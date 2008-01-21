@@ -1,0 +1,524 @@
+    /**
+     * AtomTableUTest.cxxtest
+     *
+     * Author: Welter
+     */
+    #include <AtomSpace.h>
+    #include <AtomTable.h>
+    #include <Node.h>
+    #include <FileXMLBufferReader.h>
+    #include <HandleEntry.h>
+    #include <TLB.h>
+    #include <NMXmlParser.h>
+    #include "CompositeTruthValue.h"
+    #include "AtomSpaceDefinitions.h"
+
+    #include "ClassServer.h"
+    #include "Link.h" 
+
+    #ifdef HAVE_LIBPTHREAD
+    #include <pthread.h>
+    #endif
+
+    const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
+    int numberOfExpectedMatches[] = {26,
+                     26,
+                     26,
+                     1,
+                     1,
+                     1}; 
+                     
+    #define VH1 VersionHandle(HYPOTHETICAL,  (Handle) 1)
+    #define VH2 VersionHandle(CONTEXTUAL,  (Handle) 2)
+                     
+    int numberOfExpectedMatchesWithVH1[] = {15,
+                     15,
+                     15,
+                     0,
+                     0,
+                     0}; 
+    int numberOfExpectedMatchesWithVH2[] = {15,
+                     15,
+                     15,
+                     1,
+                     1,
+                     1}; 
+
+    void printAtom(Handle h) {
+        Atom* link = TLB::getAtom(h);
+        printf("%s", (*(ClassServer::getClassName()))[link->getType()]); 
+        if (link->getArity() > 0) {
+        printf("(");
+        for (int i = 0; i < link->getArity(); i++) {
+            Atom* out = link->getOutgoingAtom(i);
+            printf("%s ",(*(ClassServer::getClassName()))[out->getType()]); 
+        }
+        printf(")");
+        }
+        printf("\n");
+    }
+
+    class AtomTableUTest :  public CxxTest::TestSuite {
+    private:
+    /*
+    #ifdef HAVE_LIBPTHREAD
+        static Lobe *lobe;
+        static pthread_t lobeThread;
+        static CycleManager *cm;
+    #endif
+    */
+        AtomTable* table;
+        AtomSpace* atomSpace;
+
+    public:
+    /*
+    #ifdef HAVE_LIBPTHREAD
+        static void* runLobe(void *arg) {
+        lobe->run();
+        return(NULL);
+        }
+    #endif
+    */
+        AtomTableUTest(){
+        //InitialiseSingletons();
+        //NMCore::Create();
+        printf("BEGIN CONSTRUCTOR\n");fflush(stdout);
+    /*        
+        currentDebugLevel = DEBUG;
+        Util::seed_rand(12345678);
+    #ifdef HAVE_LIBPTHREAD
+        lobe = Lobe::getInstance();     
+        lobe->plugIn(AtomTableManagementAgent::getInstance(), "Atom Table Management Agent", 1);
+        cm = CycleManager::getInstance();
+        cm->setIterativeMode(false);
+        pthread_create(&lobeThread, NULL, AtomTableUTest::runLobe, NULL);
+    #endif
+    */
+
+    /*
+        //MindDBProxy* mdb = MindDBProxy::getInstance();
+        //AtomTable* table = mdb->getAtomTable(DEFAULT);
+        table = new AtomTable();
+        Node* gpn = new Node(GROUNDED_PREDICATE_NODE, gpnNames[0]);
+        table->add(gpn);
+        Handle gpnHandle = TLB::getHandle(gpn);
+        Link* evalLink = new Link(EVALUATION_LINK, std::vector<Handle>());
+        table->add(evalLink);
+        TreePredicate* p = new TreePredicate(TLB::getHandle(evalLink), NULL);
+        printf("Setting procedure TreePredicate:%s with RootHandle = %p\n", gpnNames[0], p->getRootHandle());
+        ProcedureRepository::getInstance()->setProcedure(gpnHandle, p);
+        table->addPredicateIndex(gpnHandle, new TreePredicateEvaluator(gpnHandle));
+        
+        gpn = new Node(GROUNDED_PREDICATE_NODE, gpnNames[1]);
+        table->add(gpn);
+        gpnHandle = TLB::getHandle(gpn);
+        Link* listLink = new Link(LIST_LINK, std::vector<Handle>());
+        table->add(listLink);
+
+        char handleStr[16];
+        sprintf(handleStr, "%p", listLink);
+        p = (TreePredicate*) PredicateFactory::buildTreePredicateFromString(handleStr,NULL);
+        printf("Setting procedure TreePredicate:%s with RootHandle = %p\n", gpnNames[1], p->getRootHandle());
+        ProcedureRepository::getInstance()->setProcedure(gpnHandle, p);
+        table->addPredicateIndex(gpnHandle, new TreePredicateEvaluator(gpnHandle));
+        
+        gpn = new Node(GROUNDED_PREDICATE_NODE, gpnNames[2]);
+        table->add(gpn);
+        gpnHandle = TLB::getHandle(gpn);
+        char str[256];
+        sprintf(str, "%s\n%p", TREE_PREDICATE_TYPE, listLink);
+        //printf("PredicateStr = %s\n", str);
+        p = (TreePredicate*) ProcedureFactory::newProcedureFromString(str);
+        printf("Setting procedure TreePredicate:%s with RootHandle = %p\n", gpnNames[2], p->getRootHandle());
+        ProcedureRepository::getInstance()->setProcedure(gpnHandle, p);
+        table->addPredicateIndex(gpnHandle, new TreePredicateEvaluator(gpnHandle));
+
+        gpn = new Node(GROUNDED_PREDICATE_NODE, gpnNames[3]);
+        table->add(gpn);
+        gpnHandle = TLB::getHandle(gpn);
+        const char* predicateStr = "<list><AndLink></AndLink></list>\n";
+        p = (TreePredicate*) PredicateFactory::buildTreePredicate(predicateStr);
+        printf("Setting procedure TreePredicate:%s with RootHandle = %p\n", gpnNames[3], p->getRootHandle());
+        ProcedureRepository::getInstance()->setProcedure(gpnHandle, p);
+        table->addPredicateIndex(gpnHandle, new TreePredicateEvaluator(gpnHandle));
+
+
+        // TEST PREDICATE WITH UNORDERED LINKS
+        
+        gpn = new Node(GROUNDED_PREDICATE_NODE, gpnNames[4]);
+        table->add(gpn);
+        gpnHandle = TLB::getHandle(gpn);
+        predicateStr = 
+            "<list>"
+            "<FWVariableNode name=\"$x1\"/>"
+            "<PredicateNode name=\"CW_color\"/>"
+            "<CWPixelPerceptNode name=\"630057840_12\"/>"
+            "<SetLink>"
+                "<Element class=\"FWVariableNode\" name=\"$x1\"/>"
+                "<Element class=\"PredicateNode\" name=\"CW_color\"/>"
+                "<Element class=\"CWPixelPerceptNode\" name=\"630057840_12\"/>"
+            "</SetLink>"
+            "</list>\n";
+        p = (TreePredicate*) PredicateFactory::buildTreePredicate(predicateStr);
+        printf("Setting procedure TreePredicate:%s with RootHandle = %p\n", gpnNames[4], p->getRootHandle());
+        ProcedureRepository::getInstance()->setProcedure(gpnHandle, p);
+        table->addPredicateIndex(gpnHandle, new TreePredicateEvaluator(gpnHandle));
+
+        gpn = new Node(GROUNDED_PREDICATE_NODE, gpnNames[5]);
+        table->add(gpn);
+        gpnHandle = TLB::getHandle(gpn);
+        predicateStr = 
+            "<list>"
+            "<FWVariableNode name=\"$x2\"/>"
+            "<PredicateNode name=\"CW_position\"/>"
+            "<CWPixelPerceptNode name=\"630057840_12\"/>"
+            "<SetLink>"
+                "<Element class=\"CWPixelPerceptNode\" name=\"630057840_12\"/>"
+                "<Element class=\"PredicateNode\" name=\"CW_position\"/>"
+                "<Element class=\"FWVariableNode\" name=\"$x2\"/>"
+            "</SetLink>"
+            "</list>\n";
+        p = (TreePredicate*) PredicateFactory::buildTreePredicate(predicateStr);
+        printf("Setting procedure TreePredicate:%s with RootHandle = %p\n", gpnNames[5], p->getRootHandle());
+        ProcedureRepository::getInstance()->setProcedure(gpnHandle, p);
+        table->addPredicateIndex(gpnHandle, new TreePredicateEvaluator(gpnHandle));
+        printf("END CONSTRUCTOR\n");fflush(stdout);
+    */
+        }
+
+        ~AtomTableUTest() {
+            //Util::Logger::releaseMainLogger();
+        } 
+
+        void setUp() {
+        printf("BEGIN SETUP\n");fflush(stdout);
+        /* load xml files with all necessary nodes and links  */
+        std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
+        atomSpace = new AtomSpace();
+        HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false); // Check for existing links because there are 2 identical links in the test xml file
+        delete result; 
+        table = (AtomTable*) &(atomSpace->getAtomTable());
+        delete readers[0];
+        printf("END SETUP\n");fflush(stdout);
+        }
+
+        void tearDown(){
+        delete atomSpace;
+        }
+
+        void REMOVEDtestPredicateIndices(){
+        printf("testPredicateIndices(): BEGIN TEST\n");fflush(stdout);
+        /* TODO: REVIEW ALL THIS STUFF */
+        HandleEntry* expectedEntries[6];
+        //printf("building expectedEntries\n");
+        for (int index = 0; index < 6; index++) {
+            HandleEntry* indexedHandles = table->makeSet(NULL, table->getPredicateIndexHead(index), PREDICATE_INDEX | index);
+            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            expectedEntries[index] = indexedHandles;
+            //printf("Handles in the index %d: \n", index);
+            int matchCount = 0;
+            while (indexedHandles != NULL) {
+                matchCount++;
+                //printf("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //printAtom(indexedHandles->handle);
+                indexedHandles = indexedHandles->next;
+            }
+            //printf("\ncount = %d, expected count = %d\n", matchCount, numberOfExpectedMatches[index]);
+            TS_ASSERT(matchCount == numberOfExpectedMatches[index]);
+        }
+        //printf("testPredicateIndices with NULL_VERSION_HANDLE\n");
+        for (int index = 0; index < 6; index++) {
+            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index]);
+            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            //printf("Handles that matches predicate %s: \n", gpnNames[index]);
+            HandleEntry* expectedEntry = expectedEntries[index];
+            while (indexedHandles != NULL) {
+                TS_ASSERT(expectedEntry);
+                TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
+                //printf("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                indexedHandles = indexedHandles->next;
+                expectedEntry = expectedEntry->next;
+            }
+            TS_ASSERT(!expectedEntry);
+            //printf("\n");
+        }
+        // test with non-null VersionHandles        
+        //printf("adding versioned TVs\n");
+        for (int index = 0; index < 6; index++) {
+            HandleEntry* expectedEntry = expectedEntries[index];
+            int count = 0;
+            while (expectedEntry != NULL) {
+                if (count < numberOfExpectedMatchesWithVH1[index]) {
+                    //printf("adding versioned tv with VH1\n");
+                    Atom* atom = TLB::getAtom(expectedEntry->handle);
+                    TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
+                    atom->setTruthValue(*tv);
+                    delete tv;
+                    //printf("resulting tv = %s\n", atom->getTruthValue()->toString().c_str());
+                }
+                if (numberOfExpectedMatches[index] - count <=  numberOfExpectedMatchesWithVH2[index]) {
+                    //printf("adding versioned tv with VH2\n");
+                    Atom* atom = TLB::getAtom(expectedEntry->handle);
+                    TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
+                    atom->setTruthValue(*tv);
+                    delete tv;
+                    //printf("resulting tv = %s\n", atom->getTruthValue()->toString().c_str());
+                }
+                expectedEntry = expectedEntry->next;
+                count++;
+            }
+        }
+        //printf("testPredicateIndices with VH1\n");
+        for (int index = 0; index < 6; index++) {
+            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH1);
+            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            HandleEntry* expectedEntry = expectedEntries[index];
+            int count = 0;
+            while (indexedHandles != NULL) {
+                TS_ASSERT(expectedEntry);
+                TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
+                //printf("Checking atom with TV = %s\n", TLB::getAtom(indexedHandles->handle)->getTruthValue().toString().c_str());
+                TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                indexedHandles = indexedHandles->next;
+                expectedEntry = expectedEntry->next;
+                count++;
+            }
+            //printf("count before = %d\n", count);
+            while(count < numberOfExpectedMatches[index]) {
+                TS_ASSERT(expectedEntry);
+                expectedEntry = expectedEntry->next;
+                count++;
+            }
+            //printf("count after = %d\n", count);
+            TS_ASSERT(!expectedEntry);
+        }
+        //printf("testPredicateIndices with VH2\n");
+        for (int index = 0; index < 6; index++) {
+            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH2);
+            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            HandleEntry* expectedEntry = expectedEntries[index];
+            int count = 0;
+            while(numberOfExpectedMatches[index] - count > numberOfExpectedMatchesWithVH2[index]) {
+                TS_ASSERT(expectedEntry);
+                expectedEntry = expectedEntry->next;
+                count++;
+            }
+            //printf("count before = %d\n", count);
+            while (indexedHandles != NULL) {
+                TS_ASSERT(expectedEntry);
+                TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
+                //printf("Checking atom with TV = %s\n", TLB::getAtom(indexedHandles->handle)->getTruthValue()->toString().c_str());
+                TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                indexedHandles = indexedHandles->next;
+                expectedEntry = expectedEntry->next;
+                count++;
+            }
+            //printf("count after = %d\n", count);
+            TS_ASSERT(!expectedEntry);
+        }
+        
+        //printf("testPredicateIndices(): END TEST\n");fflush(stdout);
+    }
+
+/* Look for atoms in the following structure:
+      <ListLink timestamp="630057840">
+        <Element class="CWPixelPerceptNode" name="630057840_11"/>
+        <Element class="NumberNode" name="12"/>
+      </ListLink>
+ */
+    void testGetHandleSet() {
+        printf("BEGIN TEST: testGetHandleSet\n");fflush(stdout);
+        //AtomTable* table = MindDBProxy::getInstance()->getAtomTable(DEFAULT);
+
+//== getHandleSet(const char**, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
+
+        const char* names1[] = {"630057840_11", "12"};
+        Type types1[] = {CW_PIXEL_PERCEPT_NODE,NUMBER_NODE};
+        HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);        
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete (result);
+
+        const char* names2[] = {"12", "630057840_11"};
+        Type types2[] = {NUMBER_NODE, CW_PIXEL_PERCEPT_NODE};
+        result = table->getHandleSet(names2, types2, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(!result);
+
+        const char* names3[] = {NULL, "12"};
+        Type types3[] = {NOTYPE, NUMBER_NODE};
+        result = table->getHandleSet(names3, types3, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        const char* names4[] = {NULL, "630057840_11"};
+        Type types4[] = {NOTYPE, CW_PIXEL_PERCEPT_NODE};
+        result = table->getHandleSet(names4, types4, NULL, 2, LIST_LINK, false);
+        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        TS_ASSERT(!result);
+
+        result = table->getHandleSet((const char**) NULL, types1, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        result = table->getHandleSet((const char**) NULL, types2, NULL, 2, LIST_LINK, false);
+        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        TS_ASSERT(!result);
+
+        bool exceptionCaught = false;
+        try {
+            table->getHandleSet(names1, NULL, NULL, 2, LIST_LINK, false);
+        } catch (RuntimeException& e) {
+            exceptionCaught = true;
+            //delete e;
+        }
+        TS_ASSERT(exceptionCaught);
+
+        exceptionCaught = false;
+        try {
+            table->getHandleSet(names2, NULL, NULL, 2, LIST_LINK, false);
+        } catch (RuntimeException& e) {
+            exceptionCaught = true;
+            //delete e;
+        }
+        TS_ASSERT(exceptionCaught);
+
+        exceptionCaught = false;
+        try {
+            table->getHandleSet(names3, NULL, NULL, 2, LIST_LINK, false);
+        } catch (RuntimeException& e) {
+            exceptionCaught = true;
+            //delete e;
+        }
+        TS_ASSERT(exceptionCaught);
+
+        exceptionCaught = false;
+        try {
+            table->getHandleSet(names4, NULL, NULL, 2, LIST_LINK, false);
+        } catch (RuntimeException& e) {
+            exceptionCaught = true;
+            //delete e;
+        }
+        TS_ASSERT(exceptionCaught);
+
+//== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
+
+        std::vector<Handle> handles1(2);
+        handles1[0] = table->getHandle("630057840_11", CW_PIXEL_PERCEPT_NODE);
+        handles1[1] = table->getHandle("12", NUMBER_NODE);
+        result = table->getHandleSet(handles1, types1, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        std::vector<Handle> handles2(2);
+        handles2[0] = table->getHandle("12", NUMBER_NODE);
+        handles2[1] = table->getHandle("630057840_11", CW_PIXEL_PERCEPT_NODE);
+        result = table->getHandleSet(handles2, types2, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(!result);
+        //printf("result = %s\n", result->toString().c_str());
+        
+        std::vector<Handle> handles3(2);
+        handles3[0] = NULL;
+        handles3[1] = table->getHandle("12", NUMBER_NODE);
+        result = table->getHandleSet(handles3, types3, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        std::vector<Handle> handles4(2);
+        handles4[0] = table->getHandle("12", NUMBER_NODE);
+        handles4[1] = NULL;
+        result = table->getHandleSet(handles4, types4, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(!result);
+        //printf("result = %s\n", result->toString().c_str());
+
+        result = table->getHandleSet(std::vector<Handle>(), types1, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        result = table->getHandleSet(std::vector<Handle>(), types2, NULL, 2, LIST_LINK, false);
+        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        TS_ASSERT(!result);
+
+        result = table->getHandleSet(handles1, NULL , NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        result = table->getHandleSet(handles2, NULL, NULL, 2, LIST_LINK, false);
+        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        TS_ASSERT(!result);
+
+        result = table->getHandleSet(handles3, NULL , NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        result = table->getHandleSet(handles4, NULL, NULL, 2, LIST_LINK, false);
+        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        TS_ASSERT(!result);
+
+//== getHandleSet(Type*, bool*, Arity, Type = ATOM, bool = true) ==/
+
+        result = table->getHandleSet(types1, NULL, 2, LIST_LINK, false);        
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        result = table->getHandleSet(types2, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(!result);
+
+        result = table->getHandleSet(types3, NULL, 2, LIST_LINK, false);
+        TS_ASSERT(result);
+        //printf("result = %s\n", result->toString().c_str());
+        delete(result);
+
+        result = table->getHandleSet(types4, NULL, 2, LIST_LINK, false);
+        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        TS_ASSERT(!result);
+
+        printf("END TEST: testGetHandleSet\n");fflush(stdout);
+    }
+
+    void testGetHandleSet_bugfix1() {
+        HandleSeq emptyOutgoing;
+        HandleEntry* result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, false);
+        TS_ASSERT(!result);
+        result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, true);
+        TS_ASSERT(!result);
+        Link* link = new Link(LIST_LINK, emptyOutgoing);
+        Handle h = table->add(link);
+        if (TLB::getHandle(link) != h) delete link; 
+        result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, false);
+        TS_ASSERT(result);
+        delete result;
+        result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, true);
+        TS_ASSERT(result);
+        delete result;
+    }
+
+    void testPrint() {
+        cout << "All Atoms:" << endl;
+        table->print();        
+        cout << "All Nodes:" << endl;
+        table->print(cout, NODE);        
+        cout << "All ConceptNodes:" << endl;
+        table->print(cout, CONCEPT_NODE, false);        
+        cout << "All Links:" << endl;
+        table->print(cout, LINK);        
+        cout << "All ListLinks:" << endl;
+        table->print(cout, LIST_LINK, false);        
+    } 
+
+};
+
+/*
+#ifdef HAVE_LIBPTHREAD
+pthread_t AtomTableUTest::lobeThread = (pthread_t) 0;
+Lobe *AtomTableUTest::lobe = NULL;
+CycleManager *AtomTableUTest::cm = NULL;
+#endif
+*/

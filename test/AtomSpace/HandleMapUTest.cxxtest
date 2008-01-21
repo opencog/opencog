@@ -1,0 +1,99 @@
+/**
+ * HandleMapUTest.cxxtest
+ *
+ *
+ * Author: Rodrigo Barra
+ * Copyright(c) 2004 Vettatech Technologies
+ * All rights reserved.
+ */
+#include <HandleMap.h>
+#include "CoreUtils.h"
+#include "exceptions.h"
+#include "numeric.h"
+#include "mt19937ar.h"
+
+#define N_HANDLES 10
+
+class HandleMapUTest :  public CxxTest::TestSuite{
+private:
+	Handle handles[N_HANDLES];
+	char *content[N_HANDLES];
+
+	HandleMap *handleMap;
+public:
+	HandleMapUTest(){
+		for (int i = 0; i < N_HANDLES; i++){
+			handles[i] = (Handle) i;
+			content[i] = new char[0];
+		}
+	}
+
+
+    void setUp(){
+		handleMap = new HandleMap();
+    }
+
+    void tearDown(){
+		delete(handleMap);
+    }
+
+	void testAdd(){
+		for (int i = 0; i < N_HANDLES; i++){
+			TS_ASSERT(!handleMap->contains(handles[i]));
+			TS_ASSERT(!handleMap->get(handles[i]));
+		}
+		for (int i = 0; i < N_HANDLES; i++){
+			handleMap->add(handles[i], content[i]);
+			TS_ASSERT(handleMap->contains(handles[i]));
+			TS_ASSERT(handleMap->get(handles[i]) == content[i]);
+			TS_ASSERT(handleMap->getCount() == i+1);
+		}
+	}
+	
+	void testRemove(){
+		for (int i = 0; i < N_HANDLES; i++){
+			handleMap->add(handles[i], content[i]);
+		}
+		for (int i = 0; i < N_HANDLES; i++){
+			TS_ASSERT(handleMap->contains(handles[i]));
+			TS_ASSERT(handleMap->remove(handles[i]) == content[i]);
+			TS_ASSERT(!handleMap->contains(handles[i]));
+		}
+	}
+
+	void testKeys(){
+		bool iterated[N_HANDLES];
+		
+		memset(iterated, 0, sizeof(bool)*N_HANDLES);
+
+		for (int i = 0; i < N_HANDLES; i++){
+			handleMap->add(handles[i], content[i]);
+		}
+		HandleMapIterator *it = handleMap->keys();
+		for (int i = 0; i < N_HANDLES; i++){
+			TS_ASSERT(it->hasNext());
+			Handle h = it->next();
+			for (int j = 0; j < N_HANDLES; j++){
+				if (!CoreUtils::compare(h, handles[j])){
+					iterated[i] = true;
+				}
+			}
+		}		
+		for (int i = 0; i < N_HANDLES; i++){
+			TS_ASSERT(iterated[i]);
+		}
+		TS_ASSERT(!it->hasNext());
+		TS_ASSERT_THROWS(it->next(), IndexErrorException&);
+		delete(it);
+	}
+
+	void testSize(){
+		Util::MT19937RandGen rng(12345678);
+		int size = rng.randint(N_HANDLES);
+		delete(handleMap);
+		handleMap = new HandleMap(size);
+		TS_ASSERT(handleMap->getSize() >= size);
+		handleMap->resize(size+1);
+		TS_ASSERT(handleMap->getSize() >= size+1);
+	}
+};

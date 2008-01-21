@@ -1,0 +1,98 @@
+/**
+ * TemporalToHandleSetMap.h
+ *
+ * $Author: Welter
+ */
+#ifndef TEMPORALTOHANDLESETMAP_H
+#define TEMPORALTOHANDLESETMAP_H
+
+#include "TemporalMap.h"
+#include "HandleSet.h"
+#include <string>
+
+class TemporalToHandleSetMap {
+private :
+    TemporalMap* internalMap;
+
+public:
+
+    /**
+     * Constructor for this class.
+     */
+    TemporalToHandleSetMap();
+
+    ~TemporalToHandleSetMap();
+
+    /**
+     * @param Key.
+     * @param Element.
+     */
+    void add(Temporal*, HandleSet*);
+
+    /**
+     * Returns the element for a given key.
+     *
+     * @param Key.
+     * @return Element for a given key.
+     */
+    HandleSet* get(Temporal*);
+
+    /**
+     * Returns the key Temporal object equals to the given parameter.
+     *
+     * @param t    reference to a Temporal object to make the lookup.
+     * @return pointer to the searched key Temporal object, if it exists. NULL, otherwise.
+     */
+    Temporal *getKey(const Temporal&);
+
+    /**
+     * Checks if there exists an element for the given key.
+     *
+     * @param Key.
+     * @return Whether there exists an element for the given key.
+     */
+    bool contains(Temporal*);
+
+    /**
+     * Removes an element referred by a given key from the table and
+     * returns it.
+     *
+     * @param Key.
+     * @return Removed element.
+     */
+    HandleSet* remove(Temporal*);
+
+    /**
+     * Returns the total number of elements in the hash table.
+     *
+     * @return Total number of elements in the hash table.
+     */
+    int getCount();
+
+    /**
+     * Returns the size of the hash table (number of possible collision
+     * lists).
+     *
+     * @return Size of the hash table (number of possible collision lists).
+     */
+    int getSize();
+
+
+    /**
+     * Returns an iterator through all keys stored in the hash table.
+     *
+     * @return An iterator through all keys stored in the hash table.
+     */
+    TemporalMapIterator *keys();
+
+    /**
+     * Return a copy of the TemporalToHandleSetMap.
+     */
+    TemporalToHandleSetMap *clone();
+
+    std::string toString();
+
+};
+
+
+#endif

@@ -1,0 +1,184 @@
+/**
+ * HandleEntryUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include <Node.h>
+#include "CompositeTruthValue.h"
+#include "TLB.h"
+//#include "NMPrinter.h"
+#include "Link.h"
+
+#define VH1 VersionHandle(CONTEXTUAL, (Handle)1)
+#define VH2 VersionHandle(CONTEXTUAL, (Handle)2)
+
+class HandleEntryUTest :  public CxxTest::TestSuite {
+private:
+
+public:
+	HandleEntryUTest(){
+	}
+
+    void setUp() {
+    }
+
+    void tearDown(){
+    }
+
+    void printHandleEntry(HandleEntry* p) {
+        printf("HandleEntry = %s\n", p->toString().c_str());
+        /*
+        while (p != NULL) {
+            printf("p = %p\n", p);
+            printf("p->getAtom() = %p\n", p->getAtom());
+            printf("p->getAtom()->getTruthValue() = %p\n", p->getAtom()->getTruthValue());
+            TruthValue* tv = p->getAtom()->getTruthValue();
+            printf("%s\n", TruthValue::typeToStr(tv->getType()).c_str());
+            printf("%s\n", tv->toString().c_str());
+            p = p->next;
+        }
+        */
+    }
+    
+	void testFilterSetVersionHandle(){
+        Node* n1 = new Node(CONCEPT_NODE, "TEST1");
+        Node* n2 = new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE));
+        Node* n3 = new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
+        CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
+        tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
+        Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
+        Node* n5 = new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        
+        HandleEntry* he = new HandleEntry(TLB::getHandle(n1));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n2)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n3)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n4)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n5)));
+        TS_ASSERT(he->getSize() == 5);
+        
+        // Now filter
+        //printf("======================\nFiltering using NULL_VERSION_HANDLE\n");
+        he = HandleEntry::filterSet(he, NULL_VERSION_HANDLE);
+        TS_ASSERT(he->getSize() == 5);
+        printHandleEntry(he);
+        //printf("======================\nFiltering using VH1\n");
+        he = HandleEntry::filterSet(he, VH1);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 2);
+        //printf("======================\nFiltering using VH2\n");
+        he = HandleEntry::filterSet(he, VH2);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 1);
+    }
+
+    void testFilterSetTypeBoolVersionHandle(){
+        Node* n1 = new Node(CONCEPT_NODE, "TEST1");
+        //Node* n2 = new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE));
+        Node* n3 = new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
+        CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
+        tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
+        Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
+        Node* n5 = new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        
+        // Create links that contains at least 1 target whose type is CONCEPT_NODE and 
+        // 1 target whose type is PREDICATE_NODE
+        std::vector<Handle> outgoing(2);
+        outgoing[0] = n1; // concept (without any VH)
+        outgoing[1] = n3; // predicate (with VH1)
+        Link* l1 = new Link(LIST_LINK, outgoing);
+        outgoing.resize(3);
+        outgoing[0] = n3; // predicate (with VH1)
+        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        outgoing[2] = n5; // concept (with VH2)
+        Link* l2 = new Link(LIST_LINK, outgoing);
+        outgoing.resize(2);
+        outgoing[0] = n4; // predicate (with VH1 and VH2)
+        outgoing[1] = n5; // concept (with VH2)
+        Link* l3 = new Link(LIST_LINK, outgoing);
+        
+        
+        HandleEntry* he = new HandleEntry(TLB::getHandle(l1));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l2)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l3)));
+        TS_ASSERT(he->getSize() == 3);
+        
+        // Now filter
+        he = HandleEntry::filterSet(he, NODE, true, NULL_VERSION_HANDLE);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 3);
+
+        he = HandleEntry::filterSet(he, NODE, true, VH1);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 3);
+
+        he = HandleEntry::filterSet(he, PREDICATE_NODE, false, VH1);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 3);
+
+        he = HandleEntry::filterSet(he, CONCEPT_NODE, false, VH2);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 2);
+        
+        he = HandleEntry::filterSet(he, PREDICATE_NODE, false, VH2);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 2);
+
+        he = HandleEntry::filterSet(he, CONCEPT_NODE, false, VH1);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 0);
+    }
+
+    void testFilterSetCharPtrTypeVersionHandle(){
+        Node* n1 = new Node(CONCEPT_NODE, "TEST1");
+        //Node* n2 = new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE));
+        Node* n3 = new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
+        CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
+        tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
+        Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
+        Node* n5 = new Node(CONCEPT_NODE, "TEST4", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        
+        // Create links that contains at least 1 target whose type is CONCEPT_NODE and 
+        // 1 target whose type is PREDICATE_NODE
+        std::vector<Handle> outgoing(2);
+        outgoing[0] = n1; // concept (without any VH)
+        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        Link* l1 = new Link(LIST_LINK, outgoing);
+        outgoing.resize(3);
+        outgoing[0] = n3; // predicate (with VH1)
+        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        outgoing[2] = n5; // concept (with VH2)
+        Link* l2 = new Link(LIST_LINK, outgoing);
+        outgoing.resize(2);
+        outgoing[0] = n4; // predicate (with VH1 and VH2)
+        outgoing[1] = n5; // concept (with VH2)
+        Link* l3 = new Link(LIST_LINK, outgoing);
+        
+        
+        HandleEntry* he = new HandleEntry(TLB::getHandle(l1));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l2)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l3)));
+        TS_ASSERT(he->getSize() == 3);
+        
+        // Now filter
+        he = HandleEntry::filterSet(he, "TEST4", PREDICATE_NODE, NULL_VERSION_HANDLE);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 3);
+
+        he = HandleEntry::filterSet(he, "TEST4", PREDICATE_NODE, VH1);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 3);
+
+        he = HandleEntry::filterSet(he, "TEST4", PREDICATE_NODE, VH2);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 3);
+
+        he = HandleEntry::filterSet(he, "TEST4", CONCEPT_NODE, VH2);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 2);
+        
+        he = HandleEntry::filterSet(he, "TEST4", CONCEPT_NODE, VH1);
+        printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 0);
+    }
+    
+};

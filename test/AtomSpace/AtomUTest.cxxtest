@@ -1,0 +1,52 @@
+/**
+ * AtomUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include "Atom.h"
+
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+
+class ConcreteAtom : public Atom {
+
+public:
+    ConcreteAtom(Type t, const std::vector<Handle>& o) : Atom(t,o) {}
+    std::string toString() {return "toString not implemented yet";}
+    std::string toShortString() {return "toShortString not implemented yet";}
+};
+
+class AtomUTest :  public CxxTest::TestSuite {
+private:
+
+public:
+	AtomUTest(){
+	}
+
+    void setUp() {
+    }
+
+    void tearDown(){
+    }
+
+    void testConstructor() {
+        std::vector<Handle> outgoing;
+        outgoing.push_back((Handle) 10);
+        outgoing.push_back((Handle) 5);
+        outgoing.push_back((Handle) 9);
+
+        Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing); 
+        TS_ASSERT(atom != NULL);
+
+        // Specific tests for ordered and unnordered links:  
+        TS_ASSERT(atom->getOutgoingSet()[0] == (Handle) 10);
+        TS_ASSERT(atom->getOutgoingSet()[1] == (Handle) 5);
+        TS_ASSERT(atom->getOutgoingSet()[2] == (Handle) 9);
+        atom = new ConcreteAtom(UNORDERED_LINK, outgoing); 
+        TS_ASSERT(atom != NULL);
+        TS_ASSERT(atom->getOutgoingSet()[0] == (Handle) 5);
+        TS_ASSERT(atom->getOutgoingSet()[1] == (Handle) 9);
+        TS_ASSERT(atom->getOutgoingSet()[2] == (Handle) 10);
+    }
+ 
+};
+

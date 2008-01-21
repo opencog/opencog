@@ -1,0 +1,85 @@
+/**
+ * NMXmlExporterUTest.cxxtest
+ *
+ *
+ * Author: Rodrigo Barra
+ * Copyright(c) 2004 Vettatech Technologies
+ * All rights reserved.
+ */
+#include <NMXmlExporter.h>
+#include <NMXmlParserExperiment.h>
+#include <FileXMLBufferReader.h>
+
+
+class NMXmlExporterUTest :  public CxxTest::TestSuite{
+	
+private: 
+    AtomSpace* atomSpace;
+
+public:
+	NMXmlExporterUTest(){
+		NMXmlParserExperiment::initStaticVars();
+    }
+
+	~NMXmlExporterUTest(){
+    }
+
+    void setUp(){
+        atomSpace = new AtomSpace();
+    }
+
+    void tearDown(){
+    }
+
+	void testToXML(){
+		NMXmlExporter *exporter = new NMXmlExporter();
+
+		printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
+		for (int i = 0; i < NMXmlParserExperiment::getNExperiments(); i++){
+			printf("\nExperiment %d\n", i);
+			NMXmlParserExperiment::createExperiment(i, atomSpace);	
+				
+			std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(NMXmlParserExperiment::currentFileName));
+			NMXmlParser::loadXML(readers, atomSpace);			
+			delete readers[0];
+
+			HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
+			printf("Handles before concate %s\n", handles->toString().c_str());
+			//handles = HandleEntry::concatenation(handles, atomSpace->getAtomTable().getHandleSet(ATOM, true));
+			//printf("Handles after concate %s\n", handles->toString().c_str());
+			
+			std::string xml = exporter->toXML(handles);
+			
+			printf("XML %s\n", xml.c_str());
+
+			atomSpace = NMXmlParserExperiment::cleanupAtomSpace();
+			
+			FILE *fp = fopen(NMXmlParserExperiment::currentFileName, "w");
+			fwrite(xml.c_str(), sizeof(char), xml.length(), fp);
+			fclose(fp);
+
+			readers[0] = new FileXMLBufferReader(NMXmlParserExperiment::currentFileName);
+			NMXmlParser::loadXML(readers, atomSpace);
+			delete readers[0];
+
+			HandleEntry *h = atomSpace->getAtomTable().getHandleSet(ATOM, true);
+			HandleEntry *it = h;
+			while (it != NULL){
+				//if (ClassServer::isAssignableFrom(NODE, TLB::getAtom(it->handle)->getType())){
+				//	printf("%p %s\n", it->handle, ((Node *)it->handle)->toString().c_str());
+				//}else{
+				//	printf("%p %s\n", it->handle, ((Link *)it->handle)->toShortString());
+				//}
+				it = it->next;
+			}
+			delete(h);
+			
+			TS_ASSERT(NMXmlParserExperiment::checkExperiment());
+			atomSpace = NMXmlParserExperiment::destroyExperiment();
+			printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
+		}
+		
+		delete(exporter);
+	}
+};
+

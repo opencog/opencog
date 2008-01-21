@@ -1,0 +1,95 @@
+/**
+ * TemporalMapUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include <TemporalMap.h>
+#include <TemporalEntry.h>
+#include <exceptions.h>
+#include "numeric.h"
+#include "mt19937ar.h"
+
+#define N_TIMES 10
+
+class TemporalMapUTest :  public CxxTest::TestSuite{
+private:
+	Temporal* times[N_TIMES];
+	char *content[N_TIMES];
+
+	TemporalMap *temporalMap;
+public:
+	TemporalMapUTest(){
+		for (int i = 0; i < N_TIMES; i++){
+    		times[i] = new Temporal(i,i,true);
+			content[i] = new char[0];
+		}
+	}
+
+    void setUp(){
+		temporalMap = new TemporalMap();
+    }
+
+    void tearDown(){
+		delete(temporalMap);
+    }
+
+	void testAdd(){
+		for (int i = 0; i < N_TIMES; i++){
+			TS_ASSERT(!temporalMap->contains(times[i]));
+			TS_ASSERT(!temporalMap->get(times[i]));
+		}
+		for (int i = 0; i < N_TIMES; i++){
+			temporalMap->add(times[i], content[i]);
+			TS_ASSERT(temporalMap->contains(times[i]));
+			TS_ASSERT(temporalMap->get(times[i]) == content[i]);
+			TS_ASSERT(temporalMap->getCount() == i+1);
+		}
+	}
+	
+	void testRemove(){
+		for (int i = 0; i < N_TIMES; i++){
+			temporalMap->add(times[i], content[i]);
+		}
+		for (int i = 0; i < N_TIMES; i++){
+			TS_ASSERT(temporalMap->contains(times[i]));
+			TS_ASSERT(temporalMap->remove(times[i]) == content[i]);
+			TS_ASSERT(!temporalMap->contains(times[i]));
+		}
+	}
+
+	void testKeys(){
+		bool iterated[N_TIMES];
+		
+		memset(iterated, 0, sizeof(bool)*N_TIMES);
+
+		for (int i = 0; i < N_TIMES; i++){
+			temporalMap->add(times[i], content[i]);
+		}
+		TemporalMapIterator *it = temporalMap->keys();
+		for (int i = 0; i < N_TIMES; i++){
+			TS_ASSERT(it->hasNext());
+			Temporal* t = it->next();
+			for (int j = 0; j < N_TIMES; j++){
+				if (!TemporalEntry::temporalCompare(&t, &times[j])){
+					iterated[i] = true;
+				}
+			}
+		}		
+		for (int i = 0; i < N_TIMES; i++){
+			TS_ASSERT(iterated[i]);
+		}
+		TS_ASSERT(!it->hasNext());
+		TS_ASSERT_THROWS(it->next(), IndexErrorException&);
+		delete(it);
+	}
+
+	void testSize(){
+		Util::MT19937RandGen rng(12345678);
+		int size = rng.randint(N_TIMES);
+		delete(temporalMap);
+		temporalMap = new TemporalMap(size);
+		TS_ASSERT(temporalMap->getSize() >= size);
+		temporalMap->resize(size+1);
+		TS_ASSERT(temporalMap->getSize() >= size+1);
+	}
+};

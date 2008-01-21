@@ -1,0 +1,45 @@
+/**
+ * NodeUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include <Node.h>
+
+class NodeUTest :  public CxxTest::TestSuite {
+private:
+
+public:
+	NodeUTest(){
+	}
+
+    void setUp() {
+    }
+
+    void tearDown(){
+    }
+
+	void testEquals(){
+        Node* n1 = new Node(CONCEPT_NODE, "TEST");
+        Node* n2 = new Node(CONCEPT_NODE, "TEST");
+        Node* n3 = new Node(PREDICATE_NODE, "TEST");
+        Node* n4 = new Node(PREDICATE_NODE, "TEST1");
+        Node* n5 = new Node(CONCEPT_NODE, "");
+        Node* n6 = new Node(CONCEPT_NODE, "");
+        Node* n7 = new Node(PREDICATE_NODE, "");
+        
+        TS_ASSERT(n1->equals(n2));
+        TS_ASSERT(!n1->equals(n3));
+        TS_ASSERT(!n3->equals(n4));
+
+        TS_ASSERT(!n1->equals(n5));
+        TS_ASSERT(!n1->equals(n7));
+        TS_ASSERT(!n3->equals(n5));
+        TS_ASSERT(!n3->equals(n7));
+        TS_ASSERT(!n4->equals(n5));
+        TS_ASSERT(!n4->equals(n7));
+
+        TS_ASSERT(n5->equals(n6));
+        TS_ASSERT(!n5->equals(n7));
+    }
+    
+};

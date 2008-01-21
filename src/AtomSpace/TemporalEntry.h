@@ -1,0 +1,215 @@
+/**
+ * TemporalEntry.h
+ *
+ * Copyright(c) 2001 Thiago Maia, Andre Senna
+ * All rights reserved.
+ */
+
+#ifndef TEMPORALENTRY_H
+#define TEMPORALENTRY_H
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdlib.h>
+#include <limits.h>
+#include "Temporal.h"
+#include <string>
+
+/**
+ * This class implements a linked-list of times, and provides several
+ * methods to perform operations between lists such as concatenation,
+ * intersection, and filtering.
+ */
+class TemporalEntry {
+
+    public:
+  
+        static int existingObjects;
+
+        /**
+         * Cell dat 
+         */
+        Temporal* time;
+
+        /**
+         * Next cell.
+         */
+        TemporalEntry *next;
+
+        /**
+         * Constructor for this class.
+         *
+         * @param Cell data.
+         */
+        TemporalEntry(Temporal*);
+
+        /**
+         * Destructor for this class.
+         */
+        ~TemporalEntry();
+
+        /**
+         * Clones the list that starts in this time entry cell, preserving
+         * all cell data.
+         *
+         * @return Pointer to the new cloned list head.
+         */
+        TemporalEntry* clone();
+
+        /**
+         * Returns the size of the linked-list from the current time entry
+         * head.
+         *
+         * @return Size of the linked-list from the current time entry head.
+         */
+        int getSize();
+
+        /**
+         * Returns last member of the linked-list
+         *
+         * @return last member of the linked-list
+         */
+        TemporalEntry* last();
+
+        /**
+         * Returns true iff this list contains the given time.
+         */
+        bool contains(Temporal*);
+
+        /**
+         * Returns a string representation of the list that starts in the
+         * time entry cell. The string returned is allocated in the
+         * activation registry stack, so it must be duplicated if not
+         * immediately used.
+         *
+         * @return A string representation of the list that starts in the
+         * time entry cell.
+         */
+        std::string toString();
+
+        /**
+         * Returns a vector of times containing all data in the list that
+         * starts in the time entry cell.
+         *
+         * @param Pointer passed by reference where the vector will be
+         * allocated.
+         * @param Length of the allocated vector passed by reference.
+         * @return Pointer passed by reference where the vector will be
+         * allocated. Same as the first parameter.
+         */
+        Temporal** toTemporalVector(Temporal**&, int&) throw (InconsistenceException);
+
+        /**
+         * Returns a HandlEntry containing all data in the array passed
+         * as a parameter.
+         *
+         * @param Pointer where the vector is stored.
+         * @param Length of the allocated vector.
+         * @return A TemporalEntry containing the element s of the vector.
+         */
+         static TemporalEntry* fromTemporalVector(Temporal**, int);
+
+        /**
+         * Adds a time to the list.
+         * @param The linked list
+         * @param The time that should be added to the list
+         * @return The resulting linked list after adding the time
+         */
+        static TemporalEntry* add(TemporalEntry*, Temporal*);
+        
+        /**
+         * Removes a time from the list.
+         * @param The linked list
+         * @param The time from atom that should be removed from the
+         *        list
+         * @return The filtered linked list
+         */
+        static TemporalEntry* remove(TemporalEntry*, Temporal*);
+
+        /**
+         * Returns the intersection between two linked-lists. The two
+         * linked-lists passed as arguments are automatically destroyed.
+         *
+         * @param First linked-list.
+         * @param Second linked-list.
+         * @return The intersection between two linked-lists.
+         */
+        static TemporalEntry* intersection(TemporalEntry*, TemporalEntry*) throw (InconsistenceException);
+
+        /**
+         * Returns the intersection between several linked-lists. The n
+         * linked-lists passed as arguments are automatically destroyed.
+         * 
+         * @param Array of linked-lists.
+         * @param Length of the array of linked-lists.
+         * @return Intersection between the given linked-lists.
+         */
+        static TemporalEntry* intersection(TemporalEntry**, int) throw (InconsistenceException);
+
+        /**
+         * This method is internal for the intersection calculation methods.
+         * It returns the position of a common element in the first array if
+         * the element is present in all arrays.
+         *
+         * @param Array of vector where each represents a linked-list.
+         * @param Array of vector lengths.
+         * @param Internal data structure that represents the current
+         * searching position.
+         * @return The position of a common element in the first array.
+         */
+        static int nextMatch(Temporal***, int*, std::vector<int>&);
+
+        /**
+         * This method is internal for the intersection calculation methods.
+         * It returns the intersection of an array of vectors where each
+         * represents a linked-list.
+         *
+         * @param Array of vector where each represents a linked-list.
+         * @param Array of vector lengths.
+         * @param Number of vectors.
+         * @return Intersection between the given linked-lists.
+         */
+        static TemporalEntry* intersection(Temporal***, int*, int);
+
+        /**
+         * This method returns the concatenation of two linked-lists, the
+         * first linked-list followed by the second.
+         * THE FIRST LIST IS CHANGED AS SIDE-EFFECT if it is not null. 
+         *
+         * @param First linked-list.
+         * @param Second linked-list.
+         * @return Concatenation of the first list with the second list.
+         */
+        static TemporalEntry* concatenation(TemporalEntry*, TemporalEntry*);
+
+        /**
+         * Temporal* sort criterion used by qsort. It returns a negative value,
+         * zero or a positive value if the first argument is respectively
+         * smaller than, equal to, or larger then the second argument.
+         *
+         * @param The first time element.
+         * @param The second time element.
+         * @return A negative value, zero or a positive value if the first
+         * argument is respectively smaller than, equal to, or larger then the
+         * second argument.
+         */
+        static int temporalCompare(const void*, const void*);
+
+        /**
+         * Temporal* sort criterion used by qsort. It returns a negative value,
+         * zero or a positive value if the first argument is respectively
+         * smaller than, equal to, or larger then the second argument.
+         *
+         * @param The first time element.
+         * @param The second time element.
+         * @return A negative value, zero or a positive value if the first
+         * argument is respectively smaller than, equal to, or larger then the
+         * second argument.
+         */
+        static int compare(const Temporal*, const Temporal*);
+
+};
+
+#endif

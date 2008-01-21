@@ -1,0 +1,209 @@
+/**
+ * TemporalMap.cc - hashtable based in Temporal* keys and (void *) elements
+ *
+ * $Author: welter
+ */
+#include <platform.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "TemporalMap.h"
+#include "exceptions.h"
+#include "utils.h"
+
+inline void TemporalMap::lock() {
+#ifdef HAVE_LIBPTHREAD
+    if (useMutex){
+        pthread_mutex_lock(&plock);
+    }
+#endif
+}
+
+inline void TemporalMap::unlock() {
+#ifdef HAVE_LIBPTHREAD
+    if (useMutex){
+        pthread_mutex_unlock(&plock);
+    }
+#endif
+}
+
+
+void TemporalMap::init(int initialSize, bool useMutex) {
+
+    hashMap = new InternalHashMap(initialSize);
+
+    this->useMutex = useMutex;
+
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_init(&plock, NULL);
+#endif
+}
+
+TemporalMap::~TemporalMap() {
+
+    lock();
+
+    delete(hashMap);
+
+    unlock();
+}
+
+TemporalMap::TemporalMap(bool useMutex) {
+    init(DEFAULT_SIZE, useMutex);
+}
+
+TemporalMap::TemporalMap(int size, bool useMutex) {
+    init(size, useMutex);
+}
+
+void TemporalMap::add(Temporal* key, void *element) throw (RuntimeException){
+
+    lock();
+
+    // check if the element is already in the hash table. If not, it
+    // is added to the head of the list for that position
+    if (!contains(key)) {
+        (*hashMap)[key] = element;
+    } else {
+        throw RuntimeException(TRACE_INFO, 
+                "TemporalMap - Attempting to insert duplicated key in hash map: '%d'.", key);
+    }
+
+    unlock();
+}
+
+void *TemporalMap::get(Temporal* key) {
+    //cprintf(NORMAL, "TemporalMap::get(%s)\n", key->toString().c_str());
+
+    void *ret;
+
+    lock();
+
+    InternalIterator ti = hashMap->find(key);
+
+    if (ti == hashMap->end()){
+        // if the key is not found, return NULL.
+        ret = NULL;
+    } else {
+        ret = ti->second;
+    }
+
+    unlock();
+
+    return ret;
+}
+
+Temporal *TemporalMap::getKey(const Temporal& lookupKey) {
+    //cprintf(NORMAL, "TemporalMap::getKey(%s)\n", lookupKey.toString().c_str());
+
+    Temporal *ret;
+
+    lock();
+
+    InternalIterator ti = hashMap->find((Temporal*) &lookupKey);
+
+    if (ti == hashMap->end()){
+        // if the key is not found, return NULL.
+        ret = NULL;
+    } else {
+        ret = ti->first;
+    }
+
+    unlock();
+
+    return ret;
+}
+
+bool TemporalMap::contains(Temporal* key) {
+
+    bool ret;
+
+    // lock and call private contains()
+    lock();
+
+    InternalIterator ti = hashMap->find(key);
+
+    ret = ti != hashMap->end();
+
+    unlock();
+
+    return ret;
+}
+
+void *TemporalMap::remove(Temporal* key) {
+    void *ret = NULL;
+
+    lock();
+
+    InternalIterator ti = hashMap->find(key);
+
+    if (ti != hashMap->end()){
+        ret = ti->second;
+        hashMap->erase(ti);
+    }
+
+    unlock();
+
+    // returns the removed element.
+    return ret;
+}
+
+void TemporalMap::resize(int newSize) {
+    lock();
+
+    hashMap->resize(newSize);
+
+    unlock();
+}
+
+int TemporalMap::getCount() {
+    int size;
+    lock();
+
+    size = hashMap->size();
+
+    unlock();
+    return(size);
+}
+
+int TemporalMap::getSize() {
+    int max_size;
+    lock();
+
+    max_size = hashMap->bucket_count();
+
+    unlock();
+
+    return max_size;
+}
+
+
+TemporalMapIterator *TemporalMap::keys() {
+    return new TemporalMapIterator(this);
+}
+
+TemporalMapIterator::TemporalMapIterator(TemporalMap *m){
+    map = m;
+    current = map->hashMap->begin();
+}
+
+bool TemporalMapIterator::hasNext() {
+    return current != map->hashMap->end();
+}
+
+Temporal* TemporalMapIterator::next() throw (IndexErrorException) {
+
+    if (!hasNext()) {
+        throw IndexErrorException(TRACE_INFO, "TemporalMap - Iterator out of bounds.");
+    }
+
+    map->lock();
+
+    Temporal* ret = current->first;
+
+    current++;
+
+    map->unlock();
+
+    return ret;
+}
+

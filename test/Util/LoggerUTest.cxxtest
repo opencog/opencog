@@ -1,0 +1,65 @@
+/**
+ * LoggerUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Thu Jul  5 20:56:04 BRT 2007
+ */
+
+#include <Logger.h>
+
+using namespace Util;
+
+class LoggerUTest : public CxxTest::TestSuite {
+
+    private:
+
+    public:
+
+    LoggerUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testLog() {
+
+        char baselineFile[256];
+        char logFile[256];
+
+        strcpy(baselineFile, "/tmp/testLogBaseline.txt");
+        strcpy(logFile, "/tmp/testLog.txt");
+
+        Logger baseline("/tmp/testLogBaseline.txt", Logger::FINE, false);
+        Logger logger("/tmp/testLog.txt", Logger::DEBUG, false);
+
+        logger.log(Logger::FINE, "msg1");
+
+        logger.log(Logger::DEBUG, "msg2");
+        baseline.log(Logger::DEBUG, "msg2");
+
+        logger.log(Logger::INFO, "msg3");
+        baseline.log(Logger::INFO, "msg3");
+
+        FILE *f1 = fopen(baselineFile, "r");
+        FILE *f2 = fopen(logFile, "r");
+
+        TS_ASSERT(f1 != NULL);
+        TS_ASSERT(f2 != NULL);
+
+        char c1 = fgetc(f1);
+        while (c1 != EOF) {
+            char c2 = fgetc(f2);
+            TS_ASSERT(c1 == c2);
+            c1 = fgetc(f1);
+        }
+
+        remove(baselineFile);
+        remove(logFile);
+    }
+}; // class

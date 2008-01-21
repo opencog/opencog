@@ -1,0 +1,1299 @@
+/**
+ * AtomSpaceUTest.cxxtest
+ *
+ * @author: RicBit (former FilterUTest.cxxtest)
+ * @author: Welter
+ */
+#include <AtomSpace.h>
+#include <SimpleTruthValue.h>
+#include <math.h>
+#include <Node.h>  
+#include <TLB.h>
+
+#define NUM_VHS 4
+VersionHandle VHs[NUM_VHS] = {
+    NULL_VERSION_HANDLE,
+    VersionHandle(HYPOTHETICAL, (Handle) 1),
+    VersionHandle(HYPOTHETICAL, (Handle) 2),
+    VersionHandle(CONTEXTUAL, (Handle) 1),
+};
+
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+
+#define NUM_NODES 6
+#define NUM_FORCEUSER_LINKS 4
+#define NUM_HUMAN_LINKS 4
+
+
+void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
+{	
+    int array_size=0;
+    Handle *dest_array = new Handle[1000];
+
+    src.toHandleVector(dest_array, array_size);
+    for (int i =0;i<array_size;i++)
+    {
+        dest.push_back(dest_array[i]);
+    }
+
+    delete dest_array;
+}
+
+class AtomSpaceUTest :  public CxxTest::TestSuite {
+private:
+
+static AtomSpace *atomSpace;
+//AtomSpace *atomSpace;
+
+public:
+  AtomSpaceUTest(){
+  }
+
+  void setUp() {
+    atomSpace = new AtomSpace();
+  }
+
+  void tearDown(){
+    delete atomSpace;
+  }
+
+  struct mean {
+    bool operator()(Handle h) {
+      return atomSpace->getTV(h).getMean()>0.8;
+    }
+  };
+
+  struct everything {
+    bool operator()(Handle h) {
+      return true;
+    }
+  };
+
+  void testMiscelaneous(){
+    printf("\ntestMiscelaneous()\n");
+
+    const char* nodeNames[NUM_NODES] = {
+      "Vader",
+      "Luke",
+      "Chewbacca",
+      "R2D2",
+      "Force",
+      "Human"
+    };
+    Handle h[NUM_NODES];
+    for (int i=0; i<NUM_NODES; i++) {
+      h[i] = atomSpace->addNode (CONCEPT_NODE,nodeNames[i],SimpleTruthValue(0.001,SimpleTruthValue::confidenceToCount(0.99)));
+    }
+    //printf("Nodes created\n");
+
+    float ForceUser[NUM_FORCEUSER_LINKS]={0.99,0.99,0.0,0.5};
+    Handle FU[NUM_FORCEUSER_LINKS];
+    for (int i=0; i<NUM_FORCEUSER_LINKS; i++) {
+      std::vector<Handle> temp(2);
+      temp[0]=h[i];
+      temp[1]=h[4];
+      FU[i]=atomSpace->addLink(PART_OF_LINK,temp,SimpleTruthValue(ForceUser[i],SimpleTruthValue::confidenceToCount(0.99)));
+    }
+    //printf("ForceUser links created\n");
+
+    float Human[4]={0.99,0.99,0.5,0.0};
+    vector<Handle> out[4];
+    Handle H[4];
+    for (int i=0; i<4; i++) {
+      out[i].push_back(h[i]);
+      out[i].push_back(h[5]);
+      H[i]=atomSpace->addLink(INHERITANCE_LINK,out[i],SimpleTruthValue(Human[i],SimpleTruthValue::confidenceToCount(0.99)));
+    }
+    //printf("Human links created\n");
+
+    // Add versioned TVS
+    for (int i = 0; i < NUM_NODES; i++) {
+        int vhIdx = i%NUM_VHS;
+        if (vhIdx) {
+            VersionHandle vh = VHs[vhIdx];
+            atomSpace->setTV(h[i], TruthValue::DEFAULT_TV(), vh);
+            if (i < NUM_FORCEUSER_LINKS)
+                atomSpace->setTV(FU[i], TruthValue::DEFAULT_TV(), vh);
+            if (i < NUM_HUMAN_LINKS)
+                atomSpace->setTV(H[i], TruthValue::DEFAULT_TV(), vh);
+        }
+    }
+    //printf("Versioned TVS added\n");
+
+    // Check primary and versioned TVS
+    for (int i = 0; i < NUM_NODES; i++) {
+        int vhIdx = i%NUM_VHS;
+        const TruthValue& tv = atomSpace->getTV(h[i]);
+        printf("tv initialized to TV object with pointer %p => &(atomSpace->getTV(h[i])) = %p\n",  &tv,&(atomSpace->getTV(h[i])));
+        TS_ASSERT(!tv.isNullTv());
+        printf("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv.getMean(), atomSpace->getTV(h[i]).getMean());
+        TS_ASSERT(fabs(tv.getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
+        printf("h: confidence = %f, diff = %f, error = %f\n", tv.getConfidence(), fabs(tv.getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(tv.getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+        if (i < NUM_FORCEUSER_LINKS) {
+            const TruthValue& tv = atomSpace->getTV(FU[i]);
+            printf("AFTER ASSIGN THE reference tv to another TV: &tv = %p, &(atomSpace->getTV(h[i]) = %p &(atomSpace->getTV(FU[i])) = %p\n", &tv, &(atomSpace->getTV(h[i])), &(atomSpace->getTV(FU[i])));
+            TS_ASSERT(!tv.isNullTv());
+        printf("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv.getMean(), atomSpace->getTV(h[i]).getMean());
+        printf("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv.getMean(), atomSpace->getTV(FU[i]).getMean());
+            TS_ASSERT(fabs(tv.getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
+        printf("FU: confidence = %f, diff = %f, error = %f\n", tv.getConfidence(), fabs(tv.getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv.getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+        }
+        if (i < NUM_HUMAN_LINKS) {
+            const TruthValue& tv = atomSpace->getTV(H[i]);
+            TS_ASSERT(!tv.isNullTv());
+        printf("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv.getMean(), atomSpace->getTV(h[i]).getMean());
+        printf("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv.getMean(), atomSpace->getTV(FU[i]).getMean());
+        printf("H: tv mean = %f,atomSpace->getTV(H[i]) = %f\n", tv.getMean(), atomSpace->getTV(H[i]).getMean());
+            TS_ASSERT(fabs(tv.getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
+        printf("H: confidence = %f, diff = %f, error = %f\n", tv.getConfidence(), fabs(tv.getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv.getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+        }
+        if (vhIdx) {
+            const TruthValue& expectedTv = TruthValue::DEFAULT_TV();
+            VersionHandle vh = VHs[vhIdx];
+            const TruthValue& tv = atomSpace->getTV(h[i], vh);
+            TS_ASSERT(!tv.isNullTv());
+            TS_ASSERT(fabs(tv.getMean() - expectedTv.getMean()) < FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv.getConfidence() - expectedTv.getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+            if (i < NUM_FORCEUSER_LINKS) {
+                const TruthValue& tv = atomSpace->getTV(FU[i], vh);
+                TS_ASSERT(!tv.isNullTv());
+                TS_ASSERT(fabs(tv.getMean() - expectedTv.getMean()) < FLOAT_ACCEPTABLE_ERROR);
+                TS_ASSERT(fabs(tv.getConfidence() - expectedTv.getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+            }
+            if (i < NUM_HUMAN_LINKS) {
+                const TruthValue& tv = atomSpace->getTV(H[i], vh);
+                TS_ASSERT(!tv.isNullTv());
+                TS_ASSERT(fabs(tv.getMean() - expectedTv.getMean()) < FLOAT_ACCEPTABLE_ERROR);
+                TS_ASSERT(fabs(tv.getConfidence() - expectedTv.getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+            }
+        }
+    }
+    //printf("Primary and versioned TVS checked\n");
+
+    TS_ASSERT(atomSpace->Nodes()==NUM_NODES);
+    TS_ASSERT(atomSpace->Links()==8);
+
+    // Test filters
+    for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
+        //printf("Checking against VersionHandle %d\n", vhIdx);
+        vector<Handle> high_mean=atomSpace->filter(mean(), VHs[vhIdx]);
+    
+        vector<Handle> nodes=atomSpace->filter_type(NODE, VHs[vhIdx]);
+    
+        vector<Handle> links;
+        atomSpace->filter_type(back_inserter(links),LINK, VHs[vhIdx]);
+    
+        vector<Handle> all;
+        atomSpace->filter(back_inserter(all),everything(), VHs[vhIdx]);
+
+        switch (vhIdx) {
+            case 0:
+                TS_ASSERT(high_mean.size()==4);
+                TS_ASSERT(nodes.size()==NUM_NODES);
+                TS_ASSERT(links.size()==8);
+                TS_ASSERT(all.size()==14);
+                break;
+            case 1:
+                TS_ASSERT(high_mean.size()==2);
+                TS_ASSERT(nodes.size()==2);
+                TS_ASSERT(links.size()==2);
+                TS_ASSERT(all.size()==4);
+                break;
+            case 2:
+            case 3:
+                TS_ASSERT(high_mean.size()==0);
+                TS_ASSERT(nodes.size()==1);
+                TS_ASSERT(links.size()==2);
+                TS_ASSERT(all.size()==3);
+                break;
+            default:
+                TS_ASSERT(false); // invalid vhIdx
+        }
+        
+        if (vhIdx == 0) {
+            TS_ASSERT(find(high_mean.begin(),high_mean.end(),FU[0])!=high_mean.end());
+            TS_ASSERT(find(high_mean.begin(),high_mean.end(),H[0])!=high_mean.end());
+        }
+        if (vhIdx == 0 || vhIdx == 1) {    
+            TS_ASSERT(find(high_mean.begin(),high_mean.end(),FU[1])!=high_mean.end());
+            TS_ASSERT(find(high_mean.begin(),high_mean.end(),H[1])!=high_mean.end());
+        }
+    
+        for (int i=0; i<NUM_FORCEUSER_LINKS; i++) {
+            if (vhIdx == 0 || (i%4 == vhIdx)) {
+                TS_ASSERT (find(links.begin(),links.end(),FU[i])!=links.end());
+                TS_ASSERT (find(all.begin(),all.end(),FU[i])!=all.end());
+            }
+        }
+
+        for (int i=0; i<NUM_HUMAN_LINKS; i++) {
+            if (vhIdx == 0 || (i%4 == vhIdx)) {
+                TS_ASSERT (find(links.begin(),links.end(),H[i])!=links.end());
+                TS_ASSERT (find(all.begin(),all.end(),H[i])!=all.end());
+            }
+        }
+    
+        for (int i=0; i<NUM_NODES; i++) {
+            if (vhIdx == 0 || (i%4 == vhIdx)) { 
+                TS_ASSERT (find(all.begin(),all.end(),h[i])!=all.end());
+                TS_ASSERT (find(nodes.begin(),nodes.end(),h[i])!=nodes.end());
+            }
+        }
+    }
+    
+    // Test getHandleSet
+    // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true, VersionHandle = NULL_VERSION_HANDLE) const;
+    
+    for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
+        VersionHandle vh = VHs[vhIdx];
+        for (int i = 0; i < NUM_NODES; i++) {
+            HandleSeq nodes;
+            atomSpace->getHandleSet(back_inserter(nodes), NODE, nodeNames[i], true, vh);
+            bool mustMatch = (vhIdx == 0 || (i%4 == vhIdx));
+            TS_ASSERT(nodes.size() == (mustMatch?1:0));
+            for (int j = 0; j < NUM_NODES; j++) {
+                if (i == j && mustMatch) {
+                    TS_ASSERT(find(nodes.begin(),nodes.end(),h[j])!=nodes.end());
+                } else {
+                    TS_ASSERT(find(nodes.begin(),nodes.end(),h[j])==nodes.end());
+                }
+            }
+        }
+        // Note: PART_OF_LINK is a subType of INHERITANCE_LINK
+        HandleSeq links;
+        atomSpace->getHandleSet(back_inserter(links), ATOM, "", true, vh);
+        printf("1) links.size() = %d Expected = %d\n", links.size(), (vhIdx == 0?8:2));
+        TS_ASSERT(links.size() == (vhIdx == 0?8:2));
+        links.clear();
+        atomSpace->getHandleSet(back_inserter(links), LINK, "", true, vh);
+        //printf("2) links.size() = %d\n", links.size());
+        TS_ASSERT(links.size() == (vhIdx == 0?8:2));
+        links.clear();
+        atomSpace->getHandleSet(back_inserter(links), LINK, "", false, vh);
+        //printf("3) links.size() = %d\n", links.size());
+        TS_ASSERT(links.size() == 0);
+        HandleSeq allInhLinks;
+        atomSpace->getHandleSet(back_inserter(allInhLinks), INHERITANCE_LINK, "", true, vh);
+        //printf("4) allInhLinks.size() = %d\n", allInhLinks.size());
+        TS_ASSERT(allInhLinks.size() == (vhIdx == 0?8:2));
+        HandleSeq justInhLinks;
+        atomSpace->getHandleSet(back_inserter(justInhLinks), INHERITANCE_LINK, "", false, vh);
+        //printf("5) justInhLinks.size() = %d\n", justInhLinks.size());
+        TS_ASSERT(justInhLinks.size() == (vhIdx == 0?4:1));
+        HandleSeq partOfLinks;
+        atomSpace->getHandleSet(back_inserter(partOfLinks), PART_OF_LINK, "", true, vh);
+        //printf("6) partOfLinks.size() = %d\n", partOfLinks.size());
+        TS_ASSERT(partOfLinks.size() == (vhIdx == 0?4:1));
+        partOfLinks.clear();
+        atomSpace->getHandleSet(back_inserter(partOfLinks), PART_OF_LINK, "", false, vh);
+        //printf("7) partOfLinks.size() = %d\n", partOfLinks.size());
+        TS_ASSERT(partOfLinks.size() == (vhIdx == 0?4:1));
+    }
+
+  }
+  
+    /**
+     * Method tested: 
+     *  
+     * Add a new atom represented by a tree of Vertex to the Atom Table
+     * @param the tree of Vertex representation of the atom to be added
+     * @param the TruthValue object to be associated to the added atom
+     * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable. 
+     * @param managed ???
+     *
+     * virtual Handle addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fresh=false, bool managed=true);
+     */
+    void testAddAtomVtreeTruthValueBool() {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5,0.99));
+        tree<Vertex> tr = mva((Handle)EVALUATION_LINK,
+			      mva(h1),
+			      mva((Handle)LIST_LINK,
+				  mva(h2),
+				  mva(h3)
+				  )
+			      );
+
+        HandleSeq links;
+        atomSpace->getHandleSet(back_inserter(links), LINK, true);
+        printf("links.size() = %d\n", links.size());
+        TS_ASSERT(links.size() == 0);
+        Handle evalLink = atomSpace->addAtom(tr, TruthValue::DEFAULT_TV()); 
+        TS_ASSERT(CoreUtils::compare(evalLink, UNDEFINED_HANDLE));
+        links.clear();
+        atomSpace->getHandleSet(back_inserter(links), LINK, true);
+        printf("links.size() = %d\n", links.size());
+        TS_ASSERT(links.size() == 2);
+
+        tr = mva(new Node(PREDICATE_NODE, strdup("barkingAt")));
+        Handle h1_ = atomSpace->addAtom(tr, SimpleTruthValue(0.5f,0.5f)); 
+        TS_ASSERT(CoreUtils::compare(h1_, UNDEFINED_HANDLE));
+        // In this case, the expected behavior is to perform a merge and return the 
+        // handle was inserted previously.
+        TS_ASSERT(!CoreUtils::compare(h1_, h1));
+        Atom* atom = TLB::getAtom(h1_);
+        TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+
+        tr = mva(evalLink);        
+        Handle evalLink_ = atomSpace->addAtom(tr, SimpleTruthValue(0.5f, 0.5f));
+        TS_ASSERT(CoreUtils::compare(evalLink_, UNDEFINED_HANDLE));
+        // In this case, the expected behavior is to perform a merge and return the 
+        // handle was inserted previously.
+        TS_ASSERT(!CoreUtils::compare(evalLink_, evalLink));
+        atom = TLB::getAtom(evalLink_);
+        TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+    }
+
+    /**
+     * Method tested: 
+     *  
+     * Add a new node to the Atom Table
+     * @param t     Type of the node
+     * @param name  Name of the node
+     * @param tvn   TruthValue of the node
+     * 
+     * virtual Handle addNode(Type t,const string& name,const TruthValue& tvn,bool fresh=false,bool managed=true)=0;
+     * 
+     */
+    void testAddNode() {
+        SimpleTruthValue tv1(0.001f, 0.00001f);
+        SimpleTruthValue tv2(0.001f, 0.00001f);
+        SimpleTruthValue tv3(0.5,0.99);
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1);
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2);
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", tv3);
+
+        SimpleTruthValue tv1_(0.002f, 0.00002f);
+        SimpleTruthValue tv2_(0.1f, 0.0f);
+        SimpleTruthValue tv3_(0.6,0.90);
+        Handle h1_ = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1_);
+        Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2_);
+        Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree", tv3_);
+        
+        TS_ASSERT(!CoreUtils::compare(h1,h1_));
+        const TruthValue& h1tv = TLB::getAtom(h1)->getTruthValue();
+        TS_ASSERT(h1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(!CoreUtils::compare(h2,h2_));
+        const TruthValue& h2tv = TLB::getAtom(h2)->getTruthValue();
+        TS_ASSERT(h2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(!CoreUtils::compare(h3,h3_));
+        const TruthValue& h3tv = TLB::getAtom(h3)->getTruthValue();
+        TS_ASSERT(h3tv.getMean() - tv3.getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3tv.getCount() - tv3.getCount() < FLOAT_ACCEPTABLE_ERROR);
+
+    }
+
+
+    /**
+     * Method tested: 
+     *  
+     * Add a new link to the Atom Table
+     * @param t         Type of the link
+     * @param outgoing  vector<Handle> containing the outgoing set of the link
+     * @param tvn       TruthValue of the link
+     * 
+     * virtual Handle addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn,bool fresh=false,bool managed=true)=0;
+     */
+    void testAddLink() {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5,0.99));
+        SimpleTruthValue tv1(0.001f, 0.00001f);
+        SimpleTruthValue tv2(0.001f, 0.00001f);
+        HandleSeq outgoing1;
+        outgoing1.push_back(h2);
+        outgoing1.push_back(h3);
+        Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
+        HandleSeq outgoing2;
+        outgoing2.push_back(h1);
+        outgoing2.push_back(l1);
+        Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+
+        SimpleTruthValue tv1_(0.002f, 0.00002f);
+        Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1, tv1_);
+        SimpleTruthValue tv2_(0.1f, 0.0f);
+        Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2_);
+        
+        TS_ASSERT(!CoreUtils::compare(l1,l1_));
+        const TruthValue& l1tv = TLB::getAtom(l1)->getTruthValue();
+        TS_ASSERT(l1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(!CoreUtils::compare(l2,l2_));
+        const TruthValue& l2tv = TLB::getAtom(l2)->getTruthValue();
+        TS_ASSERT(l2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
+
+    }
+
+    void testImportanceUpdate() {
+        AtomSpace at;
+        std::vector<short> imp;
+        for (int i = 0; i < 1000; i++) {
+            char s[256];
+            sprintf(s, "node_%d", i);
+            at.addNode(CONCEPT_NODE, s, SimpleTruthValue(0.5, 0.5));
+            short v = -100 + (i % 200);
+            ((Node *) at.getHandle(CONCEPT_NODE, s))->setAttentionValue(*AttentionValue::factory(v));
+            short newImp = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
+            imp.push_back(newImp);
+            //printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
+        }
+        /*
+        for (int i = 0; i < 10; i++) {
+            char s[256];
+            sprintf(s, "node_%d", i);
+            short newImp = ((Node *) at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
+            printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
+        }*/
+        for (int i = 0; i < 100; i++) {
+            //printf("DECAYING\n");
+            at.decayShortTermImportance();
+        }
+        for (int i = 0; i < 1000; i++) {
+            char s[256];
+            sprintf(s, "node_%d", i);
+            short newImp = ((Node *) at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
+            //printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
+            TS_ASSERT(newImp == (imp[i] - 100));
+        }
+    }
+    
+    void testGetHandle_bugfix1() {
+        AtomSpace atomSpace; 
+        HandleSeq emptyOutgoing;
+        Handle result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
+        TS_ASSERT(!CoreUtils::compare(result, UNDEFINED_HANDLE));
+        atomSpace.addLink(LIST_LINK, emptyOutgoing);
+        result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
+        TS_ASSERT(CoreUtils::compare(result, UNDEFINED_HANDLE));
+    }
+
+    void testAddGetTimeInfo() {
+        AtomSpace atomSpace;
+        Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        
+        Handle atTimeLink = atomSpace.addTimeInfo(node1, 1000);
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
+        vector<HandleTemporalPair> res;
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        Temporal t1(1000);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        Temporal t2(2000,3000);
+        atTimeLink = atomSpace.addTimeInfo(node1, t2);
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        timeNode = atomSpace.getHandle(TIME_NODE, t2.getTimeNodeName());
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        atomSpace.addTimeInfo(node2, t2);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node2);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        // Check getTimeInfo with other temporal relationship criteria
+        
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::STARTS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500,2500), TemporalTable::STARTS_WITHIN);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500,2500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1000), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 1500), TemporalTable::ENDS_WITHIN);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(3000), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500, 2500), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::OVERLAP);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::OVERLAP);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, t1, TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.empty());
+        
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, t1, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, t2, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, t1, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, t2, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        
+        // Check getTimeInfo with UNDEFINED_HANDLE 
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t2);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500), TemporalTable::STARTS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500,2500), TemporalTable::STARTS_WITHIN);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500,2500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1000), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 1500), TemporalTable::ENDS_WITHIN);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(3000), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500, 2500), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500), TemporalTable::OVERLAP);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::OVERLAP);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t1, TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t1, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t2, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t1, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, t2, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+    }
+
+    void testGetAtTimeLink() {
+        AtomSpace atomSpace;
+        Handle h1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        Handle h2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        Temporal* t1 = new Temporal(1000); 
+        Temporal* t2 = new Temporal(500, 1500); 
+        
+        Handle atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        
+        atomSpace.addTimeInfo(h1, *t1);
+
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        
+        atomSpace.addTimeInfo(h1, *t2);
+
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+
+        atomSpace.addTimeInfo(h2, *t1);
+
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
+        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+
+        atomSpace.addTimeInfo(h2, *t2);
+
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+
+    }
+
+    void testRemoveTimeInfo() {
+        AtomSpace atomSpace; 
+        Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, 1000));
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
+        
+        Handle atTimeLink = atomSpace.addTimeInfo(node1, 1000);
+        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
+        
+        // Check if the TimeNode was removed from AtomTable. I should not, since removeDisconnectedTimeNodes flag is false.  
+        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(timeNode != UNDEFINED_HANDLE);
+        // Check if the AtTimeLink was removed from AtomTable 
+        HandleSeq outgoing;
+        outgoing.push_back(timeNode); 
+        outgoing.push_back(node1);
+        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, outgoing) == UNDEFINED_HANDLE);
+        // Check if the pair(node1, T) was removed from TimeServer
+        vector<HandleTemporalPair> res;
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+        // Check if node1 was not affected
+        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != UNDEFINED_HANDLE);
+        
+        atomSpace.addTimeInfo(node1, 1000);
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, 1000));
+
+        // Since the removeDisconnectedTimeNodes flag is true, TimeNode should have been removed too
+        timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(timeNode == UNDEFINED_HANDLE);
+        // Check if the AtTimeLink was removed from AtomTable
+        HandleSeq atTimeLinks;
+        atomSpace.getHandleSet(back_inserter(atTimeLinks), AT_TIME_LINK, false);
+        TS_ASSERT(atTimeLinks.empty());
+        // Check if the pair(node1, T) was removed from TimeServer
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+        // Check if node1 was not affected
+        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != UNDEFINED_HANDLE);
+
+        
+        atomSpace.addTimeInfo(node1, 1000);
+        Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        atomSpace.addTimeInfo(node2, 1000);
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, 1000));
+        
+        // Even the removeDisconnectedTimeNodes flag being true, TimeNode should not have been removed, since there is another atom associated to it.
+        timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(timeNode != UNDEFINED_HANDLE);
+        // Check if the AtTimeLink was removed from AtomTable 
+        outgoing.clear();
+        outgoing.push_back(timeNode); 
+        outgoing.push_back(node1);
+        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, outgoing) == UNDEFINED_HANDLE);
+        // Check if the pair(node1, T) was removed from TimeServer
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+        // Check if node1 was not affected
+        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != UNDEFINED_HANDLE);
+        // Check if the Timeinfo related to node2 is still there 
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == Temporal(1000));
+
+        // Remove all remaining entries and check.
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.empty());
+        
+        // Check removeTimeInfo with other temporal relationship criteria
+        
+        Temporal t1(1000);
+        Temporal t2(2000,3000);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::STARTS_BEFORE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500,2500), TemporalTable::STARTS_WITHIN));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(1500,2500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(1000), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(500, 1500), TemporalTable::ENDS_WITHIN));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(3000), TemporalTable::ENDS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::ENDS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::OVERLAP));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::OVERLAP));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, t1, TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_START_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, t1, TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        // Check getTimeInfo with UNDEFINED_HANDLE 
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, t1));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+        
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, t2));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::STARTS_BEFORE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+        
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500,2500), TemporalTable::STARTS_WITHIN));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500,2500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1000), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(500, 1500), TemporalTable::ENDS_WITHIN));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(3000), TemporalTable::ENDS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500, 2500), TemporalTable::ENDS_AFTER));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::OVERLAP));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::OVERLAP));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.empty());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, t1, TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_START_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, t1, TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+    }
+    
+
+    
+};
+
+AtomSpace *AtomSpaceUTest::atomSpace = NULL;

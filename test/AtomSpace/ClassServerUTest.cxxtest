@@ -1,0 +1,47 @@
+/**
+ * ClassServerUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include <ClassServer.h>
+
+class ClassServerUTest :  public CxxTest::TestSuite {
+private:
+
+public:
+	ClassServerUTest(){
+	}
+
+    void setUp() {
+    }
+
+    void tearDown(){
+    }
+
+    void testIsAssignableFrom(){
+       int numClasses = ClassServer::getNumberOfClasses();
+       for (Type t = 0; t < numClasses; t++) { 
+          printf("Checking type %d\n", t);
+          TS_ASSERT(ClassServer::isAssignableFrom(t, t));
+          if (t > 0) {
+              TS_ASSERT(ClassServer::isAssignableFrom(NODE, t) || ClassServer::isAssignableFrom(LINK, t));
+          }
+       }
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, CONCEPT_NODE));
+       TS_ASSERT(!ClassServer::isAssignableFrom(CONCEPT_NODE, NODE));
+       
+       // TODO: Make more tests with well-known atom hierarchy
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_NODE));
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_OBJECT_NODE));
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_PET_NODE));
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_AVATAR_NODE));
+
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, PREDICATE_NODE));
+       TS_ASSERT(ClassServer::isAssignableFrom(NODE, NUMBER_NODE));
+       TS_ASSERT(ClassServer::isAssignableFrom(LINK, EVALUATION_LINK));
+       TS_ASSERT(ClassServer::isAssignableFrom(LINK, LIST_LINK));
+    }
+
+       // TODO: Make tests with other ClassServer methods
+    
+};

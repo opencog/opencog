@@ -1,0 +1,48 @@
+/**
+ * NMXmlParserUTest.cxxtest
+ *
+ *
+ * Copyright(c) 2003 Rodrigo Barra
+ * All rights reserved.
+ */
+#include <AtomSpace.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <exceptions.h>
+#include <NMXmlParser.h>
+#include <typeinfo>
+#include <NMXmlParserExperiment.h>
+#include <FileXMLBufferReader.h>
+
+
+class NMXmlParserUTest: public CxxTest::TestSuite{
+private: 
+    AtomSpace* atomSpace;
+public:		
+	
+    NMXmlParserUTest() {
+		NMXmlParserExperiment::initStaticVars();
+        atomSpace = new AtomSpace();
+    }
+
+	void tearDown() {
+		atomSpace = NMXmlParserExperiment::cleanupAtomSpace();
+	}
+
+	void testParser(){
+		printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
+		for (int i = 0; i < NMXmlParserExperiment::getNExperiments(); i++){
+			printf("\nExperiment %d\n", i);
+			NMXmlParserExperiment::createExperiment(i, atomSpace);	
+
+			std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(NMXmlParserExperiment::currentFileName));
+			NMXmlParser::loadXML(readers, atomSpace);
+			delete readers[0];
+			
+			TS_ASSERT(NMXmlParserExperiment::checkExperiment());
+			atomSpace = NMXmlParserExperiment::destroyExperiment();
+			printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
+		}
+	}
+};
+

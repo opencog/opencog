@@ -1,0 +1,1286 @@
+/**
+ * TimeServerUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include <TimeServer.h>
+#include <Node.h>
+#include "CoreUtils.h"
+#include "numeric.h"
+
+//=============== Tables used for testing both get and remove methods ================= //
+#define NUMBER_OF_HANDLES 2
+#define NUMBER_OF_SEARCH_INTERVALS 10
+#define NUMBER_OF_CRITERIA 10
+
+    static Temporal search_intervals[NUMBER_OF_SEARCH_INTERVALS] = {
+          Temporal(0,0), 
+          Temporal(0,1),
+          Temporal(1,1), 
+          Temporal(1,2),
+          Temporal(2,2), 
+          Temporal(2,3),
+          Temporal(3,3), 
+          Temporal(3,4),
+          Temporal(4,4), 
+          Temporal(4,5)
+        };
+    static TemporalTable::TemporalRelationship criteria[NUMBER_OF_CRITERIA] = {
+            TemporalTable::STARTS_BEFORE,
+            TemporalTable::STARTS_WITHIN,
+            TemporalTable::STARTS_AFTER,
+            TemporalTable::ENDS_BEFORE,
+            TemporalTable::ENDS_WITHIN,
+            TemporalTable::ENDS_AFTER,
+            TemporalTable::NEXT_AFTER_START_OF,
+            TemporalTable::NEXT_AFTER_END_OF,
+            TemporalTable::PREVIOUS_BEFORE_START_OF,
+            TemporalTable::PREVIOUS_BEFORE_END_OF,
+        };
+        
+    /* Map of entries for these tests: 
+     *  H0       H1
+     * [0,0]    [1,1]
+     * [1,2]    [2,3]
+     * [0,2]    [1,3]
+     */
+    static int expectedNumberOfEntries[NUMBER_OF_HANDLES][NUMBER_OF_SEARCH_INTERVALS][NUMBER_OF_CRITERIA] = {
+         { {0,2,1,0,1,2,1,1,0,0},{0,3,0,0,1,2,1,0,0,1},{2,1,0,1,0,2,0,0,1,1},{2,1,0,1,2,0,0,0,1,1},{3,0,0,1,2,0,0,0,1,1},
+           {3,0,0,1,2,0,0,0,1,1},{3,0,0,3,0,0,0,0,1,1},{3,0,0,3,0,0,0,0,1,1},{3,0,0,3,0,0,0,0,1,1},{3,0,0,3,0,0,0,0,1,1} },
+         { {0,0,3,0,0,3,1,1,0,0},{0,2,1,0,1,2,1,1,0,0},{0,2,1,0,1,2,1,1,0,0},{0,3,0,0,1,2,1,0,0,1},{2,1,0,1,0,2,0,0,1,1},
+           {2,1,0,1,2,0,0,0,1,1},{3,0,0,1,2,0,0,0,1,1},{3,0,0,1,2,0,0,0,1,1},{3,0,0,3,0,0,0,0,1,1},{3,0,0,3,0,0,0,0,1,1} }
+        };
+    static Temporal expectedNextAfterStartOf[NUMBER_OF_HANDLES][NUMBER_OF_SEARCH_INTERVALS] = {
+         {Temporal(1,2),Temporal(1,2),UNDEFINED_TEMPORAL, UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL},
+         {Temporal(1,1),Temporal(1,1),Temporal(2,3),Temporal(2,3),UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL}
+        };
+    static Temporal expectedNextAfterEndOf[NUMBER_OF_HANDLES][NUMBER_OF_SEARCH_INTERVALS] = {
+         {Temporal(1,2),UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL, UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL},
+         {Temporal(1,1),Temporal(2,3),Temporal(2,3),UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL}
+        };
+    static Temporal expectedPreviousBeforeStartOf[NUMBER_OF_HANDLES][NUMBER_OF_SEARCH_INTERVALS] = {
+         {UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,Temporal(0,2),Temporal(0,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2)},
+         {UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,Temporal(1,3),Temporal(1,3),Temporal(2,3),Temporal(2,3),Temporal(2,3),Temporal(2,3)}
+        };
+    static Temporal expectedPreviousBeforeEndOf[NUMBER_OF_HANDLES][NUMBER_OF_SEARCH_INTERVALS] = {
+         {UNDEFINED_TEMPORAL,Temporal(0,2),Temporal(0,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2),Temporal(1,2)},
+         {UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,UNDEFINED_TEMPORAL,Temporal(1,3),Temporal(1,3),Temporal(2,3),Temporal(2,3),Temporal(2,3),Temporal(2,3),Temporal(2,3)}
+        };
+//========================================================================================= //
+
+#define N_TIMES 10
+
+string toString(const std::list<HandleTemporalPair> &l) {
+    string result;
+    for (std::list<HandleTemporalPair>::const_iterator it = l.begin(); 
+         it != l.end(); it++) {
+        result += (*it).toString(); 
+        result += "->";
+    }
+    result += "NULL";
+    return result;
+}
+
+class TimeServerUTest :  public CxxTest::TestSuite{
+private:
+
+    Temporal* times[N_TIMES];
+    Handle handles[N_TIMES];
+
+    TimeServer *timeServer;
+       
+public:
+
+    TimeServerUTest(){
+        timeServer = new TimeServer;
+        for (int i = 0; i < N_TIMES; i++){
+            times[i] = new Temporal(i*2,i*2);
+            char name[1<<16];
+            sprintf(name, "name-%d", i);
+            Node *n = new Node(WORD_NODE, name);
+            handles[i] = n;
+        }
+    }
+
+    ~TimeServerUTest(){
+        for(int i = 0; i < N_TIMES; i++){
+            delete times[i];
+            delete handles[i];
+        }
+    }
+
+    void setUp(){
+        timeServer->clear();
+    }
+
+    void tearDown(){
+    }
+
+    void testAdd(){
+        std::list<HandleTemporalPair> ret;
+        for (int i = 0; i < N_TIMES; i++){
+            // TODO: how to assign the OutputIterator to an variable? 
+            //TS_ASSERT(timeServer->get(back_inserter(ret), handles[i]) == ret.end());
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]));
+            TS_ASSERT(ret.empty());
+        }
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->add(handles[i], *(times[i]));
+            ret.clear();
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 1);
+            ret.clear();
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]));
+            TS_ASSERT(ret.size() == 1);
+        }
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->add(handles[i], *(times[N_TIMES-1-i]));
+        }
+        for (int i = 0; i < N_TIMES; i++){
+            bool firstHalf = i < N_TIMES/2;
+            // Check times by handle
+            ret.clear();
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 2);
+            TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[firstHalf?i:(N_TIMES-i-1)]) == 0);
+            ret.pop_front();
+            TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[firstHalf?(N_TIMES-i-1):i]) == 0);
+            ret.pop_front();
+            // Check handles by time
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]));
+            TS_ASSERT(ret.size() == 2);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0 || CoreUtils::compare(ret.front().getHandle(), handles[N_TIMES-i-1]) == 0);
+            ret.pop_front();
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0 || CoreUtils::compare(ret.front().getHandle(), handles[N_TIMES-i-1]) == 0);
+            ret.pop_front();
+        }
+    }
+
+    void testGetByHandle(){
+        //HandleTemporalPairEntry* get(Handle);
+        std::list<HandleTemporalPair> ret;
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        for (int i = 0; i < N_TIMES; i++){
+            if (i < N_TIMES/2) {
+                // Insertions in ascendent order
+                for (unsigned int j = 0; j < N_TIMES; j++){
+                    timeServer->add(handles[i], *(times[j]));
+                    timeServer->get(back_inserter(ret), handles[i]);
+                    TS_ASSERT(ret.size() == j+1);
+                    for (unsigned int k = 0; k <= j; k++) {
+                        TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[k]) == 0);
+                        ret.pop_front();
+                    }
+                }
+            } else {
+                // Insertions in descendent order
+                for (int j = N_TIMES-1; j >=0 ; j--){
+                    timeServer->add(handles[i], *(times[j]));
+                    timeServer->get(back_inserter(ret), handles[i]);
+                    for (int k = j; k < N_TIMES; k++) {
+                        TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[k]) == 0);
+                        ret.pop_front();
+                    }
+                }
+            }
+        }
+    }
+
+    void testGetByHandleAndTemporal() {
+        //HandleTemporalPairEntry* get(Handle, Temporal*, bool)
+        std::list<HandleTemporalPair> ret;
+        Temporal time (0,(N_TIMES-1)*2);
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+            timeServer->add(handles[i], time);
+        }
+        for (int i = 0; i < N_TIMES; i++){
+            if (i < N_TIMES/2) {
+                // Insertions in ascendent order
+                for (unsigned int j = 0; j < N_TIMES; j++){
+                    timeServer->add(handles[i], *(times[j]));
+                    // Check times[0]
+                    timeServer->get(back_inserter(ret), handles[i], *(times[0]));
+                    TS_ASSERT(ret.size() == 1);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[0]) == 0);
+                    ret.pop_front();
+                    timeServer->get(back_inserter(ret), handles[i], *(times[0]), TemporalTable::OVERLAP);
+                    TS_ASSERT(ret.size() == 2);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), 
+                              (TemporalEntry::compare(&time, times[0]) < 0)?&time:times[0]) == 0);
+                    ret.pop_front();
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), 
+                              (TemporalEntry::compare(&time, times[0]) > 0)?&time:times[0]) == 0);
+                    ret.pop_front();
+                    // Check times[j]
+                    timeServer->get(back_inserter(ret), handles[i], *(times[j]));
+                    TS_ASSERT(ret.size() == 1);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[j]) == 0);
+                    ret.pop_front();
+                    timeServer->get(back_inserter(ret), handles[i], *(times[j]), TemporalTable::OVERLAP);
+//                    printf("%s\n", toString(ret).c_str());
+//                    printf("expected time = %s\n", ((TemporalEntry::compare(&time, times[j]) < 0)?&time:times[j])->toString().c_str());
+                    TS_ASSERT(ret.size() == 2);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), 
+                              (TemporalEntry::compare(&time, times[j]) < 0)?&time:times[j]) == 0);
+                    ret.pop_front();
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), 
+                              (TemporalEntry::compare(&time, times[j]) > 0)?&time:times[j]) == 0);
+                    ret.pop_front();
+                    // Check with a time interval that contains all times
+                    timeServer->get(back_inserter(ret), handles[i], time);
+                    TS_ASSERT(ret.size() == 1);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), &time) == 0);
+                    ret.pop_front();
+                    timeServer->get(back_inserter(ret), handles[i], time, TemporalTable::OVERLAP);
+                    TS_ASSERT(ret.size() == j+2);
+                    for (unsigned int k = 0; k <= (j+1); k++) {
+                        Temporal* expectedTime = (k==0)?times[0]:((k>1)?times[k-1]:&time);
+                        TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), expectedTime) == 0);
+                        ret.pop_front();
+                    }
+                }
+            } else {
+                // Insertions in descendent order
+                for (unsigned int j = 0; j < N_TIMES; j++){
+                    unsigned int timeIndex = N_TIMES-j-1;
+                    timeServer->add(handles[i], *(times[timeIndex]));
+                    // Check times[N_TIMES-1]
+                    timeServer->get(back_inserter(ret), handles[i], *(times[N_TIMES-1]));
+                    TS_ASSERT(ret.size() == 1);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[N_TIMES-1]) == 0);
+                    ret.pop_front();
+                    timeServer->get(back_inserter(ret), handles[i], *(times[N_TIMES-1]), TemporalTable::OVERLAP);
+                    TS_ASSERT(ret.size() == 2);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), &time) == 0);
+                    ret.pop_front();
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[N_TIMES-1]) == 0);
+                    ret.pop_front();
+                    // Check times[timeIndex]
+                    timeServer->get(back_inserter(ret), handles[i], *(times[timeIndex]));
+                    TS_ASSERT(ret.size() == 1);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), times[timeIndex]) == 0);
+                    ret.pop_front();
+                    timeServer->get(back_inserter(ret), handles[i], *(times[timeIndex]), TemporalTable::OVERLAP);
+                    TS_ASSERT(ret.size() == 2);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), (timeIndex==0)?times[timeIndex]:&time) == 0);
+                    ret.pop_front();
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), (timeIndex==0)?&time:times[timeIndex]) == 0);
+                    ret.pop_front();
+                    // Check with a time interval that contains all times
+                    timeServer->get(back_inserter(ret), handles[i], time);
+                    TS_ASSERT(ret.size() == 1);
+                    TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), &time) == 0);
+                    ret.pop_front();
+                    timeServer->get(back_inserter(ret), handles[i], time, TemporalTable::OVERLAP);
+                    TS_ASSERT(ret.size() == N_TIMES-timeIndex+1);
+                    for (unsigned int k = timeIndex; k <= N_TIMES; k++) {
+                        Temporal* expectedTime = (timeIndex==0)?(k==0?times[0]:k==1?&time:times[k-1])
+                                                       :(k==timeIndex?&time:times[k-1]);
+                        TS_ASSERT(TemporalEntry::compare(ret.front().getTemporal(), expectedTime) == 0);
+                        ret.pop_front();
+                    }
+                }
+            }
+        }
+        
+    }
+
+    void testGetByHandleAndTemporalWithOtherCriteria() {
+        std::list<HandleTemporalPair> ret;
+        for (int i = 0; i < NUMBER_OF_HANDLES; i++) {
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+            timeServer->add(handles[i], Temporal(i,i));      // [0,0]    [1,1]
+            timeServer->add(handles[i], Temporal(i+1,i+2));  // [1,2]    [2,3]
+            timeServer->add(handles[i], Temporal(i,i+2));    // [0,2]    [1,3]
+        }
+        for (int h = 0; h < NUMBER_OF_HANDLES; h++) {
+            for (int t = 0; t < NUMBER_OF_SEARCH_INTERVALS; t++) {
+                for (int c = 0; c < NUMBER_OF_CRITERIA; c++) {
+                    timeServer->get(back_inserter(ret), handles[h],search_intervals[t],criteria[c]);
+                    int numberOfReturnedEntries = ret.size();
+                    if(numberOfReturnedEntries != expectedNumberOfEntries[h][t][c]) {
+                        printf("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s", 
+                               TLB::getAtom(handles[h])->toString().c_str(), 
+                               search_intervals[t].toString().c_str(), 
+                               TemporalTable::getTemporalRelationshipStr(criteria[c]), 
+                               expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, toString(ret).c_str());
+                    } 
+                    TS_ASSERT(numberOfReturnedEntries == expectedNumberOfEntries[h][t][c]); 
+                    for (int i = 0; i < expectedNumberOfEntries[h][t][c]; i++) {
+                        if (criteria[c] == TemporalTable::NEXT_AFTER_START_OF) { 
+                            if(*(ret.front().getTemporal()) != expectedNextAfterStartOf[h][t]) {
+                                printf("Next after start of t %s for h (%s) does not match\nExpected %s, but got %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       expectedNextAfterStartOf[h][t].toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) == expectedNextAfterStartOf[h][t]);
+                        } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) { 
+                            if(*(ret.front().getTemporal()) != expectedNextAfterEndOf[h][t]) {
+                                printf("Next after end of t %s for h (%s) does not match\nExpected %s, but got %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       expectedNextAfterEndOf[h][t].toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) == expectedNextAfterEndOf[h][t]);
+                        } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) { 
+                            if(*(ret.front().getTemporal()) != expectedPreviousBeforeStartOf[h][t]) {
+                                printf("Previous after start of t %s for h (%s) does not match\nExpected %s, but got %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       expectedPreviousBeforeStartOf[h][t].toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) == expectedPreviousBeforeStartOf[h][t]);
+                        } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) { 
+                            if(*(ret.front().getTemporal()) != expectedPreviousBeforeEndOf[h][t]) {
+                                printf("Previous after end of t %s for h (%s) does not match\nExpected %s, but got %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       expectedPreviousBeforeEndOf[h][t].toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) == expectedPreviousBeforeEndOf[h][t]);
+                        }
+                        ret.pop_front();
+                    }
+                }
+            } 
+        }
+    }
+
+    void testGetByTemporal(){
+        std::list<HandleTemporalPair> ret;
+        //HandleTemporalPairEntry* get(Temporal*, bool = true);
+        
+        // Check if there is no entry yet
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        
+        // Check association of all times to the first handle
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->add(handles[0], *(times[i]));
+        }
+        // Exact match
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]));
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+            ret.pop_front();
+        }
+        // Overlap match
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]), TemporalTable::OVERLAP);
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+            ret.pop_front();
+        }
+        
+        // Check association of the first time to all handles
+        for (int i = 1; i < N_TIMES; i++){
+            timeServer->add(handles[i], *(times[0]));
+        }
+        // Exact match
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[0]));
+        TS_ASSERT(ret.size() == N_TIMES);
+        for (int i = 0; i < N_TIMES; i++){
+            // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+            // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+        }
+        // Overlap match
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[0]), TemporalTable::OVERLAP);
+        TS_ASSERT(ret.size() == N_TIMES);
+        for (int i = 0; i < N_TIMES; i++){
+            // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+            // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+        }
+    }
+
+    // Special case 1: check different intervals contained by an existent interval
+    void testGetByTemporalSpecialCase1(){
+        std::list<HandleTemporalPair> ret;
+        Temporal time(0,20);
+        // Check if TimeServer is empty
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, time);
+        TS_ASSERT(ret.empty());
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, time, TemporalTable::OVERLAP);
+        TS_ASSERT(ret.empty());
+        // Inserts new time
+        timeServer->add(handles[0],time);
+        // Gets time with exact match
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, time);
+        TS_ASSERT(ret.size() == 1);
+        TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+        ret.pop_front();
+        // Gets time with Overlap match
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, time, TemporalTable::OVERLAP);
+        TS_ASSERT(ret.size() == 1);
+        TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+        ret.pop_front();
+        // Lookups using several different times whose interval is contained by the interval of the inserted time
+        for (int i = 0; i < N_TIMES; i++){
+            // Exact match does not return anything
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]));
+            TS_ASSERT(ret.empty());
+            // Overlap match return one entry for all times
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(times[i]), TemporalTable::OVERLAP);
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+            ret.pop_front();
+        }
+    }
+
+    // Special case 2: check an interval that is contained by several existing intervals 
+    void testGetByTemporalSpecialCase2(){
+        std::list<HandleTemporalPair> ret;
+        Temporal* specialTimes[N_TIMES/2];
+        for (int i = 0; i < N_TIMES/2; i++){
+            specialTimes[i] = new Temporal(i*2,(N_TIMES-i)*2);
+            timeServer->add(handles[i], *(specialTimes[i]));
+        }
+        Temporal time(N_TIMES, N_TIMES);
+        // Exact match
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, time);
+        TS_ASSERT(ret.empty());
+        // Overlap match
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, time, TemporalTable::OVERLAP);
+        TS_ASSERT(ret.size() == N_TIMES/2);
+        for (int i = 0; i < N_TIMES/2; i++){
+            // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+            // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            delete specialTimes[i];
+        }
+    }
+        
+    // Special case 3: check intervals that has the same lower bound of several existing intervals
+    void testGetByTemporalSpecialCase3(){
+        std::list<HandleTemporalPair> ret;
+        Temporal* specialTimes[N_TIMES/2];
+        for (int i = 0; i < N_TIMES/2; i++){
+            specialTimes[i] = new Temporal(0,i*2);
+            timeServer->add(handles[i], *(specialTimes[i]));
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            // Exact match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]));
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+            // Overlap match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAP);
+            TS_ASSERT(ret.size() == N_TIMES/2);
+            for (int j = 0; j < N_TIMES/2; j++){
+                // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                ret.pop_front();
+            }
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            delete specialTimes[i];
+        }
+    }
+        
+    // Special case 4: check intervals that has the same upper bound of several existing intervals
+    void testGetByTemporalSpecialCase4(){
+        std::list<HandleTemporalPair> ret;
+        Temporal* specialTimes[N_TIMES/2];
+        for (int i = 0; i < N_TIMES/2; i++){
+            specialTimes[i] = new Temporal(i*2,N_TIMES);
+            timeServer->add(handles[i], *(specialTimes[i]));
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            // Exact match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]));
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+            // Overlap match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAP);
+            TS_ASSERT(ret.size() == N_TIMES/2);
+            for (int j = 0; j < N_TIMES/2; j++){
+                // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                ret.pop_front();
+            }
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            delete specialTimes[i];
+        }
+    }
+
+    // Special case 5: check intervals against several existing intervals that has many points of intersection with other intervals
+    void testGetByTemporalSpecialCase5(){
+        std::list<HandleTemporalPair> ret;
+        Temporal* specialTimes[N_TIMES/2];
+        for (int i = 0; i < N_TIMES/2; i++){
+            specialTimes[i] = new Temporal(i*2,(i+(N_TIMES/2)-2)*2);
+            timeServer->add(handles[i], *(specialTimes[i]));
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            // Exact match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]));
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+            // Overlap match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAP);
+            unsigned int howManyIntersections = (i > 0 && i < (N_TIMES/2-1))?(N_TIMES/2):(N_TIMES/2-1);
+            TS_ASSERT(ret.size() == howManyIntersections);
+            for (unsigned int j = 0; j < howManyIntersections; j++){
+                // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                ret.pop_front();
+            }
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            delete specialTimes[i];
+        }
+    }
+        
+    // Special case 6: check intervals against several existing intervals that has only one point of intersection with other intervals
+    void testGetByTemporalSpecialCase6(){
+        std::list<HandleTemporalPair> ret;
+        Temporal* specialTimes[N_TIMES/2];
+        for (int i = 0; i < N_TIMES/2; i++){
+            specialTimes[i] = new Temporal(i*2,(i+1)*2);
+            timeServer->add(handles[i], *(specialTimes[i]));
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            // Exact match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]));
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+            // Overlap match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAP);
+            unsigned int howManyIntersections = (i > 0 && i < (N_TIMES/2-1))?3:2;
+            TS_ASSERT(ret.size() == howManyIntersections);
+            for (unsigned int j = 0; j < howManyIntersections; j++){
+                // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
+                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                ret.pop_front();
+            }
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            delete specialTimes[i];
+        }
+    }
+        
+    // Special case 7: check intervals against several existing intervals that has no point of intersection with another intervals
+    void testGetByTemporalSpecialCase7(){
+        std::list<HandleTemporalPair> ret;
+        Temporal* specialTimes[N_TIMES/2];
+        for (int i = 0; i < N_TIMES/2; i++){
+            specialTimes[i] = new Temporal(i*2,i*2);
+            timeServer->add(handles[i], *(specialTimes[i]));
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            // Exact match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]));
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+            // Overlap match
+            // Exact match
+            timeServer->get(back_inserter(ret), UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAP);
+            TS_ASSERT(ret.size() == 1);
+            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            ret.pop_front();
+        }
+        for (int i = 0; i < N_TIMES/2; i++){
+            delete specialTimes[i];
+        }
+    }
+
+    void testGetByTemporalWithOtherCriteria() {
+        std::list<HandleTemporalPair> ret;
+        for (int i = 0; i < NUMBER_OF_HANDLES; i++) {
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+            timeServer->add(handles[i], Temporal(i,i));      // [0,0]    [1,1]
+            timeServer->add(handles[i], Temporal(i+1,i+2));  // [1,2]    [2,3]
+            timeServer->add(handles[i], Temporal(i,i+2));    // [0,2]    [1,3]
+        }
+
+        for (int t = 0; t < NUMBER_OF_SEARCH_INTERVALS; t++) {
+            for (int c = 0; c < NUMBER_OF_CRITERIA; c++) {
+                timeServer->get(back_inserter(ret), UNDEFINED_HANDLE,search_intervals[t],criteria[c]);
+                int numberOfReturnedEntries = ret.size();
+                int totalExpectedNumberOfEntries = 
+                    (criteria[c] != TemporalTable::NEXT_AFTER_START_OF &&
+                     criteria[c] != TemporalTable::NEXT_AFTER_END_OF &&
+                     criteria[c] != TemporalTable::PREVIOUS_BEFORE_START_OF &&
+                     criteria[c] != TemporalTable::PREVIOUS_BEFORE_END_OF)?
+                        (expectedNumberOfEntries[0][t][c] + expectedNumberOfEntries[1][t][c]):
+                        (expectedNumberOfEntries[0][t][c] | expectedNumberOfEntries[1][t][c]);
+                if(numberOfReturnedEntries != totalExpectedNumberOfEntries) {
+                    printf("\nWrong number of entries returned t=%s, c=%s\nExpected %d, but got %d => %s", 
+                           search_intervals[t].toString().c_str(), 
+                           TemporalTable::getTemporalRelationshipStr(criteria[c]), 
+                           totalExpectedNumberOfEntries, numberOfReturnedEntries, toString(ret).c_str());
+                } 
+                TS_ASSERT(numberOfReturnedEntries == totalExpectedNumberOfEntries); 
+                for (int i = 0; i < totalExpectedNumberOfEntries; i++) {
+                    if (criteria[c] == TemporalTable::NEXT_AFTER_START_OF) { 
+                        const Temporal& nextAfterStartOf = 
+                            (expectedNextAfterStartOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterStartOf[1][t]:
+                            (expectedNextAfterStartOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterStartOf[0][t]: 
+                            (expectedNextAfterStartOf[0][t] < expectedNextAfterStartOf[1][t])?
+                             expectedNextAfterStartOf[0][t]:
+                             expectedNextAfterStartOf[1][t];
+                        if(*(ret.front().getTemporal()) != nextAfterStartOf) {
+                            printf("Next after start of t %s does not match\nExpected %s, but got %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   nextAfterStartOf.toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) == nextAfterStartOf);
+                    } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) { 
+                        const Temporal& nextAfterEndOf = 
+                            (expectedNextAfterEndOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterEndOf[1][t]:
+                            (expectedNextAfterEndOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterEndOf[0][t]: 
+                            (expectedNextAfterEndOf[0][t] < expectedNextAfterEndOf[1][t])?
+                             expectedNextAfterEndOf[0][t]:
+                             expectedNextAfterEndOf[1][t];
+                        if(*(ret.front().getTemporal()) != nextAfterEndOf) {
+                            printf("Next after end of t %s does not match\nExpected %s, but got %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   nextAfterEndOf.toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) == nextAfterEndOf);
+                    } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) { 
+                        const Temporal& previousBeforeStartOf = 
+                            (expectedPreviousBeforeStartOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeStartOf[1][t]:
+                            (expectedPreviousBeforeStartOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeStartOf[0][t]: 
+                            (expectedPreviousBeforeStartOf[0][t] > expectedPreviousBeforeStartOf[1][t])?
+                             expectedPreviousBeforeStartOf[0][t]:
+                             expectedPreviousBeforeStartOf[1][t];
+                        if(*(ret.front().getTemporal()) != previousBeforeStartOf) {
+                            printf("Next after start of t %s does not match\nExpected %s, but got %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   previousBeforeStartOf.toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) == previousBeforeStartOf);
+                    } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) { 
+                        const Temporal& previousBeforeEndOf = 
+                            (expectedPreviousBeforeEndOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeEndOf[1][t]:
+                            (expectedPreviousBeforeEndOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeEndOf[0][t]: 
+                            (expectedPreviousBeforeEndOf[0][t] > expectedPreviousBeforeEndOf[1][t])?
+                             expectedPreviousBeforeEndOf[0][t]:
+                             expectedPreviousBeforeEndOf[1][t];
+                        if(*(ret.front().getTemporal()) != previousBeforeEndOf) {
+                            printf("Next after end of t %s does not match\nExpected %s, but got %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   previousBeforeEndOf.toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) == previousBeforeEndOf);
+                    }
+                    ret.pop_front();
+                }
+            }
+        } 
+    }
+
+    void testRemoveByHandle(){
+        std::list<HandleTemporalPair> ret;
+        // Check if it is empty
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        // Add entries
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 1);
+            ret.pop_front();
+        }
+        // Removes and check if ok
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->remove(handles[i]);
+            for (int j = 0; j < N_TIMES; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j <= i) {
+                    TS_ASSERT(ret.empty());
+                } else {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+        // Adds entries again
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 1);
+            ret.pop_front();
+        }
+        // Removes in the inverse order and check if ok
+        for (int i = N_TIMES-1; i >= 0; i--){
+            timeServer->remove(handles[i]);
+            for (int j = 0; j < N_TIMES; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j >= i) {
+                    TS_ASSERT(ret.empty());
+                } else {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+        // Now adds two entries for each handle
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[(i+1)%N_TIMES]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 2);
+            ret.clear();
+        }
+        // Removes and check if ok
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->remove(handles[i]);
+            for (int j = 0; j < N_TIMES; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j <= i) {
+                    TS_ASSERT(ret.empty());
+                } else {
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+    }
+
+    void testRemoveByHandleAndTemporalExact(){
+        std::list<HandleTemporalPair> ret;
+        // Check if it is empty
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        // Adds two entries for each handle
+        for (int i = 0; i < N_TIMES-1; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[i+1]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 2);
+            ret.clear();
+        }
+        // Removes only one of the insertions of each handle and check
+        for (int i = 0; i < N_TIMES-1; i++){
+            if (i < N_TIMES/2) {
+                timeServer->remove(handles[i], *(times[i]));
+            } else {
+                timeServer->remove(handles[i], *(times[i+1]));
+            }
+            for (int j = 0; j < N_TIMES-1; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j <= i) {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                } else {
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                }
+            }
+        }
+        // Removes the remaining insertions of each handle and check
+        for (int i = 0; i < N_TIMES-1; i++){
+            if (i < N_TIMES/2) {
+                timeServer->remove(handles[i], *(times[i+1]));
+            } else {
+                timeServer->remove(handles[i], *(times[i]));
+            }
+            for (int j = 0; j < N_TIMES-1; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j <= i) {
+                    TS_ASSERT(ret.empty());
+                } else {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+    }    
+
+    void testRemoveByHandleAndTemporalNonExact(){
+        std::list<HandleTemporalPair> ret;
+        // FIRST TEST THE SAME CASES OF EXACT MATCH:
+        // Check if it is empty
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        // Adds two entries for each handle
+        for (int i = 0; i < N_TIMES-1; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[i+1]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 2);
+            ret.clear();
+        }
+        // Removes only one of the insertions of each handle and check
+        for (int i = 0; i < N_TIMES-1; i++){
+            if (i < N_TIMES/2) {
+                timeServer->remove(handles[i], *(times[i]), TemporalTable::OVERLAP);
+            } else {
+                timeServer->remove(handles[i], *(times[i+1]), TemporalTable::OVERLAP);
+            }
+            for (int j = 0; j < N_TIMES-1; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j <= i) {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                } else {
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                }
+            }
+        }
+        // Removes the remaining insertions of each handle and check
+        for (int i = 0; i < N_TIMES-1; i++){
+            if (i < N_TIMES/2) {
+                timeServer->remove(handles[i], *(times[i+1]), TemporalTable::OVERLAP);
+            } else {
+                timeServer->remove(handles[i], *(times[i]), TemporalTable::OVERLAP);
+            }
+            for (int j = 0; j < N_TIMES-1; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j <= i) {
+                    TS_ASSERT(ret.empty());
+                } else {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+        
+        // TEST OTHER SPECIFIC CASES
+        // Declares different times for using in this test
+        Temporal* specialTimes[N_TIMES];
+        for (int i = 0; i < N_TIMES; i++){
+            specialTimes[i] = new Temporal(0,i*2);
+        }
+        // Adds three entries for each handle
+        for (int i = 0; i < N_TIMES-1; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[i+1]));
+            timeServer->add(handles[i], *(specialTimes[i+1]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 3);
+            ret.clear();
+        }
+        /*
+        printf("All entries in TimeServer = %s\n", timeServer->get(back_inserter(ret), UNDEFINED_HANDLE)->toString().c_str()); 
+        Temporal specialTime(0, (N_TIMES-1)*2); // overlaps any inserted time
+        printf("specialTime = %s\n", specialTime.toString().c_str()); 
+        timeServer->remove(UNDEFINED_HANDLE, specialTime, TemporalTable::OVERLAP);
+        */
+        // Removes the entries and check
+        for (int i = 0; i < N_TIMES-1; i++){
+            for (int j = 0; j < N_TIMES; j++) {
+                // For each handle i => remove by times (0,j) => (0,1), (0,2), ..., (0,N)
+                timeServer->remove(handles[i], *(specialTimes[j]), TemporalTable::OVERLAP);
+                timeServer->get(back_inserter(ret), handles[i]);
+                if (j < i) {
+                    // [0,j+1] removed, [j,j] and [j+1,j+1] kept
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                } else if (j == i) {
+                    // [j,j] [0,j+1] removed, [j+1,j+1] kept
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                } else {
+                    // [j,j] [j+1,j+1] [0,j+1] removed
+                    TS_ASSERT(ret.empty());
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        //printf("All entries in TimeServer = %s\n", toString(ret).c_str()); 
+        TS_ASSERT(ret.empty());
+        for (int i = 0; i < N_TIMES; i++){
+            delete specialTimes[i];
+        }
+    }    
+
+    void testRemoveByTemporalExact(){
+        std::list<HandleTemporalPair> ret;
+        // Check if it is empty
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        // Adds two entries for each handle
+        for (int i = 0; i < N_TIMES-1; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[i+1]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 2);
+            ret.clear();
+        }
+        // Removes each time and check
+        for (int i = 0; i < N_TIMES; i++){
+//printf("i = %d\n", i);
+            timeServer->remove(UNDEFINED_HANDLE, *(times[i]));
+            for (int j = 0; j < N_TIMES-1; j++) {
+//printf("j = %d\n", j);
+                timeServer->get(back_inserter(ret), handles[j]);
+//printf("ret => %s\n", toString(ret).c_str());
+                if (j < i) {
+                    TS_ASSERT(ret.empty());
+                } else if (j == i) {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                } else {
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+    }    
+
+    void testRemoveByTemporalNonExact(){
+        std::list<HandleTemporalPair> ret;
+        // FIRST TEST THE SAME CASES OF EXACT MATCH:
+        // Check if it is empty
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.empty());
+        }
+        // Adds two entries for each handle
+        for (int i = 0; i < N_TIMES-1; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[i+1]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 2);
+            ret.clear();
+        }
+        // Removes each time and check
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->remove(UNDEFINED_HANDLE, *(times[i]), TemporalTable::OVERLAP);
+            for (int j = 0; j < N_TIMES-1; j++) {
+                timeServer->get(back_inserter(ret), handles[j]);
+                if (j < i) {
+                    TS_ASSERT(ret.empty());
+                } else if (j == i) {
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                } else {
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+        
+        // TEST OTHER SPECIFIC CASES
+        // Declares different times for using in this test
+        Temporal* specialTimes[N_TIMES];
+        for (int i = 0; i < N_TIMES; i++){
+            specialTimes[i] = new Temporal(0,i*2);
+        }
+        // Adds some entries for each handle
+        for (int i = 0; i < N_TIMES-1; i++){
+            timeServer->add(handles[i], *(times[i]));
+            timeServer->add(handles[i], *(times[i+1]));
+            timeServer->add(handles[i], *(specialTimes[i+1]));
+            timeServer->get(back_inserter(ret), handles[i]);
+            TS_ASSERT(ret.size() == 3);
+            ret.clear();
+        }
+        // Removes the entries and check
+        for (int i = 0; i < N_TIMES; i++){
+            timeServer->remove(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAP);
+            for (int j = 0; j < N_TIMES-1; j++){
+                timeServer->get(back_inserter(ret), handles[j]);
+                //printf("j= %d, i = %d, %s\n", j, i, toString(ret).c_str());
+                if (j < i) {
+                    // [j,j] [j+1,j+1] [0,j+1] removed
+                    TS_ASSERT(ret.empty());      
+                } else if (j == i) {
+                    // [j,j] [0,j+1] removed, [j+1,j+1] kept
+                    TS_ASSERT(ret.size() == 1);
+                    ret.pop_front();
+                } else {
+                    // [0,j+1] removed, [j,j] and [j+1,j+1] kept
+                    TS_ASSERT(ret.size() == 2);
+                    ret.clear();
+                }
+            }
+        }
+        // Check if they are all removed.
+        timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+        TS_ASSERT(ret.empty());
+        for (int i = 0; i < N_TIMES; i++){
+            delete specialTimes[i];
+        }
+    }    
+
+    void testRemoveByHandleAndTemporalWithOtherCriteria() {
+        std::list<HandleTemporalPair> ret;
+        for (int h = 0; h < NUMBER_OF_HANDLES; h++) {
+            for (int t = 0; t < NUMBER_OF_SEARCH_INTERVALS; t++) {
+                for (int c = 0; c < NUMBER_OF_CRITERIA; c++) {
+                    
+                    // adds all the entries for each removal test
+                    for (int i = 0; i < NUMBER_OF_HANDLES; i++) {
+                        timeServer->get(back_inserter(ret), handles[i]);
+                        TS_ASSERT(ret.empty());
+                        timeServer->add(handles[i], Temporal(i,i));      // [0,0]    [1,1]
+                        timeServer->add(handles[i], Temporal(i+1,i+2));  // [1,2]    [2,3]
+                        timeServer->add(handles[i], Temporal(i,i+2));    // [0,2]    [1,3]
+                    }
+                    unsigned int totalNumberOfEntries = NUMBER_OF_HANDLES*3;
+                    timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+                    TS_ASSERT(totalNumberOfEntries == ret.size());
+                    ret.clear();
+                    
+                    // Remove the entries
+                    timeServer->remove(handles[h],search_intervals[t],criteria[c]);
+                    
+                    // Check if the entries were removed
+                    timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+                    unsigned int numberOfReturnedEntries = ret.size();
+                    if(numberOfReturnedEntries != (totalNumberOfEntries - expectedNumberOfEntries[h][t][c])) {
+                        printf("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s", 
+                               TLB::getAtom(handles[h])->toString().c_str(), 
+                               search_intervals[t].toString().c_str(), 
+                               TemporalTable::getTemporalRelationshipStr(criteria[c]), 
+                               expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, toString(ret).c_str());
+                    } 
+                    TS_ASSERT(numberOfReturnedEntries == (totalNumberOfEntries - expectedNumberOfEntries[h][t][c])); 
+                    
+                    for (unsigned int i = 0; i < numberOfReturnedEntries; i++) {
+                        if (criteria[c] == TemporalTable::NEXT_AFTER_START_OF) { 
+                            if(*(ret.front().getTemporal()) == expectedNextAfterStartOf[h][t]) {
+                                printf("Next after start of t %s for h (%s), that should have been removed is still there: %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) != expectedNextAfterStartOf[h][t]);
+                        } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) { 
+                            if(*(ret.front().getTemporal()) == expectedNextAfterEndOf[h][t]) {
+                                printf("Next after end of t %s for h (%s), that should have been removed is still there: %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) != expectedNextAfterEndOf[h][t]);
+                        } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) { 
+                            if(*(ret.front().getTemporal()) == expectedPreviousBeforeStartOf[h][t]) {
+                                printf("Next after start of t %s for h (%s), that should have been removed is still there: %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) != expectedPreviousBeforeStartOf[h][t]);
+                        } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) { 
+                            if(*(ret.front().getTemporal()) == expectedPreviousBeforeEndOf[h][t]) {
+                                printf("Next after end of t %s for h (%s), that should have been removed is still there: %s\n", 
+                                       search_intervals[t].toString().c_str(), 
+                                       TLB::getAtom(handles[h])->toString().c_str(), 
+                                       ret.front().getTemporal()->toString().c_str());
+                            }
+                            TS_ASSERT(*(ret.front().getTemporal()) != expectedPreviousBeforeEndOf[h][t]);
+                        }
+                        ret.pop_front();
+                    }
+                    
+                    // reset the TimeServer 
+                    timeServer->clear();
+                }
+            } 
+        }
+    }
+
+    void testRemoveByTemporalWithOtherCriteria() {
+        std::list<HandleTemporalPair> ret;
+        for (int t = 0; t < NUMBER_OF_SEARCH_INTERVALS; t++) {
+            for (int c = 0; c < NUMBER_OF_CRITERIA; c++) {
+                  
+                  // adds all the entries for each removal test
+                for (int i = 0; i < NUMBER_OF_HANDLES; i++) {
+                    timeServer->get(back_inserter(ret), handles[i]);
+                    TS_ASSERT(ret.empty());
+                    timeServer->add(handles[i], Temporal(i,i));      // [0,0]    [1,1]
+                    timeServer->add(handles[i], Temporal(i+1,i+2));  // [1,2]    [2,3]
+                    timeServer->add(handles[i], Temporal(i,i+2));    // [0,2]    [1,3]
+                }
+                unsigned int totalNumberOfEntries = NUMBER_OF_HANDLES*3;
+                timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+                TS_ASSERT(totalNumberOfEntries == ret.size());
+                ret.clear();
+                
+                // Remove the entries
+                timeServer->remove(UNDEFINED_HANDLE,search_intervals[t],criteria[c]);
+                
+                // Check if the entries were removed
+                timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+                int numberOfReturnedEntries = ret.size();
+                int totalExpectedNumberOfEntries = totalNumberOfEntries -( 
+                    (criteria[c] != TemporalTable::NEXT_AFTER_START_OF &&
+                     criteria[c] != TemporalTable::NEXT_AFTER_END_OF &&
+                     criteria[c] != TemporalTable::PREVIOUS_BEFORE_START_OF &&
+                     criteria[c] != TemporalTable::PREVIOUS_BEFORE_END_OF)?
+                        (expectedNumberOfEntries[0][t][c] + expectedNumberOfEntries[1][t][c]):
+                        (expectedNumberOfEntries[0][t][c] | expectedNumberOfEntries[1][t][c])
+                        );
+                //printf("expectedNumberOfEntries[0][t][c] = %d, expectedNumberOfEntries[1][t][c] = %d\n", expectedNumberOfEntries[0][t][c], expectedNumberOfEntries[1][t][c]);
+                //printf("nRetEntries = %d, totalExpEntries = %d\n", numberOfReturnedEntries, totalExpectedNumberOfEntries);
+                if(numberOfReturnedEntries != totalExpectedNumberOfEntries) {
+                    printf("\nWrong number of entries returned t=%s, c=%s\nExpected %d, but got %d => %s", 
+                           search_intervals[t].toString().c_str(), 
+                           TemporalTable::getTemporalRelationshipStr(criteria[c]), 
+                           totalExpectedNumberOfEntries, numberOfReturnedEntries, toString(ret).c_str());
+                } 
+                TS_ASSERT(numberOfReturnedEntries == totalExpectedNumberOfEntries); 
+                for (int i = 0; i < totalExpectedNumberOfEntries; i++) {
+                    if (criteria[c] == TemporalTable::NEXT_AFTER_START_OF) { 
+                        const Temporal& nextAfterStartOf = 
+                            (expectedNextAfterStartOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterStartOf[1][t]:
+                            (expectedNextAfterStartOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterStartOf[0][t]: 
+                            (expectedNextAfterStartOf[0][t] < expectedNextAfterStartOf[1][t])?
+                             expectedNextAfterStartOf[0][t]:
+                             expectedNextAfterStartOf[1][t];
+                        if(*(ret.front().getTemporal()) == nextAfterStartOf) {
+                            printf("Next after start of t %s, that should have been removed, is still there: %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) != nextAfterStartOf);
+                    } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) { 
+                        const Temporal& nextAfterEndOf = 
+                            (expectedNextAfterEndOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterEndOf[1][t]:
+                            (expectedNextAfterEndOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedNextAfterEndOf[0][t]: 
+                            (expectedNextAfterEndOf[0][t] < expectedNextAfterEndOf[1][t])?
+                             expectedNextAfterEndOf[0][t]:
+                             expectedNextAfterEndOf[1][t];
+                        if(*(ret.front().getTemporal()) == nextAfterEndOf) {
+                            printf("Next after end of t %s, that should have been removed, is still there: %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) != nextAfterEndOf);
+                    } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) { 
+                        const Temporal& previousBeforeStartOf = 
+                            (expectedPreviousBeforeStartOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeStartOf[1][t]:
+                            (expectedPreviousBeforeStartOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeStartOf[0][t]: 
+                            (expectedPreviousBeforeStartOf[0][t] > expectedPreviousBeforeStartOf[1][t])?
+                             expectedPreviousBeforeStartOf[0][t]:
+                             expectedPreviousBeforeStartOf[1][t];
+                        if(*(ret.front().getTemporal()) == previousBeforeStartOf) {
+                            printf("Next after start of t %s, that should have been removed, is still there: %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) != previousBeforeStartOf);
+                    } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) { 
+                        const Temporal& previousBeforeEndOf = 
+                            (expectedPreviousBeforeEndOf[0][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeEndOf[1][t]:
+                            (expectedPreviousBeforeEndOf[1][t] == UNDEFINED_TEMPORAL)? 
+                             expectedPreviousBeforeEndOf[0][t]: 
+                            (expectedPreviousBeforeEndOf[0][t] > expectedPreviousBeforeEndOf[1][t])?
+                             expectedPreviousBeforeEndOf[0][t]:
+                             expectedPreviousBeforeEndOf[1][t];
+                        if(*(ret.front().getTemporal()) == previousBeforeEndOf) {
+                            printf("Next after end of t %s, that should have been removed, is still there: %s\n", 
+                                   search_intervals[t].toString().c_str(), 
+                                   ret.front().getTemporal()->toString().c_str());
+                        }
+                        TS_ASSERT(*(ret.front().getTemporal()) != previousBeforeEndOf);
+                    }
+                    ret.pop_front();
+                }
+
+                // reset the TimeServer 
+                timeServer->clear();
+            }
+        } 
+    }
+
+    void testStress() {
+        std::list<HandleTemporalPair> ret;
+        int NUMBER_OF_ENTRIES = 100;
+        //printf("testStress(): adding...\n");
+        for (int i = 0; i < N_TIMES; i++){
+            for (int j = 0; j < N_TIMES; j++){
+                timeServer->add(handles[i], *(times[j]));
+            }
+        }
+        for (int i = 0; i < N_TIMES; i++) {
+            for (int j = N_TIMES; j < NUMBER_OF_ENTRIES; j++){
+                timeServer->add(handles[i], Temporal(N_TIMES-1,j));
+            }
+        }
+        //printf("testStress(): removing...\n");
+        for (int i = 0; i < N_TIMES; i++){
+            for (int j = 0; j < N_TIMES; j++){
+                timeServer->remove(handles[i], *(times[j]));
+            }
+        }
+        for (int i = 0; i < N_TIMES; i++) {
+            for (int j = N_TIMES; j < NUMBER_OF_ENTRIES; j++){
+                timeServer->remove(handles[i], Temporal(N_TIMES-1, j));
+            }
+        }
+    }
+    
+};
