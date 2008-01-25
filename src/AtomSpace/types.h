@@ -1,6 +1,8 @@
 /**
  * types.h
  *
+ * OpenCog -- basic type definitions.
+ *
  * Copyright(c) 2001 Thiago Maia, Andre Senna
  * All rights reserved.
  */
@@ -19,7 +21,8 @@
 typedef Util::ConstCharPointerIntHashMap ClassTypeHashMap;
 typedef Util::IntConstCharPointerHashMap ClassNameHashMap;
 
-// initial definition of a handle while the system is not distributed
+// Definition of a handle.
+// Will change when system is reworked for distributed computing.
 typedef class Atom* Handle;
 
 extern const Handle UNDEFINED_HANDLE;
@@ -27,13 +30,13 @@ extern const Handle UNDEFINED_HANDLE;
 //#ifdef WIN32
 //typedef hash_map<Handle, void *> HandleVoidPointerHashMap;
 //#else
-struct hashHandle{
+struct hashHandle {
     int operator()(Handle h) const;
 };
 
-struct eqHandle{
+struct eqHandle {
     bool operator()(Handle h1, Handle h2) const;
-}; 
+};
 
 typedef Util::hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
 //#endif
@@ -78,8 +81,10 @@ class ShortFloatOps {
         static void setValue(ShortFloat*, float);
 };
 
-// structure used to return a linked-list of atoms instead of the standard
-// linked-list of handles (HandleEntry)
+/**
+ * Structure used to return a linked-list of atoms instead of the standard
+ * linked-list of handles (HandleEntry)
+ */
 struct AtomEntry {
     AtomEntry *next;
     Atom *atom;
