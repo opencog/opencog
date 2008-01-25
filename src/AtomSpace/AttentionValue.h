@@ -1,8 +1,10 @@
-// Copyright(c)	2007 Novamente LLC  All rights reserved.
-// Filename:	$(src)\core\AttentionValue.h
-// Author:		Tony Lofthouse	
-// Created:		24 Apr 2007
-// Updates:
+/**
+ * AttentionValue.h
+ *
+ * Copyright(c)	2007 Novamente LLC  All rights reserved.
+ * Author:		Tony Lofthouse	
+ * Created:		24 Apr 2007
+ */
 
 #pragma once
 #ifndef ATTENTIONVALUE_H
