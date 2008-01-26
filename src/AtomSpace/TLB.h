@@ -20,12 +20,11 @@
 class Atom;
 
 /**
- * 
- * Each entity stored on MindDB will have an immutable ID, which will be used
- * to refer to that atom when someone needs to express some cognitive
- * knowledge about it. Then, each proxy must have a translation look-aside
- * buffer (TLB) to map from this ID to the actual memory address for the
- * entities stored in that machine.
+ * Each atom stored on MindDB will have an immutable ID, which will be used
+ * to refer to that atom when a reference to that atom needs to be kept.
+ * Each proxy must have a look-up mechanism or table (TLB) to map from 
+ * this ID to the actual memory address for the atom in the local process
+ * address sapce.
  */
 class TLB {
 
