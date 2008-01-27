@@ -1,7 +1,6 @@
 /**
  * Link.cc
  *
- *
  * Copyright(c) 2001 Thiago Maia, Andre Senna
  * All rights reserved.
  */
@@ -19,22 +18,25 @@
 #include "Logger.h"
 
 
-void Link::init() throw (InvalidParamException) {
+void Link::init() throw (InvalidParamException)
+{
     if (!ClassServer::isAssignableFrom(LINK, type)) {
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
         if (outgoing) free(outgoing);
-#endif        
+#endif
         throw InvalidParamException(TRACE_INFO, "Link -  invalid link type: %d", type);
     }
     trail = new Trail();
 }
 
-Link::Link(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv) 
-    : Atom(type, outgoingVector, tv) {
+Link::Link(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv)
+    : Atom(type, outgoingVector, tv)
+{
     init();
 }
 
-Link::~Link() throw () {
+Link::~Link() throw ()
+{
     //printf("Link::~Link() begin\n");
 //    fprintf(stdout, "Deleting link:\n%s\n", this->toString().c_str());
 //    fflush(stdout);
@@ -42,24 +44,28 @@ Link::~Link() throw () {
     //printf("Link::~Link() end\n");
 }
 
-void Link::setTrail(Trail* t) {
-	if (trail){
-		delete(trail);
-	}
+void Link::setTrail(Trail* t)
+{
+    if (trail) {
+        delete(trail);
+    }
     trail = t;
 }
 
-Trail* Link::getTrail() {
+Trail* Link::getTrail()
+{
     return trail;
 }
 
-std::string Link::toShortString() {
+std::string Link::toShortString()
+{
     std::string answer;
-    char buf[1024];
+#define BUFSZ 1024
+    char buf[BUFSZ];
 
-    sprintf(buf, "[%d %s", type, (getFlag(HYPOTETHICAL_FLAG)?"h ":""));
+    snprintf(buf, BUFSZ, "[%d %s", type, (getFlag(HYPOTETHICAL_FLAG)?"h ":""));
     answer += buf;
-    // here the targets string is made. If a target is a node, its name is
+    // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
@@ -71,19 +77,23 @@ std::string Link::toShortString() {
     answer += ">";
     float mean = this->getTruthValue().getMean();
     float count = this->getTruthValue().getCount();
-    sprintf(buf, " %f %f", mean, count);
+    snprintf(buf, BUFSZ, " %f %f", mean, count);
     answer += buf;
     answer += "]";
     return answer;
 }
 
-std::string Link::toString() {
+std::string Link::toString()
+{
     std::string answer;
-    char buf[1024];
+    char buf[BUFSZ];
 
-	sprintf(buf, "link[%d (%d,%f,%d) ", type, (int)getAttentionValue().getSTI(), getTruthValue().toFloat(), (int)getAttentionValue().getLTI());
+    snprintf(buf, BUFSZ, "link[%d (%d,%f,%d) ", type,
+       (int)getAttentionValue().getSTI(),
+       getTruthValue().toFloat(),
+       (int)getAttentionValue().getLTI());
     answer += buf;
-    // here the targets string is made. If a target is a node, its name is
+    // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
@@ -103,13 +113,14 @@ std::string Link::toString() {
     return answer;
 }
 
-float Link::getWeight() {
+float Link::getWeight()
+{
     return getTruthValue().toFloat();
 }
 
-bool Link::isSource(Handle handle) throw (InvalidParamException){
-
-    // on ordered links, only the first position in the outgoing set is a source
+bool Link::isSource(Handle handle) throw (InvalidParamException)
+{
+    // On ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the handle given is equal to the first position,
     // true is returned.
     if (ClassServer::isAssignableFrom(ORDERED_LINK, type)) {
@@ -128,8 +139,8 @@ bool Link::isSource(Handle handle) throw (InvalidParamException){
     }
 }
 
-bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException) {
-
+bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
+{
     // tests if the int given is valid.
     if ((i > getArity()) || (i < 0)) {
         throw IndexErrorException(TRACE_INFO, "Link::isSource(int) invalid index argument");
@@ -148,8 +159,8 @@ bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException) {
     }
 }
 
-bool Link::isTarget(Handle handle) throw (InvalidParamException) {
-
+bool Link::isTarget(Handle handle) throw (InvalidParamException)
+{
     // on ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets. So, it scans the
     // outgoing set from the second position searching for the given handle. If
@@ -174,8 +185,8 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException) {
     }
 }
 
-bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException) {
-
+bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
+{
     // tests if the int given is valid.
     if ((i > getArity()) || (i < 0)) {
         throw IndexErrorException(TRACE_INFO, "Link::istarget(int) invalid index argument");

@@ -19,21 +19,19 @@
 #include <string>
 
 /**
- * Nodes in Webmind are connected to each other by links. Each link embodies
+ * Nodes in OpenCog are connected to each other by links. Each link embodies
  * one of the basic inter-node relationships. Links do not necessarily
  * describe a binary relationship between two entities. Links may describe
  * relationships between more than two entities at once. Finally, links
  * describe relationships not only between nodes, but also higher-order
  * relationships between links, and between nodes and links.
  */
-class Link : public Atom {
-
+class Link : public Atom
+{
     friend class SavingLoading;
-
     friend class AtomTable;
 
     private:
-
         Trail* trail;
         void init() throw (InvalidParamException);
 
@@ -76,18 +74,14 @@ class Link : public Atom {
         float getWeight();
 
         /**
-         * Returns a string representation of the link. The string returned is
-         * allocated in the activation registry stack, so it must be
-         * duplicated if not immediately used.
+         * Returns a string representation of the link. 
          *
          * @return A string representation of the link.
          */
         std::string toString();
 
         /**
-         * Returns a short string representation of the link. The string
-         * returned is allocated in the activation registry stack, so it must
-         * be duplicated if not immediately used.
+         * Returns a short string representation of the link.
          *
          * @return A short string representation of the link.
          */
