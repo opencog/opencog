@@ -43,8 +43,8 @@ bool eqAtom::operator()(Atom* a1, Atom* a2) const{
     return (a1->equals(a2));
 }
 
-AtomTable::AtomTable(bool dsa) {
-
+AtomTable::AtomTable(bool dsa)
+{
     useDSA = dsa;
     size = 0;
     atomSet = new AtomHashSet();
@@ -67,7 +67,8 @@ AtomTable::AtomTable(bool dsa) {
 
 }
 
-AtomTable::~AtomTable(){
+AtomTable::~AtomTable()
+{
 #ifdef USE_ATOM_HASH_SET
     // remove all atoms from AtomTable
     AtomHashSet::iterator it = atomSet->begin();
@@ -198,6 +199,8 @@ void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeExcep
 unsigned int AtomTable::strHash(const char* name) const{
 
     // this is a traditional hash algorithm that implements the MD5
+    // XXX Why? Isn't MD5 a bit of overkill for this? 
+    // It'll just be slow, without adding much value.
 
     // special hash value for NULL names
     if (name == NULL) return 0;
@@ -218,10 +221,11 @@ unsigned int AtomTable::strHash(const char* name) const{
     return (hash % (NAME_INDEX_SIZE - 1)) + 1;
 }
 
-inline unsigned int AtomTable::getNameHash(Atom* atom) const{
-    return ClassServer::isAssignableFrom(NODE, atom->getType()) ? strHash(((Node*) atom)->getName().c_str()) : strHash(NULL);
+inline unsigned int AtomTable::getNameHash(Atom* atom) const
+{
+    return ClassServer::isAssignableFrom(NODE, atom->getType()) ?
+          strHash(((Node*) atom)->getName().c_str()) : strHash(NULL);
 }
-
 
 unsigned int AtomTable::importanceBin(short importance) {
     // STI is in range of [-32768, 32767] so adding 32768 puts it in
