@@ -19,7 +19,7 @@ class Atom;
 
 /**
  * This is a subclass of Atom. It represents the most basic kind of pattern
- * known to the Webmind system.
+ * known to the OpenCog system.
  */
 
 class Node : public Atom {
@@ -29,8 +29,7 @@ class Node : public Atom {
     private:
 
         // properties
-
-        std::string name; // empty (uninitialised) if unamed
+        std::string name;
 
     public:
 
@@ -42,7 +41,8 @@ class Node : public Atom {
          *                  Use empty string for unamed node.
          * @param Node truthvalue A reference to a TruthValue object. 
          */
-        Node(Type, const std::string&, const TruthValue& = TruthValue::NULL_TV()) throw (InvalidParamException, AssertionException);
+        Node(Type, const std::string&, const TruthValue& = TruthValue::NULL_TV())
+             throw (InvalidParamException, AssertionException);
         
         /**
          * Destructor for this class.
