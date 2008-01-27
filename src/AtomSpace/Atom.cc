@@ -194,6 +194,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // if the atom importance has changed its bin, 
         // updates the importance index
         if (oldBin != newBin) {
+#ifdef USE_MIND_DB_PROXY
             /* THIS WAS ONLY NEEDED WHEN ATOM HAD NO ATTRIBUTE WITH ITS TABLE ID.
                AtomTable *table;
             // cycles trhough all the tables searching for the Atom.
@@ -212,6 +213,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
             }
             StatisticsMonitor::getInstance()->atomChangeImportanceBin(type, oldBin, newBin);
             */
+#endif
 
             if (!atomTable->updateImportanceIndex(this, oldBin)) {
                 throw RuntimeException(TRACE_INFO, "failed to locate atom in importance bin");

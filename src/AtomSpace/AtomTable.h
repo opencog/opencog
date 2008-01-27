@@ -45,8 +45,8 @@ class PredicateEvaluator;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
- * efficient lookups. It implements the local storage data structure of the
- * MindDB. It contains methods to add and remove atoms, as well as to retrieve
+ * efficient lookups. It implements the local storage data structure of
+ * OpenCog. It contains methods to add and remove atoms, as well as to retrieve
  * specific sets according to different criteria.
  */
 class AtomTable {

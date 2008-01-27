@@ -20,7 +20,7 @@
 class Atom;
 
 /**
- * Each atom stored on MindDB will have an immutable ID, which will be used
+ * Each atom stored on OpenCog will have an immutable ID, which will be used
  * to refer to that atom when a reference to that atom needs to be kept.
  * Each proxy must have a look-up mechanism or table (TLB) to map from 
  * this ID to the actual memory address for the atom in the local process
