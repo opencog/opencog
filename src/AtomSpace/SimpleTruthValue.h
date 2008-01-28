@@ -16,28 +16,29 @@
 #include "TruthValue.h"
 #include "utils.h"
 
-class SimpleTruthValue : public TruthValue {
-
+class SimpleTruthValue : public TruthValue
+{
     protected:
 
         float mean;
         float count;
 
-        void init(float mean,float count); 
-        
+        void init(float mean,float count);
+ 
     public:
 
         SimpleTruthValue(float mean,float count);
         SimpleTruthValue(SimpleTruthValue const&);
 
         SimpleTruthValue* clone() const;
-        SimpleTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
+        SimpleTruthValue& operator=(const TruthValue& rhs)
+            throw (RuntimeException);
 
         static SimpleTruthValue* fromString(const char*);
         static float confidenceToCount(float);
         static float countToConfidence(float);
 
-	    float toFloat() const;
+        float toFloat() const;
         std::string toString() const;
         TruthValueType getType() const;
 
