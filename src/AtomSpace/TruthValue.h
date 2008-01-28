@@ -52,25 +52,26 @@ public:
      */
     static const TruthValue& NULL_TV();
     /**
-     * The shared reference to a special default (Simple) TruthValue object with both 
-     * mean and count set to default values (currently 0 and 0).
-     * This is supposed to be used as a temporary TV object (in Formulae and 
-     * Rules internal TV arrays, for instance).
+     * The shared reference to a special default (Simple) TruthValue
+     * object with both mean and count set to default values 
+     * (currently 0 and 0).  This is supposed to be used as a 
+     * temporary TV object (in Formulae and Rules internal 
+     * TV arrays, for instance).
      */
     static const TruthValue& DEFAULT_TV();
     /**
-     * The shared reference to a special TRUE (Simple) TruthValue object with 
-     * MAX_TRUTH mean and MAX_TV_COUNT count.
+     * The shared reference to a special TRUE (Simple) TruthValue
+     * object with MAX_TRUTH mean and MAX_TV_COUNT count.
      */
     static const TruthValue& TRUE_TV();
     /**
-     * The shared reference to a special FALSE (Simple) TruthValue object with 
-     * 0 mean and MAX_TV_COUNT count.
+     * The shared reference to a special FALSE (Simple) TruthValue
+     * object with 0 mean and MAX_TV_COUNT count.
      */
     static const TruthValue& FALSE_TV();
     /**
-     * The shared reference to a special TRIVIAL (Simple) TruthValue object with
-     * 0 count.
+     * The shared reference to a special TRIVIAL (Simple) TruthValue
+     * object with 0 count.
      */
     static const TruthValue& TRIVIAL_TV();
 
@@ -95,9 +96,10 @@ public:
     virtual TruthValue* clone() const  = 0;
 
     /**
-     * Assignment operator. Must be implemented by each subclass to allow
-     * correct assignment, according with the exact class of the TruthValue objects 
-     * in the left and right sides of the operator.
+     * Assignment operator. Must be implemented by each subclass to
+     * allow correct assignment, according with the exact class of
+     * the TruthValue objects in the left and right sides of the 
+     * operator.
      */
     virtual TruthValue& operator=(const TruthValue& rhs) = 0;
 
@@ -117,18 +119,23 @@ public:
 
 // STATIC METHODS: 
 
-    static const char* typeToStr(TruthValueType t) throw (InvalidParamException);
-    static TruthValueType strToType(const char* str) throw (InvalidParamException);
+    static const char* typeToStr(TruthValueType t)
+        throw (InvalidParamException);
+    static TruthValueType strToType(const char* str)
+         throw (InvalidParamException);
 
     // Factories
-    static TruthValue* factory(const char*); // former factory used by NMShell mkatom command
-    static TruthValue* factory(TruthValueType, const char*) throw (InvalidParamException);
+    // former factory used by NMShell mkatom command
+    static TruthValue* factory(const char*); 
+    static TruthValue* factory(TruthValueType, const char*)
+        throw (InvalidParamException);
 
 protected: 
 
     /**
-     * Special method that checks if the given TV is not the DefaultTV object, but it's 
-     * equals to it and, if so, delete this object and set it to the DefaultTV object.
+     * Special method that checks if the given TV is not the DefaultTV
+     * object, but its equal to it and, if so, delete this object 
+     * and set it to the DefaultTV object.
      */
     static void DeleteAndSetDefaultTVIfPertinent(TruthValue** tv);
 
