@@ -3,13 +3,13 @@
 *
 * @author Guilherme Lamacie
 * @author Welter Silva
-* 
+*
 */
 
 #ifndef _TRUTH_VALUE_H_
 #define _TRUTH_VALUE_H_
 
-#include <string> 
+#include <string>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -24,38 +24,38 @@ const int MAX_TV_COUNT = DefaultU;
 
 // TruthValue types:
 // Warning: NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
-enum TruthValueType {SIMPLE_TRUTH_VALUE = 0, 
-                      INDEFINITE_TRUTH_VALUE, 
-                      COMPOSITE_TRUTH_VALUE, 
+enum TruthValueType {SIMPLE_TRUTH_VALUE = 0,
+                      INDEFINITE_TRUTH_VALUE,
+                      COMPOSITE_TRUTH_VALUE,
                       NUMBER_OF_TRUTH_VALUE_TYPES};
-                      
+
 class TruthValue
 {
     friend class CompositeTruthValue;
     friend class SavingLoading;
     friend class Atom;
     friend class NMSHServer;
-    
+
     friend class TruthValueUTest;
-    
+
 public:
 
     virtual ~TruthValue() {}
 
     // Special TVs
-    
+
     /**
-     * The shared reference to a special NullTruthValue object. 
-     * This is supposed to be used as a Flag only and so, 
-     * it cannot be used as a normal TV object, as for setting the TV 
-     * object of an Atom, for example. 
+     * The shared reference to a special NullTruthValue object.
+     * This is supposed to be used as a Flag only and so,
+     * it cannot be used as a normal TV object, as for setting the TV
+     * object of an Atom, for example.
      */
     static const TruthValue& NULL_TV();
     /**
      * The shared reference to a special default (Simple) TruthValue
-     * object with both mean and count set to default values 
-     * (currently 0 and 0).  This is supposed to be used as a 
-     * temporary TV object (in Formulae and Rules internal 
+     * object with both mean and count set to default values
+     * (currently 0 and 0).  This is supposed to be used as a
+     * temporary TV object (in Formulae and Rules internal
      * TV arrays, for instance).
      */
     static const TruthValue& DEFAULT_TV();
@@ -80,7 +80,7 @@ public:
      */
     static const char* getTVTypeName(TruthValueType);
 
-// PURE VIRTUAL METHODS: 
+// PURE VIRTUAL METHODS:
 
     virtual float getMean()  const = 0;
     virtual float getCount()  const = 0;
@@ -89,7 +89,7 @@ public:
     virtual float toFloat() const  = 0;
     virtual std::string toString() const  = 0;
     virtual TruthValueType getType() const  = 0;
-    
+
     /**
      * Deep clone of this object. Returns a new object. .
      */
@@ -98,26 +98,26 @@ public:
     /**
      * Assignment operator. Must be implemented by each subclass to
      * allow correct assignment, according with the exact class of
-     * the TruthValue objects in the left and right sides of the 
+     * the TruthValue objects in the left and right sides of the
      * operator.
      */
     virtual TruthValue& operator=(const TruthValue& rhs) = 0;
 
-// VIRTUAL METHODS: 
+// VIRTUAL METHODS:
 
     /**
-     * Merge this TV object with the given TV object argument. 
-     * It always returns a new TV object with the result of the merge, 
+     * Merge this TV object with the given TV object argument.
+     * It always returns a new TV object with the result of the merge,
      * even if it is equals to one of the merged TV objects.
      */
     virtual TruthValue* merge(const TruthValue&) const;
 
     /**
-     * Check if this TV is a null TV. 
+     * Check if this TV is a null TV.
      */
     virtual bool isNullTv() const;
 
-// STATIC METHODS: 
+// STATIC METHODS:
 
     static const char* typeToStr(TruthValueType t)
         throw (InvalidParamException);
@@ -126,15 +126,15 @@ public:
 
     // Factories
     // former factory used by NMShell mkatom command
-    static TruthValue* factory(const char*); 
+    static TruthValue* factory(const char*);
     static TruthValue* factory(TruthValueType, const char*)
         throw (InvalidParamException);
 
-protected: 
+protected:
 
     /**
      * Special method that checks if the given TV is not the DefaultTV
-     * object, but its equal to it and, if so, delete this object 
+     * object, but its equal to it and, if so, delete this object
      * and set it to the DefaultTV object.
      */
     static void DeleteAndSetDefaultTVIfPertinent(TruthValue** tv);
