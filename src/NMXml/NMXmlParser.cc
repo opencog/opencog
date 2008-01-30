@@ -388,7 +388,7 @@ void NMXmlParser::setOutgoingSet(Atom* atom, const std::vector<Handle>& outgoing
 }
 
 HandleEntry* NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders, AtomSpace * atomSpace, bool fresh, bool freshLinks) {
-    printf("NMXmlParser::loadXML\n");
+    //printf("NMXmlParser::loadXML\n");
     cassert(TRACE_INFO, atomSpace != NULL, "loadXML - atomSpace should pointer should not be NULL.");
     HandleEntry* result = NULL;
 

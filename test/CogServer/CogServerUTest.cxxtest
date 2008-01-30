@@ -1,0 +1,147 @@
+/**
+ * CogServerUTest.h
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Wed Jan 23 16:00:19 BRT 2008
+ */
+#include <CogServer.h>
+
+#include <string>
+
+class REQ : public opencog::CogServerRequest {
+
+    public:
+
+        std::string name;
+        std::string type;
+
+        REQ(std::string type, std::string name) {
+            this->type = type;
+            this->name = name;
+        }
+
+        std::string getName() {
+            return name;
+        }
+
+        std::string getType() {
+            return type;
+        }
+
+        void callBack() {
+        }
+};
+
+class RP : public opencog::RequestProcessor {
+
+    public: 
+
+        std::string name;
+        int count;
+
+        RP(std::string name) {
+            this->name = name;
+            count = 0;
+
+        }
+        void processRequest(opencog::CogServerRequest *req) {
+            //REQ *request = (REQ *) req;
+            //printf("executed %s on %s(%s)\n", name.c_str(), request->getName().c_str(), request->getType().c_str());
+            count++;
+        }
+};
+
+class MA : public opencog::MindAgent {
+
+    public: 
+
+        std::string name;
+        int count;
+
+        MA(std::string name) {
+            this->name = name;
+            count = 0;
+
+        }
+        void run(opencog::CogServer *server) {
+            //printf("%ld: executed %s\n", server->getCycleCount(), name.c_str());
+            count++;
+        }
+};
+
+class CogServerUTest :  public CxxTest::TestSuite {
+
+    private:
+
+
+    public:
+
+        CogServerUTest(){
+        }
+
+        void setUp() {
+        }
+
+        void tearDown(){
+        }
+
+        void testProcessMindAgents() {
+
+            opencog::CogServer server;
+            MA *ma1 = new MA("MA1");
+            MA *ma2 = new MA("MA2");
+            MA *ma3 = new MA("MA3");
+            MA *ma4 = new MA("MA4");
+            MA *ma5 = new MA("MA5");
+
+            server.plugInMindAgent(ma1, 1);
+            server.plugInMindAgent(ma2, 2);
+            server.plugInMindAgent(ma3, 3);
+            server.plugInMindAgent(ma4, 4);
+            server.plugInMindAgent(ma5, 5);
+            server.unitTestServerLoop(50);
+
+            TS_ASSERT(ma1->count == 50);
+            TS_ASSERT(ma2->count == 25);
+            TS_ASSERT(ma3->count == 16);
+            TS_ASSERT(ma4->count == 12);
+            TS_ASSERT(ma5->count == 10);
+        }
+
+        void testProcessRequests() {
+            opencog::CogServer server;
+            
+            RP *rp1 = new RP("rp1");
+            RP *rp2 = new RP("rp2");
+
+            server.plugInRequestProcessor("type1", rp1);
+            server.plugInRequestProcessor("type2", rp2);
+            server.plugInRequestProcessor("type3", rp1);
+            server.plugInRequestProcessor("type4", rp2);
+            server.plugInRequestProcessor("type5", rp1);
+
+            server.pushRequest(new REQ("type1", "req1"));
+            server.pushRequest(new REQ("type2", "req2"));
+            server.pushRequest(new REQ("type3", "req3"));
+            server.pushRequest(new REQ("type4", "req4"));
+            server.pushRequest(new REQ("type5", "req5"));
+            server.pushRequest(new REQ("type2", "req6"));
+            server.pushRequest(new REQ("type3", "req7"));
+            server.pushRequest(new REQ("type4", "req8"));
+            server.pushRequest(new REQ("type5", "req9"));
+            server.pushRequest(new REQ("type3", "req10"));
+            server.pushRequest(new REQ("type4", "req11"));
+            server.pushRequest(new REQ("type5", "req12"));
+            server.pushRequest(new REQ("type4", "req13"));
+            server.pushRequest(new REQ("type5", "req14"));
+            server.pushRequest(new REQ("type5", "req15"));
+
+            server.unitTestServerLoop(50);
+
+            TS_ASSERT(rp1->count == 9);
+            TS_ASSERT(rp2->count == 6);
+        }
+
+};
