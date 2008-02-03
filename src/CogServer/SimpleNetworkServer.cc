@@ -78,6 +78,15 @@ void *SimpleNetworkServer::portListener(void *arg) {
     return NULL;
 }
 
+/**
+ * parseCommandLine -- split string into space-separated tokens
+ * @line -- input string
+ * @command -- output, contains first non-whitespace part of input string
+ * @args -- output, queue of space-separated tokens split from the input string.
+ *
+ * XXX ?? what is the purpose of this?? gnu getopt is an easier way to get
+ * args from a command line.
+ */
 void SimpleNetworkServer::parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args) {
 
     unsigned int pos1, pos2;
