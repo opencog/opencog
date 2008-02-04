@@ -463,7 +463,13 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
     XML_SetUserData(parser, &userData);
     XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
 
-    xmlReader->open();
+    try {
+        xmlReader->open();
+    }
+    catch (IOException e) {
+        fprintf(stderr, "%s\n", e.getMessage());
+        return UNDEFINED_HANDLE;
+    };
     do {
         size_t len = xmlReader->read(buf, 1, sizeof(buf));
         done = len < sizeof(buf);
