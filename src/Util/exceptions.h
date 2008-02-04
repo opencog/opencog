@@ -24,8 +24,8 @@
 /**
  * Base exception class from which all other exceptions should inheritates.
  */
-class StandardException{
- 
+class StandardException
+{
     private:
         /**
          * c-string error message
@@ -39,6 +39,7 @@ class StandardException{
          * with their corresponding values. 
          */
         void parseErrorMessage(const char* fmt, va_list ap);
+        void parseErrorMessage(const char * trace, const char* fmt, va_list ap);
 
     public:
 
