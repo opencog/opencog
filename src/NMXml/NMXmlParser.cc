@@ -388,9 +388,15 @@ void NMXmlParser::setOutgoingSet(Atom* atom, const std::vector<Handle>& outgoing
     atom->setOutgoingSet(outgoing);
 }
 
-HandleEntry* NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders, AtomSpace * atomSpace, bool fresh, bool freshLinks) {
+HandleEntry* 
+NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
+                     AtomSpace * atomSpace,
+                     bool fresh,
+                     bool freshLinks)
+{
     //printf("NMXmlParser::loadXML\n");
-    cassert(TRACE_INFO, atomSpace != NULL, "loadXML - atomSpace should pointer should not be NULL.");
+    cassert(TRACE_INFO, atomSpace != NULL,
+        "loadXML - atomSpace should pointer should not be NULL.");
     HandleEntry* result = NULL;
 
     if (xmlReaders.size() <= 0) return result;
@@ -400,13 +406,15 @@ HandleEntry* NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReader
 //    time_t start = time(NULL);
 //        timeval s;
 //        gettimeofday(&s, NULL);
-    // only nodes are processed in the first pass
+    // Only nodes are processed in the first pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            MAIN_LOGGER.log(Util::Logger::DEBUG, "First pass: processing file %s\n", ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
+            MAIN_LOGGER.log(Util::Logger::DEBUG,
+                            "First pass: processing file %s\n",
+                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
         //MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML: %d%% done.\r", (int) (100 * ((float) i / (size * 2))));
-        fflush(stdout);
+        // fflush(stdout);
         parser.parse(xmlReaders[i], PARSE_NODES);
     }
         //timeval e;
@@ -418,10 +426,12 @@ HandleEntry* NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReader
     // only links are processed in the second pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            MAIN_LOGGER.log(Util::Logger::DEBUG, "Second pass: processing file %s\n", ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
+            MAIN_LOGGER.log(Util::Logger::DEBUG, 
+                            "Second pass: processing file %s\n", 
+                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        //MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
-        fflush(stdout);
+        // MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
+        // fflush(stdout);
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
         if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &UNDEFINED_HANDLE)) {
             result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
@@ -463,13 +473,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
     XML_SetUserData(parser, &userData);
     XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
 
-    try {
-        xmlReader->open();
-    }
-    catch (IOException &e) {
-        fprintf(stderr, "%s\n", e.getMessage());
-        return UNDEFINED_HANDLE;
-    };
+    xmlReader->open();
     do {
         size_t len = xmlReader->read(buf, 1, sizeof(buf));
         done = len < sizeof(buf);
