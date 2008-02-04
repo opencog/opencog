@@ -34,9 +34,10 @@ const TruthValue& NMXmlParser::DEFAULT_TV() {
     return *instance;
 }
 
-const int TYPE_LENGTH = (int) log10((double)NUMBER_OF_CLASSES) + 1;
+// const int TYPE_LENGTH = (int) log10((double)NUMBER_OF_CLASSES) + 1;
 
-struct Status {
+// XXX Caution: non-thread-safe: global!
+struct status_s {
     unsigned enabled: 1;
     unsigned ignoring: 1;
     unsigned processNodes: 1;
@@ -437,10 +438,9 @@ HandleEntry* NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReader
     return result;
 }
 
-Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass) {
-
+Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader)
+{
     char buf[BUFSIZ];
-    XML_Parser parser;
     int done;
     UserData userData;
 
@@ -448,37 +448,44 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass) {
     //userData.atomTable = atomSpace->getAtomTable();
     userData.atomSpace = atomSpace;
 
+    XML_Parser parser = XML_ParserCreate(NULL);
+    XML_SetUserData(parser, &userData);
+    XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
+
+    xmlReader->open();
+    do {
+        size_t len = xmlReader->read(buf, 1, sizeof(buf));
+        done = len < sizeof(buf);
+        if (!XML_Parse(parser, buf, len, done)) {
+            fprintf(stderr,
+                    "%s at line %d\n",
+                    XML_ErrorString(XML_GetErrorCode(parser)),
+                    XML_GetCurrentLineNumber(parser));
+            return UNDEFINED_HANDLE;
+        }
+    } while (!done);
+    xmlReader->close();
+
+    XML_ParserFree(parser);
+    return userData.lastInsertedHandle;
+}
+
+Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
+{
+    Handle h = UNDEFINED_HANDLE;
     if (pass == PARSE_NODES) {
 
         MAIN_LOGGER.log(Util::Logger::DEBUG, "Parsing nodes...\n");
         
         // FIRST PASS - creates relationships with arity == 0 (nodes)
-        
-        parser = XML_ParserCreate(NULL);
-        XML_SetUserData(parser, &userData);
-        XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
-
         status.enabled = 0;
         status.ignoring = 0;
         status.processNodes = 1;
         status.processRelationships = 0;
 
-        xmlReader->open();
-        do {
-            size_t len = xmlReader->read(buf, 1, sizeof(buf));
-            done = len < sizeof(buf);
-            if (!XML_Parse(parser, buf, len, done)) {
-                fprintf(stderr,
-                        "%s at line %d\n",
-                        XML_ErrorString(XML_GetErrorCode(parser)),
-                        XML_GetCurrentLineNumber(parser));
-                return UNDEFINED_HANDLE;
-            }
-        } while (!done);
-        xmlReader->close();
-
-        XML_ParserFree(parser);
-
+        h = parse_pass(xmlReader);
+        if (h == UNDEFINED_HANDLE) return UNDEFINED_HANDLE;
+        
     } else if (pass == PARSE_LINKS) {
 
         MAIN_LOGGER.log(Util::Logger::DEBUG, "Parsing links...\n");
@@ -486,31 +493,12 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass) {
         // SECOND PASS - creates other relationships
         // second pass must be avoided once subgraph insertion and/or lazy
         // insertion is implemented
-        
-        parser = XML_ParserCreate(NULL);
-        XML_SetUserData(parser, &userData);
-        XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
-
         status.enabled = 0;
         status.ignoring = 0;
         status.processNodes = 0;
         status.processRelationships = 1;
 
-        xmlReader->open();
-        do {
-            size_t len = xmlReader->read(buf, 1, sizeof(buf));
-            done = len < sizeof(buf);
-            if (!XML_Parse(parser, buf, len, done)) {
-                fprintf(stderr,
-                        "%s at line %d\n",
-                        XML_ErrorString(XML_GetErrorCode(parser)),
-                        XML_GetCurrentLineNumber(parser));
-                return UNDEFINED_HANDLE;
-            }
-        } while (!done);
-        xmlReader->close();
-
-        XML_ParserFree(parser);
+        h = parse_pass(xmlReader);
     }
-    return userData.lastInsertedHandle;
+    return h;
 }

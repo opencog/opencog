@@ -34,6 +34,9 @@ enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
  * corresponding structure of nodes and links in the MindDB.
  */
 class NMXmlParser {
+  private:
+    Handle parse_pass(XMLBufferReader*);
+
   public:
  
     //static Transaction *transaction;
