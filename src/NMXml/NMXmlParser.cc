@@ -466,7 +466,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
     try {
         xmlReader->open();
     }
-    catch (IOException e) {
+    catch (IOException &e) {
         fprintf(stderr, "%s\n", e.getMessage());
         return UNDEFINED_HANDLE;
     };
