@@ -1,0 +1,17 @@
+
+                       Overview
+                       --------
+
+The CogServer provides a simple server interface to the reasoning system.
+
+See CommandRequestProcessor.cc as an example control interface to
+the server.  This command processor understands 3 simple commands:
+load <xml file name>, ls and shutdown. There is an example XML file
+under test/CogServer/atomSpace.xml
+
+To run a simple test, build everything and execute 
+bin/src/CogServer/cogServer.  From another terminal, run 
+"telnet localhost 17001". Try loading the example XML file and ls 
+to see all the nodes and links.
+
+
