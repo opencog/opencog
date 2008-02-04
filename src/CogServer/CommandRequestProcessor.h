@@ -14,17 +14,15 @@
 
 namespace opencog {
 
-class CommandRequestProcessor : public RequestProcessor {
-
+class CommandRequestProcessor : public RequestProcessor
+{
     public:
-		
-		~CommandRequestProcessor();
-		CommandRequestProcessor();
+        ~CommandRequestProcessor();
+        CommandRequestProcessor();
         virtual void processRequest(CogServerRequest *request);
 
     private:
-
-        void load(std::string fileName);
+        std::string load(std::string fileName);
         std::string ls();
 
 }; // class

@@ -14,11 +14,21 @@ CommandRequestProcessor::~CommandRequestProcessor() {
 CommandRequestProcessor::CommandRequestProcessor() {
 }
 
-void CommandRequestProcessor::load(std::string fileName) {
-    AtomSpace *atomSpace = CogServer::getAtomSpace();;
+std::string CommandRequestProcessor::load(std::string fileName)
+{
+    std::string msg = "load successful";
+    AtomSpace *atomSpace = CogServer::getAtomSpace();
     std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(fileName.c_str()));
-    NMXmlParser::loadXML(readers, atomSpace);
+    try {
+        NMXmlParser::loadXML(readers, atomSpace);
+    }
+    catch (IOException &e)
+    {
+        msg = "load failed: ";
+        msg += e.getMessage();
+    }
     delete readers[0];
+    return msg;
 }
 
 std::string CommandRequestProcessor::ls() {
@@ -69,8 +79,8 @@ std::string CommandRequestProcessor::ls() {
 
 }
 
-void CommandRequestProcessor::processRequest(CogServerRequest *request) {
-
+void CommandRequestProcessor::processRequest(CogServerRequest *request)
+{
     std::string command = ((CommandRequest *) request)->getCommand();
     std::queue<std::string> args = ((CommandRequest *) request)->getArgs();
     std::string answer;
@@ -79,8 +89,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *request) {
         if (args.size() != 1) {
             answer = "invalid command syntax";
         } else {
-            load(args.front());
-            answer = "load sucessful";
+            answer = load(args.front());
         }
     } else if (command == "ls") {
         if (args.size() != 0) {
@@ -95,7 +104,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *request) {
             exit(0);
         }
     } else {
-        answer = "unknown command";
+        answer = "unknown command\n\tAvailable commands: load ls shutdown";
     }
 
     ((CommandRequest *) request)->setAnswer(answer);
