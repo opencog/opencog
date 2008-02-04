@@ -10,12 +10,11 @@
 #include "CogServer.h"
 
 #include <exceptions.h>
+#include <unistd.h>
 
 using namespace opencog;
 
 AtomSpace *CogServer::atomSpace = NULL;
-
-unsigned sleep(unsigned seconds);
 
 CogServer::~CogServer() {
 }
@@ -71,7 +70,13 @@ void CogServer::serverLoop() {
     }
 
     do {
-        processRequests();
+        // Avoid hard spinloop when there's no work.
+        int reqQueSize = getRequestQueueSize();
+        int numAgents = mindAgents.size();
+        if ((0 == reqQueSize) && (0 == numAgents))
+            usleep(10000);  // 10 millisecs == 100HZ
+
+        if (reqQueSize != 0) processRequests();
         processMindAgents();
 
         cycleCount++;
