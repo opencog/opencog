@@ -1,3 +1,5 @@
+SET(CMAKE_BUILD_TYPE Debug)
+
 add_library (NMXml
 FileXMLBufferReader.cc  NMXmlExporter.cc  NMXmlParser.cc StringXMLBufferReader.cc
 )
