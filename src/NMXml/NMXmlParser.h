@@ -35,7 +35,7 @@ enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
  */
 class NMXmlParser {
   private:
-    Handle parse_pass(XMLBufferReader*);
+    Handle parse_pass(XMLBufferReader*, NMXmlParseType);
 
   public:
  

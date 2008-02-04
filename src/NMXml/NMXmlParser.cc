@@ -36,24 +36,24 @@ const TruthValue& NMXmlParser::DEFAULT_TV() {
 
 // const int TYPE_LENGTH = (int) log10((double)NUMBER_OF_CLASSES) + 1;
 
-// XXX Caution: non-thread-safe: global!
-struct status_s {
+typedef struct {
     unsigned enabled: 1;
     unsigned ignoring: 1;
     unsigned processNodes: 1;
     unsigned processRelationships: 1;
-} status;
+} Status;
 
 typedef std::stack<void*> ParserStack;
-// TODO: CREATE AN ABSTRACT CLASS "Stackable" for check for subclasses when poping elements from stack.
+// TODO: CREATE AN ABSTRACT CLASS "Stackable" for check for subclasses 
+// when poping elements from stack.
 
-typedef struct UserData UserData;
-struct UserData {
-	AtomSpace* atomSpace;
+typedef struct {
+    AtomSpace* atomSpace;
     //AtomTable* atomTable;
     ParserStack stack;
     Handle lastInsertedHandle;
-};
+    Status status;
+} UserData;
 
 void push(ParserStack& ps, void* p) {
     ps.push(p);
@@ -117,21 +117,21 @@ void nativeStartElement(void *userData, const char *name, const char **atts) thr
 
     // precesses head tags (list, tagdescription, etc)
     if (strcmp(name, LIST_TOKEN) == 0) {
-        status.enabled = 1;
+        ud->status.enabled = 1;
         return;
     } else if (strcmp(name, TAG_DESCRIPTION_TOKEN) == 0) {
-        status.ignoring = 1;
+        ud->status.ignoring = 1;
         return;
     }
 
     // abandons element if necessary
-    if ((!status.enabled) || status.ignoring)
+    if ((!ud->status.enabled) || ud->status.ignoring)
         return;
 
     typeFound = getTypeForString(name, false);
 
     // processes nodes
-    if (status.processNodes) {
+    if (ud->status.processNodes) {
 //        timeval s;
 //        gettimeofday(&s, NULL);
 
@@ -180,7 +180,7 @@ void nativeStartElement(void *userData, const char *name, const char **atts) thr
     }
 
     // processes relationships
-    if (status.processRelationships) {
+    if (ud->status.processRelationships) {
         // inheritance links may be declared inside lexical category node
         // tags. this information is ignored once it is redundant with source
         // and target data contained in the inheritance link declaration
@@ -284,9 +284,9 @@ void nativeEndElement(void *userData, const char *name) throw (InconsistenceExce
     UserData* ud = (UserData*) userData;
 
     if (strcmp(name, LIST_TOKEN) == 0) {
-        status.enabled = 0;
+        ud->status.enabled = 0;
     } else if (strcmp(name, TAG_DESCRIPTION_TOKEN) == 0) {
-        status.ignoring = 0;
+        ud->status.ignoring = 0;
     } else {
         void* object = top(ud->stack);
         Atom* currentAtom = (Atom*) object;
@@ -294,8 +294,8 @@ void nativeEndElement(void *userData, const char *name) throw (InconsistenceExce
 //            timeval s;
 //            gettimeofday(&s, NULL);
             Type type = getTypeForString(name, false);
-            if (((ClassServer::isAssignableFrom(NODE, type)) && status.processNodes) ||
-                (ClassServer::isAssignableFrom(LINK, type)) && status.processRelationships) {
+            if (((ClassServer::isAssignableFrom(NODE, type)) && ud->status.processNodes) ||
+                (ClassServer::isAssignableFrom(LINK, type)) && ud->status.processRelationships) {
                 if (currentAtom->getType() == type) {
                     if (ClassServer::isAssignableFrom(LINK, type)){
                         pop(ud->stack);
@@ -438,7 +438,7 @@ HandleEntry* NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReader
     return result;
 }
 
-Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader)
+Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
 {
     char buf[BUFSIZ];
     int done;
@@ -448,6 +448,17 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader)
     //userData.atomTable = atomSpace->getAtomTable();
     userData.atomSpace = atomSpace;
 
+    userData.status.enabled = 0;
+    userData.status.ignoring = 0;
+
+    if (pass == PARSE_NODES) {
+        userData.status.processNodes = 1;
+        userData.status.processRelationships = 0;
+    } else {
+        userData.status.processNodes = 0;
+        userData.status.processRelationships = 1;
+    }
+    
     XML_Parser parser = XML_ParserCreate(NULL);
     XML_SetUserData(parser, &userData);
     XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
@@ -478,12 +489,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
         MAIN_LOGGER.log(Util::Logger::DEBUG, "Parsing nodes...\n");
         
         // FIRST PASS - creates relationships with arity == 0 (nodes)
-        status.enabled = 0;
-        status.ignoring = 0;
-        status.processNodes = 1;
-        status.processRelationships = 0;
-
-        h = parse_pass(xmlReader);
+        h = parse_pass(xmlReader, pass);
         if (h == UNDEFINED_HANDLE) return UNDEFINED_HANDLE;
         
     } else if (pass == PARSE_LINKS) {
@@ -493,12 +499,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
         // SECOND PASS - creates other relationships
         // second pass must be avoided once subgraph insertion and/or lazy
         // insertion is implemented
-        status.enabled = 0;
-        status.ignoring = 0;
-        status.processNodes = 0;
-        status.processRelationships = 1;
-
-        h = parse_pass(xmlReader);
+        h = parse_pass(xmlReader, pass);
     }
     return h;
 }
