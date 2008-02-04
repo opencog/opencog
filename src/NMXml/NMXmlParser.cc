@@ -478,7 +478,8 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
                     "%s at line %d\n",
                     XML_ErrorString(XML_GetErrorCode(parser)),
                     XML_GetCurrentLineNumber(parser));
-            return UNDEFINED_HANDLE;
+            userData.lastInsertedHandle = UNDEFINED_HANDLE;
+            break;
         }
     } while (!done);
     xmlReader->close();
