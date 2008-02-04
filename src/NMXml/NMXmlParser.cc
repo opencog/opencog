@@ -463,7 +463,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass) {
         status.processNodes = 1;
         status.processRelationships = 0;
 
-        xmlReader->reset();
+        xmlReader->open();
         do {
             size_t len = xmlReader->read(buf, 1, sizeof(buf));
             done = len < sizeof(buf);
@@ -496,7 +496,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass) {
         status.processNodes = 0;
         status.processRelationships = 1;
 
-        xmlReader->reset();
+        xmlReader->open();
         do {
             size_t len = xmlReader->read(buf, 1, sizeof(buf));
             done = len < sizeof(buf);

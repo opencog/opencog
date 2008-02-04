@@ -11,7 +11,7 @@ StringXMLBufferReader::~StringXMLBufferReader()
 {
 }
 
-void StringXMLBufferReader::reset() {
+void StringXMLBufferReader::open() {
     currentPos = (char *) content;
 }
 

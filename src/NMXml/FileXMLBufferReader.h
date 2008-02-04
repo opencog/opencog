@@ -12,12 +12,17 @@ public:
     /**
      * This constructor does make a copy of filename
      **/
-	FileXMLBufferReader(const char* filename);
+    FileXMLBufferReader(const char* filename);
     /**
      * This destructor frees filename memory
      **/
-	virtual ~FileXMLBufferReader();
-    virtual void reset() throw (IOException);
+    virtual ~FileXMLBufferReader();
+
+    /**
+     * Open the previously indicated filename.
+     * Throw an exception if the file does not exist.
+     */
+    virtual void open() throw (IOException);
     virtual size_t read(void *ptr, size_t size, size_t nmemb);
     virtual void close();
     /**
@@ -29,7 +34,6 @@ public:
 private:
     char* filename;
     FILE* file;
-    
 };
 
 #endif //_FILEXMLBUFFERREADER_H_

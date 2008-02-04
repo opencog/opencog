@@ -8,7 +8,7 @@ class XMLBufferReader
 public:
 	virtual ~XMLBufferReader() {}
 
-    virtual void reset() = 0;
+    virtual void open() = 0;
     virtual size_t read(void *ptr, size_t size, size_t nmemb) = 0;
     virtual void close() = 0;
     virtual XMLBufferReader* clone() = 0;

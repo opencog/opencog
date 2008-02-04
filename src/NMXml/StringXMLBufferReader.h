@@ -14,7 +14,7 @@ public:
      * This destructor does not frees xml content
      **/
 	virtual ~StringXMLBufferReader();
-    virtual void reset();
+    virtual void open();
     virtual size_t read(void *ptr, size_t size, size_t nmemb);
     virtual void close();
     /**
