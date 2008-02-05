@@ -89,6 +89,7 @@ static Type getTypeForString(const char *name, bool onlyClassName)
     return 0;
 }
 
+#ifdef NOT_USED_RIGHT_NOW
 static char *nativeBuildLinkKey(Atom *link)
 {
     char key[1<<16];
@@ -106,6 +107,7 @@ static char *nativeBuildLinkKey(Atom *link)
 
     return strdup(key);
 }
+#endif /* NOT_USED_RIGHT_NOW */
 
 //#include <sys/time.h>
 //unsigned long int cumulativeParseNodesStart = 0;
@@ -113,6 +115,30 @@ static char *nativeBuildLinkKey(Atom *link)
 //unsigned long int cumulativeParseEnd = 0;
 //unsigned long int cumulativeParseEnd1 = 0;
 //unsigned long int cumulativeParseEnd2 = 0;
+
+
+static const char ** scan_common_attrs (Atom *r, const char **atts)
+{
+    float buffer;
+    if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
+        atts++;
+        sscanf(*atts, "%f", &buffer);
+        if (buffer == 1.0){
+            throw RuntimeException(TRACE_INFO, 
+                    "fatal error: confidence can not be 1.0");
+        }
+        SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
+                            newTv.setConfidence(buffer);
+        r->setTruthValue(newTv);
+    } else if (strcmp(*atts, STRENGTH_TOKEN) == 0) {
+        atts++;
+        sscanf(*atts, "%f", &buffer);
+        SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
+                            newTv.setMean(buffer);
+        r->setTruthValue(newTv);
+    }
+    return atts;
+}
 
 static void nativeStartElement(void *userData, const char *name, const char **atts)
     throw (RuntimeException, InconsistenceException)
@@ -142,40 +168,27 @@ static void nativeStartElement(void *userData, const char *name, const char **at
 //        timeval s;
 //        gettimeofday(&s, NULL);
 
-
         if (ClassServer::isAssignableFrom(NODE, typeFound)) {
             //cprintf(5,"Processing Node: %d (%s)\n",  typeFound, name);
             r = (Atom*) new Node(typeFound, "", NMXmlParser::DEFAULT_TV());
             //printf("Pushing r = %p\n", r);
             push(ud->stack, r);
+
             const TruthValue& t = r->getTruthValue();
             if (typeid(t) != typeid(SimpleTruthValue)){
                 throw InconsistenceException(TRACE_INFO, 
                         "DefaultTruthValue is not SimpleTruthValue.");
             }
             while (*atts != NULL) {
-                float buffer;
                 if (strcmp(*atts, NAME_TOKEN) == 0) {
                     atts++;
                     NMXmlParser::setNodeName((Node*) r, *atts);
-                }else if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
-                    atts++;
-                    sscanf(*atts, "%f", &buffer);
-                    if (buffer == 1.0){
-                        throw RuntimeException(TRACE_INFO, 
-                                "fatal error: confidence can not be 1.0");
-                    }
-                    SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
-                                        newTv.setConfidence(buffer);
-                    r->setTruthValue(newTv);
-                } else if (strcmp(*atts, STRENGTH_TOKEN) == 0) {
-                    atts++;
-                    sscanf(*atts, "%f", &buffer);
-                    SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
-                                        newTv.setMean(buffer);
-                    r->setTruthValue(newTv);
-                } else{
-                    MAIN_LOGGER.log(Util::Logger::ERROR, "unrecognized Node token: %s\n", *atts);
+                } else {
+                   const char **natts = scan_common_attrs(r, atts);
+                   if (atts == natts) {
+                      MAIN_LOGGER.log(Util::Logger::ERROR, "unrecognized Node token: %s\n", *atts);
+                   }
+                   atts = natts;
                 }
                 atts++;
             }
@@ -202,36 +215,23 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                 throw InconsistenceException(TRACE_INFO, 
                         "DefaultTruthValue is not SimpleTruthValue");
             }
+
             while (*atts != NULL) {
-                float buffer;
-                if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
-                    atts++;
-                    sscanf(*atts, "%f", &buffer);
-                    if (buffer == 1.0){
-                        throw RuntimeException(TRACE_INFO, 
-                                "fatal error: confidence can not be 1.0");
-                    }
-                    SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
-                                        newTv.setConfidence(buffer);
-                    r->setTruthValue(newTv);
-                } else if (strcmp(*atts, STRENGTH_TOKEN) == 0) {
-                    atts++;
-                    sscanf(*atts, "%f", &buffer);
-                    SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
-                                        newTv.setMean(buffer);
-                    r->setTruthValue(newTv);
-                } else {
+                const char **natts = scan_common_attrs(r, atts);
+                if (atts == natts) {
                     //MAIN_LOGGER.log(Util::Logger::ERROR, "unrecognized Link token: %s\n", *atts);
                 }
+                atts = natts;
                 atts++;
             }
+
             Atom* currentAtom = (Atom*) top(ud->stack);
             if (currentAtom != NULL) {
                 //printf("Getting link element inside currentAtom = %p\n", currentAtom);
                 if (ClassServer::isAssignableFrom(LINK,currentAtom->getType())){
-                    if (r != NULL){
+                    if (r != NULL) {
                         NMXmlParser::addOutgoingAtom(currentAtom, NULL);
-                    }else{
+                    } else {
                         throw RuntimeException(TRACE_INFO, "fatal error: NULL inner link");
                     }
                 }
