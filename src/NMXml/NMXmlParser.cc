@@ -71,17 +71,22 @@ void* pop(ParserStack& ps) {
     return ret;
 }
 
-Type getTypeForString(const char *name, bool onlyClassName) {
+Type getTypeForString(const char *name, bool onlyClassName)
+{
+    if (!name) return 0;
+
     Type result = ClassServer::getType(name);
     if (result != NOTYPE) {          
         return result;
     }
 
-  if (strcmp(name, POLYGON_CORNER_TOKEN) != 0 && (onlyClassName || strcmp(name, ELEMENT_TOKEN) != 0)){
+    if (strcmp(name, POLYGON_CORNER_TOKEN) != 0 && 
+        (onlyClassName || strcmp(name, ELEMENT_TOKEN) != 0))
+    {
       MAIN_LOGGER.log(Util::Logger::ERROR, "Warning: null type for name returned! (%s)\n", name);
-  }
+    }
   
-  return 0;
+    return 0;
 }
 
 char *nativeBuildLinkKey(Atom *link){
