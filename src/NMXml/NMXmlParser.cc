@@ -55,23 +55,23 @@ typedef struct {
     Status status;
 } UserData;
 
-void push(ParserStack& ps, void* p) {
+static void push(ParserStack& ps, void* p) {
     ps.push(p);
 }
 
-void* top(ParserStack& ps) {
+static void* top(ParserStack& ps) {
     if (!ps.size()) return NULL;
     return ps.top();
 }
 
-void* pop(ParserStack& ps) {
+static void* pop(ParserStack& ps) {
     if (!ps.size()) return NULL;
     void* ret = ps.top();
     ps.pop();  
     return ret;
 }
 
-Type getTypeForString(const char *name, bool onlyClassName)
+static Type getTypeForString(const char *name, bool onlyClassName)
 {
     if (!name) return 0;
 
@@ -89,7 +89,8 @@ Type getTypeForString(const char *name, bool onlyClassName)
     return 0;
 }
 
-char *nativeBuildLinkKey(Atom *link){
+static char *nativeBuildLinkKey(Atom *link)
+{
     char key[1<<16];
     char aux[1 << 16];
 
@@ -121,7 +122,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
     
     UserData* ud = (UserData*) userData;
 
-    // precesses head tags (list, tagdescription, etc)
+    // processes head tags (list, tagdescription, etc)
     if (strcmp(name, LIST_TOKEN) == 0) {
         ud->status.enabled = 1;
         return;
