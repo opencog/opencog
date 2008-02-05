@@ -113,8 +113,9 @@ char *nativeBuildLinkKey(Atom *link){
 //unsigned long int cumulativeParseEnd1 = 0;
 //unsigned long int cumulativeParseEnd2 = 0;
 
-void nativeStartElement(void *userData, const char *name, const char **atts) throw (RuntimeException, InconsistenceException){
-
+static void nativeStartElement(void *userData, const char *name, const char **atts)
+    throw (RuntimeException, InconsistenceException)
+{
     Atom* r = NULL;
     Type typeFound;
     
@@ -284,8 +285,9 @@ void nativeStartElement(void *userData, const char *name, const char **atts) thr
     }
 }
 
-void nativeEndElement(void *userData, const char *name) throw (InconsistenceException) {
-
+static void nativeEndElement(void *userData, const char *name)
+    throw (InconsistenceException)
+{
     UserData* ud = (UserData*) userData;
 
     if (strcmp(name, LIST_TOKEN) == 0) {
