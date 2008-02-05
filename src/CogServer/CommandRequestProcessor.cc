@@ -22,9 +22,11 @@ std::string CommandRequestProcessor::load(std::string fileName)
     try {
         NMXmlParser::loadXML(readers, atomSpace);
     }
-    catch (IOException &e)
+    // Can catch IOException, for file not found, or
+    // RuntimeException, for bad file format.
+    catch (StandardException &e)
     {
-        msg = "load failed: ";
+        msg = "xload failed: ";
         msg += e.getMessage();
     }
     delete readers[0];
