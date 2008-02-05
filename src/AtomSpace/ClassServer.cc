@@ -123,11 +123,14 @@ bool ClassServer::isDefined(const char *typeName) {
     return (getType(typeName) < NUMBER_OF_CLASSES);
 }
 
-Type ClassServer::getType(const char *typeName) {
+Type ClassServer::getType(const char *typeName)
+{
+    if (!typeName) return NOTYPE;
+
     ClassTypeHashMap::iterator it = getClassType()->find(typeName);
 
     if (it == getClassType()->end()){
-        return(NOTYPE);
+        return NOTYPE;
     }
     return it->second;
 }
