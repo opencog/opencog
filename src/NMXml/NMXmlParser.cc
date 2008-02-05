@@ -76,7 +76,7 @@ static void* pop(ParserStack& ps) {
  */
 static Type getTypeFromString(const char *name, bool onlyClassName)
 {
-    if (!name) return 0;
+    if (!name) return NOTYPE;
 
     Type result = ClassServer::getType(name);
     if (result != NOTYPE) {          
@@ -169,6 +169,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
         return;
 
     typeFound = getTypeFromString(name, false);
+    if (NOTYPE == typeFound) return;
 
     // processes nodes
     if (ud->status.processNodes) {
