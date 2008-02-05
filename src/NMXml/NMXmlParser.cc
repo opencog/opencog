@@ -71,7 +71,10 @@ static void* pop(ParserStack& ps) {
     return ret;
 }
 
-static Type getTypeForString(const char *name, bool onlyClassName)
+/**
+ * Return the type corresponding to the type name
+ */
+static Type getTypeFromString(const char *name, bool onlyClassName)
 {
     if (!name) return 0;
 
@@ -117,6 +120,10 @@ static char *nativeBuildLinkKey(Atom *link)
 //unsigned long int cumulativeParseEnd2 = 0;
 
 
+/**
+ * Handle attributes that are common to both Nodes and Links.
+ * In other words, handle "confidence" and "strength" attributes.
+ */
 static const char ** scan_common_attrs (Atom *r, const char **atts)
 {
     float buffer;
@@ -161,7 +168,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
     if ((!ud->status.enabled) || ud->status.ignoring)
         return;
 
-    typeFound = getTypeForString(name, false);
+    typeFound = getTypeFromString(name, false);
 
     // processes nodes
     if (ud->status.processNodes) {
@@ -201,6 +208,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
 
     // processes relationships
     if (ud->status.processRelationships) {
+
         // inheritance links may be declared inside lexical category node
         // tags. this information is ignored once it is redundant with source
         // and target data contained in the inheritance link declaration
@@ -270,11 +278,11 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             }
 
             Handle h;
-            //r = getRelationshipByNameAndType(n, getTypeForString(t, true));
+            //r = getRelationshipByNameAndType(n, getTypeFromString(t, true));
 
 //            printf("Getting existing node (%s,%s)\n", n, t);
-                //h = ud->atomTable->getHandle(n, getTypeForString(t, true));
-                h = ud->atomSpace->getHandle(getTypeForString(t, true), n);
+                //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
+                h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
 //            printf(" => h = %p\n", h);
             if (h != NULL) {
                 NMXmlParser::addOutgoingAtom(currentAtom, h);
@@ -301,7 +309,7 @@ static void nativeEndElement(void *userData, const char *name)
         if (currentAtom != NULL) {
 //            timeval s;
 //            gettimeofday(&s, NULL);
-            Type type = getTypeForString(name, false);
+            Type type = getTypeFromString(name, false);
             if (((ClassServer::isAssignableFrom(NODE, type)) && ud->status.processNodes) ||
                 (ClassServer::isAssignableFrom(LINK, type)) && ud->status.processRelationships) {
                 if (currentAtom->getType() == type) {
@@ -372,7 +380,6 @@ static void nativeEndElement(void *userData, const char *name)
         //    cprintf(NORMAL, "WARNING: Got NULL Atom* from the parser stack!\n");
         }
     }
-
 }
 
 NMXmlParser::NMXmlParser(AtomSpace* atomSpace,  bool fresh, bool freshLinks) {
