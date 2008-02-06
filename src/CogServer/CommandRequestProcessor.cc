@@ -83,10 +83,21 @@ std::string CommandRequestProcessor::ls() {
 
 void CommandRequestProcessor::processRequest(CogServerRequest *request)
 {
-    std::string command = ((CommandRequest *) request)->getCommand();
-    std::queue<std::string> args = ((CommandRequest *) request)->getArgs();
+    std::string command;
+    std::queue<std::string> args;
+
+    // Use RTTI for a safe cast
+    if (typeid(request) == typeid(CommandRequest))
+    { 
+        command = ((CommandRequest *) request)->getCommand();
+        args = ((CommandRequest *) request)->getArgs();
+    }
+    else
+    {
+        return;
+    }
+
     std::string answer;
-    
     if (command == "load") {
         if (args.size() != 1) {
             answer = "invalid command syntax";
