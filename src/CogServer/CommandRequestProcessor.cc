@@ -81,10 +81,12 @@ std::string CommandRequestProcessor::ls() {
 
 }
 
-void CommandRequestProcessor::processRequest(CogServerRequest *request)
+void CommandRequestProcessor::processRequest(CogServerRequest *req)
 {
-    std::string command = ((CommandRequest *) request)->getCommand();
-    std::queue<std::string> args = ((CommandRequest *) request)->getArgs();
+    CommandRequest * request = dynamic_cast<CommandRequest *>(req);
+
+    std::string command = request->getCommand();
+    std::queue<std::string> args = request->getArgs();
 
     std::string answer;
     if (command == "load") {
@@ -109,7 +111,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *request)
         answer = "unknown command\n\tAvailable commands: load ls shutdown";
     }
 
-    ((CommandRequest *) request)->setAnswer(answer);
+    request->setAnswer(answer);
     request->callBack();
 
 #ifdef DEBUG 
