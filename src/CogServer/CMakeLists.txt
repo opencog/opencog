@@ -1,3 +1,5 @@
+SET(CMAKE_BUILD_TYPE Debug)
+
 add_library (CogServer STATIC
 CogServerSetup.cc 
 CogServer.cc 
