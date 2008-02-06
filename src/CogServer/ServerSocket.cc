@@ -46,6 +46,7 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
     // Close on ctrl-D aka ASCII EOT
     if ((len == 1) && (buf[0] == 0x4)) {
         Close();
+        master->processData(this, NULL, 0);
     } else {
         master->processData(this, buf, len);
     }

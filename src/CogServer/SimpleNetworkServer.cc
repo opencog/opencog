@@ -17,13 +17,19 @@ SimpleNetworkServer::~SimpleNetworkServer() {
    }
 }
 
-SimpleNetworkServer::SimpleNetworkServer(CogServer *cogServer, int portNumber) {
+SimpleNetworkServer::SimpleNetworkServer(CogServer *cogServer, int portNumber)
+{
     started = false;
     stopListenerThreadFlag = false;
     this->portNumber = portNumber;
     this->cogServer = cogServer;
+    buffer = "";
 }
 
+/**
+ * Convert a command line, received over a socket from some client,
+ * into a request for the CogServer.
+ */
 void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack, 
                                              const std::string &cmdLine)
 {
@@ -35,10 +41,30 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     cogServer->pushRequest(request);
 }
 
+/**
+ * Buffer up incoming raw data until an end-of-transmission (EOT)
+ * is received. After the EOT, dispatch the buffered data as a single
+ * command request.
+ *
+ * XXX This is broken, in that right now, there is only one buffer
+ * that is shared by all clients. There really should be one buffer 
+ * per client. The best waty to deal with this would be to have one
+ * data thread per client, and then one buffer per thread. But, 
+ * right now, this hasn't been implemented.
+ */
 void SimpleNetworkServer::processData(CallBackInterface *callBack, 
                                       const char *buf, size_t len)
 {
-printf ("duude got data len=%d\n", len);
+    if (len != 0) {
+        buffer += buf;
+        return;
+    }
+    std::string command = "data";
+    std::queue<std::string> args;
+    args.push(buffer);
+    CommandRequest *request = new CommandRequest(callBack, command, args);
+    cogServer->pushRequest(request);
+    buffer = "";
 }
 
 void SimpleNetworkServer::start()

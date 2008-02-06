@@ -23,7 +23,7 @@ class CommandRequestProcessor : public RequestProcessor
         virtual void processRequest(CogServerRequest *request);
 
     private:
-        std::string data();
+        std::string data(std::string buf);
         std::string load(std::string fileName);
         std::string ls();
 

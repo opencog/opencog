@@ -39,8 +39,9 @@ std::string CommandRequestProcessor::load(std::string fileName)
 /**
  * Accept XML data on this socket.
  */
-std::string CommandRequestProcessor::data()
+std::string CommandRequestProcessor::data(std::string buf)
 {
+printf ("duude got buf >>%s<<\n", buf.c_str());
     std::string msg = "not implemented";
     return msg;
 }
@@ -105,10 +106,10 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 
     std::string answer;
     if (command == "data") {
-        if (args.size() != 0) {
+        if (args.size() != 1) {
             answer = "data: invalid command syntax";
         } else {
-            answer = data();
+            answer = data(args.front());
         }
     } else if (command == "load") {
         if (args.size() != 1) {
