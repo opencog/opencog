@@ -42,7 +42,7 @@ std::string CommandRequestProcessor::ls() {
     atomSpace->print(stream, LINK, true);
     std::string answer = stream.str();
 
-    /*
+#ifdef ALTERNATE_LS_OUTPUT
     std::vector<Handle> nodes;
     atomSpace->getHandleSet(back_inserter(nodes), NODE, true);
 
@@ -75,7 +75,7 @@ std::string CommandRequestProcessor::ls() {
         answer.append(")");
         answer.append("\n");
     }
-    */
+#endif /* ALTERNATE_LS_OUTPUT */
 
     return answer;
 
@@ -112,7 +112,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *request)
     ((CommandRequest *) request)->setAnswer(answer);
     request->callBack();
 
-    /*
+#ifdef DEBUG 
      // Debug code
     answer = "processed command " + command + "(";
     while (! args.empty()) {
@@ -125,5 +125,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *request)
     answer.append(")");
     ((CommandRequest *) request)->setAnswer(answer);
     request->callBack();
-    */
+#endif /* DEBUG */
+
 }
