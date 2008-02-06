@@ -10,15 +10,15 @@
 #ifndef REQUESTPROCESSOR_H
 #define REQUESTPROCESSOR_H
 
-#include "CogServerRequest.h"
-
 namespace opencog {
 
-class RequestProcessor {
+class CogServerRequest;
 
+class RequestProcessor
+{
     public:
 		
-		virtual ~RequestProcessor() {}
+        virtual ~RequestProcessor() {}
         virtual void processRequest(CogServerRequest *request) = 0;
 
 }; // class
