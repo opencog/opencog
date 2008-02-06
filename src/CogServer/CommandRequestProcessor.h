@@ -10,6 +10,7 @@
 #ifndef COMMANDREQUESTPROCESSOR_H
 #define COMMANDREQUESTPROCESSOR_H
 
+#include <string>
 #include "RequestProcessor.h"
 
 namespace opencog {
