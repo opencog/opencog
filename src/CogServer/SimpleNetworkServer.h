@@ -20,8 +20,8 @@
 
 namespace opencog {
 
-class SimpleNetworkServer : public NetworkServer {
-
+class SimpleNetworkServer : public NetworkServer
+{
     private:
 
         bool started;
@@ -33,15 +33,16 @@ class SimpleNetworkServer : public NetworkServer {
         pthread_attr_t socketListenerAttr;
 
         static void *portListener(void *arg);
-        static void parseCommandLine(const std::string &cmdLine, std::string &command, std::queue<std::string> &args);
-
-
+        static void parseCommandLine(const std::string &cmdLine,
+                                     std::string &command,
+                                     std::queue<std::string> &args);
     public:
-		
-		~SimpleNetworkServer();
-		SimpleNetworkServer(CogServer *cogServer, int portNumber);
+
+        ~SimpleNetworkServer();
+        SimpleNetworkServer(CogServer *cogServer, int portNumber);
 
         void processCommandLine(CallBackInterface *callBack, const std::string &line);
+        void processData(CallBackInterface *callBack, const char *, size_t);
 
         void start();
 

@@ -35,6 +35,12 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     cogServer->pushRequest(request);
 }
 
+void SimpleNetworkServer::processData(CallBackInterface *callBack, 
+                                      const char *buf, size_t len)
+{
+printf ("duude got data len=%d\n", len);
+}
+
 void SimpleNetworkServer::start()
 {
     if (started) {
@@ -90,8 +96,10 @@ void *SimpleNetworkServer::portListener(void *arg) {
  * XXX ?? what is the purpose of this?? gnu getopt is an easier way to get
  * args from a command line.
  */
-void SimpleNetworkServer::parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args) {
-
+void SimpleNetworkServer::parseCommandLine(const std::string &line, 
+                                           std::string &command, 
+                                           std::queue<std::string> &args)
+{
     unsigned int pos1, pos2;
 
     pos1 = line.find(' ', 0);

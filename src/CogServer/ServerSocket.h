@@ -33,6 +33,7 @@ class ServerSocket : public TcpSocket, CallBackInterface {
 
         static void setMaster(SimpleNetworkServer *master);
         void OnLine(const std::string&);
+        void OnRawData(const char *, size_t);
         void callBack(const std::string &message);
 
 }; // class

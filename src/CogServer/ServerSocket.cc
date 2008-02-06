@@ -26,8 +26,29 @@ void ServerSocket::setMaster(SimpleNetworkServer *m) {
     master = m;
 }
 
-void ServerSocket::OnLine(const std::string& line) {
-    master->processCommandLine(this, line);
+void ServerSocket::OnLine(const std::string& line)
+{
+    if (line == "data")
+    {
+        // Disable line protocol; we are expecting a stream
+        // of bytes from now on, until socket closure.
+        // The OnRawData() method will be called from here on out.
+        SetLineProtocol(false);
+    }
+    else
+    {
+        master->processCommandLine(this, line);
+    }
+}
+
+void ServerSocket::OnRawData(const char * buf, size_t len)
+{
+    // Close on ctrl-D aka ASCII EOT
+    if ((len == 1) && (buf[0] == 0x4)) {
+        Close();
+    } else {
+        master->processData(this, buf, len);
+    }
 }
 
 void ServerSocket::callBack(const std::string &message) {

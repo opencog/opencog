@@ -14,6 +14,9 @@ CommandRequestProcessor::~CommandRequestProcessor() {
 CommandRequestProcessor::CommandRequestProcessor() {
 }
 
+/**
+ * read XML data from a file
+ */
 std::string CommandRequestProcessor::load(std::string fileName)
 {
     std::string msg = "load successful";
@@ -33,8 +36,20 @@ std::string CommandRequestProcessor::load(std::string fileName)
     return msg;
 }
 
-std::string CommandRequestProcessor::ls() {
+/**
+ * Accept XML data on this socket.
+ */
+std::string CommandRequestProcessor::data()
+{
+    std::string msg = "not implemented";
+    return msg;
+}
 
+/**
+ * A simple-minded list of the graph
+ */
+std::string CommandRequestProcessor::ls()
+{
     AtomSpace *atomSpace = CogServer::getAtomSpace();;
 
     ostringstream stream;
@@ -89,26 +104,32 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     std::queue<std::string> args = request->getArgs();
 
     std::string answer;
-    if (command == "load") {
+    if (command == "data") {
+        if (args.size() != 0) {
+            answer = "data: invalid command syntax";
+        } else {
+            answer = data();
+        }
+    } else if (command == "load") {
         if (args.size() != 1) {
-            answer = "invalid command syntax";
+            answer = "load: invalid command syntax";
         } else {
             answer = load(args.front());
         }
     } else if (command == "ls") {
         if (args.size() != 0) {
-            answer = "invalid command syntax";
+            answer = "ls: invalid command syntax";
         } else {
             answer = ls();
         }
     } else if (command == "shutdown") {
         if (args.size() != 0) {
-            answer = "invalid command syntax";
+            answer = "shutdown: invalid command syntax";
         } else {
             exit(0);
         }
     } else {
-        answer = "unknown command\n\tAvailable commands: load ls shutdown";
+        answer = "unknown command\n\tAvailable commands: data load ls shutdown";
     }
 
     request->setAnswer(answer);
