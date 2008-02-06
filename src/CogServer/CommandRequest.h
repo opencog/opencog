@@ -30,8 +30,10 @@ class CommandRequest : public CogServerRequest {
         std::string command;
         std::queue<std::string> args;
 
-		~CommandRequest();
-		CommandRequest(CallBackInterface *callback, std::string &command, std::queue<std::string> &args);
+        ~CommandRequest();
+        CommandRequest(CallBackInterface *callback, 
+                       std::string &command,
+                       std::queue<std::string> &args);
         std::string getType();
         void callBack();
         void setAnswer(std::string &cmdOutput);
