@@ -61,21 +61,21 @@ void *SimpleNetworkServer::portListener(void *arg) {
 
     int port = *((int*) arg);
 
-	SocketHandler socketHandler;
-	ListenSocket<ServerSocket> listenSocket(socketHandler);
-	
+    SocketHandler socketHandler;
+    ListenSocket<ServerSocket> listenSocket(socketHandler);
+
     if (listenSocket.Bind(port)) {
-		throw new RuntimeException(NULL, "NetworkElement - Cannot bind to port %d.", port);
+        throw new RuntimeException(NULL, "NetworkElement - Cannot bind to port %d.", port);
     }
-	
+
     socketHandler.Add(&listenSocket);
-	socketHandler.Select(0,200);
+    socketHandler.Select(0,200);
 
     while (!stopListenerThreadFlag) {
         if (socketHandler.GetCount() == 0) {
-    		throw new RuntimeException(NULL, "NetworkElement - Bind to port %d is broken.", port);
+            throw new RuntimeException(NULL, "NetworkElement - Bind to port %d is broken.", port);
         }
-		socketHandler.Select(0,200);
+        socketHandler.Select(0,200);
     }
 
     return NULL;
