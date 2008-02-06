@@ -31,11 +31,14 @@ void StandardException::parseErrorMessage(const char* fmt, va_list ap)
 
 void StandardException::parseErrorMessage(const char * trace, const char * msg, va_list ap)
 {
-    char * concatMsg = new char[strlen(msg) + strlen(trace) + 1];
+    size_t tlen = 0;
+    if (trace) tlen = strlen(trace);
+
+    char * concatMsg = new char[tlen + strlen(msg) + 1];
     *concatMsg = '\0'; // empty c-string
 
     strcat(concatMsg, msg);
-    strcat(concatMsg, trace);
+    if (trace) strcat(concatMsg, trace);
 
     parseErrorMessage(concatMsg, ap);
 
