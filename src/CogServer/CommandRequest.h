@@ -14,16 +14,18 @@
 #include <queue>
 
 #include "ServerSocket.h"
+#include "RequestProcessor.h"
 #include "CallBackInterface.h"
 
 namespace opencog {
 
-class CommandRequest : public CogServerRequest {
-
+class CommandRequest : public CogServerRequest
+{
     private:
 
         std::string answer;
         CallBackInterface *callBackRequestor;
+        static RequestProcessor *requestProcessor;
 
     public:
 		
@@ -34,8 +36,9 @@ class CommandRequest : public CogServerRequest {
         CommandRequest(CallBackInterface *callback, 
                        std::string &command,
                        std::queue<std::string> &args);
-        std::string getType();
         void callBack();
+        RequestProcessor * getRequestProcessor();
+
         void setAnswer(std::string &cmdOutput);
         std::string getCommand();
         std::queue<std::string> getArgs();

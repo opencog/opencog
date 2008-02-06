@@ -10,7 +10,9 @@ CogServerSetup::~CogServerSetup() {
 CogServerSetup::CogServerSetup() {
 }
 
-void CogServerSetup::setUp(CogServer *server) {
-    server->setNetworkServer(new SimpleNetworkServer(server, 17001));
-    server->plugInRequestProcessor("COMMAND_LINE", new CommandRequestProcessor());
+#define COG_SERVER_DEFAULT_PORT 17001
+
+void CogServerSetup::setUp(CogServer *server)
+{
+    server->setNetworkServer(new SimpleNetworkServer(server, COG_SERVER_DEFAULT_PORT));
 }

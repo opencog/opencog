@@ -47,8 +47,6 @@ class CogServer {
         pthread_mutex_t messageQueueLock;
         std::queue<CogServerRequest *> requestQueue;
 
-        std::map<std::string,RequestProcessor *> requestProcessor;
-
         CogServerSetup *initializer;
         NetworkServer *networkServer;
 
@@ -60,7 +58,6 @@ class CogServer {
         static AtomSpace *getAtomSpace();
         void serverLoop();
         void plugInMindAgent(MindAgent *task, int frequency);
-        void plugInRequestProcessor(const std::string &requestType, RequestProcessor *processor);
         long getCycleCount();
         
         CogServerRequest *popRequest();

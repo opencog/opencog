@@ -11,16 +11,19 @@
 #define COGSERVERREQUEST_H
 
 #include <string>
+#include "RequestProcessor.h"
 
 namespace opencog {
 
-class CogServerRequest {
-
+class CogServerRequest
+{
     public:
-		
-		virtual ~CogServerRequest() {}
-        virtual std::string getType() = 0;
+        virtual ~CogServerRequest() {}
         virtual void callBack() = 0;
+        virtual RequestProcessor * getRequestProcessor() = 0;
+        virtual void processRequest() {
+	         getRequestProcessor()->processRequest(this);
+        }
 
 }; // class
 }  // namespace

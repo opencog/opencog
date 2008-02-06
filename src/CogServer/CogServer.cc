@@ -87,31 +87,24 @@ void CogServer::serverLoop() {
     } while(true);
 }
 
-void CogServer::processRequests() {
-
+void CogServer::processRequests()
+{
     int countDown = getRequestQueueSize();
     while (countDown != 0) {
         CogServerRequest *request = popRequest();
-        if (requestProcessor.find(request->getType()) == requestProcessor.end()) {
-           throw new RuntimeException(NULL, "Unable to find request processor for <%s>", request->getType().c_str());
-        }
-        requestProcessor[request->getType()]->processRequest(request);
+        request->processRequest();
         delete request;
         countDown--;
     }
 }
 
-void CogServer::processMindAgents() {
-
+void CogServer::processMindAgents()
+{
     for (unsigned int i = 0; i < mindAgents.size(); i++) {
         if ((cycleCount % mindAgents[i].frequency) == 0) {
             (mindAgents[i].agent)->run(this);
         }
     }
-}
-
-void CogServer::plugInRequestProcessor(const std::string &requestType, RequestProcessor *processor) {
-    requestProcessor[requestType] = processor;
 }
 
 void CogServer::plugInMindAgent(MindAgent *agent, int frequency) {

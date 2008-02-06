@@ -1,9 +1,12 @@
 #include "CommandRequest.h"
+#include "CommandRequestProcessor.h"
 
 using namespace opencog;
 
 CommandRequest::~CommandRequest() {
 }
+
+RequestProcessor* CommandRequest::requestProcessor = NULL;
 
 CommandRequest::CommandRequest(CallBackInterface *callBack, 
                                std::string &command,
@@ -14,8 +17,10 @@ CommandRequest::CommandRequest(CallBackInterface *callBack,
     this->args = args;
 }
 
-std::string CommandRequest::getType() {
-    return "COMMAND_LINE";
+RequestProcessor * CommandRequest::getRequestProcessor()
+{
+    if (requestProcessor == NULL) requestProcessor = new CommandRequestProcessor();
+    return requestProcessor;
 }
 
 void CommandRequest::setAnswer(std::string &commandOutput) {
