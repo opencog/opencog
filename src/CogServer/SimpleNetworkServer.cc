@@ -24,8 +24,9 @@ SimpleNetworkServer::SimpleNetworkServer(CogServer *cogServer, int portNumber) {
     this->cogServer = cogServer;
 }
 
-void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack, const std::string &cmdLine) {
-
+void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack, 
+                                             const std::string &cmdLine)
+{
     std::string command;
     std::queue<std::string> args;
 
@@ -34,10 +35,10 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack, const 
     cogServer->pushRequest(request);
 }
 
-void SimpleNetworkServer::start() {
-
+void SimpleNetworkServer::start()
+{
     if (started) {
-        throw new RuntimeException(NULL, "Can not restart SimpleNetworkServer");
+        throw new RuntimeException(NULL, "Cannot restart SimpleNetworkServer");
     }
 
     ServerSocket::setMaster(this);
@@ -47,10 +48,12 @@ void SimpleNetworkServer::start() {
     pthread_attr_setinheritsched(&socketListenerAttr, PTHREAD_EXPLICIT_SCHED);
     pthread_attr_setdetachstate(&socketListenerAttr, PTHREAD_CREATE_DETACHED);
 
-    pthread_create(&socketListenerThread, &socketListenerAttr, SimpleNetworkServer::portListener, &portNumber);
+    pthread_create(&socketListenerThread,
+                   &socketListenerAttr, 
+                   SimpleNetworkServer::portListener,
+                   &portNumber);
 
     started = true;
-
 }
 
 
