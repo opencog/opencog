@@ -5,7 +5,10 @@ using namespace opencog;
 CommandRequest::~CommandRequest() {
 }
 
-CommandRequest::CommandRequest(CallBackInterface *callBack, std::string &command, std::queue<std::string> &args) {
+CommandRequest::CommandRequest(CallBackInterface *callBack, 
+                               std::string &command,
+                               std::queue<std::string> &args)
+{
     this->callBackRequestor = callBack;
     this->command = command;
     this->args = args;
