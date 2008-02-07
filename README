@@ -28,6 +28,13 @@ To run unit tests type (from the bin directory):
 ../scripts/run_utests.sh
 
 
+Modifying the list of basic types
+---------------------------------
+At this time, the types are hard-coded (this should be fixed someday).
+To build a new set of types, cd to src/AtomSpace, edit type.script
+and then say "make", in that directory.  The makefile there will 
+automatically build the new header files that define the types.
+
 
 ToDo
 ----
