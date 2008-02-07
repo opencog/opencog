@@ -15,7 +15,9 @@ using namespace opencog;
 
 SimpleNetworkServer *ServerSocket::master = NULL;
 
-ServerSocket::~ServerSocket() {
+ServerSocket::~ServerSocket()
+{
+    cb->Close();
 }
 
 ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler)
@@ -23,6 +25,7 @@ ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler)
     SetLineProtocol();
     in_raw_mode = false;
     buffer = "";
+    cb = new CBI(this);
 }
 
 void ServerSocket::setMaster(SimpleNetworkServer *m) {
@@ -33,7 +36,7 @@ void ServerSocket::OnDisconnect()
 {
     if (!in_raw_mode) return;
 
-    master->processCommandLine(this, buffer);
+    master->processCommandLine(cb, buffer);
     SetLineProtocol(true);
     buffer = "";
     in_raw_mode = false;
@@ -53,7 +56,7 @@ void ServerSocket::OnLine(const std::string& line)
     }
     else
     {
-        master->processCommandLine(this, line);
+        master->processCommandLine(cb, line);
     }
 }
 
@@ -80,12 +83,25 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
     buffer += buf;
 }
 
-void ServerSocket::callBack(const std::string &message) {
+ServerSocket::CBI::CBI(ServerSocket *s)
+{
+    sock = s;
+}
+
+void ServerSocket::CBI::Close(void)
+{
+    sock = NULL;
+}
+
+void ServerSocket::CBI::callBack(const std::string &message)
+{
+    // If the socket is closed, then we can't send anything at all.
+    if(sock == NULL) return;
 
     std::istringstream stream(message.c_str());
     std::string line;
 
     while (getline(stream, line)) {
-        Send(line + "\n");
+        sock->Send(line + "\n");
     }
 }
