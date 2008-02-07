@@ -36,6 +36,7 @@ void ServerSocket::OnDisconnect()
 {
     if (!in_raw_mode) return;
 
+    cb->AtomicInc(1);
     master->processCommandLine(cb, buffer);
     SetLineProtocol(true);
     buffer = "";
@@ -56,6 +57,7 @@ void ServerSocket::OnLine(const std::string& line)
     }
     else
     {
+        cb->AtomicInc(1);
         master->processCommandLine(cb, line);
     }
 }
@@ -87,13 +89,32 @@ ServerSocket::CBI::CBI(ServerSocket *s)
 {
     pthread_mutex_init(&sock_lock, NULL);
     sock = s;
+    pthread_mutex_init(&use_count_lock, NULL);
+    use_count = 1;
+}
+
+int ServerSocket::CBI::AtomicInc(int inc)
+{
+    int uc;
+    pthread_mutex_lock(&use_count_lock);
+    use_count += inc;
+    uc = use_count;
+    pthread_mutex_unlock(&use_count_lock);
+    return uc;
 }
 
 void ServerSocket::CBI::Close(void)
 {
     pthread_mutex_lock(&sock_lock);
     sock = NULL;
+    int cnt = AtomicInc(-1);
     pthread_mutex_unlock(&sock_lock);
+
+    // There will be one callback for each request that 
+    // was generated on this socket. When all of these
+    // have been processed, then self-delete, as no one
+    // else will.
+    if (cnt <= 0) delete this;
 }
 
 void ServerSocket::CBI::callBack(const std::string &message)
@@ -112,6 +133,10 @@ void ServerSocket::CBI::callBack(const std::string &message)
     }
     pthread_mutex_unlock(&sock_lock);
 
-    // We are done, and no one else will clean us up.
-//    delete this;
+    // There will be one callback for each request that 
+    // was generated on this socket. When all of these
+    // have been processed, then self-delete, as no one
+    // else will.
+    int cnt = AtomicInc(-1);
+    if (cnt <= 0) delete this;
 }

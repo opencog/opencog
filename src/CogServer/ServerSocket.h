@@ -44,9 +44,12 @@ class ServerSocket : public TcpSocket
             private:
                 ServerSocket *sock;
                 pthread_mutex_t sock_lock;
+                int use_count;
+                pthread_mutex_t use_count_lock;
 	         public:
                 CBI(ServerSocket *);
                 void Close(void);
+                int AtomicInc(int inc);
                 void callBack(const std::string &message);
         };
         CBI *cb;
