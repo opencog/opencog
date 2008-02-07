@@ -7,13 +7,13 @@ class StringXMLBufferReader : public XMLBufferReader
 {
 public:
     /**
-     * This constructor does make a copy of content
+     * This constructor does NOT make a copy of content
      **/
-	StringXMLBufferReader(const char* content);
+    StringXMLBufferReader(const char* content);
     /**
-     * This destructor does not frees xml content
+     * This destructor does NOT free xml content
      **/
-	virtual ~StringXMLBufferReader();
+    virtual ~StringXMLBufferReader();
     virtual void open();
     virtual size_t read(void *ptr, size_t size, size_t nmemb);
     virtual void close();
