@@ -48,6 +48,7 @@
 #define EXECUTION_LINK_CLASS "ExecutionLink"
 #define IMPLICATION_LINK_CLASS "ImplicationLink"
 #define VARIABLE_NODE_CLASS "VariableNode"
+#define WR_LINK_CLASS "WRLink"
 #define REFERENCE_LINK_CLASS "ReferenceLink"
 #define DEFINED_LINGUISTIC_CONCEPT_NODE_CLASS "DefinedLinguisticConceptNode"
 #define DEFINED_LINGUISTIC_RELATIONSHIP_NODE_CLASS "DefinedLinguisticRelationshipNode"

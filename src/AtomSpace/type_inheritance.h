@@ -90,6 +90,7 @@ init_inheritance(map, INHERITANCE_LINK, PART_OF_LINK);
 init_inheritance(map, SCHEMA_NODE, GROUNDED_SCHEMA_NODE);
 init_inheritance(map, GROUNDED_PROCEDURE_NODE, GROUNDED_SCHEMA_NODE);
 init_inheritance(map, GROUNDED_PROCEDURE_NODE, COMPOUND_TERM_NODE);
+init_inheritance(map, ASSOCIATIVE_LINK, WR_LINK);
 init_inheritance(map, ASSOCIATIVE_LINK, REFERENCE_LINK);
 init_inheritance(map, IMPLICATION_LINK, SCHEMA_GOAL_IMPLICATION_LINK);
 init_inheritance(map, SL_OBJECT_NODE, SL_PET_NODE);
