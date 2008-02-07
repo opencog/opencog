@@ -85,25 +85,32 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
 
 ServerSocket::CBI::CBI(ServerSocket *s)
 {
+    pthread_mutex_init(&sock_lock, NULL);
     sock = s;
 }
 
 void ServerSocket::CBI::Close(void)
 {
+    pthread_mutex_lock(&sock_lock);
     sock = NULL;
+    pthread_mutex_unlock(&sock_lock);
 }
 
 void ServerSocket::CBI::callBack(const std::string &message)
 {
     // If the socket is closed, then we can't send anything at all.
-    if(sock == NULL) return;
+    // Note that the sock is typically closed in a distinct thread,
+    // which can race, and so lock to make sure that sock != NULL.
+    pthread_mutex_lock(&sock_lock);
+    if(sock) {
+        std::istringstream stream(message.c_str());
+        std::string line;
 
-    std::istringstream stream(message.c_str());
-    std::string line;
-
-    while (getline(stream, line)) {
-        sock->Send(line + "\n");
+        while (getline(stream, line)) {
+            sock->Send(line + "\n");
+        }
     }
+    pthread_mutex_unlock(&sock_lock);
 
     // We are done, and no one else will clean us up.
 //    delete this;

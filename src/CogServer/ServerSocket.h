@@ -43,6 +43,7 @@ class ServerSocket : public TcpSocket
         {
             private:
                 ServerSocket *sock;
+                pthread_mutex_t sock_lock;
 	         public:
                 CBI(ServerSocket *);
                 void Close(void);
