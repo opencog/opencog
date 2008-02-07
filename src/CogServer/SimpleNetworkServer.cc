@@ -23,7 +23,6 @@ SimpleNetworkServer::SimpleNetworkServer(CogServer *cogServer, int portNumber)
     stopListenerThreadFlag = false;
     this->portNumber = portNumber;
     this->cogServer = cogServer;
-    buffer = "";
 }
 
 /**
@@ -36,35 +35,14 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     std::string command;
     std::queue<std::string> args;
 
-    parseCommandLine(cmdLine, command, args);
-    CommandRequest *request = new CommandRequest(callBack, command, args);
-    cogServer->pushRequest(request);
-}
-
-/**
- * Buffer up incoming raw data until an end-of-transmission (EOT)
- * is received. After the EOT, dispatch the buffered data as a single
- * command request.
- *
- * XXX This is broken, in that right now, there is only one buffer
- * that is shared by all clients. There really should be one buffer 
- * per client. The best waty to deal with this would be to have one
- * data thread per client, and then one buffer per thread. But, 
- * right now, this hasn't been implemented.
- */
-void SimpleNetworkServer::processData(CallBackInterface *callBack, 
-                                      const char *buf, size_t len)
-{
-    if (len != 0) {
-        buffer += buf;
-        return;
+    if (cmdLine.substr(0,5) == "data\n") {
+        command = "data";
+        args.push(cmdLine.substr(5));
+    } else {
+        parseCommandLine(cmdLine, command, args);
     }
-    std::string command = "data";
-    std::queue<std::string> args;
-    args.push(buffer);
     CommandRequest *request = new CommandRequest(callBack, command, args);
     cogServer->pushRequest(request);
-    buffer = "";
 }
 
 void SimpleNetworkServer::start()
@@ -89,8 +67,8 @@ void SimpleNetworkServer::start()
 }
 
 
-void *SimpleNetworkServer::portListener(void *arg) {
-
+void *SimpleNetworkServer::portListener(void *arg)
+{
     int port = *((int*) arg);
 
     SocketHandler socketHandler;
@@ -101,13 +79,15 @@ void *SimpleNetworkServer::portListener(void *arg) {
     }
 
     socketHandler.Add(&listenSocket);
+
     socketHandler.Select(0,200);
 
     while (!stopListenerThreadFlag) {
         if (socketHandler.GetCount() == 0) {
             throw new RuntimeException(NULL, "NetworkElement - Bind to port %d is broken.", port);
         }
-        socketHandler.Select(0,200);
+        // poll for 200 millsecs 
+        socketHandler.Select(0,200 * 1000);
     }
 
     return NULL;

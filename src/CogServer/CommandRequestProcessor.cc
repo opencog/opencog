@@ -41,7 +41,7 @@ std::string CommandRequestProcessor::load(std::string fileName)
  */
 std::string CommandRequestProcessor::data(std::string buf)
 {
-printf ("duude got buf >>%s<<\n", buf.c_str());
+printf ("duude finally got buf >>%s<<\n", buf.c_str());
     std::string msg = "not implemented";
     return msg;
 }
