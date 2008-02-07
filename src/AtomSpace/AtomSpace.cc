@@ -284,7 +284,7 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
         }
     }
 
-    return addLink((Type)(int)head_type, handles, tvn);
+    return addLink((Type)(long)head_type, handles, tvn);
 }
 
 Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn) {
