@@ -104,4 +104,7 @@ void ServerSocket::CBI::callBack(const std::string &message)
     while (getline(stream, line)) {
         sock->Send(line + "\n");
     }
+
+    // We are done, and no one else will clean us up.
+    delete this;
 }
