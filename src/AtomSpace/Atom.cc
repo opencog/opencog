@@ -639,13 +639,14 @@ bool Atom::equals(Atom* other){
     return(equal);
 }
 
-int Atom::hashCode(){
-    int result = type + (getArity()<<8);
+int Atom::hashCode()
+{
+    long result = type + (getArity()<<8);
 
     for (int i = 0; i < getArity(); i++){
-        result += ((int) outgoing[i]);
+        result = result  ^ (((long) outgoing[i])<<i);
     }
-    return result;
+    return (int) result;
 }
 
 HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const{
