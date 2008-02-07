@@ -137,7 +137,8 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             exit(0);
         }
     } else {
-        answer = "unknown command\n\tAvailable commands: data load ls shutdown";
+        answer = "unknown command: " + command + 
+                 "\n\tAvailable commands: data load ls shutdown";
     }
 
     request->setAnswer(answer);
