@@ -268,7 +268,7 @@ Handle AtomTable::getPredicateIndexHead(int index) const{
 PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const{
     PredicateEvaluator* result = NULL;
     if (predicateHandles2Indices->contains(gpnHandle)) {
-        int index = (int) predicateHandles2Indices->get(gpnHandle);
+        int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
         result = predicateEvaluators[index];
     }
     return result;
@@ -288,7 +288,7 @@ HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) con
     if (gpnHandle != NULL) {
         //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);
         if (predicateHandles2Indices->contains(gpnHandle)) {
-            int index = (int) predicateHandles2Indices->get(gpnHandle);
+            int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
             //printf("AtomTable::findHandlesByGPN(): found index %d for gpnHandle\n", index);
             result = makeSet(NULL, getPredicateIndexHead(index), PREDICATE_INDEX | index);
         }
