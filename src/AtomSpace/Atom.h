@@ -133,7 +133,7 @@ class Atom {
             if (isReal())
                 return type;
             else
-                return (Type)((int)this);
+                return (Type)((long)this);
         }
 
         /**
