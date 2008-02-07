@@ -1,13 +1,24 @@
 #
-# Makefile for the making the program to make the types.
+# Makefile for base OpenCog types.
 # (CMake currently can't do this) 
+#
+# To use:
+# Edit types.script, as desired. Then, simply say "make"
+# and the following files will be automatically generated:
+#
+#      type_codes.h
+#      type_names.h
+#      type_classint.h
+#      type_intclass.h
+#      type_inheritance.h
+#
 
 all: type-definer
 	cat type.script |./type-definer
-	rm -f type.yacc.h
 
 type-definer: type.yacc.o type.lex.o
 	cc -o $@ $^ -lfl
+	rm -f type.yacc.h
 
 .l.c:
 	flex -o $@ $<
