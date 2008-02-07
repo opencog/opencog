@@ -17,6 +17,7 @@ init_inheritance(map, NODE, SHAPE_NODE);
 init_inheritance(map, NODE, POINT_NODE);
 init_inheritance(map, NODE, NM_ENTITY_NODE);
 init_inheritance(map, NODE, PROCEDURE_NODE);
+init_inheritance(map, NODE, VARIABLE_NODE);
 init_inheritance(map, NODE, AGISIM_SOUND_NODE);
 init_inheritance(map, NODE, AGISIM_TASTE_NODE);
 init_inheritance(map, NODE, AGISIM_SMELL_NODE);

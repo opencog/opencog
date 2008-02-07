@@ -47,6 +47,7 @@ class_to_int[(*getClassName()) [COMPOUND_TERM_NODE]] = COMPOUND_TERM_NODE;
 class_to_int[(*getClassName()) [EVALUATION_LINK]] = EVALUATION_LINK;
 class_to_int[(*getClassName()) [EXECUTION_LINK]] = EXECUTION_LINK;
 class_to_int[(*getClassName()) [IMPLICATION_LINK]] = IMPLICATION_LINK;
+class_to_int[(*getClassName()) [VARIABLE_NODE]] = VARIABLE_NODE;
 class_to_int[(*getClassName()) [REFERENCE_LINK]] = REFERENCE_LINK;
 class_to_int[(*getClassName()) [DEFINED_LINGUISTIC_CONCEPT_NODE]] = DEFINED_LINGUISTIC_CONCEPT_NODE;
 class_to_int[(*getClassName()) [DEFINED_LINGUISTIC_RELATIONSHIP_NODE]] = DEFINED_LINGUISTIC_RELATIONSHIP_NODE;
