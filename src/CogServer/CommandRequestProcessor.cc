@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <FileXMLBufferReader.h>
+#include <StringXMLBufferReader.h>
 #include <NMXmlParser.h>
 
 using namespace opencog;
@@ -15,13 +16,13 @@ CommandRequestProcessor::CommandRequestProcessor() {
 }
 
 /**
- * read XML data from a file
+ * read XML data from a buffer
  */
-std::string CommandRequestProcessor::load(std::string fileName)
+std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf)
 {
     std::string msg = "load successful";
     AtomSpace *atomSpace = CogServer::getAtomSpace();
-    std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(fileName.c_str()));
+    std::vector<XMLBufferReader*> readers(1, buf);
     try {
         NMXmlParser::loadXML(readers, atomSpace);
     }
@@ -37,13 +38,19 @@ std::string CommandRequestProcessor::load(std::string fileName)
 }
 
 /**
- * Accept XML data on this socket.
+ * Read XML data from a file
+ */
+std::string CommandRequestProcessor::load(std::string fileName)
+{
+    return loadXML(new FileXMLBufferReader(fileName.c_str()));
+}
+
+/**
+ * Read XML data from a string
  */
 std::string CommandRequestProcessor::data(std::string buf)
 {
-printf ("duude finally got buf >>%s<<\n", buf.c_str());
-    std::string msg = "not implemented";
-    return msg;
+    return loadXML(new StringXMLBufferReader(buf.c_str()));
 }
 
 /**

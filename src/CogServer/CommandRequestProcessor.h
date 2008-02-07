@@ -12,6 +12,7 @@
 
 #include <string>
 #include "RequestProcessor.h"
+#include "XMLBufferReader.h"
 
 namespace opencog {
 
@@ -23,6 +24,7 @@ class CommandRequestProcessor : public RequestProcessor
         virtual void processRequest(CogServerRequest *request);
 
     private:
+        std::string loadXML(XMLBufferReader *buf);
         std::string data(std::string buf);
         std::string load(std::string fileName);
         std::string ls();
