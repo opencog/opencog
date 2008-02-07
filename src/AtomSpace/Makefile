@@ -3,10 +3,11 @@
 # (CMake currently can't do this) 
 
 all: type-definer
+	cat type.script |./type-definer
+	rm -f type.yacc.h
 
-type-definer: type.lex.o type.yacc.o
+type-definer: type.yacc.o type.lex.o
 	cc -o $@ $^ -lfl
-
 
 .l.c:
 	flex -o $@ $<
@@ -22,6 +23,6 @@ clean:
 
 distclean: clean
 	rm -f lex.yy.c y.tab.c y.tab.h
-	rm -f type.lex.c type.yacc.c
+	rm -f type.lex.c type.yacc.c type.yacc.h
 	rm -f type-definer
 
