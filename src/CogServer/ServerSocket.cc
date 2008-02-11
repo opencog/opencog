@@ -77,12 +77,28 @@ void ServerSocket::OnLine(const std::string& line)
  */
 void ServerSocket::OnRawData(const char * buf, size_t len)
 {
-    // Close on ctrl-D aka ASCII EOT
-    if ((len == 1) && (buf[0] == 0x4)) {
+    size_t i;
+    size_t istart = 0;
+    while (istart<len)
+    {
+        // Search for ctrl-D aka ASCII EOT
+        for (i=istart; i<len; i++)
+        {
+            if (0x4 == buf[i]) break;
+        }
+        if (i == len)
+        {
+            // no ctrl-D found, append the string, and go home
+            buffer.append (&buf[istart], len-istart);
+            return;
+        }
+
+        // found a ctrl-D, dispatch the thing.
+        int iend = i;
+        buffer.append (&buf[istart], iend-istart);
         OnDisconnect();
-        return;
-    }
-    buffer += buf;
+        istart = iend+1;
+	}
 }
 
 ServerSocket::CBI::CBI(ServerSocket *s)
