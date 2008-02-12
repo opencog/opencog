@@ -498,6 +498,12 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
                     "%s at line %d\n",
                     XML_ErrorString(XML_GetErrorCode(parser)),
                     XML_GetCurrentLineNumber(parser));
+            fprintf(stderr, "\tBuffer was:\n");
+            fflush(stderr);
+            fwrite(buf, 1, len, stderr);
+            fflush(stderr);
+            fprintf(stderr, "\n");
+            fflush(stderr);
             userData.lastInsertedHandle = UNDEFINED_HANDLE;
             break;
         }
