@@ -32,6 +32,7 @@ class ServerSocket : public TcpSocket
         // run in streaming mode, it can only batch the requests :-(
         std::string buffer;
         bool in_raw_mode;
+        bool have_raw_eot;
 
         // If the client closes the socket before the command
         // has been processed, then an instance of this class 

@@ -24,6 +24,7 @@ ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler)
 {
     SetLineProtocol();
     in_raw_mode = false;
+    have_raw_eot = false;
     buffer = "";
     cb = new CBI(this);
 }
@@ -85,22 +86,34 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
         for (i=istart; i<len-1; i++)
         {
             if ((0x4 == buf[i]) && ((0xd == buf[i+1]) || (0xa == buf[i+1]))) break;
+            if (have_raw_eot && ((0xd == buf[i]) || (0xa == buf[i]))) {
+                have_raw_eot = false;
+                break;
+            }
         }
         if (i == len-1)
         {
-            // no ctrl-D found, append the string, and go home
+            if(0x4 == buf[i]) {
+                have_raw_eot = true;
+                len --;  // Do not copy the ctrl-D
+            }
+            // No ctrl-D found, append the string, and go home
             buffer.append (&buf[istart], len-istart);
             return;
         }
 
-        // found a ctrl-D, dispatch the thing.
+        // Found a ctrl-D, dispatch the thing.
         int iend = i;
         buffer.append (&buf[istart], iend-istart);
         cb->AtomicInc(1);
         master->processCommandLine(cb, buffer);
         buffer = "";
-        istart = iend+2;  // skip both the ctrl-D and the newline.
-        if (0xa == buf[istart]) istart ++; // skip LF, if any
+        istart = iend;
+
+        // Skip over the ctrl-D and any newlines/carriage returns.
+        while ((0xa == buf[istart]) || 
+               (0xd == buf[istart]) || 
+               (0x4 == buf[istart])) istart ++;
 
         // XXX at this point, we should check if the
         // thing after the ctrl-D is an ordinary line-mode command
