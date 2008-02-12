@@ -96,9 +96,25 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
         // found a ctrl-D, dispatch the thing.
         int iend = i;
         buffer.append (&buf[istart], iend-istart);
-        OnDisconnect();
+        cb->AtomicInc(1);
+        master->processCommandLine(cb, buffer);
+        buffer = "";
         istart = iend+1;
-	}
+
+        // XXX at this point, we should check if the
+        // thing after the ctrl-D is an ordinary line-mode command
+        // or not. If it is, then we should handle it. But for now,
+        // we will punt: the only way for multiple commands to end
+        // up in one packet is if there is a very high transmit rate.
+        // And this is improbable for teh current server design/usage.
+    }
+
+    // If we are here, then the last char in the buffer was a ctrl-D. 
+    // (That's the only way out of the while loop above). Go back to
+    // line-mode.
+    SetLineProtocol(true);
+    buffer = "";
+    in_raw_mode = false;
 }
 
 ServerSocket::CBI::CBI(ServerSocket *s)
