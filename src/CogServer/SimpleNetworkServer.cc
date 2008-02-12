@@ -38,6 +38,10 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     if (cmdLine.substr(0,5) == "data\n") {
         command = "data";
         args.push(cmdLine.substr(5));
+    } else 
+    if (cmdLine.substr(0,6) == "data\r\n") {
+        command = "data";
+        args.push(cmdLine.substr(6));
     } else {
         parseCommandLine(cmdLine, command, args);
     }
