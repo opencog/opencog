@@ -81,12 +81,12 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
     size_t istart = 0;
     while (istart<len)
     {
-        // Search for ctrl-D aka ASCII EOT
-        for (i=istart; i<len; i++)
+        // Search for ctrl-D aka ASCII EOT, followed by newline
+        for (i=istart; i<len-1; i++)
         {
-            if (0x4 == buf[i]) break;
+            if ((0x4 == buf[i]) && ((0xd == buf[i+1]) || (0xa == buf[i+1]))) break;
         }
-        if (i == len)
+        if (i == len-1)
         {
             // no ctrl-D found, append the string, and go home
             buffer.append (&buf[istart], len-istart);
@@ -99,7 +99,8 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
         cb->AtomicInc(1);
         master->processCommandLine(cb, buffer);
         buffer = "";
-        istart = iend+1;
+        istart = iend+2;  // skip both the ctrl-D and the newline.
+        if (0xa == buf[istart]) istart ++; // skip LF, if any
 
         // XXX at this point, we should check if the
         // thing after the ctrl-D is an ordinary line-mode command
