@@ -13,6 +13,11 @@ cxxtest     -- a test framework -- http://cxxtest.sourceforge.net/
 
 libxmlparse -- an XML parsing library - provided by the Debian/Ubuntu 
                package libxmltok1-dev
+C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
+               http://www.alhem.net/Sockets/
+
+openssl     -- SSL sockets library 
+               Debian/Ubuntu package libssl-dev
 
 To build opencog:
 -----------------

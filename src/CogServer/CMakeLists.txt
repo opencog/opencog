@@ -16,8 +16,12 @@ ${OPENCOG_SOURCE_DIR}/src/NMXml
 #
 # Local copy of xml parser, should be eliminated.
 # ${OPENCOG_SOURCE_DIR}/include/xmlparser
+#
+# Local copy of http://www.alhem.net/Sockets/
 ${OPENCOG_SOURCE_DIR}/include/sockets
-${OPENCOG_SOURCE_DIR}/include/sockets/openssl
+#
+# Local copy of openssl, should be eliminated.
+# ${OPENCOG_SOURCE_DIR}/include/sockets/openssl
 )
 
 link_directories (
