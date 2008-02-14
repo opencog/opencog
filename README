@@ -8,8 +8,11 @@ It currently consists of only the barest of essentials.
 Prerequisites:
 --------------
 To build and run OpenCog, the following pacakges are required:
-cmake -- a build management tool -- http://www.cmake.org/
-cxxtest -- a test framework -- http://cxxtest.sourceforge.net/
+cmake       -- a build management tool -- http://www.cmake.org/
+cxxtest     -- a test framework -- http://cxxtest.sourceforge.net/
+
+libxmlparse -- an XML parsing library - provided by the Debian/Ubuntu 
+               package libxmltok1-dev
 
 To build opencog:
 -----------------
