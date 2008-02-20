@@ -2,6 +2,8 @@
 
 EconomicAttentionValue::stim_t EconomicAttentionValue::stimulate(EconomicAttentionValue::stim_t amount) 
 {
+	// always greater than zero as stim_t is unsigned
+	// if (amount >= 0)
 	stimulus += amount;
 	return stimulus;
 }
@@ -10,6 +12,29 @@ EconomicAttentionValue* EconomicAttentionValue::factory()
 {
 	return new EconomicAttentionValue(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
+
+EconomicAttentionValue* EconomicAttentionValue::clone() const
+{
+    EconomicAttentionValue *eav;
+
+    eav = new EconomicAttentionValue(getSTI(), getLTI(), getVLTI());
+    eav->stimulate(getStimulus());
+    return eav;
+}
+
+bool EconomicAttentionValue::operator==(const EconomicAttentionValue& av) const {
+	return (getSTI() == av.getSTI() && getLTI() == av.getLTI()
+		&& getVLTI() == av.getVLTI() && getStimulus() == av.getStimulus());
+}
+
+EconomicAttentionValue* EconomicAttentionValue::m_defaultAV = NULL;
+
+const EconomicAttentionValue& EconomicAttentionValue::getDefaultAV() {
+	if(!m_defaultAV)
+		m_defaultAV = EconomicAttentionValue::factory();
+	return *m_defaultAV;
+}
+
 
 EconomicAttentionValue* EconomicAttentionValue::factory(sti_t sti)
 {

@@ -68,6 +68,12 @@ IF(WIN32)
 target_link_libraries(AttentionValueUTest winmm)
 ENDIF(WIN32)
             
+add_cxxtest(EconomicAttentionValueUTest)
+target_link_libraries(EconomicAttentionValueUTest AtomSpace Util)
+IF(WIN32)
+target_link_libraries(EconomicAttentionValueUTest winmm)
+ENDIF(WIN32)
+
 add_cxxtest(HandleEntryUTest)
 target_link_libraries(HandleEntryUTest AtomSpace Util)
 IF(WIN32)

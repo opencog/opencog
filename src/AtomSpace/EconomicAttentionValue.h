@@ -6,9 +6,11 @@
 class EconomicAttentionValue : public AttentionValue
 {
 public:
-	typedef short stim_t;
+	typedef unsigned short stim_t;
 private:
 	stim_t stimulus;
+
+	static EconomicAttentionValue* m_defaultAV;
 	
 public:
 
@@ -35,7 +37,7 @@ public:
 	 *
 	 * @returns the current total stimulus associated with this attention value.
 	 */
-	stim_t getStimulus() { return stimulus; }
+	stim_t getStimulus() const { return stimulus; }
 	
 	/**
 	 * Reset the stimulus counter.
@@ -43,7 +45,20 @@ public:
 	 * @returns the new stimulus value, which should be 0.
 	 */
 	stim_t resetStimulus() { stimulus = 0; return stimulus; }
+
+	virtual bool operator==(const EconomicAttentionValue& av) const;
+
+	/**
+ * Returns a copy of the EconomicAttentionValue, stimulus in new copy is equal to zero.
+ *
+ */
+	virtual EconomicAttentionValue* clone() const;
 	
+	// STATIC METHODS
+
+	// Returns a shared EconomicAttentionValue with default STI, LTI, VLTI values
+	// @param none
+	static const EconomicAttentionValue& getDefaultAV();
 	// factory methods
 	static EconomicAttentionValue* factory();
 	static EconomicAttentionValue* factory(sti_t sti);
