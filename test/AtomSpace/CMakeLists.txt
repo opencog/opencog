@@ -15,7 +15,7 @@ ENDIF(WIN32)
 
 add_definitions(-DATOM_TABLE_TEST_XML_FILE=\\"${CMAKE_CURRENT_SOURCE_DIR}/cw_proxy_1.xml\\")
 add_cxxtest(AtomTableUTest)
-target_link_libraries(AtomTableUTest NMXml AtomSpace Util xmlparser)
+target_link_libraries(AtomTableUTest NMXml AtomSpace Util xmlparse)
 IF(WIN32)
 target_link_libraries(AtomTableUTest winmm)
 ENDIF(WIN32)
