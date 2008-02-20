@@ -47,6 +47,10 @@ public:
 
     virtual bool operator==(const EconomicAttentionValue& av) const;
 
+    // Returns const string "[sti_val, lti_val, vlti_val, stim_val]"
+    // @param none
+    virtual std::string toString() const;
+
     /**
 * Returns a copy of the EconomicAttentionValue, stimulus in new copy is equal to zero.
 *

@@ -13,6 +13,12 @@ EconomicAttentionValue* EconomicAttentionValue::factory()
     return new EconomicAttentionValue(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
+std::string EconomicAttentionValue::toString() const {
+    char buffer[256];
+    sprintf(buffer, "[%d, %d, %s, %d]", (int) getSTI(), (int) getLTI(), getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE", (int) getStimulus() );
+    return buffer;
+}
+
 EconomicAttentionValue* EconomicAttentionValue::clone() const
 {
     EconomicAttentionValue *eav;

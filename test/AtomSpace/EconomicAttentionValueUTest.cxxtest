@@ -190,12 +190,12 @@ public:
 
     //static std::string toStr();
     void testtoString() {
-	char buffer[100];
+	char buffer[256];
         //printf("AttentionValue::testtoString()\n");
 	for(int i = 0; i < NUM_AVS; i++) {        
 	    //printf("AV[%d] = %s\n", i, avs[i]->toString().c_str());
             std::string str = avs[i]->toString();
-	    sprintf(buffer, "[%d, %d, %s]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE");
+	    sprintf(buffer, "[%d, %d, %s, %d]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE", avs[i]->getStimulus());
             TS_ASSERT(!strcmp(str.c_str(), buffer));
         }
     }  
