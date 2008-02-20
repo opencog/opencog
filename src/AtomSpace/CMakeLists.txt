@@ -24,6 +24,7 @@ VersionHandle.cc
 md5.c 	
 Temporal.cc
 AttentionValue.cc
+EconomicAttentionValue.cc
 HandleSet.cc     
 HandleTemporalPairEntry.cc  
 TemporalEntry.cc
