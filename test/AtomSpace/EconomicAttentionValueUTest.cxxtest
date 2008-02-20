@@ -41,26 +41,26 @@ private:
     EconomicAttentionValue* avs[NUM_AVS];    
 
 public:
-	EconomicAttentionValueUTest(){
+    EconomicAttentionValueUTest(){
 	        
-		sti[0] = DEFAULTATOMSTI;
-		sti[1] = AV1_STI;
-		sti[2] = AV2_STI;
-		sti[3] = AV3_STI;
+	sti[0] = DEFAULTATOMSTI;
+	sti[1] = AV1_STI;
+	sti[2] = AV2_STI;
+	sti[3] = AV3_STI;
 
-		lti[0] = DEFAULTATOMLTI;
-		lti[1] = DEFAULTATOMLTI;
-		lti[2] = AV2_LTI;
-		lti[3] = AV3_LTI;
+	lti[0] = DEFAULTATOMLTI;
+	lti[1] = DEFAULTATOMLTI;
+	lti[2] = AV2_LTI;
+	lti[3] = AV3_LTI;
 
-		vlti[0] = DEFAULTATOMVLTI;
-		vlti[1] = DEFAULTATOMVLTI;
-		vlti[2] = DEFAULTATOMVLTI
-		vlti[3] = AV3_VLTI;
+	vlti[0] = DEFAULTATOMVLTI;
+	vlti[1] = DEFAULTATOMVLTI;
+	vlti[2] = DEFAULTATOMVLTI
+	vlti[3] = AV3_VLTI;
 
-	        EconomicAttentionValue *av = EconomicAttentionValue::factory();
-	        delete av;
-	}
+    EconomicAttentionValue *av = EconomicAttentionValue::factory();
+	delete av;
+    }
 
     void setUp() {
 	avs[0] = EconomicAttentionValue::factory();

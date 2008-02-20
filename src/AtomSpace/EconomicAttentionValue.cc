@@ -2,15 +2,15 @@
 
 EconomicAttentionValue::stim_t EconomicAttentionValue::stimulate(EconomicAttentionValue::stim_t amount) 
 {
-	// always greater than zero as stim_t is unsigned
-	// if (amount >= 0)
-	stimulus += amount;
-	return stimulus;
+    // always greater than zero as stim_t is unsigned
+    // if (amount >= 0)
+    stimulus += amount;
+    return stimulus;
 }
 	
 EconomicAttentionValue* EconomicAttentionValue::factory()
 {
-	return new EconomicAttentionValue(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
+    return new EconomicAttentionValue(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
 EconomicAttentionValue* EconomicAttentionValue::clone() const
@@ -23,22 +23,22 @@ EconomicAttentionValue* EconomicAttentionValue::clone() const
 }
 
 bool EconomicAttentionValue::operator==(const EconomicAttentionValue& av) const {
-	return (getSTI() == av.getSTI() && getLTI() == av.getLTI()
-		&& getVLTI() == av.getVLTI() && getStimulus() == av.getStimulus());
+    return (getSTI() == av.getSTI() && getLTI() == av.getLTI()
+	    && getVLTI() == av.getVLTI() && getStimulus() == av.getStimulus());
 }
 
 EconomicAttentionValue* EconomicAttentionValue::m_defaultAV = NULL;
 
 const EconomicAttentionValue& EconomicAttentionValue::getDefaultAV() {
-	if(!m_defaultAV)
-		m_defaultAV = EconomicAttentionValue::factory();
-	return *m_defaultAV;
+    if(!m_defaultAV)
+	m_defaultAV = EconomicAttentionValue::factory();
+    return *m_defaultAV;
 }
 
 
 EconomicAttentionValue* EconomicAttentionValue::factory(sti_t sti)
 {
-	return new EconomicAttentionValue(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
+    return new EconomicAttentionValue(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
 EconomicAttentionValue* EconomicAttentionValue::factory(float scaledSti)
@@ -53,15 +53,15 @@ EconomicAttentionValue* EconomicAttentionValue::factory(float scaledSti)
         sti = (AttentionValue::sti_t) ((65534 * scaledSti) - 32767);
     }
 
-	return new EconomicAttentionValue(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
+    return new EconomicAttentionValue(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
 EconomicAttentionValue* EconomicAttentionValue::factory(sti_t sti, lti_t lti)
 {
-	return new EconomicAttentionValue(sti, lti, DEFAULTATOMVLTI);
+    return new EconomicAttentionValue(sti, lti, DEFAULTATOMVLTI);
 }
 
 EconomicAttentionValue* EconomicAttentionValue::factory(sti_t sti, lti_t lti, vlti_t vlti)
 {
-	return new EconomicAttentionValue(sti, lti, vlti);
+    return new EconomicAttentionValue(sti, lti, vlti);
 }
