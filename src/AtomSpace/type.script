@@ -1,4 +1,10 @@
+//
 // Script for automatic Type generation
+//
+// To add new types, edit this file, then say "make".
+// The Makefile in this directory will automatically
+// generate the C header files used by the code.
+//
 
 ATOM
 
