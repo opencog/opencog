@@ -578,6 +578,7 @@ public:
     /**
      * Stimulate a Handle's atom.
      *
+     * @param atom handle
      * @param amount of stimulus to give.
      * @return total stimulus given since last reset.
      */
@@ -599,6 +600,13 @@ public:
      * thread adds more.
      */
     EconomicAttentionValue::stim_t resetStimulus();
+
+    /**
+     * Get total stimulus.
+     *
+     * @return total stimulus since last reset.
+     */
+    EconomicAttentionValue::stim_t getTotalStimulus();
 
 
 };

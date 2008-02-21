@@ -9,6 +9,7 @@
 #include <math.h>
 #include <Node.h>  
 #include <TLB.h>
+#include <string.h>
 
 #define NUM_VHS 4
 VersionHandle VHs[NUM_VHS] = {
@@ -463,7 +464,7 @@ public:
             TS_ASSERT(newImp == (imp[i] - 100));
         }
     }
-    
+
     void testGetHandle_bugfix1() {
         AtomSpace atomSpace; 
         HandleSeq emptyOutgoing;

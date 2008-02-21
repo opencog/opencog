@@ -44,7 +44,7 @@ class Atom {
         // Adds a new handle to the outgoing set. Note that this is just used in NativeParser friend class
         // due to performance issues and should not be used anywhere else...
         void addOutgoingAtom(Handle h);
-        // Used by AtomTable::decayShortTermImportance()
+        // Used by AtomTable::decayShortTermImportance() and by EconomicAttentionAllocation.
         AttentionValue* getAVPointer();
 
         /**

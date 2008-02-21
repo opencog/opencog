@@ -1254,6 +1254,7 @@ EconomicAttentionValue::stim_t AtomTable::resetStimulus()
     // reset each attention value
     while (p) {
 	( (EconomicAttentionValue*) p->handle->getAVPointer() )->resetStimulus();
+	p = p->next;
     }
     // delete list of atoms
     delete stimulatedAtoms;
@@ -1266,3 +1267,7 @@ EconomicAttentionValue::stim_t AtomTable::resetStimulus()
     return totalStim;
 }
 
+EconomicAttentionValue::stim_t AtomTable::getTotalStimulus()
+{
+    return totalStim;
+}

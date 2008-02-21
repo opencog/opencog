@@ -52,7 +52,11 @@ void Atom::init(Type type, const std::vector<Handle>& outgoing, const TruthValue
     predicateIndexInfo = NULL;
 
     //attentionValue = (AttentionValue*)&AttentionValue::getDefaultAV();
-    attentionValue = (AttentionValue*) AttentionValue::factory();
+    //attentionValue = (AttentionValue*) AttentionValue::factory();
+    // Using economic attention allocation
+    // TODO: make attention system selectable at compile time
+    attentionValue = (AttentionValue*) EconomicAttentionValue::factory();
+
 #ifdef USE_SHARED_DEFAULT_TV
     truthValue = NULL; 
     setTruthValue(tv);
