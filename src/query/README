@@ -21,4 +21,10 @@ Conceptual problems, design problems:
 
 Diary and Notes
 ---------------
-Use special token to trigger mind agent.
+Use special token to trigger mind agent. Per Ben, "DialogManager",
+there are for such tokens:
+-- query
+-- statement
+-- command
+-- interjection
+
