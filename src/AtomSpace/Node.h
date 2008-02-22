@@ -18,12 +18,12 @@
 class Atom;
 
 /**
- * This is a subclass of Atom. It represents the most basic kind of pattern
- * known to the OpenCog system.
+ * This is a subclass of Atom. It represents the most basic kind of 
+ * pattern known to the OpenCog system.
  */
 
-class Node : public Atom {
-
+class Node : public Atom
+{
     friend class SavingLoading;
 
     private:
@@ -37,12 +37,13 @@ class Node : public Atom {
          * Constructor for this class.
          *
          * @param Node type
-         * @param Node name A reference to a std::string with the name of the node. 
-         *                  Use empty string for unamed node.
+         * @param Node name A reference to a std::string with the name of 
+         *                  the node.  Use empty string for unamed node.
          * @param Node truthvalue A reference to a TruthValue object. 
          */
-        Node(Type, const std::string&, const TruthValue& = TruthValue::NULL_TV())
-             throw (InvalidParamException, AssertionException);
+        Node(Type, const std::string&, 
+             const TruthValue& = TruthValue::NULL_TV())
+            throw (InvalidParamException, AssertionException);
         
         /**
          * Destructor for this class.
@@ -57,11 +58,12 @@ class Node : public Atom {
         const std::string& getName() const;
 
         /*
-         * @param Node name A reference to a std::string with the name of the node. 
-         *                  Use empty string for unamed node.
-         * @exception RuntimeException is thrown if this method is called for an Node already 
-         *                  inserted into AtomSpace. Otherwise, internal index structures 
-         *                  would become inconsistent.
+         * @param Node name A reference to a std::string with the name
+         *             of the node.  Use empty string for unamed node.
+         * @exception RuntimeException is thrown if this method is
+         *             called for an Node already inserted into
+         *             AtomSpace. Otherwise, internal index structures 
+         *              would become inconsistent.
          */
         void  setName(const std::string&) throw (RuntimeException);
 
