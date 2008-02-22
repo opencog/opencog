@@ -41,11 +41,13 @@ class Link : public Atom
          * Constructor for this class.
          *
          * @param Link type.
-         * @param Outgoing set, which is an array of the atom handles referenced 
-         * by this link (both sources and targets). 
-         * @param Link truthvalue, which will be cloned before being stored in this Link.
+         * @param Outgoing set, which is an array of the atom handles 
+         *        referenced by this link (both sources and targets). 
+         * @param Link truthvalue, which will be cloned before being
+         *        stored in this Link.
          */
-         Link(Type, const std::vector<Handle>&, const TruthValue& = TruthValue::NULL_TV());
+         Link(Type, const std::vector<Handle>&, 
+              const TruthValue& = TruthValue::NULL_TV());
 
         /**
          * Destructor for this class.
@@ -96,12 +98,12 @@ class Link : public Atom
         bool isSource(Handle) throw (InvalidParamException);
 
         /**
-         * Returns whether the element in a given position in the outgoing set
-         * of this link is a source.
+         * Returns whether the element in a given position in the 
+         * outgoing set of this link is a source.
          *
          * @param Position in the outgoing set.
-         * @return Whether the element in a given position in the outgoing set
-         * of this link is a source.
+         * @return Whether the element in a given position in the 
+         *         outgoing set of this link is a source.
          */
         bool isSource(int) throw (IndexErrorException, InvalidParamException);
         
@@ -114,12 +116,12 @@ class Link : public Atom
         bool isTarget(Handle) throw (InvalidParamException);
 
         /**
-         * Returns whether the element in a given position in the outgoing set
-         * of this link is a target.
+         * Returns whether the element in a given position in the 
+         * outgoing set of this link is a target.
          *
          * @param Position in the outgoing set.
-         * @return Whether the element in a given position in the outgoing set
-         * of this link is a target.
+         * @return Whether the element in a given position in the
+         *         outgoing set of this link is a target.
          */
         bool isTarget(int) throw (IndexErrorException, InvalidParamException);
 
