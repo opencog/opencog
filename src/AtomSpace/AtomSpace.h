@@ -354,32 +354,38 @@ class AtomSpace {
      * 
      * @param An output iterator.
      * @param the type of the atoms to be searched
-     * @param the name of the atoms to be searched. For searching only links, use an empty string
+     * @param the name of the atoms to be searched. 
+     *        For searching only links, use an empty string
      * @param if subTypes of the given type are accepted in this search
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle. 
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result. 
+     * @param if returns only atoms that contains versioned TVS with 
+     *        the given VersionHandle. If NULL_VERSION_HANDLE is given,
+     *        it does not restrict the result. 
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * NOTE: The matched entries are appended to a container whose 
+     * OutputIterator is passed as the first argument. Example of a 
+     * call to this method, which would return all entries in TimeServer:
+     *
+     *      std::list<Handle> ret;
+     *      atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      */
     template <typename OutputIterator> OutputIterator 
     getHandleSet(OutputIterator result, 
                  Type t, 
                  const string& name, 
                  bool acceptSubTypes=true, 
-                 VersionHandle vh = NULL_VERSION_HANDLE) const{
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
         HandleEntry *he = NULL;
         if (name.length()>0) {
             // This will get only nodes
             he = atomTable.getHandleSet(name.c_str(), t, acceptSubTypes, vh);
         } else {
-            // In this case, it must use another method so that it returns only links.
-            // Check the given type so that it behaves the same way of implementation of 
-            // this method for PseudoCore
+            // In this case, use different method, so that only links
+            // are returned.  Check the given type so that it behaves
+            // the same way as the implementation of this method in
+            // PseudoCore.
             if (t == ATOM)
                 t = LINK;
             if (!isNode(t))
@@ -389,7 +395,8 @@ class AtomSpace {
     }
 
     /**
-     * Gets a set of handles that matches with the given type (subclasses optionally).
+     * Gets a set of handles that matches with the given type 
+     * (subclasses optionally).
      * 
      * @param An output iterator.
      * @param The desired type.
