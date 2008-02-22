@@ -20,7 +20,6 @@
 #include "HandleMap.h"
 #include "PredicateEvaluator.h"
 #include <AttentionValue.h>
-#include "EconomicAttentionValue.h"
 #include <iostream>
 #include "exceptions.h"
 
@@ -76,18 +75,6 @@ private:
     std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
-
-    /* Economic Attention allocation variables */
-    // list of Atoms that have been stimulated since last reset
-    HandleEntry* stimulatedAtoms;
-
-    // total stimulus given out since last reset
-    EconomicAttentionValue::stim_t totalStim;
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_t stimulatedAtomsLock;
-#endif
-    /*---*/
 
     // Number of predicate indices.
     int numberOfPredicateIndices;
@@ -572,41 +559,6 @@ public:
     * AttentionValue instead of floats
     HandleEntry* getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const;
     */
-
-    /* Next three methods are for EconomicAttentionAllocation */
-
-    /**
-     * Stimulate a Handle's atom.
-     *
-     * @param atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    EconomicAttentionValue::stim_t stimulateAtom(Handle h, EconomicAttentionValue::stim_t amount);
-
-    /**
-     * Stimulate all atoms in HandleEntry list.
-     *
-     * @param linked list of atoms to spread stimulus across.
-     * @param amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    EconomicAttentionValue::stim_t stimulateAtom(HandleEntry* h, EconomicAttentionValue::stim_t amount);
-
-    /**
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    EconomicAttentionValue::stim_t resetStimulus();
-
-    /**
-     * Get total stimulus.
-     *
-     * @return total stimulus since last reset.
-     */
-    EconomicAttentionValue::stim_t getTotalStimulus();
 
 
 };

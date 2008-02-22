@@ -61,12 +61,6 @@ AtomTable::AtomTable(bool dsa)
     numberOfPredicateIndices = 0;
     predicateHandles2Indices = new HandleMap();
     
-    stimulatedAtoms = NULL;
-    totalStim = 0;
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_init(&stimulatedAtomsLock, NULL): 
-#endif
-
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
 #endif
@@ -1199,75 +1193,3 @@ HandleEntry* AtomTable::getHandleSet(float lowerBound, float upperBound, Version
 }
 */
 
-EconomicAttentionValue::stim_t AtomTable::stimulateAtom(Handle h, EconomicAttentionValue::stim_t amount)
-{
-    EconomicAttentionValue* av;
-    
-    // Add stimulus to the attention value of the atom
-    av = (EconomicAttentionValue*) h->getAVPointer();
-    av->stimulate(amount);
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_lock(&stimulatedAtomsLock);
-#endif
-    // Add atom to the list of atoms with stimulus
-    if (!stimulatedAtoms) {
-	stimulatedAtoms = new HandleEntry(h);
-    } else {
-	stimulatedAtoms->last()->next = new HandleEntry(h);
-    }
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_unlock(&stimulatedAtomsLock);
-#endif
-    
-    // update record of total stimulus given out
-    totalStim += amount;
-    return totalStim;
-}
-
-EconomicAttentionValue::stim_t AtomTable::stimulateAtom(HandleEntry* h, EconomicAttentionValue::stim_t amount)
-{
-    HandleEntry* p;
-    EconomicAttentionValue::stim_t split;
-
-    // how much to give each atom
-    split = amount / h->getSize();
-    
-    p = h;
-    while (p) {
-	stimulateAtom(p->handle, split);
-	p = p->next;
-    }
-    
-    // return unused stimulus
-    return amount - (split * h->getSize());
-}
-
-EconomicAttentionValue::stim_t AtomTable::resetStimulus()
-{
-    HandleEntry* p;
-    p = stimulatedAtoms;
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_lock(&stimulatedAtomsLock);
-#endif
-    // reset each attention value
-    while (p) {
-	( (EconomicAttentionValue*) p->handle->getAVPointer() )->resetStimulus();
-	p = p->next;
-    }
-    // delete list of atoms
-    delete stimulatedAtoms;
-    stimulatedAtoms = NULL;
-    // reset stimulus counter
-    totalStim = 0;
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_unlock(&stimulatedAtomsLock);
-#endif
-    return totalStim;
-}
-
-EconomicAttentionValue::stim_t AtomTable::getTotalStimulus()
-{
-    return totalStim;
-}

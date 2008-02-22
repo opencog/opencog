@@ -13,8 +13,24 @@
 #include "AttentionValue.h"
 #include "exceptions.h"
 
+#ifndef WIN32
+#include <ext/hash_map>
+using __gnu_cxx::hash_map;
+#define USE_ATOM_HASH_MAP
+#else
+#include <map>
+#endif
+
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
+
+typedef short stim_t;
+
+#ifdef USE_ATOM_HASH_MAP
+typedef hash_map<Atom*, stim_t, hashAtom, eqAtom> AtomHashMap;
+#else
+typedef map<Atom*, stim_t> AtomMap; 
+#endif
 
 class AtomSpace {
 
@@ -604,6 +620,49 @@ class AtomSpace {
      */
     void decayShortTermImportance();
 
+    /* Next three methods are for EconomicAttentionAllocation */
+
+    /**
+     * Stimulate a Handle's atom.
+     *
+     * @param atom handle
+     * @param amount of stimulus to give.
+     * @return total stimulus given since last reset.
+     */
+    stim_t stimulateAtom(Handle h, stim_t amount);
+
+    /**
+     * Stimulate all atoms in HandleEntry list.
+     *
+     * @param linked list of atoms to spread stimulus across.
+     * @param amount of stimulus to share.
+     * @return remainder stimulus after equal spread between atoms.
+     */
+    stim_t stimulateAtom(HandleEntry* h, stim_t amount);
+
+    /**
+     * Reset stimulus.
+     *
+     * @return new stimulus since reset, usually zero unless another
+     * thread adds more.
+     */
+    stim_t resetStimulus();
+
+    /**
+     * Get total stimulus.
+     *
+     * @return total stimulus since last reset.
+     */
+    stim_t getTotalStimulus();
+
+    /**
+     * Get stimulus for Atom.
+     *
+     * @param handle of atom to get stimulus for.
+     * @return total stimulus since last reset.
+     */
+    stim_t getAtomStimulus(Handle h);
+
     //for convenience
     bool isNode(Handle) const;
     bool isVar(Handle) const;
@@ -681,6 +740,19 @@ class AtomSpace {
     TimeServer timeServer;
     AtomTable atomTable;
     string emptyName;
+    
+    // Total stimulus given out to atoms
+    stim_t totalStimulus;
+#ifdef USE_ATOM_HASH_MAP
+    // Hash table of atoms given stimulus since reset
+    AtomHashMap* stimulatedAtoms;
+#else
+    AtomMap* stimulatedAtoms;
+#endif
+
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_t stimulatedAtomsLock;
+#endif
 
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const{

@@ -43,6 +43,16 @@ AtomSpace::AtomSpace() {
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
     emptyName = "";
+
+#ifdef USE_ATOM_HASH_MAP
+    stimulatedAtoms = new AtomHashMap();
+#else
+    stimulatedAtoms = new AtomMap();
+#endif
+    totalStimulus = 0;
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_init(&stimulatedAtomsLock, NULL);
+#endif
 }
 
 const AtomTable& AtomSpace::getAtomTable() const {
@@ -711,4 +721,70 @@ Handle AtomSpace::_getNextAtom_type(Type type) {
     Handle h=_handle_entry->handle;
     _handle_entry=_handle_entry->next;
     return h;
+}
+
+stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
+{
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_lock(&stimulatedAtomsLock);
+#endif
+    // Add atom to the map of atoms with stimulus
+    // and add stimulus to it
+    (*stimulatedAtoms)[h] += amount;
+
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_unlock(&stimulatedAtomsLock);
+#endif
+    
+    // update record of total stimulus given out
+    totalStimulus += amount;
+    return totalStimulus;
+}
+
+stim_t AtomSpace::stimulateAtom(HandleEntry* h, stim_t amount)
+{
+    HandleEntry* p;
+    stim_t split;
+
+    // how much to give each atom
+    split = amount / h->getSize();
+    
+    p = h;
+    while (p) {
+	stimulateAtom(p->handle, split);
+	p = p->next;
+    }
+    
+    // return unused stimulus
+    return amount - (split * h->getSize());
+}
+
+stim_t AtomSpace::resetStimulus()
+{
+
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_lock(&stimulatedAtomsLock);
+#endif
+    stimulatedAtoms->clear();
+    // reset stimulus counter
+    totalStimulus = 0;
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_unlock(&stimulatedAtomsLock);
+#endif
+    return totalStimulus;
+}
+
+stim_t AtomSpace::getTotalStimulus()
+{
+    return totalStimulus;
+}
+
+stim_t AtomSpace::getAtomStimulus(Handle h)
+{
+    if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
+	return 0;
+    } else {
+	return (*stimulatedAtoms)[h];
+    }
+	
 }

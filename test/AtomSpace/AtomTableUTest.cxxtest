@@ -59,44 +59,6 @@
         printf("\n");
     }
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
-{
-    char buf[256];
-    vector<Handle> testAtoms;
-    int baseNameLength;
-
-    memset(buf,0,256);
-    baseNameLength = strlen(baseName);
-    strcpy(buf,baseName);
-
-    SimpleTruthValue tv1(0.001f, 0.00001f);
-    SimpleTruthValue tv2(0.001f, 0.00001f);
-    SimpleTruthValue tv3(0.5,0.99);
-    buf[baseNameLength] = '1';
-    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
-    buf[baseNameLength] = '2';
-    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
-    buf[baseNameLength] = '3';
-    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
-
-    HandleSeq outgoing1;
-    outgoing1.push_back(h2);
-    outgoing1.push_back(h3);
-    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
-    HandleSeq outgoing2;
-    outgoing2.push_back(h1);
-    outgoing2.push_back(l1);
-    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
-
-    testAtoms.push_back(h1);
-    testAtoms.push_back(h2);
-    testAtoms.push_back(h3);
-    testAtoms.push_back(l1);
-    testAtoms.push_back(l2);
-
-    return testAtoms;
-}
-
     class AtomTableUTest :  public CxxTest::TestSuite {
     private:
     /*
@@ -552,92 +514,6 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
         table->print(cout, LIST_LINK, false);        
     } 
 
-    /**
-     * Method tested:
-     *
-     * Stimulate a Handle's atom.
-     *
-     * @param atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    void testStimulateAtom() {
-	EconomicAttentionValue::stim_t stimValue;
-	vector<Handle> atoms;
-	cout << "BEGIN TEST: stimulateAtom" << endl;
-	atoms = createSimpleGraph(atomSpace, "stim_atom\0");
-
-	stimValue = 10;
-
-	for (unsigned int i=0; i < atoms.size(); i++) {
-	    const EconomicAttentionValue& av = (const EconomicAttentionValue&) atoms[i]->getAttentionValue();
-	    table->stimulateAtom(atoms[i], stimValue);
-	    //av = (EconomicAttentionValue) atoms[i]->getAttentionValue();
-	    TS_ASSERT_EQUALS(av.getStimulus(), 10);
-	}
-	TS_ASSERT_EQUALS(table->getTotalStimulus(), stimValue*atoms.size());
-	cout << "END TEST: stimulateAtom" << endl;
-    }
-
-    /**
-     * Method tested:
-     *
-     * Stimulate all atoms in HandleEntry list.
-     *
-     * @param linked list of atoms to spread stimulus across.
-     * @param amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    void testStimulateList() {
-	EconomicAttentionValue::stim_t stimValue;
-	HandleEntry* list;
-	vector<Handle> atoms;
-	cout << "BEGIN TEST: stimulateList" << endl;
-	atoms = createSimpleGraph(atomSpace, "stim_list");
-	stimValue = 100;
-	list = HandleEntry::fromHandleVector(&atoms[0],atoms.size());
-
-	table->stimulateAtom(list, stimValue);
-	for (unsigned int i=0; i < atoms.size(); i++) {
-	    const EconomicAttentionValue& av = (const EconomicAttentionValue&) atoms[i]->getAttentionValue();
-	    TS_ASSERT_EQUALS(av.getStimulus(), 20);
-	}
-
-	TS_ASSERT_EQUALS(table->getTotalStimulus(), stimValue);
-
-	delete list;
-	cout << "END TEST: stimulateList" << endl;
-    }
-
-    /**
-     * Method tested:
-     *
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    void testResetStimulus() {
-	EconomicAttentionValue::stim_t stimValue;
-	HandleEntry* list;
-	vector<Handle> atoms;
-	cout << "BEGIN TEST: resetStimulus" << endl;
-	atoms = createSimpleGraph(atomSpace, "stim_reset");
-
-	list = HandleEntry::fromHandleVector(&atoms[0],atoms.size());
-	stimValue = 100;
-
-	table->stimulateAtom(list, stimValue);
-	table->resetStimulus();
-	for (unsigned int i=0; i < atoms.size(); i++) {
-	    const EconomicAttentionValue& av = (const EconomicAttentionValue&) atoms[i]->getAttentionValue();
-	    TS_ASSERT_EQUALS(av.getStimulus(), 0);
-	}
-
-	delete list;
-	cout << "END TEST: resetStimulus" << endl;
-    }
-    
 };
 
 /*
