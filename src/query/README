@@ -1,0 +1,24 @@
+                    query
+                    -----
+
+Simple, experimental implementation of query processing
+pre-prototype, broken, doesn't do anything yet.
+
+Conceptual problems, design problems:
+-------------------------------------
+-- How to distinguish rhetorical questions from queries that should
+   be answered?  A block of input text may contain rhetorical questions,
+   which should be ignored.
+
+-- How should query processing be triggered?  What channel should be 
+   used for reply? Currently, all input to CogServer is via XML, which 
+   is parsed. If the parse is successful, no further processing is done. 
+
+   Query processing could be performed by a mind agent, but how should
+   its activity be triggered, and what communictations channel should
+   it use to post a reply?
+
+
+Diary and Notes
+---------------
+Use special token to trigger mind agent.
