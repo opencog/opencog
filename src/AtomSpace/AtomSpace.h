@@ -57,55 +57,82 @@ class AtomSpace {
         
     /**
      * Prints atoms of this AtomTable to the given output stream.
-     * @param output  the output stream where the atoms will be printed
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is subclass of the given type.
-     * If false, matches only atoms of the exact type.
+     * @param output  the output stream where the atoms will be printed.
+     * @param type  the type of atoms that should be printed.
+     * @param subclass  if true, matches all atoms whose type is 
+     *              subclass of the given type. If false, matches 
+     *              only atoms of the exact type.
      */
-     void print(std::ostream& output = std::cout, Type type = ATOM, bool subclass = true) const;
+     void print(std::ostream& output = std::cout, 
+                Type type = ATOM, bool subclass = true) const;
 
     /**
-     * Adds both the AtTime(TimeNode <timestamp>, atom) atom representation into the AtomTable and the
-     * entry (atom, timestamp) into the TimeServer of the given AtomSpace.
+     * Adds both the AtTime(TimeNode <timestamp>, atom) atom 
+     * representation into the AtomTable and the entry (atom,
+     * timestamp) into the TimeServer of the given AtomSpace.
+     *
      * @param atom the Handle of the atom to be associated to the timestamp
      * @param timestamp The timestamp to be associated to the atom.
      * @param tv Truth value for the AtTimeLink created (optional) 
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
-    Handle addTimeInfo(Handle atom, unsigned long timestamp, const TruthValue& tv = TruthValue::NULL_TV());
+    Handle addTimeInfo(Handle atom, unsigned long timestamp, 
+                       const TruthValue& tv = TruthValue::NULL_TV());
 
     /**
-     * Adds both the AtTime(TimeNode <t>, atom) atom representation into the AtomTable and the
-     * entry (atom, t) into the TimeServer of the given AtomSpace.
+     * Adds both the AtTime(TimeNode <t>, atom) atom representation 
+     * into the AtomTable and the entry (atom, t) into the TimeServer
+     * of the given AtomSpace.
+     *
      * @param atom the Handle of the atom to be associated to the timestamp
      * @param t The Temporal object to be associated to the atom.
      * @param tv Truth value for the AtTimeLink created (optional)
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
-    Handle addTimeInfo(Handle atom, const Temporal& t, const TruthValue& tv = TruthValue::NULL_TV());
+    Handle addTimeInfo(Handle atom, const Temporal& t,
+                       const TruthValue& tv = TruthValue::NULL_TV());
 
     /**
-     * Removes both the AtTime(TimeNode <timestamp>, atom) atom representation from the AtomTable and the
-     * entry (atom, timestamp) from the TimeServer of the given AtomSpace.
+     * Removes both the AtTime(TimeNode <timestamp>, atom) atom
+     * representation from the AtomTable and the entry (atom, 
+     * timestamp) from the TimeServer of the given AtomSpace.
      * 
-     * NOTE1: All handles in the incoming set of the corresponding AtTimeLink Atom will also be removed recursively 
-     *        (unless the recursive argument is explicitely set to false).
-     * NOTE2: The TimeNode that corresponds to the given removed time info is also removed if its incoming set becomes empty 
-     *        after the removal of an AtTimeLink link (unless the removeDisconnectedTimeNodes argument is explicitly set to false).
+     * NOTE1: All handles in the incoming set of the corresponding
+     * AtTimeLink Atom will also be removed recursively (unless the
+     * recursive argument is explicitely set to false).
+     *
+     * NOTE2: The TimeNode that corresponds to the given removed
+     * time info is also removed if its incoming set becomes empty 
+     * after the removal of an AtTimeLink link (unless the 
+     * removeDisconnectedTimeNodes argument is explicitly set to false).
      * 
-     * @param atom the Handle of the atom to be associated to the timestamp. This argument cannot be an UNDEFINED_HANDLE. 
-     *        If so, it throws a RuntimeException.
+     * @param atom the Handle of the atom to be associated to
+     *        the timestamp. This argument cannot be an UNDEFINED_HANDLE. 
+     *        If it is, a RuntimeException is thrown.
      * @param timestamp The timestamp to be associated to the atom.  
-     *        This argument cannot be an UNDEFINED_TEMPORAL. Ifo so, it throws a RuntimeException.
-     * @param the Temporal relationship criteria to be used for this removal operation. 
-     *        This method only removes the time info related to the HandleTemporalPair objects whose Temporal matches with
-     *        this argument (search criteria) applied to the given timestamp argument. 
-     *        The default temporal relationship is "exact match". See the definition of TemporalRelationship enumeration 
+     *        This argument cannot be an UNDEFINED_TEMPORAL. If
+     *        so, it throws a RuntimeException.
+     * @param the Temporal relationship criteria to be used for 
+     *        this removal operation. 
+     *
+     *        This method only removes the time info related to 
+     *        the HandleTemporalPair objects whose Temporal matches with
+     *        this argument (search criteria) applied to the given 
+     *        timestamp argument. 
+     *
+     *        The default temporal relationship is "exact match".
+     *        See the definition of TemporalRelationship enumeration 
      *        to see other possible values for it.
-     * @param removeDisconnectedTimeNodes Flag to indicate if any TimeNode whose incoming set becomes empty after the removal of the AtTimeLink link must be removed.
-     * @param recursive Flag to indicate if all atoms in the incoming set of the AtTimeLink link must be removed recursively.
+     * @param removeDisconnectedTimeNodes Flag to indicate if any 
+     *        TimeNode whose incoming set becomes empty after the
+     *        removal of the AtTimeLink link must be removed.
+     * @param recursive Flag to indicate if all atoms in the
+     *        incoming set of the AtTimeLink link must be 
+     *        removed recursively.
      * 
-     * @return True if the matching pairs (Handle, Temporal) were successfully removed. False, otherwise (i.e., no mathing pair or any of them were not removed)
+     * @return True if the matching pairs (Handle, Temporal) were
+     *        successfully removed. False, otherwise (i.e., no 
+     *        mathing pair or any of them were not removed)
      */
     bool removeTimeInfo(Handle atom, unsigned long timestamp, TemporalTable::TemporalRelationship = TemporalTable::EXACT, bool removeDisconnectedTimeNodes = true, bool recursive = true);
 
@@ -143,7 +170,8 @@ class AtomSpace {
      */
     Handle getAtTimeLink(const HandleTemporalPair& htp) const;
 
-    /** Gets a list of HandleTemporalPair objects given an Atom Handle.
+    /**
+     * Gets a list of HandleTemporalPair objects given an Atom Handle.
      * 
      * \param outIt The outputIterator to 
      * \param h The Atom Handle
@@ -177,27 +205,43 @@ class AtomSpace {
         \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
     Handle addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
-    /** Add an atom represented by a given handle with an optional TruthValue object to the Atom Table
+    /** 
+     * Add an atom represented by a given handle with an optional
+     * TruthValue object to the Atom Table
+     *
      * @param the handle of the Atom to be added
-     * @param the TruthValue object to be associated to the added atom. NULL if the own atom's tv must be used.
-     * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable. 
+     * @param the TruthValue object to be associated to the added 
+     *        atom. NULL if the own atom's tv must be used.
+     * @param a flag to indicate if it does not need to check for
+     *         already existing atoms in AtomTable. 
      * @param managed ???
      */
-    Handle addRealAtom(const Atom& atom, const TruthValue& tvn=TruthValue::NULL_TV());
+    Handle addRealAtom(const Atom& atom,
+                       const TruthValue& tvn=TruthValue::NULL_TV());
 
-    /** Add a new atom represented by a tree of Vertex to the Atom Table
-     * @param the tree of Vertex that contains the representation of the atom to be added
-     * @param the iterator that points to the Vertex as root of the subTree (of the given Tree of Vertex) to be added as an Atom is.
+    /**
+     * Add a new atom represented by a tree of Vertex to the 
+     * Atom Table.
+     *
+     * @param the tree of Vertex that contains the representation
+     *        of the atom to be added
+     * @param the iterator that points to the Vertex as root of 
+     *        the subTree (of the given Tree of Vertex) to be
+     *        added as an Atom is.
      * @param the TruthValue object to be associated to the added atom
-     * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable. 
+     * @param a flag to indicate if it does not need to check for
+     *         already existing atoms in AtomTable. 
      * @param managed ???
      */
-    Handle addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn);
+    Handle addAtom(tree<Vertex>& a, 
+                   tree<Vertex>::iterator it, const TruthValue& tvn);
 
-    /** Add a new atom represented by a tree of Vertex to the Atom Table
+    /** 
+     * Add a new atom represented by a tree of Vertex to the Atom Table
      * @param the tree of Vertex representation of the atom to be added
      * @param the TruthValue object to be associated to the added atom
-     * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable. 
+     * @param a flag to indicate if it does not need to check for 
+     *        already existing atoms in AtomTable. 
      * @param managed ???
      */
     Handle addAtom(tree<Vertex>& a, const TruthValue& tvn);
@@ -206,19 +250,28 @@ class AtomSpace {
      * Removes an atom from the atomspace 
      *
      * @param The Handle of the atom to be removed.
-     * @param Recursive-removal flag; if set, the links in the incoming set of the atom to be removed will also be removed.
-     * @return True if the Atom for the given Handle was successfully removed. False, otherwise.  
+     * @param Recursive-removal flag; if set, the links in the 
+     *        incoming set of the atom to be removed will also be
+     *        removed.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.  
      */
     bool removeAtom(Handle h, bool recursive = false);
 
-    /** Retrieve from the Atom Table the Handle of a given node 
-        \param t     Type of the node
-        \param str   Name of the node */
+    /**
+     * Retrieve from the Atom Table the Handle of a given node 
+     *
+     * @param t     Type of the node
+     * @param str   Name of the node
+    */
     Handle getHandle(Type t,const string& str) const;
 
-    /** Retrieve from the Atom Table the Handle of a given link 
-        \param t        Type of the node
-        \param outgoing a reference to a HandleSeq containing the outgoing set of the link */
+    /**
+     * Retrieve from the Atom Table the Handle of a given link 
+     * @param t        Type of the node
+     * @param outgoing a reference to a HandleSeq containing
+     *        the outgoing set of the link.
+    */
     Handle getHandle(Type t,const HandleSeq& outgoing) const;
 
     /** Retrieve the name of a given Handle */
