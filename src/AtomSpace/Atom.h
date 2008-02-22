@@ -27,9 +27,10 @@ class AtomTable;
 class HandleEntry;
 
 /**
- * Atoms are the basic implementational unit in the system that represents
- * nodes and links. In terms of inheritance, nodes and links are
- * specialization of atoms, that is, they inherit all properties from atoms.
+ * Atoms are the basic implementational unit in the system that
+ * represents nodes and links. In terms of inheritance, nodes and
+ * links are specialization of atoms, that is, they inherit all
+ * properties from atoms.
  */
 class Atom {
 
@@ -41,10 +42,14 @@ class Atom {
 
         // Called by constructors to init this object
         void init(Type, const std::vector<Handle>&, const TruthValue&);
-        // Adds a new handle to the outgoing set. Note that this is just used in NativeParser friend class
-        // due to performance issues and should not be used anywhere else...
+
+        // Adds a new handle to the outgoing set. Note that this is
+        // used only in the NativeParser friend class, and, due to
+        // performance issues, it should not be used anywhere else...
         void addOutgoingAtom(Handle h);
-        // Used by AtomTable::decayShortTermImportance() and by EconomicAttentionAllocation.
+
+        // Used by AtomTable::decayShortTermImportance() and
+        // by EconomicAttentionAllocation.
         AttentionValue* getAVPointer();
 
         /**
@@ -69,15 +74,17 @@ class Atom {
 
         // connectivity
 
-        HandleEntry *incoming; // linked-list that dynamically changes as new atoms are inserted
+        // Linked-list that dynamically changes as new atoms are inserted.
+        HandleEntry *incoming;
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
-        std::vector<Handle> outgoing; // array that does not change during atom lifespam
+        // Array that does not change during atom lifespan.
+        std::vector<Handle> outgoing;
 #else
-        Handle *outgoing; // pointer array that does not change during atom lifespam
+        // Pointer array that does not change during atom lifespan.
+        Handle *outgoing;
 #endif
 
         // indices
-
         Handle* indices;
         Handle* targetTypeIndex;
         PredicateIndexStruct* predicateIndexInfo;
@@ -97,19 +104,23 @@ class Atom {
          * @param The type of the atom.
          * @param Outgoing set of the atom, that is, the set of atoms this
          * atom references. It must be an empty vector if the atom is a node.
-         * @param The truthValue of the atom. note: This is not cloned as in setTruthValue.
+         * @param The truthValue of the atom. note: This is not cloned as
+         *        in setTruthValue.
          */
-        Atom(Type, const std::vector<Handle>&, const TruthValue& = TruthValue::NULL_TV());
+        Atom(Type, const std::vector<Handle>&,
+             const TruthValue& = TruthValue::NULL_TV());
 
         Handle getNextHandleInPredicateIndex(int index) const;
         void setNextHandleInPredicateIndex(int index, Handle nextHandle);
 
         /**
           * Sets the outgoing set of the atom
-          * This method can be called only if the atom is not inserted in an AtomTable yet.
+          * This method can be called only if the atom is not inserted
+          * in an AtomTable yet.
           * Otherwise, it throws a RuntimeException.
           */
-        virtual void setOutgoingSet(const std::vector<Handle>& o) throw (RuntimeException);
+        virtual void setOutgoingSet(const std::vector<Handle>& o)
+            throw (RuntimeException);
 
     public:
 
@@ -128,8 +139,10 @@ class Atom {
          *
          * @return The type of the atom.
          */
-        inline Type getType() const{
-        // TODO: Implement smarter mapping from atom types to BuiltInTypeHandle IDs?
+        inline Type getType() const
+        {
+            // TODO: Implement smarter mapping from atom types to
+            // BuiltInTypeHandle IDs?
             if (isReal())
                 return type;
             else
@@ -145,12 +158,11 @@ class Atom {
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
             return outgoing.size();
 #else
-        return arity;
+            return arity;
 #endif
         }
 
-
-        ///**
+        //**
         // * Returns the heat value of the atom.
         // *
         // * @return The heat value of the atom.
@@ -160,34 +172,39 @@ class Atom {
         /**
          * Returns the AttentionValue object of the atom.
          *
-         * IMPORTANT NOTE: This method returns a "const reference" to the
-         * AV object of the Atom because it must not be changed at all.
-         * Otherwise, it will break internal core structures (like search indices)
-         * So, never cast the result of this method to non-const references or
-         * get the pointer to the AV object by using the address-of (&) operator.
+         * IMPORTANT NOTE: This method returns a "const reference" to
+         * the AV object of the Atom because it must not be changed
+         * at all. Otherwise, it will break internal core structures
+         * (like search indices). Never cast the result of this
+         * method to non-const references or get the pointer to the
+         * AV object by using the address-of (&) operator.
          *
-         * @return The const referent to the AttentionValue object of the atom.
+         * XXX Why do we need this "important note"? It should go
+         * without saying that no programmer should ever do anyting
+         * like this for any routine that ever returns a const ref!
+         *
+         * @return The const referent to the AttentionValue object
+         *       of the atom.
          */
 
         const AttentionValue& getAttentionValue() const;
 
         /**
          * Sets the AttentionValue object of the atom.
+         *
          * NOTE: The passed AV object will actually be cloned before
          * being stored internaly. So, if the given AV object is
          * dynamically allocated, the caller is its owner and, so, must
          * take care of memory deallocation.
+         *
+         * XXX Why do we need this note? It should go without
+         * saying, as this is the semantics of the C++ programming
+         * language!
          */
         void setAttentionValue(const AttentionValue&) throw (RuntimeException);
 
         /**
          * Returns the TruthValue object of the atom.
-         *
-         * IMPORTANT NOTE: This method returns a "const reference" to the
-         * TV object of the Atom because it must not be changed at all.
-         * Otherwise, it will break internal core structures (like search indices)
-         * So, do never cast the result of this method to non-const references or
-         * get the pointer to the TV object by using the address-of (&) operator.
          *
          * @return The const referent to the TruthValue object of the atom.
          */
@@ -195,10 +212,6 @@ class Atom {
 
         /**
          * Sets the TruthValue object of the atom.
-         * NOTE: The passed TV object will actually be cloned before
-         * being stored internaly. So, if the given TV object is
-         * dynamically allocated, the caller is its owner and, so, must
-         * take care of memory deallocation.
          */
         void setTruthValue(const TruthValue&);
 
@@ -246,26 +259,34 @@ class Atom {
          * @return A pointer to a linked-list containing the atoms that are
          * members of this one's incoming set.
          */
-        inline HandleEntry* getIncomingSet() const{
+        inline HandleEntry* getIncomingSet() const
+        {
             return incoming;
         }
 
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
         /**
-         * Returns a const reference to the array containing this atom's outgoing set.
+         * Returns a const reference to the array containing this
+         * atom's outgoing set.
          *
-         * @return A const reference to the array containing this atom's outgoing set.
+         * @return A const reference to this atom's outgoing set.
          */
-        inline const std::vector<Handle>& getOutgoingSet() const{
+        inline const std::vector<Handle>& getOutgoingSet() const
+        {
             return outgoing;
         }
 #else
         /**
-         * Returns a pointer to an array containing this atom's outgoing set.
+         * Returns a pointer to an array containing this atom's
+         * outgoing set.
+         *
+         * XXX This is rather inefficient, as the -on-stack
+         * allocation requires two (!!) copies.
          *
          * @return A pointer to an array containing this atom's outgoing set.
          */
-        inline std::vector<Handle> getOutgoingSet() const{
+        inline std::vector<Handle> getOutgoingSet() const
+        {
             std::vector<Handle> result;
             std::copy(&outgoing[0],&outgoing[arity],back_inserter(result));
             return result;
@@ -429,7 +450,10 @@ class Atom {
          * @param fanout Whether directional links point from this node to
          * another sould be consired.
          */
-        HandleEntry *getNeighbors(bool fanin = true, bool fanout = true, Type linkType = LINK, bool subClasses = true) const;
+        HandleEntry *getNeighbors(bool fanin = true,
+                                  bool fanout = true,
+                                  Type linkType = LINK,
+                                  bool subClasses = true) const;
 
         /**
          * Returns a string representation of the node.
