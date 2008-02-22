@@ -14,11 +14,11 @@ namespace opencog {
 
 class CogServer;
 
-class MindAgent {
-
+class MindAgent
+{
     public:
 		
-		virtual ~MindAgent() {}
+        virtual ~MindAgent() {}
 		
         virtual void run(CogServer *server) = 0;
 
