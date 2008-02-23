@@ -13,6 +13,8 @@ include_directories (
 ${OPENCOG_SOURCE_DIR}/src/Util
 ${OPENCOG_SOURCE_DIR}/src/AtomSpace
 ${OPENCOG_SOURCE_DIR}/src/NMXml
+${OPENCOG_SOURCE_DIR}/src/CogServer
+${OPENCOG_SOURCE_DIR}/src/query
 #
 # Local copy of xml parser, should be eliminated.
 # ${OPENCOG_SOURCE_DIR}/include/xmlparser
@@ -33,6 +35,6 @@ ${OPENCOG_SOURCE_DIR}/lib/linux/sockets
 
 add_executable (cogServer CogServerMain.cc)
 
-target_link_libraries(CogServer AtomSpace NMXml xmlparse Util Sockets pthread ssl crypto dl)
+target_link_libraries(CogServer AtomSpace query NMXml xmlparse Util Sockets pthread ssl crypto dl)
 target_link_libraries (cogServer CogServer)
 
