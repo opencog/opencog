@@ -7,7 +7,6 @@ class QueryProcessor : public MindAgent
 {
 	private:
 		void do_assertion(Handle);
-		bool is_qvar(Handle);
 
 	public:
 		QueryProcessor(void);

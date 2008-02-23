@@ -47,31 +47,11 @@ void QueryProcessor::run(CogServer *server)
 	usleep(10000);  // 10 millisecs == 100HZ
 }
 
-void QueryProcessor::do_assertion(Handle h)
-{
-	printf ("duuuude found assertion handle=%p\n", h);
-	Atom *atom = TLB::getAtom(h);
-	const std::vector<Handle> &vh = atom->getOutgoingSet();
-
-	bool found = false;
-	for (size_t i=0; i<vh.size(); i++)
-	{
-		Handle rel = vh[i];
-		found = is_qvar(rel);
-		if (found)
-		{
-			printf ("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude\n");
-		}
-		Atom *arel = TLB::getAtom(rel);
-		printf ("its %s\n", arel->toString().c_str());
-	}
-}
-
 /**
- * Return true if the handle is a link, and this link
- * contains a node whose name is "_$qVar"
+ * Return pointer to Node, if the handle is a handle to
+ * a Link, and this link contains a node whose name is match_name.
  */
-bool QueryProcessor::is_qvar(Handle h)
+static Node * link_contains_node_name(Handle h, const char * match_name)
 {
 	Atom *atom = TLB::getAtom(h);
 	const std::vector<Handle> &vh = atom->getOutgoingSet();
@@ -84,9 +64,28 @@ bool QueryProcessor::is_qvar(Handle h)
 		if (n)
 		{
 			const std::string& name = n->getName();
-			if (0 == strcmp(name.c_str(), "_$qVar")) return true;
+			if (0 == strcmp(name.c_str(), match_name)) return n;
 		}
 	}
-
-	return false;
+	return NULL;
 }
+
+void QueryProcessor::do_assertion(Handle h)
+{
+	printf ("duuuude found assertion handle=%p\n", h);
+	Atom *atom = TLB::getAtom(h);
+	const std::vector<Handle> &vh = atom->getOutgoingSet();
+
+	for (size_t i=0; i<vh.size(); i++)
+	{
+		Handle rel = vh[i];
+		Node *n = link_contains_node_name(rel, "_$qVar");
+		if (n)
+		{
+			printf ("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude\n");
+			printf ("its %s\n", n->toString().c_str());
+		}
+	}
+}
+
+/* ======================= END OF FILE ==================== */
