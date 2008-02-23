@@ -10,6 +10,7 @@
 #include "AtomSpace.h"
 #include "CogServer.h"
 #include "MindAgent.h"
+#include "Node.h"
 #include "QueryProcessor.h"
 
 using namespace opencog;
@@ -26,7 +27,6 @@ void QueryProcessor::run(CogServer *server)
 {
 	AtomSpace *as = server->getAtomSpace();
 	// Handle h = as->getHandle(qtype, "test");
-	// Atom *atom = TLB::getAtom(h);
 	
 	// Look for recently asserted assertions.
 	Type atype = ClassServer::getType("AssertionLink");
@@ -49,5 +49,44 @@ void QueryProcessor::run(CogServer *server)
 
 void QueryProcessor::do_assertion(Handle h)
 {
-	printf ("found handle=%p\n", h);
+	printf ("duuuude found assertion handle=%p\n", h);
+	Atom *atom = TLB::getAtom(h);
+	const std::vector<Handle> &vh = atom->getOutgoingSet();
+
+	bool found = false;
+	for (size_t i=0; i<vh.size(); i++)
+	{
+		Handle rel = vh[i];
+		found = is_qvar(rel);
+		if (found)
+		{
+			printf ("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude\n");
+		}
+		Atom *arel = TLB::getAtom(rel);
+		printf ("its %s\n", arel->toString().c_str());
+	}
+}
+
+/**
+ * Return true if the handle is a link, and this link
+ * contains a node whose name is "_$qVar"
+ */
+bool QueryProcessor::is_qvar(Handle h)
+{
+	Atom *atom = TLB::getAtom(h);
+	const std::vector<Handle> &vh = atom->getOutgoingSet();
+
+	for (size_t i=0; i<vh.size(); i++)
+	{
+		Handle rel = vh[i];
+		Atom *arel = TLB::getAtom(rel);
+		Node *n = dynamic_cast<Node *>(arel);
+		if (n)
+		{
+			const std::string& name = n->getName();
+			if (0 == strcmp(name.c_str(), "_$qVar")) return true;
+		}
+	}
+
+	return false;
 }

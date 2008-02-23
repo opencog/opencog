@@ -28,3 +28,10 @@ there are for such tokens:
 -- command
 -- interjection
 
+Right now, all four of these will be surrounded by an AssertionLink.
+The query processor will look for  these, perform some basic sentence
+analysis, and dispose of these as appropriate (i.e. generating an
+appropriate reply).
+
+Hmmm .. queries need to be morphed into predicates !? 
+i.e. use a PredicateNode, and an EvalLink
