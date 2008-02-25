@@ -52,9 +52,9 @@ void QueryProcessor::run(CogServer *server)
 /**
  * Set pointer to Node, if the node name is "match_name".
  */
-bool QueryProcessor::match_node_name(Atom *arel)
+bool QueryProcessor::match_node_name(Atom *atom)
 {
-	Node *n = dynamic_cast<Node *>(arel);
+	Node *n = dynamic_cast<Node *>(atom);
 	if (n)
 	{
 		const std::string& name = n->getName();
@@ -77,9 +77,10 @@ bool QueryProcessor::check_for_query(Handle rel)
 	foreach_outgoing_atom(rel, &QueryProcessor::match_node_name, this);
 	if (node)
 	{
-		printf ("found query its %s\n", node->toString().c_str());
+		// printf ("found query its %s\n", node->toString().c_str());
 		varlist.push_back(TLB::getHandle(node));
 	}
+	return true;
 }
 
 /**
