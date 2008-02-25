@@ -90,7 +90,8 @@ bool QueryProcessor::do_assertion(Handle h)
 	if (0 != varlist.size())
 	{
 		PatternMatch pm;
-		pm.match(h, varlist);
+		Handle pred = pm.filter(h, varlist);
+		pm.match(pred, varlist);
 	}
 	atom_space->removeAtom(h);
 	return false;
