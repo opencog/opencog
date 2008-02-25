@@ -80,7 +80,7 @@ bool QueryProcessor::check_for_query(Handle rel)
 		// printf ("found query its %s\n", node->toString().c_str());
 		varlist.push_back(TLB::getHandle(node));
 	}
-	return true;
+	return false;
 }
 
 /**

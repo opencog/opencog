@@ -10,6 +10,9 @@ namespace opencog {
 
 class PatternMatch
 {
+	private:
+		bool prt(Atom *);
+
 	public:
 		void match(Handle, const std::vector<Handle> &);
 

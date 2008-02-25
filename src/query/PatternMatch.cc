@@ -4,11 +4,19 @@
  * Linas Vepstas February 2008
  */
 
+#include "Foreach.h"
 #include "Node.h"
 #include "PatternMatch.h"
 #include "TLB.h"
 
 using namespace opencog;
+
+bool PatternMatch::prt(Atom *atom)
+{
+	std::string str = atom->toString();
+	printf ("duuude its %s\n", str.c_str());
+	return true;
+}
 
 /**
  * bound vars must be, by definition, Nodes.
@@ -30,12 +38,5 @@ void PatternMatch::match(Handle graph, const std::vector<Handle> &bound_vars)
 	}
 
 	// print out some of the graph ...
-	Atom *a = TLB::getAtom(graph);
-	const std::vector<Handle> &vh = a->getOutgoingSet();
-
-	for (size_t i=0; i<vh.size(); i++)
-	{
-		
-	}
-	
+	foreach_outgoing_atom(graph, &PatternMatch::prt, this);
 }
