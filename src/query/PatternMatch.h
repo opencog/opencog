@@ -16,6 +16,7 @@ class PatternMatch
 		// apply filter rules
 		std::vector<Handle> norm_outgoing;
 		bool apply_rule(Atom *);
+		bool is_ling_rel(Atom *);
 
 	public:
 		Handle filter(Handle, const std::vector<Handle> &);
