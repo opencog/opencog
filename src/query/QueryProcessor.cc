@@ -23,26 +23,17 @@ QueryProcessor::QueryProcessor(void)
 
 QueryProcessor::~QueryProcessor()
 {
+	atom_space = NULL;
 }
 
 void QueryProcessor::run(CogServer *server)
 {
-	AtomSpace *as = server->getAtomSpace();
+	atom_space = server->getAtomSpace();
 	// Handle h = as->getHandle(qtype, "test");
 	
 	// Look for recently asserted assertions.
-	Type atype = ClassServer::getType("AssertionLink");
-	std::list<Handle> asrt_list;
-	as->getHandleSet(back_inserter(asrt_list), atype, NULL);
-
-	// Loop over all recent assertions, and take care of them.
-	while(!asrt_list.empty())
-	{
-		Handle h = asrt_list.front();
-		do_assertion(h);
-		asrt_list.pop_front();
-		if (h) as->removeAtom(h);
-	}
+	foreach_handle_of_type(atom_space, "AssertionLink", 
+	                       &QueryProcessor::do_assertion, this);
 
 	/* XXX HACK ALERT -- no scheduling, so just sleep */
 	usleep(1000000);  // 1 second
@@ -87,7 +78,7 @@ bool QueryProcessor::check_for_query(Handle rel)
  * Process an assertion fed into the system.
  * Currently, this ignores all assertions that are not queries.
  */
-void QueryProcessor::do_assertion(Handle h)
+bool QueryProcessor::do_assertion(Handle h)
 {
 	printf ("duuuude found assertion handle=%p\n", h);
 
@@ -95,12 +86,14 @@ void QueryProcessor::do_assertion(Handle h)
 	varlist.clear();
 	foreach_outgoing_handle(h, &QueryProcessor::check_for_query, this);
 
-	// If a query, try to answer it.
+	// If this assertion is a query, try to answer it.
 	if (0 != varlist.size())
 	{
 		PatternMatch pm;
 		pm.match(h, varlist);
 	}
+	atom_space->removeAtom(h);
+	return false;
 }
 
 /* ======================= END OF FILE ==================== */

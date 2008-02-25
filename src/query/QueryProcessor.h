@@ -20,7 +20,8 @@ class QueryProcessor : public MindAgent
 		std::vector<Handle> varlist;
 		bool check_for_query(Atom *);
 
-		void do_assertion(Handle);
+		AtomSpace *atom_space;
+		bool do_assertion(Handle);
 
 	public:
 		QueryProcessor(void);
