@@ -12,9 +12,14 @@ namespace opencog {
 class QueryProcessor : public MindAgent
 {
 	private:
-		Node *node;
-		const char *match_name;
+
+		Node *node; // for match_node_name only
+		const char *match_name; // for match_node_name only
 		bool match_node_name(Atom *);
+
+		std::vector<Handle> varlist;
+		bool check_for_query(Atom *);
+
 		void do_assertion(Handle);
 
 	public:
