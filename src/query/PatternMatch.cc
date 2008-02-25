@@ -13,9 +13,11 @@ using namespace opencog;
 /**
  * bound vars must be, by definition, Nodes.
  */
-void PatternMatch::match (Handle graph, const std::vector<Handle> &bound_vars)
+void PatternMatch::match(Handle graph, const std::vector<Handle> &bound_vars)
 {
 	size_t i;
+
+	// Just print out the bound variables
 	for (i=0; i<bound_vars.size(); i++)
 	{
 		Handle v = bound_vars[i];
@@ -26,4 +28,14 @@ void PatternMatch::match (Handle graph, const std::vector<Handle> &bound_vars)
 			printf(" bound var: %s\n", n->getName().c_str());
 		}
 	}
+
+	// print out some of the graph ...
+	Atom *a = TLB::getAtom(graph);
+	const std::vector<Handle> &vh = a->getOutgoingSet();
+
+	for (size_t i=0; i<vh.size(); i++)
+	{
+		
+	}
+	
 }

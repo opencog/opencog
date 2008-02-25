@@ -9,6 +9,7 @@
 
 #include "AtomSpace.h"
 #include "CogServer.h"
+#include "Foreach.h"
 #include "MindAgent.h"
 #include "Node.h"
 #include "PatternMatch.h"
@@ -49,29 +50,27 @@ void QueryProcessor::run(CogServer *server)
 }
 
 /**
- * Return pointer to Node, if the handle refers to a Link, 
- * and this link contains an (outgoing) node whose name is match_name.
- * Return NULL otherwise.
+ * Set pointer to Node, if the node name is "match_name".
  */
-static Node * link_contains_node_name(Handle h, const char * match_name)
+bool QueryProcessor::match_node_name(Atom *arel)
 {
-	Atom *atom = TLB::getAtom(h);
-	const std::vector<Handle> &vh = atom->getOutgoingSet();
-
-	for (size_t i=0; i<vh.size(); i++)
+	Node *n = dynamic_cast<Node *>(arel);
+	if (n)
 	{
-		Handle rel = vh[i];
-		Atom *arel = TLB::getAtom(rel);
-		Node *n = dynamic_cast<Node *>(arel);
-		if (n)
+		const std::string& name = n->getName();
+		if (0 == strcmp(name.c_str(), match_name))
 		{
-			const std::string& name = n->getName();
-			if (0 == strcmp(name.c_str(), match_name)) return n;
+			node = n;
+			return true;
 		}
 	}
-	return NULL;
+	return false;
 }
 
+/**
+ * Process an assertion fed into the system.
+ * Currently, this ignores all assertions that are not queries.
+ */
 void QueryProcessor::do_assertion(Handle h)
 {
 	printf ("duuuude found assertion handle=%p\n", h);
@@ -79,19 +78,26 @@ void QueryProcessor::do_assertion(Handle h)
 	const std::vector<Handle> &vh = atom->getOutgoingSet();
 	std::vector<Handle> varlist;
 
+	// Look for unbound query variables
 	for (size_t i=0; i<vh.size(); i++)
 	{
 		Handle rel = vh[i];
-		Node *n = link_contains_node_name(rel, "_$qVar");
-		if (n)
+		match_name = "_$qVar";
+		node = NULL;
+		foreach_outgoing(rel, &QueryProcessor::match_node_name, this);
+		if (node)
 		{
-			printf ("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude\n");
-			printf ("its %s\n", n->toString().c_str());
-			varlist.push_back(rel);
+			printf ("found query its %s\n", node->toString().c_str());
+			varlist.push_back(TLB::getHandle(node));
 		}
 	}
-	PatternMatch pm;
-	pm.match(h, varlist);
+
+	// If a query, try to answer it.
+	if (0 != varlist.size())
+	{
+		PatternMatch pm;
+		pm.match(h, varlist);
+	}
 }
 
 /* ======================= END OF FILE ==================== */
