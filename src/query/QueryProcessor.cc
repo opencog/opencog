@@ -11,6 +11,7 @@
 #include "CogServer.h"
 #include "MindAgent.h"
 #include "Node.h"
+#include "PatternMatch.h"
 #include "QueryProcessor.h"
 
 using namespace opencog;
@@ -48,8 +49,9 @@ void QueryProcessor::run(CogServer *server)
 }
 
 /**
- * Return pointer to Node, if the handle is a handle to
- * a Link, and this link contains a node whose name is match_name.
+ * Return pointer to Node, if the handle refers to a Link, 
+ * and this link contains an (outgoing) node whose name is match_name.
+ * Return NULL otherwise.
  */
 static Node * link_contains_node_name(Handle h, const char * match_name)
 {
@@ -75,6 +77,7 @@ void QueryProcessor::do_assertion(Handle h)
 	printf ("duuuude found assertion handle=%p\n", h);
 	Atom *atom = TLB::getAtom(h);
 	const std::vector<Handle> &vh = atom->getOutgoingSet();
+	std::vector<Handle> varlist;
 
 	for (size_t i=0; i<vh.size(); i++)
 	{
@@ -84,8 +87,11 @@ void QueryProcessor::do_assertion(Handle h)
 		{
 			printf ("duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude\n");
 			printf ("its %s\n", n->toString().c_str());
+			varlist.push_back(rel);
 		}
 	}
+	PatternMatch pm;
+	pm.match(h, varlist);
 }
 
 /* ======================= END OF FILE ==================== */

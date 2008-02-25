@@ -1,6 +1,7 @@
 
 add_library (query STATIC
 QueryProcessor.cc
+PatternMatch.cc
 )
 
 include_directories (
