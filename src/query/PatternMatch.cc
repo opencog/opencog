@@ -20,6 +20,7 @@ PatternMatch::PatternMatch(AtomSpace *as)
 
 bool PatternMatch::prt(Atom *atom)
 {
+	if (!atom) return false;
 	std::string str = atom->toString();
 	printf ("%s\n", str.c_str());
 	return false;
@@ -68,6 +69,21 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 
 /* ======================================================== */
 
+/**
+ * Find the (first!, assumed only!?) inheritance link
+ */
+bool PatternMatch::find_inheritance_link(Atom *atom)
+{
+	// Look for incoming links that are InheritanceLinks.
+	if (INHERITANCE_LINK != atom->getType()) return false;
+
+	Link * link = dynamic_cast<Link *>(atom);
+	general_concept = fl.follow_binary_link(link, concept_instance);
+	if (general_concept) return true;
+	return false;
+}
+
+// Return true if there's a mis-match.
 bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 {
 	std::string sa = aa->toString();
@@ -77,6 +93,25 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 
 	// If they're the same atom, then clearly they match.
 	if (aa == ab) return false;
+
+	// Look for incoming links that are InheritanceLinks.
+	// The "generalized concept" for this should be at the far end.
+	concept_instance = aa;
+	Handle ha = TLB::getHandle(aa);
+	foreach_incoming_atom(ha, &PatternMatch::find_inheritance_link, this);
+	Atom *ca = general_concept;
+
+	concept_instance = ab;
+	Handle hb = TLB::getHandle(ab);
+	foreach_incoming_atom(hb, &PatternMatch::find_inheritance_link, this);
+	Atom *cb = general_concept;
+
+	sa = ca->toString();
+	sb = cb->toString();
+	printf ("gen comp %d %s\n"
+           "         to %s\n", ca==cb, sa.c_str(), sb.c_str());
+
+	if (ca == cb) return false;
 	return true;
 }
 

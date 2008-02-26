@@ -5,6 +5,9 @@
  */
 
 #include "types.h"
+#include "Atom.h"
+#include "FollowLink.h"
+#include "Link.h"
 
 namespace opencog {
 
@@ -28,6 +31,13 @@ class PatternMatch
 
 		// Are two nodes instances of the same concept?
 		bool concept_match(Atom *, Atom *);
+
+		// Find the inheritance link in a set of incoming nodes
+		Atom *concept_instance;
+		Atom *general_concept;
+		bool find_inheritance_link(Atom *);
+
+		FollowLink fl;
 
 	public:
 		PatternMatch(AtomSpace *);
