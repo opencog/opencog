@@ -26,6 +26,9 @@ class PatternMatch
 		bool pair_compare(Atom *, Atom *);
 		int depth;  // recursion depth for pair_compare.
 
+		// Are two nodes instances of the same concept?
+		bool concept_match(Atom *, Atom *);
+
 	public:
 		PatternMatch(AtomSpace *);
 

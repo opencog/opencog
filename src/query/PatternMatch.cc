@@ -68,6 +68,20 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 
 /* ======================================================== */
 
+bool PatternMatch::concept_match(Atom *aa, Atom *ab)
+{
+	std::string sa = aa->toString();
+	std::string sb = ab->toString();
+	printf ("concept comp %s\n"
+           "          to %s\n", sa.c_str(), sb.c_str());
+
+	// If they're the same atom, then clearly they match.
+	if (aa == ab) return false;
+	return true;
+}
+
+/* ======================================================== */
+
 // Return true if there's a mis-match.
 bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 {
@@ -82,6 +96,7 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 	{
 		Handle ha = TLB::getHandle(aa);
 		Handle hb = TLB::getHandle(ab);
+
 		depth ++;
 		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
 		                 &PatternMatch::pair_compare, this);
@@ -93,19 +108,26 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the 
 	// node types.
-	//
+	Type ntype = aa->getType();
+
 	// DefinedLinguisticRelation nodes must match exactly;
 	// so if we are here, there's already a mismatch.
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == aa->getType()) return true;
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == ntype) return true;
 	
 	// Concept nodes can match if they inherit from the same concept.
+	if (CONCEPT_NODE == ntype)
+	{
+		return concept_match(aa, ab);
+	}
+	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
+	        ClassServer::getTypeName(ntype));
 
 	std::string sa = aa->toString();
 	std::string sb = ab->toString();
-	printf ("duuude dep=%d comp %s\n"
-           "                to %s\n", depth, sa.c_str(), sb.c_str());
+	printf ("unexpected depth=%d comp %s\n"
+           "                      to %s\n", depth, sa.c_str(), sb.c_str());
 
-	return false;
+	return true;
 }
 
 bool PatternMatch::do_candidate(Atom *atom)
