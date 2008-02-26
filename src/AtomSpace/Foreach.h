@@ -6,6 +6,9 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#ifndef OPENCOG_FOREACH_H_
+#define OPENCOG_FOREACH_H_
+
 #include "Atom.h"
 #include "AtomSpace.h"
 #include "TLB.h"
@@ -106,3 +109,4 @@ inline bool foreach_incoming_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 
 
 }
+#endif /* OPENCOG_FOREACH_H_ */

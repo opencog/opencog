@@ -6,6 +6,9 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#ifndef OPENCOG_FOREACH_TWO_H_ 
+#define OPENCOG_FOREACH_TWO_H_ 
+
 #include "Atom.h"
 #include "AtomSpace.h"
 #include "TLB.h"
@@ -58,3 +61,4 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
 }
 
 }
+#endif /* OPENCOG_FOREACH_TWO_H_ */
