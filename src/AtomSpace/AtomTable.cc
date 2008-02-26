@@ -49,10 +49,13 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     atomSet = new AtomHashSet();
 
-    // there are four indices. One for types, one for target types, one for
-    // names and one for importance ranges
-    typeIndex.resize(ClassServer::getNumberOfClasses(), UNDEFINED_HANDLE);
-    targetTypeIndex.resize(ClassServer::getNumberOfClasses(), UNDEFINED_HANDLE);
+    // There are four indices. One for types, one for target types, 
+    // one for names and one for importance ranges. The typeIndex
+    // is NUMBER_OF_CLASSES+2 because NOTYPE is NUMBER_OF_CLASSES+1
+    // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
+    // (because ClassServer::getType() returns NOTYPE in this case).
+    typeIndex.resize(ClassServer::getNumberOfClasses()+2, UNDEFINED_HANDLE);
+    targetTypeIndex.resize(ClassServer::getNumberOfClasses()+2, UNDEFINED_HANDLE);
     nameIndex.resize(NAME_INDEX_SIZE, UNDEFINED_HANDLE);
     importanceIndex.resize(IMPORTANCE_INDEX_SIZE, UNDEFINED_HANDLE);
     predicateIndex.resize(MAX_PREDICATE_INDICES, UNDEFINED_HANDLE);
@@ -60,7 +63,7 @@ AtomTable::AtomTable(bool dsa)
     predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL); 
     numberOfPredicateIndices = 0;
     predicateHandles2Indices = new HandleMap();
-    
+
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
 #endif
@@ -237,8 +240,9 @@ float AtomTable::importanceBinMeanValue(unsigned int bin) {
     return (float) ((((float) bin) + 0.5) / ((unsigned int) IMPORTANCE_INDEX_SIZE));
 }
 
-HandleEntry* AtomTable::makeSet(HandleEntry* set, Handle head, int index) const{
-
+HandleEntry* AtomTable::makeSet(HandleEntry* set,
+                                Handle head, int index) const
+{
     while (head != NULL) {
         HandleEntry* entry = new HandleEntry(head);
         entry->next = set;
@@ -249,11 +253,13 @@ HandleEntry* AtomTable::makeSet(HandleEntry* set, Handle head, int index) const{
     return set;
 }
 
-Handle AtomTable::getTypeIndexHead(Type type) const{
+Handle AtomTable::getTypeIndexHead(Type type) const
+{
     return typeIndex[type];
 }
 
-Handle AtomTable::getTargetTypeIndexHead(Type type) const{
+Handle AtomTable::getTargetTypeIndexHead(Type type) const
+{
     return targetTypeIndex[type];
 }
 
@@ -330,12 +336,15 @@ Handle AtomTable::getHandle(const char* name, Type type) const{
 #endif    
 }
 
-HandleEntry* AtomTable::buildSet(Type type, bool subclass, Handle(AtomTable::*f)(Type) const, int index) const{
-    // builds a set for the given type
+HandleEntry* AtomTable::buildSet(Type type, bool subclass, 
+                                 Handle(AtomTable::*f)(Type) const,
+                                 int index) const
+{
+    // Builds a set for the given type.
     HandleEntry* set = makeSet(NULL, (this->*f)(type), index);
 
     if (subclass) {
-        // if subclasses are accepted, the subclasses are returned in the
+        // If subclasses are accepted, the subclasses are returned in the
         // array types. 
         int n;
         Type *types = ClassServer::getChildren(type, n);
@@ -358,20 +367,25 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass, Handle(AtomTable::*f)
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(Type type, bool subclass) const{
-
-    HandleEntry* set = buildSet(type, subclass, &AtomTable::getTypeIndexHead, TYPE_INDEX);
+HandleEntry* AtomTable::getHandleSet(Type type, bool subclass) const
+{
+    HandleEntry* set = buildSet(type, subclass, 
+                                &AtomTable::getTypeIndexHead, TYPE_INDEX);
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass) const{
-
-    HandleEntry* set = buildSet(targetType, targetSubclass, &AtomTable::getTargetTypeIndexHead, TARGET_TYPE_INDEX | targetType);
+HandleEntry* AtomTable::getHandleSet(Type type, Type targetType,
+                                     bool subclass, bool targetSubclass) const
+{
+    HandleEntry* set = buildSet(targetType, targetSubclass, 
+                                &AtomTable::getTargetTypeIndexHead, 
+                                TARGET_TYPE_INDEX | targetType);
     return HandleEntry::filterSet(set, type, subclass);
 }
 
-HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass) const{
-
+HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, 
+                                     bool subclass) const
+{
     HandleEntry* set = TLB::getAtom(handle)->getIncomingSet();
     if (set != NULL) set = set->clone();
     set = HandleEntry::filterSet(set, type, subclass);
@@ -1117,7 +1131,9 @@ bool AtomTable::usesDSA() const{
 }
 
 
-HandleEntry* AtomTable::getHandleSet(Type type, bool subclass, VersionHandle vh) const{
+HandleEntry* AtomTable::getHandleSet(Type type, bool subclass, 
+                                     VersionHandle vh) const
+{
     //printf("AtomTable::getHandleSet(Type =%d, bool=%d, AtomTableList=%d)\n", type, subclass, tableId);
     //printf("About to call AtomTable::getHandleSet()\n");
     HandleEntry* result = this->getHandleSet(type, subclass);
