@@ -11,16 +11,24 @@ namespace opencog {
 class PatternMatch
 {
 	private:
+		AtomSpace *atom_space;
+
 		bool prt(Atom *);
 
-		// apply filter rules
-		std::vector<Handle> norm_outgoing;
+		// Apply Filter rules, to create a normalized predicate.
+		std::vector<Handle> normed_predicate;
+		std::vector<Handle> bound_vars;
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
 
+		// Examine evaluation links.
+		bool do_eval_link(Atom *);
+
 	public:
-		Handle filter(Handle, const std::vector<Handle> &);
-		void match(Handle, const std::vector<Handle> &);
+		PatternMatch(AtomSpace *);
+
+		void filter(Handle, const std::vector<Handle> &);
+		void match(void);
 
 };
 };

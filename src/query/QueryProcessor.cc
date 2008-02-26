@@ -89,9 +89,9 @@ bool QueryProcessor::do_assertion(Handle h)
 	// If this assertion is a query, try to answer it.
 	if (0 != varlist.size())
 	{
-		PatternMatch pm;
-		Handle pred = pm.filter(h, varlist);
-		pm.match(pred, varlist);
+		PatternMatch pm(atom_space);
+		pm.filter(h, varlist);
+		pm.match();
 	}
 	atom_space->removeAtom(h);
 	return false;

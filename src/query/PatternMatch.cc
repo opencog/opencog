@@ -12,10 +12,15 @@
 
 using namespace opencog;
 
+PatternMatch::PatternMatch(AtomSpace *as)
+{
+	atom_space = as;
+}
+
 bool PatternMatch::prt(Atom *atom)
 {
 	std::string str = atom->toString();
-	printf ("duuude its %s\n", str.c_str());
+	printf ("%s\n", str.c_str());
 	return false;
 }
 
@@ -43,7 +48,7 @@ bool PatternMatch::apply_rule(Atom *atom)
 	if (!keep) return false;
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
-	norm_outgoing.push_back(TLB::getHandle(atom));
+	normed_predicate.push_back(TLB::getHandle(atom));
 	return false;
 }
 
@@ -53,13 +58,24 @@ bool PatternMatch::apply_rule(Atom *atom)
  * are not "defined lingussitic relations", e.g. all but 
  * _subj(x,y) and _obj(z,w) relations. 
  */
-Handle PatternMatch::filter(Handle graph, const std::vector<Handle> &bound_vars)
+void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 {
-	norm_outgoing.clear();
+	bound_vars = bvars;
+	normed_predicate.clear();
 	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
+}
 
-	Link *norm_pred = new Link(ASSERTION_LINK, norm_outgoing);
-	return TLB::getHandle(norm_pred);
+/* ======================================================== */
+
+bool PatternMatch::do_eval_link(Atom *atom)
+{
+	Handle ah = TLB::getHandle(atom);
+	bool keep = foreach_outgoing_atom(ah, &PatternMatch::is_ling_rel, this);
+	if (!keep) return false;
+
+	std::string str = atom->toString();
+	printf ("duuude eval is %s\n", str.c_str());
+	return false;
 }
 
 /**
@@ -68,15 +84,21 @@ Handle PatternMatch::filter(Handle graph, const std::vector<Handle> &bound_vars)
  * with the list of "bound vars" are to be solved for (or "evaluated")
  * bound vars must be, by definition, Nodes.
  */
-void PatternMatch::match(Handle graph, const std::vector<Handle> &bound_vars)
+void PatternMatch::match(void)
 {
-	size_t i;
-
-	// Just print out the bound variables
-	for (i=0; i<bound_vars.size(); i++)
+	// Print out the predicate ...
+	printf("\nPredicate is\n");
+	std::vector<Handle>::iterator i;
+	for (i = normed_predicate.begin(); 
+	     i != normed_predicate.end(); i++)
 	{
-		Handle v = bound_vars[i];
-		Atom *a = TLB::getAtom(v);
+		foreach_outgoing_atom(*i, &PatternMatch::prt, this);
+	}
+
+	// Print out the bound variables in the predicate.
+	for (i=bound_vars.begin(); i != bound_vars.end(); i++)
+	{
+		Atom *a = TLB::getAtom(*i);
 		Node *n = dynamic_cast<Node *>(a);
 		if (n)
 		{
@@ -84,6 +106,9 @@ void PatternMatch::match(Handle graph, const std::vector<Handle> &bound_vars)
 		}
 	}
 
-	// print out some of the graph ...
-	foreach_outgoing_atom(graph, &PatternMatch::prt, this);
+printf("\nnyerh hare hare\n");
+
+	// perform whole-hog searching
+	foreach_handle_of_type(atom_space, EVALUATION_LINK,
+	      &PatternMatch::do_eval_link, this);
 }
