@@ -68,12 +68,42 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 
 /* ======================================================== */
 
+// Return true if there's a mis-match.
 bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 {
+	// If they're the same atom, then clearly they match.
+	if (aa == ab) return false;
+
+	// If types differ, then no match.
+	if (aa->getType() != ab->getType()) return true;
+
+	// If links, then compare link contents
+	if (dynamic_cast<Link *>(aa))
+	{
+		Handle ha = TLB::getHandle(aa);
+		Handle hb = TLB::getHandle(ab);
+		depth ++;
+		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
+		                 &PatternMatch::pair_compare, this);
+		depth --;
+
+		return mismatch;
+	}
+
+	// If we are here, then we are comparing nodes.
+	// The result of comparing nodes depends on the 
+	// node types.
+	//
+	// DefinedLinguisticRelation nodes must match exactly;
+	// so if we are here, there's already a mismatch.
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == aa->getType()) return true;
+	
+	// Concept nodes can match if they inherit from the same concept.
+
 	std::string sa = aa->toString();
 	std::string sb = ab->toString();
-	printf ("duuude comp %s\n"
-           "         to %s\n", sa.c_str(), sb.c_str());
+	printf ("duuude dep=%d comp %s\n"
+           "                to %s\n", depth, sa.c_str(), sb.c_str());
 
 	return false;
 }
@@ -86,8 +116,10 @@ bool PatternMatch::do_candidate(Atom *atom)
 	bool keep = foreach_outgoing_atom(ah, &PatternMatch::is_ling_rel, this);
 	if (!keep) return false;
 
+	depth = 1;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah, 
 	                 &PatternMatch::pair_compare, this);
+	depth = 0;
 
 	if (mismatch) return false;
 

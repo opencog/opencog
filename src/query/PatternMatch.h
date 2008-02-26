@@ -24,6 +24,7 @@ class PatternMatch
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Atom *);
 		bool pair_compare(Atom *, Atom *);
+		int depth;  // recursion depth for pair_compare.
 
 	public:
 		PatternMatch(AtomSpace *);
