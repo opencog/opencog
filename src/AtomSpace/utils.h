@@ -6,8 +6,8 @@
  * All rights reserved.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef OPENCOG_UTILS_H
+#define OPENCOG_UTILS_H
 
 #include "platform.h"
 #include "exceptions.h"
@@ -180,4 +180,4 @@ InputT GetBest(InputT start, InputT end, evalT op, ValT minVal)
 	return ret;
 }
 
-#endif
+#endif /* OPENCOG_UTILS_H */

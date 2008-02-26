@@ -7,8 +7,8 @@
  * All rights reserved.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef OPENCOG_TYPES_H
+#define OPENCOG_TYPES_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -90,4 +90,4 @@ struct AtomEntry {
     Atom *atom;
 };
 
-#endif
+#endif /* OPENCOG_TYPES_H */
