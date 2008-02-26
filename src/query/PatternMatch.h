@@ -21,8 +21,9 @@ class PatternMatch
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
 
-		// Examine evaluation links.
-		bool do_eval_link(Atom *);
+		// Examine each candidate for a match, in turn.
+		bool do_candidate(Atom *);
+		bool pair_compare(Atom *, Atom *);
 
 	public:
 		PatternMatch(AtomSpace *);

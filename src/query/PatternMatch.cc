@@ -5,6 +5,7 @@
  */
 
 #include "Foreach.h"
+#include "ForeachTwo.h"
 #include "Link.h"
 #include "Node.h"
 #include "PatternMatch.h"
@@ -67,14 +68,31 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 
 /* ======================================================== */
 
-bool PatternMatch::do_eval_link(Atom *atom)
+bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 {
+	std::string sa = aa->toString();
+	std::string sb = ab->toString();
+	printf ("duuude comp %s\n"
+           "         to %s\n", sa.c_str(), sb.c_str());
+
+	return false;
+}
+
+bool PatternMatch::do_candidate(Atom *atom)
+{
+	// XXX Use the same basic filter rejection as was used to clean up
+	// the predicate -- reject anything thats not a linguistic relation.
 	Handle ah = TLB::getHandle(atom);
 	bool keep = foreach_outgoing_atom(ah, &PatternMatch::is_ling_rel, this);
 	if (!keep) return false;
 
+	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah, 
+	                 &PatternMatch::pair_compare, this);
+
+	if (mismatch) return false;
+
 	std::string str = atom->toString();
-	printf ("duuude eval is %s\n", str.c_str());
+	printf ("duuude have match %s\n", str.c_str());
 	return false;
 }
 
@@ -86,6 +104,8 @@ bool PatternMatch::do_eval_link(Atom *atom)
  */
 void PatternMatch::match(void)
 {
+	if (normed_predicate.size() == 0) return;
+
 	// Print out the predicate ...
 	printf("\nPredicate is\n");
 	std::vector<Handle>::iterator i;
@@ -108,7 +128,12 @@ void PatternMatch::match(void)
 
 printf("\nnyerh hare hare\n");
 
+	// Get type of the first item in the predicate list.
+	Handle h = normed_predicate[0];
+	Atom *a = TLB::getAtom(h);
+	Type ptype = a->getType();
+
 	// perform whole-hog searching
-	foreach_handle_of_type(atom_space, EVALUATION_LINK,
-	      &PatternMatch::do_eval_link, this);
+	foreach_handle_of_type(atom_space, ptype,
+	      &PatternMatch::do_candidate, this);
 }
