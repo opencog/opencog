@@ -54,10 +54,9 @@ inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
  */
 template<class T>
 inline bool foreach_handle_of_type(AtomSpace *as, 
-                                 const char * atypename, 
+                                 Type atype,
                                  bool (T::*cb)(Handle), T *data)
 {
-	Type atype = ClassServer::getType(atypename);
 	std::list<Handle> handle_set;
 	as->getHandleSet(back_inserter(handle_set), atype, NULL);
 
@@ -71,5 +70,15 @@ inline bool foreach_handle_of_type(AtomSpace *as,
 	}
 	return false;
 }
+
+template<class T>
+inline bool foreach_handle_of_type(AtomSpace *as, 
+                                 const char * atypename, 
+                                 bool (T::*cb)(Handle), T *data)
+{
+	Type atype = ClassServer::getType(atypename);
+	return foreach_handle_of_type(as, atype, cb, data);
+}
+
 
 }
