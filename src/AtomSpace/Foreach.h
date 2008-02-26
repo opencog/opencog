@@ -49,6 +49,7 @@ inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 	return false;
 }
 
+/* ----------------------------------------------------------- */
 /**
  * Invoke the callback on each handle of the given type.
  */
@@ -78,6 +79,29 @@ inline bool foreach_handle_of_type(AtomSpace *as,
 {
 	Type atype = ClassServer::getType(atypename);
 	return foreach_handle_of_type(as, atype, cb, data);
+}
+
+/* ----------------------------------------------------------- */
+
+/**
+ * Invoke the callback on each atom in the incoming set of handle h.
+ */
+
+template<class T>
+inline bool foreach_incoming_atom(Handle h, bool (T::*cb)(Atom *), T *data)
+{
+	Atom *atom = TLB::getAtom(h);
+	HandleEntry *he = atom->getIncomingSet();
+
+	// Simple linked-list pointer chase
+	while (he)
+	{
+		Atom *aout = TLB::getAtom(he->handle);
+		bool rc = (data->*cb)(aout);
+		if (rc) return rc;
+		he = he->next;
+	}
+	return false;
 }
 
 
