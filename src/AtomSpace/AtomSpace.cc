@@ -205,6 +205,9 @@ bool AtomSpace::isNode(Type t) const {
  	//fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
+    // XXX TODO: it would be computationally much more efficient
+    // to just do this:
+    // return (NULL != dynamic_cast<Node *>(this));
     return inheritsType(t,NODE);
 } 
 string AtomSpace::getName(Type t) const {
