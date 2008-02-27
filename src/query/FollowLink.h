@@ -30,10 +30,22 @@ class FollowLink
 		 */
 		inline Atom * follow_binary_link(Atom *atom, Type ltype)
 		{
-			// Look for incoming links that are InheritanceLinks.
-			// The "generalized concept" for this should be at the far end.
+			return follow_link(atom, ltype, 0, 1);
+		}
+
+		inline Atom * backtrack_binary_link(Atom *atom, Type ltype)
+		{
+			return follow_link(atom, ltype, 1, 0);
+		}
+
+		inline Atom * follow_link(Atom *atom, Type ltype, int from, int to)
+		{
+			// Look for incoming links that are of the given type.
+			// Then grab the thing that they link to.
 			link_type = ltype;
 			from_atom = atom;
+			position_from = from;
+			position_to = to;
 			Handle h = TLB::getHandle(atom);
 			foreach_incoming_atom(h, &FollowLink::find_link_type, this);
 			return to_atom;
@@ -43,6 +55,8 @@ class FollowLink
 		Type link_type;
 		Atom * from_atom;
 		Atom * to_atom;
+		int position_from;
+		int position_to;
 		int cnt;
 
 		/**
@@ -53,30 +67,33 @@ class FollowLink
 			// Look for incoming links that are of the specified link type
 			if (link_type != atom->getType()) return false;
 
-			cnt = 0;
+			cnt = -1;
 			to_atom = NULL;
 			Handle h = TLB::getHandle(atom);
-			foreach_outgoing_atom(h, &FollowLink::check_link, this);
+			foreach_outgoing_atom(h, &FollowLink::pursue_link, this);
 			if (to_atom) return true;
 			return false;
 		}
 
-		inline bool check_link(Atom *atom)
+		inline bool pursue_link(Atom *atom)
 		{
 			cnt ++;
-			// The first node should be the node itself.
-			if (1 == cnt)
+
+			// The from-slot should be occupied by the node itself.
+			if (position_from == cnt)
 			{
 				if (from_atom != atom) return true;
 				return false;
 			}
 
-			// The second node is the one we're looking for.
-			to_atom = atom;
+			// The to-slot is the one we're looking for.
+			if (position_to == cnt)
+			{
+				to_atom = atom;
+				return true;  // We're done now.
+			}
 
-			// If there's a third node, then its an error,
-			// but we are not error checking this.
-			return true;
+			return false;
 		}
 };
 }
