@@ -40,10 +40,13 @@ class FollowLink
 
 		inline Atom * follow_link(Atom *atom, Type ltype, int from, int to)
 		{
+			if (NULL == atom) return NULL;
+
 			// Look for incoming links that are of the given type.
 			// Then grab the thing that they link to.
 			link_type = ltype;
 			from_atom = atom;
+			to_atom = NULL;
 			position_from = from;
 			position_to = to;
 			Handle h = TLB::getHandle(atom);
