@@ -24,17 +24,18 @@ class FollowLink
 		 */
 		inline Atom * follow_binary_link(Link *link, Atom *atom)
 		{
-			link_this = atom;
-			link_that = NULL;
+			from_atom = atom;
+			to_atom = NULL;
 			cnt = 0;
 			Handle h = TLB::getHandle(link);
 			foreach_outgoing_atom(h, &FollowLink::check_link, this);
-			return link_that;
+			return to_atom;
 		};
 
 	private:
-		Atom * link_this;
-		Atom * link_that;
+		Type link_type;
+		Atom * from_atom;
+		Atom * to_atom;
 		int cnt;
 		inline bool check_link(Atom *atom)
 		{
@@ -42,12 +43,12 @@ class FollowLink
 			// The first node should be the node itself.
 			if (1 == cnt)
 			{
-				if (link_this != atom) return true;
+				if (from_atom != atom) return true;
 				return false;
 			} 
 		
 			// The second node is the one we're looking for.
-			link_that = atom;
+			to_atom = atom;
 		
 			// If there's a third node, then its an error,
 			// but we are not error checking this.
