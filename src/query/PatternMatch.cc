@@ -63,11 +63,27 @@ bool PatternMatch::apply_rule(Atom *atom)
 void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 {
 	bound_vars = bvars;
+	var_solution = bvars;
 	normed_predicate.clear();
 	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
 }
 
 /* ======================================================== */
+
+/**
+ * If Atom is an instance of a general concept, 
+ * return a pointer to the general concept.
+ */
+Atom * PatternMatch::get_general_concept(Atom *atom)
+{
+	// Look for incoming links that are InheritanceLinks.
+	// The "generalized concept" for this should be at the far end.
+	concept_instance = atom;
+	general_concept = NULL;
+	Handle h = TLB::getHandle(atom);
+	foreach_incoming_atom(h, &PatternMatch::find_inheritance_link, this);
+	return general_concept;
+}
 
 /**
  * Find the (first!, assumed only!?) inheritance link
@@ -83,6 +99,8 @@ bool PatternMatch::find_inheritance_link(Atom *atom)
 	return false;
 }
 
+/* ======================================================== */
+
 // Return true if there's a mis-match.
 bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 {
@@ -94,17 +112,8 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 	// If they're the same atom, then clearly they match.
 	if (aa == ab) return false;
 
-	// Look for incoming links that are InheritanceLinks.
-	// The "generalized concept" for this should be at the far end.
-	concept_instance = aa;
-	Handle ha = TLB::getHandle(aa);
-	foreach_incoming_atom(ha, &PatternMatch::find_inheritance_link, this);
-	Atom *ca = general_concept;
-
-	concept_instance = ab;
-	Handle hb = TLB::getHandle(ab);
-	foreach_incoming_atom(hb, &PatternMatch::find_inheritance_link, this);
-	Atom *cb = general_concept;
+	Atom *ca = get_general_concept(aa);
+	Atom *cb = get_general_concept(ab);
 
 	sa = ca->toString();
 	sb = cb->toString();
@@ -116,15 +125,80 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 }
 
 /* ======================================================== */
+/**
+ * Check to see if atom aa is a bound variable. 
+ * If it is, return true;
+ */
+bool PatternMatch::is_var(Atom *aa)
+{
+	std::vector<Handle>::iterator i;
+	for (i = bound_vars.begin(); 
+	     i != bound_vars.end(); i++)
+	{
+		Atom *v = TLB::getAtom (*i);
+		v = get_general_concept(v);
+		if (v == aa) return true;
+	}
+	return false;
+}
 
-// Return true if there's a mis-match.
+/**
+ * Check to see if atom aa is a bound variable. If it is, 
+ * then atom ab is a solution.
+ */
+void PatternMatch::solve_var(Atom *aa, Atom *ab)
+{
+	std::vector<Handle>::iterator i, j;
+	for (i = bound_vars.begin(), j = var_solution.begin(); 
+	     i != bound_vars.end(); i++, j++)
+	{
+		Atom *v = TLB::getAtom (*i);
+		if (v == aa) 
+		{
+			*j = TLB::getHandle(ab);
+			return;
+		}
+	}
+}
+
+/* ======================================================== */
+/**
+ * pair_compare compare two graphs, side-by-side.
+ *
+ * Compare two graphs, side-by-side. It is assumed
+ * that one of these is the predicate, and so the
+ * comparison is between a candidate graph, and a
+ * predicate.
+ *
+ * Return true if there's a mis-match.
+ */
 bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 {
+	// Atom aa is from the predicate, and it might be one 
+	// of the bound variables. If so, then declare a match.
+	if (is_var(aa))
+	{
+		// If ab is the very same var, then its a mismatch.
+		if (aa == ab) return true;
+
+printf("==== ta dah\n");
+		// Else, we have a candidate solution. 
+		// Make a record of it.
+		solve_var(aa,ab);
+		return false;
+	}
+
 	// If they're the same atom, then clearly they match.
+	// ... but only if aa is NOT a bound var.
 	if (aa == ab) return false;
 
 	// If types differ, then no match.
 	if (aa->getType() != ab->getType()) return true;
+
+std::string sta = aa->toString();
+std::string stb = ab->toString();
+printf ("par_compare depth=%d comp %s\n"
+        "                       to %s\n", depth, sta.c_str(), stb.c_str());
 
 	// If links, then compare link contents
 	if (dynamic_cast<Link *>(aa))
@@ -137,6 +211,7 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 		                 &PatternMatch::pair_compare, this);
 		depth --;
 
+printf("par_comp link mist=%d\n", mismatch);
 		return mismatch;
 	}
 
@@ -152,19 +227,32 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
-		return concept_match(aa, ab);
+		bool mismatch = concept_match(aa, ab);
+printf("par_comp concept mist=%d\n", mismatch);
+		return mismatch;
 	}
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
 	        ClassServer::getTypeName(ntype));
 
 	std::string sa = aa->toString();
 	std::string sb = ab->toString();
-	printf ("unexpected depth=%d comp %s\n"
-           "                      to %s\n", depth, sa.c_str(), sb.c_str());
+	fprintf (stderr, "unexpected depth=%d comp %s\n"
+	                 "                      to %s\n", 
+	        depth, sa.c_str(), sb.c_str());
 
 	return true;
 }
 
+/**
+ * do_candidate - examine candidates, looking for matches.
+ *
+ * This routine is invoked on every candidate atom taken from
+ * the atom space. That atom is assumed to anchor some part of
+ * a graph that hopefully will match the predicate.
+ *
+ * The atom is used to xxx pariwise compare.
+ * Unfinished.
+ */ 
 bool PatternMatch::do_candidate(Atom *atom)
 {
 	// XXX Use the same basic filter rejection as was used to clean up
@@ -173,6 +261,9 @@ bool PatternMatch::do_candidate(Atom *atom)
 	bool keep = foreach_outgoing_atom(ah, &PatternMatch::is_ling_rel, this);
 	if (!keep) return false;
 
+std::string str = atom->toString();
+printf ("\nduuude candidate %s\n", str.c_str());
+	// perform a pair-wise compare of the atom to the predicate.
 	depth = 1;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah, 
 	                 &PatternMatch::pair_compare, this);
@@ -180,9 +271,11 @@ bool PatternMatch::do_candidate(Atom *atom)
 
 	if (mismatch) return false;
 
-	std::string str = atom->toString();
-	printf ("duuude have match %s\n", str.c_str());
-	return false;
+str = atom->toString();
+printf ("duuude have match %s\n", str.c_str());
+
+	// Found a solution, return true to terminate search.
+	return true;
 }
 
 /**
@@ -222,7 +315,20 @@ printf("\nnyerh hare hare\n");
 	Atom *a = TLB::getAtom(h);
 	Type ptype = a->getType();
 
-	// perform whole-hog searching
+	// Plunge into the deep end - start looking at all viable
+	// candidates in the AtomSpace.
 	foreach_handle_of_type(atom_space, ptype,
 	      &PatternMatch::do_candidate, this);
+
+	// Print out the solution vector.
+	for (i=var_solution.begin(); i != var_solution.end(); i++)
+	{
+		Atom *a = TLB::getAtom(*i);
+		Node *n = dynamic_cast<Node *>(a);
+		if (n)
+		{
+			printf(" solution var: %s\n", n->getName().c_str());
+		}
+	}
+
 }
