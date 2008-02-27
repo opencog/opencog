@@ -70,37 +70,6 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 
 /* ======================================================== */
 
-/**
- * If Atom is an instance of a general concept, 
- * return a pointer to the general concept.
- */
-Atom * PatternMatch::get_general_concept(Atom *atom)
-{
-	// Look for incoming links that are InheritanceLinks.
-	// The "generalized concept" for this should be at the far end.
-	concept_instance = atom;
-	general_concept = NULL;
-	Handle h = TLB::getHandle(atom);
-	foreach_incoming_atom(h, &PatternMatch::find_inheritance_link, this);
-	return general_concept;
-}
-
-/**
- * Find the (first!, assumed only!?) inheritance link
- */
-bool PatternMatch::find_inheritance_link(Atom *atom)
-{
-	// Look for incoming links that are InheritanceLinks.
-	if (INHERITANCE_LINK != atom->getType()) return false;
-
-	Link * link = dynamic_cast<Link *>(atom);
-	general_concept = fl.follow_binary_link(link, concept_instance);
-	if (general_concept) return true;
-	return false;
-}
-
-/* ======================================================== */
-
 // Return true if there's a mis-match.
 bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 {
@@ -112,8 +81,10 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 	// If they're the same atom, then clearly they match.
 	if (aa == ab) return false;
 
-	Atom *ca = get_general_concept(aa);
-	Atom *cb = get_general_concept(ab);
+	// Look for incoming links that are InheritanceLinks.
+	// The "generalized concept" for this should be at the far end.
+	Atom *ca = fl.follow_binary_link(aa, INHERITANCE_LINK);
+	Atom *cb = fl.follow_binary_link(ab, INHERITANCE_LINK);
 
 	sa = ca->toString();
 	sb = cb->toString();
@@ -136,7 +107,7 @@ bool PatternMatch::is_var(Atom *aa)
 	     i != bound_vars.end(); i++)
 	{
 		Atom *v = TLB::getAtom (*i);
-		v = get_general_concept(v);
+		v = fl.follow_binary_link(v, INHERITANCE_LINK);
 		if (v == aa) return true;
 	}
 	return false;
