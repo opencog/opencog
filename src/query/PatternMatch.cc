@@ -97,39 +97,26 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 
 /* ======================================================== */
 /**
- * Check to see if atom aa is a bound variable. 
- * If it is, return true;
+ * Check to see if atom is a bound variable. 
+ * If it is, return position in the variable array.
  */
-bool PatternMatch::is_var(Atom *aa)
+int PatternMatch::var_position(Atom *atom)
 {
+	// The local atom will be an instance of a general concept...
+	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
+	// and we want the "word" associated with this general concept.
+	atom = fl.backtrack_binary_link(atom, WR_LINK);
+
+	int pos = 0;
 	std::vector<Handle>::iterator i;
 	for (i = bound_vars.begin(); 
 	     i != bound_vars.end(); i++)
 	{
 		Atom *v = TLB::getAtom (*i);
-		v = fl.follow_binary_link(v, INHERITANCE_LINK);
-		if (v == aa) return true;
+		if (v == atom) return pos;
+		pos ++;
 	}
-	return false;
-}
-
-/**
- * Check to see if atom aa is a bound variable. If it is, 
- * then atom ab is a solution.
- */
-void PatternMatch::solve_var(Atom *aa, Atom *ab)
-{
-	std::vector<Handle>::iterator i, j;
-	for (i = bound_vars.begin(), j = var_solution.begin(); 
-	     i != bound_vars.end(); i++, j++)
-	{
-		Atom *v = TLB::getAtom (*i);
-		if (v == aa) 
-		{
-			*j = TLB::getHandle(ab);
-			return;
-		}
-	}
+	return -1;
 }
 
 /* ======================================================== */
@@ -147,7 +134,8 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 {
 	// Atom aa is from the predicate, and it might be one 
 	// of the bound variables. If so, then declare a match.
-	if (is_var(aa))
+	int pos = var_position(aa);
+	if (-1 < pos)
 	{
 		// If ab is the very same var, then its a mismatch.
 		if (aa == ab) return true;
@@ -155,7 +143,7 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 printf("==== ta dah\n");
 		// Else, we have a candidate solution. 
 		// Make a record of it.
-		solve_var(aa,ab);
+		var_solution[pos] = ab;
 		return false;
 	}
 

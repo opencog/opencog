@@ -41,8 +41,7 @@ class PatternMatch
 		FollowLink fl;
 
 		// Verify binding of varaibles
-		bool is_var(Atom *);
-		void solve_var(Atom *, Atom *);
+		int var_position(Atom *);
 
 		// Result of solvig the predicate
 		std::vector<Handle> var_solution;
