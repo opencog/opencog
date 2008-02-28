@@ -37,10 +37,20 @@ bool PatternMatch::is_ling_rel(Atom *atom)
 	return false;
 }
 
+/**
+ * Create an associative array that gives a list of all of the
+ * predicatees that a given node participates in.
+ */
 bool PatternMatch::note_root(Handle h)
 {
-	printf("ola root=%p h=%p\n", curr_root, h); 
-	// root_map.get...
+	RootList *rl = root_map[h];
+	if (NULL == rl)
+	{
+		rl = new RootList();
+		root_map[h] = rl;
+	}
+	rl->push_back(curr_root);
+
 	foreach_outgoing_handle(h, &PatternMatch::note_root, this);
 	return false;
 }
