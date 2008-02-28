@@ -53,6 +53,9 @@ AtomSpace::AtomSpace() {
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&stimulatedAtomsLock, NULL);
 #endif
+
+    totalSTI = 0;
+    totalLTI = 0;
 }
 
 const AtomTable& AtomSpace::getAtomTable() const {
@@ -667,10 +670,48 @@ int AtomSpace::Nodes(VersionHandle vh) const
 }
 
 void AtomSpace::decayShortTermImportance() {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     atomTable.decayShortTermImportance();
+}
+
+long AtomSpace::getTotalSTI() const
+{
+    long totalSTI = 0;
+    HandleEntry* q;
+
+    /* get atom iterator, go through each atom and calculate add
+     * sti to total */
+
+    HandleEntry* h = getAtomTable().getHandleSet(ATOM, true);
+    q=h;
+    while (q) {
+	totalSTI += getSTI(q->handle);
+	q = q->next;
+    }
+    delete h;
+    return totalSTI;
+
+}
+
+long AtomSpace::getTotalLTI() const
+{
+    long totalLTI = 0;
+    HandleEntry* q;
+
+    /* get atom iterator, go through each atom and calculate add
+     * lti to total */
+
+    HandleEntry* h = getAtomTable().getHandleSet(ATOM, true);
+    q=h;
+    while (q) {
+	totalLTI += getLTI(q->handle);
+	q = q->next;
+    }
+    delete h;
+    return totalLTI;
+
 }
 
 int AtomSpace::Links(VersionHandle vh) const

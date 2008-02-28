@@ -7,6 +7,7 @@ SimpleNetworkServer.cc
 ServerSocket.cc 
 CommandRequest.cc 
 CommandRequestProcessor.cc 
+ImportanceUpdatingAgent.cc
 )
 
 include_directories (

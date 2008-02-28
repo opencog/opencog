@@ -680,6 +680,20 @@ class AtomSpace {
      */
     void decayShortTermImportance();
 
+    /* Get the total amount of STI in the AtomSpace, sum of
+     * STI across all atoms.
+     *
+     * @return total STI in AtomSpace
+     */
+    long getTotalSTI() const;
+
+    /* Get the total amount of LTI in the AtomSpace, sum of
+     * all LTI across atoms.
+     *
+     * @return total LTI in AtomSpace
+     */
+    long getTotalLTI() const;
+
     /* Next three methods are for EconomicAttentionAllocation */
 
     /**
@@ -722,6 +736,25 @@ class AtomSpace {
      * @return total stimulus since last reset.
      */
     stim_t getAtomStimulus(Handle h);
+
+    /**
+     * Get attentional focus boundary, generally atoms below
+     * this threshold won't be accessed unless search methods
+     * are unsuccessful on those that are above this value.
+     *
+     * @return Short Term Importance threshold value
+     */
+    AttentionValue::sti_t getAttentionalFocusBoundary();
+
+    /**
+     * Change the attentional focus boundary. Some situations
+     * may benefit from less focussed searches.
+     *
+     * @param New threshold
+     * @return Short Term Importance threshold value
+     */
+    AttentionValue::sti_t setAttentionalFocusBoundary(
+	    AttentionValue::sti_t s);
 
     //for convenience
     bool isNode(Handle) const;
@@ -813,6 +846,15 @@ class AtomSpace {
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_t stimulatedAtomsLock;
 #endif
+
+    /* Boundary at which an atom is considered within the attentional
+     * focus of opencog. Atom's with STI less than this value are
+     * not charged STI rent */
+    AttentionValue::sti_t attentionalFocusBoundary;
+
+    /* These indicate the total AtomSpace currency */
+    long totalSTI;
+    long totalLTI;
 
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const{

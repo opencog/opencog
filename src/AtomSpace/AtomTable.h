@@ -38,7 +38,6 @@ typedef hash_set<Atom*, hashAtom, eqAtom> AtomHashSet;
 
 class HandleEntry;
 class HandleIterator;
-class ImportanceUpdatingAgent;
 class SavingLoading;
 
 class PredicateEvaluator;

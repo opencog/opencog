@@ -11,6 +11,7 @@
 #define ATTENTIONVALUE_H
 
 #include <types.h>
+#include <limits.h>
 #include <string>
 
 struct AttentionValue {
@@ -26,6 +27,10 @@ public:
 	static const sti_t DEFAULTATOMSTI = 500;
 	static const lti_t DEFAULTATOMLTI = 0;
 	static const vlti_t DEFAULTATOMVLTI = DISPOSABLE;
+
+	static const sti_t MAXSTI = SHRT_MAX;
+	static const lti_t MAXLTI = SHRT_MAX;
+
 
 	private:
 
