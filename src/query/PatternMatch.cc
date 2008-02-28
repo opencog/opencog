@@ -26,12 +26,22 @@ bool PatternMatch::prt(Atom *atom)
 	return false;
 }
 
+/* ======================================================== */
+
 /**
  * Return true, for example, if the node is _subj or _obj
  */
 bool PatternMatch::is_ling_rel(Atom *atom)
 {
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
+	return false;
+}
+
+bool PatternMatch::note_root(Handle h)
+{
+	printf("ola root=%p h=%p\n", curr_root, h); 
+	// root_map.get...
+	foreach_outgoing_handle(h, &PatternMatch::note_root, this);
 	return false;
 }
 
@@ -50,14 +60,19 @@ bool PatternMatch::apply_rule(Atom *atom)
 	if (!keep) return false;
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
-	normed_predicate.push_back(TLB::getHandle(atom));
+	normed_predicate.push_back(ah);
+
+	// Create a table of nodes in the predicates, with
+	// a list of the predicates that each node participates in.
+	curr_root = ah;
+	foreach_outgoing_handle(ah, &PatternMatch::note_root, this);
 	return false;
 }
 
 /**
  * Put predicate into "normal form".
  * In this case, a cheap hack: remove all relations that
- * are not "defined lingussitic relations", e.g. all but
+ * are not "defined linguistic relations", e.g. all but
  * _subj(x,y) and _obj(z,w) relations.
  */
 void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
@@ -65,13 +80,18 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 	bound_vars = bvars;
 	var_solution = bvars;
 	normed_predicate.clear();
-	morphism.clear();
+	root_map.clear();
 	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
 }
 
 /* ======================================================== */
 
-// Return true if there's a mis-match.
+/**
+ * Are two atoms instances of the same concept?
+ * Return true if they are are NOT (that is, if they
+ * are mismatched). This stops iteration in the standard
+ * iterator.
+ */
 bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 {
 	std::string sa = aa->toString();
@@ -301,5 +321,6 @@ printf("\nnyerh hare hare\n");
 			printf(" solution var: %s\n", n->getName().c_str());
 		}
 	}
-
 }
+
+/* ===================== END OF FILE ===================== */

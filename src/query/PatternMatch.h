@@ -13,6 +13,10 @@
 
 namespace opencog {
 
+typedef std::vector<Handle> RootList;
+typedef std::map<Handle, RootList> RootMap;
+typedef std::pair<Handle, RootList> RootPair;
+
 class PatternMatch
 {
 	private:
@@ -27,26 +31,26 @@ class PatternMatch
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
 
+		// traversal utilities
+		RootMap root_map;
+		Handle curr_root;
+		bool note_root(Handle);
+
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Atom *);
+
+		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
 		int depth;  // recursion depth for tree_compare.
 
 		// Are two nodes instances of the same concept?
 		bool concept_match(Atom *, Atom *);
 
-		// Find the inheritance link in a set of incoming nodes
-		Atom *get_general_concept(Atom *atom);
-		Atom *concept_instance;
-		Atom *general_concept;
-		bool find_inheritance_link(Atom *);
 		FollowLink fl;
 
 		// Verify binding of varaibles
 		int var_position(Atom *);
 
-		// Embedding from subgraph to graph.
-		std::map<Handle, Handle> morphism;
 
 		// Result of solving the predicate
 		std::vector<Handle> var_solution;
