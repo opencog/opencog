@@ -37,7 +37,7 @@ bool PatternMatch::is_ling_rel(Atom *atom)
 
 /**
  * Hack --- not actually applying any rules, except one
- * hard-coded one: if the link involves a 
+ * hard-coded one: if the link involves a
  * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
  */
 bool PatternMatch::apply_rule(Atom *atom)
@@ -56,9 +56,9 @@ bool PatternMatch::apply_rule(Atom *atom)
 
 /**
  * Put predicate into "normal form".
- * In this case, a checp hack: remove all relations that 
- * are not "defined lingussitic relations", e.g. all but 
- * _subj(x,y) and _obj(z,w) relations. 
+ * In this case, a cheap hack: remove all relations that
+ * are not "defined lingussitic relations", e.g. all but
+ * _subj(x,y) and _obj(z,w) relations.
  */
 void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 {
@@ -97,7 +97,7 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 
 /* ======================================================== */
 /**
- * Check to see if atom is a bound variable. 
+ * Check to see if atom is a bound variable.
  * If it is, return position in the variable array.
  */
 int PatternMatch::var_position(Atom *atom)
@@ -109,7 +109,7 @@ int PatternMatch::var_position(Atom *atom)
 
 	int pos = 0;
 	std::vector<Handle>::iterator i;
-	for (i = bound_vars.begin(); 
+	for (i = bound_vars.begin();
 	     i != bound_vars.end(); i++)
 	{
 		Atom *v = TLB::getAtom (*i);
@@ -132,7 +132,7 @@ int PatternMatch::var_position(Atom *atom)
  */
 bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 {
-	// Atom aa is from the predicate, and it might be one 
+	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
 	int pos = var_position(aa);
 	if (-1 < pos)
@@ -141,7 +141,7 @@ bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
 		if (aa == ab) return true;
 
 printf("==== ta dah\n");
-		// Else, we have a candidate solution. 
+		// Else, we have a candidate solution.
 		// Make a record of it.
 		var_solution[pos] = ab;
 		return false;
@@ -175,14 +175,14 @@ printf("par_comp link mist=%d\n", mismatch);
 	}
 
 	// If we are here, then we are comparing nodes.
-	// The result of comparing nodes depends on the 
+	// The result of comparing nodes depends on the
 	// node types.
 	Type ntype = aa->getType();
 
 	// DefinedLinguisticRelation nodes must match exactly;
 	// so if we are here, there's already a mismatch.
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == ntype) return true;
-	
+
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
@@ -196,7 +196,7 @@ printf("par_comp concept mist=%d\n", mismatch);
 	std::string sa = aa->toString();
 	std::string sb = ab->toString();
 	fprintf (stderr, "unexpected depth=%d comp %s\n"
-	                 "                      to %s\n", 
+	                 "                      to %s\n",
 	        depth, sa.c_str(), sb.c_str());
 
 	return true;
@@ -211,7 +211,7 @@ printf("par_comp concept mist=%d\n", mismatch);
  *
  * The atom is used to xxx pariwise compare.
  * Unfinished.
- */ 
+ */
 bool PatternMatch::do_candidate(Atom *atom)
 {
 	// XXX Use the same basic filter rejection as was used to clean up
@@ -224,7 +224,7 @@ std::string str = atom->toString();
 printf ("\nduuude candidate %s\n", str.c_str());
 	// perform a pair-wise compare of the atom to the predicate.
 	depth = 1;
-	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah, 
+	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
 	                 &PatternMatch::pair_compare, this);
 	depth = 0;
 
@@ -239,7 +239,7 @@ printf ("duuude have match %s\n", str.c_str());
 
 /**
  * Solve a predicate.
- * Its understood that the input "graph" is a predicate, of sorts, 
+ * Its understood that the input "graph" is a predicate, of sorts,
  * with the list of "bound vars" are to be solved for (or "evaluated")
  * bound vars must be, by definition, Nodes.
  */
@@ -250,7 +250,7 @@ void PatternMatch::match(void)
 	// Print out the predicate ...
 	printf("\nPredicate is\n");
 	std::vector<Handle>::iterator i;
-	for (i = normed_predicate.begin(); 
+	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
 	{
 		foreach_outgoing_atom(*i, &PatternMatch::prt, this);
