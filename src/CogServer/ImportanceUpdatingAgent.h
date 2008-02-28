@@ -53,6 +53,13 @@ private:
     float noiseOdds;
     /* The default stimulus unit, used by random stimulation */
     stim_t noiseUnit;
+
+    /**
+     * Randomly stimulate atoms in the AtomSpace
+     *
+     * @param AtomSpace to act upon
+     */
+    void randomStimulation(AtomSpace *a) {};
     
     /* Recent amount of stimulus given per cycle */
     stim_t recentTotalStimulusPerCycle;
@@ -84,11 +91,82 @@ private:
     long acceptableLobeSTIRange[2];
     long acceptableLobeLTIRange[2];
     
-    void collectRent(AtomSpace* a); 
-    void payWages(AtomSpace* a);
+    /**
+     * Collect STI rent for atoms above attentional focus boundary.
+     *
+     * @param AtomSpace the MindAgent is working on.
+     */
+    void collectSTIRent(AtomSpace* a); 
+    
+    /**
+     * Collect STI rent for atoms above attentional focus boundary.
+     *
+     * @param AtomSpace the MindAgent is working on.
+     */
+    void collectLTIRent(AtomSpace* a); 
+
+    /**
+     * Pay STI wages to atoms that have been useful.
+     *
+     * @param AtomSpace the MindAgent is working on.
+     */
+    void paySTIWages(AtomSpace* a);
+
+    /**
+     * Pay LTI wages to atoms that have been useful.
+     *
+     * @param AtomSpace the MindAgent is working on.
+     */
+    void payLTIWages(AtomSpace* a);
+
+    /**
+     * Cap STI values to the maximum to prevent all important atoms.
+     *
+     * @param AtomSpace the MindAgent is working on.
+     * @return Whether any atoms had an STI above the cap.
+     */
+    bool enforceSTICap(AtomSpace* a);
+
+    /**
+     * Cap LTI values to the maximum to prevent all important atoms.
+     *
+     * @param AtomSpace the MindAgent is working on.
+     * @return Whether any atoms had an STI above the cap.
+     */
+    bool enforceLTICap(AtomSpace* a);
+
+    /**
+     * Check whether AtomSpace funds are within limits, and make changes
+     * if not.
+     *
+     * @param AtomSpace to work in.
+     */
     void checkAtomSpaceFunds(AtomSpace* a);
+
+    /**
+     * Decide whether first value is in the range specified by the 2
+     * values in range.
+     *
+     * @param value to check
+     * @param range to compare with
+     * @return whether value is within range
+     */
     bool inRange(long val, long range[2]) const;
+
+    /**
+     * If STI funds are outside of acceptable limits, then adjust
+     * rent.
+     *
+     * @param AtomSpace to work in
+     */
     void fixSTIDynamics(AtomSpace* a);
+
+    /**
+     * If LTI funds are outside of acceptable limits, then adjust
+     * rent.
+     *
+     * @param AtomSpace to work in
+     */
     void fixLTIDynamics(AtomSpace* a);
 
     /**

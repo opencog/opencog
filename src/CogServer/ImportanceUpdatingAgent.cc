@@ -58,13 +58,23 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     /* Calculate attentional focus sizes */
     updateAttentionalFocusSizes(a);
 
+    /* Collect rent */
+    collectSTIRent(a);
+    collectLTIRent(a);
+
+    /* Random stimulation if on */
+    if (noiseOn) randomStimulation(a);
+
     /* Check AtomSpace funds are within bounds */
     checkAtomSpaceFunds(a);
 
-    /* Collect rent */
-
     /* Pay wages based on stimulus */
+    paySTIWages(a);
+    payLTIWages(a);
     
+    /* Enfore sti and lti caps */
+    enforceSTICap(a);
+    enforceLTICap(a);
 }
 
 bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
@@ -162,15 +172,35 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
 }
 
-void ImportanceUpdatingAgent::collectRent(AtomSpace* a)
+void ImportanceUpdatingAgent::collectSTIRent(AtomSpace* a)
 {
     /* Iterate through atoms w STI > a->attentionalFocusBoundary */
 
+}
+
+void ImportanceUpdatingAgent::collectLTIRent(AtomSpace* a)
+{
     /* Iterate through all atoms and collect LTI */
 }
 
-void ImportanceUpdatingAgent::payWages(AtomSpace* a)
+void ImportanceUpdatingAgent::paySTIWages(AtomSpace* a)
 {
+
+}
+
+void ImportanceUpdatingAgent::payLTIWages(AtomSpace* a)
+{
+
+}
+
+bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a)
+{
+    return false;
+}
+
+bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a)
+{
+    return false;
 }
 
 string ImportanceUpdatingAgent::toString()
