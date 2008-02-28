@@ -59,19 +59,34 @@ one uses a "subgraph isomorphism algorithm" to find the match.
 
 Currently Implemented Algorithm
 -------------------------------
-1) Input consists a sequence of the roots of hypergraph trees, 
-   in that the incidence graph forms a tree. Thus, by definition,
-   to incidence tree root must be a hypergraph link, as hypergraph
-   vertex cannot, by definition, have a non-trivial incidence tree
-   under it.
+0) In the following, the word "atom" may refer to either a hypergraph
+   node, or a hypergraph edge. Corresponding to every hypergraph is
+   an incidence graph. The atoms of a hypergraph are vertices of
+   the incidence graph. The convetion used here is that the incidence
+   graph is a directed graph; thus, only hypergraph links have 
+   outgoing incidence graph edges; whereas hypergraph nodes have
+   no outgoing incidence graph edges.
 
-   In CogServer, the outgoing pointers form the incidence tree. 
-   Each tree is by definition acyclic.  Thus, for example: 
-   _subj(row, Steve) has _subj at the root of the tree, with row 
-   and Steve as leaves. 
+   The implemented algorithm makes direct use of the incidence 
+   graph, and only indirectly to the hypergraph. The insistence
+   on making the incidence graph be a directed graph helps make
+   traversal more direct and removes ambiguity.
+
+   [OpenCog-specific remarks are in square brackets.  In OpenCog, the 
+   outgoing incidence graph edges are given by the "outgoing set" of 
+   the atom.]
+
+1) Input consists a sequence of the roots of incidence trees, that is,
+   of a list of subgraphs of the incidence graph that are trees.  Thus,
+   by definition, the incidence tree root must be a hypergraph link, 
+   as hypergraph vertex cannot, by definition, have a non-trivial 
+   incidence tree under it.  Each tree is, by definition acyclic.
+
+   Thus, for example: _subj(row, Steve) has _subj at the root of the 
+   tree, with row and Steve as leaves.
 
    Each tree will be refered to as a "predicate" in the following.
-   Distinct trees may have common nodes. The collection of trees,
+   Distinct trees may have common verticies. The collection of trees,
    as a whole, may contain loops. The collection of trees, as a 
    whole, must be connected; no disjoint graphs allowed.
 
@@ -79,19 +94,42 @@ Currently Implemented Algorithm
    Thus, for example _obj(row,_$qVar) has _$qVar is the variable
    to be solved for. The list serves to explicitly identify the 
    variables, so that they do not need to be computed or guessed.
-   The designated variables need not be leaf nodes. There may be
+   The designated variables need not be leaf verticies. There may be
    more than one variable; there must be at least one.
 
 3) Pick the first tree. Get the type of the root atom of the 
    first tree. Get a list of all atoms in the universe of this type. 
    These are the "candidate atoms".  Iterate over this list.
-   For each candidate atom, iterate over the atoms pointed at 
-   by the incidence edges. (These are given by the outgoing set
-   in CogServer).  The iterator is the next step below (step 4).
-   (Ths step is implemented in PatternMatch::match()). 
+   The iterator is the next step below (step 4).
 
-4) Apply accept/reject filters to the candidate atom.
-   In this specific application, the atom labels must match,
-   and the 
-   (The step implemented in PatternMatch::do_candidate())
+   [This step is implemented in PatternMatch::match(), which calls
+   PatternMatch::do_candidate() for each candidate root.]
 
+4) Initiate a recursive tree matching algorithm, comparing the 
+   incidence tree of the first predicate to that rooted at the 
+   candidate atom.
+
+   The tree matching algorithm is the appropriate place to implement 
+   any special-case tests and match requirements, such as matching 
+   types or labels on hypergraph atoms.
+
+   [This step is implemented in PatternMatch::tree_compare()
+   Several "special case tests" are applied at this point. The
+   most important one is in the comparision of nodes. The predicate
+   nodes are considered to match nodes in the universe when both nodes
+   are "is-a" instances of the same concept. So, for example, the
+   assertion _obj(throw_123, ball_456) is understood to be instance 123 
+   of the general concept of "throwing", and ball_456 is instance 456 of
+   the general concept of "ball". To answer the query "Who threw the 
+   ball?", the "ball" in the predicate will be a specific instance of
+   "ball", (e.g. "ball_789"), and we want to match on the concept,
+   not the instance.
+
+   These specifics may need to be modified if there is reasoning 
+   performed prior to the query, or it the overall representation of
+   the relex and frame structures in opencog change.]
+
+	If the tree contains bound variables, the corresponding atom in
+   the universe graph is marked as a solution candidate.
+
+5) Do other trees .... 
