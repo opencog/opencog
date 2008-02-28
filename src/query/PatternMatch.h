@@ -29,8 +29,8 @@ class PatternMatch
 
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Atom *);
-		bool pair_compare(Atom *, Atom *);
-		int depth;  // recursion depth for pair_compare.
+		bool tree_compare(Atom *, Atom *);
+		int depth;  // recursion depth for tree_compare.
 
 		// Are two nodes instances of the same concept?
 		bool concept_match(Atom *, Atom *);

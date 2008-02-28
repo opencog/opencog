@@ -122,21 +122,26 @@ int PatternMatch::var_position(Atom *atom)
 
 /* ======================================================== */
 /**
- * pair_compare compare two graphs, side-by-side.
+ * tree_compare compares two trees, side-by-side.
  *
- * Compare two graphs, side-by-side. It is assumed
+ * Compare two incidence trees, side-by-side. It is assumed
  * that the first of these is the predicate, and so the
  * comparison is between the predicate, and a candidate
  * graph. 
  *
- * By "graph", it is meant "a structure of atoms and
- * links", and only the "outgoing links" are considered.
- * It is assumed that the predicate is acyclic (has no
- * loops).
+ * The graph/tree refered to here is the incidence 
+ * graph/tree (aka Levi graph) of the hypergraph.
+ * (and not the hypergraph itself).
+ * The incidence graph is given by the "outgoing set"
+ * of the atom.
+ *
+ * This routine is recursive, calling itself on each
+ * subtree of the predicate, performing comparisions until
+ * a match is found (or not found).
  *
  * Return true if there's a mis-match.
  */
-bool PatternMatch::pair_compare(Atom *aa, Atom *ab)
+bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 {
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
@@ -166,10 +171,11 @@ printf("==== ta dah\n");
 
 std::string sta = aa->toString();
 std::string stb = ab->toString();
-printf ("par_compare depth=%d comp %s\n"
+printf ("tree_compare depth=%d comp %s\n"
         "                       to %s\n", depth, sta.c_str(), stb.c_str());
 
 	// If links, then compare link contents
+	// This is the recursive step.
 	if (dynamic_cast<Link *>(aa))
 	{
 		Handle ha = TLB::getHandle(aa);
@@ -177,10 +183,10 @@ printf ("par_compare depth=%d comp %s\n"
 
 		depth ++;
 		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
-		                 &PatternMatch::pair_compare, this);
+		                 &PatternMatch::tree_compare, this);
 		depth --;
 
-printf("par_comp link mist=%d\n", mismatch);
+printf("tree_comp link mist=%d\n", mismatch);
 		return mismatch;
 	}
 
@@ -197,7 +203,7 @@ printf("par_comp link mist=%d\n", mismatch);
 	if (CONCEPT_NODE == ntype)
 	{
 		bool mismatch = concept_match(aa, ab);
-printf("par_comp concept mist=%d\n", mismatch);
+printf("tree_comp concept mist=%d\n", mismatch);
 		return mismatch;
 	}
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
@@ -231,7 +237,7 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	// perform a pair-wise compare of the atom to the predicate.
 	depth = 1;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
-	                 &PatternMatch::pair_compare, this);
+	                 &PatternMatch::tree_compare, this);
 	depth = 0;
 
 	if (mismatch) return false;
