@@ -4,6 +4,8 @@
  * Linas Vepstas February 2008
  */
 
+#include <map>
+
 #include "types.h"
 #include "Atom.h"
 #include "FollowLink.h"
@@ -43,7 +45,10 @@ class PatternMatch
 		// Verify binding of varaibles
 		int var_position(Atom *);
 
-		// Result of solvig the predicate
+		// Embedding from subgraph to graph.
+		std::map<Handle, Handle> morphism;
+
+		// Result of solving the predicate
 		std::vector<Handle> var_solution;
 		std::vector<Handle> predicate_solution;
 

@@ -65,6 +65,7 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 	bound_vars = bvars;
 	var_solution = bvars;
 	normed_predicate.clear();
+	morphism.clear();
 	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
 }
 
@@ -218,16 +219,12 @@ printf("par_comp concept mist=%d\n", mismatch);
  * the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  *
- * The atom is used to xxx pariwise compare.
+ * The atom is used to xxx pairwise compare.
  * Unfinished.
  */
 bool PatternMatch::do_candidate(Atom *atom)
 {
-	// XXX Use the same basic filter rejection as was used to clean up
-	// the predicate -- reject anything thats not a linguistic relation.
 	Handle ah = TLB::getHandle(atom);
-	bool keep = foreach_outgoing_atom(ah, &PatternMatch::is_ling_rel, this);
-	if (!keep) return false;
 
 std::string str = atom->toString();
 printf ("\nduuude candidate %s\n", str.c_str());
