@@ -36,8 +36,13 @@ appropriate reply).
 Hmmm .. queries need to be morphed into predicates !?
 i.e. use a PredicateNode, and an EvalLink
 
-The Basic Algorithm
--------------------
+Terminology
+-----------
+The incidence graph of a hypergraph is called the "Levi graph".
+Levi graphs are bipartite.
+
+The Basic Algorithmic Idea
+--------------------------
 The basic idea is to treat the query as a graph, in which are embedded
 one or more unknowns. This query graph can be loosely understood to be
 a predicate, with the unknowns corresponding to the bound variables of
@@ -48,6 +53,45 @@ looking for a subgraph that matches the predicate. The nodes that fit
 where the unknowns would go are then the answer to the query.
 
 The problem of finding certain subgraphs within graphs is known as the
-"Subgraph Isomorphism Problem", and one uses a "Subgraph Isomorphism
-Algorithm" to find the match.
+"subgraph isomorphism problem" or the "subgraph matching problem", and 
+one uses a "subgraph isomorphism algorithm" to find the match.
+
+
+Currently Implemented Algorithm
+-------------------------------
+1) Input consists a sequence of the roots of hypergraph trees, 
+   in that the incidence graph forms a tree. Thus, by definition,
+   to incidence tree root must be a hypergraph link, as hypergraph
+   vertex cannot, by definition, have a non-trivial incidence tree
+   under it.
+
+   In CogServer, the outgoing pointers form the incidence tree. 
+   Each tree is by definition acyclic.  Thus, for example: 
+   _subj(row, Steve) has _subj at the root of the tree, with row 
+   and Steve as leaves. 
+
+   Each tree will be refered to as a "predicate" in the following.
+   Distinct trees may have common nodes. The collection of trees,
+   as a whole, may contain loops. The collection of trees, as a 
+   whole, must be connected; no disjoint graphs allowed.
+
+2) Input includes a list of the bound variables in the expressions.
+   Thus, for example _obj(row,_$qVar) has _$qVar is the variable
+   to be solved for. The list serves to explicitly identify the 
+   variables, so that they do not need to be computed or guessed.
+   The designated variables need not be leaf nodes. There may be
+   more than one variable; there must be at least one.
+
+3) Pick the first tree. Get the type of the root atom of the 
+   first tree. Get a list of all atoms in the universe of this type. 
+   These are the "candidate atoms".  Iterate over this list.
+   For each candidate atom, iterate over the atoms pointed at 
+   by the incidence edges. (These are given by the outgoing set
+   in CogServer).  The iterator is the next step below (step 4).
+   (Ths step is implemented in PatternMatch::match()). 
+
+4) Apply accept/reject filters to the candidate atom.
+   In this specific application, the atom labels must match,
+   and the 
+   (The step implemented in PatternMatch::do_candidate())
 
