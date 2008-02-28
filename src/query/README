@@ -33,5 +33,21 @@ The query processor will look for  these, perform some basic sentence
 analysis, and dispose of these as appropriate (i.e. generating an
 appropriate reply).
 
-Hmmm .. queries need to be morphed into predicates !? 
+Hmmm .. queries need to be morphed into predicates !?
 i.e. use a PredicateNode, and an EvalLink
+
+The Basic Algorithm
+-------------------
+The basic idea is to treat the query as a graph, in which are embedded
+one or more unknowns. This query graph can be loosely understood to be
+a predicate, with the unknowns corresponding to the bound variables of
+the predicate.
+
+The goal of query processing is to scan the collection of all knowledge,
+looking for a subgraph that matches the predicate. The nodes that fit
+where the unknowns would go are then the answer to the query.
+
+The problem of finding certain subgraphs within graphs is known as the
+"Subgraph Isomorphism Problem", and one uses a "Subgraph Isomorphism
+Algorithm" to find the match.
+

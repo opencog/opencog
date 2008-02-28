@@ -124,9 +124,14 @@ int PatternMatch::var_position(Atom *atom)
  * pair_compare compare two graphs, side-by-side.
  *
  * Compare two graphs, side-by-side. It is assumed
- * that one of these is the predicate, and so the
- * comparison is between a candidate graph, and a
- * predicate.
+ * that the first of these is the predicate, and so the
+ * comparison is between the predicate, and a candidate
+ * graph. 
+ *
+ * By "graph", it is meant "a structure of atoms and
+ * links", and only the "outgoing links" are considered.
+ * It is assumed that the predicate is acyclic (has no
+ * loops).
  *
  * Return true if there's a mis-match.
  */
@@ -150,6 +155,10 @@ printf("==== ta dah\n");
 	// If they're the same atom, then clearly they match.
 	// ... but only if aa is NOT a bound var.
 	if (aa == ab) return false;
+
+	// If one is null, but the other is not, there's clearly no match.
+	if (aa && !ab) return true;
+	if (ab && !aa) return true;
 
 	// If types differ, then no match.
 	if (aa->getType() != ab->getType()) return true;
