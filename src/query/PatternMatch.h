@@ -60,7 +60,7 @@ class PatternMatch
 	public:
 		PatternMatch(AtomSpace *);
 
-		void filter(Handle, std::vector<Handle> &);
+		void filter(Handle, const std::vector<Handle> &);
 		void match(void);
 
 };

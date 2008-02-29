@@ -85,9 +85,9 @@ bool PatternMatch::apply_rule(Atom *atom)
  * are not "defined linguistic relations", e.g. all but
  * _subj(x,y) and _obj(z,w) relations.
  */
-void PatternMatch::filter(Handle graph, std::vector<Handle> &bvars)
+void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 {
-	std::vector<Handle>::iterator i;
+	std::vector<Handle>::const_iterator i;
 	for (i = bvars.begin();
 	     i != bvars.end(); i++)
 	{
