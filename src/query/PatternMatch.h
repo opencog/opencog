@@ -10,6 +10,7 @@
 #include "Atom.h"
 #include "FollowLink.h"
 #include "Link.h"
+#include "OutgoingTree.h"
 
 namespace opencog {
 
@@ -24,6 +25,8 @@ class PatternMatch
 
 		bool prt(Atom *);
 
+		// -------------------------------------------
+		// Setup the predicate to be solved.
 		// Apply Filter rules, to create a normalized predicate.
 		std::vector<Handle> normed_predicate;
 		std::map<Handle, bool> bound_vars;
@@ -31,7 +34,8 @@ class PatternMatch
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
 
-		// traversal utilities
+		// -------------------------------------------
+		// Traversal utilities
 		RootMap root_map;
 		Handle curr_root;
 		bool note_root(Handle);
@@ -43,18 +47,25 @@ class PatternMatch
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
 		int depth;  // recursion depth for tree_compare.
-		bool direction_down; // recursion direction
+
+		// Tree comparison failed, erase the propsed solution.
+		bool erase_solution(Handle);
+
+		bool pred_up(Atom *);
+		OutgoingTree ot;
+
+		// -------------------------------------------
+		// Routines that implement node matching heuristics.
 
 		// Are two nodes instances of the same concept?
 		bool concept_match(Atom *, Atom *);
 
 		FollowLink fl;
 
-		// Verify binding of varaibles
+		// Verify binding of variables
 		bool is_var(Atom *);
 
 		// -------------------------------------------
-		bool erase_solution(Handle);
 
 		// Result of solving the predicate
 		std::map<Handle, Handle> var_solution;

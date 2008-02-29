@@ -158,15 +158,13 @@ bool PatternMatch::is_var(Atom *atom)
 
 /* ======================================================== */
 
+/**
+ * tree comparison failed, so erase the proposed solution.
+ */
 bool PatternMatch::erase_solution(Handle h)
 {
 	if (var_solution[h]) var_solution[h] = NULL;
-
-	if (direction_down)
-	{
-		foreach_outgoing_handle(h,
-		             &PatternMatch::erase_solution, this);
-	}
+	foreach_outgoing_handle(h, &PatternMatch::erase_solution, this);
 	return false;
 }
 
@@ -227,32 +225,19 @@ std::string stb = ab->toString();
 printf ("tree_compare depth=%d comp %s\n"
         "                        to %s\n", depth, sta.c_str(), stb.c_str());
 
-	// The recursion step. There are two ways to navigate
-	// the tree: follow the outgoing edges, and so recursing
-	// "down" the tree.  The other direction is to go upwards,
-	// by following the incoming links, to try to find the 
-	// root of the tree.
-	if (direction_down)
+	// The recursion step: traverse down the tree.
+	// Only links should have non-empty outgoing sets.
+	if (dynamic_cast<Link *>(aa))
 	{
-		// If links, then compare link contents.
-		// Only links should have non-empty outgoing sets.
-		if (dynamic_cast<Link *>(aa))
-		{
-			Handle hb = TLB::getHandle(ab);
-	
-			depth ++;
-			bool mismatch = foreach_outgoing_atom_pair(ha, hb,
-			              	      &PatternMatch::tree_compare, this);
-			depth --;
-			if (false == mismatch) var_solution[ha] = ab;
+		Handle hb = TLB::getHandle(ab);
+
+		depth ++;
+		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
+		              	      &PatternMatch::tree_compare, this);
+		depth --;
+		if (false == mismatch) var_solution[ha] = ab;
 printf("tree_comp down link mismatch=%d\n", mismatch);
-			return mismatch;
-		}
-	}
-	else
-	{
-printf("tree_comp up in\n");
-return false;
+		return mismatch;
 	}
 
 	// If we are here, then we are comparing nodes.
@@ -284,6 +269,24 @@ printf("tree_comp concept mist=%d\n", mismatch);
 	return true;
 }
 
+/* ======================================================== */
+
+bool PatternMatch::pred_up(Atom *a)
+{
+	Handle h = TLB::getHandle(a);
+
+printf("duude examine ");
+prt(a);
+	// Is this atom even a part of the predicate we are considering?
+	bool valid = ot.is_node_in_tree(curr_root, h);
+	if (!valid) return false;
+
+printf("duude found one! \n");
+	prt(a);
+	return false;
+}
+
+/* ======================================================== */
 /**
  * do_candidate - examine candidates, looking for matches.
  *
@@ -300,7 +303,6 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	// compare a predicate tree to a tree in the graph.
 	// The compare is pair-wise, in parallel.
 	depth = 1;
-	direction_down = true;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
 	                 &PatternMatch::tree_compare, this);
 	depth = 0;
@@ -320,6 +322,7 @@ printf ("duuude pred zero solved %s\n", str.c_str());
 	// For each solved node, look up root to see if root is solved.
 	// If not, start working on that.
 	Handle pursue = UNDEFINED_HANDLE;
+	Handle unsolved_pred = UNDEFINED_HANDLE;
 	RootMap::iterator k;
 	for (k=root_map.begin(); k != root_map.end(); k++)
 	{
@@ -334,8 +337,15 @@ printf ("duuude pred zero solved %s\n", str.c_str());
 		for (i=rl->begin(); i != rl->end(); i++)
 		{
 			Handle root = *i;
-			if(predicate_solution[root] != NULL) solved = true;
-			else unsolved = true;
+			if(predicate_solution[root] != NULL)
+			{
+				solved = true;
+			}
+			else
+			{
+				unsolved_pred = root;
+				unsolved = true;
+			}
 		}
 		if (solved && unsolved) break;
 	}
@@ -346,15 +356,16 @@ printf ("duuude pred zero solved %s\n", str.c_str());
 
 printf("duude next handle is ");
 prt(pursue);
-#if WRONG
-	depth = 1;
-	direction_down = false;
-	Handle ap = var_solution[pursue];
+	// pursue is a pointer to a node that's shared between
+	// several predicates. One of the predicates has been
+	// solved, another has not.  We want to now traverse 
+	// upwards from this node, to find the top of the 
+	// unsolved predicate.
+	curr_root = unsolved_pred;
+	foreach_incoming_atom(pursue, &PatternMatch::pred_up, this);
 
-	mismatch = foreach_outgoing_atom_pair(pursue, ap,
-	                 &PatternMatch::tree_compare, this);
+	// Handle ap = var_solution[pursue];
 
-#endif
 	return true;
 }
 
