@@ -181,13 +181,19 @@ Type AtomSpace::getTypeV(const tree<Vertex>& _target) const {
     return getType(v2h(*_target.begin()));
 }
 
-bool AtomSpace::isReal(Handle h) const { 	//fprintf(stdout,"Atom space address: %p\n", this);
+bool AtomSpace::isReal(Handle h) const 
+{
+ 	//fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-return h->isReal(); }
-Type AtomSpace::getType(Handle h) const { 	//fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-return h->getType(); }
+	return TLB::getAtom(h)->isReal();
+}
 
+Type AtomSpace::getType(Handle h) const
+{
+ 	//fprintf(stdout,"Atom space address: %p\n", this);
+    //fflus(stdout);
+	return TLB::getAtom(h)->getType();
+}
 
 Type AtomSpace::getAtomType(const string& str) const {
 	//fprintf(stdout,"Atom space address: %p\n", this);
