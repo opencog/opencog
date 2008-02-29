@@ -43,6 +43,7 @@ class PatternMatch
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
 		int depth;  // recursion depth for tree_compare.
+		bool direction_down; // recursion direction
 
 		// Are two nodes instances of the same concept?
 		bool concept_match(Atom *, Atom *);
@@ -53,6 +54,7 @@ class PatternMatch
 		bool is_var(Atom *);
 
 		// -------------------------------------------
+		bool erase_solution(Handle);
 
 		// Result of solving the predicate
 		std::map<Handle, Handle> var_solution;

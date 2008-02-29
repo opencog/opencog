@@ -137,7 +137,13 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 /* ======================================================== */
 /**
  * Check to see if atom is a bound variable.
- * If it is, return true
+ * Heuristics are used to determine this: the local atom should
+ * be an instance of a concept, whose dictionary word is _$qVar,
+ * i.e. one of the bound variable names.
+ *
+ * XXX This heuristic should be re-examined/rethought at some point.
+ *
+ * If it is, return true.
  */
 bool PatternMatch::is_var(Atom *atom)
 {
@@ -151,6 +157,19 @@ bool PatternMatch::is_var(Atom *atom)
 }
 
 /* ======================================================== */
+
+bool PatternMatch::erase_solution(Handle h)
+{
+	if (var_solution[h]) var_solution[h] = NULL;
+
+	if (direction_down)
+	{
+		foreach_outgoing_handle(h,
+		             &PatternMatch::erase_solution, this);
+	}
+	return false;
+}
+
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -173,6 +192,8 @@ bool PatternMatch::is_var(Atom *atom)
  */
 bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 {
+	Handle ha = TLB::getHandle(aa);
+
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (is_var(aa))
@@ -182,14 +203,17 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 
 		// Else, we have a candidate solution.
 		// Make a record of it.
-		Handle ha = TLB::getHandle(aa);
 		var_solution[ha] = ab;
 		return false;
 	}
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if aa is NOT a bound var.
-	if (aa == ab) return false;
+	if (aa == ab)
+	{
+		var_solution[ha] = ab;
+		return false;
+	}
 
 	// If one is null, but the other is not, there's clearly no match.
 	if (aa && !ab) return true;
@@ -201,22 +225,34 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 std::string sta = aa->toString();
 std::string stb = ab->toString();
 printf ("tree_compare depth=%d comp %s\n"
-        "                       to %s\n", depth, sta.c_str(), stb.c_str());
+        "                        to %s\n", depth, sta.c_str(), stb.c_str());
 
-	// If links, then compare link contents
-	// This is the recursive step.
-	if (dynamic_cast<Link *>(aa))
+	// The recursion step. There are two ways to navigate
+	// the tree: follow the outgoing edges, and so recursing
+	// "down" the tree.  The other direction is to go upwards,
+	// by following the incoming links, to try to find the 
+	// root of the tree.
+	if (direction_down)
 	{
-		Handle ha = TLB::getHandle(aa);
-		Handle hb = TLB::getHandle(ab);
-
-		depth ++;
-		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
-		                 &PatternMatch::tree_compare, this);
-		depth --;
-
-printf("tree_comp link mist=%d\n", mismatch);
-		return mismatch;
+		// If links, then compare link contents.
+		// Only links should have non-empty outgoing sets.
+		if (dynamic_cast<Link *>(aa))
+		{
+			Handle hb = TLB::getHandle(ab);
+	
+			depth ++;
+			bool mismatch = foreach_outgoing_atom_pair(ha, hb,
+			              	      &PatternMatch::tree_compare, this);
+			depth --;
+			if (false == mismatch) var_solution[ha] = ab;
+printf("tree_comp down link mismatch=%d\n", mismatch);
+			return mismatch;
+		}
+	}
+	else
+	{
+printf("tree_comp up in\n");
+return false;
 	}
 
 	// If we are here, then we are comparing nodes.
@@ -232,6 +268,7 @@ printf("tree_comp link mist=%d\n", mismatch);
 	if (CONCEPT_NODE == ntype)
 	{
 		bool mismatch = concept_match(aa, ab);
+		if (false == mismatch) var_solution[ha] = ab;
 printf("tree_comp concept mist=%d\n", mismatch);
 		return mismatch;
 	}
@@ -263,11 +300,16 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	// compare a predicate tree to a tree in the graph.
 	// The compare is pair-wise, in parallel.
 	depth = 1;
+	direction_down = true;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
 	                 &PatternMatch::tree_compare, this);
 	depth = 0;
 
-	if (mismatch) return false;
+	if (mismatch)
+	{
+		erase_solution(ah);
+		return false;
+	}
 
 str = atom->toString();
 printf ("duuude pred zero solved %s\n", str.c_str());
@@ -302,8 +344,17 @@ printf ("duuude pred zero solved %s\n", str.c_str());
 	// we are done! Return true to terminate the search.
 	if (UNDEFINED_HANDLE == pursue) return true;
 
-printf("duude next handle to do is %p\n", pursue);
+printf("duude next handle is ");
+prt(pursue);
+#if WRONG
+	depth = 1;
+	direction_down = false;
+	Handle ap = var_solution[pursue];
 
+	mismatch = foreach_outgoing_atom_pair(pursue, ap,
+	                 &PatternMatch::tree_compare, this);
+
+#endif
 	return true;
 }
 
@@ -352,15 +403,19 @@ printf("\nnyerh hare hare\n");
 	      &PatternMatch::do_candidate, this);
 
 	// Print out the solution vector.
-	std::map<Handle, Handle>::iterator k;
-	for (k=var_solution.begin(); k != var_solution.end(); k++)
+	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
-		std::pair<Handle, Handle> vk = *k;
-		Atom *a = TLB::getAtom(vk.first);
-		Node *n = dynamic_cast<Node *>(a);
-		if (n)
+		std::pair<Handle, bool> vj = *j;
+		Handle var = vj.first;
+		Handle soln = var_solution[var];
+		Atom *av = TLB::getAtom(var);
+		Atom *as = TLB::getAtom(soln);
+		Node *nv = dynamic_cast<Node *>(av);
+		Node *ns = dynamic_cast<Node *>(as);
+		if (ns && nv)
 		{
-			printf(" solution var: %s\n", n->getName().c_str());
+			printf("var %s solved by %s\n", 
+			       nv->getName().c_str(), ns->getName().c_str());
 		}
 	}
 }
