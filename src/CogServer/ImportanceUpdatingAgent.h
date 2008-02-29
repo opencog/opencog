@@ -16,6 +16,7 @@
 #include <AttentionValue.h>
 
 #include <AtomSpace.h>
+#include <RandGen.h>
 #include "CogServer.h"
 #include "MindAgent.h"
 
@@ -56,10 +57,13 @@ private:
 
     /**
      * Randomly stimulate atoms in the AtomSpace
+     * Simulates a "cognitive process" (e.g. a Novamente lobe)
+     * that stimulates Atoms selectively. May also be useful to
+     * introduce a level of noise into the system.
      *
      * @param AtomSpace to act upon
      */
-    void randomStimulation(AtomSpace *a) {};
+    void randomStimulation(AtomSpace *a);
     
     /* Recent amount of stimulus given per cycle */
     stim_t recentTotalStimulusPerCycle;
@@ -90,34 +94,23 @@ private:
     long targetLobeLTI;
     long acceptableLobeSTIRange[2];
     long acceptableLobeLTIRange[2];
-    
-    /**
-     * Collect STI rent for atoms above attentional focus boundary.
-     *
-     * @param AtomSpace the MindAgent is working on.
-     */
-    void collectSTIRent(AtomSpace* a); 
-    
-    /**
-     * Collect STI rent for atoms above attentional focus boundary.
-     *
-     * @param AtomSpace the MindAgent is working on.
-     */
-    void collectLTIRent(AtomSpace* a); 
+    bool lobeSTIOutOfBounds;
 
     /**
-     * Pay STI wages to atoms that have been useful.
+     * Collect STI rent for atoms above attentional focus boundary
+     * and pay wages based on stimulation.
      *
      * @param AtomSpace the MindAgent is working on.
      */
-    void paySTIWages(AtomSpace* a);
-
+    void updateAtomSTI(AtomSpace* a, Handle h); 
+    
     /**
-     * Pay LTI wages to atoms that have been useful.
+     * Collect LTI rent for atoms above attentional focus boundary
+     * and pay wages based on stimulation
      *
      * @param AtomSpace the MindAgent is working on.
      */
-    void payLTIWages(AtomSpace* a);
+    void updateAtomLTI(AtomSpace* a, Handle h); 
 
     /**
      * Cap STI values to the maximum to prevent all important atoms.
@@ -125,7 +118,7 @@ private:
      * @param AtomSpace the MindAgent is working on.
      * @return Whether any atoms had an STI above the cap.
      */
-    bool enforceSTICap(AtomSpace* a);
+    bool enforceSTICap(AtomSpace* a, Handle h);
 
     /**
      * Cap LTI values to the maximum to prevent all important atoms.
@@ -133,7 +126,10 @@ private:
      * @param AtomSpace the MindAgent is working on.
      * @return Whether any atoms had an STI above the cap.
      */
-    bool enforceLTICap(AtomSpace* a);
+    bool enforceLTICap(AtomSpace* a, Handle h);
+
+
+    void updateSTIRent(AtomSpace* a);
 
     /**
      * Check whether AtomSpace funds are within limits, and make changes
@@ -159,7 +155,7 @@ private:
      *
      * @param AtomSpace to work in
      */
-    void fixSTIDynamics(AtomSpace* a);
+    void adjustSTIFunds(AtomSpace* a);
 
     /**
      * If LTI funds are outside of acceptable limits, then adjust
@@ -167,7 +163,7 @@ private:
      *
      * @param AtomSpace to work in
      */
-    void fixLTIDynamics(AtomSpace* a);
+    void adjustLTIFunds(AtomSpace* a);
 
     /**
      * Update the attentional focus size variables
