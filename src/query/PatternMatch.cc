@@ -253,9 +253,6 @@ printf("tree_comp concept mist=%d\n", mismatch);
  * This routine is invoked on every candidate atom taken from
  * the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
- *
- * The atom is used to xxx pairwise compare.
- * Unfinished.
  */
 bool PatternMatch::do_candidate(Atom *atom)
 {
@@ -263,7 +260,8 @@ bool PatternMatch::do_candidate(Atom *atom)
 
 std::string str = atom->toString();
 printf ("\nduuude candidate %s\n", str.c_str());
-	// perform a pair-wise compare of the atom to the predicate.
+	// compare a predicate tree to a tree in the graph.
+	// The compare is pair-wise, in parallel.
 	depth = 1;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
 	                 &PatternMatch::tree_compare, this);
@@ -272,13 +270,40 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	if (mismatch) return false;
 
 str = atom->toString();
-printf ("duuude have match %s\n", str.c_str());
+printf ("duuude pred zero solved %s\n", str.c_str());
 	Handle ph = normed_predicate[0];
 	predicate_solution[ph] = ah;
 
 	// Now, search for an as-yet unsolved/unmatched predicate.
+	// For each solved node, look up root to see if root is solved.
+	// If not, start working on that.
+	Handle pursue = UNDEFINED_HANDLE;
+	RootMap::iterator k;
+	for (k=root_map.begin(); k != root_map.end(); k++)
+	{
+		RootPair vk = *k;
+		RootList *rl = vk.second;
+		pursue = vk.first;
 
-	// Found a solution, return true to terminate search.
+		bool unsolved = false;
+		bool solved = false;
+
+		std::vector<Handle>::iterator i;
+		for (i=rl->begin(); i != rl->end(); i++)
+		{
+			Handle root = *i;
+			if(predicate_solution[root] != NULL) solved = true;
+			else unsolved = true;
+		}
+		if (solved && unsolved) break;
+	}
+
+	// If there are no further predicates to solve,
+	// we are done! Return true to terminate the search.
+	if (UNDEFINED_HANDLE == pursue) return true;
+
+printf("duude next handle to do is %p\n", pursue);
+
 	return true;
 }
 

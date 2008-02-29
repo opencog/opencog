@@ -15,6 +15,7 @@ namespace opencog {
 
 typedef std::vector<Handle> RootList;
 typedef std::map<Handle, RootList *> RootMap;
+typedef std::pair<Handle, RootList *> RootPair;
 
 class PatternMatch
 {
