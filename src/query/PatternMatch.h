@@ -24,6 +24,7 @@ class PatternMatch
 		AtomSpace *atom_space;
 
 		bool prt(Atom *);
+		bool prt(Handle);
 
 		// -------------------------------------------
 		// Setup the predicate to be solved.

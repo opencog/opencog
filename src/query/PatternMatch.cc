@@ -26,6 +26,11 @@ bool PatternMatch::prt(Atom *atom)
 	return false;
 }
 
+bool PatternMatch::prt(Handle h)
+{
+	return prt(TLB::getAtom(h));
+}
+
 /* ======================================================== */
 
 /**
@@ -289,6 +294,8 @@ bool PatternMatch::soln_up(Atom *as)
 	// If no match, try the next one.
 	if (no_match) return false;
 
+	curr_soln_handle = TLB::getHandle(as);
+
 	// Ahh ! found a match!
 	// If we've navigated to the top of the predicate, then we're done!
 	if (curr_pred_handle == curr_root) return true;
@@ -297,7 +304,6 @@ printf("have soln match, ");
 prt(as);
 printf("moving up the pred\n");
 	// Move up the predicate, and hunt for a match, again.
-	curr_soln_handle = TLB::getHandle(as);
 	bool found = foreach_incoming_atom(curr_pred_handle,
 	                &PatternMatch::pred_up, this);
 printf("up pred find =%d\n", found);
@@ -335,6 +341,10 @@ bool PatternMatch::do_candidate(Handle ah)
 {
 	Atom *atom = TLB::getAtom(ah);
 
+	predicate_solution.clear();
+	var_solution.clear();
+	curr_root = normed_predicate[0];
+
 std::string str = atom->toString();
 printf ("\nduuude candidate %s\n", str.c_str());
 	// Compare a predicate tree to a tree in the graph.
@@ -344,66 +354,77 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	                 &PatternMatch::tree_compare, this);
 	depth = 0;
 
-	if (mismatch)
+	// Return false to try the next candidate.
+	if (mismatch) return false;
+
+	curr_soln_handle = ah;
+
+	while (true)
 	{
-		erase_solution(ah);
-		// Return false to try the next candidate.
-		return false;
-	}
+		predicate_solution[curr_root] = curr_soln_handle;
+printf ("duuude --------------------- \npred: ");
+prt(curr_root);
+printf("soln: ");
+prt(curr_soln_handle);
 
-str = atom->toString();
-printf ("duuude --------------------- \npred zero solved %s\n", str.c_str());
-	Handle ph = normed_predicate[0];
-	predicate_solution[ph] = ah;
 
-	// Now, search for an as-yet unsolved/unmatched predicate.
-	// For each solved node, look up root to see if root is solved.
-	// If not, start working on that.
-	Handle pursue = UNDEFINED_HANDLE;
-	Handle unsolved_pred = UNDEFINED_HANDLE;
-	RootMap::iterator k;
-	for (k=root_map.begin(); k != root_map.end(); k++)
-	{
-		RootPair vk = *k;
-		RootList *rl = vk.second;
-		pursue = vk.first;
-
-		bool unsolved = false;
-		bool solved = false;
-
-		std::vector<Handle>::iterator i;
-		for (i=rl->begin(); i != rl->end(); i++)
+		// Now, search for an as-yet unsolved/unmatched predicate.
+		// For each solved node, look up root to see if root is solved.
+		// If not, start working on that.
+		Handle pursue = UNDEFINED_HANDLE;
+		Handle unsolved_pred = UNDEFINED_HANDLE;
+		RootMap::iterator k;
+		for (k=root_map.begin(); k != root_map.end(); k++)
 		{
-			Handle root = *i;
-			if(predicate_solution[root] != NULL)
+			RootPair vk = *k;
+			RootList *rl = vk.second;
+			pursue = vk.first;
+	
+			bool unsolved = false;
+			bool solved = false;
+	
+			std::vector<Handle>::iterator i;
+			for (i=rl->begin(); i != rl->end(); i++)
 			{
-				solved = true;
+				Handle root = *i;
+				if(predicate_solution[root] != NULL)
+				{
+					solved = true;
+				}
+				else
+				{
+					unsolved_pred = root;
+					unsolved = true;
+				}
 			}
-			else
-			{
-				unsolved_pred = root;
-				unsolved = true;
-			}
+			if (solved && unsolved) break;
 		}
-		if (solved && unsolved) break;
-	}
 
-	// If there are no further predicates to solve,
-	// we are done! Return true to terminate the search.
-	if (UNDEFINED_HANDLE == pursue) return true;
+		// If there are no further predicates to solve,
+		// we are done! Return true to terminate the search.
+		if (UNDEFINED_HANDLE == pursue) return true;
 
+		// pursue is a pointer to a node that's shared between
+		// several predicates. One of the predicates has been
+		// solved, another has not.  We want to now traverse 
+		// upwards from this node, to find the top of the 
+		// unsolved predicate.
+		curr_root = unsolved_pred;
 printf("duude next handle is ");
-prt(TLB::getAtom(pursue));
-	// pursue is a pointer to a node that's shared between
-	// several predicates. One of the predicates has been
-	// solved, another has not.  We want to now traverse 
-	// upwards from this node, to find the top of the 
-	// unsolved predicate.
-	curr_root = unsolved_pred;
-	curr_soln_handle = var_solution[pursue];
-	bool found = foreach_incoming_atom(pursue, &PatternMatch::pred_up, this);
-
+prt(pursue);
+printf("next pred is ");
+prt(curr_root);
+		curr_soln_handle = var_solution[pursue];
+		bool found = foreach_incoming_atom(pursue, &PatternMatch::pred_up, this);
 printf("final up result = %d\n", found);
+
+		// If found is false, then there's no solution here.
+		// Bail out, return false to try again at top level.
+		if (!found) return false;
+
+		// If found is true, then we successfully matched the unsolved
+		// predicate. Look for more unsolved predicates, and repeat.
+	}
 
 	return true;
 }
