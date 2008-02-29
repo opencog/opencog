@@ -29,7 +29,7 @@ class OutgoingTree
 		{
 			if (tree == NULL) return false;
 			if (tree == tgt) return true;
-			foreach_outgoing_handle(tree, &OutgoingTree::in_tree, this);
+			return foreach_outgoing_handle(tree, &OutgoingTree::in_tree, this);
 		}
 };
 
