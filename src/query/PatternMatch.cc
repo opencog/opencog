@@ -85,9 +85,9 @@ bool PatternMatch::apply_rule(Atom *atom)
  * are not "defined linguistic relations", e.g. all but
  * _subj(x,y) and _obj(z,w) relations.
  */
-void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
+void PatternMatch::filter(Handle graph, std::vector<Handle> &bvars)
 {
-	const std::vector<Handle>::iterator i;
+	std::vector<Handle>::iterator i;
 	for (i = bvars.begin();
 	     i != bvars.end(); i++)
 	{
@@ -302,9 +302,11 @@ void PatternMatch::match(void)
 	}
 
 	// Print out the bound variables in the predicate.
-	for (i=bound_vars.begin(); i != bound_vars.end(); i++)
+	std::map<Handle, bool>::iterator j;
+	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
-		Atom *a = TLB::getAtom(*i);
+		std::pair<Handle, bool> vj = *j;
+		Atom *a = TLB::getAtom(vj.first);
 		Node *n = dynamic_cast<Node *>(a);
 		if (n)
 		{
@@ -325,9 +327,11 @@ printf("\nnyerh hare hare\n");
 	      &PatternMatch::do_candidate, this);
 
 	// Print out the solution vector.
-	for (i=var_solution.begin(); i != var_solution.end(); i++)
+	std::map<Handle, Handle>::iterator k;
+	for (k=var_solution.begin(); k != var_solution.end(); k++)
 	{
-		Atom *a = TLB::getAtom(*i);
+		std::pair<Handle, Handle> vk = *k;
+		Atom *a = TLB::getAtom(vk.first);
 		Node *n = dynamic_cast<Node *>(a);
 		if (n)
 		{
