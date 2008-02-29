@@ -29,7 +29,7 @@ class PatternMatch
 		// Setup the predicate to be solved.
 		// Apply Filter rules, to create a normalized predicate.
 		std::vector<Handle> normed_predicate;
-		std::map<Handle, bool> bound_vars;
+		std::set<Handle> bound_vars;
 
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
@@ -42,7 +42,7 @@ class PatternMatch
 
 		// -------------------------------------------
 		// Examine each candidate for a match, in turn.
-		bool do_candidate(Atom *);
+		bool do_candidate(Handle);
 
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
@@ -79,6 +79,8 @@ class PatternMatch
 
 		void filter(Handle, const std::vector<Handle> &);
 		void match(void);
+
+		void print_solution(void);
 
 };
 };

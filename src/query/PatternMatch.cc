@@ -92,7 +92,7 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 	     i != bvars.end(); i++)
 	{
 		Handle h = *i;
-		bound_vars[h] = true;
+		bound_vars.insert(h);
 	}
 
 	var_solution.clear();
@@ -149,11 +149,15 @@ bool PatternMatch::is_var(Atom *atom)
 {
 	// The local atom will be an instance of a general concept...
 	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
+	if(!atom) return false;
 	// and we want the "word" associated with this general concept.
 	atom = fl.backtrack_binary_link(atom, WR_LINK);
+	if(!atom) return false;
 
 	Handle h = TLB::getHandle(atom);
-	return bound_vars[h];
+	std::set<Handle>::const_iterator it = bound_vars.find(h);
+	if (*it) return true;
+	return false;
 }
 
 /* ======================================================== */
@@ -163,7 +167,9 @@ bool PatternMatch::is_var(Atom *atom)
  */
 bool PatternMatch::erase_solution(Handle h)
 {
-	if (var_solution[h]) var_solution[h] = NULL;
+	// std:map<Handle,Handle>::const_iterator it = var_solution.find(h);
+	// if (*it) var_solution[h] = NULL;
+	var_solution[h] = NULL;
 	foreach_outgoing_handle(h, &PatternMatch::erase_solution, this);
 	return false;
 }
@@ -186,7 +192,10 @@ bool PatternMatch::erase_solution(Handle h)
  * subtree of the predicate, performing comparisions until
  * a match is found (or not found).
  *
- * Return true if there's a mis-match.
+ * Return true if there's a mis-match. The goal here
+ * is to iterate the entire tree, without mismatches.
+ * Since a return value of true stops the iteration,
+ * true is used to signal a mistmatch.
  */
 bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 {
@@ -321,13 +330,13 @@ printf("duude upward soln find =%d\n", found);
  * the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
-bool PatternMatch::do_candidate(Atom *atom)
+bool PatternMatch::do_candidate(Handle ah)
 {
-	Handle ah = TLB::getHandle(atom);
+	Atom *atom = TLB::getAtom(ah);
 
 std::string str = atom->toString();
 printf ("\nduuude candidate %s\n", str.c_str());
-	// compare a predicate tree to a tree in the graph.
+	// Compare a predicate tree to a tree in the graph.
 	// The compare is pair-wise, in parallel.
 	depth = 1;
 	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
@@ -337,11 +346,13 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	if (mismatch)
 	{
 		erase_solution(ah);
+		// Return false to try the next candidate.
 		return false;
 	}
 
 str = atom->toString();
 printf ("duuude pred zero solved %s\n", str.c_str());
+print_solution();
 	Handle ph = normed_predicate[0];
 	predicate_solution[ph] = ah;
 
@@ -381,8 +392,9 @@ printf ("duuude pred zero solved %s\n", str.c_str());
 	// we are done! Return true to terminate the search.
 	if (UNDEFINED_HANDLE == pursue) return true;
 
+print_solution();
 printf("duude next handle is ");
-prt(pursue);
+prt(TLB::getAtom(pursue));
 	// pursue is a pointer to a node that's shared between
 	// several predicates. One of the predicates has been
 	// solved, another has not.  We want to now traverse 
@@ -417,19 +429,17 @@ void PatternMatch::match(void)
 	}
 
 	// Print out the bound variables in the predicate.
-	std::map<Handle, bool>::iterator j;
+	std::set<Handle>::const_iterator j;
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
-		std::pair<Handle, bool> vj = *j;
-		Atom *a = TLB::getAtom(vj.first);
+		Handle h = *j;
+		Atom *a = TLB::getAtom(h);
 		Node *n = dynamic_cast<Node *>(a);
 		if (n)
 		{
 			printf(" bound var: %s\n", n->getName().c_str());
 		}
 	}
-
-printf("\nnyerh hare hare\n");
 
 	// Get type of the first item in the predicate list.
 	Handle h = normed_predicate[0];
@@ -441,14 +451,23 @@ printf("\nnyerh hare hare\n");
 	foreach_handle_of_type(atom_space, ptype,
 	      &PatternMatch::do_candidate, this);
 
+	print_solution();
+}
+
+void PatternMatch::print_solution(void)
+{
+	printf("\nSolution vector:\n");
+
 	// Print out the solution vector.
+	std::set<Handle>::const_iterator j;
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
-		std::pair<Handle, bool> vj = *j;
-		Handle var = vj.first;
+		Handle var = *j;
 		Handle soln = var_solution[var];
+printf("\nnyerh hare hare var=%p soln=%p\n", var, soln);
 		Atom *av = TLB::getAtom(var);
 		Atom *as = TLB::getAtom(soln);
+prt(av);
 		Node *nv = dynamic_cast<Node *>(av);
 		Node *ns = dynamic_cast<Node *>(as);
 		if (ns && nv)
