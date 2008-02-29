@@ -29,7 +29,7 @@ using namespace Util;
 const char* AtomSpace::SPACE_MAP_NODE_NAME = "SpaceMap";
 
 AtomSpace::~AtomSpace() {
-    
+
     // check if has already been deleted. See in code where it can be delete.
     if(_handle_iterator){
         delete (_handle_iterator);
@@ -61,14 +61,14 @@ AtomSpace::AtomSpace() {
 const AtomTable& AtomSpace::getAtomTable() const {
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-    return atomTable; 
+    return atomTable;
 }
 
 const TimeServer& AtomSpace::getTimeServer() const{
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    return timeServer; 
+    return timeServer;
 }
 
 
@@ -89,14 +89,14 @@ Handle AtomSpace::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
 }
 
 Handle AtomSpace::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv) {
-//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp init"); 
+//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp init");
     Handle timeNode = addNode(TIME_NODE, timeNodeName.c_str());
-//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp 1"); 
+//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp 1");
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
     atTimeLinkOutgoing.push_back(h);
     Handle atTimeLink = addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv);
-//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp end"); 
+//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp end");
     return atTimeLink;
 }
 
@@ -108,11 +108,11 @@ bool AtomSpace::removeTimeInfo(Handle h, unsigned long timestamp, TemporalTable:
 
 bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive) {
     //printf("AtomSpace::removeTimeInfo(%s, %s, %d, %s, %d, %d)\n", TLB::getHandle(h)->toString().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
-    
+
     list<HandleTemporalPair> existingEntries;
     timeServer.get(back_inserter(existingEntries), h, t, criterion);
     bool result = !existingEntries.empty();
-    for(list<HandleTemporalPair>::const_iterator itr = existingEntries.begin(); 
+    for(list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
          itr != existingEntries.end(); itr++) {
         Handle atTimeLink = getAtTimeLink(*itr);
         //printf("Got atTimeLink = %p\n", atTimeLink);
@@ -170,57 +170,57 @@ Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const{
     return result;
 }
 
-const TruthValue& AtomSpace::getDefaultTV() { 
-    return TruthValue::DEFAULT_TV(); 
+const TruthValue& AtomSpace::getDefaultTV() {
+    return TruthValue::DEFAULT_TV();
 }
 
 Type AtomSpace::getTypeV(const tree<Vertex>& _target) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-  
+
     return getType(v2h(*_target.begin()));
 }
 
-bool AtomSpace::isReal(Handle h) const 
+bool AtomSpace::isReal(Handle h) const
 {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-	return TLB::getAtom(h)->isReal();
+        return TLB::getAtom(h)->isReal();
 }
 
 Type AtomSpace::getType(Handle h) const
 {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-	return TLB::getAtom(h)->getType();
+        return TLB::getAtom(h)->getType();
 }
 
 Type AtomSpace::getAtomType(const string& str) const {
-	//fprintf(stdout,"Atom space address: %p\n", this);
+        //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return ClassServer::getType(const_cast<char*>(str.c_str()));
 }
 bool AtomSpace::inheritsType(Type t1,Type t2) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   
-    //printf("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2); 
+
+    //printf("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2);
     bool result = ClassServer::isAssignableFrom(t2,t1);
-    //printf("AtomSpace::inheritsType result = %d\n", result); 
+    //printf("AtomSpace::inheritsType result = %d\n", result);
     return result;
-} 
+}
 bool AtomSpace::isNode(Type t) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     // XXX TODO: it would be computationally much more efficient
     // to just do this:
     // return (NULL != dynamic_cast<Node *>(this));
     return inheritsType(t,NODE);
-} 
+}
 string AtomSpace::getName(Type t) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     if (ClassServer::getClassName()->find(t)==ClassServer::getClassName()->end()) {
@@ -229,18 +229,18 @@ string AtomSpace::getName(Type t) const {
     return ClassServer::getTypeName(t);
 }
 
-bool AtomSpace::isNode(Handle h) const {  	//fprintf(stdout,"Atom space address: %p\n", this);
+bool AtomSpace::isNode(Handle h) const {          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 return inheritsType(getType(h), NODE); }
-bool AtomSpace::isVar(Handle h) const {  	//fprintf(stdout,"Atom space address: %p\n", this);
+bool AtomSpace::isVar(Handle h) const {          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 return inheritsType(getType(h),VARIABLE_NODE); }
-bool AtomSpace::isList(Handle h) const {  	//fprintf(stdout,"Atom space address: %p\n", this);
+bool AtomSpace::isList(Handle h) const {          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 return inheritsType(getType(h), LIST_LINK); }
 
-bool AtomSpace::containsVar(Handle h) const { 
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+bool AtomSpace::containsVar(Handle h) const {
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     if (!isNode(h)) {
@@ -253,7 +253,7 @@ bool AtomSpace::containsVar(Handle h) const {
 }
 
 Handle AtomSpace::createHandle(Type t,const string& str,bool managed) {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     Handle h=getHandle(t,str);
@@ -261,7 +261,7 @@ Handle AtomSpace::createHandle(Type t,const string& str,bool managed) {
 }
 
 Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     Handle h=getHandle(t,outgoing);
@@ -269,7 +269,7 @@ Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
 }
 
 bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     bool result = isNullVersionHandle(vh);
@@ -282,7 +282,7 @@ bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
 }
 
 Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn) {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     cassert(TRACE_INFO, boost::get<Handle>(&*it), "AtomSpace::addAtom(): Vertex should be of 'Handle' type.");
@@ -310,7 +310,7 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
 }
 
 Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn) {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
    return addAtom(a,a.begin(),tvn);
 }
@@ -321,8 +321,8 @@ bool AtomSpace::removeAtom(Handle h, bool recursive) {
         HandleEntry* currentEntry = extractedHandles;
         while (currentEntry) {
             Handle h = currentEntry->handle;
-            Type type = getType(h); 
-            if (type == AT_TIME_LINK) { 
+            Type type = getType(h);
+            if (type == AT_TIME_LINK) {
                 cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::removeAtom: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
 
                 Handle timeNode = getOutgoing(h, 0);
@@ -331,13 +331,13 @@ bool AtomSpace::removeAtom(Handle h, bool recursive) {
 
                 Handle timedAtom = getOutgoing(h, 1);
                 timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
-            } 
+            }
             currentEntry = currentEntry->next;
         }
         atomTable.removeExtractedHandles(extractedHandles);
         return true;
     }
-    return false; 
+    return false;
 }
 
 bool TValued(Type t)
@@ -352,14 +352,14 @@ const HandleSeq& AtomSpace::getOutgoing(Handle h) const
 HandleSeq AtomSpace::getOutgoing(Handle h) const
 #endif
 {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return TLB::getAtom(h)->getOutgoingSet();
 }
 
 Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     Handle result = atomTable.getHandle(name.c_str(), t);
@@ -383,10 +383,10 @@ Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
 
 Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn)
 {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    Handle result; 
+    Handle result;
     HandleEntry* he = atomTable.getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), t, false);
     if (he) {
         result = he->handle;
@@ -412,7 +412,7 @@ Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn
                 Atom* timeAtom = l->getOutgoingAtom(0);
                 if (timeAtom->getType() == TIME_NODE) {
                     const string& timeNodeName = ((Node*) timeAtom)->getName();
-                    
+
                     // USED TO SEEK MEMORY LEAK
                     //if(uniqueTimestamp.find(timeNodeName) == uniqueTimestamp.end()){
                     //    uniqueTimestamp.insert(timeNodeName);
@@ -424,12 +424,12 @@ Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn
                     timeServer.add(h, t);
                 } else {
                     MAIN_LOGGER.log(Util::Logger::WARNING,
-                        "AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", 
+                        "AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n",
                         ClassServer::getTypeName(timeAtom->getType()));
                 }
             } else {
                 MAIN_LOGGER.log(Util::Logger::WARNING,
-                    "AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n", 
+                    "AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n",
                     l->getArity());
             }
         }
@@ -451,7 +451,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn) {
         }
     } else {
         const Link& link = (const Link&) atom;
-        HandleSeq outgoing; 
+        HandleSeq outgoing;
         for (int i = 0; i < link.getArity(); i++) {
             outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
         }
@@ -473,15 +473,15 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn) {
 }
 
 Handle AtomSpace::getHandle(Type t,const string& str) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    Handle h=atomTable.getHandle(str.c_str(),t); 
+    Handle h=atomTable.getHandle(str.c_str(),t);
     return h;
 }
 
 Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     HandleEntry* he=atomTable.getHandleSet(outgoing,NULL,NULL,outgoing.size(),t, false);
@@ -490,29 +490,29 @@ Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const {
     return ret;
 }
 
-const string& AtomSpace::getName(Handle h) const { 
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+const string& AtomSpace::getName(Handle h) const {
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     //  cassert(TRACE_INFO, isNode(h));
     //bool isNodeHandle = isNode(h);
     //printf("AtomSpace::getName: isNodeHandle = %d\n", isNodeHandle);
     //printf("AtomSpace::getName: atom = %s\n", TLB::getAtom(h)->toString().c_str());
-    if (isNode(h)) 
+    if (isNode(h))
         return dynamic_cast<Node*>(TLB::getAtom(h))->getName();
-    else 
+    else
         return emptyName;
 }
 
 Handle AtomSpace::getOutgoing(Handle h,int idx) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return TLB::getAtom(h)->getOutgoingSet()[idx];
 }
 
 int AtomSpace::getArity(Handle h) const {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return TLB::getAtom(h)->getArity();
@@ -520,18 +520,18 @@ int AtomSpace::getArity(Handle h) const {
 
 void AtomSpace::setName(Handle h, const string& name)
 {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   
+
     cassert(TRACE_INFO, isNode(h), "AtomSpace::setName(): Handle h should be of 'Node' type.");
     dynamic_cast<Node*>(TLB::getAtom(h))->setName((char*)name.c_str());
 }
 
 HandleSeq AtomSpace::getIncoming(Handle h) const
 {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   
+
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
     Handle *temp; int size;
     he->toHandleVector(temp,size);
@@ -542,9 +542,9 @@ HandleSeq AtomSpace::getIncoming(Handle h) const
 }
 void AtomSpace::setTV(Handle h,const TruthValue& tv, VersionHandle vh)
 {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   
+
     const TruthValue& currentTv = getTV(h);
     if (!isNullVersionHandle(vh)) {
         CompositeTruthValue ctv = (currentTv.getType() == COMPOSITE_TRUTH_VALUE)?
@@ -553,7 +553,7 @@ void AtomSpace::setTV(Handle h,const TruthValue& tv, VersionHandle vh)
         ctv.setVersionedTV(tv, vh);
         TLB::getAtom(h)->setTruthValue(ctv); // always call setTruthValue to update indices
     } else {
-        if (currentTv.getType() == COMPOSITE_TRUTH_VALUE && 
+        if (currentTv.getType() == COMPOSITE_TRUTH_VALUE &&
             tv.getType() != COMPOSITE_TRUTH_VALUE) {
             CompositeTruthValue ctv((const CompositeTruthValue&) currentTv);
             ctv.setVersionedTV(tv, vh);
@@ -566,9 +566,9 @@ void AtomSpace::setTV(Handle h,const TruthValue& tv, VersionHandle vh)
 
 const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   
+
     const TruthValue& tv  = TLB::getAtom(h)->getTruthValue();
     if (isNullVersionHandle(vh)) {
         return tv;
@@ -579,29 +579,29 @@ const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
 }
 
 void AtomSpace::setMean(Handle h, float mean) throw (InvalidParamException) {
-    TruthValue* newTv = getTV(h).clone(); 
+    TruthValue* newTv = getTV(h).clone();
     if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
         // Since CompositeTV has no setMean() method, we must handle it differently
         CompositeTruthValue* ctv = (CompositeTruthValue*) newTv;
-	TruthValue* primaryTv = ctv->getVersionedTV(NULL_VERSION_HANDLE).clone();
-	if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
+        TruthValue* primaryTv = ctv->getVersionedTV(NULL_VERSION_HANDLE).clone();
+        if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
             ((SimpleTruthValue*)primaryTv)->setMean(mean);
-	} else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
+        } else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
             ((IndefiniteTruthValue*)primaryTv)->setMean(mean);
-	} else {
-            throw InvalidParamException(TRACE_INFO, 
-                 "AtomSpace - Got a primaryTV with an invalid or unknown type"); 
+        } else {
+            throw InvalidParamException(TRACE_INFO,
+                 "AtomSpace - Got a primaryTV with an invalid or unknown type");
         }
-	ctv->setVersionedTV(*primaryTv, NULL_VERSION_HANDLE);
-	delete primaryTv;
+        ctv->setVersionedTV(*primaryTv, NULL_VERSION_HANDLE);
+        delete primaryTv;
     } else {
-	if (newTv->getType() == SIMPLE_TRUTH_VALUE) {
+        if (newTv->getType() == SIMPLE_TRUTH_VALUE) {
             ((SimpleTruthValue*)newTv)->setMean(mean);
-	} else if (newTv->getType() == INDEFINITE_TRUTH_VALUE) {
+        } else if (newTv->getType() == INDEFINITE_TRUTH_VALUE) {
             ((IndefiniteTruthValue*)newTv)->setMean(mean);
-	} else {
-            throw InvalidParamException(TRACE_INFO, 
-                  "AtomSpace - Got a TV with an invalid or unknown type"); 
+        } else {
+            throw InvalidParamException(TRACE_INFO,
+                  "AtomSpace - Got a TV with an invalid or unknown type");
         }
     }
     setTV(h,*newTv);
@@ -644,31 +644,31 @@ AttentionValue::sti_t AtomSpace::getSTI(Handle h) const {
 AttentionValue::lti_t AtomSpace::getLTI(Handle h) const {
     return TLB::getAtom(h)->getAttentionValue().getLTI();
 }
-    
+
 AttentionValue::vlti_t AtomSpace::getVLTI(Handle h) const {
     return TLB::getAtom(h)->getAttentionValue().getVLTI();
-}    
+}
 
 float AtomSpace::getCount(Handle h) const
 {
-  	//fprintf(stdout,"Atom space address: %p\n", this);
+          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   
+
     return TLB::getAtom(h)->getTruthValue().getCount();
 }
 
 int AtomSpace::Nodes(VersionHandle vh) const
 {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    /* This is too expensive and depending on a MindAgent that may be disabled. 
+    /* This is too expensive and depending on a MindAgent that may be disabled.
      * Besides it does not have statistics by VersionHandles
      DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
-     agent->reevaluateAllStatistics(); 
+     agent->reevaluateAllStatistics();
      return agent->getNodeCount();
      */
-    // The following implementation is still expensive, but already deals with VersionHandles: 
+    // The following implementation is still expensive, but already deals with VersionHandles:
     HandleEntry* he = atomTable.getHandleSet(NODE, true, vh);
     int result = he->getSize();
     delete he;
@@ -693,8 +693,8 @@ long AtomSpace::getTotalSTI() const
     HandleEntry* h = getAtomTable().getHandleSet(ATOM, true);
     q=h;
     while (q) {
-	totalSTI += getSTI(q->handle);
-	q = q->next;
+        totalSTI += getSTI(q->handle);
+        q = q->next;
     }
     delete h;
     return totalSTI;
@@ -712,8 +712,8 @@ long AtomSpace::getTotalLTI() const
     HandleEntry* h = getAtomTable().getHandleSet(ATOM, true);
     q=h;
     while (q) {
-	totalLTI += getLTI(q->handle);
-	q = q->next;
+        totalLTI += getLTI(q->handle);
+        q = q->next;
     }
     delete h;
     return totalLTI;
@@ -722,16 +722,16 @@ long AtomSpace::getTotalLTI() const
 
 int AtomSpace::Links(VersionHandle vh) const
 {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    /* This is too expensive and depending on a MindAgent that may be disabled. 
+    /* This is too expensive and depending on a MindAgent that may be disabled.
      * Besides it does not have statistics by VersionHandles
      DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
-     agent->reevaluateAllStatistics(); 
+     agent->reevaluateAllStatistics();
      return agent->getLinkCount();
      */
-    // The following implementation is still expensive, but already deals with VersionHandles: 
+    // The following implementation is still expensive, but already deals with VersionHandles:
     HandleEntry* he = atomTable.getHandleSet(LINK, true, vh);
     int result = he->getSize();
     delete he;
@@ -739,7 +739,7 @@ int AtomSpace::Links(VersionHandle vh) const
 }
 
 void AtomSpace::_getNextAtomPrepare() {
- 	//fprintf(stdout,"Atom space address: %p\n", this);
+         //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     _handle_iterator=atomTable.getHandleIterator(ATOM,true);
@@ -785,7 +785,7 @@ stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_unlock(&stimulatedAtomsLock);
 #endif
-    
+
     // update record of total stimulus given out
     totalStimulus += amount;
     return totalStimulus;
@@ -798,13 +798,13 @@ stim_t AtomSpace::stimulateAtom(HandleEntry* h, stim_t amount)
 
     // how much to give each atom
     split = amount / h->getSize();
-    
+
     p = h;
     while (p) {
-	stimulateAtom(p->handle, split);
-	p = p->next;
+        stimulateAtom(p->handle, split);
+        p = p->next;
     }
-    
+
     // return unused stimulus
     return amount - (split * h->getSize());
 }
@@ -832,9 +832,8 @@ stim_t AtomSpace::getTotalStimulus()
 stim_t AtomSpace::getAtomStimulus(Handle h)
 {
     if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
-	return 0;
+        return 0;
     } else {
-	return (*stimulatedAtoms)[h];
+        return (*stimulatedAtoms)[h];
     }
-	
 }
