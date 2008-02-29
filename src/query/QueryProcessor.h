@@ -18,7 +18,7 @@ class QueryProcessor : public MindAgent
 		bool match_node_name(Atom *);
 
 		std::vector<Handle> varlist;
-		bool check_for_query(Atom *);
+		bool check_for_query(Handle);
 
 		AtomSpace *atom_space;
 		bool do_assertion(Handle);
