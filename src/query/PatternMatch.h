@@ -52,7 +52,10 @@ class PatternMatch
 		bool erase_solution(Handle);
 
 		bool pred_up(Atom *);
+		bool soln_up(Atom *);
 		OutgoingTree ot;
+		Handle curr_soln_handle;
+		Handle curr_pred_handle;
 
 		// -------------------------------------------
 		// Routines that implement node matching heuristics.

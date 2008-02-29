@@ -271,19 +271,46 @@ printf("tree_comp concept mist=%d\n", mismatch);
 
 /* ======================================================== */
 
+bool PatternMatch::soln_up(Atom *as)
+{
+	Atom *ap = TLB::getAtom(curr_pred_handle);
+	bool no_match = tree_compare(ap, as);
+
+	// If no match, try the next one.
+	if (no_match) return false;
+
+	// Ahh ! found a match!
+	// If we've navigated to the top of the predicate, then we're done!
+	if (curr_pred_handle == curr_root) return true;
+
+printf("have soln match, ");
+prt(as);
+printf("moving up the pred\n");
+	// Move up the predicate, and hunt for a match, again.
+	curr_soln_handle = TLB::getHandle(as);
+	bool found = foreach_incoming_atom(curr_pred_handle,
+	                &PatternMatch::pred_up, this);
+printf("up pred find =%d\n", found);
+	return found;
+}
+
 bool PatternMatch::pred_up(Atom *a)
 {
 	Handle h = TLB::getHandle(a);
 
-printf("duude examine ");
-prt(a);
 	// Is this atom even a part of the predicate we are considering?
+	// If not, try the next atom.
 	bool valid = ot.is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
-printf("duude found one! \n");
-	prt(a);
-	return false;
+	// Now, move up the solution outgoing set, looking for a match.
+	curr_pred_handle = h;
+
+	bool found = foreach_incoming_atom(curr_soln_handle,
+	                     &PatternMatch::soln_up, this);
+
+printf("duude upward soln find =%d\n", found);
+	return found;
 }
 
 /* ======================================================== */
@@ -362,9 +389,10 @@ prt(pursue);
 	// upwards from this node, to find the top of the 
 	// unsolved predicate.
 	curr_root = unsolved_pred;
-	foreach_incoming_atom(pursue, &PatternMatch::pred_up, this);
+	curr_soln_handle = var_solution[pursue];
+	bool found = foreach_incoming_atom(pursue, &PatternMatch::pred_up, this);
 
-	// Handle ap = var_solution[pursue];
+printf("final up result = %d\n", found);
 
 	return true;
 }
