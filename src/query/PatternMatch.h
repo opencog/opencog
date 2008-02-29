@@ -25,7 +25,7 @@ class PatternMatch
 
 		// Apply Filter rules, to create a normalized predicate.
 		std::vector<Handle> normed_predicate;
-		std::vector<Handle> bound_vars;
+		std::map<Handle, bool> bound_vars;
 
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
@@ -35,6 +35,7 @@ class PatternMatch
 		Handle curr_root;
 		bool note_root(Handle);
 
+		// -------------------------------------------
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Atom *);
 
@@ -48,12 +49,13 @@ class PatternMatch
 		FollowLink fl;
 
 		// Verify binding of varaibles
-		int var_position(Atom *);
+		bool is_var(Atom *);
 
+		// -------------------------------------------
 
 		// Result of solving the predicate
-		std::vector<Handle> var_solution;
-		std::vector<Handle> predicate_solution;
+		std::map<Handle, Handle> var_solution;
+		std::map<Handle, Handle> predicate_solution;
 
 	public:
 		PatternMatch(AtomSpace *);

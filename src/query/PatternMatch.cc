@@ -87,8 +87,16 @@ bool PatternMatch::apply_rule(Atom *atom)
  */
 void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
 {
-	bound_vars = bvars;
-	var_solution = bvars;
+	const std::vector<Handle>::iterator i;
+	for (i = bvars.begin();
+	     i != bvars.end(); i++)
+	{
+		Handle h = *i;
+		bound_vars[h] = true;
+	}
+
+	var_solution.clear();
+	predicate_solution.clear();
 	normed_predicate.clear();
 	root_map.clear();
 	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
@@ -129,25 +137,17 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 /* ======================================================== */
 /**
  * Check to see if atom is a bound variable.
- * If it is, return position in the variable array.
+ * If it is, return true
  */
-int PatternMatch::var_position(Atom *atom)
+bool PatternMatch::is_var(Atom *atom)
 {
 	// The local atom will be an instance of a general concept...
 	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
 	// and we want the "word" associated with this general concept.
 	atom = fl.backtrack_binary_link(atom, WR_LINK);
 
-	int pos = 0;
-	std::vector<Handle>::iterator i;
-	for (i = bound_vars.begin();
-	     i != bound_vars.end(); i++)
-	{
-		Atom *v = TLB::getAtom (*i);
-		if (v == atom) return pos;
-		pos ++;
-	}
-	return -1;
+	Handle h = TLB::getHandle(atom);
+	return bound_vars[h];
 }
 
 /* ======================================================== */
@@ -175,16 +175,15 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 {
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
-	int pos = var_position(aa);
-	if (-1 < pos)
+	if (is_var(aa))
 	{
 		// If ab is the very same var, then its a mismatch.
 		if (aa == ab) return true;
 
-printf("==== ta dah\n");
 		// Else, we have a candidate solution.
 		// Make a record of it.
-		var_solution[pos] = ab;
+		Handle ha = TLB::getHandle(aa);
+		var_solution[ha] = ab;
 		return false;
 	}
 
@@ -274,6 +273,10 @@ printf ("\nduuude candidate %s\n", str.c_str());
 
 str = atom->toString();
 printf ("duuude have match %s\n", str.c_str());
+	Handle ph = normed_predicate[0];
+	predicate_solution[ph] = ah;
+
+	// Now, search for an as-yet unsolved/unmatched predicate.
 
 	// Found a solution, return true to terminate search.
 	return true;
