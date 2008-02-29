@@ -18,12 +18,14 @@
 #include <string.h>
 #include "platform.h"
 
+class Atom;
+
 typedef Util::ConstCharPointerIntHashMap ClassTypeHashMap;
 typedef Util::IntConstCharPointerHashMap ClassNameHashMap;
 
-// Definition of a handle.
+// Definition of a handle. Opaque type.
 // Will change when system is reworked for distributed computing.
-typedef class Atom* Handle;
+typedef void* Handle;
 
 extern const Handle UNDEFINED_HANDLE;
 

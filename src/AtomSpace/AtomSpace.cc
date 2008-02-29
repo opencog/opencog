@@ -300,7 +300,7 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
         Handle *h_ptr = boost::get<Handle>(&*i);
 
         if (h_ptr && isReal(*h_ptr)) {
-            handles.push_back(addRealAtom(**h_ptr, TruthValue::NULL_TV()));
+            handles.push_back(addRealAtom(*TLB::getAtom(*h_ptr), TruthValue::NULL_TV()));
         } else {
             handles.push_back(addAtom(a, i, TruthValue::TRIVIAL_TV()));
         }
@@ -780,7 +780,7 @@ stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
 #endif
     // Add atom to the map of atoms with stimulus
     // and add stimulus to it
-    (*stimulatedAtoms)[h] += amount;
+    (*stimulatedAtoms)[TLB::getAtom(h)] += amount;
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_unlock(&stimulatedAtomsLock);
@@ -831,9 +831,9 @@ stim_t AtomSpace::getTotalStimulus()
 
 stim_t AtomSpace::getAtomStimulus(Handle h)
 {
-    if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
+    if (stimulatedAtoms->find(TLB::getAtom(h)) == stimulatedAtoms->end()) {
         return 0;
     } else {
-        return (*stimulatedAtoms)[h];
+        return (*stimulatedAtoms)[TLB::getAtom(h)];
     }
 }

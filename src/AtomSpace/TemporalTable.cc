@@ -928,7 +928,7 @@ void TemporalTable::load(FILE *fp, HandleMap *conv) throw (InconsistenceExceptio
                 throw InconsistenceException(TRACE_INFO, 
                       "Temporal Table - Couldn't load TemporalRepository, address incosistency.");
             }
-            add(TLB::getHandle((Handle)conv->get(oldHandle)),t);
+            add(conv->get(oldHandle),t);
         }
     }
 }

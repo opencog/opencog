@@ -62,7 +62,7 @@ std::string HandleSet::toString() {
     for (HandleSetIterator *it = keys(); it->hasNext();) {
         Handle key = it->next();
         /* append key */
-        answer += key->toShortString();
+        answer += TLB::getAtom(key)->toShortString();
         if (it->hasNext()) {
             answer += ",";
         }

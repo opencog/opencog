@@ -44,7 +44,7 @@ class TLB {
          * @return Corresponding atom for the given handle.
          */
         static inline Atom* getAtom(Handle handle) {
-            return handle;
+            return (Atom *) handle;
         }
 
         /**

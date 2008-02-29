@@ -271,7 +271,8 @@ void Atom::addOutgoingAtom(Handle h) {
 #endif    
 }
 
-Handle Atom::getOutgoingAtom(int position) const throw (RuntimeException) {
+Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
+{
     // checks for a valid position
     if ((position < getArity()) && (position >= 0)) {
         return TLB::getAtom(outgoing[position]);

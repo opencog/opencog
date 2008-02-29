@@ -1051,7 +1051,7 @@ void AtomTable::decayShortTermImportance() throw (RuntimeException) {
         } else {
             // head has changed: seek correct previous
             previous = clone[band];
-            while (previous->next(IMPORTANCE_INDEX) != current) {
+            while (TLB::getAtom(previous)->next(IMPORTANCE_INDEX) != current) {
                 previous = TLB::getAtom(previous)->next(IMPORTANCE_INDEX);
                 if (previous == NULL) {
                     throw RuntimeException(TRACE_INFO, "AtomTable - Found null previous");

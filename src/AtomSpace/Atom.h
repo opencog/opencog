@@ -299,7 +299,7 @@ class Atom {
          * @param The position of the atom in the array.
          * @return A specific atom in the outgoing set (using the TLB).
          */
-        Handle getOutgoingAtom(int) const throw (RuntimeException);
+        Atom * getOutgoingAtom(int) const throw (RuntimeException);
 
         /**
          * Adds a new entry to this atom's incoming set.
