@@ -143,21 +143,20 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
  *
  * XXX This heuristic should be re-examined/rethought at some point.
  *
- * If it is, return true.
+ * If it is, return pointer to the canonical var.
  */
-bool PatternMatch::is_var(Atom *atom)
+Atom * PatternMatch::is_var(Atom *atom)
 {
 	// The local atom will be an instance of a general concept...
 	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
-	if(!atom) return false;
+	if(!atom) return NULL;
 	// and we want the "word" associated with this general concept.
 	atom = fl.backtrack_binary_link(atom, WR_LINK);
-	if(!atom) return false;
+	if(!atom) return NULL;
 
 	Handle h = TLB::getHandle(atom);
-	std::set<Handle>::const_iterator it = bound_vars.find(h);
-	if (*it) return true;
-	return false;
+	if (bound_vars.count(h)) return atom;
+	return NULL;
 }
 
 /* ======================================================== */
@@ -203,7 +202,8 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (is_var(aa))
+	Atom *canon_var = is_var(aa);
+	if (canon_var)
 	{
 		// If ab is the very same var, then its a mismatch.
 		if (aa == ab) return true;
@@ -211,6 +211,7 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		// Else, we have a candidate solution.
 		// Make a record of it.
 		var_solution[ha] = ab;
+		var_solution[TLB::getHandle(canon_var)] = ab;
 		return false;
 	}
 
@@ -232,7 +233,7 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 std::string sta = aa->toString();
 std::string stb = ab->toString();
 printf ("tree_compare depth=%d comp %s\n"
-        "                        to %s\n", depth, sta.c_str(), stb.c_str());
+        "                       to %s\n", depth, sta.c_str(), stb.c_str());
 
 	// The recursion step: traverse down the tree.
 	// Only links should have non-empty outgoing sets.
@@ -351,8 +352,7 @@ printf ("\nduuude candidate %s\n", str.c_str());
 	}
 
 str = atom->toString();
-printf ("duuude pred zero solved %s\n", str.c_str());
-print_solution();
+printf ("duuude --------------------- \npred zero solved %s\n", str.c_str());
 	Handle ph = normed_predicate[0];
 	predicate_solution[ph] = ah;
 
@@ -392,7 +392,6 @@ print_solution();
 	// we are done! Return true to terminate the search.
 	if (UNDEFINED_HANDLE == pursue) return true;
 
-print_solution();
 printf("duude next handle is ");
 prt(TLB::getAtom(pursue));
 	// pursue is a pointer to a node that's shared between

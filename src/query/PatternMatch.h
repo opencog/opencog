@@ -66,7 +66,7 @@ class PatternMatch
 		FollowLink fl;
 
 		// Verify binding of variables
-		bool is_var(Atom *);
+		Atom * is_var(Atom *);
 
 		// -------------------------------------------
 
