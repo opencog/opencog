@@ -107,6 +107,22 @@ inline bool foreach_incoming_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 	return false;
 }
 
+template<class T>
+inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
+{
+	Atom *atom = TLB::getAtom(h);
+	HandleEntry *he = atom->getIncomingSet();
+
+	// Simple linked-list pointer chase
+	while (he)
+	{
+		bool rc = (data->*cb)(he->handle);
+		if (rc) return rc;
+		he = he->next;
+	}
+	return false;
+}
+
 
 }
 #endif /* OPENCOG_FOREACH_H_ */
