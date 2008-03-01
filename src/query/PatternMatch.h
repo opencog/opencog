@@ -54,8 +54,8 @@ class PatternMatch
 		// Tree comparison failed, erase the propsed solution.
 		bool erase_solution(Handle);
 
-		bool pred_up(Atom *);
-		bool soln_up(Atom *);
+		bool pred_up(Handle);
+		bool soln_up(Handle);
 		OutgoingTree ot;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;

@@ -286,8 +286,9 @@ printf("tree_comp concept mist=%d\n", mismatch);
 
 /* ======================================================== */
 
-bool PatternMatch::soln_up(Atom *as)
+bool PatternMatch::soln_up(Handle hsoln)
 {
+	Atom *as = TLB::getAtom(hsoln);
 	Atom *ap = TLB::getAtom(curr_pred_handle);
 	depth = 1;
 	bool no_match = tree_compare(ap, as);
@@ -326,8 +327,9 @@ prt(curr_pred_handle);
 printf("next pred is ");
 prt(curr_root);
 		curr_soln_handle = var_solution[curr_pred_handle];
-		Atom *as = TLB::getAtom(curr_soln_handle);
-		soln_up(as);
+		bool found = soln_up(curr_soln_handle);
+
+/// xxx
 
 		return true;
 	}
@@ -336,16 +338,14 @@ printf("have soln match, ");
 prt(as);
 printf("moving up the pred\n");
 	// Move up the predicate, and hunt for a match, again.
-	bool found = foreach_incoming_atom(curr_pred_handle,
+	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatch::pred_up, this);
 printf("up pred find =%d\n", found);
 	return found;
 }
 
-bool PatternMatch::pred_up(Atom *a)
+bool PatternMatch::pred_up(Handle h)
 {
-	Handle h = TLB::getHandle(a);
-
 	// Is this atom even a part of the predicate we are considering?
 	// If not, try the next atom.
 	bool valid = ot.is_node_in_tree(curr_root, h);
@@ -354,7 +354,7 @@ bool PatternMatch::pred_up(Atom *a)
 	// Now, move up the solution outgoing set, looking for a match.
 	curr_pred_handle = h;
 
-	bool found = foreach_incoming_atom(curr_soln_handle,
+	bool found = foreach_incoming_handle(curr_soln_handle,
 	                     &PatternMatch::soln_up, this);
 
 printf("duude upward soln find =%d\n", found);
@@ -416,14 +416,17 @@ bool PatternMatch::do_candidate(Handle ah)
 {
 	predicate_solution.clear();
 	var_solution.clear();
-	curr_root = normed_predicate[0];
 
 	// Don't stare at our navel.
-	if (ah == curr_root) return false;
+	std::vector<Handle>::iterator i;
+	for (i = normed_predicate.begin(); i != normed_predicate.end(); i++)
+	{
+		if (ah == *i) return false;
+	}
 
+	curr_root = normed_predicate[0];
 	curr_pred_handle = curr_root;
-	Atom *atom = TLB::getAtom(ah);
-	bool found = soln_up(atom);
+	bool found = soln_up(ah);
 
 printf("final up result = %d\n", found);
 
@@ -487,10 +490,8 @@ void PatternMatch::print_solution(void)
 	{
 		Handle var = *j;
 		Handle soln = var_solution[var];
-printf("\nnyerh hare hare var=%p soln=%p\n", var, soln);
 		Atom *av = TLB::getAtom(var);
 		Atom *as = TLB::getAtom(soln);
-prt(av);
 		Node *nv = dynamic_cast<Node *>(av);
 		Node *ns = dynamic_cast<Node *>(as);
 		if (ns && nv)
