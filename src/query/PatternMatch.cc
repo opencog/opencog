@@ -289,6 +289,7 @@ printf("tree_comp concept mist=%d\n", mismatch);
 bool PatternMatch::soln_up(Atom *as)
 {
 	Atom *ap = TLB::getAtom(curr_pred_handle);
+	depth = 1;
 	bool no_match = tree_compare(ap, as);
 
 	// If no match, try the next one.
@@ -302,8 +303,16 @@ bool PatternMatch::soln_up(Atom *as)
 	if (curr_pred_handle == curr_root)
 	{
 		predicate_solution[curr_root] = curr_soln_handle;
+printf ("duuude --------------------- \npred: ");
+prt(curr_root);
+printf("soln: ");
+prt(curr_soln_handle);
 		get_next_unsolved_pred();
 
+printf("duude next handle is ");
+prt(curr_pred_handle);
+printf("next pred is ");
+prt(curr_root);
 		// If there are no further predicates to solve,
 		// we are really done! Return true to terminate the search.
 		if (UNDEFINED_HANDLE == curr_root)
@@ -412,49 +421,15 @@ bool PatternMatch::do_candidate(Handle ah)
 	// Don't stare at our navel.
 	if (ah == curr_root) return false;
 
-printf ("=======================\npred: ");
-prt(curr_root);
-printf("cand: ");
-prt(ah);
-	// Compare a predicate tree to a tree in the graph.
-	// The compare is pair-wise, in parallel.
-	depth = 1;
-	bool mismatch = foreach_outgoing_atom_pair(curr_root, ah,
-	                 &PatternMatch::tree_compare, this);
-	depth = 0;
+	curr_pred_handle = curr_root;
+	Atom *atom = TLB::getAtom(ah);
+	bool found = soln_up(atom);
 
-	// Return false to try the next candidate.
-	if (mismatch) return false;
-
-	curr_soln_handle = ah;
-
-	predicate_solution[curr_root] = curr_soln_handle;
-printf ("duuude --------------------- \npred: ");
-prt(curr_root);
-printf("soln: ");
-prt(curr_soln_handle);
-
-	get_next_unsolved_pred();
-
-	// If there are no further predicates to solve,
-	// we are done! Return true to terminate the search.
-	if (UNDEFINED_HANDLE == curr_root) return true;
-
-printf("duude next handle is ");
-prt(curr_pred_handle);
-printf("next pred is ");
-prt(curr_root);
-	curr_soln_handle = var_solution[curr_pred_handle];
-
-	Atom *as = TLB::getAtom(curr_soln_handle);
-	bool found = soln_up(as);
 printf("final up result = %d\n", found);
 
 	// If found is false, then there's no solution here.
-	// Bail out, return false to try again at top level.
-	if (!found) return false;
-
-	return true;
+	// Bail out, return false to try again with the next candidate.
+	return found;
 }
 
 /**
