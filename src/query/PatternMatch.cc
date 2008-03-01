@@ -296,9 +296,32 @@ bool PatternMatch::soln_up(Atom *as)
 
 	curr_soln_handle = TLB::getHandle(as);
 
-	// Ahh ! found a match!
-	// If we've navigated to the top of the predicate, then we're done!
-	if (curr_pred_handle == curr_root) return true;
+	// Ahh ! found a match!  If we've navigated to the top of the 
+	// predicate, then we're done with it.  Look for the next 
+	// unsovled predicate.
+	if (curr_pred_handle == curr_root)
+	{
+		predicate_solution[curr_root] = curr_soln_handle;
+		get_next_unsolved_pred();
+
+		// If there are no further predicates to solve,
+		// we are really done! Return true to terminate the search.
+		if (UNDEFINED_HANDLE == curr_root)
+		{
+printf ("==================== FINITO!\n");
+			return true;
+		}
+
+printf("duude next handle is ");
+prt(curr_pred_handle);
+printf("next pred is ");
+prt(curr_root);
+		curr_soln_handle = var_solution[curr_pred_handle];
+		Atom *as = TLB::getAtom(curr_soln_handle);
+		soln_up(as);
+
+		return true;
+	}
 
 printf("have soln match, ");
 prt(as);
@@ -405,44 +428,31 @@ prt(ah);
 
 	curr_soln_handle = ah;
 
-	while (true)
-	{
-		predicate_solution[curr_root] = curr_soln_handle;
+	predicate_solution[curr_root] = curr_soln_handle;
 printf ("duuude --------------------- \npred: ");
 prt(curr_root);
 printf("soln: ");
 prt(curr_soln_handle);
 
-		get_next_unsolved_pred();
+	get_next_unsolved_pred();
 
-if (UNDEFINED_HANDLE == curr_root) {
-printf ("==================== FINITO!\n");
-}
-		// If there are no further predicates to solve,
-		// we are done! Return true to terminate the search.
-		if (UNDEFINED_HANDLE == curr_root) return true;
+	// If there are no further predicates to solve,
+	// we are done! Return true to terminate the search.
+	if (UNDEFINED_HANDLE == curr_root) return true;
 
-		// curr_pred_handle is a pointer to a node that's shared between
-		// several predicates. One of the predicates has been
-		// solved, another has not.  We want to now traverse 
-		// upwards from this node, to find the top of the 
-		// unsolved predicate.
 printf("duude next handle is ");
 prt(curr_pred_handle);
 printf("next pred is ");
 prt(curr_root);
-		curr_soln_handle = var_solution[curr_pred_handle];
-		bool found = foreach_incoming_atom(curr_pred_handle,
-		              &PatternMatch::pred_up, this);
+	curr_soln_handle = var_solution[curr_pred_handle];
+
+	Atom *as = TLB::getAtom(curr_soln_handle);
+	bool found = soln_up(as);
 printf("final up result = %d\n", found);
 
-		// If found is false, then there's no solution here.
-		// Bail out, return false to try again at top level.
-		if (!found) return false;
-
-		// If found is true, then we successfully matched the unsolved
-		// predicate. Look for more unsolved predicates, and repeat.
-	}
+	// If found is false, then there's no solution here.
+	// Bail out, return false to try again at top level.
+	if (!found) return false;
 
 	return true;
 }
