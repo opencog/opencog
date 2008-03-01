@@ -5,6 +5,7 @@
  */
 
 #include <map>
+#include <stack>
 
 #include "types.h"
 #include "Atom.h"
@@ -58,7 +59,10 @@ class PatternMatch
 		OutgoingTree ot;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
-		Handle get_next_unsolved_pred(void);
+		void get_next_unsolved_pred(void);
+
+		std::stack<Handle> pred_handle_stack;
+		std::stack<Handle> soln_handle_stack;
 
 		// -------------------------------------------
 		// Routines that implement node matching heuristics.

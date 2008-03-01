@@ -329,7 +329,7 @@ printf("duude upward soln find =%d\n", found);
 	return found;
 }
 
-Handle PatternMatch::get_next_unsolved_pred(void)
+void PatternMatch::get_next_unsolved_pred(void)
 {
 	// Search for an as-yet unsolved/unmatched predicate.
 	// For each solved node, look up root to see if root is solved.
@@ -369,7 +369,7 @@ Handle PatternMatch::get_next_unsolved_pred(void)
 	// upwards from this node, to find the top of the 
 	// unsolved predicate.
 	curr_root = unsolved_pred;
-	return pursue;
+	curr_pred_handle = pursue;
 }
 
 /* ======================================================== */
@@ -413,7 +413,7 @@ prt(curr_root);
 printf("soln: ");
 prt(curr_soln_handle);
 
-		Handle pursue = get_next_unsolved_pred();
+		get_next_unsolved_pred();
 
 if (UNDEFINED_HANDLE == curr_root) {
 printf ("==================== FINITO!\n");
@@ -422,17 +422,18 @@ printf ("==================== FINITO!\n");
 		// we are done! Return true to terminate the search.
 		if (UNDEFINED_HANDLE == curr_root) return true;
 
-		// pursue is a pointer to a node that's shared between
+		// curr_pred_handle is a pointer to a node that's shared between
 		// several predicates. One of the predicates has been
 		// solved, another has not.  We want to now traverse 
 		// upwards from this node, to find the top of the 
 		// unsolved predicate.
 printf("duude next handle is ");
-prt(pursue);
+prt(curr_pred_handle);
 printf("next pred is ");
 prt(curr_root);
-		curr_soln_handle = var_solution[pursue];
-		bool found = foreach_incoming_atom(pursue, &PatternMatch::pred_up, this);
+		curr_soln_handle = var_solution[curr_pred_handle];
+		bool found = foreach_incoming_atom(curr_pred_handle,
+		              &PatternMatch::pred_up, this);
 printf("final up result = %d\n", found);
 
 		// If found is false, then there's no solution here.
