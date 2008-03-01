@@ -40,6 +40,7 @@ class PatternMatch
 		RootMap root_map;
 		Handle curr_root;
 		bool note_root(Handle);
+		
 
 		// -------------------------------------------
 		// Examine each candidate for a match, in turn.
@@ -57,6 +58,7 @@ class PatternMatch
 		OutgoingTree ot;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
+		Handle get_next_unsolved_pred(void);
 
 		// -------------------------------------------
 		// Routines that implement node matching heuristics.

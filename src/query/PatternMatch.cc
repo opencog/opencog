@@ -329,6 +329,49 @@ printf("duude upward soln find =%d\n", found);
 	return found;
 }
 
+Handle PatternMatch::get_next_unsolved_pred(void)
+{
+	// Search for an as-yet unsolved/unmatched predicate.
+	// For each solved node, look up root to see if root is solved.
+	// If not, start working on that.
+	Handle pursue = UNDEFINED_HANDLE;
+	Handle unsolved_pred = UNDEFINED_HANDLE;
+	RootMap::iterator k;
+	for (k=root_map.begin(); k != root_map.end(); k++)
+	{
+		RootPair vk = *k;
+		RootList *rl = vk.second;
+		pursue = vk.first;
+
+		bool unsolved = false;
+		bool solved = false;
+
+		std::vector<Handle>::iterator i;
+		for (i=rl->begin(); i != rl->end(); i++)
+		{
+			Handle root = *i;
+			if(predicate_solution[root] != NULL)
+			{
+				solved = true;
+			}
+			else
+			{
+				unsolved_pred = root;
+				unsolved = true;
+			}
+		}
+		if (solved && unsolved) break;
+	}
+
+	// pursue is a pointer to a node that's shared between
+	// several predicates. One of the predicates has been
+	// solved, another has not.  We want to now traverse 
+	// upwards from this node, to find the top of the 
+	// unsolved predicate.
+	curr_root = unsolved_pred;
+	return pursue;
+}
+
 /* ======================================================== */
 /**
  * do_candidate - examine candidates, looking for matches.
@@ -339,8 +382,6 @@ printf("duude upward soln find =%d\n", found);
  */
 bool PatternMatch::do_candidate(Handle ah)
 {
-	Atom *atom = TLB::getAtom(ah);
-
 	predicate_solution.clear();
 	var_solution.clear();
 	curr_root = normed_predicate[0];
@@ -372,52 +413,20 @@ prt(curr_root);
 printf("soln: ");
 prt(curr_soln_handle);
 
+		Handle pursue = get_next_unsolved_pred();
 
-		// Now, search for an as-yet unsolved/unmatched predicate.
-		// For each solved node, look up root to see if root is solved.
-		// If not, start working on that.
-		Handle pursue = UNDEFINED_HANDLE;
-		Handle unsolved_pred = UNDEFINED_HANDLE;
-		RootMap::iterator k;
-		for (k=root_map.begin(); k != root_map.end(); k++)
-		{
-			RootPair vk = *k;
-			RootList *rl = vk.second;
-			pursue = vk.first;
-	
-			bool unsolved = false;
-			bool solved = false;
-	
-			std::vector<Handle>::iterator i;
-			for (i=rl->begin(); i != rl->end(); i++)
-			{
-				Handle root = *i;
-				if(predicate_solution[root] != NULL)
-				{
-					solved = true;
-				}
-				else
-				{
-					unsolved_pred = root;
-					unsolved = true;
-				}
-			}
-			if (solved && unsolved) break;
-		}
-
-if (UNDEFINED_HANDLE == unsolved_pred) {
+if (UNDEFINED_HANDLE == curr_root) {
 printf ("==================== FINITO!\n");
 }
 		// If there are no further predicates to solve,
 		// we are done! Return true to terminate the search.
-		if (UNDEFINED_HANDLE == unsolved_pred) return true;
+		if (UNDEFINED_HANDLE == curr_root) return true;
 
 		// pursue is a pointer to a node that's shared between
 		// several predicates. One of the predicates has been
 		// solved, another has not.  We want to now traverse 
 		// upwards from this node, to find the top of the 
 		// unsolved predicate.
-		curr_root = unsolved_pred;
 printf("duude next handle is ");
 prt(pursue);
 printf("next pred is ");
