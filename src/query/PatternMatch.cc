@@ -221,8 +221,8 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only if aa is NOT a bound var.
-	if (aa == ab)
+	// ... but only if ab is not one of the predicates itself.
+	if ((aa == ab) && (ab != curr_root))
 	{
 		var_solution[ha] = ab;
 		return false;
@@ -345,12 +345,17 @@ bool PatternMatch::do_candidate(Handle ah)
 	var_solution.clear();
 	curr_root = normed_predicate[0];
 
-std::string str = atom->toString();
-printf ("\nduuude candidate %s\n", str.c_str());
+	// Don't stare at our navel.
+	if (ah == curr_root) return false;
+
+printf ("=======================\npred: ");
+prt(curr_root);
+printf("cand: ");
+prt(ah);
 	// Compare a predicate tree to a tree in the graph.
 	// The compare is pair-wise, in parallel.
 	depth = 1;
-	bool mismatch = foreach_outgoing_atom_pair(normed_predicate[0], ah,
+	bool mismatch = foreach_outgoing_atom_pair(curr_root, ah,
 	                 &PatternMatch::tree_compare, this);
 	depth = 0;
 
@@ -400,9 +405,12 @@ prt(curr_soln_handle);
 			if (solved && unsolved) break;
 		}
 
+if (UNDEFINED_HANDLE == unsolved_pred) {
+printf ("==================== FINITO!\n");
+}
 		// If there are no further predicates to solve,
 		// we are done! Return true to terminate the search.
-		if (UNDEFINED_HANDLE == pursue) return true;
+		if (UNDEFINED_HANDLE == unsolved_pred) return true;
 
 		// pursue is a pointer to a node that's shared between
 		// several predicates. One of the predicates has been
