@@ -32,88 +32,6 @@ bool PatternMatch::prt(Handle h)
 }
 
 /* ======================================================== */
-/**
- * Return true, for example, if the node is _subj or _obj
- */
-bool PatternMatch::is_ling_rel(Atom *atom)
-{
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
-	return false;
-}
-
-/**
- * Hack --- not actually applying any rules, except one
- * hard-coded one: if the link involves a
- * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
- */
-bool PatternMatch::apply_rule(Atom *atom)
-{
-	if (EVALUATION_LINK != atom->getType()) return false;
-
-	Handle ah = TLB::getHandle(atom);
-	bool keep = foreach_outgoing_atom(ah, &PatternMatch::is_ling_rel, this);
-
-	if (!keep) return false;
-
-	// Its a keeper, add this to our list of acceptable predicate terms.
-	normed_predicate.push_back(ah);
-
-	return false;
-}
-
-/**
- * Check to see if atom is a bound variable.
- * Heuristics are used to determine this: the local atom should
- * be an instance of a concept, whose dictionary word is _$qVar,
- * i.e. one of the bound variable names.
- *
- * XXX this is subject to change, if the relex rep changes.
- */
-bool PatternMatch::find_vars(Handle h)
-{
-	foreach_outgoing_handle(h, &PatternMatch::find_vars, this);
-
-	Atom *atom = TLB::getAtom(h);
-
-	// The local atom will be an instance of a general concept...
-	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
-	if(!atom) return false;
-	// and we want the "word" associated with this general concept.
-	atom = fl.backtrack_binary_link(atom, WR_LINK);
-	if(!atom) return false;
-
-	Node *n = dynamic_cast<Node *>(atom);
-	if(!n) return false;
-
-	const char * match_name = "_$qVar";
-	const std::string& name = n->getName();
-	if (strcmp(name.c_str(), match_name)) return false;
-
-	bound_vars.insert(h);
-	return false;
-}
-
-/**
- * Put predicate into "normal form".
- * In this case, a cheap hack: remove all relations that
- * are not "defined linguistic relations", e.g. all but
- * _subj(x,y) and _obj(z,w) relations.
- */
-void PatternMatch::filter(Handle graph)
-{
-	normed_predicate.clear();
-	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
-
-	std::vector<Handle>::const_iterator i;
-	for (i = normed_predicate.begin();
-	     i != normed_predicate.end(); i++)
-	{
-		Handle h = *i;
-		find_vars(h);
-	}
-}
-
-/* ======================================================== */
 
 /**
  * tree_compare compares two trees, side-by-side.
@@ -388,8 +306,21 @@ bool PatternMatch::note_root(Handle h)
  * with the list of "bound vars" are to be solved for (or "evaluated")
  * bound vars must be, by definition, Nodes.
  */
-void PatternMatch::match(PatternMatchCallback *cb)
+void PatternMatch::match(PatternMatchCallback *cb,
+                         std::vector<Handle> *preds,
+                         std::vector<Handle> *vars)
 {
+	std::vector<Handle>::const_iterator i;
+
+	normed_predicate = *preds;
+
+	for (i = vars->begin();
+	     i != vars->end(); i++)
+	{
+		Handle h = *i;
+		bound_vars.insert(h);
+	}
+
 	var_solution.clear();
 	predicate_solution.clear();
 
@@ -399,7 +330,6 @@ void PatternMatch::match(PatternMatchCallback *cb)
 	// Create a table of nodes in the predicates, with
 	// a list of the predicates that each node participates in.
 	root_map.clear();
-	std::vector<Handle>::const_iterator i;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
 	{
@@ -445,8 +375,8 @@ void PatternMatch::match(PatternMatchCallback *cb)
 
 }
 
-void PatternMatch::print_solution(std::map<Handle, Handle> &vars,
-                                  std::map<Handle, Handle> &preds)
+void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
+                                  std::map<Handle, Handle> &vars)
 {
 #if 0
 	printf("\nSolution variable bindings:\n");

@@ -12,7 +12,6 @@
 
 #include "types.h"
 #include "Atom.h"
-#include "FollowLink.h"
 #include "Link.h"
 #include "OutgoingTree.h"
 
@@ -63,10 +62,6 @@ class PatternMatch
 		std::vector<Handle> normed_predicate;
 		std::set<Handle> bound_vars;
 
-		bool apply_rule(Atom *);
-		bool is_ling_rel(Atom *);
-		bool find_vars(Handle);
-
 		// -------------------------------------------
 		// Traversal utilities
 		RootMap root_map;
@@ -95,11 +90,6 @@ class PatternMatch
 		std::stack<SolnMap> pred_solutn_stack;
 
 		// -------------------------------------------
-		// Routines that implement node matching heuristics.
-
-		FollowLink fl;
-
-		// -------------------------------------------
 
 		PatternMatchCallback *pmc;
 		// Result of solving the predicate
@@ -109,11 +99,12 @@ class PatternMatch
 	public:
 		PatternMatch(AtomSpace *);
 
-		void filter(Handle);
-		void match(PatternMatchCallback *);
+		void match(PatternMatchCallback *,
+		           std::vector<Handle> *preds,
+		           std::vector<Handle> *vars);
 
-		static void print_solution(std::map<Handle, Handle> &vars,
-		                           std::map<Handle, Handle> &preds);
+		static void print_solution(std::map<Handle, Handle> &preds,
+		                           std::map<Handle, Handle> &vars);
 
 };
 };

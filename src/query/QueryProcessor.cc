@@ -91,10 +91,12 @@ bool QueryProcessor::do_assertion(Handle h)
 	// If this assertion is a query, try to answer it.
 	if (0 != varlist.size())
 	{
-		PatternMatch pm(atom_space);
 		RelexQuery rlx;
-		pm.filter(h);
-		pm.match(&rlx);
+		rlx.setup(h);
+
+		PatternMatch pm(atom_space);
+		RelexQuery *prlx = &rlx;
+		pm.match(prlx, &prlx->normed_predicate, &prlx->bound_vars);
 	}
 	atom_space->removeAtom(h);
 	return false;
