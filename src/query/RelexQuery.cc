@@ -14,7 +14,49 @@
 using namespace opencog;
 
 /* ======================================================== */
-/* Setup related routines. */
+/* Routines used to determine if an assertion is a query.
+ * XXX This algo is flawed, fragile, but simple.
+ */
+
+/**
+ * Set pointer to Node, if the node name is "match_name".
+ */
+bool RelexQuery::match_node_name(Atom *atom)
+{
+	const char *match_name = "_$qVar";
+	Node *n = dynamic_cast<Node *>(atom);
+	if (n)
+	{
+		const std::string& name = n->getName();
+		if (0 == strcmp(name.c_str(), match_name))
+			return true;
+	}
+	return false;
+}
+
+/**
+ * Search for queries. 
+ * XXX This implementation is kinda-wrong, its very specific
+ * to the structure of the relex-to-opencog converstion, and 
+ * is fragile, if that structure changes.
+ */
+bool RelexQuery::check_for_query(Handle rel)
+{
+	return foreach_outgoing_atom(rel, &RelexQuery::match_node_name, this);
+}
+
+/**
+ * Return true if assertion is a query.
+ * A simple checdk is made: does the assertion have 
+ * a _$qVar in it? 
+ */
+bool RelexQuery::is_query(Handle h)
+{
+	return foreach_outgoing_handle(h, &RelexQuery::check_for_query, this);
+}
+
+/* ======================================================== */
+/* Routines to help put the query into normal form. */
 
 /**
  * Return true, for example, if the node is _subj or _obj

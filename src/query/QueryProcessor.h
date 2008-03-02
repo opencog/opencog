@@ -12,14 +12,6 @@ namespace opencog {
 class QueryProcessor : public MindAgent
 {
 	private:
-
-		Node *node; // for match_node_name only
-		const char *match_name; // for match_node_name only
-		bool match_node_name(Atom *);
-
-		std::vector<Handle> varlist;
-		bool check_for_query(Handle);
-
 		AtomSpace *atom_space;
 		bool do_assertion(Handle);
 
@@ -27,7 +19,6 @@ class QueryProcessor : public MindAgent
 		QueryProcessor(void);
 		virtual ~QueryProcessor();
 		virtual void run(CogServer *server);
-
 };
 }
 

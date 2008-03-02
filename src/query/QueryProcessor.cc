@@ -43,40 +43,6 @@ void QueryProcessor::run(CogServer *server)
 }
 
 /**
- * Set pointer to Node, if the node name is "match_name".
- */
-bool QueryProcessor::match_node_name(Atom *atom)
-{
-	Node *n = dynamic_cast<Node *>(atom);
-	if (n)
-	{
-		const std::string& name = n->getName();
-		if (0 == strcmp(name.c_str(), match_name))
-		{
-			node = n;
-			return true;
-		}
-	}
-	return false;
-}
-
-/**
- * Search for queries
- */
-bool QueryProcessor::check_for_query(Handle rel)
-{
-	match_name = "_$qVar";
-	node = NULL;
-	foreach_outgoing_atom(rel, &QueryProcessor::match_node_name, this);
-	if (node)
-	{
-		// printf ("found query its %s\n", node->toString().c_str());
-		varlist.push_back(TLB::getHandle(node));
-	}
-	return false;
-}
-
-/**
  * Process an assertion fed into the system.
  * Currently, this ignores all assertions that are not queries.
  */
@@ -84,14 +50,10 @@ bool QueryProcessor::do_assertion(Handle h)
 {
 	printf ("duuuude found assertion handle=%p\n", h);
 
-	// Look for unbound query variables
-	varlist.clear();
-	foreach_outgoing_handle(h, &QueryProcessor::check_for_query, this);
-
 	// If this assertion is a query, try to answer it.
-	if (0 != varlist.size())
+	RelexQuery rlx;
+	if (rlx.is_query(h))
 	{
-		RelexQuery rlx;
 		rlx.setup(h);
 
 		PatternMatch pm(atom_space);
