@@ -235,10 +235,8 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	// If types differ, then no match.
 	if (aa->getType() != ab->getType()) return true;
 
-std::string sta = aa->toString();
-std::string stb = ab->toString();
-printf ("tree_compare depth=%d comp %s\n"
-        "                       to %s\n", depth, sta.c_str(), stb.c_str());
+	// printf ("tree_compare depth=%d comp "); prt(aa);
+	// printf ("                       to "); prt(ab);
 
 	// The recursion step: traverse down the tree.
 	// Only links should have non-empty outgoing sets.
@@ -251,7 +249,7 @@ printf ("tree_compare depth=%d comp %s\n"
 		              	      &PatternMatch::tree_compare, this);
 		depth --;
 		if (false == mismatch) var_solution[ha] = ab;
-printf("tree_comp down link mismatch=%d\n", mismatch);
+		// printf("tree_comp down link mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 
@@ -269,7 +267,7 @@ printf("tree_comp down link mismatch=%d\n", mismatch);
 	{
 		bool mismatch = concept_match(aa, ab);
 		if (false == mismatch) var_solution[ha] = ab;
-printf("tree_comp concept mist=%d\n", mismatch);
+		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
@@ -310,28 +308,22 @@ bool PatternMatch::soln_up(Handle hsoln)
 		pred_solutn_stack.push(predicate_solution);
 
 		predicate_solution[curr_root] = curr_soln_handle;
-printf ("duuude --------------------- \npred: ");
-prt(curr_root);
-printf("soln: ");
-prt(curr_soln_handle);
+		// printf("--------------------- \npred: "); prt(curr_root);
+		// printf("soln: "); prt(curr_soln_handle);
+		
 		get_next_unsolved_pred();
 
-printf("duude next handle is ");
-prt(curr_pred_handle);
-printf("next pred is ");
-prt(curr_root);
+		// printf("next handle is "); prt(curr_pred_handle);
+		// printf("next pred is "); prt(curr_root);
+
 		// If there are no further predicates to solve,
 		// we are really done! Return true to terminate the search.
 		if (UNDEFINED_HANDLE == curr_root)
 		{
-printf ("==================== FINITO!\n");
+			// printf ("==================== FINITO!\n");
 			return true;
 		}
 
-printf("duude next handle is ");
-prt(curr_pred_handle);
-printf("next pred is ");
-prt(curr_root);
 		curr_soln_handle = var_solution[curr_pred_handle];
 		bool found = soln_up(curr_soln_handle);
 
@@ -355,13 +347,12 @@ prt(curr_root);
 		return found;
 	}
 
-printf("have soln match, ");
-prt(as);
-printf("moving up the pred\n");
+	// printf("node has soln, move up: "); prt(as);
+
 	// Move up the predicate, and hunt for a match, again.
 	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatch::pred_up, this);
-printf("up pred find =%d\n", found);
+	// printf("up pred find =%d\n", found);
 	return found;
 }
 
@@ -378,7 +369,7 @@ bool PatternMatch::pred_up(Handle h)
 	bool found = foreach_incoming_handle(curr_soln_handle,
 	                     &PatternMatch::soln_up, this);
 
-printf("duude upward soln find =%d\n", found);
+	// printf("upward soln find =%d\n", found);
 	return found;
 }
 
@@ -453,8 +444,6 @@ bool PatternMatch::do_candidate(Handle ah)
 	curr_root = normed_predicate[0];
 	curr_pred_handle = curr_root;
 	bool found = soln_up(ah);
-
-printf("final up result = %d\n", found);
 
 	if (found)
 	{
