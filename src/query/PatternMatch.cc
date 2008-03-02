@@ -13,6 +13,13 @@
 
 using namespace opencog;
 
+#define DEBUG 1
+#ifdef DEBUG
+	#define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+	#define dbgprt(f, varargs...) 
+#endif
+
 PatternMatch::PatternMatch(AtomSpace *as)
 {
 	atom_space = as;
@@ -26,9 +33,20 @@ bool PatternMatch::prt(Atom *atom)
 	return false;
 }
 
-bool PatternMatch::prt(Handle h)
+inline void PatternMatch::prtmsg(const char * msg, Atom *atom)
 {
-	return prt(TLB::getAtom(h));
+#ifdef DEBUG
+	if (!atom) return;
+	std::string str = atom->toString();
+	printf ("%s %s\n", msg, str.c_str());
+#endif
+}
+
+inline void PatternMatch::prtmsg(const char * msg, Handle h)
+{
+#ifdef DEBUG
+	prtmsg(msg, TLB::getAtom(h));
+#endif
 }
 
 /* ======================================================== */
@@ -88,8 +106,9 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	// If types differ, then no match.
 	if (aa->getType() != ab->getType()) return true;
 
-	// printf ("tree_compare depth=%d comp "); prt(aa);
-	// printf ("                       to "); prt(ab);
+	dbgprt("depth=%d\n", depth);
+	prtmsg("tree_compare", aa);
+	prtmsg("          to", ab);
 
 	// The recursion step: traverse down the tree.
 	// Only links should have non-empty outgoing sets.
@@ -102,7 +121,7 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		              	      &PatternMatch::tree_compare, this);
 		depth --;
 		if (false == mismatch) var_solution[ha] = ab;
-		// printf("tree_comp down link mismatch=%d\n", mismatch);
+		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 
@@ -138,20 +157,20 @@ bool PatternMatch::soln_up(Handle hsoln)
 		pred_solutn_stack.push(predicate_solution);
 
 		predicate_solution[curr_root] = curr_soln_handle;
-		// printf("--------------------- \npred: "); prt(curr_root);
-		// printf("soln: "); prt(curr_soln_handle);
+		prtmsg("--------------------- \npred:", curr_root);
+		prtmsg("soln:", curr_soln_handle);
 		
 		get_next_unsolved_pred();
 
-		// printf("next handle is "); prt(curr_pred_handle);
-		// printf("next pred is "); prt(curr_root);
+		prtmsg("next handle is", curr_pred_handle);
+		prtmsg("next pred is", curr_root);
 
 		// If there are no further predicates to solve,
 		// we are really done! Report the solution via callback.
 		bool found = false;
 		if (UNDEFINED_HANDLE == curr_root)
 		{
-			// printf ("==================== FINITO!\n");
+			dbgprt ("==================== FINITO!\n");
 			found = pmc->solution(predicate_solution, var_solution);
 		}
 		else
@@ -180,12 +199,12 @@ bool PatternMatch::soln_up(Handle hsoln)
 		return found;
 	}
 
-	// printf("node has soln, move up: "); prt(as);
+	prtmsg("node has soln, move up:", as);
 
 	// Move up the predicate, and hunt for a match, again.
 	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatch::pred_up, this);
-	// printf("up pred find =%d\n", found);
+	dbgprt("up pred find =%d\n", found);
 	return found;
 }
 
@@ -202,7 +221,7 @@ bool PatternMatch::pred_up(Handle h)
 	bool found = foreach_incoming_handle(curr_soln_handle,
 	                     &PatternMatch::soln_up, this);
 
-	// printf("upward soln find =%d\n", found);
+	dbgprt("upward soln find =%d\n", found);
 	return found;
 }
 
@@ -343,11 +362,11 @@ void PatternMatch::match(PatternMatchCallback *cb,
 #ifdef DEBUG
 	// Print out the predicate ...
 	printf("\nPredicate is\n");
-	std::vector<Handle>::iterator i;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
 	{
-		foreach_outgoing_atom(*i, &PatternMatch::prt, this);
+		Handle h = *i;
+		foreach_outgoing_atom(h, &PatternMatch::prt, this);
 	}
 
 	// Print out the bound variables in the predicate.
@@ -405,8 +424,10 @@ void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
 	for (m = preds.begin(); m != preds.end(); m++) 
 	{
 		std::pair<Handle, Handle> pm = *m;
-		prt(pm.second);
+		std::string str = TLB::getAtom(pm.second)->toString();
+		printf ("   %s\n", str.c_str());
 	}
+	printf ("\n");
 	fflush(stdout);
 }
 

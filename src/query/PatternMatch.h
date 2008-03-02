@@ -51,8 +51,10 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 
-		static bool prt(Atom *);
-		static bool prt(Handle);
+		bool prt(Atom *);
+
+		static void prtmsg(const char *, Atom *);
+		static void prtmsg(const char *, Handle);
 
 		// -------------------------------------------
 		// predicates to be solved.
