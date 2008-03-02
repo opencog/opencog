@@ -13,6 +13,18 @@
 
 using namespace opencog;
 
+
+RelexQuery::RelexQuery(void)
+{
+	pm = NULL;
+}
+
+RelexQuery::~RelexQuery()
+{
+	if (pm) delete pm;
+	pm = NULL;
+}
+
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
  * XXX This algo is flawed, fragile, but simple.
@@ -125,11 +137,16 @@ bool RelexQuery::find_vars(Handle h)
  * are not "defined linguistic relations", e.g. all but
  * _subj(x,y) and _obj(z,w) relations.
  */
-void RelexQuery::setup(Handle graph)
+void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 {
+	if (pm) delete pm;
+	pm = new PatternMatch(atom_space);
+
+	// Setup "normed" predicates.
 	normed_predicate.clear();
 	foreach_outgoing_atom(graph, &RelexQuery::apply_rule, this);
 
+	// Find the variables, so that they can be bound.
 	std::vector<Handle>::const_iterator i;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
@@ -137,6 +154,9 @@ void RelexQuery::setup(Handle graph)
 		Handle h = *i;
 		find_vars(h);
 	}
+
+	// Solve...
+	pm->match(this, &normed_predicate, &bound_vars);
 }
 
 /* ======================================================== */

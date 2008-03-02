@@ -11,8 +11,6 @@
 #include "CogServer.h"
 #include "Foreach.h"
 #include "MindAgent.h"
-#include "Node.h"
-#include "PatternMatch.h"
 #include "QueryProcessor.h"
 #include "RelexQuery.h"
 
@@ -54,11 +52,7 @@ bool QueryProcessor::do_assertion(Handle h)
 	RelexQuery rlx;
 	if (rlx.is_query(h))
 	{
-		rlx.setup(h);
-
-		PatternMatch pm(atom_space);
-		RelexQuery *prlx = &rlx;
-		pm.match(prlx, &prlx->normed_predicate, &prlx->bound_vars);
+		rlx.solve(atom_space, h);
 	}
 	atom_space->removeAtom(h);
 	return false;

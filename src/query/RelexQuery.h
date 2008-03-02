@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include "AtomSpace.h"
 #include "FollowLink.h"
 #include "PatternMatch.h"
 
@@ -27,18 +28,24 @@ class RelexQuery : public PatternMatchCallback
 		bool is_ling_rel(Atom *);
 		bool apply_rule(Atom *);
 		bool find_vars(Handle);
+		FollowLink fl;
 
 		// Aid in equivalent node identification.
 		bool concept_match(Atom *, Atom *);
 
-		FollowLink fl;
-
-	public:
-		void setup(Handle);
+		// normalized predicates
 		std::vector<Handle> normed_predicate;
 		std::vector<Handle> bound_vars;
 
+		// solver
+		PatternMatch *pm;
+
+	public:
+		RelexQuery(void);
+		virtual ~RelexQuery();
+
 		bool is_query(Handle);
+		void solve(AtomSpace *, Handle);
 
 		/* Callbacks called from PatternMatch */
 		virtual bool node_match(Atom *, Atom *);
