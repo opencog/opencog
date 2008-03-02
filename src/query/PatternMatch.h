@@ -17,15 +17,12 @@
 
 namespace opencog {
 
-class PatternMatch;
-
+/**
+ * Callback class, used to implement spcifics of node 
+ * matching, and also, to report solutions when found.
+ */
 class PatternMatchCallback
 {
-	protected:
-		std::map<Handle, Handle> *var_solution;
-		std::map<Handle, Handle> *predicate_solution;
-		friend class PatternMatch;
-
 	public:
 		virtual ~PatternMatchCallback() {};
 
@@ -41,7 +38,8 @@ class PatternMatchCallback
 		 * return false to search for more solutions;
 		 * or return true to terminate search.
 		 */
-		virtual bool solution(void) = 0;
+		virtual bool solution(std::map<Handle, Handle> &pred_soln,
+		                      std::map<Handle, Handle> &var_soln) = 0;
 };
 
 typedef std::vector<Handle> RootList;
@@ -57,8 +55,7 @@ class PatternMatch
 		static bool prt(Handle);
 
 		// -------------------------------------------
-		// Setup the predicate to be solved.
-		// Apply Filter rules, to create a normalized predicate.
+		// predicates to be solved.
 		std::vector<Handle> normed_predicate;
 		std::set<Handle> bound_vars;
 
@@ -83,6 +80,7 @@ class PatternMatch
 		Handle curr_pred_handle;
 		void get_next_unsolved_pred(void);
 
+		// Stack used during recursive exploration
 		std::stack<Handle> pred_handle_stack;
 		std::stack<Handle> soln_handle_stack;
 		std::stack<Handle> root_handle_stack;
@@ -91,10 +89,12 @@ class PatternMatch
 
 		// -------------------------------------------
 
-		PatternMatchCallback *pmc;
 		// Result of solving the predicate
 		std::map<Handle, Handle> var_solution;
 		std::map<Handle, Handle> predicate_solution;
+
+		// callback to report results.
+		PatternMatchCallback *pmc;
 
 	public:
 		PatternMatch(AtomSpace *);

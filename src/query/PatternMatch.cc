@@ -151,9 +151,7 @@ bool PatternMatch::soln_up(Handle hsoln)
 		if (UNDEFINED_HANDLE == curr_root)
 		{
 			// printf ("==================== FINITO!\n");
-			pmc->var_solution = &var_solution;
-			pmc->predicate_solution = &predicate_solution;
-			return pmc->solution();
+			return pmc->solution(predicate_solution, var_solution);
 		}
 
 		curr_soln_handle = var_solution[curr_pred_handle];

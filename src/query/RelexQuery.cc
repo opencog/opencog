@@ -158,11 +158,12 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 
 /* ======================================================== */
 
-bool RelexQuery::solution(void)
+bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
+                          std::map<Handle, Handle> &var_soln)
 {
 	printf ("duude have soln\n");
 	PatternMatch pm(NULL);
-	pm.print_solution(*predicate_solution, *var_solution);
+	pm.print_solution(pred_soln, var_soln);
 	return false;
 }
 
