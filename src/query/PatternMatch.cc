@@ -321,7 +321,9 @@ bool PatternMatch::soln_up(Handle hsoln)
 		if (UNDEFINED_HANDLE == curr_root)
 		{
 			// printf ("==================== FINITO!\n");
-			return true;
+			pmc->var_solution = &var_solution;
+			pmc->predicate_solution = &predicate_solution;
+			return pmc->solution();
 		}
 
 		curr_soln_handle = var_solution[curr_pred_handle];
@@ -464,9 +466,11 @@ bool PatternMatch::do_candidate(Handle ah)
  * with the list of "bound vars" are to be solved for (or "evaluated")
  * bound vars must be, by definition, Nodes.
  */
-void PatternMatch::match(void)
+void PatternMatch::match(PatternMatchCallback *cb)
 {
 	if (normed_predicate.size() == 0) return;
+
+	pmc = cb;
 
 	// Print out the predicate ...
 	printf("\nPredicate is\n");

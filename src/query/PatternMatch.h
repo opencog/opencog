@@ -15,6 +15,19 @@
 
 namespace opencog {
 
+class PatternMatch;
+
+class PatternMatchCallback
+{
+	protected:
+		std::map<Handle, Handle> *var_solution;
+		std::map<Handle, Handle> *predicate_solution;
+		friend class PatternMatch;
+
+	public:
+		virtual bool solution(void) = 0;
+};
+
 typedef std::vector<Handle> RootList;
 typedef std::map<Handle, RootList *> RootMap;
 typedef std::pair<Handle, RootList *> RootPair;
@@ -80,6 +93,7 @@ class PatternMatch
 
 		// -------------------------------------------
 
+		PatternMatchCallback *pmc;
 		// Result of solving the predicate
 		std::map<Handle, Handle> var_solution;
 		std::map<Handle, Handle> predicate_solution;
@@ -88,7 +102,7 @@ class PatternMatch
 		PatternMatch(AtomSpace *);
 
 		void filter(Handle, const std::vector<Handle> &);
-		void match(void);
+		void match(PatternMatchCallback *);
 
 		void print_solution(void);
 
