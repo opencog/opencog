@@ -32,7 +32,6 @@ bool PatternMatch::prt(Handle h)
 }
 
 /* ======================================================== */
-
 /**
  * Return true, for example, if the node is _subj or _obj
  */
@@ -85,66 +84,61 @@ bool PatternMatch::apply_rule(Atom *atom)
 }
 
 /**
- * Put predicate into "normal form".
- * In this case, a cheap hack: remove all relations that
- * are not "defined linguistic relations", e.g. all but
- * _subj(x,y) and _obj(z,w) relations.
- */
-void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
-{
-	std::vector<Handle>::const_iterator i;
-	for (i = bvars.begin();
-	     i != bvars.end(); i++)
-	{
-		Handle h = *i;
-		bound_vars.insert(h);
-	}
-
-	var_solution.clear();
-	predicate_solution.clear();
-	normed_predicate.clear();
-	root_map.clear();
-	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
-}
-
-/* ======================================================== */
-/**
  * Check to see if atom is a bound variable.
  * Heuristics are used to determine this: the local atom should
  * be an instance of a concept, whose dictionary word is _$qVar,
  * i.e. one of the bound variable names.
  *
- * XXX This heuristic should be re-examined/rethought at some point.
- *
- * If it is, return pointer to the canonical var.
+ * XXX this is subject to change, if the relex rep changes.
  */
-Atom * PatternMatch::is_var(Atom *atom)
+bool PatternMatch::find_vars(Handle h)
 {
+	foreach_outgoing_handle(h, &PatternMatch::find_vars, this);
+
+	Atom *atom = TLB::getAtom(h);
+
 	// The local atom will be an instance of a general concept...
 	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
-	if(!atom) return NULL;
+	if(!atom) return false;
 	// and we want the "word" associated with this general concept.
 	atom = fl.backtrack_binary_link(atom, WR_LINK);
-	if(!atom) return NULL;
+	if(!atom) return false;
 
-	Handle h = TLB::getHandle(atom);
-	if (bound_vars.count(h)) return atom;
-	return NULL;
+	Node *n = dynamic_cast<Node *>(atom);
+	if(!n) return false;
+
+	const char * match_name = "_$qVar";
+	const std::string& name = n->getName();
+	if (strcmp(name.c_str(), match_name)) return false;
+
+	bound_vars.insert(h);
+	return false;
+}
+
+/**
+ * Put predicate into "normal form".
+ * In this case, a cheap hack: remove all relations that
+ * are not "defined linguistic relations", e.g. all but
+ * _subj(x,y) and _obj(z,w) relations.
+ */
+void PatternMatch::filter(Handle graph)
+{
+	var_solution.clear();
+	predicate_solution.clear();
+	normed_predicate.clear();
+	root_map.clear();
+	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
+
+	std::vector<Handle>::const_iterator i;
+	for (i = normed_predicate.begin();
+	     i != normed_predicate.end(); i++)
+	{
+		Handle h = *i;
+		find_vars(h);
+	}
 }
 
 /* ======================================================== */
-
-/**
- * tree comparison failed, so erase the proposed solution.
- */
-bool PatternMatch::erase_solution(Handle h)
-{
-	// std:map<Handle,Handle>::const_iterator it = var_solution.find(h);
-	// if (*it) var_solution[h] = NULL;
-	var_solution[h] = NULL;
-	foreach_outgoing_handle(h, &PatternMatch::erase_solution, this);
-	return false;
-}
 
 /**
  * tree_compare compares two trees, side-by-side.
@@ -175,8 +169,7 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
-	Atom *canon_var = is_var(aa);
-	if (canon_var)
+	if (bound_vars.count(ha))
 	{
 		// If ab is the very same var, then its a mismatch.
 		if (aa == ab) return true;
@@ -184,7 +177,6 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		// Else, we have a candidate solution.
 		// Make a record of it.
 		var_solution[ha] = ab;
-		var_solution[TLB::getHandle(canon_var)] = ab;
 		return false;
 	}
 

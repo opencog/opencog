@@ -93,7 +93,7 @@ bool QueryProcessor::do_assertion(Handle h)
 	{
 		PatternMatch pm(atom_space);
 		RelexQuery rlx;
-		pm.filter(h, varlist);
+		pm.filter(h);
 		pm.match(&rlx);
 	}
 	atom_space->removeAtom(h);

@@ -65,6 +65,7 @@ class PatternMatch
 
 		bool apply_rule(Atom *);
 		bool is_ling_rel(Atom *);
+		bool find_vars(Handle);
 
 		// -------------------------------------------
 		// Traversal utilities
@@ -79,9 +80,6 @@ class PatternMatch
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
 		int depth;  // recursion depth for tree_compare.
-
-		// Tree comparison failed, erase the propsed solution.
-		bool erase_solution(Handle);
 
 		bool pred_up(Handle);
 		bool soln_up(Handle);
@@ -101,9 +99,6 @@ class PatternMatch
 
 		FollowLink fl;
 
-		// Verify binding of variables
-		Atom * is_var(Atom *);
-
 		// -------------------------------------------
 
 		PatternMatchCallback *pmc;
@@ -114,7 +109,7 @@ class PatternMatch
 	public:
 		PatternMatch(AtomSpace *);
 
-		void filter(Handle, const std::vector<Handle> &);
+		void filter(Handle);
 		void match(PatternMatchCallback *);
 
 		static void print_solution(std::map<Handle, Handle> &vars,
