@@ -456,9 +456,17 @@ bool PatternMatch::do_candidate(Handle ah)
 
 printf("final up result = %d\n", found);
 
+	if (found)
+	{
+		print_solution();
+	}
+
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
-	return found;
+	// return found;
+	//
+	// Alternately, return false to search for all possible solutions.
+	return false;
 }
 
 /**
@@ -503,7 +511,6 @@ void PatternMatch::match(void)
 	foreach_handle_of_type(atom_space, ptype,
 	      &PatternMatch::do_candidate, this);
 
-	print_solution();
 }
 
 void PatternMatch::print_solution(void)
@@ -535,6 +542,7 @@ void PatternMatch::print_solution(void)
 		std::pair<Handle, Handle> pm = *m;
 		prt(pm.second);
 	}
+	fflush(stdout);
 }
 
 /* ===================== END OF FILE ===================== */
