@@ -12,12 +12,6 @@
 
 using namespace opencog;
 
-bool RelexQuery::solution(void)
-{
-	printf ("duude have soln\n");
-	return false;
-}
-
 /* ======================================================== */
 /**
  * Are two atoms instances of the same concept?
@@ -73,6 +67,16 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 
 	return true;
+}
+
+/* ======================================================== */
+
+bool RelexQuery::solution(void)
+{
+	printf ("duude have soln\n");
+	PatternMatch pm(NULL);
+	pm.print_solution(*var_solution, *predicate_solution);
+	return false;
 }
 
 /* ===================== END OF FILE ===================== */

@@ -392,17 +392,9 @@ bool PatternMatch::do_candidate(Handle ah)
 	curr_pred_handle = curr_root;
 	bool found = soln_up(ah);
 
-	if (found)
-	{
-		print_solution();
-	}
-
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
-	// return found;
-	//
-	// Alternately, return false to search for all possible solutions.
-	return false;
+	return found;
 }
 
 /**
@@ -417,6 +409,7 @@ void PatternMatch::match(PatternMatchCallback *cb)
 
 	pmc = cb;
 
+#if 0
 	// Print out the predicate ...
 	printf("\nPredicate is\n");
 	std::vector<Handle>::iterator i;
@@ -438,6 +431,7 @@ void PatternMatch::match(PatternMatchCallback *cb)
 			printf(" bound var: %s\n", n->getName().c_str());
 		}
 	}
+#endif
 
 	// Get type of the first item in the predicate list.
 	Handle h = normed_predicate[0];
@@ -451,8 +445,10 @@ void PatternMatch::match(PatternMatchCallback *cb)
 
 }
 
-void PatternMatch::print_solution(void)
+void PatternMatch::print_solution(std::map<Handle, Handle> &vars,
+                                  std::map<Handle, Handle> &preds)
 {
+#if 0
 	printf("\nSolution variable bindings:\n");
 
 	// Print out the bindings of solutions to variables.
@@ -460,7 +456,7 @@ void PatternMatch::print_solution(void)
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
 		Handle var = *j;
-		Handle soln = var_solution[var];
+		Handle soln = vars[var];
 		Atom *av = TLB::getAtom(var);
 		Atom *as = TLB::getAtom(soln);
 		Node *nv = dynamic_cast<Node *>(av);
@@ -471,11 +467,12 @@ void PatternMatch::print_solution(void)
 			       nv->getName().c_str(), ns->getName().c_str());
 		}
 	}
+#endif
 
 	// Print out the full binding to all of the preds.
 	printf("\nFull solution:\n");
 	std::map<Handle, Handle>::const_iterator m;
-	for (m = predicate_solution.begin(); m != predicate_solution.end(); m++) 
+	for (m = preds.begin(); m != preds.end(); m++) 
 	{
 		std::pair<Handle, Handle> pm = *m;
 		prt(pm.second);

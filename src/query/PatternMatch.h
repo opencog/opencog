@@ -54,8 +54,8 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 
-		bool prt(Atom *);
-		bool prt(Handle);
+		static bool prt(Atom *);
+		static bool prt(Handle);
 
 		// -------------------------------------------
 		// Setup the predicate to be solved.
@@ -72,7 +72,6 @@ class PatternMatch
 		Handle curr_root;
 		bool note_root(Handle);
 		
-
 		// -------------------------------------------
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle);
@@ -100,9 +99,6 @@ class PatternMatch
 		// -------------------------------------------
 		// Routines that implement node matching heuristics.
 
-		// Are two nodes instances of the same concept?
-		bool concept_match(Atom *, Atom *);
-
 		FollowLink fl;
 
 		// Verify binding of variables
@@ -121,7 +117,8 @@ class PatternMatch
 		void filter(Handle, const std::vector<Handle> &);
 		void match(PatternMatchCallback *);
 
-		void print_solution(void);
+		static void print_solution(std::map<Handle, Handle> &vars,
+		                           std::map<Handle, Handle> &preds);
 
 };
 };
