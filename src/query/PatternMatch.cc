@@ -303,6 +303,12 @@ bool PatternMatch::soln_up(Handle hsoln)
 	// unsovled predicate.
 	if (curr_pred_handle == curr_root)
 	{
+
+		root_handle_stack.push(curr_root);
+		pred_handle_stack.push(curr_pred_handle);
+		soln_handle_stack.push(curr_soln_handle);
+		pred_solutn_stack.push(predicate_solution);
+
 		predicate_solution[curr_root] = curr_soln_handle;
 printf ("duuude --------------------- \npred: ");
 prt(curr_root);
@@ -329,9 +335,24 @@ prt(curr_root);
 		curr_soln_handle = var_solution[curr_pred_handle];
 		bool found = soln_up(curr_soln_handle);
 
-/// xxx
+		// If we failed to find anything at this level,
+		// we need to pop, and try other possible matches.
+		if (!found)
+		{
+			curr_root = root_handle_stack.top();
+			root_handle_stack.pop();
 
-		return true;
+			curr_pred_handle = pred_handle_stack.top();
+			pred_handle_stack.pop();
+
+			curr_soln_handle = soln_handle_stack.top();
+			soln_handle_stack.pop();
+
+			predicate_solution = pred_solutn_stack.top();
+			pred_solutn_stack.pop();
+		}
+
+		return found;
 	}
 
 printf("have soln match, ");
@@ -414,15 +435,20 @@ void PatternMatch::get_next_unsolved_pred(void)
  */
 bool PatternMatch::do_candidate(Handle ah)
 {
-	predicate_solution.clear();
-	var_solution.clear();
-
 	// Don't stare at our navel.
 	std::vector<Handle>::iterator i;
 	for (i = normed_predicate.begin(); i != normed_predicate.end(); i++)
 	{
 		if (ah == *i) return false;
 	}
+
+	// Cleanup
+	predicate_solution.clear();
+	var_solution.clear();
+	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
+	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
+	while(!root_handle_stack.empty()) root_handle_stack.pop();
+	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 
 	curr_root = normed_predicate[0];
 	curr_pred_handle = curr_root;

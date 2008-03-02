@@ -63,6 +63,9 @@ class PatternMatch
 
 		std::stack<Handle> pred_handle_stack;
 		std::stack<Handle> soln_handle_stack;
+		std::stack<Handle> root_handle_stack;
+		typedef std::map<Handle, Handle> SolnMap;
+		std::stack<SolnMap> pred_solutn_stack;
 
 		// -------------------------------------------
 		// Routines that implement node matching heuristics.
