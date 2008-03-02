@@ -147,15 +147,18 @@ bool PatternMatch::soln_up(Handle hsoln)
 		// printf("next pred is "); prt(curr_root);
 
 		// If there are no further predicates to solve,
-		// we are really done! Return true to terminate the search.
+		// we are really done! Report the solution via callback.
+		bool found = false;
 		if (UNDEFINED_HANDLE == curr_root)
 		{
 			// printf ("==================== FINITO!\n");
-			return pmc->solution(predicate_solution, var_solution);
+			found = pmc->solution(predicate_solution, var_solution);
 		}
-
-		curr_soln_handle = var_solution[curr_pred_handle];
-		bool found = soln_up(curr_soln_handle);
+		else
+		{
+			curr_soln_handle = var_solution[curr_pred_handle];
+			found = soln_up(curr_soln_handle);
+		}
 
 		// If we failed to find anything at this level,
 		// we need to pop, and try other possible matches.
@@ -337,7 +340,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	}
 	pmc = cb;
 
-#if 0
+#ifdef DEBUG
 	// Print out the predicate ...
 	printf("\nPredicate is\n");
 	std::vector<Handle>::iterator i;
@@ -356,7 +359,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		Node *n = dynamic_cast<Node *>(a);
 		if (n)
 		{
-			printf(" bound var: %s\n", n->getName().c_str());
+			printf(" bound var: "); prt(a);
 		}
 	}
 #endif
@@ -376,15 +379,15 @@ void PatternMatch::match(PatternMatchCallback *cb,
 void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
                                   std::map<Handle, Handle> &vars)
 {
-#if 0
 	printf("\nSolution variable bindings:\n");
 
 	// Print out the bindings of solutions to variables.
-	std::set<Handle>::const_iterator j;
-	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
+	std::map<Handle, Handle>::const_iterator j;
+	for (j=vars.begin(); j != vars.end(); j++)
 	{
-		Handle var = *j;
-		Handle soln = vars[var];
+		std::pair<Handle, Handle> pv = *j;
+		Handle var = pv.first;
+		Handle soln = pv.second;
 		Atom *av = TLB::getAtom(var);
 		Atom *as = TLB::getAtom(soln);
 		Node *nv = dynamic_cast<Node *>(av);
@@ -395,7 +398,6 @@ void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
 			       nv->getName().c_str(), ns->getName().c_str());
 		}
 	}
-#endif
 
 	// Print out the full binding to all of the preds.
 	printf("\nFull solution:\n");
