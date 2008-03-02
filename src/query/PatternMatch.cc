@@ -13,7 +13,7 @@
 
 using namespace opencog;
 
-#define DEBUG 1
+// #define DEBUG 1
 #ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -143,26 +143,24 @@ bool PatternMatch::soln_up(Handle hsoln)
 	// If no match, try the next one.
 	if (no_match) return false;
 
-	curr_soln_handle = TLB::getHandle(as);
-
 	// Ahh ! found a match!  If we've navigated to the top of the 
 	// predicate, then we're done with it.  Look for the next 
 	// unsovled predicate.
 	if (curr_pred_handle == curr_root)
 	{
-
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
 		pred_solutn_stack.push(predicate_solution);
 
+		curr_soln_handle = TLB::getHandle(as);
 		predicate_solution[curr_root] = curr_soln_handle;
 		prtmsg("--------------------- \npred:", curr_root);
 		prtmsg("soln:", curr_soln_handle);
 		
 		get_next_unsolved_pred();
 
-		prtmsg("next handle is", curr_pred_handle);
+		prtmsg("joining handle is", curr_pred_handle);
 		prtmsg("next pred is", curr_root);
 
 		// If there are no further predicates to solve,
@@ -175,36 +173,46 @@ bool PatternMatch::soln_up(Handle hsoln)
 		}
 		else
 		{
+			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = var_solution[curr_pred_handle];
 			found = soln_up(curr_soln_handle);
+
+			curr_soln_handle = soln_handle_stack.top();
+			soln_handle_stack.pop();
 		}
 
 		// If we failed to find anything at this level,
 		// we need to pop, and try other possible matches.
-		if (!found)
-		{
-			curr_root = root_handle_stack.top();
-			root_handle_stack.pop();
+		curr_root = root_handle_stack.top();
+		root_handle_stack.pop();
 
-			curr_pred_handle = pred_handle_stack.top();
-			pred_handle_stack.pop();
+		curr_pred_handle = pred_handle_stack.top();
+		pred_handle_stack.pop();
 
-			curr_soln_handle = soln_handle_stack.top();
-			soln_handle_stack.pop();
+		curr_soln_handle = soln_handle_stack.top();
+		soln_handle_stack.pop();
 
-			predicate_solution = pred_solutn_stack.top();
-			pred_solutn_stack.pop();
-		}
+		predicate_solution = pred_solutn_stack.top();
+		pred_solutn_stack.pop();
+
+		prtmsg("pop to joining handle", curr_pred_handle);
+		prtmsg("pop to pred", curr_root);
 
 		return found;
 	}
 
-	prtmsg("node has soln, move up:", as);
+	soln_handle_stack.push(curr_soln_handle);
+	curr_soln_handle = TLB::getHandle(as);
 
 	// Move up the predicate, and hunt for a match, again.
+	prtmsg("node has soln, move up:", as);
 	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatch::pred_up, this);
 	dbgprt("up pred find =%d\n", found);
+
+	curr_soln_handle = soln_handle_stack.top();
+	soln_handle_stack.pop();
+
 	return found;
 }
 
@@ -216,10 +224,14 @@ bool PatternMatch::pred_up(Handle h)
 	if (!valid) return false;
 
 	// Now, move up the solution outgoing set, looking for a match.
+	pred_handle_stack.push(curr_pred_handle);
 	curr_pred_handle = h;
 
 	bool found = foreach_incoming_handle(curr_soln_handle,
 	                     &PatternMatch::soln_up, this);
+
+	curr_pred_handle = pred_handle_stack.top();
+	pred_handle_stack.pop();
 
 	dbgprt("upward soln find =%d\n", found);
 	return found;
