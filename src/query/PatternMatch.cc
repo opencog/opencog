@@ -117,10 +117,8 @@ void PatternMatch::filter(Handle graph, const std::vector<Handle> &bvars)
  */
 bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 {
-	std::string sa = aa->toString();
-	std::string sb = ab->toString();
-	printf ("concept comp %s\n"
-           "          to %s\n", sa.c_str(), sb.c_str());
+	// printf ("concept comp "); prt(aa);
+	// printf ("          to "); prt(ab);
 
 	// If they're the same atom, then clearly they match.
 	if (aa == ab) return false;
@@ -130,10 +128,8 @@ bool PatternMatch::concept_match(Atom *aa, Atom *ab)
 	Atom *ca = fl.follow_binary_link(aa, INHERITANCE_LINK);
 	Atom *cb = fl.follow_binary_link(ab, INHERITANCE_LINK);
 
-	sa = ca->toString();
-	sb = cb->toString();
-	printf ("gen comp %d %s\n"
-           "         to %s\n", ca==cb, sa.c_str(), sb.c_str());
+	// printf ("gen comp %d ", ca==cb); prt(ca);
+	// printf ("        to "); prt(cb);
 
 	if (ca == cb) return false;
 	return true;

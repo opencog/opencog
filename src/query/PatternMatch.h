@@ -29,6 +29,19 @@ class PatternMatchCallback
 
 	public:
 		virtual ~PatternMatchCallback() {};
+
+		/**
+		 * Called when two candidate nodes need to be
+		 * compared. Return true if the nodes match,
+		 * else return false.
+		 */
+		virtual bool node_match(Atom *, Atom *) = 0;
+
+		/**
+		 * Called when a solution is found. Should 
+		 * return false to search for more solutions;
+		 * or return true to terminate search.
+		 */
 		virtual bool solution(void) = 0;
 };
 
