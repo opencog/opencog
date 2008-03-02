@@ -28,6 +28,7 @@ class PatternMatchCallback
 		friend class PatternMatch;
 
 	public:
+		virtual ~PatternMatchCallback() {};
 		virtual bool solution(void) = 0;
 };
 

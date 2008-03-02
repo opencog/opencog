@@ -14,20 +14,9 @@
 #include "Node.h"
 #include "PatternMatch.h"
 #include "QueryProcessor.h"
+#include "RelexQuery.h"
 
 using namespace opencog;
-
-class Relex : public PatternMatchCallback
-{
-	public:
-		virtual bool solution(void);
-};
-
-bool Relex::solution(void)
-{
-	printf ("duude have soln\n");
-	return false;
-}
 
 // ----------------------------------------
 QueryProcessor::QueryProcessor(void)
@@ -103,7 +92,7 @@ bool QueryProcessor::do_assertion(Handle h)
 	if (0 != varlist.size())
 	{
 		PatternMatch pm(atom_space);
-		Relex rlx;
+		RelexQuery rlx;
 		pm.filter(h, varlist);
 		pm.match(&rlx);
 	}
