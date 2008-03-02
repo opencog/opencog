@@ -42,24 +42,6 @@ bool PatternMatch::is_ling_rel(Atom *atom)
 }
 
 /**
- * Create an associative array that gives a list of all of the
- * predicatees that a given node participates in.
- */
-bool PatternMatch::note_root(Handle h)
-{
-	RootList *rl = root_map[h];
-	if (NULL == rl)
-	{
-		rl = new RootList();
-		root_map[h] = rl;
-	}
-	rl->push_back(curr_root);
-
-	foreach_outgoing_handle(h, &PatternMatch::note_root, this);
-	return false;
-}
-
-/**
  * Hack --- not actually applying any rules, except one
  * hard-coded one: if the link involves a
  * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
@@ -76,10 +58,6 @@ bool PatternMatch::apply_rule(Atom *atom)
 	// Its a keeper, add this to our list of acceptable predicate terms.
 	normed_predicate.push_back(ah);
 
-	// Create a table of nodes in the predicates, with
-	// a list of the predicates that each node participates in.
-	curr_root = ah;
-	foreach_outgoing_handle(ah, &PatternMatch::note_root, this);
 	return false;
 }
 
@@ -123,10 +101,7 @@ bool PatternMatch::find_vars(Handle h)
  */
 void PatternMatch::filter(Handle graph)
 {
-	var_solution.clear();
-	predicate_solution.clear();
 	normed_predicate.clear();
-	root_map.clear();
 	foreach_outgoing_atom(graph, &PatternMatch::apply_rule, this);
 
 	std::vector<Handle>::const_iterator i;
@@ -390,6 +365,24 @@ bool PatternMatch::do_candidate(Handle ah)
 }
 
 /**
+ * Create an associative array that gives a list of all of the
+ * predicatees that a given node participates in.
+ */
+bool PatternMatch::note_root(Handle h)
+{
+	RootList *rl = root_map[h];
+	if (NULL == rl)
+	{
+		rl = new RootList();
+		root_map[h] = rl;
+	}
+	rl->push_back(curr_root);
+
+	foreach_outgoing_handle(h, &PatternMatch::note_root, this);
+	return false;
+}
+
+/**
  * Solve a predicate.
  * Its understood that the input "graph" is a predicate, of sorts,
  * with the list of "bound vars" are to be solved for (or "evaluated")
@@ -397,8 +390,23 @@ bool PatternMatch::do_candidate(Handle ah)
  */
 void PatternMatch::match(PatternMatchCallback *cb)
 {
+	var_solution.clear();
+	predicate_solution.clear();
+
 	if (normed_predicate.size() == 0) return;
 
+	// Preparation prior to search.
+	// Create a table of nodes in the predicates, with
+	// a list of the predicates that each node participates in.
+	root_map.clear();
+	std::vector<Handle>::const_iterator i;
+	for (i = normed_predicate.begin();
+	     i != normed_predicate.end(); i++)
+	{
+		Handle h = *i;
+		curr_root = h;
+		note_root(h);
+	}
 	pmc = cb;
 
 #if 0
