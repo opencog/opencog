@@ -4,6 +4,9 @@
  * Linas Vepstas February 2008
  */
 
+#ifndef OPENCOG_PATTERN_MATCH_H_
+#define OPENCOG_PATTERN_MATCH_H_
+
 #include <map>
 #include <stack>
 
@@ -109,3 +112,4 @@ class PatternMatch
 };
 };
 
+#endif /* OPENCOG_PATTERN_MATCH_H_ */

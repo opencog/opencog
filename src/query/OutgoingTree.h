@@ -6,6 +6,9 @@
  * Linas Vepstas February 2008
  */
 
+#ifndef OPENCOG_OUTGOING_TREE_H
+#define OPENCOG_OUTGOING_TREE_H
+
 #include "types.h"
 
 namespace opencog {
@@ -35,3 +38,4 @@ class OutgoingTree
 
 }
 
+#endif /* OPENCOG_OUTGOING_TREE_H */
