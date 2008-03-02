@@ -508,9 +508,9 @@ void PatternMatch::match(void)
 
 void PatternMatch::print_solution(void)
 {
-	printf("\nSolution vector:\n");
+	printf("\nSolution variable bindings:\n");
 
-	// Print out the solution vector.
+	// Print out the bindings of solutions to variables.
 	std::set<Handle>::const_iterator j;
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
@@ -525,6 +525,15 @@ void PatternMatch::print_solution(void)
 			printf("var %s solved by %s\n", 
 			       nv->getName().c_str(), ns->getName().c_str());
 		}
+	}
+
+	// Print out the full binding to all of the preds.
+	printf("\nFull solution:\n");
+	std::map<Handle, Handle>::const_iterator m;
+	for (m = predicate_solution.begin(); m != predicate_solution.end(); m++) 
+	{
+		std::pair<Handle, Handle> pm = *m;
+		prt(pm.second);
 	}
 }
 
