@@ -5,7 +5,9 @@
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
-#include <stdio.h>
+
+#ifndef OPENCOG_FOLLOW_LINK_H_
+#define OPENCOG_FOLLOW_LINK_H_
 
 #include "Atom.h"
 #include "Link.h"
@@ -101,5 +103,4 @@ class FollowLink
 };
 }
 
-
-/* =================== END OF FILE ====================== */
+#endif /* OPENCOG_FOLLOW_LINK_H_ */
