@@ -55,8 +55,128 @@ with the explicit mapping given by:
     atom John_51 maps to John_85
     atom _$qVar_05 maps to ball_79
 
+
 Algorithm overview
 ------------------
+The following sections present the algorithm details.
+
+Terminology
+-----------
+The incidence graph of a hypergraph is called the "Levi graph".
+Levi graphs are bipartite; although the algorithm does not make
+use of this.
+
+The Basic Algorithmic Idea
+--------------------------
+The basic idea is to treat the query as a graph, in which are embedded
+some number of variables or unknowns. This query graph can be loosely 
+understood to be kind of like a predicate, in that the query is solved
+only when the variables take on appropriate values.
+
+The goal of query processing is to scan the collection of all knowledge,
+(the "universe hypergraph"), looking for a subgraph that matches the 
+predicate. The nodes that fit where the unknowns would go are then the 
+answer to the query.
+
+The problem of finding certain subgraphs within graphs is known as the
+"subgraph isomorphism problem" or the "subgraph matching problem", and 
+one uses a "subgraph isomorphism algorithm" to find the match.
+
+
+Currently Implemented Algorithm
+-------------------------------
+0) In the following, the word "atom" may refer to either a hypergraph
+   node, or a hypergraph link. Corresponding to every hypergraph is
+   an incidence graph. The atoms of a hypergraph are vertices of
+   the incidence graph. The convetion used here is that the incidence
+   graph is a directed graph; thus, only hypergraph links have 
+   outgoing incidence graph edges; whereas hypergraph nodes have
+   no outgoing incidence graph edges.
+
+   The implemented algorithm makes direct use of the incidence 
+   graph, and only indirectly to the hypergraph. The insistence
+   on making the incidence graph be a directed graph helps make
+   traversal more direct and removes ambiguity.
+
+   [OpenCog-specific remarks are in square brackets.  In OpenCog, the 
+   outgoing incidence graph edges are given by the "outgoing set" of 
+   the atom.]
+
+1) Input consists a sequence of the roots of incidence trees, that is,
+   of a list of subgraphs of the incidence graph that are trees.  Thus,
+   by definition, the incidence tree root must be a hypergraph link, 
+   as hypergraph node cannot, by definition, have a non-trivial 
+   incidence tree under it.  Each tree is, by definition, acyclic.
+
+   Thus, for example: _subj(row, Steve) has _subj at the root of the 
+   tree, with "row" and "Steve" as leaves.
+
+   In the following [and in the code], each tree will be refered to as 
+   a "predicate"; although this term is potentially misleading, as the
+   resemblance to logical predicates is superficial.
+
+   Distinct trees may have common verticies.  The common verticies 
+   act to join together the trees into a single, connected graph. 
+   Disconnected graphs are not allowed; the algorithm will fail to
+   find and solve disconnected components.  The graph as a whole may
+   contain loops (the decomposition into trees keeps the algorithm
+   from having to explicitly accomadate loops).
+
+	The universe graph may have any structure whatsoever; there is no
+	requirement that the universe be decomposable into trees.
+
+2) Input includes a list of the bound variables in the expressions.
+   Thus, for example _obj(row,_$qVar) has _$qVar is the variable
+   to be solved for. The list serves to explicitly identify the 
+   variables, so that they do not need to be computed or guessed.
+   The designated variables need not be leaf verticies. There may be
+   zero, one or more variables.
+
+3) Node equivalence is determined by means of a callback; the user
+   may implement any notion at all of "equivalance".  In particular,
+   the equivalence callback may be used as an alternate way to perform
+   variable bindings, with the callback itself determining when a 
+	node is variable, and what the allowed bindings to it may be.
+
+	[This callback is implemented in PatternMatchCallback::node_match().
+	In opencog, links are not given unique names, only types. Thus,
+	links are considered to match when thier types match, and the
+   tree given by the link's outoging set also matches. In particular,
+   the node_match() callback is never called for links.]
+
+4) Pick the first tree. Get the type of the root atom of the 
+   first tree. Get a list of all atoms in the universe of this type. 
+   These are the "candidate atoms".  Iterate over this list.
+   The iterator is the next step below (step 5).
+
+   [This step is implemented in PatternMatch::match(), which calls
+   PatternMatch::do_candidate() for each candidate root.]
+
+5) Initiate a recursive tree matching algorithm, comparing the 
+   incidence tree of the first predicate to that rooted at the 
+   candidate atom.
+
+	First, the tree matching algo checks to see if the given 
+	node in the predicate is a variable; if so, then the match
+	is considered to be successful, and the corresponding node
+	in the universe is recorded as a solution.
+
+	If the predicate itself is found in the universe, it is rejected.
+
+	If the atom is a link, so that it has a non-zero number of outgoing
+	edges, then the number of edges (the arity) of both the predicate
+   and the corresponding lik in the universe, must be equal.
+
+   The tree matching algorithm invokes the node-equivalence callback,
+	as each pair of nodes is encountered.  Recursion is terminated when 
+	a mismatch is found.
+
+   [This step is implemented in PatternMatch::tree_compare().
+	Atoms with different types are rejected before the callback is
+   called. Because links are anonymous, the callback is never
+	called for links.]
+
+5) Do other trees .... 
 
 
 Query processing conceptual problems, design problems:
@@ -89,100 +209,3 @@ analysis, and dispose of these as appropriate (i.e. generating an
 appropriate reply).
 
 
-Terminology
------------
-The incidence graph of a hypergraph is called the "Levi graph".
-Levi graphs are bipartite.
-
-The Basic Algorithmic Idea
---------------------------
-The basic idea is to treat the query as a graph, in which are embedded
-one or more unknowns. This query graph can be loosely understood to be
-a predicate, with the unknowns corresponding to the bound variables of
-the predicate.
-
-The goal of query processing is to scan the collection of all knowledge,
-looking for a subgraph that matches the predicate. The nodes that fit
-where the unknowns would go are then the answer to the query.
-
-The problem of finding certain subgraphs within graphs is known as the
-"subgraph isomorphism problem" or the "subgraph matching problem", and 
-one uses a "subgraph isomorphism algorithm" to find the match.
-
-
-Currently Implemented Algorithm
--------------------------------
-0) In the following, the word "atom" may refer to either a hypergraph
-   node, or a hypergraph edge. Corresponding to every hypergraph is
-   an incidence graph. The atoms of a hypergraph are vertices of
-   the incidence graph. The convetion used here is that the incidence
-   graph is a directed graph; thus, only hypergraph links have 
-   outgoing incidence graph edges; whereas hypergraph nodes have
-   no outgoing incidence graph edges.
-
-   The implemented algorithm makes direct use of the incidence 
-   graph, and only indirectly to the hypergraph. The insistence
-   on making the incidence graph be a directed graph helps make
-   traversal more direct and removes ambiguity.
-
-   [OpenCog-specific remarks are in square brackets.  In OpenCog, the 
-   outgoing incidence graph edges are given by the "outgoing set" of 
-   the atom.]
-
-1) Input consists a sequence of the roots of incidence trees, that is,
-   of a list of subgraphs of the incidence graph that are trees.  Thus,
-   by definition, the incidence tree root must be a hypergraph link, 
-   as hypergraph vertex cannot, by definition, have a non-trivial 
-   incidence tree under it.  Each tree is, by definition acyclic.
-
-   Thus, for example: _subj(row, Steve) has _subj at the root of the 
-   tree, with row and Steve as leaves.
-
-   Each tree will be refered to as a "predicate" in the following.
-   Distinct trees may have common verticies. The collection of trees,
-   as a whole, may contain loops. The collection of trees, as a 
-   whole, must be connected; no disjoint graphs allowed.
-
-2) Input includes a list of the bound variables in the expressions.
-   Thus, for example _obj(row,_$qVar) has _$qVar is the variable
-   to be solved for. The list serves to explicitly identify the 
-   variables, so that they do not need to be computed or guessed.
-   The designated variables need not be leaf verticies. There may be
-   more than one variable; there must be at least one.
-
-3) Pick the first tree. Get the type of the root atom of the 
-   first tree. Get a list of all atoms in the universe of this type. 
-   These are the "candidate atoms".  Iterate over this list.
-   The iterator is the next step below (step 4).
-
-   [This step is implemented in PatternMatch::match(), which calls
-   PatternMatch::do_candidate() for each candidate root.]
-
-4) Initiate a recursive tree matching algorithm, comparing the 
-   incidence tree of the first predicate to that rooted at the 
-   candidate atom.
-
-   The tree matching algorithm is the appropriate place to implement 
-   any special-case tests and match requirements, such as matching 
-   types or labels on hypergraph atoms.
-
-   [This step is implemented in PatternMatch::tree_compare()
-   Several "special case tests" are applied at this point. The
-   most important one is in the comparision of nodes. The predicate
-   nodes are considered to match nodes in the universe when both nodes
-   are "is-a" instances of the same concept. So, for example, the
-   assertion _obj(throw_123, ball_456) is understood to be instance 123 
-   of the general concept of "throwing", and ball_456 is instance 456 of
-   the general concept of "ball". To answer the query "Who threw the 
-   ball?", the "ball" in the predicate will be a specific instance of
-   "ball", (e.g. "ball_789"), and we want to match on the concept,
-   not the instance.
-
-   These specifics may need to be modified if there is reasoning 
-   performed prior to the query, or it the overall representation of
-   the relex and frame structures in opencog change.]
-
-	If the tree contains bound variables, the corresponding atom in
-   the universe graph is marked as a solution candidate.
-
-5) Do other trees .... 
