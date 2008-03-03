@@ -15,7 +15,7 @@ A) The details of the Atom.h incoming and outgoing sets are abstracted.
 
 B) The foreach abstraction makes multi-threaded implementation,
    including mutex locking, much easier. In particular, the semantics
-   of atomic locking of a forech traversal is much simpler than complexity
+   of atomic locking of a foreach traversal is much simpler than complexity
    of trying to lock a naked linked list for read-only traversal, or
    read-write editing.
 
@@ -33,7 +33,7 @@ D) The foreach abstraction allows complex iterators to be implemented.
    performance over filters. For example, consider a long linked list
    consisting of many types of atoms, and one wants to perform a certain
    operation only on a specific type of atom. Traditional "filters"
-   would make a copy of the list, incuding only the desired atom
+   would make a copy of the list, including only the desired atom
    types in the copied list. This requires significant overhead:
    nodes must be copied, iterated over, and then freed.  The foreach
    abstraction allows a zero-copy filter to be implemented: the
@@ -88,13 +88,16 @@ Foreach-style iterator (do code like this):
 
 Not only does this require fewer lines of code, but it hides the
 fact that the outgoing set is a vector. This allows the implementation
-of the outgoingset to change in the future, if needed. In addition,
-the "foreach_outgoing_handle" routine provides a single, centralized
-place for mutex locking to be implemented, and a single place for the
-correctness of that code to be reviewed, as opposed to locking code
-being scattered haphazardly all over the application.
+of the outgoing set to change in the future, if needed. (Another
+example might be that of replacing hash tables by red-black trees,
+without disturbing users of the code).
+
+In addition, the "foreach_outgoing_handle" routine provides a single,
+centralized place for mutex locking to be implemented, and a single
+place for the correctness of that code to be reviewed, as opposed to
+locking code being scattered haphazardly all over the application.
 
 (The current implementation does not have the mutex lock in place,
-this is a bigger taks, because, unfortunately, there are already
+this is a bigger task, because, unfortunately, there are already
 a number of users of the raw access methods).
 
