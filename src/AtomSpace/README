@@ -1,0 +1,42 @@
+
+                   Foreach Iterators
+                   -----------------
+
+When iterating over the incoming and outgoing sets of an atom,
+please make use of the "foreach" iterators to do so.  The "foreach" 
+mechanism has multiple, strong, advantages over the raw access to 
+the incoming linked list, or the outgoing vector array. It is important
+to understand these.
+
+A) The details of the Atom.h incoming and outgoing sets are abstracted.
+	Thus, while the outgoing set uses std:vector, the incoming set uses
+	a simple linked list. This detail is immaterial to the "foreach" user,
+	as both look the same. This makes code easier to structure.
+
+B) The foreach abstraction makes multi-threaded implementation,
+	including mutex locking, much easier. In particular, the semantics
+	of atomic locking of a forech traversal is much simpler than complexity
+	of trying to lock a naked linked list for read-only traversal, or 
+	read-write editing.
+
+C) The foreach abstraction can (and will) have performance that is 
+	equal to a for-loop iteration over an array or linked list. This
+	is because, when the set to be iterated over is a simple list or
+	array, the foreach iterator can be implemented as an inline function.
+	Modern compilers are able to inline such functions correctly,
+	and optimize the result, providing performance equivalent to 
+	a raw for-loop iteration.
+
+D) The foreach abstraction allows complex iterators to be implemented.
+	Thus, the foreach abstraction eliminates the data copying associated
+	with naive "filters", and thus can offer superior space *and* time
+	performance over filters. For example, consider a long linked list
+	consisting of many types of atoms, and one wants to perform a certain
+	operation only on a specific type of atom. Traditional "filters"
+	would make a copy of the list, incuding only the desired atom
+	types in the copied list. This requires significant overhead:
+	nodes must be copied, iterated over, and then freed.  The foreach
+	abstraction allows a zero-copy filter to be implemented: the 
+	callback is invoked only for those nodes that match the filter
+	crieteria.
+
