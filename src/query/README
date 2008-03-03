@@ -122,6 +122,10 @@ Currently Implemented Algorithm
    contain loops (the decomposition into trees keeps the algorithm
    from having to explicitly accomadate loops).
 
+	A list of the common, or shared, vertices is made; this list is 
+   used later in the algorithm, to find all trees connnected to a
+	specific vertex. [This list is implemented as PatternMatch::root_map]
+
 	The universe graph may have any structure whatsoever; there is no
 	requirement that the universe be decomposable into trees.
 
@@ -176,8 +180,108 @@ Currently Implemented Algorithm
    called. Because links are anonymous, the callback is never
 	called for links.]
 
-5) Do other trees .... 
+6) Assuming a single tree has been sucessfully matched in the previous
+	step, the next step is to find a predicate tree that has not yet been 
+	solved.  This is done by examining the list of all nodes that are
+	shared between the most recently solved tree, looking for an unsolved
+   tree.
 
+	[This is implemented in PattherMatch::get_next_unsolved_pred()]
+
+7) If an unsolved tree is found, then tree-matching, as described in
+	step 5), resumes. However, the tree matching resumes at the shared
+   node of the unsolved tree. The unsovled tree is recursively walked
+	upwards, towards its root, with a tree match attempted at ever stage.
+
+	The upwards recursion uses a stack to track state; this is required
+	in the case of there being multiple possible matches to a tree: 
+	after finding one match, the stack may be popped to explore other
+	possible matches.
+
+	If the upwards recursion reaches the root of the predicate, the
+	predicate is now considered to be solved. Go to step 6), to find
+	other unsolved predicates.
+
+	[This is implemented by two routines: PatternMatch::soln_up()
+	and PatternMatch::pred_up(). These two routines alternate
+	calls to each other, by traversing the *incoming* set of the
+	current node in the predicate, and the candidate solution node.
+	The incoming set takes one "upwards" in the tree.]
+
+	[The stack of current state is maintained in PatternMatch::
+	pred_handle_stack, etc. These are pushed as an upwards(incoming) 
+	edge is explored, and popped when the edge is rejected.]
+
+	[Partial solutions are recorded in PatternMatch::var_solution and 
+	PatternMatch::predicate_solution.  These partial solutions must also
+	be kept on stack, as a failed match at a later stage means that 
+	backtracking must be done. Since the partial solutions are used to
+	find unsolved predicates, care must be taken that the partial
+	solution is correct after backtracking: i.e. they must be popped
+	as failed matches are encountered.]
+
+	Note that mutiple solution graphs may overlap.  Thus, if the 
+	universe contains the statement: "John threw a ball and a rock."
+	and the query is "What did John throw?", then there are two 
+	valid subgraph matches: "John threw a ball" and "John threw
+	a rock".  Both of these solutions contain a common subgraph,
+	"John threw...", which must be reachable, and reconsidered,
+	after one solution is proposed. In particular, this implies
+	that the partial solution state must also be kept on stack,
+	so that the backtracking can be performed to find other,
+	overlapping solutions.
+
+8) If no unsolved tree is found, then the matching is complete.
+	The full solution is reported via callback.  The callback may
+	indicate that the search be terminated, or that it continue to 
+	find other possible solutions.
+
+Summary
+-------
+The above describes the specific implemention of a subraph matching 
+algorithm. It is generic, in that it makes no reference to the 
+specifics of the actual data layout, or of node equivalences in the
+data.  The only restriction made is that the input, query graph,
+has been decomposed into a set of trees.
+
+[On opencog, the entire implementation is in PatternMatch.[h, .cc]. 
+The algorithm makes heavy use of "foreach" iterators to walk the
+incoming and outgoing edges of an atom.  The "foreach" mechanism
+has multiple advantages over other techniques, and it is important
+to understand these.
+
+A) The details of the Atom.h incoming and outgoing sets are abstracted.
+	Thus, while the outgoing set uses std:vector, the incoming set uses
+	a simple linked list. This detail is immaterial to the "foreach" user,
+	as both look the same. The only requirement is that each edge is visited
+	exactly once.
+
+B) The foreach abstraction makes multi-threaded implementation,
+	including mutex locking, much easier. In particular, the semantics
+	of atomic locking of a forech traversal is much simpler than complexity
+	of trying to lock a naked linked list for read-only or read-write 
+	traversal.
+
+C) The foreach abstraction can (and will) have performance that is 
+	equal to a for-loop iteration over an array or linked list. This
+	is because, when the set to be iterated over is a simple list or
+	array, the foreach iterator can be implemented as an inline function.
+	Modern compilers are able to inline such functions correctly,
+	and optimize the result, providing performance equivalent to 
+	a raw for-loop iteration.
+
+D) The foreach abstraction allows complex iterators to be implemented.
+	Thus, the foeach abstraction eliminates the data copying associated
+	with naive "filters", and thus can offer superior space *and* time
+	performance over filters. For example, consider a long linked list
+	consisting of many types of atoms, and one wants to perform a certain
+	operation only on a specific type of atom. Traditional "filters"
+	would make a copy of the list, incuding only the desired atom
+	types in the copied list. This requires significant overhead:
+	nodes must be copied, iterated over, and then freed.  The foreach
+	abstraction allows a zero-copy filter to be implemented: the 
+	callback is invoked only for those nodes that match the filter
+	crieteria.
 
 Query processing conceptual problems, design problems:
 ------------------------------------------------------
