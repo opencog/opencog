@@ -99,6 +99,9 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		return false;
 	}
 
+	// The number of outgoing edges must match.
+	if(aa->getArity() != ab->getArity()) return true;
+
 	// If one is null, but the other is not, there's clearly no match.
 	if (aa && !ab) return true;
 	if (ab && !aa) return true;
