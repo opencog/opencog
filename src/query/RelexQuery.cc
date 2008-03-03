@@ -71,11 +71,26 @@ bool RelexQuery::is_query(Handle h)
 /* Routines to help put the query into normal form. */
 
 /**
- * Return true, for example, if the node is _subj or _obj
+ * Return true, if the node is, for example, _subj or _obj
  */
 bool RelexQuery::is_ling_rel(Atom *atom)
 {
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
+	return false;
+}
+
+/**
+ * Return true, if the node is, for example, #singluar or #masculine.
+ */
+bool RelexQuery::is_ling_cncpt(Atom *atom)
+{
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->getType()) return true;
+	return false;
+}
+
+bool RelexQuery::is_cncpt(Atom *atom)
+{
+	if (CONCEPT_NODE == atom->getType()) return true;
 	return false;
 }
 
@@ -86,12 +101,32 @@ bool RelexQuery::is_ling_rel(Atom *atom)
  */
 bool RelexQuery::apply_rule(Atom *atom)
 {
-	if (EVALUATION_LINK != atom->getType()) return false;
-
 	Handle ah = TLB::getHandle(atom);
-	bool keep = foreach_outgoing_atom(ah, &RelexQuery::is_ling_rel, this);
-
-	if (!keep) return false;
+	Type atype = atom->getType();
+	if (EVALUATION_LINK == atype)
+	{
+		bool keep = foreach_outgoing_atom(ah, &RelexQuery::is_ling_rel, this);
+		if (!keep) return false;
+	}
+	else if (INHERITANCE_LINK == atype)
+	{
+		/* Keep things like "tense (throw, past)" but reject things like
+		 * "Temporal_colocation:Time(past,throw)"
+		 * Also, must not try to pattern-match 
+		 * QUERY-TYPE(_$qVar,what)
+		 * HYP(throw, T)
+		 */
+		bool keep = foreach_outgoing_atom(ah, &RelexQuery::is_ling_cncpt, this);
+		if (!keep) return false;
+		keep = foreach_outgoing_atom(ah, &RelexQuery::is_cncpt, this);
+		if (!keep) return false;
+// XXX not done ...  need to handle HYP, etc.
+return false;
+	}
+	else
+	{
+		return false;
+	}
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
 	normed_predicate.push_back(ah);
@@ -189,6 +224,13 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
 }
 
 
+/**
+ * Are two nodes "equivalent", as far as the opencog representation 
+ * of RelEx expressions are concerned? 
+ *
+ * Return true to signify a mismatch,
+ * Return false to signify equivalence.
+ */
 bool RelexQuery::node_match(Atom *aa, Atom *ab)
 {
 	// If we are here, then we are comparing nodes.
@@ -207,6 +249,44 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;
 	}
+
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype)
+	{
+		/* We force agreement for gender, etc.
+		 * be have more relaxed agreement for tense...
+		 * i.e. match #past to #past_infinitive, etc.
+		 */
+		Node *na = dynamic_cast<Node *>(aa);
+		Node *nb = dynamic_cast<Node *>(ab);
+		if (na && nb)
+		{
+			const char * sa = na->getName().c_str();
+			const char * sb = nb->getName().c_str();
+			char * ua = strchr(sa, '_');
+			if (ua)
+			{
+				size_t len = ua-sa;
+				char * s = (char *) alloca(len+1);
+				strncpy(s,sa,len);
+				s[len] = 0x0;
+				sa = s;
+			}
+			char * ub = strchr(sb, '_');
+			if (ub)
+			{
+				size_t len = ub-sb;
+				char * s = (char *) alloca(len+1);
+				strncpy(s,sb,len);
+				s[len] = 0x0;
+				sb = s;
+			}
+printf("compare %s to %s\n", sa, sb);
+			if (!strcmp(sa, sb)) return false;
+			return true;
+		}
+		return true;
+	}
+
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
 	        ClassServer::getTypeName(ntype));
 

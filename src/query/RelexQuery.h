@@ -26,6 +26,8 @@ class RelexQuery : public PatternMatchCallback
 
 		// Convert query into a normal form.
 		bool is_ling_rel(Atom *);
+		bool is_ling_cncpt(Atom *);
+		bool is_cncpt(Atom *);
 		bool apply_rule(Atom *);
 		bool find_vars(Handle);
 		FollowLink fl;
