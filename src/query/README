@@ -1,11 +1,66 @@
-                    query
-                    -----
+                        query
+                        -----
 
-Simple, experimental implementation of query processing
-pre-prototype, broken, doesn't do anything yet.
+This directory contains code that implements a subgraph isomorphism
+algorithm, and then uses this algorithm to perform query processing.
 
-Conceptual problems, design problems:
--------------------------------------
+Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the 
+subgraph isomorphism algorithm finds and returns the corresponding
+smaller graph within the universe graph.  The smaller graph may include
+one or more variable nodes or links, which will match any corresponding
+node or link in the universe; for this reason, subgraph matching
+can be used to perform query processing, to "fill in the blanks".
+
+The subgraph matching algorithm is fairly general, but with an 
+important restriction on how the subgraph is specified. Every
+hypergraph has a corresponding incidence graph (or "Levi graph"),
+where the nodes and links of the hypergraph are mapped to vertices
+on the incidence graph, while the edges of the incidence graph
+reflect the connectivity of the hypergraph.  The input to the 
+algorithm must be specified as a set of trees in the incidence
+graph, with some nodes shared between the trees, so as to form
+a single, connected graph. This is a natural fit for the currently
+envisioned linguistics applications; for example:
+
+  _subj(John, throw)
+  _obj(ball, throw)
+
+consists of two trees, with a shared leaf (throw) connecting the 
+two trees together to form a single graph.  The tree input keeps
+the algorithm simple, as the subgraph matching is performed recursively,
+one tree at a time.
+
+The algorithm is kept generic, by means of two callbacks.  One callback
+simply reports a solution, and provides a map between nodes/links in 
+the subgraph, and nodes/links in the universe.  The second callback is
+used to determine when two nodes/links are identical.  For example,
+in linguistic matching, two nodes might be considered to be identical
+when they are both instances of the same concept; the details of what
+constitutes "the same concept" are left to the callback.
+
+As a concrete example, consider the statement and query: "John threw a 
+ball. What did John throw?" The query takes the form:
+
+   link[40 <_obj,link[26 <throw_49,_$qVar_05>]>]
+   link[40 <_subj,link[26 <throw_49,John_51>]>]
+
+which is sovled by:
+   link[40 <_obj,link[26 <throw_22,ball_79>]>]
+   link[40 <_subj,link[26 <throw_22,John_85>]>]
+
+with the explicit mapping given by:
+    atom _obj maps to _obj
+    atom _subj maps to _subj
+    atom throw_49 maps to throw_22
+    atom John_51 maps to John_85
+    atom _$qVar_05 maps to ball_79
+
+Algorithm overview
+------------------
+
+
+Query processing conceptual problems, design problems:
+------------------------------------------------------
 -- How to distinguish rhetorical questions from queries that should
    be answered?  A block of input text may contain rhetorical questions,
    which should be ignored.
@@ -22,7 +77,7 @@ Conceptual problems, design problems:
 Diary and Notes
 ---------------
 Use special token to trigger mind agent. Per Ben, "DialogManager",
-there are for such tokens:
+there are four such tokens:
 -- query
 -- statement
 -- command
@@ -33,8 +88,6 @@ The query processor will look for  these, perform some basic sentence
 analysis, and dispose of these as appropriate (i.e. generating an
 appropriate reply).
 
-Hmmm .. queries need to be morphed into predicates !?
-i.e. use a PredicateNode, and an EvalLink
 
 Terminology
 -----------

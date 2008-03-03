@@ -410,7 +410,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
                                   std::map<Handle, Handle> &vars)
 {
-	printf("\nSolution variable bindings:\n");
+	printf("\nSolution atom mapping:\n");
 
 	// Print out the bindings of solutions to variables.
 	std::map<Handle, Handle>::const_iterator j;
@@ -425,7 +425,7 @@ void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
 		Node *ns = dynamic_cast<Node *>(as);
 		if (ns && nv)
 		{
-			printf("var %s solved by %s\n", 
+			printf("atom %s maps to %s\n", 
 			       nv->getName().c_str(), ns->getName().c_str());
 		}
 	}
