@@ -28,6 +28,10 @@ class RelexQuery : public PatternMatchCallback
 		bool is_ling_rel(Atom *);
 		bool is_ling_cncpt(Atom *);
 		bool is_cncpt(Atom *);
+
+		bool do_discard;
+		bool discard_extra_markup(Atom *);
+
 		bool apply_rule(Atom *);
 		bool find_vars(Handle);
 		FollowLink fl;

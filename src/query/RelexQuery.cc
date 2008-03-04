@@ -2,6 +2,13 @@
  * RelexQuery.cc
  *
  * Implement pattern matching for RelEx queries.
+ * The pattern matching is performed for the relex part
+ * only, and not for the frame part of a sentence parse.
+ *
+ * The result of using RelEx only matching means that 
+ * queries will be interpreted quite literally; the 
+ * structure of a query sentence must closely resemble
+ * the structure of a sentence in the corpus.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -49,7 +56,7 @@ bool RelexQuery::match_node_name(Atom *atom)
 /**
  * Search for queries. 
  * XXX This implementation is kinda-wrong, its very specific
- * to the structure of the relex-to-opencog converstion, and 
+ * to the structure of the relex-to-opencog conversion, and 
  * is fragile, if that structure changes.
  */
 bool RelexQuery::check_for_query(Handle rel)
@@ -95,6 +102,32 @@ bool RelexQuery::is_cncpt(Atom *atom)
 }
 
 /**
+ * Discard 
+ * QUERY-TYPE(_$qVar,what)
+ * HYP(throw, T)
+ * from pattern-matching consideration; only
+ * questions will have these.
+ *
+ * Return true to keep, false to discard.
+ */
+bool RelexQuery::discard_extra_markup(Atom *atom)
+{
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+
+	Node *n = dynamic_cast<Node *>(atom);
+	if(!n) return false;
+
+	const char *name = n->getName().c_str();
+	if (!strcmp("#masculine", name)) do_discard = false;
+	else if (!strcmp("#feminine", name)) do_discard = false;
+	else if (!strcmp("#person", name)) do_discard = false;
+	else if (!strcmp("#definite", name)) do_discard = false;
+	else if (!strcmp("#singular", name)) do_discard = false;
+
+	return false;
+}
+
+/**
  * Hack --- not actually applying any rules, except one
  * hard-coded one: if the link involves a
  * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
@@ -110,18 +143,19 @@ bool RelexQuery::apply_rule(Atom *atom)
 	}
 	else if (INHERITANCE_LINK == atype)
 	{
-		/* Keep things like "tense (throw, past)" but reject things like
-		 * "Temporal_colocation:Time(past,throw)"
-		 * Also, must not try to pattern-match 
+		/* Discard 
 		 * QUERY-TYPE(_$qVar,what)
 		 * HYP(throw, T)
+		 * from pattern-matching consideration; only
+		 * questions will have these.
 		 */
-		bool keep = foreach_outgoing_atom(ah, &RelexQuery::is_ling_cncpt, this);
-		if (!keep) return false;
-		keep = foreach_outgoing_atom(ah, &RelexQuery::is_cncpt, this);
-		if (!keep) return false;
-// XXX not done ...  need to handle HYP, etc.
-return false;
+		do_discard = true;
+		foreach_outgoing_atom(ah, &RelexQuery::discard_extra_markup, this);
+		if (do_discard) return false;
+
+		/* Keep things like "tense (throw, past)" but reject things like
+		 * "Temporal_colocation:Time(past,throw)"
+		 */
 	}
 	else
 	{
@@ -280,7 +314,6 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 				s[len] = 0x0;
 				sb = s;
 			}
-printf("compare %s to %s\n", sa, sb);
 			if (!strcmp(sa, sb)) return false;
 			return true;
 		}
