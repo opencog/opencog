@@ -244,7 +244,10 @@ specifics of the actual data layout, or of node equivalences in the
 data.  The only restriction made is that the input, query graph,
 has been decomposed into a set of trees.
 
-[On opencog, the entire implementation is in PatternMatch.[h, .cc].
+[On opencog, the entire implementation is in PatternMatch.[h, .cc].]
+
+Foreach iterators
+-----------------
 The algorithm makes heavy use of "foreach" iterators to walk the
 incoming and outgoing edges of an atom.  The "foreach" mechanism
 has multiple advantages over other techniques, and it is important
@@ -281,10 +284,25 @@ D) The foreach abstraction allows complex iterators to be implemented.
    nodes must be copied, iterated over, and then freed.  The foreach
    abstraction allows a zero-copy filter to be implemented: the
    callback is invoked only for those nodes that match the filter
-   crieteria.
+   criteria.
 
-Query processing conceptual problems, design problems:
-------------------------------------------------------
+Ranking
+-------
+Because the solution subgraph is returned, a ranking of the qality of
+the solution can be performed in a post-processing stage, by applying
+weights to links, etc.  There seems to be little advantage to computing
+a ranking score during the graph search itself.
+
+Since solutions are returned as they are found, each can be ranked on
+the fly, and the search terminated once a solution that is "good enough"
+has been found.
+
+
+Query processing architectural issues:
+--------------------------------------
+Below are some architectural issues that have been given temporary
+solutions, but need a better long-term solution.
+
 -- How to distinguish rhetorical questions from queries that should
    be answered?  A block of input text may contain rhetorical questions,
    which should be ignored.
