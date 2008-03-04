@@ -3,7 +3,12 @@
 
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to perform query processing.
+The first part of the file describes the generic algorithm; the second
+part describes its application to query processing.
 
+
+Subgraph Isomorphism Discovery
+------------------------------
 Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
 subgraph isomorphism algorithm finds and returns the corresponding
 smaller graph within the universe graph.  The smaller graph may include
@@ -296,6 +301,45 @@ a ranking score during the graph search itself.
 Since solutions are returned as they are found, each can be ranked on
 the fly, and the search terminated once a solution that is "good enough"
 has been found.
+
+Query Processing Overview
+-------------------------
+Query processing proceeds by taking English langauge sentences, 
+passing them through the link-grammar perser, then through relex,
+through the semanitic framing, and then importing the result into
+opencog.
+
+When a sentence is determined to be a query, the above-described
+patern matching is performed on the contents of opencog, in an
+attempt to find a matching result.  Pattern matching can be done
+at several levels: at the relex level, or at the more abstract
+semantic framing level.  Query processing at the relex level should
+be used only when a very narrow, literal answer is desired. This
+is because pattern matching at the relex level introduces very
+little wiggle room.  Thus, for example, to answer the question
+"What did John throw?" at the relex level,
+
+    _subj(throw, John )
+    _obj(throw, _$qVar)
+
+The opencog server must contain a sentence that had parsed into
+exactly the above form; so, for example: "John threw a ball"
+
+    _subj(throw, John )
+    _obj(throw, ball)
+
+would provide a matching solution, whereas ...
+
+(provide example)
+
+Thus, a looser matching, based on deeper semantic understanding,
+is desirable.  This is afforded by using the semantic framing 
+matcher.
+
+XXX NOT IMPLEMENTED>
+
+
+
 
 
 Query processing architectural issues:

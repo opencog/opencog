@@ -3,6 +3,10 @@
  *
  * Process user queries.
  *
+ * XXX Currently, this is very crude scaffolding to interface
+ * to the opencog server. It needs to be replaced/expanded as
+ * appropriate.
+ *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 #include <stdio.h>

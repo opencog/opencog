@@ -3,12 +3,14 @@
  *
  * Implement pattern matching for RelEx queries.
  * The pattern matching is performed for the relex part
- * only, and not for the frame part of a sentence parse.
+ * only, and not for the semantic frame part of a sentence
+ * parse.
  *
- * The result of using RelEx only matching means that 
- * queries will be interpreted quite literally; the 
+ * The result of using RelEx-only matching means that 
+ * queries will be interpreted very literally; the 
  * structure of a query sentence must closely resemble
- * the structure of a sentence in the corpus.
+ * the structure of a sentence in the corpus; otherwise,
+ * no matching response will be found.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
