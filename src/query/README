@@ -4,19 +4,19 @@
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to perform query processing.
 
-Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the 
+Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
 subgraph isomorphism algorithm finds and returns the corresponding
 smaller graph within the universe graph.  The smaller graph may include
 one or more variable nodes or links, which will match any corresponding
 node or link in the universe; for this reason, subgraph matching
 can be used to perform query processing, to "fill in the blanks".
 
-The subgraph matching algorithm is fairly general, but with an 
+The subgraph matching algorithm is fairly general, but with an
 important restriction on how the subgraph is specified. Every
 hypergraph has a corresponding incidence graph (or "Levi graph"),
 where the nodes and links of the hypergraph are mapped to vertices
 on the incidence graph, while the edges of the incidence graph
-reflect the connectivity of the hypergraph.  The input to the 
+reflect the connectivity of the hypergraph.  The input to the
 algorithm must be specified as a set of trees in the incidence
 graph, with some nodes shared between the trees, so as to form
 a single, connected graph. This is a natural fit for the currently
@@ -25,20 +25,20 @@ envisioned linguistics applications; for example:
   _subj(John, throw)
   _obj(ball, throw)
 
-consists of two trees, with a shared leaf (throw) connecting the 
+consists of two trees, with a shared leaf (throw) connecting the
 two trees together to form a single graph.  The tree input keeps
 the algorithm simple, as the subgraph matching is performed recursively,
 one tree at a time.
 
 The algorithm is kept generic, by means of two callbacks.  One callback
-simply reports a solution, and provides a map between nodes/links in 
+simply reports a solution, and provides a map between nodes/links in
 the subgraph, and nodes/links in the universe.  The second callback is
 used to determine when two nodes/links are identical.  For example,
 in linguistic matching, two nodes might be considered to be identical
 when they are both instances of the same concept; the details of what
 constitutes "the same concept" are left to the callback.
 
-As a concrete example, consider the statement and query: "John threw a 
+As a concrete example, consider the statement and query: "John threw a
 ball. What did John throw?" The query takes the form:
 
    link[40 <_obj,link[26 <throw_49,_$qVar_05>]>]
@@ -69,17 +69,17 @@ use of this.
 The Basic Algorithmic Idea
 --------------------------
 The basic idea is to treat the query as a graph, in which are embedded
-some number of variables or unknowns. This query graph can be loosely 
+some number of variables or unknowns. This query graph can be loosely
 understood to be kind of like a predicate, in that the query is solved
 only when the variables take on appropriate values.
 
 The goal of query processing is to scan the collection of all knowledge,
-(the "universe hypergraph"), looking for a subgraph that matches the 
-predicate. The nodes that fit where the unknowns would go are then the 
+(the "universe hypergraph"), looking for a subgraph that matches the
+predicate. The nodes that fit where the unknowns would go are then the
 answer to the query.
 
 The problem of finding certain subgraphs within graphs is known as the
-"subgraph isomorphism problem" or the "subgraph matching problem", and 
+"subgraph isomorphism problem" or the "subgraph matching problem", and
 one uses a "subgraph isomorphism algorithm" to find the match.
 
 
@@ -89,49 +89,49 @@ Currently Implemented Algorithm
    node, or a hypergraph link. Corresponding to every hypergraph is
    an incidence graph. The atoms of a hypergraph are vertices of
    the incidence graph. The convetion used here is that the incidence
-   graph is a directed graph; thus, only hypergraph links have 
+   graph is a directed graph; thus, only hypergraph links have
    outgoing incidence graph edges; whereas hypergraph nodes have
    no outgoing incidence graph edges.
 
-   The implemented algorithm makes direct use of the incidence 
+   The implemented algorithm makes direct use of the incidence
    graph, and only indirectly to the hypergraph. The insistence
    on making the incidence graph be a directed graph helps make
    traversal more direct and removes ambiguity.
 
-   [OpenCog-specific remarks are in square brackets.  In OpenCog, the 
-   outgoing incidence graph edges are given by the "outgoing set" of 
+   [OpenCog-specific remarks are in square brackets.  In OpenCog, the
+   outgoing incidence graph edges are given by the "outgoing set" of
    the atom.]
 
 1) Input consists a sequence of the roots of incidence trees, that is,
    of a list of subgraphs of the incidence graph that are trees.  Thus,
-   by definition, the incidence tree root must be a hypergraph link, 
-   as hypergraph node cannot, by definition, have a non-trivial 
+   by definition, the incidence tree root must be a hypergraph link,
+   as hypergraph node cannot, by definition, have a non-trivial
    incidence tree under it.  Each tree is, by definition, acyclic.
 
-   Thus, for example: _subj(row, Steve) has _subj at the root of the 
+   Thus, for example: _subj(row, Steve) has _subj at the root of the
    tree, with "row" and "Steve" as leaves.
 
-   In the following [and in the code], each tree will be refered to as 
+   In the following [and in the code], each tree will be refered to as
    a "predicate"; although this term is potentially misleading, as the
    resemblance to logical predicates is superficial.
 
-   Distinct trees may have common verticies.  The common verticies 
-   act to join together the trees into a single, connected graph. 
+   Distinct trees may have common verticies.  The common verticies
+   act to join together the trees into a single, connected graph.
    Disconnected graphs are not allowed; the algorithm will fail to
    find and solve disconnected components.  The graph as a whole may
    contain loops (the decomposition into trees keeps the algorithm
    from having to explicitly accomadate loops).
 
-	A list of the common, or shared, vertices is made; this list is 
+   A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connnected to a
-	specific vertex. [This list is implemented as PatternMatch::root_map]
+   specific vertex. [This list is implemented as PatternMatch::root_map]
 
-	The universe graph may have any structure whatsoever; there is no
-	requirement that the universe be decomposable into trees.
+   The universe graph may have any structure whatsoever; there is no
+   requirement that the universe be decomposable into trees.
 
 2) Input includes a list of the bound variables in the expressions.
    Thus, for example _obj(row,_$qVar) has _$qVar is the variable
-   to be solved for. The list serves to explicitly identify the 
+   to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
    The designated variables need not be leaf verticies. There may be
    zero, one or more variables.
@@ -139,149 +139,149 @@ Currently Implemented Algorithm
 3) Node equivalence is determined by means of a callback; the user
    may implement any notion at all of "equivalance".  In particular,
    the equivalence callback may be used as an alternate way to perform
-   variable bindings, with the callback itself determining when a 
-	node is variable, and what the allowed bindings to it may be.
+   variable bindings, with the callback itself determining when a
+   node is variable, and what the allowed bindings to it may be.
 
-	[This callback is implemented in PatternMatchCallback::node_match().
-	In opencog, links are not given unique names, only types. Thus,
-	links are considered to match when thier types match, and the
+   [This callback is implemented in PatternMatchCallback::node_match().
+   In opencog, links are not given unique names, only types. Thus,
+   links are considered to match when thier types match, and the
    tree given by the link's outoging set also matches. In particular,
    the node_match() callback is never called for links.]
 
-4) Pick the first tree. Get the type of the root atom of the 
-   first tree. Get a list of all atoms in the universe of this type. 
+4) Pick the first tree. Get the type of the root atom of the
+   first tree. Get a list of all atoms in the universe of this type.
    These are the "candidate atoms".  Iterate over this list.
    The iterator is the next step below (step 5).
 
    [This step is implemented in PatternMatch::match(), which calls
    PatternMatch::do_candidate() for each candidate root.]
 
-5) Initiate a recursive tree matching algorithm, comparing the 
-   incidence tree of the first predicate to that rooted at the 
+5) Initiate a recursive tree matching algorithm, comparing the
+   incidence tree of the first predicate to that rooted at the
    candidate atom.
 
-	First, the tree matching algo checks to see if the given 
-	node in the predicate is a variable; if so, then the match
-	is considered to be successful, and the corresponding node
-	in the universe is recorded as a solution.
+   First, the tree matching algo checks to see if the given
+   node in the predicate is a variable; if so, then the match
+   is considered to be successful, and the corresponding node
+   in the universe is recorded as a solution.
 
-	If the predicate itself is found in the universe, it is rejected.
+   If the predicate itself is found in the universe, it is rejected.
 
-	If the atom is a link, so that it has a non-zero number of outgoing
-	edges, then the number of edges (the arity) of both the predicate
+   If the atom is a link, so that it has a non-zero number of outgoing
+   edges, then the number of edges (the arity) of both the predicate
    and the corresponding lik in the universe, must be equal.
 
    The tree matching algorithm invokes the node-equivalence callback,
-	as each pair of nodes is encountered.  Recursion is terminated when 
-	a mismatch is found.
+   as each pair of nodes is encountered.  Recursion is terminated when
+   a mismatch is found.
 
    [This step is implemented in PatternMatch::tree_compare().
-	Atoms with different types are rejected before the callback is
+   Atoms with different types are rejected before the callback is
    called. Because links are anonymous, the callback is never
-	called for links.]
+   called for links.]
 
 6) Assuming a single tree has been sucessfully matched in the previous
-	step, the next step is to find a predicate tree that has not yet been 
-	solved.  This is done by examining the list of all nodes that are
-	shared between the most recently solved tree, looking for an unsolved
+   step, the next step is to find a predicate tree that has not yet been
+   solved.  This is done by examining the list of all nodes that are
+   shared between the most recently solved tree, looking for an unsolved
    tree.
 
-	[This is implemented in PattherMatch::get_next_unsolved_pred()]
+   [This is implemented in PattherMatch::get_next_unsolved_pred()]
 
 7) If an unsolved tree is found, then tree-matching, as described in
-	step 5), resumes. However, the tree matching resumes at the shared
+   step 5), resumes. However, the tree matching resumes at the shared
    node of the unsolved tree. The unsovled tree is recursively walked
-	upwards, towards its root, with a tree match attempted at ever stage.
+   upwards, towards its root, with a tree match attempted at ever stage.
 
-	The upwards recursion uses a stack to track state; this is required
-	in the case of there being multiple possible matches to a tree: 
-	after finding one match, the stack may be popped to explore other
-	possible matches.
+   The upwards recursion uses a stack to track state; this is required
+   in the case of there being multiple possible matches to a tree:
+   after finding one match, the stack may be popped to explore other
+   possible matches.
 
-	If the upwards recursion reaches the root of the predicate, the
-	predicate is now considered to be solved. Go to step 6), to find
-	other unsolved predicates.
+   If the upwards recursion reaches the root of the predicate, the
+   predicate is now considered to be solved. Go to step 6), to find
+   other unsolved predicates.
 
-	[This is implemented by two routines: PatternMatch::soln_up()
-	and PatternMatch::pred_up(). These two routines alternate
-	calls to each other, by traversing the *incoming* set of the
-	current node in the predicate, and the candidate solution node.
-	The incoming set takes one "upwards" in the tree.]
+   [This is implemented by two routines: PatternMatch::soln_up()
+   and PatternMatch::pred_up(). These two routines alternate
+   calls to each other, by traversing the *incoming* set of the
+   current node in the predicate, and the candidate solution node.
+   The incoming set takes one "upwards" in the tree.]
 
-	[The stack of current state is maintained in PatternMatch::
-	pred_handle_stack, etc. These are pushed as an upwards(incoming) 
-	edge is explored, and popped when the edge is rejected.]
+   [The stack of current state is maintained in PatternMatch::
+   pred_handle_stack, etc. These are pushed as an upwards(incoming)
+   edge is explored, and popped when the edge is rejected.]
 
-	[Partial solutions are recorded in PatternMatch::var_solution and 
-	PatternMatch::predicate_solution.  These partial solutions must also
-	be kept on stack, as a failed match at a later stage means that 
-	backtracking must be done. Since the partial solutions are used to
-	find unsolved predicates, care must be taken that the partial
-	solution is correct after backtracking: i.e. they must be popped
-	as failed matches are encountered.]
+   [Partial solutions are recorded in PatternMatch::var_solution and
+   PatternMatch::predicate_solution.  These partial solutions must also
+   be kept on stack, as a failed match at a later stage means that
+   backtracking must be done. Since the partial solutions are used to
+   find unsolved predicates, care must be taken that the partial
+   solution is correct after backtracking: i.e. they must be popped
+   as failed matches are encountered.]
 
-	Note that mutiple solution graphs may overlap.  Thus, if the 
-	universe contains the statement: "John threw a ball and a rock."
-	and the query is "What did John throw?", then there are two 
-	valid subgraph matches: "John threw a ball" and "John threw
-	a rock".  Both of these solutions contain a common subgraph,
-	"John threw...", which must be reachable, and reconsidered,
-	after one solution is proposed. In particular, this implies
-	that the partial solution state must also be kept on stack,
-	so that the backtracking can be performed to find other,
-	overlapping solutions.
+   Note that mutiple solution graphs may overlap.  Thus, if the
+   universe contains the statement: "John threw a ball and a rock."
+   and the query is "What did John throw?", then there are two
+   valid subgraph matches: "John threw a ball" and "John threw
+   a rock".  Both of these solutions contain a common subgraph,
+   "John threw...", which must be reachable, and reconsidered,
+   after one solution is proposed. In particular, this implies
+   that the partial solution state must also be kept on stack,
+   so that the backtracking can be performed to find other,
+   overlapping solutions.
 
 8) If no unsolved tree is found, then the matching is complete.
-	The full solution is reported via callback.  The callback may
-	indicate that the search be terminated, or that it continue to 
-	find other possible solutions.
+   The full solution is reported via callback.  The callback may
+   indicate that the search be terminated, or that it continue to
+   find other possible solutions.
 
 Summary
 -------
-The above describes the specific implemention of a subraph matching 
-algorithm. It is generic, in that it makes no reference to the 
+The above describes the specific implemention of a subraph matching
+algorithm. It is generic, in that it makes no reference to the
 specifics of the actual data layout, or of node equivalences in the
 data.  The only restriction made is that the input, query graph,
 has been decomposed into a set of trees.
 
-[On opencog, the entire implementation is in PatternMatch.[h, .cc]. 
+[On opencog, the entire implementation is in PatternMatch.[h, .cc].
 The algorithm makes heavy use of "foreach" iterators to walk the
 incoming and outgoing edges of an atom.  The "foreach" mechanism
 has multiple advantages over other techniques, and it is important
 to understand these.
 
 A) The details of the Atom.h incoming and outgoing sets are abstracted.
-	Thus, while the outgoing set uses std:vector, the incoming set uses
-	a simple linked list. This detail is immaterial to the "foreach" user,
-	as both look the same. The only requirement is that each edge is visited
-	exactly once.
+   Thus, while the outgoing set uses std:vector, the incoming set uses
+   a simple linked list. This detail is immaterial to the "foreach" user,
+   as both look the same. The only requirement is that each edge is visited
+   exactly once.
 
 B) The foreach abstraction makes multi-threaded implementation,
-	including mutex locking, much easier. In particular, the semantics
-	of atomic locking of a forech traversal is much simpler than complexity
-	of trying to lock a naked linked list for read-only or read-write 
-	traversal.
+   including mutex locking, much easier. In particular, the semantics
+   of atomic locking of a forech traversal is much simpler than complexity
+   of trying to lock a naked linked list for read-only or read-write
+   traversal.
 
-C) The foreach abstraction can (and will) have performance that is 
-	equal to a for-loop iteration over an array or linked list. This
-	is because, when the set to be iterated over is a simple list or
-	array, the foreach iterator can be implemented as an inline function.
-	Modern compilers are able to inline such functions correctly,
-	and optimize the result, providing performance equivalent to 
-	a raw for-loop iteration.
+C) The foreach abstraction can (and will) have performance that is
+   equal to a for-loop iteration over an array or linked list. This
+   is because, when the set to be iterated over is a simple list or
+   array, the foreach iterator can be implemented as an inline function.
+   Modern compilers are able to inline such functions correctly,
+   and optimize the result, providing performance equivalent to
+   a raw for-loop iteration.
 
 D) The foreach abstraction allows complex iterators to be implemented.
-	Thus, the foeach abstraction eliminates the data copying associated
-	with naive "filters", and thus can offer superior space *and* time
-	performance over filters. For example, consider a long linked list
-	consisting of many types of atoms, and one wants to perform a certain
-	operation only on a specific type of atom. Traditional "filters"
-	would make a copy of the list, incuding only the desired atom
-	types in the copied list. This requires significant overhead:
-	nodes must be copied, iterated over, and then freed.  The foreach
-	abstraction allows a zero-copy filter to be implemented: the 
-	callback is invoked only for those nodes that match the filter
-	crieteria.
+   Thus, the foeach abstraction eliminates the data copying associated
+   with naive "filters", and thus can offer superior space *and* time
+   performance over filters. For example, consider a long linked list
+   consisting of many types of atoms, and one wants to perform a certain
+   operation only on a specific type of atom. Traditional "filters"
+   would make a copy of the list, incuding only the desired atom
+   types in the copied list. This requires significant overhead:
+   nodes must be copied, iterated over, and then freed.  The foreach
+   abstraction allows a zero-copy filter to be implemented: the
+   callback is invoked only for those nodes that match the filter
+   crieteria.
 
 Query processing conceptual problems, design problems:
 ------------------------------------------------------
@@ -289,9 +289,9 @@ Query processing conceptual problems, design problems:
    be answered?  A block of input text may contain rhetorical questions,
    which should be ignored.
 
--- How should query processing be triggered?  What channel should be 
-   used for reply? Currently, all input to CogServer is via XML, which 
-   is parsed. If the parse is successful, no further processing is done. 
+-- How should query processing be triggered?  What channel should be
+   used for reply? Currently, all input to CogServer is via XML, which
+   is parsed. If the parse is successful, no further processing is done.
 
    Query processing could be performed by a mind agent, but how should
    its activity be triggered, and what communictations channel should
