@@ -680,19 +680,35 @@ class AtomSpace {
      */
     void decayShortTermImportance();
 
-    /* Get the total amount of STI in the AtomSpace, sum of
+    /**
+     * Get the total amount of STI in the AtomSpace, sum of
      * STI across all atoms.
      *
      * @return total STI in AtomSpace
      */
     long getTotalSTI() const;
 
-    /* Get the total amount of LTI in the AtomSpace, sum of
+    /**
+     * Get the total amount of LTI in the AtomSpace, sum of
      * all LTI across atoms.
      *
      * @return total LTI in AtomSpace
      */
     long getTotalLTI() const;
+
+    /**
+     * Get the STI funds available in the AtomSpace pool.
+     * 
+     * @return STI funds available
+     */
+    long getSTIFunds() const;
+
+    /**
+     * Get the LTI funds available in the AtomSpace pool.
+     * 
+     * @return LTI funds available
+     */
+    long getLTIFunds() const;
 
     /* Next three methods are for EconomicAttentionAllocation */
 
@@ -852,9 +868,10 @@ class AtomSpace {
      * not charged STI rent */
     AttentionValue::sti_t attentionalFocusBoundary;
 
-    /* These indicate the total AtomSpace currency */
-    long totalSTI;
-    long totalLTI;
+    /* These indicate the amount importance funds available in the
+     * AtomSpace */
+    long fundsSTI;
+    long fundsLTI;
 
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const{

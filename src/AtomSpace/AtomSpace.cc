@@ -54,8 +54,8 @@ AtomSpace::AtomSpace() {
     pthread_mutex_init(&stimulatedAtomsLock, NULL);
 #endif
 
-    totalSTI = 0;
-    totalLTI = 0;
+    fundsSTI = LOBE_STARTING_STI_FUNDS;
+    fundsLTI = LOBE_STARTING_LTI_FUNDS;
 }
 
 const AtomTable& AtomSpace::getAtomTable() const {
@@ -332,7 +332,12 @@ bool AtomSpace::removeAtom(Handle h, bool recursive) {
                 Handle timedAtom = getOutgoing(h, 1);
                 timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
             }
+	    // Also refund sti/lti to AtomSpace funds pool
+	    fundsSTI += getSTI(h) - AttentionValue::DEFAULTATOMSTI;
+	    fundsLTI += getLTI(h) - AttentionValue::DEFAULTATOMLTI;
+	    
             currentEntry = currentEntry->next;
+
         }
         atomTable.removeExtractedHandles(extractedHandles);
         return true;
@@ -352,14 +357,14 @@ const HandleSeq& AtomSpace::getOutgoing(Handle h) const
 HandleSeq AtomSpace::getOutgoing(Handle h) const
 #endif
 {
-          //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return TLB::getAtom(h)->getOutgoingSet();
 }
 
 Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     Handle result = atomTable.getHandle(name.c_str(), t);
@@ -616,13 +621,21 @@ const AttentionValue& AtomSpace::getAV(Handle h) const
 
 void AtomSpace::setAV(Handle h, const AttentionValue& av)
 {
-    return TLB::getAtom(h)->setAttentionValue(av); // setAttentionValue takes care of updating indices
+    const AttentionValue& oldAV = TLB::getAtom(h)->getAttentionValue();
+    // Add the old attention values to the AtomSpace funds and
+    // subtract the new attention values from the AtomSpace funds
+    fundsSTI += (oldAV.getSTI() - av.getSTI());
+    fundsLTI += (oldAV.getLTI() - av.getLTI());
+
+    TLB::getAtom(h)->setAttentionValue(av); // setAttentionValue takes care of updating indices
+
 }
 
 void AtomSpace::setSTI(Handle h, AttentionValue::sti_t stiValue)
 {
     const AttentionValue& currentAv = getAV(h);
     setAV(h, AttentionValue(stiValue, currentAv.getLTI(), currentAv.getVLTI()));
+
 }
 
 void AtomSpace::setLTI(Handle h, AttentionValue::lti_t ltiValue)
@@ -651,7 +664,7 @@ AttentionValue::vlti_t AtomSpace::getVLTI(Handle h) const {
 
 float AtomSpace::getCount(Handle h) const
 {
-          //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return TLB::getAtom(h)->getTruthValue().getCount();
@@ -718,6 +731,16 @@ long AtomSpace::getTotalLTI() const
     delete h;
     return totalLTI;
 
+}
+
+long AtomSpace::getSTIFunds() const
+{
+    return fundsSTI;   
+}
+
+long AtomSpace::getLTIFunds() const
+{
+    return fundsLTI;
 }
 
 int AtomSpace::Links(VersionHandle vh) const

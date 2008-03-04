@@ -30,12 +30,12 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     maxSTIDecayRate = 0.8;
     recentMaxSTI = 0;
 
-    targetLobeSTI = 1000;
-    acceptableLobeSTIRange[0] = 800;
-    acceptableLobeSTIRange[1] = 1200;
-    targetLobeLTI = 1000;
-    acceptableLobeLTIRange[0] = 800;
-    acceptableLobeLTIRange[1] = 1200;
+    targetLobeSTI = LOBE_STARTING_STI_FUNDS;
+    acceptableLobeSTIRange[0] = targetLobeSTI - LOBE_STI_FUNDS_BUFFER;
+    acceptableLobeSTIRange[1] = targetLobeSTI + LOBE_STI_FUNDS_BUFFER;
+    targetLobeLTI = LOBE_STARTING_LTI_FUNDS;
+    acceptableLobeLTIRange[0] = targetLobeLTI - LOBE_LTI_FUNDS_BUFFER;
+    acceptableLobeLTIRange[1] = targetLobeLTI + LOBE_LTI_FUNDS_BUFFER;
 
     lobeSTIOutOfBounds = false;
 
@@ -181,7 +181,26 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 
 void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 {
-   lobeSTIOutOfBounds = false; 
+    AttentionValue::sti_t oldSTIAtomRent;
+    // STIAtomRent must be adapted based on attentional focus size, or else balance btw
+    // lobe STI wealth and node/link STI wealth may not be maintained
+
+    oldSTIAtomRent = STIAtomRent;
+    if (updateLinks) {
+	if (recentAttentionalFocusNodesSize > 0)
+	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset \
+			  / recentAttentionalFocusNodesSize;
+	else
+	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset;
+    } else {
+	if (recentAttentionalFocusSize > 0)
+	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset \
+			  / recentAttentionalFocusSize;
+	else
+	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset;
+    }
+    
+    lobeSTIOutOfBounds = false; 
 }
     
 

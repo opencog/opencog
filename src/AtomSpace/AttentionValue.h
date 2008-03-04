@@ -14,6 +14,14 @@
 #include <limits.h>
 #include <string>
 
+/*
+ * Starting funds for the AtomSpace and buffer amount.
+ */
+#define LOBE_STARTING_STI_FUNDS 1000
+#define LOBE_STARTING_LTI_FUNDS 1000
+#define LOBE_STI_FUNDS_BUFFER 200
+#define LOBE_LTI_FUNDS_BUFFER 200
+
 struct AttentionValue {
 public:
 	typedef short sti_t;			// short-term importance type
