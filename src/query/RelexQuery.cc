@@ -68,7 +68,7 @@ bool RelexQuery::check_for_query(Handle rel)
 
 /**
  * Return true if assertion is a query.
- * A simple checdk is made: does the assertion have 
+ * A simple check is made: does the assertion have 
  * a _$qVar in it? 
  */
 bool RelexQuery::is_query(Handle h)

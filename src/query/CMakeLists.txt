@@ -1,5 +1,6 @@
 
 add_library (query STATIC
+FrameQuery.cc
 QueryProcessor.cc
 PatternMatch.cc
 RelexQuery.cc

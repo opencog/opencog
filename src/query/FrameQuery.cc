@@ -80,8 +80,8 @@ bool FrameQuery::discard_extra_markup(Atom *atom)
  */
 bool FrameQuery::apply_rule(Atom *atom)
 {
-#if 0
 	Handle ah = TLB::getHandle(atom);
+#if 0
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{
@@ -128,6 +128,7 @@ bool FrameQuery::apply_rule(Atom *atom)
  */
 bool FrameQuery::node_match(Atom *aa, Atom *ab)
 {
+#if 0
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
@@ -189,6 +190,7 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 
+#endif
 	return true;
 }
 

@@ -32,12 +32,15 @@ class RelexQuery : public PatternMatchCallback
 		bool do_discard;
 		bool discard_extra_markup(Atom *);
 
-		bool apply_rule(Atom *);
-		bool find_vars(Handle);
-		FollowLink fl;
 
 		// Aid in equivalent node identification.
 		bool concept_match(Atom *, Atom *);
+
+	protected:
+		virtual bool find_vars(Handle);
+		FollowLink fl;
+
+		virtual bool apply_rule(Atom *);
 
 		// normalized predicates
 		std::vector<Handle> normed_predicate;
@@ -50,8 +53,8 @@ class RelexQuery : public PatternMatchCallback
 		RelexQuery(void);
 		virtual ~RelexQuery();
 
-		bool is_query(Handle);
-		void solve(AtomSpace *, Handle);
+		virtual bool is_query(Handle);
+		virtual void solve(AtomSpace *, Handle);
 
 		/* Callbacks called from PatternMatch */
 		virtual bool node_match(Atom *, Atom *);
