@@ -1,5 +1,6 @@
 #include "ImportanceUpdatingAgent.h"
 #include <mt19937ar.h>
+#include <math.h>
 
 namespace opencog {
 
@@ -41,6 +42,8 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 
     initialEstimateMade = false;
 
+    rng = NULL;
+
     // Provide a logger, but disable it initially
     setLogger(new Util::Logger("ImportanceUpdatingAgent.log",Util::Logger::DEBUG,true));
     log->disable();
@@ -49,6 +52,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
 {
     if (log) delete log;
+    if (rng) delete rng;
 }
 		
 void ImportanceUpdatingAgent::init(CogServer *server)
@@ -136,14 +140,22 @@ void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 	adjustLTIFunds(a);
 }
 
+Util::RandGen* ImportanceUpdatingAgent::getRandGen()
+{
+    if (!rng) {
+	// TODO: Use time or something
+	rng = new Util::MT19937RandGen(32423423);
+    }
+    return rng;
+}
+
 void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 {
     int expectedNum, actualNum;    
     HandleEntry *h, *q;
     Util::RandGen *rng;
 
-    // TODO: Use time or something
-    rng = new Util::MT19937RandGen(32423423);
+    rng = getRandGen();
 
     expectedNum = (int) (noiseOdds * a->getAtomTable().getSize());
 
@@ -163,26 +175,26 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 	    "atoms, expected about %d.", actualNum, expectedNum);
 
     delete h;
-    delete rng;
 
 }
 
 void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 {
     long diff, oldTotal, newTotal;
-    AttentionValue::sti_t taxAmount, afterTax;
+    AttentionValue::sti_t afterTax;
+    double taxAmount;
     HandleEntry* h;
     HandleEntry* q;
 
     oldTotal = a->getSTIFunds();
     diff = targetLobeSTI - oldTotal;
     h = a->getAtomTable().getHandleSet(ATOM, true);
-    taxAmount = diff / a->getAtomTable().getSize();
+    taxAmount = (double) diff / (double) a->getAtomTable().getSize();
 
     newTotal = 0;
     q=h;
     while (q) {
-	afterTax = a->getSTI(q->handle) - taxAmount;
+	afterTax = a->getSTI(q->handle) - getTaxAmount(taxAmount);
 	a->setSTI(q->handle, afterTax);
 	newTotal += afterTax;
 	q = q->next;
@@ -197,20 +209,21 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 {
     long diff, oldTotal, newTotal;
-    AttentionValue::lti_t taxAmount, afterTax;
+    AttentionValue::lti_t afterTax;
+    double taxAmount;
     HandleEntry* h;
     HandleEntry* q;
 
     oldTotal = a->getLTIFunds();
     diff = targetLobeLTI - oldTotal;
     h = a->getAtomTable().getHandleSet(ATOM, true);
-    taxAmount = diff / a->getAtomTable().getSize();
+    taxAmount = (double) diff / (double) a->getAtomTable().getSize();
 
     newTotal = 0;
     q=h;
     while (q) {
-	afterTax = a->getLTI(q->handle) - taxAmount;
-	a->setSTI(q->handle, afterTax);
+	afterTax = a->getLTI(q->handle) - getTaxAmount(taxAmount);
+	a->setLTI(q->handle, afterTax);
 	newTotal += afterTax;
 	q = q->next;
     }
@@ -218,6 +231,27 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     
     log->log(Util::Logger::INFO, "AtomSpace LTI Funds were %d, now %d. All atoms taxed %d.", \
 	    oldTotal, newTotal, taxAmount);
+}
+
+int ImportanceUpdatingAgent::getTaxAmount(double mean)
+{
+    double sum, prob, p;
+    int count = 0;
+
+    p = getRandGen()->randDoubleOneExcluded();
+    prob = sum = exp(-mean);
+
+    if (sum == 0.0f) {
+	log->log(Util::Logger::WARNING, "Mean (%.4f) for Poisson too large!", mean);
+    }
+
+    while (p > sum) {
+	count++;
+	prob = (prob*mean)/count;
+	sum += prob;
+    }
+
+    return count;
 }
 
 void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)

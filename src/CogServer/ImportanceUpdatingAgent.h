@@ -170,6 +170,26 @@ private:
     void adjustLTIFunds(AtomSpace* a);
 
     /**
+     * When adjusting funds, use the mean value to stochastically
+     * determine how much rent to charge an atom. (This is because sti/lti
+     * are integers and the tax amount will likely be < 1 in any reasonable
+     * sized opencog instance.
+     *
+     * Internally samples from a Poisson distribution.
+     *
+     * @param The tax that would be charged if sti/lti were a float.
+     * @return an integer amount of tax to charge
+     */
+    int getTaxAmount(double mean);
+
+    Util::RandGen* rng; 
+    /**
+     * Get Random number generator associated with MindAgent.
+     * TODO: Move this to the CogServer.
+     */
+    Util::RandGen* getRandGen();
+
+    /**
      * Update the attentional focus size variables
      * needed for tuning attention dynamics.
      *
