@@ -17,6 +17,7 @@
 
 #include <AtomSpace.h>
 #include <RandGen.h>
+#include <Logger.h>
 #include "CogServer.h"
 #include "MindAgent.h"
 
@@ -47,6 +48,9 @@ private:
 
     /* Update links or not */
     bool updateLinks;
+
+    /* Logger object for MindAgent */
+    Util::Logger *log;
 
     /* Randomly stimulate atoms? */
     bool noiseOn;
@@ -196,6 +200,8 @@ public:
 
     virtual string toString();
 
+    Util::Logger* getLogger();
+    void setLogger(Util::Logger* l);
 }; // class
 
 }  // namespace

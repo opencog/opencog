@@ -40,35 +40,63 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     lobeSTIOutOfBounds = false;
 
     initialEstimateMade = false;
+
+    // Provide a logger, but disable it initially
+    setLogger(new Util::Logger("ImportanceUpdatingAgent.log",Util::Logger::DEBUG,true));
+    log->disable();
 }
 
-ImportanceUpdatingAgent::~ImportanceUpdatingAgent() {};
+ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
+{
+    if (log) delete log;
+}
 		
 void ImportanceUpdatingAgent::init(CogServer *server)
 {
     /* Not sure exactly what initial estimates should be made... */
+    log->log(Util::Logger::FINE, "ImportanceUpdatingAgent::init");
 
+}
+
+void ImportanceUpdatingAgent::setLogger(Util::Logger* log)
+{
+    if (this->log) delete this->log;
+    this->log = log;
+    log->log(Util::Logger::FINE, "Set new logger for ImportanceUpdatingMindAgent");
+}
+
+Util::Logger* ImportanceUpdatingAgent::getLogger()
+{
+    return log;
 }
 
 void ImportanceUpdatingAgent::run(CogServer *server)
 {
     AtomSpace* a = server->getAtomSpace();
     HandleEntry *h, *q;
-
+   
+    log->log(Util::Logger::DEBUG, "ImportanceUpdatingAgent::run start");
     /* init iterative variables, that can't be calculated in
      * (no pointer to CogServer there) */
     if (!initialEstimateMade) init(server);
 
     /* Calculate attentional focus sizes */
+    log->log(Util::Logger::DEBUG, "Updating attentional focus size");
     updateAttentionalFocusSizes(a);
 
     /* Check AtomSpace funds are within bounds */
+    log->log(Util::Logger::DEBUG, "Checking AtomSpace funds");
     checkAtomSpaceFunds(a);
 
     /* Random stimulation if on */
-    if (noiseOn) randomStimulation(a);
+    if (noiseOn) {
+	log->log(Util::Logger::DEBUG, "Random stimulation on, stimulating atoms");
+	randomStimulation(a);
+    }
 
     /* Update atoms: Collect rent, pay wages */
+    log->log(Util::Logger::DEBUG, "Collecting rent and paying wages");
+
     h = a->getAtomTable().getHandleSet(ATOM, true);
     q=h;
     while (q) {
@@ -83,7 +111,10 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     }
     delete h;
 
-    if (lobeSTIOutOfBounds) updateSTIRent(a);
+    if (lobeSTIOutOfBounds) {
+	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");
+	updateSTIRent(a);
+    }
 
 }
 
@@ -96,10 +127,12 @@ bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
 
 void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
-    if (!inRange(a->getTotalSTI(),acceptableLobeSTIRange))
+    if (!inRange(a->getSTIFunds(),acceptableLobeSTIRange))
+	log->log(Util::Logger::DEBUG, "Lobe STI funds out of bounds, re-adjusting.");
 	lobeSTIOutOfBounds = true;
 	adjustSTIFunds(a);
-    if (!inRange(a->getTotalLTI(),acceptableLobeLTIRange))
+    if (!inRange(a->getLTIFunds(),acceptableLobeLTIRange))
+	log->log(Util::Logger::DEBUG, "Lobe LTI funds out of bounds, re-adjusting.");
 	adjustLTIFunds(a);
 }
 
@@ -126,6 +159,9 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 	q = q->next;
     }
 
+    log->log(Util::Logger::INFO, "Applied stimulation randomly to %d " \
+	    "atoms, expected about %d.", actualNum, expectedNum);
+
     delete h;
     delete rng;
 
@@ -138,7 +174,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     HandleEntry* h;
     HandleEntry* q;
 
-    oldTotal = a->getTotalSTI();
+    oldTotal = a->getSTIFunds();
     diff = targetLobeSTI - oldTotal;
     h = a->getAtomTable().getHandleSet(ATOM, true);
     taxAmount = diff / a->getAtomTable().getSize();
@@ -152,6 +188,9 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 	q = q->next;
     }
     delete h;
+
+    log->log(Util::Logger::INFO, "AtomSpace STI Funds were %d, now %d. All atoms taxed %d.", \
+	    oldTotal, newTotal, taxAmount);
     
 }
 
@@ -162,7 +201,7 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     HandleEntry* h;
     HandleEntry* q;
 
-    oldTotal = a->getTotalLTI();
+    oldTotal = a->getLTIFunds();
     diff = targetLobeLTI - oldTotal;
     h = a->getAtomTable().getHandleSet(ATOM, true);
     taxAmount = diff / a->getAtomTable().getSize();
@@ -177,6 +216,8 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     }
     delete h;
     
+    log->log(Util::Logger::INFO, "AtomSpace LTI Funds were %d, now %d. All atoms taxed %d.", \
+	    oldTotal, newTotal, taxAmount);
 }
 
 void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
