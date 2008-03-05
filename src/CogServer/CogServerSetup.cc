@@ -1,3 +1,4 @@
+#include <Logger.h>
 #include "CogServerSetup.h"
 #include "SimpleNetworkServer.h"
 #include "CommandRequestProcessor.h"
@@ -14,5 +15,15 @@ CogServerSetup::CogServerSetup() {
 
 void CogServerSetup::setUp(CogServer *server)
 {
+    Util::Logger* log;
+
+    // Setup main logger
+    log = new Util::Logger("CogServer.txt", Util::Logger::INFO, true);
+    log->setPrintToStdoutFlag(true);
+    Util::Logger::initMainLogger(log);
+    log->log(Util::Logger::INFO,"Logger set up!");
+
+    
     server->setNetworkServer(new SimpleNetworkServer(server, COG_SERVER_DEFAULT_PORT));
+
 }

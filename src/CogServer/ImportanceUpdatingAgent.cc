@@ -238,6 +238,7 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
     double sum, prob, p;
     int count = 0;
 
+    // Calculates tax amount by sampling a Poisson distribution
     p = getRandGen()->randDoubleOneExcluded();
     prob = sum = exp(-mean);
 
