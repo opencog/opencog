@@ -40,9 +40,11 @@ void QueryProcessor::run(CogServer *server)
 	                       &QueryProcessor::do_assertion, this);
 
 	/* XXX HACK ALERT -- no scheduling, so just sleep */
-	usleep(1000000);  // 1 second
+	// usleep(1000000);  // 1 second
 	usleep(10000);  // 10 millisecs == 100HZ
 }
+
+static int cnt = 0;
 
 /**
  * Process an assertion fed into the system.
@@ -50,7 +52,8 @@ void QueryProcessor::run(CogServer *server)
  */
 bool QueryProcessor::do_assertion(Handle h)
 {
-	printf ("duuuude found assertion handle=%p\n", h);
+	cnt ++;
+	printf ("duuuude found assertion %d handle=%p\n", cnt, h);
 
 	// If this assertion is a query, try to answer it.
 	RelexQuery rlx;
