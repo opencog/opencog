@@ -10,6 +10,7 @@
 #define OPENCOG_OUTGOING_TREE_H
 
 #include "types.h"
+#include "Foreach.h"
 
 namespace opencog {
 
