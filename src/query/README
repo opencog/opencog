@@ -291,8 +291,8 @@ D) The foreach abstraction allows complex iterators to be implemented.
    callback is invoked only for those nodes that match the filter
    criteria.
 
-Ranking
--------
+Ranking; Approximate matching
+-----------------------------
 Because the solution subgraph is returned, a ranking of the qality of
 the solution can be performed in a post-processing stage, by applying
 weights to links, etc.  There seems to be little advantage to computing
@@ -301,6 +301,23 @@ a ranking score during the graph search itself.
 Since solutions are returned as they are found, each can be ranked on
 the fly, and the search terminated once a solution that is "good enough"
 has been found.
+
+Note that one can used the existing framework to implement approximate
+matching, but manually computing a partial-match score on the fly. One
+would do this by accepting poor matches unconditionally, while also
+keeping a running total score. If the running total gets too low, then
+the current node match can be rejected.  At this point, the algo will
+back-track, trying alternate matches. An approximate match is found
+when matching has completed, without the running score having dipped too
+low. Even after a match, there will be back-tracking, so other, nearby
+solutions will also be found as well.
+
+Two gotchas: probably need to export push-pop callbacks, in order to
+enable the above approximate-matching scoring.  Also, note that during
+matching, some nodes may be visited multiple times, even during the same
+match attempt. This was a matter of convenience, but will screw up
+partial scores, if not accounted for. 
+
 
 Query Processing Overview
 -------------------------
