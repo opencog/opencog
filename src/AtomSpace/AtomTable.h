@@ -96,7 +96,7 @@ private:
     void removeFromIterator(Atom *, HandleIterator *);
     void lockIterators();
     void unlockIterators();
-    void decayAtomShortTermImportance(Atom *);
+    void decayAtomShortTermImportance(Atom *) __attribute__ ((deprecated));
 
     /**
      * Extracts atoms from the table. Table will not contain the
@@ -536,7 +536,7 @@ public:
      * Decays importance of all atoms in the table, reindexing
      * importanceIndex accordingly.
      */
-    void decayShortTermImportance() throw (RuntimeException);
+    void decayShortTermImportance() throw (RuntimeException) __attribute__ ((deprecated));
 
     /**
      * Returns whether DynamicsStatisticsAgent is to be used with

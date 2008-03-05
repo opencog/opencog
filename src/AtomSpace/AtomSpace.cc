@@ -745,7 +745,7 @@ long AtomSpace::getLTIFunds() const
 
 int AtomSpace::Links(VersionHandle vh) const
 {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     /* This is too expensive and depending on a MindAgent that may be disabled.

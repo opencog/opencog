@@ -676,9 +676,11 @@ class AtomSpace {
     }
 
     /**
-     * Decays STI of all atoms (one cycle of importance decay)
+     * Decays STI of all atoms (one cycle of importance decay).
+     * Deprecated, importance updating should be done by ImportanceUpdating
+     * MindAgent.
      */
-    void decayShortTermImportance();
+    void decayShortTermImportance() __attribute__ ((deprecated));
 
     /**
      * Get the total amount of STI in the AtomSpace, sum of
