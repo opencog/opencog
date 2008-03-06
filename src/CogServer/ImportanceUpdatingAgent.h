@@ -31,7 +31,10 @@ namespace opencog {
 
 class CogServer;
 
-class ImportanceUpdatingAgent : MindAgent {
+class ImportanceUpdatingAgent : public MindAgent {
+
+    friend class ImportanceUpdatingAgentUTest;
+
 private:
 
     /* Atom Rent */

@@ -269,7 +269,7 @@ Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
 }
 
 bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     bool result = isNullVersionHandle(vh);
@@ -333,8 +333,8 @@ bool AtomSpace::removeAtom(Handle h, bool recursive) {
                 timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
             }
 	    // Also refund sti/lti to AtomSpace funds pool
-	    fundsSTI += getSTI(h) - AttentionValue::DEFAULTATOMSTI;
-	    fundsLTI += getLTI(h) - AttentionValue::DEFAULTATOMLTI;
+	    fundsSTI += getSTI(h);
+	    fundsLTI += getLTI(h);
 	    
             currentEntry = currentEntry->next;
 
@@ -381,14 +381,20 @@ Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
             }
         }
     } else {
+	// Remove default STI/LTI from AtomSpace Funds
+	fundsSTI -= AttentionValue::DEFAULTATOMSTI;
+	fundsLTI -= AttentionValue::DEFAULTATOMLTI;
+
+	// Add Node
         result = atomTable.add(new Node(t, name, tvn));
+	
     }
     return result;
 }
 
 Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn)
 {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     Handle result;
@@ -408,6 +414,9 @@ Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn
         }
         delete he;
     } else {
+	// Remove default STI/LTI from AtomSpace Funds
+	fundsSTI -= AttentionValue::DEFAULTATOMSTI;
+	fundsLTI -= AttentionValue::DEFAULTATOMLTI;
 
         Link* l = new Link(t, outgoing, tvn);
         result = atomTable.add(l);
@@ -859,4 +868,15 @@ stim_t AtomSpace::getAtomStimulus(Handle h)
     } else {
         return (*stimulatedAtoms)[TLB::getAtom(h)];
     }
+}
+
+AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary()
+{
+    return attentionalFocusBoundary;
+}
+
+AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti_t s)
+{
+    attentionalFocusBoundary = s;
+    return s;
 }
