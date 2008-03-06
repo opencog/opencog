@@ -1,0 +1,88 @@
+/**
+ * ImportanceUpdatingAgentUTest.h
+ *
+ * $Header$
+ *
+ * Author: Joel Pitt
+ * Creation: Thurs Mar 6 12:00:19 GMT+12 2008
+ */
+#include <CogServer.h>
+#include <MindAgent.h>
+#include <ImportanceUpdatingAgent.h>
+#include <SimpleTruthValue.h>
+
+#include <vector>
+#include <string>
+
+vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
+{
+    char buf[256];
+    vector<Handle> testAtoms;
+    int baseNameLength;
+
+    memset(buf,0,256);
+    baseNameLength = strlen(baseName);
+    strcpy(buf,baseName);
+
+    SimpleTruthValue tv1(0.001f, 0.00001f);
+    SimpleTruthValue tv2(0.001f, 0.00001f);
+    SimpleTruthValue tv3(0.5,0.99);
+    buf[baseNameLength] = '1';
+    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+    buf[baseNameLength] = '2';
+    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
+    buf[baseNameLength] = '3';
+    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
+
+    HandleSeq outgoing1;
+    outgoing1.push_back(h2);
+    outgoing1.push_back(h3);
+    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
+    HandleSeq outgoing2;
+    outgoing2.push_back(h1);
+    outgoing2.push_back(l1);
+    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+
+    testAtoms.push_back(h1);
+    testAtoms.push_back(h2);
+    testAtoms.push_back(h3);
+    testAtoms.push_back(l1);
+    testAtoms.push_back(l2);
+
+    return testAtoms;
+}
+
+class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
+
+    private:
+	opencog::ImportanceUpdatingAgent *agent;
+	opencog::CogServer server;
+
+    public:
+
+        ImportanceUpdatingAgentUTest(){
+        }
+
+        void setUp() {
+	    printf("\nCreating Agent\n");
+	    agent = new opencog::ImportanceUpdatingAgent();
+	    agent->getLogger()->enable();
+	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setPrintToStdoutFlag(true);
+	    printf("ImportanceUpdating agent created\n");
+            server.plugInMindAgent(agent, 1);
+	    printf("ImportanceUpdating agent plugged in\n");
+	    createSimpleGraph(server.getAtomSpace(), "import-update");
+        }
+
+        void tearDown(){
+	    delete agent;
+        }
+
+        void testRun() {
+	    printf("Running test\n");
+            server.unitTestServerLoop(5);
+
+        }
+
+};
