@@ -1,0 +1,29 @@
+To use the Logger class include Logger.h
+
+You can then choose to manage your own Logger instance(s) for applicable parts
+of your program. OR, you can call Util::Logger::initMainLogger(Logger*) and the
+provided Logger will be accesible as the macro MAIN_LOGGER. 
+
+The constructor of Logger is documented as:
+
+ /* @param fileName The log file
+ * @param level Only messages with log-level lower than or equals to level will be logged
+ * @param timestampEnabled If true, a timestamp will be pre-fixed in every log message
+ */
+Logger(const std::string &fileName = "logFile.txt", int level = FINE, bool timestampEnabled = true);
+
+All loggers can log to logFile.txt - the messages will just be interleaved, but
+you may want say individual mind agents to have their own log files.
+
+level is one of:
+        static const int ERROR = 0;
+        static const int WARNING = 1;
+        static const int INFO = 2;
+        static const int DEBUG = 3;
+        static const int FINE = 4;
+defined in Util::Logger.
+
+You can also enable() and disable() the log.
+
+The method setPrintToStdoutFlag(bool flag) is useful for getting the Logger to
+print to stdout. Loggers don't do this by default.
