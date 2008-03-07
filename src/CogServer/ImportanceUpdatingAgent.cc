@@ -48,6 +48,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     rng = NULL;
 
     // Provide a logger, but disable it initially
+    log = NULL;
     setLogger(new Util::Logger("ImportanceUpdatingAgent.log",Util::Logger::DEBUG,true));
     log->disable();
 }
@@ -76,6 +77,16 @@ void ImportanceUpdatingAgent::setLogger(Util::Logger* log)
 Util::Logger* ImportanceUpdatingAgent::getLogger()
 {
     return log;
+}
+
+HandleEntry* ImportanceUpdatingAgent::getHandlesToUpdate(AtomSpace *a)
+{
+    HandleEntry *h;
+    if (updateLinks)
+	h = a->getAtomTable().getHandleSet(ATOM, true);
+    else
+	h = a->getAtomTable().getHandleSet(NODE, true);
+    return h;
 }
 
 void ImportanceUpdatingAgent::run(CogServer *server)
@@ -108,7 +119,8 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     /* Update atoms: Collect rent, pay wages */
     log->log(Util::Logger::DEBUG, "Collecting rent and paying wages");
 
-    h = a->getAtomTable().getHandleSet(ATOM, true);
+    h = getHandlesToUpdate(a);
+
     q=h;
     while (q) {
 	updateAtomSTI(a, q->handle);
@@ -189,12 +201,14 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 
     log->log(Util::Logger::FINE, "Starting random stimulation");
 
-    expectedNum = (int) (noiseOdds * a->getAtomTable().getSize());
 
     // TODO: use util::lazy_random_selector and a binomial dist
     // to get actualNum
     actualNum = 0;
-    h = a->getAtomTable().getHandleSet(ATOM, true);
+    
+    h = getHandlesToUpdate(a);
+    expectedNum = (int) (noiseOdds * h->getSize());
+
     q=h;
     while (q) {
 	double r;
@@ -223,8 +237,8 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 
     oldTotal = a->getSTIFunds();
     diff = targetLobeSTI - oldTotal;
-    h = a->getAtomTable().getHandleSet(ATOM, true);
-    taxAmount = (double) diff / (double) a->getAtomTable().getSize();
+    h = getHandlesToUpdate(a);
+    taxAmount = (double) diff / (double) h->getSize();
 
     q=h;
     while (q) {
@@ -253,9 +267,9 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 
     oldTotal = a->getLTIFunds();
     diff = targetLobeLTI - oldTotal;
-    h = a->getAtomTable().getHandleSet(ATOM, true);
+    h = getHandlesToUpdate(a);
 
-    taxAmount = (double) diff / (double) a->getAtomTable().getSize();
+    taxAmount = (double) diff / (double) h->getSize();
 
     q=h;
     while (q) {
@@ -279,19 +293,20 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
 	negative = true;
 	mean = -mean;
     }
-
     // Calculates tax amount by sampling a Poisson distribution
     p = getRandGen()->randDoubleOneExcluded();
     prob = sum = exp(-mean);
 
     if (sum == 0.0f) {
-	log->log(Util::Logger::WARNING, "Mean (%.4f) for Poisson too large!", mean);
-    }
+	log->log(Util::Logger::WARNING, "Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
+	count = (int) mean;
+    } else {
 
-    while (p > sum) {
-	count++;
-	prob = (prob*mean)/count;
-	sum += prob;
+	while (p > sum) {
+	    count++;
+	    prob = (prob*mean)/count;
+	    sum += prob;
+	}
     }
 
     if (negative) count = -count;

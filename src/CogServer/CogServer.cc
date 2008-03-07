@@ -17,6 +17,8 @@ using namespace opencog;
 AtomSpace *CogServer::atomSpace = NULL;
 
 CogServer::~CogServer() {
+    delete initializer;
+    delete networkServer;
 }
 
 CogServer::CogServer() {

@@ -6,6 +6,7 @@
 using namespace opencog;
 
 CogServerSetup::~CogServerSetup() {
+    Util::Logger::releaseMainLogger();
 }
 
 CogServerSetup::CogServerSetup() {

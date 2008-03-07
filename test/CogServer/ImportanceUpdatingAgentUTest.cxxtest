@@ -55,21 +55,10 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
 class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 
     private:
-	opencog::ImportanceUpdatingAgent *agent;
-	opencog::CogServer server;
 
     public:
 
         ImportanceUpdatingAgentUTest(){
-	    printf("\nCreating Agent\n");
-	    agent = new opencog::ImportanceUpdatingAgent();
-	    agent->getLogger()->enable();
-	    agent->getLogger()->setLevel(Util::Logger::FINE);
-	    agent->getLogger()->setPrintToStdoutFlag(true);
-	    printf("ImportanceUpdating agent created\n");
-            server.plugInMindAgent(agent, 1);
-	    printf("ImportanceUpdating agent plugged in\n");
-	    createSimpleGraph(server.getAtomSpace(), "import-update");
         }
 
         void setUp() {
@@ -79,15 +68,65 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
         }
 
         void testRun() {
+	    opencog::ImportanceUpdatingAgent *agent;
+	    opencog::CogServer server;
+
+	    agent = new opencog::ImportanceUpdatingAgent();
+
+	    agent->getLogger()->enable();
+	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setPrintToStdoutFlag(true);
+	    
+            server.plugInMindAgent(agent, 1);
+	    createSimpleGraph(server.getAtomSpace(), "import-update");
+
 	    printf("Running agent without noise\n");
             server.unitTestServerLoop(20);
+
+	    delete agent;
         }
 
 	void testNoise() {
+	    opencog::ImportanceUpdatingAgent *agent;
+	    opencog::CogServer server;
+
+	    agent = new opencog::ImportanceUpdatingAgent();
+
+	    agent->getLogger()->enable();
+	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setPrintToStdoutFlag(true);
+	    
+            server.plugInMindAgent(agent, 1);
+	    createSimpleGraph(server.getAtomSpace(), "import-update");
+
 	    printf("Running agent with noise\n");
 	    agent->setNoiseFlag(true);
-            server.unitTestServerLoop(40);
+            server.unitTestServerLoop(20);
 
+	    delete agent;
 	}
 
+	void testNoLinks() {
+	    opencog::ImportanceUpdatingAgent *agent;
+	    opencog::CogServer server;
+
+	    agent = new opencog::ImportanceUpdatingAgent();
+
+	    agent->getLogger()->enable();
+	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setPrintToStdoutFlag(true);
+	    
+            server.plugInMindAgent(agent, 1);
+	    createSimpleGraph(server.getAtomSpace(), "import-update");
+
+	    printf("Running agent excluding links\n");
+	    agent->setUpdateLinks(false);
+            server.unitTestServerLoop(10);
+
+	    printf("Running agent excluding links, with noise\n");
+	    agent->setNoiseFlag(true);
+            server.unitTestServerLoop(20);
+
+	    delete agent;
+	}
 };

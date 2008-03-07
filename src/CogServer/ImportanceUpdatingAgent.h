@@ -216,6 +216,8 @@ private:
      */
     void updateTotalStimulus(AtomSpace* a);
 
+    HandleEntry* getHandlesToUpdate(AtomSpace* a);
+
     /* Debug */
     bool verbose;
 
@@ -238,6 +240,13 @@ public:
      * @param flag
      */
     void setNoiseFlag(bool newVal);
+
+    /**
+     * Set whether link atoms should be updated.
+     *
+     * @param flag
+     */
+    void setUpdateLinks(bool flag) { updateLinks = flag; }
 
 }; // class
 
