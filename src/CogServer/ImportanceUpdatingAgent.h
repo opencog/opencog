@@ -24,8 +24,8 @@
 /* Starting values for rent and wage */
 #define DEFAULT_ATOM_STI_RENT 10
 #define DEFAULT_ATOM_LTI_RENT 10
-#define DEFAULT_ATOM_STI_WAGE 10
-#define DEFAULT_ATOM_LTI_WAGE 10
+#define DEFAULT_ATOM_STI_WAGE 2
+#define DEFAULT_ATOM_LTI_WAGE 2
 
 namespace opencog {
 
@@ -73,7 +73,6 @@ private:
     void randomStimulation(AtomSpace *a);
     
     /* Recent amount of stimulus given per cycle */
-    stim_t recentTotalStimulusPerCycle;
     stim_t recentTotalStimulusSinceReset;
     /* Rate of decay (r) for estimating recentAttentionalFocusSize
      * Estimate equal to:
@@ -210,6 +209,13 @@ private:
      */
     void init(CogServer *server);
 
+    /**
+     * Update the total stimulus variables.
+     *
+     * @param the AtomSpace to work on
+     */
+    void updateTotalStimulus(AtomSpace* a);
+
     /* Debug */
     bool verbose;
 
@@ -225,6 +231,14 @@ public:
 
     Util::Logger* getLogger();
     void setLogger(Util::Logger* l);
+
+    /**
+     * Set whether to randomly stimulate atoms.
+     *
+     * @param flag
+     */
+    void setNoiseFlag(bool newVal);
+
 }; // class
 
 }  // namespace

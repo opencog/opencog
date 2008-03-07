@@ -1,6 +1,7 @@
 #include "ImportanceUpdatingAgent.h"
 #include <mt19937ar.h>
 #include <math.h>
+#include <time.h>
 
 namespace opencog {
 
@@ -19,7 +20,6 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     noiseOdds = 0.20;
     noiseUnit = 10;
 
-    recentTotalStimulusPerCycle = 0;
     recentTotalStimulusSinceReset = 0;
     recentTotalStimulusDecay = 0.3;
 
@@ -83,7 +83,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     AtomSpace* a = server->getAtomSpace();
     HandleEntry *h, *q;
    
-    log->log(Util::Logger::DEBUG, "ImportanceUpdatingAgent::run start");
+    log->log(Util::Logger::FINE, "=========== ImportanceUpdating::run =======");
     /* init iterative variables, that can't be calculated in
      * (no pointer to CogServer there) */
     if (!initialEstimateMade) init(server);
@@ -101,6 +101,9 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 	log->log(Util::Logger::DEBUG, "Random stimulation on, stimulating atoms");
 	randomStimulation(a);
     }
+
+    /* Update stimulus totals */
+    updateTotalStimulus(a);
 
     /* Update atoms: Collect rent, pay wages */
     log->log(Util::Logger::DEBUG, "Collecting rent and paying wages");
@@ -124,6 +127,22 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 	updateSTIRent(a);
     }
 
+    /* Reset Stimulus */
+    a->resetStimulus();
+
+}
+
+void ImportanceUpdatingAgent::updateTotalStimulus(AtomSpace* a)
+{
+    double r = (double) recentTotalStimulusDecay;
+    recentTotalStimulusSinceReset = (stim_t) (r * a->getTotalStimulus() + (1.0-r) \
+				     * recentTotalStimulusSinceReset);
+
+}
+
+void ImportanceUpdatingAgent::setNoiseFlag(bool newVal)
+{
+    noiseOn = newVal;
 }
 
 bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
@@ -155,7 +174,7 @@ Util::RandGen* ImportanceUpdatingAgent::getRandGen()
 {
     if (!rng) {
 	// TODO: Use time or something
-	rng = new Util::MT19937RandGen(32423423);
+	rng = new Util::MT19937RandGen(time(NULL));
     }
     return rng;
 }
@@ -168,6 +187,8 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 
     rng = getRandGen();
 
+    log->log(Util::Logger::FINE, "Starting random stimulation");
+
     expectedNum = (int) (noiseOdds * a->getAtomTable().getSize());
 
     // TODO: use util::lazy_random_selector and a binomial dist
@@ -176,9 +197,12 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
     h = a->getAtomTable().getHandleSet(ATOM, true);
     q=h;
     while (q) {
-	if (rng->randdouble() < noiseOdds)
-	    a->stimulateAtom(q, noiseUnit);
+	double r;
+	r=rng->randdouble();
+	if (r < noiseOdds) {
+	    a->stimulateAtom(q->handle, noiseUnit);
 	    actualNum++;
+	}
 	q = q->next;
     }
 
@@ -191,7 +215,7 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 
 void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 {
-    long diff, oldTotal, newTotal;
+    long diff, oldTotal;
     AttentionValue::sti_t afterTax,beforeTax;
     double taxAmount;
     HandleEntry* h;
@@ -202,7 +226,6 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     h = a->getAtomTable().getHandleSet(ATOM, true);
     taxAmount = (double) diff / (double) a->getAtomTable().getSize();
 
-    newTotal = 0;
     q=h;
     while (q) {
 	int actualTax;
@@ -210,8 +233,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 	beforeTax = a->getSTI(q->handle);
 	afterTax = beforeTax - actualTax;
 	a->setSTI(q->handle, afterTax);
-	newTotal += afterTax;
-	log->log(Util::Logger::FINE, "sti %d. Actual tax %d. after tax %d. new total %d.", beforeTax, actualTax, afterTax, newTotal); 
+	log->log(Util::Logger::FINE, "sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax, afterTax); 
 	q = q->next;
     }
     delete h;
@@ -223,7 +245,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 
 void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 {
-    long diff, oldTotal, newTotal;
+    long diff, oldTotal;
     AttentionValue::lti_t afterTax;
     double taxAmount;
     HandleEntry* h;
@@ -235,18 +257,16 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 
     taxAmount = (double) diff / (double) a->getAtomTable().getSize();
 
-    newTotal = 0;
     q=h;
     while (q) {
 	afterTax = a->getLTI(q->handle) - getTaxAmount(taxAmount);
 	a->setLTI(q->handle, afterTax);
-	newTotal += afterTax;
 	q = q->next;
     }
     delete h;
     
     log->log(Util::Logger::INFO, "AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.", \
-	    oldTotal, newTotal, taxAmount);
+	    oldTotal, a->getLTIFunds(), taxAmount);
 }
 
 int ImportanceUpdatingAgent::getTaxAmount(double mean)
@@ -286,20 +306,23 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
     // lobe STI wealth and node/link STI wealth may not be maintained
 
     oldSTIAtomRent = STIAtomRent;
-    if (updateLinks) {
+    
+    if (!updateLinks) {
 	if (recentAttentionalFocusNodesSize > 0)
-	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset \
-			  / recentAttentionalFocusNodesSize;
+	    STIAtomRent = (AttentionValue::sti_t) ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset \
+			  / (float) recentAttentionalFocusNodesSize);
 	else
-	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset;
+	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset);
     } else {
 	if (recentAttentionalFocusSize > 0)
-	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset \
-			  / recentAttentionalFocusSize;
+	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset \
+			  / (float) recentAttentionalFocusSize);
 	else
-	    STIAtomRent = STIAtomWage * recentTotalStimulusSinceReset;
+	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset);
     }
-    
+
+    log->log(Util::Logger::INFO, "STIAtomRent was %d, now %d.", oldSTIAtomRent, STIAtomRent);
+
     lobeSTIOutOfBounds = false; 
 }
     
@@ -337,13 +360,12 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
     delete inFocus;
 
-    log->log(Util::Logger::FINE, "end");
-
 }
 
 void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
 {
     AttentionValue::sti_t current, stiRentCharged, exchangeAmount;
+    stim_t s;
 
     current = a->getSTI(h);
     /* collect if STI > a->attentionalFocusBoundary */
@@ -352,10 +374,11 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
     else
 	stiRentCharged = 0;
 
-    exchangeAmount = - stiRentCharged + (STIAtomWage * a->getAtomStimulus(h));
+    s = a->getAtomStimulus(h);
+    exchangeAmount = - stiRentCharged + (STIAtomWage * s);
     a->setSTI(h, current + exchangeAmount);
 
-    log->log(Util::Logger::FINE, "Atom STI old = %d, new = %d", current, a->getSTI(h));
+    log->log(Util::Logger::FINE, "Atom %s stim = %d, STI old = %d, new = %d", a->getName(h).c_str(), s, current, a->getSTI(h));
 
 }
 
@@ -368,7 +391,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, Handle h)
     exchangeAmount = - LTIAtomRent + (LTIAtomWage * a->getAtomStimulus(h));
     a->setLTI(h, current + exchangeAmount);
 
-    log->log(Util::Logger::FINE, "Atom LTI old = %d, new = %d", current, a->getLTI(h));
+    log->log(Util::Logger::FINE, "Atom %s LTI old = %d, new = %d", a->getName(h).c_str(), current, a->getLTI(h));
 }
 
 bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
@@ -426,8 +449,7 @@ string ImportanceUpdatingAgent::toString()
     if (noiseOn)
 	s << "Random stimulation on. Chance: " << noiseOdds << \
 	    " Amount: " << noiseUnit << "\n";
-    s << "Recent Total Stim, per cycle: " << recentTotalStimulusPerCycle \
-	<< ", since reset: " << recentTotalStimulusSinceReset \
+    s << "Recent Total Stim since reset: " << recentTotalStimulusSinceReset \
 	<< ", decay: " << recentTotalStimulusDecay << "\n";
     s << "Att. focus. Size: " << attentionalFocusSize << ", recent: " \
 	<< recentAttentionalFocusSize << ", recentForNodes: " \
