@@ -61,9 +61,6 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
     public:
 
         ImportanceUpdatingAgentUTest(){
-        }
-
-        void setUp() {
 	    printf("\nCreating Agent\n");
 	    agent = new opencog::ImportanceUpdatingAgent();
 	    agent->getLogger()->enable();
@@ -75,14 +72,22 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    createSimpleGraph(server.getAtomSpace(), "import-update");
         }
 
+        void setUp() {
+        }
+
         void tearDown(){
-	    delete agent;
         }
 
         void testRun() {
-	    printf("Running test\n");
-            server.unitTestServerLoop(5);
-
+	    printf("Running agent without noise\n");
+            server.unitTestServerLoop(20);
         }
+
+	void testNoise() {
+	    printf("Running agent with noise\n");
+	    agent->setNoiseFlag(true);
+            server.unitTestServerLoop(40);
+
+	}
 
 };
