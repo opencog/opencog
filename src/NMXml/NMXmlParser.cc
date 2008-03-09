@@ -297,8 +297,19 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             if (h != NULL) {
                 NMXmlParser::addOutgoingAtom(currentAtom, h);
             } else {
+#ifdef THROW_EXCEPTIONS
                 throw RuntimeException(TRACE_INFO, 
                         "fatal error: unable to find atom named %s, type %s", n, t);
+#else
+                /* Don't just core dump on bad XML format.
+                 * (since exceptions can't be thrown past the C library
+                 * of the parser, a core dump is inevitable).
+                 */
+                fprintf (stderr,
+                    "Fatal error: unable to find atom named %s, type %s\n", n, t);
+                 MAIN_LOGGER.log(Util::Logger::ERROR,
+                    "fatal error: unable to find atom named %s, type %s\n", n, t);
+#endif
             }
         }
     }
