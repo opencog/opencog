@@ -93,13 +93,7 @@ private:
     float maxSTIDecayRate;
     AttentionValue::sti_t recentMaxSTI;
 
-    /* The target lobe STI and LTI values are not only initial values, but
-     * also values that are returned to if the values exit their
-     * acceptable ranges */
-    long targetLobeSTI;
-    long targetLobeLTI;
-    long acceptableLobeSTIRange[2];
-    long acceptableLobeLTIRange[2];
+    /* STI has gone out of aceceptable range during this mindagent cycle */
     bool lobeSTIOutOfBounds;
 
     /**
@@ -247,6 +241,14 @@ public:
      * @param flag
      */
     void setUpdateLinks(bool flag) { updateLinks = flag; }
+
+    /* The target lobe STI and LTI values are not only initial values, but
+     * also values that are returned to if the values exit their
+     * acceptable ranges */
+    long targetLobeSTI;
+    long targetLobeLTI;
+    long acceptableLobeSTIRange[2];
+    long acceptableLobeLTIRange[2];
 
 }; // class
 

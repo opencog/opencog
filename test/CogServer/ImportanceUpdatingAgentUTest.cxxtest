@@ -82,6 +82,16 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 
 	    printf("Running agent without noise\n");
             server.unitTestServerLoop(20);
+	    
+	    // Check AtomSpace funds within bounds
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
+		    server.getAtomSpace()->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getSTIFunds(), \
+		    agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], \
+		    server.getAtomSpace()->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
+		    agent->acceptableLobeLTIRange[1]);
 
 	    delete agent;
         }
@@ -103,6 +113,15 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent->setNoiseFlag(true);
             server.unitTestServerLoop(20);
 
+	    // Check AtomSpace funds within bounds
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
+		    server.getAtomSpace()->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getSTIFunds(), \
+		    agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], \
+		    server.getAtomSpace()->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
+		    agent->acceptableLobeLTIRange[1]);
 	    delete agent;
 	}
 
@@ -127,6 +146,17 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent->setNoiseFlag(true);
             server.unitTestServerLoop(20);
 
+	    // Check AtomSpace funds within bounds
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
+		    server.getAtomSpace()->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getSTIFunds(), \
+		    agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], \
+		    server.getAtomSpace()->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
+		    agent->acceptableLobeLTIRange[1]);
+
 	    delete agent;
 	}
 };
+
