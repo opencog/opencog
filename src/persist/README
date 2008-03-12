@@ -1,0 +1,25 @@
+                          Persist
+                          -------
+
+A trivial, simple-minded implementation of atom persistence. 
+Incomplete prototype.
+
+The goal of this implementation is to:
+1) Simplify Linas' day-to-day use of opencog. The problem is that
+   loading data, by parsing english sentences, into opencog is slow.
+   Every time opencog source is changed, the data needs to be reloaded.
+   This makes development tedious.  The hope is that data persistence
+   will aleviate data load time.
+
+2) Make sure that the opencog core desisgn is amenable to data
+   persistence, including locks, use counts, etc.  This prototype
+   should lay the foundations for more sophisticated schemes to take
+   its place.
+
+3) Provide a baseline/reference implementation by which other 
+   persistence designs can be measured.
+
+The core design will use a few very simple SQL tables, and some
+simple readers and writers to save and restore atoms from an SQL 
+database.
+
