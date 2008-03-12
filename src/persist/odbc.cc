@@ -17,6 +17,7 @@
 #include <sql.h>
 #include <sqlext.h>
 #include <string.h>
+#include <stdio.h>
 
 class ODBCConnection
 {
@@ -25,6 +26,7 @@ class ODBCConnection
 		const char * username;
 		SQLHENV sql_henv;
 		SQLHDBC  sql_hdbc;
+		GList * free_pool;
 
 	public:
 		ODBCConnection(const char * dbname,
@@ -33,24 +35,92 @@ class ODBCConnection
 };
 
 
+// cheesy hack for missing PERR
+#define PERR printf
+
+/* =========================================================== */
+
+#define PRINT_SQLERR(HTYPE,HAN)                                \
+{                                                              \
+	char sql_stat[10];                                          \
+	SQLSMALLINT msglen;                                         \
+	SQLINTEGER err;                                             \
+	char msg[200];                                              \
+	                                                            \
+	SQLGetDiagRec(HTYPE, HAN, 1, (SQLCHAR *) sql_stat,          \
+	              &err, (SQLCHAR*) msg, sizeof(msg), &msglen);  \
+	PERR("(%ld) %s\n", err, msg);                               \
+}
+
+/* =========================================================== */
+
 ODBCConnection::ODBCConnection(const char * dbname,
                                const char * username,
                                const char * authentication)
 {
+	SQLRETURN rc;
+
+	if (NULL == dbname)
+	{
+		PERR("No DB specified");
+		return;
+	}
+
+	free_pool = NULL;
+
+	/* Allocate environment handle */
+	rc = SQLAllocEnv(&sql_henv);
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR("Can't SQLAllocEnv, rc=%d", rc);
+		return;
+	}
+
+	/* set the ODBC version */
+	rc = SQLSetEnvAttr(sql_henv, SQL_ATTR_ODBC_VERSION, 
+			       (void*)SQL_OV_ODBC3, 0); 
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR("Can't SQLSetEnv, rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
+		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		return;
+	}
+
+	/* allocate the connection handle */
+	rc = SQLAllocConnect(sql_henv, &sql_hdbc); 
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR ("Can't SQLAllocConnect handle rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
+		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		return;
+	}
+
+	/* set the timeout to 5 seconds ?? hack alert fixme */
+	SQLSetConnectAttr(sql_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
+
+	if (NULL == authentication) authentication = "";
+	rc = SQLConnect(sql_hdbc, 
+			 (SQLCHAR*) dbname, SQL_NTS,
+			 (SQLCHAR*) username, SQL_NTS,
+			 (SQLCHAR*) authentication, SQL_NTS);
+
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR ("Can't perform SQLConnect rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_DBC, sql_hdbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
+		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		return;
+	}
+
+	dbname = g_strdup (dbname);
+	username = g_strdup (username);
 }
 
 
-#if 0
-struct DuiODBCConnection_s
-{
-	DuiDBConnection dbcon;
-	const char * dbname;
-	const char * username;
-	SQLHENV sql_henv;
-	SQLHDBC	sql_hdbc;
-
-	GList * free_pool;
-};
+#if OLD_CODE
 
 struct DuiODBCRecordSet_s
 {
@@ -70,92 +140,11 @@ static void dui_odbc_recordset_free (DuiODBCRecordSet *rs);
 
 /* =========================================================== */
 
-#define PRINT_SQLERR(HTYPE,HAN)                                \
-{                                                              \
-	char sql_stat[10];                                          \
-	SQLSMALLINT msglen;                                         \
-	SQLINTEGER err;                                             \
-	char msg[200];                                              \
-	                                                            \
-	SQLGetDiagRec(HTYPE, HAN, 1, sql_stat,                      \
-	              &err, msg, sizeof(msg), &msglen);             \
-	PERR("(%ld) %s\n", err, msg);                               \
-}
-
-
-/* =========================================================== */
-
 DuiDBConnection *
 dui_odbc_connection_new (const char * dbname, 
                          const char * username, 
                          const char * authentication)
 {
-	SQLRETURN rc;
-	DuiODBCConnection *conn;
-
-	ENTER ("(dbname=%s, username=%s)", dbname, username);
-	if (NULL == dbname) return NULL;
-
-	conn = g_new (DuiODBCConnection, 1);
-	
-	conn->free_pool = NULL;
-
-	/* Allocate environment handle */
-	rc = SQLAllocEnv(&conn->sql_henv);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR("Can't SQLAllocEnv, rc=%d", rc);
-		g_free (conn);
-		return NULL;
-	}
-
-
-	/* set the ODBC version */
-	rc = SQLSetEnvAttr(conn->sql_henv, SQL_ATTR_ODBC_VERSION, 
-			       (void*)SQL_OV_ODBC3, 0); 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR("Can't SQLSetEnv, rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_ENV, conn->sql_henv);
-		SQLFreeHandle(SQL_HANDLE_ENV, conn->sql_henv);
-		g_free (conn);
-		return NULL;
-	}
-
-	/* allocate the connection handle */
-	rc = SQLAllocConnect(conn->sql_henv, &conn->sql_hdbc); 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR ("Can't SQLAllocConnect handle rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_ENV, conn->sql_henv);
-		SQLFreeHandle(SQL_HANDLE_ENV, conn->sql_henv);
-		g_free (conn);
-		return NULL;
-	}
-
-	/* set the timeout to 5 seconds ?? hack alert fixme */
-	SQLSetConnectAttr(conn->sql_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
-
-	if (NULL == authentication) authentication = "";
-	rc = SQLConnect(conn->sql_hdbc, 
-			 (SQLCHAR*) dbname, SQL_NTS,
-			 (SQLCHAR*) username, SQL_NTS,
-			 (SQLCHAR*) authentication, SQL_NTS);
-
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR ("Can't perform SQLConnect rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_DBC, conn->sql_hdbc);
-		SQLFreeHandle(SQL_HANDLE_DBC, conn->sql_hdbc);
-		SQLFreeHandle(SQL_HANDLE_ENV, conn->sql_henv);
-		return NULL;
-	}
-
-	conn->dbname = g_strdup (dbname);
-	conn->username = g_strdup (username);
-
-	LEAVE ("(dbname=%s, username=%s)", dbname, username);
-	return &conn->dbcon;
 }
 
 /* =========================================================== */
@@ -614,7 +603,6 @@ dui_odbc_plugin_new (void)
 	return plg;
 }
 
-#endif /* USE_ODBC */
 /* =========================================================== */
 
 void 
@@ -628,7 +616,7 @@ dui_odbc_init (void)
 	PERR ("The DWI db drivers were compiled without ODBC support");
 #endif /* USE_ODBC */
 }
-#endif
 
+#endif /* USE_ODBC */
 /* ============================= END OF FILE ================= */
  

@@ -23,3 +23,16 @@ The core design will use a few very simple SQL tables, and some
 simple readers and writers to save and restore atoms from an SQL 
 database.
 
+Getting started
+---------------
+Create a database called "OpenCog"; for example, in postgres, at
+the unix command line:
+
+	$ createdb opencog
+
+(you may need to su - postgres; creastureuser <username> first)
+
+Then create the database tables:
+
+   $ cat atom.sql | psql opencog
+
