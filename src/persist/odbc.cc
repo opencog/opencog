@@ -248,46 +248,79 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 	SQLRETURN rc;
 	int i;
 
-	if (new_ncols > arrsize)
+	if (new_ncols <= arrsize) return;
+
+	if (column_labels)
 	{
-		if (column_labels) delete column_labels;
-		if (column_datatype) delete column_datatype;
-
-		if (values)
+		for (i=0; i<arrsize; i++)
 		{
-			for (i=0; i<arrsize; i++)
+			if (column_labels[i])
 			{
-				if (NULL == values[i])
-				{
-					delete values[i];
-				}
+				delete column_labels[i];
 			}
-			delete values;
 		}
-		if (vsizes) delete vsizes;
+		delete column_labels;
+	}
+	if (column_datatype) delete column_datatype;
 
-		column_labels = new char*[new_ncols];
-		column_datatype = new int[new_ncols];
-		values = new char*[new_ncols];
-		vsizes = new int[new_ncols];
-
-		/* intialize */
-		for (i = 0; i<new_ncols; i++)
+	if (values)
+	{
+		for (i=0; i<arrsize; i++)
 		{
-			column_labels[i] = NULL;
-			column_datatype[i] = 0;
-			values[i] = NULL;
-			vsizes[i] = 0;
+			if (values[i])
+			{
+				delete values[i];
+			}
 		}
-		arrsize = _new_ncols; 
+		delete values;
+	}
+	if (vsizes) delete vsizes;
+
+	column_labels = new char*[new_ncols];
+	column_datatype = new int[new_ncols];
+	values = new char*[new_ncols];
+	vsizes = new int[new_ncols];
+
+	/* intialize */
+	for (i = 0; i<new_ncols; i++)
+	{
+		column_labels[i] = NULL;
+		column_datatype[i] = 0;
+		values[i] = NULL;
+		vsizes[i] = 0;
+	}
+
+	arrsize = new_ncols; 
+
+	if (sql_hstmt)
+	{
+		rc = SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
+		sql_hstmt = NULL;
+		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+		{
+			PERR("Failed to free statement handle, rc=%d", rc);
+		}
+	}
+
+	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR("Can't allocate statement handle, rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+		/* oops memory leak */
+		return;
 	}
 
 	/* Initialize the newly realloc'ed entries */
 	for (i=0; i<new_ncols; i++)
 	{
-		column_labels[i] = NULL;
 		column_datatype[i] = 0;
 
+		if (NULL == column_labels[i])
+		{
+			column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
+			column_labels[i][0] = 0;
+		}
 		if (NULL == values[i])
 		{
 			values[i] = new char[DEFAULT_VARCHAR_SIZE];
@@ -311,8 +344,6 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 
 ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 {
-	SQLRETURN rc;
-
 	if (!_conn) return;
 	conn = _conn;
 	
@@ -322,15 +353,7 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 	column_datatype = NULL;
 	values = NULL;
 	vsizes = NULL;
-
-	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR("Can't allocate statment handle, rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
-		/* oops memory leak */
-		return;
-	}
+	sql_hstmt = NULL;
 }
 
 /* =========================================================== */
@@ -424,9 +447,8 @@ ODBCRecordSet::get_column_labels(void)
 		namebuff[namelen] = 0x0;
 		// PINFO ("column %d has name\'%s\'", i, namebuff);
 
-		if (column_labels[i]) delete column_labels[i];
-		column_labels[i] = new char[sizeof(namebuff)+1];
-		strcpy(column_labels[i], namebuff);
+		strncpy(column_labels[i], namebuff, DEFAULT_COLUMN_NAME_SIZE);
+		column_labels[DEFAULT_COLUMN_NAME_SIZE-1] = 0;
 		column_datatype[i] = datatype;
 	}
 
