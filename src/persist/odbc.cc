@@ -21,6 +21,7 @@
 
 class ODBCConnection
 {
+	friend class ODBCRecordSet;
 	private:
 		std::string dbname;
 		std::string username;
@@ -51,6 +52,7 @@ class ODBCRecordSet
 
 		void alloc_and_bind_cols(int ncols);
 	public:
+		ODBCRecordSet(ODBCConnection *);
 };
 
 
@@ -217,6 +219,48 @@ ODBCRecordSet::alloc_and_bind_cols(int ncols)
 }
 
 /* =========================================================== */
+/* pseudo-private routine */
+
+#define DEFAULT_NUM_COLS 50
+
+ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
+{
+	SQLRETURN rc;
+
+	if (!conn) return;
+#if LATER
+	if (conn->free_pool)
+	{
+		rs = conn->free_pool->data;
+		conn->free_pool = g_list_remove (conn->free_pool, rs);
+		rs->ncols = -1;
+	}
+	else
+#endif
+	{
+		conn = _conn;
+	
+		ncols = -1;
+		arrsize = 0;
+		column_labels = NULL;
+		column_datatype = NULL;
+		values = NULL;
+		vsizes = NULL;
+	}
+
+	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR("Can't allocate statment handle, rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+		/* oops memory leak */
+		return;
+	}
+
+	alloc_and_bind_cols(DEFAULT_NUM_COLS);
+}
+
+/* =========================================================== */
 
 main ()
 {
@@ -228,52 +272,6 @@ main ()
 /* =========================================================== */
 
 #if OLD_CODE
-
-/* =========================================================== */
-/* pseudo-private routine */
-
-#define DEFAULT_NUM_COLS 50
-
-static DuiODBCRecordSet *
-dui_odbc_recordset_new (DuiODBCConnection *conn)
-{
-	SQLRETURN rc;
-	DuiODBCRecordSet *rs;
-
-	if (!conn) return NULL;
-	if (conn->free_pool)
-	{
-		rs = conn->free_pool->data;
-		conn->free_pool = g_list_remove (conn->free_pool, rs);
-		rs->ncols = -1;
-	}
-	else
-	{
-	
-		rs = g_new (DuiODBCRecordSet, 1);
-		rs->conn = conn;
-	
-		rs->ncols = -1;
-		rs->arrsize = 0;
-		rs->column_labels = NULL;
-		rs->column_datatype = NULL;
-		rs->values = NULL;
-		rs->vsizes = NULL;
-	}
-
-	rc = SQLAllocStmt (conn->sql_hdbc, &rs->sql_hstmt);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR("Can't allocate statment handle, rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-		/* oops memory leak */
-		return NULL;
-	}
-
-	dui_odbc_recordset_alloc_and_bind_cols (rs, DEFAULT_NUM_COLS);
-
-	return rs;
-}
 
 /* =========================================================== */
 
