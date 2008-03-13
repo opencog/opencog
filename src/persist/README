@@ -36,3 +36,29 @@ Then create the database tables:
 
    $ cat atom.sql | psql opencog
 
+Next, set up the correct ODBC connection. This version uses iODBC
+So edit .odbc.ini in your home directory, and add a stanza similar
+to this, adjusting for user and passwd appropriately.  The password
+to be supplied is the database password, not the user password.
+The database password can be set by doing:
+
+   $ psql -c "ALTER USER linas WITH PASSWORD 'asdf'" -d template1
+
+[opencog]
+Description    = PostgreSQL
+Driver      = PostgreSQL
+Trace    = No
+TraceFile      =
+Database    = opencog
+Servername     = localhost
+Port     = 5433
+Username    = linas
+Password    = asdf
+ReadOnly    = No
+RowVersioning     = No
+ShowSystemTables     = Yes
+ShowOidColumn     = Yes
+FakeOidIndex      = Yes
+ConnSettings      =
+
+

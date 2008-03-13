@@ -13,20 +13,20 @@
  * created by Linas Vepstas  March 2002
  */
 
-#include <glib.h>
+#include <string>
+
 #include <sql.h>
 #include <sqlext.h>
-#include <string.h>
 #include <stdio.h>
 
 class ODBCConnection
 {
 	private:
-		const char * dbname;
-		const char * username;
+		std::string dbname;
+		std::string username;
 		SQLHENV sql_henv;
-		SQLHDBC  sql_hdbc;
-		GList * free_pool;
+		SQLHDBC sql_hdbc;
+		// GList * free_pool;
 
 	public:
 		ODBCConnection(const char * dbname,
@@ -54,19 +54,19 @@ class ODBCConnection
 
 /* =========================================================== */
 
-ODBCConnection::ODBCConnection(const char * dbname,
-                               const char * username,
-                               const char * authentication)
+ODBCConnection::ODBCConnection(const char * _dbname,
+                               const char * _username,
+                               const char * _authentication)
 {
 	SQLRETURN rc;
 
-	if (NULL == dbname)
+	if (NULL == _dbname)
 	{
 		PERR("No DB specified");
 		return;
 	}
 
-	free_pool = NULL;
+	// free_pool = NULL;
 
 	/* Allocate environment handle */
 	rc = SQLAllocEnv(&sql_henv);
@@ -98,13 +98,13 @@ ODBCConnection::ODBCConnection(const char * dbname,
 	}
 
 	/* set the timeout to 5 seconds ?? hack alert fixme */
-	SQLSetConnectAttr(sql_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
+	// SQLSetConnectAttr(sql_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
 
-	if (NULL == authentication) authentication = "";
+	if (NULL == _authentication) _authentication = "";
 	rc = SQLConnect(sql_hdbc, 
-			 (SQLCHAR*) dbname, SQL_NTS,
-			 (SQLCHAR*) username, SQL_NTS,
-			 (SQLCHAR*) authentication, SQL_NTS);
+			 (SQLCHAR*) _dbname, SQL_NTS,
+			 (SQLCHAR*) _username, SQL_NTS,
+			 (SQLCHAR*) _authentication, SQL_NTS);
 
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 	{
@@ -115,10 +115,20 @@ ODBCConnection::ODBCConnection(const char * dbname,
 		return;
 	}
 
-	dbname = g_strdup (dbname);
-	username = g_strdup (username);
+	dbname = _dbname;
+	username = _username;
 }
 
+/* =========================================================== */
+
+main ()
+{
+	ODBCConnection *conn;
+	conn = new ODBCConnection("opencog", "linas", NULL);
+}
+
+
+/* =========================================================== */
 
 #if OLD_CODE
 
