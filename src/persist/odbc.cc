@@ -66,6 +66,9 @@ class ODBCRecordSet
 		int get_col_by_name (const char *);
 
 	public:
+		// rewind the cursor to the start
+		void rewind(void);
+
 		int fetch_row(void); // return non-zero value if there's another row.
 		const char * get_value(const char * fieldname);
 
@@ -73,6 +76,11 @@ class ODBCRecordSet
 		// when done with this instance.
 		void release(void);
 
+		// Calls the callback once for each row.
+		template<class T> bool 
+			foreach_row(bool (T::*cb)(void), T *data);
+
+		// Calls the callback once for each column.
 		template<class T> bool 
 			foreach_column(bool (T::*cb)(const char *, const char *), T *data);
 };
@@ -230,25 +238,19 @@ ODBCConnection::exec(const char * buff)
 
 /* =========================================================== */
 
+#define DEFAULT_COLUMN_NAME_SIZE 121
 #define DEFAULT_VARCHAR_SIZE 4040
 
 void
-ODBCRecordSet::alloc_and_bind_cols(int ncols)
+ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
 	SQLINTEGER err;
 	SQLRETURN rc;
 	int i;
 
-	if (ncols > arrsize)
+	if (new_ncols > arrsize)
 	{
-		if (column_labels)
-		{
-			for (i=0; i<arrsize; i++)
-			{
-				if (column_labels[i]) delete column_labels[i];
-			}
-			delete column_labels;
-		}
+		if (column_labels) delete column_labels;
 		if (column_datatype) delete column_datatype;
 
 		if (values)
@@ -264,24 +266,24 @@ ODBCRecordSet::alloc_and_bind_cols(int ncols)
 		}
 		if (vsizes) delete vsizes;
 
-		column_labels = new char*[ncols];
-		column_datatype = new int[ncols];
-		values = new char*[ncols];
-		vsizes = new int[ncols];
+		column_labels = new char*[new_ncols];
+		column_datatype = new int[new_ncols];
+		values = new char*[new_ncols];
+		vsizes = new int[new_ncols];
 
 		/* intialize */
-		for (i = 0; i<ncols; i++)
+		for (i = 0; i<new_ncols; i++)
 		{
 			column_labels[i] = NULL;
 			column_datatype[i] = 0;
 			values[i] = NULL;
 			vsizes[i] = 0;
 		}
-		arrsize = ncols; 
+		arrsize = _new_ncols; 
 	}
 
 	/* Initialize the newly realloc'ed entries */
-	for (i=0; i<ncols; i++)
+	for (i=0; i<new_ncols; i++)
 	{
 		column_labels[i] = NULL;
 		column_datatype[i] = 0;
@@ -433,6 +435,14 @@ ODBCRecordSet::get_column_labels(void)
 
 /* =========================================================== */
 
+void
+ODBCRecordSet::rewind(void)
+{
+	if (!this) return;
+	SQL_POSITION_TO(sql_hstmt, 0);
+}
+
+
 int
 ODBCRecordSet::fetch_row(void)
 {
@@ -504,17 +514,36 @@ ODBCRecordSet::get_value(const char * fieldname)
 }
 
 /* =========================================================== */
+
+template<class T> bool 
+ODBCRecordSet::foreach_row(bool (T::*cb)(void), T *data)
+{
+	rewind();
+	while (fetch_row())
+	{
+		bool rc = (data->*cb) ();
+		if (rc) return rc;
+	}
+	return false;
+}
+
+
 template<class T> bool 
 ODBCRecordSet::foreach_column(bool (T::*cb)(const char *, const char *),
                                T *data)
 {
 	int i;
+	if (0 > ncols)
+	{
+		get_column_labels();
+	}
+
 	for (i=0; i<ncols; i++)
 	{
 		bool rc = (data->*cb) (column_labels[i], values[i]);
 		if (rc) return rc;
 	}
-	return true;
+	return false;
 }
 
 /* =========================================================== */
@@ -522,9 +551,16 @@ ODBCRecordSet::foreach_column(bool (T::*cb)(const char *, const char *),
 class Ola
 {
 	public:
+		ODBCRecordSet *rs;
 		bool column_cb(const char *colname, const char * colvalue)
 		{
 			printf ("%s = %s\n", colname, colvalue);
+			return false;
+		}
+		bool row_cb(void)
+		{
+			printf ("---- New row found ----\n");
+			rs->foreach_column(&Ola::column_cb, this);
 			return false;
 		}
 };
@@ -542,17 +578,29 @@ int main ()
 		"INSERT INTO Atoms VALUES (3,1,0.5, 0.5, 'umm');");
 #endif
 
+	// One way of doing things
 	rs = conn->exec("SELECT * FROM Atoms;");
-
-	Ola *ola = new Ola();
-
 	while (rs->fetch_row())
 	{
-		rs->foreach_column(&Ola::column_cb, ola);
 		const char * n = rs->get_value("name");
-		printf ("found one %s\n", n);
+		printf ("found column with value %s\n", n);
 	}
+	rs->release();
 
+	// Another way of doing things
+	Ola *ola = new Ola();
+	rs = conn->exec("SELECT * FROM Atoms;");
+	while (rs->fetch_row())
+	{
+		printf("--- method 2 has row:\n");
+		rs->foreach_column(&Ola::column_cb, ola);
+	}
+	rs->release();
+
+	// A third way of doing things
+	ola->rs = rs;
+	rs = conn->exec("SELECT * FROM Atoms;");
+	rs->foreach_row(&Ola::row_cb, ola);
 	rs->release();
 
 	delete conn;
@@ -631,18 +679,6 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	 * given results yet. */
 	rs->ncols = -1;
 	return &rs->recset;
-}
-
-
-/* =========================================================== */
-
-int
-dui_odbc_recordset_rewind (DuiDBRecordSet *recset)
-{
-	/* XXX implement me */
-	/* DuiODBCRecordSet *rs = (DuiODBCRecordSet *) recset; */
-	
-	return dui_odbc_recordset_fetch_row (recset);
 }
 
 #endif /* USE_ODBC */
