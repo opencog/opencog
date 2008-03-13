@@ -32,13 +32,15 @@ class ODBCConnection
 		SQLHDBC sql_hdbc;
 		std::stack<ODBCRecordSet *> free_pool;
 
+		ODBCRecordSet *get_record_set(void);
+
 	public:
 		ODBCConnection(const char * dbname,
 		               const char * username,
 		               const char * authentication);
 		~ODBCConnection();
 
-		ODBCRecordSet *get_record_set(void);
+		ODBCRecordSet *exec(const char * buff);
 };
 
 class ODBCRecordSet
@@ -188,6 +190,33 @@ ODBCRecordSet * ODBCConnection::get_record_set(void)
 
 /* =========================================================== */
 
+ODBCRecordSet *
+ODBCConnection::exec(const char * buff)
+{
+	ODBCRecordSet *rs;
+	SQLRETURN rc;
+
+	rs = get_record_set();
+	if (!rs) return NULL;
+
+	rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR ("Can't perform query rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
+		rs->release();
+		return NULL;
+	}
+
+	/* Use numbr of columns to indicate that the query hasn't 
+	 * given results yet. */
+	rs->ncols = -1;
+	return rs;
+}
+
+/* =========================================================== */
+
 #define DEFAULT_VARCHAR_SIZE 4040
 
 void
@@ -294,6 +323,8 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 void
 ODBCRecordSet::release(void)
 {
+	if (!this) return;
+
 	SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
 	sql_hstmt = NULL;
 
@@ -333,7 +364,7 @@ int main ()
 	ODBCConnection *conn;
 	conn = new ODBCConnection("opencog", "linas", NULL);
 
-	ODBCRecordSet *rs = conn->get_record_set();
+	ODBCRecordSet *rs = conn->exec("SELECT * FROM Atoms;");
 	rs->release();
 
 	return 0;
@@ -343,38 +374,6 @@ int main ()
 /* =========================================================== */
 
 #if OLD_CODE
-
-/* =========================================================== */
-
-DuiDBRecordSet *
-dui_odbc_connection_exec (DuiDBConnection *dbc, const char * buff)
-{
-	DuiODBCConnection *conn = (DuiODBCConnection *) dbc;
-	DuiODBCRecordSet *rs;
-	SQLRETURN rc;
-
-	ENTER ("(conn=%p, buff=%s)", conn, buff);
-	if (!conn) return NULL;
-
-	rs = dui_odbc_recordset_new (conn);
-	if (!rs) return NULL;
-
-	rc = SQLExecDirect(rs->sql_hstmt, (char *)buff, SQL_NTS);
-
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR ("Can't perform query rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-		dui_odbc_recordset_release (&rs->recset);
-		return NULL;
-	}
-
-	LEAVE ("(conn=%p, buff=%s)", conn, buff);
-	/* Use numbr of columns to indicate that the query hasn't 
-	 * given results yet. */
-	rs->ncols = -1;
-	return &rs->recset;
-}
 
 
 /* =========================================================== */

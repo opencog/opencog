@@ -3,7 +3,7 @@
 -- Create a table representation for an opencog Atom
 --
 
-CREATE TABLE OpenCogAtom (
+CREATE TABLE Atoms (
 	-- the uuid maps to the atom handle
 	uuid	INT PRIMARY KEY,
 
@@ -26,7 +26,7 @@ CREATE TABLE OpenCogAtom (
 -- is the set of outgoing edges of the atom. Understood
 -- as dst<-src, with fixed dst, are the incoming edges.
 --
-CREATE TABLE OpenCogEdge (
+CREATE TABLE Edges (
 	src_uuid  INT,
 	dst_uuid  INT
 );
