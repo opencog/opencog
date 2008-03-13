@@ -61,6 +61,8 @@ class ODBCRecordSet
 		ODBCRecordSet(ODBCConnection *);
 		~ODBCRecordSet();
 
+		void get_column_labels(void);
+
 	public:
 		int fetch_row(void); // return non-zero value if there's another row.
 		void release(void);
@@ -361,6 +363,67 @@ ODBCRecordSet::~ODBCRecordSet()
 
 /* =========================================================== */
 
+void
+ODBCRecordSet::get_column_labels(void)
+{
+	SQLSMALLINT _ncols;
+	SQLRETURN rc;
+	int i;
+
+	if (0 <= ncols) return;
+
+	/* If number of columns is negative, then we haven't 
+	 * gotten any results back yet.  Start by getting the 
+	 * column labels. 
+	 */
+
+	rc = SQLNumResultCols(sql_hstmt, &_ncols);
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR ("Can't get num columns rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+		return;
+	}
+
+	if (_ncols > arrsize)
+	{
+		PERR( "screwed not enough columns !! ");
+		_ncols = arrsize;
+	}
+
+	for (i=0; i<_ncols; i++)
+	{
+		char namebuff[300];
+		SQLSMALLINT namelen;
+		SQLUINTEGER column_size;
+		SQLSMALLINT datatype;
+		SQLSMALLINT decimal_digits;
+		SQLSMALLINT nullable;
+
+		rc = SQLDescribeCol (sql_hstmt, i+1,
+				(SQLCHAR *) namebuff, 299, &namelen,
+   			 &datatype, &column_size, &decimal_digits, &nullable);
+		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+		{
+			PERR ("Can't describe col rc=%d", rc);
+			PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+			return;
+		}
+
+		namebuff[namelen] = 0x0;
+		// PINFO ("column %d has name\'%s\'", i, namebuff);
+
+		if (column_labels[i]) delete column_labels[i];
+		column_labels[i] = new char[sizeof(namebuff)+1];
+		strcpy(column_labels[i], namebuff);
+		column_datatype[i] = datatype;
+	}
+
+	ncols = _ncols;
+}
+
+/* =========================================================== */
+
 int
 ODBCRecordSet::fetch_row(void)
 {
@@ -389,8 +452,12 @@ int main ()
 	ODBCConnection *conn;
 	conn = new ODBCConnection("opencog", "linas", NULL);
 
-	ODBCRecordSet *rs = conn->exec(
+	ODBCRecordSet *rs;
+
+#ifdef MAKE_SOME_DATA
+	rs = conn->exec(
 		"INSERT INTO Atoms VALUES (2,1,0.5, 0.5, 'duhh');");
+#endif
 
 	rs = conn->exec("SELECT * FROM Atoms;");
 
@@ -479,65 +546,6 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	return &rs->recset;
 }
 
-
-/* =========================================================== */
-
-static void
-dui_odbc_recordset_get_column_labels (DuiODBCRecordSet *rs)
-{
-	SQLSMALLINT ncols;
-	SQLRETURN rc;
-	int i;
-
-	if (0 <= rs->ncols) return;
-
-	/* If number of columns is negative, then we haven't 
-	 * gotten any results back yet.  Start by getting the 
-	 * column labels. 
-	 */
-
-	rc = SQLNumResultCols (rs->sql_hstmt, &ncols);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR ("Can't get num columns rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-		return;
-	}
-
-	if (ncols > rs->arrsize)
-	{
-		PERR( "screwed not enough columns !! ");
-		ncols =  rs->arrsize;
-	}
-
-	for (i=0; i<ncols; i++)
-	{
-		char namebuff[300];
-		SQLSMALLINT namelen;
-		SQLUINTEGER column_size;
-		SQLSMALLINT datatype;
-		SQLSMALLINT decimal_digits;
-		SQLSMALLINT nullable;
-
-		rc = SQLDescribeCol (rs->sql_hstmt, i+1, namebuff, 299, &namelen,
-   			 &datatype, &column_size, &decimal_digits, &nullable);
-		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-		{
-			PERR ("Can't describe col rc=%d", rc);
-			PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-			return;
-		}
-
-		namebuff[namelen] = 0x0;
-		PINFO ("column %d has name\'%s\'", i, namebuff);
-
-		g_free (rs->column_labels[i]);
-		rs->column_labels[i] = g_strdup (namebuff);
-		rs->column_datatype[i] = datatype;
-	}
-
-	rs->ncols = ncols;
-}
 
 /* =========================================================== */
 
