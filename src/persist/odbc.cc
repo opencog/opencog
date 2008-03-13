@@ -62,9 +62,11 @@ class ODBCRecordSet
 		~ODBCRecordSet();
 
 		void get_column_labels(void);
+		int get_col_by_name (const char *);
 
 	public:
 		int fetch_row(void); // return non-zero value if there's another row.
+		const char * get_value(const char * fieldname);
 		void release(void);
 };
 
@@ -447,6 +449,55 @@ ODBCRecordSet::fetch_row(void)
 
 /* =========================================================== */
 
+int
+ODBCRecordSet::get_col_by_name (const char * fieldname)
+{
+	int i;
+	const char * fp;
+
+	/* lookup the column number based on the column name */
+	for (i=0; i<ncols; i++)
+	{
+		if (!strcasecmp (fieldname, column_labels[i])) return i;
+	}
+
+	/* oops. Try removing the table name if possible */
+	fp = strrchr (fieldname, '.');
+	if (!fp) return -1;
+	fp ++;
+
+	for (i=0; i<ncols; i++)
+	{
+		if (!strcasecmp (fp, column_labels[i])) return i;
+	}
+
+	return -1;
+}
+
+const char *
+ODBCRecordSet::get_value(const char * fieldname)
+{
+	if (!this) return NULL;
+	int column;
+
+	/* If number of columns is negative, then we haven't 
+	 * gotten any results back yet.  Start by getting the 
+	 * column labels. 
+	 */
+	if (0 > ncols)
+	{
+		get_column_labels();
+	}
+
+	column = get_col_by_name (fieldname);
+	if (0 > column) return NULL;
+
+	// LEAVE ("(rs=%p, fieldname=%s) {val=\'%s\'}", rs, fieldname,  rs->values[column]);
+	return values[column];
+}
+
+/* =========================================================== */
+
 int main ()
 {
 	ODBCConnection *conn;
@@ -454,16 +505,18 @@ int main ()
 
 	ODBCRecordSet *rs;
 
+#define MAKE_SOME_DATA
 #ifdef MAKE_SOME_DATA
 	rs = conn->exec(
-		"INSERT INTO Atoms VALUES (2,1,0.5, 0.5, 'duhh');");
+		"INSERT INTO Atoms VALUES (3,1,0.5, 0.5, 'umm');");
 #endif
 
 	rs = conn->exec("SELECT * FROM Atoms;");
 
 	while (rs->fetch_row())
 	{
-		printf ("found one\n");
+		const char * n = rs->get_value("name");
+		printf ("found one %s\n", n);
 	}
 
 	rs->release();
@@ -549,33 +602,6 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 
 /* =========================================================== */
 
-static int
-get_col_by_name (DuiODBCRecordSet *rs, const char * fieldname)
-{
-	int i;
-	const char * fp;
-
-	/* lookup the column number based on the column name */
-	for (i=0; i<rs->ncols; i++)
-	{
-		if (!strcasecmp (fieldname, rs->column_labels[i])) return i;
-	}
-
-	/* oops. Try removing the table name if possible */
-	fp = strrchr (fieldname, '.');
-	if (!fp) return -1;
-	fp ++;
-
-	for (i=0; i<rs->ncols; i++)
-	{
-		if (!strcasecmp (fp, rs->column_labels[i])) return i;
-	}
-
-	return -1;
-}
-
-/* =========================================================== */
-
 int
 dui_odbc_recordset_rewind (DuiDBRecordSet *recset)
 {
@@ -583,32 +609,6 @@ dui_odbc_recordset_rewind (DuiDBRecordSet *recset)
 	/* DuiODBCRecordSet *rs = (DuiODBCRecordSet *) recset; */
 	
 	return dui_odbc_recordset_fetch_row (recset);
-}
-
-/* =========================================================== */
-
-const char *
-dui_odbc_recordset_get_value (DuiDBRecordSet *recset, const char * fieldname)
-{
-	DuiODBCRecordSet *rs = (DuiODBCRecordSet *) recset;
-	int column;
-
-	if (!rs) return NULL;
-
-	/* If number of columns is negative, then we haven't 
-	 * gotten any results back yet.  Start by getting the 
-	 * column labels. 
-	 */
-	if (0 > rs->ncols)
-	{
-		dui_odbc_recordset_get_column_labels (rs);
-	}
-
-	column = get_col_by_name (rs, fieldname);
-	if (0 > column) return NULL;
-
-	LEAVE ("(rs=%p, fieldname=%s) {val=\'%s\'}", rs, fieldname,  rs->values[column]);
-	return rs->values[column];
 }
 
 #endif /* USE_ODBC */
