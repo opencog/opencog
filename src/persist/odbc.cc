@@ -32,6 +32,25 @@ class ODBCConnection
 		ODBCConnection(const char * dbname,
 		               const char * username,
 		               const char * authentication);
+		~ODBCConnection();
+};
+
+class ODBCRecordSet
+{
+	private:
+		// DuiDBRecordSet recset;
+		ODBCConnection *conn;
+		SQLHSTMT sql_hstmt;
+	
+		int ncols;
+		int arrsize;
+		char **column_labels;
+		int  *column_datatype;
+		char **values;
+		int  *vsizes;
+
+		void alloc_and_bind_cols(int ncols);
+	public:
 };
 
 
@@ -121,6 +140,84 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 
 /* =========================================================== */
 
+ODBCConnection::~ODBCConnection()
+{
+	SQLDisconnect(sql_hdbc);
+	SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
+	sql_hdbc = NULL;
+
+	SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+	sql_henv = NULL;
+	
+#if LATER
+	for (node=conn->free_pool; node; node=node->next)
+	{
+		dui_odbc_recordset_free (node->data);
+	}
+	g_list_free (conn->free_pool);
+	conn -> free_pool = NULL;
+#endif
+}
+
+/* =========================================================== */
+
+#define DEFAULT_VARCHAR_SIZE 4040
+
+void
+ODBCRecordSet::alloc_and_bind_cols(int ncols)
+{
+	SQLINTEGER err;
+	SQLRETURN rc;
+	int i;
+
+	if (ncols > arrsize)
+	{
+		if (column_labels) delete column_labels;
+		if (column_datatype) delete column_datatype;
+		if (values) delete values;
+		if (vsizes) delete vsizes;
+
+		column_labels = new char*[ncols];
+		column_datatype = new int[ncols];
+		values = new char*[ncols];
+		vsizes = new int[ncols];
+
+		/* intialize */
+		for (i = 0; i<ncols; i++)
+		{
+			column_labels[i] = NULL;
+			column_datatype[i] = 0;
+			values[i] = NULL;
+			vsizes[i] = 0;
+		}
+		arrsize = ncols; 
+	}
+
+	for (i=0; i<ncols; i++)
+	{
+		if (column_labels[i]) delete column_labels[i];
+		column_labels[i] = NULL;
+		column_datatype[i] = 0;
+
+		if (NULL == values[i])
+		{
+			values[i] = new char[DEFAULT_VARCHAR_SIZE];
+			vsizes[i] = DEFAULT_VARCHAR_SIZE;
+			values[i][0] = 0;
+		}
+		rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR, 
+			values[i], vsizes[i], &err);
+		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+		{
+			PERR ("Can't bind col=%d rc=%d", i, rc);
+			PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+			return;
+		}
+	}
+}
+
+/* =========================================================== */
+
 main ()
 {
 	ODBCConnection *conn;
@@ -131,114 +228,6 @@ main ()
 /* =========================================================== */
 
 #if OLD_CODE
-
-struct DuiODBCRecordSet_s
-{
-	DuiDBRecordSet recset;
-	DuiODBCConnection *conn;
-	SQLHSTMT sql_hstmt;
-
-	int ncols;
-	int arrsize;
-	char **column_labels;
-	int  *column_datatype;
-	char **values;
-	int  *vsizes;
-};
-
-static void dui_odbc_recordset_free (DuiODBCRecordSet *rs);
-
-/* =========================================================== */
-
-DuiDBConnection *
-dui_odbc_connection_new (const char * dbname, 
-                         const char * username, 
-                         const char * authentication)
-{
-}
-
-/* =========================================================== */
-
-void
-dui_odbc_connection_free (DuiDBConnection *dbc)
-{
-	DuiODBCConnection *conn = (DuiODBCConnection *) dbc;
-	GList *node;
-
-	if (!conn) return;
-
-	if (conn->dbname) g_free ((char *) conn->dbname);
-	conn->dbname = NULL;
-
-	if (conn->username) g_free ((char *) conn->username);
-	conn->username = NULL;
-
-	SQLDisconnect(conn->sql_hdbc);
-	SQLFreeHandle(SQL_HANDLE_DBC, conn->sql_hdbc);
-	conn->sql_hdbc = NULL;
-
-	SQLFreeHandle(SQL_HANDLE_ENV, conn->sql_henv);
-	conn->sql_henv = NULL;
-	
-	for (node=conn->free_pool; node; node=node->next)
-	{
-		dui_odbc_recordset_free (node->data);
-	}
-	g_list_free (conn->free_pool);
-	conn -> free_pool = NULL;
-}
-
-/* =========================================================== */
-
-#define DEFAULT_VARCHAR_SIZE 4040
-
-static void
-dui_odbc_recordset_alloc_and_bind_cols (DuiODBCRecordSet *rs, int ncols)
-{
-	SQLINTEGER err;
-	SQLRETURN rc;
-	int i;
-
-	if (ncols > rs->arrsize)
-	{
-		rs->column_labels = g_renew (char *, rs->column_labels, ncols);
-		rs->column_datatype = g_renew (int, rs->column_datatype, ncols);
-		rs->values = g_renew (char *, rs->values, ncols);
-		rs->vsizes = g_renew (int, rs->vsizes, ncols);
-
-		/* intialize */
-		for (i = rs->arrsize; i<ncols; i++)
-		{
-			rs->column_labels[i] = NULL;
-			rs->column_datatype[i] = 0;
-			rs->values[i] = NULL;
-			rs->vsizes[i] = 0;
-		}
-		rs->arrsize = ncols; 
-	}
-
-	for (i=0; i<ncols; i++)
-	{
-		if (rs->column_labels[i]) g_free (rs->column_labels[i]);
-		rs->column_labels[i] = NULL;
-		rs->column_datatype[i] = 0;
-
-		if (NULL == rs->values[i])
-		{
-			rs->values[i] = g_new (char, DEFAULT_VARCHAR_SIZE);
-			rs->vsizes[i] = DEFAULT_VARCHAR_SIZE;
-			rs->values[i][0] = 0;
-		}
-		rc = SQLBindCol(rs->sql_hstmt, i+1, SQL_C_CHAR, 
-			rs->values[i], rs->vsizes[i], &err);
-		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-		{
-			PERR ("Can't bind col=%d rc=%d", i, rc);
-			PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-			return;
-		}
-	}
-}
 
 /* =========================================================== */
 /* pseudo-private routine */
@@ -580,51 +569,6 @@ dui_odbc_recordset_get_value (DuiDBRecordSet *recset, const char * fieldname)
 
 	LEAVE ("(rs=%p, fieldname=%s) {val=\'%s\'}", rs, fieldname,  rs->values[column]);
 	return rs->values[column];
-}
-
-/* =========================================================== */
-
-static void
-dui_odbc_plugin_free (DuiDBPlugin *plg)
-{
-	g_free (plg);
-}
-
-/* =========================================================== */
-
-static DuiDBPlugin *
-dui_odbc_plugin_new (void)
-{
-	DuiDBPlugin *plg;
-	plg = g_new0 (DuiDBPlugin, 1);
-	plg->db_provider_name = "odbc";
-	plg->plugin_free = dui_odbc_plugin_free;
-	plg->connection_new = dui_odbc_connection_new;
-	plg->connection_free = dui_odbc_connection_free;
-	plg->connection_exec = dui_odbc_connection_exec;
-	plg->connection_tables = dui_odbc_connection_tables;
-	plg->connection_table_columns = dui_odbc_connection_table_columns;
-	plg->recordset_free = dui_odbc_recordset_release;
-	plg->recordset_rewind = dui_odbc_recordset_rewind;
-	plg->recordset_fetch_row = dui_odbc_recordset_fetch_row;
-	plg->recordset_get_value = dui_odbc_recordset_get_value;
-	plg->recordset_get_error = NULL;
-
-	return plg;
-}
-
-/* =========================================================== */
-
-void 
-dui_odbc_init (void)
-{
-#ifdef USE_ODBC
-	DuiDBPlugin *plg;
-	plg = dui_odbc_plugin_new();
-	dui_db_provider_register (plg);
-#else
-	PERR ("The DWI db drivers were compiled without ODBC support");
-#endif /* USE_ODBC */
 }
 
 #endif /* USE_ODBC */
