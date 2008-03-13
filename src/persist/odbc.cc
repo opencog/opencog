@@ -60,7 +60,9 @@ class ODBCRecordSet
 		void alloc_and_bind_cols(int ncols);
 		ODBCRecordSet(ODBCConnection *);
 		~ODBCRecordSet();
+
 	public:
+		int fetch_row(void); // return non-zero value if there's another row.
 		void release(void);
 };
 
@@ -359,13 +361,47 @@ ODBCRecordSet::~ODBCRecordSet()
 
 /* =========================================================== */
 
+int
+ODBCRecordSet::fetch_row(void)
+{
+	if (!this) return 0;
+
+	SQLRETURN rc = SQLFetch(sql_hstmt);  
+
+	/* no more data */
+	if (SQL_NO_DATA == rc) return 0;
+	if (SQL_NULL_DATA == rc) return 0;
+
+	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	{
+		PERR ("Can't fetch row rc=%d", rc);
+		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+		return 0;
+	}
+
+	return 1;
+}
+
+/* =========================================================== */
+
 int main ()
 {
 	ODBCConnection *conn;
 	conn = new ODBCConnection("opencog", "linas", NULL);
 
-	ODBCRecordSet *rs = conn->exec("SELECT * FROM Atoms;");
+	ODBCRecordSet *rs = conn->exec(
+		"INSERT INTO Atoms VALUES (2,1,0.5, 0.5, 'duhh');");
+
+	rs = conn->exec("SELECT * FROM Atoms;");
+
+	while (rs->fetch_row())
+	{
+		printf ("found one\n");
+	}
+
 	rs->release();
+
+	delete conn;
 
 	return 0;
 }
@@ -539,32 +575,6 @@ dui_odbc_recordset_rewind (DuiDBRecordSet *recset)
 	/* DuiODBCRecordSet *rs = (DuiODBCRecordSet *) recset; */
 	
 	return dui_odbc_recordset_fetch_row (recset);
-}
-
-/* =========================================================== */
-
-int
-dui_odbc_recordset_fetch_row (DuiDBRecordSet *recset)
-{
-	DuiODBCRecordSet *rs = (DuiODBCRecordSet *) recset;
-	SQLRETURN rc;
-
-	if (!rs) return 0;
-
-	rc = SQLFetch(rs->sql_hstmt);  
-
-	/* no more data */
-	if (SQL_NO_DATA == rc) return 0;
-	if (SQL_NULL_DATA == rc) return 0;
-
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
-	{
-		PERR ("Can't fetch row rc=%d", rc);
-		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-		return 0;
-	}
-
-	return 1;
 }
 
 /* =========================================================== */
