@@ -8,9 +8,12 @@
 
 #include "odbcxx.h"
 
-class Ola
+#include "Atom.h"
+
+class AtomStorage
 {
-	public:
+	private:
+		ODBCConnection *db_conn;
 		ODBCRecordSet *rs;
 		bool column_cb(const char *colname, const char * colvalue)
 		{
@@ -20,26 +23,50 @@ class Ola
 		bool row_cb(void)
 		{
 			printf ("---- New row found ----\n");
-			rs->foreach_column(&Ola::column_cb, this);
+			// rs->foreach_column(&Ola::column_cb, this);
 			return false;
 		}
+	public:
+		AtomStorage(void);
+		~AtomStorage();
+
+		void storeAtom(Atom *);
 };
+
+#include "Node.h"
+#include "type_codes.h"
+
+AtomStorage::AtomStorage(void)
+{
+	db_conn = new ODBCConnection("opencog", "linas", NULL);
+}
+
+AtomStorage::~AtomStorage()
+{
+	delete db_conn;
+}
+
+void AtomStorage::storeAtom(Atom *)
+{
+}
+
+#include "TruthValue.h"
 
 int main ()
 {
-	ODBCConnection *conn;
-	conn = new ODBCConnection("opencog", "linas", NULL);
+	AtomStorage *store = new AtomStorage();
 
+	Atom *a = new Node(SCHEMA_NODE, "someNode");
+
+	store->storeAtom(a);
+
+#if 0
 	ODBCRecordSet *rs;
-
-	// A third way of doing things
-	Ola *ola = new Ola();
 	rs = conn->exec("SELECT * FROM Atoms;");
 	ola->rs = rs;
 	rs->foreach_row(&Ola::row_cb, ola);
 	rs->release();
-
-	delete conn;
+#endif
 
 	return 0;
 }
