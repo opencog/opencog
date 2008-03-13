@@ -50,7 +50,7 @@ class ODBCRecordSet
 	private:
 		ODBCConnection *conn;
 		SQLHSTMT sql_hstmt;
-	
+
 		int ncols;
 		int arrsize;
 		char **column_labels;
@@ -178,7 +178,7 @@ ODBCConnection::~ODBCConnection()
 
 	SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
 	sql_henv = NULL;
-	
+
 	while (!free_pool.empty())
 	{
 		ODBCRecordSet *rs = free_pool.top();
@@ -248,58 +248,49 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 	SQLRETURN rc;
 	int i;
 
-	if (new_ncols <= arrsize) return;
-
-	if (column_labels)
+	if (new_ncols > arrsize)
 	{
-		for (i=0; i<arrsize; i++)
+		if (column_labels)
 		{
-			if (column_labels[i])
+			for (i=0; i<arrsize; i++)
 			{
-				delete column_labels[i];
+				if (column_labels[i])
+				{
+					delete column_labels[i];
+				}
 			}
+			delete column_labels;
 		}
-		delete column_labels;
-	}
-	if (column_datatype) delete column_datatype;
+		if (column_datatype) delete column_datatype;
 
-	if (values)
-	{
-		for (i=0; i<arrsize; i++)
+		if (values)
 		{
-			if (values[i])
+			for (i=0; i<arrsize; i++)
 			{
-				delete values[i];
+				if (values[i])
+				{
+					delete values[i];
+				}
 			}
+			delete values;
 		}
-		delete values;
-	}
-	if (vsizes) delete vsizes;
+		if (vsizes) delete vsizes;
 
-	column_labels = new char*[new_ncols];
-	column_datatype = new int[new_ncols];
-	values = new char*[new_ncols];
-	vsizes = new int[new_ncols];
+		column_labels = new char*[new_ncols];
+		column_datatype = new int[new_ncols];
+		values = new char*[new_ncols];
+		vsizes = new int[new_ncols];
 
-	/* intialize */
-	for (i = 0; i<new_ncols; i++)
-	{
-		column_labels[i] = NULL;
-		column_datatype[i] = 0;
-		values[i] = NULL;
-		vsizes[i] = 0;
-	}
-
-	arrsize = new_ncols; 
-
-	if (sql_hstmt)
-	{
-		rc = SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
-		sql_hstmt = NULL;
-		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+		/* intialize */
+		for (i = 0; i<new_ncols; i++)
 		{
-			PERR("Failed to free statement handle, rc=%d", rc);
+			column_labels[i] = NULL;
+			column_datatype[i] = 0;
+			values[i] = NULL;
+			vsizes[i] = 0;
 		}
+
+		arrsize = new_ncols; 
 	}
 
 	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
@@ -346,7 +337,7 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 {
 	if (!_conn) return;
 	conn = _conn;
-	
+
 	ncols = -1;
 	arrsize = 0;
 	column_labels = NULL;
