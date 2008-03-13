@@ -21,70 +21,7 @@
 #include <sqlext.h>
 #include <stdio.h>
 
-class ODBCRecordSet;
-
-class ODBCConnection
-{
-	friend class ODBCRecordSet;
-	private:
-		std::string dbname;
-		std::string username;
-		SQLHENV sql_henv;
-		SQLHDBC sql_hdbc;
-		std::stack<ODBCRecordSet *> free_pool;
-
-		ODBCRecordSet *get_record_set(void);
-
-	public:
-		ODBCConnection(const char * dbname,
-		               const char * username,
-		               const char * authentication);
-		~ODBCConnection();
-
-		ODBCRecordSet *exec(const char * buff);
-};
-
-class ODBCRecordSet
-{
-	friend class ODBCConnection;
-	private:
-		ODBCConnection *conn;
-		SQLHSTMT sql_hstmt;
-
-		int ncols;
-		int arrsize;
-		char **column_labels;
-		int  *column_datatype;
-		char **values;
-		int  *vsizes;
-
-		void alloc_and_bind_cols(int ncols);
-		ODBCRecordSet(ODBCConnection *);
-		~ODBCRecordSet();
-
-		void get_column_labels(void);
-		int get_col_by_name (const char *);
-
-	public:
-		// rewind the cursor to the start
-		void rewind(void);
-
-		int fetch_row(void); // return non-zero value if there's another row.
-		const char * get_value(const char * fieldname);
-
-		// call this, instead of the destructor, 
-		// when done with this instance.
-		void release(void);
-
-		// Calls the callback once for each row.
-		template<class T> bool 
-			foreach_row(bool (T::*cb)(void), T *data);
-
-		// Calls the callback once for each column.
-		template<class T> bool 
-			foreach_column(bool (T::*cb)(const char *, const char *), T *data);
-};
-
+#include "odbcxx.h"
 
 // cheesy hack for missing PERR
 #define PERR printf
@@ -561,6 +498,8 @@ ODBCRecordSet::foreach_column(bool (T::*cb)(const char *, const char *),
 
 /* =========================================================== */
 
+#ifdef UNIT_TEST_EXAMPLE
+
 class Ola
 {
 	public:
@@ -621,11 +560,11 @@ int main ()
 	return 0;
 }
 
+#endif /* UNIT_TEST_EXAMPLE */
 
 /* =========================================================== */
 
-#if OLD_CODE
-
+#if OLD_UNPORTED_C_CODE
 
 /* =========================================================== */
 
@@ -658,7 +597,6 @@ dui_odbc_connection_tables (DuiDBConnection *dbc)
 	rs->ncols = -1;
 	return &rs->recset;
 }
-
 
 /* =========================================================== */
 
@@ -694,6 +632,6 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	return &rs->recset;
 }
 
-#endif /* USE_ODBC */
+#endif /* OLD_UNPORTED_C_CODE */
 /* ============================= END OF FILE ================= */
  
