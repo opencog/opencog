@@ -182,8 +182,6 @@ bool RelexQuery::apply_rule(Atom *atom)
  * Heuristics are used to determine this: the local atom should
  * be an instance of a concept, whose dictionary word is _$qVar,
  * i.e. one of the bound variable names.
- *
- * XXX this is subject to change, if the relex rep changes.
  */
 bool RelexQuery::find_vars(Handle h)
 {
@@ -191,19 +189,7 @@ bool RelexQuery::find_vars(Handle h)
 
 	Atom *atom = TLB::getAtom(h);
 
-	// The local atom will be an instance of a general concept...
-	atom = fl.follow_binary_link(atom, INHERITANCE_LINK);
-	if(!atom) return false;
-	// and we want the "word" associated with this general concept.
-	atom = fl.backtrack_binary_link(atom, WR_LINK);
-	if(!atom) return false;
-
-	Node *n = dynamic_cast<Node *>(atom);
-	if(!n) return false;
-
-	const char * match_name = "_$qVar";
-	const std::string& name = n->getName();
-	if (strcmp(name.c_str(), match_name)) return false;
+	if (!is_word_instance (atom, "_$qVar")) return false;
 
 	bound_vars.push_back(h);
 	return false;
@@ -269,6 +255,15 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
 /**
  * Return true if the indicated atom is an instance of 
  * the word.
+ *
+ * XXX
+ * The actual determination of whether some concept is 
+ * represented by some word is fragily dependent on the 
+ * actual nature of concept representation in the 
+ * relex-to-opencog mapping. Intil this is placed into
+ * concrete, its inhherently fragile.  This is subject 
+ * to change, if the relex-to-opencog mapping changes.
+ * XXX
  */
 bool RelexQuery::is_word_instance(Atom *atom, const char * word)
 {
@@ -277,12 +272,18 @@ bool RelexQuery::is_word_instance(Atom *atom, const char * word)
 	Atom *cncpt = fl.follow_binary_link(atom, INHERITANCE_LINK);
 	if (!cncpt) return false;
 
-	Atom *wrd = fl.follow_binary_link(cncpt, WR_LINK);
+	// and we want the "word" associated with this general concept.
+	Atom *wrd = fl.backtrack_binary_link(cncpt, WR_LINK);
 	if (!wrd) return false;
 
-	printf ("duude "); prt(wrd);
+	Node *n = dynamic_cast<Node *>(wrd);
+	if(!n) return false;
 
-	return false;
+	// A simple string compare.
+	const std::string& name = n->getName();
+	if (strcmp(name.c_str(), word)) return false;
+
+	return true;
 }
 
 /**
@@ -306,9 +307,6 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
-		bool reject_qvar = is_word_instance(ab, "_$qVar");
-		if (reject_qvar) return true;
-
 		bool mismatch = concept_match(aa, ab);
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;
@@ -366,6 +364,20 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
+	// Reject any solution where a variable is solved
+	// by another variable (e.g. if there are multiple 
+	// questions in the corpus, and we just happened to 
+	// find one of them.)
+	std::map<Handle, Handle>::const_iterator j;
+	for (j=var_soln.begin(); j != var_soln.end(); j++)
+	{
+		std::pair<Handle, Handle> pv = *j;
+		Handle soln = pv.second;
+		Atom *as = TLB::getAtom(soln);
+		bool reject_qvar = is_word_instance(as, "_$qVar");
+		if (reject_qvar) return false;
+	}
+
 	printf ("duude have soln\n");
 	PatternMatch pm(NULL);
 	pm.print_solution(pred_soln, var_soln);
