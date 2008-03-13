@@ -9,8 +9,9 @@
  * Blame it on SQLBindCol(), which is a terrible idea.  @#$%^ Microsoft.
  *
  * HISTORY:
- * Copyright (c) 2002 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2002,2008 Linas Vepstas <linas@linas.org>
  * created by Linas Vepstas  March 2002
+ * ported to C++ March 2008
  */
 
 #include <stack>
@@ -67,7 +68,13 @@ class ODBCRecordSet
 	public:
 		int fetch_row(void); // return non-zero value if there's another row.
 		const char * get_value(const char * fieldname);
+
+		// call this, instead of the destructor, 
+		// when done with this instance.
 		void release(void);
+
+		template<class T> bool 
+			foreach_column(bool (T::*cb)(const char *, const char *), T *data);
 };
 
 
@@ -497,6 +504,30 @@ ODBCRecordSet::get_value(const char * fieldname)
 }
 
 /* =========================================================== */
+template<class T> bool 
+ODBCRecordSet::foreach_column(bool (T::*cb)(const char *, const char *),
+                               T *data)
+{
+	int i;
+	for (i=0; i<ncols; i++)
+	{
+		bool rc = (data->*cb) (column_labels[i], values[i]);
+		if (rc) return rc;
+	}
+	return true;
+}
+
+/* =========================================================== */
+
+class Ola
+{
+	public:
+		bool column_cb(const char *colname, const char * colvalue)
+		{
+			printf ("%s = %s\n", colname, colvalue);
+			return false;
+		}
+};
 
 int main ()
 {
@@ -505,7 +536,7 @@ int main ()
 
 	ODBCRecordSet *rs;
 
-#define MAKE_SOME_DATA
+// #define MAKE_SOME_DATA
 #ifdef MAKE_SOME_DATA
 	rs = conn->exec(
 		"INSERT INTO Atoms VALUES (3,1,0.5, 0.5, 'umm');");
@@ -513,8 +544,11 @@ int main ()
 
 	rs = conn->exec("SELECT * FROM Atoms;");
 
+	Ola *ola = new Ola();
+
 	while (rs->fetch_row())
 	{
+		rs->foreach_column(&Ola::column_cb, ola);
 		const char * n = rs->get_value("name");
 		printf ("found one %s\n", n);
 	}
