@@ -57,6 +57,7 @@ class ODBCRecordSet
 
 		void alloc_and_bind_cols(int ncols);
 		ODBCRecordSet(ODBCConnection *);
+		~ODBCRecordSet();
 	public:
 		void release(void);
 };
@@ -155,12 +156,11 @@ ODBCConnection::~ODBCConnection()
 	SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
 	sql_henv = NULL;
 	
-	ODBCRecordSet *rs = free_pool.top();
-	while (rs)
+	while (!free_pool.empty())
 	{
+		ODBCRecordSet *rs = free_pool.top();
 		delete rs;
 		free_pool.pop();
-		rs = free_pool.top();
 	}
 }
 
@@ -169,9 +169,11 @@ ODBCConnection::~ODBCConnection()
 
 ODBCRecordSet * ODBCConnection::get_record_set(void)
 {
-	ODBCRecordSet *rs = free_pool.top();
-	if (rs)
+	ODBCRecordSet *rs;
+	if (!free_pool.empty())
 	{
+		rs = free_pool.top();
+		free_pool.pop();
 		rs->ncols = -1;
 	}
 	else
@@ -300,10 +302,39 @@ ODBCRecordSet::release(void)
 
 /* =========================================================== */
 
+ODBCRecordSet::~ODBCRecordSet()
+{
+	int i;
+
+	conn = NULL;
+
+	for (i=0; i<arrsize; i++)
+	{
+		delete column_labels[i];
+		delete values[i];
+	}
+	delete column_labels;
+	column_labels = NULL;
+
+	delete column_datatype;
+	column_datatype = NULL;
+
+	delete values;
+	values = NULL;
+
+	delete vsizes;
+	vsizes = NULL;
+}
+
+/* =========================================================== */
+
 int main ()
 {
 	ODBCConnection *conn;
 	conn = new ODBCConnection("opencog", "linas", NULL);
+
+	ODBCRecordSet *rs = conn->get_record_set();
+	rs->release();
 
 	return 0;
 }
@@ -312,37 +343,6 @@ int main ()
 /* =========================================================== */
 
 #if OLD_CODE
-
-/* =========================================================== */
-
-static void
-dui_odbc_recordset_free (DuiODBCRecordSet *rs)
-{
-	int i;
-
-	if (!rs) return;
-
-	rs->conn = NULL;
-
-	for (i=0; i<rs->arrsize; i++)
-	{
-		g_free (rs->column_labels[i]);
-		g_free (rs->values[i]);
-	}
-	g_free (rs->column_labels);
-	rs->column_labels = NULL;
-
-	g_free (rs->column_datatype);
-	rs->column_datatype = NULL;
-
-	g_free (rs->values);
-	rs->values = NULL;
-
-	g_free (rs->vsizes);
-	rs->vsizes = NULL;
-
-	g_free (rs);
-}
 
 /* =========================================================== */
 
