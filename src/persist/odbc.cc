@@ -13,11 +13,14 @@
  * created by Linas Vepstas  March 2002
  */
 
+#include <stack>
 #include <string>
 
 #include <sql.h>
 #include <sqlext.h>
 #include <stdio.h>
+
+class ODBCRecordSet;
 
 class ODBCConnection
 {
@@ -27,19 +30,21 @@ class ODBCConnection
 		std::string username;
 		SQLHENV sql_henv;
 		SQLHDBC sql_hdbc;
-		// GList * free_pool;
+		std::stack<ODBCRecordSet *> free_pool;
 
 	public:
 		ODBCConnection(const char * dbname,
 		               const char * username,
 		               const char * authentication);
 		~ODBCConnection();
+
+		ODBCRecordSet *get_record_set(void);
 };
 
 class ODBCRecordSet
 {
+	friend class ODBCConnection;
 	private:
-		// DuiDBRecordSet recset;
 		ODBCConnection *conn;
 		SQLHSTMT sql_hstmt;
 	
@@ -51,8 +56,9 @@ class ODBCRecordSet
 		int  *vsizes;
 
 		void alloc_and_bind_cols(int ncols);
-	public:
 		ODBCRecordSet(ODBCConnection *);
+	public:
+		void release(void);
 };
 
 
@@ -86,8 +92,6 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 		PERR("No DB specified");
 		return;
 	}
-
-	// free_pool = NULL;
 
 	/* Allocate environment handle */
 	rc = SQLAllocEnv(&sql_henv);
@@ -151,14 +155,33 @@ ODBCConnection::~ODBCConnection()
 	SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
 	sql_henv = NULL;
 	
-#if LATER
-	for (node=conn->free_pool; node; node=node->next)
+	ODBCRecordSet *rs = free_pool.top();
+	while (rs)
 	{
-		dui_odbc_recordset_free (node->data);
+		delete rs;
+		free_pool.pop();
+		rs = free_pool.top();
 	}
-	g_list_free (conn->free_pool);
-	conn -> free_pool = NULL;
-#endif
+}
+
+/* =========================================================== */
+#define DEFAULT_NUM_COLS 50
+
+ODBCRecordSet * ODBCConnection::get_record_set(void)
+{
+	ODBCRecordSet *rs = free_pool.top();
+	if (rs)
+	{
+		rs->ncols = -1;
+	}
+	else
+	{
+		rs = new ODBCRecordSet(this);
+	}
+
+	rs->alloc_and_bind_cols(DEFAULT_NUM_COLS);
+
+	return rs;
 }
 
 /* =========================================================== */
@@ -174,9 +197,27 @@ ODBCRecordSet::alloc_and_bind_cols(int ncols)
 
 	if (ncols > arrsize)
 	{
-		if (column_labels) delete column_labels;
+		if (column_labels)
+		{
+			for (i=0; i<arrsize; i++)
+			{
+				if (column_labels[i]) delete column_labels[i];
+			}
+			delete column_labels;
+		}
 		if (column_datatype) delete column_datatype;
-		if (values) delete values;
+
+		if (values)
+		{
+			for (i=0; i<arrsize; i++)
+			{
+				if (NULL == values[i])
+				{
+					delete values[i];
+				}
+			}
+			delete values;
+		}
 		if (vsizes) delete vsizes;
 
 		column_labels = new char*[ncols];
@@ -195,9 +236,9 @@ ODBCRecordSet::alloc_and_bind_cols(int ncols)
 		arrsize = ncols; 
 	}
 
+	/* Initialize the newly realloc'ed entries */
 	for (i=0; i<ncols; i++)
 	{
-		if (column_labels[i]) delete column_labels[i];
 		column_labels[i] = NULL;
 		column_datatype[i] = 0;
 
@@ -221,32 +262,20 @@ ODBCRecordSet::alloc_and_bind_cols(int ncols)
 /* =========================================================== */
 /* pseudo-private routine */
 
-#define DEFAULT_NUM_COLS 50
 
 ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 {
 	SQLRETURN rc;
 
-	if (!conn) return;
-#if LATER
-	if (conn->free_pool)
-	{
-		rs = conn->free_pool->data;
-		conn->free_pool = g_list_remove (conn->free_pool, rs);
-		rs->ncols = -1;
-	}
-	else
-#endif
-	{
-		conn = _conn;
+	if (!_conn) return;
+	conn = _conn;
 	
-		ncols = -1;
-		arrsize = 0;
-		column_labels = NULL;
-		column_datatype = NULL;
-		values = NULL;
-		vsizes = NULL;
-	}
+	ncols = -1;
+	arrsize = 0;
+	column_labels = NULL;
+	column_datatype = NULL;
+	values = NULL;
+	vsizes = NULL;
 
 	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
@@ -256,37 +285,33 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 		/* oops memory leak */
 		return;
 	}
-
-	alloc_and_bind_cols(DEFAULT_NUM_COLS);
 }
 
 /* =========================================================== */
 
-main ()
+void
+ODBCRecordSet::release(void)
+{
+	SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
+	sql_hstmt = NULL;
+
+	conn->free_pool.push(this);
+}
+
+/* =========================================================== */
+
+int main ()
 {
 	ODBCConnection *conn;
 	conn = new ODBCConnection("opencog", "linas", NULL);
+
+	return 0;
 }
 
 
 /* =========================================================== */
 
 #if OLD_CODE
-
-/* =========================================================== */
-
-void
-dui_odbc_recordset_release (DuiDBRecordSet *recset)
-{
-	DuiODBCRecordSet *rs = (DuiODBCRecordSet *) recset;
-	if (!rs) return;
-
-	SQLFreeHandle(SQL_HANDLE_STMT, rs->sql_hstmt);
-	rs->sql_hstmt = NULL;
-
-	rs->conn->free_pool = g_list_prepend (rs->conn->free_pool, rs);
-
-}
 
 /* =========================================================== */
 
