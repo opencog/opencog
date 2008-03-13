@@ -465,39 +465,6 @@ ODBCRecordSet::get_value(const char * fieldname)
 
 /* =========================================================== */
 
-template<class T> bool 
-ODBCRecordSet::foreach_row(bool (T::*cb)(void), T *data)
-{
-	rewind();
-	while (fetch_row())
-	{
-		bool rc = (data->*cb) ();
-		if (rc) return rc;
-	}
-	return false;
-}
-
-
-template<class T> bool 
-ODBCRecordSet::foreach_column(bool (T::*cb)(const char *, const char *),
-                               T *data)
-{
-	int i;
-	if (0 > ncols)
-	{
-		get_column_labels();
-	}
-
-	for (i=0; i<ncols; i++)
-	{
-		bool rc = (data->*cb) (column_labels[i], values[i]);
-		if (rc) return rc;
-	}
-	return false;
-}
-
-/* =========================================================== */
-
 #ifdef UNIT_TEST_EXAMPLE
 
 class Ola

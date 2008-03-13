@@ -72,10 +72,32 @@ class ODBCRecordSet
 
 		// Calls the callback once for each row.
 		template<class T> bool 
-			foreach_row(bool (T::*cb)(void), T *data);
+			foreach_row(bool (T::*cb)(void), T *data)
+		{
+			while (fetch_row())
+			{
+				bool rc = (data->*cb) ();
+				if (rc) return rc;
+			}
+			return false;
+		}
 
 		// Calls the callback once for each column.
 		template<class T> bool 
-			foreach_column(bool (T::*cb)(const char *, const char *), T *data);
+			foreach_column(bool (T::*cb)(const char *, const char *), T *data)
+		{
+			int i;
+			if (0 > ncols)
+			{
+				get_column_labels();
+			}
+
+			for (i=0; i<ncols; i++)
+			{
+				bool rc = (data->*cb) (column_labels[i], values[i]);
+				if (rc) return rc;
+			}
+			return false;
+		}
 };
 

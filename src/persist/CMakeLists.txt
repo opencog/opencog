@@ -7,6 +7,8 @@ ${OPENCOG_SOURCE_DIR}/src/AtomSpace
 ${OPENCOG_SOURCE_DIR}/src/Util
 )
 
-add_executable (sniff odbcxx.cc)
+add_executable (sniff sniff.cc)
 
-target_link_libraries (sniff iodbc)
+target_link_libraries (persist iodbc)
+
+target_link_libraries (sniff persist iodbc)
