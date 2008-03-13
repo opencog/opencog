@@ -33,7 +33,6 @@ QueryProcessor::~QueryProcessor()
 void QueryProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
-	// Handle h = as->getHandle(qtype, "test");
 	
 	// Look for recently asserted assertions.
 	foreach_handle_of_type(atom_space, "AssertionLink", 

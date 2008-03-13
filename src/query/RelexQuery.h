@@ -21,7 +21,7 @@ class RelexQuery : public PatternMatchCallback
 {
 	private:
 		// Help determine if assertion is a query.
-		bool match_node_name(Atom *);
+		bool is_qVar(Atom *);
 		bool check_for_query(Handle);
 
 		// Convert query into a normal form.

@@ -40,9 +40,10 @@ RelexQuery::~RelexQuery()
  */
 
 /**
- * Set pointer to Node, if the node name is "match_name".
+ * Return true, if atom is of type Node, and if the node 
+ * name is "match_name" (currently hard-coded as _$qVar)
  */
-bool RelexQuery::match_node_name(Atom *atom)
+bool RelexQuery::is_qVar(Atom *atom)
 {
 	const char *match_name = "_$qVar";
 	Node *n = dynamic_cast<Node *>(atom);
@@ -63,7 +64,7 @@ bool RelexQuery::match_node_name(Atom *atom)
  */
 bool RelexQuery::check_for_query(Handle rel)
 {
-	return foreach_outgoing_atom(rel, &RelexQuery::match_node_name, this);
+	return foreach_outgoing_atom(rel, &RelexQuery::is_qVar, this);
 }
 
 /**
@@ -231,7 +232,7 @@ void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 }
 
 /* ======================================================== */
-/* rutime matching routines */
+/* runtime matching routines */
 
 /**
  * Are two atoms instances of the same concept?
