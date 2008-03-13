@@ -34,6 +34,12 @@ RelexQuery::~RelexQuery()
 	pm = NULL;
 }
 
+static void prt(Atom *atom)
+{
+   std::string str = atom->toString();
+   printf ("%s\n", str.c_str());
+}
+
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
  * XXX This algo is flawed, fragile, but simple.
@@ -260,6 +266,24 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
 	return true;
 }
 
+/**
+ * Return true if the indicated atom is an instance of 
+ * the word.
+ */
+bool RelexQuery::is_word_instance(Atom *atom, const char * word)
+{
+	// Look for incoming links that are InheritanceLinks.
+	// The "generalized concept" for this should be at the far end.
+	Atom *cncpt = fl.follow_binary_link(atom, INHERITANCE_LINK);
+	if (!cncpt) return false;
+
+	Atom *wrd = fl.follow_binary_link(cncpt, WR_LINK);
+	if (!wrd) return false;
+
+	printf ("duude "); prt(wrd);
+
+	return false;
+}
 
 /**
  * Are two nodes "equivalent", as far as the opencog representation 
@@ -282,6 +306,9 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
+		bool reject_qvar = is_word_instance(ab, "_$qVar");
+		if (reject_qvar) return true;
+
 		bool mismatch = concept_match(aa, ab);
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;

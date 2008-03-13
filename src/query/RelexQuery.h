@@ -34,6 +34,7 @@ class RelexQuery : public PatternMatchCallback
 
 
 		// Aid in equivalent node identification.
+		bool is_word_instance(Atom *, const char *);
 		bool concept_match(Atom *, Atom *);
 
 	protected:
