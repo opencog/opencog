@@ -7,6 +7,15 @@
  * semnatically correct matching.
  *
  * Experiminetal, incomplete, broken.
+ * XXX todo-- should have is_query look for 
+ *   <EvaluationLink>
+ *       <Element class="DefinedFrameElementNode" name="#Questioning:Message"/>
+ *       <ListLink>
+ *          <Element class="DefinedLinguisticConceptNode" name="#what"/>
+ *          <Element class="ConceptNode" name="_$qVar_be8ca85e"/>
+ *       </ListLink>
+ *  </EvaluationLink>
+ *
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -30,48 +39,55 @@ FrameQuery::~FrameQuery()
 /* ======================================================== */
 /* Routines to help put the query into normal form. */
 
-#if 0
 /**
  * Return true, if the node is, for example, _subj or _obj
  */
-bool FrameQuery::is_ling_rel(Atom *atom)
+bool FrameQuery::is_frame_elt(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
-	return false;
-}
-
-bool FrameQuery::is_cncpt(Atom *atom)
-{
-	if (CONCEPT_NODE == atom->getType()) return true;
+	if (DEFINED_FRAME_ELEMENT_NODE == atom->getType()) return true;
 	return false;
 }
 
 /**
- * Discard 
- * QUERY-TYPE(_$qVar,what)
- * HYP(throw, T)
- * from pattern-matching consideration; only
- * questions will have these.
+ * Discard all simple relex relations, keeping only 
+ * frame relations.
  *
- * Return true to keep, false to discard.
+ * Set do_discard to false to keep the thing.
  */
+bool FrameQuery::discard_eval_markup(Atom *atom)
+{
+
+	Node *n = dynamic_cast<Node *>(atom);
+	if(!n) return false;
+	if (DEFINED_FRAME_ELEMENT_NODE != atom->getType()) return false;
+
+	const char *name = n->getName().c_str();
+
+	/* Throw away #Questioning,
+	 * as that frame will never occur as a part of the answer.
+	 */
+	if (!strcmp("#Questioning:Message", name)) do_discard = false;
+
+	return false;
+}
+
 bool FrameQuery::discard_extra_markup(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
 
 	const char *name = n->getName().c_str();
-	if (!strcmp("#masculine", name)) do_discard = false;
-	else if (!strcmp("#feminine", name)) do_discard = false;
-	else if (!strcmp("#person", name)) do_discard = false;
-	else if (!strcmp("#definite", name)) do_discard = false;
-	else if (!strcmp("#singular", name)) do_discard = false;
+	if (DEFINED_FRAME_NODE == atom->getType())
+	{
+		/* Throw away #Questioning,
+		 * as that frame will never occur as a part of the answer.
+		 */
+		if (!strcmp("#Questioning", name)) do_discard = false;
+	}
 
 	return false;
 }
-#endif
 
 /**
  * Hack --- not actually applying any rules, except one
@@ -81,34 +97,28 @@ bool FrameQuery::discard_extra_markup(Atom *atom)
 bool FrameQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = TLB::getHandle(atom);
-#if 0
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{
-		bool keep = foreach_outgoing_atom(ah, &FrameQuery::is_ling_rel, this);
+		bool keep = foreach_outgoing_atom(ah, &FrameQuery::is_frame_elt, this);
 		if (!keep) return false;
+
+		do_discard = true;
+		foreach_outgoing_atom(ah, &FrameQuery::discard_eval_markup, this);
+		if (do_discard) return false;
 	}
 	else if (INHERITANCE_LINK == atype)
 	{
-		/* Discard 
-		 * QUERY-TYPE(_$qVar,what)
-		 * HYP(throw, T)
-		 * from pattern-matching consideration; only
-		 * questions will have these.
-		 */
+		/* Discard strctures that won't appear in the answer,
+		 * or that we don't want to match to.  */
 		do_discard = true;
 		foreach_outgoing_atom(ah, &FrameQuery::discard_extra_markup, this);
 		if (do_discard) return false;
-
-		/* Keep things like "tense (throw, past)" but reject things like
-		 * "Temporal_colocation:Time(past,throw)"
-		 */
 	}
 	else
 	{
 		return false;
 	}
-#endif
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
 	normed_predicate.push_back(ah);

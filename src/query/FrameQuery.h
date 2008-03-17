@@ -19,6 +19,12 @@ namespace opencog {
 
 class FrameQuery : public RelexQuery
 {
+	private:
+		bool is_frame_elt(Atom *);
+
+		bool do_discard;
+		bool discard_eval_markup(Atom *atom);
+		bool discard_extra_markup(Atom *atom);
 	protected:
 		virtual bool assemble_predicate(Atom *atom);
 
