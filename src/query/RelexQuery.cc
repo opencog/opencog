@@ -77,6 +77,11 @@ bool RelexQuery::check_for_query(Handle rel)
  * Return true if assertion is a query.
  * A simple check is made: does the assertion have 
  * a _$qVar in it? 
+ *
+ * The pattern check here is trivial, in that an assertion
+ * that contains <WordNode name="_$qVar"/> will be assumed
+ * to be a query.  Perhaps something more sophisticated may
+ * be desired eventually.
  */
 bool RelexQuery::is_query(Handle h)
 {
@@ -130,6 +135,10 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
 	 * because we haven't implemented tense matching properly, 
 	 * and so don't do tense matching at all.
 	 *
+	 * Throw away #copula-question and QUERY-TYPE #what,
+	 * #which, etc. and also #truth-query, as these will 
+	 * never be part of the structure of the answer.
+	 *
 	 * Keep gender matching, noun_number matching, and 
 	 * definite-FLAG matching. Everything else is ignored
 	 * in the match.
@@ -140,6 +149,7 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
 	else if (!strcmp("#person", name)) do_discard = false;
 	else if (!strcmp("#definite", name)) do_discard = false;
 	else if (!strcmp("#singular", name)) do_discard = false;
+	else if (!strcmp("#uncountable", name)) do_discard = false;
 
 	return false;
 }
