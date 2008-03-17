@@ -117,7 +117,7 @@ bool RelexQuery::is_cncpt(Atom *atom)
  * from pattern-matching consideration; only
  * questions will have these.
  *
- * Return true to keep, false to discard.
+ * Set "do_discard" to false to keep this one.
  */
 bool RelexQuery::discard_extra_markup(Atom *atom)
 {
@@ -126,6 +126,14 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
 
+	/* Throw away #past_infinitive and similar forms, 
+	 * because we haven't implemented tense matching properly, 
+	 * and so don't do tense matching at all.
+	 *
+	 * Keep gender matching, noun_number matching, and 
+	 * definite-FLAG matching. Everything else is ignored
+	 * in the match.
+	 */
 	const char *name = n->getName().c_str();
 	if (!strcmp("#masculine", name)) do_discard = false;
 	else if (!strcmp("#feminine", name)) do_discard = false;
@@ -137,9 +145,18 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
 }
 
 /**
- * Hack --- not actually applying any rules, except one
- * hard-coded one: if the link involves a
- * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
+ * This method is called once for every top-level link
+ * in the candidate query graph.  Out if this, it picks
+ * out those relationships that should form a part of a query.
+ *
+ * For relex-based queries, we try to match up the relex
+ * parts of the graph; using the current variant of the 
+ * relex-to-opencog mapping.
+ *
+ * These are EvaluationLink's which have a 
+ * DefinedLinguisticRelationship node in them,
+ * and InheritanceLinks which have a 
+ * DefinedLinguisticConcept node in them.
  */
 bool RelexQuery::assemble_predicate(Atom *atom)
 {
