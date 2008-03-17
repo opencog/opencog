@@ -16,6 +16,7 @@
 #include "Foreach.h"
 #include "MindAgent.h"
 #include "QueryProcessor.h"
+#include "FrameQuery.h"
 #include "RelexQuery.h"
 
 using namespace opencog;
@@ -55,11 +56,19 @@ bool QueryProcessor::do_assertion(Handle h)
 	printf ("duuuude found assertion %d handle=%p\n", cnt, h);
 
 	// If this assertion is a query, try to answer it.
+#if USE_RELEX_QUERY
 	RelexQuery rlx;
 	if (rlx.is_query(h))
 	{
 		rlx.solve(atom_space, h);
 	}
+#else
+	FrameQuery frq;
+	if (frq.is_query(h))
+	{
+		frq.solve(atom_space, h);
+	}
+#endif
 	atom_space->removeAtom(h);
 	return false;
 }

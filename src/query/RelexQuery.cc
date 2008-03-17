@@ -141,7 +141,7 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
  * hard-coded one: if the link involves a
  * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
  */
-bool RelexQuery::apply_rule(Atom *atom)
+bool RelexQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = TLB::getHandle(atom);
 	Type atype = atom->getType();
@@ -195,6 +195,12 @@ bool RelexQuery::find_vars(Handle h)
 	return false;
 }
 
+/* non-virtual wrapper to call virtual function */
+bool RelexQuery::assemble_wrapper(Atom *atom)
+{
+	return assemble_predicate(atom);
+}
+
 /**
  * Put predicate into "normal form".
  * In this case, a cheap hack: remove all relations that
@@ -208,7 +214,7 @@ void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
-	foreach_outgoing_atom(graph, &RelexQuery::apply_rule, this);
+	foreach_outgoing_atom(graph, &RelexQuery::assemble_wrapper, this);
 
 	// Find the variables, so that they can be bound.
 	std::vector<Handle>::const_iterator i;

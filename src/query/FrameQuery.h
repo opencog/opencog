@@ -20,7 +20,7 @@ namespace opencog {
 class FrameQuery : public RelexQuery
 {
 	protected:
-		bool apply_rule(Atom *atom);
+		virtual bool assemble_predicate(Atom *atom);
 
 	public:
 		FrameQuery(void);

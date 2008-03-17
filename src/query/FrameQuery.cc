@@ -78,7 +78,7 @@ bool FrameQuery::discard_extra_markup(Atom *atom)
  * hard-coded one: if the link involves a
  * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
  */
-bool FrameQuery::apply_rule(Atom *atom)
+bool FrameQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = TLB::getHandle(atom);
 #if 0
@@ -128,16 +128,16 @@ bool FrameQuery::apply_rule(Atom *atom)
  */
 bool FrameQuery::node_match(Atom *aa, Atom *ab)
 {
-#if 0
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
 	Type ntype = aa->getType();
 
-	// DefinedLinguisticRelation nodes must match exactly;
+	// DefinedLinguisticConcept nodes must match exactly;
 	// so if we are here, there's already a mismatch.
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == ntype) return true;
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype) return true;
 
+#if 0
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{

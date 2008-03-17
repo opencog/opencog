@@ -23,6 +23,7 @@ class RelexQuery : public PatternMatchCallback
 		// Help determine if assertion is a query.
 		bool is_qVar(Atom *);
 		bool check_for_query(Handle);
+		bool assemble_wrapper(Atom *);
 
 		// Convert query into a normal form.
 		bool is_ling_rel(Atom *);
@@ -32,16 +33,16 @@ class RelexQuery : public PatternMatchCallback
 		bool do_discard;
 		bool discard_extra_markup(Atom *);
 
-
 		// Aid in equivalent node identification.
 		bool is_word_instance(Atom *, const char *);
 		bool concept_match(Atom *, Atom *);
 
 	protected:
-		virtual bool find_vars(Handle);
 		FollowLink fl;
 
-		virtual bool apply_rule(Atom *);
+		// create the predicate
+		virtual bool assemble_predicate(Atom *);
+		virtual bool find_vars(Handle);
 
 		// normalized predicates
 		std::vector<Handle> normed_predicate;
