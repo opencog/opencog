@@ -24,7 +24,7 @@ class FrameQuery : public RelexQuery
 
 		bool do_discard;
 		bool discard_eval_markup(Atom *atom);
-		bool discard_extra_markup(Atom *atom);
+		bool discard_heir_markup(Atom *atom);
 	protected:
 		virtual bool assemble_predicate(Atom *atom);
 

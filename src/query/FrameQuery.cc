@@ -36,6 +36,11 @@ FrameQuery::~FrameQuery()
 {
 }
 
+static void prt(Atom *atom)
+{
+   std::string str = atom->toString();
+   printf ("%s\n", str.c_str());
+}
 /* ======================================================== */
 /* Routines to help put the query into normal form. */
 
@@ -52,26 +57,36 @@ bool FrameQuery::is_frame_elt(Atom *atom)
  * Discard all simple relex relations, keeping only 
  * frame relations.
  *
- * Set do_discard to false to keep the thing.
+ * Return true to discard.
  */
 bool FrameQuery::discard_eval_markup(Atom *atom)
 {
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
+
+	/* Explicitly discard standard relex relations */
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType())
+	{
+		do_discard = true;
+		return false;
+	}
 	if (DEFINED_FRAME_ELEMENT_NODE != atom->getType()) return false;
+
+	/* By default, keep frame elt links */
+	do_discard = false;
 
 	const char *name = n->getName().c_str();
 
 	/* Throw away #Questioning,
 	 * as that frame will never occur as a part of the answer.
 	 */
-	if (!strcmp("#Questioning:Message", name)) do_discard = false;
+	if (!strcmp("#Questioning:Message", name)) do_discard = true;
 
 	return false;
 }
 
-bool FrameQuery::discard_extra_markup(Atom *atom)
+bool FrameQuery::discard_heir_markup(Atom *atom)
 {
 
 	Node *n = dynamic_cast<Node *>(atom);
@@ -80,19 +95,36 @@ bool FrameQuery::discard_extra_markup(Atom *atom)
 	const char *name = n->getName().c_str();
 	if (DEFINED_FRAME_NODE == atom->getType())
 	{
+		/* Keep, things that have frame nodes, by default */
+		do_discard = false;
+
 		/* Throw away #Questioning,
 		 * as that frame will never occur as a part of the answer.
 		 */
-		if (!strcmp("#Questioning", name)) do_discard = false;
+		if (!strcmp("#Questioning", name)) do_discard = true;
+	}
+
+	else if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->getType())
+	{
+		/* Throw away #what, #which, etc. 
+		 * as that frame will never occur as a part of the answer.
+		 */
+		if (!strcmp("#what", name)) do_discard = true;
+		if (!strcmp("#which", name)) do_discard = true;
+		if (!strcmp("#truth-query", name)) do_discard = true;
 	}
 
 	return false;
 }
 
 /**
- * Hack --- not actually applying any rules, except one
- * hard-coded one: if the link involves a
- * DEFINED_LINGUISTIC_RELATIONSHIP_NODE, then its a keeper.
+ * This method is called once for every top-level link
+ * in the candidate query graph.  Out if this, it picks
+ * out those relationships that should form a part of a query.
+ *
+ * For frame-based queries, we try to match up the frame
+ * parts of the graph; using the current variant of the
+ * frame-to-opencog mapping.
  */
 bool FrameQuery::assemble_predicate(Atom *atom)
 {
@@ -100,11 +132,14 @@ bool FrameQuery::assemble_predicate(Atom *atom)
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{
+prt(atom);
 		bool keep = foreach_outgoing_atom(ah, &FrameQuery::is_frame_elt, this);
 		if (!keep) return false;
+printf ("OK so far\n");
 
 		do_discard = true;
 		foreach_outgoing_atom(ah, &FrameQuery::discard_eval_markup, this);
+printf ("step 2 disc=%d\n", do_discard);
 		if (do_discard) return false;
 	}
 	else if (INHERITANCE_LINK == atype)
@@ -112,7 +147,7 @@ bool FrameQuery::assemble_predicate(Atom *atom)
 		/* Discard strctures that won't appear in the answer,
 		 * or that we don't want to match to.  */
 		do_discard = true;
-		foreach_outgoing_atom(ah, &FrameQuery::discard_extra_markup, this);
+		foreach_outgoing_atom(ah, &FrameQuery::discard_heir_markup, this);
 		if (do_discard) return false;
 	}
 	else
