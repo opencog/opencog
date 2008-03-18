@@ -392,3 +392,64 @@ analysis, and dispose of these as appropriate (i.e. generating an
 appropriate reply).
 
 
+Frame examples:
+--------------
+Yarn is a length of fibers.
+
+^1_Categorization:Category(be,length)
+^1_Existance:Entity(be,yarn)
+^2_Inheritence:Quality(of,length)
+^2_Inheritence:Inheritor(of,fiber)
+^2_Inheritence:Group(of,fiber)
+^2_Inheritence:Instance(of,length)
+^1_Partitive:Subset(of,length)
+^1_Partitive:Group(of,fiber)
+^1_Part_whole:Part(of,length)
+^1_Part_whole:Whole(of,fiber)
+^1_Physical_entity:Constituents(of,fiber)
+^1_Physical_entity:Entity(of,length)
+^1_Categorization:Item(be,yarn)
+^1_Temporal_colocation:Time(present,be)
+^1_Temporal_colocation:Event(present,be)
+
+
+What is yarn?
+
+^1_Existance:Entity(be,_$qVar)
+^1_Categorization:Category(be,yarn)
+^1_Temporal_colocation:Time(present,be)
+^1_Temporal_colocation:Event(present,be)
+^1_Categorization:Item(be,_$qVar)
+^1_Entity:Entity(what,_$qVar)
+^1_Questioning:Message(what,_$qVar)
+^1_Attributes:Entity(what,_$qVar)
+
+Trim the question to remove references to questioning (as the answer
+won't possess these). Remove the "what" part as well. The question
+becomes:
+
+^1_Categorization:Category(be,yarn)
+^1_Temporal_colocation:Time(present,be)
+^1_Temporal_colocation:Event(present,be)
+^1_Categorization:Item(be,_$qVar)
+^1_Existance:Entity(be,_$qVar)
+
+The goal of pettern matching is to glue (i.e. patern-match) 
+the above five clauses onto the original assertion that 
+"yarn is a length of fibers".
+
+The glueing fails. I want to get the answer that $qVar == length.
+But I cannot match up ^1_Existance:Entity(be,_$qVar)
+to ^1_Existance:Entity(be,length) --
+
+Next, I want to match up ^1_Categorization:Category(be,yarn),
+(from the question) to ^1_Categorization:Item(be,yarn) (from
+the answer) but I can't. 
+
+This asymmetry of the question and its answer has me blocked.
+Any enlightening comments?
+
+
+
+
+
