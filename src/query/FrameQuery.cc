@@ -93,11 +93,15 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 	if(!n) return false;
 
 	const char *name = n->getName().c_str();
+	if (CONCEPT_NODE == atom->getType())
+	{
+		/* frame links never have concept nodes in them. */
+		do_discard = true;
+		return false;
+	}
+
 	if (DEFINED_FRAME_NODE == atom->getType())
 	{
-		/* Keep, things that have frame nodes, by default */
-		do_discard = false;
-
 		/* Throw away #Questioning,
 		 * as that frame will never occur as a part of the answer.
 		 */
@@ -144,9 +148,9 @@ printf ("step 2 disc=%d\n", do_discard);
 	}
 	else if (INHERITANCE_LINK == atype)
 	{
-		/* Discard strctures that won't appear in the answer,
+		/* Discard structures that won't appear in the answer,
 		 * or that we don't want to match to.  */
-		do_discard = true;
+		do_discard = false;
 		foreach_outgoing_atom(ah, &FrameQuery::discard_heir_markup, this);
 		if (do_discard) return false;
 	}
@@ -182,7 +186,6 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 	// so if we are here, there's already a mismatch.
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype) return true;
 
-#if 0
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
@@ -191,6 +194,7 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 		return mismatch;
 	}
 
+#if 0
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype)
 	{
 		/* We force agreement for gender, etc.
