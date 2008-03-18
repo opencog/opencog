@@ -156,7 +156,7 @@ printf ("step 2 disc=%d\n", do_discard);
 	}
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
-	normed_predicate.push_back(ah);
+	add_to_predicate(ah);
 
 	return false;
 }

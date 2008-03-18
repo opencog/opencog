@@ -224,9 +224,35 @@ bool RelexQuery::assemble_predicate(Atom *atom)
 	}
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
-	normed_predicate.push_back(ah);
+	add_to_predicate(ah);
 
 	return false;
+}
+
+void RelexQuery::add_to_predicate(Handle ah)
+{
+	/* scan for duplicates, and don't add them */
+	std::vector<Handle>::const_iterator i;
+	for (i = normed_predicate.begin();
+	     i != normed_predicate.end(); i++)
+	{
+		Handle h = *i;
+		if (h == ah) return;
+	}
+	normed_predicate.push_back(ah);
+}
+
+void RelexQuery::add_to_vars(Handle ah)
+{
+	/* scan for duplicates, and don't add them */
+	std::vector<Handle>::const_iterator i;
+	for (i = bound_vars.begin();
+	     i != bound_vars.end(); i++)
+	{
+		Handle h = *i;
+		if (h == ah) return;
+	}
+	bound_vars.push_back(ah);
 }
 
 /**
@@ -243,7 +269,7 @@ bool RelexQuery::find_vars(Handle h)
 
 	if (!is_word_instance (atom, "_$qVar")) return false;
 
-	bound_vars.push_back(h);
+	add_to_vars(h);
 	return false;
 }
 

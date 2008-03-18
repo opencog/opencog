@@ -44,6 +44,9 @@ class RelexQuery : public PatternMatchCallback
 		virtual bool assemble_predicate(Atom *);
 		virtual bool find_vars(Handle);
 
+		void add_to_predicate(Handle);
+		void add_to_vars(Handle);
+
 		// normalized predicates
 		std::vector<Handle> normed_predicate;
 		std::vector<Handle> bound_vars;
