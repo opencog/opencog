@@ -6,8 +6,8 @@
  * only, and not for the semantic frame part of a sentence
  * parse.
  *
- * The result of using RelEx-only matching means that 
- * queries will be interpreted very literally; the 
+ * The result of using RelEx-only matching means that
+ * queries will be interpreted very literally; the
  * structure of a query sentence must closely resemble
  * the structure of a sentence in the corpus; otherwise,
  * no matching response will be found.
@@ -34,11 +34,36 @@ RelexQuery::~RelexQuery()
 	pm = NULL;
 }
 
+/* ======================================================== */
+
+#define DEBUG
+#ifdef DEBUG
 static void prt(Atom *atom)
 {
    std::string str = atom->toString();
    printf ("%s\n", str.c_str());
 }
+
+static void prt_pred (std::vector<Handle> pred,
+                      std::vector<Handle> vars)
+{
+	printf("\nPredicate:\n");
+	std::vector<Handle>::const_iterator i;
+	for (i = pred.begin(); i != pred.end(); i++)
+	{
+		Handle h = *i;
+		Atom *a = TLB::getAtom(h);
+		prt(a);
+	}
+	printf("\nVars:\n");
+	for (i = vars.begin(); i != vars.end(); i++)
+	{
+		Handle h = *i;
+		Atom *a = TLB::getAtom(h);
+		prt(a);
+	}
+}
+#endif /* DEBUG */
 
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
@@ -46,7 +71,7 @@ static void prt(Atom *atom)
  */
 
 /**
- * Return true, if atom is of type Node, and if the node 
+ * Return true, if atom is of type Node, and if the node
  * name is "match_name" (currently hard-coded as _$qVar)
  */
 bool RelexQuery::is_qVar(Atom *atom)
@@ -63,9 +88,9 @@ bool RelexQuery::is_qVar(Atom *atom)
 }
 
 /**
- * Search for queries. 
+ * Search for queries.
  * XXX This implementation is kinda-wrong, its very specific
- * to the structure of the relex-to-opencog conversion, and 
+ * to the structure of the relex-to-opencog conversion, and
  * is fragile, if that structure changes.
  */
 bool RelexQuery::check_for_query(Handle rel)
@@ -75,8 +100,8 @@ bool RelexQuery::check_for_query(Handle rel)
 
 /**
  * Return true if assertion is a query.
- * A simple check is made: does the assertion have 
- * a _$qVar in it? 
+ * A simple check is made: does the assertion have
+ * a _$qVar in it?
  *
  * The pattern check here is trivial, in that an assertion
  * that contains <WordNode name="_$qVar"/> will be assumed
@@ -116,7 +141,7 @@ bool RelexQuery::is_cncpt(Atom *atom)
 }
 
 /**
- * Discard 
+ * Discard
  * QUERY-TYPE(_$qVar,what)
  * HYP(throw, T)
  * from pattern-matching consideration; only
@@ -131,15 +156,15 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
 
-	/* Throw away #past_infinitive and similar forms, 
-	 * because we haven't implemented tense matching properly, 
+	/* Throw away #past_infinitive and similar forms,
+	 * because we haven't implemented tense matching properly,
 	 * and so don't do tense matching at all.
 	 *
 	 * Throw away #copula-question and QUERY-TYPE #what,
-	 * #which, etc. and also #truth-query, as these will 
+	 * #which, etc. and also #truth-query, as these will
 	 * never be part of the structure of the answer.
 	 *
-	 * Keep gender matching, noun_number matching, and 
+	 * Keep gender matching, noun_number matching, and
 	 * definite-FLAG matching. Everything else is ignored
 	 * in the match.
 	 */
@@ -160,12 +185,12 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
  * out those relationships that should form a part of a query.
  *
  * For relex-based queries, we try to match up the relex
- * parts of the graph; using the current variant of the 
+ * parts of the graph; using the current variant of the
  * relex-to-opencog mapping.
  *
- * These are EvaluationLink's which have a 
+ * These are EvaluationLink's which have a
  * DefinedLinguisticRelationship node in them,
- * and InheritanceLinks which have a 
+ * and InheritanceLinks which have a
  * DefinedLinguisticConcept node in them.
  */
 bool RelexQuery::assemble_predicate(Atom *atom)
@@ -179,7 +204,7 @@ bool RelexQuery::assemble_predicate(Atom *atom)
 	}
 	else if (INHERITANCE_LINK == atype)
 	{
-		/* Discard 
+		/* Discard
 		 * QUERY-TYPE(_$qVar,what)
 		 * HYP(throw, T)
 		 * from pattern-matching consideration; only
@@ -252,6 +277,10 @@ void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 		find_vars(h);
 	}
 
+#ifdef DEBUG
+	prt_pred(normed_predicate, bound_vars);
+#endif
+
 	// Solve...
 	pm->match(this, &normed_predicate, &bound_vars);
 }
@@ -286,15 +315,15 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
 }
 
 /**
- * Return true if the indicated atom is an instance of 
+ * Return true if the indicated atom is an instance of
  * the word.
  *
  * XXX
- * The actual determination of whether some concept is 
- * represented by some word is fragily dependent on the 
- * actual nature of concept representation in the 
+ * The actual determination of whether some concept is
+ * represented by some word is fragily dependent on the
+ * actual nature of concept representation in the
  * relex-to-opencog mapping. Intil this is placed into
- * concrete, its inhherently fragile.  This is subject 
+ * concrete, its inhherently fragile.  This is subject
  * to change, if the relex-to-opencog mapping changes.
  * XXX
  */
@@ -320,8 +349,8 @@ bool RelexQuery::is_word_instance(Atom *atom, const char * word)
 }
 
 /**
- * Are two nodes "equivalent", as far as the opencog representation 
- * of RelEx expressions are concerned? 
+ * Are two nodes "equivalent", as far as the opencog representation
+ * of RelEx expressions are concerned?
  *
  * Return true to signify a mismatch,
  * Return false to signify equivalence.
@@ -398,8 +427,8 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
 	// Reject any solution where a variable is solved
-	// by another variable (e.g. if there are multiple 
-	// questions in the corpus, and we just happened to 
+	// by another variable (e.g. if there are multiple
+	// questions in the corpus, and we just happened to
 	// find one of them.)
 	std::map<Handle, Handle>::const_iterator j;
 	for (j=var_soln.begin(); j != var_soln.end(); j++)
