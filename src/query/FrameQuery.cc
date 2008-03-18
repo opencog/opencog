@@ -186,6 +186,7 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 	// so if we are here, there's already a mismatch.
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype) return true;
 
+#if 0
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
@@ -194,7 +195,6 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 		return mismatch;
 	}
 
-#if 0
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype)
 	{
 		/* We force agreement for gender, etc.
