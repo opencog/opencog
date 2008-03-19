@@ -102,4 +102,5 @@
 #define AT_TIME_LINK_CLASS "AtTimeLink"
 #define TIME_NODE_CLASS "TimeNode"
 #define SPACE_MAP_NODE_CLASS "SpaceMapNode"
-#define HEBBIAN_LINK_CLASS "HebbianLink"
+#define ASYMMETRIC_HEBBIAN_LINK_CLASS "AsymmetricHebbianLink"
+#define SYMMETRIC_HEBBIAN_LINK_CLASS "SymmetricHebbianLink"

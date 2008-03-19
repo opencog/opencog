@@ -217,5 +217,6 @@ SPACE_MAP_NODE <- NODE
 
 // Attention allocation atoms:
 
-HEBBIAN_LINK <- ORDERED_LINK "HebbianLink"
+ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK "AsymmetricHebbianLink"
+SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK "SymmetricHebbianLink"
 

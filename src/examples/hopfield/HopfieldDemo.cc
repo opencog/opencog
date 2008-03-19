@@ -116,7 +116,7 @@ void HopfieldDemo::init(int width, int height, int numLinks)
 
 	outgoing.push_back(hGrid[target]);
 	outgoing.push_back(hGrid[source]);
-	atomSpace->addLink(HEBBIAN_LINK, outgoing);
+	atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
 
 	numLinks--;
     }
@@ -208,16 +208,13 @@ void HopfieldDemo::spreadImportance()
 
     AttentionValue::sti_t current;
 
-    // Find all nodes with sti > spread threshold
     AtomSpace *a;
     std::vector<Handle> atoms;
     std::vector<Handle>::iterator hi;
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
     
     a = getAtomSpace();
-    MAIN_LOGGER.log(Util::Logger::INFO, "Getting handle set");
     a->getHandleSet(out_hi,NODE,true);
-    MAIN_LOGGER.log(Util::Logger::INFO, "Got handle set");
 
     hi = atoms.begin();
     while (hi != atoms.end()) {
@@ -249,11 +246,10 @@ void HopfieldDemo::spreadAtomImportance(Handle h)
 
     a = getAtomSpace();
     
-    neighbours = TLB::getAtom(h)->getNeighbors(true,true,HEBBIAN_LINK);
+    neighbours = TLB::getAtom(h)->getNeighbors(true,true,SYMMETRIC_HEBBIAN_LINK);
     links = TLB::getAtom(h)->getIncomingSet()->clone();
-    // TODO: Make only Symmetric hebbian links and assymmetric hebbian links,
-    // that have h as a source, be in the var links.
-    links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
+    // TODO: process assymmetric hebbian links too, those that have h as a source
+    links = HandleEntry::filterSet(links, SYMMETRIC_HEBBIAN_LINK, true);
     
     maxTransferAmount = (int) (a->getSTI(h) * importanceSpreadingFactor);
 
