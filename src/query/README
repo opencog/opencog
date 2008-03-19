@@ -392,8 +392,82 @@ analysis, and dispose of these as appropriate (i.e. generating an
 appropriate reply).
 
 
-Frame examples:
+
+Relex pattern matching
+----------------------
+
+"John threw a ball."
+
+_subj(throw, John)
+_obj(throw, ball)
+tense(throw, past)
+noun_number(ball, singular)
+DEFINITE-FLAG(John, T)
+noun_number(John, singular)
+
+"What did John throw?"
+
+_subj(throw, John)
+_obj(throw, _$qVar)
+tense(throw, past_infinitive)
+HYP(throw, T)
+QUERY-TYPE(_$qVar, what)
+DEFINITE-FLAG(John, T)
+noun_number(John, singular)
+
+Eliminate the HYP and QUERY-TYPE from the question, since
+the answer will never contain these:
+
+_subj(throw, John)
+_obj(throw, _$qVar)
+tense(throw, past_infinitive)
+DEFINITE-FLAG(John, T)
+noun_number(John, singular)
+
+Clearly, the relex pattern of the question can be matched to 
+the relex pattern of the answer, to find that _$qVar == ball.
+(Some twiddling required to match tense correctly).
+
+However, pattern matching at the relex level is not always 
+possible, as shown next.
+
+Copula troubles:
+----------------
+Intensional/extensional inheritance causes problems for 
+simple relex matching.
+
+Yarn is a length of fibers.
+_subj(be, yarn)
+_obj(be, length)
+tense(be, present)
+of(length, fiber)
+noun_number(length, singular)
+noun_number(fiber, plural)
+noun_number(yarn, uncountable)
+
+
+Yarn is what?
+(fails to parse in link-grammar)
+
+What is yarn?
+
+_subj(be, _$qVar)
+_obj(be, yarn)
+tense(be, present)
+noun_number(yarn, uncountable)
+COPULA-QUESTION-FLAG(yarn, T)
+QUERY-TYPE(_$qVar, what)
+noun_number(_$qVar, uncountable)
+
+Note that the _subj and _obj are exchanged in the query, 
+preventing a direct match.
+
+Frame matching
 --------------
+The goal of working with frames rather than relex relations is
+to escape from the stricturures of the syntactic relations, and
+move to a more semantic interpretation.
+
 Yarn is a length of fibers.
 
 ^1_Categorization:Category(be,length)
@@ -448,8 +522,6 @@ the answer) but I can't.
 
 This asymmetry of the question and its answer has me blocked.
 Any enlightening comments?
-
-
 
 
 
