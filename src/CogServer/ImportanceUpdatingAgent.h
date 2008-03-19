@@ -181,7 +181,6 @@ private:
     Util::RandGen* rng; 
     /**
      * Get Random number generator associated with MindAgent.
-     * TODO: Move this to the CogServer.
      */
     Util::RandGen* getRandGen();
 
@@ -249,6 +248,9 @@ public:
     long targetLobeLTI;
     long acceptableLobeSTIRange[2];
     long acceptableLobeLTIRange[2];
+
+    void setUpdateLinksFlag(bool f);
+    bool getUpdateLinksFlag();
 
 }; // class
 

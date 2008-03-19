@@ -185,7 +185,6 @@ void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 Util::RandGen* ImportanceUpdatingAgent::getRandGen()
 {
     if (!rng) {
-	// TODO: Use time or something
 	rng = new Util::MT19937RandGen(time(NULL));
     }
     return rng;
@@ -446,6 +445,10 @@ bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a, Handle h)
     }
     return false;
 }
+
+void ImportanceUpdatingAgent::setUpdateLinksFlag(bool f) { updateLinks = f; }
+
+bool ImportanceUpdatingAgent::getUpdateLinksFlag() { return updateLinks; }
 
 string ImportanceUpdatingAgent::toString()
 {

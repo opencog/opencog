@@ -79,4 +79,12 @@ class HopfieldDemo : public opencog::CogServer {
 	std::string patternToString(std::vector<int> p);
 };
 
+struct ImportanceSpreadSTISort
+{
+     bool operator()(const Handle& h1, const Handle& h2)
+     {
+          return TLB::getAtom(h1)->getAttentionValue().getSTI() > TLB::getAtom(h2)->getAttentionValue().getSTI();
+     }
+};
+
 #endif // HOPFIELDDEMO_H

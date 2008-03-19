@@ -102,3 +102,4 @@ class_to_int[(*getClassName()) [SL_ACCESSORY_NODE]] = SL_ACCESSORY_NODE;
 class_to_int[(*getClassName()) [AT_TIME_LINK]] = AT_TIME_LINK;
 class_to_int[(*getClassName()) [TIME_NODE]] = TIME_NODE;
 class_to_int[(*getClassName()) [SPACE_MAP_NODE]] = SPACE_MAP_NODE;
+class_to_int[(*getClassName()) [HEBBIAN_LINK]] = HEBBIAN_LINK;

@@ -245,6 +245,8 @@ void HopfieldDemo::spreadAtomImportance(Handle h)
     
     neighbours = TLB::getAtom(h)->getNeighbors(true,true,HEBBIAN_LINK);
     links = TLB::getAtom(h)->getIncomingSet()->clone();
+    // TODO: Make only Symmetric hebbian links and assymmetric hebbian links,
+    // that have h as a source, be in the var links.
     links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
     
     maxTransferAmount = (int) (a->getSTI(h) * importanceSpreadingFactor);
@@ -257,46 +259,55 @@ void HopfieldDemo::spreadAtomImportance(Handle h)
     }
 
     if (totalRelatedness > 0) {
-	// Find order of links based on their STI
-	// links = orderBySTI (handleEntry)?
+	std::vector<Handle> linksVector;
+	std::vector<Handle>::iterator linksVector_i;
 
-	he = links;
-	while (he) {
+	// Find order of links based on their STI
+	// I.e. links with higher STI are more likely to get sti passed along
+	// them before available sti for spreading runs out.
+	links->toHandleVector(linksVector);
+	std::sort(linksVector.begin(), linksVector.end(), ImportanceSpreadSTISort());
+
+	for (linksVector_i = linksVector.begin();
+		linksVector_i != linksVector.end(); linksVector_i++) {
 	    double transferWeight, transferAmount;
 	    std::vector<Handle> targets;
-	    Handle h = he->handle;
-	    const TruthValue &linkTV = a->getTV(h);
-	    // TODO: Transfer weight should be combination of TV strength and
-	    // confidence...
+	    std::vector<Handle>::iterator t;
+	    Handle lh = *linksVector_i;
+	    const TruthValue &linkTV = a->getTV(lh);
+
 	    transferWeight = linkTV.toFloat();
-	    targets = TLB::getAtom(h)->getOutgoingSet();
+	    targets = TLB::getAtom(lh)->getOutgoingSet();
 
 	    // amount to spread dependent on weight and quantum - needs to be
 	    // divided by (targets->size - 1)
-	    transferAmount = transferWeight * importanceSpreadingQuantum;
+	    transferAmount = transferWeight * importanceSpreadingQuantum / (targets.size() - 1.0);
 
-	    if (totalTransferred + transferAmount < maxTransferAmount) {
-		std::vector<Handle>::iterator t;
-		t = targets.begin();
-		while (t != targets.end()) {
-		    Handle target_h = *t;
+	    for (t = targets.begin();
+		    t != targets.end() &&
+		    totalTransferred + transferAmount < maxTransferAmount;
+		    t++) {
+		Handle target_h = *t;
 
-
-		    t++;
-		}
 		// Then for each target of link (except source)...
-		bool doTransfer = true; 
+		if ( TLB::getAtom(target_h) == TLB::getAtom(h) )
+		    continue;
+
+		// Check removing STI doesn't take node out of attentional
+		// focus...
 		if (a->getSTI(h) >= a->getAttentionalFocusBoundary() && \
-		    a->getSTI(h) - transferAmount < a->getAttentionalFocusBoundary()) {
+		    a->getSTI(h) - transferAmount < a->getAttentionalFocusBoundary())
+		    break;
 
-		}
-
+		totalTransferred += transferAmount;
+		a->setSTI( h, a->getSTI(h) - transferAmount );
+		a->setSTI( target_h, a->getSTI(target_h) + transferAmount );
 		
 	    }
 
 
-	    he = he->next;
 	}
     }
+    delete links;
 
 }

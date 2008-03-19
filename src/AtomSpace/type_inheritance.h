@@ -81,6 +81,7 @@ init_inheritance(map, ORDERED_LINK, EVENTUAL_PREDICTIVE_IMPLICATION_LINK);
 init_inheritance(map, ORDERED_LINK, VARIABLE_SCOPE_LINK);
 init_inheritance(map, SL_NODE, SL_OBJECT_NODE);
 init_inheritance(map, ORDERED_LINK, AT_TIME_LINK);
+init_inheritance(map, ORDERED_LINK, HEBBIAN_LINK);
 init_inheritance(map, SIMILARITY_LINK, EXT_SIMILARITY_LINK);
 init_inheritance(map, SCHEMA_NODE, PREDICATE_NODE);
 init_inheritance(map, INHERITANCE_LINK, SCHEMA_EXECUTION_LINK);

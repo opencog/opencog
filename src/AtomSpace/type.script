@@ -215,3 +215,7 @@ TIME_NODE <- NODE
 // Space-related atoms:
 SPACE_MAP_NODE <- NODE
 
+// Attention allocation atoms:
+
+HEBBIAN_LINK <- ORDERED_LINK "HebbianLink"
+
