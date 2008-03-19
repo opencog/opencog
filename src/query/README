@@ -542,6 +542,170 @@ This type of relex frame-level setup, query massaging
 and node matching is implemented in FrameQuery.cc, FrameQuery.h
 It seems to work, but hasn't undergone strenuous testing.
 
+Testing
+-------
+Some test corpus material, and test results:
+
+====
+Mike threw a rock.
+John threw a ball and a screwdriver.
+John ate a peach.
+What did John throw?
+
+Relex matching provides two correct answers: 
+_$qVar = ball, and _$qVar = screwdriver.
+====
+Yarn is a length of fibers.
+What is yarn?
+
+Fails, as discussed above
+====
+Yarn is used to make cloth.
+What is yarn used for?
+
+_to-do(use, make)
+_obj(use, yarn)
+tense(use, present)
+_subj(make, yarn)
+_obj(make, cloth)
+tense(make, infinitive)
+HYP(make, T)
+noun_number(cloth, uncountable)
+noun_number(yarn, uncountable)
+
+The assertion has a second parse, with "to" instead of "_to-do"
+
+The question has three parses. The first is:
+
+for(use, for)
+_obj(use, yarn)
+tense(use, present)
+_amod(for, use)
+_obj(for, _$qVar)
+tense(for, present)
+noun_number(yarn, uncountable)
+
+All three parses contain _obj(use, yarn), and that's good.
+
+Clearly, the pattern match here fails. All three parses contain
+_obj(for, _$qVar) which cannot be matched to the original assertion.
+
+All three contain either _amod(for, use) or _amod(for, be)
+and these _amod's cannot be matched to the original assertion.
+
+The frame situation is no better.  The assertion frame is:
+
+^1_Transitive_action:Agent(make,yarn)
+^1_Ingest_substance:Substance(use,yarn)
+^1_Intentionally_create:Creator(make,yarn)
+^1_Using:Instrument(use,yarn)
+^1_Building:Created_entity(make,cloth)
+^1_Causation:Affected(make,yarn)
+^1_Arriving:Theme(make,yarn)
+^1_Causation:Effect(make,cloth)
+^1_Ingest_substance:Purpose(use,make)
+^1_Cause_change:Cause(make,yarn)
+^1_Possibilites:Event(hyp,make)
+^1_Using:Purpose(use,make)
+^1_Arriving:Goal(make,cloth)
+^1_Temporal_colocation:Time(present,use)
+^1_Temporal_colocation:Event(present,use)
+^1_Transitive_action:Cause(verb,use)
+^1_Transitive_action:Event(verb,make)
+^1_Cooking_creation:Cook(make,yarn)
+^1_Building:Agent(make,yarn)
+^1_Cooking_creation:Produced_food(make,cloth)
+^1_Intentionally_create:(make,cloth)
+^1_Transitive_action:Object(make,cloth)
+^1_Transitive_action:Object(use,yarn)
+^1_Manufacturing:Product(make,cloth)
+^1_Manufacturing:Factory(make,yarn)
+^1_Cause_change:Entity(make,cloth)
+
+The appearence of "cooking" is unexpected.  "Building" is odd 
+Why not "manufacture" or "intentionally_create"?
+
+"Ingest" is ... and odd way of saying that the yarn is used up...
+
+  "What is yarn used for?"
+
+Has the frameset below.  I've manually removed Questioning:Message, 
+etc. as these are explicitly ignored for the question pattern match.
+I've marked up each according to whether the frames echoed the
+assertion:
+
+
+^1_Using:Purpose(use,for)                         -- no match
+^1_Ingest_substance:Substance(use,yarn)           == OK
+^1_Using:Instrument(use,yarn)                     == OK
+^1_Relative_time:Focal_occasion(for,for)          -- no match
+^1_Relative_time:Landmark_occasion(for,use)       -- no match
+^1_Temporal_colocation:Time(present,use)          == OK
+^1_Temporal_colocation:Event(present,use)         == OK
+^1_Temporal_colocation:Event(present_1,for)       -- no match
+^1_Temporal_colocation:Time(present_1,for)        -- no match
+^1_Ingest_substance:Purpose(use,for)              -- no match
+^1_Transitive_action:Object(for,_$qVar)           -- no match
+^1_Transitive_action:Object(use,yarn)             == OK
+
+The word "for" seems to lie at the root of the problem.  
+Lets try a different assertion:
+
+  "Yarn is used for making cloth."
+
+A clause by clause comparison shows that this doesn't match
+the question any better then before. So pattern matching the
+question fails here too.  
+
+How similar are the two assertions? Lets compare relex output first;
+ignoring tense, noun_number, which are correct, we have:
+
+  "Yarn is used for making cloth."
+_obj(use, yarn)
+_amod(for, use)
+_subj(make, for)
+_obj(make, cloth)
+
+  "Yarn is used to make cloth."
+_to-do(use, make)
+_obj(use, yarn)
+_subj(make, yarn)
+_obj(make, cloth)
+HYP(make, T)
+
+The only agreement is that both correctly state _obj(make, cloth)
+and _obj(use, yarn)  However, _subj in both is confusing, and 
+it seems hard to induce that the thing being used is also the 
+input to the thing being made.
+
+  "Yarn is used in making cloth."
+
+_obj(use, yarn)
+_amod(in, use)
+_subj(make, in)
+_obj(make, cloth)
+
+  "Yarn is used in the making of cloth."
+
+in(use, making)
+_obj(use, yarn)
+of(making, cloth)
+
+The frame rules do not seem to introduce more commonality
+between these; rather, they seem to diverge even more. Thus,
+instead of the frames making things seem "more semantically
+similar", they seem to do the opposite.
+
+Now, some sort of fuzzy matching could be done here, since there
+is clearly some non-zero overlap between all of these. Even more
+so: it seems like the common parts of all of these ways of saying 
+this capture the "underlying truth" the best. But without a large 
+corpus, without lots of activation, and repeated similar but not 
+identical restatements of the same ideas, I don't see any particularly
+good ways of inducing that yarn is used to make cloth...
+
+
+
 Query processing architectural issues:
 --------------------------------------
 Below are some architectural issues that have been given temporary
