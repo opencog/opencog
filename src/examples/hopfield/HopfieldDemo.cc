@@ -92,12 +92,18 @@ void HopfieldDemo::init(int width, int height, int numLinks)
 	    nodeName += to_string(i) + "_" + to_string(j);
 	    cout << nodeName << endl;
 	    Handle h = atomSpace->addNode(CONCEPT_NODE, nodeName.c_str());
+	    // We don't want the forgetting process to remove
+	    // the atoms perceiving the patterns
+	    atomSpace->setVLTI(h,AttentionValue::NONDISPOSABLE);
 	    hGrid.push_back(h);
 	}
     }
     
     // If only 1 node, don't try and connect it
-    if (hGrid.size() < 2) return;
+    if (hGrid.size() < 2) {
+	MAIN_LOGGER.log(Util::Logger::INFO,"Only one node, this is kind of silly but I shall follow instructions.");
+	return;
+    }
 
     // Link nodes randomly with numLinks links
     while (numLinks > 0) {
@@ -299,9 +305,9 @@ void HopfieldDemo::spreadAtomImportance(Handle h)
 		    a->getSTI(h) - transferAmount < a->getAttentionalFocusBoundary())
 		    break;
 
-		totalTransferred += transferAmount;
-		a->setSTI( h, a->getSTI(h) - transferAmount );
-		a->setSTI( target_h, a->getSTI(target_h) + transferAmount );
+		totalTransferred += (int) transferAmount;
+		a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
+		a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
 		
 	    }
 
