@@ -23,6 +23,7 @@ class FrameQuery : public RelexQuery
 		bool is_frame_elt(Atom *);
 
 		bool do_discard;
+		bool discard_question_markup(Atom *atom);
 		bool discard_eval_markup(Atom *atom);
 		bool discard_heir_markup(Atom *atom);
 	protected:

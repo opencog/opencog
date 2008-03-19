@@ -523,5 +523,40 @@ the answer) but I can't.
 This asymmetry of the question and its answer has me blocked.
 Any enlightening comments?
 
+============
+Step back; look at frame matching in a simpler example.
 
+John threw a ball. 
+^1_Body_movement:Agent(throw,John)
+^1_Cause_motion:Theme(throw,ball)
+^1_Transitive_action:Agent(throw,John)
+^1_Temporal_colocation:Event(past,throw)
+^1_Temporal_colocation:Time(past,throw)
+^1_Body_movement:Body_part(throw,ball)
+^1_Cause_motion:Cause(throw,John)
+^1_Transitive_action:Object(throw,ball)
+
+
+What did John throw?
+
+^1_Body_movement:Agent(throw,John)
+^1_Cause_motion:Theme(throw,_$qVar)
+^1_Transitive_action:Agent(throw,John)
+^1_Entity:Entity(what,_$qVar)
+^1_Questioning:Message(what,_$qVar)
+^1_Attributes:Entity(what,_$qVar)
+^1_Possibilites:Event(hyp,throw)
+^1_Body_movement:Body_part(throw,_$qVar)
+^1_Cause_motion:Cause(throw,John)
+^1_Transitive_action:Object(throw,_$qVar)
+
+
+Remove "Questioning" and "what".
+
+^1_Body_movement:Agent(throw,John)          -- OK match
+^1_Cause_motion:Theme(throw,_$qVar)         -- OK _$qVar == ball.
+^1_Transitive_action:Agent(throw,John)      -- OK match
+^1_Body_movement:Body_part(throw,_$qVar)    -- OK _$qVar == ball
+^1_Cause_motion:Cause(throw,John)           -- OK match
+^1_Transitive_action:Object(throw,_$qVar)   -- OK _$qVar == bal
 

@@ -56,7 +56,8 @@ bool QueryProcessor::do_assertion(Handle h)
 	printf ("duuuude found assertion %d handle=%p\n", cnt, h);
 
 	// If this assertion is a query, try to answer it.
-#if USE_RELEX_QUERY
+// #define USE_RELEX_QUERY 1
+#ifdef USE_RELEX_QUERY
 	RelexQuery rlx;
 	if (rlx.is_query(h))
 	{

@@ -15,7 +15,8 @@
  *          <Element class="ConceptNode" name="_$qVar_be8ca85e"/>
  *       </ListLink>
  *  </EvaluationLink>
- *
+ *  That is, a query is recognized if something like the above is in
+ *  it.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -53,6 +54,32 @@ bool FrameQuery::is_frame_elt(Atom *atom)
 	return false;
 }
 
+bool FrameQuery::discard_question_markup(Atom *atom)
+{
+	Node *n = dynamic_cast<Node *>(atom);
+	if(!n) return false;
+
+	Type atype = atom->getType();
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atype)
+	{
+		const char *name = n->getName().c_str();
+
+		/* Throw away #what, #which, etc. 
+		 * as that frame will never occur as a part of the answer.
+		 */
+		if (!strcmp("#hyp", name)) do_discard = true;
+		if (!strcmp("#what", name)) do_discard = true;
+		if (!strcmp("#which", name)) do_discard = true;
+		if (!strcmp("#when", name)) do_discard = true;
+		if (!strcmp("#where", name)) do_discard = true;
+		if (!strcmp("#why", name)) do_discard = true;
+		if (!strcmp("#how", name)) do_discard = true;
+		if (!strcmp("#truth-query", name)) do_discard = true;
+	}
+
+	return false;
+}
+
 /**
  * Discard all simple relex relations, keeping only 
  * frame relations.
@@ -61,17 +88,26 @@ bool FrameQuery::is_frame_elt(Atom *atom)
  */
 bool FrameQuery::discard_eval_markup(Atom *atom)
 {
+	Type atype = atom->getType();
 
-	Node *n = dynamic_cast<Node *>(atom);
-	if(!n) return false;
+	if (LIST_LINK == atype)
+	{
+prt(atom);
+		Handle ah = TLB::getHandle(atom);
+		foreach_outgoing_atom(ah, &FrameQuery::discard_question_markup, this);
+		return false;
+	}
 
 	/* Explicitly discard standard relex relations */
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType())
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atype)
 	{
 		do_discard = true;
 		return false;
 	}
-	if (DEFINED_FRAME_ELEMENT_NODE != atom->getType()) return false;
+	if (DEFINED_FRAME_ELEMENT_NODE != atype) return false;
+
+	Node *n = dynamic_cast<Node *>(atom);
+	if(!n) return false;
 
 	/* By default, keep frame elt links */
 	do_discard = false;
@@ -91,16 +127,17 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
+	Type atype = atom->getType();
 
 	const char *name = n->getName().c_str();
-	if (CONCEPT_NODE == atom->getType())
+	if (CONCEPT_NODE == atype)
 	{
 		/* frame links never have concept nodes in them. */
 		do_discard = true;
 		return false;
 	}
 
-	if (DEFINED_FRAME_NODE == atom->getType())
+	if (DEFINED_FRAME_NODE == atype)
 	{
 		/* Throw away #Questioning,
 		 * as that frame will never occur as a part of the answer.
@@ -108,13 +145,18 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 		if (!strcmp("#Questioning", name)) do_discard = true;
 	}
 
-	else if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->getType())
+	else if (DEFINED_LINGUISTIC_CONCEPT_NODE == atype)
 	{
 		/* Throw away #what, #which, etc. 
 		 * as that frame will never occur as a part of the answer.
 		 */
+		if (!strcmp("#hyp", name)) do_discard = true;
 		if (!strcmp("#what", name)) do_discard = true;
 		if (!strcmp("#which", name)) do_discard = true;
+		if (!strcmp("#when", name)) do_discard = true;
+		if (!strcmp("#where", name)) do_discard = true;
+		if (!strcmp("#why", name)) do_discard = true;
+		if (!strcmp("#how", name)) do_discard = true;
 		if (!strcmp("#truth-query", name)) do_discard = true;
 	}
 
@@ -136,14 +178,11 @@ bool FrameQuery::assemble_predicate(Atom *atom)
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{
-prt(atom);
 		bool keep = foreach_outgoing_atom(ah, &FrameQuery::is_frame_elt, this);
 		if (!keep) return false;
-printf ("OK so far\n");
 
 		do_discard = true;
 		foreach_outgoing_atom(ah, &FrameQuery::discard_eval_markup, this);
-printf ("step 2 disc=%d\n", do_discard);
 		if (do_discard) return false;
 	}
 	else if (INHERITANCE_LINK == atype)
