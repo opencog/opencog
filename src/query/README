@@ -1,5 +1,7 @@
                         query
                         -----
+        Author: Linas vepstas <linasvepstas@gmail.com>
+        Revision of 18 March 2008
 
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to perform query processing.
@@ -353,48 +355,10 @@ Thus, a looser matching, based on deeper semantic understanding,
 is desirable.  This is afforded by using the semantic framing 
 matcher.
 
-XXX NOT IMPLEMENTED>
-
-
-
-
-
-Query processing architectural issues:
---------------------------------------
-Below are some architectural issues that have been given temporary
-solutions, but need a better long-term solution.
-
--- How to distinguish rhetorical questions from queries that should
-   be answered?  A block of input text may contain rhetorical questions,
-   which should be ignored.
-
--- How should query processing be triggered?  What channel should be
-   used for reply? Currently, all input to CogServer is via XML, which
-   is parsed. If the parse is successful, no further processing is done.
-
-   Query processing could be performed by a mind agent, but how should
-   its activity be triggered, and what communictations channel should
-   it use to post a reply?
-
-
-Diary and Notes
----------------
-Use special token to trigger mind agent. Per Ben, "DialogManager",
-there are four such tokens:
--- query
--- statement
--- command
--- interjection
-
-Right now, all four of these will be surrounded by an AssertionLink.
-The query processor will look for  these, perform some basic sentence
-analysis, and dispose of these as appropriate (i.e. generating an
-appropriate reply).
-
-
 
 Relex pattern matching
 ----------------------
+A detailed example of relex relationship matching follows.
 
 "John threw a ball."
 
@@ -416,7 +380,7 @@ DEFINITE-FLAG(John, T)
 noun_number(John, singular)
 
 Eliminate the HYP and QUERY-TYPE from the question, since
-the answer will never contain these:
+the answer will never contain these. One is left with:
 
 _subj(throw, John)
 _obj(throw, _$qVar)
@@ -427,8 +391,11 @@ noun_number(John, singular)
 Clearly, the relex pattern of the question can be matched to 
 the relex pattern of the answer, to find that _$qVar == ball.
 (Some twiddling required to match tense correctly).
+This type of relex relation-level setup, query massaging 
+and node matching is implemented in RelexQuery.cc, RelexQuery.h
+It seems to work, but hasn't undergone strenuous testing.
 
-However, pattern matching at the relex level is not always 
+Pattern matching at the relex level is not always 
 possible, as shown next.
 
 Copula troubles:
@@ -508,7 +475,7 @@ becomes:
 ^1_Categorization:Item(be,_$qVar)
 ^1_Existance:Entity(be,_$qVar)
 
-The goal of pettern matching is to glue (i.e. patern-match) 
+The goal of pattern matching is to glue (i.e. pattern-match) 
 the above five clauses onto the original assertion that 
 "yarn is a length of fibers".
 
@@ -521,7 +488,18 @@ Next, I want to match up ^1_Categorization:Category(be,yarn),
 the answer) but I can't. 
 
 This asymmetry of the question and its answer has me blocked.
-Any enlightening comments?
+
+The root problem seems to be that both
+
+_subj(be, _$qVar)
+_obj(be, yarn)
+and
+_obj(be, _$qVar)
+_subj(be, yarn)
+
+are valid forms for the question. The second one should be
+more common, but its not the one being generated. There 
+should probably be a frame rule to reverse this order.
 
 ============
 Step back; look at frame matching in a simpler example.
@@ -559,4 +537,42 @@ Remove "Questioning" and "what".
 ^1_Body_movement:Body_part(throw,_$qVar)    -- OK _$qVar == ball
 ^1_Cause_motion:Cause(throw,John)           -- OK match
 ^1_Transitive_action:Object(throw,_$qVar)   -- OK _$qVar == bal
+
+This type of relex frame-level setup, query massaging 
+and node matching is implemented in FrameQuery.cc, FrameQuery.h
+It seems to work, but hasn't undergone strenuous testing.
+
+Query processing architectural issues:
+--------------------------------------
+Below are some architectural issues that have been given temporary
+solutions, but need a better long-term solution.
+
+-- How to distinguish rhetorical questions from queries that should
+   be answered?  A block of input text may contain rhetorical questions,
+   which should be ignored.
+
+-- How should query processing be triggered?  What channel should be
+   used for reply? Currently, all input to CogServer is via XML, which
+   is parsed. If the parse is successful, no further processing is done.
+
+   Query processing could be performed by a mind agent, but how should
+   its activity be triggered, and what communictations channel should
+   it use to post a reply?
+
+
+Diary and Notes
+---------------
+Use special token to trigger mind agent. Per Ben, "DialogManager",
+there are four such tokens:
+-- query
+-- statement
+-- command
+-- interjection
+
+Right now, all four of these will be surrounded by an AssertionLink.
+The query processor will look for  these, perform some basic sentence
+analysis, and dispose of these as appropriate (i.e. generating an
+appropriate reply).
+
+
 
