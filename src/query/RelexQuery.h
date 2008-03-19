@@ -35,10 +35,12 @@ class RelexQuery : public PatternMatchCallback
 
 		// Aid in equivalent node identification.
 		bool is_word_instance(Atom *, const char *);
-		bool concept_match(Atom *, Atom *);
 
 	protected:
 		FollowLink fl;
+
+		// Aid in equivalent node identification.
+		bool concept_match(Atom *, Atom *);
 
 		// create the predicate
 		virtual bool assemble_predicate(Atom *);

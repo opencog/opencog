@@ -6,7 +6,8 @@
  * and thus should provide at once a looser but more 
  * semnatically correct matching.
  *
- * Experiminetal, incomplete, broken.
+ * Works, at least for basic queries.
+ *
  * XXX todo-- should have is_query look for 
  *   <EvaluationLink>
  *       <Element class="DefinedFrameElementNode" name="#Questioning:Message"/>
@@ -92,7 +93,6 @@ bool FrameQuery::discard_eval_markup(Atom *atom)
 
 	if (LIST_LINK == atype)
 	{
-prt(atom);
 		Handle ah = TLB::getHandle(atom);
 		foreach_outgoing_atom(ah, &FrameQuery::discard_question_markup, this);
 		return false;
@@ -224,50 +224,15 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 	// DefinedLinguisticConcept nodes must match exactly;
 	// so if we are here, there's already a mismatch.
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype) return true;
+	if (DEFINED_FRAME_NODE == ntype) return true;
+	if (DEFINED_FRAME_ELEMENT_NODE == ntype) return true;
 
-#if 0
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
 		bool mismatch = concept_match(aa, ab);
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;
-	}
-
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype)
-	{
-		/* We force agreement for gender, etc.
-		 * be have more relaxed agreement for tense...
-		 * i.e. match #past to #past_infinitive, etc.
-		 */
-		Node *na = dynamic_cast<Node *>(aa);
-		Node *nb = dynamic_cast<Node *>(ab);
-		if (na && nb)
-		{
-			const char * sa = na->getName().c_str();
-			const char * sb = nb->getName().c_str();
-			char * ua = strchr(sa, '_');
-			if (ua)
-			{
-				size_t len = ua-sa;
-				char * s = (char *) alloca(len+1);
-				strncpy(s,sa,len);
-				s[len] = 0x0;
-				sa = s;
-			}
-			char * ub = strchr(sb, '_');
-			if (ub)
-			{
-				size_t len = ub-sb;
-				char * s = (char *) alloca(len+1);
-				strncpy(s,sb,len);
-				s[len] = 0x0;
-				sb = s;
-			}
-			if (!strcmp(sa, sb)) return false;
-			return true;
-		}
-		return true;
 	}
 
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
@@ -278,7 +243,6 @@ bool FrameQuery::node_match(Atom *aa, Atom *ab)
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 
-#endif
 	return true;
 }
 
