@@ -20,14 +20,15 @@ class CommandRequestProcessor : public RequestProcessor
 {
     public:
         ~CommandRequestProcessor();
-        CommandRequestProcessor();
-        virtual void processRequest(CogServerRequest *request);
+        CommandRequestProcessor(void);
+        virtual void processRequest(CogServerRequest *);
 
     private:
-        std::string loadXML(XMLBufferReader *buf);
-        std::string data(std::string buf);
-        std::string load(std::string fileName);
-        std::string ls();
+        std::string loadXML(XMLBufferReader *);
+        std::string data(std::string);
+        std::string help(std::string);
+        std::string load(std::string);
+        std::string ls(void);
 
 }; // class
 }  // namespace

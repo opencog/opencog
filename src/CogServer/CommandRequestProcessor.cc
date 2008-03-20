@@ -37,6 +37,17 @@ std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf)
     return msg;
 }
 
+std::string CommandRequestProcessor::help(std::string topic)
+{
+    std::string reply = "";
+    reply = 
+         "Available commands:\n"
+         "data <xmldata>   -- load OpenCog XML data immediately following\n"
+         "load <filename>  -- load OpenCog XML from indicated filename\n"
+         "ls               -- list entire system contents\n";
+    return reply;
+}
+
 /**
  * Read XML data from a file
  */
@@ -118,7 +129,12 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = data(args.front());
         }
-    } else if (command == "load") {
+    }
+    else if (command == "help")
+    {
+        answer = help(args.front());
+    }
+    else if (command == "load") {
         if (args.size() != 1) {
             answer = "load: invalid command syntax";
         } else {
@@ -138,7 +154,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         }
     } else {
         answer = "unknown command >>" + command + "<<\n" +
-                 "\tAvailable commands: data load ls shutdown";
+                 "\tAvailable commands: data help load ls shutdown";
         if(!args.empty())
             answer += "\tArgs: " + args.front();
     }
