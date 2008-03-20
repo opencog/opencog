@@ -67,6 +67,11 @@ void ImportanceUpdatingAgent::init(CogServer *server)
 
 }
 
+AttentionValue::sti_t ImportanceUpdatingAgent::getRecentMaxSTI()
+{
+    return recentMaxSTI;
+}
+
 void ImportanceUpdatingAgent::setLogger(Util::Logger* log)
 {
     if (this->log) delete this->log;
@@ -93,6 +98,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 {
     AtomSpace* a = server->getAtomSpace();
     HandleEntry *h, *q;
+    AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
    
     log->log(Util::Logger::FINE, "=========== ImportanceUpdating::run =======");
     /* init iterative variables, that can't be calculated in
@@ -130,9 +136,16 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 	enforceSTICap(a, q->handle);
 	enforceLTICap(a, q->handle);
 
+	// Greater than max sti seen?
+	if (a->getSTI(q->handle) > maxSTISeen) 
+	    maxSTISeen = a->getSTI(q->handle);
+
 	q = q->next;
     }
     delete h;
+
+    /* Update recentMaxSTI */
+    recentMaxSTI = (AttentionValue::sti_t) (maxSTIDecayRate * maxSTISeen + (1.0-maxSTIDecayRate) * recentMaxSTI);
 
     if (lobeSTIOutOfBounds) {
 	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");

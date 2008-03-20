@@ -77,6 +77,10 @@ class HopfieldDemo : public opencog::CogServer {
 	void spreadAtomImportance(Handle h);
 
 	std::string patternToString(std::vector<int> p);
+	void hebbianLearningUpdate();
+	void resetNodes();
+	float targetConjunction(std::vector<Handle> handles);
+	void imprintPattern(std::vector<int> pattern, int cycles);
 };
 
 struct ImportanceSpreadSTISort

@@ -38,6 +38,8 @@ public:
 
 	static const sti_t MAXSTI = SHRT_MAX;
 	static const lti_t MAXLTI = SHRT_MAX;
+	static const sti_t MINSTI = SHRT_MIN;
+	static const lti_t MINLTI = SHRT_MIN;
 
 
 	private:

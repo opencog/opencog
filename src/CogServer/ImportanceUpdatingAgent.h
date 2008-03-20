@@ -252,6 +252,8 @@ public:
     void setUpdateLinksFlag(bool f);
     bool getUpdateLinksFlag();
 
+    AttentionValue::sti_t getRecentMaxSTI();
+
 }; // class
 
 }  // namespace

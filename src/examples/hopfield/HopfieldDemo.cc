@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
     hDemo.unitTestServerLoop(5);
     MAIN_LOGGER.log(Util::Logger::INFO,"Ran server for 5 loops");
 
-    hDemo.encodePattern(pattern1);
-    hDemo.unitTestServerLoop(10);
+    hDemo.imprintPattern(pattern1,5);
+    
     MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for 5 loops");
     hDemo.retrievePattern(pattern2,1);
     MAIN_LOGGER.log(Util::Logger::INFO,"Updated Atom table for retrieval");
@@ -124,6 +124,137 @@ void HopfieldDemo::init(int width, int height, int numLinks)
 
 }
 
+void HopfieldDemo::hebbianLearningUpdate()
+{
+    HandleEntry *links, *current_l;
+
+    // tc affects the truthvalue
+    float tc, old_tc;
+    float tcDecayRate = 0.2;
+    float stimMultiplier = 1.0;
+
+    AtomSpace* a = getAtomSpace();
+
+    // Go through all Hebbian links and update TVs
+    links = a->getAtomTable().getHandleSet(SYMMETRIC_HEBBIAN_LINK, true);
+    // TODO: process assymmetric hebbian links too
+
+    for (current_l = links; current_l; current_l = current_l->next) {
+	// for each hebbian link, find targets, work out conjunction and convert
+	// that into truthvalue change. the change should be based on existing TV.
+	Handle h;
+	std::vector<Handle> outgoing;
+	stim_t stimAmount;
+
+	h = current_l->handle;
+
+	// get out going set
+	outgoing = TLB::getAtom(h)->getOutgoingSet();
+	tc = targetConjunction(outgoing);
+	// old link strength decays 
+	old_tc = a->getTV(h).getMean();
+	tc = (tcDecayRate * tc) + ( (1.0-tcDecayRate) * old_tc);
+	MAIN_LOGGER.log(Util::Logger::INFO,"old/new TV for atom %s is %f/%f", TLB::getAtom(h)->toString().c_str(), old_tc, tc);
+	// Update TV
+	a->setMean(h,tc);
+	
+	// greater change in TV leads to greater amount of stimulus
+	// which in turn leads to more STI/LTI.
+	stimAmount = (stim_t) (fabs(tc - old_tc) * stimMultiplier);
+	a->stimulateAtom(h,stimAmount);
+	
+    }
+    // if not enough links, try and create some more either randomly
+    // or by looking at what nodes are in attentional focus
+
+    delete links;
+
+}
+
+void HopfieldDemo::resetNodes()
+{
+    AtomSpace* a = getAtomSpace();
+    HandleEntry *nodes, *n;
+
+    nodes = a->getAtomTable().getHandleSet(NODE, true);
+
+    // Set all nodes to sti 0 and default LTI
+    for (n = nodes; n; n = n->next) {
+	a->setSTI(n->handle, 0);
+	a->setLTI(n->handle, AttentionValue::DEFAULTATOMLTI);
+    }
+    delete nodes;
+
+}
+
+float HopfieldDemo::targetConjunction(std::vector<Handle> handles)
+{
+    // TODO: this won't work for Hebbian Links with arity > 2
+
+    // indicates whether at least one of the source/target are
+    // in the attentional focus
+    bool inAttention = false;
+    int normaliser;
+    std::vector<Handle>::iterator h_i;
+    Handle h;
+    AtomSpace *a;
+    AttentionValue::sti_t sti;
+    float tc = 0.0f, normsti;
+
+    a = getAtomSpace();
+    // get normalizer (maxSTI - attention boundary)
+    normaliser = agent->getRecentMaxSTI() - a->getAttentionalFocusBoundary();
+
+    for (h_i = handles.begin();
+	    h_i != handles.end();
+	    h_i++) {
+	h = *h_i;
+	sti = a->getSTI(h); 
+
+	// if none in attention return 0 at end
+	if (sti > a->getAttentionalFocusBoundary()) inAttention = true;
+
+	// normalise each sti and multiple each
+	normsti = (sti - a->getAttentionalFocusBoundary()) / normaliser;
+	if (tc == 0.0f) tc = normsti;
+	else tc *= normsti;
+
+    }
+    if (!inAttention) return 0.0f;
+    
+    // cap conjunction to range [-1,1]
+    if (tc > 1.0f) return 1.0f;
+    if (tc < 1.0f) return -1.0f;
+    return tc;
+	
+}
+
+void HopfieldDemo::imprintPattern(std::vector<int> pattern, int cycles)
+{
+
+    // loop for number of imprinting cyles
+    for (; cycles > 0; cycles--) {
+        // for each encode pattern
+	encodePattern(pattern);
+	// then update with learning
+	// TODO: move below to separate function updateWithLearning();
+	
+	hebbianLearningUpdate();
+
+	// ImportanceUpdating with links
+	agent->run(this);
+
+	spreadImportance();
+	
+	//doForgetting();
+
+	//----------
+	
+	resetNodes();
+    }
+
+}
+
 void HopfieldDemo::encodePattern(std::vector<int> pattern)
 {
     std::vector<Handle>::iterator it = hGrid.begin();
@@ -141,6 +272,7 @@ void HopfieldDemo::encodePattern(std::vector<int> pattern)
 std::vector<int> HopfieldDemo::retrievePattern(std::vector<int> partialPattern, int numCycles)
 {
     std::string logString;
+    std::vector<int> a;
     
     logString += "Initialising " + to_string(numCycles) + " cycle pattern retrieval process.";
     MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
@@ -153,12 +285,13 @@ std::vector<int> HopfieldDemo::retrievePattern(std::vector<int> partialPattern, 
 	MAIN_LOGGER.log(Util::Logger::INFO, "Cycles left %d",numCycles);
     }
     
-    logString = "Imprinted pattern: \n" + patternToString(partialPattern); 
+    logString = "Cue pattern: \n" + patternToString(partialPattern); 
     MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
+
+    // Get the STI of nodes as the pattern...
     
     MAIN_LOGGER.log(Util::Logger::INFO, "Pattern retrieval process ended.");
     
-    std::vector<int> a;
     return a;
 }
 
