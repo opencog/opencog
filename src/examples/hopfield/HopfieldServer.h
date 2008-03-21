@@ -1,5 +1,5 @@
 /**
- * HopfieldDemo.h
+ * HopfieldServer.h
  *
  * Emulates a hopfield network using OpenCog dynamics
  *
@@ -7,8 +7,8 @@
  * Creation: Wed Mar 12 11:14:22 GMT+12 2008
  */
 
-#ifndef HOPFIELDDEMO_H
-#define HOPFIELDDEMO_H
+#ifndef HOPFIELDSERVER_H
+#define HOPFIELDSERVER_H
 
 #include <CogServer.h>
 #include <RandGen.h>
@@ -16,7 +16,7 @@
 
 #include <vector>
 
-class HopfieldDemo : public opencog::CogServer {
+class HopfieldServer : public opencog::CogServer {
 
     private:
 	
@@ -33,11 +33,12 @@ class HopfieldDemo : public opencog::CogServer {
 	opencog::ImportanceUpdatingAgent *agent;
 
 	AttentionValue::sti_t spreadThreshold;
+	AttentionValue::sti_t vizThreshold;
 
     public:
 
-        ~HopfieldDemo();
-        HopfieldDemo();
+        ~HopfieldServer();
+        HopfieldServer();
 
 	/**
 	 * Initialise the demo with a lattice of width * height nodes.
@@ -67,7 +68,7 @@ class HopfieldDemo : public opencog::CogServer {
 	/**
 	 *
 	 */
-	std::vector<int> updateAtomTableForRetrieval();
+	void updateAtomTableForRetrieval();
 
 	/**
 	 *
@@ -76,11 +77,42 @@ class HopfieldDemo : public opencog::CogServer {
 
 	void spreadAtomImportance(Handle h);
 
-	std::string patternToString(std::vector<int> p);
+	template<typename Number> std::string patternToString(std::vector<Number> p)
+	{
+	    std::stringstream ss;
+	    Number col = 0;
+
+	    typename std::vector<Number>::iterator it = p.begin();
+
+	    while(it != p.end()) {
+		ss << *it << " ";
+		col++;
+		if (col == width) {
+		    ss << endl;
+		    col = 0;
+		}
+		it++;
+	    }
+	    return ss.str();
+	}
+
+	std::vector<int> binariseArray(std::vector<float>);
+	std::vector<float> getGridAsFloatVector();
+	std::vector<stim_t> getGridStimVector();
+
 	void hebbianLearningUpdate();
 	void resetNodes();
 	float targetConjunction(std::vector<Handle> handles);
 	void imprintPattern(std::vector<int> pattern, int cycles);
+
+	std::vector< std::vector<int> > generateRandomPatterns(int amount);
+	std::vector< std::vector<int> > mutatePatterns( std::vector< std::vector<int> > patterns, float error);
+
+	float hammingSimilarity(std::vector<int>,std::vector<int>);
+	void doForgetting(float proportion);
+	void addRandomLinks(int amount);
+
+	void printStatus();
 };
 
 struct ImportanceSpreadSTISort
@@ -91,4 +123,12 @@ struct ImportanceSpreadSTISort
      }
 };
 
-#endif // HOPFIELDDEMO_H
+struct ImportanceSpreadLTIAscendingSort
+{
+     bool operator()(const Handle& h1, const Handle& h2)
+     {
+          return TLB::getAtom(h1)->getAttentionValue().getLTI() < TLB::getAtom(h2)->getAttentionValue().getLTI();
+     }
+};
+
+#endif // HOPFIELDSERVER_H

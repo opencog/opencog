@@ -91,7 +91,7 @@ private:
 
     /* for calculate the recent maximum STI value, used in Hebbian learning */
     float maxSTIDecayRate;
-    AttentionValue::sti_t recentMaxSTI;
+    //AttentionValue::sti_t recentMaxSTI;
 
     /* STI has gone out of aceceptable range during this mindagent cycle */
     bool lobeSTIOutOfBounds;
@@ -252,7 +252,8 @@ public:
     void setUpdateLinksFlag(bool f);
     bool getUpdateLinksFlag();
 
-    AttentionValue::sti_t getRecentMaxSTI();
+    // Moved to Atomspace
+    // AttentionValue::sti_t getRecentMaxSTI();
 
 }; // class
 

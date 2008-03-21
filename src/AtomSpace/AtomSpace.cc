@@ -56,6 +56,8 @@ AtomSpace::AtomSpace() {
 
     fundsSTI = LOBE_STARTING_STI_FUNDS;
     fundsLTI = LOBE_STARTING_LTI_FUNDS;
+    recentMaxSTI = 0;
+    attentionalFocusBoundary = 0;
 }
 
 const AtomTable& AtomSpace::getAtomTable() const {
@@ -335,6 +337,9 @@ bool AtomSpace::removeAtom(Handle h, bool recursive) {
 	    // Also refund sti/lti to AtomSpace funds pool
 	    fundsSTI += getSTI(h);
 	    fundsLTI += getLTI(h);
+
+	    // Remove stimulus
+	    removeStimulus(h);
 	    
             currentEntry = currentEntry->next;
 
@@ -823,6 +828,26 @@ stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
     return totalStimulus;
 }
 
+void AtomSpace::removeStimulus(Handle h)
+{
+    stim_t amount;
+    // if handle not in map then return
+    if (stimulatedAtoms->find(TLB::getAtom(h)) == stimulatedAtoms->end()) 
+	return;
+
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_lock(&stimulatedAtomsLock);
+#endif
+    amount = (*stimulatedAtoms)[TLB::getAtom(h)];
+    stimulatedAtoms->erase(TLB::getAtom(h));
+#ifdef HAVE_LIBPTHREAD
+    pthread_mutex_unlock(&stimulatedAtomsLock);
+#endif
+
+    // update record of total stimulus given out
+    totalStimulus -= amount;
+}
+
 stim_t AtomSpace::stimulateAtom(HandleEntry* h, stim_t amount)
 {
     HandleEntry* p;
@@ -879,4 +904,15 @@ AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti
 {
     attentionalFocusBoundary = s;
     return s;
+}
+
+AttentionValue::sti_t AtomSpace::getRecentMaxSTI()
+{
+    return recentMaxSTI;
+}
+
+AttentionValue::sti_t AtomSpace::setRecentMaxSTI(AttentionValue::sti_t val)
+{
+    recentMaxSTI = val;
+    return recentMaxSTI;
 }

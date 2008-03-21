@@ -29,7 +29,8 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     attentionalFocusSizeDecay = 0.3;
 
     maxSTIDecayRate = 0.8;
-    recentMaxSTI = 0;
+    // Moved to AtomSpace
+    //recentMaxSTI = 0;
 
     targetLobeSTI = LOBE_STARTING_STI_FUNDS;
     acceptableLobeSTIRange[0] = targetLobeSTI - LOBE_STI_FUNDS_BUFFER;
@@ -67,10 +68,7 @@ void ImportanceUpdatingAgent::init(CogServer *server)
 
 }
 
-AttentionValue::sti_t ImportanceUpdatingAgent::getRecentMaxSTI()
-{
-    return recentMaxSTI;
-}
+// AttentionValue::sti_t ImportanceUpdatingAgent::getRecentMaxSTI() { return recentMaxSTI; }
 
 void ImportanceUpdatingAgent::setLogger(Util::Logger* log)
 {
@@ -106,11 +104,9 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     if (!initialEstimateMade) init(server);
 
     /* Calculate attentional focus sizes */
-    log->log(Util::Logger::DEBUG, "Updating attentional focus size");
     updateAttentionalFocusSizes(a);
 
     /* Check AtomSpace funds are within bounds */
-    log->log(Util::Logger::DEBUG, "Checking AtomSpace funds");
     checkAtomSpaceFunds(a);
 
     /* Random stimulation if on */
@@ -145,8 +141,9 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     delete h;
 
     /* Update recentMaxSTI */
-    recentMaxSTI = (AttentionValue::sti_t) (maxSTIDecayRate * maxSTISeen + (1.0-maxSTIDecayRate) * recentMaxSTI);
-
+    a->setRecentMaxSTI( (AttentionValue::sti_t) (maxSTIDecayRate * maxSTISeen + (1.0-maxSTIDecayRate) * a->getRecentMaxSTI() ) );
+    log->log(Util::Logger::DEBUG, "Max STI seen is %d, recentMaxSTI is now %d", maxSTISeen, a->getRecentMaxSTI());
+    
     if (lobeSTIOutOfBounds) {
 	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");
 	updateSTIRent(a);
@@ -179,7 +176,7 @@ bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
 
 void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
-    log->log(Util::Logger::DEBUG, "STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
+    log->log(Util::Logger::DEBUG, "Checking STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
 	    acceptableLobeSTIRange[0], acceptableLobeSTIRange[1]);
     if (!inRange(a->getSTIFunds(),acceptableLobeSTIRange)) {
 	log->log(Util::Logger::DEBUG, "Lobe STI funds out of bounds, re-adjusting.");
@@ -187,7 +184,7 @@ void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 	adjustSTIFunds(a);
     }
 
-    log->log(Util::Logger::DEBUG, "LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
+    log->log(Util::Logger::DEBUG, "Checking LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
 	    acceptableLobeLTIRange[0], acceptableLobeLTIRange[1]);
     if (!inRange(a->getLTIFunds(),acceptableLobeLTIRange)) {
 	log->log(Util::Logger::DEBUG, "Lobe LTI funds out of bounds, re-adjusting.");
@@ -210,9 +207,6 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
     Util::RandGen *rng;
 
     rng = getRandGen();
-
-    log->log(Util::Logger::FINE, "Starting random stimulation");
-
 
     // TODO: use util::lazy_random_selector and a binomial dist
     // to get actualNum
@@ -329,6 +323,7 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
 void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 {
     AttentionValue::sti_t oldSTIAtomRent;
+    int focusSize = 0;
     // STIAtomRent must be adapted based on attentional focus size, or else balance btw
     // lobe STI wealth and node/link STI wealth may not be maintained
 
@@ -340,15 +335,20 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 			  / (float) recentAttentionalFocusNodesSize);
 	else
 	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset);
+
+	focusSize = recentAttentionalFocusNodesSize;
+	    
     } else {
 	if (recentAttentionalFocusSize > 0)
 	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset \
 			  / (float) recentAttentionalFocusSize);
 	else
 	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset);
+
+	focusSize = recentAttentionalFocusSize;
     }
 
-    log->log(Util::Logger::INFO, "STIAtomRent was %d, now %d.", oldSTIAtomRent, STIAtomRent);
+    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %d.", oldSTIAtomRent, STIAtomRent, focusSize);
 
     lobeSTIOutOfBounds = false; 
 }
@@ -362,7 +362,6 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     HandleEntry* h;
 
     const AtomTable& at = a->getAtomTable(); 
-    // TODO: implement max and get method of next line
     inFocus = at.getHandleSet(a->getAttentionalFocusBoundary(),AttentionValue::MAXSTI);
     attentionalFocusSize = inFocus->getSize();
 

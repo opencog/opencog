@@ -774,6 +774,9 @@ class AtomSpace {
     AttentionValue::sti_t setAttentionalFocusBoundary(
 	    AttentionValue::sti_t s);
 
+    AttentionValue::sti_t getRecentMaxSTI();
+    AttentionValue::sti_t setRecentMaxSTI(AttentionValue::sti_t val);
+
     //for convenience
     bool isNode(Handle) const;
     bool isVar(Handle) const;
@@ -870,10 +873,17 @@ class AtomSpace {
      * not charged STI rent */
     AttentionValue::sti_t attentionalFocusBoundary;
 
+    AttentionValue::sti_t recentMaxSTI;
+
     /* These indicate the amount importance funds available in the
      * AtomSpace */
     long fundsSTI;
     long fundsLTI;
+
+    /*
+     * Remove stimulus from atom, only should be used when Atom is deleted.
+     */
+    void removeStimulus(Handle h);
 
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const{
