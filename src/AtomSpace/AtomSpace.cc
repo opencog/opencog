@@ -57,7 +57,7 @@ AtomSpace::AtomSpace() {
     fundsSTI = LOBE_STARTING_STI_FUNDS;
     fundsLTI = LOBE_STARTING_LTI_FUNDS;
     recentMaxSTI = 0;
-    attentionalFocusBoundary = 0;
+    attentionalFocusBoundary = 1;
 }
 
 const AtomTable& AtomSpace::getAtomTable() const {

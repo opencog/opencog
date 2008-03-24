@@ -28,6 +28,7 @@ class HopfieldServer : public opencog::CogServer {
 	Util::RandGen* rng; 
 
 	stim_t perceptStimUnit;
+	stim_t stimForSpread;
 	int width, height;
 
 	opencog::ImportanceUpdatingAgent *agent;

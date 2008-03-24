@@ -32,7 +32,7 @@ public:
 	static const int NONDISPOSABLE = 1; //Status flag for vlti 
 
 	// CLASS CONSTANTS
-	static const sti_t DEFAULTATOMSTI = 500;
+	static const sti_t DEFAULTATOMSTI = 1;
 	static const lti_t DEFAULTATOMLTI = 0;
 	static const vlti_t DEFAULTATOMVLTI = DISPOSABLE;
 

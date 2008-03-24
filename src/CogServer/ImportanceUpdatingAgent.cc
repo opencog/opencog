@@ -348,7 +348,7 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 	focusSize = recentAttentionalFocusSize;
     }
 
-    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %d.", oldSTIAtomRent, STIAtomRent, focusSize);
+    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %d. Wage is %d.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage);
 
     lobeSTIOutOfBounds = false; 
 }

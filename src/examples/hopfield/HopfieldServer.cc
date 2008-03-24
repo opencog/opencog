@@ -19,16 +19,18 @@
 using namespace opencog;
 using namespace std;
 
-#define HDEMO_DEFAULT_WIDTH 3
+#define HDEMO_DEFAULT_WIDTH 2
 #define HDEMO_DEFAULT_HEIGHT 3
-#define HDEMO_DEFAULT_LINKS 15 
+#define HDEMO_DEFAULT_LINKS 10 
 #define HDEMO_DEFAULT_PERCEPT_STIM 10
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 4
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 5
+#define HDEMO_DEFAULT_SPREAD_STIM 1
 
-#define HDEMO_LOG_LEVEL Util::Logger::INFO
+#define HDEMO_LOG_LEVEL Util::Logger::FINE
 
 void testHopfieldNetwork();
+void testHopfieldNetworkRolling();
 std::vector<int> testPattern(std::vector<int> p, int imprint, std::vector<int> c, int retrieve);
 
 HopfieldServer hDemo;
@@ -38,7 +40,53 @@ int main(int argc, char *argv[])
     //int patternArray[] = { 0, 1, 0, 1, 1, 1, 0, 1, 0 };
     //std::vector<int> pattern1(patternArray, patternArray + 9);
 
-    testHopfieldNetwork();
+    testHopfieldNetworkRolling();
+
+}
+
+void testHopfieldNetworkRolling()
+{
+    std::vector< std::vector<int> > patterns;
+    std::vector< std::vector<int> > cuePatterns;
+    std::vector< std::vector<int> > rPatterns;
+    std::vector<int> result;
+
+    MAIN_LOGGER.setLevel(HDEMO_LOG_LEVEL);
+    MAIN_LOGGER.setPrintToStdoutFlag(true);
+    MAIN_LOGGER.log(Util::Logger::INFO,"Init HopfieldServer");
+	
+    hDemo.init(HDEMO_DEFAULT_WIDTH, HDEMO_DEFAULT_HEIGHT, HDEMO_DEFAULT_LINKS);
+
+    patterns = hDemo.generateRandomPatterns(2);
+    cuePatterns = hDemo.mutatePatterns(patterns, 0.2);
+
+    for (unsigned int i = 0; i< patterns.size(); i++) {
+	hDemo.imprintPattern(patterns[i],15);
+	MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for 5 loops");
+    }
+
+    for (unsigned int i = 0; i< patterns.size(); i++) {
+	result = hDemo.retrievePattern(cuePatterns[i],5);
+	MAIN_LOGGER.log(Util::Logger::INFO,"Updated Atom table for retrieval");
+	rPatterns.push_back(result);
+    }
+
+
+    cout << "-----------------------" << endl;
+    for (unsigned int i = 0; i< patterns.size(); i++) {
+	float before, after, diff;
+
+	cout << hDemo.patternToString(patterns[i]) << endl;
+	cout << hDemo.patternToString(cuePatterns[i]) << endl;
+	cout << hDemo.patternToString(rPatterns[i]) << endl;
+
+	before = hDemo.hammingSimilarity(patterns[i], cuePatterns[i]); 
+	after = hDemo.hammingSimilarity(patterns[i], rPatterns[i]);
+	diff = after-before;
+	cout << "=== similarity before/after/diff: " <<
+	    before << "/" << after << "/" << diff << endl;
+	cout << "-----------------------" << endl;
+    }
 
 }
 
@@ -54,7 +102,7 @@ void testHopfieldNetwork()
 	
     hDemo.init(HDEMO_DEFAULT_WIDTH, HDEMO_DEFAULT_HEIGHT, HDEMO_DEFAULT_LINKS);
 
-    patterns = hDemo.generateRandomPatterns(10);
+    patterns = hDemo.generateRandomPatterns(1);
     cuePatterns = hDemo.mutatePatterns(patterns, 0.2);
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
@@ -119,12 +167,13 @@ inline string to_string (const T& t)
 HopfieldServer::HopfieldServer()
 {
     perceptStimUnit = HDEMO_DEFAULT_PERCEPT_STIM;
+    stimForSpread = HDEMO_DEFAULT_SPREAD_STIM;
     spreadThreshold = HDEMO_DEFAULT_SPREAD_THRESHOLD;
     vizThreshold = HDEMO_DEFAULT_VIZ_THRESHOLD;
-    rng = new Util::MT19937RandGen(0);
+    rng = new Util::MT19937RandGen(time(NULL));
 
     agent = new ImportanceUpdatingAgent();
-//    agent->getLogger()->enable();
+    agent->getLogger()->enable();
     agent->getLogger()->setLevel(Util::Logger::FINE);
     agent->getLogger()->setPrintToStdoutFlag(true);
     plugInMindAgent(agent, 1);
@@ -197,10 +246,9 @@ void HopfieldServer::hebbianLearningUpdate()
     // tc affects the truthvalue
     float tc, old_tc;
     float tcDecayRate = 0.2;
-    float stimMultiplier = 1.0;
 
     AtomSpace* a = getAtomSpace();
-    MAIN_LOGGER.log(Util::Logger::DEBUG,"Hebbian Learning update");
+    MAIN_LOGGER.log(Util::Logger::DEBUG,"----------- Hebbian Learning update");
 
     // Go through all Hebbian links and update TVs
     links = a->getAtomTable().getHandleSet(SYMMETRIC_HEBBIAN_LINK, true);
@@ -218,7 +266,6 @@ void HopfieldServer::hebbianLearningUpdate()
 	// that into truthvalue change. the change should be based on existing TV.
 	Handle h;
 	std::vector<Handle> outgoing;
-	stim_t stimAmount;
 
 	h = current_l->handle;
 
@@ -231,12 +278,7 @@ void HopfieldServer::hebbianLearningUpdate()
 	// Update TV
 	a->setMean(h,tc);
 	
-	// greater change in TV leads to greater amount of stimulus
-	// which in turn leads to more STI/LTI.
-	stimAmount = (stim_t) (fabs(tc) * stimMultiplier);
-	a->stimulateAtom(h,stimAmount);
-
-	MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: %s old tv %f, stim %d", TLB::getAtom(h)->toString().c_str(), old_tc, stimAmount);
+	MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 	
     }
     // if not enough links, try and create some more either randomly
@@ -318,29 +360,32 @@ float HopfieldServer::targetConjunction(std::vector<Handle> handles)
 
 void HopfieldServer::imprintPattern(std::vector<int> pattern, int cycles)
 {
+    bool first=true;
 
     // loop for number of imprinting cyles
     for (; cycles > 0; cycles--) {
         // for each encode pattern
-	MAIN_LOGGER.log(Util::Logger::FINE,"Encoding pattern");
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Encoding pattern");
 	encodePattern(pattern);
-	//printStatus();
+	printStatus();
 	// then update with learning
 	// TODO: move below to separate function updateWithLearning();
 	
 	// ImportanceUpdating with links
-	MAIN_LOGGER.log(Util::Logger::FINE,"Running Importance update");
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Running Importance update");
 	agent->run(this);
-	//printStatus();
+	printStatus();
 	
 	hebbianLearningUpdate();
 
 	spreadImportance();
 	
-	//doForgetting(0.10);
-
+	if (first) 
+	    first = false;
+	else
+	    doForgetting(0.10);
 	//----------
-	//printStatus();
+	printStatus();
 	
 	resetNodes();
     }
@@ -401,7 +446,12 @@ std::vector<int> HopfieldServer::retrievePattern(std::vector<int> partialPattern
 
     while (numCycles > 0) {
 	encodePattern(partialPattern);
+	printStatus();
 	updateAtomTableForRetrieval();
+	printStatus();
+	updateAtomTableForRetrieval();
+	printStatus();
+
 
 	numCycles--;
 	MAIN_LOGGER.log(Util::Logger::INFO, "Cycles left %d",numCycles);
@@ -490,7 +540,7 @@ void HopfieldServer::spreadImportance()
     
     a = getAtomSpace();
     a->getHandleSet(out_hi,NODE,true);
-    MAIN_LOGGER.log(Util::Logger::FINE, "Spreading importance for atoms with threshold above %d", spreadThreshold);
+    MAIN_LOGGER.log(Util::Logger::FINE, "---------- Spreading importance for atoms with threshold above %d", spreadThreshold);
 
     hi = atoms.begin();
     while (hi != atoms.end()) {
@@ -515,7 +565,7 @@ void HopfieldServer::spreadAtomImportance(Handle h)
     AtomSpace *a;
     float maxTransferAmount,totalRelatedness;
     int totalTransferred;
-    AttentionValue::sti_t importanceSpreadingQuantum = 15;
+    AttentionValue::sti_t importanceSpreadingQuantum = 10;
     float importanceSpreadingFactor = 0.4;
 
     totalRelatedness = 0.0f;
@@ -553,19 +603,30 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 	std::sort(linksVector.begin(), linksVector.end(), ImportanceSpreadSTISort());
 
 	for (linksVector_i = linksVector.begin();
-		linksVector_i != linksVector.end(); linksVector_i++) {
+		linksVector_i != linksVector.end() &&
+		totalTransferred <= maxTransferAmount; linksVector_i++) {
 	    double transferWeight, transferAmount;
 	    std::vector<Handle> targets;
 	    std::vector<Handle>::iterator t;
 	    Handle lh = *linksVector_i;
 	    const TruthValue &linkTV = a->getTV(lh);
 
-	    transferWeight = linkTV.toFloat();
+
 	    targets = TLB::getAtom(lh)->getOutgoingSet();
+	    transferWeight = linkTV.toFloat();
 
 	    // amount to spread dependent on weight and quantum - needs to be
 	    // divided by (targets->size - 1)
-	    transferAmount = transferWeight * importanceSpreadingQuantum / (targets.size()-1.0f);
+	    transferAmount = transferWeight * importanceSpreadingQuantum;
+	    
+	    // Allow at least one hebbian link to spread importance, even if it's
+	    // less than the amount the weight would indicate
+	    if (transferAmount > maxTransferAmount)
+		transferAmount = maxTransferAmount;
+	    
+	    transferAmount = transferAmount / (targets.size()-1.0f);
+	    if (transferAmount == 0.0f) continue;
+
 	    MAIN_LOGGER.log(Util::Logger::FINE, "weight %f, quanta %d, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingQuantum, targets.size(), transferAmount, maxTransferAmount);
 
 	    for (t = targets.begin();
@@ -589,6 +650,9 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 		a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
 		a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
 		
+		// stimulate link 
+		if ( agent->getUpdateLinksFlag() )
+		    a->stimulateAtom(lh,stimForSpread);
 	    }
 
 
@@ -640,6 +704,7 @@ void HopfieldServer::printStatus()
 	cout << TLB::getAtom(h)->toString() << endl;
 	
     }
+    cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" <<endl;
 }
 
 std::vector< std::vector<int> > HopfieldServer::generateRandomPatterns(int amount)
