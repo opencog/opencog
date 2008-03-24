@@ -555,6 +555,13 @@ What did John throw?
 Relex matching provides two correct answers: 
 _$qVar = ball, and _$qVar = screwdriver.
 ====
+
+The book is red. What color is the book?
+The color of the book is red. What color is the book?
+
+Both of these fail on the simple pattern match.
+
+====
 Yarn is a length of fibers.
 What is yarn?
 
