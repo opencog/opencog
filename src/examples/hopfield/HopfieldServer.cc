@@ -9,38 +9,149 @@
 
 #include <sstream>
 #include <math.h>
+#include <getopt.h>
 
 #include <mt19937ar.h>
 #include <Logger.h>
 #include <SimpleTruthValue.h>
+#include <Link.h>
 
 #include "HopfieldServer.h"
 
 using namespace opencog;
 using namespace std;
 
-#define HDEMO_DEFAULT_WIDTH 2
+#define HDEMO_DEFAULT_WIDTH 3
 #define HDEMO_DEFAULT_HEIGHT 3
-#define HDEMO_DEFAULT_LINKS 10 
+#define HDEMO_DEFAULT_LINKS 15 
 #define HDEMO_DEFAULT_PERCEPT_STIM 10
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 4
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 5
 #define HDEMO_DEFAULT_SPREAD_STIM 1
 
-#define HDEMO_LOG_LEVEL Util::Logger::FINE
-
+void parseOptions(int argc, char *argv[]);
 void testHopfieldNetwork();
 void testHopfieldNetworkRolling();
 std::vector<int> testPattern(std::vector<int> p, int imprint, std::vector<int> c, int retrieve);
+void printMatrixResult(std::vector< int > p1, std::vector< int > p2, std::vector< int > p3);
 
 HopfieldServer hDemo;
+int verboseFlag = 0;
+int interleaveFlag = 0;
+int showMatrixFlag = 0;
+int nPatterns = 1;
+int retrieveCycles = 10;
+int imprintCycles = 15;
+float cueErrorRate = 0.1;
 
 int main(int argc, char *argv[])
 {
     //int patternArray[] = { 0, 1, 0, 1, 1, 1, 0, 1, 0 };
     //std::vector<int> pattern1(patternArray, patternArray + 9);
+    parseOptions(argc, argv);
+
+    /* setup logging */
+    MAIN_LOGGER.setPrintToStdoutFlag(true);
+    if (verboseFlag == 1) {
+	MAIN_LOGGER.setLevel(Util::Logger::DEBUG);
+    } else if (verboseFlag == 2) {
+	MAIN_LOGGER.setLevel(Util::Logger::FINE);
+    } else {
+	MAIN_LOGGER.setLevel(Util::Logger::WARNING);
+    }
+	
+    MAIN_LOGGER.log(Util::Logger::INFO,"Init HopfieldServer");
+    hDemo.init(-1, -1, -1);
 
     testHopfieldNetworkRolling();
+
+}
+
+void parseOptions(int argc, char *argv[])
+{
+
+    int c;
+
+    while (1) {
+	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:c:r:mie:";
+
+	static const struct option longOptions[] = {
+	    /* These options are flags */
+	    {"verbose", 0, &verboseFlag, 1},
+	    {"debug", 0, &verboseFlag, 2},
+	    /* These options set variables */
+	    {"width", required_argument, 0, 'w'},
+	    {"height", required_argument, 0, 'h'},
+	    {"size", required_argument, 0, 'n'},
+	    {"links", required_argument, 0, 'l'},
+	    {"density", required_argument, 0, 'd'},
+	    {"stimulus", required_argument, 0, 's'},
+	    {"spread-threshold", required_argument, 0, 't'},
+	    {"viz-threshold", required_argument, 0, 'z'},
+	    {"focus", required_argument, 0, 'f'},
+	    {"patterns", no_argument, 0, 'p'}, // number of patterns to test
+	    {"imprint", required_argument, 0, 'c'}, // # of imprint _c_ycles
+	    {"retrieve", required_argument, 0, 'r'}, // # of retrieve iterations
+	    {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
+	    {"interleave", 0, &interleaveFlag, 1}, // interleave imprint of each pattern
+	    {"error", required_argument, 0, 'e'}, // cue error rate
+	    {0,0,0,0}
+	};
+
+	int optionIndex = 0;
+	c = getopt_long(argc, argv, optString, longOptions, &optionIndex);
+
+	/* Detect end of options */
+	if (c==-1) break;
+
+	switch (c) {
+	   case 'v':
+		verboseFlag = 1; break;
+	   case 'D':
+		verboseFlag = 2; break;
+	    case 'w':
+		hDemo.width=atoi(optarg); break;
+	    case 'h':
+		hDemo.height=atoi(optarg); break;
+	    case 'n':
+		hDemo.height=atoi(optarg);
+		hDemo.width=atoi(optarg);
+		break;
+	    case 'l':
+		hDemo.links=atoi(optarg); break;
+	    case 'd':
+		hDemo.density=atof(optarg); break;
+	    case 's':
+		hDemo.perceptStimUnit=atoi(optarg); break;
+	    case 't':
+		hDemo.spreadThreshold=atoi(optarg); break;
+	    case 'z':
+		hDemo.vizThreshold=atoi(optarg); break;
+	    case 'f':
+		AttentionValue::sti_t f;
+		f = (AttentionValue::sti_t) atoi(optarg);
+		hDemo.getAtomSpace()->setAttentionalFocusBoundary(f);
+		break;
+	    case 'p':
+		nPatterns = atoi(optarg); break;
+	    case 'c':
+		imprintCycles = atoi(optarg); break;
+	    case 'r':
+		retrieveCycles = atoi(optarg); break;
+	    case 'e':
+		cueErrorRate = atof(optarg); break;
+	    case 'm':
+		showMatrixFlag = 1; break;
+	    case 'i':
+		interleaveFlag = 1; break;
+
+
+	    case '?':
+		break;
+	    default:
+		break;
+	}
+    }
 
 }
 
@@ -51,22 +162,16 @@ void testHopfieldNetworkRolling()
     std::vector< std::vector<int> > rPatterns;
     std::vector<int> result;
 
-    MAIN_LOGGER.setLevel(HDEMO_LOG_LEVEL);
-    MAIN_LOGGER.setPrintToStdoutFlag(true);
-    MAIN_LOGGER.log(Util::Logger::INFO,"Init HopfieldServer");
-	
-    hDemo.init(HDEMO_DEFAULT_WIDTH, HDEMO_DEFAULT_HEIGHT, HDEMO_DEFAULT_LINKS);
-
-    patterns = hDemo.generateRandomPatterns(2);
-    cuePatterns = hDemo.mutatePatterns(patterns, 0.2);
+    patterns = hDemo.generateRandomPatterns(nPatterns);
+    cuePatterns = hDemo.mutatePatterns(patterns, cueErrorRate);
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
-	hDemo.imprintPattern(patterns[i],15);
+	hDemo.imprintPattern(patterns[i],imprintCycles);
 	MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for 5 loops");
     }
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
-	result = hDemo.retrievePattern(cuePatterns[i],5);
+	result = hDemo.retrievePattern(cuePatterns[i],retrieveCycles);
 	MAIN_LOGGER.log(Util::Logger::INFO,"Updated Atom table for retrieval");
 	rPatterns.push_back(result);
     }
@@ -76,9 +181,8 @@ void testHopfieldNetworkRolling()
     for (unsigned int i = 0; i< patterns.size(); i++) {
 	float before, after, diff;
 
-	cout << hDemo.patternToString(patterns[i]) << endl;
-	cout << hDemo.patternToString(cuePatterns[i]) << endl;
-	cout << hDemo.patternToString(rPatterns[i]) << endl;
+	if (showMatrixFlag)
+	    printMatrixResult(patterns[i],cuePatterns[i],rPatterns[i]);
 
 	before = hDemo.hammingSimilarity(patterns[i], cuePatterns[i]); 
 	after = hDemo.hammingSimilarity(patterns[i], rPatterns[i]);
@@ -90,17 +194,32 @@ void testHopfieldNetworkRolling()
 
 }
 
+void printMatrixResult(std::vector< int > p1, std::vector< int > p2, std::vector< int > p3) {
+    int i, col;
+
+    for (i = 0; i<hDemo.height; i++) {	
+	for (col = 0; col < hDemo.width; col++) {
+	    printf("%2d", p1[i*hDemo.width + col]);
+	}
+	cout << " | ";
+	for (col = 0; col < hDemo.width; col++) {
+	    printf("%2d", p2[i*hDemo.width + col]);
+	}
+	cout << " | ";
+
+	for (col = 0; col < hDemo.width; col++) {
+	    printf("%2d", p3[i*hDemo.width + col]);
+	}
+	cout << endl;
+    }
+    
+}
+
 void testHopfieldNetwork()
 {
     std::vector< std::vector<int> > patterns;
     std::vector< std::vector<int> > cuePatterns;
     std::vector< std::vector<int> > rPatterns;
-
-    MAIN_LOGGER.setLevel(HDEMO_LOG_LEVEL);
-    MAIN_LOGGER.setPrintToStdoutFlag(true);
-    MAIN_LOGGER.log(Util::Logger::INFO,"Init HopfieldServer");
-	
-    hDemo.init(HDEMO_DEFAULT_WIDTH, HDEMO_DEFAULT_HEIGHT, HDEMO_DEFAULT_LINKS);
 
     patterns = hDemo.generateRandomPatterns(1);
     cuePatterns = hDemo.mutatePatterns(patterns, 0.2);
@@ -170,12 +289,16 @@ HopfieldServer::HopfieldServer()
     stimForSpread = HDEMO_DEFAULT_SPREAD_STIM;
     spreadThreshold = HDEMO_DEFAULT_SPREAD_THRESHOLD;
     vizThreshold = HDEMO_DEFAULT_VIZ_THRESHOLD;
+    width = HDEMO_DEFAULT_WIDTH;
+    height = HDEMO_DEFAULT_HEIGHT;
+    links = HDEMO_DEFAULT_LINKS;
+    density = -1.0f;
     rng = new Util::MT19937RandGen(time(NULL));
 
     agent = new ImportanceUpdatingAgent();
-    agent->getLogger()->enable();
-    agent->getLogger()->setLevel(Util::Logger::FINE);
-    agent->getLogger()->setPrintToStdoutFlag(true);
+    //agent->getLogger()->enable();
+    //agent->getLogger()->setLevel(Util::Logger::FINE);
+    //agent->getLogger()->setPrintToStdoutFlag(true);
     plugInMindAgent(agent, 1);
 }
 
@@ -190,12 +313,18 @@ void HopfieldServer::init(int width, int height, int numLinks)
 {
     AtomSpace* atomSpace = getAtomSpace();
     string nodeName = "Hopfield_";
-    this->width = width;
-    this->height = height;
+    if (width > 0) this->width = width;
+    if (height > 0)this->height = height;
+
+    if (links > 0)
+	this->links = numLinks;
+    else if (density != -1.0f)
+	this->links = (int) (density * (this->width * this->height));
+    
 
     // Create nodes
-    for (int i=0; i < width; i++) {
-	for (int j=0; j < height; j++) {
+    for (int i=0; i < this->width; i++) {
+	for (int j=0; j < this->height; j++) {
 	    nodeName = "Hopfield_";
 	    nodeName += to_string(i) + "_" + to_string(j);
 	    Handle h = atomSpace->addNode(CONCEPT_NODE, nodeName.c_str());
@@ -208,11 +337,11 @@ void HopfieldServer::init(int width, int height, int numLinks)
     
     // If only 1 node, don't try and connect it
     if (hGrid.size() < 2) {
-	MAIN_LOGGER.log(Util::Logger::WARNING,"Only one node, this is kind of silly but I shall follow instructions.");
+	MAIN_LOGGER.log(Util::Logger::WARNING,"Only %d node(s), <2 so this is kind of silly but I shall follow instructions.", hGrid.size());
 	return;
     }
 
-    addRandomLinks(numLinks);
+    addRandomLinks(this->links);
 
 }
 
@@ -229,8 +358,8 @@ void HopfieldServer::addRandomLinks(int amount)
 	target = source;
 	while (target == source) target = rng->randint(hGrid.size());
 
-	outgoing.push_back(hGrid[target]);
 	outgoing.push_back(hGrid[source]);
+	outgoing.push_back(hGrid[target]);
 	atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
 
 	amount--;
@@ -251,7 +380,7 @@ void HopfieldServer::hebbianLearningUpdate()
     MAIN_LOGGER.log(Util::Logger::DEBUG,"----------- Hebbian Learning update");
 
     // Go through all Hebbian links and update TVs
-    links = a->getAtomTable().getHandleSet(SYMMETRIC_HEBBIAN_LINK, true);
+    links = a->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
     // TODO: process assymmetric hebbian links too
 
     // Add links if less than desired number and to replace forgotten links
@@ -259,7 +388,7 @@ void HopfieldServer::hebbianLearningUpdate()
     delete links;
     
     // get links again to include the new ones
-    links = a->getAtomTable().getHandleSet(SYMMETRIC_HEBBIAN_LINK, true);
+    links = a->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
 
     for (current_l = links; current_l; current_l = current_l->next) {
 	// for each hebbian link, find targets, work out conjunction and convert
@@ -272,11 +401,29 @@ void HopfieldServer::hebbianLearningUpdate()
 	// get out going set
 	outgoing = TLB::getAtom(h)->getOutgoingSet();
 	tc = targetConjunction(outgoing);
+
 	// old link strength decays 
 	old_tc = a->getTV(h).getMean();
 	tc = (tcDecayRate * tc) + ( (1.0-tcDecayRate) * old_tc);
+	if (tc < 0.0f) {
+	    Handle source = outgoing[0];
+	    AttentionValue::sti_t s_sti = a->getSTI(source);
+	    // check link type. if symmetric, delete and replace with
+	    // asymmetric.
+	    // if asymmetric then check link goes from -ve to +ve atom
+	    if (TLB::getAtom(h)->getType() == SYMMETRIC_HEBBIAN_LINK ||
+		    (TLB::getAtom(h)->getType() == ASYMMETRIC_HEBBIAN_LINK
+		     && getNormSTI(s_sti) > 0) ) {
+
+		a->removeAtom(h);
+		outgoing = moveSourceToFront(outgoing);
+		// add new asymmetric link
+		h = a->addLink(ASYMMETRIC_HEBBIAN_LINK, outgoing);
+	    } 
+	}
+
 	// Update TV
-	a->setMean(h,tc);
+	a->setMean(h,fabs(tc));
 	
 	MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 	
@@ -285,6 +432,31 @@ void HopfieldServer::hebbianLearningUpdate()
     // or by looking at what nodes are in attentional focus
 
     delete links;
+
+}
+
+std::vector<Handle> HopfieldServer::moveSourceToFront(std::vector<Handle> outgoing)
+{
+    // find source, atom with negative norm_sti, and make first in outgoing
+    std::vector<Handle>::iterator outgoing_i;
+    AtomSpace *a = getAtomSpace();
+    Handle theSource = NULL;
+    for (outgoing_i = outgoing.begin(); outgoing_i < outgoing.end();) {
+	float normsti;
+	Handle oh = *outgoing_i;
+	normsti = getNormSTI(a->getSTI(oh));
+	if (normsti < 0.0f) {
+	    theSource = oh;
+	    outgoing_i = outgoing.erase(outgoing_i);
+	} else
+	    outgoing_i++;
+    }
+    if (theSource) {
+	outgoing.insert(outgoing.begin(),theSource);
+    } else {
+	MAIN_LOGGER.log(Util::Logger::ERROR,"Can't find source atom for new Asymmetric Hebbian Link");
+    }
+    return outgoing;
 
 }
 
@@ -312,7 +484,6 @@ float HopfieldServer::targetConjunction(std::vector<Handle> handles)
     // indicates whether at least one of the source/target are
     // in the attentional focus
     bool inAttention = false;
-    int normaliser;
     std::vector<Handle>::iterator h_i;
     Handle h;
     AtomSpace *a;
@@ -322,8 +493,6 @@ float HopfieldServer::targetConjunction(std::vector<Handle> handles)
     bool tcInit = true;
 
     a = getAtomSpace();
-    // get normalizer (maxSTI - attention boundary)
-    normaliser = a->getRecentMaxSTI() - a->getAttentionalFocusBoundary();
 
     for (h_i = handles.begin();
 	    h_i != handles.end();
@@ -335,7 +504,7 @@ float HopfieldServer::targetConjunction(std::vector<Handle> handles)
 	if (sti > a->getAttentionalFocusBoundary()) inAttention = true;
 
 	// normalise each sti and multiple each
-	normsti = (sti - a->getAttentionalFocusBoundary()) / (float) normaliser;
+	normsti = getNormSTI(sti);
 
 	// For debugging:
 	normsti_v.push_back(normsti);
@@ -347,7 +516,7 @@ float HopfieldServer::targetConjunction(std::vector<Handle> handles)
 
     }
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"TC: normaliser %d, normstis [%f,%f]", normaliser, normsti_v[0],normsti_v[1]);
+    MAIN_LOGGER.log(Util::Logger::FINE,"TC: normstis [%f,%f]", normsti_v[0],normsti_v[1]);
 
     if (!inAttention) return 0.0f;
     
@@ -356,6 +525,14 @@ float HopfieldServer::targetConjunction(std::vector<Handle> handles)
     if (tc < -1.0f) return -1.0f;
     return tc;
 	
+}
+
+float HopfieldServer::getNormSTI(AttentionValue::sti_t s)
+{
+    // get normalizer (maxSTI - attention boundary)
+    AtomSpace *a = getAtomSpace();
+    int normaliser = a->getRecentMaxSTI() - a->getAttentionalFocusBoundary();
+    return (s - a->getAttentionalFocusBoundary()) / (float) normaliser;
 }
 
 void HopfieldServer::imprintPattern(std::vector<int> pattern, int cycles)
@@ -403,23 +580,23 @@ void HopfieldServer::doForgetting(float proportion = 0.10)
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
     //
     atoms->toHandleVector(atomsVector);
-    std::sort(atomsVector.begin(), atomsVector.end(), ImportanceSpreadLTIAscendingSort());
+    std::sort(atomsVector.begin(), atomsVector.end(), ImportanceSpreadLTIAndTVAscendingSort());
     delete atoms;
 
     removalAmount = (int) (atomsVector.size() * proportion);
 
-    for (unsigned int i = 0; i < atomsVector.size() &&
-	    count < removalAmount; i++) {
-	if (getAtomSpace()->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE) {
-	    cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;
+    for (unsigned int i = 0; i < atomsVector.size() ; i++) {
+	if (getAtomSpace()->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE && count < removalAmount) {
+	    //cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;
+	    MAIN_LOGGER.log(Util::Logger::FINE,"Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
 	    if (!getAtomSpace()->removeAtom(atomsVector[i])) {
 		cout << "Error removing atom" << endl;
 		return;
 	    }
 	    count++;
-	}
+	} else
+	    MAIN_LOGGER.log(Util::Logger::FINE,"Not removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
     }
-    cout << "-" << endl;
 
 }
 
@@ -444,14 +621,13 @@ std::vector<int> HopfieldServer::retrievePattern(std::vector<int> partialPattern
     logString += "Initialising " + to_string(numCycles) + " cycle pattern retrieval process.";
     MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
 
+    resetNodes();
+
     while (numCycles > 0) {
 	encodePattern(partialPattern);
 	printStatus();
 	updateAtomTableForRetrieval();
 	printStatus();
-	updateAtomTableForRetrieval();
-	printStatus();
-
 
 	numCycles--;
 	MAIN_LOGGER.log(Util::Logger::INFO, "Cycles left %d",numCycles);
@@ -561,7 +737,7 @@ void HopfieldServer::spreadImportance()
 
 void HopfieldServer::spreadAtomImportance(Handle h)
 {
-    HandleEntry *neighbours, *links, *he;
+    HandleEntry *links, *he;
     AtomSpace *a;
     float maxTransferAmount,totalRelatedness;
     int totalTransferred;
@@ -573,22 +749,23 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 
     a = getAtomSpace();
     
-    MAIN_LOGGER.log(Util::Logger::FINE, "Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
+    MAIN_LOGGER.log(Util::Logger::FINE, "+Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
 
-    neighbours = TLB::getAtom(h)->getNeighbors(true,true,SYMMETRIC_HEBBIAN_LINK);
     links = TLB::getAtom(h)->getIncomingSet()->clone();
     // TODO: process assymmetric hebbian links too, those that have h as a source
-    links = HandleEntry::filterSet(links, SYMMETRIC_HEBBIAN_LINK, true);
-    MAIN_LOGGER.log(Util::Logger::FINE, "Hebbian links found %d", links->getSize());
+    links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
+    MAIN_LOGGER.log(Util::Logger::FINE, "  +Hebbian links found %d", links->getSize());
     
     maxTransferAmount = a->getSTI(h) * importanceSpreadingFactor;
 
     // sum total relatedness
     he = links;
     while (he) {
-	float val;
-	val = fabs(a->getTV(he->handle).toFloat());
-	totalRelatedness += val;
+	if (((Link*)TLB::getAtom(he->handle))->isSource(h)) {
+	    float val;
+	    val = fabs(a->getTV(he->handle).toFloat());
+	    totalRelatedness += val;
+	}
 	he = he->next;
     }
 
@@ -611,6 +788,10 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 	    Handle lh = *linksVector_i;
 	    const TruthValue &linkTV = a->getTV(lh);
 
+	    if (!((Link*)TLB::getAtom(lh))->isSource(h)) {
+		//MAIN_LOGGER.log(Util::Logger::FINE, "Link %s does not have this atom as a source.", TLB::getAtom(lh)->toString().c_str() );
+		continue; 
+	    }
 
 	    targets = TLB::getAtom(lh)->getOutgoingSet();
 	    transferWeight = linkTV.toFloat();
@@ -627,7 +808,8 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 	    transferAmount = transferAmount / (targets.size()-1.0f);
 	    if (transferAmount == 0.0f) continue;
 
-	    MAIN_LOGGER.log(Util::Logger::FINE, "weight %f, quanta %d, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingQuantum, targets.size(), transferAmount, maxTransferAmount);
+	    MAIN_LOGGER.log(Util::Logger::FINE, "  +Link %s", TLB::getAtom(lh)->toString().c_str() );
+	    MAIN_LOGGER.log(Util::Logger::FINE, "    |weight %f, quanta %d, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingQuantum, targets.size(), transferAmount, maxTransferAmount);
 
 	    for (t = targets.begin();
 		    t != targets.end() &&
@@ -649,17 +831,21 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 		totalTransferred += (int) transferAmount;
 		a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
 		a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
+		MAIN_LOGGER.log(Util::Logger::FINE, "    |%d sti from %s to %s", (int) transferAmount, TLB::getAtom(h)->toString().c_str(), TLB::getAtom(target_h)->toString().c_str() );
 		
 		// stimulate link 
-		if ( agent->getUpdateLinksFlag() )
-		    a->stimulateAtom(lh,stimForSpread);
+		// Doesn't make sense to stimulate the links just for spread.
+		// Maybe stimulate links that are helpful in getting the right
+		// pattern.
+		//if ( agent->getUpdateLinksFlag() )
+		//    a->stimulateAtom(lh,stimForSpread);
 	    }
 
 
 	}
     }
     else {
-	MAIN_LOGGER.log(Util::Logger::FINE, "Total relatedness = 0, spreading nothing");
+	MAIN_LOGGER.log(Util::Logger::FINE, "  |Total relatedness = 0, spreading nothing");
     }
     delete links;
 
@@ -677,26 +863,27 @@ void HopfieldServer::printStatus()
     int i;
 
     int col;
+    if (!verboseFlag) return;
 
     for (i = 0; i<height; i++) {	
 	for (col = 0; col < width; col++) {
-	    cout << nodeStim[i*width + col] << " ";
+	    printf("%3d", nodeStim[i*width + col]);
 	}
-	cout << " |  ";
+	cout << " | ";
 	for (col = 0; col < width; col++) {
-	    cout << nodeSTI[i*width + col] << " ";
+	    printf("%4.0f", nodeSTI[i*width + col]);
 	}
-	cout << " |  ";
+	cout << " | ";
 
 	for (col = 0; col < width; col++) {
-	    cout << pattern[i*width + col] << " ";
+	    printf("%3d", pattern[i*width + col]);
 	}
 	cout << endl;
     }
     
     //
     // Print out links.
-    links = getAtomSpace()->getAtomTable().getHandleSet(SYMMETRIC_HEBBIAN_LINK, true);
+    links = getAtomSpace()->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
 
     for (current_l = links; current_l; current_l = current_l->next) {
 	Handle h = current_l->handle;

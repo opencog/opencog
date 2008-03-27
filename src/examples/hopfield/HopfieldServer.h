@@ -27,16 +27,19 @@ class HopfieldServer : public opencog::CogServer {
 
 	Util::RandGen* rng; 
 
-	stim_t perceptStimUnit;
-	stim_t stimForSpread;
-	int width, height;
 
 	opencog::ImportanceUpdatingAgent *agent;
 
+    public:
+	stim_t perceptStimUnit;
+	stim_t stimForSpread;
+
+	int width, height, links;
+	float density;
+	
 	AttentionValue::sti_t spreadThreshold;
 	AttentionValue::sti_t vizThreshold;
 
-    public:
 
         ~HopfieldServer();
         HopfieldServer();
@@ -104,6 +107,8 @@ class HopfieldServer : public opencog::CogServer {
 	void hebbianLearningUpdate();
 	void resetNodes();
 	float targetConjunction(std::vector<Handle> handles);
+	float getNormSTI(AttentionValue::sti_t s);
+	std::vector<Handle> moveSourceToFront(std::vector<Handle> outgoing);
 	void imprintPattern(std::vector<int> pattern, int cycles);
 
 	std::vector< std::vector<int> > generateRandomPatterns(int amount);
@@ -124,12 +129,33 @@ struct ImportanceSpreadSTISort
      }
 };
 
-struct ImportanceSpreadLTIAscendingSort
+struct ImportanceSpreadLTIAndTVAscendingSort
 {
-     bool operator()(const Handle& h1, const Handle& h2)
-     {
-          return TLB::getAtom(h1)->getAttentionValue().getLTI() < TLB::getAtom(h2)->getAttentionValue().getLTI();
-     }
+    bool operator()(const Handle& h1, const Handle& h2)
+    {
+	AttentionValue::lti_t lti1, lti2;
+	float tv1, tv2;
+
+	tv1 = fabs(TLB::getAtom(h1)->getTruthValue().getMean());
+	tv2 = fabs(TLB::getAtom(h2)->getTruthValue().getMean());
+
+	lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
+	lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
+
+	if (lti1 < 0)
+	    tv1 = lti1 * (1.0f - tv1);
+	else
+	    tv1 = lti1 * tv1;
+
+	if (lti2 < 0)
+	    tv2 = lti2 * (1.0f - tv2);
+	else
+	    tv2 = lti2 * tv2;
+
+	 
+	return tv1 < tv2;
+    }
+
 };
 
 #endif // HOPFIELDSERVER_H
