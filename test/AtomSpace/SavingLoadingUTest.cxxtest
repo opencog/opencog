@@ -150,9 +150,9 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
             TS_ASSERT(h1);
             Atom* a1 = TLB::getAtom(h1);
             const AttentionValue& av1 = a1->getAttentionValue();
-            TS_ASSERT(av1.getSTI()  == 500);
-            TS_ASSERT(av1.getLTI()  == 0);
-            TS_ASSERT(av1.getVLTI() == AttentionValue::DISPOSABLE);
+            TS_ASSERT(av1.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+            TS_ASSERT(av1.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+            TS_ASSERT(av1.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
             const TruthValue& tv1 = a1->getTruthValue();
             TS_ASSERT(tv1.getType() == tvs[0]->getType());
             TS_ASSERT(tv1.getMean() == tvs[0]->getMean());
@@ -163,9 +163,9 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
             TS_ASSERT(h2);
             Atom* a2 = TLB::getAtom(h2);
             const AttentionValue& av2 = a2->getAttentionValue();
-            TS_ASSERT(av2.getSTI()  == 500);
-            TS_ASSERT(av2.getLTI()  == 0);
-            TS_ASSERT(av2.getVLTI() == AttentionValue::DISPOSABLE);
+            TS_ASSERT(av2.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+            TS_ASSERT(av2.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+            TS_ASSERT(av2.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
             const TruthValue& tv2 = a2->getTruthValue();
             TS_ASSERT(tv2.getType() == tvs[1]->getType());
@@ -177,9 +177,9 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
             TS_ASSERT(h3);
             Atom* a3 = TLB::getAtom(h3);
             const AttentionValue& av3 = a3->getAttentionValue();
-            TS_ASSERT(av3.getSTI()  == 500);
-            TS_ASSERT(av3.getLTI()  == 0);
-            TS_ASSERT(av3.getVLTI() == AttentionValue::DISPOSABLE);
+            TS_ASSERT(av3.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+            TS_ASSERT(av3.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+            TS_ASSERT(av3.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
             const TruthValue& tv3 = a3->getTruthValue();
             TS_ASSERT(tv3.getType() == tvs[2]->getType());
@@ -192,9 +192,9 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
             TS_ASSERT(h4);
             Atom* a4 = TLB::getAtom(h4);
             const AttentionValue& av4 = a4->getAttentionValue();
-            TS_ASSERT(av4.getSTI()  == 500);
-            TS_ASSERT(av4.getLTI()  == 0);
-            TS_ASSERT(av4.getVLTI() == AttentionValue::DISPOSABLE);
+            TS_ASSERT(av4.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+            TS_ASSERT(av4.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+            TS_ASSERT(av4.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
             const TruthValue& tv4 = a4->getTruthValue();
             TS_ASSERT(tv4.getType() == tvs[3]->getType());
@@ -214,9 +214,9 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
             TS_ASSERT(h5);
             Atom* a5 = TLB::getAtom(h5);
             const AttentionValue& av5 = a5->getAttentionValue();
-            TS_ASSERT(av5.getSTI()  == 500);
-            TS_ASSERT(av5.getLTI()  == 0);
-            TS_ASSERT(av5.getVLTI() == AttentionValue::DISPOSABLE);
+            TS_ASSERT(av5.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+            TS_ASSERT(av5.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+            TS_ASSERT(av5.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
             const TruthValue& tv5 = a5->getTruthValue();
             TS_ASSERT(tv5.getType() == tvs[4]->getType());

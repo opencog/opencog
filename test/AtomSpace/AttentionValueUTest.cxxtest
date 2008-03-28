@@ -21,9 +21,9 @@
 #define AV_LBOUND -32768
 #define AV_UBOUND 32767
 
-#define DEFAULTATOMSTI 500;
-#define DEFAULTATOMLTI 0;
-#define DEFAULTATOMVLTI 0;
+#define DEFAULTATOMSTI AttentionValue::DEFAULTATOMSTI;
+#define DEFAULTATOMLTI AttentionValue::DEFAULTATOMLTI;
+#define DEFAULTATOMVLTI AttentionValue::DEFAULTATOMVLTI;
 
 class AttentionValueUTest :  public CxxTest::TestSuite {
 private:
