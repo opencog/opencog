@@ -12,6 +12,6 @@ link_directories (
 ${OPENCOG_SOURCE_DIR}/lib/linux/sockets
 )
 
-target_link_libraries(hopfield CogServer)
+target_link_libraries (hopfield CogServer Sockets)
 
 
