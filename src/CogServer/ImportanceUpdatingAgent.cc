@@ -21,12 +21,12 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     noiseUnit = 10;
 
     recentTotalStimulusSinceReset = 0;
-    recentTotalStimulusDecay = 0.3;
+    recentTotalStimulusDecay = 0.5;
 
     attentionalFocusSize = 0;
     recentAttentionalFocusSize = 0.0f;
     recentAttentionalFocusNodesSize = 0.0f;
-    attentionalFocusSizeDecay = 0.3;
+    attentionalFocusSizeDecay = 0.8;
 
     maxSTIDecayRate = 0.8;
     // Moved to AtomSpace

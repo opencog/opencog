@@ -31,6 +31,7 @@ using namespace std;
 #define HDEMO_DEFAULT_SPREAD_STIM 1
 
 void parseOptions(int argc, char *argv[]);
+void printHelp();
 void testHopfieldNetwork();
 void testHopfieldNetworkRolling();
 std::vector<int> testPattern(std::vector<int> p, int imprint, std::vector<int> c, int retrieve);
@@ -70,13 +71,48 @@ int main(int argc, char *argv[])
 
 }
 
+void printHelp()
+{
+
+    const std::string helpOutput = "Hopfield network emulator using attention dynamics of OpenCog.\n"
+"Joel Pitt, March 2008.\nCopyright Singularity Institute for Artificial Intelligence\n"
+"-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
+"Options:\n"
+"   -v, --verbose \t Set to verbose output (log level \"DEBUG\")\n"
+"   -d, --debug   \t Set debug output, traces dynamics (log level \"FINE\")\n"
+"--\n"
+"   -w --width N \t Set width of Hopfield network\n"
+"   -h --height N \t Set height of Hopfield network\n"
+"   -n --size N   \t Set width and height of Hopfield network to N\n"
+"   -l --links N \t Add N random Hebbian links to network\n"
+"   -d --density N \t Set the number of links to a ratio of the total possible links\n"
+"                  \t   numLinks = density * ( ( width * height ) - 1 )!\n"
+"   -s --stimulus N\t Amount of stimulus to give an atom during imprinting or retrieval\n"
+"   -t --spread-threshold N  The minimum threshold of atom STI before it gets spread.\n"
+"   -z --viz-threshold N\t The atom STI needed for an atom to be considered \"on\" when\n"
+"                  \t   compared to original stored pattern.\n"
+"   -f --focus N \t Attentional focus boundary.\n"
+"   -p --patterns N \t Number of patterns to test.\n"
+"   -c --imprint N \t Number of _C_ycles to imprint pattern.\n"
+"   -r --retrieve N \t Number of cycles to retrieve pattern for.\n"
+"   -m --show-matrix \t Show matrices of stored/cue/retrieved pattern at end.\n"
+"   -i --interleave \t Interleave training of each pattern.\n"
+"   -e --error N \t probability of error in each bit of cue pattern.\n"
+"   -o --total   \t Report the mean performance increase between cue and retrieval.\n"
+"   -q --spread-multiplier N  multiplier for importance spread, if 0 then evenly\n"
+"                  \t spread across links\n";
+    cout << helpOutput;
+
+
+}
+
 void parseOptions(int argc, char *argv[])
 {
 
     int c;
 
     while (1) {
-	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:c:r:mie:oq:";
+	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:c:r:mie:oq:?";
 
 	static const struct option longOptions[] = {
 	    /* These options are flags */
@@ -160,6 +196,8 @@ void parseOptions(int argc, char *argv[])
 
 
 	    case '?':
+		printHelp();
+		exit(0);
 		break;
 	    default:
 		break;
@@ -341,7 +379,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
     if (width > 0) this->width = width;
     if (height > 0)this->height = height;
 
-    if (links > 0)
+    if (numLinks > 0)
 	this->links = numLinks;
     else if (density != -1.0f)
 	this->links = (int) (density * (this->width * this->height));
