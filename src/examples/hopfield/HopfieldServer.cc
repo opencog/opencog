@@ -10,6 +10,7 @@
 #include <sstream>
 #include <math.h>
 #include <getopt.h>
+#include <sys/time.h>
 
 #include <mt19937ar.h>
 #include <Logger.h>
@@ -39,10 +40,12 @@ HopfieldServer hDemo;
 int verboseFlag = 0;
 int interleaveFlag = 0;
 int showMatrixFlag = 0;
+int totalFlag = 0;
 int nPatterns = 1;
 int retrieveCycles = 10;
 int imprintCycles = 15;
 float cueErrorRate = 0.1;
+float importanceSpreadingMultiplier = 10.0f;
 
 int main(int argc, char *argv[])
 {
@@ -73,7 +76,7 @@ void parseOptions(int argc, char *argv[])
     int c;
 
     while (1) {
-	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:c:r:mie:";
+	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:c:r:mie:oq:";
 
 	static const struct option longOptions[] = {
 	    /* These options are flags */
@@ -95,6 +98,8 @@ void parseOptions(int argc, char *argv[])
 	    {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
 	    {"interleave", 0, &interleaveFlag, 1}, // interleave imprint of each pattern
 	    {"error", required_argument, 0, 'e'}, // cue error rate
+	    {"total", 0, &totalFlag, 1}, // t_o_tal, reports mean, suitable for batch output
+	    {"spread-multiplier", required_argument, 0, 'q'}, // multiplier for importance spread, if 0 then evenly spread across links
 	    {0,0,0,0}
 	};
 
@@ -108,7 +113,11 @@ void parseOptions(int argc, char *argv[])
 	   case 'v':
 		verboseFlag = 1; break;
 	   case 'D':
-		verboseFlag = 2; break;
+		verboseFlag = 2;
+		hDemo.agent->getLogger()->enable();
+		hDemo.agent->getLogger()->setLevel(Util::Logger::FINE);
+		hDemo.agent->getLogger()->setPrintToStdoutFlag(true);
+		break;
 	    case 'w':
 		hDemo.width=atoi(optarg); break;
 	    case 'h':
@@ -144,6 +153,10 @@ void parseOptions(int argc, char *argv[])
 		showMatrixFlag = 1; break;
 	    case 'i':
 		interleaveFlag = 1; break;
+	    case 'o':
+		totalFlag = 1; break;
+	    case 'q':
+		importanceSpreadingMultiplier = atof(optarg); break;
 
 
 	    case '?':
@@ -161,13 +174,14 @@ void testHopfieldNetworkRolling()
     std::vector< std::vector<int> > cuePatterns;
     std::vector< std::vector<int> > rPatterns;
     std::vector<int> result;
+    std::vector<float> diffs;
 
     patterns = hDemo.generateRandomPatterns(nPatterns);
     cuePatterns = hDemo.mutatePatterns(patterns, cueErrorRate);
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
 	hDemo.imprintPattern(patterns[i],imprintCycles);
-	MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for 5 loops");
+	MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for %d loops",imprintCycles);
     }
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
@@ -176,8 +190,7 @@ void testHopfieldNetworkRolling()
 	rPatterns.push_back(result);
     }
 
-
-    cout << "-----------------------" << endl;
+    if (! totalFlag) cout << "-----------------------" << endl;
     for (unsigned int i = 0; i< patterns.size(); i++) {
 	float before, after, diff;
 
@@ -187,9 +200,18 @@ void testHopfieldNetworkRolling()
 	before = hDemo.hammingSimilarity(patterns[i], cuePatterns[i]); 
 	after = hDemo.hammingSimilarity(patterns[i], rPatterns[i]);
 	diff = after-before;
-	cout << "=== similarity before/after/diff: " <<
+	diffs.push_back(diff);
+	
+	if (! totalFlag) cout << "=== similarity before/after/diff: " <<
 	    before << "/" << after << "/" << diff << endl;
-	cout << "-----------------------" << endl;
+    }
+
+    if (totalFlag) {
+	float total = 0.0f;
+	for (unsigned int i = 0; i < diffs.size(); i++)
+	    total += diffs[i];
+	cout << total / diffs.size() << endl;
+	
     }
 
 }
@@ -285,6 +307,12 @@ inline string to_string (const T& t)
 
 HopfieldServer::HopfieldServer()
 {
+    struct timeval tv;
+    struct timezone tz;
+    struct tm *tm;
+    gettimeofday(&tv, &tz);
+    tm=localtime(&tv.tv_sec);
+
     perceptStimUnit = HDEMO_DEFAULT_PERCEPT_STIM;
     stimForSpread = HDEMO_DEFAULT_SPREAD_STIM;
     spreadThreshold = HDEMO_DEFAULT_SPREAD_THRESHOLD;
@@ -293,12 +321,9 @@ HopfieldServer::HopfieldServer()
     height = HDEMO_DEFAULT_HEIGHT;
     links = HDEMO_DEFAULT_LINKS;
     density = -1.0f;
-    rng = new Util::MT19937RandGen(time(NULL));
+    rng = new Util::MT19937RandGen(tv.tv_usec);
 
     agent = new ImportanceUpdatingAgent();
-    //agent->getLogger()->enable();
-    //agent->getLogger()->setLevel(Util::Logger::FINE);
-    //agent->getLogger()->setPrintToStdoutFlag(true);
     plugInMindAgent(agent, 1);
 }
 
@@ -353,13 +378,20 @@ void HopfieldServer::addRandomLinks(int amount)
     while (amount > 0) {
 	int source, target;
 	HandleSeq outgoing;
+	HandleEntry* he;
 
 	source = rng->randint(hGrid.size());
 	target = source;
+
 	while (target == source) target = rng->randint(hGrid.size());
 
 	outgoing.push_back(hGrid[source]);
 	outgoing.push_back(hGrid[target]);
+	he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), SYMMETRIC_HEBBIAN_LINK, false);
+	if (he) {
+	    delete he;
+	    continue;
+	}
 	atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
 
 	amount--;
@@ -373,7 +405,7 @@ void HopfieldServer::hebbianLearningUpdate()
     HandleEntry *links, *current_l;
 
     // tc affects the truthvalue
-    float tc, old_tc;
+    float tc, old_tc, new_tc;
     float tcDecayRate = 0.2;
 
     AtomSpace* a = getAtomSpace();
@@ -400,30 +432,33 @@ void HopfieldServer::hebbianLearningUpdate()
 
 	// get out going set
 	outgoing = TLB::getAtom(h)->getOutgoingSet();
-	tc = targetConjunction(outgoing);
+	new_tc = targetConjunction(outgoing);
 
 	// old link strength decays 
 	old_tc = a->getTV(h).getMean();
-	tc = (tcDecayRate * tc) + ( (1.0-tcDecayRate) * old_tc);
-	if (tc < 0.0f) {
+	tc = (tcDecayRate * new_tc) + ( (1.0-tcDecayRate) * old_tc);
+	if (tc < 0.0f && new_tc < 0.0f ) {
 	    Handle source = outgoing[0];
 	    AttentionValue::sti_t s_sti = a->getSTI(source);
+
 	    // check link type. if symmetric, delete and replace with
 	    // asymmetric.
-	    // if asymmetric then check link goes from -ve to +ve atom
+	    // if asymmetric then check link goes from +ve to -ve atom
+	    // and fix if it doesn't
 	    if (TLB::getAtom(h)->getType() == SYMMETRIC_HEBBIAN_LINK ||
 		    (TLB::getAtom(h)->getType() == ASYMMETRIC_HEBBIAN_LINK
-		     && getNormSTI(s_sti) > 0) ) {
+		     && getNormSTI(s_sti) < 0) ) {
 
 		a->removeAtom(h);
 		outgoing = moveSourceToFront(outgoing);
-		// add new asymmetric link
-		h = a->addLink(ASYMMETRIC_HEBBIAN_LINK, outgoing);
+		// add asymmetric link
+		// if it already exists then the truth values will be mergerd.
+		h = a->addLink(ASYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(tc, 1));
 	    } 
+	} else {
+	    // Update TV
+	    a->setMean(h,tc);
 	}
-
-	// Update TV
-	a->setMean(h,fabs(tc));
 	
 	MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 	
@@ -445,7 +480,7 @@ std::vector<Handle> HopfieldServer::moveSourceToFront(std::vector<Handle> outgoi
 	float normsti;
 	Handle oh = *outgoing_i;
 	normsti = getNormSTI(a->getSTI(oh));
-	if (normsti < 0.0f) {
+	if (normsti > 0.0f) {
 	    theSource = oh;
 	    outgoing_i = outgoing.erase(outgoing_i);
 	} else
@@ -741,7 +776,6 @@ void HopfieldServer::spreadAtomImportance(Handle h)
     AtomSpace *a;
     float maxTransferAmount,totalRelatedness;
     int totalTransferred;
-    AttentionValue::sti_t importanceSpreadingQuantum = 10;
     float importanceSpreadingFactor = 0.4;
 
     totalRelatedness = 0.0f;
@@ -752,7 +786,6 @@ void HopfieldServer::spreadAtomImportance(Handle h)
     MAIN_LOGGER.log(Util::Logger::FINE, "+Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
 
     links = TLB::getAtom(h)->getIncomingSet()->clone();
-    // TODO: process assymmetric hebbian links too, those that have h as a source
     links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
     MAIN_LOGGER.log(Util::Logger::FINE, "  +Hebbian links found %d", links->getSize());
     
@@ -796,20 +829,24 @@ void HopfieldServer::spreadAtomImportance(Handle h)
 	    targets = TLB::getAtom(lh)->getOutgoingSet();
 	    transferWeight = linkTV.toFloat();
 
-	    // amount to spread dependent on weight and quantum - needs to be
+	    // amount to spread dependent on weight and multiplier - needs to be
 	    // divided by (targets->size - 1)
-	    transferAmount = transferWeight * importanceSpreadingQuantum;
-	    
+	    if (importanceSpreadingMultiplier == 0.0f) {
+		transferAmount = transferWeight * (maxTransferAmount / totalRelatedness);
+	    } else
+		transferAmount = transferWeight * importanceSpreadingMultiplier;
+
 	    // Allow at least one hebbian link to spread importance, even if it's
 	    // less than the amount the weight would indicate
 	    if (transferAmount > maxTransferAmount)
 		transferAmount = maxTransferAmount;
 	    
-	    transferAmount = transferAmount / (targets.size()-1.0f);
+	    if (targets.size() != 2)
+		transferAmount = transferAmount / (targets.size()-1.0f);
 	    if (transferAmount == 0.0f) continue;
 
 	    MAIN_LOGGER.log(Util::Logger::FINE, "  +Link %s", TLB::getAtom(lh)->toString().c_str() );
-	    MAIN_LOGGER.log(Util::Logger::FINE, "    |weight %f, quanta %d, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingQuantum, targets.size(), transferAmount, maxTransferAmount);
+	    MAIN_LOGGER.log(Util::Logger::FINE, "    |weight %f, quanta %.2f, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingMultiplier, targets.size(), transferAmount, maxTransferAmount);
 
 	    for (t = targets.begin();
 		    t != targets.end() &&

@@ -81,9 +81,9 @@ private:
 
     /* Number of atoms within attentionFocusBoundary */
     long attentionalFocusSize;
-    long recentAttentionalFocusSize;
+    float recentAttentionalFocusSize;
     long attentionalFocusNodesSize;
-    long recentAttentionalFocusNodesSize;
+    float recentAttentionalFocusNodesSize;
     /* Rate of decay (r) for estimating recentAttentionalFocusSize
      * Estimate equal to:
      * r *(attentionalFocusSize + (1-r) recentAttentionalFocusSize */

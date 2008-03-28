@@ -24,8 +24,8 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     recentTotalStimulusDecay = 0.3;
 
     attentionalFocusSize = 0;
-    recentAttentionalFocusSize = 0;
-    recentAttentionalFocusNodesSize = 0;
+    recentAttentionalFocusSize = 0.0f;
+    recentAttentionalFocusNodesSize = 0.0f;
     attentionalFocusSizeDecay = 0.3;
 
     maxSTIDecayRate = 0.8;
@@ -323,7 +323,7 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
 void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 {
     AttentionValue::sti_t oldSTIAtomRent;
-    int focusSize = 0;
+    float focusSize = 0;
     // STIAtomRent must be adapted based on attentional focus size, or else balance btw
     // lobe STI wealth and node/link STI wealth may not be maintained
 
@@ -348,7 +348,7 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 	focusSize = recentAttentionalFocusSize;
     }
 
-    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %d. Wage is %d.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage);
+    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage);
 
     lobeSTIOutOfBounds = false; 
 }
@@ -365,10 +365,10 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     inFocus = at.getHandleSet(a->getAttentionalFocusBoundary(),AttentionValue::MAXSTI);
     attentionalFocusSize = inFocus->getSize();
 
-    recentAttentionalFocusSize = (long) ( (r * attentionalFocusSize) + \
-				 ((1.0-r) * recentAttentionalFocusSize) );
+    recentAttentionalFocusSize = (r * attentionalFocusSize) + \
+				 ((1.0-r) * recentAttentionalFocusSize);
   
-    log->log(Util::Logger::FINE, "attentionalFocusSize = %d, recent = %d",
+    log->log(Util::Logger::FINE, "attentionalFocusSize = %d, recent = %f",
 	    attentionalFocusSize, recentAttentionalFocusSize);
 
     h = inFocus;
@@ -378,10 +378,10 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 	h = h->next;
     }
     attentionalFocusNodesSize = n;
-    recentAttentionalFocusNodesSize = (long) ( (r * attentionalFocusNodesSize) + \
-				 ((1.0-r) * recentAttentionalFocusNodesSize) );
+    recentAttentionalFocusNodesSize = (r * attentionalFocusNodesSize) + \
+				 ((1.0-r) * recentAttentionalFocusNodesSize);
 
-    log->log(Util::Logger::FINE, "attentionalFocusNodesSize = %d, recent = %d",
+    log->log(Util::Logger::FINE, "attentionalFocusNodesSize = %d, recent = %f",
 	    attentionalFocusNodesSize, recentAttentionalFocusNodesSize);
 
     delete inFocus;
