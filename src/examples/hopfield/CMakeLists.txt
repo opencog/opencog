@@ -6,12 +6,12 @@ ${OPENCOG_SOURCE_DIR}/src/CogServer
 ${OPENCOG_SOURCE_DIR}/src/Util
 )
 
-add_executable (hopfield HopfieldServer.cc)
 
 link_directories (
 ${OPENCOG_SOURCE_DIR}/lib/linux/sockets
 )
 
+add_executable (hopfield HopfieldServer.cc)
 target_link_libraries (hopfield CogServer Sockets)
 
 
