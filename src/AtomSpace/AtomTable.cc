@@ -394,7 +394,13 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const{
+HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
+                                     Type* types,
+                                     bool* subclasses,
+                                     Arity arity,
+                                     Type type,
+                                     bool subclass) const
+{
 //printf("AtomTable::getHandleSet()\n");  
 
 #ifdef USE_ATOM_HASH_SET    
@@ -410,7 +416,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
         //printf("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());  
         Link* link = new Link(type, handles);
         AtomHashSet::iterator it = atomSet->find(link);
-        Handle h = NULL;
+        Handle h = UNDEFINED_HANDLE;
         if (it != atomSet->end()) {
             h = TLB::getHandle(*it);
         }
@@ -644,12 +650,13 @@ void AtomTable::merge(Atom *original, Atom *copy) {
     delete copy;
 }
     
-Handle AtomTable::add(Atom *atom) throw (RuntimeException) {
+Handle AtomTable::add(Atom *atom) throw (RuntimeException)
+{
     if (atom->getAtomTable() != NULL){
         //Atom is already inserted
         return  TLB::addAtom(atom);
     }
-    Handle existingHandle = NULL;
+    Handle existingHandle = UNDEFINED_HANDLE;
     if (ClassServer::isAssignableFrom(NODE, atom->getType())) {
         // checks if the node handle already exists.
         existingHandle = getHandle(((Node*) atom)->getName().c_str(), atom->getType());
@@ -981,7 +988,7 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
     //MAIN_LOGGER.log(Util::Logger::FINE, "victim = %s", victim?victim->toString().c_str():"NULL");
 
     Handle p = index[headIndex];
-    Handle q = NULL;
+    Handle q = UNDEFINED_HANDLE;
     while (p != victimHandle) {
         if (TLB::isInvalidHandle(p)) {
             throw RuntimeException(TRACE_INFO, 
@@ -1003,7 +1010,7 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
         qatom->setNext(indexID, patom->next(indexID));
     }
 
-    victim->setNext(indexID, NULL);
+    victim->setNext(indexID, UNDEFINED_HANDLE);
 }
 
 void AtomTable::removeFromTargetTypeIndex(Atom *atom) {
@@ -1047,7 +1054,7 @@ void AtomTable::decayShortTermImportance() throw (RuntimeException) {
         Handle previous;
         if (current == clone[band]) {
             // head has not changed
-            previous = NULL;
+            previous = UNDEFINED_HANDLE;
         } else {
             // head has changed: seek correct previous
             previous = clone[band];
