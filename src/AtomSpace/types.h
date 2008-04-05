@@ -25,7 +25,7 @@ typedef Util::IntConstCharPointerHashMap ClassNameHashMap;
 
 // Definition of a handle. Opaque type.
 // Will change when system is reworked for distributed computing.
-typedef void* Handle;
+typedef unsigned long Handle;
 
 extern const Handle UNDEFINED_HANDLE;
 

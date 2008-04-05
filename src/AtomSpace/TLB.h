@@ -64,7 +64,7 @@ class TLB {
          * @return Handle of the newly added atom.
          */
         static inline Handle addAtom(Atom* atom) {
-            return atom;
+            return (Handle) atom;
         }
 
         /**
@@ -78,10 +78,10 @@ class TLB {
         }        
 
         static inline bool isInvalidHandle(Handle h) {
-            return (h == NULL);
+            return (h == 0);
         }
         static inline bool isValidHandle(Handle h) {
-            return (h != NULL);
+            return (h != 0);
         }
 };
 
