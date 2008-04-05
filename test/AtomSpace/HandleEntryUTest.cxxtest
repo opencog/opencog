@@ -83,17 +83,17 @@ public:
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and 
         // 1 target whose type is PREDICATE_NODE
         std::vector<Handle> outgoing(2);
-        outgoing[0] = n1; // concept (without any VH)
-        outgoing[1] = n3; // predicate (with VH1)
+        outgoing[0] = TLB::getHandle(n1); // concept (without any VH)
+        outgoing[1] = TLB::getHandle(n3); // predicate (with VH1)
         Link* l1 = new Link(LIST_LINK, outgoing);
         outgoing.resize(3);
-        outgoing[0] = n3; // predicate (with VH1)
-        outgoing[1] = n4; // predicate (with VH1 and VH2)
-        outgoing[2] = n5; // concept (with VH2)
+        outgoing[0] = TLB::getHandle(n3); // predicate (with VH1)
+        outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
+        outgoing[2] = TLB::getHandle(n5); // concept (with VH2)
         Link* l2 = new Link(LIST_LINK, outgoing);
         outgoing.resize(2);
-        outgoing[0] = n4; // predicate (with VH1 and VH2)
-        outgoing[1] = n5; // concept (with VH2)
+        outgoing[0] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
+        outgoing[1] = TLB::getHandle(n5); // concept (with VH2)
         Link* l3 = new Link(LIST_LINK, outgoing);
         
         
@@ -140,17 +140,17 @@ public:
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and 
         // 1 target whose type is PREDICATE_NODE
         std::vector<Handle> outgoing(2);
-        outgoing[0] = n1; // concept (without any VH)
-        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        outgoing[0] = TLB::getHandle(n1); // concept (without any VH)
+        outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
         Link* l1 = new Link(LIST_LINK, outgoing);
         outgoing.resize(3);
-        outgoing[0] = n3; // predicate (with VH1)
-        outgoing[1] = n4; // predicate (with VH1 and VH2)
-        outgoing[2] = n5; // concept (with VH2)
+        outgoing[0] = TLB::getHandle(n3); // predicate (with VH1)
+        outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
+        outgoing[2] = TLB::getHandle(n5); // concept (with VH2)
         Link* l2 = new Link(LIST_LINK, outgoing);
         outgoing.resize(2);
-        outgoing[0] = n4; // predicate (with VH1 and VH2)
-        outgoing[1] = n5; // concept (with VH2)
+        outgoing[0] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
+        outgoing[1] = TLB::getHandle(n5); // concept (with VH2)
         Link* l3 = new Link(LIST_LINK, outgoing);
         
         
