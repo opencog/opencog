@@ -77,7 +77,7 @@ class TLB {
             return atom;
         }        
 
-        static inline bool isNullHandle(Handle h) {
+        static inline bool isInvalidHandle(Handle h) {
             return (h != NULL);
         }
 };
