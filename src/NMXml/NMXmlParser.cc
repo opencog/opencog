@@ -469,7 +469,8 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
         // MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
         // fflush(stdout);
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
-        if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &UNDEFINED_HANDLE)) {
+        Handle uh = UNDEFINED_HANDLE;
+        if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &uh)) {
             result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
         }
     }
