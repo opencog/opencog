@@ -9,6 +9,9 @@
  * ported to C++ March 2008
  */
 
+#ifndef PERSISTENT_ODBC_DRIVER_H_
+#define PERSISTENT_ODBC_DRIVER_H_
+
 #include <stack>
 #include <string>
 
@@ -101,3 +104,4 @@ class ODBCRecordSet
 		}
 };
 
+#endif /* PERSISTENT_ODBC_DRIVER_H_ */

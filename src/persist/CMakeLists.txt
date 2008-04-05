@@ -1,5 +1,6 @@
 add_library (persist STATIC
 odbcxx.cc
+AtomStorage.cc
 )
 
 include_directories (
