@@ -294,7 +294,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                 //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
                 h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
 //            printf(" => h = %p\n", h);
-            if (h != NULL) {
+            if (!TLB::isInvalidHandle(h)) {
                 NMXmlParser::addOutgoingAtom(currentAtom, h);
             } else {
 #ifdef THROW_EXCEPTIONS
@@ -377,8 +377,8 @@ static void nativeEndElement(void *userData, const char *name)
                         if ((nextUd != NULL)&&(ClassServer::isAssignableFrom(LINK, nextUd->getType()))){
                             int arity = nextUd->getArity();
                             std::vector<Handle> outgoingSet = nextUd->getOutgoingSet();
-                            for (int i = 0; i < arity; i++){
-                                if (outgoingSet[i] == NULL){
+                            for (int i = 0; i < arity; i++) {
+                                if (TLB::isInvalidHandle(outgoingSet[i])) {
                                     outgoingSet[i] = newHandle;
                                     break;
                                 }
