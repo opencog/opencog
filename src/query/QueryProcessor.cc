@@ -53,7 +53,7 @@ static int cnt = 0;
 bool QueryProcessor::do_assertion(Handle h)
 {
 	cnt ++;
-	printf ("duuuude found assertion %d handle=%p\n", cnt, h);
+	printf ("duuuude found assertion %d handle=%lu\n", cnt, (unsigned long) h);
 
 	// If this assertion is a query, try to answer it.
 // #define USE_RELEX_QUERY 1
