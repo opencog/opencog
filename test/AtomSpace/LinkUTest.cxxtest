@@ -24,6 +24,8 @@ public:
 	void testEquals(){
         Node* n1 = new Node(CONCEPT_NODE, "TEST");
         Node* n2 = new Node(CONCEPT_NODE, "TEST");
+        TLB::addAtom(n1);
+        TLB::addAtom(n2);
         std::vector<Handle> out1;
         Link* l1 = new Link(LIST_LINK, out1);
         Link* l2 = new Link(LIST_LINK, out1);

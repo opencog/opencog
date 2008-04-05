@@ -23,7 +23,7 @@ public:
 			char name[1<<16];
 			sprintf(name, "name-%d", i);
 			Node *n = new Node(WORD_NODE, strdup(name));
-			handles[i] = TLB::getHandle(n);
+			handles[i] = TLB::addAtom(n);
 		}
 	}
 
