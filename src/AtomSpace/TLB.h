@@ -76,6 +76,10 @@ class TLB {
         static inline Atom* removeAtom(Atom* atom) {
             return atom;
         }        
+
+        static inline bool isNullHandle(Handle h) {
+            return (h != NULL);
+        }
 };
 
 #endif
