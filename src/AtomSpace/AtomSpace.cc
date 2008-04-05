@@ -410,7 +410,7 @@ Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn
     if (he) {
         result = he->handle;
         // Just merges the TV
-        if (!tvn.isNullTv()) {
+        if (TLB::isValidHandle(result) && !tvn.isNullTv()) {
             const TruthValue& currentTV = getTV(result);
             if (currentTV.isNullTv()) {
                 setTV(result, tvn);
@@ -588,8 +588,10 @@ void AtomSpace::setTV(Handle h,const TruthValue& tv, VersionHandle vh)
 
 const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
-          //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
+
+    if (TLB::isInvalidHandle(h)) return TruthValue::NULL_TV();
 
     const TruthValue& tv  = TLB::getAtom(h)->getTruthValue();
     if (isNullVersionHandle(vh)) {
