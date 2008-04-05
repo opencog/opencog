@@ -373,7 +373,7 @@ Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
     //fflus(stdout);
 
     Handle result = atomTable.getHandle(name.c_str(), t);
-    if (result) {
+    if (TLB::isValidHandle(result)) {
         // Just merges the TV
         if (!tvn.isNullTv()) {
             const TruthValue& currentTV = getTV(result);
