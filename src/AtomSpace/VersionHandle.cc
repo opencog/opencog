@@ -6,6 +6,7 @@
 
 #include "VersionHandle.h" 
 #include "exceptions.h"
+#include "TLB.h"
 
 VersionHandle::VersionHandle() {
     indicator = UNKNOWN;
