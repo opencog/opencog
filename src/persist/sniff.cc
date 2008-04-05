@@ -15,15 +15,15 @@ class AtomStorage
 	private:
 		ODBCConnection *db_conn;
 		ODBCRecordSet *rs;
-		bool column_cb(const char *colname, const char * colvalue)
+		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			printf ("%s = %s\n", colname, colvalue);
 			return false;
 		}
-		bool row_cb(void)
+		bool create_atom_row_cb(void)
 		{
 			printf ("---- New row found ----\n");
-			rs->foreach_column(&AtomStorage::column_cb, this);
+			rs->foreach_column(&AtomStorage::create_atom_column_cb, this);
 			return false;
 		}
 
@@ -61,6 +61,10 @@ AtomStorage::~AtomStorage()
 
 #define STMT(colname,val) { \
 	if(update) { \
+		if (notfirst) { cols += ", "; } else notfirst = 1; \
+		cols += colname; \
+		cols += " = "; \
+		cols += val; \
 	} else { \
 		if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
 		cols += colname; \
@@ -84,9 +88,9 @@ void AtomStorage::storeAtom(Atom *atom)
 	bool update = atomExists(h);
 	if (update)
 	{
-printf ("duude atom exists\n");
 		cols = "UPDATE Atoms SET ";
-		coda = "WHERE uuid = ";
+		vals = "";
+		coda = " WHERE uuid = ";
 		coda += uuidbuff;
 		coda += ";";
 	}
@@ -115,11 +119,12 @@ printf ("duude atom exists\n");
 
 	std::string qry = cols + vals + coda;
 printf ("duude its %s\n", qry.c_str());
-	db_conn->exec(qry.c_str());
+	rs = db_conn->exec(qry.c_str());
+	rs->release();
 }
 
 /**
- * Return true if the indicated handle esists in the storage.
+ * Return true if the indicated handle exists in the storage.
  */
 bool AtomStorage::atomExists(Handle h)
 {
@@ -137,6 +142,9 @@ bool AtomStorage::atomExists(Handle h)
 	return row_exists;
 }
 
+/**
+ * Create a new atom, retreived from storage
+ */
 Atom * AtomStorage::getAtom(Handle h)
 {
 	char buff[BUFSZ];
@@ -146,7 +154,7 @@ Atom * AtomStorage::getAtom(Handle h)
 	select += buff;
 	select += ";"; 
 	rs = db_conn->exec(select.c_str());
-	rs->foreach_row(&AtomStorage::row_cb, this);
+	rs->foreach_row(&AtomStorage::create_atom_row_cb, this);
 	rs->release();
 	return NULL;
 }
