@@ -87,15 +87,15 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 
 		// Else, we have a candidate solution.
 		// Make a record of it.
-		var_solution[ha] = ab;
+		var_solution[ha] = TLB::getHandle(ab);
 		return false;
 	}
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if ab is not one of the predicates itself.
-	if ((aa == ab) && (ab != curr_root))
+	if ((aa == ab) && (TLB::getHandle(ab) != curr_root))
 	{
-		var_solution[ha] = ab;
+		var_solution[ha] = TLB::getHandle(ab);
 		return false;
 	}
 
@@ -123,14 +123,14 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
 		              	      &PatternMatch::tree_compare, this);
 		depth --;
-		if (false == mismatch) var_solution[ha] = ab;
+		if (false == mismatch) var_solution[ha] = TLB::getHandle(ab);
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 
 	// Call the callback to make the final determination.
 	bool mismatch = pmc->node_match(aa, ab);
-	if (false == mismatch) var_solution[ha] = ab;
+	if (false == mismatch) var_solution[ha] = TLB::getHandle(ab);
 	return mismatch;
 }
 
@@ -261,7 +261,7 @@ void PatternMatch::get_next_unsolved_pred(void)
 		for (i=rl->begin(); i != rl->end(); i++)
 		{
 			Handle root = *i;
-			if(predicate_solution[root] != NULL)
+			if(TLB::isValidHandle(predicate_solution[root]))
 			{
 				solved = true;
 			}
