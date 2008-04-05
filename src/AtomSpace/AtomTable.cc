@@ -524,7 +524,7 @@ HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Ty
     HandleEntry* result = NULL;
     // then, if the atom returend is valid, the list with the given target name
     // and types will be returned.
-    if (CoreUtils::handleCompare(&handle, &UNDEFINED_HANDLE)) {
+    if (TLB::isValidHandle(handle)) {
         result = getHandleSet(handle, type, subclass);
     }
     return result;
