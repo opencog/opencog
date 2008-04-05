@@ -14,6 +14,22 @@ class AtomStorage
 {
 	private:
 		ODBCConnection *db_conn;
+
+		class Response;
+
+	public:
+		AtomStorage(void);
+		~AtomStorage();
+
+		void storeAtom(Atom *);
+		bool atomExists(Handle);
+		Atom * getAtom(Handle);
+};
+
+
+class AtomStorage::Response
+{
+	public:
 		ODBCRecordSet *rs;
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
@@ -23,7 +39,7 @@ class AtomStorage
 		bool create_atom_row_cb(void)
 		{
 			printf ("---- New row found ----\n");
-			rs->foreach_column(&AtomStorage::create_atom_column_cb, this);
+			rs->foreach_column(&Response::create_atom_column_cb, this);
 			return false;
 		}
 
@@ -33,14 +49,6 @@ class AtomStorage
 			row_exists = true;
 			return false;
 		}
-
-	public:
-		AtomStorage(void);
-		~AtomStorage();
-
-		void storeAtom(Atom *);
-		bool atomExists(Handle);
-		Atom * getAtom(Handle);
 };
 
 #include "Node.h"
@@ -119,8 +127,9 @@ void AtomStorage::storeAtom(Atom *atom)
 
 	std::string qry = cols + vals + coda;
 printf ("duude its %s\n", qry.c_str());
-	rs = db_conn->exec(qry.c_str());
-	rs->release();
+	Response rp;
+	rp.rs = db_conn->exec(qry.c_str());
+	rp.rs->release();
 }
 
 /**
@@ -134,12 +143,13 @@ bool AtomStorage::atomExists(Handle h)
 	std::string select = "SELECT uuid FROM Atoms WHERE uuid = ";
 	select += buff;
 	select += ";"; 
-	rs = db_conn->exec(select.c_str());
 
-	row_exists = false;
-	rs->foreach_row(&AtomStorage::row_exists_cb, this);
-	rs->release();
-	return row_exists;
+	Response rp;
+	rp.row_exists = false;
+	rp.rs = db_conn->exec(select.c_str());
+	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
+	rp.rs->release();
+	return rp.row_exists;
 }
 
 /**
@@ -153,9 +163,11 @@ Atom * AtomStorage::getAtom(Handle h)
 	std::string select = "SELECT * FROM Atoms WHERE uuid = ";
 	select += buff;
 	select += ";"; 
-	rs = db_conn->exec(select.c_str());
-	rs->foreach_row(&AtomStorage::create_atom_row_cb, this);
-	rs->release();
+
+	Response rp;
+	rp.rs = db_conn->exec(select.c_str());
+	rp.rs->foreach_row(&Response::create_atom_row_cb, &rp);
+	rp.rs->release();
 	return NULL;
 }
 
