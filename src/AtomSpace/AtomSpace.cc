@@ -78,14 +78,16 @@ void AtomSpace::print(std::ostream& output, Type type, bool subclass) const {
     atomTable.print(output, type, subclass);
 }
 
-Handle AtomSpace::addTimeInfo(Handle h, unsigned long timestamp, const TruthValue& tv) {
-    cassert(TRACE_INFO, h != UNDEFINED_HANDLE, "AtomSpace::addTimeInfo: Got an UNDEFINED_HANDLE as argument\n");
+Handle AtomSpace::addTimeInfo(Handle h, unsigned long timestamp, const TruthValue& tv)
+{
+    cassert(TRACE_INFO, TLB::isValidHandle(h), "AtomSpace::addTimeInfo: Got an invalid handle as argument\n");
     std::string nodeName = Temporal::getTimeNodeName(timestamp);
     return addTimeInfo(h, nodeName, tv);
 }
 
-Handle AtomSpace::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv) {
-    cassert(TRACE_INFO, h != UNDEFINED_HANDLE, "AtomSpace::addTimeInfo: Got an UNDEFINED_HANDLE as argument\n");
+Handle AtomSpace::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
+{
+    cassert(TRACE_INFO, TLB::isValidHandle(h), "AtomSpace::addTimeInfo: Got an invalid handle as argument\n");
     cassert(TRACE_INFO, t != UNDEFINED_TEMPORAL, "AtomSpace::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
     return addTimeInfo(h, t.getTimeNodeName(), tv);
 }
@@ -118,11 +120,11 @@ bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::Tempo
          itr != existingEntries.end(); itr++) {
         Handle atTimeLink = getAtTimeLink(*itr);
         //printf("Got atTimeLink = %p\n", atTimeLink);
-        if (atTimeLink != UNDEFINED_HANDLE) {
+        if (TLB::isValidHandle(atTimeLink)) {
             Handle timeNode = getOutgoing(atTimeLink, 0);
             //printf("Got timeNode = %p\n", timeNode);
             cassert(TRACE_INFO, getArity(atTimeLink) == 2, "AtomSpace::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n", getArity(atTimeLink));
-            cassert(TRACE_INFO, timeNode != UNDEFINED_HANDLE && getType(timeNode) == TIME_NODE, "AtomSpace::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
+            cassert(TRACE_INFO, TLB::isValidHandle(timeNode) && getType(timeNode) == TIME_NODE, "AtomSpace::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
             if (removeAtom(atTimeLink, recursive)) {
                 //printf("atTimeLink removed from AT successfully\n");
                 if (removeDisconnectedTimeNodes && getIncoming(timeNode).empty()) {
@@ -139,7 +141,8 @@ bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::Tempo
     return result;
 }
 
-Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const{
+Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const
+{
     Handle result = UNDEFINED_HANDLE;
 
     const Temporal& t = *(htp.getTemporal());
@@ -148,7 +151,7 @@ Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const{
 
     Handle timeNode = getHandle(TIME_NODE, t.getTimeNodeName().c_str());
     //printf("timeNode = %p\n", timeNode);
-    if (CoreUtils::compare(timeNode, UNDEFINED_HANDLE)) {
+    if (TLB::isInvalidHandle(timeNode)) {
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;
         atTimeLinkOutgoing[1] = h;
