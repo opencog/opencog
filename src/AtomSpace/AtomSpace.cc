@@ -386,11 +386,11 @@ Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
             }
         }
     } else {
-	// Remove default STI/LTI from AtomSpace Funds
-	fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-	fundsLTI -= AttentionValue::DEFAULTATOMLTI;
+        // Remove default STI/LTI from AtomSpace Funds
+        fundsSTI -= AttentionValue::DEFAULTATOMSTI;
+        fundsLTI -= AttentionValue::DEFAULTATOMLTI;
 
-	// Add Node
+        // Add Node
         result = atomTable.add(new Node(t, name, tvn));
 	
     }
