@@ -7,13 +7,15 @@
  * All rights reserved.
  */
 #include "CoreUtils.h"
+#include "TLB.h"
 
-void CoreUtils::updateHandle(Handle *handle, HandleMap *handles) throw (RuntimeException) {
+void CoreUtils::updateHandle(Handle *handle, HandleMap *handles) throw (RuntimeException)
+{
     //printf("CoreUtils::updateHandle(%p)\n", *handle);
-    if (!handleCompare(handle, &UNDEFINED_HANDLE)) return;
+    if (TLB::isValidHandle(*handle)) return;
 
     Handle newH = (Handle)handles->get(*handle);
-    if (compare(newH, UNDEFINED_HANDLE)) {
+    if (TLB::isValidHandle(newH)) {
         *handle = newH;
     } else {
         throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: unknown handle %p", *handle);
