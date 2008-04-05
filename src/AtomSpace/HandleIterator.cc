@@ -31,7 +31,8 @@ void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle
         currentType = 0;
         while (currentType < ClassServer::getNumberOfClasses()) {
             if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
-                table->getTypeIndexHead(currentType) != NULL) {
+                !TLB::isInvalidHandle(table->getTypeIndexHead(currentType)))
+            {
                 break;
             } else {
                 currentType++;
@@ -55,7 +56,7 @@ HandleIterator::~HandleIterator() {
 }
 
 bool HandleIterator::hasNext() {
-    return currentHandle != NULL;
+    return !TLB::isInvalidHandle(currentHandle);
 }
 
 Handle HandleIterator::next() {
@@ -68,12 +69,14 @@ Handle HandleIterator::next() {
 
     // if the list finishes, it's necessary to move to the next index
     // that matches subclass criteria
-    if (currentHandle == NULL) {
+    if (TLB::isInvalidHandle(currentHandle))
+    {
         if (desiredTypeSubclass) {
             currentType++;
             while (currentType < ClassServer::getNumberOfClasses()) {
                 if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
-                    table->getTypeIndexHead(currentType) != NULL) {
+                    !TLB::isInvalidHandle(table->getTypeIndexHead(currentType)))
+                {
                     break;
                 } else {
                     currentType++;
