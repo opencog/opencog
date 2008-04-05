@@ -243,7 +243,7 @@ float AtomTable::importanceBinMeanValue(unsigned int bin) {
 HandleEntry* AtomTable::makeSet(HandleEntry* set,
                                 Handle head, int index) const
 {
-    while (head != NULL) {
+    while (TLB::isValidHandle(head)) {
         HandleEntry* entry = new HandleEntry(head);
         entry->next = set;
         set = entry;
@@ -291,7 +291,7 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 
 HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const{
     HandleEntry* result = NULL;    
-    if (gpnHandle != NULL) {
+    if (TLB::isValidHandle(gpnHandle)) {
         //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);
         if (predicateHandles2Indices->contains(gpnHandle)) {
             int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
@@ -403,7 +403,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
     //printf("special case\n");  
     bool hasAllHandles = true;
     for (int i = 0; hasAllHandles && i < arity; i++) {
-        hasAllHandles = (handles[i] != NULL);
+        hasAllHandles = TLB::isValidHandle(handles[i]);
     }
     //printf("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);  
     if (hasAllHandles && !subclass) { 
@@ -415,7 +415,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
             h = TLB::getHandle(*it);
         }
         HandleEntry* result = NULL;
-        if (h != NULL) {
+        if (TLB::isValidHandle(h)) {
             result = new HandleEntry(h);
         }
         delete link;
@@ -438,7 +438,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
   // builds a set for each element in the outgoing set. Empty sets are
   // counted to be removed a posteriori
     for (int i = 0; i < arity; i++) {
-        if ((!handles.empty()) && (handles[i] != NULL)) {
+        if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
             sets[i] = TLB::getAtom(handles[i])->getIncomingSet()->clone();
             sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
             // Also filter links that do not belong to this table
@@ -667,7 +667,7 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException) {
         }
         delete(head);
     }
-    if (existingHandle != NULL) {
+    if (TLB::isValidHandle(existingHandle)) {
         //printf("Merging existing Atom with the Atom being added ...\n");
         merge(TLB::getAtom(existingHandle), atom);
         return existingHandle;
@@ -694,7 +694,7 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException) {
     // checks for null outgoing set members
     const std::vector<Handle>& ogs = atom->getOutgoingSet();
     for (int i = atom->getArity() - 1; i >= 0; i--) {
-        if (ogs[i] == NULL) {
+        if (TLB::isInvalidHandle(ogs[i])) {
             throw RuntimeException(TRACE_INFO, 
                   "AtomTable - Attempting to insert atom with invalid (null) outgoing members");
         }
@@ -782,7 +782,7 @@ bool AtomTable::updateImportanceIndex(Atom* atom, int bin) {
     Handle wanted = TLB::getHandle(atom);
 
     // checks if current is valid.
-    if (current == NULL) {
+    if (TLB::isInvalidHandle(current)) {
         return(false);
     }
     // here is checked if the atom is on the first position of its importance
@@ -795,7 +795,7 @@ bool AtomTable::updateImportanceIndex(Atom* atom, int bin) {
         Handle p;
         while ((p = TLB::getAtom(current)->next(IMPORTANCE_INDEX)) != wanted) {
             current = p;
-            if (p == NULL) {
+            if (TLB::isInvalidHandle(p)) {
                 return(false);
             }
         }
@@ -983,7 +983,7 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
     Handle p = index[headIndex];
     Handle q = NULL;
     while (p != victimHandle) {
-        if (p == NULL) {
+        if (TLB::isInvalidHandle(p)) {
             throw RuntimeException(TRACE_INFO, 
                   "AtomTable - Unable to remove atom. NULL atom at index 0x%X.", indexID);
         }
@@ -995,7 +995,7 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
     
     //cprintf(DEBUG,"removeFromIndex(): found position in the index\n");
     
-    if (q == NULL) {
+    if (TLB::isInvalidHandle(q)) {
         index[headIndex] = victim->next(indexID);
     } else {
         Atom *qatom = TLB::getAtom(q);
@@ -1053,12 +1053,12 @@ void AtomTable::decayShortTermImportance() throw (RuntimeException) {
             previous = clone[band];
             while (TLB::getAtom(previous)->next(IMPORTANCE_INDEX) != current) {
                 previous = TLB::getAtom(previous)->next(IMPORTANCE_INDEX);
-                if (previous == NULL) {
+                if (TLB::isInvalidHandle(previous)) {
                     throw RuntimeException(TRACE_INFO, "AtomTable - Found null previous");
                 }
             }
         }
-        while (current != NULL) {
+        while (TLB::isValidHandle(current)) {
             // the importance is updated.
             Atom* atom = TLB::getAtom(current);
             decayAtomShortTermImportance(atom);
@@ -1068,7 +1068,7 @@ void AtomTable::decayShortTermImportance() throw (RuntimeException) {
             // list will point to old next of the atom. In case the atom is the
             // first of the list, its next will be the new head of the list.
             if (newBand != band) {
-                if (previous == NULL) {
+                if (TLB::isInvalidHandle(previous)) {
                     // element in head
                     clone[band] = atom->next(IMPORTANCE_INDEX);
                 } else {
