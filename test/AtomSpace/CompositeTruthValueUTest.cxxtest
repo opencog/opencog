@@ -465,9 +465,9 @@ public:
         printf("testUpdateVersionHandles()\n");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
         HandleMap* handles = new HandleMap();
-        handles->add((Handle) 1, (Handle) 2);
-        handles->add((Handle) 2, (Handle) 3);
-        handles->add((Handle) 3, (Handle) 1);
+        handles->add((Handle) 1, (void *) 2);
+        handles->add((Handle) 2, (void *) 3);
+        handles->add((Handle) 3, (void *) 1);
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue* tv = tvs[i];
             tv->updateVersionHandles(handles);
