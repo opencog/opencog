@@ -26,11 +26,20 @@ class AtomStorage
 			rs->foreach_column(&AtomStorage::column_cb, this);
 			return false;
 		}
+
+		bool row_exists;
+		bool row_exists_cb(void)
+		{
+			row_exists = true;
+			return false;
+		}
+
 	public:
 		AtomStorage(void);
 		~AtomStorage();
 
 		void storeAtom(Atom *);
+		bool atomExists(Handle);
 		Atom * getAtom(Handle);
 };
 
@@ -48,40 +57,95 @@ AtomStorage::~AtomStorage()
 	delete db_conn;
 }
 
+#define BUFSZ 34
+
+#define STMT(colname,val) { \
+	if(update) { \
+	} else { \
+		if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
+		cols += colname; \
+		vals += val; \
+	} \
+}
+
 void AtomStorage::storeAtom(Atom *atom)
 {
-	std::string cols = "INSERT INTO Atoms (";
-	std::string vals = ") VALUES (";
+	int notfirst = 0;
+	std::string cols;
+	std::string vals;
+	std::string coda;
 
-	char buff[24];
 	Handle h = TLB::getHandle(atom);
-	snprintf(buff, 24, "%lu", (unsigned long) h);
-	cols += "uuid"; 
-	vals += buff;
 
+	// Currently using the TLB Handle as the UUID, ...XXX
+	char uuidbuff[BUFSZ];
+	snprintf(uuidbuff, BUFSZ, "%lu", (unsigned long) h);
+
+	bool update = atomExists(h);
+	if (update)
+	{
+printf ("duude atom exists\n");
+		cols = "UPDATE Atoms SET ";
+		coda = "WHERE uuid = ";
+		coda += uuidbuff;
+		coda += ";";
+	}
+	else
+	{
+		cols = "INSERT INTO Atoms (";
+		vals = ") VALUES (";
+		coda = ");";
+	}
+
+	STMT("uuid", uuidbuff);
+
+	char buff[BUFSZ];
 	Type t = atom->getType();
-	snprintf(buff, 24, "%u", t);
-	cols += ", type"; 
-	vals += ", "; 
-	vals += buff;
+	snprintf(buff, BUFSZ, "%u", t);
+	STMT("type", buff);
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if (n)
 	{
-		cols += ", name";
-		vals += ", '";
-		vals += n->getName();
-		vals += "'";
+		std::string qname = "'";
+		qname += n->getName();
+		qname += "'";
+		STMT("name", qname);
 	}
 
-	std::string qry = cols + vals + ");";
+	std::string qry = cols + vals + coda;
 printf ("duude its %s\n", qry.c_str());
 	db_conn->exec(qry.c_str());
 }
 
+/**
+ * Return true if the indicated handle esists in the storage.
+ */
+bool AtomStorage::atomExists(Handle h)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "%lu", (unsigned long) h);
+
+	std::string select = "SELECT uuid FROM Atoms WHERE uuid = ";
+	select += buff;
+	select += ";"; 
+	rs = db_conn->exec(select.c_str());
+
+	row_exists = false;
+	rs->foreach_row(&AtomStorage::row_exists_cb, this);
+	rs->release();
+	return row_exists;
+}
+
 Atom * AtomStorage::getAtom(Handle h)
 {
-	rs = db_conn->exec("SELECT * FROM Atoms;");
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "%lu", (unsigned long) h);
+
+	std::string select = "SELECT * FROM Atoms WHERE uuid = ";
+	select += buff;
+	select += ";"; 
+	rs = db_conn->exec(select.c_str());
 	rs->foreach_row(&AtomStorage::row_cb, this);
 	rs->release();
 	return NULL;
@@ -95,7 +159,9 @@ int main ()
 printf ("hello\n");
 
 	store->storeAtom(a);
-	store->getAtom(a);
+
+	Handle h = TLB::getHandle(a);
+	store->getAtom(h);
 
 
 	return 0;
