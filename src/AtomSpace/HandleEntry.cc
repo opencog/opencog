@@ -538,7 +538,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 		}else{
 			int position;
 			for (position = 0; position < arity; position++){
-				if ((target = TLB::getAtom(set->getAtom()->getOutgoingAtom(position))->getType()) &&
+				if ((target = set->getAtom()->getOutgoingAtom(position)->getType()) &&
 					((!subclass && (type == target)) ||
 					 (subclass && ClassServer::isAssignableFrom(type, target)))) {
 					break;
@@ -568,7 +568,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 		}else{
 			int position;
 			for (position = 0; position < arity; position++){
-				if ((target = TLB::getAtom(set->next->getAtom()->getOutgoingAtom(position))->getType()) &&
+				if ((target = set->next->getAtom()->getOutgoingAtom(position)->getType()) &&
 					((!subclass && (type == target)) ||
 					 (subclass && ClassServer::isAssignableFrom(type, target)))) {
 					break;
@@ -603,7 +603,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 
     while ((set != NULL) &&
                 ((set->getAtom()->getArity() != arity) ||
-                (target = TLB::getAtom(set->getAtom()->getOutgoingAtom(position))->getType(),
+                (target = set->getAtom()->getOutgoingAtom(position)->getType(),
                 ((!subclass && (type != target)) ||
                 (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
         
@@ -618,7 +618,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
     HandleEntry* head = set;
     while (set->next != NULL) {
     if (((set->next->getAtom()->getArity() != arity) ||
-                (target = TLB::getAtom(set->next->getAtom()->getOutgoingAtom(position))->getType(),
+                (target = set->next->getAtom()->getOutgoingAtom(position)->getType(),
                 ((!subclass && (type != target)) ||
                 (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
             buffer = set->next;
@@ -645,11 +645,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
 
     while ((set != NULL) &&
                 ((set->getAtom()->getArity() != arity) ||
-                (target = TLB::getAtom(set->getAtom()->getOutgoingAtom(position))->getType(),
+                (target = set->getAtom()->getOutgoingAtom(position)->getType(),
                 ((!subclass && (type != target)) ||
                 (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
                 (ClassServer::isAssignableFrom(NODE, target) ?
-                (strcmp(name, ((Node*) TLB::getAtom(set->getAtom()->getOutgoingAtom(position)))->getName().c_str())) :
+                (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
                 name != NULL))) {
         
         buffer = set;
@@ -663,11 +663,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
     HandleEntry* head = set;
     while (set->next != NULL) {
         if (((set->next->getAtom()->getArity() != arity) ||
-                (target = TLB::getAtom(set->next->getAtom()->getOutgoingAtom(position))->getType(),
+                (target = set->next->getAtom()->getOutgoingAtom(position)->getType(),
                 ((!subclass && (type != target)) ||
                 (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
                 (ClassServer::isAssignableFrom(NODE, target) ?
-                (strcmp(name, ((Node*) TLB::getAtom(set->getAtom()->getOutgoingAtom(position)))->getName().c_str())) :
+                (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
                 name != NULL))) {
             buffer = set->next;
             set->next = set->next->next;
@@ -692,8 +692,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
 
     while ((set != NULL) &&
                 ((set->getAtom()->getArity() != arity) ||
-                (ClassServer::isAssignableFrom(NODE, TLB::getAtom(set->next->getAtom()->getOutgoingAtom(position))->getType()) ?
-                (strcmp(name, ((Node*) TLB::getAtom(set->getAtom()->getOutgoingAtom(position)))->getName().c_str())) :
+                (ClassServer::isAssignableFrom(NODE, set->next->getAtom()->getOutgoingAtom(position)->getType()) ?
+                (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
                 name != NULL))) {
         
         buffer = set;
@@ -707,8 +707,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
     HandleEntry* head = set;
     while (set->next != NULL) {
         if (((set->next->getAtom()->getArity() != arity) ||
-                (ClassServer::isAssignableFrom(NODE, TLB::getAtom(set->next->getAtom()->getOutgoingAtom(position))->getType()) ?
-                (strcmp(name, ((Node*) TLB::getAtom(set->getAtom()->getOutgoingAtom(position)))->getName().c_str())) :
+                (ClassServer::isAssignableFrom(NODE, set->next->getAtom()->getOutgoingAtom(position)->getType()) ?
+                (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
                 name != NULL))) {
             buffer = set->next;
             set->next = set->next->next;
@@ -803,7 +803,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh) {
 bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh) {
     bool result = false;
     for (int i = 0; i < atom->getArity() && !result; i++) {
-        const Atom* target = TLB::getAtom(atom->getOutgoingAtom(i));
+        const Atom* target = atom->getOutgoingAtom(i);
         //printf("Checking atom with TYPE = %s, TV = %s\n", ClassServer::getTypeName(target->getType()), target->getTruthValue().toString().c_str());
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE && 
             !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
@@ -863,7 +863,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type targetType, bool targ
 bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, VersionHandle vh) {
     bool result = false;
     for (int i = 0; i < atom->getArity() && !result; i++) {
-        const Atom* target = TLB::getAtom(atom->getOutgoingAtom(i));
+        const Atom* target = atom->getOutgoingAtom(i);
         //printf("Checking atom with TYPE = %s, TV = %s\n", ClassServer::getTypeName(target->getType()), target->getTruthValue().toString().c_str());
         //if (ClassServer::isAssignableFrom(NODE, target->getType())) {
             //printf("Node name = %s\n", ((Node*) target)->getName().c_str());
