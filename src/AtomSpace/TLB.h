@@ -78,6 +78,9 @@ class TLB {
         }        
 
         static inline bool isInvalidHandle(Handle h) {
+            return (h == NULL);
+        }
+        static inline bool isValidHandle(Handle h) {
             return (h != NULL);
         }
 };
