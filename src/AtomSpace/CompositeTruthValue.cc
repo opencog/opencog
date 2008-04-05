@@ -5,6 +5,7 @@
 */
 #include "CompositeTruthValue.h"
 #include "type_codes.h"
+#include "TLB.h"
 
 
 //#define USE_SHARED_DEFAULT_TV
@@ -311,7 +312,7 @@ void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh)
     }
     VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
     if (itr == versionedTVs.end()) {
-        if (CoreUtils::compare(vh.substantive, UNDEFINED_HANDLE)) {
+        if (!isNullVersionHandle(vh)) {
             // valid version handle
             versionedTVs[vh] = newTv;
         } else {
@@ -341,8 +342,9 @@ void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh)
 }
 
 
-const TruthValue& CompositeTruthValue::getVersionedTV(VersionHandle vh) const {
-    if (CoreUtils::compare(vh.substantive, UNDEFINED_HANDLE)) {
+const TruthValue& CompositeTruthValue::getVersionedTV(VersionHandle vh) const
+{
+    if (!isNullVersionHandle(vh)) {
         VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
         if (itr == versionedTVs.end()) {
             return TruthValue::NULL_TV();
