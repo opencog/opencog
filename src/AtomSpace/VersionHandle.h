@@ -32,6 +32,6 @@ struct eqVersionHandle{
     bool operator()(VersionHandle vh1, VersionHandle vh2) const;
 }; 
 
-#define isNullVersionHandle(vh) (!CoreUtils::compare(vh.substantive, UNDEFINED_HANDLE))
+#define isNullVersionHandle(vh) TLB::isInvalidHandle(vh.substantive)
 
 #endif //_VERSIONHANDLE_H_

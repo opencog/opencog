@@ -83,6 +83,12 @@ class TLB {
         static inline bool isValidHandle(Handle h) {
             return (h != 0x55555555);
         }
+
+        static inline Handle UndefinedHandle(void) {
+            return 0x55555555;
+        }
+
+#define UNDEFINED_HANDLE (TLB::UndefinedHandle())
 };
 
 #endif

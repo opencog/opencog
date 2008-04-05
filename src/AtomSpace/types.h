@@ -27,8 +27,6 @@ typedef Util::IntConstCharPointerHashMap ClassNameHashMap;
 // Will change when system is reworked for distributed computing.
 typedef unsigned long Handle;
 
-extern const Handle UNDEFINED_HANDLE;
-
 //#ifdef WIN32
 //typedef hash_map<Handle, void *> HandleVoidPointerHashMap;
 //#else

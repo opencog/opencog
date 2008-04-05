@@ -7,9 +7,6 @@
  */
 #include "types.h"
 
-
-const Handle UNDEFINED_HANDLE = NULL;
-
 int hashHandle::operator()(Handle h) const{
     int hashCode =  Util::hash<unsigned long>()((unsigned long) h);
     return(hashCode);
