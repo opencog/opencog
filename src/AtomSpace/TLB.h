@@ -44,7 +44,7 @@ class TLB {
          * @return Corresponding atom for the given handle.
          */
         static inline Atom* getAtom(Handle handle) {
-            return (Atom *) handle;
+            return (Atom *) (handle ^ 0x55555555);
         }
 
         /**
@@ -54,7 +54,7 @@ class TLB {
          * @return Corresponding handle for the given atom.
          */
         static inline Handle getHandle(const Atom* atom) {
-            return (Handle) atom;
+            return ((Handle) atom) ^ 0x55555555;
         }
 
         /**
@@ -64,7 +64,7 @@ class TLB {
          * @return Handle of the newly added atom.
          */
         static inline Handle addAtom(Atom* atom) {
-            return (Handle) atom;
+            return ((Handle) atom) ^ 0x55555555;
         }
 
         /**
@@ -78,10 +78,10 @@ class TLB {
         }        
 
         static inline bool isInvalidHandle(Handle h) {
-            return (h == 0);
+            return (h == 0x55555555);
         }
         static inline bool isValidHandle(Handle h) {
-            return (h != 0);
+            return (h != 0x55555555);
         }
 };
 
