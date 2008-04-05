@@ -98,14 +98,14 @@ public:
             char name[1<<16];
             sprintf(name, "name-%d", i);
             Node *n = new Node(WORD_NODE, name);
-            handles[i] = n;
+            handles[i] = TLB::addAtom(n);
         }
     }
 
     ~TimeServerUTest(){
         for(int i = 0; i < N_TIMES; i++){
             delete times[i];
-            delete handles[i];
+            delete TLB::removeAtom(TLB::getAtom(handles[i]));
         }
     }
 
