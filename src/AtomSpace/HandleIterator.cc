@@ -38,7 +38,7 @@ void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle
                 currentType++;
             }
         }
-        currentHandle = currentType >= ClassServer::getNumberOfClasses() ? NULL : table->getTypeIndexHead(currentType);
+        currentHandle = currentType >= ClassServer::getNumberOfClasses() ? UNDEFINED_HANDLE : table->getTypeIndexHead(currentType);
     } else {
         // if no subclasses are allowed, the current handle is simply
         // the first element of the desired type index.
@@ -83,7 +83,7 @@ Handle HandleIterator::next() {
                 }
             }
             // currentHandle is the first element of the next index.
-            currentHandle = currentType >= ClassServer::getNumberOfClasses() ? NULL : table->getTypeIndexHead(currentType);
+            currentHandle = currentType >= ClassServer::getNumberOfClasses() ? UNDEFINED_HANDLE : table->getTypeIndexHead(currentType);
         }
     }
 
