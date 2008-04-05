@@ -31,7 +31,7 @@ class OutgoingTree
 		Handle tgt;
 		inline bool in_tree(Handle tree)
 		{
-			if (tree == NULL) return false;
+			if (TLB::isInvalidHandle(tree)) return false;
 			if (tree == tgt) return true;
 			return foreach_outgoing_handle(tree, &OutgoingTree::in_tree, this);
 		}
