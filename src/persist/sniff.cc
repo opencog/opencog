@@ -23,7 +23,7 @@ class AtomStorage
 		bool row_cb(void)
 		{
 			printf ("---- New row found ----\n");
-			// rs->foreach_column(&Ola::column_cb, this);
+			rs->foreach_column(&AtomStorage::column_cb, this);
 			return false;
 		}
 	public:
@@ -31,6 +31,7 @@ class AtomStorage
 		~AtomStorage();
 
 		void storeAtom(Atom *);
+		Atom * getAtom(Handle);
 };
 
 #include "Node.h"
@@ -48,25 +49,27 @@ AtomStorage::~AtomStorage()
 
 void AtomStorage::storeAtom(Atom *)
 {
+	
 }
 
-#include "TruthValue.h"
+Atom * AtomStorage::getAtom(Handle h)
+{
+	rs = db_conn->exec("SELECT * FROM Atoms;");
+	rs->foreach_row(&AtomStorage::row_cb, this);
+	rs->release();
+	return NULL;
+}
 
 int main ()
 {
 	AtomStorage *store = new AtomStorage();
 
 	Atom *a = new Node(SCHEMA_NODE, "someNode");
+printf ("hello\n");
 
 	store->storeAtom(a);
+	store->getAtom(a);
 
-#if 0
-	ODBCRecordSet *rs;
-	rs = conn->exec("SELECT * FROM Atoms;");
-	ola->rs = rs;
-	rs->foreach_row(&Ola::row_cb, ola);
-	rs->release();
-#endif
 
 	return 0;
 }
