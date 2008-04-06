@@ -262,7 +262,7 @@ Handle AtomSpace::createHandle(Type t,const string& str,bool managed) {
     //fflus(stdout);
 
     Handle h = getHandle(t,str);
-    return isValidHandle(h) ? h : addNode(t,str,TruthValue::NULL_TV());
+    return TLB::isValidHandle(h) ? h : addNode(t,str,TruthValue::NULL_TV());
 }
 
 Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
@@ -270,7 +270,7 @@ Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
     //fflus(stdout);
 
     Handle h=getHandle(t,outgoing);
-    return isValidHandle(h) ? h : addLink(t,outgoing,TruthValue::NULL_TV());
+    return TLB::isValidHandle(h) ? h : addLink(t,outgoing,TruthValue::NULL_TV());
 }
 
 bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
