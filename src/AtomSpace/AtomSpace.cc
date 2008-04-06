@@ -288,8 +288,8 @@ bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
 
 Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     cassert(TRACE_INFO, boost::get<Handle>(&*it), "AtomSpace::addAtom(): Vertex should be of 'Handle' type.");
 
@@ -312,13 +312,14 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
         }
     }
 
-    return addLink((Type)(long)head_type, handles, tvn);
+    return addLink((Type) ((long) TLB::getAtom(head_type)), handles, tvn);
 }
 
-Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn) {
-          //fprintf(stdout,"Atom space address: %p\n", this);
+Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn)
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-   return addAtom(a,a.begin(),tvn);
+    return addAtom(a,a.begin(),tvn);
 }
 
 bool AtomSpace::removeAtom(Handle h, bool recursive) {
