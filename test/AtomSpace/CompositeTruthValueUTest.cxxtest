@@ -8,6 +8,7 @@
 #include "IndefiniteTruthValue.h"
 #include <math.h>
 #include "exceptions.h"
+#include "TLB.h"
 
 #define NUM_TVS 3
 #define TV1_MEAN 0.25f
@@ -35,9 +36,9 @@ public:
         counts[0] = TV1_COUNT;
         counts[1] = TV2_COUNT;
         counts[2] = TV3_COUNT;
-        versionHandles[0] = VersionHandle(HYPOTHETICAL, (Handle) 1);
-        versionHandles[1] = VersionHandle(CONTEXTUAL, (Handle) 2);
-        versionHandles[2] = VersionHandle(UNKNOWN, (Handle) 3);
+        versionHandles[0] = VersionHandle(HYPOTHETICAL, TLB::getHandle((Atom *) 1));
+        versionHandles[1] = VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *) 2));
+        versionHandles[2] = VersionHandle(UNKNOWN, TLB::getHandle((Atom *) 3));
 	}
 
     void setUp() {
@@ -465,16 +466,16 @@ public:
         printf("testUpdateVersionHandles()\n");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
         HandleMap* handles = new HandleMap();
-        handles->add((Handle) 1, (void *) 2);
-        handles->add((Handle) 2, (void *) 3);
-        handles->add((Handle) 3, (void *) 1);
+        handles->add(TLB::getHandle((Atom *) 1), (void *) 2);
+        handles->add(TLB::getHandle((Atom *) 2), (void *) 3);
+        handles->add(TLB::getHandle((Atom *) 3), (void *) 1);
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue* tv = tvs[i];
             tv->updateVersionHandles(handles);
             const TruthValue& versionedTv1 = tv->getVersionedTV(versionHandles[i]);
             TS_ASSERT(versionedTv1.isNullTv());
             //printf("%d => %p\n", i+1, handles->get(i+1));
-            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, (Handle) handles->get((Handle)(i+1))));
+            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, TLB::getHandle((Atom *) handles->get(TLB::getHandle((Atom *)(i+1))))));
             TS_ASSERT(!versionedTv2.isNullTv());
             TS_ASSERT(fabs(versionedTv2.getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(versionedTv2.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
