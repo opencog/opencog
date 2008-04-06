@@ -795,57 +795,57 @@ public:
         Temporal* t2 = new Temporal(500, 1500); 
         
         Handle atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         
         atomSpace.addTimeInfo(h1, *t1);
 
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         
         atomSpace.addTimeInfo(h1, *t2);
 
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
 
         atomSpace.addTimeInfo(h2, *t1);
 
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
-        TS_ASSERT(atTimeLink == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
 
         atomSpace.addTimeInfo(h2, *t2);
 
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t1));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h1,t2));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t1));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2,t2));
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
 
     }
 
@@ -856,12 +856,12 @@ public:
         TS_ASSERT(!atomSpace.removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
         
         Handle atTimeLink = atomSpace.addTimeInfo(node1, 1000);
-        TS_ASSERT(atTimeLink != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
         TS_ASSERT(atomSpace.removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
         
         // Check if the TimeNode was removed from AtomTable. I should not, since removeDisconnectedTimeNodes flag is false.  
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
-        TS_ASSERT(timeNode != UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isValidHandle(timeNode));
         // Check if the AtTimeLink was removed from AtomTable 
         HandleSeq outgoing;
         outgoing.push_back(timeNode); 
@@ -879,7 +879,7 @@ public:
 
         // Since the removeDisconnectedTimeNodes flag is true, TimeNode should have been removed too
         timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
-        TS_ASSERT(timeNode == UNDEFINED_HANDLE);
+        TS_ASSERT(TLB::isInvalidHandle(timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq atTimeLinks;
         atomSpace.getHandleSet(back_inserter(atTimeLinks), AT_TIME_LINK, false);
