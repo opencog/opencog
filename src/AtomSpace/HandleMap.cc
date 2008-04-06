@@ -9,176 +9,204 @@
 #include <stdlib.h>
 #include "HandleMap.h"
 
-inline void HandleMap::lock() {
+template <class T>
+void HandleMap<T>::lock()
+{
 #ifdef HAVE_LIBPTHREAD
-	if (useMutex){
-		pthread_mutex_lock(&plock);
-	}
+    if (useMutex){
+        pthread_mutex_lock(&plock);
+    }
 #endif
 }
 
-inline void HandleMap::unlock() {
+template <class T>
+void HandleMap<T>::unlock()
+{
 #ifdef HAVE_LIBPTHREAD
-	if (useMutex){
-		pthread_mutex_unlock(&plock);
+    if (useMutex){
+        pthread_mutex_unlock(&plock);
     }
 #endif
 }
 
 
-void HandleMap::init(int initialSize, bool useMutex) {
-	
-	hashMap = new InternalHashMap(initialSize);
-	
-	this->useMutex = useMutex;
-	
+template <class T>
+void HandleMap<T>::init(int initialSize, bool use_mutex)
+{
+    handle_map = new InternalMap(initialSize);
+
+    useMutex = use_mutex;
+
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&plock, NULL);
 #endif
 }
 
-HandleMap::~HandleMap() {
-	
+template <class T>
+HandleMap<T>::~HandleMap<T>()
+{
+
     lock();
-	
-	delete(hashMap);
-	
+
+    delete(handle_map);
+
     unlock();
 }
 
-HandleMap::HandleMap(bool useMutex) {
-    init(DEFAULT_SIZE, useMutex);
+template <class T>
+HandleMap<T>::HandleMap(bool use_mutex)
+{
+    init(DEFAULT_SIZE, use_mutex);
 }
 
-HandleMap::HandleMap(int size, bool useMutex) {
-    init(size, useMutex);
+template <class T>
+HandleMap<T>::HandleMap(int size, bool use_mutex)
+{
+    init(size, use_mutex);
 }
 
-void HandleMap::add(Handle key, void *element) throw (RuntimeException){
-	
+template <class T>
+void HandleMap<T>::add(Handle key, T element) throw (RuntimeException)
+{
     lock();
-	
+
     // check if the element is already in the hash table. If not, it
     // is added to the head of the list for that position
     if (!contains(key)) {
-		(*hashMap)[key] = element;
+        (*handle_map)[key] = element;
     } else {
         throw RuntimeException(TRACE_INFO, "attempting to insert duplicated key %d in hash map", key);
     }
-	
+
     unlock();
 }
 
-void *HandleMap::get(Handle key) {
-	
-	void *ret;
-	
+template <class T>
+T HandleMap<T>::get(Handle key)
+{
+    T ret;
+
     lock();
-	
-	InternalIterator ti = hashMap->find(key);
-	
-	if (ti == hashMap->end()){
-		return(NULL);
-	}
-	
-	ret = ti->second;
-	
+
+    InternalIterator ti = handle_map->find(key);
+
+    if (ti == handle_map->end()){
+        return(NULL);
+    }
+
+    ret = ti->second;
+
     unlock();
-	
+
     // if the key is not found, return NULL.
     return ret;
 }
 
-bool HandleMap::contains(Handle key) {
-	
-	bool ret;
-	
+template <class T>
+bool HandleMap<T>::contains(Handle key)
+{
+    bool ret;
+
     // lock and call private contains()
     lock();
-	
-	InternalIterator ti = hashMap->find(key);
-	
-	ret = ti != hashMap->end();
-	
-	unlock();
+
+    InternalIterator ti = handle_map->find(key);
+
+    ret = ti != handle_map->end();
+
+    unlock();
 
     return ret;
 }
 
-void *HandleMap::remove(Handle key) {
-	void *ret = NULL;
-	
+template <class T>
+T HandleMap<T>::remove(Handle key)
+{
+    T ret = NULL;
+
     lock();
-	
-	InternalIterator ti = hashMap->find(key);
-	
-	if (ti != hashMap->end()){
-		ret = ti->second;
-		hashMap->erase(ti);
-	}
-	
+
+    InternalIterator ti = handle_map->find(key);
+
+    if (ti != handle_map->end()){
+        ret = ti->second;
+        handle_map->erase(ti);
+    }
+
     unlock();
-	
+
     // returns the removed element.
     return ret;
 }
 
-void HandleMap::resize(int newSize) {
+template <class T>
+void HandleMap<T>::resize(int newSize)
+{
     lock();
 
-	hashMap->resize(newSize);
-	
+    handle_map->resize(newSize);
+
     unlock();
 }
 
-int HandleMap::getCount() {
+template <class T>
+int HandleMap<T>::getCount()
+{
     int size;
-	lock();
+    lock();
 
-    size = hashMap->size();
+    size = handle_map->size();
 
-	unlock();
-	return(size);
+    unlock();
+    return(size);
 }
 
-int HandleMap::getSize() {
-	int max_size;
-	lock();
-	
-	max_size = hashMap->bucket_count();
-	
-	unlock();
-	
-	return max_size;
+template <class T>
+int HandleMap<T>::getSize()
+{
+    int max_size;
+    lock();
+
+    max_size = handle_map->bucket_count();
+
+    unlock();
+
+    return max_size;
 }
 
-
-HandleMapIterator *HandleMap::keys() {
-	return new HandleMapIterator(this);
+template <class T>
+HandleMapIterator<T> *HandleMap<T>::keys()
+{
+    return new HandleMapIterator<T>(this);
 }
 
-HandleMapIterator::HandleMapIterator(HandleMap *m){
-	map = m;
-	current = map->hashMap->begin();
+template <class T>
+HandleMapIterator<T>::HandleMapIterator(HandleMap<T> *m)
+{
+    map = m;
+    current = map->handle_map->begin();
 }
 
-bool HandleMapIterator::hasNext() {
-    return current != map->hashMap->end();
+template <class T>
+bool HandleMapIterator<T>::hasNext()
+{
+    return current != map->handle_map->end();
 }
 
-Handle HandleMapIterator::next() throw (IndexErrorException){
-	
+template <class T>
+Handle HandleMapIterator<T>::next() throw (IndexErrorException)
+{
     if (!hasNext()) {
         throw IndexErrorException(TRACE_INFO, "HandleMapIterator out of bounds");
-    } 
-	
+    }
+
     map->lock();
 
     Handle ret = current->first;
 
-	current++;
-    
-	map->unlock();
+    current++;
+
+    map->unlock();
 
     return ret;
 }

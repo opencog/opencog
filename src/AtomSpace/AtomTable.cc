@@ -167,7 +167,7 @@ void AtomTable::addPredicateIndex(Handle predicateHandle, PredicateEvaluator* ev
     }
     
     // Ok, add it.
-    predicateHandles2Indices->add(predicateHandle, (int*) numberOfPredicateIndices);
+    predicateHandles2Indices->add(predicateHandle, numberOfPredicateIndices);
     predicateHandles[numberOfPredicateIndices] = predicateHandle;
     predicateEvaluators[numberOfPredicateIndices] = evaluator;
     numberOfPredicateIndices++;

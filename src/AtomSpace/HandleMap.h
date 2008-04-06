@@ -47,24 +47,21 @@ private:
 	 */
     static const int DEFAULT_SIZE = 100;
 
-	/**
-	 * Defines the hash_map that will be used.
-	 */
 public:
 	
 	/**
-	 * Defines an iterator to the hashMap.
+	 * Defines an iterator to the map.
 	 */
-   typedef std::map<Handle, T> InternalHashMap;
-	// typedef InternalHashMap::iterator InternalIterator;
+   typedef std::map<Handle, T> InternalMap;
+	typedef typename InternalMap::iterator InternalIterator;
 	
 	
 private:
 	
 	/**
-	 * The hashMap where the elements will be stored.
+	 * The Map where the elements will be stored.
 	 */
-	InternalHashMap *hashMap;
+	InternalMap *handle_map;
 
 	/**
 	 * Indicates whether a mutex for concurrent acces is to be used or not.
@@ -199,10 +196,6 @@ private:
 	/**
 	 * Stores the current iterator.
 	 */
-   // HandleMap<T>::InternalIterator current;
-
-   // typedef typename std::map<Handle, T *>::iterator blammo;
-
    typename std::map<Handle, T *>::iterator current;
 
 	/**
