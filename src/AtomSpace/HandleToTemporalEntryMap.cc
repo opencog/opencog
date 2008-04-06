@@ -5,6 +5,7 @@
  */
 #include <HandleToTemporalEntryMap.h>
 #include <TLB.h>
+#include "HandleMap.cc"
 
 HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 {

@@ -161,7 +161,8 @@ int HandleMap<T>::getSize()
     int max_size;
     lock();
 
-    max_size = handle_map->bucket_count();
+    // max_size = handle_map->bucket_count();
+    max_size = handle_map->size();
 
     unlock();
 
