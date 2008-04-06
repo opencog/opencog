@@ -282,7 +282,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     fread(&atomCount, sizeof(int), 1, f);
     
     // creates a hash map from old handles to new ones
-    HandleMap *handles = new HandleMap();
+    HandleMap<Atom *> *handles = new HandleMap<Atom *>();
     
     processed = 0;
     total = atomCount;
@@ -297,7 +297,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
 
     //MAIN_LOGGER.log(Util::Logger::INFO, "nodes, links and indices loaded. number of handles = %d", handles->getCount());
     // update types in all atoms 
-    HandleMapIterator *it = handles->keys();
+    HandleMapIterator<Atom *> *it = handles->keys();
     while (it->hasNext()){
         Atom *element = (Atom *)handles->get(it->next());
         if (dumpToCore[element->getType()] > ClassServer::getNumberOfClasses()){
@@ -359,7 +359,8 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore){
     
 }
 
-void SavingLoading::loadNodes(FILE *f, HandleMap *handles, AtomTable& atomTable) {
+void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadNodes");
 
     int numNodes;
@@ -379,7 +380,8 @@ void SavingLoading::loadNodes(FILE *f, HandleMap *handles, AtomTable& atomTable)
     atomTable.size += numNodes;
 }
 
-void SavingLoading::loadLinks(FILE *f, HandleMap *handles, AtomTable& atomTable) {
+void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadLinks");
     
     int numLinks;
@@ -399,7 +401,10 @@ void SavingLoading::loadLinks(FILE *f, HandleMap *handles, AtomTable& atomTable)
     atomTable.size += numLinks;
 }
 
-void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable, HandleMap* handles, const std::vector<Type>& dumpToCore) {
+void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
+                                HandleMap<Atom *>* handles,
+                                const std::vector<Type>& dumpToCore)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadIndices");
     int numTypes = ClassServer::getNumberOfClasses();
     
@@ -476,7 +481,8 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable, HandleMap* handle
     free(targetTypeIndexCache);
 }
 
-void SavingLoading::updateHandles(Atom *atom, HandleMap *handles) {
+void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: atom = %p, type = %d", atom, atom->getType());
 
     // if atom uses a CompositeTruthValue, updates the version handles inside it
@@ -608,7 +614,8 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom) {
     writeTruthValue(f, atom->getTruthValue());
 }
 
-void SavingLoading::readAtom(FILE *f, HandleMap *handles, Atom *atom) {
+void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readAtom()");
 
     // reads the atom type
@@ -687,7 +694,8 @@ void SavingLoading::writeNode(FILE *f, Node *node) {
     }
 }
 
-Node* SavingLoading::readNode(FILE *f, HandleMap *handles) {
+Node* SavingLoading::readNode(FILE *f, HandleMap<Atom *> *handles)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readNode()");
     // a new node is created
     Node *node = new Node(NODE, "");
@@ -709,7 +717,8 @@ Node* SavingLoading::readNode(FILE *f, HandleMap *handles) {
     return node;
 }
 
-void SavingLoading::writeLink(FILE *f, Link *link) {
+void SavingLoading::writeLink(FILE *f, Link *link)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "writeLink(): %s", link->toString().c_str());
 
     //link->getTrail()->print();
@@ -776,7 +785,8 @@ AttentionValue *SavingLoading::readAttentionValue(FILE *f) {
 }
 
 
-TruthValue *SavingLoading::readTruthValue(FILE *f) {
+TruthValue *SavingLoading::readTruthValue(FILE *f)
+{
     //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readTruthValue()");
     TruthValueType type;
     int length;
@@ -793,8 +803,8 @@ TruthValue *SavingLoading::readTruthValue(FILE *f) {
     return result;
 }
 
-Link *SavingLoading::readLink(FILE *f, HandleMap *handles) {
-
+Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
+{
     // a new link is created
     Link *link = new Link(LINK, std::vector<Handle>());
 
@@ -843,8 +853,8 @@ Link *SavingLoading::readLink(FILE *f, HandleMap *handles) {
     return link;
 }
 
-void SavingLoading::printProgress(const char *s, int n) {
-
+void SavingLoading::printProgress(const char *s, int n)
+{
     static int old = -1;
     
     if (old != n) {
@@ -853,7 +863,8 @@ void SavingLoading::printProgress(const char *s, int n) {
     }
 }
 
-void SavingLoading::addSavableRepository(SavableRepository *repository) throw (RuntimeException) {
+void SavingLoading::addSavableRepository(SavableRepository *repository) throw (RuntimeException)
+{
     const char* id = repository->getId();
     
     RepositoryHash::const_iterator it = repositories.find(id);
@@ -882,8 +893,8 @@ void SavingLoading::saveRepositories(FILE *f){
     }
 }
 
-
-void SavingLoading::loadRepositories(FILE *f, HandleMap *conv) throw (RuntimeException) {
+void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (RuntimeException)
+{
     MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadRepositories");
     unsigned int size;
     fread(&size, sizeof(unsigned int), 1, f);

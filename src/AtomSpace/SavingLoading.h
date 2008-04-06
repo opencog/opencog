@@ -94,7 +94,7 @@ class SavingLoading {
 	 * @param Table that maps from old to new handles, necessary during
 	 * loading.
 	 */
-	void loadNodes(FILE *, HandleMap *, AtomTable& );
+	void loadNodes(FILE *, HandleMap<Atom *> *, AtomTable& );
         
 	/**
 	 * This method loads links from a given file.
@@ -103,7 +103,7 @@ class SavingLoading {
 	 * @param Table that maps from old to new handles, necessary during
 	 * loading.
 	 */
-	void loadLinks(FILE *, HandleMap *, AtomTable& );
+	void loadLinks(FILE *, HandleMap<Atom *> *, AtomTable& );
 	
 	/**
 	 * This method loads indices from a given file.
@@ -112,7 +112,7 @@ class SavingLoading {
 	 * @param Table that maps from old to new handles, necessary during
 	 * loading.
 	 */
-	void loadIndices(FILE *, AtomTable&,  HandleMap*, const std::vector<Type>&);
+	void loadIndices(FILE *, AtomTable&,  HandleMap<Atom *>*, const std::vector<Type>&);
 
 	/**
 	 * This post-loading method translates all occurrences of old handles
@@ -121,7 +121,7 @@ class SavingLoading {
 	 * @param Atom whose handles references will be translated.
 	 * @param Table that maps from old to new handles.
 	 */
-	void updateHandles(Atom *, HandleMap *);
+	void updateHandles(Atom *, HandleMap<Atom *> *);
         
 	/**
 	 * This method writes all atom members to a given file.
@@ -174,7 +174,7 @@ class SavingLoading {
 	 * @param Table to be filled with mappings from old to new handles.
 	 * @param Location where the read atom will be placed.
 	 */
-	void readAtom(FILE *, HandleMap *, Atom *);
+	void readAtom(FILE *, HandleMap<Atom *> *, Atom *);
 
 	/**
 	 * This method reads all node members from a given file, and uses
@@ -184,7 +184,7 @@ class SavingLoading {
 	 * @param Table to be filled with mappings from old to new handles.
 	 * @return Newly read node.
 	 */
-	Node *readNode(FILE *, HandleMap *);
+	Node *readNode(FILE *, HandleMap<Atom *> *);
 
 	/**
 	 * This method reads all link members from a given file, and uses
@@ -194,7 +194,7 @@ class SavingLoading {
 	 * @param Table to be filled with mappings from old to new handles.
 	 * @return Newly read link.
 	 */
-	Link *readLink(FILE *, HandleMap *);
+	Link *readLink(FILE *, HandleMap<Atom *> *);
 
 	/**
 	 * This method reads all TruthValue members from a given file.
@@ -229,7 +229,7 @@ class SavingLoading {
 	 * @param File from where the repositories will be read.
 	 * @param Table filled with mappings from old to new handles.
 	 */
-	void loadRepositories(FILE *, HandleMap *) throw (RuntimeException);
+	void loadRepositories(FILE *, HandleMap<Atom *> *) throw (RuntimeException);
 	
 
 	/**
