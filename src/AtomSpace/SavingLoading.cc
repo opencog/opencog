@@ -27,6 +27,7 @@
 #include "CompositeTruthValue.h"
 #include "AtomSpaceDefinitions.h"
 #include "Logger.h"
+#include "HandleMap.cc"
 
 //#include "../agents/DynamicsStatisticsAgent.h"
 //#include "TreePredicateEvaluator.h"
