@@ -9,6 +9,7 @@
 #include <math.h>
 #include "exceptions.h"
 #include "TLB.h"
+#include "HandleMap.cc"
 
 #define NUM_TVS 3
 #define TV1_MEAN 0.25f
@@ -462,13 +463,14 @@ public:
         }
     }
     
-    void testUpdateVersionHandles() {
+    void testUpdateVersionHandles()
+    {
         printf("testUpdateVersionHandles()\n");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
-        HandleMap* handles = new HandleMap();
-        handles->add(TLB::getHandle((Atom *) 1), (void *) 2);
-        handles->add(TLB::getHandle((Atom *) 2), (void *) 3);
-        handles->add(TLB::getHandle((Atom *) 3), (void *) 1);
+        HandleMap<Atom *>* handles = new HandleMap<Atom *>();
+        handles->add(TLB::getHandle((Atom *) 1), (Atom *) 2);
+        handles->add(TLB::getHandle((Atom *) 2), (Atom *) 3);
+        handles->add(TLB::getHandle((Atom *) 3), (Atom *) 1);
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue* tv = tvs[i];
             tv->updateVersionHandles(handles);
