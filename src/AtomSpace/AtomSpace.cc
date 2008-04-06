@@ -257,19 +257,21 @@ bool AtomSpace::containsVar(Handle h) const {
     return isVar(h);
 }
 
-Handle AtomSpace::createHandle(Type t,const string& str,bool managed) {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+Handle AtomSpace::createHandle(Type t,const string& str,bool managed)
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     Handle h = getHandle(t,str);
     return TLB::isValidHandle(h) ? h : addNode(t,str,TruthValue::NULL_TV());
 }
 
-Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed)
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    Handle h=getHandle(t,outgoing);
+    Handle h = getHandle(t,outgoing);
     return TLB::isValidHandle(h) ? h : addLink(t,outgoing,TruthValue::NULL_TV());
 }
 
@@ -497,16 +499,18 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-Handle AtomSpace::getHandle(Type t,const string& str) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+Handle AtomSpace::getHandle(Type t,const string& str) const 
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    Handle h=atomTable.getHandle(str.c_str(),t);
+    Handle h = atomTable.getHandle(str.c_str(),t);
     return h;
 }
 
-Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     HandleEntry* he=atomTable.getHandleSet(outgoing,NULL,NULL,outgoing.size(),t, false);
