@@ -37,6 +37,8 @@ class TLB {
 
     public:
 
+// #define OBFUSCATE 0x55555555
+#define OBFUSCATE 0x0
         /**
          * Maps a handle to its corresponding atom.
          *
@@ -44,7 +46,7 @@ class TLB {
          * @return Corresponding atom for the given handle.
          */
         static inline Atom* getAtom(Handle handle) {
-            return (Atom *) (handle ^ 0x55555555);
+            return (Atom *) (handle ^ OBFUSCATE);
         }
 
         /**
@@ -54,7 +56,7 @@ class TLB {
          * @return Corresponding handle for the given atom.
          */
         static inline Handle getHandle(const Atom* atom) {
-            return ((Handle) atom) ^ 0x55555555;
+            return ((Handle) atom) ^ OBFUSCATE;
         }
 
         /**
@@ -64,7 +66,7 @@ class TLB {
          * @return Handle of the newly added atom.
          */
         static inline Handle addAtom(Atom* atom) {
-            return ((Handle) atom) ^ 0x55555555;
+            return ((Handle) atom) ^ OBFUSCATE;
         }
 
         /**
@@ -78,14 +80,14 @@ class TLB {
         }        
 
         static inline bool isInvalidHandle(Handle h) {
-            return (h == 0x55555555);
+            return (h == OBFUSCATE);
         }
         static inline bool isValidHandle(Handle h) {
-            return (h != 0x55555555);
+            return (h != OBFUSCATE);
         }
 
         static inline Handle UndefinedHandle(void) {
-            return 0x55555555;
+            return OBFUSCATE;
         }
 
 #define UNDEFINED_HANDLE (TLB::UndefinedHandle())
