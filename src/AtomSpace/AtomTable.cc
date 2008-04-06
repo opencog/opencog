@@ -23,6 +23,7 @@ extern "C" {
 #include "CoreUtils.h"
 #include "AtomSpaceDefinitions.h"
 #include "Logger.h"
+#include "HandleMap.cc"
 
 #define USE_ATOM_HASH_SET
 

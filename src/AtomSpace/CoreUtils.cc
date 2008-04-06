@@ -8,6 +8,7 @@
  */
 #include "CoreUtils.h"
 #include "TLB.h"
+#include "HandleMap.cc"
 
 void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (RuntimeException)
 {
