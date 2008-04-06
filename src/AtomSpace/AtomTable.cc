@@ -289,7 +289,8 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
     return result;
 }
 
-HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const{
+HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const
+{
     HandleEntry* result = NULL;    
     if (TLB::isValidHandle(gpnHandle)) {
         //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);

@@ -31,9 +31,9 @@ void HandleMap<T>::unlock()
 
 
 template <class T>
-void HandleMap<T>::init(int initialSize, bool use_mutex)
+void HandleMap<T>::init(bool use_mutex)
 {
-    handle_map = new InternalMap(initialSize);
+    handle_map = new InternalMap();
 
     useMutex = use_mutex;
 
@@ -56,13 +56,7 @@ HandleMap<T>::~HandleMap<T>()
 template <class T>
 HandleMap<T>::HandleMap(bool use_mutex)
 {
-    init(DEFAULT_SIZE, use_mutex);
-}
-
-template <class T>
-HandleMap<T>::HandleMap(int size, bool use_mutex)
-{
-    init(size, use_mutex);
+    init(use_mutex);
 }
 
 template <class T>

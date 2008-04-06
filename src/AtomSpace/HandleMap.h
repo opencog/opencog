@@ -40,12 +40,7 @@ private:
 	/**
 	 * initializes the HandleMap.
 	 */
-	void init(int initialSize, bool useMutex);
-
-	/**
-	 * Defines the default size for HandleMaps.
-	 */
-    static const int DEFAULT_SIZE = 100;
+	void init(bool useMutex);
 
 public:
 	
@@ -87,16 +82,6 @@ public:
 	 * all operations in the table.
 	 */
 	HandleMap(bool useMutex = false);
-	
-	/**
-	 * Constructor for this class.
-	 *
-	 * @param Table with at least this size.
-	 * @param Whether a concurrent access control mechanism should be
-	 * used. Notice that this will introduce a considerable overhead to
-	 * all operations in the table.
-	 */
-	HandleMap(int, bool useMutex = false);
 	
 	/**
 	 * Destructor for this class
