@@ -151,7 +151,7 @@ Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const
 
     Handle timeNode = getHandle(TIME_NODE, t.getTimeNodeName().c_str());
     //printf("timeNode = %p\n", timeNode);
-    if (TLB::isInvalidHandle(timeNode)) {
+    if (TLB::isValidHandle(timeNode)) {
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;
         atTimeLinkOutgoing[1] = h;
