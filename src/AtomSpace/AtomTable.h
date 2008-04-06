@@ -78,7 +78,7 @@ private:
     // Number of predicate indices.
     int numberOfPredicateIndices;
     // Map from each Tree PredicateNode Handle to its corresponding index
-    HandleMap* predicateHandles2Indices;
+    HandleMap<int>* predicateHandles2Indices;
 
     unsigned int strHash(const char*) const;
     inline unsigned int getNameHash(Atom* atom) const;

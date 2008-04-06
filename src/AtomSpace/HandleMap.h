@@ -17,16 +17,22 @@
 #include <pthread.h>
 #endif
 
+#include <map>
+
 #include "types.h"
 #include "exceptions.h"
 
+template<class T>
 class HandleMapIterator;
 
+	
 /**
  * This is an Adapter to stl's HashMap.
  */
-class HandleMap {
-	friend class HandleMapIterator;
+template<class T>
+class HandleMap
+{
+	friend class HandleMapIterator<T>;
 	
 private:
 
@@ -44,14 +50,14 @@ private:
 	/**
 	 * Defines the hash_map that will be used.
 	 */
-    typedef HandleVoidPointerHashMap InternalHashMap;
-	
 public:
 	
 	/**
 	 * Defines an iterator to the hashMap.
 	 */
-	typedef InternalHashMap::iterator InternalIterator;
+   typedef std::map<Handle, T *> InternalHashMap;
+	// typedef InternalHashMap::iterator InternalIterator;
+	
 	
 private:
 	
@@ -124,7 +130,7 @@ public:
 	 * @param Key.
 	 * @return Element for a given key.
 	 */
-	void *get(Handle);
+	T *get(Handle);
 	
 	/**
 	 * Checks if there exists an element for the given key.
@@ -141,7 +147,7 @@ public:
 	 * @param Key.
 	 * @return Removed element.
 	 */
-	void *remove(Handle);
+	T *remove(Handle);
 	
 	/**
 	 * Changes the size of the hash table to at least a new size.
@@ -179,33 +185,37 @@ public:
 	 *
 	 * @return An iterator through all keys stored in the hash table.
 	 */
-	HandleMapIterator *keys();
+	HandleMapIterator<T> *keys();
 
 };
 
-
-class HandleMapIterator {
-	
-    friend class HandleMap;
+template<class T>
+class HandleMapIterator
+{
+    friend class HandleMap<T>;
 	
 private:
 
 	/**
 	 * Stores the current iterator.
 	 */
-    HandleMap::InternalIterator current;
+   // HandleMap<T>::InternalIterator current;
+
+   // typedef typename std::map<Handle, T *>::iterator blammo;
+
+   typename std::map<Handle, T *>::iterator current;
 
 	/**
 	 * Stores the handleMap.
 	 */
-	HandleMap *map;
+	HandleMap<T> *map;
 	
 	/**
 	 * Constructor for this class.
 	 *
 	 * @param HandleMap object to be iterated.
 	 */
-	HandleMapIterator(HandleMap *);
+	HandleMapIterator(HandleMap<T> *);
 	
 public:
 	

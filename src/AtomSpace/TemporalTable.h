@@ -117,7 +117,7 @@ public:
      * @param the file pointer where the TemporalTable is stored.
      * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
      */
-    void load(FILE *, HandleMap *) throw (InconsistenceException);
+    void load(FILE *, HandleMap<Atom *> *) throw (InconsistenceException);
      
 
 private:

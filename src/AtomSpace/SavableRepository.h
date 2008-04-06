@@ -17,7 +17,8 @@
  * registyer in the SavingLoading using the 
  * method SavingLoading::addSavableRepository.
  */
-class SavableRepository {
+class SavableRepository
+{
 protected:
 	/**
 	 * Protected constructor so that this class is abstract.
@@ -43,7 +44,7 @@ public:
 	 *
 	 * @param The file from where the repository should be loaded.
 	 */
-	virtual void loadRepository(FILE *, HandleMap *) = 0;
+	virtual void loadRepository(FILE *, HandleMap<Atom *> *) = 0;
 
 
 	/**

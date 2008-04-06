@@ -10,9 +10,10 @@
 #include "TemporalEntry.h"
 #include <string>
 
-class HandleToTemporalEntryMap {
+class HandleToTemporalEntryMap
+{
 private :
-	HandleMap *internalMap;
+	HandleMap<TemporalEntry *> *internalMap;
 	
 public:
 	
@@ -75,7 +76,7 @@ public:
 	 *
 	 * @return An iterator through all keys stored in the hash table.
 	 */
-	HandleMapIterator *keys();
+	HandleMapIterator<TemporalEntry *> * keys();
 
 	/**
 	 * Return a copy of the HandleToTemporalEntryMap.

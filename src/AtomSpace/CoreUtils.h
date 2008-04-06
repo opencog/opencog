@@ -14,8 +14,9 @@
 #include "HandleMap.h"
 #include "exceptions.h"
 
-class CoreUtils {
-
+template<class T>
+class CoreUtils
+{
 public:    
 
     /**
@@ -25,7 +26,7 @@ public:
      * @param Handle which will be translated.
      * @param Table that maps from old to new handles.
      */
-    static void updateHandle(Handle *, HandleMap *) throw (RuntimeException);
+    static void updateHandle(Handle *, HandleMap<T> *) throw (RuntimeException);
     
     /**
      * Handle sort criterion used by qsort. It returns a negative value,

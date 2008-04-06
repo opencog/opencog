@@ -106,7 +106,7 @@ public:
      * HandleMap passed as argument. 
      * @param A HandleMap that maps old Handles to new ones. 
      */
-    void updateVersionHandles(HandleMap *handles);
+    void updateVersionHandles(HandleMap<Atom *> *handles);
 };
 
 #endif
