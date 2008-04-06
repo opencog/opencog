@@ -15,7 +15,7 @@
 #include "exceptions.h"
 
 template<class T>
-class CoreUtils
+class CoreMapUtils
 {
 public:    
 
@@ -27,7 +27,11 @@ public:
      * @param Table that maps from old to new handles.
      */
     static void updateHandle(Handle *, HandleMap<T> *) throw (RuntimeException);
+};
     
+class CoreUtils
+{
+public:    
     /**
      * Handle sort criterion used by qsort. It returns a negative value,
      * zero or a positive value if the first argument is respectively
@@ -58,7 +62,6 @@ public:
         public:
         bool operator()(const Handle& h1, const Handle& h2) const;
     };
-
 };    
 
 
