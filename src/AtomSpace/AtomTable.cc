@@ -62,7 +62,7 @@ AtomTable::AtomTable(bool dsa)
     predicateHandles.resize(MAX_PREDICATE_INDICES, UNDEFINED_HANDLE);
     predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL); 
     numberOfPredicateIndices = 0;
-    predicateHandles2Indices = new HandleMap();
+    predicateHandles2Indices = new HandleMap<int>();
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);

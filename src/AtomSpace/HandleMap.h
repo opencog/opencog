@@ -1,5 +1,5 @@
 /**
- * HandleMap.h - hashtable based in Handle keys and (void *) elements
+ * HandleMap.h - red-black tree maps Handle keys to type T elements
  *
  *
  * Copyright (c) 2001 Thiago Maia, Andre Senna
@@ -55,7 +55,7 @@ public:
 	/**
 	 * Defines an iterator to the hashMap.
 	 */
-   typedef std::map<Handle, T *> InternalHashMap;
+   typedef std::map<Handle, T> InternalHashMap;
 	// typedef InternalHashMap::iterator InternalIterator;
 	
 	
@@ -122,7 +122,7 @@ public:
 	 * @param Key.
 	 * @param Element.
 	 */
-	void add(Handle, void *) throw (RuntimeException);
+	void add(Handle, T) throw (RuntimeException);
 	
 	/**
 	 * Returns the element for a given key.
@@ -130,7 +130,7 @@ public:
 	 * @param Key.
 	 * @return Element for a given key.
 	 */
-	T *get(Handle);
+	T get(Handle);
 	
 	/**
 	 * Checks if there exists an element for the given key.
@@ -147,7 +147,7 @@ public:
 	 * @param Key.
 	 * @return Removed element.
 	 */
-	T *remove(Handle);
+	T remove(Handle);
 	
 	/**
 	 * Changes the size of the hash table to at least a new size.

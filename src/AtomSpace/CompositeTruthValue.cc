@@ -414,7 +414,7 @@ VersionHandle CompositeTruthValue::getVersionHandle(int i) const {
 }
 
 
-void CompositeTruthValue::updateVersionHandles(HandleMap *handles)
+void CompositeTruthValue::updateVersionHandles(HandleMap<Atom *> *handles)
 {
     VersionedTruthValueMap newVersionedTVs;
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
