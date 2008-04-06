@@ -14,6 +14,7 @@ void CoreUtils::updateHandle(Handle *handle, HandleMap *handles) throw (RuntimeE
     //printf("CoreUtils::updateHandle(%p)\n", *handle);
     if (TLB::isValidHandle(*handle)) return;
 
+    // Assume that the HandleMap stores <Handle, Atom *> pairs ....
     Handle newH = TLB::getHandle((Atom *)handles->get(*handle));
     if (TLB::isValidHandle(newH)) {
         *handle = newH;
