@@ -34,32 +34,38 @@ void TimeServer::add(Handle h, const Temporal& t) {
     }
 }
     
-bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion) { 
+bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion)
+{
     return table->remove(h, t, criterion);
 }
 
-const char* TimeServer::getId() const{
+const char* TimeServer::getId() const
+{
     static const char* id = "TimeServer";
     return id;
 }
 
-void TimeServer::saveRepository(FILE *fp) const{
+void TimeServer::saveRepository(FILE *fp) const
+{
     MAIN_LOGGER.log(Util::Logger::DEBUG, "Saving %s (%ld)\n", getId(), ftell(fp));
     // Saves TemporalTable
     table->save(fp);
 }
 
-void TimeServer::loadRepository(FILE *fp, HandleMap *conv){
+void TimeServer::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
+{
     MAIN_LOGGER.log(Util::Logger::DEBUG, "Loading %s (%ld)\n", getId(), ftell(fp));
     // Loads the TemporalTable
     table->load(fp, conv);
 }
 
-void TimeServer::clear(){
+void TimeServer::clear()
+{
     delete table;
     init();
 }
 
-unsigned long TimeServer::getLatestTimestamp() const {
+unsigned long TimeServer::getLatestTimestamp() const
+{
     return latestTimestamp;
 }

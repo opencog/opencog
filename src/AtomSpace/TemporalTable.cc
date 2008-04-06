@@ -8,7 +8,8 @@
 #define INITIAL_INDEX_TABLE_SIZE 1
 
 
-TemporalTable::TemporalTable() {
+TemporalTable::TemporalTable()
+{
     handleMap = new HandleToTemporalEntryMap();
     tailHandleMap = new HandleToTemporalEntryMap();
     temporalMap = new TemporalToHandleSetMap();
@@ -19,15 +20,16 @@ TemporalTable::TemporalTable() {
     pendingUpdateCount = 0;
 }
 
-TemporalTable::~TemporalTable() {
-
+TemporalTable::~TemporalTable()
+{
     //delete(tailHandleMap);
-    HandleMapIterator *keys = tailHandleMap->keys();
-    while (keys->hasNext()){
+    HandleMapIterator<TemporalEntry *> *keys = tailHandleMap->keys();
+    while (keys->hasNext())
+    {
         Handle nextKey = keys->next();
         tailHandleMap->remove(nextKey);
     }
-	delete(tailHandleMap);
+    delete(tailHandleMap);
 
     delete(handleMap);
 
@@ -905,7 +907,8 @@ const char* TemporalTable::getTemporalRelationshipStr(TemporalRelationship crite
         
 } 
 
-void TemporalTable::load(FILE *fp, HandleMap *conv) throw (InconsistenceException) {
+void TemporalTable::load(FILE *fp, HandleMap<Atom *> *conv) throw (InconsistenceException)
+{
     int size;
     // reads the table size (number of temporal entries)
     fread(&size, sizeof(int), 1, fp);
