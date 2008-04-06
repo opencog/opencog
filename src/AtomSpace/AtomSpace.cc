@@ -286,8 +286,9 @@ bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
     return result;
 }
 
-Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn) {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     cassert(TRACE_INFO, boost::get<Handle>(&*it), "AtomSpace::addAtom(): Vertex should be of 'Handle' type.");
@@ -459,7 +460,8 @@ Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn
     return result;
 }
 
-Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn) {
+Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
+{
     //printf("AtomSpace::addRealAtom\n");
     const TruthValue& newTV = (tvn.isNullTv())?atom.getTruthValue():tvn;
     // Check if the given handle is of an atom that was not inserted yet.
@@ -468,7 +470,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn) {
     if (isNode(atom.getType())) {
         const Node& node = (const Node&) atom;
         result = getHandle(node.getType(),node.getName());
-        if (!result) {
+        if (TLB::isInvalidHandle(result)) {
             return addNode(node.getType(), node.getName(), newTV);
         }
     } else {
@@ -478,7 +480,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn) {
             outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
         }
         result = getHandle(link.getType(), outgoing);
-        if (!result) {
+        if (TLB::isInvalidHandle(result)) {
             return addLink(link.getType(), outgoing, newTV);
         }
     }
