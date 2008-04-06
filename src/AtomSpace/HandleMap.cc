@@ -184,7 +184,8 @@ HandleMapIterator<T>::HandleMapIterator(HandleMap<T> *m)
 template <class T>
 bool HandleMapIterator<T>::hasNext()
 {
-    return current != map->handle_map->end();
+    iter_type e = map->handle_map->end();
+    return current != e;
 }
 
 template <class T>

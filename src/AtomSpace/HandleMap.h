@@ -181,7 +181,8 @@ private:
 	/**
 	 * Stores the current iterator.
 	 */
-   typename std::map<Handle, T *>::iterator current;
+   typedef typename std::map<Handle, T>::iterator iter_type;
+   iter_type current;
 
 	/**
 	 * Stores the handleMap.

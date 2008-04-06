@@ -1,5 +1,6 @@
 #include "TemporalTable.h"
 #include "Logger.h"
+#include "HandleMap.cc"
 #include <set>
 
 // Minimal rate (number of entries / pending updates) so that an index table must be re-built
