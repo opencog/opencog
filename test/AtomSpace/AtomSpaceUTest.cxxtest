@@ -349,9 +349,9 @@ public:
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5,0.99));
-        tree<Vertex> tr = mva((Handle)EVALUATION_LINK,
+        tree<Vertex> tr = mva(TLB::getHandle((Atom *)EVALUATION_LINK),
 			      mva(h1),
-			      mva((Handle)LIST_LINK,
+			      mva(TLB::getHandle((Atom *)LIST_LINK),
 				  mva(h2),
 				  mva(h3)
 				  )
