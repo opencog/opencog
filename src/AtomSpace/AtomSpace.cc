@@ -261,8 +261,8 @@ Handle AtomSpace::createHandle(Type t,const string& str,bool managed) {
          //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    Handle h=getHandle(t,str);
-    return h ? h : addNode(t,str,TruthValue::NULL_TV());
+    Handle h = getHandle(t,str);
+    return isValidHandle(h) ? h : addNode(t,str,TruthValue::NULL_TV());
 }
 
 Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
@@ -270,7 +270,7 @@ Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed) {
     //fflus(stdout);
 
     Handle h=getHandle(t,outgoing);
-    return h ? h : addLink(t,outgoing,TruthValue::NULL_TV());
+    return isValidHandle(h) ? h : addLink(t,outgoing,TruthValue::NULL_TV());
 }
 
 bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
@@ -509,7 +509,7 @@ Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const {
     //fflus(stdout);
 
     HandleEntry* he=atomTable.getHandleSet(outgoing,NULL,NULL,outgoing.size(),t, false);
-    Handle ret = he ? he->handle : NULL;
+    Handle ret = he ? he->handle : UNDEFINED_HANDLE;
     delete he;
     return ret;
 }
