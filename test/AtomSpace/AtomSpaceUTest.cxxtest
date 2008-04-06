@@ -478,7 +478,9 @@ public:
             sprintf(s, "node_%d", i);
             at.addNode(CONCEPT_NODE, s, SimpleTruthValue(0.5, 0.5));
             short v = -100 + (i % 200);
-            ((Node *) at.getHandle(CONCEPT_NODE, s))->setAttentionValue(*AttentionValue::factory(v));
+            Atom * aaa = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))
+            Node * nnn = dynamic_cast<Node *> aaa;
+            nnn -> setAttentionValue(*AttentionValue::factory(v));
             short newImp = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
             imp.push_back(newImp);
             //printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
@@ -487,7 +489,9 @@ public:
         for (int i = 0; i < 10; i++) {
             char s[256];
             sprintf(s, "node_%d", i);
-            short newImp = ((Node *) at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
+            Atom * aaa = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))
+            Node * nnn = dynamic_cast<Node *> aaa;
+            short newImp = nnn -> getAttentionValue().getSTI();
             printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
         }*/
         for (int i = 0; i < 100; i++) {
@@ -497,7 +501,9 @@ public:
         for (int i = 0; i < 1000; i++) {
             char s[256];
             sprintf(s, "node_%d", i);
-            short newImp = ((Node *) at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
+            Atom * aaa = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))
+            Node * nnn = dynamic_cast<Node *> aaa;
+            short newImp = nnn -> getAttentionValue().getSTI();
             //printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
             TS_ASSERT(newImp == (imp[i] - 100));
         }
