@@ -9,8 +9,8 @@
 //#include "NMPrinter.h"
 #include "Link.h"
 
-#define VH1 VersionHandle(CONTEXTUAL, (Handle)1)
-#define VH2 VersionHandle(CONTEXTUAL, (Handle)2)
+#define VH1 VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *)1))
+#define VH2 VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *)2))
 
 class HandleEntryUTest :  public CxxTest::TestSuite {
 private:
@@ -59,12 +59,14 @@ public:
         // Now filter
         //printf("======================\nFiltering using NULL_VERSION_HANDLE\n");
         he = HandleEntry::filterSet(he, NULL_VERSION_HANDLE);
-        TS_ASSERT(he->getSize() == 5);
         printHandleEntry(he);
+        TS_ASSERT(he->getSize() == 5);
+
         //printf("======================\nFiltering using VH1\n");
         he = HandleEntry::filterSet(he, VH1);
         printHandleEntry(he);
         TS_ASSERT(he->getSize() == 2);
+
         //printf("======================\nFiltering using VH2\n");
         he = HandleEntry::filterSet(he, VH2);
         printHandleEntry(he);
