@@ -40,10 +40,10 @@ bool NMXmlParserExperiment::noCheck = false;
 char *NMXmlParserExperiment::currentFileName = NULL;
 int NMXmlParserExperiment::currentExperiment = -1;
 
-Handle NMXmlParserExperiment::sport = NULL;
-Handle NMXmlParserExperiment::soccer = NULL;
-Handle NMXmlParserExperiment::link_sport_socker = NULL;
-Handle NMXmlParserExperiment::hihger_order_link = NULL;
+Handle NMXmlParserExperiment::sport = UNDEFINED_HANDLE;
+Handle NMXmlParserExperiment::soccer = UNDEFINED_HANDLE;
+Handle NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
+Handle NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
 AtomSpace* NMXmlParserExperiment::atomSpace = NULL;
 
 void NMXmlParserExperiment::initStaticVars() {
@@ -51,10 +51,10 @@ void NMXmlParserExperiment::initStaticVars() {
 	NMXmlParserExperiment::currentFileName = NULL;
 	NMXmlParserExperiment::currentExperiment = -1;
 
-	NMXmlParserExperiment::sport = NULL;
-	NMXmlParserExperiment::soccer = NULL;
-	NMXmlParserExperiment::link_sport_socker = NULL;
-	NMXmlParserExperiment::hihger_order_link = NULL;
+	NMXmlParserExperiment::sport = UNDEFINED_HANDLE;
+	NMXmlParserExperiment::soccer = UNDEFINED_HANDLE;
+	NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
+	NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
 	NMXmlParserExperiment::atomSpace = NULL;
 }
 
@@ -142,9 +142,9 @@ bool NMXmlParserExperiment::checkExp0()
 	soccer = atomSpace->getHandle(WORD_NODE, "soccer");
 	sport = atomSpace->getHandle(WORD_NODE, "sport");
 
-	TS_ASSERT(soccer != NULL);
-	TS_ASSERT(sport != NULL);
-	if ((!soccer) || (!sport)){
+	TS_ASSERT(TLB::isValidHandle(soccer));
+	TS_ASSERT(TLB::isValidHandle(sport));
+	if (TLB::isInvalidHandle(soccer) || TLB::isInvalidHandle(sport)){
 		return(false);
 	}
 	
@@ -155,7 +155,7 @@ bool NMXmlParserExperiment::checkExp0()
 	if (handles.size() != 1){
 		return(false);
 	}
-	Atom *atom = TLB::getAtom((Handle)handles[0]);
+	Atom *atom = TLB::getAtom(handles[0]);
 	link_sport_socker = handles[0];
 
 	TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
@@ -173,9 +173,9 @@ bool NMXmlParserExperiment::checkExp1(){
 	soccer = atomSpace->getHandle(WORD_NODE, "soccer");
 	sport = atomSpace->getHandle(WORD_NODE, "sport");
 	
-	TS_ASSERT(soccer != NULL);
-	TS_ASSERT(sport != NULL);
-	if ((!soccer) || (!sport)){
+	TS_ASSERT(TLB::isValidHandle(soccer));
+	TS_ASSERT(TLB::isValidHandle(sport));
+	if (TLB::isInvalidHandle(soccer) || TLB::isInvalidHandle(sport)){
 		return(false);
 	}
 	
@@ -199,13 +199,13 @@ bool NMXmlParserExperiment::checkExp1(){
 	for(it = handles.begin(); it != handles.end(); it++){
 		atom = TLB::getAtom((Handle)*it);
 		if (atom->getIncomingSet()->getSize() == 1){
-			TS_ASSERT(link_sport_socker == NULL);
-			link_sport_socker = (Handle)*it;
+			TS_ASSERT(TLB::isInvalidHandle(link_sport_socker));
+			link_sport_socker = *it;
 		}
 	}
 	handles.clear();
 	
-	TS_ASSERT(link_sport_socker != NULL);
+	TS_ASSERT(TLB::isValidHandle(link_sport_socker));
 	TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
 	TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
 	if ((atom->getOutgoingSet()[0] != soccer) ||
@@ -220,7 +220,7 @@ bool NMXmlParserExperiment::checkExp1(){
 	if (handles.size() != 1){
 		return(false);
 	}
-	atom = TLB::getAtom((Handle)handles[0]);
+	atom = TLB::getAtom(handles[0]);
 	hihger_order_link = handles[0];
 
 	TS_ASSERT(atom->getOutgoingSet()[0] == link_sport_socker);
@@ -247,7 +247,7 @@ bool NMXmlParserExperiment::checkExp1(){
 	while (it){
 		atom = it->getAtom();
 		if (atom->getIncomingSet()->getSize() == 1){
-			TS_ASSERT(link_sport_socker == NULL);
+			TS_ASSERT(TLB::isInvalidHandle(link_sport_socker));
 			link_sport_socker = it->handle;
 		}
 		it = it->next;
