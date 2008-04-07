@@ -248,7 +248,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                 //printf("Getting link element inside currentAtom = %p\n", currentAtom);
                 if (ClassServer::isAssignableFrom(LINK,currentAtom->getType())){
                     if (r != NULL) {
-                        NMXmlParser::addOutgoingAtom(currentAtom, NULL);
+                        NMXmlParser::addOutgoingAtom(currentAtom, UNDEFINED_HANDLE);
                     } else {
                         throw RuntimeException(TRACE_INFO, "fatal error: NULL inner link");
                     }
@@ -367,6 +367,10 @@ static void nativeEndElement(void *userData, const char *name)
                         //printf("(2) Pushing currentAtom = %p\n", currentAtom);
                         push(ud->stack, currentAtom);
                     }
+                    // XXX FIXME:
+                    // would be better if this was replaced by
+                    // if (NULL != dynamic_cast<Link *>(currentAtom)) {
+                    // and also a few lines down.
                     if (ClassServer::isAssignableFrom(LINK, currentAtom->getType())) {
                         //KMI -- find out if this is a nested link
                         pop(ud->stack);
