@@ -23,7 +23,8 @@
 
 #undef Type
 
-void Atom::init(Type type, const std::vector<Handle>& outgoing, const TruthValue& tv ) {
+void Atom::init(Type type, const std::vector<Handle>& outgoing, const TruthValue& tv )
+{
     // resets all flags
     flags = 0;
 
@@ -93,9 +94,10 @@ Atom::~Atom() throw (RuntimeException) {
     //printf("Atom::~Atom() end\n");
 }
 
-bool Atom::isReal() const{
-    long value = (long)this;
-    bool real = (value < 0 || value >= NUMBER_OF_CLASSES);
+bool Atom::isReal() const
+{
+    long value = (unsigned long) this;
+    bool real = (value >= NUMBER_OF_CLASSES);
    //if(!real){
         //fprintf(stdout, "Atom - Type: %d, Pointe converted: (%p, %d)\n", type, this, (long)this);
         //fflush(stdout);
@@ -233,12 +235,26 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 //    ShortFloatOps::setValue(&importance, value);
 //}
 
-void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (RuntimeException) {
+void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (RuntimeException)
+{
     //printf("Atom::setOutgoingSet\n");
     if (atomTable != NULL){
         throw RuntimeException(TRACE_INFO, "Cannot change the OutgoingSet of an atom already inserted into an AtomTable\n");
     }
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
+#ifdef PEFORM_INVALID_HANDLE_CHECKS
+    // Make sure that garbage is not being passed in.
+    // We'd like to perform a test for valid values here, but it seems
+    // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
+    // which it hopefully repairs later on ...
+    for (int i=0; i<outgoingVector.size(); i++)
+    {
+        if (TLB::isInvalidHandle(outgoingVector[i]))
+        {
+            throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
+        }
+    }
+#endif
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
@@ -252,7 +268,17 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
     arity = outgoingVector.size(); 
     if (arity > 0) { 
         outgoing = (Handle*) malloc(sizeof(Handle)*arity);
-        for (int i = 0; i < arity; i++) {
+        for (int i = 0; i < arity; i++)
+        {
+#ifdef PEFORM_INVALID_HANDLE_CHECKS
+            // We'd like to perform a test for valid values here, but it seems
+            // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
+            // which it hopefully repairs later on ...
+            if (TLB::isInvalidHandle(outgoingVector[i]))
+            {
+                throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
+            }
+#endif
             outgoing[i] = outgoingVector[i];
         }
     } 
@@ -262,7 +288,15 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
 #endif
 }
 
-void Atom::addOutgoingAtom(Handle h) {
+void Atom::addOutgoingAtom(Handle h)
+{
+#ifdef PEFORM_INVALID_HANDLE_CHECKS
+    // We'd like to perform a test for valid values here, but it seems
+    // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
+    // which it hopefully repairs later on ...
+    if (TLB::isInvalidHandle(h)) 
+        throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
+#endif
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
     outgoing.push_back(h);
 #else 
@@ -657,7 +691,7 @@ HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, b
     Handle me = TLB::getHandle(this);
 
     for (HandleEntry *h = getIncomingSet(); h != NULL; h = h ->next) {
-        Link *link = (Link *) TLB::getAtom(h->handle);
+        Link *link = dynamic_cast<Link*>(TLB::getAtom(h->handle));
         Type linkType = link->getType();
         //printf("linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
         if ((linkType == desiredLinkType) || (subClasses && ClassServer::isAssignableFrom(desiredLinkType, linkType))) {
