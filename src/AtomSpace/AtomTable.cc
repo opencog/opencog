@@ -659,10 +659,12 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
         return  TLB::addAtom(atom);
     }
     Handle existingHandle = UNDEFINED_HANDLE;
-    if (ClassServer::isAssignableFrom(NODE, atom->getType())) {
+    Node * nnn = dynamic_cast<Node *>(atom);
+    Link * lll = dynamic_cast<Link *>(atom);
+    if (nnn) {
         // checks if the node handle already exists.
-        existingHandle = getHandle(((Node*) atom)->getName().c_str(), atom->getType());
-    } else if (ClassServer::isAssignableFrom(LINK, atom->getType())) {
+        existingHandle = getHandle(nnn->getName().c_str(), atom->getType());
+    } else if (lll) {
         // New link may already exist.
         std::vector<Handle> outgoing(atom->getArity());
         for(int i = 0; i < atom->getArity(); i++) {
