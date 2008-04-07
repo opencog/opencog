@@ -421,7 +421,7 @@
         //printf("result = %s\n", result->toString().c_str());
         
         std::vector<Handle> handles3(2);
-        handles3[0] = NULL;
+        handles3[0] = UNDEFINED_HANDLE;
         handles3[1] = table->getHandle("12", NUMBER_NODE);
         result = table->getHandleSet(handles3, types3, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
@@ -430,7 +430,7 @@
 
         std::vector<Handle> handles4(2);
         handles4[0] = table->getHandle("12", NUMBER_NODE);
-        handles4[1] = NULL;
+        handles4[1] = UNDEFINED_HANDLE;
         result = table->getHandleSet(handles4, types4, NULL, 2, LIST_LINK, false);
         TS_ASSERT(!result);
         //printf("result = %s\n", result->toString().c_str());
