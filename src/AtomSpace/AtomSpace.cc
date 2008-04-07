@@ -404,7 +404,7 @@ Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {
     return result;
 }
 
-Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn)
+Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing, const TruthValue& tvn)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
@@ -426,9 +426,9 @@ Handle AtomSpace::addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn
         }
         delete he;
     } else {
-	// Remove default STI/LTI from AtomSpace Funds
-	fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-	fundsLTI -= AttentionValue::DEFAULTATOMLTI;
+        // Remove default STI/LTI from AtomSpace Funds
+        fundsSTI -= AttentionValue::DEFAULTATOMSTI;
+        fundsLTI -= AttentionValue::DEFAULTATOMLTI;
 
         Link* l = new Link(t, outgoing, tvn);
         result = atomTable.add(l);
