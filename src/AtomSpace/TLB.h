@@ -37,8 +37,8 @@ class TLB {
 
     public:
 
-// #define OBFUSCATE 0x55555555
-#define OBFUSCATE 0x0
+#define OBFUSCATE 0x55555555
+// #define OBFUSCATE 0x0
         /**
          * Maps a handle to its corresponding atom.
          *
