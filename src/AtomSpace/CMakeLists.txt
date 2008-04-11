@@ -1,6 +1,7 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
 add_library (AtomSpace STATIC
+TLB.cc
 Atom.cc         
 CompositeTruthValue.cc  
 HandleEntry.cc     
