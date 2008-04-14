@@ -22,6 +22,7 @@ class AtomStorage
 
 		// Utility for handling responses on stack.
 		class Response;
+		class Outgoing;
 
 		// Set of atoms that we know about.
 		std::map<Handle,Atom *> handle_map;

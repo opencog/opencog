@@ -8,6 +8,7 @@
 
 #include "AtomStorage.h"
 #include "Atom.h"
+#include "Link.h"
 #include "Node.h"
 #include "TLB.h"
 
@@ -46,6 +47,14 @@ printf ("hello\n");
 	{
 		printf("atom compare success\n");
 	}
+
+	Atom *a2 = new Node(SCHEMA_NODE, "otherNode");
+	std::vector<Handle> hvec;
+	hvec.push_back(TLB::getHandle(a));
+	hvec.push_back(TLB::getHandle(a2));
+
+	Link *l = new Link(SET_LINK, hvec);
+	store->storeAtom(l);
 
 	return 0;
 }

@@ -26,7 +26,10 @@ CREATE TABLE Atoms (
 -- is the set of outgoing edges of the atom. Understood
 -- as dst<-src, with fixed dst, are the incoming edges.
 --
+-- Outgoing edges are understood to be ordered. "pos" is
+-- is the order, starting with 0.
 CREATE TABLE Edges (
 	src_uuid  INT,
-	dst_uuid  INT
+	dst_uuid  INT,
+	pos INT
 );

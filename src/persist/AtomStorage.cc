@@ -9,11 +9,16 @@
 #include "odbcxx.h"
 #include "Atom.h"
 #include "ClassServer.h"
+#include "Foreach.h"
 #include "Node.h"
 #include "TLB.h"
 #include "type_codes.h"
 
 #include "AtomStorage.h"
+
+using namespace opencog;
+
+/* ================================================================ */
 
 class AtomStorage::Response
 {
@@ -53,6 +58,41 @@ class AtomStorage::Response
 		}
 };
 
+/* ================================================================ */
+#define BUFSZ 250
+
+class AtomStorage::Outgoing
+{
+	private:
+		ODBCConnection *db_conn;
+		unsigned int pos;
+		Handle src_handle;
+	public:
+		Outgoing (ODBCConnection *c, Handle h)
+		{
+			db_conn = c;
+			src_handle = h;
+			pos = 0;
+		}
+		bool each_handle (Handle h)
+		{
+			char buff[BUFSZ];
+			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
+                 "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
+			        (unsigned long) src_handle, (unsigned long) h, pos);
+
+			Response rp;
+			rp.rs = db_conn->exec(buff);
+			rp.rs->release();
+
+printf ("duude outgoing %s\n", buff);
+			pos ++;
+			return false;
+		}
+};
+
+/* ================================================================ */
+
 AtomStorage::AtomStorage(void)
 {
 	db_conn = new ODBCConnection("opencog", "linas", NULL);
@@ -63,7 +103,7 @@ AtomStorage::~AtomStorage()
 	delete db_conn;
 }
 
-#define BUFSZ 34
+/* ================================================================ */
 
 #define STMT(colname,val) { \
 	if(update) { \
@@ -85,7 +125,9 @@ AtomStorage::~AtomStorage()
  */
 void AtomStorage::storeOutgoing(Atom *atom, Handle h)
 {
-	// foreach_outgoing_handle(h, cb, T*);
+	Outgoing out(db_conn, h);
+
+	foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
 }
 
 void AtomStorage::storeAtom(Atom *atom)
@@ -139,9 +181,16 @@ printf ("duude its %s\n", qry.c_str());
 	rp.rs = db_conn->exec(qry.c_str());
 	rp.rs->release();
 
-	storeOutgoing(atom, h);
+	// Store the outgoing handles only if we are storing for the first
+	// time, otherwise do nothing. The semantics is that, once the 
+	// outgoing set has been determined, it cannot be changed.
+	if (false == update)
+	{
+		storeOutgoing(atom, h);
+	}
 }
 
+/* ================================================================ */
 /**
  * Return true if the indicated handle exists in the storage.
  */
@@ -162,6 +211,7 @@ bool AtomStorage::atomExists(Handle h)
 	return rp.row_exists;
 }
 
+/* ================================================================ */
 /**
  * Create a new atom, retreived from storage
  *
