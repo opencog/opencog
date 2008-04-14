@@ -21,6 +21,15 @@ using namespace opencog;
 
 /* ================================================================ */
 
+/**
+ * Utility class, hangs on to a single response to an SQL query,
+ * and provides routines to parse it, i.e. walk the rows and columns,
+ * converting each row into an Atom, or Edge.
+ *
+ * Intended to be allocated on stack, to avoid malloc overhead.
+ * Methods are intended to be inlined, so as to avoid subroutine 
+ * call overhead.  It really *is* supposed to be a convenience wrapper. :-)
+ */
 class AtomStorage::Response
 {
 	public:
@@ -58,6 +67,7 @@ class AtomStorage::Response
 			return false;
 		}
 
+		// Temporary cache of info about the outgoing set.
 		std::vector<Handle> *outvec;
 		Handle dst;
 		int pos;
@@ -89,6 +99,10 @@ class AtomStorage::Response
 /* ================================================================ */
 #define BUFSZ 250
 
+/**
+ * Callback class, whose method is invoked on each outgoing edge.
+ * The callback constructs an SQL query to store the edge.
+ */
 class AtomStorage::Outgoing
 {
 	private:

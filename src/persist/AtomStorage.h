@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Base classe for SQL-backed persistent storage.
+ * Base class for SQL-backed persistent storage.
  *
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
