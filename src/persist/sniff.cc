@@ -26,6 +26,25 @@ int atomCompare(Atom *a, Atom *b)
 		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
 		rc --;
 	}
+	if (a->getArity() != b->getArity())
+	{
+		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", a->getArity(), b->getArity());
+		rc --;
+	}
+	if (0 < a->getArity())
+	{
+		std::vector<Handle> outa = a->getOutgoingSet();
+		std::vector<Handle> outb = b->getOutgoingSet();
+		for (int i =0; i< a->getArity(); i++)
+		{
+			if (outa[i] != outb[i])
+			{
+				fprintf(stderr, "Error, outgoing set mis-match, "
+				        "i=%d a=%lx b=%lx\n", i, outa[i], outb[i]);
+				rc --;
+			}
+		}
+	}
 	return rc;
 }
 
@@ -55,6 +74,13 @@ printf ("hello\n");
 
 	Link *l = new Link(SET_LINK, hvec);
 	store->storeAtom(l);
+
+	Atom *lb = store->getAtom(TLB::getHandle(l));
+	rc = atomCompare(l,lb);
+	if (!rc) 
+	{
+		printf("atom compare success\n");
+	}
 
 	return 0;
 }

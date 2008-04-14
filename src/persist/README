@@ -2,8 +2,13 @@
                           -------
 
 A trivial, simple-minded implementation of atom persistence. 
-Incomplete prototype.
 
+STATUS:
+Incomplete prototype. Save and restore of atoms, but not 
+truth values, works. Interaction with TLB not handled.
+
+Goals:
+------
 The goal of this implementation is to:
 1) Simplify Linas' day-to-day use of opencog. The problem is that
    loading data, by parsing english sentences, into opencog is slow.
@@ -19,9 +24,19 @@ The goal of this implementation is to:
 3) Provide a baseline/reference implementation by which other 
    persistence designs can be measured.
 
+Design:
+-------
 The core design will use a few very simple SQL tables, and some
 simple readers and writers to save and restore atoms from an SQL 
 database.
+
+Caveats:
+--------
+Its not at all clear whether this is a good idea; there are several
+major drawbacks to using SQL. These include:
+-- Large performance overhead, even if an embedded SQL server is used.
+-- Potentially large churn, as opencog creates many short-lived atoms,
+   which shouldn't be persisted.
 
 Getting started
 ---------------

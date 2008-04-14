@@ -12,6 +12,7 @@
 #include "odbcxx.h"
 
 #include <map>
+#include <vector>
 
 #include "Atom.h"
 
@@ -28,6 +29,7 @@ class AtomStorage
 		std::map<Handle,Atom *> handle_map;
 
 		void storeOutgoing(Atom *, Handle);
+		void getOutgoing(std::vector<Handle> &, Handle);
 
 	public:
 		AtomStorage(void);

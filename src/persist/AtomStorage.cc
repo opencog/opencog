@@ -10,6 +10,7 @@
 #include "Atom.h"
 #include "ClassServer.h"
 #include "Foreach.h"
+#include "Link.h"
 #include "Node.h"
 #include "TLB.h"
 #include "type_codes.h"
@@ -42,9 +43,9 @@ class AtomStorage::Response
 			}
 			return false;
 		}
-		bool create_atom_row_cb(void)
+		bool create_atom_cb(void)
 		{
-			printf ("---- New row found ----\n");
+			printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			return false;
@@ -54,6 +55,33 @@ class AtomStorage::Response
 		bool row_exists_cb(void)
 		{
 			row_exists = true;
+			return false;
+		}
+
+		std::vector<Handle> *outvec;
+		Handle dst;
+		int pos;
+
+		bool create_edge_cb(void)
+		{
+			// printf ("---- New edge found ----\n");
+			rs->foreach_column(&Response::create_edge_column_cb, this);
+			int sz = outvec->size();
+			if (sz <= pos) outvec->resize(pos+1);
+			outvec->at(pos) = dst;
+			return false;
+		}
+		bool create_edge_column_cb(const char *colname, const char * colvalue)
+		{
+			// printf ("%s = %s\n", colname, colvalue);
+			if (!strcmp(colname, "dst_uuid"))
+			{
+				dst = strtoul(colvalue, (char **) NULL, 10);
+			}
+			else if (!strcmp(colname, "pos"))
+			{
+				pos = atoi(colvalue);
+			}
 			return false;
 		}
 };
@@ -197,18 +225,29 @@ printf ("duude its %s\n", qry.c_str());
 bool AtomStorage::atomExists(Handle h)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "%lu", (unsigned long) h);
-
-	std::string select = "SELECT uuid FROM Atoms WHERE uuid = ";
-	select += buff;
-	select += ";"; 
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
 
 	Response rp;
 	rp.row_exists = false;
-	rp.rs = db_conn->exec(select.c_str());
+	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
 	rp.rs->release();
 	return rp.row_exists;
+}
+
+/* ================================================================ */
+
+void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", (unsigned long) h);
+printf("duude %s\n", buff);
+
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.outvec = &outv;
+	rp.rs->foreach_row(&Response::create_edge_cb, &rp);
+	rp.rs->release();
 }
 
 /* ================================================================ */
@@ -220,25 +259,23 @@ bool AtomStorage::atomExists(Handle h)
 Atom * AtomStorage::getAtom(Handle h)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "%lu", (unsigned long) h);
-
-	std::string select = "SELECT * FROM Atoms WHERE uuid = ";
-	select += buff;
-	select += ";"; 
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
 
 	Response rp;
-	rp.rs = db_conn->exec(select.c_str());
-	rp.rs->foreach_row(&Response::create_atom_row_cb, &rp);
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
 	// Now that we know everything about an atom, actually construct one.
 	Atom *atom = NULL;
 	if (ClassServer::isAssignableFrom(NODE, rp.itype))
 	{
-		atom = new Node (rp.itype, rp.name);
+		atom = new Node(rp.itype, rp.name);
 	}
 	else
 	{
-		// atom = new Link(itype, xxx);
+		std::vector<Handle> outvec;
+		getOutgoing(outvec, h);
+		atom = new Link(rp.itype, outvec);
 	}
 
 	rp.rs->release();
