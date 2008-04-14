@@ -11,6 +11,8 @@
 
 #include "odbcxx.h"
 
+#include <map>
+
 #include "Atom.h"
 
 class AtomStorage
@@ -18,7 +20,13 @@ class AtomStorage
 	private:
 		ODBCConnection *db_conn;
 
+		// Utility for handling responses on stack.
 		class Response;
+
+		// Set of atoms that we know about.
+		std::map<Handle,Atom *> handle_map;
+
+		void storeOutgoing(Atom *, Handle);
 
 	public:
 		AtomStorage(void);

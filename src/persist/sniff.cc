@@ -11,6 +11,24 @@
 #include "Node.h"
 #include "TLB.h"
 
+int atomCompare(Atom *a, Atom *b)
+{
+	int rc = 0;
+	if (NULL == b)
+	{
+		fprintf(stderr, "Error: No atom found\n");
+		return -1;
+	}
+
+	if (a->getType() != b->getType())
+	{
+		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
+		rc --;
+	}
+	return rc;
+}
+
+
 int main ()
 {
 	AtomStorage *store = new AtomStorage();
@@ -21,8 +39,13 @@ printf ("hello\n");
 	store->storeAtom(a);
 
 	Handle h = TLB::getHandle(a);
-	store->getAtom(h);
+	Atom *b = store->getAtom(h);
 
+	int rc = atomCompare(a,b);
+	if (!rc) 
+	{
+		printf("atom compare success\n");
+	}
 
 	return 0;
 }
