@@ -105,3 +105,4 @@
 #define HEBBIAN_LINK_CLASS "HebbianLink"
 #define ASYMMETRIC_HEBBIAN_LINK_CLASS "AsymmetricHebbianLink"
 #define SYMMETRIC_HEBBIAN_LINK_CLASS "SymmetricHebbianLink"
+#define INVERSE_HEBBIAN_LINK_CLASS "InverseHebbianLink"

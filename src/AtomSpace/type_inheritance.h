@@ -102,6 +102,7 @@ init_inheritance(map, SL_OBJECT_NODE, SL_PET_NODE);
 init_inheritance(map, SL_OBJECT_NODE, SL_AVATAR_NODE);
 init_inheritance(map, SL_OBJECT_NODE, SL_STRUCTURE_NODE);
 init_inheritance(map, SL_OBJECT_NODE, SL_ACCESSORY_NODE);
+init_inheritance(map, ASYMMETRIC_HEBBIAN_LINK, INVERSE_HEBBIAN_LINK);
 init_inheritance(map, SCHEMA_EXECUTION_LINK, SCHEMA_EVALUATION_LINK);
 init_inheritance(map, PREDICATE_NODE, GROUNDED_PREDICATE_NODE);
 init_inheritance(map, GROUNDED_PROCEDURE_NODE, GROUNDED_PREDICATE_NODE);

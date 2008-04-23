@@ -8,6 +8,8 @@ ServerSocket.cc
 CommandRequest.cc 
 CommandRequestProcessor.cc 
 ImportanceUpdatingAgent.cc
+ImportanceSpreadingAgent.cc
+HebbianLearningAgent.cc
 )
 
 include_directories (
