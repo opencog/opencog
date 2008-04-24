@@ -17,6 +17,7 @@
 
 #include <AtomSpace.h>
 #include <RandGen.h>
+#include <recent_val.h>
 #include <Logger.h>
 #include "CogServer.h"
 #include "MindAgent.h"
@@ -73,21 +74,14 @@ private:
     void randomStimulation(AtomSpace *a);
     
     /* Recent amount of stimulus given per cycle */
-    stim_t recentTotalStimulusSinceReset;
-    /* Rate of decay (r) for estimating recentAttentionalFocusSize
-     * Estimate equal to:
-     * r *(attentionalFocusSize + (1-r) recentAttentionalFocusSize */
-    float recentTotalStimulusDecay;
+    Util::recent_val<stim_t> totalStimulusSinceReset;
 
     /* Number of atoms within attentionFocusBoundary */
-    long attentionalFocusSize;
-    float recentAttentionalFocusSize;
-    long attentionalFocusNodesSize;
-    float recentAttentionalFocusNodesSize;
-    /* Rate of decay (r) for estimating recentAttentionalFocusSize
+    Util::recent_val<long> attentionalFocusSize;
+    Util::recent_val<long> attentionalFocusNodesSize;
+    /* Rate of decay (r) for estimating AttentionalFocusSize
      * Estimate equal to:
-     * r *(attentionalFocusSize + (1-r) recentAttentionalFocusSize */
-    float attentionalFocusSizeDecay;
+     * r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent */
 
     /* for calculate the recent maximum STI value, used in Hebbian learning */
     float maxSTIDecayRate;

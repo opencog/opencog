@@ -56,7 +56,6 @@ AtomSpace::AtomSpace() {
 
     fundsSTI = LOBE_STARTING_STI_FUNDS;
     fundsLTI = LOBE_STARTING_LTI_FUNDS;
-    recentMaxSTI = 0;
     attentionalFocusBoundary = 1;
 }
 
@@ -918,13 +917,5 @@ AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti
     return s;
 }
 
-AttentionValue::sti_t AtomSpace::getRecentMaxSTI()
-{
-    return recentMaxSTI;
-}
+Util::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI() { return maxSTI; }
 
-AttentionValue::sti_t AtomSpace::setRecentMaxSTI(AttentionValue::sti_t val)
-{
-    recentMaxSTI = val;
-    return recentMaxSTI;
-}

@@ -59,7 +59,11 @@ void HopfieldOptions::printHelp()
 "   -a --log-performance [prefix] log the change cue/retrieval/diff similarity to\n"
 "                  \t separate files, optionally beginning with [prefix].\n"
 "   -q --spread-multiplier N  multiplier for importance spread, if 0 then evenly\n"
-"                  \t spread across links.\n";
+"                  \t spread across links.\n"
+"   == Pattern commands ==\n"
+"      --train-file <x> \t load patterns from file, must use -n to specify pattern size.\n"
+"      --cue-file <x> \t load patterns from file, must use -n to specify pattern size.\n"
+"      --result-file <x> \t output retrieved patterns to this file.\n";
     cout << helpOutput;
 
 
@@ -96,6 +100,9 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 	    {"total", 0, &totalFlag, 1}, // t_o_tal, reports mean, suitable for batch output
 	    {"spread-multiplier", required_argument, 0, 'q'}, // multiplier for importance spread, if 0 then evenly spread across links
 	    {"log-performance", optional_argument, 0, 'a'},
+	    {"train-file", required_argument, 0, '3'},
+	    {"cue-file", required_argument, 0, '4'},
+	    {"result-file", required_argument, 0, '5'},
 	    {0,0,0,0}
 	};
 
@@ -165,7 +172,15 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 		recordToFile = true;
 		recordToFilePrefix = optarg;
 		break;
-
+	    case '3':
+		fileTraining = optarg;
+		break;
+	    case '4':
+		fileCue = optarg;
+		break;
+	    case '5':
+		fileResult = optarg;
+		break;
 	    case '?':
 		printHelp();
 		exit(0);

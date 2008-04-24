@@ -28,7 +28,7 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
     for (int i = 0; i < imprint; i++) {
 
 	result.push_back(singleImprintAndTestPattern(p,retrieve,mutate));
-	if (!options->verboseFlag) cout << ".";
+	if (!options->verboseFlag) cout << "." << flush;
 
     }
 
@@ -96,7 +96,12 @@ HopfieldServer::HopfieldServer()
 
     importUpdateAgent = new ImportanceUpdatingAgent();
     hebLearnAgent = new HebbianLearningAgent();
+    hebLearnAgent->convertLinks = true;
     spreadAgent = new ImportanceSpreadingAgent();
+    forgetAgent = new ForgettingAgent();
+    forgetAgent->forgetPercentage = 0.10;
+
+
     plugInMindAgent(importUpdateAgent, 1);
     plugInMindAgent(hebLearnAgent, 1);
 }
@@ -217,7 +222,7 @@ void HopfieldServer::resetNodes()
 
 void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 {
-    bool first=true;
+    static bool first=true;
 
     // loop for number of imprinting cyles
     for (; cycles > 0; cycles--) {
@@ -242,42 +247,11 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 	if (first) 
 	    first = false;
 	else
-	    doForgetting(0.10);
-	//----------
+	    forgetAgent->run(this);
+
 	printStatus();
 	
 	resetNodes();
-    }
-
-}
-
-void HopfieldServer::doForgetting(float proportion = 0.05)
-{
-    HandleEntry *atoms;
-    std::vector<Handle> atomsVector;
-    int count = 0;
-    int removalAmount;
-
-    atoms = getAtomSpace()->getAtomTable().getHandleSet(ATOM,true);
-    // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
-    //
-    atoms->toHandleVector(atomsVector);
-    std::sort(atomsVector.begin(), atomsVector.end(), ImportanceSpreadLTIThenTVAscendingSort());
-    delete atoms;
-
-    removalAmount = (int) (atomsVector.size() * proportion);
-
-    for (unsigned int i = 0; i < atomsVector.size() ; i++) {
-	if (getAtomSpace()->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE && count < removalAmount) {
-	    //cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;
-	    MAIN_LOGGER.log(Util::Logger::FINE,"Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
-	    if (!getAtomSpace()->removeAtom(atomsVector[i])) {
-		cout << "Error removing atom" << endl;
-		return;
-	    }
-	    count++;
-	} else
-	    MAIN_LOGGER.log(Util::Logger::FINE,"Not removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
     }
 
 }
@@ -384,7 +358,7 @@ void HopfieldServer::printStatus()
     Pattern nodeSTI = getGridSTIAsPattern();
     Pattern pattern = nodeSTI.binarisePattern(options->vizThreshold);
     std::vector<stim_t> nodeStim = getGridStimVector();
-    HandleEntry *links, *current_l;
+//    HandleEntry *links, *current_l;
 
     int i;
 
@@ -409,16 +383,16 @@ void HopfieldServer::printStatus()
     
     //
     // Print out links.
-    if (options->verboseFlag > 1) {
-	links = getAtomSpace()->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
-
-	for (current_l = links; current_l; current_l = current_l->next) {
-	    Handle h = current_l->handle;
-
-	    cout << TLB::getAtom(h)->toString() << endl;
-	    
-	}
-    }
+    //if (options->verboseFlag > 1) {
+//	links = getAtomSpace()->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
+//
+//	for (current_l = links; current_l; current_l = current_l->next) {
+//	    Handle h = current_l->handle;
+//
+//	    cout << TLB::getAtom(h)->toString() << endl;
+//	    
+//	}
+ //   }
     cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" <<endl;
 }
 

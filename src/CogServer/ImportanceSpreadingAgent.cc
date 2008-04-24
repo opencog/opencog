@@ -19,8 +19,10 @@ ImportanceSpreadingAgent::~ImportanceSpreadingAgent()
 
 void ImportanceSpreadingAgent::run(CogServer* server)
 {
+
     a = server->getAtomSpace();
     spreadImportance();
+
 
 }
 
@@ -50,8 +52,6 @@ void ImportanceSpreadingAgent::spreadImportance()
 	hi++;
     }
 
-    
-
 }
 
 void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
@@ -79,7 +79,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     while (he) {
 	if (((Link*)TLB::getAtom(he->handle))->isSource(h)) {
 	    float val;
-	    val = fabs(a->getTV(he->handle).toFloat());
+	    val = a->getTV(he->handle).toFloat();
 	    totalRelatedness += val;
 	}
 	he = he->next;
@@ -128,6 +128,8 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 		transferAmount = transferAmount / (targets.size()-1.0f);
 	    if (transferAmount == 0.0f) continue;
 
+	    if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) transferAmount = -transferAmount;
+		
 	    MAIN_LOGGER.log(Util::Logger::FINE, "  +Link %s", TLB::getAtom(lh)->toString().c_str() );
 	    MAIN_LOGGER.log(Util::Logger::FINE, "    |weight %f, quanta %.2f, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingMultiplier, targets.size(), transferAmount, maxTransferAmount);
 
@@ -140,21 +142,20 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 		// Then for each target of link (except source)...
 		if ( TLB::getAtom(target_h) == TLB::getAtom(h) )
 		    continue;
-
-		// Check removing STI doesn't take node out of attentional
-		// focus...
-		// TODO: precalculate this in loop conditional
-		if (a->getSTI(h) >= a->getAttentionalFocusBoundary() && \
-		    a->getSTI(h) - transferAmount < a->getAttentionalFocusBoundary())
-		    break;
-
-		// Check that if the amount is negative, it doesn't steal too
-		// much from the atom
-		if (transferAmount < 0.0f) {
-		    if (a->getSTI(target_h) - (AttentionValue::sti_t) transferAmount \
-			    < minStealingBoundary)
+		
+		if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) {
+		    // Check that if the link is inverse, that it doesn't steal too
+		    // much from the target atom
+		    if (a->getSTI(target_h) < minStealingBoundary)
 			continue;
+		} else {
+		    // Check removing STI doesn't take node out of attentional
+		    // focus...
+		    if (a->getSTI(h) >= a->getAttentionalFocusBoundary() && \
+			a->getSTI(h) - transferAmount < a->getAttentionalFocusBoundary())
+			break;
 		}
+
 		totalTransferred += (int) transferAmount;
 		a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
 		a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );

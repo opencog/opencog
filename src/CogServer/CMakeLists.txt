@@ -10,6 +10,7 @@ CommandRequestProcessor.cc
 ImportanceUpdatingAgent.cc
 ImportanceSpreadingAgent.cc
 HebbianLearningAgent.cc
+ForgettingAgent.cc
 )
 
 include_directories (

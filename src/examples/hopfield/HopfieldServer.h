@@ -13,12 +13,13 @@
 #include <CogServer.h>
 #include <RandGen.h>
 #include <ImportanceUpdatingAgent.h>
+#include <HebbianLearningAgent.h>
+#include <ImportanceSpreadingAgent.h>
+#include <ForgettingAgent.h>
 
 #include <vector>
 #include <math.h>
 
-#include "HebbianLearningAgent.h"
-#include "ImportanceSpreadingAgent.h"
 #include "HopfieldOptions.h"
 #include "Pattern.h"
 
@@ -50,6 +51,7 @@ class HopfieldServer : public opencog::CogServer {
 	opencog::ImportanceUpdatingAgent *importUpdateAgent;
 	opencog::HebbianLearningAgent *hebLearnAgent;
 	opencog::ImportanceSpreadingAgent *spreadAgent;
+	opencog::ForgettingAgent *forgetAgent;
 
 	HopfieldOptions *options;
 

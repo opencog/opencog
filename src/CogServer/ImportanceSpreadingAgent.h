@@ -38,6 +38,7 @@ class ImportanceSpreadingAgent : public MindAgent
 
 	void spreadAtomImportance(Handle h);
 
+	Util::recent_val<long> amountSpread;
 
     public:
 

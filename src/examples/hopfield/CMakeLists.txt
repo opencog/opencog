@@ -12,6 +12,6 @@ ${OPENCOG_SOURCE_DIR}/lib/linux/sockets
 
 add_executable (hopfield HopfieldDemo.cc HopfieldServer.cc Pattern.cc
 	HopfieldOptions.cc)
-target_link_libraries (hopfield CogServer Sockets)
+target_link_libraries (hopfield AtomSpace CogServer Sockets)
 
 

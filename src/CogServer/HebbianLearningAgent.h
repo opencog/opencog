@@ -31,6 +31,10 @@ class HebbianLearningAgent : public MindAgent
 	float getNormSTI(AttentionValue::sti_t s);
 	std::vector<Handle>& moveSourceToFront(std::vector<Handle> &outgoing);
     public:
+	// Convert links to/from inverse as necessary.
+	bool convertLinks;
+	// Maximum LTI of a link that can be converted.
+	AttentionValue::lti_t conversionThreshold;
 
 	HebbianLearningAgent();
 	virtual ~HebbianLearningAgent();

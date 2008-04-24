@@ -76,6 +76,17 @@ class Pattern : public std::vector< int > {
 	 */
 	static std::vector< Pattern > mutatePatterns( std::vector< Pattern > &patterns, float error);
 
+	/**
+	 * Load a series of patterns from a file. The format must use O (letter
+	 * o) as the active nodes, and a space for inactive nodes. The patterns
+	 * must be square and separated by a blank line.
+	 *
+	 * @param file to load 
+	 * @param size equal to width or height (patterns must be square)
+	 * @return the loaded patterns.
+	 */
+	static std::vector< Pattern > loadPatterns( std::string fn, int size);
+
 };
 
 #endif // HDEMO_PATTERNMATRIX_H

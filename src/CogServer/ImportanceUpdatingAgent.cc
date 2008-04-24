@@ -20,17 +20,10 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     noiseOdds = 0.20;
     noiseUnit = 10;
 
-    recentTotalStimulusSinceReset = 0;
-    recentTotalStimulusDecay = 0.5;
-
-    attentionalFocusSize = 0;
-    recentAttentionalFocusSize = 0.0f;
-    recentAttentionalFocusNodesSize = 0.0f;
-    attentionalFocusSizeDecay = 0.8;
-
-    maxSTIDecayRate = 0.8;
-    // Moved to AtomSpace
-    //recentMaxSTI = 0;
+    // set decay rates for dampened values
+    totalStimulusSinceReset.decay = 0.5;
+    attentionalFocusSize.decay = 0.8;
+    attentionalFocusNodesSize.decay = 0.8;
 
     targetLobeSTI = LOBE_STARTING_STI_FUNDS;
     acceptableLobeSTIRange[0] = targetLobeSTI - LOBE_STI_FUNDS_BUFFER;
@@ -67,8 +60,6 @@ void ImportanceUpdatingAgent::init(CogServer *server)
     initialEstimateMade = true;
 
 }
-
-// AttentionValue::sti_t ImportanceUpdatingAgent::getRecentMaxSTI() { return recentMaxSTI; }
 
 void ImportanceUpdatingAgent::setLogger(Util::Logger* log)
 {
@@ -141,25 +132,24 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     delete h;
 
     /* Update recentMaxSTI */
-    a->setRecentMaxSTI( (AttentionValue::sti_t) (maxSTIDecayRate * maxSTISeen + (1.0-maxSTIDecayRate) * a->getRecentMaxSTI() ) );
-    log->log(Util::Logger::DEBUG, "Max STI seen is %d, recentMaxSTI is now %d", maxSTISeen, a->getRecentMaxSTI());
+    a->getMaxSTI().update( maxSTISeen );
+    log->log(Util::Logger::DEBUG, "Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
     
     if (lobeSTIOutOfBounds) {
 	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");
-	updateSTIRent(a);
+	//updateSTIRent(a);
     }
 
     /* Reset Stimulus */
     a->resetStimulus();
 
+    log->log(Util::Logger::DEBUG, "total stim now %d", a->getTotalStimulus());
+
 }
 
 void ImportanceUpdatingAgent::updateTotalStimulus(AtomSpace* a)
 {
-    double r = (double) recentTotalStimulusDecay;
-    recentTotalStimulusSinceReset = (stim_t) (r * a->getTotalStimulus() + (1.0-r) \
-				     * recentTotalStimulusSinceReset);
-
+    totalStimulusSinceReset.update(a->getTotalStimulus());
 }
 
 void ImportanceUpdatingAgent::setNoiseFlag(bool newVal)
@@ -330,25 +320,25 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
     oldSTIAtomRent = STIAtomRent;
     
     if (!updateLinks) {
-	if (recentAttentionalFocusNodesSize > 0)
-	    STIAtomRent = (AttentionValue::sti_t) ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset \
-			  / (float) recentAttentionalFocusNodesSize);
+	if (attentionalFocusNodesSize.recent > 0)
+	    STIAtomRent = (AttentionValue::sti_t) ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
+			  / (float) attentionalFocusNodesSize.recent);
 	else
-	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset);
+	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
 
-	focusSize = recentAttentionalFocusNodesSize;
+	focusSize = attentionalFocusNodesSize.recent;
 	    
     } else {
-	if (recentAttentionalFocusSize > 0)
-	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset \
-			  / (float) recentAttentionalFocusSize);
+	if (attentionalFocusSize.recent > 0)
+	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
+			  / (float) attentionalFocusSize.recent);
 	else
-	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) recentTotalStimulusSinceReset);
+	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
 
-	focusSize = recentAttentionalFocusSize;
+	focusSize = attentionalFocusSize.recent;
     }
 
-    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage);
+    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %d.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
 
     lobeSTIOutOfBounds = false; 
 }
@@ -356,20 +346,17 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 
 void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 {
-    float r = attentionalFocusSizeDecay;
     int n = 0;
     HandleEntry* inFocus;
     HandleEntry* h;
 
     const AtomTable& at = a->getAtomTable(); 
     inFocus = at.getHandleSet(a->getAttentionalFocusBoundary(),AttentionValue::MAXSTI);
-    attentionalFocusSize = inFocus->getSize();
 
-    recentAttentionalFocusSize = (r * attentionalFocusSize) + \
-				 ((1.0-r) * recentAttentionalFocusSize);
+    attentionalFocusSize.update(inFocus->getSize());
   
     log->log(Util::Logger::FINE, "attentionalFocusSize = %d, recent = %f",
-	    attentionalFocusSize, recentAttentionalFocusSize);
+	    attentionalFocusSize.val, attentionalFocusSize.recent);
 
     h = inFocus;
     while (h) {
@@ -377,12 +364,10 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 	    n += 1;
 	h = h->next;
     }
-    attentionalFocusNodesSize = n;
-    recentAttentionalFocusNodesSize = (r * attentionalFocusNodesSize) + \
-				 ((1.0-r) * recentAttentionalFocusNodesSize);
+    attentionalFocusNodesSize.update(n);
 
     log->log(Util::Logger::FINE, "attentionalFocusNodesSize = %d, recent = %f",
-	    attentionalFocusNodesSize, recentAttentionalFocusNodesSize);
+	    attentionalFocusNodesSize.val, attentionalFocusNodesSize.recent);
 
     delete inFocus;
 
@@ -479,12 +464,12 @@ string ImportanceUpdatingAgent::toString()
     if (noiseOn)
 	s << "Random stimulation on. Chance: " << noiseOdds << \
 	    " Amount: " << noiseUnit << "\n";
-    s << "Recent Total Stim since reset: " << recentTotalStimulusSinceReset \
-	<< ", decay: " << recentTotalStimulusDecay << "\n";
-    s << "Att. focus. Size: " << attentionalFocusSize << ", recent: " \
-	<< recentAttentionalFocusSize << ", recentForNodes: " \
-	<< recentAttentionalFocusNodesSize << ", decay: " \
-	<< attentionalFocusSizeDecay << "\n"; 
+    s << "Recent Total Stim since reset: " << totalStimulusSinceReset.recent \
+	<< ", decay: " << totalStimulusSinceReset.decay << "\n";
+    s << "Att. focus. Size: " << attentionalFocusSize.val << ", recent: " \
+	<< attentionalFocusSize.recent << ", recentForNodes: " \
+	<< attentionalFocusNodesSize.val << ", decay: " \
+	<< attentionalFocusSize.decay << "\n"; 
     s << "target (range) STI: " << targetLobeSTI << \
 	"(" << acceptableLobeSTIRange[0] << "-" << acceptableLobeSTIRange[1] << \
 	") LTI: " << targetLobeLTI << \

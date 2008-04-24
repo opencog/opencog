@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <sys/time.h>
 
 #include <AttentionValue.h>
@@ -98,3 +99,51 @@ float Pattern::hammingSimilarity(const Pattern &a)
 
 }
 
+std::vector< Pattern > Pattern::loadPatterns( std::string fn, int size)
+{
+    std::ifstream in;
+    char x;
+    std::vector< Pattern > patterns;
+
+    cout << "loading file" << endl;
+
+    in.open(fn.c_str());
+    if (!in) {
+	cout << "cannot open file " << fn << endl;
+	exit(1);
+    }
+
+    while(in) {
+
+	int row = 0, col = 0;
+	Pattern p(size,size);
+	while (row < size) {
+	    while(col < size) {
+		if(in) in.get(x);
+
+		if (x == 'O') {
+		    p[row*size + col] = 1;
+		    col++;
+		} else if (x == ' ') {
+		    p[row*size + col] = 0;
+		    col++;
+		} else if (x == '\n') {
+		    row++;
+		    col = size;
+		} else
+		    cout << "unknown character in file" << endl;
+	    }
+	    col = 0;
+	}
+	// retreive blank line
+	if (in) in.get(x);
+
+	patterns.push_back(p);
+
+    }
+    in.close();
+
+    cout << "num patterns = " << patterns.size() << endl;
+    return patterns;
+
+}

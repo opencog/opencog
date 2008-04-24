@@ -13,6 +13,8 @@
 #include "AttentionValue.h"
 #include "exceptions.h"
 
+#include <recent_val.h>
+
 #ifndef WIN32
 #include <ext/hash_map>
 using __gnu_cxx::hash_map;
@@ -774,8 +776,7 @@ class AtomSpace {
     AttentionValue::sti_t setAttentionalFocusBoundary(
 	    AttentionValue::sti_t s);
 
-    AttentionValue::sti_t getRecentMaxSTI();
-    AttentionValue::sti_t setRecentMaxSTI(AttentionValue::sti_t val);
+    Util::recent_val<AttentionValue::sti_t>& getMaxSTI();
 
     //for convenience
     bool isNode(Handle) const;
@@ -873,7 +874,7 @@ class AtomSpace {
      * not charged STI rent */
     AttentionValue::sti_t attentionalFocusBoundary;
 
-    AttentionValue::sti_t recentMaxSTI;
+    Util::recent_val<AttentionValue::sti_t> maxSTI;
 
     /* These indicate the amount importance funds available in the
      * AtomSpace */

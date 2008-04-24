@@ -3,6 +3,7 @@
 
 #include "HopfieldServer.h"
 
+std::vector< Pattern > getPatterns();
 void testHopfieldNetworkRolling();
 void testHopfieldNetworkRollingOld();
 void testHopfieldNetworkInterleave();
@@ -39,14 +40,27 @@ int main(int argc, char *argv[])
     if (o->recordToFile) o->closeOutputFiles();
 }
 
+std::vector< Pattern > getPatterns()
+{
+    if (o->fileTraining.size() > 0) {
+	std::vector< Pattern > ps;
+	ps = Pattern::loadPatterns(o->fileTraining,hDemo.height);
+	o->nPatterns = ps.size();
+	return ps;
+    } else
+	return Pattern::generateRandomPatterns(o->nPatterns,hDemo.width,hDemo.height,o->genPatternDensity);
+
+}
+
 void testHopfieldNetworkInterleave()
 {
 # define HDEMO_NORESULT -100
     std::vector< Pattern > patterns;
     std::vector< std::vector < float > > results;
-    int totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
+    int totalCycles;
 
-    patterns = Pattern::generateRandomPatterns(o->nPatterns,hDemo.width,hDemo.height,o->genPatternDensity);
+    patterns = getPatterns();
+    totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
 
     if (o->showMatrixFlag) {
 	hDemo.printMatrixResult(patterns);
@@ -112,7 +126,7 @@ void testHopfieldNetworkRolling()
     std::vector< std::vector<float> > results;
     std::vector<float> diffs;
 
-    patterns = Pattern::generateRandomPatterns(o->nPatterns,hDemo.width,hDemo.height,o->genPatternDensity);
+    patterns = getPatterns();
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
 	results.push_back(hDemo.imprintAndTestPattern(patterns[i],o->imprintCycles,o->retrieveCycles,o->cueErrorRate));
@@ -149,7 +163,8 @@ void testHopfieldNetworkRollingOld()
     Pattern result(hDemo.width, hDemo.height);
     std::vector<float> diffs;
 
-    patterns = Pattern::generateRandomPatterns(o->nPatterns,hDemo.width,hDemo.height,o->genPatternDensity);
+    patterns = getPatterns();
+
     cuePatterns = Pattern::mutatePatterns(patterns, o->cueErrorRate);
 
     for (unsigned int i = 0; i< patterns.size(); i++) {

@@ -66,6 +66,9 @@ class HopfieldOptions {
 	std::ofstream afterFile;
 	std::ofstream diffFile;
 
+	std::string fileTraining;
+	std::string fileCue;
+	std::string fileResult;
 
 };
 
