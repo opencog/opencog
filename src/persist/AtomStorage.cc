@@ -98,6 +98,16 @@ class AtomStorage::Response
 		}
 };
 
+bool AtomStorage::idExists(const char * buff)
+{
+	Response rp;
+	rp.row_exists = false;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
+	rp.rs->release();
+	return rp.row_exists;
+}
+
 /* ================================================================ */
 #define BUFSZ 250
 
@@ -161,9 +171,16 @@ AtomStorage::~AtomStorage()
 		vals += val; \
 	} \
 }
+
 #define STMTI(colname,ival) { \
 	char buff[BUFSZ]; \
 	snprintf(buff, BUFSZ, "%u", ival); \
+	STMT(colname, buff); \
+}
+
+#define STMTF(colname,fval) { \
+	char buff[BUFSZ]; \
+	snprintf(buff, BUFSZ, "%12.8g", fval); \
 	STMT(colname, buff); \
 }
 
@@ -183,17 +200,11 @@ void AtomStorage::storeOutgoing(Atom *atom, Handle h)
 /**
  * Return true if the indicated handle exists in the storage.
  */
-bool AtomStorage::atomExists(Handle h)
+bool AtomStorage::tvExists(int tvid)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
-
-	Response rp;
-	rp.row_exists = false;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
-	rp.rs->release();
-	return rp.row_exists;
+	snprintf(buff, BUFSZ, "SELECT tvid FROM SimpleTVs WHERE tvid = %u;", tvid);
+	return idExists(buff);
 }
 
 /**
@@ -203,6 +214,11 @@ bool AtomStorage::atomExists(Handle h)
  */
 int AtomStorage::storeTruthValue(Atom *atom, Handle h)
 {
+	int notfirst = 0;
+	std::string cols;
+	std::string vals;
+	std::string coda;
+
 	const TruthValue &tv = atom->getTruthValue();
 
 	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
@@ -217,12 +233,41 @@ int AtomStorage::storeTruthValue(Atom *atom, Handle h)
 	// If its a stock truth value, there is nothing to do.
 	if (tvid <= 4) return tvid;
 
+	// Use the TLB Handle as the UUID.
+	char tvidbuff[BUFSZ];
+	snprintf(tvidbuff, BUFSZ, "%u", tvid);
+
+	bool update = tvExists(tvid);
+	if (update)
+	{
+		cols = "UPDATE SimpleTVs SET ";
+		vals = "";
+		coda = " WHERE tvid = ";
+		coda += tvidbuff;
+		coda += ";";
+	}
+	else
+	{
+		cols = "INSERT INTO SimpleTVs (";
+		vals = ") VALUES (";
+		coda = ");";
+		STMT("tvid", tvidbuff);
+	}
+
+	STMTF("mean", tv.getMean());
+	STMTF("count", tv.getCount());
+
+	std::string qry = cols + vals + coda;
+printf ("duude atv its %s\n", qry.c_str());
+	Response rp;
+	rp.rs = db_conn->exec(qry.c_str());
+	rp.rs->release();
+
 	return tvid;
 }
 
-int AtomStorage::TVID(const TruthValue &ctv)
+int AtomStorage::TVID(const TruthValue &tv)
 {
-	TruthValue &tv = (TruthValue &) ctv;
 	if (tv == TruthValue::NULL_TV()) return 0;
 	if (tv == TruthValue::DEFAULT_TV()) return 1;
 	if (tv == TruthValue::FALSE_TV()) return 2;
@@ -261,9 +306,9 @@ void AtomStorage::storeAtom(Atom *atom)
 		cols = "INSERT INTO Atoms (";
 		vals = ") VALUES (";
 		coda = ");";
-	}
 
-	STMT("uuid", uuidbuff);
+		STMT("uuid", uuidbuff);
+	}
 
 	// Store the atom UUID
 	Type t = atom->getType();
@@ -306,13 +351,7 @@ bool AtomStorage::atomExists(Handle h)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
-
-	Response rp;
-	rp.row_exists = false;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
-	rp.rs->release();
-	return rp.row_exists;
+	return idExists(buff);
 }
 
 /* ================================================================ */

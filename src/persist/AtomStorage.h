@@ -31,6 +31,8 @@ class AtomStorage
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
 
+		bool idExists(const char *);
+		bool tvExists(int);
 		int storeTruthValue(Atom *, Handle);
 		int  TVID(const TruthValue &);
 

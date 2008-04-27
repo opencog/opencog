@@ -10,6 +10,7 @@
 #include "Atom.h"
 #include "Link.h"
 #include "Node.h"
+#include "SimpleTruthValue.h"
 #include "TLB.h"
 
 int atomCompare(Atom *a, Atom *b)
@@ -45,6 +46,15 @@ int atomCompare(Atom *a, Atom *b)
 			}
 		}
 	}
+	if (!(a->getTruthValue() == b->getTruthValue()))
+	{
+		const TruthValue &ta = a->getTruthValue();
+		const TruthValue &tb = b->getTruthValue();
+		fprintf(stderr, "Error, truth value miscompare, "
+		        "ma=%f mb=%f ca=%f cb=%f\n",
+		        ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
+		rc --;
+	}
 	return rc;
 }
 
@@ -54,6 +64,10 @@ int main ()
 	AtomStorage *store = new AtomStorage();
 
 	Atom *a = new Node(SCHEMA_NODE, "someNode");
+
+	SimpleTruthValue stv(0.55, 0.6);
+	a->setTruthValue(stv);
+
 printf ("hello\n");
 
 	store->storeAtom(a);
