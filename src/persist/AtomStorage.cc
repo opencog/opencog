@@ -12,7 +12,9 @@
 #include "Foreach.h"
 #include "Link.h"
 #include "Node.h"
+#include "SimpleTruthValue.h"
 #include "TLB.h"
+#include "TruthValue.h"
 #include "type_codes.h"
 
 #include "AtomStorage.h"
@@ -159,6 +161,11 @@ AtomStorage::~AtomStorage()
 		vals += val; \
 	} \
 }
+#define STMTI(colname,ival) { \
+	char buff[BUFSZ]; \
+	snprintf(buff, BUFSZ, "%u", ival); \
+	STMT(colname, buff); \
+}
 
 /**
  * Store the outgoing set of the atom.
@@ -171,6 +178,61 @@ void AtomStorage::storeOutgoing(Atom *atom, Handle h)
 
 	foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
 }
+
+/* ================================================================ */
+/**
+ * Return true if the indicated handle exists in the storage.
+ */
+bool AtomStorage::atomExists(Handle h)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
+
+	Response rp;
+	rp.row_exists = false;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
+	rp.rs->release();
+	return rp.row_exists;
+}
+
+/**
+ * Store the truthvalue of the atom.
+ * Handle h must be the handle for the atom; its passed as an arg to 
+ * avoid having to look it up.
+ */
+int AtomStorage::storeTruthValue(Atom *atom, Handle h)
+{
+	const TruthValue &tv = atom->getTruthValue();
+
+	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
+	if (NULL == stv)
+	{
+		fprintf(stderr, "Error: non-simple truth values are not handled\n");
+		return 0;
+	}
+
+	int tvid = TVID(tv);
+
+	// If its a stock truth value, there is nothing to do.
+	if (tvid <= 4) return tvid;
+
+	return tvid;
+}
+
+int AtomStorage::TVID(const TruthValue &ctv)
+{
+	TruthValue &tv = (TruthValue &) ctv;
+	if (tv == TruthValue::NULL_TV()) return 0;
+	if (tv == TruthValue::DEFAULT_TV()) return 1;
+	if (tv == TruthValue::FALSE_TV()) return 2;
+	if (tv == TruthValue::TRUE_TV()) return 3;
+	if (tv == TruthValue::TRIVIAL_TV()) return 4;
+
+	return 5; // XXX should be next unusued ID XXX
+}
+
+/* ================================================================ */
 
 void AtomStorage::storeAtom(Atom *atom)
 {
@@ -203,11 +265,11 @@ void AtomStorage::storeAtom(Atom *atom)
 
 	STMT("uuid", uuidbuff);
 
-	char buff[BUFSZ];
+	// Store the atom UUID
 	Type t = atom->getType();
-	snprintf(buff, BUFSZ, "%u", t);
-	STMT("type", buff);
+	STMTI("type", t);
 
+	// Store the node name, if its a node
 	Node *n = dynamic_cast<Node *>(atom);
 	if (n)
 	{
@@ -216,6 +278,10 @@ void AtomStorage::storeAtom(Atom *atom)
 		qname += "'";
 		STMT("name", qname);
 	}
+
+	// Store the truth value
+	int id = storeTruthValue(atom, h);
+	STMTI("tvid", id);
 
 	std::string qry = cols + vals + coda;
 printf ("duude its %s\n", qry.c_str());

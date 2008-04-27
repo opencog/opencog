@@ -31,6 +31,9 @@ class AtomStorage
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
 
+		int storeTruthValue(Atom *, Handle);
+		int  TVID(const TruthValue &);
+
 	public:
 		AtomStorage(void);
 		~AtomStorage();

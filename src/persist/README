@@ -30,6 +30,12 @@ The core design will use a few very simple SQL tables, and some
 simple readers and writers to save and restore atoms from an SQL 
 database.
 
+Note that the core design does *not* make use of object reflection, 
+nor can it store arbitrary kinds of objects. It is very definitely 
+hard-wired. Yes, this can be considered to be a short-coming. 
+A more general, persistent object framework (for C) can be found 
+at http://estron.alioth.debian.org/ 
+
 Caveats:
 --------
 Its not at all clear whether this is a good idea; there are several
