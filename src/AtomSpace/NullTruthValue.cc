@@ -13,6 +13,13 @@ bool NullTruthValue::isNullTv() const {
     return true; 
 }
 
+bool NullTruthValue::operator==(const TruthValue& rhs)
+{
+    const NullTruthValue *ntv = dynamic_cast<const NullTruthValue *>(&rhs);
+    if (ntv) return true;
+    return false;
+}
+
 std::string NullTruthValue::toString() const { 
     return "(null TV)"; 
 }

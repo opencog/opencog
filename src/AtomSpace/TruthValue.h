@@ -103,6 +103,13 @@ public:
      */
     virtual TruthValue& operator=(const TruthValue& rhs) = 0;
 
+    /**
+     * Equality. Used to determine if two truth values are the 
+     * same, or not. Primarily useful see if a TV is equal to 
+     * NULL_TV, TRUE_TV, FALSE_TV, etc.
+     */
+    virtual bool operator==(const TruthValue& rhs) = 0;
+
 // VIRTUAL METHODS:
 
     /**

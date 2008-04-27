@@ -82,6 +82,15 @@ SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue& rhs) throw (Runt
     return *this;
 }
 
+bool SimpleTruthValue::operator==(const TruthValue& rhs)
+{
+    const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
+    if (NULL == stv) return false;
+    if (mean != stv->mean) return false;
+    if (count != stv->count) return false;
+    return true;
+}
+
 TruthValueType SimpleTruthValue::getType() const{
     return SIMPLE_TRUTH_VALUE;
 }

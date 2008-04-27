@@ -45,6 +45,8 @@ class IndefiniteTruthValue : public TruthValue {
         IndefiniteTruthValue* clone() const;
         IndefiniteTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
 
+        virtual bool operator==(const TruthValue& rhs);
+
         static IndefiniteTruthValue* fromString(const char*);
 
         float getMean() const;

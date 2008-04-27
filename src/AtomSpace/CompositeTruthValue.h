@@ -43,13 +43,19 @@ public:
     
     CompositeTruthValue* clone() const;
     TruthValue* merge(const TruthValue&) const;
+
     CompositeTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
-    // The following operator method was created because when a tv is assignment to 
-    // a variable declared as CompositeTruthValue, it does not match the operator method 
-    // above (that receives a "const TruthValue&" argument). 
-    // Strangely, this does not happen with other TruthValue subclasses (Simple and Indefinite, for instance...)
+
+    // The following operator method was created because when a tv is
+    // assigned to a variable declared as CompositeTruthValue, it
+    // does not match the operator method above (that receives a 
+    // "const TruthValue&" argument). 
+    // Strangely, this does not happen with other TruthValue 
+    // subclasses (Simple and Indefinite, for instance...)
     CompositeTruthValue& operator=(const CompositeTruthValue& rhs) throw (RuntimeException);
     
+    virtual bool operator==(const TruthValue& rhs);
+
     static CompositeTruthValue* fromString(const char*) throw (InvalidParamException);
     
     float getMean() const;

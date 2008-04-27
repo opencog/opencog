@@ -23,6 +23,8 @@ public:
     std::string toString() const;
     TruthValueType getType() const throw (RuntimeException);
 
+    virtual bool operator==(const TruthValue& rhs);
+
 protected:
     NullTruthValue(); // TODO: Make this constructor protected. For some reason compiler is complaining if it's declared protected.
     TruthValue* merge(TruthValue*) throw (RuntimeException);

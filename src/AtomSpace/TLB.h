@@ -12,7 +12,7 @@
 #include "config.h"
 #endif
 
-// #define USE_TLB_MAP
+#define USE_TLB_MAP
 #ifdef USE_TLB_MAP
 #include <map>
 #endif

@@ -66,6 +66,11 @@ IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue& rhs) thr
     return *this;
 }
 
+bool IndefiniteTruthValue::operator==(const TruthValue& rhs)
+{
+    return false; // XXX Implement me!
+}
+
 float IndefiniteTruthValue::getL() const {return L;}
 float IndefiniteTruthValue::getU() const {return U;}
 float IndefiniteTruthValue::getDiff() const {return diff;}

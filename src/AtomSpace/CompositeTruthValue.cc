@@ -227,6 +227,11 @@ CompositeTruthValue& CompositeTruthValue::operator=(const CompositeTruthValue& r
 }
 
 
+bool CompositeTruthValue::operator==(const TruthValue& rhs)
+{
+    return false;  // XXX implement me !!
+}
+
 TruthValueType CompositeTruthValue::getType() const {
     return COMPOSITE_TRUTH_VALUE;
 }

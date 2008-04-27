@@ -34,6 +34,8 @@ class SimpleTruthValue : public TruthValue
         SimpleTruthValue& operator=(const TruthValue& rhs)
             throw (RuntimeException);
 
+        virtual bool operator==(const TruthValue& rhs);
+
         static SimpleTruthValue* fromString(const char*);
         static float confidenceToCount(float);
         static float countToConfidence(float);
