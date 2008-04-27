@@ -9,8 +9,8 @@ CREATE TABLE Atoms (
 
 	type  INT,
 
-	-- maps to TruthValue
-	truth FLOAT,
+	-- maps to TruthValue ID
+	tvid INT,
 
 	-- maps to AttentionValue
 	attention FLOAT,
@@ -18,6 +18,22 @@ CREATE TABLE Atoms (
    -- The node name
 	name    TEXT
 );
+
+--
+-- Simple truth values
+--
+CREATE TABLE SimpleTVs (
+	tvid INT PRIMARY KEY,
+	mean FLOAT,
+	count FLOAT
+);
+
+
+INSERT INTO SimpleTVs VALUES (0, 0.0, 0.0);     -- NULL_TV
+INSERT INTO SimpleTVs VALUES (1, 0.0, 0.0);     -- DEFAULT_TV
+INSERT INTO SimpleTVs VALUES (2, 0.0, 10000.0); -- FALSE_TV
+INSERT INTO SimpleTVs VALUES (3, 1.0, 10000.0); -- TRUE_TV
+INSERT INTO SimpleTVs VALUES (4, 1.0, 0.0);     -- TRIVIAL_TV
 
 
 -- Table of the edges of the Levi craph corresponding 
