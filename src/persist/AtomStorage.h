@@ -35,6 +35,7 @@ class AtomStorage
 		bool tvExists(int);
 		int storeTruthValue(Atom *, Handle);
 		int  TVID(const TruthValue &);
+		TruthValue * getTV(int);
 
 	public:
 		AtomStorage(void);

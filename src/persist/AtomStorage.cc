@@ -40,6 +40,7 @@ class AtomStorage::Response
 		// Temporary cache of info about atom being assembled.
 		Type itype;
 		const char * name;
+		int tvid;
 
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
@@ -51,6 +52,10 @@ class AtomStorage::Response
 			else if (!strcmp(colname, "name"))
 			{
 				name = colvalue;
+			}
+			else if (!strcmp(colname, "tvid"))
+			{
+				tvid = atoi(colvalue);
 			}
 			return false;
 		}
@@ -93,6 +98,30 @@ class AtomStorage::Response
 			else if (!strcmp(colname, "pos"))
 			{
 				pos = atoi(colvalue);
+			}
+			return false;
+		}
+
+		// Callbacks for SimpleTruthValues
+		double mean;
+		double count;
+
+		bool create_tv_cb(void)
+		{
+			// printf ("---- New SimpleTV found ----\n");
+			rs->foreach_column(&Response::create_tv_column_cb, this);
+			return false;
+		}
+		bool create_tv_column_cb(const char *colname, const char * colvalue)
+		{
+			printf ("%s = %s\n", colname, colvalue);
+			if (!strcmp(colname, "mean"))
+			{
+				mean = atof(colvalue);
+			}
+			else if (!strcmp(colname, "count"))
+			{
+				count = atof(colvalue);
 			}
 			return false;
 		}
@@ -370,6 +399,30 @@ printf("duude %s\n", buff);
 }
 
 /* ================================================================ */
+
+TruthValue* AtomStorage::getTV(int tvid)
+{
+printf("duude tvid=%d\n", tvid);
+	if (0 == tvid) return (TruthValue *) & TruthValue::NULL_TV();
+	if (1 == tvid) return (TruthValue *) & TruthValue::DEFAULT_TV();
+	if (2 == tvid) return (TruthValue *) & TruthValue::FALSE_TV();
+	if (3 == tvid) return (TruthValue *) & TruthValue::TRUE_TV();
+	if (4 == tvid) return (TruthValue *) & TruthValue::TRIVIAL_TV();
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
+printf("duude %s\n", buff);
+
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::create_tv_cb, &rp);
+	rp.rs->release();
+
+	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean,rp.count);
+	return stv;
+}
+
+/* ================================================================ */
 /**
  * Create a new atom, retreived from storage
  *
@@ -384,6 +437,9 @@ Atom * AtomStorage::getAtom(Handle h)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
+	// Now get the truth value
+	TruthValue *tv = getTV(rp.tvid);
+
 	// Now that we know everything about an atom, actually construct one.
 	Atom *atom = NULL;
 	if (ClassServer::isAssignableFrom(NODE, rp.itype))
@@ -396,6 +452,8 @@ Atom * AtomStorage::getAtom(Handle h)
 		getOutgoing(outvec, h);
 		atom = new Link(rp.itype, outvec);
 	}
+
+	atom->setTruthValue(*tv);
 
 	rp.rs->release();
 	return atom;
