@@ -82,7 +82,7 @@ SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue& rhs) throw (Runt
     return *this;
 }
 
-bool SimpleTruthValue::operator==(const TruthValue& rhs)
+bool SimpleTruthValue::operator==(const TruthValue& rhs) const
 {
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;

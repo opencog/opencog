@@ -66,7 +66,7 @@ IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue& rhs) thr
     return *this;
 }
 
-bool IndefiniteTruthValue::operator==(const TruthValue& rhs)
+bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
 {
     return false; // XXX Implement me!
 }

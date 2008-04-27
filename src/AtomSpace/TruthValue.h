@@ -108,7 +108,7 @@ public:
      * same, or not. Primarily useful see if a TV is equal to 
      * NULL_TV, TRUE_TV, FALSE_TV, etc.
      */
-    virtual bool operator==(const TruthValue& rhs) = 0;
+    virtual bool operator==(const TruthValue& rhs) const = 0;
 
 // VIRTUAL METHODS:
 

@@ -227,7 +227,7 @@ CompositeTruthValue& CompositeTruthValue::operator=(const CompositeTruthValue& r
 }
 
 
-bool CompositeTruthValue::operator==(const TruthValue& rhs)
+bool CompositeTruthValue::operator==(const TruthValue& rhs) const
 {
     return false;  // XXX implement me !!
 }

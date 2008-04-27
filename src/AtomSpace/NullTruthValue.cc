@@ -13,7 +13,7 @@ bool NullTruthValue::isNullTv() const {
     return true; 
 }
 
-bool NullTruthValue::operator==(const TruthValue& rhs)
+bool NullTruthValue::operator==(const TruthValue& rhs) const
 {
     const NullTruthValue *ntv = dynamic_cast<const NullTruthValue *>(&rhs);
     if (ntv) return true;

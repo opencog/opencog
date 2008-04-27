@@ -45,7 +45,7 @@ class IndefiniteTruthValue : public TruthValue {
         IndefiniteTruthValue* clone() const;
         IndefiniteTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
 
-        virtual bool operator==(const TruthValue& rhs);
+        virtual bool operator==(const TruthValue& rhs) const;
 
         static IndefiniteTruthValue* fromString(const char*);
 

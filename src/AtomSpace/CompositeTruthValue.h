@@ -54,7 +54,7 @@ public:
     // subclasses (Simple and Indefinite, for instance...)
     CompositeTruthValue& operator=(const CompositeTruthValue& rhs) throw (RuntimeException);
     
-    virtual bool operator==(const TruthValue& rhs);
+    virtual bool operator==(const TruthValue& rhs) const;
 
     static CompositeTruthValue* fromString(const char*) throw (InvalidParamException);
     
