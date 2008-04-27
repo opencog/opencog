@@ -54,11 +54,11 @@ class AtomStorage::Response
 			{
 				name = colvalue;
 			}
-			else if (!strcmp(colname, "mean"))
+			else if (!strcmp(colname, "stv_mean"))
 			{
 				mean = atof(colvalue);
 			}
-			else if (!strcmp(colname, "count"))
+			else if (!strcmp(colname, "stv_count"))
 			{
 				count = atof(colvalue);
 			}
@@ -404,6 +404,15 @@ void AtomStorage::storeAtom(Atom *atom)
 	}
 
 	// Store the truth value
+	const TruthValue &tv = atom->getTruthValue();
+	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
+	if (NULL == stv)
+	{
+		fprintf(stderr, "Error: non-simple truth values are not handled\n");
+		return;
+	}
+	STMTF("stv_mean", tv.getMean());
+	STMTF("stv_count", tv.getCount());
 
 	std::string qry = cols + vals + coda;
 printf ("duude its %s\n", qry.c_str());
@@ -476,7 +485,8 @@ Atom * AtomStorage::getAtom(Handle h)
 		atom = new Link(rp.itype, outvec);
 	}
 
-	// atom->setTruthValue(*tv);
+	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.count);
+	atom->setTruthValue(*stv);
 
 	rp.rs->release();
 	return atom;

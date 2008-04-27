@@ -14,7 +14,7 @@ CREATE TABLE Atoms (
 
 	-- Inlined truth values
 	stv_mean FLOAT,
-	stv_count FLOAT
+	stv_count FLOAT,
 
 	-- maps to AttentionValue
 	attention FLOAT,
