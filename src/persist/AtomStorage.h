@@ -32,10 +32,13 @@ class AtomStorage
 		void getOutgoing(std::vector<Handle> &, Handle);
 
 		bool idExists(const char *);
+
+#ifdef OUT_OF_LINE_TVS
 		bool tvExists(int);
 		int storeTruthValue(Atom *, Handle);
 		int  TVID(const TruthValue &);
 		TruthValue * getTV(int);
+#endif /* OUT_OF_LINE_TVS */
 
 	public:
 		AtomStorage(void);
