@@ -200,9 +200,11 @@ class AtomStorage::Outgoing
 
 /* ================================================================ */
 
-AtomStorage::AtomStorage(void)
+AtomStorage::AtomStorage(const char * dbname, 
+                         const char * username,
+                         const char * authentication)
 {
-	db_conn = new ODBCConnection("opencog", "linas", NULL);
+	db_conn = new ODBCConnection(dbname, username, authentication);
 	TLB::uuid = getMaxUUID();
 }
 

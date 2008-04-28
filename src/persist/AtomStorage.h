@@ -44,7 +44,9 @@ class AtomStorage
 #endif /* OUT_OF_LINE_TVS */
 
 	public:
-		AtomStorage(void);
+		AtomStorage(const char * dbname, 
+		            const char * username,
+		            const char * authentication);
 		~AtomStorage();
 
 		void storeAtom(Atom *);

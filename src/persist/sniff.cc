@@ -65,7 +65,7 @@ int atomCompare(Atom *a, Atom *b)
  */
 void single_atom_test(void)
 {
-	AtomStorage *store = new AtomStorage();
+	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 
 	Atom *a = new Node(SCHEMA_NODE, "someNode");
 
@@ -99,6 +99,22 @@ void single_atom_test(void)
 	}
 
 	delete store;
+}
+
+/**
+ * Save and restore entire snapshots of atom tables
+ */
+class Snapshot
+{
+	public:
+		void load(AtomTable& atomTable);
+};
+
+void Snapshot::load(AtomTable& atomTable)
+{
+	// node->setAtomTable(&atomTable);
+	// atomTable.atomSet->insert(node);
+	// atomTable.size ++; //!!! ???
 }
 
 int main ()
