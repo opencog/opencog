@@ -13,6 +13,7 @@
 #endif
 
 #define USE_TLB_MAP
+// #define CHECK_MAP_CONSISTENCY
 #ifdef USE_TLB_MAP
 #include <map>
 #endif
@@ -77,9 +78,10 @@ class TLB
             Handle h = atom_map[(Atom *) atom];
             if (h != 0) return h;
 #ifdef CHECK_MAP_CONSISTENCY
-            throw InvalidParamException(TRACE_INFO, "Atom is not in the TLB");
-#endif
+            return UndefinedHandle();
+#else
             return addAtom(atom);
+#endif
 #else
             return ((Handle) atom) ^ OBFUSCATE;
 #endif
