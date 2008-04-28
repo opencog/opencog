@@ -33,7 +33,7 @@ class Link : public Atom
 
     private:
         Trail* trail;
-        void init() throw (InvalidParamException);
+        void init(void) throw (InvalidParamException);
 
     public:
 
