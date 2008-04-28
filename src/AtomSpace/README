@@ -101,3 +101,50 @@ locking code being scattered haphazardly all over the application.
 this is a bigger task, because, unfortunately, there are already
 a number of users of the raw access methods).
 
+
+======================================================================
+======================================================================
+======================================================================
+ Design Review Notes/Issues
+ --------------------------
+Linas made the following observations/posted the following questions
+during review of the opencog internals, in April 2008:
+
+1) typeIndex and atom->setNext() -- these seem to be trying to 
+   maintain an unusual linked list of atoms based on type. 
+   (unusual because it uses handles instead of pointers).
+   It seems to me that it would be more efficient to have the 
+   AtomTable maintain its own std::map of these indicies, instead
+   of using a linked list.
+ 
+   Similar comments apply to targetTypes, importanceIndex, etc.
+   See in particular point 6) below.
+
+2) Only Links have an outgoing set and an arity. It would be more
+   space-efficient if the outgoing set and arity were moved from 
+   class Atom to class Link.
+
+3) There are many uses of 
+   ClassServer::isAssignableFrom(NODE, atom->getType()) 
+   it would be more computationally efficient to replace these with
+   (NULL != dynamic_cast<Node *>(atom);
+
+4) AtomTable::Add() computes a getNameHash() for all atoms, even
+   when they are not of type Node. It would be more effcient to skip
+   this for Nodes.
+
+5) class Atom has a AtomTable pointer that seems to be of little 
+   utility -- it seems to be used in only two places: by AtomTable
+   itself, and in SavingLoading. The first check is of little 
+   utility, since the check could be perormed in other ways, and 
+   there is no need to have this check be computationally efficient.
+   The use in SavingLoading could probably be avoided as well.
+   Avoiding this pointer would provide a space-savings. 
+
+6) AtomTable::add(Atom *) uses AtomTable::getHandle() to see if
+   the indicated atom aleady exists in the atom table. The 
+   implementation of AtomTable::getHandle() is incredibly 
+   inefficient. It would be much speedier if std::map was used
+   instead, as the linear searches and filterings would be 
+   replaced by O(log N) search.
+
