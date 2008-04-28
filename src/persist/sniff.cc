@@ -63,12 +63,12 @@ int atomCompare(Atom *a, Atom *b)
  * A simple test cases that tests the save and restore of 
  * a couple of nodes and a link. Does not test atomspaces at all.
  */
-void single_atom_test(void)
+void single_atom_test(std::string id)
 {
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 
 	// Create an atom ... 
-	Atom *a = new Node(SCHEMA_NODE, "someNode");
+	Atom *a = new Node(SCHEMA_NODE, id + "someNode");
 	SimpleTruthValue stv(0.55, 0.6);
 	a->setTruthValue(stv);
 	TLB::addAtom(a);
@@ -89,7 +89,7 @@ void single_atom_test(void)
 
 	// Create a second atom, connect it to the first
 	// with a link. Save it, fetch it ... are they equal?
-	Atom *a2 = new Node(SCHEMA_NODE, "otherNode");
+	Atom *a2 = new Node(SCHEMA_NODE, id + "otherNode");
 	TLB::addAtom(a2);
 	store->storeAtom(a2);
 
@@ -114,7 +114,13 @@ void single_atom_test(void)
 
 int main ()
 {
-	single_atom_test();
+#if 0
+   single_atom_test("aaa ");
+   single_atom_test("bbb ");
+   single_atom_test("ccc ");
+   single_atom_test("ddd ");
+   single_atom_test("eee ");
+#endif
 
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 

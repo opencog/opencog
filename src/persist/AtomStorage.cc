@@ -93,7 +93,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Atom *atom = store->makeAtom(*this, handle);
-			table->add(atom);
+			table->add(atom, false);
 
 			return false;
 		}
@@ -560,6 +560,8 @@ void AtomStorage::load(AtomTable *table)
 	rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 
 	rp.rs->release();
+
+	table->scrubIncoming();
 }
 
 void AtomStorage::store(AtomTable *table)
