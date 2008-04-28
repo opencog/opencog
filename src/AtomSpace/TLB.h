@@ -144,10 +144,8 @@ class TLB
             }
             atom_map.erase(atom);
             handle_map.erase(h);
-            return atom;
-#else
-            return atom;
 #endif
+            return atom;
         }        
 
         static inline bool isInvalidHandle(Handle h) {

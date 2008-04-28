@@ -647,9 +647,11 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
 }
 
 
-void AtomTable::merge(Atom *original, Atom *copy) {
-    original->merge( copy);
-    delete copy;
+void AtomTable::merge(Atom *original, Atom *copy)
+{
+    original->merge(copy);
+    TLB::removeAtom(copy);
+    delete copy; 
 }
     
 Handle AtomTable::add(Atom *atom) throw (RuntimeException)
@@ -711,7 +713,8 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
         }
     }
 
-    Handle handle = TLB::addAtom(atom);
+    Handle handle = TLB::getHandle(atom);
+    if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
     // Inserts atom in the type index of its type (as head of the list)
     Type type = atom->getType();
