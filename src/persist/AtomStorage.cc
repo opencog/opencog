@@ -12,6 +12,8 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#include <stdlib.h>
+
 #include "odbcxx.h"
 #include "Atom.h"
 #include "ClassServer.h"
@@ -43,9 +45,8 @@ class AtomStorage::Response
 	public:
 		ODBCRecordSet *rs;
 
-		void (*got_atom_cb)(void);
-
 		// Temporary cache of info about atom being assembled.
+		Handle handle;
 		Type itype;
 		const char * name;
 		double mean;
@@ -70,12 +71,29 @@ class AtomStorage::Response
 			{
 				count = atof(colvalue);
 			}
+			else if (!strcmp(colname, "uuid"))
+			{
+				handle = strtoul(colvalue, NULL, 10);
+			}
 			return false;
 		}
 		bool create_atom_cb(void)
 		{
 			printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
+
+			return false;
+		}
+
+		AtomTable *table;
+		AtomStorage *store;
+		bool load_all_atoms_cb(void)
+		{
+			printf ("---- New atom found ----\n");
+			rs->foreach_column(&Response::create_atom_column_cb, this);
+
+			Atom *atom = store->makeAtom(*this, handle);
+			table->add(atom);
 
 			return false;
 		}
@@ -534,6 +552,14 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 
 void AtomStorage::load(AtomTable *table)
 {
+	Response rp;
+	rp.table = table;
+	rp.store = this;
+
+	rp.rs = db_conn->exec("SELECT * FROM Atoms;");
+	rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
+
+	rp.rs->release();
 }
 
 void AtomStorage::store(AtomTable *table)

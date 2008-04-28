@@ -47,7 +47,7 @@ CREATE TABLE Global (
 	max_uuid INT           -- sequentially issued UUID
 );
 
-INSERT INTO Global VALUES (1);     -- initial, sequentially issued UUID
+INSERT INTO Global VALUES (501);     -- initial, sequentially issued UUID
 
 -- -----------------------------------------------------------
 -- Simple truth values

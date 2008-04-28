@@ -67,59 +67,63 @@ void single_atom_test(void)
 {
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 
+	// Create an atom ... 
 	Atom *a = new Node(SCHEMA_NODE, "someNode");
-
 	SimpleTruthValue stv(0.55, 0.6);
 	a->setTruthValue(stv);
+	TLB::addAtom(a);
 
+	// Store the atom ... 
 	store->storeAtom(a);
 
+	// Fetch it back ...
 	Handle h = TLB::getHandle(a);
 	Atom *b = store->getAtom(h);
 
+	// Are they equal ??
 	int rc = atomCompare(a,b);
 	if (!rc) 
 	{
 		printf("atom compare success\n");
 	}
 
+	// Create a second atom, connect it to the first
+	// with a link. Save it, fetch it ... are they equal?
 	Atom *a2 = new Node(SCHEMA_NODE, "otherNode");
+	TLB::addAtom(a2);
+	store->storeAtom(a2);
+
 	std::vector<Handle> hvec;
 	hvec.push_back(TLB::getHandle(a));
 	hvec.push_back(TLB::getHandle(a2));
 
 	Link *l = new Link(SET_LINK, hvec);
+	TLB::addAtom(l);
 	store->storeAtom(l);
 
 	Atom *lb = store->getAtom(TLB::getHandle(l));
 	rc = atomCompare(l,lb);
 	if (!rc) 
 	{
-		printf("atom compare success\n");
+		printf("link compare success\n");
 	}
 
 	delete store;
 }
 
-/**
- * Save and restore entire snapshots of atom tables
- */
-class Snapshot
-{
-	public:
-		void load(AtomTable& atomTable);
-};
-
-void Snapshot::load(AtomTable& atomTable)
-{
-	// node->setAtomTable(&atomTable);
-	// atomTable.atomSet->insert(node);
-	// atomTable.size ++; //!!! ???
-}
 
 int main ()
 {
 	single_atom_test();
+
+	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
+
+	AtomTable *table = new AtomTable();
+	store->load(table);
+
+	table->print();
+
+	delete store;
 	return 0;
 }
 
