@@ -20,7 +20,12 @@ void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (
     if (TLB::isValidHandle(newH)) {
         *handle = newH;
     } else {
-        throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: unknown handle %p", *handle);
+        newH = TLB::addAtom(handles->get(*handle));
+        if (TLB::isValidHandle(newH)) {
+            *handle = newH;
+        } else {
+            throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: unknown handle %p", *handle);
+        }
     }
 }
 
