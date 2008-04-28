@@ -118,7 +118,14 @@ during review of the opencog internals, in April 2008:
    of using a linked list.
  
    Similar comments apply to targetTypes, importanceIndex, etc.
-   See in particular point 6) below.
+   See in particular point 1a) below.
+
+1a) AtomTable::add(Atom *) uses AtomTable::getHandle() to see if
+   the indicated atom aleady exists in the atom table. The 
+   implementation of AtomTable::getHandle() is incredibly 
+   inefficient. It would be much speedier if std::map was used
+   instead, as the linear searches and filterings would be 
+   replaced by O(log N) search.
 
 2) Only Links have an outgoing set and an arity. It would be more
    space-efficient if the outgoing set and arity were moved from 
@@ -128,6 +135,9 @@ during review of the opencog internals, in April 2008:
    ClassServer::isAssignableFrom(NODE, atom->getType()) 
    it would be more computationally efficient to replace these with
    (NULL != dynamic_cast<Node *>(atom);
+
+3a) There are many uses of isNode() that could also be replaced
+   by the dynamic_cast method.   -- Conversion finished.
 
 4) AtomTable::Add() computes a getNameHash() for all atoms, even
    when they are not of type Node. It would be more effcient to skip
@@ -140,11 +150,4 @@ during review of the opencog internals, in April 2008:
    there is no need to have this check be computationally efficient.
    The use in SavingLoading could probably be avoided as well.
    Avoiding this pointer would provide a space-savings. 
-
-6) AtomTable::add(Atom *) uses AtomTable::getHandle() to see if
-   the indicated atom aleady exists in the atom table. The 
-   implementation of AtomTable::getHandle() is incredibly 
-   inefficient. It would be much speedier if std::map was used
-   instead, as the linear searches and filterings would be 
-   replaced by O(log N) search.
 

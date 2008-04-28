@@ -778,8 +778,8 @@ class AtomSpace {
 
     Util::recent_val<AttentionValue::sti_t>& getMaxSTI();
 
-    //for convenience
-    bool isNode(Handle) const;
+    // For convenience
+    // bool isNode(Handle) const;
     bool isVar(Handle) const;
     bool isList(Handle) const;
     bool containsVar(Handle) const;

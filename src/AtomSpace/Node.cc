@@ -41,8 +41,7 @@ const std::string& Node::getName() const
 
 void Node::setName(const std::string& cname) throw (RuntimeException)
 {
-    
-    if (atomTable != NULL){
+    if (atomTable != NULL) {
         throw RuntimeException(TRACE_INFO, 
               "Node - Cannot change the name of a node already inserted into an AtomTable.");
     }

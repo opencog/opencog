@@ -178,53 +178,58 @@ const TruthValue& AtomSpace::getDefaultTV() {
     return TruthValue::DEFAULT_TV();
 }
 
-Type AtomSpace::getTypeV(const tree<Vertex>& _target) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+Type AtomSpace::getTypeV(const tree<Vertex>& _target) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     return getType(v2h(*_target.begin()));
 }
 
 bool AtomSpace::isReal(Handle h) const
 {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-        return TLB::getAtom(h)->isReal();
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+    return TLB::getAtom(h)->isReal();
 }
 
 Type AtomSpace::getType(Handle h) const
 {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
-        return TLB::getAtom(h)->getType();
+    return TLB::getAtom(h)->getType();
 }
 
-Type AtomSpace::getAtomType(const string& str) const {
-        //fprintf(stdout,"Atom space address: %p\n", this);
+Type AtomSpace::getAtomType(const string& str) const
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     return ClassServer::getType(const_cast<char*>(str.c_str()));
 }
-bool AtomSpace::inheritsType(Type t1,Type t2) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
 
-    //printf("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2);
+bool AtomSpace::inheritsType(Type t1,Type t2) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflus(stdout);
+
+    // printf("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2);
     bool result = ClassServer::isAssignableFrom(t2,t1);
-    //printf("AtomSpace::inheritsType result = %d\n", result);
+    // printf("AtomSpace::inheritsType result = %d\n", result);
     return result;
 }
-bool AtomSpace::isNode(Type t) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
 
-    // XXX TODO: it would be computationally much more efficient
-    // to just do this:
-    // return (NULL != dynamic_cast<Node *>(this));
+bool AtomSpace::isNode(Type t) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+
     return inheritsType(t,NODE);
 }
-string AtomSpace::getName(Type t) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
+
+string AtomSpace::getName(Type t) const
+{
+    //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
     if (ClassServer::getClassName()->find(t)==ClassServer::getClassName()->end()) {
@@ -233,21 +238,36 @@ string AtomSpace::getName(Type t) const {
     return ClassServer::getTypeName(t);
 }
 
-bool AtomSpace::isNode(Handle h) const {          //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-return inheritsType(getType(h), NODE); }
-bool AtomSpace::isVar(Handle h) const {          //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-return inheritsType(getType(h),VARIABLE_NODE); }
-bool AtomSpace::isList(Handle h) const {          //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-return inheritsType(getType(h), LIST_LINK); }
+#ifdef DEAD_CODE
+bool AtomSpace::isNode(Handle h) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+    return inheritsType(getType(h), NODE);
+}
+#endif
 
-bool AtomSpace::containsVar(Handle h) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+bool AtomSpace::isVar(Handle h) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+    return inheritsType(getType(h),VARIABLE_NODE);
+}
 
-    if (!isNode(h)) {
+bool AtomSpace::isList(Handle h) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+    return inheritsType(getType(h), LIST_LINK);
+}
+
+bool AtomSpace::containsVar(Handle h) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+
+    Node *nnn = dynamic_cast<Node *>(TLB::getAtom(h));
+    if (!nnn) {
         for (int i=0;i<getArity(h);++i)
             if (containsVar(getOutgoing(h,i)))
                 return true;
@@ -258,8 +278,8 @@ bool AtomSpace::containsVar(Handle h) const {
 
 Handle AtomSpace::createHandle(Type t,const string& str,bool managed)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     Handle h = getHandle(t,str);
     return TLB::isValidHandle(h) ? h : addNode(t,str,TruthValue::NULL_TV());
@@ -267,16 +287,17 @@ Handle AtomSpace::createHandle(Type t,const string& str,bool managed)
 
 Handle AtomSpace::createHandle(Type t,const HandleSeq& outgoing,bool managed)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     Handle h = getHandle(t,outgoing);
     return TLB::isValidHandle(h) ? h : addLink(t,outgoing,TruthValue::NULL_TV());
 }
 
-bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const {
-     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     bool result = isNullVersionHandle(vh);
     if (!result) {
@@ -469,7 +490,8 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     // Check if the given handle is of an atom that was not inserted yet.
     // If so, adds the atom. Otherwise, just sets result to the correct/valid handle.
     Handle result;
-    if (isNode(atom.getType())) {
+    Node *nnn = dynamic_cast<Node *>((Atom *) &atom);
+    if (nnn) {
         const Node& node = (const Node&) atom;
         result = getHandle(node.getType(),node.getName());
         if (TLB::isInvalidHandle(result)) {
@@ -509,8 +531,8 @@ Handle AtomSpace::getHandle(Type t,const string& str) const
 
 Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     HandleEntry* he=atomTable.getHandleSet(outgoing,NULL,NULL,outgoing.size(),t, false);
     Handle ret = he ? he->handle : UNDEFINED_HANDLE;
@@ -518,47 +540,48 @@ Handle AtomSpace::getHandle(Type t,const HandleSeq& outgoing) const
     return ret;
 }
 
-const string& AtomSpace::getName(Handle h) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+const string& AtomSpace::getName(Handle h) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
-    //  cassert(TRACE_INFO, isNode(h));
-    //bool isNodeHandle = isNode(h);
-    //printf("AtomSpace::getName: isNodeHandle = %d\n", isNodeHandle);
-    //printf("AtomSpace::getName: atom = %s\n", TLB::getAtom(h)->toString().c_str());
-    if (isNode(h))
-        return dynamic_cast<Node*>(TLB::getAtom(h))->getName();
+    Node * nnn = dynamic_cast<Node*>(TLB::getAtom(h));
+    if (nnn)
+        return nnn->getName();
     else
         return emptyName;
 }
 
-Handle AtomSpace::getOutgoing(Handle h,int idx) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+Handle AtomSpace::getOutgoing(Handle h,int idx) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflus(stdout);
 
     return TLB::getAtom(h)->getOutgoingSet()[idx];
 }
 
-int AtomSpace::getArity(Handle h) const {
-         //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+int AtomSpace::getArity(Handle h) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflus(stdout);
 
     return TLB::getAtom(h)->getArity();
 }
 
 void AtomSpace::setName(Handle h, const string& name)
 {
-          //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflus(stdout);
 
-    cassert(TRACE_INFO, isNode(h), "AtomSpace::setName(): Handle h should be of 'Node' type.");
-    dynamic_cast<Node*>(TLB::getAtom(h))->setName((char*)name.c_str());
+    Node * nnn = dynamic_cast<Node*>(TLB::getAtom(h));
+    cassert(TRACE_INFO, nnn, "AtomSpace::setName(): Handle h should be of 'Node' type.");
+    nnn->setName(name);
 }
 
 HandleSeq AtomSpace::getIncoming(Handle h) const
 {
-          //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
 
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
     Handle *temp; int size;
