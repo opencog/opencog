@@ -18,7 +18,7 @@
 #include "Logger.h"
 
 
-void Link::init() throw (InvalidParamException)
+void Link::init(void) throw (InvalidParamException)
 {
     if (!ClassServer::isAssignableFrom(LINK, type)) {
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
