@@ -14,7 +14,7 @@
  * This interface should be implemented by any 
  * Repositories that want to be called by the 
  * SavingLoading. These repositories should
- * registyer in the SavingLoading using the 
+ * register in the SavingLoading using the 
  * method SavingLoading::addSavableRepository.
  */
 class SavableRepository
