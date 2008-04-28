@@ -59,7 +59,11 @@ int atomCompare(Atom *a, Atom *b)
 }
 
 
-int main ()
+/**
+ * A simple test cases that tests the save and restore of 
+ * a couple of nodes and a link. Does not test atomspaces at all.
+ */
+void single_atom_test(void)
 {
 	AtomStorage *store = new AtomStorage();
 
@@ -67,8 +71,6 @@ int main ()
 
 	SimpleTruthValue stv(0.55, 0.6);
 	a->setTruthValue(stv);
-
-printf ("hello\n");
 
 	store->storeAtom(a);
 
@@ -97,7 +99,11 @@ printf ("hello\n");
 	}
 
 	delete store;
+}
 
+int main ()
+{
+	single_atom_test();
 	return 0;
 }
 

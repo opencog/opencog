@@ -4,8 +4,9 @@
 A trivial, simple-minded implementation of atom persistence. 
 
 STATUS:
-Incomplete prototype. Save and restore of atoms, but not 
-truth values, works. Interaction with TLB not handled.
+Functional but incomplete prototype. Save and restore of atoms, 
+and simple truth values, works. Attempts to stay in sync with
+handles as stored in the TLB.
 
 Goals:
 ------
