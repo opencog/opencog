@@ -49,11 +49,11 @@ public:
         Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
         Node* n5 = new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
         
-        HandleEntry* he = new HandleEntry(TLB::getHandle(n1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n3)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n4)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(n5)));
+        HandleEntry* he = new HandleEntry(TLB::addAtom(n1));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n2)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n3)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n4)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n5)));
         TS_ASSERT(he->getSize() == 5);
         
         // Now filter
@@ -85,13 +85,13 @@ public:
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and 
         // 1 target whose type is PREDICATE_NODE
         std::vector<Handle> outgoing(2);
-        outgoing[0] = TLB::getHandle(n1); // concept (without any VH)
-        outgoing[1] = TLB::getHandle(n3); // predicate (with VH1)
+        outgoing[0] = TLB::addAtom(n1); // concept (without any VH)
+        outgoing[1] = TLB::addAtom(n3); // predicate (with VH1)
         Link* l1 = new Link(LIST_LINK, outgoing);
         outgoing.resize(3);
         outgoing[0] = TLB::getHandle(n3); // predicate (with VH1)
-        outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
-        outgoing[2] = TLB::getHandle(n5); // concept (with VH2)
+        outgoing[1] = TLB::addAtom(n4); // predicate (with VH1 and VH2)
+        outgoing[2] = TLB::addAtom(n5); // concept (with VH2)
         Link* l2 = new Link(LIST_LINK, outgoing);
         outgoing.resize(2);
         outgoing[0] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
@@ -99,9 +99,9 @@ public:
         Link* l3 = new Link(LIST_LINK, outgoing);
         
         
-        HandleEntry* he = new HandleEntry(TLB::getHandle(l1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l3)));
+        HandleEntry* he = new HandleEntry(TLB::addAtom(l1));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l2)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l3)));
         TS_ASSERT(he->getSize() == 3);
         
         // Now filter
@@ -142,13 +142,13 @@ public:
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and 
         // 1 target whose type is PREDICATE_NODE
         std::vector<Handle> outgoing(2);
-        outgoing[0] = TLB::getHandle(n1); // concept (without any VH)
-        outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
+        outgoing[0] = TLB::addAtom(n1); // concept (without any VH)
+        outgoing[1] = TLB::addAtom(n4); // predicate (with VH1 and VH2)
         Link* l1 = new Link(LIST_LINK, outgoing);
         outgoing.resize(3);
-        outgoing[0] = TLB::getHandle(n3); // predicate (with VH1)
+        outgoing[0] = TLB::addAtom(n3); // predicate (with VH1)
         outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
-        outgoing[2] = TLB::getHandle(n5); // concept (with VH2)
+        outgoing[2] = TLB::addAtom(n5); // concept (with VH2)
         Link* l2 = new Link(LIST_LINK, outgoing);
         outgoing.resize(2);
         outgoing[0] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
@@ -156,9 +156,9 @@ public:
         Link* l3 = new Link(LIST_LINK, outgoing);
         
         
-        HandleEntry* he = new HandleEntry(TLB::getHandle(l1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::getHandle(l3)));
+        HandleEntry* he = new HandleEntry(TLB::addAtom(l1));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l2)));
+        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l3)));
         TS_ASSERT(he->getSize() == 3);
         
         // Now filter
