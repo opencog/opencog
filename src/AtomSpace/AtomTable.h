@@ -487,24 +487,28 @@ public:
      bool updateImportanceIndex(Atom*, int);
 
     /**
-     * Adds a new atom to the table, checking for duplicates and merging
+     * Adds an atom to the table, checking for duplicates and merging
      * when necessary.
+     *
+     * When adding atoms in bulk, it can be convenient to defer 
+     * the setup of incoming links until a later stage.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(Atom*) throw (RuntimeException);
+    Handle add(Atom*, bool dont_defer_incoming_links = true) throw (RuntimeException);
 
     /**
-     * Merges two equivalent atoms into one, and deletes the copy. Atoms
-     * must be of same type.
+     * Merges the second atom into the first, then deletes the second
+     * argument. Atoms must be of same type, else exception is thrown.
+     *
      * @param Original atom.
      * @param Copy to be merged to original atom.
      */
     void merge(Atom*, Atom*);
 
     /**
-     * Removes atoms from the table.
+     * Removes atom from the table.
      *
      * @param The atom to be removed.
      * @param Recursive-removal flag; if set, the links in the incoming
@@ -560,6 +564,15 @@ public:
     */
 
 
+    /**
+     * For use by atom table persistence systems only. When bulk-adding
+     * atoms to the atom table, it is convenient to avoid resolving
+     * incoming pointers until all atoms have been added. However, the
+     * incoming set of an atom *must* be set up before the atom can be
+     * used. This routine will review the contents of the AtomTable,
+     * and set up all incoming sets of each atom.
+     */
+    void scrubIncoming(void);
 };
 
 #endif

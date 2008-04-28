@@ -656,7 +656,7 @@ void AtomTable::merge(Atom *original, Atom *copy)
     delete copy; 
 }
     
-Handle AtomTable::add(Atom *atom) throw (RuntimeException)
+Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL){
         // Atom is already inserted
@@ -771,9 +771,11 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
         }
     }
 
-    // updates incoming set of all targets.
-    for (int i = 0; i < atom->getArity(); i++) {
-        atom->getOutgoingAtom(i)->addIncomingHandle(handle);
+    // Updates incoming set of all targets.
+    if (dont_defer_incoming_links) {
+        for (int i = 0; i < atom->getArity(); i++) {
+            atom->getOutgoingAtom(i)->addIncomingHandle(handle);
+        }
     }
 
     // updates statistics
@@ -1224,3 +1226,24 @@ HandleEntry* AtomTable::getHandleSet(float lowerBound, float upperBound, Version
 }
 */
 
+void AtomTable::scrubIncoming(void)
+{
+#ifdef USE_ATOM_HASH_SET
+    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++)
+    {
+        Atom* atom = *it;
+        Handle handle = TLB::getHandle(atom);
+
+        // Updates incoming set of all targets.
+        for (int i = 0; i < atom->getArity(); i++)
+        {
+            Atom *oa = atom->getOutgoingAtom(i);
+            HandleEntry *he = oa->getIncomingSet();
+            if (false == he->contains(handle))
+            {
+                oa->addIncomingHandle(handle);
+            }
+        }
+    }
+#endif
+}

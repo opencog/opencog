@@ -151,3 +151,12 @@ during review of the opencog internals, in April 2008:
    The use in SavingLoading could probably be avoided as well.
    Avoiding this pointer would provide a space-savings. 
 
+6) AtomTable::atomSet is currently implemented as a hash table.
+   It would almost surely be more efficient, both space and 
+   time-wise, to use std::map (which is an RB-tree).
+
+7) Class HandleEntry is implemented as a linked list. It implements
+   many O(N) and O(N^2) algorithms, such as set intersection, etc.
+   Performance will almost certainly be improved by using
+   std:map instead of linked lists.
+
