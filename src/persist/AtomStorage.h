@@ -11,10 +11,10 @@
 
 #include "odbcxx.h"
 
-#include <map>
 #include <vector>
 
 #include "Atom.h"
+#include "AtomTable.h"
 
 class AtomStorage
 {
@@ -25,8 +25,7 @@ class AtomStorage
 		class Response;
 		class Outgoing;
 
-		// Set of atoms that we know about.
-		std::map<Handle,Atom *> handle_map;
+		Atom * makeAtom (Response &, Handle h);
 
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
@@ -52,6 +51,9 @@ class AtomStorage
 		void storeAtom(Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
+
+		void load(AtomTable *);
+		void store(AtomTable *);
 };
 
 #endif /* PERSITENT_ATOM_STORAGE_H_ */

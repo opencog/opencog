@@ -43,6 +43,8 @@ class AtomStorage::Response
 	public:
 		ODBCRecordSet *rs;
 
+		void (*got_atom_cb)(void);
+
 		// Temporary cache of info about atom being assembled.
 		Type itype;
 		const char * name;
@@ -481,6 +483,15 @@ Atom * AtomStorage::getAtom(Handle h)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
+	Atom *atom = makeAtom(rp, h);
+
+	rp.rs->release();
+
+	return atom;
+}
+
+Atom * AtomStorage::makeAtom(Response &rp, Handle h)
+{
 	// Now that we know everything about an atom, actually construct one.
 	Atom *atom = TLB::getAtom(h);
 
@@ -516,9 +527,17 @@ Atom * AtomStorage::getAtom(Handle h)
 	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.count);
 	atom->setTruthValue(*stv);
 
-	rp.rs->release();
-
 	return atom;
+}
+
+/* ================================================================ */
+
+void AtomStorage::load(AtomTable *table)
+{
+}
+
+void AtomStorage::store(AtomTable *table)
+{
 }
 
 /* ================================================================ */
