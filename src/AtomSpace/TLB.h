@@ -27,10 +27,10 @@ class Atom;
  * to refer to that atom when a reference to that atom needs to be kept.
  * Each proxy must have a look-up mechanism or table (TLB) to map from 
  * this ID to the actual memory address for the atom in the local process
- * address sapce.
+ * address space.
  */
-class TLB {
-
+class TLB
+{
     private:
 
 #ifdef USE_TLB_MAP
@@ -76,6 +76,9 @@ class TLB {
 #ifdef USE_TLB_MAP
             Handle h = atom_map[(Atom *) atom];
             if (h != 0) return h;
+#ifdef CHECK_MAP_CONSISTENCY
+            throw InvalidParamException(TRACE_INFO, "Atom is not in the TLB");
+#endif
             return addAtom(atom);
 #else
             return ((Handle) atom) ^ OBFUSCATE;
@@ -95,7 +98,9 @@ class TLB {
             Handle ha = atom_map[a];
             if (ha != 0)
             {
-                // if (h != ha) throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
+#ifdef CHECK_MAP_CONSISTENCY
+                if (h != ha) throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
+#endif
                 return ha;
             }
             if (h == 0) h = uuid;
@@ -117,6 +122,13 @@ class TLB {
         static inline Atom* removeAtom(Atom* atom) {
 #ifdef USE_TLB_MAP
             Handle h = atom_map[atom];
+            if (h == 0)
+            {
+#ifdef CHECK_MAP_CONSISTENCY
+                throw InvalidParamException(TRACE_INFO, "Atom is not in the TLB");
+#endif
+                return atom;
+            }
             atom_map.erase(atom);
             handle_map.erase(h);
             return atom;
@@ -132,6 +144,7 @@ class TLB {
             return (h == OBFUSCATE);
 #endif
         }
+
         static inline bool isValidHandle(Handle h) {
 #ifdef USE_TLB_MAP
             return (h != 0) && (h < uuid);

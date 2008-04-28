@@ -655,8 +655,8 @@ void AtomTable::merge(Atom *original, Atom *copy) {
 Handle AtomTable::add(Atom *atom) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL){
-        //Atom is already inserted
-        return  TLB::addAtom(atom);
+        // Atom is already inserted
+        return  TLB::getHandle(atom);
     }
     Handle existingHandle = UNDEFINED_HANDLE;
     Node * nnn = dynamic_cast<Node *>(atom);
