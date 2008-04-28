@@ -23,7 +23,31 @@ CREATE TABLE Atoms (
 	name    TEXT
 );
 
+
+-- -----------------------------------------------------------
+-- Table of the edges of the Levi craph corresponding 
+-- to the hypergraph. An edge is a (src,dst) pair. The
+-- pair, understood as going src->dst, for a fixed src,
+-- is the set of outgoing edges of the atom. Understood
+-- as dst<-src, with fixed dst, are the incoming edges.
 --
+-- Outgoing edges are understood to be ordered. "pos" is
+-- is the order, starting with 0.
+
+CREATE TABLE Edges (
+	src_uuid  INT,
+	dst_uuid  INT,
+	pos INT
+);
+
+-- -----------------------------------------------------------
+-- Global state
+
+CREATE TABLE Global (
+	max_uuid INT
+);
+
+-- -----------------------------------------------------------
 -- Simple truth values
 -- This would store truth values out-of-line with the atom,
 -- but this seems very ineffcient, as it wastes index space, 
@@ -46,17 +70,3 @@ CREATE TABLE Atoms (
 -- CREATE SEQUENCE tvid_seq START WITH 5;
 -- 
 
-
--- Table of the edges of the Levi craph corresponding 
--- to the hypergraph. An edge is a (src,dst) pair. The
--- pair, understood as going src->dst, for a fixed src,
--- is the set of outgoing edges of the atom. Understood
--- as dst<-src, with fixed dst, are the incoming edges.
---
--- Outgoing edges are understood to be ordered. "pos" is
--- is the order, starting with 0.
-CREATE TABLE Edges (
-	src_uuid  INT,
-	dst_uuid  INT,
-	pos INT
-);

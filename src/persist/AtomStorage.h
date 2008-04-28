@@ -33,6 +33,9 @@ class AtomStorage
 
 		bool idExists(const char *);
 
+		unsigned long getMaxUUID(void);
+		void setMaxUUID(unsigned long);
+
 #ifdef OUT_OF_LINE_TVS
 		bool tvExists(int);
 		int storeTruthValue(Atom *, Handle);

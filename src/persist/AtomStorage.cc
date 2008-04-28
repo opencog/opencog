@@ -130,18 +130,20 @@ class AtomStorage::Response
 			return false;
 		}
 
-		bool tvid_seq_cb(void)
+#endif /* OUT_OF_LINE_TVS */
+
+		int intval;
+		bool intval_cb(void)
 		{
-			rs->foreach_column(&Response::tvid_seq_column_cb, this);
+			rs->foreach_column(&Response::intval_column_cb, this);
 			return false;
 		}
-
-		bool tvid_seq_column_cb(const char *colname, const char * colvalue)
+		bool intval_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ... 
-			tvid = atoi(colvalue);
+			intval = atoi(colvalue);
+			return false;
 		}
-#endif /* OUT_OF_LINE_TVS */
 
 };
 
@@ -197,10 +199,12 @@ printf ("duude outgoing %s\n", buff);
 AtomStorage::AtomStorage(void)
 {
 	db_conn = new ODBCConnection("opencog", "linas", NULL);
+	TLB::uuid = getMaxUUID();
 }
 
 AtomStorage::~AtomStorage()
 {
+	setMaxUUID(TLB::uuid);
 	delete db_conn;
 }
 
@@ -490,6 +494,27 @@ Atom * AtomStorage::getAtom(Handle h)
 
 	rp.rs->release();
 	return atom;
+}
+
+/* ================================================================ */
+
+unsigned long AtomStorage::getMaxUUID()
+{
+	Response rp;
+	rp.rs = db_conn->exec("SELECT max_uuid FROM Global;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	rp.rs->release();
+	return rp.intval;
+}
+
+void AtomStorage::setMaxUUID(unsigned long uuid)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "UPDATE Global SET max_uuid = %lu;", (unsigned long) uuid);
+
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->release();
 }
 
 /* ============================= END OF FILE ================= */
