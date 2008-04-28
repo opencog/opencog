@@ -227,8 +227,9 @@ unsigned int AtomTable::strHash(const char* name) const{
 
 inline unsigned int AtomTable::getNameHash(Atom* atom) const
 {
-    return ClassServer::isAssignableFrom(NODE, atom->getType()) ?
-          strHash(((Node*) atom)->getName().c_str()) : strHash(NULL);
+    Node *nnn = dynamic_cast<Node *>(atom);
+    if (NULL == nnn) return strHash(NULL);
+    return strHash(nnn->getName().c_str());
 }
 
 unsigned int AtomTable::importanceBin(short importance) {
@@ -305,7 +306,8 @@ HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) con
     return result;
 }
 
-Handle AtomTable::getHandle(const char* name, Type type) const{
+Handle AtomTable::getHandle(const char* name, Type type) const
+{
     if (!ClassServer::isAssignableFrom(NODE, type)) {    
         return UNDEFINED_HANDLE;
     }
@@ -680,6 +682,7 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
         }
         delete(head);
     }
+
     if (TLB::isValidHandle(existingHandle)) {
         //printf("Merging existing Atom with the Atom being added ...\n");
         merge(TLB::getAtom(existingHandle), atom);
@@ -687,24 +690,21 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
     }
 
     // New atom, its Handle will be stored in the AtomTable
-
-    // increments the size of the table
+    // Increment the size of the table
     size++;
     
 #ifdef USE_ATOM_HASH_SET    
     // Adds to the hash_set
-    //printf("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode()); 
-/*    
-    printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), atom->getArity());
-    NMPrinter p;
-    p.print(atom);
-*/    
-//    printf("%s\n", atom->toString().c_str());
+    // printf("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode()); 
+    // printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), atom->getArity());
+    // NMPrinter p;
+    // p.print(atom);
+    // printf("%s\n", atom->toString().c_str());
     atomSet->insert(atom);
-//    printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", tableId, atom, atomSet->size());
+    // printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", tableId, atom, atomSet->size());
 #endif    
 
-    // checks for null outgoing set members
+    // Checks for null outgoing set members.
     const std::vector<Handle>& ogs = atom->getOutgoingSet();
     for (int i = atom->getArity() - 1; i >= 0; i--) {
         if (TLB::isInvalidHandle(ogs[i])) {
@@ -716,17 +716,17 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
     Handle handle = TLB::getHandle(atom);
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    // Inserts atom in the type index of its type (as head of the list)
+    // Inserts atom in the type index of its type (as head of the list).
     Type type = atom->getType();
     atom->setNext(TYPE_INDEX, typeIndex[type]);
     typeIndex[type] = handle; 
 
-    // if the atom is a link, the targetIndexTypes list is built. Then, from 
+    // If the atom is a link, the targetIndexTypes list is built. Then, from 
     // the atom's arity, it will be checked how many targetTypes are distinct.
     int distinctSize;
     Type* targetTypes = atom->buildTargetIndexTypes(&distinctSize);
     if (distinctSize > 0) {
-        // here, the atom is placed on each target index list. 
+        // Here, the atom is placed on each target index list. 
         Handle* targetIndices = new Handle[distinctSize];
         for (int i = 0; i < distinctSize; i++) {
             // Insert it as head of the corresponding list
@@ -737,27 +737,28 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
     }
     delete[](targetTypes);
 
-    // the atom is placed on its proper name index list.
+    // The atom is placed on its proper name index list.
     unsigned int nameHash = getNameHash(atom);
     atom->setNext(NAME_INDEX, nameIndex[nameHash]);
     nameIndex[nameHash] = handle;
 
-    // the atom is placed on its proper importance index list.
+    // The atom is placed on its proper importance index list.
     int bin = importanceBin(atom->getAttentionValue().getSTI());
-    //printf("Adding handle %p with importance %f into importanceIndex (bin = %d)\n", atom, atom->getImportance(), bin);
+    // printf("Adding handle %p with importance %f into importanceIndex (bin = %d)\n", atom, atom->getImportance(), bin);
     atom->setNext(IMPORTANCE_INDEX, importanceIndex[bin]);
     importanceIndex[bin] = handle;
     
     // Checks Atom against predicate indices and inserts it if needed
     for (int i = 0; i < numberOfPredicateIndices; i++) {
-        //printf("Processing predicate index %d\n");
+        // printf("Processing predicate index %d\n");
         PredicateEvaluator* evaluator = predicateEvaluators[i];
-        //printf("Evaluating handle %p with PredicateEvaluator  = %p\n", handle, evaluator);
+        // printf("Evaluating handle %p with PredicateEvaluator  = %p\n", handle, evaluator);
         if (evaluator->evaluate(handle)) {
-            //printf("ADDING HANDLE %p TO THE PREDICATE INDEX %d (HEAD = %p)\n", handle, i, getPredicateIndexHead(i));
+            // printf("ADDING HANDLE %p TO THE PREDICATE INDEX %d (HEAD = %p)\n", handle, i, getPredicateIndexHead(i));
             atom->addNextPredicateIndex(i, predicateIndex[i]);
             predicateIndex[i] = handle; // adds as head of the linked list
-/*
+
+#ifdef DEBUG_PRINTING
             printf("HEAD AFTER INSERTION = %p\n", getPredicateIndexHead(i));
             HandleEntry* indexedHandles = makeSet(NULL, getPredicateIndexHead(i), PREDICATE_INDEX | i);
             printf("Handles in the index %d: \n", i);
@@ -766,7 +767,7 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
                 indexedHandles = indexedHandles->next;
             }
             printf("\n");
-*/            
+#endif /* DEBUG_PRINTING */
         }
     }
 
