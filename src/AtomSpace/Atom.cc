@@ -485,19 +485,18 @@ void Atom::addNextPredicateIndex(int index, Handle nextHandle) {
     }
 }
 
-void Atom::merge(Atom* other) throw (InconsistenceException){
+void Atom::merge(Atom* other) throw (InconsistenceException) {
 
-    if (!equals(other)){
+    if (!equals(other)) {
         throw InconsistenceException(TRACE_INFO, "Different atoms cannot be merged");
     }
 
-    //merges the incoming set and updated the outgoingSets
-    HandleEntry *inc = other->getIncomingSet();
+    // Merges the incoming set and updates the outgoingSets
     Handle thisHandle = TLB::getHandle(this);
-    // ricbit changed the second "this" for "other"
     Handle otherHandle = TLB::getHandle(other);
-    //Handle otherHandle = TLB::getHandle(this);
-    while (inc != NULL){
+
+    HandleEntry *inc = other->getIncomingSet();
+    while (inc != NULL) {
         addIncomingHandle(inc->handle);
 
         Atom *incAtom = TLB::getAtom(inc->handle);
@@ -507,8 +506,10 @@ void Atom::merge(Atom* other) throw (InconsistenceException){
                 outgoingSet[i] = thisHandle;
             }
         }
-        // Although we have direct access to outgoing here, we need to call setOutgoingSet anyway, 
-        // since special handling may be need by subclasses (e.g, sorting of the outgoing, if it's an unordered link)
+        // Although we have direct access to outgoing here, we need to
+        // call setOutgoingSet anyway, since special handling may be
+        // need by subclasses (e.g, sorting of the outgoing, if it's 
+        // an unordered link)
         incAtom->setOutgoingSet(outgoingSet); 
         inc = inc->next;
     }
