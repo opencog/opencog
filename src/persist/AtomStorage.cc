@@ -2,6 +2,12 @@
  * FUNCTION:
  * Persistent Atom storage, SQL-backed.
  *
+ * Atoms are saved to, and restored from, and SQL DB.
+ * Atoms are identified by means of unique ID's, which are taken to
+ * be the atom Handles, as maintained by the TLB. In particular, the
+ * system here depends on the handles in the TLB and in the SQL DB
+ * to be consistent (i.e. kept in sync).
+ *
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -187,8 +193,6 @@ class AtomStorage::Outgoing
 			Response rp;
 			rp.rs = db_conn->exec(buff);
 			rp.rs->release();
-
-printf ("duude outgoing %s\n", buff);
 			pos ++;
 			return false;
 		}
@@ -311,7 +315,6 @@ int AtomStorage::storeTruthValue(Atom *atom, Handle h)
 	STMTF("count", tv.getCount());
 
 	std::string qry = cols + vals + coda;
-printf ("duude atv its %s\n", qry.c_str());
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
 	rp.rs->release();
@@ -338,7 +341,6 @@ int AtomStorage::TVID(const TruthValue &tv)
 
 TruthValue* AtomStorage::getTV(int tvid)
 {
-printf("duude tvid=%d\n", tvid);
 	if (0 == tvid) return (TruthValue *) & TruthValue::NULL_TV();
 	if (1 == tvid) return (TruthValue *) & TruthValue::DEFAULT_TV();
 	if (2 == tvid) return (TruthValue *) & TruthValue::FALSE_TV();
@@ -347,7 +349,6 @@ printf("duude tvid=%d\n", tvid);
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
-printf("duude %s\n", buff);
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);
@@ -362,6 +363,10 @@ printf("duude %s\n", buff);
 
 /* ================================================================ */
 
+/**
+ * Store the indicated atom.
+ * Store its truth values too.
+ */
 void AtomStorage::storeAtom(Atom *atom)
 {
 	int notfirst = 0;
@@ -419,7 +424,6 @@ void AtomStorage::storeAtom(Atom *atom)
 	STMTF("stv_count", tv.getCount());
 
 	std::string qry = cols + vals + coda;
-printf ("duude its %s\n", qry.c_str());
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
 	rp.rs->release();
@@ -450,7 +454,6 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", (unsigned long) h);
-printf("duude %s\n", buff);
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);
@@ -464,6 +467,8 @@ printf("duude %s\n", buff);
  * Create a new atom, retreived from storage
  *
  * This method does *not* register the atom with any atomtable/atomspace
+ * However, it does register with the TLB, as the SQL uuids and the 
+ * TLB Handles must be kept in sync, or all hell breaks loose.
  */
 Atom * AtomStorage::getAtom(Handle h)
 {
@@ -474,25 +479,43 @@ Atom * AtomStorage::getAtom(Handle h)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
-	// Now get the truth value
-
 	// Now that we know everything about an atom, actually construct one.
-	Atom *atom = NULL;
-	if (ClassServer::isAssignableFrom(NODE, rp.itype))
+	Atom *atom = TLB::getAtom(h);
+
+	if (NULL == atom)
 	{
-		atom = new Node(rp.itype, rp.name);
+		if (ClassServer::isAssignableFrom(NODE, rp.itype))
+		{
+			atom = new Node(rp.itype, rp.name);
+		}
+		else
+		{
+			std::vector<Handle> outvec;
+			getOutgoing(outvec, h);
+			atom = new Link(rp.itype, outvec);
+		}
+
+		// Make sure that the handle in the TLB is synced with 
+		// the handle we use in the database.
+		TLB::addAtom(atom, h);
 	}
 	else
 	{
-		std::vector<Handle> outvec;
-		getOutgoing(outvec, h);
-		atom = new Link(rp.itype, outvec);
+		// Perform at least some basic sanity checking ...
+		if (rp.itype != atom->getType())
+		{
+			fprintf(stderr,
+				"Error: mismatched atom type for existing atom! uuid=%lu\n",
+				(unsigned long) h);
+		}
 	}
 
+	// Now get the truth value
 	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.count);
 	atom->setTruthValue(*stv);
 
 	rp.rs->release();
+
 	return atom;
 }
 

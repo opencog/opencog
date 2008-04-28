@@ -44,8 +44,10 @@ CREATE TABLE Edges (
 -- Global state
 
 CREATE TABLE Global (
-	max_uuid INT
+	max_uuid INT           -- sequentially issued UUID
 );
+
+INSERT INTO Global VALUES (1);     -- initial, sequentially issued UUID
 
 -- -----------------------------------------------------------
 -- Simple truth values

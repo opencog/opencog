@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * sniff test.
+ * Sniff test. Low-brow test, to see if basic atom storage is working.
  *
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -95,6 +95,8 @@ printf ("hello\n");
 	{
 		printf("atom compare success\n");
 	}
+
+	delete store;
 
 	return 0;
 }
