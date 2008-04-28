@@ -368,7 +368,7 @@ public:
         printf("links.size() = %d\n", links.size());
         TS_ASSERT(links.size() == 2);
 
-        tr = mva(TLB::getHandle(new Node(PREDICATE_NODE, strdup("barkingAt"))));
+        tr = mva(TLB::addAtom(new Node(PREDICATE_NODE, strdup("barkingAt"))));
         Handle h1_ = atomSpace->addAtom(tr, SimpleTruthValue(0.5f,0.5f)); 
         TS_ASSERT(CoreUtils::compare(h1_, UNDEFINED_HANDLE));
         // In this case, the expected behavior is to perform a merge and return the 
