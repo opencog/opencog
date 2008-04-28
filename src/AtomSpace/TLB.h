@@ -33,9 +33,10 @@ class TLB {
 
     private:
 
-        static unsigned long uuid;
+#ifdef USE_TLB_MAP
         static std::map<Handle, Atom *> handle_map;
         static std::map<Atom *, Handle> atom_map;
+#endif
 
         /**
          * Private default constructor for this class to make it abstract.
@@ -43,6 +44,9 @@ class TLB {
         TLB() {}
 
     public:
+#ifdef USE_TLB_MAP
+        static unsigned long uuid;
+#endif
 
 #define OBFUSCATE 0x55555555
 // #define OBFUSCATE 0x0
@@ -84,17 +88,17 @@ class TLB {
          * @param Atom to be added.
          * @return Handle of the newly added atom.
          */
-        static inline Handle addAtom(const Atom* atom)
+        static inline Handle addAtom(const Atom* atom, Handle h = 0)
         {
 #ifdef USE_TLB_MAP
             Atom *a = (Atom *) atom;
-            Handle h = atom_map[a];
-            if (h != 0)
+            Handle ha = atom_map[a];
+            if (ha != 0)
             {
-                // throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
-                return h;
+                // if (h != ha) throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
+                return ha;
             }
-            h = uuid;
+            if (h == 0) h = uuid;
             handle_map[h] = a;
             atom_map[a] = h;
             uuid++;
@@ -143,6 +147,7 @@ class TLB {
             return OBFUSCATE;
 #endif
         }
+
 
 #define UNDEFINED_HANDLE (TLB::UndefinedHandle())
 };
