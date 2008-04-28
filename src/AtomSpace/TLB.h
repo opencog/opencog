@@ -13,13 +13,14 @@
 #endif
 
 #define USE_TLB_MAP
-// #define CHECK_MAP_CONSISTENCY
+#define CHECK_MAP_CONSISTENCY
 #ifdef USE_TLB_MAP
 #include <map>
 #endif
 
 #include "Atom.h" 
 #include "types.h" 
+#include "type_codes.h" 
 
 class Atom;
 
@@ -60,6 +61,7 @@ class TLB
         static inline Atom* getAtom(Handle handle)
         {
 #ifdef USE_TLB_MAP
+            if (handle <= NOTYPE) return (Atom *) handle; // check for "non-real" atoms
             return handle_map[handle];
 #else
             return (Atom *) (handle ^ OBFUSCATE);
@@ -75,7 +77,10 @@ class TLB
         static inline Handle getHandle(const Atom* atom)
         {
 #ifdef USE_TLB_MAP
-            Handle h = atom_map[(Atom *) atom];
+            Handle h = (Handle) atom;
+            if (h <= NOTYPE) return h; // check for "non-real" atoms
+
+            h = atom_map[(Atom *) atom];
             if (h != 0) return h;
 #ifdef CHECK_MAP_CONSISTENCY
             return UndefinedHandle();
@@ -96,6 +101,9 @@ class TLB
         static inline Handle addAtom(const Atom* atom, Handle h = 0)
         {
 #ifdef USE_TLB_MAP
+            Handle ht = (Handle) atom;
+            if (ht <= NOTYPE) return ht; // check for "non-real" atoms
+
             Atom *a = (Atom *) atom;
             Handle ha = atom_map[a];
             if (ha != 0)
@@ -123,7 +131,10 @@ class TLB
          */
         static inline Atom* removeAtom(Atom* atom) {
 #ifdef USE_TLB_MAP
-            Handle h = atom_map[atom];
+            Handle h = (Handle) atom;
+            if (h <= NOTYPE) return atom; // check for "non-real" atoms
+
+            h = atom_map[atom];
             if (h == 0)
             {
 #ifdef CHECK_MAP_CONSISTENCY
