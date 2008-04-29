@@ -32,6 +32,6 @@ INCLUDE_DIRECTORIES (
 
 ADD_EXECUTABLE(cogServer CogServerMain.cc)
 
-TARGET_LINK_LIBRARIES(CogServer query persist AtomSpace NMXml Util Sockets ${CSOCKETS_LIBRARIES} ${EXPAT_LIBRARIES} pthread ssl crypto dl)
+TARGET_LINK_LIBRARIES(CogServer query persist AtomSpace NMXml Util ${CSOCKETS_LIBRARIES} ${EXPAT_LIBRARIES} pthread ssl crypto dl)
 
 TARGET_LINK_LIBRARIES(cogServer CogServer)
