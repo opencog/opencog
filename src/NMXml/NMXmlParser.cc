@@ -25,10 +25,7 @@
 
 #include <math.h>
 #include <stack>
-
-extern "C" {
-#include "xmlparse.h"
-}
+#include <expat.h>
 
 // NOTE: Any time information (including Timestamps) are represented using Atoms as follows: 
 // AtTimeLink(TimeNode:<temporalStringValue>, Atom1 [, Atom2 [... , AtomN]])
