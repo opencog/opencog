@@ -14,11 +14,8 @@
 #include "Link.h"
 #include "HandleEntry.h"
 #include "ClassServer.h"
-#include <StatisticsMonitor.h>
-
+#include "StatisticsMonitor.h"
 #include "Logger.h"
-
-#include "StdAfx.h"
 
 using std::string;
 using std::cerr;
