@@ -1,6 +1,6 @@
 #include <exceptions.h>
-#include <ListenSocket.h>
-#include <SocketHandler.h>
+#include <Sockets/ListenSocket.h>
+#include <Sockets/SocketHandler.h>
 
 #include "SimpleNetworkServer.h"
 #include "ServerSocket.h"

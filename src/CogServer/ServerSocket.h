@@ -12,8 +12,8 @@
 
 #include <string>
 
-#include <TcpSocket.h>
-#include <ISocketHandler.h>
+#include <Sockets/TcpSocket.h>
+#include <Sockets/ISocketHandler.h>
 #include "SimpleNetworkServer.h"
 #include "CallBackInterface.h"
 
