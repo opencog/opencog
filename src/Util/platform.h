@@ -71,7 +71,6 @@ namespace Util {
 #include <ext/hash_map>
 #include <ext/functional>
 #define stl_hash_ul(x) __gnu_cxx::hash<unsigned long>()(x)
-#define LPWSTR char*
 
 namespace Util {
   typedef __gnu_cxx::hash<int> int_hash;
