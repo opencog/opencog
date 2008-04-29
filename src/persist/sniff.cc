@@ -111,6 +111,33 @@ void single_atom_test(std::string id)
 	delete store;
 }
 
+void add_to_table(AtomTable *table, std::string id)
+{
+	// Create an atom ... 
+	Atom *a = new Node(SCHEMA_NODE, id + "fromNode");
+	SimpleTruthValue stv(0.11, 33);
+	a->setTruthValue(stv);
+	table->add(a);
+
+	Atom *a2 = new Node(SCHEMA_NODE, id + "toNode");
+	SimpleTruthValue stv2(0.22, 66);
+	a2->setTruthValue(stv2);
+	table->add(a2);
+
+	Atom *a3 = new Node(SCHEMA_NODE, id + "third wheel");
+	SimpleTruthValue stv3(0.33, 99);
+	a3->setTruthValue(stv3);
+	table->add(a3);
+
+	std::vector<Handle> hvec;
+	hvec.push_back(TLB::getHandle(a));
+	hvec.push_back(TLB::getHandle(a2));
+	hvec.push_back(TLB::getHandle(a3));
+
+	Link *l = new Link(SET_LINK, hvec);
+	table->add(l);
+}
+
 
 int main ()
 {
@@ -122,6 +149,7 @@ int main ()
    single_atom_test("eee ");
 #endif
 
+#if 1
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 
 	AtomTable *table = new AtomTable();
@@ -130,6 +158,22 @@ int main ()
 	table->print();
 
 	delete store;
+#endif
+
+#if 0
+	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
+
+	AtomTable *table = new AtomTable();
+   add_to_table(table, "aaa ");
+   add_to_table(table, "bbb ");
+   add_to_table(table, "ccc ");
+   add_to_table(table, "ddd ");
+   add_to_table(table, "eee ");
+
+	store->store(table);
+
+	delete store;
+#endif
 	return 0;
 }
 

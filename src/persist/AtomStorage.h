@@ -29,6 +29,7 @@ class AtomStorage
 
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
+		bool store_cb(Atom *);
 
 		bool idExists(const char *);
 

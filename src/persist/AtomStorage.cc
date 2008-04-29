@@ -564,8 +564,15 @@ void AtomStorage::load(AtomTable *table)
 	table->scrubIncoming();
 }
 
+bool AtomStorage::store_cb(Atom *atom)
+{
+	storeAtom(atom);
+	return false;
+}
+
 void AtomStorage::store(AtomTable *table)
 {
+   table->foreach_atom (&AtomStorage::store_cb, this);
 }
 
 /* ================================================================ */
