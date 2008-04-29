@@ -11,6 +11,7 @@
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
+#ifdef HAVE_SQL_STORAGE
 
 #include <stdlib.h>
 
@@ -596,4 +597,5 @@ void AtomStorage::setMaxUUID(unsigned long uuid)
 	rp.rs->release();
 }
 
+#endif /* HAVE_SQL_STORAGE */
 /* ============================= END OF FILE ================= */

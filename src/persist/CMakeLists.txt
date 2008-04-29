@@ -1,3 +1,6 @@
+
+# ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
+
 add_library (persist STATIC
 odbcxx.cc
 AtomStorage.cc

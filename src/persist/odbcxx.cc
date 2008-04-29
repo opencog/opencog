@@ -14,6 +14,8 @@
  * ported to C++ March 2008
  */
 
+#ifdef HAVE_SQL_STORAGE
+
 #include <stack>
 #include <string>
 
@@ -600,5 +602,7 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 }
 
 #endif /* OLD_UNPORTED_C_CODE */
+
+#endif /* HAVE_SQL_STORAGE */
 /* ============================= END OF FILE ================= */
  

@@ -6,6 +6,8 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#ifdef HAVE_SQL_STORAGE
+
 #include "AtomStorage.h"
 #include "Atom.h"
 #include "Link.h"
@@ -177,4 +179,7 @@ int main ()
 	return 0;
 }
 
+#else /* HAVE_SQL_STORAGE */
+int main () { return 1; }
+#endif /* HAVE_SQL_STORAGE */
 /* ============================= END OF FILE ================= */
