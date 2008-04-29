@@ -155,7 +155,7 @@ int main ()
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 
 	AtomTable *table = new AtomTable();
-	store->load(table);
+	store->load(*table);
 
 	table->print();
 
@@ -172,7 +172,7 @@ int main ()
    add_to_table(table, "ddd ");
    add_to_table(table, "eee ");
 
-	store->store(table);
+	store->store(*table);
 
 	delete store;
 #endif

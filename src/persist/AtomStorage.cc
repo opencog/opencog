@@ -559,10 +559,10 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 
 /* ================================================================ */
 
-void AtomStorage::load(AtomTable *table)
+void AtomStorage::load(AtomTable &table)
 {
 	Response rp;
-	rp.table = table;
+	rp.table = &table;
 	rp.store = this;
 
 	rp.rs = db_conn->exec("SELECT * FROM Atoms;");
@@ -570,7 +570,7 @@ void AtomStorage::load(AtomTable *table)
 
 	rp.rs->release();
 
-	table->scrubIncoming();
+	table.scrubIncoming();
 }
 
 bool AtomStorage::store_cb(Atom *atom)
@@ -579,9 +579,9 @@ bool AtomStorage::store_cb(Atom *atom)
 	return false;
 }
 
-void AtomStorage::store(AtomTable *table)
+void AtomStorage::store(const AtomTable &table)
 {
-   table->foreach_atom (&AtomStorage::store_cb, this);
+   table.foreach_atom (&AtomStorage::store_cb, this);
 }
 
 /* ================================================================ */

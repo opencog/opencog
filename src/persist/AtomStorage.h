@@ -56,8 +56,8 @@ class AtomStorage
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
 
-		void load(AtomTable *);
-		void store(AtomTable *);
+		void load(AtomTable &);
+		void store(const AtomTable &);
 };
 
 #endif /* PERSITENT_ATOM_STORAGE_H_ */
