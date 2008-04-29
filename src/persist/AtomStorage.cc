@@ -54,7 +54,7 @@ class AtomStorage::Response
 
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
-			printf ("%s = %s\n", colname, colvalue);
+			// printf ("%s = %s\n", colname, colvalue);
 			if (!strcmp(colname, "type"))
 			{
 				itype = atoi(colvalue);
@@ -79,7 +79,7 @@ class AtomStorage::Response
 		}
 		bool create_atom_cb(void)
 		{
-			printf ("---- New atom found ----\n");
+			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			return false;
@@ -89,7 +89,7 @@ class AtomStorage::Response
 		AtomStorage *store;
 		bool load_all_atoms_cb(void)
 		{
-			printf ("---- New atom found ----\n");
+			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Atom *atom = store->makeAtom(*this, handle);
