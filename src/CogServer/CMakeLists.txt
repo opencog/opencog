@@ -1,3 +1,7 @@
+
+# Uncomment this if SQL is installed.
+# ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
+
 SET(CMAKE_BUILD_TYPE Debug)
 
 FIND_PACKAGE(EXPAT REQUIRED)
@@ -22,11 +26,12 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/src/NMXml
 	${OPENCOG_SOURCE_DIR}/src/CogServer
 	${OPENCOG_SOURCE_DIR}/src/query
+	${OPENCOG_SOURCE_DIR}/src/persist
 	${CSOCKETS_INCLUDE_DIRS}
 )
 
 ADD_EXECUTABLE(cogServer CogServerMain.cc)
 
-TARGET_LINK_LIBRARIES(CogServer AtomSpace query NMXml Util ${CSOCKETS_LIBRARIES} ${EXPAT_LIBRARIES} pthread ssl crypto dl)
+TARGET_LINK_LIBRARIES(CogServer query persist AtomSpace NMXml Util Sockets ${CSOCKETS_LIBRARIES} ${EXPAT_LIBRARIES} pthread ssl crypto dl)
 
 TARGET_LINK_LIBRARIES(cogServer CogServer)
