@@ -565,9 +565,11 @@ public:
 
     /**
      * Invoke the callback cb for *every* atom in the AtomTable
+     * This assumes that the callback does *not* modify the AtomTable,
+     * specifically, does not insert or remove atoms from the atom table.
      */
     template<class T>
-    inline bool foreach_atom(bool (T::*cb)(Atom *), T *data)
+    inline bool foreach_atom(bool (T::*cb)(Atom *), T *data) const
     {
         for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++)
         {
