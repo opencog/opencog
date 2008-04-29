@@ -36,7 +36,7 @@ void QueryProcessor::run(CogServer *server)
 	atom_space = server->getAtomSpace();
 	
 	// Look for recently asserted assertions.
-	foreach_handle_of_type(atom_space, "AssertionLink", 
+	atom_space->foreach_handle_of_type("AssertionLink", 
 	                       &QueryProcessor::do_assertion, this);
 
 	/* XXX HACK ALERT -- no scheduling, so just sleep */

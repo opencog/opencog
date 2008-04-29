@@ -677,6 +677,41 @@ class AtomSpace {
         return (toOutputIterator(result, handleEntry));    
     }
 
+    /* ----------------------------------------------------------- */
+    /* The foreach routines offer an alternative interface
+     * to the getHandleSet API.
+     */
+    /**
+     * Invoke the callback on each handle of the given type.
+     */
+    template<class T>
+    inline bool foreach_handle_of_type(Type atype,
+                                       bool (T::*cb)(Handle), T *data)
+    {
+        std::list<Handle> handle_set;
+        getHandleSet(back_inserter(handle_set), atype, NULL);
+    
+        // Loop over all handles in the handle set.
+        std::list<Handle>::iterator i;
+        for (i = handle_set.begin(); i != handle_set.end(); i++)
+        {
+            Handle h = *i;
+            bool rc = (data->*cb)(h);
+            if (rc) return rc;
+        }
+        return false;
+    }
+    
+    template<class T>
+    inline bool foreach_handle_of_type(const char * atypename, 
+                                       bool (T::*cb)(Handle), T *data)
+    {
+        Type atype = ClassServer::getType(atypename);
+        return foreach_handle_of_type(atype, cb, data);
+    }
+
+    /* ----------------------------------------------------------- */
+
     /**
      * Decays STI of all atoms (one cycle of importance decay).
      * Deprecated, importance updating should be done by ImportanceUpdating

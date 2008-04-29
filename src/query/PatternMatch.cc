@@ -405,7 +405,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	// Plunge into the deep end - start looking at all viable
 	// candidates in the AtomSpace.
-	foreach_handle_of_type(atom_space, ptype,
+	atom_space->foreach_handle_of_type(ptype,
 	      &PatternMatch::do_candidate, this);
 
 }
