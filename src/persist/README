@@ -1,26 +1,40 @@
                           Persist
                           -------
+                Linas Vepstas, Feb-April 2008
 
-A trivial, simple-minded implementation of atom persistence. 
+A simple-minded implementation of atom persistence into SQL.
 
 STATUS:
 Functional but incomplete prototype. Save and restore of atoms, 
 and simple truth values, works. Attempts to stay in sync with
-handles as stored in the TLB.
+handles as stored in the TLB. Can bulk-save and bulk-restore
+the entire contents of an AtomTable.
+
+ToDo: add incremental save/restore.
+Add full support for other truth values.
+Add full support for attention values. (??)
+Add full support for Atom deletion.
 
 Goals:
 ------
 The goal of this implementation is to:
+
 1) Simplify Linas' day-to-day use of opencog. The problem is that
    loading data, by parsing english sentences, into opencog is slow.
    Every time opencog source is changed, the data needs to be reloaded.
    This makes development tedious.  The hope is that data persistence
    will aleviate data load time.
 
-2) Make sure that the opencog core desisgn is amenable to data
-   persistence, including locks, use counts, etc.  This prototype
-   should lay the foundations for more sophisticated schemes to take
-   its place.
+2) Make sure that the opencog core desisgn is amenable to incremental,
+   just-in-time data persistence; that is, the fetching of data 
+   as it is needed, and saving it away when its not needed. This
+   requires an infrastrcture for attention allocation (atoms
+   that don't get attention can be saved away to disk, while those
+   that are needed are fetched on demand.) This will also require 
+   infrastructure for locks, use counts, etc. that are typical
+   of multi-htreded programming.  This prototype should lay the 
+   foundations for more sophisticated schemes (non-SQL-based) 
+   to take its place.
 
 3) Provide a baseline/reference implementation by which other 
    persistence designs can be measured.
@@ -35,15 +49,31 @@ Note that the core design does *not* make use of object reflection,
 nor can it store arbitrary kinds of objects. It is very definitely 
 hard-wired. Yes, this can be considered to be a short-coming. 
 A more general, persistent object framework (for C) can be found 
-at http://estron.alioth.debian.org/ 
+at http://estron.alioth.debian.org/  However, simplicity, at the
+cost of missing flexibility, seems more important.
+
+The current design can save/restore individual atoms, and it can
+bulk-save/bulk-restore the entire contents of an AtomTable.
+As such, if offers little or no advantage over flat-file storage.
+A so-far unrealized goal of the prototype is to implement 
+incremental save and restore -- that is, to fetch atoms in a 
+"just in time" fashion, and to save away atoms that are not 
+needed in RAM (e.g. atoms with low/non-existent attention values).
+
+However, the current AtomTable implementation makes it hard for
+the incremental approach to be pursued.  For example, the incoming
+set of an atom is expected to be fully populated; and the current
+manner in which this is done requires atoms to be fully instantiated.
+This makes it somewhat hard to have only a part of a graph in RAM.
+However, this is solvable with a bit of elbow grease.
 
 Caveats:
 --------
 Its not at all clear whether this is a good idea; there are several
 major drawbacks to using SQL. These include:
--- Large performance overhead, even if an embedded SQL server is used.
--- Potentially large churn, as opencog creates many short-lived atoms,
-   which shouldn't be persisted.
+-- Large performance overhead, even if an embedded SQL server were to be used.
+-- If/when incremental save/restore is implemented, then there's potentially 
+   large churn, if short-lived atoms are constantly created/destroyed.
 
 Getting started
 ---------------
