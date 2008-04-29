@@ -466,7 +466,7 @@ public:
     HandleEntry* getHandleSet(Type*, bool*, Arity,
                 Type type = ATOM, bool subclass = true) const;
 
-      /**
+    /**
      * Returns the set of atoms within the given importance range.
      *
      * @param Importance range lower bound (inclusive).
@@ -563,6 +563,20 @@ public:
     HandleEntry* getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const;
     */
 
+    /**
+     * Invoke the callback cb for *every* atom in the AtomTable
+     */
+    template<class T>
+    inline bool foreach_atom(bool (T::*cb)(Atom *), T *data)
+    {
+        for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++)
+        {
+            Atom* atom = *it;
+            bool rc = (data->*cb)(atom);
+            if (rc) return rc;
+        }
+        return false;
+    }
 
     /**
      * For use by atom table persistence systems only. When bulk-adding

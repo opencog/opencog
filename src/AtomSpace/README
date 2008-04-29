@@ -160,3 +160,11 @@ during review of the opencog internals, in April 2008:
    Performance will almost certainly be improved by using
    std:map instead of linked lists.
 
+8) AtomTable::makeSet() and AtomTable::buildSet() and
+   the various flavors of getHandleSet() all create 
+   linked lists. Presumably, some user will use these lists, 
+   and thn delete them. It would be much more computationally 
+   efficient if the creation and destruction of the lists were
+   skipped completely, and, instead, a foreach loop was used,
+   to call the user's callback. This would avoid the cost of 
+   malloc and free of the list, and un-needed data copying.
