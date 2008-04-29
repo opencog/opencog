@@ -1,39 +1,29 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
-add_library (CogServer STATIC
-CogServerSetup.cc 
-CogServer.cc 
-SimpleNetworkServer.cc 
-ServerSocket.cc 
-CommandRequest.cc 
-CommandRequestProcessor.cc 
-ImportanceUpdatingAgent.cc
-ImportanceSpreadingAgent.cc
-HebbianLearningAgent.cc
-ForgettingAgent.cc
+FIND_PACKAGE(EXPAT REQUIRED)
+FIND_PACKAGE(CSockets REQUIRED)
+
+ADD_LIBRARY (CogServer STATIC
+	CogServerSetup.cc 
+	CogServer.cc 
+	SimpleNetworkServer.cc 
+	ServerSocket.cc 
+	CommandRequest.cc 
+	CommandRequestProcessor.cc 
+	ImportanceUpdatingAgent.cc
 )
 
-include_directories (
-${OPENCOG_SOURCE_DIR}/src/Util
-${OPENCOG_SOURCE_DIR}/src/AtomSpace
-${OPENCOG_SOURCE_DIR}/src/NMXml
-${OPENCOG_SOURCE_DIR}/src/CogServer
-${OPENCOG_SOURCE_DIR}/src/query
-
-# Local copy of http://www.alhem.net/Sockets/
-${OPENCOG_SOURCE_DIR}/include/sockets
-
-# Local copy of openssl, should be eliminated.
-# ${OPENCOG_SOURCE_DIR}/include/sockets/openssl
+INCLUDE_DIRECTORIES (
+	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/AtomSpace
+	${OPENCOG_SOURCE_DIR}/src/NMXml
+	${OPENCOG_SOURCE_DIR}/src/CogServer
+	${OPENCOG_SOURCE_DIR}/src/query
+	${CSOCKETS_INCLUDE_DIRS}
 )
 
-link_directories (
-${OPENCOG_SOURCE_DIR}/lib/linux/sockets
-)
+ADD_EXECUTABLE(cogServer CogServerMain.cc)
 
+TARGET_LINK_LIBRARIES(CogServer AtomSpace query NMXml Util ${CSOCKETS_LIBRARIES} ${EXPAT_LIBRARIES} pthread ssl crypto dl)
 
-add_executable (cogServer CogServerMain.cc)
-
-target_link_libraries(CogServer AtomSpace query NMXml expat Util Sockets pthread ssl crypto dl)
-target_link_libraries (cogServer CogServer)
-
+TARGET_LINK_LIBRARIES(cogServer CogServer)

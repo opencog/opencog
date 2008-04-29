@@ -4,17 +4,7 @@
  * Copyright (c) 2001 Thiago Maia, Andre Senna
  * All rights reserved.
  *
- * XXX To be fixed: remove all of the uses of "throw" in this code, 
- * to be replaced by a gentler error mechanism. The problem is two-fold:
- * the "throws" are made from within routines that are called by the
- * external libxmlparser library, which is written in C, not C++. 
- * Thus, these errors can't ever actually be caught, since they never
- * get through the parser. As a result, any minor mistake in an XML
- * will cause the entire server to crash, which is just plain ugly.
- * Yuck!
  */
-
-//#include "platform.h"
 
 #include "NMXmlParser.h"
 #include "FileXMLBufferReader.h"
@@ -27,8 +17,19 @@
 #include <stack>
 #include <expat.h>
 
-// NOTE: Any time information (including Timestamps) are represented using Atoms as follows: 
-// AtTimeLink(TimeNode:<temporalStringValue>, Atom1 [, Atom2 [... , AtomN]])
+/*
+ * XXX To be fixed: remove all of the uses of "throw" in this code, 
+ * to be replaced by a gentler error mechanism. The problem is two-fold:
+ * the "throws" are made from within routines that are called by the
+ * external libxmlparser library, which is written in C, not C++. 
+ * Thus, these errors can't ever actually be caught, since they never
+ * get through the parser. As a result, any minor mistake in an XML
+ * will cause the entire server to crash, which is just plain ugly.
+ * Yuck!
+
+ * NOTE: Any time information (including Timestamps) are represented using Atoms as follows: 
+ * AtTimeLink(TimeNode:<temporalStringValue>, Atom1 [, Atom2 [... , AtomN]])
+ */
 
 Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> NMXmlParser::hypHandles;
 bool NMXmlParser::fresh = true;

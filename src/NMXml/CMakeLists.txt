@@ -1,13 +1,17 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
-add_library (NMXml
-FileXMLBufferReader.cc  NMXmlExporter.cc  NMXmlParser.cc StringXMLBufferReader.cc
+FIND_PACKAGE(EXPAT REQUIRED)
+
+ADD_LIBRARY(NMXml
+	FileXMLBufferReader.cc
+	NMXmlExporter.cc
+	NMXmlParser.cc
+	StringXMLBufferReader.cc
 )
 
-include_directories (
-${OPENCOG_SOURCE_DIR}/src/Util
-${OPENCOG_SOURCE_DIR}/src/AtomSpace
-${OPENCOG_SOURCE_DIR}/src/NMXml
-${OPENCOG_SOURCE_DIR}/include/expat
+INCLUDE_DIRECTORIES (
+	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/AtomSpace
+	${OPENCOG_SOURCE_DIR}/src/NMXml
+	${EXPAT_INCLUDE_DIRS}
 )
-

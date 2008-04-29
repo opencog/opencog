@@ -1,3 +1,5 @@
+FIND_PACKAGE(EXPAT REQUIRED)
+
 include_directories(
 ${OPENCOG_SOURCE_DIR}/src/Util
 ${OPENCOG_SOURCE_DIR}/src/AtomSpace
@@ -9,18 +11,16 @@ ${OPENCOG_SOURCE_DIR}/test/NMXml
 link_directories(${OPENCOG_BINARY_DIR})
 IF(WIN32)
 link_directories(${OPENCOG_SOURCE_DIR}/lib/win32/expat)
-ELSE(WIN32)
-link_directories(${OPENCOG_SOURCE_DIR}/lib/linux/expat)
 ENDIF(WIN32)
 
 add_cxxtest(NMXmlParserUTest NMXmlParserExperiment.cc)
-target_link_libraries(NMXmlParserUTest NMXml AtomSpace Util expat)
+target_link_libraries(NMXmlParserUTest NMXml AtomSpace Util ${EXPAT_LIBRARIES})
 IF(WIN32)
 target_link_libraries(NMXmlParserUTest winmm)
 ENDIF(WIN32)
 
 add_cxxtest(NMXmlExporterUTest NMXmlParserExperiment.cc)
-target_link_libraries(NMXmlExporterUTest NMXml AtomSpace Util expat)
+target_link_libraries(NMXmlExporterUTest NMXml AtomSpace Util ${EXPAT_LIBRARIES})
 IF(WIN32)
 target_link_libraries(NMXmlExporterUTest winmm)
 ENDIF(WIN32)

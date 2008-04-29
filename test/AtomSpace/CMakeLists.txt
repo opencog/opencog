@@ -1,21 +1,23 @@
+FIND_PACKAGE(EXPAT REQUIRED)
+
 include_directories(
 ${OPENCOG_SOURCE_DIR}/src/Util
 ${OPENCOG_SOURCE_DIR}/src/AtomSpace
 ${OPENCOG_SOURCE_DIR}/src/NMXml
 )
+
 link_directories(
 ${OPENCOG_BINARY_DIR}/src/AtomSpace
 ${OPENCOG_BINARY_DIR}/src/NMXml
 )
+
 IF(WIN32) 
-link_directories(${OPENCOG_SOURCE_DIR}/lib/win32/xmlparser)
-ELSE(WIN32)
-link_directories(${OPENCOG_SOURCE_DIR}/lib/linux/xmlparser)
+link_directories(${OPENCOG_SOURCE_DIR}/lib/win32/xmlparse)
 ENDIF(WIN32)
 
 add_definitions(-DATOM_TABLE_TEST_XML_FILE=\\"${CMAKE_CURRENT_SOURCE_DIR}/cw_proxy_1.xml\\")
 add_cxxtest(AtomTableUTest)
-target_link_libraries(AtomTableUTest NMXml AtomSpace Util xmlparse)
+target_link_libraries(AtomTableUTest NMXml AtomSpace Util ${EXPAT_LIBRARIES})
 IF(WIN32)
 target_link_libraries(AtomTableUTest winmm)
 ENDIF(WIN32)
