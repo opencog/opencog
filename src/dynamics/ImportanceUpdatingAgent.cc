@@ -137,13 +137,11 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     
     if (lobeSTIOutOfBounds) {
 	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");
-	//updateSTIRent(a);
+	updateSTIRent(a);
     }
 
     /* Reset Stimulus */
     a->resetStimulus();
-
-    log->log(Util::Logger::DEBUG, "total stim now %d", a->getTotalStimulus());
 
 }
 
@@ -338,7 +336,7 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 	focusSize = attentionalFocusSize.recent;
     }
 
-    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %d.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
+    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
 
     lobeSTIOutOfBounds = false; 
 }

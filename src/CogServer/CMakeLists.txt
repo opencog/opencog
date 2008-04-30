@@ -14,10 +14,6 @@ ADD_LIBRARY (CogServer STATIC
 	ServerSocket.cc 
 	CommandRequest.cc 
 	CommandRequestProcessor.cc 
-	ImportanceUpdatingAgent.cc
-	ImportanceSpreadingAgent.cc
-	HebbianLearningAgent.cc
-	ForgettingAgent.cc
 )
 
 INCLUDE_DIRECTORIES (

@@ -856,6 +856,7 @@ stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
 
     // update record of total stimulus given out
     totalStimulus += amount;
+    //MAIN_LOGGER.log(Util::Logger::FINE, "%d added to totalStimulus, now %d", amount, totalStimulus);
     return totalStimulus;
 }
 
