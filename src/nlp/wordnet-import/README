@@ -3,7 +3,11 @@
                      --------------
                  Linas Vepstas April 2008
 
-Import the wordnet synsets into opencog.  Uses the NLTK wordnet
-python libraries to do so.
+Import the wordnet synsets into opencog.  Uses the NLTK wordnet python
+libraries to do so.  Because the NLTK wordnet code is under the GPLv2
+license, then so is the code in this directory. The GPLv2 applies to 
+code in this directory only.
+
+
 
 
