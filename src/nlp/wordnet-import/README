@@ -1,0 +1,9 @@
+
+                     Wordnet Import
+                     --------------
+                 Linas Vepstas April 2008
+
+Import the wordnet synsets into opencog.  Uses the NLTK wordnet
+python libraries to do so.
+
+
