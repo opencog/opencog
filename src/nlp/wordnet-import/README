@@ -8,6 +8,9 @@ libraries to do so.  Because the NLTK wordnet code is under the GPLv2
 license, then so is the code in this directory. The GPLv2 applies to 
 code in this directory only.
 
+The prototype has barely been started, nothing works yet.
 
+To run: at the command line, "python import.py"
+Must have wordnet, python 2.5 and NLTK installed.
 
 
