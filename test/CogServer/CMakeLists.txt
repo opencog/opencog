@@ -18,6 +18,3 @@ ${OPENCOG_SOURCE_DIR}/lib/linux/expat
 
 add_cxxtest(CogServerUTest)
 target_link_libraries(CogServerUTest CogServer)
-
-add_cxxtest(ImportanceUpdatingAgentUTest)
-target_link_libraries(ImportanceUpdatingAgentUTest AtomSpace CogServer)
