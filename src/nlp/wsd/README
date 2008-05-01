@@ -5,11 +5,17 @@
                       Linas Vepstas April 2008
 
 
+This document contains working notes for the mapping of wordnet ideas
+onto opencog structures. It also describes how words in a parsed
+sentence are associated with different word senses.
 
+
+Word senese or word concepts
+----------------------------
 Associated with every word is a list of possible senses.
 Consider the word "bark", thus:
 
-    <WordNode name="bark">   -- a word.
+    <WordNode name="bark" />   -- a word.
 
 A "word sense" is a bag of information about a single semantic
 sense of a word. This bag includes information about the part-of-speech
@@ -22,7 +28,7 @@ In the opencog type heirarchy, (type.script)
 A WordSenseLink will, of course, include the word itself:
 
    <WordSenseLink>
-      <WordNode name="bark">
+      <WordNode name="bark" />
    </WordSenseLink>
 
 Word senses can be crudely categorized according to part-of-speech.
@@ -32,9 +38,29 @@ Thus:
 and
 
    <WordSenseLink>
-      <WordNode name="bark">
-      <PartOfSpeechNode name="noun">
+      <WordNode name="bark" />
+      <PartOfSpeechNode name="noun" />
    </WordSenseLink>
+
+[[ Actually, it is probably better to represent word attributes as
+follows -- by example -- 
+   <DefinedLinguisticConceptNode name="#pos#noun" />
+   <DefinedLinguisticConceptNode name="#pos#verb" />
+   <DefinedLinguisticConceptNode name="#tense#past" />
+   <DefinedLinguisticConceptNode name="#number#singular" />
+   <DefinedLinguisticConceptNode name="#number#uncountable" />
+   <DefinedLinguisticConceptNode name="#entity#person" />
+   <DefinedLinguisticConceptNode name="#entity#place" />
+
+and so on. The goal here is to avoid having to maintain a large stable
+of types for word attributes. Of course, other representations are
+possible; the above seems to be simple and straight-forward, and should
+do until such time that some more complex structure is needed. 
+
+Note, however, that not all of the above will appear in a word sense:
+thus, while we may want to mark a word-sense with a part-of-speech,
+we don't want to mark up tense ... at least not right now, not in this
+narrow view.  ]]
 
 Each of these nodes and links are assigned a truth value of 1 and a
 confidence of 1. Non-unit truthvalues & confidence will be used when 
@@ -52,16 +78,16 @@ values. Thus:
    HYPONYM_LINK <- CONCEPT_LINK
 
    <WordSenseLink>
-      <WordNode name="bark">
-      <PartOfSpeechNode name="noun">
-      <HypernymLink strength=0.8 confidence=0.9>
+      <WordNode name="bark" />
+      <PartOfSpeechNode name="noun" />
+      <HypernymLink strength=0.8 confidence=0.9 />
          <WordSenseLink>
-            <WordNode name="covering">
+            <WordNode name="covering" />
          </WordSenseLink>
       </HypernymLink>
-      <HyponymLink strength=0.8 confidence=0.9>
+      <HyponymLink strength=0.8 confidence=0.9 />
          <WordSenseLink>
-            <WordNode name="cork">
+            <WordNode name="cork" />
          </WordSenseLink>
       </HyponymLink>
    </WordSenseLink>
@@ -90,20 +116,56 @@ Thus:
 To continue with the tree-bark example:
 
    <WordSenseLink>
-      <WordNode name="bark">
-      <PartOfSpeechNode name="noun">
-      <HypernymLink strength=0.8 confidence=0.9>
+      <WordNode name="bark" />
+      <PartOfSpeechNode name="noun" />
+      <HolonymLink strength=0.8 confidence=0.9>
          <WordSenseLink>
-            <WordNode name="covering">
+            <WordNode name="branch" />  <!-- bark is a part of a branch -->
          </WordSenseLink>
-      </HypernymLink>
-      <HyponymLink strength=0.8 confidence=0.9>
+      </HolonymLink>
+      <MeronymLink strength=0.8 confidence=0.9>
          <WordSenseLink>
-            <WordNode name="cork">
+            <WordNode name="lignin" />  <!-- bark is composed of lignin -->
          </WordSenseLink>
-      </HyponymLink>
+      </MeronymLink>
    </WordSenseLink>
 
 
+Sentences to meanings
+---------------------
+Consider two sentences: "The loud bark woke me up." or "The rough bark
+cut my finger." The goal of word-sense disambiguation is two-fold:
+associate to all possible meanings of the word bark, and then, pick the
+most likely meaning.
 
+There are three things to distinguish: the word instance, as it occurs
+in the sentence, the word sense, as described above, and the concept 
+the word represents. The "word concept" is distinguished from the "word
+sense", as being the concept within context of the sentence/text in 
+which it appears. Thus, "We stood in the yard.  As she walked up to me,
+I laid my hand on the old oak.  Its rough bark cut my finger."  The goal
+is to distingusih the word-instance "bark", from the most likely
+word-sense of "tree bark", from the concept "the bark of an oak tree in
+a particular yard in which there are two people".
+
+
+------
+The current, possibly inappropriate, parse structure is:
+
+   <InheritanceLink>
+      <ConceptNode name="bark_1234" />
+      <ConceptNode name="bark_1" />
+   </InheritanceLink>
+
+   <ReferenceLink>
+      <WordNode name="#bark">
+      <ConceptNode = "bark_1">
+   </ReferenceLink>
+
+
+
+   <InheritanceLink>
+      <DefinedLinguisticConceptNode name="#pos#noun" />
+      <ConceptNode name="bark_1234" />
+   </InheritanceLink>
 
