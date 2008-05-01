@@ -1,0 +1,23 @@
+
+                      Word Sense Disambiguation
+                      -------------------------
+                           Working Notes 
+                      Linas Vepstas April 2008
+
+
+
+Associated with every word is a list of possible senses.
+Thus:
+    <WordNode name="bark">   -- a word.
+
+A "word sense" is a bag of information about a single semantic
+sense of a word. This bag includes information about the part-of-speech
+(noun, verb, etc.), example usages, pointers to synonym sets (synsets),
+hyponyms, hypernyms, etc. Thus, a "word sense" is an unordered link.
+
+In the opencog type heirarchy,
+   WORD_SENSE_LINK <- SET_LINK
+
+
+The possible senses are group according to rough part-of-speech
+categories: noun, verb, adjective adverb.

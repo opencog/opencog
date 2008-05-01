@@ -1,25 +1,40 @@
 #
-# Wordnet to OpenCog synset importer
+# Wordnet to OpenCog prototype sandbox
 # Copyright (C) 2008 Linas Vepstas <linas@linas.org>
 #
 
-"""Wordnet to OpenCog synset importer
+"""Wordnet to OpenCog test sandbox
 """
 
 import nltk;
 import nltk.wordnet.dictionary
 
 def import_wn():
-	print "<!-- OpenCog XML data follows --> "
-	word = "dog"
+	word = "bark"
 	print word
+
 	noundict = nltk.wordnet.dictionaryFor("NOUN");
-	wd = noundict['dog'];
+	wd = noundict['bark'];
 	print wd
-	print noundict[0];
-	print noundict[1];
-	print noundict[2];
-	print noundict[3];
+
+	print "\nduude sense zero"
+	print wd[0]
+
+	print "\nduude stuff"
+	print wd[0][0]
+	# print wd[0][1]
+	# print wd[0][2]
+
+	print "\nduude other senses"
+	print wd[1]
+	print wd[2]
+	print wd[3]
+
+	idx = 4440
+	print noundict[idx]
+	print noundict.getWord("bark")
+
+	# nounsyn = noundict.getSynset(0)
 
 
 if __name__ == '__main__':

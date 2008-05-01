@@ -6,3 +6,5 @@
 This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on word sense
 disambiguation.
+
+See wsd subdirectory.
