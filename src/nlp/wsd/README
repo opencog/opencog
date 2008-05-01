@@ -7,7 +7,8 @@
 
 
 Associated with every word is a list of possible senses.
-Thus:
+Consider the word "bark", thus:
+
     <WordNode name="bark">   -- a word.
 
 A "word sense" is a bag of information about a single semantic
@@ -15,9 +16,94 @@ sense of a word. This bag includes information about the part-of-speech
 (noun, verb, etc.), example usages, pointers to synonym sets (synsets),
 hyponyms, hypernyms, etc. Thus, a "word sense" is an unordered link.
 
-In the opencog type heirarchy,
+In the opencog type heirarchy, (type.script)
    WORD_SENSE_LINK <- SET_LINK
 
+A WordSenseLink will, of course, include the word itself:
 
-The possible senses are group according to rough part-of-speech
-categories: noun, verb, adjective adverb.
+   <WordSenseLink>
+      <WordNode name="bark">
+   </WordSenseLink>
+
+Word senses can be crudely categorized according to part-of-speech.
+Thus:
+   PART_OF_SPEECH_NODE <- NODE
+
+and
+
+   <WordSenseLink>
+      <WordNode name="bark">
+      <PartOfSpeechNode name="noun">
+   </WordSenseLink>
+
+Each of these nodes and links are assigned a truth value of 1 and a
+confidence of 1. Non-unit truthvalues & confidence will be used when 
+relating word senses to the use of actual words in sentences. Here, 
+however, the goal is to state "this word might have this meaning, no 
+matter how rarely used this meaing might be."
+
+Word senses are commonly established by giving sister terms (loose 
+synonyms), as well as hypernyms, hyponyms, part holonyms, etc. A 
+synonym/hypernym/hyponym/etc. are thus links. Since some sister
+terms are closer than others, these links will have non-unit truth
+values. Thus:
+
+   HYPERNYM_LINK <- CONCEPT_LINK
+   HYPONYM_LINK <- CONCEPT_LINK
+
+   <WordSenseLink>
+      <WordNode name="bark">
+      <PartOfSpeechNode name="noun">
+      <HypernymLink strength=0.8 confidence=0.9>
+         <WordSenseLink>
+            <WordNode name="covering">
+         </WordSenseLink>
+      </HypernymLink>
+      <HyponymLink strength=0.8 confidence=0.9>
+         <WordSenseLink>
+            <WordNode name="cork">
+         </WordSenseLink>
+      </HyponymLink>
+   </WordSenseLink>
+
+Indicates that "bark" is a kind of "covering", and that "cork" is a 
+kind of bark. Note that the hyper/hypo links link not to word nodes,
+but to other word-sense links.  There may be many hypo/hyper links
+in a word sense.
+
+There is a potential confusion as to the idea of a "synonym", as 
+some synonyms are better than others. In an attempt to avoid this
+confusion, and stay close to the wordnet idea of a "sister term", 
+these will be called Sisnym's. The idea of a synonym will be reserved
+for relations between words, rather than relations between concepts.
+
+Thus:
+
+   SISNYM_LINK <- CONCEPT_LINK
+ 
+Wordnet uses the idea of "part holonyms", which is mirrored here.
+Thus:
+
+   HOLONYM_LINK <- CONCEPT_LINK
+   MERONYM_LINK <- CONCEPT_LINK
+
+To continue with the tree-bark example:
+
+   <WordSenseLink>
+      <WordNode name="bark">
+      <PartOfSpeechNode name="noun">
+      <HypernymLink strength=0.8 confidence=0.9>
+         <WordSenseLink>
+            <WordNode name="covering">
+         </WordSenseLink>
+      </HypernymLink>
+      <HyponymLink strength=0.8 confidence=0.9>
+         <WordSenseLink>
+            <WordNode name="cork">
+         </WordSenseLink>
+      </HyponymLink>
+   </WordSenseLink>
+
+
+
+
