@@ -92,10 +92,10 @@ values. Thus:
       </HyponymLink>
    </WordSenseLink>
 
-Indicates that "bark" is a kind of "covering", and that "cork" is a 
-kind of bark. Note that the hyper/hypo links link not to word nodes,
-but to other word-sense links.  There may be many hypo/hyper links
-in a word sense.
+The above indicates that "bark" is a kind of "covering", and that 
+"cork" is a kind of bark. Note that the hyper/hypo links link not
+to word nodes, but to other word-sense links.  There may be many 
+hypo/hyper links in a word sense.
 
 There is a potential confusion as to the idea of a "synonym", as 
 some synonyms are better than others. In an attempt to avoid this
@@ -130,6 +130,18 @@ To continue with the tree-bark example:
       </MeronymLink>
    </WordSenseLink>
 
+Commentary
+----------
+Note that the WordSenseLink "bag of parts" was not endowed with a unique
+identifier of some sort. That is, it did not contain a node resembling
+the following:
+
+   <ConceptNode name="bark_6372">
+
+to label this particular word sense with the universal-unique label
+"bark_6372".  There does not appear to be any reason (at this time) to
+provide such a label.
+
 
 Sentences to meanings
 ---------------------
@@ -148,24 +160,69 @@ is to distingusih the word-instance "bark", from the most likely
 word-sense of "tree bark", from the concept "the bark of an oak tree in
 a particular yard in which there are two people".
 
+The distinction between the word instance and the concept is
+accomplished by using WordInstanceNode and ConceptNode.
 
 ------
-The current, possibly inappropriate, parse structure is:
+The current RelEx output is as follows, but this seems wrong, in light 
+of the above discussions.
 
    <InheritanceLink>
-      <ConceptNode name="bark_1234" />
+      <WordInstanceNode name="bark_1234" />
       <ConceptNode name="bark_1" />
    </InheritanceLink>
 
    <ReferenceLink>
       <WordNode name="#bark">
-      <ConceptNode = "bark_1">
+      <ConceptNode = "bark_1">  <!-- the generic tree-bark concept -->
    </ReferenceLink>
 
+One problem is the missing notion of the specific concept of the 
+bark of a particular tree.  Another problem is that the generic 
+tree-bark concept is refered to by a label "bark_1", yet, there
+is no need to refer to it directly. Next, RelEx is not in a position
+to guess whether or not a specific word-instance refers to a word sense;
+this must be defered until after a word-sense disambiguation step.
+And, of course, Relex is not in a position to guess at the specific
+concept either.  These problems are remedied by the structure below.
 
+------
+
+XXXXXXXXXXXXXXXXXXXXXXX
+Unfinished ... will do tommorrow.
+
+RelEx should generate the following:
+
+   <ReferenceLink>
+      <WordInstanceNode name="bark_1234" />
+      <WordNode name="#bark">
+   </ReferenceLink>
+
+The word-instance here is assigned a universal unique ID of "1234"
+in order that it can be used to state the properties of this word
+instance; thus:
 
    <InheritanceLink>
       <DefinedLinguisticConceptNode name="#pos#noun" />
-      <ConceptNode name="bark_1234" />
+      <WordInstanceNode name="bark_1234" />
    </InheritanceLink>
+
+However, I think that perhaps a cleaner structure would be to make a
+word instance a link, as opposed to a node. Thus, 
+
+  <WordInstanceLink>
+      <WordNode name="#bark">
+      <DefinedLinguisticConceptNode name="#pos#noun" />
+      <DefinedLinguisticConceptNode name="#count#uncountable" />
+  </WordInstanceLink>
+
+XXXX Maybe this is wrong .. 
+  
+
+
+-------------
+
+
+XXX Ignore the flow. Its what the current code generates.
+
 
