@@ -1,20 +1,20 @@
-
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
-add_library (persist STATIC
-odbcxx.cc
-AtomStorage.cc
+INCLUDE_DIRECTORIES (
+	${OPENCOG_SOURCE_DIR}/src/AtomSpace
+	${OPENCOG_SOURCE_DIR}/src/Util
+	${IODBC_INCLUDE_DIR}
 )
 
-include_directories (
-${OPENCOG_SOURCE_DIR}/src/AtomSpace
-${OPENCOG_SOURCE_DIR}/src/Util
+ADD_LIBRARY (persist STATIC
+	odbcxx.cc
+	AtomStorage.cc
 )
 
+ADD_EXECUTABLE (sniff
+	sniff.cc
+)
 
+TARGET_LINK_LIBRARIES (persist iodbc)
 
-add_executable (sniff sniff.cc)
-
-target_link_libraries (persist iodbc)
-
-target_link_libraries (sniff persist iodbc AtomSpace)
+TARGET_LINK_LIBRARIES (sniff persist iodbc AtomSpace ${IODBC_LIBRARY})

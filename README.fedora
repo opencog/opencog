@@ -1,0 +1,48 @@
+###############################################################################
+Instalation and dependency resolution for Fedora 8 users
+###############################################################################
+
+Opencog depends on the following Fedora 8 packages:
+
+   subversion gcc-c++ cmake openssl openssl-devel boost boost-devel expat
+   expat-devel 
+
+----------------------------------------------------------
+
+Additionally, it depends on the following non-official packages:
+
+   cxxtest csockets csockets-devel
+
+They may be downloaded and installed using the following commands:
+
+   wget 'http://downloads.sourceforge.net/cxxtest/cxxtest-3.10.1-1.noarch.rpm?modtime=1101936807&big_mirror=0'
+
+   wget http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/fc8/i386/RPMS.dries/csockets-devel-2.2.5-1.fc8.rf.i386.rpm
+
+   wget http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/fc8/i386/RPMS.dries/csockets-2.2.9-1.fc8.rf.i386.rpm
+
+   sudo yum --nogpgcheck localinstall cxxtest-3.10.1-1.noarch.rpm \
+   csockets-devel-2.2.5-1.fc8.rf.i386.rpm csockets-2.2.9-1.fc8.rf.i386.rpm
+
+----------------------------------------------------------
+
+Opencog also optionally depends on libiodbc, which may be downloaded and
+installed by executing:
+
+   wget http://downloads.sourceforge.net/iodbc/libiodbc-3.52.6-1.i386.rpm
+
+   wget http://downloads.sourceforge.net/iodbc/libiodbc-devel-3.52.6-1.i386.rpm
+
+   sudo yum --nogpgcheck localinstall libiodbc-3.52.6-1.i386.rpm libiodbc-devel-3.52.6-1.i386.rpm
+
+----------------------------------------------------------
+
+Finally, to checkout and compile the code, run:
+
+   svn checkout svn+ssh://extranet.vettalabs.com/vetta/svnroot/opencog/trunk <opencog-basedir>
+
+   cd <opencog-basedir>
+
+   cmake .
+
+   make

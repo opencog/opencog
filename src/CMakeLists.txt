@@ -1,8 +1,14 @@
-add_subdirectory (Util)
-add_subdirectory (NMXml)
-add_subdirectory (AtomSpace)
-add_subdirectory (query)
-add_subdirectory (persist)
-add_subdirectory (CogServer)
-add_subdirectory (dynamics)
-add_subdirectory (examples)
+FIND_PACKAGE(IODBC 3.52)
+
+ADD_SUBDIRECTORY (Util)
+ADD_SUBDIRECTORY (NMXml)
+ADD_SUBDIRECTORY (AtomSpace)
+ADD_SUBDIRECTORY (query)
+ADD_SUBDIRECTORY (dynamics)
+
+IF (IODBC_FOUND)
+	ADD_SUBDIRECTORY (persist)
+ENDIF (IODBC_FOUND)
+
+ADD_SUBDIRECTORY (CogServer)
+ADD_SUBDIRECTORY (examples)
