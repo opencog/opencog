@@ -1,0 +1,45 @@
+###############################################################################
+Instalation and dependency resolution for OpenSUSE 10.3 users
+###############################################################################
+
+Opencog depends on the following OpenSUSE 10.3 packages:
+
+   subversion gcc-c++ make cmake openssl-devel boost-devel libexpat-devel
+
+----------------------------------------------------------
+
+Additionally, it depends on the following non-official packages:
+
+   cxxtest csockets
+
+They may be downloaded and installed using the following commands:
+
+   wget http://downloads.sourceforge.net/cxxtest/cxxtest-3.10.1-1.noarch.rpm
+
+   wget http://download.opensuse.org/repositories/home:/darix/openSUSE_10.3/i586/csockets-2.2.5-1.1.i586.rpm
+
+   sudo rpm -Uhv cxxtest-3.10.1-1.noarch.rpm csockets-2.2.5-1.1.i586.rpm
+   
+
+----------------------------------------------------------
+
+Opencog also optionally depends on libiodbc, which may be downloaded and
+installed by executing:
+
+   wget http://downloads.sourceforge.net/iodbc/libiodbc-3.52.6-1.i386.rpm
+
+   wget http://downloads.sourceforge.net/iodbc/libiodbc-devel-3.52.6-1.i386.rpm
+
+   sudo rpm -Uhv libiodbc-3.52.6-1.i386.rpm libiodbc-devel-3.52.6-1.i386.rpm
+
+----------------------------------------------------------
+
+Finally, to checkout and compile the code, run:
+
+   svn checkout svn+ssh://extranet.vettalabs.com/vetta/svnroot/opencog/trunk <opencog-basedir>
+
+   cd <opencog-basedir>
+
+   cmake .
+
+   make
