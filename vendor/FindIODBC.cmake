@@ -1,8 +1,8 @@
 # - Try to find the IODBC library; Once done this will define
 #
-# IODBC_FOUND - system has the OpenSSL library
-# IODBC_INCLUDE_DIR - the OpenSSL include directory
-# IODBC_LIBRARIES - The libraries needed to use OpenSSL
+# IODBC_FOUND - system has the IODBC library
+# IODBC_INCLUDE_DIRS - the IODBC include directory
+# IODBC_LIBRARIES - The libraries needed to use IODBC
 
 # Copyright (c) 2008, OpenCog.org (http://opencog.org)
 #
@@ -31,7 +31,7 @@ ENDIF(IODBC_INCLUDE_DIR AND IODBC_LIBRARY)
 # Report the results.
 IF(NOT IODBC_FOUND)
   SET(IODBC_DIR_MESSAGE
-    "IODBC was not found. Make sure IODBC_LIBRARY and IODBC_INCLUDE_DIR are set.")
+    "IODBC was not found. Make sure IODBC_LIBRARIES and IODBC_INCLUDE_DIRS are set.")
   IF(NOT IODBC_FIND_QUIETLY)
     MESSAGE(STATUS "${IODBC_DIR_MESSAGE}")
   ELSE(NOT IODBC_FIND_QUIETLY)
