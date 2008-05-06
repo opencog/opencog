@@ -1,0 +1,23 @@
+###############################################################################
+Instalation and dependency resolution for Ubuntu 8.04 (hardy) users
+###############################################################################
+
+Opencog depends on the following packages:
+
+   subversion g++ make cmake libssl-dev libboost-dev libexpat-dev
+
+----------------------------------------------------------
+
+Additionally, it depends on the following non-official packages:
+
+   cxxtest csockets csockets-dev
+
+which are available at the 'vendor' directory.
+
+----------------------------------------------------------
+
+Opencog also _optionally_ depends on the following packages:
+
+   libiodbc2-dev.
+
+----------------------------------------------------------

@@ -2,7 +2,7 @@
 Instalation and dependency resolution for OpenSUSE 10.3 users
 ###############################################################################
 
-Opencog depends on the following OpenSUSE 10.3 packages:
+Opencog depends on the following packages:
 
    subversion gcc-c++ make cmake openssl-devel boost-devel libexpat-devel
 
@@ -33,13 +33,3 @@ installed by executing:
    sudo rpm -Uhv libiodbc-3.52.6-1.i386.rpm libiodbc-devel-3.52.6-1.i386.rpm
 
 ----------------------------------------------------------
-
-Finally, to checkout and compile the code, run:
-
-   svn checkout svn+ssh://extranet.vettalabs.com/vetta/svnroot/opencog/trunk <opencog-basedir>
-
-   cd <opencog-basedir>
-
-   cmake .
-
-   make
