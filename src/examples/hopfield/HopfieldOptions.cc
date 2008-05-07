@@ -19,6 +19,7 @@ HopfieldOptions::HopfieldOptions()
     retrieveCycles = HDEMO_DEFAULT_RETRIEVE_CYCLES;
     imprintCycles = HDEMO_DEFAULT_IMPRINT_CYCLES;
     cueErrorRate = HDEMO_DEFAULT_CUE_ERROR;
+    cueGenerateOnce = HDEMO_DEFAULT_CUE_GENERATE_ONCE;
     spreadThreshold = HDEMO_DEFAULT_SPREAD_THRESHOLD;
     importanceSpreadingMultiplier = HDEMO_DEFAULT_SPREAD_MULTIPLIER;
     recordToFile = HDEMO_DEFAULT_RECORD_TO_FILE;
@@ -69,7 +70,8 @@ void HopfieldOptions::printHelp()
 "   == Pattern commands ==\n"
 "   -p --patterns N \t Number of patterns to test.\n"
 "   -g --gen-density N \t Density of generated patterns (active/inactive nodes).\n"
-"   -e --error N \t probability of error in each bit of cue pattern.\n"
+"   -e --error N \t Probability of error in each bit of cue pattern.\n"
+"   -E --one-cue \t Only generate a cue file once for a pattern and reuse it.\n"
 "      --train-file <x> \t load patterns from file, must use -n to specify pattern size.\n"
 "      --cue-file <x> \t load patterns from file, must use -n to specify pattern size.\n";
     cout << helpOutput;
@@ -82,7 +84,7 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
     int c;
 
     while (1) {
-	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:g:c:r:mi:e:oq:a:CR?";
+	static const char *optString = "vDw:h:n:l:d:s:t:z:f:p:g:c:r:mi:e:oq:a:CR?E";
 
 	static const struct option longOptions[] = {
 	    /* These options are flags */
@@ -113,6 +115,7 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 	    {"result-file", required_argument, 0, '5'},
 	    {"show-config", 0, &showConfigFlag, 1},
 	    {"reset", 0, &resetFlag, 1},
+	    {"one-cue", 0, &cueGenerateOnce, 1},
 	    {0,0,0,0}
 	};
 
@@ -196,6 +199,9 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 		break;
 	    case 'R':
 		resetFlag = 1;
+		break;
+	    case 'E':
+		cueGenerateOnce = true;
 		break;
 	    case '?':
 		printHelp();

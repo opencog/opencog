@@ -148,7 +148,7 @@ class HopfieldServer : public opencog::CogServer {
 	 * @return vector with the hamming similarity of the retrieved pattern after
 	 * each imprint
 	 */
-	float singleImprintAndTestPattern(Pattern p, int retrieve, float mutate);
+	float singleImprintAndTestPattern(Pattern p, int retrieve, float mutate, Pattern c);
 
 	void printStatus();
 };

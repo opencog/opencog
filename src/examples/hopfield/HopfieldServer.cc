@@ -24,10 +24,20 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
 {
     std::vector<float> result;
     std::vector<int> rPattern;
+    Pattern c(width,height);
+
+    if (options->cueGenerateOnce)
+	c = p.mutatePattern(mutate);
 
     for (int i = 0; i < imprint; i++) {
 
-	result.push_back(singleImprintAndTestPattern(p,retrieve,mutate));
+	float iResult;
+	if (options->cueGenerateOnce)
+	    iResult = singleImprintAndTestPattern(p,retrieve,mutate,c);
+	else
+	    iResult = singleImprintAndTestPattern(p,retrieve,mutate,c);
+
+	result.push_back(iResult);
 	if (!options->verboseFlag) cout << "." << flush;
 	if (i < imprint - 1 && options->recordToFile) {
 	    options->beforeFile << ", ";
@@ -41,18 +51,20 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
     
 }
 
-float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve=10, float mutate=0.0f)
+float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve=10, float mutate=0.0f, Pattern c= Pattern(0,0))
 {
     float result;
     float before;
     Pattern rPattern(width,height);
-    Pattern c(width,height);
 
     imprintPattern(p,1);
     MAIN_LOGGER.log(Util::Logger::FINE,"Encoded pattern for 1 loop");
 
-    c = p.mutatePattern(mutate);
-    MAIN_LOGGER.log(Util::Logger::FINE,"Mutated pattern");
+    if (! options->cueGenerateOnce) {
+	c = p.mutatePattern(mutate);
+	MAIN_LOGGER.log(Util::Logger::FINE,"Mutated pattern");
+    }
+	
     if (options->recordToFile) {
 	before = p.hammingSimilarity(c); 
 	options->beforeFile << before;

@@ -30,11 +30,16 @@ do
     do
 	echo "Size $n - density $d"
 	logfile=log_n_${n}_d_${d}.txt
-	$h_exe -n $n -d $d -a results_n_${n}_d_${d}_ \
+	options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	    -f ${focus_threshold} -z ${viz_threshold} -e ${error} \
 	    -c ${retrieval_cycles} -s ${stimulus} -D \
-	    -g ${gen_density} -p ${npatterns} \
-	    > ${logfile}
+	    -g ${gen_density} -p ${npatterns}"
+	echo " === Command line:" > $logfile
+	echo $options >> $logfile
+	echo " === Output of -C from program:" > $logfile
+	$h_exe $options -C >> ${logfile}
+	echo " ===" >> $logfile
+	$h_exe $options >> ${logfile}
 	mv ${logfile} ${results_dir}/.
 	gzip ${results_dir}/${logfile} 
 	mv results_n_${n}_d_${d}_* ${results_dir}/.
@@ -56,13 +61,18 @@ for d in $densities
 do
     logfile=log_user_pattern_n_${n}_d_${d}.txt
     echo "Size $n - density $d"
-    $h_exe -n $n -d $d -a results_n_${n}_d_${d}_ \
+    options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	-f ${focus_threshold} -z ${viz_threshold} -e ${error} \
 	-c ${retrieval_cycles} -s ${stimulus} -D \
 	--train-file=${train_file} \
 	--result-file=${results_file} \
-	--cue-file=${cue_file} \
-	> ${logfile}
+	--cue-file=${cue_file}"
+    echo " === Command line:" > $logfile
+    echo $options >> $logfile
+    echo " === Output of -C from program:" > $logfile
+    $h_exe $options -C >> ${logfile}
+    echo " ===" >> $logfile
+    $h_exe $options >> ${logfile}
     mv ${logfile} ${results_dir}/.
     gzip ${results_dir}/${logfile} 
     mv results_n_${n}_d_${d}_* ${results_dir}/.
@@ -77,12 +87,17 @@ for d in $densities
 do
     logfile=log_user_pattern_n_${n}_d_${d}.txt
     echo "Size $n - density $d"
-    $h_exe -n $n -d $d -a results_n_${n}_d_${d}_ \
+    options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	-f ${focus_threshold} -z ${viz_threshold} -e ${error} \
 	-c ${retrieval_cycles} -s ${stimulus} -D \
 	--train-file=${train_file} \
-	--result-file=${results_file} \
-	> ${logfile}
+	--result-file=${results_file}"
+    echo " === Command line:" > $logfile
+    echo $options >> $logfile
+    echo " === Output of -C from program:" > $logfile
+    $h_exe $options -C >> ${logfile}
+    echo " ===" >> $logfile
+    $h_exe $options >> ${logfile}
     mv ${logfile} ${results_dir}/.
     gzip ${results_dir}/${logfile} 
     mv results_n_${n}_d_${d}_* ${results_dir}/.

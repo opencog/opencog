@@ -25,6 +25,7 @@
 #define HDEMO_DEFAULT_RETRIEVE_CYCLES 10
 #define HDEMO_DEFAULT_IMPRINT_CYCLES 15
 #define HDEMO_DEFAULT_CUE_ERROR 0.1
+#define HDEMO_DEFAULT_CUE_GENERATE_ONCE false
 #define HDEMO_DEFAULT_SPREAD_MULTIPLIER 10.0f
 #define HDEMO_DEFAULT_RECORD_TO_FILE false
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 5
@@ -50,6 +51,7 @@ class HopfieldOptions {
 	int retrieveCycles;
 	int imprintCycles;
 	float cueErrorRate;
+	int cueGenerateOnce;
 	float importanceSpreadingMultiplier;
 	AttentionValue::sti_t spreadThreshold;
 	int recordToFile;
