@@ -47,34 +47,38 @@ Thus, for example:
 
 The above introduces a new node type "PartOfSpeechNode", and a new link
 type: "PartOfSpeechLink".  Other possible properties might include gender,
-entity tags, and so on. This
-potentially leads to an explosion of special-purpose nodes. For
-example, there are over a dozen commmonly employed in RelEx, and
-more are occasionally added to suit particular needs.  To avoid
-this explosion, the following syntax can be used:
+entity tags, and so on. This potentially leads to an explosion of 
+special-purpose nodes. For example, there are over a dozen properties
+that RelEx uses to tag words.  To avoid this explosion, the following 
+syntax will be used:
 
-   PROPERTY_LINK <- ORDERED_LINK
-   PROPERTY_NAME_NODE <- NODE
-   PROPERTY_VALUE_NODE <- NODE
-
-   <WordSenseLink>
-      <WordNode name="bark" />
-      <PropertyLink>
-        <PropertyNameNode name="PartOfSpeech" />
-        <PropertyValueNode name="noun" />
-      </PropertyLink/>
-   </WordSenseLink>
-
-
-An alternate notation, perhaps more in line with traditional PLN,
-is
-
-   <EvaluationLink>
-     <ConceptNode name="PartOfSpeech"/>
+   <PropertyLink>
+     <ConceptNode name="bark_sense_23" />
      <ListLink>
-       <WordSenseNode name="bark_sense_23" />
+       <ConceptNode name="PartOfSpeech"/>
        <ConceptNode name="noun" />
+     </ListLink>
+   </PropertyLink>
 
+or maybe
+   <MemberLink>
+     <ListLink>
+       <ConceptNode name="PartOfSpeech"/>
+       <ConceptNode name="noun" />
+     </ListLink>
+     <ConceptNode name="bark_sense_23" />
+   </MemberLink>
+
+or maybe
+   <EvaluationLink>
+     <PredicateNode name="PartOfSpeech"/>
+     <ListLink>
+       <ConceptNode name="bark_sense_23" />
+       <ConceptNode name="noun" />
+     </ListLink>
+   </EvaluationLink>
+
+Should use a SatisfyingSetLink
 
 
 Each of these nodes and links are assigned a truth value of 1 and a
