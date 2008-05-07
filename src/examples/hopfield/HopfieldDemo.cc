@@ -17,6 +17,11 @@ int main(int argc, char *argv[])
     //std::vector<int> pattern1(patternArray, patternArray + 9);
     o->parseOptions(argc, argv);
 
+    if (o->showConfigFlag) {
+	o->printConfiguration();
+	exit(0);
+    }
+
     /* setup logging */
     MAIN_LOGGER.setPrintToStdoutFlag(true);
     if (o->verboseFlag == 1) {

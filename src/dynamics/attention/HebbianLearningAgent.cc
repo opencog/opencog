@@ -32,7 +32,8 @@ void HebbianLearningAgent::hebbianLearningUpdate()
     float tc, old_tc, new_tc;
     float tcDecayRate = 0.1;
 
-    MAIN_LOGGER.log(Util::Logger::DEBUG,"----------- Hebbian Learning update");
+    MAIN_LOGGER.log(Util::Logger::DEBUG,"------- Hebbian Learning update "
+	    "(convert links = %d)",convertLinks);
 
     // get links again to include the new ones
     links = a->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
@@ -53,32 +54,33 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 
 	if (convertLinks && a->getLTI(h) < conversionThreshold)
 	{
-	    float temp_tc;
 	    // If mind agent is set to convert hebbian links then
 	    // inverse and symmetric links will convert between one
 	    // another when conjunction between sti values is right
 	    // (initially for hopfield emulation, but could
 	    // be useful in other cases)
 	    if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK) {
-		temp_tc = (tcDecayRate * -new_tc) + ( (1.0-tcDecayRate) * old_tc);
-		if (temp_tc < 0) {
+		tc = (tcDecayRate * -new_tc) + ( (1.0-tcDecayRate) * old_tc);
+		if (tc < 0) {
 		    // Inverse link no longer representative
 		    // change to symmetric hebbian link
+		    MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
 		    a->removeAtom(h);
-		    h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-temp_tc, 1));
+		    h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
 		} else {
-		    a->setMean(h,temp_tc);
+		    a->setMean(h,tc);
 		}
 	    } else {
-		temp_tc = (tcDecayRate * new_tc) + ( (1.0-tcDecayRate) * old_tc);
-		if (temp_tc < 0) {
+		tc = (tcDecayRate * new_tc) + ( (1.0-tcDecayRate) * old_tc);
+		if (tc < 0) {
 		    // link no longer representative
 		    // change to inverse hebbian link
+		    MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
 		    a->removeAtom(h);
 		    outgoing = moveSourceToFront(outgoing);
-		    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-temp_tc, 1));
+		    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
 		} else {
-		    a->setMean(h,temp_tc);
+		    a->setMean(h,tc);
 		}
 	    }
 
@@ -170,13 +172,16 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 
     }
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"TC: normstis [%f,%f]", normsti_v[0],normsti_v[1]);
-
+    MAIN_LOGGER.log(Util::Logger::FINE,"TC: normstis [%.3f,%.3f]", normsti_v[0],normsti_v[1]);
     if (!inAttention) return 0.0f;
     
+    
     // cap conjunction to range [-1,1]
-    if (tc > 1.0f) return 1.0f;
-    if (tc < -1.0f) return -1.0f;
+    if (tc > 1.0f) tc = 1.0f;
+    if (tc < -1.0f) tc = -1.0f;
+
+    MAIN_LOGGER.log(Util::Logger::FINE,"TC: tc=%.3f", tc);
+
     return tc;
 	
 }

@@ -29,6 +29,11 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
 
 	result.push_back(singleImprintAndTestPattern(p,retrieve,mutate));
 	if (!options->verboseFlag) cout << "." << flush;
+	if (i < imprint - 1 && options->recordToFile) {
+	    options->beforeFile << ", ";
+	    options->afterFile << ", ";
+	    options->diffFile << ", ";
+	}
 
     }
 
@@ -50,14 +55,14 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve=10, fl
     MAIN_LOGGER.log(Util::Logger::FINE,"Mutated pattern");
     if (options->recordToFile) {
 	before = p.hammingSimilarity(c); 
-	options->beforeFile << before << ", ";
+	options->beforeFile << before;
     }
     
     rPattern = retrievePattern(c,retrieve);
     result = p.hammingSimilarity(rPattern);
     if (options->recordToFile) {
-	options->afterFile << result << ", ";
-	options->diffFile << (result - before) << ", ";
+	options->afterFile << result;
+	options->diffFile << (result - before);
     }
     // Nodes are left with STI after retrieval
     resetNodes();
@@ -224,35 +229,41 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 {
     static bool first=true;
 
+    MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Begin");
     // loop for number of imprinting cyles
     for (; cycles > 0; cycles--) {
         // for each encode pattern
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Encoding pattern");
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Encoding pattern");
 	encodePattern(pattern,imprintStimUnit);
 	printStatus();
 	// then update with learning
-	// TODO: move below to separate function updateWithLearning();
 	
 	// ImportanceUpdating with links
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Running Importance update");
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Running Importance update");
 	importUpdateAgent->run(this);
 	printStatus();
 	
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Adding random links");
 	addRandomLinks();
 
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Hebbian learning");
 	hebLearnAgent->run(this);
 
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Importance spreading");
 	spreadAgent->run(this);
 	
 	if (first) 
 	    first = false;
 	else
+	    MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Forgetting");
 	    forgetAgent->run(this);
 
 	printStatus();
 	
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Resetting nodes");
 	resetNodes();
     }
+    MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:End");
 
 }
 
@@ -274,25 +285,27 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles)
 {
     std::string logString;
     
-    logString += "Initialising " + to_string(numCycles) + " cycle pattern retrieval process.";
+    logString += "---Retrieve:Initialising " + to_string(numCycles) + " cycle pattern retrieval process.";
     MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
 
+    MAIN_LOGGER.log(Util::Logger::FINE,"---Retrieve:Resetting nodes");
     resetNodes();
 
     while (numCycles > 0) {
+	MAIN_LOGGER.log(Util::Logger::FINE,"---Retrieve:Encoding pattern");
 	encodePattern(partialPattern,perceptStimUnit);
 	printStatus();
 	updateAtomTableForRetrieval(5);
 	printStatus();
 
 	numCycles--;
-	MAIN_LOGGER.log(Util::Logger::INFO, "Cycles left %d",numCycles);
+	MAIN_LOGGER.log(Util::Logger::INFO, "---Retreive:Cycles left %d",numCycles);
     }
     
     logString = "Cue pattern: \n" + patternToString(partialPattern); 
     MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "Pattern retrieval process ended.");
+    MAIN_LOGGER.log(Util::Logger::INFO, "---Retrieve:End");
     
     return getGridSTIAsPattern().binarisePattern(options->vizThreshold);
 }
@@ -336,16 +349,14 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1)
     bool oldLinksFlag = importUpdateAgent->getUpdateLinksFlag();
     importUpdateAgent->setUpdateLinksFlag(false);
     
-    MAIN_LOGGER.log(Util::Logger::INFO, "===updateAtomTableForRetreival===");
-    MAIN_LOGGER.log(Util::Logger::INFO, "Running Importance updating agent");
+    MAIN_LOGGER.log(Util::Logger::INFO,"---Retreive:Running Importance updating agent");
     importUpdateAgent->run(this);
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "Spreading Importance %d times", spreadCycles);
+    MAIN_LOGGER.log(Util::Logger::INFO, "---Retreive:Spreading Importance %d times", spreadCycles);
     for (int i = 0; i< spreadCycles; i++) {
-	MAIN_LOGGER.log(Util::Logger::FINE, "Spreading Importance - cycle %d", i);
+	MAIN_LOGGER.log(Util::Logger::FINE, "---Retreive:Spreading Importance - cycle %d", i);
 	spreadAgent->run(this);
     }
-
 
     importUpdateAgent->setUpdateLinksFlag(oldLinksFlag);
 
@@ -381,9 +392,8 @@ void HopfieldServer::printStatus()
 	cout << endl;
     }
     
-    //
     // Print out links.
-    //if (options->verboseFlag > 1) {
+//  if (options->verboseFlag > 1) {
 //	links = getAtomSpace()->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
 //
 //	for (current_l = links; current_l; current_l = current_l->next) {
@@ -392,7 +402,7 @@ void HopfieldServer::printStatus()
 //	    cout << TLB::getAtom(h)->toString() << endl;
 //	    
 //	}
- //   }
+//  }
     cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" <<endl;
 }
 

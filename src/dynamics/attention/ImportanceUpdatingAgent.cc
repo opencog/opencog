@@ -97,9 +97,6 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     /* Calculate attentional focus sizes */
     updateAttentionalFocusSizes(a);
 
-    /* Check AtomSpace funds are within bounds */
-    checkAtomSpaceFunds(a);
-
     /* Random stimulation if on */
     if (noiseOn) {
 	log->log(Util::Logger::DEBUG, "Random stimulation on, stimulating atoms");
@@ -135,6 +132,9 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     a->getMaxSTI().update( maxSTISeen );
     log->log(Util::Logger::DEBUG, "Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
     
+    /* Check AtomSpace funds are within bounds */
+    checkAtomSpaceFunds(a);
+
     if (lobeSTIOutOfBounds) {
 	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");
 	updateSTIRent(a);
@@ -281,27 +281,31 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
 {
     double sum, prob, p;
     int count = 0;
+    int base;
     bool negative = false;
 
     if (mean < 0.0) {
 	negative = true;
 	mean = -mean;
     }
+    base = (int) mean;
+    mean = mean - base;
     // Calculates tax amount by sampling a Poisson distribution
     p = getRandGen()->randDoubleOneExcluded();
     prob = sum = exp(-mean);
 
-    if (sum == 0.0f) {
-	log->log(Util::Logger::WARNING, "Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
-	count = (int) mean;
-    } else {
-
-	while (p > sum) {
-	    count++;
-	    prob = (prob*mean)/count;
-	    sum += prob;
-	}
+    // No longer happens due to truncating mean above 
+    //if (sum == 0.0f) {
+//	log->log(Util::Logger::WARNING, "Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
+//	count = (int) mean;
+//    } else {
+    while (p > sum) {
+	count++;
+	prob = (prob*mean)/count;
+	sum += prob;
     }
+    //}
+    count = count + base;
 
     if (negative) count = -count;
 
@@ -321,8 +325,8 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 	if (attentionalFocusNodesSize.recent > 0)
 	    STIAtomRent = (AttentionValue::sti_t) ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
 			  / (float) attentionalFocusNodesSize.recent);
-	else
-	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
+	//else
+	//    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
 
 	focusSize = attentionalFocusNodesSize.recent;
 	    
@@ -330,8 +334,8 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 	if (attentionalFocusSize.recent > 0)
 	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
 			  / (float) attentionalFocusSize.recent);
-	else
-	    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
+	//else
+	//    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
 
 	focusSize = attentionalFocusSize.recent;
     }
@@ -349,7 +353,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     HandleEntry* h;
 
     const AtomTable& at = a->getAtomTable(); 
-    inFocus = at.getHandleSet(a->getAttentionalFocusBoundary(),AttentionValue::MAXSTI);
+    inFocus = at.getHandleSet(a->getAttentionalFocusBoundary()+5,AttentionValue::MAXSTI);
 
     attentionalFocusSize.update(inFocus->getSize());
   
@@ -378,7 +382,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
 
     current = a->getSTI(h);
     /* collect if STI > a->attentionalFocusBoundary */
-    if (current > a->getAttentionalFocusBoundary())
+    if (current > a->getAttentionalFocusBoundary()+5)
 	stiRentCharged = STIAtomRent;
     else
 	stiRentCharged = 0;

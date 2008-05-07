@@ -39,9 +39,11 @@ class HopfieldOptions {
 
     public:
 	int verboseFlag;
+	int resetFlag;
 	int interleaveFlag;
 	int interleaveAmount;
 	int showMatrixFlag;
+	int showConfigFlag;
 	int totalFlag;
 	int nPatterns;
 	float genPatternDensity;
@@ -58,6 +60,7 @@ class HopfieldOptions {
 
 	void parseOptions(int argc, char *argv[]);
 	void printHelp();
+	void printConfiguration();
 	void setServer(HopfieldServer* s) {hServer=s;};
 
 	void openOutputFiles();
