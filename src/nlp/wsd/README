@@ -10,69 +10,87 @@ onto opencog structures. It also describes how words in a parsed
 sentence are associated with different word senses.
 
 
-Word senese or word concepts
+Word senses or word concepts
 ----------------------------
 Associated with every word is a list of possible senses.
 Consider the word "bark", thus:
 
     <WordNode name="bark" />   -- a word.
 
-A "word sense" is a bag of information about a single semantic
+A "word sense" is a collection of information about a single semantic
 sense of a word. This bag includes information about the part-of-speech
 (noun, verb, etc.), example usages, pointers to synonym sets (synsets),
-hyponyms, hypernyms, etc. Thus, a "word sense" is an unordered link.
+hyponyms, hypernyms, etc. A specific "word sense" will be tagged with a
+unique identifier, which is then used to reference that sense.
 
 In the opencog type heirarchy, (type.script)
-   WORD_SENSE_LINK <- SET_LINK
+   WORD_SENSE_LINK <- ASSOCIATIVE_LINK
 
-A WordSenseLink will, of course, include the word itself:
+A WordSenseLink couples the tag that will stand for the word sense,
+to the word itself:
 
    <WordSenseLink>
       <WordNode name="bark" />
+      <ConceptNode name="bark_sense_23" />
    </WordSenseLink>
+
+The tag value "bark_sense_23" has no particular meaning in itself,
+it is just some unique string used to identify the sense.
 
 Word senses can be crudely categorized according to part-of-speech.
-Thus:
-   PART_OF_SPEECH_NODE <- NODE
+Thus, for example:
 
-and
+   <PartOfSpeechLink>
+      <ConceptNode name="bark_sense_23" />
+      <PartOfSpeechNode name="noun" />
+   </PartOfSpeechLink>
+
+The above introduces a new node type "PartOfSpeechNode", and a new link
+type: "PartOfSpeechLink".  Other possible properties might include gender,
+entity tags, and so on. This
+potentially leads to an explosion of special-purpose nodes. For
+example, there are over a dozen commmonly employed in RelEx, and
+more are occasionally added to suit particular needs.  To avoid
+this explosion, the following syntax can be used:
+
+   PROPERTY_LINK <- ORDERED_LINK
+   PROPERTY_NAME_NODE <- NODE
+   PROPERTY_VALUE_NODE <- NODE
 
    <WordSenseLink>
       <WordNode name="bark" />
-      <PartOfSpeechNode name="noun" />
+      <PropertyLink>
+        <PropertyNameNode name="PartOfSpeech" />
+        <PropertyValueNode name="noun" />
+      </PropertyLink/>
    </WordSenseLink>
 
-[[ Actually, it is probably better to represent word attributes as
-follows -- by example -- 
-   <DefinedLinguisticConceptNode name="#pos#noun" />
-   <DefinedLinguisticConceptNode name="#pos#verb" />
-   <DefinedLinguisticConceptNode name="#tense#past" />
-   <DefinedLinguisticConceptNode name="#number#singular" />
-   <DefinedLinguisticConceptNode name="#number#uncountable" />
-   <DefinedLinguisticConceptNode name="#entity#person" />
-   <DefinedLinguisticConceptNode name="#entity#place" />
 
-and so on. The goal here is to avoid having to maintain a large stable
-of types for word attributes. Of course, other representations are
-possible; the above seems to be simple and straight-forward, and should
-do until such time that some more complex structure is needed. 
+An alternate notation, perhaps more in line with traditional PLN,
+is
 
-Note, however, that not all of the above will appear in a word sense:
-thus, while we may want to mark a word-sense with a part-of-speech,
-we don't want to mark up tense ... at least not right now, not in this
-narrow view.  ]]
+   <EvaluationLink>
+     <ConceptNode name="PartOfSpeech"/>
+     <ListLink>
+       <WordSenseNode name="bark_sense_23" />
+       <ConceptNode name="noun" />
+
+
 
 Each of these nodes and links are assigned a truth value of 1 and a
 confidence of 1. Non-unit truthvalues & confidence will be used when 
 relating word senses to the use of actual words in sentences. Here, 
-however, the goal is to state "this word might have this meaning, no 
-matter how rarely used this meaing might be."
+however, the goal is to state "this word does have this as one possible
+meaning, no matter how rarely used this meaing might be."
 
-Word senses are commonly established by giving sister terms (loose 
-synonyms), as well as hypernyms, hyponyms, part holonyms, etc. A 
-synonym/hypernym/hyponym/etc. are thus links. Since some sister
-terms are closer than others, these links will have non-unit truth
-values. Thus:
+In wordnet, word senses are commonly established by giving "sister
+terms" (a wordnet concept, equivalent to "synonyms for word senses")
+as well as hypernyms, hyponyms, part holonyms, etc. A sister term,
+hypernym, hyponym, etc. are thus links. Since some sister terms are 
+closer than others, these links will have non-unit truth values. 
+
+Hypernyms and hyponyms will be mapped to inheritence links.
+Thus:
 
    HYPERNYM_LINK <- CONCEPT_LINK
    HYPONYM_LINK <- CONCEPT_LINK
@@ -100,12 +118,13 @@ hypo/hyper links in a word sense.
 There is a potential confusion as to the idea of a "synonym", as 
 some synonyms are better than others. In an attempt to avoid this
 confusion, and stay close to the wordnet idea of a "sister term", 
-these will be called Sisnym's. The idea of a synonym will be reserved
-for relations between words, rather than relations between concepts.
+these will be called Sibnym's (sibling nyms). The idea of a synonym 
+will be reserved for relations between words, rather than relations 
+between concepts.
 
 Thus:
 
-   SISNYM_LINK <- CONCEPT_LINK
+   SIBNYM_LINK <- CONCEPT_LINK
  
 Wordnet uses the idea of "part holonyms", which is mirrored here.
 Thus:
@@ -198,17 +217,17 @@ RelEx should generate the following:
       <WordNode name="#bark">
    </ReferenceLink>
 
-The word-instance here is assigned a universal unique ID of "1234"
-in order that it can be used to state the properties of this word
-instance; thus:
+The word-instance is tagged with a universal unique ID of "1234" for 
+record-keeping purposes; it captures the notion that this is a specific
+word in a specific sentence.  Word properties are given as:
 
    <InheritanceLink>
       <DefinedLinguisticConceptNode name="#pos#noun" />
       <WordInstanceNode name="bark_1234" />
    </InheritanceLink>
 
-However, I think that perhaps a cleaner structure would be to make a
-word instance a link, as opposed to a node. Thus, 
+An alternative representation would be to use a word instance link, as 
+opposed to a node. Thus, 
 
   <WordInstanceLink>
       <WordNode name="#bark">
