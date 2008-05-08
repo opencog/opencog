@@ -118,12 +118,11 @@ Note the reversed order between the hypo- and hyper- representations.
 
 Wordnet uses the phrase "sister term" instead of "synonym" to relate 
 similar word senses. Wordnet reserves the use of "synonym" for relating
-words, not word senses.
+words, not word senses. Related word senses will be linked with
+SimilarityLinks
 
+   SIMILARITY_LINK <- UNORDERED_LINK
 
-
-XXXXXXX FINISH THIS. XXXXXXXXXX
- 
 Wordnet includes the idea of "part holonyms", that something is a part
 of something else, and its converse, the meronym, that something is
 composed of parts.  
@@ -148,26 +147,40 @@ To continue with the tree-bark example:
       <WordSenseNode name="bark_sense_23" />
    </PartOfLink>
 
+Finally, wordnet has the concpt of "instance-of" relations.  These
+will use InstanceLinks:
+
+   INSTANCE_LINK <- ORDERED_LINK
+
 
 Sentences to meanings
 ---------------------
 Consider two sentences: "The loud bark woke me up." or "The rough bark
 cut my finger." The goal of word-sense disambiguation is two-fold:
-associate to all possible meanings of the word bark, and then, pick the
-most likely meaning.
+associate to all possible meanings of the word "bark", and then, rank
+the possible meanings from most likely to least.
 
-There are three things to distinguish: the word instance, as it occurs
-in the sentence, the word sense, as described above, and the concept 
-the word represents. The "word concept" is distinguished from the "word
-sense", as being the concept within context of the sentence/text in 
-which it appears. Thus, "We stood in the yard.  As she walked up to me,
-I laid my hand on the old oak.  Its rough bark cut my finger."  The goal
-is to distingusih the word-instance "bark", from the most likely
-word-sense of "tree bark", from the concept "the bark of an oak tree in
-a particular yard in which there are two people".
+There are four things to distinguish: the first two are the word
+instance, as it occurs in the sentence, and the word sense, as 
+described above. Third is the "word concept", the linkage of a word
+sense to a word instance.  The "word concept" is distinguished from the
+"word sense", as being a particular word sense within context of the 
+sentence in which it appears. Finally, there is a "text concept", which
+is loosely a specific word sense, as it appears in a text of multiple
+sentences.  It is an aglomeration of the word concepts in different 
+sentences.
 
-The distinction between the word instance and the concept is
-accomplished by using WordInstanceNode and ConceptNode.
+Thus, consider the example text: "We stood in the yard.  As she walked
+up to me, I laid my hand on the old oak.  Its rough bark cut my finger."
+This sentence contains the word-instance "bark". From WordNet, we know
+that there are many word-senses for "bark". The word-concept would be 
+a linakge from the word-instance "bark" to the sense of "tree bark";
+the goal of word-sense disambiguation is to give this particular 
+word-concept a high probability and a high confidence.  Lastly, there
+is the text concept. In this case, the text concept can be deduced to
+be "the bark of an oak tree in a particular yard in which there are two
+people".
+
 
 ------
 The current RelEx output is as follows, but this seems wrong, in light 
