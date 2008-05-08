@@ -160,26 +160,64 @@ cut my finger." The goal of word-sense disambiguation is two-fold:
 associate to all possible meanings of the word "bark", and then, rank
 the possible meanings from most likely to least.
 
-There are four things to distinguish: the first two are the word
-instance, as it occurs in the sentence, and the word sense, as 
-described above. Third is the "word concept", the linkage of a word
-sense to a word instance.  The "word concept" is distinguished from the
-"word sense", as being a particular word sense within context of the 
-sentence in which it appears. Finally, there is a "text concept", which
-is loosely a specific word sense, as it appears in a text of multiple
-sentences.  It is an aglomeration of the word concepts in different 
-sentences.
+There are six related ideas of a word, and its sense, that need to 
+be distinguished. These are:
 
-Thus, consider the example text: "We stood in the yard.  As she walked
-up to me, I laid my hand on the old oak.  Its rough bark cut my finger."
-This sentence contains the word-instance "bark". From WordNet, we know
-that there are many word-senses for "bark". The word-concept would be 
-a linakge from the word-instance "bark" to the sense of "tree bark";
+1) The "word instance", as it occurs in the sentence. Word instances
+   may be mis-spelled, and thus it may be ambiguous as to which 
+   actual dictionary word was intended.
+
+2) The "dictionary word", the word as it would be in the standard
+   lexicon of a language: a word in its proper spelling, and with
+   morphological inflections stripped away: the root form of the word.
+
+3) The "word sense", a particular sense of a word, as it might appear
+   in a dictionary, or in wordnet. For example, "bark" in the sense of
+   "tree bark". A word-sense exists independently of a particular
+   sentence or text.
+
+4) The "word parse", a linkage of a word-instance to a particular
+   sentence parse. In the course of parsing, syntatactical information
+   is assigned to the word-parse: the word parse is identified by a
+   a part-of-speech, a tense, a number, as a subject or object. The
+   assignement of these properties may vary from parse to parse.
+   For any one given sentence, there may be as many different
+   word-parses as there are sentence parses. Typically, most sentence
+   parses will assign the same word properties to each word-parse;
+   these can then be collapsed into one, with the realization that the
+   identification of the word-parse is unambiguous across all of the
+   different parses.
+
+5) The "word concept", the linkage of a word sense to a word parse.
+   The "word concept" is distinguished from the "word sense", as being 
+   a particular word sense within context of the sentence in which it 
+   appears. Word-concepts may be uncertain or ambiguous: the meaning of
+   any particular word-instance, as it appears in a sentence, may not be
+   entirely clear. Initially, a link is created between a word-parse and
+   every possible appropriate word-sense (based on the part-of-speech
+   assignment, etc.). Each link is assigned equal weight. The goal of 
+   word-sense disambiguation is to (strongly) prefer one particular
+   word-concept over another.
+
+6) Finally, there is a "text-sense", which is the disembodied concept
+   that a word instance is refering to, across the entire text. For
+   example, in the text "Mary looked at the glass. She picked it up."
+   the word-instances "she" and "Mary" both refer to the same
+   text-sense, even though they are represented by completely different
+   surface words.
+
+Consider the example text: "We stood in the yard.  As she walked up to
+me, I laid my hand on the old oak.  Its rough bark cut my finger."
+This sentence contains the word-instance "bark". The word-parse of
+"bark" is unambiguous: it is a noun.  From WordNet, we know that 
+"bark-the-noun" has several different word-senses: it may be tree-bark,
+or it may be a type of watercraft.  The word-concept would be 
+a linakge from the word-parse "bark-the-noun" to the sense of "tree-bark";
 the goal of word-sense disambiguation is to give this particular 
-word-concept a high probability and a high confidence.  Lastly, there
-is the text concept. In this case, the text concept can be deduced to
-be "the bark of an oak tree in a particular yard in which there are two
-people".
+word-concept a high probability and a high confidence, as compared to
+"bark-the-watercraft".  Lastly, there is the text-sense. In this text, 
+the text-concept for "bark" can be deduced to be "the bark of an oak
+tree in a particular yard in which there are two people".
 
 ------
 The current RelEx output is as follows, but this seems somehow
@@ -202,19 +240,30 @@ not quite right, in light of the above discussions.
 It seems that RelEx should generate the following:
 
    <!-- link a word-instance to a word -->
-   <ReferenceLink>
+   <ReferenceLink strength=1 confidence=1 >
       <WordInstanceNode name="bark_1234" />
       <WordNode name="#bark">
    </ReferenceLink>
 
 The word-instance is tagged with a universal unique ID of "1234" for 
 record-keeping purposes; it captures the notion that this is a specific
-word in a specific sentence.  Relex word properties would be given as:
+word in a specific sentence.  The strength and confidence are ranked
+very high, to indicate that there is little or no question that the 
+word in the sentence was "bark". This may not be the case if a word
+is mis-spelled in the original sentence, and the mis-spelled word has
+several possible spelling-interpretations.
 
-   <InheritanceLink>
+Relex word properties would be given as:
+
+   <InheritanceLink strength=0.9 confidence=0.8>
       <WordInstanceNode name="bark_1234" />
       <DefinedLinguisticConceptNode name="#pos#noun" />
    </InheritanceLink>
+
+These are given a lower truth value and confidence, to indicate that the
+interprestation of a part-of-speech may depend on how the sentence was
+parsed; the strength and confidence values are keyed of of the
+parse-ranking of a sentence. XXX how to show parse-dep ??
 
 At a later stage, the word-sense disambiguation code would generate
 the extra nodes needed to encode the text concept, etc.  Thus:
@@ -225,5 +274,6 @@ the extra nodes needed to encode the text concept, etc.  Thus:
    </InheritanceLink>
 
 
+anaphora.
 
 
