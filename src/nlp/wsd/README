@@ -181,37 +181,27 @@ is the text concept. In this case, the text concept can be deduced to
 be "the bark of an oak tree in a particular yard in which there are two
 people".
 
-
 ------
-The current RelEx output is as follows, but this seems wrong, in light 
-of the above discussions.
+The current RelEx output is as follows, but this seems somehow
+not quite right, in light of the above discussions.
 
+   <!-- link the word-instance to the "text concept" bark_1 -->
    <InheritanceLink>
       <WordInstanceNode name="bark_1234" />
       <ConceptNode name="bark_1" />
    </InheritanceLink>
 
+   <!-- link the "text concept" bark_1 to the word node -->
    <ReferenceLink>
       <WordNode name="#bark">
-      <ConceptNode = "bark_1">  <!-- the generic tree-bark concept -->
+      <ConceptNode = "bark_1">
    </ReferenceLink>
-
-One problem is the missing notion of the specific concept of the 
-bark of a particular tree.  Another problem is that the generic 
-tree-bark concept is refered to by a label "bark_1", yet, there
-is no need to refer to it directly. Next, RelEx is not in a position
-to guess whether or not a specific word-instance refers to a word sense;
-this must be defered until after a word-sense disambiguation step.
-And, of course, Relex is not in a position to guess at the specific
-concept either.  These problems are remedied by the structure below.
 
 ------
 
-XXXXXXXXXXXXXXXXXXXXXXX
-Unfinished ... will do tommorrow.
+It seems that RelEx should generate the following:
 
-RelEx should generate the following:
-
+   <!-- link a word-instance to a word -->
    <ReferenceLink>
       <WordInstanceNode name="bark_1234" />
       <WordNode name="#bark">
@@ -219,29 +209,21 @@ RelEx should generate the following:
 
 The word-instance is tagged with a universal unique ID of "1234" for 
 record-keeping purposes; it captures the notion that this is a specific
-word in a specific sentence.  Word properties are given as:
+word in a specific sentence.  Relex word properties would be given as:
 
    <InheritanceLink>
-      <DefinedLinguisticConceptNode name="#pos#noun" />
       <WordInstanceNode name="bark_1234" />
+      <DefinedLinguisticConceptNode name="#pos#noun" />
    </InheritanceLink>
 
-An alternative representation would be to use a word instance link, as 
-opposed to a node. Thus, 
+At a later stage, the word-sense disambiguation code would generate
+the extra nodes needed to encode the text concept, etc.  Thus:
 
-  <WordInstanceLink>
-      <WordNode name="#bark">
-      <DefinedLinguisticConceptNode name="#pos#noun" />
-      <DefinedLinguisticConceptNode name="#count#uncountable" />
-  </WordInstanceLink>
-
-XXXX Maybe this is wrong .. 
-  
+   <InheritanceLink>
+      <WordInstanceNode name="bark_1234" />
+      <ConceptNode = "bark_sense_23">
+   </InheritanceLink>
 
 
--------------
-
-
-XXX Ignore the flow. Its what the current code generates.
 
 
