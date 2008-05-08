@@ -10,8 +10,8 @@ onto opencog structures. It also describes how words in a parsed
 sentence are associated with different word senses.
 
 
-Word senses or word concepts
-----------------------------
+Word senses
+-----------
 Associated with every word is a list of possible senses.
 Consider the word "bark", thus:
 
@@ -171,13 +171,15 @@ be distinguished. These are:
    lexicon of a language: a word in its proper spelling, and with
    morphological inflections stripped away: the root form of the word.
 
+   Dictionary-words are represented by WordNode.
+
 3) The "word sense", a particular sense of a word, as it might appear
    in a dictionary, or in wordnet. For example, "bark" in the sense of
    "tree bark". A word-sense exists independently of a particular
    sentence or text.
 
 4) The "word parse", a linkage of a word-instance to a particular
-   sentence parse. In the course of parsing, syntatactical information
+   sentence parse. In the course of parsing, syntactical information
    is assigned to the word-parse: the word parse is identified by a
    a part-of-speech, a tense, a number, as a subject or object. The
    assignement of these properties may vary from parse to parse.
@@ -187,6 +189,16 @@ be distinguished. These are:
    these can then be collapsed into one, with the realization that the
    identification of the word-parse is unambiguous across all of the
    different parses.
+
+   Note that a word-parse is also an assignment of a word-instance to
+   a dictionary-word. Although very rare, there are words which the
+   English language which can plausibly be one of two different roots, 
+   and that different sentence parses might assign different roots.
+   This can occur more frequently if a word was mis-spelled: for 
+   instance, using "there" instead of "thier". An incorrect parse
+   would link the mis-spelled word-instance to the spelled-the-same
+   but-wrong dictionary-word; the correct parse would link the 
+   word-instance to its correct spelling.
 
 5) The "word concept", the linkage of a word sense to a word parse.
    The "word concept" is distinguished from the "word sense", as being 
@@ -223,19 +235,21 @@ tree in a particular yard in which there are two people".
 The current RelEx output is as follows, but this seems somehow
 not quite right, in light of the above discussions.
 
-   <!-- link the word-instance to the "text concept" bark_1 -->
+   <!-- link the word-instance to the "text-sense" bark_1 -->
    <InheritanceLink>
       <WordInstanceNode name="bark_1234" />
       <ConceptNode name="bark_1" />
    </InheritanceLink>
 
-   <!-- link the "text concept" bark_1 to the word node -->
+   <!-- link the "text-sense" bark_1 to the word node -->
    <ReferenceLink>
       <WordNode name="#bark">
       <ConceptNode = "bark_1">
    </ReferenceLink>
 
 ------
+
+XXX The below is wrong and is still being drafted.
 
 It seems that RelEx should generate the following:
 
