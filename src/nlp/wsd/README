@@ -52,24 +52,6 @@ special-purpose nodes. For example, there are over a dozen properties
 that RelEx uses to tag words.  To avoid this explosion, the following 
 syntax will be used:
 
-   <PropertyLink>
-     <ConceptNode name="bark_sense_23" />
-     <ListLink>
-       <ConceptNode name="PartOfSpeech"/>
-       <ConceptNode name="noun" />
-     </ListLink>
-   </PropertyLink>
-
-or maybe
-   <MemberLink>
-     <ListLink>
-       <ConceptNode name="PartOfSpeech"/>
-       <ConceptNode name="noun" />
-     </ListLink>
-     <ConceptNode name="bark_sense_23" />
-   </MemberLink>
-
-or maybe
    <EvaluationLink>
      <PredicateNode name="PartOfSpeech"/>
      <ListLink>
@@ -78,8 +60,31 @@ or maybe
      </ListLink>
    </EvaluationLink>
 
-Should use a SatisfyingSetLink
+[[The above specifies a triple that is to be associated together.
+Another possible way of denoting a triple might have been:
 
+   <PropertyLink>
+     <ConceptNode name="bark_sense_23" />
+     <ListLink>
+       <ConceptNode name="PartOfSpeech"/>
+       <ConceptNode name="noun" />
+     </ListLink>
+   </PropertyLink>
+
+but this would require the invention of a new link type, "PropertyLink",
+which other parts of the system are unaware of. Alternately, 
+
+   <MemberLink>
+     <ListLink>
+       <ConceptNode name="PartOfSpeech"/>
+       <ConceptNode name="noun" />
+     </ListLink>
+     <ConceptNode name="bark_sense_23" />
+   </MemberLink>
+
+could be useful, but this would loose the benefit of the predicate form.
+A predicate could still be created later, by making use of a link from
+the predicate name to a SatisfyingSetLink. ]]
 
 Each of these nodes and links are assigned a truth value of 1 and a
 confidence of 1. Non-unit truthvalues & confidence will be used when 
@@ -94,76 +99,54 @@ hypernym, hyponym, etc. are thus links. Since some sister terms are
 closer than others, these links will have non-unit truth values. 
 
 Hypernyms and hyponyms will be mapped to inheritence links.
-Thus:
+A hypernym for the wood-bark is that it is a covering of something:
 
-   HYPERNYM_LINK <- CONCEPT_LINK
-   HYPONYM_LINK <- CONCEPT_LINK
+   <InheritanceLink strength=0.8 confidence=0.9 />
+      <WordSenseNode name="bark_sense_23" />
+      <WordSenceNode name="covering_sense_42" />
+   </InheritanceLink>
 
-   <WordSenseLink>
-      <WordNode name="bark" />
-      <PartOfSpeechNode name="noun" />
-      <HypernymLink strength=0.8 confidence=0.9 />
-         <WordSenseLink>
-            <WordNode name="covering" />
-         </WordSenseLink>
-      </HypernymLink>
-      <HyponymLink strength=0.8 confidence=0.9 />
-         <WordSenseLink>
-            <WordNode name="cork" />
-         </WordSenseLink>
-      </HyponymLink>
-   </WordSenseLink>
+A hyponym for wood-bark is that cork is a kind of bark:
 
-The above indicates that "bark" is a kind of "covering", and that 
-"cork" is a kind of bark. Note that the hyper/hypo links link not
-to word nodes, but to other word-sense links.  There may be many 
-hypo/hyper links in a word sense.
+   <InheritanceLink strength=0.8 confidence=0.9 />
+      <WordSenceNode name="cork_sense_98" />
+      <WordSenseNode name="bark_sense_23" />
+   </InheritanceLink>
 
-There is a potential confusion as to the idea of a "synonym", as 
-some synonyms are better than others. In an attempt to avoid this
-confusion, and stay close to the wordnet idea of a "sister term", 
-these will be called Sibnym's (sibling nyms). The idea of a synonym 
-will be reserved for relations between words, rather than relations 
-between concepts.
+Note the reversed order between the hypo- and hyper- representations.
 
-Thus:
 
-   SIBNYM_LINK <- CONCEPT_LINK
+Wordnet uses the phrase "sister term" instead of "synonym" to relate 
+similar word senses. Wordnet reserves the use of "synonym" for relating
+words, not word senses.
+
+
+
+XXXXXXX FINISH THIS. XXXXXXXXXX
  
-Wordnet uses the idea of "part holonyms", which is mirrored here.
-Thus:
+Wordnet includes the idea of "part holonyms", that something is a part
+of something else, and its converse, the meronym, that something is
+composed of parts.  
 
-   HOLONYM_LINK <- CONCEPT_LINK
-   MERONYM_LINK <- CONCEPT_LINK
+   PART_OF_LINK <- INHERITANCE_LINK
+
+[[Making the part-of link derive from inheritance link seems dangerous,
+since wordnet does distinguish is-a and kind-of relations, whereas the
+above mapping erases it. This may need to be fixed. ]]
 
 To continue with the tree-bark example:
 
-   <WordSenseLink>
-      <WordNode name="bark" />
-      <PartOfSpeechNode name="noun" />
-      <HolonymLink strength=0.8 confidence=0.9>
-         <WordSenseLink>
-            <WordNode name="branch" />  <!-- bark is a part of a branch -->
-         </WordSenseLink>
-      </HolonymLink>
-      <MeronymLink strength=0.8 confidence=0.9>
-         <WordSenseLink>
-            <WordNode name="lignin" />  <!-- bark is composed of lignin -->
-         </WordSenseLink>
-      </MeronymLink>
-   </WordSenseLink>
+   <!-- bark is a part of a branch -->
+   <PartOfLink strength=0.8 confidence=0.9>
+      <WordSenseNode name="bark_sense_23" />
+      <WordSenseNode name="branch_sense_2" />
+   </PartOfLink>
 
-Commentary
-----------
-Note that the WordSenseLink "bag of parts" was not endowed with a unique
-identifier of some sort. That is, it did not contain a node resembling
-the following:
-
-   <ConceptNode name="bark_6372">
-
-to label this particular word sense with the universal-unique label
-"bark_6372".  There does not appear to be any reason (at this time) to
-provide such a label.
+   <!-- bark is composed of lignin -->
+   <PartOfLink strength=0.8 confidence=0.9>
+      <WordSenseNode name="lignin_sense_1" />
+      <WordSenseNode name="bark_sense_23" />
+   </PartOfLink>
 
 
 Sentences to meanings
