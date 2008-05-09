@@ -60,8 +60,13 @@ syntax will be used:
      </ListLink>
    </EvaluationLink>
 
-[[The above specifies a triple that is to be associated together.
-Another possible way of denoting a triple might have been:
+[[Square brackets set off design discussions; below follows some
+commentary about alternate ways in which the above might have been
+acheived.
+
+The above specifies a triple that is to be associated together, the
+triple ("bark_sense_23", PartOfSpeech, "noun").  Another possible way
+of denoting a triple might have been:
 
    <PropertyLink>
      <ConceptNode name="bark_sense_23" />
@@ -91,6 +96,10 @@ confidence of 1. Non-unit truth-values & confidence will be used when
 relating word senses to the use of actual words in sentences. Here, 
 however, the goal is to state "this word does have this as one possible
 meaning, no matter how rarely used this meaning might be."
+
+[[Some word senses are more common than others. For example, archaic
+word senses tend to be rarely encountered ... except when one is 
+reading an archaic text. This is addressed in a section below.]]
 
 In WordNet, word senses are commonly established by giving "sister
 terms" (a WordNet concept, equivalent to "synonyms for word senses")
@@ -280,6 +289,56 @@ E) Use "common-sense reasoning" to refine probabilities for text-senses.
    in an effort to find convergence.
 
 
+Word-parse meaning
+------------------
+Word-parses assign syntactic meaning to a word, within the context of a
+parse. Thus, for example, the goal is to express "in parse 2, the word
+'bark' has part-of-speech 'noun'"
+
+This suggests the structure below:
+   <ConceptNode name="parse_1" strength=0.9 confidence=0.6/>
+   <ConceptNode name="parse_2" strength=0.8 confidence=0.5/>
+   <ConceptNode name="parse_3" strength=0.6 confidence=0.3/>
+
+   <!-- in parse 2, the word "bark" is associated with bark_144 -->
+   <InheritanceLink>
+      <WordInstanceNode name="bark_word_instance_4" />
+      <ConceptNode name="bark_144" />
+   </InheritanceLink>
+
+   <!-- in parse 3, the word "bark" is associated with bark_169 -->
+   <InheritanceLink>
+      <WordInstanceNode name="bark_word_instance_4" />
+      <ConceptNode name="bark_169" />
+   </InheritanceLink>
+
+   <!-- Identify bark_144 as being parse instance 2 -->
+   <EvaluationLink>
+     <PredicateNode name="ParseInstance"/>
+     <ListLink>
+       <ConceptNode name="bark_144" />
+       <ConceptNode name="parse_2" t/>
+     </ListLink>
+   </EvaluationLink>
+
+   <!-- In parse 2, which has bark_144, it is a noun -->
+   <EvaluationLink>
+     <PredicateNode name="PartOfSpeech"/>
+     <ListLink>
+       <ConceptNode name="bark_144" />
+       <ConceptNode name="noun" />
+     </ListLink>
+   </EvaluationLink>
+
+   <!-- In parse 3, which has bark_169, it is a verb -->
+   <EvaluationLink>
+     <PredicateNode name="PartOfSpeech"/>
+     <ListLink>
+       <ConceptNode name="bark_169" />
+       <ConceptNode name="noun" />
+     </ListLink>
+   </EvaluationLink>
+
 ------
 The current RelEx output is as follows, but this seems somehow
 not quite right, in light of the above discussions.
@@ -342,5 +401,17 @@ anaphora.
 
 
 ContextLink ... should each parse have its own context link ??
+
+Word-sense frequency counts
+---------------------------
+Some word senses are more common than others. For example, archaic word 
+senses tend to be rarely encountered ... except when one is reading an 
+archaic text. Similarly, scientific and technical texts tend to employ 
+certain common word with certain very uncommon meanings. Cool, hip,
+edgy writing will also use words in uncomon senses, or in unusual
+constructions.
+
+XXX ToBeResolved: How to employ context-sensitive word-frequency counts
+is unclear.
 
 
