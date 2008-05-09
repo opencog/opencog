@@ -5,8 +5,8 @@
                       Linas Vepstas April 2008
 
 
-This document contains working notes for the mapping of wordnet ideas
-onto opencog structures. It also describes how words in a parsed
+This document contains working notes for the mapping of WordNet ideas
+onto OpenCog structures. It also describes how words in a parsed
 sentence are associated with different word senses.
 
 
@@ -23,7 +23,7 @@ sense of a word. This bag includes information about the part-of-speech
 hyponyms, hypernyms, etc. A specific "word sense" will be tagged with a
 unique identifier, which is then used to reference that sense.
 
-In the opencog type heirarchy, (type.script)
+In the OpenCog type hierarchy, (type.script)
    WORD_SENSE_LINK <- ASSOCIATIVE_LINK
 
 A WordSenseLink couples the tag that will stand for the word sense,
@@ -87,50 +87,50 @@ A predicate could still be created later, by making use of a link from
 the predicate name to a SatisfyingSetLink. ]]
 
 Each of these nodes and links are assigned a truth value of 1 and a
-confidence of 1. Non-unit truthvalues & confidence will be used when 
+confidence of 1. Non-unit truth-values & confidence will be used when 
 relating word senses to the use of actual words in sentences. Here, 
 however, the goal is to state "this word does have this as one possible
-meaning, no matter how rarely used this meaing might be."
+meaning, no matter how rarely used this meaning might be."
 
-In wordnet, word senses are commonly established by giving "sister
-terms" (a wordnet concept, equivalent to "synonyms for word senses")
+In WordNet, word senses are commonly established by giving "sister
+terms" (a WordNet concept, equivalent to "synonyms for word senses")
 as well as hypernyms, hyponyms, part holonyms, etc. A sister term,
 hypernym, hyponym, etc. are thus links. Since some sister terms are 
 closer than others, these links will have non-unit truth values. 
 
-Hypernyms and hyponyms will be mapped to inheritence links.
+Hypernyms and hyponyms will be mapped to inheritance links.
 A hypernym for the wood-bark is that it is a covering of something:
 
    <InheritanceLink strength=0.8 confidence=0.9 />
       <WordSenseNode name="bark_sense_23" />
-      <WordSenceNode name="covering_sense_42" />
+      <WordSenseNode name="covering_sense_42" />
    </InheritanceLink>
 
 A hyponym for wood-bark is that cork is a kind of bark:
 
    <InheritanceLink strength=0.8 confidence=0.9 />
-      <WordSenceNode name="cork_sense_98" />
+      <WordSenseNode name="cork_sense_98" />
       <WordSenseNode name="bark_sense_23" />
    </InheritanceLink>
 
 Note the reversed order between the hypo- and hyper- representations.
 
 
-Wordnet uses the phrase "sister term" instead of "synonym" to relate 
-similar word senses. Wordnet reserves the use of "synonym" for relating
+WordNet uses the phrase "sister term" instead of "synonym" to relate 
+similar word senses. WordNet reserves the use of "synonym" for relating
 words, not word senses. Related word senses will be linked with
 SimilarityLinks
 
    SIMILARITY_LINK <- UNORDERED_LINK
 
-Wordnet includes the idea of "part holonyms", that something is a part
+WordNet includes the idea of "part holonyms", that something is a part
 of something else, and its converse, the meronym, that something is
 composed of parts.  
 
    PART_OF_LINK <- INHERITANCE_LINK
 
 [[Making the part-of link derive from inheritance link seems dangerous,
-since wordnet does distinguish is-a and kind-of relations, whereas the
+since WordNet does distinguish is-a and kind-of relations, whereas the
 above mapping erases it. This may need to be fixed. ]]
 
 To continue with the tree-bark example:
@@ -147,7 +147,7 @@ To continue with the tree-bark example:
       <WordSenseNode name="bark_sense_23" />
    </PartOfLink>
 
-Finally, wordnet has the concpt of "instance-of" relations.  These
+Finally, WordNet has the concept of "instance-of" relations.  These
 will use InstanceLinks:
 
    INSTANCE_LINK <- ORDERED_LINK
@@ -174,7 +174,7 @@ be distinguished. These are:
    Dictionary-words are represented by WordNode.
 
 3) The "word sense", a particular sense of a word, as it might appear
-   in a dictionary, or in wordnet. For example, "bark" in the sense of
+   in a dictionary, or in WordNet. For example, "bark" in the sense of
    "tree bark". A word-sense exists independently of a particular
    sentence or text.
 
@@ -182,7 +182,7 @@ be distinguished. These are:
    sentence parse. In the course of parsing, syntactical information
    is assigned to the word-parse: the word parse is identified by a
    a part-of-speech, a tense, a number, as a subject or object. The
-   assignement of these properties may vary from parse to parse.
+   assignment of these properties may vary from parse to parse.
    For any one given sentence, there may be as many different
    word-parses as there are sentence parses. Typically, most sentence
    parses will assign the same word properties to each word-parse;
@@ -195,7 +195,7 @@ be distinguished. These are:
    English language which can plausibly be one of two different roots, 
    and that different sentence parses might assign different roots.
    This can occur more frequently if a word was mis-spelled: for 
-   instance, using "there" instead of "thier". An incorrect parse
+   instance, using "there" instead of "their". An incorrect parse
    would link the mis-spelled word-instance to the spelled-the-same
    but-wrong dictionary-word; the correct parse would link the 
    word-instance to its correct spelling.
@@ -212,13 +212,13 @@ be distinguished. These are:
    word-concept over another.
 
 6) Finally, there is a "text-sense", which is the disembodied concept
-   that a word instance is refering to, across the entire text. For
+   that a word instance is referring to, across the entire text. For
    example, in the text "Mary looked at the glass. She picked it up."
    the word-instances "she" and "Mary" both refer to the same
    text-sense, even though they are represented by completely different
    surface words. The relation of text-senses to a text is also
-   probablistic: there is a non-zero proability that "she" does 
-   not actually refr to Mary.  At the basic level, a text-sense 
+   probabilistic: there is a non-zero probability that "she" does 
+   not actually refer to Mary.  At the basic level, a text-sense 
    is a link between a node "Mary the abstract concept" and various 
    word-concepts. 
 
@@ -227,8 +227,8 @@ be distinguished. These are:
    animal, or "Mary" may be a statue of the the Virgin Mary.  The act of 
    word-sense disambiguation will assign a probability to the 
    word-concepts binding "Mary" to each of these possible word-senses.
-   Then, the likilihood that "she" refers to "Mary" depends on the 
-   liklihood that "Mary" refers to a statue of the Virgin Mary, as
+   Then, the likelihood that "she" refers to "Mary" depends on the 
+   likelihood that "Mary" refers to a statue of the Virgin Mary, as
    statues cannot pick things up. 
 
    (Incidentally, this gives some mathematical insight into humour,
@@ -248,12 +248,37 @@ This sentence contains the word-instance "bark". The word-parse of
 "bark" is unambiguous: it is a noun.  From WordNet, we know that 
 "bark-the-noun" has several different word-senses: it may be tree-bark,
 or it may be a type of watercraft.  The word-concept would be 
-a linakge from the word-parse "bark-the-noun" to the sense of "tree-bark";
+a linkage from the word-parse "bark-the-noun" to the sense of "tree-bark";
 the goal of word-sense disambiguation is to give this particular 
 word-concept a high probability and a high confidence, as compared to
 "bark-the-watercraft".  Lastly, there is the text-sense. In this text, 
 the text-concept for "bark" can be deduced to be "the bark of an oak
 tree in a particular yard in which there are two people".
+
+Network structure
+-----------------
+The goal of the OpenCog network structure given below is to properly 
+capture the above-described relationships, inserting probabilities 
+in all of the right places, and allowing an algorithm to walk the
+network of connections and assign the highest probabilities to the most
+likely interpretations.
+
+The basic algorithmic components are as follows:
+A) Import WordNet data to establish "dictionary-words" and "word-senses" 
+   as defined above.
+B) Use the Link-Grammar+RelEx infrastructure to identify 
+   "word-instances", and link them to "word-parses", and to assign
+   initial probabilities ranking alternative parses.
+C) Use Radu Mihalcea's word-sense-disambiguation algorithms to compute
+   initial probability assignments for "word-concepts".
+D) Use anaphora resolution algorithms to assign initial probabilities
+   to text-senses.
+E) Use "common-sense reasoning" to refine probabilities for text-senses.
+   A given text-sense probability can act as feedback for the
+   likelihood of a given parse being correct, and so the initial
+   probabilities assigned in steps B,C,D are then iterated upon,
+   in an effort to find convergence.
+
 
 ------
 The current RelEx output is as follows, but this seems somehow
@@ -273,7 +298,7 @@ not quite right, in light of the above discussions.
 
 ------
 
-XXX The below is wrong and is still being drafted.
+XXX The below is totally wrong and is still being drafted.
 
 It seems that RelEx should generate the following:
 
@@ -291,7 +316,7 @@ word in the sentence was "bark". This may not be the case if a word
 is mis-spelled in the original sentence, and the mis-spelled word has
 several possible spelling-interpretations.
 
-Relex word properties would be given as:
+RelEx word properties would be given as:
 
    <InheritanceLink strength=0.9 confidence=0.8>
       <WordInstanceNode name="bark_1234" />
@@ -299,7 +324,7 @@ Relex word properties would be given as:
    </InheritanceLink>
 
 These are given a lower truth value and confidence, to indicate that the
-interprestation of a part-of-speech may depend on how the sentence was
+interpretation of a part-of-speech may depend on how the sentence was
 parsed; the strength and confidence values are keyed of of the
 parse-ranking of a sentence. XXX how to show parse-dep ??
 
