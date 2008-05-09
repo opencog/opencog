@@ -295,31 +295,40 @@ Word-parses assign syntactic meaning to a word, within the context of a
 parse. Thus, for example, the goal is to express "in parse 2, the word
 'bark' has part-of-speech 'noun'"
 
-This suggests the structure below:
+This suggests the structure below. Each parse of a sentence is assigned
+an initial parse ranking, and so:
+
    <ConceptNode name="parse_1" strength=0.9 confidence=0.6/>
    <ConceptNode name="parse_2" strength=0.8 confidence=0.5/>
    <ConceptNode name="parse_3" strength=0.6 confidence=0.3/>
 
-   <!-- in parse 2, the word "bark" is associated with bark_144 -->
-   <InheritanceLink>
-      <WordInstanceNode name="bark_word_instance_4" />
-      <ConceptNode name="bark_144" />
-   </InheritanceLink>
-
-   <!-- in parse 3, the word "bark" is associated with bark_169 -->
-   <InheritanceLink>
-      <WordInstanceNode name="bark_word_instance_4" />
-      <ConceptNode name="bark_169" />
-   </InheritanceLink>
+Each word in each parse of a sentence gets a unique concept node
+assignement. This is in order to allow the same word-instance be
+associated to different values in different parses. Suppose, for
+example, that, in two different parses of the same sentence, the word
+"bark" is identified as a noun, or as a verb. Thus, one has distinct
+nodes:
 
    <!-- Identify bark_144 as being parse instance 2 -->
    <EvaluationLink>
      <PredicateNode name="ParseInstance"/>
      <ListLink>
        <ConceptNode name="bark_144" />
-       <ConceptNode name="parse_2" t/>
+       <ConceptNode name="parse_2" />
      </ListLink>
    </EvaluationLink>
+
+   <!-- Identify bark_169 as being parse instance 3 -->
+   <EvaluationLink>
+     <PredicateNode name="ParseInstance"/>
+     <ListLink>
+       <ConceptNode name="bark_169" />
+       <ConceptNode name="parse_3" />
+     </ListLink>
+   </EvaluationLink>
+
+As promised by the example, one of these identifies "bark" as a 
+noun, the other as verb:
 
    <!-- In parse 2, which has bark_144, it is a noun -->
    <EvaluationLink>
@@ -335,13 +344,47 @@ This suggests the structure below:
      <PredicateNode name="PartOfSpeech"/>
      <ListLink>
        <ConceptNode name="bark_169" />
-       <ConceptNode name="noun" />
+       <ConceptNode name="verb" />
      </ListLink>
    </EvaluationLink>
 
-------
-The current RelEx output is as follows, but this seems somehow
-not quite right, in light of the above discussions.
+It should be made clear that both concepts "bark_144" and "bark_169"
+refer to the same word in the same sentence.
+
+   <!-- in parse 2, the word "bark" is associated with bark_144 -->
+   <ReferenceLink>
+      <WordNode name="#bark">
+      <ConceptNode name="bark_144" />
+   </ReferenceLink>
+
+   <!-- in parse 3, the word "bark" is associated with bark_169 -->
+   <ReferenceLink>
+      <WordNode name="#bark">
+      <ConceptNode name="bark_169" />
+   </ReferenceLink>
+
+In the above, the associated WordNode is meant to be the non-lemmatized
+form of the word, since, in principle (though extremely rare in
+practice), the lemmatization might be different for different parses.
+(By "lemmatized form", we mean the infinitive form of a verb, the 
+singular of a plural noun, etc.)
+
+[[In the above, "bark_144" and "bark_169" were identified as 
+ConceptNodes. However, for clarity, it migh be convenient to
+identify these as WordInstanceNodes?]]
+
+[[In the above, a collection of triples were used to specify the
+quadruple relation (parse 2, 'bark', part-of-speech, 'noun'), which can
+be read as "in the context of parse 2, the word 'bark' is a noun". This
+suggests that perhaps ContextLink could be used?]]
+
+If all parses agree on the properties of a given word, it would
+be advantageous to collapse the proliferation of word-instances
+down to one or two, as early in the processing as possible.
+
+[[-----
+The current RelEx output is as follows, but this is at odds with the 
+discussion above. It will be abandoned shortly!?
 
    <!-- link the word-instance to the "text-sense" bark_1 -->
    <InheritanceLink>
@@ -355,61 +398,39 @@ not quite right, in light of the above discussions.
       <ConceptNode = "bark_1">
    </ReferenceLink>
 
-------
-
-XXX The below is totally wrong and is still being drafted.
-
-It seems that RelEx should generate the following:
-
-   <!-- link a word-instance to a word -->
-   <ReferenceLink strength=1 confidence=1 >
-      <WordInstanceNode name="bark_1234" />
-      <WordNode name="#bark">
-   </ReferenceLink>
-
-The word-instance is tagged with a universal unique ID of "1234" for 
-record-keeping purposes; it captures the notion that this is a specific
-word in a specific sentence.  The strength and confidence are ranked
-very high, to indicate that there is little or no question that the 
-word in the sentence was "bark". This may not be the case if a word
-is mis-spelled in the original sentence, and the mis-spelled word has
-several possible spelling-interpretations.
-
-RelEx word properties would be given as:
-
-   <InheritanceLink strength=0.9 confidence=0.8>
-      <WordInstanceNode name="bark_1234" />
-      <DefinedLinguisticConceptNode name="#pos#noun" />
-   </InheritanceLink>
-
-These are given a lower truth value and confidence, to indicate that the
-interpretation of a part-of-speech may depend on how the sentence was
-parsed; the strength and confidence values are keyed of of the
-parse-ranking of a sentence. XXX how to show parse-dep ??
-
-At a later stage, the word-sense disambiguation code would generate
-the extra nodes needed to encode the text concept, etc.  Thus:
-
-   <InheritanceLink>
-      <WordInstanceNode name="bark_1234" />
-      <ConceptNode = "bark_sense_23">
-   </InheritanceLink>
+------]]
 
 
-anaphora.
-
-
-
-ContextLink ... should each parse have its own context link ??
-
-Word-sense frequency counts
----------------------------
+Domains of discourse (aka word-sense frequency counts)
+------------------------------------------------------
 Some word senses are more common than others. For example, archaic word 
 senses tend to be rarely encountered ... except when one is reading an 
 archaic text. Similarly, scientific and technical texts tend to employ 
 certain common word with certain very uncommon meanings. Cool, hip,
 edgy writing will also use words in uncomon senses, or in unusual
 constructions.
+
+An anecdote to illustrate the idea:
+
+  "When I was young and learning French, I found it easy to read and 
+   understand "Le Monde", and was utterly perplexed by "Paris Match",
+   even thought Paris Match sentences were considerably shorter, and 
+   seemed to use a simpler vocabulary -- alas, for me, the Paris Match
+   lingo was heavily overladen with French pop culture references and 
+   current events, which I was completely unaware of.  I would sit 
+   there, with Paris Match, and look up every word in the dictionary, 
+   even though I already knew the word, because I was searching for 
+   some meaning... which, of course was not to be found in the 
+   dictionary. By contrast, Le Monde was not trying to be hip, edgy
+   or entertaining, it was trying to be precise and explicit, and in
+   this, it succeeds.  The moral of the story is that word-sense 
+   frequency counts for Le Monde and Paris Match would be radically 
+   different -- and so, when I read a "typical" French text, say, 
+   Le Canard Enchainee (a satirical political paper), or Alexander
+   Dumas (The Three Musketeers-- eminently readable, but clearly 18th
+   century French), which should I use?"
+
+Wordnet does have the notion of discourse domains.
 
 XXX ToBeResolved: How to employ context-sensitive word-frequency counts
 is unclear.
