@@ -216,7 +216,31 @@ be distinguished. These are:
    example, in the text "Mary looked at the glass. She picked it up."
    the word-instances "she" and "Mary" both refer to the same
    text-sense, even though they are represented by completely different
-   surface words.
+   surface words. The relation of text-senses to a text is also
+   probablistic: there is a non-zero proability that "she" does 
+   not actually refr to Mary.  At the basic level, a text-sense 
+   is a link between a node "Mary the abstract concept" and various 
+   word-concepts. 
+
+   Thus, for example, the word "Mary" has multiple possible word-senses:
+   "Mary" may be a human being, but also, "Mary" may be a dog or other 
+   animal, or "Mary" may be a statue of the the Virgin Mary.  The act of 
+   word-sense disambiguation will assign a probability to the 
+   word-concepts binding "Mary" to each of these possible word-senses.
+   Then, the likilihood that "she" refers to "Mary" depends on the 
+   liklihood that "Mary" refers to a statue of the Virgin Mary, as
+   statues cannot pick things up. 
+
+   (Incidentally, this gives some mathematical insight into humour,
+   poetry, and "magical" and fantasy literature: in the normal world,
+   a statue cannot pick things up. But a well-directed joke can force
+   one to conclude that it must have: an impossibility, and therefore
+   funny. A "well-directed" joke does this by making sure that there
+   is no ambiguity in either the parse, or in the associated
+   word-senses, so that there is no question, upon arriving at the punch
+   line, of what it implies, however absurd that may be.)
+
+To illustrate the above:
 
 Consider the example text: "We stood in the yard.  As she walked up to
 me, I laid my hand on the old oak.  Its rough bark cut my finger."
@@ -289,5 +313,9 @@ the extra nodes needed to encode the text concept, etc.  Thus:
 
 
 anaphora.
+
+
+
+ContextLink ... should each parse have its own context link ??
 
 
