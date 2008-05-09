@@ -77,7 +77,8 @@ of denoting a triple might have been:
    </PropertyLink>
 
 but this would require the invention of a new link type, "PropertyLink",
-which other parts of the system are unaware of. Alternately, 
+which other parts of PLN are unaware of -- PLN already has a fairly
+established set of relations it is used to handling. Alternately, 
 
    <MemberLink>
      <ListLink>
@@ -90,6 +91,18 @@ which other parts of the system are unaware of. Alternately,
 could be useful, but this would loose the benefit of the predicate form.
 A predicate could still be created later, by making use of a link from
 the predicate name to a SatisfyingSetLink. ]]
+
+[[Per Ben, it seems desirable to *define* a new, unknow link type L to
+be
+    L A B
+    =
+    EvaluationLink
+       L
+       ListLink A B
+
+Thus, the new link type PartOfSpeechLink is understood to be
+mathematically identical to an evaluation link where the pedicate name
+is "part of speech". ]]
 
 Each of these nodes and links are assigned a truth value of 1 and a
 confidence of 1. Non-unit truth-values & confidence will be used when 
@@ -273,7 +286,7 @@ network of connections and assign the highest probabilities to the most
 likely interpretations.
 
 The basic algorithmic components are as follows:
-A) Import WordNet data to establish "dictionary-words" and "word-senses" 
+A) Import WordNet data to establish "dictionary-words" and "word-senses",
    as defined above.
 B) Use the Link-Grammar+RelEx infrastructure to identify 
    "word-instances", and link them to "word-parses", and to assign
@@ -291,9 +304,17 @@ E) Use "common-sense reasoning" to refine probabilities for text-senses.
 
 Word-parse meaning
 ------------------
+This section elaborates on point 4) above.
+
 Word-parses assign syntactic meaning to a word, within the context of a
 parse. Thus, for example, the goal is to express "in parse 2, the word
-'bark' has part-of-speech 'noun'"
+'bark' has part-of-speech 'noun'". Such associations are required 
+because, in parse 3, the word 'bark' might be a verb.
+
+Mathematically, this is a quadruple: (parse2, 'bark', part-of-speech, 
+'noun'). Most PLN structures are oriented around triples, and so this
+section explores how to map this quadruple into a set of predicate 
+triples.
 
 This suggests the structure below. Each parse of a sentence is assigned
 an initial parse ranking, and so:
@@ -399,6 +420,29 @@ discussion above. It will be abandoned shortly!?
    </ReferenceLink>
 
 ------]]
+
+
+Word concepts
+-------------
+This section elaborates on point 5 above.
+
+Prior to performing word-sense disambiguation, every word instance
+in a sentence is linked to every possible word-sense for that word.
+The goal of word-sense disambiguation is to raise the strength values
+for the most likely senses, and lower them for the least-likely senses.
+
+The word-concept links will be represented as follows:
+
+   <AssociativeLink strength=0.9 confidence=0.1>
+      <ConceptNode name="bark_144" />
+      <WordSenseNode name="bark_sense_23" />
+   </AssociativeLink>
+
+
+Algorithms
+----------
+
+
 
 
 Domains of discourse (aka word-sense frequency counts)
