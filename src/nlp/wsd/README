@@ -191,7 +191,8 @@ be distinguished. These are:
 
 2) The "dictionary word", the word as it would be in the standard
    lexicon of a language: a word in its proper spelling, and with
-   morphological inflections stripped away: the root form of the word.
+   morphological inflections stripped away: the lemmatized or root form
+   of the word.
 
    Dictionary-words are represented by WordNode.
 
@@ -213,7 +214,7 @@ be distinguished. These are:
    different parses.
 
    Note that a word-parse is also an assignment of a word-instance to
-   a dictionary-word. Although very rare, there are words which the
+   a dictionary-word. Although very rare, there are words in the
    English language which can plausibly be one of two different roots, 
    and that different sentence parses might assign different roots.
    This can occur more frequently if a word was mis-spelled: for 
@@ -426,21 +427,78 @@ Word concepts
 -------------
 This section elaborates on point 5 above.
 
-Prior to performing word-sense disambiguation, every word instance
-in a sentence is linked to every possible word-sense for that word.
-The goal of word-sense disambiguation is to raise the strength values
-for the most likely senses, and lower them for the least-likely senses.
+The goal of word-sense disambiguation is to asociate a word instance to
+each possible word-sense, and then to determine the most-likely pairing.
+The Mihalcea algorithm[1] performs this by creating weighted links
+between (word-instance, word-sense) pairs. The goal of this section is
+to describe the opencog representation of these pairs-of-pairs. 
+Crudely speaking, these relations form an adjacency matrix for a graph
+resembling Markov chain; and so the representation problem is that of 
+representing a square matrix in OpenCog.  Several representiatons are
+reviewed.
 
-The word-concept links will be represented as follows:
+A naive way of representing word-concept links would be to create links:
 
-   <AssociativeLink strength=0.9 confidence=0.1>
+   <InheritanceLink strength=0.9 confidence=0.1>
       <ConceptNode name="bark_144" />
+      <WordSenseNode name="bark_sense_23" />
+   </InheritanceLink>
+
+The likelihood "bark_sense_23" being the correct sense for the word
+"bark" is encoded in the strength of the Inheritance Link.
+
+The pairs-of-pairs relations can then be provided as below. Here, the
+example sentence contains the words "tree" and "bark", which can then
+mutually reinforce the most likely meaning of each word.
+
+   <!-- the word "tree" occured in the sentence -->
+   <SetLink strength=0.49 confidence=0.3>
+      <InheritanceLink strength=0.9 confidence=0.6>
+         <ConceptNode name="tree_99" />
+         <WordSenseNode name="tree_sense_12" />
+      </InheritanceLink>
+      
+      <InheritanceLink strength=0.9 confidence=0.1>
+         <ConceptNode name="bark_144" />
+         <WordSenseNode name="bark_sense_23" />
+      </InheritanceLink>
+   </SetLink>
+
+Note that the set link is unordered: there is no prefered direction in
+the relation between "tree" and "bark".
+
+An alternate representation for the above would create a single node
+for every (word-instance, word-sense) pair, like so:
+
+   <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
+
+The likelihood "bark_sense_23" being the correct sense for the word
+"bark" is encoded in the strength of this node. This node is  
+associated with the (word-instance, word-sense) pair as follows:
+
+   <AssociativeLink>
+      <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
       <WordSenseNode name="bark_sense_23" />
    </AssociativeLink>
 
+   <AssociativeLink>
+      <ConceptNode name="bark_144" />
+      <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
+   </AssociativeLink>
 
-Algorithms
-----------
+The associative links are not weighted. The pairs-of-pairs are then
+represented as follows:
+
+   <SetLink strength=0.49 confidence=0.3>
+      <ConceptNode name="tree_pair_2"  strength=0.9 confidence=0.6>
+      <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
+   </SetLink>
+
+Its not clear which representation is "better".
+
+
+Propagation of probabilities
+----------------------------
 
 
 
@@ -479,4 +537,10 @@ Wordnet does have the notion of discourse domains.
 XXX ToBeResolved: How to employ context-sensitive word-frequency counts
 is unclear.
 
+
+References
+----------
+[1] Radu Mihalcea, "Unsupervised Large-Vocabulary Word Sense
+    Disambiguation with Graph-based Algorithms for Sequence Data 
+    Labeling", 2005
 
