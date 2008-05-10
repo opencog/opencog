@@ -16,8 +16,168 @@ Must have wordnet, python 2.5 and NLTK installed.
 Proposed Mapping
 ----------------
 
+Word senses
+-----------
+Associated with every word is a list of possible senses.
+Consider the word "bark", thus:
+
+    <WordNode name="bark" />   -- a word.
+
+A "word sense" is a collection of information about a single semantic
+sense of a word. This bag includes information about the part-of-speech
+(noun, verb, etc.), example usages, pointers to synonym sets (synsets),
+hyponyms, hypernyms, etc. A specific "word sense" will be tagged with a
+unique identifier, which is then used to reference that sense.
+
+In the OpenCog type hierarchy, (type.script)
+   WORD_SENSE_LINK <- ASSOCIATIVE_LINK
+
+A WordSenseLink couples the tag that will stand for the word sense,
+to the word itself:
+
+   <WordSenseLink>
+      <WordNode name="bark" />
+      <ConceptNode name="bark_sense_23" />
+   </WordSenseLink>
+
+The tag value "bark_sense_23" has no particular meaning in itself,
+it is just some unique string used to identify the sense.
+
+Word senses can be crudely categorized according to part-of-speech.
+Thus, for example:
+
+   <PartOfSpeechLink>
+      <ConceptNode name="bark_sense_23" />
+      <PartOfSpeechNode name="noun" />
+   </PartOfSpeechLink>
+
+The above introduces a new node type "PartOfSpeechNode", and a new link
+type: "PartOfSpeechLink".  Other possible properties might include gender,
+entity tags, and so on. This potentially leads to an explosion of 
+special-purpose nodes. For example, there are over a dozen properties
+that RelEx uses to tag words.  To avoid this explosion, the following 
+syntax will be used:
+
+   <EvaluationLink>
+     <PredicateNode name="PartOfSpeech"/>
+     <ListLink>
+       <ConceptNode name="bark_sense_23" />
+       <ConceptNode name="noun" />
+     </ListLink>
+   </EvaluationLink>
+
+[[Square brackets set off design discussions; below follows some
+commentary about alternate ways in which the above might have been
+acheived.
+
+The above specifies a triple that is to be associated together, the
+triple ("bark_sense_23", PartOfSpeech, "noun").  Another possible way
+of denoting a triple might have been:
+
+   <PropertyLink>
+     <ConceptNode name="bark_sense_23" />
+     <ListLink>
+       <ConceptNode name="PartOfSpeech"/>
+       <ConceptNode name="noun" />
+     </ListLink>
+   </PropertyLink>
+
+but this would require the invention of a new link type, "PropertyLink",
+which other parts of PLN are unaware of -- PLN already has a fairly
+established set of relations it is used to handling. Alternately, 
+
+   <MemberLink>
+     <ListLink>
+       <ConceptNode name="PartOfSpeech"/>
+       <ConceptNode name="noun" />
+     </ListLink>
+     <ConceptNode name="bark_sense_23" />
+   </MemberLink>
+
+could be useful, but this would loose the benefit of the predicate form.
+A predicate could still be created later, by making use of a link from
+the predicate name to a SatisfyingSetLink. ]]
+
+[[Per Ben, it seems desirable to *define* a new, unknow link type L to
+be
+    L A B
+    =
+    EvaluationLink
+       L
+       ListLink A B
+
+Thus, the new link type PartOfSpeechLink is understood to be
+mathematically identical to an evaluation link where the pedicate name
+is "part of speech". ]]
+
+Each of these nodes and links are assigned a truth value of 1 and a
+confidence of 1. Non-unit truth-values & confidence will be used when 
+relating word senses to the use of actual words in sentences. Here, 
+however, the goal is to state "this word does have this as one possible
+meaning, no matter how rarely used this meaning might be."
+
+[[Some word senses are more common than others. For example, archaic
+word senses tend to be rarely encountered ... except when one is 
+reading an archaic text. This is addressed in a section below.]]
+
+In WordNet, word senses are commonly established by giving "sister
+terms" (a WordNet concept, equivalent to "synonyms for word senses")
+as well as hypernyms, hyponyms, part holonyms, etc. A sister term,
+hypernym, hyponym, etc. are thus links. Since some sister terms are 
+closer than others, these links will have non-unit truth values. 
+
+Hypernyms and hyponyms will be mapped to inheritance links.
+A hypernym for the wood-bark is that it is a covering of something:
+
+   <InheritanceLink strength=0.8 confidence=0.9 />
+      <WordSenseNode name="bark_sense_23" />
+      <WordSenseNode name="covering_sense_42" />
+   </InheritanceLink>
+
+A hyponym for wood-bark is that cork is a kind of bark:
+
+   <InheritanceLink strength=0.8 confidence=0.9 />
+      <WordSenseNode name="cork_sense_98" />
+      <WordSenseNode name="bark_sense_23" />
+   </InheritanceLink>
+
+Note the reversed order between the hypo- and hyper- representations.
 
 
-<WordNode name="bark">
+WordNet uses the phrase "sister term" instead of "synonym" to relate 
+similar word senses. WordNet reserves the use of "synonym" for relating
+words, not word senses. Related word senses will be linked with
+SimilarityLinks
+
+   SIMILARITY_LINK <- UNORDERED_LINK
+
+WordNet includes the idea of "part holonyms", that something is a part
+of something else, and its converse, the meronym, that something is
+composed of parts.  
+
+   PART_OF_LINK <- INHERITANCE_LINK
+
+[[Making the part-of link derive from inheritance link seems dangerous,
+since WordNet does distinguish is-a and kind-of relations, whereas the
+above mapping erases it. This may need to be fixed. ]]
+
+To continue with the tree-bark example:
+
+   <!-- bark is a part of a branch -->
+   <PartOfLink strength=0.8 confidence=0.9>
+      <WordSenseNode name="bark_sense_23" />
+      <WordSenseNode name="branch_sense_2" />
+   </PartOfLink>
+
+   <!-- bark is composed of lignin -->
+   <PartOfLink strength=0.8 confidence=0.9>
+      <WordSenseNode name="lignin_sense_1" />
+      <WordSenseNode name="bark_sense_23" />
+   </PartOfLink>
+
+Finally, WordNet has the concept of "instance-of" relations.  These
+will use InstanceLinks:
+
+   INSTANCE_LINK <- ORDERED_LINK
 
 
