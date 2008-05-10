@@ -216,14 +216,15 @@ be distinguished. These are:
    different parses.
 
    Note that a word-parse is also an assignment of a word-instance to
-   a dictionary-word. Although very rare, there are words in the
-   English language which can plausibly be one of two different roots, 
-   and that different sentence parses might assign different roots.
-   This can occur more frequently if a word was mis-spelled: for 
-   instance, using "there" instead of "their". An incorrect parse
-   would link the mis-spelled word-instance to the spelled-the-same
-   but-wrong dictionary-word; the correct parse would link the 
-   word-instance to its correct spelling.
+   a dictionary-word. Although rare, there are words in the English 
+   language which have multiple different base forms; for example,
+   "axes" is the plural form of both "axe" and "axis". Two different
+   parses might then assign different base-forms to the word-instance.
+   This may also occur if a word was mis-spelled: for instance, using 
+   "there" instead of "their". An incorrect parse would link the 
+   mis-spelled word-instance to the spelled-the-same but-wrong 
+   dictionary-word; the correct parse would link the word-instance 
+   to its correct spelling.
 
 5) The "word concept", the linkage of a word sense to a word parse.
    The "word concept" is distinguished from the "word sense", as being 
