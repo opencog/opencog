@@ -5,10 +5,12 @@
                       Linas Vepstas April 2008
 
 
-This document contains working notes for the mapping of WordNet ideas
-onto OpenCog structures. It also describes how words in a parsed
-sentence are associated with different word senses.
-
+This document contains working notes for performing word-sense
+disambiguation within the framework of OpenCog. The first section
+reviews the mapping of WordNet ideas onto OpenCog structures. The
+second section discusses how various different ideas of "word-sense"
+are associated with a parsed sentence, and the algorithms that can
+be used to perform the actual disambiguation. 
 
 Word senses
 -----------
@@ -452,7 +454,7 @@ example sentence contains the words "tree" and "bark", which can then
 mutually reinforce the most likely meaning of each word.
 
    <!-- the word "tree" occured in the sentence -->
-   <SetLink strength=0.49 confidence=0.3>
+   <SentenceCooccurrenceLink strength=0.49 confidence=0.3>
       <InheritanceLink strength=0.9 confidence=0.6>
          <ConceptNode name="tree_99" />
          <WordSenseNode name="tree_sense_12" />
@@ -462,7 +464,7 @@ mutually reinforce the most likely meaning of each word.
          <ConceptNode name="bark_144" />
          <WordSenseNode name="bark_sense_23" />
       </InheritanceLink>
-   </SetLink>
+   </SentenceCooccurrenceLink>
 
 Note that the set link is unordered: there is no prefered direction in
 the relation between "tree" and "bark".
@@ -489,10 +491,10 @@ associated with the (word-instance, word-sense) pair as follows:
 The associative links are not weighted. The pairs-of-pairs are then
 represented as follows:
 
-   <SetLink strength=0.49 confidence=0.3>
+   <SentenceCooccurrenceLink strength=0.49 confidence=0.3>
       <ConceptNode name="tree_pair_2"  strength=0.9 confidence=0.6>
       <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
-   </SetLink>
+   </SentenceCooccurrenceLink>
 
 Its not clear which representation is "better".
 
