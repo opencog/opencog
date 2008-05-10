@@ -7,7 +7,11 @@
 """
 
 import nltk;
-import nltk.wordnet.dictionary
+# import nltk.wordnet.dictionary
+# import nltk.wordnet.synset
+# import nltk.wordnet.util
+import nltk.wordnet
+from nltk.wordnet.util import *
 
 def import_wn():
 	word = "bark"
@@ -34,7 +38,12 @@ def import_wn():
 	print noundict[idx]
 	print noundict.getWord("bark")
 
-	# nounsyn = noundict.getSynset(0)
+	nounsyn = wd.synsets();
+	print "the synset is "
+	print nounsyn
+	for i in nounsyn :
+		print i
+		print i[HYPERNYM]
 
 
 if __name__ == '__main__':

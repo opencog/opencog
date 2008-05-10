@@ -11,15 +11,16 @@ import nltk.wordnet.dictionary
 
 def import_wn():
 	print "<!-- OpenCog XML data follows --> "
-	word = "dog"
-	print word
 	noundict = nltk.wordnet.dictionaryFor("NOUN");
 	wd = noundict['dog'];
 	print wd
-	print noundict[0];
-	print noundict[1];
-	print noundict[2];
-	print noundict[3];
+
+	for i in range(0, 4):
+		wd = noundict[i+1456]
+		print wd
+		ss = wd.synsets()  # returns a list of sysnsets ss
+		for sens in ss:
+			print sens
 
 
 if __name__ == '__main__':
