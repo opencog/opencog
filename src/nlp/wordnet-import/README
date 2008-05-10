@@ -1,17 +1,18 @@
 
-                     Wordnet Import
+                     WordNet Import
                      --------------
                  Linas Vepstas April 2008
 
-Import the wordnet synsets into opencog.  Uses the NLTK wordnet python
-libraries to do so.  Because the NLTK wordnet code is under the GPLv2
-license, then so is the code in this directory. The GPLv2 applies to 
-code in this directory only.
+Import the WordNet synsets into opencog.  
 
-The prototype has barely been started, nothing works yet.
+Design Overview
+---------------
 
-To run: at the command line, "python import.py"
-Must have wordnet, python 2.5 and NLTK installed.
+The use of Python, and the NLTK wordnet module was breifly explored.
+Unfortunately, the NLTK wordnet interfaces lack support for wordnet 
+sense-keys, which is crucial for properly/easily cross-indexing the
+various relations.
+
 
 Proposed Mapping
 ----------------
