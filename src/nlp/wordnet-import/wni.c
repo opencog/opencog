@@ -26,8 +26,9 @@ static int getsspos(Synset *synp)
 		case 'v': pos = 2; break;
 		case 'a': pos = 3; break;
 		case 'r': pos = 4; break;
+		case 's': pos = 5; break;
 		default:
-			fprintf(stderr, "Error: unexpoected pos %x\n", synp->pos[0]);
+			fprintf(stderr, "Error: unexpected pos %x\n", synp->pos[0]);
 			exit(1);
 	}
 	return pos;
@@ -58,12 +59,15 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
  \
 		while(nymp) \
 		{ \
-			printf("<!-- gloss=%s -->\n", nymp->defn); \
-			int i; \
-			for (i=0; i<nymp->wcount; i++) \
+			if (5 != getsspos(nymp)) \
 			{ \
-				get_sense_key(buff, nymp, i); \
-				(BLOCK); \
+				printf("<!-- gloss=%s -->\n", nymp->defn); \
+				int i; \
+				for (i=0; i<nymp->wcount; i++) \
+				{ \
+					get_sense_key(buff, nymp, i); \
+					(BLOCK); \
+				} \
 			} \
 			nymp = nymp->nextss; \
 		} \
