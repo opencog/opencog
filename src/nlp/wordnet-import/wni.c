@@ -33,19 +33,19 @@ static int getsspos(Synset *synp)
 	return pos;
 }
 
-static void get_sense_key(char * buff, const char * wd, Synset *synp)
+static void get_sense_key(char * buff, Synset *synp, int idx)
 {
 	if (!synp->headword)
 	{
 		sprintf(buff, "%s%%%d:%02d:%02d::",
-		              wd, getsspos(synp),
-		              synp->fnum, *(synp->lexid));
+		              synp->words[idx], getsspos(synp),
+		              synp->fnum, synp->lexid[idx]);
 	}
 	else
 	{
 		sprintf(buff, "%s%%%d:%02d:%02d:%s:%02d",
-		              wd, getsspos(synp),
-		              synp->fnum, *(synp->lexid),
+		              synp->words[idx], getsspos(synp),
+		              synp->fnum, synp->lexid[idx],
 		              synp->headword, synp->headsense);
 	}
 }
@@ -58,7 +58,6 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 	printf ("duude nym sense=%d\n", si->wnsense);
 
 	int pos = getsspos(synp);
-	printf ("duude pos=%d sstype=%dn", pos, synp->sstype);
 
 	unsigned int bitmask = is_defined(word, pos);
 	// printf ("duude mask=%x\n", bitmask);
@@ -71,12 +70,14 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 		while(nymp)
 		{
 			printf("<!-- gloss=%s -->\n", nymp->defn);
-			printf("duude whichword=%d\n", nymp->whichword);
 			int i;
 			for (i=0; i<nymp->wcount; i++)
 			{
-				get_sense_key(buff, nymp->words[i], nymp);
-				printf("duude its %s\n", buff);
+				get_sense_key(buff, nymp, i);
+				printf("<InheritanceLink>\n");
+				printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+				printf("   <WordSenseNode name=\"%s\" />\n", buff);
+				printf("</InheritanceLink>\n");
 			}
 			nymp = nymp->nextss;
 		}
@@ -90,12 +91,14 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 		while(nymp)
 		{
 			printf("<!-- gloss=%s -->\n", nymp->defn);
-			printf("duude whichword=%d\n", nymp->whichword);
 			int i;
 			for (i=0; i<nymp->wcount; i++)
 			{
-				get_sense_key(buff, nymp->words[i], nymp);
-				printf("duude its %s\n", buff);
+				get_sense_key(buff, nymp, i);
+				printf("<InheritanceLink>\n");
+				printf("   <WordSenseNode name=\"%s\" />\n", buff);
+				printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+				printf("</InheritanceLink>\n");
 			}
 			nymp = nymp->nextss;
 		}
