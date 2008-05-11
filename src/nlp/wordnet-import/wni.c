@@ -13,28 +13,69 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int getpos(Synset *synp)
+{
+	// The value stored in *(synp->ppos) seems to be incorrect,
+	// its alwaus 1, so construct the pos from string.
+	int pos = 0;
+	switch (synp->pos[0])
+	{
+		case 'n': pos = 1; break;
+		case 'v': pos = 2; break;
+		case 'a': pos = 3; break;
+		case 'r': pos = 4; break;
+		default:
+			fprintf(stderr, "Error: unexpoected pos %x\n", synp->pos[0]);
+			exit(1);
+	}
+	return pos;
+}
+
+
 void print_nyms(char * sense_key, char * word, Synset *synp)
 {
-	unsigned int bitmask = is_defined(word, *synp->ppos);
+	SnsIndex *si = GetSenseIndex(sense_key);
+	printf ("duude nym sense=%d\n", si->wnsense);
+
+	int pos = getpos(synp);
+
+	unsigned int bitmask = is_defined(word, pos);
 	printf ("duude mask=%x\n", bitmask);
 
-	// if ((1<<HYPERPTR) & bitmask)
-	int j;
-	for (j=0; j<32; j++)
+	if ((1<<HYPERPTR) & bitmask)
 	{
-		SnsIndex *si = GetSenseIndex(sense_key);
-		printf ("duude hyper sense=%d pos=%d\n", si->wnsense, *synp->ppos);
-		// Synset *nymp = findtheinfo_ds(word, *synp->ppos, HYPERPTR, si->wnsense);
-		// yaSynset *nymp = findtheinfo_ds(word, 2, HYPERPTR, si->wnsense);
-		Synset *nymp = findtheinfo_ds(word, 2, j, si->wnsense);
-if (!nymp) continue;
+		Synset *nymp = findtheinfo_ds(word, pos, HYPERPTR, si->wnsense);
+		if (nymp) nymp = nymp->ptrlist;
 
-		printf("duude gloss=%s\n", nymp->defn);
-		printf("duude whichword=%d\n", nymp->whichword);
-		int i;
-		for (i=0; i<nymp->wcount; i++)
+		while(nymp)
 		{
-			printf("duude its %s\n", nymp->words[i]);
+			printf("<!-- gloss=%s -->\n", nymp->defn);
+			printf("duude whichword=%d\n", nymp->whichword);
+			int i;
+			for (i=0; i<nymp->wcount; i++)
+			{
+				printf("duude its %s\n", nymp->words[i]);
+			}
+			nymp = nymp->nextss;
+		}
+	}
+
+	if ((1<<HYPOPTR) & bitmask)
+	{
+		Synset *nymp = findtheinfo_ds(word, pos, HYPOPTR, si->wnsense);
+		if (nymp) nymp = nymp->ptrlist;
+
+		while(nymp)
+		{
+			printf("<!-- gloss=%s -->\n", nymp->defn);
+			printf("duude whichword=%d\n", nymp->whichword);
+			int i;
+			for (i=0; i<nymp->wcount; i++)
+			{
+				printf("duude its %s\n", nymp->words[i]);
+				printf("duude guess %s uhh %d\n", nymp->words[i], pos);
+			}
+			nymp = nymp->nextss;
 		}
 	}
 }
@@ -42,14 +83,14 @@ if (!nymp) continue;
 void print_synset(char * sense_key, Synset *synp)
 {
 	char * posstr = "";
-	switch(*(synp->ppos)) // XXX this is wrong somehow
+	switch(synp->pos[0])
 	{
-		case NOUN: posstr = "noun"; break;
-		case VERB: posstr = "verb"; break;
-		case ADJ:  posstr = "adjective"; break;
-		case ADV:  posstr = "adverb"; break;
+		case 'n': posstr = "noun"; break;
+		case 'v': posstr = "verb"; break;
+		case 'a':  posstr = "adjective"; break;
+		case 'r':  posstr = "adverb"; break;
 		default:
-			fprintf(stderr, "Error: unknown pos %d\n", *synp->ppos);
+			fprintf(stderr, "Error: unknown pos %x\n", synp->pos[0]);
 			exit(1);
 	}
 
@@ -113,7 +154,12 @@ main (int argc, char * argv[])
 	// open /usr/share/wordnet/index.sense
 	//
 	char buff[120];
+	strcpy(buff, "shiny%3:00:04:: 01119421 2 0");
 	strcpy(buff, "abandon%2:40:01:: 02227741 2 6");
+	strcpy(buff, "fast%4:02:01:: 00086000 1 16");
+	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
+
+
 	show_index(buff);
 
 }
