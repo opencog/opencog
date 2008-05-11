@@ -19,6 +19,10 @@ Consider the word "bark", thus:
 
     <WordNode name="bark" />   -- a word.
 
+Wordnet netries are not necessarily single words; more properly, the
+should be called "lexical units": they can be single words,
+collocations, idioms, and so on.
+
 A "word sense" is a collection of information about a single semantic
 sense of a word. This bag includes information about the part-of-speech
 (noun, verb, etc.), example usages, pointers to synonym sets (synsets),
@@ -147,11 +151,15 @@ SimilarityLinks
 
    SIMILARITY_LINK <- UNORDERED_LINK
 
-WordNet includes the idea of "part holonyms", that something is a part
-of something else, and its converse, the meronym, that something is
-composed of parts.  
+WordNet includes the idea of a holonym, namely, that something is a
+part of something else, and its converse, the meronym, that something is
+composed of parts. It furthermore subdivides these into three
+subclasses: 
+-- member holonym/meronym
+-- substance holonym/meronym
+-- part holonym/meronym
 
-   PART_OF_LINK <- INHERITANCE_LINK
+   HOLONYM_LINK <- INHERITANCE_LINK
 
 [[Making the part-of link derive from inheritance link seems dangerous,
 since WordNet does distinguish is-a and kind-of relations, whereas the
@@ -160,21 +168,19 @@ above mapping erases it. This may need to be fixed. ]]
 To continue with the tree-bark example:
 
    <!-- bark is a part of a branch -->
-   <PartOfLink strength=0.8 confidence=0.9>
+   <HolonymLink strength=0.8 confidence=0.9>
       <WordSenseNode name="bark_sense_23" />
       <WordSenseNode name="branch_sense_2" />
-   </PartOfLink>
+   </HolonymLink>
 
    <!-- bark is composed of lignin -->
-   <PartOfLink strength=0.8 confidence=0.9>
+   <HolonymLink strength=0.8 confidence=0.9>
       <WordSenseNode name="lignin_sense_1" />
       <WordSenseNode name="bark_sense_23" />
-   </PartOfLink>
+   </HolonyLink>
 
-Finally, WordNet has the concept of "instance-of" relations.  These
-will use InstanceLinks:
-
-   INSTANCE_LINK <- ORDERED_LINK
+WordNet as a number of other relations, including: antonyms, 
+entailment (e.g. weaning entails nursing), cause, participles, pertaining-to.
 
 
 Sentences to meanings
