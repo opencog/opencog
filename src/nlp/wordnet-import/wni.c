@@ -50,22 +50,25 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 	}
 }
 
-void print_nyms(char * sense_key, char * word, Synset *synp)
+void print_nyms(char * sense_key, char * word, int sense_num, Synset *synp)
 {
 	char buff[BUFSZ];
 
-	SnsIndex *si = GetSenseIndex(sense_key);
-	// printf ("nym sense=%d\n", si->wnsense);
+	// Hmm .. GetSenseIndex() is buggy, it crashes due to bad access
+	// SnsIndex *si = GetSenseIndex(sense_key);
+	// printf ("nym sense=%d, %d\n", si->wnsense, sense_num);
 
 	int pos = getsspos(synp);
 
 	unsigned int bitmask = is_defined(word, pos);
 	// printf ("mask=%x\n", bitmask);
 
+	// Consult 'man 3 winintro' for details of these calls.
+	//
 	/* Hypernym */
 	if ((1<<HYPERPTR) & bitmask)
 	{
-		Synset *nymp = findtheinfo_ds(word, pos, HYPERPTR, si->wnsense);
+		Synset *nymp = findtheinfo_ds(word, pos, HYPERPTR, sense_num);
 		if (nymp) nymp = nymp->ptrlist;
 
 		while(nymp)
@@ -87,7 +90,7 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 	/* Hyponym */
 	if ((1<<HYPOPTR) & bitmask)
 	{
-		Synset *nymp = findtheinfo_ds(word, pos, HYPOPTR, si->wnsense);
+		Synset *nymp = findtheinfo_ds(word, pos, HYPOPTR, sense_num);
 		if (nymp) nymp = nymp->ptrlist;
 
 		while(nymp)
@@ -141,7 +144,7 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 	}
 }
 
-void print_synset(char * sense_key, Synset *synp)
+void print_synset(char * sense_key, int sense_num, Synset *synp)
 {
 	char * posstr = "";
 	switch(synp->pos[0])
@@ -170,7 +173,7 @@ void print_synset(char * sense_key, Synset *synp)
 		printf("   <ConceptNode name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
 
-		print_nyms(sense_key, synp->words[i], synp);
+		print_nyms(sense_key, synp->words[i], sense_num, synp);
 	}
 }
 
@@ -180,13 +183,17 @@ void show_index(char * index_entry)
 
 	// Parse a line out from /usr/share/wordnet/index.sense
 	// The format of this line is documented in 'man index.sense'
+	char * p = strchr(index_entry, '%') + 1;
+	int ipos = atoi(p);
+
 	char * sense_key = index_entry;
-	char * p = strchr(index_entry, ' ');
+	p = strchr(index_entry, ' ');
 	*p = 0;
 	char * byte_offset = ++p;
 	int offset = atoi(byte_offset);
-	p = strchr(index_entry, '%') + 1;
-	int ipos = atoi(p);
+
+	p = strchr(p, ' ') + 1;
+	int sense_num = atoi(p); 
 
 	// Read the synset corresponding to this line.
 	synp = read_synset(ipos, offset, NULL);
@@ -209,7 +216,7 @@ void show_index(char * index_entry)
 		fprintf(stderr, "sense=%s pos=%d off=%d\n", sense_key, ipos, offset);
 	}
 
-	print_synset(sense_key, synp);
+	print_synset(sense_key, sense_num, synp);
 
 	free_synset(synp);
 }
@@ -228,8 +235,8 @@ main (int argc, char * argv[])
 #endif
 
 	// open /usr/share/wordnet/index.sense
-	// FILE *fh = fopen("/usr/share/wordnet/index.sense", "r");
-	FILE *fh = fopen("/tmp/x", "r");
+	// The format of this file is described in 'man senseidx'
+	FILE *fh = fopen("/usr/share/wordnet/index.sense", "r");
 	while (1)
 	{
 		char * rc = fgets(buff, BUFSZ, fh);
