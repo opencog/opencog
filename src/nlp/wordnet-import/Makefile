@@ -8,4 +8,4 @@ wni: wni.o
 
 
 .c.o:
-	$(CC) -g -O2 -c $@ $^
+	$(CC) -g -O2 -c $^

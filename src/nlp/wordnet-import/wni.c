@@ -50,7 +50,27 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 	}
 }
 
-void print_nyms(char * sense_key, char * word, int sense_num, Synset *synp)
+#define SENSE(RELNAME, BLOCK) { \
+	if ((1<<RELNAME) & bitmask) \
+	{ \
+		Synset *nymp = findtheinfo_ds(word, pos, RELNAME, sense_num); \
+		if (nymp) nymp = nymp->ptrlist; \
+ \
+		while(nymp) \
+		{ \
+			printf("<!-- gloss=%s -->\n", nymp->defn); \
+			int i; \
+			for (i=0; i<nymp->wcount; i++) \
+			{ \
+				get_sense_key(buff, nymp, i); \
+				(BLOCK); \
+			} \
+			nymp = nymp->nextss; \
+		} \
+	} \
+}
+
+static void print_nyms(char * sense_key, char * word, int sense_num, Synset *synp)
 {
 	char buff[BUFSZ];
 
@@ -66,66 +86,78 @@ void print_nyms(char * sense_key, char * word, int sense_num, Synset *synp)
 	// Consult 'man 3 winintro' for details of these calls.
 	//
 	/* Hypernym */
-	if ((1<<HYPERPTR) & bitmask)
-	{
-		Synset *nymp = findtheinfo_ds(word, pos, HYPERPTR, sense_num);
-		if (nymp) nymp = nymp->ptrlist;
-
-		while(nymp)
-		{
-			printf("<!-- gloss=%s -->\n", nymp->defn);
-			int i;
-			for (i=0; i<nymp->wcount; i++)
-			{
-				get_sense_key(buff, nymp, i);
-				printf("<InheritanceLink>\n");
-				printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-				printf("   <WordSenseNode name=\"%s\" />\n", buff);
-				printf("</InheritanceLink>\n");
-			}
-			nymp = nymp->nextss;
-		}
-	}
+	SENSE (HYPERPTR, ({
+		printf("<InheritanceLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("</InheritanceLink>\n");
+	}))
 
 	/* Hyponym */
-	if ((1<<HYPOPTR) & bitmask)
-	{
-		Synset *nymp = findtheinfo_ds(word, pos, HYPOPTR, sense_num);
-		if (nymp) nymp = nymp->ptrlist;
+	SENSE (HYPOPTR, ({
+		printf("<InheritanceLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("</InheritanceLink>\n");
+	}))
 
-		while(nymp)
-		{
-			printf("<!-- gloss=%s -->\n", nymp->defn);
-			int i;
-			for (i=0; i<nymp->wcount; i++)
-			{
-				get_sense_key(buff, nymp, i);
-				printf("<InheritanceLink>\n");
-				printf("   <WordSenseNode name=\"%s\" />\n", buff);
-				printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-				printf("</InheritanceLink>\n");
-			}
-			nymp = nymp->nextss;
-		}
-	}
+	/* Similarity */
+	SENSE (SIMPTR, ({
+		printf("<SimilarityLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("</SimilarityLink>\n");
+	}))
+
+	/* Member holonym */
+	SENSE (ISMEMBERPTR, ({
+		printf("<HolonymLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("</HolonymLink>\n");
+	}))
+
+	/* Substance holonym */
+	SENSE (ISSTUFFPTR, ({
+		printf("<HolonymLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("</HolonymLink>\n");
+	}))
+
+	/* Substance holonym */
+	SENSE (ISPARTPTR, ({
+		printf("<HolonymLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("</HolonymLink>\n");
+	}))
+
+	/* Member meronym */
+	SENSE (HASMEMBERPTR, ({
+		printf("<HolonymLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("</HolonymLink>\n");
+	}))
+
+	/* Substance meronym */
+	SENSE (HASSTUFFPTR, ({
+		printf("<HolonymLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("</HolonymLink>\n");
+	}))
+
+	/* Substance meronym */
+	SENSE (HASPARTPTR, ({
+		printf("<HolonymLink>\n");
+		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("</HolonymLink>\n");
+	}))
 
 	/* Some unhandled cases */
-	if (((1<<ISMEMBERPTR) & bitmask) || ((1<<HASMEMBERPTR) & bitmask))
-	{
-		fprintf(stderr, "Warning: unhandled member meronym for %s\n", sense_key);
-	}
-	if (((1<<ISSTUFFPTR) & bitmask) || ((1<<HASSTUFFPTR) & bitmask))
-	{
-		fprintf(stderr, "Warning: unhandled substance meronym %s\n", sense_key);
-	}
-	if (((1<<ISPARTPTR) & bitmask) || ((1<<HASPARTPTR) & bitmask))
-	{
-		fprintf(stderr, "Warning: unhandled part meronym for %s\n", sense_key);
-	}
-	if ((1<<SIMPTR) & bitmask)
-	{
-		fprintf(stderr, "Warning: unhandled similarity for %s\n", sense_key);
-	}
 	if ((1<<ENTAILPTR) & bitmask)
 	{
 		fprintf(stderr, "Warning: unhandled entail for %s\n", sense_key);
