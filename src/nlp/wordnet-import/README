@@ -35,6 +35,9 @@ the API appears to be under-documented.
 
 Proposed Mapping
 ----------------
+The section proposes a mapping to pseudo-OpenCog XML. Actual OpenCog
+XML has a slightly more complex structure, and is harder to read. 
+Details for the actual XML format are given in a later section.
 
 Word senses
 -----------
@@ -205,4 +208,17 @@ To continue with the tree-bark example:
 
 WordNet as a number of other relations, including: antonyms, 
 entailment (e.g. weaning entails nursing), cause, participles, pertaining-to.
+
+Actual NMXML details
+--------------------
+Nodes that are included inside of links have a different markup 
+than free-standing nodes. Thus, the correct notation would be:
+
+   <PartOfSpeechLink>
+      <Element class="ConceptNode" name="bark_sense_23" />
+      <Element class="PartOfSpeechNode" name="noun" />
+   </PartOfSpeechLink>
+
+Furthermore, new nodes must be specified outside of a link, before they
+can be used inside of a link.
 

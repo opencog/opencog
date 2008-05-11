@@ -66,6 +66,7 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 				for (i=0; i<nymp->wcount; i++) \
 				{ \
 					get_sense_key(buff, nymp, i); \
+					printf("<WordSenseNode name=\"%s\" />\n", buff); \
 					(BLOCK); \
 				} \
 			} \
@@ -87,77 +88,79 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 	unsigned int bitmask = is_defined(word, pos);
 	// printf ("mask=%x\n", bitmask);
 
+	printf("<WordSenseNode name=\"%s\" />\n", sense_key);
+
 	// Consult 'man 3 winintro' for details of these calls.
 	//
 	/* Hypernym */
 	SENSE (HYPERPTR, ({
 		printf("<InheritanceLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</InheritanceLink>\n");
 	}))
 
 	/* Hyponym */
 	SENSE (HYPOPTR, ({
 		printf("<InheritanceLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</InheritanceLink>\n");
 	}))
 
 	/* Similarity */
 	SENSE (SIMPTR, ({
 		printf("<SimilarityLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</SimilarityLink>\n");
 	}))
 
 	/* Member holonym */
 	SENSE (ISMEMBERPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance holonym */
 	SENSE (ISSTUFFPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance holonym */
 	SENSE (ISPARTPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Member meronym */
 	SENSE (HASMEMBERPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance meronym */
 	SENSE (HASSTUFFPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance meronym */
 	SENSE (HASPARTPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <WordSenseNode name=\"%s\" />\n", sense_key);
-		printf("   <WordSenseNode name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 	}))
 
@@ -195,8 +198,8 @@ void print_synset(char * sense_key, int sense_num, Synset *synp)
 	}
 
 	printf("<PartOfSpeechLink>\n");
-	printf("   <ConceptNode name = \"%s\" />\n", sense_key);
-	printf("   <ConceptNode name = \"%s\" />\n", posstr);
+	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", sense_key);
+	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", posstr);
 	printf("</PartOfSpeechLink>\n");
 
 	printf("<!-- gloss=%s -->\n", synp->defn);
@@ -205,8 +208,8 @@ void print_synset(char * sense_key, int sense_num, Synset *synp)
 	for (i=0; i<synp->wcount; i++)
 	{
 		printf("<WordSenseLink>\n");
-		printf("   <WordNode name = \"%s\" />\n", synp->words[i]);
-		printf("   <ConceptNode name = \"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordNode\" name = \"%s\" />\n", synp->words[i]);
+		printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
 
 		print_nyms(sense_key, synp->words[i], sense_num, synp);
