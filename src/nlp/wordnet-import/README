@@ -8,10 +8,29 @@ Import the WordNet synsets into opencog.
 Design Overview
 ---------------
 
+Choice of programming API
+-------------------------
+There does not appear to be any "adequate" programming interface to
+wordnet! There are many many interfaces, and yet, none of them are
+very good, much less comprehensive!
+
+The native wordnet interface is in the "C" programming langauge.
+It does not seem to be a well-designed interface. It does not seem to
+support any means by which the entire contents of the database can be
+dumped.
+
 The use of Python, and the NLTK wordnet module was breifly explored.
 Unfortunately, the NLTK wordnet interfaces lack support for wordnet 
 sense-keys, which is crucial for properly/easily cross-indexing the
-various relations.
+various relations. The NLTK python interface is undocumented.
+
+The perl interface WordNet::QueryData does not seem to support
+sense-keys either.
+
+The perl interface Lingua-Wordnet does nt seem to support wordnet-3.0.
+
+The java interface JWNL does not seem to support wordnet-3.0, and 
+the API appears to be under-documented.
 
 
 Proposed Mapping
