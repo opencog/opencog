@@ -55,12 +55,12 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 	char buff[BUFSZ];
 
 	SnsIndex *si = GetSenseIndex(sense_key);
-	printf ("duude nym sense=%d\n", si->wnsense);
+	// printf ("nym sense=%d\n", si->wnsense);
 
 	int pos = getsspos(synp);
 
 	unsigned int bitmask = is_defined(word, pos);
-	// printf ("duude mask=%x\n", bitmask);
+	// printf ("mask=%x\n", bitmask);
 
 	/* Hypernym */
 	if ((1<<HYPERPTR) & bitmask)
@@ -109,35 +109,35 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 	/* Some unhandled cases */
 	if (((1<<ISMEMBERPTR) & bitmask) || ((1<<HASMEMBERPTR) & bitmask))
 	{
-		fprintf(stderr, "Warning: unhandled member meronym for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled member meronym for %s\n", sense_key);
 	}
 	if (((1<<ISSTUFFPTR) & bitmask) || ((1<<HASSTUFFPTR) & bitmask))
 	{
-		fprintf(stderr, "Warning: unhandled substance meronym %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled substance meronym %s\n", sense_key);
 	}
 	if (((1<<ISPARTPTR) & bitmask) || ((1<<HASPARTPTR) & bitmask))
 	{
-		fprintf(stderr, "Warning: unhandled part meronym for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled part meronym for %s\n", sense_key);
 	}
 	if ((1<<SIMPTR) & bitmask)
 	{
-		fprintf(stderr, "Warning: unhandled similarity for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled similarity for %s\n", sense_key);
 	}
 	if ((1<<ENTAILPTR) & bitmask)
 	{
-		fprintf(stderr, "Warning: unhandled entail for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled entail for %s\n", sense_key);
 	}
-	if ((1<<CAUSETOPTR) & bitmask)
+	if ((1<<CAUSETO) & bitmask)
 	{
-		fprintf(stderr, "Warning: unhandled causeto for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled causeto for %s\n", sense_key);
 	}
 	if ((1<<PPLPTR) & bitmask)
 	{
-		fprintf(stderr, "Warning: unhandled participle of verb for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled participle of verb for %s\n", sense_key);
 	}
 	if ((1<<PERTPTR) & bitmask)
 	{
-		fprintf(stderr, "Warning: unhandled pertaining for %s\n", sense_ley);
+		fprintf(stderr, "Warning: unhandled pertaining for %s\n", sense_key);
 	}
 }
 
@@ -216,17 +216,25 @@ void show_index(char * index_entry)
 
 main (int argc, char * argv[])
 {
+	char buff[BUFSZ];
 	wninit();
 
-	// open /usr/share/wordnet/index.sense
-	//
-	char buff[BUFSZ];
+#ifdef TEST_STRINGS
 	strcpy(buff, "shiny%3:00:04:: 01119421 2 0");
 	strcpy(buff, "abandon%2:40:01:: 02227741 2 6");
 	strcpy(buff, "fast%4:02:01:: 00086000 1 16");
 	strcpy(buff, "abnormal%5:00:00:immoderate:00 01533535 3 0");
 	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
+#endif
 
-	show_index(buff);
+	// open /usr/share/wordnet/index.sense
+	// FILE *fh = fopen("/usr/share/wordnet/index.sense", "r");
+	FILE *fh = fopen("/tmp/x", "r");
+	while (1)
+	{
+		char * rc = fgets(buff, BUFSZ, fh);
+		if (!rc) break;
+		show_index(buff);
+	}
 
 }
