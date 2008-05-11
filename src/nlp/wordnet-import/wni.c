@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int getpos(Synset *synp)
+#define BUFSZ 300
+
+static int getsspos(Synset *synp)
 {
 	// The value stored in *(synp->ppos) seems to be incorrect,
 	// its alwaus 1, so construct the pos from string.
@@ -31,16 +33,35 @@ static int getpos(Synset *synp)
 	return pos;
 }
 
+static void get_sense_key(char * buff, const char * wd, Synset *synp)
+{
+	if (!synp->headword)
+	{
+		sprintf(buff, "%s%%%d:%02d:%02d::",
+		              wd, getsspos(synp),
+		              synp->fnum, *(synp->lexid));
+	}
+	else
+	{
+		sprintf(buff, "%s%%%d:%02d:%02d:%s:%02d",
+		              wd, getsspos(synp),
+		              synp->fnum, *(synp->lexid),
+		              synp->headword, synp->headsense);
+	}
+}
 
 void print_nyms(char * sense_key, char * word, Synset *synp)
 {
+	char buff[BUFSZ];
+
 	SnsIndex *si = GetSenseIndex(sense_key);
 	printf ("duude nym sense=%d\n", si->wnsense);
 
-	int pos = getpos(synp);
+	int pos = getsspos(synp);
+	printf ("duude pos=%d sstype=%dn", pos, synp->sstype);
 
 	unsigned int bitmask = is_defined(word, pos);
-	printf ("duude mask=%x\n", bitmask);
+	// printf ("duude mask=%x\n", bitmask);
 
 	if ((1<<HYPERPTR) & bitmask)
 	{
@@ -54,7 +75,8 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 			int i;
 			for (i=0; i<nymp->wcount; i++)
 			{
-				printf("duude its %s\n", nymp->words[i]);
+				get_sense_key(buff, nymp->words[i], nymp);
+				printf("duude its %s\n", buff);
 			}
 			nymp = nymp->nextss;
 		}
@@ -72,8 +94,8 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 			int i;
 			for (i=0; i<nymp->wcount; i++)
 			{
-				printf("duude its %s\n", nymp->words[i]);
-				printf("duude guess %s uhh %d\n", nymp->words[i], pos);
+				get_sense_key(buff, nymp->words[i], nymp);
+				printf("duude its %s\n", buff);
 			}
 			nymp = nymp->nextss;
 		}
@@ -153,7 +175,7 @@ main (int argc, char * argv[])
 
 	// open /usr/share/wordnet/index.sense
 	//
-	char buff[120];
+	char buff[BUFSZ];
 	strcpy(buff, "shiny%3:00:04:: 01119421 2 0");
 	strcpy(buff, "abandon%2:40:01:: 02227741 2 6");
 	strcpy(buff, "fast%4:02:01:: 00086000 1 16");
