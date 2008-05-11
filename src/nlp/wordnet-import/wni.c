@@ -62,6 +62,7 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 	unsigned int bitmask = is_defined(word, pos);
 	// printf ("duude mask=%x\n", bitmask);
 
+	/* Hypernym */
 	if ((1<<HYPERPTR) & bitmask)
 	{
 		Synset *nymp = findtheinfo_ds(word, pos, HYPERPTR, si->wnsense);
@@ -83,6 +84,7 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 		}
 	}
 
+	/* Hyponym */
 	if ((1<<HYPOPTR) & bitmask)
 	{
 		Synset *nymp = findtheinfo_ds(word, pos, HYPOPTR, si->wnsense);
@@ -102,6 +104,40 @@ void print_nyms(char * sense_key, char * word, Synset *synp)
 			}
 			nymp = nymp->nextss;
 		}
+	}
+
+	/* Some unhandled cases */
+	if (((1<<ISMEMBERPTR) & bitmask) || ((1<<HASMEMBERPTR) & bitmask))
+	{
+		fprintf(stderr, "Warning: unhandled member meronym for %s\n", sense_ley);
+	}
+	if (((1<<ISSTUFFPTR) & bitmask) || ((1<<HASSTUFFPTR) & bitmask))
+	{
+		fprintf(stderr, "Warning: unhandled substance meronym %s\n", sense_ley);
+	}
+	if (((1<<ISPARTPTR) & bitmask) || ((1<<HASPARTPTR) & bitmask))
+	{
+		fprintf(stderr, "Warning: unhandled part meronym for %s\n", sense_ley);
+	}
+	if ((1<<SIMPTR) & bitmask)
+	{
+		fprintf(stderr, "Warning: unhandled similarity for %s\n", sense_ley);
+	}
+	if ((1<<ENTAILPTR) & bitmask)
+	{
+		fprintf(stderr, "Warning: unhandled entail for %s\n", sense_ley);
+	}
+	if ((1<<CAUSETOPTR) & bitmask)
+	{
+		fprintf(stderr, "Warning: unhandled causeto for %s\n", sense_ley);
+	}
+	if ((1<<PPLPTR) & bitmask)
+	{
+		fprintf(stderr, "Warning: unhandled participle of verb for %s\n", sense_ley);
+	}
+	if ((1<<PERTPTR) & bitmask)
+	{
+		fprintf(stderr, "Warning: unhandled pertaining for %s\n", sense_ley);
 	}
 }
 
@@ -133,7 +169,8 @@ void print_synset(char * sense_key, Synset *synp)
 		printf("   <WordNode name = \"%s\" />\n", synp->words[i]);
 		printf("   <ConceptNode name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
-print_nyms(sense_key, synp->words[i], synp);
+
+		print_nyms(sense_key, synp->words[i], synp);
 	}
 }
 
@@ -153,6 +190,11 @@ void show_index(char * index_entry)
 
 	// Read the synset corresponding to this line.
 	synp = read_synset(ipos, offset, NULL);
+
+	if (5 == ipos)
+	{
+		return;
+	}
 
 	if (!synp)
 	{
@@ -182,8 +224,8 @@ main (int argc, char * argv[])
 	strcpy(buff, "shiny%3:00:04:: 01119421 2 0");
 	strcpy(buff, "abandon%2:40:01:: 02227741 2 6");
 	strcpy(buff, "fast%4:02:01:: 00086000 1 16");
+	strcpy(buff, "abnormal%5:00:00:immoderate:00 01533535 3 0");
 	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
-
 
 	show_index(buff);
 
