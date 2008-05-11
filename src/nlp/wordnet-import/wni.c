@@ -10,7 +10,66 @@
 
 #include <wn.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+void print_nyms(char * sense_key, char * word, Synset *synp)
+{
+	unsigned int bitmask = is_defined(word, *synp->ppos);
+	printf ("duude mask=%x\n", bitmask);
+
+	// if ((1<<HYPERPTR) & bitmask)
+	int j;
+	for (j=0; j<32; j++)
+	{
+		SnsIndex *si = GetSenseIndex(sense_key);
+		printf ("duude hyper sense=%d pos=%d\n", si->wnsense, *synp->ppos);
+		// Synset *nymp = findtheinfo_ds(word, *synp->ppos, HYPERPTR, si->wnsense);
+		// yaSynset *nymp = findtheinfo_ds(word, 2, HYPERPTR, si->wnsense);
+		Synset *nymp = findtheinfo_ds(word, 2, j, si->wnsense);
+if (!nymp) continue;
+
+		printf("duude gloss=%s\n", nymp->defn);
+		printf("duude whichword=%d\n", nymp->whichword);
+		int i;
+		for (i=0; i<nymp->wcount; i++)
+		{
+			printf("duude its %s\n", nymp->words[i]);
+		}
+	}
+}
+
+void print_synset(char * sense_key, Synset *synp)
+{
+	char * posstr = "";
+	switch(*(synp->ppos)) // XXX this is wrong somehow
+	{
+		case NOUN: posstr = "noun"; break;
+		case VERB: posstr = "verb"; break;
+		case ADJ:  posstr = "adjective"; break;
+		case ADV:  posstr = "adverb"; break;
+		default:
+			fprintf(stderr, "Error: unknown pos %d\n", *synp->ppos);
+			exit(1);
+	}
+
+	printf("<PartOfSpeechLink>\n");
+	printf("   <ConceptNode name = \"%s\" />\n", sense_key);
+	printf("   <ConceptNode name = \"%s\" />\n", posstr);
+	printf("</PartOfSpeechLink>\n");
+
+	printf("<!-- gloss=%s -->\n", synp->defn);
+
+	int i;
+	for (i=0; i<synp->wcount; i++)
+	{
+		printf("<WordSenseLink>\n");
+		printf("   <WordNode name = \"%s\" />\n", synp->words[i]);
+		printf("   <ConceptNode name = \"%s\" />\n", sense_key);
+		printf("</WordSenseLink>\n");
+print_nyms(sense_key, synp->words[i], synp);
+	}
+}
 
 void show_index(char * index_entry)
 {
@@ -26,8 +85,6 @@ void show_index(char * index_entry)
 	p = strchr(index_entry, '%') + 1;
 	int ipos = atoi(p);
 
-	printf("sense=%s pos=%d off=%d\n", sense_key, ipos, offset);
-	
 	// Read the synset corresponding to this line.
 	synp = read_synset(ipos, offset, NULL);
 
@@ -43,17 +100,8 @@ void show_index(char * index_entry)
 		fprintf(stderr, "Error: bad offset!!\n");
 		fprintf(stderr, "sense=%s pos=%d off=%d\n", sense_key, ipos, offset);
 	}
-	printf("pos=%s\n", synp->pos);
-	printf("gloss=%s\n", synp->defn);
 
-	printf("wcount=%d\n", synp->wcount);
-
-	int i;
-	for (i=0; i<synp->wcount; i++)
-	{
-		printf ("its %s\n", synp->words[i]);
-	}
-	
+	print_synset(sense_key, synp);
 
 	free_synset(synp);
 }
@@ -67,11 +115,5 @@ main (int argc, char * argv[])
 	char buff[120];
 	strcpy(buff, "abandon%2:40:01:: 02227741 2 6");
 	show_index(buff);
-
-
-	SnsIndex *sp;
-	sp = GetSenseIndex("a_horizon%1:15:00::");
-
-	printf ("duude %p %s\n", sp, sp->word);
 
 }
