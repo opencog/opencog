@@ -35,9 +35,15 @@ Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> NMXmlParser::hyp
 bool NMXmlParser::fresh = true;
 bool NMXmlParser::freshLinks = false;
 
-//const TruthValue& NMXmlParser::DEFAULT_TV() = SimpleTruthValue(0.000001f, 0.5f);
-const TruthValue& NMXmlParser::DEFAULT_TV() {
-    static TruthValue* instance = new SimpleTruthValue(0.000001f, 0.5f);
+// If unspecified, the default truth value is "true", with confidence of 0.5
+const TruthValue& NMXmlParser::DEFAULT_TV()
+{
+    static SimpleTruthValue* instance = NULL;
+    if (instance == NULL)
+    {
+        instance = new SimpleTruthValue(1.0f, 1.0f);
+        instance->setConfidence(0.5);
+    }
     return *instance;
 }
 
