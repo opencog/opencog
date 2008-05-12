@@ -72,6 +72,9 @@ std::string CommandRequestProcessor::help(std::string topic)
          "sql-store        -- store all server data to SQL storage\n"
          "sql-load         -- load server from SQL storage\n";
 #endif
+    reply += 
+         "shutdown         -- stop the server, and exit\n";
+
     return reply;
 }
 
