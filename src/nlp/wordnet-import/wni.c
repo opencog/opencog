@@ -338,11 +338,17 @@ main (int argc, char * argv[])
 	printf("</list>\n");
 	printf("%c\n", 0x4);
 
+	int cnt = 1;
 	while (1)
 	{
 		char * rc = fgets(buff, BUFSZ, fh);
 		if (!rc) break;
+
 		show_index(buff);
+
+		// printf("<!-- %d -->\n", cnt);
+		if (cnt % 1000 == 0) fprintf(stderr, "Info: done processing %d synsets\n", cnt);
+		cnt ++;
 	}
 
 }
