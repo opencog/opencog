@@ -398,10 +398,10 @@ static void nativeEndElement(void *userData, const char *name)
                 } else {
                     char buff[300];
                     snprintf(buff, 300,
-                             "fatal error: relationship type mismatch at line %d.\n"
-                             "\tname=%s atom=%s", 
+                             "XML parse error: relationship type mismatch at line %d.\n"
+                             "\txml type=%s(%d) current atom type=%d %s", 
                              XML_GetCurrentLineNumber(ud->parser),
-                             name, currentAtom->toString().c_str());
+                             name, type, currentAtom->getType(), currentAtom->toString().c_str());
                     throw InconsistenceException(TRACE_INFO, buff);
                 }
                 pop(ud->stack);
