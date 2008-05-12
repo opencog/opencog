@@ -6,11 +6,17 @@
 Import the WordNet synsets into opencog.  
 
 The WordNet synset importer scans the wordnet data files, and prints
-NMXML to stdout. Currently, the result of such a dump is a 630MB 
-file; it is more efficient to pipe the output directly to opencog.
+NMXML to stdout. The output can be piped sent to a file, or piped
+directly to the opencog server.
 
 To dump to a file, run, at the command-line, ./wni >file
 To pipe directly to the opencog server, ./wni | telnet localhost 17001
+
+Currently, the result of such a dump is a 630MB file. It takes about
+15 minutes (on current CPU's) to dump, with the vast majority of the 
+time spent in the wordnet code. During dumping, there are many 
+warnings printed to stderr, for certain unhandled relations. These can
+be safely ignored (and used to gauge progress).
 
 The importer assumes a default location for the wordnet sense.index
 file (in /usr/share/wordnet). A different location can be specified 
