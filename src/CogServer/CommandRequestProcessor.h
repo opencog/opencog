@@ -38,6 +38,8 @@ class CommandRequestProcessor : public RequestProcessor
         std::string sql_load(void);
         std::string sql_store(void);
 
+        int load_count;
+
 #ifdef HAVE_SQL_STORAGE
         AtomStorage *store;
 #endif

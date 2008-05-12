@@ -20,6 +20,7 @@ CommandRequestProcessor::~CommandRequestProcessor()
 
 CommandRequestProcessor::CommandRequestProcessor() 
 {
+    load_count = 0;
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
 #endif /* HAVE_SQL_STORAGE */
@@ -30,7 +31,12 @@ CommandRequestProcessor::CommandRequestProcessor()
  */
 std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf)
 {
-    std::string msg = "load successful";
+    load_count ++;
+    char buff[20];
+    snprintf(buff, 20, "%d", load_count);
+    std::string msg = "xml load ";
+    msg += buff;
+    msg += " successful";
     AtomSpace *atomSpace = CogServer::getAtomSpace();
     std::vector<XMLBufferReader*> readers(1, buf);
     try {
@@ -40,7 +46,9 @@ std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf)
     // RuntimeException, for bad file format.
     catch (StandardException &e)
     {
-        msg = "xload failed: ";
+        msg = "xml load ";
+        msg += buff;
+        msg = " failed: ";
         msg += e.getMessage();
     }
     delete readers[0];
@@ -166,6 +174,8 @@ std::string CommandRequestProcessor::sql_open(std::string dbname,
     answer += username;
     answer += "\"\n";
     return answer;
+#else
+    return "";
 #endif /* HAVE_SQL_STORAGE */
 }
 
@@ -182,6 +192,8 @@ std::string CommandRequestProcessor::sql_close(void)
         return "SQL connection closed\n";
     }
     return "Warning: SQL connection not open\n";
+#else
+    return "";
 #endif /* HAVE_SQL_STORAGE */
 }
 
@@ -200,6 +212,8 @@ std::string CommandRequestProcessor::sql_load(void)
     store->load(*ap);
 
     return "SQL data loaded\n";
+#else
+    return "";
 #endif /* HAVE_SQL_STORAGE */
 }
 
@@ -216,6 +230,8 @@ std::string CommandRequestProcessor::sql_store(void)
     store->store(atomTable);
 
     return "opencog data stored to SQL\n";
+#else
+    return "";
 #endif /* HAVE_SQL_STORAGE */
 }
 
