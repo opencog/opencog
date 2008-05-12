@@ -70,8 +70,11 @@ std::string Node::toString()
 {
     char buf[BUFSZ];
     //activation here at 0: can be replace with LTI
-    snprintf(buf, BUFSZ, "node[%d:%s] (%d,%f)", 
-        type, name.c_str(), (int)getAttentionValue().getSTI(), 0.0);
+    snprintf(buf, BUFSZ, "node[%d:%s] sti:(%d,%d) tv:(%f,%f)", 
+        type, name.c_str(), 
+        (int)getAttentionValue().getSTI(),
+        (int)getAttentionValue().getLTI(),
+        getTruthValue().getMean(), getTruthValue().getConfidence());
     return buf;
 }
 

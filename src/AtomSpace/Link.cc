@@ -88,10 +88,11 @@ std::string Link::toString()
     std::string answer;
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "link[%d (%d,%f,%d) ", type,
+    snprintf(buf, BUFSZ, "link[%d sti:(%d,%d) tv:(%f,%f) ", type,
        (int)getAttentionValue().getSTI(),
-       getTruthValue().toFloat(),
-       (int)getAttentionValue().getLTI());
+       (int)getAttentionValue().getLTI(),
+       getTruthValue().getMean(),
+       getTruthValue().getConfidence());
     answer += buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
