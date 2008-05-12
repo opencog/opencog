@@ -38,7 +38,18 @@ very good, much less comprehensive!
 The native wordnet interface is in the "C" programming langauge.
 It does not seem to be a well-designed interface. It does not seem to
 support any means by which the entire contents of the database can be
-dumped.
+dumped. It has serious problems:
+-- some routines, such as GetSenseIndex, do bad mem references.
+-- some data fields, such as ppos, contain garbage data
+-- the synset structure fails to contain enough info on its own, 
+	to print related words (hypernyms, etc).
+-- the is_defined() routine is less than accurate in its return values.
+-- the code uses inconsistent naming conventions.
+-- the api is incomplete: there are no routines for building up 
+   a sense-key.
+
+However, the C api is very well-documneted; which makes it superior
+to all otehr systems.
 
 The use of Python, and the NLTK wordnet module was breifly explored.
 Unfortunately, the NLTK wordnet interfaces lack support for wordnet 

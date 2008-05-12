@@ -71,6 +71,7 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 	if ((1<<RELNAME) & bitmask) \
 	{ \
 		Synset *nymp = findtheinfo_ds(word, pos, RELNAME, sense_num); \
+		Synset *sroot = nymp; \
 		if (nymp) nymp = nymp->ptrlist; \
  \
 		while(nymp) \
@@ -88,6 +89,7 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 			} \
 			nymp = nymp->nextss; \
 		} \
+		if (sroot) free_syns(sroot); \
 	} \
 }
 
@@ -290,7 +292,8 @@ static void show_index(char * index_entry)
 
 	print_synset(sense_key, sense_num, synp);
 
-	free_synset(synp);
+	// free_synset() only frees one sysnet, not the whole chain of them.
+	free_syns(synp);
 }
 
 main (int argc, char * argv[])
