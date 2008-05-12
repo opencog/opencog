@@ -53,62 +53,7 @@ Thus, for example:
 
 The above introduces a new node type "PartOfSpeechNode", and a new link
 type: "PartOfSpeechLink".  Other possible properties might include gender,
-entity tags, and so on. This potentially leads to an explosion of 
-special-purpose nodes. For example, there are over a dozen properties
-that RelEx uses to tag words.  To avoid this explosion, the following 
-syntax will be used:
-
-   <EvaluationLink>
-     <PredicateNode name="PartOfSpeech"/>
-     <ListLink>
-       <ConceptNode name="bark_sense_23" />
-       <ConceptNode name="noun" />
-     </ListLink>
-   </EvaluationLink>
-
-[[Square brackets set off design discussions; below follows some
-commentary about alternate ways in which the above might have been
-acheived.
-
-The above specifies a triple that is to be associated together, the
-triple ("bark_sense_23", PartOfSpeech, "noun").  Another possible way
-of denoting a triple might have been:
-
-   <PropertyLink>
-     <ConceptNode name="bark_sense_23" />
-     <ListLink>
-       <ConceptNode name="PartOfSpeech"/>
-       <ConceptNode name="noun" />
-     </ListLink>
-   </PropertyLink>
-
-but this would require the invention of a new link type, "PropertyLink",
-which other parts of PLN are unaware of -- PLN already has a fairly
-established set of relations it is used to handling. Alternately, 
-
-   <MemberLink>
-     <ListLink>
-       <ConceptNode name="PartOfSpeech"/>
-       <ConceptNode name="noun" />
-     </ListLink>
-     <ConceptNode name="bark_sense_23" />
-   </MemberLink>
-
-could be useful, but this would loose the benefit of the predicate form.
-A predicate could still be created later, by making use of a link from
-the predicate name to a SatisfyingSetLink. ]]
-
-[[Per Ben, it seems desirable to *define* a new, unknow link type L to
-be
-    L A B
-    =
-    EvaluationLink
-       L
-       ListLink A B
-
-Thus, the new link type PartOfSpeechLink is understood to be
-mathematically identical to an evaluation link where the pedicate name
-is "part of speech". ]]
+entity tags, and so on. 
 
 Each of these nodes and links are assigned a truth value of 1 and a
 confidence of 1. Non-unit truth-values & confidence will be used when 
@@ -127,61 +72,9 @@ hypernym, hyponym, etc. are thus links. Since some sister terms are
 closer than others, these links will have non-unit truth values. 
 
 Hypernyms and hyponyms will be mapped to inheritance links.
-A hypernym for the wood-bark is that it is a covering of something:
 
-   <InheritanceLink strength=0.8 confidence=0.9 />
-      <WordSenseNode name="bark_sense_23" />
-      <WordSenseNode name="covering_sense_42" />
-   </InheritanceLink>
-
-A hyponym for wood-bark is that cork is a kind of bark:
-
-   <InheritanceLink strength=0.8 confidence=0.9 />
-      <WordSenseNode name="cork_sense_98" />
-      <WordSenseNode name="bark_sense_23" />
-   </InheritanceLink>
-
-Note the reversed order between the hypo- and hyper- representations.
-
-
-WordNet uses the phrase "sister term" instead of "synonym" to relate 
-similar word senses. WordNet reserves the use of "synonym" for relating
-words, not word senses. Related word senses will be linked with
-SimilarityLinks
-
-   SIMILARITY_LINK <- UNORDERED_LINK
-
-WordNet includes the idea of a holonym, namely, that something is a
-part of something else, and its converse, the meronym, that something is
-composed of parts. It furthermore subdivides these into three
-subclasses: 
--- member holonym/meronym
--- substance holonym/meronym
--- part holonym/meronym
-
-   HOLONYM_LINK <- INHERITANCE_LINK
-
-[[Making the part-of link derive from inheritance link seems dangerous,
-since WordNet does distinguish is-a and kind-of relations, whereas the
-above mapping erases it. This may need to be fixed. ]]
-
-To continue with the tree-bark example:
-
-   <!-- bark is a part of a branch -->
-   <HolonymLink strength=0.8 confidence=0.9>
-      <WordSenseNode name="bark_sense_23" />
-      <WordSenseNode name="branch_sense_2" />
-   </HolonymLink>
-
-   <!-- bark is composed of lignin -->
-   <HolonymLink strength=0.8 confidence=0.9>
-      <WordSenseNode name="lignin_sense_1" />
-      <WordSenseNode name="bark_sense_23" />
-   </HolonyLink>
-
-WordNet as a number of other relations, including: antonyms, 
-entailment (e.g. weaning entails nursing), cause, participles, pertaining-to.
-
+Details of the actual mapping used are given in greater detail 
+in the wordnet-import/README file.
 
 Sentences to meanings
 ---------------------
