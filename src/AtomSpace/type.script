@@ -172,6 +172,7 @@ FRAME_ELEMENT_LINK <- ORDERED_LINK
 
 // New wordnet-import nodes, added by Linas.
 // These are subject to change, pending review.
+WORD_SENSE_NODE <- CONCEPT_NODE
 WORD_SENSE_LINK <- ASSOCIATIVE_LINK
 PART_OF_SPEECH_LINK <- ORDERED_LINK
 HOLONYM_LINK <- INHERITANCE_LINK

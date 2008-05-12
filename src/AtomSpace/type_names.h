@@ -72,6 +72,7 @@
 #define DEFINED_FRAME_NODE_CLASS "DefinedFrameNode"
 #define DEFINED_FRAME_ELEMENT_NODE_CLASS "DefinedFrameElementNode"
 #define FRAME_ELEMENT_LINK_CLASS "FrameElementLink"
+#define WORD_SENSE_NODE_CLASS "WordSenseNode"
 #define WORD_SENSE_LINK_CLASS "WordSenseLink"
 #define PART_OF_SPEECH_LINK_CLASS "PartOfSpeechLink"
 #define HOLONYM_LINK_CLASS "HolonymLink"

@@ -3,7 +3,7 @@
 # (CMake currently can't do this) 
 #
 # To use:
-# Edit types.script, as desired. Then, simply say "make"
+# Edit type.script, as desired. Then, simply say "make -f Makefile.types"
 # and the following files will be automatically generated:
 #
 #      type_codes.h

@@ -72,6 +72,7 @@ class_to_int[(*getClassName()) [DEFINED_LINGUISTIC_RELATIONSHIP_NODE]] = DEFINED
 class_to_int[(*getClassName()) [DEFINED_FRAME_NODE]] = DEFINED_FRAME_NODE;
 class_to_int[(*getClassName()) [DEFINED_FRAME_ELEMENT_NODE]] = DEFINED_FRAME_ELEMENT_NODE;
 class_to_int[(*getClassName()) [FRAME_ELEMENT_LINK]] = FRAME_ELEMENT_LINK;
+class_to_int[(*getClassName()) [WORD_SENSE_NODE]] = WORD_SENSE_NODE;
 class_to_int[(*getClassName()) [WORD_SENSE_LINK]] = WORD_SENSE_LINK;
 class_to_int[(*getClassName()) [PART_OF_SPEECH_LINK]] = PART_OF_SPEECH_LINK;
 class_to_int[(*getClassName()) [HOLONYM_LINK]] = HOLONYM_LINK;
