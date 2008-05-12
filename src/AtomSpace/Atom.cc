@@ -96,7 +96,7 @@ Atom::~Atom() throw (RuntimeException) {
 
 bool Atom::isReal() const
 {
-    long value = (unsigned long) this;
+    unsigned long value = (unsigned long) this;
     bool real = (value >= NUMBER_OF_CLASSES);
    //if(!real){
         //fprintf(stdout, "Atom - Type: %d, Pointe converted: (%p, %d)\n", type, this, (long)this);
