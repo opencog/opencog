@@ -188,9 +188,8 @@ subclasses:
 
    HOLONYM_LINK <- INHERITANCE_LINK
 
-[[Making the part-of link derive from inheritance link seems dangerous,
-since WordNet does distinguish is-a and kind-of relations, whereas the
-above mapping erases it. This may need to be fixed. ]]
+Assigning all three subclasses to a single type of link does erase some
+of the information offered by WordNet; this may need to be revisted.
 
 To continue with the tree-bark example:
 

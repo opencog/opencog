@@ -197,6 +197,7 @@ void print_synset(char * sense_key, int sense_num, Synset *synp)
 			exit(1);
 	}
 
+	printf("<ConceptNode name = \"%s\" />\n", sense_key);
 	printf("<PartOfSpeechLink>\n");
 	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", sense_key);
 	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", posstr);
@@ -207,6 +208,7 @@ void print_synset(char * sense_key, int sense_num, Synset *synp)
 	int i;
 	for (i=0; i<synp->wcount; i++)
 	{
+		printf("<WordNode name = \"%s\" />\n", synp->words[i]);
 		printf("<WordSenseLink>\n");
 		printf("   <Element class=\"WordNode\" name = \"%s\" />\n", synp->words[i]);
 		printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", sense_key);
@@ -273,6 +275,13 @@ main (int argc, char * argv[])
 	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
 #endif
 
+	printf("data\n");
+	printf("<list>\n");
+	printf("<ConceptNode name = \"noun\" />\n");
+	printf("<ConceptNode name = \"verb\" />\n");
+	printf("<ConceptNode name = \"adjective\" />\n");
+	printf("<ConceptNode name = \"adverb\" />\n");
+
 	// open /usr/share/wordnet/index.sense
 	// The format of this file is described in 'man senseidx'
 	FILE *fh = fopen("/usr/share/wordnet/index.sense", "r");
@@ -282,5 +291,6 @@ main (int argc, char * argv[])
 		if (!rc) break;
 		show_index(buff);
 	}
+	printf("</list>\n");
 
 }
