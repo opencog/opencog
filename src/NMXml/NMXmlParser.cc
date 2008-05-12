@@ -66,6 +66,7 @@ typedef struct {
     ParserStack stack;
     Handle lastInsertedHandle;
     Status status;
+    XML_Parser parser;
 } UserData;
 
 static void push(ParserStack& ps, void* p) {
@@ -373,7 +374,7 @@ static void nativeEndElement(void *userData, const char *name)
                     }
                     // XXX FIXME:
                     // would be better if this was replaced by
-                    // if (NULL != dynamic_cast<Link *>(currentAtom)) {
+                    // if (NULL != dynamic_cast<Link *>(currentAtom)) 
                     // and also a few lines down.
                     if (ClassServer::isAssignableFrom(LINK, currentAtom->getType())) {
                         //KMI -- find out if this is a nested link
@@ -395,8 +396,13 @@ static void nativeEndElement(void *userData, const char *name)
                         }
                     }
                 } else {
-                    throw InconsistenceException(TRACE_INFO, 
-                            "fatal error: relationship type mismatch.");
+                    char buff[300];
+                    snprintf(buff, 300,
+                             "fatal error: relationship type mismatch at line %d.\n"
+                             "\tname=%s atom=%s", 
+                             XML_GetCurrentLineNumber(ud->parser),
+                             name, currentAtom->toString().c_str());
+                    throw InconsistenceException(TRACE_INFO, buff);
                 }
                 pop(ud->stack);
             }
@@ -515,6 +521,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
     }
     
     XML_Parser parser = XML_ParserCreate(NULL);
+    userData.parser = parser;
     XML_SetUserData(parser, &userData);
     XML_SetElementHandler(parser, nativeStartElement, nativeEndElement);
 
