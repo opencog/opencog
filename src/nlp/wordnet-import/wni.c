@@ -224,9 +224,9 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 			exit(1);
 	}
 
-	printf("<ConceptNode name = \"%s\" />\n", sense_key);
+	printf("<WordSenseNode name = \"%s\" />\n", sense_key);
 	printf("<PartOfSpeechLink>\n");
-	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", sense_key);
+	printf("   <Element class=\"WordSenseNode\" name = \"%s\" />\n", sense_key);
 	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", posstr);
 	printf("</PartOfSpeechLink>\n");
 
@@ -240,7 +240,7 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 		printf("<WordNode name = \"%s\" />\n", synp->words[i]);
 		printf("<WordSenseLink>\n");
 		printf("   <Element class=\"WordNode\" name = \"%s\" />\n", synp->words[i]);
-		printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
 
 		print_nyms(sense_key, synp->words[i], sense_num, synp);
@@ -290,7 +290,11 @@ static void show_index(char * index_entry)
 		fprintf(stderr, "sense=%s pos=%d off=%d\n", sense_key, ipos, offset);
 	}
 
+	printf("data\n");
+	printf("<list>\n");
 	print_synset(sense_key, sense_num, synp);
+	printf("</list>\n");
+	printf("%c\n", 0x4);
 
 	// free_synset() only frees one sysnet, not the whole chain of them.
 	free_syns(synp);
@@ -322,6 +326,7 @@ main (int argc, char * argv[])
 	strcpy(buff, "fast%4:02:01:: 00086000 1 16");
 	strcpy(buff, "abnormal%5:00:00:immoderate:00 01533535 3 0");
 	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
+	strcpy(buff, "abnormally%4:02:00:: 00227171 1 1");
 #endif
 
 	printf("data\n");
@@ -330,6 +335,8 @@ main (int argc, char * argv[])
 	printf("<ConceptNode name = \"verb\" />\n");
 	printf("<ConceptNode name = \"adjective\" />\n");
 	printf("<ConceptNode name = \"adverb\" />\n");
+	printf("</list>\n");
+	printf("%c\n", 0x4);
 
 	while (1)
 	{
@@ -337,6 +344,5 @@ main (int argc, char * argv[])
 		if (!rc) break;
 		show_index(buff);
 	}
-	printf("</list>\n");
 
 }
