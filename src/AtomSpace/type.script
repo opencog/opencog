@@ -170,6 +170,12 @@ DEFINED_FRAME_NODE <- CONCEPT_NODE
 DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
 FRAME_ELEMENT_LINK <- ORDERED_LINK
 
+// New wordnet-import nodes, added by Linas.
+// These are subject to change, pending review.
+WORD_SENSE_LINK <- ASSOCIATIVE_LINK
+PART_OF_SPEECH_LINK <- ORDERED_LINK
+HOLONYM_LINK <- INHERITANCE_LINK
+
 // Currently used to scope a RelEx links that comprise a sentence.
 // Probably needs to be re-named, redesigned.
 ASSERTION_LINK <- SET_LINK
