@@ -64,7 +64,9 @@ void CogServer::setNetworkServer(NetworkServer *networkServer) {
     this->networkServer = networkServer;
 }
 
+#ifdef MEM_DEBUG
 static char * heap_bottom;
+#endif
 
 void CogServer::serverLoop()
 {
@@ -72,7 +74,9 @@ void CogServer::serverLoop()
     if (networkServer != NULL) {
         networkServer->start();
     }
+#ifdef MEM_DEBUG
 heap_bottom=(char *)sbrk(0);
+#endif
 
     do {
         // Avoid hard spinloop when there's no work.
@@ -92,14 +96,17 @@ heap_bottom=(char *)sbrk(0);
     } while(true);
 }
 
+#ifdef MEM_DEBUG
 static int cnt = 0;
+#endif
 
 void CogServer::processRequests()
 {
     int countDown = getRequestQueueSize();
     while (countDown != 0) {
+#ifdef MEM_DEBUG
 cnt++;
-//printf("duude req %d\n", cnt);
+// printf("duude proc req %d qlen=%d\n", cnt, countDown);
 if (cnt%23456==0) {
 char *h = (char*)sbrk(0);
 size_t mem = h - heap_bottom;
@@ -107,6 +114,7 @@ mem /= 1024*1024;
 printf("cnt=%d at %d MB (%p)\n", cnt, mem, heap_bottom);
 }
 if (593060 < cnt) printf("now cnt=%d\n", cnt);
+#endif
         CogServerRequest *request = popRequest();
         request->processRequest();
         delete request;
@@ -156,7 +164,7 @@ void CogServer::pushRequest(CogServerRequest *request) {
     pthread_mutex_unlock(&messageQueueLock);
 }
 
-bool CogServer::getRequestQueueSize() {
+int CogServer::getRequestQueueSize() {
     pthread_mutex_lock(&messageQueueLock);
     int size = requestQueue.size();
     pthread_mutex_unlock(&messageQueueLock);

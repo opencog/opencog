@@ -62,7 +62,7 @@ class CogServer {
         
         CogServerRequest *popRequest();
         void pushRequest(CogServerRequest *request);
-        bool getRequestQueueSize();
+        int getRequestQueueSize();
         void setNetworkServer(NetworkServer *networkServer);
           
         // used for debug purposes in unit tests
