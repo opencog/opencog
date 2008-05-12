@@ -61,7 +61,7 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 		{ \
 			if (5 != getsspos(nymp)) \
 			{ \
-				printf("<!-- gloss=%s -->\n", nymp->defn); \
+				/* printf("<!-- gloss=%s -->\n", nymp->defn); */ \
 				int i; \
 				for (i=0; i<nymp->wcount; i++) \
 				{ \
@@ -110,7 +110,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 
 	/* Similarity */
 	SENSE (SIMPTR, ({
-		printf("<SimilarityLink>\n");
+		printf("<SimilarityLink strength=\"0.8\" confidence=\"0.95\">\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</SimilarityLink>\n");
@@ -203,7 +203,9 @@ void print_synset(char * sense_key, int sense_num, Synset *synp)
 	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", posstr);
 	printf("</PartOfSpeechLink>\n");
 
-	printf("<!-- gloss=%s -->\n", synp->defn);
+	// Don't print gloss - some glosses have double-dash, 
+	// which drives XML parser nuts.
+	// printf("<!-- gloss=%s -->\n", synp->defn);
 
 	int i;
 	for (i=0; i<synp->wcount; i++)

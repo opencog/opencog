@@ -219,5 +219,13 @@ than free-standing nodes. Thus, the correct notation would be:
    </PartOfSpeechLink>
 
 Furthermore, new nodes must be specified outside of a link, before they
-can be used inside of a link.
+can be used inside of a link. That is, one must specify 
 
+   <ConceptNode name="bark_sense_23" />
+   <PartOfSpeechNode name="noun" />
+
+before being able to use either inside a link.
+
+Truth/confidence values are specified as follows:
+
+   <SimilarityLink strength=0.8 confidence=0.9>
