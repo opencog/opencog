@@ -17,8 +17,6 @@
 
 static int getsspos(Synset *synp)
 {
-	// The value stored in *(synp->ppos) seems to be incorrect,
-	// its alwaus 1, so construct the pos from string.
 	int pos = 0;
 	switch (synp->pos[0])
 	{
@@ -34,23 +32,41 @@ static int getsspos(Synset *synp)
 	return pos;
 }
 
+/**
+ * Create a sense-key string, given a synset.
+ */
 static void get_sense_key(char * buff, Synset *synp, int idx)
 {
+	// The synp->ppos field seems to frequently contain garbage or
+	// erroneous data. Have to use getsspos instead, to get the proper
+	// part-of-speech.  This is OK, because hypernyms/hyponyms, etc. 
+	// will always have the same part of speech (right?).  This may not
+	// be true for cause-by, pertains-to, entails.
+	// 
+	// if (getsspos(synp) != synp->ppos[idx]) 
+	//    fprintf (stderr, "fail! %d %d\n", getsspos(synp), synp->ppos[idx]);
+	//
+	int pos = getsspos(synp);
 	if (!synp->headword)
 	{
 		sprintf(buff, "%s%%%d:%02d:%02d::",
-		              synp->words[idx], getsspos(synp),
+		              synp->words[idx], pos,
 		              synp->fnum, synp->lexid[idx]);
 	}
 	else
 	{
 		sprintf(buff, "%s%%%d:%02d:%02d:%s:%02d",
-		              synp->words[idx], getsspos(synp),
+		              synp->words[idx], pos,
 		              synp->fnum, synp->lexid[idx],
 		              synp->headword, synp->headsense);
 	}
 }
 
+/**
+ * Main loop for finding a relation, and printing it out.
+ * See 'man 3 wnintro' for an overview, and 'man findtheinfo'
+ * for a description of how synsets are to be navigated.
+ */
 #define SENSE(RELNAME, BLOCK) { \
 	if ((1<<RELNAME) & bitmask) \
 	{ \
@@ -75,6 +91,9 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 	} \
 }
 
+/**
+ * Print the relations between different synsets.
+ */
 static void print_nyms(char * sense_key, char * word, int sense_num, Synset *synp)
 {
 	char buff[BUFSZ];
@@ -183,7 +202,13 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 	}
 }
 
-void print_synset(char * sense_key, int sense_num, Synset *synp)
+/**
+ * Print the synset.
+ * First, print the word, and associate the word-sense index to it.
+ * Next, associate the part-of-speech to the word-sense index.
+ * Finally, traverse the set of synset relations, and print those.
+ */
+static void print_synset(char * sense_key, int sense_num, Synset *synp)
 {
 	char * posstr = "";
 	switch(synp->pos[0])
@@ -220,12 +245,16 @@ void print_synset(char * sense_key, int sense_num, Synset *synp)
 	}
 }
 
-void show_index(char * index_entry)
+/**
+ * Parse a line out from /usr/share/wordnet/index.sense
+ * The format of this line is documented in 'man index.sense'
+ * Use this line to find the corresponding sysnset.
+ * Print the synset, then delete the synset.
+ */
+static void show_index(char * index_entry)
 {
 	Synset *synp;
 
-	// Parse a line out from /usr/share/wordnet/index.sense
-	// The format of this line is documented in 'man index.sense'
 	char * p = strchr(index_entry, '%') + 1;
 	int ipos = atoi(p);
 
@@ -269,7 +298,22 @@ main (int argc, char * argv[])
 	char buff[BUFSZ];
 	wninit();
 
+	/* Default sense index location over-ridden at the command line */
+	char * sense_index = "/usr/share/wordnet/index.sense";
+	if (2 == argc) sense_index = argv[1];
+
+	// open /usr/share/wordnet/index.sense
+	// The format of this file is described in 'man senseidx'
+	FILE *fh = fopen(sense_index, "r");
+	if (!fh)
+	{
+		fprintf(stderr, "Fatal error: cannot open file %s\n", sense_index);
+		exit(1);
+	}
+
 #ifdef TEST_STRINGS
+	// Some sample strings, typical of what is encountered in
+	// the index.sense file.
 	strcpy(buff, "shiny%3:00:04:: 01119421 2 0");
 	strcpy(buff, "abandon%2:40:01:: 02227741 2 6");
 	strcpy(buff, "fast%4:02:01:: 00086000 1 16");
@@ -284,9 +328,6 @@ main (int argc, char * argv[])
 	printf("<ConceptNode name = \"adjective\" />\n");
 	printf("<ConceptNode name = \"adverb\" />\n");
 
-	// open /usr/share/wordnet/index.sense
-	// The format of this file is described in 'man senseidx'
-	FILE *fh = fopen("/usr/share/wordnet/index.sense", "r");
 	while (1)
 	{
 		char * rc = fgets(buff, BUFSZ, fh);

@@ -5,6 +5,27 @@
 
 Import the WordNet synsets into opencog.  
 
+The WordNet synset importer scans the wordnet data files, and prints
+NMXML to stdout. Currently, the result of such a dump is a 630MB 
+file; it is more efficient to pipe the output directly to opencog.
+
+To dump to a file, run, at the command-line, ./wni >file
+To pipe directly to the opencog server, ./wni | telnet localhost 17001
+
+The importer assumes a default location for the wordnet sense.index
+file (in /usr/share/wordnet). A different location can be specified 
+on the command-line.
+
+Building the importer requires wordnet to be installed; it makes
+use of the wordnet programming API.
+
+As of May 2008, the importer appears to work well, generating the 
+XML markup explained below.  The generated XML is suitable for 
+current needs, but may evolves as requirements change. For example,
+the importer does not handle all relationships; in particular, it
+ignores "pertaining to", "caused by" and "entails" relationships.
+
+
 Design Overview
 ---------------
 
@@ -33,9 +54,9 @@ The java interface JWNL does not seem to support wordnet-3.0, and
 the API appears to be under-documented.
 
 
-Proposed Mapping
-----------------
-The section proposes a mapping to pseudo-OpenCog XML. Actual OpenCog
+Wordnet-to-Opencog Mapping
+--------------------------
+The section proposes a mapping to OpenCog pseudo-XML. Actual OpenCog
 XML has a slightly more complex structure, and is harder to read. 
 Details for the actual XML format are given in a later section.
 
