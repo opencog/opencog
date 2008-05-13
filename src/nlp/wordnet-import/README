@@ -12,11 +12,9 @@ directly to the opencog server.
 To dump to a file, run, at the command-line, ./wni >file
 To pipe directly to the opencog server, ./wni | telnet localhost 17001
 
-Currently, the result of such a dump is a 630MB file. It takes about
-15 minutes (on current CPU's) to dump, with the vast majority of the 
-time spent in the wordnet code. During dumping, there are many 
-warnings printed to stderr, for certain unhandled relations. These can
-be safely ignored (and used to gauge progress).
+During dumping, there are many warnings printed to stderr, for certain 
+unhandled relations. These can be safely ignored (and used to gauge 
+progress).
 
 The importer assumes a default location for the wordnet sense.index
 file (in /usr/share/wordnet). A different location can be specified 
@@ -30,6 +28,27 @@ XML markup explained below.  The generated XML is suitable for
 current needs, but may evolves as requirements change. For example,
 the importer does not handle all relationships; in particular, it
 ignores "pertaining to", "caused by" and "entails" relationships.
+
+The wordnet database contains about 207 thousand word senses, 
+arranged into 37MB of flat-ascii files; this works out to about
+180 Bytes per word-sense.
+
+Currently, dumping to a file results in a 630MB file. This works
+out to about 3KB of XML per word-sense -- no surprise; XML is 
+verbose.
+
+It takes about 15 minutes (on current CPU's) to dump, most of the 
+time spent in the wordnet code (as opposed to opencog code). 
+
+The opencog server will grow to about 2.6 gigabytes! while reading
+the full dataset. This works out to about 12KB of opencog atoms per
+word sense.
+
+To reduce mem usage, the "skip_colocations" flag was added to skip
+over all colocations in wordnet. There appear to be about 120K 
+word senses that are not colocations.  Loading these into opencog
+resulted in 1.04GBytes of RAM usage (Intel, 32bit mode), or 8.7KB
+of opencog atoms per word sense.
 
 
 Design Overview

@@ -15,6 +15,18 @@
 
 #define BUFSZ 300
 
+/**
+ * Skip processing of colocations if this flag is set to 1
+ */
+static int skip_colocations = 1;
+
+static int do_export(const char * word)
+{
+	if (0 == skip_colocations) return 1;
+	char * p = strchr(word, '_');
+	return (p == NULL);
+}
+
 static int getsspos(Synset *synp)
 {
 	int pos = 0;
@@ -82,6 +94,7 @@ static void get_sense_key(char * buff, Synset *synp, int idx)
 				int i; \
 				for (i=0; i<nymp->wcount; i++) \
 				{ \
+					if (0 == do_export(nymp->words[i])) continue; \
 					get_sense_key(buff, nymp, i); \
 					printf("<WordSenseNode name=\"%s\" />\n", buff); \
 					(BLOCK); \
@@ -237,6 +250,8 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 	int i;
 	for (i=0; i<synp->wcount; i++)
 	{
+		if (0 == do_export(synp->words[i])) continue;
+
 		printf("<WordNode name = \"%s\" />\n", synp->words[i]);
 		printf("<WordSenseLink>\n");
 		printf("   <Element class=\"WordNode\" name = \"%s\" />\n", synp->words[i]);
@@ -253,9 +268,11 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
  * Use this line to find the corresponding sysnset.
  * Print the synset, then delete the synset.
  */
-static void show_index(char * index_entry)
+static int show_index(char * index_entry)
 {
 	Synset *synp;
+
+	if (!do_export(index_entry)) return -1;
 
 	char * p = strchr(index_entry, '%') + 1;
 	int ipos = atoi(p);
@@ -274,14 +291,14 @@ static void show_index(char * index_entry)
 
 	if (5 == ipos)
 	{
-		return;
+		return -2;
 	}
 
 	if (!synp)
 	{
 		fprintf(stderr, "Error: failed to find sysnset!!\n");
 		fprintf(stderr, "sense=%s pos=%d off=%d\n", sense_key, ipos, offset);
-		return;
+		return -3;
 	}
 
 	if (synp->hereiam != offset)
@@ -298,6 +315,8 @@ static void show_index(char * index_entry)
 
 	// free_synset() only frees one sysnet, not the whole chain of them.
 	free_syns(synp);
+
+	return 0;
 }
 
 main (int argc, char * argv[])
@@ -338,17 +357,18 @@ main (int argc, char * argv[])
 	printf("</list>\n");
 	printf("%c\n", 0x4);
 
-	int cnt = 1;
+	int cnt = 0;
 	while (1)
 	{
-		char * rc = fgets(buff, BUFSZ, fh);
-		if (!rc) break;
+		char * p = fgets(buff, BUFSZ, fh);
+		if (!p) break;
 
-		show_index(buff);
+		int rc = show_index(buff);
+		if (0 == rc) cnt ++;
 
 		// printf("<!-- %d -->\n", cnt);
-		if (cnt % 1000 == 0) fprintf(stderr, "Info: done processing %d synsets\n", cnt);
-		cnt ++;
+		if (cnt % 1000 == 0) fprintf(stderr, "Info: done processing %d word senes\n", cnt);
 	}
 
+	fprintf(stderr, "Info: finished loading %d word senses\n", cnt);
 }
