@@ -131,7 +131,7 @@ public:
       std::vector<Handle> temp(2);
       temp[0]=h[i];
       temp[1]=h[4];
-      FU[i]=atomSpace->addLink(PART_OF_LINK,temp,SimpleTruthValue(ForceUser[i],SimpleTruthValue::confidenceToCount(0.99)));
+      FU[i]=atomSpace->addLink(SCHEMA_EXECUTION_LINK,temp,SimpleTruthValue(ForceUser[i],SimpleTruthValue::confidenceToCount(0.99)));
     }
     //printf("ForceUser links created\n");
 
@@ -301,7 +301,7 @@ public:
                 }
             }
         }
-        // Note: PART_OF_LINK is a subType of INHERITANCE_LINK
+        // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
         HandleSeq links;
         atomSpace->getHandleSet(back_inserter(links), ATOM, "", true, vh);
         printf("1) links.size() = %d Expected = %d\n", links.size(), (vhIdx == 0?8:2));
@@ -323,11 +323,11 @@ public:
         //printf("5) justInhLinks.size() = %d\n", justInhLinks.size());
         TS_ASSERT(justInhLinks.size() == (vhIdx == 0?4:1));
         HandleSeq partOfLinks;
-        atomSpace->getHandleSet(back_inserter(partOfLinks), PART_OF_LINK, "", true, vh);
+        atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, "", true, vh);
         //printf("6) partOfLinks.size() = %d\n", partOfLinks.size());
         TS_ASSERT(partOfLinks.size() == (vhIdx == 0?4:1));
         partOfLinks.clear();
-        atomSpace->getHandleSet(back_inserter(partOfLinks), PART_OF_LINK, "", false, vh);
+        atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, "", false, vh);
         //printf("7) partOfLinks.size() = %d\n", partOfLinks.size());
         TS_ASSERT(partOfLinks.size() == (vhIdx == 0?4:1));
     }
