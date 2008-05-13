@@ -35,6 +35,7 @@ void QueryProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
 	
+// XXX AssertionLink's are not currently generateed by Relex ... 
 	// Look for recently asserted assertions.
 	atom_space->foreach_handle_of_type("AssertionLink", 
 	                       &QueryProcessor::do_assertion, this);
@@ -56,7 +57,7 @@ bool QueryProcessor::do_assertion(Handle h)
 	printf ("duuuude found assertion %d handle=%lu\n", cnt, (unsigned long) h);
 
 	// If this assertion is a query, try to answer it.
-// #define USE_RELEX_QUERY 1
+#define USE_RELEX_QUERY 1
 #ifdef USE_RELEX_QUERY
 	RelexQuery rlx;
 	if (rlx.is_query(h))

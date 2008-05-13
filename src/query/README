@@ -1,12 +1,18 @@
-                        query
-                        -----
-        Author: Linas vepstas <linasvepstas@gmail.com>
-        Revision of 18 March 2008
+                    query processng
+                    ---------------
+        Linas Vepstas <linasvepstas@gmail.com>
+                  Created 18 March 2008
+                  Revised on 13 May 2008
 
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to perform query processing.
 The first part of the file describes the generic algorithm; the second
 part describes its application to query processing.
+
+XXX As of 13 may, minor changes to the relex output breaks the query
+processing part of the code; basicially, individual sentences are
+no longer surrounded by "AssertionLink". An alternate machanism 
+should be devised. This shouldn't be hard.
 
 
 Subgraph Isomorphism Discovery

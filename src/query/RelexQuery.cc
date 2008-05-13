@@ -348,20 +348,22 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
  * The actual determination of whether some concept is
  * represented by some word is fragily dependent on the
  * actual nature of concept representation in the
- * relex-to-opencog mapping. Intil this is placed into
- * concrete, its inhherently fragile.  This is subject
+ * relex-to-opencog mapping. Until this is placed into
+ * concrete, its inherently fragile.  This is subject
  * to change, if the relex-to-opencog mapping changes.
  * XXX
+ *
+ * Current mapping is:
+ *   <ReferenceLink>
+ *      <WordNode name="#bark">
+ *      <ConceptNode name="bark_169" />
+ *   </ReferenceLink>
+ *
  */
 bool RelexQuery::is_word_instance(Atom *atom, const char * word)
 {
-	// Look for incoming links that are InheritanceLinks.
-	// The "generalized concept" for this should be at the far end.
-	Atom *cncpt = fl.follow_binary_link(atom, INHERITANCE_LINK);
-	if (!cncpt) return false;
-
-	// and we want the "word" associated with this general concept.
-	Atom *wrd = fl.backtrack_binary_link(cncpt, WR_LINK);
+	// We want the word-node associated with this word instance.
+	Atom *wrd = fl.backtrack_binary_link(atom, REFERENCE_LINK);
 	if (!wrd) return false;
 
 	Node *n = dynamic_cast<Node *>(wrd);
