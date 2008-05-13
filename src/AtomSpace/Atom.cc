@@ -23,23 +23,23 @@
 
 #undef Type
 
-void Atom::init(Type type, const std::vector<Handle>& outgoing, const TruthValue& tv )
+void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
 {
     // resets all flags
     flags = 0;
 
     atomTable = NULL;
 
+    incoming = NULL;
+    type = t;
+
 #ifndef PUT_OUTGOING_SET_IN_LINKS
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
-    this->outgoing = NULL;
-    this->arity = 0; // not really needed
+    outgoing = NULL;
+    arity = 0; // not really needed
 #endif
-    setOutgoingSet(outgoing); // need to call the method to handle specific subclass case
+    setOutgoingSet(outg); // need to call the method to handle specific subclass case
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    this->incoming = NULL;
-    this->type = type;
 
     //// sets default values
     //rawSetHeat(Defaults::getDefaultHeat(type));
