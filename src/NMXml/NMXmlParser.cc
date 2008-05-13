@@ -251,9 +251,10 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             Atom* currentAtom = (Atom*) top(ud->stack);
             if (currentAtom != NULL) {
                 //printf("Getting link element inside currentAtom = %p\n", currentAtom);
-                if (ClassServer::isAssignableFrom(LINK,currentAtom->getType())){
+                Link *link = dynamic_cast<Link *>(currentAtom);
+                if (link) {
                     if (r != NULL) {
-                        NMXmlParser::addOutgoingAtom(currentAtom, UNDEFINED_HANDLE);
+                        NMXmlParser::addOutgoingAtom(link, UNDEFINED_HANDLE);
                     } else {
                         throw RuntimeException(TRACE_INFO, "fatal error: NULL inner link");
                     }
@@ -300,7 +301,10 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                 h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
 //            printf(" => h = %p\n", h);
             if (!TLB::isInvalidHandle(h)) {
-                NMXmlParser::addOutgoingAtom(currentAtom, h);
+                Link *link = dynamic_cast<Link *>(currentAtom);
+                if (link) {
+                    NMXmlParser::addOutgoingAtom(link, h);
+                }
             } else {
 #ifdef THROW_EXCEPTIONS
                 throw RuntimeException(TRACE_INFO, 
@@ -347,12 +351,11 @@ static void nativeEndElement(void *userData, const char *name)
                     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently... 
-                        std::vector<Handle> outgoing;
                         Link *link = dynamic_cast<Link *>(currentAtom);
                         if (link) {
-                           outgoing = link->getOutgoingSet();
+                           std::vector<Handle> outgoing = link->getOutgoingSet();
+                           NMXmlParser::setOutgoingSet(link, outgoing); 
                         }
-                        NMXmlParser::setOutgoingSet(currentAtom, outgoing); 
                     }
                     Handle oldHandle = TLB::getHandle(currentAtom);
 //                    timeval s1;
@@ -398,7 +401,7 @@ static void nativeEndElement(void *userData, const char *name)
                                     break;
                                 }
                             }
-                            NMXmlParser::setOutgoingSet(nextUd, outgoingSet);
+                            NMXmlParser::setOutgoingSet(nextlink, outgoingSet);
                         }
                     }
                 } else {
@@ -436,12 +439,12 @@ void NMXmlParser::setNodeName(Node* node, const char* name) {
     node->setName(name);
 }
 
-void NMXmlParser::addOutgoingAtom(Atom* atom, Handle h) {
-    atom->addOutgoingAtom(h);
+void NMXmlParser::addOutgoingAtom(Link * link, Handle h) {
+    link->addOutgoingAtom(h);
 }
 
-void NMXmlParser::setOutgoingSet(Atom* atom, const std::vector<Handle>& outgoing) {
-    atom->setOutgoingSet(outgoing);
+void NMXmlParser::setOutgoingSet(Link * link, const std::vector<Handle>& outgoing) {
+    link->setOutgoingSet(outgoing);
 }
 
 HandleEntry* 

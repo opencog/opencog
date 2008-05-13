@@ -19,6 +19,7 @@
 #include "exceptions.h"
 #include "XMLBufferReader.h"
 
+#include <Link.h>
 #include <Node.h>
 #include <vector>
 #include <AtomSpace.h>
@@ -119,14 +120,14 @@ class NMXmlParser {
      * @param Atom to have its outgoing set changed.
      * @param Handle to be added to the outgoing set.
      */
-    static void addOutgoingAtom(Atom*, Handle);
+    static void addOutgoingAtom(Link*, Handle);
     
     /**
       * Sets the outgoing set of the given atom using the given const reference to a vector of handles.
       * This method can be called only if the atom is not inserted in an AtomTable yet.
       * Otherwise, it throws a RuntimeException.
       */
-    static void setOutgoingSet(Atom*, const std::vector<Handle>&);
+    static void setOutgoingSet(Link*, const std::vector<Handle>&);
     
 };
 
