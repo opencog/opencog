@@ -57,10 +57,6 @@ class Node : public Atom
          */
         const std::string& getName() const;
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
-        virtual Arity getArity() const;
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
         /*
          * @param Node name A reference to a std::string with the name
          *             of the node.  Use empty string for unamed node.

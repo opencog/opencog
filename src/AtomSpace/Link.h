@@ -80,7 +80,9 @@ class Link : public Atom
         ~Link() throw ();
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
-        virtual Arity getArity() const;
+        inline Arity getArity() const {
+            return outgoing.size();
+        }
 
         /**
          * Returns a const reference to the array containing this

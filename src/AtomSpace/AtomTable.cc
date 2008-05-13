@@ -676,11 +676,11 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         existingHandle = getHandle(nnn->getName().c_str(), atom->getType());
     } else if (lll) {
         // New link may already exist.
-        std::vector<Handle> outgoing(atom->getArity());
-        for(int i = 0; i < atom->getArity(); i++) {
-             outgoing[i] = atom->getOutgoingSet()[i];
+        std::vector<Handle> outgoing(lll->getArity());
+        for(int i = 0; i < lll->getArity(); i++) {
+             outgoing[i] = lll->getOutgoingSet()[i];
         }
-        HandleEntry* head = getHandleSet(outgoing, NULL, NULL, atom->getArity(), atom->getType(), false);
+        HandleEntry* head = getHandleSet(outgoing, NULL, NULL, lll->getArity(), atom->getType(), false);
         // if the link handle already exists.
         if (head != NULL) {
             // gets the existing handle
@@ -702,7 +702,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 #ifdef USE_ATOM_HASH_SET    
     // Adds to the hash_set
     // printf("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode()); 
-    // printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), atom->getArity());
+    // printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), lll->getArity());
     // NMPrinter p;
     // p.print(atom);
     // printf("%s\n", atom->toString().c_str());
@@ -711,11 +711,14 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 #endif    
 
     // Checks for null outgoing set members.
-    const std::vector<Handle>& ogs = atom->getOutgoingSet();
-    for (int i = atom->getArity() - 1; i >= 0; i--) {
-        if (TLB::isInvalidHandle(ogs[i])) {
-            throw RuntimeException(TRACE_INFO, 
-                  "AtomTable - Attempting to insert atom with invalid (null) outgoing members");
+    Link *link = dynamic_cast<Link *>(atom);
+    if (link) {
+        const std::vector<Handle>& ogs = link->getOutgoingSet();
+        for (int i = link->getArity() - 1; i >= 0; i--) {
+            if (TLB::isInvalidHandle(ogs[i])) {
+                throw RuntimeException(TRACE_INFO, 
+                      "AtomTable - Attempting to insert link with invalid (null) outgoing members");
+            }
         }
     }
 
@@ -778,9 +781,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     }
 
     // Updates incoming set of all targets.
-    if (dont_defer_incoming_links) {
-        for (int i = 0; i < atom->getArity(); i++) {
-            atom->getOutgoingAtom(i)->addIncomingHandle(handle);
+    if (dont_defer_incoming_links && (link != NULL)) {
+        for (int i = 0; i < link->getArity(); i++) {
+            link->getOutgoingAtom(i)->addIncomingHandle(handle);
         }
     }
 
@@ -952,10 +955,13 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
     // remove from incoming sets
     Handle atomHandle = TLB::getHandle(atom);
 
-    int arity = atom->getArity();
-    for (int i = 0; i < arity; i++) {
-        Atom* target = atom->getOutgoingAtom(i);
-        target->removeIncomingHandle(atomHandle);
+    Link * link = dynamic_cast<Link *>(atom);
+    if (link) {
+        int arity = link->getArity();
+        for (int i = 0; i < arity; i++) {
+            Atom* target = link->getOutgoingAtom(i);
+            target->removeIncomingHandle(atomHandle);
+        }
     }
     
     //printf("AtomTable::extract(): after removing from Network\n");
@@ -1241,13 +1247,16 @@ void AtomTable::scrubIncoming(void)
         Handle handle = TLB::getHandle(atom);
 
         // Updates incoming set of all targets.
-        for (int i = 0; i < atom->getArity(); i++)
-        {
-            Atom *oa = atom->getOutgoingAtom(i);
-            HandleEntry *he = oa->getIncomingSet();
-            if (false == he->contains(handle))
+        Link * link = dynamic_cast<Link *>(atom);
+        if (link) {
+            for (int i = 0; i < link->getArity(); i++)
             {
-                oa->addIncomingHandle(handle);
+                Atom *oa = link->getOutgoingAtom(i);
+                HandleEntry *he = oa->getIncomingSet();
+                if (false == he->contains(handle))
+                {
+                    oa->addIncomingHandle(handle);
+                }
             }
         }
     }

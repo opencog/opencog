@@ -389,7 +389,10 @@ HandleSeq AtomSpace::getOutgoing(Handle h) const
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    return TLB::getAtom(h)->getOutgoingSet();
+    HandleSeq hs;
+    Link *link = dynamic_cast<Link *>(TLB::getAtom(h));
+    if (!link) return hs;
+    return link->getOutgoingSet();
 }
 
 Handle AtomSpace::addNode(Type t,const string& name,const TruthValue& tvn) {

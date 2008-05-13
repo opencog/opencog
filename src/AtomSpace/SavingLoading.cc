@@ -500,7 +500,8 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         CoreUtils::updateHandle(&p->handle, handles);
     }
 
-    if (atom->getArity() > 0) {
+    Link *link = dynamic_cast<Link *>(atom);
+    if (link && (link->getArity() > 0)) {
         //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: outgoing set");
         AtomTable& atomTable = *(atom->getAtomTable());
         
@@ -508,15 +509,15 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         atomTable.atomSet->erase(atom);
 //        printf("AtomTable[%d]::atomSet->erase(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
         // updates the handles for the atom outgoing set
-        for (int i = 0; i < atom->getArity(); i++) {
-            CoreUtils::updateHandle(&(atom->outgoing[i]), handles);
+        for (int i = 0; i < link->getArity(); i++) {
+            CoreUtils::updateHandle(&(link->outgoing[i]), handles);
         }
 
         if (ClassServer::isAssignableFrom(UNORDERED_LINK, atom->type)) {
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
-            std::sort(atom->outgoing.begin(), atom->outgoing.end(), CoreUtils::HandleComparison());
+            std::sort(link->outgoing.begin(), link->outgoing.end(), CoreUtils::HandleComparison());
 #else
-            qsort(atom->outgoing, atom->getArity(), sizeof(Handle), CoreUtils::handleCompare);
+            qsort(link->outgoing, link->getArity(), sizeof(Handle), CoreUtils::handleCompare);
 #endif        
         }
 

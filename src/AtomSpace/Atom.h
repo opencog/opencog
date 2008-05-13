@@ -162,10 +162,8 @@ class Atom {
          *
          * @return The arity of the atom.
          */
-#ifdef PUT_OUTGOING_SET_IN_LINKS
-        virtual Arity getArity(void) const = 0;
-#else
-        inline Arity getArity(void) const{
+#ifndef PUT_OUTGOING_SET_IN_LINKS
+        inline Arity getArity(void) const {
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
             return outgoing.size();
 #else

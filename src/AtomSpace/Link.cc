@@ -44,13 +44,6 @@ Link::~Link() throw ()
     //printf("Link::~Link() end\n");
 }
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
-Arity Link::getArity() const
-{
-	return outgoing.size();
-}
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
 void Link::setTrail(Trail* t)
 {
     if (trail) {

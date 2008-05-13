@@ -34,13 +34,6 @@ Node::~Node() throw ()
 //    fflush(stdout);
 }
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
-Arity Node::getArity() const
-{
-	return 0;
-}
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
 const std::string& Node::getName() const
 {
     return name;
