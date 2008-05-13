@@ -12,6 +12,31 @@ second section discusses how various different ideas of "word-sense"
 are associated with a parsed sentence, and the algorithms that can
 be used to perform the actual disambiguation. 
 
+Preliminary comments
+--------------------
+Per current conversations with Ben Goertzel, new links introduced in
+the text below should be understodd to be a kind of predicate. That is,
+a link of the form
+
+   <BlahLink>
+      <Node name="AAA" />
+      <Node name="BBB" />
+   </BlahLink>
+
+is to be understood to be equivalent to 
+
+   <EvaluationLink>
+     <PredicateNode name="Blah"/>
+     <ListLink>
+       <Node name="AAA" />
+       <Node name="BBB" />
+     </ListLink>
+   </EvaluationLink>
+
+Although opencog does not currently handle this equivalance in a 
+transparent fashion, this is the long-term intention.  Thus, the text
+below will mix these two different representation forms.
+
 Word senses
 -----------
 Associated with every word is a list of possible senses.
@@ -334,13 +359,13 @@ a single sentence. This may be accomplished by declaring a sentence:
 and associating it with each parse:
 
    <ParseLink>
-      <ConceptNode name="sentence_22" strength=0.9 confidence=0.6/>
       <ConceptNode name="parse_1" strength=0.9 confidence=0.6/>
+      <ConceptNode name="sentence_22" />
    </ParseLink>
 
    <ParseLink>
-      <ConceptNode name="sentence_22" strength=0.9 confidence=0.6/>
       <ConceptNode name="parse_2" strength=0.8 confidence=0.5/>
+      <ConceptNode name="sentence_22" />
    </ParseLink>
 
 and so on.
