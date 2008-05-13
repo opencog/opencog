@@ -347,7 +347,11 @@ static void nativeEndElement(void *userData, const char *name)
                     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently... 
-                        std::vector<Handle> outgoing = currentAtom->getOutgoingSet();
+                        std::vector<Handle> outgoing;
+                        Link *link = dynamic_cast<Link *>(currentAtom);
+                        if (link) {
+                           outgoing = link->getOutgoingSet();
+                        }
                         NMXmlParser::setOutgoingSet(currentAtom, outgoing); 
                     }
                     Handle oldHandle = TLB::getHandle(currentAtom);
@@ -383,9 +387,11 @@ static void nativeEndElement(void *userData, const char *name)
                         //printf("Getting link element inside nextUd = %p\n", nextUd);
                         //printf("(3) Pushing currentAtom = %p\n", currentAtom);
                         push(ud->stack, currentAtom);
-                        if ((nextUd != NULL)&&(ClassServer::isAssignableFrom(LINK, nextUd->getType()))){
-                            int arity = nextUd->getArity();
-                            std::vector<Handle> outgoingSet = nextUd->getOutgoingSet();
+
+                        Link *nextlink = dynamic_cast<Link *>(nextUd);
+                        if (nextlink != NULL) {
+                            int arity = nextlink->getArity();
+                            std::vector<Handle> outgoingSet = nextlink->getOutgoingSet();
                             for (int i = 0; i < arity; i++) {
                                 if (TLB::isInvalidHandle(outgoingSet[i])) {
                                     outgoingSet[i] = newHandle;

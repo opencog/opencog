@@ -5,6 +5,7 @@
  * Copyright(c) 2004 Vettatech Technologies
  * All rights reserved.
  */
+#include "Link.h"
 #include "NMXmlExporter.h"
 #include "NMXmlDefinitions.h"
 
@@ -37,9 +38,13 @@ HandleSet *NMXmlExporter::findExportables(HandleEntry *seed){
 	return(exportables);
 }
 
-void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalLinks, Atom *atom){
-	for (int i = 0; i < atom->getArity(); i++){
-		Handle h = atom->getOutgoingSet()[i];
+void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalLinks, Atom *atom)
+{
+	Link *link = dynamic_cast<Link *>(atom);
+	if (link == NULL) return;
+
+	for (int i = 0; i < link->getArity(); i++){
+		Handle h = link->getOutgoingSet()[i];
 		exportables->add(h);
 		
 		Atom *newAtom = TLB::getAtom(h);
@@ -105,9 +110,12 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
 		sprintf(aux,">\n");
 		result += aux;
 
-		for (int i = 0; i < atom->getArity(); i++){
-			exportAtom(atom->getOutgoingSet()[i], typesUsed, result, true);
-		}
+	   Link *link = dynamic_cast<Link *>(atom);
+	   if (link) {
+		   for (int i = 0; i < link->getArity(); i++){
+			   exportAtom(link->getOutgoingSet()[i], typesUsed, result, true);
+		   }
+      }
 		sprintf(aux,"</%s>\n", ClassServer::getTypeName(atom->getType()));
 		result += aux;
 	}
