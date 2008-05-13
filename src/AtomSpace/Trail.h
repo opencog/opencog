@@ -11,6 +11,8 @@
 
 
 #include <deque>
+#include <exception>
+
 #include "types.h"
 #include "exceptions.h"
 
@@ -21,14 +23,14 @@ class Trail {
         int maxSize;
         deque<Handle>* trail;
 
-        void init(int,int) throw (InvalidParamException);
+        void init(int,int) throw (InvalidParamException, std::bad_exception);
 
     public:
 
         
-        Trail() throw (InvalidParamException);
-        Trail(int) throw (InvalidParamException);
-        Trail(int,int) throw (InvalidParamException);
+        Trail() throw (InvalidParamException, std::bad_exception);
+        Trail(int) throw (InvalidParamException, std::bad_exception);
+        Trail(int,int) throw (InvalidParamException, std::bad_exception);
 
         ~Trail();
 
@@ -43,7 +45,7 @@ class Trail {
         void print();
         void print(FILE*);
 
-        Handle getElement(int) throw (IndexErrorException);
+        Handle getElement(int) throw (IndexErrorException, std::bad_exception);
 };
 
 #endif
