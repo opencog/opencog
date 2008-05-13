@@ -324,6 +324,27 @@ discussion above. It will be abandoned shortly!?
 
 ------]]
 
+Sentence identification
+-----------------------
+Multiple alternate parses of a sentence should be associated with
+a single sentence. This may be accomplished by declaring a sentence:
+
+   <ConceptNode name="sentence_22" strength=0.9 confidence=0.6/>
+
+and associating it with each parse:
+
+   <ParseLink>
+      <ConceptNode name="sentence_22" strength=0.9 confidence=0.6/>
+      <ConceptNode name="parse_1" strength=0.9 confidence=0.6/>
+   </ParseLink>
+
+   <ParseLink>
+      <ConceptNode name="sentence_22" strength=0.9 confidence=0.6/>
+      <ConceptNode name="parse_2" strength=0.8 confidence=0.5/>
+   </ParseLink>
+
+and so on.
+
 
 Word concepts
 -------------
