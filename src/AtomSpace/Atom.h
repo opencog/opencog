@@ -15,7 +15,8 @@
 #include "HandleEntry.h"
 #include "AttentionValue.h"
 
-//#define USE_STD_VECTOR_FOR_OUTGOING
+// #define USE_STD_VECTOR_FOR_OUTGOING
+// #define PUT_OUTGOING_SET_IN_LINKS
 
 
 typedef struct _predicateIndexStruct {
@@ -43,10 +44,12 @@ class Atom {
         // Called by constructors to init this object
         void init(Type, const std::vector<Handle>&, const TruthValue&);
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
         // Adds a new handle to the outgoing set. Note that this is
         // used only in the NativeParser friend class, and, due to
         // performance issues, it should not be used anywhere else...
         void addOutgoingAtom(Handle h);
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         // Used by AtomTable::decayShortTermImportance() and
         // by EconomicAttentionAllocation.
@@ -67,22 +70,25 @@ class Atom {
         // properties
 
         Type type;
-#ifndef USE_STD_VECTOR_FOR_OUTGOING
-        Arity arity;
-#endif
+
         AtomTable *atomTable;
 
         // connectivity
 
         // Linked-list that dynamically changes as new atoms are inserted.
         HandleEntry *incoming;
+
+
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
         // Array that does not change during atom lifespan.
         std::vector<Handle> outgoing;
 #else
+        Arity arity;
         // Pointer array that does not change during atom lifespan.
         Handle *outgoing;
 #endif
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         // indices
         Handle* indices;
@@ -113,6 +119,7 @@ class Atom {
         Handle getNextHandleInPredicateIndex(int index) const;
         void setNextHandleInPredicateIndex(int index, Handle nextHandle);
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
         /**
           * Sets the outgoing set of the atom
           * This method can be called only if the atom is not inserted
@@ -121,6 +128,7 @@ class Atom {
           */
         virtual void setOutgoingSet(const std::vector<Handle>& o)
             throw (RuntimeException);
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     public:
 
@@ -154,13 +162,17 @@ class Atom {
          *
          * @return The arity of the atom.
          */
-        inline Arity getArity() const{
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+        virtual Arity getArity(void) const = 0;
+#else
+        inline Arity getArity(void) const{
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
             return outgoing.size();
 #else
             return arity;
 #endif
         }
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         //**
         // * Returns the heat value of the atom.
@@ -264,6 +276,7 @@ class Atom {
             return incoming;
         }
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
         /**
          * Returns a const reference to the array containing this
@@ -300,6 +313,7 @@ class Atom {
          * @return A specific atom in the outgoing set (using the TLB).
          */
         Atom * getOutgoingAtom(int) const throw (RuntimeException);
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         /**
          * Adds a new entry to this atom's incoming set.
@@ -365,6 +379,7 @@ class Atom {
          */
         Handle next(int index);
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
         /**
          * Builds the target type index structure according to the types of
          * elements in the outgoing set of the given atom.
@@ -391,6 +406,7 @@ class Atom {
          * @return The number of different target types of an atom.
          */
         int getTargetTypeIndexSize() const;
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         /**
          * Indicates if this atom has any predicate index information

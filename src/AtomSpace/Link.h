@@ -35,6 +35,13 @@ class Link : public Atom
         Trail* trail;
         void init(void) throw (InvalidParamException);
 
+    protected:
+
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+        // Array that does not change during atom lifespan.
+        std::vector<Handle> outgoing;
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
+
     public:
 
         /**
@@ -53,6 +60,29 @@ class Link : public Atom
          * Destructor for this class.
          */
         ~Link() throw ();
+
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+        virtual Arity getArity() const;
+
+        /**
+         * Returns a const reference to the array containing this
+         * atom's outgoing set.
+         *
+         * @return A const reference to this atom's outgoing set.
+         */
+        inline const std::vector<Handle>& getOutgoingSet() const
+        {
+            return outgoing;
+        }
+        /**
+         * Returns a specific atom in the outgoing set (using the TLB).
+         *
+         * @param The position of the atom in the array.
+         * @return A specific atom in the outgoing set (using the TLB).
+         */
+        Atom * getOutgoingAtom(int) const throw (RuntimeException);
+
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         /**
          * Returns the trail of the link.
