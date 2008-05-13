@@ -4,13 +4,14 @@
  * Author: Welter
  */
 #include "Atom.h"
+#include "Link.h"
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
-class ConcreteAtom : public Atom {
+class ConcreteAtom : public Link {
 
 public:
-    ConcreteAtom(Type t, const std::vector<Handle>& o) : Atom(t,o) {}
+    ConcreteAtom(Type t, const std::vector<Handle>& o) : Link(t,o) {}
     std::string toString() {return "toString not implemented yet";}
     std::string toShortString() {return "toShortString not implemented yet";}
 };
@@ -35,17 +36,19 @@ public:
         outgoing.push_back((Handle) 9);
 
         Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing); 
-        TS_ASSERT(atom != NULL);
+        Link *link = dynamic_cast<Link *>(atom);
+        TS_ASSERT(link != NULL);
 
         // Specific tests for ordered and unnordered links:  
-        TS_ASSERT(atom->getOutgoingSet()[0] == (Handle) 10);
-        TS_ASSERT(atom->getOutgoingSet()[1] == (Handle) 5);
-        TS_ASSERT(atom->getOutgoingSet()[2] == (Handle) 9);
+        TS_ASSERT(link->getOutgoingSet()[0] == (Handle) 10);
+        TS_ASSERT(link->getOutgoingSet()[1] == (Handle) 5);
+        TS_ASSERT(link->getOutgoingSet()[2] == (Handle) 9);
         atom = new ConcreteAtom(UNORDERED_LINK, outgoing); 
-        TS_ASSERT(atom != NULL);
-        TS_ASSERT(atom->getOutgoingSet()[0] == (Handle) 5);
-        TS_ASSERT(atom->getOutgoingSet()[1] == (Handle) 9);
-        TS_ASSERT(atom->getOutgoingSet()[2] == (Handle) 10);
+        link = dynamic_cast<Link *>(atom);
+        TS_ASSERT(link != NULL);
+        TS_ASSERT(link->getOutgoingSet()[0] == (Handle) 5);
+        TS_ASSERT(link->getOutgoingSet()[1] == (Handle) 9);
+        TS_ASSERT(link->getOutgoingSet()[2] == (Handle) 10);
     }
  
 };
