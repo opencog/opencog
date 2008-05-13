@@ -46,9 +46,20 @@ word sense.
 
 To reduce mem usage, the "skip_colocations" flag was added to skip
 over all colocations in wordnet. There appear to be about 120K 
-word senses that are not colocations.  Loading these into opencog
-resulted in 1.04GBytes of RAM usage (Intel, 32bit mode), or 8.7KB
-of opencog atoms per word sense.
+word senses that are not colocations. For Intel 32-bit mode, sizes
+as follows:
+
+-- Loading these into opencog resulted in 1.04GBytes of RAM usage,
+   or 8.7KB of opencog atoms per word sense. This is with TLB 
+   lookup tables (used only for the SQL backend).
+
+-- Turning off TLB lookup, the load uses 670MBytes of RAM, or about
+   5.6KB per word sense.  Thus, the TLB lookup tables add a hefty 55%
+   storage overhead.
+
+-- AtomTable.cc defines USE_ATOM_HASH_SET to improve table performance.
+   Turning it off increases CPU usage by 100-fold or more, with no
+   appreciable memory savings. Long runs end with memory corruption.
 
 
 Design Overview

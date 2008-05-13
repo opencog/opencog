@@ -12,8 +12,13 @@
 #include "config.h"
 #endif
 
-#define USE_TLB_MAP
+// Use the TLB map only if SQL storage is being used.
+#ifdef HAVE_SQL_STORAGE
+#define USE_TLB_MAP 1
+#endif
+
 #define CHECK_MAP_CONSISTENCY
+
 #ifdef USE_TLB_MAP
 #include <map>
 #endif
