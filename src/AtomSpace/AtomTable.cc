@@ -25,6 +25,12 @@ extern "C" {
 #include "Logger.h"
 #include "HandleMap.cc"
 
+/* By defining USE_ATOM_HASH_SET, AtomTable lookup performance is
+ * improved by a hundredfold(!) or more(!) for large atom tables.
+ * It does not appear to affect overall memory usage.  Disabling
+ * this has been observed to lead to memory corruption; I guess
+ * there's a bug somewhere when this is not defined.
+ */
 #define USE_ATOM_HASH_SET
 
 
