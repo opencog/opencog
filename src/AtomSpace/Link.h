@@ -30,16 +30,34 @@ class Link : public Atom
 {
     friend class SavingLoading;
     friend class AtomTable;
+    friend class NMXmlParser;
+    friend class Atom;
 
     private:
         Trail* trail;
         void init(void) throw (InvalidParamException);
+
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+        // Adds a new handle to the outgoing set. Note that this is
+        // used only in the NativeParser friend class, and, due to
+        // performance issues, it should not be used anywhere else...
+        void addOutgoingAtom(Handle h);
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     protected:
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
         // Array that does not change during atom lifespan.
         std::vector<Handle> outgoing;
+
+        /**
+          * Sets the outgoing set of the atom
+          * This method can be called only if the atom is not inserted
+          * in an AtomTable yet.
+          * Otherwise, it throws a RuntimeException.
+          */
+        void setOutgoingSet(const std::vector<Handle>& o)
+            throw (RuntimeException);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     public:
@@ -81,6 +99,33 @@ class Link : public Atom
          * @return A specific atom in the outgoing set (using the TLB).
          */
         Atom * getOutgoingAtom(int) const throw (RuntimeException);
+
+        /**
+         * Builds the target type index structure according to the types of
+         * elements in the outgoing set of the given atom.
+         *
+         * @return A pointer to target types array built.
+         * NOTE: The argument size gets the size of the returned array.
+         */
+        Type* buildTargetIndexTypes(int *size);
+
+        /**
+         * Returns the position of a certain type on the reduced array of
+         * target types of an atom.
+         *
+         * @param The type which will be searched in the reduced target types
+         * index array.
+         * @return The position of the given type in the reduced array of
+         * target types.
+         */
+        int locateTargetIndexTypes(Type) const;
+
+        /**
+         * Returns the number of different target types of an atom.
+         *
+         * @return The number of different target types of an atom.
+         */
+        int getTargetTypeIndexSize() const;
 
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
@@ -155,6 +200,8 @@ class Link : public Atom
          */
         bool isTarget(int) throw (IndexErrorException, InvalidParamException);
 
+        virtual bool equals(Atom *);
+        virtual int hashCode(void);
 };
 
 #endif

@@ -213,3 +213,27 @@ bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
     }
 }
 
+bool Link::equals(Atom* other)
+{
+    if (type != other->getType()) return false;
+
+    Link *olink = dynamic_cast<Link *>(other);
+    if (getArity() != olink->getArity()) return false;
+
+    for (int i = 0; i < getArity(); i++){
+        if (outgoing[i] != olink->outgoing[i]) return false;
+    }
+
+    return true;
+}
+
+int Link::hashCode(void)
+{
+    long result = type + (getArity()<<8);
+
+    for (int i = 0; i < getArity(); i++){
+        result = result  ^ (((long) outgoing[i])<<i);
+    }
+    return (int) result;
+}
+

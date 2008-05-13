@@ -30,13 +30,16 @@ void Atom::init(Type type, const std::vector<Handle>& outgoing, const TruthValue
 
     atomTable = NULL;
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
     this->outgoing = NULL;
     this->arity = 0; // not really needed
 #endif
+    setOutgoingSet(outgoing); // need to call the method to handle specific subclass case
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
+
     this->incoming = NULL;
     this->type = type;
-    setOutgoingSet(outgoing); // need to call the method to handle specific subclass case
 
     //// sets default values
     //rawSetHeat(Defaults::getDefaultHeat(type));
@@ -73,10 +76,13 @@ Atom::~Atom() throw (RuntimeException) {
         throw RuntimeException(TRACE_INFO, "Attempting to remove atom with non-empty incoming set.");
     }
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
     //printf("Atom::~Atom() freeing outgoing\n");
     if (outgoing) free(outgoing);
 #endif        
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
+
     //printf("Atom::~Atom() deleting targetTypeIndex\n");
     delete[](targetTypeIndex);
     //printf("Atom::~Atom() deleting predicateIndexInfo\n");
@@ -235,6 +241,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 //    ShortFloatOps::setValue(&importance, value);
 //}
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (RuntimeException)
 {
     //printf("Atom::setOutgoingSet\n");
@@ -314,6 +321,7 @@ Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
         throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", position);
     }
 }
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 void Atom::addIncomingHandle(Handle handle) {
 
@@ -358,6 +366,7 @@ void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException) {
 	//printf("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
 }
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 void Atom::setNext(int index, Handle handle) {
     //printf("Setting next of index %p, handle=%p\n", index, handle);
     //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
@@ -391,6 +400,7 @@ void Atom::setNext(int index, Handle handle) {
         indices[index] = handle;
     }
 }
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 Handle* Atom::getTargetTypeIndex() const{
     return targetTypeIndex;
@@ -411,7 +421,14 @@ Handle Atom::next(int index) {
     // has its value OR-ed (binary) to the TARGET_TYPE_INDEX flag.
     if (index & TARGET_TYPE_INDEX) {
         index &= ~TARGET_TYPE_INDEX;
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+        int targetIndex = -1;
+        Link *link = dynamic_cast<Link *>(this);
+        if (link)
+            targetIndex = link->locateTargetIndexTypes(index);
+#else
         int targetIndex = locateTargetIndexTypes(index);
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
         if (targetIndex != -1) {
             return targetTypeIndex[targetIndex];
         } else {
@@ -499,18 +516,22 @@ void Atom::merge(Atom* other) throw (InconsistenceException) {
     while (inc != NULL) {
         addIncomingHandle(inc->handle);
 
+        // For links, merege the outgoing sets.
         Atom *incAtom = TLB::getAtom(inc->handle);
-        std::vector<Handle> outgoingSet = incAtom->getOutgoingSet();
-        for (int i = 0; i < incAtom->getArity(); i++){
-            if (eqHandle()(outgoingSet[i], otherHandle)){
-                outgoingSet[i] = thisHandle;
+        Link *link = dynamic_cast<Link *>(incAtom);
+        if (link) {
+            std::vector<Handle> outgoingSet = link->getOutgoingSet();
+            for (int i = 0; i < link->getArity(); i++){
+                if (eqHandle()(outgoingSet[i], otherHandle)){
+                    outgoingSet[i] = thisHandle;
+                }
             }
+            // Although we have direct access to outgoing here, we need to
+            // call setOutgoingSet anyway, since special handling may be
+            // need by subclasses (e.g, sorting of the outgoing, if it's 
+            // an unordered link)
+            link->setOutgoingSet(outgoingSet); 
         }
-        // Although we have direct access to outgoing here, we need to
-        // call setOutgoingSet anyway, since special handling may be
-        // need by subclasses (e.g, sorting of the outgoing, if it's 
-        // an unordered link)
-        incAtom->setOutgoingSet(outgoingSet); 
         inc = inc->next;
     }
 
@@ -544,6 +565,7 @@ bool Atom::isMarkedForRemoval() const{
     return flags & MARKED_FOR_REMOVAL;
 }
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 int Atom::locateTargetIndexTypes(Type key) const{
 
     if (getArity() == 0) return -1;
@@ -610,6 +632,7 @@ int Atom::getTargetTypeIndexSize() const{
     // returns the number of different target types
     return j;
 }
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 bool Atom::hasPredicateIndexInfo() {
     return (predicateIndexInfo != NULL);
@@ -660,30 +683,17 @@ AtomTable *Atom::getAtomTable() const{
     return(atomTable);
 }
 
-bool Atom::equals(Atom* other){
-    bool equal = ((type == other->type) &&
-            (getArity() == other->getArity()));
-
-    if (equal){
-        for (int i = 0; i < getArity(); i++){
-            if (outgoing[i] != other->outgoing[i]){
-                equal = false;
-                break;
-            }
-        }
-    }
-
-    return(equal);
+// This is a virtual function, overloaded by Link class and Node class.
+bool Atom::equals(Atom* other)
+{
+    if (type != other->type) return false;
+    return true;
 }
 
+// This is a virtual function, overloaded by Link class and Node class.
 int Atom::hashCode()
 {
-    long result = type + (getArity()<<8);
-
-    for (int i = 0; i < getArity(); i++){
-        result = result  ^ (((long) outgoing[i])<<i);
-    }
-    return (int) result;
+    return (int) type;
 }
 
 HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const{

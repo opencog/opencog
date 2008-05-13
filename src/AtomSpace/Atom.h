@@ -329,6 +329,7 @@ class Atom {
          */
         void removeIncomingHandle(Handle) throw (RuntimeException);
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
         /**
          * Sets the next entry pointed by this atom in one of the indices
          * linked-lists.
@@ -337,6 +338,7 @@ class Atom {
          * @param The next entry in the given index linked-list.
          */
         void setNext(int, Handle);
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
         /**
          * Returns a pointer to the target types index.
@@ -476,8 +478,8 @@ class Atom {
          *
          * @return A string representation of the node.
          */
-        virtual std::string toString()=0;
-        virtual std::string toShortString()=0;
+        virtual std::string toString(void)=0;
+        virtual std::string toShortString(void)=0;
 
         /**
         * Returns whether to atoms are equal.
@@ -489,7 +491,7 @@ class Atom {
         * Returns the hashCode of the Atom.
         * @return a integer value as the hashCode of the Atom.
         */
-        virtual int hashCode();
+        virtual int hashCode(void);
 };
 
 #endif
