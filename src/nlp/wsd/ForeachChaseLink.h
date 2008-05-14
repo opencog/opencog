@@ -61,7 +61,7 @@ class ForeachChaseLink
 		 */
 		inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 		{
-			return follow_link(atom, ltype, 0, 1, cb, data);
+			return follow_link(h, ltype, 0, 1, cb, data);
 		}
 
 		/**
@@ -70,7 +70,7 @@ class ForeachChaseLink
 		 */
 		inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 		{
-			return follow_link(atom, ltype, 1, 0, cb, data);
+			return follow_link(h, ltype, 1, 0, cb, data);
 		}
 
 		/**
