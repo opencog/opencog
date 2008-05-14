@@ -1,7 +1,34 @@
 /**
- * LinkChase.h
+ * ForeachChaseLink.h
  *
- * Follow a binary link.
+ * This template class implements a foreach iterator that iterates over
+ * all atoms associated with a given atom via a certain link type.
+ * It does this by iterating over all links containing the given atom,
+ * and then invoking a callback for a corresponding atom in that link.
+ * Two utility methods are provided: follow a binary link in the foreard
+ * direction, and in the reverse direction.  
+ *
+ * Example usage:
+ *
+ * class MyClass
+ * {
+ *    bool my_callback(Handle h)
+ *    {
+ *       printf("Hello world, found %ul\n", (unsigned long) h);
+ *    }
+ *
+ *    void do_stuff_with_handle(Handle h)
+ *    {
+ *       ForeachChaseLink<MyClass> my_iter;
+ *
+ *       my_iter.follow_binary_link(h, INHERITANCE_LINK, 
+ *                                  MyClass::my_callback, this);
+ *    }
+ * };
+ *
+ * The above example invokes the callback "my_callback" on every handle
+ * that is at the far end of an inheritence link containing the input 
+ * handle h.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -17,32 +44,49 @@
 namespace opencog {
 
 template <class T>
-class LinkChase
+class ForeachChaseLink
 {
 	public:
 
 		/**
 		 * follow_binary_link -- follow an ordered, binary link.
 		 *
-		 * Look at the incoming set of this atom.
-		 * Find the first link of type link_type,
+		 * Look at the incoming set of the specified atom.
+		 * Find all links of type link_type,
 		 * then follow this link to see where its going.
-		 * Its asssumed that there is only one such link,
-		 * and that its binary.
-		 * Return a pointer to where the link is going.
+		 * Call the callback for each endpoint found.
+		 *
+		 * The callback should return false to search for 
+		 * more matches, or return true to halt the search.
 		 */
-#if 0
-		inline Atom * follow_binary_link(Atom *atom, Type ltype)
+		inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 		{
-			return follow_link(atom, ltype, 0, 1);
+			return follow_link(atom, ltype, 0, 1, cb, data);
 		}
 
-		inline Atom * backtrack_binary_link(Atom *atom, Type ltype)
+		/**
+		 * Same as above, except that the link is followed in the
+		 * reverse direction.
+		 */
+		inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 		{
-			return follow_link(atom, ltype, 1, 0);
+			return follow_link(atom, ltype, 1, 0, cb, data);
 		}
-#endif
 
+		/**
+		 * follow_link -- follow an ordered, binary link.
+		 *
+		 * Look at the incoming set of the specified atom.
+		 * Find all links of type link_type.
+		 * Check to make sure that the input handle "h"
+		 * occupies position "from" in the link. 
+		 * If it does, then invoke the callback,
+		 * passing the handle in position "to" to the callback.
+		 * The callback is called for each endpoint found.
+		 *
+		 * The callback should return false to search for 
+		 * more matches, or return true to halt the search.
+		 */
 		inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
 		{
 			Atom *atom = TLB::getAtom(h);
@@ -57,7 +101,7 @@ class LinkChase
 			position_to = to;
 			user_callback = cb;
 			user_data = data;
-			bool rc = foreach_incoming_atom(h, &LinkChase::find_link_type, this);
+			bool rc = foreach_incoming_atom(h, &ForeachChaseLink::find_link_type, this);
 			return rc;
 		}
 
@@ -80,7 +124,7 @@ class LinkChase
 
 			cnt = -1;
 			Handle h = TLB::getHandle(atom);
-			bool rc = foreach_outgoing_atom(h, &LinkChase::pursue_link, this);
+			bool rc = foreach_outgoing_atom(h, &ForeachChaseLink::pursue_link, this);
 			if (rc) return rc;
 			return false;
 		}
