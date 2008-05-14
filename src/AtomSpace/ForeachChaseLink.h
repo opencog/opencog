@@ -125,8 +125,7 @@ class ForeachChaseLink
 			cnt = -1;
 			Handle h = TLB::getHandle(atom);
 			bool rc = foreach_outgoing_atom(h, &ForeachChaseLink::pursue_link, this);
-			if (rc) return rc;
-			return false;
+			return rc;
 		}
 
 		inline bool pursue_link(Atom *atom)
