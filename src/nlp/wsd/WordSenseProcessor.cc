@@ -14,6 +14,7 @@
 #include "AtomSpace.h"
 #include "CogServer.h"
 #include "Foreach.h"
+#include "ForeachChaseLink.h"
 #include "Link.h"
 #include "MindAgent.h"
 #include "Node.h"
@@ -60,9 +61,12 @@ bool WordSenseProcessor::do_sentence(Handle h)
 printf("duude donehand=%x\n", (unsigned long) completion_handle);
 
 	// fl.follow_binary_link(at, INHERITANCE_LINK)
-	bool found = foreach_incoming_handle(h, &WordSenseProcessor::check_done, this);
+	// bool found = foreach_incoming_handle(h, &WordSenseProcessor::check_done, this);
+
+	ForeachChaseLink<WordSenseProcessor> lc;
+	lc.follow_link(h, INHERITANCE_LINK, 1, 0, &WordSenseProcessor::check_done, this);
 	
-printf("duude found = %d\n", found);
+// printf("duude found = %d\n", found);
 
 	// Mark as completed
 	std::vector<Handle> out;
