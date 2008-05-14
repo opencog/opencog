@@ -67,6 +67,7 @@
 #define EVENTUAL_PREDICTIVE_IMPLICATION_LINK_CLASS "EventualSequentialImplication"
 #define WR_LINK_CLASS "WRLink"
 #define SENTENCE_NODE_CLASS "SentenceNode"
+#define PARSE_LINK_CLASS "ParseLink"
 #define PARSE_INSTANCE_LINK_CLASS "ParseInstanceLink"
 #define REFERENCE_LINK_CLASS "ReferenceLink"
 #define DEFINED_LINGUISTIC_CONCEPT_NODE_CLASS "DefinedLinguisticConceptNode"

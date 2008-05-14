@@ -163,6 +163,7 @@ WR_LINK <- ASSOCIATIVE_LINK "WRLink"
 // New relex nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.
 SENTENCE_NODE <- CONCEPT_NODE
+PARSE_LINK <- ASSOCIATIVE_LINK
 PARSE_INSTANCE_LINK <- ASSOCIATIVE_LINK
 
 REFERENCE_LINK <- ASSOCIATIVE_LINK

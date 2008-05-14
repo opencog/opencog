@@ -67,6 +67,7 @@ class_to_int[(*getClassName()) [EVENTUAL_SEQUENTIAL_AND_LINK]] = EVENTUAL_SEQUEN
 class_to_int[(*getClassName()) [EVENTUAL_PREDICTIVE_IMPLICATION_LINK]] = EVENTUAL_PREDICTIVE_IMPLICATION_LINK;
 class_to_int[(*getClassName()) [WR_LINK]] = WR_LINK;
 class_to_int[(*getClassName()) [SENTENCE_NODE]] = SENTENCE_NODE;
+class_to_int[(*getClassName()) [PARSE_LINK]] = PARSE_LINK;
 class_to_int[(*getClassName()) [PARSE_INSTANCE_LINK]] = PARSE_INSTANCE_LINK;
 class_to_int[(*getClassName()) [REFERENCE_LINK]] = REFERENCE_LINK;
 class_to_int[(*getClassName()) [DEFINED_LINGUISTIC_CONCEPT_NODE]] = DEFINED_LINGUISTIC_CONCEPT_NODE;
