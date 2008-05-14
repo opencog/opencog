@@ -1,13 +1,13 @@
 /**
- * FollowLink.h
+ * LinkChase.h
  *
  * Follow a binary link.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#ifndef OPENCOG_FOLLOW_LINK_H_
-#define OPENCOG_FOLLOW_LINK_H_
+#ifndef OPENCOG_LINK_CHASE_H_
+#define OPENCOG_LINK_CHASE_H_
 
 #include "Atom.h"
 #include "Link.h"
@@ -16,7 +16,8 @@
 
 namespace opencog {
 
-class FollowLink
+template <class T>
+class LinkChase
 {
 	public:
 
@@ -30,6 +31,7 @@ class FollowLink
 		 * and that its binary.
 		 * Return a pointer to where the link is going.
 		 */
+#if 0
 		inline Atom * follow_binary_link(Atom *atom, Type ltype)
 		{
 			return follow_link(atom, ltype, 0, 1);
@@ -39,30 +41,34 @@ class FollowLink
 		{
 			return follow_link(atom, ltype, 1, 0);
 		}
+#endif
 
-		inline Atom * follow_link(Atom *atom, Type ltype, int from, int to)
+		inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
 		{
+			Atom *atom = TLB::getAtom(h);
+
 			if (NULL == atom) return NULL;
 
 			// Look for incoming links that are of the given type.
 			// Then grab the thing that they link to.
 			link_type = ltype;
 			from_atom = atom;
-			to_atom = NULL;
 			position_from = from;
 			position_to = to;
-			Handle h = TLB::getHandle(atom);
-			foreach_incoming_atom(h, &FollowLink::find_link_type, this);
-			return to_atom;
+			user_callback = cb;
+			user_data = data;
+			bool rc = foreach_incoming_atom(h, &LinkChase::find_link_type, this);
+			return rc;
 		}
 
 	private:
 		Type link_type;
 		Atom * from_atom;
-		Atom * to_atom;
 		int position_from;
 		int position_to;
 		int cnt;
+		bool (T::*user_callback)(Handle);
+		T *user_data;
 
 		/**
 		 * Find the (first!, assumed only!?) link of desired type.
@@ -73,10 +79,9 @@ class FollowLink
 			if (link_type != atom->getType()) return false;
 
 			cnt = -1;
-			to_atom = NULL;
 			Handle h = TLB::getHandle(atom);
-			foreach_outgoing_atom(h, &FollowLink::pursue_link, this);
-			if (to_atom) return true;
+			bool rc = foreach_outgoing_atom(h, &LinkChase::pursue_link, this);
+			if (rc) return rc;
 			return false;
 		}
 
@@ -94,8 +99,8 @@ class FollowLink
 			// The to-slot is the one we're looking for.
 			if (position_to == cnt)
 			{
-				to_atom = atom;
-				return true;  // We're done now.
+				bool rc = (user_data->*user_callback)(TLB::getHandle(atom));
+				if(rc) return rc;  // We're done now.
 			}
 
 			return false;
@@ -103,4 +108,4 @@ class FollowLink
 };
 }
 
-#endif /* OPENCOG_FOLLOW_LINK_H_ */
+#endif /* OPENCOG_LINK_CHASE_H_ */
