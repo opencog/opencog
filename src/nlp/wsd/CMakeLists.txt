@@ -1,5 +1,6 @@
 
 add_library (wsd STATIC
+Mihalcea.cc
 WordSenseProcessor.cc
 )
 

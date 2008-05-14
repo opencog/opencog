@@ -16,6 +16,7 @@
 #include "Foreach.h"
 #include "ForeachChaseLink.h"
 #include "Link.h"
+#include "Mihalcea.h"
 #include "MindAgent.h"
 #include "Node.h"
 #include "WordSenseProcessor.h"
@@ -26,11 +27,14 @@ using namespace opencog;
 WordSenseProcessor::WordSenseProcessor(void)
 {
 	cnt = 0;
+	wsd = new Mihalcea();
 }
 
 WordSenseProcessor::~WordSenseProcessor()
 {
 	atom_space = NULL;
+	delete wsd;
+	wsd = NULL;
 }
 
 void WordSenseProcessor::run(CogServer *server)
@@ -61,7 +65,7 @@ bool WordSenseProcessor::do_sentence(Handle h)
 	completion_handle = atom_space->addRealAtom(node);
 
 	// Look to see the the sentence is associated with the 
-   // completion indicator. 
+	// completion indicator. 
 	ForeachChaseLink<WordSenseProcessor> lc;
 	bool rc = lc.follow_link(h, INHERITANCE_LINK, 1, 0, &WordSenseProcessor::check_done, this);
 	
@@ -69,6 +73,7 @@ bool WordSenseProcessor::do_sentence(Handle h)
 
 	// If we are here, then there's a freash sentence to work on.
 	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
+	wsd->process_sentence(h);
 
 	// Mark this sentence as being completed.
 	std::vector<Handle> out;
