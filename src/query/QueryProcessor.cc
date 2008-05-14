@@ -14,7 +14,9 @@
 #include "AtomSpace.h"
 #include "CogServer.h"
 #include "Foreach.h"
+#include "ForeachChaseLink.h"
 #include "MindAgent.h"
+#include "Node.h"
 #include "QueryProcessor.h"
 #include "FrameQuery.h"
 #include "RelexQuery.h"
@@ -24,6 +26,7 @@ using namespace opencog;
 // ----------------------------------------
 QueryProcessor::QueryProcessor(void)
 {
+	cnt = 0;
 }
 
 QueryProcessor::~QueryProcessor()
@@ -35,9 +38,8 @@ void QueryProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
 	
-// XXX AssertionLink's are not currently generateed by Relex ... 
 	// Look for recently asserted assertions.
-	atom_space->foreach_handle_of_type("AssertionLink", 
+	atom_space->foreach_handle_of_type("SentenceNode", 
 	                       &QueryProcessor::do_assertion, this);
 
 	/* XXX HACK ALERT -- no scheduling, so just sleep */
@@ -45,16 +47,29 @@ void QueryProcessor::run(CogServer *server)
 	usleep(10000);  // 10 millisecs == 100HZ
 }
 
-static int cnt = 0;
-
 /**
- * Process an assertion fed into the system.
+ * Process a sentence fed into the system. This routine is called on
+ * every sentence encountered in the system.
  * Currently, this ignores all assertions that are not queries.
  */
 bool QueryProcessor::do_assertion(Handle h)
 {
 	cnt ++;
-	printf ("duuuude found assertion %d handle=%lu\n", cnt, (unsigned long) h);
+
+	// Obtain the handle which indicates that the processing of a
+ 	// sentence is complete. 
+	Node node(CONCEPT_NODE, "#Query_processing_completed");
+	completion_handle = atom_space->addRealAtom(node);
+
+	// Look to see the the sentence is associated with the 
+	// completion indicator. 
+	ForeachChaseLink<QueryProcessor> lc;
+	bool rc = lc.follow_link(h, INHERITANCE_LINK, 1, 0, &QueryProcessor::check_done, this);
+	
+	if (rc) return false;
+
+	// If we are here, then there's a freash sentence to work on.
+	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
 
 	// If this assertion is a query, try to answer it.
 #define USE_RELEX_QUERY 1
@@ -71,7 +86,20 @@ bool QueryProcessor::do_assertion(Handle h)
 		frq.solve(atom_space, h);
 	}
 #endif
-	atom_space->removeAtom(h);
+
+	// Mark this sentence as being completed.
+	std::vector<Handle> out;
+	out.push_back(h);
+	out.push_back(completion_handle);
+
+	atom_space->addLink(INHERITANCE_LINK, out);
+
+	return false;
+}
+
+bool QueryProcessor::check_done(Handle h)
+{
+	if (h == completion_handle) return true;
 	return false;
 }
 

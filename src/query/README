@@ -9,10 +9,10 @@ algorithm, and then uses this algorithm to perform query processing.
 The first part of the file describes the generic algorithm; the second
 part describes its application to query processing.
 
-XXX As of 13 may, minor changes to the relex output breaks the query
-processing part of the code; basicially, individual sentences are
-no longer surrounded by "AssertionLink". An alternate machanism 
-should be devised. This shouldn't be hard.
+XXX As of 13 may, minor changes to the relex output might have broken
+the query processing part of the code. This code might trip over the
+new way in which sentences are specified.... or maybe this code will
+work?  Untested...
 
 
 Subgraph Isomorphism Discovery
