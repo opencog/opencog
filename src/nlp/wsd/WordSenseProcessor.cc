@@ -33,9 +33,9 @@ void WordSenseProcessor::run(CogServer *server)
 	atom_space = server->getAtomSpace();
 
 	/* XXX HACK ALERT -- no scheduling, so just sleep */
-	usleep(1000000);  // 1 second
-	// usleep(10000);  // 10 millisecs == 100HZ
-printf("hellow wrold\n");
+	// usleep(1000000);  // 1 second
+	usleep(10000);  // 10 millisecs == 100HZ
+// printf("hellow wrold\n");
 }
 
 /* ======================= END OF FILE ==================== */
