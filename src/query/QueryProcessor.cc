@@ -69,7 +69,7 @@ bool QueryProcessor::do_assertion(Handle h)
 	if (rc) return false;
 
 	// If we are here, then there's a freash sentence to work on.
-	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
+	printf ("Query Processor found sentence %d handle=%lx\n", cnt, (unsigned long) h);
 
 	// If this assertion is a query, try to answer it.
 #define USE_RELEX_QUERY 1
