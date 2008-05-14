@@ -5,7 +5,6 @@
  */
 
 #include "MindAgent.h"
-#include "Node.h"
 
 namespace opencog {
 
