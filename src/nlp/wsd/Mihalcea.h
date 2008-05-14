@@ -15,6 +15,8 @@ namespace opencog {
 class Mihalcea
 {
 	private:
+		bool annotate_parse(Handle);
+		void annotate_sentence(Handle);
 
 	public:
 		Mihalcea(void);
