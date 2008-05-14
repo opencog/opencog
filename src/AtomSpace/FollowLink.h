@@ -76,7 +76,7 @@ class FollowLink
 		 */
 		inline bool find_link_type(Atom *atom)
 		{
-			// Look for incoming links that are of the specified link type
+			// Make sure that the link is of the desired type.
 			if (link_type != atom->getType()) return false;
 
 			cnt = -1;
@@ -94,7 +94,11 @@ class FollowLink
 			// The from-slot should be occupied by the node itself.
 			if (position_from == cnt)
 			{
-				if (from_atom != atom) return true;
+				if (from_atom != atom)
+				{
+					to_atom = NULL;
+					return true; // Bad match, stop now.
+				}
 				return false;
 			}
 
@@ -102,7 +106,6 @@ class FollowLink
 			if (position_to == cnt)
 			{
 				to_atom = atom;
-				return true;  // We're done now.
 			}
 
 			return false;

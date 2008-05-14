@@ -100,6 +100,7 @@ class ForeachChaseLink
 			// Then grab the thing that they link to.
 			link_type = ltype;
 			from_atom = atom;
+			to_atom = NULL;
 			position_from = from;
 			position_to = to;
 			user_callback = cb;
@@ -111,6 +112,7 @@ class ForeachChaseLink
 	private:
 		Type link_type;
 		Atom * from_atom;
+		Atom * to_atom;
 		int position_from;
 		int position_to;
 		int cnt;
@@ -118,16 +120,23 @@ class ForeachChaseLink
 		T *user_data;
 
 		/**
-		 * Find the (first!, assumed only!?) link of desired type.
+		 * Check for link of the desired type, then loop over its outgoing set.
 		 */
 		inline bool find_link_type(Atom *atom)
 		{
-			// Look for incoming links that are of the specified link type
+			// Make sure the link is of the specified link type
 			if (link_type != atom->getType()) return false;
 
 			cnt = -1;
+         to_atom = NULL;
 			Handle h = TLB::getHandle(atom);
-			bool rc = foreach_outgoing_atom(h, &ForeachChaseLink::pursue_link, this);
+			foreach_outgoing_atom(h, &ForeachChaseLink::pursue_link, this);
+
+			bool rc = false;
+			if (to_atom)
+			{
+				rc = (user_data->*user_callback)(TLB::getHandle(to_atom));
+			}
 			return rc;
 		}
 
@@ -138,15 +147,18 @@ class ForeachChaseLink
 			// The from-slot should be occupied by the node itself.
 			if (position_from == cnt)
 			{
-				if (from_atom != atom) return true;
+				if (from_atom != atom)
+				{
+					to_atom = NULL;
+					return true; // bad match, stop now.
+				}
 				return false;
 			}
 
 			// The to-slot is the one we're looking for.
 			if (position_to == cnt)
 			{
-				bool rc = (user_data->*user_callback)(TLB::getHandle(atom));
-				if(rc) return rc;  // We're done now.
+				to_atom = atom;
 			}
 
 			return false;
