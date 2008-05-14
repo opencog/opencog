@@ -5,6 +5,7 @@
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
+#include <stdio.h>
 
 #include "Mihalcea.h"
 

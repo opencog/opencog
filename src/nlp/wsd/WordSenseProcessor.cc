@@ -46,9 +46,8 @@ void WordSenseProcessor::run(CogServer *server)
 	               &WordSenseProcessor::do_sentence, this);
 
 	/* XXX HACK ALERT -- no scheduling, so just sleep */
-	usleep(1000000);  // 1 second
-	// usleep(10000);  // 10 millisecs == 100HZ
-// printf("hellow wrold\n");
+	// usleep(1000000);  // 1 second
+	usleep(10000);  // 10 millisecs == 100HZ
 }
 
 /**
@@ -57,8 +56,6 @@ void WordSenseProcessor::run(CogServer *server)
  */
 bool WordSenseProcessor::do_sentence(Handle h)
 {
-	cnt++;
-
 	// Obtain the handle which indicates that the processing of a
  	// sentence is complete. 
 	Node node(CONCEPT_NODE, "#WSD_completed");
@@ -67,12 +64,13 @@ bool WordSenseProcessor::do_sentence(Handle h)
 	// Look to see the the sentence is associated with the 
 	// completion indicator. 
 	ForeachChaseLink<WordSenseProcessor> lc;
-	bool rc = lc.follow_link(h, INHERITANCE_LINK, 1, 0, &WordSenseProcessor::check_done, this);
-	
+	bool rc = lc.follow_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_done, this);
+
 	if (rc) return false;
 
-	// If we are here, then there's a freash sentence to work on.
-	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
+	// If we are here, then there's a fresh sentence to work on.
+	cnt++;
+	printf ("WordSenseProcessor found sentence %d handle=%lx\n", cnt, (unsigned long) h);
 	wsd->process_sentence(h);
 
 	// Mark this sentence as being completed.
