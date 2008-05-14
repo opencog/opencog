@@ -18,7 +18,7 @@
 namespace opencog {
 
 /**
- * Callback class, used to implement spcifics of node 
+ * Callback class, used to implement specifics of node 
  * matching, and also, to report solutions when found.
  */
 class PatternMatchCallback
