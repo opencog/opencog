@@ -18,7 +18,7 @@
 /**
  * Skip processing of colocations if this flag is set to 1
  */
-static int skip_colocations = 1;
+static int skip_colocations = 0;
 
 static int do_export(const char * word)
 {

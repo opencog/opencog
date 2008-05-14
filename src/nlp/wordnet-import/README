@@ -61,6 +61,12 @@ as follows:
    Turning it off increases CPU usage by 100-fold or more, with no
    appreciable memory savings. Long runs end with memory corruption.
 
+-- Updating AtomSpace/Trail.cc with new version from Welter Luigi 
+   decreased RAM usage to 207MBytes, or 1.7KB per sord sense. Wow!
+
+   Similarly, the full (with colocations) load yeilds: 399MB/187K
+   = 2.1KB per word sense.
+
 
 Design Overview
 ---------------
