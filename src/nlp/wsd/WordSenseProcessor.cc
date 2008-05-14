@@ -13,7 +13,10 @@
 
 #include "AtomSpace.h"
 #include "CogServer.h"
+#include "Foreach.h"
+#include "Link.h"
 #include "MindAgent.h"
+#include "Node.h"
 #include "WordSenseProcessor.h"
 
 using namespace opencog;
@@ -49,8 +52,31 @@ void WordSenseProcessor::run(CogServer *server)
 bool WordSenseProcessor::do_sentence(Handle h)
 {
 	cnt++;
-	printf ("duuuude found sentence %d handle=%lu\n", cnt, (unsigned long) h);
+	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
 
+	Node node(CONCEPT_NODE, "#WSD_completed");
+	completion_handle = atom_space->addRealAtom(node);
+
+printf("duude donehand=%x\n", (unsigned long) completion_handle);
+
+	// fl.follow_binary_link(at, INHERITANCE_LINK)
+	bool found = foreach_incoming_handle(h, &WordSenseProcessor::check_done, this);
+	
+printf("duude found = %d\n", found);
+
+	// Mark as completed
+	std::vector<Handle> out;
+	out.push_back(h);
+	out.push_back(completion_handle);
+
+	atom_space->addLink(INHERITANCE_LINK, out);
+
+	return false;
+}
+
+bool WordSenseProcessor::check_done(Handle h)
+{
+	printf ("duude check=%x\n", (unsigned long) h);
 	return false;
 }
 

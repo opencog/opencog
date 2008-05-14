@@ -15,6 +15,9 @@ class WordSenseProcessor : public MindAgent
 		AtomSpace *atom_space;
 		bool do_sentence(Handle h);
 
+		Handle completion_handle;
+		bool check_done(Handle h);
+
 	public:
 		WordSenseProcessor(void);
 		virtual ~WordSenseProcessor();
