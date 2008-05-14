@@ -1,7 +1,14 @@
 /**
  * FollowLink.h
  *
- * Follow a binary link.
+ * Follow a link. Given an atom and a link type, follow the link and 
+ * and return another atom in the link. It is assumed that there is only
+ * one link of the given type that is attached to the given atom; the
+ * methods here return the first match found. If multiple-link support
+ * is needed, use the ForeachChaseLink<T> class.
+ *
+ * This method includes two utility routines, meant to follow binary
+ * links (i.e. links with only two members).
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
