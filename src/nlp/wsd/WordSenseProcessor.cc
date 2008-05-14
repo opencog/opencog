@@ -48,27 +48,29 @@ void WordSenseProcessor::run(CogServer *server)
 }
 
 /**
- * Process a sentence fed into the system.
+ * Process a sentence fed into the system. This routine is called on
+ * every sentence encountered in the system.
  */
 bool WordSenseProcessor::do_sentence(Handle h)
 {
 	cnt++;
-	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
 
+	// Obtain the handle which indicates that the processing of a
+ 	// sentence is complete. 
 	Node node(CONCEPT_NODE, "#WSD_completed");
 	completion_handle = atom_space->addRealAtom(node);
 
-printf("duude donehand=%x\n", (unsigned long) completion_handle);
-
-	// fl.follow_binary_link(at, INHERITANCE_LINK)
-	// bool found = foreach_incoming_handle(h, &WordSenseProcessor::check_done, this);
-
+	// Look to see the the sentence is associated with the 
+   // completion indicator. 
 	ForeachChaseLink<WordSenseProcessor> lc;
-	lc.follow_link(h, INHERITANCE_LINK, 1, 0, &WordSenseProcessor::check_done, this);
+	bool rc = lc.follow_link(h, INHERITANCE_LINK, 1, 0, &WordSenseProcessor::check_done, this);
 	
-// printf("duude found = %d\n", found);
+	if (rc) return false;
 
-	// Mark as completed
+	// If we are here, then there's a freash sentence to work on.
+	printf ("duuuude found sentence %d handle=%lx\n", cnt, (unsigned long) h);
+
+	// Mark this sentence as being completed.
 	std::vector<Handle> out;
 	out.push_back(h);
 	out.push_back(completion_handle);
@@ -80,7 +82,7 @@ printf("duude donehand=%x\n", (unsigned long) completion_handle);
 
 bool WordSenseProcessor::check_done(Handle h)
 {
-	printf ("duude check=%x\n", (unsigned long) h);
+	if (h == completion_handle) return true;
 	return false;
 }
 
