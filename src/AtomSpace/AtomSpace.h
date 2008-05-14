@@ -200,12 +200,18 @@ class AtomSpace {
         \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
     Handle addNode(Type t,const string& name,const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
-    /** Add a new link to the Atom Table
-	if the atom already exists then the old and the new truth value is merged
-        \param t         Type of the link
-        \param outgoing  a const reference to a HandleSeq containing the outgoing set of the link
-        \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
-    Handle addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    /** 
+     * Add a new link to the Atom Table
+     * If the atom already exists then the old and the new truth value
+     * is merged
+     * @param t         Type of the link
+     * @param outgoing  a const reference to a HandleSeq containing
+     *                  the outgoing set of the link
+     * @param tvn       Optional TruthValue of the node. If not 
+     *                  provided, uses the DEFAULT_TV (see TruthValue.h)
+     */
+    Handle addLink(Type t,const HandleSeq& outgoing,
+                   const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
     /** 
      * Add an atom represented by a given handle with an optional
@@ -214,9 +220,6 @@ class AtomSpace {
      * @param the handle of the Atom to be added
      * @param the TruthValue object to be associated to the added 
      *        atom. NULL if the own atom's tv must be used.
-     * @param a flag to indicate if it does not need to check for
-     *         already existing atoms in AtomTable. 
-     * @param managed ???
      */
     Handle addRealAtom(const Atom& atom,
                        const TruthValue& tvn=TruthValue::NULL_TV());
