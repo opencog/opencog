@@ -354,22 +354,31 @@ Sentence identification
 Multiple alternate parses of a sentence should be associated with
 a single sentence. This may be accomplished by declaring a sentence:
 
-   <ConceptNode name="sentence_22" strength=0.9 confidence=0.6/>
+   SENTENCE_NODE <- CONCEPT_NODE
+
+   <SentenceNode name="sentence_22" strength=0.9 confidence=0.6/>
 
 and associating it with each parse:
 
    <ParseLink>
       <ConceptNode name="parse_1" strength=0.9 confidence=0.6/>
-      <ConceptNode name="sentence_22" />
+      <SentenceNode name="sentence_22" />
    </ParseLink>
 
    <ParseLink>
       <ConceptNode name="parse_2" strength=0.8 confidence=0.5/>
-      <ConceptNode name="sentence_22" />
+      <SentenceNode name="sentence_22" />
    </ParseLink>
 
-and so on.
+and so on. The special node type "SentenceNode" is used in order to
+easily locate new sentences added to the system. After word processing
+has been performed, the sentence node is marked to indicate that 
+processing is complete, as so:
 
+   <InheritanceLink>
+      <SentenceNode name="sentence_22" />
+      <ConceptNode name="wsd_completed" />
+   </InheritanceLink>
 
 Word concepts
 -------------

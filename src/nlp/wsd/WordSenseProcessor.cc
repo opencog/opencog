@@ -21,6 +21,7 @@ using namespace opencog;
 // ----------------------------------------
 WordSenseProcessor::WordSenseProcessor(void)
 {
+	cnt = 0;
 }
 
 WordSenseProcessor::~WordSenseProcessor()
@@ -32,10 +33,25 @@ void WordSenseProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
 
+	// Look for recently entered text
+	atom_space->foreach_handle_of_type("SentenceNode",
+	               &WordSenseProcessor::do_sentence, this);
+
 	/* XXX HACK ALERT -- no scheduling, so just sleep */
-	// usleep(1000000);  // 1 second
-	usleep(10000);  // 10 millisecs == 100HZ
+	usleep(1000000);  // 1 second
+	// usleep(10000);  // 10 millisecs == 100HZ
 // printf("hellow wrold\n");
+}
+
+/**
+ * Process a sentence fed into the system.
+ */
+bool WordSenseProcessor::do_sentence(Handle h)
+{
+	cnt++;
+	printf ("duuuude found sentence %d handle=%lu\n", cnt, (unsigned long) h);
+
+	return false;
 }
 
 /* ======================= END OF FILE ==================== */

@@ -11,7 +11,9 @@ namespace opencog {
 class WordSenseProcessor : public MindAgent
 {
 	private:
+		int cnt;
 		AtomSpace *atom_space;
+		bool do_sentence(Handle h);
 
 	public:
 		WordSenseProcessor(void);
