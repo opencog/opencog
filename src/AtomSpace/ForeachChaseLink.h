@@ -8,6 +8,9 @@
  * Two utility methods are provided: follow a binary link in the foreard
  * direction, and in the reverse direction.  
  *
+ * If there is only one link of the given type, for the given atom, then
+ * the FollowLink clas provides an easier-to-use interface.
+ *
  * Example usage:
  *
  * class MyClass
