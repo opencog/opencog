@@ -54,8 +54,6 @@ void QueryProcessor::run(CogServer *server)
  */
 bool QueryProcessor::do_assertion(Handle h)
 {
-	cnt ++;
-
 	// Obtain the handle which indicates that the processing of a
  	// sentence is complete. 
 	Node node(CONCEPT_NODE, "#Query_processing_completed");
@@ -68,7 +66,8 @@ bool QueryProcessor::do_assertion(Handle h)
 	
 	if (rc) return false;
 
-	// If we are here, then there's a freash sentence to work on.
+	// If we are here, then there's a fresh sentence to work on.
+	cnt ++;
 	printf ("Query Processor found sentence %d handle=%lx\n", cnt, (unsigned long) h);
 
 	// If this assertion is a query, try to answer it.
