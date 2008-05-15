@@ -11,15 +11,18 @@
 #include "ForeachChaseLink.h"
 #include "Mihalcea.h"
 #include "Node.h"
+#include "SimpleTruthValue.h"
 
 using namespace opencog;
 
 Mihalcea::Mihalcea(void)
 {
+	atom_space = NULL;
 }
 
 Mihalcea::~Mihalcea()
 {
+	atom_space = NULL;
 }
 
 /**
@@ -96,7 +99,7 @@ bool Mihalcea::annotate_parse(Handle h)
  */
 bool Mihalcea::annotate_word(Handle h)
 {
-	Atom *word_instance = TLB::getAtom(h);
+	word_instance = TLB::getAtom(h);
 
 Node *n = dynamic_cast<Node *>(word_instance);
 printf("found word-inst %s\n",  n->toString().c_str());
@@ -130,20 +133,41 @@ printf("found word-dict %s\n",  n->toString().c_str());
 	return false;
 }
 
+/**
+ * Create a link coupling a specific word-instance to a possible 
+ * word-sense.  The link to be created will resemble the following:
+ *
+ *   <InheritanceLink strength=0.9 confidence=0.1>
+ *      <ConceptNode name="bark_144" />
+ *      <WordSenseNode name="bark_sense_23" />
+ *   </InheritanceLink>
+ */
 bool Mihalcea::annotate_word_sense(Handle h)
 {
 	Atom *word_sense = TLB::getAtom(h);
-Node *n = dynamic_cast<Node *>(word_sense);
-printf("found word-sense %s\n",  n->toString().c_str());
 
+	// Find the part-of-speech for this word-sense.
 	FollowLink fl;
 	Atom *a = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
-	n = dynamic_cast<Node *>(a);
+	Node *n = dynamic_cast<Node *>(a);
 	std::string sense_pos = n->getName();
-printf("found word-sense pos %s\n",  sense_pos.c_str());
 
+	// If there's no POS match, skip this sense.
 	if (word_inst_pos.compare(sense_pos)) return false;
+
+n = dynamic_cast<Node *>(word_sense);
+printf("found word-sense %s\n",  n->toString().c_str());
 printf("keeping word-sense pos %s\n",  sense_pos.c_str());
+
+	// Create a link connecting this word-instance to this word-sense.
+	std::vector<Handle> out;
+	out.push_back(TLB::getHandle(word_instance));
+	out.push_back(TLB::getHandle(word_sense));
+
+	// Give it a mediocre truth value, very low confidence.
+	SimpleTruthValue stv(0.5, 1.0);
+	stv.setConfidence(0.01);
+	atom_space->addLink(INHERITANCE_LINK, out, stv);
 
 	return false;
 }

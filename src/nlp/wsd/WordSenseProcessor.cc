@@ -40,6 +40,7 @@ WordSenseProcessor::~WordSenseProcessor()
 void WordSenseProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
+	wsd->set_atom_space(atom_space);
 
 	// Look for recently entered text
 	atom_space->foreach_handle_of_type("SentenceNode",
