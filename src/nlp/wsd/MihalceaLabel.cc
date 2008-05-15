@@ -29,12 +29,7 @@ MihalceaLabel::~MihalceaLabel()
 /**
  * Anotate every word in every parse of the sentence with every possible
  * word sense for that word. The argument handle is presumed to identify
- * a SentenceNode, which is linked to parses via a ParseLink:
- * 
- *    <ParseLink>
- *      <ConceptNode name="parse_2" strength=0.8 confidence=0.5/>
- *      <SentenceNode name="sentence_22" />
- *    </ParseLink>
+ * a SentenceNode.
  */
 void MihalceaLabel::annotate_sentence(Handle h)
 {
@@ -44,20 +39,12 @@ void MihalceaLabel::annotate_sentence(Handle h)
 /**
  * Anotate every word in the given parse with every possible word sense
  * for that word. The argument handle is presumed to identify a specific
- * parse. Each word-instance in the parse is linked to it via a 
- * ParseInstanceLink:
- *
- *    <ParseInstanceLink>
- *       <ConceptNode name="bark_169" />
- *       <ConceptNode name="parse_3" />
- *    </ParseInstanceLink>
+ * parse.
  */
 bool MihalceaLabel::annotate_parse(Handle h)
 {
 	printf("found parse %x\n", (unsigned long) h);
-	ForeachChaseLink<MihalceaLabel> chase;
-	chase.backtrack_binary_link(h, PARSE_INSTANCE_LINK,
-	                            &MihalceaLabel::annotate_word, this);
+	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
 	return false;
 }
 

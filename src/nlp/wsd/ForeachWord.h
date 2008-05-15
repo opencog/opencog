@@ -20,28 +20,24 @@ inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 	chase.backtrack_binary_link(h, PARSE_LINK, cb, data);
 }
 
-#if 0
 /**
- * Anotate every word in the given parse with every possible word sense
- * for that word. The argument handle is presumed to identify a specific
- * parse. Each word-instance in the parse is linked to it via a 
- * ParseInstanceLink:
+ * Call the callback for every word-instance in a parse. The argument
+ * handle is presumed to identify a specific parse. Each word-instance
+ * in the parse is linked to it via a ParseInstanceLink:
  *
  *    <ParseInstanceLink>
  *       <ConceptNode name="bark_169" />
  *       <ConceptNode name="parse_3" />
  *    </ParseInstanceLink>
  */
-template class<T>
-inline void annotate_parse(Handle h)
+template <class T>
+inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	printf("found parse %x\n", (unsigned long) h);
-	ForeachChaseLink<MihalceaLabel> chase;
-	chase.backtrack_binary_link(h, PARSE_INSTANCE_LINK,
-	                            &MihalceaLabel::annotate_word, this);
-	return false;
+	ForeachChaseLink<T> chase;
+	chase.backtrack_binary_link(h, PARSE_INSTANCE_LINK, cb, data);
 }
 
+#if 0
 /**
  * Anotate the given word with every possible word sense, given its 
  * part-of-speech. The argument handle is assumed to point at a specific 
