@@ -1,13 +1,14 @@
 /*
- * Mihalcea.h
+ * MihalceaLabel.h
  *
- * Implements the Rada Mihalcea word-sense disambiguation algorithm.
+ * Implements the word-instance labelling portion of the Rada Mihalcea
+ * word-sense disambiguation algorithm.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#ifndef OPENCOG_MIHALCEA_H
-#define OPENCOG_MIHALCEA_H
+#ifndef OPENCOG_MIHALCEA_LABEL_H
+#define OPENCOG_MIHALCEA_LABEL_H
 
 #include <string>
 
@@ -16,12 +17,11 @@
 
 namespace opencog {
 
-class Mihalcea
+class MihalceaLabel
 {
 	private:
 		AtomSpace *atom_space;
 
-		void annotate_sentence(Handle);
 		bool annotate_parse(Handle);
 		bool annotate_word(Handle);
 		bool annotate_word_sense(Handle);
@@ -30,11 +30,12 @@ class Mihalcea
 		std::string word_inst_pos;
 
 	public:
-		Mihalcea(void);
-		~Mihalcea();
+		MihalceaLabel(void);
+		~MihalceaLabel();
 		void set_atom_space(AtomSpace *as) {atom_space = as;}
-		void process_sentence(Handle);
+
+		void annotate_sentence(Handle);
 };
 }
 
-#endif /* OPENCOG_MIHALCEA_H */
+#endif /* OPENCOG_MIHALCEA_LABEL_H */

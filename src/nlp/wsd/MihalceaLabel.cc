@@ -1,7 +1,8 @@
 /*
- * Mihalcea.cc
+ * MihalceaLabel.cc
  *
- * Implements the Rada Mihalcea word-sense disambiguation algorithm.
+ * Implements the word-instance labelling portion of the Rada Mihalcea
+ * word-sense disambiguation algorithm.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -15,12 +16,12 @@
 
 using namespace opencog;
 
-Mihalcea::Mihalcea(void)
+MihalceaLabel::MihalceaLabel(void)
 {
 	atom_space = NULL;
 }
 
-Mihalcea::~Mihalcea()
+MihalceaLabel::~MihalceaLabel()
 {
 	atom_space = NULL;
 }
@@ -35,11 +36,11 @@ Mihalcea::~Mihalcea()
  *      <SentenceNode name="sentence_22" />
  *    </ParseLink>
  */
-void Mihalcea::annotate_sentence(Handle h)
+void MihalceaLabel::annotate_sentence(Handle h)
 {
-	ForeachChaseLink<Mihalcea> chase;
+	ForeachChaseLink<MihalceaLabel> chase;
 	chase.backtrack_binary_link(h, PARSE_LINK, 
-	                            &Mihalcea::annotate_parse, this);
+	                            &MihalceaLabel::annotate_parse, this);
 }
 
 /**
@@ -53,12 +54,12 @@ void Mihalcea::annotate_sentence(Handle h)
  *       <ConceptNode name="parse_3" />
  *    </ParseInstanceLink>
  */
-bool Mihalcea::annotate_parse(Handle h)
+bool MihalceaLabel::annotate_parse(Handle h)
 {
 	printf("found parse %x\n", (unsigned long) h);
-	ForeachChaseLink<Mihalcea> chase;
+	ForeachChaseLink<MihalceaLabel> chase;
 	chase.backtrack_binary_link(h, PARSE_INSTANCE_LINK,
-	                            &Mihalcea::annotate_word, this);
+	                            &MihalceaLabel::annotate_word, this);
 	return false;
 }
 
@@ -97,7 +98,7 @@ bool Mihalcea::annotate_parse(Handle h)
  *    </PartOfSpeechLink>
  *
  */
-bool Mihalcea::annotate_word(Handle h)
+bool MihalceaLabel::annotate_word(Handle h)
 {
 	word_instance = TLB::getAtom(h);
 
@@ -127,9 +128,9 @@ printf("found inst-pos %s\n",  word_inst_pos.c_str());
 n = dynamic_cast<Node *>(dict_word);
 printf("found word-dict %s\n",  n->toString().c_str());
  
-	ForeachChaseLink<Mihalcea> chase;
+	ForeachChaseLink<MihalceaLabel> chase;
 	chase.follow_binary_link(dict_word_h, WORD_SENSE_LINK,
-	                            &Mihalcea::annotate_word_sense, this);
+	                            &MihalceaLabel::annotate_word_sense, this);
 	return false;
 }
 
@@ -142,7 +143,7 @@ printf("found word-dict %s\n",  n->toString().c_str());
  *      <WordSenseNode name="bark_sense_23" />
  *   </InheritanceLink>
  */
-bool Mihalcea::annotate_word_sense(Handle h)
+bool MihalceaLabel::annotate_word_sense(Handle h)
 {
 	Atom *word_sense = TLB::getAtom(h);
 
@@ -172,8 +173,4 @@ printf("keeping word-sense pos %s\n",  sense_pos.c_str());
 	return false;
 }
 
-void Mihalcea::process_sentence(Handle h)
-{
-	annotate_sentence(h);
-}
-
+/* ============================== END OF FILE ====================== */
