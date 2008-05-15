@@ -1,6 +1,7 @@
 
 add_library (wsd STATIC
 Mihalcea.cc
+MihalceaEdge.cc
 MihalceaLabel.cc
 WordSenseProcessor.cc
 )

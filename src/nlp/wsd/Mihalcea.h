@@ -13,6 +13,7 @@
 
 #include "Atom.h"
 #include "AtomSpace.h"
+#include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
 
 namespace opencog {
@@ -22,6 +23,7 @@ class Mihalcea
 	private:
 		AtomSpace *atom_space;
 		MihalceaLabel *labeller;
+		MihalceaEdge *edger;
 
 	public:
 		Mihalcea(void);
