@@ -68,14 +68,7 @@ bool MihalceaLabel::annotate_parse(Handle h)
  *       <DefinedLinguisticConceptNode name="#noun" />
  *    </PartOfSpeechLink>
  *
- * Each dictionary-word is assumed to be linked to word senses via
- *
- *    <WordSenseLink>
- *       <WordNode name="bark" />
- *       <ConceptNode name="bark_sense_23" />
- *    </WordSenseLink>
- *  
- * Each word-sense is assumed to be linked to a prt-of-speech via
+ * Each word-sense is assumed to be linked to a part-of-speech via
  *
  *    <PartOfSpeechLink>
  *       <ConceptNode name="bark_sense_23" />
@@ -113,9 +106,8 @@ printf("found inst-pos %s\n",  word_inst_pos.c_str());
 n = dynamic_cast<Node *>(dict_word);
 printf("found word-dict %s\n",  n->toString().c_str());
  
-	ForeachChaseLink<MihalceaLabel> chase;
-	chase.follow_binary_link(dict_word_h, WORD_SENSE_LINK,
-	                            &MihalceaLabel::annotate_word_sense, this);
+	foreach_dict_word_sense(dict_word_h, 
+	                        &MihalceaLabel::annotate_word_sense, this);
 	return false;
 }
 

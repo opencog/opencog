@@ -1,3 +1,18 @@
+/*
+ * ForeachWord.h
+ *
+ * Implements a collection of iterators for running over the multiple
+ * parses of a sentence, the multiple word-instances of a parse, and so
+ * on. The goal here is that these iterators hide the structural detail
+ * of the opencog representation of sentences, pares, and so on. Thus,
+ * if (when?) the opencog representation changes, then only this file 
+ * needs to be adjusted, instead of the broad sweep of algorithms.
+ *
+ * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ */
+
+#ifndef OPENCOG_FOREACH_WORD_H
+#define OPENCOG_FOREACH_WORD_H
 
 #include <ForeachChaseLink.h>
 
@@ -37,26 +52,10 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 	chase.backtrack_binary_link(h, PARSE_INSTANCE_LINK, cb, data);
 }
 
-#if 0
 /**
- * Anotate the given word with every possible word sense, given its 
- * part-of-speech. The argument handle is assumed to point at a specific 
- * word-instance in some parse.
- *
- * Each word-instance is assumed to be link to a single WordNode via 
- * a ReferenceLink:
- *
- *    <ReferenceLink>
- *      <ConceptNode name="bark_169" />
- *      <WordNode name="bark">
- *    </ReferenceLink>
- *
- * Each word-instance is assumed to be linked to a part-of-speech via
- *
- *    <PartOfSpeechLink>
- *       <ConceptNode name="bark_169" />
- *       <DefinedLinguisticConceptNode name="#noun" />
- *    </PartOfSpeechLink>
+ * Given a dictionary word, call the callback for each word sense
+ * associated with that dictionary word (for all parts-of-speech).
+ * The argument is presumed to point at a specific dictionary word.
  *
  * Each dictionary-word is assumed to be linked to word senses via
  *
@@ -65,30 +64,15 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
  *       <ConceptNode name="bark_sense_23" />
  *    </WordSenseLink>
  *  
- * Each word-sense is assumed to be linked to a prt-of-speech via
- *
- *    <PartOfSpeechLink>
- *       <ConceptNode name="bark_sense_23" />
- *       <ConceptNode name="noun" />
- *    </PartOfSpeechLink>
- *
  */
-bool MihalceaLabel::annotate_word(Handle h)
+template <class T>
+inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	word_instance = TLB::getAtom(h);
-
-	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
-	Handle dict_word_h = TLB::getHandle(dict_word);
-n = dynamic_cast<Node *>(dict_word);
-printf("found word-dict %s\n",  n->toString().c_str());
- 
-	ForeachChaseLink<MihalceaLabel> chase;
-	chase.follow_binary_link(dict_word_h, WORD_SENSE_LINK,
-	                            &MihalceaLabel::annotate_word_sense, this);
-	return false;
+	ForeachChaseLink<T> chase;
+	chase.follow_binary_link(h, WORD_SENSE_LINK, cb, data);
 }
-#endif
 
 }
 
-/* ============================== END OF FILE ====================== */
+#endif /* OPENCOG_FOREACH_WORD_H */
+
