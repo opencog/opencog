@@ -69,21 +69,82 @@ bool Mihalcea::annotate_parse(Handle h)
  *
  *    <ReferenceLink>
  *      <ConceptNode name="bark_169" />
- *      <WordNode name="#bark">
+ *      <WordNode name="bark">
  *    </ReferenceLink>
+ *
+ * Each word-instance is assumed to be linked to a part-of-speech via
+ *
+ *    <PartOfSpeechLink>
+ *       <ConceptNode name="bark_169" />
+ *       <DefinedLinguisticConceptNode name="#noun" />
+ *    </PartOfSpeechLink>
+ *
+ * Each dictionary-word is assumed to be linked to word senses via
+ *
+ *    <WordSenseLink>
+ *       <WordNode name="bark" />
+ *       <ConceptNode name="bark_sense_23" />
+ *    </WordSenseLink>
+ *  
+ * Each word-sense is assumed to be linked to a prt-of-speech via
+ *
+ *    <PartOfSpeechLink>
+ *       <ConceptNode name="bark_sense_23" />
+ *       <ConceptNode name="noun" />
+ *    </PartOfSpeechLink>
  *
  */
 bool Mihalcea::annotate_word(Handle h)
 {
 	Atom *word_instance = TLB::getAtom(h);
-	Node *n = dynamic_cast<Node *>(word_instance);
-	printf("found word-inst %s\n",  n->toString().c_str());
+
+Node *n = dynamic_cast<Node *>(word_instance);
+printf("found word-inst %s\n",  n->toString().c_str());
+
+	// Find the part-of-speech for this word instance.
+	FollowLink fl;
+	Atom *inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
+	n = dynamic_cast<Node *>(inst_pos);
+	word_inst_pos = n->getName();
+
+	word_inst_pos.erase(0,1);  // remove leading hash sign
+
+	// Reject some unwanted parts-of-speech.
+	if (0 == word_inst_pos.compare("WORD")) return false;
+	if (0 == word_inst_pos.compare("det")) return false;
+	if (0 == word_inst_pos.compare("particle")) return false;
+	if (0 == word_inst_pos.compare("prep")) return false;
+	if (0 == word_inst_pos.compare("punctuation")) return false;
+
+
+printf("found inst-pos %s\n",  word_inst_pos.c_str());
+
+	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
+	Handle dict_word_h = TLB::getHandle(dict_word);
+n = dynamic_cast<Node *>(dict_word);
+printf("found word-dict %s\n",  n->toString().c_str());
+ 
+	ForeachChaseLink<Mihalcea> chase;
+	chase.follow_binary_link(dict_word_h, WORD_SENSE_LINK,
+	                            &Mihalcea::annotate_word_sense, this);
+	return false;
+}
+
+bool Mihalcea::annotate_word_sense(Handle h)
+{
+	Atom *word_sense = TLB::getAtom(h);
+Node *n = dynamic_cast<Node *>(word_sense);
+printf("found word-sense %s\n",  n->toString().c_str());
 
 	FollowLink fl;
-	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
-	n = dynamic_cast<Node *>(dict_word);
-	printf("found word-dict %s\n",  n->toString().c_str());
- 
+	Atom *a = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
+	n = dynamic_cast<Node *>(a);
+	std::string sense_pos = n->getName();
+printf("found word-sense pos %s\n",  sense_pos.c_str());
+
+	if (word_inst_pos.compare(sense_pos)) return false;
+printf("keeping word-sense pos %s\n",  sense_pos.c_str());
+
 	return false;
 }
 

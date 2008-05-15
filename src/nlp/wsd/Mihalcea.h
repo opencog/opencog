@@ -18,6 +18,9 @@ class Mihalcea
 		void annotate_sentence(Handle);
 		bool annotate_parse(Handle);
 		bool annotate_word(Handle);
+		bool annotate_word_sense(Handle);
+
+		std::string word_inst_pos;
 
 	public:
 		Mihalcea(void);
