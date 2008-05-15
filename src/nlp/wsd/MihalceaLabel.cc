@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #include "FollowLink.h"
-#include "ForeachChaseLink.h"
+#include "ForeachWord.h"
 #include "MihalceaLabel.h"
 #include "Node.h"
 #include "SimpleTruthValue.h"
@@ -38,9 +38,7 @@ MihalceaLabel::~MihalceaLabel()
  */
 void MihalceaLabel::annotate_sentence(Handle h)
 {
-	ForeachChaseLink<MihalceaLabel> chase;
-	chase.backtrack_binary_link(h, PARSE_LINK, 
-	                            &MihalceaLabel::annotate_parse, this);
+	foreach_parse(h, &MihalceaLabel::annotate_parse, this);
 }
 
 /**
