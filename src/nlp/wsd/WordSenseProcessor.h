@@ -9,7 +9,7 @@
  */
 
 #include "MindAgent.h"
-#include "Mihalcea.h"
+#include "MihalceaLabel.h"
 
 namespace opencog {
 

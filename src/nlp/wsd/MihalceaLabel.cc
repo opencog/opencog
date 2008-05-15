@@ -9,7 +9,7 @@
 
 #include "FollowLink.h"
 #include "ForeachChaseLink.h"
-#include "Mihalcea.h"
+#include "MihalceaLabel.h"
 #include "Node.h"
 #include "SimpleTruthValue.h"
 

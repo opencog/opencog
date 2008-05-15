@@ -16,7 +16,7 @@
 #include "Foreach.h"
 #include "ForeachChaseLink.h"
 #include "Link.h"
-#include "Mihalcea.h"
+#include "MihalceaLabel.h"
 #include "MindAgent.h"
 #include "Node.h"
 #include "WordSenseProcessor.h"

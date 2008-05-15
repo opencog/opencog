@@ -387,7 +387,8 @@ This section elaborates on point 5 above.
 The goal of word-sense disambiguation is to asociate a word instance to
 each possible word-sense, and then to determine the most-likely pairing.
 The Mihalcea algorithm[1] performs this by creating weighted links
-between (word-instance, word-sense) pairs. The goal of this section is
+between (word-instance, word-sense) pairs. (These are refered to as
+"admissible labels" in [1]).  The goal of this section is
 to describe the opencog representation of these pairs-of-pairs. 
 Crudely speaking, these relations form an adjacency matrix for a graph
 resembling Markov chain; and so the representation problem is that of 
@@ -424,7 +425,7 @@ mutually reinforce the most likely meaning of each word.
 Note that the set link is unordered: there is no prefered direction in
 the relation between "tree" and "bark".
 
-An alternate representation for the above would create a single node
+[[An alternate representation for the above would create a single node
 for every (word-instance, word-sense) pair, like so:
 
    <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
@@ -451,7 +452,7 @@ represented as follows:
       <ConceptNode name="bark_pair_1"  strength=0.9 confidence=0.1>
    </SentenceCooccurrenceLink>
 
-Its not clear which representation is "better".
+Its not clear which representation is "better".]]
 
 
 Propagation of probabilities
