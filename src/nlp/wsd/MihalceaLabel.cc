@@ -43,7 +43,7 @@ void MihalceaLabel::annotate_sentence(Handle h)
  */
 bool MihalceaLabel::annotate_parse(Handle h)
 {
-printf("found parse %x\n", (unsigned long) h);
+printf("found parse %x\n", (unsigned int) h);
 	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
 	return false;
 }

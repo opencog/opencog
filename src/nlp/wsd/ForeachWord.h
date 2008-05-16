@@ -95,10 +95,11 @@ inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
  *    </PartOfSpeechLink>
  *
  */
-// The POSFilter class should be local scope to 
+// The PrivateUseOnlyPOSFilter class should be local scope to 
 // foreach_dict_word_sense_pos() only, but C++ doesn't allow this. :-(
+// This class is not for general, public use!
 template <typename T>
-class POSFilter  
+class PrivateUseOnlyPOSFilter  
 {
 	public:
 		bool (T::*user_cb)(Handle);
@@ -126,12 +127,13 @@ template <typename T>
 inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
                                         bool (T::*cb)(Handle), T *data)
 {
-	POSFilter<T> pf;
+	PrivateUseOnlyPOSFilter<T> pf;
 	pf.user_cb = cb;
 	pf.user_data = data;
 	pf.desired_pos = &pos;
-	ForeachChaseLink<POSFilter<T> > chase;
-	chase.follow_binary_link(h, WORD_SENSE_LINK, &POSFilter<T>::pos_filter, &pf);
+	ForeachChaseLink<PrivateUseOnlyPOSFilter<T> > chase;
+	chase.follow_binary_link(h, WORD_SENSE_LINK,
+	                         &PrivateUseOnlyPOSFilter<T>::pos_filter, &pf);
 }
 
 /**
@@ -173,6 +175,85 @@ inline Handle get_dict_word_of_word_instance(Handle h)
 	FollowLink fl;
 	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
 	return TLB::getHandle(dict_word);
+}
+
+
+/**
+ * For each word-instance, loop over all syntactic relationships
+ * (i.e. _subj, _obj, _nn, _amod, and so on). For each relationship,
+ * call the indicated callback. It is assumed that the relex 
+ * relationships are structured as follows:
+ *
+ *    "The outfielder caught the ball."
+ *    <!-- _subj (<<catch>>, <<outfielder>>) -->
+ *    <EvaluationLink>
+ *       <DefinedLinguisticRelationshipNode name="_subj"/>
+ *       <ListLink>
+ *          <ConceptNode name="catch_instance_23"/>
+ *          <ConceptNode name="outfielder_instance_48"/>
+ *       </ListLink>
+ *    </EvaluationLink>
+ *
+ * It is assumed that the passed handle indicates the first word
+ * instance in the relationship.
+ */
+// The PrivateUseOnlyRelationFinder class should be local scope to 
+// foreach_relex_relation() only, but C++ doesn't allow this. :-(
+// This class is not for general, public use!
+template <typename T>
+class PrivateUseOnlyRelexRelationFinder
+{
+	private:
+		Atom *listlink;
+		bool look_for_eval_link(Handle h)
+		{
+			Atom *a = TLB::getAtom(h);
+			if (a->getType() != EVALUATION_LINK) return false;
+
+			// If we are here, lets see if the first node is a ling rel.
+			Link *l = dynamic_cast<Link *>(a);
+			if (l == NULL) return false;
+
+			a = l->getOutgoingAtom(0);
+			Node *n = dynamic_cast<Node *>(a);
+			if (n == NULL) return false;
+			if (n->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
+
+			// OK, we've found a relationship. Get the second member of
+			// the list link, and call the suer callback with it.
+			const std::string &relname = n->getName();
+
+			l = dynamic_cast<Link *>(listlink);
+			a = l->getOutgoingAtom(1);
+			Handle second = TLB::getHandle(a);
+
+			(user_data->*user_cb)(relname, second);
+			return false;
+		}
+		
+	public:
+		bool (T::*user_cb)(const std::string &, Handle);
+		T *user_data;
+
+		bool look_for_list_link(Handle h)
+		{
+			Atom *a = TLB::getAtom(h);
+			if (a->getType() != LIST_LINK) return false;
+			listlink = a;
+
+			// If we are here, lets see if the list link is in eval link.
+			foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder::look_for_eval_link, this);
+			return false;
+		}
+};
+
+template <typename T>
+inline void foreach_relex_relation(Handle h, bool (T::*cb)(const std::string &, Handle), T *data)
+{
+	PrivateUseOnlyRelexRelationFinder<T> rrf;
+	rrf.user_cb = cb;
+	rrf.user_data = data;
+	foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
 }
 
 }
