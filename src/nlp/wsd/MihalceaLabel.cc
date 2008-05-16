@@ -43,7 +43,7 @@ void MihalceaLabel::annotate_sentence(Handle h)
  */
 bool MihalceaLabel::annotate_parse(Handle h)
 {
-	printf("found parse %x\n", (unsigned long) h);
+printf("found parse %x\n", (unsigned long) h);
 	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
 	return false;
 }
@@ -52,21 +52,6 @@ bool MihalceaLabel::annotate_parse(Handle h)
  * Anotate the given word with every possible word sense, given its 
  * part-of-speech. The argument handle is assumed to point at a specific 
  * word-instance in some parse.
- *
- * Each word-instance is assumed to be link to a single WordNode via 
- * a ReferenceLink:
- *
- *    <ReferenceLink>
- *      <ConceptNode name="bark_169" />
- *      <WordNode name="bark">
- *    </ReferenceLink>
- *
- * Each word-instance is assumed to be linked to a part-of-speech via
- *
- *    <PartOfSpeechLink>
- *       <ConceptNode name="bark_169" />
- *       <DefinedLinguisticConceptNode name="#noun" />
- *    </PartOfSpeechLink>
  */
 bool MihalceaLabel::annotate_word(Handle h)
 {
@@ -76,10 +61,7 @@ Node *n = dynamic_cast<Node *>(word_instance);
 printf("found word-inst %s\n",  n->toString().c_str());
 
 	// Find the part-of-speech for this word instance.
-	FollowLink fl;
-	Atom *inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
-	n = dynamic_cast<Node *>(inst_pos);
-	std::string word_inst_pos = n->getName();
+	std::string word_inst_pos = get_pos_of_word_instance(h);
 
 	word_inst_pos.erase(0,1);  // remove leading hash sign
 
@@ -92,11 +74,12 @@ printf("found word-inst %s\n",  n->toString().c_str());
 
 printf("found inst-pos %s\n",  word_inst_pos.c_str());
 
-	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
-	Handle dict_word_h = TLB::getHandle(dict_word);
-n = dynamic_cast<Node *>(dict_word);
+	Handle dict_word_h = get_dict_word_of_word_instance(h);
+
+n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
 printf("found word-dict %s\n",  n->toString().c_str());
  
+	// loop over all word senses with this part-of-speech.
 	foreach_dict_word_sense_pos(dict_word_h, word_inst_pos,
 	                        &MihalceaLabel::annotate_word_sense, this);
 	return false;

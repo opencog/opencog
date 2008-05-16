@@ -134,6 +134,47 @@ inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
 	chase.follow_binary_link(h, WORD_SENSE_LINK, &POSFilter<T>::pos_filter, &pf);
 }
 
+/**
+ * Return the part-of-speech for the indicated word-instance.
+ * @handle:  handle of a word-instance node.
+ *
+ * Each word-instance is assumed to be linked to a part-of-speech via
+ *
+ *    <PartOfSpeechLink>
+ *       <ConceptNode name="bark_169" />
+ *       <DefinedLinguisticConceptNode name="#noun" />
+ *    </PartOfSpeechLink>
+ */
+inline const std::string& get_pos_of_word_instance(Handle h)
+{
+	Atom * word_instance = TLB::getAtom(h);
+
+	// Find the part-of-speech for this word instance.
+	FollowLink fl;
+	Atom *inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
+	Node *n = dynamic_cast<Node *>(inst_pos);
+	return n->getName();
+}
+
+/**
+ * Return the dictionary-word correspondng to a given word-instance.
+ *
+ * Each word-instance is assumed to be link to a single WordNode via 
+ * a ReferenceLink:
+ *
+ *    <ReferenceLink>
+ *      <ConceptNode name="bark_169" />
+ *      <WordNode name="bark">
+ *    </ReferenceLink>
+ */
+inline Handle get_dict_word_of_word_instance(Handle h)
+{
+	Atom *word_instance = TLB::getAtom(h);
+	FollowLink fl;
+	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
+	return TLB::getHandle(dict_word);
+}
+
 }
 
 #endif /* OPENCOG_FOREACH_WORD_H */
