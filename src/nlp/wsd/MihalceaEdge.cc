@@ -62,9 +62,56 @@ bool MihalceaEdge::annotate_parse(Handle h)
  *       </ListLink>
  *    </EvaluationLink>
  *
+ * It is assumed that the passed handle indicates the first word
+ * instance in the relationship.
  */
+// template <typename T>
+class RelexRelationFinder
+{
+	private:
+		bool look_for_eval_link(Handle h)
+		{
+			Atom *a = TLB::getAtom(h);
+			if (a->getType() != EVALUATION_LINK) return false;
+
+			// If we are here, lets see if the first node is a ling rel.
+			Link *l = dynamic_cast<Link *>(a);
+			if (l == NULL) return false;
+
+			a = l->getOutgoingAtom(0);
+			Node *n = dynamic_cast<Node *>(a);
+			if (n == NULL) return false;
+			if (n->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
+
+			// OK, we've found a relationship. Get the second member of
+			// the list link, and call the suer callback with it.
+			const std::string &relname = n->getName();
+printf ("duude found lingre; %s\n", relname.c_str());
+
+			l = dynamic_cast<Link *>(listlink);
+			a = l->getOutgoingAtom(1);
+			Handle second = TLB::getHandle(a);
+
+			return false;
+		}
+		
+	public:
+		Atom *listlink;
+		bool look_for_list_link(Handle h)
+		{
+			Atom *a = TLB::getAtom(h);
+			if (a->getType() != LIST_LINK) return false;
+			listlink = a;
+
+			// If we are here, lets see if the list link is in eval link.
+			foreach_incoming_handle(h, &RelexRelationFinder::look_for_eval_link, this);
+			return false;
+		}
+};
 inline void foreach_relex_relation(Handle h)
 {
+	RelexRelationFinder rrf;
+	foreach_incoming_handle(h, &RelexRelationFinder::look_for_list_link, &rrf);
 }
 
 /**
