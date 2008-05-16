@@ -21,6 +21,8 @@ class MihalceaEdge
 {
 	private:
 		AtomSpace *atom_space;
+		bool annotate_parse(Handle);
+		bool annotate_word(Handle);
 
 	public:
 		MihalceaEdge(void);
