@@ -67,14 +67,6 @@ bool MihalceaLabel::annotate_parse(Handle h)
  *       <ConceptNode name="bark_169" />
  *       <DefinedLinguisticConceptNode name="#noun" />
  *    </PartOfSpeechLink>
- *
- * Each word-sense is assumed to be linked to a part-of-speech via
- *
- *    <PartOfSpeechLink>
- *       <ConceptNode name="bark_sense_23" />
- *       <ConceptNode name="noun" />
- *    </PartOfSpeechLink>
- *
  */
 bool MihalceaLabel::annotate_word(Handle h)
 {
@@ -87,7 +79,7 @@ printf("found word-inst %s\n",  n->toString().c_str());
 	FollowLink fl;
 	Atom *inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
 	n = dynamic_cast<Node *>(inst_pos);
-	word_inst_pos = n->getName();
+	std::string word_inst_pos = n->getName();
 
 	word_inst_pos.erase(0,1);  // remove leading hash sign
 
@@ -98,7 +90,6 @@ printf("found word-inst %s\n",  n->toString().c_str());
 	if (0 == word_inst_pos.compare("prep")) return false;
 	if (0 == word_inst_pos.compare("punctuation")) return false;
 
-
 printf("found inst-pos %s\n",  word_inst_pos.c_str());
 
 	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
@@ -106,7 +97,7 @@ printf("found inst-pos %s\n",  word_inst_pos.c_str());
 n = dynamic_cast<Node *>(dict_word);
 printf("found word-dict %s\n",  n->toString().c_str());
  
-	foreach_dict_word_sense(dict_word_h, 
+	foreach_dict_word_sense_pos(dict_word_h, word_inst_pos,
 	                        &MihalceaLabel::annotate_word_sense, this);
 	return false;
 }
@@ -124,18 +115,8 @@ bool MihalceaLabel::annotate_word_sense(Handle h)
 {
 	Atom *word_sense = TLB::getAtom(h);
 
-	// Find the part-of-speech for this word-sense.
-	FollowLink fl;
-	Atom *a = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
-	Node *n = dynamic_cast<Node *>(a);
-	std::string sense_pos = n->getName();
-
-	// If there's no POS match, skip this sense.
-	if (word_inst_pos.compare(sense_pos)) return false;
-
-n = dynamic_cast<Node *>(word_sense);
+Node *n = dynamic_cast<Node *>(word_sense);
 printf("found word-sense %s\n",  n->toString().c_str());
-printf("keeping word-sense pos %s\n",  sense_pos.c_str());
 
 	// Create a link connecting this word-instance to this word-sense.
 	std::vector<Handle> out;

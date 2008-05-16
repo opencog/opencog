@@ -14,7 +14,10 @@
 #ifndef OPENCOG_FOREACH_WORD_H
 #define OPENCOG_FOREACH_WORD_H
 
+#include <Atom.h>
 #include <ForeachChaseLink.h>
+#include <FollowLink.h>
+#include <Node.h>
 
 namespace opencog {
 
@@ -54,7 +57,7 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 
 /**
  * Given a dictionary word, call the callback for each word sense
- * associated with that dictionary word (for all parts-of-speech).
+ * associated with that dictionary word, for all parts-of-speech.
  * The argument is presumed to point at a specific dictionary word.
  *
  * Each dictionary-word is assumed to be linked to word senses via
@@ -70,6 +73,65 @@ inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
 {
 	ForeachChaseLink<T> chase;
 	chase.follow_binary_link(h, WORD_SENSE_LINK, cb, data);
+}
+
+/**
+ * Given a dictionary word, call the callback for each word sense
+ * associated with that dictionary word, for the indicated parts-of-speech.
+ * The argument is presumed to point at a specific dictionary word.
+ *
+ * Each dictionary-word is assumed to be linked to word senses via
+ *
+ *    <WordSenseLink>
+ *       <WordNode name="bark" />
+ *       <ConceptNode name="bark_sense_23" />
+ *    </WordSenseLink>
+ *  
+ * Each word-sense is assumed to be linked to a part-of-speech via
+ *
+ *    <PartOfSpeechLink>
+ *       <ConceptNode name="bark_sense_23" />
+ *       <ConceptNode name="noun" />
+ *    </PartOfSpeechLink>
+ *
+ */
+// The POSFilter class should be local scope to 
+// foreach_dict_word_sense_pos() only, but C++ doesn't allow this. :-(
+template <typename T>
+class POSFilter  
+{
+	public:
+		bool (T::*user_cb)(Handle);
+		T *user_data;
+		const std::string *desired_pos;
+		bool pos_filter(Handle h)
+		{
+			Atom *word_sense = TLB::getAtom(h);
+
+			// Find the part-of-speech for this word-sense.
+			FollowLink fl;
+			Atom *a = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
+			Node *n = dynamic_cast<Node *>(a);
+			std::string sense_pos = n->getName();
+
+			// If there's no POS match, skip this sense.
+			if (desired_pos->compare(sense_pos)) return false;
+
+			// If we are here, there's a match, so call the user callback.
+			return (user_data->*user_cb)(h);
+		}
+};
+
+template <typename T>
+inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
+                                        bool (T::*cb)(Handle), T *data)
+{
+	POSFilter<T> pf;
+	pf.user_cb = cb;
+	pf.user_data = data;
+	pf.desired_pos = &pos;
+	ForeachChaseLink<POSFilter<T> > chase;
+	chase.follow_binary_link(h, WORD_SENSE_LINK, &POSFilter<T>::pos_filter, &pf);
 }
 
 }

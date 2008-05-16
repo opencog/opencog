@@ -27,7 +27,6 @@ class MihalceaLabel
 		bool annotate_word_sense(Handle);
 
 		Atom * word_instance;
-		std::string word_inst_pos;
 
 	public:
 		MihalceaLabel(void);
