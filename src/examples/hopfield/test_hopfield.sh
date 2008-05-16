@@ -15,6 +15,7 @@ viz_threshold=5
 error=0.2
 stimulus=10
 retrieval_cycles=10
+flags="-R -E"
 
 # test random created patterns
 sizes="3 4 5"
@@ -33,10 +34,10 @@ do
 	options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	    -f ${focus_threshold} -z ${viz_threshold} -e ${error} \
 	    -c ${retrieval_cycles} -s ${stimulus} -D \
-	    -g ${gen_density} -p ${npatterns}"
+	    -g ${gen_density} -p ${npatterns} ${flags}"
 	echo " === Command line:" > $logfile
 	echo $options >> $logfile
-	echo " === Output of -C from program:" > $logfile
+	echo " === Output of -C from program:" >> $logfile
 	$h_exe $options -C >> ${logfile}
 	echo " ===" >> $logfile
 	$h_exe $options >> ${logfile}
@@ -66,10 +67,10 @@ do
 	-c ${retrieval_cycles} -s ${stimulus} -D \
 	--train-file=${train_file} \
 	--result-file=${results_file} \
-	--cue-file=${cue_file}"
+	--cue-file=${cue_file} ${flags}"
     echo " === Command line:" > $logfile
     echo $options >> $logfile
-    echo " === Output of -C from program:" > $logfile
+    echo " === Output of -C from program:" >> $logfile
     $h_exe $options -C >> ${logfile}
     echo " ===" >> $logfile
     $h_exe $options >> ${logfile}
@@ -91,10 +92,10 @@ do
 	-f ${focus_threshold} -z ${viz_threshold} -e ${error} \
 	-c ${retrieval_cycles} -s ${stimulus} -D \
 	--train-file=${train_file} \
-	--result-file=${results_file}"
+	--result-file=${results_file} ${flags}"
     echo " === Command line:" > $logfile
     echo $options >> $logfile
-    echo " === Output of -C from program:" > $logfile
+    echo " === Output of -C from program:" >> $logfile
     $h_exe $options -C >> ${logfile}
     echo " ===" >> $logfile
     $h_exe $options >> ${logfile}

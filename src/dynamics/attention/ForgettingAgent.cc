@@ -9,7 +9,7 @@ ForgettingAgent::ForgettingAgent()
     // forget 0.1% of atoms
     forgetPercentage = 0.001;
     // No limit to lti of removed atoms
-    forgettingThreshold = AttentionValue::MAXLTI;
+    forgetThreshold = AttentionValue::MAXLTI;
 }
 
 ForgettingAgent::~ForgettingAgent()
@@ -40,7 +40,7 @@ void ForgettingAgent::forget(float proportion=0.10f)
     removalAmount = (int) (atomsVector.size() * proportion);
 
     for (unsigned int i = 0; i < atomsVector.size() ; i++) {
-	if (a->getLTI(atomsVector[i]) <= forgettingThreshold
+	if (a->getLTI(atomsVector[i]) <= forgetThreshold
 		&& count < removalAmount) {
 	    if (a->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE ) {
 		//cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;

@@ -30,7 +30,7 @@ class ForgettingAgent : public MindAgent
 
     public:
 	// Maximum LTI of a link that can be forgot.
-	AttentionValue::lti_t forgettingThreshold;
+	AttentionValue::lti_t forgetThreshold;
 	// percentage to forget
 	float forgetPercentage;
 

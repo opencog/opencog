@@ -379,10 +379,11 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
 {
     AttentionValue::sti_t current, stiRentCharged, exchangeAmount;
     stim_t s;
+    AttentionValue::sti_t amnesty = 5;
 
     current = a->getSTI(h);
     /* collect if STI > a->attentionalFocusBoundary */
-    if (current > a->getAttentionalFocusBoundary()+5)
+    if (current > a->getAttentionalFocusBoundary()+amnesty)
 	stiRentCharged = STIAtomRent;
     else
 	stiRentCharged = 0;

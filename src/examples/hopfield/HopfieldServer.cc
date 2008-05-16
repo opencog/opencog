@@ -180,17 +180,28 @@ void HopfieldServer::init(int width, int height, int numLinks)
 
 }
 
+void HopfieldServer::reset()
+{
+    AtomSpace* atomSpace = getAtomSpace();
+    HandleEntry *links, *l;
+    
+    // Remove all links and replace
+    links = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
+    for (l=links; l->next; l=l->next)
+	atomSpace->removeAtom(l->handle);
+    delete links;
+
+    addRandomLinks();
+}
+
 void HopfieldServer::addRandomLinks()
 {
     AtomSpace* atomSpace = getAtomSpace();
     HandleEntry *links;
     int amount;
     
-    // Go through all Hebbian links and update TVs
-    links = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
-    // TODO: process assymmetric hebbian links too
-
     // Add links if less than desired number and to replace forgotten links
+    links = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
     amount = this->links - links->getSize();
     delete links;
 

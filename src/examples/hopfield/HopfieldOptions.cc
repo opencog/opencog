@@ -35,6 +35,7 @@ void HopfieldOptions::printHelp()
 "Joel Pitt, March 2008.\nCopyright Singularity Institute for Artificial Intelligence\n"
 "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
 "Options:\n"
+"   -? --help   \t Output this screen and exit.\n"
 "   == Mode ==\n"
 "   [none]      \t Default mode is to imprint, test and repeat.\n"
 "   -R --reset  \t Same as above mode, but completely reset the network between\n"
@@ -116,6 +117,7 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 	    {"show-config", 0, &showConfigFlag, 1},
 	    {"reset", 0, &resetFlag, 1},
 	    {"one-cue", 0, &cueGenerateOnce, 1},
+	    {"help", 0, 0, '?'},
 	    {0,0,0,0}
 	};
 
@@ -147,7 +149,8 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 	    case 'd':
 		hServer->density=atof(optarg); break;
 	    case 's':
-		hServer->perceptStimUnit=atoi(optarg); break;
+		hServer->perceptStimUnit=atoi(optarg);
+		hServer->imprintStimUnit=atoi(optarg); break;
 	    case 't':
 		spreadThreshold=atoi(optarg); break;
 	    case 'z':

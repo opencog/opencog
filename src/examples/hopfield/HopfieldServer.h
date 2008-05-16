@@ -114,6 +114,13 @@ class HopfieldServer : public opencog::CogServer {
 	Pattern getGridSTIAsPattern();
 	std::vector<stim_t> getGridStimVector();
 
+	/**
+	 * Remove all links and replace.
+	 */
+	void reset();
+	/**
+	 * Reset STI of all nodes to zero.
+	 */
 	void resetNodes();
 	void imprintPattern(Pattern pattern, int cycles);
 

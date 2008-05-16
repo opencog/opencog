@@ -8,8 +8,8 @@ void testHopfieldNetworkRolling();
 void testHopfieldNetworkRollingOld();
 void testHopfieldNetworkInterleave();
 
-HopfieldServer hDemo;
-HopfieldOptions *o = hDemo.options;
+HopfieldServer hServer;
+HopfieldOptions *o = hServer.options;
 
 int main(int argc, char *argv[])
 {
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     }
 	
     MAIN_LOGGER.log(Util::Logger::INFO,"Init HopfieldServer");
-    hDemo.init(-1, -1, -1);
+    hServer.init(-1, -1, -1);
 
     if (o->recordToFile) o->openOutputFiles();
 
@@ -49,11 +49,11 @@ std::vector< Pattern > getPatterns()
 {
     if (o->fileTraining.size() > 0) {
 	std::vector< Pattern > ps;
-	ps = Pattern::loadPatterns(o->fileTraining,hDemo.height);
+	ps = Pattern::loadPatterns(o->fileTraining,hServer.height);
 	o->nPatterns = ps.size();
 	return ps;
     } else
-	return Pattern::generateRandomPatterns(o->nPatterns,hDemo.width,hDemo.height,o->genPatternDensity);
+	return Pattern::generateRandomPatterns(o->nPatterns,hServer.width,hServer.height,o->genPatternDensity);
 
 }
 
@@ -68,7 +68,7 @@ void testHopfieldNetworkInterleave()
     totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
 
     if (o->showMatrixFlag) {
-	hDemo.printMatrixResult(patterns);
+	hServer.printMatrixResult(patterns);
     }
 
     for (int i = 0; i < totalCycles; i++) {
@@ -94,8 +94,8 @@ void testHopfieldNetworkInterleave()
 
 	// Imprint each of them.
 	for (unsigned int j = startPattern; j <= (unsigned int) endPattern; j++) {
-	    hDemo.resetNodes();
-	    hDemo.imprintPattern(patterns[j],1);
+	    hServer.resetNodes();
+	    hServer.imprintPattern(patterns[j],1);
 	    //if (!verboseFlag) cout << ".";
 	}
 
@@ -103,7 +103,7 @@ void testHopfieldNetworkInterleave()
 	    float rSim;
 	    if (j <= (unsigned int) endPattern) {
 		Pattern c = patterns[j].mutatePattern(o->cueErrorRate);
-		Pattern rPattern = hDemo.retrievePattern(c,o->retrieveCycles);
+		Pattern rPattern = hServer.retrievePattern(c,o->retrieveCycles);
 		rSim = patterns[j].hammingSimilarity(rPattern);
 		cycleResults.push_back(rSim);
 		cout << rSim << "(" << rSim-patterns[j].hammingSimilarity(c) <<")" << ", ";
@@ -117,7 +117,7 @@ void testHopfieldNetworkInterleave()
 
 	}
 	if (!o->verboseFlag) cout << endl; 
-	if (o->showMatrixFlag) hDemo.printMatrixResult(toPrint);
+	if (o->showMatrixFlag) hServer.printMatrixResult(toPrint);
 	results.push_back(cycleResults);
 
     }
@@ -134,7 +134,9 @@ void testHopfieldNetworkRolling()
     patterns = getPatterns();
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
-	results.push_back(hDemo.imprintAndTestPattern(patterns[i],o->imprintCycles,o->retrieveCycles,o->cueErrorRate));
+	if (o->resetFlag)
+	    hServer.reset();
+	results.push_back(hServer.imprintAndTestPattern(patterns[i],o->imprintCycles,o->retrieveCycles,o->cueErrorRate));
 	if (!o->verboseFlag) cout << " - pattern " << i << " done" << endl;
 	if (o->recordToFile) {
 	    o->beforeFile << endl;
@@ -165,7 +167,7 @@ void testHopfieldNetworkRollingOld()
     std::vector< Pattern > patterns;
     std::vector< Pattern > cuePatterns;
     std::vector< Pattern > rPatterns;
-    Pattern result(hDemo.width, hDemo.height);
+    Pattern result(hServer.width, hServer.height);
     std::vector<float> diffs;
 
     patterns = getPatterns();
@@ -173,12 +175,12 @@ void testHopfieldNetworkRollingOld()
     cuePatterns = Pattern::mutatePatterns(patterns, o->cueErrorRate);
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
-	hDemo.imprintPattern(patterns[i],o->imprintCycles);
+	hServer.imprintPattern(patterns[i],o->imprintCycles);
 	MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for %d loops",o->imprintCycles);
     }
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
-	result = hDemo.retrievePattern(cuePatterns[i],o->retrieveCycles);
+	result = hServer.retrievePattern(cuePatterns[i],o->retrieveCycles);
 	MAIN_LOGGER.log(Util::Logger::INFO,"Updated Atom table for retrieval");
 	rPatterns.push_back(result);
     }
@@ -192,7 +194,7 @@ void testHopfieldNetworkRollingOld()
 	    toPrint.push_back(patterns[i]);
 	    toPrint.push_back(cuePatterns[i]);
 	    toPrint.push_back(rPatterns[i]);
-	    hDemo.printMatrixResult(toPrint);
+	    hServer.printMatrixResult(toPrint);
 	}
 
 	before = patterns[i].hammingSimilarity(cuePatterns[i]); 
