@@ -65,10 +65,11 @@ bool MihalceaEdge::annotate_parse(Handle h)
  * It is assumed that the passed handle indicates the first word
  * instance in the relationship.
  */
-// template <typename T>
+template <typename T>
 class RelexRelationFinder
 {
 	private:
+		Atom *listlink;
 		bool look_for_eval_link(Handle h)
 		{
 			Atom *a = TLB::getAtom(h);
@@ -86,17 +87,19 @@ class RelexRelationFinder
 			// OK, we've found a relationship. Get the second member of
 			// the list link, and call the suer callback with it.
 			const std::string &relname = n->getName();
-printf ("duude found lingre; %s\n", relname.c_str());
 
 			l = dynamic_cast<Link *>(listlink);
 			a = l->getOutgoingAtom(1);
 			Handle second = TLB::getHandle(a);
 
+			(user_data->*user_cb)(relname, second);
 			return false;
 		}
 		
 	public:
-		Atom *listlink;
+		bool (T::*user_cb)(const std::string &, Handle);
+		T *user_data;
+
 		bool look_for_list_link(Handle h)
 		{
 			Atom *a = TLB::getAtom(h);
@@ -108,10 +111,14 @@ printf ("duude found lingre; %s\n", relname.c_str());
 			return false;
 		}
 };
-inline void foreach_relex_relation(Handle h)
+
+template <typename T>
+inline void foreach_relex_relation(Handle h, bool (T::*cb)(const std::string &, Handle), T *data)
 {
-	RelexRelationFinder rrf;
-	foreach_incoming_handle(h, &RelexRelationFinder::look_for_list_link, &rrf);
+	RelexRelationFinder<T> rrf;
+	rrf.user_cb = cb;
+	rrf.user_data = data;
+	foreach_incoming_handle(h, &RelexRelationFinder<T>::look_for_list_link, &rrf);
 }
 
 /**
@@ -123,7 +130,12 @@ inline void foreach_relex_relation(Handle h)
 bool MihalceaEdge::annotate_word(Handle h)
 {
 	printf("Hellowwwwwwwwww world\n");
-	foreach_relex_relation(h);
+	foreach_relex_relation(h, &MihalceaEdge::annotate_relation, this);
 	return false;
 }
 
+bool MihalceaEdge::annotate_relation(const std::string &relname, Handle h)
+{
+	printf("dude got rel=%s\n", relname.c_str());
+	return false;
+}
