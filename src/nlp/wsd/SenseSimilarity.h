@@ -19,6 +19,10 @@ namespace opencog {
 class SenseSimilarity
 {
 	private:
+		Handle first_sense;
+		Handle second_sense;
+		int first_cnt;
+		bool up_first(Handle);
 
 	public:
 		SenseSimilarity(void);
