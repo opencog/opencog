@@ -181,8 +181,10 @@ inline Handle get_dict_word_of_word_instance(Handle h)
 /**
  * For each word-instance, loop over all syntactic relationships
  * (i.e. _subj, _obj, _nn, _amod, and so on). For each relationship,
- * call the indicated callback. It is assumed that the relex 
- * relationships are structured as follows:
+ * call the indicated callback. The callback is passed the relation 
+ * name, and the two members of the relation. 
+ *
+ * It is assumed that the relex relationships are structured as follows:
  *
  *    "The outfielder caught the ball."
  *    <!-- _subj (<<catch>>, <<outfielder>>) -->
@@ -224,15 +226,14 @@ class PrivateUseOnlyRelexRelationFinder
 			const std::string &relname = n->getName();
 
 			l = dynamic_cast<Link *>(listlink);
-			a = l->getOutgoingAtom(1);
-			Handle second = TLB::getHandle(a);
+			const std::vector<Handle> outset = l->getOutgoingSet();
 
-			(user_data->*user_cb)(relname, second);
+			(user_data->*user_cb)(relname, outset[0], outset[1]);
 			return false;
 		}
 		
 	public:
-		bool (T::*user_cb)(const std::string &, Handle);
+		bool (T::*user_cb)(const std::string &, Handle, Handle);
 		T *user_data;
 
 		bool look_for_list_link(Handle h)
@@ -248,7 +249,9 @@ class PrivateUseOnlyRelexRelationFinder
 };
 
 template <typename T>
-inline void foreach_relex_relation(Handle h, bool (T::*cb)(const std::string &, Handle), T *data)
+inline void 
+foreach_relex_relation(Handle h, 
+                       bool (T::*cb)(const std::string &, Handle, Handle), T *data)
 {
 	PrivateUseOnlyRelexRelationFinder<T> rrf;
 	rrf.user_cb = cb;

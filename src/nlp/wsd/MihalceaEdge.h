@@ -23,7 +23,7 @@ class MihalceaEdge
 		AtomSpace *atom_space;
 		bool annotate_parse(Handle);
 		bool annotate_word(Handle);
-		bool annotate_relation(const std::string &, Handle);
+		bool annotate_relation(const std::string &, Handle, Handle);
 
 	public:
 		MihalceaEdge(void);

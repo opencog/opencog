@@ -59,8 +59,18 @@ bool MihalceaEdge::annotate_word(Handle h)
 	return false;
 }
 
-bool MihalceaEdge::annotate_relation(const std::string &relname, Handle h)
+/**
+ * This routine is the inner loop of the edge-creator. It is called for
+ * every relation in a parse.
+ */
+bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, Handle second)
 {
-	printf("dude got rel=%s\n", relname.c_str());
+Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
+Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
+const std::string &fn = f->getName();
+const std::string &sn = s->getName();
+printf("dude got rel=%s %s %s\n", relname.c_str(), fn.c_str(), sn.c_str());
+	// foreach_relex_relation(second, &MihalceaEdge::annotate_relation, this);
+printf("----\n");
 	return false;
 }
