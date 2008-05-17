@@ -46,7 +46,7 @@
 
 namespace opencog {
 
-template <class T>
+template <typename T>
 class ForeachChaseLink
 {
 	public:
@@ -68,12 +68,30 @@ class ForeachChaseLink
 		}
 
 		/**
+		 * Same as above, except that callback has second argument.
+		 * The handle of the link itself is passed in the second argument.
+		 */
+		inline bool follow_binary_link_lh(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+		{
+			return follow_link_lh(h, ltype, 0, 1, cb, data);
+		}
+
+		/**
 		 * Same as above, except that the link is followed in the
 		 * reverse direction.
 		 */
 		inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 		{
 			return follow_link(h, ltype, 1, 0, cb, data);
+		}
+
+		/**
+		 * Same as above, except that callback has second argument.
+		 * The handle of the link itself is passed in the second argument.
+		 */
+		inline bool backtrack_binary_link_lh(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+		{
+			return follow_link_lh(h, ltype, 1, 0, cb, data);
 		}
 
 		/**
@@ -104,6 +122,32 @@ class ForeachChaseLink
 			position_from = from;
 			position_to = to;
 			user_callback = cb;
+			user_callback_lh = NULL;
+			user_data = data;
+			bool rc = foreach_incoming_atom(h, &ForeachChaseLink::find_link_type, this);
+			return rc;
+		}
+
+		/**
+		 * Same as above, except the callback is passed the handle of 
+		 * the link itself in the second arg.
+		 */
+		inline bool follow_link_lh(Handle h, Type ltype, int from, int to, 
+		                         bool (T::*cb)(Handle, Handle), T *data)
+		{
+			Atom *atom = TLB::getAtom(h);
+
+			if (NULL == atom) return NULL;
+
+			// Look for incoming links that are of the given type.
+			// Then grab the thing that they link to.
+			link_type = ltype;
+			from_atom = atom;
+			to_atom = NULL;
+			position_from = from;
+			position_to = to;
+			user_callback = NULL;
+			user_callback_lh = cb;
 			user_data = data;
 			bool rc = foreach_incoming_atom(h, &ForeachChaseLink::find_link_type, this);
 			return rc;
@@ -117,25 +161,29 @@ class ForeachChaseLink
 		int position_to;
 		int cnt;
 		bool (T::*user_callback)(Handle);
+		bool (T::*user_callback_lh)(Handle,Handle);
 		T *user_data;
 
 		/**
 		 * Check for link of the desired type, then loop over its outgoing set.
 		 */
-		inline bool find_link_type(Atom *atom)
+		inline bool find_link_type(Atom *link_atom)
 		{
 			// Make sure the link is of the specified link type
-			if (link_type != atom->getType()) return false;
+			if (link_type != link_atom->getType()) return false;
 
 			cnt = -1;
          to_atom = NULL;
-			Handle h = TLB::getHandle(atom);
-			foreach_outgoing_atom(h, &ForeachChaseLink::pursue_link, this);
+			Handle link_h = TLB::getHandle(link_atom);
+			foreach_outgoing_atom(link_h, &ForeachChaseLink::pursue_link, this);
 
 			bool rc = false;
 			if (to_atom)
 			{
-				rc = (user_data->*user_callback)(TLB::getHandle(to_atom));
+				if (user_callback)
+					rc = (user_data->*user_callback)(TLB::getHandle(to_atom));
+				else
+					rc = (user_data->*user_callback_lh)(TLB::getHandle(to_atom), link_h);
 			}
 			return rc;
 		}
