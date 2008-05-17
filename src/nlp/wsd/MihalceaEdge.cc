@@ -10,6 +10,7 @@
 
 #include "ForeachWord.h"
 #include "MihalceaEdge.h"
+#include "SenseSimilarity.h"
 #include "SimpleTruthValue.h"
 
 using namespace opencog;
@@ -93,6 +94,8 @@ bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, H
 bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
                                        Handle first_sense_link_h)
 {
+	first_word_sense = first_word_sense_h;
+
 	// Rule out relations that aren't actual word-senses.
 	Node *sense = dynamic_cast<Node *>(TLB::getAtom(first_word_sense_h));
 	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
@@ -141,12 +144,10 @@ printf("ola second sense %s!\n", sense->getName().c_str());
 	out.push_back(first_sense_link);
 	out.push_back(second_sense_link);
 
-	// XXX At this point, a word-sense similarity/relationship measure 
-	// should be used to obtain the truth value.
-	//
-	// Give it a mediocre truth value, very low confidence.
-	SimpleTruthValue stv(0.5, 1.0);
-	stv.setConfidence(0.01);
+	// Use a word-sense similarity/relationship measure to assign an 
+	// initial truth value to the edge.
+	SenseSimilarity *ss = new SenseSimilarity();
+	SimpleTruthValue stv = ss->lch_similarity(first_word_sense, second_word_sense_h);
 
 	atom_space->addLink(COSENSE_LINK, out, stv);
 

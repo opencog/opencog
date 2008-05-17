@@ -26,6 +26,7 @@ class MihalceaEdge
 		bool annotate_relation(const std::string &, Handle, Handle);
 
 		Handle second_word_inst;
+		Handle first_word_sense;
 		Handle first_sense_link;
 		bool sense_of_first_inst(Handle, Handle);
 		bool sense_of_second_inst(Handle, Handle);
