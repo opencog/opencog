@@ -81,6 +81,7 @@ init_inheritance(map, CONCEPT_NODE, DEFINED_FRAME_NODE);
 init_inheritance(map, ORDERED_LINK, FRAME_ELEMENT_LINK);
 init_inheritance(map, CONCEPT_NODE, WORD_SENSE_NODE);
 init_inheritance(map, ORDERED_LINK, PART_OF_SPEECH_LINK);
+init_inheritance(map, UNORDERED_LINK, COSENSE_LINK);
 init_inheritance(map, SL_NODE, SL_OBJECT_NODE);
 init_inheritance(map, ORDERED_LINK, AT_TIME_LINK);
 init_inheritance(map, ORDERED_LINK, ASYMMETRIC_HEBBIAN_LINK);

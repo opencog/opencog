@@ -79,6 +79,7 @@ class_to_int[(*getClassName()) [WORD_SENSE_NODE]] = WORD_SENSE_NODE;
 class_to_int[(*getClassName()) [WORD_SENSE_LINK]] = WORD_SENSE_LINK;
 class_to_int[(*getClassName()) [PART_OF_SPEECH_LINK]] = PART_OF_SPEECH_LINK;
 class_to_int[(*getClassName()) [HOLONYM_LINK]] = HOLONYM_LINK;
+class_to_int[(*getClassName()) [COSENSE_LINK]] = COSENSE_LINK;
 class_to_int[(*getClassName()) [AGISIM_SOUND_NODE]] = AGISIM_SOUND_NODE;
 class_to_int[(*getClassName()) [AGISIM_TASTE_NODE]] = AGISIM_TASTE_NODE;
 class_to_int[(*getClassName()) [AGISIM_SMELL_NODE]] = AGISIM_SMELL_NODE;

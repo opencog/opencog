@@ -79,6 +79,7 @@
 #define WORD_SENSE_LINK_CLASS "WordSenseLink"
 #define PART_OF_SPEECH_LINK_CLASS "PartOfSpeechLink"
 #define HOLONYM_LINK_CLASS "HolonymLink"
+#define COSENSE_LINK_CLASS "CosenseLink"
 #define AGISIM_SOUND_NODE_CLASS "AGISIMSoundNode"
 #define AGISIM_TASTE_NODE_CLASS "AGISIMTasteNode"
 #define AGISIM_SMELL_NODE_CLASS "AGISIMSmellNode"
