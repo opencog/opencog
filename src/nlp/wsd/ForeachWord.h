@@ -222,17 +222,21 @@ class PrivateUseOnlyRelexRelationFinder
 			if (n->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
 
 			// OK, we've found a relationship. Get the second member of
-			// the list link, and call the suer callback with it.
+			// the list link, and call the user callback with it.
 			const std::string &relname = n->getName();
 
 			l = dynamic_cast<Link *>(listlink);
 			const std::vector<Handle> outset = l->getOutgoingSet();
+
+			// First arg must be first (avoid reporting twice with swapped order).
+			if (first_arg != outset[0]) return false;
 
 			(user_data->*user_cb)(relname, outset[0], outset[1]);
 			return false;
 		}
 		
 	public:
+		Handle first_arg;
 		bool (T::*user_cb)(const std::string &, Handle, Handle);
 		T *user_data;
 
@@ -256,6 +260,7 @@ foreach_relex_relation(Handle h,
 	PrivateUseOnlyRelexRelationFinder<T> rrf;
 	rrf.user_cb = cb;
 	rrf.user_data = data;
+	rrf.first_arg = h;
 	foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
 }
 
