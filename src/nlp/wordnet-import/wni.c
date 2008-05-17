@@ -18,7 +18,7 @@
 /**
  * Skip processing of colocations if this flag is set to 1
  */
-static int skip_colocations = 0;
+static int skip_colocations = 1;
 
 static int do_export(const char * word)
 {
@@ -228,10 +228,11 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 	char * posstr = "";
 	switch(synp->pos[0])
 	{
+		/* These string match the RelEx naming for parts-of-speech. */
 		case 'n': posstr = "noun"; break;
 		case 'v': posstr = "verb"; break;
-		case 'a':  posstr = "adjective"; break;
-		case 'r':  posstr = "adverb"; break;
+		case 'a':  posstr = "adj"; break;
+		case 'r':  posstr = "adv"; break;
 		default:
 			fprintf(stderr, "Error: unknown pos %x\n", synp->pos[0]);
 			exit(1);
@@ -352,8 +353,8 @@ main (int argc, char * argv[])
 	printf("<list>\n");
 	printf("<ConceptNode name = \"noun\" />\n");
 	printf("<ConceptNode name = \"verb\" />\n");
-	printf("<ConceptNode name = \"adjective\" />\n");
-	printf("<ConceptNode name = \"adverb\" />\n");
+	printf("<ConceptNode name = \"adj\" />\n");
+	printf("<ConceptNode name = \"adv\" />\n");
 	printf("</list>\n");
 	printf("%c\n", 0x4);
 
