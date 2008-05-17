@@ -17,8 +17,10 @@
 
 /**
  * Skip processing of colocations if this flag is set to 1
+ * This makes the output smaller, but breaks the hierachy
+ * tree, and thus breaks word-sense similarity measures.
  */
-static int skip_colocations = 1;
+static int skip_colocations = 0;
 
 static int do_export(const char * word)
 {
@@ -120,13 +122,11 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 	int pos = getsspos(synp);
 
 	unsigned int bitmask = is_defined(word, pos);
-	// printf ("mask=%x\n", bitmask);
+	// printf ("word=%s sense=%d mask=%x\n", word, sense_num, bitmask);
 
 	// Not needed, we'd printed this ppreviously ... 
 	// printf("<WordSenseNode name=\"%s\" />\n", sense_key);
 
-	// Consult 'man 3 winintro' for details of these calls.
-	//
 	/* Hypernym */
 	SENSE (HYPERPTR, ({
 		printf("<InheritanceLink>\n");
@@ -349,6 +349,9 @@ main (int argc, char * argv[])
 	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
 	strcpy(buff, "abnormally%4:02:00:: 00227171 1 1");
 	strcpy(buff, "sign%1:10:03:: 06791372 3 4");
+	strcpy(buff, "covering%1:17:00:: 09257949 1 0");
+	show_index(buff);
+	exit(0);
 #endif
 
 	printf("data\n");
