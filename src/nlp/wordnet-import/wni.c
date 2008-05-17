@@ -122,7 +122,8 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 	unsigned int bitmask = is_defined(word, pos);
 	// printf ("mask=%x\n", bitmask);
 
-	printf("<WordSenseNode name=\"%s\" />\n", sense_key);
+	// Not needed, we'd printed this ppreviously ... 
+	// printf("<WordSenseNode name=\"%s\" />\n", sense_key);
 
 	// Consult 'man 3 winintro' for details of these calls.
 	//
@@ -259,7 +260,7 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 		printf("   <Element class=\"WordSenseNode\" name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
 
-		print_nyms(sense_key, synp->words[i], sense_num, synp);
+		print_nyms(sense_key, synp->words[i], synp->wnsns[i], synp);
 	}
 }
 
@@ -347,6 +348,7 @@ main (int argc, char * argv[])
 	strcpy(buff, "abnormal%5:00:00:immoderate:00 01533535 3 0");
 	strcpy(buff, "bark%1:20:00:: 13162297 1 4");
 	strcpy(buff, "abnormally%4:02:00:: 00227171 1 1");
+	strcpy(buff, "sign%1:10:03:: 06791372 3 4");
 #endif
 
 	printf("data\n");
