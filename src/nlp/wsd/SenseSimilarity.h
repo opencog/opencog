@@ -22,7 +22,12 @@ class SenseSimilarity
 		Handle first_sense;
 		Handle second_sense;
 		int first_cnt;
+		int second_cnt;
+		int min_cnt;
+		Handle join_candidate;
 		bool up_first(Handle);
+		bool up_second(Handle);
+
 
 	public:
 		SenseSimilarity(void);

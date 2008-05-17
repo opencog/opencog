@@ -51,11 +51,15 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	first_sense = fs;
 	second_sense = ss;
 	first_cnt = 0;
+	min_cnt = 1<<28;
 
+	// Look up the hypernym tree, to see where the two senses have 
+	// a common hypernym.
 	ForeachChaseLink<SenseSimilarity> chase;
-	// chase.follow_binary_link(first_sense, INHERITANCE_LINK, 
-chase.follow_binary_link(ss, INHERITANCE_LINK, 
+	chase.follow_binary_link(first_sense, INHERITANCE_LINK, 
 	                         &SenseSimilarity::up_first, this);
+	// At this point, min_cnt will contain the shortest distance between 
+	// the two word senses.
 
 	SimpleTruthValue stv(0.5,1.0);
 	return stv;
@@ -67,12 +71,50 @@ bool SenseSimilarity::up_first(Handle up)
 	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
 
 	first_cnt ++;
-printf ("duuude %d up=%s\n", first_cnt, n->getName().c_str());
+	// printf ("height=%d up=%s\n", first_cnt, n->getName().c_str());
 
+	// Look to see if the join candidate appears anywhere on the up chain
+	// of the second sense.
+	join_candidate = up;
 	ForeachChaseLink<SenseSimilarity> chase;
+
+	second_cnt = 0;
+	chase.follow_binary_link(second_sense, INHERITANCE_LINK, 
+	                         &SenseSimilarity::up_second, this);
+
+	// Go up, see if there are shorter paths
 	chase.follow_binary_link(up, INHERITANCE_LINK, 
 	                         &SenseSimilarity::up_first, this);
 	first_cnt --;
+
+	return false;
+}
+
+bool SenseSimilarity::up_second(Handle up)
+{
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(up));
+	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
+
+	second_cnt ++;
+
+	// If we found the match to the candidate, compute the distance,
+	// and save it. The distance is number of steps from each sense,
+	// to thier common (indirect) hypernym.
+	if (up == join_candidate)
+	{
+		int dist = first_cnt + second_cnt;
+		// printf("found dist=%d (%d+%d) min=%d\n", dist, first_cnt, second_cnt, min_cnt);
+		if (dist < min_cnt) min_cnt = dist;
+	}
+	else
+	{
+		// Else, if no match, search upwards.
+		ForeachChaseLink<SenseSimilarity> chase;
+		chase.follow_binary_link(up, INHERITANCE_LINK, 
+		                         &SenseSimilarity::up_second, this);
+	}
+
+	second_cnt --;
 	return false;
 }
 
