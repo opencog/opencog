@@ -454,6 +454,28 @@ represented as follows:
 
 Its not clear which representation is "better".]]
 
+The Mihalcea algorithm
+----------------------
+This section describes how the Mihalcea algorithm[1] is actually
+implemented in opencog.
+
+-- "Admissible labels" -- in the text above, and in the code, these are
+   refered to as (word-instance, word-sense) pairs. These are added to
+   the raw relex input by class MihalceaLabel. They are added to all
+   words in all parses.
+
+-- "Build a graph of label dependencies". In the text above, and in the
+   code, these are refered to as "pairs of pairs". These are added to 
+   the by the class MihalceaEdge.  There is an importqnt difference:
+   the original Mihalcea algorithm directs that these be added 
+   word-by-word in the sentence. Here, instead, these are added between
+   words participating between relex relations. In particular, because
+   relex will omit determiners ("a", "the") and other words from 
+   relations, there won't be edges between these. Relex will also
+   sometimes collapse prepositional phrases into colocations, as well
+   as entities, this will also cause a subtle difference in the graph
+   structure.
+
 
 Propagation of probabilities
 ----------------------------

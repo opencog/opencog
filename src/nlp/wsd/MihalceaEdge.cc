@@ -141,6 +141,9 @@ printf("ola second sense %s!\n", sense->getName().c_str());
 	out.push_back(first_sense_link);
 	out.push_back(second_sense_link);
 
+	// XXX At this point, a word-sense similarity/relationship measure 
+	// should be used to obtain the truth value.
+	//
 	// Give it a mediocre truth value, very low confidence.
 	SimpleTruthValue stv(0.5, 1.0);
 	stv.setConfidence(0.01);
