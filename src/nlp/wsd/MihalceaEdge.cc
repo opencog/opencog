@@ -78,7 +78,6 @@ bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, H
 	printf("%s (%s, %s)\n", relname.c_str(), fn.c_str(), sn.c_str());
 #endif
 
-	first_word_inst = first;
 	second_word_inst = second;
 	foreach_word_sense_of_inst(first, &MihalceaEdge::sense_of_first_inst, this);
 	
@@ -90,24 +89,36 @@ bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, H
  * word-instance of a relex relationship. This, in turn iterates
  * over the second word-instance of the relex relationship.
  */
-bool MihalceaEdge::sense_of_first_inst(Handle h)
+bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
+                                       Handle first_sense_link_h)
 {
 	// Rule out relations that aren't actual word-senses.
-	Node *sense = dynamic_cast<Node *>(TLB::getAtom(h));
+	Node *sense = dynamic_cast<Node *>(TLB::getAtom(first_word_sense_h));
 	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
 
 printf("ola first sense %s!\n", sense->getName().c_str());
 	// Get the handle of the link itself .. 
+	first_sense_link = first_sense_link_h;
 
-	foreach_word_sense_of_inst(second_word_inst, &MihalceaEdge::sense_of_second_inst, this);
+	foreach_word_sense_of_inst(second_word_inst,
+	                           &MihalceaEdge::sense_of_second_inst, this);
 	return false;
 }
 
-bool MihalceaEdge::sense_of_second_inst(Handle h)
+/**
+ * Called for every pair (word-instance,word-sense) of the second
+ * word-instance of a relex relationship. This routine is the last,
+ * most deeply nested loop of all of this set of nested loops.  This
+ * routine now has possession of both pairs, and can now create a 
+ * Mihalcea-graph edge between these pairs.
+ */
+bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
+                                        Handle second_sense_link)
 {
 	// Rule out relations that aren't actual word-senses.
-	Node *sense = dynamic_cast<Node *>(TLB::getAtom(h));
+	Node *sense = dynamic_cast<Node *>(TLB::getAtom(second_word_sense_h));
 	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
 printf("ola second sense %s!\n", sense->getName().c_str());
+
 	return false;
 }
