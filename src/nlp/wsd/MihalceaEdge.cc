@@ -50,27 +50,64 @@ bool MihalceaEdge::annotate_parse(Handle h)
  * For each word-instance loop over all syntactic relationships.
  * (i.e. _subj, _obj, _nn, _amod, and so on). For each relationship,
  * create an edge between all corresponding (word-instance, word-sense)
- * pairs.
+ * pairs.  Not every word instance will participiate in a Relex 
+ * relationship; for example, determiners (a, the) and punctuation 
+ * will not.
  */
 bool MihalceaEdge::annotate_word(Handle h)
 {
-	printf("Hellowwwwwwwwww world\n");
 	foreach_relex_relation(h, &MihalceaEdge::annotate_relation, this);
 	return false;
 }
 
 /**
- * This routine is the inner loop of the edge-creator. It is called for
- * every relation in a parse.
+ * This routine is called for every relation between word-instances in
+ * a parse. Its ultimate goal is to create a link between pairs. First
+ * it iterates over the word sensess associated with the first arg of
+ * the relation, then it eventually iterates over the second, and thus
+ * creates the link.
  */
 bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, Handle second)
 {
-Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
-Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
-const std::string &fn = f->getName();
-const std::string &sn = s->getName();
-printf("dude got rel=%s %s %s\n", relname.c_str(), fn.c_str(), sn.c_str());
-	// foreach_relex_relation(second, &MihalceaEdge::annotate_relation, this);
-printf("----\n");
+#define DEBUG
+#ifdef DEBUG
+	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
+	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
+	const std::string &fn = f->getName();
+	const std::string &sn = s->getName();
+	printf("%s (%s, %s)\n", relname.c_str(), fn.c_str(), sn.c_str());
+#endif
+
+	first_word_inst = first;
+	second_word_inst = second;
+	foreach_word_sense_of_inst(first, &MihalceaEdge::sense_of_first_inst, this);
+	
+	return false;
+}
+
+/**
+ * Called for every pair (word-instance,word-sense) of the first
+ * word-instance of a relex relationship. This, in turn iterates
+ * over the second word-instance of the relex relationship.
+ */
+bool MihalceaEdge::sense_of_first_inst(Handle h)
+{
+	// Rule out relations that aren't actual word-senses.
+	Node *sense = dynamic_cast<Node *>(TLB::getAtom(h));
+	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
+
+printf("ola first sense %s!\n", sense->getName().c_str());
+	// Get the handle of the link itself .. 
+
+	foreach_word_sense_of_inst(second_word_inst, &MihalceaEdge::sense_of_second_inst, this);
+	return false;
+}
+
+bool MihalceaEdge::sense_of_second_inst(Handle h)
+{
+	// Rule out relations that aren't actual word-senses.
+	Node *sense = dynamic_cast<Node *>(TLB::getAtom(h));
+	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
+printf("ola second sense %s!\n", sense->getName().c_str());
 	return false;
 }

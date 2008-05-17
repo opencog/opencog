@@ -25,6 +25,11 @@ class MihalceaEdge
 		bool annotate_word(Handle);
 		bool annotate_relation(const std::string &, Handle, Handle);
 
+		Handle first_word_inst;
+		Handle second_word_inst;
+		bool sense_of_first_inst(Handle);
+		bool sense_of_second_inst(Handle);
+
 	public:
 		MihalceaEdge(void);
 		~MihalceaEdge();
