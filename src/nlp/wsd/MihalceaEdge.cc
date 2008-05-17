@@ -10,6 +10,7 @@
 
 #include "ForeachWord.h"
 #include "MihalceaEdge.h"
+#include "SimpleTruthValue.h"
 
 using namespace opencog;
 
@@ -111,6 +112,21 @@ printf("ola first sense %s!\n", sense->getName().c_str());
  * most deeply nested loop of all of this set of nested loops.  This
  * routine now has possession of both pairs, and can now create a 
  * Mihalcea-graph edge between these pairs.
+ *
+ * As discussed in the README file, the resulting structure is:
+ *
+ *    <!-- the word "tree" occured in the sentence -->
+ *    <CosenseLink strength=0.49 confidence=0.3>
+ *       <InheritanceLink strength=0.9 confidence=0.6>
+ *          <ConceptNode name="tree_99" />
+ *          <WordSenseNode name="tree_sense_12" />
+ *       </InheritanceLink>
+ *       
+ *       <InheritanceLink strength=0.9 confidence=0.1>
+ *          <ConceptNode name="bark_144" />
+ *          <WordSenseNode name="bark_sense_23" />
+ *       </InheritanceLink>
+ *    </CosenseLink>
  */
 bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
@@ -119,6 +135,17 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 	Node *sense = dynamic_cast<Node *>(TLB::getAtom(second_word_sense_h));
 	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
 printf("ola second sense %s!\n", sense->getName().c_str());
+
+	// Create a link connecting the first pair to the second pair.
+	std::vector<Handle> out;
+	out.push_back(first_sense_link);
+	out.push_back(second_sense_link);
+
+	// Give it a mediocre truth value, very low confidence.
+	SimpleTruthValue stv(0.5, 1.0);
+	stv.setConfidence(0.01);
+
+	atom_space->addLink(COSENSE_LINK, out, stv);
 
 	return false;
 }
