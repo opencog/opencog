@@ -44,6 +44,9 @@ SenseSimilarity::~SenseSimilarity()
  *       <WordSenseNode name="bark_sense_23" />
  *       <WordSenseNode name="covering_sense_42" />
  *    </InheritanceLink>
+ *
+ * XXX If two words have different parts-of-speech, they willl not have
+ * any common senses.
  * 
  */
 SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
@@ -60,6 +63,14 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	                         &SenseSimilarity::up_first, this);
 	// At this point, min_cnt will contain the shortest distance between 
 	// the two word senses.
+#define DEBUG
+#ifdef DEBUG
+	Node *sense = dynamic_cast<Node *>(TLB::getAtom(first_sense));
+	printf("first sense %s\n", sense->getName().c_str());
+	sense = dynamic_cast<Node *>(TLB::getAtom(second_sense));
+	printf("second sense %s\n", sense->getName().c_str());
+	printf("distance between senses = %d\n", min_cnt);
+#endif
 
 	SimpleTruthValue stv(0.5,1.0);
 	return stv;
