@@ -13,6 +13,7 @@
 #include "SenseRank.h"
 #include "Node.h"
 #include "SimpleTruthValue.h"
+#include "TruthValue.h"
 
 using namespace opencog;
 
@@ -74,20 +75,45 @@ bool SenseRank::start_sense(Handle word_sense_h,
  */
 void SenseRank::rank_sense(Handle h)
 {
-	printf("Hello ranke sense world\n");
-	
+	rank_sum = 0.0;
 	foreach_sense_edge(h, &SenseRank::outer_sum, this);
+	rank_sum *= damping_factor;
+	rank_sum += 1.0-damping_factor;
+printf("Hello ranke sense finally %g\n", rank_sum);
+
+	Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
+	SimpleTruthValue stv(rank_sum, 1.0);
+	stv.setConfidence(sense->getTruthValue().getConfidence());
+	sense->setTruthValue(stv);
 }
 
-bool SenseRank::outer_sum(Handle h, Handle edge)
+bool SenseRank::outer_sum(Handle h, Handle hedge)
 {
-	printf("outer sum\n");
+	// Get the weight of the edge
+	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
+	double weight_ba = edge->getTruthValue().getMean();
+
+	// Normalize the weight by the sum of competitors.
+	edge_sum = 0.0;
+	foreach_sense_edge(h, &SenseRank::inner_sum, this);
+	double weight = weight_ba / edge_sum; 
+
+	// Get the word-sense probability
+	Link *bee = dynamic_cast<Link *>(TLB::getAtom(h));
+	double p_b = bee->getTruthValue().getMean();
+	weight *= p_b;
+
+printf("outer sum w=%g sum=%g\n", weight, rank_sum);
+	rank_sum += weight;
 	return false;
 }
 
-bool SenseRank::inner_sum(Handle h)
+bool SenseRank::inner_sum(Handle h, Handle hedge)
 {
-	printf("outer sum\n");
+	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
+	double weight_to_b = edge->getTruthValue().getMean();
+	edge_sum += weight_to_b;
+printf("inner sum %g %g\n", weight_to_b, edge_sum);
 	return false;
 }
 
