@@ -196,6 +196,20 @@ inline Handle get_dict_word_of_word_instance(Handle h)
 	return TLB::getHandle(dict_word);
 }
 
+/**
+ * Follow sense edges. 
+ * It is assumed that the incoming handle is a (inst,sense) pair. 
+ * The callback is invoked for each edge, passing the far pair
+ * as the first argument, and the edge itself as the second argument.
+ */
+template <typename T>
+inline bool
+foreach_sense_edge(Handle h,
+                   bool (T::*cb)(Handle, Handle), T *data)
+{
+	return follow_unordered_binary_link(h, COSENSE_LINK, cb, data);
+}
+
 
 /**
  * For each word-instance, loop over all syntactic relationships
