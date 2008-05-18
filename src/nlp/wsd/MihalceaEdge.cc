@@ -13,6 +13,8 @@
 #include "SenseSimilarity.h"
 #include "SimpleTruthValue.h"
 
+#define DEBUG
+
 using namespace opencog;
 
 MihalceaEdge::MihalceaEdge(void)
@@ -76,7 +78,6 @@ bool MihalceaEdge::annotate_word(Handle h)
  */
 bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, Handle second)
 {
-#define DEBUG
 #ifdef DEBUG
 	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
