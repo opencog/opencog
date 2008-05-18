@@ -10,6 +10,7 @@
 #include "Mihalcea.h"
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
+#include "SenseRank.h"
 
 using namespace opencog;
 
@@ -18,6 +19,7 @@ Mihalcea::Mihalcea(void)
 	atom_space = NULL;
 	labeller = new MihalceaLabel();
 	edger = new MihalceaEdge();
+	ranker = new SenseRank();
 }
 
 Mihalcea::~Mihalcea()
@@ -38,5 +40,6 @@ void Mihalcea::process_sentence(Handle h)
 {
 	labeller->annotate_sentence(h);
 	edger->annotate_sentence(h);
+	ranker->iterate(h);
 }
 

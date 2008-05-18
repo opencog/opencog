@@ -15,6 +15,7 @@
 #include "AtomSpace.h"
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
+#include "SenseRank.h"
 
 namespace opencog {
 
@@ -24,6 +25,7 @@ class Mihalcea
 		AtomSpace *atom_space;
 		MihalceaLabel *labeller;
 		MihalceaEdge *edger;
+		SenseRank *ranker;
 
 	public:
 		Mihalcea(void);

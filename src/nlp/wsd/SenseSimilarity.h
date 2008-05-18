@@ -7,8 +7,8 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#ifndef OPENCOG_MIHALCEA_LABEL_H
-#define OPENCOG_MIHALCEA_LABEL_H
+#ifndef OPENCOG_SENSE_SIMILARITY_H
+#define OPENCOG_SENSE_SIMILARITY_H
 
 #include <string>
 
@@ -37,4 +37,4 @@ class SenseSimilarity
 };
 }
 
-#endif /* OPENCOG_MIHALCEA_LABEL_H */
+#endif /* OPENCOG_SENSE_SIMILARITY_H */
