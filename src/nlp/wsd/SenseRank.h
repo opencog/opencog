@@ -19,6 +19,9 @@ class SenseRank
 		bool rank_parse(Handle);
 		bool start_word(Handle);
 		bool start_sense(Handle, Handle);
+		void rank_sense(Handle);
+		bool outer_sum(Handle, Handle);
+		bool inner_sum(Handle);
 		void rand_walk(Handle);
 
 	public:

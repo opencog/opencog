@@ -66,13 +66,78 @@ bool SenseRank::start_sense(Handle word_sense_h,
 }
 
 /**
- * Walk randomly over a connected component. Use page rank.
- * Incoming handle points at a word sense.
+ * Follow sense edges. 
+ * It is assumed that the incoming handle is a (inst,sense) pair. The
+ * incoming set of this pair should be all of the sense-edges.
+ */
+template <typename T>
+class PrivateUseOnlySenseEdge
+{
+	public:
+		Handle near_end;
+		bool (T::*user_cb)(Handle, Handle);
+		T *user_data;
+		bool walk_edge(Handle h)
+		{
+			// Handle h should be a sense edge.  Verify this, just
+			// in case, and reject those that aren't.
+			Link *l = dynamic_cast<Link *> (TLB::getAtom(h));
+			if ((l == NULL) || (l->getType() != COSENSE_LINK)) return false;
+
+			// The link is assumed binary. Find the far end of the link.
+
+			// return (user_data->*user_cb)(xxx);
+			return false;
+		}
+};
+
+template <typename T>
+inline bool
+foreach_sense_edge(Handle h,
+                   bool (T::*cb)(Handle, Handle), T *data)
+{
+
+	PrivateUseOnlySenseEdge<T> se;
+	se.user_cb = cb;
+	se.user_data = data;
+	se.near_end = h;
+	return foreach_incoming_handle(h, &PrivateUseOnlySenseEdge<T>::walk_edge, &se);
+}
+
+/**
+ * Compute the page rank for the indicated (word-inst,word-sense) pair.
+ * The handle argument points at a (word-inst,word-sense) pair.
+ * The page rank is defined as
+ *
+ * P(a) = (1-d) + d* sum_b w_ba / (sum_c w_bc) P(b)
+ */
+void SenseRank::rank_sense(Handle h)
+{
+	printf("Hello ranke sense world\n");
+	
+	foreach_sense_edge(h, &SenseRank::outer_sum, this);
+}
+
+bool SenseRank::outer_sum(Handle h, Handle l)
+{
+	printf("outer sum\n");
+	return false;
+}
+
+bool SenseRank::inner_sum(Handle h)
+{
+	printf("outer sum\n");
+	return false;
+}
+
+/**
+ *
+ * Walk randomly over a connected component. 
  */
 void SenseRank::rand_walk(Handle h)
 {
 	printf("Hello world\n");
-	
+	rank_sense(h);
 }
 
 /* ============================== END OF FILE ====================== */
