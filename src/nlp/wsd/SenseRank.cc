@@ -6,6 +6,7 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include "FollowLink.h"
@@ -112,6 +113,7 @@ bool SenseRank::outer_sum(Handle h, Handle hedge)
 	return false;
 }
 
+int xxx = 0;
 /**
  * Perform the inner, normalization sum of the page-rank algorithm.
  * This sum simply computes the normalization that will be used to
@@ -123,16 +125,62 @@ bool SenseRank::inner_sum(Handle h, Handle hedge)
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
 	// printf("inner sum %g %g\n", weight_to_b, edge_sum);
+xxx ++;
 	return false;
 }
 
 /**
- *
+ * Look at each edge in turn, until the sum of edge weights
+ * exceeds a random number.
+ */
+bool SenseRank::random_sum(Handle h, Handle hedge)
+{
+xxx ++;
+	next_sense = h;
+
+	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
+	double weight_to_b = edge->getTruthValue().getMean();
+	edge_sum += weight_to_b;
+	if (randy < edge_sum)
+	{
+		return true; // we are done, we found our edge.
+	}
+	return false;
+}
+
+/**
+ * Pick a random edge from the set of edges.
+ */
+Handle SenseRank::pick_random_edge(Handle h)
+{
+	// get a random number between zero and one.
+	randy = ((double) rand()) / ((double) RAND_MAX);
+
+	// Get the total weight of the edges
+xxx = 0;
+	edge_sum = 0.0;
+	foreach_sense_edge(h, &SenseRank::inner_sum, this);
+printf("tot edges=%d\n", xxx);
+
+	// randy needs to be exceeeded for an edge to be choosen.
+	randy *= edge_sum;
+	edge_sum = 0.0;
+xxx = 0;
+	foreach_sense_edge(h, &SenseRank::random_sum, this);
+printf("picked edge =%d\n", xxx);
+	return next_sense;
+}
+
+/**
  * Walk randomly over a connected component. 
  */
 void SenseRank::rand_walk(Handle h)
 {
-	rank_sense(h);
+	for (int i=0; i<20; i++)
+	{
+		rank_sense(h);
+		h = pick_random_edge(h);
+	}
 }
 
 /* ============================== END OF FILE ====================== */
