@@ -6,6 +6,7 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 #include <stdio.h>
+#include <math.h>
 
 #include "FollowLink.h"
 #include "ForeachWord.h"
@@ -24,55 +25,87 @@ SenseSimilarity::~SenseSimilarity()
 }
 
 /**
- * Compute the Leacock-Chodorow word-sense similarity measure. 
+ * Compute the Leacock-Chodorow word-sense similarity measure.
  *
- * This similarity measure is given by 
+ * This similarity measure is given by
  *    sim = -log(len/(2*depth))
  * where len is the distance, in nodes, between the two word-senses,
- * and depth is the total depth (top-to-bottom) of the tree containing
- * these two senses.
+ * and depth is the total depth (top-to-bottom) of the
+ * least-common-subsumer tree containing these two senses.
+ *
+ * In wordnet 3.0, the total depth (including the root node) of the 
+ * verb taxonomy is 14, and the total depth of the noun taxonomy is 20.
+ * There is no adjective/adverb taxonomy.
  *
  * In wordnet, there are several ways to determine distance:
  * 1) upwards, via hypernyms
- * 2) sideways, via similarity links, and then upwards,
- * 3) upwards, via holonym links
+ * 2) upwards, via holonym links
  *
- * The current implementation only explores the hypernym tree. It is
- * assumed that hypernyams are describe via ihneritance links:
+ * The current implementation only explores the hypernym tree. This 
+ * seems to be the intended defintion for Leacock-Chodorow similarity.
+ *
+ * It is assumed that hypernyms are describe via inheritance links:
  *
  *    <InheritanceLink strength=0.8 confidence=0.9 />
  *       <WordSenseNode name="bark_sense_23" />
  *       <WordSenseNode name="covering_sense_42" />
  *    </InheritanceLink>
  *
- * XXX If two words have different parts-of-speech, they willl not have
- * any common senses.
- * 
+ * Note that, in this algorithm, two words having different parts-of-speech
+ * will have zero similarity (infinite distance).
  */
 SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 {
 	first_sense = fs;
 	second_sense = ss;
+
+	// If the parts-of-speech don't match, the similarity is zero.
+	// If either one is an adjective or adverb, they're unrelated.
+	// (Although we are not very confident of that!)
+	std::string first_pos = get_pos_of_word_instance(first_sense);
+	std::string second_pos = get_pos_of_word_instance(second_sense);
+	if ((0 != first_pos.compare(second_pos)) ||
+	    (0 == first_pos.compare("#adj")) ||
+	    (0 == first_pos.compare("#adv")))
+	{
+		SimpleTruthValue stv(0.0, 0.5);
+		return stv;
+	}
+
+	// As of wordnet-3.0, the depth of verb taxonomy is 14, noun is 20.
+	double depth = 14;
+	double norm = -3.3323;
+	if (0 == first_pos.compare("#noun"))
+	{
+		depth = 20;
+		norm = -3.6889;
+	}
+
 	first_cnt = 0;
 	min_cnt = 1<<28;
 
-	// Look up the hypernym tree, to see where the two senses have 
+	// Look up the hypernym tree, to see where the two senses have
 	// a common hypernym.
 	ForeachChaseLink<SenseSimilarity> chase;
-	chase.follow_binary_link(first_sense, INHERITANCE_LINK, 
+	chase.follow_binary_link(first_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
-	// At this point, min_cnt will contain the shortest distance between 
-	// the two word senses.
+
+	// At this point, min_cnt will contain the shortest distance between
+	// the two word senses. Divide by depth, compute the measure.
+	double sim = ((double) min_cnt+1) / (2.0*depth);
+	sim = log(sim) / norm;
+	if (sim < 0.0) sim = 0.0;
+
 #define DEBUG
 #ifdef DEBUG
 	Node *sense = dynamic_cast<Node *>(TLB::getAtom(first_sense));
 	printf("first sense %s\n", sense->getName().c_str());
 	sense = dynamic_cast<Node *>(TLB::getAtom(second_sense));
 	printf("second sense %s\n", sense->getName().c_str());
-	printf("distance between senses = %d\n", min_cnt);
+	printf("distance between senses = %d sim=%g\n", min_cnt, sim);
 #endif
 
-	SimpleTruthValue stv(0.5,1.0);
+	SimpleTruthValue stv(sim,0.9);
 	return stv;
 }
 
@@ -90,11 +123,11 @@ bool SenseSimilarity::up_first(Handle up)
 	ForeachChaseLink<SenseSimilarity> chase;
 
 	second_cnt = 0;
-	chase.follow_binary_link(second_sense, INHERITANCE_LINK, 
+	chase.follow_binary_link(second_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_second, this);
 
 	// Go up, see if there are shorter paths
-	chase.follow_binary_link(up, INHERITANCE_LINK, 
+	chase.follow_binary_link(up, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
 	first_cnt --;
 
@@ -121,7 +154,7 @@ bool SenseSimilarity::up_second(Handle up)
 	{
 		// Else, if no match, search upwards.
 		ForeachChaseLink<SenseSimilarity> chase;
-		chase.follow_binary_link(up, INHERITANCE_LINK, 
+		chase.follow_binary_link(up, INHERITANCE_LINK,
 		                         &SenseSimilarity::up_second, this);
 	}
 
