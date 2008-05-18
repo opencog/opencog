@@ -68,6 +68,11 @@ bool MihalceaEdge::annotate_word(Handle h)
  * it iterates over the word sensess associated with the first arg of
  * the relation, then it eventually iterates over the second, and thus
  * creates the link.
+ *
+ * All of the current word-sense similarity algorithms report zero
+ * similarity when the two words are different parts of speech. 
+ * Therefore, in order to improve performance, this routine does not 
+ * create any edges between words of differing parts-of-speech.
  */
 bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, Handle second)
 {
@@ -79,6 +84,15 @@ bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, H
 	const std::string &sn = s->getName();
 	printf("%s (%s, %s)\n", relname.c_str(), fn.c_str(), sn.c_str());
 #endif
+
+	// Don't bother linking words with different parts-of-speech;
+	// the similarity measures don't support these.
+	std::string first_pos = get_pos_of_word_instance(first);
+	std::string second_pos = get_pos_of_word_instance(second);
+	if (0 != first_pos.compare(second_pos))
+	{
+		return false;
+	}
 
 	second_word_inst = second;
 	foreach_word_sense_of_inst(first, &MihalceaEdge::sense_of_first_inst, this);
