@@ -79,14 +79,18 @@ void SenseRank::rank_sense(Handle h)
 	foreach_sense_edge(h, &SenseRank::outer_sum, this);
 	rank_sum *= damping_factor;
 	rank_sum += 1.0-damping_factor;
-printf("Hello ranke sense finally %g\n", rank_sum);
 
 	Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
+printf("Hello ranke sense was %g finally %g\n", sense->getTruthValue().getMean(), rank_sum);
+
 	SimpleTruthValue stv(rank_sum, 1.0);
 	stv.setConfidence(sense->getTruthValue().getConfidence());
 	sense->setTruthValue(stv);
 }
 
+/**
+ * Perform the outermost sum of the page-rank algorithm.
+ */
 bool SenseRank::outer_sum(Handle h, Handle hedge)
 {
 	// Get the weight of the edge
@@ -103,17 +107,22 @@ bool SenseRank::outer_sum(Handle h, Handle hedge)
 	double p_b = bee->getTruthValue().getMean();
 	weight *= p_b;
 
-printf("outer sum w=%g sum=%g\n", weight, rank_sum);
 	rank_sum += weight;
+	// printf("outer sum w=%g sum=%g\n", weight, rank_sum);
 	return false;
 }
 
+/**
+ * Perform the inner, normalization sum of the page-rank algorithm.
+ * This sum simply computes the normalization that will be used to
+ * adjust an edge weight. 
+ */
 bool SenseRank::inner_sum(Handle h, Handle hedge)
 {
 	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
-printf("inner sum %g %g\n", weight_to_b, edge_sum);
+	// printf("inner sum %g %g\n", weight_to_b, edge_sum);
 	return false;
 }
 
@@ -123,7 +132,6 @@ printf("inner sum %g %g\n", weight_to_b, edge_sum);
  */
 void SenseRank::rand_walk(Handle h)
 {
-	printf("Hello world\n");
 	rank_sense(h);
 }
 
