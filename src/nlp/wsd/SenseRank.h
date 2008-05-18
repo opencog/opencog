@@ -32,6 +32,8 @@ class SenseRank
 		bool random_sum(Handle, Handle);
 		Handle next_sense;
 
+		double converge;
+		double convergence_damper;
 		void rand_walk(Handle);
 
 	public:

@@ -20,7 +20,17 @@ using namespace opencog;
 
 SenseRank::SenseRank(void)
 {
+	// The page-rank damping factor. Normally taken to be quite large.
 	damping_factor = 0.85;
+
+	// The convergence damping factor, used to determine when the page
+	// rank has converged. This is used to create an exponentially 
+	// decaying average of the last N page-rank adjustments, where 
+	// N = 1/convergence_damper.  Basically, N should be choosen so
+	// that N == total number of word-senses in graph. For now, this
+	// is assumed to be 20 (i.e. a single-sentence-worth of senses.)
+	// For multi-sentence use, this should probably be pumped up.
+	convergence_damper = 0.05; 
 }
 
 SenseRank::~SenseRank()
@@ -56,6 +66,9 @@ bool SenseRank::start_word(Handle h)
 	std::string pos = get_pos_of_word_instance(h);
 	if (pos.compare("#noun") && pos.compare("#verb")) return false;
 
+Node *n = dynamic_cast<Node *>(TLB::getAtom(h));
+printf ("duude start word =%s\n", n->getName().c_str());
+printf("duude start pos=%s\n", pos.c_str());
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
 	return false;
 }
@@ -63,6 +76,8 @@ bool SenseRank::start_word(Handle h)
 bool SenseRank::start_sense(Handle word_sense_h,
                             Handle sense_link_h)
 {
+Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+printf ("duude start sense =%s\n", n->getName().c_str());
 	rand_walk(sense_link_h);
 	return true;
 }
@@ -82,7 +97,13 @@ void SenseRank::rank_sense(Handle h)
 	rank_sum += 1.0-damping_factor;
 
 	Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
-printf("Hello ranke sense was %g finally %g\n", sense->getTruthValue().getMean(), rank_sum);
+	double old_rank = sense->getTruthValue().getMean();
+printf("Hello ranke sense was %g finally %g\n", old_rank, rank_sum);
+
+	// Compute convergence criterion to determine when the 
+	// random walk has settled down/converged.
+	converge *= (1.0-convergence_damper);
+	converge += convergence_damper * fabs(rank_sum - old_rank);
 
 	SimpleTruthValue stv(rank_sum, 1.0);
 	stv.setConfidence(sense->getTruthValue().getConfidence());
@@ -109,7 +130,7 @@ bool SenseRank::outer_sum(Handle h, Handle hedge)
 	weight *= p_b;
 
 	rank_sum += weight;
-	// printf("outer sum w=%g sum=%g\n", weight, rank_sum);
+printf("outer sum h=%ld w=%g sum=%g\n", h, weight, rank_sum);
 	return false;
 }
 
@@ -124,7 +145,7 @@ bool SenseRank::inner_sum(Handle h, Handle hedge)
 	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
-	// printf("inner sum %g %g\n", weight_to_b, edge_sum);
+	printf("inner sum h=%ld, %g %g\n", h, weight_to_b, edge_sum);
 xxx ++;
 	return false;
 }
@@ -176,8 +197,19 @@ printf("picked edge =%d\n", xxx);
  */
 void SenseRank::rand_walk(Handle h)
 {
-	for (int i=0; i<20; i++)
+int cnt = 0;
+	converge = 1.0;
+	while (0.01 < converge)
 	{
+Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
+std::vector<Handle> oset = sense->getOutgoingSet();
+Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[0]));
+printf ("duude begin on word =%s\n", n->getName().c_str());
+n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
+printf ("duude begin on sense =%s\n", n->getName().c_str());
+
+printf("start walk %d conv=%g\n", cnt, converge);
+cnt++;
 		rank_sense(h);
 		h = pick_random_edge(h);
 	}
