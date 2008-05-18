@@ -47,8 +47,10 @@
 namespace opencog {
 
 /**
- * This class is not meant for external use, it should be considered to be private.
- * Unfortunately, C++ does not give any way of hiding this. Too bad :-(
+ * This class is not meant for external use, it is meant to be a 
+ * private utility for the use of the helper functions below.
+ * Unfortunately, C++ does not give any way of hiding this from the
+ * namespace. Too bad :-(
  */
 template <typename T>
 class PrivateUseOnlyChaseLink
@@ -225,6 +227,38 @@ inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Ha
 	return cl.follow_link_lh(h, ltype, 1, 0, cb, data);
 }
 
+/**
+ * follow_link -- follow an ordered, binary link.
+ *
+ * Look at the incoming set of the specified atom.
+ * Find all links of type link_type.
+ * Check to make sure that the input handle "h"
+ * occupies position "from" in the link. 
+ * If it does, then invoke the callback,
+ * passing the handle in position "to" to the callback.
+ * The callback is called for each endpoint found.
+ *
+ * The callback should return false to search for 
+ * more matches, or return true to halt the search.
+ */
+template <typename T>
+inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
+{
+	PrivateUseOnlyChaseLink<T> cl;
+	return cl.follow_link(h, ltype, from, to, cb, data);
+}
+
+/**
+ * Same as above, except the callback is passed the handle of 
+ * the link itself in the second arg.
+ */
+template <typename T>
+inline bool follow_link_lh(Handle h, Type ltype, int from, int to, 
+                         bool (T::*cb)(Handle, Handle), T *data)
+{
+	PrivateUseOnlyChaseLink<T> cl;
+	return cl.follow_link_lh(h, ltype, from, to, cb, data);
+}
 }
 
 #endif /* OPENCOG_LINK_CHASE_H_ */
