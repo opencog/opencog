@@ -34,7 +34,7 @@ namespace opencog {
 template<class T>
 inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	backtrack_binary_link(h, PARSE_LINK, cb, data);
+	foreach_reverse_binary_link(h, PARSE_LINK, cb, data);
 }
 
 /**
@@ -50,7 +50,7 @@ inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 template <class T>
 inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	backtrack_binary_link(h, PARSE_INSTANCE_LINK, cb, data);
+	foreach_reverse_binary_link(h, PARSE_INSTANCE_LINK, cb, data);
 }
 
 /**
@@ -73,7 +73,7 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 template<class T>
 inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), T *data)
 {
-	follow_binary_link(h, INHERITANCE_LINK, cb, data);
+	foreach_binary_link(h, INHERITANCE_LINK, cb, data);
 }
 
 /**
@@ -92,7 +92,7 @@ inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), 
 template <class T>
 inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	follow_binary_link(h, WORD_SENSE_LINK, cb, data);
+	foreach_binary_link(h, WORD_SENSE_LINK, cb, data);
 }
 
 /**
@@ -151,7 +151,7 @@ inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
 	pf.user_cb = cb;
 	pf.user_data = data;
 	pf.desired_pos = &pos;
-	follow_binary_link(h, WORD_SENSE_LINK,
+	foreach_binary_link(h, WORD_SENSE_LINK,
 	                         &PrivateUseOnlyPOSFilter<T>::pos_filter, &pf);
 }
 
@@ -207,7 +207,7 @@ inline bool
 foreach_sense_edge(Handle h,
                    bool (T::*cb)(Handle, Handle), T *data)
 {
-	return follow_unordered_binary_link(h, COSENSE_LINK, cb, data);
+	return foreach_unordered_binary_link(h, COSENSE_LINK, cb, data);
 }
 
 

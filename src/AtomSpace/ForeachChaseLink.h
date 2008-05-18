@@ -215,7 +215,7 @@ class PrivateUseOnlyChaseLink
 };
 
 /**
- * follow_binary_link -- follow an ordered, binary link.
+ * foreach_binary_link -- follow an ordered, binary link.
  *
  * Look at the incoming set of the specified atom.
  * Find all links of type link_type,
@@ -226,7 +226,7 @@ class PrivateUseOnlyChaseLink
  * more matches, or return true to halt the search.
  */
 template <typename T>
-inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link(h, ltype, 0, 1, cb, data);
@@ -237,7 +237,7 @@ inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *d
  * The handle of the link itself is passed in the second argument.
  */
 template <typename T>
-inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link_lh(h, ltype, 0, 1, cb, data);
@@ -248,7 +248,7 @@ inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handl
  * reverse direction.
  */
 template <typename T>
-inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+inline bool foreach_reverse_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link(h, ltype, 1, 0, cb, data);
@@ -259,14 +259,14 @@ inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T
  * The handle of the link itself is passed in the second argument.
  */
 template <typename T>
-inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_reverse_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link_lh(h, ltype, 1, 0, cb, data);
 }
 
 /**
- * follow_link -- follow an ordered, binary link.
+ * foreach_link -- follow an ordered N-ary link.
  *
  * Look at the incoming set of the specified atom.
  * Find all links of type link_type.
@@ -280,7 +280,7 @@ inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Ha
  * more matches, or return true to halt the search.
  */
 template <typename T>
-inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
+inline bool foreach_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_link(h, ltype, from, to, cb, data);
@@ -291,7 +291,7 @@ inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Ha
  * the link itself in the second arg.
  */
 template <typename T>
-inline bool follow_link(Handle h, Type ltype, int from, int to, 
+inline bool foreach_link(Handle h, Type ltype, int from, int to, 
                          bool (T::*cb)(Handle, Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
@@ -299,14 +299,14 @@ inline bool follow_link(Handle h, Type ltype, int from, int to,
 }
 
 template <typename T>
-inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_unordered_binary_link(h, ltype, cb, data);
 }
 
 template <typename T>
-inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
 {
 	PrivateUseOnlyChaseLink<T> cl;
 	return cl.follow_unordered_binary_link(h, ltype, cb, data);

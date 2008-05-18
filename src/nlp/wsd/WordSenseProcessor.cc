@@ -64,7 +64,7 @@ bool WordSenseProcessor::do_sentence(Handle h)
 
 	// Look to see the the sentence is associated with the 
 	// completion indicator. 
-	bool rc = follow_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_done, this);
+	bool rc = foreach_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_done, this);
 
 	if (rc) return false;
 
