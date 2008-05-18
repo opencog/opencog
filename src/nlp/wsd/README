@@ -476,6 +476,11 @@ implemented in opencog.
    as entities, this will also cause a subtle difference in the graph
    structure.
 
+-- "Label dependencies". Currently, only the Leacock-Chodorow word-sense
+   similarity measure is implemented. t only provides a measure that
+   relates nouns to nouns, and verbs to verbs. It says nothing about 
+   adjectives or adverbs. It is implemented in class SenseSimilarity.
+
 
 Propagation of probabilities
 ----------------------------

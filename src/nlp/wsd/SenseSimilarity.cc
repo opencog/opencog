@@ -2,6 +2,8 @@
  * SenseSimilarity.cc
  *
  * Implements various wordnet-based sense-similarity measures.
+ * Currently implements only Leacock-Chodorow, however, Wu-Palmer
+ * should be (very) easy to implement in this framework.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
