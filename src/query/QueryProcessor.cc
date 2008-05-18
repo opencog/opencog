@@ -61,8 +61,7 @@ bool QueryProcessor::do_assertion(Handle h)
 
 	// Look to see the the sentence is associated with the 
 	// completion indicator. 
-	ForeachChaseLink<QueryProcessor> lc;
-	bool rc = lc.follow_binary_link(h, INHERITANCE_LINK, &QueryProcessor::check_done, this);
+	bool rc = follow_binary_link(h, INHERITANCE_LINK, &QueryProcessor::check_done, this);
 	
 	if (rc) return false;
 

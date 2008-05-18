@@ -34,8 +34,7 @@ namespace opencog {
 template<class T>
 inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	ForeachChaseLink<T> chase;
-	chase.backtrack_binary_link(h, PARSE_LINK, cb, data);
+	backtrack_binary_link(h, PARSE_LINK, cb, data);
 }
 
 /**
@@ -51,8 +50,7 @@ inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 template <class T>
 inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	ForeachChaseLink<T> chase;
-	chase.backtrack_binary_link(h, PARSE_INSTANCE_LINK, cb, data);
+	backtrack_binary_link(h, PARSE_INSTANCE_LINK, cb, data);
 }
 
 /**
@@ -75,8 +73,7 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 template<class T>
 inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), T *data)
 {
-	ForeachChaseLink<T> chase;
-	chase.follow_binary_link_lh(h, INHERITANCE_LINK, cb, data);
+	follow_binary_link(h, INHERITANCE_LINK, cb, data);
 }
 
 /**
@@ -95,8 +92,7 @@ inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), 
 template <class T>
 inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	ForeachChaseLink<T> chase;
-	chase.follow_binary_link(h, WORD_SENSE_LINK, cb, data);
+	follow_binary_link(h, WORD_SENSE_LINK, cb, data);
 }
 
 /**
@@ -155,8 +151,7 @@ inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
 	pf.user_cb = cb;
 	pf.user_data = data;
 	pf.desired_pos = &pos;
-	ForeachChaseLink<PrivateUseOnlyPOSFilter<T> > chase;
-	chase.follow_binary_link(h, WORD_SENSE_LINK,
+	follow_binary_link(h, WORD_SENSE_LINK,
 	                         &PrivateUseOnlyPOSFilter<T>::pos_filter, &pf);
 }
 

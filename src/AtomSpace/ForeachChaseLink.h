@@ -1,5 +1,5 @@
 /**
- * ForeachChaseLink.h
+ * PrivateUseOnlyChaseLink.h
  *
  * This template class implements a foreach iterator that iterates over
  * all atoms associated with a given atom via a certain link type.
@@ -22,7 +22,7 @@
  *
  *    void do_stuff_with_handle(Handle h)
  *    {
- *       ForeachChaseLink<MyClass> my_iter;
+ *       PrivateUseOnlyChaseLink<MyClass> my_iter;
  *
  *       my_iter.follow_binary_link(h, INHERITANCE_LINK, 
  *                                  MyClass::my_callback, this);
@@ -46,53 +46,14 @@
 
 namespace opencog {
 
+/**
+ * This class is not meant for external use, it should be considered to be private.
+ * Unfortunately, C++ does not give any way of hiding this. Too bad :-(
+ */
 template <typename T>
-class ForeachChaseLink
+class PrivateUseOnlyChaseLink
 {
 	public:
-
-		/**
-		 * follow_binary_link -- follow an ordered, binary link.
-		 *
-		 * Look at the incoming set of the specified atom.
-		 * Find all links of type link_type,
-		 * then follow this link to see where its going.
-		 * Call the callback for each endpoint found.
-		 *
-		 * The callback should return false to search for 
-		 * more matches, or return true to halt the search.
-		 */
-		inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
-		{
-			return follow_link(h, ltype, 0, 1, cb, data);
-		}
-
-		/**
-		 * Same as above, except that callback has second argument.
-		 * The handle of the link itself is passed in the second argument.
-		 */
-		inline bool follow_binary_link_lh(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
-		{
-			return follow_link_lh(h, ltype, 0, 1, cb, data);
-		}
-
-		/**
-		 * Same as above, except that the link is followed in the
-		 * reverse direction.
-		 */
-		inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
-		{
-			return follow_link(h, ltype, 1, 0, cb, data);
-		}
-
-		/**
-		 * Same as above, except that callback has second argument.
-		 * The handle of the link itself is passed in the second argument.
-		 */
-		inline bool backtrack_binary_link_lh(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
-		{
-			return follow_link_lh(h, ltype, 1, 0, cb, data);
-		}
 
 		/**
 		 * follow_link -- follow an ordered, binary link.
@@ -124,7 +85,7 @@ class ForeachChaseLink
 			user_callback = cb;
 			user_callback_lh = NULL;
 			user_data = data;
-			bool rc = foreach_incoming_atom(h, &ForeachChaseLink::find_link_type, this);
+			bool rc = foreach_incoming_atom(h, &PrivateUseOnlyChaseLink::find_link_type, this);
 			return rc;
 		}
 
@@ -149,7 +110,7 @@ class ForeachChaseLink
 			user_callback = NULL;
 			user_callback_lh = cb;
 			user_data = data;
-			bool rc = foreach_incoming_atom(h, &ForeachChaseLink::find_link_type, this);
+			bool rc = foreach_incoming_atom(h, &PrivateUseOnlyChaseLink::find_link_type, this);
 			return rc;
 		}
 
@@ -173,9 +134,9 @@ class ForeachChaseLink
 			if (link_type != link_atom->getType()) return false;
 
 			cnt = -1;
-         to_atom = NULL;
+		         to_atom = NULL;
 			Handle link_h = TLB::getHandle(link_atom);
-			foreach_outgoing_atom(link_h, &ForeachChaseLink::pursue_link, this);
+			foreach_outgoing_atom(link_h, &PrivateUseOnlyChaseLink::pursue_link, this);
 
 			bool rc = false;
 			if (to_atom)
@@ -212,6 +173,58 @@ class ForeachChaseLink
 			return false;
 		}
 };
+
+/**
+ * follow_binary_link -- follow an ordered, binary link.
+ *
+ * Look at the incoming set of the specified atom.
+ * Find all links of type link_type,
+ * then follow this link to see where its going.
+ * Call the callback for each endpoint found.
+ *
+ * The callback should return false to search for 
+ * more matches, or return true to halt the search.
+ */
+template <typename T>
+inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+{
+	PrivateUseOnlyChaseLink<T> cl;
+	return cl.follow_link(h, ltype, 0, 1, cb, data);
+}
+
+/**
+ * Same as above, except that callback has second argument.
+ * The handle of the link itself is passed in the second argument.
+ */
+template <typename T>
+inline bool follow_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+{
+	PrivateUseOnlyChaseLink<T> cl;
+	return cl.follow_link_lh(h, ltype, 0, 1, cb, data);
+}
+
+/**
+ * Same as above, except that the link is followed in the
+ * reverse direction.
+ */
+template <typename T>
+inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+{
+	PrivateUseOnlyChaseLink<T> cl;
+	return cl.follow_link(h, ltype, 1, 0, cb, data);
+}
+
+/**
+ * Same as above, except that callback has second argument.
+ * The handle of the link itself is passed in the second argument.
+ */
+template <typename T>
+inline bool backtrack_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+{
+	PrivateUseOnlyChaseLink<T> cl;
+	return cl.follow_link_lh(h, ltype, 1, 0, cb, data);
+}
+
 }
 
 #endif /* OPENCOG_LINK_CHASE_H_ */

@@ -88,8 +88,7 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 
 	// Look up the hypernym tree, to see where the two senses have
 	// a common hypernym.
-	ForeachChaseLink<SenseSimilarity> chase;
-	chase.follow_binary_link(first_sense, INHERITANCE_LINK,
+	follow_binary_link(first_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
 
 	// At this point, min_cnt will contain the shortest distance between
@@ -122,14 +121,13 @@ bool SenseSimilarity::up_first(Handle up)
 	// Look to see if the join candidate appears anywhere on the up chain
 	// of the second sense.
 	join_candidate = up;
-	ForeachChaseLink<SenseSimilarity> chase;
 
 	second_cnt = 0;
-	chase.follow_binary_link(second_sense, INHERITANCE_LINK,
+	follow_binary_link(second_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_second, this);
 
 	// Go up, see if there are shorter paths
-	chase.follow_binary_link(up, INHERITANCE_LINK,
+	follow_binary_link(up, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
 	first_cnt --;
 
@@ -155,8 +153,7 @@ bool SenseSimilarity::up_second(Handle up)
 	else
 	{
 		// Else, if no match, search upwards.
-		ForeachChaseLink<SenseSimilarity> chase;
-		chase.follow_binary_link(up, INHERITANCE_LINK,
+		follow_binary_link(up, INHERITANCE_LINK,
 		                         &SenseSimilarity::up_second, this);
 	}
 
