@@ -3,6 +3,7 @@ add_library (wsd STATIC
 Mihalcea.cc
 MihalceaEdge.cc
 MihalceaLabel.cc
+NNAdjust.cc
 ReportRank.cc
 SenseRank.cc
 SenseSimilarity.cc

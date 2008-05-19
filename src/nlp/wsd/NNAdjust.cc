@@ -95,10 +95,10 @@ bool NNAdjust::sense_of_first_inst(Handle first_word_sense_h,
  * Called for every pair (word-instance,word-sense) of the second
  * word-instance of a relex relationship. This routine is the last,
  * most deeply nested loop of all of this set of nested loops.  This
- * routine now has possession of both pairs, and can now create a 
- * Mihalcea-graph edge between these pairs.
+ * routine now has possession of both pairs, and can now adjust the
+ * strength of the link between them.
  *
- * As discussed in the README file, the resulting structure is:
+ * As discussed in the README file, the expected structure is:
  *
  *    <!-- the word "tree" occured in the sentence -->
  *    <CosenseLink strength=0.49 confidence=0.3>
@@ -117,18 +117,6 @@ bool NNAdjust::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
 	// printf("second sense %s!\n", sense->getName().c_str());
-
-	// Create a link connecting the first pair to the second pair.
-	std::vector<Handle> out;
-	out.push_back(first_sense_link);
-	out.push_back(second_sense_link);
-
-	// Use a word-sense similarity/relationship measure to assign an 
-	// initial truth value to the edge.
-	SenseSimilarity *ss = new SenseSimilarity();
-	SimpleTruthValue stv = ss->lch_similarity(first_word_sense, second_word_sense_h);
-
-	atom_space->addLink(COSENSE_LINK, out, stv);
 
 	return false;
 }
