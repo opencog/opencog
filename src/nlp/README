@@ -7,4 +7,17 @@ This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on word sense
 disambiguation.
 
-See wsd subdirectory.
+The wordnet-import directory contains stand-alone code (i.e. not a part
+of opencog) that will walk over the wordnet database, and convert it 
+into OpenCog NMXML that can be leaded into opencog.
+
+The wsd directory contains code that implements the Rada Mihalcea 
+word-sense disambiguation algorithm.
+
+
+
+
+A classic parse-ranking example:
+(S (NP I) (VP saw (NP the man) (PP with (NP the telescope))) .)
+
+(S (NP I) (VP saw (NP (NP the man) (PP with (NP the telescope)))) .)

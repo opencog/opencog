@@ -486,6 +486,20 @@ Propagation of probabilities
 ----------------------------
 
 
+Ideas
+-----
+-- give special weight to noun-modifier relations _nn because of thier 
+   special role!? Because _nn need to be "strongly correct" in a way
+   that other relations might just be accidental.
+-- elevate weights/connections that run directly through relex 
+   relations!? maybe a bad idea, since some nearby relations seem 
+   to offer little insight e.g. "the tree bark cut my finger"
+   the words "cut, finger" offer little/no insight into the meaning 
+   of "tree bark", or "finger". 
+
+   But what about "John threw a ball"? Without further knowledge,
+   ball is imagined to be baseball.
+
 
 
 Domains of discourse (aka word-sense frequency counts)
