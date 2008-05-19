@@ -12,6 +12,22 @@ second section discusses how various different ideas of "word-sense"
 are associated with a parsed sentence, and the algorithms that can
 be used to perform the actual disambiguation. 
 
+The wordnet-import directory contains code to import the wordnet dataset
+into opencog, based on the structures outlined below.
+
+The code in this directory is primarily focused on the implementation
+of the Rada Mihalcea word-sense disambiguation algorithm, together with
+extensions/enhancements/modifications thereof.
+
+The Mihalcea algorithm assigns senses to the words in a sentence, and 
+constructs links between these different senses. The links are weighted 
+by a word-sense similarity measure. The result is a graph whose vertices 
+are word-senses, and whose edges are these links.  The graph is 
+essentially just a Markov chain, and is solved as such, looking for a 
+stationary vector of probabilities for the word-sense verticies. The 
+verticies with the highest scores are then the most likely meaning for
+a word.
+
 Preliminary comments
 --------------------
 Per current conversations with Ben Goertzel, new links introduced in
@@ -499,6 +515,15 @@ Ideas
 
    But what about "John threw a ball"? Without further knowledge,
    ball is imagined to be baseball.
+
+-- stumped: how to use opencyc data, since there's no concordance 
+   with wordnet data?
+
+-- Ben:
+   Google "dekang lin path minipar" for the papers on his "syntactic 
+   path dependency" paper.  He makes an argument that by parsing and
+   then analyzing paths in the parse trees, one can handle a variety
+   of tasks varying from semantic disambiguation to question-answering. 
 
 
 
