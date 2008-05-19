@@ -475,6 +475,13 @@ The Mihalcea algorithm
 This section describes how the Mihalcea algorithm[1] is actually
 implemented in opencog.
 
+-- "Input/output" -- Input is received from the opencog server, in
+   the form of relex-generated opencog networks. These are directly
+   obtained by class WordSenseProcessor, which interfaces with the
+   OpenCog server (and isolates the rest of the code from the OpenCog
+   server details). It then passes input to class Mihalcea, which
+   provides the top-level class for the rest of the aglorithm.
+
 -- "Admissible labels" -- in the text above, and in the code, these are
    refered to as (word-instance, word-sense) pairs. These are added to
    the raw relex input by class MihalceaLabel. They are added to all
