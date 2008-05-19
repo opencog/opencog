@@ -10,6 +10,7 @@
 #ifndef OPENCOG_MIHALCEA_EDGE_H
 #define OPENCOG_MIHALCEA_EDGE_H
 
+#include <set>
 #include <string>
 
 #include "Atom.h"
@@ -23,7 +24,10 @@ class MihalceaEdge
 		AtomSpace *atom_space;
 		bool annotate_parse(Handle);
 		bool annotate_word(Handle);
-		bool annotate_relation(const std::string &, Handle, Handle);
+
+		std::set<Handle> words;
+		bool look_at_relation(const std::string &, Handle, Handle);
+		bool annotate_word_pair(Handle, Handle);
 
 		Handle second_word_inst;
 		Handle first_word_sense;

@@ -52,38 +52,58 @@ bool MihalceaEdge::annotate_parse(Handle h)
 
 /**
  * For each word-instance loop over all syntactic relationships.
- * (i.e. _subj, _obj, _nn, _amod, and so on). For each relationship,
- * create an edge between all corresponding (word-instance, word-sense)
- * pairs.  Not every word instance will participiate in a Relex 
- * relationship; for example, determiners (a, the) and punctuation 
- * will not.
+ * (i.e. _subj, _obj, _nn, _amod, and so on). Generate a list of all
+ * words that participate in relationships. Then create links between
+ * word-senses of every pair of words.
  */
 bool MihalceaEdge::annotate_word(Handle h)
 {
-	foreach_relex_relation(h, &MihalceaEdge::annotate_relation, this);
+	words.clear();
+	foreach_relex_relation(h, &MihalceaEdge::look_at_relation, this);
+
+	std::set<Handle>::const_iterator f;
+	for (f = words.begin(); f != words.end(); f++)
+	{
+		std::set<Handle>::const_iterator s = f;
+		for (s++; s != words.end(); s++)
+		{
+			annotate_word_pair(*f, *s);
+		}
+	}
 	return false;
 }
 
 /**
  * This routine is called for every relation between word-instances in
- * a parse. Its ultimate goal is to create a link between pairs. First
- * it iterates over the word sensess associated with the first arg of
- * the relation, then it eventually iterates over the second, and thus
- * creates the link.
+ * a parse. It simply creates a list of all of the words in a sentence
+ * that participate in RelEx relations.
+ */
+bool MihalceaEdge::look_at_relation(const std::string &relname, Handle first, Handle second)
+{
+	words.insert(first);
+	words.insert(second);
+	return false;
+}
+
+/**
+ * Create edges between all senses of a pair of words.
+ *
+ * This routine implements a doubley-nested foreach loop, iterating
+ * over all senses of each word, and creating an edge between them.
  *
  * All of the current word-sense similarity algorithms report zero
  * similarity when the two words are different parts of speech. 
  * Therefore, in order to improve performance, this routine does not 
  * create any edges between words of differing parts-of-speech.
  */
-bool MihalceaEdge::annotate_relation(const std::string &relname, Handle first, Handle second)
+bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
 {
 #ifdef DEBUG
 	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
 	const std::string &fn = f->getName();
 	const std::string &sn = s->getName();
-	printf("%s (%s, %s)\n", relname.c_str(), fn.c_str(), sn.c_str());
+	printf("(%s, %s)\n", fn.c_str(), sn.c_str());
 #endif
 
 	// Don't bother linking words with different parts-of-speech;
