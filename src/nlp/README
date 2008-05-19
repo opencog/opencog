@@ -12,7 +12,14 @@ of opencog) that will walk over the wordnet database, and convert it
 into OpenCog NMXML that can be leaded into opencog.
 
 The wsd directory contains code that implements the Rada Mihalcea 
-word-sense disambiguation algorithm.
+word-sense disambiguation algorithm.  The Mihalcea algorithm assigns
+senses to the words in a sentence, and constructs links between these
+different senses. The links are weighted by a word-sense similarity
+measure. The result is a graph whose vertices are word-senses, and 
+whose edges are these links.  The graph is essentially just a Markov 
+chain, and is solved as such, looking for a stationary vector of 
+probabilities for the word-sense verticies. The verticies with the 
+highest scores are then the most likely meaning for a word.
 
 
 
