@@ -18,6 +18,8 @@
 
 using namespace opencog;
 
+#define DEBUG
+
 SenseRank::SenseRank(void)
 {
 	// The page-rank damping factor. Normally taken to be quite large.
@@ -30,7 +32,8 @@ SenseRank::SenseRank(void)
 	// that N == total number of word-senses in graph. For now, this
 	// is assumed to be 20 (i.e. a single-sentence-worth of senses.)
 	// For multi-sentence use, this should probably be pumped up.
-	convergence_damper = 0.05; 
+	double N = 50;
+	convergence_damper = 1.0/N;
 }
 
 SenseRank::~SenseRank()
@@ -98,7 +101,12 @@ void SenseRank::rank_sense(Handle h)
 
 	Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
 	double old_rank = sense->getTruthValue().getMean();
-printf("Hello ranke sense was %g finally %g\n", old_rank, rank_sum);
+
+#ifdef DEBUG
+	std::vector<Handle> oset = sense->getOutgoingSet();
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
+	printf ("sense %s was %g nw %g\n", n->getName().c_str(), old_rank, rank_sum);
+#endif
 
 	// Compute convergence criterion to determine when the 
 	// random walk has settled down/converged.
@@ -130,7 +138,7 @@ bool SenseRank::outer_sum(Handle h, Handle hedge)
 	weight *= p_b;
 
 	rank_sum += weight;
-printf("outer sum h=%ld w=%g sum=%g\n", h, weight, rank_sum);
+	// printf("outer sum h=%ld w=%g sum=%g\n", h, weight, rank_sum);
 	return false;
 }
 
@@ -145,7 +153,7 @@ bool SenseRank::inner_sum(Handle h, Handle hedge)
 	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
-	printf("inner sum h=%ld, %g %g\n", h, weight_to_b, edge_sum);
+	// printf("inner sum h=%ld, %g %g\n", h, weight_to_b, edge_sum);
 xxx ++;
 	return false;
 }
@@ -201,13 +209,6 @@ int cnt = 0;
 	converge = 1.0;
 	while (0.01 < converge)
 	{
-Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
-std::vector<Handle> oset = sense->getOutgoingSet();
-Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[0]));
-printf ("duude begin on word =%s\n", n->getName().c_str());
-n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
-printf ("duude begin on sense =%s\n", n->getName().c_str());
-
 printf("start walk %d conv=%g\n", cnt, converge);
 cnt++;
 		rank_sense(h);
