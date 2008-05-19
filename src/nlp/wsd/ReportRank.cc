@@ -55,7 +55,7 @@ bool ReportRank::report_word(Handle h)
 	std::string pos = get_pos_of_word_instance(h);
 	if (pos.compare("#noun") && pos.compare("#verb")) return false;
 
-	double hi_score = 0.0;
+	hi_score = 0.0;
 	foreach_word_sense_of_inst(h, &ReportRank::choose_sense, this);
 
 	Node *word = dynamic_cast<Node *>(TLB::getAtom(h));
@@ -69,14 +69,19 @@ bool ReportRank::report_word(Handle h)
 bool ReportRank::choose_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
+	// Skip links that aren't actually to word senses
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+	if ((n == NULL) || (n->getType() != WORD_SENSE_NODE)) return false;
+
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double score = l->getTruthValue().getMean();
+printf ("word sense=%s score=%f hi=%f\n", n->getName().c_str(), score, hi_score);
 	if (hi_score < score)
 	{
 		hi_score = score;
 		hi_scorer = word_sense_h;
 	}
-	return true;
+	return false;
 }
 
 /* ============================== END OF FILE ====================== */
