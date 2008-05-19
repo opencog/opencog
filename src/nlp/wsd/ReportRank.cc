@@ -69,7 +69,7 @@ bool ReportRank::report_word(Handle h)
 bool ReportRank::choose_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(sense_link_h));
 	double score = n->getTruthValue().getMean();
 	if (hi_score < score)
 	{
