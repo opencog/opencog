@@ -82,10 +82,6 @@ bool NNAdjust::sense_of_first_inst(Handle first_word_sense_h,
 {
 	first_word_sense = first_word_sense_h;
 
-	// Rule out relations that aren't actual word-senses.
-	Node *sense = dynamic_cast<Node *>(TLB::getAtom(first_word_sense_h));
-	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
-
 	// printf("first sense %s\n", sense->getName().c_str());
 	// Get the handle of the link itself .. 
 	first_sense_link = first_sense_link_h;
@@ -120,9 +116,6 @@ bool NNAdjust::sense_of_first_inst(Handle first_word_sense_h,
 bool NNAdjust::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
-	// Rule out relations that aren't actual word-senses.
-	Node *sense = dynamic_cast<Node *>(TLB::getAtom(second_word_sense_h));
-	if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
 	// printf("second sense %s!\n", sense->getName().c_str());
 
 	// Create a link connecting the first pair to the second pair.

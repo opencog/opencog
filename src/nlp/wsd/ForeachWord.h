@@ -38,6 +38,7 @@ inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 }
 
 /**
+ * foreach_word_instance --
  * Call the callback for every word-instance in a parse. The argument
  * handle is presumed to identify a specific parse. Each word-instance
  * in the parse is linked to it via a ParseInstanceLink:
@@ -54,6 +55,7 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 }
 
 /**
+ * foreach_word_sense_of_inst --
  * Call the callback for each word-sense associated with a word-instance
  * The argument handle is presumed to identify a word instance, which is 
  * linked to word senses via an InheritanceLink:
@@ -70,10 +72,29 @@ inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
  * contain the handle of the word-sense; the second arg will contain the
  * handle of the link making up the pair.
  */
-template<class T>
+template<typename T>
+class PrivateUseOnlyEachSense
+{
+	public:
+		bool (T::*user_cb)(Handle, Handle);
+		T *user_data;
+		bool sense_filter(Handle h, Handle l)
+		{
+			// Rule out relations that aren't actual word-senses.
+			Node *sense = dynamic_cast<Node *>(TLB::getAtom(h));
+			if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
+
+			return (user_data->*user_cb)(h, l);
+		}
+};
+
+template<typename T>
 inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), T *data)
 {
-	foreach_binary_link(h, INHERITANCE_LINK, cb, data);
+	PrivateUseOnlyEachSense<T> es;
+	es.user_cb = cb;
+	es.user_data = data;
+	foreach_binary_link(h, INHERITANCE_LINK, &PrivateUseOnlyEachSense<T>::sense_filter, &es);
 }
 
 /**

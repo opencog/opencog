@@ -76,10 +76,6 @@ bool SenseRank::start_word(Handle h)
 bool SenseRank::start_sense(Handle word_sense_h,
                             Handle sense_link_h)
 {
-	// Rule out things that aren't actually senses
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
-	if ((n == NULL) || (n->getType() != WORD_SENSE_NODE)) return false;
-
 	rand_walk(sense_link_h);
 	return true;
 }
