@@ -43,4 +43,4 @@ class MihalceaEdge
 };
 }
 
-#endif /* OPENCOG_MIHALCEA_LABEL_H */
+#endif /* OPENCOG_MIHALCEA_EDGE_H */
