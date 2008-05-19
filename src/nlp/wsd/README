@@ -482,7 +482,7 @@ implemented in opencog.
 
 -- "Build a graph of label dependencies". In the text above, and in the
    code, these are refered to as "pairs of pairs". These are added to
-   the by the class MihalceaEdge.  There is an importqnt difference:
+   the by the class MihalceaEdge.  There is an slight difference:
    the original Mihalcea algorithm directs that these be added
    word-by-word in the sentence. Here, instead, these are added between
    words participating between relex relations. In particular, because
@@ -493,9 +493,18 @@ implemented in opencog.
    structure.
 
 -- "Label dependencies". Currently, only the Leacock-Chodorow word-sense
-   similarity measure is implemented. t only provides a measure that
+   similarity measure is implemented. It only provides a measure that
    relates nouns to nouns, and verbs to verbs. It says nothing about
    adjectives or adverbs. It is implemented in class SenseSimilarity.
+
+-- "Score vertices". Scoring is performed using the the PageRank 
+   algorithm. The graph is walked in a weighted random fashion, 
+   with the liklihood of taking an edge proportional to the edge's
+   weight. The score of each vertex is then adjusted using a weighted
+   page-rank sum. The algo is implemented in class SenseRank.
+
+-- "Label assignment". The highest-scoring word-senses are reported
+   by class ReportRank. Currently, it just prints word senses to stdout.
 
 
 Propagation of probabilities
@@ -524,6 +533,26 @@ Ideas
    path dependency" paper.  He makes an argument that by parsing and
    then analyzing paths in the parse trees, one can handle a variety
    of tasks varying from semantic disambiguation to question-answering.
+
+-- integrate anaphora resoliution
+
+I've only done some basic testing so far, the results are "OK". Mihalcea
+herself claims about 50% accuracy, which is said to be more-or-less 
+state-of-the-art.  However, based on even this small bit of testing, the
+reason for both the successes and the failures of the Mihalcea algorithm
+are evident:  For example, consider the sentence "I cut my finger on the 
+tree bark".  The word pair "tree bark" are strongly reinforcing of one-another,
+and thus correctly pick out the correct sense of both "tree" and "bark". 
+On the other hand, "cut" and "finger" and "me" pretty much have nothing to 
+to with tree-bark, and serve only to inject noise and confusion into the 
+sense ranking.
+
+it might make sense to severly punish word-sense similarity sccores that 
+are too far away from one another.
+
+-- use framenet for scoring.
+
+-- do some common-sennse reasoning from the wordnet ontology.
 
 
 
