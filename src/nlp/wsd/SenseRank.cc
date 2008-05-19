@@ -18,7 +18,7 @@
 
 using namespace opencog;
 
-#define DEBUG
+// #define DEBUG
 
 SenseRank::SenseRank(void)
 {
