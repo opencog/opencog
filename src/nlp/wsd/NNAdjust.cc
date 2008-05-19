@@ -58,39 +58,13 @@ bool NNAdjust::adjust_word(Handle h)
 bool NNAdjust::adjust_relation(const std::string &relname, Handle first, Handle second)
 {
 	if (relname.compare("_nn")) return false;
-xxx
-	return false;
-}
-
-/**
- * Create edges between all senses of a pair of words.
- *
- * This routine implements a doubley-nested foreach loop, iterating
- * over all senses of each word, and creating an edge between them.
- *
- * All of the current word-sense similarity algorithms report zero
- * similarity when the two words are different parts of speech. 
- * Therefore, in order to improve performance, this routine does not 
- * create any edges between words of differing parts-of-speech.
- */
-bool NNAdjust::annotate_word_pair(Handle first, Handle second)
-{
 #ifdef DEBUG
 	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
 	const std::string &fn = f->getName();
 	const std::string &sn = s->getName();
-	printf("(%s, %s)\n", fn.c_str(), sn.c_str());
+	printf("_nn(%s, %s)\n", fn.c_str(), sn.c_str());
 #endif
-
-	// Don't bother linking words with different parts-of-speech;
-	// the similarity measures don't support these.
-	std::string first_pos = get_pos_of_word_instance(first);
-	std::string second_pos = get_pos_of_word_instance(second);
-	if (0 != first_pos.compare(second_pos))
-	{
-		return false;
-	}
 
 	second_word_inst = second;
 	foreach_word_sense_of_inst(first, &NNAdjust::sense_of_first_inst, this);
