@@ -15,6 +15,7 @@
 #include "AtomSpace.h"
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
+#include "NNAdjust.h"
 #include "SenseRank.h"
 #include "ReportRank.h"
 
@@ -26,6 +27,7 @@ class Mihalcea
 		AtomSpace *atom_space;
 		MihalceaLabel *labeller;
 		MihalceaEdge *edger;
+		NNAdjust *nn_adjuster;
 		SenseRank *ranker;
 		ReportRank *reporter;
 

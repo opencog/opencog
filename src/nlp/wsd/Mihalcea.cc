@@ -20,6 +20,7 @@ Mihalcea::Mihalcea(void)
 	atom_space = NULL;
 	labeller = new MihalceaLabel();
 	edger = new MihalceaEdge();
+	nn_adjuster = new NNAdjust();
 	ranker = new SenseRank();
 	reporter = new ReportRank();
 }
@@ -29,6 +30,9 @@ Mihalcea::~Mihalcea()
 	atom_space = NULL;
 	delete labeller;
 	delete edger;
+	delete nn_adjuster;
+	delete ranker;
+	delete reporter;
 }
 
 void Mihalcea::set_atom_space(AtomSpace *as)
@@ -42,6 +46,7 @@ void Mihalcea::process_sentence(Handle h)
 {
 	labeller->annotate_sentence(h);
 	edger->annotate_sentence(h);
+	nn_adjuster->adjust_sentence(h);
 	ranker->iterate(h);
 	reporter->report_rank(h);
 }
