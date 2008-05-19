@@ -69,9 +69,6 @@ bool SenseRank::start_word(Handle h)
 	std::string pos = get_pos_of_word_instance(h);
 	if (pos.compare("#noun") && pos.compare("#verb")) return false;
 
-Node *n = dynamic_cast<Node *>(TLB::getAtom(h));
-printf ("duude start word =%s\n", n->getName().c_str());
-printf("duude start pos=%s\n", pos.c_str());
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
 	return false;
 }
@@ -79,8 +76,6 @@ printf("duude start pos=%s\n", pos.c_str());
 bool SenseRank::start_sense(Handle word_sense_h,
                             Handle sense_link_h)
 {
-Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
-printf ("duude start sense =%s\n", n->getName().c_str());
 	rand_walk(sense_link_h);
 	return true;
 }
@@ -199,12 +194,9 @@ Handle SenseRank::pick_random_edge(Handle h)
  */
 void SenseRank::rand_walk(Handle h)
 {
-int cnt = 0;
 	converge = 1.0;
 	while (0.01 < converge)
 	{
-printf("start walk %d conv=%g\n", cnt, converge);
-cnt++;
 		rank_sense(h);
 		h = pick_random_edge(h);
 	}
