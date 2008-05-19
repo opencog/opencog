@@ -1,10 +1,22 @@
-/**
- * ForgettingAgent.h
+/*
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Written by Joel Pitt <joel@fruitionnz.com>
+ * All Rights Reserved
  *
- * Forgetting agent, removes atoms with low LTI.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
  *
- * Author: Joel Pitt 
- * Creation: Wed Apr 24 15:32:00 GMT+12 2008
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _FORGETTING_AGENT_H
@@ -22,6 +34,9 @@ namespace opencog {
 
 class CogServer;
 
+/**
+ * Forgetting agent, removes atoms with low LTI.
+ */
 class ForgettingAgent : public MindAgent
 {
 
