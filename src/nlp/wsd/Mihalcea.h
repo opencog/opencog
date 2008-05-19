@@ -16,6 +16,7 @@
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
 #include "SenseRank.h"
+#include "ReportRank.h"
 
 namespace opencog {
 
@@ -26,6 +27,7 @@ class Mihalcea
 		MihalceaLabel *labeller;
 		MihalceaEdge *edger;
 		SenseRank *ranker;
+		ReportRank *reporter;
 
 	public:
 		Mihalcea(void);

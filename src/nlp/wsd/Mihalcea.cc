@@ -11,6 +11,7 @@
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
 #include "SenseRank.h"
+#include "ReportRank.h"
 
 using namespace opencog;
 
@@ -20,6 +21,7 @@ Mihalcea::Mihalcea(void)
 	labeller = new MihalceaLabel();
 	edger = new MihalceaEdge();
 	ranker = new SenseRank();
+	reporter = new ReportRank();
 }
 
 Mihalcea::~Mihalcea()
@@ -41,5 +43,6 @@ void Mihalcea::process_sentence(Handle h)
 	labeller->annotate_sentence(h);
 	edger->annotate_sentence(h);
 	ranker->iterate(h);
+	reporter->report_rank(h);
 }
 

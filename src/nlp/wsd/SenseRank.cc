@@ -105,7 +105,8 @@ void SenseRank::rank_sense(Handle h)
 #ifdef DEBUG
 	std::vector<Handle> oset = sense->getOutgoingSet();
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
-	printf ("sense %s was %g nw %g\n", n->getName().c_str(), old_rank, rank_sum);
+	printf ("sense %s was %g new %g delta=%g\n", n->getName().c_str(),
+	        old_rank, rank_sum, fabs(rank_sum - old_rank));
 #endif
 
 	// Compute convergence criterion to determine when the 
@@ -142,7 +143,6 @@ bool SenseRank::outer_sum(Handle h, Handle hedge)
 	return false;
 }
 
-int xxx = 0;
 /**
  * Perform the inner, normalization sum of the page-rank algorithm.
  * This sum simply computes the normalization that will be used to
@@ -154,7 +154,6 @@ bool SenseRank::inner_sum(Handle h, Handle hedge)
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
 	// printf("inner sum h=%ld, %g %g\n", h, weight_to_b, edge_sum);
-xxx ++;
 	return false;
 }
 
@@ -164,7 +163,6 @@ xxx ++;
  */
 bool SenseRank::random_sum(Handle h, Handle hedge)
 {
-xxx ++;
 	next_sense = h;
 
 	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
@@ -186,17 +184,13 @@ Handle SenseRank::pick_random_edge(Handle h)
 	randy = ((double) rand()) / ((double) RAND_MAX);
 
 	// Get the total weight of the edges
-xxx = 0;
 	edge_sum = 0.0;
 	foreach_sense_edge(h, &SenseRank::inner_sum, this);
-printf("tot edges=%d\n", xxx);
 
 	// randy needs to be exceeeded for an edge to be choosen.
 	randy *= edge_sum;
 	edge_sum = 0.0;
-xxx = 0;
 	foreach_sense_edge(h, &SenseRank::random_sum, this);
-printf("picked edge =%d\n", xxx);
 	return next_sense;
 }
 
