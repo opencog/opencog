@@ -20,6 +20,12 @@ using namespace opencog;
 
 NNAdjust::NNAdjust(void)
 {
+	/* The "strength_adjust" value is a multiplicative value by which
+	 * all _nn-related word-senses will have thier connecting links 
+	 * boosted by. The goal is to more strongly tie together the word
+	 * senses of any two words related by _nn (noun modifier) relations.
+	 */
+	strength_adjust = 1.3;
 }
 
 NNAdjust::~NNAdjust()
@@ -80,8 +86,6 @@ bool NNAdjust::adjust_relation(const std::string &relname, Handle first, Handle 
 bool NNAdjust::sense_of_first_inst(Handle first_word_sense_h,
                                        Handle first_sense_link_h)
 {
-	first_word_sense = first_word_sense_h;
-
 	// printf("first sense %s\n", sense->getName().c_str());
 	// Get the handle of the link itself .. 
 	first_sense_link = first_sense_link_h;
@@ -93,10 +97,8 @@ bool NNAdjust::sense_of_first_inst(Handle first_word_sense_h,
 
 /**
  * Called for every pair (word-instance,word-sense) of the second
- * word-instance of a relex relationship. This routine is the last,
- * most deeply nested loop of all of this set of nested loops.  This
- * routine now has possession of both pairs, and can now adjust the
- * strength of the link between them.
+ * word-instance of a relex relationship. This routine now has 
+ * possession of both pairs, and will look for the edge connecting them.
  *
  * As discussed in the README file, the expected structure is:
  *
@@ -117,6 +119,29 @@ bool NNAdjust::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
 	// printf("second sense %s!\n", sense->getName().c_str());
+	foreach_incoming_handle(second_sense_link, &NNAdjust::sense_pair, this);
+	return false;
+}
+
+bool NNAdjust::sense_pair(Handle pair_link)
+{
+	// If this is not a cosense link, skip it.
+	Link *edge = dynamic_cast<Link *>(TLB::getAtom(pair_link));
+	if ((edge == NULL) || (edge->getType() != COSENSE_LINK)) return false;
+
+	// If this link is not linking the first and second sense, skip it.
+	std::vector<Handle> outset = edge->getOutgoingSet();
+	if ((first_sense_link != outset[0]) && 
+	    (first_sense_link != outset[1])) return false;
+
+	// If we are here, we've got the link that we want. 
+	// Increase its strength.
+	double strength = edge->getTruthValue().getMean();
+	strength *= strength_adjust;
+	SimpleTruthValue stv(strength, 1.0);
+
+	stv.setConfidence(edge->getTruthValue().getConfidence());
+   edge->setTruthValue(stv);
 
 	return false;
 }
