@@ -13,7 +13,7 @@ are associated with a parsed sentence, and the algorithms that can
 be used to perform the actual disambiguation.
 
 The wordnet-import directory contains code to import the wordnet dataset
-into opencog, based on the structures outlined below.
+into OpenCog, based on the structures outlined below.
 
 The code in this directory is primarily focused on the implementation
 of the Rada Mihalcea word-sense disambiguation algorithm, together with
@@ -24,14 +24,14 @@ constructs links between these different senses. The links are weighted
 by a word-sense similarity measure. The result is a graph whose vertices
 are word-senses, and whose edges are these links.  The graph is
 essentially just a Markov chain, and is solved as such, looking for a
-stationary vector of probabilities for the word-sense verticies. The
-verticies with the highest scores are then the most likely meaning for
+stationary vector of probabilities for the word-sense vertices. The
+vertices with the highest scores are then the most likely meaning for
 a word.
 
 Preliminary comments
 --------------------
 Per current conversations with Ben Goertzel, new links introduced in
-the text below should be understodd to be a kind of predicate. That is,
+the text below should be understood to be a kind of predicate. That is,
 a link of the form
 
    <BlahLink>
@@ -49,7 +49,7 @@ is to be understood to be equivalent to
      </ListLink>
    </EvaluationLink>
 
-Although opencog does not currently handle this equivalance in a
+Although OpenCog does not currently handle this equivalence in a
 transparent fashion, this is the long-term intention.  Thus, the text
 below will mix these two different representation forms.
 
@@ -60,7 +60,7 @@ Consider the word "bark", thus:
 
     <WordNode name="bark" />   -- a word.
 
-Wordnet netries are not necessarily single words; more properly, the
+Wordnet entries are not necessarily single words; more properly, the
 should be called "lexical units": they can be single words,
 collocations, idioms, and so on.
 
@@ -235,7 +235,7 @@ A) Import WordNet data to establish "dictionary-words" and "word-senses",
 B) Use the Link-Grammar+RelEx infrastructure to identify
    "word-instances", and link them to "word-parses", and to assign
    initial probabilities ranking alternative parses.
-C) Use Radu Mihalcea's word-sense-disambiguation algorithms to compute
+C) Use Rada Mihalcea's word-sense-disambiguation algorithms to compute
    initial probability assignments for "word-concepts".
 D) Use anaphora resolution algorithms to assign initial probabilities
    to text-senses.
@@ -268,7 +268,7 @@ an initial parse ranking, and so:
    <ConceptNode name="parse_3" strength=0.6 confidence=0.3/>
 
 Each word in each parse of a sentence gets a unique concept node
-assignement. This is in order to allow the same word-instance be
+assignment. This is in order to allow the same word-instance be
 associated to different values in different parses. Suppose, for
 example, that, in two different parses of the same sentence, the word
 "bark" is identified as a noun, or as a verb. Thus, one has distinct
@@ -335,7 +335,7 @@ practice), the lemmatization might be different for different parses.
 singular of a plural noun, etc.)
 
 [[In the above, "bark_144" and "bark_169" were identified as
-ConceptNodes. However, for clarity, it migh be convenient to
+ConceptNodes. However, for clarity, it might be convenient to
 identify these as WordInstanceNodes?]]
 
 [[In the above, a collection of triples were used to specify the
@@ -400,15 +400,15 @@ Word concepts
 -------------
 This section elaborates on point 5 above.
 
-The goal of word-sense disambiguation is to asociate a word instance to
+The goal of word-sense disambiguation is to associate a word instance to
 each possible word-sense, and then to determine the most-likely pairing.
 The Mihalcea algorithm[1] performs this by creating weighted links
-between (word-instance, word-sense) pairs. (These are refered to as
+between (word-instance, word-sense) pairs. (These are referred to as
 "admissible labels" in [1]).  The goal of this section is
-to describe the opencog representation of these pairs-of-pairs.
+to describe the OpenCog representation of these pairs-of-pairs.
 Crudely speaking, these relations form an adjacency matrix for a graph
 resembling Markov chain; and so the representation problem is that of
-representing a square matrix in OpenCog.  Several representiatons are
+representing a square matrix in OpenCog.  Several representations are
 reviewed.
 
 A naive way of representing word-concept links would be to create links:
@@ -425,7 +425,7 @@ The pairs-of-pairs relations can then be provided as below. Here, the
 example sentence contains the words "tree" and "bark", which can then
 mutually reinforce the most likely meaning of each word.
 
-   <!-- the word "tree" occured in the sentence -->
+   <!-- the word "tree" occurred in the sentence -->
    <CosenseLink strength=0.49 confidence=0.3>
       <InheritanceLink strength=0.9 confidence=0.6>
          <ConceptNode name="tree_99" />
@@ -438,7 +438,7 @@ mutually reinforce the most likely meaning of each word.
       </InheritanceLink>
    </CosenseLink>
 
-Note that the set link is unordered: there is no prefered direction in
+Note that the set link is unordered: there is no preferred direction in
 the relation between "tree" and "bark".
 
 [[An alternate representation for the above would create a single node
@@ -473,29 +473,29 @@ Its not clear which representation is "better".]]
 The Mihalcea algorithm
 ----------------------
 This section describes how the Mihalcea algorithm[1] is actually
-implemented in opencog.
+implemented in OpenCog.
 
--- "Input/output" -- Input is received from the opencog server, in
-   the form of relex-generated opencog networks. These are directly
+-- "Input/output" -- Input is received from the OpenCog server, in
+   the form of RelEx-generated OpenCog networks. These are directly
    obtained by class WordSenseProcessor, which interfaces with the
    OpenCog server (and isolates the rest of the code from the OpenCog
    server details). It then passes input to class Mihalcea, which
-   provides the top-level class for the rest of the aglorithm.
+   provides the top-level class for the rest of the algorithm.
 
 -- "Admissible labels" -- in the text above, and in the code, these are
-   refered to as (word-instance, word-sense) pairs. These are added to
-   the raw relex input by class MihalceaLabel. They are added to all
+   referred to as (word-instance, word-sense) pairs. These are added to
+   the raw relax input by class MihalceaLabel. They are added to all
    words in all parses.
 
 -- "Build a graph of label dependencies". In the text above, and in the
-   code, these are refered to as "pairs of pairs". These are added to
+   code, these are referred to as "pairs of pairs". These are added to
    the by the class MihalceaEdge.  There is an slight difference:
    the original Mihalcea algorithm directs that these be added
    word-by-word in the sentence. Here, instead, these are added between
-   words participating between relex relations. In particular, because
-   relex will omit determiners ("a", "the") and other words from
-   relations, there won't be edges between these. Relex will also
-   sometimes collapse prepositional phrases into colocations, as well
+   words participating between RelEx relations. In particular, because
+   RelEx will omit determiners ("a", "the") and other words from
+   relations, there won't be edges between these. RelEx will also
+   sometimes collapse prepositional phrases into collocations, as well
    as entities, this will also cause a subtle difference in the graph
    structure.
 
@@ -506,7 +506,7 @@ implemented in opencog.
 
 -- "Score vertices". Scoring is performed using the the PageRank 
    algorithm. The graph is walked in a weighted random fashion, 
-   with the liklihood of taking an edge proportional to the edge's
+   with the likelihood of taking an edge proportional to the edge's
    weight. The score of each vertex is then adjusted using a weighted
    page-rank sum. The algo is implemented in class SenseRank.
 
@@ -537,11 +537,11 @@ sentence structure, obtained from parsing, into the algorithm.
 Noun-modifier Strengthening
 ---------------------------
 The  parser identifies noun-modifier phrases, such as "tree bark" or
-"aquatic mammal". The senses choosen for both nouns in the noun-modifier
+"aquatic mammal". The senses chosen for both nouns in the noun-modifier
 phrase should be in strong agreement with each other. There are several 
 ways in which this might be accomplished.
 -- Strengthen all similarity links between all senses of these two 
-   words.  This should have the effect of sheilding these two words
+   words.  This should have the effect of shielding these two words
    from outside influences.
 -- Weaken all links to the modifying noun, or strengthen all links to
    the modified noun.
@@ -557,7 +557,7 @@ Propagation of probabilities
 
 Ideas
 -----
--- elevate weights/connections that run directly through relex
+-- elevate weights/connections that run directly through RelEx
    relations!? maybe a bad idea, since some nearby relations seem
    to offer little insight e.g. "the tree bark cut my finger"
    the words "cut, finger" offer little/no insight into the meaning
@@ -587,13 +587,13 @@ Ideas
    are only distantly related. it would be better if one generated 
    a random function, taking as input, the distances to the least-common
    subsumer, and the distance of the least-common subsumer from the top
-   of the heirarchy. One might then try to use some optimization algo to 
+   of the hierarchy. One might then try to use some optimization algo to 
    find the best-possible function of these inputs, that gives the highest
    word-sense score.
    
 -- use framenet for scoring.
 
--- do some common-sennse reasoning from the wordnet ontology.
+-- do some common-sense reasoning from the wordnet ontology.
 
 
 
@@ -603,7 +603,7 @@ Some word senses are more common than others. For example, archaic word
 senses tend to be rarely encountered ... except when one is reading an
 archaic text. Similarly, scientific and technical texts tend to employ
 certain common word with certain very uncommon meanings. Cool, hip,
-edgy writing will also use words in uncomon senses, or in unusual
+edgy writing will also use words in uncommon senses, or in unusual
 constructions.
 
 An anecdote to illustrate the idea:
@@ -634,7 +634,7 @@ is unclear.
 
 References
 ----------
-[1] Radu Mihalcea, "Unsupervised Large-Vocabulary Word Sense
+[1] Rada Mihalcea, "Unsupervised Large-Vocabulary Word Sense
     Disambiguation with Graph-based Algorithms for Sequence Data
     Labeling", 2005
 
