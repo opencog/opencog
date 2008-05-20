@@ -2,7 +2,7 @@ PROJECT(OPENCOG)
 SET(CMAKE_BUILD_TYPE Debug) #Release)
 
 # add the 'vendor' dir to cmake's module search path
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vendor/")
+SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector -Wall")

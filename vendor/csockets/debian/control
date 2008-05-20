@@ -1,0 +1,21 @@
+Source: csockets
+Priority: extra
+Maintainer: Gustavo Machado Campagnani Gama <gama@vettalabs.com>
+Build-Depends: debhelper (>= 5), libssl-dev (>= 0.9)
+Standards-Version: 3.7.2
+Section: libs
+
+Package: csockets-dev
+Section: libdevel
+Architecture: any
+Depends: csockets (>= 2.2.9), libssl-dev (>= 0.9)
+Description: Header files, libraries and development documentation for the C++ Sockets
+             library.
+
+Package: csockets
+Section: libs
+Architecture: any
+Depends: libc6 (>= 2.3)
+Description: C++ Sockets is a C++ wrapper for BSD-style sockets. Its features include
+             transparent SOCKS4 client support and asynchronous DNS. It implements the TCP,
+             UDP, ICMP, HTTP (GET, PUT, and POST), and HTTPS (using OpenSSL) protocols.
