@@ -20,6 +20,8 @@ using namespace opencog;
 
 SenseSimilarity::SenseSimilarity(void)
 {
+	// Set 'follow_holo' to true if holonym links are to be followed.
+	follow_holo = 1;
 }
 
 SenseSimilarity::~SenseSimilarity()
@@ -93,8 +95,9 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	second_cnt = 0;
 	foreach_binary_link(second_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_second, this);
-	foreach_binary_link(second_sense, HOLONYM_LINK,
-	                         &SenseSimilarity::up_second, this);
+	if (follow_holo)
+		foreach_binary_link(second_sense, HOLONYM_LINK,
+		                         &SenseSimilarity::up_second, this);
 
 	// Now look to see if there is an alternate, shorter, path,
 	// where the two senses have a common hypernym or holonym.
@@ -102,8 +105,9 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// immediately above the second sense).
 	foreach_binary_link(first_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
-	foreach_binary_link(first_sense, HOLONYM_LINK,
-	                         &SenseSimilarity::up_first, this);
+	if (follow_holo)
+		foreach_binary_link(first_sense, HOLONYM_LINK,
+		                         &SenseSimilarity::up_first, this);
 
 	// At this point, min_cnt will contain the shortest distance between
 	// the two word senses. Divide by depth, compute the measure.
@@ -149,14 +153,16 @@ bool SenseSimilarity::up_first(Handle up)
 	second_cnt = 0;
 	foreach_binary_link(second_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_second, this);
-	foreach_binary_link(second_sense, HOLONYM_LINK,
-	                         &SenseSimilarity::up_second, this);
+	if (follow_holo)
+		foreach_binary_link(second_sense, HOLONYM_LINK,
+		                         &SenseSimilarity::up_second, this);
 
 	// Go up, see if there are shorter paths
 	foreach_binary_link(up, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
-	foreach_binary_link(up, HOLONYM_LINK,
-	                         &SenseSimilarity::up_first, this);
+	if (follow_holo)
+		foreach_binary_link(up, HOLONYM_LINK,
+		                         &SenseSimilarity::up_first, this);
 	first_cnt --;
 
 	return false;
@@ -190,8 +196,9 @@ bool SenseSimilarity::up_second(Handle up)
 	                         &SenseSimilarity::up_second, this);
 
 	// Give the holonym heirarchy a spin, too.
-	foreach_binary_link(up, HOLONYM_LINK,
-	                         &SenseSimilarity::up_second, this);
+	if (follow_holo)
+		foreach_binary_link(up, HOLONYM_LINK,
+		                         &SenseSimilarity::up_second, this);
 
 	second_cnt --;
 	return false;
