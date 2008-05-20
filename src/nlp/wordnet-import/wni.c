@@ -154,50 +154,57 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 	/* Member holonym */
 	SENSE (ISMEMBERPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance holonym */
 	SENSE (ISSTUFFPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance holonym */
 	SENSE (ISPARTPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Member meronym */
 	SENSE (HASMEMBERPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance meronym */
 	SENSE (HASSTUFFPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 	}))
 
 	/* Substance meronym */
 	SENSE (HASPARTPTR, ({
 		printf("<HolonymLink>\n");
-		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
+		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 	}))
+
+#if LATER
+	SENSE (DERIVATION, ({
+		printf("duuude  name=\"%s\" />\n", sense_key);
+		printf("yeah duu name=\"%s\" />\n", buff);
+	}))
+#endif
 
 	/* Some unhandled cases */
 	if ((1<<ENTAILPTR) & bitmask)
@@ -350,6 +357,7 @@ main (int argc, char * argv[])
 	strcpy(buff, "abnormally%4:02:00:: 00227171 1 1");
 	strcpy(buff, "sign%1:10:03:: 06791372 3 4");
 	strcpy(buff, "covering%1:17:00:: 09257949 1 0");
+	strcpy(buff, "cut%2:35:10:: 01610834 4 2");
 	show_index(buff);
 	exit(0);
 #endif
