@@ -18,6 +18,8 @@
 
 using namespace opencog;
 
+#define DEBUG
+
 SenseSimilarity::SenseSimilarity(void)
 {
 	// Set 'follow_holo' to true if holonym links are to be followed.
@@ -91,13 +93,13 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// Look up the hypernym tree, to see if the seccond sense is 
 	// immediately above the first sense in either the hypernym (is-a)
 	// or the holonym (has-a) hierarchy.
+	follow_holo = 0;
 	join_candidate = first_sense;
 	second_cnt = 0;
 	foreach_binary_link(second_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_second, this);
-	if (follow_holo)
-		foreach_binary_link(second_sense, HOLONYM_LINK,
-		                         &SenseSimilarity::up_second, this);
+	foreach_binary_link(second_sense, HOLONYM_LINK,
+	                         &SenseSimilarity::up_second, this);
 
 	// Now look to see if there is an alternate, shorter, path,
 	// where the two senses have a common hypernym or holonym.
@@ -105,9 +107,32 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// immediately above the second sense).
 	foreach_binary_link(first_sense, INHERITANCE_LINK,
 	                         &SenseSimilarity::up_first, this);
-	if (follow_holo)
-		foreach_binary_link(first_sense, HOLONYM_LINK,
-		                         &SenseSimilarity::up_first, this);
+	foreach_binary_link(first_sense, HOLONYM_LINK,
+	                         &SenseSimilarity::up_first, this);
+
+#ifdef COMBINATORIAL_EXPLOSION
+	// Turning on 'follow_holo' leads to a combinatorial explosion of
+	// choices and paths to explore, using gobs of cpu time (an hour
+	// per sentence, typically). Thus, this is commented out at compile
+	// time, as it currently does not seem to be a viable way of
+	// exploring word-sense similarity.
+	follow_holo = 1;
+	join_candidate = first_sense;
+	second_cnt = 0;
+	foreach_binary_link(second_sense, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_second, this);
+	foreach_binary_link(second_sense, HOLONYM_LINK,
+	                         &SenseSimilarity::up_second, this);
+
+	// Now look to see if there is an alternate, shorter, path,
+	// where the two senses have a common hypernym or holonym.
+	// (This also catches the case where the first sense is
+	// immediately above the second sense).
+	foreach_binary_link(first_sense, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_first, this);
+	foreach_binary_link(first_sense, HOLONYM_LINK,
+	                         &SenseSimilarity::up_first, this);
+#endif
 
 	// At this point, min_cnt will contain the shortest distance between
 	// the two word senses. Divide by depth, compute the measure.
@@ -115,13 +140,14 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	sim = log(sim) / norm;
 	if (sim < 0.0) sim = 0.0;
 
-#define DEBUG
 #ifdef DEBUG
-	Node *sense = dynamic_cast<Node *>(TLB::getAtom(first_sense));
-	printf("first sense %s\n", sense->getName().c_str());
-	sense = dynamic_cast<Node *>(TLB::getAtom(second_sense));
-	printf("second sense %s\n", sense->getName().c_str());
-	printf("distance between senses = %d sim=%g\n", min_cnt, sim);
+	Node *sense_a = dynamic_cast<Node *>(TLB::getAtom(first_sense));
+	Node *sense_b = dynamic_cast<Node *>(TLB::getAtom(second_sense));
+	printf("----\n");
+	printf("(%s, %s) dist=%d sim=%g\n", 
+	       sense_a->getName().c_str(),
+	       sense_b->getName().c_str(),
+	       min_cnt, sim);
 #endif
 
 	SimpleTruthValue stv(sim,0.9);
@@ -144,7 +170,7 @@ bool SenseSimilarity::up_first(Handle up)
 	// Don't explore paths that are longer than the current shortest path.
 	if (first_cnt + 1 >= min_cnt) return false;
 
-	// printf ("height=%d up=%s\n", first_cnt, n->getName().c_str());
+	// printf ("first height=%d up=%s\n", first_cnt, n->getName().c_str());
 
 	// Look to see if the join candidate (candidate for the "least common
 	// subsumer") appears anywhere on the up chain of the second sense.
@@ -178,6 +204,7 @@ bool SenseSimilarity::up_second(Handle up)
 	if (dist >= min_cnt) return false;
 
 	second_cnt ++;
+	// printf ("second height=%d up=%s\n", second_cnt, n->getName().c_str());
 
 	// If we found the match to the candidate, compute the distance,
 	// and save it. The distance is number of steps from each sense,
@@ -185,7 +212,9 @@ bool SenseSimilarity::up_second(Handle up)
 	// subsumer".
 	if (up == join_candidate)
 	{
-		// printf("found dist=%d (%d+%d) min=%d\n", dist, first_cnt, second_cnt, min_cnt);
+#ifdef DEBUG
+		printf("found dist=%d (%d+%d) min=%d\n", dist, first_cnt, second_cnt, min_cnt);
+#endif
 		if (dist < min_cnt) min_cnt = dist;
 		second_cnt --;
 		return false;
