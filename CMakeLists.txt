@@ -10,4 +10,14 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 #SET(CMAKE_BUILD_TYPE Release)
 
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(test)
+ADD_SUBDIRECTORY(tests)
+
+ADD_CUSTOM_TARGET(tests
+	COMMAND make
+	WORKING_DIRECTORY tests
+)
+ADD_CUSTOM_TARGET(test
+	DEPENDS tests
+	COMMAND @$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	COMMAND /usr/bin/ctest --force-new-ctest-process $(ARGS)
+)

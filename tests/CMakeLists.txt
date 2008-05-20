@@ -1,6 +1,4 @@
 # Make sure testing is enabled
-ENABLE_TESTING()
-
 INCLUDE(MacroAddCxxTest)
 
 # Use Python interpreter

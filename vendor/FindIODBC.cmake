@@ -10,7 +10,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 # Look for the header file
-FIND_PATH(IODBC_INCLUDE_DIR sql.h /usr/include /usr/local/include)
+FIND_PATH(IODBC_INCLUDE_DIR sql.h /usr/include /usr/local/include /usr/include/iodbc /usr/local/include/iodbc /usr/include/libiodbc /usr/local/include/libiodbc)
 #MARK_AS_ADVANCED(IODBC_INCLUDE_DIR)
 
 # Look for the library
