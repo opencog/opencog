@@ -1,25 +1,21 @@
-
 #include "CommandRequestProcessor.h"
 #include "CommandRequest.h"
+#include "FileXMLBufferReader.h"
+#include "StringXMLBufferReader.h"
+#include "NMXmlParser.h"
 
 #include <sstream>
 
-#include <FileXMLBufferReader.h>
-#include <StringXMLBufferReader.h>
-#include <NMXmlParser.h>
-
 using namespace opencog;
 
-CommandRequestProcessor::~CommandRequestProcessor()
-{
+CommandRequestProcessor::~CommandRequestProcessor() {
 #ifdef HAVE_SQL_STORAGE
     if (store) delete store;
     store = NULL;
 #endif /* HAVE_SQL_STORAGE */
 }
 
-CommandRequestProcessor::CommandRequestProcessor() 
-{
+CommandRequestProcessor::CommandRequestProcessor() {
     load_count = 0;
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
@@ -29,8 +25,7 @@ CommandRequestProcessor::CommandRequestProcessor()
 /**
  * read XML data from a buffer
  */
-std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf)
-{
+std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf) {
     load_count ++;
     char buff[20];
     snprintf(buff, 20, "%d", load_count);
@@ -271,7 +266,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         if (args.size() != 0) {
             answer = "shutdown: invalid command syntax";
         } else {
-            exit(0);
+            server().stop();
         }
     } else if (command == "sql-open") {
         if (args.size() < 2) {

@@ -22,15 +22,16 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // create server instance
-        CogServer server;
+        // once the configuration is loaded, init the server
+        server().init();
 
-        // Cheapo hack to get the query processory up and running.
+        // cheapo hack to get the query processory up and running.
         // XXX fix me with some more permanent, appropriate solution.
-        server.plugInMindAgent(new QueryProcessor(), 1);
-        server.plugInMindAgent(new WordSenseProcessor(), 1);
+        server().plugInMindAgent(new QueryProcessor(), 1);
+        server().plugInMindAgent(new WordSenseProcessor(), 1);
 
-        server.serverLoop();
+        // run the server's main loop
+        server().serverLoop();
     } else {
         usage(argv[0]);
         return 1;

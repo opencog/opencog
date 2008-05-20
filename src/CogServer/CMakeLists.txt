@@ -1,7 +1,6 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
 ADD_LIBRARY (CogServer STATIC
-	CogServerSetup.cc 
 	CogServer.cc 
 	SimpleNetworkServer.cc 
 	ServerSocket.cc 

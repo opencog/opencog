@@ -17,14 +17,11 @@
 #include <AtomSpace.h>
 
 #include "MindAgent.h"
-#include "CogServerSetup.h"
 #include "NetworkServer.h"
 #include "CogServerRequest.h"
 #include "RequestProcessor.h"
 
 namespace opencog {
-
-class CogServerSetup;
 
 class CogServer {
     
@@ -40,6 +37,7 @@ class CogServer {
         std::vector<ScheduledMindAgent> mindAgents;
 
         long cycleCount;
+        bool running;
 
         void processMindAgents();
         void processRequests();
@@ -47,7 +45,6 @@ class CogServer {
         pthread_mutex_t messageQueueLock;
         std::queue<CogServerRequest *> requestQueue;
 
-        CogServerSetup *initializer;
         NetworkServer *networkServer;
 
     public:
@@ -55,10 +52,12 @@ class CogServer {
         ~CogServer();
         CogServer();
 
+        void init();
         static AtomSpace *getAtomSpace();
         void serverLoop();
         void plugInMindAgent(MindAgent *task, int frequency);
         long getCycleCount();
+        void stop();
         
         CogServerRequest *popRequest();
         void pushRequest(CogServerRequest *request);
@@ -68,6 +67,10 @@ class CogServer {
         // used for debug purposes in unit tests
         void unitTestServerLoop(int limitNumberOfCycles);
 }; // class
+
+// singleton instance (following meyer's design pattern)
+CogServer& server();
+
 }  // namespace
 
 #endif

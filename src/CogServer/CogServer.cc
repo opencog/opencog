@@ -7,29 +7,42 @@
  * Creation: Wed Jun 20 16:00:19 BRT 2007
  */
 
-#include "CogServer.h"
-
-#include <exceptions.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+
+#include "CogServer.h"
+#include "exceptions.h"
+#include "Config.h"
+#include "Logger.h"
+#include "SimpleNetworkServer.h"
 
 using namespace opencog;
-
-AtomSpace *CogServer::atomSpace = NULL;
+AtomSpace* CogServer::atomSpace = NULL;
 
 CogServer::~CogServer() {
-    delete initializer;
+    Util::Logger::releaseMainLogger();
     delete networkServer;
 }
 
-CogServer::CogServer() {
-    cycleCount = 1;
+CogServer::CogServer() : cycleCount(1), networkServer(NULL) {
     pthread_mutex_init(&messageQueueLock, NULL);
-    initializer = new CogServerSetup();
-    networkServer = NULL;
+}
+
+void CogServer::init() {
     if (atomSpace != NULL) {
         delete atomSpace;
     }
     atomSpace = new AtomSpace();
+
+    // setup main logger
+    Util::Logger *log = new Util::Logger(config()["LOG_FILE"], Util::Logger::INFO, true);
+    log->setPrintToStdoutFlag(true);
+    Util::Logger::initMainLogger(log);
+
+    // set network server
+    this->networkServer =
+        new SimpleNetworkServer(this, config().get_int("SERVER_PORT"));
 }
 
 AtomSpace *CogServer::getAtomSpace() {
@@ -40,7 +53,6 @@ AtomSpace *CogServer::getAtomSpace() {
  * Used for debug purposes in unit tests
  */
 void CogServer::unitTestServerLoop(int limitNumberOfCycles) {
-
     do {
         if ((limitNumberOfCycles >= 0) && (cycleCount > limitNumberOfCycles)) {
             return;
@@ -57,64 +69,37 @@ void CogServer::unitTestServerLoop(int limitNumberOfCycles) {
     } while(true);
 }
 
-void CogServer::setNetworkServer(NetworkServer *networkServer) {
-    if (this->networkServer != NULL) {
-        throw new RuntimeException(NULL, "Can not reset NetworkServer");
-    }
-    this->networkServer = networkServer;
-}
+void CogServer::serverLoop() {
+    struct timeval timer_start, timer_end;
+    time_t elapsed_time;
+    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
 
-#ifdef MEM_DEBUG
-static char * heap_bottom;
-#endif
+    if (networkServer != NULL) networkServer->start();
 
-void CogServer::serverLoop()
-{
-    initializer->setUp(this);
-    if (networkServer != NULL) {
-        networkServer->start();
-    }
-#ifdef MEM_DEBUG
-heap_bottom=(char *)sbrk(0);
-#endif
+    Util::Logger::getMainLogger().log(Util::Logger::INFO, "opencog server ready.");
+    running = true;
+    while (running) {
+        gettimeofday(&timer_start, NULL);
 
-    do {
-        // Avoid hard spinloop when there's no work.
-        int reqQueSize = getRequestQueueSize();
-        int numAgents = mindAgents.size();
-        if ((0 == reqQueSize) && (0 == numAgents))
-            usleep(10000);  // 10 millisecs == 100HZ
-
-        if (reqQueSize != 0) processRequests();
+        if (getRequestQueueSize() != 0) processRequests();
         processMindAgents();
 
         cycleCount++;
-        if (cycleCount < 0) {
-            cycleCount = 0;
-        }
+        if (cycleCount < 0) cycleCount = 0;
 
-    } while(true);
+        // sleep long enough so that the next cycle will only start
+        // after config["SERVER_CYCLE_DURATION"] microseconds
+        gettimeofday(&timer_end, NULL);
+        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                       (timer_end.tv_usec - timer_start.tv_usec);
+        if ((cycle_duration - elapsed_time) > 0)
+            usleep(cycle_duration - elapsed_time);
+    }
 }
 
-#ifdef MEM_DEBUG
-static int cnt = 0;
-#endif
-
-void CogServer::processRequests()
-{
+void CogServer::processRequests() {
     int countDown = getRequestQueueSize();
     while (countDown != 0) {
-#ifdef MEM_DEBUG
-cnt++;
-// printf("duude proc req %d qlen=%d\n", cnt, countDown);
-if (cnt%23456==0) {
-char *h = (char*)sbrk(0);
-size_t mem = h - heap_bottom;
-mem /= 1024*1024;
-printf("cnt=%d at %d MB (%p)\n", cnt, mem, heap_bottom);
-}
-if (593060 < cnt) printf("now cnt=%d\n", cnt);
-#endif
         CogServerRequest *request = popRequest();
         request->processRequest();
         delete request;
@@ -122,8 +107,7 @@ if (593060 < cnt) printf("now cnt=%d\n", cnt);
     }
 }
 
-void CogServer::processMindAgents()
-{
+void CogServer::processMindAgents() {
     for (unsigned int i = 0; i < mindAgents.size(); i++) {
         if ((cycleCount % mindAgents[i].frequency) == 0) {
             (mindAgents[i].agent)->run(this);
@@ -140,6 +124,10 @@ void CogServer::plugInMindAgent(MindAgent *agent, int frequency) {
 
 long CogServer::getCycleCount() {
     return cycleCount;
+}
+
+void CogServer::stop() {
+    running = false;
 }
 
 CogServerRequest *CogServer::popRequest() {
@@ -169,4 +157,10 @@ int CogServer::getRequestQueueSize() {
     int size = requestQueue.size();
     pthread_mutex_unlock(&messageQueueLock);
     return size;
+}
+
+// create and return the single instance
+CogServer& opencog::server() {
+    static CogServer instance;
+    return instance;
 }
