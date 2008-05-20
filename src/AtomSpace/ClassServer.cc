@@ -1,9 +1,26 @@
-/**
- * ClassServer.cc
+/*
+ * src/AtomSpace/ClassServer.cc
  *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
  *
- * Copyright(c) 2001 Thiago Maia, Andre Senna
- * All rights reserved.
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "ClassServer.h"
@@ -21,7 +38,6 @@ ClassNameHashMap* ClassServer::getClassName() {
    return class_name;
 }
 
-
 /*
  * A function to automatically initialize the map with
  * all classes and super-classes. 
@@ -36,7 +52,6 @@ void ClassServer::init_inheritance(std::vector<std::vector<bool> >& map, int par
   }
 }
 
-
 /*
  * Mike says: I changed this function to make it easier to debug.
  * I noticed that a few of the original mappings were not completely
@@ -45,8 +60,7 @@ void ClassServer::init_inheritance(std::vector<std::vector<bool> >& map, int par
  * Now you only have to indicate the direct parent class of a class.
  * But you now MUST insert every parent class before each of its descendents.
  * This could be made even simpler at the expense of efficiency.
- * 
-*/
+ */
 std::vector<std::vector<bool> > ClassServer::init_map() {
    std::vector<std::vector<bool> > map(NUMBER_OF_CLASSES);
    // map will first receive false for all positions, except when the
@@ -69,8 +83,6 @@ std::vector<std::vector<bool> > ClassServer::init_map() {
 //=================================================================
 
 #include "type_inheritance.h"
-
-
    return map;
 }
 
@@ -142,7 +154,8 @@ const char* ClassServer::getTypeName(Type type) {
    }
    return (*getClassName())[type];
 }
-Handle ClassServer::typeDesignatorHandle(Type T) {
+
 // TODO: Implement smarter mapping from atom types to BuiltInTypeHandle IDs?
+Handle ClassServer::typeDesignatorHandle(Type T) {
     return (Handle)T;
 }

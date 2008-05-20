@@ -1,14 +1,36 @@
-#ifndef _ATOM_SPACE_DEFINITIONS_H_
-#define _ATOM_SPACE_DEFINITIONS_H_
-/**
- * AtomSpaceDefinitions.h
- * 
- * A special header file to put all definitions needed by AtomSpace's classes.
- * 
+/*
+ * src/AtomSpace/AtomSpaceDefinitions.h
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// Atom flags
+/**
+ * A special header file to put all definitions needed by AtomSpace's classes.
+ */
 
+#ifndef _ATOM_SPACE_DEFINITIONS_H_
+#define _ATOM_SPACE_DEFINITIONS_H_
+
+// Atom flags
 #define WRITE_MUTEX             1  //BIT0
 #define MARKED_FOR_REMOVAL      2  //BIT1
 //#define MULTIPLE_TRUTH_VALUES 4  //BIT2

@@ -1,7 +1,26 @@
-/**
- * TemporalMap.h - hashtable based in Temporal* keys and (void *) elements
+/*
+ * src/AtomSpace/TemporalMap.h
  *
- * $Author: welter
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Welter Silva <welter@vettalabs.com>
+ *            Carlos Lopes <dlopes@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef TEMPORALMAP_H
@@ -11,22 +30,23 @@
 #include "config.h"
 #endif
 
+#include "Temporal.h"
+
 #ifdef HAVE_LIBPTHREAD
 #include <pthread.h>
 #endif
 
-#include <Temporal.h>
+/**
+ * Hashtable based in Temporal* keys and (void *) elements. This is an Adapter
+ * to stl's HashMap.
+ */
 
 class TemporalMapIterator;
 
-/**
- * This is an Adapter to stl's HashMap.
- */
 class TemporalMap {
     friend class TemporalMapIterator;
 
 private:
-
 
     /**
      * initializes the TemporalMap.
@@ -41,7 +61,6 @@ private:
     /**
      * Defines the hash_map that will be used.
      */
-
     typedef Util::hash_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
 
 public:
@@ -69,8 +88,6 @@ private:
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_t plock;
 #endif
-
-
 
 public:
 

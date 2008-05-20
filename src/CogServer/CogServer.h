@@ -1,10 +1,27 @@
-/**
- * CogServer.h
+/*
+ * src/CogServer/CogServer.h
  *
- * $Header$
+ * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
  *
- * Author: Andre Senna
- * Creation: Wed Jan 23 16:00:19 BRT 2008
+ * Written by Andre Senna <senna@vettalabs.com>
+ *            Gustavo Gama <gama@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef COGSERVER_H
@@ -24,50 +41,50 @@
 namespace opencog {
 
 class CogServer {
+
+private:
+
+    static AtomSpace *atomSpace;
+
+    typedef struct {
+        int frequency;
+        MindAgent *agent;
+    } ScheduledMindAgent;
+
+    std::vector<ScheduledMindAgent> mindAgents;
+
+    long cycleCount;
+    bool running;
+
+    void processMindAgents();
+    void processRequests();
+
+    pthread_mutex_t messageQueueLock;
+    std::queue<CogServerRequest *> requestQueue;
+
+    NetworkServer *networkServer;
+
+public:
+
+    static AtomSpace *getAtomSpace();
+
+    ~CogServer();
+    CogServer();
+
+    void enableNetworkServer();
+    void disableNetworkServer();
+
+    void serverLoop();
+    void plugInMindAgent(MindAgent *task, int frequency);
+    long getCycleCount();
+    void stop();
     
-    private:
-
-        static AtomSpace *atomSpace;
-
-        typedef struct {
-            int frequency;
-            MindAgent *agent;
-        } ScheduledMindAgent;
-
-        std::vector<ScheduledMindAgent> mindAgents;
-
-        long cycleCount;
-        bool running;
-
-        void processMindAgents();
-        void processRequests();
-
-        pthread_mutex_t messageQueueLock;
-        std::queue<CogServerRequest *> requestQueue;
-
-        NetworkServer *networkServer;
-
-    public:
-
-        static AtomSpace *getAtomSpace();
-
-        ~CogServer();
-        CogServer();
-
-        void enableNetworkServer();
-        void disableNetworkServer();
-
-        void serverLoop();
-        void plugInMindAgent(MindAgent *task, int frequency);
-        long getCycleCount();
-        void stop();
-        
-        CogServerRequest *popRequest();
-        void pushRequest(CogServerRequest *request);
-        int getRequestQueueSize();
-          
-        // used for debug purposes in unit tests
-        void unitTestServerLoop(int limitNumberOfCycles);
+    CogServerRequest *popRequest();
+    void pushRequest(CogServerRequest *request);
+    int getRequestQueueSize();
+      
+    // used for debug purposes in unit tests
+    void unitTestServerLoop(int limitNumberOfCycles);
 }; // class
 
 // singleton instance (following meyer's design pattern)

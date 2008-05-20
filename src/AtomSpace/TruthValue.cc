@@ -1,9 +1,28 @@
-/**
-* TruthValue.cc
-*
-* @author Guilherme Lamacie
-* @author Welter Silva
-*/
+/*
+ * src/AtomSpace/TruthValue.cc
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Welter Silva <welter@vettalabs.com>
+ *            Guilherme Lamacie
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include "TruthValue.h"
 #include "SimpleTruthValue.h"
 #include "IndefiniteTruthValue.h"
@@ -27,6 +46,7 @@ const TruthValue& TruthValue::DEFAULT_TV() {
 	static TruthValue* instance	= new SimpleTruthValue(0,0);
 	return *instance;
 }
+
 //const TruthValue& TruthValue::TRUE_TV() = SimpleTruthValue(MAX_TRUTH, MAX_TV_COUNT);
 const TruthValue& TruthValue::TRUE_TV() {
 	static TruthValue* instance	= new SimpleTruthValue(MAX_TRUTH, MAX_TV_COUNT);

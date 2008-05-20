@@ -1,8 +1,27 @@
-/**
- * Atom.cc
+/*
+ * src/AtomSpace/Atom.cc
  *
- * Copyright(c) 2001 Thiago Maia, Andre Senna
- * All rights reserved.
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
+ *            Welter Silva <welter@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "Atom.h"
@@ -725,41 +744,3 @@ HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, b
 
     return answer;
 }
-
-
-/*
-   void Atom::beginRead() {
-   pthread_mutex_lock(&lock);
-   while (flags & WRITE_MUTEX) {
-   pthread_cond_wait(&cond, &lock);
-   }
-   readSemaphore++;
-   pthread_mutex_unlock(&lock);
-   }
-
-   void Atom::endRead() {
-   pthread_mutex_lock(&lock);
-   readSemaphore--;
-   if (readSemaphore == 0) {
-//cond_signal();
-pthread_cond_broadcast(&cond);
-}
-pthread_mutex_unlock(&lock);
-}
-
-void Atom::beginWrite() {
-pthread_mutex_lock(&lock);
-while ((readSemaphore > 0) && (flags & WRITE_MUTEX)) {
-pthread_cond_wait(&cond, &lock);
-}
-flags |= WRITE_MUTEX;
-pthread_mutex_unlock(&lock);
-}
-
-void Atom::endWrite() {
-pthread_mutex_lock(&lock);
-flags &= ~WRITE_MUTEX;
-pthread_cond_broadcast(&cond);
-pthread_mutex_unlock(&lock);
-}
-*/

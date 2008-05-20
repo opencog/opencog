@@ -1,9 +1,26 @@
-/**
- * exceptions.h
+/*
+ * src/Util/exceptions.h
  *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
  *
- * Copyright(c) 2001 Thiago Maia, Andre Senna
- * All rights reserved.
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef EXCEPTIONS_H
@@ -26,42 +43,43 @@
  */
 class StandardException
 {
-    private:
-        /**
-         * c-string error message
-         */
-        char * message;
 
-    protected:
+private:
+    /**
+     * c-string error message
+     */
+    char * message;
 
-        /**
-         * Parse error message substituting scape characters like (%s, %d, etc)
-         * with their corresponding values. 
-         */
-        void parseErrorMessage(const char* fmt, va_list ap);
-        void parseErrorMessage(const char * trace, const char* fmt, va_list ap);
+protected:
 
-    public:
+    /**
+     * Parse error message substituting scape characters like (%s, %d, etc)
+     * with their corresponding values. 
+     */
+    void parseErrorMessage(const char* fmt, va_list ap);
+    void parseErrorMessage(const char * trace, const char* fmt, va_list ap);
 
-        /**
-         * Construtor and destructor.
-         */
-        StandardException();
-        ~StandardException();
-        
-        /**
-         * Get error message.
-         * @return A c-string representing the error message. If no message have
-         * been created just return an empty string.
-         */
-	    const char* getMessage();
-        
-        /**
-         * Set the error message.
-         * @param A c-string representing the error message. The caller is
-         * responsable to free the memory allocated in the c-string parameter.
-         */
-        void setMessage(const char *);
+public:
+
+    /**
+     * Construtor and destructor.
+     */
+    StandardException();
+    ~StandardException();
+    
+    /**
+     * Get error message.
+     * @return A c-string representing the error message. If no message have
+     * been created just return an empty string.
+     */
+    const char* getMessage();
+    
+    /**
+     * Set the error message.
+     * @param A c-string representing the error message. The caller is
+     * responsable to free the memory allocated in the c-string parameter.
+     */
+    void setMessage(const char *);
 
 }; // StandardException
 
@@ -70,26 +88,26 @@ class StandardException
  * is detected.
  */
 class RuntimeException : public StandardException {
-    
-    public:
 
-        /**
-         * Generic exception to be called in runtime, whenever an unexpected
-         * condition is detected.
-         *
-         * @param Exception message in printf standard format.
-         */
-        RuntimeException(const char*, const char*, ...);
+public:
 
-        /**
-         * Default constructor used for inheritance 
-         */
-        RuntimeException();
+    /**
+     * Generic exception to be called in runtime, whenever an unexpected
+     * condition is detected.
+     *
+     * @param Exception message in printf standard format.
+     */
+    RuntimeException(const char*, const char*, ...);
 
-        /**
-         * Destructor
-         */
-        ~RuntimeException();
+    /**
+     * Default constructor used for inheritance 
+     */
+    RuntimeException();
+
+    /**
+     * Destructor
+     */
+    ~RuntimeException();
 
 }; // RuntimException
 
@@ -98,16 +116,16 @@ class RuntimeException : public StandardException {
  */
 class XMLException : public RuntimeException {
 
-    public:
+public:
 
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        XMLException(const char*, const char*, ...);
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    XMLException(const char*, const char*, ...);
 
 }; // XMLException
 
@@ -116,16 +134,16 @@ class XMLException : public RuntimeException {
  */
 class IOException : public RuntimeException {
 
-    public:
+public:
 
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        IOException(const char*, const char*, ...);
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    IOException(const char*, const char*, ...);
 
 }; // IOException
 
@@ -134,16 +152,16 @@ class IOException : public RuntimeException {
  */
 class ComboException : public RuntimeException {
 
-    public:
+public:
 
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        ComboException(const char*, const char*, ...);
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    ComboException(const char*, const char*, ...);
 
 }; // ComboException
 
@@ -152,16 +170,16 @@ class ComboException : public RuntimeException {
  */
 class IndexErrorException : public RuntimeException {
 
-    public:
+public:
 
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        IndexErrorException(const char*, const char*, ...);
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    IndexErrorException(const char*, const char*, ...);
 
 }; // IndexErrorException
 
@@ -171,16 +189,16 @@ class IndexErrorException : public RuntimeException {
  */
 class InvalidParamException : public RuntimeException {
 
-    public:
+public:
 
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        InvalidParamException(const char*, const char*, ...);
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    InvalidParamException(const char*, const char*, ...);
 
 }; // InvalidParamException
 
@@ -190,16 +208,16 @@ class InvalidParamException : public RuntimeException {
  */
 class InconsistenceException : public RuntimeException {
 
-    public:
+public:
 
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        InconsistenceException(const char*, const char*, ...);
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    InconsistenceException(const char*, const char*, ...);
 
 }; // InconsistenceException
 
@@ -209,16 +227,16 @@ class InconsistenceException : public RuntimeException {
  */
 class FatalErrorException : public StandardException {
 
-    public:
-        
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        FatalErrorException(const char*, const char*, ...);
+public:
+    
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    FatalErrorException(const char*, const char*, ...);
 
 }; // FatalErrorException
 
@@ -228,16 +246,16 @@ class FatalErrorException : public StandardException {
  */
 class NetworkException : public StandardException {
 
-    public:
-        
-        /**
-         * Constructor
-         *
-         * @param Trace information (filename:line-number). Use TRACE_INFO
-         * macro.
-         * @param Exception message in printf standard format.
-         */
-        NetworkException(const char*, const char*, ...);
+public:
+    
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    NetworkException(const char*, const char*, ...);
 
 }; // NetworkException
 
@@ -247,10 +265,10 @@ class NetworkException : public StandardException {
  */
 class AssertionException {
 
-    public:
+public:
 
-        AssertionException(const char*, ...);
-        AssertionException(const char* fmt, va_list ap);
+    AssertionException(const char*, ...);
+    AssertionException(const char* fmt, va_list ap);
 };
 
 /**
