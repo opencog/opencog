@@ -16,12 +16,14 @@
 #include "ClassServer.h"
 #include "StatisticsMonitor.h"
 #include "Logger.h"
+#include "Config.h"
 
 using std::string;
 using std::cerr;
 using std::cout;
 using std::endl;
 using namespace Util;
+using namespace opencog;
 
 const char* AtomSpace::SPACE_MAP_NODE_NAME = "SpaceMap";
 
@@ -38,7 +40,7 @@ AtomSpace::~AtomSpace() {
 AtomSpace::AtomSpace() {
     _handle_iterator = NULL;
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
     emptyName = "";
 
 #ifdef USE_ATOM_HASH_MAP
@@ -51,8 +53,8 @@ AtomSpace::AtomSpace() {
     pthread_mutex_init(&stimulatedAtomsLock, NULL);
 #endif
 
-    fundsSTI = LOBE_STARTING_STI_FUNDS;
-    fundsLTI = LOBE_STARTING_LTI_FUNDS;
+    fundsSTI = config().get_int("STARTING_STI_FUNDS");
+    fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
 }
 

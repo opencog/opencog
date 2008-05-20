@@ -1,0 +1,129 @@
+/*
+ * ./src/Util/Util.cc
+ *
+ * Copyright (c) 2008 OpenCog.org
+ */
+
+#include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <errno.h>
+
+#include "Config.h"
+#include "exceptions.h"
+
+using namespace opencog;
+using namespace std;
+
+// returns a string with leading/trailing characters of a set stripped
+static char const* blank_chars = " \t\f\v\n\r";
+static string strip(string const& str) {
+    string::size_type const first = str.find_first_not_of(blank_chars);
+    return (first == string::npos) ? string() : str.substr(first, str.find_last_not_of(blank_chars) - first + 1);
+} 
+
+Config::~Config() {
+}
+
+Config::Config() {
+    reset();
+}
+
+void Config::reset() {
+    table.clear();
+    // load default configuration
+    for (unsigned int i = 0; DEFAULT_CONFIG[i] != ""; i += 2) {
+        if (table.find(DEFAULT_CONFIG[i]) == table.end()) {
+            table[DEFAULT_CONFIG[i]] = DEFAULT_CONFIG[i + 1];
+        }
+    }
+}
+
+// constructor
+void Config::load(const char* filename) {
+    // quit if no explicit filename was supplied
+    if (filename == NULL) return;
+
+    // reset to default values
+    reset();
+
+    // finally, read and process the config file
+    ifstream fin(filename);
+    if (!fin || !fin.good() || !fin.is_open()) throw IOException(TRACE_INFO, "[ERROR] unable to open file \"%s\"", filename);
+
+    string line;
+    string name;
+    string value;
+    unsigned int line_number = 0;
+    
+    while (++line_number, fin.good() && getline(fin, line)) {
+        size_t idx;
+        // find comment and discard the rest of the line
+        if ((idx = line.find('#')) != string::npos) {
+            line.replace(idx, line.size() - idx, "");
+        }
+        // search for the '=' character
+        if ((idx = line.find('=')) != string::npos) {
+            // select name and value
+            name  = line.substr(0, idx);
+            value = line.substr(idx + 1);
+            // strip them
+            name  = strip(name);
+            value = strip(value);
+            // finally, store the entries
+            table[name] = value;
+        } else if (line.find_first_not_of(blank_chars) != string::npos) {
+            throw InvalidParamException(TRACE_INFO, "[ERROR] invalid configuration entry (line %d)", line_number);
+        }
+    }
+    fin.close();
+}
+
+const string& Config::get(const string &name) const {
+    map<string, string>::const_iterator it = table.find(name);
+    if (it == table.end()) throw InvalidParamException(TRACE_INFO, "[ERROR] parameter not found (%s)", name.c_str());
+    return it->second;
+}
+
+const string& Config::operator[](const string &name) const {
+    return get(name);
+}
+
+int Config::get_int(const string &name) const {
+    int int_val;
+    errno = 0;
+    int_val = strtol(get(name).c_str(), NULL, 0);
+    if (errno != 0) throw InvalidParamException(TRACE_INFO, "[ERROR] invalid integer parameter (%s)", name.c_str());
+    return int_val;
+}
+
+double Config::get_double(const string &name) const {
+    double int_val;
+    errno = 0;
+    int_val = strtod(get(name).c_str(), NULL);
+    if (errno != 0) throw InvalidParamException(TRACE_INFO, "[ERROR] invalid double parameter (%s: %s)", name.c_str(), get(name).c_str());
+    return int_val;
+}
+
+bool Config::get_bool(const string &name) const {
+    if (strcasecmp(get(name).c_str(), "true") == 0) return true;
+    else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
+    else throw InvalidParamException(TRACE_INFO, "[ERROR] invalid double parameter (%s: %s)", name.c_str(), get(name).c_str());
+}
+
+std::string Config::to_string() const {
+    std::ostringstream oss;
+    oss << "{\"";
+    for (map<string, string>::const_iterator it = table.begin(); it != table.end(); ++it) {
+        if (it != table.begin()) oss << "\", \"";
+        oss << it->first << "\" => \"" << it->second;
+    }
+    oss << "\"}";
+    return oss.str();
+}
+
+// create and return the single instance
+Config& opencog::config() {
+    static Config instance;
+    return instance;
+}

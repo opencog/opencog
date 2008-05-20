@@ -19,7 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ImportanceUpdatingAgent.h"
-#include <mt19937ar.h>
+#include "Config.h"
+#include "mt19937ar.h"
+
 #include <math.h>
 #include <time.h>
 
@@ -45,12 +47,12 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     attentionalFocusSize.decay = 0.8;
     attentionalFocusNodesSize.decay = 0.8;
 
-    targetLobeSTI = LOBE_STARTING_STI_FUNDS;
-    acceptableLobeSTIRange[0] = targetLobeSTI - LOBE_STI_FUNDS_BUFFER;
-    acceptableLobeSTIRange[1] = targetLobeSTI + LOBE_STI_FUNDS_BUFFER;
-    targetLobeLTI = LOBE_STARTING_LTI_FUNDS;
-    acceptableLobeLTIRange[0] = targetLobeLTI - LOBE_LTI_FUNDS_BUFFER;
-    acceptableLobeLTIRange[1] = targetLobeLTI + LOBE_LTI_FUNDS_BUFFER;
+    targetLobeSTI = config().get_int("STARTING_STI_FUNDS");
+    acceptableLobeSTIRange[0] = targetLobeSTI - config().get_int("STI_FUNDS_BUFFER");
+    acceptableLobeSTIRange[1] = targetLobeSTI + config().get_int("STI_FUNDS_BUFFER");
+    targetLobeLTI = config().get_int("STARTING_LTI_FUNDS");
+    acceptableLobeLTIRange[0] = targetLobeLTI - config().get_int("LTI_FUNDS_BUFFER");
+    acceptableLobeLTIRange[1] = targetLobeLTI + config().get_int("LTI_FUNDS_BUFFER");
 
     lobeSTIOutOfBounds = false;
 
@@ -63,7 +65,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new Util::Logger("ImportanceUpdatingAgent.log",Util::Logger::DEBUG,true));
+    setLogger(new Util::Logger("ImportanceUpdatingAgent.log", Util::Logger::DEBUG,true));
     log->disable();
 }
 
