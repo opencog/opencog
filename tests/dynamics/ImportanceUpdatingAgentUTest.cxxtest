@@ -6,10 +6,10 @@
  * Author: Joel Pitt
  * Creation: Thurs Mar 6 12:00:19 GMT+12 2008
  */
-#include <CogServer.h>
-#include <MindAgent.h>
-#include <ImportanceUpdatingAgent.h>
-#include <SimpleTruthValue.h>
+#include "CogServer.h"
+#include "MindAgent.h"
+#include "ImportanceUpdatingAgent.h"
+#include "SimpleTruthValue.h"
 
 #include <vector>
 #include <string>
@@ -74,7 +74,7 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent = new opencog::ImportanceUpdatingAgent();
 
 	    agent->getLogger()->enable();
-	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    agent->getLogger()->setPrintToStdoutFlag(true);
 	    
             server.plugInMindAgent(agent, 1);
@@ -103,7 +103,7 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent = new opencog::ImportanceUpdatingAgent();
 
 	    agent->getLogger()->enable();
-	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    agent->getLogger()->setPrintToStdoutFlag(true);
 	    
             server.plugInMindAgent(agent, 1);
@@ -132,7 +132,7 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent = new opencog::ImportanceUpdatingAgent();
 
 	    agent->getLogger()->enable();
-	    agent->getLogger()->setLevel(Util::Logger::FINE);
+	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    agent->getLogger()->setPrintToStdoutFlag(true);
 	    
             server.plugInMindAgent(agent, 1);

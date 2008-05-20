@@ -76,11 +76,11 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve=10, fl
     Pattern rPattern(width,height);
 
     imprintPattern(p,1);
-    MAIN_LOGGER.log(Util::Logger::FINE,"Encoded pattern for 1 loop");
+    logger().fine("Encoded pattern for 1 loop");
 
     if (! options->cueGenerateOnce) {
 	c = p.mutatePattern(mutate);
-	MAIN_LOGGER.log(Util::Logger::FINE,"Mutated pattern");
+	logger().fine("Mutated pattern");
     }
 	
     if (options->recordToFile) {
@@ -97,7 +97,7 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve=10, fl
     // Nodes are left with STI after retrieval
     resetNodes();
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"Retrieved pattern");
+    logger().fine("Retrieved pattern");
 
     return result;
     
@@ -167,7 +167,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
 	n = this->width * this->height - 1;
 	maxLinks = n * (n+1) / 2;
 	this->links = (int) (density * maxLinks);
-	MAIN_LOGGER.log(Util::Logger::INFO ,"Density of %.2f gives %d links out of %d", density, this->links, maxLinks);
+	logger().info("Density of %.2f gives %d links out of %d", density, this->links, maxLinks);
     }
 
     // Tune mind agents from command line options
@@ -190,7 +190,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
     
     // If only 1 node, don't try and connect it
     if (hGrid.size() < 2) {
-	MAIN_LOGGER.log(Util::Logger::WARNING,"Only %d node(s), <2 so this is kind of silly but I shall follow instructions.", hGrid.size());
+	logger().warn("Only %d node(s), <2 so this is kind of silly but I shall follow instructions.", hGrid.size());
 	return;
     }
 
@@ -223,7 +223,7 @@ void HopfieldServer::addRandomLinks()
     amount = this->links - links->getSize();
     delete links;
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"Adding %d random Hebbian Links.", amount);
+    logger().fine("Adding %d random Hebbian Links.", amount);
     // Link nodes randomly with amount links
     while (amount > 0) {
 	int source, target;
@@ -238,7 +238,7 @@ void HopfieldServer::addRandomLinks()
 	outgoing.push_back(hGrid[target]);
 	he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), SYMMETRIC_HEBBIAN_LINK, false);
 	if (he) {
-	    //MAIN_LOGGER.log(Util::Logger::FINE,"Trying to add %d -> %d, but already exists %s", source, target, TLB::getAtom(he->handle)->toString().c_str());
+	    //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, TLB::getAtom(he->handle)->toString().c_str());
 	    delete he;
 	} else {
 	    atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
@@ -263,48 +263,48 @@ void HopfieldServer::resetNodes()
     }
     delete nodes;
 
-    MAIN_LOGGER.log(Util::Logger::DEBUG,"Nodes Reset");
+    logger().debug("Nodes Reset");
 }
 
 void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 {
     static bool first=true;
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Begin");
+    logger().fine("---Imprint:Begin");
     // loop for number of imprinting cyles
     for (; cycles > 0; cycles--) {
         // for each encode pattern
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Encoding pattern");
+	logger().fine("---Imprint:Encoding pattern");
 	encodePattern(pattern,imprintStimUnit);
 	printStatus();
 	// then update with learning
 	
 	// ImportanceUpdating with links
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Running Importance update");
+	logger().fine("---Imprint:Running Importance update");
 	importUpdateAgent->run(this);
 	printStatus();
 	
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Adding random links");
+	logger().fine("---Imprint:Adding random links");
 	addRandomLinks();
 
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Hebbian learning");
+	logger().fine("---Imprint:Hebbian learning");
 	hebLearnAgent->run(this);
 
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Importance spreading");
+	logger().fine("---Imprint:Importance spreading");
 	spreadAgent->run(this);
 	
 	if (first) 
 	    first = false;
 	else
-	    MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Forgetting");
+	    logger().fine("---Imprint:Forgetting");
 	    forgetAgent->run(this);
 
 	printStatus();
 	
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:Resetting nodes");
+	logger().fine("---Imprint:Resetting nodes");
 	resetNodes();
     }
-    MAIN_LOGGER.log(Util::Logger::FINE,"---Imprint:End");
+    logger().fine("---Imprint:End");
 
 }
 
@@ -327,26 +327,26 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles)
     std::string logString;
     
     logString += "---Retrieve:Initialising " + to_string(numCycles) + " cycle pattern retrieval process.";
-    MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
+    logger().info(logString.c_str());
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"---Retrieve:Resetting nodes");
+    logger().fine("---Retrieve:Resetting nodes");
     resetNodes();
 
     while (numCycles > 0) {
-	MAIN_LOGGER.log(Util::Logger::FINE,"---Retrieve:Encoding pattern");
+	logger().fine("---Retrieve:Encoding pattern");
 	encodePattern(partialPattern,perceptStimUnit);
 	printStatus();
 	updateAtomTableForRetrieval(5);
 	printStatus();
 
 	numCycles--;
-	MAIN_LOGGER.log(Util::Logger::INFO, "---Retreive:Cycles left %d",numCycles);
+	logger().info("---Retreive:Cycles left %d",numCycles);
     }
     
     logString = "Cue pattern: \n" + patternToString(partialPattern); 
-    MAIN_LOGGER.log(Util::Logger::INFO, logString.c_str());
+    logger().info(logString.c_str());
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "---Retrieve:End");
+    logger().info("---Retrieve:End");
     
     return getGridSTIAsPattern().binarisePattern(options->vizThreshold);
 }
@@ -390,12 +390,12 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1)
     bool oldLinksFlag = importUpdateAgent->getUpdateLinksFlag();
     importUpdateAgent->setUpdateLinksFlag(false);
     
-    MAIN_LOGGER.log(Util::Logger::INFO,"---Retreive:Running Importance updating agent");
+    logger().info("---Retreive:Running Importance updating agent");
     importUpdateAgent->run(this);
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "---Retreive:Spreading Importance %d times", spreadCycles);
+    logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
     for (int i = 0; i< spreadCycles; i++) {
-	MAIN_LOGGER.log(Util::Logger::FINE, "---Retreive:Spreading Importance - cycle %d", i);
+	logger().fine("---Retreive:Spreading Importance - cycle %d", i);
 	spreadAgent->run(this);
     }
 

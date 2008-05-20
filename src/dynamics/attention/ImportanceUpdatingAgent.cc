@@ -65,7 +65,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new Util::Logger("ImportanceUpdatingAgent.log", Util::Logger::DEBUG,true));
+    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::DEBUG, true));
     log->disable();
 }
 
@@ -78,19 +78,19 @@ ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
 void ImportanceUpdatingAgent::init(CogServer *server)
 {
     /* Not sure exactly what initial estimates should be made... */
-    log->log(Util::Logger::FINE, "ImportanceUpdatingAgent::init");
+    log->fine("ImportanceUpdatingAgent::init");
     initialEstimateMade = true;
 
 }
 
-void ImportanceUpdatingAgent::setLogger(Util::Logger* log)
+void ImportanceUpdatingAgent::setLogger(Logger* log)
 {
     if (this->log) delete this->log;
     this->log = log;
-    log->log(Util::Logger::FINE, "Set new logger for ImportanceUpdatingMindAgent");
+    log->fine("Set new logger for ImportanceUpdatingMindAgent");
 }
 
-Util::Logger* ImportanceUpdatingAgent::getLogger()
+Logger* ImportanceUpdatingAgent::getLogger()
 {
     return log;
 }
@@ -111,7 +111,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     HandleEntry *h, *q;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
    
-    log->log(Util::Logger::FINE, "=========== ImportanceUpdating::run =======");
+    log->fine("=========== ImportanceUpdating::run =======");
     /* init iterative variables, that can't be calculated in
      * (no pointer to CogServer there) */
     if (!initialEstimateMade) init(server);
@@ -121,7 +121,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 
     /* Random stimulation if on */
     if (noiseOn) {
-	log->log(Util::Logger::DEBUG, "Random stimulation on, stimulating atoms");
+	log->debug("Random stimulation on, stimulating atoms");
 	randomStimulation(a);
     }
 
@@ -129,7 +129,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     updateTotalStimulus(a);
 
     /* Update atoms: Collect rent, pay wages */
-    log->log(Util::Logger::DEBUG, "Collecting rent and paying wages");
+    log->debug("Collecting rent and paying wages");
 
     h = getHandlesToUpdate(a);
 
@@ -152,13 +152,13 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 
     /* Update recentMaxSTI */
     a->getMaxSTI().update( maxSTISeen );
-    log->log(Util::Logger::DEBUG, "Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
+    log->debug("Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
     
     /* Check AtomSpace funds are within bounds */
     checkAtomSpaceFunds(a);
 
     if (lobeSTIOutOfBounds) {
-	log->log(Util::Logger::DEBUG, "Lobe STI was out of bounds, updating STI rent");
+	log->debug("Lobe STI was out of bounds, updating STI rent");
 	updateSTIRent(a);
     }
 
@@ -186,18 +186,18 @@ bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
 
 void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
-    log->log(Util::Logger::DEBUG, "Checking STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
+    log->debug("Checking STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
 	    acceptableLobeSTIRange[0], acceptableLobeSTIRange[1]);
     if (!inRange(a->getSTIFunds(),acceptableLobeSTIRange)) {
-	log->log(Util::Logger::DEBUG, "Lobe STI funds out of bounds, re-adjusting.");
+	log->debug("Lobe STI funds out of bounds, re-adjusting.");
 	lobeSTIOutOfBounds = true;
 	adjustSTIFunds(a);
     }
 
-    log->log(Util::Logger::DEBUG, "Checking LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
+    log->debug("Checking LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
 	    acceptableLobeLTIRange[0], acceptableLobeLTIRange[1]);
     if (!inRange(a->getLTIFunds(),acceptableLobeLTIRange)) {
-	log->log(Util::Logger::DEBUG, "Lobe LTI funds out of bounds, re-adjusting.");
+	log->debug("Lobe LTI funds out of bounds, re-adjusting.");
 	adjustLTIFunds(a);
     }
 }
@@ -236,7 +236,7 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 	q = q->next;
     }
 
-    log->log(Util::Logger::INFO, "Applied stimulation randomly to %d " \
+    log->info("Applied stimulation randomly to %d " \
 	    "atoms, expected about %d.", actualNum, expectedNum);
 
     delete h;
@@ -263,12 +263,12 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 	beforeTax = a->getSTI(q->handle);
 	afterTax = beforeTax - actualTax;
 	a->setSTI(q->handle, afterTax);
-	log->log(Util::Logger::FINE, "sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax, afterTax); 
+	log->fine("sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax, afterTax); 
 	q = q->next;
     }
     delete h;
 
-    log->log(Util::Logger::INFO, "AtomSpace STI Funds were %d, now %d. All atoms taxed %f.", \
+    log->info("AtomSpace STI Funds were %d, now %d. All atoms taxed %f.", \
 	    oldTotal, a->getSTIFunds(), taxAmount);
     
 }
@@ -295,7 +295,7 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     }
     delete h;
     
-    log->log(Util::Logger::INFO, "AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.", \
+    log->info("AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.", \
 	    oldTotal, a->getLTIFunds(), taxAmount);
 }
 
@@ -318,7 +318,7 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
 
     // No longer happens due to truncating mean above 
     //if (sum == 0.0f) {
-//	log->log(Util::Logger::WARNING, "Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
+//	log->warn("Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
 //	count = (int) mean;
 //    } else {
     while (p > sum) {
@@ -362,7 +362,7 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 	focusSize = attentionalFocusSize.recent;
     }
 
-    log->log(Util::Logger::FINE, "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
+    log->fine("STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
 
     lobeSTIOutOfBounds = false; 
 }
@@ -379,7 +379,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
     attentionalFocusSize.update(inFocus->getSize());
   
-    log->log(Util::Logger::FINE, "attentionalFocusSize = %d, recent = %f",
+    log->fine("attentionalFocusSize = %d, recent = %f",
 	    attentionalFocusSize.val, attentionalFocusSize.recent);
 
     h = inFocus;
@@ -390,7 +390,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     }
     attentionalFocusNodesSize.update(n);
 
-    log->log(Util::Logger::FINE, "attentionalFocusNodesSize = %d, recent = %f",
+    log->fine("attentionalFocusNodesSize = %d, recent = %f",
 	    attentionalFocusNodesSize.val, attentionalFocusNodesSize.recent);
 
     delete inFocus;
@@ -414,7 +414,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
     exchangeAmount = - stiRentCharged + (STIAtomWage * s);
     a->setSTI(h, current + exchangeAmount);
 
-    log->log(Util::Logger::FINE, "Atom %s stim = %d, STI old = %d, new = %d", a->getName(h).c_str(), s, current, a->getSTI(h));
+    log->fine("Atom %s stim = %d, STI old = %d, new = %d", a->getName(h).c_str(), s, current, a->getSTI(h));
 
 }
 
@@ -427,7 +427,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, Handle h)
     exchangeAmount = - LTIAtomRent + (LTIAtomWage * a->getAtomStimulus(h));
     a->setLTI(h, current + exchangeAmount);
 
-    log->log(Util::Logger::FINE, "Atom %s LTI old = %d, new = %d", a->getName(h).c_str(), current, a->getLTI(h));
+    log->fine("Atom %s LTI old = %d, new = %d", a->getName(h).c_str(), current, a->getLTI(h));
 }
 
 bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
@@ -438,12 +438,12 @@ bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
     if (current > STICap) {
 	diff = current - STICap;
 	a->setSTI(h, STICap);
-	log->log(Util::Logger::FINE, "Atom STI too high - old = %d, new = %d", current, a->getSTI(h));
+	log->fine("Atom STI too high - old = %d, new = %d", current, a->getSTI(h));
 	return true;
     } else if (current < -STICap) {
 	diff = -STICap + current;
 	a->setSTI(h, -STICap);
-	log->log(Util::Logger::FINE, "Atom STI too low - old = %d, new = %d", current, a->getSTI(h));
+	log->fine("Atom STI too low - old = %d, new = %d", current, a->getSTI(h));
 	return true;
     }
     return false;
@@ -457,12 +457,12 @@ bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a, Handle h)
     if (current > LTICap) {
 	diff = current - LTICap;
 	a->setLTI(h, LTICap);
-	log->log(Util::Logger::FINE, "Atom LTI too high - old = %d, new = %d", current, a->getSTI(h));
+	log->fine("Atom LTI too high - old = %d, new = %d", current, a->getSTI(h));
 	return true;
     } else if (current < -LTICap) {
 	diff = -LTICap + current;
 	a->setLTI(h, -LTICap);
-	log->log(Util::Logger::FINE, "Atom LTI too low - old = %d, new = %d", current, a->getSTI(h));
+	log->fine("Atom LTI too low - old = %d, new = %d", current, a->getSTI(h));
 	return true;
     }
     return false;

@@ -20,6 +20,7 @@
 #define DEFAULT_MAX_TRAIL_SIZE 1000
 
 using namespace std;
+using namespace opencog;
 
 void Trail::init(int initialSize, int max) throw (InvalidParamException, std::bad_exception) {
     if (max < initialSize) {
@@ -118,16 +119,16 @@ void Trail::append(Trail* t) {
 void Trail::print() {
 
 	if (trail == NULL) {
-    	MAIN_LOGGER.log(Util::Logger::DEBUG, "trailSize %d\n", 0);
+    	logger().debug("trailSize %d\n", 0);
 
 	} else {
-    	MAIN_LOGGER.log(Util::Logger::DEBUG, "trailSize %d\n", (int)trail->size());
+    	logger().debug("trailSize %d\n", (int)trail->size());
 	    for(int i = 0; i < (int)trail->size(); i++) {
-			MAIN_LOGGER.log(Util::Logger::INFO, "%d. %s\n", i, ((Link*)((*trail)[i]))->toShortString().c_str());
+			logger().info("%d. %s\n", i, ((Link*)((*trail)[i]))->toShortString().c_str());
 	    }
 	}
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "endOfTrail\n\n");
+    logger().info("endOfTrail\n\n");
 }
 
 

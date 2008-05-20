@@ -52,7 +52,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
     float tc, old_tc, new_tc;
     float tcDecayRate = 0.1;
 
-    MAIN_LOGGER.log(Util::Logger::DEBUG,"------- Hebbian Learning update "
+    logger().debug("------- Hebbian Learning update "
 	    "(convert links = %d)",convertLinks);
 
     // get links again to include the new ones
@@ -84,7 +84,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 		if (tc < 0) {
 		    // Inverse link no longer representative
 		    // change to symmetric hebbian link
-		    MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
+		    logger().fine("HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
 		    a->removeAtom(h);
 		    h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
 		} else {
@@ -95,7 +95,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 		if (tc < 0) {
 		    // link no longer representative
 		    // change to inverse hebbian link
-		    MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
+		    logger().fine("HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
 		    a->removeAtom(h);
 		    outgoing = moveSourceToFront(outgoing);
 		    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
@@ -110,7 +110,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 	    if (tc < 0.0f) tc = 0.0f;
 	    a->setMean(h,tc);
 	}
-	MAIN_LOGGER.log(Util::Logger::FINE,"HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
+	logger().fine("HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 	
     }
     // if not enough links, try and create some more either randomly
@@ -141,7 +141,7 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     if (foundTheSource) {
 	outgoing.insert(outgoing.begin(),theSource);
     } else {
-	MAIN_LOGGER.log(Util::Logger::ERROR,"Can't find source atom for new Asymmetric Hebbian Link");
+	logger().error("Can't find source atom for new Asymmetric Hebbian Link");
     }
     return outgoing;
 
@@ -192,7 +192,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 
     }
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"TC: normstis [%.3f,%.3f]", normsti_v[0],normsti_v[1]);
+    logger().fine("TC: normstis [%.3f,%.3f]", normsti_v[0],normsti_v[1]);
     if (!inAttention) return 0.0f;
     
     
@@ -200,7 +200,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
 
-    MAIN_LOGGER.log(Util::Logger::FINE,"TC: tc=%.3f", tc);
+    logger().fine("TC: tc=%.3f", tc);
 
     return tc;
 	

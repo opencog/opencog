@@ -5,9 +5,9 @@
 
 // Minimal rate (number of entries / pending updates) so that an index table must be re-built
 #define PENDING_UPDATE_RATE_THRESHOLD 8
-
 #define INITIAL_INDEX_TABLE_SIZE 1
 
+using namespace opencog;
 
 TemporalTable::TemporalTable()
 {
@@ -52,7 +52,7 @@ TemporalTable::~TemporalTable()
 
 void TemporalTable::add(Handle h, const Temporal& t) throw (RuntimeException){
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::add - init.");
+//    logger().debug("TemporalTable::add - init.");
 
     //printf("TemporalTable::add(%p, %s)\n", h, t.toString().c_str());
     Temporal* internal_t = temporalMap->getKey(t);
@@ -107,13 +107,13 @@ void TemporalTable::add(Handle h, const Temporal& t) throw (RuntimeException){
         }
     }
     //cprintf(DEBUG, "Affer adding => sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::add - end.");
+//    logger().debug("TemporalTable::add - end.");
 
 }
 
 HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, TemporalRelationship criterion) {
     //printf("get(h, t = %s, criterion = %s\n", t.toString().c_str(), getTemporalRelationshipStr(criterion));
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::getHandle - init.");
+//    logger().debug("TemporalTable::getHandle - init.");
 
     if (!CoreUtils::compare(h, UNDEFINED_HANDLE)) {
         return get(t, criterion);
@@ -154,7 +154,7 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
         te = te->next;
     }
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::getHandle - end.");
+//    logger().debug("TemporalTable::getHandle - end.");
     //printf("Returning!\n");
     return result;
 }
@@ -162,7 +162,7 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
 HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelationship criterion) throw (RuntimeException) {
     //cprintf(NORMAL, "TemporalTable::get(%s, %d)\n", t.toString().c_str(), criterion);
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::getTemporal - init.");
+//    logger().debug("TemporalTable::getTemporal - init.");
     HandleTemporalPairEntry* result = NULL;
     if (t == UNDEFINED_TEMPORAL) {
         // get all entries
@@ -341,7 +341,7 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
         }
     }
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::getTemporal - end.");
+//    logger().debug("TemporalTable::getTemporal - end.");
 
     //cprintf(NORMAL, "TemporalTable::get() returning...\n");fflush(stdout);
     return result;
@@ -349,7 +349,7 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
 
 bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship criterion) {
 //printf("TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship criterion)\n");
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::removeHandle - init.");
+//    logger().debug("TemporalTable::removeHandle - init.");
 
     if (!CoreUtils::compare(h, UNDEFINED_HANDLE)) {
         return remove(t, criterion);
@@ -441,14 +441,14 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
         delete *it;
     }
     
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::rwmoveHandle - emd.");
+//    logger().debug("TemporalTable::rwmoveHandle - emd.");
     
     return result;
 }
 
 bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion) {
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::removeTemporal - init.");
+//    logger().debug("TemporalTable::removeTemporal - init.");
 
     bool result = false;
     //printf("TemporalTable::remove(%s, %d)\n", t.toString().c_str(), criterion);
@@ -566,14 +566,14 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion) {
             }
         } // switch (criterion)
     }
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::removeTemporal - end.");
+//    logger().debug("TemporalTable::removeTemporal - end.");
     
     return result;
 }
 
 void TemporalTable::removeFromSortedEntries(const Temporal& t) {
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::removeFrom - init.");
+//    logger().debug("TemporalTable::removeFrom - init.");
     //printf("TemporalTable::removeFromSortedEntries(%s)\n", t.toString().c_str());
     // First check if corresponding te is in the index table
     int pos = getTemporalIndexTablePos(t);
@@ -649,12 +649,12 @@ void TemporalTable::removeFromSortedEntries(const Temporal& t) {
         }
         delete currentTe;
     }
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::removeFrom - end.");
+//    logger().debug("TemporalTable::removeFrom - end.");
 }
 
 int TemporalTable::replaceIndexTablePosition(int pos, TemporalEntry* newEntry) {
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::replaceIndex - init.");
+//    logger().debug("TemporalTable::replaceIndex - init.");
 
     TemporalEntry* oldEntry = temporalIndexTable[pos];
     temporalIndexTable[pos] = newEntry;
@@ -670,13 +670,13 @@ int TemporalTable::replaceIndexTablePosition(int pos, TemporalEntry* newEntry) {
         temporalIndexTable[bPos] = newEntry;
         bPos--;
     }
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::replaceIndex - end.");
+//    logger().debug("TemporalTable::replaceIndex - end.");
     return bPos;
 }
  
 void TemporalTable::addToMaps(Handle h, Temporal* t) {
     // Add to handleMap
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::addToMaps - init");
+//    logger().debug("TemporalTable::addToMaps - init");
 
     TemporalEntry* timeEntry;
     if (handleMap->contains(h)) {
@@ -689,14 +689,14 @@ void TemporalTable::addToMaps(Handle h, Temporal* t) {
     if (tailHandleMap->contains(h)) {
         tailTimeEntry = tailHandleMap->remove(h);
         if (TemporalEntry::compare(t,tailTimeEntry->time) > 0) {
-//		    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::addToMaps - using tail");
+//		    logger().debug("TemporalTable::addToMaps - using tail");
 		    TemporalEntry::add(tailTimeEntry, t);
 		    tailTimeEntry = tailTimeEntry->last();
         } else {
 		    timeEntry = TemporalEntry::add(timeEntry, t);
         }
     } else {
-//	    MAIN_LOGGER.log(Util::Logger::FINE, "TemporalTable - addToMaps: set tail");
+//	    logger().fine("TemporalTable - addToMaps: set tail");
 	    timeEntry = TemporalEntry::add(timeEntry, t);
 	    tailTimeEntry = timeEntry->last();
     }
@@ -715,13 +715,13 @@ void TemporalTable::addToMaps(Handle h, Temporal* t) {
     handleSet->add(h);
     temporalMap->add(t, handleSet);
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::addToMaps - end");
+//    logger().debug("TemporalTable::addToMaps - end");
 
 }
 
 void TemporalTable::updateIndexTable(int numEntries) {
 
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::updateIndex - init.");
+//    logger().debug("TemporalTable::updateIndex - init.");
     //cprintf(NORMAL, "TemporalTable::updateIndexTable(%d)\n", numEntries);
     if ((numEntries > indexTableSize) || (numEntries < indexTableSize/4)) {
         // needs to allocate more memory or free unecessary memory
@@ -739,15 +739,15 @@ void TemporalTable::updateIndexTable(int numEntries) {
     indexTableCount = i;
     //printf("indexTableCount = i => %d\n", indexTableCount);
     if (i != numEntries) {
-        MAIN_LOGGER.log(Util::Logger::WARNING, "WARNING: Inconsistent sizes (sortedTemporalList => %d, numEntries => %d)\n", i, numEntries);
+        logger().warn("WARNING: Inconsistent sizes (sortedTemporalList => %d, numEntries => %d)\n", i, numEntries);
     }
     pendingUpdateCount = 0;
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::updateIndex - end.");
+//    logger().debug("TemporalTable::updateIndex - end.");
 }
 
 
 int TemporalTable::getTemporalIndexTablePos(const Temporal& t) {
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::updateIndexPs - init.");
+//    logger().debug("TemporalTable::updateIndexPs - init.");
 
     // Look up at index table, using binary search
     int low = 0;
@@ -766,12 +766,12 @@ int TemporalTable::getTemporalIndexTablePos(const Temporal& t) {
         }
     } while (low <= up);
     //cprintf(NORMAL, "getTemporalIndexTablePos(): key not found!\n");
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::updateIndexPs - end.");
+//    logger().debug("TemporalTable::updateIndexPs - end.");
     return up;
 }
 
 TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t) {
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::getPrevious - init.");
+//    logger().debug("TemporalTable::getPrevious - init.");
 
     int pos = getTemporalIndexTablePos(t);
     //cprintf(NORMAL, "Got pos = %d for Temporal %s\n", pos, t.toString().c_str());
@@ -779,7 +779,7 @@ TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t) {
         // key found. Get previous pos
         pos--;
     }
-//    MAIN_LOGGER.log(Util::Logger::DEBUG, "TemporalTable::getPrevious - end.");
+//    logger().debug("TemporalTable::getPrevious - end.");
     if (pos < 0) {
         return NULL;
     } else {

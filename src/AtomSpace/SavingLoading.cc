@@ -29,6 +29,8 @@
 #include "Logger.h"
 #include "HandleMap.cc"
 
+using namespace opencog;
+
 //#include "../agents/DynamicsStatisticsAgent.h"
 //#include "TreePredicateEvaluator.h"
 //#include "NMPrinter.h"
@@ -36,7 +38,6 @@
 #define FULL_NETWORK_DUMP          (1 << 0)
 #define ATOM_SET                   (1 << 1)
 #define PHYSICAL_ADDRESSING        (1 << 2)
-
 
 #define INDEX_REPORT_FACTOR             1.02
 #define POST_PROCESSING_REPORT_FACTOR   1.10
@@ -49,7 +50,7 @@ SavingLoading::SavingLoading() {
 
 void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOException){
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "Starting Memory dump");
+    logger().info("Starting Memory dump");
     
     time_t start = time(NULL);
 
@@ -90,14 +91,13 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     
     // calculates the total time that the process of saving has spent
     time_t duration = time(NULL) - start;
-    MAIN_LOGGER.log(Util::Logger::INFO, 
-                    "Memory dump: 100%% done (in %d second%c).", 
-                    (int) duration, duration == 1 ? '\0' : 's');
+    logger().info("Memory dump: 100%% done (in %d second%c).", 
+                (int) duration, duration == 1 ? '\0' : 's');
     fflush(stdout);
 }
 
 void SavingLoading::saveClassServerInfo(FILE *f) {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::saveClassServerInfo");
+    logger().fine("SavingLoading::saveClassServerInfo");
     int numTypes = ClassServer::getNumberOfClasses();
     
     fwrite(&numTypes, sizeof(int), 1, f);
@@ -111,7 +111,7 @@ void SavingLoading::saveClassServerInfo(FILE *f) {
 }
 
 void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount) {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::saveNodes");
+    logger().fine("SavingLoading::saveNodes");
 
     int numNodes = 0;
     
@@ -154,7 +154,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount) {
 }
 
 void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount) {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::saveLinks");
+    logger().fine("SavingLoading::saveLinks");
 
     int numLinks = 0;
     // gets the position of the pointer on the file for future reference
@@ -194,7 +194,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount) {
 
 
 void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable) {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::saveIndices");
+    logger().fine("SavingLoading::saveIndices");
 
     int numTypes = ClassServer::getNumberOfClasses();
     
@@ -249,7 +249,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
 
     clearRepositories();
 
-    MAIN_LOGGER.log(Util::Logger::INFO, "Starting Memory load");
+    logger().fine("Starting Memory load");
     
     if (StatisticsMonitor::getInstance()->getAtomCount() > 0) {
         throw RuntimeException(TRACE_INFO, 
@@ -296,7 +296,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     loadLinks(f, handles, atomTable);
     loadIndices(f, atomTable, handles, dumpToCore);
 
-    //MAIN_LOGGER.log(Util::Logger::INFO, "nodes, links and indices loaded. number of handles = %d", handles->getCount());
+    // logger().info("nodes, links and indices loaded. number of handles = %d", handles->getCount());
     // update types in all atoms 
     HandleMapIterator<Atom *> *it = handles->keys();
     while (it->hasNext()){
@@ -327,14 +327,13 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
 
     // calculates the total time that the process of loading has spent
     time_t duration = time(NULL) - start;
-    MAIN_LOGGER.log(Util::Logger::INFO, 
-                "Memory load: 100%% done (in %d second%c).", 
+    logger().info("Memory load: 100%% done (in %d second%c).", 
                 (int) duration, duration == 1 ? '\0' : 's');
     fflush(stdout);
 }
 
 void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore){
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadClassServerInfo");
+    logger().fine("SavingLoading::loadClassServerInfo");
     char buffer[1 << 16];
     int numTypes = ClassServer::getNumberOfClasses();
 
@@ -352,7 +351,7 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore){
         
         if (!ClassServer::isDefined(buffer)){
             dumpToCore[typeDump] = numTypes + 1;
-            MAIN_LOGGER.log(Util::Logger::WARNING,"Warning: type inconsistence found (%d-%s)",typeDump,buffer);
+            logger().warn("Warning: type inconsistence found (%d-%s)",typeDump,buffer);
         }else{
             dumpToCore[typeDump] = ClassServer::getType(buffer);
         }
@@ -362,7 +361,7 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore){
 
 void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadNodes");
+    logger().fine("SavingLoading::loadNodes");
 
     int numNodes;
     // reads the total number of nodes
@@ -383,7 +382,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
 void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadLinks");
+    logger().fine("SavingLoading::loadLinks");
     
     int numLinks;
     // reads the total number of links
@@ -406,7 +405,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
                                 HandleMap<Atom *>* handles,
                                 const std::vector<Type>& dumpToCore)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadIndices");
+    logger().fine("SavingLoading::loadIndices");
     int numTypes = ClassServer::getNumberOfClasses();
     
     Handle* typeIndexCache = (Handle*) malloc(sizeof(Handle)*dumpToCore.size());
@@ -421,7 +420,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     for (unsigned int i = 0; i < dumpToCore.size(); i++) {
         fread(&(typeIndexCache[i]), sizeof(Handle), 1, f);
     }
-    //MAIN_LOGGER.log(Util::Logger::DEBUG, "Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
+    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
     for (unsigned int i = 0; i < dumpToCore.size(); i++) {
@@ -437,7 +436,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
         CoreUtils::updateHandle(&(atomTable.typeIndex[i]), handles);
         CoreUtils::updateHandle(&(atomTable.targetTypeIndex[i]), handles);
     }
-    //MAIN_LOGGER.log(Util::Logger::DEBUG, "Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
+    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
     
@@ -447,7 +446,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     for (int i = 0; i < NAME_INDEX_SIZE; i++) {
         CoreUtils::updateHandle(&(atomTable.nameIndex[i]), handles);
     }
-    //MAIN_LOGGER.log(Util::Logger::DEBUG, "Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
+    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
     
@@ -457,7 +456,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
         CoreUtils::updateHandle(&(atomTable.importanceIndex[i]), handles);
     }
-    //MAIN_LOGGER.log(Util::Logger::DEBUG, "Memory load: %d%% done.\r", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
+    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
     
@@ -484,17 +483,17 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
 
 void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: atom = %p, type = %d", atom, atom->getType());
+    logger().fine("SavingLoading::updateHandles: atom = %p, type = %d", atom, atom->getType());
 
     // if atom uses a CompositeTruthValue, updates the version handles inside it
     if (atom->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE) {
-        //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: CTV");
+        //logger().fine("SavingLoading::updateHandles: CTV");
         CompositeTruthValue ctv((const CompositeTruthValue&) atom->getTruthValue());
         ctv.updateVersionHandles(handles);
         atom->setTruthValue(ctv);
     }
     
-    //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: incoming set");
+    //logger().fine("SavingLoading::updateHandles: incoming set");
     // updates the handles for the atom's incoming set
     for (HandleEntry *p = atom->incoming; p != NULL; p = p->next) {
         CoreUtils::updateHandle(&p->handle, handles);
@@ -502,7 +501,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 
     Link *link = dynamic_cast<Link *>(atom);
     if (link && (link->getArity() > 0)) {
-        //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: outgoing set");
+        //logger().fine("SavingLoading::updateHandles: outgoing set");
         AtomTable& atomTable = *(atom->getAtomTable());
         
         // BUG FIX: Links should be updated in AtomSet because it still uses old handles in its outgoing 
@@ -525,18 +524,18 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 //        printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
     }
 
-    //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: indices");
+    //logger().fine("SavingLoading::updateHandles: indices");
     // updates the handles for indices
     for (int i = 0; i < NUMBER_OF_INDICES; i++) {
         CoreUtils::updateHandle(&(atom->indices[i]), handles);
     }
-    //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: targetTypeIndices");
+    //logger().fine("SavingLoading::updateHandles: targetTypeIndices");
     int targetTypeSize = atom->getTargetTypeIndexSize();
     for (int i = 0; i < targetTypeSize; i++) {
         CoreUtils::updateHandle(&(atom->targetTypeIndex[i]), handles);
     }
     if (atom->predicateIndexInfo) {
-        //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: predicateIndices");
+        //logger().fine("SavingLoading::updateHandles: predicateIndices");
         int size = bitcount(atom->predicateIndexInfo->predicateIndexMask);
         for (int i = 0; i < size; i++) {
             CoreUtils::updateHandle(&(atom->predicateIndexInfo->predicateIndex[i]), handles);
@@ -547,7 +546,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     if (ClassServer::isAssignableFrom(LINK, atom->type)) {
         Trail *t = ((Link *)atom)->getTrail();
         if (t->getSize()){
-            //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::updateHandles: trails");
+            //logger().fine("SavingLoading::updateHandles: trails");
             Trail *newTrail = new Trail();
             for (int i = 0; i < t->getSize(); i++){
                 Handle handle = t->getElement(i);
@@ -562,7 +561,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 }
 
 void SavingLoading::writeAtom(FILE *f, Atom *atom) {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::writeAtom: %p (type = %d)", atom, atom->getType());
+    logger().fine("SavingLoading::writeAtom: %p (type = %d)", atom, atom->getType());
 
     // writes the atom type
     fwrite(&atom->type, sizeof(Type), 1, f);
@@ -618,7 +617,7 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom) {
 
 void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readAtom()");
+    logger().fine("SavingLoading::readAtom()");
 
     // reads the atom type
     //atom->type
@@ -637,9 +636,9 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
 
     if (handles != NULL) {
         handles->add(atomHandle, atom);
-        MAIN_LOGGER.log(Util::Logger::FINE, "Added handles in map: %p => %p (type = %d)", atomHandle, atom, atom->getType());
+        logger().fine("Added handles in map: %p => %p (type = %d)", atomHandle, atom, atom->getType());
     } else {
-        MAIN_LOGGER.log(Util::Logger::WARNING, "No HandleMap while reading atom from file: %p (type = %d)", atom, atom->getType());
+        logger().warn("No HandleMap while reading atom from file: %p (type = %d)", atom, atom->getType());
     }
 
     // reads the incoming set of the atom, including the number of incoming
@@ -698,7 +697,7 @@ void SavingLoading::writeNode(FILE *f, Node *node) {
 
 Node* SavingLoading::readNode(FILE *f, HandleMap<Atom *> *handles)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readNode()");
+    logger().fine("SavingLoading::readNode()");
     // a new node is created
     Node *node = new Node(NODE, "");
 
@@ -721,7 +720,7 @@ Node* SavingLoading::readNode(FILE *f, HandleMap<Atom *> *handles)
 
 void SavingLoading::writeLink(FILE *f, Link *link)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "writeLink(): %s", link->toString().c_str());
+    logger().fine("writeLink(): %s", link->toString().c_str());
 
     //link->getTrail()->print();
 
@@ -733,7 +732,7 @@ void SavingLoading::writeLink(FILE *f, Link *link)
 
     // the link's outgoing set is written on the file
     for (int i = 0; i < arity; i++) {
-        //MAIN_LOGGER.log(Util::Logger::FINE, "writeLink(): outgoing[%d] => %p: %s", i, link->outgoing[i], link->outgoing[i]->toString().c_str());
+        //logger().fine("writeLink(): outgoing[%d] => %p: %s", i, link->outgoing[i], link->outgoing[i]->toString().c_str());
         fwrite(&(link->outgoing[i]), sizeof(Handle), 1, f);
     }
 
@@ -789,18 +788,18 @@ AttentionValue *SavingLoading::readAttentionValue(FILE *f) {
 
 TruthValue *SavingLoading::readTruthValue(FILE *f)
 {
-    //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readTruthValue()");
+    //logger().fine("SavingLoading::readTruthValue()");
     TruthValueType type;
     int length;
     
     fread(&type, sizeof(TruthValueType), 1, f);
     fread(&length, sizeof(int), 1, f);
-    //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readTruthValue() type = %d, length =  %d", type, length);
+    //logger().fine("SavingLoading::readTruthValue() type = %d, length =  %d", type, length);
     char tvStr[length+1];
     fread(tvStr, sizeof(char), length, f);
     tvStr[length] = '\0';
 
-    //MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
+    //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     TruthValue* result = TruthValue::factory(type, tvStr);
     return result;
 }
@@ -861,7 +860,7 @@ void SavingLoading::printProgress(const char *s, int n)
     
     if (old != n) {
         old = n;
-        MAIN_LOGGER.log(Util::Logger::DEBUG, "Memory %s: %d%% done.\r", s, n);
+        logger().debug("Memory %s: %d%% done.\r", s, n);
     }
 }
 
@@ -878,7 +877,7 @@ void SavingLoading::addSavableRepository(SavableRepository *repository) throw (R
 }
 
 void SavingLoading::saveRepositories(FILE *f){
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::saveRepositories");
+    logger().fine("SavingLoading::saveRepositories");
     unsigned int size = repositories.size();
     fwrite(&size, sizeof(unsigned int), 1, f);
     
@@ -888,7 +887,7 @@ void SavingLoading::saveRepositories(FILE *f){
         fwrite(&idSize, sizeof(int), 1, f);
         fwrite(repId, sizeof(char), idSize, f);
 
-        MAIN_LOGGER.log(Util::Logger::DEBUG,"Saving repository: %s", repId);
+        logger().debug("Saving repository: %s", repId);
         SavableRepository* rep = it->second; 
         rep->saveRepository(f);
 
@@ -897,12 +896,12 @@ void SavingLoading::saveRepositories(FILE *f){
 
 void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (RuntimeException)
 {
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::loadRepositories");
+    logger().fine("SavingLoading::loadRepositories");
     unsigned int size;
     fread(&size, sizeof(unsigned int), 1, f);
     
     if (size != repositories.size()) {
-        MAIN_LOGGER.log(Util::Logger::WARNING,"Number of repositories in dump file (%d) is different from number of registered repositories (%d)", size, repositories.size());        
+        logger().warn("Number of repositories in dump file (%d) is different from number of registered repositories (%d)", size, repositories.size());        
         return;
     }
     
@@ -914,7 +913,7 @@ void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (Ru
         
         fread(id.get(), sizeof(char), idSize, f);
         
-        MAIN_LOGGER.log(Util::Logger::DEBUG,"Loading repository: %s\n", id.get());
+        logger().debug("Loading repository: %s\n", id.get());
 
         RepositoryHash::const_iterator it = repositories.find((const char *)id.get());
 
@@ -930,7 +929,7 @@ void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (Ru
 }
 
 void SavingLoading::clearRepositories(){
-    MAIN_LOGGER.log(Util::Logger::FINE, "SavingLoading::clearRepositories");
+    logger().fine("SavingLoading::clearRepositories");
     for (RepositoryHash::const_iterator it = repositories.begin();
          it != repositories.end(); it++){
         

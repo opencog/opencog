@@ -22,7 +22,6 @@ using std::string;
 using std::cerr;
 using std::cout;
 using std::endl;
-using namespace Util;
 using namespace opencog;
 
 const char* AtomSpace::SPACE_MAP_NODE_NAME = "SpaceMap";
@@ -91,14 +90,14 @@ Handle AtomSpace::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
 }
 
 Handle AtomSpace::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv) {
-//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp init");
+//    logger().debug("AtomSpace::addTimeInfo - temp init");
     Handle timeNode = addNode(TIME_NODE, timeNodeName.c_str());
-//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp 1");
+//    logger().debug("AtomSpace::addTimeInfo - temp 1");
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
     atTimeLinkOutgoing.push_back(h);
     Handle atTimeLink = addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv);
-//    MAIN_LOGGER.log(Logger::DEBUG, "AtomSpace::addTimeInfo - temp end");
+//    logger().debug("AtomSpace::addTimeInfo - temp end");
     return atTimeLink;
 }
 
@@ -158,17 +157,17 @@ Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const
         if (!atTimeLinks.empty()) {
             result = atTimeLinks[0];
             if (atTimeLinks.size() > 1) {
-                MAIN_LOGGER.log(Util::Logger::WARNING,
+                logger().warn(
                     "AtomSpace::getAtTimeLink: More than 1 AtTimeLink(TimeNode, TimedAtom) found for HandleTemporalPair = %s \n",
                     htp.toString().c_str());
             }
         //} else {
-        //    MAIN_LOGGER.log(Util::Logger::DEBUG,
+        //    logger().debug(
         //        "AtomSpace::getAtTimeLink: No corresponding AtTimeLink(TimeNode, TimedAtom) found for HandleTemporalPair = %s \n",
         //        htp.toString().c_str());
         }
     //} else {
-    //    MAIN_LOGGER.log(Util::Logger::DEBUG, "AtomSpace::getAtTimeLink: No TimeNode found for Temporal = %s (timeNodeName = %s)\n", t.toString().c_str(), t.getTimeNodeName().c_str());
+    //    logger().debug("AtomSpace::getAtTimeLink: No TimeNode found for Temporal = %s (timeNodeName = %s)\n", t.toString().c_str(), t.getTimeNodeName().c_str());
     }
     return result;
 }
@@ -471,12 +470,12 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing, const TruthValue& t
                     Handle h = TLB::getHandle(l->getOutgoingAtom(1));
                     timeServer.add(h, t);
                 } else {
-                    MAIN_LOGGER.log(Util::Logger::WARNING,
+                    logger().warn(
                         "AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n",
                         ClassServer::getTypeName(timeAtom->getType()));
                 }
             } else {
-                MAIN_LOGGER.log(Util::Logger::WARNING,
+                logger().warn(
                     "AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n",
                     l->getArity());
             }
@@ -861,7 +860,7 @@ stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
 
     // update record of total stimulus given out
     totalStimulus += amount;
-    //MAIN_LOGGER.log(Util::Logger::FINE, "%d added to totalStimulus, now %d", amount, totalStimulus);
+    //logger().fine("%d added to totalStimulus, now %d", amount, totalStimulus);
     return totalStimulus;
 }
 

@@ -1,78 +1,57 @@
 /**
  * Logger.cc
  *
- * $Header$
- *
  * Author: Andre Senna
  * Creation: Thu Jul  5 20:56:04 BRT 2007
  */
 
-#include <stdarg.h>
 #include "Logger.h"
+
+#include <stdarg.h>
 #include <time.h>
+#include <sys/time.h>
 
-using namespace Util;
-
-Logger* Logger::mainLogger = NULL;
+using namespace opencog;
 
 // messages greater than this will be truncated
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
-
-void Logger::initMainLogger(Logger* specificLogger) {
-    if (mainLogger) {
-        delete mainLogger;
-    }
-    mainLogger = specificLogger;
-}
-
-void Logger::releaseMainLogger() {
-    if (mainLogger) {
-        delete mainLogger;
-        mainLogger = NULL;
-    }
-}
-
-Logger& Logger::getMainLogger() {
-
-    if (!mainLogger) {
-        mainLogger = new Logger();
-    }
-    return *mainLogger; 
-}
+const char* levelStrings[] = {"ERROR","WARN","INFO","DEBUG","FINE",""};
 
 Logger::~Logger() {
-	if (f != NULL)
-        fclose(f);
+	if (f != NULL) fclose(f);
 }
 
-Logger::Logger(const std::string &fileName, int level, bool timestampEnabled) {
-
+Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampEnabled) {
     this->fileName.assign(fileName);
     this->currentLevel = level;
     this->timestampEnabled = timestampEnabled;
     this->printToStdout = false;
 
-		pthread_mutex_init(&lock, NULL);
+    this->logEnabled = true;
+    this->f = NULL;
 
-	    f = fopen(fileName.c_str(), "a");
-	    if (f == NULL) {
-	        disable();
-	    } else {
-	//        fclose(f);
-	        enable();
-	    }
-
+    pthread_mutex_init(&lock, NULL);
 }
 
 // ***********************************************/
 // API
 
-void Logger::setLevel(int newLevel) {
+void Logger::setLevel(Logger::Level newLevel) {
     currentLevel = newLevel;
 }
 
-int Logger::getLevel() const {
+Logger::Level Logger::getLevel() const {
     return currentLevel;
+}
+
+void Logger::setFilename(const std::string& s) {
+    fileName.assign(s);
+    f = NULL;
+    enable();
+}
+
+const std::string& Logger::getFilename() {
+    return fileName;
 }
 
 void Logger::setTimestampFlag(bool flag) {
@@ -91,98 +70,76 @@ void Logger::disable() {
     logEnabled = false;
 }
 
-void Logger::log(int level, const std::string &txt) {
+void Logger::log(Logger::Level level, const std::string &txt) {
+    if (!logEnabled) return; 
+    // delay opening the file until the first logging statement is issued;
+    // this allows us to set the main logger's filename without creating
+    // a useless log file with the default filename
+    if (f == NULL) {
+        if ((f = fopen(fileName.c_str(), "a")) == NULL) {
+            fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n", fileName.c_str());
+            disable();
+            return;
+        } else enable();
+    }
 
+    if (level <= currentLevel) {
+        pthread_mutex_lock(&lock);
+        if (timestampEnabled) {
+            char timestamp[64];
+            struct timeval stv;
+            struct tm stm;
 
-
-    if (logEnabled) {
-        if (level <= currentLevel) {
-            pthread_mutex_lock(&lock);
-            
-//            FILE *f = fopen(fileName.c_str(), "a");
-            if (f == NULL) {
-           		f = fopen(fileName.c_str(), "a");
-            }
-            if (timestampEnabled) {
-                char timestamp[64]; //= (char *) malloc(64 * sizeof(char));
-                time_t t = time(NULL);
-				
-				struct timespec ts;
-                int mSecs = 0;
-				if (0 == clock_gettime(CLOCK_REALTIME, &ts))
-                	mSecs = ts.tv_nsec / 1000;
-
-                //timestamp = 
-                ctime_r(&t, (char *) timestamp);
-//cut year
-				timestamp[19] = '\0';
-//                    if (timestamp[strlen(timestamp) - 1] == '\n') {
-//                        timestamp[strlen(timestamp) - 1] = '\0';
-//                    }
-                int ret = fprintf(f, "%s.%06d: ", timestamp, mSecs);
-          		if (ret < 0) {
-          			if (f != NULL)
-						fclose(f);
-					f = fopen(fileName.c_str(), "a");
-                    ret = fprintf(f, "%s.%06d: ", timestamp, mSecs);
-              	}
-  
-                    if (printToStdout) fprintf(stdout, "%s: ", timestamp);
-//                    free(timestamp);
-            }
-            switch(level){
-                case ERROR:
-                    fprintf(f, "ERROR - %s\n", txt.c_str());
-                    if (printToStdout) fprintf(stdout, "ERROR - %s\n", txt.c_str());
-                    fflush(f);
-                    break;
-
-                case WARNING:
-                    fprintf(f, "WARNING - %s\n", txt.c_str());
-                    if (printToStdout) fprintf(stdout, "WARNING - %s\n", txt.c_str());
-                    fflush(f);
-                    break;
-
-                case INFO:
-                    fprintf(f, "INFO - %s\n", txt.c_str());
-                    if (printToStdout) fprintf(stdout, "INFO - %s\n", txt.c_str());
-                    break;
-
-                case DEBUG:
-                    fprintf(f, "DEBUG - %s\n", txt.c_str());
-                    if (printToStdout) fprintf(stdout, "DEBUG - %s\n", txt.c_str());
-                    fflush(f);
-                    break;
-
-                case FINE:
-                    fprintf(f, "FINE - %s\n", txt.c_str());
-                    if (printToStdout) fprintf(stdout, "FINE - %s\n", txt.c_str());
-                    break;
-
-                default:
-                    // should not get here!
-                    break;
-            }
-            if (fileName == "logFile.txt") {
-				
-            	fclose(f);
-            	f = NULL;
-            }
-            pthread_mutex_unlock(&lock);
+            gettimeofday(&stv, NULL);
+            gmtime_r(&(stv.tv_sec), &stm);
+            strftime(timestamp, sizeof(timestamp), "%F %T", &stm);
+            fprintf(f, "[%s:%03ld] ", timestamp, stv.tv_usec / 1000);
+            if (printToStdout) fprintf(stdout, "[%s:%3ld] ", timestamp, stv.tv_usec / 1000);
         }
+
+        fprintf(f, "[%s] %s\n", getLevelString(level), txt.c_str());
+        if (printToStdout) fprintf(stdout, "[%s] %s\n", getLevelString(level), txt.c_str());
+        fflush(f);
+
+        pthread_mutex_unlock(&lock);
+    }
+}
+void Logger::error(const std::string &txt) { log(ERROR, txt); }
+void Logger::warn (const std::string &txt) { log(WARN,  txt); }
+void Logger::info (const std::string &txt) { log(INFO,  txt); }
+void Logger::debug(const std::string &txt) { log(DEBUG, txt); }
+void Logger::fine (const std::string &txt) { log(FINE,  txt); }
+
+void Logger::logva(Logger::Level level, const char *fmt, va_list args) {
+    if (level <= currentLevel) {
+        char buffer[MAX_PRINTF_STYLE_MESSAGE_SIZE];
+        vsnprintf(buffer, sizeof(buffer), fmt, args);
+        std::string msg = buffer;
+        log(level, msg);
     }
 }
 
-void Logger::log(int level, const char *fmt, ...) {
+void Logger::log(Logger::Level level, const char *fmt, ...) { va_list args; va_start(args, fmt); logva(level, fmt, args); va_end(args); }
+void Logger::error(const char *fmt, ...) { va_list args; va_start(args, fmt); logva(ERROR, fmt, args); va_end(args); }
+void Logger::warn (const char *fmt, ...) { va_list args; va_start(args, fmt); logva(WARN,  fmt, args); va_end(args); }
+void Logger::info (const char *fmt, ...) { va_list args; va_start(args, fmt); logva(INFO,  fmt, args); va_end(args); }
+void Logger::debug(const char *fmt, ...) { va_list args; va_start(args, fmt); logva(DEBUG, fmt, args); va_end(args); }
+void Logger::fine (const char *fmt, ...) { va_list args; va_start(args, fmt); logva(FINE,  fmt, args); va_end(args); }
 
-    if (level <= currentLevel) {
-	    va_list ap;
-	    va_start(ap, fmt);
-	
-        char buffer[MAX_PRINTF_STYLE_MESSAGE_SIZE];
-        vsnprintf(buffer, sizeof(buffer), fmt, ap);
-        std::string msg = buffer;
-        log(level, msg);
-        va_end(ap);
+const char* Logger::getLevelString(const Logger::Level level) {
+    return levelStrings[level];
+}
+
+const Logger::Level Logger::getLevelFromString(const std::string& levelStr) {
+    for (int i = 0; levelStrings[i] != ""; ++i) {
+        if (strcasecmp(levelStrings[i], levelStr.c_str()) == 0)
+            return ((Logger::Level) i);
     }
+    return ((Logger::Level) -1);
+}
+
+// create and return the single instance
+Logger& opencog::logger() {
+    static Logger instance;
+    return instance;
 }

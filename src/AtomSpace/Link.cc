@@ -17,6 +17,7 @@
 #include "AtomSpaceDefinitions.h"
 #include "Logger.h"
 
+using namespace opencog;
 
 void Link::init(void) throw (InvalidParamException)
 {
@@ -100,13 +101,13 @@ std::string Link::toString()
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
         Type t = TLB::getAtom(outgoing[i])->getType();
-        //MAIN_LOGGER.log(Util::Logger::FINE, "toString() => type of outgoing[%d] = %d", i, t);
+        //logger().fine("toString() => type of outgoing[%d] = %d", i, t);
         if (ClassServer::isAssignableFrom(NODE, t)) {
             answer += ((Node*) TLB::getAtom(outgoing[i]))->getName();
         } else if  (ClassServer::isAssignableFrom(LINK, t)) {
             answer += ((Link*) TLB::getAtom(outgoing[i]))->toString();
         } else {
-            MAIN_LOGGER.log(Util::Logger::ERROR, "Link::toString() => type of outgoing[%d] = %d is invalid", i, t);
+            logger().error("Link::toString() => type of outgoing[%d] = %d is invalid", i, t);
             answer += "INVALID_ATOM_TYPE!";
         }
     }

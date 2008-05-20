@@ -1,15 +1,14 @@
 /**
  * LoggerUTest
  *
- * $Header$
- *
  * Author: Andre Senna
  * Creation: Thu Jul  5 20:56:04 BRT 2007
  */
 
-#include <Logger.h>
+#include "Logger.h"
+#include <fstream>
 
-using namespace Util;
+using namespace opencog;
 
 class LoggerUTest : public CxxTest::TestSuite {
 
@@ -28,7 +27,6 @@ class LoggerUTest : public CxxTest::TestSuite {
     }
 
     void testLog() {
-
         char baselineFile[256];
         char logFile[256];
 
@@ -36,14 +34,14 @@ class LoggerUTest : public CxxTest::TestSuite {
         strcpy(logFile, "/tmp/testLog.txt");
 
         Logger baseline("/tmp/testLogBaseline.txt", Logger::FINE, false);
-        Logger logger("/tmp/testLog.txt", Logger::DEBUG, false);
+        Logger _logger("/tmp/testLog.txt", Logger::DEBUG, false);
 
-        logger.log(Logger::FINE, "msg1");
+        _logger.log(Logger::FINE, "msg1");
 
-        logger.log(Logger::DEBUG, "msg2");
+        _logger.log(Logger::DEBUG, "msg2");
         baseline.log(Logger::DEBUG, "msg2");
 
-        logger.log(Logger::INFO, "msg3");
+        _logger.log(Logger::INFO, "msg3");
         baseline.log(Logger::INFO, "msg3");
 
         FILE *f1 = fopen(baselineFile, "r");
@@ -58,8 +56,42 @@ class LoggerUTest : public CxxTest::TestSuite {
             TS_ASSERT(c1 == c2);
             c1 = fgetc(f1);
         }
-
         remove(baselineFile);
         remove(logFile);
     }
+
+    void testDefaultLogger() {
+        logger().info("Running LoggerUTest");
+    }
+
+    unsigned int countLines(char *filename) {
+        unsigned int nLines = 0;
+        std::string line;
+
+        std::ifstream fin(filename);
+        while (fin.good() && std::getline(fin, line)) nLines++;
+        fin.close();
+        return nLines;
+    }
+
+    void logAllLevels(char *filename, Logger::Level level, unsigned int nLines) {
+        Logger _logger(filename, level);
+        _logger.error("message");
+        _logger.warn ("message");
+        _logger.info ("message");
+        _logger.debug("message");
+        _logger.fine ("message");
+
+        TS_ASSERT(countLines(filename) == nLines);
+        remove(filename);
+    }
+
+    void testLevels() {
+        logAllLevels("LoggerUTest.error.log", Logger::ERROR, 1);
+        logAllLevels("LoggerUTest.warn.log",  Logger::WARN,  2);
+        logAllLevels("LoggerUTest.info.log",  Logger::INFO,  3);
+        logAllLevels("LoggerUTest.debug.log", Logger::DEBUG, 4);
+        logAllLevels("LoggerUTest.fine.log",  Logger::FINE,  5);
+    }
+
 }; // class

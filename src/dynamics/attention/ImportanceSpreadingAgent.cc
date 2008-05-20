@@ -57,7 +57,7 @@ void ImportanceSpreadingAgent::spreadImportance()
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
     
     a->getHandleSet(out_hi,NODE,true);
-    MAIN_LOGGER.log(Util::Logger::FINE, "---------- Spreading importance for atoms with threshold above %d", spreadThreshold);
+    logger().fine("---------- Spreading importance for atoms with threshold above %d", spreadThreshold);
 
     hi = atoms.begin();
     while (hi != atoms.end()) {
@@ -85,11 +85,11 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     totalRelatedness = 0.0f;
     totalTransferred = 0;
 
-    MAIN_LOGGER.log(Util::Logger::FINE, "+Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
+    logger().fine("+Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
 
     links = TLB::getAtom(h)->getIncomingSet()->clone();
     links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
-    MAIN_LOGGER.log(Util::Logger::FINE, "  +Hebbian links found %d", links->getSize());
+    logger().fine("  +Hebbian links found %d", links->getSize());
     
     maxTransferAmount = a->getSTI(h) * importanceSpreadingFactor;
     minStealingBoundary = a->getAttentionalFocusBoundary() - (2 * abs(a->getAttentionalFocusBoundary()));
@@ -125,7 +125,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 	    const TruthValue &linkTV = a->getTV(lh);
 
 	    if (!((Link*)TLB::getAtom(lh))->isSource(h)) {
-		//MAIN_LOGGER.log(Util::Logger::FINE, "Link %s does not have this atom as a source.", TLB::getAtom(lh)->toString().c_str() );
+		//logger().fine("Link %s does not have this atom as a source.", TLB::getAtom(lh)->toString().c_str() );
 		continue; 
 	    }
 
@@ -150,8 +150,8 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
 	    if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) transferAmount = -transferAmount;
 		
-	    MAIN_LOGGER.log(Util::Logger::FINE, "  +Link %s", TLB::getAtom(lh)->toString().c_str() );
-	    MAIN_LOGGER.log(Util::Logger::FINE, "    |weight %f, quanta %.2f, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingMultiplier, targets.size(), transferAmount, maxTransferAmount);
+	    logger().fine("  +Link %s", TLB::getAtom(lh)->toString().c_str() );
+	    logger().fine("    |weight %f, quanta %.2f, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingMultiplier, targets.size(), transferAmount, maxTransferAmount);
 
 	    for (t = targets.begin();
 		    t != targets.end() &&
@@ -179,7 +179,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 		totalTransferred += (int) transferAmount;
 		a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
 		a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
-		MAIN_LOGGER.log(Util::Logger::FINE, "    |%d sti from %s to %s", (int) transferAmount, TLB::getAtom(h)->toString().c_str(), TLB::getAtom(target_h)->toString().c_str() );
+		logger().fine("    |%d sti from %s to %s", (int) transferAmount, TLB::getAtom(h)->toString().c_str(), TLB::getAtom(target_h)->toString().c_str() );
 		
 		// stimulate link 
 		// Doesn't make sense to stimulate the links just for spread.
@@ -193,7 +193,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 	}
     }
     else {
-	MAIN_LOGGER.log(Util::Logger::FINE, "  |Total relatedness = 0, spreading nothing");
+	logger().fine("  |Total relatedness = 0, spreading nothing");
     }
     delete links;
 

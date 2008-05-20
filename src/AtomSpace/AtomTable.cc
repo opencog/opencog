@@ -25,6 +25,8 @@ extern "C" {
 #include "Logger.h"
 #include "HandleMap.cc"
 
+using namespace opencog;
+
 /* By defining USE_ATOM_HASH_SET, AtomTable lookup performance is
  * improved by a hundredfold(!) or more(!) for large atom tables.
  * It does not appear to affect overall memory usage.  Disabling
@@ -32,7 +34,6 @@ extern "C" {
  * there's a bug somewhere when this is not defined.
  */
 #define USE_ATOM_HASH_SET
-
 
 int hashAtom::operator()(Atom* a) const{
 //    printf("hashAtom a = %p\n", a);
@@ -84,7 +85,7 @@ AtomTable::~AtomTable()
     AtomHashSet::iterator it = atomSet->begin();
     
     while(it != atomSet->end()) {
-        //MAIN_LOGGER.log(Util::Logger::FINE, "Removing atom %s (atomSet size = %u)", (*it)->toString().c_str(), atomSet->size());
+        //logger().fine("Removing atom %s (atomSet size = %u)", (*it)->toString().c_str(), atomSet->size());
         remove(TLB::getHandle(*it), true);
         it = atomSet->begin();
     }
@@ -857,8 +858,8 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
     // TODO: Check if this atom is really inserted in this AtomTable and get the exact Atom object  
     
     Atom *atom = TLB::getAtom(handle);
-    //MAIN_LOGGER.log(Util::Logger::FINE, "AtomTable::extract(): atom = %s", atom->toString().c_str());
-    //MAIN_LOGGER.log(Util::Logger::FINE, "AtomTable::extract(): atom = %p", atom);
+    //logger().fine("AtomTable::extract(): atom = %s", atom->toString().c_str());
+    //logger().fine("AtomTable::extract(): atom = %p", atom);
 
     // If the atom is already marked for removal, we should not process it again
     if (atom->isMarkedForRemoval()) {
@@ -870,7 +871,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
     if (recursive) {
         //printf("AtomTable::extract() recursive\n");
         HandleEntry* incomingSet = atom->getIncomingSet();
-        //MAIN_LOGGER.log(Util::Logger::FINE, "AtomTable::extract(): incomingSet = %s", incomingSet?incomingSet->toString().c_str():"NULL");
+        //logger().fine("AtomTable::extract(): incomingSet = %s", incomingSet?incomingSet->toString().c_str():"NULL");
         //printf("incomingSet = %s\n", incomingSet->toString().c_str());
 	std::vector<Handle> hs; 
         for (HandleEntry* in = incomingSet; in != NULL; in=in->next) {
@@ -885,15 +886,15 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
                     result = HandleEntry::concatenation(inResult, result);
                     //printf("result = %s\n", result?result->toString().c_str():"NULL");
                 } else {
-                    MAIN_LOGGER.log(Util::Logger::ERROR, "AtomTable.extract(): extract() applied to an incoming set's element, which was not marked for removal, returned no entry: \n", TLB::getAtom(h)->toShortString().c_str());
+                    logger().error("AtomTable.extract(): extract() applied to an incoming set's element, which was not marked for removal, returned no entry: \n", TLB::getAtom(h)->toShortString().c_str());
                 }
             }
         }
     }
     if (atom->getIncomingSet()) {
-        MAIN_LOGGER.log(Util::Logger::WARNING, "AtomTable.extract(): attempting to extract atom with non-empty incoming set: %s\n", atom->toShortString().c_str());
+        logger().warn("AtomTable.extract(): attempting to extract atom with non-empty incoming set: %s\n", atom->toShortString().c_str());
         for (HandleEntry* it = atom->getIncomingSet(); it != NULL; it = it->next) {
-            MAIN_LOGGER.log(Util::Logger::WARNING, "\t%s\n", TLB::getAtom(it->handle)->toShortString().c_str());
+            logger().warn("\t%s\n", TLB::getAtom(it->handle)->toShortString().c_str());
         }
         atom->unsetRemovalFlag();
         return result;
@@ -940,7 +941,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
         StatisticsMonitor::getInstance()->remove(atom);
     }
 
-    //MAIN_LOGGER.log(Util::Logger::FINE, "AtomTable::extract(): Before removing indices: atom = %p", atom);
+    //logger().fine("AtomTable::extract(): Before removing indices: atom = %p", atom);
     // remove from indices
     removeFromIndex(atom, typeIndex, TYPE_INDEX, atom->getType());
     unsigned int nameHash = getNameHash(atom);
@@ -1005,9 +1006,9 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles) {
 }
 
 void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int indexID, int headIndex) throw (RuntimeException) {
-    //MAIN_LOGGER.log(Util::Logger::FINE, "AtomTable::removeFromIndex(): index.size() = %d, indexId = %d(%x), headIndex = %d(%x)", index.size(), indexID, indexID, headIndex, headIndex);
+    //logger().fine("AtomTable::removeFromIndex(): index.size() = %d, indexId = %d(%x), headIndex = %d(%x)", index.size(), indexID, indexID, headIndex, headIndex);
     Handle victimHandle = TLB::getHandle(victim);
-    //MAIN_LOGGER.log(Util::Logger::FINE, "victim = %s", victim?victim->toString().c_str():"NULL");
+    //logger().fine("victim = %s", victim?victim->toString().c_str():"NULL");
 
     Handle p = index[headIndex];
     Handle q = UNDEFINED_HANDLE;
@@ -1017,7 +1018,7 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
                   "AtomTable - Unable to remove atom. NULL atom at index 0x%X.", indexID);
         }
         Atom *patom = TLB::getAtom(p);
-        //MAIN_LOGGER.log(Util::Logger::FINE, "Next atom in index = %s", patom?patom->toString().c_str():"NULL");
+        //logger().fine("Next atom in index = %s", patom?patom->toString().c_str():"NULL");
         q = p;
         p = patom->next(indexID);
     }
@@ -1036,7 +1037,7 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
 }
 
 void AtomTable::removeFromTargetTypeIndex(Atom *atom) {
-    //MAIN_LOGGER.log(Util::Logger::FINE, "AtomTable::removeFromTargetTypeIndex(%p)", atom);
+    //logger().fine("AtomTable::removeFromTargetTypeIndex(%p)", atom);
 
     int arraySize;
     Type *types = atom->buildTargetIndexTypes(&arraySize);
@@ -1050,10 +1051,10 @@ void AtomTable::removeFromTargetTypeIndex(Atom *atom) {
 
 void AtomTable::removeFromPredicateIndex(Atom *atom) {
     if (!atom->hasPredicateIndexInfo()) {
-        //MAIN_LOGGER.log(Util::Logger::FINE, "removeFromPredicateIndex(%p): No predicate index info", atom);
+        //logger().fine("removeFromPredicateIndex(%p): No predicate index info", atom);
         return;
     }
-    //MAIN_LOGGER.log(Util::Logger::FINE, "removeFromPredicateIndex(%p): has predicate index info", atom);
+    //logger().fine("removeFromPredicateIndex(%p): has predicate index info", atom);
     
     int arraySize;
     int *predicateIndices = atom->buildPredicateIndices(&arraySize);

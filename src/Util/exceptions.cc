@@ -24,8 +24,7 @@ void StandardException::parseErrorMessage(const char* fmt, va_list ap)
     char    buf[1024];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    MAIN_LOGGER.log(Util::Logger::ERROR, buf);
-
+    opencog::logger().error(buf);
     setMessage(buf);
 }
 
@@ -213,7 +212,7 @@ AssertionException::AssertionException(const char* fmt, ...)
     va_start(ap, fmt);
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    MAIN_LOGGER.log(Util::Logger::ERROR, buf);
+    opencog::logger().error(buf);
     va_end(ap);
 }
 
@@ -222,7 +221,7 @@ AssertionException::AssertionException(const char* fmt, va_list ap)
     char    buf[1024];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    MAIN_LOGGER.log(Util::Logger::ERROR, buf);
+    opencog::logger().error(buf);
 }
 
 void cassert(const char * trace, bool condition, const char *fmt, ...)

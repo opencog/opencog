@@ -1,6 +1,8 @@
 #include "TimeServer.h"
 #include "Logger.h"
 
+using namespace opencog;
+
 int TimeServer::timeServerEntrys = 0;
 // USED TO SEEK MEMORY LEAK
 //std::set<Temporal> TimeServer::temporalSet;
@@ -47,14 +49,14 @@ const char* TimeServer::getId() const
 
 void TimeServer::saveRepository(FILE *fp) const
 {
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "Saving %s (%ld)\n", getId(), ftell(fp));
+    logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
     // Saves TemporalTable
     table->save(fp);
 }
 
 void TimeServer::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
 {
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "Loading %s (%ld)\n", getId(), ftell(fp));
+    logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
     // Loads the TemporalTable
     table->load(fp, conv);
 }

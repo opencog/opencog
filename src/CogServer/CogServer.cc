@@ -21,7 +21,6 @@ using namespace opencog;
 AtomSpace* CogServer::atomSpace = NULL;
 
 CogServer::~CogServer() {
-    Util::Logger::releaseMainLogger();
     delete networkServer;
 }
 
@@ -36,9 +35,8 @@ void CogServer::init() {
     atomSpace = new AtomSpace();
 
     // setup main logger
-    Util::Logger *log = new Util::Logger(config()["LOG_FILE"], Util::Logger::INFO, true);
-    log->setPrintToStdoutFlag(true);
-    Util::Logger::initMainLogger(log);
+    //Util::Logger *log = new Util::Logger(config()["LOG_FILE"], Util::Logger::INFO, true);
+    logger().setPrintToStdoutFlag(true);
 
     // set network server
     this->networkServer =
@@ -76,7 +74,7 @@ void CogServer::serverLoop() {
 
     if (networkServer != NULL) networkServer->start();
 
-    Util::Logger::getMainLogger().log(Util::Logger::INFO, "opencog server ready.");
+    logger().info("opencog server ready.");
     running = true;
     while (running) {
         gettimeofday(&timer_start, NULL);

@@ -24,6 +24,7 @@
 #include <getopt.h>
 
 using namespace std;
+using namespace opencog;
 
 HopfieldOptions::HopfieldOptions()
 {
@@ -153,7 +154,7 @@ void HopfieldOptions::parseOptions(int argc, char *argv[])
 	   case 'D':
 		verboseFlag = 2;
 		hServer->importUpdateAgent->getLogger()->enable();
-		hServer->importUpdateAgent->getLogger()->setLevel(Util::Logger::FINE);
+		hServer->importUpdateAgent->getLogger()->setLevel(Logger::FINE);
 		hServer->importUpdateAgent->getLogger()->setPrintToStdoutFlag(true);
 		break;
 	    case 'w':

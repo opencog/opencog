@@ -64,10 +64,10 @@ void ForgettingAgent::forget(float proportion=0.10f)
 		&& count < removalAmount) {
 	    if (a->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE ) {
 		//cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;
-		MAIN_LOGGER.log(Util::Logger::FINE,"Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
+		logger().fine("Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
 		if (!a->removeAtom(atomsVector[i])) {
-		    MAIN_LOGGER.log(Util::Logger::ERROR,"Couldn't remove atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
-		    MAIN_LOGGER.log(Util::Logger::ERROR,"Aborting forget process");
+		    logger().error("Couldn't remove atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
+		    logger().error("Aborting forget process");
 		    return;
 		}
 		count++;

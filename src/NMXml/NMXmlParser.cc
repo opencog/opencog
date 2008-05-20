@@ -31,6 +31,8 @@
  * AtTimeLink(TimeNode:<temporalStringValue>, Atom1 [, Atom2 [... , AtomN]])
  */
 
+using namespace opencog;
+
 Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> NMXmlParser::hypHandles;
 bool NMXmlParser::fresh = true;
 bool NMXmlParser::freshLinks = false;
@@ -100,7 +102,7 @@ static Type getTypeFromString(const char *name, bool onlyClassName)
     if (strcmp(name, POLYGON_CORNER_TOKEN) != 0 && 
         (onlyClassName || strcmp(name, ELEMENT_TOKEN) != 0))
     {
-      MAIN_LOGGER.log(Util::Logger::ERROR, "Warning: null type for name returned! (%s)\n", name);
+      logger().error("Warning: null type for name returned! (%s)\n", name);
     }
   
     return 0;
@@ -208,7 +210,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                 } else {
                    const char **natts = scan_common_attrs(r, atts);
                    if (atts == natts) {
-                      MAIN_LOGGER.log(Util::Logger::ERROR, "unrecognized Node token: %s\n", *atts);
+                      logger().error("unrecognized Node token: %s\n", *atts);
                    }
                    atts = natts;
                 }
@@ -242,7 +244,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             while (*atts != NULL) {
                 const char **natts = scan_common_attrs(r, atts);
                 if (atts == natts) {
-                    //MAIN_LOGGER.log(Util::Logger::ERROR, "unrecognized Link token: %s\n", *atts);
+                    //logger().error("unrecognized Link token: %s\n", *atts);
                 }
                 atts = natts;
                 atts++;
@@ -273,7 +275,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
           
             Atom* currentAtom = (Atom*) top(ud->stack);
             if (currentAtom == NULL) {
-                MAIN_LOGGER.log(Util::Logger::ERROR, "error: this token (%s) is expected to be nested\n", name);
+                logger().error("error: this token (%s) is expected to be nested\n", name);
                 return;
             }
             //printf("Getting node element inside currentAtom = %p\n", currentAtom);
@@ -288,7 +290,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                     atts++;
                     t = *atts;
                 }else{
-                    MAIN_LOGGER.log(Util::Logger::ERROR, "unrecognized token: %s\n", *atts);
+                    logger().error("unrecognized token: %s\n", *atts);
                 }
                 atts++;
             }
@@ -316,7 +318,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                  */
                 fprintf (stderr,
                     "Fatal error: unable to find atom named %s, type %s\n", n, t);
-                 MAIN_LOGGER.log(Util::Logger::ERROR,
+                 logger().error(
                     "fatal error: unable to find atom named %s, type %s\n", n, t);
 #endif
             }
@@ -468,11 +470,10 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     // Only nodes are processed in the first pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            MAIN_LOGGER.log(Util::Logger::DEBUG,
-                            "First pass: processing file %s\n",
-                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
+            logger().debug("First pass: processing file %s\n",
+                         ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        //MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML: %d%% done.\r", (int) (100 * ((float) i / (size * 2))));
+        //logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) i / (size * 2))));
         // fflush(stdout);
         parser.parse(xmlReaders[i], PARSE_NODES);
     }
@@ -485,11 +486,10 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     // only links are processed in the second pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            MAIN_LOGGER.log(Util::Logger::DEBUG, 
-                            "Second pass: processing file %s\n", 
-                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
+            logger().debug("Second pass: processing file %s\n", 
+                         ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        // MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
+        // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
         // fflush(stdout);
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
         Handle uh = UNDEFINED_HANDLE;
@@ -503,7 +503,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
 //        unsigned long spentTime = (e.tv_sec-s.tv_sec)*1000000 + (e.tv_usec-s.tv_usec);
 //        printf("PARSE XML time = %lu\n", spentTime);
 
-//    MAIN_LOGGER.log(Util::Logger::WARNING, "Loading XML contents: 100%% done (in %d second%c).\n", (int) duration, duration == 1 ? '\0' : 's');
+//    logger().warn("Loading XML contents: 100%% done (in %d second%c).\n", (int) duration, duration == 1 ? '\0' : 's');
     //cprintf(NORMAL, "Number of timestamp entries: %d\n", stackTimeFlag);
     return result;
 }
@@ -564,7 +564,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
     Handle h = UNDEFINED_HANDLE;
     if (pass == PARSE_NODES) {
 
-        MAIN_LOGGER.log(Util::Logger::DEBUG, "Parsing nodes...\n");
+        logger().debug("Parsing nodes...\n");
         
         // FIRST PASS - creates relationships with arity == 0 (nodes)
         h = parse_pass(xmlReader, pass);
@@ -572,7 +572,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
         
     } else if (pass == PARSE_LINKS) {
 
-        MAIN_LOGGER.log(Util::Logger::DEBUG, "Parsing links...\n");
+        logger().debug("Parsing links...\n");
         
         // SECOND PASS - creates other relationships
         // second pass must be avoided once subgraph insertion and/or lazy

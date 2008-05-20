@@ -16,117 +16,114 @@
 #include <string>
 #include <pthread.h>
 
-// Macro for the main logger, which is a static member of this class
-#define MAIN_LOGGER Util::Logger::getMainLogger()
-
-namespace Util {
+namespace opencog {
 
 class Logger {
 
-    private:
+public:
 
-        std::string fileName;
-        bool timestampEnabled;
-        int currentLevel;
-        bool logEnabled;
-        bool printToStdout;
-        pthread_mutex_t lock;
-        
-        static Logger* mainLogger;
-		FILE *f;
-		
-    public:
+    enum Level { ERROR, WARN, INFO, DEBUG, FINE };
 
-        static const int ERROR = 0;
-        static const int WARNING = 1;
-        static const int INFO = 2;
-        static const int DEBUG = 3;
-        static const int FINE = 4;
+    /** Convert from 'enum' (int) to 'string' and vice-versa */
+    static const Level getLevelFromString(const std::string&);
+    static const char* getLevelString(const Level);
 
-        /**
-         * Initializes the main logger (this will be the main logger of each process) with specific arguments. 
-         * For each program/process, this method should be called before the first call to the getMainLogger() method, 
-         * so that it uses the given specific logger.
-         */
-        static void initMainLogger(Logger* specificLogger);
 
-        /**
-         * Releases the main logger if it is already allocated/initialized
-         * Processes must call this at the end of thep program
-         **/ 
-        static void releaseMainLogger();
+    // ***********************************************/
+    // Constructors/destructors
+    ~Logger();
 
-        /**
-         * Gets the main logger (this will be the main logger of each process)
-         * The initMainLogger() method should be called before the first call to this method
-         * so that it can be initialized with specific arguments for each process/program.
-         */
-        static Logger& getMainLogger();
+    /**
+     * Messages will be appended to the passed file.
+     *
+     * @param fileName The log file
+     * @param level Only messages with log-level lower than or equals to level will be logged
+     * @param timestampEnabled If true, a timestamp will be pre-fixed in every log message
+     */
+    Logger(const std::string &fileName = "opencog.log", Level level = INFO, bool timestampEnabled = true);
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // API
 
-        ~Logger();
+    /**
+     * Reset the level of messages which will be logged. Every message with
+     * log-level lower than or equals to newLevel will be logged.
+     */
+    void setLevel(Level);
 
-        /**
-         * Messages will be appended to the passed file.
-         *
-         * @param fileName The log file
-         * @param level Only messages with log-level lower than or equals to level will be logged
-         * @param timestampEnabled If true, a timestamp will be pre-fixed in every log message
-         */
-        Logger(const std::string &fileName = "logFile.txt", int level = FINE, bool timestampEnabled = true);
+    /**
+     * Get the current log level that determines which messages will be
+     * logged: Every message with log-level lower than or equals to returned
+     * level will be logged.
+     */
+    Level getLevel() const;
 
-        // ***********************************************/
-        // API
+    /* filename property */
+    void setFilename(const std::string&);
+    const std::string& getFilename();
 
-        /**
-         * Reset the level of messages which will be logged. Every message with log-level
-         * lower than or equals to newLevel will be logged.
-         */
-        void setLevel(int newLevel);
+    /**
+     * Reset the flag that indicates whether a timestamp is to be prefixed
+     * in every message or not.
+     */
+    void setTimestampFlag(bool flag);
 
-        /**
-         * Get the current log level that determines which messages will be logged: Every message with log-level
-         * lower than or equals to returned level will be logged.
-         */
-        int getLevel() const;
+    /**
+     * Reset the flag that indicates whether the log messages should be
+     * printed to the stdout or not.
+     */
+    void setPrintToStdoutFlag(bool flag);
 
-        /**
-         * Reset the flag that indicates whether a timestamp is to be prefixed in every message or not.
-         */
-        void setTimestampFlag(bool flag);
+    /**
+     * Logs a message into log file (passed in constructor) if and only if passed level is
+     * lower than or equals to the current log level of Logger.
+     */
+    void log  (Level level, const std::string &txt);
+    void error(const std::string &txt);
+    void warn (const std::string &txt);
+    void info (const std::string &txt);
+    void debug(const std::string &txt);
+    void fine (const std::string &txt);
 
-        /**
-         * Reset the flag that indicates whether the log messages should be printed to the stdout or not.
-         */
-        void setPrintToStdoutFlag(bool flag);
+    /**
+     * Logs a message (printf style) into log file (passed in constructor) if and only if passed level is
+     * lower than or equals to the current log level of Logger.
+     *
+     * You may use this method as any printf-style call, eg: log(FINE, "Count = %d", count)
+     */
+    void logva(Level level, const char *, va_list args);
+    void log  (Level level, const char *, ...);
+    void error(const char *, ...);
+    void warn (const char *, ...);
+    void info (const char *, ...);
+    void debug(const char *, ...);
+    void fine (const char *, ...);
 
-        /**
-         * Logs a message into log file (passed in constructor) if and only if passed level is
-         * lower than or equals to the current log level of Logger.
-         */
-        void log(int level, const std::string &txt);
+    /**
+     * Enable logging messages.
+     */
+    void enable();
 
-        /**
-         * Logs a message (printf style) into log file (passed in constructor) if and only if passed level is
-         * lower than or equals to the current log level of Logger.
-         *
-         * You may use this method as any printf-style call, eg: log(FINE, "Count = %d", count)
-         */
-        void log(int level, const char *, ...);
+    /**
+     * Disable logging messages.
+     */
+    void disable();
 
-        /**
-         * Enable logging messages.
-         */
-        void enable();
+private:
 
-        /**
-         * Disable logging messages.
-         */
-        void disable();
-
+    std::string fileName;
+    bool timestampEnabled;
+    Level currentLevel;
+    bool logEnabled;
+    bool printToStdout;
+    pthread_mutex_t lock;
+    FILE *f;
+ 
 }; // class
-}  // namespace
+
+// singleton instance (following meyer's design pattern)
+Logger& logger();
+
+}  // namespace opencog
 
 #endif

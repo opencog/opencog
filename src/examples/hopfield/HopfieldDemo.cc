@@ -30,6 +30,8 @@ void testHopfieldNetworkInterleave();
 HopfieldServer hServer;
 HopfieldOptions *o = hServer.options;
 
+using namespace opencog;
+
 int main(int argc, char *argv[])
 {
     //int patternArray[] = { 0, 1, 0, 1, 1, 1, 0, 1, 0 };
@@ -42,16 +44,16 @@ int main(int argc, char *argv[])
     }
 
     /* setup logging */
-    MAIN_LOGGER.setPrintToStdoutFlag(true);
+    logger().setPrintToStdoutFlag(true);
     if (o->verboseFlag == 1) {
-	MAIN_LOGGER.setLevel(Util::Logger::DEBUG);
+	logger().setLevel(Logger::DEBUG);
     } else if (o->verboseFlag == 2) {
-	MAIN_LOGGER.setLevel(Util::Logger::FINE);
+	logger().setLevel(Logger::FINE);
     } else {
-	MAIN_LOGGER.setLevel(Util::Logger::WARNING);
+	logger().setLevel(Logger::WARN);
     }
 	
-    MAIN_LOGGER.log(Util::Logger::INFO,"Init HopfieldServer");
+    logger().info("Init HopfieldServer");
     hServer.init(-1, -1, -1);
 
     if (o->recordToFile) o->openOutputFiles();
@@ -195,12 +197,12 @@ void testHopfieldNetworkRollingOld()
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
 	hServer.imprintPattern(patterns[i],o->imprintCycles);
-	MAIN_LOGGER.log(Util::Logger::INFO,"Encoded pattern and ran server for %d loops",o->imprintCycles);
+	logger().info("Encoded pattern and ran server for %d loops",o->imprintCycles);
     }
 
     for (unsigned int i = 0; i< patterns.size(); i++) {
 	result = hServer.retrievePattern(cuePatterns[i],o->retrieveCycles);
-	MAIN_LOGGER.log(Util::Logger::INFO,"Updated Atom table for retrieval");
+	logger().info("Updated Atom table for retrieval");
 	rPatterns.push_back(result);
     }
 

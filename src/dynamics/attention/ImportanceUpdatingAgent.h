@@ -70,7 +70,7 @@ private:
     bool updateLinks;
 
     /* Logger object for MindAgent */
-    Util::Logger *log;
+    Logger *log;
 
     /* Randomly stimulate atoms? */
     bool noiseOn;
@@ -234,8 +234,8 @@ public:
 
     virtual string toString();
 
-    Util::Logger* getLogger();
-    void setLogger(Util::Logger* l);
+    Logger* getLogger();
+    void setLogger(Logger* l);
 
     /**
      * Set whether to randomly stimulate atoms.

@@ -11,7 +11,7 @@ namespace Util {
 /* Period parameters */  
 int MT19937RandGen::N = 624;
 int MT19937RandGen::M = 397;
-unsigned long MT19937RandGen::MATRIX_A = 0x9908b0dfUL;  /* constant vector a */
+unsigned long MT19937RandGen::MATRIX_A = 0x9908b0dfUL;   /* constant vector a */
 unsigned long MT19937RandGen::UPPER_MASK = 0x80000000UL; /* most significant w-r bits */
 unsigned long MT19937RandGen::LOWER_MASK = 0x7fffffffUL; /* least significant r bits */
 
@@ -36,7 +36,7 @@ int MT19937RandGen::randint() {
     int result;
     result = (int) genrand_int31();
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randint() => %d", result);
+    logger().debug("MT19937RandGen::randint() => %d", result);
 #endif
     return result;
 }
@@ -46,7 +46,7 @@ float MT19937RandGen::randfloat() {
     float result;
     result = (float) genrand_real1();
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randfloat() => %f", result);
+    logger().debug("MT19937RandGen::randfloat() => %f", result);
 #endif
     return result;
 }
@@ -56,7 +56,7 @@ double MT19937RandGen::randdouble() {
     double result;
     result = genrand_real1();
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randfloat() => %f", result);
+    logger().debug("MT19937RandGen::randfloat() => %f", result);
 #endif
     return result;
 }
@@ -66,7 +66,7 @@ double MT19937RandGen::randDoubleOneExcluded() {
     double result;
     result = genrand_real2();
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randDoubleOneExcluded() => %f", result);
+    logger().debug("MT19937RandGen::randDoubleOneExcluded() => %f", result);
 #endif
     return result;
 }
@@ -76,7 +76,7 @@ int MT19937RandGen::randint(int n) {
     int result;
     result = (int) genrand_int31()%n;
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randint(%d) => %d", n, result);
+    logger().debug("MT19937RandGen::randint(%d) => %d", n, result);
 #endif
     return result;
 }
@@ -86,7 +86,7 @@ int MT19937RandGen::randPositiveNegative(){
     int result;
     result = (this->randint(2) == 0) ? 1 : -1;
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randPositiveNegative() => %d", result);
+    logger().debug("MT19937RandGen::randPositiveNegative() => %d", result);
 #endif
     return result;
 }
@@ -100,7 +100,7 @@ unsigned int MT19937RandGen::pos_gaussian_rand(unsigned int std_dev, unsigned in
 
     unsigned int result = (random >= 0 ? (unsigned) random : 0);
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::pos_gaussian_rand() => %u", result);
+    logger().debug("MT19937RandGen::pos_gaussian_rand() => %u", result);
 #endif
     return result;
 }
@@ -110,7 +110,7 @@ bool MT19937RandGen::randbool() {
     bool result;
     result = genrand_int31()%2==0;
 #ifdef DEBUG_RAND_CALLS
-    MAIN_LOGGER.log(Util::Logger::DEBUG, "MT19937RandGen::randbool() => %s", result?"true":"false");
+    logger().debug("MT19937RandGen::randbool() => %s", result?"true":"false");
 #endif
     return result;
 }
