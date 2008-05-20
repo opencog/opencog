@@ -1,6 +1,7 @@
 #include "CogServer.h"
 #include "QueryProcessor.h"
 #include "WordSenseProcessor.h"
+#include "Logger.h"
 #include "Config.h"
 
 using namespace opencog;
@@ -22,15 +23,18 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // once the configuration is loaded, init the server
-        server().init();
-
+        // setup global logger
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+ 
         // cheapo hack to get the query processory up and running.
         // XXX fix me with some more permanent, appropriate solution.
         server().plugInMindAgent(new QueryProcessor(), 1);
         server().plugInMindAgent(new WordSenseProcessor(), 1);
 
-        // run the server's main loop
+        // enable the network server and run the server's main loop
+        server().enableNetworkServer();
         server().serverLoop();
     } else {
         usage(argv[0]);

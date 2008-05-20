@@ -49,11 +49,14 @@ class CogServer {
 
     public:
 
+        static AtomSpace *getAtomSpace();
+
         ~CogServer();
         CogServer();
 
-        void init();
-        static AtomSpace *getAtomSpace();
+        void enableNetworkServer();
+        void disableNetworkServer();
+
         void serverLoop();
         void plugInMindAgent(MindAgent *task, int frequency);
         long getCycleCount();
@@ -62,7 +65,6 @@ class CogServer {
         CogServerRequest *popRequest();
         void pushRequest(CogServerRequest *request);
         int getRequestQueueSize();
-        void setNetworkServer(NetworkServer *networkServer);
           
         // used for debug purposes in unit tests
         void unitTestServerLoop(int limitNumberOfCycles);

@@ -7,64 +7,44 @@
  * Creation: Wed Jun 20 16:00:19 BRT 2007
  */
 
+#include "Config.h"
+#include "Logger.h"
+#include "CogServer.h"
+#include "exceptions.h"
+#include "SimpleNetworkServer.h"
+
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-
-#include "CogServer.h"
-#include "exceptions.h"
-#include "Config.h"
-#include "Logger.h"
-#include "SimpleNetworkServer.h"
 
 using namespace opencog;
 AtomSpace* CogServer::atomSpace = NULL;
 
 CogServer::~CogServer() {
-    delete networkServer;
+    disableNetworkServer();
 }
 
 CogServer::CogServer() : cycleCount(1), networkServer(NULL) {
-    pthread_mutex_init(&messageQueueLock, NULL);
-}
-
-void CogServer::init() {
-    if (atomSpace != NULL) {
-        delete atomSpace;
-    }
+    if (atomSpace != NULL) delete atomSpace;
     atomSpace = new AtomSpace();
 
-    // setup main logger
-    //Util::Logger *log = new Util::Logger(config()["LOG_FILE"], Util::Logger::INFO, true);
-    logger().setPrintToStdoutFlag(true);
-
-    // set network server
-    this->networkServer =
-        new SimpleNetworkServer(this, config().get_int("SERVER_PORT"));
+    pthread_mutex_init(&messageQueueLock, NULL);
 }
 
 AtomSpace *CogServer::getAtomSpace() {
     return atomSpace;
 }
 
-/**
- * Used for debug purposes in unit tests
- */
-void CogServer::unitTestServerLoop(int limitNumberOfCycles) {
-    do {
-        if ((limitNumberOfCycles >= 0) && (cycleCount > limitNumberOfCycles)) {
-            return;
-        }
+void CogServer::enableNetworkServer() {
+    if (networkServer == NULL)
+        networkServer = new SimpleNetworkServer(this, config().get_int("SERVER_PORT"));
+}
 
-        processRequests();
-        processMindAgents();
-
-        cycleCount++;
-        if (cycleCount < 0) {
-            cycleCount = 0;
-        }
-
-    } while(true);
+void CogServer::disableNetworkServer() {
+    if (networkServer != NULL) {
+        delete networkServer;
+        networkServer = NULL;
+    }
 }
 
 void CogServer::serverLoop() {
@@ -73,10 +53,9 @@ void CogServer::serverLoop() {
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
 
     if (networkServer != NULL) networkServer->start();
-
     logger().info("opencog server ready.");
-    running = true;
-    while (running) {
+
+    for (running = true; running;) {
         gettimeofday(&timer_start, NULL);
 
         if (getRequestQueueSize() != 0) processRequests();
@@ -157,7 +136,17 @@ int CogServer::getRequestQueueSize() {
     return size;
 }
 
-// create and return the single instance
+// Used for debug purposes on unit tests
+void CogServer::unitTestServerLoop(int nCycles) {
+    for (int i = 0; (nCycles == 0) || (i < nCycles); ++i) {
+        processRequests();
+        processMindAgents();
+        cycleCount++;
+        if (cycleCount < 0) cycleCount = 0;
+    }
+}
+
+// create and return static singleton instance
 CogServer& opencog::server() {
     static CogServer instance;
     return instance;
