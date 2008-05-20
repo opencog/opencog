@@ -574,7 +574,9 @@ Ideas
    path dependency" paper.  He makes an argument that by parsing and
    then analyzing paths in the parse trees, one can handle a variety
    of tasks varying from semantic disambiguation to question-answering.
-   (Seem to be two papers: DIRT, and the question answering one ...)
+   (Seem to be two papers: DIRT[2], and the question answering one ...)
+	DIRT[2] seems to be aimed at the automatic discovery of word senses,
+   rather than in sense-disambiguation per-se.
 
 -- integrate anaphora resolution
 
@@ -636,3 +638,6 @@ References
     Disambiguation with Graph-based Algorithms for Sequence Data
     Labeling", 2005
 
+[2] Dekang Lin, Patrick Pantel, "DIRT: Discovering Inference Rules from 
+    Text". In Proceedings of the ACM SIGKDD Conference on Knowledge 
+    Discovery and Data Mining, 2001.
