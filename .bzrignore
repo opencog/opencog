@@ -1,0 +1,11 @@
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+DartTestfile.txt
+*.a
+*UTest.cpp
+*UTest
+src/CogServer/cogServer
+src/examples/hopfield/hopfield
+src/persist/sniff
