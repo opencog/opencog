@@ -723,6 +723,9 @@ http://www.cs.ualberta.ca/~lindek/papers.htm
 Dekang Lin and Patrick Pantel. 2001. Discovery of Inference Rules for
 Question Answering. Natural Language Engineering 7(4):343-360. [PDF][PS]
 
+See also:
+DIRT - Discovery of Inference Rules from Text, Dekang Lin and Patrick Pantel.
+
 
 Query processing architectural issues:
 --------------------------------------
