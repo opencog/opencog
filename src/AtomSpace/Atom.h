@@ -458,6 +458,9 @@ class Atom {
          */
         void unsetRemovalFlag();
 
+        /* tests the atom's sti */
+        bool isOld(const AttentionValue::sti_t threshold) const;
+
         /**
          * Returns neighboring atoms, following links and returning their
          * target sets.

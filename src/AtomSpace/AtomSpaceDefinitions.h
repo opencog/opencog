@@ -14,6 +14,7 @@
 //#define MULTIPLE_TRUTH_VALUES 4  //BIT2
 #define FIRED_ACTIVATION        8  //BIT3
 #define HYPOTETHICAL_FLAG       16 //BIT4
+#define REMOVED_BY_DECAY        32 //BIT5
 
 // AtomTable indices 
 

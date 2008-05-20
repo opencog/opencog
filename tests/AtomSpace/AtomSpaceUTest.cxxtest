@@ -470,45 +470,6 @@ public:
 
     }
 
-    void testImportanceUpdate() {
-        AtomSpace at;
-        std::vector<short> imp;
-        for (int i = 0; i < 1000; i++) {
-            char s[256];
-            sprintf(s, "node_%d", i);
-            at.addNode(CONCEPT_NODE, s, SimpleTruthValue(0.5, 0.5));
-            short v = -100 + (i % 200);
-            Handle h = at.getHandle(CONCEPT_NODE, s);
-            Atom * aaa = TLB::getAtom(h);
-            Node * nnn = dynamic_cast<Node *>(aaa);
-            nnn -> setAttentionValue(*AttentionValue::factory(v));
-            short newImp = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))->getAttentionValue().getSTI();
-            imp.push_back(newImp);
-            //printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
-        }
-        /*
-        for (int i = 0; i < 10; i++) {
-            char s[256];
-            sprintf(s, "node_%d", i);
-            Atom * aaa = TLB::getAtom(at.getHandle(CONCEPT_NODE, s))
-            Node * nnn = dynamic_cast<Node *>(aaa);
-            short newImp = nnn -> getAttentionValue().getSTI();
-            printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
-        }*/
-        for (int i = 0; i < 100; i++) {
-            //printf("DECAYING\n");
-            at.decayShortTermImportance();
-        }
-        for (int i = 0; i < 1000; i++) {
-            char s[256];
-            sprintf(s, "node_%d", i);
-            Atom * aaa = TLB::getAtom(at.getHandle(CONCEPT_NODE, s));
-            Node * nnn = dynamic_cast<Node *>(aaa);
-            short newImp = nnn -> getAttentionValue().getSTI();
-            //printf("newImp = %d imp[%d] = %d\n", newImp, i, imp[i]);
-            TS_ASSERT(newImp == (imp[i] - 100));
-        }
-    }
 
     void testGetHandle_bugfix1() {
         AtomSpace atomSpace; 

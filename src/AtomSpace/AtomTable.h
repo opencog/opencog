@@ -66,6 +66,10 @@ private:
      */
     bool useDSA;
 
+    // cache the minSTI variable to speed up recursive
+    // removals by decay
+    AttentionValue::sti_t minSTI;
+
     // linked lists for each kind of index
     std::vector<Handle> typeIndex;
     std::vector<Handle> targetTypeIndex;
@@ -96,7 +100,10 @@ private:
     void removeFromIterator(Atom *, HandleIterator *);
     void lockIterators();
     void unlockIterators();
-    void decayAtomShortTermImportance(Atom *) __attribute__ ((deprecated));
+
+    void removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID);
+    void removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID);
+    void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
     /**
      * Extracts atoms from the table. Table will not contain the
@@ -112,6 +119,7 @@ private:
      * @return A list with the Handles of all extracted Atoms.
      */
     HandleEntry* extract(Handle, bool recursive = false);
+    HandleEntry* extractOld(Handle, bool recursive = false);
 
     /**
      * Removes the previously extracted Handles (using the extract
@@ -538,9 +546,11 @@ public:
 
     /**
      * Decays importance of all atoms in the table, reindexing
-     * importanceIndex accordingly.
+     * importanceIndex accordingly and removing the atom that fall
+     * below the "LOWER_STI_VALUE" threshold.
      */
-    void decayShortTermImportance() throw (RuntimeException) __attribute__ ((deprecated));
+    //void decayShortTermImportance() throw (RuntimeException) __attribute__ ((deprecated));
+    HandleEntry* decayShortTermImportance();
 
     /**
      * Returns whether DynamicsStatisticsAgent is to be used with

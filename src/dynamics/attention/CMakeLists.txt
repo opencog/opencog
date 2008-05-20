@@ -3,6 +3,7 @@ ADD_LIBRARY(attention STATIC
 	ImportanceSpreadingAgent.cc
 	HebbianLearningAgent.cc
 	ForgettingAgent.cc
+    STIDecayingAgent.cc
 )
 
 INCLUDE_DIRECTORIES(

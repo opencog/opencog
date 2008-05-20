@@ -1,0 +1,53 @@
+/**
+ * STIDecayingAgentUTest.h
+ *
+ * Author: Gustavo Gama
+ * Creation: Thu May 15 13:11:06 BRT 2008
+ */
+
+#include "Config.h"
+#include "CogServer.h"
+#include "AtomSpace.h"
+#include "Node.h"
+#include "STIDecayingAgent.h"
+
+using namespace opencog;
+
+class STIDecayingAgentUTest : public CxxTest::TestSuite {
+
+private:
+
+public:
+
+    STIDecayingAgentUTest(){}
+    void setUp() {}
+    void tearDown() {}
+
+    void testSimple() {
+        logger().setLevel(Logger::DEBUG);
+        AttentionValue::sti_t min_sti = config().get_int("MIN_STI");
+
+        AtomSpace *as = server().getAtomSpace();
+        Handle h = as->addNode(WORD_NODE, "test");
+        Node *node = dynamic_cast<Node*>(TLB::getAtom(h));
+        node->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
+
+
+        // first, ensure the node's sti is what it should
+        h = as->getHandle(node->getType(), node->getName());
+        TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == (min_sti + 5));
+
+        server().plugInMindAgent(new STIDecayingAgent(), 1);
+        server().unitTestServerLoop(5);
+
+        // we're on the verge of removing the node; check if its sti equals
+        // min_sti
+        h = as->getHandle(node->getType(), node->getName());
+        TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == min_sti);
+
+        // run another cycle and check whether the atom has been removed
+        server().unitTestServerLoop(1);
+        h = as->getHandle(node->getType(), node->getName());
+        TS_ASSERT(TLB::isInvalidHandle(h));
+    }
+};

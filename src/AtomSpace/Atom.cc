@@ -654,7 +654,7 @@ int* Atom::buildPredicateIndices(int *size) const{
     return result;
 }
 
-bool Atom::getFlag(int flag) const{
+bool Atom::getFlag(int flag) const {
     return flags & flag;
 }
 
@@ -674,13 +674,17 @@ void Atom::markForRemoval() {
     flags |= MARKED_FOR_REMOVAL;
 }
 
-
 void Atom::setAtomTable(AtomTable *tb){
     atomTable = tb;
 }
 
 AtomTable *Atom::getAtomTable() const{
     return(atomTable);
+}
+
+bool Atom::isOld(const AttentionValue::sti_t threshold) const {
+    return ((attentionValue->getSTI() < threshold) &&
+            (attentionValue->getLTI() < 1));
 }
 
 // This is a virtual function, overloaded by Link class and Node class.

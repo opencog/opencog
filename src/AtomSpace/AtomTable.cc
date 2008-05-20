@@ -24,6 +24,7 @@ extern "C" {
 #include "AtomSpaceDefinitions.h"
 #include "Logger.h"
 #include "HandleMap.cc"
+#include "Config.h"
 
 using namespace opencog;
 
@@ -557,7 +558,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
     // name (to avoid hash conflicts) and by the correspondent type in the
     // array of types.
     for (int i = 0; i < arity; i++) {
-            //printf("getHandleSet: arity %d\n", i);
+        //printf("getHandleSet: arity %d\n", i);
         bool sub = subclasses == NULL ? false : subclasses[i];
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
@@ -754,7 +755,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     // The atom is placed on its proper importance index list.
     int bin = importanceBin(atom->getAttentionValue().getSTI());
-    // printf("Adding handle %p with importance %f into importanceIndex (bin = %d)\n", atom, atom->getImportance(), bin);
+    //logger().debug("adding handle %p with sti %d into importanceIndex (bin = %d)\n", handle, atom->getAttentionValue().getSTI(), bin);
     atom->setNext(IMPORTANCE_INDEX, importanceIndex[bin]);
     importanceIndex[bin] = handle;
     
@@ -851,44 +852,51 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const {
 #endif
 }
 
-HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
+HandleEntry* AtomTable::extractOld(Handle handle, bool recursive) {
     HandleEntry* result = NULL;
-    //printf("AtomTable::extract(%p)\n", handle);
-
-    // TODO: Check if this atom is really inserted in this AtomTable and get the exact Atom object  
-    
     Atom *atom = TLB::getAtom(handle);
-    //logger().fine("AtomTable::extract(): atom = %s", atom->toString().c_str());
-    //logger().fine("AtomTable::extract(): atom = %p", atom);
 
-    // If the atom is already marked for removal, we should not process it again
-    if (atom->isMarkedForRemoval()) {
-        return result;
-    }
-    atom->markForRemoval();
-    
+    if (atom->getFlag(REMOVED_BY_DECAY)) return result;
+    else atom->setFlag(REMOVED_BY_DECAY, true);
+
     // if recursive-flag is set, also extract all the links in the atom's incoming set
     if (recursive) {
-        //printf("AtomTable::extract() recursive\n");
-        HandleEntry* incomingSet = atom->getIncomingSet();
-        //logger().fine("AtomTable::extract(): incomingSet = %s", incomingSet?incomingSet->toString().c_str():"NULL");
-        //printf("incomingSet = %s\n", incomingSet->toString().c_str());
-	std::vector<Handle> hs; 
-        for (HandleEntry* in = incomingSet; in != NULL; in=in->next) {
-            hs.push_back(in->handle);
-        }
-        for(std::vector<Handle>::iterator it = hs.begin(); it != hs.end(); it++) {
-            Handle h = *it;
-            //printf("Following handle in incomingSet: %p\n", h);
-            if(!TLB::getAtom(h)->isMarkedForRemoval()) {
-                HandleEntry* inResult = extract(h, true);
-                if (inResult) {
-                    result = HandleEntry::concatenation(inResult, result);
-                    //printf("result = %s\n", result?result->toString().c_str():"NULL");
-                } else {
-                    logger().error("AtomTable.extract(): extract() applied to an incoming set's element, which was not marked for removal, returned no entry: \n", TLB::getAtom(h)->toShortString().c_str());
-                }
+        for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
+            Atom *a = TLB::getAtom(in->handle);
+            if (a->isOld(minSTI)) {
+                result = HandleEntry::concatenation(extractOld(in->handle, true), result);
             }
+        }
+    }
+
+    // only return if there is at least one incoming atom that is not marked for
+    // removal by decay
+    for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
+        if (TLB::getAtom(in->handle)->getFlag(REMOVED_BY_DECAY) == false) {
+            atom->setFlag(REMOVED_BY_DECAY, false);
+            return result;
+        }
+    }
+    result = HandleEntry::concatenation(new HandleEntry(handle), result);
+    return result;
+}
+
+HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
+    // TODO: Check if this atom is really inserted in this AtomTable and get the
+    // exact Atom object  
+    HandleEntry* result = NULL;
+
+    Atom *atom = TLB::getAtom(handle);
+    if (atom->isMarkedForRemoval()) return result;
+    atom->markForRemoval();
+
+    // if recursive-flag is set, also extract all the links in the atom's incoming set
+    if (recursive) {
+        HandleEntry* next = NULL;
+        for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = next) {
+            next = in->next;
+            if (TLB::getAtom(in->handle)->isMarkedForRemoval() == false)
+                result = HandleEntry::concatenation(extract(in->handle, true), result);
         }
     }
     if (atom->getIncomingSet()) {
@@ -899,74 +907,33 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
         atom->unsetRemovalFlag();
         return result;
     }
-    
+
     //decrements the size of the table
     size--;
-    
-#ifdef USE_ATOM_HASH_SET    
-    //Extracts atom from hash_set
-    //printf("Removing atom %p in hash_set (type=%d, hashCode=%d) from atomSet %p\n", atom, atom->getType(), atom->hashCode(), atomSet); 
 
-/*    
-    printf("REMOVING ATOM (%p) FROM ATOMSET:\n", atom);
-    NMPrinter p;
-    p.print(atom);
-//    printf("%s\n", atom->toString().c_str());
-    int s1 = atomSet->size();
-    AtomHashSet::iterator it = atomSet->find(atom);
-    if (it == atomSet->end()) {
-        printf("ATOM TO BE EXTRACTED NOT FOUND IN ATOMSET: %s\n", atom->toString().c_str());
-    }
-*/ 
+#ifdef USE_ATOM_HASH_SET    
     atomSet->erase(atom);
-//    printf("AtomTable[%d]::atomSet->erase(%p) => size = %d\n", tableId, atom, atomSet->size());
-/*    
-    int s2 = atomSet->size();
-    if (s2 == s1) {
-        printf("ATOM EXTRACTED FROM ATOMSET BUT DIDNT MAKE IT DECREASE ITS SIZE: %s\n", atom->toString().c_str());
-    }
-*/    
 #endif
 
-        //printf("AtomTable::extract() Before clearing attributes\n");
+    // updates all global statistics regarding the removal of this atom
+    if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
-    // forces values to zero to update statistics correctly
-    //atom->setImportance(0); // TODO: Performance question: Can this be done after removing from index?
-    //atom->setHeat(0);
-
-        //printf("AtomTable::extract() After clearing attributes\n");
-        
-    if (useDSA){
-        // updates all global statistics regarding the removal of this atom
-        StatisticsMonitor::getInstance()->remove(atom);
-    }
-
-    //logger().fine("AtomTable::extract(): Before removing indices: atom = %p", atom);
     // remove from indices
     removeFromIndex(atom, typeIndex, TYPE_INDEX, atom->getType());
-    unsigned int nameHash = getNameHash(atom);
-    removeFromIndex(atom, nameIndex, NAME_INDEX, nameHash);
-    int bin = importanceBin(atom->getAttentionValue().getSTI());
-    removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, bin);
+    removeFromIndex(atom, nameIndex, NAME_INDEX, getNameHash(atom));
+    removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, importanceBin(atom->getAttentionValue().getSTI()));
     removeFromTargetTypeIndex(atom);
     removeFromPredicateIndex(atom);
 
-    //printf("AtomTable::extract(): after removing indices\n");
-    
     // remove from incoming sets
-    Handle atomHandle = TLB::getHandle(atom);
-
-    Link * link = dynamic_cast<Link *>(atom);
+    Link* link = dynamic_cast<Link*>(atom);
     if (link) {
-        int arity = link->getArity();
-        for (int i = 0; i < arity; i++) {
+        for (int i = 0; i < link->getArity(); i++) {
             Atom* target = link->getOutgoingAtom(i);
-            target->removeIncomingHandle(atomHandle);
+            target->removeIncomingHandle(handle);
         }
     }
-    
-    //printf("AtomTable::extract(): after removing from Network\n");
-    
+
     // remove from iterators
     lockIterators();
     for (unsigned int i = 0; i < iterators.size(); i++) {
@@ -975,11 +942,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
     }
     unlockIterators();
 
-    //printf("AtomTable::extract(): after removing from Iterators\n");
-
-    result = HandleEntry::concatenation(new HandleEntry(atomHandle), result);
-    
-    return result;
+    return HandleEntry::concatenation(new HandleEntry(handle), result);
 }
 
 bool AtomTable::remove(Handle handle, bool recursive) {
@@ -1068,63 +1031,151 @@ void AtomTable::removeFromPredicateIndex(Atom *atom) {
     delete[](predicateIndices);
 }
 
-void AtomTable::decayShortTermImportance() throw (RuntimeException) {
-
-    std::vector<Handle> clone(importanceIndex);
-
+HandleEntry* AtomTable::decayShortTermImportance() {
     for (unsigned int band = 0; band < (unsigned int) IMPORTANCE_INDEX_SIZE; band++) {
         Handle current = importanceIndex[band];
-        Handle previous;
-        if (current == clone[band]) {
-            // head has not changed
-            previous = UNDEFINED_HANDLE;
-        } else {
-            // head has changed: seek correct previous
-            previous = clone[band];
-            while (TLB::getAtom(previous)->next(IMPORTANCE_INDEX) != current) {
-                previous = TLB::getAtom(previous)->next(IMPORTANCE_INDEX);
-                if (TLB::isInvalidHandle(previous)) {
-                    throw RuntimeException(TRACE_INFO, "AtomTable - Found null previous");
-                }
-            }
-        }
         while (TLB::isValidHandle(current)) {
-            // the importance is updated.
             Atom* atom = TLB::getAtom(current);
-            decayAtomShortTermImportance(atom);
+            Handle next = atom->next(IMPORTANCE_INDEX);
+
+            // update sti
+            atom->getAVPointer()->decaySTI();
+
+            // update importanceIndex
+            // potential optimization: if we may reliably assume that all atoms
+            // decrease the sti by one unit (i.e. --sti), we could update the
+            // indexes with "importanceIndex[band - 1] = importanceIndex[band];"
             unsigned int newBand = AtomTable::importanceBin(atom->getAttentionValue().getSTI());
-            // if the atom has to be reindexed, it will be placed on the first
-            // position of the new list, and the previous element in the old 
-            // list will point to old next of the atom. In case the atom is the
-            // first of the list, its next will be the new head of the list.
-            if (newBand != band) {
-                if (TLB::isInvalidHandle(previous)) {
-                    // element in head
-                    clone[band] = atom->next(IMPORTANCE_INDEX);
-                } else {
-                    // element in body
-                    TLB::getAtom(previous)->setNext(IMPORTANCE_INDEX, atom->next(IMPORTANCE_INDEX));
-                }
-                Handle previousHead = clone[newBand];
-                clone[newBand] = current;
-                current = atom->next(IMPORTANCE_INDEX);
-                atom->setNext(IMPORTANCE_INDEX, previousHead);
-                StatisticsMonitor::getInstance()->atomChangeImportanceBin(atom->getType(), band, newBand);
-            } else {
-                previous = current;
-                current = atom->next(IMPORTANCE_INDEX);
-            }
+            removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, band);
+            atom->setNext(IMPORTANCE_INDEX, importanceIndex[newBand]);
+            importanceIndex[newBand] = current;
+
+            current = next;
+        }
+    }
+
+    // cache the minSTI
+    minSTI = config().get_int("MIN_STI");
+    unsigned int lowerStiBand = importanceBin(minSTI);
+    HandleEntry* oldAtoms = NULL;
+
+    for (unsigned int band = 0; band <= lowerStiBand; band++) {
+        Handle current = importanceIndex[band];
+        while (TLB::isValidHandle(current)) {
+            Atom* atom = TLB::getAtom(current);
+            Handle next = atom->next(IMPORTANCE_INDEX);
+            // remove it if too old
+            if (atom->isOld(minSTI))
+                oldAtoms = HandleEntry::concatenation(extractOld(current, true), oldAtoms);
+            current = next;
         }
     }
 
     // clone is copied to the real importance index lists.
-    importanceIndex = clone;
+    if (oldAtoms) clearIndexesAndRemoveAtoms(oldAtoms);
+    return oldAtoms;
 }
 
-void AtomTable::decayAtomShortTermImportance(Atom* atom) {
-    atom->getAVPointer()->decaySTI();
+void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID) {
+	//visit all atoms in index
+	for (unsigned int i = 0; i < index.size(); i++) {
+	    Handle p = index[i];
+        Handle q = UNDEFINED_HANDLE;
+        while (!TLB::isInvalidHandle(p)) {
+	        Atom *patom = TLB::getAtom(p);
+			//found marked element
+	        if (patom->getFlag(REMOVED_BY_DECAY)) {
+                //search next valid atom to put in index
+		        while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
+		        	p = patom->next(indexID);
+		        	//clear old index
+					patom->setNext(indexID, UNDEFINED_HANDLE);
+					patom = TLB::getAtom(p);
+		        }
+	    		// it is the first element of list
+	    		if (TLB::isInvalidHandle(q)) index[i] = p;
+	    		else TLB::getAtom(q)->setNext(indexID, p);
+	        } else {
+				//save previous element in q
+		        q = p;
+		        p = patom->next(indexID);
+	        }
+	    }
+	}
 }
 
+void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID) {
+	//visit all atoms in index
+	for (unsigned int i = 0; i < index.size(); i++) {
+        int targetIndexID = indexID | i;
+	    Handle p = index[i];
+	    Handle q = UNDEFINED_HANDLE;
+	    while (!TLB::isInvalidHandle(p)) {
+	        Atom *patom = TLB::getAtom(p);
+			//found marked element
+	        if (patom->getFlag(REMOVED_BY_DECAY)) {
+                //search next valid atom to put in index
+		        while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
+		        	p = patom->next(targetIndexID);
+		        	//clear old index
+					patom->setNext(targetIndexID, UNDEFINED_HANDLE);
+					patom = TLB::getAtom(p);
+		        }
+	    		// it is the first element of list
+	    		if (TLB::isInvalidHandle(q)) index[i] = p;
+	    		else TLB::getAtom(q)->setNext(targetIndexID, p);
+	        } else {
+				//save previous element in q
+		        q = p;
+		        p = patom->next(targetIndexID);
+	        }
+	    }
+	}
+
+}
+
+void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
+    if (extractedHandles == NULL) return;
+
+    // remove from indices
+    removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
+    removeMarkedAtomsFromIndex(typeIndex, TYPE_INDEX);
+    removeMarkedAtomsFromIndex(nameIndex, NAME_INDEX);
+    removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
+    removeMarkedAtomsFromMultipleIndex(targetTypeIndex, TARGET_TYPE_INDEX);
+    removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);
+
+    for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
+        Atom* atom = TLB::getAtom(curr->handle);
+#ifdef USE_ATOM_HASH_SET    
+        //Extracts atom from hash_set
+        atomSet->erase(atom);
+#endif
+        // update the AtomTable's size
+        size--;
+
+        if (useDSA)
+            // updates all global statistics regarding the removal of this atom
+            StatisticsMonitor::getInstance()->remove(atom);
+        
+        // remove from incoming sets
+        for (int i = 0; i < atom->getArity(); i++)
+            atom->getOutgoingAtom(i)->removeIncomingHandle(curr->handle);
+    
+        // remove from iterators
+        lockIterators();
+        for (unsigned int i = 0; i < iterators.size(); i++) {
+            // TODO: CAN THIS REALLY BE CALLED AFTER THE ATOM HAS BEEN
+            // REMOVED FROM TYPE INDEX ALREADY ?
+            removeFromIterator(atom, iterators[i]);
+        }
+        unlockIterators();
+
+        // remove from TLB
+        TLB::removeAtom(atom);
+    }
+    delete extractedHandles;
+}
 
 void AtomTable::removeFromIterator(Atom *atom, HandleIterator *iterator) {
     if (iterator->currentHandle == TLB::getHandle(atom)) {
