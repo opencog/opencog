@@ -25,7 +25,8 @@ class SenseSimilarity
 		int second_cnt;
 		int min_cnt;
 
-		bool follow_holo;
+		int follow_holo_cnt;
+		int max_follow_holo;
 		Handle join_candidate; // aka least common subsumer
 		bool up_first(Handle);
 		bool up_second(Handle);
