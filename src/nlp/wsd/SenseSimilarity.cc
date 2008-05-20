@@ -86,9 +86,23 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	first_cnt = 0;
 	min_cnt = 1<<28;
 
-	// Look up the hypernym tree, to see where the two senses have
-	// a common hypernym.
+	// Look up the hypernym tree, to see if the seccond sense is 
+	// immediately above the first sense in either the hypernym (is-a)
+	// or the holonym (has-a) hierarchy.
+	join_candidate = first_sense;
+	second_cnt = 0;
+	foreach_binary_link(second_sense, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_second, this);
+	foreach_binary_link(second_sense, HOLONYM_LINK,
+	                         &SenseSimilarity::up_second, this);
+
+	// Now look to see if there is an alternate, shorter, path,
+	// where the two senses have a common hypernym or holonym.
+	// (This also catches the case where the first sense is
+	// immediately above the second sense).
 	foreach_binary_link(first_sense, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_first, this);
+	foreach_binary_link(first_sense, HOLONYM_LINK,
 	                         &SenseSimilarity::up_first, this);
 
 	// At this point, min_cnt will contain the shortest distance between
@@ -116,18 +130,32 @@ bool SenseSimilarity::up_first(Handle up)
 	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
 
 	first_cnt ++;
+	if (up == second_sense)
+	{
+		if (first_cnt < min_cnt) min_cnt = first_cnt;
+		first_cnt --;
+		return false;
+	}
+
+	// Don't explore paths that are longer than the current shortest path.
+	if (first_cnt + 1 >= min_cnt) return false;
+
 	// printf ("height=%d up=%s\n", first_cnt, n->getName().c_str());
 
-	// Look to see if the join candidate appears anywhere on the up chain
-	// of the second sense.
+	// Look to see if the join candidate (candidate for the "least common
+	// subsumer") appears anywhere on the up chain of the second sense.
+	// Explore both the hypernym, and the holonym heirarchies.
 	join_candidate = up;
-
 	second_cnt = 0;
 	foreach_binary_link(second_sense, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_second, this);
+	foreach_binary_link(second_sense, HOLONYM_LINK,
 	                         &SenseSimilarity::up_second, this);
 
 	// Go up, see if there are shorter paths
 	foreach_binary_link(up, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_first, this);
+	foreach_binary_link(up, HOLONYM_LINK,
 	                         &SenseSimilarity::up_first, this);
 	first_cnt --;
 
@@ -139,23 +167,31 @@ bool SenseSimilarity::up_second(Handle up)
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(up));
 	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
 
+	// Don't explore paths that are longer than the current shortest path.
+	int dist = first_cnt + second_cnt + 1;
+	if (dist >= min_cnt) return false;
+
 	second_cnt ++;
 
 	// If we found the match to the candidate, compute the distance,
 	// and save it. The distance is number of steps from each sense,
-	// to thier common (indirect) hypernym.
+	// to thier common (indirect) hypernym, i.e. to thier "least common
+	// subsumer".
 	if (up == join_candidate)
 	{
-		int dist = first_cnt + second_cnt;
 		// printf("found dist=%d (%d+%d) min=%d\n", dist, first_cnt, second_cnt, min_cnt);
 		if (dist < min_cnt) min_cnt = dist;
+		second_cnt --;
+		return false;
 	}
-	else
-	{
-		// Else, if no match, search upwards.
-		foreach_binary_link(up, INHERITANCE_LINK,
-		                         &SenseSimilarity::up_second, this);
-	}
+
+	// Else, if no match, search upwards in the hypernym tree.
+	foreach_binary_link(up, INHERITANCE_LINK,
+	                         &SenseSimilarity::up_second, this);
+
+	// Give the holonym heirarchy a spin, too.
+	foreach_binary_link(up, HOLONYM_LINK,
+	                         &SenseSimilarity::up_second, this);
 
 	second_cnt --;
 	return false;
