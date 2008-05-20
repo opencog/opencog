@@ -1,20 +1,17 @@
-include_directories(
-${OPENCOG_SOURCE_DIR}/src/Util
+INCLUDE_DIRECTORIES(
+	${OPENCOG_SOURCE_DIR}/src/Util
 )
 
-link_directories(
-${OPENCOG_BINARY_DIR}
-${OPENCOG_BINARY_DIR}/src/Util
+LINK_DIRECTORIES(
+	${OPENCOG_BINARY_DIR}
+	${OPENCOG_BINARY_DIR}/src/Util
 )
 
-add_cxxtest(LoggerUTest)
-target_link_libraries(LoggerUTest Util)
+LINK_LIBRARIES(Util)
 IF(WIN32)
-target_link_libraries(LoggerUTest winmm)
+	LINK_LIBRARIES(winmm)
 ENDIF(WIN32)
 
-add_cxxtest(StringTokenizerUTest)
-target_link_libraries(StringTokenizerUTest Util)
-IF(WIN32)
-target_link_libraries(StringTokenizerUTest winmm)
-ENDIF(WIN32)
+ADD_CXXTEST(ConfigUTest)
+ADD_CXXTEST(LoggerUTest)
+ADD_CXXTEST(StringTokenizerUTest)

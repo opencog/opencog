@@ -1,4 +1,5 @@
-add_library(Util
+ADD_LIBRARY(Util
+	Config
 	exceptions
 	lazy_random_selector
     Logger
@@ -8,4 +9,6 @@ add_library(Util
 	tree
 )
 
-target_link_libraries(Util rt)
+TARGET_LINK_LIBRARIES(Util
+	rt
+)

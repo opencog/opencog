@@ -1,1 +1,1 @@
-add_subdirectory (hopfield)
+ADD_SUBDIRECTORY (hopfield)

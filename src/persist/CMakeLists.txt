@@ -7,15 +7,20 @@ INCLUDE_DIRECTORIES (
 	${IODBC_INCLUDE_DIR}
 )
 
-ADD_LIBRARY (persist STATIC
+ADD_LIBRARY(persist STATIC
 	odbcxx.cc
 	AtomStorage.cc
 )
 
-ADD_EXECUTABLE (sniff
+ADD_EXECUTABLE(sniff
 	sniff.cc
 )
 
-TARGET_LINK_LIBRARIES (persist iodbc)
+TARGET_LINK_LIBRARIES(persist iodbc)
 
-TARGET_LINK_LIBRARIES (sniff persist iodbc AtomSpace ${IODBC_LIBRARY})
+TARGET_LINK_LIBRARIES(sniff
+	persist
+	iodbc
+	AtomSpace
+	${IODBC_LIBRARY}
+)

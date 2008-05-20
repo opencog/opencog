@@ -1,30 +1,19 @@
 # ADD_CXXTEST macro from http://www.cmake.org/Wiki/CMakeMacroAddCxxTest
 
-FIND_PACKAGE(PythonInterp)
-
-# Find path to the cxxtestgen.py script (NB: this stuff should move to FindCxxtest.cmake)
-# CXXTEST_BIN_DIR enviroment variable must have been defined already
-FIND_PATH(CXXTEST_BIN_DIR cxxtestgen.py
-    $ENV{CXXTEST_BIN_DIR}
-    /usr/bin
-    /usr/local/bin
-    DOC "Where is cxxtest located?"
-)
-
-SET(CXXTESTGEN "${CXXTEST_BIN_DIR}/cxxtestgen.py")
+FIND_PACKAGE(Cxxtest REQUIRED)
 
 MACRO(ADD_CXXTEST NAME)
-    IF(PYTHONINTERP_FOUND)
+    IF(CXXTEST_FOUND)
         ADD_CUSTOM_COMMAND(
             OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cpp
             COMMAND
-                ${PYTHON_EXECUTABLE} ${CXXTESTGEN}
+                ${PYTHON_EXECUTABLE} ${CXXTEST_GEN}
                 --runner=ErrorPrinter
                 -o ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.cxxtest
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.cxxtest ${ARGN}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
-    ENDIF(PYTHONINTERP_FOUND)
+    ENDIF(CXXTEST_FOUND)
 
     ADD_EXECUTABLE(${NAME} ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cpp ${ARGN})
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
@@ -36,7 +25,7 @@ ENDMACRO(ADD_CXXTEST)
 #If by some reason you prefer separate compilation of each part, you may use the variation:
 
 MACRO(ADD_CXXTEST_SEP NAME)
-    IF(PYTHONINTERP_FOUND)
+    IF(CXXTEST_FOUND)
         # generate the parts
         FOREACH(_PART ${ARGN})
             GET_FILENAME_COMPONENT(_NAME ${_PART} NAME)
@@ -44,7 +33,7 @@ MACRO(ADD_CXXTEST_SEP NAME)
             ADD_CUSTOM_COMMAND(
                 OUTPUT ${_NAME_WE}.cpp
                 COMMAND
-                    ${PYTHON_EXECUTABLE} ${CXXTESTGEN}
+                    ${PYTHON_EXECUTABLE} ${CXXTEST_GEN}
                     --part
                     -o ${_NAME_WE}.cpp
                     ${_NAME}
@@ -57,12 +46,12 @@ MACRO(ADD_CXXTEST_SEP NAME)
         ADD_CUSTOM_COMMAND(
             OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}_runner.cpp
             COMMAND
-                ${PYTHON_EXECUTABLE} ${CXXTESTGEN}
+                ${PYTHON_EXECUTABLE} ${CXXTEST_GEN}
                 --runner=ErrorPrinter --root
                 -o ${NAME}_runner.cpp
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
-    ENDIF(PYTHONINTERP_FOUND)
+    ENDIF(CXXTEST_FOUND)
 
     # enumerate all generated files
     SET(PARTS ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}_runner.cpp)

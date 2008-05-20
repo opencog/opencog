@@ -1,1 +1,1 @@
-add_subdirectory (attention)
+ADD_SUBDIRECTORY(attention)
