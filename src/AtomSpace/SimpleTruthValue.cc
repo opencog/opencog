@@ -34,6 +34,10 @@ SimpleTruthValue::SimpleTruthValue(float m, float c){
     count = c;
 }
 
+SimpleTruthValue::SimpleTruthValue(const TruthValue& source) {
+    mean = source.getMean();
+    count = source.getCount();
+}
 SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source) {
     mean = source.mean;
     count = source.count;

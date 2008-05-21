@@ -46,6 +46,7 @@ protected:
 public:
 
     SimpleTruthValue(float mean,float count);
+    SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(SimpleTruthValue const&);
 
     SimpleTruthValue* clone() const;
