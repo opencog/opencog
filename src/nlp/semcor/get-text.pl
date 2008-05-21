@@ -33,9 +33,27 @@ while(<>)
 	}
 	$xml .= "\n";
 }
-print $xml;
+# print $xml;
 
-# my $xmlobj = new XML::SimpleObject(XML => $xml);
+my $xmlobj = new XML::SimpleObject(XML => $xml);
+
+foreach $para ($xmlobj->child("contextfile")
+                        ->child("context")
+                        ->child("p"))
+{
+	foreach $sent ($para->child("s"))
+	{
+		foreach $colo ($sent->child("wf"))
+		{
+			$word = $colo->value;
+			$word =~ s/_/ /;
+			print $word;
+			print " ";
+		}
+		print "\n";
+	}
+
+}
 
 
 
