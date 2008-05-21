@@ -117,6 +117,7 @@ inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
 }
 
 /**
+ * foreach_dict_word_sense_pos -- 
  * Given a dictionary word, call the callback for each word sense
  * associated with that dictionary word, for the indicated parts-of-speech.
  * The argument is presumed to point at a specific dictionary word.
@@ -177,8 +178,13 @@ inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
 }
 
 /**
- * Return the part-of-speech for the indicated word-instance.
- * @handle:  handle of a word-instance node.
+ * get_part_of_speech - return part of speech for indicated atom.
+ * @handle:  handle of a concept (word-instance or word-sense node).
+ *
+ * Return the part-of-speech for the indicated concept (word-instance
+ * or word-sense node). This is just a predicate, looking for a link
+ * type of "PartOfSpeech", and returning the second element of that
+ * link, (which is assumed to be a node).
  *
  * Each word-instance is assumed to be linked to a part-of-speech via
  *
@@ -186,8 +192,15 @@ inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
  *       <ConceptNode name="bark_169" />
  *       <DefinedLinguisticConceptNode name="#noun" />
  *    </PartOfSpeechLink>
+ *
+ * Word-sense nodes are similarly linked:
+ *
+ *    <PartOfSpeechLink>
+ *       <WordSenseNode name="bark_sense_2" />
+ *       <ConceptNode name="noun" />
+ *    </PartOfSpeechLink>
  */
-inline const std::string& get_pos_of_word_instance(Handle h)
+inline const std::string& get_part_of_speech(Handle h)
 {
 	Atom * word_instance = TLB::getAtom(h);
 

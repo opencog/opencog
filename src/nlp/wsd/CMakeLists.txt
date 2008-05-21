@@ -4,6 +4,7 @@ ADD_LIBRARY (wsd STATIC
 	MihalceaLabel.cc
 	NNAdjust.cc
 	ReportRank.cc
+	SenseCache.cc
 	SenseRank.cc
 	SenseSimilarity.cc
 	WordSenseProcessor.cc

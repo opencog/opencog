@@ -34,6 +34,9 @@ SenseRank::SenseRank(void)
 	// For multi-sentence use, this should probably be pumped up.
 	double N = 50;
 	convergence_damper = 1.0/N;
+
+	// The absolute value to which convergence is desired.
+	convergence_limit = 0.01;
 }
 
 SenseRank::~SenseRank()
@@ -56,28 +59,72 @@ void SenseRank::iterate(Handle h)
  */
 bool SenseRank::rank_parse(Handle h)
 {
+	converge = 1.0;
+	noun_converge = 1.0;
+	verb_converge = 1.0;
 	foreach_word_instance(h, &SenseRank::start_word, this);
 	return false;
 }
 
 /**
- * Pick some random word sense to start at.
+ * For every word sense, try walking the graph from there. Some word
+ * senses might be disconnected from the main graph, but we don't know
+ * a-priori which ones, so have to try them all.
  */
 bool SenseRank::start_word(Handle h)
 {
 	// Only noun-senses and verb-senses get ranked.
-	std::string pos = get_pos_of_word_instance(h);
-	if (pos.compare("#noun") && pos.compare("#verb")) return false;
+	std::string pos = get_part_of_speech(h);
+	if (0 == pos.compare("#noun"))
+	{
+		converge = noun_converge;
+	}
+	else if (0 == pos.compare("#verb"))
+	{
+		converge = verb_converge;
+	}
+	else
+	{
+		return false;
+	}
+	if ((noun_converge < convergence_limit) && 
+	    (verb_converge < convergence_limit)) return true;
+
+	if (converge < convergence_limit) return false;
 
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
+
+	if (0 == pos.compare("#noun"))
+	{
+		noun_converge = converge;
+	}
+	else
+	{
+		verb_converge = converge;
+	}
 	return false;
 }
 
+/**
+ * Walk randomly over a connected component. 
+ */
 bool SenseRank::start_sense(Handle word_sense_h,
                             Handle sense_link_h)
 {
-	rand_walk(sense_link_h);
-	return true;
+	// Make sure that this word sense is actually connected to something.
+	// if its not, return, and better lunk next time.
+	edge_sum = 0.0;
+	foreach_sense_edge(sense_link_h, &SenseRank::inner_sum, this);
+	if (edge_sum < 1.0e-10) return false;
+
+	// Walk randomly over the connected component 
+	while (convergence_limit < converge)
+	{
+		rank_sense(sense_link_h);
+		sense_link_h = pick_random_edge(sense_link_h);
+	}
+
+	return false;
 }
 
 /**
@@ -187,19 +234,6 @@ Handle SenseRank::pick_random_edge(Handle h)
 	edge_sum = 0.0;
 	foreach_sense_edge(h, &SenseRank::random_sum, this);
 	return next_sense;
-}
-
-/**
- * Walk randomly over a connected component. 
- */
-void SenseRank::rand_walk(Handle h)
-{
-	converge = 1.0;
-	while (0.01 < converge)
-	{
-		rank_sense(h);
-		h = pick_random_edge(h);
-	}
 }
 
 /* ============================== END OF FILE ====================== */

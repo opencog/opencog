@@ -10,8 +10,6 @@
 #ifndef OPENCOG_SENSE_SIMILARITY_H
 #define OPENCOG_SENSE_SIMILARITY_H
 
-#include <string>
-
 #include "SimpleTruthValue.h"
 
 namespace opencog {

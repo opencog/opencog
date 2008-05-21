@@ -52,16 +52,24 @@ bool ReportRank::report_parse(Handle h)
 bool ReportRank::report_word(Handle h)
 {
 	// Only noun-senses and verb-senses get ranked.
-	std::string pos = get_pos_of_word_instance(h);
+	std::string pos = get_part_of_speech(h);
 	if (pos.compare("#noun") && pos.compare("#verb")) return false;
 
 	hi_score = 0.0;
+	hi_scorer = UNDEFINED_HANDLE;
 	foreach_word_sense_of_inst(h, &ReportRank::choose_sense, this);
 
 	Node *word = dynamic_cast<Node *>(TLB::getAtom(h));
-	Node *sense = dynamic_cast<Node *>(TLB::getAtom(hi_scorer));
-	printf ("%s sense %s score=%g\n", 
-	        word->getName().c_str(), sense->getName().c_str(), hi_score);
+	if (hi_scorer != UNDEFINED_HANDLE)
+	{
+		Node *sense = dynamic_cast<Node *>(TLB::getAtom(hi_scorer));
+		printf ("%s sense %s score=%g\n", 
+		        word->getName().c_str(), sense->getName().c_str(), hi_score);
+	}
+	else
+	{
+		printf ("No word sense found for %s\n", word->getName().c_str());
+	}
 
 	return false;
 }

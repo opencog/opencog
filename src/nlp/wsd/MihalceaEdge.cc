@@ -10,6 +10,7 @@
 
 #include "ForeachWord.h"
 #include "MihalceaEdge.h"
+#include "SenseCache.h"
 #include "SenseSimilarity.h"
 #include "SimpleTruthValue.h"
 
@@ -108,8 +109,8 @@ bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
 
 	// Don't bother linking words with different parts-of-speech;
 	// the similarity measures don't support these.
-	std::string first_pos = get_pos_of_word_instance(first);
-	std::string second_pos = get_pos_of_word_instance(second);
+	std::string first_pos = get_part_of_speech(first);
+	std::string second_pos = get_part_of_speech(second);
 	if (0 != first_pos.compare(second_pos))
 	{
 		return false;
@@ -166,16 +167,30 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
 	// printf("second sense %s!\n", sense->getName().c_str());
+	
+	// Get the similarity between the two word senses out of the 
+	// cache (if it exists).
+	SenseCache sc;
+	SimpleTruthValue stv(0.5,0.5);
+	stv = sc.similarity(first_word_sense, second_word_sense_h);
+	if (stv == TruthValue::DEFAULT_TV())
+	{
+		// Use a word-sense similarity/relationship measure to assign an 
+		// initial truth value to the edge.
+		SenseSimilarity ss;
+		stv = ss.lch_similarity(first_word_sense, second_word_sense_h);
+		Link * l = sc.set_similarity(first_word_sense, second_word_sense_h, stv);
+		atom_space->addRealAtom(*l);
+		delete l;
+	}
+
+	// Skip making edges between utterly unrelated nodes. 
+	if (stv.getMean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
 	std::vector<Handle> out;
 	out.push_back(first_sense_link);
 	out.push_back(second_sense_link);
-
-	// Use a word-sense similarity/relationship measure to assign an 
-	// initial truth value to the edge.
-	SenseSimilarity *ss = new SenseSimilarity();
-	SimpleTruthValue stv = ss->lch_similarity(first_word_sense, second_word_sense_h);
 
 	atom_space->addLink(COSENSE_LINK, out, stv);
 

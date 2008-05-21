@@ -25,8 +25,9 @@ SenseSimilarity::SenseSimilarity(void)
 	// Set 'max_follow_holo' to a small number to limit the total number
 	// of holonym relations to be followed. Setting this to a large number
 	// leads to an exponential explosion of searches performed. Currently,
-	// the best value appears to be '1'.  Larger numbers can lead to hours
-	// of cpu time per sentence.
+	// the best value appears to be '1'.  Numbers larger than 4 can lead
+	// to hours of cpu time per sentence, since cpu time usage is 
+	// proportional to 2^(n-factorial). Wow. 
 	max_follow_holo = 1;
 }
 
@@ -72,11 +73,11 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// If the parts-of-speech don't match, the similarity is zero.
 	// If either one is an adjective or adverb, they're unrelated.
 	// (Although we are not very confident of that!)
-	std::string first_pos = get_pos_of_word_instance(first_sense);
-	std::string second_pos = get_pos_of_word_instance(second_sense);
+	std::string first_pos = get_part_of_speech(first_sense);
+	std::string second_pos = get_part_of_speech(second_sense);
 	if ((0 != first_pos.compare(second_pos)) ||
-	    (0 == first_pos.compare("#adj")) ||
-	    (0 == first_pos.compare("#adv")))
+	    (0 == first_pos.compare("adj")) ||
+	    (0 == first_pos.compare("adv")))
 	{
 		SimpleTruthValue stv(0.0, 0.5);
 		return stv;
@@ -85,7 +86,7 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// As of wordnet-3.0, the depth of verb taxonomy is 14, noun is 20.
 	double depth = 14;
 	double norm = -3.3323;
-	if (0 == first_pos.compare("#noun"))
+	if (0 == first_pos.compare("noun"))
 	{
 		depth = 20;
 		norm = -3.6889;

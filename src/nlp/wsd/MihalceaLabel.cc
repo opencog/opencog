@@ -61,7 +61,7 @@ Node *n = dynamic_cast<Node *>(word_instance);
 printf("found word-inst %s\n",  n->toString().c_str());
 
 	// Find the part-of-speech for this word instance.
-	std::string word_inst_pos = get_pos_of_word_instance(h);
+	std::string word_inst_pos = get_part_of_speech(h);
 
 	word_inst_pos.erase(0,1);  // remove leading hash sign
 
@@ -106,8 +106,8 @@ printf("found word-sense %s\n",  n->toString().c_str());
 	out.push_back(TLB::getHandle(word_instance));
 	out.push_back(TLB::getHandle(word_sense));
 
-	// Give it a mediocre truth value, very low confidence.
-	SimpleTruthValue stv(0.5, 1.0);
+	// Give it a false truth value, very low confidence.
+	SimpleTruthValue stv(0.0, 1.0);
 	stv.setConfidence(0.01);
 	atom_space->addLink(INHERITANCE_LINK, out, stv);
 

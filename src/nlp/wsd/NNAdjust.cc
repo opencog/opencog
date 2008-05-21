@@ -26,6 +26,7 @@ NNAdjust::NNAdjust(void)
 	 * senses of any two words related by _nn (noun modifier) relations.
 	 */
 	strength_adjust = 1.3;
+	strength_adjust = 1.0;
 }
 
 NNAdjust::~NNAdjust()
