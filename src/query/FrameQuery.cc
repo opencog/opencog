@@ -38,11 +38,14 @@ FrameQuery::~FrameQuery()
 {
 }
 
+#ifdef DEBUG
 static void prt(Atom *atom)
 {
    std::string str = atom->toString();
    printf ("%s\n", str.c_str());
 }
+#endif
+
 /* ======================================================== */
 /* Routines to help put the query into normal form. */
 
