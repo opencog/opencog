@@ -715,10 +715,13 @@ class AtomSpace {
      */
     template<class T>
     inline bool foreach_handle_of_type(Type atype,
-                                       bool (T::*cb)(Handle), T *data)
+                                       bool (T::*cb)(Handle), T *data,
+                                       bool subclass=false)
     {
         std::list<Handle> handle_set;
-        getHandleSet(back_inserter(handle_set), atype, NULL);
+        // The intended signatue is
+        // getHandleSet(OutputIterator result, Type type, bool subclass)
+        getHandleSet(back_inserter(handle_set), atype, subclass);
     
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i;
@@ -733,10 +736,11 @@ class AtomSpace {
     
     template<class T>
     inline bool foreach_handle_of_type(const char * atypename, 
-                                       bool (T::*cb)(Handle), T *data)
+                                       bool (T::*cb)(Handle), T *data,
+                                       bool subclass=false)
     {
         Type atype = ClassServer::getType(atypename);
-        return foreach_handle_of_type(atype, cb, data);
+        return foreach_handle_of_type(atype, cb, data, subclass);
     }
 
     /* ----------------------------------------------------------- */
