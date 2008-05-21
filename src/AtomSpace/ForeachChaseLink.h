@@ -119,8 +119,7 @@ class PrivateUseOnlyChaseLink
 		inline bool do_follow_link(Handle h, Type ltype, int from, int to, T *data)
 		{
 			Atom *atom = TLB::getAtom(h);
-
-			if (NULL == atom) return NULL;
+			if (NULL == atom) return false;
 
 			// Look for incoming links that are of the given type.
 			// Then grab the thing that they link to.
@@ -138,8 +137,7 @@ class PrivateUseOnlyChaseLink
 		inline bool do_follow_unordered_binary_link(Handle h, Type ltype, T *data)
 		{
 			Atom *atom = TLB::getAtom(h);
-
-			if (NULL == atom) return NULL;
+			if (NULL == atom) return false;
 
 			// Look for incoming links that are of the given type.
 			// Then grab the thing that they link to.
