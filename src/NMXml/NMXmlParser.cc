@@ -428,7 +428,7 @@ static void nativeEndElement(void *userData, const char *name)
                     snprintf(buff, 300,
                              "XML parse error: relationship type mismatch at line %d.\n"
                              "\txml type=%s(%d) current atom type=%d %s", 
-                             XML_GetCurrentLineNumber(ud->parser),
+                             (int) XML_GetCurrentLineNumber(ud->parser),
                              name, type, currentAtom->getType(), currentAtom->toString().c_str());
                     throw InconsistenceException(TRACE_INFO, buff);
                 }
@@ -559,7 +559,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
             fprintf(stderr,
                     "%s at line %d\n",
                     XML_ErrorString(XML_GetErrorCode(parser)),
-                    XML_GetCurrentLineNumber(parser));
+                    (int) XML_GetCurrentLineNumber(parser));
             fprintf(stderr, "\tBuffer was:\n");
             fflush(stderr);
             fwrite(buf, 1, len, stderr);

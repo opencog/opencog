@@ -34,7 +34,7 @@ using namespace opencog;
 
 // messages greater than this will be truncated
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
-const char* levelStrings[] = {"ERROR","WARN","INFO","DEBUG","FINE",""};
+const char* levelStrings[] = {"ERROR","WARN","INFO","DEBUG","FINE"};
 
 Logger::~Logger() {
 	if (f != NULL) fclose(f);
@@ -150,7 +150,8 @@ const char* Logger::getLevelString(const Logger::Level level) {
 }
 
 const Logger::Level Logger::getLevelFromString(const std::string& levelStr) {
-    for (int i = 0; levelStrings[i] != ""; ++i) {
+    unsigned int nLevels = sizeof(levelStrings)/sizeof(levelStrings[0]);
+    for (unsigned int i = 0; i < nLevels; ++i) {
         if (strcasecmp(levelStrings[i], levelStr.c_str()) == 0)
             return ((Logger::Level) i);
     }
