@@ -1,13 +1,17 @@
 #! /usr/bin/env perl
-
-# XML::Simple complains about the xml markup used in the semcore files :-(
+#
+# This file just stripes out the sentences from the semcor files.
+# Unfortunately, the XML::SimpleParser is buggy as all get-out, 
+# and is unusable. Booooooo!
+#
+# XML::Simple complains about unquoted attribute values in semcor files.
+# That's just stupid.
 # Grrr so does XML::SimpleObject
+# WTF Don't actual human beings actually use this shit?
 #
 # use XML::Simple;
 # my $xs1 = XML::Simple->new();
 # my $doc = $xs1->XMLin("-");
-
-use XML::SimpleObject;
 
 $xml = "";
 
@@ -35,25 +39,37 @@ while(<>)
 }
 # print $xml;
 
+# Grrrr XML::SimpleObject does not preserve the order of the children! WTF!
+# That is the most inane, insulting bug to date.  Arghhh!
+#
+use XML::SimpleObject;
 my $xmlobj = new XML::SimpleObject(XML => $xml);
-
 foreach $para ($xmlobj->child("contextfile")
                         ->child("context")
                         ->child("p"))
 {
 	foreach $sent ($para->child("s"))
 	{
-		foreach $colo ($sent->child("wf"))
+		@ch = $sent->children;
+		foreach $elt (@ch)
 		{
-			$word = $colo->value;
-			$word =~ s/_/ /;
-			print $word;
-			print " ";
+			$name = $elt->name;
+			if ($name =~ "wf")
+			{
+				$word = $elt->value;
+				$word =~ s/_/ /g;
+				if (!($word =~ /^\'/)) { 
+					print " ";
+				}
+				print $word;
+			}
+			if ($name =~ "punc")
+			{
+				print $elt->value;
+			}
 		}
 		print "\n";
 	}
-
 }
-
 
 
