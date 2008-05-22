@@ -7,6 +7,9 @@ This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on word sense
 disambiguation.
 
+The semcor directory contains some trite SemCor utilities. SemCor
+is a WSJ corpus marked up with word senses.
+
 The wordnet-import directory contains stand-alone code (i.e. not a part
 of opencog) that will walk over the wordnet database, and convert it 
 into OpenCog NMXML that can be leaded into opencog.
