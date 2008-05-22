@@ -16,6 +16,7 @@
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
 #include "NNAdjust.h"
+#include "ParseRank.h"
 #include "SenseRank.h"
 #include "ReportRank.h"
 
@@ -28,7 +29,8 @@ class Mihalcea
 		MihalceaLabel *labeller;
 		MihalceaEdge *edger;
 		NNAdjust *nn_adjuster;
-		SenseRank *ranker;
+		ParseRank *parse_ranker;
+		SenseRank *sense_ranker;
 		ReportRank *reporter;
 
 		std::vector<Handle> sentence_list;

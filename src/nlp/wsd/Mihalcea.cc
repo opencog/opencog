@@ -10,6 +10,7 @@
 #include "Mihalcea.h"
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
+#include "ParseRank.h"
 #include "SenseRank.h"
 #include "ReportRank.h"
 
@@ -21,7 +22,8 @@ Mihalcea::Mihalcea(void)
 	labeller = new MihalceaLabel();
 	edger = new MihalceaEdge();
 	nn_adjuster = new NNAdjust();
-	ranker = new SenseRank();
+	parse_ranker = new ParseRank();
+	sense_ranker = new SenseRank();
 	reporter = new ReportRank();
 }
 
@@ -31,7 +33,8 @@ Mihalcea::~Mihalcea()
 	delete labeller;
 	delete edger;
 	delete nn_adjuster;
-	delete ranker;
+	delete parse_ranker;
+	delete sense_ranker;
 	delete reporter;
 }
 
@@ -47,10 +50,12 @@ void Mihalcea::process_sentence(Handle h)
 	// Add handle to sentence to our running list.
 	sentence_list.push_back(h);
 
+	Handle top_parse = parse_ranker->get_top_ranked_parse(h);
+
 	labeller->annotate_sentence(h);
 	edger->annotate_sentence(h);
 	nn_adjuster->adjust_sentence(h);
-	ranker->iterate(h);
+	sense_ranker->iterate(h);
 	reporter->report_rank(h);
 }
 

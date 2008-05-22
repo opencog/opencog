@@ -32,10 +32,10 @@ ParseRank::~ParseRank()
  * The returned value is the highest-ranked parse of the 
  * bunch.
  */
-Handle ParseRank::getTop_ranked_parse(Handle h)
+Handle ParseRank::get_top_ranked_parse(Handle h)
 {
-	top = INVALID_HANDLE;
-	rank = -123456.0;
+	top = UNDEFINED_HANDLE;
+	top_rank = -123456.0;
 	foreach_parse(h, &ParseRank::lookat_parse, this);
 	return top;
 }
