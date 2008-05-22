@@ -27,6 +27,8 @@ class MihalceaLabel
 		bool annotate_word_sense(Handle);
 
 		Atom * word_instance;
+		int total_words;
+		int total_labels;
 
 	public:
 		MihalceaLabel(void);

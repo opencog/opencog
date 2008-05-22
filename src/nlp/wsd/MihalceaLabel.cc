@@ -13,6 +13,8 @@
 #include "Node.h"
 #include "SimpleTruthValue.h"
 
+#define DEBUG
+
 using namespace opencog;
 
 MihalceaLabel::MihalceaLabel(void)
@@ -42,7 +44,13 @@ void MihalceaLabel::annotate_sentence(Handle h)
  */
 void MihalceaLabel::annotate_parse(Handle h)
 {
+	total_words = 0;
+	total_labels = 0;
 	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
+#ifdef DEBUG
+	printf("Applied %d word-sense labels to %d words\n", total_labels, total_words);
+	printf("---------------------------------\n");
+#endif
 }
 
 bool MihalceaLabel::annotate_parse_f(Handle h)
@@ -60,9 +68,6 @@ bool MihalceaLabel::annotate_word(Handle h)
 {
 	word_instance = TLB::getAtom(h);
 
-Node *n = dynamic_cast<Node *>(word_instance);
-printf("found word-inst %s\n",  n->toString().c_str());
-
 	// Find the part-of-speech for this word instance.
 	std::string word_inst_pos = get_part_of_speech(h);
 
@@ -73,13 +78,18 @@ printf("found word-inst %s\n",  n->toString().c_str());
 	if (0 == word_inst_pos.compare("prep")) return false;
 	if (0 == word_inst_pos.compare("punctuation")) return false;
 
-printf("found inst-pos %s\n",  word_inst_pos.c_str());
 
 	Handle dict_word_h = get_dict_word_of_word_instance(h);
 
-n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
-printf("found word-dict %s\n",  n->toString().c_str());
- 
+#ifdef DEBUG
+	total_words ++;
+	Node *n = dynamic_cast<Node *>(word_instance);
+	printf("found word-inst %s\n",  n->toString().c_str());
+	printf("\thas inst-pos %s\n",  word_inst_pos.c_str());
+	n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
+	printf("\thas word-dict %s\n",  n->toString().c_str());
+#endif
+
 	// loop over all word senses with this part-of-speech.
 	foreach_dict_word_sense_pos(dict_word_h, word_inst_pos,
 	                        &MihalceaLabel::annotate_word_sense, this);
@@ -99,8 +109,11 @@ bool MihalceaLabel::annotate_word_sense(Handle h)
 {
 	Atom *word_sense = TLB::getAtom(h);
 
-Node *n = dynamic_cast<Node *>(word_sense);
-printf("found word-sense %s\n",  n->toString().c_str());
+#ifdef DEBUG
+	Node *n = dynamic_cast<Node *>(word_sense);
+	printf("\thas word-sense %s\n",  n->toString().c_str());
+	total_labels++;
+#endif
 
 	// Create a link connecting this word-instance to this word-sense.
 	std::vector<Handle> out;
