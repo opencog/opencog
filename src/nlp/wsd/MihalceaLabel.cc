@@ -63,8 +63,6 @@ printf("found word-inst %s\n",  n->toString().c_str());
 	// Find the part-of-speech for this word instance.
 	std::string word_inst_pos = get_part_of_speech(h);
 
-	word_inst_pos.erase(0,1);  // remove leading hash sign
-
 	// Reject some unwanted parts-of-speech.
 	if (0 == word_inst_pos.compare("WORD")) return false;
 	if (0 == word_inst_pos.compare("det")) return false;

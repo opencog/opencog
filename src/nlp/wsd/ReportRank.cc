@@ -53,7 +53,7 @@ bool ReportRank::report_word(Handle h)
 {
 	// Only noun-senses and verb-senses get ranked.
 	std::string pos = get_part_of_speech(h);
-	if (pos.compare("#noun") && pos.compare("#verb")) return false;
+	if (pos.compare("noun") && pos.compare("verb")) return false;
 
 	hi_score = 0.0;
 	hi_scorer = UNDEFINED_HANDLE;

@@ -75,11 +75,11 @@ bool SenseRank::start_word(Handle h)
 {
 	// Only noun-senses and verb-senses get ranked.
 	std::string pos = get_part_of_speech(h);
-	if (0 == pos.compare("#noun"))
+	if (0 == pos.compare("noun"))
 	{
 		converge = noun_converge;
 	}
-	else if (0 == pos.compare("#verb"))
+	else if (0 == pos.compare("verb"))
 	{
 		converge = verb_converge;
 	}
@@ -94,7 +94,7 @@ bool SenseRank::start_word(Handle h)
 
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
 
-	if (0 == pos.compare("#noun"))
+	if (0 == pos.compare("noun"))
 	{
 		noun_converge = converge;
 	}
