@@ -72,8 +72,25 @@ bool MihalceaEdge::annotate_parse_f(Handle h)
  * For each pair of parses, create word-sense edge-links between
  * the two parses.
  */
-void MihalceaEdge::annotate_parse_pair(Handle earlier, Handle later)
+void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 {
+	foreach_word_instance(ha, &MihalceaEdge::look_at_word, this);
+	std::set<Handle> pa_words = words;
+	words.clear();
+	foreach_word_instance(hb, &MihalceaEdge::look_at_word, this);
+
+	// At this point, "pa_words" contains all of the relex-participating
+	// words in parse ha, and "words" contains those of parse hb.
+	// Loop over word-pairs, and annotate them.
+	std::set<Handle>::const_iterator ia;
+	for (ia = pa_words.begin(); ia != pa_words.end(); ia++)
+	{
+		std::set<Handle>::const_iterator ib;
+		for (ib = words.begin(); ib != words.end(); ib++)
+		{
+			annotate_word_pair(*ia, *ib);
+		}
+	}
 }
 
 /**
