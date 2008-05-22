@@ -244,14 +244,6 @@ A hyponym for wood-bark is that cork is a kind of bark:
 
 Note the reversed order between the hypo- and hyper- representations.
 
-
-WordNet uses the phrase "sister term" instead of "synonym" to relate 
-similar word senses. WordNet reserves the use of "synonym" for relating
-words, not word senses. Related word senses will be linked with
-SimilarityLinks
-
-   SIMILARITY_LINK <- UNORDERED_LINK
-
 WordNet includes the idea of a holonym, namely, that something is a
 part of something else, and its converse, the meronym, that something is
 composed of parts. It furthermore subdivides these into three
@@ -279,8 +271,29 @@ To continue with the tree-bark example:
       <WordSenseNode name="bark_sense_23" />
    </HolonyLink>
 
-WordNet as a number of other relations, including: antonyms, 
-entailment (e.g. weaning entails nursing), cause, participles, pertaining-to.
+There are distinct hypernym hierarchies for nouns and verbs;
+these hierarchies do not touch. Only nouns have a holonym
+hierarchy.
+
+Nouns and verbs are related by means of "derivationally
+related forms", e.g. verbized nouns, etc.
+
+Adjectives and adverbes are not organized in hypernym or holonym 
+hierarchies. Instead, they are grouped according to similarity.
+(SIMPTR). The similarity relation is not used for nouns and verbs.
+The similarity relation will be mapped with with SimilarityLinks
+
+   SIMILARITY_LINK <- UNORDERED_LINK
+
+
+WordNet as a number of other relations, including: 
+troponyms,
+sister terms,
+antonyms, 
+entailment (e.g. weaning entails nursing),
+cause, 
+participles, 
+pertaining-to.
 
 Actual NMXML details
 --------------------
