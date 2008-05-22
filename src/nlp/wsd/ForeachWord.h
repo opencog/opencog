@@ -202,12 +202,14 @@ inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
  */
 inline const std::string& get_part_of_speech(Handle h)
 {
+	static std::string empty;
 	Atom * word_instance = TLB::getAtom(h);
 
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
 	Atom *inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
 	Node *n = dynamic_cast<Node *>(inst_pos);
+	if (n == NULL) return empty;
 	return n->getName();
 }
 
