@@ -14,11 +14,11 @@ while(<>)
 	s/_/ /g;  # replace underscores.
 
 	s/\'\'/\"/g;
-	s/\`\`/\"/g;
+	s/\`\`/\"/g;  # replace double-quotes.
 
-	if (!($_)) { next; }
+	if (!($_)) { next; }  # skip empty lines
 
-	if ((!(/^[\'\"\,\.]/)) && ($leading_quote == 0))
+	if ((!(/^[\'\"\,\.]/)) && ($leading_quote == 0) && (!(/\'/)))
 	{ 
 		print " ";
 	}
