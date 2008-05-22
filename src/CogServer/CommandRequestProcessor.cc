@@ -290,6 +290,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         if (args.size() != 0) {
             answer = "shutdown: invalid command syntax";
         } else {
+            sql_close();
             server().stop();
         }
     } else if (command == "sql-open") {
