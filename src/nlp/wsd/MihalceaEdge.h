@@ -23,9 +23,9 @@ class MihalceaEdge
 	private:
 		AtomSpace *atom_space;
 		bool annotate_parse_f(Handle);
-		bool annotate_word(Handle);
 
 		std::set<Handle> words;
+		bool look_at_word(Handle);
 		bool look_at_relation(const std::string &, Handle, Handle);
 		bool annotate_word_pair(Handle, Handle);
 
@@ -41,6 +41,7 @@ class MihalceaEdge
 		void set_atom_space(AtomSpace *as);
 		void annotate_sentence(Handle);
 		void annotate_parse(Handle);
+		void annotate_parse_pair(Handle, Handle);
 };
 }
 

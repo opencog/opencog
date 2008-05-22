@@ -47,26 +47,10 @@ void MihalceaEdge::annotate_sentence(Handle h)
  */
 void MihalceaEdge::annotate_parse(Handle h)
 {
-	foreach_word_instance(h, &MihalceaEdge::annotate_word, this);
-}
+	foreach_word_instance(h, &MihalceaEdge::look_at_word, this);
 
-bool MihalceaEdge::annotate_parse_f(Handle h)
-{
-	annotate_parse(h);
-	return false;
-}
-
-/**
- * For each word-instance loop over all syntactic relationships.
- * (i.e. _subj, _obj, _nn, _amod, and so on). Generate a list of all
- * words that participate in relationships. Then create links between
- * word-senses of every pair of words.
- */
-bool MihalceaEdge::annotate_word(Handle h)
-{
-	words.clear();
-	foreach_relex_relation(h, &MihalceaEdge::look_at_relation, this);
-
+	// At this point, "words" contains all of the relex-participating
+	// words in the parse. Loop over word-pairs, and annotate them.
 	std::set<Handle>::const_iterator f;
 	for (f = words.begin(); f != words.end(); f++)
 	{
@@ -76,6 +60,33 @@ bool MihalceaEdge::annotate_word(Handle h)
 			annotate_word_pair(*f, *s);
 		}
 	}
+}
+
+bool MihalceaEdge::annotate_parse_f(Handle h)
+{
+	annotate_parse(h);
+	return false;
+}
+
+/**
+ * For each pair of parses, create word-sense edge-links between
+ * the two parses.
+ */
+void MihalceaEdge::annotate_parse_pair(Handle earlier, Handle later)
+{
+}
+
+/**
+ * For each word-instance loop over all syntactic relationships.
+ * (i.e. _subj, _obj, _nn, _amod, and so on). Generate a list of all
+ * words that participate in relationships. Then create links between
+ * word-senses of every pair of words.
+ */
+bool MihalceaEdge::look_at_word(Handle h)
+{
+	words.clear();
+	foreach_relex_relation(h, &MihalceaEdge::look_at_relation, this);
+
 	return false;
 }
 
