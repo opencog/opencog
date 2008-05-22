@@ -51,7 +51,6 @@ bool ParseRank::lookat_parse(Handle h)
 		top_rank = rank;
 		top = h;
 	}
-printf ("duuude r= %g %g\n", top_rank, rank);
 	return false;
 }
 
