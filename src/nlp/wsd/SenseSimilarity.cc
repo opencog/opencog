@@ -127,11 +127,11 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 #ifdef DEBUG
 	Node *sense_a = dynamic_cast<Node *>(TLB::getAtom(first_sense));
 	Node *sense_b = dynamic_cast<Node *>(TLB::getAtom(second_sense));
-	printf("----\n");
 	printf("(%s, %s) dist=%d sim=%g\n", 
 	       sense_a->getName().c_str(),
 	       sense_b->getName().c_str(),
 	       min_cnt, sim);
+	// printf("----\n");
 #endif
 
 	SimpleTruthValue stv(sim,0.9);
@@ -204,7 +204,7 @@ bool SenseSimilarity::up_second(Handle up)
 	// subsumer".
 	if (up == join_candidate)
 	{
-#ifdef DEBUG
+#ifdef XDEBUG
 		printf("found dist=%d (%d+%d) min=%d\n", dist, first_cnt, second_cnt, min_cnt);
 #endif
 		if (dist < min_cnt) min_cnt = dist;
