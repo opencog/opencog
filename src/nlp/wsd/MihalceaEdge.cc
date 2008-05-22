@@ -74,6 +74,9 @@ bool MihalceaEdge::annotate_parse_f(Handle h)
  */
 void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 {
+#ifdef DEBUG
+	printf ("========================= start sent pair\n");
+#endif
 	foreach_word_instance(ha, &MihalceaEdge::look_at_word, this);
 	std::set<Handle> pa_words = words;
 	words.clear();
@@ -91,6 +94,9 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 			annotate_word_pair(*ia, *ib);
 		}
 	}
+#ifdef DEBUG
+	printf ("========================= end sent pair\n");
+#endif
 }
 
 /**
