@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "FollowLink.h"
 #include "ForeachWord.h"
 #include "SenseRank.h"
 #include "Node.h"

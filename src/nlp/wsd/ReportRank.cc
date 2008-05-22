@@ -7,7 +7,6 @@
  */
 #include <stdio.h>
 
-#include "FollowLink.h"
 #include "ForeachWord.h"
 #include "ReportRank.h"
 #include "Node.h"

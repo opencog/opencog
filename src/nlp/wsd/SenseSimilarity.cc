@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "FollowLink.h"
 #include "ForeachWord.h"
 #include "SenseSimilarity.h"
 #include "Node.h"

@@ -8,7 +8,6 @@
  */
 #include <stdio.h>
 
-#include "FollowLink.h"
 #include "ForeachWord.h"
 #include "MihalceaLabel.h"
 #include "Node.h"
