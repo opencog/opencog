@@ -157,6 +157,7 @@ int main ()
 	AtomTable *table = new AtomTable();
 	store->load(*table);
 
+	printf("Printing table:\n");
 	table->print();
 
 	delete store;
