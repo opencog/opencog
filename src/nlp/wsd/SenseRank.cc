@@ -45,9 +45,9 @@ SenseRank::~SenseRank()
 /**
  * For each parse of the sentence, perform the ranking algo.
  */
-void SenseRank::iterate(Handle h)
+void SenseRank::rank_sentence(Handle h)
 {
-	foreach_parse(h, &SenseRank::rank_parse, this);
+	foreach_parse(h, &SenseRank::rank_parse_f, this);
 }
 
 /**
@@ -56,12 +56,17 @@ void SenseRank::iterate(Handle h)
  * off on every word. That is, as of right now, the graph consists
  * of multplie connected components.
  */
-bool SenseRank::rank_parse(Handle h)
+void SenseRank::rank_parse(Handle h)
 {
 	converge = 1.0;
 	noun_converge = 1.0;
 	verb_converge = 1.0;
 	foreach_word_instance(h, &SenseRank::start_word, this);
+}
+
+bool SenseRank::rank_parse_f(Handle h)
+{
+	rank_parse(h);
 	return false;
 }
 

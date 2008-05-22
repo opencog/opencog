@@ -28,20 +28,25 @@ ReportRank::~ReportRank()
 /**
  * For each parse of the sentence, make a report.
  */
-void ReportRank::report_rank(Handle h)
+void ReportRank::report_sentence(Handle h)
 {
 	parse_cnt = 0;
-	foreach_parse(h, &ReportRank::report_parse, this);
+	foreach_parse(h, &ReportRank::report_parse_f, this);
 }
 
 /**
  * For each parse, walk over each word.
  */
-bool ReportRank::report_parse(Handle h)
+void ReportRank::report_parse(Handle h)
 {
 	printf ("Parse %d:\n", parse_cnt);
 	foreach_word_instance(h, &ReportRank::report_word, this);
 	parse_cnt ++;
+}
+
+bool ReportRank::report_parse_f(Handle h)
+{
+	report_parse(h);
 	return false;
 }
 

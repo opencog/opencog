@@ -52,10 +52,10 @@ void Mihalcea::process_sentence(Handle h)
 
 	Handle top_parse = parse_ranker->get_top_ranked_parse(h);
 
-	labeller->annotate_sentence(h);
-	edger->annotate_sentence(h);
-	nn_adjuster->adjust_sentence(h);
-	sense_ranker->iterate(h);
-	reporter->report_rank(h);
+	labeller->annotate_parse(top_parse);
+	edger->annotate_parse(top_parse);
+	nn_adjuster->adjust_parse(top_parse);
+	sense_ranker->rank_parse(top_parse);
+	reporter->report_parse(top_parse);
 }
 

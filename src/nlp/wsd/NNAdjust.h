@@ -22,7 +22,7 @@ class NNAdjust
 	private:
 		double strength_adjust;
 
-		bool adjust_parse(Handle);
+		bool adjust_parse_f(Handle);
 		bool adjust_word(Handle);
 		bool adjust_relation(const std::string &, Handle, Handle);
 
@@ -36,6 +36,7 @@ class NNAdjust
 		NNAdjust(void);
 		~NNAdjust();
 		void adjust_sentence(Handle);
+		void adjust_parse(Handle);
 };
 }
 

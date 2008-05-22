@@ -32,7 +32,7 @@ MihalceaLabel::~MihalceaLabel()
  */
 void MihalceaLabel::annotate_sentence(Handle h)
 {
-	foreach_parse(h, &MihalceaLabel::annotate_parse, this);
+	foreach_parse(h, &MihalceaLabel::annotate_parse_f, this);
 }
 
 /**
@@ -40,10 +40,14 @@ void MihalceaLabel::annotate_sentence(Handle h)
  * for that word. The argument handle is presumed to identify a specific
  * parse.
  */
-bool MihalceaLabel::annotate_parse(Handle h)
+void MihalceaLabel::annotate_parse(Handle h)
 {
-printf("found parse %x\n", (unsigned int) h);
 	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
+}
+
+bool MihalceaLabel::annotate_parse_f(Handle h)
+{
+	annotate_parse(h);
 	return false;
 }
 

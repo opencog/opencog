@@ -16,7 +16,7 @@ class ReportRank
 {
 	private:
 		int parse_cnt;
-		bool report_parse(Handle);
+		bool report_parse_f(Handle);
 		bool report_word(Handle);
 		double hi_score;
 		Handle hi_scorer;
@@ -25,7 +25,8 @@ class ReportRank
 	public:
 		ReportRank(void);
 		~ReportRank();
-		void report_rank(Handle);
+		void report_sentence(Handle);
+		void report_parse(Handle);
 
 };
 }

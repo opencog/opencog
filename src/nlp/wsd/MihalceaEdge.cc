@@ -36,7 +36,7 @@ void MihalceaEdge::set_atom_space(AtomSpace *as)
 /** Loop over all parses for this sentence. */
 void MihalceaEdge::annotate_sentence(Handle h)
 {
-	foreach_parse(h, &MihalceaEdge::annotate_parse, this);
+	foreach_parse(h, &MihalceaEdge::annotate_parse_f, this);
 }
 
 /**
@@ -45,9 +45,14 @@ void MihalceaEdge::annotate_sentence(Handle h)
  * create an edge between all corresponding (word-instance, word-sense)
  * pairs.
  */
-bool MihalceaEdge::annotate_parse(Handle h)
+void MihalceaEdge::annotate_parse(Handle h)
 {
 	foreach_word_instance(h, &MihalceaEdge::annotate_word, this);
+}
+
+bool MihalceaEdge::annotate_parse_f(Handle h)
+{
+	annotate_parse(h);
 	return false;
 }
 

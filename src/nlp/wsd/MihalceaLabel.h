@@ -22,7 +22,7 @@ class MihalceaLabel
 	private:
 		AtomSpace *atom_space;
 
-		bool annotate_parse(Handle);
+		bool annotate_parse_f(Handle);
 		bool annotate_word(Handle);
 		bool annotate_word_sense(Handle);
 
@@ -34,6 +34,7 @@ class MihalceaLabel
 		void set_atom_space(AtomSpace *as) {atom_space = as;}
 
 		void annotate_sentence(Handle);
+		void annotate_parse(Handle);
 };
 }
 

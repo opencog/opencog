@@ -36,15 +36,20 @@ NNAdjust::~NNAdjust()
 /** Loop over all parses for this sentence. */
 void NNAdjust::adjust_sentence(Handle h)
 {
-	foreach_parse(h, &NNAdjust::adjust_parse, this);
+	foreach_parse(h, &NNAdjust::adjust_parse_f, this);
 }
 
 /**
- * For each parse, loop over all word-instances
+ * Loop over all word-instances, adjusting edge strengths
  */
-bool NNAdjust::adjust_parse(Handle h)
+void NNAdjust::adjust_parse(Handle h)
 {
 	foreach_word_instance(h, &NNAdjust::adjust_word, this);
+}
+
+bool NNAdjust::adjust_parse_f(Handle h)
+{
+	adjust_parse(h);
 	return false;
 }
 

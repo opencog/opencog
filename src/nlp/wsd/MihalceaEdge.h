@@ -22,7 +22,7 @@ class MihalceaEdge
 {
 	private:
 		AtomSpace *atom_space;
-		bool annotate_parse(Handle);
+		bool annotate_parse_f(Handle);
 		bool annotate_word(Handle);
 
 		std::set<Handle> words;
@@ -40,6 +40,7 @@ class MihalceaEdge
 		~MihalceaEdge();
 		void set_atom_space(AtomSpace *as);
 		void annotate_sentence(Handle);
+		void annotate_parse(Handle);
 };
 }
 
