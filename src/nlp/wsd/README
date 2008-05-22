@@ -627,6 +627,14 @@ Ideas/TODO
    The experiment could be done by using floating point 
    adjustments.
 
+-- Per ben:
+   Use the following similarity measure:
+   "Probability of _obj(sense 1 of cut, sense 1 of finger)"
+   "Probability of _obj(sense  1 cut, sense 2 of finger)"
+   based on a large corpus.
+
+
+
 -- where does parse-ranking fit into the scheme of things?
    Should total up the high scores for different parses. This
    assumes that tdifferent parses lead to diffferent graphs.
