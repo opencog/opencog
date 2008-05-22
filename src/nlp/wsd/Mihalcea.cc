@@ -25,6 +25,8 @@ Mihalcea::Mihalcea(void)
 	parse_ranker = new ParseRank();
 	sense_ranker = new SenseRank();
 	reporter = new ReportRank();
+
+	previous_parse = UNDEFINED_HANDLE;
 }
 
 Mihalcea::~Mihalcea()
@@ -54,7 +56,16 @@ void Mihalcea::process_sentence(Handle h)
 
 	labeller->annotate_parse(top_parse);
 	edger->annotate_parse(top_parse);
-	nn_adjuster->adjust_parse(top_parse);
+	// nn_adjuster->adjust_parse(top_parse);
+
+	// Link sentences together ... 
+	if (UNDEFINED_HANDLE != previous_parse)
+	{
+		edger->annotate_parse_pair(previous_parse, top_parse);
+	}
+	previous_parse = top_parse;
+
+
 	sense_ranker->rank_parse(top_parse);
 	reporter->report_parse(top_parse);
 }
