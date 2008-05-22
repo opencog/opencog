@@ -50,6 +50,9 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 {
 	SQLRETURN rc;
 
+	sql_hdbc = NULL;
+	sql_henv = NULL;
+
 	if (NULL == _dbname)
 	{
 		PERR("No DB specified");
@@ -72,6 +75,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 		PERR("Can't SQLSetEnv, rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
 		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		sql_henv = NULL;
 		return;
 	}
 
@@ -82,6 +86,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 		PERR ("Can't SQLAllocConnect handle rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
 		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		sql_henv = NULL;
 		return;
 	}
 
@@ -100,6 +105,8 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 		PRINT_SQLERR (SQL_HANDLE_DBC, sql_hdbc);
 		SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
 		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		sql_henv = NULL;
+		sql_hdbc = NULL;
 		return;
 	}
 
@@ -111,12 +118,18 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 
 ODBCConnection::~ODBCConnection()
 {
-	SQLDisconnect(sql_hdbc);
-	SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
-	sql_hdbc = NULL;
+	if (sql_hdbc)
+	{
+		SQLDisconnect(sql_hdbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
+		sql_hdbc = NULL;
+	}
 
-	SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
-	sql_henv = NULL;
+	if (sql_henv)
+	{
+		SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
+		sql_henv = NULL;
+	}
 
 	while (!free_pool.empty())
 	{
