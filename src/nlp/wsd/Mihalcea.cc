@@ -44,6 +44,9 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 
 void Mihalcea::process_sentence(Handle h)
 {
+	// Add handle to sentence to our running list.
+	sentence_list.push_back(h);
+
 	labeller->annotate_sentence(h);
 	edger->annotate_sentence(h);
 	nn_adjuster->adjust_sentence(h);

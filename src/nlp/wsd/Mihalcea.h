@@ -31,6 +31,8 @@ class Mihalcea
 		SenseRank *ranker;
 		ReportRank *reporter;
 
+		std::vector<Handle> sentence_list;
+
 	public:
 		Mihalcea(void);
 		~Mihalcea();
