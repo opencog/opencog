@@ -28,7 +28,8 @@ TARGET_LINK_LIBRARIES(CogServer
 	NMXml
 	Util
 	query
-    wsd
+	wsd
+	persist
 	${IODBC_LIBRARIES}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}

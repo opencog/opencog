@@ -1,5 +1,3 @@
-# Uncomment this if SQL is installed.
-# ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 SET(CMAKE_BUILD_TYPE Debug)
 
