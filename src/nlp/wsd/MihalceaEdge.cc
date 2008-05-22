@@ -96,14 +96,11 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 /**
  * For each word-instance loop over all syntactic relationships.
  * (i.e. _subj, _obj, _nn, _amod, and so on). Generate a list of all
- * words that participate in relationships. Then create links between
- * word-senses of every pair of words.
+ * words that participate in relationships. 
  */
 bool MihalceaEdge::look_at_word(Handle h)
 {
-	words.clear();
 	foreach_relex_relation(h, &MihalceaEdge::look_at_relation, this);
-
 	return false;
 }
 
