@@ -394,6 +394,17 @@ TruthValue* AtomStorage::getTV(int tvid)
 
 /* ================================================================ */
 
+void escape_single_quotes(std::string &str)
+{
+	size_t pos = 0;
+	pos = str.find ('\'', pos);
+	while (pos != std::string::npos)
+	{
+		str.insert(pos, 1, '\'');
+		pos = str.find('\'', pos);
+	}
+}
+
 /**
  * Store the indicated atom.
  * Store its truth values too.
@@ -437,8 +448,9 @@ void AtomStorage::storeAtom(Atom *atom)
 	Node *n = dynamic_cast<Node *>(atom);
 	if (n)
 	{
-		std::string qname = "'";
-		qname += n->getName();
+		std::string qname = n->getName();
+		escape_single_quotes(qname);
+		qname.insert(0,1,'\'');
 		qname += "'";
 		STMT("name", qname);
 	}

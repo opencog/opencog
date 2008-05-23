@@ -19,7 +19,7 @@ CREATE TABLE Atoms (
 	-- maps to AttentionValue
 	attention FLOAT,
 
-   -- The node name
+	-- The node name
 	name    TEXT
 );
 

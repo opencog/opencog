@@ -114,3 +114,10 @@ FakeOidIndex      = Yes
 ConnSettings      =
 
 
+
+Measurements
+------------
+112:00 [md4_raid1]
+17 minutes for postgres, and opencog, each.
+1937576 - 1088032 kB = 850MBytes disk use
+
