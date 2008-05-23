@@ -115,9 +115,30 @@ ConnSettings      =
 
 
 
-Measurements
-------------
-112:00 [md4_raid1]
-17 minutes for postgres, and opencog, each.
-1937576 - 1088032 kB = 850MBytes disk use
+Experimental Diary & Results
+----------------------------
+First run with a large data set (millions of atoms) was a disaster.
+Huge CPU usage, with 75% of cpu usage occuring in the kernel block i/o
+layer, and 12% each for the opencog and postgres times:
+   112:00 [md4_raid1]
+   17 minutes for postgres, and opencog, each.
+   1937576 - 1088032 kB = 850MBytes disk use
 
+The above disaster can be attributed to the bad design for trying to
+figure whether "INSERT" or "UPDATE" should be used. A local client-side
+cache of the keys in the DB seems to change everything.
+aaof using a query
+to determine if 
+
+   2:51
+   1703244 kB
+
+TODO
+----
+-- Store  a separate index of atom types, so that the proper mapping
+   can be made if the list of opencog atom types changes between the
+   previous stores and the latest loads.
+
+-- Store more complex truth value types
+
+-- Store attention values.

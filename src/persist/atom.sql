@@ -12,7 +12,7 @@ CREATE TABLE Atoms (
 	-- maps to TruthValue ID
 	-- tvid INT, -- not used, just inline the truth value
 
-	-- Inlined truth values
+	-- Inlined (simple) truth values
 	stv_mean FLOAT,
 	stv_count FLOAT,
 

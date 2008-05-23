@@ -159,6 +159,7 @@ class AtomStorage::Response
 
 #endif /* OUT_OF_LINE_TVS */
 
+		// get generic integer values
 		int intval;
 		bool intval_cb(void)
 		{
@@ -169,6 +170,21 @@ class AtomStorage::Response
 		{
 			// we're not going to bother to check the column name ... 
 			intval = atoi(colvalue);
+			return false;
+		}
+
+		// Get all handles in the database.
+		std::set<Handle> *id_set;
+		bool note_id_cb(void)
+		{
+			rs->foreach_column(&Response::note_id_column_cb, this);
+			return false;
+		}
+		bool note_id_column_cb(const char *colname, const char * colvalue)
+		{
+			// we're not going to bother to check the column name ... 
+			Handle h = strtoul(colvalue, NULL, 10);
+			id_set->insert(h);
 			return false;
 		}
 
@@ -440,19 +456,26 @@ void AtomStorage::storeAtom(Atom *atom)
 		STMT("uuid", uuidbuff);
 	}
 
-	// Store the atom UUID
-	Type t = atom->getType();
-	STMTI("type", t);
-
-	// Store the node name, if its a node
-	Node *n = dynamic_cast<Node *>(atom);
-	if (n)
+	// Store the atom type and node name only if storing for the
+	// first time ever. Once an atom is in an atom table, it's 
+	// name can type cannot be changed. Only its truth value can
+	// change.
+	if (false == update)
 	{
-		std::string qname = n->getName();
-		escape_single_quotes(qname);
-		qname.insert(0,1,'\'');
-		qname += "'";
-		STMT("name", qname);
+		// Store the atom UUID
+		Type t = atom->getType();
+		STMTI("type", t);
+	
+		// Store the node name, if its a node
+		Node *n = dynamic_cast<Node *>(atom);
+		if (n)
+		{
+			std::string qname = n->getName();
+			escape_single_quotes(qname);
+			qname.insert(0,1,'\'');
+			qname += "'";
+			STMT("name", qname);
+		}
 	}
 
 	// Store the truth value
@@ -478,6 +501,9 @@ void AtomStorage::storeAtom(Atom *atom)
 	{
 		storeOutgoing(atom, h);
 	}
+
+	// Make note of the fact that this atom has been stored.
+	local_id_cache.insert(h);
 }
 
 /* ================================================================ */
@@ -486,9 +512,29 @@ void AtomStorage::storeAtom(Atom *atom)
  */
 bool AtomStorage::atomExists(Handle h)
 {
+#ifdef ASK_SQL_SERVER
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
 	return idExists(buff);
+#else
+	// look at the local cache of id's to see if the atom is in storage or not.
+	return local_id_cache.count(h);
+#endif
+}
+
+/**
+ * Build up a client-side cache of all atom id's in storage
+ */
+void AtomStorage::get_ids(void)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms;");
+
+	Response rp;
+	rp.id_set = &local_id_cache;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::note_id_cb, &rp);
+	rp.rs->release();
 }
 
 /* ================================================================ */
@@ -593,6 +639,7 @@ bool AtomStorage::store_cb(Atom *atom)
 
 void AtomStorage::store(const AtomTable &table)
 {
+	get_ids();
    table.foreach_atom (&AtomStorage::store_cb, this);
 }
 

@@ -11,6 +11,7 @@
 
 #include "odbcxx.h"
 
+#include <set>
 #include <vector>
 
 #include "Atom.h"
@@ -31,6 +32,8 @@ class AtomStorage
 		void getOutgoing(std::vector<Handle> &, Handle);
 		bool store_cb(Atom *);
 
+		std::set<unsigned long> local_id_cache;
+		void get_ids(void);
 		bool idExists(const char *);
 
 		unsigned long getMaxUUID(void);
