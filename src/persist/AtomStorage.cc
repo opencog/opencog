@@ -417,6 +417,7 @@ void escape_single_quotes(std::string &str)
 	while (pos != std::string::npos)
 	{
 		str.insert(pos, 1, '\'');
+		pos += 2;
 		pos = str.find('\'', pos);
 	}
 }
