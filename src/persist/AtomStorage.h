@@ -31,6 +31,7 @@ class AtomStorage
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
 		bool store_cb(Atom *);
+		unsigned long load_count;
 		unsigned long store_count;
 
 		std::set<unsigned long> local_id_cache;
