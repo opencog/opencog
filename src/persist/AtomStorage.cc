@@ -616,6 +616,8 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	{
 		fprintf(stderr, "\tLoaded %lu atoms.\n", store_count);
 	}
+
+	local_id_cache.insert(h);
 	return atom;
 }
 

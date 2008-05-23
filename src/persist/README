@@ -82,7 +82,8 @@ the unix command line:
 
 	$ createdb opencog
 
-(you may need to su - postgres; creastureuser <username> first)
+(you may need to su - postgres; createuser <username> first)
+(You may need to edit pg_hba.conf)
 
 Then create the database tables:
 
@@ -103,7 +104,7 @@ Trace    = No
 TraceFile      =
 Database    = opencog
 Servername     = localhost
-Port     = 5433
+Port     = 5432
 Username    = linas
 Password    = asdf
 ReadOnly    = No
@@ -114,24 +115,62 @@ FakeOidIndex      = Yes
 ConnSettings      =
 
 
-
 Experimental Diary & Results
-----------------------------
-First run with a large data set (millions of atoms) was a disaster.
+ ----------------------------
+First run with a large data set (1564K atoms) was a disaster.
 Huge CPU usage, with 75% of cpu usage occuring in the kernel block i/o
 layer, and 12% each for the opencog and postgres times:
-   112:00 [md4_raid1]
-   17 minutes for postgres, and opencog, each.
+   112:00 [md4_raid1] or 4.3 millisecs per atom
+   17 minutes for postgres, and opencog, each. or 0.66 milisecs per atom
    1937576 - 1088032 kB = 850MBytes disk use
 
-The above disaster can be attributed to the bad design for trying to
-figure whether "INSERT" or "UPDATE" should be used. A local client-side
-cache of the keys in the DB seems to change everything.
-aaof using a query
-to determine if 
+Experiment: is this due to the bad design for trying to figure whether
+"INSERT" or "UPDATE" should be used. A local client-side cache of the 
+keys in the DB seems to change little:
 
-   2:51
-   1703244 kB
+   cpu usage for postgres 11:04  and opencog 10:40 and 112:30 for md
+
+So this change drops postgres server and opencog cpu usage
+significantly, but the insance kernel CPU usage remains.
+
+The above disaster can be attributed to bad defaults for the postgres
+server. In particular, sync to disk, while critical for commercial
+database use, is pointless for current use. Also, buffer sizes are much
+too small. Edit postgresql.conf and make the following changes:
+
+   shared_buffers = default was 24MB, change to 384MB
+   work_mem = default was 1MB change to 32MB
+   fsync = default on  change to off
+   synchronous_commit = default on change to off
+   wal_buffers = default 64kB change to 512kB
+   commit_delay = default 0 change to 10000 (10K) microseconds
+
+Restarting the server might lead to errors stating that max shared mem
+usage has been exceeded. This can be fixed by:
+
+   vi /etc/sysctl.conf
+   kernel.shmmax = 440100100
+(save file contents, then)
+   sysctl -p /etc/sysctl.conf
+
+Result:
+   cogserver = 10:45 mins = 0.41  millisecs/atom
+   postgres  =  7:32 mins = 0.29  millisecs/atom
+   md        =  0:42 mins = 0.026 millisecs/atom
+
+
+try again with begn; commit;  
+use analyze;
+
+use prepare
+
+   2:34 start
+112:24  md
+224:53  md
+225:35
+
+
+
 
 TODO
 ----
