@@ -159,8 +159,8 @@ class AtomStorage::Response
 
 #endif /* OUT_OF_LINE_TVS */
 
-		// get generic integer values
-		int intval;
+		// get generic positive integer values
+		unsigned long intval;
 		bool intval_cb(void)
 		{
 			rs->foreach_column(&Response::intval_column_cb, this);
@@ -169,7 +169,7 @@ class AtomStorage::Response
 		bool intval_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ... 
-			intval = atoi(colvalue);
+			intval = strtoul(colvalue, NULL, 10);
 			return false;
 		}
 
@@ -634,13 +634,21 @@ void AtomStorage::load(AtomTable &table)
 bool AtomStorage::store_cb(Atom *atom)
 {
 	storeAtom(atom);
+	store_count ++;
+	if (store_count%1000 == 0)
+	{
+		fprintf(stderr, "\tStored %lu atoms.\n", store_count);
+	}
 	return false;
 }
 
 void AtomStorage::store(const AtomTable &table)
 {
+	store_count = 0;
 	get_ids();
-   table.foreach_atom (&AtomStorage::store_cb, this);
+	setMaxUUID(TLB::uuid);
+	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
+   table.foreach_atom(&AtomStorage::store_cb, this);
 }
 
 /* ================================================================ */
@@ -657,7 +665,7 @@ unsigned long AtomStorage::getMaxUUID()
 void AtomStorage::setMaxUUID(unsigned long uuid)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "UPDATE Global SET max_uuid = %lu;", (unsigned long) uuid);
+	snprintf(buff, BUFSZ, "UPDATE Global SET max_uuid = %lu;", uuid);
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);
