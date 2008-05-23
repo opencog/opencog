@@ -614,7 +614,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	load_count ++;
 	if (load_count%1000 == 0)
 	{
-		fprintf(stderr, "\tLoaded %lu atoms.\n", store_count);
+		fprintf(stderr, "\tLoaded %lu atoms.\n", load_count);
 	}
 
 	local_id_cache.insert(h);
@@ -659,6 +659,11 @@ void AtomStorage::store(const AtomTable &table)
 	setMaxUUID(TLB::uuid);
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
    table.foreach_atom(&AtomStorage::store_cb, this);
+
+	Response rp;
+	rp.rs = db_conn->exec("VACUUM ANALYZE;");
+	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
+	rp.rs->release();
 }
 
 /* ================================================================ */
