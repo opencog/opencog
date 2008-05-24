@@ -10,6 +10,7 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 #include <stdio.h>
+#include <pthread.h>
 
 #include "AtomSpace.h"
 #include "CogServer.h"
@@ -37,18 +38,26 @@ WordSenseProcessor::~WordSenseProcessor()
 	wsd = NULL;
 }
 
+// ----------------------------------------
+
+void * WordSenseProcessor::thread_start(void *data)
+{
+	WordSenseProcessor *wsp = (WordSenseProcessor *) data;
+
+	wsp->wsd->set_atom_space(wsp->atom_space);
+
+	// Look for recently entered text
+	wsp->atom_space->foreach_handle_of_type("SentenceNode",
+	               &WordSenseProcessor::do_sentence, wsp);
+	return NULL;
+}
+
 void WordSenseProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
-	wsd->set_atom_space(atom_space);
 
-	// Look for recently entered text
-	atom_space->foreach_handle_of_type("SentenceNode",
-	               &WordSenseProcessor::do_sentence, this);
-
-	/* XXX HACK ALERT -- no scheduling, so just sleep */
-	// usleep(1000000);  // 1 second
-	usleep(10000);  // 10 millisecs == 100HZ
+	pthread_t pth;
+	pthread_create (&pth, NULL, &WordSenseProcessor::thread_start, this);
 }
 
 /**

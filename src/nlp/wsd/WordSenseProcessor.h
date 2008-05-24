@@ -16,6 +16,9 @@ namespace opencog {
 class WordSenseProcessor : public MindAgent
 {
 	private:
+
+		static void * thread_start(void *);
+
 		int cnt;
 		AtomSpace *atom_space;
 		bool do_sentence(Handle h);
