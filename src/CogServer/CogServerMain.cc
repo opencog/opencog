@@ -56,6 +56,9 @@ int main(int argc, char *argv[]) {
  
         // cheapo hack to get the query processory up and running.
         // XXX fix me with some more permanent, appropriate solution.
+        // There problem here is multi-fold: there is no scheduling,
+        // and so the server loop runs full tilt ... and there's
+        // no universal way of looking for, waiting on new input.
         server().plugInMindAgent(new QueryProcessor(), 1);
         server().plugInMindAgent(new WordSenseProcessor(), 1);
 
