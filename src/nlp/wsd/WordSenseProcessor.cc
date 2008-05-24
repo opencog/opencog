@@ -78,6 +78,11 @@ void WordSenseProcessor::run(CogServer *server)
 	// Look for recently entered text
 	atom_space->foreach_handle_of_type("SentenceNode",
 	               &WordSenseProcessor::do_sentence, this);
+
+	// XXX avoid lots and lots of polling! Polling is a real
+	// cpu time-waster, so do it only infrequently.
+	// Keep it to 1/20th of a second for interactivity.
+	usleep(50 * 1000); // 50 milliseconds.
 }
 
 /**
