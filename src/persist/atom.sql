@@ -5,7 +5,8 @@
 
 CREATE TABLE Atoms (
 	-- the uuid maps to the atom handle
-	uuid	INT PRIMARY KEY,
+	-- Do not build index until after load, to speed storage
+	uuid	INT,
 
 	type  INT,
 

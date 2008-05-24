@@ -381,6 +381,7 @@ int AtomStorage::TVID(const TruthValue &tv)
 	Response rp;
 	rp.rs = db_conn->exec("SELECT NEXTVAL('tvid_seq');");
 	rp.rs->foreach_row(&Response::tvid_seq_cb, &rp);
+	rp.rs->release();
 	return rp.tvid;
 }
 
@@ -633,6 +634,12 @@ void AtomStorage::load(AtomTable &table)
 	Response rp;
 	rp.table = &table;
 	rp.store = this;
+
+	// Create indexes, if missing
+	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
+	rp.rs->release();
+	rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
+	rp.rs->release();
 
 #if 0
 	rp.rs = db_conn->exec("SELECT * FROM Atoms;");

@@ -306,6 +306,8 @@ ODBCRecordSet::release(void)
 {
 	if (!this) return;
 
+	// SQLFreeStmt(sql_hstmt, SQL_CLOSE);
+	// SQLFreeStmt(sql_hstmt, SQL_UNBIND);
 	SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
 	sql_hstmt = NULL;
 
