@@ -48,16 +48,16 @@ class CommandRequestProcessor : public RequestProcessor
         std::string help(std::string);
         std::string load(std::string);
         std::string ls(void);
+#ifdef HAVE_SQL_STORAGE
         std::string sql_open(std::string, std::string, std::string);
         std::string sql_close(void);
         std::string sql_load(void);
         std::string sql_store(void);
 
-        int load_count;
-
-#ifdef HAVE_SQL_STORAGE
         AtomStorage *store;
-#endif
+#endif /* HAVE_SQL_STORAGE */
+
+        int load_count;
 
 }; // class
 }  // namespace

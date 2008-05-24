@@ -22,13 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <pthread.h>
+#include <sstream>
+
 #include "CommandRequestProcessor.h"
 #include "CommandRequest.h"
 #include "FileXMLBufferReader.h"
 #include "StringXMLBufferReader.h"
 #include "NMXmlParser.h"
 
-#include <sstream>
 
 using namespace opencog;
 
@@ -172,6 +174,7 @@ std::string CommandRequestProcessor::ls()
 
 }
 
+#ifdef HAVE_SQL_STORAGE
 /**
  * Open a connection to the sql server
  */
@@ -179,7 +182,6 @@ std::string CommandRequestProcessor::sql_open(std::string dbname,
                                               std::string username,
                                               std::string authentication)
 {
-#ifdef HAVE_SQL_STORAGE
     if (store) 
     {
         return "Error: SQL connection already open\n";
@@ -193,9 +195,6 @@ std::string CommandRequestProcessor::sql_open(std::string dbname,
     answer += username;
     answer += "\"\n";
     return answer;
-#else
-    return "";
-#endif /* HAVE_SQL_STORAGE */
 }
 
 /**
@@ -203,7 +202,6 @@ std::string CommandRequestProcessor::sql_open(std::string dbname,
  */
 std::string CommandRequestProcessor::sql_close(void)
 {
-#ifdef HAVE_SQL_STORAGE
     if (store) 
     {
         delete store;
@@ -211,48 +209,59 @@ std::string CommandRequestProcessor::sql_close(void)
         return "SQL connection closed\n";
     }
     return "Warning: SQL connection not open\n";
-#else
-    return "";
-#endif /* HAVE_SQL_STORAGE */
 }
 
 /**
  * Load data from the sql server
  */
-std::string CommandRequestProcessor::sql_load(void)
+static void * sql_load_thread_start_routine(void *data)
 {
-#ifdef HAVE_SQL_STORAGE
-    if (!store) return "Error: No SQL connection is open";
-
+    AtomStorage *store = (AtomStorage *) data;
     AtomSpace *atomSpace = CogServer::getAtomSpace();
     const AtomTable& atomTable = atomSpace->getAtomTable();
 
     AtomTable * ap = (AtomTable *) &atomTable; // It most certainly is NOT const!!
     store->load(*ap);
 
-    return "SQL data loaded\n";
-#else
-    return "";
-#endif /* HAVE_SQL_STORAGE */
+    return NULL;
+}
+
+std::string CommandRequestProcessor::sql_load(void)
+{
+    if (!store) return "Error: No SQL connection is open";
+
+    pthread_t loader;
+    int rc = pthread_create (&loader, NULL, sql_load_thread_start_routine, store);
+
+    if (rc) return "Error:Failed to create SQL loader thread";
+    return "SQL loader thread started\n";
 }
 
 /**
  * Store data to the sql server
  */
-std::string CommandRequestProcessor::sql_store(void)
+static void * sql_store_thread_start_routine(void *data)
 {
-#ifdef HAVE_SQL_STORAGE
-    if (!store) return "Error: No SQL connection is open";
+    AtomStorage *store = (AtomStorage *) data;
 
     AtomSpace *atomSpace = CogServer::getAtomSpace();
     const AtomTable& atomTable = atomSpace->getAtomTable();
     store->store(atomTable);
 
-    return "opencog data stored to SQL\n";
-#else
-    return "";
-#endif /* HAVE_SQL_STORAGE */
+    return NULL;
 }
+
+std::string CommandRequestProcessor::sql_store(void)
+{
+    if (!store) return "Error: No SQL connection is open";
+
+    pthread_t saver;
+    int rc = pthread_create (&saver, NULL, sql_store_thread_start_routine, store);
+
+    if (rc) return "Error:Failed to create SQL store thread";
+    return "SQL data store thread started\n";
+}
+#endif /* HAVE_SQL_STORAGE */
 
 void CommandRequestProcessor::processRequest(CogServerRequest *req)
 {
@@ -293,7 +302,9 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             sql_close();
             server().stop();
         }
-    } else if (command == "sql-open") {
+    } 
+#ifdef HAVE_SQL_STORAGE
+    else if (command == "sql-open") {
         if (args.size() < 2) {
             answer = "sql-open: invalid command syntax";
         } else if (args.size() == 2) {
@@ -327,7 +338,9 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = sql_store();
         }
-    } else {
+    } 
+#endif /* HAVE_SQL_STORAGE */
+    else {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: data help load ls shutdown";
         if(!args.empty())
