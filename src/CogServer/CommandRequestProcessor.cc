@@ -94,7 +94,7 @@ std::string CommandRequestProcessor::help(std::string topic)
          "load <filename>  -- load OpenCog XML from indicated filename\n"
          "ls               -- list entire system contents\n"
          "ls <handle>      -- list handle and its incoming set\n"
-         "ls <node name>   -- list node and its incoming set\n";
+         "ls <type> <name> -- list node and its incoming set\n";
 #ifdef HAVE_SQL_STORAGE
     reply += 
          "sql-open <dbname> <username> <auth>\n"
@@ -125,6 +125,15 @@ std::string CommandRequestProcessor::data(std::string buf)
     return loadXML(new StringXMLBufferReader(buf.c_str()));
 }
 
+std::string CommandRequestProcessor::ls(std::string type, std::string name)
+{
+    Type t = atoi(type.c_str());
+
+    AtomSpace *atomSpace = CogServer::getAtomSpace();
+    Handle h = atomSpace->getAtomTable().getHandle(name.c_str(), t);
+    return ls(h);
+}
+
 std::string CommandRequestProcessor::ls(std::string arg)
 {
     if (0 == arg.length())
@@ -140,13 +149,7 @@ std::string CommandRequestProcessor::ls(std::string arg)
         return ls(h);
     }
 
-    // Else, its the name of an atom. ind the atom.
-    AtomSpace *atomSpace = CogServer::getAtomSpace();
-    Handle h = atomSpace->getAtomTable().getHandle(arg.c_str(), NODE);
-    return ls(h);
-
-
-    return "";
+    return "Invalid ls format: handle must be numeric";
 }
 
 std::string CommandRequestProcessor::ls(Handle h)
@@ -346,6 +349,11 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             answer = ls();
         } else if (args.size() == 1) {
             answer = ls(args.front());
+        } else if (args.size() == 2) {
+            std::string type = args.front();
+            args.pop();
+            std::string name = args.front();
+            answer = ls(type, name);
         } else {
             answer = "ls: invalid command syntax";
         }

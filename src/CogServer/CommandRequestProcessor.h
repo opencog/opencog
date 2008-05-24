@@ -47,6 +47,7 @@ class CommandRequestProcessor : public RequestProcessor
         std::string data(std::string);
         std::string help(std::string);
         std::string load(std::string);
+        std::string ls(std::string, std::string);
         std::string ls(std::string);
         std::string ls(Handle);
         std::string ls(void);
