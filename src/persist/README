@@ -169,6 +169,7 @@ use prepare
 224:53  md
 225:35
 
+CREATE INDEX src_idx ON Edges (src_uuid);
 
 
 

@@ -625,7 +625,8 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 
 void AtomStorage::load(AtomTable &table)
 {
-	TLB::uuid = getMaxUUID();
+	unsigned long max_nrec = getMaxUUID();
+	TLB::uuid = max_nrec;
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
 	load_count = 0;
 
@@ -633,10 +634,24 @@ void AtomStorage::load(AtomTable &table)
 	rp.table = &table;
 	rp.store = this;
 
+#if 0
 	rp.rs = db_conn->exec("SELECT * FROM Atoms;");
 	rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-
 	rp.rs->release();
+#else
+
+#define STEP 1003
+	unsigned long rec;
+	for (rec = 0; rec <= max_nrec; rec += STEP)
+	{
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid > %lu AND uuid <= %lu;",
+		        rec, rec+STEP);
+		rp.rs = db_conn->exec(buff);
+		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
+		rp.rs->release();
+	}
+#endif
 
 	table.scrubIncoming();
 }
