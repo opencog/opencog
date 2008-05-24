@@ -299,7 +299,9 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         if (args.size() != 0) {
             answer = "shutdown: invalid command syntax";
         } else {
+#ifdef HAVE_SQL_STORAGE
             sql_close();
+#endif /* HAVE_SQL_STORAGE */
             server().stop();
         }
     } 
