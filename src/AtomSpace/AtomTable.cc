@@ -856,23 +856,26 @@ bool AtomTable::updateImportanceIndex(Atom* atom, int bin) {
     return(true);
 }
 
-int AtomTable::getSize() const{
+int AtomTable::getSize() const
+{
     return(size);
 }
 
-void AtomTable::print(std::ostream& output, Type type, bool subclass) const {
+void AtomTable::print(std::ostream& output, Type type, bool subclass) const
+{
 #ifdef USE_ATOM_HASH_SET
     for(AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
         Atom* atom = *it;
         bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
-        if (matched) output << atom << ": " << atom->toString() << endl;
+        if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
 #else
     output << "Sorry, AtomTable::print() method is not implemented when USE_ATOM_HASH_SET is disabled" << endl;
 #endif
 }
 
-HandleEntry* AtomTable::extractOld(Handle handle, bool recursive) {
+HandleEntry* AtomTable::extractOld(Handle handle, bool recursive)
+{
     HandleEntry* result = NULL;
     Atom *atom = TLB::getAtom(handle);
 
