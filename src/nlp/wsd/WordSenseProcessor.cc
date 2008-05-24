@@ -27,6 +27,8 @@ using namespace opencog;
 // ----------------------------------------
 WordSenseProcessor::WordSenseProcessor(void)
 {
+	pthread_mutex_init(&queue_lock, NULL);
+	thread_running = false;
 	cnt = 0;
 	wsd = new Mihalcea();
 }
@@ -43,26 +45,50 @@ WordSenseProcessor::~WordSenseProcessor()
 void * WordSenseProcessor::thread_start(void *data)
 {
 	WordSenseProcessor *wsp = (WordSenseProcessor *) data;
-
-	wsp->wsd->set_atom_space(wsp->atom_space);
-
-	// Look for recently entered text
-	wsp->atom_space->foreach_handle_of_type("SentenceNode",
-	               &WordSenseProcessor::do_sentence, wsp);
+	wsp->work_thread();
 	return NULL;
 }
+
+void WordSenseProcessor::work_thread(void)
+{
+	while (1)
+	{
+		pthread_mutex_lock(&queue_lock);
+		if (work_queue.empty())
+		{
+			thread_running = false;
+			return;
+		}
+		Handle h = work_queue.front();
+		work_queue.pop();
+		pthread_mutex_unlock(&queue_lock);
+
+		wsd->process_sentence(h);
+	}
+}
+
+// ----------------------------------------
 
 void WordSenseProcessor::run(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
 
-	pthread_t pth;
-	pthread_create (&pth, NULL, &WordSenseProcessor::thread_start, this);
+	wsd->set_atom_space(atom_space);
+
+	// Look for recently entered text
+	atom_space->foreach_handle_of_type("SentenceNode",
+	               &WordSenseProcessor::do_sentence, this);
 }
 
 /**
  * Process a sentence fed into the system. This routine is called on
- * every sentence encountered in the system.
+ * every sentence encountered in the system.  It looks for sentences
+ * that are not tagged as being "finished."
+ *
+ * XXX This routine does not guarentee that sentences are found in
+ * order. Once found, they are handled in serial order, in the order
+ * in which they wre found. But they could have beenm found in "random"
+ * order. This needs a long term fix.
  */
 bool WordSenseProcessor::do_sentence(Handle h)
 {
@@ -80,7 +106,6 @@ bool WordSenseProcessor::do_sentence(Handle h)
 	// If we are here, then there's a fresh sentence to work on.
 	cnt++;
 	printf ("WordSenseProcessor found sentence %d handle=%lx\n", cnt, (unsigned long) h);
-	wsd->process_sentence(h);
 
 	// Mark this sentence as being completed.
 	std::vector<Handle> out;
@@ -89,6 +114,17 @@ bool WordSenseProcessor::do_sentence(Handle h)
 
 	atom_space->addLink(INHERITANCE_LINK, out);
 
+	// Now queue the sentence for actual processing.
+	pthread_mutex_lock(&queue_lock);
+	work_queue.push(h);
+
+	if (false == thread_running)
+	{
+		thread_running = true;
+		pthread_create (&worker, NULL, &WordSenseProcessor::thread_start, this);
+	}
+
+	pthread_mutex_unlock(&queue_lock);
 	return false;
 }
 

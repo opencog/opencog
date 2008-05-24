@@ -8,6 +8,8 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#include <pthread.h>
+
 #include "MindAgent.h"
 #include "Mihalcea.h"
 
@@ -17,7 +19,12 @@ class WordSenseProcessor : public MindAgent
 {
 	private:
 
+		pthread_t worker;
 		static void * thread_start(void *);
+		std::queue<Handle> work_queue;
+		pthread_mutex_t queue_lock;
+		bool thread_running;
+		void work_thread(void);
 
 		int cnt;
 		AtomSpace *atom_space;
