@@ -306,8 +306,8 @@ ODBCRecordSet::release(void)
 {
 	if (!this) return;
 
-	// SQLFreeStmt(sql_hstmt, SQL_CLOSE);
 	// SQLFreeStmt(sql_hstmt, SQL_UNBIND);
+	// SQLFreeStmt(sql_hstmt, SQL_CLOSE);
 	SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
 	sql_hstmt = NULL;
 
@@ -393,7 +393,7 @@ ODBCRecordSet::get_column_labels(void)
 		// PINFO ("column %d has name\'%s\'", i, namebuff);
 
 		strncpy(column_labels[i], namebuff, DEFAULT_COLUMN_NAME_SIZE);
-		column_labels[DEFAULT_COLUMN_NAME_SIZE-1] = 0;
+		column_labels[i][DEFAULT_COLUMN_NAME_SIZE-1] = 0;
 		column_datatype[i] = datatype;
 	}
 
