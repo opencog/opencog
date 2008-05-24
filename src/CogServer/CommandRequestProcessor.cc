@@ -92,7 +92,9 @@ std::string CommandRequestProcessor::help(std::string topic)
          "Available commands:\n"
          "data <xmldata>   -- load OpenCog XML data immediately following\n"
          "load <filename>  -- load OpenCog XML from indicated filename\n"
-         "ls               -- list entire system contents\n";
+         "ls               -- list entire system contents\n"
+         "ls <handle>      -- list handle and its incoming set\n"
+         "ls <node name>   -- list node and its incoming set\n";
 #ifdef HAVE_SQL_STORAGE
     reply += 
          "sql-open <dbname> <username> <auth>\n"
@@ -123,10 +125,53 @@ std::string CommandRequestProcessor::data(std::string buf)
     return loadXML(new StringXMLBufferReader(buf.c_str()));
 }
 
+std::string CommandRequestProcessor::ls(std::string arg)
+{
+    if (0 == arg.length())
+    {
+        return ls();
+    }
+
+    // If its all numeric, its a handle !?
+    size_t alpha = arg.find_first_not_of("0123456789");
+    if (std::string::npos == alpha)
+    {
+        Handle h = (Handle) strtoul(arg.c_str(), NULL, 10);
+        return ls(h);
+    }
+
+    // Else, its the name of an atom. ind the atom.
+    AtomSpace *atomSpace = CogServer::getAtomSpace();
+    Handle h = atomSpace->getAtomTable().getHandle(arg.c_str(), NODE);
+    return ls(h);
+
+
+    return "";
+}
+
+std::string CommandRequestProcessor::ls(Handle h)
+{
+    if (false == TLB::isValidHandle(h)) return "Invalid handle/unknown node";
+
+    std::string answer;
+    Atom *atom = TLB::getAtom(h);
+    answer += atom->toString();
+    answer += "\n";
+
+    HandleEntry *he = atom->getIncomingSet(); 
+    while (he)
+    {
+        answer += TLB::getAtom(he->handle)->toString();
+        answer += "\n";
+        he = he->next;
+    }
+    return answer;
+}
+
 /**
  * A simple-minded list of the graph
  */
-std::string CommandRequestProcessor::ls()
+std::string CommandRequestProcessor::ls(void)
 {
     AtomSpace *atomSpace = CogServer::getAtomSpace();;
 
@@ -290,10 +335,12 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             answer = load(args.front());
         }
     } else if (command == "ls") {
-        if (args.size() != 0) {
-            answer = "ls: invalid command syntax";
-        } else {
+        if (args.size() == 0) {
             answer = ls();
+        } else if (args.size() == 1) {
+            answer = ls(args.front());
+        } else {
+            answer = "ls: invalid command syntax";
         }
     } else if (command == "shutdown") {
         if (args.size() != 0) {
