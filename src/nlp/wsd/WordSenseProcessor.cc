@@ -57,6 +57,7 @@ void WordSenseProcessor::work_thread(void)
 		if (work_queue.empty())
 		{
 			thread_running = false;
+			pthread_mutex_unlock(&queue_lock);
 			return;
 		}
 		Handle h = work_queue.front();
