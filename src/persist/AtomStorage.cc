@@ -609,8 +609,8 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	}
 
 	// Now get the truth value
-	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.count);
-	atom->setTruthValue(*stv);
+	SimpleTruthValue stv(rp.mean, rp.count);
+	atom->setTruthValue(stv);
 
 	load_count ++;
 	if (load_count%1000 == 0)
