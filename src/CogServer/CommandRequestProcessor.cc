@@ -345,6 +345,9 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     else {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: data help load ls shutdown";
+#ifdef HAVE_SQL_STORAGE
+        answer += "\nsql-open sql-close sql-store sql-load";
+#endif
         if(!args.empty())
             answer += "\tArgs: " + args.front();
     }
