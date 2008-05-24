@@ -153,7 +153,11 @@ std::string CommandRequestProcessor::ls(Handle h)
 {
     if (false == TLB::isValidHandle(h)) return "Invalid handle/unknown node";
 
+    char buff[20];
     std::string answer;
+
+    snprintf(buff, 20, "%lu: ", (unsigned long) h);
+    answer += buff;
     Atom *atom = TLB::getAtom(h);
     answer += atom->toString();
     answer += "\n";
@@ -161,6 +165,9 @@ std::string CommandRequestProcessor::ls(Handle h)
     HandleEntry *he = atom->getIncomingSet(); 
     while (he)
     {
+        answer += "\t";
+        snprintf(buff, 20, "%lu: ", (unsigned long) he->handle);
+        answer += buff;
         answer += TLB::getAtom(he->handle)->toString();
         answer += "\n";
         he = he->next;
