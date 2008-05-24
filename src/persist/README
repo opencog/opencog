@@ -80,7 +80,7 @@ Getting started
 Create a database called "OpenCog"; for example, in postgres, at
 the unix command line:
 
-	$ createdb opencog
+   $ createdb opencog
 
 (you may need to su - postgres; createuser <username> first)
 (You may need to edit pg_hba.conf)
@@ -144,6 +144,7 @@ too small. Edit postgresql.conf and make the following changes:
    synchronous_commit = default on change to off
    wal_buffers = default 64kB change to 512kB
    commit_delay = default 0 change to 10000 (10K) microseconds
+   ssl = default true change to false
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by:
@@ -172,9 +173,14 @@ use prepare
 
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:
-3:38.31 postgres = 0.138 millisecs/atom
+2:08 postgres = 82 microsecs/atom
 similar to for opencog, but then atomtable needs to reconcile, which
 takes an additional 8:30 minutes to attach incoming handles!!
+
+Conclude: database loading would be much faster if we loaded all of
+the atoms first, then all of the lowest-level links, etc.  This assumes
+tht opencog is strictly hierarchically structured.
+
 
 
 TODO
@@ -186,3 +192,7 @@ TODO
 -- Store more complex truth value types
 
 -- Store attention values.
+
+-- Loading from SQL uses half as much ram as loading from XML, which
+   suggests the XML loader has a memory leak!?  Need to run valgrind on
+   it.
