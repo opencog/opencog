@@ -72,12 +72,12 @@ void Link::setTrail(Trail* t)
     trail = t;
 }
 
-Trail* Link::getTrail()
+Trail* Link::getTrail(void)
 {
     return trail;
 }
 
-std::string Link::toShortString()
+std::string Link::toShortString(void)
 {
     std::string answer;
 #define BUFSZ 1024
@@ -103,7 +103,7 @@ std::string Link::toShortString()
     return answer;
 }
 
-std::string Link::toString()
+std::string Link::toString(void)
 {
     std::string answer;
     char buf[BUFSZ];
@@ -119,22 +119,29 @@ std::string Link::toString()
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
-        Type t = TLB::getAtom(outgoing[i])->getType();
+        // Type t = TLB::getAtom(outgoing[i])->getType();
         //logger().fine("toString() => type of outgoing[%d] = %d", i, t);
-        if (ClassServer::isAssignableFrom(NODE, t)) {
-            answer += ((Node*) TLB::getAtom(outgoing[i]))->getName();
-        } else if  (ClassServer::isAssignableFrom(LINK, t)) {
-            answer += ((Link*) TLB::getAtom(outgoing[i]))->toString();
+        Handle h = outgoing[i];
+        if (TLB::isValidHandle(h)) {
+            Atom *a = TLB::getAtom(outgoing[i]);
+            Node *nnn = dynamic_cast<Node *>(a);
+            if (nnn) {
+                answer += nnn->getName();
+            } else {
+                Link *lll = dynamic_cast<Link *>(a);
+                answer += lll->toString();
+            }
         } else {
-            logger().error("Link::toString() => type of outgoing[%d] = %d is invalid", i, t);
-            answer += "INVALID_ATOM_TYPE!";
+            logger().error("Link::toString() => invalid handle %lu "
+                           "in position %d of ougoing set!", h, i);
+            answer += "INVALID_HANDLE!";
         }
     }
     answer += ">]";
     return answer;
 }
 
-float Link::getWeight()
+float Link::getWeight(void)
 {
     return getTruthValue().toFloat();
 }
