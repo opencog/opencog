@@ -15,3 +15,13 @@ bin/src/CogServer/cogServer.  From another terminal, run
 to see all the nodes and links.
 
 
+ToDo/Bugs:
+----------
+There is curently no job scheduling whatsoever, and no standardized
+input-queue polling. Thus, all routines that look for input need to
+poll, yet they also must minimize cpu overhead, to avoid blocking 
+the command-line processor.   Heavy cpu use must be done in its
+own threads.
+
+This is a very unsatisfactory state of affairs, and should be fixed.
+
