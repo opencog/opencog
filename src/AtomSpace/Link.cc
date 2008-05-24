@@ -126,7 +126,10 @@ std::string Link::toString(void)
             Atom *a = TLB::getAtom(outgoing[i]);
             Node *nnn = dynamic_cast<Node *>(a);
             if (nnn) {
+                snprintf(buf, BUFSZ, "[%d ", a->getType());
+                answer += buf;
                 answer += nnn->getName();
+                answer += "]";
             } else {
                 Link *lll = dynamic_cast<Link *>(a);
                 answer += lll->toString();
