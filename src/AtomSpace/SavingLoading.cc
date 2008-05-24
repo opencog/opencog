@@ -433,8 +433,8 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     Handle* targetTypeIndexCache = (Handle*) malloc(sizeof(Handle)*dumpToCore.size());
     
     for (int i = 0; i < numTypes; i++){
-        atomTable.typeIndex[i] = NULL;
-        atomTable.targetTypeIndex[i] = NULL;
+        atomTable.typeIndex[i] = UNDEFINED_HANDLE;
+        atomTable.targetTypeIndex[i] = UNDEFINED_HANDLE;
     }
     
     // reads the handle of each index list head from the file

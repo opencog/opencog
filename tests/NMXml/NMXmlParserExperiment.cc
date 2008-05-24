@@ -193,7 +193,7 @@ bool NMXmlParserExperiment::checkExp1(){
 	
 	TS_ASSERT(entry == NULL);
 	
-	link_sport_socker = NULL;
+	link_sport_socker = UNDEFINED_HANDLE;
 	Atom *atom = NULL;
 	std::vector<Handle>::iterator it;
 	for(it = handles.begin(); it != handles.end(); it++){

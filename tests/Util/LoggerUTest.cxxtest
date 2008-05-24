@@ -83,7 +83,7 @@ public:
         logger().info("Running LoggerUTest");
     }
 
-    unsigned int countLines(char *filename) {
+    unsigned int countLines(const char *filename) {
         unsigned int nLines = 0;
         std::string line;
 
@@ -93,7 +93,7 @@ public:
         return nLines;
     }
 
-    void logAllLevels(char *filename, Logger::Level level, unsigned int nLines) {
+    void logAllLevels(const char *filename, const Logger::Level level, const unsigned int nLines) {
         Logger _logger(filename, level);
         _logger.error("message");
         _logger.warn ("message");

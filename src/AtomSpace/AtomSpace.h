@@ -750,7 +750,7 @@ class AtomSpace {
      * Deprecated, importance updating should be done by ImportanceUpdating
      * MindAgent.
      */
-    void decayShortTermImportance() __attribute__ ((deprecated));
+    void decayShortTermImportance();
 
     /**
      * Get the total amount of STI in the AtomSpace, sum of

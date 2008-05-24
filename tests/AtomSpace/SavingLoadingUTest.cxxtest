@@ -37,7 +37,6 @@ using namespace std;
 #include <AtomSpace.h>
 
 #define DUMP_FILENAME "SavingLoadingUTest.dump"
-#define DUMP_FILENAME_RESAVE "SavingLoadingUTestResave.dump"
 
 #define NUM_TVS 5
 #define TV1_MEAN 0.25f
@@ -63,7 +62,6 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
 
     public:
         SavingLoadingUTest(){
-            //unlink(DUMP_FILENAME);
             tvs[0] = new SimpleTruthValue(TV1_MEAN, TV1_COUNT);
             tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
             tvs[2] = new CompositeTruthValue(SimpleTruthValue(TV3_MEAN, TV3_COUNT), NULL_VERSION_HANDLE);
@@ -325,6 +323,9 @@ class SavingLoadingUTest :  public CxxTest::TestSuite {
             runSaving(atomSpace2);
             AtomSpace atomSpace4;
             runLoading(atomSpace4);
+
+            if (!CxxTest::TestTracker::tracker().testFailed())
+                std::remove(DUMP_FILENAME);
         }
 
 };

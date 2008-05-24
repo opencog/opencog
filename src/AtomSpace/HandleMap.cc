@@ -104,15 +104,12 @@ T HandleMap<T>::get(Handle key)
 
     InternalIterator ti = handle_map->find(key);
 
-    if (ti == handle_map->end()){
-        return(NULL);
-    }
-
+    // if the key is not found, return NULL.
+    if (ti == handle_map->end())
+        return ((T)(void*) NULL); // crazy double cast due to gcc 4.1 bug
     ret = ti->second;
 
     unlock();
-
-    // if the key is not found, return NULL.
     return ret;
 }
 

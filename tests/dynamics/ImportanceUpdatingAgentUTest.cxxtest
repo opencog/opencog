@@ -74,16 +74,13 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 
     public:
 
-        ImportanceUpdatingAgentUTest(){
-        }
+	ImportanceUpdatingAgentUTest(){}
 
-        void setUp() {
-        }
+	void setUp() {}
 
-        void tearDown(){
-        }
+	void tearDown(){}
 
-        void testRun() {
+	void testRun() {
 	    opencog::ImportanceUpdatingAgent *agent;
 	    opencog::CogServer server;
 
@@ -93,11 +90,11 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    agent->getLogger()->setPrintToStdoutFlag(true);
 	    
-            server.plugInMindAgent(agent, 1);
+	    server.plugInMindAgent(agent, 1);
 	    createSimpleGraph(server.getAtomSpace(), "import-update");
 
 	    printf("Running agent without noise\n");
-            server.unitTestServerLoop(20);
+	    server.unitTestServerLoop(20);
 	    
 	    // Check AtomSpace funds within bounds
 	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
@@ -109,8 +106,11 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
 		    agent->acceptableLobeLTIRange[1]);
 
+	    // erase the log file if no assertions failed
+	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+		std::remove(agent->getLogger()->getFilename().c_str());
 	    delete agent;
-        }
+	}
 
 	void testNoise() {
 	    opencog::ImportanceUpdatingAgent *agent;
@@ -122,12 +122,12 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    agent->getLogger()->setPrintToStdoutFlag(true);
 	    
-            server.plugInMindAgent(agent, 1);
+	    server.plugInMindAgent(agent, 1);
 	    createSimpleGraph(server.getAtomSpace(), "import-update");
 
 	    printf("Running agent with noise\n");
 	    agent->setNoiseFlag(true);
-            server.unitTestServerLoop(20);
+	    server.unitTestServerLoop(20);
 
 	    // Check AtomSpace funds within bounds
 	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
@@ -138,6 +138,10 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 		    server.getAtomSpace()->getLTIFunds());
 	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
 		    agent->acceptableLobeLTIRange[1]);
+
+	    // erase the log file if no assertions failed
+	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+		std::remove(agent->getLogger()->getFilename().c_str());
 	    delete agent;
 	}
 
@@ -151,16 +155,16 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    agent->getLogger()->setPrintToStdoutFlag(true);
 	    
-            server.plugInMindAgent(agent, 1);
+	    server.plugInMindAgent(agent, 1);
 	    createSimpleGraph(server.getAtomSpace(), "import-update");
 
 	    printf("Running agent excluding links\n");
 	    agent->setUpdateLinks(false);
-            server.unitTestServerLoop(10);
+	    server.unitTestServerLoop(10);
 
 	    printf("Running agent excluding links, with noise\n");
 	    agent->setNoiseFlag(true);
-            server.unitTestServerLoop(20);
+	    server.unitTestServerLoop(20);
 
 	    // Check AtomSpace funds within bounds
 	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
@@ -172,7 +176,9 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
 		    agent->acceptableLobeLTIRange[1]);
 
+	    // erase the log file if no assertions failed
+	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+		std::remove(agent->getLogger()->getFilename().c_str());
 	    delete agent;
 	}
 };
-
