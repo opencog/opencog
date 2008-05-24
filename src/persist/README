@@ -169,8 +169,12 @@ use prepare
 224:53  md
 225:35
 
-CREATE INDEX src_idx ON Edges (src_uuid);
 
+Loading performance. Database contains 1564K Atoms, and 2413K edges.
+CPU usage:
+3:38.31 postgres = 0.138 millisecs/atom
+similar to for opencog, but then atomtable needs to reconcile, which
+takes an additional 8:30 minutes to attach incoming handles!!
 
 
 TODO

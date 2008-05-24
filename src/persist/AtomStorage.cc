@@ -635,19 +635,13 @@ void AtomStorage::load(AtomTable &table)
 	rp.table = &table;
 	rp.store = this;
 
-	// Create indexes, if missing
-	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
-	rp.rs->release();
-	rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
-	rp.rs->release();
-
-#if 0
+#if GET_ONE_BIG_BLOB
 	rp.rs = db_conn->exec("SELECT * FROM Atoms;");
 	rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 	rp.rs->release();
 #else
 
-#define STEP 1003
+#define STEP 10003
 	unsigned long rec;
 	for (rec = 0; rec <= max_nrec; rec += STEP)
 	{
@@ -680,11 +674,23 @@ void AtomStorage::store(const AtomTable &table)
 	get_ids();
 	setMaxUUID(TLB::uuid);
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
+
+	// Drop indexes, for faster loading.
+	Response rp;
+	rp.rs = db_conn->exec("DROP INDEX uuid_idx;");
+	rp.rs->release();
+	rp.rs = db_conn->exec("DROP INDEX src_idx;");
+	rp.rs->release();
+
    table.foreach_atom(&AtomStorage::store_cb, this);
 
-	Response rp;
+	// Create indexes
+	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
+	rp.rs->release();
+	rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
+	rp.rs->release();
+
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
-	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
 	rp.rs->release();
 }
 
