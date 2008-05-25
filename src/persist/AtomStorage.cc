@@ -134,6 +134,26 @@ class AtomStorage::Response
 			return false;
 		}
 
+		// deal twith the type-to-id map
+		bool type_cb(void)
+		{
+			rs->foreach_column(&Response::type_column_cb, this);
+			store->set_typemap(itype, tname);
+			return false;
+		}
+		const char * tname;
+		bool type_column_cb(const char *colname, const char * colvalue)
+		{
+			if (!strcmp(colname, "type"))
+			{
+				itype = atoi(colvalue);
+			}
+			else if (!strcmp(colname, "typename"))
+			{
+				tname = colvalue;
+			}
+			return false;
+		}
 #ifdef OUT_OF_LINE_TVS
 		// Callbacks for SimpleTruthValues
 		int tvid;
@@ -236,12 +256,14 @@ class AtomStorage::Outgoing
 };
 
 /* ================================================================ */
+// Constructors
 
 AtomStorage::AtomStorage(const char * dbname, 
                          const char * username,
                          const char * authentication)
 {
 	db_conn = new ODBCConnection(dbname, username, authentication);
+	type_map_was_loaded = false;
 }
 
 AtomStorage::AtomStorage(const std::string dbname, 
@@ -249,6 +271,7 @@ AtomStorage::AtomStorage(const std::string dbname,
                          const std::string authentication)
 {
 	db_conn = new ODBCConnection(dbname.c_str(), username.c_str(), authentication.c_str());
+	type_map_was_loaded = false;
 }
 
 AtomStorage::~AtomStorage()
@@ -427,6 +450,8 @@ void escape_single_quotes(std::string &str)
  */
 void AtomStorage::storeAtom(Atom *atom)
 {
+	store_typemap();
+
 	int notfirst = 0;
 	std::string cols;
 	std::string vals;
@@ -504,6 +529,65 @@ void AtomStorage::storeAtom(Atom *atom)
 
 	// Make note of the fact that this atom has been stored.
 	local_id_cache.insert(h);
+}
+
+/* ================================================================ */
+
+/**
+ * Store the concordance of type names to type values.
+ */
+void AtomStorage::store_typemap(void)
+{
+	/* Store the type map only if it has never been stored before.
+	 * Otherwise we risk messing it up.
+	 */
+	if (type_map_was_loaded) return;
+	type_map_was_loaded = true;
+
+	Response rp;
+	char buff[BUFSZ];
+	Type t;
+
+	loading_typemap.resize(NUMBER_OF_CLASSES,0);
+	storing_typemap.resize(NUMBER_OF_CLASSES,0);
+	for (t=0; t<NUMBER_OF_CLASSES; t++)
+	{
+		snprintf(buff, BUFSZ,
+		         "INSERT INTO TypeCodes (type, typename) "
+		         "VALUES (%d, \'%s\');",
+		         t, ClassServer::getTypeName(t));
+		rp.rs = db_conn->exec(buff);
+		rp.rs->release();
+
+		loading_typemap.at(t) = t;
+		storing_typemap.at(t) = t;
+	}
+
+}
+
+void AtomStorage::load_typemap(void)
+{
+	/* Load the type map only once. If it was previously stored, 
+	 * don't load it.
+	 */
+	if (type_map_was_loaded) return;
+	type_map_was_loaded = true;
+
+	// Asume less than 100 new classes were added since last time
+	loading_typemap.resize(NUMBER_OF_CLASSES+100,0);
+	storing_typemap.resize(NUMBER_OF_CLASSES+100,0);
+
+	Response rp;
+	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
+	rp.rs->foreach_row(&Response::type_cb, &rp);
+	rp.rs->release();
+}
+
+void AtomStorage::set_typemap(int dbval, const char * tname)
+{
+	Type realtype = ClassServer::getType(tname);
+	loading_typemap.at(dbval) = realtype;
+	storing_typemap.at(realtype) = dbval;
 }
 
 /* ================================================================ */

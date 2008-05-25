@@ -42,6 +42,16 @@ CREATE TABLE Edges (
 );
 
 -- -----------------------------------------------------------
+-- Table associating type names to stored integer values. The list of
+-- type names and numbers may differ from one version of the opencog
+-- server to another; thus, we do not want to store numerical type 
+-- values in the datase.
+
+CREATE TABLE TypeCodes (
+	type INT,
+	typename TEXT
+);
+-- -----------------------------------------------------------
 -- Global state
 
 CREATE TABLE Global (
