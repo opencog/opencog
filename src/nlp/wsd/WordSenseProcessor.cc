@@ -79,6 +79,10 @@ void WordSenseProcessor::run(CogServer *server)
 	// Look for recently entered text
 	atom_space->foreach_handle_of_type("SentenceNode",
 	               &WordSenseProcessor::do_sentence, this);
+
+	// XXX we are being called too often. this needs to be fixed.
+	// in truyth, should only poll on new input.
+	usleep(50*1000);
 }
 
 /**
@@ -98,15 +102,15 @@ bool WordSenseProcessor::do_sentence(Handle h)
 	Node node(CONCEPT_NODE, "#WSD_completed");
 	completion_handle = atom_space->addRealAtom(node);
 
-	// Look to see the the sentence is associated with the 
-	// completion indicator. 
+	// Look to see if the sentence is associated with the
+	// completion indicator.
 	bool rc = foreach_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_done, this);
 
 	if (rc) return false;
 
 	// If we are here, then there's a fresh sentence to work on.
 	cnt++;
-	printf ("WordSenseProcessor found sentence %d handle=%lx\n", cnt, (unsigned long) h);
+	printf ("WordSenseProcessor found sentence %d handle=%lu\n", cnt, (unsigned long) h);
 
 	// Mark this sentence as being completed.
 	std::vector<Handle> out;
