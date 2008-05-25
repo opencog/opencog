@@ -33,6 +33,10 @@
 #include "AtomStorage.h"
 #endif /* HAVE_SQL_STORAGE */
 
+#ifdef HAVE_GUILE
+#include "SchemeShell.h"
+#endif /* HAVE_GUILE */
+
 namespace opencog {
 
 class CommandRequestProcessor : public RequestProcessor
@@ -59,6 +63,9 @@ class CommandRequestProcessor : public RequestProcessor
 
         AtomStorage *store;
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_GUILE
+        SchemeShell *ss;
+#endif /* HAVE_GUILE */
 
         int load_count;
 

@@ -39,6 +39,10 @@ CommandRequestProcessor::~CommandRequestProcessor() {
     if (store) delete store;
     store = NULL;
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_GUILE
+    if (ss) delete ss;
+    ss = NULL;
+#endif /* HAVE_GUILE */
 }
 
 CommandRequestProcessor::CommandRequestProcessor() {
@@ -46,8 +50,12 @@ CommandRequestProcessor::CommandRequestProcessor() {
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_GUILE
+    ss = new SchemeShell();
+#endif /* HAVE_GUILE */
 }
 
+/* ============================================================== */
 /**
  * read XML data from a buffer
  */
@@ -76,6 +84,7 @@ std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf) {
     return msg;
 }
 
+/* ============================================================== */
 std::string CommandRequestProcessor::help(std::string topic)
 {
     std::string reply = "";
@@ -95,6 +104,10 @@ std::string CommandRequestProcessor::help(std::string topic)
          "ls               -- list entire system contents\n"
          "ls <handle>      -- list handle and its incoming set\n"
          "ls <type> <name> -- list node and its incoming set\n";
+#ifdef HAVE_GUILE
+    reply += 
+         "scm <expr>       -- evaluate the Scheme expression\n";
+#endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
     reply += 
          "sql-open <dbname> <username> <auth>\n"
@@ -109,6 +122,7 @@ std::string CommandRequestProcessor::help(std::string topic)
     return reply;
 }
 
+/* ============================================================== */
 /**
  * Read XML data from a file
  */
@@ -133,6 +147,8 @@ std::string CommandRequestProcessor::ls(std::string type, std::string name)
     Handle h = atomSpace->getAtomTable().getHandle(name.c_str(), t);
     return ls(h);
 }
+
+/* ============================================================== */
 
 std::string CommandRequestProcessor::ls(std::string arg)
 {
@@ -229,6 +245,7 @@ std::string CommandRequestProcessor::ls(void)
 
 }
 
+/* ============================================================== */
 #ifdef HAVE_SQL_STORAGE
 /**
  * Open a connection to the sql server
@@ -318,6 +335,8 @@ std::string CommandRequestProcessor::sql_store(void)
 }
 #endif /* HAVE_SQL_STORAGE */
 
+/* ============================================================== */
+
 void CommandRequestProcessor::processRequest(CogServerRequest *req)
 {
     CommandRequest * request = dynamic_cast<CommandRequest *>(req);
@@ -367,6 +386,11 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             server().stop();
         }
     } 
+#ifdef HAVE_GUILE
+    else if (command == "scm") {
+answer = "duude got an scm command";
+    }
+#endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
     else if (command == "sql-open") {
         if (args.size() < 2) {

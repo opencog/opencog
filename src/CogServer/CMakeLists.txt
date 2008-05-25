@@ -28,6 +28,7 @@ TARGET_LINK_LIBRARIES(CogServer
 	NMXml
 	Util
 	query
+	schemes
 	wsd
 	persist
 	${IODBC_LIBRARIES}
