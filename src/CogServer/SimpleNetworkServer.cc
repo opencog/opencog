@@ -59,6 +59,7 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     std::string command;
     std::queue<std::string> args;
 
+    // Special handling for command escapes
     if (cmdLine.substr(0,5) == "data\n") {
         command = "data";
         args.push(cmdLine.substr(5));
@@ -66,6 +67,14 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     if (cmdLine.substr(0,6) == "data\r\n") {
         command = "data";
         args.push(cmdLine.substr(6));
+    } else
+    if (cmdLine.substr(0,5) == "scm\n") {
+        command = "scm";
+        args.push(cmdLine.substr(4));
+    } else 
+    if (cmdLine.substr(0,6) == "scm\r\n") {
+        command = "scm";
+        args.push(cmdLine.substr(5));
     } else {
         parseCommandLine(cmdLine, command, args);
     }
@@ -127,7 +136,7 @@ void *SimpleNetworkServer::portListener(void *arg)
  * @command -- output, contains first non-whitespace part of input string
  * @args -- output, queue of space-separated tokens split from the input string.
  *
- * XXX ?? what is the purpose of this?? gnu getopt is an easier way to get
+ * XXX ?? what is the purpose of this?? gnu getopt is an better/more general way to get
  * args from a command line.
  */
 void SimpleNetworkServer::parseCommandLine(const std::string &line, 

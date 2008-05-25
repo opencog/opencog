@@ -20,7 +20,7 @@ class SchemeShell
 
 	public:
 		SchemeShell(void);
-		void eval(const char *);
+		std::string eval(const std::string &);
 };
 
 }

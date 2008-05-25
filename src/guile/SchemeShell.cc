@@ -43,14 +43,15 @@ void SchemeShell::register_procs(void)
 /**
  * Evaluate the expression
  */
-void SchemeShell::eval(const char * expr)
+std::string SchemeShell::eval(const std::string &expr)
 {
-	scm_c_eval_string(expr);
+	scm_c_eval_string(expr.c_str());
 
 	// alternately, to catch any throws...
 	// scm_internal_stack_catch (SCM_BOOL_T, (scm_t_catch_body) scm_c_eval_string,
 	//            expr, (scm_t_catch_handler) my_catch_handler, expr);
 
+	return "ola";
 }
 
 #endif

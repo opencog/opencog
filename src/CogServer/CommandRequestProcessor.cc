@@ -106,7 +106,7 @@ std::string CommandRequestProcessor::help(std::string topic)
          "ls <type> <name> -- list node and its incoming set\n";
 #ifdef HAVE_GUILE
     reply += 
-         "scm <expr>       -- evaluate the Scheme expression\n";
+         "scm              -- enter the scheme interpreter\n";
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
     reply += 
@@ -388,7 +388,11 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     } 
 #ifdef HAVE_GUILE
     else if (command == "scm") {
-answer = "duude got an scm command";
+        if (args.size() != 1) {
+            answer = "scm: invalid command syntax";
+        } else {
+            answer = ss->eval(args.front());
+        }
     }
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
@@ -431,6 +435,9 @@ answer = "duude got an scm command";
     else {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: data help load ls shutdown";
+#ifdef HAVE_GUILE
+        answer += " scm";
+#endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
         answer += "\n\tsql-open sql-close sql-store sql-load";
 #endif
