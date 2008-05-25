@@ -8,18 +8,19 @@
 #ifndef OPENCOG_SCHEME_SHELL_H
 #define OPENCOG_SCHEME_SHELL_H
 
-#include <Atom.h>
+#include <string>
 
 namespace opencog {
 
 class SchemeShell
 {
 	private:
-		static bool is_inited = false;
+		static bool is_inited;
 		void register_procs(void);
 
 	public:
 		SchemeShell(void);
+		void eval(const char *);
 };
 
 }

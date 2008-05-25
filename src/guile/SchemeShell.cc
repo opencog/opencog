@@ -5,6 +5,8 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#ifdef HAVE_GUILE
+
 #include <guile/gh.h>
 #include <libguile.h>
 #include <libguile/backtrace.h>
@@ -13,7 +15,9 @@
 
 using namespace opencog;
 
-SchemeShell:SchemeShell(void)
+bool SchemeShell::is_inited = false;
+
+SchemeShell::SchemeShell(void)
 {
 	if (!is_inited)
 	{
@@ -31,7 +35,22 @@ static SCM ss_hello (void)
 	return SCM_EOL;
 }
 
-void SchemeShell:register_procs(void)
+void SchemeShell::register_procs(void)
 {
 	scm_c_define_gsubr("cog-hello",               0, 0, 0, ss_hello);
 }
+
+/**
+ * Evaluate the expression
+ */
+void SchemeShell::eval(const char * expr)
+{
+	scm_c_eval_string(expr);
+
+	// alternately, to catch any throws...
+	// scm_internal_stack_catch (SCM_BOOL_T, (scm_t_catch_body) scm_c_eval_string,
+	//            expr, (scm_t_catch_handler) my_catch_handler, expr);
+
+}
+
+#endif
