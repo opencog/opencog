@@ -62,7 +62,8 @@ void CogServer::disableNetworkServer() {
     }
 }
 
-void CogServer::serverLoop() {
+void CogServer::serverLoop()
+{
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
@@ -70,8 +71,8 @@ void CogServer::serverLoop() {
     if (networkServer != NULL) networkServer->start();
     logger().info("opencog server ready.");
 
+    gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
-        gettimeofday(&timer_start, NULL);
 
         if (getRequestQueueSize() != 0) processRequests();
         processMindAgents();
@@ -80,12 +81,13 @@ void CogServer::serverLoop() {
         if (cycleCount < 0) cycleCount = 0;
 
         // sleep long enough so that the next cycle will only start
-        // after config["SERVER_CYCLE_DURATION"] microseconds
+        // after config["SERVER_CYCLE_DURATION"] milliseconds
         gettimeofday(&timer_end, NULL);
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
         if ((cycle_duration - elapsed_time) > 0)
             usleep(cycle_duration - elapsed_time);
+        timer_start = timer_end;
     }
 }
 
