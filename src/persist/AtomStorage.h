@@ -42,8 +42,8 @@ class AtomStorage
 		void setMaxUUID(unsigned long);
 
 		// XXX assume there are fewer than 500 atom types.
-		std::vector<int>  storing_typemap;
-		std::vector<Type> loading_typemap;
+		int  storing_typemap[500];
+		Type loading_typemap[500];
 		bool type_map_was_loaded;
 		void load_typemap(void);
 		void store_typemap(void);

@@ -553,8 +553,6 @@ void AtomStorage::store_typemap(void)
 	char buff[BUFSZ];
 	Type t;
 
-	loading_typemap.resize(NUMBER_OF_CLASSES,0);
-	storing_typemap.resize(NUMBER_OF_CLASSES,0);
 	for (t=0; t<NUMBER_OF_CLASSES; t++)
 	{
 		snprintf(buff, BUFSZ,
@@ -564,8 +562,8 @@ void AtomStorage::store_typemap(void)
 		rp.rs = db_conn->exec(buff);
 		rp.rs->release();
 
-		loading_typemap.at(t) = t;
-		storing_typemap.at(t) = t;
+		loading_typemap[t] = t;
+		storing_typemap[t] = t;
 	}
 
 }
@@ -578,10 +576,6 @@ void AtomStorage::load_typemap(void)
 	if (type_map_was_loaded) return;
 	type_map_was_loaded = true;
 
-	// Asume less than 100 new classes were added since last time
-	loading_typemap.resize(NUMBER_OF_CLASSES+100,0);
-	storing_typemap.resize(NUMBER_OF_CLASSES+100,0);
-
 	Response rp;
 	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
 	rp.rs->foreach_row(&Response::type_cb, &rp);
@@ -591,8 +585,8 @@ void AtomStorage::load_typemap(void)
 void AtomStorage::set_typemap(int dbval, const char * tname)
 {
 	Type realtype = ClassServer::getType(tname);
-	loading_typemap.at(dbval) = realtype;
-	storing_typemap.at(realtype) = dbval;
+	loading_typemap[dbval] = realtype;
+	storing_typemap[realtype] = dbval;
 }
 
 /* ================================================================ */
