@@ -1,0 +1,15 @@
+
+                        Scheme Scripting
+                        ----------------
+
+                    Linas Vepstas, May 2008
+
+
+This directory contains an experimental, rather broken binding to
+the scheme programming language, via guile. Scheme is a lisp dialect.
+This binding is intended to be used for day-to-day maintenance 
+activities, and for experimentation. it is not meant to be used 
+for any sort of serious calculation, simply because it is not
+(and cannot be) a high-performance interface. Guile is an interpreter,
+not a compiler, and so will never have the performance of compiled code.
+
