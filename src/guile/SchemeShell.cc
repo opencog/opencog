@@ -1,31 +1,24 @@
-
 /*
  * SchemeShell.c
  *
  * Simple scheme shell
+ * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
-
-class SchemeShell
-{
-	private:
-		static bool is_inited = false;
-		void register_procs(void);
-
-	public:
-		SchemeShell(void);
-};
-
 
 #include <guile/gh.h>
 #include <libguile.h>
 #include <libguile/backtrace.h>
 
+#include "SchemeShell.h"
+
+using namespace opencog;
 
 SchemeShell:SchemeShell(void)
 {
 	if (!is_inited)
 	{
 		is_inited = true;
+		scm_init_guile();
 		scm_init_debug();
 		scm_init_backtrace();
 		register_procs();
