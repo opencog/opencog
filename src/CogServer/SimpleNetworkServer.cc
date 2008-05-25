@@ -68,11 +68,11 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
         command = "data";
         args.push(cmdLine.substr(6));
     } else
-    if (cmdLine.substr(0,5) == "scm\n") {
+    if (cmdLine.substr(0,4) == "scm\n") {
         command = "scm";
         args.push(cmdLine.substr(4));
     } else 
-    if (cmdLine.substr(0,6) == "scm\r\n") {
+    if (cmdLine.substr(0,5) == "scm\r\n") {
         command = "scm";
         args.push(cmdLine.substr(5));
     } else {

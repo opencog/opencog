@@ -69,7 +69,8 @@ void ServerSocket::OnLine(const std::string& line)
         // until a ctrl-D or socket close.
         SetLineProtocol(false);
         in_raw_mode = true;
-        buffer = "data\n";
+        buffer = line;
+        buffer += "\n";
     }
     else
     {
