@@ -578,6 +578,7 @@ void AtomStorage::load_typemap(void)
 
 	Response rp;
 	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
+	rp.store = this;
 	rp.rs->foreach_row(&Response::type_cb, &rp);
 	rp.rs->release();
 }
