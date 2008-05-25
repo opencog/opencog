@@ -185,10 +185,6 @@ tht opencog is strictly hierarchically structured.
 
 TODO
 ----
--- Store  a separate index of atom types, so that the proper mapping
-   can be made if the list of opencog atom types changes between the
-   previous stores and the latest loads.
-
 -- Store more complex truth value types
 
 -- Store attention values.

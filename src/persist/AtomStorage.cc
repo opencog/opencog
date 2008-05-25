@@ -48,7 +48,7 @@ class AtomStorage::Response
 
 		// Temporary cache of info about atom being assembled.
 		Handle handle;
-		Type itype;
+		int itype;
 		const char * name;
 		double mean;
 		double count;
@@ -489,7 +489,8 @@ void AtomStorage::storeAtom(Atom *atom)
 	{
 		// Store the atom UUID
 		Type t = atom->getType();
-		STMTI("type", t);
+		int dbtype = storing_typemap[t];
+		STMTI("type", dbtype);
 	
 		// Store the node name, if its a node
 		Node *n = dynamic_cast<Node *>(atom);
@@ -532,9 +533,13 @@ void AtomStorage::storeAtom(Atom *atom)
 }
 
 /* ================================================================ */
-
 /**
  * Store the concordance of type names to type values.
+ * The problem being solved here is that the list of atom types might
+ * have changed between the last time that data was stored to the database,
+ * and the current instance. Thus, all type saving/loading works by type
+ * name rather than by integer type value. Of course, the sql db stores
+ * an actual short, so this helps add to the confusion.
  */
 void AtomStorage::store_typemap(void)
 {
@@ -645,6 +650,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
  */
 Atom * AtomStorage::getAtom(Handle h)
 {
+	load_typemap();
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
 
@@ -663,18 +669,19 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 {
 	// Now that we know everything about an atom, actually construct one.
 	Atom *atom = TLB::getAtom(h);
+	Type realtype = loading_typemap[rp.itype];
 
 	if (NULL == atom)
 	{
 		if (ClassServer::isAssignableFrom(NODE, rp.itype))
 		{
-			atom = new Node(rp.itype, rp.name);
+			atom = new Node(realtype, rp.name);
 		}
 		else
 		{
 			std::vector<Handle> outvec;
 			getOutgoing(outvec, h);
-			atom = new Link(rp.itype, outvec);
+			atom = new Link(realtype, outvec);
 		}
 
 		// Make sure that the handle in the TLB is synced with 
@@ -684,7 +691,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	else
 	{
 		// Perform at least some basic sanity checking ...
-		if (rp.itype != atom->getType())
+		if (realtype != atom->getType())
 		{
 			fprintf(stderr,
 				"Error: mismatched atom type for existing atom! uuid=%lu\n",
@@ -714,6 +721,8 @@ void AtomStorage::load(AtomTable &table)
 	TLB::uuid = max_nrec;
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
 	load_count = 0;
+
+	load_typemap();
 
 	Response rp;
 	rp.table = &table;
@@ -758,6 +767,8 @@ void AtomStorage::store(const AtomTable &table)
 	get_ids();
 	setMaxUUID(TLB::uuid);
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
+
+	store_typemap();
 
 	// Drop indexes, for faster loading.
 	Response rp;

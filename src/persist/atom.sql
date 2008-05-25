@@ -8,7 +8,7 @@ CREATE TABLE Atoms (
 	-- Do not build index until after load, to speed storage
 	uuid	INT,
 
-	type  INT,
+	type  SMALLINT,
 
 	-- maps to TruthValue ID
 	-- tvid INT, -- not used, just inline the truth value
@@ -48,7 +48,7 @@ CREATE TABLE Edges (
 -- values in the datase.
 
 CREATE TABLE TypeCodes (
-	type INT,
+	type SMALLINT,
 	typename TEXT
 );
 -- -----------------------------------------------------------
