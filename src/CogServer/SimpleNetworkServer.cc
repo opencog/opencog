@@ -41,12 +41,13 @@ SimpleNetworkServer::~SimpleNetworkServer() {
    }
 }
 
-SimpleNetworkServer::SimpleNetworkServer(CogServer *cogServer, int portNumber)
+SimpleNetworkServer::SimpleNetworkServer(CogServer *cs, int pn)
 {
     started = false;
     stopListenerThreadFlag = false;
-    this->portNumber = portNumber;
-    this->cogServer = cogServer;
+    portNumber = pn;
+    cogServer = cs;
+    shell_mode = false;
 }
 
 /**
@@ -70,14 +71,27 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     } else
     if (cmdLine.substr(0,4) == "scm\n") {
         command = "scm";
-        args.push(cmdLine.substr(4));
+        shell_mode = true;
     } else 
     if (cmdLine.substr(0,5) == "scm\r\n") {
         command = "scm";
-        args.push(cmdLine.substr(5));
+        shell_mode = true;
+    } else 
+    if (cmdLine.substr(0,1) == "\n") {
+        command = "scm-exit";
+        shell_mode = false;
+    } else 
+    if (cmdLine.substr(0,2) == "\r\n") {
+        command = "scm-exit";
+        shell_mode = false;
+    } else 
+    if (shell_mode) {
+        // In shell mode, do *not* parse the command line!
+        command = cmdLine;
     } else {
         parseCommandLine(cmdLine, command, args);
     }
+
     CommandRequest *request = new CommandRequest(callBack, command, args);
     cogServer->pushRequest(request);
 }

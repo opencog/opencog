@@ -52,6 +52,7 @@ CommandRequestProcessor::CommandRequestProcessor() {
 #endif /* HAVE_SQL_STORAGE */
 #ifdef HAVE_GUILE
     ss = new SchemeShell();
+    shell_mode = false;
 #endif /* HAVE_GUILE */
 }
 
@@ -345,6 +346,14 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     std::queue<std::string> args = request->getArgs();
 
     std::string answer;
+    if (shell_mode)
+    {
+       answer = ss->eval(args.front());
+       request->setAnswer(answer);
+       request->callBack();
+       return;
+    }
+
     if (command == "data") {
         if (args.size() != 1) {
             answer = "data: invalid command syntax";
@@ -388,11 +397,12 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     } 
 #ifdef HAVE_GUILE
     else if (command == "scm") {
-        if (args.size() != 1) {
-            answer = "scm: invalid command syntax";
-        } else {
-            answer = ss->eval(args.front());
-        }
+        shell_mode = true;
+        answer = "Entering scheme shell mode";
+    }
+    else if (command == "scm-exit") {
+        shell_mode = false;
+        answer = "Exiting scheme shell mode";
     }
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE

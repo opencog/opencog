@@ -43,6 +43,7 @@ class SimpleNetworkServer : public NetworkServer
         static bool stopListenerThreadFlag;
         int portNumber;
         CogServer *cogServer;
+        bool shell_mode;
 
         pthread_t socketListenerThread; // thread which will listen to the port
         pthread_attr_t socketListenerAttr;

@@ -64,6 +64,7 @@ class CommandRequestProcessor : public RequestProcessor
         AtomStorage *store;
 #endif /* HAVE_SQL_STORAGE */
 #ifdef HAVE_GUILE
+        bool shell_mode;
         SchemeShell *ss;
 #endif /* HAVE_GUILE */
 

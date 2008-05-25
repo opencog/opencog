@@ -61,7 +61,7 @@ void ServerSocket::OnDisconnect()
 
 void ServerSocket::OnLine(const std::string& line)
 {
-    if ((line == "data") || (line == "scm"))
+    if (line == "data")
     {
         // Disable line protocol; we are expecting a stream
         // of bytes from now on, until socket closure.
@@ -69,8 +69,7 @@ void ServerSocket::OnLine(const std::string& line)
         // until a ctrl-D or socket close.
         SetLineProtocol(false);
         in_raw_mode = true;
-        buffer = line;
-        buffer += "\n";
+        buffer = "data\n";
     }
     else
     {
