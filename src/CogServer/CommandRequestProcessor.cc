@@ -348,7 +348,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     std::string answer;
     if (shell_mode)
     {
-       answer = ss->eval(args.front());
+       answer = ss->eval(command);
        request->setAnswer(answer);
        request->callBack();
        return;

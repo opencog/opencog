@@ -61,6 +61,10 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     std::queue<std::string> args;
 
     // Special handling for command escapes
+    // Note that "data" will have LF or CRLF because the socket code
+    // has already been put into "raw" mode when "data" shows up.  
+    // However, other things, like "scm", will not have CRLF because 
+    // the socket code will be in line mode.
     if (cmdLine.substr(0,5) == "data\n") {
         command = "data";
         args.push(cmdLine.substr(5));
@@ -69,19 +73,11 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
         command = "data";
         args.push(cmdLine.substr(6));
     } else
-    if (cmdLine.substr(0,4) == "scm\n") {
+    if (cmdLine.substr(0,3) == "scm") {
         command = "scm";
         shell_mode = true;
     } else 
-    if (cmdLine.substr(0,5) == "scm\r\n") {
-        command = "scm";
-        shell_mode = true;
-    } else 
-    if (cmdLine.substr(0,1) == "\n") {
-        command = "scm-exit";
-        shell_mode = false;
-    } else 
-    if (cmdLine.substr(0,2) == "\r\n") {
+    if (cmdLine.substr(0,1) == "") {
         command = "scm-exit";
         shell_mode = false;
     } else 
@@ -89,6 +85,10 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
         // In shell mode, do *not* parse the command line!
         command = cmdLine;
     } else {
+
+        // XXX FIXME: this is really the wrong place to do command-line 
+        // parsing. Thisneeds to be moved to the simple cog server,
+        // so that the silly "shell_mode" crap above can be removed.
         parseCommandLine(cmdLine, command, args);
     }
 
