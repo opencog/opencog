@@ -25,20 +25,9 @@ SchemeShell::SchemeShell(void)
 		scm_init_debug();
 		scm_init_backtrace();
 
+		init_smob_type();
 		register_procs();
 	}
-}
-
-/* ============================================================== */
-
-static SCM ss_hello (void)
-{
-	return scm_from_locale_string("Hello, world!");
-}
-
-void SchemeShell::register_procs(void)
-{
-	scm_c_define_gsubr("cog-hello",               0, 0, 0, ss_hello);
 }
 
 /* ============================================================== */
