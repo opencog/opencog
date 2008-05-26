@@ -10,7 +10,12 @@
 #include <libguile.h>
 
 #include "Atom.h"
+#include "ClassServer.h"
+#include "CogServer.h"
+#include "Link.h"
+#include "Node.h"
 #include "SchemeSmob.h"
+#include "TLB.h"
 
 using namespace opencog;
 
@@ -31,22 +36,9 @@ SchemeSmob::SchemeSmob(void)
 
 /* ============================================================== */
 
-SCM SchemeSmob::mark_cog(SCM node)
-{
-	printf("duuude! mark\n");
-	return SCM_EOL;
-}
-
-size_t SchemeSmob::free_cog(SCM node)
-{
-	printf("duuude! free\n");
-	return 0;
-}
-
 int SchemeSmob::print_cog(SCM node, SCM port, scm_print_state * ps)
 {
 	scm_puts ("#<atom>", port);
-	printf("duuude! print\n");
 	return 1; //non-zero meanss success
 }
 
@@ -59,27 +51,72 @@ SCM SchemeSmob::equalp_cog(SCM a, SCM b)
 void SchemeSmob::init_smob_type(void)
 {
 	cog_tag = scm_make_smob_type ("opencog_atom", sizeof (scm_t_bits));
-	scm_set_smob_mark (cog_tag, mark_cog);
-	scm_set_smob_free (cog_tag, free_cog);
 	scm_set_smob_print (cog_tag, print_cog);
 	scm_set_smob_equalp (cog_tag, equalp_cog);
 }
 
+/**
+ * return atom->toString() for the corresponding atom.
+ */
+std::string SchemeSmob::to_string(SCM node)
+{
+	SCM shandle = SCM_SMOB_OBJECT(node);
+	Handle h = scm_to_ulong(shandle);
 
+	if (UNDEFINED_HANDLE == h) return "Undefined atom handle";
+
+	if (h < NOTYPE) return "non-real atom";
+
+	Atom *atom = TLB::getAtom(h);
+	if (NULL == atom) return "Invalid handle";
+
+	return atom->toString();
+}
 
 /* ============================================================== */
 
+/**
+ * Create a new scheme object, holding the atom handle
+ */
 SCM SchemeSmob::ss_atom (SCM shandle)
 {
 	SCM smob;
-printf ("duude handle=%d\n", scm_to_int(shandle));
 	SCM_NEWSMOB (smob, cog_tag, shandle);
 	return smob;
 }
 
-static SCM ss_hello (void)
+/**
+ * Create a new node, of named type stype, and string name sname
+ */
+SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 {
-	return scm_from_locale_string("Hello, world!");
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+   char * ct = scm_to_locale_string(stype);
+	Type t = ClassServer::getType(ct);
+	free(ct);
+
+	if (NOTYPE == t)
+	{
+		SCM key = scm_from_locale_symbol("bad-type");
+		SCM args = scm_from_locale_string("uhhhh");
+		scm_throw(key, args);
+		return SCM_EOL;
+	}
+	
+	char * cname = scm_to_locale_string(sname);
+	std::string name = cname;
+	free(cname);
+
+	AtomSpace *as = CogServer::getAtomSpace();
+	Handle h = as->addNode(t, name);
+
+	SCM shandle = scm_from_ulong(h);
+
+	SCM smob;
+	SCM_NEWSMOB (smob, cog_tag, shandle);
+	return smob;
 }
 
 #define C(X) ((SCM (*) ()) X)
@@ -87,7 +124,7 @@ static SCM ss_hello (void)
 void SchemeSmob::register_procs(void)
 {
 	scm_c_define_gsubr("cog-atom",                1, 0, 0, C(ss_atom));
-	scm_c_define_gsubr("cog-hello",               0, 0, 0, ss_hello);
+	scm_c_define_gsubr("cog-new-node",            2, 0, 0, C(ss_new_node));
 }
 
 #endif

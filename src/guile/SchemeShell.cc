@@ -69,6 +69,12 @@ std::string SchemeShell::prt(SCM node)
 		free(str);
 		return rv;
 	}
+
+	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, node))
+	{
+		return SchemeSmob::to_string(node);
+	}
+
 	else if (scm_is_true(scm_integer_p(node))) 
 	{
 		char buff[20];
@@ -88,7 +94,7 @@ std::string SchemeShell::prt(SCM node)
 	}
 	else if (scm_is_true(scm_null_p(node))) 
 	{
-		return "(xxxnull)";
+		return "nil";
 	}
 #if 0
 	else if (scm_is_true(scm_procedure_p(node))) 
@@ -112,11 +118,6 @@ std::string SchemeShell::prt(SCM node)
 		return "variable";
 	}
 #endif
-
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, node))
-	{
-		return "Atom";
-	}
 
 	return "";
 }

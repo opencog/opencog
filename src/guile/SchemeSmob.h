@@ -9,28 +9,32 @@
 #define OPENCOG_SCHEME_SMOB_H
 #ifdef HAVE_GUILE
 
+#include <string>
 #include <libguile.h>
 
 namespace opencog {
 
 class SchemeSmob
 {
+	friend class SchemeShell;
+
 	private:
 		static bool is_inited;
 		void register_procs(void);
 
+		static scm_t_bits cog_tag;
 		void init_smob_type(void);
-		static SCM mark_cog(SCM);
-		static size_t free_cog(SCM);
 		static int print_cog(SCM, SCM, scm_print_state *);
 		static SCM equalp_cog(SCM, SCM);
 
+		static std::string to_string(SCM);
+
 		// Functions
 		static SCM ss_atom(SCM);
+		static SCM ss_new_node(SCM, SCM);
 
 	public:
 		SchemeSmob(void);
-		static scm_t_bits cog_tag;
 };
 
 }

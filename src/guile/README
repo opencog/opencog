@@ -13,3 +13,8 @@ for any sort of serious calculation, simply because it is not
 (and cannot be) a high-performance interface. Guile is an interpreter,
 not a compiler, and so will never have the performance of compiled code.
 
+
+Functions:
+
+   cog-atom handle   -- reference the atom identified by the numeric handle
+       Example: (cog-atom 4444) prints the atom associated with handle 4444.
