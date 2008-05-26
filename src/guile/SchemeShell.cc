@@ -138,7 +138,7 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	error_string_port = scm_open_output_string();
 	SCM port = error_string_port;
 
-	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) == 4))
+	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 4))
 	{
 		SCM stack   = scm_make_stack (SCM_BOOL_T, SCM_EOL);
 		SCM subr    = SCM_CAR (throw_args);
@@ -164,7 +164,7 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	}
 	else
 	{
-printf("duuude unexpected\n");
+		printf("ERROR: thow args are unexpectedly short!\n");
 	}
 
 #if 0

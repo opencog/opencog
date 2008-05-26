@@ -97,10 +97,30 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 	Type t = ClassServer::getType(ct);
 	free(ct);
 
-	if (NOTYPE == t)
+	// Look for user errors
+	if ((NOTYPE == t) || (false == ClassServer::isAssignableFrom(NODE, t)))
 	{
-		SCM key = scm_from_locale_symbol("bad-type");
-		SCM args = scm_from_locale_string("uhhhh");
+		SCM key = scm_from_locale_symbol("bad-atom-type");
+		SCM subr = scm_from_locale_string("cog-new-node");
+
+		std::string err;
+		if (NOTYPE == t)
+		{
+			err = "Unknown atom type: \'";
+		}
+		else
+		{
+			err = "Atom type must be a node: \'";
+		}
+  		ct = scm_to_locale_string(stype);
+		err += ct;
+		free(ct);
+		SCM msg = scm_from_locale_string (err.c_str());
+
+		SCM parts = SCM_EOL;
+		SCM rest = SCM_EOL;
+		SCM args = scm_list_4(subr, msg, parts, rest);
+
 		scm_throw(key, args);
 		return SCM_EOL;
 	}

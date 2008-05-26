@@ -16,5 +16,15 @@ not a compiler, and so will never have the performance of compiled code.
 
 Functions:
 
-   cog-atom handle   -- reference the atom identified by the numeric handle
-       Example: (cog-atom 4444) prints the atom associated with handle 4444.
+   cog-atom handle
+       Reference the atom identified by the numeric handle
+       Example:
+          (cog-atom 4444) 
+          prints the atom associated with handle 4444.
+
+
+	cog-new-node node-type node-name 
+      Creae a new node of the given type and name
+      Example:
+          (cog-new-node 'ConceptNode "some node name")
+
