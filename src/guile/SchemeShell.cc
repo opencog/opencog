@@ -25,16 +25,15 @@ SchemeShell::SchemeShell(void)
 		scm_init_debug();
 		scm_init_backtrace();
 
-		scm_init_strports();
-		string_outport = scm_open_output_string();
 		register_procs();
 	}
 }
 
+/* ============================================================== */
+
 static SCM ss_hello (void)
 {
-	printf("hello world\n");
-	return SCM_EOL;
+	return scm_from_locale_string("Hello, world!");
 }
 
 void SchemeShell::register_procs(void)
@@ -46,40 +45,28 @@ void SchemeShell::register_procs(void)
 
 std::string SchemeShell::prt(SCM node)
 {
-  if (scm_is_pair(node))
-   {
-std::string str = "";
-printf("duude pair\n");
+	if (scm_is_pair(node))
+	{
+		std::string str = "(";
       SCM node_list = node;
+		const char * sp = "";
       do
       {
+			str += sp;
+			sp = " ";
          node = SCM_CAR (node_list);
          str += prt (node);
          node_list = SCM_CDR (node_list);
       }
       while (scm_is_pair(node_list));
-      str += prt (node_list);
+		str += ")";
 		return str;
    }
-	else if (scm_is_true(scm_list_p(node))) 
-	{
-		std::string str = "";
-		int len = scm_to_long(scm_length(node));
-		if (0 == len) return "()";
-printf("duuude len=%d\n", len);
-		for (int k=0; k<len; k++)
-      {
-printf("duuude k=%d\n", k);
-         SCM n = scm_list_ref(node, scm_from_int(k));
-         str += prt (n);
-      }
-		return str;
-	}
 	else if (scm_is_true(scm_symbol_p(node))) 
 	{
 		node = scm_symbol_to_string(node);
 		char * str = scm_to_locale_string(node);
-		std::string rv = "YYY>";
+		std::string rv = "'";
 		rv += str;
 		free(str);
 		return rv;
@@ -87,15 +74,16 @@ printf("duuude k=%d\n", k);
 	else if (scm_is_true(scm_string_p(node))) 
 	{
 		char * str = scm_to_locale_string(node);
-		std::string rv = "SSS>";
+		std::string rv = "\"";
 		rv += str;
+		rv += "\"";
 		free(str);
 		return rv;
 	}
 	else if (scm_is_true(scm_integer_p(node))) 
 	{
 		char buff[20];
-		snprintf (buff, 20, "NNN>%d", scm_to_long(node));
+		snprintf (buff, 20, "%d", scm_to_long(node));
 		return buff;
 	}
 	else if (scm_is_true(scm_char_p(node))) 
@@ -113,8 +101,28 @@ printf("duuude k=%d\n", k);
 	{
 		return "(xxxnull)";
 	}
+	else if (scm_is_true(scm_procedure_p(node))) 
+	{
+		return "procedure";
+	}
+	else if (scm_subr_p(node)) 
+	{
+		return "subr";
+	}
+	else if (scm_is_true(scm_operator_p(node))) 
+	{
+		return "operator";
+	}
+	else if (scm_is_true(scm_entity_p(node))) 
+	{
+		return "entity";
+	}
+	else if (scm_is_true(scm_variable_p(node))) 
+	{
+		return "variable";
+	}
 
-	return "Error: unknown type";
+	return "";
 }
 
 /* ============================================================== */
@@ -130,7 +138,8 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	caught_error = true;
 
 	/* get string port into which we write the error message and stack. */
-	SCM port = string_outport;
+	error_string_port = scm_open_output_string();
+	SCM port = error_string_port;
 
 	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) == 4))
 	{
@@ -180,21 +189,19 @@ printf("duuude unexpected\n");
  */
 std::string SchemeShell::eval(const std::string &expr)
 {
-	SCM captured_stack = SCM_BOOL_F;
-
 	caught_error = false;
 	SCM rc = scm_internal_catch (SCM_BOOL_T,
 	            (scm_t_catch_body) scm_c_eval_string, (void *) expr.c_str(),
 	            SchemeShell::catch_handler_wrapper, this);
 
-	if (captured_stack != SCM_BOOL_F)
-	{
-		printf("duude got stack too\n");
-	}
-
 	if (caught_error)
 	{
-		rc = scm_get_output_string(string_outport);
+		rc = scm_get_output_string(error_string_port);
+		char * str = scm_to_locale_string(rc);
+		std::string rv = str;
+		free(str);
+		scm_close_port(error_string_port);
+		return rv;
 	}
 
 	return prt(rc);

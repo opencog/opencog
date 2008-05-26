@@ -20,7 +20,7 @@ class SchemeShell
 		static bool is_inited;
 		void register_procs(void);
 
-		SCM string_outport;
+		SCM error_string_port;
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
 		SCM catch_handler(SCM, SCM);
 		bool caught_error;
