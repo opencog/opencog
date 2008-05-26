@@ -11,6 +11,7 @@
 #include <libguile/backtrace.h>
 
 #include "SchemeShell.h"
+#include "SchemeSmob.h"
 
 using namespace opencog;
 
@@ -24,10 +25,9 @@ SchemeShell::SchemeShell(void)
 		scm_init_guile();
 		scm_init_debug();
 		scm_init_backtrace();
-
-		init_smob_type();
-		register_procs();
 	}
+
+	funcs = new SchemeSmob();
 }
 
 /* ============================================================== */
@@ -90,6 +90,7 @@ std::string SchemeShell::prt(SCM node)
 	{
 		return "(xxxnull)";
 	}
+#if 0
 	else if (scm_is_true(scm_procedure_p(node))) 
 	{
 		return "procedure";
@@ -109,6 +110,12 @@ std::string SchemeShell::prt(SCM node)
 	else if (scm_is_true(scm_variable_p(node))) 
 	{
 		return "variable";
+	}
+#endif
+
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, node))
+	{
+		return "Atom";
 	}
 
 	return "";
