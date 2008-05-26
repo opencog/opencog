@@ -23,6 +23,7 @@ class SchemeShell
 		SCM string_outport;
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
 		SCM catch_handler(SCM, SCM);
+		bool caught_error;
 
 		std::string prt(SCM);
 
