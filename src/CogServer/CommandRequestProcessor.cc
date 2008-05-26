@@ -346,6 +346,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     std::queue<std::string> args = request->getArgs();
 
     std::string answer;
+#ifdef HAVE_GUILE
     if (shell_mode)
     {
        if (command == "scm-exit")
@@ -361,6 +362,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
        request->callBack();
        return;
     }
+#endif /* HAVE_GUILE */
 
     if (command == "data") {
         if (args.size() != 1) {
