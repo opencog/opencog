@@ -16,6 +16,26 @@ not a compiler, and so will never have the performance of compiled code.
 
 Functions:
 
+	cog-new-node node-type node-name 
+      Create a new node of the given type and name
+      Example:
+          (cog-new-node 'ConceptNode "some node name")
+          creates a new node, and prints its value:
+          node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)
+      Throws errors if node-type is not a valide atom type for a node,
+      and if node-name is not a string.
+
+
+   cog-new-link link-type atom-list
+      Create a new link, with the given atoms in the link.
+      Example:
+          (define x (cog-new-node 'ConceptNode "abc"))
+          (define y (cog-new-node 'ConceptNode "def"))
+          (cog-new-link 'Link (list x y))
+
+          creates a new link, and prints it:
+          link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]
+      
    cog-atom handle
        Reference the atom identified by the numeric handle
        Example:
@@ -23,8 +43,5 @@ Functions:
           prints the atom associated with handle 4444.
 
 
-	cog-new-node node-type node-name 
-      Creae a new node of the given type and name
-      Example:
-          (cog-new-node 'ConceptNode "some node name")
+
 

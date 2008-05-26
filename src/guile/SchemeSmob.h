@@ -32,6 +32,7 @@ class SchemeSmob
 		// Functions
 		static SCM ss_atom(SCM);
 		static SCM ss_new_node(SCM, SCM);
+		static SCM ss_new_link(SCM, SCM);
 
 	public:
 		SchemeSmob(void);
