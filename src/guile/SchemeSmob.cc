@@ -99,34 +99,16 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 	Type t = ClassServer::getType(ct);
 	free(ct);
 
-	// Look for user errors
-	if ((NOTYPE == t) || (false == ClassServer::isAssignableFrom(NODE, t)))
-	{
-		SCM key = scm_from_locale_symbol("bad-atom-type");
-		SCM subr = scm_from_locale_string("cog-new-node");
+	// Make sure that the type is good
+	if (NOTYPE == t)
+		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog atom type");
+		
+	if (false == ClassServer::isAssignableFrom(NODE, t))
+		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog node type");
 
-		std::string err;
-		if (NOTYPE == t)
-		{
-			err = "Unknown atom type: \'";
-		}
-		else
-		{
-			err = "Atom type must be a node: \'";
-		}
-  		ct = scm_to_locale_string(stype);
-		err += ct;
-		free(ct);
-		SCM msg = scm_from_locale_string (err.c_str());
+	if (sim_is_false(scm_string_p(sname)))
+		scm_wrong_type_arg_msg("cog-new-node", 2, sname, "string name for the node");
 
-		SCM parts = SCM_EOL;
-		SCM rest = SCM_EOL;
-		SCM args = scm_list_4(subr, msg, parts, rest);
-
-		scm_throw(key, args);
-		return SCM_EOL;
-	}
-	
 	// Now, create the actual node... in the actual atom space.
 	char * cname = scm_to_locale_string(sname);
 	std::string name = cname;
@@ -155,50 +137,27 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	Type t = ClassServer::getType(ct);
 	free(ct);
 
-	// Look for user errors
-	if ((NOTYPE == t) || (false == ClassServer::isAssignableFrom(LINK, t)))
-	{
-		SCM key = scm_from_locale_symbol("bad-atom-type");
-		SCM subr = scm_from_locale_string("cog-new-link");
+	// Make sure that the type is good
+	if (NOTYPE == t)
+		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog atom type");
+		
+	if (false == ClassServer::isAssignableFrom(LINK, t))
+		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog link type");
 
-		std::string err;
-		if (NOTYPE == t)
-		{
-			err = "Unknown atom type: \'";
-		}
-		else
-		{
-			err = "Atom type must be a link: \'";
-		}
-  		ct = scm_to_locale_string(stype);
-		err += ct;
-		free(ct);
-		SCM msg = scm_from_locale_string (err.c_str());
+	// Verify that second arg is an actual list
+	if (!scm_is_pair(satom_list))
+		scm_wrong_type_arg_msg("cog-new-link", 2, satom_list, "a list of atoms");
 
-		SCM parts = SCM_EOL;
-		SCM rest = SCM_EOL;
-		SCM args = scm_list_4(subr, msg, parts, rest);
-
-		scm_throw(key, args);
-		return SCM_EOL;
-	}
-
-	// Verify that the contents of the list are actual atoms.
 	std::vector<Handle> outgoing_set;
 	SCM sl = satom_list;
+	int pos = 2;
 	do
 	{
 		SCM satom = SCM_CAR(sl);
-		if (false == SCM_SMOB_PREDICATE(cog_tag, satom))
-		{
-			SCM key = scm_from_locale_symbol("bad-atom-list");
-			SCM subr = scm_from_locale_string("cog-new-link");
-			SCM msg = scm_from_locale_string ("All items in the list must be atoms");
-			SCM args = scm_list_4(subr, msg, SCM_EOL, SCM_EOL);
 
-			scm_throw(key, args);
-			return SCM_EOL;
-		}
+		// Verify that the contents of the list are actual atoms.
+		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
 
 		// Get the handle  ... should we check for valid handles here? 
 		SCM shandle = SCM_SMOB_OBJECT(satom);
@@ -206,6 +165,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 		outgoing_set.push_back(h);
 		sl = SCM_CDR(sl);
+		pos++;
 	}
 	while (scm_is_pair(sl));
 	
