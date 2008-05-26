@@ -45,7 +45,8 @@ int SchemeSmob::print_cog(SCM node, SCM port, scm_print_state * ps)
 
 SCM SchemeSmob::equalp_cog(SCM a, SCM b)
 {
-	printf("duuude! equalp\n");
+	// They are equal if thier handles are the same.
+	if (SCM_SMOB_OBJECT(a) == SCM_SMOB_OBJECT(b)) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
@@ -191,6 +192,72 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	return smob;
 }
 
+/* ============================================================== */
+/**
+ * Convert the outgoing set of an atom into a list; return the list.
+ */
+SCM SchemeSmob::ss_outgoing_set (SCM satom)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+		scm_wrong_type_arg_msg("cog-outgoing-set", 1, satom, "opencog atom");
+
+	SCM shandle = SCM_SMOB_OBJECT(satom);
+	Handle h = scm_to_ulong(shandle);
+	Link *l = dynamic_cast<Link*>(TLB::getAtom(h));
+	if (l == NULL) return SCM_EOL;  // only links have outgoing sets.
+
+	const std::vector<Handle> &oset = l->getOutgoingSet();
+
+	SCM list = SCM_EOL;
+	for (int i = oset.size()-1; i >= 0; i--)
+	{
+		Handle h = oset[i];
+		SCM sh = scm_from_ulong(h);
+		SCM smob;
+		SCM_NEWSMOB (smob, cog_tag, sh);
+		list = scm_cons (smob, list);
+	}
+
+	return list;
+}
+
+/* ============================================================== */
+/**
+ * Convert the incoming set of an atom into a list; return the list.
+ */
+SCM SchemeSmob::ss_incoming_set (SCM satom)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+		scm_wrong_type_arg_msg("cog-outgoing-set", 1, satom, "opencog atom");
+
+	SCM shandle = SCM_SMOB_OBJECT(satom);
+	Handle h = scm_to_ulong(shandle);
+	Atom *atom = TLB::getAtom(h);
+
+	HandleEntry *he = atom->getIncomingSet();
+	if (!he) return SCM_EOL;
+
+	SCM sh = scm_from_ulong(he->handle);
+	SCM smob;
+	SCM_NEWSMOB (smob, cog_tag, sh);
+	SCM head = scm_cons (smob, SCM_EOL);
+	SCM tail = head;
+	he = he->next;
+	while (he)
+	{
+		SCM sh = scm_from_ulong(he->handle);
+		SCM_NEWSMOB (smob, cog_tag, sh);
+		SCM pair = scm_cons (smob, SCM_EOL);
+		scm_set_cdr_x(tail, pair);
+		tail = pair;
+		he = he->next;
+	}
+
+	return head;
+}
+
+/* ============================================================== */
+
 #define C(X) ((SCM (*) ()) X)
 
 void SchemeSmob::register_procs(void)
@@ -199,6 +266,8 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-new-node",            2, 0, 0, C(ss_new_node));
 	scm_c_define_gsubr("cog-atom",                1, 0, 0, C(ss_atom));
 	scm_c_define_gsubr("cog-handle",              1, 0, 0, C(ss_handle));
+	scm_c_define_gsubr("cog-incoming-set",        1, 0, 0, C(ss_incoming_set));
+	scm_c_define_gsubr("cog-outgoing-set",        1, 0, 0, C(ss_outgoing_set));
 }
 
 #endif
