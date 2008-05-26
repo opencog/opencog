@@ -5,14 +5,17 @@
                     Linas Vepstas, May 2008
 
 
-This directory contains an experimental, rather broken binding to
-the scheme programming language, via guile. Scheme is a lisp dialect.
-This binding is intended to be used for day-to-day maintenance 
-activities, and for experimentation. it is not meant to be used 
-for any sort of serious calculation, simply because it is not
-(and cannot be) a high-performance interface. Guile is an interpreter,
-not a compiler, and so will never have the performance of compiled code.
+This directory contains an implementation of the a Scheme shell for the
+OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
+code to manipulate the contents of an OpenCog AtomSpace. The shell 
+may be invoked by typing "scm" at the opencog prompt. Currently, only a
+small number of primitives have been implemented.
 
+This binding is intended to be used for day-to-day maintenance 
+activities, and for experimentation. it is not meant to be used for any
+sort of serious calculation, simply because it is not (and cannot be) a
+high-performance interface. The shell is implemented in guile; guile is
+an interpreter, not a compiler. There is no bytecode or virtual machine.
 
 Functions:
 
