@@ -18,16 +18,21 @@ Functions:
 
 	cog-new-node node-type node-name 
       Create a new node of the given type and name
+
+      Throws errors if node-type is not a valide atom type for a node,
+      and if node-name is not a string.
       Example:
           (cog-new-node 'ConceptNode "some node name")
           creates a new node, and prints its value:
           node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)
-      Throws errors if node-type is not a valide atom type for a node,
-      and if node-name is not a string.
 
 
    cog-new-link link-type atom-list
       Create a new link, with the given atoms in the link.
+
+      Throws errors if the link type is not a valid opencog link type,
+      or if the list contains items other than atoms.
+
       Example:
           (define x (cog-new-node 'ConceptNode "abc"))
           (define y (cog-new-node 'ConceptNode "def"))
@@ -38,9 +43,20 @@ Functions:
       
    cog-atom handle
        Reference the atom identified by the numeric handle
+   cog-handle atom
+       Return the handle of the atom
+
        Example:
-          (cog-atom 4444) 
-          prints the atom associated with handle 4444.
+          (define x (cog-new-node 'ConceptNode "abc"))
+          (define y (cog-new-node 'ConceptNode "def"))
+          (cog-handle x)
+          113
+          (cog-handle y)
+          114
+          (cog-atom 114)
+          node[3:def] sti:(0,0) tv:(0.000000,0.000000)
+
+
 
 
 

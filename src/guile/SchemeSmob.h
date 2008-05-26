@@ -30,9 +30,10 @@ class SchemeSmob
 		static std::string to_string(SCM);
 
 		// Functions
-		static SCM ss_atom(SCM);
 		static SCM ss_new_node(SCM, SCM);
 		static SCM ss_new_link(SCM, SCM);
+		static SCM ss_atom(SCM);
+		static SCM ss_handle(SCM);
 
 	public:
 		SchemeSmob(void);

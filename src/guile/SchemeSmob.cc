@@ -75,15 +75,25 @@ std::string SchemeSmob::to_string(SCM node)
 }
 
 /* ============================================================== */
-
 /**
  * Create a new scheme object, holding the atom handle
  */
 SCM SchemeSmob::ss_atom (SCM shandle)
 {
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_tag, shandle);
-	return smob;
+	if (scm_is_false(scm_integer_p(shandle)))
+		scm_wrong_type_arg_msg("cog-atom", 1, shandle, "integer opencog handle");
+	SCM_RETURN_NEWSMOB (cog_tag, shandle);
+}
+
+/* ============================================================== */
+/**
+ * Return handle of atom
+ */
+SCM SchemeSmob::ss_handle (SCM satom)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
+	return SCM_SMOB_OBJECT(satom);
 }
 
 /* ============================================================== */
@@ -106,7 +116,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 	if (false == ClassServer::isAssignableFrom(NODE, t))
 		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog node type");
 
-	if (sim_is_false(scm_string_p(sname)))
+	if (scm_is_false(scm_string_p(sname)))
 		scm_wrong_type_arg_msg("cog-new-node", 2, sname, "string name for the node");
 
 	// Now, create the actual node... in the actual atom space.
@@ -185,9 +195,10 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 void SchemeSmob::register_procs(void)
 {
-	scm_c_define_gsubr("cog-atom",                1, 0, 0, C(ss_atom));
 	scm_c_define_gsubr("cog-new-link",            2, 0, 0, C(ss_new_link));
 	scm_c_define_gsubr("cog-new-node",            2, 0, 0, C(ss_new_node));
+	scm_c_define_gsubr("cog-atom",                1, 0, 0, C(ss_atom));
+	scm_c_define_gsubr("cog-handle",              1, 0, 0, C(ss_handle));
 }
 
 #endif
