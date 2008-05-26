@@ -19,11 +19,16 @@ class SchemeShell
 	private:
 		static bool is_inited;
 		void register_procs(void);
+
 		SCM string_outport;
+		static SCM catch_handler_wrapper(void *, SCM, SCM);
+		SCM catch_handler(SCM, SCM);
+
+		std::string prt(SCM);
 
 	public:
 		SchemeShell(void);
-		char * eval(const char *);
+		std::string eval(const std::string &);
 };
 
 }
