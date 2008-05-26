@@ -541,6 +541,17 @@ for anaphora resolution: create a hidden markov model that consolidates
 different word meanings in different senses, as referring to the same
 object.
 
+Correlations and Probabilities
+------------------------------
+The correct way to understand sense-similarity measures is to interpret
+them as correlations between pairs of senses. Given a correlation function,
+the underlying probability distribution can be computed, and then, from
+this, the conditional probability of one word sense, given another word 
+sense, can be computed. Properly speaking, the edge weights used in
+the Mihalcea algorithm should be these conditional probabilities, and not
+the rescaled word-sense similarity corrrelations.  However, for now, 
+rescaling is approximately correct, and should be enough.
+
 
 Algorithm Modifications
 -----------------------
