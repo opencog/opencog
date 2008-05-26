@@ -348,7 +348,15 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     std::string answer;
     if (shell_mode)
     {
-       answer = ss->eval(command);
+       if (command == "scm-exit")
+       {
+           shell_mode = false;
+           answer = "Exiting scheme shell mode";
+       }
+       else
+       {
+           answer = ss->eval(command);
+       }
        request->setAnswer(answer);
        request->callBack();
        return;
@@ -399,10 +407,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     else if (command == "scm") {
         shell_mode = true;
         answer = "Entering scheme shell mode";
-    }
-    else if (command == "scm-exit") {
-        shell_mode = false;
-        answer = "Exiting scheme shell mode";
     }
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE

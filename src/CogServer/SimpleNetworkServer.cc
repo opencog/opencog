@@ -81,6 +81,10 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
         command = "scm-exit";
         shell_mode = false;
     } else 
+    if (cmdLine.substr(0,1) == ".") {
+        command = "scm-exit";
+        shell_mode = false;
+    } else 
     if (shell_mode) {
         // In shell mode, do *not* parse the command line!
         command = cmdLine;
