@@ -102,4 +102,14 @@ Functions:
          but not the link y.
 
 
+ToDo
+----
+-- implement truth values
+-- pass truth values with keywords
+-- multi-line input
+-- have prompt for input
+-- support readline/editline (uparrows, etc.) on input.
+-- enable module loading
+-- enable file loading
+
 
