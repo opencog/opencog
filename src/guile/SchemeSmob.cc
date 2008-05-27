@@ -269,16 +269,12 @@ SCM SchemeSmob::ss_delete (SCM satom)
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
 	Handle h = scm_to_ulong(shandle);
-	Atom *atom = TLB::getAtom(h);
-
-	HandleEntry *he = atom->getIncomingSet();
-	if (he) 
-		scm_wrong_type_arg_msg("cog-delete", 1, satom, "atom with empty incoming set");
 
 	AtomSpace *as = CogServer::getAtomSpace();
-	as->removeAtom(h, false);
+	bool rc = as->removeAtom(h, false);
 
-	return SCM_EOL;
+	if (rc) return SCM_BOOL_T;
+	return SCM_BOOL_F;
 }
 
 /* ============================================================== */
@@ -288,15 +284,16 @@ SCM SchemeSmob::ss_delete (SCM satom)
 SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
-		scm_wrong_type_arg_msg("cog-delete", 1, satom, "opencog atom");
+		scm_wrong_type_arg_msg("cog-delete-recursive", 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
 	Handle h = scm_to_ulong(shandle);
 
 	AtomSpace *as = CogServer::getAtomSpace();
-	as->removeAtom(h, true);
+	bool rc = as->removeAtom(h, true);
 
-	return SCM_EOL;
+	if (rc) return SCM_BOOL_T;
+	return SCM_BOOL_F;
 }
 
 
