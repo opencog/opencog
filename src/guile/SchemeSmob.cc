@@ -72,7 +72,10 @@ std::string SchemeSmob::to_string(SCM node)
 	Atom *atom = TLB::getAtom(h);
 	if (NULL == atom) return "Invalid handle";
 
-	return atom->toString();
+	std::string ret = "#<";
+	ret += atom->toString();
+	ret += ">\n";
+	return ret;
 }
 
 /* ============================================================== */

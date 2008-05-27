@@ -27,7 +27,7 @@ Functions:
       Example:
           (cog-new-node 'ConceptNode "some node name")
           creates a new node, and prints its value:
-          node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)
+          #<node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)>
 
 
    cog-new-link link-type atom-list
@@ -42,25 +42,38 @@ Functions:
           (cog-new-link 'Link (list x y))
 
           creates a new link, and prints it:
-          link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]
+          #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
       
    cog-atom handle
-       Reference the atom identified by the numeric handle
+      Reference the atom identified by the numeric handle
    cog-handle atom
-       Return the handle of the atom
+      Return the handle of the atom
 
-       Example:
-          (define x (cog-new-node 'ConceptNode "abc"))
-          (define y (cog-new-node 'ConceptNode "def"))
-          (cog-handle x)
-          113
-          (cog-handle y)
-          114
-          (cog-atom 114)
-          node[3:def] sti:(0,0) tv:(0.000000,0.000000)
+      Example:
+         (define x (cog-new-node 'ConceptNode "abc"))
+         (define y (cog-new-node 'ConceptNode "def"))
+         (cog-handle x)
+         113
+         (cog-handle y)
+         114
+         (cog-atom 114)
+         #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
 
 
+   cog-incoming-set atom
+   cog-outgoing-set atom
+      Return the incoming and outgoing sets, respectively, of the atom.
 
+      Example:
+         (define x (cog-new-node 'ConceptNode "abc"))
+         (define y (cog-new-node 'ConceptNode "def"))
+         (define l (cog-new-link 'Link (list x y)))
+         (cog-incoming-set x)
+         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
+         (cog-incoming-set y)
+         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
+         (equal? (cog-incoming-set x) (cog-incoming-set y))
+         #t
 
 
 
