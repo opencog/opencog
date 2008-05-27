@@ -369,7 +369,8 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn)
     return addAtom(a,a.begin(),tvn);
 }
 
-bool AtomSpace::removeAtom(Handle h, bool recursive) {
+bool AtomSpace::removeAtom(Handle h, bool recursive)
+{
     HandleEntry* extractedHandles = atomTable.extract(h, recursive);
     if (extractedHandles) {
         HandleEntry* currentEntry = extractedHandles;
@@ -386,13 +387,14 @@ bool AtomSpace::removeAtom(Handle h, bool recursive) {
                 Handle timedAtom = getOutgoing(h, 1);
                 timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
             }
-	    // Also refund sti/lti to AtomSpace funds pool
-	    fundsSTI += getSTI(h);
-	    fundsLTI += getLTI(h);
 
-	    // Remove stimulus
-	    removeStimulus(h);
-	    
+            // Also refund sti/lti to AtomSpace funds pool
+            fundsSTI += getSTI(h);
+            fundsLTI += getLTI(h);
+
+            // Remove stimulus
+            removeStimulus(h);
+
             currentEntry = currentEntry->next;
 
         }
