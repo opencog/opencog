@@ -27,6 +27,9 @@ class SchemeShell
 		SCM catch_handler(SCM, SCM);
 		bool caught_error;
 
+		std::string input_line;
+		bool pending_input;
+
 		// printfing of basic types
 		std::string prt(SCM);
 

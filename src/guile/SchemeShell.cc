@@ -28,6 +28,8 @@ SchemeShell::SchemeShell(void)
 	}
 
 	funcs = new SchemeSmob();
+	pending_input = false;
+	input_line = "";
 }
 
 /* ============================================================== */
@@ -132,6 +134,19 @@ SCM SchemeShell::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
 
 SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 {
+	// Check for read error. If a read error, then wait for user to correct it.
+	SCM re = scm_symbol_to_string(tag);
+	char * restr = scm_to_locale_string(re);
+	pending_input = false;
+	if (0 == strcmp(restr, "read-error"))
+	{
+		pending_input = true;
+		free(restr);
+		return SCM_EOL;
+	}
+	free(restr);
+
+	// If its not a read error, then its a regular error; report it.
 	caught_error = true;
 
 	/* get string port into which we write the error message and stack. */
@@ -186,10 +201,20 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
  */
 std::string SchemeShell::eval(const std::string &expr)
 {
+	input_line += expr;
+
 	caught_error = false;
+	pending_input = false;
 	SCM rc = scm_internal_catch (SCM_BOOL_T,
-	            (scm_t_catch_body) scm_c_eval_string, (void *) expr.c_str(),
+	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
 	            SchemeShell::catch_handler_wrapper, this);
+
+	if (pending_input)
+	{
+		return "... ";
+	}
+	pending_input = false;
+	input_line = "";
 
 	if (caught_error)
 	{
@@ -198,10 +223,13 @@ std::string SchemeShell::eval(const std::string &expr)
 		std::string rv = str;
 		free(str);
 		scm_close_port(error_string_port);
+		rv += "\nguile> ";
 		return rv;
 	}
 
-	return prt(rc);
+	std::string rv = prt(rc);
+	rv += "\nguile> ";
+	return rv;
 }
 
 #endif
