@@ -1018,7 +1018,7 @@ void AtomTable::removeFromIndex(Atom *victim,
     
     //cprintf(DEBUG,"removeFromIndex(): found position in the index\n");
     
-    if (TLB::isInvalidHandle(q)) {
+    if (victimHandle == index[headIndex]) {
         index[headIndex] = victim->next(indexID);
     } else {
         Atom *qatom = TLB::getAtom(q);
