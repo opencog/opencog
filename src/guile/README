@@ -75,5 +75,30 @@ Functions:
          (equal? (cog-incoming-set x) (cog-incoming-set y))
          #t
 
+   cog-delete atom
+      Delete the indicated atom, but only if it has no incoming links.
+   cog-delete-recursive atom
+      Delete the incoming atom, and all atoms that point at it.
+
+      Example:
+         (define x (cog-new-node 'ConceptNode "abc"))
+         (define y (cog-new-node 'ConceptNode "def"))
+         (define l (cog-new-link 'Link (list x y)))
+
+         (cog-delete x)
+         ERROR: In procedure cog-delete:
+         ERROR: Wrong type argument in position 1 (expecting atom with empty incoming set): #<atom>
+         (cog-delete-recursive x)
+         nil
+         l
+         Invalid handle
+         x
+         Invalid handle
+         y
+         #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
+
+         Note that x and the link l point to have been deleted,
+         but not the link y.
+
 
 
