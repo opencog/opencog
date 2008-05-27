@@ -48,7 +48,7 @@ CommandRequestProcessor::~CommandRequestProcessor()
 
 CommandRequestProcessor::CommandRequestProcessor(void)
 {
-    prompt = "opencog> "
+    prompt = "opencog> ";
     load_count = 0;
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
