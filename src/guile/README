@@ -19,7 +19,7 @@ an interpreter, not a compiler. There is no bytecode or virtual machine.
 
 Functions:
 
-	cog-new-node node-type node-name 
+   cog-new-node node-type node-name 
       Create a new node of the given type and name
 
       Throws errors if node-type is not a valide atom type for a node,
@@ -30,16 +30,16 @@ Functions:
           #<node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)>
 
 
-   cog-new-link link-type atom-list
+   cog-new-link link-type atom ... atom
       Create a new link, with the given atoms in the link.
 
       Throws errors if the link type is not a valid opencog link type,
-      or if the list contains items other than atoms.
+      or if any of the arguments after the link type are not atoms.
 
       Example:
           (define x (cog-new-node 'ConceptNode "abc"))
           (define y (cog-new-node 'ConceptNode "def"))
-          (cog-new-link 'Link (list x y))
+          (cog-new-link 'Link x y)
 
           creates a new link, and prints it:
           #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
@@ -67,7 +67,7 @@ Functions:
       Example:
          (define x (cog-new-node 'ConceptNode "abc"))
          (define y (cog-new-node 'ConceptNode "def"))
-         (define l (cog-new-link 'Link (list x y)))
+         (define l (cog-new-link 'Link x y))
          (cog-incoming-set x)
          (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
          (cog-incoming-set y)
@@ -83,7 +83,7 @@ Functions:
       Example:
          (define x (cog-new-node 'ConceptNode "abc"))
          (define y (cog-new-node 'ConceptNode "def"))
-         (define l (cog-new-link 'Link (list x y)))
+         (define l (cog-new-link 'Link x y))
 
          (cog-delete x)
          ERROR: In procedure cog-delete:
