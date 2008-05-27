@@ -30,6 +30,8 @@ SchemeShell::SchemeShell(void)
 	funcs = new SchemeSmob();
 	pending_input = false;
 	input_line = "";
+	normal_prompt = "guile> ";
+	pending_prompt = "... ";
 }
 
 /* ============================================================== */
@@ -219,24 +221,26 @@ std::string SchemeShell::eval(const std::string &expr)
 
 	if (pending_input)
 	{
-		return "... ";
+		return pending_prompt;
 	}
 	pending_input = false;
 	input_line = "";
 
+	std::string rv;
 	if (caught_error)
 	{
 		rc = scm_get_output_string(error_string_port);
 		char * str = scm_to_locale_string(rc);
-		std::string rv = str;
+		rv = str;
 		free(str);
 		scm_close_port(error_string_port);
-		rv += "\nguile> ";
-		return rv;
 	}
-
-	std::string rv = prt(rc);
-	rv += "\nguile> ";
+	else
+	{
+		rv = prt(rc);
+	}
+	rv += "\n";
+	rv += normal_prompt;
 	return rv;
 }
 

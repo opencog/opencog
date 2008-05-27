@@ -21,14 +21,17 @@ class SchemeShell
 	private:
 		static bool is_inited;
 
+		std::string normal_prompt;
+		std::string pending_prompt;
+		std::string input_line;
+		bool pending_input;
+
+
 		// Error handling stuff
 		SCM error_string_port;
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
 		SCM catch_handler(SCM, SCM);
 		bool caught_error;
-
-		std::string input_line;
-		bool pending_input;
 
 		// printfing of basic types
 		std::string prt(SCM);
