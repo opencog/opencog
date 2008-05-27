@@ -74,7 +74,16 @@ void CogServer::serverLoop()
     gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
 
-        if (getRequestQueueSize() != 0) processRequests();
+        bool had_input = false;
+        if (getRequestQueueSize() != 0) {
+            processRequests();
+            had_input = true;
+        }
+
+        // Only run the input handlers if there was actual input.
+        if (had_input) {
+           processInput();
+        }
         processMindAgents();
 
         cycleCount++;
@@ -91,7 +100,8 @@ void CogServer::serverLoop()
     }
 }
 
-void CogServer::processRequests() {
+void CogServer::processRequests(void)
+{
     int countDown = getRequestQueueSize();
     while (countDown != 0) {
         CogServerRequest *request = popRequest();
@@ -101,7 +111,8 @@ void CogServer::processRequests() {
     }
 }
 
-void CogServer::processMindAgents() {
+void CogServer::processMindAgents(void)
+{
     for (unsigned int i = 0; i < mindAgents.size(); i++) {
         if ((cycleCount % mindAgents[i].frequency) == 0) {
             (mindAgents[i].agent)->run(this);
@@ -109,11 +120,24 @@ void CogServer::processMindAgents() {
     }
 }
 
-void CogServer::plugInMindAgent(MindAgent *agent, int frequency) {
+void CogServer::processInput(void)
+{
+    for (unsigned int i = 0; i < inputHandlers.size(); i++) {
+        inputHandlers[i]->run(this);
+    }
+}
+
+void CogServer::plugInMindAgent(MindAgent *agent, int frequency)
+{
     ScheduledMindAgent newScheduledAgent;
     newScheduledAgent.agent = agent;
     newScheduledAgent.frequency = frequency;
     mindAgents.push_back(newScheduledAgent);
+}
+
+void CogServer::plugInInputHandler(MindAgent *handler)
+{
+    inputHandlers.push_back(handler);
 }
 
 long CogServer::getCycleCount() {

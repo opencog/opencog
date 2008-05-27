@@ -55,12 +55,11 @@ int main(int argc, char *argv[]) {
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
  
         // cheapo hack to get the query processory up and running.
-        // XXX fix me with some more permanent, appropriate solution.
-        // There problem here is multi-fold: there is no scheduling,
-        // and so the server loop runs full tilt ... and there's
-        // no universal way of looking for, waiting on new input.
-        server().plugInMindAgent(new QueryProcessor(), 1);
-        server().plugInMindAgent(new WordSenseProcessor(), 1);
+        // It would be more correct to have this loaded by a script
+        // executed from the command shell, rather than hard-coded 
+        // into the C++ source.
+        server().plugInInputHandler(new QueryProcessor());
+        server().plugInInputHandler(new WordSenseProcessor());
 
         // enable the network server and run the server's main loop
         server().enableNetworkServer();

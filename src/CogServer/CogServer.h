@@ -52,10 +52,12 @@ private:
     } ScheduledMindAgent;
 
     std::vector<ScheduledMindAgent> mindAgents;
+    std::vector<MindAgent *> inputHandlers;
 
     long cycleCount;
     bool running;
 
+    void processInput();
     void processMindAgents();
     void processRequests();
 
@@ -69,19 +71,20 @@ public:
     static AtomSpace *getAtomSpace();
 
     ~CogServer();
-    CogServer();
+    CogServer(void);
 
-    void enableNetworkServer();
-    void disableNetworkServer();
+    void enableNetworkServer(void);
+    void disableNetworkServer(void);
 
-    void serverLoop();
+    void serverLoop(void);
     void plugInMindAgent(MindAgent *task, int frequency);
-    long getCycleCount();
-    void stop();
+    void plugInInputHandler(MindAgent *task);
+    long getCycleCount(void);
+    void stop(void);
     
-    CogServerRequest *popRequest();
+    CogServerRequest *popRequest(void);
     void pushRequest(CogServerRequest *request);
-    int getRequestQueueSize();
+    int getRequestQueueSize(void);
       
     // used for debug purposes in unit tests
     void unitTestServerLoop(int limitNumberOfCycles);
