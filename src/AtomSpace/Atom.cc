@@ -585,8 +585,8 @@ bool Atom::isMarkedForRemoval() const{
 }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
-int Atom::locateTargetIndexTypes(Type key) const{
-
+int Atom::locateTargetIndexTypes(Type key) const
+{
     if (getArity() == 0) return -1;
 
     set<unsigned int> checkedTypes;
@@ -609,8 +609,8 @@ int Atom::locateTargetIndexTypes(Type key) const{
     return -1;
 }
 
-Type* Atom::buildTargetIndexTypes(int *size) {
-
+Type* Atom::buildTargetIndexTypes(int *size)
+{
     *size = 0;
     if (getArity() == 0) {
         return NULL;
@@ -634,8 +634,8 @@ Type* Atom::buildTargetIndexTypes(int *size) {
     return types;
 }
 
-int Atom::getTargetTypeIndexSize() const{
-
+int Atom::getTargetTypeIndexSize() const
+{
     std::set<unsigned int> checkedTypes;
     int j = 0;
     // for each type in the target types array, it checks if it has already
@@ -673,11 +673,13 @@ int* Atom::buildPredicateIndices(int *size) const{
     return result;
 }
 
-bool Atom::getFlag(int flag) const {
+bool Atom::getFlag(int flag) const
+{
     return flags & flag;
 }
 
-void Atom::setFlag(int flag, bool value) {
+void Atom::setFlag(int flag, bool value)
+{
     if (value) {
         flags |= flag;
     } else {
@@ -685,23 +687,28 @@ void Atom::setFlag(int flag, bool value) {
     }
 }
 
-void Atom::unsetRemovalFlag() {
+void Atom::unsetRemovalFlag(void)
+{
     flags &= ~MARKED_FOR_REMOVAL;
 }
 
-void Atom::markForRemoval() {
+void Atom::markForRemoval(void)
+{
     flags |= MARKED_FOR_REMOVAL;
 }
 
-void Atom::setAtomTable(AtomTable *tb){
+void Atom::setAtomTable(AtomTable *tb)
+{
     atomTable = tb;
 }
 
-AtomTable *Atom::getAtomTable() const{
+AtomTable *Atom::getAtomTable() const
+{
     return(atomTable);
 }
 
-bool Atom::isOld(const AttentionValue::sti_t threshold) const {
+bool Atom::isOld(const AttentionValue::sti_t threshold) const
+{
     return ((attentionValue->getSTI() < threshold) &&
             (attentionValue->getLTI() < 1));
 }

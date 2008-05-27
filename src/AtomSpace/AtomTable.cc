@@ -904,7 +904,8 @@ HandleEntry* AtomTable::extractOld(Handle handle, bool recursive)
     return result;
 }
 
-HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
+HandleEntry* AtomTable::extract(Handle handle, bool recursive)
+{
     // TODO: Check if this atom is really inserted in this AtomTable and get the
     // exact Atom object  
     HandleEntry* result = NULL;
@@ -968,7 +969,8 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive) {
     return HandleEntry::concatenation(new HandleEntry(handle), result);
 }
 
-bool AtomTable::remove(Handle handle, bool recursive) {
+bool AtomTable::remove(Handle handle, bool recursive)
+{
     HandleEntry* extractedHandles = extract(handle, recursive);
     if (extractedHandles) {
         removeExtractedHandles(extractedHandles);
@@ -977,7 +979,8 @@ bool AtomTable::remove(Handle handle, bool recursive) {
     return false; 
 } 
     
-void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles) {    
+void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
+{
     if (extractedHandles) {
         HandleEntry* currentEntry = extractedHandles;
         while (currentEntry) {
@@ -991,7 +994,11 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles) {
     }
 }
 
-void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int indexID, int headIndex) throw (RuntimeException) {
+void AtomTable::removeFromIndex(Atom *victim,
+                                std::vector<Handle>& index,
+                                int indexID, int headIndex)
+    throw (RuntimeException)
+{
     //logger().fine("AtomTable::removeFromIndex(): index.size() = %d, indexId = %d(%x), headIndex = %d(%x)", index.size(), indexID, indexID, headIndex, headIndex);
     Handle victimHandle = TLB::getHandle(victim);
     //logger().fine("victim = %s", victim?victim->toString().c_str():"NULL");
@@ -1022,7 +1029,8 @@ void AtomTable::removeFromIndex(Atom *victim, std::vector<Handle>& index, int in
     victim->setNext(indexID, UNDEFINED_HANDLE);
 }
 
-void AtomTable::removeFromTargetTypeIndex(Atom *atom) {
+void AtomTable::removeFromTargetTypeIndex(Atom *atom)
+{
     //logger().fine("AtomTable::removeFromTargetTypeIndex(%p)", atom);
 
     int arraySize;
