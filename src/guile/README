@@ -104,6 +104,7 @@ Functions:
 
 ToDo
 ----
+-- add cmake scripts to auto-find guile, and build appropriately, if found.
 -- implement truth values
 -- pass truth values with keywords
 -- multi-line input
