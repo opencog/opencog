@@ -271,9 +271,6 @@ class AtomSpace {
      * Add a new atom represented by a tree of Vertex to the Atom Table
      * @param the tree of Vertex representation of the atom to be added
      * @param the TruthValue object to be associated to the added atom
-     * @param a flag to indicate if it does not need to check for 
-     *        already existing atoms in AtomTable. 
-     * @param managed ???
      */
     Handle addAtom(tree<Vertex>& a, const TruthValue& tvn);
 
@@ -286,6 +283,9 @@ class AtomSpace {
      *        removed.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.  
+     *
+     * XXX Please clarify: does this also free memory associated with the
+     * removed atom? Or not? If not, is there a recursive delete call?
      */
     bool removeAtom(Handle h, bool recursive = false);
 
