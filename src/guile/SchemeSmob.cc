@@ -183,9 +183,8 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	while (scm_is_pair(sl));
 	
-	AtomSpace *as = CogServer::getAtomSpace();
-
 	// Now, create the actual link... in the actual atom space.
+	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addLink(t, outgoing_set);
 
 	SCM shandle = scm_from_ulong(h);
@@ -231,7 +230,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
-		scm_wrong_type_arg_msg("cog-outgoing-set", 1, satom, "opencog atom");
+		scm_wrong_type_arg_msg("cog-incoming-set", 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
 	Handle h = scm_to_ulong(shandle);
@@ -260,6 +259,48 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 }
 
 /* ============================================================== */
+/**
+ * delete the atom, but only if it has no incoming links.
+ */
+SCM SchemeSmob::ss_delete (SCM satom)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+		scm_wrong_type_arg_msg("cog-delete", 1, satom, "opencog atom");
+
+	SCM shandle = SCM_SMOB_OBJECT(satom);
+	Handle h = scm_to_ulong(shandle);
+	Atom *atom = TLB::getAtom(h);
+
+	HandleEntry *he = atom->getIncomingSet();
+	if (he) 
+		scm_wrong_type_arg_msg("cog-delete", 1, satom, "atom with empty incoming set");
+
+	AtomSpace *as = CogServer::getAtomSpace();
+	as->removeAtom(h, false);
+
+	return SCM_EOL;
+}
+
+/* ============================================================== */
+/**
+ * delete the atom, and everything pointing to it.
+ */
+SCM SchemeSmob::ss_delete_recursive (SCM satom)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+		scm_wrong_type_arg_msg("cog-delete", 1, satom, "opencog atom");
+
+	SCM shandle = SCM_SMOB_OBJECT(satom);
+	Handle h = scm_to_ulong(shandle);
+
+	AtomSpace *as = CogServer::getAtomSpace();
+	as->removeAtom(h, true);
+
+	return SCM_EOL;
+}
+
+
+/* ============================================================== */
 
 #define C(X) ((SCM (*) ()) X)
 
@@ -271,6 +312,8 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-handle",              1, 0, 0, C(ss_handle));
 	scm_c_define_gsubr("cog-incoming-set",        1, 0, 0, C(ss_incoming_set));
 	scm_c_define_gsubr("cog-outgoing-set",        1, 0, 0, C(ss_outgoing_set));
+	scm_c_define_gsubr("cog-delete",              1, 0, 0, C(ss_delete));
+	scm_c_define_gsubr("cog-delete-recursive",    1, 0, 0, C(ss_delete_recursive));
 }
 
 #endif

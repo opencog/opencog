@@ -36,6 +36,8 @@ class SchemeSmob
 		static SCM ss_handle(SCM);
 		static SCM ss_incoming_set(SCM);
 		static SCM ss_outgoing_set(SCM);
+		static SCM ss_delete(SCM);
+		static SCM ss_delete_recursive(SCM);
 
 	public:
 		SchemeSmob(void);
