@@ -133,9 +133,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 
 	SCM shandle = scm_from_ulong(h);
 
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_tag, shandle);
-	return smob;
+	SCM_RETURN_NEWSMOB (cog_tag, shandle);
 }
 
 /* ============================================================== */
@@ -189,9 +187,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 	SCM shandle = scm_from_ulong(h);
 
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_tag, shandle);
-	return smob;
+	SCM_RETURN_NEWSMOB (cog_tag, shandle);
 }
 
 /* ============================================================== */

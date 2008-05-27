@@ -8,8 +8,9 @@
 This directory contains an implementation of the a Scheme shell for the
 OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
 code to manipulate the contents of an OpenCog AtomSpace. The shell 
-may be invoked by typing "scm" at the opencog prompt. Currently, only a
-small number of primitives have been implemented.
+may be invoked by typing "scm" at the opencog prompt. To leave the shell,
+place a single . on the line, and hit enter. Alternately, hit ^D. 
+Currently, only a small number of primitives have been implemented.
 
 This binding is intended to be used for day-to-day maintenance 
 activities, and for experimentation. it is not meant to be used for any
