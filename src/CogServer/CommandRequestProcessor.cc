@@ -412,7 +412,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #ifdef HAVE_GUILE
     else if (command == "scm") {
         shell_mode = true;
-        answer = "Entering scheme shell mode\nguile> ";
+        answer = "Entering scheme shell mode; enter \".\" to leave\nguile> ";
         request->setAnswer(answer);
         request->callBack();
         return;
