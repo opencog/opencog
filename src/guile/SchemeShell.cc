@@ -142,6 +142,14 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	{
 		pending_input = true;
 		free(restr);
+
+		// quit accumulating text on escape (^[), cancel (^X) or ^C
+		char c = input_line[input_line.length()-1];
+		if ((0x6 == c) || (0x16 == c) || (0x18 == c) || (0x1b == c))
+		{
+			pending_input = false;
+			input_line = "";
+		}
 		return SCM_EOL;
 	}
 	free(restr);
