@@ -91,7 +91,7 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     } else {
 
         // XXX FIXME: this is really the wrong place to do command-line 
-        // parsing. Thisneeds to be moved to the simple cog server,
+        // parsing. This needs to be moved to the simple cog server,
         // so that the silly "shell_mode" crap above can be removed.
         parseCommandLine(cmdLine, command, args);
     }
