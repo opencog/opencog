@@ -34,7 +34,8 @@
 
 using namespace opencog;
 
-CommandRequestProcessor::~CommandRequestProcessor() {
+CommandRequestProcessor::~CommandRequestProcessor()
+{
 #ifdef HAVE_SQL_STORAGE
     if (store) delete store;
     store = NULL;
@@ -45,7 +46,9 @@ CommandRequestProcessor::~CommandRequestProcessor() {
 #endif /* HAVE_GUILE */
 }
 
-CommandRequestProcessor::CommandRequestProcessor() {
+CommandRequestProcessor::CommandRequestProcessor(void)
+{
+    prompt = "opencog> "
     load_count = 0;
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
@@ -352,7 +355,8 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
        if (command == "scm-exit")
        {
            shell_mode = false;
-           answer = "Exiting scheme shell mode";
+           answer = "Exiting scheme shell mode\n";
+           answer += prompt;
        }
        else
        {
@@ -408,7 +412,10 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #ifdef HAVE_GUILE
     else if (command == "scm") {
         shell_mode = true;
-        answer = "Entering scheme shell mode\nguile>";
+        answer = "Entering scheme shell mode\nguile> ";
+        request->setAnswer(answer);
+        request->callBack();
+        return;
     }
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
@@ -461,6 +468,8 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             answer += "\tArgs: " + args.front();
     }
 
+    answer += "\n";
+    answer += prompt;
     request->setAnswer(answer);
     request->callBack();
 

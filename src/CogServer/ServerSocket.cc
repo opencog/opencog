@@ -188,9 +188,16 @@ void ServerSocket::CBI::callBack(const std::string &message)
         std::istringstream stream(message.c_str());
         std::string line;
 
+        // The "nl" mechanism prints a new-line, except after
+        // the last line (unless, of course, the message had one there.)
+        // Basically, it reinserts all the newlines tht getline stripped out.
+        std::string nl = "";
         while (getline(stream, line)) {
-            sock->Send(line + "\n");
+            sock->Send(nl + line);
+            nl = "\n";
         }
+        if ('\n' == message[message.length()-1])
+            sock->Send("\n");
     }
     pthread_mutex_unlock(&sock_lock);
 
