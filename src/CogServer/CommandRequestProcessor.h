@@ -28,8 +28,10 @@
 #include <string>
 #include <map>
 #include <queue>
+
 #include "RequestProcessor.h"
 #include "XMLBufferReader.h"
+#include "types.h"
 
 #ifdef HAVE_SQL_STORAGE
 #include "AtomStorage.h"
