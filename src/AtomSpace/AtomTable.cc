@@ -1191,10 +1191,10 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
         
         // remove from incoming sets
         for (int i = 0; i < atom->getArity(); i++) {
-			Atom *outgoing = atom->getOutgoingAtom(i);
-			if (outgoing)
-				outgoing->removeIncomingHandle(curr->handle);
-		}
+            Atom *outgoing = atom->getOutgoingAtom(i);
+            if (outgoing)
+                outgoing->removeIncomingHandle(curr->handle);
+        }
     
         // remove from iterators
         lockIterators();
