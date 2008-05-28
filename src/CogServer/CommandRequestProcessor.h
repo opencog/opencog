@@ -26,6 +26,8 @@
 #define COMMANDREQUESTPROCESSOR_H
 
 #include <string>
+#include <map>
+#include <queue>
 #include "RequestProcessor.h"
 #include "XMLBufferReader.h"
 
@@ -52,6 +54,9 @@ class CommandRequestProcessor : public RequestProcessor
         std::string data(std::string);
         std::string help(std::string);
         std::string load(std::string);
+        std::string dlopen(std::string);
+        std::string dlclose(std::string);
+        bool externalCommand(std::string,std::queue<std::string>&,std::string&);
         std::string ls(std::string, std::string);
         std::string ls(std::string);
         std::string ls(Handle);
@@ -70,6 +75,7 @@ class CommandRequestProcessor : public RequestProcessor
 #endif /* HAVE_GUILE */
 
         int load_count;
+        std::map<std::string, void*> dlmodules;
 
 }; // class
 }  // namespace
