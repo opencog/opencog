@@ -1,0 +1,13 @@
+An example of how to make a module that is loadable into the CogServer with
+the dlopen command. e.g.,
+
+../CogServer/cogServer &
+[2008-05-28 11:32:18:118] [INFO] opencog server ready.
+telnet localhost 17001
+Trying 127.0.0.1...
+Connected to localhost.localdomain.
+Escape character is '^]'.
+opencog> dlopen libSampleModule.so
+hello world
+ok
+

@@ -24,6 +24,7 @@
 
 #include <pthread.h>
 #include <sstream>
+#include <dlfcn.h>
 
 #include "CommandRequestProcessor.h"
 #include "CommandRequest.h"
@@ -102,11 +103,13 @@ std::string CommandRequestProcessor::help(std::string topic)
 
     reply += 
          "Available commands:\n"
-         "data <xmldata>   -- load OpenCog XML data immediately following\n"
-         "load <filename>  -- load OpenCog XML from indicated filename\n"
-         "ls               -- list entire system contents\n"
-         "ls <handle>      -- list handle and its incoming set\n"
-         "ls <type> <name> -- list node and its incoming set\n";
+         "data <xmldata>     -- load OpenCog XML data immediately following\n"
+         "load <filename>    -- load OpenCog XML from indicated filename\n"
+         "ls                 -- list entire system contents\n"
+         "ls <handle>        -- list handle and its incoming set\n"
+         "ls <type> <name>   -- list node and its incoming set\n"
+         "dlopen <filename>  -- load a dynamic module (and run it).\n"
+         "dlclose <filename> -- close a previously loaded dynamic module.\n"; 
 #ifdef HAVE_GUILE
     reply += 
          "scm              -- enter the scheme interpreter\n";
@@ -132,6 +135,43 @@ std::string CommandRequestProcessor::help(std::string topic)
 std::string CommandRequestProcessor::load(std::string fileName)
 {
     return loadXML(new FileXMLBufferReader(fileName.c_str()));
+}
+
+/**
+ * Load a dynamic module and run it
+ */
+std::string CommandRequestProcessor::dlopen(std::string fileName)
+{
+	if (fileName.find('/') == std::string::npos)
+		fileName = "./" + fileName;
+	std::map<std::string, void *>::iterator it = dlmodules.find(fileName);
+	if (it != dlmodules.end())
+		return "Error: that module is already open, close it first\n";
+	void *h = ::dlopen(fileName.c_str(), RTLD_LAZY);
+	if (h == NULL) {
+		std::string answer = "Error: " + std::string(::dlerror()) + "\n"; 
+		return answer;
+	}
+	dlmodules[fileName] = h;
+	return "ok\n";
+}
+
+/**
+ * Close a previously loaded dynamic module
+ */
+std::string CommandRequestProcessor::dlclose(std::string fileName)
+{
+	if (fileName.find('/') == std::string::npos)
+		fileName = "./" + fileName;
+	std::map<std::string, void *>::iterator it = dlmodules.find(fileName);
+	if (it == dlmodules.end())
+		return "Error: can't find that module\n";
+		
+	void *h = it->second;
+	dlmodules.erase(it);
+		
+	::dlclose(h);
+	return "ok\n";
 }
 
 /**
@@ -372,17 +412,26 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = data(args.front());
         }
-    }
-    else if (command == "help")
-    {
+    } else if (command == "help") {
         if (args.size() == 0) answer = help("");
         else answer = help(args.front());
-    }
-    else if (command == "load") {
+    } else if (command == "load") {
         if (args.size() != 1) {
             answer = "load: invalid command syntax";
         } else {
             answer = load(args.front());
+        }
+    } else if (command == "dlopen") {
+        if (args.size() != 1) {
+            answer = "dlopen: invalid command syntax";
+        } else {
+            answer = dlopen(args.front());
+        }
+    } else if (command == "dlclose") {
+        if (args.size() != 1) {
+            answer = "dlclose: invalid command syntax";
+        } else {
+            answer = dlclose(args.front());
         }
     } else if (command == "ls") {
         if (args.size() == 0) {
