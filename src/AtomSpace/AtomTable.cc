@@ -1190,8 +1190,11 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
             StatisticsMonitor::getInstance()->remove(atom);
         
         // remove from incoming sets
-        for (int i = 0; i < atom->getArity(); i++)
-            atom->getOutgoingAtom(i)->removeIncomingHandle(curr->handle);
+        for (int i = 0; i < atom->getArity(); i++) {
+            Atom *outgoing = atom->getOutgoingAtom(i);
+            if (outgoing)
+                outgoing->removeIncomingHandle(curr->handle);
+        }
     
         // remove from iterators
         lockIterators();
