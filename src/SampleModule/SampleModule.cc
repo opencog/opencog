@@ -1,5 +1,7 @@
 #include <platform.h>
 #include <CogServer.h>
+#include <string>
+#include <queue>
 
 using namespace opencog;
 
@@ -13,3 +15,8 @@ public:
 };
 
 Foo f;
+
+extern "C" std::string cmd_hello(std::queue<std::string> &args)
+{
+    return "hello world";
+}

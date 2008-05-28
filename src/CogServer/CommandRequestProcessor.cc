@@ -175,6 +175,24 @@ std::string CommandRequestProcessor::dlclose(std::string fileName)
 }
 
 /**
+ * Look for an external command in the loaded modules
+ */
+bool CommandRequestProcessor::externalCommand(std::string command,std::queue<std::string> &args,std::string &answer)
+{
+	std::string sym = "cmd_" + command;
+	for (std::map<std::string, void *>::iterator it = dlmodules.begin(); it != dlmodules.end(); it++) {
+		void *p = ::dlsym(it->second, sym.c_str());
+		if (p) {
+			typedef std::string cmdProc(std::queue<std::string> &args);
+			cmdProc *pp = (cmdProc*)p;
+			answer = (*pp)(args);			
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * Read XML data from a string
  */
 std::string CommandRequestProcessor::data(std::string buf)
@@ -502,7 +520,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         }
     } 
 #endif /* HAVE_SQL_STORAGE */
-    else {
+    else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: data help load ls shutdown";
 #ifdef HAVE_GUILE

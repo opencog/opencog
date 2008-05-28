@@ -11,3 +11,11 @@ opencog> dlopen libSampleModule.so
 hello world
 ok
 
+Now that the module is loaded you can do:
+
+opencog> hello
+hello world
+opencog>
+
+This is an example of an "external command".. when the CommandRequestProcessor cannot find the "hello" command internally it looks for a function called "cmd_hello" in every loaded module.  The first to be found will be called with the queue of arguments from the command line (in this case none).
+
