@@ -16,6 +16,17 @@ FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(IODBC)
 FIND_PACKAGE(Guile)
 
+# add compiler definitions associated with the optional dependencies
+IF (IODBC_FOUND)
+	# Enable the use of SQL storage, if either iodbc of unixodbc is found.
+	# Caution: this can also increase RAM usage significantly!
+	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
+ENDIF (IODBC_FOUND)
+
+IF (GUILE_FOUND)
+	ADD_DEFINITIONS(-DHAVE_GUILE)
+ENDIF (GUILE_FOUND)
+
 # global includes
 INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIRS})
 
