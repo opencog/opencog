@@ -48,6 +48,11 @@ void ServerSocket::setMaster(SimpleNetworkServer *m) {
     master = m;
 }
 
+void ServerSocket::OnAccept()
+{
+    Send(master->getCommandPrompt());
+}
+
 void ServerSocket::OnDisconnect()
 {
     if (!in_raw_mode) return;
@@ -188,16 +193,10 @@ void ServerSocket::CBI::callBack(const std::string &message)
         std::istringstream stream(message.c_str());
         std::string line;
 
-        // The "nl" mechanism prints a new-line, except after
-        // the last line (unless, of course, the message had one there.)
-        // Basically, it reinserts all the newlines tht getline stripped out.
-        std::string nl = "";
         while (getline(stream, line)) {
-            sock->Send(nl + line);
-            nl = "\n";
+            sock->Send(line + "\r\n");
         }
-        if ('\n' == message[message.length()-1])
-            sock->Send("\n");
+        sock->Send(master->getCommandPrompt());
     }
     pthread_mutex_unlock(&sock_lock);
 

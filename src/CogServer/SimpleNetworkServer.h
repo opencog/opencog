@@ -39,6 +39,7 @@ class SimpleNetworkServer : public NetworkServer
 {
     private:
 
+        std::string prompt;
         bool started;
         static bool stopListenerThreadFlag;
         int portNumber;
@@ -58,6 +59,7 @@ class SimpleNetworkServer : public NetworkServer
         SimpleNetworkServer(CogServer *cogServer, int portNumber);
 
         void processCommandLine(CallBackInterface *callBack, const std::string &line);
+        std::string getCommandPrompt();
 
         void start();
 

@@ -48,7 +48,6 @@ CommandRequestProcessor::~CommandRequestProcessor()
 
 CommandRequestProcessor::CommandRequestProcessor(void)
 {
-    prompt = "opencog> ";
     load_count = 0;
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
@@ -356,7 +355,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
        {
            shell_mode = false;
            answer = "Exiting scheme shell mode\n";
-           answer += prompt;
        }
        else
        {
@@ -469,7 +467,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     }
 
     answer += "\n";
-    answer += prompt;
     request->setAnswer(answer);
     request->callBack();
 

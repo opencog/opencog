@@ -48,6 +48,7 @@ SimpleNetworkServer::SimpleNetworkServer(CogServer *cs, int pn)
     portNumber = pn;
     cogServer = cs;
     shell_mode = false;
+    prompt = "opencog> ";
 }
 
 /**
@@ -98,6 +99,11 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
 
     CommandRequest *request = new CommandRequest(callBack, command, args);
     cogServer->pushRequest(request);
+}
+
+std::string SimpleNetworkServer::getCommandPrompt()
+{
+    return prompt;
 }
 
 void SimpleNetworkServer::start()
