@@ -386,7 +386,8 @@ void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException) {
 }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
-void Atom::setNext(int index, Handle handle) {
+void Atom::setNext(int index, Handle handle)
+{
     //printf("Setting next of index %p, handle=%p\n", index, handle);
     //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
     //printf("TARGET_TYPE_INDEX = %p!\n", TARGET_TYPE_INDEX);
@@ -421,15 +422,18 @@ void Atom::setNext(int index, Handle handle) {
 }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-Handle* Atom::getTargetTypeIndex() const{
+Handle* Atom::getTargetTypeIndex() const
+{
     return targetTypeIndex;
 }
 
-void Atom::setNextTargetTypeIndex(Handle* handles) {
+void Atom::setNextTargetTypeIndex(Handle* handles)
+{
     targetTypeIndex = handles;
 }
 
-Handle Atom::next(int index) {
+Handle Atom::next(int index)
+{
     //printf("Getting next of index %p\n", index);
     //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
     //printf("TARGET_TYPE_INDEX = %p!\n", TARGET_TYPE_INDEX);
