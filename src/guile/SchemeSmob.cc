@@ -67,7 +67,7 @@ std::string SchemeSmob::to_string(SCM node)
 
 	if (UNDEFINED_HANDLE == h) return "Undefined atom handle";
 
-	if (h < NOTYPE) return "non-real atom";
+	if (h <= NOTYPE) return "non-real atom";
 
 	Atom *atom = TLB::getAtom(h);
 	if (NULL == atom) return "Invalid handle";
