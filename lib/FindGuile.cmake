@@ -3,6 +3,11 @@
 # GUILE_FOUND - system has the GUILE library
 # GUILE_INCLUDE_DIRS - the GUILE include directory
 # GUILE_LIBRARIES - The libraries needed to use GUILE
+#
+# XXX --- need to have guile-1.8, since the code uses some API
+# functions that are not in guile-1.6 However, its not clear
+# how to use CMake to skip searching for guile-1.6
+
 
 # Copyright (c) 2008, OpenCog.org (http://opencog.org)
 #
