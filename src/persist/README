@@ -166,10 +166,6 @@ use analyze;
 use prepare
 
    2:34 start
-112:24  md
-224:53  md
-225:35
-
 
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:

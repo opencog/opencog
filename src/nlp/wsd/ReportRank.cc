@@ -19,6 +19,7 @@ using namespace opencog;
 
 ReportRank::ReportRank(void)
 {
+	parse_cnt = 0;
 }
 
 ReportRank::~ReportRank()

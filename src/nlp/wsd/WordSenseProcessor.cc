@@ -25,6 +25,7 @@
 using namespace opencog;
 
 // ----------------------------------------
+
 WordSenseProcessor::WordSenseProcessor(void)
 {
 	pthread_mutex_init(&queue_lock, NULL);
