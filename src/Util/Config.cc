@@ -7,9 +7,9 @@
  * Written by Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,19 +35,23 @@ using namespace std;
 
 // returns a string with leading/trailing characters of a set stripped
 static char const* blank_chars = " \t\f\v\n\r";
-static string strip(string const& str) {
+static string strip(string const& str)
+{
     string::size_type const first = str.find_first_not_of(blank_chars);
     return (first == string::npos) ? string() : str.substr(first, str.find_last_not_of(blank_chars) - first + 1);
-} 
-
-Config::~Config() {
 }
 
-Config::Config() {
+Config::~Config()
+{
+}
+
+Config::Config()
+{
     reset();
 }
 
-void Config::reset() {
+void Config::reset()
+{
     table.clear();
     // load default configuration
     for (unsigned int i = 0; DEFAULT_CONFIG[i] != ""; i += 2) {
@@ -58,7 +62,8 @@ void Config::reset() {
 }
 
 // constructor
-void Config::load(const char* filename) {
+void Config::load(const char* filename)
+{
     // quit if no explicit filename was supplied
     if (filename == NULL) return;
 
@@ -73,7 +78,7 @@ void Config::load(const char* filename) {
     string name;
     string value;
     unsigned int line_number = 0;
-    
+
     while (++line_number, fin.good() && getline(fin, line)) {
         size_t idx;
         // find comment and discard the rest of the line
@@ -97,17 +102,20 @@ void Config::load(const char* filename) {
     fin.close();
 }
 
-const string& Config::get(const string &name) const {
+const string& Config::get(const string &name) const
+{
     map<string, string>::const_iterator it = table.find(name);
     if (it == table.end()) throw InvalidParamException(TRACE_INFO, "[ERROR] parameter not found (%s)", name.c_str());
     return it->second;
 }
 
-const string& Config::operator[](const string &name) const {
+const string& Config::operator[](const string &name) const
+{
     return get(name);
 }
 
-int Config::get_int(const string &name) const {
+int Config::get_int(const string &name) const
+{
     int int_val;
     errno = 0;
     int_val = strtol(get(name).c_str(), NULL, 0);
@@ -115,7 +123,8 @@ int Config::get_int(const string &name) const {
     return int_val;
 }
 
-double Config::get_double(const string &name) const {
+double Config::get_double(const string &name) const
+{
     double int_val;
     errno = 0;
     int_val = strtod(get(name).c_str(), NULL);
@@ -123,13 +132,15 @@ double Config::get_double(const string &name) const {
     return int_val;
 }
 
-bool Config::get_bool(const string &name) const {
+bool Config::get_bool(const string &name) const
+{
     if (strcasecmp(get(name).c_str(), "true") == 0) return true;
     else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
     else throw InvalidParamException(TRACE_INFO, "[ERROR] invalid double parameter (%s: %s)", name.c_str(), get(name).c_str());
 }
 
-std::string Config::to_string() const {
+std::string Config::to_string() const
+{
     std::ostringstream oss;
     oss << "{\"";
     for (map<string, string>::const_iterator it = table.begin(); it != table.end(); ++it) {
@@ -141,7 +152,8 @@ std::string Config::to_string() const {
 }
 
 // create and return the single instance
-Config& opencog::config() {
+Config& opencog::config()
+{
     static Config instance;
     return instance;
 }

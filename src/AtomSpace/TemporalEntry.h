@@ -8,9 +8,9 @@
  *            Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,14 +40,15 @@
  * methods to perform operations between lists such as concatenation,
  * intersection, and filtering.
  */
-class TemporalEntry {
+class TemporalEntry
+{
 
 public:
 
     static int existingObjects;
 
     /**
-     * Cell dat 
+     * Cell dat
      */
     Temporal* time;
 
@@ -127,7 +128,7 @@ public:
      * @param Length of the allocated vector.
      * @return A TemporalEntry containing the element s of the vector.
      */
-     static TemporalEntry* fromTemporalVector(Temporal**, int);
+    static TemporalEntry* fromTemporalVector(Temporal**, int);
 
     /**
      * Adds a time to the list.
@@ -136,7 +137,7 @@ public:
      * @return The resulting linked list after adding the time
      */
     static TemporalEntry* add(TemporalEntry*, Temporal*);
-    
+
     /**
      * Removes a time from the list.
      * @param The linked list
@@ -159,7 +160,7 @@ public:
     /**
      * Returns the intersection between several linked-lists. The n
      * linked-lists passed as arguments are automatically destroyed.
-     * 
+     *
      * @param Array of linked-lists.
      * @param Length of the array of linked-lists.
      * @return Intersection between the given linked-lists.
@@ -194,7 +195,7 @@ public:
     /**
      * This method returns the concatenation of two linked-lists, the
      * first linked-list followed by the second.
-     * THE FIRST LIST IS CHANGED AS SIDE-EFFECT if it is not null. 
+     * THE FIRST LIST IS CHANGED AS SIDE-EFFECT if it is not null.
      *
      * @param First linked-list.
      * @param Second linked-list.

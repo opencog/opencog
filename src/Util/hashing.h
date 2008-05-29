@@ -5,9 +5,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,28 +26,34 @@
 #include <boost/functional/hash.hpp>
 #include "tree.h"
 
-namespace Util {
+namespace Util
+{
 
-  template<typename T,
-	   typename Hash=boost::hash<T> >
-  struct deref_hash {
-    deref_hash(const Hash& h=Hash()) : hash(h) {} 
-    size_t operator()(const T& t) const { return hash(*t); }
+template < typename T,
+typename Hash = boost::hash<T> >
+struct deref_hash {
+    deref_hash(const Hash& h = Hash()) : hash(h) {}
+    size_t operator()(const T& t) const {
+        return hash(*t);
+    }
     Hash hash;
-  };
+};
 
-  template<typename T,
-	   typename Equals=std::equal_to<T> >
-  struct deref_equals {
-    deref_equals(const Equals& e=Equals()) : equals(e) {} 
-    bool operator()(const T& x,const T& y) const { return equals(*x,*y); }
+template < typename T,
+typename Equals = std::equal_to<T> >
+struct deref_equals {
+    deref_equals(const Equals& e = Equals()) : equals(e) {}
+    bool operator()(const T& x, const T& y) const {
+        return equals(*x, *y);
+    }
     Equals equals;
-  };
+};
 
-  template<typename T>
-  std::size_t hash_value(const tree<T>& tr) { 
-    return boost::hash_range(tr.begin(),tr.end());
-  }
+template<typename T>
+std::size_t hash_value(const tree<T>& tr)
+{
+    return boost::hash_range(tr.begin(), tr.end());
+}
 
 } //~namespace Util
 

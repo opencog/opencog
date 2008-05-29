@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "FileXMLBufferReader.h"
 #include "NMXmlDefinitions.h"
 #include "SimpleTruthValue.h"
-#include "Link.h" 
+#include "Link.h"
 #include "Logger.h"
 
 #include <math.h>
@@ -35,16 +35,16 @@
 #include <expat.h>
 
 /*
- * XXX To be fixed: remove all of the uses of "throw" in this code, 
+ * XXX To be fixed: remove all of the uses of "throw" in this code,
  * to be replaced by a gentler error mechanism. The problem is two-fold:
  * the "throws" are made from within routines that are called by the
- * external libxmlparser library, which is written in C, not C++. 
+ * external libxmlparser library, which is written in C, not C++.
  * Thus, these errors can't ever actually be caught, since they never
  * get through the parser. As a result, any minor mistake in an XML
  * will cause the entire server to crash, which is just plain ugly.
  * Yuck!
 
- * NOTE: Any time information (including Timestamps) are represented using Atoms as follows: 
+ * NOTE: Any time information (including Timestamps) are represented using Atoms as follows:
  * AtTimeLink(TimeNode:<temporalStringValue>, Atom1 [, Atom2 [... , AtomN]])
  */
 
@@ -58,8 +58,7 @@ bool NMXmlParser::freshLinks = false;
 const TruthValue& NMXmlParser::DEFAULT_TV()
 {
     static SimpleTruthValue* instance = NULL;
-    if (instance == NULL)
-    {
+    if (instance == NULL) {
         instance = new SimpleTruthValue(1.0f, 1.0f);
         instance->setConfidence(0.5);
     }
@@ -69,14 +68,14 @@ const TruthValue& NMXmlParser::DEFAULT_TV()
 // const int TYPE_LENGTH = (int) log10((double)NUMBER_OF_CLASSES) + 1;
 
 typedef struct {
-    unsigned enabled: 1;
-    unsigned ignoring: 1;
-    unsigned processNodes: 1;
-    unsigned processRelationships: 1;
+unsigned enabled: 1;
+unsigned ignoring: 1;
+unsigned processNodes: 1;
+unsigned processRelationships: 1;
 } Status;
 
 typedef std::stack<void*> ParserStack;
-// TODO: CREATE AN ABSTRACT CLASS "Stackable" for check for subclasses 
+// TODO: CREATE AN ABSTRACT CLASS "Stackable" for check for subclasses
 // when poping elements from stack.
 
 typedef struct {
@@ -88,19 +87,22 @@ typedef struct {
     XML_Parser parser;
 } UserData;
 
-static void push(ParserStack& ps, void* p) {
+static void push(ParserStack& ps, void* p)
+{
     ps.push(p);
 }
 
-static void* top(ParserStack& ps) {
+static void* top(ParserStack& ps)
+{
     if (!ps.size()) return NULL;
     return ps.top();
 }
 
-static void* pop(ParserStack& ps) {
+static void* pop(ParserStack& ps)
+{
     if (!ps.size()) return NULL;
     void* ret = ps.top();
-    ps.pop();  
+    ps.pop();
     return ret;
 }
 
@@ -112,16 +114,15 @@ static Type getTypeFromString(const char *name, bool onlyClassName)
     if (!name) return NOTYPE;
 
     Type result = ClassServer::getType(name);
-    if (result != NOTYPE) {          
+    if (result != NOTYPE) {
         return result;
     }
 
-    if (strcmp(name, POLYGON_CORNER_TOKEN) != 0 && 
-        (onlyClassName || strcmp(name, ELEMENT_TOKEN) != 0))
-    {
-      logger().error("Warning: null type for name returned! (%s)\n", name);
+    if (strcmp(name, POLYGON_CORNER_TOKEN) != 0 &&
+            (onlyClassName || strcmp(name, ELEMENT_TOKEN) != 0)) {
+        logger().error("Warning: null type for name returned! (%s)\n", name);
     }
-  
+
     return 0;
 }
 
@@ -133,10 +134,10 @@ static char *nativeBuildLinkKey(Atom *link)
 
     key[0] = '\0';
 
-    sprintf(aux, "%d ",link->getType());
+    sprintf(aux, "%d ", link->getType());
     strcat(key, aux);
 
-    for (int i = 0; i < link->getArity(); i++){
+    for (int i = 0; i < link->getArity(); i++) {
         sprintf(aux, "%p ", TLB::getHandle(link->getOutgoingAtom(i)));
         strcat(key, aux);
     }
@@ -163,29 +164,29 @@ static const char ** scan_common_attrs (Atom *r, const char **atts)
     if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
         atts++;
         sscanf(*atts, "%f", &buffer);
-        if (buffer == 1.0){
-            throw RuntimeException(TRACE_INFO, 
-                    "fatal error: confidence can not be 1.0");
+        if (buffer == 1.0) {
+            throw RuntimeException(TRACE_INFO,
+                                   "fatal error: confidence can not be 1.0");
         }
         SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
-                            newTv.setConfidence(buffer);
+        newTv.setConfidence(buffer);
         r->setTruthValue(newTv);
     } else if (strcmp(*atts, STRENGTH_TOKEN) == 0) {
         atts++;
         sscanf(*atts, "%f", &buffer);
         SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
-                            newTv.setMean(buffer);
+        newTv.setMean(buffer);
         r->setTruthValue(newTv);
     }
     return atts;
 }
 
 static void nativeStartElement(void *userData, const char *name, const char **atts)
-    throw (RuntimeException, InconsistenceException)
+throw (RuntimeException, InconsistenceException)
 {
     Atom* r = NULL;
     Type typeFound;
-    
+
     UserData* ud = (UserData*) userData;
 
     // processes head tags (list, tagdescription, etc)
@@ -216,20 +217,20 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             push(ud->stack, r);
 
             const TruthValue& t = r->getTruthValue();
-            if (typeid(t) != typeid(SimpleTruthValue)){
-                throw InconsistenceException(TRACE_INFO, 
-                        "DefaultTruthValue is not SimpleTruthValue.");
+            if (typeid(t) != typeid(SimpleTruthValue)) {
+                throw InconsistenceException(TRACE_INFO,
+                                             "DefaultTruthValue is not SimpleTruthValue.");
             }
             while (*atts != NULL) {
                 if (strcmp(*atts, NAME_TOKEN) == 0) {
                     atts++;
                     NMXmlParser::setNodeName((Node*) r, *atts);
                 } else {
-                   const char **natts = scan_common_attrs(r, atts);
-                   if (atts == natts) {
-                      logger().error("unrecognized Node token: %s\n", *atts);
-                   }
-                   atts = natts;
+                    const char **natts = scan_common_attrs(r, atts);
+                    if (atts == natts) {
+                        logger().error("unrecognized Node token: %s\n", *atts);
+                    }
+                    atts = natts;
                 }
                 atts++;
             }
@@ -253,9 +254,9 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             r = (Atom*) new Link(typeFound, std::vector<Handle>(), NMXmlParser::DEFAULT_TV());
 
             const TruthValue& t = r->getTruthValue();
-            if (typeid(t) != typeid(SimpleTruthValue)){
-                throw InconsistenceException(TRACE_INFO, 
-                        "DefaultTruthValue is not SimpleTruthValue");
+            if (typeid(t) != typeid(SimpleTruthValue)) {
+                throw InconsistenceException(TRACE_INFO,
+                                             "DefaultTruthValue is not SimpleTruthValue");
             }
 
             while (*atts != NULL) {
@@ -289,24 +290,24 @@ static void nativeStartElement(void *userData, const char *name, const char **at
         } else if (strcmp(name, ELEMENT_TOKEN) == 0) {
             // processes elements of other relationships, and inserts them in
             // the link previously defined;
-          
+
             Atom* currentAtom = (Atom*) top(ud->stack);
             if (currentAtom == NULL) {
                 logger().error("error: this token (%s) is expected to be nested\n", name);
                 return;
             }
             //printf("Getting node element inside currentAtom = %p\n", currentAtom);
-          
-          
+
+
             const char *n = NULL, *t = NULL;
             while (*atts != NULL) {
                 if (strcmp(*atts, NAME_TOKEN) == 0) {
                     atts++;
                     n = *atts;
-                }else if (strcmp(*atts, CLASS_TOKEN) == 0) {
+                } else if (strcmp(*atts, CLASS_TOKEN) == 0) {
                     atts++;
                     t = *atts;
-                }else{
+                } else {
                     logger().error("unrecognized token: %s\n", *atts);
                 }
                 atts++;
@@ -316,8 +317,8 @@ static void nativeStartElement(void *userData, const char *name, const char **at
             //r = getRelationshipByNameAndType(n, getTypeFromString(t, true));
 
 //            printf("Getting existing node (%s,%s)\n", n, t);
-                //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
-                h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
+            //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
+            h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
 //            printf(" => h = %p\n", h);
             if (!TLB::isInvalidHandle(h)) {
                 Link *link = dynamic_cast<Link *>(currentAtom);
@@ -326,16 +327,16 @@ static void nativeStartElement(void *userData, const char *name, const char **at
                 }
             } else {
 #ifdef THROW_EXCEPTIONS
-                throw RuntimeException(TRACE_INFO, 
-                        "fatal error: unable to find atom named %s, type %s", n, t);
+                throw RuntimeException(TRACE_INFO,
+                                       "fatal error: unable to find atom named %s, type %s", n, t);
 #else
                 /* Don't just core dump on bad XML format.
-                 * (since exceptions can't be thrown past the C library
-                 * of the parser, a core dump is inevitable).
-                 */
+                * (since exceptions can't be thrown past the C library
+                * of the parser, a core dump is inevitable).
+                */
                 fprintf (stderr,
-                    "Fatal error: unable to find atom named %s, type %s\n", n, t);
-                 logger().error(
+                         "Fatal error: unable to find atom named %s, type %s\n", n, t);
+                logger().error(
                     "fatal error: unable to find atom named %s, type %s\n", n, t);
 #endif
             }
@@ -344,7 +345,7 @@ static void nativeStartElement(void *userData, const char *name, const char **at
 }
 
 static void nativeEndElement(void *userData, const char *name)
-    throw (InconsistenceException)
+throw (InconsistenceException)
 {
     UserData* ud = (UserData*) userData;
 
@@ -360,26 +361,26 @@ static void nativeEndElement(void *userData, const char *name)
 //            gettimeofday(&s, NULL);
             Type type = getTypeFromString(name, false);
             if (((ClassServer::isAssignableFrom(NODE, type)) && ud->status.processNodes) ||
-                (ClassServer::isAssignableFrom(LINK, type)) && ud->status.processRelationships) {
+                    (ClassServer::isAssignableFrom(LINK, type)) && ud->status.processRelationships) {
                 if (currentAtom->getType() == type) {
-                    if (ClassServer::isAssignableFrom(LINK, type)){
+                    if (ClassServer::isAssignableFrom(LINK, type)) {
                         pop(ud->stack);
                         //printf("(1) Pushing currentAtom = %p\n", currentAtom);
                         push(ud->stack, currentAtom);
                     }
                     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
-                        // TODO: implement a sortOutgoingSet for doing the same thing more efficiently... 
+                        // TODO: implement a sortOutgoingSet for doing the same thing more efficiently...
                         Link *link = dynamic_cast<Link *>(currentAtom);
                         if (link) {
-                           std::vector<Handle> outgoing = link->getOutgoingSet();
-                           NMXmlParser::setOutgoingSet(link, outgoing); 
+                            std::vector<Handle> outgoing = link->getOutgoingSet();
+                            NMXmlParser::setOutgoingSet(link, outgoing);
                         }
                     }
                     Handle oldHandle = TLB::getHandle(currentAtom);
 //                    timeval s1;
 //                    gettimeofday(&s1, NULL);
-                            //printf("currentAtom => %s\n", currentAtom->toString().c_str());
+                    //printf("currentAtom => %s\n", currentAtom->toString().c_str());
                     //Handle newHandle = ud->atomTable->add(currentAtom);
                     Handle newHandle = ud->atomSpace->addRealAtom(*currentAtom);
 //                    timeval e1;
@@ -389,7 +390,7 @@ static void nativeEndElement(void *userData, const char *name)
 //                    cumulativeParseEnd1 += spentTime1;
                     // Updates last inserted/merged atom handle
                     ud->lastInsertedHandle = newHandle;
-                    if (CoreUtils::handleCompare(&oldHandle, &newHandle)){
+                    if (CoreUtils::handleCompare(&oldHandle, &newHandle)) {
                         // already existed
                         delete currentAtom;
                         //printf("Already existed\n");
@@ -400,7 +401,7 @@ static void nativeEndElement(void *userData, const char *name)
                     }
                     // XXX FIXME:
                     // would be better if this was replaced by
-                    // if (NULL != dynamic_cast<Link *>(currentAtom)) 
+                    // if (NULL != dynamic_cast<Link *>(currentAtom))
                     // and also a few lines down.
                     if (ClassServer::isAssignableFrom(LINK, currentAtom->getType())) {
                         //KMI -- find out if this is a nested link
@@ -427,7 +428,7 @@ static void nativeEndElement(void *userData, const char *name)
                     char buff[300];
                     snprintf(buff, 300,
                              "XML parse error: relationship type mismatch at line %d.\n"
-                             "\txml type=%s(%d) current atom type=%d %s", 
+                             "\txml type=%s(%d) current atom type=%d %s",
                              (int) XML_GetCurrentLineNumber(ud->parser),
                              name, type, currentAtom->getType(), currentAtom->toString().c_str());
                     throw InconsistenceException(TRACE_INFO, buff);
@@ -439,34 +440,39 @@ static void nativeEndElement(void *userData, const char *name)
 //            unsigned long spentTime = (e.tv_sec -  s.tv_sec)*1000000+(e.tv_usec -  s.tv_usec);
 //            cumulativeParseEnd += spentTime;
 
-        //} else {
-        //    cprintf(NORMAL, "WARNING: Got NULL Atom* from the parser stack!\n");
+            //} else {
+            //    cprintf(NORMAL, "WARNING: Got NULL Atom* from the parser stack!\n");
         }
     }
 }
 
-NMXmlParser::NMXmlParser(AtomSpace* atomSpace,  bool fresh, bool freshLinks) {
+NMXmlParser::NMXmlParser(AtomSpace* atomSpace,  bool fresh, bool freshLinks)
+{
     this->atomSpace = atomSpace;
     this->fresh = fresh;
     this->freshLinks = freshLinks;
 }
 
-NMXmlParser::~NMXmlParser() {
+NMXmlParser::~NMXmlParser()
+{
 }
 
-void NMXmlParser::setNodeName(Node* node, const char* name) {
+void NMXmlParser::setNodeName(Node* node, const char* name)
+{
     node->setName(name);
 }
 
-void NMXmlParser::addOutgoingAtom(Link * link, Handle h) {
+void NMXmlParser::addOutgoingAtom(Link * link, Handle h)
+{
     link->addOutgoingAtom(h);
 }
 
-void NMXmlParser::setOutgoingSet(Link * link, const std::vector<Handle>& outgoing) {
+void NMXmlParser::setOutgoingSet(Link * link, const std::vector<Handle>& outgoing)
+{
     link->setOutgoingSet(outgoing);
 }
 
-HandleEntry* 
+HandleEntry*
 NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
                      AtomSpace * atomSpace,
                      bool fresh,
@@ -474,7 +480,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
 {
     //printf("NMXmlParser::loadXML\n");
     cassert(TRACE_INFO, atomSpace != NULL,
-        "loadXML - atomSpace should pointer should not be NULL.");
+            "loadXML - atomSpace should pointer should not be NULL.");
     HandleEntry* result = NULL;
 
     if (xmlReaders.size() <= 0) return result;
@@ -488,23 +494,23 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
             logger().debug("First pass: processing file %s\n",
-                         ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
+                           ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
         //logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) i / (size * 2))));
         // fflush(stdout);
         parser.parse(xmlReaders[i], PARSE_NODES);
     }
-        //timeval e;
-        //gettimeofday(&e, NULL);
-        //unsigned long spentTime = (e.tv_sec*1000 + e.tv_usec/1000) - (s.tv_sec*1000 + s.tv_usec/1000);
-        //printf("PARSE NODES time = %lu\n", spentTime);
-        //s = e;
+    //timeval e;
+    //gettimeofday(&e, NULL);
+    //unsigned long spentTime = (e.tv_sec*1000 + e.tv_usec/1000) - (s.tv_sec*1000 + s.tv_usec/1000);
+    //printf("PARSE NODES time = %lu\n", spentTime);
+    //s = e;
 
     // only links are processed in the second pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            logger().debug("Second pass: processing file %s\n", 
-                         ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
+            logger().debug("Second pass: processing file %s\n",
+                           ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
         // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
         // fflush(stdout);
@@ -545,7 +551,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
         userData.status.processNodes = 0;
         userData.status.processRelationships = 1;
     }
-    
+
     XML_Parser parser = XML_ParserCreate(NULL);
     userData.parser = parser;
     XML_SetUserData(parser, &userData);
@@ -582,15 +588,15 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
     if (pass == PARSE_NODES) {
 
         logger().debug("Parsing nodes...\n");
-        
+
         // FIRST PASS - creates relationships with arity == 0 (nodes)
         h = parse_pass(xmlReader, pass);
         if (h == UNDEFINED_HANDLE) return UNDEFINED_HANDLE;
-        
+
     } else if (pass == PARSE_LINKS) {
 
         logger().debug("Parsing links...\n");
-        
+
         // SECOND PASS - creates other relationships
         // second pass must be avoided once subgraph insertion and/or lazy
         // insertion is implemented

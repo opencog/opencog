@@ -7,9 +7,9 @@
  * Written by Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,9 +30,10 @@
 
 using namespace opencog;
 
-class ConfigUTest : public CxxTest::TestSuite {
+class ConfigUTest : public CxxTest::TestSuite
+{
 
-public: 
+public:
     ConfigUTest() {}
     void setUp() {}
     void tearDown() {}
@@ -55,16 +56,16 @@ public:
         const char *config_file_name = "ConfigUTest.config";
         std::ofstream out(config_file_name);
         out << "# ConfigUTest file; commented initial line\n";
-        out << "    	# Another comment line with blank prefix\n";
+        out << "     # Another comment line with blank prefix\n";
         out << " PARAM1 = VALUE1\n";
-        out << "    PARAM2 	  = 	  VALUE2   \n";
+        out << "    PARAM2    =    VALUE2   \n";
         out << "PARAM3=VALUE3\n";
         out << "COMPOSED PARAMETER NAME 4 = VALUE4\n";
         out << "# another comment, just for kicks\n";
         out << "PARAM5 =  COMPOSED PARAMETER VALUE 5 \n";
         out << "PARAM6 = VALUE6  # end of line comments\n";
-        out << "  PARAM7		=  248 # integer parameter\n";
-        out << "PARAM8		=1.2584 # double parameter\n";
+        out << "  PARAM7  =  248 # integer parameter\n";
+        out << "PARAM8  =1.2584 # double parameter\n";
         out << "PARAM9=   -29847.167015 $&@*a786A!$alk # double parameter and useless discarded extra characters\n";
         out << "STI_FUNDS_BUFFER = 200\n";
         out << "LTI_FUNDS_BUFFER = 10\n";

@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,85 +30,86 @@
 
 #define N_TIMES 10
 
-class TemporalMapUTest :  public CxxTest::TestSuite{
+class TemporalMapUTest :  public CxxTest::TestSuite
+{
 private:
-	Temporal* times[N_TIMES];
-	char *content[N_TIMES];
+    Temporal* times[N_TIMES];
+    char *content[N_TIMES];
 
-	TemporalMap *temporalMap;
+    TemporalMap *temporalMap;
 public:
-	TemporalMapUTest(){
-		for (int i = 0; i < N_TIMES; i++){
-    		times[i] = new Temporal(i,i,true);
-			content[i] = new char[0];
-		}
-	}
-
-    void setUp(){
-		temporalMap = new TemporalMap();
+    TemporalMapUTest() {
+        for (int i = 0; i < N_TIMES; i++) {
+            times[i] = new Temporal(i, i, true);
+            content[i] = new char[0];
+        }
     }
 
-    void tearDown(){
-		delete(temporalMap);
+    void setUp() {
+        temporalMap = new TemporalMap();
     }
 
-	void testAdd(){
-		for (int i = 0; i < N_TIMES; i++){
-			TS_ASSERT(!temporalMap->contains(times[i]));
-			TS_ASSERT(!temporalMap->get(times[i]));
-		}
-		for (int i = 0; i < N_TIMES; i++){
-			temporalMap->add(times[i], content[i]);
-			TS_ASSERT(temporalMap->contains(times[i]));
-			TS_ASSERT(temporalMap->get(times[i]) == content[i]);
-			TS_ASSERT(temporalMap->getCount() == i+1);
-		}
-	}
-	
-	void testRemove(){
-		for (int i = 0; i < N_TIMES; i++){
-			temporalMap->add(times[i], content[i]);
-		}
-		for (int i = 0; i < N_TIMES; i++){
-			TS_ASSERT(temporalMap->contains(times[i]));
-			TS_ASSERT(temporalMap->remove(times[i]) == content[i]);
-			TS_ASSERT(!temporalMap->contains(times[i]));
-		}
-	}
+    void tearDown() {
+        delete(temporalMap);
+    }
 
-	void testKeys(){
-		bool iterated[N_TIMES];
-		
-		memset(iterated, 0, sizeof(bool)*N_TIMES);
+    void testAdd() {
+        for (int i = 0; i < N_TIMES; i++) {
+            TS_ASSERT(!temporalMap->contains(times[i]));
+            TS_ASSERT(!temporalMap->get(times[i]));
+        }
+        for (int i = 0; i < N_TIMES; i++) {
+            temporalMap->add(times[i], content[i]);
+            TS_ASSERT(temporalMap->contains(times[i]));
+            TS_ASSERT(temporalMap->get(times[i]) == content[i]);
+            TS_ASSERT(temporalMap->getCount() == i + 1);
+        }
+    }
 
-		for (int i = 0; i < N_TIMES; i++){
-			temporalMap->add(times[i], content[i]);
-		}
-		TemporalMapIterator *it = temporalMap->keys();
-		for (int i = 0; i < N_TIMES; i++){
-			TS_ASSERT(it->hasNext());
-			Temporal* t = it->next();
-			for (int j = 0; j < N_TIMES; j++){
-				if (!TemporalEntry::temporalCompare(&t, &times[j])){
-					iterated[i] = true;
-				}
-			}
-		}		
-		for (int i = 0; i < N_TIMES; i++){
-			TS_ASSERT(iterated[i]);
-		}
-		TS_ASSERT(!it->hasNext());
-		TS_ASSERT_THROWS(it->next(), IndexErrorException&);
-		delete(it);
-	}
+    void testRemove() {
+        for (int i = 0; i < N_TIMES; i++) {
+            temporalMap->add(times[i], content[i]);
+        }
+        for (int i = 0; i < N_TIMES; i++) {
+            TS_ASSERT(temporalMap->contains(times[i]));
+            TS_ASSERT(temporalMap->remove(times[i]) == content[i]);
+            TS_ASSERT(!temporalMap->contains(times[i]));
+        }
+    }
 
-	void testSize(){
-		Util::MT19937RandGen rng(12345678);
-		int size = rng.randint(N_TIMES);
-		delete(temporalMap);
-		temporalMap = new TemporalMap(size);
-		TS_ASSERT(temporalMap->getSize() >= size);
-		temporalMap->resize(size+1);
-		TS_ASSERT(temporalMap->getSize() >= size+1);
-	}
+    void testKeys() {
+        bool iterated[N_TIMES];
+
+        memset(iterated, 0, sizeof(bool)*N_TIMES);
+
+        for (int i = 0; i < N_TIMES; i++) {
+            temporalMap->add(times[i], content[i]);
+        }
+        TemporalMapIterator *it = temporalMap->keys();
+        for (int i = 0; i < N_TIMES; i++) {
+            TS_ASSERT(it->hasNext());
+            Temporal* t = it->next();
+            for (int j = 0; j < N_TIMES; j++) {
+                if (!TemporalEntry::temporalCompare(&t, &times[j])) {
+                    iterated[i] = true;
+                }
+            }
+        }
+        for (int i = 0; i < N_TIMES; i++) {
+            TS_ASSERT(iterated[i]);
+        }
+        TS_ASSERT(!it->hasNext());
+        TS_ASSERT_THROWS(it->next(), IndexErrorException&);
+        delete(it);
+    }
+
+    void testSize() {
+        Util::MT19937RandGen rng(12345678);
+        int size = rng.randint(N_TIMES);
+        delete(temporalMap);
+        temporalMap = new TemporalMap(size);
+        TS_ASSERT(temporalMap->getSize() >= size);
+        temporalMap->resize(size + 1);
+        TS_ASSERT(temporalMap->getSize() >= size + 1);
+    }
 };

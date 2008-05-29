@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,21 +29,24 @@
 #include "hash_map.h"
 #include "RandGen.h"
 
-namespace Util {
+namespace Util
+{
 
-  //a lazy random selector without replacement -
-  //lets you select m random integers in [0,n) without replacement each in O(1)
-  //and only uses O(m) memory - useful where n is much larger than m
-  struct lazy_random_selector {
-    lazy_random_selector(int n, Util::RandGen& _rng) : _n(n),_v(-1),rng(_rng) { }
-    bool empty() const { return (_n==0); }
+//a lazy random selector without replacement -
+//lets you select m random integers in [0,n) without replacement each in O(1)
+//and only uses O(m) memory - useful where n is much larger than m
+struct lazy_random_selector {
+    lazy_random_selector(int n, Util::RandGen& _rng) : _n(n), _v(-1), rng(_rng) { }
+    bool empty() const {
+        return (_n == 0);
+    }
     int operator()();
-  private:
+private:
     int _n;
-    hash_map<int,int> _map;
+    hash_map<int, int> _map;
     int _v;
     Util::RandGen& rng;
-  };
+};
 
 } //~namespace Util
 

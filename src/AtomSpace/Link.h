@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -51,177 +51,176 @@ class Link : public Atom
     friend class NMXmlParser;
     friend class Atom;
 
-    private:
-        Trail* trail;
-        void init(void) throw (InvalidParamException);
+private:
+    Trail* trail;
+    void init(void) throw (InvalidParamException);
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
-        // Adds a new handle to the outgoing set. Note that this is
-        // used only in the NativeParser friend class, and, due to
-        // performance issues, it should not be used anywhere else...
-        void addOutgoingAtom(Handle h);
+    // Adds a new handle to the outgoing set. Note that this is
+    // used only in the NativeParser friend class, and, due to
+    // performance issues, it should not be used anywhere else...
+    void addOutgoingAtom(Handle h);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    protected:
+protected:
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
-        // Array that does not change during atom lifespan.
-        std::vector<Handle> outgoing;
+    // Array that does not change during atom lifespan.
+    std::vector<Handle> outgoing;
 
-        /**
-          * Sets the outgoing set of the atom
-          * This method can be called only if the atom is not inserted
-          * in an AtomTable yet.
-          * Otherwise, it throws a RuntimeException.
-          */
-        void setOutgoingSet(const std::vector<Handle>& o)
-            throw (RuntimeException);
+    /**
+      * Sets the outgoing set of the atom
+      * This method can be called only if the atom is not inserted
+      * in an AtomTable yet.
+      * Otherwise, it throws a RuntimeException.
+      */
+    void setOutgoingSet(const std::vector<Handle>& o)
+    throw (RuntimeException);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    public:
+public:
 
-        /**
-         * Constructor for this class.
-         *
-         * @param Link type.
-         * @param Outgoing set, which is an array of the atom handles 
-         *        referenced by this link (both sources and targets). 
-         * @param Link truthvalue, which will be cloned before being
-         *        stored in this Link.
-         */
-         Link(Type, const std::vector<Handle>&, 
-              const TruthValue& = TruthValue::NULL_TV());
+    /**
+     * Constructor for this class.
+     *
+     * @param Link type.
+     * @param Outgoing set, which is an array of the atom handles
+     *        referenced by this link (both sources and targets).
+     * @param Link truthvalue, which will be cloned before being
+     *        stored in this Link.
+     */
+    Link(Type, const std::vector<Handle>&,
+         const TruthValue& = TruthValue::NULL_TV());
 
-        /**
-         * Destructor for this class.
-         */
-        ~Link() throw ();
+    /**
+     * Destructor for this class.
+     */
+    ~Link() throw ();
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
-        inline Arity getArity() const {
-            return outgoing.size();
-        }
+    inline Arity getArity() const {
+        return outgoing.size();
+    }
 
-        /**
-         * Returns a const reference to the array containing this
-         * atom's outgoing set.
-         *
-         * @return A const reference to this atom's outgoing set.
-         */
-        inline const std::vector<Handle>& getOutgoingSet() const
-        {
-            return outgoing;
-        }
-        /**
-         * Returns a specific atom in the outgoing set (using the TLB).
-         *
-         * @param The position of the atom in the array.
-         * @return A specific atom in the outgoing set (using the TLB).
-         */
-        Atom * getOutgoingAtom(int) const throw (RuntimeException);
+    /**
+     * Returns a const reference to the array containing this
+     * atom's outgoing set.
+     *
+     * @return A const reference to this atom's outgoing set.
+     */
+    inline const std::vector<Handle>& getOutgoingSet() const {
+        return outgoing;
+    }
+    /**
+     * Returns a specific atom in the outgoing set (using the TLB).
+     *
+     * @param The position of the atom in the array.
+     * @return A specific atom in the outgoing set (using the TLB).
+     */
+    Atom * getOutgoingAtom(int) const throw (RuntimeException);
 
-        /**
-         * Builds the target type index structure according to the types of
-         * elements in the outgoing set of the given atom.
-         *
-         * @return A pointer to target types array built.
-         * NOTE: The argument size gets the size of the returned array.
-         */
-        Type* buildTargetIndexTypes(int *size);
+    /**
+     * Builds the target type index structure according to the types of
+     * elements in the outgoing set of the given atom.
+     *
+     * @return A pointer to target types array built.
+     * NOTE: The argument size gets the size of the returned array.
+     */
+    Type* buildTargetIndexTypes(int *size);
 
-        /**
-         * Returns the position of a certain type on the reduced array of
-         * target types of an atom.
-         *
-         * @param The type which will be searched in the reduced target types
-         * index array.
-         * @return The position of the given type in the reduced array of
-         * target types.
-         */
-        int locateTargetIndexTypes(Type) const;
+    /**
+     * Returns the position of a certain type on the reduced array of
+     * target types of an atom.
+     *
+     * @param The type which will be searched in the reduced target types
+     * index array.
+     * @return The position of the given type in the reduced array of
+     * target types.
+     */
+    int locateTargetIndexTypes(Type) const;
 
-        /**
-         * Returns the number of different target types of an atom.
-         *
-         * @return The number of different target types of an atom.
-         */
-        int getTargetTypeIndexSize() const;
+    /**
+     * Returns the number of different target types of an atom.
+     *
+     * @return The number of different target types of an atom.
+     */
+    int getTargetTypeIndexSize() const;
 
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-        /**
-         * Returns the trail of the link.
-         *
-         * @return Trail of the link.
-         */
-        Trail* getTrail();
+    /**
+     * Returns the trail of the link.
+     *
+     * @return Trail of the link.
+     */
+    Trail* getTrail();
 
-        /**
-         * Sets a trail for the link.
-         * 
-         * @param Trail to be set.
-         */ 
-        void setTrail(Trail *);
+    /**
+     * Sets a trail for the link.
+     *
+     * @param Trail to be set.
+     */
+    void setTrail(Trail *);
 
-        /**
-         * Returns the weight value of the link.
-         *
-         * @return Weight value of the link.
-         */
-        float getWeight();
+    /**
+     * Returns the weight value of the link.
+     *
+     * @return Weight value of the link.
+     */
+    float getWeight();
 
-        /**
-         * Returns a string representation of the link. 
-         *
-         * @return A string representation of the link.
-         */
-        std::string toString();
+    /**
+     * Returns a string representation of the link.
+     *
+     * @return A string representation of the link.
+     */
+    std::string toString();
 
-        /**
-         * Returns a short string representation of the link.
-         *
-         * @return A short string representation of the link.
-         */
-        std::string toShortString();
+    /**
+     * Returns a short string representation of the link.
+     *
+     * @return A short string representation of the link.
+     */
+    std::string toShortString();
 
-        /**
-         * Returns whether a given handle is a source of this link.
-         *
-         * @param Handle to be checked for being a link source.
-         * @return Whether a given handle is a source of this link.
-         */
-        bool isSource(Handle) throw (InvalidParamException);
+    /**
+     * Returns whether a given handle is a source of this link.
+     *
+     * @param Handle to be checked for being a link source.
+     * @return Whether a given handle is a source of this link.
+     */
+    bool isSource(Handle) throw (InvalidParamException);
 
-        /**
-         * Returns whether the element in a given position in the 
-         * outgoing set of this link is a source.
-         *
-         * @param Position in the outgoing set.
-         * @return Whether the element in a given position in the 
-         *         outgoing set of this link is a source.
-         */
-        bool isSource(int) throw (IndexErrorException, InvalidParamException);
-        
-        /**
-         * Returns whether a given handle is a target of this link.
-         *
-         * @param Handle to be checked for being a link target.
-         * @return Whether a given handle is a target of this link.
-         */
-        bool isTarget(Handle) throw (InvalidParamException);
+    /**
+     * Returns whether the element in a given position in the
+     * outgoing set of this link is a source.
+     *
+     * @param Position in the outgoing set.
+     * @return Whether the element in a given position in the
+     *         outgoing set of this link is a source.
+     */
+    bool isSource(int) throw (IndexErrorException, InvalidParamException);
 
-        /**
-         * Returns whether the element in a given position in the 
-         * outgoing set of this link is a target.
-         *
-         * @param Position in the outgoing set.
-         * @return Whether the element in a given position in the
-         *         outgoing set of this link is a target.
-         */
-        bool isTarget(int) throw (IndexErrorException, InvalidParamException);
+    /**
+     * Returns whether a given handle is a target of this link.
+     *
+     * @param Handle to be checked for being a link target.
+     * @return Whether a given handle is a target of this link.
+     */
+    bool isTarget(Handle) throw (InvalidParamException);
 
-        virtual bool equals(Atom *);
-        virtual int hashCode(void);
+    /**
+     * Returns whether the element in a given position in the
+     * outgoing set of this link is a target.
+     *
+     * @param Position in the outgoing set.
+     * @return Whether the element in a given position in the
+     *         outgoing set of this link is a target.
+     */
+    bool isTarget(int) throw (IndexErrorException, InvalidParamException);
+
+    virtual bool equals(Atom *);
+    virtual int hashCode(void);
 };
 
 #endif

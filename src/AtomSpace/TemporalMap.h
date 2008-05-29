@@ -8,9 +8,9 @@
  *            Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -43,7 +43,8 @@
 
 class TemporalMapIterator;
 
-class TemporalMap {
+class TemporalMap
+{
     friend class TemporalMapIterator;
 
 private:
@@ -207,7 +208,8 @@ public:
 };
 
 
-class TemporalMapIterator {
+class TemporalMapIterator
+{
 
     friend class TemporalMap;
 

@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -47,21 +47,24 @@ void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (
     }
 }
 
-int CoreUtils::handleCompare(const void* e1, const void* e2) {
+int CoreUtils::handleCompare(const void* e1, const void* e2)
+{
     return compare(*((Handle *)e1), *((Handle *)e2));
 }
 
-int CoreUtils::compare(Handle h1, Handle h2) {
-    if (h1 < h2){
+int CoreUtils::compare(Handle h1, Handle h2)
+{
+    if (h1 < h2) {
         return(-1);
-    }else if (h1 > h2){
+    } else if (h1 > h2) {
         return(1);
-    }else{
+    } else {
         return(0);
     }
 }
 
-bool CoreUtils::HandleComparison::operator()(const Handle& h1, const Handle& h2) const {
+bool CoreUtils::HandleComparison::operator()(const Handle& h1, const Handle& h2) const
+{
     return(CoreUtils::compare(h1, h2) > 0);
 }
 

@@ -9,9 +9,9 @@
  *            Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -42,20 +42,21 @@
 #include <map>
 #endif
 
-#include "Atom.h" 
-#include "types.h" 
-#include "type_codes.h" 
+#include "Atom.h"
+#include "types.h"
+#include "type_codes.h"
 
 class Atom;
 
 /**
  * Each atom stored on OpenCog will have an immutable ID, which will be used
  * to refer to that atom when a reference to that atom needs to be kept.
- * Each proxy must have a look-up mechanism or table (TLB) to map from 
+ * Each proxy must have a look-up mechanism or table (TLB) to map from
  * this ID to the actual memory address for the atom in the local process
  * address space.
  */
-class TLB {
+class TLB
+{
 private:
 
 #ifdef USE_TLB_MAP
@@ -81,8 +82,7 @@ public:
      * @param Handle to be mapped.
      * @return Corresponding atom for the given handle.
      */
-    static inline Atom* getAtom(Handle handle)
-    {
+    static inline Atom* getAtom(Handle handle) {
 #ifdef USE_TLB_MAP
         if (handle <= NOTYPE) return (Atom *) handle; // check for "non-real" atoms
         return handle_map[handle];
@@ -97,8 +97,7 @@ public:
      * @param Atom to be mapped.
      * @return Corresponding handle for the given atom.
      */
-    static inline Handle getHandle(const Atom* atom)
-    {
+    static inline Handle getHandle(const Atom* atom) {
 #ifdef USE_TLB_MAP
         Handle h = (Handle) atom;
         if (h <= NOTYPE) return h; // check for "non-real" atoms
@@ -121,16 +120,14 @@ public:
      * @param Atom to be added.
      * @return Handle of the newly added atom.
      */
-    static inline Handle addAtom(const Atom* atom, Handle h = 0)
-    {
+    static inline Handle addAtom(const Atom* atom, Handle h = 0) {
 #ifdef USE_TLB_MAP
         Handle ht = (Handle) atom;
         if (ht <= NOTYPE) return ht; // check for "non-real" atoms
 
         Atom *a = (Atom *) atom;
         Handle ha = atom_map[a];
-        if (ha != 0)
-        {
+        if (ha != 0) {
 #ifdef CHECK_MAP_CONSISTENCY
             if (h != ha) throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
 #endif
@@ -158,8 +155,7 @@ public:
         if (h <= NOTYPE) return atom; // check for "non-real" atoms
 
         h = atom_map[atom];
-        if (h == 0)
-        {
+        if (h == 0) {
 #ifdef CHECK_MAP_CONSISTENCY
             throw InvalidParamException(TRACE_INFO, "Atom is not in the TLB");
 #endif
@@ -169,7 +165,7 @@ public:
         handle_map.erase(h);
 #endif
         return atom;
-    }        
+    }
 
     static inline bool isInvalidHandle(Handle h) {
 #ifdef USE_TLB_MAP

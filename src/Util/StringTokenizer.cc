@@ -7,9 +7,9 @@
  * Written by Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,54 +28,63 @@
 using namespace Util;
 
 
-StringTokenizer::StringTokenizer(){
+StringTokenizer::StringTokenizer()
+{
     reset();
-    
+
     str.assign("");
     delimiter.assign("");
 }
 
-StringTokenizer::StringTokenizer(const std::string &str, const std::string &delimiter){
+StringTokenizer::StringTokenizer(const std::string &str, const std::string &delimiter)
+{
     reset();
-    
+
     this->str = str;
     this->delimiter = delimiter;
 }
 
-StringTokenizer::~StringTokenizer(){
+StringTokenizer::~StringTokenizer()
+{
 }
-        
-std::string StringTokenizer::getString(){
+
+std::string StringTokenizer::getString()
+{
     return str;
 }
 
-void StringTokenizer::setString(const std::string &str){
+void StringTokenizer::setString(const std::string &str)
+{
     this->str = str;
 }
-        
-const std::string & StringTokenizer::getDelimiter(){
+
+const std::string & StringTokenizer::getDelimiter()
+{
     return delimiter;
 }
 
-void StringTokenizer::setDelimiter(const std::string &str){
+void StringTokenizer::setDelimiter(const std::string &str)
+{
     this->delimiter = delimiter;
-} 
+}
 
-void StringTokenizer::reset(){
+void StringTokenizer::reset()
+{
     start = 0;
     end = 0;
 }
-        
-const std::string StringTokenizer::nextToken() {
+
+const std::string StringTokenizer::nextToken()
+{
     cassert(TRACE_INFO, str != "", "StringTokenizer - string should not be empty.");
     cassert(TRACE_INFO, delimiter != "", "StringTokenized - delimiter should not be empty.");
-    
+
     // end of the string
-    if(end == str.size()){
+    if (end == str.size()) {
         return "";
     }
-    
-    if(start ==  0 && end == 0){
+
+    if (start ==  0 && end == 0) {
         end = str.find(delimiter);
         if ( end == std::string::npos ) {
             end = str.size();
@@ -83,19 +92,22 @@ const std::string StringTokenizer::nextToken() {
         return str.substr(start, end - start);
     }
 
-    do{
+    do {
         start = end + delimiterSize();
         if (start == str.size()) {
             end = start;
             return "";
         }
         end = str.find(delimiter, start);
-        if(end == std::string::npos){ end = str.size(); } 
-    } while( str.substr(start, end - start) == delimiter || end == start);
-    
+        if (end == std::string::npos) {
+            end = str.size();
+        }
+    } while ( str.substr(start, end - start) == delimiter || end == start);
+
     return str.substr(start, end - start);
 }
 
-unsigned int StringTokenizer::delimiterSize(){
+unsigned int StringTokenizer::delimiterSize()
+{
     return delimiter.size();
-} 
+}

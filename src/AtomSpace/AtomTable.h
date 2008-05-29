@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -47,10 +47,10 @@
 using __gnu_cxx::hash_set;
 #endif
 
-struct hashAtom{
+struct hashAtom {
     int operator()(Atom* a) const;
 };
-struct eqAtom{
+struct eqAtom {
     bool operator()(Atom* a1, Atom* a2) const;
 };
 typedef hash_set<Atom*, hashAtom, eqAtom> AtomHashSet;
@@ -67,7 +67,8 @@ class PredicateEvaluator;
  * OpenCog. It contains methods to add and remove atoms, as well as to
  * retrieve specific sets according to different criteria.
  */
-class AtomTable {
+class AtomTable
+{
 
     friend class ImportanceUpdatingAgent;
     friend class SavingLoading;
@@ -113,7 +114,7 @@ private:
 #endif
 
     void removeFromIndex(Atom *, std::vector<Handle>&, int, int)
-        throw (RuntimeException);
+    throw (RuntimeException);
     void removeFromTargetTypeIndex(Atom *);
     void removeFromPredicateIndex(Atom *);
     void removeFromIterator(Atom *, HandleIterator *);
@@ -219,8 +220,8 @@ public:
      * @return The newly created iterator.
      */
     HandleIterator* getHandleIterator(Type,
-         bool subclass = false,
-         VersionHandle vh = NULL_VERSION_HANDLE);
+                                      bool subclass = false,
+                                      VersionHandle vh = NULL_VERSION_HANDLE);
 
     /**
      * Makes a set from a index head. It receives a linked-list and an
@@ -300,7 +301,7 @@ public:
      * inserted previously in the AtomTable.
      */
     void addPredicateIndex(Handle, PredicateEvaluator*)
-        throw (InvalidParamException);
+    throw (InvalidParamException);
 
     /**
      * Returns the index head for the given Functionspredicate index.
@@ -325,7 +326,7 @@ public:
      *        context. NULL_VERSION_HANDLE indicates no filtering
      */
     HandleEntry* findHandlesByGPN(const char*,
-                VersionHandle = NULL_VERSION_HANDLE) const;
+                                  VersionHandle = NULL_VERSION_HANDLE) const;
 
     /**
      * Returns a list of handles that matches the GroundedPredicateNode
@@ -335,7 +336,7 @@ public:
      *       context. NULL_VERSION_HANDLE indicates no filtering
      **/
     HandleEntry* findHandlesByGPN(Handle,
-          VersionHandle = NULL_VERSION_HANDLE) const;
+                                  VersionHandle = NULL_VERSION_HANDLE) const;
 
     /**
      * Returns the exact atom for the given name and type.
@@ -369,7 +370,7 @@ public:
      *         (subclasses optionally).
      */
     HandleEntry* getHandleSet(Type, Type,
-          bool subclass = false, bool targetSubclass = false) const;
+                              bool subclass = false, bool targetSubclass = false) const;
 
     /**
      * Returns the set of atoms with a given target handle in their
@@ -424,7 +425,7 @@ public:
      * @return The set of atoms of the given type and name.
      */
     HandleEntry* getHandleSet(const char*,
-                Type type = ATOM, bool subclass = true) const;
+                              Type type = ATOM, bool subclass = true) const;
 
     /**
      * Returns the set of atoms whose outgoing set contains at least one
@@ -441,7 +442,7 @@ public:
      *         set contains at least one atom of the given type and name.
      */
     HandleEntry* getHandleSet(const char*, Type,
-                 Type type = ATOM, bool subclass = true) const;
+                              Type type = ATOM, bool subclass = true) const;
 
     /**
      * Returns the set of atoms with the given target names and/or types
@@ -469,7 +470,7 @@ public:
      */
     HandleEntry* getHandleSet(const char**, Type*, bool*, Arity,
                               Type type = ATOM, bool subclass = true) const
-        throw (RuntimeException);
+    throw (RuntimeException);
 
     /**
      * Returns the set of atoms with the given target names and/or types
@@ -491,7 +492,7 @@ public:
      * criteria in their outgoing set.
      */
     HandleEntry* getHandleSet(Type*, bool*, Arity,
-                Type type = ATOM, bool subclass = true) const;
+                              Type type = ATOM, bool subclass = true) const;
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -511,13 +512,13 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-     bool updateImportanceIndex(Atom*, int);
+    bool updateImportanceIndex(Atom*, int);
 
     /**
      * Adds an atom to the table, checking for duplicates and merging
      * when necessary.
      *
-     * When adding atoms in bulk, it can be convenient to defer 
+     * When adding atoms in bulk, it can be convenient to defer
      * the setup of incoming links until a later stage.
      *
      * @param The new atom to be added.
@@ -598,10 +599,8 @@ public:
      * specifically, does not insert or remove atoms from the atom table.
      */
     template<class T>
-    inline bool foreach_atom(bool (T::*cb)(Atom *), T *data) const
-    {
-        for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++)
-        {
+    inline bool foreach_atom(bool (T::*cb)(Atom *), T *data) const {
+        for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
             Atom* atom = *it;
             bool rc = (data->*cb)(atom);
             if (rc) return rc;

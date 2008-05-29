@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,31 +32,32 @@
 #include "RequestProcessor.h"
 #include "CallBackInterface.h"
 
-namespace opencog {
+namespace opencog
+{
 
 class CommandRequest : public CogServerRequest
 {
-    private:
+private:
 
-        std::string answer;
-        CallBackInterface *callBackRequestor;
-        static RequestProcessor *requestProcessor;
+    std::string answer;
+    CallBackInterface *callBackRequestor;
+    static RequestProcessor *requestProcessor;
 
-    public:
-		
-        std::string command;
-        std::queue<std::string> args;
+public:
 
-        ~CommandRequest();
-        CommandRequest(CallBackInterface *callback, 
-                       std::string &command,
-                       std::queue<std::string> &args);
-        void callBack();
-        RequestProcessor * getRequestProcessor();
+    std::string command;
+    std::queue<std::string> args;
 
-        void setAnswer(std::string &cmdOutput);
-        std::string getCommand();
-        std::queue<std::string> getArgs();
+    ~CommandRequest();
+    CommandRequest(CallBackInterface *callback,
+                   std::string &command,
+                   std::queue<std::string> &args);
+    void callBack();
+    RequestProcessor * getRequestProcessor();
+
+    void setAnswer(std::string &cmdOutput);
+    std::string getCommand();
+    std::queue<std::string> getArgs();
 
 }; // class
 }  // namespace

@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -64,7 +64,8 @@ CommandRequestProcessor::CommandRequestProcessor(void)
 /**
  * read XML data from a buffer
  */
-std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf) {
+std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf)
+{
     load_count ++;
     char buff[20];
     snprintf(buff, 20, "%d", load_count);
@@ -78,8 +79,7 @@ std::string CommandRequestProcessor::loadXML(XMLBufferReader *buf) {
     }
     // Can catch IOException, for file not found, or
     // RuntimeException, for bad file format.
-    catch (StandardException &e)
-    {
+    catch (StandardException &e) {
         msg = "xml load ";
         msg += buff;
         msg = " failed: ";
@@ -94,37 +94,36 @@ std::string CommandRequestProcessor::help(std::string topic)
 {
     std::string reply = "";
 
-    if (0 < topic.size())
-    {
+    if (0 < topic.size()) {
         reply += "No help available for command \"";
         reply += topic;
         reply += "\"\n\n";
     }
 
 
-    reply += 
-         "Available commands:\n"
-         "data <xmldata>     -- load OpenCog XML data immediately following\n"
-         "load <filename>    -- load OpenCog XML from indicated filename\n"
-         "ls                 -- list entire system contents\n"
-         "ls <handle>        -- list handle and its incoming set\n"
-         "ls <type> <name>   -- list node and its incoming set\n"
-         "dlopen <filename>  -- load a dynamic module (and run it).\n"
-         "dlclose <filename> -- close a previously loaded dynamic module.\n"; 
+    reply +=
+        "Available commands:\n"
+        "data <xmldata>     -- load OpenCog XML data immediately following\n"
+        "load <filename>    -- load OpenCog XML from indicated filename\n"
+        "ls                 -- list entire system contents\n"
+        "ls <handle>        -- list handle and its incoming set\n"
+        "ls <type> <name>   -- list node and its incoming set\n"
+        "dlopen <filename>  -- load a dynamic module (and run it).\n"
+        "dlclose <filename> -- close a previously loaded dynamic module.\n";
 #ifdef HAVE_GUILE
-    reply += 
-         "scm              -- enter the scheme interpreter\n";
+    reply +=
+        "scm              -- enter the scheme interpreter\n";
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
-    reply += 
-         "sql-open <dbname> <username> <auth>\n"
-         "                 -- open connection to SQL storage\n"
-         "sql-close        -- close connection to SQL storage\n"
-         "sql-store        -- store all server data to SQL storage\n"
-         "sql-load         -- load server from SQL storage\n";
+    reply +=
+        "sql-open <dbname> <username> <auth>\n"
+        "                 -- open connection to SQL storage\n"
+        "sql-close        -- close connection to SQL storage\n"
+        "sql-store        -- store all server data to SQL storage\n"
+        "sql-load         -- load server from SQL storage\n";
 #endif
-    reply += 
-         "shutdown         -- stop the server, and exit\n";
+    reply +=
+        "shutdown         -- stop the server, and exit\n";
 
     return reply;
 }
@@ -143,18 +142,18 @@ std::string CommandRequestProcessor::load(std::string fileName)
  */
 std::string CommandRequestProcessor::dlopen(std::string fileName)
 {
-	if (fileName.find('/') == std::string::npos)
-		fileName = "./" + fileName;
-	std::map<std::string, void *>::iterator it = dlmodules.find(fileName);
-	if (it != dlmodules.end())
-		return "Error: that module is already open, close it first\n";
-	void *h = ::dlopen(fileName.c_str(), RTLD_LAZY);
-	if (h == NULL) {
-		std::string answer = "Error: " + std::string(::dlerror()) + "\n"; 
-		return answer;
-	}
-	dlmodules[fileName] = h;
-	return "ok\n";
+    if (fileName.find('/') == std::string::npos)
+        fileName = "./" + fileName;
+    std::map<std::string, void *>::iterator it = dlmodules.find(fileName);
+    if (it != dlmodules.end())
+        return "Error: that module is already open, close it first\n";
+    void *h = ::dlopen(fileName.c_str(), RTLD_LAZY);
+    if (h == NULL) {
+        std::string answer = "Error: " + std::string(::dlerror()) + "\n";
+        return answer;
+    }
+    dlmodules[fileName] = h;
+    return "ok\n";
 }
 
 /**
@@ -162,35 +161,35 @@ std::string CommandRequestProcessor::dlopen(std::string fileName)
  */
 std::string CommandRequestProcessor::dlclose(std::string fileName)
 {
-	if (fileName.find('/') == std::string::npos)
-		fileName = "./" + fileName;
-	std::map<std::string, void *>::iterator it = dlmodules.find(fileName);
-	if (it == dlmodules.end())
-		return "Error: can't find that module\n";
-		
-	void *h = it->second;
-	dlmodules.erase(it);
-		
-	::dlclose(h);
-	return "ok\n";
+    if (fileName.find('/') == std::string::npos)
+        fileName = "./" + fileName;
+    std::map<std::string, void *>::iterator it = dlmodules.find(fileName);
+    if (it == dlmodules.end())
+        return "Error: can't find that module\n";
+
+    void *h = it->second;
+    dlmodules.erase(it);
+
+    ::dlclose(h);
+    return "ok\n";
 }
 
 /**
  * Look for an external command in the loaded modules
  */
-bool CommandRequestProcessor::externalCommand(std::string command,std::queue<std::string> &args,std::string &answer)
+bool CommandRequestProcessor::externalCommand(std::string command, std::queue<std::string> &args, std::string &answer)
 {
-	std::string sym = "cmd_" + command;
-	for (std::map<std::string, void *>::iterator it = dlmodules.begin(); it != dlmodules.end(); it++) {
-		void *p = ::dlsym(it->second, sym.c_str());
-		if (p) {
-			typedef std::string cmdProc(std::queue<std::string> &args);
-			cmdProc *pp = (cmdProc*)p;
-			answer = (*pp)(args);			
-			return true;
-		}
-	}
-	return false;
+    std::string sym = "cmd_" + command;
+    for (std::map<std::string, void *>::iterator it = dlmodules.begin(); it != dlmodules.end(); it++) {
+        void *p = ::dlsym(it->second, sym.c_str());
+        if (p) {
+            typedef std::string cmdProc(std::queue<std::string> &args);
+            cmdProc *pp = (cmdProc*)p;
+            answer = (*pp)(args);
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -214,15 +213,13 @@ std::string CommandRequestProcessor::ls(std::string type, std::string name)
 
 std::string CommandRequestProcessor::ls(std::string arg)
 {
-    if (0 == arg.length())
-    {
+    if (0 == arg.length()) {
         return ls();
     }
 
     // If its all numeric, its a handle !?
     size_t alpha = arg.find_first_not_of("0123456789");
-    if (std::string::npos == alpha)
-    {
+    if (std::string::npos == alpha) {
         Handle h = (Handle) strtoul(arg.c_str(), NULL, 10);
         return ls(h);
     }
@@ -243,9 +240,8 @@ std::string CommandRequestProcessor::ls(Handle h)
     answer += atom->toString();
     answer += "\n";
 
-    HandleEntry *he = atom->getIncomingSet(); 
-    while (he)
-    {
+    HandleEntry *he = atom->getIncomingSet();
+    while (he) {
         answer += "\t";
         snprintf(buff, 20, "%lu: ", (unsigned long) he->handle);
         answer += buff;
@@ -313,11 +309,10 @@ std::string CommandRequestProcessor::ls(void)
  * Open a connection to the sql server
  */
 std::string CommandRequestProcessor::sql_open(std::string dbname,
-                                              std::string username,
-                                              std::string authentication)
+        std::string username,
+        std::string authentication)
 {
-    if (store) 
-    {
+    if (store) {
         return "Error: SQL connection already open\n";
     }
 
@@ -336,8 +331,7 @@ std::string CommandRequestProcessor::sql_open(std::string dbname,
  */
 std::string CommandRequestProcessor::sql_close(void)
 {
-    if (store) 
-    {
+    if (store) {
         delete store;
         store = NULL;
         return "SQL connection closed\n";
@@ -354,7 +348,7 @@ static void * sql_load_thread_start_routine(void *data)
     AtomSpace *atomSpace = CogServer::getAtomSpace();
     const AtomTable& atomTable = atomSpace->getAtomTable();
 
-    AtomTable * ap = (AtomTable *) &atomTable; // It most certainly is NOT const!!
+    AtomTable * ap = (AtomTable *) & atomTable; // It most certainly is NOT const!!
     store->load(*ap);
 
     return NULL;
@@ -408,21 +402,17 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 
     std::string answer;
 #ifdef HAVE_GUILE
-    if (shell_mode)
-    {
-       if (command == "scm-exit")
-       {
-           shell_mode = false;
-           answer = "Exiting scheme shell mode\n";
-           answer += prompt;
-       }
-       else
-       {
-           answer = ss->eval(command);
-       }
-       request->setAnswer(answer);
-       request->callBack();
-       return;
+    if (shell_mode) {
+        if (command == "scm-exit") {
+            shell_mode = false;
+            answer = "Exiting scheme shell mode\n";
+            answer += prompt;
+        } else {
+            answer = ss->eval(command);
+        }
+        request->setAnswer(answer);
+        request->callBack();
+        return;
     }
 #endif /* HAVE_GUILE */
 
@@ -475,7 +465,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #endif /* HAVE_SQL_STORAGE */
             server().stop();
         }
-    } 
+    }
 #ifdef HAVE_GUILE
     else if (command == "scm") {
         shell_mode = true;
@@ -520,7 +510,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = sql_store();
         }
-    } 
+    }
 #endif /* HAVE_SQL_STORAGE */
     else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
@@ -531,7 +521,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #ifdef HAVE_SQL_STORAGE
         answer += "\n\tsql-open sql-close sql-store sql-load";
 #endif
-        if(!args.empty())
+        if (!args.empty())
             answer += "\tArgs: " + args.front();
     }
 
@@ -540,8 +530,8 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     request->setAnswer(answer);
     request->callBack();
 
-#ifdef DEBUG 
-     // Debug code
+#ifdef DEBUG
+    // Debug code
     answer = "processed command " + command + "(";
     while (! args.empty()) {
         answer.append(args.front());

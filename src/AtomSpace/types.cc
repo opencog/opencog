@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,19 +25,23 @@
 
 #include "types.h"
 
-int hashHandle::operator()(Handle h) const{
+int hashHandle::operator()(Handle h) const
+{
     int hashCode =  Util::hash<unsigned long>()((unsigned long) h);
     return(hashCode);
 }
 
-bool eqHandle::operator()(Handle h1, Handle h2) const{
+bool eqHandle::operator()(Handle h1, Handle h2) const
+{
     return (h1 == h2);
 }
 
-float ShortFloatOps::getValue(const ShortFloat *x) {
-	return(*x);
+float ShortFloatOps::getValue(const ShortFloat *x)
+{
+    return(*x);
 }
 
-void ShortFloatOps::setValue(ShortFloat *x, float value) {
-    *x = value; 
+void ShortFloatOps::setValue(ShortFloat *x, float value)
+{
+    *x = value;
 }

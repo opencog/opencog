@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,21 +26,22 @@
 #include <Link.h>
 #include <TLB.h>
 
-class LinkUTest :  public CxxTest::TestSuite {
+class LinkUTest :  public CxxTest::TestSuite
+{
 private:
 
 public:
-	LinkUTest(){
-           printf("sizeof(Trail) = %u\n", sizeof(Trail));
-	}
+    LinkUTest() {
+        printf("sizeof(Trail) = %u\n", sizeof(Trail));
+    }
 
     void setUp() {
     }
 
-    void tearDown(){
+    void tearDown() {
     }
 
-	void testEquals(){
+    void testEquals() {
         Node* n1 = new Node(CONCEPT_NODE, "TEST");
         Node* n2 = new Node(CONCEPT_NODE, "TEST");
         TLB::addAtom(n1);
@@ -74,7 +75,7 @@ public:
         TS_ASSERT(l3->equals(l4));
         TS_ASSERT(l5->equals(l6));
         TS_ASSERT(l7->equals(l8));
-        
+
         TS_ASSERT(!l1->equals(l3));
         TS_ASSERT(!l1->equals(l4));
         TS_ASSERT(!l1->equals(l5));
@@ -102,7 +103,7 @@ public:
         TS_ASSERT(!l7->equals(l4));
         TS_ASSERT(!l7->equals(l5));
         TS_ASSERT(!l7->equals(l6));
-        
+
     }
-    
+
 };

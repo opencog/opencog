@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,43 +33,42 @@ HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 
 HandleToTemporalEntryMap::~HandleToTemporalEntryMap()
 {
-    HandleMapIterator<TemporalEntry *>* keys = internalMap->keys();    
+    HandleMapIterator<TemporalEntry *>* keys = internalMap->keys();
     while (keys->hasNext()) {
         delete (internalMap->get(keys->next()));
     }
     delete keys;
     delete(internalMap);
 }
-    
+
 void HandleToTemporalEntryMap::add(Handle key, TemporalEntry* obj)
 {
-    if (contains(key))
-    {
+    if (contains(key)) {
         remove(key);
     }
     internalMap->add(key, obj);
 }
-    
+
 TemporalEntry* HandleToTemporalEntryMap::get(Handle key)
 {
     return(internalMap->get(key));
 }
-    
+
 bool HandleToTemporalEntryMap::contains(Handle key)
 {
     return(internalMap->contains(key));
 }
-    
+
 TemporalEntry* HandleToTemporalEntryMap::remove(Handle key)
 {
     return internalMap->remove(key);
 }
-    
+
 int HandleToTemporalEntryMap::getCount()
 {
     return(internalMap->getCount());
 }
-    
+
 int HandleToTemporalEntryMap::getSize()
 {
     return internalMap->getSize();
@@ -84,8 +83,7 @@ HandleToTemporalEntryMap *HandleToTemporalEntryMap::clone()
 {
     HandleToTemporalEntryMap *ret = new HandleToTemporalEntryMap();
     HandleMapIterator<TemporalEntry *> *originalKeys = keys();
-    while (originalKeys->hasNext())
-    {
+    while (originalKeys->hasNext()) {
         Handle nextKey = originalKeys->next();
         ret->add(nextKey, get(nextKey));
     }
@@ -96,8 +94,7 @@ HandleToTemporalEntryMap *HandleToTemporalEntryMap::clone()
 std::string HandleToTemporalEntryMap::toString()
 {
     std::string answer;
-    for (HandleMapIterator<TemporalEntry *> *it = keys(); it->hasNext();)
-    {
+    for (HandleMapIterator<TemporalEntry *> *it = keys(); it->hasNext();) {
         Handle key = it->next();
         TemporalEntry* value = get(key);
         /* append key */

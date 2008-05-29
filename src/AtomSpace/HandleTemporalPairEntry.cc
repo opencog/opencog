@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,21 +31,24 @@
 
 int HandleTemporalPairEntry::existingObjects = 0;
 
-HandleTemporalPairEntry::HandleTemporalPairEntry(HandleTemporalPair _handleTemporalPair): handleTemporalPair(_handleTemporalPair) {
+HandleTemporalPairEntry::HandleTemporalPairEntry(HandleTemporalPair _handleTemporalPair): handleTemporalPair(_handleTemporalPair)
+{
 
     ++existingObjects;
     // linked-list with no head cell
     next = NULL;
 }
 
-HandleTemporalPairEntry::HandleTemporalPairEntry(Handle h, Temporal* t): handleTemporalPair(h, t) {
+HandleTemporalPairEntry::HandleTemporalPairEntry(Handle h, Temporal* t): handleTemporalPair(h, t)
+{
 
     ++existingObjects;
     // linked-list with no head cell
     next = NULL;
 }
 
-HandleTemporalPairEntry::~HandleTemporalPairEntry() {
+HandleTemporalPairEntry::~HandleTemporalPairEntry()
+{
 
     // recursion is not used to avoid stack overflow on large lists
     if (next != NULL) {
@@ -62,12 +65,13 @@ HandleTemporalPairEntry::~HandleTemporalPairEntry() {
     --existingObjects;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::clone() {
+HandleTemporalPairEntry* HandleTemporalPairEntry::clone()
+{
 
-	if (this == NULL) return(NULL);
+    if (this == NULL) return(NULL);
 
     HandleTemporalPairEntry *answer, *p, *q;
-    
+
     // answer keeps the cloned list head while p is used to iterate in the
     // cloned list
     answer = p = new HandleTemporalPairEntry(handleTemporalPair);
@@ -80,7 +84,8 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::clone() {
     return answer;
 }
 
-int HandleTemporalPairEntry::getSize() {
+int HandleTemporalPairEntry::getSize()
+{
 
     HandleTemporalPairEntry *current = this;
     int size = 0;
@@ -92,16 +97,18 @@ int HandleTemporalPairEntry::getSize() {
     return size;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::last() {
+HandleTemporalPairEntry* HandleTemporalPairEntry::last()
+{
     HandleTemporalPairEntry *current = this;
     // O(n) to get last member
     while (current->next != NULL) {
         current = current->next;
     }
-    return current;  
+    return current;
 }
 
-bool HandleTemporalPairEntry::contains(HandleTemporalPair t) {
+bool HandleTemporalPairEntry::contains(HandleTemporalPair t)
+{
     HandleTemporalPairEntry *current = this;
     while (current != NULL) {
         int comparison = compare(current->handleTemporalPair, t);
@@ -112,10 +119,11 @@ bool HandleTemporalPairEntry::contains(HandleTemporalPair t) {
         }
         current = current->next;
     }
-    return false;  
+    return false;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPairEntry* set1, HandleTemporalPairEntry* set2) {
+HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPairEntry* set1, HandleTemporalPairEntry* set2)
+{
 
     HandleTemporalPairEntry** sets = new HandleTemporalPairEntry*[2];
     sets[0] = set1;
@@ -123,13 +131,15 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPai
     return intersection(sets, 2);
 }
 
-int HandleTemporalPairEntry::handleTemporalPairCompare(const void* e1, const void* e2) {
-	HandleTemporalPair* ht1 = (HandleTemporalPair*)e1;
-	HandleTemporalPair* ht2 = (HandleTemporalPair*)e2;
+int HandleTemporalPairEntry::handleTemporalPairCompare(const void* e1, const void* e2)
+{
+    HandleTemporalPair* ht1 = (HandleTemporalPair*)e1;
+    HandleTemporalPair* ht2 = (HandleTemporalPair*)e2;
     return HandleTemporalPairEntry::compare(*ht1, *ht2);
 }
 
-int HandleTemporalPairEntry::compare(HandleTemporalPair ht1, HandleTemporalPair ht2) {
+int HandleTemporalPairEntry::compare(HandleTemporalPair ht1, HandleTemporalPair ht2)
+{
     int handleDiff = CoreUtils::compare(ht1.getHandle(), ht2.getHandle());
     if (handleDiff != 0) {
         return handleDiff;
@@ -138,13 +148,14 @@ int HandleTemporalPairEntry::compare(HandleTemporalPair ht1, HandleTemporalPair 
     }
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::remove(HandleTemporalPairEntry* set, HandleTemporalPair t) {
+HandleTemporalPairEntry* HandleTemporalPairEntry::remove(HandleTemporalPairEntry* set, HandleTemporalPair t)
+{
     HandleTemporalPairEntry* buffer;
     // The search for invalid elements need to be done in two steps because
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
-    while ((set != NULL) && 
-           (HandleTemporalPairEntry::compare(set->handleTemporalPair, t) == 0)) {
+    while ((set != NULL) &&
+            (HandleTemporalPairEntry::compare(set->handleTemporalPair, t) == 0)) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -166,14 +177,15 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::remove(HandleTemporalPairEntry
     return head;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::add(HandleTemporalPairEntry* sortedSet, HandleTemporalPair ht) {
+HandleTemporalPairEntry* HandleTemporalPairEntry::add(HandleTemporalPairEntry* sortedSet, HandleTemporalPair ht)
+{
     HandleTemporalPairEntry* current = sortedSet;
     HandleTemporalPairEntry* previous = NULL;
     while (current != NULL) {
         int comparison = HandleTemporalPairEntry::compare(current->handleTemporalPair, ht);
         if (comparison == 0) {
             // Already in the sorted list. Do nothing
-            return sortedSet; 
+            return sortedSet;
         }
         if (comparison > 0) {
             // Found insertion position
@@ -195,8 +207,9 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::add(HandleTemporalPairEntry* s
     }
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPairEntry** sets, unsigned int n) throw (InconsistenceException) {
-    
+HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPairEntry** sets, unsigned int n) throw (InconsistenceException)
+{
+
     // leave this method if there are no lists
     if (n == 0) {
         delete[](sets);
@@ -250,7 +263,8 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPai
     return intersection(v);
 }
 
-int HandleTemporalPairEntry::nextMatch(std::vector<std::vector<HandleTemporalPair> >& sets, std::vector<unsigned int>& cursors) {
+int HandleTemporalPairEntry::nextMatch(std::vector<std::vector<HandleTemporalPair> >& sets, std::vector<unsigned int>& cursors)
+{
 
     for (;;) {
 
@@ -297,11 +311,12 @@ int HandleTemporalPairEntry::nextMatch(std::vector<std::vector<HandleTemporalPai
     }
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(std::vector<std::vector<HandleTemporalPair> >& sets) {
+HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(std::vector<std::vector<HandleTemporalPair> >& sets)
+{
 
     HandleTemporalPairEntry *answer = NULL, *current = NULL;
 
-    // there is one cursor for each list. 
+    // there is one cursor for each list.
     std::vector<unsigned int> cursors(sets.size(), 0);
     int pos;
 
@@ -313,16 +328,17 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(std::vector<std::
             current = current->next;
         }
     }
-    
+
     return answer;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::concatenation(HandleTemporalPairEntry* set1, HandleTemporalPairEntry* set2) {
+HandleTemporalPairEntry* HandleTemporalPairEntry::concatenation(HandleTemporalPairEntry* set1, HandleTemporalPairEntry* set2)
+{
 
     if (set1 == NULL) return set2;
 
     // it scans the first list until the last element is reached, and then
-    // it makes the next of the last element point to the first element of the 
+    // it makes the next of the last element point to the first element of the
     // second list.
     HandleTemporalPairEntry* current = set1;
     while (current->next != NULL) {
@@ -333,7 +349,8 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::concatenation(HandleTemporalPa
     return set1;
 }
 
-std::string HandleTemporalPairEntry::toString() {
+std::string HandleTemporalPairEntry::toString()
+{
 
     std::string answer;
 
@@ -345,7 +362,8 @@ std::string HandleTemporalPairEntry::toString() {
     return answer;
 }
 
-HandleTemporalPair* HandleTemporalPairEntry::toHandleTemporalPairVector(HandleTemporalPair*& vector, int& n) throw (InconsistenceException) {
+HandleTemporalPair* HandleTemporalPairEntry::toHandleTemporalPairVector(HandleTemporalPair*& vector, int& n) throw (InconsistenceException)
+{
     n = getSize();
     vector = new HandleTemporalPair[n];
     int i = 0;
@@ -358,11 +376,12 @@ HandleTemporalPair* HandleTemporalPairEntry::toHandleTemporalPairVector(HandleTe
     return vector;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::fromHandleTemporalPairVector(HandleTemporalPair* vector, int size){
-	HandleTemporalPairEntry *ret = NULL;
-	for (int i = size - 1; i >= 0; i--){
-		HandleTemporalPairEntry *temp = new HandleTemporalPairEntry(vector[i]);
-		ret = HandleTemporalPairEntry::concatenation(temp, ret);
-	}
-	return(ret);
+HandleTemporalPairEntry* HandleTemporalPairEntry::fromHandleTemporalPairVector(HandleTemporalPair* vector, int size)
+{
+    HandleTemporalPairEntry *ret = NULL;
+    for (int i = size - 1; i >= 0; i--) {
+        HandleTemporalPairEntry *temp = new HandleTemporalPairEntry(vector[i]);
+        ret = HandleTemporalPairEntry::concatenation(temp, ret);
+    }
+    return(ret);
 }

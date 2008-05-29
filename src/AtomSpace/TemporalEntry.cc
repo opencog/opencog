@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,8 @@
 
 int TemporalEntry::existingObjects = 0;
 
-TemporalEntry::TemporalEntry(Temporal* time) {
+TemporalEntry::TemporalEntry(Temporal* time)
+{
 
     ++existingObjects;
     // USED TO SEEK MEMORY LEAK
@@ -37,7 +38,8 @@ TemporalEntry::TemporalEntry(Temporal* time) {
     next = NULL;
 }
 
-TemporalEntry::~TemporalEntry() {
+TemporalEntry::~TemporalEntry()
+{
 
     --existingObjects;
     // recursion is not used to avoid stack overflow on large lists
@@ -54,12 +56,13 @@ TemporalEntry::~TemporalEntry() {
     }
 }
 
-TemporalEntry* TemporalEntry::clone() {
+TemporalEntry* TemporalEntry::clone()
+{
 
-	if (this == NULL) return(NULL);
+    if (this == NULL) return(NULL);
 
     TemporalEntry *answer, *p, *q;
-    
+
     // answer keeps the cloned list head while p is used to iterate in the
     // cloned list
     answer = p = new TemporalEntry(time);
@@ -72,7 +75,8 @@ TemporalEntry* TemporalEntry::clone() {
     return answer;
 }
 
-int TemporalEntry::getSize() {
+int TemporalEntry::getSize()
+{
 
     TemporalEntry *current = this;
     int size = 0;
@@ -84,16 +88,18 @@ int TemporalEntry::getSize() {
     return size;
 }
 
-TemporalEntry* TemporalEntry::last() {
+TemporalEntry* TemporalEntry::last()
+{
     TemporalEntry *current = this;
     // O(n) to get last member
     while (current->next != NULL) {
         current = current->next;
     }
-    return current;  
+    return current;
 }
 
-bool TemporalEntry::contains(Temporal* t) {
+bool TemporalEntry::contains(Temporal* t)
+{
     TemporalEntry *current = this;
     while (current != NULL) {
         int comparison = compare(current->time, t);
@@ -104,10 +110,11 @@ bool TemporalEntry::contains(Temporal* t) {
         }
         current = current->next;
     }
-    return false;  
+    return false;
 }
 
-TemporalEntry* TemporalEntry::intersection(TemporalEntry* set1, TemporalEntry* set2) throw (InconsistenceException) {
+TemporalEntry* TemporalEntry::intersection(TemporalEntry* set1, TemporalEntry* set2) throw (InconsistenceException)
+{
 
     TemporalEntry** sets = new TemporalEntry*[2];
     sets[0] = set1;
@@ -115,13 +122,15 @@ TemporalEntry* TemporalEntry::intersection(TemporalEntry* set1, TemporalEntry* s
     return intersection(sets, 2);
 }
 
-int TemporalEntry::temporalCompare(const void* e1, const void* e2) {
-	const Temporal **t1 = (const Temporal **)e1;
-	const Temporal **t2 = (const Temporal **)e2;
+int TemporalEntry::temporalCompare(const void* e1, const void* e2)
+{
+    const Temporal **t1 = (const Temporal **)e1;
+    const Temporal **t2 = (const Temporal **)e2;
     return TemporalEntry::compare(*t1, *t2);
 }
 
-int TemporalEntry::compare(const Temporal* t1, const Temporal* t2) {
+int TemporalEntry::compare(const Temporal* t1, const Temporal* t2)
+{
     // Special cases where at least one of them are NULL.
     if (t1 == NULL) {
         if (t2 != NULL) {
@@ -136,14 +145,15 @@ int TemporalEntry::compare(const Temporal* t1, const Temporal* t2) {
     }
 }
 
-TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t) {
+TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t)
+{
     TemporalEntry* buffer;
     // The search for invalid elements need to be done in two steps because
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
     //printf("TemporalEntry::remove(set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
-    while ((set != NULL) && 
-           (*(set->time) == *t)) {
+    while ((set != NULL) &&
+            (*(set->time) == *t)) {
 //printf("set->time == t. Removing head\n");
         buffer = set;
         set = set->next;
@@ -168,7 +178,8 @@ TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t) {
     return head;
 }
 
-TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t) {
+TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t)
+{
     //printf("TemporalEntry::add(%s,%s)\n", sortedSet->toString().c_str(), t->toString().c_str());
     TemporalEntry* current = sortedSet;
     TemporalEntry* previous = NULL;
@@ -178,7 +189,7 @@ TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t) {
         if (comparison == 0) {
             // Already in the sorted list. Do nothing
             //printf("TemporalEntry::add => Already exists\n");
-            return sortedSet; 
+            return sortedSet;
         }
         if (comparison > 0) {
             // Found insertion position
@@ -202,8 +213,9 @@ TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t) {
     }
 }
 
-TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n) throw (InconsistenceException) {
-    
+TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n) throw (InconsistenceException)
+{
+
     // leave this method if there are no lists
     if (n == 0) {
         delete[](sets);
@@ -244,8 +256,8 @@ TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n) throw (I
         }
 
         if (j != size[i]) {
-            throw InconsistenceException(TRACE_INFO, 
-                    "TemporalEntry - Consistency check failed for intersection.");
+            throw InconsistenceException(TRACE_INFO,
+                                         "TemporalEntry - Consistency check failed for intersection.");
         }
 
         // sets[i] is destroyed after v is set.
@@ -260,7 +272,8 @@ TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n) throw (I
     return intersection(v, size, n);
 }
 
-int TemporalEntry::nextMatch(Temporal*** sets, int* sizes, std::vector<int>& cursors) {
+int TemporalEntry::nextMatch(Temporal*** sets, int* sizes, std::vector<int>& cursors)
+{
 
     int n = cursors.size();
     for (;;) {
@@ -307,11 +320,12 @@ int TemporalEntry::nextMatch(Temporal*** sets, int* sizes, std::vector<int>& cur
     }
 }
 
-TemporalEntry* TemporalEntry::intersection(Temporal*** sets, int* sizes, int n) {
+TemporalEntry* TemporalEntry::intersection(Temporal*** sets, int* sizes, int n)
+{
 
     TemporalEntry *answer = NULL, *current = NULL;
 
-    // there is one cursor for each list. 
+    // there is one cursor for each list.
     std::vector<int> cursors(n, 0);
     int pos;
 
@@ -323,7 +337,7 @@ TemporalEntry* TemporalEntry::intersection(Temporal*** sets, int* sizes, int n) 
             current = current->next;
         }
     }
-    
+
     for (int i = 0; i < n; i++) {
         delete[](sets[i]);
     }
@@ -333,12 +347,13 @@ TemporalEntry* TemporalEntry::intersection(Temporal*** sets, int* sizes, int n) 
     return answer;
 }
 
-TemporalEntry* TemporalEntry::concatenation(TemporalEntry* set1, TemporalEntry* set2) {
+TemporalEntry* TemporalEntry::concatenation(TemporalEntry* set1, TemporalEntry* set2)
+{
 
     if (set1 == NULL) return set2;
 
     // it scans the first list until the last element is reached, and then
-    // it makes the next of the last element point to the first element of the 
+    // it makes the next of the last element point to the first element of the
     // second list.
     TemporalEntry* current = set1;
     while (current->next != NULL) {
@@ -349,7 +364,8 @@ TemporalEntry* TemporalEntry::concatenation(TemporalEntry* set1, TemporalEntry* 
     return set1;
 }
 
-std::string TemporalEntry::toString() {
+std::string TemporalEntry::toString()
+{
 
     std::string answer;
 
@@ -361,7 +377,8 @@ std::string TemporalEntry::toString() {
     return answer;
 }
 
-Temporal** TemporalEntry::toTemporalVector(Temporal**& vector, int& n) throw (InconsistenceException) {
+Temporal** TemporalEntry::toTemporalVector(Temporal**& vector, int& n) throw (InconsistenceException)
+{
     n = getSize();
     vector = new Temporal*[n];
     int i = 0;
@@ -374,11 +391,12 @@ Temporal** TemporalEntry::toTemporalVector(Temporal**& vector, int& n) throw (In
     return vector;
 }
 
-TemporalEntry* TemporalEntry::fromTemporalVector(Temporal** vector, int size){
-	TemporalEntry *ret = NULL;
-	for (int i = size - 1; i >= 0; i--){
-		TemporalEntry *temp = new TemporalEntry(vector[i]);
-		ret = TemporalEntry::concatenation(temp, ret);
-	}
-	return(ret);
+TemporalEntry* TemporalEntry::fromTemporalVector(Temporal** vector, int size)
+{
+    TemporalEntry *ret = NULL;
+    for (int i = size - 1; i >= 0; i--) {
+        TemporalEntry *temp = new TemporalEntry(vector[i]);
+        ret = TemporalEntry::concatenation(temp, ret);
+    }
+    return(ret);
 }

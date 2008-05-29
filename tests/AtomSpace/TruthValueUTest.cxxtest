@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -47,7 +47,8 @@
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
-class TruthValueUTest :  public CxxTest::TestSuite {
+class TruthValueUTest :  public CxxTest::TestSuite
+{
 private:
 
     TruthValue* tvs[NUM_TVS];
@@ -56,7 +57,7 @@ private:
     float confidences[NUM_TVS];
 
 public:
-	TruthValueUTest(){
+    TruthValueUTest() {
         means[0] = TV1_MEAN;
         counts[0] = TV1_COUNT;
         confidences[0] = SimpleTruthValue::countToConfidence(counts[0]);
@@ -70,7 +71,7 @@ public:
         means[2] = TV3_MEAN;
         counts[2] = TV3_COUNT;
         confidences[2] = SimpleTruthValue::countToConfidence(counts[2]);
-	}
+    }
 
     void setUp() {
         tvs[0] = new SimpleTruthValue(means[0], counts[0]);
@@ -78,7 +79,7 @@ public:
         tvs[2] = new CompositeTruthValue(SimpleTruthValue(means[2], counts[2]), NULL_VERSION_HANDLE);
     }
 
-    void tearDown(){
+    void tearDown() {
         for (int i = 0; i < NUM_TVS; i++) {
             delete tvs[i];
         }
@@ -92,7 +93,7 @@ public:
         TS_ASSERT(!strcmp(TruthValue::typeToStr(COMPOSITE_TRUTH_VALUE), "COMPOSITE_TRUTH_VALUE"));
         TS_ASSERT_THROWS(TruthValue::typeToStr(NUMBER_OF_TRUTH_VALUE_TYPES), InvalidParamException&);
     }
-        
+
     //static const TruthValueType strToType(char* s);
     void testStrToType() {
         //printf("testStrToType()\n");
@@ -116,7 +117,7 @@ public:
             TS_ASSERT(fabs(tv->getConfidence() - tvs[i]->getConfidence() ) <= FLOAT_ACCEPTABLE_ERROR);
         }
     }
-    
+
     //static TruthValue* factory(TruthValueType, char *);
     void testFactoryTruthValueTypeCharPtr() {
         //printf("testFactoryTruthValueTypeCharPtr()\n");
@@ -168,10 +169,10 @@ public:
         }
 
         // Merge with other types of TV
-        float lowerConfidence = simpleConfidences[1]-0.01;
-        float upperConfidence = simpleConfidences[1]+0.01;
+        float lowerConfidence = simpleConfidences[1] - 0.01;
+        float upperConfidence = simpleConfidences[1] + 0.01;
         TruthValue* otherTypeTv;
-        // Merging SimpleTruthValue and CompositeTruthValue objects 
+        // Merging SimpleTruthValue and CompositeTruthValue objects
         otherTypeTv = new CompositeTruthValue(SimpleTruthValue(0.333f, SimpleTruthValue::confidenceToCount(lowerConfidence)), NULL_VERSION_HANDLE);
         mergedTv = simpleTvs[1]->merge(*otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
@@ -195,7 +196,7 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             delete simpleTvs[i];
         }
-        
+
         // Merge calling merge() of all types of TVs.
         TruthValue* indefiniteTvs[NUM_TVS];
         float indefiniteLs[NUM_TVS];
@@ -224,7 +225,7 @@ public:
                 TS_ASSERT(mergedTv != indefiniteTv);
                 TS_ASSERT(fabs(mergedTv->getMean()  - indefiniteMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
 //printf("mergedTv->getCount() =%f, indefiniteCounts[i] = %f\n", mergedTv->getCount(), indefiniteCounts[i]);
-                TS_ASSERT(fabs(mergedTv->getCount() - indefiniteCounts[i]) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.          
+                TS_ASSERT(fabs(mergedTv->getCount() - indefiniteCounts[i]) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
                 TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
                 if (tvs[i]->getType() != COMPOSITE_TRUTH_VALUE) {
                     TS_ASSERT(mergedTv != tv);
@@ -245,7 +246,7 @@ public:
             delete indefiniteTvs[i];
         }
     }
-    
+
     void testIsNullTv() {
         for (int i = 0; i < NUM_TVS; i++) {
             TS_ASSERT(!(tvs[i]->isNullTv()));
@@ -256,15 +257,15 @@ public:
         TS_ASSERT(!TruthValue::FALSE_TV().isNullTv());
         TS_ASSERT(!TruthValue::TRIVIAL_TV().isNullTv());
     }
-    
+
     void testDeleteAndSetDefaultTVIfPertinent() {
-        TruthValue* tv = (TruthValue*) &(TruthValue::DEFAULT_TV());
+        TruthValue* tv = (TruthValue*) & (TruthValue::DEFAULT_TV());
         TruthValue::DeleteAndSetDefaultTVIfPertinent(&tv);
         TS_ASSERT(tv == &(TruthValue::DEFAULT_TV()));
         tv = TruthValue::DEFAULT_TV().clone();
         TruthValue::DeleteAndSetDefaultTVIfPertinent(&tv);
         TS_ASSERT(tv == &(TruthValue::DEFAULT_TV()));
     }
-    
-    
+
+
 };

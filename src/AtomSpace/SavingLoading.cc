@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -66,40 +66,42 @@ using namespace opencog;
 int processed = 0;
 int total = 0;
 
-SavingLoading::SavingLoading() {
+SavingLoading::SavingLoading()
+{
 }
 
-void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOException){
+void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOException)
+{
 
     logger().info("Starting Memory dump");
-    
+
     time_t start = time(NULL);
 
     // opens the file that will be modified
     FILE *f = fopen(fileName, "wb");
     if (f == NULL) {
-        throw IOException(TRACE_INFO, 
-              "SavingLoading - Unable to open file '%s' for writing", fileName);
+        throw IOException(TRACE_INFO,
+                          "SavingLoading - Unable to open file '%s' for writing", fileName);
     }
 
     AtomTable& atomTable = atomSpace.atomTable;
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
-    
+
     // a flag that indicates the file format
     char format = FULL_NETWORK_DUMP;
-    
+
     // writes on the file the file format and the  number of atoms
     fwrite(&format, sizeof(char), 1, f);
     fwrite(&atomCount, sizeof(int), 1, f);
-    
+
     processed = 0;
     total = atomCount;
 
     // save classserver info
     saveClassServerInfo(f);
-    
+
     saveNodes(f, atomTable, atomCount);
     saveLinks(f, atomTable, atomCount);
     saveIndices(f, atomTable);
@@ -109,21 +111,22 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
 
     // closes the file
     fclose(f);
-    
+
     // calculates the total time that the process of saving has spent
     time_t duration = time(NULL) - start;
-    logger().info("Memory dump: 100%% done (in %d second%c).", 
-                (int) duration, duration == 1 ? '\0' : 's');
+    logger().info("Memory dump: 100%% done (in %d second%c).",
+                  (int) duration, duration == 1 ? '\0' : 's');
     fflush(stdout);
 }
 
-void SavingLoading::saveClassServerInfo(FILE *f) {
+void SavingLoading::saveClassServerInfo(FILE *f)
+{
     logger().fine("SavingLoading::saveClassServerInfo");
     int numTypes = ClassServer::getNumberOfClasses();
-    
+
     fwrite(&numTypes, sizeof(int), 1, f);
 
-    for (Type i = 0; i < numTypes; i++){
+    for (Type i = 0; i < numTypes; i++) {
         int classNameLength = strlen(ClassServer::getTypeName(i));
         fwrite(&classNameLength, sizeof(int), 1, f);
         fwrite(ClassServer::getTypeName(i), sizeof(char), classNameLength, f);
@@ -131,21 +134,22 @@ void SavingLoading::saveClassServerInfo(FILE *f) {
     }
 }
 
-void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount) {
+void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
+{
     logger().fine("SavingLoading::saveNodes");
 
     int numNodes = 0;
-    
+
     // gets the position of the pointer on the file for future reference
     int numNodesOffset = ftell(f);
-    
+
     // writes 0 on the file. Later, the total number of nodes will be written
     // here
     fwrite(&numNodes, sizeof(int), 1, f);
-    
+
     // creates an iterator to iterate on all nodes
     HandleIterator* iter = atomTable.getHandleIterator(NODE, true);
-    
+
     // writes nodes to file and increments node counter
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
@@ -163,18 +167,19 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount) {
 
     // rewind to position where number of nodes must be written
     fseek(f, numNodesOffset, SEEK_SET);
-  
+
     // writes the number of nodes in the proper position
     fwrite(&numNodes, sizeof(int), 1, f);
 
     //updates atomCount
     atomCount += numNodes;
-    
+
     // returns the pointer back to the end of the file
     fseek(f, 0, SEEK_END);
 }
 
-void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount) {
+void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
+{
     logger().fine("SavingLoading::saveLinks");
 
     int numLinks = 0;
@@ -187,7 +192,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount) {
 
     // creates a iterator to iterate on all links
     HandleIterator* iter = atomTable.getHandleIterator(LINK, true);
-    
+
     // writes links to file and increments link counter
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
@@ -198,7 +203,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount) {
         fflush(stdout);
     }
 
-    delete iter; 
+    delete iter;
 
     // rewind to position where number of links must be written
     fseek(f, numLinksOffset, SEEK_SET);
@@ -208,104 +213,106 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount) {
 
     // updates the atomCount
     atomCount += numLinks;
-    
+
     // returns the pointer back to the end of the file
     fseek(f, 0, SEEK_END);
 }
 
 
-void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable) {
+void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
+{
     logger().fine("SavingLoading::saveIndices");
 
     int numTypes = ClassServer::getNumberOfClasses();
-    
+
     // writes the head of each index list on the file
-    for (int i = 0; i < numTypes; i++) {    
+    for (int i = 0; i < numTypes; i++) {
         fwrite(&(atomTable.typeIndex[i]), sizeof(Handle), 1, f);
     }
-    printf( "Memory dump: %d%% done.\r", (int) (100 * 
-        (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed)))
-        / (total * INDEX_REPORT_FACTOR))));
+    printf( "Memory dump: %d%% done.\r", (int) (100 *
+            (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed)))
+             / (total * INDEX_REPORT_FACTOR))));
     fflush(stdout);
-    
-    for (int i = 0; i < numTypes; i++) {    
+
+    for (int i = 0; i < numTypes; i++) {
         fwrite(&(atomTable.targetTypeIndex[i]), sizeof(Handle), 1, f);
     }
-    printf( "Memory dump: %d%% done.\r", (int) (100 * 
-        (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) 
-        / (total * INDEX_REPORT_FACTOR))));
+    printf( "Memory dump: %d%% done.\r", (int) (100 *
+            (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed)))
+             / (total * INDEX_REPORT_FACTOR))));
     fflush(stdout);
-    
-    for (int i = 0; i < NAME_INDEX_SIZE; i++) {    
+
+    for (int i = 0; i < NAME_INDEX_SIZE; i++) {
         fwrite(&(atomTable.nameIndex[i]), sizeof(Handle), 1, f);
     }
-    printf( "Memory dump: %d%% done.\r", (int) (100 * 
-        (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) 
-        / (total * INDEX_REPORT_FACTOR))));
+    printf( "Memory dump: %d%% done.\r", (int) (100 *
+            (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed)))
+             / (total * INDEX_REPORT_FACTOR))));
     fflush(stdout);
-    
-    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {    
+
+    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
         fwrite(&(atomTable.importanceIndex[i]), sizeof(Handle), 1, f);
     }
-    printf( "Memory dump: %d%% done.\r", (int) (100 * 
-        (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) 
-        / (total * INDEX_REPORT_FACTOR))));
+    printf( "Memory dump: %d%% done.\r", (int) (100 *
+            (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed)))
+             / (total * INDEX_REPORT_FACTOR))));
     fflush(stdout);
-    
+
     fwrite(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {    
+    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
         fwrite(&(atomTable.predicateIndex[i]), sizeof(Handle), 1, f);
     }
-    
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {    
+
+    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
         fwrite(&(atomTable.predicateHandles[i]), sizeof(Handle), 1, f);
     }
-// TODO: Save predicate type to rebuild predicateEvaluators when loading dump. For now, assuming always TreePredicateEvaluators    
-//    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {    
-//        fwrite(&(atomTable.predicateEvaluators[i]), sizeof(Handle), 1, f); 
+// TODO: Save predicate type to rebuild predicateEvaluators when loading dump. For now, assuming always TreePredicateEvaluators
+//    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
+//        fwrite(&(atomTable.predicateEvaluators[i]), sizeof(Handle), 1, f);
 //    }
 }
 
-void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (RuntimeException, IOException, InconsistenceException) {
+void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (RuntimeException, IOException, InconsistenceException)
+{
 
     clearRepositories();
 
     logger().fine("Starting Memory load");
-    
+
     if (StatisticsMonitor::getInstance()->getAtomCount() > 0) {
-        throw RuntimeException(TRACE_INFO, 
-                "SavingLoading - Can only load binary image from disk into an empty atom table.");
+        throw RuntimeException(TRACE_INFO,
+                               "SavingLoading - Can only load binary image from disk into an empty atom table.");
     }
     // The above sanity check does not work if StatisticMonitor is disabled. So, makes a different check:
     if (atomSpace.getAtomTable().getSize() > 0) {
-        throw RuntimeException(TRACE_INFO, 
-                "SavingLoading - Can only load binary image from disk in a empty atom table.");
+        throw RuntimeException(TRACE_INFO,
+                               "SavingLoading - Can only load binary image from disk in a empty atom table.");
     }
-    
+
     time_t start = time(NULL);
 
     // opens the file that will be read
     FILE *f = fopen(fileName, "rb");
     if (f == NULL) {
-        throw IOException(TRACE_INFO, 
+        throw IOException(TRACE_INFO,
                           "SavingLoading - Unable to open file '%s' for reading.", fileName);
     }
 
     // reads the file format
     char format;
     fread(&format, sizeof(char), 1, f);
-    
+
     if (! (format & FULL_NETWORK_DUMP)) {
         throw RuntimeException(TRACE_INFO, "SavingLoading - invalid file format '%c'.", format);
     }
-    
+
     // reads the total number of atoms. Just an idea for now.
     int atomCount = StatisticsMonitor::getInstance()->getAtomCount();
     fread(&atomCount, sizeof(int), 1, f);
-    
+
     // creates a hash map from old handles to new ones
     HandleMap<Atom *> *handles = new HandleMap<Atom *>();
-    
+
     processed = 0;
     total = atomCount;
 
@@ -318,19 +325,19 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     loadIndices(f, atomTable, handles, dumpToCore);
 
     // logger().info("nodes, links and indices loaded. number of handles = %d", handles->getCount());
-    // update types in all atoms 
+    // update types in all atoms
     HandleMapIterator<Atom *> *it = handles->keys();
-    while (it->hasNext()){
+    while (it->hasNext()) {
         Atom *element = (Atom *)handles->get(it->next());
-        if (dumpToCore[element->getType()] > ClassServer::getNumberOfClasses()){
-            throw InconsistenceException(TRACE_INFO, 
-                    "SavingLoading - Type inconsistence clash '%d'.",element->getType());
+        if (dumpToCore[element->getType()] > ClassServer::getNumberOfClasses()) {
+            throw InconsistenceException(TRACE_INFO,
+                                         "SavingLoading - Type inconsistence clash '%d'.", element->getType());
         }
         element->type =  dumpToCore[element->getType()];
-        updateHandles(element, handles);    
+        updateHandles(element, handles);
     }
     delete(it);
-    
+
     //printf( "Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
@@ -340,44 +347,45 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     loadRepositories(f, handles);
 
     delete handles;
-    
+
     fclose(f);
-    
+
     // update all statistics
     StatisticsMonitor::getInstance()->reevaluateAllStatistics(atomTable);
 
     // calculates the total time that the process of loading has spent
     time_t duration = time(NULL) - start;
-    logger().info("Memory load: 100%% done (in %d second%c).", 
-                (int) duration, duration == 1 ? '\0' : 's');
+    logger().info("Memory load: 100%% done (in %d second%c).",
+                  (int) duration, duration == 1 ? '\0' : 's');
     fflush(stdout);
 }
 
-void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore){
+void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
+{
     logger().fine("SavingLoading::loadClassServerInfo");
     char buffer[1 << 16];
     int numTypes = ClassServer::getNumberOfClasses();
 
     int numTypesDump;
     fread(&numTypesDump, sizeof(int), 1, f);
-    
+
     dumpToCore.resize(numTypesDump);
-    for (int i = 0; i < numTypesDump; i++){
+    for (int i = 0; i < numTypesDump; i++) {
         int classNameLength;
         fread(&classNameLength, sizeof(int), 1, f);
         fread(buffer, sizeof(char), classNameLength, f);
         buffer[classNameLength] = '\0';
         Type typeDump;
         fread(&typeDump, sizeof(Type), 1, f);
-        
-        if (!ClassServer::isDefined(buffer)){
+
+        if (!ClassServer::isDefined(buffer)) {
             dumpToCore[typeDump] = numTypes + 1;
-            logger().warn("Warning: type inconsistence found (%d-%s)",typeDump,buffer);
-        }else{
+            logger().warn("Warning: type inconsistence found (%d-%s)", typeDump, buffer);
+        } else {
             dumpToCore[typeDump] = ClassServer::getType(buffer);
         }
     }
-    
+
 }
 
 void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
@@ -392,9 +400,9 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
     for (int i = 0; i < numNodes; i++) {
         Node* node = readNode(f, handles);
         node->setAtomTable(&atomTable);
-     
+
         atomTable.atomSet->insert(node);
-        
+
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
@@ -404,7 +412,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
 {
     logger().fine("SavingLoading::loadLinks");
-    
+
     int numLinks;
     // reads the total number of links
     fread(&numLinks, sizeof(int), 1, f);
@@ -413,9 +421,9 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
     for (int i = 0; i < numLinks; i++) {
         Link* link = readLink(f, handles);
         link->setAtomTable(&atomTable);
-     
+
         atomTable.atomSet->insert(link);
-        
+
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
@@ -428,15 +436,15 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
 {
     logger().fine("SavingLoading::loadIndices");
     int numTypes = ClassServer::getNumberOfClasses();
-    
-    Handle* typeIndexCache = (Handle*) malloc(sizeof(Handle)*dumpToCore.size());
-    Handle* targetTypeIndexCache = (Handle*) malloc(sizeof(Handle)*dumpToCore.size());
-    
-    for (int i = 0; i < numTypes; i++){
+
+    Handle* typeIndexCache = (Handle*) malloc(sizeof(Handle) * dumpToCore.size());
+    Handle* targetTypeIndexCache = (Handle*) malloc(sizeof(Handle) * dumpToCore.size());
+
+    for (int i = 0; i < numTypes; i++) {
         atomTable.typeIndex[i] = UNDEFINED_HANDLE;
         atomTable.targetTypeIndex[i] = UNDEFINED_HANDLE;
     }
-    
+
     // reads the handle of each index list head from the file
     for (unsigned int i = 0; i < dumpToCore.size(); i++) {
         fread(&(typeIndexCache[i]), sizeof(Handle), 1, f);
@@ -447,9 +455,9 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     for (unsigned int i = 0; i < dumpToCore.size(); i++) {
         fread(&(targetTypeIndexCache[i]), sizeof(Handle), 1, f);
     }
-    
+
     //updating TypeIndex
-    for (unsigned int i = 0; i <  dumpToCore.size(); i++){
+    for (unsigned int i = 0; i <  dumpToCore.size(); i++) {
         atomTable.typeIndex[dumpToCore[i]] = typeIndexCache[i];
         atomTable.targetTypeIndex[dumpToCore[i]] = targetTypeIndexCache[i];
     }
@@ -460,7 +468,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
-    
+
     for (int i = 0; i < NAME_INDEX_SIZE; i++) {
         fread(&(atomTable.nameIndex[i]), sizeof(Handle), 1, f);
     }
@@ -470,7 +478,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
-    
+
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
         fread(&(atomTable.importanceIndex[i]), sizeof(Handle), 1, f);
     }
@@ -480,7 +488,7 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
-    
+
     fread(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
     for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
         fread(&(atomTable.predicateIndex[i]), sizeof(Handle), 1, f);
@@ -492,11 +500,11 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
         CoreUtils::updateHandle(&(atomTable.predicateIndex[i]), handles);
         CoreUtils::updateHandle(&(atomTable.predicateHandles[i]), handles);
     }
-    // TODO: Read predicate type to rebuild predicateEvaluators. For now, assuming always TreePredicateEvaluators    
-/*    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        atomTable.predicateEvaluators[i] = new TreePredicateEvaluator(atomTable.predicateHandles[i]);
-        atomTable.predicateHandles2Indices->add(atomTable.predicateHandles[i],(int*)i);
-    }*/
+    // TODO: Read predicate type to rebuild predicateEvaluators. For now, assuming always TreePredicateEvaluators
+    /*    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
+            atomTable.predicateEvaluators[i] = new TreePredicateEvaluator(atomTable.predicateHandles[i]);
+            atomTable.predicateHandles2Indices->add(atomTable.predicateHandles[i],(int*)i);
+        }*/
 
     free(typeIndexCache);
     free(targetTypeIndexCache);
@@ -513,7 +521,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         ctv.updateVersionHandles(handles);
         atom->setTruthValue(ctv);
     }
-    
+
     //logger().fine("SavingLoading::updateHandles: incoming set");
     // updates the handles for the atom's incoming set
     for (HandleEntry *p = atom->incoming; p != NULL; p = p->next) {
@@ -524,8 +532,8 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     if (link && (link->getArity() > 0)) {
         //logger().fine("SavingLoading::updateHandles: outgoing set");
         AtomTable& atomTable = *(atom->getAtomTable());
-        
-        // BUG FIX: Links should be updated in AtomSet because it still uses old handles in its outgoing 
+
+        // BUG FIX: Links should be updated in AtomSet because it still uses old handles in its outgoing
         atomTable.atomSet->erase(atom);
 //        printf("AtomTable[%d]::atomSet->erase(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
         // updates the handles for the atom outgoing set
@@ -538,7 +546,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
             std::sort(link->outgoing.begin(), link->outgoing.end(), CoreUtils::HandleComparison());
 #else
             qsort(link->outgoing, link->getArity(), sizeof(Handle), CoreUtils::handleCompare);
-#endif        
+#endif
         }
 
         atomTable.atomSet->insert(atom);
@@ -562,14 +570,14 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
             CoreUtils::updateHandle(&(atom->predicateIndexInfo->predicateIndex[i]), handles);
         }
     }
-    
+
     // updates handles for trail
     if (ClassServer::isAssignableFrom(LINK, atom->type)) {
         Trail *t = ((Link *)atom)->getTrail();
-        if (t->getSize()){
+        if (t->getSize()) {
             //logger().fine("SavingLoading::updateHandles: trails");
             Trail *newTrail = new Trail();
-            for (int i = 0; i < t->getSize(); i++){
+            for (int i = 0; i < t->getSize(); i++) {
                 Handle handle = t->getElement(i);
                 CoreUtils::updateHandle(&handle, handles);
                 newTrail->insert(handle);
@@ -581,7 +589,8 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     }
 }
 
-void SavingLoading::writeAtom(FILE *f, Atom *atom) {
+void SavingLoading::writeAtom(FILE *f, Atom *atom)
+{
     logger().fine("SavingLoading::writeAtom: %p (type = %d)", atom, atom->getType());
 
     // writes the atom type
@@ -631,7 +640,7 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom) {
 
     // writes the Attention Value
     writeAttentionValue(f, atom->getAttentionValue());
-    
+
     // writes the Truth Value
     writeTruthValue(f, atom->getTruthValue());
 }
@@ -668,7 +677,7 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
     fread(&incomingSize, sizeof(int), 1, f);
     for (int i = 0; i < incomingSize; i++) {
         Handle incomingHandle;
-    fread(&incomingHandle, sizeof(Handle), 1, f);
+        fread(&incomingHandle, sizeof(Handle), 1, f);
         atom->addIncomingHandle(incomingHandle);
     }
 
@@ -704,8 +713,9 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
 
 }
 
-void SavingLoading::writeNode(FILE *f, Node *node) {
-    
+void SavingLoading::writeNode(FILE *f, Node *node)
+{
+
     writeAtom(f, node);
 
     // writes the node's name on the file
@@ -764,17 +774,18 @@ void SavingLoading::writeLink(FILE *f, Link *link)
 
     // the trail
     Trail *trail = link->getTrail();
-    
+
     int trailSize = trail->getSize();
     fwrite(&trailSize, sizeof(int), 1, f);
-    for (int i = 0; i < trailSize; i++){
+    for (int i = 0; i < trailSize; i++) {
         Handle handle = trail->getElement(i);
         fwrite(&handle, sizeof(Handle), 1, f);
     }
-  
+
 }
 
-void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attentionValue) {
+void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attentionValue)
+{
     AttentionValue::sti_t tempSTI = attentionValue.getSTI();
     AttentionValue::lti_t tempLTI = attentionValue.getLTI();
     AttentionValue::vlti_t tempVLTI = attentionValue.getVLTI();
@@ -784,7 +795,8 @@ void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attention
     fwrite(&tempVLTI, sizeof(AttentionValue::vlti_t), 1, f);
 }
 
-void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv) {
+void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv)
+{
     string tvStr = tv.toString();
     TruthValueType type = tv.getType();
     int length = tvStr.size();
@@ -794,7 +806,8 @@ void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv) {
     fwrite(tvStr.c_str(), sizeof(char), length, f);
 }
 
-AttentionValue *SavingLoading::readAttentionValue(FILE *f) {
+AttentionValue *SavingLoading::readAttentionValue(FILE *f)
+{
     AttentionValue::sti_t tempSTI;
     AttentionValue::lti_t tempLTI;
     AttentionValue::vlti_t tempVLTI;
@@ -812,7 +825,7 @@ TruthValue *SavingLoading::readTruthValue(FILE *f)
     //logger().fine("SavingLoading::readTruthValue()");
     TruthValueType type;
     int length;
-    
+
     fread(&type, sizeof(TruthValueType), 1, f);
     fread(&length, sizeof(int), 1, f);
     //logger().fine("SavingLoading::readTruthValue() type = %d, length =  %d", type, length);
@@ -848,11 +861,11 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
     fread(&link->arity, sizeof(Arity), 1, f);
 
     // the link's outgoing set is read from the file
-    link->outgoing = (Handle*) malloc(sizeof(Handle)*link->arity);
+    link->outgoing = (Handle*) malloc(sizeof(Handle) * link->arity);
     for (int i = 0; i < link->arity; i++) {
         fread(&(link->outgoing[i]), sizeof(Handle), 1, f);
     }
-#endif        
+#endif
 
     // the target type indices is read from the file
     int targetTypeSize;
@@ -866,19 +879,19 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
     Trail *trail = link->getTrail();
     int trailSize;
     fread(&trailSize, sizeof(int), 1, f);
-    for (int i = 0; i < trailSize; i++){
+    for (int i = 0; i < trailSize; i++) {
         Handle handle;
         fread(&handle, sizeof(Handle), 1, f);
         trail->insert(handle, false);
     }
-    
+
     return link;
 }
 
 void SavingLoading::printProgress(const char *s, int n)
 {
     static int old = -1;
-    
+
     if (old != n) {
         old = n;
         logger().debug("Memory %s: %d%% done.\r", s, n);
@@ -888,28 +901,29 @@ void SavingLoading::printProgress(const char *s, int n)
 void SavingLoading::addSavableRepository(SavableRepository *repository) throw (RuntimeException)
 {
     const char* id = repository->getId();
-    
+
     RepositoryHash::const_iterator it = repositories.find(id);
-    if (it != repositories.end()){
+    if (it != repositories.end()) {
         throw RuntimeException(TRACE_INFO, "SavingLoading - Duplicated repository ids: '%s'.", id);
     }
 
     repositories[id] = repository;
 }
 
-void SavingLoading::saveRepositories(FILE *f){
+void SavingLoading::saveRepositories(FILE *f)
+{
     logger().fine("SavingLoading::saveRepositories");
     unsigned int size = repositories.size();
     fwrite(&size, sizeof(unsigned int), 1, f);
-    
-    for (RepositoryHash::const_iterator it = repositories.begin(); it != repositories.end(); it++){
+
+    for (RepositoryHash::const_iterator it = repositories.begin(); it != repositories.end(); it++) {
         const char* repId = it->first;
-        int idSize = strlen(repId)+1;
+        int idSize = strlen(repId) + 1;
         fwrite(&idSize, sizeof(int), 1, f);
         fwrite(repId, sizeof(char), idSize, f);
 
         logger().debug("Saving repository: %s", repId);
-        SavableRepository* rep = it->second; 
+        SavableRepository* rep = it->second;
         rep->saveRepository(f);
 
     }
@@ -920,40 +934,41 @@ void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (Ru
     logger().fine("SavingLoading::loadRepositories");
     unsigned int size;
     fread(&size, sizeof(unsigned int), 1, f);
-    
+
     if (size != repositories.size()) {
-        logger().warn("Number of repositories in dump file (%d) is different from number of registered repositories (%d)", size, repositories.size());        
+        logger().warn("Number of repositories in dump file (%d) is different from number of registered repositories (%d)", size, repositories.size());
         return;
     }
-    
-    for (unsigned int i = 0; i <size; i++){
+
+    for (unsigned int i = 0; i < size; i++) {
         int idSize;
         fread(&idSize, sizeof(int), 1, f);
 
         auto_ptr<char> id(new char[idSize]);
-        
+
         fread(id.get(), sizeof(char), idSize, f);
-        
+
         logger().debug("Loading repository: %s\n", id.get());
 
         RepositoryHash::const_iterator it = repositories.find((const char *)id.get());
 
-        if (it == repositories.end()){
-            throw RuntimeException(TRACE_INFO, 
-                    "SavingLoading - Unknown repository id: '%s'.", id.get());
+        if (it == repositories.end()) {
+            throw RuntimeException(TRACE_INFO,
+                                   "SavingLoading - Unknown repository id: '%s'.", id.get());
         }
-        
-        
+
+
         it->second->loadRepository(f, conv);
     }
-    
+
 }
 
-void SavingLoading::clearRepositories(){
+void SavingLoading::clearRepositories()
+{
     logger().fine("SavingLoading::clearRepositories");
     for (RepositoryHash::const_iterator it = repositories.begin();
-         it != repositories.end(); it++){
-        
-        it->second->clear();        
+            it != repositories.end(); it++) {
+
+        it->second->clear();
     }
 }

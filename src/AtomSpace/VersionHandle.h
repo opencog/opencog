@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,9 +25,9 @@
 #ifndef _VERSIONHANDLE_H_
 #define _VERSIONHANDLE_H_
 
-#include "CoreUtils.h" 
+#include "CoreUtils.h"
 
-enum IndicatorType {HYPOTHETICAL=0, CONTEXTUAL, UNKNOWN}; 
+enum IndicatorType {HYPOTHETICAL = 0, CONTEXTUAL, UNKNOWN};
 
 struct VersionHandle {
     IndicatorType indicator;
@@ -43,13 +43,13 @@ struct VersionHandle {
 
 #define NULL_VERSION_HANDLE VersionHandle()
 
-struct hashVersionHandle{
+struct hashVersionHandle {
     int operator()(VersionHandle vh) const;
 };
 
-struct eqVersionHandle{
+struct eqVersionHandle {
     bool operator()(VersionHandle vh1, VersionHandle vh2) const;
-}; 
+};
 
 #define isNullVersionHandle(vh) TLB::isInvalidHandle(vh.substantive)
 

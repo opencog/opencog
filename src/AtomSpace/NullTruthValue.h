@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,15 +22,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TruthValue.h" 
+#include "TruthValue.h"
 
 #ifndef _NULL_TRUTH_VALUE_TV_H_
 #define _NULL_TRUTH_VALUE_TV_H_
 
-class NullTruthValue : public TruthValue {
+class NullTruthValue : public TruthValue
+{
 
     friend class TruthValue;
-    
+
 public:
     bool isNullTv() const;
     float getMean() const throw (RuntimeException);
@@ -45,7 +46,7 @@ public:
 protected:
     // TODO: Make this constructor protected. For some reason compiler is
     // complaining if it's declared protected.
-    NullTruthValue(); 
+    NullTruthValue();
     TruthValue* merge(TruthValue*) throw (RuntimeException);
     TruthValue* clone() const throw (RuntimeException);
     NullTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);

@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,32 +26,39 @@
 #include "Atom.h"
 #include "TLB.h"
 
-HandleTemporalPair::HandleTemporalPair() {
+HandleTemporalPair::HandleTemporalPair()
+{
 }
 
-HandleTemporalPair::HandleTemporalPair(Handle handle, Temporal* time) {
+HandleTemporalPair::HandleTemporalPair(Handle handle, Temporal* time)
+{
     this->handle = handle;
     this->time = time;
 }
 
-HandleTemporalPair::~HandleTemporalPair() {
+HandleTemporalPair::~HandleTemporalPair()
+{
 }
 
-Handle HandleTemporalPair::getHandle() const{
+Handle HandleTemporalPair::getHandle() const
+{
     return handle;
 }
 
-Temporal* HandleTemporalPair::getTemporal() const{
+Temporal* HandleTemporalPair::getTemporal() const
+{
     return time;
 }
 
-std::string HandleTemporalPair::toString() const{
+std::string HandleTemporalPair::toString() const
+{
     Atom* atom = TLB::getAtom(handle);
     std::string  answer;
     answer += "(" + atom->toShortString() + "," + time->toString() + ")";
     return answer;
 }
 
-HandleTemporalPair HandleTemporalPair::clone() {
+HandleTemporalPair HandleTemporalPair::clone()
+{
     return HandleTemporalPair(handle, time);
 }

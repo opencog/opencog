@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -54,7 +54,7 @@ protected:
 
     /**
      * Parse error message substituting scape characters like (%s, %d, etc)
-     * with their corresponding values. 
+     * with their corresponding values.
      */
     void parseErrorMessage(const char* fmt, va_list ap);
     void parseErrorMessage(const char * trace, const char* fmt, va_list ap);
@@ -66,14 +66,14 @@ public:
      */
     StandardException();
     ~StandardException();
-    
+
     /**
      * Get error message.
      * @return A c-string representing the error message. If no message have
      * been created just return an empty string.
      */
     const char* getMessage();
-    
+
     /**
      * Set the error message.
      * @param A c-string representing the error message. The caller is
@@ -87,7 +87,8 @@ public:
  * Generic exception to be called in runtime, whenever an unexpected condition
  * is detected.
  */
-class RuntimeException : public StandardException {
+class RuntimeException : public StandardException
+{
 
 public:
 
@@ -100,7 +101,7 @@ public:
     RuntimeException(const char*, const char*, ...);
 
     /**
-     * Default constructor used for inheritance 
+     * Default constructor used for inheritance
      */
     RuntimeException();
 
@@ -114,7 +115,8 @@ public:
 /**
  * Exception to be thrown when a XML operation (processing, creation) fails.
  */
-class XMLException : public RuntimeException {
+class XMLException : public RuntimeException
+{
 
 public:
 
@@ -132,7 +134,8 @@ public:
 /**
  * Exception to be thrown when an I/O operation (reading, writing, open) fails.
  */
-class IOException : public RuntimeException {
+class IOException : public RuntimeException
+{
 
 public:
 
@@ -150,7 +153,8 @@ public:
 /**
  * Exception to be thrown when a Combo operation (parsing, executing) fails.
  */
-class ComboException : public RuntimeException {
+class ComboException : public RuntimeException
+{
 
 public:
 
@@ -168,7 +172,8 @@ public:
 /**
  * Exception to be thrown when an out of range index is used.
  */
-class IndexErrorException : public RuntimeException {
+class IndexErrorException : public RuntimeException
+{
 
 public:
 
@@ -187,7 +192,8 @@ public:
  * Exception to be thrown when an invalid parameter is used within a function or
  * an object initalization.
  */
-class InvalidParamException : public RuntimeException {
+class InvalidParamException : public RuntimeException
+{
 
 public:
 
@@ -206,7 +212,8 @@ public:
  * Exception to be thrown when a consistence check (equals to, different, etc)
  * fails.
  */
-class InconsistenceException : public RuntimeException {
+class InconsistenceException : public RuntimeException
+{
 
 public:
 
@@ -225,10 +232,11 @@ public:
  * Exception to be called when an unrecoverable error has occured. When catching
  * such exception all state savings should be done.
  */
-class FatalErrorException : public StandardException {
+class FatalErrorException : public StandardException
+{
 
 public:
-    
+
     /**
      * Constructor
      *
@@ -244,10 +252,11 @@ public:
  * Exception to be called when a network error  has occured. When catching
  * such exception all state savings should be done.
  */
-class NetworkException : public StandardException {
+class NetworkException : public StandardException
+{
 
 public:
-    
+
     /**
      * Constructor
      *
@@ -263,7 +272,8 @@ public:
 /**
  * Exception to be called when an assertion fails to pass a casset function.
  */
-class AssertionException {
+class AssertionException
+{
 
 public:
 

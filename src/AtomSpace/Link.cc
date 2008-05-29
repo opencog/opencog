@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -50,7 +50,7 @@ void Link::init(void) throw (InvalidParamException)
 }
 
 Link::Link(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv)
-    : Atom(type, outgoingVector, tv)
+        : Atom(type, outgoingVector, tv)
 {
     init();
 }
@@ -83,7 +83,7 @@ std::string Link::toShortString(void)
 #define BUFSZ 1024
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "[%d %s", type, (getFlag(HYPOTETHICAL_FLAG)?"h ":""));
+    snprintf(buf, BUFSZ, "[%d %s", type, (getFlag(HYPOTETHICAL_FLAG) ? "h " : ""));
     answer += buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
@@ -91,8 +91,8 @@ std::string Link::toShortString(void)
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
         answer += ClassServer::isAssignableFrom(NODE, TLB::getAtom(outgoing[i])->getType()) ?
-                        ((Node*) TLB::getAtom(outgoing[i]))->getName() :
-                        ((Link*) TLB::getAtom(outgoing[i]))->toShortString();
+                  ((Node*) TLB::getAtom(outgoing[i]))->getName() :
+                  ((Link*) TLB::getAtom(outgoing[i]))->toShortString();
     }
     answer += ">";
     float mean = this->getTruthValue().getMean();
@@ -109,10 +109,10 @@ std::string Link::toString(void)
     char buf[BUFSZ];
 
     snprintf(buf, BUFSZ, "link[%d sti:(%d,%d) tv:(%f,%f) ", type,
-       (int)getAttentionValue().getSTI(),
-       (int)getAttentionValue().getLTI(),
-       getTruthValue().getMean(),
-       getTruthValue().getConfidence());
+             (int)getAttentionValue().getSTI(),
+             (int)getAttentionValue().getLTI(),
+             getTruthValue().getMean(),
+             getTruthValue().getConfidence());
     answer += buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
@@ -243,7 +243,7 @@ bool Link::equals(Atom* other)
     Link *olink = dynamic_cast<Link *>(other);
     if (getArity() != olink->getArity()) return false;
 
-    for (int i = 0; i < getArity(); i++){
+    for (int i = 0; i < getArity(); i++) {
         if (outgoing[i] != olink->outgoing[i]) return false;
     }
 
@@ -252,10 +252,10 @@ bool Link::equals(Atom* other)
 
 int Link::hashCode(void)
 {
-    long result = type + (getArity()<<8);
+    long result = type + (getArity() << 8);
 
-    for (int i = 0; i < getArity(); i++){
-        result = result  ^ (((long) outgoing[i])<<i);
+    for (int i = 0; i < getArity(); i++) {
+        result = result  ^ (((long) outgoing[i]) << i);
     }
     return (int) result;
 }

@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,14 +40,15 @@
  * This class implements a linked-list of HandleTemporalPair objects, and provides several
  * methods to perform operations between lists such as concatenation.
  */
-class HandleTemporalPairEntry {
+class HandleTemporalPairEntry
+{
 
 public:
 
     static int existingObjects;
 
     /**
-     * Cell dat 
+     * Cell dat
      */
     HandleTemporalPair handleTemporalPair;
 
@@ -69,7 +70,7 @@ public:
      * @param Cell data.
      */
     HandleTemporalPairEntry(Handle, Temporal*);
-    
+
     /**
      * Destructor for this class.
      */
@@ -134,7 +135,7 @@ public:
      * @param Length of the allocated vector.
      * @return A HandleTemporalPairEntry containing the element s of the vector.
      */
-     static HandleTemporalPairEntry* fromHandleTemporalPairVector(HandleTemporalPair*, int);
+    static HandleTemporalPairEntry* fromHandleTemporalPairVector(HandleTemporalPair*, int);
 
     /**
      * Adds a handleTemporalPair to the list.
@@ -142,11 +143,11 @@ public:
      * @param The handleTemporalPair that should be added to the list
      * @param Flat to indicate if it must keep the sorting
      * @return The resulting linked list after adding the handleTemporalPair
-     * NOTE: The handleTemporalPair argument to be added will be cloned internally. 
+     * NOTE: The handleTemporalPair argument to be added will be cloned internally.
      * So, the caller must take care of delete such argument when it is not used anymore.
      */
     static HandleTemporalPairEntry* add(HandleTemporalPairEntry*, HandleTemporalPair);
-    
+
     /**
      * Removes a handleTemporalPair from the list.
      * @param The linked list
@@ -169,7 +170,7 @@ public:
     /**
      * Returns the intersection between several linked-lists. The n
      * linked-lists passed as arguments are automatically destroyed.
-     * 
+     *
      * @param Array of linked-lists.
      * @param Length of the array of linked-lists.
      * @return Intersection between the given linked-lists.
@@ -201,7 +202,7 @@ public:
     /**
      * This method returns the concatenation of two linked-lists, the
      * first linked-list followed by the second.
-     * THE FIRST LIST IS CHANGED AS SIDE-EFFECT if it is not null. 
+     * THE FIRST LIST IS CHANGED AS SIDE-EFFECT if it is not null.
      *
      * @param First linked-list.
      * @param Second linked-list.
@@ -235,11 +236,12 @@ public:
      */
     static int compare(HandleTemporalPair, HandleTemporalPair);
 
-    class SortComparison {
-            public:
-            bool operator()(const HandleTemporalPair& htp1, const HandleTemporalPair& htp2) const {
-                    return(compare(htp1, htp2) < 0);
-            }
+    class SortComparison
+    {
+    public:
+        bool operator()(const HandleTemporalPair& htp1, const HandleTemporalPair& htp2) const {
+            return(compare(htp1, htp2) < 0);
+        }
     };
 
 };

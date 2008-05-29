@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,27 +35,32 @@
 using namespace opencog;
 AtomSpace* CogServer::atomSpace = NULL;
 
-CogServer::~CogServer() {
+CogServer::~CogServer()
+{
     disableNetworkServer();
 }
 
-CogServer::CogServer() : cycleCount(1), networkServer(NULL) {
+CogServer::CogServer() : cycleCount(1), networkServer(NULL)
+{
     if (atomSpace != NULL) delete atomSpace;
     atomSpace = new AtomSpace();
 
     pthread_mutex_init(&messageQueueLock, NULL);
 }
 
-AtomSpace *CogServer::getAtomSpace() {
+AtomSpace *CogServer::getAtomSpace()
+{
     return atomSpace;
 }
 
-void CogServer::enableNetworkServer() {
+void CogServer::enableNetworkServer()
+{
     if (networkServer == NULL)
         networkServer = new SimpleNetworkServer(this, config().get_int("SERVER_PORT"));
 }
 
-void CogServer::disableNetworkServer() {
+void CogServer::disableNetworkServer()
+{
     if (networkServer != NULL) {
         delete networkServer;
         networkServer = NULL;
@@ -82,7 +87,7 @@ void CogServer::serverLoop()
 
         // Only run the input handlers if there was actual input.
         if (had_input) {
-           processInput();
+            processInput();
         }
         processMindAgents();
 
@@ -140,15 +145,18 @@ void CogServer::plugInInputHandler(MindAgent *handler)
     inputHandlers.push_back(handler);
 }
 
-long CogServer::getCycleCount() {
+long CogServer::getCycleCount()
+{
     return cycleCount;
 }
 
-void CogServer::stop() {
+void CogServer::stop()
+{
     running = false;
 }
 
-CogServerRequest *CogServer::popRequest() {
+CogServerRequest *CogServer::popRequest()
+{
 
     CogServerRequest *request;
 
@@ -164,13 +172,15 @@ CogServerRequest *CogServer::popRequest() {
     return request;
 }
 
-void CogServer::pushRequest(CogServerRequest *request) {
+void CogServer::pushRequest(CogServerRequest *request)
+{
     pthread_mutex_lock(&messageQueueLock);
     requestQueue.push(request);
     pthread_mutex_unlock(&messageQueueLock);
 }
 
-int CogServer::getRequestQueueSize() {
+int CogServer::getRequestQueueSize()
+{
     pthread_mutex_lock(&messageQueueLock);
     int size = requestQueue.size();
     pthread_mutex_unlock(&messageQueueLock);
@@ -178,7 +188,8 @@ int CogServer::getRequestQueueSize() {
 }
 
 // Used for debug purposes on unit tests
-void CogServer::unitTestServerLoop(int nCycles) {
+void CogServer::unitTestServerLoop(int nCycles)
+{
     for (int i = 0; (nCycles == 0) || (i < nCycles); ++i) {
         processRequests();
         processMindAgents();
@@ -188,7 +199,8 @@ void CogServer::unitTestServerLoop(int nCycles) {
 }
 
 // create and return static singleton instance
-CogServer& opencog::server() {
+CogServer& opencog::server()
+{
     static CogServer instance;
     return instance;
 }

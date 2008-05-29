@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,8 @@
 #include "Link.h"
 #include "Node.h"
 #include "TLB.h"
-extern "C" {
+extern "C"
+{
 #include "md5.h"
 }
 //#include "NMPrinter.h"
@@ -56,14 +57,16 @@ using namespace opencog;
  */
 #define USE_ATOM_HASH_SET
 
-int hashAtom::operator()(Atom* a) const{
+int hashAtom::operator()(Atom* a) const
+{
 //    printf("hashAtom a = %p\n", a);
 //    printf("table of a = %d\n", a->getAtomTable());
 //    printf("%s\n", a->toString().c_str());
     return(a->hashCode());
 }
 
-bool eqAtom::operator()(Atom* a1, Atom* a2) const{
+bool eqAtom::operator()(Atom* a1, Atom* a2) const
+{
 //    printf("eqAtom a1 = %p, a2 = %p\n", a1, a2);
 //    printf("table of a1 = %d\n",  a1->getAtomTable());
 //    printf("table of a2 = %d\n",  a2->getAtomTable());
@@ -78,18 +81,18 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     atomSet = new AtomHashSet();
 
-    // There are four indices. One for types, one for target types, 
+    // There are four indices. One for types, one for target types,
     // one for names and one for importance ranges. The typeIndex
     // is NUMBER_OF_CLASSES+2 because NOTYPE is NUMBER_OF_CLASSES+1
     // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
     // (because ClassServer::getType() returns NOTYPE in this case).
-    typeIndex.resize(ClassServer::getNumberOfClasses()+2, UNDEFINED_HANDLE);
-    targetTypeIndex.resize(ClassServer::getNumberOfClasses()+2, UNDEFINED_HANDLE);
+    typeIndex.resize(ClassServer::getNumberOfClasses() + 2, UNDEFINED_HANDLE);
+    targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, UNDEFINED_HANDLE);
     nameIndex.resize(NAME_INDEX_SIZE, UNDEFINED_HANDLE);
     importanceIndex.resize(IMPORTANCE_INDEX_SIZE, UNDEFINED_HANDLE);
     predicateIndex.resize(MAX_PREDICATE_INDICES, UNDEFINED_HANDLE);
     predicateHandles.resize(MAX_PREDICATE_INDICES, UNDEFINED_HANDLE);
-    predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL); 
+    predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
     numberOfPredicateIndices = 0;
     predicateHandles2Indices = new HandleMap<int>();
 
@@ -104,8 +107,8 @@ AtomTable::~AtomTable()
 #ifdef USE_ATOM_HASH_SET
     // remove all atoms from AtomTable
     AtomHashSet::iterator it = atomSet->begin();
-    
-    while(it != atomSet->end()) {
+
+    while (it != atomSet->end()) {
         //logger().fine("Removing atom %s (atomSet size = %u)", (*it)->toString().c_str(), atomSet->size());
         remove(TLB::getHandle(*it), true);
         it = atomSet->begin();
@@ -113,10 +116,11 @@ AtomTable::~AtomTable()
     atomSet->clear();
     delete (atomSet);
 #endif
-    delete (predicateHandles2Indices); 
+    delete (predicateHandles2Indices);
 }
 
-bool AtomTable::isCleared() const{
+bool AtomTable::isCleared() const
+{
 //    tableId = id;
 //    useDSA = dsa;
     if (size != 0) {
@@ -165,7 +169,7 @@ bool AtomTable::isCleared() const{
             return false;
         }
     }
-    
+
     if (numberOfPredicateIndices != 0) {
         //printf("numberOfPredicateIndices is not 0\n");
         return false;
@@ -183,18 +187,19 @@ bool AtomTable::isCleared() const{
     return true;
 }
 
-void AtomTable::addPredicateIndex(Handle predicateHandle, PredicateEvaluator* evaluator) 
-                                                                throw (InvalidParamException) {
+void AtomTable::addPredicateIndex(Handle predicateHandle, PredicateEvaluator* evaluator)
+throw (InvalidParamException)
+{
 
     if (numberOfPredicateIndices > MAX_PREDICATE_INDICES) {
-        throw InvalidParamException(TRACE_INFO, 
-              "AtomTable - Exceeded number of predicate indices = %d", MAX_PREDICATE_INDICES);
+        throw InvalidParamException(TRACE_INFO,
+                                    "AtomTable - Exceeded number of predicate indices = %d", MAX_PREDICATE_INDICES);
     }
     if (predicateHandles2Indices->contains(predicateHandle)) {
-        throw InvalidParamException(TRACE_INFO, 
-              "AtomTable - There is already an index for predicate handle %p", predicateHandle);
+        throw InvalidParamException(TRACE_INFO,
+                                    "AtomTable - There is already an index for predicate handle %p", predicateHandle);
     }
-    
+
     // Ok, add it.
     predicateHandles2Indices->add(predicateHandle, numberOfPredicateIndices);
     predicateHandles[numberOfPredicateIndices] = predicateHandle;
@@ -202,14 +207,16 @@ void AtomTable::addPredicateIndex(Handle predicateHandle, PredicateEvaluator* ev
     numberOfPredicateIndices++;
 }
 
-void AtomTable::registerIterator(HandleIterator* iterator) {
+void AtomTable::registerIterator(HandleIterator* iterator)
+{
 
     lockIterators();
     iterators.push_back(iterator);
     unlockIterators();
 }
 
-void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeException) {
+void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeException)
+{
 
     lockIterators();
 
@@ -228,10 +235,11 @@ void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeExcep
     throw RuntimeException(TRACE_INFO, "could not unregister iterator");
 }
 
-unsigned int AtomTable::strHash(const char* name) const{
+unsigned int AtomTable::strHash(const char* name) const
+{
 
     // this is a traditional hash algorithm that implements the MD5
-    // XXX Why? Isn't MD5 a bit of overkill for this? 
+    // XXX Why? Isn't MD5 a bit of overkill for this?
     // It'll just be slow, without adding much value.
 
     // special hash value for NULL names
@@ -260,13 +268,15 @@ inline unsigned int AtomTable::getNameHash(Atom* atom) const
     return strHash(nnn->getName().c_str());
 }
 
-unsigned int AtomTable::importanceBin(short importance) {
+unsigned int AtomTable::importanceBin(short importance)
+{
     // STI is in range of [-32768, 32767] so adding 32768 puts it in
     // [0, 65535] which is the size of the index
     return importance + 32768;
 }
 
-float AtomTable::importanceBinMeanValue(unsigned int bin) {
+float AtomTable::importanceBinMeanValue(unsigned int bin)
+{
     return (float) ((((float) bin) + 0.5) / ((unsigned int) IMPORTANCE_INDEX_SIZE));
 }
 
@@ -293,15 +303,18 @@ Handle AtomTable::getTargetTypeIndexHead(Type type) const
     return targetTypeIndex[type];
 }
 
-Handle AtomTable::getNameIndexHead(const char* name) const{
+Handle AtomTable::getNameIndexHead(const char* name) const
+{
     return nameIndex[strHash(name)];
 }
 
-Handle AtomTable::getPredicateIndexHead(int index) const{
+Handle AtomTable::getPredicateIndexHead(int index) const
+{
     return predicateIndex[index];
 }
 
-PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const{
+PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const
+{
     PredicateEvaluator* result = NULL;
     if (predicateHandles2Indices->contains(gpnHandle)) {
         int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
@@ -310,7 +323,8 @@ PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const{
     return result;
 }
 
-HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle vh) const{
+HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle vh) const
+{
     //printf("AtomTable::findHandlesByGPN(%s)\n", gpnNodeName);
     // Get the GroundPredicateNode with such name
     Handle gpnHandle = getHandle(gpnNodeName, GROUNDED_PREDICATE_NODE);
@@ -321,7 +335,7 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 
 HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const
 {
-    HandleEntry* result = NULL;    
+    HandleEntry* result = NULL;
     if (TLB::isValidHandle(gpnHandle)) {
         //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);
         if (predicateHandles2Indices->contains(gpnHandle)) {
@@ -336,7 +350,7 @@ HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) con
 
 Handle AtomTable::getHandle(const char* name, Type type) const
 {
-    if (!ClassServer::isAssignableFrom(NODE, type)) {    
+    if (!ClassServer::isAssignableFrom(NODE, type)) {
         return UNDEFINED_HANDLE;
     }
 #ifdef USE_ATOM_HASH_SET
@@ -349,7 +363,7 @@ Handle AtomTable::getHandle(const char* name, Type type) const
     }
     delete node;
     return result;
-#else    
+#else
     // creates a set with all atoms whose names have the same hash value as
     // the name key
     HandleEntry* set = makeSet(NULL, getNameIndexHead(name), NAME_INDEX);
@@ -365,10 +379,10 @@ Handle AtomTable::getHandle(const char* name, Type type) const
         delete set;
     }
     return result;
-#endif    
+#endif
 }
 
-HandleEntry* AtomTable::buildSet(Type type, bool subclass, 
+HandleEntry* AtomTable::buildSet(Type type, bool subclass,
                                  Handle(AtomTable::*f)(Type) const,
                                  int index) const
 {
@@ -377,31 +391,31 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass,
 
     if (subclass) {
         // If subclasses are accepted, the subclasses are returned in the
-        // array types. 
+        // array types.
         int n;
         Type *types = ClassServer::getChildren(type, n);
 
         //printf("Checking %d subclasses:\n", n);
- 
+
         // for all subclasses found, a set is concatenated to the answer set
         for (int i = 0; i < n; i++) {
             //printf("%d\n", i);
-            if (index && TARGET_TYPE_INDEX){
-                index = types[i] & TARGET_TYPE_INDEX;    
+            if (index && TARGET_TYPE_INDEX) {
+                index = types[i] & TARGET_TYPE_INDEX;
             }
-            
+
             set = makeSet(set, (this->*f)(types[i]), index);
         }
         //printf("\n");
         delete[](types);
     }
-   
+
     return set;
 }
 
 HandleEntry* AtomTable::getHandleSet(Type type, bool subclass) const
 {
-    HandleEntry* set = buildSet(type, subclass, 
+    HandleEntry* set = buildSet(type, subclass,
                                 &AtomTable::getTypeIndexHead, TYPE_INDEX);
     return set;
 }
@@ -409,20 +423,20 @@ HandleEntry* AtomTable::getHandleSet(Type type, bool subclass) const
 HandleEntry* AtomTable::getHandleSet(Type type, Type targetType,
                                      bool subclass, bool targetSubclass) const
 {
-    HandleEntry* set = buildSet(targetType, targetSubclass, 
-                                &AtomTable::getTargetTypeIndexHead, 
+    HandleEntry* set = buildSet(targetType, targetSubclass,
+                                &AtomTable::getTargetTypeIndexHead,
                                 TARGET_TYPE_INDEX | targetType);
     return HandleEntry::filterSet(set, type, subclass);
 }
 
-HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, 
+HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
                                      bool subclass) const
 {
     HandleEntry* set = TLB::getAtom(handle)->getIncomingSet();
     if (set != NULL) set = set->clone();
     set = HandleEntry::filterSet(set, type, subclass);
     // Also filter links that do not belong to this table
-    //set = HandleEntry::filterSet(set, tableId); 
+    //set = HandleEntry::filterSet(set, tableId);
     return set;
 }
 
@@ -433,48 +447,48 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      Type type,
                                      bool subclass) const
 {
-//printf("AtomTable::getHandleSet()\n");  
+//printf("AtomTable::getHandleSet()\n");
 
-#ifdef USE_ATOM_HASH_SET    
-  // Check if it is the special case of looking for an specific atom
-  if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0 || !handles.empty())) {
-    //printf("special case\n");  
-    bool hasAllHandles = true;
-    for (int i = 0; hasAllHandles && i < arity; i++) {
-        hasAllHandles = TLB::isValidHandle(handles[i]);
-    }
-    //printf("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);  
-    if (hasAllHandles && !subclass) { 
-        //printf("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());  
-        Link* link = new Link(type, handles);
-        AtomHashSet::iterator it = atomSet->find(link);
-        Handle h = UNDEFINED_HANDLE;
-        if (it != atomSet->end()) {
-            h = TLB::getHandle(*it);
+#ifdef USE_ATOM_HASH_SET
+    // Check if it is the special case of looking for an specific atom
+    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0 || !handles.empty())) {
+        //printf("special case\n");
+        bool hasAllHandles = true;
+        for (int i = 0; hasAllHandles && i < arity; i++) {
+            hasAllHandles = TLB::isValidHandle(handles[i]);
         }
-        HandleEntry* result = NULL;
-        if (TLB::isValidHandle(h)) {
-            result = new HandleEntry(h);
+        //printf("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
+        if (hasAllHandles && !subclass) {
+            //printf("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());
+            Link* link = new Link(type, handles);
+            AtomHashSet::iterator it = atomSet->find(link);
+            Handle h = UNDEFINED_HANDLE;
+            if (it != atomSet->end()) {
+                h = TLB::getHandle(*it);
+            }
+            HandleEntry* result = NULL;
+            if (TLB::isValidHandle(h)) {
+                result = new HandleEntry(h);
+            }
+            delete link;
+            //cprintf(NORMAL, "Returning HandleSet by using atom hash_set!\n");
+            return result;
         }
-        delete link;
-        //cprintf(NORMAL, "Returning HandleSet by using atom hash_set!\n");
-        return result;
     }
-  }
 #endif
 
-  if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0)) {
-    HandleEntry* result = getHandleSet(type, subclass);
-    result = HandleEntry::filterSet(result, arity);
-    return result;
-  }
-  
-  std::vector<HandleEntry*> sets(arity, NULL);
+    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0)) {
+        HandleEntry* result = getHandleSet(type, subclass);
+        result = HandleEntry::filterSet(result, arity);
+        return result;
+    }
 
-  int countdown = 0;
+    std::vector<HandleEntry*> sets(arity, NULL);
 
-  // builds a set for each element in the outgoing set. Empty sets are
-  // counted to be removed a posteriori
+    int countdown = 0;
+
+    // builds a set for each element in the outgoing set. Empty sets are
+    // counted to be removed a posteriori
     for (int i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
             sets[i] = TLB::getAtom(handles[i])->getIncomingSet()->clone();
@@ -502,13 +516,13 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             countdown++;
         }
     }
-    
+
     int newLength = arity;
     // if the empty set counter is not zero, removes them by shrinking the
     // list of sets
     if (countdown > 0) {
         //printf("newset allocated size = %d\n", (arity - countdown));
-    // TODO: Perhaps it's better to simply erase the NULL entries of the sets 
+        // TODO: Perhaps it's better to simply erase the NULL entries of the sets
         std::vector<HandleEntry*> newset;
         for (int i = 0; i < arity; i++) {
             if (sets[i] != NULL) {
@@ -544,7 +558,8 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass) const{
+HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass) const
+{
     // a list of the given names is built.
     HandleEntry* set = makeSet(NULL, getNameIndexHead(name), NAME_INDEX);
 
@@ -554,9 +569,10 @@ HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass)
     return HandleEntry::filterSet(set, type, subclass);
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass) const{
+HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass) const
+{
 
-    // Gets the exact atom with the given name and type, in any AtomTable. 
+    // Gets the exact atom with the given name and type, in any AtomTable.
     Handle handle = getHandle(targetName, targetType);
 
     HandleEntry* result = NULL;
@@ -568,13 +584,14 @@ HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Ty
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const throw (RuntimeException) {
+HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const throw (RuntimeException)
+{
     //printf("getHandleSet begin\n");
 
     std::vector<HandleEntry*> sets(arity, NULL);
 
     int countdown = 0;
-    // a list for each array of names is built. Then, it's filtered by the 
+    // a list for each array of names is built. Then, it's filtered by the
     // name (to avoid hash conflicts) and by the correspondent type in the
     // array of types.
     for (int i = 0; i < arity; i++) {
@@ -583,13 +600,13 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
                 sets[i] = getHandleSet(names[i], types[i], type, subclass);
-                if (sub){
+                if (sub) {
                     // if subclasses are accepted, the subclasses are returned in the
-                    // array types. 
+                    // array types.
                     int n;
-    
+
                     Type *subTypes = ClassServer::getChildren(types[i], n);
-                    
+
                     // for all subclasses found, a set is concatenated to the answer set
                     for (int j = 0; j < n; j++) {
                         HandleEntry *subSet = getHandleSet(names[i], subTypes[j], type, subclass);
@@ -616,7 +633,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
     // list of sets
     if (countdown > 0) {
         //printf("newset allocated size = %d\n", (arity - countdown));
-    // TODO: Perhaps it's better to simply erase the NULL entries of the sets 
+        // TODO: Perhaps it's better to simply erase the NULL entries of the sets
         std::vector<HandleEntry*> newset;
         for (int i = 0; i < arity; i++) {
             if (sets[i] != NULL) {
@@ -626,8 +643,8 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
         sets = newset;
     }
 
-    // the intersection is made for all non-empty sets, and then is filtered 
-    // by the optional specified type. Also, if subclasses are not accepted, 
+    // the intersection is made for all non-empty sets, and then is filtered
+    // by the optional specified type. Also, if subclasses are not accepted,
     // it will not pass the filter.
     //printf("getHandleSet: about to call intersection\n");
     HandleEntry* set = HandleEntry::intersection(sets);
@@ -636,7 +653,8 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
     return  set;
 }
 
-HandleEntry* AtomTable::getHandleSet(AttentionValue::sti_t lowerBound, AttentionValue::sti_t upperBound) const{
+HandleEntry* AtomTable::getHandleSet(AttentionValue::sti_t lowerBound, AttentionValue::sti_t upperBound) const
+{
 
     // the indice for the lower bound and upper bound lists is returned.
     int lowerBin = importanceBin(lowerBound);
@@ -647,18 +665,18 @@ HandleEntry* AtomTable::getHandleSet(AttentionValue::sti_t lowerBound, Attention
     HandleEntry* set = makeSet(NULL, importanceIndex[lowerBin], IMPORTANCE_INDEX);
 
     // for the lower bound and upper bound index, the list is filtered, because
-    // there may be atoms that have the same importanceIndex and whose 
+    // there may be atoms that have the same importanceIndex and whose
     // importance is lower than lowerBound or bigger than upperBound.
     set = HandleEntry::filterSet(set, lowerBound, upperBound);
 
     if (lowerBin == upperBin) {
-        // If both lower and upper bounds are in the same bin, 
-        // it can ans must return the already built set. 
+        // If both lower and upper bounds are in the same bin,
+        // it can ans must return the already built set.
         // Otherwise, it will duplicate entries when concatening the upper set latter.
         return set;
     }
 
-    // for every index within lowerBound and upperBound, the list is 
+    // for every index within lowerBound and upperBound, the list is
     // concatenated.
     while (++lowerBin < upperBin) {
         set = makeSet(set, importanceIndex[lowerBin], IMPORTANCE_INDEX);
@@ -672,7 +690,8 @@ HandleEntry* AtomTable::getHandleSet(AttentionValue::sti_t lowerBound, Attention
     return HandleEntry::concatenation(uset, set);
 }
 
-HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const{
+HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const
+{
     return getHandleSet((const char**) NULL, types, subclasses, arity, type, subclass);
 }
 
@@ -681,12 +700,12 @@ void AtomTable::merge(Atom *original, Atom *copy)
 {
     original->merge(copy);
     TLB::removeAtom(copy);
-    delete copy; 
+    delete copy;
 }
-    
+
 Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
 {
-    if (atom->getAtomTable() != NULL){
+    if (atom->getAtomTable() != NULL) {
         // Atom is already inserted
         return  TLB::getHandle(atom);
     }
@@ -699,8 +718,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     } else if (lll) {
         // New link may already exist.
         std::vector<Handle> outgoing(lll->getArity());
-        for(int i = 0; i < lll->getArity(); i++) {
-             outgoing[i] = lll->getOutgoingSet()[i];
+        for (int i = 0; i < lll->getArity(); i++) {
+            outgoing[i] = lll->getOutgoingSet()[i];
         }
         HandleEntry* head = getHandleSet(outgoing, NULL, NULL, lll->getArity(), atom->getType(), false);
         // if the link handle already exists.
@@ -720,17 +739,17 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // New atom, its Handle will be stored in the AtomTable
     // Increment the size of the table
     size++;
-    
-#ifdef USE_ATOM_HASH_SET    
+
+#ifdef USE_ATOM_HASH_SET
     // Adds to the hash_set
-    // printf("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode()); 
+    // printf("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode());
     // printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), lll->getArity());
     // NMPrinter p;
     // p.print(atom);
     // printf("%s\n", atom->toString().c_str());
     atomSet->insert(atom);
     // printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", tableId, atom, atomSet->size());
-#endif    
+#endif
 
     // Checks for null outgoing set members.
     Link *link = dynamic_cast<Link *>(atom);
@@ -738,8 +757,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         const std::vector<Handle>& ogs = link->getOutgoingSet();
         for (int i = link->getArity() - 1; i >= 0; i--) {
             if (TLB::isInvalidHandle(ogs[i])) {
-                throw RuntimeException(TRACE_INFO, 
-                      "AtomTable - Attempting to insert link with invalid (null) outgoing members");
+                throw RuntimeException(TRACE_INFO,
+                                       "AtomTable - Attempting to insert link with invalid (null) outgoing members");
             }
         }
     }
@@ -750,14 +769,14 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // Inserts atom in the type index of its type (as head of the list).
     Type type = atom->getType();
     atom->setNext(TYPE_INDEX, typeIndex[type]);
-    typeIndex[type] = handle; 
+    typeIndex[type] = handle;
 
-    // If the atom is a link, the targetIndexTypes list is built. Then, from 
+    // If the atom is a link, the targetIndexTypes list is built. Then, from
     // the atom's arity, it will be checked how many targetTypes are distinct.
     int distinctSize;
     Type* targetTypes = atom->buildTargetIndexTypes(&distinctSize);
     if (distinctSize > 0) {
-        // Here, the atom is placed on each target index list. 
+        // Here, the atom is placed on each target index list.
         Handle* targetIndices = new Handle[distinctSize];
         for (int i = 0; i < distinctSize; i++) {
             // Insert it as head of the corresponding list
@@ -778,7 +797,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     //logger().debug("adding handle %p with sti %d into importanceIndex (bin = %d)\n", handle, atom->getAttentionValue().getSTI(), bin);
     atom->setNext(IMPORTANCE_INDEX, importanceIndex[bin]);
     importanceIndex[bin] = handle;
-    
+
     // Checks Atom against predicate indices and inserts it if needed
     for (int i = 0; i < numberOfPredicateIndices; i++) {
         // printf("Processing predicate index %d\n");
@@ -816,14 +835,15 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     atom->setAtomTable(this);
 
-    if (useDSA){
+    if (useDSA) {
         StatisticsMonitor::getInstance()->add(atom);
     }
 
     return handle;
 }
 
-bool AtomTable::updateImportanceIndex(Atom* atom, int bin) {
+bool AtomTable::updateImportanceIndex(Atom* atom, int bin)
+{
 
     // current receives the first element of the list that the atom is in.
     Handle current = importanceIndex[bin];
@@ -836,7 +856,7 @@ bool AtomTable::updateImportanceIndex(Atom* atom, int bin) {
     // here is checked if the atom is on the first position of its importance
     // index list.
     if (current == wanted) {
-        // if so, the new first element will be the next one.    
+        // if so, the new first element will be the next one.
         importanceIndex[bin] = atom->next(IMPORTANCE_INDEX);
     } else {
         // if not, the list will be scanned until the atom is found.
@@ -848,7 +868,7 @@ bool AtomTable::updateImportanceIndex(Atom* atom, int bin) {
             }
         }
         TLB::getAtom(current)->setNext(IMPORTANCE_INDEX, TLB::getAtom(wanted)->next(IMPORTANCE_INDEX));
-    }    
+    }
 
     // the atom is placed on the last position of the new list.
     atom->setNext(IMPORTANCE_INDEX, importanceIndex[importanceBin(atom->getAttentionValue().getSTI())]);
@@ -864,7 +884,7 @@ int AtomTable::getSize() const
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
 #ifdef USE_ATOM_HASH_SET
-    for(AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
+    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
         Atom* atom = *it;
         bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
@@ -907,7 +927,7 @@ HandleEntry* AtomTable::extractOld(Handle handle, bool recursive)
 HandleEntry* AtomTable::extract(Handle handle, bool recursive)
 {
     // TODO: Check if this atom is really inserted in this AtomTable and get the
-    // exact Atom object  
+    // exact Atom object
     HandleEntry* result = NULL;
 
     Atom *atom = TLB::getAtom(handle);
@@ -935,7 +955,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     //decrements the size of the table
     size--;
 
-#ifdef USE_ATOM_HASH_SET    
+#ifdef USE_ATOM_HASH_SET
     atomSet->erase(atom);
 #endif
 
@@ -976,9 +996,9 @@ bool AtomTable::remove(Handle handle, bool recursive)
         removeExtractedHandles(extractedHandles);
         return true;
     }
-    return false; 
-} 
-    
+    return false;
+}
+
 void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 {
     if (extractedHandles) {
@@ -997,7 +1017,7 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 void AtomTable::removeFromIndex(Atom *victim,
                                 std::vector<Handle>& index,
                                 int indexID, int headIndex)
-    throw (RuntimeException)
+throw (RuntimeException)
 {
     //logger().fine("AtomTable::removeFromIndex(): index.size() = %d, indexId = %d(%x), headIndex = %d(%x)", index.size(), indexID, indexID, headIndex, headIndex);
     Handle victimHandle = TLB::getHandle(victim);
@@ -1007,17 +1027,17 @@ void AtomTable::removeFromIndex(Atom *victim,
     Handle q = UNDEFINED_HANDLE;
     while (p != victimHandle) {
         if (TLB::isInvalidHandle(p)) {
-            throw RuntimeException(TRACE_INFO, 
-                  "AtomTable - Unable to remove atom. NULL atom at index 0x%X.", indexID);
+            throw RuntimeException(TRACE_INFO,
+                                   "AtomTable - Unable to remove atom. NULL atom at index 0x%X.", indexID);
         }
         Atom *patom = TLB::getAtom(p);
         //logger().fine("Next atom in index = %s", patom?patom->toString().c_str():"NULL");
         q = p;
         p = patom->next(indexID);
     }
-    
+
     //cprintf(DEBUG,"removeFromIndex(): found position in the index\n");
-    
+
     if (victimHandle == index[headIndex]) {
         index[headIndex] = victim->next(indexID);
     } else {
@@ -1043,13 +1063,14 @@ void AtomTable::removeFromTargetTypeIndex(Atom *atom)
     delete[](types);
 }
 
-void AtomTable::removeFromPredicateIndex(Atom *atom) {
+void AtomTable::removeFromPredicateIndex(Atom *atom)
+{
     if (!atom->hasPredicateIndexInfo()) {
         //logger().fine("removeFromPredicateIndex(%p): No predicate index info", atom);
         return;
     }
     //logger().fine("removeFromPredicateIndex(%p): has predicate index info", atom);
-    
+
     int arraySize;
     int *predicateIndices = atom->buildPredicateIndices(&arraySize);
 
@@ -1062,7 +1083,8 @@ void AtomTable::removeFromPredicateIndex(Atom *atom) {
     delete[](predicateIndices);
 }
 
-HandleEntry* AtomTable::decayShortTermImportance() {
+HandleEntry* AtomTable::decayShortTermImportance()
+{
     for (unsigned int band = 0; band < (unsigned int) IMPORTANCE_INDEX_SIZE; band++) {
         Handle current = importanceIndex[band];
         while (TLB::isValidHandle(current)) {
@@ -1107,65 +1129,68 @@ HandleEntry* AtomTable::decayShortTermImportance() {
     return oldAtoms;
 }
 
-void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID) {
-	//visit all atoms in index
-	for (unsigned int i = 0; i < index.size(); i++) {
-	    Handle p = index[i];
+void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID)
+{
+    //visit all atoms in index
+    for (unsigned int i = 0; i < index.size(); i++) {
+        Handle p = index[i];
         Handle q = UNDEFINED_HANDLE;
         while (!TLB::isInvalidHandle(p)) {
-	        Atom *patom = TLB::getAtom(p);
-			//found marked element
-	        if (patom->getFlag(REMOVED_BY_DECAY)) {
+            Atom *patom = TLB::getAtom(p);
+            //found marked element
+            if (patom->getFlag(REMOVED_BY_DECAY)) {
                 //search next valid atom to put in index
-		        while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
-		        	p = patom->next(indexID);
-		        	//clear old index
-					patom->setNext(indexID, UNDEFINED_HANDLE);
-					patom = TLB::getAtom(p);
-		        }
-	    		// it is the first element of list
-	    		if (TLB::isInvalidHandle(q)) index[i] = p;
-	    		else TLB::getAtom(q)->setNext(indexID, p);
-	        } else {
-				//save previous element in q
-		        q = p;
-		        p = patom->next(indexID);
-	        }
-	    }
-	}
+                while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
+                    p = patom->next(indexID);
+                    //clear old index
+                    patom->setNext(indexID, UNDEFINED_HANDLE);
+                    patom = TLB::getAtom(p);
+                }
+                // it is the first element of list
+                if (TLB::isInvalidHandle(q)) index[i] = p;
+                else TLB::getAtom(q)->setNext(indexID, p);
+            } else {
+                //save previous element in q
+                q = p;
+                p = patom->next(indexID);
+            }
+        }
+    }
 }
 
-void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID) {
-	//visit all atoms in index
-	for (unsigned int i = 0; i < index.size(); i++) {
+void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID)
+{
+    //visit all atoms in index
+    for (unsigned int i = 0; i < index.size(); i++) {
         int targetIndexID = indexID | i;
-	    Handle p = index[i];
-	    Handle q = UNDEFINED_HANDLE;
-	    while (!TLB::isInvalidHandle(p)) {
-	        Atom *patom = TLB::getAtom(p);
-			//found marked element
-	        if (patom->getFlag(REMOVED_BY_DECAY)) {
+        Handle p = index[i];
+        Handle q = UNDEFINED_HANDLE;
+        while (!TLB::isInvalidHandle(p)) {
+            Atom *patom = TLB::getAtom(p);
+            //found marked element
+            if (patom->getFlag(REMOVED_BY_DECAY)) {
                 //search next valid atom to put in index
-		        while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
-		        	p = patom->next(targetIndexID);
-		        	//clear old index
-					patom->setNext(targetIndexID, UNDEFINED_HANDLE);
-					patom = TLB::getAtom(p);
-		        }
-	    		// it is the first element of list
-	    		if (TLB::isInvalidHandle(q)) index[i] = p;
-	    		else TLB::getAtom(q)->setNext(targetIndexID, p);
-	        } else {
-				//save previous element in q
-		        q = p;
-		        p = patom->next(targetIndexID);
-	        }
-	    }
-	}
+                while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
+                    p = patom->next(targetIndexID);
+                    //clear old index
+                    patom->setNext(targetIndexID, UNDEFINED_HANDLE);
+                    patom = TLB::getAtom(p);
+                }
+                // it is the first element of list
+                if (TLB::isInvalidHandle(q)) index[i] = p;
+                else TLB::getAtom(q)->setNext(targetIndexID, p);
+            } else {
+                //save previous element in q
+                q = p;
+                p = patom->next(targetIndexID);
+            }
+        }
+    }
 
 }
 
-void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
+void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
+{
     if (extractedHandles == NULL) return;
 
     // remove from indices
@@ -1178,7 +1203,7 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Atom* atom = TLB::getAtom(curr->handle);
-#ifdef USE_ATOM_HASH_SET    
+#ifdef USE_ATOM_HASH_SET
         //Extracts atom from hash_set
         atomSet->erase(atom);
 #endif
@@ -1188,14 +1213,14 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
         if (useDSA)
             // updates all global statistics regarding the removal of this atom
             StatisticsMonitor::getInstance()->remove(atom);
-        
+
         // remove from incoming sets
         for (int i = 0; i < atom->getArity(); i++) {
             Atom *outgoing = atom->getOutgoingAtom(i);
             if (outgoing)
                 outgoing->removeIncomingHandle(curr->handle);
         }
-    
+
         // remove from iterators
         lockIterators();
         for (unsigned int i = 0; i < iterators.size(); i++) {
@@ -1211,42 +1236,49 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles) {
     delete extractedHandles;
 }
 
-void AtomTable::removeFromIterator(Atom *atom, HandleIterator *iterator) {
+void AtomTable::removeFromIterator(Atom *atom, HandleIterator *iterator)
+{
     if (iterator->currentHandle == TLB::getHandle(atom)) {
         iterator->next();
     }
 }
-void AtomTable::lockIterators() {
+void AtomTable::lockIterators()
+{
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_lock(&iteratorsLock);
 #endif
 }
 
-void AtomTable::unlockIterators() {
+void AtomTable::unlockIterators()
+{
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_unlock(&iteratorsLock);
 #endif
 }
 
 
-HandleIterator* AtomTable::getHandleIterator(){
+HandleIterator* AtomTable::getHandleIterator()
+{
     return new HandleIterator(this, (Type)ATOM, true);
 }
 
-HandleIterator* AtomTable::getHandleIterator(Type type, bool subclass, VersionHandle vh){
+HandleIterator* AtomTable::getHandleIterator(Type type, bool subclass, VersionHandle vh)
+{
     return new HandleIterator(this, type, subclass, vh);
 }
 
-Handle AtomTable::getImportanceIndexHead(int i) const{
+Handle AtomTable::getImportanceIndexHead(int i) const
+{
     return importanceIndex[i];
 }
 
-bool AtomTable::usesDSA() const{
+bool AtomTable::usesDSA() const
+{
     return useDSA;
 }
 
 
-HandleEntry* AtomTable::getHandleSet(Type type, bool subclass, 
+HandleEntry* AtomTable::getHandleSet(Type type, bool subclass,
                                      VersionHandle vh) const
 {
     //printf("AtomTable::getHandleSet(Type =%d, bool=%d, AtomTableList=%d)\n", type, subclass, tableId);
@@ -1258,7 +1290,8 @@ HandleEntry* AtomTable::getHandleSet(Type type, bool subclass,
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh) const{
+HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh) const
+{
     //printf("AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(type, targetType, subclass, targetSubclass);
     result = HandleEntry::filterSet(result, vh);
@@ -1266,25 +1299,28 @@ HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, 
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh) const{
+HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh) const
+{
     //printf("AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(handle, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const{
+HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
+{
     //printf("AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(handles, types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh) const{
+HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh) const
+{
     //printf("AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = NULL;
-    if (name == NULL) { 
-        result = getHandleSet(type, subclass, vh); 
+    if (name == NULL) {
+        result = getHandleSet(type, subclass, vh);
     } else {
         result = this->getHandleSet(name, type, subclass);
         result = HandleEntry::filterSet(result, vh);
@@ -1292,7 +1328,8 @@ HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass,
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh) const{
+HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh) const
+{
     //printf("AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(targetName, targetType, type, subclass);
     result = HandleEntry::filterSet(result, vh);
@@ -1300,14 +1337,16 @@ HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Ty
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const{
+HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
+{
     //printf("AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(names, types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const{
+HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
+{
     //printf("AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId\n");
     HandleEntry* result = this->getHandleSet(types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
@@ -1327,20 +1366,17 @@ HandleEntry* AtomTable::getHandleSet(float lowerBound, float upperBound, Version
 void AtomTable::scrubIncoming(void)
 {
 #ifdef USE_ATOM_HASH_SET
-    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++)
-    {
+    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
         Atom* atom = *it;
         Handle handle = TLB::getHandle(atom);
 
         // Updates incoming set of all targets.
         Link * link = dynamic_cast<Link *>(atom);
         if (link) {
-            for (int i = 0; i < link->getArity(); i++)
-            {
+            for (int i = 0; i < link->getArity(); i++) {
                 Atom *oa = link->getOutgoingAtom(i);
                 HandleEntry *he = oa->getIncomingSet();
-                if (false == he->contains(handle))
-                {
+                if (false == he->contains(handle)) {
                     oa->addIncomingHandle(handle);
                 }
             }

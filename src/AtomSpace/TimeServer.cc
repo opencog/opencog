@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,20 +31,24 @@ int TimeServer::timeServerEntrys = 0;
 // USED TO SEEK MEMORY LEAK
 //std::set<Temporal> TimeServer::temporalSet;
 
-void TimeServer::init() {
+void TimeServer::init()
+{
     table = new TemporalTable();
     latestTimestamp = 0;
 }
 
-TimeServer::TimeServer() {
+TimeServer::TimeServer()
+{
     init();
 }
 
-TimeServer::~TimeServer() {
+TimeServer::~TimeServer()
+{
     delete table;
 }
-    
-void TimeServer::add(Handle h, const Temporal& t) {
+
+void TimeServer::add(Handle h, const Temporal& t)
+{
     // USED TO SEEK MEMORY LEAK
     //++timeServerEntrys;
     //cout << "Total timeServerEntrys: " << timeServerEntrys << endl;
@@ -59,7 +63,7 @@ void TimeServer::add(Handle h, const Temporal& t) {
         latestTimestamp = t.getUpperBound();
     }
 }
-    
+
 bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion)
 {
     return table->remove(h, t, criterion);

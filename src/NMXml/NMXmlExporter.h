@@ -7,9 +7,9 @@
  * Written by Rodrigo Barra
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,51 +32,52 @@
 /**
  * This class is used to export XML from a subset of Atoms.
  */
-class NMXmlExporter {
+class NMXmlExporter
+{
 
 private:
-	/**
-	 * Stores the default initial size for the buffer.
-	 */
-	static const int DEFAULT_BUFF_SIZE = 1<<16;
+    /**
+     * Stores the default initial size for the buffer.
+     */
+    static const int DEFAULT_BUFF_SIZE = 1 << 16;
 
-	/**
-	 * Find the set of atoms to be exported based on an 
-	 * initial seed.
-	 */
-	HandleSet *findExportables(HandleEntry *);
+    /**
+     * Find the set of atoms to be exported based on an
+     * initial seed.
+     */
+    HandleSet *findExportables(HandleEntry *);
 
-	/**
-	 * Used to explor a subgraph of the AtomTable.
-	 */
-	void findExportables(HandleSet *, HandleSet *, Atom *);
-
-
-	/**
-	 * Exports a subset of the AtomTable to XML.
-	 * @param The set of Handles to be exported.
-	 *        After the handles are exported
-	 *        the HandleSet is deleted.
-	 * @return An string describing the subset of Atoms in XML.
-	 */
-	std::string toXML(HandleSet  *);
+    /**
+     * Used to explor a subgraph of the AtomTable.
+     */
+    void findExportables(HandleSet *, HandleSet *, Atom *);
 
 
-	/**
-	 * Exports an Atom and the Atoms in its outgoingset.
-	 */
-	void exportAtom(Handle, bool [], std::string&, bool = false);
+    /**
+     * Exports a subset of the AtomTable to XML.
+     * @param The set of Handles to be exported.
+     *        After the handles are exported
+     *        the HandleSet is deleted.
+     * @return An string describing the subset of Atoms in XML.
+     */
+    std::string toXML(HandleSet  *);
+
+
+    /**
+     * Exports an Atom and the Atoms in its outgoingset.
+     */
+    void exportAtom(Handle, bool [], std::string&, bool = false);
 
 public:
 
-	/**
-	 * Exports a subset of the AtomTable to XML.
-	 * @param The set of Handles from where the subset 
-	 *        should be built. After the handles are exported
-	 *        the HandleEntry is deleted.
-	 * @return A string describing the subset of Atoms in XML.
-	 */
-	std::string toXML(HandleEntry *);
+    /**
+     * Exports a subset of the AtomTable to XML.
+     * @param The set of Handles from where the subset
+     *        should be built. After the handles are exported
+     *        the HandleEntry is deleted.
+     * @return A string describing the subset of Atoms in XML.
+     */
+    std::string toXML(HandleEntry *);
 
 };
 

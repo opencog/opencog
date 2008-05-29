@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,8 @@
  * TODO: Depending on the use cases, this class would have a better performance
  *       if we use a sortedTemporalList in inverse cronological order.
  */
-class TimeServer : public SavableRepository {
+class TimeServer : public SavableRepository
+{
 
     /**
      * Initializes the TimeServer
@@ -46,7 +47,7 @@ class TimeServer : public SavableRepository {
     void init();
 
 public:
-    
+
     static int timeServerEntrys;
 
     // USED TO SEEK MEMORY LEAK
@@ -74,15 +75,14 @@ public:
      *         std::list<HandleTemporalPair> ret;
      *         timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
      */
-     template<typename OutputIterator> OutputIterator
+    template<typename OutputIterator> OutputIterator
     get(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
-        TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const{
+        TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
         HandleTemporalPairEntry* hte = table->get(h, t, criterion);
         HandleTemporalPairEntry* toRemove = hte;
 
-        while (hte)
-        {
+        while (hte) {
             *(outIt++) = hte->handleTemporalPair;
             hte = hte->next;
         }
@@ -129,7 +129,7 @@ public:
     void clear();
 
     /**
-     * Get the timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer.  
+     * Get the timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer.
      */
     unsigned long getLatestTimestamp() const;
 
@@ -141,9 +141,9 @@ private:
     TemporalTable* table;
 
     /**
-     * The timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer  
+     * The timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer
      */
-    unsigned long latestTimestamp; 
+    unsigned long latestTimestamp;
 
 };
 

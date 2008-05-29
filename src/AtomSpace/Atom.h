@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -55,7 +55,8 @@ class HandleEntry;
  * links are specialization of atoms, that is, they inherit all
  * properties from atoms.
  */
-class Atom {
+class Atom
+{
 
     friend class SavingLoading;
     friend class AtomTable;
@@ -149,7 +150,7 @@ protected:
       * Otherwise, it throws a RuntimeException.
       */
     virtual void setOutgoingSet(const std::vector<Handle>& o)
-        throw (RuntimeException);
+    throw (RuntimeException);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 public:
@@ -169,8 +170,7 @@ public:
      *
      * @return The type of the atom.
      */
-    inline Type getType() const
-    {
+    inline Type getType() const {
         // TODO: Implement smarter mapping from atom types to
         // BuiltInTypeHandle IDs?
         if (isReal())
@@ -291,8 +291,7 @@ public:
      * @return A pointer to a linked-list containing the atoms that are
      * members of this one's incoming set.
      */
-    inline HandleEntry* getIncomingSet() const
-    {
+    inline HandleEntry* getIncomingSet() const {
         return incoming;
     }
 
@@ -304,24 +303,22 @@ public:
      *
      * @return A const reference to this atom's outgoing set.
      */
-    inline const std::vector<Handle>& getOutgoingSet() const
-    {
+    inline const std::vector<Handle>& getOutgoingSet() const {
         return outgoing;
     }
 #else
     /**
-     * Returns a pointer to an array containing this atom's
-     * outgoing set.
-     *
-     * XXX This is rather inefficient, as the -on-stack
-     * allocation requires two (!!) copies.
-     *
-     * @return A pointer to an array containing this atom's outgoing set.
-     */
-    inline std::vector<Handle> getOutgoingSet() const
-    {
+    * Returns a pointer to an array containing this atom's
+    * outgoing set.
+    *
+    * XXX This is rather inefficient, as the -on-stack
+    * allocation requires two (!!) copies.
+    *
+    * @return A pointer to an array containing this atom's outgoing set.
+    */
+    inline std::vector<Handle> getOutgoingSet() const {
         std::vector<Handle> result;
-        std::copy(&outgoing[0],&outgoing[arity],back_inserter(result));
+        std::copy(&outgoing[0], &outgoing[arity], back_inserter(result));
         return result;
     }
 #endif
@@ -501,8 +498,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    virtual std::string toString(void)=0;
-    virtual std::string toShortString(void)=0;
+    virtual std::string toString(void) = 0;
+    virtual std::string toShortString(void) = 0;
 
     /**
     * Returns whether to atoms are equal.

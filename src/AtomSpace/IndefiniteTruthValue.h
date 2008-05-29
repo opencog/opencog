@@ -8,9 +8,9 @@
  *            Fabricio Silva <fabricio@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,7 +40,8 @@ using namespace std;
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
  * N will be hold constant and thus we have only ([L,U],b).
  */
-class IndefiniteTruthValue : public TruthValue {
+class IndefiniteTruthValue : public TruthValue
+{
 
 private:
     float mean;
@@ -57,7 +58,7 @@ private:
 
 public:
     IndefiniteTruthValue();
-    IndefiniteTruthValue(float,float,float c=DEFAULT_CONFIDENCE_LEVEL);
+    IndefiniteTruthValue(float, float, float c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
 
     IndefiniteTruthValue* clone() const;
@@ -93,7 +94,11 @@ public:
 
     static float DEFAULT_CONFIDENCE_LEVEL;
     static float DEFAULT_K;
-    static void setDefaultConfidenceLevel(float c){DEFAULT_CONFIDENCE_LEVEL=c;}
-    static void setDefaultK(float k){DEFAULT_K=k;}
+    static void setDefaultConfidenceLevel(float c) {
+        DEFAULT_CONFIDENCE_LEVEL = c;
+    }
+    static void setDefaultK(float k) {
+        DEFAULT_K = k;
+    }
 };
 #endif /*_INDEFINITE_TRUTH_VALUE_H_*/
