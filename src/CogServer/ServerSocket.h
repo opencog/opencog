@@ -76,6 +76,7 @@ class ServerSocket : public TcpSocket
         ServerSocket(ISocketHandler &handler);
 
         static void setMaster(SimpleNetworkServer *master);
+        void OnAccept();
         void OnDisconnect();
         void OnLine(const std::string&);
         void OnRawData(const char *, size_t);

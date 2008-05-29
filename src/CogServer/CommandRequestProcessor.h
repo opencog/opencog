@@ -51,7 +51,6 @@ class CommandRequestProcessor : public RequestProcessor
         virtual void processRequest(CogServerRequest *);
 
     private:
-        std::string prompt;
         std::string loadXML(XMLBufferReader *);
         std::string data(std::string);
         std::string help(std::string);

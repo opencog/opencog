@@ -48,6 +48,11 @@ void ServerSocket::setMaster(SimpleNetworkServer *m) {
     master = m;
 }
 
+void ServerSocket::OnAccept()
+{
+    Send(master->getCommandPrompt());
+}
+
 void ServerSocket::OnDisconnect()
 {
     if (!in_raw_mode) return;
@@ -71,6 +76,9 @@ void ServerSocket::OnLine(const std::string& line)
         in_raw_mode = true;
         buffer = "data\n";
     }
+    else if (line == "close") {
+        Close();
+    } 
     else
     {
         cb->AtomicInc(1);
@@ -194,10 +202,12 @@ void ServerSocket::CBI::callBack(const std::string &message)
         std::string nl = "";
         while (getline(stream, line)) {
             sock->Send(nl + line);
-            nl = "\n";
+            nl = "\r\n";
         }
-        if ('\n' == message[message.length()-1])
-            sock->Send("\n");
+        if ('\n' == message[message.length()-1]) {
+            sock->Send("\r\n");
+            sock->Send(master->getCommandPrompt());
+        }
     }
     pthread_mutex_unlock(&sock_lock);
 

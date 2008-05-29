@@ -49,7 +49,6 @@ CommandRequestProcessor::~CommandRequestProcessor()
 
 CommandRequestProcessor::CommandRequestProcessor(void)
 {
-    prompt = "opencog> ";
     load_count = 0;
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
@@ -110,7 +109,8 @@ std::string CommandRequestProcessor::help(std::string topic)
          "ls <handle>        -- list handle and its incoming set\n"
          "ls <type> <name>   -- list node and its incoming set\n"
          "dlopen <filename>  -- load a dynamic module (and run it).\n"
-         "dlclose <filename> -- close a previously loaded dynamic module.\n"; 
+         "dlclose <filename> -- close a previously loaded dynamic module.\n"
+         "close              -- end the session.\n";
 #ifdef HAVE_GUILE
     reply += 
          "scm              -- enter the scheme interpreter\n";
@@ -414,7 +414,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
        {
            shell_mode = false;
            answer = "Exiting scheme shell mode\n";
-           answer += prompt;
        }
        else
        {
@@ -524,7 +523,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #endif /* HAVE_SQL_STORAGE */
     else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
-                 "\tAvailable commands: data help load ls shutdown";
+                 "\tAvailable commands: data help load ls dlopen dlclose shutdown close";
 #ifdef HAVE_GUILE
         answer += " scm";
 #endif /* HAVE_GUILE */
@@ -536,7 +535,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     }
 
     answer += "\n";
-    answer += prompt;
     request->setAnswer(answer);
     request->callBack();
 
