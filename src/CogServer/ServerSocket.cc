@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,8 +23,8 @@
  */
 
 #include "ServerSocket.h"
-#include <string> 
-#include <sstream> 
+#include <string>
+#include <sstream>
 
 using namespace opencog;
 
@@ -35,7 +35,7 @@ ServerSocket::~ServerSocket()
     cb->Close();
 }
 
-ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler)
+ServerSocket::ServerSocket(ISocketHandler &handler): TcpSocket(handler)
 {
     SetLineProtocol();
     in_raw_mode = false;
@@ -44,7 +44,8 @@ ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler)
     cb = new CBI(this);
 }
 
-void ServerSocket::setMaster(SimpleNetworkServer *m) {
+void ServerSocket::setMaster(SimpleNetworkServer *m)
+{
     master = m;
 }
 
@@ -61,18 +62,15 @@ void ServerSocket::OnDisconnect()
 
 void ServerSocket::OnLine(const std::string& line)
 {
-    if (line == "data")
-    {
+    if (line == "data") {
         // Disable line protocol; we are expecting a stream
         // of bytes from now on, until socket closure.
-        // The OnRawData() method will be called from here 
+        // The OnRawData() method will be called from here
         // until a ctrl-D or socket close.
         SetLineProtocol(false);
         in_raw_mode = true;
         buffer = "data\n";
-    }
-    else
-    {
+    } else {
         cb->AtomicInc(1);
         master->processCommandLine(cb, line);
     }
@@ -95,40 +93,37 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
 {
     size_t i;
     size_t istart = 0;
-    while (istart<len)
-    {
+    while (istart < len) {
         // Search for ctrl-D aka ASCII EOT, followed by newline
-        for (i=istart; i<len-1; i++)
-        {
+        for (i = istart; i < len - 1; i++) {
             if ((0x4 == buf[i]) && ((0xd == buf[i+1]) || (0xa == buf[i+1]))) break;
             if (have_raw_eot && ((0xd == buf[i]) || (0xa == buf[i]))) {
                 have_raw_eot = false;
                 break;
             }
         }
-        if (i == len-1)
-        {
-            if(0x4 == buf[i]) {
+        if (i == len - 1) {
+            if (0x4 == buf[i]) {
                 have_raw_eot = true;
                 len --;  // Do not copy the ctrl-D
             }
             // No ctrl-D found, append the string, and go home
-            buffer.append (&buf[istart], len-istart);
+            buffer.append (&buf[istart], len - istart);
             return;
         }
 
         // Found a ctrl-D, dispatch the thing.
         int iend = i;
-        buffer.append (&buf[istart], iend-istart);
+        buffer.append (&buf[istart], iend - istart);
         cb->AtomicInc(1);
         master->processCommandLine(cb, buffer);
         buffer = "";
         istart = iend;
 
         // Skip over the ctrl-D and any newlines/carriage returns.
-        while ((0xa == buf[istart]) || 
-               (0xd == buf[istart]) || 
-               (0x4 == buf[istart])) istart ++;
+        while ((0xa == buf[istart]) ||
+                (0xd == buf[istart]) ||
+                (0x4 == buf[istart])) istart ++;
 
         // XXX at this point, we should check if the
         // thing after the ctrl-D is an ordinary line-mode command
@@ -138,7 +133,7 @@ void ServerSocket::OnRawData(const char * buf, size_t len)
         // And this is improbable for teh current server design/usage.
     }
 
-    // If we are here, then the last char in the buffer was a ctrl-D. 
+    // If we are here, then the last char in the buffer was a ctrl-D.
     // (That's the only way out of the while loop above). Go back to
     // line-mode.
     SetLineProtocol(true);
@@ -171,7 +166,7 @@ void ServerSocket::CBI::Close(void)
     int cnt = AtomicInc(-1);
     pthread_mutex_unlock(&sock_lock);
 
-    // There will be one callback for each request that 
+    // There will be one callback for each request that
     // was generated on this socket. When all of these
     // have been processed, then self-delete, as no one
     // else will.
@@ -184,7 +179,7 @@ void ServerSocket::CBI::callBack(const std::string &message)
     // Note that the sock is typically closed in a distinct thread,
     // which can race, and so lock to make sure that sock != NULL.
     pthread_mutex_lock(&sock_lock);
-    if(sock) {
+    if (sock) {
         std::istringstream stream(message.c_str());
         std::string line;
 
@@ -201,7 +196,7 @@ void ServerSocket::CBI::callBack(const std::string &message)
     }
     pthread_mutex_unlock(&sock_lock);
 
-    // There will be one callback for each request that 
+    // There will be one callback for each request that
     // was generated on this socket. When all of these
     // have been processed, then self-delete, as no one
     // else will.

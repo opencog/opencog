@@ -8,9 +8,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -123,8 +123,8 @@ public:
     virtual TruthValue& operator=(const TruthValue& rhs) = 0;
 
     /**
-     * Equality. Used to determine if two truth values are the 
-     * same, or not. Primarily useful see if a TV is equal to 
+     * Equality. Used to determine if two truth values are the
+     * same, or not. Primarily useful see if a TV is equal to
      * NULL_TV, TRUE_TV, FALSE_TV, etc.
      */
     virtual bool operator==(const TruthValue& rhs) const = 0;
@@ -146,15 +146,15 @@ public:
 // STATIC METHODS:
 
     static const char* typeToStr(TruthValueType t)
-        throw (InvalidParamException);
+    throw (InvalidParamException);
     static TruthValueType strToType(const char* str)
-         throw (InvalidParamException);
+    throw (InvalidParamException);
 
     // Factories
     // former factory used by NMShell mkatom command
     static TruthValue* factory(const char*);
     static TruthValue* factory(TruthValueType, const char*)
-        throw (InvalidParamException);
+    throw (InvalidParamException);
 
 protected:
 

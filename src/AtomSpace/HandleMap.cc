@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,7 +33,7 @@ template <class T>
 void HandleMap<T>::lock()
 {
 #ifdef HAVE_LIBPTHREAD
-    if (useMutex){
+    if (useMutex) {
         pthread_mutex_lock(&plock);
     }
 #endif
@@ -43,7 +43,7 @@ template <class T>
 void HandleMap<T>::unlock()
 {
 #ifdef HAVE_LIBPTHREAD
-    if (useMutex){
+    if (useMutex) {
         pthread_mutex_unlock(&plock);
     }
 #endif
@@ -139,7 +139,7 @@ T HandleMap<T>::remove(Handle key)
 
     InternalIterator ti = handle_map->find(key);
 
-    if (ti != handle_map->end()){
+    if (ti != handle_map->end()) {
         ret = ti->second;
         handle_map->erase(ti);
     }

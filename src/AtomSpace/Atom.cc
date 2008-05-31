@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -78,18 +78,20 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
     attentionValue = (AttentionValue*) AttentionValue::factory();
 
 #ifdef USE_SHARED_DEFAULT_TV
-    truthValue = NULL; 
+    truthValue = NULL;
     setTruthValue(tv);
-#else 
-    truthValue = tv.isNullTv()? TruthValue::DEFAULT_TV().clone() : tv.clone();
-#endif     
+#else
+    truthValue = tv.isNullTv() ? TruthValue::DEFAULT_TV().clone() : tv.clone();
+#endif
 }
 
-Atom::Atom(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv ) {
+Atom::Atom(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv )
+{
     init(type, outgoingVector, tv);
 }
 
-Atom::~Atom() throw (RuntimeException) {
+Atom::~Atom() throw (RuntimeException)
+{
     // checks if there is still an atom pointing to the one being removed
     if (incoming != NULL) {
         throw RuntimeException(TRACE_INFO, "Attempting to remove atom with non-empty incoming set.");
@@ -99,7 +101,7 @@ Atom::~Atom() throw (RuntimeException) {
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
     //printf("Atom::~Atom() freeing outgoing\n");
     if (outgoing) free(outgoing);
-#endif        
+#endif
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     //printf("Atom::~Atom() deleting targetTypeIndex\n");
@@ -108,13 +110,13 @@ Atom::~Atom() throw (RuntimeException) {
     delete(predicateIndexInfo);
     //printf("Atom::~Atom() deleting truthValue\n");
     delete (attentionValue);
-#ifdef USE_SHARED_DEFAULT_TV    
+#ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != &(TruthValue::DEFAULT_TV())) {
         delete truthValue;
     }
 #else
     delete truthValue;
-#endif    
+#endif
     free(indices);
     //printf("Atom::~Atom() end\n");
 }
@@ -123,9 +125,9 @@ bool Atom::isReal() const
 {
     unsigned long value = (unsigned long) this;
     bool real = (value >= NUMBER_OF_CLASSES);
-   //if(!real){
-        //fprintf(stdout, "Atom - Type: %d, Pointe converted: (%p, %d)\n", type, this, (long)this);
-        //fflush(stdout);
+    //if(!real){
+    //fprintf(stdout, "Atom - Type: %d, Pointe converted: (%p, %d)\n", type, this, (long)this);
+    //fflush(stdout);
     //}
     return real;
 }
@@ -154,42 +156,46 @@ bool Atom::isReal() const
 // returned AttentionValue object is supposed to be const, as in the method
 // getAttentionValue() below. Don't use this method to change AttentionValue
 // because you may break AtomTable indices.
-AttentionValue* Atom::getAVPointer() {
+AttentionValue* Atom::getAVPointer()
+{
     return attentionValue;
 }
 
-const AttentionValue& Atom::getAttentionValue() const{
+const AttentionValue& Atom::getAttentionValue() const
+{
     return *attentionValue;
 }
 
-const TruthValue& Atom::getTruthValue() const{
+const TruthValue& Atom::getTruthValue() const
+{
     return *truthValue;
 }
 
-void Atom::setTruthValue(const TruthValue& tv) {
-#ifdef USE_SHARED_DEFAULT_TV   
+void Atom::setTruthValue(const TruthValue& tv)
+{
+#ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != NULL && &tv != truthValue && truthValue != &(TruthValue::DEFAULT_TV())) {
         delete truthValue;
     }
-    truthValue = (TruthValue*) &(TruthValue::DEFAULT_TV());
+    truthValue = (TruthValue*) & (TruthValue::DEFAULT_TV());
     if (!tv.isNullTv() && (&tv != &(TruthValue::DEFAULT_TV()))) {
         truthValue = tv.clone();
     }
-#else 
+#else
     if (truthValue != NULL && &tv != truthValue) {
         delete truthValue;
     }
 #if 1
-    // just like it was before    
+    // just like it was before
     truthValue = tv.clone();
-#else    
+#else
     if (!tv.isNullTv()) {
         truthValue = tv.clone();
     } else {
         truthValue = TruthValue::DEFAULT_TV().clone();
     }
-#endif    
-#endif     
+#endif
+#endif
 }
 
 //float Atom::getImportance() {
@@ -197,7 +203,8 @@ void Atom::setTruthValue(const TruthValue& tv) {
 //    return ShortFloatOps::getValue(&importance);
 //}
 
-void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException) {
+void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)
+{
     //// if the value is out of bounds, it is set to either the upper or lower bound
     //if (value > 1) value = 1;
     //if (value < 0) value = 0;
@@ -210,7 +217,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 
     //// this MUST come before updateImportanceIndex
     //rawSetImportance(value);
-    if(attentionValue != NULL && &new_av != attentionValue)
+    if (attentionValue != NULL && &new_av != attentionValue)
         delete attentionValue;
 
     attentionValue = new_av.clone();
@@ -219,7 +226,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // gets new bin
         int newBin = AtomTable::importanceBin(attentionValue->getSTI());
 
-        // if the atom importance has changed its bin, 
+        // if the atom importance has changed its bin,
         // updates the importance index
         if (oldBin != newBin) {
 #ifdef USE_MIND_DB_PROXY
@@ -227,7 +234,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
                AtomTable *table;
             // cycles trhough all the tables searching for the Atom.
             // This implementation priviledges the most commom case DEFAULT
-            // We did not use an identifier for the table the atom is inserted in 
+            // We did not use an identifier for the table the atom is inserted in
             // because of space constraints.
             AtomTableList t;
             for (t = DEFAULT; t < ATOM_TABLE_LIST_SIZE; t++){
@@ -264,7 +271,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (RuntimeException)
 {
     //printf("Atom::setOutgoingSet\n");
-    if (atomTable != NULL){
+    if (atomTable != NULL) {
         throw RuntimeException(TRACE_INFO, "Cannot change the OutgoingSet of an atom already inserted into an AtomTable\n");
     }
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
@@ -273,10 +280,8 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
     // We'd like to perform a test for valid values here, but it seems
     // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
     // which it hopefully repairs later on ...
-    for (int i=0; i<outgoingVector.size(); i++)
-    {
-        if (TLB::isInvalidHandle(outgoingVector[i]))
-        {
+    for (int i = 0; i < outgoingVector.size(); i++) {
+        if (TLB::isInvalidHandle(outgoingVector[i])) {
             throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
         }
     }
@@ -291,23 +296,21 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
         free(outgoing);
         outgoing = NULL;
     }
-    arity = outgoingVector.size(); 
-    if (arity > 0) { 
-        outgoing = (Handle*) malloc(sizeof(Handle)*arity);
-        for (int i = 0; i < arity; i++)
-        {
+    arity = outgoingVector.size();
+    if (arity > 0) {
+        outgoing = (Handle*) malloc(sizeof(Handle) * arity);
+        for (int i = 0; i < arity; i++) {
 #ifdef PEFORM_INVALID_HANDLE_CHECKS
             // We'd like to perform a test for valid values here, but it seems
             // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
             // which it hopefully repairs later on ...
-            if (TLB::isInvalidHandle(outgoingVector[i]))
-            {
+            if (TLB::isInvalidHandle(outgoingVector[i])) {
                 throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
             }
 #endif
             outgoing[i] = outgoingVector[i];
         }
-    } 
+    }
     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
         qsort(outgoing, arity, sizeof(Handle), CoreUtils::handleCompare);
     }
@@ -320,15 +323,15 @@ void Atom::addOutgoingAtom(Handle h)
     // We'd like to perform a test for valid values here, but it seems
     // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
     // which it hopefully repairs later on ...
-    if (TLB::isInvalidHandle(h)) 
+    if (TLB::isInvalidHandle(h))
         throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
 #endif
 #ifdef USE_STD_VECTOR_FOR_OUTGOING
     outgoing.push_back(h);
-#else 
-    outgoing = (Handle*) realloc(outgoing, (arity+1)*sizeof(Handle));
+#else
+    outgoing = (Handle*) realloc(outgoing, (arity + 1) * sizeof(Handle));
     outgoing[arity++] = h;
-#endif    
+#endif
 }
 
 Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
@@ -342,7 +345,8 @@ Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
 }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-void Atom::addIncomingHandle(Handle handle) {
+void Atom::addIncomingHandle(Handle handle)
+{
 
     // creates a new entry with handle
     HandleEntry* entry = new HandleEntry(handle);
@@ -351,9 +355,10 @@ void Atom::addIncomingHandle(Handle handle) {
     incoming = entry;
 }
 
-void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException) {
+void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
+{
 
-	//printf("Entering Atom::removeIncomingHandle(): handle:\n%s\nincoming:\n%s\n", TLB::getAtom(handle)->toShortString().c_str(), incoming->toString().c_str());
+    //printf("Entering Atom::removeIncomingHandle(): handle:\n%s\nincoming:\n%s\n", TLB::getAtom(handle)->toShortString().c_str(), incoming->toString().c_str());
     HandleEntry* current = incoming;
     // checks if incoming set is empty
     if (incoming == NULL) {
@@ -382,7 +387,7 @@ void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException) {
         foundit->next = NULL;
         delete foundit;
     }
-	//printf("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
+    //printf("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
 }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
@@ -410,7 +415,7 @@ void Atom::setNext(int index, Handle handle)
             throw RuntimeException(TRACE_INFO, "no info about predicate indices");
         }
         index &= ~PREDICATE_INDEX;
-        unsigned long indexMask = (1UL<<index);
+        unsigned long indexMask = (1UL << index);
         //cprintf(DEBUG,"Index = %p (mask = %p)\n", index, indexMask);
         if (!(predicateIndexInfo->predicateIndexMask & indexMask)) {
             throw RuntimeException(TRACE_INFO, "could not find predicate index");
@@ -464,7 +469,7 @@ Handle Atom::next(int index)
         }
         index &= ~PREDICATE_INDEX;
         //cprintf(DEBUG,"Index = %p (mask = %p)\n", index, (1UL<<index));
-        if (predicateIndexInfo->predicateIndexMask & (1UL<<index)) {
+        if (predicateIndexInfo->predicateIndexMask & (1UL << index)) {
             Handle result = getNextHandleInPredicateIndex(index);
             //cprintf(DEBUG,"next = %p\n", result);
             return result;
@@ -476,7 +481,8 @@ Handle Atom::next(int index)
     }
 }
 
-Handle Atom::getNextHandleInPredicateIndex(int index) const{
+Handle Atom::getNextHandleInPredicateIndex(int index) const
+{
     // NOTE: Here, we know that index exists already.
     unsigned long maskOfMask = ~(0xFFFFFFFFUL << index);
     int pos = bitcount(predicateIndexInfo->predicateIndexMask & maskOfMask);
@@ -484,7 +490,8 @@ Handle Atom::getNextHandleInPredicateIndex(int index) const{
     return predicateIndexInfo->predicateIndex[pos];
 }
 
-void Atom::setNextHandleInPredicateIndex(int index, Handle nextHandle) {
+void Atom::setNextHandleInPredicateIndex(int index, Handle nextHandle)
+{
     // NOTE: Here, we know that index exists already.
     unsigned long maskOfMask = ~(0xFFFFFFFFUL << index);
     int pos = bitcount(predicateIndexInfo->predicateIndexMask & maskOfMask);
@@ -492,7 +499,8 @@ void Atom::setNextHandleInPredicateIndex(int index, Handle nextHandle) {
     predicateIndexInfo->predicateIndex[pos] = nextHandle;
 }
 
-void Atom::addNextPredicateIndex(int index, Handle nextHandle) {
+void Atom::addNextPredicateIndex(int index, Handle nextHandle)
+{
     //    printf("Atom(%p)::addNextPredicateIndex(%d, %p)\n", this, index, nextHandle);
     // NOTE: Here, we know that index is not added yet.
     if (predicateIndexInfo == NULL) {
@@ -508,7 +516,7 @@ void Atom::addNextPredicateIndex(int index, Handle nextHandle) {
         unsigned long maskOfMask = ~(0xFFFFFFFFUL << index);
         int pos = bitcount(mask & maskOfMask);
         // Gets the new size and increment it by one
-        int size = bitcount(mask)+1;
+        int size = bitcount(mask) + 1;
         // allocates a new array for indices and set its positions
         Handle* newPredicateIndex = new Handle[size];
         for (int i = 0; i < size; i++) {
@@ -518,14 +526,15 @@ void Atom::addNextPredicateIndex(int index, Handle nextHandle) {
                 newPredicateIndex[i] = oldPredicateIndex[i-1];
             } else {
                 newPredicateIndex[i] = nextHandle;
-            }   
+            }
         }
         predicateIndexInfo->predicateIndex = newPredicateIndex;
         predicateIndexInfo->predicateIndexMask |= (1UL << index);
     }
 }
 
-void Atom::merge(Atom* other) throw (InconsistenceException) {
+void Atom::merge(Atom* other) throw (InconsistenceException)
+{
 
     if (!equals(other)) {
         throw InconsistenceException(TRACE_INFO, "Different atoms cannot be merged");
@@ -544,16 +553,16 @@ void Atom::merge(Atom* other) throw (InconsistenceException) {
         Link *link = dynamic_cast<Link *>(incAtom);
         if (link) {
             std::vector<Handle> outgoingSet = link->getOutgoingSet();
-            for (int i = 0; i < link->getArity(); i++){
-                if (eqHandle()(outgoingSet[i], otherHandle)){
+            for (int i = 0; i < link->getArity(); i++) {
+                if (eqHandle()(outgoingSet[i], otherHandle)) {
                     outgoingSet[i] = thisHandle;
                 }
             }
             // Although we have direct access to outgoing here, we need to
             // call setOutgoingSet anyway, since special handling may be
-            // need by subclasses (e.g, sorting of the outgoing, if it's 
+            // need by subclasses (e.g, sorting of the outgoing, if it's
             // an unordered link)
-            link->setOutgoingSet(outgoingSet); 
+            link->setOutgoingSet(outgoingSet);
         }
         inc = inc->next;
     }
@@ -564,13 +573,13 @@ void Atom::merge(Atom* other) throw (InconsistenceException) {
 
 #ifdef USE_SHARED_DEFAULT_TV
     // TruthValue::merge() method always return a new TV object
-    TruthValue* mergedTv = truthValue->merge(other->getTruthValue()); 
+    TruthValue* mergedTv = truthValue->merge(other->getTruthValue());
     if (truthValue != &(TruthValue::DEFAULT_TV())) {
         delete(truthValue);
     }
     if (mergedTv == &(TruthValue::DEFAULT_TV())) {
         delete(mergedTv);
-        truthValue = (TruthValue*) &(TruthValue::DEFAULT_TV());
+        truthValue = (TruthValue*) & (TruthValue::DEFAULT_TV());
     } else {
         truthValue = mergedTv;
     }
@@ -578,13 +587,14 @@ void Atom::merge(Atom* other) throw (InconsistenceException) {
     TruthValue* mergedTv = truthValue->merge(other->getTruthValue()); // always return a new TV object
     delete(truthValue);
     truthValue = mergedTv;
-#endif    
+#endif
 
-    //cprintf(DEBUG, ">> This atom's truth values after merge: %f %f %f\n", truthValue->getMean(), truthValue->getConfidence(), truthValue->getCount()); 
+    //cprintf(DEBUG, ">> This atom's truth values after merge: %f %f %f\n", truthValue->getMean(), truthValue->getConfidence(), truthValue->getCount());
 }
 
-bool Atom::isMarkedForRemoval() const{
-	//printf("Atom::isMarkedForRemoval(): %p\n", this);
+bool Atom::isMarkedForRemoval() const
+{
+    //printf("Atom::isMarkedForRemoval(): %p\n", this);
     return flags & MARKED_FOR_REMOVAL;
 }
 
@@ -643,7 +653,7 @@ int Atom::getTargetTypeIndexSize() const
     std::set<unsigned int> checkedTypes;
     int j = 0;
     // for each type in the target types array, it checks if it has already
-    // been found so that repeated types are not considered in the counting 
+    // been found so that repeated types are not considered in the counting
     for (int i = 0; i < getArity(); i++) {
         Type type = TLB::getAtom(outgoing[i])->getType();
         if (checkedTypes.find(type) == checkedTypes.end()) {
@@ -657,11 +667,13 @@ int Atom::getTargetTypeIndexSize() const
 }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-bool Atom::hasPredicateIndexInfo() {
+bool Atom::hasPredicateIndexInfo()
+{
     return (predicateIndexInfo != NULL);
 }
 
-int* Atom::buildPredicateIndices(int *size) const{
+int* Atom::buildPredicateIndices(int *size) const
+{
     unsigned long mask = predicateIndexInfo->predicateIndexMask;
     *size = bitcount(mask);
     int* result = new int[*size ];
@@ -671,8 +683,8 @@ int* Atom::buildPredicateIndices(int *size) const{
         if (mask & 1) {
             result[pos++] = predicateIndex;
         }
-        predicateIndex++;    
-        mask >>= 1;    
+        predicateIndex++;
+        mask >>= 1;
     }
     return result;
 }
@@ -730,7 +742,8 @@ int Atom::hashCode()
     return (int) type;
 }
 
-HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const{
+HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const
+{
 
     HandleEntry *answer = NULL;
     Handle me = TLB::getHandle(this);

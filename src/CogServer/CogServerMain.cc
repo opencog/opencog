@@ -9,9 +9,9 @@
  *            Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,11 +32,13 @@
 
 using namespace opencog;
 
-static void usage(char* progname) {
+static void usage(char* progname)
+{
     cerr << "Usage: " << progname << " [-c <config-file>]\n\n";
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // check command line
     if ((argc == 1) || ((argc == 3) && (strcmp(argv[1], "-c") == 0))) {
         // load the configuration from file if a filename was supplied on the command line
@@ -53,10 +55,10 @@ int main(int argc, char *argv[]) {
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
- 
+
         // cheapo hack to get the query processory up and running.
         // It would be more correct to have this loaded by a script
-        // executed from the command shell, rather than hard-coded 
+        // executed from the command shell, rather than hard-coded
         // into the C++ source.
         server().plugInInputHandler(new QueryProcessor());
         server().plugInInputHandler(new WordSenseProcessor());

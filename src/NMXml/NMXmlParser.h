@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -51,19 +51,20 @@ enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
  * This class implements an XML parser that reads XML files and inserts the
  * corresponding structure of nodes and links in the MindDB.
  */
-class NMXmlParser {
-  private:
+class NMXmlParser
+{
+private:
     Handle parse_pass(XMLBufferReader*, NMXmlParseType);
 
-  public:
- 
+public:
+
     //static Transaction *transaction;
     //AtomTable* atomTable;
     AtomSpace * atomSpace;
-    
+
     static bool fresh;
     static bool freshLinks;
-    
+
     /**
      * Store the name->handle mapping obtained during the first pass of
      * the parsing (when only Nodes are read) to be used in the second
@@ -72,26 +73,26 @@ class NMXmlParser {
     static Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> hypHandles;
 
     /**
-     * A special default (Simple) TruthValue object for any atom loaded from a XML doc,  
-     * unless the xml specifies explicitly the mean (strength) and/or count (confidence) 
+     * A special default (Simple) TruthValue object for any atom loaded from a XML doc,
+     * unless the xml specifies explicitly the mean (strength) and/or count (confidence)
      * using proper xml elements.
      * NOTE: this is actually the old DEFAULT TV returned by the former
      * static TruthValue::factoryDefaultTruthValue() method.
      */
     static const TruthValue& DEFAULT_TV();
-    
+
     /**
      * Constructor for this class.
      */
     //NMXmlParser(Transaction *, bool = true, bool = false);
     //NMXmlParser(AtomTable*, bool = true, bool = false);
     NMXmlParser(AtomSpace*, bool = true, bool = false);
-    
+
     /**
      * Destructor for this class.
      */
     ~NMXmlParser();
-    
+
     /**
      * Parses a XML document.
      *
@@ -104,7 +105,7 @@ class NMXmlParser {
      * @return the Handle of the last atomm inserted/merged into the atom table. Or UNDEFINED_HANDLE, if no atom was inserted/merged.
      */
     Handle parse(XMLBufferReader*, NMXmlParseType);
-    
+
     /**
      * This method loads XML files, reading them and creating the
      * corresponding atom structure in the atom table.
@@ -114,11 +115,11 @@ class NMXmlParser {
      *        wants to use a registered Transaction.
      * @param boolean indicating whether the XML contains solely
      *        new Nodes. Note: Hypothetical links are always fresh.
-    * @return a HandleEntry with the last outter link inserted/merged in the atom table for each parsed NM-xml. 
+    * @return a HandleEntry with the last outter link inserted/merged in the atom table for each parsed NM-xml.
      */
     //static HandleEntry* loadXML(const std::vector<XMLBufferReader*>&, AtomTable*,  bool = true, bool = false);
     static HandleEntry* loadXML(const std::vector<XMLBufferReader*>&, AtomSpace*,  bool = true, bool = false);
-    
+
     /**
      * Sets a node name. This method exists because Parser is friends with
      * Node, and the standard C portions of the parser need to access
@@ -128,7 +129,7 @@ class NMXmlParser {
      * @param Node name.
      */
     static void setNodeName(Node*, const char* name);
-    
+
     /**
      * Adds a handle to the outgoing set of an atom . This method exists because
      * Parser is friends with Atom, and the standard C portions of the
@@ -138,14 +139,14 @@ class NMXmlParser {
      * @param Handle to be added to the outgoing set.
      */
     static void addOutgoingAtom(Link*, Handle);
-    
+
     /**
       * Sets the outgoing set of the given atom using the given const reference to a vector of handles.
       * This method can be called only if the atom is not inserted in an AtomTable yet.
       * Otherwise, it throws a RuntimeException.
       */
     static void setOutgoingSet(Link*, const std::vector<Handle>&);
-    
+
 };
 
 #endif //NMXMLPARSER_H

@@ -7,9 +7,9 @@
  * Written by Rodrigo Barra
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,92 +28,93 @@
 
 #define N_HANDLES 10
 
-class HandleSetUTest :  public CxxTest::TestSuite{
+class HandleSetUTest :  public CxxTest::TestSuite
+{
 private:
-	Handle handles[N_HANDLES];
-	
-	HandleSet *handleSet;
+    Handle handles[N_HANDLES];
+
+    HandleSet *handleSet;
 public:
-	HandleSetUTest(){
-		for (int i = 0; i < N_HANDLES; i++){
-			char name[1<<16];
-			sprintf(name, "name-%d", i);
-			Node *n = new Node(WORD_NODE, strdup(name));
-			handles[i] = TLB::addAtom(n);
-		}
-	}
-
-	~HandleSetUTest(){
+    HandleSetUTest() {
+        for (int i = 0; i < N_HANDLES; i++) {
+            char name[1<<16];
+            sprintf(name, "name-%d", i);
+            Node *n = new Node(WORD_NODE, strdup(name));
+            handles[i] = TLB::addAtom(n);
+        }
     }
 
-    void setUp(){
-		handleSet = new HandleSet();
+    ~HandleSetUTest() {
     }
 
-    void tearDown(){
-		delete(handleSet);
+    void setUp() {
+        handleSet = new HandleSet();
     }
 
-	void testAdd1(){
-		for (int i = 0; i < N_HANDLES; i++){
-			TS_ASSERT(!handleSet->contains(handles[i]));
-		}
-		for (int i = 0; i < N_HANDLES; i++){
-			handleSet->add(handles[i]);
-			TS_ASSERT(handleSet->contains(handles[i]));
-			TS_ASSERT(handleSet->getSize() == i+1);
-		}
-	}
+    void tearDown() {
+        delete(handleSet);
+    }
 
-	void testAdd2(){
-		
-		for (int i = 0; i < N_HANDLES; i++){
-			handleSet->add(handles[i]);
-		}
-		HandleSet *handleSet1 = new HandleSet();
-		handleSet1->add(handleSet);
-		for (int i = 0; i < N_HANDLES; i++){
-			TS_ASSERT(handleSet->contains(handles[i]));
-		}
-		TS_ASSERT(handleSet1->getSize() == N_HANDLES);
-		delete(handleSet1);
-	}
-	
-	void testRemove(){
-		for (int i = 0; i < N_HANDLES; i++){
-			handleSet->add(handles[i]);
-		}
-		for (int i = 0; i < N_HANDLES; i++){
-			TS_ASSERT(handleSet->contains(handles[i]));
-			handleSet->remove(handles[i]);
-			TS_ASSERT(!handleSet->contains(handles[i]));
-			TS_ASSERT_THROWS(handleSet->remove(handles[i]), RuntimeException&);
-		}
-	}
+    void testAdd1() {
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(!handleSet->contains(handles[i]));
+        }
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleSet->add(handles[i]);
+            TS_ASSERT(handleSet->contains(handles[i]));
+            TS_ASSERT(handleSet->getSize() == i + 1);
+        }
+    }
 
-	void testKeys(){
-		bool iterated[N_HANDLES];
-		
-		memset(iterated, 0, sizeof(bool)*N_HANDLES);
+    void testAdd2() {
 
-		for (int i = 0; i < N_HANDLES; i++){
-			handleSet->add(handles[i]);
-		}
-		HandleSetIterator *it = handleSet->keys();
-		for (int i = 0; i < N_HANDLES; i++){
-			TS_ASSERT(it->hasNext());
-			Handle h = it->next();
-			for (int j = 0; j < N_HANDLES; j++){
-				if (!CoreUtils::handleCompare(&h, &handles[j])){
-					iterated[i] = true;
-				}
-			}
-		}		
-		for (int i = 0; i < N_HANDLES; i++){
-			TS_ASSERT(iterated[i]);
-		}
-		TS_ASSERT(!it->hasNext());
-		TS_ASSERT_THROWS(it->next(), IndexErrorException&);
-		delete(it);
-	}
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleSet->add(handles[i]);
+        }
+        HandleSet *handleSet1 = new HandleSet();
+        handleSet1->add(handleSet);
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(handleSet->contains(handles[i]));
+        }
+        TS_ASSERT(handleSet1->getSize() == N_HANDLES);
+        delete(handleSet1);
+    }
+
+    void testRemove() {
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleSet->add(handles[i]);
+        }
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(handleSet->contains(handles[i]));
+            handleSet->remove(handles[i]);
+            TS_ASSERT(!handleSet->contains(handles[i]));
+            TS_ASSERT_THROWS(handleSet->remove(handles[i]), RuntimeException&);
+        }
+    }
+
+    void testKeys() {
+        bool iterated[N_HANDLES];
+
+        memset(iterated, 0, sizeof(bool)*N_HANDLES);
+
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleSet->add(handles[i]);
+        }
+        HandleSetIterator *it = handleSet->keys();
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(it->hasNext());
+            Handle h = it->next();
+            for (int j = 0; j < N_HANDLES; j++) {
+                if (!CoreUtils::handleCompare(&h, &handles[j])) {
+                    iterated[i] = true;
+                }
+            }
+        }
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(iterated[i]);
+        }
+        TS_ASSERT(!it->hasNext());
+        TS_ASSERT_THROWS(it->next(), IndexErrorException&);
+        delete(it);
+    }
 };

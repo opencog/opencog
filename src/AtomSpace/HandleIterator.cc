@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,26 +31,27 @@
 #include "TLB.h"
 #include "AtomSpaceDefinitions.h"
 
-HandleIterator::HandleIterator( AtomTable *t, Type type, bool subclass, VersionHandle vh) {
+HandleIterator::HandleIterator( AtomTable *t, Type type, bool subclass, VersionHandle vh)
+{
     init(t, type, subclass, vh);
 }
 
-void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle vh) {
+void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle vh)
+{
 
-	table = t;
+    table = t;
 
     desiredType = type;
     desiredTypeSubclass = subclass;
     desiredVersionHandle = vh;
-    
+
     if (subclass) {
         // current handle and type are set to be the first element in the
         // first index that matches subclass criteria
         currentType = 0;
         while (currentType < ClassServer::getNumberOfClasses()) {
             if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
-                !TLB::isInvalidHandle(table->getTypeIndexHead(currentType)))
-            {
+                    !TLB::isInvalidHandle(table->getTypeIndexHead(currentType))) {
                 break;
             } else {
                 currentType++;
@@ -69,15 +70,18 @@ void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle
     table->registerIterator(this);
 }
 
-HandleIterator::~HandleIterator() {
+HandleIterator::~HandleIterator()
+{
     table->unregisterIterator(this);
 }
 
-bool HandleIterator::hasNext() {
+bool HandleIterator::hasNext()
+{
     return !TLB::isInvalidHandle(currentHandle);
 }
 
-Handle HandleIterator::next() {
+Handle HandleIterator::next()
+{
 
     // keep current handle to return it
     Handle answer = currentHandle;
@@ -87,14 +91,12 @@ Handle HandleIterator::next() {
 
     // if the list finishes, it's necessary to move to the next index
     // that matches subclass criteria
-    if (TLB::isInvalidHandle(currentHandle))
-    {
+    if (TLB::isInvalidHandle(currentHandle)) {
         if (desiredTypeSubclass) {
             currentType++;
             while (currentType < ClassServer::getNumberOfClasses()) {
                 if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
-                    !TLB::isInvalidHandle(table->getTypeIndexHead(currentType)))
-                {
+                        !TLB::isInvalidHandle(table->getTypeIndexHead(currentType))) {
                     break;
                 } else {
                     currentType++;

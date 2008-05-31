@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +31,7 @@
 // Low-lying values are reserved for "non-real" atoms.
 unsigned long TLB::uuid = NOTYPE + 1;
 
-std::map<Handle,Atom *> TLB::handle_map;
-std::map<Atom *,Handle> TLB::atom_map;
+std::map<Handle, Atom *> TLB::handle_map;
+std::map<Atom *, Handle> TLB::atom_map;
 
 #endif

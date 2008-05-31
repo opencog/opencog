@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,46 +30,46 @@
 #include <HandleMap.h>
 
 /**
- * This interface should be implemented by any 
- * Repositories that want to be called by the 
+ * This interface should be implemented by any
+ * Repositories that want to be called by the
  * SavingLoading. These repositories should
- * register in the SavingLoading using the 
+ * register in the SavingLoading using the
  * method SavingLoading::addSavableRepository.
  */
 class SavableRepository
 {
 protected:
-	/**
-	 * Protected constructor so that this class is abstract.
-	 */
-	SavableRepository(){}
+    /**
+     * Protected constructor so that this class is abstract.
+     */
+    SavableRepository() {}
 public:
-	virtual ~SavableRepository(){}
-	
-	/**
-	 * Returns an identifier for the Repository.
-	 */
-	virtual const char* getId() const = 0;
-	
-	/**
-	 * Saves the repository to a file.
-	 *
-	 * @param The file where the repository should be saved.
-	 */
-	virtual void saveRepository(FILE *) const = 0;
-	
-	/**
-	 * Loads the repository from a file.
-	 *
-	 * @param The file from where the repository should be loaded.
-	 */
-	virtual void loadRepository(FILE *, HandleMap<Atom *> *) = 0;
+    virtual ~SavableRepository() {}
+
+    /**
+     * Returns an identifier for the Repository.
+     */
+    virtual const char* getId() const = 0;
+
+    /**
+     * Saves the repository to a file.
+     *
+     * @param The file where the repository should be saved.
+     */
+    virtual void saveRepository(FILE *) const = 0;
+
+    /**
+     * Loads the repository from a file.
+     *
+     * @param The file from where the repository should be loaded.
+     */
+    virtual void loadRepository(FILE *, HandleMap<Atom *> *) = 0;
 
 
-	/**
-	 * This method is used to clear the Repository.
-	 */
-	virtual void clear() = 0;
+    /**
+     * This method is used to clear the Repository.
+     */
+    virtual void clear() = 0;
 
 };
 

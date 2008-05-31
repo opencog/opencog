@@ -7,9 +7,9 @@
  * Written by Tony Lofthouse <tony_lofthouse@btinternet.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -41,63 +41,64 @@
 #define DEFAULTATOMLTI AttentionValue::DEFAULTATOMLTI;
 #define DEFAULTATOMVLTI AttentionValue::DEFAULTATOMVLTI;
 
-class AttentionValueUTest :  public CxxTest::TestSuite {
+class AttentionValueUTest :  public CxxTest::TestSuite
+{
 private:
-	
+
     AttentionValue::sti_t sti[NUM_AVS];
     AttentionValue::lti_t lti[NUM_AVS];
     AttentionValue::vlti_t vlti[NUM_AVS];
 
-    AttentionValue* avs[NUM_AVS];    
+    AttentionValue* avs[NUM_AVS];
 
 public:
-	AttentionValueUTest(){
-	        
-		sti[0] = DEFAULTATOMSTI;
-		sti[1] = AV1_STI;
-		sti[2] = AV2_STI;
-		sti[3] = AV3_STI;
+    AttentionValueUTest() {
 
-		lti[0] = DEFAULTATOMLTI;
-		lti[1] = DEFAULTATOMLTI;
-		lti[2] = AV2_LTI;
-		lti[3] = AV3_LTI;
+        sti[0] = DEFAULTATOMSTI;
+        sti[1] = AV1_STI;
+        sti[2] = AV2_STI;
+        sti[3] = AV3_STI;
 
-		vlti[0] = DEFAULTATOMVLTI;
-		vlti[1] = DEFAULTATOMVLTI;
-		vlti[2] = DEFAULTATOMVLTI
-		vlti[3] = AV3_VLTI;
+        lti[0] = DEFAULTATOMLTI;
+        lti[1] = DEFAULTATOMLTI;
+        lti[2] = AV2_LTI;
+        lti[3] = AV3_LTI;
 
-	        AttentionValue *av = AttentionValue::factory();
-	        delete av;
-	}
+        vlti[0] = DEFAULTATOMVLTI;
+        vlti[1] = DEFAULTATOMVLTI;
+        vlti[2] = DEFAULTATOMVLTI
+                  vlti[3] = AV3_VLTI;
 
-    void setUp() {
-	avs[0] = AttentionValue::factory();
-	avs[1] = AttentionValue::factory(sti[1]);
-	avs[2] = AttentionValue::factory(sti[2], lti[2]);
-	avs[3] = AttentionValue::factory(sti[3], lti[3], vlti[3]);
+        AttentionValue *av = AttentionValue::factory();
+        delete av;
     }
 
-    void tearDown(){
+    void setUp() {
+        avs[0] = AttentionValue::factory();
+        avs[1] = AttentionValue::factory(sti[1]);
+        avs[2] = AttentionValue::factory(sti[2], lti[2]);
+        avs[3] = AttentionValue::factory(sti[3], lti[3], vlti[3]);
+    }
+
+    void tearDown() {
         for (int i = 0; i < NUM_AVS; i++) {
             delete avs[i];
         }
     }
 
-    void testConstructors(){
-        
+    void testConstructors() {
+
         AttentionValue *av;
-        
-	for(int i = 0; i < NUM_AVS; i++) {
+
+        for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
-	    //printf("getSTI()=%d, sti[i]=%d\n", av->getSTI(), sti[i]);
-	    //printf("getLTI()=%d, lti[i]=%d\n", av->getLTI(), lti[i]);
-	    //printf("getVLTI()=%d, vlti[i]=%d\n", av->getVLTI(), vlti[i]);
+            //printf("getSTI()=%d, sti[i]=%d\n", av->getSTI(), sti[i]);
+            //printf("getLTI()=%d, lti[i]=%d\n", av->getLTI(), lti[i]);
+            //printf("getVLTI()=%d, vlti[i]=%d\n", av->getVLTI(), vlti[i]);
             TS_ASSERT(av != NULL);
             TS_ASSERT(av->getSTI() == sti[i]);
             TS_ASSERT(av->getLTI() == lti[i]);
-            TS_ASSERT(av->getVLTI() == vlti[i]);           
+            TS_ASSERT(av->getVLTI() == vlti[i]);
         }
     }
 
@@ -105,81 +106,81 @@ public:
 
         AttentionValue *av;
 
-	for(int i = 0; i < NUM_AVS; i++) {
+        for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
 
             TS_ASSERT(av->getSTI() == sti[i]);
             TS_ASSERT(av->getLTI() == lti[i]);
-            TS_ASSERT(av->getVLTI() == vlti[i]);           
+            TS_ASSERT(av->getVLTI() == vlti[i]);
         }
     }
 
     void testclone() {
-	AttentionValue *clonedAV, *av;
+        AttentionValue *clonedAV, *av;
 
-	for(int i = 0; i < NUM_AVS; i++) {
+        for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
-	    clonedAV = av->clone();	    
+            clonedAV = av->clone();
             TS_ASSERT(av->getSTI() == clonedAV->getSTI());
             TS_ASSERT(av->getLTI() == clonedAV->getLTI());
-            TS_ASSERT(av->getVLTI() == clonedAV->getVLTI());           
+            TS_ASSERT(av->getVLTI() == clonedAV->getVLTI());
         }
     }
 
     void testOperatorEquals() {
-	
 
-	for(int i = 0; i < NUM_AVS; i++) {
-	    const AttentionValue& av1 = *avs[i];
-	    const AttentionValue& av2 = *av1.clone();
-	    //printf("getSTI()=%d, cloned=%d\n", av1.getSTI(), av2.getSTI());
-	    //printf("getLTI()=%d, cloned=%d\n", av1.getLTI(), av2.getLTI());
-	    //printf("getVLTI()=%d, cloned=%d\n", av1.getVLTI(), av2.getVLTI());	    
+
+        for (int i = 0; i < NUM_AVS; i++) {
+            const AttentionValue& av1 = *avs[i];
+            const AttentionValue& av2 = *av1.clone();
+            //printf("getSTI()=%d, cloned=%d\n", av1.getSTI(), av2.getSTI());
+            //printf("getLTI()=%d, cloned=%d\n", av1.getLTI(), av2.getLTI());
+            //printf("getVLTI()=%d, cloned=%d\n", av1.getVLTI(), av2.getVLTI());
             TS_ASSERT(av1 == av2);
         }
     }
 
     void testgetDefault() {
-	const AttentionValue& av = AttentionValue::getDefaultAV();
+        const AttentionValue& av = AttentionValue::getDefaultAV();
 
-	TS_ASSERT(av.getSTI() == sti[0]);
+        TS_ASSERT(av.getSTI() == sti[0]);
         TS_ASSERT(av.getLTI() == lti[0]);
-        TS_ASSERT(av.getVLTI() == vlti[0]); 
+        TS_ASSERT(av.getVLTI() == vlti[0]);
     }
 
     void testfactory() {
-	AttentionValue *av;
-        
-	av = AttentionValue::factory();
-	TS_ASSERT(av->getSTI() == sti[0]);
-	TS_ASSERT(av->getLTI() == lti[0]);
-	TS_ASSERT(av->getVLTI() == vlti[0]);
+        AttentionValue *av;
 
-	av = AttentionValue::factory(sti[1]);
-	TS_ASSERT(av->getSTI() == sti[1]);
-	TS_ASSERT(av->getLTI() == lti[1]);
-	TS_ASSERT(av->getVLTI() == vlti[1]);
+        av = AttentionValue::factory();
+        TS_ASSERT(av->getSTI() == sti[0]);
+        TS_ASSERT(av->getLTI() == lti[0]);
+        TS_ASSERT(av->getVLTI() == vlti[0]);
 
-	av = AttentionValue::factory(sti[2], lti[2]);
-	TS_ASSERT(av->getSTI() == sti[2]);
-	TS_ASSERT(av->getLTI() == lti[2]);
-	TS_ASSERT(av->getVLTI() == vlti[2]);
+        av = AttentionValue::factory(sti[1]);
+        TS_ASSERT(av->getSTI() == sti[1]);
+        TS_ASSERT(av->getLTI() == lti[1]);
+        TS_ASSERT(av->getVLTI() == vlti[1]);
 
-	av = AttentionValue::factory(sti[3], lti[3], vlti[3]);
-	TS_ASSERT(av->getSTI() == sti[3]);
-	TS_ASSERT(av->getLTI() == lti[3]);
-	TS_ASSERT(av->getVLTI() == vlti[3]);
+        av = AttentionValue::factory(sti[2], lti[2]);
+        TS_ASSERT(av->getSTI() == sti[2]);
+        TS_ASSERT(av->getLTI() == lti[2]);
+        TS_ASSERT(av->getVLTI() == vlti[2]);
+
+        av = AttentionValue::factory(sti[3], lti[3], vlti[3]);
+        TS_ASSERT(av->getSTI() == sti[3]);
+        TS_ASSERT(av->getLTI() == lti[3]);
+        TS_ASSERT(av->getVLTI() == vlti[3]);
     }
 
     //static std::string toStr();
     void testtoString() {
-	char buffer[100];
+        char buffer[100];
         //printf("AttentionValue::testtoString()\n");
-	for(int i = 0; i < NUM_AVS; i++) {        
-	    //printf("AV[%d] = %s\n", i, avs[i]->toString().c_str());
+        for (int i = 0; i < NUM_AVS; i++) {
+            //printf("AV[%d] = %s\n", i, avs[i]->toString().c_str());
             std::string str = avs[i]->toString();
-	    sprintf(buffer, "[%d, %d, %s]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE");
+            sprintf(buffer, "[%d, %d, %s]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE");
             TS_ASSERT(!strcmp(str.c_str(), buffer));
         }
-    }  
+    }
 };

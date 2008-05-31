@@ -7,9 +7,9 @@
  * Written by Rodrigo Barra
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,34 +31,35 @@
 #include <NMXmlParserExperiment.h>
 #include <FileXMLBufferReader.h>
 
-class NMXmlParserUTest: public CxxTest::TestSuite{
-private: 
+class NMXmlParserUTest: public CxxTest::TestSuite
+{
+private:
     AtomSpace* atomSpace;
-public:		
-	
+public:
+
     NMXmlParserUTest() {
-		NMXmlParserExperiment::initStaticVars();
+        NMXmlParserExperiment::initStaticVars();
         atomSpace = new AtomSpace();
     }
 
-	void tearDown() {
-		atomSpace = NMXmlParserExperiment::cleanupAtomSpace();
-	}
+    void tearDown() {
+        atomSpace = NMXmlParserExperiment::cleanupAtomSpace();
+    }
 
-	void testParser(){
-		printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
-		for (int i = 0; i < NMXmlParserExperiment::getNExperiments(); i++){
-			printf("\nExperiment %d\n", i);
-			NMXmlParserExperiment::createExperiment(i, atomSpace);	
+    void testParser() {
+        printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
+        for (int i = 0; i < NMXmlParserExperiment::getNExperiments(); i++) {
+            printf("\nExperiment %d\n", i);
+            NMXmlParserExperiment::createExperiment(i, atomSpace);
 
-			std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(NMXmlParserExperiment::currentFileName));
-			NMXmlParser::loadXML(readers, atomSpace);
-			delete readers[0];
-			
-			TS_ASSERT(NMXmlParserExperiment::checkExperiment());
-			atomSpace = NMXmlParserExperiment::destroyExperiment();
-			printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
-		}
-	}
+            std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(NMXmlParserExperiment::currentFileName));
+            NMXmlParser::loadXML(readers, atomSpace);
+            delete readers[0];
+
+            TS_ASSERT(NMXmlParserExperiment::checkExperiment());
+            atomSpace = NMXmlParserExperiment::destroyExperiment();
+            printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
+        }
+    }
 };
 

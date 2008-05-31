@@ -5,9 +5,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,41 +25,46 @@
 
 #include <boost/variant.hpp>
 
-namespace Util {
-  namespace detail {
-    template<typename Base>
-    struct based_variant_visitor : public boost::static_visitor<Base*> {
-      template<typename T>
-      Base* operator()(T& t) const { return &t; }
-    };
-    template<typename Base>    
-    struct const_based_variant_visitor : public boost::static_visitor<const Base*> {
-      template<typename T>
-      const Base* operator()(const T& t) const { return &t; }
-    };
-  } //~namespace detail
+namespace Util
+{
+namespace detail {
+template<typename Base>
+struct based_variant_visitor : public boost::static_visitor<Base*> {
+    template<typename T>
+    Base* operator()(T& t) const {
+        return &t;
+    }
+};
+template<typename Base>
+struct const_based_variant_visitor : public boost::static_visitor<const Base*> {
+    template<typename T>
+    const Base* operator()(const T& t) const {
+        return &t;
+    }
+};
+} //~namespace detail
 
-  template<typename Variant,typename Base>
-  struct based_variant : public Variant {
+template<typename Variant, typename Base>
+struct based_variant : public Variant {
     template<typename T>
     based_variant(const T& v) : Variant(v) { }
     based_variant() { }
 
     Base* operator->() {
-      return boost::apply_visitor(detail::based_variant_visitor<Base>(),*this); 
+        return boost::apply_visitor(detail::based_variant_visitor<Base>(), *this);
     }
     const Base* operator->() const {
-      return boost::apply_visitor(detail::const_based_variant_visitor<Base>(),*this);
+        return boost::apply_visitor(detail::const_based_variant_visitor<Base>(), *this);
     }
 
-    /*operator Base&() { 
-      return *boost::apply_visitor(detail::based_variant_visitor<Base>(),*this); 
+    /*operator Base&() {
+      return *boost::apply_visitor(detail::based_variant_visitor<Base>(),*this);
     }
-    operator const Base&() const { 
+    operator const Base&() const {
       return *boost::apply_visitor(detail::const_based_variant_visitor<Base>(),
       *this);
       }*/
-  };
+};
 
 } //~namespace Util
 

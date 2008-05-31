@@ -7,9 +7,9 @@
  * Written by Guilherme Lamaciee
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,28 +34,29 @@
 
 using namespace std;
 
-class Trail {
+class Trail
+{
 
     int maxSize;
     deque<Handle>* trail;
 
-    void init(int,int) throw (InvalidParamException, std::bad_exception);
+    void init(int, int) throw (InvalidParamException, std::bad_exception);
 
 public:
 
-    
+
     Trail() throw (InvalidParamException, std::bad_exception);
     Trail(int) throw (InvalidParamException, std::bad_exception);
-    Trail(int,int) throw (InvalidParamException, std::bad_exception);
+    Trail(int, int) throw (InvalidParamException, std::bad_exception);
 
     ~Trail();
 
     bool isInTrail(Handle);
 
-    void insert(Handle, bool = true); 
+    void insert(Handle, bool = true);
 
     void append(Trail*);
-    
+
     int getSize();
 
     void print();

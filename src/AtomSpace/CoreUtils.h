@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,9 +31,10 @@
 #include "exceptions.h"
 
 /** Module for including any core-specific common utilities */
-class CoreUtils {
+class CoreUtils
+{
 
-public:    
+public:
 
     /**
      * This method is used to translate an old handle to a new one mapped
@@ -43,7 +44,7 @@ public:
      * @param Table that maps from old to new handles.
      */
     static void updateHandle(Handle *, HandleMap<Atom *> *) throw (RuntimeException);
-    
+
     /**
      * Handle sort criterion used by qsort. It returns a negative value,
      * zero or a positive value if the first argument is respectively
@@ -58,8 +59,8 @@ public:
     static int handleCompare(const void*, const void*);
 
     /**
-     * Returns a negative value, zero or a positive value if the first 
-     * argument is respectively smaller than, equal to, or larger than 
+     * Returns a negative value, zero or a positive value if the first
+     * argument is respectively smaller than, equal to, or larger than
      * the second argument.
      *
      * @param The first handle element.
@@ -69,12 +70,13 @@ public:
      * second argument.
      */
     static int compare(Handle, Handle);
-    
-    class HandleComparison {
-        public:
+
+    class HandleComparison
+    {
+    public:
         bool operator()(const Handle& h1, const Handle& h2) const;
     };
-};    
+};
 
 
 #endif

@@ -9,9 +9,9 @@
  *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,24 +34,25 @@
 #include "TruthValue.h"
 #include "utils.h"
 
-class SimpleTruthValue : public TruthValue {
+class SimpleTruthValue : public TruthValue
+{
 
 protected:
 
     float mean;
     float count;
 
-    void init(float mean,float count);
+    void init(float mean, float count);
 
 public:
 
-    SimpleTruthValue(float mean,float count);
+    SimpleTruthValue(float mean, float count);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(SimpleTruthValue const&);
 
     SimpleTruthValue* clone() const;
     SimpleTruthValue& operator=(const TruthValue& rhs)
-        throw (RuntimeException);
+    throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
 

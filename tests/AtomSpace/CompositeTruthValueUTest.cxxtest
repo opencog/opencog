@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,7 +39,8 @@
 #define TV3_COUNT 2.0f
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
-class CompositeTruthValueUTest :  public CxxTest::TestSuite {
+class CompositeTruthValueUTest :  public CxxTest::TestSuite
+{
 private:
 
     CompositeTruthValue* tvs[NUM_TVS];
@@ -49,7 +50,7 @@ private:
     VersionHandle versionHandles[NUM_TVS];
 
 public:
-	CompositeTruthValueUTest(){
+    CompositeTruthValueUTest() {
         means[0] = TV1_MEAN;
         means[1] = TV2_MEAN;
         means[2] = TV3_MEAN;
@@ -59,7 +60,7 @@ public:
         versionHandles[0] = VersionHandle(HYPOTHETICAL, TLB::getHandle((Atom *) 1));
         versionHandles[1] = VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *) 2));
         versionHandles[2] = VersionHandle(UNKNOWN, TLB::getHandle((Atom *) 3));
-	}
+    }
 
     void setUp() {
         for (int i = 0; i < NUM_TVS; i++) {
@@ -69,14 +70,14 @@ public:
         }
     }
 
-    void tearDown(){
+    void tearDown() {
         for (int i = 0; i < NUM_TVS; i++) {
             delete tvs[i];
         }
     }
 
-    void testConstructor(){
-    	printf("testConstructor()\n");
+    void testConstructor() {
+        printf("testConstructor()\n");
         SimpleTruthValue* expectedPrimaryTV = (SimpleTruthValue*) TruthValue::DEFAULT_TV().clone();
         CompositeTruthValue* tv;
         for (int i = 0; i < NUM_TVS; i++) {
@@ -98,10 +99,10 @@ public:
         TS_ASSERT(fabs(tv->getConfidence() - expectedPrimaryTV->getConfidence()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(tv->getNumberOfVersionedTVs() == 0);
         delete tv;
-        delete expectedPrimaryTV;        
+        delete expectedPrimaryTV;
     }
-    
-    void testCopyConstructor(){
+
+    void testCopyConstructor() {
         printf("testCopyConstructor()\n");
         const TruthValue& expectedPrimaryTV = TruthValue::DEFAULT_TV();
         CompositeTruthValue* tv;
@@ -126,7 +127,7 @@ public:
         TS_ASSERT(tv->getNumberOfVersionedTVs() == 0);
         delete tv;
     }
-    
+
     void testClone() {
         printf("testClone() \n");
         // test clone of CTVs with default primary TVs
@@ -201,7 +202,7 @@ public:
             TS_ASSERT(tvs[i]->getType() == COMPOSITE_TRUTH_VALUE);
         }
     }
-    
+
     void testToFloat() {
         printf("testToFloat()\n");
         SimpleTruthValue* expectedPrimaryTV = (SimpleTruthValue*) TruthValue::DEFAULT_TV().clone();
@@ -210,7 +211,7 @@ public:
             TS_ASSERT(fabs(tvs[i]->toFloat()  - expectedPrimaryTV->toFloat()) <= FLOAT_ACCEPTABLE_ERROR);
         }
     }
-    
+
     void testToAndFromString() {
         printf("testToAndFromString()\n");
         char tvStr[1024];
@@ -232,7 +233,7 @@ public:
             TS_ASSERT(rebuiltCtv->getNumberOfVersionedTVs() == tvs[i]->getNumberOfVersionedTVs());
             for (int j = 0; j < NUM_TVS; j++) {
                 const SimpleTruthValue* versionedTv = dynamic_cast<const SimpleTruthValue*>(&(rebuiltCtv->getVersionedTV(versionHandles[j])));
-                if (versionedTv) { 
+                if (versionedTv) {
                     //printf("************ found versionedTv for tv[%d] => %s\n", i, versionedTv->toString().c_str());
                 }
                 if (j != i) {
@@ -257,7 +258,7 @@ public:
             TS_ASSERT(fabs(mergedTv->getMean()  - expectedPrimaryTV->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(mergedTv->getCount()  - expectedPrimaryTV->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(mergedTv->getConfidence() - expectedPrimaryTV->getConfidence()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(mergedTv->getNumberOfVersionedTVs() == (i+1)); // each iteration adds a distinct versioned tv
+            TS_ASSERT(mergedTv->getNumberOfVersionedTVs() == (i + 1)); // each iteration adds a distinct versioned tv
             for (int j = 0; j < NUM_TVS; j++) {
                 const SimpleTruthValue* versionedTv = dynamic_cast<const SimpleTruthValue*>(&(mergedTv->getVersionedTV(versionHandles[j])));
                 if (j > i) {
@@ -284,11 +285,11 @@ public:
         TS_ASSERT(fabs(mergedTv->getCount()  - counts[2]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - confidences[2]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(mergedTv->getNumberOfVersionedTVs() == 2);
-        
+
         // test merge between CTVs with similar but different versioned Tvs
         CompositeTruthValue* newCTv = new CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
         for (int i = 0; i < NUM_TVS; i++) {
-            newCTv->setVersionedTV(SimpleTruthValue(means[i]/2, counts[i]+1), versionHandles[i]);
+            newCTv->setVersionedTV(SimpleTruthValue(means[i] / 2, counts[i] + 1), versionHandles[i]);
         }
         mergedTv = (CompositeTruthValue*) tvs[0]->merge(*newCTv);
         SimpleTruthValue expectedPrimaryTV((const SimpleTruthValue&)TruthValue::DEFAULT_TV());
@@ -299,11 +300,11 @@ public:
         for (int j = 0; j < NUM_TVS; j++) {
             const SimpleTruthValue* versionedTv = dynamic_cast<const SimpleTruthValue*>(&(mergedTv->getVersionedTV(versionHandles[j])));
             TS_ASSERT(versionedTv != NULL);
-            TS_ASSERT(fabs(versionedTv->getMean()  - means[j]/2) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(versionedTv->getCount()  - (counts[j]+1)) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(versionedTv->getMean()  - means[j] / 2) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(versionedTv->getCount()  - (counts[j] + 1)) <= FLOAT_ACCEPTABLE_ERROR);
         }
         delete newCTv;
-        
+
         // test merge between a CTV and other types of TV
         // merging with SimpleTruthValue objects
         TruthValue* fPtlTv = new SimpleTruthValue(0.0f, 0.0f);
@@ -320,14 +321,14 @@ public:
         TS_ASSERT(fabs(mergedTv->getConfidence() - confidences[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(mergedTv->getNumberOfVersionedTVs() == 1);
         delete fPtlTv;
-        
+
         // merging with IndefiniteTruthValue objects
         expectedPrimaryTV = SimpleTruthValue(mergedTv->getMean(), mergedTv->getCount());
         TruthValue* indefiniteTv = new IndefiniteTruthValue(0.0f, 1.0f); // more u greater than l, less count value
         //printf("tvs[1]->getConfidence() = %f, indefiniteTv->getConfidence() = %f\n", tvs[1]->getConfidence(), indefiniteTv->getConfidence());
         //printf("tvs[1]->getMean() = %f, indefiniteTv->getMean() = %f\n", tvs[1]->getMean(), indefiniteTv->getMean());
         mergedTv = (CompositeTruthValue*) tvs[1]->merge(*indefiniteTv);
-        //printf("mergedTv->getMean() = %f, expectedPrimaryTV.getMean() = %f\n", mergedTv->getMean(), expectedPrimaryTV.getMean()); 
+        //printf("mergedTv->getMean() = %f, expectedPrimaryTV.getMean() = %f\n", mergedTv->getMean(), expectedPrimaryTV.getMean());
         TS_ASSERT(fabs(mergedTv->getMean()  - expectedPrimaryTV.getMean()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getCount()  - expectedPrimaryTV.getCount()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - expectedPrimaryTV.getConfidence()) <= FLOAT_ACCEPTABLE_ERROR);
@@ -336,19 +337,19 @@ public:
         indefiniteTv = new IndefiniteTruthValue(0.5f, 0.5f); // more u tends to l, more count value
         mergedTv = (CompositeTruthValue*) tvs[1]->merge(*indefiniteTv);
         TS_ASSERT(fabs(mergedTv->getMean()  - indefiniteTv->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(fabs(mergedTv->getCount() - indefiniteTv->getCount()) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.          
+        TS_ASSERT(fabs(mergedTv->getCount() - indefiniteTv->getCount()) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
         TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteTv->getConfidence()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(mergedTv->getNumberOfVersionedTVs() == 1);
         delete indefiniteTv;
-    }    
-    
-    void testAssignmentOperator(){
+    }
+
+    void testAssignmentOperator() {
         printf("testAssignmentOperator()\n");
         SimpleTruthValue expectedPrimaryTV((const SimpleTruthValue&) TruthValue::DEFAULT_TV());
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue tv(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
             tv = *(tvs[i]); // This test operator=(const CompositeTruthvalue&) method
-            // Alternativaly, you could use the line bellow: 
+            // Alternativaly, you could use the line bellow:
             // tv = (const CompositeTruthValue&) *(tvs[i]);
             TS_ASSERT(fabs(tv.getMean()  - TruthValue::DEFAULT_TV().getMean()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv.getCount()  - TruthValue::DEFAULT_TV().getCount()) <= FLOAT_ACCEPTABLE_ERROR);
@@ -361,7 +362,7 @@ public:
         }
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue tv(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
-            tv = (const TruthValue&) *(tvs[i]); // This test operator=(const TruthValue&) method
+            tv = (const TruthValue&) * (tvs[i]); // This test operator=(const TruthValue&) method
             TS_ASSERT(fabs(tv.getMean()  - TruthValue::DEFAULT_TV().getMean()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv.getCount()  - TruthValue::DEFAULT_TV().getCount()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv.getConfidence() - TruthValue::DEFAULT_TV().getConfidence()) <= FLOAT_ACCEPTABLE_ERROR);
@@ -371,7 +372,7 @@ public:
             TS_ASSERT(fabs(versionedTv.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(versionedTv.getConfidence() - confidences[i]) <= FLOAT_ACCEPTABLE_ERROR);
         }
-        const TruthValue& simpleTv = SimpleTruthValue(0,0);
+        const TruthValue& simpleTv = SimpleTruthValue(0, 0);
         const TruthValue& indefiniteTv = IndefiniteTruthValue();
         CompositeTruthValue tv(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
         TS_ASSERT_THROWS(tv = TruthValue::NULL_TV(), RuntimeException&);
@@ -384,8 +385,8 @@ public:
         CompositeTruthValue* ctv = new CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
         TS_ASSERT(ctv->getNumberOfVersionedTVs() == 0);
         for (int i = 0; i < NUM_TVS; i++) {
-            ctv->setVersionedTV(SimpleTruthValue(means[0],counts[0]), versionHandles[i]);
-            TS_ASSERT(ctv->getNumberOfVersionedTVs() == (i+1));
+            ctv->setVersionedTV(SimpleTruthValue(means[0], counts[0]), versionHandles[i]);
+            TS_ASSERT(ctv->getNumberOfVersionedTVs() == (i + 1));
             for (int j = 0; j < NUM_TVS; j++) {
                 if (j <= i) {
                     const TruthValue& versionedTv = ctv->getVersionedTV(versionHandles[j]);
@@ -399,7 +400,7 @@ public:
         }
         for (int i = 0; i < NUM_TVS; i++) {
             ctv->removeVersionedTVs(versionHandles[i].substantive);
-            TS_ASSERT(ctv->getNumberOfVersionedTVs() == (2-i));
+            TS_ASSERT(ctv->getNumberOfVersionedTVs() == (2 - i));
             for (int j = 0; j < NUM_TVS; j++) {
                 if (j > i) {
                     const TruthValue& versionedTv = ctv->getVersionedTV(versionHandles[j]);
@@ -413,35 +414,35 @@ public:
         }
         // Test invalid removal
         for (int i = 0; i < NUM_TVS; i++) {
-            ctv->removeVersionedTVs(versionHandles[i].substantive); 
+            ctv->removeVersionedTVs(versionHandles[i].substantive);
         }
     }
-    
+
     void testRemoveVersionedTV() {
         printf("testRemoveVersionedTV()\n");
         for (int i = 0; i < NUM_TVS; i++) {
             for (int j = 0; j < NUM_TVS; j++) {
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j+1));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j + 1));
                 if (j != i) {
-                    tvs[i]->setVersionedTV(SimpleTruthValue(means[j], counts[j]), 
+                    tvs[i]->setVersionedTV(SimpleTruthValue(means[j], counts[j]),
                                            VersionHandle(versionHandles[j].indicator, versionHandles[i].substantive));
                 } else {
-                    tvs[i]->setVersionedTV(SimpleTruthValue(means[i], counts[i]), 
+                    tvs[i]->setVersionedTV(SimpleTruthValue(means[i], counts[i]),
                                            VersionHandle(versionHandles[i].indicator, versionHandles[(i+1)%NUM_TVS].substantive));
                 }
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j+2));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j + 2));
             }
         }
         for (int i = 0; i < NUM_TVS; i++) {
             for (int j = 0; j < NUM_TVS; j++) {
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS-j+1));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS - j + 1));
                 tvs[i]->removeVersionedTV(NULL_VERSION_HANDLE);
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS-j+1));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS - j + 1));
                 tvs[i]->removeVersionedTV(VersionHandle(versionHandles[j].indicator, versionHandles[i].substantive));
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS-j));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS - j));
                 // trying to remove non-existing versioned TVs
                 tvs[i]->removeVersionedTV(VersionHandle(versionHandles[j].indicator, versionHandles[i].substantive));
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS-j));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (NUM_TVS - j));
             }
             TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == 1);
             // removing the last versioned TV
@@ -454,15 +455,15 @@ public:
         printf("testSpecialCaseOfRemoveVersionedTVs()\n");
         for (int i = 0; i < NUM_TVS; i++) {
             for (int j = 0; j < NUM_TVS; j++) {
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j+1));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j + 1));
                 if (j != i) {
-                    tvs[i]->setVersionedTV(SimpleTruthValue(means[j], counts[j]), 
+                    tvs[i]->setVersionedTV(SimpleTruthValue(means[j], counts[j]),
                                            VersionHandle(versionHandles[j].indicator, versionHandles[i].substantive));
                 } else {
-                    tvs[i]->setVersionedTV(SimpleTruthValue(means[i], counts[i]), 
+                    tvs[i]->setVersionedTV(SimpleTruthValue(means[i], counts[i]),
                                            VersionHandle(versionHandles[i].indicator, versionHandles[(i+1)%NUM_TVS].substantive));
                 }
-                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j+2));
+                TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == (j + 2));
             }
             tvs[i]->removeVersionedTVs(versionHandles[i].substantive);
             TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == 1);
@@ -470,7 +471,7 @@ public:
             TS_ASSERT(tvs[i]->getNumberOfVersionedTVs() == 0);
         }
     }
-    
+
     void testGetVersionHandle() {
         printf("testGetVersionHandle()\n");
         for (int i = 0; i < NUM_TVS; i++) {
@@ -481,9 +482,8 @@ public:
             }
         }
     }
-    
-    void testUpdateVersionHandles()
-    {
+
+    void testUpdateVersionHandles() {
         printf("testUpdateVersionHandles()\n");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
         HandleMap<Atom *>* handles = new HandleMap<Atom *>();
@@ -496,7 +496,7 @@ public:
             const TruthValue& versionedTv1 = tv->getVersionedTV(versionHandles[i]);
             TS_ASSERT(versionedTv1.isNullTv());
             //printf("%d => %p\n", i+1, handles->get(i+1));
-            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, TLB::getHandle((Atom *) handles->get(TLB::getHandle((Atom *)(i+1))))));
+            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, TLB::getHandle((Atom *) handles->get(TLB::getHandle((Atom *)(i + 1))))));
             TS_ASSERT(!versionedTv2.isNullTv());
             TS_ASSERT(fabs(versionedTv2.getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(versionedTv2.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);

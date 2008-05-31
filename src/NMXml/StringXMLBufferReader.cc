@@ -5,9 +5,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,25 +33,29 @@ StringXMLBufferReader::~StringXMLBufferReader()
 {
 }
 
-void StringXMLBufferReader::open() {
+void StringXMLBufferReader::open()
+{
     currentPos = (char *) content;
 }
 
-void StringXMLBufferReader::close() {
+void StringXMLBufferReader::close()
+{
     currentPos = NULL;
 }
 
-XMLBufferReader* StringXMLBufferReader::clone() {
+XMLBufferReader* StringXMLBufferReader::clone()
+{
     XMLBufferReader* result = new StringXMLBufferReader(content);
     return result;
 }
 
 
-size_t StringXMLBufferReader::read(void *ptr, size_t size, size_t nmemb) {
+size_t StringXMLBufferReader::read(void *ptr, size_t size, size_t nmemb)
+{
     size_t result = 0;
     while (*currentPos != '\0' && result < nmemb) {
         *((char *)ptr) = *currentPos++;
-        ptr = (void*)(((char *) ptr)+1);
+        ptr = (void*)(((char *) ptr) + 1);
         result++;
     }
     return result;

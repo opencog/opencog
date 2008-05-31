@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,35 +33,36 @@
 #include <string>
 #include <queue>
 
-namespace opencog {
+namespace opencog
+{
 
 class SimpleNetworkServer : public NetworkServer
 {
-    private:
+private:
 
-        std::string prompt;
-        bool started;
-        static bool stopListenerThreadFlag;
-        int portNumber;
-        CogServer *cogServer;
-        bool shell_mode;
+    std::string prompt;
+    bool started;
+    static bool stopListenerThreadFlag;
+    int portNumber;
+    CogServer *cogServer;
+    bool shell_mode;
 
-        pthread_t socketListenerThread; // thread which will listen to the port
-        pthread_attr_t socketListenerAttr;
+    pthread_t socketListenerThread; // thread which will listen to the port
+    pthread_attr_t socketListenerAttr;
 
-        static void *portListener(void *arg);
-        static void parseCommandLine(const std::string &cmdLine,
-                                     std::string &command,
-                                     std::queue<std::string> &args);
-    public:
+    static void *portListener(void *arg);
+    static void parseCommandLine(const std::string &cmdLine,
+                                 std::string &command,
+                                 std::queue<std::string> &args);
+public:
 
-        ~SimpleNetworkServer();
-        SimpleNetworkServer(CogServer *cogServer, int portNumber);
+    ~SimpleNetworkServer();
+    SimpleNetworkServer(CogServer *cogServer, int portNumber);
 
-        void processCommandLine(CallBackInterface *callBack, const std::string &line);
-        std::string getCommandPrompt();
+    void processCommandLine(CallBackInterface *callBack, const std::string &line);
+    std::string getCommandPrompt();
 
-        void start();
+    void start();
 
 }; // class
 }  // namespace

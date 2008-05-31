@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,12 +27,13 @@
 
 using namespace opencog;
 
-CommandRequest::~CommandRequest() {
+CommandRequest::~CommandRequest()
+{
 }
 
 RequestProcessor* CommandRequest::requestProcessor = NULL;
 
-CommandRequest::CommandRequest(CallBackInterface *callBack, 
+CommandRequest::CommandRequest(CallBackInterface *callBack,
                                std::string &command,
                                std::queue<std::string> &args)
 {
@@ -47,18 +48,22 @@ RequestProcessor * CommandRequest::getRequestProcessor()
     return requestProcessor;
 }
 
-void CommandRequest::setAnswer(std::string &commandOutput) {
+void CommandRequest::setAnswer(std::string &commandOutput)
+{
     answer = commandOutput;
 }
 
-std::string CommandRequest::getCommand() {
+std::string CommandRequest::getCommand()
+{
     return command;
 }
 
-std::queue<std::string> CommandRequest::getArgs() {
+std::queue<std::string> CommandRequest::getArgs()
+{
     return args;
 }
 
-void CommandRequest::callBack() {
+void CommandRequest::callBack()
+{
     callBackRequestor->callBack(answer);
 }

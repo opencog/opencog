@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,137 +26,141 @@
 
 #include <string>
 
-class REQ : public opencog::CogServerRequest {
+class REQ : public opencog::CogServerRequest
+{
 
-        opencog::RequestProcessor * proc;
-    public:
+    opencog::RequestProcessor * proc;
+public:
 
-        std::string name;
-        std::string type;
+    std::string name;
+    std::string type;
 
-        REQ(std::string type, std::string name, opencog::RequestProcessor *rp) {
-            this->type = type;
-            this->name = name;
-            this->proc = rp;
-        }
+    REQ(std::string type, std::string name, opencog::RequestProcessor *rp) {
+        this->type = type;
+        this->name = name;
+        this->proc = rp;
+    }
 
-        std::string getName() {
-            return name;
-        }
+    std::string getName() {
+        return name;
+    }
 
-        void setRequestProcessor(opencog::RequestProcessor * rp) {
-           proc = rp;
-        }
-        opencog::RequestProcessor * getRequestProcessor() {
-           return proc;
-        }
+    void setRequestProcessor(opencog::RequestProcessor * rp) {
+        proc = rp;
+    }
+    opencog::RequestProcessor * getRequestProcessor() {
+        return proc;
+    }
 
-        void callBack() {
-        }
+    void callBack() {
+    }
 };
 
-class RP : public opencog::RequestProcessor {
+class RP : public opencog::RequestProcessor
+{
 
-    public: 
+public:
 
-        std::string name;
-        int count;
+    std::string name;
+    int count;
 
-        RP(std::string name) {
-            this->name = name;
-            count = 0;
+    RP(std::string name) {
+        this->name = name;
+        count = 0;
 
-        }
-        void processRequest(opencog::CogServerRequest *req) {
-            //REQ *request = (REQ *) req;
-            //printf("executed %s on %s(%s)\n", name.c_str(), request->getName().c_str(), request->getType().c_str());
-            count++;
-        }
+    }
+    void processRequest(opencog::CogServerRequest *req) {
+        //REQ *request = (REQ *) req;
+        //printf("executed %s on %s(%s)\n", name.c_str(), request->getName().c_str(), request->getType().c_str());
+        count++;
+    }
 };
 
-class MA : public opencog::MindAgent {
+class MA : public opencog::MindAgent
+{
 
-    public: 
+public:
 
-        std::string name;
-        int count;
+    std::string name;
+    int count;
 
-        MA(std::string name) {
-            this->name = name;
-            count = 0;
+    MA(std::string name) {
+        this->name = name;
+        count = 0;
 
-        }
-        void run(opencog::CogServer *server) {
-            //printf("%ld: executed %s\n", server->getCycleCount(), name.c_str());
-            count++;
-        }
+    }
+    void run(opencog::CogServer *server) {
+        //printf("%ld: executed %s\n", server->getCycleCount(), name.c_str());
+        count++;
+    }
 };
 
-class CogServerUTest :  public CxxTest::TestSuite {
+class CogServerUTest :  public CxxTest::TestSuite
+{
 
-    private:
+private:
 
 
-    public:
+public:
 
-        CogServerUTest(){
-        }
+    CogServerUTest() {
+    }
 
-        void setUp() {
-        }
+    void setUp() {
+    }
 
-        void tearDown(){
-        }
+    void tearDown() {
+    }
 
-        void testProcessMindAgents() {
+    void testProcessMindAgents() {
 
-            opencog::CogServer server;
-            MA *ma1 = new MA("MA1");
-            MA *ma2 = new MA("MA2");
-            MA *ma3 = new MA("MA3");
-            MA *ma4 = new MA("MA4");
-            MA *ma5 = new MA("MA5");
+        opencog::CogServer server;
+        MA *ma1 = new MA("MA1");
+        MA *ma2 = new MA("MA2");
+        MA *ma3 = new MA("MA3");
+        MA *ma4 = new MA("MA4");
+        MA *ma5 = new MA("MA5");
 
-            server.plugInMindAgent(ma1, 1);
-            server.plugInMindAgent(ma2, 2);
-            server.plugInMindAgent(ma3, 3);
-            server.plugInMindAgent(ma4, 4);
-            server.plugInMindAgent(ma5, 5);
-            server.unitTestServerLoop(50);
+        server.plugInMindAgent(ma1, 1);
+        server.plugInMindAgent(ma2, 2);
+        server.plugInMindAgent(ma3, 3);
+        server.plugInMindAgent(ma4, 4);
+        server.plugInMindAgent(ma5, 5);
+        server.unitTestServerLoop(50);
 
-            TS_ASSERT(ma1->count == 50);
-            TS_ASSERT(ma2->count == 25);
-            TS_ASSERT(ma3->count == 16);
-            TS_ASSERT(ma4->count == 12);
-            TS_ASSERT(ma5->count == 10);
-        }
+        TS_ASSERT(ma1->count == 50);
+        TS_ASSERT(ma2->count == 25);
+        TS_ASSERT(ma3->count == 16);
+        TS_ASSERT(ma4->count == 12);
+        TS_ASSERT(ma5->count == 10);
+    }
 
-        void testProcessRequests() {
-            opencog::CogServer server;
-            
-            RP *rp1 = new RP("rp1");
-            RP *rp2 = new RP("rp2");
+    void testProcessRequests() {
+        opencog::CogServer server;
 
-            server.pushRequest(new REQ("type1", "req1", rp1));
-            server.pushRequest(new REQ("type2", "req2", rp2));
-            server.pushRequest(new REQ("type3", "req3", rp1));
-            server.pushRequest(new REQ("type4", "req4", rp2));
-            server.pushRequest(new REQ("type5", "req5", rp1));
-            server.pushRequest(new REQ("type2", "req6", rp2));
-            server.pushRequest(new REQ("type3", "req7", rp1));
-            server.pushRequest(new REQ("type4", "req8", rp2));
-            server.pushRequest(new REQ("type5", "req9", rp1));
-            server.pushRequest(new REQ("type3", "req10", rp1));
-            server.pushRequest(new REQ("type4", "req11", rp2));
-            server.pushRequest(new REQ("type5", "req12", rp1));
-            server.pushRequest(new REQ("type4", "req13", rp2));
-            server.pushRequest(new REQ("type5", "req14", rp1));
-            server.pushRequest(new REQ("type5", "req15", rp1));
+        RP *rp1 = new RP("rp1");
+        RP *rp2 = new RP("rp2");
 
-            server.unitTestServerLoop(50);
+        server.pushRequest(new REQ("type1", "req1", rp1));
+        server.pushRequest(new REQ("type2", "req2", rp2));
+        server.pushRequest(new REQ("type3", "req3", rp1));
+        server.pushRequest(new REQ("type4", "req4", rp2));
+        server.pushRequest(new REQ("type5", "req5", rp1));
+        server.pushRequest(new REQ("type2", "req6", rp2));
+        server.pushRequest(new REQ("type3", "req7", rp1));
+        server.pushRequest(new REQ("type4", "req8", rp2));
+        server.pushRequest(new REQ("type5", "req9", rp1));
+        server.pushRequest(new REQ("type3", "req10", rp1));
+        server.pushRequest(new REQ("type4", "req11", rp2));
+        server.pushRequest(new REQ("type5", "req12", rp1));
+        server.pushRequest(new REQ("type4", "req13", rp2));
+        server.pushRequest(new REQ("type5", "req14", rp1));
+        server.pushRequest(new REQ("type5", "req15", rp1));
 
-            TS_ASSERT(rp1->count == 9);
-            TS_ASSERT(rp2->count == 6);
-        }
+        server.unitTestServerLoop(50);
+
+        TS_ASSERT(rp1->count == 9);
+        TS_ASSERT(rp2->count == 6);
+    }
 
 };

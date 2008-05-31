@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,20 +24,21 @@
 
 #include <Node.h>
 
-class NodeUTest :  public CxxTest::TestSuite {
+class NodeUTest :  public CxxTest::TestSuite
+{
 private:
 
 public:
-	NodeUTest(){
-	}
+    NodeUTest() {
+    }
 
     void setUp() {
     }
 
-    void tearDown(){
+    void tearDown() {
     }
 
-	void testEquals(){
+    void testEquals() {
         Node* n1 = new Node(CONCEPT_NODE, "TEST");
         Node* n2 = new Node(CONCEPT_NODE, "TEST");
         Node* n3 = new Node(PREDICATE_NODE, "TEST");
@@ -45,7 +46,7 @@ public:
         Node* n5 = new Node(CONCEPT_NODE, "");
         Node* n6 = new Node(CONCEPT_NODE, "");
         Node* n7 = new Node(PREDICATE_NODE, "");
-        
+
         TS_ASSERT(n1->equals(n2));
         TS_ASSERT(!n1->equals(n3));
         TS_ASSERT(!n3->equals(n4));
@@ -60,5 +61,5 @@ public:
         TS_ASSERT(n5->equals(n6));
         TS_ASSERT(!n5->equals(n7));
     }
-    
+
 };

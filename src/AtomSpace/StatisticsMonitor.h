@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,168 +35,169 @@
  * statistics values from many parts of the system and making them available
  * through its API.
  */
-class StatisticsMonitor  {
+class StatisticsMonitor
+{
 
-    private:
+private:
 
-        int atomCount;
-        int nodeCount;
-        int linkCount;
+    int atomCount;
+    int nodeCount;
+    int linkCount;
 
-        std::vector<int> typeCount;
+    std::vector<int> typeCount;
 
-        float heatSummation;
+    float heatSummation;
 
-        std::vector<float> weightSummation;
-        std::vector<float> heatTypeSummation;
+    std::vector<float> weightSummation;
+    std::vector<float> heatTypeSummation;
 
-        std::vector<int> nodeImportanceBinCount;
+    std::vector<int> nodeImportanceBinCount;
 
-        /**
-         * Updates the number of atoms of a given type, as well as the total
-         * atom count.
-         *
-         * @param Atom type count to be updated.
-         * @param Number of atoms to be incremented to the given type count
-         * (decrements if negative).
-         */
-        void updateTypeCount(Type, int);
+    /**
+     * Updates the number of atoms of a given type, as well as the total
+     * atom count.
+     *
+     * @param Atom type count to be updated.
+     * @param Number of atoms to be incremented to the given type count
+     * (decrements if negative).
+     */
+    void updateTypeCount(Type, int);
 
-    public:
+public:
 
-        // JUST FOR TESTS
-        void init(); 
-        bool isCleared();
-        
-        /**
-         * Constructor for this class.
-         */
-        StatisticsMonitor();
+    // JUST FOR TESTS
+    void init();
+    bool isCleared();
 
-        /**
-         * Returns singleton instance.
-         *
-         * @return Singleton instance.
-         */
-        static StatisticsMonitor* getInstance();
+    /**
+     * Constructor for this class.
+     */
+    StatisticsMonitor();
 
-        /**
-         * Returns the current lobe cycle.
-         *
-         * @return Current lobe cycle.
-         */
-        int getLobeCycle();
+    /**
+     * Returns singleton instance.
+     *
+     * @return Singleton instance.
+     */
+    static StatisticsMonitor* getInstance();
 
-        /**
-         * This method is called whenever the agent is executed by the
-         * scheduler. Since this agent is supposed to be executed once every
-         * cycle, this method keeps track of what is the current Lobe cycle.
-         */
-        void execute();
+    /**
+     * Returns the current lobe cycle.
+     *
+     * @return Current lobe cycle.
+     */
+    int getLobeCycle();
 
-        /**
-         * Updates the total weight summation of all atoms and of atoms of a
-         * given type.
-         *
-         * @param Atom type to be updated.
-         * @param Value to be added to the total weight summation for both the
-         * given type and all atoms.
-         */
-        void updateWeightSummation(Type, float);
+    /**
+     * This method is called whenever the agent is executed by the
+     * scheduler. Since this agent is supposed to be executed once every
+     * cycle, this method keeps track of what is the current Lobe cycle.
+     */
+    void execute();
 
-        /**
-         * Returns the mean weight for atoms of a given type.
-         *
-         * @return Mean weight for atoms of a given type.
-         */
-        float getMeanWeight(Type);
+    /**
+     * Updates the total weight summation of all atoms and of atoms of a
+     * given type.
+     *
+     * @param Atom type to be updated.
+     * @param Value to be added to the total weight summation for both the
+     * given type and all atoms.
+     */
+    void updateWeightSummation(Type, float);
 
-        /**
-         * Updates the total heat summation of all atoms and of atoms of a
-         * given type.
-         *
-         * @param Atom type to be updated.
-         * @param Value to be added to the total heat summation for both the
-         * given type and all atoms.
-         */
-        void updateHeatSummation(Type, float);
+    /**
+     * Returns the mean weight for atoms of a given type.
+     *
+     * @return Mean weight for atoms of a given type.
+     */
+    float getMeanWeight(Type);
 
-        /**
-         * Returns the mean heat for all atoms.
-         *
-         * @return Mean heat for all atoms.
-         */
-        float getMeanHeat();
+    /**
+     * Updates the total heat summation of all atoms and of atoms of a
+     * given type.
+     *
+     * @param Atom type to be updated.
+     * @param Value to be added to the total heat summation for both the
+     * given type and all atoms.
+     */
+    void updateHeatSummation(Type, float);
 
-        /**
-         * Returns the mean heat for all atoms of a given type.
-         *
-         * @return Mean heat for all atoms of a given type.
-         */
-        float getMeanHeat(Type);
+    /**
+     * Returns the mean heat for all atoms.
+     *
+     * @return Mean heat for all atoms.
+     */
+    float getMeanHeat();
 
-        /**
-         * Updates all statistics from scratch. This is expensive since all
-         * atoms in the system must be traversed.
-         */
-        void reevaluateAllStatistics(const AtomTable&);
+    /**
+     * Returns the mean heat for all atoms of a given type.
+     *
+     * @return Mean heat for all atoms of a given type.
+     */
+    float getMeanHeat(Type);
 
-        /**
-         * Returns the total number of atoms in the system.
-         *
-         * @return Total number of atoms in the system.
-         */
-        int getAtomCount();
+    /**
+     * Updates all statistics from scratch. This is expensive since all
+     * atoms in the system must be traversed.
+     */
+    void reevaluateAllStatistics(const AtomTable&);
 
-        /**
-         * Returns the total number of nodes in the system.
-         *
-         * @return Total number of nodes in the system.
-         */
-        int getNodeCount();
-        
-        /**
-         * Returns the total number of links in the system.
-         *
-         * @return Total number of links in the system.
-         */
-        int getLinkCount();
+    /**
+     * Returns the total number of atoms in the system.
+     *
+     * @return Total number of atoms in the system.
+     */
+    int getAtomCount();
 
-        /**
-         * Changes importance statistics whenever an atom changes importance
-         * bins.
-         *
-         * @param Atom type that changed importance bin.
-         * @param Old importance bin.
-         * @param New importance bin.
-         */
-        void atomChangeImportanceBin(Type, int, int);
+    /**
+     * Returns the total number of nodes in the system.
+     *
+     * @return Total number of nodes in the system.
+     */
+    int getNodeCount();
 
-        /**
-         * Returns the number of nodes in a given importance bin.
-         *
-         * @param Importance bin.
-         * @return Number of nodes in a given importance bin.
-         */
-        int getNodeImportanceBinCount(int);
+    /**
+     * Returns the total number of links in the system.
+     *
+     * @return Total number of links in the system.
+     */
+    int getLinkCount();
 
-        /**
-         * Updates all necessary statistics whenever a new atom is added to
-         * the system.
-         *
-         * @param Atom being added.
-         */
-        void add(Atom*);
+    /**
+     * Changes importance statistics whenever an atom changes importance
+     * bins.
+     *
+     * @param Atom type that changed importance bin.
+     * @param Old importance bin.
+     * @param New importance bin.
+     */
+    void atomChangeImportanceBin(Type, int, int);
 
-        /**
-         * Updates all necessary statistics whenever an atom is removed from
-         * the system.
-         *
-         * @param Atom being removed.
-         */
-        void remove(Atom*);
+    /**
+     * Returns the number of nodes in a given importance bin.
+     *
+     * @param Importance bin.
+     * @return Number of nodes in a given importance bin.
+     */
+    int getNodeImportanceBinCount(int);
 
-        int getTypeCount(Type type);
+    /**
+     * Updates all necessary statistics whenever a new atom is added to
+     * the system.
+     *
+     * @param Atom being added.
+     */
+    void add(Atom*);
+
+    /**
+     * Updates all necessary statistics whenever an atom is removed from
+     * the system.
+     *
+     * @param Atom being removed.
+     */
+    void remove(Atom*);
+
+    int getTypeCount(Type type);
 
 };
 

@@ -9,9 +9,9 @@
  *            Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,7 +35,7 @@
 #include "CompositeTruthValue.h"
 #include "AtomSpaceDefinitions.h"
 #include "ClassServer.h"
-#include "Link.h" 
+#include "Link.h"
 #include "Logger.h"
 #include "Config.h"
 
@@ -43,15 +43,16 @@
 #include <fstream>
 
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
-int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1}; 
-                 
+int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
+
 #define VH1 VersionHandle(HYPOTHETICAL,  (Handle) 1)
 #define VH2 VersionHandle(CONTEXTUAL,  (Handle) 2)
-                 
-int numberOfExpectedMatchesWithVH1[] = {15, 15, 15, 0, 0, 0}; 
-int numberOfExpectedMatchesWithVH2[] = {15, 15, 15, 1, 1, 1}; 
 
-class AtomTableUTest : public CxxTest::TestSuite {
+int numberOfExpectedMatchesWithVH1[] = {15, 15, 15, 0, 0, 0};
+int numberOfExpectedMatchesWithVH2[] = {15, 15, 15, 1, 1, 1};
+
+class AtomTableUTest : public CxxTest::TestSuite
+{
 
 private:
 
@@ -61,17 +62,17 @@ private:
 public:
 
     AtomTableUTest() {}
-    ~AtomTableUTest() {} 
+    ~AtomTableUTest() {}
 
     void setUp() {
-         /* load xml files with all necessary nodes and links  */
-         std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
-         atomSpace = new AtomSpace();
-         // Check for existing links because there are 2 identical links in the test xml file
-         HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
-         delete result; 
-         table = (AtomTable*) &(atomSpace->getAtomTable());
-         delete readers[0];
+        /* load xml files with all necessary nodes and links  */
+        std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
+        atomSpace = new AtomSpace();
+        // Check for existing links because there are 2 identical links in the test xml file
+        HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
+        delete result;
+        table = (AtomTable*) & (atomSpace->getAtomTable());
+        delete readers[0];
     }
 
     void tearDown() {
@@ -122,7 +123,7 @@ public:
             TS_ASSERT(!expectedEntry);
             //printf("\n");
         }
-        // test with non-null VersionHandles        
+        // test with non-null VersionHandles
         //printf("adding versioned TVs\n");
         for (int index = 0; index < 6; index++) {
             HandleEntry* expectedEntry = expectedEntries[index];
@@ -164,7 +165,7 @@ public:
                 count++;
             }
             //printf("count before = %d\n", count);
-            while(count < numberOfExpectedMatches[index]) {
+            while (count < numberOfExpectedMatches[index]) {
                 TS_ASSERT(expectedEntry);
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -178,7 +179,7 @@ public:
             //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
-            while(numberOfExpectedMatches[index] - count > numberOfExpectedMatchesWithVH2[index]) {
+            while (numberOfExpectedMatches[index] - count > numberOfExpectedMatchesWithVH2[index]) {
                 TS_ASSERT(expectedEntry);
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -209,7 +210,7 @@ public:
         //== getHandleSet(const char**, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         const char* names1[] = {"630057840_11", "12"};
         Type types1[] = {CW_PIXEL_PERCEPT_NODE, NUMBER_NODE};
-        HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);        
+        HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
         //printf("result = %s\n", result->toString().c_str());
         delete (result);
@@ -306,7 +307,7 @@ public:
 
         //== getHandleSet(Type*, bool*, Arity, Type = ATOM, bool = true) ==/
 
-        result = table->getHandleSet(types1, NULL, 2, LIST_LINK, false);        
+        result = table->getHandleSet(types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
         //printf("result = %s\n", result->toString().c_str());
         delete(result);
@@ -326,17 +327,17 @@ public:
 
     void testGetHandleSet_bugfix1() {
         HandleSeq emptyOutgoing;
-        HandleEntry* result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, false);
+        HandleEntry* result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
         TS_ASSERT(!result);
-        result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, true);
+        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true);
         TS_ASSERT(!result);
         Link* link = new Link(LIST_LINK, emptyOutgoing);
         Handle h = table->add(link);
-        if (TLB::getHandle(link) != h) delete link; 
-        result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, false);
+        if (TLB::getHandle(link) != h) delete link;
+        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
         TS_ASSERT(result);
         delete result;
-        result = table->getHandleSet(emptyOutgoing,NULL,NULL,emptyOutgoing.size(),LIST_LINK, true);
+        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true);
         TS_ASSERT(result);
         delete result;
     }
@@ -346,15 +347,15 @@ public:
         std::ofstream out(filename);
 
         out << "All Atoms:" << endl;
-        table->print(out);        
+        table->print(out);
         out << "All Nodes:" << endl;
-        table->print(out, NODE);        
+        table->print(out, NODE);
         out << "All ConceptNodes:" << endl;
-        table->print(out, CONCEPT_NODE, false);        
+        table->print(out, CONCEPT_NODE, false);
         out << "All Links:" << endl;
-        table->print(out, LINK);        
+        table->print(out, LINK);
         out << "All ListLinks:" << endl;
-        table->print(out, LIST_LINK, false);        
+        table->print(out, LIST_LINK, false);
 
         out.close();
 
@@ -367,7 +368,7 @@ public:
 
         /* add a simple set of links & nodes */
         Node* wordNode = new Node(WORD_NODE, "test");
-        wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) -10));
+        wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) - 10));
         Handle wnHandle = atomTable.add(wordNode);
 
         Node* senseNode = new Node(WORD_SENSE_NODE, "28675194");
@@ -418,7 +419,7 @@ public:
         // decay sti up to the threshold where the least important atoms
         // should be about to be removed
         for (int i = 0; i < 5; i++) atomTable.decayShortTermImportance();
-        // and test the existance of each atom 
+        // and test the existance of each atom
         TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);

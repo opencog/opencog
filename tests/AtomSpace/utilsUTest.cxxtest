@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,36 +24,37 @@
 
 #include <utils.h>
 
-class utilsUTest :  public CxxTest::TestSuite {
+class utilsUTest :  public CxxTest::TestSuite
+{
 private:
 
 public:
-    utilsUTest(){
+    utilsUTest() {
     }
 
     void setUp() {
     }
 
-    void tearDown(){
+    void tearDown() {
     }
 
     void testToString() {
         double d;
-        d = 237874.123456; 
-	TS_ASSERT(toString(d) == "237874.123456");
-        d = 237874.12345; 
-	TS_ASSERT(toString(d) == "237874.123450");
-        d = 237874.1234; 
-	TS_ASSERT(toString(d) == "237874.123400");
-        d = 237874.123; 
-	TS_ASSERT(toString(d) == "237874.123000");
-        d = 237874.12; 
-	TS_ASSERT(toString(d) == "237874.120000");
-        d = 237874.1; 
-	TS_ASSERT(toString(d) == "237874.100000");
-        d = 237874.0; 
-	TS_ASSERT(toString(d) == "237874.000000");
-        d = 237874; 
-	TS_ASSERT(toString(d) == "237874.000000");
-    } 
+        d = 237874.123456;
+        TS_ASSERT(toString(d) == "237874.123456");
+        d = 237874.12345;
+        TS_ASSERT(toString(d) == "237874.123450");
+        d = 237874.1234;
+        TS_ASSERT(toString(d) == "237874.123400");
+        d = 237874.123;
+        TS_ASSERT(toString(d) == "237874.123000");
+        d = 237874.12;
+        TS_ASSERT(toString(d) == "237874.120000");
+        d = 237874.1;
+        TS_ASSERT(toString(d) == "237874.100000");
+        d = 237874.0;
+        TS_ASSERT(toString(d) == "237874.000000");
+        d = 237874;
+        TS_ASSERT(toString(d) == "237874.000000");
+    }
 };

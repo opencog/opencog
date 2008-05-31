@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,86 +26,97 @@
 #include "Temporal.h"
 #include "utils.h"
 
-std::ostream& operator<<(std::ostream& out, const Temporal& t) {
-  return (out << t.toString());
+std::ostream& operator<<(std::ostream& out, const Temporal& t)
+{
+    return (out << t.toString());
 }
 
 // Values of A, B and NORMAL for the UNDEFINED_TEMPORAL Temporal instance
-// These values should not compose a valid Temporal, btw. 
-// In other words, if someone pass these values for a Temporal constructor it will throw an exception.  
+// These values should not compose a valid Temporal, btw.
+// In other words, if someone pass these values for a Temporal constructor it will throw an exception.
 #define UNDEFINED_A ULONG_MAX
-#define UNDEFINED_B ULONG_MAX 
-#define UNDEFINED_NORMAL true 
+#define UNDEFINED_B ULONG_MAX
+#define UNDEFINED_NORMAL true
 
 // USED TO SEEK MEMORY LEAK
 //int Temporal::numTemporals = 0;
 
-void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (InvalidParamException) {
+void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (InvalidParamException)
+{
 
     // USED TO SEEK MEMORY LEAK
     //numTemporals++;
     //cout << "Total temporals: " << numTemporals << endl;
 
     // sanity checks
-    if (normal) { 
+    if (normal) {
         if (b > a) {
-            throw InvalidParamException(TRACE_INFO, 
-                    "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);  
+            throw InvalidParamException(TRACE_INFO,
+                                        "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
         }
         unsigned long long sum = (unsigned long long)a + b;
         if (sum > (unsigned long long) ULONG_MAX) {
-            throw InvalidParamException(TRACE_INFO, 
-                    "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);  
-        }  
+            throw InvalidParamException(TRACE_INFO,
+                                        "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
+        }
     } else {
         if (a > b) {
-            throw InvalidParamException(TRACE_INFO, 
-                    "Cannot create a Temporal (uniform-distribution) with lower bound (%lu) greater than upper bound (%lu)", b, a);  
-        } 
+            throw InvalidParamException(TRACE_INFO,
+                                        "Cannot create a Temporal (uniform-distribution) with lower bound (%lu) greater than upper bound (%lu)", b, a);
+        }
     }
     this->normal = normal;
     this->a = a;
     this->b = b;
-}    
+}
 
-Temporal Temporal::UndefinedTemporalFactory() {
+Temporal Temporal::UndefinedTemporalFactory()
+{
     Temporal t(0);
     t.a = UNDEFINED_A;
     t.b = UNDEFINED_B;
     t.normal = UNDEFINED_NORMAL;
-    return t; 
+    return t;
 };
 
 
-const Temporal& Temporal::undefined_temporal() {
+const Temporal& Temporal::undefined_temporal()
+{
     static const Temporal& instance = UndefinedTemporalFactory();
     return instance;
 }
 
-Temporal::Temporal(unsigned long a, unsigned long b, bool normal) {
-    init(a,b,normal);
+Temporal::Temporal(unsigned long a, unsigned long b, bool normal)
+{
+    init(a, b, normal);
 }
 
-Temporal::Temporal(unsigned long timestamp) {
+Temporal::Temporal(unsigned long timestamp)
+{
     init(timestamp, timestamp, false);
 }
 
-Temporal::~Temporal() {
+Temporal::~Temporal()
+{
 }
 
-bool Temporal::isNormal() const {
+bool Temporal::isNormal() const
+{
     return normal;
 }
 
-unsigned long Temporal::getA() const {
+unsigned long Temporal::getA() const
+{
     return a;
 }
 
-unsigned long Temporal::getB() const {
+unsigned long Temporal::getB() const
+{
     return b;
 }
 
-unsigned long Temporal::getLowerBound() const {
+unsigned long Temporal::getLowerBound() const
+{
     if (normal) {
         return (a - b);
     } else {
@@ -113,7 +124,8 @@ unsigned long Temporal::getLowerBound() const {
     }
 }
 
-unsigned long Temporal::getUpperBound() const {
+unsigned long Temporal::getUpperBound() const
+{
     if (normal) {
         return (a + b);
     } else {
@@ -121,15 +133,17 @@ unsigned long Temporal::getUpperBound() const {
     }
 }
 
-std::string Temporal::toString() const {
+std::string Temporal::toString() const
+{
     if (*this == UNDEFINED_TEMPORAL) return "UNDEFINED_TEMPORAL";
     char buf[1 << 8];
     char* answer = buf;
-    sprintf(answer, "(%s,%lu,%lu)", (normal?"NORMAL":"UNIFORM"), a, b); 
+    sprintf(answer, "(%s,%lu,%lu)", (normal ? "NORMAL" : "UNIFORM"), a, b);
     return answer;
 }
 
-std::string Temporal::getTimeNodeName() const {
+std::string Temporal::getTimeNodeName() const
+{
     char buffer[1000];
     if (normal) {
         sprintf(buffer, "%lu:%lu:%d", a, b, normal);
@@ -139,93 +153,103 @@ std::string Temporal::getTimeNodeName() const {
         sprintf(buffer, "%lu:%lu", a, b);
     }
     return buffer;
-} 
+}
 
-std::string Temporal::getTimeNodeName(unsigned long timestamp) {
-    // NOTE: The strictly correct way to implement this would be like follows: 
+std::string Temporal::getTimeNodeName(unsigned long timestamp)
+{
+    // NOTE: The strictly correct way to implement this would be like follows:
     //   return Temporal(timestamp).getTimeNodeName();
     // However, for performance reasons, this is implemented as bellow:
     char buffer[1000];
     sprintf(buffer, "%lu", timestamp);
     return buffer;
-} 
+}
 
-Temporal Temporal::getFromTimeNodeName(const char* timeNodeName) {
-    const char* nextToken = timeNodeName; 
+Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
+{
+    const char* nextToken = timeNodeName;
     unsigned long a = (unsigned long)atoll(nextToken);
 
     //    printf("getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (unsigned long)atof(timeNodeName), timeNodeName);
 
-    while(*nextToken && *nextToken != ':') {
-        nextToken++; 
+    while (*nextToken && *nextToken != ':') {
+        nextToken++;
     }
     if (!(*nextToken)) {
         return Temporal(a);
     }
     unsigned long b = (unsigned long)atoll(++nextToken);
- 
+
     // printf("getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
-  
-   while(*nextToken && *nextToken != ':') {
-        nextToken++; 
+
+    while (*nextToken && *nextToken != ':') {
+        nextToken++;
     }
     if (!(*nextToken)) {
-        return Temporal(a,b);
+        return Temporal(a, b);
     }
     bool normal = atoi(++nextToken); // must be true, actually.
-    return Temporal(a,b,normal);
+    return Temporal(a, b, normal);
 }
 
-int Temporal::compareTo(const Temporal* other) const {
+int Temporal::compareTo(const Temporal* other) const
+{
     long low1 = this->getLowerBound();
     long low2 = other->getLowerBound();
     long lowDiff = low1 - low2;
     if (lowDiff != 0) {
-        return (lowDiff > 0)?1:-1;
+        return (lowDiff > 0) ? 1 : -1;
     }
     long up1 = this->getUpperBound();
     long up2 = other->getUpperBound();
     long upDiff = up1 - up2;
     if (upDiff != 0) {
-        return (upDiff > 0)?1:-1;
+        return (upDiff > 0) ? 1 : -1;
     }
-    // if lower and upper bounds are equal, make distinction if 
+    // if lower and upper bounds are equal, make distinction if
     // they have different distribution (nomal < uniform)
     int result;
     if (this->isNormal()) {
-        result = (other->isNormal())?0:-1;
+        result = (other->isNormal()) ? 0 : -1;
     } else {
-        result = (other->isNormal())?1:0;
+        result = (other->isNormal()) ? 1 : 0;
     }
     return result;
 }
 
-bool Temporal::operator<(const Temporal& rhs) const {
-    return (compareTo(&rhs)<0);
+bool Temporal::operator<(const Temporal& rhs) const
+{
+    return (compareTo(&rhs) < 0);
 }
 
-bool Temporal::operator>(const Temporal& rhs) const {
-    return (compareTo(&rhs)>0);
+bool Temporal::operator>(const Temporal& rhs) const
+{
+    return (compareTo(&rhs) > 0);
 }
 
-bool Temporal::operator<=(const Temporal& rhs) const {
+bool Temporal::operator<=(const Temporal& rhs) const
+{
     return !(operator>(rhs));
 }
 
-bool Temporal::operator>=(const Temporal& rhs) const {
+bool Temporal::operator>=(const Temporal& rhs) const
+{
     return !(operator<(rhs));
 }
 
-bool Temporal::operator==(const Temporal& rhs) const {
-    return (normal==rhs.isNormal() &&
-            a==rhs.getA() &&
-            b==rhs.getB());
+bool Temporal::operator==(const Temporal& rhs) const
+{
+    return (normal == rhs.isNormal() &&
+            a == rhs.getA() &&
+            b == rhs.getB());
 }
 
-bool Temporal::operator!=(const Temporal& rhs) const {
+bool Temporal::operator!=(const Temporal& rhs) const
+{
     return !(operator==(rhs));
 }
 
-Temporal* Temporal::clone() const {
+Temporal* Temporal::clone() const
+{
     return new Temporal(a, b, normal);
 }

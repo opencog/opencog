@@ -5,9 +5,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,12 +23,12 @@
 #ifndef _BUFFERREADER_H_
 #define _BUFFERREADER_H_
 
-#include <stdio.h> 
+#include <stdio.h>
 
 class XMLBufferReader
 {
 public:
-	virtual ~XMLBufferReader() {}
+    virtual ~XMLBufferReader() {}
 
     virtual void open() = 0;
     virtual size_t read(void *ptr, size_t size, size_t nmemb) = 0;

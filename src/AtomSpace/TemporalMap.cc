@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,24 +31,27 @@
 #include "exceptions.h"
 #include "utils.h"
 
-inline void TemporalMap::lock() {
+inline void TemporalMap::lock()
+{
 #ifdef HAVE_LIBPTHREAD
-    if (useMutex){
+    if (useMutex) {
         pthread_mutex_lock(&plock);
     }
 #endif
 }
 
-inline void TemporalMap::unlock() {
+inline void TemporalMap::unlock()
+{
 #ifdef HAVE_LIBPTHREAD
-    if (useMutex){
+    if (useMutex) {
         pthread_mutex_unlock(&plock);
     }
 #endif
 }
 
 
-void TemporalMap::init(int initialSize, bool useMutex) {
+void TemporalMap::init(int initialSize, bool useMutex)
+{
 
     hashMap = new InternalHashMap(initialSize);
 
@@ -59,7 +62,8 @@ void TemporalMap::init(int initialSize, bool useMutex) {
 #endif
 }
 
-TemporalMap::~TemporalMap() {
+TemporalMap::~TemporalMap()
+{
 
     lock();
 
@@ -68,15 +72,18 @@ TemporalMap::~TemporalMap() {
     unlock();
 }
 
-TemporalMap::TemporalMap(bool useMutex) {
+TemporalMap::TemporalMap(bool useMutex)
+{
     init(DEFAULT_SIZE, useMutex);
 }
 
-TemporalMap::TemporalMap(int size, bool useMutex) {
+TemporalMap::TemporalMap(int size, bool useMutex)
+{
     init(size, useMutex);
 }
 
-void TemporalMap::add(Temporal* key, void *element) throw (RuntimeException){
+void TemporalMap::add(Temporal* key, void *element) throw (RuntimeException)
+{
 
     lock();
 
@@ -85,14 +92,15 @@ void TemporalMap::add(Temporal* key, void *element) throw (RuntimeException){
     if (!contains(key)) {
         (*hashMap)[key] = element;
     } else {
-        throw RuntimeException(TRACE_INFO, 
-                "TemporalMap - Attempting to insert duplicated key in hash map: '%d'.", key);
+        throw RuntimeException(TRACE_INFO,
+                               "TemporalMap - Attempting to insert duplicated key in hash map: '%d'.", key);
     }
 
     unlock();
 }
 
-void *TemporalMap::get(Temporal* key) {
+void *TemporalMap::get(Temporal* key)
+{
     //cprintf(NORMAL, "TemporalMap::get(%s)\n", key->toString().c_str());
 
     void *ret;
@@ -101,7 +109,7 @@ void *TemporalMap::get(Temporal* key) {
 
     InternalIterator ti = hashMap->find(key);
 
-    if (ti == hashMap->end()){
+    if (ti == hashMap->end()) {
         // if the key is not found, return NULL.
         ret = NULL;
     } else {
@@ -113,16 +121,17 @@ void *TemporalMap::get(Temporal* key) {
     return ret;
 }
 
-Temporal *TemporalMap::getKey(const Temporal& lookupKey) {
+Temporal *TemporalMap::getKey(const Temporal& lookupKey)
+{
     //cprintf(NORMAL, "TemporalMap::getKey(%s)\n", lookupKey.toString().c_str());
 
     Temporal *ret;
 
     lock();
 
-    InternalIterator ti = hashMap->find((Temporal*) &lookupKey);
+    InternalIterator ti = hashMap->find((Temporal*) & lookupKey);
 
-    if (ti == hashMap->end()){
+    if (ti == hashMap->end()) {
         // if the key is not found, return NULL.
         ret = NULL;
     } else {
@@ -134,7 +143,8 @@ Temporal *TemporalMap::getKey(const Temporal& lookupKey) {
     return ret;
 }
 
-bool TemporalMap::contains(Temporal* key) {
+bool TemporalMap::contains(Temporal* key)
+{
 
     bool ret;
 
@@ -150,14 +160,15 @@ bool TemporalMap::contains(Temporal* key) {
     return ret;
 }
 
-void *TemporalMap::remove(Temporal* key) {
+void *TemporalMap::remove(Temporal* key)
+{
     void *ret = NULL;
 
     lock();
 
     InternalIterator ti = hashMap->find(key);
 
-    if (ti != hashMap->end()){
+    if (ti != hashMap->end()) {
         ret = ti->second;
         hashMap->erase(ti);
     }
@@ -168,7 +179,8 @@ void *TemporalMap::remove(Temporal* key) {
     return ret;
 }
 
-void TemporalMap::resize(int newSize) {
+void TemporalMap::resize(int newSize)
+{
     lock();
 
     hashMap->resize(newSize);
@@ -176,7 +188,8 @@ void TemporalMap::resize(int newSize) {
     unlock();
 }
 
-int TemporalMap::getCount() {
+int TemporalMap::getCount()
+{
     int size;
     lock();
 
@@ -186,7 +199,8 @@ int TemporalMap::getCount() {
     return(size);
 }
 
-int TemporalMap::getSize() {
+int TemporalMap::getSize()
+{
     int max_size;
     lock();
 
@@ -198,20 +212,24 @@ int TemporalMap::getSize() {
 }
 
 
-TemporalMapIterator *TemporalMap::keys() {
+TemporalMapIterator *TemporalMap::keys()
+{
     return new TemporalMapIterator(this);
 }
 
-TemporalMapIterator::TemporalMapIterator(TemporalMap *m){
+TemporalMapIterator::TemporalMapIterator(TemporalMap *m)
+{
     map = m;
     current = map->hashMap->begin();
 }
 
-bool TemporalMapIterator::hasNext() {
+bool TemporalMapIterator::hasNext()
+{
     return current != map->hashMap->end();
 }
 
-Temporal* TemporalMapIterator::next() throw (IndexErrorException) {
+Temporal* TemporalMapIterator::next() throw (IndexErrorException)
+{
 
     if (!hasNext()) {
         throw IndexErrorException(TRACE_INFO, "TemporalMap - Iterator out of bounds.");

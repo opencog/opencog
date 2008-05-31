@@ -7,9 +7,9 @@
  * Written by Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,57 +27,59 @@
 
 #include <string>
 
-namespace Util{
+namespace Util
+{
 
-class StringTokenizer {
-	
-	public:
-		
-		/**
-		 * Constructor and destructor
-		 */ 
-		StringTokenizer();
-		StringTokenizer(const std::string &str, const std::string &delimiter);
-		~StringTokenizer();
-		
-		/**
-		 * Getter and setter for the string to be parsed, that is, to extract 
-		 * its tokens.  
-		 */
-		std::string getString();
-		void setString(const std::string &str);
-		
-		/**
-		 * Getter and setter for the delimiter to the tokens.
-		 */
-		const std::string & getDelimiter();
-		void setDelimiter(const std::string &str);  
-		
-		/**
-		 * Return the next token from the string. If the end of the string is 
-		 * reached the method retuns a empty string "" 
-		 */
-		const std::string nextToken();
-		
-		/**
-		 * Reset the position pointers to init position.
-		 */
-		void reset(); 
-	
-	private:
-		std::string str;
-		std::string delimiter;
-		
-		// start/end position pointers
-		unsigned int start;
-		unsigned int end;
-		
-		/**
-		 * Inform the delimiter size
-		 */
-		unsigned int delimiterSize();
-		 
-}; // class	
+class StringTokenizer
+{
+
+public:
+
+    /**
+     * Constructor and destructor
+     */
+    StringTokenizer();
+    StringTokenizer(const std::string &str, const std::string &delimiter);
+    ~StringTokenizer();
+
+    /**
+     * Getter and setter for the string to be parsed, that is, to extract
+     * its tokens.
+     */
+    std::string getString();
+    void setString(const std::string &str);
+
+    /**
+     * Getter and setter for the delimiter to the tokens.
+     */
+    const std::string & getDelimiter();
+    void setDelimiter(const std::string &str);
+
+    /**
+     * Return the next token from the string. If the end of the string is
+     * reached the method retuns a empty string ""
+     */
+    const std::string nextToken();
+
+    /**
+     * Reset the position pointers to init position.
+     */
+    void reset();
+
+private:
+    std::string str;
+    std::string delimiter;
+
+    // start/end position pointers
+    unsigned int start;
+    unsigned int end;
+
+    /**
+     * Inform the delimiter size
+     */
+    unsigned int delimiterSize();
+
+}; // class
 }  // namespace
 
 #endif /*STRINGBUFFER_H_*/

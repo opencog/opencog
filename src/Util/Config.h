@@ -7,9 +7,9 @@
  * Written by Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +28,8 @@
 #include <string>
 #include <map>
 
-namespace opencog {
+namespace opencog
+{
 
 static const std::string DEFAULT_CONFIG[] = {
     "SERVER_PORT",                "17001",
@@ -45,7 +46,8 @@ static const std::string DEFAULT_CONFIG[] = {
     "",                           ""
 };
 
-class Config {
+class Config
+{
 
 protected:
 
@@ -62,7 +64,7 @@ public:
 
     // Load passed file and redefines values for parameters.
     void load(const char* config_file);
-          
+
     // Return current value of a given parameter.
     const std::string& get(const std::string &parameter_name) const;
     const std::string& operator[](const std::string &name) const;

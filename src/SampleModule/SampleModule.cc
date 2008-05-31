@@ -8,8 +8,8 @@ using namespace opencog;
 class Foo
 {
 public:
-    Foo() { 
-        printf("hello world\n"); 
+    Foo() {
+        printf("hello world\n");
         AtomSpace *space = CogServer::getAtomSpace();
     }
 };

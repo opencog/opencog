@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,25 +27,31 @@
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
-class ConcreteAtom : public Link {
+class ConcreteAtom : public Link
+{
 
 public:
-    ConcreteAtom(Type t, const std::vector<Handle>& o) : Link(t,o) {}
-    std::string toString() {return "toString not implemented yet";}
-    std::string toShortString() {return "toShortString not implemented yet";}
+    ConcreteAtom(Type t, const std::vector<Handle>& o) : Link(t, o) {}
+    std::string toString() {
+        return "toString not implemented yet";
+    }
+    std::string toShortString() {
+        return "toShortString not implemented yet";
+    }
 };
 
-class AtomUTest :  public CxxTest::TestSuite {
+class AtomUTest :  public CxxTest::TestSuite
+{
 private:
 
 public:
-	AtomUTest(){
-	}
+    AtomUTest() {
+    }
 
     void setUp() {
     }
 
-    void tearDown(){
+    void tearDown() {
     }
 
     void testConstructor() {
@@ -54,21 +60,21 @@ public:
         outgoing.push_back((Handle) 5);
         outgoing.push_back((Handle) 9);
 
-        Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing); 
+        Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
         Link *link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
 
-        // Specific tests for ordered and unnordered links:  
+        // Specific tests for ordered and unnordered links:
         TS_ASSERT(link->getOutgoingSet()[0] == (Handle) 10);
         TS_ASSERT(link->getOutgoingSet()[1] == (Handle) 5);
         TS_ASSERT(link->getOutgoingSet()[2] == (Handle) 9);
-        atom = new ConcreteAtom(UNORDERED_LINK, outgoing); 
+        atom = new ConcreteAtom(UNORDERED_LINK, outgoing);
         link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
         TS_ASSERT(link->getOutgoingSet()[0] == (Handle) 5);
         TS_ASSERT(link->getOutgoingSet()[1] == (Handle) 9);
         TS_ASSERT(link->getOutgoingSet()[2] == (Handle) 10);
     }
- 
+
 };
 

@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,49 +28,52 @@
 #include <set>
 #include "exceptions.h"
 
-namespace Util {
+namespace Util
+{
 
-class RandGen {
+class RandGen
+{
 
-public: 
+public:
 
     virtual ~RandGen() {}
 
     // random int between 0 and max rand number.
-    virtual int randint()=0;
+    virtual int randint() = 0;
 
     //random float in [0,1]
-    virtual float randfloat()=0; 
+    virtual float randfloat() = 0;
 
     //random double in [0,1]
-    virtual double randdouble()=0;
+    virtual double randdouble() = 0;
 
     //random double in [0,1)
-    virtual double randDoubleOneExcluded()=0;
+    virtual double randDoubleOneExcluded() = 0;
 
     //random int in [0,n)
-    virtual int randint(int n)=0;
+    virtual int randint(int n) = 0;
 
     // return -1 or 1 randonly
-    virtual int randPositiveNegative()=0;
+    virtual int randPositiveNegative() = 0;
 
     // Random int from a gaussian distribution. Neg numbers are clipped to 0
-    virtual unsigned int pos_gaussian_rand(unsigned int std_dev, unsigned int mean)=0;
+    virtual unsigned int pos_gaussian_rand(unsigned int std_dev, unsigned int mean) = 0;
 
     //random boolean
-    virtual bool randbool()=0;
+    virtual bool randbool() = 0;
 
 };
 
 //choose uniformly randomly an element of the set s
 //WARNING : it is assumed that s is non-empty
-template<typename T> T randset(const std::set<T>& s, RandGen& rng) {
+template<typename T> T randset(const std::set<T>& s, RandGen& rng)
+{
     cassert(TRACE_INFO, !s.empty(), "numeric - std::set should be empty.");
     int chosen_int = rng.randint(s.size());
     typename std::set<T>::const_iterator s_it = s.begin();
     //can be optimized maybe
-    for(int si = 0; si < chosen_int; si++) 
-      ++s_it;
+    for (int si = 0; si < chosen_int; si++)
+        ++s_it;
     return *s_it;
 }
 

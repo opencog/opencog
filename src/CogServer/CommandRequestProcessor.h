@@ -7,9 +7,9 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -41,43 +41,44 @@
 #include "SchemeShell.h"
 #endif /* HAVE_GUILE */
 
-namespace opencog {
+namespace opencog
+{
 
 class CommandRequestProcessor : public RequestProcessor
 {
-    public:
-        ~CommandRequestProcessor();
-        CommandRequestProcessor(void);
-        virtual void processRequest(CogServerRequest *);
+public:
+    ~CommandRequestProcessor();
+    CommandRequestProcessor(void);
+    virtual void processRequest(CogServerRequest *);
 
-    private:
-        std::string prompt;
-        std::string loadXML(XMLBufferReader *);
-        std::string data(std::string);
-        std::string help(std::string);
-        std::string load(std::string);
-        std::string dlopen(std::string);
-        std::string dlclose(std::string);
-        bool externalCommand(std::string,std::queue<std::string>&,std::string&);
-        std::string ls(std::string, std::string);
-        std::string ls(std::string);
-        std::string ls(Handle);
-        std::string ls(void);
+private:
+    std::string prompt;
+    std::string loadXML(XMLBufferReader *);
+    std::string data(std::string);
+    std::string help(std::string);
+    std::string load(std::string);
+    std::string dlopen(std::string);
+    std::string dlclose(std::string);
+    bool externalCommand(std::string, std::queue<std::string>&, std::string&);
+    std::string ls(std::string, std::string);
+    std::string ls(std::string);
+    std::string ls(Handle);
+    std::string ls(void);
 #ifdef HAVE_SQL_STORAGE
-        std::string sql_open(std::string, std::string, std::string);
-        std::string sql_close(void);
-        std::string sql_load(void);
-        std::string sql_store(void);
+    std::string sql_open(std::string, std::string, std::string);
+    std::string sql_close(void);
+    std::string sql_load(void);
+    std::string sql_store(void);
 
-        AtomStorage *store;
+    AtomStorage *store;
 #endif /* HAVE_SQL_STORAGE */
 #ifdef HAVE_GUILE
-        bool shell_mode;
-        SchemeShell *ss;
+    bool shell_mode;
+    SchemeShell *ss;
 #endif /* HAVE_GUILE */
 
-        int load_count;
-        std::map<std::string, void*> dlmodules;
+    int load_count;
+    std::map<std::string, void*> dlmodules;
 
 }; // class
 }  // namespace

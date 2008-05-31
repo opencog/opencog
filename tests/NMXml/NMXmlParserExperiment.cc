@@ -28,10 +28,10 @@ using namespace std;
 #define _S_IWRITE 128
 int mkstemp(char *tmpl)
 {
-	int ret=-1;
-	_mktemp(tmpl); 
-	ret=open(tmpl,O_RDWR|O_BINARY|O_CREAT|O_EXCL|_O_SHORT_LIVED, _S_IREAD|_S_IWRITE); 
-	return ret;
+    int ret = -1;
+    _mktemp(tmpl);
+    ret = open(tmpl, O_RDWR | O_BINARY | O_CREAT | O_EXCL | _O_SHORT_LIVED, _S_IREAD | _S_IWRITE);
+    return ret;
 }
 
 #endif
@@ -46,286 +46,294 @@ Handle NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
 Handle NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
 AtomSpace* NMXmlParserExperiment::atomSpace = NULL;
 
-void NMXmlParserExperiment::initStaticVars() {
-	NMXmlParserExperiment::noCheck = false;
-	NMXmlParserExperiment::currentFileName = NULL;
-	NMXmlParserExperiment::currentExperiment = -1;
+void NMXmlParserExperiment::initStaticVars()
+{
+    NMXmlParserExperiment::noCheck = false;
+    NMXmlParserExperiment::currentFileName = NULL;
+    NMXmlParserExperiment::currentExperiment = -1;
 
-	NMXmlParserExperiment::sport = UNDEFINED_HANDLE;
-	NMXmlParserExperiment::soccer = UNDEFINED_HANDLE;
-	NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
-	NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
-	NMXmlParserExperiment::atomSpace = NULL;
+    NMXmlParserExperiment::sport = UNDEFINED_HANDLE;
+    NMXmlParserExperiment::soccer = UNDEFINED_HANDLE;
+    NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
+    NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
+    NMXmlParserExperiment::atomSpace = NULL;
 }
 
-int NMXmlParserExperiment::getNExperiments(){
-	return(NNMXMLXMLEXPERIMENTS);
+int NMXmlParserExperiment::getNExperiments()
+{
+    return(NNMXMLXMLEXPERIMENTS);
 }
 
-void NMXmlParserExperiment::createExperiment(int exp, AtomSpace* as){
-	if ((exp < 0) || (exp > NNMXMLXMLEXPERIMENTS)){
-	    throw new RuntimeException(TRACE_INFO, "Invalid Experiment\n");
-	}
+void NMXmlParserExperiment::createExperiment(int exp, AtomSpace* as)
+{
+    if ((exp < 0) || (exp > NNMXMLXMLEXPERIMENTS)) {
+        throw new RuntimeException(TRACE_INFO, "Invalid Experiment\n");
+    }
 
-	if (currentExperiment != -1){
-		throw new RuntimeException(TRACE_INFO, "Tried to start a new experiment without destroying the last one");
-	}
+    if (currentExperiment != -1) {
+        throw new RuntimeException(TRACE_INFO, "Tried to start a new experiment without destroying the last one");
+    }
 
-	currentExperiment = exp;
-	
-	//currentFileName = strdup("/var/tmp/xmltest.XXXXXX");
-	currentFileName = strdup("xmltest.XXXXXX");
+    currentExperiment = exp;
+
+    //currentFileName = strdup("/var/tmp/xmltest.XXXXXX");
+    currentFileName = strdup("xmltest.XXXXXX");
     printf("just allocated currentFileName = %s\n", currentFileName);
-	
-	int fd = mkstemp(currentFileName);
+
+    int fd = mkstemp(currentFileName);
     printf("after mkstemp currentFileName = %s\n", currentFileName);
 
-	if (fd == -1){
-		throw new RuntimeException(TRACE_INFO, "Could not create temporary file\n");
-	}
+    if (fd == -1) {
+        throw new RuntimeException(TRACE_INFO, "Could not create temporary file\n");
+    }
 
-	write(fd, expContents[exp%2], strlen(expContents[exp%2]));
-   
-	close(fd);
+    write(fd, expContents[exp%2], strlen(expContents[exp%2]));
+
+    close(fd);
 
     if (atomSpace) delete atomSpace;
-    atomSpace = as;    
+    atomSpace = as;
 }
 
-bool NMXmlParserExperiment::checkExperiment(){
+bool NMXmlParserExperiment::checkExperiment()
+{
     if (noCheck) {
         return (true);
     }
-	if (currentExperiment == -1){
-		return(true);
-	}
-	switch (currentExperiment){
-	case 0:
-		return(checkExp0());
-		break;
-	case 1:
-		return(checkExp1());
-		break;
-	}
-	return(false);
+    if (currentExperiment == -1) {
+        return(true);
+    }
+    switch (currentExperiment) {
+    case 0:
+        return(checkExp0());
+        break;
+    case 1:
+        return(checkExp1());
+        break;
+    }
+    return(false);
 }
 
-AtomSpace* NMXmlParserExperiment::destroyExperiment(bool cleanup){
-	if (currentExperiment == -1){
-		return atomSpace;
-	}
+AtomSpace* NMXmlParserExperiment::destroyExperiment(bool cleanup)
+{
+    if (currentExperiment == -1) {
+        return atomSpace;
+    }
     printf("currentFileName = %s\n", currentFileName);
-	remove(currentFileName);
+    remove(currentFileName);
 #ifndef WIN32 // For some reason, this causes error on Windows
-	free(currentFileName);
+    free(currentFileName);
 #endif
-	currentFileName = NULL;
-	currentExperiment = -1;
+    currentFileName = NULL;
+    currentExperiment = -1;
     if (cleanup) {
-    	cleanupAtomSpace();
+        cleanupAtomSpace();
     }
     return atomSpace;
 }
 
-AtomSpace* NMXmlParserExperiment::cleanupAtomSpace(){
+AtomSpace* NMXmlParserExperiment::cleanupAtomSpace()
+{
     delete atomSpace;
     atomSpace = new AtomSpace();
     return atomSpace;
 }
 
-AtomSpace* NMXmlParserExperiment::getAtomSpace(){
+AtomSpace* NMXmlParserExperiment::getAtomSpace()
+{
     return atomSpace;
 }
 
 bool NMXmlParserExperiment::checkExp0()
 {
-	soccer = atomSpace->getHandle(WORD_NODE, "soccer");
-	sport = atomSpace->getHandle(WORD_NODE, "sport");
+    soccer = atomSpace->getHandle(WORD_NODE, "soccer");
+    sport = atomSpace->getHandle(WORD_NODE, "sport");
 
-	TS_ASSERT(TLB::isValidHandle(soccer));
-	TS_ASSERT(TLB::isValidHandle(sport));
-	if (TLB::isInvalidHandle(soccer) || TLB::isInvalidHandle(sport)){
-		return(false);
-	}
-	
-	std::vector<Handle> handles;
-	atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);	
+    TS_ASSERT(TLB::isValidHandle(soccer));
+    TS_ASSERT(TLB::isValidHandle(sport));
+    if (TLB::isInvalidHandle(soccer) || TLB::isInvalidHandle(sport)) {
+        return(false);
+    }
 
-	TS_ASSERT(handles.size() == 1);
-	if (handles.size() != 1){
-		return(false);
-	}
-	Atom *atom = TLB::getAtom(handles[0]);
-	link_sport_socker = handles[0];
+    std::vector<Handle> handles;
+    atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);
 
-	TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
-	TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
-	if ((atom->getOutgoingSet()[0] != soccer) ||
-		(atom->getOutgoingSet()[1] != sport)){
-		return(false);
-	}
+    TS_ASSERT(handles.size() == 1);
+    if (handles.size() != 1) {
+        return(false);
+    }
+    Atom *atom = TLB::getAtom(handles[0]);
+    link_sport_socker = handles[0];
 
-	return(true);
+    TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
+    TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
+    if ((atom->getOutgoingSet()[0] != soccer) ||
+            (atom->getOutgoingSet()[1] != sport)) {
+        return(false);
+    }
+
+    return(true);
 }
 
-bool NMXmlParserExperiment::checkExp1(){
-	
-	soccer = atomSpace->getHandle(WORD_NODE, "soccer");
-	sport = atomSpace->getHandle(WORD_NODE, "sport");
-	
-	TS_ASSERT(TLB::isValidHandle(soccer));
-	TS_ASSERT(TLB::isValidHandle(sport));
-	if (TLB::isInvalidHandle(soccer) || TLB::isInvalidHandle(sport)){
-		return(false);
-	}
-	
-	HandleEntry* entry = atomSpace->getAtomTable().getHandleSet(INHERITANCE_LINK, true);
-	
-	std::vector<Handle> handles;
-	atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);
-	TS_ASSERT(handles.size() == 0);
-	
-	atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);
-	TS_ASSERT(handles.size() == 2);
-	if (handles.size() != 2){
-		return(false);
-	}	
-	
-	TS_ASSERT(entry == NULL);
-	
-	link_sport_socker = UNDEFINED_HANDLE;
-	Atom *atom = NULL;
-	std::vector<Handle>::iterator it;
-	for(it = handles.begin(); it != handles.end(); it++){
-		atom = TLB::getAtom((Handle)*it);
-		if (atom->getIncomingSet()->getSize() == 1){
-			TS_ASSERT(TLB::isInvalidHandle(link_sport_socker));
-			link_sport_socker = *it;
-		}
-	}
-	handles.clear();
-	
-	TS_ASSERT(TLB::isValidHandle(link_sport_socker));
-	TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
-	TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
-	if ((atom->getOutgoingSet()[0] != soccer) ||
-		(atom->getOutgoingSet()[1] != sport)){
-		return(false);
-	}
-		
-	atomSpace->getHandleSet(back_inserter(handles), MEMBER_LINK, true);
-	
+bool NMXmlParserExperiment::checkExp1()
+{
 
-	TS_ASSERT(handles.size() == 1);	
-	if (handles.size() != 1){
-		return(false);
-	}
-	atom = TLB::getAtom(handles[0]);
-	hihger_order_link = handles[0];
+    soccer = atomSpace->getHandle(WORD_NODE, "soccer");
+    sport = atomSpace->getHandle(WORD_NODE, "sport");
 
-	TS_ASSERT(atom->getOutgoingSet()[0] == link_sport_socker);
-	TS_ASSERT(atom->getOutgoingSet()[1] == soccer);	
-	if ((atom->getOutgoingSet()[0] != link_sport_socker) ||
-		(atom->getOutgoingSet()[1] != soccer)){
-		return(false);
-	}
-	
-	
-/*	
-	entry = atomSpace->getAtomTable()->getHandleSet(INHERITANCE_LINK, true);	
+    TS_ASSERT(TLB::isValidHandle(soccer));
+    TS_ASSERT(TLB::isValidHandle(sport));
+    if (TLB::isInvalidHandle(soccer) || TLB::isInvalidHandle(sport)) {
+        return(false);
+    }
 
-	TS_ASSERT(entry->getSize() == 2);
-	if (entry->getSize() != 2){
-		delete entry;
-		return(false);
-	}
-	
-	link_sport_socker = NULL;
-	Atom *atom = NULL;
-	
-	HandleEntry *it = entry;
-	while (it){
-		atom = it->getAtom();
-		if (atom->getIncomingSet()->getSize() == 1){
-			TS_ASSERT(TLB::isInvalidHandle(link_sport_socker));
-			link_sport_socker = it->handle;
-		}
-		it = it->next;
-	}
-	delete entry;
-	
-	TS_ASSERT(link_sport_socker != NULL);
+    HandleEntry* entry = atomSpace->getAtomTable().getHandleSet(INHERITANCE_LINK, true);
 
-	TS_ASSERT(TLB::getHandle(atom->getOutgoingSet()[0]) == soccer);
-	TS_ASSERT(TLB::getHandle(atom->getOutgoingSet()[1]) == sport);
-	if ((atom->getOutgoingSet()[0] != soccer) ||
-		(atom->getOutgoingSet()[1] != sport)){
-		return(false);
-	}
-	
-	entry = atomSpace->getAtomTable()->getHandleSet(MEMBER_LINK, true);
-	
+    std::vector<Handle> handles;
+    atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);
+    TS_ASSERT(handles.size() == 0);
 
-	TS_ASSERT(entry->getSize() == 1);	
-	if (entry->getSize() != 1){
-		delete entry;
-		return(false);
-	}
-	atom = entry->getAtom();
-	hihger_order_link = entry->handle;
-	delete entry;
+    atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);
+    TS_ASSERT(handles.size() == 2);
+    if (handles.size() != 2) {
+        return(false);
+    }
 
-	TS_ASSERT(atom->getOutgoingSet()[0] == link_sport_socker);
-	TS_ASSERT(atom->getOutgoingSet()[1] == soccer);	
-	if ((atom->getOutgoingSet()[0] != link_sport_socker) ||
-		(atom->getOutgoingSet()[1] != soccer)){
-		return(false);
-	}
-*/
-	return(true);
+    TS_ASSERT(entry == NULL);
+
+    link_sport_socker = UNDEFINED_HANDLE;
+    Atom *atom = NULL;
+    std::vector<Handle>::iterator it;
+    for (it = handles.begin(); it != handles.end(); it++) {
+        atom = TLB::getAtom((Handle) * it);
+        if (atom->getIncomingSet()->getSize() == 1) {
+            TS_ASSERT(TLB::isInvalidHandle(link_sport_socker));
+            link_sport_socker = *it;
+        }
+    }
+    handles.clear();
+
+    TS_ASSERT(TLB::isValidHandle(link_sport_socker));
+    TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
+    TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
+    if ((atom->getOutgoingSet()[0] != soccer) ||
+            (atom->getOutgoingSet()[1] != sport)) {
+        return(false);
+    }
+
+    atomSpace->getHandleSet(back_inserter(handles), MEMBER_LINK, true);
+
+
+    TS_ASSERT(handles.size() == 1);
+    if (handles.size() != 1) {
+        return(false);
+    }
+    atom = TLB::getAtom(handles[0]);
+    hihger_order_link = handles[0];
+
+    TS_ASSERT(atom->getOutgoingSet()[0] == link_sport_socker);
+    TS_ASSERT(atom->getOutgoingSet()[1] == soccer);
+    if ((atom->getOutgoingSet()[0] != link_sport_socker) ||
+            (atom->getOutgoingSet()[1] != soccer)) {
+        return(false);
+    }
+
+
+    /*
+     entry = atomSpace->getAtomTable()->getHandleSet(INHERITANCE_LINK, true);
+
+     TS_ASSERT(entry->getSize() == 2);
+     if (entry->getSize() != 2){
+      delete entry;
+      return(false);
+     }
+
+     link_sport_socker = NULL;
+     Atom *atom = NULL;
+
+     HandleEntry *it = entry;
+     while (it){
+      atom = it->getAtom();
+      if (atom->getIncomingSet()->getSize() == 1){
+       TS_ASSERT(TLB::isInvalidHandle(link_sport_socker));
+       link_sport_socker = it->handle;
+      }
+      it = it->next;
+     }
+     delete entry;
+
+     TS_ASSERT(link_sport_socker != NULL);
+
+     TS_ASSERT(TLB::getHandle(atom->getOutgoingSet()[0]) == soccer);
+     TS_ASSERT(TLB::getHandle(atom->getOutgoingSet()[1]) == sport);
+     if ((atom->getOutgoingSet()[0] != soccer) ||
+      (atom->getOutgoingSet()[1] != sport)){
+      return(false);
+     }
+
+     entry = atomSpace->getAtomTable()->getHandleSet(MEMBER_LINK, true);
+
+
+     TS_ASSERT(entry->getSize() == 1);
+     if (entry->getSize() != 1){
+      delete entry;
+      return(false);
+     }
+     atom = entry->getAtom();
+     hihger_order_link = entry->handle;
+     delete entry;
+
+     TS_ASSERT(atom->getOutgoingSet()[0] == link_sport_socker);
+     TS_ASSERT(atom->getOutgoingSet()[1] == soccer);
+     if ((atom->getOutgoingSet()[0] != link_sport_socker) ||
+      (atom->getOutgoingSet()[1] != soccer)){
+      return(false);
+     }
+    */
+    return(true);
 }
 
 
 char *NMXmlParserExperiment::expContents[NNMXMLXMLEXPERIMENTS] = {
-"<?xml version=\"1.0\"?> \
-<list> \
-<tagdescription> \
-<tag name=\"WordNode\" value=\"WordNode\"/> \
-<tag name=\"InheritanceLink\" value=\"InheritanceLink\"/> \
-</tagdescription> \
-<WordNode name=\"soccer\" timestamp=\"3422826\"/> \
-<WordNode name=\"sport\" timestamp=\"3422826\"/> \
-<InheritanceLink hyp=\"hyp_1\" strength=\"1.0\" confidence=\"0.95\"> \
-<Element name=\"soccer\" class=\"WordNode\"/> \
-<Element name=\"sport\" class=\"WordNode\"/> \
-</InheritanceLink> \
-<InheritanceLink hyp=\"hyp_1\" strength=\"1.0\" confidence=\"0.95\"> \
-<Element name=\"soccer\" class=\"WordNode\"/> \
-<Element name=\"sport\" class=\"WordNode\"/> \
-</InheritanceLink> \
-</list>"
-/* UNCOMMENT TO USE HYPOTHETICAL ATOMTABLE 
-,
-"<?xml version=\"1.0\"?> \
-<list> \
-<tagdescription> \
-<tag name=\"WordNode\" value=\"WordNode\"/> \
-<tag name=\"InheritanceLink\" value=\"InheritanceLink\"/> \
-<tag name=\"MemberLink\" value=\"MemberLink\"/> \
-</tagdescription> \
-<WordNode name=\"soccer\" timestamp=\"3422827\"/> \
-<WordNode name=\"sport\" timestamp=\"3422827\"/> \
-<MemberLink strength=\"0.50\" confidence=\"0.80\"> \
-  <InheritanceLink hyp=\"hyp_1\" strength=\"1.0\" confidence=\"0.95\"> \
+    "<?xml version=\"1.0\"?> \
+    <list> \
+    <tagdescription> \
+    <tag name=\"WordNode\" value=\"WordNode\"/> \
+    <tag name=\"InheritanceLink\" value=\"InheritanceLink\"/> \
+    </tagdescription> \
+    <WordNode name=\"soccer\" timestamp=\"3422826\"/> \
+    <WordNode name=\"sport\" timestamp=\"3422826\"/> \
+    <InheritanceLink hyp=\"hyp_1\" strength=\"1.0\" confidence=\"0.95\"> \
     <Element name=\"soccer\" class=\"WordNode\"/> \
     <Element name=\"sport\" class=\"WordNode\"/> \
-  </InheritanceLink> \
-  <Element name=\"soccer\" class=\"WordNode\"/> \
-</MemberLink> \
-<InheritanceLink hyp=\"hyp_2\" strength=\"1.0\" confidence=\"0.95\"> \
-  <Element name=\"soccer\" class=\"WordNode\"/> \
-  <Element name=\"sport\" class=\"WordNode\"/> \
-</InheritanceLink> \
-</list>"
-*/
+    </InheritanceLink> \
+    <InheritanceLink hyp=\"hyp_1\" strength=\"1.0\" confidence=\"0.95\"> \
+    <Element name=\"soccer\" class=\"WordNode\"/> \
+    <Element name=\"sport\" class=\"WordNode\"/> \
+    </InheritanceLink> \
+    </list>"
+    /* UNCOMMENT TO USE HYPOTHETICAL ATOMTABLE
+    ,
+    "<?xml version=\"1.0\"?> \
+    <list> \
+    <tagdescription> \
+    <tag name=\"WordNode\" value=\"WordNode\"/> \
+    <tag name=\"InheritanceLink\" value=\"InheritanceLink\"/> \
+    <tag name=\"MemberLink\" value=\"MemberLink\"/> \
+    </tagdescription> \
+    <WordNode name=\"soccer\" timestamp=\"3422827\"/> \
+    <WordNode name=\"sport\" timestamp=\"3422827\"/> \
+    <MemberLink strength=\"0.50\" confidence=\"0.80\"> \
+      <InheritanceLink hyp=\"hyp_1\" strength=\"1.0\" confidence=\"0.95\"> \
+        <Element name=\"soccer\" class=\"WordNode\"/> \
+        <Element name=\"sport\" class=\"WordNode\"/> \
+      </InheritanceLink> \
+      <Element name=\"soccer\" class=\"WordNode\"/> \
+    </MemberLink> \
+    <InheritanceLink hyp=\"hyp_2\" strength=\"1.0\" confidence=\"0.95\"> \
+      <Element name=\"soccer\" class=\"WordNode\"/> \
+      <Element name=\"sport\" class=\"WordNode\"/> \
+    </InheritanceLink> \
+    </list>"
+    */
 };

@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,43 +24,44 @@
 
 #include <ClassServer.h>
 
-class ClassServerUTest :  public CxxTest::TestSuite {
+class ClassServerUTest :  public CxxTest::TestSuite
+{
 private:
 
 public:
-	ClassServerUTest(){
-	}
+    ClassServerUTest() {
+    }
 
     void setUp() {
     }
 
-    void tearDown(){
+    void tearDown() {
     }
 
-    void testIsAssignableFrom(){
-       int numClasses = ClassServer::getNumberOfClasses();
-       for (Type t = 0; t < numClasses; t++) { 
-          printf("Checking type %d\n", t);
-          TS_ASSERT(ClassServer::isAssignableFrom(t, t));
-          if (t > 0) {
-              TS_ASSERT(ClassServer::isAssignableFrom(NODE, t) || ClassServer::isAssignableFrom(LINK, t));
-          }
-       }
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, CONCEPT_NODE));
-       TS_ASSERT(!ClassServer::isAssignableFrom(CONCEPT_NODE, NODE));
-       
-       // TODO: Make more tests with well-known atom hierarchy
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_NODE));
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_OBJECT_NODE));
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_PET_NODE));
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_AVATAR_NODE));
+    void testIsAssignableFrom() {
+        int numClasses = ClassServer::getNumberOfClasses();
+        for (Type t = 0; t < numClasses; t++) {
+            printf("Checking type %d\n", t);
+            TS_ASSERT(ClassServer::isAssignableFrom(t, t));
+            if (t > 0) {
+                TS_ASSERT(ClassServer::isAssignableFrom(NODE, t) || ClassServer::isAssignableFrom(LINK, t));
+            }
+        }
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, CONCEPT_NODE));
+        TS_ASSERT(!ClassServer::isAssignableFrom(CONCEPT_NODE, NODE));
 
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, PREDICATE_NODE));
-       TS_ASSERT(ClassServer::isAssignableFrom(NODE, NUMBER_NODE));
-       TS_ASSERT(ClassServer::isAssignableFrom(LINK, EVALUATION_LINK));
-       TS_ASSERT(ClassServer::isAssignableFrom(LINK, LIST_LINK));
+        // TODO: Make more tests with well-known atom hierarchy
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_NODE));
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_OBJECT_NODE));
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_PET_NODE));
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_AVATAR_NODE));
+
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, PREDICATE_NODE));
+        TS_ASSERT(ClassServer::isAssignableFrom(NODE, NUMBER_NODE));
+        TS_ASSERT(ClassServer::isAssignableFrom(LINK, EVALUATION_LINK));
+        TS_ASSERT(ClassServer::isAssignableFrom(LINK, LIST_LINK));
     }
 
-       // TODO: Make tests with other ClassServer methods
-    
+    // TODO: Make tests with other ClassServer methods
+
 };

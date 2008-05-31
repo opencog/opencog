@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,76 +35,96 @@
 #include "TLB.h"
 #include "utils.h"
 
-StatisticsMonitor* StatisticsMonitor::getInstance() {
-	static StatisticsMonitor* instance = new StatisticsMonitor();
+StatisticsMonitor* StatisticsMonitor::getInstance()
+{
+    static StatisticsMonitor* instance = new StatisticsMonitor();
     return instance;
 }
 
-StatisticsMonitor::StatisticsMonitor() {
+StatisticsMonitor::StatisticsMonitor()
+{
     init();
 }
 
-void StatisticsMonitor::init() {
+void StatisticsMonitor::init()
+{
 }
 
-bool StatisticsMonitor::isCleared() {
+bool StatisticsMonitor::isCleared()
+{
     return false;
 }
 
-int StatisticsMonitor::getLobeCycle() {
+int StatisticsMonitor::getLobeCycle()
+{
     return 0;
 }
 
-void StatisticsMonitor::updateTypeCount(Type type, int delta) {
+void StatisticsMonitor::updateTypeCount(Type type, int delta)
+{
 }
 
-void StatisticsMonitor::updateWeightSummation(Type type, float delta) {
+void StatisticsMonitor::updateWeightSummation(Type type, float delta)
+{
 }
 
-float StatisticsMonitor::getMeanWeight(Type type) {
+float StatisticsMonitor::getMeanWeight(Type type)
+{
     return 0;
 }
 
-void StatisticsMonitor::updateHeatSummation(Type type, float delta) {
+void StatisticsMonitor::updateHeatSummation(Type type, float delta)
+{
 }
 
-float StatisticsMonitor::getMeanHeat() {
+float StatisticsMonitor::getMeanHeat()
+{
     return 0;
 }
 
-float StatisticsMonitor::getMeanHeat(Type type) {
+float StatisticsMonitor::getMeanHeat(Type type)
+{
     return 0;
 }
 
-int StatisticsMonitor::getAtomCount() {
+int StatisticsMonitor::getAtomCount()
+{
     return 0;
 }
 
-int StatisticsMonitor::getNodeCount() {
+int StatisticsMonitor::getNodeCount()
+{
     return 0;
 }
 
-int StatisticsMonitor::getLinkCount() {
+int StatisticsMonitor::getLinkCount()
+{
     return linkCount;
 }
 
-void StatisticsMonitor::atomChangeImportanceBin(Type type, int oldBin, int newBin) {
+void StatisticsMonitor::atomChangeImportanceBin(Type type, int oldBin, int newBin)
+{
 }
 
-void StatisticsMonitor::add(Atom* atom) {
+void StatisticsMonitor::add(Atom* atom)
+{
 }
 
 
-void StatisticsMonitor::remove(Atom* atom) {
+void StatisticsMonitor::remove(Atom* atom)
+{
 }
 
-int StatisticsMonitor::getNodeImportanceBinCount(int i) {
+int StatisticsMonitor::getNodeImportanceBinCount(int i)
+{
     return 0;
 }
 
-void StatisticsMonitor::reevaluateAllStatistics(const AtomTable& atomTable) {
+void StatisticsMonitor::reevaluateAllStatistics(const AtomTable& atomTable)
+{
 }
 
-int StatisticsMonitor::getTypeCount(Type type) {
+int StatisticsMonitor::getTypeCount(Type type)
+{
     return 0;
 }

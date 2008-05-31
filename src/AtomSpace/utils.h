@@ -8,9 +8,9 @@
  *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -45,15 +45,16 @@ string toString(double data);
 /**
  * Returns a string from the given argument by using the << operator
  */
-template <typename T> 
-string toString(T data) {
+template <typename T>
+string toString(T data)
+{
     ostringstream oss;
     oss << data;
     return oss.str();
 }
 
 /**
- * Returns a copy of the given string surrounded by ANSI bold tags. 
+ * Returns a copy of the given string surrounded by ANSI bold tags.
  *
  * @return Copy of the given string surrounded by ANSI bold tags.
  */
@@ -70,38 +71,42 @@ string bold(int i);
 
 template <class _Key> struct hash2int { };
 
-inline size_t __hash2int(const char* __s) {
-    unsigned long __h = 0; 
+inline size_t __hash2int(const char* __s)
+{
+    unsigned long __h = 0;
     size_t size = 2 * sizeof(int);
     for (size_t i = 0; i < size; i++, __s++) {
-        __h = 5*__h + *__s;
+        __h = 5 * __h + *__s;
     }
     return size_t(__h);
 }
 
 template <> struct hash2int<char *> {
-    size_t operator()(const char* __s) const { return __hash2int(__s); }
+    size_t operator()(const char* __s) const {
+        return __hash2int(__s);
+    }
 };
 
 enum padAlignment { CENTER, LEFT, RIGHT };
 std::string padstr(const char*, unsigned int, padAlignment) throw (InvalidParamException);
 
-class FileList {
+class FileList
+{
 
-    private:
+private:
 
-        std::vector<char *>fileList;
+    std::vector<char *>fileList;
 
-    public:
+public:
 
-        FileList(const char* ) throw (IOException);
-        FileList();
-        ~FileList();
+    FileList(const char* ) throw (IOException);
+    FileList();
+    ~FileList();
 
-        static FileList *getAllFilesRecursively(const char* );
+    static FileList *getAllFilesRecursively(const char* );
 
-        unsigned int getSize();
-        const char* getFile(unsigned int) throw (IndexErrorException);
+    unsigned int getSize();
+    const char* getFile(unsigned int) throw (IndexErrorException);
 };
 
 /**
@@ -122,10 +127,10 @@ int bitcount(unsigned long n);
 /**
  * Initializes the reference time that will be used for getting current elapsed times
  */
-void initReferenceTime(); 
+void initReferenceTime();
 /**
- * Gets the elapsed time (in milliseconds) since the reference time initialized with 
- * initReferenceTime() function. The initReferenceTime() function must be called before 
+ * Gets the elapsed time (in milliseconds) since the reference time initialized with
+ * initReferenceTime() function. The initReferenceTime() function must be called before
  * this function be called by the first time.
  */
 ulong getElapsedMillis();
@@ -137,11 +142,10 @@ ulong getElapsedMillis();
 template<typename T, typename OutT>
 void to_list(OutT outIt, T inEntry)
 {
-	while (inEntry)
-	{
-		*(outIt++) = inEntry->handleTemporalPair; //handle;
-		inEntry = inEntry->next;
-	}
+    while (inEntry) {
+        *(outIt++) = inEntry->handleTemporalPair; //handle;
+        inEntry = inEntry->next;
+    }
 }
 
 /** STL-Listifies a HandleEntry */
@@ -149,52 +153,53 @@ void to_list(OutT outIt, T inEntry)
 template<typename T, typename OutT>
 void h_to_list(OutT outIt, T inEntry)
 {
-	while (inEntry)
-	{
-		*(outIt++) = inEntry->handle;
-		inEntry = inEntry->next;
-	}
+    while (inEntry) {
+        *(outIt++) = inEntry->handle;
+        inEntry = inEntry->next;
+    }
 }
 
 template<typename T>
-bool empty(const T& c) { return c.empty(); }
+bool empty(const T& c)
+{
+    return c.empty();
+}
 
 template<typename LinkT, typename ArgT1, typename ArgT2>
 LinkT make_tuple(const ArgT1& arg1, const ArgT2& arg2)
 {
-	return LinkT(arg1, arg2);
+    return LinkT(arg1, arg2);
 }
 
-template<typename ForwardIter,
-	typename OutputIter,
-	typename UnaryPred>
+template < typename ForwardIter,
+typename OutputIter,
+typename UnaryPred >
 OutputIter copy_if(ForwardIter begin, ForwardIter end, OutputIter dest, UnaryPred f)
 {
-  while(begin != end) {
-    if(f(*begin))
-      *dest++ = *begin;
-    ++begin;
-  }
-  return dest;
+    while (begin != end) {
+        if (f(*begin))
+            *dest++ = *begin;
+        ++begin;
+    }
+    return dest;
 }
 
 template<typename InputT, typename evalT, typename ValT>
 InputT GetBest(InputT start, InputT end, evalT op, ValT minVal)
 {
-	if (start == end)
-		return end;
-	
-	ValT bestV = minVal, tempVal;
-	
-	InputT ret = start;
-	while (++start != end)
-		if ( (tempVal=op(*start)) > bestV)
-		{
-			bestV = tempVal;
-			ret = start;
-		}
-		
-	return ret;
+    if (start == end)
+        return end;
+
+    ValT bestV = minVal, tempVal;
+
+    InputT ret = start;
+    while (++start != end)
+        if ( (tempVal = op(*start)) > bestV) {
+            bestV = tempVal;
+            ret = start;
+        }
+
+    return ret;
 }
 
 #endif /* OPENCOG_UTILS_H */

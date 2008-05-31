@@ -8,9 +8,9 @@
  *            Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -54,278 +54,279 @@ using namespace std;
 #define NODE4_NAME "node4"
 #define NODE5_NAME "node5"
 
-class SavingLoadingUTest :  public CxxTest::TestSuite {
+class SavingLoadingUTest :  public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-        TruthValue* tvs[NUM_TVS];
+    TruthValue* tvs[NUM_TVS];
 
-    public:
-        SavingLoadingUTest(){
-            tvs[0] = new SimpleTruthValue(TV1_MEAN, TV1_COUNT);
-            tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
-            tvs[2] = new CompositeTruthValue(SimpleTruthValue(TV3_MEAN, TV3_COUNT), NULL_VERSION_HANDLE);
-            tvs[3] = NULL; 
-            tvs[4] = NULL;
+public:
+    SavingLoadingUTest() {
+        tvs[0] = new SimpleTruthValue(TV1_MEAN, TV1_COUNT);
+        tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
+        tvs[2] = new CompositeTruthValue(SimpleTruthValue(TV3_MEAN, TV3_COUNT), NULL_VERSION_HANDLE);
+        tvs[3] = NULL;
+        tvs[4] = NULL;
+    }
+
+    ~SavingLoadingUTest() {
+        for (int i = 0; i < NUM_TVS; i++) {
+            delete tvs[i];
         }
+    }
 
-        ~SavingLoadingUTest(){
-            for (int i = 0; i < NUM_TVS; i++) {
-                delete tvs[i];
-            } 
-        }
+    void setUp() {
+    }
 
-        void setUp() {
-        }
+    void tearDown() {
+    }
 
-        void tearDown(){
-        }
+    void runSaving(AtomSpace& atomSpace) {
+        printf("\nrunSaving()\n");
+        SavingLoading savingLoading;
 
-        void runSaving(AtomSpace& atomSpace){
-            printf("\nrunSaving()\n");
-            SavingLoading savingLoading;
+        // Insert 3 basic concept nodes with the already declared names and tvs.
+        Handle h1 = atomSpace.addNode(CONCEPT_NODE, (string)NODE1_NAME, *(tvs[0]));
+        Handle h2 = atomSpace.addNode(CONCEPT_NODE, (string)NODE2_NAME, *(tvs[1]));
+        Handle h3 = atomSpace.addNode(CONCEPT_NODE, (string)NODE3_NAME, *(tvs[2]));
+        //printf("runSaving() 1\n");
 
-            // Insert 3 basic concept nodes with the already declared names and tvs.
-            Handle h1 = atomSpace.addNode(CONCEPT_NODE, (string)NODE1_NAME, *(tvs[0]));
-            Handle h2 = atomSpace.addNode(CONCEPT_NODE, (string)NODE2_NAME, *(tvs[1]));
-            Handle h3 = atomSpace.addNode(CONCEPT_NODE, (string)NODE3_NAME, *(tvs[2]));
-            //printf("runSaving() 1\n");
+        // Insert other nodes with 2 more Composite TVs with valid handles
+        //if (tvs[3] == NULL) {
+        tvs[3] = tvs[2]->clone();
+        ((CompositeTruthValue*)tvs[3])->setVersionedTV(*(tvs[0]), VersionHandle(HYPOTHETICAL, h1));
+        //}
+        //if (tvs[4] == NULL) {
+        tvs[4] = tvs[2]->clone();
+        ((CompositeTruthValue*)tvs[4])->setVersionedTV(*(tvs[1]), VersionHandle(CONTEXTUAL, h2));
+        ((CompositeTruthValue*)tvs[4])->setVersionedTV(*(tvs[1]), VersionHandle(HYPOTHETICAL, h2));
+        //}
+        //printf("runSaving() 2\n");
+        Handle h4 = atomSpace.addNode(CONCEPT_NODE, (string)NODE4_NAME, *(tvs[3]));
+        Handle h5 = atomSpace.addNode(CONCEPT_NODE, (string)NODE5_NAME, *(tvs[4]));
+        //printf("runSaving() 3\n");
 
-            // Insert other nodes with 2 more Composite TVs with valid handles
-            //if (tvs[3] == NULL) {
-                tvs[3] = tvs[2]->clone();
-                ((CompositeTruthValue*)tvs[3])->setVersionedTV(*(tvs[0]), VersionHandle(HYPOTHETICAL, h1));
-            //}
-            //if (tvs[4] == NULL) { 
-                tvs[4] = tvs[2]->clone();
-                ((CompositeTruthValue*)tvs[4])->setVersionedTV(*(tvs[1]), VersionHandle(CONTEXTUAL, h2));
-                ((CompositeTruthValue*)tvs[4])->setVersionedTV(*(tvs[1]), VersionHandle(HYPOTHETICAL, h2));
-            //} 
-            //printf("runSaving() 2\n");
-            Handle h4 = atomSpace.addNode(CONCEPT_NODE, (string)NODE4_NAME, *(tvs[3]));
-            Handle h5 = atomSpace.addNode(CONCEPT_NODE, (string)NODE5_NAME, *(tvs[4]));
-            //printf("runSaving() 3\n");
+        // Insert some links
+        HandleSeq outgoing;
+        Handle h6 = atomSpace.addLink(LIST_LINK, outgoing);
+        outgoing.push_back(h1);
+        atomSpace.addLink(LIST_LINK, outgoing);
+        outgoing.push_back(h2);
+        outgoing.push_back(h3);
+        atomSpace.addLink(LIST_LINK, outgoing);
+        outgoing.clear();
+        outgoing.push_back(h4);
+        outgoing.push_back(h5);
+        Handle h9 = atomSpace.addLink(LIST_LINK, outgoing);
 
-            // Insert some links
-            HandleSeq outgoing;
-            Handle h6 = atomSpace.addLink(LIST_LINK, outgoing);
-            outgoing.push_back(h1);
-            atomSpace.addLink(LIST_LINK, outgoing);
-            outgoing.push_back(h2);
-            outgoing.push_back(h3);
-            atomSpace.addLink(LIST_LINK, outgoing);
-            outgoing.clear();
-            outgoing.push_back(h4);
-            outgoing.push_back(h5);
-            Handle h9 = atomSpace.addLink(LIST_LINK, outgoing);
+        // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
+        atomSpace.addTimeInfo(h1, Temporal(0, 0));
+        atomSpace.addTimeInfo(h4, Temporal(10, 100));
+        atomSpace.addTimeInfo(h6, Temporal(0, 0));
+        atomSpace.addTimeInfo(h9, Temporal(0, 0));
+        atomSpace.addTimeInfo(h9, Temporal(10, 100));
+        atomSpace.addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
 
-            // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
-            atomSpace.addTimeInfo(h1, Temporal(0,0));
-            atomSpace.addTimeInfo(h4, Temporal(10,100));
-            atomSpace.addTimeInfo(h6, Temporal(0,0));
-            atomSpace.addTimeInfo(h9, Temporal(0,0));
-            atomSpace.addTimeInfo(h9, Temporal(10,100));
-            atomSpace.addTimeInfo(h9, Temporal(0,10)); // put in inverse order intentionally for testing this case too
+        Handle h10 = atomSpace.addNode(WORD_NODE, "fido ferraris");
+        Handle h11 = atomSpace.addNode(SL_PET_NODE, "fido");
+        outgoing.clear();
+        outgoing.push_back(h10);
+        outgoing.push_back(h11);
+        atomSpace.addLink(WR_LINK, outgoing);
+        Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
+        TS_ASSERT(h11 == h12);
 
-            Handle h10 = atomSpace.addNode(WORD_NODE, "fido ferraris");
-            Handle h11 = atomSpace.addNode(SL_PET_NODE, "fido");
-            outgoing.clear();
-            outgoing.push_back(h10);
-            outgoing.push_back(h11);
-            atomSpace.addLink(WR_LINK, outgoing);
-            Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
-            TS_ASSERT(h11 == h12);
-
-            savingLoading.save(DUMP_FILENAME, atomSpace);
-            printf("runSaving() ended\n");
-        }
+        savingLoading.save(DUMP_FILENAME, atomSpace);
+        printf("runSaving() ended\n");
+    }
 
 
-        void runLoading(AtomSpace& atomSpace){
-            printf("runLoading()\n");
-            SavingLoading savingLoading;
+    void runLoading(AtomSpace& atomSpace) {
+        printf("runLoading()\n");
+        SavingLoading savingLoading;
 
-            StatisticsMonitor* sm = StatisticsMonitor::getInstance();
-            sm->reevaluateAllStatistics(atomSpace.getAtomTable());
+        StatisticsMonitor* sm = StatisticsMonitor::getInstance();
+        sm->reevaluateAllStatistics(atomSpace.getAtomTable());
 
-            savingLoading.load(DUMP_FILENAME, atomSpace);
+        savingLoading.load(DUMP_FILENAME, atomSpace);
 
 #if 0 // TODO: SM code has been disabled. So this test fails. We can get back with this when it is enabled again.
-            // Check statistics:
-            printf("atomCount=%d\n", sm->getAtomCount());
-            printf("nodeCount=%d\n", sm->getNodeCount());
-            printf("LinkCount=%d\n", sm->getLinkCount());
-            TS_ASSERT(sm->getAtomCount() == 9);
-            TS_ASSERT(sm->getNodeCount() == 5);
-            TS_ASSERT(sm->getLinkCount() == 4);
+        // Check statistics:
+        printf("atomCount=%d\n", sm->getAtomCount());
+        printf("nodeCount=%d\n", sm->getNodeCount());
+        printf("LinkCount=%d\n", sm->getLinkCount());
+        TS_ASSERT(sm->getAtomCount() == 9);
+        TS_ASSERT(sm->getNodeCount() == 5);
+        TS_ASSERT(sm->getLinkCount() == 4);
 #endif
 
-            // Check if it loads all inserted atoms with the same attributes (specially TruthValues)
+        // Check if it loads all inserted atoms with the same attributes (specially TruthValues)
 
-            // Check nodes
-            Handle h1 = atomSpace.getHandle(CONCEPT_NODE, NODE1_NAME);
-            TS_ASSERT(h1);
-            Atom* a1 = TLB::getAtom(h1);
-            const AttentionValue& av1 = a1->getAttentionValue();
-            TS_ASSERT(av1.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-            TS_ASSERT(av1.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-            TS_ASSERT(av1.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
-            const TruthValue& tv1 = a1->getTruthValue();
-            TS_ASSERT(tv1.getType() == tvs[0]->getType());
-            TS_ASSERT(tv1.getMean() == tvs[0]->getMean());
-            TS_ASSERT(tv1.getCount() == tvs[0]->getCount());
-            TS_ASSERT(fabs(tv1.getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        // Check nodes
+        Handle h1 = atomSpace.getHandle(CONCEPT_NODE, NODE1_NAME);
+        TS_ASSERT(h1);
+        Atom* a1 = TLB::getAtom(h1);
+        const AttentionValue& av1 = a1->getAttentionValue();
+        TS_ASSERT(av1.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av1.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av1.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        const TruthValue& tv1 = a1->getTruthValue();
+        TS_ASSERT(tv1.getType() == tvs[0]->getType());
+        TS_ASSERT(tv1.getMean() == tvs[0]->getMean());
+        TS_ASSERT(tv1.getCount() == tvs[0]->getCount());
+        TS_ASSERT(fabs(tv1.getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-            Handle h2 = atomSpace.getHandle(CONCEPT_NODE, NODE2_NAME);
-            TS_ASSERT(h2);
-            Atom* a2 = TLB::getAtom(h2);
-            const AttentionValue& av2 = a2->getAttentionValue();
-            TS_ASSERT(av2.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-            TS_ASSERT(av2.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-            TS_ASSERT(av2.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        Handle h2 = atomSpace.getHandle(CONCEPT_NODE, NODE2_NAME);
+        TS_ASSERT(h2);
+        Atom* a2 = TLB::getAtom(h2);
+        const AttentionValue& av2 = a2->getAttentionValue();
+        TS_ASSERT(av2.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av2.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av2.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-            const TruthValue& tv2 = a2->getTruthValue();
-            TS_ASSERT(tv2.getType() == tvs[1]->getType());
-            TS_ASSERT(tv2.getMean() == tvs[1]->getMean());
-            TS_ASSERT(tv2.getCount() == tvs[1]->getCount());
-            TS_ASSERT(fabs(tv2.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        const TruthValue& tv2 = a2->getTruthValue();
+        TS_ASSERT(tv2.getType() == tvs[1]->getType());
+        TS_ASSERT(tv2.getMean() == tvs[1]->getMean());
+        TS_ASSERT(tv2.getCount() == tvs[1]->getCount());
+        TS_ASSERT(fabs(tv2.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-            Handle h3 = atomSpace.getHandle(CONCEPT_NODE, NODE3_NAME);
-            TS_ASSERT(h3);
-            Atom* a3 = TLB::getAtom(h3);
-            const AttentionValue& av3 = a3->getAttentionValue();
-            TS_ASSERT(av3.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-            TS_ASSERT(av3.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-            TS_ASSERT(av3.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        Handle h3 = atomSpace.getHandle(CONCEPT_NODE, NODE3_NAME);
+        TS_ASSERT(h3);
+        Atom* a3 = TLB::getAtom(h3);
+        const AttentionValue& av3 = a3->getAttentionValue();
+        TS_ASSERT(av3.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av3.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av3.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-            const TruthValue& tv3 = a3->getTruthValue();
-            TS_ASSERT(tv3.getType() == tvs[2]->getType());
-            TS_ASSERT(tv3.getMean() == tvs[2]->getMean());
-            TS_ASSERT(tv3.getCount() == tvs[2]->getCount());
-            TS_ASSERT(fabs(tv3.getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(((const CompositeTruthValue&)tv3).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[2])->getNumberOfVersionedTVs());
+        const TruthValue& tv3 = a3->getTruthValue();
+        TS_ASSERT(tv3.getType() == tvs[2]->getType());
+        TS_ASSERT(tv3.getMean() == tvs[2]->getMean());
+        TS_ASSERT(tv3.getCount() == tvs[2]->getCount());
+        TS_ASSERT(fabs(tv3.getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(((const CompositeTruthValue&)tv3).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[2])->getNumberOfVersionedTVs());
 
-            Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
-            TS_ASSERT(h4);
-            Atom* a4 = TLB::getAtom(h4);
-            const AttentionValue& av4 = a4->getAttentionValue();
-            TS_ASSERT(av4.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-            TS_ASSERT(av4.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-            TS_ASSERT(av4.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
+        TS_ASSERT(h4);
+        Atom* a4 = TLB::getAtom(h4);
+        const AttentionValue& av4 = a4->getAttentionValue();
+        TS_ASSERT(av4.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av4.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av4.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-            const TruthValue& tv4 = a4->getTruthValue();
-            TS_ASSERT(tv4.getType() == tvs[3]->getType());
-            TS_ASSERT(tv4.getMean() == tvs[3]->getMean());
-            TS_ASSERT(tv4.getCount() == tvs[3]->getCount());
-            TS_ASSERT(fabs(tv4.getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(((const CompositeTruthValue&)tv4).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[3])->getNumberOfVersionedTVs());
+        const TruthValue& tv4 = a4->getTruthValue();
+        TS_ASSERT(tv4.getType() == tvs[3]->getType());
+        TS_ASSERT(tv4.getMean() == tvs[3]->getMean());
+        TS_ASSERT(tv4.getCount() == tvs[3]->getCount());
+        TS_ASSERT(fabs(tv4.getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(((const CompositeTruthValue&)tv4).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[3])->getNumberOfVersionedTVs());
 
-            const TruthValue& versionedTv = ((const CompositeTruthValue&)tv4).getVersionedTV(VersionHandle(HYPOTHETICAL, h1));
-            TS_ASSERT(!versionedTv.isNullTv());
-            TS_ASSERT(versionedTv.getType() == tvs[0]->getType());
-            TS_ASSERT(versionedTv.getMean() == tvs[0]->getMean());
-            TS_ASSERT(versionedTv.getCount() == tvs[0]->getCount());
-            TS_ASSERT(fabs(versionedTv.getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        const TruthValue& versionedTv = ((const CompositeTruthValue&)tv4).getVersionedTV(VersionHandle(HYPOTHETICAL, h1));
+        TS_ASSERT(!versionedTv.isNullTv());
+        TS_ASSERT(versionedTv.getType() == tvs[0]->getType());
+        TS_ASSERT(versionedTv.getMean() == tvs[0]->getMean());
+        TS_ASSERT(versionedTv.getCount() == tvs[0]->getCount());
+        TS_ASSERT(fabs(versionedTv.getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-            Handle h5 = atomSpace.getHandle(CONCEPT_NODE, NODE5_NAME);
-            TS_ASSERT(h5);
-            Atom* a5 = TLB::getAtom(h5);
-            const AttentionValue& av5 = a5->getAttentionValue();
-            TS_ASSERT(av5.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-            TS_ASSERT(av5.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-            TS_ASSERT(av5.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        Handle h5 = atomSpace.getHandle(CONCEPT_NODE, NODE5_NAME);
+        TS_ASSERT(h5);
+        Atom* a5 = TLB::getAtom(h5);
+        const AttentionValue& av5 = a5->getAttentionValue();
+        TS_ASSERT(av5.getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av5.getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av5.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-            const TruthValue& tv5 = a5->getTruthValue();
-            TS_ASSERT(tv5.getType() == tvs[4]->getType());
-            TS_ASSERT(tv5.getMean() == tvs[4]->getMean());
-            TS_ASSERT(tv5.getCount() == tvs[4]->getCount());
-            TS_ASSERT(fabs(tv5.getConfidence() - tvs[4]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(((const CompositeTruthValue&)tv5).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[4])->getNumberOfVersionedTVs());
+        const TruthValue& tv5 = a5->getTruthValue();
+        TS_ASSERT(tv5.getType() == tvs[4]->getType());
+        TS_ASSERT(tv5.getMean() == tvs[4]->getMean());
+        TS_ASSERT(tv5.getCount() == tvs[4]->getCount());
+        TS_ASSERT(fabs(tv5.getConfidence() - tvs[4]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(((const CompositeTruthValue&)tv5).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[4])->getNumberOfVersionedTVs());
 
-            const TruthValue& versionedTv1 = ((const CompositeTruthValue&)tv5).getVersionedTV(VersionHandle(CONTEXTUAL, h2));
-            TS_ASSERT(!versionedTv1.isNullTv());
-            TS_ASSERT(versionedTv1.getType() == tvs[1]->getType());
-            TS_ASSERT(versionedTv1.getMean() == tvs[1]->getMean());
-            TS_ASSERT(versionedTv1.getCount() == tvs[1]->getCount());
-            TS_ASSERT(fabs(versionedTv1.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-            const TruthValue& versionedTv2 = ((const CompositeTruthValue&)tv5).getVersionedTV(VersionHandle(HYPOTHETICAL, h2));
-            TS_ASSERT(!versionedTv2.isNullTv());
-            TS_ASSERT(versionedTv2.getType() == tvs[1]->getType());
-            TS_ASSERT(versionedTv2.getMean() == tvs[1]->getMean());
-            TS_ASSERT(versionedTv2.getCount() == tvs[1]->getCount());
-            TS_ASSERT(fabs(versionedTv2.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        const TruthValue& versionedTv1 = ((const CompositeTruthValue&)tv5).getVersionedTV(VersionHandle(CONTEXTUAL, h2));
+        TS_ASSERT(!versionedTv1.isNullTv());
+        TS_ASSERT(versionedTv1.getType() == tvs[1]->getType());
+        TS_ASSERT(versionedTv1.getMean() == tvs[1]->getMean());
+        TS_ASSERT(versionedTv1.getCount() == tvs[1]->getCount());
+        TS_ASSERT(fabs(versionedTv1.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        const TruthValue& versionedTv2 = ((const CompositeTruthValue&)tv5).getVersionedTV(VersionHandle(HYPOTHETICAL, h2));
+        TS_ASSERT(!versionedTv2.isNullTv());
+        TS_ASSERT(versionedTv2.getType() == tvs[1]->getType());
+        TS_ASSERT(versionedTv2.getMean() == tvs[1]->getMean());
+        TS_ASSERT(versionedTv2.getCount() == tvs[1]->getCount());
+        TS_ASSERT(fabs(versionedTv2.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-            // Check links
+        // Check links
 
-            HandleSeq outgoing;
-            Handle h6 = atomSpace.getHandle(LIST_LINK, outgoing);
-            TS_ASSERT(h6);
+        HandleSeq outgoing;
+        Handle h6 = atomSpace.getHandle(LIST_LINK, outgoing);
+        TS_ASSERT(h6);
 
-            outgoing.push_back(h1);
-            Handle h7 = atomSpace.getHandle(LIST_LINK, outgoing);
-            TS_ASSERT(h7);
+        outgoing.push_back(h1);
+        Handle h7 = atomSpace.getHandle(LIST_LINK, outgoing);
+        TS_ASSERT(h7);
 
-            outgoing.push_back(h2);
-            outgoing.push_back(h3);
-            Handle h8 = atomSpace.getHandle(LIST_LINK, outgoing);
-            TS_ASSERT(h8);
+        outgoing.push_back(h2);
+        outgoing.push_back(h3);
+        Handle h8 = atomSpace.getHandle(LIST_LINK, outgoing);
+        TS_ASSERT(h8);
 
-            outgoing.clear();
-            outgoing.push_back(h4);
-            outgoing.push_back(h5);
-            Handle h9 = atomSpace.getHandle(LIST_LINK, outgoing);
-            TS_ASSERT(h9);
+        outgoing.clear();
+        outgoing.push_back(h4);
+        outgoing.push_back(h5);
+        Handle h9 = atomSpace.getHandle(LIST_LINK, outgoing);
+        TS_ASSERT(h9);
 
-            // Check TimeServer entries
-            vector<HandleTemporalPair> result;
-            atomSpace.getTimeInfo(back_inserter(result), h1);
-            TS_ASSERT(result.size() == 1);
-            TS_ASSERT(*(result[0].getTemporal()) == Temporal(0,0));
+        // Check TimeServer entries
+        vector<HandleTemporalPair> result;
+        atomSpace.getTimeInfo(back_inserter(result), h1);
+        TS_ASSERT(result.size() == 1);
+        TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
-            result.clear();
-            atomSpace.getTimeInfo(back_inserter(result), h4);
-            TS_ASSERT(result.size() == 1);
-            TS_ASSERT(*(result[0].getTemporal()) == Temporal(10,100));
+        result.clear();
+        atomSpace.getTimeInfo(back_inserter(result), h4);
+        TS_ASSERT(result.size() == 1);
+        TS_ASSERT(*(result[0].getTemporal()) == Temporal(10, 100));
 
-            result.clear();
-            atomSpace.getTimeInfo(back_inserter(result), h6);
-            TS_ASSERT(result.size() == 1);
-            TS_ASSERT(*(result[0].getTemporal()) == Temporal(0,0));
+        result.clear();
+        atomSpace.getTimeInfo(back_inserter(result), h6);
+        TS_ASSERT(result.size() == 1);
+        TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
-            result.clear();
-            atomSpace.getTimeInfo(back_inserter(result), h9);
-            TS_ASSERT(result.size() == 3);
-            TS_ASSERT(*(result[0].getTemporal()) == Temporal(0,0));
-            TS_ASSERT(*(result[1].getTemporal()) == Temporal(0,10));
-            TS_ASSERT(*(result[2].getTemporal()) == Temporal(10,100));
+        result.clear();
+        atomSpace.getTimeInfo(back_inserter(result), h9);
+        TS_ASSERT(result.size() == 3);
+        TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
+        TS_ASSERT(*(result[1].getTemporal()) == Temporal(0, 10));
+        TS_ASSERT(*(result[2].getTemporal()) == Temporal(10, 100));
 
-            Handle h10 = atomSpace.getHandle(WORD_NODE, "fido ferraris");
-            TS_ASSERT(h10);
-            Handle h11 = atomSpace.getHandle(SL_PET_NODE, "fido");
-            TS_ASSERT(h11);
-            outgoing.clear();
-            outgoing.push_back(h10);
-            outgoing.push_back(h11);
-            TS_ASSERT(atomSpace.getHandle(WR_LINK, outgoing));
+        Handle h10 = atomSpace.getHandle(WORD_NODE, "fido ferraris");
+        TS_ASSERT(h10);
+        Handle h11 = atomSpace.getHandle(SL_PET_NODE, "fido");
+        TS_ASSERT(h11);
+        outgoing.clear();
+        outgoing.push_back(h10);
+        outgoing.push_back(h11);
+        TS_ASSERT(atomSpace.getHandle(WR_LINK, outgoing));
 
-            Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
-            TS_ASSERT(h11 == h12);
+        Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
+        TS_ASSERT(h11 == h12);
 
-            printf("runLoading() ended\n");
-        }
+        printf("runLoading() ended\n");
+    }
 
-        void testSavingLoading() {
-            AtomSpace atomSpace1;
-            runSaving(atomSpace1);
-            AtomSpace atomSpace2;
-            runLoading(atomSpace2);
+    void testSavingLoading() {
+        AtomSpace atomSpace1;
+        runSaving(atomSpace1);
+        AtomSpace atomSpace2;
+        runLoading(atomSpace2);
 
-            runSaving(atomSpace2);
-            AtomSpace atomSpace4;
-            runLoading(atomSpace4);
+        runSaving(atomSpace2);
+        AtomSpace atomSpace4;
+        runLoading(atomSpace4);
 
-            if (!CxxTest::TestTracker::tracker().testFailed())
-                std::remove(DUMP_FILENAME);
-        }
+        if (!CxxTest::TestTracker::tracker().testFailed())
+            std::remove(DUMP_FILENAME);
+    }
 
 };

@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,58 +24,69 @@
 
 #include <TemporalToHandleSetMap.h>
 
-TemporalToHandleSetMap::TemporalToHandleSetMap(){
+TemporalToHandleSetMap::TemporalToHandleSetMap()
+{
     internalMap = new TemporalMap();
 }
 
-TemporalToHandleSetMap::~TemporalToHandleSetMap(){
+TemporalToHandleSetMap::~TemporalToHandleSetMap()
+{
     TemporalMapIterator* keys = internalMap->keys();
     while (keys->hasNext()) {
-        delete ((HandleSet*) internalMap->get(keys->next())); 
+        delete ((HandleSet*) internalMap->get(keys->next()));
     }
     delete(keys);
     delete(internalMap);
 }
-    
-void TemporalToHandleSetMap::add(Temporal* key, HandleSet* obj){
-    if (contains(key)){
+
+void TemporalToHandleSetMap::add(Temporal* key, HandleSet* obj)
+{
+    if (contains(key)) {
         remove(key);
     }
     internalMap->add(key, (void *) obj);
 }
-    
-HandleSet* TemporalToHandleSetMap::get(Temporal* key){
+
+HandleSet* TemporalToHandleSetMap::get(Temporal* key)
+{
     return((HandleSet*) internalMap->get(key));
 }
-    
-Temporal* TemporalToHandleSetMap::getKey(const Temporal& lookupKey){
+
+Temporal* TemporalToHandleSetMap::getKey(const Temporal& lookupKey)
+{
     return internalMap->getKey(lookupKey);
 }
-    
-bool TemporalToHandleSetMap::contains(Temporal* key){
+
+bool TemporalToHandleSetMap::contains(Temporal* key)
+{
     return(internalMap->contains(key));
 }
-    
-HandleSet* TemporalToHandleSetMap::remove(Temporal* key){
+
+HandleSet* TemporalToHandleSetMap::remove(Temporal* key)
+{
     return((HandleSet*) internalMap->remove(key));
 }
-    
-int TemporalToHandleSetMap::getCount(){
+
+int TemporalToHandleSetMap::getCount()
+{
     return(internalMap->getCount());
 }
-    
-int TemporalToHandleSetMap::getSize(){
+
+int TemporalToHandleSetMap::getSize()
+{
     return(internalMap->getSize());
 }
 
-TemporalMapIterator *TemporalToHandleSetMap::keys(){
+TemporalMapIterator *TemporalToHandleSetMap::keys()
+{
     return(internalMap->keys());
 }
 
-TemporalToHandleSetMap *TemporalToHandleSetMap::clone(){
+TemporalToHandleSetMap *TemporalToHandleSetMap::clone()
+{
     TemporalToHandleSetMap *ret = new TemporalToHandleSetMap();
     TemporalMapIterator *originalKeys = keys();
-    while (originalKeys->hasNext()){
+    while (originalKeys->hasNext()) {
         Temporal* nextKey = originalKeys->next();
         ret->add(nextKey, get(nextKey));
     }
@@ -83,7 +94,8 @@ TemporalToHandleSetMap *TemporalToHandleSetMap::clone(){
     return(ret);
 }
 
-std::string TemporalToHandleSetMap::toString() {
+std::string TemporalToHandleSetMap::toString()
+{
     std::string answer;
     for (TemporalMapIterator *it = keys(); it->hasNext();) {
         Temporal* key = it->next();

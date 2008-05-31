@@ -7,9 +7,9 @@
  * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,22 +28,23 @@
 #include "types.h"
 #include "Temporal.h"
 
-class HandleTemporalPair {
+class HandleTemporalPair
+{
 
 public:
-	HandleTemporalPair();
-	HandleTemporalPair(Handle, Temporal*);
-	virtual ~HandleTemporalPair();
-    
+    HandleTemporalPair();
+    HandleTemporalPair(Handle, Temporal*);
+    virtual ~HandleTemporalPair();
+
     Handle getHandle() const;
     Temporal* getTemporal() const;
     std::string toString() const;
     HandleTemporalPair clone();
-    
+
 private:
     Handle handle;
     Temporal* time;
-     
+
 };
 
 #endif //HANDLETEMPORALPAIR_H
