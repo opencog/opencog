@@ -39,7 +39,7 @@
 	                                                            \
 	SQLGetDiagRec(HTYPE, HAN, 1, (SQLCHAR *) sql_stat,          \
 	              &err, (SQLCHAR*) msg, sizeof(msg), &msglen);  \
-	PERR("(%ld) %s\n", err, msg);                               \
+	PERR("(%ld) %s\n", (long int) err, msg);                               \
 }
 
 /* =========================================================== */
@@ -374,7 +374,7 @@ ODBCRecordSet::get_column_labels(void)
 	{
 		char namebuff[300];
 		SQLSMALLINT namelen;
-		SQLUINTEGER column_size;
+		SQLULEN column_size;
 		SQLSMALLINT datatype;
 		SQLSMALLINT decimal_digits;
 		SQLSMALLINT nullable;

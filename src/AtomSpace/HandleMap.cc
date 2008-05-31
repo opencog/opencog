@@ -106,7 +106,8 @@ T HandleMap<T>::get(Handle key)
 
     // if the key is not found, return NULL.
     if (ti == handle_map->end())
-        return ((T)(void*) NULL); // crazy double cast due to gcc 4.1 bug
+        // return ((T)(void*) NULL); // crazy double cast due to gcc 4.1 bug
+        return ((T) NULL); // double cast doesn't work in 64bit
     ret = ti->second;
 
     unlock();
