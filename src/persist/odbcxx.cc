@@ -196,7 +196,7 @@ ODBCConnection::exec(const char * buff)
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
-	SQLINTEGER err;
+	SQLLEN err;
 	SQLRETURN rc;
 	int i;
 
