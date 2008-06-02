@@ -26,21 +26,19 @@
 #include <string>
 #include <ext/hash_map>
 
-namespace Util
+namespace opencog
 {
 using __gnu_cxx::hash_map;
 using __gnu_cxx::hash;
-
 }
 
 namespace __gnu_cxx
 {
-template<> struct hash< std::string > {
-    size_t operator()( const std::string& x ) const {
-        return hash< const char* >()( x.c_str() );
+template<> struct hash<std::string> {
+    size_t operator()(const std::string& x) const {
+        return hash<const char*>()(x.c_str());
     }
 };
 }
-
 
 #endif

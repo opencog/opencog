@@ -49,7 +49,7 @@
 
 #include "RandGen.h"
 
-namespace Util {
+namespace opencog {
 
 class MT19937RandGen : public RandGen {
 

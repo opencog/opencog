@@ -92,11 +92,11 @@ private:
     void randomStimulation(AtomSpace *a);
 
     /* Recent amount of stimulus given per cycle */
-    Util::recent_val<stim_t> totalStimulusSinceReset;
+    opencog::recent_val<stim_t> totalStimulusSinceReset;
 
     /* Number of atoms within attentionFocusBoundary */
-    Util::recent_val<long> attentionalFocusSize;
-    Util::recent_val<long> attentionalFocusNodesSize;
+    opencog::recent_val<long> attentionalFocusSize;
+    opencog::recent_val<long> attentionalFocusNodesSize;
     /* Rate of decay (r) for estimating AttentionalFocusSize
      * Estimate equal to:
      * r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent */
@@ -190,11 +190,11 @@ private:
      */
     int getTaxAmount(double mean);
 
-    Util::RandGen* rng;
+    opencog::RandGen* rng;
     /**
      * Get Random number generator associated with MindAgent.
      */
-    Util::RandGen* getRandGen();
+    opencog::RandGen* getRandGen();
 
     /**
      * Update the attentional focus size variables

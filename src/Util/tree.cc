@@ -27,7 +27,7 @@ namespace
 {
 using namespace boost::spirit;
 using std::string;
-using namespace Util;
+using namespace opencog;
 
 tree<string> tr;
 tree<string>::iterator at = tr.begin();
@@ -87,7 +87,7 @@ tree<std::string> parse_string_tree(const std::string& str)
 }
 } //~namespace
 
-std::istream& operator>>(std::istream& in, Util::tree<std::string>& t)
+std::istream& operator>>(std::istream& in, opencog::tree<std::string>& t)
 {
     t.clear();
     std::string str, tmp;

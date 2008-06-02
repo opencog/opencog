@@ -52,7 +52,7 @@
 
 #include <ext/numeric>
 
-namespace Util
+namespace opencog
 {
 //this needs to be changed for non-gcc
 using __gnu_cxx::power;
@@ -237,12 +237,12 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
     FloatT cp = 1.0 - p;
     FloatT res;
     if (p > PROB_EPSILON && cp > PROB_EPSILON)
-        res = -p * Util::log2(p) - cp * Util::log2(cp);
+        res = -p * opencog::log2(p) - cp * opencog::log2(cp);
     else
         res = 0.0;
     return res;
 }
 
-} //~namespace Util
+} //~namespace opencog
 
 #endif

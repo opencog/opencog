@@ -6,7 +6,7 @@
 #include "Logger.h"
 #endif
 
-namespace Util {
+namespace opencog {
 
 /* Period parameters */  
 int MT19937RandGen::N = 624;

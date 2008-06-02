@@ -110,7 +110,7 @@ bool Node::equals(Atom *other)
 int Node::hashCode()
 {
     int result = Atom::hashCode();
-    result += Util::hash<const char*>()(name.c_str());
+    result += opencog::hash<const char*>()(name.c_str());
     return result;
 }
 

@@ -55,7 +55,7 @@ class SavingLoading
 
 private:
 
-    typedef Util::hash_map<const char *, SavableRepository*, Util::hash<const char*>, Util::eqconststr> RepositoryHash;
+    typedef opencog::hash_map<const char *, SavableRepository*, opencog::hash<const char*>, opencog::eqconststr> RepositoryHash;
 
     /**
      * Stores the SavableRepositories actually loaded with Novamente.

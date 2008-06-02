@@ -125,7 +125,7 @@ HopfieldServer::HopfieldServer()
     height = HDEMO_DEFAULT_HEIGHT;
     links = HDEMO_DEFAULT_LINKS;
     density = -1.0f;
-    rng = new Util::MT19937RandGen(tv.tv_usec);
+    rng = new opencog::MT19937RandGen(tv.tv_usec);
     options = new HopfieldOptions();
     options->setServer(this);
 

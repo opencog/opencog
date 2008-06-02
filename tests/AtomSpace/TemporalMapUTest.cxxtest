@@ -104,7 +104,7 @@ public:
     }
 
     void testSize() {
-        Util::MT19937RandGen rng(12345678);
+        opencog::MT19937RandGen rng(12345678);
         int size = rng.randint(N_TIMES);
         delete(temporalMap);
         temporalMap = new TemporalMap(size);

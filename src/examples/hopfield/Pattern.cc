@@ -32,7 +32,7 @@
 
 using namespace std;
 
-Util::RandGen* patternRng = new Util::MT19937RandGen(1);
+opencog::RandGen* patternRng = new opencog::MT19937RandGen(1);
 
 Pattern::Pattern(int w, int h, float density)
 {

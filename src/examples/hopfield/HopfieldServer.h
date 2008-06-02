@@ -59,7 +59,7 @@ private:
      */
     std::vector<Handle> hGrid;
 
-    Util::RandGen* rng;
+    opencog::RandGen* rng;
 
 public:
     // Amount of stimulus to apply when retrieving a pattern

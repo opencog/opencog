@@ -40,8 +40,8 @@
 
 class Atom;
 
-typedef Util::ConstCharPointerIntHashMap ClassTypeHashMap;
-typedef Util::IntConstCharPointerHashMap ClassNameHashMap;
+typedef opencog::ConstCharPointerIntHashMap ClassTypeHashMap;
+typedef opencog::IntConstCharPointerHashMap ClassNameHashMap;
 
 // Definition of a handle. Opaque type.
 // Will change when system is reworked for distributed computing.
@@ -58,7 +58,7 @@ struct eqHandle {
     bool operator()(Handle h1, Handle h2) const;
 };
 
-typedef Util::hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
+typedef opencog::hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
 //#endif
 
 // type and arity of Atoms, represented as short integers (16 bits)

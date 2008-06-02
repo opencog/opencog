@@ -70,7 +70,7 @@ public:
      * the parsing (when only Nodes are read) to be used in the second
      * pass (to resolve references in Links).
      */
-    static Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> hypHandles;
+    static opencog::hash_map<char *, Handle, opencog::hash<char *>, opencog::eqstr> hypHandles;
 
     /**
      * A special default (Simple) TruthValue object for any atom loaded from a XML doc,

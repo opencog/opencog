@@ -26,7 +26,7 @@
 #include <boost/functional/hash.hpp>
 #include "tree.h"
 
-namespace Util
+namespace opencog
 {
 
 template < typename T,
@@ -55,6 +55,6 @@ std::size_t hash_value(const tree<T>& tr)
     return boost::hash_range(tr.begin(), tr.end());
 }
 
-} //~namespace Util
+} //~namespace opencog
 
 #endif

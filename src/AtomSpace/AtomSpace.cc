@@ -987,7 +987,7 @@ AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti
     return s;
 }
 
-Util::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
+opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
 {
     return maxSTI;
 }

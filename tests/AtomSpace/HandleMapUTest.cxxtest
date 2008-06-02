@@ -107,7 +107,7 @@ public:
 
     void testSize() {
 #ifdef BAD_TEST
-        Util::MT19937RandGen rng(12345678);
+        opencog::MT19937RandGen rng(12345678);
         int size = rng.randint(N_HANDLES);
         delete(handleMap);
         handleMap = new HandleMap<char *>(size);

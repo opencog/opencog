@@ -28,7 +28,7 @@
 #include "types.h"
 #include "Temporal.h"
 
-using Util::tree;
+using opencog::tree;
 
 typedef unsigned int uint;
 

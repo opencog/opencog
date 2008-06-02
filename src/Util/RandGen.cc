@@ -28,7 +28,7 @@
 #include <set>
 #include "exceptions.h"
 
-namespace Util
+namespace opencog
 {
 
 class RandGen

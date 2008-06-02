@@ -33,7 +33,7 @@ private:
     int width;
     int height;
 
-    Util::RandGen *rng;
+    opencog::RandGen *rng;
 
 public:
 

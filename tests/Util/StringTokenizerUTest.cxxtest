@@ -23,7 +23,8 @@
  */
 
 #include "StringTokenizer.h"
-using namespace Util;
+
+using namespace opencog;
 
 static const std::string toTokenizer = "this is a common phrase";
 static const std::string delimiter = " ";
