@@ -64,6 +64,7 @@ class CBI : public CallBackInterface
         int use_count;
         pthread_mutex_t use_count_lock;
     public:
+<<<<<<< TREE
         CBI(ServerSocket *);
         void Close(void);
         int AtomicInc(int inc);
@@ -80,6 +81,17 @@ public:
     void OnDisconnect();
     void OnLine(const std::string&);
     void OnRawData(const char *, size_t);
+=======
+
+        ~ServerSocket();
+        ServerSocket(ISocketHandler &handler);
+
+        static void setMaster(SimpleNetworkServer *master);
+        void OnAccept();
+        void OnDisconnect();
+        void OnLine(const std::string&);
+        void OnRawData(const char *, size_t);
+>>>>>>> MERGE-SOURCE
 }; // class
 }  // namespace
 

@@ -49,6 +49,11 @@ void ServerSocket::setMaster(SimpleNetworkServer *m)
     master = m;
 }
 
+void ServerSocket::OnAccept()
+{
+    Send(master->getCommandPrompt());
+}
+
 void ServerSocket::OnDisconnect()
 {
     if (!in_raw_mode) return;
@@ -62,7 +67,8 @@ void ServerSocket::OnDisconnect()
 
 void ServerSocket::OnLine(const std::string& line)
 {
-    if (line == "data") {
+    if (line == "data")
+    {
         // Disable line protocol; we are expecting a stream
         // of bytes from now on, until socket closure.
         // The OnRawData() method will be called from here
@@ -70,7 +76,12 @@ void ServerSocket::OnLine(const std::string& line)
         SetLineProtocol(false);
         in_raw_mode = true;
         buffer = "data\n";
-    } else {
+    }
+    else if (line == "close") {
+        Close();
+    } 
+    else
+    {
         cb->AtomicInc(1);
         master->processCommandLine(cb, line);
     }
@@ -189,10 +200,12 @@ void ServerSocket::CBI::callBack(const std::string &message)
         std::string nl = "";
         while (getline(stream, line)) {
             sock->Send(nl + line);
-            nl = "\n";
+            nl = "\r\n";
         }
-        if ('\n' == message[message.length()-1])
-            sock->Send("\n");
+        if ('\n' == message[message.length()-1]) {
+            sock->Send("\r\n");
+            sock->Send(master->getCommandPrompt());
+        }
     }
     pthread_mutex_unlock(&sock_lock);
 
