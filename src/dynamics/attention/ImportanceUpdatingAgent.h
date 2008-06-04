@@ -266,8 +266,10 @@ public:
     void setUpdateLinksFlag(bool f);
     bool getUpdateLinksFlag();
 
-    // Moved to Atomspace
-    // AttentionValue::sti_t getRecentMaxSTI();
+    inline AttentionValue::sti_t getSTIAtomWage()
+		{ return STIAtomWage; }
+    inline AttentionValue::lti_t getLTIAtomWage()
+		{ return LTIAtomWage; }
 
 }; // class
 

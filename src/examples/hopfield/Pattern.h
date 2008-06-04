@@ -77,6 +77,8 @@ public:
     int getWidth();
     int getHeight();
 
+	int activity();
+
     /**
      * Generate random patterns.
      *

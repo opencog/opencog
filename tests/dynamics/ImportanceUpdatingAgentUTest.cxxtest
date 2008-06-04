@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
+vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
     vector<Handle> testAtoms;

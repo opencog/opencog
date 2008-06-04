@@ -513,4 +513,14 @@ string ImportanceUpdatingAgent::toString()
 
 }
 
+//AttentionValue::sti_t ImportanceUpdatingAgent::getSTIAtomWage()
+//{
+//	return STIAtomWage;
+//}
+
+//AttentionValue::lti_t ImportanceUpdatingAgent::getLTIAtomWage()
+//{
+//	return LTIAtomWage;
+//}
+
 } // Namespace opencog

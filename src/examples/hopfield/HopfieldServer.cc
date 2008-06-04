@@ -119,8 +119,7 @@ HopfieldServer::HopfieldServer()
     gettimeofday(&tv, &tz);
     tm = localtime(&tv.tv_sec);
 
-    perceptStimUnit = HDEMO_DEFAULT_PERCEPT_STIM;
-    imprintStimUnit = HDEMO_DEFAULT_IMPRINT_STIM;
+	patternStimulus = HDEMO_DEFAULT_PATTERN_STIM;
     width = HDEMO_DEFAULT_WIDTH;
     height = HDEMO_DEFAULT_HEIGHT;
     links = HDEMO_DEFAULT_LINKS;
@@ -249,18 +248,33 @@ void HopfieldServer::addRandomLinks()
 
 }
 
-void HopfieldServer::resetNodes()
+void HopfieldServer::resetNodes(bool toDefault)
 {
     AtomSpace* a = getAtomSpace();
     HandleEntry *nodes, *n;
 
     nodes = a->getAtomTable().getHandleSet(NODE, true);
 
-    // Set all nodes to sti 0 and default LTI
-    for (n = nodes; n; n = n->next) {
-        a->setSTI(n->handle, 0);
-        a->setLTI(n->handle, AttentionValue::DEFAULTATOMLTI);
-    }
+	if (toDefault) {
+		for (n = nodes; n; n = n->next) {
+			// Set all nodes to default STI and default LTI
+			a->setSTI(n->handle, AttentionValue::DEFAULTATOMSTI);
+			a->setLTI(n->handle, AttentionValue::DEFAULTATOMLTI);
+		}
+	} else {
+		// Set nodes to negative of AF boundary - patternStimulus*wages
+		AttentionValue::sti_t startSTI;
+		AttentionValue::lti_t startLTI;
+		startSTI = getAtomSpace()->getAttentionalFocusBoundary() -
+			(patternStimulus * importUpdateAgent->getSTIAtomWage())/hGrid.size();
+		startLTI = getAtomSpace()->getAttentionalFocusBoundary() -
+			(patternStimulus * importUpdateAgent->getLTIAtomWage())/hGrid.size();
+		for (n = nodes; n; n = n->next) {
+			a->setSTI(n->handle, startSTI);
+			a->setLTI(n->handle, startLTI);
+		}
+	}
+    
     delete nodes;
 
     logger().debug("Nodes Reset");
@@ -275,7 +289,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
     for (; cycles > 0; cycles--) {
         // for each encode pattern
         logger().fine("---Imprint:Encoding pattern");
-        encodePattern(pattern, imprintStimUnit);
+        encodePattern(pattern, patternStimulus);
         printStatus();
         // then update with learning
 
@@ -312,11 +326,18 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 {
     std::vector<Handle>::iterator it = hGrid.begin();
     std::vector<int>::iterator p_it = pattern.begin();
+	int activity;
+	
+	activity = pattern.activity();
+	// Avoid floating point exception if blank pattern
+	if (activity == 0)
+		activity = 1;
+	stim_t perUnit = patternStimulus / activity;
 
     while (it != hGrid.end() && p_it != pattern.end()) {
         Handle h = (*it);
         int value = (*p_it);
-        getAtomSpace()->stimulateAtom(h, stimulus * value);
+        getAtomSpace()->stimulateAtom(h, perUnit * value);
         it++; p_it++;
     }
 
@@ -334,7 +355,7 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles)
 
     while (numCycles > 0) {
         logger().fine("---Retrieve:Encoding pattern");
-        encodePattern(partialPattern, perceptStimUnit);
+        encodePattern(partialPattern, patternStimulus);
         printStatus();
         updateAtomTableForRetrieval(5);
         printStatus();
@@ -413,22 +434,23 @@ void HopfieldServer::printStatus()
 //    HandleEntry *links, *current_l;
 
     int i;
+	
 
     int col;
     if (!options->verboseFlag) return;
 
     for (i = 0; i < height; i++) {
         for (col = 0; col < width; col++) {
-            printf("%3d", nodeStim[i*width + col]);
+            printf("% 1.2f ", nodeStim[i*width + col] / (float) patternStimulus);
         }
-        cout << " | ";
+        cout << "| ";
         for (col = 0; col < width; col++) {
-            printf("%3d", nodeSTI[i*width + col]);
+            printf("% 1.2f ", nodeSTI[i*width + col] / (float) getAtomSpace()->getMaxSTI().recent);
         }
-        cout << " | ";
+        cout << "| ";
 
         for (col = 0; col < width; col++) {
-            printf("%3d", pattern[i*width + col]);
+            printf("% 2d", pattern[i*width + col]);
         }
         cout << endl;
     }
