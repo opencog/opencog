@@ -38,14 +38,14 @@
 #include "CogServer.h"
 #include "MindAgent.h"
 
-/* Starting values for rent and wage */
-#define DEFAULT_ATOM_STI_RENT 10
-#define DEFAULT_ATOM_LTI_RENT 10
-#define DEFAULT_ATOM_STI_WAGE 2
-#define DEFAULT_ATOM_LTI_WAGE 2
-
 namespace opencog
 {
+
+// Starting values for rent and wage
+const int DEFAULT_ATOM_STI_RENT = 10;
+const int DEFAULT_ATOM_LTI_RENT = 10;
+const int DEFAULT_ATOM_STI_WAGE = 2;
+const int DEFAULT_ATOM_LTI_WAGE = 2;
 
 class CogServer;
 
@@ -56,29 +56,44 @@ class ImportanceUpdatingAgent : public MindAgent
 
 private:
 
-    /* Atom Rent */
+    // Atom Rent
     AttentionValue::sti_t STIAtomRent;
     AttentionValue::lti_t LTIAtomRent;
 
-    /* Atom wages (to be weighted by stimulus) */
+    // Amnesty is used in calculating rent.
+    AttentionValue::sti_t amnesty;
+	// The different ways rent can be calculated
+	enum { RENT_FLAT, RENT_EXP, RENT_LOG };
+	int rentType;
+	
+    /**
+     * Calculate the rent to apply to the atom referenced by
+	 * handle h.
+     *
+     * @param the AtomSpace to work on
+     * @param the sti of the atom to calculate rent for
+     */
+	AttentionValue::sti_t calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c);
+
+    // Atom wages (to be weighted by stimulus)
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
 
-    /* Cap on STI/LTI */
+    // Cap on STI/LTI
     AttentionValue::sti_t STICap;
     AttentionValue::lti_t LTICap;
 
-    /* Update links or not */
+    // Update links or not
     bool updateLinks;
 
-    /* Logger object for MindAgent */
+    // Logger object for MindAgent
     Logger *log;
 
-    /* Randomly stimulate atoms? */
+    // Randomly stimulate atoms?
     bool noiseOn;
-    /* Change of randomly introduced stimulation */
+    // Change of randomly introduced stimulation
     float noiseOdds;
-    /* The default stimulus unit, used by random stimulation */
+    // The default stimulus unit, used by random stimulation
     stim_t noiseUnit;
 
     /**
@@ -91,21 +106,21 @@ private:
      */
     void randomStimulation(AtomSpace *a);
 
-    /* Recent amount of stimulus given per cycle */
+    // Recent amount of stimulus given per cycle */
     Util::recent_val<stim_t> totalStimulusSinceReset;
 
-    /* Number of atoms within attentionFocusBoundary */
+    // Number of atoms within attentionFocusBoundary */
     Util::recent_val<long> attentionalFocusSize;
     Util::recent_val<long> attentionalFocusNodesSize;
-    /* Rate of decay (r) for estimating AttentionalFocusSize
-     * Estimate equal to:
-     * r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent */
+    // Rate of decay (r) for estimating AttentionalFocusSize
+    // Estimate equal to:
+    // r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent
 
-    /* for calculate the recent maximum STI value, used in Hebbian learning */
-    float maxSTIDecayRate;
+    // for calculate the recent maximum STI value, used in Hebbian learning
+    //float maxSTIDecayRate;
     //AttentionValue::sti_t recentMaxSTI;
 
-    /* STI has gone out of aceceptable range during this mindagent cycle */
+    // STI has gone out of aceceptable range during this mindagent cycle
     bool lobeSTIOutOfBounds;
 
     /**
@@ -204,7 +219,7 @@ private:
      */
     void updateAttentionalFocusSizes(AtomSpace* a);
 
-    /* Has init been run to give iterative variables sensible start points */
+    // Has init been run to give iterative variables sensible start points
     bool initialEstimateMade;
 
     /**
@@ -223,7 +238,7 @@ private:
 
     HandleEntry* getHandlesToUpdate(AtomSpace* a);
 
-    /* Debug */
+    // Debug
     bool verbose;
 
 public:
@@ -255,9 +270,9 @@ public:
         updateLinks = flag;
     }
 
-    /* The target lobe STI and LTI values are not only initial values, but
-     * also values that are returned to if the values exit their
-     * acceptable ranges */
+    // The target lobe STI and LTI values are not only initial values, but
+    // also values that are returned to if the values exit their
+    // acceptable ranges
     long targetLobeSTI;
     long targetLobeLTI;
     long acceptableLobeSTIRange[2];

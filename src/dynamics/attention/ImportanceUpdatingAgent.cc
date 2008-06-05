@@ -24,18 +24,22 @@
 
 #include <math.h>
 #include <time.h>
+#include <algorithm>
 
 namespace opencog
 {
 
 ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 {
-    /* init starting wages/rents. these should quickly change and reach
-     * stable cycles */
+    // init starting wages/rents. these should quickly change and reach
+    // stable values, which adapt to the system dynamics
     STIAtomRent = DEFAULT_ATOM_STI_RENT;
     LTIAtomRent = DEFAULT_ATOM_LTI_RENT;
     STIAtomWage = DEFAULT_ATOM_STI_WAGE;
     LTIAtomWage = DEFAULT_ATOM_LTI_WAGE;
+
+	rentType = RENT_LOG; //config().get_int("RENT_TYPE");
+	amnesty = 5; //config().get_int("RENT_AMNESTY");
 
     updateLinks = true;
 
@@ -402,20 +406,49 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
 {
     AttentionValue::sti_t current, stiRentCharged, exchangeAmount;
     stim_t s;
-    AttentionValue::sti_t amnesty = 5;
 
     current = a->getSTI(h);
-    /* collect if STI > a->attentionalFocusBoundary */
-    if (current > a->getAttentionalFocusBoundary() + amnesty)
-        stiRentCharged = STIAtomRent;
-    else
-        stiRentCharged = 0;
+	stiRentCharged = calculateSTIRent(a, current);
 
     s = a->getAtomStimulus(h);
     exchangeAmount = - stiRentCharged + (STIAtomWage * s);
     a->setSTI(h, current + exchangeAmount);
 
-    log->fine("Atom %s stim = %d, STI old = %d, new = %d", a->getName(h).c_str(), s, current, a->getSTI(h));
+    log->fine("Atom %s stim = %d, STI old = %d, new = %d, rent = %d", a->getName(h).c_str(), s, current, a->getSTI(h), stiRentCharged);
+
+}
+
+AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c)
+{
+    AttentionValue::sti_t stiRentCharged = 0;
+
+	switch (rentType) {
+		case RENT_FLAT:
+			// Charge a flat rent to all atoms with
+			// STI > AF boundary + amnesty
+			if (c > a->getAttentionalFocusBoundary() + amnesty)
+				stiRentCharged = STIAtomRent;
+			break;
+		case RENT_EXP:
+			if (c > a->getAttentionalFocusBoundary() + amnesty)
+				stiRentCharged = STIAtomRent;
+			break;
+		case RENT_LOG:
+			// max(0,i) where i = log((x-(amnesty%-0.05))*20)/2])
+			if (c > a->getAttentionalFocusBoundary()) {
+				double percentAmnesty = 0.05;
+				double multiplier = 0.0;
+				double x;
+				percentAmnesty = percentAmnesty-0.05;
+				x = c - a->getAttentionalFocusBoundary();
+				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
+				if (percentAmnesty < 0) percentAmnesty = 0;
+				multiplier = ::log((x-percentAmnesty)*20)/2.0;
+				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
+			}
+			break;
+	}
+	return stiRentCharged;
 
 }
 
