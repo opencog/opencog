@@ -22,9 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ServerSocket.h"
 #include <string>
 #include <sstream>
+
+#include "ServerSocket.h"
+#include "Logger.h"
 
 using namespace opencog;
 
@@ -51,11 +53,13 @@ void ServerSocket::setMaster(SimpleNetworkServer *m)
 
 void ServerSocket::OnAccept()
 {
+    logger().debug("ServerSocket.OnAccept");
     Send(master->getCommandPrompt());
 }
 
 void ServerSocket::OnDisconnect()
 {
+    logger().debug("ServerSocket.OnDisconnect");
     if (!in_raw_mode) return;
 
     cb->AtomicInc(1);
@@ -67,8 +71,10 @@ void ServerSocket::OnDisconnect()
 
 void ServerSocket::OnLine(const std::string& line)
 {
-    if (line == "data")
-    {
+    logger().debug("ServerSocket.OnLine [%s]", line.c_str());
+    if (line == "exit") {
+       SetCloseAndDelete();
+    } else if (line == "data") {
         // Disable line protocol; we are expecting a stream
         // of bytes from now on, until socket closure.
         // The OnRawData() method will be called from here
@@ -76,12 +82,7 @@ void ServerSocket::OnLine(const std::string& line)
         SetLineProtocol(false);
         in_raw_mode = true;
         buffer = "data\n";
-    }
-    else if (line == "close") {
-        Close();
-    } 
-    else
-    {
+    } else {
         cb->AtomicInc(1);
         master->processCommandLine(cb, line);
     }
@@ -102,6 +103,7 @@ void ServerSocket::OnLine(const std::string& line)
  */
 void ServerSocket::OnRawData(const char * buf, size_t len)
 {
+    logger().debug("ServerSocket.OnRawData [%s]", buf);
     size_t i;
     size_t istart = 0;
     while (istart < len) {

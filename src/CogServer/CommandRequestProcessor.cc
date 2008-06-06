@@ -99,31 +99,27 @@ std::string CommandRequestProcessor::help(std::string topic)
         reply += "\"\n\n";
     }
 
-
     reply +=
         "Available commands:\n"
-        "data <xmldata>     -- load OpenCog XML data immediately following\n"
-        "load <filename>    -- load OpenCog XML from indicated filename\n"
-        "ls                 -- list entire system contents\n"
-        "ls <handle>        -- list handle and its incoming set\n"
-        "ls <type> <name>   -- list node and its incoming set\n"
-        "dlopen <filename>  -- load a dynamic module (and run it).\n"
-        "dlclose <filename> -- close a previously loaded dynamic module.\n"
-        "close              -- end the session.\n";
+        "    data <xmldata>     -- load OpenCog XML data immediately following\n"
+        "    load <filename>    -- load OpenCog XML from indicated filename\n"
+        "    ls                 -- list entire system contents\n"
+        "    ls <handle>        -- list handle and its incoming set\n"
+        "    ls <type> <name>   -- list node and its incoming set\n"
+        "    dlopen <filename>  -- load a dynamic module (and run it).\n"
+        "    dlclose <filename> -- close a previously loaded dynamic module.\n"
 #ifdef HAVE_GUILE
-    reply +=
-        "scm              -- enter the scheme interpreter\n";
+        "    scm                -- enter the scheme interpreter\n"
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
-    reply +=
-        "sql-open <dbname> <username> <auth>\n"
-        "                 -- open connection to SQL storage\n"
-        "sql-close        -- close connection to SQL storage\n"
-        "sql-store        -- store all server data to SQL storage\n"
-        "sql-load         -- load server from SQL storage\n";
+        "    sql-open <dbname> <username> <auth>\n"
+        "                       -- open connection to SQL storage\n"
+        "    sql-close          -- close connection to SQL storage\n"
+        "    sql-store          -- store all server data to SQL storage\n"
+        "    sql-load           -- load server from SQL storage\n"
 #endif
-    reply +=
-        "shutdown         -- stop the server, and exit\n";
+        "    exit               -- end the session.\n"
+        "    shutdown           -- stop the server, and exit\n";
 
     return reply;
 }
@@ -406,7 +402,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         if (command == "scm-exit") {
             shell_mode = false;
             answer = "Exiting scheme shell mode\n";
-            answer += prompt;
         } else {
             answer = ss->eval(command);
         }
@@ -415,7 +410,6 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         return;
     }
 #endif /* HAVE_GUILE */
-
     if (command == "data") {
         if (args.size() != 1) {
             answer = "data: invalid command syntax";
@@ -464,19 +458,19 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             sql_close();
 #endif /* HAVE_SQL_STORAGE */
             server().stop();
+            // do not call setAnswer and callBack to avoid printing the prompt
+            return;
         }
-    }
 #ifdef HAVE_GUILE
-    else if (command == "scm") {
+    } else if (command == "scm") {
         shell_mode = true;
         answer = "Entering scheme shell mode; enter \".\" to leave\nguile> ";
         request->setAnswer(answer);
         request->callBack();
         return;
-    }
 #endif /* HAVE_GUILE */
 #ifdef HAVE_SQL_STORAGE
-    else if (command == "sql-open") {
+    } else if (command == "sql-open") {
         if (args.size() < 2) {
             answer = "sql-open: invalid command syntax";
         } else if (args.size() == 2) {
@@ -510,9 +504,8 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = sql_store();
         }
-    }
 #endif /* HAVE_SQL_STORAGE */
-    else if (!externalCommand(command, args, answer)) {
+    } else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: data help load ls dlopen dlclose shutdown close";
 #ifdef HAVE_GUILE
