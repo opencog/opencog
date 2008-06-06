@@ -31,6 +31,8 @@
 #include "exceptions.h"
 #include "Logger.h"
 
+using namespace opencog;
+
 /**
  * ----------------------------------------------------------------------------
  * StandardException class
@@ -243,7 +245,7 @@ AssertionException::AssertionException(const char* fmt, va_list ap)
     opencog::logger().error(buf);
 }
 
-void cassert(const char * trace, bool condition, const char *fmt, ...)
+void opencog::cassert(const char * trace, bool condition, const char *fmt, ...)
 {
     if (condition) return;
 
@@ -263,7 +265,7 @@ void cassert(const char * trace, bool condition, const char *fmt, ...)
     throw ex;
 }
 
-void cassert(const char * trace, bool condition)
+void opencog::cassert(const char * trace, bool condition)
 {
 
     if (condition) return;

@@ -34,7 +34,8 @@
 #include "utils.h"
 #include <vector>
 
-using namespace std;
+namespace opencog
+{
 
 /*
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
@@ -51,7 +52,7 @@ private:
     bool symmetric;
     float diff;//used in inference rule procedure in order to compute L1 and U1
 
-    vector<float*> firstOrderDistribution;
+    std::vector<float*> firstOrderDistribution;
 
     void init(float c = 0.0f, float d = 0.0f, float e = DEFAULT_CONFIDENCE_LEVEL);
     void copy(const IndefiniteTruthValue&);
@@ -73,14 +74,14 @@ public:
     float getL() const;
     float getConfidenceLevel() const;
     float getDiff() const;
-    vector<float*> getFirstOrderDistribution() const;
+    std::vector<float*> getFirstOrderDistribution() const;
 
     void setMean(float);
     void setU(float);
     void setL(float);
     void setConfidenceLevel(float);
     void setDiff(float);
-    void setFirstOrderDistribution(vector<float*>);
+    void setFirstOrderDistribution(std::vector<float*>);
 
     float getCount() const;
     float getConfidence() const;
@@ -101,4 +102,7 @@ public:
         DEFAULT_K = k;
     }
 };
+
+} // namespace opencog
+
 #endif /*_INDEFINITE_TRUTH_VALUE_H_*/

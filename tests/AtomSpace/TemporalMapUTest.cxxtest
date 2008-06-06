@@ -28,6 +28,8 @@
 #include "numeric.h"
 #include "mt19937ar.h"
 
+using namespace opencog;
+
 #define N_TIMES 10
 
 class TemporalMapUTest :  public CxxTest::TestSuite

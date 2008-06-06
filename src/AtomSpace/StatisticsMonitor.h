@@ -30,6 +30,9 @@
 #include "types.h"
 #include "AtomTable.h"
 
+namespace opencog
+{
+
 /**
  * The dynamics statistics agent is responsible for collecting several
  * statistics values from many parts of the system and making them available
@@ -200,5 +203,7 @@ public:
     int getTypeCount(Type type);
 
 };
+
+} // namespace opencog
 
 #endif

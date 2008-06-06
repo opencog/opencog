@@ -26,6 +26,8 @@
 #include <TLB.h>
 #include "HandleMap.cc"
 
+using namespace opencog;
+
 HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 {
     internalMap = new HandleMap<TemporalEntry *>();

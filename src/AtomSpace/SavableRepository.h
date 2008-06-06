@@ -26,8 +26,12 @@
 
 #ifndef SAVABLEREPOSITORY_H
 #define SAVABLEREPOSITORY_H
+
 #include <stdio.h>
 #include <HandleMap.h>
+
+namespace opencog
+{
 
 /**
  * This interface should be implemented by any
@@ -72,5 +76,7 @@ public:
     virtual void clear() = 0;
 
 };
+
+} // namespace opencog
 
 #endif //SAVABLEREPOSITORY_H

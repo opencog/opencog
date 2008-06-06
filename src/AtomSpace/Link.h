@@ -36,6 +36,9 @@
 
 #include <string>
 
+namespace opencog
+{
+
 /**
  * Nodes in OpenCog are connected to each other by links. Each link embodies
  * one of the basic inter-node relationships. Links do not necessarily
@@ -222,5 +225,7 @@ public:
     virtual bool equals(Atom *);
     virtual int hashCode(void);
 };
+
+}
 
 #endif

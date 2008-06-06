@@ -58,5 +58,6 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
     return false;
 }
 
-}
+} // namespace opencog
+
 #endif /* OPENCOG_FOREACH_TWO_H_ */

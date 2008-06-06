@@ -88,6 +88,6 @@ inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
     return false;
 }
 
+} // namespace opencog
 
-}
 #endif /* OPENCOG_FOREACH_H_ */

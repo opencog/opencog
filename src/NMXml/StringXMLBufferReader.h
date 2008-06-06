@@ -25,6 +25,9 @@
 
 #include "XMLBufferReader.h"
 
+namespace opencog
+{
+
 class StringXMLBufferReader : public XMLBufferReader
 {
 public:
@@ -49,5 +52,7 @@ private:
     char* currentPos;
 
 };
+
+} // namespace opencog
 
 #endif //_STRINGXMLBUFFERREADER_H_

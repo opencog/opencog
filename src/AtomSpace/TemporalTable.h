@@ -30,6 +30,9 @@
 #include "TemporalToHandleSetMap.h"
 #include "HandleTemporalPairEntry.h"
 
+namespace opencog
+{
+
 // TODO: Depending on the use cases, this class would have a better performance
 // if we use a sortedTemporalList in inverse cronological order.
 // Or, if saving space is not required, we can even have 2 sortedTemporalLists.
@@ -169,5 +172,7 @@ private:
     bool matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished) throw (RuntimeException);
 
 };
+
+} // namespace opencog
 
 #endif //TEMPORALTABLE_H

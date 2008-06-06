@@ -47,6 +47,9 @@
 #define HDEMO_DEFAULT_PERCEPT_STIM 5
 #define HDEMO_DEFAULT_IMPRINT_STIM 10
 
+namespace opencog
+{
+
 class HopfieldOptions;
 
 class HopfieldServer : public opencog::CogServer
@@ -177,5 +180,7 @@ public:
 
     void printStatus();
 };
+
+} // namespace opencog
 
 #endif // HOPFIELDSERVER_H

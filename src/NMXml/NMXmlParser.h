@@ -45,6 +45,9 @@
 #include <ext/hash_map>
 #endif
 
+namespace opencog
+{
+
 enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
 
 /**
@@ -53,7 +56,9 @@ enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
  */
 class NMXmlParser
 {
+
 private:
+
     Handle parse_pass(XMLBufferReader*, NMXmlParseType);
 
 public:
@@ -148,5 +153,7 @@ public:
     static void setOutgoingSet(Link*, const std::vector<Handle>&);
 
 };
+
+} // namespace opencog
 
 #endif //NMXMLPARSER_H

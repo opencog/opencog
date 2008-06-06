@@ -31,7 +31,9 @@
 #include "TLB.h"
 #include <math.h>
 #include <cstdlib>
+
 using namespace std;
+using namespace opencog;
 
 #include <SavingLoading.h>
 #include <AtomSpace.h>

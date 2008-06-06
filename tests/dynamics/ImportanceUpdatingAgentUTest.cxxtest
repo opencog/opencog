@@ -30,6 +30,8 @@
 #include <vector>
 #include <string>
 
+using namespace opencog;
+
 vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
 {
     char buf[256];

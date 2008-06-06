@@ -56,7 +56,7 @@ private:
     // still exist, so that it can be called. The CBI class
     // exists entirely so that the callback remains instantiated
     // even if the socket is closed.
-class CBI : public CallBackInterface
+    class CBI : public CallBackInterface
     {
     private:
         ServerSocket *sock;
@@ -64,7 +64,6 @@ class CBI : public CallBackInterface
         int use_count;
         pthread_mutex_t use_count_lock;
     public:
-<<<<<<< TREE
         CBI(ServerSocket *);
         void Close(void);
         int AtomicInc(int inc);
@@ -78,21 +77,12 @@ public:
     ServerSocket(ISocketHandler &handler);
 
     static void setMaster(SimpleNetworkServer *master);
+    void OnAccept();
     void OnDisconnect();
     void OnLine(const std::string&);
     void OnRawData(const char *, size_t);
-=======
-
-        ~ServerSocket();
-        ServerSocket(ISocketHandler &handler);
-
-        static void setMaster(SimpleNetworkServer *master);
-        void OnAccept();
-        void OnDisconnect();
-        void OnLine(const std::string&);
-        void OnRawData(const char *, size_t);
->>>>>>> MERGE-SOURCE
 }; // class
+
 }  // namespace
 
 #endif

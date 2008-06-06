@@ -26,6 +26,8 @@
 #include "exceptions.h"
 #include "TLB.h"
 
+using namespace opencog;
+
 VersionHandle::VersionHandle()
 {
     indicator = UNKNOWN;

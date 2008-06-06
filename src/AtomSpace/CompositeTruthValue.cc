@@ -28,6 +28,8 @@
 
 //#define USE_SHARED_DEFAULT_TV
 
+using namespace opencog;
+
 void CompositeTruthValue::init(const TruthValue& tv, VersionHandle vh)
 {
     primaryTV = NULL;

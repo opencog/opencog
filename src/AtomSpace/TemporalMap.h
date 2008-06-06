@@ -36,13 +36,15 @@
 #include <pthread.h>
 #endif
 
+namespace opencog
+{
+
+class TemporalMapIterator;
+
 /**
  * Hashtable based in Temporal* keys and (void *) elements. This is an Adapter
  * to stl's HashMap.
  */
-
-class TemporalMapIterator;
-
 class TemporalMap
 {
     friend class TemporalMapIterator;
@@ -249,5 +251,6 @@ public:
     Temporal* next() throw (IndexErrorException);
 };
 
+} // namespace opencog
 
 #endif

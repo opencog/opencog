@@ -33,6 +33,11 @@
 #include <types.h>
 #include "exceptions.h"
 
+class TruthValueUTest;
+
+namespace opencog
+{
+
 // TODO: These variables were moved from reasoning/StdAfx.h as they were. Find a better
 // implementation for them...
 const int DefaultU = 10000;
@@ -53,9 +58,8 @@ class TruthValue
     friend class CompositeTruthValue;
     friend class SavingLoading;
     friend class Atom;
-    friend class NMSHServer;
 
-    friend class TruthValueUTest;
+    friend class ::TruthValueUTest;
 
 public:
 
@@ -166,5 +170,7 @@ protected:
     static void DeleteAndSetDefaultTVIfPertinent(TruthValue** tv);
 
 };
+
+} // namespace opencog
 
 #endif

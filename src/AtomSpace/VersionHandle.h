@@ -27,6 +27,9 @@
 
 #include "CoreUtils.h"
 
+namespace opencog
+{
+
 enum IndicatorType {HYPOTHETICAL = 0, CONTEXTUAL, UNKNOWN};
 
 struct VersionHandle {
@@ -52,5 +55,7 @@ struct eqVersionHandle {
 };
 
 #define isNullVersionHandle(vh) TLB::isInvalidHandle(vh.substantive)
+
+} // namespace opencog
 
 #endif //_VERSIONHANDLE_H_

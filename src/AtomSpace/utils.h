@@ -34,21 +34,23 @@
 #endif
 #include <string>
 #include <sstream>
-
-using namespace std;
+#include <list>
 
 #define Abs(a) ( ((a)>0) ? (a) : (-a) )
 
+namespace opencog
+{
+
 // Specific toString method for float numbers (force 3 digits after decimal point)
-string toString(double data);
+std::string toString(double data);
 
 /**
  * Returns a string from the given argument by using the << operator
  */
 template <typename T>
-string toString(T data)
+std::string toString(T data)
 {
-    ostringstream oss;
+    std::ostringstream oss;
     oss << data;
     return oss.str();
 }
@@ -58,7 +60,7 @@ string toString(T data)
  *
  * @return Copy of the given string surrounded by ANSI bold tags.
  */
-string bold(const char*);
+std::string bold(const char*);
 
 /**
  * Returns the string representation of an integer surrounded by ANSI bold
@@ -67,7 +69,7 @@ string bold(const char*);
  * @return The string representation of an integer surrounded by ANSI bold
  * tags.
  */
-string bold(int i);
+std::string bold(int i);
 
 template <class _Key> struct hash2int { };
 
@@ -136,9 +138,6 @@ void initReferenceTime();
 ulong getElapsedMillis();
 
 /** STL-Listifies a TemporalEntry */
-
-#include <list>
-
 template<typename T, typename OutT>
 void to_list(OutT outIt, T inEntry)
 {
@@ -201,5 +200,7 @@ InputT GetBest(InputT start, InputT end, evalT op, ValT minVal)
 
     return ret;
 }
+
+} // namespace opencog
 
 #endif /* OPENCOG_UTILS_H */

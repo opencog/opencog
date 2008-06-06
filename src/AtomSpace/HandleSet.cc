@@ -24,6 +24,8 @@
 
 #include <HandleSet.h>
 
+using namespace opencog;
+
 HandleSet::HandleSet()
 {
     handleSet = new InternalHandleSet();

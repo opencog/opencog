@@ -30,6 +30,8 @@
 #include <TLB.h>
 #include <string.h>
 
+using namespace opencog;
+
 #define NUM_VHS 4
 VersionHandle VHs[NUM_VHS] = {
     NULL_VERSION_HANDLE,
@@ -43,7 +45,6 @@ VersionHandle VHs[NUM_VHS] = {
 #define NUM_NODES 6
 #define NUM_FORCEUSER_LINKS 4
 #define NUM_HUMAN_LINKS 4
-
 
 void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
 {

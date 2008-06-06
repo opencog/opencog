@@ -29,6 +29,8 @@
 #include "mt19937ar.h"
 #include "HandleMap.cc"
 
+using namespace opencog;
+
 #define N_HANDLES 10
 
 class HandleMapUTest :  public CxxTest::TestSuite
@@ -107,7 +109,7 @@ public:
 
     void testSize() {
 #ifdef BAD_TEST
-        opencog::MT19937RandGen rng(12345678);
+        MT19937RandGen rng(12345678);
         int size = rng.randint(N_HANDLES);
         delete(handleMap);
         handleMap = new HandleMap<char *>(size);

@@ -100,7 +100,6 @@ std::string CommandRequestProcessor::help(std::string topic)
     }
 
 
-<<<<<<< TREE
     reply +=
         "Available commands:\n"
         "data <xmldata>     -- load OpenCog XML data immediately following\n"
@@ -109,19 +108,8 @@ std::string CommandRequestProcessor::help(std::string topic)
         "ls <handle>        -- list handle and its incoming set\n"
         "ls <type> <name>   -- list node and its incoming set\n"
         "dlopen <filename>  -- load a dynamic module (and run it).\n"
-        "dlclose <filename> -- close a previously loaded dynamic module.\n";
-=======
-    reply += 
-         "Available commands:\n"
-         "data <xmldata>     -- load OpenCog XML data immediately following\n"
-         "load <filename>    -- load OpenCog XML from indicated filename\n"
-         "ls                 -- list entire system contents\n"
-         "ls <handle>        -- list handle and its incoming set\n"
-         "ls <type> <name>   -- list node and its incoming set\n"
-         "dlopen <filename>  -- load a dynamic module (and run it).\n"
-         "dlclose <filename> -- close a previously loaded dynamic module.\n"
-         "close              -- end the session.\n";
->>>>>>> MERGE-SOURCE
+        "dlclose <filename> -- close a previously loaded dynamic module.\n"
+        "close              -- end the session.\n";
 #ifdef HAVE_GUILE
     reply +=
         "scm              -- enter the scheme interpreter\n";

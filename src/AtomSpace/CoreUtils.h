@@ -30,6 +30,9 @@
 #include "HandleMap.h"
 #include "exceptions.h"
 
+namespace opencog
+{
+
 /** Module for including any core-specific common utilities */
 class CoreUtils
 {
@@ -78,5 +81,6 @@ public:
     };
 };
 
+} // namespace opencog
 
 #endif

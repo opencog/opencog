@@ -49,6 +49,9 @@
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 5
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 4
 
+namespace opencog
+{
+
 class HopfieldServer;
 
 class HopfieldOptions
@@ -97,5 +100,7 @@ public:
     std::string fileResult;
 
 };
+
+} // namespace opencog
 
 #endif // HDEMO_OPTIONS_H

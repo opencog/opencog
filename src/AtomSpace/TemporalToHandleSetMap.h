@@ -29,6 +29,9 @@
 #include "HandleSet.h"
 #include <string>
 
+namespace opencog
+{
+
 class TemporalToHandleSetMap
 {
 
@@ -115,5 +118,7 @@ public:
     std::string toString();
 
 };
+
+} // namespace opencog
 
 #endif

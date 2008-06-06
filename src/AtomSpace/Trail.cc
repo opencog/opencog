@@ -25,7 +25,6 @@
 #include "Trail.h"
 #include "Atom.h"
 #include "Link.h"
-#include <deque>
 #include <stdio.h>
 #include "types.h"
 #include "TLB.h"
@@ -35,7 +34,6 @@
 #define DEFAULT_INITIAL_TRAIL_SIZE 0
 #define DEFAULT_MAX_TRAIL_SIZE 1000
 
-using namespace std;
 using namespace opencog;
 
 void Trail::init(int initialSize, int max) throw (InvalidParamException, std::bad_exception)
@@ -45,7 +43,7 @@ void Trail::init(int initialSize, int max) throw (InvalidParamException, std::ba
                                     "Trail - maxSize: %d < initialSize: %d.", max, initialSize);
     }
     if (initialSize != 0) {
-        trail = new deque<Handle>(initialSize);
+        trail = new std::deque<Handle>(initialSize);
     } else {
         trail = NULL;
     }

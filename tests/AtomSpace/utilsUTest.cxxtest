@@ -24,6 +24,8 @@
 
 #include <utils.h>
 
+using namespace opencog;
+
 class utilsUTest :  public CxxTest::TestSuite
 {
 private:

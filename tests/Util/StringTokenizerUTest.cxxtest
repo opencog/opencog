@@ -33,7 +33,6 @@ static const std::string words [] = {"this", "is", "a", "common", "phrase"};
 class StringTokenizerUTest : public CxxTest::TestSuite
 {
 
-
 public:
     void setUp() {
         // TODO: Implement setUp() function.

@@ -25,6 +25,8 @@
 
 #include "ClassServer.h"
 
+using namespace opencog;
+
 std::vector<std::vector<bool> >& ClassServer::getMap()
 {
     static std::vector<std::vector<bool> > map = ClassServer::init_map();

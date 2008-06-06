@@ -31,6 +31,7 @@
 
 namespace opencog
 {
+
 struct eqstr {
     bool operator()(char *s1, char *s2) const {
         return strcmp(s1, s2) == 0;

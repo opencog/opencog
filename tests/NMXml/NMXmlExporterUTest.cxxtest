@@ -26,6 +26,8 @@
 #include <NMXmlParserExperiment.h>
 #include <FileXMLBufferReader.h>
 
+using namespace opencog;
+
 class NMXmlExporterUTest :  public CxxTest::TestSuite
 {
 

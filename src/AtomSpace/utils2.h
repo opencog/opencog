@@ -28,8 +28,6 @@
 #include "types.h"
 #include "Temporal.h"
 
-using opencog::tree;
-
 typedef unsigned int uint;
 
 /// Note! This does not re-define std::for_each!
@@ -37,6 +35,8 @@ typedef unsigned int uint;
 
 #define v2h(v) boost::get<Handle>(v)
 
+namespace opencog
+{
 
 template<typename T>
 struct TypeWrapper {
@@ -71,14 +71,14 @@ typedef TypeWrapper<signed char> CharWrapper;
 typedef TypeWrapper<short int> ShortIntegerWrapper;
 //typedef TypeWrapper<ShortFloat> ShortFloatWrapper;
 
-typedef boost::variant < Handle,
-TimeStampWrapper,
-IntegerWrapper,
-FloatWrapper,
-BoolWrapper,
-ByteWrapper,
-CharWrapper,
-ShortIntegerWrapper > Vertex;
+typedef boost::variant <Handle,
+                        TimeStampWrapper,
+                        IntegerWrapper,
+                        FloatWrapper,
+                        BoolWrapper,
+                        ByteWrapper,
+                        CharWrapper,
+                        ShortIntegerWrapper> Vertex;
 //ShortFloatWrapper> Vertex; since ShortFloat is
 //typedef'ed to float, this is a mistake
 
@@ -163,7 +163,6 @@ public:
     std::vector<std::string> WithoutEmpty() const;
 };
 
-
 /** nocase_string: STL string class which ignores the case. */
 struct nocase_string : public std::string {
 public:
@@ -200,5 +199,6 @@ struct less_vtree : public std::binary_function<tree<Vertex>, tree<Vertex>, bool
     bool operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const;
 };
 
+} // namespace opencog
 
 #endif

@@ -42,6 +42,8 @@
 #include <iostream>
 #include <fstream>
 
+using namespace opencog;
+
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
 

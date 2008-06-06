@@ -33,6 +33,8 @@
 #include "utils.h"
 #include "AtomSpaceDefinitions.h"
 
+using namespace opencog;
+
 Node::Node(Type type,
            const std::string& cname,
            const TruthValue& tv)

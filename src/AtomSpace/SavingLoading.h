@@ -46,6 +46,9 @@
 using __gnu_cxx::hash_map;
 #endif
 
+namespace opencog
+{
+
 /**
  * This class provides saving and loading services based on binary images of
  * the atom table and other registered SavableRepositories
@@ -293,5 +296,7 @@ public:
      */
     void addSavableRepository(SavableRepository *) throw (RuntimeException);
 };
+
+} // namespace opencog
 
 #endif

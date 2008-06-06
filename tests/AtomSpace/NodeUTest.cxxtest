@@ -24,6 +24,8 @@
 
 #include <Node.h>
 
+using namespace opencog;
+
 class NodeUTest :  public CxxTest::TestSuite
 {
 private:

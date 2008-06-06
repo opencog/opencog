@@ -29,6 +29,9 @@
 #include "TemporalEntry.h"
 #include <string>
 
+namespace opencog
+{
+
 class HandleToTemporalEntryMap
 {
 
@@ -106,5 +109,7 @@ public:
 
     std::string toString();
 };
+
+} // namespace opencog
 
 #endif

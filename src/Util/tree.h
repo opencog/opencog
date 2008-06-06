@@ -73,9 +73,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
+namespace opencog
+{
+
 // HP-style construct/destroy have gone from the standard,
 // so here is a copy.
-
 namespace kp
 {
 
@@ -97,10 +99,8 @@ void destructor(T1* p)
     p->~T1();
 }
 
-};
+} // namespace kp
 
-namespace opencog
-{
 
 /// A node in the tree, combining links to other nodes as well as the actual data.
 template<class T>
@@ -137,13 +137,8 @@ public:
     tree<T, tree_node_allocator>& operator=(const tree<T, tree_node_allocator>&);
 
     /// Base class for iterators, only pointers stored, no traversal logic.
-#ifdef __SGI_STL_PORT
-class iterator_base : public stlport::bidirectional_iterator<T, ptrdiff_t>
-    {
-#else
     class iterator_base
     {
-#endif
     public:
         typedef T                               value_type;
         typedef T*                              pointer;
@@ -711,7 +706,7 @@ void tree<T, tree_node_allocator>::erase_children(const iterator_base& it) {
         prev = cur;
         cur = cur->next_sibling;
         erase_children(pre_order_iterator(prev));
-        kp::destructor(&prev->data);
+        opencog::kp::destructor(&prev->data);
         alloc_.deallocate(prev, 1);
     }
     it.node->first_child = 0;
@@ -2810,27 +2805,6 @@ typename tree<T, tree_node_allocator>::upwards_iterator& tree<T, tree_node_alloc
     return (*this);
 }
 
-} //~namespace opencog
-
-namespace std {
-
-template<typename T>
-void swap(opencog::tree<T>& x, opencog::tree<T>& y)
-{
-    std::swap(x.head, y.head);
-    std::swap(x.feet, y.feet);
-}
-
-} //~namespace std
-
-template<typename T>
-std::ostream& operator<<(std::ostream&, const opencog::tree<T>&);
-template<typename T>
-std::istream& operator>>(std::istream&, opencog::tree<T>&);
-
-std::istream& operator>>(std::istream& in, opencog::tree<std::string>& t);
-
-namespace opencog {
 template<typename iter>
 std::string subtree_to_string(iter it)
 {
@@ -3015,7 +2989,7 @@ boost_range_end(const tree<T>& tr)
     return make_counting_iterator(tr.end());
 }
 
-} //namespace opencog
+} // namespace opencog
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
@@ -3043,8 +3017,18 @@ std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
     return  in;
 }
 
-#endif
+template<typename T>
+void std::swap(opencog::tree<T>& x, opencog::tree<T>& y)
+{
+    std::swap(x.head, y.head);
+    std::swap(x.feet, y.feet);
+}
 
-// Local variables:
-// default-tab-width: 3
-// End:
+template<typename T>
+std::ostream& operator<<(std::ostream&, const opencog::tree<T>&);
+template<typename T>
+std::istream& operator>>(std::istream&, opencog::tree<T>&);
+
+std::istream& operator>>(std::istream& in, opencog::tree<std::string>& t);
+
+#endif

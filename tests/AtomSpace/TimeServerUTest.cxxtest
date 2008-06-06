@@ -27,6 +27,8 @@
 #include "CoreUtils.h"
 #include "numeric.h"
 
+using namespace opencog;
+
 //=============== Tables used for testing both get and remove methods ================= //
 #define NUMBER_OF_HANDLES 2
 #define NUMBER_OF_SEARCH_INTERVALS 10
