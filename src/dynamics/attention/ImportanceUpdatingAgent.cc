@@ -430,11 +430,20 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				stiRentCharged = STIAtomRent;
 			break;
 		case RENT_EXP:
-			if (c > a->getAttentionalFocusBoundary() + amnesty)
-				stiRentCharged = STIAtomRent;
+			// ipython: plot(x, [max(0,i) for i in (exp(x)-(1-y))/(1+y)])
+			if (c > a->getAttentionalFocusBoundary() + amnesty) {
+				double y = 0.0;
+				double multiplier = 0.0;
+				double x;
+				x = c - a->getAttentionalFocusBoundary();
+				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
+				multiplier = max(0.0, (exp(x) - (1.0 - y))/(1.0 + y));
+				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
+			}
 			break;
 		case RENT_LOG:
 			// max(0,i) where i = log((x-(amnesty%-0.05))*20)/2])
+			// ipython: plot(x, [max(0,i) for i in log((x)*20)/2])
 			if (c > a->getAttentionalFocusBoundary()) {
 				double percentAmnesty = 0.05;
 				double multiplier = 0.0;
@@ -443,7 +452,7 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				x = c - a->getAttentionalFocusBoundary();
 				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
 				if (percentAmnesty < 0) percentAmnesty = 0;
-				multiplier = ::log((x-percentAmnesty)*20)/2.0;
+				multiplier = max(0.0, ::log((x - percentAmnesty) * 20) / 2.0);
 				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
 			}
 			break;

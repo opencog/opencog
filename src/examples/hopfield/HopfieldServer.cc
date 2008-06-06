@@ -173,7 +173,6 @@ void HopfieldServer::init(int width, int height, int numLinks)
     spreadAgent->setSpreadThreshold(options->spreadThreshold);
     spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
 
-
     // Create nodes
     for (int i = 0; i < this->width; i++) {
         for (int j = 0; j < this->height; j++) {
@@ -194,6 +193,10 @@ void HopfieldServer::init(int width, int height, int numLinks)
     }
 
     addRandomLinks();
+
+	// make sure nodes are slightly negative if necessary
+	// otherwise Hebbian Learning doesn't detect (get target conjunction == 0)
+	resetNodes();
 
 }
 

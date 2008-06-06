@@ -106,6 +106,8 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 
         } else {
             // otherwise just update link weights
+            if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK)
+				new_tc = -new_tc;
             tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
             if (tc < 0.0f) tc = 0.0f;
             a->setMean(h, tc);
@@ -192,7 +194,6 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 
     }
 
-    logger().fine("TC: normstis [%.3f,%.3f]", normsti_v[0], normsti_v[1]);
     if (!inAttention) return 0.0f;
 
 
@@ -200,7 +201,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
 
-    logger().fine("TC: tc=%.3f", tc);
+    logger().fine("TC: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
 
     return tc;
 
