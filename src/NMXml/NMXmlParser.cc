@@ -50,7 +50,7 @@
 
 using namespace opencog;
 
-Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> NMXmlParser::hypHandles;
+opencog::hash_map<char *, Handle, opencog::hash<char *>, opencog::eqstr> NMXmlParser::hypHandles;
 bool NMXmlParser::fresh = true;
 bool NMXmlParser::freshLinks = false;
 

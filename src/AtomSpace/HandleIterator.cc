@@ -31,6 +31,8 @@
 #include "TLB.h"
 #include "AtomSpaceDefinitions.h"
 
+using namespace opencog;
+
 HandleIterator::HandleIterator( AtomTable *t, Type type, bool subclass, VersionHandle vh)
 {
     init(t, type, subclass, vh);

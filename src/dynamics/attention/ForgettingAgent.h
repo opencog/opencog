@@ -4,9 +4,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,7 +30,8 @@
 #include <MindAgent.h>
 #include <AttentionValue.h>
 
-namespace opencog {
+namespace opencog
+{
 
 class CogServer;
 
@@ -40,27 +41,25 @@ class CogServer;
 class ForgettingAgent : public MindAgent
 {
 
-    private:
-	AtomSpace* a;
+private:
+    AtomSpace* a;
 
-    public:
-	// Maximum LTI of a link that can be forgot.
-	AttentionValue::lti_t forgetThreshold;
-	// percentage to forget
-	float forgetPercentage;
+public:
+    // Maximum LTI of a link that can be forgot.
+    AttentionValue::lti_t forgetThreshold;
+    // percentage to forget
+    float forgetPercentage;
 
-	ForgettingAgent();
-	virtual ~ForgettingAgent();
-	virtual void run(CogServer *server);
+    ForgettingAgent();
+    virtual ~ForgettingAgent();
+    virtual void run(CogServer *server);
 
-	void forget(float p);
+    void forget(float p);
 
 }; // class
 
-struct ForgettingLTIThenTVAscendingSort
-{
-    bool operator()(const Handle& h1, const Handle& h2)
-    {
+struct ForgettingLTIThenTVAscendingSort {
+    bool operator()(const Handle& h1, const Handle& h2) {
         AttentionValue::lti_t lti1, lti2;
         float tv1, tv2;
 

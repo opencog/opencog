@@ -4,9 +4,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -44,11 +44,13 @@
 #define DEFAULT_ATOM_STI_WAGE 2
 #define DEFAULT_ATOM_LTI_WAGE 2
 
-namespace opencog {
+namespace opencog
+{
 
 class CogServer;
 
-class ImportanceUpdatingAgent : public MindAgent {
+class ImportanceUpdatingAgent : public MindAgent
+{
 
     friend class ImportanceUpdatingAgentUTest;
 
@@ -88,13 +90,13 @@ private:
      * @param AtomSpace to act upon
      */
     void randomStimulation(AtomSpace *a);
-    
+
     /* Recent amount of stimulus given per cycle */
-    Util::recent_val<stim_t> totalStimulusSinceReset;
+    opencog::recent_val<stim_t> totalStimulusSinceReset;
 
     /* Number of atoms within attentionFocusBoundary */
-    Util::recent_val<long> attentionalFocusSize;
-    Util::recent_val<long> attentionalFocusNodesSize;
+    opencog::recent_val<long> attentionalFocusSize;
+    opencog::recent_val<long> attentionalFocusNodesSize;
     /* Rate of decay (r) for estimating AttentionalFocusSize
      * Estimate equal to:
      * r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent */
@@ -112,15 +114,15 @@ private:
      *
      * @param AtomSpace the MindAgent is working on.
      */
-    void updateAtomSTI(AtomSpace* a, Handle h); 
-    
+    void updateAtomSTI(AtomSpace* a, Handle h);
+
     /**
      * Collect LTI rent for atoms above attentional focus boundary
      * and pay wages based on stimulation
      *
      * @param AtomSpace the MindAgent is working on.
      */
-    void updateAtomLTI(AtomSpace* a, Handle h); 
+    void updateAtomLTI(AtomSpace* a, Handle h);
 
     /**
      * Cap STI values to the maximum to prevent all important atoms.
@@ -188,11 +190,11 @@ private:
      */
     int getTaxAmount(double mean);
 
-    Util::RandGen* rng; 
+    opencog::RandGen* rng;
     /**
      * Get Random number generator associated with MindAgent.
      */
-    Util::RandGen* getRandGen();
+    opencog::RandGen* getRandGen();
 
     /**
      * Update the attentional focus size variables
@@ -225,11 +227,11 @@ private:
     bool verbose;
 
 public:
-		
+
     ImportanceUpdatingAgent();
 
     virtual ~ImportanceUpdatingAgent();
-		
+
     virtual void run(CogServer *server);
 
     virtual string toString();
@@ -249,7 +251,9 @@ public:
      *
      * @param flag
      */
-    void setUpdateLinks(bool flag) { updateLinks = flag; }
+    void setUpdateLinks(bool flag) {
+        updateLinks = flag;
+    }
 
     /* The target lobe STI and LTI values are not only initial values, but
      * also values that are returned to if the values exit their

@@ -25,6 +25,8 @@
 #include "exceptions.h"
 #include <iostream>
 
+using namespace opencog;
+
 int TemporalEntry::existingObjects = 0;
 
 TemporalEntry::TemporalEntry(Temporal* time)

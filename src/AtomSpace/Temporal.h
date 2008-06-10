@@ -30,6 +30,9 @@
 #include "exceptions.h"
 #include <string>
 
+namespace opencog
+{
+
 class Temporal
 {
 
@@ -176,8 +179,10 @@ struct equalTemporal {
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const Temporal& t);
-
 #define UNDEFINED_TEMPORAL Temporal::undefined_temporal()
+
+} // namespace opencog
+
+std::ostream& operator<<(std::ostream& out, const opencog::Temporal& t);
 
 #endif //TEMPORAL_H

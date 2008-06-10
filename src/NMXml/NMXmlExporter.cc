@@ -26,6 +26,8 @@
 #include "NMXmlExporter.h"
 #include "NMXmlDefinitions.h"
 
+using namespace opencog;
+
 std::string NMXmlExporter::toXML(HandleEntry *subset)
 {
     HandleSet *exportable = findExportables(subset);

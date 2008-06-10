@@ -45,6 +45,9 @@
 #include <ext/hash_map>
 #endif
 
+namespace opencog
+{
+
 enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
 
 /**
@@ -53,7 +56,9 @@ enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
  */
 class NMXmlParser
 {
+
 private:
+
     Handle parse_pass(XMLBufferReader*, NMXmlParseType);
 
 public:
@@ -70,7 +75,7 @@ public:
      * the parsing (when only Nodes are read) to be used in the second
      * pass (to resolve references in Links).
      */
-    static Util::hash_map<char *, Handle, Util::hash<char *>, Util::eqstr> hypHandles;
+    static opencog::hash_map<char *, Handle, opencog::hash<char *>, opencog::eqstr> hypHandles;
 
     /**
      * A special default (Simple) TruthValue object for any atom loaded from a XML doc,
@@ -148,5 +153,7 @@ public:
     static void setOutgoingSet(Link*, const std::vector<Handle>&);
 
 };
+
+} // namespace opencog
 
 #endif //NMXMLPARSER_H

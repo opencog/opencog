@@ -26,6 +26,8 @@
 #include "Atom.h"
 #include "TLB.h"
 
+using namespace opencog;
+
 HandleTemporalPair::HandleTemporalPair()
 {
 }

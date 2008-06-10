@@ -4,7 +4,6 @@ ADD_LIBRARY(Util
 	lazy_random_selector
     Logger
     mt19937ar
-	RandGen
 	StringTokenizer
 	tree
 )

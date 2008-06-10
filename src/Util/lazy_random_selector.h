@@ -29,14 +29,14 @@
 #include "hash_map.h"
 #include "RandGen.h"
 
-namespace Util
+namespace opencog
 {
 
 //a lazy random selector without replacement -
 //lets you select m random integers in [0,n) without replacement each in O(1)
 //and only uses O(m) memory - useful where n is much larger than m
 struct lazy_random_selector {
-    lazy_random_selector(int n, Util::RandGen& _rng) : _n(n), _v(-1), rng(_rng) { }
+    lazy_random_selector(int n, opencog::RandGen& _rng) : _n(n), _v(-1), rng(_rng) { }
     bool empty() const {
         return (_n == 0);
     }
@@ -45,9 +45,9 @@ private:
     int _n;
     hash_map<int, int> _map;
     int _v;
-    Util::RandGen& rng;
+    opencog::RandGen& rng;
 };
 
-} //~namespace Util
+} //~namespace opencog
 
 #endif

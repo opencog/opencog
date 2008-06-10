@@ -36,6 +36,9 @@
 #include <limits.h>
 #include <string>
 
+namespace opencog
+{
+
 /**
  * This class implements a linked-list of HandleTemporalPair objects, and provides several
  * methods to perform operations between lists such as concatenation.
@@ -245,5 +248,7 @@ public:
     };
 
 };
+
+} // namespace opencog
 
 #endif

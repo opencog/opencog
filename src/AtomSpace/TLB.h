@@ -46,7 +46,8 @@
 #include "types.h"
 #include "type_codes.h"
 
-class Atom;
+namespace opencog
+{
 
 /**
  * Each atom stored on OpenCog will have an immutable ID, which will be used
@@ -193,5 +194,7 @@ public:
 
 #define UNDEFINED_HANDLE (TLB::UndefinedHandle())
 };
+
+} // namespace opencog
 
 #endif

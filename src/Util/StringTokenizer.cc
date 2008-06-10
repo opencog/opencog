@@ -25,8 +25,8 @@
 #include "StringTokenizer.h"
 #include "exceptions.h"
 #include <cstring>
-using namespace Util;
 
+using namespace opencog;
 
 StringTokenizer::StringTokenizer()
 {

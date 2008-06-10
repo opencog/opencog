@@ -25,6 +25,9 @@
 
 #include <stdio.h>
 
+namespace opencog
+{
+
 class XMLBufferReader
 {
 public:
@@ -35,5 +38,7 @@ public:
     virtual void close() = 0;
     virtual XMLBufferReader* clone() = 0;
 };
+
+} // namespace opencog
 
 #endif //_BUFFERREADER_H_

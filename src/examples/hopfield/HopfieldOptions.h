@@ -4,9 +4,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -49,50 +49,58 @@
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 5
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 4
 
+namespace opencog
+{
+
 class HopfieldServer;
 
-class HopfieldOptions {
-    private:
+class HopfieldOptions
+{
+private:
 
-	HopfieldServer* hServer;
+    HopfieldServer* hServer;
 
-    public:
-	int verboseFlag;
-	int resetFlag;
-	int interleaveFlag;
-	int interleaveAmount;
-	int showMatrixFlag;
-	int showConfigFlag;
-	int totalFlag;
-	int nPatterns;
-	float genPatternDensity;
-	int retrieveCycles;
-	int imprintCycles;
-	float cueErrorRate;
-	int cueGenerateOnce;
-	float importanceSpreadingMultiplier;
-	AttentionValue::sti_t spreadThreshold;
-	int recordToFile;
-	std::string recordToFilePrefix;
-	AttentionValue::sti_t vizThreshold;
+public:
+    int verboseFlag;
+    int resetFlag;
+    int interleaveFlag;
+    int interleaveAmount;
+    int showMatrixFlag;
+    int showConfigFlag;
+    int totalFlag;
+    int nPatterns;
+    float genPatternDensity;
+    int retrieveCycles;
+    int imprintCycles;
+    float cueErrorRate;
+    int cueGenerateOnce;
+    float importanceSpreadingMultiplier;
+    AttentionValue::sti_t spreadThreshold;
+    int recordToFile;
+    std::string recordToFilePrefix;
+    AttentionValue::sti_t vizThreshold;
 
-	HopfieldOptions();
+    HopfieldOptions();
 
-	void parseOptions(int argc, char *argv[]);
-	void printHelp();
-	void printConfiguration();
-	void setServer(HopfieldServer* s) {hServer=s;};
+    void parseOptions(int argc, char *argv[]);
+    void printHelp();
+    void printConfiguration();
+    void setServer(HopfieldServer* s) {
+        hServer = s;
+    };
 
-	void openOutputFiles();
-	void closeOutputFiles();
-	std::ofstream beforeFile;
-	std::ofstream afterFile;
-	std::ofstream diffFile;
+    void openOutputFiles();
+    void closeOutputFiles();
+    std::ofstream beforeFile;
+    std::ofstream afterFile;
+    std::ofstream diffFile;
 
-	std::string fileTraining;
-	std::string fileCue;
-	std::string fileResult;
+    std::string fileTraining;
+    std::string fileCue;
+    std::string fileResult;
 
 };
+
+} // namespace opencog
 
 #endif // HDEMO_OPTIONS_H

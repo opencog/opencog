@@ -29,7 +29,10 @@
 #include "HandleMap.h"
 #include "VersionHandle.h"
 
-typedef Util::hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+namespace opencog
+{
+
+typedef opencog::hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
 
 class CompositeTruthValue: public TruthValue
 {
@@ -133,5 +136,7 @@ public:
      */
     void updateVersionHandles(HandleMap<Atom *> *handles);
 };
+
+} // namespace opencog
 
 #endif

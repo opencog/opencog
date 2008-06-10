@@ -23,6 +23,8 @@
 #include <platform.h>
 #include "StringXMLBufferReader.h"
 
+using namespace opencog;
+
 StringXMLBufferReader::StringXMLBufferReader(const char* content)
 {
     this->content = content;

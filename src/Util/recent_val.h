@@ -25,7 +25,7 @@
 #ifndef _UTIL_RECENT_VAL_H
 #define _UTIL_RECENT_VAL_H
 
-namespace Util
+namespace opencog
 {
 /**
  * recent_val is a value that can update which also

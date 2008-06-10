@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace Util
+namespace opencog
 {
 
 class StringTokenizer

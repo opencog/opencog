@@ -26,6 +26,8 @@
 #include "exceptions.h"
 #include <sstream>
 
+using namespace opencog;
+
 class TemporalUTest :  public CxxTest::TestSuite
 {
 private:

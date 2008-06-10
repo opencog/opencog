@@ -24,6 +24,8 @@
 
 #include <ClassServer.h>
 
+using namespace opencog;
+
 class ClassServerUTest :  public CxxTest::TestSuite
 {
 private:

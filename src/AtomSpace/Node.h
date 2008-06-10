@@ -33,7 +33,8 @@
 #include "Atom.h"
 //#include "types.h"
 
-class Atom;
+namespace opencog
+{
 
 /**
  * This is a subclass of Atom. It represents the most basic kind of
@@ -112,5 +113,7 @@ public:
     */
     virtual int hashCode();
 };
+
+} // namespace opencog
 
 #endif

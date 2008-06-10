@@ -4,9 +4,9 @@
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,8 @@
 #include <CogServer.h>
 #include <SimpleTruthValue.h>
 
-namespace opencog {
+namespace opencog
+{
 
 HebbianLearningAgent::HebbianLearningAgent()
 {
@@ -53,65 +54,64 @@ void HebbianLearningAgent::hebbianLearningUpdate()
     float tcDecayRate = 0.1;
 
     logger().debug("------- Hebbian Learning update "
-	    "(convert links = %d)",convertLinks);
+                   "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
     links = a->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
 
     for (current_l = links; current_l; current_l = current_l->next) {
-	// for each hebbian link, find targets, work out conjunction and convert
-	// that into truthvalue change. the change should be based on existing TV.
-	Handle h;
-	std::vector<Handle> outgoing;
+        // for each hebbian link, find targets, work out conjunction and convert
+        // that into truthvalue change. the change should be based on existing TV.
+        Handle h;
+        std::vector<Handle> outgoing;
 
-	h = current_l->handle;
-	
-	// get out going set
-	outgoing = TLB::getAtom(h)->getOutgoingSet();
-	new_tc = targetConjunction(outgoing);
-	// old link strength decays 
-	old_tc = a->getTV(h).getMean();
+        h = current_l->handle;
 
-	if (convertLinks && a->getLTI(h) < conversionThreshold)
-	{
-	    // If mind agent is set to convert hebbian links then
-	    // inverse and symmetric links will convert between one
-	    // another when conjunction between sti values is right
-	    // (initially for hopfield emulation, but could
-	    // be useful in other cases)
-	    if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK) {
-		tc = (tcDecayRate * -new_tc) + ( (1.0-tcDecayRate) * old_tc);
-		if (tc < 0) {
-		    // Inverse link no longer representative
-		    // change to symmetric hebbian link
-		    logger().fine("HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
-		    a->removeAtom(h);
-		    h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
-		} else {
-		    a->setMean(h,tc);
-		}
-	    } else {
-		tc = (tcDecayRate * new_tc) + ( (1.0-tcDecayRate) * old_tc);
-		if (tc < 0) {
-		    // link no longer representative
-		    // change to inverse hebbian link
-		    logger().fine("HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
-		    a->removeAtom(h);
-		    outgoing = moveSourceToFront(outgoing);
-		    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
-		} else {
-		    a->setMean(h,tc);
-		}
-	    }
+        // get out going set
+        outgoing = TLB::getAtom(h)->getOutgoingSet();
+        new_tc = targetConjunction(outgoing);
+        // old link strength decays
+        old_tc = a->getTV(h).getMean();
 
-	} else { 
-	    // otherwise just update link weights
-	    tc = (tcDecayRate * new_tc) + ( (1.0-tcDecayRate) * old_tc);
-	    if (tc < 0.0f) tc = 0.0f;
-	    a->setMean(h,tc);
-	}
-	logger().fine("HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
-	
+        if (convertLinks && a->getLTI(h) < conversionThreshold) {
+            // If mind agent is set to convert hebbian links then
+            // inverse and symmetric links will convert between one
+            // another when conjunction between sti values is right
+            // (initially for hopfield emulation, but could
+            // be useful in other cases)
+            if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK) {
+                tc = (tcDecayRate * -new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+                if (tc < 0) {
+                    // Inverse link no longer representative
+                    // change to symmetric hebbian link
+                    logger().fine("HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
+                    a->removeAtom(h);
+                    h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
+                } else {
+                    a->setMean(h, tc);
+                }
+            } else {
+                tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+                if (tc < 0) {
+                    // link no longer representative
+                    // change to inverse hebbian link
+                    logger().fine("HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
+                    a->removeAtom(h);
+                    outgoing = moveSourceToFront(outgoing);
+                    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
+                } else {
+                    a->setMean(h, tc);
+                }
+            }
+
+        } else {
+            // otherwise just update link weights
+            tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+            if (tc < 0.0f) tc = 0.0f;
+            a->setMean(h, tc);
+        }
+        logger().fine("HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
+
     }
     // if not enough links, try and create some more either randomly
     // or by looking at what nodes are in attentional focus
@@ -128,20 +128,20 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     Handle theSource;
     bool foundTheSource = false;
     for (outgoing_i = outgoing.begin(); outgoing_i < outgoing.end();) {
-	float normsti;
-	Handle oh = *outgoing_i;
-	normsti = getNormSTI(a->getSTI(oh));
-	if (normsti > 0.0f) {
-	    theSource = oh;
-	    foundTheSource = true;
-	    outgoing_i = outgoing.erase(outgoing_i);
-	} else
-	    outgoing_i++;
+        float normsti;
+        Handle oh = *outgoing_i;
+        normsti = getNormSTI(a->getSTI(oh));
+        if (normsti > 0.0f) {
+            theSource = oh;
+            foundTheSource = true;
+            outgoing_i = outgoing.erase(outgoing_i);
+        } else
+            outgoing_i++;
     }
     if (foundTheSource) {
-	outgoing.insert(outgoing.begin(),theSource);
+        outgoing.insert(outgoing.begin(), theSource);
     } else {
-	logger().error("Can't find source atom for new Asymmetric Hebbian Link");
+        logger().error("Can't find source atom for new Asymmetric Hebbian Link");
     }
     return outgoing;
 
@@ -171,31 +171,31 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 
 
     for (h_i = handles.begin();
-	    h_i != handles.end();
-	    h_i++) {
-	h = *h_i;
-	sti = a->getSTI(h); 
+            h_i != handles.end();
+            h_i++) {
+        h = *h_i;
+        sti = a->getSTI(h);
 
-	// if none in attention return 0 at end
-	if (sti > a->getAttentionalFocusBoundary()) inAttention = true;
+        // if none in attention return 0 at end
+        if (sti > a->getAttentionalFocusBoundary()) inAttention = true;
 
-	// normalise each sti and multiple each
-	normsti = getNormSTI(sti);
+        // normalise each sti and multiple each
+        normsti = getNormSTI(sti);
 
-	// For debugging:
-	normsti_v.push_back(normsti);
+        // For debugging:
+        normsti_v.push_back(normsti);
 
-	if (tcInit) {
-	    tc = normsti;
-	    tcInit = false;
-	} else tc *= normsti;
+        if (tcInit) {
+            tc = normsti;
+            tcInit = false;
+        } else tc *= normsti;
 
     }
 
-    logger().fine("TC: normstis [%.3f,%.3f]", normsti_v[0],normsti_v[1]);
+    logger().fine("TC: normstis [%.3f,%.3f]", normsti_v[0], normsti_v[1]);
     if (!inAttention) return 0.0f;
-    
-    
+
+
     // cap conjunction to range [-1,1]
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
@@ -203,7 +203,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     logger().fine("TC: tc=%.3f", tc);
 
     return tc;
-	
+
 }
 
 };

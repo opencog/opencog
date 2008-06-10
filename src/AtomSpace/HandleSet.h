@@ -34,6 +34,9 @@
 using __gnu_cxx::hash_set;
 #endif
 
+namespace opencog
+{
+
 class HandleSetIterator;
 
 class HandleSet
@@ -171,5 +174,7 @@ public:
      */
     Handle next() throw (IndexErrorException);
 };
+
+} // namespace opencog
 
 #endif //HANDLESET_H

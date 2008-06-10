@@ -73,9 +73,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
+namespace opencog
+{
+
 // HP-style construct/destroy have gone from the standard,
 // so here is a copy.
-
 namespace kp
 {
 
@@ -97,10 +99,8 @@ void destructor(T1* p)
     p->~T1();
 }
 
-};
+} // namespace kp
 
-namespace Util
-{
 
 /// A node in the tree, combining links to other nodes as well as the actual data.
 template<class T>
@@ -137,13 +137,8 @@ public:
     tree<T, tree_node_allocator>& operator=(const tree<T, tree_node_allocator>&);
 
     /// Base class for iterators, only pointers stored, no traversal logic.
-#ifdef __SGI_STL_PORT
-class iterator_base : public stlport::bidirectional_iterator<T, ptrdiff_t>
-    {
-#else
     class iterator_base
     {
-#endif
     public:
         typedef T                               value_type;
         typedef T*                              pointer;
@@ -711,7 +706,7 @@ void tree<T, tree_node_allocator>::erase_children(const iterator_base& it) {
         prev = cur;
         cur = cur->next_sibling;
         erase_children(pre_order_iterator(prev));
-        kp::destructor(&prev->data);
+        opencog::kp::destructor(&prev->data);
         alloc_.deallocate(prev, 1);
     }
     it.node->first_child = 0;
@@ -2810,27 +2805,6 @@ typename tree<T, tree_node_allocator>::upwards_iterator& tree<T, tree_node_alloc
     return (*this);
 }
 
-} //~namespace Util
-
-namespace std {
-
-template<typename T>
-void swap(Util::tree<T>& x, Util::tree<T>& y)
-{
-    std::swap(x.head, y.head);
-    std::swap(x.feet, y.feet);
-}
-
-} //~namespace std
-
-template<typename T>
-std::ostream& operator<<(std::ostream&, const Util::tree<T>&);
-template<typename T>
-std::istream& operator>>(std::istream&, Util::tree<T>&);
-
-std::istream& operator>>(std::istream& in, Util::tree<std::string>& t);
-
-namespace Util {
 template<typename iter>
 std::string subtree_to_string(iter it)
 {
@@ -2932,17 +2906,17 @@ struct lexicographic_subtree_order {
     compare comp;
 
     template<typename iter>
-    bool operator()(const Util::tree<T>& tr1, iter it2) const {
+    bool operator()(const opencog::tree<T>& tr1, iter it2) const {
         return (cmp(iter(tr1.begin()), it2) > 0);
     }
 
     template<typename iter>
-    bool operator()(const iter& it1, const Util::tree<T>& tr2) const {
+    bool operator()(const iter& it1, const opencog::tree<T>& tr2) const {
         return (cmp(it1, iter(tr2.begin())) > 0);
     }
 
-    bool operator()(const Util::tree<T>& tr1,
-                    const Util::tree<T>& tr2) const {
+    bool operator()(const opencog::tree<T>& tr1,
+                    const opencog::tree<T>& tr2) const {
         return (cmp(tr1.begin(), tr2.begin()) > 0);
     }
 
@@ -2980,7 +2954,7 @@ struct lexicographic_subtree_order {
 //otherwise lexicographic_subtree_order
 template < typename T, typename compare = std::less<T> >
 struct size_tree_order : lexicographic_subtree_order<T, compare> {
-    bool operator()(const Util::tree<T>& tr1, const Util::tree<T>& tr2) const {
+    bool operator()(const opencog::tree<T>& tr1, const opencog::tree<T>& tr2) const {
         int s1 = tr1.size();
         int s2 = tr2.size();
         if (s1 == s2) {
@@ -3015,13 +2989,13 @@ boost_range_end(const tree<T>& tr)
     return make_counting_iterator(tr.end());
 }
 
-} //namespace Util
+} // namespace opencog
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const Util::tree<T>& tr)
+std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
 {
-    for (typename Util::tree<T>::iterator it = tr.begin();it != tr.end();++it) {
-        out << Util::subtree_to_string(it);
+    for (typename opencog::tree<T>::iterator it = tr.begin();it != tr.end();++it) {
+        out << opencog::subtree_to_string(it);
         it.skip_children();
         out << " ";
     }
@@ -3030,12 +3004,12 @@ std::ostream& operator<<(std::ostream& out, const Util::tree<T>& tr)
 
 
 template<typename T>
-std::istream& operator>>(std::istream& in, Util::tree<T>& tr)
+std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
 {
-    Util::tree<std::string> tmp;
+    opencog::tree<std::string> tmp;
     in >> tmp;
     try {
-        Util::tree_convert(tmp, tr);
+        opencog::tree_convert(tmp, tr);
     } catch (boost::bad_lexical_cast&) {
         std::cerr << "bad node data in tree '" << tr << "'" << std::endl;
         exit(1);
@@ -3043,8 +3017,18 @@ std::istream& operator>>(std::istream& in, Util::tree<T>& tr)
     return  in;
 }
 
-#endif
+template<typename T>
+void std::swap(opencog::tree<T>& x, opencog::tree<T>& y)
+{
+    std::swap(x.head, y.head);
+    std::swap(x.feet, y.feet);
+}
 
-// Local variables:
-// default-tab-width: 3
-// End:
+template<typename T>
+std::ostream& operator<<(std::ostream&, const opencog::tree<T>&);
+template<typename T>
+std::istream& operator>>(std::istream&, opencog::tree<T>&);
+
+std::istream& operator>>(std::istream& in, opencog::tree<std::string>& t);
+
+#endif

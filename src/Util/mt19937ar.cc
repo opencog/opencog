@@ -6,7 +6,7 @@
 #include "Logger.h"
 #endif
 
-namespace Util {
+using namespace opencog;
 
 /* Period parameters */  
 int MT19937RandGen::N = 624;
@@ -240,6 +240,5 @@ double MT19937RandGen::genrand_res53(void)
     unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
-/* These real versions are due to Isaku Wada, 2002/01/09 added */
 
-}
+/* These real versions are due to Isaku Wada, 2002/01/09 added */

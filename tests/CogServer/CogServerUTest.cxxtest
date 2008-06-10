@@ -23,19 +23,20 @@
  */
 
 #include <CogServer.h>
-
 #include <string>
 
-class REQ : public opencog::CogServerRequest
+using namespace opencog;
+
+class REQ : public CogServerRequest
 {
 
-    opencog::RequestProcessor * proc;
+    RequestProcessor * proc;
 public:
 
     std::string name;
     std::string type;
 
-    REQ(std::string type, std::string name, opencog::RequestProcessor *rp) {
+    REQ(std::string type, std::string name, RequestProcessor *rp) {
         this->type = type;
         this->name = name;
         this->proc = rp;
@@ -45,10 +46,10 @@ public:
         return name;
     }
 
-    void setRequestProcessor(opencog::RequestProcessor * rp) {
+    void setRequestProcessor(RequestProcessor * rp) {
         proc = rp;
     }
-    opencog::RequestProcessor * getRequestProcessor() {
+    RequestProcessor * getRequestProcessor() {
         return proc;
     }
 
@@ -56,7 +57,7 @@ public:
     }
 };
 
-class RP : public opencog::RequestProcessor
+class RP : public RequestProcessor
 {
 
 public:
@@ -69,14 +70,14 @@ public:
         count = 0;
 
     }
-    void processRequest(opencog::CogServerRequest *req) {
+    void processRequest(CogServerRequest *req) {
         //REQ *request = (REQ *) req;
         //printf("executed %s on %s(%s)\n", name.c_str(), request->getName().c_str(), request->getType().c_str());
         count++;
     }
 };
 
-class MA : public opencog::MindAgent
+class MA : public MindAgent
 {
 
 public:
@@ -89,7 +90,7 @@ public:
         count = 0;
 
     }
-    void run(opencog::CogServer *server) {
+    void run(CogServer *server) {
         //printf("%ld: executed %s\n", server->getCycleCount(), name.c_str());
         count++;
     }
@@ -114,7 +115,7 @@ public:
 
     void testProcessMindAgents() {
 
-        opencog::CogServer server;
+        CogServer server;
         MA *ma1 = new MA("MA1");
         MA *ma2 = new MA("MA2");
         MA *ma3 = new MA("MA3");
@@ -136,7 +137,7 @@ public:
     }
 
     void testProcessRequests() {
-        opencog::CogServer server;
+        CogServer server;
 
         RP *rp1 = new RP("rp1");
         RP *rp2 = new RP("rp2");

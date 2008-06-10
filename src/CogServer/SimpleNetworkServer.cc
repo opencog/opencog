@@ -57,7 +57,7 @@ SimpleNetworkServer::SimpleNetworkServer(CogServer *cs, int pn)
  * into a request for the CogServer.
  */
 void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
-        const std::string &cmdLine)
+                                             const std::string &cmdLine)
 {
     std::string command;
     std::queue<std::string> args;
@@ -70,33 +70,27 @@ void SimpleNetworkServer::processCommandLine(CallBackInterface *callBack,
     if (cmdLine.substr(0, 5) == "data\n") {
         command = "data";
         args.push(cmdLine.substr(5));
-    } else
-        if (cmdLine.substr(0, 6) == "data\r\n") {
-            command = "data";
-            args.push(cmdLine.substr(6));
-        } else
-            if (cmdLine.substr(0, 3) == "scm") {
-                command = "scm";
-                shell_mode = true;
-            } else
-                if (cmdLine.substr(0, 1) == "") {
-                    command = "scm-exit";
-                    shell_mode = false;
-                } else
-                    if (cmdLine.substr(0, 1) == ".") {
-                        command = "scm-exit";
-                        shell_mode = false;
-                    } else
-                        if (shell_mode) {
-                            // In shell mode, do *not* parse the command line!
-                            command = cmdLine;
-                        } else {
-
-                            // XXX FIXME: this is really the wrong place to do command-line
-                            // parsing. This needs to be moved to the simple cog server,
-                            // so that the silly "shell_mode" crap above can be removed.
-                            parseCommandLine(cmdLine, command, args);
-                        }
+    } else if (cmdLine.substr(0, 6) == "data\r\n") {
+        command = "data";
+        args.push(cmdLine.substr(6));
+    } else if (cmdLine.substr(0, 3) == "scm") {
+        command = "scm";
+        shell_mode = true;
+    } else if (cmdLine.substr(0, 1) == "") {
+        command = "scm-exit";
+        shell_mode = false;
+    } else if (cmdLine.substr(0, 1) == ".") {
+        command = "scm-exit";
+        shell_mode = false;
+    } else if (shell_mode) {
+        // In shell mode, do *not* parse the command line!
+        command = cmdLine;
+    } else {
+        // XXX FIXME: this is really the wrong place to do command-line
+        // parsing. This needs to be moved to the simple cog server,
+        // so that the silly "shell_mode" crap above can be removed.
+        parseCommandLine(cmdLine, command, args);
+    }
 
     CommandRequest *request = new CommandRequest(callBack, command, args);
     cogServer->pushRequest(request);

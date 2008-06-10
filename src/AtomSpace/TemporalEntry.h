@@ -35,6 +35,9 @@
 #include "Temporal.h"
 #include <string>
 
+namespace opencog
+{
+
 /**
  * This class implements a linked-list of times, and provides several
  * methods to perform operations between lists such as concatenation,
@@ -230,5 +233,7 @@ public:
     static int compare(const Temporal*, const Temporal*);
 
 };
+
+} // namespace opencog
 
 #endif

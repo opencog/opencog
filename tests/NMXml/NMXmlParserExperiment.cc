@@ -19,7 +19,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include <cstdlib>
+
 using namespace std;
+using namespace opencog;
 
 #ifdef WIN32
 #include <fcntl.h>

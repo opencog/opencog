@@ -35,28 +35,30 @@
 #include <winsock2.h>
 #endif
 
-std::string toString(double data)
+using namespace opencog;
+
+std::string opencog::toString(double data)
 {
     char buffer[256];
     sprintf(buffer, "%f", data);
     return buffer;
 }
 
-std::string bold(int i)
+std::string opencog::bold(int i)
 {
     char buf[256];
     sprintf(buf, "[1m%d[0m", i);
     return buf;
 }
 
-std::string bold(const char* str)
+std::string opencog::bold(const char* str)
 {
     char buf[512];
     sprintf(buf, "[1m%s[0m", str);
     return buf;
 }
 
-std::string padstr(const char* s, unsigned int size, padAlignment a) throw (InvalidParamException)
+std::string opencog::padstr(const char* s, unsigned int size, padAlignment a) throw (InvalidParamException)
 {
     std::string answer;
     switch (a) {
@@ -190,7 +192,7 @@ const char* FileList::getFile(unsigned int i) throw (IndexErrorException)
 
 #endif // !WIN32
 
-const char *nextLine(const char *from, std::string &line)
+const char* opencog::nextLine(const char *from, std::string &line)
 {
     line = "";
     if (from != NULL) {
@@ -212,7 +214,7 @@ const char *nextLine(const char *from, std::string &line)
 }
 
 // TODO: Review this method for both 32/64-bit processor compatibility
-int bitcount(unsigned long n)
+int opencog::bitcount(unsigned long n)
 {
     /* works for 32-bit numbers only    */
     /* fix last line for 64-bit numbers */
@@ -424,7 +426,7 @@ bool exists(const char *fname)
     return true;
 }
 
-char Isox(char s)
+char opencog::Isox(char s)
 {
     if (s > 96 && s < 123) s -= 32;
     return s;
@@ -491,7 +493,7 @@ nocase_string nocase_string::operator+(nocase_string s)
     return nocase_string(string(*this) + string(s));
 }
 
-bool nocase_equal(const char *s1, const char *s2)
+bool opencog::nocase_equal(const char *s1, const char *s2)
 {
     int i;
     for (i = 0; s1[i] != 0 && s2[i] != 0;i++)

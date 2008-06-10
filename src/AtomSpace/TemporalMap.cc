@@ -31,6 +31,8 @@
 #include "exceptions.h"
 #include "utils.h"
 
+using namespace opencog;
+
 inline void TemporalMap::lock()
 {
 #ifdef HAVE_LIBPTHREAD

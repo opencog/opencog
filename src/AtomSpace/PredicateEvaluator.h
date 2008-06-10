@@ -27,6 +27,9 @@
 
 #include "types.h"
 
+namespace opencog
+{
+
 class PredicateEvaluator
 {
 
@@ -34,4 +37,7 @@ public:
     virtual ~PredicateEvaluator();
     virtual bool evaluate(Handle h) = 0;
 };
+
+} // namespace opencog
+
 #endif //_PREDICATEEVALUATOR_H_

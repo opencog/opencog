@@ -25,6 +25,7 @@
 #include "AtomSpaceUtil.h"
 #include "SimpleTruthValue.h"
 
+using namespace opencog;
 
 class AtomSpaceUtilUTest :  public CxxTest::TestSuite
 {

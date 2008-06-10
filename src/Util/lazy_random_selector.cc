@@ -28,8 +28,7 @@
 #include "numeric.h"
 #include "RandGen.h"
 
-namespace Util
-{
+using namespace opencog;
 
 int lazy_random_selector::operator()()
 {
@@ -55,5 +54,3 @@ int lazy_random_selector::operator()()
     }
     return res;
 }
-
-} //~namespace Util

@@ -297,6 +297,6 @@ inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Ha
     return cl.follow_unordered_binary_link(h, ltype, cb, data);
 }
 
-}
+} // namespace opencog
 
 #endif /* OPENCOG_LINK_CHASE_H_ */

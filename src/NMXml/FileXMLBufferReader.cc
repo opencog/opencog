@@ -23,6 +23,8 @@
 #include "FileXMLBufferReader.h"
 #include <string.h>
 
+using namespace opencog;
+
 FileXMLBufferReader::FileXMLBufferReader(const char* filename)
 {
     this->filename = strdup(filename);

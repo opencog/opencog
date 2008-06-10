@@ -25,20 +25,20 @@
 #ifndef TRAIL_H
 #define TRAIL_H
 
-
 #include <deque>
 #include <exception>
 
 #include "types.h"
 #include "exceptions.h"
 
-using namespace std;
+namespace opencog
+{
 
 class Trail
 {
 
     int maxSize;
-    deque<Handle>* trail;
+    std::deque<Handle>* trail;
 
     void init(int, int) throw (InvalidParamException, std::bad_exception);
 
@@ -64,5 +64,7 @@ public:
 
     Handle getElement(int) throw (IndexErrorException, std::bad_exception);
 };
+
+} // namespace opencog
 
 #endif

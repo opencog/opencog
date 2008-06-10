@@ -36,7 +36,8 @@
 #include <stdlib.h>
 #include <vector>
 
-using std::vector;
+namespace opencog
+{
 
 /**
  * This class keeps track of the complete atom class hierarchy.
@@ -135,5 +136,7 @@ public:
      */
     static Handle typeDesignatorHandle(Type T);
 };
+
+} // namespace opencog
 
 #endif

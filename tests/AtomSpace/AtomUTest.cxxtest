@@ -25,6 +25,8 @@
 #include "Atom.h"
 #include "Link.h"
 
+using namespace opencog;
+
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
 class ConcreteAtom : public Link

@@ -33,6 +33,9 @@
 #include "ClassServer.h"
 #include "types.h"
 
+namespace opencog
+{
+
 /**
  * This class is a temporary solution for dynamics values until a more
  * thorough parameter system is defined.
@@ -69,5 +72,7 @@ public:
         return 0;
     }
 };
+
+} // namespace opencog
 
 #endif

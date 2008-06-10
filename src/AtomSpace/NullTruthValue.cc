@@ -25,6 +25,8 @@
 #include "NullTruthValue.h"
 #include "exceptions.h"
 
+using namespace opencog;
+
 NullTruthValue::NullTruthValue() {};
 
 bool NullTruthValue::isNullTv() const
