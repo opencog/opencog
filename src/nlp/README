@@ -31,3 +31,17 @@ A classic parse-ranking example:
 (S (NP I) (VP saw (NP the man) (PP with (NP the telescope))) .)
 
 (S (NP I) (VP saw (NP (NP the man) (PP with (NP the telescope)))) .)
+
+
+Parse ranking notes
+-------------------
+Yuret develops a statistical "lexical attraction" theory for data
+minig links.
+
+See also probablistic context-free grammars.
+E. Charniak, 1997. Statistical parsing with a context-free grammar 
+and word statistics. AAAI 1997.
+
+* Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical 
+  Attraction'' (1998) PhD Thesis
+
