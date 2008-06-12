@@ -7,3 +7,19 @@ This is an experimental prototype for opencog persistence, making use
 of the memcache API, and the memcachedb daemon. 
 
 Actually, its a pre-proptotype, nothing works yet.
+
+Installation
+------------
+Need to install "memcachedb". This is a very simple database server that
+talks the memcached protocol. The "start-db-server.sh" is a simple shell
+to start the server. Edit this script as nmeeded. In particular, change
+the database name, as needed.
+
+Testing the install
+-------------------
+The "sniff.cc" program provides a very simple example of programming with
+the memcached API. This rpogram should run and work correctly.
+
+
+
+
