@@ -4,7 +4,10 @@
                    Linas Vepstas      June 2008
 
 This is an experimental prototype for opencog persistence, making use
-of the memcache API, and the memcachedb daemon. 
+of the memcache API, and the memcachedb daemon.  The goal of this 
+prototype is to explore a simple distrubted persistence scheme, focusing
+on performance. This is in contrast to the SQL perstance mechanism, 
+which currently has underwhelming performance.
 
 Actually, its a pre-proptotype, nothing works yet.
 
@@ -21,5 +24,25 @@ The "sniff.cc" program provides a very simple example of programming with
 the memcached API. This rpogram should run and work correctly.
 
 
+Mapping AtomSpace to key-value pairs
+------------------------------------
+The mapping of atoms to key-value pairs is in the form of a file-system
+path. The root is the integer value of the handle. This is followed by
+a slash, and then a named field, appropriate for that atom.  
+
+   Key                   Value                                 Format
+   ---                   -----                                 ------
+   Handle/"type"         atom type                             int
+   Handle/"name"         Node string name (absent for links)   string
+   Handle/"stv/mean"     simple truth value mean               double
+   Handle/"stv/count"    simple truth value count              double
+	Handle/"edges/arity"  arity, for links                      int
+	Handle/"edges/0"      Handle of 0'th outgoing link          int
+	Handle/"edges/1"      Handle of 1'th outgoing link          int
+   
+At this time, ints are assumed to be 32-bit ints. Memcache stores the
+lengths of both keys and values, this should be adequeate to easily 
+expand for 64-bit handles in the future, while also remaining backwards
+compatible.
 
 
