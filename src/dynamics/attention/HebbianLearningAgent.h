@@ -34,8 +34,8 @@ namespace opencog
 
 class CogServer;
 
-/**
- * MindAgent that carries out simple Hebbian learning, only updates existing HebbianLinks.
+/** MindAgent that carries out simple Hebbian learning. Only updates
+ * existing HebbianLinks.
  */
 class HebbianLearningAgent : public MindAgent
 {
@@ -43,19 +43,48 @@ class HebbianLearningAgent : public MindAgent
 private:
     AtomSpace* a;
 
+	/** Work out the conjunction between a series of handles.
+	 *
+	 * The returned value is the correlation between distance in/out of
+	 * the attentional focus. STI of atoms are normalised (separately
+	 * for atoms within the attentional focus and those below it) and then
+	 * multiplied. Only returns a non zero value if at least one atom
+	 * is in the attentional focus.
+	 *
+	 * @param handles A vector of handles to calculate the conjunction for.
+	 * @return conjunction between -1 and 1.
+	 * @todo create a method for working out conjunction between more than
+	 * two atoms.
+	 */
     float targetConjunction(std::vector<Handle> handles);
+
+	/** Transform STI into a normalised STI value between -1 and 1.
+	 *
+	 * @param s STI to normalise.
+	 * @return the normalised STI between -1.0 and 1.0
+	 */
     float getNormSTI(AttentionValue::sti_t s);
+
+	/** Rearrange the the vector so that the one with a positive normalised
+	 * STI is at the front.
+	 *
+	 * @param outgoing Vector to rearrange.
+	 * @return rearranged vector.
+	 */
     std::vector<Handle>& moveSourceToFront(std::vector<Handle> &outgoing);
+
 public:
-    // Convert links to/from inverse as necessary.
+    //! Whether to convert links to/from InverseHebbianLinks as necessary.
     bool convertLinks;
-    // Maximum LTI of a link that can be converted.
+
+    //! Maximum allowable LTI of a link to be converted.
     AttentionValue::lti_t conversionThreshold;
 
     HebbianLearningAgent();
     virtual ~HebbianLearningAgent();
     virtual void run(CogServer *server);
 
+	//! Update the TruthValues of the HebbianLinks in the AtomSpace.
     void hebbianLearningUpdate();
 
 }; // class

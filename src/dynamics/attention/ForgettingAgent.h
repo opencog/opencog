@@ -35,9 +35,9 @@ namespace opencog
 
 class CogServer;
 
-/**
- * The ForgettingAgent, carries out the forgetting process in OpenCog Prime. It
- * does based on the LTI of Atoms. Low LTI indicates that an atom has not been
+/** The ForgettingAgent, carries out the forgetting process in OpenCog Prime. 
+ * 
+ * It does based on the LTI of Atoms. Low LTI indicates that an atom has not been
  * of any use for a long time, and additionally, isn't near any other important
  * atoms. The latter condition is because the ImportanceSpreadingAgent would
  * otherwise increase the STI of the atom, by moving STI from nearby important
@@ -68,13 +68,9 @@ private:
     AtomSpace* a;
 
 public:
-    /**
-	 * Maximum LTI of a link that can be forgot.
-	 */
+    //! Maximum LTI of a link that can be forgot.
     AttentionValue::lti_t forgetThreshold;
-    /**
-	 * Percentage of AtomSpace to forget.
-	 */
+	//! Percentage of AtomSpace to forget.
     float forgetPercentage;
 
     ForgettingAgent();
