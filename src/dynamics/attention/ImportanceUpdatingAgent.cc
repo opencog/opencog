@@ -82,10 +82,12 @@ ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
 
 void ImportanceUpdatingAgent::init(CogServer *server)
 {
-    /* Not sure exactly what initial estimates should be made... */
+    // Not sure exactly what initial estimates should be made...
     log->fine("ImportanceUpdatingAgent::init");
     initialEstimateMade = true;
 
+	// Perhaps initiate recent_val members to initial
+	// size before the mind process begins.
 }
 
 void ImportanceUpdatingAgent::setLogger(Logger* log)
@@ -199,14 +201,17 @@ bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
     return false;
 }
 
-void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
+bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
+	bool adjustmentMade = false;
+
     log->debug("Checking STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
                acceptableLobeSTIRange[0], acceptableLobeSTIRange[1]);
     if (!inRange(a->getSTIFunds(), acceptableLobeSTIRange)) {
         log->debug("Lobe STI funds out of bounds, re-adjusting.");
         lobeSTIOutOfBounds = true;
         adjustSTIFunds(a);
+		adjustmentMade = true;
     }
 
     log->debug("Checking LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
@@ -214,7 +219,9 @@ void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
     if (!inRange(a->getLTIFunds(), acceptableLobeLTIRange)) {
         log->debug("Lobe LTI funds out of bounds, re-adjusting.");
         adjustLTIFunds(a);
+		adjustmentMade = true;
     }
+	return adjustmentMade;
 }
 
 opencog::RandGen* ImportanceUpdatingAgent::getRandGen()
@@ -331,17 +338,11 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
     p = getRandGen()->randDoubleOneExcluded();
     prob = sum = exp(-mean);
 
-    // No longer happens due to truncating mean above
-    //if (sum == 0.0f) {
-// log->warn("Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
-// count = (int) mean;
-//    } else {
     while (p > sum) {
         count++;
         prob = (prob * mean) / count;
         sum += prob;
     }
-    //}
     count = count + base;
 
     if (negative) count = -count;

@@ -49,12 +49,6 @@
 namespace opencog
 {
 
-namespace opencog
-{
-
-namespace opencog
-{
-
 class HopfieldOptions;
 
 class HopfieldServer : public opencog::CogServer

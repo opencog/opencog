@@ -844,16 +844,8 @@ public:
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s);
 
-<<<<<<< TREE
-<<<<<<< TREE
-    Util::recent_val<AttentionValue::sti_t>& getMaxSTI();
-    Util::recent_val<AttentionValue::sti_t>& getMinSTI();
-=======
     opencog::recent_val<AttentionValue::sti_t>& getMaxSTI();
->>>>>>> MERGE-SOURCE
-=======
-    opencog::recent_val<AttentionValue::sti_t>& getMaxSTI();
->>>>>>> MERGE-SOURCE
+    opencog::recent_val<AttentionValue::sti_t>& getMinSTI();
 
     // For convenience
     // bool isNode(Handle) const;
@@ -951,16 +943,8 @@ private:
      * not charged STI rent */
     AttentionValue::sti_t attentionalFocusBoundary;
 
-<<<<<<< TREE
-<<<<<<< TREE
-    Util::recent_val<AttentionValue::sti_t> maxSTI;
-    Util::recent_val<AttentionValue::sti_t> minSTI;
-=======
     opencog::recent_val<AttentionValue::sti_t> maxSTI;
->>>>>>> MERGE-SOURCE
-=======
-    opencog::recent_val<AttentionValue::sti_t> maxSTI;
->>>>>>> MERGE-SOURCE
+    opencog::recent_val<AttentionValue::sti_t> minSTI;
 
     /* These indicate the amount importance funds available in the
      * AtomSpace */

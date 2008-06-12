@@ -46,6 +46,7 @@ HopfieldOptions::HopfieldOptions()
     recordToFile = HDEMO_DEFAULT_RECORD_TO_FILE;
     vizThreshold = HDEMO_DEFAULT_VIZ_THRESHOLD;
     resetFlag = false;
+	showConfigFlag = false;
 
 }
 

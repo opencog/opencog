@@ -174,7 +174,6 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     bool inAttention = false;
     std::vector<Handle>::iterator h_i;
     Handle h;
-    AtomSpace *a;
     AttentionValue::sti_t sti;
     float tc = 0.0f, normsti;
     std::vector<float> normsti_v;
