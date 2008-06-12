@@ -116,7 +116,7 @@ ConnSettings      =
 
 
 Experimental Diary & Results
- ----------------------------
+----------------------------
 First run with a large data set (1564K atoms) was a disaster.
 Huge CPU usage, with 75% of cpu usage occuring in the kernel block i/o
 layer, and 12% each for the opencog and postgres times:
@@ -155,9 +155,9 @@ usage has been exceeded. This can be fixed by:
    sysctl -p /etc/sysctl.conf
 
 Result:
-   cogserver = 10:45 mins = 0.41  millisecs/atom
-   postgres  =  7:32 mins = 0.29  millisecs/atom
-   md        =  0:42 mins = 0.026 millisecs/atom
+   cogserver = 10:45 mins = 0.41  millisecs/atom (2.42K atoms/sec)
+   postgres  =  7:32 mins = 0.29  millisecs/atom (2.65K atoms/sec)
+   md        =  0:42 mins = 0.026 millisecs/atom (37K atoms/sec)
 
 
 try again with begn; commit;  
@@ -169,7 +169,7 @@ use prepare
 
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:
-2:08 postgres = 82 microsecs/atom
+2:08 postgres = 82 microsecs/atom (12.2K atoms/sec)
 similar to for opencog, but then atomtable needs to reconcile, which
 takes an additional 8:30 minutes to attach incoming handles!!
 
