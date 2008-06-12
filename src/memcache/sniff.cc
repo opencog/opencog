@@ -5,6 +5,8 @@
  * Linas Vepstas June 2008
  */
 
+#ifdef HAVE_LIBMEMCACHED
+
 #include <assert.h>
 #include <memcached.h>
 #include <stdio.h>
@@ -48,4 +50,7 @@ int main ()
 	
 
 	memcached_free(mc);
+
+	return 0;
 }
+#endif /* HAVE_LIBMEMCACHED */
