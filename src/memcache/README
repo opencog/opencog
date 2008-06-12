@@ -1,0 +1,9 @@
+
+               Memcachedb-based persistent storage
+               -----------------------------------
+                   Linas Vepstas      June 2008
+
+This is an experimental prototype for opencog persistence, making use
+of the memcache API, and the memcachedb daemon. 
+
+Actually, its a pre-proptotype, nothing works yet.
