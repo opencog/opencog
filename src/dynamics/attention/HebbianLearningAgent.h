@@ -19,12 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * HebbianLearningAgent.h
- *
- * Simple Hebbian Learning, currently only updates existing Hebbian Links.
- */
-
 #ifndef _HEBBIAN_LEARNING_AGENT_H
 #define _HEBBIAN_LEARNING_AGENT_H
 
@@ -40,6 +34,9 @@ namespace opencog
 
 class CogServer;
 
+/**
+ * MindAgent that carries out simple Hebbian learning, only updates existing HebbianLinks.
+ */
 class HebbianLearningAgent : public MindAgent
 {
 

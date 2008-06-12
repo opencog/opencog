@@ -842,6 +842,7 @@ public:
         AttentionValue::sti_t s);
 
     Util::recent_val<AttentionValue::sti_t>& getMaxSTI();
+    Util::recent_val<AttentionValue::sti_t>& getMinSTI();
 
     // For convenience
     // bool isNode(Handle) const;
@@ -940,6 +941,7 @@ private:
     AttentionValue::sti_t attentionalFocusBoundary;
 
     Util::recent_val<AttentionValue::sti_t> maxSTI;
+    Util::recent_val<AttentionValue::sti_t> minSTI;
 
     /* These indicate the amount importance funds available in the
      * AtomSpace */

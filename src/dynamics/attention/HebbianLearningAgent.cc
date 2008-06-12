@@ -64,6 +64,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
         // that into truthvalue change. the change should be based on existing TV.
         Handle h;
         std::vector<Handle> outgoing;
+		bool isDifferent = false;
 
         h = current_l->handle;
 
@@ -72,6 +73,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
         new_tc = targetConjunction(outgoing);
         // old link strength decays
         old_tc = a->getTV(h).getMean();
+		if (new_tc != old_tc) isDifferent = true;
 
         if (convertLinks && a->getLTI(h) < conversionThreshold) {
             // If mind agent is set to convert hebbian links then
@@ -98,7 +100,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     logger().fine("HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
                     a->removeAtom(h);
                     outgoing = moveSourceToFront(outgoing);
-                    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
+                    h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 0));
                 } else {
                     a->setMean(h, tc);
                 }
@@ -112,7 +114,8 @@ void HebbianLearningAgent::hebbianLearningUpdate()
             if (tc < 0.0f) tc = 0.0f;
             a->setMean(h, tc);
         }
-        logger().fine("HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
+		if (isDifferent)
+			logger().fine("HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 
     }
     // if not enough links, try and create some more either randomly
@@ -152,8 +155,14 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
 float HebbianLearningAgent::getNormSTI(AttentionValue::sti_t s)
 {
     // get normalizer (maxSTI - attention boundary)
-    int normaliser = (int) a->getMaxSTI().recent - a->getAttentionalFocusBoundary();
-    return (s - a->getAttentionalFocusBoundary()) / (float) normaliser;
+	int normaliser;
+	if (s > a->getAttentionalFocusBoundary()) {
+		normaliser = (int) a->getMaxSTI().recent - a->getAttentionalFocusBoundary();
+		return (s - a->getAttentionalFocusBoundary()) / (float) normaliser;
+	} else {
+		normaliser = -((int) a->getMinSTI().recent + a->getAttentionalFocusBoundary());
+		return (s + a->getAttentionalFocusBoundary()) / (float) normaliser;
+	}
 }
 
 float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
@@ -171,6 +180,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     std::vector<float> normsti_v;
     bool tcInit = true;
 
+	logger().fine("TC: start", sti);
 
     for (h_i = handles.begin();
             h_i != handles.end();
@@ -179,7 +189,11 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
         sti = a->getSTI(h);
 
         // if none in attention return 0 at end
-        if (sti > a->getAttentionalFocusBoundary()) inAttention = true;
+        if (sti > a->getAttentionalFocusBoundary()) {
+			logger().fine("TC: %d in attention, focus boundary = %d", sti,
+					a->getAttentionalFocusBoundary() );
+			inAttention = true;
+		}
 
         // normalise each sti and multiple each
         normsti = getNormSTI(sti);
@@ -191,6 +205,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
             tc = normsti;
             tcInit = false;
         } else tc *= normsti;
+		logger().fine("TC: normsti %.3f, tc %.3f", normsti, tc);
 
     }
 

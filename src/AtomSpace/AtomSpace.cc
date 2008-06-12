@@ -992,3 +992,8 @@ Util::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
     return maxSTI;
 }
 
+Util::recent_val<AttentionValue::sti_t>& AtomSpace::getMinSTI()
+{
+    return minSTI;
+}
+

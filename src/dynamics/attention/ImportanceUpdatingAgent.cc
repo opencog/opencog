@@ -115,6 +115,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     AtomSpace* a = server->getAtomSpace();
     HandleEntry *h, *q;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
+    AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
 
     log->fine("=========== ImportanceUpdating::run =======");
     /* init iterative variables, that can't be calculated in
@@ -148,16 +149,25 @@ void ImportanceUpdatingAgent::run(CogServer *server)
         enforceLTICap(a, q->handle);
 
         // Greater than max sti seen?
-        if (a->getSTI(q->handle) > maxSTISeen)
+        if (a->getSTI(q->handle) > maxSTISeen) {
             maxSTISeen = a->getSTI(q->handle);
+		} else if (a->getSTI(q->handle) < minSTISeen) {
+            minSTISeen = a->getSTI(q->handle);
+		}
 
         q = q->next;
     }
     delete h;
 
-    /* Update recentMaxSTI */
+    // Update AtomSpace recent maxSTI and recent minSTI 
+	if (minSTISeen > maxSTISeen) {
+		// if all Atoms have the same STI this will occur
+		minSTISeen = maxSTISeen;
+	}
     a->getMaxSTI().update( maxSTISeen );
+    a->getMinSTI().update( minSTISeen );
     log->debug("Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
+    log->debug("Min STI seen is %d, recentMinSTI is now %f", minSTISeen, a->getMinSTI().recent);
 
     /* Check AtomSpace funds are within bounds */
     checkAtomSpaceFunds(a);
