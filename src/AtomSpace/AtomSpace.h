@@ -49,6 +49,9 @@ using __gnu_cxx::hash_map;
 #include <map>
 #endif
 
+namespace opencog
+{
+
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
 
@@ -841,8 +844,16 @@ public:
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s);
 
+<<<<<<< TREE
+<<<<<<< TREE
     Util::recent_val<AttentionValue::sti_t>& getMaxSTI();
     Util::recent_val<AttentionValue::sti_t>& getMinSTI();
+=======
+    opencog::recent_val<AttentionValue::sti_t>& getMaxSTI();
+>>>>>>> MERGE-SOURCE
+=======
+    opencog::recent_val<AttentionValue::sti_t>& getMaxSTI();
+>>>>>>> MERGE-SOURCE
 
     // For convenience
     // bool isNode(Handle) const;
@@ -940,8 +951,16 @@ private:
      * not charged STI rent */
     AttentionValue::sti_t attentionalFocusBoundary;
 
+<<<<<<< TREE
+<<<<<<< TREE
     Util::recent_val<AttentionValue::sti_t> maxSTI;
     Util::recent_val<AttentionValue::sti_t> minSTI;
+=======
+    opencog::recent_val<AttentionValue::sti_t> maxSTI;
+>>>>>>> MERGE-SOURCE
+=======
+    opencog::recent_val<AttentionValue::sti_t> maxSTI;
+>>>>>>> MERGE-SOURCE
 
     /* These indicate the amount importance funds available in the
      * AtomSpace */
@@ -977,5 +996,7 @@ private:
     Handle addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv = TruthValue::NULL_TV());
 
 };
+
+} // namespace opencog
 
 #endif // ATOMSPACE_H

@@ -26,6 +26,8 @@
 #include <Link.h>
 #include <TLB.h>
 
+using namespace opencog;
+
 class LinkUTest :  public CxxTest::TestSuite
 {
 private:

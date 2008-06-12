@@ -29,6 +29,8 @@
 #include "TemporalTable.h"
 #include <set>
 
+namespace opencog
+{
 
 /**
  * This class is used to associate temporal information (timestamps or timelags) to
@@ -146,5 +148,7 @@ private:
     unsigned long latestTimestamp;
 
 };
+
+} // namespace opencog
 
 #endif //TIMESERVER_H

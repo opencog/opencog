@@ -188,3 +188,5 @@ TODO
 -- Loading from SQL uses half as much ram as loading from XML, which
    suggests the XML loader has a memory leak!?  Need to run valgrind on
    it.
+
+-- Investigate "memcachedb" as an alternative?

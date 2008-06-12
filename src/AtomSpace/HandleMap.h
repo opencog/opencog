@@ -41,9 +41,11 @@
 #include "types.h"
 #include "exceptions.h"
 
+namespace opencog
+{
+
 template<class T>
 class HandleMapIterator;
-
 
 /**
  * This is an Adapter to stl's HashMap.
@@ -229,5 +231,7 @@ public:
      */
     Handle next() throw (IndexErrorException);
 };
+
+} // namespace opencog
 
 #endif

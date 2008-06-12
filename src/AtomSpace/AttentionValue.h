@@ -30,6 +30,9 @@
 #include <limits.h>
 #include <string>
 
+namespace opencog
+{
+
 struct AttentionValue {
 
 public:
@@ -111,4 +114,7 @@ public:
     static AttentionValue* factory(sti_t sti, lti_t lti);
     static AttentionValue* factory(sti_t sti, lti_t lti, vlti_t vlti);
 };
+
+} // namespace opencog 
+
 #endif

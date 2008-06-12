@@ -47,6 +47,9 @@
 using __gnu_cxx::hash_set;
 #endif
 
+namespace opencog
+{
+
 struct hashAtom {
     int operator()(Atom* a) const;
 };
@@ -618,5 +621,7 @@ public:
      */
     void scrubIncoming(void);
 };
+
+} //namespace opencog
 
 #endif

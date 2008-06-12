@@ -28,6 +28,8 @@
 
 #ifdef USE_TLB_MAP
 
+using namespace opencog;
+
 // Low-lying values are reserved for "non-real" atoms.
 unsigned long TLB::uuid = NOTYPE + 1;
 

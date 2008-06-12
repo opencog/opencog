@@ -27,6 +27,8 @@
 #include "exceptions.h"
 #include <math.h>
 
+using namespace opencog;
+
 #define KKK 800.0f
 
 SimpleTruthValue::SimpleTruthValue(float m, float c)

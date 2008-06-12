@@ -29,6 +29,8 @@
 #include "CoreUtils.h"
 #include <algorithm>
 
+using namespace opencog;
+
 int HandleTemporalPairEntry::existingObjects = 0;
 
 HandleTemporalPairEntry::HandleTemporalPairEntry(HandleTemporalPair _handleTemporalPair): handleTemporalPair(_handleTemporalPair)

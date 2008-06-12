@@ -31,8 +31,9 @@
 #include "Pattern.h"
 
 using namespace std;
+using namespace opencog;
 
-Util::RandGen* patternRng = new Util::MT19937RandGen(1);
+RandGen* patternRng = new MT19937RandGen(1);
 
 Pattern::Pattern(int w, int h, float density)
 {

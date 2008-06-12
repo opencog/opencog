@@ -46,6 +46,15 @@
 #define HDEMO_DEFAULT_LINKS 15
 #define HDEMO_DEFAULT_PATTERN_STIM 1000
 
+namespace opencog
+{
+
+namespace opencog
+{
+
+namespace opencog
+{
+
 class HopfieldOptions;
 
 class HopfieldServer : public opencog::CogServer
@@ -58,7 +67,7 @@ private:
      */
     std::vector<Handle> hGrid;
 
-    Util::RandGen* rng;
+    opencog::RandGen* rng;
 
 public:
     // Amount of stimulus to apply across a pattern
@@ -174,5 +183,7 @@ public:
 
     void printStatus();
 };
+
+} // namespace opencog
 
 #endif // HOPFIELDSERVER_H

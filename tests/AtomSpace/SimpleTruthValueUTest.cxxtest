@@ -23,11 +23,12 @@
  */
 
 #include "SimpleTruthValue.h"
-//#include "NMCore.h"
 #include "IndefiniteTruthValue.h"
 #include "CompositeTruthValue.h"
 #include "exceptions.h"
 #include <math.h>
+
+using namespace opencog;
 
 #define NUM_TVS 3
 #define TV1_MEAN 0.25f
@@ -40,7 +41,7 @@
 //Exact float comparison is not working due to float representation issues...
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
-class SimpleTruthValueUTest :  public CxxTest::TestSuite
+class SimpleTruthValueUTest : public CxxTest::TestSuite
 {
 private:
 

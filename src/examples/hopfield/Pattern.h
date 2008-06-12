@@ -25,6 +25,9 @@
 #include <AttentionValue.h>
 #include <RandGen.h>
 
+namespace opencog
+{
+
 class Pattern : public std::vector< int >
 {
 
@@ -33,7 +36,7 @@ private:
     int width;
     int height;
 
-    Util::RandGen *rng;
+    opencog::RandGen *rng;
 
 public:
 
@@ -109,7 +112,8 @@ public:
      * @return the loaded patterns.
      */
     static std::vector< Pattern > loadPatterns( std::string fn, int size);
-
 };
+
+} // namespace opencog
 
 #endif // HDEMO_PATTERNMATRIX_H

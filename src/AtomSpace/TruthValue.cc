@@ -33,6 +33,8 @@
 #include <typeinfo>
 #include "ClassServer.h"
 
+using namespace opencog;
+
 // Static references to special TVs:
 
 //const TruthValue& TruthValue::NULL_TV() = NullTruthValue();

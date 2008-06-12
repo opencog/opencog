@@ -30,7 +30,18 @@
 #include <vector>
 #include <string>
 
+<<<<<<< TREE
+<<<<<<< TREE
 vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+=======
+using namespace opencog;
+
+=======
+using namespace opencog;
+
+>>>>>>> MERGE-SOURCE
+vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
+>>>>>>> MERGE-SOURCE
 {
     char buf[256];
     vector<Handle> testAtoms;

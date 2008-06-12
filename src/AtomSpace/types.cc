@@ -25,9 +25,11 @@
 
 #include "types.h"
 
+using namespace opencog;
+
 int hashHandle::operator()(Handle h) const
 {
-    int hashCode =  Util::hash<unsigned long>()((unsigned long) h);
+    int hashCode =  opencog::hash<unsigned long>()((unsigned long) h);
     return(hashCode);
 }
 

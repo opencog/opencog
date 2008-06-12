@@ -24,6 +24,8 @@
 
 #include "AttentionValue.h"
 
+using namespace opencog;
+
 AttentionValue::AttentionValue(sti_t STI, lti_t LTI, vlti_t VLTI)
 {
     m_STI = STI;

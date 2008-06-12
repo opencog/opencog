@@ -28,6 +28,8 @@
 
 #define W() getU()-getL();
 
+using namespace opencog;
+
 float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9f;
 float IndefiniteTruthValue::DEFAULT_K = 2.0f;
 

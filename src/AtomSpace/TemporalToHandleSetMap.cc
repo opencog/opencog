@@ -24,6 +24,8 @@
 
 #include <TemporalToHandleSetMap.h>
 
+using namespace opencog;
+
 TemporalToHandleSetMap::TemporalToHandleSetMap()
 {
     internalMap = new TemporalMap();

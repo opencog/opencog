@@ -23,6 +23,8 @@
 
 #include "HopfieldServer.h"
 
+using namespace opencog;
+
 std::vector< Pattern > getPatterns();
 void testHopfieldNetworkRolling();
 void testHopfieldNetworkRollingOld();
@@ -30,8 +32,6 @@ void testHopfieldNetworkInterleave();
 
 HopfieldServer hServer;
 HopfieldOptions *o = hServer.options;
-
-using namespace opencog;
 
 int main(int argc, char *argv[])
 {

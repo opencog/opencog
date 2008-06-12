@@ -28,6 +28,9 @@
 #include "types.h"
 #include "Temporal.h"
 
+namespace opencog
+{
+
 class HandleTemporalPair
 {
 
@@ -46,5 +49,7 @@ private:
     Temporal* time;
 
 };
+
+} // namespace opencog
 
 #endif //HANDLETEMPORALPAIR_H

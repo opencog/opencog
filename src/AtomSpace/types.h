@@ -38,10 +38,8 @@
 #include <string.h>
 #include "platform.h"
 
-class Atom;
-
-typedef Util::ConstCharPointerIntHashMap ClassTypeHashMap;
-typedef Util::IntConstCharPointerHashMap ClassNameHashMap;
+namespace opencog
+{
 
 // Definition of a handle. Opaque type.
 // Will change when system is reworked for distributed computing.
@@ -58,7 +56,7 @@ struct eqHandle {
     bool operator()(Handle h1, Handle h2) const;
 };
 
-typedef Util::hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
+typedef opencog::hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
 //#endif
 
 // type and arity of Atoms, represented as short integers (16 bits)
@@ -70,6 +68,8 @@ typedef unsigned short Arity;
 // to a smaller representation
 typedef float ShortFloat;
 
+typedef opencog::ConstCharPointerIntHashMap ClassTypeHashMap;
+typedef opencog::IntConstCharPointerHashMap ClassNameHashMap;
 
 /**
  * This class provides basic operations over the ShortFloat type.
@@ -102,6 +102,8 @@ public:
     static void setValue(ShortFloat*, float);
 };
 
+class Atom;
+
 /**
  * Structure used to return a linked-list of atoms instead of the standard
  * linked-list of handles (HandleEntry)
@@ -110,5 +112,7 @@ struct AtomEntry {
     AtomEntry *next;
     Atom *atom;
 };
+
+} // namespace opencog
 
 #endif /* OPENCOG_TYPES_H */

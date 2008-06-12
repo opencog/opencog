@@ -35,6 +35,8 @@
 #include "TLB.h"
 #include "utils.h"
 
+using namespace opencog;
+
 StatisticsMonitor* StatisticsMonitor::getInstance()
 {
     static StatisticsMonitor* instance = new StatisticsMonitor();

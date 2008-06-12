@@ -104,6 +104,7 @@ private:
         return false;
     }
 };
-}
+
+} // namespace opencog
 
 #endif /* OPENCOG_FOLLOW_LINK_H_ */

@@ -22,9 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ServerSocket.h"
 #include <string>
 #include <sstream>
+
+#include "ServerSocket.h"
+#include "Logger.h"
 
 using namespace opencog;
 
@@ -49,8 +51,15 @@ void ServerSocket::setMaster(SimpleNetworkServer *m)
     master = m;
 }
 
+void ServerSocket::OnAccept()
+{
+    logger().debug("ServerSocket.OnAccept");
+    Send(master->getCommandPrompt());
+}
+
 void ServerSocket::OnDisconnect()
 {
+    logger().debug("ServerSocket.OnDisconnect");
     if (!in_raw_mode) return;
 
     cb->AtomicInc(1);
@@ -62,7 +71,10 @@ void ServerSocket::OnDisconnect()
 
 void ServerSocket::OnLine(const std::string& line)
 {
-    if (line == "data") {
+    logger().debug("ServerSocket.OnLine [%s]", line.c_str());
+    if (line == "exit") {
+       SetCloseAndDelete();
+    } else if (line == "data") {
         // Disable line protocol; we are expecting a stream
         // of bytes from now on, until socket closure.
         // The OnRawData() method will be called from here
@@ -91,6 +103,7 @@ void ServerSocket::OnLine(const std::string& line)
  */
 void ServerSocket::OnRawData(const char * buf, size_t len)
 {
+    logger().debug("ServerSocket.OnRawData [%s]", buf);
     size_t i;
     size_t istart = 0;
     while (istart < len) {
@@ -189,10 +202,12 @@ void ServerSocket::CBI::callBack(const std::string &message)
         std::string nl = "";
         while (getline(stream, line)) {
             sock->Send(nl + line);
-            nl = "\n";
+            nl = "\r\n";
         }
-        if ('\n' == message[message.length()-1])
-            sock->Send("\n");
+        if ('\n' == message[message.length()-1]) {
+            sock->Send("\r\n");
+            sock->Send(master->getCommandPrompt());
+        }
     }
     pthread_mutex_unlock(&sock_lock);
 

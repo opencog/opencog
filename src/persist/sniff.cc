@@ -15,6 +15,8 @@
 #include "SimpleTruthValue.h"
 #include "TLB.h"
 
+using namespace opencog;
+
 int atomCompare(Atom *a, Atom *b)
 {
 	int rc = 0;

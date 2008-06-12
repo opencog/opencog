@@ -34,13 +34,14 @@
 #include "types.h"
 #include "VersionHandle.h"
 
+namespace opencog {
+
+class AtomTable;
+
 /**
  * This class provides an iterator that cycles through atoms in the AtomTable
  * according to specific criteria.
  */
-
-class AtomTable;
-
 class HandleIterator
 {
 
@@ -102,5 +103,7 @@ public:
      */
     Handle next();
 };
+
+} // namespace opencog
 
 #endif

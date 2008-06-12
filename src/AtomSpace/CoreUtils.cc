@@ -27,6 +27,8 @@
 #include "TLB.h"
 #include "HandleMap.cc"
 
+using namespace opencog;
+
 /* Module for including any core-specific common utilities */
 void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (RuntimeException)
 {

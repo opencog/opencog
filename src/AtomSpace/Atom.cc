@@ -42,6 +42,8 @@
 
 #undef Type
 
+using namespace opencog;
+
 void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
 {
     // resets all flags
@@ -603,7 +605,7 @@ int Atom::locateTargetIndexTypes(Type key) const
 {
     if (getArity() == 0) return -1;
 
-    set<unsigned int> checkedTypes;
+    std::set<unsigned int> checkedTypes;
     int j = 0;
     // for each type in the target types array, it checks if it has already
     // been found so that repeated types are not considered. If a type is equal

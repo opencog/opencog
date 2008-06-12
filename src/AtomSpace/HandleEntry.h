@@ -35,6 +35,9 @@
 #include <string>
 #include <AttentionValue.h>
 
+namespace opencog
+{
+
 class AtomTable;
 
 /**
@@ -399,5 +402,7 @@ public:
     static HandleEntry* filterSet(HandleEntry*, const char*, Type, VersionHandle);
 
 };
+
+} // namespace opencog
 
 #endif

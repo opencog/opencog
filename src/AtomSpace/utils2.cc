@@ -22,12 +22,14 @@
 
 #include "utils2.h"
 
+using namespace opencog;
+
 //this typedef is put is the .cc not the .h because that provokes a vtree clash
 //with combo::vtree
 typedef tree<Vertex> vtree;
 typedef vtree::iterator pre_it;
 
-vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
 {
     try {
         vtree ret;
@@ -45,7 +47,7 @@ vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtr
         puts("MakeVirtualAtom_slow exception."); getc(stdin); return vtree();
     }
 }
-vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
     try {
         vtree ret;
@@ -62,7 +64,7 @@ vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtr
         puts("MakeVirtualAtom_slow exception."); getc(stdin); return tree<Vertex>();
     }
 }
-vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3)
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
     try {
         vtree ret;
@@ -79,7 +81,7 @@ vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtr
     }
 }
 
-vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
 {
     try {
         vtree ret;
@@ -95,7 +97,7 @@ vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
     }
 }
 
-vtree MakeVirtualAtom_slow(Handle T, const vtree& t1)
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1)
 {
     try {
         vtree ret;
@@ -110,7 +112,7 @@ vtree MakeVirtualAtom_slow(Handle T, const vtree& t1)
     }
 }
 
-vtree MakeVirtualAtom_slow(Handle T)
+vtree opencog::MakeVirtualAtom_slow(Handle T)
 {
     try {
         vtree ret;
@@ -122,7 +124,7 @@ vtree MakeVirtualAtom_slow(Handle T)
         puts("MakeVirtualAtom_slow exception."); getc(stdin);  return tree<Vertex>();
     }
 }
-vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
 {
     try {
         vtree ret;
@@ -140,7 +142,7 @@ vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtr
         puts("MakeVirtualAtom_slow exception."); getc(stdin);  return tree<Vertex>();
     }
 }
-vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
     try {
         vtree ret;
@@ -157,7 +159,7 @@ vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtr
         puts("MakeVirtualAtom_slow exception."); getc(stdin);  return tree<Vertex>();
     }
 }
-vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3)
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
     try {
         vtree ret;
@@ -174,7 +176,7 @@ vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtr
     }
 }
 
-vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
 {
     try {
         vtree ret;
@@ -190,7 +192,7 @@ vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
     }
 }
 
-vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1)
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1)
 {
     try {
         vtree ret;
@@ -205,7 +207,7 @@ vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1)
     }
 }
 
-vtree MakeVirtualAtom_slow(Vertex T)
+vtree opencog::MakeVirtualAtom_slow(Vertex T)
 {
     try {
         vtree ret;

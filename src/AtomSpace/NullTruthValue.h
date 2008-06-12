@@ -22,10 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TruthValue.h"
-
 #ifndef _NULL_TRUTH_VALUE_TV_H_
 #define _NULL_TRUTH_VALUE_TV_H_
+
+#include "TruthValue.h"
+
+namespace opencog
+{
 
 class NullTruthValue : public TruthValue
 {
@@ -51,5 +54,7 @@ protected:
     TruthValue* clone() const throw (RuntimeException);
     NullTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
 };
+
+} // namespace
 
 #endif

@@ -106,15 +106,39 @@ private:
      */
     void randomStimulation(AtomSpace *a);
 
+<<<<<<< TREE
     // Recent amount of stimulus given per cycle */
     Util::recent_val<stim_t> totalStimulusSinceReset;
+=======
+    /* Recent amount of stimulus given per cycle */
+<<<<<<< TREE
+    opencog::recent_val<stim_t> totalStimulusSinceReset;
+>>>>>>> MERGE-SOURCE
+=======
+    opencog::recent_val<stim_t> totalStimulusSinceReset;
+>>>>>>> MERGE-SOURCE
 
+<<<<<<< TREE
+<<<<<<< TREE
     // Number of atoms within attentionFocusBoundary */
     Util::recent_val<long> attentionalFocusSize;
     Util::recent_val<long> attentionalFocusNodesSize;
     // Rate of decay (r) for estimating AttentionalFocusSize
     // Estimate equal to:
     // r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent
+=======
+    /* Number of atoms within attentionFocusBoundary */
+    opencog::recent_val<long> attentionalFocusSize;
+    opencog::recent_val<long> attentionalFocusNodesSize;
+=======
+    /* Number of atoms within attentionFocusBoundary */
+    opencog::recent_val<long> attentionalFocusSize;
+    opencog::recent_val<long> attentionalFocusNodesSize;
+>>>>>>> MERGE-SOURCE
+    /* Rate of decay (r) for estimating AttentionalFocusSize
+     * Estimate equal to:
+     * r *(attentionalFocusSize + (1-r) attentionalFocusSize.recent */
+>>>>>>> MERGE-SOURCE
 
     // for calculate the recent maximum STI value, used in Hebbian learning
     //float maxSTIDecayRate;
@@ -205,11 +229,11 @@ private:
      */
     int getTaxAmount(double mean);
 
-    Util::RandGen* rng;
+    opencog::RandGen* rng;
     /**
      * Get Random number generator associated with MindAgent.
      */
-    Util::RandGen* getRandGen();
+    opencog::RandGen* getRandGen();
 
     /**
      * Update the attentional focus size variables

@@ -26,6 +26,8 @@
 #include <Node.h>
 #include "CoreUtils.h"
 
+using namespace opencog;
+
 #define N_HANDLES 10
 
 class HandleSetUTest :  public CxxTest::TestSuite

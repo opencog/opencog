@@ -32,6 +32,8 @@
 #include "CoreUtils.h"
 #include "CompositeTruthValue.h"
 
+using namespace opencog;
+
 int HandleEntry::existingObjects = 0;
 
 HandleEntry::HandleEntry(Handle handle)

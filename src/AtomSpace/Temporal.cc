@@ -26,6 +26,8 @@
 #include "Temporal.h"
 #include "utils.h"
 
+using namespace opencog;
+
 std::ostream& operator<<(std::ostream& out, const Temporal& t)
 {
     return (out << t.toString());

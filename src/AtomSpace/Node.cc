@@ -33,6 +33,8 @@
 #include "utils.h"
 #include "AtomSpaceDefinitions.h"
 
+using namespace opencog;
+
 Node::Node(Type type,
            const std::string& cname,
            const TruthValue& tv)
@@ -110,7 +112,7 @@ bool Node::equals(Atom *other)
 int Node::hashCode()
 {
     int result = Atom::hashCode();
-    result += Util::hash<const char*>()(name.c_str());
+    result += opencog::hash<const char*>()(name.c_str());
     return result;
 }
 

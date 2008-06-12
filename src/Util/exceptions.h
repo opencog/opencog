@@ -38,6 +38,9 @@
 #define TOSTRING(x) STRINGIFY(x)
 #define TRACE_INFO " ("__FILE__":"TOSTRING(__LINE__)")"
 
+namespace opencog 
+{
+
 /**
  * Base exception class from which all other exceptions should inheritates.
  */
@@ -290,5 +293,7 @@ void cassert(const char * trace,  bool condition, const char * msg, ...);
  * cassert without message. Just trace information
  */
 void cassert(const char * trace, bool condition);
+
+} // namespace opencog
 
 #endif

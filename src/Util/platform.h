@@ -29,8 +29,9 @@
 #include <string.h>
 #include <assert.h>
 
-namespace Util
+namespace opencog
 {
+
 struct eqstr {
     bool operator()(char *s1, char *s2) const {
         return strcmp(s1, s2) == 0;
@@ -48,7 +49,7 @@ struct eqint {
         return s1 == s2;
     }
 };
-} //~namespace Util
+} //~namespace opencog
 
 #ifdef WIN32
 
@@ -64,7 +65,7 @@ struct eqint {
 
 #include <time.h>
 
-namespace Util
+namespace opencog
 {
 using namespace std;
 
@@ -90,7 +91,7 @@ typedef hash_map<int, const char*, int_hash, eqint> IntConstCharPointerHashMap;
 typedef hash_map<const char*, void*, const_char_hash, eqconststr> ConstCharPointerVoidHashMap;
 typedef hash_map<int, int> Int2IntHashMap;
 typedef hash_set<int> Int2IntHashSet;
-} //~namespace Util
+} //~namespace opencog
 #else // !WIN32
 
 #include <ext/hash_set>
@@ -98,7 +99,7 @@ typedef hash_set<int> Int2IntHashSet;
 #include <ext/functional>
 #define stl_hash_ul(x) __gnu_cxx::hash<unsigned long>()(x)
 
-namespace Util
+namespace opencog
 {
 typedef __gnu_cxx::hash<int> int_hash;
 typedef __gnu_cxx::hash<const char*> const_char_hash;
@@ -115,7 +116,7 @@ using __gnu_cxx::hash;
 //using __gnu_cxx::select2nd;
 using std::make_pair;
 using namespace std;
-} //~namespace Util
+} //~namespace opencog
 
 #endif // WIN32!
 

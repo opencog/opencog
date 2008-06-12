@@ -25,14 +25,16 @@
 #include <Node.h>
 #include "CompositeTruthValue.h"
 #include "TLB.h"
-//#include "NMPrinter.h"
 #include "Link.h"
+
+using namespace opencog;
 
 #define VH1 VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *)1))
 #define VH2 VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *)2))
 
 class HandleEntryUTest :  public CxxTest::TestSuite
 {
+
 private:
 
 public:

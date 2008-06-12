@@ -49,83 +49,82 @@
 
 #include "RandGen.h"
 
-namespace Util {
+namespace opencog
+{
 
-class MT19937RandGen : public RandGen {
+class MT19937RandGen : public RandGen
+{
 
-    private: 
+private: 
 
-        /* Period parameters */  
-        static int  N;
-        static int  M;
-        static unsigned long MATRIX_A;   /* constant vector a */
-        static unsigned long UPPER_MASK; /* most significant w-r bits */
-        static unsigned long LOWER_MASK; /* least significant r bits */
+    /* Period parameters */  
+    static int  N;
+    static int  M;
+    static unsigned long MATRIX_A;   /* constant vector a */
+    static unsigned long UPPER_MASK; /* most significant w-r bits */
+    static unsigned long LOWER_MASK; /* least significant r bits */
 
-        unsigned long *mt; /* the array for the state vector  */
-        int mti; /* mti==N+1 means mt[N] is not initialized */
+    unsigned long *mt; /* the array for the state vector  */
+    int mti; /* mti==N+1 means mt[N] is not initialized */
 
-        /* creates the data structures */
-        void init();
+    /* creates the data structures */
+    void init();
 
-        /* initializes mt[N] with a seed */
-        void init_genrand(unsigned long s);
+    /* initializes mt[N] with a seed */
+    void init_genrand(unsigned long s);
 
-        /* initialize by an array with array-length */
-        /* init_key is the array for initializing keys */
-        /* key_length is its length */
-        void init_by_array(unsigned long init_key[], int key_length);
-        
-        /* generates a random number on [0,0xffffffff]-interval */
-        unsigned long genrand_int32(void);
+    /* initialize by an array with array-length */
+    /* init_key is the array for initializing keys */
+    /* key_length is its length */
+    void init_by_array(unsigned long init_key[], int key_length);
+    
+    /* generates a random number on [0,0xffffffff]-interval */
+    unsigned long genrand_int32(void);
 
-        /* generates a random number on [0,0x7fffffff]-interval */
-        long genrand_int31(void);
+    /* generates a random number on [0,0x7fffffff]-interval */
+    long genrand_int31(void);
 
-        /* generates a random number on [0,1]-real-interval */
-        double genrand_real1(void);
+    /* generates a random number on [0,1]-real-interval */
+    double genrand_real1(void);
 
-        /* generates a random number on [0,1)-real-interval */
-        double genrand_real2(void);
+    /* generates a random number on [0,1)-real-interval */
+    double genrand_real2(void);
 
-        /* generates a random number on (0,1)-real-interval */
-        double genrand_real3(void);
- 
-        /* generates a random number on [0,1) with 53-bit resolution*/
-        double genrand_res53(void);
+    /* generates a random number on (0,1)-real-interval */
+    double genrand_real3(void);
 
-    public: 
+    /* generates a random number on [0,1) with 53-bit resolution*/
+    double genrand_res53(void);
 
-	MT19937RandGen(unsigned long s);
+public: 
 
-	MT19937RandGen(unsigned long init_key[], int key_length);
+    MT19937RandGen(unsigned long s);
+    MT19937RandGen(unsigned long init_key[], int key_length);
+    ~MT19937RandGen();
 
-        ~MT19937RandGen();
+    // random int between 0 and max rand number.
+    int randint();
 
-        // random int between 0 and max rand number.
-        int randint();
+    //random float in [0,1]
+    float randfloat(); 
 
-        //random float in [0,1]
-        float randfloat(); 
+    //random double in [0,1]
+    double randdouble();
 
-        //random double in [0,1]
-        double randdouble();
-  
-        //random double in [0,1)
-        double randDoubleOneExcluded();
+    //random double in [0,1)
+    double randDoubleOneExcluded();
 
-        //random int in [0,n)
-        int randint(int n);
+    //random int in [0,n)
+    int randint(int n);
 
-        // return -1 or 1 randonly
-        int randPositiveNegative();
+    // return -1 or 1 randonly
+    int randPositiveNegative();
 
-        // Random int from a gaussian distribution. Neg numbers are clipped to 0
-        unsigned int pos_gaussian_rand(unsigned int std_dev, unsigned int mean);
+    // Random int from a gaussian distribution. Neg numbers are clipped to 0
+    unsigned int pos_gaussian_rand(unsigned int std_dev, unsigned int mean);
 
-        //random boolean
-        bool randbool();
-
+    //random boolean
+    bool randbool();
 };
 
 }

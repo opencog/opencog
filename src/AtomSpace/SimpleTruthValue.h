@@ -34,6 +34,9 @@
 #include "TruthValue.h"
 #include "utils.h"
 
+namespace opencog
+{
+
 class SimpleTruthValue : public TruthValue
 {
 
@@ -71,5 +74,7 @@ public:
     void setCount(float);
     void setConfidence(float);
 };
+
+} // namespace opencog
 
 #endif

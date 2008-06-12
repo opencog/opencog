@@ -17,6 +17,9 @@
 #include "Atom.h"
 #include "AtomTable.h"
 
+namespace opencog
+{
+
 class AtomStorage
 {
 	private:
@@ -73,5 +76,6 @@ class AtomStorage
 		void store(const AtomTable &);
 };
 
-#endif /* PERSITENT_ATOM_STORAGE_H_ */
+} // namespace opencog
 
+#endif /* PERSITENT_ATOM_STORAGE_H_ */

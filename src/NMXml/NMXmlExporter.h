@@ -29,6 +29,9 @@
 #include <HandleSet.h>
 #include "NMXmlParser.h"
 
+namespace opencog
+{
+
 /**
  * This class is used to export XML from a subset of Atoms.
  */
@@ -80,5 +83,7 @@ public:
     std::string toXML(HandleEntry *);
 
 };
+
+} // namespace opencog
 
 #endif //NMXMLEXPORTER_H

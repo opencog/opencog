@@ -25,7 +25,7 @@
 
 #include <ext/hash_set>
 
-namespace Util
+namespace opencog
 {
 using __gnu_cxx::hash_set;
 using __gnu_cxx::hash;

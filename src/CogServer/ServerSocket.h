@@ -56,7 +56,7 @@ private:
     // still exist, so that it can be called. The CBI class
     // exists entirely so that the callback remains instantiated
     // even if the socket is closed.
-class CBI : public CallBackInterface
+    class CBI : public CallBackInterface
     {
     private:
         ServerSocket *sock;
@@ -77,10 +77,12 @@ public:
     ServerSocket(ISocketHandler &handler);
 
     static void setMaster(SimpleNetworkServer *master);
+    void OnAccept();
     void OnDisconnect();
     void OnLine(const std::string&);
     void OnRawData(const char *, size_t);
 }; // class
+
 }  // namespace
 
 #endif

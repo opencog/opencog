@@ -24,7 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 //#pragma warning(disable : 4311)
 //#pragma warning(disable : 4312)
 
@@ -987,12 +986,12 @@ AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti
     return s;
 }
 
-Util::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
+opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
 {
     return maxSTI;
 }
 
-Util::recent_val<AttentionValue::sti_t>& AtomSpace::getMinSTI()
+opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMinSTI()
 {
     return minSTI;
 }

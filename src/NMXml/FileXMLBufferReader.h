@@ -28,6 +28,9 @@
 
 #include <stdio.h>
 
+namespace opencog
+{
+
 class FileXMLBufferReader : public XMLBufferReader
 {
 
@@ -58,5 +61,7 @@ private:
     char* filename;
     FILE* file;
 };
+
+} // namespace opencog
 
 #endif //_FILEXMLBUFFERREADER_H_

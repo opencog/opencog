@@ -29,6 +29,8 @@
 #include "exceptions.h"
 #include <math.h>
 
+using namespace opencog;
+
 #define NUM_TVS 3
 #define TV1_MEAN 0.25f
 #define TV1_COUNT 0.0f
@@ -266,6 +268,5 @@ public:
         TruthValue::DeleteAndSetDefaultTVIfPertinent(&tv);
         TS_ASSERT(tv == &(TruthValue::DEFAULT_TV()));
     }
-
 
 };

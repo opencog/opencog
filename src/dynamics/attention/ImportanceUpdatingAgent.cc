@@ -217,10 +217,10 @@ void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
     }
 }
 
-Util::RandGen* ImportanceUpdatingAgent::getRandGen()
+opencog::RandGen* ImportanceUpdatingAgent::getRandGen()
 {
     if (!rng) {
-        rng = new Util::MT19937RandGen(time(NULL));
+        rng = new opencog::MT19937RandGen(time(NULL));
     }
     return rng;
 }
@@ -229,7 +229,7 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
 {
     int expectedNum, actualNum;
     HandleEntry *h, *q;
-    Util::RandGen *rng;
+    opencog::RandGen *rng;
 
     rng = getRandGen();
 

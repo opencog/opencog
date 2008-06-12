@@ -57,7 +57,7 @@ private:
 
     void spreadAtomImportance(Handle h);
 
-    Util::recent_val<long> amountSpread;
+    opencog::recent_val<long> amountSpread;
 
 public:
 
@@ -131,4 +131,3 @@ struct ImportanceSpreadLTIThenTVAscendingSort {
 
 }; // namespace
 #endif // _IMPORTANCE_SPREADING_AGENT_H
-

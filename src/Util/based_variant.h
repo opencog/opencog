@@ -25,7 +25,7 @@
 
 #include <boost/variant.hpp>
 
-namespace Util
+namespace opencog
 {
 namespace detail {
 template<typename Base>
@@ -66,6 +66,6 @@ struct based_variant : public Variant {
       }*/
 };
 
-} //~namespace Util
+} //~namespace opencog
 
 #endif
