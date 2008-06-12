@@ -161,7 +161,7 @@ class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
 	    createSimpleGraph(server.getAtomSpace(), "import-update");
 
 	    printf("Running agent excluding links\n");
-	    agent->setUpdateLinks(false);
+	    agent->setUpdateLinksFlag(false);
 	    server.unitTestServerLoop(10);
 
 	    printf("Running agent excluding links, with noise\n");

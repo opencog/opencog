@@ -19,12 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * HebbianLearningAgent.h
- *
- * Simple Hebbian Learning, currently only updates existing Hebbian Links.
- */
-
 #ifndef _IMPORTANCE_SPREADING_AGENT_H
 #define _IMPORTANCE_SPREADING_AGENT_H
 
@@ -37,44 +31,72 @@
 #include <MindAgent.h>
 #include <AttentionValue.h>
 
-#define MA_DEFAULT_SPREAD_THRESHOLD 4
-#define MA_DEFAULT_SPREAD_MULTIPLIER 10.0f
-#define MA_DEFAULT_SPREAD_STIM 1
-
 namespace opencog
 {
 
+const int MA_DEFAULT_SPREAD_THRESHOLD = 4;
+const float MA_DEFAULT_SPREAD_MULTIPLIER = 10.0f;
+const int MA_DEFAULT_SPREAD_STIM = 1;
+
 class CogServer;
 
+/** Spreads short term importance along HebbianLinks.
+ *
+ * Currently spread along Symmetric and Inverse HebbianLinks.
+ *
+ * @todo Spread along asymmetric hebbian links too.
+ * @todo Optionally spread long term importance.
+ */
 class ImportanceSpreadingAgent : public MindAgent
 {
 
 private:
     AtomSpace* a;
 
+	//! Minimal amount of STI necessary for an atom to have before it spreads
+	//! STI.
     AttentionValue::sti_t spreadThreshold;
+
+	//! How much to multiply the HebbianLink TruthValue to convert to STI.
     float importanceSpreadingMultiplier;
 
+	/** Spread importance for an atom.
+	 *
+	 * @param h The handle for the atom to spread importance for.
+	 */
     void spreadAtomImportance(Handle h);
 
+	//! Total amount spread during recent runs.
     opencog::recent_val<long> amountSpread;
+
+    //! Spread importance along Hebbian links.
+    void spreadImportance();
 
 public:
 
     ImportanceSpreadingAgent();
     virtual ~ImportanceSpreadingAgent();
     virtual void run(CogServer *server);
+
+	/** Set minimal amount of STI necessary for an atom to have before it
+	 * spreads STI.
+	 *
+	 * @param t the threshold.
+	 */
     void setSpreadThreshold(AttentionValue::sti_t t) {
         spreadThreshold = t;
     };
+
+	/** Set the multiplier for converting the HebbianLink TruthValue to STI.
+	 *
+	 * If multiplier is zero, then \b all STI above the threshold is evenly
+	 * distributed.
+	 *
+	 * @param m the multiplier.
+	 */
     void setImportanceSpreadingMultiplier(float m) {
         importanceSpreadingMultiplier = m;
     };
-
-    /**
-     *
-     */
-    void spreadImportance();
 
 }; // class
 
@@ -119,8 +141,8 @@ struct ImportanceSpreadLTIThenTVAscendingSort {
         lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
         lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
 
-        tv1 = fabs(TLB::getAtom(h1)->getTruthValue().getMean());
-        tv2 = fabs(TLB::getAtom(h2)->getTruthValue().getMean());
+        tv1 = TLB::getAtom(h1)->getTruthValue().getMean();
+        tv2 = TLB::getAtom(h2)->getTruthValue().getMean();
 
         if (lti1 != lti2) return lti1 < lti2;
 

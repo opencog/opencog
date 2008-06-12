@@ -44,8 +44,7 @@
 #define HDEMO_DEFAULT_WIDTH 3
 #define HDEMO_DEFAULT_HEIGHT 3
 #define HDEMO_DEFAULT_LINKS 15
-#define HDEMO_DEFAULT_PERCEPT_STIM 5
-#define HDEMO_DEFAULT_IMPRINT_STIM 10
+#define HDEMO_DEFAULT_PATTERN_STIM 1000
 
 namespace opencog
 {
@@ -65,10 +64,8 @@ private:
     opencog::RandGen* rng;
 
 public:
-    // Amount of stimulus to apply when retrieving a pattern
-    stim_t perceptStimUnit;
-    // Amount of stimulus to apply when imprinting a pattern
-    stim_t imprintStimUnit;
+    // Amount of stimulus to apply across a pattern
+    stim_t patternStimulus;
 
     opencog::ImportanceUpdatingAgent *importUpdateAgent;
     opencog::HebbianLearningAgent *hebLearnAgent;
@@ -142,7 +139,7 @@ public:
     /**
      * Reset STI of all nodes to zero.
      */
-    void resetNodes();
+    void resetNodes(bool toDefault=false);
     void imprintPattern(Pattern pattern, int cycles);
 
     void doForgetting(float proportion);

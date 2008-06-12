@@ -991,3 +991,8 @@ opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
     return maxSTI;
 }
 
+opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMinSTI()
+{
+    return minSTI;
+}
+
