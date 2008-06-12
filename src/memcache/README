@@ -36,9 +36,9 @@ a slash, and then a named field, appropriate for that atom.
    Handle/"name"         Node string name (absent for links)   string
    Handle/"stv/mean"     simple truth value mean               double
    Handle/"stv/count"    simple truth value count              double
-	Handle/"edges/arity"  arity, for links                      int
-	Handle/"edges/0"      Handle of 0'th outgoing link          int
-	Handle/"edges/1"      Handle of 1'th outgoing link          int
+   Handle/"edges/arity"  arity, for links                      int
+   Handle/"edges/0"      Handle of 0'th outgoing link          int
+   Handle/"edges/1"      Handle of 1'th outgoing link          int
    
 At this time, ints are assumed to be 32-bit ints. Memcache stores the
 lengths of both keys and values, this should be adequeate to easily 
