@@ -22,8 +22,24 @@
 
 using namespace opencog;
 
-AtomCache::AtomCache(const std::string dbname, int portno)
+AtomCache::AtomCache(const std::string server, int portno)
 {
+	memcached_return rc;
+	mc = memcached_create(NULL);
+
+	memcached_server_st *servers;
+	const char *servername = server.c_str();
+	servers = memcached_server_list_append(NULL, (char *) servername, portno, &rc);
+	
+	connect_status = memcached_server_push(mc, servers);
+
+	memcached_server_list_free(servers);
+
+}
+
+AtomCache::~AtomCache()
+{
+	memcached_free(mc);
 }
 
 #endif /* HAVE_LIBMEMCACHED */

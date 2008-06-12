@@ -25,10 +25,14 @@ namespace opencog
 
 class AtomCache
 {
+	private:
+		memcached_st *mc;
+		memcached_return connect_status;
 
 	public:
-		AtomCache(const std::string dbname, int portno);
+		AtomCache(const std::string server, int portno);
 		~AtomCache();
+
 
 		void storeAtom(Atom *);
 		Atom * getAtom(Handle);
