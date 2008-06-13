@@ -45,10 +45,11 @@ public:
         TS_ASSERT(config().get_double("SERVER_PORT") == 17001.0);
         TS_ASSERT(config().get_bool("LOG_TO_STDOUT"));
         TS_ASSERT(config().get_int("IDLE_CYCLES_PER_TICK") == 3);
-        TS_ASSERT(config().get_int("STARTING_STI_FUNDS") == 1000);
-        TS_ASSERT(config().get_int("STARTING_LTI_FUNDS") == 1000);
-        TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 200);
-        TS_ASSERT(config().get_int("LTI_FUNDS_BUFFER") == 200);
+        TS_ASSERT(config().get_int("STARTING_STI_FUNDS") == 10000);
+        TS_ASSERT(config().get_int("STARTING_LTI_FUNDS") == 10000);
+        TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 10000);
+        TS_ASSERT(config().get_int("LTI_FUNDS_BUFFER") == 10000);
+        TS_ASSERT(config().get_int("MIN_STI") == -400);
     }
 
     void testLoadFromFile() {
@@ -73,8 +74,8 @@ public:
         out.close();
 
         // check default parameters before and after loading file
-        TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 200);
-        TS_ASSERT(config().get_int("LTI_FUNDS_BUFFER") == 200);
+        TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 10000);
+        TS_ASSERT(config().get_int("LTI_FUNDS_BUFFER") == 10000);
         config().load(config_file_name);
         TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 200);
         TS_ASSERT(config().get_int("LTI_FUNDS_BUFFER") == 10);
