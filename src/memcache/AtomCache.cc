@@ -124,6 +124,8 @@ Atom * AtomCache::getAtom(Handle h)
 	// Does the atom exist already ?
 	Atom *atom = TLB::getAtom(h);
 
+// for sniff test only
+atom = NULL;
 	if (NULL == atom)
 	{
 		// Get the atom type.
@@ -146,6 +148,22 @@ Atom * AtomCache::getAtom(Handle h)
 		}
 		else
 		{
+			// Get the outvec.
+			strcpy(p, "edges");
+			val = memcached_get(mc, keybuff, rootlen+5, &vlen, &flags, &rc);
+			NCHECK_RC(rc, val);
+
+			int arity = atoi(val+1);
+			std::vector<Handle> outvec;
+			outvec.resize(arity);
+
+			char *comma = strchr(val+2, ',');
+			for (int i=0; i<arity; i++)
+			{
+				Handle ho = (Handle) strtoul(comma+1, &comma, 10);
+				outvec.at(i) = ho;
+			}
+			atom = new Link(atype, outvec);
 		}
 	}
 	return atom;
