@@ -14,6 +14,7 @@ FIND_PACKAGE(CSockets REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(IODBC)
+FIND_PACKAGE(LibMemCache)
 FIND_PACKAGE(Guile)
 
 # add compiler definitions associated with the optional dependencies

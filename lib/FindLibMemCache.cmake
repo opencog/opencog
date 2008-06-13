@@ -1,0 +1,42 @@
+# - Try to find the XMLParse library; Once done this will define
+#
+#  LIBMEMCACHE_FOUND - system has the OpenSSL library
+#  LIBMEMCACHE_INCLUDE_DIR - the OpenSSL include directory
+#  LIBMEMCACHE_LIBRARIES - The libraries needed to use OpenSSL
+
+# Copyright (c) 2008, OpenCog.org (http://opencog.org)
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+
+# Look for the header file
+FIND_PATH(LIBMEMCACHE_INCLUDE_DIR memcache.h /usr/include /usr/include/Sockets /usr/local/include /usr/local/include/Sockets)
+#MARK_AS_ADVANCED(LIBMEMCACHE_INCLUDE_DIR)
+
+# Look for the library
+FIND_LIBRARY(LIBMEMCACHE_LIBRARY NAMES Sockets PATH /usr/lib /usr/lib/Sockets /usr/local/lib /usr/local/lib/Sockets)
+#MARK_AS_ADVANCED(LIBMEMCACHE_LIBRARY)
+
+# Copy the results to the output variables.
+IF(LIBMEMCACHE_INCLUDE_DIR AND LIBMEMCACHE_LIBRARY)
+  SET(LIBMEMCACHE_FOUND 1)
+  SET(LIBMEMCACHE_LIBRARIES ${LIBMEMCACHE_LIBRARY})
+  SET(LIBMEMCACHE_INCLUDE_DIRS ${LIBMEMCACHE_INCLUDE_DIR})
+ELSE(LIBMEMCACHE_INCLUDE_DIR AND LIBMEMCACHE_LIBRARY)
+  SET(LIBMEMCACHE_FOUND 0)
+  SET(LIBMEMCACHE_LIBRARIES)
+  SET(LIBMEMCACHE_INCLUDE_DIRS)
+ENDIF(LIBMEMCACHE_INCLUDE_DIR AND LIBMEMCACHE_LIBRARY)
+
+# Report the results.
+IF(NOT LIBMEMCACHE_FOUND)
+  SET(LIBMEMCACHE_DIR_MESSAGE
+    "LibMemCache was not found. Make sure LIBMEMCACHE_LIBRARY and LIBMEMCACHE_INCLUDE_DIR are set.")
+  IF(NOT LIBMEMCACHE_FIND_QUIETLY)
+    MESSAGE(STATUS "${LIBMEMCACHE_DIR_MESSAGE}")
+  ELSE(NOT LIBMEMCACHE_FIND_QUIETLY)
+    IF(LIBMEMCACHE_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "${LIBMEMCACHE_DIR_MESSAGE}")
+    ENDIF(LIBMEMCACHE_FIND_REQUIRED)
+  ENDIF(NOT LIBMEMCACHE_FIND_QUIETLY)
+ENDIF(NOT LIBMEMCACHE_FOUND)
