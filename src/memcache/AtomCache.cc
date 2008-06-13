@@ -22,7 +22,9 @@
 #include "ClassServer.h"
 #include "Node.h"
 #include "Link.h"
+#include "SimpleTruthValue.h"
 #include "TLB.h"
+#include "TruthValue.h"
 
 using namespace opencog;
 
@@ -44,6 +46,8 @@ AtomCache::~AtomCache()
 {
 	memcached_free(mc);
 }
+
+/* ================================================================== */
 
 #define CHECK_RC(rc) \
 	if(MEMCACHED_SUCCESS != rc) \
@@ -104,7 +108,23 @@ void AtomCache::storeAtom(Atom *atom)
 		rc = memcached_set (mc, keybuff, rootlen+5, valbuff, vlen, 0, 0);
 		CHECK_RC(rc);
 	}
+
+	// Store the truth value
+	const TruthValue &tv = atom->getTruthValue();
+	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
+	if (NULL == stv)
+	{
+		fprintf(stderr, "Error: non-simple truth values are not handled\n");
+		return;
+	}
+	
+	vlen = snprintf(valbuff, VBSIZE, "(%20.16g, %20.16g)", tv.getMean(), tv.getCount());
+	strcpy(p, "stv");
+	rc = memcached_set (mc, keybuff, rootlen+3, valbuff, vlen, 0, 0);
+	CHECK_RC(rc);
 }
+
+/* ================================================================== */
 
 #define NCHECK_RC(rc, val) \
 	if(MEMCACHED_SUCCESS != rc) \
@@ -169,6 +189,8 @@ atom = NULL;
 	return atom;
 }
 
+/* ================================================================== */
+
 void AtomCache::load(AtomTable &at)
 {
 }
@@ -179,3 +201,4 @@ void AtomCache::store(const AtomTable &at)
 
 #endif /* HAVE_LIBMEMCACHED */
 
+/* ======================= END OF FILE ============================== */
