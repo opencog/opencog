@@ -24,18 +24,22 @@
 
 #include <math.h>
 #include <time.h>
+#include <algorithm>
 
 namespace opencog
 {
 
 ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 {
-    /* init starting wages/rents. these should quickly change and reach
-     * stable cycles */
+    // init starting wages/rents. these should quickly change and reach
+    // stable values, which adapt to the system dynamics
     STIAtomRent = DEFAULT_ATOM_STI_RENT;
     LTIAtomRent = DEFAULT_ATOM_LTI_RENT;
     STIAtomWage = DEFAULT_ATOM_STI_WAGE;
     LTIAtomWage = DEFAULT_ATOM_LTI_WAGE;
+
+	rentType = RENT_LOG; //config().get_int("RENT_TYPE");
+	amnesty = 5; //config().get_int("RENT_AMNESTY");
 
     updateLinks = true;
 
@@ -78,10 +82,12 @@ ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
 
 void ImportanceUpdatingAgent::init(CogServer *server)
 {
-    /* Not sure exactly what initial estimates should be made... */
+    // Not sure exactly what initial estimates should be made...
     log->fine("ImportanceUpdatingAgent::init");
     initialEstimateMade = true;
 
+	// Perhaps initiate recent_val members to initial
+	// size before the mind process begins.
 }
 
 void ImportanceUpdatingAgent::setLogger(Logger* log)
@@ -111,6 +117,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     AtomSpace* a = server->getAtomSpace();
     HandleEntry *h, *q;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
+    AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
 
     log->fine("=========== ImportanceUpdating::run =======");
     /* init iterative variables, that can't be calculated in
@@ -144,16 +151,25 @@ void ImportanceUpdatingAgent::run(CogServer *server)
         enforceLTICap(a, q->handle);
 
         // Greater than max sti seen?
-        if (a->getSTI(q->handle) > maxSTISeen)
+        if (a->getSTI(q->handle) > maxSTISeen) {
             maxSTISeen = a->getSTI(q->handle);
+		} else if (a->getSTI(q->handle) < minSTISeen) {
+            minSTISeen = a->getSTI(q->handle);
+		}
 
         q = q->next;
     }
     delete h;
 
-    /* Update recentMaxSTI */
+    // Update AtomSpace recent maxSTI and recent minSTI 
+	if (minSTISeen > maxSTISeen) {
+		// if all Atoms have the same STI this will occur
+		minSTISeen = maxSTISeen;
+	}
     a->getMaxSTI().update( maxSTISeen );
+    a->getMinSTI().update( minSTISeen );
     log->debug("Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
+    log->debug("Min STI seen is %d, recentMinSTI is now %f", minSTISeen, a->getMinSTI().recent);
 
     /* Check AtomSpace funds are within bounds */
     checkAtomSpaceFunds(a);
@@ -185,14 +201,17 @@ bool ImportanceUpdatingAgent::inRange(long val, long range[2]) const
     return false;
 }
 
-void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
+bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
+	bool adjustmentMade = false;
+
     log->debug("Checking STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
                acceptableLobeSTIRange[0], acceptableLobeSTIRange[1]);
     if (!inRange(a->getSTIFunds(), acceptableLobeSTIRange)) {
         log->debug("Lobe STI funds out of bounds, re-adjusting.");
         lobeSTIOutOfBounds = true;
         adjustSTIFunds(a);
+		adjustmentMade = true;
     }
 
     log->debug("Checking LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
@@ -200,7 +219,9 @@ void ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
     if (!inRange(a->getLTIFunds(), acceptableLobeLTIRange)) {
         log->debug("Lobe LTI funds out of bounds, re-adjusting.");
         adjustLTIFunds(a);
+		adjustmentMade = true;
     }
+	return adjustmentMade;
 }
 
 opencog::RandGen* ImportanceUpdatingAgent::getRandGen()
@@ -317,17 +338,11 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
     p = getRandGen()->randDoubleOneExcluded();
     prob = sum = exp(-mean);
 
-    // No longer happens due to truncating mean above
-    //if (sum == 0.0f) {
-// log->warn("Mean (%.4f) for calculating tax using Poisson is too large, using exact value instead.", mean);
-// count = (int) mean;
-//    } else {
     while (p > sum) {
         count++;
         prob = (prob * mean) / count;
         sum += prob;
     }
-    //}
     count = count + base;
 
     if (negative) count = -count;
@@ -402,20 +417,58 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
 {
     AttentionValue::sti_t current, stiRentCharged, exchangeAmount;
     stim_t s;
-    AttentionValue::sti_t amnesty = 5;
 
     current = a->getSTI(h);
-    /* collect if STI > a->attentionalFocusBoundary */
-    if (current > a->getAttentionalFocusBoundary() + amnesty)
-        stiRentCharged = STIAtomRent;
-    else
-        stiRentCharged = 0;
+	stiRentCharged = calculateSTIRent(a, current);
 
     s = a->getAtomStimulus(h);
     exchangeAmount = - stiRentCharged + (STIAtomWage * s);
     a->setSTI(h, current + exchangeAmount);
 
-    log->fine("Atom %s stim = %d, STI old = %d, new = %d", a->getName(h).c_str(), s, current, a->getSTI(h));
+    log->fine("Atom %s stim = %d, STI old = %d, new = %d, rent = %d", a->getName(h).c_str(), s, current, a->getSTI(h), stiRentCharged);
+
+}
+
+AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c)
+{
+    AttentionValue::sti_t stiRentCharged = 0;
+
+	switch (rentType) {
+		case RENT_FLAT:
+			// Charge a flat rent to all atoms with
+			// STI > AF boundary + amnesty
+			if (c > a->getAttentionalFocusBoundary() + amnesty)
+				stiRentCharged = STIAtomRent;
+			break;
+		case RENT_EXP:
+			// ipython: plot(x, [max(0,i) for i in (exp(x)-(1-y))/(1+y)])
+			if (c > a->getAttentionalFocusBoundary() + amnesty) {
+				double y = 0.0;
+				double multiplier = 0.0;
+				double x;
+				x = c - a->getAttentionalFocusBoundary();
+				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
+				multiplier = max(0.0, (exp(x) - (1.0 - y))/(1.0 + y));
+				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
+			}
+			break;
+		case RENT_LOG:
+			// max(0,i) where i = log((x-(amnesty%-0.05))*20)/2])
+			// ipython: plot(x, [max(0,i) for i in log((x)*20)/2])
+			if (c > a->getAttentionalFocusBoundary()) {
+				double percentAmnesty = 0.05;
+				double multiplier = 0.0;
+				double x;
+				percentAmnesty = percentAmnesty-0.05;
+				x = c - a->getAttentionalFocusBoundary();
+				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
+				if (percentAmnesty < 0) percentAmnesty = 0;
+				multiplier = max(0.0, ::log((x - percentAmnesty) * 20) / 2.0);
+				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
+			}
+			break;
+	}
+	return stiRentCharged;
 
 }
 
@@ -512,5 +565,15 @@ string ImportanceUpdatingAgent::toString()
     return s.str();
 
 }
+
+//AttentionValue::sti_t ImportanceUpdatingAgent::getSTIAtomWage()
+//{
+//	return STIAtomWage;
+//}
+
+//AttentionValue::lti_t ImportanceUpdatingAgent::getLTIAtomWage()
+//{
+//	return LTIAtomWage;
+//}
 
 } // Namespace opencog

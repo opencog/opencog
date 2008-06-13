@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <fstream>
+#include <iomanip>
 
 #include "HopfieldServer.h"
 
@@ -127,13 +128,13 @@ void testHopfieldNetworkInterleave()
                 Pattern rPattern = hServer.retrievePattern(c, o->retrieveCycles);
                 rSim = patterns[j].hammingSimilarity(rPattern);
                 cycleResults.push_back(rSim);
-                cout << rSim << "(" << rSim - patterns[j].hammingSimilarity(c) << ")" << ", ";
+                cout << setw(4) << rSim << "(" << setw(5) << rSim - patterns[j].hammingSimilarity(c) << ")" << ", ";
                 if (o->showMatrixFlag) {
                     toPrint.push_back(rPattern);
                 }
             } else {
                 cycleResults.push_back(HDEMO_NORESULT);
-                cout << "-" << ", ";
+                cout << setw(11) << "-" << ", ";
             }
 
         }

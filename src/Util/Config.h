@@ -38,10 +38,10 @@ static const std::string DEFAULT_CONFIG[] = {
     "LOG_TO_STDOUT",              "true",
     "SERVER_CYCLE_DURATION",      "100",     // in milliseconds
     "IDLE_CYCLES_PER_TICK",       "3",
-    "STARTING_STI_FUNDS",         "1000",
-    "STARTING_LTI_FUNDS",         "1000",
-    "STI_FUNDS_BUFFER",           "200",
-    "LTI_FUNDS_BUFFER",           "200",
+    "STARTING_STI_FUNDS",         "10000",
+    "STARTING_LTI_FUNDS",         "10000",
+    "STI_FUNDS_BUFFER",           "10000",
+    "LTI_FUNDS_BUFFER",           "10000",
     "MIN_STI",                    "-400",
     "",                           ""
 };

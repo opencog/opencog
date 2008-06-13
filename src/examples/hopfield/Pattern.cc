@@ -171,3 +171,15 @@ std::vector< Pattern > Pattern::loadPatterns( std::string fn, int size)
     return patterns;
 
 }
+
+int Pattern::activity()
+{
+    Pattern::iterator p;
+	int total = 0;
+
+    for (p = begin(); p != end(); p++) {
+		total += *p;
+    }
+    return total;
+
+}
