@@ -11,7 +11,7 @@
 #include <memcached.h>
 #include <stdio.h>
 
-int main ()
+int main (int argc, char *argv[])
 {
 	memcached_return rc;
 	memcached_st *mc;
@@ -53,4 +53,6 @@ int main ()
 
 	return 0;
 }
+#else /* HAVE_LIBMEMCACHED */
+int main (int argc, char * argv[]) { return 0; }
 #endif /* HAVE_LIBMEMCACHED */
