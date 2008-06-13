@@ -19,6 +19,8 @@
 #include "Atom.h"
 #include "AtomTable.h"
 #include "AtomCache.h"
+#include "Node.h"
+#include "Link.h"
 #include "TLB.h"
 
 using namespace opencog;
@@ -61,17 +63,45 @@ void AtomCache::storeAtom(Atom *atom)
 	char *p = &keybuff[rootlen];
 
 	// The buffer for values.
-	char valbuff[KBSIZE];
+#define VBSIZE 1050
+	char valbuff[VBSIZE];
 
 	// Get the atom type.
 	Type t = atom->getType();
 	strcpy(p, "type");
-	int vlen = snprintf(valbuff, KBSIZE, "%d", t);
+	int vlen = snprintf(valbuff, VBSIZE, "%d", t);
 
 	rc = memcached_set (mc, keybuff, rootlen+4, valbuff, vlen, 0, 0);
 	CHECK_RC(rc);
 
-	
+	// If a node, store the name
+	Node *n = dynamic_cast<Node *>(atom);
+	if (n)
+	{
+		strcpy(p, "name");
+		const char *name = n->getName().c_str();
+		vlen = n->getName().size();
+		rc = memcached_set (mc, keybuff, rootlen+4, name, vlen, 0, 0);
+		CHECK_RC(rc);
+	}
+	else
+	{
+		// Store the outgoing set
+		Link *l = dynamic_cast<Link *>(atom);
+		int arity = l->getArity();
+		vlen = snprintf(valbuff, VBSIZE, "(%d", arity);
+
+		std::vector<Handle> out = l->getOutgoingSet();
+		for (int i=0; i<arity; i++)
+		{
+			vlen += snprintf(valbuff+vlen, VBSIZE-vlen, ", %lu", out[i]);
+		}
+
+		vlen += snprintf(valbuff+vlen, VBSIZE-vlen, ")");
+		strcpy(p, "edges");
+		rc = memcached_set (mc, keybuff, rootlen+5, valbuff, vlen, 0, 0);
+		CHECK_RC(rc);
+	}
 }
 
 Atom * AtomCache::getAtom(Handle h)
