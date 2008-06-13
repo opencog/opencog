@@ -18,9 +18,20 @@ ADD_EXECUTABLE(sniff
 	sniff.cc
 )
 
+ADD_EXECUTABLE(sniff2
+	sniff2.cc
+)
+
 TARGET_LINK_LIBRARIES(cachedb memcached)
 
 TARGET_LINK_LIBRARIES(sniff
+	AtomSpace
+	${LIBMEMCACHED_LIBRARIES}
+	memcached
+)
+
+TARGET_LINK_LIBRARIES(sniff2
+	cachedb
 	AtomSpace
 	${LIBMEMCACHED_LIBRARIES}
 	memcached

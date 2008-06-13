@@ -16,6 +16,7 @@
 #define MEMCACHE_ATOM_STORAGE_H_
 
 #include <string>
+#include <memcached.h>
 
 #include "Atom.h"
 #include "AtomTable.h"
