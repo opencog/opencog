@@ -117,7 +117,7 @@ void AtomCache::storeAtom(Atom *atom)
 		fprintf(stderr, "Error: non-simple truth values are not handled\n");
 		return;
 	}
-	
+
 	vlen = snprintf(valbuff, VBSIZE, "(%20.16g, %20.16g)", tv.getMean(), tv.getCount());
 	strcpy(p, "stv");
 	rc = memcached_set (mc, keybuff, rootlen+3, valbuff, vlen, 0, 0);
@@ -136,7 +136,11 @@ void AtomCache::storeAtom(Atom *atom)
 
 Atom * AtomCache::getAtom(Handle h)
 {
+	size_t vlen;
+	uint32_t flags;
 	memcached_return rc;
+	char * val;
+
 	char keybuff[KBSIZE];
 	int rootlen = snprintf(keybuff, KBSIZE, "%lu/", h);
 	char *p = &keybuff[rootlen];
@@ -144,15 +148,11 @@ Atom * AtomCache::getAtom(Handle h)
 	// Does the atom exist already ?
 	Atom *atom = TLB::getAtom(h);
 
-// for sniff test only
-atom = NULL;
 	if (NULL == atom)
 	{
 		// Get the atom type.
 		strcpy(p, "type");
-		size_t vlen;
-		uint32_t flags;
-		char *val = memcached_get(mc, keybuff, rootlen+4, &vlen, &flags, &rc);
+		val = memcached_get(mc, keybuff, rootlen+4, &vlen, &flags, &rc);
 		NCHECK_RC(rc, val);
 		int atype = atoi(val);
 		free(val);
@@ -186,6 +186,26 @@ atom = NULL;
 			atom = new Link(atype, outvec);
 		}
 	}
+
+	// Fetch the truth value
+	const TruthValue &tv = atom->getTruthValue();
+	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
+	if (NULL == stv)
+	{
+		fprintf(stderr, "Error: non-simple truth values are not handled\n");
+		return atom;
+	}
+
+	strcpy(p, "stv");
+	val = memcached_get(mc, keybuff, rootlen+3, &vlen, &flags, &rc);
+	NCHECK_RC(rc, val);
+
+	double mean = atof(val+1);
+	char *comma = strchr(val+2, ',');
+	double count = atof(comma+1);
+	SimpleTruthValue nstv(mean,count);
+	atom->setTruthValue(nstv);
+
 	return atom;
 }
 
