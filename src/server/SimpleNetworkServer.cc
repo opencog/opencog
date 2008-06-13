@@ -164,7 +164,7 @@ void SimpleNetworkServer::parseCommandLine(const std::string &line,
         std::string &command,
         std::queue<std::string> &args)
 {
-    size_t pos1, pos2;
+    std::string::size_type pos1, pos2;
 
     pos1 = line.find(' ', 0);
     if (pos1 == line.npos) {

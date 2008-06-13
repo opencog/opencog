@@ -71,13 +71,13 @@ private:
     std::string delimiter;
 
     // start/end position pointers
-    size_t start;
-    size_t end;
+    std::string::size_type start;
+    std::string::size_type end;
 
     /**
      * Inform the delimiter size
      */
-    unsigned int delimiterSize();
+    std::string::size_type delimiterSize();
 
 }; // class
 }  // namespace

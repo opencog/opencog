@@ -107,7 +107,7 @@ const std::string StringTokenizer::nextToken()
     return str.substr(start, end - start);
 }
 
-unsigned int StringTokenizer::delimiterSize()
+std::string::size_type StringTokenizer::delimiterSize()
 {
     return delimiter.size();
 }

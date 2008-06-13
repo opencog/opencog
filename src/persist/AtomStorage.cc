@@ -469,7 +469,7 @@ int AtomStorage::height(Atom *atom)
 
 void escape_single_quotes(std::string &str)
 {
-	size_t pos = 0;
+	std::string::size_type pos = 0;
 	pos = str.find ('\'', pos);
 	while (pos != std::string::npos)
 	{

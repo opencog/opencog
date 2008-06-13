@@ -81,7 +81,7 @@ void Config::load(const char* filename)
     unsigned int line_number = 0;
 
     while (++line_number, fin.good() && getline(fin, line)) {
-        size_t idx;
+        string::size_type idx;
         // find comment and discard the rest of the line
         if ((idx = line.find('#')) != string::npos) {
             line.replace(idx, line.size() - idx, "");

@@ -81,7 +81,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	foreach_word_instance(hb, &MihalceaEdge::look_at_word, this);
 
 #ifdef DEBUG
-	printf ("========================= start sent pair (%d x %d) words\n",
+	printf ("========================= start sent pair (%lu x %lu) words\n",
 	        (int) pa_words.size(), (int) words.size());
 #endif
 	// At this point, "pa_words" contains all of the relex-participating
