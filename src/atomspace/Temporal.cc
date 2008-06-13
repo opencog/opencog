@@ -37,8 +37,8 @@ std::ostream& operator<<(std::ostream& out, const Temporal& t)
 // Values of A, B and NORMAL for the UNDEFINED_TEMPORAL Temporal instance
 // These values should not compose a valid Temporal, btw.
 // In other words, if someone pass these values for a Temporal constructor it will throw an exception.
-#define UNDEFINED_A ULONG_MAX
-#define UNDEFINED_B ULONG_MAX
+#define UNDEFINED_A UINT_MAX
+#define UNDEFINED_B UINT_MAX
 #define UNDEFINED_NORMAL true
 
 // USED TO SEEK MEMORY LEAK
@@ -57,10 +57,7 @@ void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (Invali
             throw InvalidParamException(TRACE_INFO,
                                         "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
         }
-        unsigned long sum = a + b;
-        if (sum < a || sum < b) {
-            // on both 32 and 64 bit machines, the overflow wraps
-            // and so the sum will be smaller than at least a or b
+        if (sum > (unsigned long long) UINT_MAX) {
             throw InvalidParamException(TRACE_INFO,
                                         "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
         }
