@@ -17,8 +17,9 @@
 #include <memcached.h>
 
 #include "Atom.h"
-#include "AtomTable.h"
 #include "AtomCache.h"
+#include "AtomTable.h"
+#include "ClassServer.h"
 #include "Node.h"
 #include "Link.h"
 #include "TLB.h"
@@ -48,6 +49,7 @@ AtomCache::~AtomCache()
 	if(MEMCACHED_SUCCESS != rc) \
 	{ \
 		fprintf(stderr, "Error: memcachedb: %s\n", memcached_strerror(mc, rc)); \
+		return; \
 	}
 
 void AtomCache::storeAtom(Atom *atom)
@@ -104,9 +106,49 @@ void AtomCache::storeAtom(Atom *atom)
 	}
 }
 
+#define NCHECK_RC(rc, val) \
+	if(MEMCACHED_SUCCESS != rc) \
+	{ \
+		fprintf(stderr, "Error: memcachedb: %s\n", memcached_strerror(mc, rc)); \
+		if (val) free(val); \
+		return atom; \
+	}
+
 Atom * AtomCache::getAtom(Handle h)
 {
-	return NULL;
+	memcached_return rc;
+	char keybuff[KBSIZE];
+	int rootlen = snprintf(keybuff, KBSIZE, "%lu/", h);
+	char *p = &keybuff[rootlen];
+
+	// Does the atom exist already ?
+	Atom *atom = TLB::getAtom(h);
+
+	if (NULL == atom)
+	{
+		// Get the atom type.
+		strcpy(p, "type");
+		size_t vlen;
+		uint32_t flags;
+		char *val = memcached_get(mc, keybuff, rootlen+4, &vlen, &flags, &rc);
+		NCHECK_RC(rc, val);
+		int atype = atoi(val);
+		free(val);
+	
+		if (ClassServer::isAssignableFrom(NODE, atype))
+		{
+			// Get the atom name
+			strcpy(p, "name");
+			val = memcached_get(mc, keybuff, rootlen+4, &vlen, &flags, &rc);
+			NCHECK_RC(rc, val);
+			atom = new Node(atype, val);
+			free(val);
+		}
+		else
+		{
+		}
+	}
+	return atom;
 }
 
 void AtomCache::load(AtomTable &at)

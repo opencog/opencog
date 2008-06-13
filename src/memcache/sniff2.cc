@@ -1,6 +1,7 @@
 /*
  * FUNCTION:
- * Sniff test. Low-brow test, to see if basic atom storage is working.
+ * Sniff test. Low-brow unit test, to see if basic atom storage is working.
+ * The code here is very nearly identical to that in src/persist/sniff.cc
  *
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
