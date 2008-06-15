@@ -40,6 +40,8 @@ AtomCache::AtomCache(const std::string server, int portno)
 	connect_status = memcached_server_push(mc, servers);
 
 	memcached_server_list_free(servers);
+
+	store_count = 0;
 }
 
 AtomCache::~AtomCache()
@@ -215,8 +217,20 @@ void AtomCache::load(AtomTable &at)
 {
 }
 
-void AtomCache::store(const AtomTable &at)
+bool AtomCache::store_cb(Atom *atom)
 {
+	storeAtom(atom);
+	store_count ++;
+	if (store_count%1000 == 0)
+	{
+		fprintf(stderr, "\tStored %lu atoms.\n", store_count);
+	}
+	return false;
+}
+
+void AtomCache::store(const AtomTable &table)
+{
+	table.foreach_atom(&AtomCache::store_cb, this);
 }
 
 #endif /* HAVE_LIBMEMCACHED */

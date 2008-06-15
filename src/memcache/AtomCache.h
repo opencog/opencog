@@ -30,6 +30,9 @@ class AtomCache
 		memcached_st *mc;
 		memcached_return connect_status;
 
+		unsigned long store_count;
+		bool store_cb(Atom *);
+
 	public:
 		AtomCache(const std::string server, int portno);
 		~AtomCache();
