@@ -109,7 +109,7 @@ std::string CommandRequestProcessor::help(std::string topic)
     reply +=
         "Available commands:\n"
 #ifdef HAVE_LIBMEMCACHED
-        "    cache-open <hostname> <port\n"
+        "    cache-open <hostname> <port>\n"
         "                       -- open connection to memcachedb server\n"
         "    cache-close        -- close connection to memcachedb server\n"
         "    cache-store        -- store all server data to memcachedb\n"
