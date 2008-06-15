@@ -11,11 +11,26 @@ which currently has underwhelming performance.
 
 Actually, its a pre-proptotype, nothing works yet.
 
+Memcache overview
+-----------------
+Memcache was originally developed as a system for high-speed caching of 
+precomputed data used in high-volume webserver applications. It consists
+of three parts: memcached, a daemon that performs the actual caching,
+the memcache protocol, a network protocol of rather simple caching
+commands (get, set, delete, etc.) and various libraries that emit the
+network protocol to talk to the caching daemons.  There are two
+libraries for C/C++: libmemcache (deprecated) and libmemcached. 
+There are also client-side libraries for other programming langauges.
+
+Persistence is obtained via memcachedb, a daemon which responds to the 
+memcache protocol, and uses the Sleepycat/Berkeley DB to provide 
+persistant storage for the cached objects.
+
 Installation
 ------------
 Need to install "memcachedb". This is a very simple database server that
 talks the memcached protocol. The "start-db-server.sh" is a simple shell
-to start the server. Edit this script as nmeeded. In particular, change
+to start the server. Edit this script as needed. In particular, change
 the database name, as needed.
 
 Testing the install
@@ -45,4 +60,19 @@ lengths of both keys and values, this should be adequeate to easily
 expand for 64-bit handles in the future, while also remaining backwards
 compatible.
 
+The above mapping, while being fairly orthogonal, is not very effcient
+for either storage nor for protocol overhead. Thus, the code uses a 
+slightly modified version, as below.
+
+   Key                   Value                                 Format
+   ---                   -----                                 ------
+   Handle/"type"         atom type                             int
+   Handle/"name"         Node string name (absent for links)   string
+   Handle/"stv"          (mean, count)                         (double, double)
+   Handle/"edges"        (arity, handle0, handle1, ...)        (int, int, ...)
+
+Atoms will typically have only three of the four above: Nodes will have
+type, name, and stv, while Links will have type, edges and stv. If/when
+other kinds of TruthValue are supported, those will not be stored under
+"stv", but rather thier own paths.
 
