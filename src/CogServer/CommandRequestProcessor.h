@@ -37,6 +37,10 @@
 #include "AtomStorage.h"
 #endif /* HAVE_SQL_STORAGE */
 
+#ifdef HAVE_LIBMEMCACHED
+#include "AtomCache.h"
+#endif /* HAVE_LIBMEMCACHED */
+
 #ifdef HAVE_GUILE
 #include "SchemeShell.h"
 #endif /* HAVE_GUILE */
@@ -72,6 +76,14 @@ private:
 
     AtomStorage *store;
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_LIBMEMCACHED
+    std::string cache_open(std::string, std::string);
+    std::string cache_close(void);
+    std::string cache_load(void);
+    std::string cache_store(void);
+
+    AtomCache *cache;
+#endif /* HAVE_LIBMEMCACHED */
 #ifdef HAVE_GUILE
     bool shell_mode;
     SchemeShell *ss;

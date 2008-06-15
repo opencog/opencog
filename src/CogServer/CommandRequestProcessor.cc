@@ -41,6 +41,10 @@ CommandRequestProcessor::~CommandRequestProcessor()
     if (store) delete store;
     store = NULL;
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_LIBMEMCACHED
+    if (cache) delete cache;
+    cache = NULL;
+#endif /* HAVE_LIBMEMCACHED */
 #ifdef HAVE_GUILE
     if (ss) delete ss;
     ss = NULL;
@@ -53,6 +57,9 @@ CommandRequestProcessor::CommandRequestProcessor(void)
 #ifdef HAVE_SQL_STORAGE
     store = NULL;
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_LIBMEMCACHED
+    cache = NULL;
+#endif /* HAVE_LIBMEMCACHED */
 #ifdef HAVE_GUILE
     ss = new SchemeShell();
     shell_mode = false;
@@ -101,6 +108,13 @@ std::string CommandRequestProcessor::help(std::string topic)
 
     reply +=
         "Available commands:\n"
+#ifdef HAVE_LIBMEMCACHED
+        "    cache-open <hostname> <port\n"
+        "                       -- open connection to memcachedb server\n"
+        "    cache-close        -- close connection to memcachedb server\n"
+        "    cache-store        -- store all server data to memcachedb\n"
+        "    cache-load         -- load server from memcachedb\n"
+#endif
         "    data <xmldata>     -- load OpenCog XML data immediately following\n"
         "    load <filename>    -- load OpenCog XML from indicated filename\n"
         "    ls                 -- list entire system contents\n"
@@ -305,8 +319,8 @@ std::string CommandRequestProcessor::ls(void)
  * Open a connection to the sql server
  */
 std::string CommandRequestProcessor::sql_open(std::string dbname,
-        std::string username,
-        std::string authentication)
+                                              std::string username,
+                                              std::string authentication)
 {
     if (store) {
         return "Error: SQL connection already open\n";
@@ -386,6 +400,95 @@ std::string CommandRequestProcessor::sql_store(void)
     return "SQL data store thread started\n";
 }
 #endif /* HAVE_SQL_STORAGE */
+
+/* ============================================================== */
+#ifdef HAVE_LIBMEMCACHED
+/**
+ * Open a connection to the cache server
+ */
+std::string CommandRequestProcessor::cache_open(std::string hostname,
+                                                std::string portno)
+{
+    if (cache)
+    {
+        return "Error: cache connection already open\n";
+    }
+
+    int port = atoi(portno.c_str());
+    cache = new AtomCache(hostname, port);
+
+    std::string answer = "Opened \"";
+    answer += hostname;
+    answer += "\" port ";
+    answer += portno;
+    answer += "\n";
+    return answer;
+}
+
+/**
+ * Close connection to the cache server
+ */
+std::string CommandRequestProcessor::cache_close(void)
+{
+    if (cache) {
+        delete cache;
+        cache = NULL;
+        return "memcachedb connection closed\n";
+    }
+    return "Warning: memcachedb connection not open\n";
+}
+
+/**
+ * Load data from the cache server
+ */
+static void * cache_load_thread_start_routine(void *data)
+{
+    AtomCache *cache = (AtomCache *) data;
+    AtomSpace *atomSpace = CogServer::getAtomSpace();
+    const AtomTable& atomTable = atomSpace->getAtomTable();
+
+    AtomTable * ap = (AtomTable *) & atomTable; // It most certainly is NOT const!!
+    cache->load(*ap);
+
+    return NULL;
+}
+
+std::string CommandRequestProcessor::cache_load(void)
+{
+    if (!cache) return "Error: No memcachedb connection is open";
+
+    pthread_t loader;
+    int rc = pthread_create (&loader, NULL, cache_load_thread_start_routine, cache);
+
+    if (rc) return "Error:Failed to create memcachedb loader thread";
+    return "memcachedb loader thread started\n";
+}
+
+/**
+ * Store data to the cache server
+ */
+static void * cache_store_thread_start_routine(void *data)
+{
+    AtomCache *cache = (AtomCache *) data;
+
+    AtomSpace *atomSpace = CogServer::getAtomSpace();
+    const AtomTable& atomTable = atomSpace->getAtomTable();
+    cache->store(atomTable);
+
+    return NULL;
+}
+
+std::string CommandRequestProcessor::cache_store(void)
+{
+    if (!cache) return "Error: No memcachedb connection is open";
+
+    pthread_t saver;
+    int rc = pthread_create (&saver, NULL, cache_store_thread_start_routine, cache);
+
+    if (rc) return "Error:Failed to create memcachedb store thread";
+    return "memcachedb data store thread started\n";
+}
+#endif /* HAVE_LIBMEMCACHED */
 
 /* ============================================================== */
 
@@ -505,6 +608,42 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             answer = sql_store();
         }
 #endif /* HAVE_SQL_STORAGE */
+#ifdef HAVE_LIBMEMCACHED
+    } else if (command == "cache-open") {
+        if (args.size() < 2) {
+            answer = "cache-open: invalid command syntax";
+        } else if (args.size() == 2) {
+            std::string dbname = args.front();
+            args.pop();
+            std::string username = args.front();
+            answer = cache_open(dbname, username, "");
+        } else {
+            std::string dbname = args.front();
+            args.pop();
+            std::string username = args.front();
+            args.pop();
+            std::string auth = args.front();
+            answer = cache_open(dbname, username, auth);
+        }
+    } else if (command == "cache-close") {
+        if (args.size() != 0) {
+            answer = "cache-close: invalid command syntax";
+        } else {
+            answer = cache_close();
+        }
+    } else if (command == "cache-load") {
+        if (args.size() != 0) {
+            answer = "cache-load: invalid command syntax";
+        } else {
+            answer = cache_load();
+        }
+    } else if (command == "cache-store") {
+        if (args.size() != 0) {
+            answer = "cache-store: invalid command syntax";
+        } else {
+            answer = cache_store();
+        }
+#endif /* HAVE_LIBMEMCACHED */
     } else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: data help load ls dlopen dlclose shutdown close";
