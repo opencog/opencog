@@ -244,7 +244,7 @@ class AtomStorage::Outgoing
 		{
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
-                 "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
+			        "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
 			        (unsigned long) src_handle, (unsigned long) h, pos);
 
 			Response rp;
@@ -772,7 +772,7 @@ void AtomStorage::store(const AtomTable &table)
 	rp.rs = db_conn->exec("DROP INDEX src_idx;");
 	rp.rs->release();
 
-   table.foreach_atom(&AtomStorage::store_cb, this);
+	table.foreach_atom(&AtomStorage::store_cb, this);
 
 	// Create indexes
 	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
