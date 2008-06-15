@@ -32,6 +32,7 @@ class AtomCache
 
 		unsigned long store_count;
 		bool store_cb(Atom *);
+		std::string node_list;
 
 	public:
 		AtomCache(const std::string server, int portno);

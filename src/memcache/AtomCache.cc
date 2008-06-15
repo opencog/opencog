@@ -219,6 +219,15 @@ void AtomCache::load(AtomTable &at)
 
 bool AtomCache::store_cb(Atom *atom)
 {
+	Handle h = TLB::getHandle(atom);
+	Node *n = dynamic_cast<Node *>(atom);
+	if (n)
+	{
+		char hbuff[KBSIZE];
+		snprintf(hbuff, KBSIZE, "%lu, ", h);
+		node_list += hbuff;
+	}
+
 	storeAtom(atom);
 	store_count ++;
 	if (store_count%1000 == 0)
@@ -230,7 +239,13 @@ bool AtomCache::store_cb(Atom *atom)
 
 void AtomCache::store(const AtomTable &table)
 {
+	node_list = "(";
 	table.foreach_atom(&AtomCache::store_cb, this);
+	node_list += ")";
+
+	memcached_return rc;
+	rc = memcached_set (mc, "node-list", 9, node_list.c_str(), node_list.size(), 0, 0);
+	CHECK_RC(rc);
 }
 
 #endif /* HAVE_LIBMEMCACHED */
