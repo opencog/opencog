@@ -613,17 +613,10 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         if (args.size() < 2) {
             answer = "cache-open: invalid command syntax";
         } else if (args.size() == 2) {
-            std::string dbname = args.front();
+            std::string hostname = args.front();
             args.pop();
-            std::string username = args.front();
-            answer = cache_open(dbname, username, "");
-        } else {
-            std::string dbname = args.front();
-            args.pop();
-            std::string username = args.front();
-            args.pop();
-            std::string auth = args.front();
-            answer = cache_open(dbname, username, auth);
+            std::string portno = args.front();
+            answer = cache_open(hostname, portno);
         }
     } else if (command == "cache-close") {
         if (args.size() != 0) {
