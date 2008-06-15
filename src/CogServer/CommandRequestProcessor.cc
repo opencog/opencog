@@ -646,10 +646,15 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #endif /* HAVE_LIBMEMCACHED */
     } else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
-                 "\tAvailable commands: data help load ls dlopen dlclose shutdown close";
+                 "\tAvailable commands: ";
+#ifdef HAVE_LIBMEMCACHED
+        answer += "cache-open cache-close cache-store cache-load\n\t";
+#endif
+        answer += "data dlopen dlclose exit help load ls";
 #ifdef HAVE_GUILE
         answer += " scm";
 #endif /* HAVE_GUILE */
+        answer += " shutdown";
 #ifdef HAVE_SQL_STORAGE
         answer += "\n\tsql-open sql-close sql-store sql-load";
 #endif
