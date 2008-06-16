@@ -5,16 +5,16 @@
 
 This is an experimental prototype for opencog persistence, making use
 of the memcache API, and the memcachedb daemon.  The goal of this 
-prototype is to explore a simple distrubted persistence scheme, focusing
-on performance. This experiment offers a contrast to the SQL perstance 
+prototype is to explore a simple distributed persistence scheme, focusing
+on performance. This experiment offers a contrast to the SQL persistence 
 mechanism, which currently has underwhelming performance.
 
 Status: the current implementation works, for both saving and restoring 
 of the atom table. Its missing some "minor" features, such as support
-for differnet types of truth values, and isolation of changes to atom 
+for different types of truth values, and isolation of changes to atom 
 types.
 
-The performance, for both saving and restoring, is disasterously bad;
+The performance, for both saving and restoring, is disastrously bad;
 it it strongly limited by disk I/O performance. On a system with 
 slow ATA disk drives, it can store at about 300 atoms/second, and
 load about 100 atoms/second. High speed SATA drives should improve
@@ -29,7 +29,7 @@ disk-i/o intensive operation.
 So -- despite "advertising claims" as to the performance of memcachedb, 
 its actual operation appears to be abysmally poor, gated primarily by
 what seems to be either poor design, or poor configuration of the 
-Berkely DB.
+Berkeley DB.
 
 At this time, development in this directory has been abandoned.
 
@@ -42,11 +42,11 @@ the memcache protocol, a network protocol of rather simple caching
 commands (get, set, delete, etc.) and various libraries that emit the
 network protocol to talk to the caching daemons.  There are two
 libraries for C/C++: libmemcache (deprecated) and libmemcached. 
-There are also client-side libraries for other programming langauges.
+There are also client-side libraries for other programming languages.
 
 Persistence is obtained via memcachedb, a daemon which responds to the 
 memcache protocol, and uses the Sleepycat/Berkeley DB to provide 
-persistant storage for the cached objects.
+persistent storage for the cached objects.
 
 Installation
 ------------
@@ -58,7 +58,7 @@ the database name, as needed.
 Testing the install
 -------------------
 The "sniff.cc" program provides a very simple example of programming with
-the memcached API. This rpogram should run and work correctly.
+the memcached API. This program should run and work correctly.
 
 
 Mapping AtomSpace to key-value pairs
@@ -78,11 +78,11 @@ a slash, and then a named field, appropriate for that atom.
    Handle/"edges/1"      Handle of 1'th outgoing link          int
    
 At this time, ints are assumed to be 32-bit ints. Memcache stores the
-lengths of both keys and values, this should be adequeate to easily 
+lengths of both keys and values, this should be adequate to easily 
 expand for 64-bit handles in the future, while also remaining backwards
 compatible.
 
-The above mapping, while being fairly orthogonal, is not very effcient
+The above mapping, while being fairly orthogonal, is not very efficient
 for either storage nor for protocol overhead. Thus, the code uses a 
 slightly modified version, as below.
 
@@ -96,7 +96,7 @@ slightly modified version, as below.
 Atoms will typically have only three of the four above: Nodes will have
 type, name, and stv, while Links will have type, edges and stv. If/when
 other kinds of TruthValue are supported, those will not be stored under
-"stv", but rather thier own paths.
+"stv", but rather their own paths.
 
 
 Notes
@@ -122,7 +122,7 @@ next 100K atoms in 219 seconds or 1.36K
 next 100K atoms in 268 seconds or 1.12K
 next 100K atoms in 367 seconds or 817 pairs per second
 
-cpu usage: 100 seconds in for 526K atoms or 63usecs/kvp, or 190 usecs/atom
+CPU usage: 100 seconds in for 526K atoms or 63usecs/kvp, or 190 usecs/atom
 Ram usage: with the -m 2048 flag, have 250 MB resident, 2161MB virtual 
 Disk usage: 950MB for 526K atoms, or 1.8K atom, or 600 bytes/key-value pair.
 
@@ -187,7 +187,7 @@ next 100K atoms took 138 seconds -- booo!
 
 1,563K atoms in 81 minutes = 322 atoms/sec = 965 key-val pairs/sec
 
-So, for ful load:
+So, for full load:
 STAT version 1.1.0
 STAT pointer_size 32
 STAT rusage_user 93.609850
