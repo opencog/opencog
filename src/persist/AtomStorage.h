@@ -33,7 +33,8 @@ class AtomStorage
 
 		int height(Atom *);
 		int max_height;
-		void setMaxHeight();
+		void setMaxHeight(void);
+		int getMaxHeight(void);
 
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
