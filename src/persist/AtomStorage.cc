@@ -94,13 +94,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Atom *atom = store->makeAtom(*this, handle);
-#define HEIGHT_STRUCTURED 1
-#if HEIGHT_STRUCTURED
 			table->add(atom, true);
-#else
-			table->add(atom, false);
-#endif
-
 			return false;
 		}
 
@@ -762,7 +756,6 @@ void AtomStorage::load(AtomTable &table)
 	rp.table = &table;
 	rp.store = this;
 
-#if HEIGHT_STRUCTURED
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = load_count;
@@ -775,29 +768,6 @@ void AtomStorage::load(AtomTable &table)
 
 		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
-#else
-#if GET_ONE_BIG_BLOB
-	rp.rs = db_conn->exec("SELECT * FROM Atoms;");
-	rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-	rp.rs->release();
-#else
-
-#define STEP 10003
-	unsigned long rec;
-	for (rec = 0; rec <= max_nrec; rec += STEP)
-	{
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid > %lu AND uuid <= %lu;",
-		        rec, rec+STEP);
-		rp.rs = db_conn->exec(buff);
-		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		rp.rs->release();
-	}
-#endif
-	// set up the ougoing lists for each link.
-	table.scrubIncoming();
-#endif
-
 }
 
 bool AtomStorage::store_cb(Atom *atom)
