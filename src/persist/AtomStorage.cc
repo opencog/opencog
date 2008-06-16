@@ -54,6 +54,7 @@ class AtomStorage::Response
 		const char * name;
 		double mean;
 		double count;
+		const char *outlist;
 
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
@@ -65,6 +66,10 @@ class AtomStorage::Response
 			else if (!strcmp(colname, "name"))
 			{
 				name = colvalue;
+			}
+			else if (!strcmp(colname, "outgoing"))
+			{
+				outlist = colvalue;
 			}
 			else if (!strcmp(colname, "stv_mean"))
 			{
@@ -107,6 +112,7 @@ class AtomStorage::Response
 			return false;
 		}
 
+#ifndef USE_INLINE_EDGES
 		// Temporary cache of info about the outgoing set.
 		std::vector<Handle> *outvec;
 		Handle dst;
@@ -134,6 +140,7 @@ class AtomStorage::Response
 			}
 			return false;
 		}
+#endif /* USE_INLINE_EDGES */
 
 		// deal twith the type-to-id map
 		bool type_cb(void)
@@ -684,6 +691,7 @@ void AtomStorage::get_ids(void)
 
 /* ================================================================ */
 
+#ifndef USE_INLINE_EDGES
 void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
 	char buff[BUFSZ];
@@ -695,6 +703,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 	rp.rs->foreach_row(&Response::create_edge_cb, &rp);
 	rp.rs->release();
 }
+#endif /* USE_INLINE_EDGES */
 
 /* ================================================================ */
 /**
@@ -736,7 +745,16 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		else
 		{
 			std::vector<Handle> outvec;
+#ifndef USE_INLINE_EDGES
 			getOutgoing(outvec, h);
+#else
+			char *p = (char *) rp.outlist;
+			while(p)
+			{
+				Handle hout = (Handle) strtoul(p+1, &p, 10);
+				outvec.push_back(hout);
+			}
+#endif /* USE_INLINE_EDGES */
 			atom = new Link(realtype, outvec);
 		}
 

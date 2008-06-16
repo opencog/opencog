@@ -202,6 +202,12 @@ after loading all atoms, rebuild the index. This time, get
    cogserver = 5:49 mins = 0.227 millisecs/atom (4.40K atoms/sec)
    postgres  = 4:50 mins = 0.189 millisecs/atom (5.30K atoms/sec)
 
+Try again, this time with inline outgoing sets. This improves 
+performance even further:
+
+   cogserver = 2:54 mm:ss = 0.113 millisecs/atom (8.83K atoms/sec)
+   postgres  = 2:22 mm:ss = 0.092 millisecs/atom (10.82K atoms/sec)
+
 begin; commit;  
 use analyze;
 use prepare;
