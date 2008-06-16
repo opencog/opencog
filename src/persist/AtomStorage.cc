@@ -30,6 +30,8 @@
 
 using namespace opencog;
 
+#define USE_INLINE_EDGES
+
 /* ================================================================ */
 
 /**
@@ -222,6 +224,7 @@ bool AtomStorage::idExists(const char * buff)
 /* ================================================================ */
 #define BUFSZ 250
 
+#ifndef USE_INLINE_EDGES
 /**
  * Callback class, whose method is invoked on each outgoing edge.
  * The callback constructs an SQL query to store the edge.
@@ -253,6 +256,20 @@ class AtomStorage::Outgoing
 			return false;
 		}
 };
+
+/**
+ * Store the outgoing set of the atom.
+ * Handle h must be the handle for the atom; its passed as an arg to 
+ * avoid having to look it up.
+ */
+void AtomStorage::storeOutgoing(Atom *atom, Handle h)
+{
+	Outgoing out(db_conn, h);
+
+	foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
+}
+
+#endif /* USE_INLINE_EDGES */
 
 /* ================================================================ */
 // Constructors
@@ -304,18 +321,6 @@ AtomStorage::~AtomStorage()
 	char buff[BUFSZ]; \
 	snprintf(buff, BUFSZ, "%12.8g", fval); \
 	STMT(colname, buff); \
-}
-
-/**
- * Store the outgoing set of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to 
- * avoid having to look it up.
- */
-void AtomStorage::storeOutgoing(Atom *atom, Handle h)
-{
-	Outgoing out(db_conn, h);
-
-	foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
 }
 
 /* ================================================================ */
@@ -532,6 +537,29 @@ void AtomStorage::storeAtom(Atom *atom)
 			int hei = height(atom);
 			if (max_height < hei) max_height = hei;
 			STMTI("height", hei);
+
+#ifdef USE_INLINE_EDGES
+			Link *l = dynamic_cast<Link *>(atom);
+			if (l)
+			{
+				int arity = l->getArity();
+				if (arity)
+				{
+					cols += ", outgoing";
+					vals += ", \'{";
+					std::vector<Handle> out = l->getOutgoingSet();
+					for (int i=0; i<arity; i++)
+					{
+						Handle h = out[i];
+						if (i != 0) vals += ", ";
+						char buff[BUFSZ];
+						snprintf(buff, BUFSZ, "%lu", h);
+						vals += buff;
+					}
+					vals += "}\'";
+				}
+			}
+#endif /* USE_INLINE_EDGES */
 		}
 	}
 
@@ -551,6 +579,7 @@ void AtomStorage::storeAtom(Atom *atom)
 	rp.rs = db_conn->exec(qry.c_str());
 	rp.rs->release();
 
+#ifndef USE_INLINE_EDGES
 	// Store the outgoing handles only if we are storing for the first
 	// time, otherwise do nothing. The semantics is that, once the 
 	// outgoing set has been determined, it cannot be changed.
@@ -558,6 +587,7 @@ void AtomStorage::storeAtom(Atom *atom)
 	{
 		storeOutgoing(atom, h);
 	}
+#endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
 	local_id_cache.insert(h);

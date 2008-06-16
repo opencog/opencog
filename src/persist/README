@@ -15,6 +15,7 @@ Add incremental save/restore (i.e. update the SQL contents
 Add full support for truth values other than SimpleTruthValue.
 Add full support for attention values. (??)
 Add full support for Atom deletion.
+Add full support for 64-bit systems, including >4Gigs of atoms.
 
 Performance status:
 AtomTable load time is *identical* to loading data from NMXml;

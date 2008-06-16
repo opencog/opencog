@@ -22,8 +22,11 @@ CREATE TABLE Atoms (
 	-- height of Links containing only nodes is one, etc.
 	height INT,
 
-	-- The node name
-	name    TEXT
+	-- The node name, non-empty only for nodes
+	name    TEXT,
+
+	-- An array of the ougoing edges; non-empty only for links
+	outgoing INT[]
 );
 
 
