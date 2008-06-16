@@ -32,7 +32,14 @@ class AtomCache
 
 		unsigned long store_count;
 		bool store_cb(Atom *);
-		std::string node_list;
+
+		int depth(Atom *);
+		int maxdepth;
+#define MAX_LATTICE_DEPTH 20
+		std::string depth_list[MAX_LATTICE_DEPTH];
+
+		unsigned long load_count;
+		void load_list(AtomTable &, int);
 
 	public:
 		AtomCache(const std::string server, int portno);

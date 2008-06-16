@@ -213,21 +213,81 @@ Atom * AtomCache::getAtom(Handle h)
 
 /* ================================================================== */
 
-void AtomCache::load(AtomTable &at)
+void AtomCache::load_list(AtomTable &table, int depth)
 {
+	size_t vlen;
+	uint32_t flags;
+	memcached_return rc;
+	char * val;
+
+	char keybuff[KBSIZE];
+	size_t klen = snprintf(keybuff, KBSIZE, "depth-list-%d", depth);
+	val = memcached_get(mc, keybuff, klen, &vlen, &flags, &rc);
+
+printf("duude depth=%d nodelist len=%d\n", depth, vlen);
+	if ((vlen == 0) || (NULL == val)) return;
+
+	unsigned long ilc = load_count;
+	char *comma = val;
+	while (comma)
+	{
+		Handle h = (Handle) strtoul(comma+1, &comma, 10);
+		getAtom(h);
+		load_count ++;
+		if (load_count%1000 == 0)
+		{
+			fprintf(stderr, "\tLoaded %lu atoms.\n", load_count);
+		}
+	}
+	free(val);
+
+	fprintf(stderr, "\tLoaded %lu atoms of depth %d.\n", load_count- ilc, depth);
 }
+
+void AtomCache::load(AtomTable &table)
+{
+	load_count = 0;
+	for (int i=0; i<MAX_LATTICE_DEPTH; i++)
+	{
+		load_list(table, i);
+	}
+}
+
+/* ================================================================== */
+
+int AtomCache::depth(Atom *atom)
+{
+	Link *l = dynamic_cast<Link *>(atom);
+	if (NULL == l) return 0;
+
+	int maxd = 0;
+	int arity = l->getArity();
+
+	std::vector<Handle> out = l->getOutgoingSet();
+	for (int i=0; i<arity; i++)
+	{
+		Handle h = out[i];
+		int d = depth(TLB::getAtom(h));
+		if (maxd < d) maxd = d;
+	}
+	return maxd +1;
+}
+
+/* ================================================================== */
 
 bool AtomCache::store_cb(Atom *atom)
 {
 	Handle h = TLB::getHandle(atom);
-	Node *n = dynamic_cast<Node *>(atom);
-	if (n)
-	{
-		char hbuff[KBSIZE];
-		snprintf(hbuff, KBSIZE, "%lu, ", h);
-		node_list += hbuff;
-	}
 
+	// Build an index of atoms of a given depth
+	char hbuff[KBSIZE];
+	snprintf(hbuff, KBSIZE, "%lu, ", h);
+
+	int d = depth(atom);
+	depth_list[d] += hbuff;
+	if (maxdepth < d) maxdepth = d;
+
+	// store the acctual atom.
 	storeAtom(atom);
 	store_count ++;
 	if (store_count%1000 == 0)
@@ -239,13 +299,27 @@ bool AtomCache::store_cb(Atom *atom)
 
 void AtomCache::store(const AtomTable &table)
 {
-	node_list = "(";
-	table.foreach_atom(&AtomCache::store_cb, this);
-	node_list += ")";
-
 	memcached_return rc;
-	rc = memcached_set (mc, "node-list", 9, node_list.c_str(), node_list.size(), 0, 0);
-	CHECK_RC(rc);
+	int i;
+	maxdepth = 0;
+
+	for (i=0; i<MAX_LATTICE_DEPTH; i++)
+	{
+		depth_list[i] = "(";
+	}
+
+	table.foreach_atom(&AtomCache::store_cb, this);
+
+	// store the index lists too
+	for (i=0; i<maxdepth; i++)
+	{
+		depth_list[i] += ")";
+
+		char keybuff[KBSIZE];
+		size_t klen = snprintf(keybuff, KBSIZE, "depth-list-%d", i);
+		rc = memcached_set (mc, keybuff, klen, depth_list[i].c_str(), depth_list[i].size(), 0, 0);
+		CHECK_RC(rc);
+	}
 }
 
 #endif /* HAVE_LIBMEMCACHED */
