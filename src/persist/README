@@ -1,6 +1,6 @@
                           Persist
                           -------
-                Linas Vepstas, Feb-April 2008
+                Linas Vepstas, Feb-June 2008
 
 A simple-minded implementation of atom persistence into SQL.
 
@@ -18,8 +18,8 @@ Add full support for Atom deletion.
 Add full support for 64-bit systems, including >4Gigs of atoms.
 
 Performance status:
-AtomTable load time is *identical* to loading data from NMXml;
-however, the SQL load significantly reduces cogServer memory usage.
+AtomTable load time is nearly 4x faster than loading from NMXml;
+Also, loading from SQL reduces cogServer memory usage by 2x.
 This strongly indicates that the NMXml loader fragments RAM in a 
 bad way.
 
@@ -245,6 +245,11 @@ Note also: cogServer CPU usage is *identical* to its CPU usage when
 loading XML! Hurrah! Also, see below: RAM usage is significantly 
 reduced; apparently, the reading of XML results in very bad memory
 fragmentation.
+
+Implement inline edges, instead of storing eges in an outboard table.
+
+  cogserver = 41 seconds = 26.7 microsecs/atom (37.5K atoms/sec)
+  postgres  =  7 seconds =  4.56 microsecs/atom (219K atoms/sec)
 
 
 Evidence of sever memory fragmentation

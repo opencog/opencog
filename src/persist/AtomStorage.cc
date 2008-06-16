@@ -751,6 +751,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 			char *p = (char *) rp.outlist;
 			while(p)
 			{
+				if (*p == '}') break;
 				Handle hout = (Handle) strtoul(p+1, &p, 10);
 				outvec.push_back(hout);
 			}
