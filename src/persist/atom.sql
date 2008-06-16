@@ -61,7 +61,7 @@ CREATE TABLE Global (
 	max_height INT          -- max height of all links.
 );
 
-INSERT INTO Global VALUES (501);     -- initial, sequentially issued UUID
+INSERT INTO Global (max_uuid, max_height) VALUES (501, 0);     -- initial, sequentially issued UUID
 
 -- -----------------------------------------------------------
 -- Simple truth values
