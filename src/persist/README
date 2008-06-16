@@ -189,4 +189,3 @@ TODO
    suggests the XML loader has a memory leak!?  Need to run valgrind on
    it.
 
--- Investigate "memcachedb" as an alternative?
