@@ -765,11 +765,15 @@ void AtomStorage::load(AtomTable &table)
 #if HEIGHT_STRUCTURED
 	for (int hei=0; hei<=max_height; hei++)
 	{
+		unsigned long cur = load_count;
+
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
 		rp.rs = db_conn->exec(buff);
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
+
+		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
 #else
 #if GET_ONE_BIG_BLOB

@@ -6,14 +6,22 @@ A simple-minded implementation of atom persistence into SQL.
 
 STATUS:
 Functional but incomplete prototype. Save and restore of atoms, 
-and simple truth values, works. Attempts to stay in sync with
-handles as stored in the TLB. Can bulk-save and bulk-restore
-the entire contents of an AtomTable.
+and simple truth values, works. Bulk save-and-restore of entire
+AtomTable contents works. 
 
-ToDo: add incremental save/restore.
-Add full support for other truth values.
+Missing features/ToDo items: 
+Add incremental save/restore (i.e. update the SQL contents 
+    as AtomTable changes)
+Add full support for truth values other than SimpleTruthValue.
 Add full support for attention values. (??)
 Add full support for Atom deletion.
+
+Performance status:
+AtomTable load time is *identical* to loading data from NMXml;
+however, the SQL load significantly reduces cogServer memory usage.
+This strongly indicates that the NMXml loader fragments RAM in a 
+bad way.
+
 
 Goals:
 ------
@@ -25,7 +33,7 @@ The goal of this implementation is to:
    This makes development tedious.  The hope is that data persistence
    will aleviate data load time.
 
-2) Make sure that the opencog core desisgn is amenable to incremental,
+2) Make sure that the opencog core design is amenable to incremental,
    just-in-time data persistence; that is, the fetching of data 
    as it is needed, and saving it away when its not needed. This
    requires an infrastrcture for attention allocation (atoms
@@ -190,8 +198,8 @@ After tunning, save of data to DB gives result:
 
 Try again, droping the indexes on the atom and edge tables. Then,
 after loading all atoms, rebuild the index. This time, get
-   cogserver = 5:49 mins = 
-   postgres  = 4:50 mins = 
+   cogserver = 5:49 mins = 0.227 millisecs/atom (4.40K atoms/sec)
+   postgres  = 4:50 mins = 0.189 millisecs/atom (5.30K atoms/sec)
 
 begn; commit;  
 use analyze;
@@ -200,8 +208,7 @@ use prepare;
    cogserver has used 2:34 mm:ss before start of save to sql.
 
 Loading performance
----------------------------------------------
-
+-------------------
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:
 2:08 postgres = 82 microsecs/atom (12.2K atoms/sec)
@@ -209,13 +216,36 @@ similar to for opencog, but then atomtable needs to reconcile, which
 takes an additional 8:30 minutes to attach incoming handles!!
 
 Conclude: database loading would be much faster if we loaded all of
-the atoms first, then all of the lowest-level links, etc.  This assumes
-tht opencog is strictly hierarchically structured.
+the atoms first, then all of the lowest-height links, etc.  This assumes
+tht opencog is strictly hierarchically structured. (no "crazy loops")
+
+After implementing height-structured restore, get following, loading
+from a "hot" postgres instance (had not been stopped since previous
+use, i.e. data should have been hot in RAM):
+  cogserver = 2:36 mm:ss = 0.101 millisecs/atom (9.85K atoms/sec)
+  postgres  = 1:59 mm:ss = 0.077 millisecs/atom (12.91K atoms/sec)
+
+The dataset had 357162 Nodes, 1206544 Links at height 1
+
+After a cold start, have
+
+  cogserver = 2:32 mm:ss
+  postgres  = 1:55 mm:ss
+
+Appears that there is no performance degradation for cold-starts.
+
+Note also: cogServer CPU usage is *identical* to its CPU usage when
+loading XML! Hurrah! Also, see below: RAM usage is significantly 
+reduced; appearantly, the reading of XML results in very bad memory
+fragmentation.
 
 
 Evidence of sever memory fragmentation
 --------------------------------------
-loading 1536K Atoms from XML results in cogserver using 1199MBytes ram.
+loading 1536K Atoms from XML results in cogserver using 1210 MBytes ram.
+loading 1536K Atoms from SQL results in cogserver using 633 MBytes ram.
+
+almost half as much ram !!
 
 
 TODO
