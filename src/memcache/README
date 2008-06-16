@@ -6,10 +6,32 @@
 This is an experimental prototype for opencog persistence, making use
 of the memcache API, and the memcachedb daemon.  The goal of this 
 prototype is to explore a simple distrubted persistence scheme, focusing
-on performance. This is in contrast to the SQL perstance mechanism, 
-which currently has underwhelming performance.
+on performance. This experiment offers a contrast to the SQL perstance 
+mechanism, which currently has underwhelming performance.
 
-Actually, its a pre-proptotype, nothing works yet.
+Status: the current implementation works, for both saving and restoring 
+of the atom table. Its missing some "minor" features, such as support
+for differnet types of truth values, and isolation of changes to atom 
+types.
+
+The performance, for both saving and restoring, is disasterously bad;
+it it strongly limited by disk I/O performance. On a system with 
+slow ATA disk drives, it can store at about 300 atoms/second, and
+load about 100 atoms/second. High speed SATA drives should improve
+this performance by 2x to 4x, and a RAID-1 disk mirroring config should
+double this performance again.
+
+The primary difficulty appears to be that the Berkeley DB does almost
+no caching-to-RAM at all, and instead uses memory-mapped files.  I was
+unable to find any way of configuring the system to avoid this extremely
+disk-i/o intensive operation.
+
+So -- despite "advertising claims" as to the performance of memcachedb, 
+its actual operation appears to be abysmally poor, gated primarily by
+what seems to be either poor design, or poor configuration of the 
+Berkely DB.
+
+At this time, development in this directory has been abandoned.
 
 Memcache overview
 -----------------
@@ -157,12 +179,67 @@ Now try revision -r45 from the SVN tree, with -N -m 768 -L 1280 -C 0
 first 100K atoms took 97 seconds 
 next 100K atoms took 180 seconds
 
-Now manually hack the thing to disable logging (disable txn, and disable auto-commit)
+Now manually hack the thing to disable logging (disable txn, and 
+disable auto-commit)
 
 first 100K atoms took 35 seconds -- woo hoo!
 next 100K atoms took 138 seconds -- booo!
 
+1,563K atoms in 81 minutes = 322 atoms/sec = 965 key-val pairs/sec
 
+So, for ful load:
+STAT version 1.1.0
+STAT pointer_size 32
+STAT rusage_user 93.609850
+STAT rusage_system 116.075254
+STAT ibuffer_size 512
+STAT cmd_get 0
+STAT cmd_set 4691119 -- or 1563700 atoms -- OK
+STAT get_hits 0
+STAT get_misses 0
+STAT bytes_read 224346770 -- or 143 bytes/atom (including the big index lists)
+STAT bytes_written 37528952
+
+OK, now that everything has been stored, can now try loading.
+The depth=0 nodelist has 2896609
+
+Yow! 610 seconds to load 61000 atoms = 100 atoms a second. WTF disaster.
+
+
+Some vmstat output during loading:
+
+linas@backlot:~/src/novamente/svn/memcachedb-read-only$ vmstat 10
+procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+ 1  0 629904 772012 161328 2034992    0    0     4     6    4    7 32  1 66  1
+ 1  0 629904 771440 161360 2034984    0    0     0    27  117  348 53  1 46  0
+ 1  0 629904 771004 161376 2034992    0    0     0     4  159 1661 61  2 38  0
+ 2  0 629904 771040 161404 2034992    0    0     0    28  122  435 51  0 49  0
+ 1  0 629904 771012 161420 2034992    0    0     0    26  134  462 50  1 49  0
+ 2  0 629904 771184 161436 2034996    0    0     0     6  120  437 51  0 49  0
+ 1  0 629904 770440 161460 2034996    0    0     0    12  113  421 50  0 49  0
+ 3  0 629904 770120 161476 2034988    0    0     0    14  141 1574 56  1 43  0
+ 4  2 629904 762188 161492 2034996    0    0     0   420  141 1424 57  4 39  0
+ 3  4 629904 761388 161496 2034996    0    0     0  4369  780 3187 40 19 10 31
+ 3  3 629904 760528 161512 2035000    0    0     0   621  602 1412 40 14  1 45
+ 2  4 629904 759080 161524 2035012    0    0     0  5057  649 3710 41 15  7 37
+ 2  4 629904 758756 161536 2035012    0    0     0  2025  580 2163 43 12  2 44
+ 1  4 629904 758024 161536 2035012    0    0     0  1841  546 2161 44 11  0 45
+ 3  4 629904 758412 161544 2035012    0    0     0    39  586 1298 42  9  0 48
+ 3  4 629904 756984 161556 2035016    0    0     0  4562  607 3261 42 14  7 37
+ 2  4 629904 757724 161568 2035016    0    0     0  2430  688 2607 39 17  0 44
+ 2  4 629904 756348 161568 2035016    0    0     0  1500  557 1877 43 11  2 44
+ 2  4 629904 756524 161576 2035016    0    0     0   690  586 1247 45  8 12 35
+ 1  4 629904 756428 161580 2035016    0    0     0  3880  574 3042 44 11  6 39
+ 2  4 629904 756320 161592 2035016    0    0     0  2518  653 2584 40 16 12 32
+procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+ 3  4 629904 755948 161592 2035016    0    0     0  1815  581 2348 41 16  5 38
+ 1  4 629904 769160 161608 2035016    0    0     0   668  579 1746 46 11  0 42
+
+
+There's another process running that is using 100% cpu time on one cpu.
+!??? Why is the block-out figure so large ?? and no blocks-in ?? WTF ??
 
 
 
