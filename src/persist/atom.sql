@@ -17,8 +17,10 @@ CREATE TABLE Atoms (
 	stv_mean FLOAT,
 	stv_count FLOAT,
 
-	-- maps to AttentionValue
-	attention FLOAT,
+	-- distance from this link to farthest Node.
+	-- height of Nodes is dy definition zero.
+	-- height of Links containing only nodes is one, etc.
+	height INT,
 
 	-- The node name
 	name    TEXT
@@ -55,7 +57,8 @@ CREATE TABLE TypeCodes (
 -- Global state
 
 CREATE TABLE Global (
-	max_uuid INT           -- sequentially issued UUID
+	max_uuid INT,           -- sequentially issued UUID
+	max_height INT          -- max height of all links.
 );
 
 INSERT INTO Global VALUES (501);     -- initial, sequentially issued UUID

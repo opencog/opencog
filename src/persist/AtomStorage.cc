@@ -430,6 +430,29 @@ TruthValue* AtomStorage::getTV(int tvid)
 
 #endif /* OUT_OF_LINE_TVS */
 
+/* ================================================================== */
+
+/**
+ * return largest distance from this atom to any node under it.
+ */
+int AtomStorage::height(Atom *atom)
+{
+	Link *l = dynamic_cast<Link *>(atom);
+	if (NULL == l) return 0;
+
+	int maxd = 0;
+	int arity = l->getArity();
+
+	std::vector<Handle> out = l->getOutgoingSet();
+	for (int i=0; i<arity; i++)
+	{
+		Handle h = out[i];
+		int d = height(TLB::getAtom(h));
+		if (maxd < d) maxd = d;
+	}
+	return maxd +1;
+}
+
 /* ================================================================ */
 
 void escape_single_quotes(std::string &str)
@@ -501,6 +524,15 @@ void AtomStorage::storeAtom(Atom *atom)
 			qname.insert(0,1,'\'');
 			qname += "'";
 			STMT("name", qname);
+
+			// Nodes have a height of zero by definition.
+			STMTI("height", 0);
+		}
+		else
+		{
+			int hei = height(atom);
+			if (max_height < hei) max_height = hei;
+			STMTI("height", hei);
 		}
 	}
 
@@ -758,6 +790,7 @@ bool AtomStorage::store_cb(Atom *atom)
 
 void AtomStorage::store(const AtomTable &table)
 {
+	max_height = 0;
 	store_count = 0;
 	get_ids();
 	setMaxUUID(TLB::uuid);
@@ -782,6 +815,8 @@ void AtomStorage::store(const AtomTable &table)
 
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
+
+	setMaxHeight();
 }
 
 /* ================================================================ */
@@ -799,6 +834,16 @@ void AtomStorage::setMaxUUID(unsigned long uuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "UPDATE Global SET max_uuid = %lu;", uuid);
+
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->release();
+}
+
+void AtomStorage::setMaxHeight(void)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);

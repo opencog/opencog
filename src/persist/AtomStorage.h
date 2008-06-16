@@ -31,6 +31,10 @@ class AtomStorage
 
 		Atom * makeAtom (Response &, Handle h);
 
+		int height(Atom *);
+		int max_height;
+		void setMaxHeight();
+
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
 		bool store_cb(Atom *);
