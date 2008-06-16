@@ -28,19 +28,19 @@ Goals:
 The goal of this implementation is to:
 
 1) Simplify Linas' day-to-day use of opencog. The problem is that
-   loading data, by parsing english sentences, into opencog is slow.
+   loading data, by parsing English sentences, into opencog is slow.
    Every time opencog source is changed, the data needs to be reloaded.
    This makes development tedious.  The hope is that data persistence
-   will aleviate data load time.
+   will alleviate data load time.
 
 2) Make sure that the opencog core design is amenable to incremental,
    just-in-time data persistence; that is, the fetching of data 
    as it is needed, and saving it away when its not needed. This
-   requires an infrastrcture for attention allocation (atoms
+   requires an infrastructure for attention allocation (atoms
    that don't get attention can be saved away to disk, while those
    that are needed are fetched on demand.) This will also require 
    infrastructure for locks, use counts, etc. that are typical
-   of multi-htreded programming.  This prototype should lay the 
+   of multi-threaded programming.  This prototype should lay the 
    foundations for more sophisticated schemes (non-SQL-based) 
    to take its place.
 
@@ -85,8 +85,8 @@ major drawbacks to using SQL. These include:
 
 Getting started
 ---------------
-Create a database called "OpenCog"; for example, in postgres, at
-the unix command line:
+Create a database called "OpenCog"; for example, in Postgres, at
+the Unix command line:
 
    $ createdb opencog
 
@@ -124,7 +124,7 @@ ConnSettings      =
 
 
 Next, the postgres default configuration needs to be tweaked for 
-performance. Failure to do this will result in disasterous load and
+performance. Failure to do this will result in disastrous load and
 store times.
 
 Edit postgresql.conf and make the following changes:
@@ -155,19 +155,19 @@ This section reviews the performance for storage of data from opencog
 to the SQL server (and thence to disk).
 
 First run with a large data set (save of 1564K atoms to the database)
-was a disaster.  Huge CPU usage, with 75% of cpu usage occuring in the
+was a disaster.  Huge CPU usage, with 75% of CPU usage occurring in the
 kernel block i/o layer, and 12% each for the opencog and postgres times:
    112:00 [md4_raid1] or 4.3 millisecs per atom
-   17 minutes for postgres, and opencog, each. or 0.66 milisecs per atom
+   17 minutes for postgres, and opencog, each. or 0.66 millisecs per atom
    1937576 - 1088032 kB = 850MBytes disk use
 
 Experiment: is this due to the bad design for trying to figure whether
 "INSERT" or "UPDATE" should be used? A local client-side cache of the 
 keys in the DB seems to change little:
 
-   cpu usage for postgres 11:04  and opencog 10:40 and 112:30 for md
+   CPU usage for postgres 11:04  and opencog 10:40 and 112:30 for md
 
-So this change drops postgres server and opencog cpu usage
+So this change drops postgres server and opencog CPU usage
 significantly, but the insane kernel CPU usage remains.
 
 The above disaster can be attributed to bad defaults for the postgres
@@ -191,17 +191,17 @@ usage has been exceeded. This can be fixed by:
 (save file contents, then)
    sysctl -p /etc/sysctl.conf
 
-After tunning, save of data to DB gives result:
+After tuning, save of data to DB gives result:
    cogserver = 10:45 mins = 0.41  millisecs/atom (2.42K atoms/sec)
    postgres  =  7:32 mins = 0.29  millisecs/atom (2.65K atoms/sec)
    md        =  0:42 mins = 0.026 millisecs/atom (37K atoms/sec)
 
-Try again, droping the indexes on the atom and edge tables. Then,
+Try again, dropping the indexes on the atom and edge tables. Then,
 after loading all atoms, rebuild the index. This time, get
    cogserver = 5:49 mins = 0.227 millisecs/atom (4.40K atoms/sec)
    postgres  = 4:50 mins = 0.189 millisecs/atom (5.30K atoms/sec)
 
-begn; commit;  
+begin; commit;  
 use analyze;
 use prepare;
 
@@ -212,12 +212,12 @@ Loading performance
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
 CPU usage:
 2:08 postgres = 82 microsecs/atom (12.2K atoms/sec)
-similar to for opencog, but then atomtable needs to reconcile, which
+similar to for opencog, but then AtomTable needs to reconcile, which
 takes an additional 8:30 minutes to attach incoming handles!!
 
 Conclude: database loading would be much faster if we loaded all of
 the atoms first, then all of the lowest-height links, etc.  This assumes
-tht opencog is strictly hierarchically structured. (no "crazy loops")
+that opencog is strictly hierarchically structured. (no "crazy loops")
 
 After implementing height-structured restore, get following, loading
 from a "hot" postgres instance (had not been stopped since previous
@@ -236,7 +236,7 @@ Appears that there is no performance degradation for cold-starts.
 
 Note also: cogServer CPU usage is *identical* to its CPU usage when
 loading XML! Hurrah! Also, see below: RAM usage is significantly 
-reduced; appearantly, the reading of XML results in very bad memory
+reduced; apparently, the reading of XML results in very bad memory
 fragmentation.
 
 
