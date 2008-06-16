@@ -76,3 +76,94 @@ type, name, and stv, while Links will have type, edges and stv. If/when
 other kinds of TruthValue are supported, those will not be stored under
 "stv", but rather thier own paths.
 
+
+Notes
+-----
+187 secs to load wsd relations from xml, 862MB RAM usage after load
+(or less -- to 156 seconds), and 1006 MB RAM -- so this is the baseline
+performance to compare against.
+
+Running memcachedb with default values (i.e. without -N flag): huge 
+amount of time in disk i/o, and very slow. Hours to store.
+
+Try again with the -N flag: approximately 140K*3/500 Key-value pairs
+per second = 840 Key-value pairs/sec.
+
+disk usage: uses about 530 MB to store 338K atoms -- 1.57KBytes/atom
+or about 522bytes/key-value pair.
+
+Try again with -N and -m 2048
+
+this time, first 100K atoms in 67 seconds, or 4.48K key-value pairs/sec
+next 100K atoms in 171 seconds or 1.75K key-value pairs/sec
+next 100K atoms in 219 seconds or 1.36K
+next 100K atoms in 268 seconds or 1.12K
+next 100K atoms in 367 seconds or 817 pairs per second
+
+cpu usage: 100 seconds in for 526K atoms or 63usecs/kvp, or 190 usecs/atom
+Ram usage: with the -m 2048 flag, have 250 MB resident, 2161MB virtual 
+Disk usage: 950MB for 526K atoms, or 1.8K atom, or 600 bytes/key-value pair.
+
+again, this time: -N -m 768 -C 0 -D 10000 -L 1280 
+
+first 100K atoms in 74 seconds 
+next 100K atoms in 140 seconds
+next 100K atoms in 178 seconds
+
+So, for 305K atoms, have:
+stats
+STAT pid 7756
+STAT uptime 491
+STAT time 1213584190
+STAT version 1.0.3
+STAT pointer_size 32
+STAT rusage_user 20.969310
+STAT rusage_system 22.573410
+STAT ibuffer_size 1024
+STAT curr_connections 1
+STAT total_connections 3
+STAT connection_structures 2
+STAT cmd_get 0
+STAT cmd_set 915742  -- or 3kvp per atom, exactly as expected.
+STAT get_hits 0
+STAT get_misses 0
+STAT bytes_read 42810330  -- read about 46 bytes per kvp --about right.
+STAT bytes_written 7325936
+STAT threads 4
+
+stats bdb
+STAT cache_size 805306368  -- specified -m 768 so this is OK
+STAT page_size 4096
+STAT txn_lg_bsize 1310720   -- specified -L 1280 so this is OK
+STAT txn_nosync 1           -- specified -N so this is OK
+STAT dldetect_val 10000000  -- specified -D 10000 so this is OK
+STAT chkpoint_val 0         -- specified -C 0 so this is OK
+
+stats malloc
+STAT arena_size 135168
+STAT free_chunks 4
+STAT fastbin_blocks 2
+STAT mmapped_regions 0
+STAT mmapped_space 0
+STAT max_total_alloc 0
+STAT fastbin_space 112
+STAT total_alloc 109592
+STAT total_free 25576
+STAT releasable_space 25184
+
+===========================
+Now try revision -r45 from the SVN tree, with -N -m 768 -L 1280 -C 0
+
+first 100K atoms took 97 seconds 
+next 100K atoms took 180 seconds
+
+Now manually hack the thing to disable logging (disable txn, and disable auto-commit)
+
+first 100K atoms took 35 seconds -- woo hoo!
+next 100K atoms took 138 seconds -- booo!
+
+
+
+
+
+
