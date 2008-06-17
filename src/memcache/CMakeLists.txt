@@ -1,5 +1,5 @@
 # Uncomment this if libmemcahced is installed.
-ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
+# ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
 
 #SET(LIBMEMCACHED_INCLUDE_DIRS, /usr/local/include/libmemcached)
 
