@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _UTIL_NUMERIC_H
-#define _UTIL_NUMERIC_H
+#ifndef _OPENCOG_NUMERIC_H
+#define _OPENCOG_NUMERIC_H
 
 #include <cmath>
 #include <ctime>
@@ -50,13 +50,19 @@
 #define isinf(x) (!isnan(x) & !isfinite(x))
 #endif
 
+#ifdef WIN32
+#include <numeric>
+#else
 #include <ext/numeric>
+#endif
 
 namespace opencog
 {
+#ifndef WIN32
 //this needs to be changed for non-gcc
 using __gnu_cxx::power;
 using __gnu_cxx::iota;
+#endif
 
 // absolute_value_order
 //   codes the following order, for T == int, -1,1,-2,2,-3,3,...

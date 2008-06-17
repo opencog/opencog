@@ -23,6 +23,7 @@
  */
 
 #include "StringTokenizer.h"
+#include <stdio.h>
 
 using namespace opencog;
 

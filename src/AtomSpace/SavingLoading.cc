@@ -26,15 +26,7 @@
 /* SavingLoading.cc - Saves/loads the atom network (or a subset of it) to/from
  * disk */
 
-#include <platform.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-#ifndef WIN32
-#include <unistd.h>
-#endif
+#include "platform.h"
 
 #include "SavingLoading.h"
 #include "ClassServer.h"
@@ -49,6 +41,11 @@
 #include "AtomSpaceDefinitions.h"
 #include "Logger.h"
 #include "HandleMap.cc"
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace opencog;
 
@@ -829,12 +826,13 @@ TruthValue *SavingLoading::readTruthValue(FILE *f)
     fread(&type, sizeof(TruthValueType), 1, f);
     fread(&length, sizeof(int), 1, f);
     //logger().fine("SavingLoading::readTruthValue() type = %d, length =  %d", type, length);
-    char tvStr[length+1];
+    char *tvStr = new char[length+1];
     fread(tvStr, sizeof(char), length, f);
     tvStr[length] = '\0';
 
     //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     TruthValue* result = TruthValue::factory(type, tvStr);
+    delete[] tvStr;
     return result;
 }
 

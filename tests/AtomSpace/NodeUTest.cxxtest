@@ -22,7 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <Node.h>
+#include "platform.h"
+#include "Node.h"
 
 using namespace opencog;
 

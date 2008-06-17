@@ -22,9 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <NMXmlExporter.h>
-#include <NMXmlParserExperiment.h>
-#include <FileXMLBufferReader.h>
+#include "platform.h"
+#include "NMXmlExporter.h"
+#include "NMXmlParserExperiment.h"
+#include "FileXMLBufferReader.h"
 
 using namespace opencog;
 

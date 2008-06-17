@@ -25,14 +25,18 @@
  * Emulates a hopfield network using OpenCog dynamics
  */
 
+#include "platform.h"
 #include <sstream>
 #include <math.h>
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 
 #include <mt19937ar.h>
 #include <Logger.h>
 #include <Link.h>
 
+#include "ImportanceUpdatingAgent.h"
 #include "HopfieldServer.h"
 
 using namespace opencog;
@@ -117,14 +121,15 @@ HopfieldServer::HopfieldServer()
     struct timezone tz;
     struct tm *tm;
     gettimeofday(&tv, &tz);
-    tm = localtime(&tv.tv_sec);
+    time_t t = tv.tv_sec;
+    tm = localtime(&t);
 
 	patternStimulus = HDEMO_DEFAULT_PATTERN_STIM;
     width = HDEMO_DEFAULT_WIDTH;
     height = HDEMO_DEFAULT_HEIGHT;
     links = HDEMO_DEFAULT_LINKS;
     density = -1.0f;
-    rng = new opencog::MT19937RandGen(tv.tv_usec);
+    rng = new MT19937RandGen(tv.tv_usec);
     options = new HopfieldOptions();
     options->setServer(this);
 

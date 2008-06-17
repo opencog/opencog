@@ -16,6 +16,7 @@
 
 #ifdef HAVE_SQL_STORAGE
 
+#include "platform.h"
 #include <stack>
 #include <string>
 

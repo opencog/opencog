@@ -34,6 +34,8 @@
 #include "CogServer.h"
 #include "MindAgent.h"
 
+class ImportanceUpdatingAgentUTest;
+
 namespace opencog
 {
 
@@ -102,7 +104,7 @@ class CogServer;
 class ImportanceUpdatingAgent : public MindAgent
 {
 
-    friend class ImportanceUpdatingAgentUTest;
+    friend class ::ImportanceUpdatingAgentUTest;
 
 private:
 

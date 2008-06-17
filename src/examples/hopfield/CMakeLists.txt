@@ -21,7 +21,7 @@ ADD_EXECUTABLE (hopfield
 
 TARGET_LINK_LIBRARIES (hopfield
 	AtomSpace
-	CogServer
+	Server
 	Sockets
 	attention
 )

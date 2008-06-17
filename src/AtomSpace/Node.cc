@@ -24,6 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include <stdio.h>
 #include "Node.h"
 #include "ClassServer.h"
@@ -112,7 +113,7 @@ bool Node::equals(Atom *other)
 int Node::hashCode()
 {
     int result = Atom::hashCode();
-    result += opencog::hash<const char*>()(name.c_str());
+    result += hash<const char*>()(name.c_str());
     return result;
 }
 

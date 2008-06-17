@@ -23,16 +23,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
+#include "utils.h"
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string>
-#include "utils.h"
+#include <time.h>
 #ifndef WIN32
 #include <sys/time.h>
-#endif
-
-#ifdef WIN32
-#include <winsock2.h>
 #endif
 
 using namespace opencog;
@@ -525,102 +524,12 @@ std::vector<string> StringTokenizer::WithoutEmpty() const
     return ret;
 }
 
-#ifdef WIN32
-
-/*
-float Abs(float a)
-{
- return (a>0) ? a : (-a);
-}
-*/
-/*
-float max(float a, float b) { return (a>b)?a:b; }
-float min(float a, float b) { return (a<b)?a:b; }
-*/
-int round(float x)
-{
-    return ( (x -(int)(x)) < 0.5 ) ? (int)x : (int)x + 1;
-}
-
-int gettimeofday(struct timeval* tp, void* tzp)
-{
-    unsigned long t;
-    t = timeGetTime();
-    tp->tv_sec = t / 1000;
-    tp->tv_usec = t % 1000;
-    /* 0 indicates that the call succeeded. */
-    return 0;
-}
-
-void usleep(unsigned int useconds)
-{
-    // Sleep is in milliseconds
-    // If 0 is passed to Sleep()
-    // It skips rest of thread scheduled time
-    // This is the best achievable with Millisecond
-    // resolution
-    Sleep((int)(useconds / 1000));
-}
-
-unsigned sleep(unsigned seconds)
-{
-    Sleep(seconds * 1000);
-    return 0;
-}
-
-#ifndef HAVE_STRTOK_R
-#define HAVE_STRTOK_R 1
-
-char * __strtok_r(char *s1, const char *s2, char **lasts)
-{
-    char *ret;
-
-    if (s1 == NULL)
-        s1 = *lasts;
-    while (*s1 && strchr(s2, *s1))
-        ++s1;
-    if (*s1 == '\0')
-        return NULL;
-    ret = s1;
-    while (*s1 && !strchr(s2, *s1))
-        ++s1;
-    if (*s1)
-        *s1++ = '\0';
-    *lasts = s1;
-    return ret;
-}
-
-#endif /* HAVE_STRTOK_R */
-
-#include <process.h>
-int __getpid(void)
-{
-    return _getpid();
-}
-
-#include <math.h>
-double rint(double nr)
-{
-    double f = floor(nr);
-    double c = ceil(nr);
-    return (((c -nr) >= (nr - f)) ? f : c);
-}
-
-#include <io.h>
-int __dup2(int fd1, int fd2)
-{
-    return _dup2(fd1, fd2);
-}
-
-
-#endif
 
 /**
  * Time used as reference to set/get timestamps over the code
  */
 static timeval referenceTime;
 static bool referenceTimeInitialized = false;
-
 
 void initReferenceTime()
 {

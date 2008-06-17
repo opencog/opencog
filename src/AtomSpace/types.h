@@ -56,7 +56,7 @@ struct eqHandle {
     bool operator()(Handle h1, Handle h2) const;
 };
 
-typedef opencog::hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
+typedef hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
 //#endif
 
 // type and arity of Atoms, represented as short integers (16 bits)

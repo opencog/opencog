@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _UTIL_HASHING_H
-#define _UTIL_HASHING_H
+#ifndef _OPENCOG_HASHING_H
+#define _OPENCOG_HASHING_H
 
 #include <boost/functional/hash.hpp>
 #include "tree.h"

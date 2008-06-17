@@ -23,11 +23,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <AtomSpace.h>
-#include <SimpleTruthValue.h>
+#include "platform.h"
+#include "TLB.h"
+#include "AtomSpace.h"
+#include "SimpleTruthValue.h"
+#include "Node.h"
+
 #include <math.h>
-#include <Node.h>
-#include <TLB.h>
 #include <string.h>
 
 using namespace opencog;

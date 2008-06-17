@@ -28,9 +28,11 @@
 #include "exceptions.h"
 #include "SimpleNetworkServer.h"
 
-#include <unistd.h>
 #include <time.h>
+#ifndef WIN32
+#include <unistd.h>
 #include <sys/time.h>
+#endif
 
 using namespace opencog;
 AtomSpace* CogServer::atomSpace = NULL;

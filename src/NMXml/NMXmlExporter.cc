@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include "Link.h"
 #include "NMXmlExporter.h"
 #include "NMXmlDefinitions.h"

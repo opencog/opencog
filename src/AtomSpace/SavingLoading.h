@@ -26,12 +26,7 @@
 #ifndef SAVINGLOADING_H
 #define SAVINGLOADING_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
-
+#include "platform.h"
 #include "Node.h"
 #include "Link.h"
 #include "types.h"
@@ -41,10 +36,7 @@
 #include "SavableRepository.h"
 #include "AtomSpace.h"
 
-#ifndef WIN32
-#include <ext/hash_map>
-using __gnu_cxx::hash_map;
-#endif
+#include <stdio.h>
 
 namespace opencog
 {
@@ -58,7 +50,7 @@ class SavingLoading
 
 private:
 
-    typedef opencog::hash_map<const char *, SavableRepository*, opencog::hash<const char*>, opencog::eqconststr> RepositoryHash;
+    typedef hash_map<const char *, SavableRepository*, hash<const char*>, opencog::eqconststr> RepositoryHash;
 
     /**
      * Stores the SavableRepositories actually loaded with Novamente.

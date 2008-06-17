@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _UTIL_RECENT_VAL_H
-#define _UTIL_RECENT_VAL_H
+#ifndef _OPENCOG_RECENT_VAL_H
+#define _OPENCOG_RECENT_VAL_H
 
 namespace opencog
 {
@@ -54,4 +54,4 @@ template<class ValueType> struct recent_val {
 };
 }
 
-#endif // _UTIL_RECENT_VAL_H
+#endif // _OPENCOG_RECENT_VAL_H

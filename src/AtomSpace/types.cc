@@ -24,12 +24,13 @@
  */
 
 #include "types.h"
+#include "platform.h"
 
 using namespace opencog;
 
 int hashHandle::operator()(Handle h) const
 {
-    int hashCode =  opencog::hash<unsigned long>()((unsigned long) h);
+    int hashCode =  hash<unsigned long>()((unsigned long) h);
     return(hashCode);
 }
 

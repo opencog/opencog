@@ -16,11 +16,12 @@ ADD_EXECUTABLE(sniff
 	sniff.cc
 )
 
-TARGET_LINK_LIBRARIES(persist iodbc)
+TARGET_LINK_LIBRARIES(persist
+	${IODBC_LIBRARIES}
+)
 
 TARGET_LINK_LIBRARIES(sniff
 	persist
-	iodbc
 	AtomSpace
 	${IODBC_LIBRARIES}
 )

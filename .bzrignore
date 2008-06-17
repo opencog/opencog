@@ -11,3 +11,12 @@ src/examples/hopfield/hopfield
 src/persist/sniff
 opencog.log
 tests/Testing/
+
+# WIN32 specific
+*.lib
+*.pdb
+*.exe*
+*.ilk
+*.dll*
+*.nmake
+CTestTestfile.cmake

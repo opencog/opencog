@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _UTIL_HASH_SET_H
-#define _UTIL_HASH_SET_H
+#ifndef _OPENCOG_HASH_SET_H
+#define _OPENCOG_HASH_SET_H
 
 #include <ext/hash_set>
 

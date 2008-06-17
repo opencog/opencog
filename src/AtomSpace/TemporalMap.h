@@ -64,7 +64,7 @@ private:
     /**
      * Defines the hash_map that will be used.
      */
-    typedef opencog::hash_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
+    typedef hash_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
 
 public:
 
