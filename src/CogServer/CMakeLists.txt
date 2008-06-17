@@ -30,7 +30,6 @@ TARGET_LINK_LIBRARIES(CogServer
 	AtomSpace
 	NMXml
 	Util
-	cachedb
 	query
 	schemes
 	wsd
