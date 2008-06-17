@@ -5,7 +5,7 @@ SET(CMAKE_BUILD_TYPE Debug) #Release)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector -Wall")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g -fstack-protector -Wall")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # check dependencies
