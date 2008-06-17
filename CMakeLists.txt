@@ -14,7 +14,7 @@ FIND_PACKAGE(CSockets REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(IODBC)
-FIND_PACKAGE(LibMemCached)
+# FIND_PACKAGE(LibMemCached)
 FIND_PACKAGE(Guile)
 
 # add compiler definitions associated with the optional dependencies
@@ -28,9 +28,11 @@ IF (GUILE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 ENDIF (GUILE_FOUND)
 
-IF (LIBMEMCACHED_FOUND)
-	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
-ENDIF (LIBMEMCACHED_FOUND)
+# At this time,. there is no reason to build with memcached for 
+# any "normal" use, so just stub it out.
+# IF (LIBMEMCACHED_FOUND)
+#	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
+# ENDIF (LIBMEMCACHED_FOUND)
 
 # global includes
 INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIRS})
