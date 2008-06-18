@@ -62,6 +62,16 @@ void ServerSocket::OnDisconnect()
     logger().debug("ServerSocket.OnDisconnect");
     if (!in_raw_mode) return;
 
+    // There may still be unprocessed bytes in the CSockets input buffer.
+    size_t remaining = ibuf.GetLength();
+    if (0 < remaining) {
+        char * bfr = (char *) malloc((remaining+1) * sizeof(char));
+        ibuf.Read(bfr, remaining);
+        bfr[remaining] = 0x0;
+        buffer += bfr;
+        free(bfr);
+    }
+
     cb->AtomicInc(1);
     master->processCommandLine(cb, buffer);
     SetLineProtocol(true);
