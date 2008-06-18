@@ -18,8 +18,8 @@ Add full support for Atom deletion.
 Add full support for 64-bit systems, including >4Gigs of atoms.
 
 Performance status:
-AtomTable load time is nearly 4x faster than loading from NMXml;
-Also, loading from SQL reduces cogServer memory usage by 2x.
+AtomTable load time is more than 6x faster than loading from NMXml;
+Also, loading from SQL reduces cogServer memory usage by 3x.
 This strongly indicates that the NMXml loader fragments RAM in a 
 bad way.
 
