@@ -251,6 +251,12 @@ Implement inline edges, instead of storing eges in an outboard table.
   cogserver = 41 seconds = 26.7 microsecs/atom (37.5K atoms/sec)
   postgres  =  7 seconds =  4.56 microsecs/atom (219K atoms/sec)
 
+Turn on -O3 optimization during compile ... all previous figures
+were without *any* optimization. Now get 
+
+  cogserver = 24 seconds = 15.6 microsecs/atom (64.0K atoms/sec)
+
+Much much better!
 
 Evidence of sever memory fragmentation
 --------------------------------------
