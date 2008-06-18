@@ -256,6 +256,8 @@ Evidence of sever memory fragmentation
 --------------------------------------
 loading 1536K Atoms from XML results in cogserver using 1210 MBytes ram.
 loading 1536K Atoms from SQL results in cogserver using 633 MBytes ram.
+loading 1536K Atoms from SQL (with new record managemnt) results in 
+cogserver using 442 MBytes ram.
 
 almost half as much ram !!
 
