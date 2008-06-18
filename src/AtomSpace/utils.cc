@@ -233,95 +233,78 @@ int opencog::bitcount(unsigned long n)
 
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3, tree<Vertex> t4)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
         ret.append_child(ret.begin(), t2.begin());
         ret.append_child(ret.begin(), t3.begin());
         ret.append_child(ret.begin(), t4.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
+
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
         ret.append_child(ret.begin(), t2.begin());
         ret.append_child(ret.begin(), t3.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
         ret.append_child(ret.begin(), t2.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 
 tree<Vertex> MakeVirtualAtom_slow(Type T)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 #endif
-
 
 bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const
 {
     return (*this)(lhs, rhs, lhs.begin(), rhs.begin());
 }
-int ddd = 0;
 bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs,
                                   tree<Vertex>::iterator ltop,
                                   tree<Vertex>::iterator rtop) const
 {
-    /*  if (ddd)
-    {
-    raw_print(*const_cast<tree<Vertex>*>(&lhs), const_cast<tree<Vertex>*>(&lhs)->begin(), 0);
-    raw_print(*const_cast<tree<Vertex>*>(&rhs), const_cast<tree<Vertex>*>(&rhs)->begin(), 0);
-    }*/
-
     if (*ltop < *rtop)
         return true;
     if (*rtop < *ltop)
@@ -438,68 +421,57 @@ nocase_string::nocase_string() { }
 
 bool nocase_string::operator <(const char* rhs)
 {
-
-    if (nocase_equal(this->c_str(), rhs)) {
-        return false; //equal
-    } else {
-        return strcmp(this->c_str(), rhs);
-    }
+	return strcasecmp(this->c_str(), rhs) < 0;
 }
 
 bool nocase_string::operator <(const nocase_string& rhs)
 {
-    return ((*this) < rhs.c_str());
+	return strcasecmp(this->c_str(), rhs.c_str()) < 0;
 }
 
 bool nocase_string::operator <(const string& rhs)
 {
-    return ((*this) < rhs.c_str());
+	return strcasecmp(this->c_str(), rhs.c_str()) < 0;
 }
 
 bool nocase_string::operator ==(const char* rhs)
 {
-    return nocase_equal(this->c_str(), rhs);
+    return strcmp(this->c_str(), rhs) == 0;
 }
 
 bool nocase_string::operator ==(const nocase_string& rhs)
 {
-    return nocase_equal(this->c_str(), rhs.c_str());
+    return strcmp(this->c_str(), rhs.c_str()) == 0;
 }
 
 bool nocase_string::operator ==(const string& rhs)
 {
-    return nocase_equal(this->c_str(), rhs.c_str());
+	return strcasecmp(this->c_str(), rhs.c_str()) == 0;
 }
 
 bool nocase_string::operator !=(const char* rhs)
 {
-    return !(*this == rhs);
+	return strcasecmp(this->c_str(), rhs) != 0;
 }
+
 bool nocase_string::operator !=(const nocase_string& rhs)
 {
-    return !(*this == rhs);
+	return strcasecmp(this->c_str(), rhs.c_str()) != 0;
 }
+
 bool nocase_string::operator !=(const string& rhs)
 {
-    return !(*this == rhs);
+	return strcasecmp(this->c_str(), rhs.c_str()) != 0;
 }
+
 void nocase_string::operator +=(nocase_string s)
 {
     string::operator+=(s);
 }
+
 nocase_string nocase_string::operator+(nocase_string s)
 {
     return nocase_string(string(*this) + string(s));
-}
-
-bool opencog::nocase_equal(const char *s1, const char *s2)
-{
-    int i;
-    for (i = 0; s1[i] != 0 && s2[i] != 0;i++)
-        if (Isox(s1[i]) != Isox(s2[i]))
-            return false;
-
-    return (s1[i] == 0 && s2[i] == 0);
 }
 
 StringTokenizer::StringTokenizer(const string &rStr, const string &rDelimiters)

@@ -13,9 +13,6 @@ LINK_DIRECTORIES(
 )
 
 LINK_LIBRARIES(Util AtomSpace Server attention)
-IF(WIN32)
-	LINK_LIBRARIES(winmm)
-ENDIF(WIN32)
 
 ADD_CXXTEST(ImportanceUpdatingAgentUTest)
 ADD_CXXTEST(STIDecayingAgentUTest)

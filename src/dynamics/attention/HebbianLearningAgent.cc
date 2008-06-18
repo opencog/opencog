@@ -51,7 +51,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 
     // tc affects the truthvalue
     float tc, old_tc, new_tc;
-    float tcDecayRate = 0.1;
+    float tcDecayRate = 0.1f;
 
     logger().debug("------- Hebbian Learning update "
                    "(convert links = %d)", convertLinks);
@@ -82,7 +82,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
             // (initially for hopfield emulation, but could
             // be useful in other cases)
             if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK) {
-                tc = (tcDecayRate * -new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+                tc = (tcDecayRate * -new_tc) + ( (1.0f - tcDecayRate) * old_tc);
                 if (tc < 0) {
                     // Inverse link no longer representative
                     // change to symmetric hebbian link
@@ -93,7 +93,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     a->setMean(h, tc);
                 }
             } else {
-                tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+                tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
                 if (tc < 0) {
                     // link no longer representative
                     // change to inverse hebbian link
@@ -110,7 +110,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
             // otherwise just update link weights
             if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK)
 				new_tc = -new_tc;
-            tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+            tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
             if (tc < 0.0f) tc = 0.0f;
             a->setMean(h, tc);
         }
@@ -179,7 +179,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     std::vector<float> normsti_v;
     bool tcInit = true;
 
-	logger().fine("TC: start", sti);
+	logger().fine("TC: start");
 
     for (h_i = handles.begin();
             h_i != handles.end();

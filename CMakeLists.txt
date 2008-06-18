@@ -1,7 +1,9 @@
 PROJECT(OPENCOG)
 SET(CMAKE_BUILD_TYPE Debug) #Release)
 
-# add the 'vendor' dir to cmake's module search path
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+
+# add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 IF(CMAKE_COMPILER_IS_GNUCXX)

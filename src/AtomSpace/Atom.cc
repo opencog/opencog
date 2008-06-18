@@ -212,7 +212,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
     //if (value > 1) value = 1;
     //if (value < 0) value = 0;
 
-    int oldBin;
+    int oldBin = -1;
     if (atomTable != NULL) {
         // gets current bin
         oldBin = AtomTable::importanceBin(attentionValue->getSTI());
@@ -598,7 +598,7 @@ void Atom::merge(Atom* other) throw (InconsistenceException)
 bool Atom::isMarkedForRemoval() const
 {
     //printf("Atom::isMarkedForRemoval(): %p\n", this);
-    return flags & MARKED_FOR_REMOVAL;
+    return (flags & MARKED_FOR_REMOVAL) != 0;
 }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
@@ -694,7 +694,7 @@ int* Atom::buildPredicateIndices(int *size) const
 
 bool Atom::getFlag(int flag) const
 {
-    return flags & flag;
+    return (flags & flag) != 0;
 }
 
 void Atom::setFlag(int flag, bool value)

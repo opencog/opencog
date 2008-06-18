@@ -28,7 +28,7 @@ namespace opencog
 ForgettingAgent::ForgettingAgent()
 {
     // forget 0.1% of atoms
-    forgetPercentage = 0.001;
+    forgetPercentage = 0.001f;
     // No limit to lti of removed atoms
     forgetThreshold = AttentionValue::MAXLTI;
 }

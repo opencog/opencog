@@ -44,13 +44,13 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     updateLinks = true;
 
     noiseOn = false;
-    noiseOdds = 0.20;
+    noiseOdds = 0.20f;
     noiseUnit = 10;
 
     // set decay rates for dampened values
-    totalStimulusSinceReset.decay = 0.5;
-    attentionalFocusSize.decay = 0.8;
-    attentionalFocusNodesSize.decay = 0.8;
+    totalStimulusSinceReset.decay = 0.5f;
+    attentionalFocusSize.decay = 0.8f;
+    attentionalFocusNodesSize.decay = 0.8f;
 
     targetLobeSTI = config().get_int("STARTING_STI_FUNDS");
     acceptableLobeSTIRange[0] = targetLobeSTI - config().get_int("STI_FUNDS_BUFFER");
@@ -227,7 +227,7 @@ bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 opencog::RandGen* ImportanceUpdatingAgent::getRandGen()
 {
     if (!rng) {
-        rng = new opencog::MT19937RandGen(time(NULL));
+        rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
     return rng;
 }

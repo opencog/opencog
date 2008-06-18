@@ -345,7 +345,7 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflush(stdout);
 
-    cassert(TRACE_INFO, boost::get<Handle>(&*it), "AtomSpace::addAtom(): Vertex should be of 'Handle' type.");
+    cassert(TRACE_INFO, boost::get<Handle>(&(*it)) != NULL, "AtomSpace::addAtom(): Vertex should be of 'Handle' type.");
 
     HandleSeq handles;
     Handle head_type = boost::get<Handle>(*it);
@@ -609,8 +609,8 @@ void AtomSpace::setName(Handle h, const string& name)
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflus(stdout);
 
-    Node * nnn = dynamic_cast<Node*>(TLB::getAtom(h));
-    cassert(TRACE_INFO, nnn, "AtomSpace::setName(): Handle h should be of 'Node' type.");
+    Node *nnn = dynamic_cast<Node*>(TLB::getAtom(h));
+    cassert(TRACE_INFO, nnn != NULL, "AtomSpace::setName(): Handle h should be of 'Node' type.");
     nnn->setName(name);
 }
 

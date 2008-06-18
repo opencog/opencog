@@ -45,8 +45,6 @@ throw (InvalidParamException, AssertionException)
     if (!ClassServer::isAssignableFrom(NODE, type)) {
         throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
     }
-
-    cassert(TRACE_INFO, &name, "Node - name parameter should not be NULL.");
     name = cname;
 }
 

@@ -73,7 +73,7 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
 
     SimpleTruthValue tv1(0.001f, 0.00001f);
     SimpleTruthValue tv2(0.001f, 0.00001f);
-    SimpleTruthValue tv3(0.5, 0.99);
+    SimpleTruthValue tv3(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
     buf[baseNameLength] = '2';
@@ -143,27 +143,27 @@ public:
         };
         Handle h[NUM_NODES];
         for (int i = 0; i < NUM_NODES; i++) {
-            h[i] = atomSpace->addNode (CONCEPT_NODE, nodeNames[i], SimpleTruthValue(0.001, SimpleTruthValue::confidenceToCount(0.99)));
+            h[i] = atomSpace->addNode (CONCEPT_NODE, nodeNames[i], SimpleTruthValue(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //printf("Nodes created\n");
 
-        float ForceUser[NUM_FORCEUSER_LINKS] = {0.99, 0.99, 0.0, 0.5};
+        float ForceUser[NUM_FORCEUSER_LINKS] = {0.99f, 0.99f, 0.0f, 0.5f};
         Handle FU[NUM_FORCEUSER_LINKS];
         for (int i = 0; i < NUM_FORCEUSER_LINKS; i++) {
             std::vector<Handle> temp(2);
             temp[0] = h[i];
             temp[1] = h[4];
-            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp, SimpleTruthValue(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99)));
+            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp, SimpleTruthValue(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //printf("ForceUser links created\n");
 
-        float Human[4] = {0.99, 0.99, 0.5, 0.0};
+        float Human[4] = {0.99f, 0.99f, 0.5f, 0.0f};
         vector<Handle> out[4];
         Handle H[4];
         for (int i = 0; i < 4; i++) {
             out[i].push_back(h[i]);
             out[i].push_back(h[5]);
-            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i], SimpleTruthValue(Human[i], SimpleTruthValue::confidenceToCount(0.99)));
+            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i], SimpleTruthValue(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //printf("Human links created\n");
 
@@ -370,7 +370,7 @@ public:
     void testAddAtomVtreeTruthValueBool() {
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5, 0.99));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
         tree<Vertex> tr = mva(TLB::getHandle((Atom *)EVALUATION_LINK),
                               mva(h1),
                               mva(TLB::getHandle((Atom *)LIST_LINK),
@@ -423,14 +423,14 @@ public:
     void testAddNode() {
         SimpleTruthValue tv1(0.001f, 0.00001f);
         SimpleTruthValue tv2(0.001f, 0.00001f);
-        SimpleTruthValue tv3(0.5, 0.99);
+        SimpleTruthValue tv3(0.5f, 0.99f);
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1);
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2);
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", tv3);
 
         SimpleTruthValue tv1_(0.002f, 0.00002f);
         SimpleTruthValue tv2_(0.1f, 0.0f);
-        SimpleTruthValue tv3_(0.6, 0.90);
+        SimpleTruthValue tv3_(0.6f, 0.90f);
         Handle h1_ = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1_);
         Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2_);
         Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree", tv3_);
@@ -464,7 +464,7 @@ public:
     void testAddLink() {
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5, 0.99));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
         SimpleTruthValue tv1(0.001f, 0.00001f);
         SimpleTruthValue tv2(0.001f, 0.00001f);
         HandleSeq outgoing1;

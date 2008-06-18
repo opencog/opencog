@@ -43,7 +43,7 @@ int opencog::gettimeofday(struct timeval* tp, void* tzp)
 {
     struct _timeb timebuffer;
     _ftime(&timebuffer);
-    tp->tv_sec = timebuffer.time;
+    tp->tv_sec = (long) timebuffer.time;
     tp->tv_usec = timebuffer.millitm * 1000;
     /* 0 indicates that the call succeeded. */
     return 0;

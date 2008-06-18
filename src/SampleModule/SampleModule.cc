@@ -10,7 +10,7 @@ class Foo
 public:
     Foo() {
         printf("hello world\n");
-        AtomSpace *space = CogServer::getAtomSpace();
+        CogServer::getAtomSpace();
     }
 };
 

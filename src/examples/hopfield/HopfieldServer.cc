@@ -76,7 +76,7 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
 float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 10, float mutate = 0.0f, Pattern c = Pattern(0, 0))
 {
     float result;
-    float before;
+    float before = 0.0;
     Pattern rPattern(width, height);
 
     imprintPattern(p, 1);
@@ -138,7 +138,7 @@ HopfieldServer::HopfieldServer()
     hebLearnAgent->convertLinks = true;
     spreadAgent = new ImportanceSpreadingAgent();
     forgetAgent = new ForgettingAgent();
-    forgetAgent->forgetPercentage = 0.10;
+    forgetAgent->forgetPercentage = 0.10f;
 
 
     plugInMindAgent(importUpdateAgent, 1);

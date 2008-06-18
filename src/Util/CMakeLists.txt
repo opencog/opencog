@@ -1,3 +1,9 @@
+IF (WIN32)
+	SET(WIN32_GETOPT_FILES getopt getopt_long)
+ELSE (WIN32)
+	SET(WIN32_GETOPT_FILES)
+ENDIF (WIN32)
+
 ADD_LIBRARY(Util
 	Config
 	exceptions
@@ -7,7 +13,5 @@ ADD_LIBRARY(Util
 	platform.cc
 	StringTokenizer
 	tree
+	${WIN32_GETOPT_FILES}
 )
-IF (WIN32)
-	ADD_LIBRARY(Util getopt.c getopt_long.c)
-ENDIF (WIN32)

@@ -191,7 +191,7 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     if (!(*nextToken)) {
         return Temporal(a, b);
     }
-    bool normal = atoi(++nextToken); // must be true, actually.
+    bool normal = atoi(++nextToken) != 0; // must be true, actually.
     return Temporal(a, b, normal);
 }
 

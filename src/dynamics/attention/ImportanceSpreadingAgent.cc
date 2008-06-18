@@ -81,7 +81,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     HandleEntry *links, *he;
     float maxTransferAmount, totalRelatedness;
     int totalTransferred;
-    float importanceSpreadingFactor = 0.4;
+    float importanceSpreadingFactor = 0.4f;
     AttentionValue::sti_t minStealingBoundary;
 
     totalRelatedness = 0.0f;

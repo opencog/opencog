@@ -5,15 +5,14 @@
  * Copyright(c) 2003 Rodrigo Barra
  * All rights reserved.
  */
+
+#include "platform.h"
 #include <NMXmlParserExperiment.h>
 #include <ClassServer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <exceptions.h>
-#ifndef WIN32
-#include <unistd.h>
-#endif
 #include <Link.h>
 #include <TLB.h>
 #include <cxxtest/TestSuite.h>
@@ -26,6 +25,11 @@ using namespace opencog;
 #ifdef WIN32
 #include <fcntl.h>
 #include <io.h>
+
+#define open _open
+#define write _write
+#define close _close
+
 #define _S_IREAD 256
 #define _S_IWRITE 128
 int mkstemp(char *tmpl)

@@ -135,7 +135,7 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// printf("----\n");
 #endif
 
-	SimpleTruthValue stv(sim,0.9);
+	SimpleTruthValue stv((float) sim, 0.9f);
 	return stv;
 }
 
