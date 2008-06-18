@@ -809,12 +809,33 @@ void AtomStorage::load(AtomTable &table)
 	{
 		unsigned long cur = load_count;
 
+#if GET_ONE_BIG_BLOB
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
 		rp.rs = db_conn->exec(buff);
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
+#else
 
+		// It appears that, when the select statment returns more than about
+		// a million atoms or so, some sort of heap corruption occurs in 
+		// the odbc code, causing future mallocs to fail. So limit the number
+		// of records processed in one go. It also appears that asking for
+		// lots of records increases the memory fragmentation (and/or there's
+		// a memory leak in odbc??)
+#define STEP 123003
+		unsigned long rec;
+		for (rec = 0; rec <= max_nrec; rec += STEP)
+		{
+			char buff[BUFSZ];
+			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
+			        "height = %d AND uuid > %lu AND uuid <= %lu;",
+			        	hei, rec, rec+STEP);
+			rp.rs = db_conn->exec(buff);
+			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
+			rp.rs->release();
+		}
+#endif
 		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
 }
