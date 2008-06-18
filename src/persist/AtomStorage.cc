@@ -40,7 +40,7 @@ using namespace opencog;
  * converting each row into an Atom, or Edge.
  *
  * Intended to be allocated on stack, to avoid malloc overhead.
- * Methods are intended to be inlined, so as to avoid subroutine 
+ * Methods are intended to be inlined, so as to avoid subroutine
  * call overhead.  It really *is* supposed to be a convenience wrapper. :-)
  */
 class AtomStorage::Response
@@ -196,7 +196,7 @@ class AtomStorage::Response
 		}
 		bool intval_column_cb(const char *colname, const char * colvalue)
 		{
-			// we're not going to bother to check the column name ... 
+			// we're not going to bother to check the column name ...
 			intval = strtoul(colvalue, NULL, 10);
 			return false;
 		}
@@ -210,7 +210,7 @@ class AtomStorage::Response
 		}
 		bool note_id_column_cb(const char *colname, const char * colvalue)
 		{
-			// we're not going to bother to check the column name ... 
+			// we're not going to bother to check the column name ...
 			Handle h = strtoul(colvalue, NULL, 10);
 			id_set->insert(h);
 			return false;
@@ -266,7 +266,7 @@ class AtomStorage::Outgoing
 
 /**
  * Store the outgoing set of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to 
+ * Handle h must be the handle for the atom; its passed as an arg to
  * avoid having to look it up.
  */
 void AtomStorage::storeOutgoing(Atom *atom, Handle h)
@@ -281,7 +281,7 @@ void AtomStorage::storeOutgoing(Atom *atom, Handle h)
 /* ================================================================ */
 // Constructors
 
-AtomStorage::AtomStorage(const char * dbname, 
+AtomStorage::AtomStorage(const char * dbname,
                          const char * username,
                          const char * authentication)
 {
@@ -289,7 +289,7 @@ AtomStorage::AtomStorage(const char * dbname,
 	type_map_was_loaded = false;
 }
 
-AtomStorage::AtomStorage(const std::string dbname, 
+AtomStorage::AtomStorage(const std::string dbname,
                          const std::string username,
                          const std::string authentication)
 {
@@ -345,7 +345,7 @@ bool AtomStorage::tvExists(int tvid)
 
 /**
  * Store the truthvalue of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to 
+ * Handle h must be the handle for the atom; its passed as an arg to
  * avoid having to look it up.
  */
 int AtomStorage::storeTruthValue(Atom *atom, Handle h)
@@ -516,7 +516,7 @@ void AtomStorage::storeAtom(Atom *atom)
 	}
 
 	// Store the atom type and node name only if storing for the
-	// first time ever. Once an atom is in an atom table, it's 
+	// first time ever. Once an atom is in an atom table, it's
 	// name can type cannot be changed. Only its truth value can
 	// change.
 	if (false == update)
@@ -588,7 +588,7 @@ void AtomStorage::storeAtom(Atom *atom)
 
 #ifndef USE_INLINE_EDGES
 	// Store the outgoing handles only if we are storing for the first
-	// time, otherwise do nothing. The semantics is that, once the 
+	// time, otherwise do nothing. The semantics is that, once the
 	// outgoing set has been determined, it cannot be changed.
 	if (false == update)
 	{
@@ -638,7 +638,7 @@ void AtomStorage::store_typemap(void)
 
 void AtomStorage::load_typemap(void)
 {
-	/* Load the type map only once. If it was previously stored, 
+	/* Load the type map only once. If it was previously stored,
 	 * don't load it.
 	 */
 	if (type_map_was_loaded) return;
@@ -710,7 +710,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
  * Create a new atom, retreived from storage
  *
  * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the 
+ * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
 Atom * AtomStorage::getAtom(Handle h)
@@ -759,7 +759,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 			atom = new Link(realtype, outvec);
 		}
 
-		// Make sure that the handle in the TLB is synced with 
+		// Make sure that the handle in the TLB is synced with
 		// the handle we use in the database.
 		TLB::addAtom(atom, h);
 	}
@@ -816,21 +816,20 @@ void AtomStorage::load(AtomTable &table)
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
 #else
-
-		// It appears that, when the select statment returns more than about
-		// a million atoms or so, some sort of heap corruption occurs in 
-		// the odbc code, causing future mallocs to fail. So limit the number
-		// of records processed in one go. It also appears that asking for
-		// lots of records increases the memory fragmentation (and/or there's
-		// a memory leak in odbc??)
-#define STEP 123003
+		// It appears that, when the select statment returns more than
+		// about a 100K to a million atoms or so, some sort of heap
+		// corruption occurs in the odbc code, causing future mallocs
+		// to fail. So limit the number of records processed in one go.
+		// It also appears that asking for lots of records increases
+		// the memory fragmentation (and/or there's a memory leak in odbc??)
+#define STEP 12003
 		unsigned long rec;
 		for (rec = 0; rec <= max_nrec; rec += STEP)
 		{
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
 			        "height = %d AND uuid > %lu AND uuid <= %lu;",
-			        	hei, rec, rec+STEP);
+			         hei, rec, rec+STEP);
 			rp.rs = db_conn->exec(buff);
 			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 			rp.rs->release();
