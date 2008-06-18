@@ -779,7 +779,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	atom->setTruthValue(stv);
 
 	load_count ++;
-	if (load_count%1000 == 0)
+	if (load_count%10000 == 0)
 	{
 		fprintf(stderr, "\tLoaded %lu atoms.\n", load_count);
 	}
