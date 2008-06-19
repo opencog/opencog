@@ -633,7 +633,6 @@ void AtomStorage::store_typemap(void)
 		loading_typemap[t] = t;
 		storing_typemap[t] = t;
 	}
-
 }
 
 void AtomStorage::load_typemap(void)
@@ -860,23 +859,31 @@ void AtomStorage::store(const AtomTable &table)
 
 	store_typemap();
 
-	// Drop indexes, for faster loading.
 	Response rp;
+
+#ifndef USE_INLINE_EDGES
+	// Drop indexes, for faster loading.
+	// But this only matters for the non-inline eges...
 	rp.rs = db_conn->exec("DROP INDEX uuid_idx;");
 	rp.rs->release();
 	rp.rs = db_conn->exec("DROP INDEX src_idx;");
 	rp.rs->release();
+#endif
 
 	table.foreach_atom(&AtomStorage::store_cb, this);
 
+#ifndef USE_INLINE_EDGES
 	// Create indexes
 	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
 	rp.rs->release();
 	rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
 	rp.rs->release();
+#endif
 
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
+
+	fprintf(stderr, "\tStored %lu atoms.\n", store_count);
 
 	setMaxHeight();
 }

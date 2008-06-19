@@ -18,7 +18,7 @@ Add full support for Atom deletion.
 Add full support for 64-bit systems, including >4Gigs of atoms.
 
 Performance status:
-AtomTable load time is more than 6x faster than loading from NMXml;
+AtomTable load time is more than 3x faster than loading from NMXml;
 Also, loading from SQL reduces cogServer memory usage by 3x.
 This strongly indicates that the NMXml loader fragments RAM in a 
 bad way.
@@ -192,7 +192,7 @@ usage has been exceeded. This can be fixed by:
 (save file contents, then)
    sysctl -p /etc/sysctl.conf
 
-After tuning, save of data to DB gives result:
+After tuning, save of data to empty DB gives result:
    cogserver = 10:45 mins = 0.41  millisecs/atom (2.42K atoms/sec)
    postgres  =  7:32 mins = 0.29  millisecs/atom (2.65K atoms/sec)
    md        =  0:42 mins = 0.026 millisecs/atom (37K atoms/sec)
@@ -208,11 +208,37 @@ performance even further:
    cogserver = 2:54 mm:ss = 0.113 millisecs/atom (8.83K atoms/sec)
    postgres  = 2:22 mm:ss = 0.092 millisecs/atom (10.82K atoms/sec)
 
+Try again, compiled with -O3, storing to an empty table, with
+no indexes on it (and with inline outgoing sets):
+   cogserver = 2:40 mm:ss
+   postgres  = 2:16 mm:ss
+
+Try again, compiled with -O3, storing to empty table, while holding 
+the index on tables (and with inline outgoing sets).
+
+   cogserver = 2:51 mm:ss
+   postgres  = 2:06 mm:ss
+
+Appearently, the problem with the indexes has to do with holding them
+for the edge table; when there's no edge table, then there's no index 
+issue!?
+
+Try again, compiled with -O3, saving to (updating) a *full* database.
+(i.e. database already has the data, so we are doing UPDATE not INSERT)
+   cogserver = 2:19 mm:ss
+   postgres  = 4:35 mm:ss
+
+
 begin; commit;  
 use analyze;
 use prepare;
 
-   cogserver has used 2:34 mm:ss before start of save to sql.
+XML loading performance
+-----------------------
+Loading the dataset from XML files takes:
+
+   cogserver 2:34 mm:ss when compiled without optimization
+   cogserver 1:19 mm:ss when compiled with -O3 optimization
 
 Loading performance
 -------------------
@@ -265,7 +291,13 @@ loading 1536K Atoms from SQL results in cogserver using 633 MBytes ram.
 loading 1536K Atoms from SQL (with new record managemnt) results in 
 cogserver using 442 MBytes ram.
 
-almost half as much ram !!
+Almost one-third the ram !!
+
+The fragmentation occurs when the XML is piped to cogserver much faster
+than the cogserver can process it; the fragmentation is between data
+buffered from the sockets, and the cogserver itself.  The fragementation
+does *not* occur when the data is piped in more slowly,i.e. at the same 
+rate that opencog processes it.
 
 
 TODO
