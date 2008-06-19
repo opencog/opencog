@@ -19,6 +19,7 @@ MACRO(ADD_CXXTEST NAME)
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CXXTEST_INCLUDE_DIRS})
 
     ADD_TEST(${NAME} ${NAME})
+	ADD_DEPENDENCIES(tests ${NAME})
 ENDMACRO(ADD_CXXTEST)
 
 #The above macro generates a single source file for all input test headers. 

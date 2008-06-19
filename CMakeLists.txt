@@ -49,17 +49,13 @@ INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIRS})
 
 # recurse into 'src' and 'tests' dirs
 ADD_SUBDIRECTORY(src)
+
+ADD_CUSTOM_TARGET(tests)
 ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 
-# add 'tests' target (to _compile_ the tests) and the 'test'
-# target (to _run_ the tests)
-ADD_CUSTOM_TARGET(tests
-	COMMAND "${CMAKE_MAKE_PROGRAM}"
-	WORKING_DIRECTORY tests
-)
 ADD_CUSTOM_TARGET(test
 	DEPENDS tests
 	WORKING_DIRECTORY tests
 	COMMAND $(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	COMMAND ctest --force-new-ctest-process $(ARGS)
+	COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
 )
