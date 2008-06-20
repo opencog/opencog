@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY (sample)
+ADD_SUBDIRECTORY (dotty)
