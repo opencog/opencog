@@ -42,7 +42,10 @@
 #include <iostream>
 #include "exceptions.h"
 
-#ifndef WIN32
+#ifdef WIN32
+#include <hash_set>
+using namespace std;
+#else
 #include <ext/hash_set>
 using __gnu_cxx::hash_set;
 #endif

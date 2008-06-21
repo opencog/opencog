@@ -15,6 +15,7 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#include "platform.h"
 #include <stdio.h>
 
 #include "Node.h"
@@ -414,7 +415,7 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 		{
 			const char * sa = na->getName().c_str();
 			const char * sb = nb->getName().c_str();
-			char * ua = strchr(sa, '_');
+			const char * ua = strchr(sa, '_');
 			if (ua)
 			{
 				size_t len = ua-sa;
@@ -423,7 +424,7 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 				s[len] = 0x0;
 				sa = s;
 			}
-			char * ub = strchr(sb, '_');
+			const char * ub = strchr(sb, '_');
 			if (ub)
 			{
 				size_t len = ub-sb;

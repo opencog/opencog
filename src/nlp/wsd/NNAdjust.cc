@@ -8,6 +8,7 @@
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
+#include "platform.h"
 #include <stdio.h>
 
 #include "ForeachWord.h"
@@ -142,12 +143,11 @@ bool NNAdjust::sense_pair(Handle pair_link)
 
 	// If we are here, we've got the link that we want. 
 	// Increase its strength.
-	double strength = edge->getTruthValue().getMean();
-	strength *= strength_adjust;
-	SimpleTruthValue stv(strength, 1.0);
+	float strength = edge->getTruthValue().getMean() * (float) strength_adjust;
+	SimpleTruthValue stv(strength, 1.0f);
 
 	stv.setConfidence(edge->getTruthValue().getConfidence());
-   edge->setTruthValue(stv);
+	edge->setTruthValue(stv);
 
 	return false;
 }

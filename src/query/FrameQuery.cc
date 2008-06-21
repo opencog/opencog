@@ -22,6 +22,7 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
+#include "platform.h"
 #include <stdio.h>
 
 #include "Node.h"

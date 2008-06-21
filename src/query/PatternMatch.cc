@@ -3,7 +3,7 @@
  *
  * Linas Vepstas February 2008
  */
-
+#include "platform.h"
 #include "Foreach.h"
 #include "ForeachTwo.h"
 #include "Link.h"
@@ -14,10 +14,19 @@
 using namespace opencog;
 
 // #define DEBUG 1
+#ifdef WIN32
+#ifdef DEBUG
+	#define dbgprt printf
+#else
+    // something better?
+	#define dbgprt
+#endif
+#else
 #ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
 	#define dbgprt(f, varargs...) 
+#endif
 #endif
 
 PatternMatch::PatternMatch(AtomSpace *as)

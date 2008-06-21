@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include "IndefiniteTruthValue.h"
 #include "exceptions.h"
 
@@ -206,7 +207,7 @@ IndefiniteTruthValue* IndefiniteTruthValue::fromString(const char* tvStr)
     //printf("IndefiniteTruthValue::fromString(%s) => mean = %f, L = %f, U = %f, confLevel = %f, diff = %f, symmetric = %d\n", tvStr, m, l, u, c, d, s);
     IndefiniteTruthValue* result = new IndefiniteTruthValue(l, u, c);
     result->setDiff(d);
-    result->symmetric = s;
+    result->symmetric = s != 0;
     result->setMean(m);
     return result;
 }

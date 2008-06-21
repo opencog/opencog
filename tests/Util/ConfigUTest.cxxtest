@@ -22,11 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "Config.h"
+#include "exceptions.h"
+
 #include <iostream>
 #include <fstream>
 #include <cstdio>
-#include <Config.h>
-#include <exceptions.h>
 
 using namespace opencog;
 

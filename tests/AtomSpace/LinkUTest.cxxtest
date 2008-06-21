@@ -22,9 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <Node.h>
-#include <Link.h>
-#include <TLB.h>
+#include "platform.h"
+#include "Node.h"
+#include "Link.h"
+#include "TLB.h"
 
 using namespace opencog;
 
@@ -37,11 +38,9 @@ public:
         printf("sizeof(Trail) = %u\n", sizeof(Trail));
     }
 
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
     void testEquals() {
         Node* n1 = new Node(CONCEPT_NODE, "TEST");
@@ -105,7 +104,5 @@ public:
         TS_ASSERT(!l7->equals(l4));
         TS_ASSERT(!l7->equals(l5));
         TS_ASSERT(!l7->equals(l6));
-
     }
-
 };

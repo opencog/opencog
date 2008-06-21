@@ -23,10 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _UTIL_LAZY_RANDOM_SELECTOR_H
-#define _UTIL_LAZY_RANDOM_SELECTOR_H
+#ifndef _OPENCOG_LAZY_RANDOM_SELECTOR_H
+#define _OPENCOG_LAZY_RANDOM_SELECTOR_H
 
-#include "hash_map.h"
+#include "platform.h"
 #include "RandGen.h"
 
 namespace opencog

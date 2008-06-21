@@ -22,13 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <exceptions.h>
-#include <Sockets/ListenSocket.h>
-#include <Sockets/SocketHandler.h>
+#include "platform.h"
 
 #include "SimpleNetworkServer.h"
 #include "ServerSocket.h"
 #include "CommandRequest.h"
+
+#include <exceptions.h>
+#include <ListenSocket.h>
+#include <SocketHandler.h>
 
 using namespace opencog;
 

@@ -171,8 +171,8 @@ public:
         }
 
         // Merge with other types of TV
-        float lowerConfidence = simpleConfidences[1] - 0.01;
-        float upperConfidence = simpleConfidences[1] + 0.01;
+        float lowerConfidence = simpleConfidences[1] - 0.01f;
+        float upperConfidence = simpleConfidences[1] + 0.01f;
         TruthValue* otherTypeTv;
         // Merging SimpleTruthValue and CompositeTruthValue objects
         otherTypeTv = new CompositeTruthValue(SimpleTruthValue(0.333f, SimpleTruthValue::confidenceToCount(lowerConfidence)), NULL_VERSION_HANDLE);

@@ -59,9 +59,10 @@
      Using a comparison class now, but this should be investigated.
 */
 
-#ifndef _UTIL_TREE_H
-#define _UTIL_TREE_H
+#ifndef _OPENCOG_TREE_H
+#define _OPENCOG_TREE_H
 
+#include "platform.h"
 #include <cassert>
 #include <memory>
 #include <stdexcept>
@@ -3017,18 +3018,21 @@ std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
     return  in;
 }
 
+namespace std {
 template<typename T>
-void std::swap(opencog::tree<T>& x, opencog::tree<T>& y)
+void swap(opencog::tree<T>& x, opencog::tree<T>& y)
 {
-    std::swap(x.head, y.head);
-    std::swap(x.feet, y.feet);
+	swap(x.head, y.head);
+	swap(x.feet, y.feet);
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream&, const opencog::tree<T>&);
-template<typename T>
-std::istream& operator>>(std::istream&, opencog::tree<T>&);
+ostream& operator<<(ostream&, const opencog::tree<T>&);
 
-std::istream& operator>>(std::istream& in, opencog::tree<std::string>& t);
+template<typename T>
+istream& operator>>(istream&, opencog::tree<T>&);
+
+istream& operator>>(istream& in, opencog::tree<string>& t);
+} // namespace std
 
 #endif

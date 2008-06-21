@@ -13,4 +13,4 @@ INCLUDE_DIRECTORIES(
 	${OPENCOG_SOURCE_DIR}/src/query
 )
 
-TARGET_LINK_LIBRARIES(attention CogServer)
+TARGET_LINK_LIBRARIES(attention Server)

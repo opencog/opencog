@@ -13,6 +13,7 @@
  */
 #ifdef HAVE_SQL_STORAGE
 
+#include "platform.h"
 #include <stdlib.h>
 
 #include "odbcxx.h"
@@ -532,7 +533,7 @@ void AtomStorage::storeAtom(Atom *atom)
 		{
 			std::string qname = n->getName();
 			escape_single_quotes(qname);
-			qname.insert(0,1,'\'');
+			qname.insert(0U,1U,'\'');
 			qname += "'";
 			STMT("name", qname);
 

@@ -24,6 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include "AtomSpace.h"
 #include "AtomTable.h"
 #include "Node.h"
@@ -41,6 +42,8 @@
 
 #include <iostream>
 #include <fstream>
+
+#define ATOM_TABLE_TEST_XML_FILE "cw_proxy_1.xml"
 
 using namespace opencog;
 

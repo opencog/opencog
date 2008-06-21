@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include "HandleEntry.h"
 #include "ClassServer.h"
 #include "exceptions.h"

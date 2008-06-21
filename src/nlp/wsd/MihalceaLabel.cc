@@ -6,6 +6,7 @@
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
+#include "platform.h"
 #include <stdio.h>
 
 #include "ForeachWord.h"
@@ -121,8 +122,8 @@ bool MihalceaLabel::annotate_word_sense(Handle h)
 	out.push_back(TLB::getHandle(word_sense));
 
 	// Give it a false truth value, very low confidence.
-	SimpleTruthValue stv(0.0, 1.0);
-	stv.setConfidence(0.01);
+	SimpleTruthValue stv(0.0f, 1.0f);
+	stv.setConfidence(0.01f);
 	atom_space->addLink(INHERITANCE_LINK, out, stv);
 
 	return false;

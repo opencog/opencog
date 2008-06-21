@@ -4,7 +4,7 @@ Instalation and dependency resolution for OpenSUSE 10.3 users
 
 Opencog depends on the following packages:
 
-   subversion gcc-c++ make cmake openssl-devel boost-devel libexpat-devel
+   gcc-c++ make cmake openssl-devel boost-devel libexpat-devel
 
 ----------------------------------------------------------
 

@@ -4,7 +4,7 @@ Instalation and dependency resolution for Fedora 8 users
 
 Opencog depends on the following packages:
 
-   subversion gcc-c++ cmake openssl openssl-devel boost boost-devel expat
+   gcc-c++ cmake openssl openssl-devel boost boost-devel expat
    expat-devel 
 
 ----------------------------------------------------------

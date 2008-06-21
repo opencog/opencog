@@ -25,6 +25,7 @@
 #ifndef _COMPOSITE_TRUTH_VALUE_H_
 #define _COMPOSITE_TRUTH_VALUE_H_
 
+#include "platform.h"
 #include "TruthValue.h"
 #include "HandleMap.h"
 #include "VersionHandle.h"
@@ -32,7 +33,7 @@
 namespace opencog
 {
 
-typedef opencog::hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+typedef hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
 
 class CompositeTruthValue: public TruthValue
 {

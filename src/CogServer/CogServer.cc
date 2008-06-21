@@ -28,9 +28,11 @@
 #include "exceptions.h"
 #include "SimpleNetworkServer.h"
 
-#include <unistd.h>
 #include <time.h>
+#ifndef WIN32
+#include <unistd.h>
 #include <sys/time.h>
+#endif
 
 using namespace opencog;
 AtomSpace* CogServer::atomSpace = NULL;
@@ -100,7 +102,7 @@ void CogServer::serverLoop()
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
         if ((cycle_duration - elapsed_time) > 0)
-            usleep(cycle_duration - elapsed_time);
+            usleep((unsigned int) (cycle_duration - elapsed_time));
         timer_start = timer_end;
     }
 }

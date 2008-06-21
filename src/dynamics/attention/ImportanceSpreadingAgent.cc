@@ -18,6 +18,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include "platform.h"
 #include "ImportanceSpreadingAgent.h"
 
 #include <CogServer.h>
@@ -80,7 +81,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     HandleEntry *links, *he;
     float maxTransferAmount, totalRelatedness;
     int totalTransferred;
-    float importanceSpreadingFactor = 0.4;
+    float importanceSpreadingFactor = 0.4f;
     AttentionValue::sti_t minStealingBoundary;
 
     totalRelatedness = 0.0f;

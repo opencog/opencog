@@ -24,15 +24,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef DEBUG
-#undef DEBUG
-#endif
-
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef _OPENCOG_LOGGER_H
+#define _OPENCOG_LOGGER_H
 
 #include <string>
 #include <pthread.h>
+
+#undef ERROR
+#undef DEBUG
 
 namespace opencog
 {

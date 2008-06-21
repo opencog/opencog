@@ -1,6 +1,3 @@
-
-SET(CMAKE_BUILD_TYPE Debug)
-
 ADD_LIBRARY (AtomSpace STATIC
 	TLB.cc
 	Atom.cc         

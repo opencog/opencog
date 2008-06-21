@@ -24,11 +24,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include "Logger.h"
 
 #include <stdarg.h>
 #include <time.h>
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 
 using namespace opencog;
 
@@ -120,8 +123,9 @@ void Logger::log(Logger::Level level, const std::string &txt)
             struct timeval stv;
             struct tm stm;
 
-            gettimeofday(&stv, NULL);
-            gmtime_r(&(stv.tv_sec), &stm);
+            ::gettimeofday(&stv, NULL);
+            time_t t = stv.tv_sec;
+            gmtime_r(&t, &stm);
             strftime(timestamp, sizeof(timestamp), "%F %T", &stm);
             fprintf(f, "[%s:%03ld] ", timestamp, stv.tv_usec / 1000);
             if (printToStdout) fprintf(stdout, "[%s:%3ld] ", timestamp, stv.tv_usec / 1000);

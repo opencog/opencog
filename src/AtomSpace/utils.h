@@ -135,7 +135,7 @@ void initReferenceTime();
  * initReferenceTime() function. The initReferenceTime() function must be called before
  * this function be called by the first time.
  */
-ulong getElapsedMillis();
+unsigned long getElapsedMillis();
 
 /** STL-Listifies a TemporalEntry */
 template<typename T, typename OutT>

@@ -19,11 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 
 #include <AttentionValue.h>
 #include <mt19937ar.h>

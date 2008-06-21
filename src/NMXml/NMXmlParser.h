@@ -30,7 +30,7 @@
 #include "config.h"
 #endif
 
-//#include <agents/AtomTableManagementAgent.h>
+#include "platform.h"
 #include "utils.h"
 #include "HandleMap.h"
 #include "exceptions.h"
@@ -40,10 +40,6 @@
 #include <Node.h>
 #include <vector>
 #include <AtomSpace.h>
-
-#ifndef WIN32
-#include <ext/hash_map>
-#endif
 
 namespace opencog
 {
@@ -75,7 +71,7 @@ public:
      * the parsing (when only Nodes are read) to be used in the second
      * pass (to resolve references in Links).
      */
-    static opencog::hash_map<char *, Handle, opencog::hash<char *>, opencog::eqstr> hypHandles;
+    static hash_map<char *, Handle, hash<char *>, opencog::eqstr> hypHandles;
 
     /**
      * A special default (Simple) TruthValue object for any atom loaded from a XML doc,

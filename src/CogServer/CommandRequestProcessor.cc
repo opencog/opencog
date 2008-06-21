@@ -22,9 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include <pthread.h>
 #include <sstream>
+#ifndef WIN32
 #include <dlfcn.h>
+#endif
 
 #include "CommandRequestProcessor.h"
 #include "CommandRequest.h"
@@ -147,6 +150,7 @@ std::string CommandRequestProcessor::load(std::string fileName)
     return loadXML(new FileXMLBufferReader(fileName.c_str()));
 }
 
+#ifndef WIN32
 /**
  * Load a dynamic module and run it
  */
@@ -201,6 +205,12 @@ bool CommandRequestProcessor::externalCommand(std::string command, std::queue<st
     }
     return false;
 }
+#else // IFNDEF WIN32
+/** TODO: implement dynamic modules on WIN32 */
+bool CommandRequestProcessor::externalCommand(std::string command, std::queue<std::string> &args, std::string &answer) {
+	return false;
+}
+#endif // IFNDEF WIN32
 
 /**
  * Read XML data from a string
@@ -528,6 +538,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = load(args.front());
         }
+#ifndef WIN32
     } else if (command == "dlopen") {
         if (args.size() != 1) {
             answer = "dlopen: invalid command syntax";
@@ -540,6 +551,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = dlclose(args.front());
         }
+#endif
     } else if (command == "ls") {
         if (args.size() == 0) {
             answer = ls();

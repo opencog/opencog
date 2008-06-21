@@ -12,10 +12,7 @@ LINK_DIRECTORIES(
 	${OPENCOG_BINARY_DIR}/src/Util
 )
 
-LINK_LIBRARIES(Util AtomSpace CogServer attention)
-IF(WIN32)
-	LINK_LIBRARIES(winmm)
-ENDIF(WIN32)
+LINK_LIBRARIES(Util AtomSpace Server attention)
 
 ADD_CXXTEST(ImportanceUpdatingAgentUTest)
 ADD_CXXTEST(STIDecayingAgentUTest)

@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
 #include "CompositeTruthValue.h"
 #include "type_codes.h"
 #include "TLB.h"

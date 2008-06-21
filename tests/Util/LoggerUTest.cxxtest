@@ -25,7 +25,9 @@
  */
 
 #include "Logger.h"
+
 #include <fstream>
+#include <stdio.h>
 
 using namespace opencog;
 

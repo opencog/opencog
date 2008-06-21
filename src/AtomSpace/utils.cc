@@ -23,16 +23,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "platform.h"
+#include "utils.h"
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string>
-#include "utils.h"
+#include <time.h>
 #ifndef WIN32
 #include <sys/time.h>
-#endif
-
-#ifdef WIN32
-#include <winsock2.h>
 #endif
 
 using namespace opencog;
@@ -234,95 +233,78 @@ int opencog::bitcount(unsigned long n)
 
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3, tree<Vertex> t4)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
         ret.append_child(ret.begin(), t2.begin());
         ret.append_child(ret.begin(), t3.begin());
         ret.append_child(ret.begin(), t4.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
+
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
         ret.append_child(ret.begin(), t2.begin());
         ret.append_child(ret.begin(), t3.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
         ret.append_child(ret.begin(), t2.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 
 tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 
 tree<Vertex> MakeVirtualAtom_slow(Type T)
 {
+	tree<Vertex> ret;
     try {
-        tree<Vertex> ret;
         ret.set_head(Vertex((Handle)T));
-
-        return ret;
-
     } catch (...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
+	return ret;
 }
 #endif
-
 
 bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const
 {
     return (*this)(lhs, rhs, lhs.begin(), rhs.begin());
 }
-int ddd = 0;
 bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs,
                                   tree<Vertex>::iterator ltop,
                                   tree<Vertex>::iterator rtop) const
 {
-    /*  if (ddd)
-    {
-    raw_print(*const_cast<tree<Vertex>*>(&lhs), const_cast<tree<Vertex>*>(&lhs)->begin(), 0);
-    raw_print(*const_cast<tree<Vertex>*>(&rhs), const_cast<tree<Vertex>*>(&rhs)->begin(), 0);
-    }*/
-
     if (*ltop < *rtop)
         return true;
     if (*rtop < *ltop)
@@ -439,68 +421,57 @@ nocase_string::nocase_string() { }
 
 bool nocase_string::operator <(const char* rhs)
 {
-
-    if (nocase_equal(this->c_str(), rhs)) {
-        return false; //equal
-    } else {
-        return strcmp(this->c_str(), rhs);
-    }
+	return strcasecmp(this->c_str(), rhs) < 0;
 }
 
 bool nocase_string::operator <(const nocase_string& rhs)
 {
-    return ((*this) < rhs.c_str());
+	return strcasecmp(this->c_str(), rhs.c_str()) < 0;
 }
 
 bool nocase_string::operator <(const string& rhs)
 {
-    return ((*this) < rhs.c_str());
+	return strcasecmp(this->c_str(), rhs.c_str()) < 0;
 }
 
 bool nocase_string::operator ==(const char* rhs)
 {
-    return nocase_equal(this->c_str(), rhs);
+    return strcmp(this->c_str(), rhs) == 0;
 }
 
 bool nocase_string::operator ==(const nocase_string& rhs)
 {
-    return nocase_equal(this->c_str(), rhs.c_str());
+    return strcmp(this->c_str(), rhs.c_str()) == 0;
 }
 
 bool nocase_string::operator ==(const string& rhs)
 {
-    return nocase_equal(this->c_str(), rhs.c_str());
+	return strcasecmp(this->c_str(), rhs.c_str()) == 0;
 }
 
 bool nocase_string::operator !=(const char* rhs)
 {
-    return !(*this == rhs);
+	return strcasecmp(this->c_str(), rhs) != 0;
 }
+
 bool nocase_string::operator !=(const nocase_string& rhs)
 {
-    return !(*this == rhs);
+	return strcasecmp(this->c_str(), rhs.c_str()) != 0;
 }
+
 bool nocase_string::operator !=(const string& rhs)
 {
-    return !(*this == rhs);
+	return strcasecmp(this->c_str(), rhs.c_str()) != 0;
 }
+
 void nocase_string::operator +=(nocase_string s)
 {
     string::operator+=(s);
 }
+
 nocase_string nocase_string::operator+(nocase_string s)
 {
     return nocase_string(string(*this) + string(s));
-}
-
-bool opencog::nocase_equal(const char *s1, const char *s2)
-{
-    int i;
-    for (i = 0; s1[i] != 0 && s2[i] != 0;i++)
-        if (Isox(s1[i]) != Isox(s2[i]))
-            return false;
-
-    return (s1[i] == 0 && s2[i] == 0);
 }
 
 StringTokenizer::StringTokenizer(const string &rStr, const string &rDelimiters)
@@ -525,102 +496,12 @@ std::vector<string> StringTokenizer::WithoutEmpty() const
     return ret;
 }
 
-#ifdef WIN32
-
-/*
-float Abs(float a)
-{
- return (a>0) ? a : (-a);
-}
-*/
-/*
-float max(float a, float b) { return (a>b)?a:b; }
-float min(float a, float b) { return (a<b)?a:b; }
-*/
-int round(float x)
-{
-    return ( (x -(int)(x)) < 0.5 ) ? (int)x : (int)x + 1;
-}
-
-int gettimeofday(struct timeval* tp, void* tzp)
-{
-    unsigned long t;
-    t = timeGetTime();
-    tp->tv_sec = t / 1000;
-    tp->tv_usec = t % 1000;
-    /* 0 indicates that the call succeeded. */
-    return 0;
-}
-
-void usleep(unsigned int useconds)
-{
-    // Sleep is in milliseconds
-    // If 0 is passed to Sleep()
-    // It skips rest of thread scheduled time
-    // This is the best achievable with Millisecond
-    // resolution
-    Sleep((int)(useconds / 1000));
-}
-
-unsigned sleep(unsigned seconds)
-{
-    Sleep(seconds * 1000);
-    return 0;
-}
-
-#ifndef HAVE_STRTOK_R
-#define HAVE_STRTOK_R 1
-
-char * __strtok_r(char *s1, const char *s2, char **lasts)
-{
-    char *ret;
-
-    if (s1 == NULL)
-        s1 = *lasts;
-    while (*s1 && strchr(s2, *s1))
-        ++s1;
-    if (*s1 == '\0')
-        return NULL;
-    ret = s1;
-    while (*s1 && !strchr(s2, *s1))
-        ++s1;
-    if (*s1)
-        *s1++ = '\0';
-    *lasts = s1;
-    return ret;
-}
-
-#endif /* HAVE_STRTOK_R */
-
-#include <process.h>
-int __getpid(void)
-{
-    return _getpid();
-}
-
-#include <math.h>
-double rint(double nr)
-{
-    double f = floor(nr);
-    double c = ceil(nr);
-    return (((c -nr) >= (nr - f)) ? f : c);
-}
-
-#include <io.h>
-int __dup2(int fd1, int fd2)
-{
-    return _dup2(fd1, fd2);
-}
-
-
-#endif
 
 /**
  * Time used as reference to set/get timestamps over the code
  */
 static timeval referenceTime;
 static bool referenceTimeInitialized = false;
-
 
 void initReferenceTime()
 {

@@ -172,7 +172,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             hServer->links = atoi(optarg);
             break;
         case 'd':
-            hServer->density = atof(optarg);
+            hServer->density = (float) atof(optarg);
             break;
         case 's':
             hServer->patternStimulus = atoi(optarg);
@@ -196,7 +196,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             nPatterns = atoi(optarg);
             break;
         case 'g':
-            genPatternDensity = atof(optarg);
+            genPatternDensity = (float) atof(optarg);
             break;
         case 'c':
             imprintCycles = atoi(optarg);
@@ -205,7 +205,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             retrieveCycles = atoi(optarg);
             break;
         case 'e':
-            cueErrorRate = atof(optarg);
+            cueErrorRate = (float) atof(optarg);
             break;
         case 'm':
             showMatrixFlag = 1;
@@ -222,7 +222,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             totalFlag = 1;
             break;
         case 'q':
-            importanceSpreadingMultiplier = atof(optarg);
+            importanceSpreadingMultiplier = (float) atof(optarg);
             break;
         case 'a':
             recordToFile = true;

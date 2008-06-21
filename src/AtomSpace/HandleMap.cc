@@ -65,7 +65,7 @@ void HandleMap<T>::init(bool use_mutex)
 }
 
 template <class T>
-HandleMap<T>::~HandleMap<T>()
+HandleMap<T>::~HandleMap()
 {
 
     lock();

@@ -40,9 +40,8 @@ namespace opencog
 
 // TODO: These variables were moved from reasoning/StdAfx.h as they were. Find a better
 // implementation for them...
-const int DefaultU = 10000;
-const float MAX_TRUTH = 1.0f;
-const int MAX_TV_COUNT = DefaultU;
+const float MAX_TRUTH    =     1.0f;
+const float MAX_TV_COUNT = 10000.0f;
 
 // TruthValue types:
 // Warning: NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.

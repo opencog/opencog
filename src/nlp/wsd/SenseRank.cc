@@ -5,6 +5,7 @@
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
+#include "platform.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -160,7 +161,7 @@ void SenseRank::rank_sense(Handle h)
 	converge *= (1.0-convergence_damper);
 	converge += convergence_damper * fabs(rank_sum - old_rank);
 
-	SimpleTruthValue stv(rank_sum, 1.0);
+	SimpleTruthValue stv((float) rank_sum, 1.0f);
 	stv.setConfidence(sense->getTruthValue().getConfidence());
 	sense->setTruthValue(stv);
 }
