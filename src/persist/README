@@ -128,7 +128,8 @@ Next, the postgres default configuration needs to be tweaked for
 performance. Failure to do this will result in disastrous load and
 store times.
 
-Edit postgresql.conf and make the following changes:
+Edit postgresql.conf (a typical location is 
+/etc/postgresql/8.3/main/postgresql.conf) and make the following changes:
 
    shared_buffers = default was 24MB, change to 250MB
    work_mem = default was 1MB change to 32MB
@@ -228,6 +229,13 @@ Try again, compiled with -O3, saving to (updating) a *full* database.
    cogserver = 2:19 mm:ss
    postgres  = 4:35 mm:ss
 
+Try again, using unixodbc instead of iodbc, to empty table, with
+index tables (and -O3 and inlined outgoing):
+   cogserver = 2:36 mm:ss
+   postgres  = 2:13 mm:ss
+
+It appears that unixodbc is ever-so-slightly faster for store
+performance.
 
 begin; commit;  
 use analyze;
@@ -283,6 +291,14 @@ were without *any* optimization. Now get
   cogserver = 24 seconds = 15.6 microsecs/atom (64.0K atoms/sec)
 
 Much much better!
+
+Load performance with unixodbc (instead of iodbc):
+
+  cogserver = 25 seconds
+  postgres  = 112 seconds on one run, and 280 seconds on later runs!
+
+wtf !?!? 
+
 
 Evidence of sever memory fragmentation
 --------------------------------------
