@@ -30,7 +30,7 @@ the importer does not handle all relationships; in particular, it
 ignores "pertaining to", "caused by" and "entails" relationships.
 
 The wordnet database contains about 207 thousand word senses, 
-arranged into 37MB of flat-ascii files; this works out to about
+arranged into 37MB of flat-ASCII files; this works out to about
 180 Bytes per word-sense.
 
 Currently, dumping to a file results in a 630MB file. This works
@@ -62,9 +62,9 @@ as follows:
    appreciable memory savings. Long runs end with memory corruption.
 
 -- Updating AtomSpace/Trail.cc with new version from Welter Luigi 
-   decreased RAM usage to 207MBytes, or 1.7KB per sord sense. Wow!
+   decreased RAM usage to 207MBytes, or 1.7KB per word sense. Wow!
 
-   Similarly, the full (with colocations) load yeilds: 399MB/187K
+   Similarly, the full (with colocations) load yields: 399MB/187K
    = 2.1KB per word sense.
 
 
@@ -77,7 +77,7 @@ There does not appear to be any "adequate" programming interface to
 wordnet! There are many many interfaces, and yet, none of them are
 very good, much less comprehensive!
 
-The native wordnet interface is in the "C" programming langauge.
+The native wordnet interface is in the "C" programming language.
 It does not seem to be a well-designed interface. It does not seem to
 support any means by which the entire contents of the database can be
 dumped. It has serious problems:
@@ -90,10 +90,10 @@ dumped. It has serious problems:
 -- the api is incomplete: there are no routines for building up 
    a sense-key.
 
-However, the C api is very well-documneted; which makes it superior
-to all otehr systems.
+However, the C api is very well-documented; which makes it superior
+to all other systems.
 
-The use of Python, and the NLTK wordnet module was breifly explored.
+The use of Python, and the NLTK wordnet module was briefly explored.
 Unfortunately, the NLTK wordnet interfaces lack support for wordnet 
 sense-keys, which is crucial for properly/easily cross-indexing the
 various relations. The NLTK python interface is undocumented.
@@ -103,7 +103,7 @@ sense-keys either.
 
 The perl interface Lingua-Wordnet does not seem to support wordnet-3.0.
 
-The java interface JWNL does not seem to support wordnet-3.0, and 
+The Java interface JWNL does not seem to support wordnet-3.0, and 
 the API appears to be under-documented.
 
 
@@ -120,7 +120,7 @@ Consider the word "bark", thus:
 
     <WordNode name="bark" />   -- a word.
 
-Wordnet netries are not necessarily single words; more properly, the
+Wordnet entries are not necessarily single words; more properly, the
 should be called "lexical units": they can be single words,
 collocations, idioms, and so on.
 
@@ -169,7 +169,7 @@ syntax will be used:
 
 [[Square brackets set off design discussions; below follows some
 commentary about alternate ways in which the above might have been
-acheived.
+achieved.
 
 The above specifies a triple that is to be associated together, the
 triple ("bark_sense_23", PartOfSpeech, "noun").  Another possible way
@@ -199,7 +199,7 @@ could be useful, but this would loose the benefit of the predicate form.
 A predicate could still be created later, by making use of a link from
 the predicate name to a SatisfyingSetLink. ]]
 
-[[Per Ben, it seems desirable to *define* a new, unknow link type L to
+[[Per Ben, it seems desirable to *define* a new, unknown link type L to
 be
     L A B
     =
@@ -208,7 +208,7 @@ be
        ListLink A B
 
 Thus, the new link type PartOfSpeechLink is understood to be
-mathematically identical to an evaluation link where the pedicate name
+mathematically identical to an evaluation link where the predicate name
 is "part of speech". ]]
 
 Each of these nodes and links are assigned a truth value of 1 and a
@@ -255,7 +255,7 @@ subclasses:
    HOLONYM_LINK <- INHERITANCE_LINK
 
 Assigning all three subclasses to a single type of link does erase some
-of the information offered by WordNet; this may need to be revisted.
+of the information offered by WordNet; this may need to be revisited.
 
 To continue with the tree-bark example:
 
@@ -269,7 +269,7 @@ To continue with the tree-bark example:
    <HolonymLink strength=0.8 confidence=0.9>
       <WordSenseNode name="lignin_sense_1" />
       <WordSenseNode name="bark_sense_23" />
-   </HolonyLink>
+   </HolonymLink>
 
 There are distinct hypernym hierarchies for nouns and verbs;
 these hierarchies do not touch. Only nouns have a holonym
@@ -278,7 +278,7 @@ hierarchy.
 Nouns and verbs are related by means of "derivationally
 related forms", e.g. verbized nouns, etc.
 
-Adjectives and adverbes are not organized in hypernym or holonym 
+Adjectives and adverbs are not organized in hypernym or holonym 
 hierarchies. Instead, they are grouped according to similarity.
 (SIMPTR). The similarity relation is not used for nouns and verbs.
 The similarity relation will be mapped with with SimilarityLinks
