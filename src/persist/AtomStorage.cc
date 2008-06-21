@@ -678,14 +678,29 @@ bool AtomStorage::atomExists(Handle h)
  */
 void AtomStorage::get_ids(void)
 {
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms;");
+	local_id_cache.clear();
 
-	Response rp;
-	rp.id_set = &local_id_cache;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::note_id_cb, &rp);
-	rp.rs->release();
+	// It appears that, when the select statment returns more than
+	// about a 100K to a million atoms or so, some sort of heap
+	// corruption occurs in the odbc code, causing future mallocs
+	// to fail. So limit the number of records processed in one go.
+	// It also appears that asking for lots of records increases
+	// the memory fragmentation (and/or there's a memory leak in odbc??)
+#define USTEP 12003
+	unsigned long rec;
+	for (rec = 0; rec <= max_nrec; rec += USTEP)
+	{
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE "
+		        "uuid > %lu AND uuid <= %lu;",
+		         rec, rec+STEP);
+
+		Response rp;
+		rp.id_set = &local_id_cache;
+		rp.rs = db_conn->exec(buff);
+		rp.rs->foreach_row(&Response::note_id_cb, &rp);
+		rp.rs->release();
+	}
 }
 
 /* ================================================================ */
@@ -853,6 +868,12 @@ void AtomStorage::store(const AtomTable &table)
 {
 	max_height = 0;
 	store_count = 0;
+
+#ifdef ALTER
+	rename_tables();
+	create_tables();
+#endif
+
 	get_ids();
 	setMaxUUID(TLB::uuid);
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
@@ -878,7 +899,7 @@ void AtomStorage::store(const AtomTable &table)
 	rp.rs->release();
 	rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
 	rp.rs->release();
-#endif
+#endif /* USE_INLINE_EDGES */
 
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
@@ -886,6 +907,58 @@ void AtomStorage::store(const AtomTable &table)
 	fprintf(stderr, "\tStored %lu atoms.\n", store_count);
 
 	setMaxHeight();
+}
+
+void AtomStorage::rename_tables(void)
+{
+	Response rp;
+
+	rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
+	rp.rs->release();
+#ifndef USE_INLINE_EDGES
+	rp.rs = db_conn->exec("ALTER TABLE Edges RENAME TO Edges_Backup;");
+	rp.rs->release();
+#endif /* USE_INLINE_EDGES */
+	rp.rs = db_conn->exec("ALTER TABLE Global RENAME TO Global_Backup;");
+	rp.rs->release();
+	rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
+	rp.rs->release();
+}
+
+void AtomStorage::create_tables(void)
+{
+	Response rp;
+
+	// See the file "atom.sql" for detailed documentation as to the 
+	// structure of teh SQL tables.
+	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
+	                      "uuid	INT,"
+	                      "type  SMALLINT,"
+	                      "stv_mean FLOAT,"
+	                      "stv_count FLOAT,"
+	                      "height INT,"
+	                      "name    TEXT,"
+	                      "outgoing INT[]);");
+	rp.rs->release();
+
+#ifndef USE_INLINE_EDGES
+	rp.rs = db_conn->exec("CREATE TABLE Edges ("
+	                      "src_uuid  INT,"
+	                      "dst_uuid  INT,"
+	                      "pos INT);");
+	rp.rs->release();
+#endif /* USE_INLINE_EDGES */
+
+	rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
+	                      "type SMALLINT,"
+	                      "typename TEXT);");
+	rp.rs->release();
+	type_map_was_loaded = false;
+
+	rp.rs = db_conn->exec("CREATE TABLE Global ("
+	                      "max_uuid INT,"
+	                      "max_height INT);");
+	rp.rs->release();
 }
 
 /* ================================================================ */

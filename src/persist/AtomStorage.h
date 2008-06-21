@@ -42,9 +42,13 @@ class AtomStorage
 		unsigned long load_count;
 		unsigned long store_count;
 
+		void rename_tables(void);
+		void create_tables(void);
+
 		std::set<unsigned long> local_id_cache;
 		void get_ids(void);
 		bool idExists(const char *);
+		bool override_exist_check;
 
 		unsigned long getMaxUUID(void);
 		void setMaxUUID(unsigned long);
