@@ -101,7 +101,7 @@ various relations. The NLTK python interface is undocumented.
 The perl interface WordNet::QueryData does not seem to support
 sense-keys either.
 
-The perl interface Lingua-Wordnet does nt seem to support wordnet-3.0.
+The perl interface Lingua-Wordnet does not seem to support wordnet-3.0.
 
 The java interface JWNL does not seem to support wordnet-3.0, and 
 the API appears to be under-documented.
