@@ -103,15 +103,34 @@ Functions:
          but not the link y.
 
 
+Example utilities
+-----------------
+Below follow some examples, in the form of utilities.
+
+Delete a list of atoms:
+
+   (define (killall lst)
+           (if (null? lst)
+               '()
+               (cons (cog-delete (car lst))
+                     (killall (cdr lst)))))
+
+
+
+
 ToDo
 ----
 -- add cmake scripts to auto-find guile, and build appropriately, if found.
 -- implement truth values
 -- pass truth values with keywords
--- multi-line input
--- have prompt for input
 -- support readline/editline (uparrows, etc.) on input.
 -- enable module loading
 -- enable file loading
+
+-- change cog-delete to also accept a list of atoms
+-- change printed output so that it's valid scheme
+-- change cog-delete to return nill, not #t (?why?)
+-- define cog-node and cog-link to return nodes/links if they
+   exist, but not create them if they don't.
 
 
