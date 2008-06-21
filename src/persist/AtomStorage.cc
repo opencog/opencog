@@ -688,12 +688,13 @@ void AtomStorage::get_ids(void)
 	// the memory fragmentation (and/or there's a memory leak in odbc??)
 #define USTEP 12003
 	unsigned long rec;
+	unsigned long max_nrec = getMaxUUID();
 	for (rec = 0; rec <= max_nrec; rec += USTEP)
 	{
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE "
 		        "uuid > %lu AND uuid <= %lu;",
-		         rec, rec+STEP);
+		         rec, rec+USTEP);
 
 		Response rp;
 		rp.id_set = &local_id_cache;
