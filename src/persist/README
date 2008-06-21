@@ -229,13 +229,12 @@ Try again, compiled with -O3, saving to (updating) a *full* database.
    cogserver = 2:19 mm:ss
    postgres  = 4:35 mm:ss
 
-Try again, using unixodbc instead of iodbc, to empty table, with
+Try again, using unixodbc instead of iodbc, to empty table, withOUT
 index tables (and -O3 and inlined outgoing):
    cogserver = 2:36 mm:ss
    postgres  = 2:13 mm:ss
 
-It appears that unixodbc is ever-so-slightly faster for store
-performance.
+It appears that unixodbc is essentially identical to iodbc performance
 
 begin; commit;  
 use analyze;
@@ -289,15 +288,12 @@ Turn on -O3 optimization during compile ... all previous figures
 were without *any* optimization. Now get 
 
   cogserver = 24 seconds = 15.6 microsecs/atom (64.0K atoms/sec)
+  postgres  = 11 seconds
 
 Much much better!
 
-Load performance with unixodbc (instead of iodbc):
-
-  cogserver = 25 seconds
-  postgres  = 112 seconds on one run, and 280 seconds on later runs!
-
-wtf !?!? 
+i10.78
+23.15
 
 
 Evidence of sever memory fragmentation

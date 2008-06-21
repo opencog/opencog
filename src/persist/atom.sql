@@ -29,6 +29,7 @@ CREATE TABLE Atoms (
 	outgoing INT[]
 );
 
+CREATE INDEX uuid_idx ON Atoms (uuid);
 
 -- -----------------------------------------------------------
 -- Table of the edges of the Levi craph corresponding 

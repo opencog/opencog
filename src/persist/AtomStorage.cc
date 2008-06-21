@@ -942,6 +942,9 @@ void AtomStorage::create_tables(void)
 	                      "outgoing INT[]);");
 	rp.rs->release();
 
+	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
+	rp.rs->release();
+
 #ifndef USE_INLINE_EDGES
 	rp.rs = db_conn->exec("CREATE TABLE Edges ("
 	                      "src_uuid  INT,"
