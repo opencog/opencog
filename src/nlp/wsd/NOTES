@@ -36,3 +36,5 @@ sentence_0648141e-0c62-4656-bc3b-abd067ce9635
 (killall (cog-incoming-set wsd-done))
 
 
+ToDo: write utilities to delete a sentence.
+
