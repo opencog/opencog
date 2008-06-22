@@ -1,0 +1,36 @@
+
+                        Lexical Attraction
+                        ------------------
+                     Linas Vepstas June 2008
+
+This directory contains a prototype implementation of Yuret's "lexical
+attraction" algorithm for the discovery of synatctic links between
+words in a sentence (Yuret 1998). The goal of this algorithm is to 
+provide a score for ranking the output of the link-grammar parser.
+
+So far, nothing has been implemented; this is a pre-prototype.
+
+
+
+
+Misc comments
+-------------
+
+A classic parse-ranking example is given in the following sentence.
+Both parses are more or less legitimate, and have valid interpretations.
+
+(S (NP I) (VP saw (NP the man) (PP with (NP the telescope))) .)
+
+(S (NP I) (VP saw (NP (NP the man) (PP with (NP the telescope)))) .)
+
+
+
+References
+----------
+See also probablistic context-free grammars.
+E. Charniak, 1997. Statistical parsing with a context-free grammar 
+and word statistics. AAAI 1997.
+
+* Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical 
+  Attraction'' (1998) PhD Thesis
+
