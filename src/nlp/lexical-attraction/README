@@ -5,10 +5,47 @@
 
 This directory contains a prototype implementation of Yuret's "lexical
 attraction" algorithm for the discovery of synatctic links between
-words in a sentence (Yuret 1998). The goal of this algorithm is to 
+words in a sentence [Yuret 1998]. The goal of this algorithm is to 
 provide a score for ranking the output of the link-grammar parser.
 
 So far, nothing has been implemented; this is a pre-prototype.
+
+
+Data Structures
+---------------
+The Yuret algorithm requires, as input, the mutual information between
+pairs of words. Computing the mutal information requires performing a
+statistical analysis on a large corpus of sentences. The statistical 
+analysis needs to maintain four counts:
+-- n(x,y) = the number of times a word pair was observed
+-- n(x,*) = the number of times a word occured as the left element of a
+            word pair
+-- n(*,y) = the number of times a word occured as the right element of
+            a word pair
+-- n(*,*) = N = the number of word pairs observed.
+
+The joint probability of seeing a word pair (x,y) is then
+
+  p(x,y) = n(x,y) / n(*,*)
+
+The marignal probabilities of seeing a word on the left, or right,
+respectively, are
+
+  p(x,*) = n(x,*) / n(*,*)
+  p(*,y) = n(*,y) / n(*,*)
+
+The "lexical attraction" is defined by Yuret as [chapter 4, page 40]:
+
+   LA(x,y) = log_2 p(x,y) / (p(x,*) p(*,y))
+
+Yuret calls this the "mutual information" for the word pair; however, 
+this usage, while in a certain sense is correct, is also in conflict
+with the common definition of mutual information as the expectation
+value of LA; that is, as:
+
+  MI(x,y) = E[LA(x,y)] = p(x,y) LA(x,y)
+
+See for example, wikipedia "mutual information" or [Ash, Chapter 1.5]
 
 
 
@@ -31,6 +68,7 @@ See also probablistic context-free grammars.
 E. Charniak, 1997. Statistical parsing with a context-free grammar 
 and word statistics. AAAI 1997.
 
+* Robert B. Ash, ''Information Theory'' (1965) Dover publications.
 * Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical 
   Attraction'' (1998) PhD Thesis
 
