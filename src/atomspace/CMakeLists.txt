@@ -1,4 +1,4 @@
-ADD_LIBRARY (AtomSpace STATIC
+ADD_LIBRARY (atomspace STATIC
 	TLB.cc
 	Atom.cc         
 	CompositeTruthValue.cc  
@@ -37,14 +37,14 @@ ADD_LIBRARY (AtomSpace STATIC
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
 )
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/Util
+	${OPENCOG_BINARY_DIR}/src/util
 )
 
-TARGET_LINK_LIBRARIES(AtomSpace
-    Util
+TARGET_LINK_LIBRARIES(atomspace
+    util
 )

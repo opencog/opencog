@@ -1,6 +1,6 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
-ADD_LIBRARY (Server STATIC
+ADD_LIBRARY (server STATIC
 	CogServer.cc 
 	SimpleNetworkServer.cc 
 	ServerSocket.cc 
@@ -9,10 +9,10 @@ ADD_LIBRARY (Server STATIC
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/Util
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/NMXml
-	${OPENCOG_SOURCE_DIR}/src/CogServer
+	${OPENCOG_SOURCE_DIR}/src/util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/xml
+	${OPENCOG_SOURCE_DIR}/src/server
 	${OPENCOG_SOURCE_DIR}/src/guile
 	${OPENCOG_SOURCE_DIR}/src/memcache
 	${OPENCOG_SOURCE_DIR}/src/nlp/wsd
@@ -24,12 +24,12 @@ INCLUDE_DIRECTORIES (
 	${LIBMEMCACHED_INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(cogServer CogServerMain.cc)
+ADD_EXECUTABLE(cogserver CogServerMain.cc)
 
-TARGET_LINK_LIBRARIES(Server
-	AtomSpace
-	NMXml
-	Util
+TARGET_LINK_LIBRARIES(server
+	atomspace
+	xml
+	util
 	query
 	schemes
 	wsd
@@ -42,7 +42,7 @@ TARGET_LINK_LIBRARIES(Server
 	${LIBMEMCACHED_LIBRARIES}
 )
 
-TARGET_LINK_LIBRARIES(cogServer Server)
+TARGET_LINK_LIBRARIES(cogserver server)
 IF (WIN32)
-	SET_TARGET_PROPERTIES(cogServer PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
+	SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
 ENDIF (WIN32)

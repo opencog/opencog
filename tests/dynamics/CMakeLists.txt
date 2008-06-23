@@ -1,18 +1,18 @@
 INCLUDE_DIRECTORIES(
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/CogServer
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/server
 	${OPENCOG_SOURCE_DIR}/src/dynamics/attention
-	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/util
 )
 
 LINK_DIRECTORIES(
-	${OPENCOG_BINARY_DIR}/src/AtomSpace
-	${OPENCOG_BINARY_DIR}/src/CogServer
+	${OPENCOG_BINARY_DIR}/src/atomspace
+	${OPENCOG_BINARY_DIR}/src/server
 	${OPENCOG_BINARY_DIR}/src/dynamics/attention
-	${OPENCOG_BINARY_DIR}/src/Util
+	${OPENCOG_BINARY_DIR}/src/util
 )
 
-LINK_LIBRARIES(Util AtomSpace Server attention)
+LINK_LIBRARIES(util atomspace server attention)
 
 ADD_CXXTEST(ImportanceUpdatingAgentUTest)
 ADD_CXXTEST(STIDecayingAgentUTest)

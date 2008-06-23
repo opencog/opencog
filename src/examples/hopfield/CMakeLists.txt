@@ -1,14 +1,14 @@
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/CogServer
-	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/server
+	${OPENCOG_SOURCE_DIR}/src/util
 	${OPENCOG_SOURCE_DIR}/src/dynamics/attention
 )
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/AtomSpace
-	${OPENCOG_BINARY_DIR}/src/NMXml
-	${OPENCOG_BINARY_DIR}/src/CogServer
+	${OPENCOG_BINARY_DIR}/src/atomspace
+	${OPENCOG_BINARY_DIR}/src/xml
+	${OPENCOG_BINARY_DIR}/src/server
 	${OPENCOG_BINARY_DIR}/src/dynamics/attention
 )
 
@@ -20,8 +20,7 @@ ADD_EXECUTABLE (hopfield
 )
 
 TARGET_LINK_LIBRARIES (hopfield
-	AtomSpace
-	Server
+	server
 	attention
 	${CSOCKETS_LIBRARIES}
 )

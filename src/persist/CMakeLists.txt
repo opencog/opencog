@@ -2,8 +2,8 @@
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/util
 	${IODBC_INCLUDE_DIRS}
 )
 
@@ -22,6 +22,6 @@ TARGET_LINK_LIBRARIES(persist
 
 TARGET_LINK_LIBRARIES(sniff
 	persist
-	AtomSpace
+	atomspace
 	${IODBC_LIBRARIES}
 )

@@ -1,14 +1,14 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
-ADD_LIBRARY (SampleModule SHARED
+ADD_LIBRARY (sample SHARED
 	SampleModule.cc 
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/Util
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/NMXml
-	${OPENCOG_SOURCE_DIR}/src/CogServer
+	${OPENCOG_SOURCE_DIR}/src/util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/xml
+	${OPENCOG_SOURCE_DIR}/src/server
 	${OPENCOG_SOURCE_DIR}/src/guile
 	${OPENCOG_SOURCE_DIR}/src/nlp/wsd
 	${OPENCOG_SOURCE_DIR}/src/persist

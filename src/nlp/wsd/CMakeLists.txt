@@ -12,7 +12,7 @@ ADD_LIBRARY (wsd STATIC
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/CogServer
-	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/server
+	${OPENCOG_SOURCE_DIR}/src/util
 )

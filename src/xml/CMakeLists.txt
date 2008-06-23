@@ -1,6 +1,6 @@
 FIND_PACKAGE(EXPAT REQUIRED)
 
-ADD_LIBRARY(NMXml
+ADD_LIBRARY(xml
 	FileXMLBufferReader.cc
 	NMXmlExporter.cc
 	NMXmlParser.cc
@@ -8,8 +8,7 @@ ADD_LIBRARY(NMXml
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/Util
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/NMXml
+	${OPENCOG_SOURCE_DIR}/src/util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
 	${EXPAT_INCLUDE_DIRS}
 )

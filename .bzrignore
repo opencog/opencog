@@ -6,7 +6,7 @@ DartTestfile.txt
 *.a
 *UTest.cpp
 *UTest
-src/CogServer/cogServer
+src/server/cogserver
 src/examples/hopfield/hopfield
 src/persist/sniff
 opencog.log

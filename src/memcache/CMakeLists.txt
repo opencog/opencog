@@ -4,8 +4,8 @@
 #SET(LIBMEMCACHED_INCLUDE_DIRS, /usr/local/include/libmemcached)
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/AtomSpace
-	${OPENCOG_SOURCE_DIR}/src/Util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/util
 	${LIBMEMCACHED_INCLUDE_DIRS}
 )
 
@@ -24,12 +24,12 @@ ADD_EXECUTABLE(sniff2
 TARGET_LINK_LIBRARIES(cachedb memcached)
 
 TARGET_LINK_LIBRARIES(sniff
-	AtomSpace
+	atomspace
 	${LIBMEMCACHED_LIBRARIES}
 )
 
 TARGET_LINK_LIBRARIES(sniff2
 	cachedb
-	AtomSpace
+	atomspace
 	${LIBMEMCACHED_LIBRARIES}
 )
