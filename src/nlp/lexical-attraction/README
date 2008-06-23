@@ -28,7 +28,7 @@ The joint probability of seeing a word pair (x,y) is then
 
   p(x,y) = n(x,y) / n(*,*)
 
-The marignal probabilities of seeing a word on the left, or right,
+The marginal probabilities of seeing a word on the left, or right,
 respectively, are
 
   p(x,*) = n(x,*) / n(*,*)
@@ -71,4 +71,5 @@ and word statistics. AAAI 1997.
 * Robert B. Ash, ''Information Theory'' (1965) Dover publications.
 * Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical 
   Attraction'' (1998) PhD Thesis
+  http://citeseer.ist.psu.edu/yuret98discovery.html
 
