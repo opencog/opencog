@@ -30,7 +30,6 @@ namespace opencog
 ImportanceSpreadingAgent::ImportanceSpreadingAgent()
 {
     spreadThreshold = MA_DEFAULT_SPREAD_THRESHOLD;
-    importanceSpreadingMultiplier = MA_DEFAULT_SPREAD_MULTIPLIER;
 
 }
 
@@ -66,7 +65,7 @@ void ImportanceSpreadingAgent::spreadImportance()
         Handle h = *hi;
 
         current = a->getSTI(h);
-        /* spread if STI > spread threshold */
+        // spread if STI > spread threshold
         if (current > spreadThreshold )
             // spread fraction of importance to nodes it's linked to
             spreadAtomImportance(h);
@@ -76,126 +75,184 @@ void ImportanceSpreadingAgent::spreadImportance()
 
 }
 
+// for a bunch of links from the source, get links passed as pointer
+// to avoid retrieving them twice 
+int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleEntry* links)
+{
+	HandleEntry *he;
+	std::vector<Handle> targets;
+	int totalDifference = 0;
+    // sum total difference
+    he = links;
+    while (he) {
+		totalDifference += sumDifference(source,he->handle);
+		he = he->next;
+    }
+	return totalDifference;
+}
+
+// For one link
+int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
+{
+	float linkWeight;
+	float linkDifference = 0.0f;
+	std::vector<Handle> targets;
+	std::vector<Handle>::iterator t;
+	AttentionValue::sti_t sourceSTI;
+	AttentionValue::sti_t targetSTI;
+	
+	// If this link doesn't have source as a source return 0
+	if (! ((Link*) TLB::getAtom(link))->isSource(source) ) {
+		return 0;
+	}
+
+	// Get outgoing set and sum difference for all non source atoms
+	linkWeight = a->getTV(link).toFloat();
+	targets = TLB::getAtom(link)->getOutgoingSet();
+
+
+	if (TLB::getAtom(link)->getType() == INVERSE_HEBBIAN_LINK) {
+		for (t = targets.begin(); t != targets.end(); t++) {
+			Handle target_h = *t;
+			if (target_h == source) continue;
+			targetSTI = a->getSTI(target_h);
+
+			// pylab code for playing with inverse link stealing schemes:
+			// s=10; w=0.5; t= frange(-20,20,0.05x)
+			// plot(t,[max(y,0)*s*w for y in log([max(x,0.000001) for x in t+(s*w)])])
+			// plot(t,[max(x,0) for x in w*(t+(w*s))])
+			// plot(t,[max(min(x,w*s),0) for x in w/2*t+(w*w*s)])
+			// ... using this last one.
+			linkDifference += calcInverseDifference(sourceSTI, targetSTI, linkWeight);
+		}
+	} else {
+		for (t = targets.begin(); t != targets.end(); t++) {
+			Handle target_h = *t;
+			if (target_h == source) continue;
+			targetSTI = a->getSTI(target_h);
+				
+			linkDifference += calcDifference(sourceSTI,targetSTI,linkWeight);
+		}
+	}
+	if (TLB::getAtom(link)->getType() == INVERSE_HEBBIAN_LINK) {
+		linkDifference *= -1.0f;
+	}
+	return (int) linkDifference;
+}
+
+float ImportanceSpreadingAgent::calcInverseDifference(AttentionValue::sti_t s, AttentionValue::sti_t t, float weight)
+{
+	float amount;
+	amount = weight * t + (weight * weight * s);
+	if (amount < 0) amount = 0;
+	else if (amount > weight * s) amount = weight * s;
+	return amount;
+}
+
+float ImportanceSpreadingAgent::calcDifference(AttentionValue::sti_t s, AttentionValue::sti_t t, float weight)
+{
+	// importance can't spread uphill
+	if (s - t > 0) {
+		return weight * (s - t);
+	}
+	return 0.0f;
+}
+
 void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 {
-    HandleEntry *links, *he;
-    float maxTransferAmount, totalRelatedness;
+    HandleEntry *links;
+    float totalDifference, differenceScaling;
     int totalTransferred;
-    float importanceSpreadingFactor = 0.4f;
-    AttentionValue::sti_t minStealingBoundary;
+	AttentionValue::sti_t sourceSTI;
 
-    totalRelatedness = 0.0f;
+	std::vector<Handle> linksVector;
+	std::vector<Handle>::iterator linksVector_i;
+
+    totalDifference = 0.0f;
+    differenceScaling = 1.0f;
     totalTransferred = 0;
 
     logger().fine("+Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
 
     links = TLB::getAtom(h)->getIncomingSet()->clone();
     links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
+
     logger().fine("  +Hebbian links found %d", links->getSize());
 
-    maxTransferAmount = a->getSTI(h) * importanceSpreadingFactor;
-    minStealingBoundary = a->getAttentionalFocusBoundary() - (2 * abs(a->getAttentionalFocusBoundary()));
+	totalDifference = sumTotalDifference(h, links);
+	sourceSTI = a->getSTI(h);
 
-    // sum total relatedness
-    he = links;
-    while (he) {
-        if (((Link*)TLB::getAtom(he->handle))->isSource(h)) {
-            float val;
-            val = a->getTV(he->handle).toFloat();
-            totalRelatedness += val;
-        }
-        he = he->next;
-    }
+	// if there is no hebbian links with > 0 weight
+	// or no lower STI atoms to spread to.
+    if (totalDifference == 0.0f) {
+		logger().fine("  |totalDifference = 0, spreading nothing");
+		delete links;
+		return;
+	}
 
-    if (totalRelatedness > 0.0f) {
-        std::vector<Handle> linksVector;
-        std::vector<Handle>::iterator linksVector_i;
+	// Find out the scaling factor required on totalDifference
+	// to prevent moving the atom below the spreadThreshold
+	if (a->getSTI(h) - totalDifference < spreadThreshold) {
+		differenceScaling = (a->getSTI(h) - spreadThreshold) / totalDifference;
+	}
+    logger().fine("  +totaldifference %.2f, scaling %.2f", totalDifference,
+			differenceScaling);
 
-        // Find order of links based on their STI
-        // I.e. links with higher STI are more likely to get sti passed along
-        // them before available sti for spreading runs out.
-        links->toHandleVector(linksVector);
-        std::sort(linksVector.begin(), linksVector.end(), ImportanceSpreadSTISort());
+	links->toHandleVector(linksVector);
 
-        for (linksVector_i = linksVector.begin();
-                linksVector_i != linksVector.end() &&
-                totalTransferred <= maxTransferAmount; linksVector_i++) {
-            double transferWeight, transferAmount;
-            std::vector<Handle> targets;
-            std::vector<Handle>::iterator t;
-            Handle lh = *linksVector_i;
-            const TruthValue &linkTV = a->getTV(lh);
+	for (linksVector_i = linksVector.begin();
+			linksVector_i != linksVector.end(); linksVector_i++) {
+		double transferWeight;
+		std::vector<Handle> targets;
+		std::vector<Handle>::iterator t;
+		Handle lh = *linksVector_i;
+		const TruthValue &linkTV = a->getTV(lh);
 
-            if (!((Link*)TLB::getAtom(lh))->isSource(h)) {
-                //logger().fine("Link %s does not have this atom as a source.", TLB::getAtom(lh)->toString().c_str() );
-                continue;
-            }
+		// For the case of an asymmetric link without this atom as a source
+		if (!((Link*)TLB::getAtom(lh))->isSource(h)) {
+			//logger().fine("Link %s does not have this atom as a source.",
+			// TLB::getAtom(lh)->toString().c_str() );
+			continue;
+		}
 
-            targets = TLB::getAtom(lh)->getOutgoingSet();
-            transferWeight = linkTV.toFloat();
+		targets = TLB::getAtom(lh)->getOutgoingSet();
+		transferWeight = linkTV.toFloat();
 
-            // amount to spread dependent on weight and multiplier - needs to be
-            // divided by (targets->size - 1)
-            if (importanceSpreadingMultiplier == 0.0f) {
-                transferAmount = transferWeight * (maxTransferAmount / totalRelatedness);
-            } else
-                transferAmount = transferWeight * importanceSpreadingMultiplier;
+		logger().fine("  +Link %s", TLB::getAtom(lh)->toString().c_str() );
+		logger().fine("    |weight %f, quanta %.2f, size %d", \
+				transferWeight, targets.size());
 
-            // Allow at least one hebbian link to spread importance, even if it's
-            // less than the amount the weight would indicate
-            if (transferAmount > maxTransferAmount)
-                transferAmount = maxTransferAmount;
+		for (t = targets.begin();
+				t != targets.end();
+				t++) {
+			Handle target_h = *t;
+			AttentionValue::sti_t targetSTI;
+			double transferAmount;
 
-            if (targets.size() != 2)
-                transferAmount = transferAmount / (targets.size() - 1.0f);
-            if (transferAmount == 0.0f) continue;
+			// Then for each target of link except source...
+			if ( TLB::getAtom(target_h) == TLB::getAtom(h) )
+				continue;
 
-            if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) transferAmount = -transferAmount;
+			targetSTI = a->getSTI(target_h);
 
-            logger().fine("  +Link %s", TLB::getAtom(lh)->toString().c_str() );
-            logger().fine("    |weight %f, quanta %.2f, size %d, Transfer amount %f, maxTransfer %f", transferWeight, importanceSpreadingMultiplier, targets.size(), transferAmount, maxTransferAmount);
+			// calculate amount to transfer, based on difference and scaling
+			if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) {
+				// if the link is inverse, then scaling is unnecessary
+				// note the negative sign
+				transferAmount = -calcInverseDifference(sourceSTI,targetSTI, \
+						linkTV.toFloat());
+			} else {
+				// Check removing STI doesn't take node out of attentional
+				// focus...
+				transferAmount = calcInverseDifference(sourceSTI,targetSTI, \
+						linkTV.toFloat()) * differenceScaling;
+			}
 
-            for (t = targets.begin();
-                    t != targets.end() &&
-                    totalTransferred + transferAmount <= maxTransferAmount;
-                    t++) {
-                Handle target_h = *t;
-
-                // Then for each target of link (except source)...
-                if ( TLB::getAtom(target_h) == TLB::getAtom(h) )
-                    continue;
-
-                if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) {
-                    // Check that if the link is inverse, that it doesn't steal too
-                    // much from the target atom
-                    if (a->getSTI(target_h) < minStealingBoundary)
-                        continue;
-                } else {
-                    // Check removing STI doesn't take node out of attentional
-                    // focus...
-                    if (a->getSTI(h) >= a->getAttentionalFocusBoundary() && \
-                            a->getSTI(h) - transferAmount < a->getAttentionalFocusBoundary())
-                        break;
-                }
-
-                totalTransferred += (int) transferAmount;
-                a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
-                a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
-                logger().fine("    |%d sti from %s to %s", (int) transferAmount, TLB::getAtom(h)->toString().c_str(), TLB::getAtom(target_h)->toString().c_str() );
-
-                // stimulate link
-                // Doesn't make sense to stimulate the links just for spread.
-                // Maybe stimulate links that are helpful in getting the right
-                // pattern.
-                //if ( agent->getUpdateLinksFlag() )
-                //    a->stimulateAtom(lh,stimForSpread);
-            }
-
-
-        }
-    } else {
-        logger().fine("  |Total relatedness = 0, spreading nothing");
-    }
+			a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
+			a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
+			logger().fine("    |%d sti from %s to %s", (int) transferAmount, TLB::getAtom(h)->toString().c_str(), TLB::getAtom(target_h)->toString().c_str() );
+		}
+	}
     delete links;
 
 }

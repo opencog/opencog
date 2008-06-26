@@ -34,9 +34,8 @@
 namespace opencog
 {
 
-const int MA_DEFAULT_SPREAD_THRESHOLD = 4;
+const int MA_DEFAULT_SPREAD_THRESHOLD = 0;
 const float MA_DEFAULT_SPREAD_MULTIPLIER = 10.0f;
-const int MA_DEFAULT_SPREAD_STIM = 1;
 
 class CogServer;
 
@@ -60,6 +59,9 @@ private:
 	//! How much to multiply the HebbianLink TruthValue to convert to STI.
     float importanceSpreadingMultiplier;
 
+	//! The 
+    AttentionValue::sti_t stealingLimit;
+
 	/** Spread importance for an atom.
 	 *
 	 * @param h The handle for the atom to spread importance for.
@@ -71,6 +73,20 @@ private:
 
     //! Spread importance along Hebbian links.
     void spreadImportance();
+
+	//! Sum total difference for an atom
+	int sumTotalDifference(Handle source, HandleEntry* links);
+
+	//! Sum difference for one link
+	int sumDifference(Handle source, Handle link);
+
+	//! Calculate the difference for an inverse link
+	float calcInverseDifference(AttentionValue::sti_t s, AttentionValue::sti_t t, \
+			float weight);
+
+	//! Calculate the difference for a normal Hebbian link
+	float calcDifference(AttentionValue::sti_t s, AttentionValue::sti_t t, \
+			float weight);
 
 public:
 
