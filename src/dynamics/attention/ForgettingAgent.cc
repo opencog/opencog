@@ -61,6 +61,12 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     removalAmount = (int) (atomsVector.size() * proportion);
 
     for (unsigned int i = 0; i < atomsVector.size() ; i++) {
+		if (TLB::getAtom(atomsVector[i]) == NULL) {
+			// Atom must have already been removed through having 
+			// previously removed atoms in it's outgoing set.
+			count++;
+			continue;
+		}
         if (a->getLTI(atomsVector[i]) <= forgetThreshold
                 && count < removalAmount) {
             if (a->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE ) {
