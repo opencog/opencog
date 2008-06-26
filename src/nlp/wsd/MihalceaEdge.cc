@@ -82,7 +82,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 
 #ifdef DEBUG
 	printf ("========================= start sent pair (%d x %d) words\n",
-	        pa_words.size(), words.size());
+	        (int) pa_words.size(), (int) words.size());
 #endif
 	// At this point, "pa_words" contains all of the relex-participating
 	// words in parse ha, and "words" contains those of parse hb.

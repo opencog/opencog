@@ -19,7 +19,7 @@ class NMXmlParserExperiment {
 private:
 
 	static int currentExperiment;
-	static char *expContents[NNMXMLXMLEXPERIMENTS];
+	static const char *expContents[NNMXMLXMLEXPERIMENTS];
 
 	//CHECKING
 	static bool checkExp0();

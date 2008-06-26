@@ -108,6 +108,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
 
 	// Get outgoing set and sum difference for all non source atoms
 	linkWeight = a->getTV(link).toFloat();
+	sourceSTI = a->getSTI(source);
 	targets = TLB::getAtom(link)->getOutgoingSet();
 
 

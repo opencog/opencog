@@ -71,8 +71,8 @@ private:
     std::string delimiter;
 
     // start/end position pointers
-    unsigned int start;
-    unsigned int end;
+    size_t start;
+    size_t end;
 
     /**
      * Inform the delimiter size

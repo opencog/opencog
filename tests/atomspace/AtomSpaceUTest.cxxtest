@@ -61,7 +61,7 @@ void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
     delete dest_array;
 }
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, char* baseName)
+vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
     vector<Handle> testAtoms;
@@ -326,7 +326,7 @@ public:
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
             atomSpace->getHandleSet(back_inserter(links), ATOM, "", true, vh);
-            printf("1) links.size() = %d Expected = %d\n", links.size(), (vhIdx == 0 ? 8 : 2));
+            printf("1) links.size() = %d Expected = %d\n", (int) links.size(), (vhIdx == 0 ? 8 : 2));
             TS_ASSERT(links.size() == (vhIdx == 0 ? 8 : 2));
             links.clear();
             atomSpace->getHandleSet(back_inserter(links), LINK, "", true, vh);
@@ -381,13 +381,13 @@ public:
 
         HandleSeq links;
         atomSpace->getHandleSet(back_inserter(links), LINK, true);
-        printf("links.size() = %d\n", links.size());
+        printf("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = atomSpace->addAtom(tr, TruthValue::DEFAULT_TV());
         TS_ASSERT(CoreUtils::compare(evalLink, UNDEFINED_HANDLE));
         links.clear();
         atomSpace->getHandleSet(back_inserter(links), LINK, true);
-        printf("links.size() = %d\n", links.size());
+        printf("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 2);
 
         tr = mva(TLB::addAtom(new Node(PREDICATE_NODE, strdup("barkingAt"))));

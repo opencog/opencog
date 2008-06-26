@@ -95,6 +95,7 @@ public:
         TS_ASSERT_THROWS(Temporal(5, 1, false), InvalidParamException&);
         TS_ASSERT_THROWS(Temporal(1, 5, true), InvalidParamException&);
         TS_ASSERT_THROWS(Temporal(10000, 10001, true), InvalidParamException&);
+		printf("%lu\n",ULONG_MAX);
         TS_ASSERT_THROWS(Temporal(ULONG_MAX, ULONG_MAX, true), InvalidParamException&);
         TS_ASSERT_THROWS(Temporal(ULONG_MAX, 1, true), InvalidParamException&);
         TS_ASSERT_THROWS(Temporal(ULONG_MAX - ULONG_MAX / 2, ULONG_MAX / 2 + 1, true), InvalidParamException&);

@@ -58,6 +58,7 @@ void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (Invali
                                         "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
         }
         unsigned long long sum = (unsigned long long)a + b;
+		cout << a << " " << b << " " << sum;
         if (sum > (unsigned long long) ULONG_MAX) {
             throw InvalidParamException(TRACE_INFO,
                                         "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
@@ -171,7 +172,7 @@ std::string Temporal::getTimeNodeName(unsigned long timestamp)
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 {
     const char* nextToken = timeNodeName;
-    unsigned long a = (unsigned long)atoll(nextToken);
+    unsigned long a = (unsigned long)strtoul(nextToken,NULL,10);
 
     //    printf("getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (unsigned long)atof(timeNodeName), timeNodeName);
 
@@ -181,7 +182,7 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     if (!(*nextToken)) {
         return Temporal(a);
     }
-    unsigned long b = (unsigned long)atoll(++nextToken);
+    unsigned long b = (unsigned long)strtoul(++nextToken,NULL,10);
 
     // printf("getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
 

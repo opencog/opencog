@@ -44,7 +44,7 @@ public:
     HandleMapUTest() {
         for (int i = 0; i < N_HANDLES; i++) {
             handles[i] = (Handle) i;
-            content[i] = new char[0];
+            content[i] = new char[1];
         }
     }
 

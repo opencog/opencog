@@ -43,7 +43,7 @@ public:
     TemporalMapUTest() {
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i, i, true);
-            content[i] = new char[0];
+            content[i] = new char[1];
         }
     }
 

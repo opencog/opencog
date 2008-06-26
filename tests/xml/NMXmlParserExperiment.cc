@@ -300,7 +300,7 @@ bool NMXmlParserExperiment::checkExp1()
 }
 
 
-char *NMXmlParserExperiment::expContents[NNMXMLXMLEXPERIMENTS] = {
+const char *NMXmlParserExperiment::expContents[NNMXMLXMLEXPERIMENTS] = {
     "<?xml version=\"1.0\"?> \
     <list> \
     <tagdescription> \
