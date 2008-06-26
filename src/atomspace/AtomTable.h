@@ -310,7 +310,7 @@ public:
     throw (InvalidParamException);
 
     /**
-     * Returns the index head for the given Functionspredicate index.
+     * Returns the index head for the given predicate index.
      *
      * @param The predicate index whose index head will be returned.
      * @return The index head for the given importance bin.
