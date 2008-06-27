@@ -27,5 +27,5 @@ If you use the VIM editor, you may add the following line to you ".vimrc"
 configuration file to automatically setup your editor to use opencog's style
 when editing a source file from opencog's tree:
 
-autocmd BufNewFile,BufReadPost * if match(expand("%:p:h"), "/opencog") >= 0 && &filetype == "cpp" | set ts=4 sw=4 tw=80 ff=unix cindent | endif
+autocmd BufNewFile,BufReadPost * if match(expand("%:p:h"), "/opencog") >= 0 && &filetype == "cpp" | set ts=4 sw=4 tw=80 ff=unix cindent expandtab | endif
 
