@@ -57,9 +57,10 @@ void Temporal::init(unsigned long a, unsigned long b, bool normal) throw (Invali
             throw InvalidParamException(TRACE_INFO,
                                         "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
         }
-        unsigned long long sum = (unsigned long long)a + b;
-		cout << a << " " << b << " " << sum;
-        if (sum > (unsigned long long) ULONG_MAX) {
+        unsigned long sum = a + b;
+        if (sum < a || sum < b) {
+            // on both 32 and 64 bit machines, the overflow wraps
+            // and so the sum will be smaller than at least a or b
             throw InvalidParamException(TRACE_INFO,
                                         "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
         }
