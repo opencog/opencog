@@ -82,18 +82,18 @@ public:
      *
      * @param Handle to be mapped.
      * @return Corresponding atom for the given handle. Returns NULL if handle
-	 * isn't found.
+     * isn't found.
      */
     static inline Atom* getAtom(Handle handle) {
 #ifdef USE_TLB_MAP
-		std::map<Handle, Atom *>::iterator i;
+        std::map<Handle, Atom *>::iterator i;
         if (handle <= NOTYPE) return (Atom *) handle; // check for "non-real" atoms
-		i = handle_map.find(handle);
+        i = handle_map.find(handle);
         if (i == handle_map.end()) {
-			return NULL;
-		} else {
-			return (Atom *) i->second;
-		}
+            return NULL;
+        } else {
+            return (Atom *) i->second;
+        }
 #else
         return (Atom *) (handle ^ OBFUSCATE);
 #endif
