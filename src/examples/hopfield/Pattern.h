@@ -28,6 +28,8 @@
 namespace opencog
 {
 
+extern RandGen* patternRng;
+
 class Pattern : public std::vector< int >
 {
 
@@ -48,6 +50,9 @@ public:
      * @param density of random ones
      */
     Pattern(int w, int h, float density = 0.0f);
+
+    Pattern(const Pattern &src) : std::vector<int>(src), 
+        width(src.width), height(src.height), rng(patternRng) {};
 
     ~Pattern();
 
@@ -79,6 +84,7 @@ public:
 
     int getWidth();
     int getHeight();
+    bool isEmpty();
 
 	int activity();
 

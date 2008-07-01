@@ -38,7 +38,7 @@
 using namespace std;
 using namespace opencog;
 
-RandGen* patternRng = new MT19937RandGen(1);
+RandGen* opencog::patternRng = new MT19937RandGen(1);
 
 Pattern::Pattern(int w, int h, float density)
 {
@@ -102,16 +102,37 @@ Pattern Pattern::mutatePattern(float error)
     Pattern result(width, height);
     Pattern::iterator r_i = result.begin();
     Pattern::iterator p;
+    // mutating the pattern so that none of the original
+    // nodes are active makes no sense so avoid it.
+    int maxToRemove = activity() - 1;
 
     for (p = begin(); p != end(); p++) {
         int val = *p;
         // Flip bit with error probability
         if (rng->randfloat() < error) {
-            val = !val;
+            if (val) {
+                if (maxToRemove > 0) {
+                    val = !val;
+                    maxToRemove--;
+                }
+            } else {
+                val = !val;
+            }
         }
         *r_i = val; r_i++;
     }
     return result;
+}
+
+bool Pattern::isEmpty()
+{
+    Pattern::iterator p;
+
+    for (p = begin(); p != end(); p++) {
+        if (((int) *p) != 0)
+            return false;
+    }
+    return true;
 }
 
 float Pattern::hammingSimilarity(const Pattern &a)
