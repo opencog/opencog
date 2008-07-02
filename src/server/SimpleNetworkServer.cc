@@ -27,6 +27,7 @@
 #include "SimpleNetworkServer.h"
 #include "ServerSocket.h"
 #include "CommandRequest.h"
+#include "Logger.h"
 
 #include <exceptions.h>
 #include <ListenSocket.h>
@@ -132,8 +133,13 @@ void *SimpleNetworkServer::portListener(void *arg)
     SocketHandler socketHandler;
     ListenSocket<ServerSocket> listenSocket(socketHandler);
 
-    if (listenSocket.Bind(port)) {
-        throw new RuntimeException(NULL, "NetworkElement - Cannot bind to port %d.", port);
+    try {
+        // we throw an exception ourselves because csockets may
+        // be compiled with exceptions disabled
+        if (listenSocket.Bind(port)) throw new Exception("bind error");
+    } catch (Exception &e) {
+        logger().error("Unable to bind to port %d. Aborting.", port);
+        std::exit(1);
     }
 
     socketHandler.Add(&listenSocket);
