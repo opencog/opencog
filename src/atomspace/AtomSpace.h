@@ -353,6 +353,10 @@ public:
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle) const;
 
+    /** Retrieve the normalised Short-Term Importance between -1..1
+     * for a given Handle */
+    float getNormalisedSTI(Handle) const;
+
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle) const;
 

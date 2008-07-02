@@ -87,6 +87,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     for (int i=0; i++; i < diffusionAtoms.size) {
         Handle dAtom = diffusionAtoms[i];
         // TODO: The sti needs to be scaled.
+        scale
         stiVector.set_element(i,0,a->getSTI(dAtom));
     }
 

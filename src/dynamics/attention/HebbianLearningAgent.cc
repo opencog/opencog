@@ -135,7 +135,7 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     for (outgoing_i = outgoing.begin(); outgoing_i < outgoing.end();) {
         float normsti;
         Handle oh = *outgoing_i;
-        normsti = getNormSTI(a->getSTI(oh));
+        normsti = a->getNormalisedSTI(a->getSTI(oh));
         if (normsti > 0.0f) {
             theSource = oh;
             foundTheSource = true;
@@ -151,20 +151,6 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     return outgoing;
 
 }
-
-float HebbianLearningAgent::getNormSTI(AttentionValue::sti_t s)
-{
-    // get normalizer (maxSTI - attention boundary)
-	int normaliser;
-	if (s > a->getAttentionalFocusBoundary()) {
-		normaliser = (int) a->getMaxSTI().recent - a->getAttentionalFocusBoundary();
-		return (s - a->getAttentionalFocusBoundary()) / (float) normaliser;
-	} else {
-		normaliser = -((int) a->getMinSTI().recent + a->getAttentionalFocusBoundary());
-		return (s + a->getAttentionalFocusBoundary()) / (float) normaliser;
-	}
-}
-
 float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 {
     // TODO: this won't work for Hebbian Links with arity > 2
@@ -195,7 +181,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 		}
 
         // normalise each sti and multiple each
-        normsti = getNormSTI(sti);
+        normsti = a->getNormalisedSTI(sti);
 
         // For debugging:
         normsti_v.push_back(normsti);

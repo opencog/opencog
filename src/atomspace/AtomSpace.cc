@@ -740,6 +740,26 @@ AttentionValue::sti_t AtomSpace::getSTI(Handle h) const
     return TLB::getAtom(h)->getAttentionValue().getSTI();
 }
 
+float AtomSpace::getNormalisedSTI(Handle h)
+{
+    // get normalizer (maxSTI - attention boundary)
+	int normaliser;
+    AttentionValue::sti_t s = a->getSTI(h);
+	if (s > a->getAttentionalFocusBoundary()) {
+		normaliser = (int) a->getMaxSTI().recent - a->getAttentionalFocusBoundary();
+        if (normaliser == 0) {
+            return 0.0f;
+        }
+		return (s - a->getAttentionalFocusBoundary()) / (float) normaliser;
+	} else {
+		normaliser = -((int) a->getMinSTI().recent + a->getAttentionalFocusBoundary());
+        if (normaliser == 0) {
+            return 0.0f;
+        }
+		return (s + a->getAttentionalFocusBoundary()) / (float) normaliser;
+	}
+}
+
 AttentionValue::lti_t AtomSpace::getLTI(Handle h) const
 {
     return TLB::getAtom(h)->getAttentionValue().getLTI();
