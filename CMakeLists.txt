@@ -1,14 +1,22 @@
 PROJECT(OPENCOG)
-SET(CMAKE_BUILD_TYPE Debug) #Release)
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+
+IF (CMAKE_BUILD_TYPE STREQUAL "")
+    SET(CMAKE_BUILD_TYPE Debug)
+ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
 # add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
-IF(CMAKE_COMPILER_IS_GNUCXX)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fstack-protector -Wall")
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+IF (CMAKE_COMPILER_IS_GNUCXX)
+    SET(CMAKE_C_FLAGS "-fstack-protector -Wall")
+    SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+
+    SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+    SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
+    SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 # check dependencies
 IF (WIN32)
@@ -24,10 +32,10 @@ FIND_PACKAGE(CSockets REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(Boost REQUIRED)
 # FIND_PACKAGE(LibMemCached)
+# Enable the use of SQL storage, if either iodbc of unixodbc is found.
+# Caution: this can also increase RAM usage significantly!
 FIND_PACKAGE(IODBC)
 IF (IODBC_FOUND)
-	# Enable the use of SQL storage, if either iodbc of unixodbc is found.
-	# Caution: this can also increase RAM usage significantly!
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
@@ -52,7 +60,7 @@ ENDIF (GUILE_FOUND)
 # ENDIF (LIBMEMCACHED_FOUND)
 
 # global includes
-INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # recurse into 'src' and 'tests' dirs
 ADD_SUBDIRECTORY(src)
