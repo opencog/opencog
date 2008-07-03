@@ -10,12 +10,10 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 # Look for the header file
-FIND_PATH(IODBC_INCLUDE_DIR sql.h /usr/include /usr/local/include /usr/include/iodbc /usr/local/include/iodbc /usr/include/libiodbc /usr/local/include/libiodbc)
-#MARK_AS_ADVANCED(IODBC_INCLUDE_DIR)
+FIND_PATH(IODBC_INCLUDE_DIR iodbcunix.h /usr/include /usr/local/include /usr/include/iodbc /usr/local/include/iodbc /usr/include/libiodbc /usr/local/include/libiodbc)
 
 # Look for the library
 FIND_LIBRARY(IODBC_LIBRARY NAMES iodbc PATH /usr/lib /usr/local/lib)
-#MARK_AS_ADVANCED(IODBC_LIBRARY)
 
 # Copy the results to the output variables.
 IF(IODBC_INCLUDE_DIR AND IODBC_LIBRARY)
@@ -40,3 +38,6 @@ IF(NOT IODBC_FOUND)
     ENDIF(IODBC_FIND_REQUIRED)
   ENDIF(NOT IODBC_FIND_QUIETLY)
 ENDIF(NOT IODBC_FOUND)
+
+MARK_AS_ADVANCED(IODBC_INCLUDE_DIRS)
+MARK_AS_ADVANCED(IODBC_LIBRARIES)
