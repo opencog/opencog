@@ -176,7 +176,7 @@ float IndefiniteTruthValue::getMean() const
 float IndefiniteTruthValue::getCount() const
 {
     float W = W();
-    W = max(W, 0.0000001f); // to avoid division by zero
+    W = max(W, 0.000001f); // to avoid division by zero
     float c = (DEFAULT_K * (1 - W) / W);
     return c;
 }

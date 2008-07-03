@@ -54,7 +54,7 @@ private:
 
     float count(float l, float u) {
         float W = u - l;
-        W = max(W, 0.0000001f);
+        W = max(W, 0.000001f);
         return (default_k*(1 - W) / W);
     }
 
@@ -103,7 +103,7 @@ public:
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
-//printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
+        //printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getCount() - expectedCount) <= 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
@@ -134,7 +134,7 @@ public:
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
-//printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
+        //printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getCount() - expectedCount) <= 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
@@ -221,7 +221,7 @@ public:
             TS_ASSERT(fabs(itv->getDiff()  - 0.0f) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(itv->isSymmetric());
             if (testChangedMean) {
-                printf("itv->getMean() = %f, means[0] = %f\n", itv->getMean(), means[0]);
+                //printf("itv->getMean() = %f, means[0] = %f\n", itv->getMean(), means[0]);
                 TS_ASSERT(fabs(itv->getMean() - means[0]) <= ERROR_THRESHOLD);
             } else {
                 TS_ASSERT(fabs(itv->getMean() - means[i]) <= ERROR_THRESHOLD);
@@ -312,7 +312,7 @@ public:
                 float diff = j * 0.1f;
                 tv->setDiff(diff);
                 TS_ASSERT(fabs(tv->getDiff()  - diff) <= FLOAT_ACCEPTABLE_ERROR);
-//                printf("diff = %f, tv->getL_() = %f, (ls[i] - diff) = %f\n", diff, tv->getL_(), (ls[i] - diff));
+                //printf("diff = %f, tv->getL_() = %f, (ls[i] - diff) = %f\n", diff, tv->getL_(), (ls[i] - diff));
                 TS_ASSERT(fabs(tv->getL_() - (ls[i] - diff)) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getU_() - (us[i] + diff)) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
