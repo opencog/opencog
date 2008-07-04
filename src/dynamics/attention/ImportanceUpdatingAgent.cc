@@ -166,10 +166,11 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 		// if all Atoms have the same STI this will occur
 		minSTISeen = maxSTISeen;
 	}
-    a->getMaxSTI().update( maxSTISeen );
-    a->getMinSTI().update( minSTISeen );
-    log->debug("Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI().recent);
-    log->debug("Min STI seen is %d, recentMinSTI is now %f", minSTISeen, a->getMinSTI().recent);
+
+    a->updateMaxSTI(maxSTISeen);
+    a->updateMinSTI(minSTISeen);
+    log->debug("Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI());
+    log->debug("Min STI seen is %d, recentMinSTI is now %f", minSTISeen, a->getMinSTI());
 
     /* Check AtomSpace funds are within bounds */
     checkAtomSpaceFunds(a);
@@ -447,7 +448,7 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				double multiplier = 0.0;
 				double x;
 				x = c - a->getAttentionalFocusBoundary();
-				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
+				x = x / (a->getMaxSTI() - a->getAttentionalFocusBoundary());
 				multiplier = max(0.0, (exp(x) - (1.0 - y))/(1.0 + y));
 				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
 			}
@@ -461,7 +462,7 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				double x;
 				percentAmnesty = percentAmnesty-0.05;
 				x = c - a->getAttentionalFocusBoundary();
-				x = x / (a->getMaxSTI().recent - a->getAttentionalFocusBoundary());
+				x = x / (a->getMaxSTI() - a->getAttentionalFocusBoundary());
 				if (percentAmnesty < 0) percentAmnesty = 0;
 				multiplier = max(0.0, ::log((x - percentAmnesty) * 20) / 2.0);
 				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);

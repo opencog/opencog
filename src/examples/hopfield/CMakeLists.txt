@@ -23,4 +23,6 @@ TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
 	${CSOCKETS_LIBRARIES}
+	gsl
+    gslcblas
 )

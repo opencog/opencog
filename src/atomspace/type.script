@@ -1,7 +1,7 @@
 //
 // Script for automatic Type generation
 //
-// To add new types, edit this file, then say "make".
+// To add new types, edit this file, then say "make -f Makefile.types".
 // The Makefile in this directory will automatically
 // generate the C header files used by the code.
 //
@@ -245,5 +245,5 @@ SPACE_MAP_NODE <- NODE
 HEBBIAN_LINK <- LINK
 ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
 SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
-INVERSE_HEBBIAN_LINK <- ASYMMETRIC_HEBBIAN_LINK
+INVERSE_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
 

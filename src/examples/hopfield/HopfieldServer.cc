@@ -140,6 +140,7 @@ HopfieldServer::HopfieldServer()
     hebLearnAgent = new HebbianLearningAgent();
     hebLearnAgent->convertLinks = true;
     spreadAgent = new ImportanceSpreadingAgent();
+    diffuseAgent = new ImportanceDiffusionAgent();
     forgetAgent = new ForgettingAgent();
     forgetAgent->forgetPercentage = 0.10f;
 
@@ -316,7 +317,8 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         hebLearnAgent->run(this);
 
         logger().fine("---Imprint:Importance spreading");
-        spreadAgent->run(this);
+        //spreadAgent->run(this);
+        diffuseAgent->run(this);
 
         if (first)
             first = false;
@@ -368,7 +370,7 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles)
         logger().fine("---Retrieve:Encoding pattern");
         encodePattern(partialPattern, patternStimulus);
         printStatus();
-        updateAtomTableForRetrieval(5);
+        updateAtomTableForRetrieval(2);
         printStatus();
 
         numCycles--;
@@ -428,7 +430,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1)
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
     for (int i = 0; i < spreadCycles; i++) {
         logger().fine("---Retreive:Spreading Importance - cycle %d", i);
-        spreadAgent->run(this);
+        diffuseAgent->run(this);
     }
 
     importUpdateAgent->setUpdateLinksFlag(oldLinksFlag);
@@ -456,7 +458,7 @@ void HopfieldServer::printStatus()
         }
         cout << "| ";
         for (col = 0; col < width; col++) {
-            printf("% 1.2f ", nodeSTI[i*width + col] / (float) getAtomSpace()->getMaxSTI().recent);
+            printf("% 1.2f ", nodeSTI[i*width + col] / (float) getAtomSpace()->getMaxSTI());
         }
         cout << "| ";
 

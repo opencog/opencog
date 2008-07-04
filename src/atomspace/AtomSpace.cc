@@ -740,24 +740,47 @@ AttentionValue::sti_t AtomSpace::getSTI(Handle h) const
     return TLB::getAtom(h)->getAttentionValue().getSTI();
 }
 
-float AtomSpace::getNormalisedSTI(Handle h)
+float AtomSpace::getNormalisedSTI(Handle h, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
 	int normaliser;
-    AttentionValue::sti_t s = a->getSTI(h);
-	if (s > a->getAttentionalFocusBoundary()) {
-		normaliser = (int) a->getMaxSTI().recent - a->getAttentionalFocusBoundary();
+    float val;
+    AttentionValue::sti_t s = getSTI(h);
+	if (s > getAttentionalFocusBoundary()) {
+		normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
         if (normaliser == 0) {
             return 0.0f;
         }
-		return (s - a->getAttentionalFocusBoundary()) / (float) normaliser;
+		val = (s - getAttentionalFocusBoundary()) / (float) normaliser;
 	} else {
-		normaliser = -((int) a->getMinSTI().recent + a->getAttentionalFocusBoundary());
+		normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
         if (normaliser == 0) {
             return 0.0f;
         }
-		return (s + a->getAttentionalFocusBoundary()) / (float) normaliser;
+		val = (s + getAttentionalFocusBoundary()) / (float) normaliser;
 	}
+    if (clip) {
+        return max(-1.0f,min(val,1.0f));
+    } else {
+        return val;
+    }
+}
+
+float AtomSpace::getNormalisedZeroToOneSTI(Handle h, bool average, bool clip) const
+{
+	int normaliser;
+    float val;
+    AttentionValue::sti_t s = getSTI(h);
+    normaliser = getMaxSTI(average) - getMinSTI(average);
+    if (normaliser == 0) {
+        return 0.0f;
+    }
+    val = (s - getMinSTI()) / (float) normaliser;
+    if (clip) {
+        return max(0.0f,min(val,1.0f));
+    } else {
+        return val;
+    }
 }
 
 AttentionValue::lti_t AtomSpace::getLTI(Handle h) const
@@ -981,12 +1004,12 @@ stim_t AtomSpace::resetStimulus()
     return totalStimulus;
 }
 
-stim_t AtomSpace::getTotalStimulus()
+stim_t AtomSpace::getTotalStimulus() const
 {
     return totalStimulus;
 }
 
-stim_t AtomSpace::getAtomStimulus(Handle h)
+stim_t AtomSpace::getAtomStimulus(Handle h) const
 {
     if (stimulatedAtoms->find(TLB::getAtom(h)) == stimulatedAtoms->end()) {
         return 0;
@@ -1006,13 +1029,26 @@ AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti
     return s;
 }
 
-opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMaxSTI()
+void AtomSpace::updateMaxSTI(AttentionValue::sti_t m)
+{ maxSTI.update(m); }
+
+AttentionValue::sti_t AtomSpace::getMaxSTI(bool average) const
 {
-    return maxSTI;
+    if (average) {
+        return maxSTI.recent;
+    } else {
+        return maxSTI.val;
+    }
 }
 
-opencog::recent_val<AttentionValue::sti_t>& AtomSpace::getMinSTI()
-{
-    return minSTI;
-}
+void AtomSpace::updateMinSTI(AttentionValue::sti_t m)
+{ minSTI.update(m); }
 
+AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
+{
+    if (average) {
+        return minSTI.recent;
+    } else {
+        return minSTI.val;
+    }
+}

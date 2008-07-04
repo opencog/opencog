@@ -25,6 +25,9 @@
 #include <string>
 #include <math.h>
 
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+
 #include <Logger.h>
 
 #include <AtomSpace.h>
@@ -54,6 +57,10 @@ private:
 
     //! Spread importance along Hebbian links.
     void spreadImportance();
+
+    void printMatrix(gsl_matrix *m);
+    void printVector(gsl_vector *m);
+    void setScaledSTI(Handle h, float scaledSTI);
 
 public:
 

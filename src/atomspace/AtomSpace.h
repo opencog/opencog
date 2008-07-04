@@ -353,9 +353,30 @@ public:
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle) const;
 
-    /** Retrieve the normalised Short-Term Importance between -1..1
-     * for a given Handle */
-    float getNormalisedSTI(Handle) const;
+    /** Retrieve the doubly normalised Short-Term Importance between -1..1
+     * for a given Handle. STI above and below threshold normalised separately
+     * and linearly.
+     *
+     * @param h The atom handle to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to -1..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between -1..1
+     */
+    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const;
+
+    /** Retrieve the linearly normalised Short-Term Importance between 0..1
+     * for a given Handle.
+     *
+     * @param h The atom handle to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to 0..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between 0..1
+     */
+    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const;
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle) const;
@@ -922,7 +943,7 @@ public:
      *
      * @return total stimulus since last reset.
      */
-    stim_t getTotalStimulus();
+    stim_t getTotalStimulus() const;
 
     /**
      * Get stimulus for Atom.
@@ -930,7 +951,7 @@ public:
      * @param handle of atom to get stimulus for.
      * @return total stimulus since last reset.
      */
-    stim_t getAtomStimulus(Handle h);
+    stim_t getAtomStimulus(Handle h) const;
 
     /**
      * Get attentional focus boundary, generally atoms below
@@ -951,8 +972,10 @@ public:
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s);
 
-    opencog::recent_val<AttentionValue::sti_t>& getMaxSTI();
-    opencog::recent_val<AttentionValue::sti_t>& getMinSTI();
+    AttentionValue::sti_t getMaxSTI(bool average=true) const;
+    AttentionValue::sti_t getMinSTI(bool average=true) const;
+    void updateMinSTI(AttentionValue::sti_t m);
+    void updateMaxSTI(AttentionValue::sti_t m);
 
     // For convenience
     // bool isNode(Handle) const;

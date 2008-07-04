@@ -135,7 +135,7 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     for (outgoing_i = outgoing.begin(); outgoing_i < outgoing.end();) {
         float normsti;
         Handle oh = *outgoing_i;
-        normsti = a->getNormalisedSTI(a->getSTI(oh));
+        normsti = a->getNormalisedSTI(oh);
         if (normsti > 0.0f) {
             theSource = oh;
             foundTheSource = true;
@@ -181,7 +181,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 		}
 
         // normalise each sti and multiple each
-        normsti = a->getNormalisedSTI(sti);
+        normsti = a->getNormalisedSTI(h);
 
         // For debugging:
         normsti_v.push_back(normsti);
