@@ -1,4 +1,4 @@
-                    query processng
+                    query processing
                     ---------------
         Linas Vepstas <linasvepstas@gmail.com>
                   Created 18 March 2008
@@ -9,10 +9,10 @@ algorithm, and then uses this algorithm to perform query processing.
 The first part of the file describes the generic algorithm; the second
 part describes its application to query processing.
 
-This code does not currently expose a "hypergraph query langauge" (HQL),
+This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
 
-XXX As of 13 may 2008, minor changes to the relex output might have broken
+XXX As of 13 may 2008, minor changes to the RelEx output might have broken
 the query processing part of the code. This code might trip over the
 new way in which sentences are specified.... or maybe this code will
 work?  Untested...
@@ -59,7 +59,7 @@ ball. What did John throw?" The query takes the form:
    link[40 <_obj,link[26 <throw_49,_$qVar_05>]>]
    link[40 <_subj,link[26 <throw_49,John_51>]>]
 
-which is sovled by:
+which is solved by:
    link[40 <_obj,link[26 <throw_22,ball_79>]>]
    link[40 <_subj,link[26 <throw_22,John_85>]>]
 
@@ -103,7 +103,7 @@ Currently Implemented Algorithm
 0) In the following, the word "atom" may refer to either a hypergraph
    node, or a hypergraph link. Corresponding to every hypergraph is
    an incidence graph. The atoms of a hypergraph are vertices of
-   the incidence graph. The convetion used here is that the incidence
+   the incidence graph. The convention used here is that the incidence
    graph is a directed graph; thus, only hypergraph links have
    outgoing incidence graph edges; whereas hypergraph nodes have
    no outgoing incidence graph edges.
@@ -126,19 +126,19 @@ Currently Implemented Algorithm
    Thus, for example: _subj(row, Steve) has _subj at the root of the
    tree, with "row" and "Steve" as leaves.
 
-   In the following [and in the code], each tree will be refered to as
+   In the following [and in the code], each tree will be referred to as
    a "predicate"; although this term is potentially misleading, as the
    resemblance to logical predicates is superficial.
 
-   Distinct trees may have common verticies.  The common verticies
+   Distinct trees may have common vertices.  The common vertices
    act to join together the trees into a single, connected graph.
    Disconnected graphs are not allowed; the algorithm will fail to
    find and solve disconnected components.  The graph as a whole may
    contain loops (the decomposition into trees keeps the algorithm
-   from having to explicitly accomadate loops).
+   from having to explicitly accommodate loops).
 
    A list of the common, or shared, vertices is made; this list is
-   used later in the algorithm, to find all trees connnected to a
+   used later in the algorithm, to find all trees connected to a
    specific vertex. [This list is implemented as PatternMatch::root_map]
 
    The universe graph may have any structure whatsoever; there is no
@@ -148,19 +148,19 @@ Currently Implemented Algorithm
    Thus, for example _obj(row,_$qVar) has _$qVar is the variable
    to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
-   The designated variables need not be leaf verticies. There may be
+   The designated variables need not be leaf vertices. There may be
    zero, one or more variables.
 
 3) Node equivalence is determined by means of a callback; the user
-   may implement any notion at all of "equivalance".  In particular,
+   may implement any notion at all of "equivalence".  In particular,
    the equivalence callback may be used as an alternate way to perform
    variable bindings, with the callback itself determining when a
    node is variable, and what the allowed bindings to it may be.
 
    [This callback is implemented in PatternMatchCallback::node_match().
-   In opencog, links are not given unique names, only types. Thus,
-   links are considered to match when thier types match, and the
-   tree given by the link's outoging set also matches. In particular,
+   In OpenCog, links are not given unique names, only types. Thus,
+   links are considered to match when their types match, and the
+   tree given by the link's outgoing set also matches. In particular,
    the node_match() callback is never called for links.]
 
 4) Pick the first tree. Get the type of the root atom of the
@@ -184,7 +184,7 @@ Currently Implemented Algorithm
 
    If the atom is a link, so that it has a non-zero number of outgoing
    edges, then the number of edges (the arity) of both the predicate
-   and the corresponding lik in the universe, must be equal.
+   and the corresponding link in the universe, must be equal.
 
    The tree matching algorithm invokes the node-equivalence callback,
    as each pair of nodes is encountered.  Recursion is terminated when
@@ -195,17 +195,17 @@ Currently Implemented Algorithm
    called. Because links are anonymous, the callback is never
    called for links.]
 
-6) Assuming a single tree has been sucessfully matched in the previous
+6) Assuming a single tree has been successfully matched in the previous
    step, the next step is to find a predicate tree that has not yet been
    solved.  This is done by examining the list of all nodes that are
    shared between the most recently solved tree, looking for an unsolved
    tree.
 
-   [This is implemented in PattherMatch::get_next_unsolved_pred()]
+   [This is implemented in PatternMatch::get_next_unsolved_pred()]
 
 7) If an unsolved tree is found, then tree-matching, as described in
    step 5), resumes. However, the tree matching resumes at the shared
-   node of the unsolved tree. The unsovled tree is recursively walked
+   node of the unsolved tree. The unsolved tree is recursively walked
    upwards, towards its root, with a tree match attempted at ever stage.
 
    The upwards recursion uses a stack to track state; this is required
@@ -235,7 +235,7 @@ Currently Implemented Algorithm
    solution is correct after backtracking: i.e. they must be popped
    as failed matches are encountered.]
 
-   Note that mutiple solution graphs may overlap.  Thus, if the
+   Note that multiple solution graphs may overlap.  Thus, if the
    universe contains the statement: "John threw a ball and a rock."
    and the query is "What did John throw?", then there are two
    valid subgraph matches: "John threw a ball" and "John threw
@@ -253,13 +253,13 @@ Currently Implemented Algorithm
 
 Summary
 -------
-The above describes the specific implemention of a subraph matching
+The above describes the specific implementation of a subgraph matching
 algorithm. It is generic, in that it makes no reference to the
 specifics of the actual data layout, or of node equivalences in the
 data.  The only restriction made is that the input, query graph,
 has been decomposed into a set of trees.
 
-[On opencog, the entire implementation is in PatternMatch.[h, .cc].]
+[On OpenCog, the entire implementation is in PatternMatch.[h, .cc].]
 
 Foreach iterators
 -----------------
@@ -276,7 +276,7 @@ A) The details of the Atom.h incoming and outgoing sets are abstracted.
 
 B) The foreach abstraction makes multi-threaded implementation,
    including mutex locking, much easier. In particular, the semantics
-   of atomic locking of a forech traversal is much simpler than complexity
+   of atomic locking of a foreach traversal is much simpler than complexity
    of trying to lock a naked linked list for read-only or read-write
    traversal.
 
@@ -289,12 +289,12 @@ C) The foreach abstraction can (and will) have performance that is
    a raw for-loop iteration.
 
 D) The foreach abstraction allows complex iterators to be implemented.
-   Thus, the foeach abstraction eliminates the data copying associated
+   Thus, the foreach abstraction eliminates the data copying associated
    with naive "filters", and thus can offer superior space *and* time
    performance over filters. For example, consider a long linked list
    consisting of many types of atoms, and one wants to perform a certain
    operation only on a specific type of atom. Traditional "filters"
-   would make a copy of the list, incuding only the desired atom
+   would make a copy of the list, including only the desired atom
    types in the copied list. This requires significant overhead:
    nodes must be copied, iterated over, and then freed.  The foreach
    abstraction allows a zero-copy filter to be implemented: the
@@ -303,7 +303,7 @@ D) The foreach abstraction allows complex iterators to be implemented.
 
 Ranking; Approximate matching
 -----------------------------
-Because the solution subgraph is returned, a ranking of the qality of
+Because the solution subgraph is returned, a ranking of the quality of
 the solution can be performed in a post-processing stage, by applying
 weights to links, etc.  There seems to be little advantage to computing
 a ranking score during the graph search itself.
@@ -331,25 +331,25 @@ partial scores, if not accounted for.
 
 Query Processing Overview
 -------------------------
-Query processing proceeds by taking English langauge sentences, 
-passing them through the link-grammar perser, then through relex,
-through the semanitic framing, and then importing the result into
-opencog.
+Query processing proceeds by taking English language sentences, 
+passing them through the link-grammar parser, then through RelEx,
+through the semantic framing, and then importing the result into
+OpenCog.
 
 When a sentence is determined to be a query, the above-described
-patern matching is performed on the contents of opencog, in an
+pattern matching is performed on the contents of OpenCog, in an
 attempt to find a matching result.  Pattern matching can be done
-at several levels: at the relex level, or at the more abstract
-semantic framing level.  Query processing at the relex level should
+at several levels: at the RelEx level, or at the more abstract
+semantic framing level.  Query processing at the RelEx level should
 be used only when a very narrow, literal answer is desired. This
-is because pattern matching at the relex level introduces very
+is because pattern matching at the RelEx level introduces very
 little wiggle room.  Thus, for example, to answer the question
-"What did John throw?" at the relex level,
+"What did John throw?" at the RelEx level,
 
     _subj(throw, John )
     _obj(throw, _$qVar)
 
-The opencog server must contain a sentence that had parsed into
+The OpenCog server must contain a sentence that had parsed into
 exactly the above form; so, for example: "John threw a ball"
 
     _subj(throw, John )
@@ -375,7 +375,7 @@ comfortable to programmers, the query language should maintain the
 outward form of SQL, SPARQL, RQL, etc. 
 
 So, for example, a hypergraph might be written as a list
-of links, and thier contents:
+of links, and their contents:
 
   <hypergraph> := { <link-type> <atom> <atom> ... <atom>.
                     <link-type> <atom> <atom> ... <atom>.
@@ -428,32 +428,32 @@ There is currently no code that will actually parse such strings, and
 return the query results, although, in principle, writing such code
 would not be hard.  In practice, its a little more subtle than that:
 we've glossed over the idea that truth values could be queryable, or
-that truth values would need to have some miniumum/maximum value, or
-that atom types could be queryable.  Also, the representation of relex
-expressions in opencog is considerably more complicated than the above.
+that truth values would need to have some minimum/maximum value, or
+that atom types could be queryable.  Also, the representation of RelEx
+expressions in OpenCog is considerably more complicated than the above.
 
 To overcome these difficulties, it is strongly suggested (would make
-sense) to create the actual query langauge from within the scheme
+sense) to create the actual query language from within the scheme
 bindings. This is because it is straight-forward, in scheme, to create
-the "syntactic sugar" to hide relex intricacies, and hide many of the 
+the "syntactic sugar" to hide RelEx intricacies, and hide many of the 
 other nasty details, while keeping a nice and simple interface for the
 user.
 
-What is currently implemented is "English as a query langauge". That is,
+What is currently implemented is "English as a query language". That is,
 queries are posed in English, such as "What did John throw?". These are
-parsed by relex and turned into opencog hypergraphs with embedded query
+parsed by RelEx and turned into OpenCog hypergraphs with embedded query
 variables (_$qVar) in them.  The code in this directory will process
 these queries, and return values for _$qVar.
 
-Thus, at least for relex-based queries, there is no need for HQL, as 
+Thus, at least for RelEx-based queries, there is no need for HQL, as 
 using the English language is (a lot) easier than writing a formal
-HQL query.  In this sense, English is the "best" query langauge, and
+HQL query.  In this sense, English is the "best" query language, and
 it is supported. 
 
 
-Relex pattern matching
+RelEx pattern matching
 ----------------------
-A detailed example of relex relationship matching follows.
+A detailed example of RelEx relationship matching follows.
 
 "John threw a ball."
 
@@ -483,16 +483,16 @@ tense(throw, past_infinitive)
 DEFINITE-FLAG(John, T)
 noun_number(John, singular)
 
-Clearly, the relex pattern of the question can be matched to 
-the relex pattern of the answer, to find that _$qVar == ball.
+Clearly, the RelEx pattern of the question can be matched to 
+the RelEx pattern of the answer, to find that _$qVar == ball.
 (Some twiddling required to match tense correctly).
-This type of relex relation-level setup, query massaging 
+This type of RelEx relation-level setup, query massaging 
 and node matching is implemented in RelexQuery.cc, RelexQuery.h
 It seems to work, but hasn't undergone strenuous testing.
 
-Pattern matching at the relex level is not always possible, as shown
-next. At the root of the problem is that relex provides only a small
-amount of "semantic normalization". That is, relex will abstract 
+Pattern matching at the RelEx level is not always possible, as shown
+next. At the root of the problem is that RelEx provides only a small
+amount of "semantic normalization". That is, RelEx will abstract 
 (pull out, normalize) some, but not much, semantics.  Similar 
 statements will be similar, whereas the query processor is looking for
 exact matches, and not merely similarities.  Thus, query processing
@@ -502,7 +502,7 @@ will fail without exact matches. A mechanism will be needed for handling
 Copula troubles:
 ----------------
 Intensional/extensional inheritance causes problems for 
-simple relex matching.
+simple RelEx matching.
 
 Yarn is a length of fibers.
 _subj(be, yarn)
@@ -532,8 +532,8 @@ preventing a direct match.
 
 Frame matching
 --------------
-The goal of working with frames rather than relex relations is
-to escape from the stricturures of the syntactic relations, and
+The goal of working with frames rather than RelEx relations is
+to escape from the strictures of the syntactic relations, and
 move to a more semantic interpretation.
 
 Yarn is a length of fibers.
@@ -639,7 +639,7 @@ Remove "Questioning" and "what".
 ^1_Cause_motion:Cause(throw,John)           -- OK match
 ^1_Transitive_action:Object(throw,_$qVar)   -- OK _$qVar == bal
 
-This type of relex frame-level setup, query massaging 
+This type of RelEx frame-level setup, query massaging 
 and node matching is implemented in FrameQuery.cc, FrameQuery.h
 It seems to work, but hasn't undergone strenuous testing.
 
@@ -653,7 +653,7 @@ John threw a ball and a screwdriver.
 John ate a peach.
 What did John throw?
 
-Relex matching provides two correct answers: 
+RelEx matching provides two correct answers: 
 _$qVar = ball, and _$qVar = screwdriver.
 ====
 
@@ -730,7 +730,7 @@ The frame situation is no better.  The assertion frame is:
 ^1_Manufacturing:Factory(make,yarn)
 ^1_Cause_change:Entity(make,cloth)
 
-The appearence of "cooking" is unexpected.  "Building" is odd 
+The appearance of "cooking" is unexpected.  "Building" is odd 
 Why not "manufacture" or "intentionally_create"?
 
 "Ingest" is ... and odd way of saying that the yarn is used up...
@@ -765,7 +765,7 @@ A clause by clause comparison shows that this doesn't match
 the question any better then before. So pattern matching the
 question fails here too.  
 
-How similar are the two assertions? Lets compare relex output first;
+How similar are the two assertions? Lets compare RelEx output first;
 ignoring tense, noun_number, which are correct, we have:
 
   "Yarn is used for making cloth."
@@ -836,7 +836,7 @@ solutions, but need a better long-term solution.
    is parsed. If the parse is successful, no further processing is done.
 
    Query processing could be performed by a mind agent, but how should
-   its activity be triggered, and what communictations channel should
+   its activity be triggered, and what communications channel should
    it use to post a reply?
 
 
