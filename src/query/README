@@ -9,11 +9,13 @@ algorithm, and then uses this algorithm to perform query processing.
 The first part of the file describes the generic algorithm; the second
 part describes its application to query processing.
 
-XXX As of 13 may, minor changes to the relex output might have broken
+This code does not currently expose a "hypergraph query langauge" (HQL),
+but doing so should not be hard to add. See the design notes below.
+
+XXX As of 13 may 2008, minor changes to the relex output might have broken
 the query processing part of the code. This code might trip over the
 new way in which sentences are specified.... or maybe this code will
 work?  Untested...
-
 
 Subgraph Isomorphism Discovery
 ------------------------------
@@ -362,6 +364,93 @@ is desirable.  This is afforded by using the semantic framing
 matcher.
 
 
+Hypergraph Query Language (HQL)
+-------------------------------
+A "hypergraph query language" is a language that allows queries to be
+expressed as strings. Given *any* way of writing down a hypergraph as
+a string, a hypergraph query language can be trivially formed by adding
+variables to the expression, in exactly the same way that one adds 
+variables to logic predicates, lambda calculus, etc.  In order to feel 
+comfortable to programmers, the query language should maintain the 
+outward form of SQL, SPARQL, RQL, etc. 
+
+So, for example, a hypergraph might be written as a list
+of links, and thier contents:
+
+  <hypergraph> := { <link-type> <atom> <atom> ... <atom>.
+                    <link-type> <atom> <atom> ... <atom>.
+                    ...
+                    <link-type> <atom> <atom> ... <atom>.
+                  }
+ 
+Here, <atom> is understood to refer to a specific, constant atom. 
+Let ?var be a variable.  Then define <vatom> as
+
+  <vatom> :=  <atom> | ?var
+
+That is, a vatom is a constant atom, or a variable. A hypergraph 
+with variables in it is then
+
+  <v-hypergraph> := { <link-type> <vatom> <vatom> ... <vatom>.
+                      <link-type> <vatom> <vatom> ... <vatom>.
+                      ...
+                      <link-type> <vatom> <vatom> ... <vatom>.
+                    }
+
+An HQL query, resembling the syntax used in SQL or SPARQL, is then
+
+  SELECT ?var-a ?var-b ... ?var-z WHERE <v-hypergraph>;
+
+So, for example, the hypergraph for 
+
+    _subj(throw, John )
+    _obj(throw, ball)
+
+is somewhat complicated to write down, but vaguely resembles
+
+    { ?x WORD_NODE John.
+      ?y WORD_NODE throw.
+      ?z WORD_NODE ball.
+      RELEX_LINK _subj ?y ?x.
+      RELEX_LINK _obj  ?y ?z.
+    }
+
+The query to determine what John threw would then be:
+
+  SELECT ?item WHERE
+    { ?x WORD_NODE John.
+      ?y WORD_NODE throw.
+      RELEX_LINK _subj ?y ?x.
+      RELEX_LINK _obj  ?y ?item.
+    }
+
+There is currently no code that will actually parse such strings, and 
+return the query results, although, in principle, writing such code
+would not be hard.  In practice, its a little more subtle than that:
+we've glossed over the idea that truth values could be queryable, or
+that truth values would need to have some miniumum/maximum value, or
+that atom types could be queryable.  Also, the representation of relex
+expressions in opencog is considerably more complicated than the above.
+
+To overcome these difficulties, it is strongly suggested (would make
+sense) to create the actual query langauge from within the scheme
+bindings. This is because it is straight-forward, in scheme, to create
+the "syntactic sugar" to hide relex intricacies, and hide many of the 
+other nasty details, while keeping a nice and simple interface for the
+user.
+
+What is currently implemented is "English as a query langauge". That is,
+queries are posed in English, such as "What did John throw?". These are
+parsed by relex and turned into opencog hypergraphs with embedded query
+variables (_$qVar) in them.  The code in this directory will process
+these queries, and return values for _$qVar.
+
+Thus, at least for relex-based queries, there is no need for HQL, as 
+using the English language is (a lot) easier than writing a formal
+HQL query.  In this sense, English is the "best" query langauge, and
+it is supported. 
+
+
 Relex pattern matching
 ----------------------
 A detailed example of relex relationship matching follows.
@@ -401,8 +490,14 @@ This type of relex relation-level setup, query massaging
 and node matching is implemented in RelexQuery.cc, RelexQuery.h
 It seems to work, but hasn't undergone strenuous testing.
 
-Pattern matching at the relex level is not always 
-possible, as shown next.
+Pattern matching at the relex level is not always possible, as shown
+next. At the root of the problem is that relex provides only a small
+amount of "semantic normalization". That is, relex will abstract 
+(pull out, normalize) some, but not much, semantics.  Similar 
+statements will be similar, whereas the query processor is looking for
+exact matches, and not merely similarities.  Thus, query processing
+will fail without exact matches. A mechanism will be needed for handling
+"similar" statements with similar meanings.
 
 Copula troubles:
 ----------------
