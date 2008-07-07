@@ -82,7 +82,7 @@ std::string SchemeShell::prt(SCM node)
 	else if (scm_is_true(scm_integer_p(node))) 
 	{
 		char buff[20];
-		snprintf (buff, 20, "%ld", scm_to_long(node));
+		snprintf (buff, 20, "%ld", (long) scm_to_long(node));
 		return buff;
 	}
 	else if (scm_is_true(scm_char_p(node))) 
