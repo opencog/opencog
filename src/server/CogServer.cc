@@ -22,17 +22,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Config.h"
-#include "Logger.h"
-#include "CogServer.h"
-#include "exceptions.h"
-#include "SimpleNetworkServer.h"
-
 #include <time.h>
-#ifndef WIN32
+#ifdef WIN32
+#include <winsock2.h>
+#else
 #include <unistd.h>
 #include <sys/time.h>
 #endif
+
+#include "CogServer.h"
+
+#include "Config.h"
+#include "Logger.h"
+#include "exceptions.h"
+#include "SimpleNetworkServer.h"
 
 using namespace opencog;
 AtomSpace* CogServer::atomSpace = NULL;

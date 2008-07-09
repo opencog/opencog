@@ -24,7 +24,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdio.h>
+
 #include "platform.h"
+
 #include "Link.h"
 #include "ClassServer.h"
 #include "StatisticsMonitor.h"
@@ -78,7 +81,7 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
-std::string Link::toShortString(void)
+std::string Link::toShortString(void) const
 {
     std::string answer;
 #define BUFSZ 1024
@@ -104,7 +107,7 @@ std::string Link::toShortString(void)
     return answer;
 }
 
-std::string Link::toString(void)
+std::string Link::toString(void) const
 {
     std::string answer;
     char buf[BUFSZ];
@@ -237,11 +240,11 @@ bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
     }
 }
 
-bool Link::equals(Atom* other)
+bool Link::equals(const Atom* other) const
 {
     if (type != other->getType()) return false;
 
-    Link *olink = dynamic_cast<Link *>(other);
+    const Link* olink = dynamic_cast<const Link*>(other);
     if (getArity() != olink->getArity()) return false;
 
     for (int i = 0; i < getArity(); i++) {
@@ -251,7 +254,7 @@ bool Link::equals(Atom* other)
     return true;
 }
 
-int Link::hashCode(void)
+int Link::hashCode(void) const
 {
     long result = type + (getArity() << 8);
 

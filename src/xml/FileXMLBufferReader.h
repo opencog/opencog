@@ -23,10 +23,14 @@
 #ifndef _FILEXMLBUFFERREADER_H_
 #define _FILEXMLBUFFERREADER_H_
 
+#include <stdio.h>
+
 #include "XMLBufferReader.h"
 #include "exceptions.h"
 
-#include <stdio.h>
+#ifdef WIN32
+#pragma warning(disable: 4290)
+#endif
 
 namespace opencog
 {

@@ -23,17 +23,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TEMPORALENTRY_H
-#define TEMPORALENTRY_H
+#ifndef TEMPORAL_ENTRY_H
+#define TEMPORAL_ENTRY_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <string>
+#include <vector>
 
 #include <stdlib.h>
 #include <limits.h>
+
 #include "Temporal.h"
-#include <string>
 
 namespace opencog
 {

@@ -93,8 +93,6 @@ std::vector<std::vector<bool> > ClassServer::init_map()
     return map;
 }
 
-
-
 ClassTypeHashMap *ClassServer::init_type()
 {
     static ClassTypeHashMap class_to_int;
@@ -153,14 +151,13 @@ Type ClassServer::getType(const char *typeName)
     if (!typeName) return NOTYPE;
 
     ClassTypeHashMap::iterator it = getClassType()->find(typeName);
-
     if (it == getClassType()->end()) {
         return NOTYPE;
     }
     return it->second;
 }
 
-const char* ClassServer::getTypeName(Type type)
+std::string ClassServer::getTypeName(Type type)
 {
     int t = (int) type;
     if ((t < 0) || (t >=  NUMBER_OF_CLASSES)) {

@@ -24,15 +24,19 @@
  */
 
 #include "platform.h"
-#include "TLB.h"
-#include "AtomSpace.h"
-#include "SimpleTruthValue.h"
-#include "Node.h"
+
+#include <algorithm>
 
 #include <math.h>
 #include <string.h>
 
+#include "AtomSpace.h"
+#include "Node.h"
+#include "SimpleTruthValue.h"
+#include "TLB.h"
+
 using namespace opencog;
+using std::find;
 
 #define NUM_VHS 4
 VersionHandle VHs[NUM_VHS] = {

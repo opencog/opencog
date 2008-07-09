@@ -43,7 +43,7 @@ struct lazy_random_selector {
     int operator()();
 private:
     int _n;
-    hash_map<int, int> _map;
+    std::tr1::unordered_map<int, int> _map;
     int _v;
     opencog::RandGen& rng;
 };

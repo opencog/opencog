@@ -37,7 +37,7 @@ int lazy_random_selector::operator()()
     cassert(TRACE_INFO, !empty(), "lazy_random_selector - selector is empty.");
     int idx = rng.randint(_n--);
 
-    hash_map<int, int>::iterator it = _map.find(idx);
+    std::tr1::unordered_map<int, int>::iterator it = _map.find(idx);
     if (idx == _n) {
         if (it != _map.end()) {
             idx = it->second;
@@ -46,7 +46,7 @@ int lazy_random_selector::operator()()
         return idx;
     }
     int res = (it == _map.end()) ? idx : it->second;
-    hash_map<int, int>::iterator last = _map.find(_n);
+    std::tr1::unordered_map<int, int>::iterator last = _map.find(_n);
     if (last == _map.end()) {
         _map.insert(std::make_pair(idx, _n));
     } else {

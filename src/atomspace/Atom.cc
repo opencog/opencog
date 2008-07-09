@@ -23,22 +23,25 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include "platform.h"
-#include "Atom.h"
-#include "Link.h"
-#include "ClassServer.h"
-#include "Defaults.h"
-#include "StatisticsMonitor.h"
-#include "exceptions.h"
-#include "TLB.h"
-#include "utils.h"
-#include "AtomTable.h"
-#include "AtomSpaceDefinitions.h"
 #include <set>
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
+
+#include "platform.h"
+#include "Atom.h"
+#include "AtomSpaceDefinitions.h"
+#include "AtomTable.h"
+#include "ClassServer.h"
+#include "Defaults.h"
+#include "Link.h"
+#include "Logger.h"
+#include "StatisticsMonitor.h"
+#include "TLB.h"
+#include "exceptions.h"
+#include "utils.h"
+
 //#define USE_SHARED_DEFAULT_TV
 
 #undef Type
@@ -733,14 +736,14 @@ bool Atom::isOld(const AttentionValue::sti_t threshold) const
 }
 
 // This is a virtual function, overloaded by Link class and Node class.
-bool Atom::equals(Atom* other)
+bool Atom::equals(const Atom* other) const
 {
-    if (type != other->type) return false;
-    return true;
+    bool rv = (type == other->type);
+    return rv;
 }
 
 // This is a virtual function, overloaded by Link class and Node class.
-int Atom::hashCode()
+int Atom::hashCode() const
 {
     return (int) type;
 }

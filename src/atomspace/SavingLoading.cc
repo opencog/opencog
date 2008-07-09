@@ -124,9 +124,9 @@ void SavingLoading::saveClassServerInfo(FILE *f)
     fwrite(&numTypes, sizeof(int), 1, f);
 
     for (Type i = 0; i < numTypes; i++) {
-        int classNameLength = strlen(ClassServer::getTypeName(i));
+        int classNameLength = ClassServer::getTypeName(i).length();
         fwrite(&classNameLength, sizeof(int), 1, f);
-        fwrite(ClassServer::getTypeName(i), sizeof(char), classNameLength, f);
+        fwrite(ClassServer::getTypeName(i).c_str(), sizeof(char), classNameLength, f);
         fwrite(&i, sizeof(Type), 1, f);
     }
 }
@@ -915,12 +915,12 @@ void SavingLoading::saveRepositories(FILE *f)
     fwrite(&size, sizeof(unsigned int), 1, f);
 
     for (RepositoryHash::const_iterator it = repositories.begin(); it != repositories.end(); it++) {
-        const char* repId = it->first;
-        int idSize = strlen(repId) + 1;
+        const std::string& repId = it->first;
+        int idSize = repId.length() + 1;
         fwrite(&idSize, sizeof(int), 1, f);
-        fwrite(repId, sizeof(char), idSize, f);
+        fwrite(repId.c_str(), sizeof(char), idSize, f);
 
-        logger().debug("Saving repository: %s", repId);
+        logger().debug("Saving repository: %s", repId.c_str());
         SavableRepository* rep = it->second;
         rep->saveRepository(f);
 

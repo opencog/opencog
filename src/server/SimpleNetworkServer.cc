@@ -22,16 +22,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
+#include <SocketHandler.h>
 
 #include "SimpleNetworkServer.h"
-#include "ServerSocket.h"
-#include "CommandRequest.h"
-#include "Logger.h"
 
-#include <exceptions.h>
-#include <ListenSocket.h>
-#include <SocketHandler.h>
+#include "platform.h"
+#include "CommandRequest.h"
+#include "ListenSocket.h"
+#include "Logger.h"
+#include "ServerSocket.h"
+#include "exceptions.h"
 
 using namespace opencog;
 
@@ -137,7 +137,7 @@ void *SimpleNetworkServer::portListener(void *arg)
         // we throw an exception ourselves because csockets may
         // be compiled with exceptions disabled
         if (listenSocket.Bind(port)) throw new Exception("bind error");
-    } catch (Exception &e) {
+    } catch (Exception) {
         logger().error("Unable to bind to port %d. Aborting.", port);
         std::exit(1);
     }

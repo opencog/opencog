@@ -24,28 +24,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_LIBPTHREAD
-#include <pthread.h>
-#endif
+#include "AtomTable.h"
 
 #include <stdlib.h>
-#include "AtomTable.h"
+#include <pthread.h>
+
+#include "AtomSpaceDefinitions.h"
 #include "ClassServer.h"
-#include "exceptions.h"
-#include "StatisticsMonitor.h"
+#include "Config.h"
+#include "CoreUtils.h"
+#include "HandleMap.cc"
 #include "Link.h"
+#include "Logger.h"
 #include "Node.h"
+#include "StatisticsMonitor.h"
 #include "TLB.h"
-extern "C"
-{
+#include "exceptions.h"
+extern "C" {
 #include "md5.h"
 }
-//#include "NMPrinter.h"
-#include "CoreUtils.h"
-#include "AtomSpaceDefinitions.h"
-#include "Logger.h"
-#include "HandleMap.cc"
-#include "Config.h"
 
 using namespace opencog;
 
@@ -56,24 +53,6 @@ using namespace opencog;
  * there's a bug somewhere when this is not defined.
  */
 #define USE_ATOM_HASH_SET
-
-int hashAtom::operator()(Atom* a) const
-{
-//    printf("hashAtom a = %p\n", a);
-//    printf("table of a = %d\n", a->getAtomTable());
-//    printf("%s\n", a->toString().c_str());
-    return(a->hashCode());
-}
-
-bool eqAtom::operator()(Atom* a1, Atom* a2) const
-{
-//    printf("eqAtom a1 = %p, a2 = %p\n", a1, a2);
-//    printf("table of a1 = %d\n",  a1->getAtomTable());
-//    printf("table of a2 = %d\n",  a2->getAtomTable());
-//    printf("a1 => %s\n", a1->toString().c_str());
-//    printf("a2 => %s\n", a2->toString().c_str());
-    return (a1->equals(a2));
-}
 
 AtomTable::AtomTable(bool dsa)
 {
@@ -643,13 +622,22 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
         sets = newset;
     }
 
+    /*
+    for (int i = 0; i < arity; i++) {
+        printf("arity %d\n:", i);
+        for (HandleEntry* it = sets[i]; it != NULL; it = it->next) {
+            printf("\t%ld: %s\n", it->handle, TLB::getAtom(it->handle)->toString().c_str());
+        }
+        printf("\n");
+    }
+    */
     // the intersection is made for all non-empty sets, and then is filtered
     // by the optional specified type. Also, if subclasses are not accepted,
     // it will not pass the filter.
     //printf("getHandleSet: about to call intersection\n");
     HandleEntry* set = HandleEntry::intersection(sets);
     //printf("getHandleSet: about to call filterSet\n");
-//    return  HandleEntry::filterSet(set, type, subclass); // This filter redundant, since all getHandleSet above uses type and subclass
+    //return  HandleEntry::filterSet(set, type, subclass); // This filter redundant, since all getHandleSet above uses type and subclass
     return  set;
 }
 
@@ -746,9 +734,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), lll->getArity());
     // NMPrinter p;
     // p.print(atom);
-    // printf("%s\n", atom->toString().c_str());
+    //printf("%s\n", atom->toString().c_str());
     atomSet->insert(atom);
-    // printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", tableId, atom, atomSet->size());
+    //printf("AtomTable::atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
 #endif
 
     // Checks for null outgoing set members.
@@ -1383,4 +1371,17 @@ void AtomTable::scrubIncoming(void)
         }
     }
 #endif
+}
+
+std::size_t opencog::atom_ptr_hash::operator()(Atom* const& x) const
+{
+    std::size_t hc = static_cast<std::size_t>(x->hashCode());
+    return hc;
+}
+
+//bool opencog::atom_ptr_equal_to::operator()(Atom* const& x, Atom* const& y) const
+bool opencog::atom_ptr_equal_to::operator()(Atom* const& x, Atom* const& y) const
+{
+    bool rv = x->equals(y);
+    return rv;
 }

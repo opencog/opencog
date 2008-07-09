@@ -23,6 +23,7 @@
  */
 
 #include "platform.h"
+
 #include "Link.h"
 #include "NMXmlExporter.h"
 #include "NMXmlDefinitions.h"
@@ -97,7 +98,7 @@ std::string NMXmlExporter::toXML(HandleSet *elements)
     result += aux;
     for (int i = 0 ; i < NUMBER_OF_CLASSES; i++) {
         if (typesUsed[i]) {
-            sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, ClassServer::getTypeName(i), VALUE_TOKEN, ClassServer::getTypeName(i));
+            sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, ClassServer::getTypeName(i).c_str(), VALUE_TOKEN, ClassServer::getTypeName(i).c_str());
             result += aux;
         }
     }
@@ -120,16 +121,16 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
     typesUsed[atom->getType()] = true;
     if (ClassServer::isAssignableFrom(NODE, atom->getType())) {
         if (!isInternal) {
-            sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
+            sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
             result += aux;
         } else {
-            sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, ClassServer::getTypeName(atom->getType()));
+            sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, ClassServer::getTypeName(atom->getType()).c_str());
             result += aux;
         }
         sprintf(aux, "%s=\"%s\" />\n", NAME_TOKEN, ((Node *)atom)->getName().c_str());
         result += aux;
     } else {
-        sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
+        sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
         result += aux;
         sprintf(aux, ">\n");
         result += aux;
@@ -140,7 +141,7 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
                 exportAtom(link->getOutgoingSet()[i], typesUsed, result, true);
             }
         }
-        sprintf(aux, "</%s>\n", ClassServer::getTypeName(atom->getType()));
+        sprintf(aux, "</%s>\n", ClassServer::getTypeName(atom->getType()).c_str());
         result += aux;
     }
 

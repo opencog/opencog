@@ -22,12 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <cstdlib>
+
 #include <errno.h>
 
+#include "platform.h"
 #include "Config.h"
 #include "exceptions.h"
 

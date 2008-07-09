@@ -500,20 +500,20 @@ public:
      *
      * @return A string representation of the node.
      */
-    virtual std::string toString(void) = 0;
-    virtual std::string toShortString(void) = 0;
+    virtual std::string toString(void) const = 0;
+    virtual std::string toShortString(void) const = 0;
 
     /**
     * Returns whether to atoms are equal.
     * @return true if the atom are equals, false otherwise.
     */
-    virtual bool equals(Atom *);
+    virtual bool equals(const Atom *) const;
 
     /**
     * Returns the hashCode of the Atom.
     * @return a integer value as the hashCode of the Atom.
     */
-    virtual int hashCode(void);
+    virtual int hashCode(void) const;
 };
 
 } // namespace opencog

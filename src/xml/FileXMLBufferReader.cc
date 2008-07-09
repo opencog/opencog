@@ -20,9 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "platform.h"
 #include "FileXMLBufferReader.h"
-#include <string.h>
 
 using namespace opencog;
 

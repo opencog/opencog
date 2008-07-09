@@ -7,10 +7,12 @@
 
 #ifdef HAVE_GUILE
 
+#include "SchemeShell.h"
+
 #include <libguile.h>
 #include <libguile/backtrace.h>
 
-#include "SchemeShell.h"
+#include "platform.h"
 #include "SchemeSmob.h"
 
 using namespace opencog;

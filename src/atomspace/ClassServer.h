@@ -128,7 +128,7 @@ public:
      * @param Atom type code.
      * @return The string representation of a givenn class.
      */
-    static const char* getTypeName(Type type);
+    static std::string getTypeName(Type type);
 
     /**
      * The typeDesignator of T is the Handle which describes the type T

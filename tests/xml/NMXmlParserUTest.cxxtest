@@ -22,14 +22,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <AtomSpace.h>
+#include <typeinfo>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <exceptions.h>
-#include <NMXmlParser.h>
-#include <typeinfo>
-#include <NMXmlParserExperiment.h>
-#include <FileXMLBufferReader.h>
+
+#include "AtomSpace.h"
+#include "FileXMLBufferReader.h"
+#include "NMXmlParser.h"
+#include "NMXmlParserExperiment.h"
+#include "Logger.h"
+#include "exceptions.h"
 
 using namespace opencog;
 
@@ -42,6 +45,8 @@ public:
     NMXmlParserUTest() {
         NMXmlParserExperiment::initStaticVars();
         atomSpace = new AtomSpace();
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
     }
 
     void tearDown() {

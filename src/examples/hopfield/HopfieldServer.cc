@@ -25,19 +25,22 @@
  * Emulates a hopfield network using OpenCog dynamics
  */
 
-#include "platform.h"
 #include <sstream>
+
 #include <math.h>
-#ifndef WIN32
+#ifdef WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
 #endif
 
-#include <mt19937ar.h>
-#include <Logger.h>
-#include <Link.h>
-
-#include "ImportanceUpdatingAgent.h"
 #include "HopfieldServer.h"
+
+#include "platform.h"
+#include "ImportanceUpdatingAgent.h"
+#include "Logger.h"
+#include "Link.h"
+#include "mt19937ar.h"
 
 using namespace opencog;
 using namespace std;

@@ -180,7 +180,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
     logger().fine("  +Hebbian links found %d", links->getSize());
 
-    totalDifference = sumTotalDifference(h, links);
+    totalDifference = static_cast<float>(sumTotalDifference(h, links));
     sourceSTI = a->getSTI(h);
 
     // if there is no hebbian links with > 0 weight

@@ -35,7 +35,6 @@
 #include "StringXMLBufferReader.h"
 #include "NMXmlParser.h"
 
-
 using namespace opencog;
 
 CommandRequestProcessor::~CommandRequestProcessor()

@@ -168,7 +168,7 @@ private:
 
 struct hashTemporal {
     int operator()(Temporal* tl) const {
-        int hashCode =  unsigned_long_hash()(tl->getA());
+        int hashCode =  hash<unsigned long>()(tl->getA());
         return(hashCode);
     }
 };

@@ -627,7 +627,7 @@ void AtomStorage::store_typemap(void)
 		snprintf(buff, BUFSZ,
 		         "INSERT INTO TypeCodes (type, typename) "
 		         "VALUES (%d, \'%s\');",
-		         t, ClassServer::getTypeName(t));
+		         t, ClassServer::getTypeName(t).c_str());
 		rp.rs = db_conn->exec(buff);
 		rp.rs->release();
 

@@ -28,34 +28,25 @@
 #ifdef WIN32
 
 #pragma warning(disable:4290)
-#define _CRT_SECURE_NO_WARNINGS 1
-#include <winsock2.h>
-#define snprintf _snprintf
-#define strcasecmp _stricmp
-#define strdup _strdup
-
-#include <hash_set>
-#include <hash_map>
+#include <unordered_set>
+#include <unordered_map>
 #include <functional>
 #include <algorithm>
 
-/// Windows headers define ATOM for other purposes, so we temporarily undef it.
-#undef ATOM
-#include <windows.h>
-#include <Mmsystem.h>
-#define ATOM 0
+#define strcasecmp _stricmp
+#define snprintf _snprintf
 
-#else // NOT WIN32
+#else // WIN32
 
-#include <ext/hash_set>
-#include <ext/hash_map>
-#include <ext/functional>
+#include <tr1/unordered_set>
+#include <tr1/unordered_map>
+#include <tr1/functional>
 
 #endif // WIN32
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+//#include <assert.h>
 #include <string>
 
 using namespace std;
@@ -97,35 +88,11 @@ int                __dup2(int, int);
 unsigned long long atoll(const char *str);
 unsigned int       sleep(unsigned seconds);
 
-typedef hash<int>           int_hash;
-typedef hash<unsigned int>  unsigned_int_hash;
-typedef hash<long>          long_hash;
-typedef hash<unsigned long> unsigned_long_hash;
-typedef hash<const char*>   const_char_hash;
-
-typedef hash_map<const char*, int, const_char_hash, eqconststr> ConstCharPointerIntHashMap;
-typedef hash_map<int, const char*, int_hash, eqint> IntConstCharPointerHashMap;
-typedef hash_map<const char*, void*, const_char_hash, eqconststr> ConstCharPointerVoidHashMap;
-typedef hash_map<int, int> Int2IntHashMap;
-typedef hash_set<int> Int2IntHashSet;
+using std::hash;
 
 #else // !WIN32
 
-typedef __gnu_cxx::hash<int>           int_hash;
-typedef __gnu_cxx::hash<unsigned int>  unsigned_int_hash;
-typedef __gnu_cxx::hash<long>          long_hash;
-typedef __gnu_cxx::hash<unsigned long> unsigned_long_hash;
-typedef __gnu_cxx::hash<const char*>   const_char_hash;
-
-typedef __gnu_cxx::hash_map<const char*, int, const_char_hash, eqconststr> ConstCharPointerIntHashMap;
-typedef __gnu_cxx::hash_map<int, const char*, int_hash, eqint> IntConstCharPointerHashMap;
-typedef __gnu_cxx::hash_map<const char*, void*, const_char_hash, eqconststr> ConstCharPointerVoidHashMap;
-typedef __gnu_cxx::hash_map<int, int> Int2IntHashMap;
-typedef __gnu_cxx::hash_set<int> Int2IntHashSet;
-
-using __gnu_cxx::hash_map;
-using __gnu_cxx::hash;
-using std::make_pair;
+using std::tr1::hash;
 
 #endif // WIN32!
 

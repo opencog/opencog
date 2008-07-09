@@ -30,8 +30,11 @@
 #include <types.h>
 
 #ifndef WIN32
+#include <tr1/unordered_set>
+/*
 #include <ext/hash_set>
 using __gnu_cxx::hash_set;
+*/
 #endif
 
 namespace opencog
@@ -47,7 +50,8 @@ private:
     /**
      * Defines a hash set used to store handles.
      */
-    typedef hash_set<Handle, hashHandle, eqHandle> InternalHandleSet;
+    //typedef hash_set<Handle, hashHandle, eqHandle> InternalHandleSet;
+    typedef std::tr1::unordered_set<Handle> InternalHandleSet;
 
 
 public:

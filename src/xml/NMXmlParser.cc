@@ -23,16 +23,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NMXmlParser.h"
-#include "FileXMLBufferReader.h"
-#include "NMXmlDefinitions.h"
-#include "SimpleTruthValue.h"
-#include "Link.h"
-#include "Logger.h"
+#include <stack>
+#include <string>
 
 #include <math.h>
-#include <stack>
 #include <expat.h>
+
+#include "platform.h"
+#include "FileXMLBufferReader.h"
+#include "Link.h"
+#include "Logger.h"
+#include "NMXmlDefinitions.h"
+#include "NMXmlParser.h"
+#include "SimpleTruthValue.h"
 
 /*
  * XXX To be fixed: remove all of the uses of "throw" in this code,
@@ -50,7 +53,7 @@
 
 using namespace opencog;
 
-hash_map<char *, Handle, hash<char *>, opencog::eqstr> NMXmlParser::hypHandles;
+std::tr1::unordered_map<const std::string, Handle, hash<std::string>, std::equal_to<std::string> > NMXmlParser::hypHandles;
 bool NMXmlParser::fresh = true;
 bool NMXmlParser::freshLinks = false;
 
@@ -213,7 +216,7 @@ throw (RuntimeException, InconsistenceException)
         if (ClassServer::isAssignableFrom(NODE, typeFound)) {
             //cprintf(5,"Processing Node: %d (%s)\n",  typeFound, name);
             r = (Atom*) new Node(typeFound, "", NMXmlParser::DEFAULT_TV());
-            //printf("Pushing r = %p\n", r);
+            logger().fine("Pushing r = %p", r);
             push(ud->stack, r);
 
             const TruthValue& t = r->getTruthValue();
@@ -262,7 +265,7 @@ throw (RuntimeException, InconsistenceException)
             while (*atts != NULL) {
                 const char **natts = scan_common_attrs(r, atts);
                 if (atts == natts) {
-                    //logger().error("unrecognized Link token: %s\n", *atts);
+                    logger().error("unrecognized Link token: %s\n", *atts);
                 }
                 atts = natts;
                 atts++;
@@ -270,7 +273,7 @@ throw (RuntimeException, InconsistenceException)
 
             Atom* currentAtom = (Atom*) top(ud->stack);
             if (currentAtom != NULL) {
-                //printf("Getting link element inside currentAtom = %p\n", currentAtom);
+                logger().fine("Getting link element inside currentAtom = %p", currentAtom);
                 Link *link = dynamic_cast<Link *>(currentAtom);
                 if (link) {
                     if (r != NULL) {
@@ -281,7 +284,7 @@ throw (RuntimeException, InconsistenceException)
                 }
             }
 
-            //printf("Pushing r = %p\n", r);
+            logger().fine("Pushing r = %p", r);
             push(ud->stack, r);
 //            timeval e;
 //            gettimeofday(&e, NULL);
@@ -296,7 +299,7 @@ throw (RuntimeException, InconsistenceException)
                 logger().error("error: this token (%s) is expected to be nested\n", name);
                 return;
             }
-            //printf("Getting node element inside currentAtom = %p\n", currentAtom);
+            logger().fine("Getting node element inside currentAtom = %p", currentAtom);
 
 
             const char *n = NULL, *t = NULL;
@@ -316,13 +319,15 @@ throw (RuntimeException, InconsistenceException)
             Handle h;
             //r = getRelationshipByNameAndType(n, getTypeFromString(t, true));
 
-//            printf("Getting existing node (%s,%s)\n", n, t);
+            logger().fine("Getting existing node (%s,%s)", n, t);
             //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
             h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
-//            printf(" => h = %p\n", h);
-            if (!TLB::isInvalidHandle(h)) {
+            logger().fine(" => h = %p", h);
+            if (TLB::isValidHandle(h)) {
+                logger().fine(TLB::getAtom(h)->toString().c_str());
                 Link *link = dynamic_cast<Link *>(currentAtom);
                 if (link) {
+                    logger().fine("adding atom %s to link %s", TLB::getAtom(h)->toShortString().c_str(), link->toShortString().c_str());
                     NMXmlParser::addOutgoingAtom(link, h);
                 }
             } else {
@@ -357,15 +362,15 @@ throw (InconsistenceException)
         void* object = top(ud->stack);
         Atom* currentAtom = (Atom*) object;
         if (currentAtom != NULL) {
-//            timeval s;
-//            gettimeofday(&s, NULL);
+            //timeval s;
+            //gettimeofday(&s, NULL);
             Type type = getTypeFromString(name, false);
             if ((ClassServer::isAssignableFrom(NODE, type) && ud->status.processNodes) ||
                 (ClassServer::isAssignableFrom(LINK, type) && ud->status.processRelationships)) {
                 if (currentAtom->getType() == type) {
                     if (ClassServer::isAssignableFrom(LINK, type)) {
                         pop(ud->stack);
-                        //printf("(1) Pushing currentAtom = %p\n", currentAtom);
+                        logger().fine("(1) Pushing currentAtom = %p", currentAtom);
                         push(ud->stack, currentAtom);
                     }
                     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
@@ -378,25 +383,25 @@ throw (InconsistenceException)
                         }
                     }
                     Handle oldHandle = TLB::getHandle(currentAtom);
-//                    timeval s1;
-//                    gettimeofday(&s1, NULL);
-                    //printf("currentAtom => %s\n", currentAtom->toString().c_str());
+                    //timeval s1;
+                    //gettimeofday(&s1, NULL);
+                    logger().fine("currentAtom => %s", currentAtom->toString().c_str());
                     //Handle newHandle = ud->atomTable->add(currentAtom);
                     Handle newHandle = ud->atomSpace->addRealAtom(*currentAtom);
-//                    timeval e1;
-//                    gettimeofday(&e1, NULL);
-//                    unsigned long spentTime1 = (e1.tv_sec -  s1.tv_sec)*1000000+(e1.tv_usec -  s1.tv_usec);
-//                    //unsigned long spentTime1 = (e1.tv_sec -  s.tv_sec)*1000000+(e1.tv_usec -  s.tv_usec);
-//                    cumulativeParseEnd1 += spentTime1;
+                    //timeval e1;
+                    //gettimeofday(&e1, NULL);
+                    //signed long spentTime1 = (e1.tv_sec -  s1.tv_sec)*1000000+(e1.tv_usec -  s1.tv_usec);
+                    //unsigned long spentTime1 = (e1.tv_sec -  s.tv_sec)*1000000+(e1.tv_usec -  s.tv_usec);
+                    //cumulativeParseEnd1 += spentTime1;
                     // Updates last inserted/merged atom handle
                     ud->lastInsertedHandle = newHandle;
                     if (CoreUtils::handleCompare(&oldHandle, &newHandle)) {
                         // already existed
                         delete currentAtom;
-                        //printf("Already existed\n");
+                        logger().fine("Already existed");
                         currentAtom = TLB::getAtom(newHandle);
                         pop(ud->stack);
-                        //printf("(2) Pushing currentAtom = %p\n", currentAtom);
+                        logger().fine("(2) Pushing currentAtom = %p", currentAtom);
                         push(ud->stack, currentAtom);
                     }
                     // XXX FIXME:
@@ -407,8 +412,8 @@ throw (InconsistenceException)
                         //KMI -- find out if this is a nested link
                         pop(ud->stack);
                         Atom* nextUd = (Atom*) top(ud->stack);
-                        //printf("Getting link element inside nextUd = %p\n", nextUd);
-                        //printf("(3) Pushing currentAtom = %p\n", currentAtom);
+                        logger().fine("Getting link element inside nextUd = %p", nextUd);
+                        logger().fine("(3) Pushing currentAtom = %p", currentAtom);
                         push(ud->stack, currentAtom);
 
                         Link *nextlink = dynamic_cast<Link *>(nextUd);
@@ -435,13 +440,13 @@ throw (InconsistenceException)
                 }
                 pop(ud->stack);
             }
-//            timeval e;
-//            gettimeofday(&e, NULL);
-//            unsigned long spentTime = (e.tv_sec -  s.tv_sec)*1000000+(e.tv_usec -  s.tv_usec);
-//            cumulativeParseEnd += spentTime;
-
-            //} else {
-            //    cprintf(NORMAL, "WARNING: Got NULL Atom* from the parser stack!\n");
+            //timeval e;
+            //gettimeofday(&e, NULL);
+            //unsigned long spentTime = (e.tv_sec -  s.tv_sec)*1000000+(e.tv_usec -  s.tv_usec);
+            //cumulativeParseEnd += spentTime;
+            else {
+                logger().fine("WARNING: Got NULL Atom* from the parser stack!");
+            }
         }
     }
 }
@@ -478,7 +483,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
                      bool fresh,
                      bool freshLinks)
 {
-    //printf("NMXmlParser::loadXML\n");
+    logger().fine("NMXmlParser::loadXML");
     cassert(TRACE_INFO, atomSpace != NULL,
             "loadXML - atomSpace should pointer should not be NULL.");
     HandleEntry* result = NULL;
@@ -493,11 +498,10 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     // Only nodes are processed in the first pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            logger().debug("First pass: processing file %s\n",
+            logger().fine("First pass: processing file %s\n",
                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        //logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) i / (size * 2))));
-        // fflush(stdout);
+        logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) i / (xmlReaders.size() * 2))));
         parser.parse(xmlReaders[i], PARSE_NODES);
     }
     //timeval e;
@@ -509,24 +513,23 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     // only links are processed in the second pass
     for (unsigned int i = 0; i < xmlReaders.size(); i++) {
         if (typeid(*xmlReaders[i]) == typeid(FileXMLBufferReader)) {
-            logger().debug("Second pass: processing file %s\n",
+            logger().fine("Second pass: processing file %s\n",
                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + size) / (size * 2))));
-        // fflush(stdout);
+        logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
         Handle uh = UNDEFINED_HANDLE;
         if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &uh)) {
             result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
         }
     }
-//    time_t duration = time(NULL) - start;
-//        timeval e;
-//        gettimeofday(&e, NULL);
-//        unsigned long spentTime = (e.tv_sec-s.tv_sec)*1000000 + (e.tv_usec-s.tv_usec);
-//        printf("PARSE XML time = %lu\n", spentTime);
+    //time_t duration = time(NULL) - start;
+    //timeval e;
+    //gettimeofday(&e, NULL);
+    //unsigned long spentTime = (e.tv_sec-s.tv_sec)*1000000 + (e.tv_usec-s.tv_usec);
+    //printf("PARSE XML time = %lu\n", spentTime);
 
-//    logger().warn("Loading XML contents: 100%% done (in %d second%c).\n", (int) duration, duration == 1 ? '\0' : 's');
+    //logger().warn("Loading XML contents: 100%% done (in %d second%c).\n", (int) duration, duration == 1 ? '\0' : 's');
     //cprintf(NORMAL, "Number of timestamp entries: %d\n", stackTimeFlag);
     return result;
 }
@@ -587,7 +590,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
     Handle h = UNDEFINED_HANDLE;
     if (pass == PARSE_NODES) {
 
-        logger().debug("Parsing nodes...\n");
+        logger().fine("Parsing nodes...\n");
 
         // FIRST PASS - creates relationships with arity == 0 (nodes)
         h = parse_pass(xmlReader, pass);
@@ -595,7 +598,7 @@ Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
 
     } else if (pass == PARSE_LINKS) {
 
-        logger().debug("Parsing links...\n");
+        logger().fine("Parsing links...\n");
 
         // SECOND PASS - creates other relationships
         // second pass must be avoided once subgraph insertion and/or lazy

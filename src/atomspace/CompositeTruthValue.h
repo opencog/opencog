@@ -33,7 +33,7 @@
 namespace opencog
 {
 
-typedef hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+typedef std::tr1::unordered_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
 
 class CompositeTruthValue: public TruthValue
 {

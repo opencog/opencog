@@ -25,13 +25,14 @@
 #ifndef SIMPLENETWORKSERVER_H
 #define SIMPLENETWORKSERVER_H
 
-#include "CogServer.h"
-#include "NetworkServer.h"
-#include "CallBackInterface.h"
-#include <pthread.h>
-
 #include <string>
 #include <queue>
+
+#include <pthread.h>
+
+#include "CallBackInterface.h"
+#include "CogServer.h"
+#include "NetworkServer.h"
 
 namespace opencog
 {

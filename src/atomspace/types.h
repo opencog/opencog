@@ -56,7 +56,9 @@ struct eqHandle {
     bool operator()(Handle h1, Handle h2) const;
 };
 
-typedef hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
+//typedef hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
+//typedef unordered_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
+typedef std::tr1::unordered_map<Handle, void *> HandleVoidPointerHashMap;
 //#endif
 
 // type and arity of Atoms, represented as short integers (16 bits)
@@ -68,8 +70,8 @@ typedef unsigned short Arity;
 // to a smaller representation
 typedef float ShortFloat;
 
-typedef opencog::ConstCharPointerIntHashMap ClassTypeHashMap;
-typedef opencog::IntConstCharPointerHashMap ClassNameHashMap;
+typedef std::tr1::unordered_map<std::string, int> ClassTypeHashMap;
+typedef std::tr1::unordered_map<int, std::string> ClassNameHashMap;
 
 /**
  * This class provides basic operations over the ShortFloat type.

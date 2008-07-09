@@ -84,7 +84,7 @@ public:
         delete atomSpace;
     }
 
-    void REMOVEDtestSimple() {
+    void testSimple() {
         AtomTable atomTable(false);
         Handle word = atomTable.add(new Node(WORD_NODE, "test"));
         Handle sense = atomTable.add(new Node(WORD_SENSE_NODE, "28675194"));
@@ -216,19 +216,19 @@ public:
         const char* names1[] = {"630057840_11", "12"};
         Type types1[] = {CW_PIXEL_PERCEPT_NODE, NUMBER_NODE};
         HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);
-        TS_ASSERT(result);
+        TS_ASSERT(result != NULL);
         //printf("result = %s\n", result->toString().c_str());
         delete (result);
 
         const char* names2[] = {"12", "630057840_11"};
         Type types2[] = {NUMBER_NODE, CW_PIXEL_PERCEPT_NODE};
         result = table->getHandleSet(names2, types2, NULL, 2, LIST_LINK, false);
-        TS_ASSERT(!result);
+        TS_ASSERT(result == NULL);
 
         const char* names3[] = {NULL, "12"};
         Type types3[] = {NOTYPE, NUMBER_NODE};
         result = table->getHandleSet(names3, types3, NULL, 2, LIST_LINK, false);
-        TS_ASSERT(result);
+        TS_ASSERT(result != NULL);
         //printf("result = %s\n", result->toString().c_str());
         delete(result);
 
@@ -236,16 +236,16 @@ public:
         Type types4[] = {NOTYPE, CW_PIXEL_PERCEPT_NODE};
         result = table->getHandleSet(names4, types4, NULL, 2, LIST_LINK, false);
         //if (result != NULL) printf("result = %s\n", result->toString().c_str());
-        TS_ASSERT(!result);
+        TS_ASSERT(result == NULL);
 
         result = table->getHandleSet((const char**) NULL, types1, NULL, 2, LIST_LINK, false);
-        TS_ASSERT(result);
+        TS_ASSERT(result != NULL);
         //printf("result = %s\n", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet((const char**) NULL, types2, NULL, 2, LIST_LINK, false);
         //if (result != NULL) printf("result = %s\n", result->toString().c_str());
-        TS_ASSERT(!result);
+        TS_ASSERT(result == NULL);
 
         TS_ASSERT_THROWS(table->getHandleSet(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
         TS_ASSERT_THROWS(table->getHandleSet(names2, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);

@@ -24,15 +24,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
 #include <stdio.h>
-#include "Node.h"
+
+#include "platform.h"
+#include "AtomSpaceDefinitions.h"
 #include "ClassServer.h"
-//#include "exceptions.h"
 #include "Link.h"
+#include "Logger.h"
+#include "Node.h"
 #include "TLB.h"
 #include "utils.h"
-#include "AtomSpaceDefinitions.h"
 
 using namespace opencog;
 
@@ -77,7 +78,7 @@ void Node::merge(Atom* atom) throw (InconsistenceException)
     Atom::merge(atom);
 }
 
-std::string Node::toShortString()
+std::string Node::toShortString() const
 {
 #define BUFSZ 1024
     char buf[BUFSZ];
@@ -86,7 +87,7 @@ std::string Node::toShortString()
     return buf;
 }
 
-std::string Node::toString()
+std::string Node::toString() const
 {
     char buf[BUFSZ];
     //activation here at 0: can be replace with LTI
@@ -98,20 +99,20 @@ std::string Node::toString()
     return buf;
 }
 
-bool Node::equals(Atom *other)
+bool Node::equals(const Atom* other) const
 {
     bool result = false;
     if (other != NULL && (type == other->getType())) {
-        Node *otherNode = (Node *) other;
-        result = !strcmp(name.c_str(), otherNode->getName().c_str());
+        const Node* onode = dynamic_cast<const Node*>(other);
+        result = !strcmp(name.c_str(), onode->getName().c_str());
     }
     return(result);
 }
 
-int Node::hashCode()
+int Node::hashCode() const
 {
     int result = Atom::hashCode();
-    result += hash<const char*>()(name.c_str());
+    result += hash<std::string>()(name);
     return result;
 }
 

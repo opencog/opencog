@@ -22,12 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/* TemporalMap.cc - hashtable based in Temporal* keys and (void *) elements */
+#include "TemporalMap.h"
 
-#include <platform.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "TemporalMap.h"
+
+#include "platform.h"
 #include "exceptions.h"
 #include "utils.h"
 
@@ -35,20 +35,16 @@ using namespace opencog;
 
 inline void TemporalMap::lock()
 {
-#ifdef HAVE_LIBPTHREAD
     if (useMutex) {
         pthread_mutex_lock(&plock);
     }
-#endif
 }
 
 inline void TemporalMap::unlock()
 {
-#ifdef HAVE_LIBPTHREAD
     if (useMutex) {
         pthread_mutex_unlock(&plock);
     }
-#endif
 }
 
 
@@ -59,9 +55,7 @@ void TemporalMap::init(int initialSize, bool useMutex)
 
     this->useMutex = useMutex;
 
-#ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&plock, NULL);
-#endif
 }
 
 TemporalMap::~TemporalMap()
@@ -181,15 +175,6 @@ void *TemporalMap::remove(Temporal* key)
     return ret;
 }
 
-void TemporalMap::resize(int newSize)
-{
-    lock();
-
-    hashMap->resize(newSize);
-
-    unlock();
-}
-
 int TemporalMap::getCount()
 {
     int size;
@@ -247,4 +232,3 @@ Temporal* TemporalMapIterator::next() throw (IndexErrorException)
 
     return ret;
 }
-

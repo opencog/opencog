@@ -24,14 +24,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
 #include "Logger.h"
 
 #include <stdarg.h>
 #include <time.h>
-#ifndef WIN32
+
+#ifdef WIN32
+#include <winsock2.h>
+#undef ERROR
+#undef DEBUG
+#else
 #include <sys/time.h>
 #endif
+
+#include "platform.h"
 
 using namespace opencog;
 

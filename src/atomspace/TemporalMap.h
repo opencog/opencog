@@ -26,15 +26,9 @@
 #ifndef TEMPORALMAP_H
 #define TEMPORALMAP_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <pthread.h>
 
 #include "Temporal.h"
-
-#ifdef HAVE_LIBPTHREAD
-#include <pthread.h>
-#endif
 
 namespace opencog
 {
@@ -64,7 +58,7 @@ private:
     /**
      * Defines the hash_map that will be used.
      */
-    typedef hash_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
+    typedef std::tr1::unordered_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
 
 public:
 
@@ -88,9 +82,7 @@ private:
     /**
      * The mutex used to control access to the HashMap.
      */
-#ifdef HAVE_LIBPTHREAD
     pthread_mutex_t plock;
-#endif
 
 public:
 

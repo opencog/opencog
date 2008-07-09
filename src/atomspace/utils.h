@@ -26,15 +26,13 @@
 #ifndef OPENCOG_UTILS_H
 #define OPENCOG_UTILS_H
 
-#include "platform.h"
-#include "exceptions.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <list>
 #include <string>
 #include <sstream>
-#include <list>
+#include <vector>
+
+#include "platform.h"
+#include "exceptions.h"
 
 #define Abs(a) ( ((a)>0) ? (a) : (-a) )
 

@@ -24,13 +24,13 @@
  */
 #ifdef WIN32
 
-#include "platform.h"
-
 #include <sys/timeb.h>
 #include <winsock2.h>
 #include <process.h>
 #include <math.h>
 #include <io.h>
+
+#include "platform.h"
 
 using namespace opencog;
 

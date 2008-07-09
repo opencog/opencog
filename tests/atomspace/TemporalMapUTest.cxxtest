@@ -111,7 +111,5 @@ public:
         delete(temporalMap);
         temporalMap = new TemporalMap(size);
         TS_ASSERT(temporalMap->getSize() >= size);
-        temporalMap->resize(size + 1);
-        TS_ASSERT(temporalMap->getSize() >= size + 1);
     }
 };

@@ -30,12 +30,13 @@
 #include <vector>
 #include <queue>
 #include <map>
-#include <pthread.h>
-#include <AtomSpace.h>
 
+#include <pthread.h>
+
+#include "AtomSpace.h"
+#include "CogServerRequest.h"
 #include "MindAgent.h"
 #include "NetworkServer.h"
-#include "CogServerRequest.h"
 #include "RequestProcessor.h"
 
 namespace opencog

@@ -507,7 +507,7 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing, const TruthValue& t
                 } else {
                     logger().warn(
                         "AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n",
-                        ClassServer::getTypeName(timeAtom->getType()));
+                        ClassServer::getTypeName(timeAtom->getType()).c_str());
                 }
             } else {
                 logger().warn(

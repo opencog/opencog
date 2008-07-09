@@ -23,7 +23,6 @@
 
 using namespace opencog;
 
-
 RelexQuery::RelexQuery(void)
 {
 	pm = NULL;
@@ -440,7 +439,7 @@ bool RelexQuery::node_match(Atom *aa, Atom *ab)
 	}
 
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
-	        ClassServer::getTypeName(ntype));
+	        ClassServer::getTypeName(ntype).c_str());
 
 	std::string sa = aa->toString();
 	std::string sb = ab->toString();

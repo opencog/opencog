@@ -97,21 +97,21 @@ public:
      *
      * @return A string representation of the node.
      */
-    std::string toString();
-    std::string toShortString();
+    std::string toString() const;
+    std::string toShortString() const;
 
     /**
      * Returns whether a given atom is equal to the current node.
      * @param Node to be tested.
      * @return true if they are equal, false otherwise.
      */
-    virtual bool equals(Atom*);
+    virtual bool equals(const Atom*) const;
 
     /**
     * Returns the hashCode of the Node.
     * @return a integer value as the hashCode of the Node.
     */
-    virtual int hashCode();
+    virtual int hashCode(void) const;
 };
 
 } // namespace opencog

@@ -71,7 +71,7 @@ public:
      * the parsing (when only Nodes are read) to be used in the second
      * pass (to resolve references in Links).
      */
-    static hash_map<char *, Handle, hash<char *>, opencog::eqstr> hypHandles;
+    static std::tr1::unordered_map<const std::string, Handle, hash<std::string>, std::equal_to<std::string> > hypHandles;
 
     /**
      * A special default (Simple) TruthValue object for any atom loaded from a XML doc,

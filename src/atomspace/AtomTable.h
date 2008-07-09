@@ -27,39 +27,31 @@
 #ifndef ATOMTABLE_H
 #define ATOMTABLE_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <iostream>
 
-#include "Atom.h"
-#include "classes.h"
+#include "platform.h"
+
+#include "AttentionValue.h"
 #include "HandleEntry.h"
 #include "HandleIterator.h"
-#include "types.h"
 #include "HandleMap.h"
 #include "PredicateEvaluator.h"
-#include <AttentionValue.h>
-#include <iostream>
+#include "classes.h"
 #include "exceptions.h"
-
-#ifdef WIN32
-#include <hash_set>
-using namespace std;
-#else
-#include <ext/hash_set>
-using __gnu_cxx::hash_set;
-#endif
+#include "types.h"
 
 namespace opencog
 {
 
-struct hashAtom {
-    int operator()(Atom* a) const;
+struct atom_ptr_hash : public std::unary_function<Atom*, std::size_t>
+{
+    std::size_t operator()(Atom* const& x) const;
 };
-struct eqAtom {
-    bool operator()(Atom* a1, Atom* a2) const;
+struct atom_ptr_equal_to : public std::binary_function<Atom*, Atom*, bool>
+{
+    bool operator()(Atom* const& x, Atom* const& y) const;
 };
-typedef hash_set<Atom*, hashAtom, eqAtom> AtomHashSet;
+typedef std::tr1::unordered_set< Atom*, atom_ptr_hash, atom_ptr_equal_to > AtomHashSet;
 
 class HandleEntry;
 class HandleIterator;

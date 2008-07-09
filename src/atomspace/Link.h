@@ -177,14 +177,14 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString();
+    std::string toString() const;
 
     /**
      * Returns a short string representation of the link.
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString();
+    std::string toShortString() const;
 
     /**
      * Returns whether a given handle is a source of this link.
@@ -222,8 +222,18 @@ public:
      */
     bool isTarget(int) throw (IndexErrorException, InvalidParamException);
 
-    virtual bool equals(Atom *);
-    virtual int hashCode(void);
+    /**
+     * Returns whether a given atom is equal to the current link.
+     * @param Link to be tested.
+     * @return true if they are equal, false otherwise.
+     */
+    virtual bool equals(const Atom *) const;
+
+    /**
+    * Returns the hashCode of the Link.
+    * @return a integer value as the hashCode of the Link.
+    */
+    virtual int hashCode(void) const;
 };
 
 }

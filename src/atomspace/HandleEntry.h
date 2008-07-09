@@ -26,14 +26,17 @@
 #ifndef HANDLEENTRY_H
 #define HANDLEENTRY_H
 
+#include <string>
+#include <vector>
+
 #include <stdlib.h>
 #include <limits.h>
+
 #include "Atom.h"
 #include "AtomTable.h"
+#include "AttentionValue.h"
 #include "types.h"
 #include "VersionHandle.h"
-#include <string>
-#include <AttentionValue.h>
 
 namespace opencog
 {

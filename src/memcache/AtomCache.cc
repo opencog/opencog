@@ -16,6 +16,7 @@
 
 #include <memcached.h>
 
+#include "platform.h"
 #include "Atom.h"
 #include "AtomCache.h"
 #include "AtomTable.h"

@@ -42,8 +42,11 @@
 #include <recent_val.h>
 
 #ifndef WIN32
+/*
 #include <ext/hash_map>
 using __gnu_cxx::hash_map;
+*/
+#include <tr1/unordered_map>
 #define USE_ATOM_HASH_MAP
 #else
 #include <map>
@@ -58,7 +61,8 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 typedef short stim_t;
 
 #ifdef USE_ATOM_HASH_MAP
-typedef hash_map<Atom*, stim_t, hashAtom, eqAtom> AtomHashMap;
+//typedef hash_map<Atom*, stim_t, hashAtom, eqAtom> AtomHashMap;
+typedef std::tr1::unordered_map<Atom*, stim_t, atom_ptr_hash, atom_ptr_equal_to > AtomHashMap;
 #else
 typedef map<Atom*, stim_t> AtomMap;
 #endif

@@ -22,12 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "Temporal.h"
+
 #include <iostream>
 
 #include <limits.h>
+#include <stdlib.h>
 
 #include "platform.h"
-#include "Temporal.h"
 #include "utils.h"
 
 using namespace opencog;
@@ -174,7 +176,7 @@ std::string Temporal::getTimeNodeName(unsigned long timestamp)
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 {
     const char* nextToken = timeNodeName;
-    unsigned long a = (unsigned long)strtoul(nextToken,NULL,10);
+    unsigned long a = (unsigned long) strtoul(nextToken,NULL,10);
 
     //    printf("getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (unsigned long)atof(timeNodeName), timeNodeName);
 

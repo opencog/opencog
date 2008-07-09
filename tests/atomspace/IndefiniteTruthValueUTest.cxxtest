@@ -22,11 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdlib.h>
+#include <math.h>
+
+#include "CompositeTruthValue.h"
 #include "IndefiniteTruthValue.h"
 #include "SimpleTruthValue.h"
-#include "CompositeTruthValue.h"
 #include "exceptions.h"
-#include <math.h>
 
 using namespace opencog;
 
