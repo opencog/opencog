@@ -966,15 +966,48 @@ public:
      * Change the attentional focus boundary. Some situations
      * may benefit from less focussed searches.
      *
-     * @param New threshold
+     * @param s New threshold
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s);
 
+    /**
+     * Get the maximum STI observed in the AtomSpace.
+     *
+     * @param average If true, return an exponentially decaying average of
+     * maximum STI, otherwise return the actual maximum.
+     * @return Maximum STI
+     */
     AttentionValue::sti_t getMaxSTI(bool average=true) const;
+
+    /**
+     * Get the minimum STI observed in the AtomSpace.
+     *
+     * @param average If true, return an exponentially decaying average of
+     * minimum STI, otherwise return the actual maximum.
+     * @return Minimum STI
+     */
     AttentionValue::sti_t getMinSTI(bool average=true) const;
+
+    /**
+     * Update the minimum STI observed in the AtomSpace. Min/max are not updated
+     * on setSTI because average is calculate by lobe cycle, although this could
+     * potentially also be handled by the cogServer.
+     *
+     * @warning Should only be used by attention allocation system.
+     * @param m New maximum STI
+     */
     void updateMinSTI(AttentionValue::sti_t m);
+
+    /**
+     * Update the maximum STI observed in the AtomSpace. Min/max are not updated
+     * on setSTI because average is calculate by lobe cycle, although this could
+     * potentially also be handled by the cogServer.
+     *
+     * @warning Should only be used by attention allocation system.
+     * @param m New minimum STI
+     */
     void updateMaxSTI(AttentionValue::sti_t m);
 
     // For convenience
