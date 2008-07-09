@@ -34,8 +34,7 @@ FIND_PACKAGE(Boost REQUIRED)
 # FIND_PACKAGE(LibMemCached)
 # Enable the use of SQL storage, if either iodbc of unixodbc is found.
 # Caution: this can also increase RAM usage significantly!
-SET(IODBC_FIND_QUIETLY 1)
-FIND_PACKAGE(IODBC)
+FIND_PACKAGE(IODBC QUIET)
 IF (IODBC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
