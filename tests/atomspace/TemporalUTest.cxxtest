@@ -22,9 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
+
+#include <limits.h>
+
 #include "Temporal.h"
 #include "exceptions.h"
-#include <sstream>
 
 using namespace opencog;
 

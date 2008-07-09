@@ -22,8 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
 #include <iostream>
+
+#include <limits.h>
+
+#include "platform.h"
 #include "Temporal.h"
 #include "utils.h"
 

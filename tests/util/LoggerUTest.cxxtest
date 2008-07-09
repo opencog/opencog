@@ -24,10 +24,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Logger.h"
-
 #include <fstream>
+
 #include <stdio.h>
+#include <string.h>
+
+#include "Logger.h"
 
 using namespace opencog;
 

@@ -360,8 +360,8 @@ throw (InconsistenceException)
 //            timeval s;
 //            gettimeofday(&s, NULL);
             Type type = getTypeFromString(name, false);
-            if (((ClassServer::isAssignableFrom(NODE, type)) && ud->status.processNodes) ||
-                    (ClassServer::isAssignableFrom(LINK, type)) && ud->status.processRelationships) {
+            if ((ClassServer::isAssignableFrom(NODE, type) && ud->status.processNodes) ||
+                (ClassServer::isAssignableFrom(LINK, type) && ud->status.processRelationships)) {
                 if (currentAtom->getType() == type) {
                     if (ClassServer::isAssignableFrom(LINK, type)) {
                         pop(ud->stack);
