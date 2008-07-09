@@ -57,6 +57,12 @@ IF (GUILE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 ENDIF (GUILE_FOUND)
 
+# Gnu Scientific Library
+FIND_PACKAGE(GSL)
+IF (GSL_FOUND)
+	ADD_DEFINITIONS(-DHAVE_GSL)
+ENDIF (GSL_FOUND)
+
 # At this time,. there is no reason to build with memcached for 
 # any "normal" use, so just stub it out.
 # IF (LIBMEMCACHED_FOUND)

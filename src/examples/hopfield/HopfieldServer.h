@@ -32,8 +32,8 @@
 #include <RandGen.h>
 #include <ImportanceUpdatingAgent.h>
 #include <HebbianLearningAgent.h>
-#include <ImportanceSpreadingAgent.h>
 #include <ImportanceDiffusionAgent.h>
+#include <ImportanceSpreadingAgent.h>
 #include <ForgettingAgent.h>
 
 #include <vector>
@@ -71,7 +71,9 @@ public:
     opencog::ImportanceUpdatingAgent *importUpdateAgent;
     opencog::HebbianLearningAgent *hebLearnAgent;
     opencog::ImportanceSpreadingAgent *spreadAgent;
+#ifdef HAVE_GSL
     opencog::ImportanceDiffusionAgent *diffuseAgent;
+#endif
     opencog::ForgettingAgent *forgetAgent;
 
     HopfieldOptions *options;

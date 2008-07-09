@@ -22,6 +22,8 @@
 #ifndef _IMPORTANCE_DIFFUSION_AGENT_H
 #define _IMPORTANCE_DIFFUSION_AGENT_H
 
+#ifdef HAVE_GSL
+
 #include <string>
 #include <math.h>
 
@@ -37,14 +39,21 @@
 namespace opencog
 {
 
+//! Default value that normalised STI has to be above before being spread
+const float MA_DEFAULT_DIFFUSION_THRESHOLD = 0.5f;
+//! Maximum percentage of STI that is spread from an atom
+const float MA_DEFAULT_MAX_SPREAD_PERCENTAGE = 0.5f;
+
 class CogServer;
 
 /** Spreads short term importance along HebbianLinks using a diffusion approach.
  *
  * Currently spreads along Symmetric and Inverse HebbianLinks.
  *
- * @todo Spread along asymmetric hebbian links too.
- * @todo Optionally spread long term importance.
+ * @todo Optionally spread long term importance?
+ * @todo Convert from using GSL matrices to a more efficient approach - either
+ * using sparse matrices or directly using the STI values to generate a
+ * temporary sparse matrix
  */
 class ImportanceDiffusionAgent : public MindAgent
 {
@@ -55,11 +64,21 @@ private:
     //! Total amount spread during recent runs.
     opencog::recent_val<long> amountSpread;
 
+    //! Maximum percentage of importance to spread
+    float maxSpreadPercentage;
+
+    //! Value that normalised STI has to be above before being spread
+    float diffusionThreshold;
+
     //! Spread importance along Hebbian links.
+    //! @todo split into sub functions instead of one giant beast.
     void spreadImportance();
 
+    //! print a gsl matrix to stdout
     void printMatrix(gsl_matrix *m);
+    //! print a gsl vector to stdout
     void printVector(gsl_vector *m);
+
     void setScaledSTI(Handle h, float scaledSTI);
 
 public:
@@ -68,7 +87,20 @@ public:
     virtual ~ImportanceDiffusionAgent();
     virtual void run(CogServer *server);
 
+    /** Set the maximum percentage of importance that can be spread.
+     * @param p the maximum percentage of importance that can be spread.
+     */
+    void setMaxSpreadPercentage(float p);
+
+    /** Get the maximum percentage of importance that can be spread.
+     * @return the maximum percentage of importance that can be spread.
+     */
+    float getMaxSpreadPercentage() const;
+
+    void setDiffusionThreshold(float p);
+    float getDiffusionThreshold() const;
 }; // class
 
 }; // namespace
+#endif // HAVE_GSL
 #endif // _IMPORTANCE_DIFFUSION_AGENT_H

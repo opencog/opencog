@@ -139,8 +139,11 @@ HopfieldServer::HopfieldServer()
     importUpdateAgent = new ImportanceUpdatingAgent();
     hebLearnAgent = new HebbianLearningAgent();
     hebLearnAgent->convertLinks = true;
-    spreadAgent = new ImportanceSpreadingAgent();
+#ifdef HAVE_GSL
     diffuseAgent = new ImportanceDiffusionAgent();
+#else
+    spreadAgent = new ImportanceSpreadingAgent();
+#endif
     forgetAgent = new ForgettingAgent();
     forgetAgent->forgetPercentage = 0.10f;
 
@@ -317,8 +320,11 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         hebLearnAgent->run(this);
 
         logger().fine("---Imprint:Importance spreading");
-        //spreadAgent->run(this);
+#ifdef HAVE_GSL
         diffuseAgent->run(this);
+#else
+        spreadAgent->run(this);
+#endif
 
         if (first)
             first = false;
@@ -430,7 +436,11 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1)
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
     for (int i = 0; i < spreadCycles; i++) {
         logger().fine("---Retreive:Spreading Importance - cycle %d", i);
+#ifdef HAVE_GSL
         diffuseAgent->run(this);
+#else
+        spreadAgent->run(this);
+#endif
     }
 
     importUpdateAgent->setUpdateLinksFlag(oldLinksFlag);
