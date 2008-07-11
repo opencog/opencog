@@ -319,7 +319,8 @@ struct mapper
 	T mbegin, mend;
 	map<T2,T2> m;
 
-	mapper(map<T2,T2>& _m, T _mbegin, T _mend) : m(_m), mbegin(_mbegin), mend(_mend) {}
+	mapper(map<T2,T2>& _m, T _mbegin, T _mend)
+        : mbegin(_mbegin), mend(_mend), m(_m) {}
 	T2 operator()(const T2& key)
 	{
 		T i = m.find(key);
@@ -437,8 +438,8 @@ bool equal_vectors(Handle* lhs, int lhs_arity, Handle* rhs);
 template<typename ATOM_REPRESENTATION_T>
 struct weak_atom
 {
-	Btr<bindingsT> bindings;
 	ATOM_REPRESENTATION_T value;
+	Btr<bindingsT> bindings;
 
 	ATOM_REPRESENTATION_T GetValue() const { return value; }
 	

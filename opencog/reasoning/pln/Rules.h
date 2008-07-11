@@ -94,7 +94,7 @@ public:
 		for (int j=0;j<n;j++)
 		{
 			const Handle *ph = boost::get<Handle>(&premiseArray[j]);
-			printf("[%d]\n", (ph?*ph:0));
+			printf("[%lu]\n", (ph?*ph:0));
 		}
 			//printTree(premiseArray[j],0,3);
 		printf("</Generic rule args>");
@@ -853,22 +853,21 @@ public:
 template<typename DeductionFormula, Type InclusionLink> //=IMPLICATION_LINK>
 class DeductionRule : public GenericRule<DeductionFormula>
 {
-  //DeductionFormula f;
+    //DeductionFormula f;
 
 	meta i2oType(const vector<Vertex>& h) const
 	{
 		assert(h.size()==2);
 		AtomSpace *nm = CogServer::getAtomSpace();	
-		assert(nm->getArity(v2h(h[0]))==2);
-		assert(nm->getArity(v2h(h[1]))==2);
-		assert(nm->getOutgoing(v2h(h[0]),0));
-		assert(nm->getOutgoing(v2h(h[1]),1));
+		//assert(nm->getArity(v2h(h[0]))==2);
+		//assert(nm->getArity(v2h(h[1]))==2);
+		//assert(nm->getOutgoing(v2h(h[0]),0));
+		//assert(nm->getOutgoing(v2h(h[1]),1));
 	
-		//return NULL;	
 		//return meta(new tree<Vertex>(mva((Handle)InclusionLink, 
-		//				Vertex(nm->getOutgoing(v2h(h[0]),0)),
-		//				Vertex(nm->getOutgoing(v2h(h[1]),1))
-		//		)));
+	//					Vertex(nm->getOutgoing(v2h(h[0]),0)),
+	//					Vertex(nm->getOutgoing(v2h(h[1]),1))
+	//			)));
 	}
 	bool validate2				(Rule::MPs& args) const
 	{

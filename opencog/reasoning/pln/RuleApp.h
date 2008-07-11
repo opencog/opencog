@@ -128,7 +128,7 @@ public:
 
 	/// Takes ownership of the "arg"
 	/// false if arg was already bound. (And assert failure.)
-	bool Bind(int arg_i, VtreeProvider* arg)  { };
+	bool Bind(int arg_i, VtreeProvider* arg)  { return false; };
 
 	/// false if arg was already bound.
 	bool Bind(vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) const;
@@ -149,7 +149,7 @@ public:
 
 	/// Use this when you know that all the args have already been Bound.
 	/// The result is cached so the performance is unproblematic.
-	BoundVertex compute(Handle CX = NULL) { };
+	BoundVertex compute(Handle CX = NULL) { return BoundVertex(); };
 	//{
 	//	vector<VtreeProvider*> dummy_vp;
 	//	return compute(dummy_vp.end(), dummy_vp.end(), CX);
@@ -195,7 +195,7 @@ public:
 			BoundVertex bv;
 			RuleApp* ra;
 
-			if (ra = dynamic_cast<RuleApp*>(*ai)) //A bound a arg is a RuleApp
+			if ( (ra = dynamic_cast<RuleApp*>(*ai)) != NULL ) //A bound a arg is a RuleApp
 				bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX);
 			else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != /*(VtreeProviderWrapper*)*/NULL) //A bound arg has type VtreeProviderWrapper
 				bv = *((*ai)->getVtree().begin());

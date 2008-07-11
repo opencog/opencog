@@ -78,11 +78,8 @@ class BITNode
 	friend class BITNodeRoot;
 	friend class ExplicitlyEvaluatedBITNode;
 protected:
-	bool Expanded;
-
 	/// Contains the target of this inference state node
-	meta	bound_target,
-		raw_target;
+	meta bound_target, raw_target;
 
 	/// For heuristics; store the nr so you don't have to re-count.
 	uint counted_number_of_free_variables_in_target;
@@ -94,27 +91,27 @@ protected:
 
 	vector<set<VtreeProvider*> > eval_results;
 
-	/// The direct results stored in this node. This approach is somewhat
-	/// clumsy but gets the job done.
-
-	Btr<set<BoundVertex> > direct_results;
-
-/// bdrum = The best (confidence of) direct result under me
-
-	float my_bdrum;
 	unsigned int depth;
-	
 	BITNodeRoot* root;
 
-	typedef set<vtree, less_tree_vertex> vtreeset;
-
-	/// Targets of all atoms above me... obsolete but partially still functions
-	vtreeset target_chain;
+	bool Expanded;
 
 	/// The Rule that the child_results of this state object's child_results will be
 	/// associated with.
 	Rule *rule;
 	
+    /// bdrum = The best (confidence of) direct result under me
+	float my_bdrum;
+	
+	typedef set<vtree, less_tree_vertex> vtreeset;
+
+	/// Targets of all atoms above me... obsolete but partially still functions
+	vtreeset target_chain;
+
+	/// The direct results stored in this node. This approach is somewhat
+	/// clumsy but gets the job done.
+	Btr<set<BoundVertex> > direct_results;
+
 	/// The vector of targets of my children, which will then become Rule arguments.
 	Rule::MPs args;
 
@@ -165,13 +162,13 @@ protected:
 	bool NotifyParentOfResult(VtreeProvider* new_result) const;
 	
 	/// Evaluate the Rule with the given new result as arg #arg_i
-	void EvaluateWith(int arg_i, VtreeProvider* new_result);
+	void EvaluateWith(unsigned int arg_i, VtreeProvider* new_result);
 	
 	/// Creation of child nodes
 	/// Normally arg = args[rule_arg_i], but children with differently-bound targets
 	/// may also be created.
 
-	BITNode* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
+	BITNode* CreateChild(unsigned int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 	bool CreateChildren(int rule_arg_i, BBvtree arg, Btr<bindingsT> bindings, spawn_mode);
 	void CreateChildrenForAllArgs();

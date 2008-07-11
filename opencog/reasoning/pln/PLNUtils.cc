@@ -2,7 +2,9 @@
 
 #include <exceptions.h>
 
+#ifdef WIN32
 #pragma warning(disable : 4996)
+#endif
 
 #include <boost/variant/static_visitor.hpp>
 #include <boost/scoped_array.hpp>
@@ -84,7 +86,7 @@ if (!hptr)
 //puts("reasoning::printTree");     
         if (!::haxx::printRealAtoms)
         {
-            printf("[%d]\n", *hptr);
+            printf("[%lu]\n", *hptr);
             if (test::logfile && _rloglevel >= 0)
                 fprintf(test::logfile, "[%d]\n", (int)*hptr);
         }
@@ -103,7 +105,7 @@ if (!hptr)
         if (test::logfile && _rloglevel >= 0)           
             fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
     }
-    else if (iptr = boost::get<IntegerWrapper>(&*top))
+    else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL)
     {
         printf("%d (%d)\n", iptr->value, top.number_of_children());
         if (test::logfile && _rloglevel >= 0)
@@ -147,7 +149,7 @@ if (!hptr)
 //puts("reasoning::printTree");		
 		if (!::haxx::printRealAtoms)
 		{
-			printf("[%d]\n", *hptr);
+			printf("[%lu]\n", *hptr);
 			if (test::logfile && _rloglevel >= 0)
 				fprintf(test::logfile, "[%d]\n", (int)*hptr);
 		}
@@ -166,7 +168,7 @@ if (!hptr)
 		if (test::logfile && _rloglevel >= 0)			
 			fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
 	}
-	else if (iptr = boost::get<IntegerWrapper>(&*top))
+	else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL)
 	{
 		printf("%d (%d)\n", iptr->value, top.number_of_children());
 		if (test::logfile && _rloglevel >= 0)
@@ -481,7 +483,9 @@ bool substitutableTo(atom& from, atom& to,
  printAtomTree(to,0,4);
  LOG(4, "vee");*/
 
+#ifdef WIN32
 #pragma warning("FW_VARIABLE_NODE substitution to the wrong direction is re-allowed!")
+#endif
 //#warning "FW_VARIABLE_NODE substitution to the wrong direction is re-allowed!"
 /*
 	map<string, atom>::const_iterator s = bindings.find(to.name);
@@ -572,15 +576,13 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 	Type T = nm->getType(*h_ptr);
 	
 	/// Needs to be handled separately.
-	if (nm->isReal(*h_ptr) && T != VarT)
-	{
+	if (nm->isReal(*h_ptr) && T != VarT) {
 		printf("TableGather:: Note: A real handle was asked for.\n");
 		insert(Vertex(*h_ptr));
         //currentDebugLevel = previousDebugLevel;
 		return;
 	}
-	if (nm->isReal(*h_ptr) && T == VarT)
-	{
+	if (nm->isReal(*h_ptr) && T == VarT) {
 		printf("Lookup for a VarT is NOT allowed!\n");
 		getc(stdin);getc(stdin);
         //currentDebugLevel = previousDebugLevel;
@@ -598,23 +600,22 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 	}
 	else
 	{*/
-		Btr<set<Handle> > lookupResults = aprovider->getHandleSet(T,name);	
+    Btr<set<Handle> > lookupResults = aprovider->getHandleSet(T,name);	
 
-printf("%d objects matched the type %d.\n", lookupResults->size(), T);
-		
-		/// If _MP has children, they must match!
+    printf("%u objects matched the type %d.\n", (unsigned int) lookupResults->size(), T);
+    
+    /// If _MP has children, they must match!
 
-		for (set<Handle>::iterator	i = lookupResults->begin();
-									i!= lookupResults->end(); i++)
-		{
-			const TruthValue& tv = nm->getTV(*i);
+    for (set<Handle>::iterator	i = lookupResults->begin();
+                                i!= lookupResults->end(); i++) {
+        const TruthValue& tv = nm->getTV(*i);
 
-if (tv.isNullTv())
-{
-	printf("NULL TV! %d\n", (int)*i);	
-	getc(stdin);
-	continue;
-}
+        if (tv.isNullTv())
+        {
+            printf("NULL TV! %d\n", (int)*i);	
+            getc(stdin);
+            continue;
+        }
 			
 			if (tv.getConfidence() < MIN_CONFIDENCE) {
                 //printf("TableGather::gather; not enough confidence. Continuing...\n");
@@ -660,7 +661,7 @@ printf("TableGather:\n");
 	//}
     
     // IF NO RESULT WAS FOUND, CHECK FOR SPECIAL CASES
-    printf("TABLEGATHER END: SIZE = %d\n", size());
+    printf("TABLEGATHER END: SIZE = %u\n", (unsigned int size());
 
 	#ifndef USE_PSEUDOCORE
 
@@ -998,7 +999,7 @@ bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
 	if (keyelem_set.empty())
 		return false;
 
-    int max_size=0;
+    unsigned int max_size=0;
 
     for (vector<Handle>::const_iterator i = link_set.begin(); i != link_set.end(); i++)
     {
@@ -1514,7 +1515,7 @@ printf("MPunifyHandle: UnifyVector exec...");
 			if (lhs_arity != rhs.hs.size())
 			{
 				bindings.clear();
-printf("MPunifyHandle: arity diff, returning (%d / %d)\n", lhs_arity, rhs.hs.size());
+printf("MPunifyHandle: arity diff, returning (%d / %u)\n", lhs_arity, (unsigned int) rhs.hs.size());
 				return false;
 			}
 		
@@ -1649,7 +1650,8 @@ printf("UnifyVector exec...");
 		if (lhs_top.number_of_children() != rhsv.size())
 		{
 			bindings.clear();
-printf("UnifyVector: arity diff, returning (%d / %d)\n", lhs_top.number_of_children(), rhsv.size());
+printf("UnifyVector: arity diff, returning (%d / %u)\n", lhs_top.number_of_children(),
+        (unsigned int) rhsv.size());
 			return false;
 		}
 		
@@ -1974,7 +1976,7 @@ void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
 		map<Handle, Handle>::const_iterator it = binds.find(*ph);
 		if (it != binds.end())
 		{
-			printf("Bound to %d", it->second);
+			printf("Bound to %lu", it->second);
 			v = Vertex(it->second);
 			recursiveBind(v, binds);
 		}

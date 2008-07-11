@@ -1,6 +1,8 @@
 #include "PLN.h"
 
+#ifdef WIN32
 #pragma warning(disable : 4311)
+#endif
 
 #include <stdlib.h>
 #include <time.h>
@@ -258,7 +260,7 @@ my_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 }
 
 BackInferenceTreeRoot::BackInferenceTreeRoot(meta _target, Btr<RuleProvider> _rp)
-: post_generalize_type(0), rp(_rp), InferenceNodes(0), exec_pool_sorted(false)
+: InferenceNodes(0), exec_pool_sorted(false), post_generalize_type(0), rp(_rp) 
 {
 	this->pre_bindings = Btr<bindingsT>(new bindingsT);
 	rule = NULL;
@@ -634,78 +636,80 @@ void BackInferenceTree::Create()
 }
 
 BackInferenceTree::BackInferenceTree(
-						BackInferenceTreeRoot* _root,
-						BackInferenceTree* _parent,
-						unsigned int _depth,
-						unsigned int _parent_arg_i,
-						meta _target,
-						Rule *_rule,
-						const Rule::MPs& _args,
-						const vtreeset& _target_chain,
-						Btr<bindingsT> _pre_bindings,
-						spawn_mode spawning,
-						bool _create)
-	: root(_root), depth(_depth), Expanded(false),
-	rule(_rule), my_bdrum(0.0f), args(_args), target_chain(_target_chain),
-	pre_bindings(new bindingsT), raw_target(_target)
-	{
-		AtomSpace *nm = CogServer::getAtomSpace();
-		if (_parent)
-			parents.insert(parent_link<BackInferenceTree>(_parent, _parent_arg_i));
+    BackInferenceTreeRoot* _root,
+    BackInferenceTree* _parent,
+    unsigned int _depth,
+    unsigned int _parent_arg_i,
+    meta _target,
+    Rule *_rule,
+    const Rule::MPs& _args,
+    const vtreeset& _target_chain,
+    Btr<bindingsT> _pre_bindings,
+    spawn_mode spawning,
+    bool _create)
+: raw_target(_target), root(_root), depth(_depth),
+target_chain(_target_chain), Expanded(false), rule(_rule),
+my_bdrum(0.0f), pre_bindings(new bindingsT), args(_args)
+{
+    AtomSpace *nm = CogServer::getAtomSpace();
+    if (_parent)
+        parents.insert(parent_link<BackInferenceTree>(_parent, _parent_arg_i));
 
-		try
-		{		  
-			assert(!parents.empty() || !root);
+    try
+    {		  
+        assert(!parents.empty() || !root);
 
-			/// Include all relevant bindings of the ones that were passed on to me
+        /// Include all relevant bindings of the ones that were passed on to me
 
-			/// pre_bindings of a node will never be changed.
-			/// Although new parents will in principle bring new pre_bindings,
-			/// we do not accept parents that have any pre_bindings which this node does not have.
+        /// pre_bindings of a node will never be changed.
+        /// Although new parents will in principle bring new pre_bindings,
+        /// we do not accept parents that have any pre_bindings which this node does not have.
 
-			pre_bindings = relevantBindings(*_pre_bindings);
+        pre_bindings = relevantBindings(*_pre_bindings);
 
-			tlog(0, "Pre-binds: my=%d parent=? given=%d\n", pre_bindings->size(), _pre_bindings->size());
+        tlog(0, "Pre-binds: my=%d parent=? given=%d\n", pre_bindings->size(), _pre_bindings->size());
 
-			SetTarget(_target);
+        SetTarget(_target);
 
-			if (inheritsType(nm->getType(v2h(*bound_target->begin())), LINK) &&
-				((nm->isReal(v2h(*bound_target->begin())) && !nm->getArity(v2h(*bound_target->begin()))) ||
-				(!nm->isReal(v2h(*bound_target->begin())) && !bound_target->number_of_children(bound_target->begin())))
-				)
-			{
-				rawPrint(*bound_target, bound_target->begin(),0);
-				assert(0);
-			}
+        if (inheritsType(nm->getType(v2h(*bound_target->begin())), LINK) &&
+            ((nm->isReal(v2h(*bound_target->begin())) && !nm->getArity(v2h(*bound_target->begin()))) ||
+            (!nm->isReal(v2h(*bound_target->begin())) && !bound_target->number_of_children(bound_target->begin())))
+            )
+        {
+            rawPrint(*bound_target, bound_target->begin(),0);
+            assert(0);
+        }
 
-			if (!root->rp)
-			{
-				root->rp.reset(new DefaultVariableRuleProvider());
-				tlog(3, "Default RuleProvider created.\n");
-			}
-			else
-				tlog(3, "Parent passed on my RuleProvider.\n");
+        if (!root->rp)
+        {
+            root->rp.reset(new DefaultVariableRuleProvider());
+            tlog(3, "Default RuleProvider created.\n");
+        }
+        else
+            tlog(3, "Parent passed on my RuleProvider.\n");
 
-			my_bdrum = _parent->my_bdrum;
+        my_bdrum = _parent->my_bdrum;
 
-			my_results = Btr<set<BoundVertex> >(new set<BoundVertex>);
+        my_results = Btr<set<BoundVertex> >(new set<BoundVertex>);
 
-			ForceTargetVirtual(spawning);
+        ForceTargetVirtual(spawning);
 
-			tlog(0, "ForceTargetVirtual ok.\n");
+        tlog(0, "ForceTargetVirtual ok.\n");
 
-			if (_create)
-			{
-				tlog(2, "Creating...\n");
-				Create();
-			}
-	  } catch(string s) { printf("EXCEPTION IN BackInferenceTree::BackInferenceTree! $s\n",s.c_str());
-		  getc(stdin); getc(stdin); throw; }
-	  catch(...)  { printf("EXCEPTION IN BackInferenceTree::BackInferenceTree!\n");
-		  getc(stdin); getc(stdin); throw; }
-
-		root->InferenceNodes++;
-	}
+        if (_create)
+        {
+            tlog(2, "Creating...\n");
+            Create();
+        }
+  } catch(string s) {
+      printf("EXCEPTION IN BackInferenceTree::BackInferenceTree! %s\n",s.c_str());
+      getc(stdin); getc(stdin); throw;
+  } catch(...) {
+      printf("EXCEPTION IN BackInferenceTree::BackInferenceTree!\n");
+      getc(stdin); getc(stdin); throw;
+  }
+  root->InferenceNodes++;
+}
 
 bool BackInferenceTree::inferenceLoopWith(meta req)
 {
@@ -899,7 +903,7 @@ BackInferenceTree* BackInferenceTree::FindNode(Rule* new_rule, meta _target,
 	return NULL;
 }
 
-BackInferenceTree* BackInferenceTree::CreateChild(int target_i, Rule* new_rule,
+BackInferenceTree* BackInferenceTree::CreateChild(unsigned int target_i, Rule* new_rule,
 	const Rule::MPs& rule_args, BBvtree _target, const bindingsT& new_bindings,
 	spawn_mode spawning)
 {
@@ -981,7 +985,8 @@ tlog(0,"------------------------------------------------------------\n");
 			delete new_node;
 
 			foreach(const parent_link<BackInferenceTree>& p, existing_node->parents)
-				if (p.link == this && p.parent_arg_i == target_i)
+				if (p.link == this &&
+                        p.parent_arg_i == target_i)
 					return existing_node;
 
 			children[target_i].insert(existing_node);
@@ -1171,7 +1176,7 @@ AtomSpace *nm = CogServer::getAtomSpace();
 							foreach(const BBvtree& bbvt, *j)
 								copy_vars(vars, vars.begin(), bbvt->begin(), bbvt->end());
 
-							printf("%d vars total\n", vars.size());
+							printf("%u vars total\n", (unsigned int) vars.size());
 
 							foreach(Vertex v, vars)
 								if (!STLhas2(*virtualized_target, v))
@@ -1263,7 +1268,7 @@ void BackInferenceTree::SimpleClone(const bindingsT& added_binds) const
 
 				copy_vars(vars, vars.begin(),virtualized_b_second.begin(), virtualized_b_second.end());
 
-				printf("%d vars total\n", vars.size());
+				printf("%u vars total\n", (unsigned int) vars.size());
 
 				foreach(const Vertex& v, vars)
 					if (!STLhas(root->varOwner, v))
@@ -1511,12 +1516,10 @@ Btr<set<BoundVertex> > BackInferenceTree::evaluate(set<const BackInferenceTree*>
 							root->inferred_with[v2h(new_result.value)] = rule;
 						}						
 				}
-next_args:;
+//next_args:;
 			}
 	}
-	else
-		return child_results[0];
-
+	else return child_results[0];
 	
 	foreach(BoundVertex bv, *ret)
 	{
@@ -1570,12 +1573,13 @@ BoundVertex BackInferenceTreeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _
 	return new_result;
 }
 
-BackInferenceTree::~BackInferenceTree() {
-		printf("Dying... %d => %d\n", root->InferenceNodes, root->InferenceNodes-1);
-		root->InferenceNodes--;
+BackInferenceTree::~BackInferenceTree()
+{
+    printf("Dying... %ld => %ld\n", root->InferenceNodes, root->InferenceNodes-1);
+    root->InferenceNodes--;
 /// TODO: TEMPORARY DISABLED FOR DEBUGGING!!! RE-ENABLE!
-//		ReleaseChildren();
-	}
+//    ReleaseChildren();
+}
 	
 void BackInferenceTree::ReleaseChildren()
 {
@@ -1912,7 +1916,7 @@ void BackInferenceTreeRoot::print_trail(Handle h, unsigned int level) const
 
 void BackInferenceTree::printArgs() const
 {
-	printf("%d args:\n", args.size());
+	printf("%u args:\n", (unsigned int) args.size());
 	foreach(meta _arg, args)
 		rawPrint(*_arg, _arg->begin(), 0);
 }

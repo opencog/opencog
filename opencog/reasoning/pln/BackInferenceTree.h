@@ -182,33 +182,32 @@ protected:
 
 	mutable set<parent_link<BackInferenceTree> > parents;
 	
-	/// BackInferenceTree supports pre-bindings extensively, but it's unclear whether they are
-	/// obsolete or not.
-
-	Btr<bindingsT> pre_bindings;
-
-	float my_bdrum;
-	unsigned int depth;
-	
 	BackInferenceTreeRoot* root;
 
+	unsigned int depth;
+	
 	/// Possibly obsolete
 	typedef set<vtree, less_tree_vertex> vtreeset;
 	vtreeset target_chain;
+
+	bool Expanded;
 
 	/// The Rule that the child_results of this state object's child_results will be
 	/// associated with.
 	Rule *rule;
 	
+	float my_bdrum;
+
+	/// BackInferenceTree supports pre-bindings extensively, but it's unclear whether they are
+	/// obsolete or not.
+	Btr<bindingsT> pre_bindings;
+
 	/// Contains the target of this inference state node
 	//vector<InferenceTaskParameters> pars;
 	//const InferenceTaskParameters& pars;
 	Rule::MPs args;
 
-	bool Expanded;
-
 	/* METHODS */
-
 	Btr<bindingsT> relevantBindings(const bindingsT& _pre_bindings) const;
 
 	void SetTarget(meta _target);
@@ -248,7 +247,7 @@ protected:
 		return true;
 	}
 
-	BackInferenceTree* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
+	BackInferenceTree* CreateChild(unsigned int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 	
 	/// Normally arg = args[rule_arg_i], but children with differently-bound targets
@@ -408,11 +407,10 @@ protected:
 	bool exec_pool_sorted;
 	BITstoreT BITstore;
 
-	Btr<RuleProvider> rp;
-
 	/// 0 = no, other = the result link type
 	Type post_generalize_type;
 
+	Btr<RuleProvider> rp;
 
 	BackInferenceTree* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);

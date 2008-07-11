@@ -124,7 +124,7 @@ Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
 		std::vector<Handle> dest_array;
 	
 		src.toHandleVector(dest_array);
-		for (int i =0;i<dest_array.size();i++)
+		for (unsigned int i =0;i<dest_array.size();i++)
 		{
 			dest.insert(dest_array[i]);
 		}
@@ -145,34 +145,30 @@ namespace reasoning
 {
 	shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
 	{
-	/*
 		HandleEntry* result = 
 			(name.empty()
-				? MindDBProxy::getInstance()->getHandleSet((Type)T, true)
-				: MindDBProxy::getInstance()->getHandleSet(name.c_str(), (Type)T));
+				? CogServer::getAtomSpace()->getAtomTable().getHandleSet((Type) T, subclass)
+				: CogServer::getAtomSpace()->getAtomTable().getHandleSet(name.c_str(), (Type) T, subclass));
 		shared_ptr<set<Handle> > ret(new set<Handle>);
 
 		HandleEntry2HandleSet(*result, *ret);
 
 		delete result;
-		
 		return ret;
-		*/
 	}
 
 	Handle AtomTableWrapper::getHandle(Type t,const string& name) const
 	{
-		puts("ATW1");
-		//return MindDBProxy::getInstance()->getHandle(name.c_str(), (Type)t);
+		return CogServer::getAtomSpace()->getAtomTable().getHandle(name.c_str(), (Type)t);
 	}
 	
 	bool equal(const HandleSeq& lhs, const HandleSeq& rhs)
 	{
-		int lhs_arity = lhs.size();
+		size_t lhs_arity = lhs.size();
 		if (lhs_arity != rhs.size())
 			return false;
 			
-		for (int i = 0; i < lhs_arity; i++)
+		for (unsigned int i = 0; i < lhs_arity; i++)
 			if (lhs[i] != rhs[i])
 				return false;
 		return true;			
@@ -297,7 +293,7 @@ bool AtomTableWrapper::LoadOther(const string& path, bool ReplaceOld)
 		{
 			vector<Handle> hs;
 
-			for (int j = 0; j < elems.size(); j++)
+			for (unsigned int j = 0; j < elems.size(); j++)
 				if (!elems[j].empty())
 					hs.push_back(nm->getHandle(CONCEPT_NODE, elems[j]));
                
@@ -395,7 +391,7 @@ Handle NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn
 int getFirstIndexOfType(HandleSeq hs, Type T)
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
-	for (int i = 0; i < hs.size(); i++)
+	for (unsigned int i = 0; i < hs.size(); i++)
 		if (nm->getType(hs[i]) == T)
 			return i;
 
@@ -520,7 +516,7 @@ Handle AtomTableWrapper::freshened(Handle h, bool managed)
 		return addNode(T, name, tv, true,managed);
 	else
 	{
-		for (int i = 0; i < hs.size(); i++)
+		for (unsigned int i = 0; i < hs.size(); i++)
 			hs[i] = freshened(hs[i], managed);
 
 		return addLink(T, hs, tv, true, managed);
@@ -1664,12 +1660,12 @@ bool equal(Handle A, Handle B)
 	vector<Handle> hsA = nm->getOutgoing(A);
 	vector<Handle> hsB = nm->getOutgoing(B);
 
-	const int Asize = hsA.size();
+	const size_t Asize = hsA.size();
 
 	if (Asize != hsB.size())
 		return false;
 
-	for (int i = 0; i < Asize; i++)
+	for (unsigned int i = 0; i < Asize; i++)
 		if (!equal(hsA[i], hsB[i]))
 			return false;
 	
