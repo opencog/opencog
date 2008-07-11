@@ -1,0 +1,476 @@
+/*
+Policy decisions:
+- EquivalenceLink
+	Exists [X for which P]
+	AndLink
+		MemberLink X Universe
+		EvaluationLink P X
+  (X is given an arbitrary label; it may turn out that it is equivalent with other things)
+- EquivalenceLink
+	ForAll [X P]
+	IntensionalInheritanceLink Universe P
+
+[ ForAll X P <=> -Exists X -P
+<=>
+EquivalenceLink
+	IntensionalInheritanceLink Universe P
+	-AndLink <tv>
+		MemberLink X Universe
+		 EvaluationLink -P X
+		 = MemberLink X SatisfyingSet(-P)
+	=-MemberLink X
+		AndLink
+			Universe
+			SatisfyingSet(-P)
+		=-OrLink
+			-Arbitrary
+			-Universe
+			SatisfyingSet(P)
+	= MemberLink X
+		OrLink
+			-Universe
+			SatisfyingSet(P)
+	= ImplicationLink
+		MemberLink X Universe
+			MemberLink X
+				SatisfyingSet(P)
+
+	[But MemberLink X Universe <1> (by def. of Universe).]
+
+[ Useful to define
+	EqLink
+		Arbitrary X
+		MemberLink X Universe ? ]
+
+//[ Eg. "exists x s.t. FriendOf(A, x) && exists x s.t. FriendOf(x,B) => "
+//<=> "exists x s.t. FriendOf(A, x) && FriendOf(x,B)" 
+
+---
+If for PN of arity 0, PN = CN,
+and for PN with arity 1, PN X = CN (etc.),
+then something like
+
+EquivalenceLink
+    EvaluationLink P $X
+    IntInhLink $X P?
+
+Ie. having the property expressed by the predicate P (of arity 1) should be
+equivalent to intensionally inheriting from a CN (defined as) having the property.
+
+"Converting" between CN and PN should be semantically transparent.
+
+(
+Then, SatisfyingSet P
+)
+
+Then, we could also say,
+
+EquivalenceLink
+    ForAll [x P(x)]
+    IntensionalInheritanceLink Universe P
+
+where Universe is a special concept that all CNs int. inherit from.
+(Or, in a local case, it can be replaced by a local concept.)
+---
+
+- Each node has Identity and Number. "Exists X" <=> create a random label node,
+with no identity and unknown number. What is Identity? Simply the collection of
+Links!
+
+- An internal node has no specific "identifier" apart from its connections.
+An external node has an identifier. It is primitive and can be considered a "qualia":
+an irreducible entity. Example qualias include GoalNodes, whose truth depends on the externally
+given fitness function (and/or on other GoalNodes which eventually depend on the fitn. f.),
+and the Universe node.
+
+- The knowledge-state of the system is determined by 2 factors: the externally given
+knowledge and the goal node strength values. The externally given knowledge should not be
+directly substituted for self-learnt nodes, but the similarity between INVENTED link clusters
+and GIVEN clusters should be realized by the system itself, making a MERGE.
+//- Eg. "If event S associates with event E in a manner P, then from the presence of S I can
+//infer E (as P). If E implies E2, then S implies also E." Given that S is a symbol statement
+//expressed by a human by an interface system P to designated E, NM also associates 
+
+- The seamlessness of the connection between these PTL inference control design issues and
+my own concept theory is, to me, striking. The fact that on one hand we have a math.
+valid inference system, and on the other hand we have a "formalized Nietzschean semantics",
+integrating nicely, suggests that the design can be made extremely robust, natural and
+powerful.
+
+- Exists1 x P(x)
+<=> ImplicationLink P (EquivalenceLink x1)
+- ExistsN x P(x) <tv>
+<=> ImplicationLink P (EquivalenceLink x1) <tv / N>
+
+! SatisfyingSets vs. concept applicability? (X might not satisfy P nor -P.) Ie. excluded middle rule doesn't work. Avoiding the mutual existence of P and NOT(P) should be a heuristic only, or handled via revision.
+! Multi-deduction?
+*/
+
+
+#ifndef PTL_FORMULAS
+#define PTL_FORMULAS
+
+#include "Formula.h"
+
+namespace reasoning {
+
+// Must keep this up to date:
+const int FORMULA_MAX_ARITY = 100;
+
+const int AND_MAX_ARITY = FORMULA_MAX_ARITY;
+const int OR_MAX_ARITY = FORMULA_MAX_ARITY;
+const int FORALL_MAX_ARITY = FORMULA_MAX_ARITY;
+
+#define DEDUCTION_TERM_WEIGHT 1.0f
+
+#define REVISION_STRENGTH_DEPENDENCY 0.0f
+#define REVISION_COUNT_DEPENDENCY 0.0f
+
+/*const float DEDUCTION_TERM_WEIGHT = 1.0f;
+
+const float REVISION_STRENGTH_DEPENDENCY = 0.0f;
+const float REVISION_COUNT_DEPENDENCY = 0.0f;
+*/
+const float MembershipToExtensionalInheritanceCountDiscountFactor = 1.0f;
+const float IntensionToExtensionCountDiscountFactor = 1.0f;
+const float ExtensionToIntensionCountDiscountFactor = 1.0f;
+
+const float IndependenceAssumptionDiscount = 1.0f;
+const float IndependenceAssumptionGeometryDiscount = 1.0f;
+
+const float DefaultNodeProbability = 1 / DefaultU;
+
+
+/**
+ * 
+ */ 
+class TautologyFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/*=========================================================================================
+    simpleCompute() methods take parameters in the order:
+    {link Tvalues}, { node Tvalues }
+=========================================================================================*/ 
+
+/**
+ * 
+ */ 
+class InversionFormula : public Formula<3>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class ImplicationBreakdownFormula : public Formula<3>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class ImplicationConstructionFormula : public Formula<3>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class NotFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class DeductionSimpleFormula : public Formula<5>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class DeductionGeometryFormula : public Formula<5>, public InversionFormula
+{
+private:
+    float g(float sA, float sB, float sC, float sAB) const;
+    //float g2(TruthValue* A, TruthValue* B ,TruthValue* C)
+    float g2(float sA, float sB, float sC, float sAB) const;
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class RevisionFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Inh2SimFormula : public Formula<4>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Sim2InhFormula : public Formula<3>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class ANDBreakdownFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class ModusPonensFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Inh2ImpFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Imp2InhFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Mem2InhFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Mem2EvalFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Eval2InhFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Ext2IntFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class Int2ExtFormula : public Formula<1>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class SymmetricANDFormula : public Formula<AND_MAX_ARITY>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * p(A),P(B|A)
+ */ 
+class AsymmetricANDFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+};
+
+/**
+ * Formula that behaves like old TruthValue::andOperation() method.
+ */
+class OldANDFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class ORFormula : public Formula<OR_MAX_ARITY>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class ExcludingORFormula : public Formula<OR_MAX_ARITY>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+class NOTFormula : public Formula<1>
+{
+public:
+     TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * 
+ */ 
+//class ORFormula2 : public SymmetricANDFormula, public NOTFormula
+class ORFormula2 : public Formula<OR_MAX_ARITY>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ * Formula that behaves like old TruthValue::orOperation() method.
+ */
+class OldORFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+
+/*=========================================================================================
+   Params: {set1, set2} where sizes are equal.
+=========================================================================================*/ 
+
+/**
+ *
+ */
+class SubsetEvalFormula : public ArityFreeFormula<TruthValue,TruthValue*>
+{
+private:
+	float f1(float a, float b) const;
+	float f2(float a, float b) const;
+public:
+	TruthValue* compute(TruthValue** TVsub,int Nsub, TruthValue** TVsuper,int Nsuper, long U = DefaultU) const;
+};
+
+/**
+ *
+ */
+class SubsetEvalFormula2 : SubsetEvalFormula
+{
+protected:
+    float f(float a, float b) const;
+};
+
+/**
+ *
+ */
+class SubsetEvalFormula1 : SubsetEvalFormula
+{
+protected:
+    float f(float a, float b) const;
+};
+
+/*=========================================================================================
+   Args: The list of truthvalues of atoms for which the predicate expression has been evaluated
+=========================================================================================*/ 
+
+/**
+ *
+ */
+class FORALLFormula : public Formula<FORALL_MAX_ARITY>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ *
+ */
+class PredicateTVFormula : public Formula<FORALL_MAX_ARITY>
+{
+public:
+	TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ *
+ */
+//class EXISTFormula : public FORALLFormula, public NOTFormula
+class EXISTFormula : public Formula<FORALL_MAX_ARITY>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+/**
+ *
+ */
+class InhSubstFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+};
+
+
+} // namespace reasoning
+
+#endif
