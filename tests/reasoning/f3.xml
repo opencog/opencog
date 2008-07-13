@@ -1,0 +1,11 @@
+
+<ImplicationLink confidence="0.999">
+<And>
+  <Element name="$ZETW1" class="FreeVariableNode"/>
+ </And>
+<ImplicationLink>
+  <Element name="$ZETW2" class="FreeVariableNode"/>
+  <Element name="$ZETW1" class="FreeVariableNode"/>
+</ImplicationLink>
+
+</ImplicationLink>

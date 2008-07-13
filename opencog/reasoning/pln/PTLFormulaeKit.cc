@@ -853,7 +853,7 @@ TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,int N, long U) const
     //float s2 = ((sA>0) ? (sAB / sA) : 0);
 
     float k = 800;
-    float d1 = d1 = nA/ (nA+k);
+    float d1 = nA/ (nA+k);
     float c_PAT = 0.75;
 
     float n3 = c_PAT * nB * d1 * sA;

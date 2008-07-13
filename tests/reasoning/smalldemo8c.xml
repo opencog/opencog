@@ -1,0 +1,32 @@
+<ListLink>
+
+<Element class="ConceptNode" name="Osama" strength="0.001" confidence=".999"/>
+<Element class="ConceptNode" name="Abu" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Amir" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Britney" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Moses" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Judea" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Muhammad" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="AlQaeda" strength="0.0001" confidence="0.999"/>
+<Element class="ConceptNode" name="killer" strength="0.05" confidence=".999"/>
+<Element class="ConceptNode" name="terrorist" strength="0.01" confidence=".999"/>
+
+
+<InheritanceLink strength=".98" confidence=".99">
+    <Element name="Osama" class="ConceptNode"/>
+    <Element name="terrorist" class="ConceptNode"/>
+</InheritanceLink>	
+
+<ExtInhLink strength=".99" confidence=".99">
+    <Element name="Muhammad" class="ConceptNode"/>
+    <Element name="AlQaeda" class="ConceptNode"/>
+</ExtInhLink>
+
+<ExtInhLink strength=".99" confidence=".99">
+    <Element name="Osama" class="ConceptNode"/>
+    <Element name="AlQaeda" class="ConceptNode"/>
+</ExtInhLink>
+
+
+</ListLink>
+

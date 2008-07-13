@@ -1,7 +1,7 @@
 #ifdef _PLN_H
 #define _PLN_H
 
-// What does this do because I don't know... GCC ignores it
+// What does this do, I don't know... GCC ignores it
 #ifdef WIN32
 #pragma warning( disable : 4786)
 #pragma warning( disable : 4503)
@@ -30,10 +30,10 @@
 // OpenCog includes
 #include <AtomSpace.h>
 //#ifndef USE_PSEUDOCORE
-	#include <Link.h>
-	#include <Atom.h>
-	#include <Node.h>
-	#include <TLB.h>
+#include <Link.h>
+#include <Atom.h>
+#include <Node.h>
+#include <TLB.h>
 //#endif
 #include <classes.h>
 #include <SimpleTruthValue.h>

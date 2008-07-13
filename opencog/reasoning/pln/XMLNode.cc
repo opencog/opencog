@@ -33,7 +33,7 @@ namespace reasoning
 void CleanSpace(string& s)
 {
 	const char *str = s.c_str();
-	int i = s.size()-1;
+	uint i = s.size()-1;
 	while (i >= 0 && (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r'))
 		i--;
 	if (i < s.size()-1)
@@ -48,7 +48,7 @@ void XMLNode::SetName(string n)
 	tagdata.name = n;
 }
 
-XMLNode::XMLNode(const string& rawdata, XMLNode* _super) : super(_super), ok(false), bytesconsumed(0)
+XMLNode::XMLNode(const string& rawdata, XMLNode* _super) : ok(false), super(_super)
 {
 	bytesconsumed = ExpandLevel(rawdata,tagdata,sub,this);
 	ok = bytesconsumed > 0;
@@ -306,7 +306,7 @@ XMLNode::XMLNode(const XMLNode& rhs)
 	super = rhs.super;
 	tagdata = rhs.tagdata;
 
-	for (int i = 0; i < rhs.sub.size(); i++)
+	for (uint i = 0; i < rhs.sub.size(); i++)
 		sub.push_back(rhs.sub[i]);
 }
 
@@ -346,7 +346,7 @@ std::string IntXMLValue::Value2String() const
 std::string FloatXMLValue::Value2String() const
 {
 	char temp[100];
-	sprintf(temp, "%.2f", temp);
+	sprintf(temp, "%.2f", value);
 	return temp;
 }
 

@@ -585,7 +585,7 @@ public:
 			i->first->print(-10, true);
 			foreach(Vertex v, i->second)
 			{
-				printf("%d\n", v2h(v));
+				printf("%lu\n", v2h(v));
 				//NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
 			}
 			printf("\n");

@@ -258,13 +258,14 @@ printf("Partial CrispU args:\n");
 
 		ret1.push_back(BBvtree(new BoundVTree(rootAtom->makeHandletree(destTable))));
 
-MPs::iterator m = ret1.begin();
-for(; m != ret1.end(); m++)
-	if (*m && (*m)->begin() != (*m)->end())
-		rawPrint(**m,(*m)->begin(),3);
-//getc(stdin);
+        // Debug printing
+        MPs::iterator m = ret1.begin();
+        for(; m != ret1.end(); m++)
+            if (*m && (*m)->begin() != (*m)->end())
+                rawPrint(**m,(*m)->begin(),3);
+        //getc(stdin);
 		
-printf("Crispu vector size=%d\n", ret1.size());
+        printf("Crispu vector size=%u\n", (unsigned int) ret1.size());
 		ret.insert(ret1);
 	}
 	

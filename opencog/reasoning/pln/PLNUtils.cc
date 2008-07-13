@@ -602,7 +602,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 	{*/
     Btr<set<Handle> > lookupResults = aprovider->getHandleSet(T,name);	
 
-    printf("%u objects matched the type %d.\n", (unsigned int) lookupResults->size(), T);
+    printf("%u objects matched the type %d.\n", (uint) lookupResults->size(), T);
     
     /// If _MP has children, they must match!
 
@@ -661,7 +661,7 @@ printf("TableGather:\n");
 	//}
     
     // IF NO RESULT WAS FOUND, CHECK FOR SPECIAL CASES
-    printf("TABLEGATHER END: SIZE = %u\n", (unsigned int size());
+    printf("TABLEGATHER END: SIZE = %u\n", (uint) size());
 
 	#ifndef USE_PSEUDOCORE
 
@@ -999,7 +999,7 @@ bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
 	if (keyelem_set.empty())
 		return false;
 
-    unsigned int max_size=0;
+    uint max_size=0;
 
     for (vector<Handle>::const_iterator i = link_set.begin(); i != link_set.end(); i++)
     {
@@ -1509,17 +1509,17 @@ printf("MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node,
 		else
 		{
 			vector<Handle> lhs_out = nm->getOutgoing(lhs);
-			int lhs_arity = nm->getArity(lhs);
+			uint lhs_arity = nm->getArity(lhs);
 		
 printf("MPunifyHandle: UnifyVector exec...");
 			if (lhs_arity != rhs.hs.size())
 			{
 				bindings.clear();
-printf("MPunifyHandle: arity diff, returning (%d / %u)\n", lhs_arity, (unsigned int) rhs.hs.size());
+printf("MPunifyHandle: arity diff, returning (%d / %u)\n", lhs_arity, (uint) rhs.hs.size());
 				return false;
 			}
 		
-			for (int i = 0; i < lhs_arity; i++)		
+			for (uint i = 0; i < lhs_arity; i++)		
 			{
 printf("MPunifyHandle: next arg...");			
 				if (!reasoning::MPunifyHandle(lhs_out[i], *rhs.hs[i], bindings, forbiddenBindings, restart, VarT))
@@ -1651,7 +1651,7 @@ printf("UnifyVector exec...");
 		{
 			bindings.clear();
 printf("UnifyVector: arity diff, returning (%d / %u)\n", lhs_top.number_of_children(),
-        (unsigned int) rhsv.size());
+        (uint) rhsv.size());
 			return false;
 		}
 		

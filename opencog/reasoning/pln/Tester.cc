@@ -141,7 +141,7 @@ void RunPLNTest(Btr<PLNTest> t);
 void finger_print_test(vtree& v)
 {
 	BoundVTree bvt(v);
-	printf("Finger print: %d\n", bvt.getFingerPrint());
+	printf("Finger print: %lu\n", bvt.getFingerPrint());
 }
 
 set<Btr<PLNTest> > PLNTests;
@@ -243,7 +243,7 @@ void RunPLNTests()
 		INstatsVT.push_back(INstatsV);
 	}
 
-	for (int v=0; v < INstatsV[0].size(); v++)
+	for (uint v=0; v < INstatsV[0].size(); v++)
 	{
 		fprintf(f, "\n");
 		for (int t=0; t < ( (FitnessEvaluator!=DETERMINISTIC) ? TestRepeats : 1); t++)
@@ -873,7 +873,7 @@ printf("axioms loaded");fflush(stdout);
 			INstats.push_back(state->InferenceNodes);
 
 			//		printf("\n\n\nExec pool size: %d\n", state->exec_pool.size());
-			printf("\n\n\nInferenceNodes: %d / %d\n", state->InferenceNodes, AllTestsInferenceNodes);
+			printf("\n\n\nInferenceNodes: %ld / %d\n", state->InferenceNodes, AllTestsInferenceNodes);
 		}
 		else
 			INstats.push_back(0);

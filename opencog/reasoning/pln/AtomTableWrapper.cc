@@ -53,10 +53,10 @@ namespace haxx
 	map<string,Handle> variableShadowMap;
 	bool ArchiveTheorems = true;
 	
-	#if USE_MIND_SHADOW
+#if USE_MIND_SHADOW
 	vector<Handle> mindShadow;
 	map<Type, vector<Handle> > mindShadowMap;
-	#endif
+#endif
 }
 
 //static map<Handle,vtree> h2vtree_cache;

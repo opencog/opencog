@@ -1,0 +1,66 @@
+<InheritanceLink strength=".99" confidence=".99">
+    <Element name="friendOf" class="PredicateNode"/>
+    <Element name="transitiveRelation" class="ConceptNode"/>
+</InheritanceLink>
+
+<InheritanceLink strength=".01" confidence=".99">
+    <Element name="Britney" class="ConceptNode"/>
+    <Element name="terrorist" class="ConceptNode"/>
+</InheritanceLink>
+
+
+
+
+<Not>
+    <EvaluationLink strength=".8" confidence=".6">
+        <Element name="isDead" class="PredicateNode"/>
+    <ListLink>
+        <Element name="Britney" class="ConceptNode"/>
+    </ListLink>
+    </EvaluationLink>
+</Not>
+
+<ForAll strength=".99" confidence=".99"> 
+  <ListLink>
+                <Element name="X007" class="VariableNode"/>
+                <Element name="X008" class="VariableNode"/>
+                <Element name="R000" class="VariableNode"/>
+  </ListLink>
+  <EquivalenceLink confidence="0">
+    <InheritanceLink confidence="0">
+        <Element name="R000" class="VariableNode"/>
+        <Element name="symmetricRelation" class="ConceptNode"/>
+    </InheritanceLink>
+    <EquivalenceLink confidence="0">
+        <EvaluationLink confidence="0">
+            <Element name="R000" class="VariableNode"/>
+            <ListLink>
+                <Element name="X007" class="VariableNode"/>
+                <Element name="X008" class="VariableNode"/>
+            </ListLink>
+        </EvaluationLink>   
+        <EvaluationLink confidence="0">
+            <Element name="R000" class="VariableNode"/>
+            <ListLink>
+                <Element name="X008" class="VariableNode"/>
+                <Element name="X007" class="VariableNode"/>
+            </ListLink>
+        </EvaluationLink>    
+    </EquivalenceLink>
+  </EquivalenceLink>
+</ForAll>
+
+<InheritanceLink strength="0.9">
+    <Element name="Muhammad" class="ConceptNode"/>
+    <Element name="terrorist" class="ConceptNode"/>
+</InheritanceLink>
+
+
+<EvaluationLink>
+    <Element name="killed" class="PredicateNode"/>
+    <ListLink>
+        <Element name="Moses" class="ConceptNode"/>
+        <Element name="Britney" class="ConceptNode"/>
+    </ListLink>
+</EvaluationLink>
+

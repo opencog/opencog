@@ -1,0 +1,60 @@
+<ListLink>
+
+<ForAll strength="0.9" confidence="0.999">
+<ListLink>
+			<Element name="$2" class="VariableNode"/>
+		<Element name="$3" class="VariableNode"/>
+</ListLink>
+<ImplicationLink>
+		<InheritanceLink>
+			<Element name="$2" class="VariableNode"/>
+			<SatSet>
+				<Element name="$3" class="VariableNode"/>
+			</SatSet>
+		</InheritanceLink>
+	<EvaluationLink>
+		<Element name="$3" class="VariableNode"/>
+		<ListLink>
+			<Element name="$2" class="VariableNode"/>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+</ForAll>
+<ForAll strength="0.8" confidence="0.999">
+<ListLink>
+				<Element name="$1" class="VariableNode"/>
+</ListLink>
+<ImplicationLink>
+		<EvaluationLink>
+			<Element name="ExtType1" class="PredicateNode"/>
+			<ListLink>
+				<Element name="$1" class="VariableNode"/>
+			</ListLink>
+		</EvaluationLink>
+	<SimAND>
+		<Element name="blockword" class="WordNode"/>
+		<Element name="$1" class="VariableNode"/>
+	</SimAND>
+</ImplicationLink>
+</ForAll>
+
+
+<Element name="B1" strength="0.1" confidence="0.999" class="ConceptNode"/>
+<Element name="blockobject" strength="0.333" confidence="0.999" class="ConceptNode"/>
+
+<InheritanceLink strength="0.999" confidence="0.9">
+	<Element name="B1" class="ConceptNode"/>
+	<Element name="blockobject" class="ConceptNode"/>
+</InheritanceLink>
+
+
+<InheritanceLink strength="0.25" confidence="0.999">
+	<Element name="B1" class="ConceptNode"/>
+	<SatisfyingSet strength="0.4" confidence="0.999">
+		<Element name="ExtType1" class="PredicateNode"/>
+	</SatisfyingSet>
+</InheritanceLink>
+
+</ListLink>
+
+

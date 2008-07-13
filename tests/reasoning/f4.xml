@@ -1,0 +1,279 @@
+<ForAll confidence="0.999">
+<ListLink>
+<Element name="$10000" class="VariableNode"/>
+</ListLink>
+		<EvaluationLink>
+			<Element name="do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$10000" class="VariableNode"/> </ListLink>
+		</EvaluationLink>
+</ForAll>
+
+<EvaluationLink confidence="0.99">
+	<Element name="NOTEdo" class="PredicateNode" confidence="0"/>
+	<ListLink>
+	   <EvaluationLink>
+		<Element name="walktowards" class="SchemaNode" confidence="0"/>
+		<ListLink>
+			<Element name="teacher" class="ConceptNode" confidence="0"/>
+		</ListLink>
+  	   </EvaluationLink>
+	</ListLink>
+</EvaluationLink>
+
+	<EvaluationLink confidence="0.999">
+		<Element name="NOTEdo" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<EvaluationLink>
+				<Element name="give" class="SchemaNode" confidence="0"/>
+				<ListLink>
+					<Element name="ball" class="ConceptNode" confidence="0"/>
+					<Element name="teacher" class="ConceptNode" confidence="0"/>
+				</ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+
+<ImplicationLink confidence="0.999">
+	<And>
+		<EvaluationLink>
+			<Element name="do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		</EvaluationLink>
+		<EvaluationLink>
+			<Element name="can_do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		</EvaluationLink>
+	</And>
+	<EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/>
+		<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+	<EvaluationLink confidence="0.999">
+		<Element name="can_do" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<EvaluationLink>
+				<Element name="give" class="SchemaNode" confidence="0"/>
+				<ListLink>
+					<Element name="ball" class="ConceptNode" confidence="0"/>
+					<Element name="teacher" class="ConceptNode" confidence="0"/>
+				</ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+
+
+<ImplicationLink confidence="0.99">
+   <And>
+	<EvaluationLink>
+		<Element name="teacher_say" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<Element name="fetch" class="WordNode" confidence="0"/>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<EvaluationLink>
+				<Element name="give" class="SchemaNode" confidence="0"/>
+				<ListLink>
+					<Element name="ball" class="ConceptNode" confidence="0"/>
+					<Element name="teacher" class="ConceptNode" confidence="0"/>
+				</ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+   </And>
+	<EvaluationLink>
+		<Element name="+++" class="PredicateNode" confidence="0"/>
+	</EvaluationLink>
+</ImplicationLink>
+
+
+<ImplicationLink confidence="0.99">
+	<And>
+	   <EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="hold" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+		<EvaluationLink>
+			<Element name="near" class="PredicateNode" confidence="0"/>
+			<ListLink>
+				<Element name="teacher" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		</EvaluationLink>
+	</And>
+	<EvaluationLink>
+		<Element name="can_do" class="PredicateNode" confidence="0"/>
+		<ListLink>		
+			<EvaluationLink>
+				<Element name="give" class="SchemaNode" confidence="0"/>
+				<ListLink>
+					<Element name="ball" class="ConceptNode" confidence="0"/>
+					<Element name="teacher" class="ConceptNode" confidence="0"/>
+				</ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+
+<ImplicationLink confidence="0.999">
+<And>
+	<EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<EvaluationLink>
+				<Element name="walktowards" class="SchemaNode" confidence="0"/>		
+				<ListLink> <Element name="$2" class="FreeVariableNode"/> </ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+</And>
+	<EvaluationLink>
+		<Element name="near" class="PredicateNode" confidence="0"/>
+		<ListLink> <Element name="$2" class="FreeVariableNode"/> </ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+
+<EvaluationLink strength="0.99" confidence="0.99">
+		<Element name="teacher_say" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<Element name="fetch" class="WordNode" confidence="0"/>
+		</ListLink>
+</EvaluationLink>
+
+<EvaluationLink confidence="0.99">
+	<Element name="can_do" class="PredicateNode" confidence="0"/>
+	<ListLink>
+	   <EvaluationLink>
+		<Element name="walktowards" class="SchemaNode" confidence="0"/>
+		<ListLink>
+			<Element name="teacher" class="ConceptNode" confidence="0"/>
+		</ListLink>
+  	   </EvaluationLink>
+	</ListLink>
+</EvaluationLink>
+
+
+<EvaluationLink confidence="0.99">
+	<Element name="can_do" class="PredicateNode" confidence="0"/>
+	<ListLink>
+	   <EvaluationLink>
+		<Element name="walktowards" class="SchemaNode" confidence="0"/>
+		<ListLink>
+			<Element name="ball" class="ConceptNode" confidence="0"/>
+		</ListLink>
+  	   </EvaluationLink>
+	</ListLink>
+</EvaluationLink>
+
+<ImplicationLink confidence="0.99">
+	   <EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="lift" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+	   <EvaluationLink>
+		<Element name="can_do" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="hold" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+</ImplicationLink>
+
+	   <EvaluationLink confidence="0.999">
+		<Element name="NOTEcan_do" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="lift" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+
+<ImplicationLink confidence="0.8">
+		<EvaluationLink>
+			<Element name="near" class="PredicateNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		</EvaluationLink>
+
+	   <EvaluationLink>
+		<Element name="can_do" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="lift" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+</ImplicationLink>
+
+
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+
+<ForAll confidence="0.999">
+<ListLink>
+<Element name="$2" class="VariableNode"/>
+</ListLink>
+<ImplicationLink>
+	<EvaluationLink>
+		<Element name="NOTEjust_done" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<EvaluationLink>
+				<Element name="walktowards" class="SchemaNode" confidence="0"/>		
+				<ListLink> <Element name="$2" class="VariableNode"/> </ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="NOTEnear" class="PredicateNode" confidence="0"/>
+		<ListLink> <Element name="$2" class="VariableNode"/> </ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+</ForAll>
+
+
+		<EvaluationLink confidence="0.99">
+			<Element name="hold" class="PredicateNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		</EvaluationLink>
+
+		<EvaluationLink confidence="0.99">
+			<Element name="NOTEnear" class="PredicateNode" confidence="0"/>
+			<ListLink>
+				<Element name="teacher" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		</EvaluationLink>
+

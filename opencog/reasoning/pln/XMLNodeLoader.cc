@@ -1,5 +1,7 @@
+#ifdef _MSC_VER
 #pragma warning( disable : 4786)
 #pragma warning( disable : 4503)
+#endif // _MSC_VER
 
 #include "PLN.h"
 #include "AtomTableWrapper.h"

@@ -58,4 +58,20 @@ TARGET_LINK_LIBRARIES(pln
 )
 
 TARGET_LINK_LIBRARIES(PLNFormulaUTest pln)
-TARGET_LINK_LIBRARIES(PLNShell pln)
+TARGET_LINK_LIBRARIES(PLNShell pln
+	atomspace
+	server
+	xml
+	util
+	query
+	schemes
+	wsd
+	persist
+	${IODBC_LIBRARIES}
+	${CSOCKETS_LIBRARIES}
+	${OPENSSL_LIBRARIES}
+	${EXPAT_LIBRARIES}
+	${GUILE_LIBRARIES}
+	${GSL_LIBRARIES}
+)
+

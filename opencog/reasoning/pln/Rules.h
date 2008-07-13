@@ -859,15 +859,16 @@ class DeductionRule : public GenericRule<DeductionFormula>
 	{
 		assert(h.size()==2);
 		AtomSpace *nm = CogServer::getAtomSpace();	
-		//assert(nm->getArity(v2h(h[0]))==2);
-		//assert(nm->getArity(v2h(h[1]))==2);
-		//assert(nm->getOutgoing(v2h(h[0]),0));
-		//assert(nm->getOutgoing(v2h(h[1]),1));
+		assert(nm->getArity(v2h(h[0]))==2);
+		assert(nm->getArity(v2h(h[1]))==2);
+		assert(nm->getOutgoing(v2h(h[0]),0));
+		assert(nm->getOutgoing(v2h(h[1]),1));
 	
-		//return meta(new tree<Vertex>(mva((Handle)InclusionLink, 
+	//	//return meta(new tree<Vertex>(mva((Handle)InclusionLink, 
 	//					Vertex(nm->getOutgoing(v2h(h[0]),0)),
 	//					Vertex(nm->getOutgoing(v2h(h[1]),1))
 	//			)));
+        return meta();
 	}
 	bool validate2				(Rule::MPs& args) const
 	{

@@ -120,7 +120,9 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #include <stdlib.h>
 #include <time.h>
 
+#ifdef _MSC_VER
 #pragma warning(disable : 4312)
+#endif // _MSC_VER
 
 using namespace reasoning;
 int currentDebugLevel;
@@ -365,7 +367,7 @@ string printTV (Handle h) {
   if (tv.isNullTv()) 
       sprintf (str,"(TruthValue::NULL_TV())");
   else
-      sprintf (str,"(%lf,%lf)",nm->getTV(h).getMean(),nm->getTV(h).getCount());
+      sprintf (str,"(%f,%f)",nm->getTV(h).getMean(),nm->getTV(h).getCount());
   string s(str);
   return s;
 }
@@ -816,7 +818,7 @@ printf("Insert test %d\n", testi++);
 						)
 					)));
 
-printf("Insert tests init OK\n", testi++);
+printf("Insert tests init\n");
 	Btr<BackInferenceTreeRootT> Bstate (new BITNodeRoot(
 		(target ? meta(target) : tests[0]),
 		new DefaultVariableRuleProvider));
@@ -1003,12 +1005,12 @@ printf("BITNodeRoot init ok\n");
 			case 'O':	cin >> h;
 //						((BITNode*)h)->PrintUsers();
 						foreach(const parent_link<BITNode>& p, ((BITNode*)h)->GetParents())
-							printf("User Node = %ld\n", p.link);
+							printf("User Node = %lu\n", (ulong) p.link);
 						break;
 //			case 'l': cprintf(0,"%d\n", state->exec_pool.size()); break;
 				
 			case 's':	cin >> h; //Give max nr of steps that we can take.
-                        j = (int) h;
+                        j = (long) h;
 				
 						printf("\nTemporarily killing the log with level -3.\n");
 			
@@ -1017,7 +1019,7 @@ printf("BITNodeRoot init ok\n");
 			
 						state->infer(j, 0.000001f, 0.01f);
 						state->printResults();
-						printf("\n%d $ remaining.\n", h);
+						printf("\n%ld $ remaining.\n", h);
 			
 						currentDebugLevel = tempi;
 

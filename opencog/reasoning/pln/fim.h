@@ -111,6 +111,6 @@ int add(const PAT s);
 int add(pat_id id, const PAT s);
 };
 
-};
+}
 
 #endif

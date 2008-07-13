@@ -1,0 +1,62 @@
+<ListLink>
+
+<Element class="ConceptNode" name="Osama" strength="0.001" confidence=".999"/>
+<Element class="ConceptNode" name="Abu" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Amir" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Britney" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Moses" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Judea" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="Muhammad" strength="0.00001" confidence=".999"/>
+<Element class="ConceptNode" name="AlQaeda" strength="0.0001" confidence="0.999"/>
+<Element class="ConceptNode" name="killer" strength="0.05" confidence=".999"/>
+<Element class="ConceptNode" name="terrorist" strength="0.01" confidence=".999"/>
+
+<ForAll strength=".99" confidence=".99"> 
+  <ListLink>
+                <Element name="X007" class="VariableNode"/>
+                <Element name="X008" class="VariableNode"/>
+                <Element name="R000" class="VariableNode"/>
+  </ListLink>
+  <ImplicationLink confidence="0">
+   <And>
+    <InheritanceLink confidence="0">
+        <Element name="R000" class="VariableNode"/>
+        <Element name="symmetricRelation" class="ConceptNode"/>
+    </InheritanceLink>
+    <EvaluationLink confidence="0">
+            <Element name="R000" class="VariableNode"/>
+            <ListLink>
+                <Element name="X007" class="VariableNode"/>
+                <Element name="X008" class="VariableNode"/>
+            </ListLink>
+    </EvaluationLink>   
+   </And>
+   <EvaluationLink confidence="0">
+            <Element name="R000" class="VariableNode"/>
+            <ListLink>
+                <Element name="X008" class="VariableNode"/>
+                <Element name="X007" class="VariableNode"/>
+            </ListLink>
+   </EvaluationLink>    
+  </ImplicationLink>
+</ForAll>
+
+
+<InheritanceLink strength=".98" confidence=".99">
+    <Element name="Osama" class="ConceptNode"/>
+    <Element name="terrorist" class="ConceptNode"/>
+</InheritanceLink>	
+
+<ExtInhLink strength=".99" confidence=".99">
+    <Element name="Muhammad" class="ConceptNode"/>
+    <Element name="AlQaeda" class="ConceptNode"/>
+</ExtInhLink>
+
+<ExtInhLink strength=".99" confidence=".99">
+    <Element name="Osama" class="ConceptNode"/>
+    <Element name="AlQaeda" class="ConceptNode"/>
+</ExtInhLink>
+
+
+</ListLink>
+

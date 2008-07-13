@@ -3,7 +3,7 @@
 
 #include <time.h>
 #include "Rule.h"
-//#include "fim.h"
+#include "fim.h"
 #include "CoreWrapper.h"
 #include <queue>
 #include "iAtomTableWrapper.h"

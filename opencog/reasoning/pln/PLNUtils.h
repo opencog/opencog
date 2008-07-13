@@ -491,7 +491,7 @@ bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& l
 template<typename T>
 bool vectorHas(std::vector<T> box, T key)
 {
-	for (int i = 0; i < box.size(); i++)
+	for (uint i = 0; i < box.size(); i++)
 		if (box[i] == key)
 			return true;
 	return false;
