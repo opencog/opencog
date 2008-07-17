@@ -7,7 +7,6 @@
 #include "AtomTableWrapper.h"
 #include "XMLNode.h"
 #include "XMLNodeLoader.h"
-#include "log.h"
 #include "Rules.h"
 #include <utils2.h>
 

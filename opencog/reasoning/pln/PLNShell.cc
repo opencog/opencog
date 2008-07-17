@@ -112,11 +112,13 @@ These should be bug-free, but there's no type checking of parameters, so providi
 
 #include "Rules.h"
 #include "RuleProvider.h"
-#include <boost/foreach.hpp>
 #include "AtomTableWrapper.h"
 #include "BackInferenceTreeNode.h"
 #include "PLNShell.h"
 
+#include <Logger.h>
+
+#include <boost/foreach.hpp>
 #include <stdlib.h>
 #include <time.h>
 
@@ -125,19 +127,19 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #endif // _MSC_VER
 
 using namespace reasoning;
-int currentDebugLevel;
+extern int currentDebugLevel;
 
 bool RunPLNtest=true;
 int tempar=0;
 
 namespace haxx
 {
-	//extern multimap<Handle,Handle> childOf;
-	//extern bool AllowFW_VARIABLENODESinCore;
-	//extern bool ArchiveTheorems;
-	//extern bool printRealAtoms;
+	extern multimap<Handle,Handle> childOf;
+	extern bool AllowFW_VARIABLENODESinCore;
+	extern bool ArchiveTheorems;
+	extern bool printRealAtoms;
 	extern map<Handle,vector<Handle> >* inferred_from;
-    //extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
 }
 
 namespace haxx
@@ -168,8 +170,7 @@ void AgentTest();
 
 void test_core_TVs()
 {
-    iAtomTableWrapper* defaultAtomTableWrapper;
-	Btr<set<Handle> > ts =  ((AtomTableWrapper*) defaultAtomTableWrapper)->getHandleSet((Type)77,"");
+	Btr<set<Handle> > ts =  ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->getHandleSet((Type)77,"");
 	foreach(Handle ti, *ts)
 	{
 		if (CogServer::getAtomSpace()->getTV(ti).isNullTv())
@@ -185,16 +186,17 @@ void test_core_TVs()
 void test_nm_reset()
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
-	//nm->Reset(NULL);
+	nm->Reset(NULL);
 	
-	//assert(nm->getHandleSet(EVALUATION_LINK,"").empty());
-	//assert(nm->getHandleSet(LIST_LINK,"").empty());
+	assert(nm->getHandleSet(EVALUATION_LINK,"").empty());
+	assert(nm->getHandleSet(LIST_LINK,"").empty());
 }
 
 
 void PLNShell_RunLoop(int argc, char** args);
 
 /// PLNShell is intended to be used with PseudoCore. Main run loop is here.
+//void PseudoCore::RunLoop(int argc, char** args) const
 int main(int argc, char** args)
 {
 	puts("PseudoCore::RunLoop");
@@ -215,7 +217,7 @@ void PLNShell_RunLoop(int argc, char** args)
 #endif
 
 		RECORD_TRAILS = true;
-		//haxx::printRealAtoms = true;
+		haxx::printRealAtoms = true;
 
 		currentDebugLevel=4;
 
@@ -224,26 +226,23 @@ void PLNShell_RunLoop(int argc, char** args)
 		printf("Creating AtomTableWrappers...");
 		
 #if LOCAL_ATW
-		//haxx::defaultAtomTableWrapper = &LocalATW::getInstance();
+		haxx::defaultAtomTableWrapper = &LocalATW::getInstance();
 #else
 		DirectATW::getInstance();
-		//haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
+		haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
 #endif
-		//AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+		AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
 				
-/*		if (RunPLNtest)
+		if (RunPLNtest)
 		{
 			reasoning::RunPLNTests();
 			exit(0);
 		}
-*/
 //		AgentTest();
 		
 #if 1 //Loading Osama or set axioms here.
 
-	//haxx::ArchiveTheorems = true;
-	iAtomTableWrapper* defaultAtomTableWrapper;
-	AtomTableWrapper& TheNM = *((AtomTableWrapper*) defaultAtomTableWrapper);
+	haxx::ArchiveTheorems = true;
  
   	bool axioms_ok = TheNM.LoadAxioms("bigdemo.xml");
 
@@ -266,25 +265,25 @@ void PLNShell_RunLoop(int argc, char** args)
 //   	  bool axioms_ok = TheNM.LoadAxioms("woademo.xml");
 	  assert(axioms_ok);
 
-	  //haxx::ArchiveTheorems = false;
+	  haxx::ArchiveTheorems = false;
 #endif
-	  printf("PTL Initialized.");
+	  logger().debug("PTL Initialized.");
 
-		printf("Running footest()...\n");
+		logger().info("Running footest()...\n");
 		footest();
-		printf("footest() complete.\n");
+		logger().info("footest() complete.\n");
 
   } catch(std::string s)
   {
-	  cout << "at root level while RunLoop initializing." << s;
+      logger().error("at root level while RunLoop initializing.");
   }
   catch(PLNexception e)
   {
-	  cout << "at root level while RunLoop initializing." << string(e.what());
+	  logger().error("at root level while RunLoop initializing.");
   }
   catch(...)
   {
-	  printf("Unknown exception at root level while RunLoop initializing. ");
+	  logger().error("Unknown exception at root level while RunLoop initializing. ");
   }
 
 	try
@@ -323,7 +322,6 @@ Rule combinations. Known examples are:
 
 */
 
-/*
 void childOfDump()
 {
 	using namespace haxx;
@@ -332,7 +330,7 @@ void childOfDump()
 	{
 		cout << "#" << (int)crel.first << " is child of " << (int)crel.second << "\n";
 	}
-}*/
+}
 
 void PLNhelp();
 
@@ -347,8 +345,8 @@ map<int, Btr<vtree > > tests;
 void PLNShell::Init()
 {
 	#if LOCAL_ATW
-	//haxx::defaultAtomTableWrapper = &reasoning::LocalATW::getInstance();
-	//((LocalATW*)haxx::defaultAtomTableWrapper)->SetCapacity(10000);
+	haxx::defaultAtomTableWrapper = &reasoning::LocalATW::getInstance();
+	((LocalATW*)haxx::defaultAtomTableWrapper)->SetCapacity(10000);
 	#endif	
 	
 	#if LOG_ON_FILE
@@ -356,8 +354,8 @@ void PLNShell::Init()
 	 cout << "LOGGING TO FILE pln.log!\n";
 	#endif
 
-	//haxx::printRealAtoms = true;
-	//haxx::ArchiveTheorems = false;
+	haxx::printRealAtoms = true;
+	haxx::ArchiveTheorems = false;
 }
 
 string printTV (Handle h) {
@@ -417,8 +415,7 @@ AtomSpace *nm = CogServer::getAtomSpace();
   return;
   //return ;
   ForwardTestRuleProvider *rp=new ForwardTestRuleProvider();
-  iAtomTableWrapper* defaultAtomTableWrapper;
-  AtomTableWrapper& TheNM = *((AtomTableWrapper*) defaultAtomTableWrapper);
+  AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
       Handle h1=nm->addNode (CONCEPT_NODE,"Human",tv);
       Handle h2=nm->addNode (CONCEPT_NODE,"Mortal",tv);
@@ -466,7 +463,7 @@ void PLNShell::Launch()
 
 void PLNShell::Launch(vtree *target)
 {
-	//AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+	AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
 
 /*	vector<Vertex> targs, targs2;
 	targs.push_back(mva((Handle)INHERITANCE_LINK,
@@ -854,7 +851,7 @@ printf("BITNodeRoot init ok\n");
 			save_log();
 		#endif
 		
-		//haxx::AllowFW_VARIABLENODESinCore = true; //false;
+		haxx::AllowFW_VARIABLENODESinCore = true; //false;
 	iAtomTableWrapper* defaultAtomTableWrapper;
 	AtomTableWrapper& TheNM = *((AtomTableWrapper*) defaultAtomTableWrapper);
 		
@@ -863,11 +860,11 @@ printf("BITNodeRoot init ok\n");
 		case 'm': printf("%d\n", test::_test_count); break;
 			case 'd':
 #if LOCAL_ATW
-			//((LocalATW*)haxx::defaultAtomTableWrapper)->DumpCore(CONCEPT_NODE);
+			((LocalATW*)haxx::defaultAtomTableWrapper)->DumpCore(CONCEPT_NODE);
 #else
 			cin >> h;
-			//ts = 
-			//((AtomTableWrapper*)haxx::defaultAtomTableWrapper)->getHandleSet((Type)h,"");
+			ts = 
+			((AtomTableWrapper*)haxx::defaultAtomTableWrapper)->getHandleSet((Type)h,"");
 			foreach(Handle ti, *ts)
 			{
 				if (nm->getTV(ti).isNullTv())
@@ -903,12 +900,12 @@ printf("BITNodeRoot init ok\n");
 						state->print_parents((BITNode*)h);
 						break;
 			case 'b': cin >> h;
-						printf("Target:\n");
+						logger().info("Target:\n");
 						((BackInferenceTreeRootT*)h)->printTarget();
-						printf("Results:\n");
+						logger().info("Results:\n");
 						((BackInferenceTreeRootT*)h)->printResults();
 
-						printf("parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
+						logger().info("parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
 
 						 break;
 /*			case 'B': cin >> h; cprintf(0, "Node has results & bindings:\n");
@@ -1046,10 +1043,10 @@ printf("BITNodeRoot init ok\n");
 						break;
 			case 'x': //puts("Give the XML input file name: "); 
 							cin >> temps;
-						//haxx::ArchiveTheorems = true; 
-						//nm->Reset(NULL);
+						haxx::ArchiveTheorems = true; 
+						nm->Reset(NULL);
 					 	  axioms_ok = TheNM.LoadAxioms(temps);
-						  //haxx::ArchiveTheorems = false;
+						  haxx::ArchiveTheorems = false;
 						  puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
 			
 						puts("Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");

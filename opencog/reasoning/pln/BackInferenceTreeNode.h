@@ -11,6 +11,7 @@
 #include <stack>
 #include <boost/foreach.hpp>
 #include "RuleApp.h"
+#include "NMPrinter.h"
 
 namespace reasoning
 {
@@ -240,13 +241,13 @@ protected:
 		{
 			puts("Rule returned NULL! Args were:\n");
 
-			//for_each(rule_args_begin, rule_args_end,
-			//	boost::bind<void>(
-					//NMPrinter(	NMP_DEFAULT,NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION,
-					//	NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, -2),
-			//		bind(&VtreeProvider::getVtree, _1)
-			//		)
-			//);
+			for_each(rule_args_begin, rule_args_end,
+				boost::bind<void>(
+					NMPrinter(	NMP_DEFAULT,NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION,
+						NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, -2),
+					bind(&VtreeProvider::getVtree, _1)
+					)
+			);
 
 			tlog(1,"Binds were (%d):\n", bindings_of_all_args->size());			
 
@@ -586,7 +587,7 @@ public:
 			foreach(Vertex v, i->second)
 			{
 				printf("%lu\n", v2h(v));
-				//NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
+				NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
 			}
 			printf("\n");
 		}

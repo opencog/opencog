@@ -163,12 +163,10 @@ ParametrizedBITNode::ParametrizedBITNode(BITNode* _prover, Btr<bindingsT> _bindi
 template<typename V, typename Vit, typename Tit>
 void copy_vars(V& vars, Vit varsbegin, Tit bbvt_begin, Tit bbvt_end)
 {
-    /*
     copy_if(bbvt_begin, bbvt_end, inserter(vars, varsbegin), 
         bind(equal_to<Type>(), 
         bind(getTypeFun, bind(&_v2h, _1)),
         (Type)FW_VARIABLE_NODE));
-    */
 }
 
 static int more_count=0;
@@ -208,9 +206,9 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     rule = NULL;
     root = this;
     bound_target = meta(new vtree);
-    //if (rp)
-    //  rp = new DefaultVariableRuleProvider;
-    //assert(!rp->empty());
+    if (rp)
+      rp = new DefaultVariableRuleProvider;
+    assert(!rp->empty());
     printf("rp ok\n");
     haxx::bitnoderoot = this;
 
@@ -245,14 +243,12 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
             bindingsT(), NO_SIBLING_SPAWNING);
     printf("scoper ok\n");
     set<Vertex> vars;
-    /*
     copy_if(    raw_target->begin(),
                 raw_target->end(),
                 inserter(vars, vars.begin()),
                 bind(equal_to<Type>(),
                     bind(getTypeFun, bind(&_v2h, _1)),
                         (Type)FW_VARIABLE_NODE));
-    */
     foreach(Vertex v, vars)
         varOwner[v].insert(root_variable_scoper);
 
@@ -362,7 +358,7 @@ int BITNode::TotalChildren() const
 }
 
 BITNodeRoot::~BITNodeRoot() {
-//  delete rp;
+  delete rp;
     foreach(BITNode* b, used_nodes) delete b;
 }
 
@@ -667,7 +663,7 @@ printf("\r%d", count111++);
 fflush(stdout);
 if (count111 == 9)
 { currentDebugLevel = 2; }*/
-                //NotifyParentOfResult(new VtreeProviderWrapper(bv.value));
+                NotifyParentOfResult(new VtreeProviderWrapper(bv.value));
             }
     }
     else
@@ -729,7 +725,6 @@ bool BITNode::ObeysPoolPolicy(Rule *new_rule, meta _target)
 
     /// This rejects all atoms that contain a link with >1 vars directly below it.
     /// \todo Goes over far more child atoms than necessary. Should be made smarter.
-/*
     for(vtree::post_order_iterator node = _target->begin_post(); node != _target->end_post(); ++node)
     {
         if (std::count_if(_target->begin(node), _target->end(node),
@@ -745,7 +740,6 @@ bool BITNode::ObeysPoolPolicy(Rule *new_rule, meta _target)
             return false;
         }
     }
-    */
 
     return true;
 }
@@ -1075,12 +1069,12 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
 {
     AtomSpace *nm = CogServer::getAtomSpace();
 
-    //if (currentDebugLevel >= 4)
-    //{
-    puts("Finally proving:");
-    //NMPrinter(NMP_ALL)(*raw_target, 4);
-    getc(stdin);
-    //}
+    if (currentDebugLevel >= 4)
+    {
+        puts("Finally proving:");
+        NMPrinter(NMP_ALL)(*raw_target, 4);
+        getc(stdin);
+    }
 
     //printf("printf variableScoper... %d %d\n", resources, currentDebugLevel);
     if (rule)
@@ -1144,8 +1138,8 @@ bool BITNode::CreateChildren(int i, BBvtree arg, Btr<bindingsT> bindings, spawn_
     }
     else
     {
-    //  foreach(Rule *r, *root->rp)
-    //      expandRule(r, i, arg, bindings, spawning);
+      foreach(Rule *r, *root->rp)
+          expandRule(r, i, arg, bindings, spawning);
     }
     tlog(1,"Rule expansion ok!\n");
 
@@ -1598,7 +1592,7 @@ void BITNode::expandFittest()
     
         if (!root->exec_pool.empty())
         {
-            if (true) //currentDebugLevel>1) //Sort and print
+            if (currentDebugLevel>1) //Sort and print
             {
                 if (!root->exec_pool_sorted)
                 {
@@ -1858,7 +1852,7 @@ void BITNodeRoot::print_trail(Handle h, unsigned int level) const //, int decima
             if (find(hvh.second.begin(), hvh.second.end(), arg_h)
             != hvh.second.end())
               h_use_count++;*/
-        //NMPrinter(NMP_ALL, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
+        NMPrinter(NMP_ALL, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
 //      NMPrinter(((h_use_count>1)?NMP_HANDLE:0)|NMP_TYPE_NAME|NMP_NODE_NAME| NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
             print_trail(arg_h, level+1);
         }
@@ -1878,8 +1872,8 @@ void BITNode::printArgs() const
 {
     printf("%u args:\n", (unsigned int) args.size());
 //  for_each(args.begin(), args.end(), NMPrinter(NMP_ALL));
-//  foreach(meta _arg, args)
-//      NMPrinter(NMP_ALL).print(*_arg, -2);
+   foreach(meta _arg, args)
+      NMPrinter(NMP_ALL).print(*_arg, -2);
 
 //      rawPrint(*_arg, _arg->begin(), -2);
 }
@@ -1901,7 +1895,7 @@ void BITNode::printFitnessPool()
         {
             (*i)->tlog(0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(), (*i)->children.size(), (long)(*i), (*i)->parents.size());
 
-            if (!((more_count++)%25))
+            if (currentDebugLevel>=2 && !((more_count++)%25))
             {
                 puts(" --- more ");
                 getc(stdin);
@@ -1920,7 +1914,7 @@ static bool bigcounter = true;
 
 int BITNode::tlog(int debugLevel, const char *format, ...) const
     {
-        if (debugLevel > 0) return 0;
+        if (debugLevel > currentDebugLevel) return 0;
 
          if (test::bigcount == 601)
          { puts("Debug feature."); }
@@ -1954,8 +1948,8 @@ int BITNode::tlog(int debugLevel, const char *format, ...) const
 
 void BITNode::printChildrenSizes() const
     {
-        //if (currentDebugLevel>=3)
-        //  puts("next chi...0");
+		if (currentDebugLevel>=3)
+			puts("next chi...0");
         tlog(3,"next chi...0");
         for(uint c=0; c< children.size(); c++)
         {

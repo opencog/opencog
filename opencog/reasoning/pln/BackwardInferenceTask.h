@@ -13,6 +13,7 @@ class InferenceTaskParameters;
 	which is not yet implemented beyond this simple skeleton.
 */
 
+//! TODO: this should inherit from Task... but Task doesn't exist in OpenCog yet
 class BackwardInferenceTask
 {
 	const InferenceTaskParameters& pars;

@@ -3,7 +3,7 @@
 
 #define MetaPredicate atom
 
-// TODO: PTL-specific types. They should be declared at src/common/type.script, 
+// TODO: PLN-specific types. They should be declared at src/common/type.script, 
 // which is a script for creating automatically (and so, in a more safer way) 
 // integer codes and string representation of all NM atom types 
 
@@ -83,9 +83,10 @@ public:
 	/// Create a copy of this wrapper into the core, regardless whether this
 	/// was created from a core handle.
 
-	Handle attach(iAtomTableWrapper* core) const {
-		return cx;
-	};
+	Handle attach(iAtomTableWrapper* core) const;
+    //{
+	//	return cx;
+	//};
 	void detach() const;
 
 	/// Copy this as an integer array into the dest array

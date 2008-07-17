@@ -26,14 +26,13 @@
 	#include "TimeServer.h"
 #endif
 
-#define STD_VARS 100
 class HandleEntry;
-//int currentDebugLevel = 0;
 namespace test
 {
 extern FILE *logfile;
 }
 
+#define STD_VARS 100
 namespace haxx
 {
 	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
@@ -41,12 +40,25 @@ namespace haxx
 	extern Handle VarTypes[STD_VARS];
 }
 
+/// Legacy log system from Novamente, TODO: replace
+extern int currentDebugLevel;
+    
+int cprintf(int debugLevel, const char *format, ...) {
+    if (debugLevel > currentDebugLevel) return 0;
+    va_list ap;
+    va_start(ap, format);
+    int answer = vprintf(format, ap);
+    fflush(stdout);
+    va_end(ap);
+    return answer;
+}
+/// End legacy
+
 /**
  * Implementation of methods for logging info from reasoning module 
  **/
 void ReasoningLog(int l, std::string m) {
-    // WELTER TODO: Dont know if the mapping of reasoning log levels to ccore log levels (used in cprintf) is ok.
-    printf("%s\n", m.c_str());
+    cprintf(l, "%s\n", m.c_str());
 }
 
 void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel);
@@ -64,7 +76,7 @@ void rawPrint(tree<Vertex>::iterator top, int _rloglevel)
 void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
-    if (_rloglevel > 0)
+    if (_rloglevel > currentDebugLevel)
         return;
 
     Handle *hptr = boost::get<Handle>(&*top);
@@ -76,8 +88,8 @@ if (!hptr)
 
     for (int i=0; i < level; i++)
     {
-        printf("   ");
-        if (test::logfile && _rloglevel >= 0)
+        cprintf(_rloglevel,"   ");
+        if (test::logfile && _rloglevel >= currentDebugLevel)
             fprintf(test::logfile, "   ");
     }
     
@@ -86,8 +98,8 @@ if (!hptr)
 //puts("reasoning::printTree");     
         if (!::haxx::printRealAtoms)
         {
-            printf("[%lu]\n", *hptr);
-            if (test::logfile && _rloglevel >= 0)
+            cprintf(_rloglevel,"[%lu]\n", *hptr);
+            if (test::logfile && _rloglevel >= currentDebugLevel)
                 fprintf(test::logfile, "[%d]\n", (int)*hptr);
         }
         else
@@ -101,20 +113,20 @@ if (!hptr)
 
     if (hptr)
     {
-        printf("%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
-        if (test::logfile && _rloglevel >= 0)           
+        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
+        if (test::logfile && _rloglevel >= currentDebugLevel)           
             fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
     }
     else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL)
     {
-        printf("%d (%d)\n", iptr->value, top.number_of_children());
-        if (test::logfile && _rloglevel >= 0)
+        cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
+        if (test::logfile && _rloglevel >= currentDebugLevel)
             fprintf(test::logfile, "%d (%d)\n", iptr->value, top.number_of_children());
     }
     else
     {
-        printf("Unsupported Vertex mode\n");
-        if (test::logfile && _rloglevel >= 0)
+        cprintf(_rloglevel, "Unsupported Vertex mode\n");
+        if (test::logfile && _rloglevel >= currentDebugLevel)
             fprintf(test::logfile, "Unsupported Vertex mode\n");
     }
 
@@ -127,7 +139,7 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
-	if (_rloglevel > 0)
+	if (_rloglevel > currentDebugLevel)
 		return;
 
 	Handle *hptr = boost::get<Handle>(&*top);
@@ -139,8 +151,8 @@ if (!hptr)
 
 	for (int i=0; i < level; i++)
 	{
-		printf("   ");
-		if (test::logfile && _rloglevel >= 0)
+		cprintf(_rloglevel,"   ");
+		if (test::logfile && _rloglevel >= currentDebugLevel)
 			fprintf(test::logfile, "   ");
 	}
 	
@@ -149,8 +161,8 @@ if (!hptr)
 //puts("reasoning::printTree");		
 		if (!::haxx::printRealAtoms)
 		{
-			printf("[%lu]\n", *hptr);
-			if (test::logfile && _rloglevel >= 0)
+			cprintf(_rloglevel, "[%d]\n", *hptr);
+			if (test::logfile && _rloglevel >= currentDebugLevel)
 				fprintf(test::logfile, "[%d]\n", (int)*hptr);
 		}
 		else
@@ -164,20 +176,20 @@ if (!hptr)
 
 	if (hptr)
 	{
-		printf("%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
-		if (test::logfile && _rloglevel >= 0)			
+		cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
+		if (test::logfile && _rloglevel >= currentDebugLevel)			
 			fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
 	}
 	else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL)
 	{
-		printf("%d (%d)\n", iptr->value, top.number_of_children());
-		if (test::logfile && _rloglevel >= 0)
+		cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
+		if (test::logfile && _rloglevel >= currentDebugLevel)
 			fprintf(test::logfile, "%d (%d)\n", iptr->value, top.number_of_children());
 	}
 	else
 	{
-		printf("Unsupported Vertex mode\n");
-		if (test::logfile && _rloglevel >= 0)
+		cprintf(_rloglevel, "Unsupported Vertex mode\n");
+		if (test::logfile && _rloglevel >= currentDebugLevel)
 			fprintf(test::logfile, "Unsupported Vertex mode\n");
 	}
 
@@ -274,14 +286,14 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
-	printf("Empty checks...\n");
+	cprintf(4,"Empty checks...\n");
 
 	if (lhs_t.empty() && rhs_t.empty())
 		return true;
 	if (lhs_t.empty() || rhs_t.empty())
 		return false;
 	
-	printf("Empty checks ok\n");				
+	cprintf(4,"Empty checks ok\n");				
 	
 	if (!((*rtop) == (*ltop)))
 	{
@@ -492,7 +504,7 @@ bool substitutableTo(atom& from, atom& to,
 	assert(s == bindings.end());
 */
 /*	if (inheritsType(from.T, FW_VARIABLE_NODE))
-		printf("Warning! FW_VARIABLE_NODE substitution to the wrong direction was used!");*/
+		cprintf(0, "Warning! FW_VARIABLE_NODE substitution to the wrong direction was used!");*/
 	/// This would complicate things...
 //	assert(!inheritsType(from.T, FW_VARIABLE_NODE));
 
@@ -506,20 +518,20 @@ bool substitutableTo(atom& from, atom& to,
 			bindings[to.name] = from; //(from, next_from,false);
 			*restart_to = new pair<string,atom>(to.name, from);
 
-			//printf("FW subst var"+to.name); 
+			LOG(4, "FW subst var"+to.name); 
 
 			return true;
 		}
 		else
 			return false;
 	}
-printf("C");
+LOG(5, "C");
 	if (from.T != to.T || from.name != to.name)
 	{
-printf("D");
+LOG(5, "D");
 		if (inheritsType(from.T, VARIABLE_NODE))
 		{
-printf("E");
+LOG(5, "E");
 
 			*restart_from = new pair<string,atom>(from.name, to);
 
@@ -528,7 +540,7 @@ printf("E");
 		else
 			return false;
 	}
-printf("G");
+LOG(5, "G");
 	if (from.hs.size() != to.hs.size())
 	{
 		return false;
@@ -549,7 +561,7 @@ printf("G");
 	}
 
 
-printf("I");
+LOG(5, "I");
 	return true;
 }
 
@@ -562,13 +574,13 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
-	printf("BEGIN GATHER for:");
+	LOG(3,"BEGIN GATHER for:");
 	rawPrint(_MP, _MP.begin(),3);
 
     Handle *h_ptr = boost::get<Handle>(&*_MP.begin());
 	if (!h_ptr || !*h_ptr)
 	{
-		printf("No handle in vertex.");
+		LOG(3,"No handle in vertex.");
         //currentDebugLevel = previousDebugLevel;
 		return;
 	}
@@ -577,13 +589,13 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 	
 	/// Needs to be handled separately.
 	if (nm->isReal(*h_ptr) && T != VarT) {
-		printf("TableGather:: Note: A real handle was asked for.\n");
+		LOG(2, "TableGather:: Note: A real handle was asked for.\n");
 		insert(Vertex(*h_ptr));
         //currentDebugLevel = previousDebugLevel;
 		return;
 	}
 	if (nm->isReal(*h_ptr) && T == VarT) {
-		printf("Lookup for a VarT is NOT allowed!\n");
+		LOG(0,"Lookup for a VarT is NOT allowed!\n");
 		getc(stdin);getc(stdin);
         //currentDebugLevel = previousDebugLevel;
 		return;
@@ -602,7 +614,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 	{*/
     Btr<set<Handle> > lookupResults = aprovider->getHandleSet(T,name);	
 
-    printf("%u objects matched the type %d.\n", (uint) lookupResults->size(), T);
+    cprintf(3, "%u objects matched the type %d.\n", (uint) lookupResults->size(), T);
     
     /// If _MP has children, they must match!
 
@@ -617,28 +629,28 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
             continue;
         }
 			
-			if (tv.getConfidence() < MIN_CONFIDENCE) {
-                //printf("TableGather::gather; not enough confidence. Continuing...\n");
-				continue;
-            }
+        if (tv.getConfidence() < MIN_CONFIDENCE) {
+            //printf("TableGather::gather; not enough confidence. Continuing...\n");
+            continue;
+        }
 
-			atom fetched_a(*i);
+        atom fetched_a(*i);
 
-			bindingsT* tentative_bindings = new bindingsT;
+        bindingsT* tentative_bindings = new bindingsT;
 
-printf("Call unifyvector...\n");			
+cprintf(4, "Call unifyvector...\n");			
 			
-			if	(_MP.size() <= 1
-				|| (reasoning::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
-				*tentative_bindings, NULL, NULL, VarT))
-				   )
-			{
-				printf("Was valid search result by unification.");
+        if	(_MP.size() <= 1
+            || (reasoning::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
+            *tentative_bindings, NULL, NULL, VarT))
+               )
+        {
+        LOG(3, "Was valid search result by unification.");
 
-				insert(BoundVertex(*i, tentative_bindings));
+        insert(BoundVertex(*i, tentative_bindings));
 
 /*/// DEBUG		
-printf("TableGather:\n");
+cprintf(2,"TableGather:\n");
 				printTree(*i,0,2);
 				for (bindingsT::const_iterator b = tentative_bindings->begin();
 														 b!= tentative_bindings->end();
@@ -653,7 +665,7 @@ printf("TableGather:\n");
 			}
 			else
 			{
-				printf("Was invalid search result by unification.");
+				LOG(4, "Was invalid search result by unification.");
 
 				delete tentative_bindings;
 			}
@@ -661,7 +673,7 @@ printf("TableGather:\n");
 	//}
     
     // IF NO RESULT WAS FOUND, CHECK FOR SPECIAL CASES
-    printf("TABLEGATHER END: SIZE = %u\n", (uint) size());
+    cprintf(0,"TABLEGATHER END: SIZE = %d\n", size());
 
 	#ifndef USE_PSEUDOCORE
 
@@ -720,31 +732,31 @@ printf("TableGather:\n");
                                         cout << "got a matching element for A: " << matchingHandle << endl;
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long tLong = atol(nm->getName(tHandle).c_str());
-                                        //TimeStamp* ts = new TimeStamp(false, tLong);
-                                        //cout << "Looking for HandleTime entries with the exact timestamp: " << ts->toString() << endl;
-                                        //HandleTemporalPairEntry* timeEntries = TimeServer::getInstance()->getTemporal(matchingHandle, ts, true);
-                                        //if (timeEntries != NULL) {
-                                        //    cout << "matched element satisfies the time condition " << timeEntries->handleTemporalPair.toString() << endl;
+                                        TimeStamp* ts = new TimeStamp(false, tLong);
+                                        cout << "Looking for HandleTime entries with the exact timestamp: " << ts->toString() << endl;
+                                        HandleTemporalPairEntry* timeEntries = TimeServer::getInstance()->getTemporal(matchingHandle, ts, true);
+                                        if (timeEntries != NULL) {
+                                            cout << "matched element satisfies the time condition " << timeEntries->handleTemporalPair.toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", tLong);
-                                            Handle tNode = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV());
+                                            Handle tNode = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             vector<Handle> listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(tNode);
-                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV());
-                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV());
+                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
+                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
                                             vector<Handle> evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)));
+											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
                                             if (itr->bindings) { 
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
                                                 insert(Vertex(evalLink));
                                             }
-                                        //}
-                                        //delete ts;
+                                        }
+                                        delete ts;
                                         itr++;
                                     }
                                 }
@@ -768,37 +780,37 @@ printf("TableGather:\n");
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long t1Long = atol(nm->getName(t1Handle).c_str());
                                         unsigned long t2Long = atol(nm->getName(t2Handle).c_str());
-                                        //TimeLag* tl = new TimeLag(false, t1Long, t2Long);
-                                        //cout << "Looking for HandleTime entries inside the following timelag: " << tl->toString() << endl;
-                                        //HandleTemporalPairEntry* timeEntries = TimeServer::getInstance()->getTemporal(matchingHandle, tl, false);
-                                        //if (timeEntries != NULL) {
-                                          //  cout << "matched element satisfies the time condition: " << timeEntries->handleTemporalPair.toString() << endl;
+                                        TimeLag* tl = new TimeLag(false, t1Long, t2Long);
+                                        cout << "Looking for HandleTime entries inside the following timelag: " << tl->toString() << endl;
+                                        HandleTemporalPairEntry* timeEntries = TimeServer::getInstance()->getTemporal(matchingHandle, tl, false);
+                                        if (timeEntries != NULL) {
+                                            cout << "matched element satisfies the time condition: " << timeEntries->handleTemporalPair.toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", t1Long);
-                                            Handle t1Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV());
+                                            Handle t1Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             sprintf(tNodeName, "%lu", t2Long);
-                                            Handle t2Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV());
+                                            Handle t2Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             std::vector<Handle> listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(t1Node);
                                             listLinkOutgoing.push_back(t2Node);
-                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV());
-                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV());
+                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
+                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
                                             std::vector<Handle> evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)));
+											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
 											
-											printf("Created new atInterval link:\n");
+											cprintf(1, "Created new atInterval link:\n");
 											printTree(evalLink,0, 1);
                                             if (itr->bindings) { 
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
                                                 insert(Vertex(evalLink));
                                             }
-                                        //}
-                                        //delete tl;
+                                        }
+                                        delete tl;
                                         itr++;
                                     }
                                 }
@@ -951,7 +963,7 @@ bool existMPin(const vector<Btr<atom> >& hs)
 	return false;
 }
 
-//void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest);
+void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest);
 
 //bool equal(const HandleWrapper& A, const HandleWrapper& B) { return A.equal(B); }
 //bool isLink(int v) { return v >= 2; }
@@ -966,7 +978,7 @@ bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& l
     {
 		if (!*i)
 		{
-			printf("getLargestIntersection(): NULL in input set");
+			LOG(2, "getLargestIntersection(): NULL in input set");
 			continue;
 		}
 //    	const vector<Handle> inc2 = getOutgoing(*i);
@@ -1040,11 +1052,11 @@ void printNode1(Handle h, int level, int LogLevel)
 	else
 		sprintf(buf, "NULL TV!");
 
-	if (test::logfile && LogLevel >= 0)
+	if (test::logfile && LogLevel >= currentDebugLevel)
 		fprintf(test::logfile, "%s\n", buf);
 
 	//if (LogLevel <= Log::getDefaultLevel())
-	printf((repeatc(' ', level*3) + buf).c_str());
+	LOG(LogLevel, (repeatc(' ', level*3) + buf).c_str());
 
 //	LOG0(LogLevel, repeatc(' ', level*3) + buf);
 }
@@ -1053,7 +1065,7 @@ void printTree(Handle h, int level, int LogLevel)
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
-	if (LogLevel > 0)
+	if (LogLevel > currentDebugLevel) 
 		return;
 
 	if (level > 20)
@@ -1074,7 +1086,7 @@ void printTree(Handle h, int level, int LogLevel)
 
 		sprintf(buf, "Virtual %s (%d) [%d]", reasoning::Type2Name((Type)(int)h), (Type)(int)h,  (int)h);
 		
-		if (test::logfile && LogLevel >= 0)
+		if (test::logfile && LogLevel >= currentDebugLevel)
 			fprintf(test::logfile, "%s\n", buf);
 
 		printf((repeatc(' ', level*3) + buf ).c_str());
@@ -1099,11 +1111,10 @@ void printTree(Handle h, int level, int LogLevel)
 		else
 			sprintf(buf, "NULL TV!");
 
-		if (test::logfile && LogLevel >= 0)
+		if (test::logfile && LogLevel >= currentDebugLevel)
 			fprintf(test::logfile, "%s\n", buf);
 		
-		//if (LogLevel <= Log::getDefaultLevel())
-			//printf((repeatc(' ', level*3) + buf ).c_str());
+        LOG(LogLevel, (repeatc(' ', level*3) + buf ).c_str());
 	}
 
 	for (vector<Handle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
@@ -1139,7 +1150,7 @@ string GetRandomString(int size)
 	_rcount++;
 	
 	if (!(_rcount++%1000))
-		printf("rcount: %d\n", _rcount);
+		cprintf(0,"rcount: %d\n", _rcount);
 	
 	///haxx
 	size = 10;
@@ -1290,7 +1301,7 @@ void printNode1(const atom& a, int level, int LogLevel)
 
 	string subst_buf = make_subst_buf(a);
 
-	//printf(repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
+	LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
 }
 
 void printAtomTree(const atom& a, int level, int LogLevel)
@@ -1302,10 +1313,10 @@ void printAtomTree(const atom& a, int level, int LogLevel)
 	else
 	{
 		char buf[500];
-		//sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), (*ClassServer::class_name)[a.T], a.T, (int)a.real);
+		sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), (*ClassServer::class_name)[a.T], a.T, (int)a.real);
 		string subst_buf = make_subst_buf(a);
 
-		//printf(repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
+		LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
 	}
 
 	for (vector<Btr<atom> >::const_iterator hi = a.hs.begin(); hi != a.hs.end(); hi++)
@@ -1314,7 +1325,7 @@ void printAtomTree(const atom& a, int level, int LogLevel)
 
 void printLeveledString(int level, string str)
 {
-	//LOG(0, repeatc(' ', level*3) + str);
+	LOG(0, repeatc(' ', level*3) + str);
 }
 
 /*reasoning::atom atomWithNewType(Handle h, Type T)
@@ -1436,13 +1447,13 @@ namespace reasoning
 		
 		Type lhs_T = nm->getType(lhs);
 	
-printf("MPunifyHandle:");		
+LOG(4,"MPunifyHandle:");		
 //printTree(lhs,0,3);
 		
 		bool lhs_is_node = inheritsType(lhs_T, NODE);
 
 		string lhs_name(lhs_is_node ? nm->getName(lhs) : "");
-printf("MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node, lhs_T, lhs_name.c_str());		
+cprintf(4, "MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node, lhs_T, lhs_name.c_str());		
 		if (lhs_is_node)
 		{
 			bindingsT::const_iterator s = bindings.find(lhs);
@@ -1455,37 +1466,37 @@ printf("MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node,
 					printAtomTree(s->second,0,3);
 				}
 				assert(lhs.name != s->second.name);*/
-					printf("MPunifyHandle: Binding found.");
+					LOG(4, "MPunifyHandle: Binding found.");
 				return equal_atom_ignoreVarNameDifferences(atom(s->second), rhs);
 			}
-			else {	printf("Binding NOT found."); }
+			else {	LOG(4, "Binding NOT found."); }
 
 			if (rhs.T!=lhs_T || rhs.name!=lhs_name)
 			{
-				printf("MPunifyHandle: Difference found.");
+				LOG(4, "MPunifyHandle: Difference found.");
 			
 				if (inheritsType(lhs_T, VarT))
 				{
 					if (*restart)
 						return true;
 				
-					printf("Request rhs handle...\n");
+					cprintf(4, "Request rhs handle...\n");
 				
 					Handle rhs_h = rhs.attach(::haxx::defaultAtomTableWrapper);
 					if (!rhs_h)
 					{
-						printf("Could not add handle!\n");
+						cprintf(0, "Could not add handle!\n");
 						return false;
 					}
 
-					printf("Request rhs handle ok %d\n", (int)rhs_h);
+					cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h);
 				
 					if (!forbiddenBindings)
-						printf("No forbiddenBindings\n");
+						cprintf(4, "No forbiddenBindings\n");
 				
 					if (!forbiddenBindings || !STLhas(**forbiddenBindings, hsubst(lhs_name, rhs_h)))
 					{			
-//printf("MPunifyHandle: New subst: " + lhs_name + " for:");
+LOG(4,"MPunifyHandle: New subst: " + lhs_name + " for:");
 //printTree(rhs_h,0,3);
 				
 						bindings[lhs] = rhs_h;
@@ -1494,7 +1505,7 @@ printf("MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node,
 					}
 					else
 					{
-						printf("Subst was forbidden\n");
+						cprintf(4, "Subst was forbidden\n");
 						return false;
 					}
 				}
@@ -1502,7 +1513,7 @@ printf("MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node,
 					return false;
 			}
 			else {
-//printf("MPunifyHandle: Returning true because has no difference in node comparison\n");      
+//cprintf(4, "MPunifyHandle: Returning true because has no difference in node comparison\n");      
 				return true;
             }
 		}
@@ -1511,24 +1522,24 @@ printf("MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_node,
 			vector<Handle> lhs_out = nm->getOutgoing(lhs);
 			uint lhs_arity = nm->getArity(lhs);
 		
-printf("MPunifyHandle: UnifyVector exec...");
+LOG(4, "MPunifyHandle: UnifyVector exec...");
 			if (lhs_arity != rhs.hs.size())
 			{
 				bindings.clear();
-printf("MPunifyHandle: arity diff, returning (%d / %u)\n", lhs_arity, (uint) rhs.hs.size());
+cprintf(4,"MPunifyHandle: arity diff, returning (%d / %u)\n", lhs_arity, (uint) rhs.hs.size());
 				return false;
 			}
 		
 			for (uint i = 0; i < lhs_arity; i++)		
 			{
-printf("MPunifyHandle: next arg...");			
+LOG(4, "MPunifyHandle: next arg...");			
 				if (!reasoning::MPunifyHandle(lhs_out[i], *rhs.hs[i], bindings, forbiddenBindings, restart, VarT))
 					return false;
 
-printf("MPunifyHandle: Unify1 was success!");
+LOG(4, "MPunifyHandle: Unify1 was success!");
 				if (*restart)
 				{
-printf("MPunifyHandle: restart reqsted...");				
+LOG(4, "MPunifyHandle: restart reqsted...");				
 					return true;
 				}
 			}
@@ -1562,13 +1573,13 @@ printf("MPunifyHandle: restart reqsted...");
 		
 		Type lhs_T = nm->getType(lhs);
 
-printf("Unify1:");		
+LOG(4,"Unify1:");		
 printTree(lhs,0,3);		
 		
 		bool lhs_is_node = inheritsType(lhs_T, NODE);
 
 		string lhs_name(lhs_is_node ? nm->getName(lhs) : "");
-printf("Node name: %s\n",lhs_name.c_str());		
+cprintf(4, "Node name: %s\n",lhs_name.c_str());		
 		if (lhs_is_node)
 		{
 			bindingsT::const_iterator s = bindings.find(lhs);
@@ -1581,42 +1592,42 @@ printf("Node name: %s\n",lhs_name.c_str());
 					printAtomTree(s->second,0,3);
 				}
 				assert(lhs.name != s->second.name);*/
-					printf("Binding found. eq...");
+					LOG(4, "Binding found. eq...");
 				bool ret = equal_atom_ignoreVarNameDifferences(atom(s->second), rhs);
-				printf("equal_atom_ignoreVarNameDifferences ok");
+				LOG(4, "equal_atom_ignoreVarNameDifferences ok");
 				return ret;
 			}
 		}
-		printf("Binding NOT found.");
+		LOG(4, "Binding NOT found.");
 		if (rhs.T!=lhs_T ||
 			 (lhs_is_node && rhs.name!=lhs_name) ||
 			 (nm->isReal(lhs) && !MPunifyHandle(lhs, rhs, bindings, forbiddenBindings, restart, VarT))
 			||(!nm->isReal(lhs)&& !MPunifyVector(lhs_t, lhs_ti, rhs.hs, bindings, forbiddenBindings, restart, VarT)))
 		{
-			printf("Difference found.");
+			LOG(4, "Difference found.");
 			
 			if (inheritsType(lhs_T, VarT))
 			{
 				if (*restart)
 					return true;
 				
-				printf("Request rhs handle...\n");
+				cprintf(4, "Request rhs handle...\n");
 				
 				Handle rhs_h = rhs.attach(::haxx::defaultAtomTableWrapper);
 				if (!rhs_h)
 				{
-					printf("Could not add handle!\n");
+					cprintf(0, "Could not add handle!\n");
 					return false;
 				}
 
-				printf("Request rhs handle ok %d\n", (int)rhs_h);
+				cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h);
 				
 				if (!forbiddenBindings)
-					printf("No forbiddenBindings\n");
+					cprintf(4, "No forbiddenBindings\n");
 				
 				if (!forbiddenBindings || !STLhas(**forbiddenBindings, hsubst(lhs_name, rhs_h)))
 				{			
-//printfG(4,"New subst: " + lhs_name + " for:");
+LOG(4,"New subst: " + lhs_name + " for:");
 //printTree(rhs_h,0,3);
 				
 					bindings[lhs] = rhs_h;
@@ -1625,7 +1636,7 @@ printf("Node name: %s\n",lhs_name.c_str());
 				}
 				else
 				{
-					printf("Subst was forbidden\n");
+					cprintf(3, "Subst was forbidden\n");
 					return false;
 				}
 			}
@@ -1646,11 +1657,11 @@ printf("Node name: %s\n",lhs_name.c_str());
 		bool root_restart = false;
 		if (isroot)
 			restart = &root_restart;
-printf("UnifyVector exec...");
+LOG(4, "UnifyVector exec...");
 		if (lhs_top.number_of_children() != rhsv.size())
 		{
 			bindings.clear();
-printf("UnifyVector: arity diff, returning (%d / %u)\n", lhs_top.number_of_children(),
+cprintf(4,"UnifyVector: arity diff, returning (%d / %u)\n", lhs_top.number_of_children(),
         (uint) rhsv.size());
 			return false;
 		}
@@ -1660,16 +1671,16 @@ printf("UnifyVector: arity diff, returning (%d / %u)\n", lhs_top.number_of_child
 		for (tree<Vertex>::sibling_iterator c=lhs_t.begin(lhs_top);
 				c!=lhs_t.end(lhs_top);c++, i++)
 		{
-printf("UnifyVector: next arg...");			
+LOG(4, "UnifyVector: next arg...");			
 			
 			if (!MPunify1(lhs_t, c, *rhsv[i], bindings, forbiddenBindings, restart, VarT))
 				return false;
 
-printf("UnifyVector: Unify1 was success!");
+LOG(4, "UnifyVector: Unify1 was success!");
 //printAtomTree(lhsv[i],0,4);
 			if (*restart)
 			{
-printf("UnifyVector: restart reqsted...");				
+LOG(4, "UnifyVector: restart reqsted...");				
 				if (!isroot) //If called from within MPunify1
 					return true;
 				else
@@ -1791,7 +1802,7 @@ bool ttsubstitutableTo(Handle from,Handle to,
     // FROM = ListLink with arity 0, TO = ListLink with arity 2, but with a FW_VARIABLE_NODE in its outgoing set => TO matches FROM!!! 
 	//assert(!inheritsType(to_T, FW_VARIABLE_NODE)); COMMENTED OUT BECAUSE TEMPLATES ARE BEING INSERTED IN REAL ATOMTABLE
     if (isVariableAtom(to_name, to_T, to_arity)) {
-        printf("substitutableTo(): TO argument is a template variable (to_name = %s, to_T = %s, to_arity = %d) => Skiping remaining checkings. Returning false...\n", to_name.c_str(), Type2Name(to_T), to_arity);
+        cprintf(NORMAL, "substitutableTo(): TO argument is a template variable (to_name = %s, to_T = %s, to_arity = %d) => Skiping remaining checkings. Returning false...\n", to_name.c_str(), Type2Name(to_T), to_arity);
         return false;
     }
 
@@ -1860,7 +1871,7 @@ bool ttsubstitutableTo(Handle from,Handle to,
                         found_unbound_variable = true;
                     }
                 } else {
-                    throw new RuntimeException();
+                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", (*(ClassServer::class_name))[from_T], variable_index, i);
                 }
             }
         }
@@ -1976,7 +1987,7 @@ void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
 		map<Handle, Handle>::const_iterator it = binds.find(*ph);
 		if (it != binds.end())
 		{
-			printf("Bound to %lu", it->second);
+			cprintf(4,"Bound to %lu", it->second);
 			v = Vertex(it->second);
 			recursiveBind(v, binds);
 		}
@@ -2003,7 +2014,7 @@ meta bind_vtree(vtree &targ, const map<Handle, Handle>& binds)
 				{				
 					changes = false;
 					
-					printf(4,"Next change...\n");
+					cprintf(4,"Next change...\n");
 					
 					for(vtree::pre_order_iterator vit = thm_substed->begin(); vit != thm_substed->end(); vit++)
 					{
@@ -2169,9 +2180,9 @@ bool equalVariableStructure(const vtree& lhs, const vtree& rhs)
 
 bool equalVariableStructure2(BBvtree lhs, BBvtree rhs)
 {
-	return false;
-	//return lhs->getStdTree() == rhs->std_tree();
-//	return equalVariableStructure(lhs->getStdTree(), rhs->std_tree());
+//	return false;
+	return lhs->std_tree() == rhs->std_tree();
+//	return equalVariableStructure(lhs->std_tree(), rhs->std_tree());
 }
 
 void ForceVirtual(meta _target, vtree::iterator& vit)
@@ -2188,7 +2199,7 @@ void ForceVirtual(meta _target, vtree::iterator& vit)
 		/// Save the sib it because the replace() will invalidate 'vit'
 //		vtree::sibling_iterator next_sib = _target->next_sibling(vit);
 
-		printf("ForceVirtual: [%d] (exists).\n", (int)*ph);
+		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)*ph);
 
 		vtree virtualized_ph(make_vtree(*ph));
 		_target->replace(vit, virtualized_ph.begin());
@@ -2223,7 +2234,7 @@ meta ForceRootLinkVirtual(meta _target)
 	Type t = nm->getType(*ph);
 	if (ph && nm->isReal(*ph) && nm->getType(*ph) != FW_VARIABLE_NODE)
 	{
-		printf("ForceVirtual: [%d] (exists).\n", (int)*ph);
+		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)*ph);
 		
 		return meta(new vtree(make_vtree(*ph)));
 	}
@@ -2234,8 +2245,8 @@ meta ForceRootLinkVirtual(meta _target)
 static long _ttt=0;
 void print_progress()
 {
-//	if (currentDebugLevel <= 0) //progress reporting
-//		printf("%c\b",(((_ttt++)%2)?'-':'|'));
+	if (currentDebugLevel <= 0) //progress reporting
+		cprintf(0,"%c\b",(((_ttt++)%2)?'-':'|'));
 }
 
 bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
@@ -2245,13 +2256,13 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
 	Handle *ph = v2h(&(*_target->begin()));
 	if (ph && nm->isReal(*ph))
 	{
-		printf("Arg [%d] exists.\n", (int)*ph);
+		cprintf(2, "Arg [%d] exists.\n", (int)*ph);
 		const TruthValue& tv = nm->getTV(*ph);
 		if (tv.isNullTv())
-			printf("NO TV!\n");
+			cprintf(2, "NO TV!\n");
 		result_set->insert(*_target->begin());
 		
-		//printf(3,"Arg %d now has %d direct child_results.\n", i, result_set->size());
+		//cprintf(3,"Arg %d now has %d direct child_results.\n", i, result_set->size());
 			
 		return true;
 	}
@@ -2282,11 +2293,12 @@ void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 	}
 }
 
-/// Ok, you're not allowed to laugh at the following. It's a collection of my various quick-hack binding printers from the last 6 months.
+/// Ok, you're not allowed to laugh at the following. It's a collection of my
+/// various quick-hack binding printers from the last 6 months.
 
 void pr2(pair<Handle, vtree> i)
-{printf("%d => ", (int)i.first);
-	rawPrint(i.second, i.second.begin(),3);
+{cprintf(4, "%d => ", (int)i.first);
+	raw_print(i.second, i.second.begin(),3);
 }
 
 void print_binding(pair<Handle, vtree> i)
@@ -2297,7 +2309,7 @@ void print_binding(pair<Handle, vtree> i)
 
 void printBinding(const pair<string, Handle> p)
 {
-	printf("%s => %d\n", p.first.c_str(), (int)p.second);
+	cprintf(3, "%s => %d\n", p.first.c_str(), (int)p.second);
 }
 
 void pr(pair<Handle, Handle> i)
@@ -2314,7 +2326,7 @@ void pr(pair<Handle, Handle> i)
 
 void printSubsts(BoundVertex a, int LogLevel)
 {
-	//LOG(LogLevel, " (   " + make_subst_buf(a) + ")");
+	LOG(LogLevel, " (   " + make_subst_buf(a) + ")");
 }
 
 string make_subst_buf(const BoundVertex& a)
@@ -2381,14 +2393,14 @@ bool unifiesTo(	const vtree & lhs_t, const vtree & rhs_t,
 
 //cprintf(0,"U: %d %d\n", 	
 	
-	printf("Empty checks...\n");				
+	cprintf(4,"Empty checks...\n");				
 
 	if (lhs_t.empty() && rhs_t.empty())
 		return true;
 	if (lhs_t.empty() || rhs_t.empty())
 		return false;
 	
-	printf("Empty checks ok\n");				
+	cprintf(4,"Empty checks ok\n");				
 	
 //	if (lhs_t.number_of_children(ltop) != rhs_t.number_of_children(rtop))
 //		return false;
@@ -2439,14 +2451,14 @@ bool unifiesTo(	const vtree & lhs_t, const vtree & rhs_t,
 					{
 						if (lhs_is_var)
 						{
-							printf("New FW_VAR binding\n");
+							cprintf(4,"New FW_VAR binding\n");
 
 							Lbindings[*ph_ltop] = vtree(rtop);
 							return true;
 						}
 						else if (rhs_is_var && allow_rhs_binding)
 						{
-							printf("FW_VAR");
+							cprintf(4,"FW_VAR");
 							Rbindings[*ph_rtop] = vtree(ltop);
 							return true;
 						}
@@ -2455,21 +2467,21 @@ bool unifiesTo(	const vtree & lhs_t, const vtree & rhs_t,
 					}
 					else // A binding found from RHS
 					{
-						printf("Binding ph_rtop\n");
+						cprintf(4,"Binding ph_rtop\n");
 						return unifiesTo(lhs_t, s->second, ltop, s->second.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
 					}
 				}
 			}
 			else // A binding found from LHS
 			{
-				printf("Binding ph_ltop\n");				
+				cprintf(4,"Binding ph_ltop\n");				
 				return unifiesTo(s->second, rhs_t, s->second.begin(), rtop, Lbindings, Rbindings, allow_rhs_binding, VarType);
 			}
 		}
 				
 		return false;
 	}
-	printf("This node ok\n");
+	cprintf(4,"This node ok\n");
 
 	vtree::sibling_iterator	rit = rhs_t.begin(rtop);
 	vtree::sibling_iterator	lit = lhs_t.begin(ltop);

@@ -41,7 +41,6 @@ For debugging in Win32:
 #include <cstddef>
 #include <windows.h>
 */
-/*
 namespace test
 {
 	long bigcount=0;
@@ -57,8 +56,7 @@ namespace test
 	extern FILE *logfile;
 	const bool LOG_WITH_NODE_ID = true;
 
-}*/
-
+}
 
 namespace haxx
 {
@@ -88,11 +86,10 @@ bool indirect_less_BIT::operator()(BackInferenceTree* lhs, BackInferenceTree* rh
 	}
 	else
 	{
-		/*
-		for(int i=0; i<lhs->args.size(); i++)
-			if (less_vtree()(lhs->args[i]->getStdTree(), rhs->args[i]->std_tree()))
+		for(uint i=0; i<lhs->args.size(); i++)
+			if (less_vtree()(lhs->args[i]->getStdTree(), rhs->args[i]->getStdTree()))
 				return true;
-			else if (less_vtree()(rhs->args[i]->getStdTree(), lhs->args[i]->std_tree()))*/
+			else if (less_vtree()(rhs->args[i]->getStdTree(), lhs->args[i]->getStdTree()))
 				return false;
 	}
 
@@ -101,7 +98,7 @@ bool indirect_less_BIT::operator()(BackInferenceTree* lhs, BackInferenceTree* rh
 
 namespace reasoning
 {
-//bool RECORD_TRAILS = false;
+bool RECORD_TRAILS = false;
 bool PREVENT_LOOPS = false;
 
 const float infinite = 9999999999.0f;
@@ -110,7 +107,7 @@ void pr(pair<Handle, Handle> i);
 void pr3(pair<Handle, Handle> i)
 {
 	printTree(i.first,0,0);
-	printf("=>");
+	cprintf(0,"=>");
 	printTree(i.second,0,0);
 }
 
@@ -298,14 +295,12 @@ BackInferenceTreeRoot::BackInferenceTreeRoot(meta _target, Btr<RuleProvider> _rp
 			bindingsT(), NO_SIBLING_SPAWNING);
 
 	set<Vertex> vars;
-	/*
 	copy_if(	raw_target->begin(),
 				raw_target->end(),
 				inserter(vars, vars.begin()),
 				bind(equal_to<Type>(),
 					bind(getTypeFun, bind(&_v2h, _1)),
 					(Type)FW_VARIABLE_NODE));
-	*/
 	foreach(Vertex v, vars)
 		varOwner[v] = root_variable_scoper;
 
@@ -350,31 +345,30 @@ Btr<set<BoundVertex> > BackInferenceTreeRoot::evaluate(set<const BackInferenceTr
 	}
 	else
 	{
-		printf("Results:\n");
+		cprintf(0, "Results:\n");
 		const float min_confidence = 0.0001f;
 		Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
-		/*foreach(BoundVertex new_result, *results)
-			if (getTruthValue(v2h(new_result.value))->getConfidence() > min_confidence)
+		foreach(BoundVertex new_result, *results)
+			if (getTruthValue(v2h(new_result.value)).getConfidence() > min_confidence)
 			{
 				printTree(v2h(new_result.value),0,0);
 
 				nontrivial_results->insert(new_result);
 			}
-		*/
 		return nontrivial_results;
 	}
 }
 
 void BackInferenceTree::print() const
 {
-	if (!((more_count++)%25))
+	if (currentDebugLevel>=2 && !((more_count++)%25))
 	{
 		puts(" --- more ");
 		if (getc(stdin) == 'q')
 			return;
 	}
-	#define prlog printf
+	#define prlog cprintf
 	if (rule)
 	{
 		string cbuf("[ ");
@@ -383,17 +377,17 @@ void BackInferenceTree::print() const
 				cbuf += i2str((long)v2h(bv.value)) + " ";
 		if (cbuf.empty())
 			cbuf = "[]";
-		prlog("%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
-		prlog("%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
+		prlog(0,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
+		prlog(0,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
 	}
 	else
-		prlog("root\n");
+		prlog(0,"root\n");
 	
 	int ccount=0;
 	for (vector<set<pBITree> >::const_iterator i =  children.begin(); i!=children.end(); i++)
 	{
-		prlog("%sARG #%d:\n", repeatc(' ', (depth+1)*3).c_str(), ccount);
-		prlog("%s---\n", repeatc(' ', (depth+1)*3).c_str());
+		prlog(0, "%sARG #%d:\n", repeatc(' ', (depth+1)*3).c_str(), ccount);
+		prlog(0, "%s---\n", repeatc(' ', (depth+1)*3).c_str());
 		ccount++;
 		
 		for_each(i->begin(), i->end(),
@@ -403,15 +397,14 @@ void BackInferenceTree::print() const
 
 void BackInferenceTree::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult, spawn_mode spawning)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = CogServer::getAtomSpace();
 	my_results->insert(directResult->begin(), directResult->end());
 
 	bool bdrum_changed = false;
 	
 	foreach(BoundVertex bv, *directResult)
 	{
-		float confidence = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-			//nm->getTruthValue(v2h(bv.value))->getConfidence();
+		float confidence = a->getTV(v2h(bv.value)).getConfidence();
 		if (confidence > my_bdrum)
 		{
 			my_bdrum = confidence;
@@ -431,7 +424,7 @@ void BackInferenceTree::addDirectResult(boost::shared_ptr<set<BoundVertex> > dir
 	
 	if (spawning)
 	{
-		printf("SPAWN...\n");
+		cprintf(1,"SPAWN...\n");
 
 #if DIRECT_RESULTS_SPAWN
 		/// Insert to pool the bound versions of all the other arguments of the parent
@@ -439,7 +432,7 @@ void BackInferenceTree::addDirectResult(boost::shared_ptr<set<BoundVertex> > dir
 			if (bv.bindings)
 				spawn(bv.bindings);
 
-		printf("----------------------\n");
+		cprintf(1,"----------------------\n");
 	}
 	else
 		tlog(0,"A no-spawning process.\n");
@@ -568,8 +561,8 @@ int missing_arity = (int)rule->getInputFilter().size();
 
 void BackInferenceTree::printChildrenSizes() const
 	{
-		//if (currentDebugLevel>=3)
-		//	puts("next chi...0");
+		if (currentDebugLevel>=3)
+			puts("next chi...0");
 		tlog(3,"next chi...0");
 		for(uint c=0; c< children.size(); c++)
 		{
@@ -1069,17 +1062,15 @@ bool BackInferenceTreeRoot::spawns(const bindingsT& bindings) const
 template<typename V, typename Vit, typename Tit>
 void copy_vars(V& vars, Vit varsbegin, Tit bbvt_begin, Tit bbvt_end)
 {
-	/*
 	copy_if(bbvt_begin, bbvt_end, inserter(vars, varsbegin), 
 		bind(equal_to<Type>(), 
 		bind(getTypeFun, bind(&_v2h, _1)),
 		(Type)FW_VARIABLE_NODE));
-	*/
 }
 
 bool BackInferenceTree::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bindingsT> bindings, spawn_mode spawning)
 {
-AtomSpace *nm = CogServer::getAtomSpace();	
+    AtomSpace *nm = CogServer::getAtomSpace();	
 	bool ret = true;
 	try
 	{
@@ -1101,16 +1092,16 @@ AtomSpace *nm = CogServer::getAtomSpace();
 
 			/// Different argument vectors of the same rule (eg. ForAllRule) may have different bindings.
 
-//time( &test::custom_start2 );
+time( &test::custom_start2 );
 
 			meta virtualized_target(bindings ? bind_vtree(*_target, *bindings) : meta(new vtree(*_target)));
 			ForceAllLinksVirtual(virtualized_target);
 
-//time( &test::custom_finish2 );
-//test::custom_duration2 += difftime( test::custom_finish2, test::custom_start2 );
+time( &test::custom_finish2 );
+test::custom_duration2 += difftime( test::custom_finish2, test::custom_start2 );
 
 			set<Rule::MPs> target_v_set = new_rule->o2iMeta(virtualized_target);
-			//test::custom_duration += (double)(test::custom_finish - test::custom_start) / CLOCKS_PER_SEC;
+			test::custom_duration += (double)(test::custom_finish - test::custom_start) / CLOCKS_PER_SEC;
 						
 			if (target_v_set.empty())
 			{
@@ -1162,7 +1153,8 @@ AtomSpace *nm = CogServer::getAtomSpace();
 						if (!spawning)
 							if (jtree->bindings)
 							{
-								int temp00 = 0; //currentDebugLevel;
+                                // Doesn't seem to do anything...
+								//int temp00 = currentDebugLevel;
 								printf("OOOOOOO\n");
 								//currentDebugLevel = temp00;
 							}
@@ -1176,7 +1168,7 @@ AtomSpace *nm = CogServer::getAtomSpace();
 							foreach(const BBvtree& bbvt, *j)
 								copy_vars(vars, vars.begin(), bbvt->begin(), bbvt->end());
 
-							printf("%u vars total\n", (unsigned int) vars.size());
+							cprintf(0,"%u vars total\n", (unsigned int) vars.size());
 
 							foreach(Vertex v, vars)
 								if (!STLhas2(*virtualized_target, v))
@@ -1199,7 +1191,7 @@ AtomSpace *nm = CogServer::getAtomSpace();
 
 									root->varOwner[v] = new_node;
 
-									printf("[%ld] owns %s\n", (long)new_node, nm->getName(v2h(v)).c_str());
+									cprintf(0,"[%ld] owns %s\n", (long)new_node, nm->getName(v2h(v)).c_str());
 								}
 								/// When one of these vars is bound later, clone the child with arg list in which that var has been bound.
 					}
@@ -1268,7 +1260,7 @@ void BackInferenceTree::SimpleClone(const bindingsT& added_binds) const
 
 				copy_vars(vars, vars.begin(),virtualized_b_second.begin(), virtualized_b_second.end());
 
-				printf("%u vars total\n", (unsigned int) vars.size());
+				cprintf(2,"%u vars total\n", (unsigned int) vars.size());
 
 				foreach(const Vertex& v, vars)
 					if (!STLhas(root->varOwner, v))
@@ -1284,19 +1276,19 @@ static bool bigcounter = true;
 
 int BackInferenceTree::tlog(int debugLevel, const char *format, ...) const
 	{
-	    //if (debugLevel > currentDebugLevel) return 0;
+	    if (debugLevel > currentDebugLevel) return 0;
 
-		 //if (test::bigcount == 75229)
+		 if (test::bigcount == 75229)
 		 { puts("Debug feature."); }
 		
-		 //printf("%d %d [(%d)] (%s): ", (bigcounter?(++test::bigcount):depth), root->InferenceNodes,
-		//	(test::LOG_WITH_NODE_ID ? ((int)this) : 0),
-		//	(rule ? (rule->name.c_str()) : "(root)"));
+		printf("%ld %ld [(%lu)] (%s): ", (bigcounter?(++test::bigcount):depth), root->InferenceNodes,
+			(test::LOG_WITH_NODE_ID ? (long) this : 0),
+			(rule ? (rule->name.c_str()) : "(root)"));
 		
-		//if (test::logfile)
-		//	fprintf(test::logfile, "%d %d [(%d)] (%s): ", depth, root->InferenceNodes,
-		//	(test::LOG_WITH_NODE_ID ? ((int)this) : 0),
-		//	(rule ? (rule->name.c_str()) : "(root)"));
+		if (test::logfile)
+			fprintf(test::logfile, "%d %ld [(%lu)] (%s): ", depth, root->InferenceNodes,
+			(test::LOG_WITH_NODE_ID ? (long) this : 0),
+			(rule ? (rule->name.c_str()) : "(root)"));
 		
 		char buf[5000];
 		
@@ -1306,19 +1298,19 @@ int BackInferenceTree::tlog(int debugLevel, const char *format, ...) const
 		
 	    printf(buf);
 		
-		//if (test::logfile)
-		//	fprintf(test::logfile, buf);
+		if (test::logfile)
+			fprintf(test::logfile, buf);
 		
-	    //fflush(stdout);
+	    fflush(stdout);
 	    va_end(ap);
 	    return answer;
 	}
 
 void BackInferenceTree::printTarget() const
 {
-	printf("Raw target:\n");
+	cprintf(0,"Raw target:\n");
 	rawPrint(*raw_target, raw_target->begin(),0);
-	printf("Bound target:\n");
+	cprintf(0,"Bound target:\n");
 	rawPrint(*GetTarget(), GetTarget()->begin(),0);
 }
 
@@ -1349,7 +1341,7 @@ void BackInferenceTree::ValidateRuleArgs(const vector<BoundVertex>& rule_args) c
 	for(vector<BoundVertex>::const_iterator bv = rule_args.begin(); bv != rule_args.end(); bv++)
 		if (nm->getType(v2h(bv->value)) == FW_VARIABLE_NODE)
 		{
-			printf("FW_VARIABLE_NODE found on Rule args: ");
+			LOG(0, "FW_VARIABLE_NODE found on Rule args: "+string(nm->getName(v2h(bv->value))));
 
 /*			tlog(0,"Bindings were:\n");
 			foreach(hpair phh, *bindings_of_all_args)
@@ -1379,7 +1371,7 @@ bool BackInferenceTree::ValidRuleResult(BoundVertex& new_result, const vector<Bo
 		foreach(hpair phh, *bindings_of_all_args)
 		{
 			printTree(phh.first,0,3);
-			printf("=>");
+			cprintf(3,"=>");
 			printTree(phh.second,0,3);
 		}			
 
@@ -1402,7 +1394,8 @@ void BackInferenceTree::WithLog_expandVectorSet(const std::vector<Btr<BV_Set> >&
 {
 	tlog(3, 	"expandVectorSet(child_results, argVectorSet)...\n");
 
-	//expandVectorSet(child_results, argVectorSet);
+    // below is template function ... not sure what it's doing
+	expandVectorSet(child_results, argVectorSet);
 
 	tlog(2, 	"RESULT FROm expandVectorSet(child_results, argVectorSet) ((%d,%d), %d,%d)...\n", (child_results.size()>0?child_results[0]->size():0), 
 		(child_results.size()>1?child_results[1]->size():0), argVectorSet.size(),	(argVectorSet.empty() ? 0 : argVectorSet.begin()->size()) );	
@@ -1423,7 +1416,6 @@ void BackInferenceTree::WithLog_expandVectorSet(const std::vector<Btr<BV_Set> >&
 
 Btr<set<BoundVertex> > BackInferenceTree::evaluate(set<const BackInferenceTree*>* chain) const
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
 	Btr<set<BoundVertex> > ret(new set<BoundVertex>(*my_results));
 
 	if (!chain)
@@ -1434,7 +1426,7 @@ Btr<set<BoundVertex> > BackInferenceTree::evaluate(set<const BackInferenceTree*>
 
 	if (STLhas(*chain, this))
 	{
-		printf("evaluate: circle!");
+		cprintf(2, "evaluate: circle!");
 		//		getc(stdin);
 		return ret;
 	}
@@ -1479,23 +1471,23 @@ Btr<set<BoundVertex> > BackInferenceTree::evaluate(set<const BackInferenceTree*>
 				/// Hypotheticals do not. So, effectively, this step is just to bind the
 				/// variables of hypotheticals.
 
-				/*for(vector<BoundVertex>::iterator bv = a->begin(); bv != a->end(); bv++)
+				for(vector<BoundVertex>::iterator bv = (a->begin());
+                        bv != a->end(); bv++)
 					if (bv->bindings)
 					{
 						bindings_of_all_args->insert(bv->bindings->begin(), bv->bindings->end());
 														
 						bv->bindings = bindings_of_all_args;
 					}		
-			*/
 				ValidateRuleArgs(rule_args);
 
 				BoundVertex new_result;
 
 				foreach(BoundVertex bv, rule_args)
 				{
-					//if (!nm->inheritsType(nm->getType(v2h(bv.value)), HYPOTHETICAL_LINK) &&
-						//nm->getTruthValue(v2h(bv.value))->getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
-					//	goto next_args;
+					if (!nm->inheritsType(nm->getType(v2h(bv.value)), HYPOTHETICAL_LINK) &&
+						nm->getTruthValue(v2h(bv.value))->getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
+						goto next_args;
 
 //					printf("(%.6f, ", nm->getTruthValue(v2h(bv.value))->getConfidence());
 				}
@@ -1509,14 +1501,14 @@ Btr<set<BoundVertex> > BackInferenceTree::evaluate(set<const BackInferenceTree*>
 
 					root->hsource[v2h(new_result.value)] = const_cast<BackInferenceTree*>(this);
 
-					//if (RECORD_TRAILS)
+					if (RECORD_TRAILS)
 						foreach(const BoundVertex& v, rule_args)
 						{
 							root->inferred_from[v2h(new_result.value)].push_back(v2h(v.value));
 							root->inferred_with[v2h(new_result.value)] = rule;
 						}						
 				}
-//next_args:;
+next_args:;
 			}
 	}
 	else return child_results[0];
@@ -1550,20 +1542,20 @@ BoundVertex BackInferenceTreeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _
 
 	if (!bvs->empty())
 	{
-		printf("\n");
+		cprintf(0,"\n");
 		tlog(0,"Generalizing results:\n");
 
 		foreach(const BoundVertex& b, *bvs)
 		{
-			//if (getTruthValue(v2h(b.value))->getConfidence() > min_confidence)
-			//{
-			//	printTree(v2h(b.value),0,0);
-			//	ForAllArgs.push_back(b.value);
-			//}
+			if (getTruthValue(v2h(b.value))->getConfidence() > min_confidence)
+			{
+				printTree(v2h(b.value),0,0);
+				ForAllArgs.push_back(b.value);
+			}
 		}
 		new_result = RuleRepository::Instance().rule[(_resultT == FORALL_LINK) ? ForAll : PLNPredicate]->compute(ForAllArgs);
 
-		printf("\n");
+		cprintf(0,"\n");
 		tlog(0,"Combining %d results for final unification. Result was:\n", ForAllArgs.size());
 		printTree(v2h(new_result.value),0,0);
 	}
@@ -1609,7 +1601,7 @@ void BackInferenceTree::printFitnessPool()
 		{
 			(*i)->tlog(0, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (long)(*i));
 
-			if (!((more_count++)%25))
+			if (currentDebugLevel>=2 && !((more_count++)%25))
 			{
 				puts(" --- more ");
 				getc(stdin);
@@ -1617,7 +1609,6 @@ void BackInferenceTree::printFitnessPool()
 		}
 	}
 }
-
 
 /// TODO: May not work. Possibly redundant anyway.
 void BackInferenceTree::expandSubtree()
@@ -1639,7 +1630,7 @@ void BackInferenceTree::expandFittest()
 	
 	if (!root->exec_pool.empty())
 	{
-		if (true) //Sort and print
+		if (currentDebugLevel>0) //Sort and print
 		{
 			if (!root->exec_pool_sorted)
 			{
@@ -1686,7 +1677,7 @@ bool BackInferenceTree::CreateChildren(int i, BBvtree arg, Btr<bindingsT> bindin
 	}
 	else
 	{
-		//for (uint j=0;j<root->rp->get().size();j++)
+		for (uint j=0;j<root->rp->get().size();j++)
 		//	expandRule(RuleRepository::Instance().rule[root->rp->get()[j]], i, arg, bindings, spawning);
 	}
 	tlog(1,"Rule expansion ok!\n");
@@ -1850,7 +1841,7 @@ tlog(3, "   nOw Result set for arg %d has size %d!\n", c, pseudo_child_results[c
 		
 		std::set<vector<BoundVertex> > argVectorSet;
 tlog(3, 	"expandVectorSet(child_results, argVectorSet)...\n");
-		//expandVectorSet(pseudo_child_results, argVectorSet);
+		expandVectorSet(pseudo_child_results, argVectorSet);
 tlog(3, 	"RESULT FROm expandVectorSet(child_results, argVectorSet) ((%d,%d), %d,%d)...\n", (pseudo_child_results.size()>0?pseudo_child_results[0]->size():0), 
 			(pseudo_child_results.size()>1?pseudo_child_results[1]->size():0), argVectorSet.size(),	(argVectorSet.empty() ? 0 : argVectorSet.begin()->size()) );
 		

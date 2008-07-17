@@ -1,8 +1,9 @@
-#include "PLN.h"
 #include "AtomTableWrapper.h"
+#include "PLN.h"
 #include "XMLNodeLoader.h"
 #include "Rules.h"
 #include <SimpleTruthValue.h>
+#include <CogServer.h> // To get access of AtomSpace
 #include <tree.h>
 #include <utils2.h>
 
@@ -15,13 +16,14 @@ boost::variant<int, char> bv;
 #define HANDLE_MANAGEMENT_HACK 0
 #define ARCHIVE_THEOREMS 1
 
+#define AS_PTR (CogServer::getAtomSpace())
+
 using namespace std;
 using namespace opencog;
 
 bool isSubType(Handle h, Type T)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	return inheritsType(nm->getType(h), T);
+	return inheritsType(AS_PTR->getType(h), T);
 }
 
 #ifndef USE_PSEUDOCORE
@@ -41,8 +43,7 @@ bool isSubType(Handle h, Type T)
 #endif
 	
 Handle child(Handle h, int i) { 
-	AtomSpace *nm = CogServer::getAtomSpace();
-	return nm->getOutgoing(h, i); }
+	return AS_PTR->getOutgoing(h, i); }
 	
 namespace haxx
 {
@@ -60,22 +61,21 @@ namespace haxx
 }
 
 //static map<Handle,vtree> h2vtree_cache;
-
 vtree make_vtree(Handle h)
 {
-	/// \todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
-/*	map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
-	if (i != h2vtree_cache.end())
-		return i->second;*/
-	
-	vtree ret;
-	//reasoning::makeHandletree(h);
-/*	h2vtree_cache[h] = ret;*/
+/// \todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
+/*    map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
+       if (i != h2vtree_cache.end())
+               return i->second;*/
+       
+   vtree ret;
+   reasoning::makeHandletree(h, true, ret);
+/*    h2vtree_cache[h] = ret;*/
 
-	reasoning::printTree(h,0,0);
-rawPrint(ret, ret.begin(), 0);
+   reasoning::printTree(h,0,0);
+   rawPrint(ret, ret.begin(), 0);
 
-	return ret;
+   return ret;
 }
 
 #ifdef USE_PSEUDOCORE
@@ -90,29 +90,26 @@ bool inheritsType(Type T1, Type T2)
 
 const TruthValue& getTruthValue(Handle h)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	return nm->getTV(h);
+	return AS_PTR->getTV(h);
 }
 
 namespace reasoning
 {
 	shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
 	{
-		AtomSpace *nm = CogServer::getAtomSpace();
-		vector<Handle> hs(nm->getHandleSet(T,name,subclass));
+		vector<Handle> hs(AS_PTR->getHandleSet(T,name,subclass));
 		return shared_ptr<set<Handle> >(new set<Handle>(hs.begin(), hs.end()));
 	}
 
 Handle AtomTableWrapper::getHandle(Type t,const string& str) const
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	return nm->getHandle(t, str);
+	AtomSpace *a = AS_PTR;
+	return AS_PTR->getHandle(t, str);
 }
 
 Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	return nm->getHandle(t, outgoing);
+	return AS_PTR->getHandle(t, outgoing);
 }
 
 }; //namespace reasoning
@@ -137,8 +134,8 @@ bool inheritsType(Type T1, Type T2)
 
 const TruthValue& getTruthValue(Handle h)
 {
-	return TruthValue::TRIVIAL_TV();
-		//(h ? (h->getTruthValue()) : TruthValue::TRIVIAL_TV());
+    AtomSpace* a = AS_PTR;
+	return (h ? (a->getTV(h)) : TruthValue::TRIVIAL_TV());
 }
 
 namespace reasoning
@@ -147,8 +144,8 @@ namespace reasoning
 	{
 		HandleEntry* result = 
 			(name.empty()
-				? CogServer::getAtomSpace()->getAtomTable().getHandleSet((Type) T, subclass)
-				: CogServer::getAtomSpace()->getAtomTable().getHandleSet(name.c_str(), (Type) T, subclass));
+				? AS_PTR->getAtomTable().getHandleSet((Type) T, subclass)
+				: AS_PTR->getAtomTable().getHandleSet(name.c_str(), (Type) T, subclass));
 		shared_ptr<set<Handle> > ret(new set<Handle>);
 
 		HandleEntry2HandleSet(*result, *ret);
@@ -159,7 +156,7 @@ namespace reasoning
 
 	Handle AtomTableWrapper::getHandle(Type t,const string& name) const
 	{
-		return CogServer::getAtomSpace()->getAtomTable().getHandle(name.c_str(), (Type)t);
+		return AS_PTR->getAtomTable().getHandle(name.c_str(), (Type)t);
 	}
 	
 	bool equal(const HandleSeq& lhs, const HandleSeq& rhs)
@@ -176,22 +173,15 @@ namespace reasoning
 
 	Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
 	{
-//		LOG(0, "WARNING: getHandle(Type t,const HandleSeq& outgoing) not supported!");
-
-		/*HandleEntry* results = 
-			MindDBProxy::getInstance()->getHandleSet((Type)t, true);
-			
-		while (results && !equal(results->handle->getOutgoingSet(), outgoing))
-			results = results->next;
-
-		Handle ret = (results ? results->handle : NULL);
-
-		delete results;
-		*/
-		Handle ret = NULL;
-
-		return ret;
-//		return MindDBProxy::getInstance()->getHandle(t, outgoing);
+//		HandleEntry* results = 
+//			AS_PTR->getHandleSet((Type)t, true);
+//			
+//		while (results && !equal(results->handle->getOutgoingSet(), outgoing))
+//			results = results->next;
+//      Handle ret = (results ? results->handle : NULL);
+//		delete results;
+		
+		return AS_PTR->getHandle(t,outgoing);
 	}
 
 }
@@ -223,10 +213,10 @@ bool AtomTableWrapper::LoadAxioms(const string& path)
 	string fname("../test/reasoning/" + path);
 	string fname2("test/reasoning/" + path);
 	string fname3("../../test/reasoning/" + path);
-	//if (!exists(fname.c_str()))
+	if (!exists(fname.c_str()))
 		fname = fname2;
-	//if (!exists(fname.c_str()))
-	//	fname = fname3;
+	if (!exists(fname.c_str()))
+		fname = fname3;
 /*#else
 		string fname(path);
 		string fname2=fname;
@@ -248,10 +238,10 @@ bool AtomTableWrapper::LoadAxioms(const string& path)
 		LoadedFiles.insert(fname2);
 
 		} catch(string s) { 
-			//LOG(0, s); 
+			LOG(0, s); 
 			return false; 
         } catch(...) { 
-			//LOG(0, "UNKNOWN EXCCEPTION IN LOADAXIOMS!!!"); 
+			LOG(0, "UNKNOWN EXCCEPTION IN LOADAXIOMS!!!"); 
 			return false; 
 		}
 	}
@@ -261,9 +251,8 @@ bool AtomTableWrapper::LoadAxioms(const string& path)
 
 bool AtomTableWrapper::LoadOther(const string& path, bool ReplaceOld)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
 	string buf;
-	//LoadTextFile(path, buf);
+	LoadTextFile(path, buf);
 
 	vector<string> lines = StringTokenizer(buf, "\n\r").WithoutEmpty();
 
@@ -295,7 +284,7 @@ bool AtomTableWrapper::LoadOther(const string& path, bool ReplaceOld)
 
 			for (unsigned int j = 0; j < elems.size(); j++)
 				if (!elems[j].empty())
-					hs.push_back(nm->getHandle(CONCEPT_NODE, elems[j]));
+					hs.push_back(AS_PTR->getHandle(CONCEPT_NODE, elems[j]));
                
 			assert (hs.size()>1);
 
@@ -380,7 +369,7 @@ bool cutVector(const vector<T>& src, int index, vector<T>& dest)
 
 Handle NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn,bool fresh,bool managed)
 {
-	//Handle ret = nm->addNode(T, name, tvn, fresh);
+	//Handle ret = a->addNode(T, name, tvn, fresh);
 
 	Handle ret = FIMATW::addNode(T, name, tvn, fresh,managed);
 	//Handle ret = FIMATW::addNode(T, name, tvn, fresh);
@@ -390,9 +379,9 @@ Handle NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn
 
 int getFirstIndexOfType(HandleSeq hs, Type T)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 	for (unsigned int i = 0; i < hs.size(); i++)
-		if (nm->getType(hs[i]) == T)
+		if (a->getType(hs[i]) == T)
 			return i;
 
 	return -1;
@@ -419,7 +408,7 @@ LOG(5, b);
 	THE FOLLOWING MAY NOT WORK OUTSIDE WIN32:
 #endif
 
-sprintf(b, "Removing %s (%d).", nm->getName(*ii).c_str(), nm->getType(*ii));
+sprintf(b, "Removing %s (%d).", a->getName(*ii).c_str(), nm->getType(*ii));
 LOG(5, b);
 
 					jj = hs.erase(jj);
@@ -464,28 +453,28 @@ bool symmetricLink(Type T)
 
 bool is_empty_link(Handle h)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	return !inheritsType(nm->getType(h), NODE)
-			&& nm->getArity(h) == 0;
+	AtomSpace *a = AS_PTR;
+	return !inheritsType(a->getType(h), NODE)
+			&& a->getArity(h) == 0;
 }
 
 bool hasFalsum(HandleSeq hs)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 //	return false;
 
 	for (vector<Handle>::const_iterator ii = hs.begin(); ii != hs.end(); ii++)
 	{
 		const Handle key = *ii;
 
-		if (inheritsType(nm->getType(*ii), FALSE_LINK) ) //Explicit falsum
+		if (inheritsType(a->getType(*ii), FALSE_LINK) ) //Explicit falsum
 			return true;
 
 		for (vector<Handle>::const_iterator jj = hs.begin(); jj != hs.end();jj++)
 			if (jj != ii)
-				if (inheritsType(nm->getType(*jj), NOT_LINK) ) //Contradiction
+				if (inheritsType(a->getType(*jj), NOT_LINK) ) //Contradiction
 				{
-					Handle notter = nm->getOutgoing(*jj)[0];
+					Handle notter = a->getOutgoing(*jj)[0];
 					if (notter == key)
 						return true;
 				}
@@ -494,22 +483,22 @@ bool hasFalsum(HandleSeq hs)
 	return false;
 }
 
-bool containsNegation(Handle ANDlink, Handle a)
+bool containsNegation(Handle ANDlink, Handle h)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	HandleSeq hs = nm->getOutgoing(ANDlink);
+	AtomSpace *a =  AS_PTR;
+	HandleSeq hs = a->getOutgoing(ANDlink);
 
-	hs.push_back(a);
+	hs.push_back(h);
 
 	return hasFalsum(hs);
 }
 
 Handle AtomTableWrapper::freshened(Handle h, bool managed)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	Type T = nm->getType(h);
-	HandleSeq hs = nm->getOutgoing(h);
-	string name = nm->getName(h);
+	AtomSpace *a = AS_PTR;
+	Type T = a->getType(h);
+	HandleSeq hs = a->getOutgoing(h);
+	string name = a->getName(h);
 	const TruthValue& tv = getTruthValue(h);
 
 	if (inheritsType(T, NODE))
@@ -527,18 +516,18 @@ Handle AtomTableWrapper::freshened(Handle h, bool managed)
 
 Handle NormalizingATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,bool fresh,bool managed)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 	Handle ret=0;
 
 bool ok_forall=false;
 
 	char buf[500];
 	sprintf(buf, "Adding link of type %s (%d)", type2name[T].c_str(), T);
-	//LOG(4, buf);
+	LOG(4, buf);
 
 	if (hs.size() > 7)
 	{
-		//LOG(4, "Adding large-arity link!");
+		LOG(4, "Adding large-arity link!");
 /*		if (TheLog.getLevel()>=5)
 		{
 			char t[100];
@@ -549,7 +538,7 @@ bool ok_forall=false;
 #if 0
 	if (T == IMPLICATION_LINK
 		&& hs.size()==2
-		&& inheritsType(nm->getType(hs[0]), FALSE_LINK))
+		&& inheritsType(a->getType(hs[0]), FALSE_LINK))
 	{
 		assert(hs.size()==2 || hs.empty());
 		
@@ -557,7 +546,7 @@ bool ok_forall=false;
 	}
 	else if (T == IMPLICATION_LINK
 		&& hs.size()==2
-		&& inheritsType(nm->getType(hs[1]), FALSE_LINK))
+		&& inheritsType(a->getType(hs[1]), FALSE_LINK))
 	{
 		assert(hs.size()==2 || hs.empty());
 
@@ -568,7 +557,7 @@ bool ok_forall=false;
 	}
 	else if (T == IMPLICATION_LINK								//Accidentally similar to da above
 			&& hs.size()==2
-			&& inheritsType(nm->getType(hs[0]), AND_LINK)
+			&& inheritsType(a->getType(hs[0]), AND_LINK)
 			&& containsNegation(hs[0], hs[1]))
 	{
 		HandleSeq NOTarg;
@@ -578,7 +567,7 @@ bool ok_forall=false;
 	}
 	else if (T == IMPLICATION_LINK
 		&& !hs.empty()
-		&& inheritsType(nm->getType(hs[1]), AND_LINK))
+		&& inheritsType(a->getType(hs[1]), AND_LINK))
 	{
 		assert(hs.size()==2 || hs.empty());
 
@@ -586,7 +575,7 @@ bool ok_forall=false;
 		
 		HandleSeq imps;
 		
-		HandleSeq hs2 = nm->getOutgoing(hs[1]);
+		HandleSeq hs2 = a->getOutgoing(hs[1]);
 		for (int i = 0; i < hs2.size(); i++)
 		{
 			HandleSeq new_hs;
@@ -603,11 +592,11 @@ bool ok_forall=false;
 #if 0
 	if (T == IMPLICATION_LINK
 		&& !hs.empty()
-		&& inheritsType(nm->getType(hs[0]), IMPLICATION_LINK))
+		&& inheritsType(a->getType(hs[0]), IMPLICATION_LINK))
 	{
 		assert(hs.size()==2 || hs.empty());
 
-		HandleSeq hs2 = nm->getOutgoing(hs[0]);
+		HandleSeq hs2 = a->getOutgoing(hs[0]);
 
 		Handle c = hs[1];
 		Handle a = hs2[0];
@@ -641,10 +630,10 @@ bool ok_forall=false;
 #endif
 /*	else if (T == AND_LINK
 			&& hs.size()==2
-			&& nm->getType(hs[1]) != IMPLICATION_LINK)
+			&& a->getType(hs[1]) != IMPLICATION_LINK)
 	{
 		LOG(0, "AND => Implication");
-		printf(0,"%d\n",nm->getType(hs[1]));
+		printf(0,"%d\n",a->getType(hs[1]));
 		getc(stdin);
 		
 		TruthValue **tvs = new TruthValue *[3];
@@ -658,7 +647,7 @@ bool ok_forall=false;
 		new_hs.push_back(addLink(T,hs,tvn,fresh,managed));
 		new_hs.push_back(addLink(IMPLICATION_LINK,hs,impTV,fresh,managed));
 		
-		printf(0,"EEE %d\n",nm->getType(new_hs[1]));
+		printf(0,"EEE %d\n",a->getType(new_hs[1]));
 		
 		ret = addLink(AND_LINK, new_hs, TruthValue::TRUE_TV(), fresh,managed);
 
@@ -670,25 +659,25 @@ bool ok_forall=false;
 #if 0
 	else if (T == NOT_LINK
 			&& !hs.empty()
-			&& inheritsType(nm->getType(hs[0]), NOT_LINK)
+			&& inheritsType(a->getType(hs[0]), NOT_LINK)
 			&& tvn.getMean() > 0.989
 			&& binary_true(hs[0]) )
 	{
 		LOG(BL, "~~A <---> A");
 
-		HandleSeq relevant_args = nm->getOutgoing(hs[0]);
+		HandleSeq relevant_args = a->getOutgoing(hs[0]);
 		assert(relevant_args.size() == 1);
-		Type relevant_type = nm->getType(relevant_args[0]);
+		Type relevant_type = a->getType(relevant_args[0]);
 
 		//if (tvn.getMean() > 0.989 && binary_true(relevant_args[0]) )
-		ret = nm->getOutgoing(hs[0])[0]; //addLink(relevant_type, relevant_args,TruthValue::TRUE_TV(),fresh);
+		ret = a->getOutgoing(hs[0])[0]; //addLink(relevant_type, relevant_args,TruthValue::TRUE_TV(),fresh);
 	}
 	else if (T == AND_LINK
 			&& !hs.empty()
 			&& tvn.getMean() > 0.989
 			&& getFirstIndexOfType(hs, AND_LINK) >= 0
 			&& binary_true(hs[getFirstIndexOfType(hs, AND_LINK)]) )
-			//&& inheritsType(nm->getType(hs[0]), AND_LINK))
+			//&& inheritsType(a->getType(hs[0]), AND_LINK))
 	{
 		LOG(BL, "AND(AND(B), AND(A)) <---> AND(B,A)");
 
@@ -700,10 +689,10 @@ bool ok_forall=false;
 		{
 //			printTree(hs[ii],0,4);
 
-			if (inheritsType(nm->getType(hs[ii]), AND_LINK)
+			if (inheritsType(a->getType(hs[ii]), AND_LINK)
 				&& binary_true(hs[ii]))
 			{
-				HandleSeq args1 = nm->getOutgoing(hs[ii]);
+				HandleSeq args1 = a->getOutgoing(hs[ii]);
 
 				for (int a = 0; a < args1.size(); a++)
 					new_args.push_back(args1[a]);
@@ -760,11 +749,11 @@ bool ok_forall=false;
 	}
 	else if (T == NOT_LINK
 			&& !hs.empty()
-			&& inheritsType(nm->getType(hs[0]), IMPLICATION_LINK))
+			&& inheritsType(a->getType(hs[0]), IMPLICATION_LINK))
 	{
 		LOG(BL, "~(A=>B) <---> ~(B | ~A) <---> &(A,~B)");
 
-		HandleSeq IMP_args = nm->getOutgoing(hs[0]);
+		HandleSeq IMP_args = a->getOutgoing(hs[0]);
 		assert(IMP_args.size() == 2);
 	
 		HandleSeq not_arg;
@@ -778,13 +767,13 @@ bool ok_forall=false;
 	}
 	else if (T == NOT_LINK
 			&& !hs.empty()
-			&& inheritsType(nm->getType(hs[0]), AND_LINK))
+			&& inheritsType(a->getType(hs[0]), AND_LINK))
 	{
 		LOG(BL, "Cut -AND(B,C,...) into AND(B=>-C, C=>-B, ...)");
 		
 		HandleSeq imps;
 		
-		HandleSeq and_args = nm->getOutgoing(hs[0]);
+		HandleSeq and_args = a->getOutgoing(hs[0]);
 
 		for (int i = 0; i < and_args.size(); i++)
 		{
@@ -808,12 +797,12 @@ bool ok_forall=false;
 			&& hs.size()==2
 			&& tvn.getMean() > 0.989
 			&& binary_true(hs[1])
-			&& inheritsType(nm->getType(hs[1]), IMPLICATION_LINK))
+			&& inheritsType(a->getType(hs[1]), IMPLICATION_LINK))
 	{
 		LOG(0, "(A=>(B=>C))	--->	((A&B) => C)");
 //exit(0);
 		Handle old_head = hs[0];
-		HandleSeq old_imp_args = nm->getOutgoing(hs[1]);
+		HandleSeq old_imp_args = a->getOutgoing(hs[1]);
 		Handle tail = old_imp_args[1];
 
 		HandleSeq new_and_args;
@@ -833,14 +822,14 @@ bool ok_forall=false;
 #if 0
 	else if (T == IMPLICATION_LINK
 			&& !hs.empty()
-			&& inheritsType(nm->getType(hs[0]), AND_LINK)
-			&& getFirstIndexOfType(nm->getOutgoing(hs[0]), IMPLICATION_LINK) >= 0)
+			&& inheritsType(a->getType(hs[0]), AND_LINK)
+			&& getFirstIndexOfType(a->getOutgoing(hs[0]), IMPLICATION_LINK) >= 0)
 	{
 		LOG(1, "Cut (A& (B=>C) ) => D	--->	(C & A) => D   &   (~B & A)=>D");
 
 		assert(hs.size()==2);
 
-		HandleSeq old_and_args = nm->getOutgoing(hs[0]);
+		HandleSeq old_and_args = a->getOutgoing(hs[0]);
 		Handle tail = hs[1];
 
 //printTree(hs[1],0,1);
@@ -859,7 +848,7 @@ for (int a1=0;a1<old_and_args.size(); a1++)
 		cutVector<Handle>(old_and_args, imp_index, new_and_args1);
 		new_and_args2 = new_and_args1;
 
-		HandleSeq internal_imp_args = nm->getOutgoing(old_and_args[imp_index]);
+		HandleSeq internal_imp_args = a->getOutgoing(old_and_args[imp_index]);
 		HandleSeq not_arg;
 		not_arg.push_back(internal_imp_args[0]);
 		
@@ -904,8 +893,8 @@ printTree(ret,0,1);
 
 	}
 #endif
-	//else if (T == EQUIVALENCE_LINK && hs.size()==2)
-	else if (hs.size()==2)
+    else if (T == EXTENSIONAL_EQUIVALENCE_LINK && hs.size()==2)
+	//else if (hs.size()==2)
 	{
 		const vector<Handle> EquiTarget = hs;
 		HandleSeq ImpTarget1, ImpTarget2;
@@ -938,11 +927,11 @@ int zz=ImpTarget1.size();
 	}
 	else if (T == FORALL_LINK
 			&& hs.size() == 2
-			&& inheritsType(nm->getType(hs[1]), AND_LINK)
+			&& inheritsType(a->getType(hs[1]), AND_LINK)
 			&& binary_true(hs[1])
-			&& nm->getArity(hs[1]) > 1)
+			&& a->getArity(hs[1]) > 1)
 	{
-		unsigned int AND_arity = nm->getArity(hs[1]);
+		unsigned int AND_arity = a->getArity(hs[1]);
 
 		HandleSeq fa_list;
 
@@ -1011,16 +1000,16 @@ ok_forall=true;
 			assert (hs.size() == original_size);
 		}*/
 
-		//LOG(5, "Adding to Core...");
+		LOG(5, "Adding to Core...");
 
+        // TODO: OpenCog port: remove FIM
 		ret = FIMATW::addLink(T,hs,tvn,fresh,managed);
+		//ret = a->addLink(T,hs,tvn,fresh,managed);
 
-		//ret = nm->addLink(T,hs,tvn,fresh,managed);
-
-		//LOG(5, "Added.");
+		LOG(5, "Added.");
 
 #if P_DEBUG
-		if (T == IMPLICATION_LINK && hs.size()==2 && nm->getType(hs[1])==AND_LINK )
+		if (T == IMPLICATION_LINK && hs.size()==2 && a->getType(hs[1])==AND_LINK )
 			printTree(ret, 0, 4);
 #endif
 	}
@@ -1036,7 +1025,7 @@ puts("Loading classed to LocalATW...");
 	for (int i = 0; i < NUMBER_OF_CLASSES; i++)
 	{
 		mindShadowMap[i] = shared_ptr<set<Handle> >(new set<Handle>);
-		for (	HandleEntry* e = nm->getHandleSet((Type)i, true);
+		for (	HandleEntry* e = a->getHandleSet((Type)i, true);
 				e && e->handle;
 				e = e->next)
 		{
@@ -1150,7 +1139,7 @@ Handle LocalATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, boo
 	{
 		if (capacity && mindShadowMap[T]->size() >= capacity && !q[T].empty())
 		{
-			//LOG(2, "Above capacity, removing...");
+			LOG(2, "Above capacity, removing...");
 			
 //			set<Handle>::iterator remo = mindShadowMap[T]->begin();
 			set<Handle>::iterator remo = q[T].front();
@@ -1185,7 +1174,7 @@ Handle LocalATW::addNode(Type T, const std::string& name, const TruthValue& tvn,
 	{
 		if (capacity && mindShadowMap[T]->size() >= capacity && !q[T].empty())
 		{
-			//LOG(2, "Above capacity, removing...");
+			LOG(2, "Above capacity, removing...");
 
 			//set<Handle>::iterator remo = mindShadowMap[T]->begin();
 			set<Handle>::iterator remo = q[T].front();
@@ -1200,12 +1189,12 @@ Handle LocalATW::addNode(Type T, const std::string& name, const TruthValue& tvn,
 		pair<set<Handle>::iterator, bool> si = mindShadowMap[T]->insert(node);
 		if (managed)
 			q[T].push(si.first);
-//LOG(4,"Node add ok.");		
+LOG(4,"Node add ok.");		
 		return node;
 	}
 	else
 	{
-//LOG(4,"Node add ok.");				
+LOG(4,"Node add ok.");				
 		return ret;
 	}
 }
@@ -1228,7 +1217,7 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fr
 
 Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn, bool fresh, bool managed)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *as = AS_PTR;
 	printf("Handle AtomTableWrapper::addAtom...");
 	rawPrint(a,it,3);
 	
@@ -1237,9 +1226,9 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, con
 	
 	//assert(haxx::AllowFW_VARIABLENODESinCore || head_type != (Handle)FW_VARIABLE_NODE);
 	
-	if (nm->isReal(head_type))
+	if (as->isReal(head_type))
 	{
-		//LOG(1, "Warning! Adding a real atom with addAtom(tree<Vertex>& a)!\n");
+		LOG(1, "Warning! Adding a real atom with addAtom(tree<Vertex>& a)!\n");
 		return head_type;
 	}
 
@@ -1247,7 +1236,7 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, con
 	{
 		Handle *h_ptr = boost::get<Handle>(&*i);
 
-		handles.push_back((h_ptr && nm->isReal(*h_ptr))
+		handles.push_back((h_ptr && as->isReal(*h_ptr))
 								? (*h_ptr)
 								: addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed));
 	}
@@ -1260,14 +1249,14 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, con
 
 Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh,bool managed)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 	if (tvn.isNullTv())
 	{
-		//LOG(0, "I don't like FactoryTruthValues, so passin NULL as TruthValue causes exit in AtomTableWrapper.cc.");
+		LOG(0, "I don't like FactoryTruthValues, so passin NULL as TruthValue causes exit in AtomTableWrapper.cc.");
 		exit(0);
 	}
 
-//LOG(3, "Directly adding...");
+LOG(3, "Directly adding...");
 assert(1);
 
 	uint arity = hs.size();
@@ -1278,28 +1267,30 @@ assert(1);
 	Handle ret;
 
 	if (haxx::ArchiveTheorems &&
-		T == IMPLICATION_LINK && nm->getType(hs[0]) == AND_LINK && tvn.getConfidence() > 0.98999f)
+		T == IMPLICATION_LINK && a->getType(hs[0]) == AND_LINK && tvn.getConfidence() > 0.98999f)
 		{
-			vector<Handle> args = nm->getOutgoing(hs[0]);
+			vector<Handle> args = a->getOutgoing(hs[0]);
 			printf("THM for:");
 
-			//vtree thm_target(make_vtree(hs[1]));
+			vtree thm_target(make_vtree(hs[1]));
 
-			//rawPrint(thm_target, thm_target.begin(), 3);
-			 //LOG(0,"Takes:");
+			rawPrint(thm_target, thm_target.begin(), 3);
+			LOG(0,"Takes:");
 			
 			foreach(Handle arg, args)
 			{
-				//vtree arg_tree(make_vtree(arg));
-				//rawPrint(arg_tree, arg_tree.begin(), 0);
-				//CrispTheoremRule::thms[thm_target].push_back(arg_tree);
+				vtree arg_tree(make_vtree(arg));
+				rawPrint(arg_tree, arg_tree.begin(), 0);
+				CrispTheoremRule::thms[thm_target].push_back(arg_tree);
 			}
 			
 			///warning "Return value will be invalid!"
-			ret = nm->addLink( FALSE_LINK, hs, tvn);
+            // TODO: fresh bug
+			ret = a->addLink( FALSE_LINK, hs, tvn);
 		}
 	else	
-		ret = nm->addLink( T, hs,  tvn);
+        // TODO: fresh bug
+		ret = a->addLink( T, hs,  tvn);
 
 	if (inheritsType(T, LINK) && !arity && T != FORALL_LINK)
 	{
@@ -1310,31 +1301,31 @@ assert(1);
 	if (!haxx::AllowFW_VARIABLENODESinCore)
 		foreach(Handle ch, hs)
 		{
-			assert(nm->isReal(ch));
-			if (nm->getType(ch) == FW_VARIABLE_NODE)
+			assert(a->isReal(ch));
+			if (a->getType(ch) == FW_VARIABLE_NODE)
 			{
 				printTree(ret,0,-10);
-				printf("ATW: nm->getType(ch) == FW_VARIABLE_NODE!");
+				printf("ATW: a->getType(ch) == FW_VARIABLE_NODE!");
 				getc(stdin);getc(stdin);
 			}
-//				throw string("nm->getType(ch) == FW_VARIABLE_NODE") + i2str(ret);
-			//assert(nm->getType(ch) != FW_VARIABLE_NODE);
+//				throw string("a->getType(ch) == FW_VARIABLE_NODE") + i2str(ret);
+			//assert(a->getType(ch) != FW_VARIABLE_NODE);
 		}
 		
 #if USE_MIND_SHADOW
 	haxx::mindShadow.push_back(ret);
 	haxx::mindShadowMap[T].push_back(ret);
 #endif
-//LOG(3, "Add ok.");
+LOG(3, "Add ok.");
 
 /*	if (!tvn.isNullTv())
-		if (Abs(nm->getTruthValue(ret)->getMean() - tvn.getMean()) > 0.0001)
+		if (Abs(a->getTruthValue(ret)->getMean() - tvn.getMean()) > 0.0001)
 		{
-			printf("ATW: %s / %s\n", nm->getTruthValue(ret)->toString().c_str(),
+			printf("ATW: %s / %s\n", a->getTruthValue(ret)->toString().c_str(),
 				tvn.toString().c_str());
 		}*/
 	
-//	assert(Abs(nm->getTruthValue(ret)->getMean() - tvn.getMean()) < 0.0001);
+//	assert(Abs(a->getTruthValue(ret)->getMean() - tvn.getMean()) < 0.0001);
 
 	return ret;
 }
@@ -1355,7 +1346,7 @@ Handle DirectATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bo
 
 Handle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 	assert(!tvn.isNullTv());
 	
 //	assert(haxx::AllowFW_VARIABLENODESinCore || T != FW_VARIABLE_NODE);
@@ -1367,9 +1358,9 @@ Handle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn, boo
         const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f); 
 	const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv;
 
-	return nm->addNode( T, name, mod_tvn, fresh,managed);
+	return a->addNode( T, name, mod_tvn, fresh,managed);
 #else
-//LOG(3,	"DirectATW::addNode");
+LOG(3,	"DirectATW::addNode");
 assert(1);
 		
 	if (inheritsType(T, FW_VARIABLE_NODE))
@@ -1382,15 +1373,14 @@ assert(1);
 		
 	}	
 	Node* node = new Node( T,  name,  tvn);
-	Handle ret = NULL;
-	//Handle ret = MindDBProxy::getInstance()->add(node, fresh);
+	Handle ret = a->addRealAtom(*node);
 	
 #if HANDLE_MANAGEMENT_HACK	
 	/// haxx:: // Due to core relic
 	if (ret != node)
 		delete node;
 #endif	
-	//LOG(3, "Add ok.");
+	LOG(3, "Add ok.");
 	
 	if (inheritsType(T, FW_VARIABLE_NODE))
 		haxx::variableShadowMap[name] = ret;
@@ -1405,7 +1395,7 @@ haxx::mindShadowMap[T].push_back(ret);
 
 Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 /// The method should be, AFAIK, identical to the one in DirectATW, unless FIM is actually in use.
 	
 	assert(!tvn.isNullTv());
@@ -1418,10 +1408,10 @@ Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool f
     const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f);
     const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv; 
 
-	Handle ret = nm->addNode( T, name, mod_tvn, fresh,managed);
+	Handle ret = a->addNode( T, name, mod_tvn, fresh,managed);
 #else
 	
-//LOG(3,"FIMATW::addNode");
+LOG(3,"FIMATW::addNode");
 
 	if (inheritsType(T, FW_VARIABLE_NODE))
 	{
@@ -1434,18 +1424,18 @@ Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool f
 	}	
 
 	Node* node = new Node( T,  name,  tvn);
-//LOG(3,"FIMATW: MindDBProxy::getInstance()->add");	
-    //Handle ret = MindDBProxy::getInstance()->add(node, fresh);
-	Handle ret = NULL;
+LOG(3,"FIMATW: AtomSpace->add");	
+    // TODO: fresh bug
+    Handle ret = AS_PTR->addRealAtom(*node);
 
 #if HANDLE_MANAGEMENT_HACK
-//LOG(3,"FIMATW: MindDBProxy::getInstance()->add OK, checking for Handle release needed");		
+LOG(3,"FIMATW: AtomSpace->add OK, checking for Handle release needed");		
 	/// haxx:: // Due to core relic
 	if (ret != node)
 		delete node;
 #endif
 	
-	//LOG(3, "Add ok.");
+	LOG(3, "Add ok.");
 	
 #endif
 
@@ -1492,7 +1482,7 @@ Handle FIMATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool 
 
 Handle AtomTableWrapper::GetRandomHandle(Type T)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 /*#ifdef USE_PSEUDOCORE	
 	int choose_node = 0;
 	
@@ -1542,7 +1532,7 @@ Handle AtomTableWrapper::GetRandomHandle(Type T)
 
 #endif*/
 
-  vector<Handle> handles=nm->filter_type(T);
+  vector<Handle> handles=a->filter_type(T);
 
   if (handles.size()==0)
     return Handle(0);
@@ -1562,9 +1552,9 @@ unsigned int USize(const set<Handle>& triples, const set<Handle>& doubles,
 
 	for (set<Handle>::const_iterator t = triples.begin(); t != triples.end(); t++)
 	{
-		nABC = TheNM.nm->getCount(*t);
+		nABC = TheNM.a->getCount(*t);
 
-		vector<Handle> tc = nm->getOutgoing(*t);
+		vector<Handle> tc = a->getOutgoing(*t);
 		assert(tc.size()==3);
 
 		tuple2<Handle> ab, ac, bc;
@@ -1578,20 +1568,20 @@ unsigned int USize(const set<Handle>& triples, const set<Handle>& doubles,
 
 		for (set<Handle>::const_iterator d = doubles.begin(); d != doubles.end(); d++)
 		{
-			vector<Handle> dc = nm->getOutgoing(*d);
+			vector<Handle> dc = a->getOutgoing(*d);
 			assert(dc.size()==2);
 
 			if (dc[0] == ab.t1 && dc[1] == ab.t2)
-				nAB = TheNM.nm->getCount(*d);
+				nAB = TheNM.a->getCount(*d);
 			else if (dc[0] == ac.t1 && dc[1] == ac.t2)
-				nAC = TheNM.nm->getCount(*d);
+				nAC = TheNM.a->getCount(*d);
 			else if (dc[1] == bc.t1 && dc[2] == bc.t2)
-				nBC = TheNM.nm->getCount(*d);
+				nBC = TheNM.a->getCount(*d);
 		}
 
-		nA = TheNM.nm->getCount(ab.t1);
-		nB = TheNM.nm->getCount(ab.t2);
-		nC = TheNM.nm->getCount(ac.t2);
+		nA = TheNM.a->getCount(ab.t1);
+		nB = TheNM.a->getCount(ab.t2);
+		nC = TheNM.a->getCount(ac.t2);
 
 		total_n += nB + (nA - nAB)*(nC - nBC) / (nAC - nABC);
 	}
@@ -1603,7 +1593,7 @@ unsigned int USize(const set<Handle>& triples, const set<Handle>& doubles,
 
 void AtomTableWrapper::DumpCoreLinks(int logLevel)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 /*#ifdef USE_PSEUDOCORE
 	  PseudoCore::LinkMap LM = ((PseudoCore*)nm)->getLinkMap();
 
@@ -1612,14 +1602,14 @@ void AtomTableWrapper::DumpCoreLinks(int logLevel)
 #else
 puts("Dump disabled");
 #endif*/
-  vector<Handle> LM=nm->filter_type(LINK);
+  vector<Handle> LM=a->filter_type(LINK);
   for (vector<Handle>::iterator i = LM.begin(); i != LM.end(); i++)
     printTree(*i,0,logLevel);
 }
 
 void AtomTableWrapper::DumpCoreNodes(int logLevel)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomSpace *a = AS_PTR;
 /*#ifdef USE_PSEUDOCORE
 	  PseudoCore::NodeMap LM = ((PseudoCore*)nm)->getNodeMap();
 
@@ -1628,7 +1618,7 @@ void AtomTableWrapper::DumpCoreNodes(int logLevel)
 #else
 puts("Dump disabled");
 #endif*/
-  vector<Handle> LM=nm->filter_type(NODE);
+  vector<Handle> LM=a->filter_type(NODE);
   for (vector<Handle>::iterator i = LM.begin(); i != LM.end(); i++)
     printTree(*i,0,logLevel);
 }
@@ -1651,14 +1641,12 @@ Handle singular(HandleSeq hs) {
 
 bool equal(Handle A, Handle B)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	if (nm->getType(A) != nm->getType(B))
-		return false;
-	if (nm->getName(A) != nm->getName(B))
+	AtomSpace *a = AS_PTR;
+	if (a->getType(A) != a->getType(B))
 		return false;
 
-	vector<Handle> hsA = nm->getOutgoing(A);
-	vector<Handle> hsB = nm->getOutgoing(B);
+	vector<Handle> hsA = a->getOutgoing(A);
+	vector<Handle> hsB = a->getOutgoing(B);
 
 	const size_t Asize = hsA.size();
 
@@ -1684,12 +1672,12 @@ Handle AtomTableWrapper::Invert(Handle h)
 
 Handle AtomTableWrapper::AND2ORLink(Handle& andL, Type _ANDLinkType, Type _ORLinkType)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	assert(nm->getType(andL) == _ANDLinkType);
+	AtomSpace *a = AS_PTR;
+	assert(a->getType(andL) == _ANDLinkType);
 
 	HandleSeq ORtarget;
 
-   	const vector<Handle> _ANDtargets = nm->getOutgoing(andL);
+   	const vector<Handle> _ANDtargets = a->getOutgoing(andL);
 
 	for (vector<Handle>::const_iterator i = _ANDtargets.begin(); i != _ANDtargets.end(); i++)
 	{
@@ -1715,15 +1703,15 @@ printTree(newORAND,0,0);
 
 pair<Handle, Handle> AtomTableWrapper::Equi2ImpLink(Handle& exL)
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	printf("((%d))\n", nm->getType(exL));
+	AtomSpace *a = AS_PTR;
+	printf("((%d))\n", a->getType(exL));
 	printTree(exL,0,0);
 
-	//assert(nm->getType(exL) == EQUIVALENCE_LINK);
+	assert(a->getType(exL) == EXTENSIONAL_EQUIVALENCE_LINK);
 
 	HandleSeq ImpTarget1, ImpTarget2;
 
-   	const vector<Handle> EquiTarget = nm->getOutgoing(exL);
+   	const vector<Handle> EquiTarget = a->getOutgoing(exL);
 
 	for (vector<Handle>::const_iterator i = EquiTarget.begin(); i != EquiTarget.end(); i++)
 		ImpTarget1.push_back((*i));
@@ -1752,11 +1740,11 @@ pair<Handle, Handle> AtomTableWrapper::Equi2ImpLink(Handle& exL)
 /*
 Handle AtomTableWrapper::Exist2ForAllLink(Handle& exL)
 {
-	assert(nm->getType(exL) == EXIST_LINK);
+	assert(a->getType(exL) == EXIST_LINK);
 
 	HandleSeq ForAllTarget;
 
-   	const vector<Handle> ExistTarget = nm->getOutgoing(exL);
+   	const vector<Handle> ExistTarget = a->getOutgoing(exL);
 
 	for (vector<Handle>::const_iterator i = ExistTarget.begin(); i != ExistTarget.end(); i++)
 	{

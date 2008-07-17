@@ -68,11 +68,11 @@ struct VtreeProviderWrapper : public VtreeProvider
 {
 	vtree val;
 	VtreeProviderWrapper(const vtree& _val) : val(_val) {}
+	VtreeProviderWrapper(const Vertex& _val) : val(vtree(_val)) {}
 	const vtree& getVtree() const { assert(this); return val; }
 	//const* VtreeProvider clone() const { return new VtreeProviderWrapper(val); }
 };
 
-/*
 template<typename VTPContainerT, typename OutIterT>
 OutIterT VtreeProviders_TO_BoundVertices(const VTPContainerT& vtps, OutIterT out)
 {
@@ -81,12 +81,11 @@ OutIterT VtreeProviders_TO_BoundVertices(const VTPContainerT& vtps, OutIterT out
 	return out;
 }
 
-
 template<typename BVContainerT, typename OutIterT>
 OutIterT BoundVertices_TO_VtreeProviders(const BVContainerT& bvs, OutIterT out)
 {
 	foreach(const BoundVertex& bv, bvs)
-		(*out)++ = Btr<VtreeProvider*>(new VtreeProviderWrapper(bv.value));
+		(*out)++ = /*Btr<VtreeProvider*>*/(new VtreeProviderWrapper(bv.value));
 	return out;
 }
 
@@ -94,10 +93,9 @@ template<typename VContainerT, typename OutIterT>
 OutIterT Vertices_TO_VtreeProviders(const VContainerT& vs, OutIterT out)
 {
 	foreach(const Vertex& v, vs)
-		(*out)++ = Btr<VtreeProvider*>(new VtreeProviderWrapper(v));
+		(*out)++ = /*Btr<VtreeProvider*>*/(new VtreeProviderWrapper(v));
 	return out;
 }
-*/
 
 /**
 	BITNode's arg results are stored as VtreeProviders.
@@ -128,7 +126,7 @@ public:
 
 	/// Takes ownership of the "arg"
 	/// false if arg was already bound. (And assert failure.)
-	bool Bind(int arg_i, VtreeProvider* arg)  { return false; };
+	bool Bind(int arg_i, VtreeProvider* arg) const;
 
 	/// false if arg was already bound.
 	bool Bind(vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) const;
@@ -149,7 +147,7 @@ public:
 
 	/// Use this when you know that all the args have already been Bound.
 	/// The result is cached so the performance is unproblematic.
-	BoundVertex compute(Handle CX = NULL) { return BoundVertex(); };
+	BoundVertex compute(Handle CX = NULL) const;
 	//{
 	//	vector<VtreeProvider*> dummy_vp;
 	//	return compute(dummy_vp.end(), dummy_vp.end(), CX);
@@ -195,7 +193,7 @@ public:
 			BoundVertex bv;
 			RuleApp* ra;
 
-			if ( (ra = dynamic_cast<RuleApp*>(*ai)) != NULL ) //A bound a arg is a RuleApp
+			if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL) //A bound a arg is a RuleApp
 				bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX);
 			else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != /*(VtreeProviderWrapper*)*/NULL) //A bound arg has type VtreeProviderWrapper
 				bv = *((*ai)->getVtree().begin());
@@ -246,9 +244,6 @@ out:
 		return result;
 	}
 };
-
-//RuleApp::RuleApp(Rule *a) { 
-//}
 
 } //namespace reasoning
 

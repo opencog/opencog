@@ -93,20 +93,8 @@
     is actually going to be printed.
 */
 
-void ReasoningLog(int l, std::string m);
-
-#define LOG(l, m) ReasoningLog(l,m)
-
 namespace reasoning
 {
-extern std::string _LOGPOS;
-extern bool _LOG_FIXED;
-
-//#define SET_LOG(s) _LOGPOS = std::string(__FILE__) + ":" + std::string(__LINE__); LOG_FIXED = true
-
-#define SET_LOG(s) _LOGPOS = s; _LOG_FIXED = true
-#define LET_LOG _LOG_FIXED = false;
-#define LOG_STR (_LOG_FIXED ? _LOGPOS : ( std::string(__FILE__) + ":" + i2str(__LINE__) ))
 
 #if 0
 

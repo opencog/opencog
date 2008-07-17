@@ -4,21 +4,28 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 ADD_LIBRARY (pln STATIC
-	deductionLookupTable.cc
-	AtomTableWrapper.cc
-	BackInferenceTree.cc
+	PTLFormulaeKit.cc
+	IndefinitePLNFormulas.cc
 	BackInferenceTreeNode.cc
 	BackwardInferenceTask.cc
-	CrispUnificationRule.cc
-	IndefinitePLNFormulas.cc
-	PLNUtils.cc
-	PTLFormulaeKit.cc
-	RuleProvider.cc
-	Rules.cc
-	Tester.cc
+    Ptlatom.cc
+    Grim.cc
 	XMLNode.cc
-	XMLNodeLoader.cc
+	PLNUtils.cc
+    spacetime.cc
+    BOASimulatorAgent.cc
+	RuleProvider.cc
 	PLNShell.cc
+	Tester.cc
+	Rules.cc
+	AtomTableWrapper.cc
+    #	BackInferenceTree.cc
+	XMLNodeLoader.cc
+	deductionLookupTable.cc
+    # for later:
+    # CrispUnificationRule.cc
+    # convert to OpenCog specific class:
+    NMPrinter.cc
 )
 
 INCLUDE_DIRECTORIES (

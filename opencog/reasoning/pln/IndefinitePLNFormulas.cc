@@ -114,7 +114,7 @@ float generateRandomValueBetaDistribution(double a, double b)
  * @param b beta parameter of beta distribution
  * 
  */
-void generateRandomValueBetaDistribution(float values[], int n, double a, double b)
+void generateRandomValueBetaDistribution(vector<float> &values, int n, double a, double b)
 {
 	for(int i=0; i < n; i++)
 	{
@@ -135,7 +135,7 @@ float scaleRandomValue(float value, float L_, float U_)
  * the formula: values[i]=L_+(U_-L_)*values[i]. Remembering that values[i]
  * must be between 0.0 and 1.0. Otherwise, it is truncated.
  */
-void scaleRandomValue(float values[], int size, float L_, float U_)
+void scaleRandomValue(vector<float> &values, int size, float L_, float U_)
 {
 	for(int i=0; i<size; i++)
 	{
@@ -154,7 +154,7 @@ void generateFirstOrderDistributions(IndefiniteTruthValue* TV)
 	vector<float*> result;
 	float L_=TV->getL_();
 	float U_=TV->getU_();
-	float values[100];///n1 random values scaled in [L_,U_]
+	vector<float> values = vector<float>(reasoning::n1, 0.0f);///n1 random values scaled in [L_,U_]
 	///step 2.1 of Matt doc. The parameters alfa=beta=0.5 is the defaulf for beta distribution 
 	float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
 	float beta=alpha;
@@ -162,7 +162,7 @@ void generateFirstOrderDistributions(IndefiniteTruthValue* TV)
 	//scale the values to inteval [L_,U_] (step 2.2 of Matt doc		
 	scaleRandomValue(values, reasoning::n1, L_, U_);
 	
-	float values2[100];
+	vector<float> values2 = vector<float>(reasoning::n2, 0.0f);
 	///Step 3
 	for(int i=0;i<reasoning::n1;i++)
 	{

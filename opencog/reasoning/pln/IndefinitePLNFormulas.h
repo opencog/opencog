@@ -13,6 +13,7 @@
 #include <IndefiniteTruthValue.h>
 
 #include "deductionLookupTable.h"
+#include "Formula.h"
      
 #include <assert.h>
 #include <algorithm>
@@ -115,10 +116,10 @@ static void setUseDeductionLookupTable(bool b){USE_DEDUCTION_LOOKUP_TABLE=b;}
 const int MAX_CONSISTENCY_COUNT=100;
 const float INCONSISTENCY_VALUE=-100.0f;
 
-class IndefiniteSymmetricANDFormula
+class IndefiniteSymmetricANDFormula : public Formula<2>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
     assert(N == 2);
 		assert(TV[0]); assert(TV[1]);
@@ -153,10 +154,10 @@ public:
 };
 
 //modus pones
-class IndefiniteSymmetricImplicationBreakdownFormula
+class IndefiniteSymmetricImplicationBreakdownFormula : public Formula<2>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
         assert(N == 2);
         assert(TV[0]); assert(TV[1]);
@@ -261,10 +262,10 @@ public:
 };
 
 
-class IndefiniteSymmetricRevisionFormula
+class IndefiniteSymmetricRevisionFormula : public Formula<2>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
         assert(N == 2);
 		assert(TV[0]); assert(TV[1]);
@@ -308,10 +309,10 @@ public:
 	}
 };
 
-class IndefiniteSymmetricAbductionFormula
+class IndefiniteSymmetricAbductionFormula : public Formula<5>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
         assert(N == 5);
 		assert(TV[0]); assert(TV[1]);assert(TV[2]); assert(TV[3]);assert(TV[4]);
@@ -340,11 +341,11 @@ public:
 		vector<vector<float> > distributionCB(n1, vector<float>(n2));
 		vector<vector<float> > distributionAC(n1, vector<float>(n2));
 		
-		float valuesA[100];
-		float valuesB[100];
-		float valuesC[100];
-		float valuesAB[100];
-		float valuesCB[100];
+		vector<float> valuesA = vector<float>(n1,0.0f);
+		vector<float> valuesB = vector<float>(n1,0.0f);
+		vector<float> valuesC = vector<float>(n1,0.0f);
+		vector<float> valuesAB = vector<float>(n1,0.0f);
+		vector<float> valuesCB = vector<float>(n1,0.0f);
 		
 		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
 		float beta=alpha;
@@ -429,10 +430,10 @@ public:
 	}
 };
 
-class IndefiniteMem2InhFormula
+class IndefiniteMem2InhFormula : public Formula<1>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
 		assert(N==1);
 		assert(TV[0]);
@@ -449,10 +450,10 @@ public:
 	}
 };
 
-class IndefiniteInh2MemFormula
+class IndefiniteInh2MemFormula : public Formula<1>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
 		assert(N==1);
 		assert(TV[0]);
@@ -472,10 +473,10 @@ public:
 };
 
 
-class IndefiniteSymmetricBayesFormula
+class IndefiniteSymmetricBayesFormula : public Formula<3>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const 
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const 
 	{
     assert(N == 3);
 		assert(TV[0]); assert(TV[1]);assert(TV[2]);
@@ -496,9 +497,9 @@ public:
 		vector<vector<float> > distributionAC(n1, vector<float>(n2));
 		vector<vector<float> > distributionCA(n1, vector<float>(n2));
 
-		float valuesA[100];
-		float valuesC[100];
-		float valuesAC[100];
+		vector<float> valuesA = vector<float>(n1,0.0f);
+		vector<float> valuesC = vector<float>(n1,0.0f);
+		vector<float> valuesAC = vector<float>(n1,0.0f);
 		
 		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
 		float beta=alpha;
@@ -565,10 +566,10 @@ public:
 };
 
 
-class IndefiniteSymmetricDeductionFormula
+class IndefiniteSymmetricDeductionFormula : public Formula<5>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = 10000) const
+	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const
 	{
     assert(N == 5);
 		assert(TV[0]); assert(TV[1]); assert(TV[2]); assert(TV[3]);assert(TV[4]);
@@ -599,11 +600,11 @@ public:
 		vector<vector<float> > distributionBC(n1, vector<float>(n2));
 		vector<vector<float> > distributionAC(n1, vector<float>(n2));
 		
-		float valuesA[100];
-		float valuesB[100];
-		float valuesC[100];
-		float valuesAB[100];
-		float valuesBC[100];
+		vector<float> valuesA = vector<float>(n1,0.0f);
+		vector<float> valuesB = vector<float>(n1,0.0f);
+		vector<float> valuesC = vector<float>(n1,0.0f);
+		vector<float> valuesAB = vector<float>(n1,0.0f);
+		vector<float> valuesBC = vector<float>(n1,0.0f);
 		
 		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
 		float beta=alpha;	
@@ -746,7 +747,7 @@ public:
 class BuildLookuptTableIndefiniteSymmetricDeductionFormula
 {
 public:
-	void compute(long U = 10000) const
+	void compute(long U = DefaultU) const
 	{
 		
 		vector<float> means;
@@ -765,12 +766,12 @@ public:
 		float valuesBC[n1];
 */
 
-        float distributionA[100];
-        float distributionB[100];
-        float distributionC[100];
-        float distributionAB[100];
-        float distributionBC[100];
-        float distributionAC[100];
+		vector<float> distributionA = vector<float>(n2,0.0f);
+		vector<float> distributionB = vector<float>(n2,0.0f);
+		vector<float> distributionC = vector<float>(n2,0.0f);
+		vector<float> distributionAB = vector<float>(n2,0.0f);
+		vector<float> distributionBC = vector<float>(n2,0.0f);
+		vector<float> distributionAC = vector<float>(n2,0.0f);
         
 		//float distributionA,distributionB,distributionC,distributionAB,distributionBC,distributionAC;		
 		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;

@@ -44,9 +44,8 @@
 //#include "iAtomTableWrapper.h"
 
 // PLN utility includes
-//#include "PLNUtils.h"
-//#include "util/log.h"
-//#include <utils2.h>
+#include "PLNUtils.h"
+#include <utils2.h>
 
 // The fixed length of a pattern
 #define PLN_CONFIG_PATTERN_LENGTH 13

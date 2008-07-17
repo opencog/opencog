@@ -14,6 +14,8 @@ namespace reasoning
 {
 enum USizeMode { CONST_SIZE, REAL_SIZE };
 
+tree<Vertex> make_vtree(Handle h);
+
 /** @class AtomTableWrapper
 	\brief The bridge between atom tables (PseudoCore) and PTL.
 */
@@ -89,13 +91,13 @@ public:
 class FIMATW : public AtomTableWrapper
 {
 //	std::map<atom,int,lessatom> node2pat_id;
-	//fim::pat_id next_free_pat_id;
+	fim::pat_id next_free_pat_id;
 public:
 	/// Semi-haxx::
-	//fim::grim myfim;
+	fim::grim myfim;
 
 //	FIMATW(combo::NMCore* core) : AtomTableWrapper(core), next_free_pat_id(30001) {}
-	//FIMATW() : next_free_pat_id(30001) {}
+	FIMATW() : next_free_pat_id(30001) {}
 	virtual ~FIMATW() {}
 
 	Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh, bool managed=true);

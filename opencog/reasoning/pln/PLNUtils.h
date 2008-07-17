@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// What's this for ???
+// What's this for? - possibly not needed?
 #ifndef WIN32
 //	#include <string.h>
 //	#include <dirent.h>
@@ -113,6 +113,17 @@ public:
 	vector2(const T& arg1)
 	{ push_back(arg1);  }
 };
+
+int currentDebugLevel = NORMAL;
+// Cprintf for log level output
+// TODO: replace with OpenCog Logger system
+int cprintf(int debugLevel, const char *format, ...);
+
+void ReasoningLog(int l, std::string m);
+#define LOG(l, m) ReasoningLog(l,m)
+#define SET_LOG(s) _LOGPOS = s; _LOG_FIXED = true
+#define LET_LOG _LOG_FIXED = false;
+#define LOG_STR (_LOG_FIXED ? _LOGPOS : ( std::string(__FILE__) + ":" + i2str(__LINE__) ))
 
 // Print out trees
 void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel);
@@ -312,7 +323,7 @@ Btr<vtree> tree_transform(vtree& vt_const, TransformerT transformer)
 }*/
 
 // It doesn't look like mbegin and mend are used here...
-// But perhaps they are used by external methods. ???
+// Check if they are used by external methods. ???
 template<typename T2, typename T>
 struct mapper
 {
@@ -592,10 +603,13 @@ struct getOutgoingFun : public binary_function<Handle, int, Handle>
 {
 	Handle operator()(Handle h, int i)
 	{
-		//AtomSpace *atomSpace = CogServer::getAtomSpace();
 		return CogServer::getAtomSpace()->getOutgoing(h,i);
 	}
 };
+
+#define getTypeFun std::bind1st(std::mem_fun(&AtomSpace::getType), CogServer::getAtomSpace())
+#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpace::getOutgoing), CogServer::getAtomSpace())
+#define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
 #define getFW_VAR(vt) (find_if((vt).begin(), (vt).end(), \
 			bind(equal_to<Type>(), \
@@ -661,7 +675,7 @@ printf("removeRecursionFromMap...\n");
 printf("removeRecursionFromMap OK!\n");
 }
 
-#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV()))
+#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV())) //, false,false)
 #define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
 
 template<typename T1, typename T2>
@@ -703,12 +717,12 @@ printf("removeRecursionFromMap...\n");
 printf("removeRecursionFromMap OK!\n");
 }
 
-//void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret);
+void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret);
 
 bool substitutableTo(Handle from,Handle to,
 						map<Handle,Handle>& bindings);
 
-}
+} // namespace reasoning
 
 bool IsIdenticalHigherConfidenceAtom(Handle a, Handle b);
 

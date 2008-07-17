@@ -221,7 +221,7 @@ printf("And formm:\n");
 		atom tempa(*outh, outh->begin());
 		tempa.bindings = i->bindings;
 		//i->getWithActualizedSubstitutions(rootAtom->hs[0]);
-		//tempa.getWithActualizedSubstitutions(rootAtom->hs[0]);
+		tempa.getWithActualizedSubstitutions(rootAtom->hs[0]);
 
 printf("Root atom:\n");
 		printAtomTree(*rootAtom,0,3);
@@ -234,12 +234,11 @@ printf("Partial CrispU args:\n");
 		{
 			rawPrint(vtree(p,p),0,0);			
 		}*/
-		/*	
 		vector<atom>& parent_hs = *rootAtom; //->hs[0].hs;
 		for (vector<atom>::iterator p=parent_hs.begin(); p != parent_hs.end(); p++)
-		{*/
+		{
 //			if (!p->real)
-/*			vector<atom>::iterator p=rootAtom.begin(); 
+		//vector<atom>::iterator p=rootAtom.begin(); 
 			set<string> vars;
 			p->extractFWVars(vars);
 			if (!vars.empty())
@@ -252,8 +251,8 @@ printf("Partial CrispU args:\n");
 
 				printAtomTree(*new_h,0,3);
 			}
-		//}
-*/
+		}
+        
 		rootAtom->detach();
 
 		ret1.push_back(BBvtree(new BoundVTree(rootAtom->makeHandletree(destTable))));
