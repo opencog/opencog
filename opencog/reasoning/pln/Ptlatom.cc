@@ -4,7 +4,6 @@
 #include "PLN.h"
 #include "AtomTableWrapper.h"
 #include "Ptlatom.h"
-#include "log.h"
 
 using namespace std;
 

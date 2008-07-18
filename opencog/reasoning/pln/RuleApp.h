@@ -116,7 +116,7 @@ OutIterT Vertices_TO_VtreeProviders(const VContainerT& vs, OutIterT out)
 class RuleApp : public VtreeProvider, public Rule
 {
 	mutable BoundVertex result;
-	mutable vtree		vt_result;
+	mutable vtree vt_result;
 	mutable bool arg_changes_since_last_compute;
 	mutable vector<VtreeProvider*> args;
 	Rule* root_rule;

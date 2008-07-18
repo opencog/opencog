@@ -114,7 +114,14 @@ public:
 	{ push_back(arg1);  }
 };
 
-int currentDebugLevel = NORMAL;
+// defines print levels
+#define SILENT          0
+#define SHY             1
+#define NORMAL          2
+#define LOCAL_DEBUG     3
+#define VERBOSE         4
+#define DEBUG           5
+extern int currentDebugLevel;
 // Cprintf for log level output
 // TODO: replace with OpenCog Logger system
 int cprintf(int debugLevel, const char *format, ...);

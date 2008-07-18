@@ -25,6 +25,10 @@ Compound Procedures
 #ifndef __SPACETIME_H__
 #define __SPACETIME_H__
 
+#include <types.h>
+
+using namespace opencog;
+
 struct Vector1D { float x1; };
 struct Vector3D { float x1; float x2; float x3; };
 

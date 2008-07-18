@@ -158,28 +158,28 @@ namespace reasoning
 
 bool foo42=false;
 
-	void InitPLNTests()
-	{
-		#if LOG_ON_FILE
-		test::logfile=fopen("pln.log","wt");
-			cout << "LOGGING TO FILE pln.log!\n";
-		#endif
+void InitPLNTests()
+{
+    #if LOG_ON_FILE
+    test::logfile=fopen("pln.log","wt");
+        cout << "LOGGING TO FILE pln.log!\n";
+    #endif
 
-		//assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
+    //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
 
-		haxx::printRealAtoms = true;
-		haxx::ArchiveTheorems = true;
+    haxx::printRealAtoms = true;
+    haxx::ArchiveTheorems = true;
 
 /*	/// Test atom identity works
-		Handle h1 = haxx::defaultAtomTableWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
-		Handle h2 = haxx::defaultAtomTableWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+    Handle h1 = haxx::defaultAtomTableWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+    Handle h2 = haxx::defaultAtomTableWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
 
-		assert(h1 == h2);
+    assert(h1 == h2);
 */
-		//currentDebugLevel=-3;
-	}
+    //currentDebugLevel=-3;
+}
 
-	bool satSetTest();
+bool satSetTest();
 
 #define RUN_FAILURE_TESTS 1
 #define WAIT_KEY_ON_FAILURE 1

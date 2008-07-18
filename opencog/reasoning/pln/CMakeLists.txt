@@ -18,6 +18,7 @@ ADD_LIBRARY (pln STATIC
 	PLNShell.cc
 	Tester.cc
 	Rules.cc
+    RuleApp.cc
 	AtomTableWrapper.cc
     #	BackInferenceTree.cc
 	XMLNodeLoader.cc
@@ -26,6 +27,7 @@ ADD_LIBRARY (pln STATIC
     # CrispUnificationRule.cc
     # convert to OpenCog specific class:
     NMPrinter.cc
+    TimeStamp.cc
 )
 
 INCLUDE_DIRECTORIES (

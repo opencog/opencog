@@ -152,6 +152,7 @@ namespace reasoning
 	extern bool RECORD_TRAILS;
 	void footest();
 	void foo_pretest();
+    void RunPLNTests();
 
 	int varcount=0;
 	int addlinks=0;
@@ -186,10 +187,13 @@ void test_core_TVs()
 void test_nm_reset()
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
-	nm->Reset(NULL);
-	
-	assert(nm->getHandleSet(EVALUATION_LINK,"").empty());
-	assert(nm->getHandleSet(LIST_LINK,"").empty());
+	//nm->Reset(NULL);
+    std::list<Handle> ret;
+    nm->getHandleSet(back_inserter(ret), EVALUATION_LINK, "");
+    assert(ret.size() == 0);
+    // if above assert is true, then ret will still be empty
+    nm->getHandleSet(back_inserter(ret), LIST_LINK, "");
+    assert(ret.size() == 0);
 }
 
 
@@ -1044,7 +1048,8 @@ printf("BITNodeRoot init ok\n");
 			case 'x': //puts("Give the XML input file name: "); 
 							cin >> temps;
 						haxx::ArchiveTheorems = true; 
-						nm->Reset(NULL);
+                        // TODO: fix/implement reset
+						//nm->Reset(NULL);
 					 	  axioms_ok = TheNM.LoadAxioms(temps);
 						  haxx::ArchiveTheorems = false;
 						  puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");

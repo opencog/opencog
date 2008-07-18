@@ -1660,7 +1660,7 @@ void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template,
     {
         foreach(Handle arg_h, haxx::inferred_from[h])
         {
-            if (unifiesTo(do_template, make_vtree(arg_h), bindings, bindings, true))
+            if (unifiesTo(do_template, make_vtree((Handle) arg_h), bindings, bindings, true))
             {
                 puts("Satisfies do_template:");
                 printTree(arg_h,level+1,0);

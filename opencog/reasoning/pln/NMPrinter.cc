@@ -1,9 +1,8 @@
 #include "NMPrinter.h"
 
-#include "ClassServer.h"
-//#include "StdAfx.h"
-#include "NMCore.h"
-#include "CoreUtils.h"
+#include <ClassServer.h>
+#include <AtomSpace.h>
+#include <CogServer.h>
 
 FILE* NMPrinter::logFile = NULL;
 int NMPrinter::numberOfPrintersUsingLogFile = 0;
@@ -182,6 +181,7 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
 void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
     //printf("NMPrinter::printHandle()\n");
 //    printf("NMPrinter::printHandle(%p): printOptions = %X\n", h, printOptions);
+    AtomSpace *nm = CogServer::getAtomSpace();
     
     bool isNode = nm->isNode(h); 
     Type type = nm->getType(h);
@@ -202,13 +202,13 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
                 if (printToFile) fprintf(logFile, ":");
             }
             if (printOptions & NMP_NODE_TYPE_NAME) {
-                const char* typeStr = TYPE_TO_STR(type);
+                const char* typeStr = (*ClassServer::getClassName())[type].c_str();
                 out << typeStr;
                 if (printToFile) fprintf(logFile, "%s", typeStr);
             }
         } else {
             if (printOptions & NMP_TYPE_NAME) {
-                const char* typeStr = TYPE_TO_STR(type);
+                const char* typeStr = (*ClassServer::getClassName())[type].c_str();
                 out << typeStr;
                 if (printToFile) fprintf(logFile, "%s", typeStr);
             }
@@ -277,14 +277,15 @@ void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLev
     //printf("NMPrinter::printVTree()\n");
 
     Handle h = boost::get<Handle>(*top);
-    if (!CoreUtils::handleCompare(&h,&UNDEFINED_HANDLE))
+    Handle undefined = TLB::UndefinedHandle();
+    if (CoreUtils::handleCompare(&h,&undefined) == 0)
     { 
         out << "null" << endl;
         if (printToFile) fprintf(logFile, "null\n");
         return;
     }
 
-    if (nm->isReal(h))
+    if (CogServer::getAtomSpace()->isReal(h))
     {
         printHandle(out, h, indentationLevel);
     } else {
@@ -297,7 +298,7 @@ void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLev
             if (!(printOptions & NMP_BRACKETED)) printSpaces(out, indentationLevel);
     
             if (printOptions & NMP_TYPE_NAME) {
-                const char* typeStr = TYPE_TO_STR(type);
+                const char* typeStr = (*ClassServer::getClassName())[type].c_str();
                 out << typeStr;
                 if (printToFile) fprintf(logFile, "%s", typeStr);
             }

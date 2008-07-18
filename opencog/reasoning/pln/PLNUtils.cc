@@ -10,14 +10,16 @@
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
 
+#include <HandleTemporalPair.h>
+#include <ClassServer.h>
+#include <utils2.h>
+
 #include "Rules.h"
 #include "PTLEvaluator.h"
 #include "spacetime.h"
 #include "AtomTableWrapper.h"
-#include <ClassServer.h>
-
+#include "TimeStamp.h"
 #include "Ptlatom.h"
-#include <utils2.h>
 #include "BackInferenceTreeNode.h"
 
 #include "PLNUtils.h"
@@ -26,7 +28,7 @@
 	#include "TimeServer.h"
 #endif
 
-class HandleEntry;
+//class HandleEntry;
 namespace test
 {
 extern FILE *logfile;
@@ -41,7 +43,7 @@ namespace haxx
 }
 
 /// Legacy log system from Novamente, TODO: replace
-extern int currentDebugLevel;
+int currentDebugLevel = NORMAL;
     
 int cprintf(int debugLevel, const char *format, ...) {
     if (debugLevel > currentDebugLevel) return 0;
@@ -733,23 +735,26 @@ cprintf(2,"TableGather:\n");
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long tLong = atol(nm->getName(tHandle).c_str());
                                         TimeStamp* ts = new TimeStamp(false, tLong);
+                                        std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries with the exact timestamp: " << ts->toString() << endl;
-                                        HandleTemporalPairEntry* timeEntries = TimeServer::getInstance()->getTemporal(matchingHandle, ts, true);
-                                        if (timeEntries != NULL) {
-                                            cout << "matched element satisfies the time condition " << timeEntries->handleTemporalPair.toString() << endl;
+                                        nm->getTimeServer().get(back_inserter(timeEntries), matchingHandle, *ts, TemporalTable::EXACT);
+                                        if (timeEntries.size() > 0) {
+                                            cout << "matched element satisfies the time condition " << timeEntries.front().toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", tLong);
-                                            Handle tNode = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            // TODO fresh bug
+                                            Handle tNode = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV()); //, false, true);
                                             vector<Handle> listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(tNode);
-                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
+                                            // TODO fresh bug
+                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV()); //, false, true);
+                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV()); //, false, true);
                                             vector<Handle> evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f))); //, true, true);
                                             if (itr->bindings) { 
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
@@ -780,27 +785,29 @@ cprintf(2,"TableGather:\n");
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long t1Long = atol(nm->getName(t1Handle).c_str());
                                         unsigned long t2Long = atol(nm->getName(t2Handle).c_str());
-                                        TimeLag* tl = new TimeLag(false, t1Long, t2Long);
-                                        cout << "Looking for HandleTime entries inside the following timelag: " << tl->toString() << endl;
-                                        HandleTemporalPairEntry* timeEntries = TimeServer::getInstance()->getTemporal(matchingHandle, tl, false);
-                                        if (timeEntries != NULL) {
-                                            cout << "matched element satisfies the time condition: " << timeEntries->handleTemporalPair.toString() << endl;
+                                        Temporal* tl = new Temporal(t1Long, t2Long);
+                                        std::list<HandleTemporalPair> timeEntries;
+                                        cout << "Looking for HandleTime entries inside the following temporal: " << tl->toString() << endl;
+                                        // TODO: is STARTS_WITHIN correct?
+                                        nm->getTimeServer().get(back_inserter(timeEntries),matchingHandle, *tl, TemporalTable::STARTS_WITHIN);
+                                        if (timeEntries.size() > 0) {
+                                            cout << "matched element satisfies the time condition: " << timeEntries.front().toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", t1Long);
-                                            Handle t1Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            Handle t1Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV()); //, false, true);
                                             sprintf(tNodeName, "%lu", t2Long);
-                                            Handle t2Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            Handle t2Node = nm->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV()); //, false, true);
                                             std::vector<Handle> listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(t1Node);
                                             listLinkOutgoing.push_back(t2Node);
-                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
+                                            Handle listLink = nm->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV()); //, false, true);
+                                            Handle atTimePredNode = nm->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV()); //, false, true);
                                             std::vector<Handle> evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f))); //, true, true);
 											
 											cprintf(1, "Created new atInterval link:\n");
 											printTree(evalLink,0, 1);
@@ -1313,7 +1320,7 @@ void printAtomTree(const atom& a, int level, int LogLevel)
 	else
 	{
 		char buf[500];
-		sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), (*ClassServer::class_name)[a.T], a.T, (int)a.real);
+		sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), (*ClassServer::getClassName())[a.T].c_str(), a.T, (int)a.real);
 		string subst_buf = make_subst_buf(a);
 
 		LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
@@ -1871,7 +1878,7 @@ bool ttsubstitutableTo(Handle from,Handle to,
                         found_unbound_variable = true;
                     }
                 } else {
-                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", (*(ClassServer::class_name))[from_T], variable_index, i);
+                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", (*(ClassServer::getClassName()))[from_T].c_str(), variable_index, i);
                 }
             }
         }
@@ -2181,7 +2188,7 @@ bool equalVariableStructure(const vtree& lhs, const vtree& rhs)
 bool equalVariableStructure2(BBvtree lhs, BBvtree rhs)
 {
 //	return false;
-	return lhs->std_tree() == rhs->std_tree();
+	return lhs->getStdTree() == rhs->getStdTree();
 //	return equalVariableStructure(lhs->std_tree(), rhs->std_tree());
 }
 
@@ -2298,7 +2305,7 @@ void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 
 void pr2(pair<Handle, vtree> i)
 {cprintf(4, "%d => ", (int)i.first);
-	raw_print(i.second, i.second.begin(),3);
+	rawPrint(i.second, i.second.begin(),3);
 }
 
 void print_binding(pair<Handle, vtree> i)
@@ -2374,8 +2381,8 @@ bool IsIdenticalHigherConfidenceAtom(Handle a, Handle b)
 
 	/// \todo Speed-optimize!
 
-	vtree va(make_vtree(a));
-	vtree vb(make_vtree(b));
+	vtree va(reasoning::make_vtree(a));
+	vtree vb(reasoning::make_vtree(b));
 
 	return va == vb &&
 		(nm->getTV(b).getConfidence() - nm->getTV(a).getConfidence())
@@ -2420,7 +2427,7 @@ bool unifiesTo(	const vtree & lhs_t, const vtree & rhs_t,
 			
 			if (nm->isReal(*ph_ltop) && !lhs_is_node)
 			{
-				vtree ltop_as_tree(make_vtree(*ph_ltop));
+				vtree ltop_as_tree(reasoning::make_vtree(*ph_ltop));
 				
 				return unifiesTo(ltop_as_tree, rhs_t,
 					ltop_as_tree.begin(), rtop, Lbindings, Rbindings, allow_rhs_binding, VarType);
@@ -2438,7 +2445,7 @@ bool unifiesTo(	const vtree & lhs_t, const vtree & rhs_t,
 
 					if (nm->isReal(*ph_rtop) && !rhs_is_node)
 					{
-						vtree rtop_as_tree(make_vtree(*ph_rtop));
+						vtree rtop_as_tree(reasoning::make_vtree(*ph_rtop));
 
 						return unifiesTo(lhs_t, rtop_as_tree,
 							rtop, rtop_as_tree.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);

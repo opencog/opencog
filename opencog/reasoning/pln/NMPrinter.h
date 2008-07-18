@@ -11,6 +11,7 @@
 
 #include <types.h>
 #include <utils2.h>
+#include "PLNUtils.h"
 
 //#include "Ptlatom.h"
 
@@ -41,6 +42,8 @@
 
 using namespace std;
 using namespace boost;
+using namespace opencog;
+using namespace reasoning;
 
 typedef variant < Handle, vtree > NMPrintable;
 
