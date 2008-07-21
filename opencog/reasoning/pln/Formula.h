@@ -38,7 +38,7 @@ class ArityFreeFormula
      *   Result compute(TruthValue** tvs,int N) const;
      ***/
 
-	virtual ResultType compute(TVType**, int N, long U = DefaultU) const;
+	virtual ResultType compute(TVType**, int N, long U = DefaultU) const {};
 
 	/**
 		U is the universe size...
@@ -79,7 +79,7 @@ class ArityFreeFormula
 		exit(1);
 	}
 
-	virtual ~ArityFreeFormula();
+	virtual ~ArityFreeFormula() {};
 
     ResultType checkTruthValue(ResultType tv) const
 	{

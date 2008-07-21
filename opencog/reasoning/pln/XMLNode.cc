@@ -24,6 +24,7 @@
  */
 #include "PLN.h"
 #include "XMLNode.h"
+#include <utils.h>
 #include <utils2.h>
 //#include "PTLutils.h"
 

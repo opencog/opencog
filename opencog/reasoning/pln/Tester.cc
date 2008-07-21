@@ -20,7 +20,6 @@
 //#include "../core/HandleTemporalPairEntry.h"
 //#include "PLNShell.h"
 
-#define STD_VARS 100
 
 using namespace reasoning;	
 

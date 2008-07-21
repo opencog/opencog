@@ -86,6 +86,11 @@ typedef tree<Vertex> vtree;
 #define Btr boost::shared_ptr
 #define DeclareBtr(__T, __varname) Btr< __T > __varname(new __T)
 
+namespace haxx
+{
+const int STD_VARS = 100;
+}
+
 // added by ricbit
 using namespace std;
 

@@ -1,5 +1,3 @@
-#include "PLN.h"
-
 #include <exceptions.h>
 
 #ifdef WIN32
@@ -13,6 +11,8 @@
 #include <HandleTemporalPair.h>
 #include <ClassServer.h>
 #include <utils2.h>
+
+#include "PLN.h"
 
 #include "Rules.h"
 #include "PTLEvaluator.h"
@@ -34,12 +34,11 @@ namespace test
 extern FILE *logfile;
 }
 
-#define STD_VARS 100
 namespace haxx
 {
 	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
 	bool printRealAtoms = false;
-	extern Handle VarTypes[STD_VARS];
+	Handle VarTypes[STD_VARS];
 }
 
 /// Legacy log system from Novamente, TODO: replace
@@ -2123,7 +2122,7 @@ void BoundVTree::createMyStdTree()
 	for (vtree::pre_order_iterator i = my_std_tree.begin(); i != my_std_tree.end(); i++)
 	{
 		Handle *plh = v2h(&*i);
-		if (plh && ((long)plh)>220+STD_VARS && inheritsType(nm->getType(*plh), FW_VARIABLE_NODE))
+		if (plh && ((long)plh)>220+::haxx::STD_VARS && inheritsType(nm->getType(*plh), FW_VARIABLE_NODE))
 		{
 			bindingsT::iterator old_mapping = varmap.find(*plh);
 			if (old_mapping != varmap.end())
@@ -2132,7 +2131,8 @@ void BoundVTree::createMyStdTree()
 			}
 			else
 			{
-				assert(vars < STD_VARS);
+                int wtf = ::haxx::STD_VARS;
+				assert(vars < wtf);
 				varmap[*plh] = ::haxx::VarTypes[vars++];
 				*i = Vertex(varmap[*plh]);
 			}

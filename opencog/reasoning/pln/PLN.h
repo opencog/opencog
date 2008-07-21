@@ -29,12 +29,10 @@
 
 // OpenCog includes
 #include <AtomSpace.h>
-//#ifndef USE_PSEUDOCORE
 #include <Link.h>
 #include <Atom.h>
 #include <Node.h>
 #include <TLB.h>
-//#endif
 #include <classes.h>
 #include <SimpleTruthValue.h>
 
@@ -55,7 +53,10 @@
 #define foreach BOOST_FOREACH
 #define Btr boost::shared_ptr
 
-typedef unsigned long ulong;
-enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
-enum MetaProperty { NONE, STRENGTH, CONFIDENCE, STRENGTH_CONFIDENCE, LTI, STI };
+namespace reasoning {
+    typedef unsigned long ulong;
+    enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
+    enum MetaProperty { NONE, STRENGTH, CONFIDENCE, STRENGTH_CONFIDENCE, LTI, STI };
+}
+
 #endif // _PLN_H

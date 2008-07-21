@@ -6,6 +6,7 @@
 #include <CogServer.h> // To get access of AtomSpace
 #include <tree.h>
 #include <utils2.h>
+#include <utils.h>
 
 #if 1 //000
 
@@ -61,7 +62,7 @@ namespace haxx
 }
 
 //static map<Handle,vtree> h2vtree_cache;
-vtree make_vtree(Handle h)
+vtree reasoning::make_vtree(Handle h)
 {
 /// \todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
 /*    map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
