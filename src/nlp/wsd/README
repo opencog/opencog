@@ -641,10 +641,21 @@ Ideas/TODO
 -- Per ben:
    Use the following similarity measure:
    "Probability of _obj(sense 1 of cut, sense 1 of finger)"
-   "Probability of _obj(sense  1 cut, sense 2 of finger)"
+   "Probability of _obj(sense 1 of cut, sense 2 of finger)"
    based on a large corpus.
 
+-- Use word frequency scores to identify the "important" words in a 
+   sentence. These "important words" should get greater weight for WSD,
+   as opposed to lower-importance words. This is similar to the idea of
+   distinguishing between "function words" and "content words" --
+   function words having only a gramatical function, whereas the
+   "content words" hold most of the semantic content. The idea here
+   is that certain "content words" hold "more content" than others,
+   based on thier information entropy (information content).
 
+-- Use mutual-information scores to tie together word pairs more
+   tightly. ... !? The tightest word-pairs are likely to be idioms, 
+   and so these should have senses of thier own.
 
 -- where does parse-ranking fit into the scheme of things?
    Should total up the high scores for different parses. This
