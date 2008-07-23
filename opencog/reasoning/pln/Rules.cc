@@ -311,7 +311,7 @@ getc(stdin);getc(stdin);getc(stdin);
 
         assert(outh->begin().number_of_children() == 1);
     
-		ret.push_back(BBvtree(new BoundVTree(vtree(outh->begin(outh->begin()))))); //1st child
+		ret.push_back(BBvtree(new BoundVTree(outh->begin(outh->begin())))); //1st child
 
 //      printAtomTree(*(*ret)[0],0,4);
 
@@ -669,12 +669,11 @@ printer.print(rootAtom->begin(),3);
                 if ( (!nm->isReal(v2h(*pit))
                     || inheritsType(nm->getType(v2h(*pit)), FW_VARIABLE_NODE))
                     && v2h(*pit) != (Handle)LIST_LINK
-                    && !STLhas(arg_targets, vtree(pit)) )
-                    // changed *pit to vtree(pit)
+					&& !STLhas(arg_targets, *pit) )
                 {
-					ret1.push_back(BBvtree(new BoundVTree(vtree(pit), pre_binds)));
+					ret1.push_back(BBvtree(new BoundVTree(pit, pre_binds)));
 
-					arg_targets.insert(vtree(pit));
+					arg_targets.insert(*pit);
                 }
             }
         }
@@ -1498,7 +1497,7 @@ printAtomTree(outh,0,1);
         for (tree<Vertex>::sibling_iterator i = outh->begin(top); i != outh->end(top); i++)
         {
             //ret.push_back(BBvtree(new BoundVTree((ModifiedVTree *) *i)));
-			ret.push_back(BBvtree(new BoundVTree(vtree(i))));
+			ret.push_back(BBvtree(new BoundVTree(i)));
         }       
             
         overrideInputFilter = true;
@@ -2160,10 +2159,11 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, Handle 
         MPs ret;
         Vertex myvar = CreateVar(destTable);
 
+        // Joel: Wrapped up myvar in vtree to fit functions
         ret.push_back(BBvtree(new BoundVTree(mva((Handle)IMPLICATION_LINK, 
-            myvar,
+            vtree(myvar),
             *outh))));
-		ret.push_back(meta(new BoundVTree(myvar)));
+//		ret.push_back(meta(new BoundVTree(myvar)));
         
         overrideInputFilter = true;
         
@@ -2244,9 +2244,9 @@ printer.print(ret, 1);
         printer.print(outh->begin(), 4);
 
         ret.push_back(BBvtree(new BoundVTree(
-                        mva((Handle)IMPLICATION_LINK, myvar,*outh))));
+                        mva((Handle)IMPLICATION_LINK, vtree(myvar),*outh))));
         cprintf(4,"Need:\n");
-        ret.push_back(BBvtree(new BoundVTree()));
+		ret.push_back(BBvtree(new BoundVTree(myvar)));
         printer.print(ret[0]->begin(), 4);
         printer.print(ret[1]->begin(), 4);
 
@@ -2906,7 +2906,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
         mva(nm->getOutgoing(v2h(h[1]))[0]),
         mva(nm->getOutgoing(v2h(h[0]))[1])));*/
     
-    return BBvtree(new BoundVTree());
+	return BBvtree(new BoundVTree(ret.makeHandletree(destTable)));
 }
 
 /*

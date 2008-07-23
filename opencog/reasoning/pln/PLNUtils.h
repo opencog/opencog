@@ -620,7 +620,7 @@ struct getOutgoingFun : public binary_function<Handle, int, Handle>
 };
 
 #define getTypeFun std::bind1st(std::mem_fun(&AtomSpace::getType), CogServer::getAtomSpace())
-#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpace::getOutgoing), CogServer::getAtomSpace())
+//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpace::getOutgoing), CogServer::getAtomSpace())
 #define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
 #define getFW_VAR(vt) (find_if((vt).begin(), (vt).end(), \
