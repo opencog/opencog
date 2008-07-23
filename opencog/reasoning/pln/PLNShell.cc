@@ -212,6 +212,10 @@ void PLNShell_RunLoop(int argc, char** args)
 	try {
 		puts("Initializing PLN test env...");
 
+        // Temporary, make PLN functional without using the CogServer
+        // Initialise CogServer
+        opencog::server();
+
 #ifdef USE_PSEUDOCORE
 		RunPLNtest = (argc>1 && args[1][0] == 't');
 
@@ -856,8 +860,8 @@ printf("BITNodeRoot init ok\n");
 		#endif
 		
 		haxx::AllowFW_VARIABLENODESinCore = true; //false;
-	iAtomTableWrapper* defaultAtomTableWrapper;
-	AtomTableWrapper& TheNM = *((AtomTableWrapper*) defaultAtomTableWrapper);
+        //iAtomTableWrapper* defaultAtomTableWrapper;
+        AtomTableWrapper& TheNM = *((AtomTableWrapper*) haxx::defaultAtomTableWrapper);
 		
 		switch (c)
 		{

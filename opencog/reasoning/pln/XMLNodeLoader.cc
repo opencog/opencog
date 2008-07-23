@@ -25,16 +25,16 @@ int xml_level = -1;
 	
 Handle LoadXMLFile(iAtomTableWrapper* table, string fname)
 {
- printf("LoadXMLfile...");
+ cprintf(5, "LoadXMLfile...");
 	/// \todo haxx::
 	xml_level = -1;
 	nodenames.clear();
- printf("thms clear...");
+ cprintf(5, "thms clear...");
 	CrispTheoremRule::thms.clear();
-  printf("LoadTextFile...");
+  cprintf(5, "LoadTextFile...");
 	string buf;
-	//LoadTextFile(fname.c_str(), buf);
-  printf("LoadXMLInput...");
+	LoadTextFile(fname.c_str(), buf);
+  cprintf(5, "LoadXMLInput...");
 	return LoadXMLInput(table, buf);
 }
 
@@ -68,7 +68,7 @@ LOG(1, "Loading XML Input...");
     L(ClassServer::getTypeName(NOT_LINK), NOT_LINK);
     L(ClassServer::getTypeName(EXIST_LINK), EXIST_LINK);
     L(ClassServer::getTypeName(FORALL_LINK), FORALL_LINK);
-   // L(ClassServer::getTypeName(EQUIVALENCE_LINK), EQUIVALENCE_LINK);
+    L(ClassServer::getTypeName(EQUIVALENCE_LINK), EQUIVALENCE_LINK);
     L(ClassServer::getTypeName(EXECUTION_OUTPUT_LINK), EXECUTION_OUTPUT_LINK);
     L(ClassServer::getTypeName(EXECUTION_LINK), EXECUTION_LINK);
     L(ClassServer::getTypeName(MEMBER_LINK), MEMBER_LINK);

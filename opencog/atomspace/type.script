@@ -107,6 +107,10 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 // NOUN_NUMBER_LINK <- ORDERED_LINK
 // WORD_GENDER_LINK <- ORDERED_LINK
 // QUERY_VARIABLE_LINK <- ORDERED_LINK
+
+// Should be replaced by entensional and intensional
+// equivalence
+EQUIVALENCE_LINK <- UNORDERED_LINK
 // 
 // New relex nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.

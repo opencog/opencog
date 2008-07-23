@@ -210,41 +210,28 @@ bool AtomTableWrapper::Prepare()
 
 bool AtomTableWrapper::LoadAxioms(const string& path)
 {
-//#ifndef WIN32
-	string fname("../test/reasoning/" + path);
-	string fname2("test/reasoning/" + path);
-	string fname3("../../test/reasoning/" + path);
-	if (!exists(fname.c_str()))
+    // TODO: check exists works on WIN32
+	string fname(path);
+	string fname2("../tests/reasoning/" + path);
+	if (!exists(fname.c_str())) {
+        printf("File %s doesn't exist.\n", fname.c_str());
 		fname = fname2;
-	if (!exists(fname.c_str()))
-		fname = fname3;
-/*#else
-		string fname(path);
-		string fname2=fname;
-#endif*/
+    }
+	if (!exists(fname.c_str())) {
+        printf("File %s doesn't exist.\n", fname.c_str());
+        return false;
+    }
 	
-	try
-	{
+	try {
         printf("Loading axioms from: %s \n", fname.c_str());
-//LOG(0, "Loading axioms from " + fname);
 		U = LoadXMLFile(this, fname);
 		LoadedFiles.insert(fname);
-	}
-	catch(...) {
-		try
-		{
-        printf("Loading axioms from: %s \n", fname2.c_str());
-//LOG(0, "Loading axioms from " + fname2);
-		U = LoadXMLFile(this, fname2);
-		LoadedFiles.insert(fname2);
-
-		} catch(string s) { 
-			LOG(0, s); 
-			return false; 
-        } catch(...) { 
-			LOG(0, "UNKNOWN EXCCEPTION IN LOADAXIOMS!!!"); 
-			return false; 
-		}
+    } catch(string s) { 
+        LOG(0, s); 
+        return false; 
+    } catch(...) { 
+        LOG(0, "UNKNOWN EXCEPTION IN LOADAXIOMS!!!"); 
+        return false; 
 	}
 
 	return true;

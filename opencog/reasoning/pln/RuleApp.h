@@ -236,10 +236,12 @@ public:
 
 		result = root_rule->compute(bound_args);
 
-out:
-
+        /// This used to be below out, but when args are empty so is
+        //result.value and isReal is false
 		//assert(v2h(result.value)->isReal());
 		assert(CogServer::getAtomSpace()->isReal(v2h(result.value)));
+out:
+
 
 		return result;
 	}

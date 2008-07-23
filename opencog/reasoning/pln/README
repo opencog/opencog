@@ -1,1 +1,25 @@
-Cesar ... todo
+
+== TODO
+
+There are a lot of potential design changes that it'd be nice to make, as well
+as other quite important tasks.
+
+=== Important
+
+* Fresh = true bug.
+* Integrate PLN atoms types with the rest of opencog in atomspace/types
+* Ask about changing the name of AtomTableWrapper to AtomSpaceWrapper
+* Replace CogServer::getAtomSpace with a call to AtomTableWrapper::getAtomSpace,
+    also implement a way to set the AtomSpace. Perhaps this is provided by the
+    Pseudocore? investigate...
+
+
+
+=== Moderate
+
+* Allow PLN to use general OpenCog XML loader instead of it's own special one.
+Either by modifying the OpenCog loader or by adapting how PLN saves XML and
+loads XML.
+
+
+=== Nice to have

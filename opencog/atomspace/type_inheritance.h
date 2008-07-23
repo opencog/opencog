@@ -58,6 +58,7 @@ init_inheritance(map, ORDERED_LINK, PREDICTIVE_IMPLICATION);
 init_inheritance(map, ORDERED_LINK, TAIL_PREDICTIVE_IMPLICATION);
 init_inheritance(map, ORDERED_LINK, EVENTUAL_SEQUENTIAL_AND_LINK);
 init_inheritance(map, ORDERED_LINK, EVENTUAL_PREDICTIVE_IMPLICATION_LINK);
+init_inheritance(map, UNORDERED_LINK, EQUIVALENCE_LINK);
 init_inheritance(map, CONCEPT_NODE, DOCUMENT_NODE);
 init_inheritance(map, CONCEPT_NODE, SENTENCE_NODE);
 init_inheritance(map, CONCEPT_NODE, PARSE_NODE);

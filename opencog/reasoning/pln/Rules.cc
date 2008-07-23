@@ -83,7 +83,7 @@ Vertex CreateVar(iAtomTableWrapper* atw, std::string varname)
     Handle ret = atw->addNode(FW_VARIABLE_NODE,varname,
         TruthValue::TRIVIAL_TV(),false,false);
     
-printf("CreateVar Added node as NEW: %s / [%lu]\n", varname.c_str(), (ulong) ret);
+cprintf(4, "CreateVar Added node as NEW: %s / [%lu]\n", varname.c_str(), (ulong) ret);
 
     varcount++;
 
@@ -105,7 +105,7 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
         {
             puts("!isReal");
             printf("%lu\n", v2h(bv.value)); 
-            //NMPrinter(NMP_ALL)(v2h(bv.value), -10);
+            NMPrinter(NMP_ALL)(v2h(bv.value), -10);
         }
 
         assert(nm->isReal(v2h(bv.value)));
@@ -159,7 +159,7 @@ bool Rule::validate(const vector<Vertex>& h) const
     
     if (n != inputFilter.size())
     {
-        printf("Rule::validate FALSE. Input vector  size: %d\n", n);
+		cprintf(0,"Rule::validate FALSE. Input vector  size: %d\n", n);
 #if 0        
         for (int i=0;i<n;i++)
             printTree(v2h(h[i]),0,0);
@@ -190,14 +190,14 @@ bool Rule::validate(const vector<Vertex>& h) const
                 std::swap(myh[i], myh[r]);
             else
             {
-                printf("Rule::validate FALSE. Input vector:\n");
+				cprintf(0,"Rule::validate FALSE. Input vector:\n");
 #if 0                
                 for (int j=0;j<n;j++)
                     printTree(v2h(h[j]),0,0);
 #else 
-                //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-                //for (int j=0;j<n;j++)
-                //    printer.print(v2h(h[j]));
+                NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+                for (uint j=0;j<n;j++)
+                    printer.print(v2h(h[j]));
 #endif             
                 
                 return false;
@@ -305,13 +305,13 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
         if (!inheritsType(nm->getType(v2h(*outh->begin())), NOT_LINK))
             return Rule::setOfMPs();
 
-printf("SHOULD NOT BE HERE!");
+LOG(-10, "SHOULD NOT BE HERE!");
 getc(stdin);getc(stdin);getc(stdin);
         MPs ret;
 
         assert(outh->begin().number_of_children() == 1);
     
-        //ret.push_back(BBvtree(new BoundVTree(outh->begin(outh->begin())))); //1st child
+		ret.push_back(BBvtree(new BoundVTree(vtree(outh->begin(outh->begin()))))); //1st child
 
 //      printAtomTree(*(*ret)[0],0,4);
 
@@ -434,14 +434,14 @@ BoundVertex BaseCrispUnificationRule::compute(const vector<Vertex>& premiseArray
     const int n = premiseArray.size();
     AtomSpace *nm = CogServer::getAtomSpace();
     
-    printf("BaseCrispUnificationRule::compute:");
+	cprintf(4, "BaseCrispUnificationRule::compute:");
 #if 0    
     for (int i=0;i<n;i++)
         printTree(v2h(premiseArray[i]), 0, 4);
 #else 
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //for (int i=0;i<n;i++)
-    //    printer.print(v2h(premiseArray[i]), 4);
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    for (int i=0;i<n;i++)
+        printer.print(v2h(premiseArray[i]), 4);
 #endif
     
     assert(nm->getType(v2h(premiseArray[0])) == FORALL_LINK);
@@ -470,12 +470,12 @@ Btr<set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta
 #if 0
     rawPrint(*outh, outh->begin(),0);
 #else 
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //printer.print(outh->begin());
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    printer.print(outh->begin());
 #endif
-printf("FindMatchingUniversals...\n");
+cprintf(3,"FindMatchingUniversals...\n");
     Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
-printf("FindMatchingUniversals OK!\n");
+cprintf(3,"FindMatchingUniversals OK!\n");
     if (!i)
         return Btr<set<BoundVertex > >();
 
@@ -493,9 +493,9 @@ printf("FindMatchingUniversals OK!\n");
         cprintf(0,"=");
         printTree((*pre_binds)[vp.first],0,0);
 #else 
-        //printer.print(vp.first);
-        printf("=");
-        //printer.print((*pre_binds)[vp.first]);
+        printer.print(vp.first);
+        cprintf(0,"=");
+        printer.print((*pre_binds)[vp.first]);
 #endif
     }
 
@@ -531,8 +531,8 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
 #if 0
     rawPrint(*outh, outh->begin(),0);
 #else 
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //printer.print(outh->begin());
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    printer.print(outh->begin());
 #endif
 
     Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
@@ -563,7 +563,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
 
     overrideInputFilter = true;
     
-printf("Crispu.o2i: OK! Solution vector size=%u\n", (uint) ret.size());
+cprintf(3,"Crispu.o2i: OK! Solution vector size=%u\n", (uint) ret.size());
     
     return ret;
 }
@@ -610,8 +610,8 @@ Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrid
 #if 0
     rawPrint(*outh, outh->begin(),0);
 #else 
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //printer.print(outh->begin());
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    printer.print(outh->begin());
 #endif
 
     Btr< set<Btr<ModifiedBoundVTree> > > varforms = FindMatchingUniversals(outh, destTable);
@@ -637,20 +637,20 @@ Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrid
 
         ret1.push_back(BBvtree(new BoundVTree(mva(i->original_handle), pre_binds)));
 
-printf("And formm:\n");
+cprintf(3,"And formm:\n");
 #if 0
 rawPrint(*ret1[0], ret1[0]->begin(),3);
 #else 
-//printer.print(ret1[0]->begin(),3);
+printer.print(ret1[0]->begin(),3);
 #endif
 
         BBvtree rootAtom(new BoundVTree(mva((Handle)HYPOTHETICAL_LINK, *i), pre_binds));
 
-printf("Root:\n");
+cprintf(3,"Root:\n");
 #if 0
 rawPrint(*rootAtom, rootAtom->begin(),3);
 #else 
-//printer.print(rootAtom->begin(),3);
+printer.print(rootAtom->begin(),3);
 #endif
 
         ///Record targets to prevent multiple occurrence of the same target in the arg set.
@@ -665,17 +665,17 @@ rawPrint(*rootAtom, rootAtom->begin(),3);
             vtree tRes(sit);
 
             for (vtree::post_order_iterator pit = tRes.begin_post(); pit!=tRes.end_post(); pit++)
-            {/*
+			{
                 if ( (!nm->isReal(v2h(*pit))
                     || inheritsType(nm->getType(v2h(*pit)), FW_VARIABLE_NODE))
                     && v2h(*pit) != (Handle)LIST_LINK
-                    && !STLhas(arg_targets, *pit) )
+                    && !STLhas(arg_targets, vtree(pit)) )
+                    // changed *pit to vtree(pit)
                 {
-                    //ret1.push_back(BBvtree(new BoundVTree(pit, pre_binds)));
+					ret1.push_back(BBvtree(new BoundVTree(vtree(pit), pre_binds)));
 
-                    //arg_targets.insert(*pit);
+					arg_targets.insert(vtree(pit));
                 }
-                */
             }
         }
 
@@ -699,7 +699,7 @@ for(; m != ret1.end(); m++)
 
     overrideInputFilter = true;
     
-printf("Crispu.o2i: OK! Solution vector size=%u\n", (uint) ret.size());
+cprintf(3,"Crispu.o2i: OK! Solution vector size=%u\n", (uint) ret.size());
     
     return ret;
 }
@@ -884,7 +884,7 @@ Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overr
     tree<Vertex>::sibling_iterator hs11 = outh->begin(hs1);
     tree<Vertex>::sibling_iterator hs10 =hs11++;
 
-printf("T:%d\n", (Type)(int)v2h(*hs1));
+cprintf(0,"T:%d\n", (Type)(int)v2h(*hs1));
     
     if (hs0  == outh->end(outh->begin()) ||
         hs11 == outh->end(hs1) ||
@@ -978,38 +978,38 @@ BBvtree bind_vtree(vtree &targ, map<Handle, vtree>& binds)
                 {               
                     changes = false;
                     
-                    printf("Next change...\n");
+					cprintf(4,"Next change...\n");
                     
                     for(vtree::pre_order_iterator vit = thm_substed->begin(); vit != thm_substed->end(); vit++)
                     {
-                        printf("Next change check...\n");
+						cprintf(4,"Next change check...\n");
                         
                         Handle *ph = v2h(&*vit);
                         if (ph)
                         {
-                            printf("(ph)");
+							cprintf(4,"(ph)");
                             
                             map<Handle, vtree>::iterator it = binds.find(*ph);
                             if (it != binds.end()) {
                             
-                                printf("replacing...[%lu]\n", v2h(*vit));
-                                printf("with...\n");
-                                //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-                                //printer.print(it->second.begin(),4);
+                                cprintf(4,"replacing...[%lu]\n", v2h(*vit));
+                                cprintf(4,"with...\n");
+                                NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+                                printer.print(it->second.begin(),4);
                                 
                                 thm_substed->replace(vit, it->second.begin());
 
-                                printf("replace ok\n");
+								cprintf(4,"replace ok\n");
 
                                 changes = true;
                                 goto break_inner; //vit = thm_substed->end(); //break inner loop                            
                             }
                         }
                         else
-                            printf("NOT (ph)");
+							cprintf(4,"NOT (ph)");
                     }
 break_inner:                    
-                    printf("1 change run ok");
+					cprintf(4,"1 change run ok");
                 } while (changes);
                 
     return thm_substed;             
@@ -1040,12 +1040,12 @@ bool htemp=false;
         
         foreach(vtree& targ, thm->second)
         {
-            printf("Producing thm: checking...\n");
+			cprintf(1, "Producing thm: checking...\n");
             
             vtree tmp(thm->first);
 
-            //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-            //printer.print(tmp.begin(),1);
+			NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+            printer.print(tmp.begin(),1);
 
             //foreach(Vertex v, targ)
             for(vtree::iterator v  = targ.begin(); v != targ.end(); v++)
@@ -1072,11 +1072,11 @@ bool htemp=false;
                 
          typedef pair<Handle,Handle> hpair;
                 
-         printf("Bindings are:\n");
+		 cprintf(4,"Bindings are:\n");
                 
          foreach(hpair hp, newPreBinds)
-            printf("%s => %s\n", nm->getName(hp.first).c_str(), nm->getName(hp.second).c_str());
-         printf("<<< Bindings\n");
+			cprintf(4, "%s => %s\n", nm->getName(hp.first).c_str(), nm->getName(hp.second).c_str());
+		 cprintf(4,"<<< Bindings\n");
                 
         /// Replace the old vars with renamed counterparts
                 
@@ -1105,35 +1105,35 @@ bool htemp=false;
                     count2++;
                 }
             }
-         printf("From,to\n");
+		 cprintf(4,"From,to\n");
             
          vtree tmp2(thm->first);
 
-         //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-         //printer.print(tmp2.begin(),4);
+		 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+         printer.print(tmp2.begin(),4);
          tmp2 = thm_target;
-         //printer.print(tmp2.begin(),4);
+         printer.print(tmp2.begin(),4);
         
-         printf("counts: %ld %ld\n", count1, count2);
+         cprintf(4,"counts: %ld %ld\n", count1, count2);
         
-         printf("Unifies to %lu:\n",v2h(*outh->begin()));
+         cprintf(4,"Unifies to %lu:\n",v2h(*outh->begin()));
 
-         //printer.print(outh->begin(), 4);
+         printer.print(outh->begin(), 4);
 
 /// haxx:: warning!
 /// should have different binds for left and right!!!
 
         if (unifiesTo(thm_target, *outh, binds, binds, true))
         {
-             printf("Unifies!\n");
+             cprintf(4,"Unifies!\n");
              vtree tmp(thm_target);
 
-             //printer.print(tmp.begin(), 4);
+             printer.print(tmp.begin(), 4);
             
              for (map<Handle, vtree>::iterator ii=binds.begin(); ii!=binds.end(); ii++)
              {
-                printf("%lu=>\n", ii->first);
-                //printer.print(ii->second.begin(), 4);
+                cprintf(4,"%lu=>\n", ii->first);
+                printer.print(ii->second.begin(), 4);
              }
 
  
@@ -1141,16 +1141,16 @@ bool htemp=false;
 
             foreach(vtree targ, thm_args)
             {
-                 printf("Subst next...\n");
+                 cprintf(4,"Subst next...\n");
                 bool changes = false;
                 
                 BBvtree thm_substed = bind_vtree(targ, binds);
 
-                 printf("FOR:\n");
+				 cprintf(4,"FOR:\n");
 
-                 //printer.print(outh->begin(), 4);
-                 printf("thm_substed\n");
-                 //printer.print(thm_substed->begin(), 4);
+                 printer.print(outh->begin(), 4);
+                 cprintf(4,"thm_substed\n");
+                 printer.print(thm_substed->begin(), 4);
                 
                  htemp =true;
                 
@@ -1161,7 +1161,7 @@ bool htemp=false;
                 *outh))));
 
             ret.insert(new_thm_args);
-            printf("Producing thm found.\n");
+			cprintf(1, "Producing thm found.\n");
 
             // Now, fix the inputFilter to correspond to the new nr of input args.
             const_cast<MPsIn*>(&inputFilter)->clear();
@@ -1196,7 +1196,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
     
     //vtree res(mva(nm->getOutgoing(v2h(premiseArray[1]))[1]));
     
-    printf("CrispTheoremRule::compute... [%lu]\n", nm->getOutgoing(v2h(premiseArray[real_args]))[0]);
+    cprintf(3,"CrispTheoremRule::compute... [%lu]\n", nm->getOutgoing(v2h(premiseArray[real_args]))[0]);
     
 /*  printTree(nm->getOutgoing(v2h(premiseArray[0]))[0],0,0);
     printTree(nm->getOutgoing(v2h(premiseArray[1]))[0],0,0);
@@ -1228,10 +1228,10 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
     Handle ret_h = destTable->addAtom(res, *tv, true,true);
     delete tv;
     
-    printf("CrispTheoremRule::compute produced:\n");
+	cprintf(3,"CrispTheoremRule::compute produced:\n");
 
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //printer.print(ret_h);
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    printer.print(ret_h);
     
     delete[] tvs;
     
@@ -1498,6 +1498,7 @@ printAtomTree(outh,0,1);
         for (tree<Vertex>::sibling_iterator i = outh->begin(top); i != outh->end(top); i++)
         {
             //ret.push_back(BBvtree(new BoundVTree((ModifiedVTree *) *i)));
+			ret.push_back(BBvtree(new BoundVTree(vtree(i))));
         }       
             
         overrideInputFilter = true;
@@ -1552,7 +1553,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
                 for (uint s=0; s < max_subset.size(); s++)
                     query_set.erase(*max_subset[s]);
 
-                //ret.push_back(BBvtree(new BoundVTree(atom(AND_LINK, max_subset).makeHandletree(destTable))));
+				ret.push_back(BBvtree(new BoundVTree(atom(AND_LINK, max_subset).makeHandletree(destTable))));
 
                 continue;
             }
@@ -1561,8 +1562,8 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
         /// Add the remaining ones.
 
-        //for (set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
-            //ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(destTable))));
+		for (set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
+			ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(destTable))));
 
         overrideInputFilter = true;
 
@@ -1592,11 +1593,11 @@ BoundVertex ANDRule::compute(const vector<Vertex>& premiseArray, Handle CX) cons
     int p=0;
     
     
-printf("ANDRule::compute");
+LOG(3, "ANDRule::compute");
 
     set<Handle> premises, nodes;
     DistinguishNodes(premiseArray, premises, nodes);
-printf("ANDRule::compute");
+LOG(4, "ANDRule::compute");
 //  if (!nodes.empty())
 //      premises.push_back( computeSymmetric(nodes) );
 
@@ -1604,7 +1605,7 @@ printf("ANDRule::compute");
     {
         premises.insert(*j);
     }
-printf("ANDRule::compute");
+LOG(4, "ANDRule::compute");
     TruthValue **partialTVs = new TruthValue*[premises.size()];
 
     set<Handle>::const_iterator i;
@@ -1612,7 +1613,7 @@ printf("ANDRule::compute");
     set<TruthValue*> TVowner;
 
     /// Create the set of elements in the result conjunction
-printf("ANDRule::computeCC");
+LOG(4, "ANDRule::computeCC");
     for (i = premises.begin(); i != premises.end(); i++)
     {
         std::vector<Handle> inc2;
@@ -1628,12 +1629,12 @@ printf("ANDRule::computeCC");
             if (conjunct.find(*j) == conjunct.end())
                 conjunct.insert(*j);
     }
-printf("22 ANDRule::compute");
+LOG(4, "22 ANDRule::compute");
     /// Loop thru the premises, creating the partialTVs.
 
     for (p=0, i = premises.begin(); i != premises.end(); i++, p++)
     {
-printf("Q ANDRule::compute");
+LOG(4, "Q ANDRule::compute");
     /// Put into Di all the elements of the result conjunct not present in the premise #i
         set<Handle> Di;
         for (set<Handle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
@@ -1649,22 +1650,22 @@ printf("Q ANDRule::compute");
             if (!vectorHas<Handle>(*inc, *j))
                 Di.insert(*j);
         }
-printf("W ANDRule::compute");
+LOG(4, "W ANDRule::compute");
         int Dis = Di.size();
     
         set<Handle> DiSubsets;
         Handle largest_intersection;
 
-printf("ANDRule::compute:");
+LOG(4,"ANDRule::compute:");
 
-//NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-//for (set<Handle>::const_iterator di = Di.begin(); di != Di.end(); di++)
-//    printer.print(*di, 4);
+NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+for (set<Handle>::const_iterator di = Di.begin(); di != Di.end(); di++)
+    printer.print(*di, 4);
         
-printf("ANDRule:: getLargestIntersection");
+LOG(4, "ANDRule:: getLargestIntersection");
         while (getLargestIntersection(Di, premises, largest_intersection))
         {
-printf("Y ANDRule::compute Di size = %u\n", (uint) Di.size());          
+cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());          
             const std::vector<Handle> new_elem2 = nm->getOutgoing(largest_intersection);
 
 #ifdef WIN32            
@@ -1699,7 +1700,7 @@ printf("Y ANDRule::compute Di size = %u\n", (uint) Di.size());
             DiSubsets.insert(largest_intersection); 
         }
 
-printf("ANDRule:: getLargestIntersection OK!");
+LOG(4, "ANDRule:: getLargestIntersection OK!");
         TruthValue** tvs = new TruthValue*[1 + DiSubsets.size()];
         
         tvs[0] = (TruthValue*) &(getTruthValue(*i));
@@ -1708,7 +1709,7 @@ printf("ANDRule:: getLargestIntersection OK!");
         set<Handle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
             tvs[h+1] = (TruthValue*) &(getTruthValue(*ss));
-printf("R ANDRule::compute");
+LOG(4, "R ANDRule::compute");
 
 /*      if (DiSubsets.size()>0)
         {
@@ -1738,19 +1739,19 @@ printf("R ANDRule::compute");
         delete[] tvs;
     }
     /// Combine the partialTVs
-printf("33 ANDRule::compute");
+LOG(4, "33 ANDRule::compute");
 
     TruthValue* retTV = fN.compute(partialTVs, premises.size());
 
     HandleSeq outgoing;
     for (set<Handle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
         outgoing.push_back(*c);
-printf("44 ANDRule::compute");
+LOG(4, "44 ANDRule::compute");
     Handle ret = destTable->addLink(AND_LINK, outgoing,
                     *retTV,
                     RuleResultFreshness);   
     
-printf("ANDRule::compute");
+LOG(4, "55 ANDRule::compute");
 
     delete[] partialTVs;
     delete retTV;
@@ -1758,11 +1759,11 @@ printf("ANDRule::compute");
     for (set<TruthValue*>::iterator t= TVowner.begin(); t != TVowner.end(); t++)
         delete *t;
     
-printf("ANDRule::compute ok.");     
+LOG(3, "ANDRule::compute ok.");		
     
         return Vertex(ret);
 
-  } catch(...) { printf("Exception in ANDRule::compute!");
+  } catch(...) { LOG(-10, "Exception in ANDRule::compute!");
         #ifdef NMDEBUG
             getc(stdin);
         #endif
@@ -1788,13 +1789,13 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
         return ret;
 
     //assert(outh->begin().number_of_children() == 2);
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //if (outh->begin().number_of_children() != 2)
-    //{
-    //    printer.print(outh->begin(), 2);
-    //    LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) with != 2 args.");
-    //    printer.print(v2h(*outh->begin()), 2);
-    //}
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    if (outh->begin().number_of_children() != 2)
+    {
+        printer.print(outh->begin(), 2);
+        LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) with != 2 args.");
+        printer.print(v2h(*outh->begin()), 2);
+    }
 
     tree<Vertex> old_subst(*outh);
     
@@ -1811,16 +1812,16 @@ haxx::AllowFW_VARIABLENODESinCore = true;
 //  assert(!inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE));
     if (inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE))
     {
-        //printer.print(outh->begin(), 2);
-        printf("ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child1 problem.");
-        //printer.print(v2h(*child1), 2);
+        printer.print(outh->begin(), 2);
+        LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child1 problem.");
+        printer.print(v2h(*child1), 2);
     }
     
     if (inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE))
     {
-        //printer.print(outh->begin(), 2);
-        printf("ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child2 problem.");
-        //printer.print(v2h(*child2), 2);
+        printer.print(outh->begin(), 2);
+        LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child2 problem.");
+        printer.print(v2h(*child2), 2);
     }
 
     
@@ -1842,7 +1843,7 @@ haxx::AllowFW_VARIABLENODESinCore = false;
 
     /// This Rule shouldn't be used to produce EXISTING Scholem function mappings!
     
-    printf("Tried to re-map a scholem function argument.");
+	LOG(3, "Tried to re-map a scholem function argument.");
     
     return ret;
 
@@ -1873,7 +1874,7 @@ TruthValue** ORRule::formatTVarray(const vector<Vertex>& premiseArray, int* newN
     {
         const int N = (int)premiseArray.size();
         
-printf("ORRule::formatTVarray...");
+cprintf(3, "ORRule::formatTVarray...");
 #if USE_INCLUSION_EXCLUSION_IN_OR_RULE
         *newN = N*(N+1)/2; // (N-1)+(N-2)+...+1 = N*(N-1)/2
 #else
@@ -1886,7 +1887,7 @@ printf("ORRule::formatTVarray...");
         for (i = 0; i < N; i++)
         {
             tvs[ii++] = (TruthValue*) &(getTruthValue(v2h(premiseArray[i])));
-printf("TV Arg: %s -\n", tvs[i]->toString().c_str());
+cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
         }
         
         for (i = 0; i < N-1; i++)
@@ -1894,12 +1895,12 @@ printf("TV Arg: %s -\n", tvs[i]->toString().c_str());
             {
 #if USE_INCLUSION_EXCLUSION_IN_OR_RULE
 
-printf("Look up ANDLINK for args #%d,%d\n", i,j);
+cprintf(4,"Look up ANDLINK for args #%d,%d\n", i,j);
                 TableGather comb(mva((Handle)AND_LINK,
                                     mva(premiseArray[i]),
                                     mva(premiseArray[j])
                                 ), destTable);
-printf("Look up %s\n", (comb.empty() ? "success." : "fails."));
+cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
                 tvs[ii++] = 
                                 (!comb.empty()
                                 ? getTruthValue(v2h(comb[0]))
@@ -1912,7 +1913,7 @@ printf("Look up %s\n", (comb.empty() ? "success." : "fails."));
 #else
 #endif
             }
-printf("ORRule::formatTVarray OK.");
+cprintf(4, "ORRule::formatTVarray OK.");
         return tvs;
     }
 
@@ -2015,7 +2016,7 @@ bool ExpandEvaluationLinks(vtree& target, iAtomTableWrapper* destTable)
             /*  timeval currentTime;
             gettimeofday(&currentTime, NULL);
             long now_stamp = currentTime.tv_sec*1000 + currentTime.tv_usec/1000;*/
-            signed long now_stamp = 0; //(signed long)getElapsedMillis();
+			signed long now_stamp = (signed long)getElapsedMillis();
             signed long now_interval = now_interval_len;
 #else
             signed long now_stamp = 3000;
@@ -2088,19 +2089,18 @@ boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(met
     Type t = nm->getTypeV(*outh);
     bool hyp_link = inheritsType(t, HYPOTHETICAL_LINK);
 
-    //if (HYPRULE_MAKES_ZERO_CONFIDENCE_ATOMS || hyp_link)
-        /*
+	if (HYPRULE_MAKES_ZERO_CONFIDENCE_ATOMS || hyp_link)
         if (!hasFW_VAR(*outh))
         {
-             printf("HYP0:\n");
-             //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-             //printer.print(outh->begin(), 4);
+ 			 cprintf(4,"HYP0:\n");
+             NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+             printer.print(outh->begin(), 4);
 
             ret->insert(BoundVertex(destTable->addAtom(*outh, TruthValue::TRIVIAL_TV(), false, true)));
 
-             printf("HYP:\n");
-             //printer.print(v2h(ret->begin()->value), 4);
-        }*/
+			 cprintf(4,"HYP:\n");
+             printer.print(v2h(ret->begin()->value), 4);
+		}
 
     return boost::shared_ptr<set<BoundVertex> >(ret);
 }
@@ -2159,12 +2159,11 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, Handle 
 
         MPs ret;
         Vertex myvar = CreateVar(destTable);
-/*
+
         ret.push_back(BBvtree(new BoundVTree(mva((Handle)IMPLICATION_LINK, 
             myvar,
             *outh))));
-*/
-        //      ret.push_back(meta(new BoundVTree(myvar)));
+		ret.push_back(meta(new BoundVTree(myvar)));
         
         overrideInputFilter = true;
         
@@ -2209,8 +2208,8 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, Handle 
 
         delete retTV;
 
-//NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-//printer.print(ret, 1);
+NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+printer.print(ret, 1);
 
         return Vertex(ret);
     }   
@@ -2240,19 +2239,18 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, Handle 
         MPs ret;
         Vertex myvar = CreateVar(destTable);
 
-        printf("\n\nTo produce\n");
-        //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-        //printer.print(outh->begin(), 4);
-/*
+        cprintf(4,"\n\nTo produce\n");
+        NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+        printer.print(outh->begin(), 4);
+
         ret.push_back(BBvtree(new BoundVTree(
                         mva((Handle)IMPLICATION_LINK, myvar,*outh))));
-*/
-                        printf("Need:\n");
+        cprintf(4,"Need:\n");
         ret.push_back(BBvtree(new BoundVTree()));
-        //printer.print(ret[0]->begin(), 4);
-        //printer.print(ret[1]->begin(), 4);
+        printer.print(ret[0]->begin(), 4);
+        printer.print(ret[1]->begin(), 4);
 
-        printf("-----\n");
+        cprintf(4,"-----\n");
         
         overrideInputFilter = true;
         
@@ -2265,11 +2263,11 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, Handle 
 
 //printTree(premiseArray[0],0,1);
 
-        printf("StrictImplicationBreakdownRule::compute:");
+		cprintf(3,"StrictImplicationBreakdownRule::compute:");
 
-        //NMPrinter printer(NMP_ALL);
-        //for (uint i=0;i<premiseArray.size();i++)
-        //    printer.print(v2h(premiseArray[i]), 3);
+        NMPrinter printer(NMP_ALL);
+        for (uint i=0;i<premiseArray.size();i++)
+            printer.print(v2h(premiseArray[i]), 3);
 
 //  vtree   vt1(make_vtree(nm->getOutgoing(v2h(premiseArray[0]),0))),
 //          vt2(make_vtree(v2h(premiseArray[1])));
@@ -2340,7 +2338,7 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, Handle 
 
         delete retTV;                    
 
-        //printer.print(ret, 3);
+		printer.print(ret, 3);
 
         return Vertex(ret);
     }   
@@ -2519,7 +2517,7 @@ struct converter  : public binary_function<T,T,void>
         if (_arg == src)
             _arg = dest; }
 };
-/*
+
 Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomTableWrapper* table)
 {
     AtomSpace *nm = CogServer::getAtomSpace();
@@ -2528,7 +2526,6 @@ Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomTableWrapper* table)
 /// USE THIS IF YOU WISH TO CONVERT VARIABLE_NODEs to FW_VARIABLE_NODEs!
     vtree::iterator vit = ret->begin();
 
-    
     while(  (vit =  find_if(ret->begin(), ret->end(),
                                 bind(equal_to<Type>(),
                                     bind(getTypeVFun, _1),
@@ -2543,14 +2540,14 @@ Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomTableWrapper* table)
         printTree(v2h(*vit),0,4);
         rawPrint(*ret, ret->begin(), 4);
 #else 
-        //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-        //printer.print(v2h(*vit), 4);
-        //printer.print(ret->begin(), 4);
+        NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+        printer.print(v2h(*vit), 4);
+        printer.print(ret->begin(), 4);
 #endif
     }
 
     return ret;
-} */
+}
 
 //Btr<ModifiedVTree> convertToModifiedVTree(Btr<vtree> vt)
 Btr<ModifiedVTree> convertToModifiedVTree(Handle h, Btr<vtree> vt)
@@ -2641,33 +2638,31 @@ Btr<set<Handle> > ForAll_handles;
 
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomTableWrapper* table)
 {
-    printf("FindMatchingUniversal...");
-    Btr<ModifiedVTree> candidate; 
-    /*
+	cprintf(4,"FindMatchingUniversal...");
+	
     Btr<ModifiedVTree> candidate = 
         convertToModifiedVTree(
                             ForAllLink,
                             convert_all_var2fwvar(
                                 make_vtree(getOutgoingFun()(ForAllLink, 1)),
                                 table));
-    */
 
     Btr<bindingsVTreeT> bindsInUniversal    (new bindingsVTreeT),
                                 bindsInTarget       (new bindingsVTreeT);
 
-    //NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    //printer.print(candidate->begin(), 4);
-    //printer.print(target->begin(), 4);
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    printer.print(candidate->begin(), 4);
+    printer.print(target->begin(), 4);
 
     if (!unifiesTo(*candidate, *target, *bindsInUniversal, *bindsInTarget, true)) //, VARIABLE_NODE))
         return Btr<ModifiedBoundVTree>();
 
-    //printer.print(candidate->begin(), 4);
-    //printer.print(candidate->original_handle, 4);
+    printer.print(candidate->begin(), 4);
+    printer.print(candidate->original_handle, 4);
 
-    printf("universal binds:");
+	cprintf(4,"universal binds:");
     for_each(bindsInUniversal->begin(), bindsInUniversal->end(), pr2);
-    printf("target binds:");
+	cprintf(4,"target binds:");
     for_each(bindsInTarget->begin(), bindsInTarget->end(), pr2);
 
     Btr<ModifiedBoundVTree> BoundUniversal(new ModifiedBoundVTree(*candidate));
@@ -2682,7 +2677,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iA
     ///Remove FW_VAR => FW_VAR mappings. WARNING! Potentially goes to infinite loop.
     removeRecursionFromMap<bindingsVTreeT::iterator, vtree::iterator>(bindsCombined->begin(), bindsCombined->end());
 
-    printf("\ncombined binds:");
+	cprintf(4,"\ncombined binds:");
     for_each(bindsCombined->begin(), bindsCombined->end(), pr2);
 
     /**     /// Previously:
@@ -2700,7 +2695,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iA
     ++v;
     }*/
 
-    //printer.print(BoundUniversal->begin(), 4);
+    printer.print(BoundUniversal->begin(), 4);
 
     /// Previously:
     /// All recursion was removed from the combined binds, but only the binds pertaining
@@ -2718,7 +2713,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iA
 
     BoundUniversal->bindings = bindsCombined;
 
-    printf("\nresult binds:");
+	cprintf(4,"\nresult binds:");
     for_each(BoundUniversal->bindings->begin(), BoundUniversal->bindings->end(), pr2);
 
     return BoundUniversal;
@@ -2911,7 +2906,6 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
         mva(nm->getOutgoing(v2h(h[1]))[0]),
         mva(nm->getOutgoing(v2h(h[0]))[1])));*/
     
-    //return BBvtree(new BoundVTree(ret.makeHandletree(destTable)));
     return BBvtree(new BoundVTree());
 }
 

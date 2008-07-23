@@ -49,7 +49,8 @@ void XMLNode::SetName(string n)
 	tagdata.name = n;
 }
 
-XMLNode::XMLNode(const string& rawdata, XMLNode* _super) : ok(false), super(_super)
+XMLNode::XMLNode(const string& rawdata, XMLNode* _super)
+: ok(false), super(_super), bytesconsumed(0)
 {
 	bytesconsumed = ExpandLevel(rawdata,tagdata,sub,this);
 	ok = bytesconsumed > 0;
@@ -120,7 +121,7 @@ int XMLNode::ExpandLevel(const string&			_source,
 			return 0;
 		}
 
-		for (nextc(&str), t = 0;*str!='/' && *str!='>' &&  t < MAX_NODE_NAME_LENGTH;str++,t++)
+		for (nextc(&str), t = 0;*str!='/' && *str!='>' && visible(*str)  &&  t < MAX_NODE_NAME_LENGTH;str++,t++)
 			temp[t] = *str;
 		temp[t] = 0;
 
@@ -175,8 +176,7 @@ int XMLNode::ExpandLevel(const string&			_source,
 		}
 		else if (*(str+1) != '/') //Contains other tags
 		{
-			do
-			{
+			do {
 				newnode = new XMLNode(string(str), _super);
 				str += newnode->bytesconsumed;
 				nextc(&str);
@@ -199,8 +199,8 @@ int XMLNode::ExpandLevel(const string&			_source,
 		}
 		str++;
 
-		//for (t = 0,nextc(&str); *str!='>' &&  t < MAX_NODE_NAME_LENGTH;str++,t++)
-		//	temp[t] = *str;
+		for (t = 0,nextc(&str);visible(*str) && *str!='>' &&  t < MAX_NODE_NAME_LENGTH;str++,t++)
+			temp[t] = *str;
 		temp[t] = 0;
 
 		if (!nocase_equal(temp, _contents.name.c_str())) //Open/close mismatch!
@@ -211,18 +211,27 @@ int XMLNode::ExpandLevel(const string&			_source,
 
 		nextc(&str);
 		str++; //str points beyond this tag now.
-	}
-	catch(...) { return 0; }
+    } // catch(string s) { 
+      //   LOG(0, s); 
+      //   return 0; 
+     //}
+    catch(...) { 
+        //LOG(0, "unknown exception in XMLNode()"); 
+        return 0;
+    }
 out:
 	return str - _source.c_str();
 }
 
 char* XMLNode::nextc(char **ptr)
 {
-	while ((**ptr) == '\r' || (**ptr) == '\n' || (**ptr) == ' ' || (**ptr) == '\t' || (**ptr) == 0)
-		if ((**ptr) != 0)
+	while ((**ptr) == '\r' || (**ptr) == '\n' ||
+            (**ptr) == ' ' || (**ptr) == '\t' || (**ptr) == 0) {
+		if ((**ptr) != 0) {
 			(*ptr)++;
-		else throw string("XMLNode::nextc - character query unsuccessful");
+        } else
+            throw string("XMLNode::nextc - character query unsuccessful");
+    }
 	return *ptr;
 }
 
@@ -240,7 +249,7 @@ bool XMLNode::ExpandArgument(char** ptr, std::map<nocase_string,nocase_string>& 
 
 	nextc(ptr);
 
-	for (t = 0; **ptr != '=' && **ptr != '/'; (*ptr)++,t++)
+	for (t = 0; visible(**ptr) && **ptr != '=' && **ptr != '/'; (*ptr)++,t++)
 		temp[t] = **ptr;
 	temp[t] = 0;
 
@@ -260,7 +269,7 @@ bool XMLNode::ExpandArgument(char** ptr, std::map<nocase_string,nocase_string>& 
 	if (**ptr == '\"')
 		(*ptr)++;
 
-	for (t = 0; (**ptr == ' ') && **ptr != '\"' && **ptr != '>'; (*ptr)++,t++)
+	for (t = 0; (**ptr == ' ' || visible(**ptr)) && **ptr != '\"' && **ptr != '>'; (*ptr)++,t++)
 		temp[t] = **ptr;
 	temp[t] = 0;
 
@@ -318,8 +327,7 @@ XMLvalue<T>::~XMLvalue()
 template<typename T>
 std::string XMLvalue<T>::AsXML() const
 {
-	//return XMLembed(name, Value2String());
-	return name;
+	return XMLembed(name, Value2String());
 }
 
 template<typename T>
@@ -347,7 +355,7 @@ std::string IntXMLValue::Value2String() const
 std::string FloatXMLValue::Value2String() const
 {
 	char temp[100];
-	sprintf(temp, "%.2f", value);
+	sprintf(temp, "%.2f", temp);
 	return temp;
 }
 
