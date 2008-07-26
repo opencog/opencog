@@ -18,7 +18,10 @@ sort of serious calculation, simply because it is not (and cannot be) a
 high-performance interface. The shell is implemented in guile; guile is
 an interpreter, not a compiler. There is no bytecode or virtual machine.
 
-Functions:
+Core Functions
+--------------
+The following are the "core" functions, implemented in the guile-to-C++
+interface. 
 
    cog-new-node node-type node-name 
       Create a new node of the given type and name
@@ -109,7 +112,7 @@ Below follow some examples, in the form of utilities.
 
 == Load scheme data from a file
 
-To load scheme code from a file, simply make sure the first 4 characters
+To load scheme code from a file, simply make sure the first 3 characters
 of the file are "scm" followed by a carraige return. Then, at the shell
 prompt, simply execute the command:
 
