@@ -17,6 +17,7 @@
 #include "Link.h"
 #include "Node.h"
 #include "SchemeSmob.h"
+#include "SimpleTruthValue.h"
 #include "TLB.h"
 
 using namespace opencog;
@@ -33,7 +34,17 @@ using namespace opencog;
  * concrete existence outside of the scheme shell. By contrast,
  * truth values created by the scheme shell are garbage collected
  * by the shell.
+ *
+ * The type of the "misc" structure is stored in the flag bits;
+ * thus, handling is dispatched based on these flags.
  */
+
+enum
+{
+	COG_HANDLE = 1,
+	COG_SIMPLE_TV,
+};
+
 
 bool SchemeSmob::is_inited = false;
 scm_t_bits SchemeSmob::cog_handle_tag;
@@ -64,6 +75,44 @@ SCM SchemeSmob::equalp_atom(SCM a, SCM b)
 	return SCM_BOOL_F;
 }
 
+SCM SchemeSmob::mark_misc(SCM misc_smob)
+{
+	scm_t_bits misctype = SCM_SMOB_FLAGS(misc_smob);
+
+	switch (misctype)
+	{
+		case COG_SIMPLE_TV: // Nothing to do here ...
+			return SCM_BOOL_F;
+		default:
+printf("duuude don't know what the heck this is\n");
+			break;
+	}
+
+	return SCM_BOOL_F;
+}
+
+size_t SchemeSmob::free_misc(SCM node)
+{
+	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
+
+	
+printf("duuude freee type=%d\n", (int) misctype);
+	switch (misctype)
+	{
+		case COG_SIMPLE_TV:
+printf("duuude freee its a simple tv\n");
+			SimpleTruthValue *stv;
+			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
+			delete stv;
+			return 0;
+
+		default:
+printf("duuude don't know this thing\n");
+			break;
+	}
+	return 0;
+}
+
 void SchemeSmob::init_smob_type(void)
 {
 	// a SMOB type for atom handles
@@ -73,8 +122,11 @@ void SchemeSmob::init_smob_type(void)
 
 	// A SMOB type for everything else
 	cog_misc_tag = scm_make_smob_type ("opencog_misc", sizeof (scm_t_bits));
+	scm_set_smob_mark (cog_misc_tag, mark_misc);
+	scm_set_smob_free (cog_misc_tag, free_misc);
 }
 
+/* ============================================================== */
 /**
  * return atom->toString() for the corresponding atom.
  */
@@ -317,8 +369,16 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
  */
 SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 {
-printf("hellow world!\n");
-	return SCM_BOOL_F;
+	double mean = scm_to_double(smean);
+	double confidence = scm_to_double(sconfidence);
+
+	float cnt = SimpleTruthValue::confidenceToCount(confidence);
+	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
+
+	SCM smob;
+	SCM_NEWSMOB (smob, cog_misc_tag, stv);
+	SCM_SET_SMOB_FLAGS(smob, COG_SIMPLE_TV);
+	return smob;
 }
 
 /* ============================================================== */

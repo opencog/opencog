@@ -105,6 +105,16 @@ interface.
          Note that x and the link l point to have been deleted,
          but not the link y.
 
+   cog-new-stv mean confidence
+      Create a SimpleTruthValue with the given mean and confidence.
+      Unlike atoms, simple truth values are ephemeral: they are
+      garbage-collected when no longer needed. 
+
+      Throws errors if mean and confidence are not floating-point
+      values.
+      Example:
+          (cog-new-stv 0.7 0.9)
+
 
 Example utilities
 -----------------
