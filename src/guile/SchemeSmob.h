@@ -1,7 +1,10 @@
 /*
  * SchemeSmob.h
  *
- * Simple scheme shell
+ * Guile SMOB interface for opencog atoms and truth values. 
+ * This class implements the actual functions the guile shell invokes
+ * when it sees the opencog-specific proceedures.
+ *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
@@ -22,10 +25,16 @@ class SchemeSmob
 		static bool is_inited;
 		void register_procs(void);
 
-		static scm_t_bits cog_tag;
+		// The handle tag is for opencog handles, only.
+		static scm_t_bits cog_handle_tag;
+
+		// The cog_misc_tag are for all other opencog types, such
+		// as truth values, which are ephemeral (garbage-collected)
+		static scm_t_bits cog_misc_tag;
+
 		void init_smob_type(void);
-		static int print_cog(SCM, SCM, scm_print_state *);
-		static SCM equalp_cog(SCM, SCM);
+		static int print_atom(SCM, SCM, scm_print_state *);
+		static SCM equalp_atom(SCM, SCM);
 
 		static std::string to_string(SCM);
 
@@ -38,6 +47,9 @@ class SchemeSmob
 		static SCM ss_outgoing_set(SCM);
 		static SCM ss_delete(SCM);
 		static SCM ss_delete_recursive(SCM);
+
+		// Truth values
+		static SCM ss_new_stv(SCM, SCM);
 
 	public:
 		SchemeSmob(void);

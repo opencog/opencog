@@ -1,7 +1,8 @@
 /*
  * SchemeSmob.c
  *
- * Scheme small objects.
+ * Scheme small objects (SMOBS) for opencog atoms and truth values.
+ *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
@@ -21,9 +22,22 @@
 using namespace opencog;
 
 /* ============================================================== */
+/**
+ * Two scheme smob types are used to impelment the interface.
+ *
+ * The cog_handle_tag is used to store atom handles only.
+ * The cog_misc_tag is used to store all other structures, such
+ * as truth values. It is assumed that these structures are all
+ * ephemeral (garbage-collected); this is in contrast to handles,
+ * which are never garbage collected. Thus, opencog atoms have a 
+ * concrete existence outside of the scheme shell. By contrast,
+ * truth values created by the scheme shell are garbage collected
+ * by the shell.
+ */
 
 bool SchemeSmob::is_inited = false;
-scm_t_bits SchemeSmob::cog_tag;
+scm_t_bits SchemeSmob::cog_handle_tag;
+scm_t_bits SchemeSmob::cog_misc_tag;
 
 SchemeSmob::SchemeSmob(void)
 {
@@ -37,24 +51,28 @@ SchemeSmob::SchemeSmob(void)
 
 /* ============================================================== */
 
-int SchemeSmob::print_cog(SCM node, SCM port, scm_print_state * ps)
+int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
 {
 	scm_puts ("#<atom>", port);
 	return 1; //non-zero meanss success
 }
 
-SCM SchemeSmob::equalp_cog(SCM a, SCM b)
+SCM SchemeSmob::equalp_atom(SCM a, SCM b)
 {
-	// They are equal if thier handles are the same.
+	// Two atoms are equal if thier handles are the same.
 	if (SCM_SMOB_OBJECT(a) == SCM_SMOB_OBJECT(b)) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
 void SchemeSmob::init_smob_type(void)
 {
-	cog_tag = scm_make_smob_type ("opencog_atom", sizeof (scm_t_bits));
-	scm_set_smob_print (cog_tag, print_cog);
-	scm_set_smob_equalp (cog_tag, equalp_cog);
+	// a SMOB type for atom handles
+	cog_handle_tag = scm_make_smob_type ("opencog_handle", sizeof (scm_t_bits));
+	scm_set_smob_print (cog_handle_tag, print_atom);
+	scm_set_smob_equalp (cog_handle_tag, equalp_atom);
+
+	// A SMOB type for everything else
+	cog_misc_tag = scm_make_smob_type ("opencog_misc", sizeof (scm_t_bits));
 }
 
 /**
@@ -86,7 +104,7 @@ SCM SchemeSmob::ss_atom (SCM shandle)
 {
 	if (scm_is_false(scm_integer_p(shandle)))
 		scm_wrong_type_arg_msg("cog-atom", 1, shandle, "integer opencog handle");
-	SCM_RETURN_NEWSMOB (cog_tag, shandle);
+	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
 /* ============================================================== */
@@ -95,7 +113,7 @@ SCM SchemeSmob::ss_atom (SCM shandle)
  */
 SCM SchemeSmob::ss_handle (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
 	return SCM_SMOB_OBJECT(satom);
 }
@@ -133,7 +151,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 
 	SCM shandle = scm_from_ulong(h);
 
-	SCM_RETURN_NEWSMOB (cog_tag, shandle);
+	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
 /* ============================================================== */
@@ -168,7 +186,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		SCM satom = SCM_CAR(sl);
 
 		// Verify that the contents of the list are actual atoms.
-		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
 
 		// Get the handle  ... should we check for valid handles here? 
@@ -187,7 +205,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 	SCM shandle = scm_from_ulong(h);
 
-	SCM_RETURN_NEWSMOB (cog_tag, shandle);
+	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
 /* ============================================================== */
@@ -196,7 +214,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-outgoing-set", 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
@@ -212,7 +230,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 		Handle h = oset[i];
 		SCM sh = scm_from_ulong(h);
 		SCM smob;
-		SCM_NEWSMOB (smob, cog_tag, sh);
+		SCM_NEWSMOB (smob, cog_handle_tag, sh);
 		list = scm_cons (smob, list);
 	}
 
@@ -225,7 +243,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
  */
 SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-incoming-set", 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
@@ -237,14 +255,14 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 
 	SCM sh = scm_from_ulong(he->handle);
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_tag, sh);
+	SCM_NEWSMOB (smob, cog_handle_tag, sh);
 	SCM head = scm_cons (smob, SCM_EOL);
 	SCM tail = head;
 	he = he->next;
 	while (he)
 	{
 		SCM sh = scm_from_ulong(he->handle);
-		SCM_NEWSMOB (smob, cog_tag, sh);
+		SCM_NEWSMOB (smob, cog_handle_tag, sh);
 		SCM pair = scm_cons (smob, SCM_EOL);
 		scm_set_cdr_x(tail, pair);
 		tail = pair;
@@ -260,7 +278,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
  */
 SCM SchemeSmob::ss_delete (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-delete", 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
@@ -279,7 +297,7 @@ SCM SchemeSmob::ss_delete (SCM satom)
  */
 SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, satom))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-delete-recursive", 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
@@ -294,19 +312,32 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
 
 
 /* ============================================================== */
+/**
+ * Create a new simple truth value, with indicated mean and confidence.
+ */
+SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
+{
+printf("hellow world!\n");
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
 
 #define C(X) ((SCM (*) ()) X)
 
 void SchemeSmob::register_procs(void)
 {
-	scm_c_define_gsubr("cog-new-link",            1, 0, 1, C(ss_new_link));
-	scm_c_define_gsubr("cog-new-node",            2, 0, 0, C(ss_new_node));
-	scm_c_define_gsubr("cog-atom",                1, 0, 0, C(ss_atom));
-	scm_c_define_gsubr("cog-handle",              1, 0, 0, C(ss_handle));
-	scm_c_define_gsubr("cog-incoming-set",        1, 0, 0, C(ss_incoming_set));
-	scm_c_define_gsubr("cog-outgoing-set",        1, 0, 0, C(ss_outgoing_set));
-	scm_c_define_gsubr("cog-delete",              1, 0, 0, C(ss_delete));
-	scm_c_define_gsubr("cog-delete-recursive",    1, 0, 0, C(ss_delete_recursive));
+	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
+	scm_c_define_gsubr("cog-new-node",          2, 0, 0, C(ss_new_node));
+	scm_c_define_gsubr("cog-atom",              1, 0, 0, C(ss_atom));
+	scm_c_define_gsubr("cog-handle",            1, 0, 0, C(ss_handle));
+	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
+	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	scm_c_define_gsubr("cog-delete",            1, 0, 0, C(ss_delete));
+	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 0, C(ss_delete_recursive));
+
+	// Truth-values
+	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
 }
 
 #endif

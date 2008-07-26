@@ -76,7 +76,7 @@ std::string SchemeShell::prt(SCM node)
 		return rv;
 	}
 
-	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_tag, node))
+	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
 	{
 		return SchemeSmob::to_string(node);
 	}
