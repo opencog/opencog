@@ -1,0 +1,37 @@
+
+                       Design Notes
+                       ------------
+                 Linas Vepstas July 2008
+
+
+This file contains some random design notes, indicating why things are
+the way they are.
+
+Adding truth values:
+--------------------
+(cog-new-node 'ConceptNode "some stuff")
+
+(cog-new-node 'ConceptNode "some stuff" :mean 0.5 :confidence 0.9)
+
+(cog-new-node 'ConceptNode "some stuff" mean: 0.5 confidence: 0.9)
+
+(cog-new-stv 0.1 0.9)
+
+(cog-new-node 'ConceptNode "some stuff" :tv (cog-new-stv 0.1 0.9))
+
+(cog-new-node 'ConceptNode "some stuff" (cog-new-stv 0.1 0.9))
+
+The :tv :mean :confidence are keywords, meant to disambiguate multiple
+floating point values in a list, so that we don't have to scratch our
+head: "what's 0.5 ??  what's 0.9? is that confidence or mean?"
+
+Notice the later lines are shorter -- it kind-of makes sense to have a 
+truth value as a first-class object in scheme.  
+
+Notice the last line is the shortest: why clutter up the markup with a
+:tv keyword? There will only be one truth value per node, and its
+unambiguous, so its pointless to make it into a key-value pair. The
+code is simpler too -- its much easier to look for a truth value, 
+than it is to try to make sure a list consists of keyword-value pairs.
+
+Conclusion: implement the last line, only.
