@@ -127,6 +127,47 @@ void SchemeSmob::init_smob_type(void)
 }
 
 /* ============================================================== */
+
+static TruthValue *get_tv_from_kvp(SCM kvp_list)
+{
+	SCM kvp = kvp_list;
+	do
+	{
+		SCM skey = SCM_CAR(kvp);
+
+		// Verify that the first item is a keyword.
+		if (!scm_is_keyword(skey)) return NULL;
+		skey = scm_keyword_to_symbol(skey);
+		skey = scm_symbol_to_string(skey);
+		char * key = scm_to_locale_string(skey);
+
+		kvp = SCM_CDR(kvp);
+		if (!scm_is_pair(kvp)) { free(key); return NULL; }
+
+		if (0 == strcmp(key, "tv"))
+		{
+ printf("got a key!! %s\n", key); 
+			SCM sval = SCM_CAR(kvp);
+			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
+			if (misctype != COG_SIMPLE_TV)
+			{
+printf ("baaad !\n");
+				return NULL;
+			}
+			TruthValue *tv;
+			tv = (TruthValue *) SCM_SMOB_DATA(sval);
+			return tv;
+		}
+		free(key);
+
+		kvp = SCM_CDR(kvp);
+	}
+	while (scm_is_pair(kvp));
+
+	return NULL;
+}
+
+/* ============================================================== */
 /**
  * return atom->toString() for the corresponding atom.
  */
@@ -174,7 +215,7 @@ SCM SchemeSmob::ss_handle (SCM satom)
 /**
  * Create a new node, of named type stype, and string name sname
  */
-SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
+SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
@@ -198,8 +239,11 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname)
 	std::string name = cname;
 	free(cname);
 
+	const TruthValue *tv = get_tv_from_kvp(kv_pairs);
+	if (!tv) tv = &TruthValue::DEFAULT_TV();
+
 	AtomSpace *as = CogServer::getAtomSpace();
-	Handle h = as->addNode(t, name);
+	Handle h = as->addNode(t, name, *tv);
 
 	SCM shandle = scm_from_ulong(h);
 
@@ -250,7 +294,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		pos++;
 	}
 	while (scm_is_pair(sl));
-	
+
 	// Now, create the actual link... in the actual atom space.
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addLink(t, outgoing_set);
@@ -388,7 +432,7 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 void SchemeSmob::register_procs(void)
 {
 	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
-	scm_c_define_gsubr("cog-new-node",          2, 0, 0, C(ss_new_node));
+	scm_c_define_gsubr("cog-new-node",          2, 0, 1, C(ss_new_node));
 	scm_c_define_gsubr("cog-atom",              1, 0, 0, C(ss_atom));
 	scm_c_define_gsubr("cog-handle",            1, 0, 0, C(ss_handle));
 	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));

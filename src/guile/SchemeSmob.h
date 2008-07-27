@@ -32,16 +32,15 @@ class SchemeSmob
 		// as truth values, which are ephemeral (garbage-collected)
 		static scm_t_bits cog_misc_tag;
 
+		// Initializatino functions
 		void init_smob_type(void);
 		static int print_atom(SCM, SCM, scm_print_state *);
 		static SCM equalp_atom(SCM, SCM);
 		static SCM mark_misc(SCM);
 		static size_t free_misc(SCM);
 
-		static std::string to_string(SCM);
-
-		// Functions
-		static SCM ss_new_node(SCM, SCM);
+		// Atom creation and deletion functions
+		static SCM ss_new_node(SCM, SCM, SCM);
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_atom(SCM);
 		static SCM ss_handle(SCM);
@@ -52,6 +51,9 @@ class SchemeSmob
 
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);
+
+		// Misc utilities
+		static std::string to_string(SCM);
 
 	public:
 		SchemeSmob(void);
