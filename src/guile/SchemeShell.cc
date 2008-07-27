@@ -143,7 +143,7 @@ std::string SchemeShell::prt(SCM node)
 	{
 		// scm_is_null(x) is true when x is SCM_EOL
 		// SCM_NILP(x) is true when x is SCM_ELISP_NIL
-		return "nil";
+		return "()";
 	}
 	else if (scm_is_eq(node, SCM_UNDEFINED))
 	{
