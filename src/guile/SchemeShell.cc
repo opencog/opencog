@@ -87,13 +87,12 @@ std::string SchemeShell::prt(SCM node)
 
 	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
 	{
-		return SchemeSmob::to_string(node);
+		return SchemeSmob::handle_to_string(node);
 	}
 
 	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
 	{
-		std::string rv = "#simple truth value";
-		return rv;
+		return SchemeSmob::misc_to_string(node);
 	}
 
 	else if (scm_is_number(node)) 

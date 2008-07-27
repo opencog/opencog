@@ -234,6 +234,17 @@ static TruthValue *get_tv_from_list(SCM slist)
  */
 std::string SchemeSmob::to_string(SCM node)
 {
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+		return handle_to_string(node);
+
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
+		return misc_to_string(node);
+
+	return "";
+}
+
+std::string SchemeSmob::handle_to_string(SCM node)
+{
 	SCM shandle = SCM_SMOB_OBJECT(node);
 	Handle h = scm_to_ulong(shandle);
 
@@ -246,6 +257,28 @@ std::string SchemeSmob::to_string(SCM node)
 
 	std::string ret = "#<";
 	ret += atom->toString();
+	ret += ">\n";
+	return ret;
+}
+
+std::string SchemeSmob::misc_to_string(SCM node)
+{
+	std::string ret = "#<";
+	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
+	switch (misctype)
+	{
+		case COG_SIMPLE_TV:
+			SimpleTruthValue *stv;
+			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
+			ret += "SimpleTruthValue ";
+			ret += stv->toString();
+			break;
+
+		default:
+			ret += "unknown opencog type";
+			break;
+	}
+
 	ret += ">\n";
 	return ret;
 }
