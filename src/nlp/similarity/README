@@ -8,6 +8,72 @@ This directory contains code pertaining to word similarity measures.
 The similarity measures are in part driven by statistical corpus
 analysis.
 
+Frequency, probability, entropy
+-------------------------------
+Words, aka Unigrams -- have a frequency count, indicating how often the
+word has been observed in a corpus. Given the frequency count "n", and
+the total number of words seen "N", one has the relations:
+
+  probability p = n/N
+  entropy     H = log_2 p
+
+It seems most reasonable to store the entropy in the "mean" field of the
+SimpleTruthValue associated with the WordNode. 
+
+Why Entropy?
+------------
+There is one primary reason to store entropy, instead of the probability
+or count, and that is that entropy provides a more robust way of
+managing the update of values, as new text is read in.  Consider: as
+new text is read in, the relative counts/probabilities/entropies of the
+observed words need to be updated. Storing a probability is impractical,
+as, for every new word read, the probability for *all* words needs to be
+updated, if the probabilities are to be summed to exactly 1.0.  This can 
+be avoided by storing two simple counts: "n" for the word, and "N" for
+all words observed.  Keeping a simple count works well, until 4 billion 
+words have been read, at which point, 32-bit systems overflow.  But it
+is also somewhat unappealing to keep a count "since the dawn of time", 
+and it makes more sense to try to "forget" old counts, supplanting them
+with only recently observed freqeuncies, via an exponentially damped
+update. The trick now is how to update counts in a decaying manner, 
+without acciddentally skewing proportions into meaningless-ness. 
+The pragmatic answer seems to be to store entropy, and update entropy
+with a decaying running average. This implies that the entropies will
+be "denormalized", in that the sum over all 2^H will not add to one.
+However, over relatively short periods of time, this seems to be OK,
+and the entropy can be periodically renormalized so that the sum 2^H
+does sum properly to one. Although, mathematically, a "denormalized"
+entropy is equivalent to a set of probabilities that don't sum to one,
+it is less "intellectually jarring" to work with denormalized entropies,
+than to explain to a surprised newcomer why the probabilities don't add
+to one.  Thus, storing entropies seems like the best way to represent
+word frequencies.
+
+Different kinds of statistics
+-----------------------------
+For many kinds of statstical calculations, it is not enough to store 
+just a single frequency; and one needs different types of statistics
+associated with a different node. Thus, for example, when computing
+mutual information, one needs the number of times a word has been
+observed on the left hand side of a pair, and on the right hand side
+of a pair. This can be represented as follows:
+
+  <EntropyLink>
+    <WordNode name = "bark">
+    <DistinguishedNode = "LeftMarginal">
+  </EntropyLink> 
+
+  <EntropyLink>
+    <WordNode name = "bark">
+    <DistinguishedNode = "RightMarginal">
+  </EntropyLink> 
+
+The DistinguishedNode serves as a kind-of column heading, serving the
+same function as a column heading in SQL does. The actual entropy value
+of to left marginal probability (resp. right marginal) is stored as a
+SimpleTruthValue in the EntropyLink. The name EntropyLink simply serves
+as a type to indicate what sort of a value the truth value is holding.
+
 Word Lemmas
 -----------
 Basic statistical information gathered from corpus analysis always
@@ -22,3 +88,6 @@ Thus, the goal is to represent the linkage between a word and its lemma.
 
 The nodes and links will have truth values associated with them; these
 will be used to hold statistical information.
+
+
+
