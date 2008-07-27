@@ -278,7 +278,7 @@ SCM SchemeSmob::ss_handle (SCM satom)
  * Check that the arguments represent a value node, else throw errors.
  * Return the node type.
  */
-static Type validate_node (SCM stype, SCM sname, const char *subrname)
+static Type validate_node (SCM stype, const char *subrname)
 {
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
@@ -294,10 +294,18 @@ static Type validate_node (SCM stype, SCM sname, const char *subrname)
 	if (false == ClassServer::isAssignableFrom(NODE, t))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog node type");
 
+	return t;
+}
+
+static std::string decode_string (SCM sname, const char *subrname)
+{
 	if (scm_is_false(scm_string_p(sname)))
 		scm_wrong_type_arg_msg(subrname, 2, sname, "string name for the node");
 
-	return t;
+	char * cname = scm_to_locale_string(sname);
+	std::string name = cname;
+	free(cname);
+	return name;
 }
 
 /**
@@ -305,13 +313,10 @@ static Type validate_node (SCM stype, SCM sname, const char *subrname)
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-	Type t = validate_node(stype, sname, "cog-new-node");
+	Type t = validate_node(stype, "cog-new-node");
+	std::string name = decode_string (sname, "cog-new-node");
 
 	// Now, create the actual node... in the actual atom space.
-	char * cname = scm_to_locale_string(sname);
-	std::string name = cname;
-	free(cname);
-
 	const TruthValue *tv = get_tv_from_list(kv_pairs);
 	if (!tv) tv = &TruthValue::DEFAULT_TV();
 
@@ -319,7 +324,6 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	Handle h = as->addNode(t, name, *tv);
 
 	SCM shandle = scm_from_ulong(h);
-
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
@@ -331,13 +335,10 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-	Type t = validate_node(stype, sname, "cog-node");
+	Type t = validate_node(stype, "cog-node");
+	std::string name = decode_string (sname, "cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
-	char * cname = scm_to_locale_string(sname);
-	std::string name = cname;
-	free(cname);
-
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->getHandle(t, name);
 	if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
