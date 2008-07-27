@@ -117,6 +117,12 @@ Hypernyms and hyponyms will be mapped to inheritance links.
 Details of the actual mapping used are given in greater detail
 in the wordnet-import/README file.
 
+Statistical corpus analysis
+---------------------------
+Word nodes can be assigned a truth value that indicates the frequency of
+occurence of the word in a text. This is discussed in greater detail in 
+the similarity/README file.
+
 Sentences to meanings
 ---------------------
 Consider two sentences: "The loud bark woke me up." or "The rough bark
@@ -300,7 +306,7 @@ noun, the other as verb:
      <PredicateNode name="PartOfSpeech"/>
      <ListLink>
        <ConceptNode name="bark_144" />
-       <ConceptNode name="noun" />
+       <PartOfSpeechNode name="noun" />
      </ListLink>
    </EvaluationLink>
 
@@ -309,7 +315,7 @@ noun, the other as verb:
      <PredicateNode name="PartOfSpeech"/>
      <ListLink>
        <ConceptNode name="bark_169" />
-       <ConceptNode name="verb" />
+       <PartOfSpeechNode name="verb" />
      </ListLink>
    </EvaluationLink>
 
@@ -318,13 +324,13 @@ refer to the same word in the same sentence.
 
    <!-- in parse 2, the word "bark" is associated with bark_144 -->
    <ReferenceLink>
-      <WordNode name="#bark">
+      <WordNode name="bark">
       <ConceptNode name="bark_144" />
    </ReferenceLink>
 
    <!-- in parse 3, the word "bark" is associated with bark_169 -->
    <ReferenceLink>
-      <WordNode name="#bark">
+      <WordNode name="bark">
       <ConceptNode name="bark_169" />
    </ReferenceLink>
 
@@ -348,6 +354,31 @@ be advantageous to collapse the proliferation of word-instances
 down to one or two, as early in the processing as possible.
 
 [[-----
+A note about the structure of PLN/OpenCog. The current working
+assumption, per discussions with Ben, is to treat thw following two
+forms as entirely equivalent:
+
+   <EvaluationLink>
+     <PredicateNode name="PartOfSpeech"/>
+     <ListLink>
+       <ConceptNode name="bark_144" />
+       <PartOfSpeechNode name="noun" />
+     </ListLink>
+   </EvaluationLink>
+
+That is, the above is (ignoring truth values) *equivalent* to the below:
+
+   <PartOfSpeechLink>
+     <ConceptNode name="bark_144" />
+     <PartOfSpeechNode name="noun" />
+   </PartOfSpeechLink>
+
+The below uses fewer atoms to represent the information. The above is
+more convenient for reasoning, as it is in predicate form.  For reasons
+of compactness, the form below shall be used in practice, at this time.
+]]
+
+[[-----
 The current RelEx output is as follows, but this is at odds with the
 discussion above. It will be abandoned shortly!?
 
@@ -359,7 +390,7 @@ discussion above. It will be abandoned shortly!?
 
    <!-- link the "text-sense" bark_1 to the word node -->
    <ReferenceLink>
-      <WordNode name="#bark">
+      <WordNode name="bark">
       <ConceptNode = "bark_1">
    </ReferenceLink>
 

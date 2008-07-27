@@ -16,4 +16,9 @@ word similarity, one is interested in having the lemma of the form.
 Thus, the goal is to represent the linkage between a word and its lemma.
 
 
+   <LemmaLink>
+      <WordNode name="barking" />
+      <LemmaNode name="bark" />
+   </LemmaLink>
+
 
