@@ -54,6 +54,13 @@ std::string SchemeShell::prt(SCM node)
          node_list = SCM_CDR (node_list);
       }
       while (scm_is_pair(node_list));
+
+		// Print the rest -- the CDR part
+		if (!scm_is_null(node_list)) 
+		{
+			str += " ";
+			str += prt (node_list);
+		}
 		str += ")";
 		return str;
    }
@@ -81,16 +88,41 @@ std::string SchemeShell::prt(SCM node)
 		return SchemeSmob::to_string(node);
 	}
 
-	else if (scm_is_integer(node)) 
+	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
 	{
-		char buff[20];
+		std::string rv = "#simple truth value";
+		return rv;
+	}
+
+	else if (scm_is_number(node)) 
+	{
+		#define NUMBUFSZ 60
+		char buff[NUMBUFSZ];
 		if (scm_is_signed_integer(node, INT_MIN, INT_MAX))
 		{
-			snprintf (buff, 20, "%ld", (long) scm_to_long(node));
+			snprintf (buff, NUMBUFSZ, "%ld", (long) scm_to_long(node));
 		}
-		else
+		else if (scm_is_unsigned_integer(node, 0, UINT_MAX))
 		{
-			snprintf (buff, 20, "%lu", (unsigned long) scm_to_ulong(node));
+			snprintf (buff, NUMBUFSZ, "%lu", (unsigned long) scm_to_ulong(node));
+		}
+		else if (scm_is_real(node))
+		{
+			snprintf (buff, NUMBUFSZ, "%g", scm_to_double(node));
+		}
+		else if (scm_is_complex(node))
+		{
+			snprintf (buff, NUMBUFSZ, "%g +i %g", 
+				scm_c_real_part(node),
+				scm_c_imag_part(node));
+		}
+		else if (scm_is_rational(node))
+		{
+			std::string rv;
+			rv = prt(scm_numerator(node));
+			rv += "/";
+			rv += prt(scm_denominator(node));
+			return rv;
 		}
 		return buff;
 	}
@@ -108,6 +140,11 @@ std::string SchemeShell::prt(SCM node)
 	else if (scm_is_true(scm_null_p(node))) 
 	{
 		return "nil";
+	}
+	else
+	{
+		fprintf (stderr, "Error: unhandled type for guile printing\n");
+		return "#opencog-guile-error: unknown type";
 	}
 #if 0
 	else if (scm_is_true(scm_procedure_p(node))) 
