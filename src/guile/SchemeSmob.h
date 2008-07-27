@@ -13,7 +13,10 @@
 #ifdef HAVE_GUILE
 
 #include <string>
+#include <vector>
 #include <libguile.h>
+
+#include "types.h"
 
 namespace opencog {
 
@@ -57,6 +60,7 @@ class SchemeSmob
 
 		// Misc utilities
 		static std::string to_string(SCM);
+		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:
 		SchemeSmob(void);

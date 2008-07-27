@@ -356,9 +356,9 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 /* ============================================================== */
 /**
- * Create a new link, of named type stype, holding the indicated atom list
+ * Verify that the arguments are appropriate for a link
  */
-SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
+static Type verify_link (SCM stype, const char * subrname)
 {
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
@@ -369,14 +369,23 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 	// Make sure that the type is good
 	if (NOTYPE == t)
-		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog atom type");
+		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
 
 	if (false == ClassServer::isAssignableFrom(LINK, t))
-		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog link type");
+		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog link type");
 
+	return t;
+}
+
+/**
+ * Convert argument into a list of handles.
+ */
+std::vector<Handle> 
+SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
+{
 	// Verify that second arg is an actual list
 	if (!scm_is_pair(satom_list))
-		scm_wrong_type_arg_msg("cog-new-link", 2, satom_list, "a list of atoms");
+		scm_wrong_type_arg_msg(subrname, 2, satom_list, "a list of atoms");
 
 	const TruthValue *tv = NULL;
 	std::vector<Handle> outgoing_set;
@@ -407,6 +416,21 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	while (scm_is_pair(sl));
 
+	return outgoing_set;
+}
+
+/**
+ * Create a new link, of named type stype, holding the indicated atom list
+ */
+SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
+{
+	Type t = verify_link (stype, "cog-new-link");
+
+	std::vector<Handle> outgoing_set;
+	outgoing_set = decode_handle_list (satom_list, "cog-new-link");
+
+	// Fish out a truth value, if its there.
+	const TruthValue *tv = get_tv_from_list(satom_list);
 	if (!tv) tv = &TruthValue::DEFAULT_TV();
 
 	// Now, create the actual link... in the actual atom space.
@@ -418,8 +442,6 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
-/* ============================================================== */
-/* ============================================================== */
 /**
  * Return the indicated link, of named type stype, holding the 
  * indicated atom list, if it exists; else return nil if 
@@ -427,61 +449,25 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
-	if (scm_is_true(scm_symbol_p(stype)))
-		stype = scm_symbol_to_string(stype);
+	Type t = verify_link (stype, "cog-link");
 
-   char * ct = scm_to_locale_string(stype);
-	Type t = ClassServer::getType(ct);
-	free(ct);
-
-	// Make sure that the type is good
-	if (NOTYPE == t)
-		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog atom type");
-
-	if (false == ClassServer::isAssignableFrom(LINK, t))
-		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog link type");
-
-	// Verify that second arg is an actual list
-	if (!scm_is_pair(satom_list))
-		scm_wrong_type_arg_msg("cog-new-link", 2, satom_list, "a list of atoms");
-
-	const TruthValue *tv = NULL;
 	std::vector<Handle> outgoing_set;
-	SCM sl = satom_list;
-	int pos = 2;
-	do
-	{
-		SCM satom = SCM_CAR(sl);
+	outgoing_set = decode_handle_list (satom_list, "cog-link");
 
-		// Verify that the contents of the list are actual atoms.
-		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
-		{
-			// Fish out a truth value, if its there.
-			tv = get_tv_from_list(sl);
-			if (tv != NULL) break;
-
-			// If its not an atom, and its not a truth value, its bad
-			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
-		}
-
-		// Get the handle  ... should we check for valid handles here? 
-		SCM shandle = SCM_SMOB_OBJECT(satom);
-		Handle h = scm_to_ulong(shandle);
-
-		outgoing_set.push_back(h);
-		sl = SCM_CDR(sl);
-		pos++;
-	}
-	while (scm_is_pair(sl));
-
-	if (!tv) tv = &TruthValue::DEFAULT_TV();
-
-	// Now, create the actual link... in the actual atom space.
+	// Now, look to find the actual link... in the actual atom space.
 	AtomSpace *as = CogServer::getAtomSpace();
-	Handle h = as->addLink(t, outgoing_set, *tv);
+	Handle h = as->getHandle(t, outgoing_set);
+	if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
+
+	// If there was a truth value, change it.
+	const TruthValue *tv = get_tv_from_list(satom_list);
+	if (tv)
+	{
+		Atom *atom = TLB::getAtom(h);
+		atom->setTruthValue(*tv);
+	}
 
 	SCM shandle = scm_from_ulong(h);
-
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
