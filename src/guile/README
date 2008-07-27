@@ -64,9 +64,9 @@ interface.
 
 
 == cog-atom handle
-      Reference the atom identified by the numeric handle
+      Reference the atom identified by the integer-valued handle
 == cog-handle atom
-      Return the handle of the atom
+      Return the handle (which is an integer) of the atom
 
       Example:
          (define x (cog-new-node 'ConceptNode "abc"))
@@ -77,6 +77,10 @@ interface.
          114
          (cog-atom 114)
          #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
+         (integer? x)
+         #f
+         (integer? (cog-handle x))
+         #t
 
 
 == cog-incoming-set atom
