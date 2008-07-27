@@ -58,7 +58,7 @@ std::string SchemeShell::prt(SCM node)
 		// Print the rest -- the CDR part
 		if (!scm_is_null(node_list)) 
 		{
-			str += " ";
+			str += " . ";
 			str += prt (node_list);
 		}
 		str += ")";
@@ -68,7 +68,8 @@ std::string SchemeShell::prt(SCM node)
 	{
 		node = scm_symbol_to_string(node);
 		char * str = scm_to_locale_string(node);
-		std::string rv = "'";
+		// std::string rv = "'";  // print the symbol escape
+		std::string rv = "";      // err .. don't print it
 		rv += str;
 		free(str);
 		return rv;
