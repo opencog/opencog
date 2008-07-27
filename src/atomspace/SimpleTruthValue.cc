@@ -1,12 +1,6 @@
 /*
  * src/AtomSpace/SimpleTruthValue.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
- * All Rights Reserved
- *
- * Written by Welter Silva <welter@vettalabs.com>
- *            Guilherme Lamacie
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -21,6 +15,13 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Welter Silva <welter@vettalabs.com>
+ *            Guilherme Lamacie
+ *
  */
 
 #include "platform.h"
@@ -87,9 +88,10 @@ float SimpleTruthValue::toFloat() const
 std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
-    // TODO: confidence is not needed for Saving&Loading. So, for saving memory space
-    // in dump files, it should be removed. However, toString is being used for debug
-    // purposes...
+    // TODO: confidence is not needed for Saving&Loading.
+    // (Only count is saved). So, for saving memory space
+    // in dump files, it should be removed. However, toString
+    // is being used for debug purposes, so both need to be shown...
     sprintf(buf, "[%f,%f=%f]", getMean(), getCount(), getConfidence());
     return buf;
 }
@@ -99,7 +101,8 @@ SimpleTruthValue* SimpleTruthValue::clone() const
     return new SimpleTruthValue(*this);
 }
 
-SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue & rhs) throw (RuntimeException)
+SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue & rhs)
+    throw (RuntimeException)
 {
     const SimpleTruthValue* tv = dynamic_cast<const SimpleTruthValue*>(&rhs);
     if (tv) {
@@ -110,11 +113,12 @@ SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue & rhs) throw (Run
     } else {
 #if 0
         // The following line was causing a compilation error on MSVC...
-        throw RuntimeException(TRACE_INFO, "Cannot assign a TV of type '%s' to one of type '%s'\n",
-                               typeid(rhs).name(), typeid(*this).name());
+        throw RuntimeException(TRACE_INFO,
+              "Cannot assign a TV of type '%s' to one of type '%s'\n",
+              typeid(rhs).name(), typeid(*this).name());
 #else
         throw RuntimeException(TRACE_INFO,
-                               "SimpleTruthValue - Invalid assignment of a SimpleTV object.");
+              "SimpleTruthValue - Invalid assignment of a SimpleTV object.");
 #endif
 
     }
@@ -149,9 +153,10 @@ float SimpleTruthValue::countToConfidence(float c)
 SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
 {
     float mean, count, conf;
-    // TODO: confidence is not needed for Saving&Loading. So, for saving memory space
-    // in dump files, it should be removed. However, toString is being used for debug
-    // purposes...
+    // TODO: confidence is not needed for Saving&Loading.
+    // (Only count is saved). So, for saving memory space
+    // in dump files, it should be removed. However, toString
+    // is being used for debug purposes, so both need to be shown...
     sscanf(tvStr, "[%f,%f=%f]", &mean, &count, &conf);
     //printf("SimpleTruthValue::fromString(%s) => mean = %f, count = %f, conf = %f\n", tvStr, mean, count, conf);
     return new SimpleTruthValue(mean, count);
