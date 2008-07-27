@@ -88,6 +88,37 @@ interface.
           guile> (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
           #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
 
+== cog-link link-type atom ... atom
+      Returns the link of the given type and list of atoms, if it
+      exists, else returns null.
+
+      Optionally, a truth value can follow the list of atoms. If the
+      link exists, then the truth value is modified.
+
+      Throws errors if the link type is not a valid opencog link type,
+      or if any of the arguments after the link type are not atoms.
+
+      Example:
+          ; Create two nodes:
+          guile> (define x (cog-new-node 'ConceptNode "abc"))
+          guile> (define y (cog-new-node 'ConceptNode "def"))
+
+          ; Does a node with these tow links exist?
+          guile> (cog-link 'Link x y)
+          ()
+
+          ; Now, create such a link
+          guile> (cog-new-link 'Link x y)
+          #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
+
+          ; Check again for existence:
+          guile> (cog-link 'Link x y)
+          #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
+
+          ; Change the truth value of an existing node:
+          guile> (cog-link 'Link x y (cog-new-stv 0.7 0.8))
+          #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
+
 
 == cog-atom handle
       Reference the atom identified by the integer-valued handle
@@ -233,8 +264,6 @@ ToDo
 
 -- change cog-delete to also accept a list of atoms
 -- change printed output so that it's valid scheme
--- change cog-delete to return nill, not #t (?why?)
--- define cog-node and cog-link to return nodes/links if they
-   exist, but not create them if they don't.
+-- change cog-delete to return null, not #t (?why?)
 
 
