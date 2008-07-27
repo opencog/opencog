@@ -95,7 +95,6 @@ size_t SchemeSmob::free_misc(SCM node)
 {
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
 
-	
 printf("duuude freee type=%d\n", (int) misctype);
 	switch (misctype)
 	{
@@ -128,9 +127,15 @@ void SchemeSmob::init_smob_type(void)
 
 /* ============================================================== */
 
-static TruthValue *get_tv_from_kvp(SCM kvp_list, const char * subrname, int pos)
+/**
+ * Search for a truth value (demarked by #:tv) in a list of key-value
+ * pairs.  Return the truth value if found, else return null.
+ * Throw errors if the list is not stictly just key-value pairs
+ */
+static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 {
-	SCM kvp = kvp_list;
+	if (!scm_is_pair(kvp)) return NULL;
+
 	do
 	{
 		SCM skey = SCM_CAR(kvp);
@@ -231,7 +236,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	// Make sure that the type is good
 	if (NOTYPE == t)
 		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog atom type");
-		
+
 	if (false == ClassServer::isAssignableFrom(NODE, t))
 		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog node type");
 
@@ -270,7 +275,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	// Make sure that the type is good
 	if (NOTYPE == t)
 		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog atom type");
-		
+
 	if (false == ClassServer::isAssignableFrom(LINK, t))
 		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog link type");
 
@@ -284,6 +289,10 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	do
 	{
 		SCM satom = SCM_CAR(sl);
+
+		// If we've found a keywrod, assume the rest of the list is
+		// nothing but key-value pairs.
+		if (scm_is_keyword(satom)) break;
 
 		// Verify that the contents of the list are actual atoms.
 		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
@@ -299,9 +308,13 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	while (scm_is_pair(sl));
 
+	// Fish out a truth value, if its there.
+	const TruthValue *tv = get_tv_from_kvp(sl, "cog-new-link", pos);
+	if (!tv) tv = &TruthValue::DEFAULT_TV();
+
 	// Now, create the actual link... in the actual atom space.
 	AtomSpace *as = CogServer::getAtomSpace();
-	Handle h = as->addLink(t, outgoing_set);
+	Handle h = as->addLink(t, outgoing_set, *tv);
 
 	SCM shandle = scm_from_ulong(h);
 

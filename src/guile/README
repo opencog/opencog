@@ -7,12 +7,12 @@
 
 This directory contains an implementation of the a Scheme shell for the
 OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
-code to manipulate the contents of an OpenCog AtomSpace. The shell 
+code to manipulate the contents of an OpenCog AtomSpace. The shell
 may be invoked by typing "scm" at the opencog prompt. To leave the shell,
-place a single . on the line, and hit enter. Alternately, hit ^D. 
+place a single . on the line, and hit enter. Alternately, hit ^D.
 Currently, only a small number of primitives have been implemented.
 
-This binding is intended to be used for day-to-day maintenance 
+This binding is intended to be used for day-to-day maintenance
 activities, and for experimentation. it is not meant to be used for any
 sort of serious calculation, simply because it is not (and cannot be) a
 high-performance interface. The shell is implemented in guile; guile is
@@ -21,22 +21,31 @@ an interpreter, not a compiler. There is no bytecode or virtual machine.
 Core Functions
 --------------
 The following are the "core" functions, implemented in the guile-to-C++
-interface. 
+interface.
 
-   cog-new-node node-type node-name 
+== cog-new-node node-type node-name
       Create a new node of the given type and name
 
+      Optionally, the #:tv keyword can be used to specify a truth value.
       Throws errors if node-type is not a valide atom type for a node,
       and if node-name is not a string.
+
       Example:
           (cog-new-node 'ConceptNode "some node name")
           creates a new node, and prints its value:
           #<node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)>
 
+          (cog-new-node 'ConceptNode "another node"
+                        #:tv (cog-new-stv 0.8 0.9))
 
-   cog-new-link link-type atom ... atom
+          creates a new node, with a truth value:
+          #<node[3:another node] sti:(0,0) tv:(0.800000,0.900000)>
+
+
+== cog-new-link link-type atom ... atom
       Create a new link, with the given atoms in the link.
 
+      Optionally, the #:tv keyword can be used to specify a truth value.
       Throws errors if the link type is not a valid opencog link type,
       or if any of the arguments after the link type are not atoms.
 
@@ -47,10 +56,16 @@ interface.
 
           creates a new link, and prints it:
           #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
-      
-   cog-atom handle
+
+          (cog-new-link 'Link x y #:tv (cog-new-stv 0.7 0.8))
+
+          creates a new link with a truth value:
+          #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 asdf],[3 another node]>]>
+
+
+== cog-atom handle
       Reference the atom identified by the numeric handle
-   cog-handle atom
+== cog-handle atom
       Return the handle of the atom
 
       Example:
@@ -64,8 +79,8 @@ interface.
          #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
 
 
-   cog-incoming-set atom
-   cog-outgoing-set atom
+== cog-incoming-set atom
+== cog-outgoing-set atom
       Return the incoming and outgoing sets, respectively, of the atom.
 
       Example:
@@ -79,9 +94,9 @@ interface.
          (equal? (cog-incoming-set x) (cog-incoming-set y))
          #t
 
-   cog-delete atom
+== cog-delete atom
       Delete the indicated atom, but only if it has no incoming links.
-   cog-delete-recursive atom
+== cog-delete-recursive atom
       Delete the incoming atom, and all atoms that point at it.
 
       Both functions return #t on success, else they return #f.
@@ -105,10 +120,10 @@ interface.
          Note that x and the link l point to have been deleted,
          but not the link y.
 
-   cog-new-stv mean confidence
+== cog-new-stv mean confidence
       Create a SimpleTruthValue with the given mean and confidence.
       Unlike atoms, simple truth values are ephemeral: they are
-      garbage-collected when no longer needed. 
+      garbage-collected when no longer needed.
 
       Throws errors if mean and confidence are not floating-point
       values.
