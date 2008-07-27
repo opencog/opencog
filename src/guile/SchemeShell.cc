@@ -141,10 +141,21 @@ std::string SchemeShell::prt(SCM node)
 	{
 		return "nil";
 	}
-	else
+	else if (scm_is_eq(node, SCM_UNDEFINED))
 	{
-		fprintf (stderr, "Error: unhandled type for guile printing\n");
-		return "#opencog-guile-error: unknown type";
+		return "undefined";
+	}
+	else if (scm_is_eq(node, SCM_EOF_VAL))
+	{
+		return "eof";
+	}
+	else if (scm_is_eq(node, SCM_EOL))
+	{
+		return "eol";
+	}
+	else if (scm_is_eq(node, SCM_UNSPECIFIED))
+	{
+		return "";
 	}
 #if 0
 	else if (scm_is_true(scm_procedure_p(node))) 
@@ -168,6 +179,12 @@ std::string SchemeShell::prt(SCM node)
 		return "variable";
 	}
 #endif
+	else
+	{
+		fprintf (stderr, "Error: unhandled type for guile printing: %x\n", 
+			(unsigned int) node);
+		return "#opencog-guile-error: unknown type";
+	}
 
 	return "";
 }
