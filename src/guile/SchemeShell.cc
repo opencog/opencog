@@ -81,10 +81,17 @@ std::string SchemeShell::prt(SCM node)
 		return SchemeSmob::to_string(node);
 	}
 
-	else if (scm_is_true(scm_integer_p(node))) 
+	else if (scm_is_integer(node)) 
 	{
 		char buff[20];
-		snprintf (buff, 20, "%ld", (long) scm_to_long(node));
+		if (scm_is_signed_integer(node, INT_MIN, INT_MAX))
+		{
+			snprintf (buff, 20, "%ld", (long) scm_to_long(node));
+		}
+		else
+		{
+			snprintf (buff, 20, "%lu", (unsigned long) scm_to_ulong(node));
+		}
 		return buff;
 	}
 	else if (scm_is_true(scm_char_p(node))) 
