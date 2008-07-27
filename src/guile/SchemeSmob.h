@@ -36,6 +36,7 @@ class SchemeSmob
 		void init_smob_type(void);
 		static int print_atom(SCM, SCM, scm_print_state *);
 		static SCM equalp_atom(SCM, SCM);
+		static size_t free_atom(SCM);
 		static SCM mark_misc(SCM);
 		static size_t free_misc(SCM);
 

@@ -75,6 +75,13 @@ SCM SchemeSmob::equalp_atom(SCM a, SCM b)
 	return SCM_BOOL_F;
 }
 
+size_t SchemeSmob::free_atom(SCM node)
+{
+	// Nothing to do here; the atom handles are stored as 
+	// immediate values in the SMOB's.
+	return 0;
+}
+
 SCM SchemeSmob::mark_misc(SCM misc_smob)
 {
 	scm_t_bits misctype = SCM_SMOB_FLAGS(misc_smob);
@@ -119,12 +126,13 @@ size_t SchemeSmob::free_misc(SCM node)
 void SchemeSmob::init_smob_type(void)
 {
 	// a SMOB type for atom handles
-	cog_handle_tag = scm_make_smob_type ("opencog_handle", sizeof (scm_t_bits));
+	cog_handle_tag = scm_make_smob_type ("opencog-handle", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_handle_tag, print_atom);
 	scm_set_smob_equalp (cog_handle_tag, equalp_atom);
+	scm_set_smob_free (cog_handle_tag, free_atom);
 
 	// A SMOB type for everything else
-	cog_misc_tag = scm_make_smob_type ("opencog_misc", sizeof (scm_t_bits));
+	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_mark (cog_misc_tag, mark_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
 }
