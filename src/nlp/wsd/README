@@ -424,8 +424,13 @@ processing is complete, as so:
 
    <InheritanceLink>
       <SentenceNode name="sentence_22" />
-      <ConceptNode name="wsd_completed" />
+      <DistinguishedNode name="wsd_completed" />
    </InheritanceLink>
+
+The DistinguishedNode is an ad-hoc node type, functioning essentially
+as a special-purpose tag with can be used to tag things like a
+SentenceNode.  
+
 
 Word concepts
 -------------
