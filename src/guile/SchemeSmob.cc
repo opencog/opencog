@@ -127,10 +127,19 @@ void SchemeSmob::init_smob_type(void)
 
 /* ============================================================== */
 
+#ifdef USE_KEYWORD_LIST_NOT_USED
 /**
  * Search for a truth value (demarked by #:tv) in a list of key-value
  * pairs.  Return the truth value if found, else return null.
  * Throw errors if the list is not stictly just key-value pairs
+ *
+ * XXX This code is not currently used, since it seems pointless
+ * to have key-value pairs for this function. After all, an atom
+ * can only have one truth value ever -- if we find a truth value, we
+ * use it. We don't really need a key to tell us that its a truth value.
+ * So punt, and get truth values implicitly. Meanwhile, this code is
+ * stubbed out, for a rainy tay, in case we need to resurrect key-value
+ * pairs in the future.
  */
 static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 {
@@ -172,6 +181,29 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 		pos ++;
 	}
 	while (scm_is_pair(kvp));
+
+	return NULL;
+}
+#endif
+
+/**
+ * Search for a truth value in a list of values.
+ * Return the truth value if found, else return null.
+ * Throw errors if the list is not stictly just key-value pairs
+ */
+static TruthValue *get_tv_from_list(SCM slist)
+{
+	while (scm_is_pair(slist))
+	{
+		SCM sval = SCM_CAR(slist);
+		scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
+		if (misctype == COG_SIMPLE_TV)
+		{
+			return ((TruthValue *) SCM_SMOB_DATA(sval));
+		}
+
+		slist = SCM_CDR(slist);
+	}
 
 	return NULL;
 }
@@ -248,7 +280,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	std::string name = cname;
 	free(cname);
 
-	const TruthValue *tv = get_tv_from_kvp(kv_pairs, "cog-new-node", 3);
+	const TruthValue *tv = get_tv_from_list(kv_pairs);
 	if (!tv) tv = &TruthValue::DEFAULT_TV();
 
 	AtomSpace *as = CogServer::getAtomSpace();
@@ -283,6 +315,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	if (!scm_is_pair(satom_list))
 		scm_wrong_type_arg_msg("cog-new-link", 2, satom_list, "a list of atoms");
 
+	const TruthValue *tv = NULL;
 	std::vector<Handle> outgoing_set;
 	SCM sl = satom_list;
 	int pos = 2;
@@ -290,13 +323,16 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	{
 		SCM satom = SCM_CAR(sl);
 
-		// If we've found a keywrod, assume the rest of the list is
-		// nothing but key-value pairs.
-		if (scm_is_keyword(satom)) break;
-
 		// Verify that the contents of the list are actual atoms.
 		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
+		{
+			// Fish out a truth value, if its there.
+			tv = get_tv_from_list(sl);
+			if (tv != NULL) break;
+
+			// If its not an atom, and its not a truth value, its bad
 			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
+		}
 
 		// Get the handle  ... should we check for valid handles here? 
 		SCM shandle = SCM_SMOB_OBJECT(satom);
@@ -308,8 +344,6 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	while (scm_is_pair(sl));
 
-	// Fish out a truth value, if its there.
-	const TruthValue *tv = get_tv_from_kvp(sl, "cog-new-link", pos);
 	if (!tv) tv = &TruthValue::DEFAULT_TV();
 
 	// Now, create the actual link... in the actual atom space.

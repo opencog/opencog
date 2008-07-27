@@ -26,7 +26,7 @@ interface.
 == cog-new-node node-type node-name
       Create a new node of the given type and name
 
-      Optionally, the #:tv keyword can be used to specify a truth value.
+      Optionally, a truth value can follow the node name.
       Throws errors if node-type is not a valide atom type for a node,
       and if node-name is not a string.
 
@@ -36,7 +36,7 @@ interface.
           #<node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)>
 
           (cog-new-node 'ConceptNode "another node"
-                        #:tv (cog-new-stv 0.8 0.9))
+                        (cog-new-stv 0.8 0.9))
 
           creates a new node, with a truth value:
           #<node[3:another node] sti:(0,0) tv:(0.800000,0.900000)>
@@ -45,7 +45,7 @@ interface.
 == cog-new-link link-type atom ... atom
       Create a new link, with the given atoms in the link.
 
-      Optionally, the #:tv keyword can be used to specify a truth value.
+      Optionally, a truth value can follow the list of atoms.
       Throws errors if the link type is not a valid opencog link type,
       or if any of the arguments after the link type are not atoms.
 
@@ -57,7 +57,7 @@ interface.
           creates a new link, and prints it:
           #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
 
-          (cog-new-link 'Link x y #:tv (cog-new-stv 0.7 0.8))
+          (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
 
           creates a new link with a truth value:
           #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 asdf],[3 another node]>]>
@@ -160,8 +160,6 @@ default port for the cogserver).
 
 ToDo
 ----
--- implement truth values
--- pass truth values with keywords
 -- support readline/editline (uparrows, etc.) on input.
 -- enable module loading
 
