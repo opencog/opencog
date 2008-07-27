@@ -11,6 +11,7 @@
 
 #include <libguile.h>
 #include <libguile/backtrace.h>
+#include <libguile/lang.h>
 
 #include "platform.h"
 #include "SchemeSmob.h"
@@ -138,8 +139,10 @@ std::string SchemeShell::prt(SCM node)
 		if (scm_to_bool(node)) return "#t";
 		return "#f";
 	}
-	else if (scm_is_true(scm_null_p(node))) 
+	else if (SCM_NULL_OR_NIL_P(node)) 
 	{
+		// scm_is_null(x) is true when x is SCM_EOL
+		// SCM_NILP(x) is true when x is SCM_ELISP_NIL
 		return "nil";
 	}
 	else if (scm_is_eq(node, SCM_UNDEFINED))
@@ -149,10 +152,6 @@ std::string SchemeShell::prt(SCM node)
 	else if (scm_is_eq(node, SCM_EOF_VAL))
 	{
 		return "eof";
-	}
-	else if (scm_is_eq(node, SCM_EOL))
-	{
-		return "eol";
 	}
 	else if (scm_is_eq(node, SCM_UNSPECIFIED))
 	{
