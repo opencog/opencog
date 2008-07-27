@@ -1,0 +1,19 @@
+
+                 Word Similarity
+                 ---------------
+             Linas Vepstas July 2008
+
+
+This directory contains code pertaining to word similarity measures.
+The similarity measures are in part driven by statistical corpus
+analysis.
+
+Word Lemmas
+-----------
+Basic statistical information gathered from corpus analysis always
+involves the frequency of words themselves, whereas for tasks such as
+word similarity, one is interested in having the lemma of the form.
+Thus, the goal is to represent the linkage between a word and its lemma.
+
+
+
