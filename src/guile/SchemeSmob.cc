@@ -100,6 +100,14 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 	return SCM_BOOL_F;
 }
 
+/**
+ * Free the memory associated with an opencog guile object.
+ * This routine is called by the guile garbage collector, from time to
+ * time. For testing purposes, you can force the garbage collector to
+ * run by saying (gc), while, for stats, try (gc-stats) and
+ * (gc-live-object-stats). The later should show both "opencog-handle"
+ * and "opencog-misc" stats.
+ */
 size_t SchemeSmob::free_misc(SCM node)
 {
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
