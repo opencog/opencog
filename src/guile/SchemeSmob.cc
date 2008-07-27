@@ -128,7 +128,7 @@ void SchemeSmob::init_smob_type(void)
 
 /* ============================================================== */
 
-static TruthValue *get_tv_from_kvp(SCM kvp_list)
+static TruthValue *get_tv_from_kvp(SCM kvp_list, const char * subrname, int pos)
 {
 	SCM kvp = kvp_list;
 	do
@@ -136,24 +136,27 @@ static TruthValue *get_tv_from_kvp(SCM kvp_list)
 		SCM skey = SCM_CAR(kvp);
 
 		// Verify that the first item is a keyword.
-		if (!scm_is_keyword(skey)) return NULL;
+		if (!scm_is_keyword(skey))
+			scm_wrong_type_arg_msg(subrname, pos, skey, "keyword");
+
 		skey = scm_keyword_to_symbol(skey);
 		skey = scm_symbol_to_string(skey);
 		char * key = scm_to_locale_string(skey);
 
 		kvp = SCM_CDR(kvp);
-		if (!scm_is_pair(kvp)) { free(key); return NULL; }
+		pos ++;
+		if (!scm_is_pair(kvp))
+		{
+			free(key);
+			scm_wrong_type_arg_msg(subrname, pos, kvp, "value following keyword");
+		}
 
 		if (0 == strcmp(key, "tv"))
 		{
- printf("got a key!! %s\n", key); 
 			SCM sval = SCM_CAR(kvp);
 			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
 			if (misctype != COG_SIMPLE_TV)
-			{
-printf ("baaad !\n");
-				return NULL;
-			}
+				scm_wrong_type_arg_msg(subrname, pos, sval, "opencog truth value");
 			TruthValue *tv;
 			tv = (TruthValue *) SCM_SMOB_DATA(sval);
 			return tv;
@@ -161,6 +164,7 @@ printf ("baaad !\n");
 		free(key);
 
 		kvp = SCM_CDR(kvp);
+		pos ++;
 	}
 	while (scm_is_pair(kvp));
 
@@ -239,7 +243,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	std::string name = cname;
 	free(cname);
 
-	const TruthValue *tv = get_tv_from_kvp(kv_pairs);
+	const TruthValue *tv = get_tv_from_kvp(kv_pairs, "cog-new-node", 3);
 	if (!tv) tv = &TruthValue::DEFAULT_TV();
 
 	AtomSpace *as = CogServer::getAtomSpace();
