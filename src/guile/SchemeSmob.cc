@@ -84,7 +84,9 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 		case COG_SIMPLE_TV: // Nothing to do here ...
 			return SCM_BOOL_F;
 		default:
-printf("duuude don't know what the heck this is\n");
+			fprintf(stderr, "Error: opencog-guile: "
+			        "don't know how to mark this type: %d\n",
+			        (int) misctype);
 			break;
 	}
 
@@ -95,18 +97,20 @@ size_t SchemeSmob::free_misc(SCM node)
 {
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
 
-printf("duuude freee type=%d\n", (int) misctype);
 	switch (misctype)
 	{
 		case COG_SIMPLE_TV:
-printf("duuude freee its a simple tv\n");
 			SimpleTruthValue *stv;
 			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (stv, 
+			                  sizeof(SimpleTruthValue), "opencog simple tv");
 			delete stv;
 			return 0;
 
 		default:
-printf("duuude don't know this thing\n");
+			fprintf(stderr, "Error: opencog-guile: "
+			        "don't know how to free this type: %d\n",
+			        (int) misctype);
 			break;
 	}
 	return 0;
@@ -469,6 +473,8 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 
 	float cnt = SimpleTruthValue::confidenceToCount(confidence);
 	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
+	scm_gc_register_collectable_memory (stv, 
+	                 sizeof(SimpleTruthValue), "opencog simple tv");
 
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, stv);
