@@ -263,7 +263,7 @@ SCM SchemeSmob::ss_atom (SCM shandle)
 
 /* ============================================================== */
 /**
- * Return handle of atom
+ * Return handle of atom (the handle is in integer)
  */
 SCM SchemeSmob::ss_handle (SCM satom)
 {
@@ -273,10 +273,12 @@ SCM SchemeSmob::ss_handle (SCM satom)
 }
 
 /* ============================================================== */
+
 /**
- * Create a new node, of named type stype, and string name sname
+ * Check that the arguments represent a value node, else throw errors.
+ * Return the node type.
  */
-SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
+static Type validate_node (SCM stype, SCM sname, const char *subrname)
 {
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
@@ -287,13 +289,23 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// Make sure that the type is good
 	if (NOTYPE == t)
-		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog atom type");
+		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
 
 	if (false == ClassServer::isAssignableFrom(NODE, t))
-		scm_wrong_type_arg_msg("cog-new-node", 1, stype, "name of opencog node type");
+		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog node type");
 
 	if (scm_is_false(scm_string_p(sname)))
-		scm_wrong_type_arg_msg("cog-new-node", 2, sname, "string name for the node");
+		scm_wrong_type_arg_msg(subrname, 2, sname, "string name for the node");
+
+	return t;
+}
+
+/**
+ * Create a new node, of named type stype, and string name sname
+ */
+SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
+{
+	Type t = validate_node(stype, sname, "cog-new-node");
 
 	// Now, create the actual node... in the actual atom space.
 	char * cname = scm_to_locale_string(sname);
@@ -311,11 +323,109 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
+/**
+ * Return the indicated node, of named type stype, and string name sname
+ * if it exists; else return nil if it does not exist.
+ * If the node exists, *and* a truth value was specified, then change
+ * the truth value.
+ */
+SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
+{
+	Type t = validate_node(stype, sname, "cog-node");
+
+	// Now, look for the actual node... in the actual atom space.
+	char * cname = scm_to_locale_string(sname);
+	std::string name = cname;
+	free(cname);
+
+	AtomSpace *as = CogServer::getAtomSpace();
+	Handle h = as->getHandle(t, name);
+	if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
+
+	// If there was a truth value, change it.
+	const TruthValue *tv = get_tv_from_list(kv_pairs);
+	if (tv)
+	{
+		Atom *atom = TLB::getAtom(h);
+		atom->setTruthValue(*tv);
+	}
+
+	SCM shandle = scm_from_ulong(h);
+	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+}
+
 /* ============================================================== */
 /**
  * Create a new link, of named type stype, holding the indicated atom list
  */
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+   char * ct = scm_to_locale_string(stype);
+	Type t = ClassServer::getType(ct);
+	free(ct);
+
+	// Make sure that the type is good
+	if (NOTYPE == t)
+		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog atom type");
+
+	if (false == ClassServer::isAssignableFrom(LINK, t))
+		scm_wrong_type_arg_msg("cog-new-link", 1, stype, "name of opencog link type");
+
+	// Verify that second arg is an actual list
+	if (!scm_is_pair(satom_list))
+		scm_wrong_type_arg_msg("cog-new-link", 2, satom_list, "a list of atoms");
+
+	const TruthValue *tv = NULL;
+	std::vector<Handle> outgoing_set;
+	SCM sl = satom_list;
+	int pos = 2;
+	do
+	{
+		SCM satom = SCM_CAR(sl);
+
+		// Verify that the contents of the list are actual atoms.
+		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
+		{
+			// Fish out a truth value, if its there.
+			tv = get_tv_from_list(sl);
+			if (tv != NULL) break;
+
+			// If its not an atom, and its not a truth value, its bad
+			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
+		}
+
+		// Get the handle  ... should we check for valid handles here? 
+		SCM shandle = SCM_SMOB_OBJECT(satom);
+		Handle h = scm_to_ulong(shandle);
+
+		outgoing_set.push_back(h);
+		sl = SCM_CDR(sl);
+		pos++;
+	}
+	while (scm_is_pair(sl));
+
+	if (!tv) tv = &TruthValue::DEFAULT_TV();
+
+	// Now, create the actual link... in the actual atom space.
+	AtomSpace *as = CogServer::getAtomSpace();
+	Handle h = as->addLink(t, outgoing_set, *tv);
+
+	SCM shandle = scm_from_ulong(h);
+
+	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+}
+
+/* ============================================================== */
+/* ============================================================== */
+/**
+ * Return the indicated link, of named type stype, holding the 
+ * indicated atom list, if it exists; else return nil if 
+ * it does not exist.
+ */
+SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
@@ -504,10 +614,12 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 
 void SchemeSmob::register_procs(void)
 {
-	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
-	scm_c_define_gsubr("cog-new-node",          2, 0, 1, C(ss_new_node));
 	scm_c_define_gsubr("cog-atom",              1, 0, 0, C(ss_atom));
 	scm_c_define_gsubr("cog-handle",            1, 0, 0, C(ss_handle));
+	scm_c_define_gsubr("cog-new-node",          2, 0, 1, C(ss_new_node));
+	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
+	scm_c_define_gsubr("cog-node",              2, 0, 1, C(ss_node));
+	scm_c_define_gsubr("cog-link",              1, 0, 1, C(ss_link));
 	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	scm_c_define_gsubr("cog-delete",            1, 0, 0, C(ss_delete));

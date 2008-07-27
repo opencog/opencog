@@ -31,15 +31,43 @@ interface.
       and if node-name is not a string.
 
       Example:
-          (cog-new-node 'ConceptNode "some node name")
-          creates a new node, and prints its value:
+          Create a new node, and prints its value:
+          guile> (cog-new-node 'ConceptNode "some node name")
           #<node[3:some node name] sti:(0,0) tv:(0.000000,0.000000)>
 
-          (cog-new-node 'ConceptNode "another node"
+          Creates a new node, with a truth value:
+          guile> (cog-new-node 'ConceptNode "another node"
                         (cog-new-stv 0.8 0.9))
-
-          creates a new node, with a truth value:
           #<node[3:another node] sti:(0,0) tv:(0.800000,0.900000)>
+
+
+== cog-node node-type node-name
+      Returns the node of the given type and name, if it exists, else
+      returns null.
+
+      Optionally, a truth value can follow the node name. If the node
+      exists, then the truth value is modified.
+      Throws errors if node-type is not a valide atom type for a node,
+      and if node-name is not a string.
+
+      Example:
+          Check to see if a node exists: 
+          guile> (cog-node 'ConceptNode "asdf")
+          ()
+
+          Verify that the return value is actually a true null:
+          guile> (null? (cog-node 'ConceptNode "asdf"))
+          #t 
+
+          Now, create the node, and see if it exists:
+          guile> (cog-new-node 'ConceptNode "asdf")
+          #<node[3:asdf] sti:(0,0) tv:(0.000000,0.000000)>
+          guile> (null? (cog-node 'ConceptNode "asdf"))
+          #f
+
+          Change the truth value of an existing node:
+          guile> (cog-node 'ConceptNode "asdf" (cog-new-stv 0.8 0.9))
+          #<node[3:some node name] sti:(0,0) tv:(0.800000,0.900000)>
 
 
 == cog-new-link link-type atom ... atom
@@ -50,17 +78,15 @@ interface.
       or if any of the arguments after the link type are not atoms.
 
       Example:
-          (define x (cog-new-node 'ConceptNode "abc"))
-          (define y (cog-new-node 'ConceptNode "def"))
-          (cog-new-link 'Link x y)
-
-          creates a new link, and prints it:
+          Creates two nodes, and a new link:
+          guile> (define x (cog-new-node 'ConceptNode "abc"))
+          guile> (define y (cog-new-node 'ConceptNode "def"))
+          guile> (cog-new-link 'Link x y)
           #<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>
 
-          (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
-
-          creates a new link with a truth value:
-          #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 asdf],[3 another node]>]>
+          Create a new link with a truth value:
+          guile> (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
+          #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
 
 
 == cog-atom handle

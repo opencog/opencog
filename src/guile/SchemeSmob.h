@@ -43,6 +43,8 @@ class SchemeSmob
 		// Atom creation and deletion functions
 		static SCM ss_new_node(SCM, SCM, SCM);
 		static SCM ss_new_link(SCM, SCM);
+		static SCM ss_node(SCM, SCM, SCM);
+		static SCM ss_link(SCM, SCM);
 		static SCM ss_atom(SCM);
 		static SCM ss_handle(SCM);
 		static SCM ss_incoming_set(SCM);
