@@ -86,8 +86,16 @@ Thus, the goal is to represent the linkage between a word and its lemma.
       <LemmaNode name="bark" />
    </LemmaLink>
 
-The nodes and links will have truth values associated with them; these
-will be used to hold statistical information.
 
 
 
+Working notes
+-------------
+Currently, Linas loads data as follows:
+* After building an SQL database of word pairs, use the
+  src/extract/export-word-count.pl script from the java lexical attraction
+  package to dump the SQL database into opencog.
+
+Curently loads 243K WordNode's -- many of these are numerical garbage,
+many are foreign words; some fair amount is confused punctuation.  This
+results in a cogserver instance of 158M, or 158M/243K=650 bytes/word.
