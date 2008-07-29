@@ -16,7 +16,7 @@ sentence_0648141e-0c62-4656-bc3b-abd067ce9635
 
 ; Scheme code to delete  selected "sentence complete" markers:
 
-(define wsd-done (cog-new-node 'ConceptNode "#WSD_completed"))
+(define wsd-done (cog-new-node 'DistinguishedNode "#WSD_completed"))
 (cog-incoming-set wsd-done)
 
 (define s (cog-new-node 'SentenceNode "sentence_6083ec49-1988-4a44-b72d-3ad0c575dd22"))

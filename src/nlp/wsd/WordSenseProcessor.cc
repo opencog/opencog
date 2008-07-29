@@ -100,7 +100,7 @@ bool WordSenseProcessor::do_sentence(Handle h)
 {
 	// Obtain the handle which indicates that the processing of a
  	// sentence is complete. 
-	Node node(CONCEPT_NODE, "#WSD_completed");
+	Node node(DISTINGUISHED_NODE, "#WSD_completed");
 	completion_handle = atom_space->addRealAtom(node);
 
 	// Look to see if the sentence is associated with the
