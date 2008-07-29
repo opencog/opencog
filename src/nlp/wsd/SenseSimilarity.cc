@@ -64,6 +64,9 @@ SenseSimilarity::~SenseSimilarity()
  *
  * Note that, in this algorithm, two words having different parts-of-speech
  * will have zero similarity (infinite distance).
+ *
+ * Note that currently, only the "mean" is used to nindicate similarity;
+ * whereas teh confidence is set to the arbitrary 0.9
  */
 SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 {
