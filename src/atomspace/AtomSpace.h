@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <set>
+#include <algorithm>
 
 #include "ClassServer.h"
 #include "AtomTable.h"
@@ -712,6 +713,40 @@ public:
         HandleEntry * handleEntry = atomTable.getHandleSet(types, subclasses, arity, type, subclass, vh);
         return (toOutputIterator(result, handleEntry));
     }
+
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally).
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param The comparison struct to use in the sort.
+     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer:
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     */
+    template <typename OutputIterator, typename Compare> OutputIterator
+    getSortedHandleSet(OutputIterator result,
+                 Type type,
+                 bool subclass,
+                 Compare compare,
+                 VersionHandle vh = NULL_VERSION_HANDLE) const {
+        // get the handle set as a vector and sort it.
+        vector<Handle> hs;
+        getSortedHandleSet(back_inserter(hs), type, subclass, vh);
+        sort(hs.begin(), hs.end(), compare);
+        
+        // copy the vector and return the iterator.
+        return copy(hs.begin(), hs.end(), result);
+    }
+
 
     /* ----------------------------------------------------------- */
     /* The foreach routines offer an alternative interface
