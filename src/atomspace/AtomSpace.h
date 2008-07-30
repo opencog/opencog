@@ -716,7 +716,8 @@ public:
 
     /**
      * Gets a set of handles that matches with the given type
-     * (subclasses optionally).
+     * (subclasses optionally), sorted according to the given comparison
+     * structure.
      *
      * @param An output iterator.
      * @param The desired type.
