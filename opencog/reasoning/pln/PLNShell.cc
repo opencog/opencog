@@ -243,6 +243,7 @@ void PLNShell_RunLoop(int argc, char** args)
 				
 		if (RunPLNtest)
 		{
+            puts("Running PLNTests...");
 			reasoning::RunPLNTests();
 			exit(0);
 		}

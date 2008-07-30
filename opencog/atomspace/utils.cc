@@ -626,7 +626,7 @@ void initReferenceTime()
     referenceTimeInitialized = true;
 }
 
-unsigned long getElapsedMillis()
+unsigned long opencog::getElapsedMillis()
 {
     cassert(TRACE_INFO, referenceTimeInitialized,
             "utils - refenceTimeInitialized should have been initialized.");

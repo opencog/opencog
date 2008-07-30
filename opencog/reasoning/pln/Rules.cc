@@ -51,6 +51,7 @@ BBvtree atomWithNewType(Handle h, Type T)
 BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 {
     Handle *ph = v2h(&*v.begin());
+// TODO just call the overloaded Vertex version below
     AtomSpace *nm = CogServer::getAtomSpace();
     if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
     {
@@ -74,6 +75,31 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
     }   
 }
 
+BBvtree atomWithNewType(const Vertex& v, Type T)
+{
+    Handle *ph = (Handle*)v2h(v);
+    AtomSpace *nm = CogServer::getAtomSpace();
+    if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
+    {
+    
+        BBvtree ret_m(new BoundVTree(v));
+        *ret_m->begin() = Vertex((Handle)T);
+        return ret_m;
+    }
+    else //Real: construct a new tree from T root and v's outgoing set.
+    {
+        assert(inheritsType(T, LINK));
+
+        vector<Handle> children = nm->getOutgoing(*ph);
+        BBvtree ret_m(new BoundVTree(mva((Handle)T)));
+        foreach(Handle c, children)
+        {
+            ret_m->append_child(ret_m->begin(), mva(c).begin());
+        }
+        
+        return ret_m;
+    }   
+}
 /// haxx:: \todo VariableNodes not memory-managed.
 
 extern int varcount;
@@ -471,7 +497,7 @@ Btr<set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta
     rawPrint(*outh, outh->begin(),0);
 #else 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    printer.print(outh->begin());
+    printer.print(vtree(outh->begin()));
 #endif
 cprintf(3,"FindMatchingUniversals...\n");
     Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
@@ -532,7 +558,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
     rawPrint(*outh, outh->begin(),0);
 #else 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-    printer.print(outh->begin());
+    printer.print(vtree(outh->begin()));
 #endif
 
     Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
@@ -655,6 +681,7 @@ printer.print(rootAtom->begin(),3);
 
         ///Record targets to prevent multiple occurrence of the same target in the arg set.
 
+        //set<vtree, less_vtree> arg_targets;
         set<vtree, less_vtree> arg_targets;
 
         /// rootAtom->hs[0] is the 1st link under the HYPOTHETICAL_LINK
@@ -666,14 +693,15 @@ printer.print(rootAtom->begin(),3);
 
             for (vtree::post_order_iterator pit = tRes.begin_post(); pit!=tRes.end_post(); pit++)
 			{
+                vtree pit_vtree(pit);
                 if ( (!nm->isReal(v2h(*pit))
                     || inheritsType(nm->getType(v2h(*pit)), FW_VARIABLE_NODE))
                     && v2h(*pit) != (Handle)LIST_LINK
-					&& !STLhas(arg_targets, *pit) )
+					&& !STLhas(arg_targets, pit_vtree) )
                 {
-					ret1.push_back(BBvtree(new BoundVTree(pit, pre_binds)));
+					ret1.push_back(BBvtree(new BoundVTree(pit_vtree, pre_binds)));
 
-					arg_targets.insert(*pit);
+					arg_targets.insert(pit_vtree);
                 }
             }
         }

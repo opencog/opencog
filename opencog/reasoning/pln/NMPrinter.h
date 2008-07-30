@@ -45,7 +45,7 @@ using namespace boost;
 using namespace opencog;
 using namespace reasoning;
 
-typedef variant < Handle, vtree > NMPrintable;
+typedef variant < Handle, vtree, vtree::iterator_base > NMPrintable;
 
 /**
  * This class provides methods for printing a data structure that represents an atom or 
@@ -144,6 +144,7 @@ private:
     bool areFromSameType(NMPrintable, NMPrintable) const;
     bool isHandle(NMPrintable) const;
     bool isVtree(NMPrintable) const;
+    bool isVtreeIterator(NMPrintable p) const;
     
     void toStream(ostream& out, const NMPrintable p, int indentationLevel) const;
     void printHandle(ostream& out, Handle h, int indentationLevel) const;

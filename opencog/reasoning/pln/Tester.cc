@@ -65,8 +65,8 @@ namespace test
 enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
 
 namespace reasoning {
-void InitAxiomSet(string premiseFile);
-extern FitnessEvalutorT FitnessEvaluator;
+    void InitAxiomSet(string premiseFile);
+    extern FitnessEvalutorT FitnessEvaluator;
 }
 
 //#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
@@ -175,7 +175,7 @@ void InitPLNTests()
 
     assert(h1 == h2);
 */
-    //currentDebugLevel=-3;
+    currentDebugLevel=-3;
 }
 
 bool satSetTest();
@@ -254,7 +254,7 @@ void RunPLNTests()
 /*	puts("\n\nTests over. Press enter.");
 	getc(stdin);*/
 
-	//currentDebugLevel=0;
+	currentDebugLevel=0;
 }
 
 void MacroRuleTest()
@@ -290,12 +290,12 @@ void MacroRuleTest()
 	RuleApp* top	= new RuleApp(deduR);
 	RuleApp* child1a= new RuleApp(deduR);
 
-	//child1a->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
-	//child1a->Bind(1, new VtreeProviderWrapper(Vertex(h1)));
-	//child1a->compute();
+	child1a->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
+	child1a->Bind(1, new VtreeProviderWrapper(Vertex(h1)));
+	child1a->compute();
 
 	top->Bind(0, child1a);
-	//top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
+	top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
 
 	BoundVertex res1a = top->compute();
 	const TruthValue& tvA = nm->getTV(v2h(res1a.value));
@@ -306,9 +306,9 @@ void MacroRuleTest()
 //	RuleApp* child1b= vtree(Vertex(h0));
 	RuleApp* child2b= new RuleApp(deduR);
 
-	//child2b->Bind(0, new VtreeProviderWrapper(Vertex(h1)));
-	//child2b->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
-	//topb->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
+	child2b->Bind(0, new VtreeProviderWrapper(Vertex(h1)));
+	child2b->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
+	topb->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
 	topb->Bind(1, child2b);
 
 	BoundVertex res1b = topb->compute();
@@ -333,9 +333,9 @@ void MacroRuleTest()
 
 
 	vector<VtreeProvider*> args;
-	//args.push_back(new VtreeProviderWrapper(Vertex(h0)));
-	//args.push_back(new VtreeProviderWrapper(Vertex(h1)));
-	//args.push_back(new VtreeProviderWrapper(Vertex(h2)));
+	args.push_back(new VtreeProviderWrapper(Vertex(h0)));
+	args.push_back(new VtreeProviderWrapper(Vertex(h1)));
+	args.push_back(new VtreeProviderWrapper(Vertex(h2)));
 
 	RuleApp* topc	= new RuleApp(deduR);
 	RuleApp* child2c= new RuleApp(deduR);
@@ -718,11 +718,11 @@ InitAxiomSet("smalldemo.xml");
 
 		AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
 
-		printf("loading...\n");		
+		cprintf(-2,"loading...\n");		
 		
  		bool axioms_ok = TheNM.LoadAxioms(premiseFile);
 		
-		printf("%s loaded. Next test: ", premiseFile.c_str());
+		cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 		assert(axioms_ok);		
 	}
 
@@ -742,8 +742,8 @@ InitAxiomSet("smalldemo.xml");
 		haxx::ArchiveTheorems = false;
 		haxx::AllowFW_VARIABLENODESinCore = true; //false;
 		
-printf("axioms loaded");fflush(stdout);
-//currentDebugLevel=-4;
+cprintf(-1, "axioms loaded");fflush(stdout);
+currentDebugLevel=-4;
 		Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
 			/*PTLEvaluator::BIT_evaluate(
 			InferenceTaskParameters(new DefaultVariableRuleProvider(),t->target));*/
@@ -769,20 +769,20 @@ printf("axioms loaded");fflush(stdout);
 				
 				eres = state->evaluate();*/
 
-				printf("\n    Evaluating...\n");
+				cprintf(-3, "\n    Evaluating...\n");
 				
-				//if (foo42)
-					//currentDebugLevel=4;
+				if (foo42)
+					currentDebugLevel=4;
 				
 				int expansions = expansions_per_run;
 				eres = state->infer(expansions, 0.000001f, 0.01f);		
 				
 				if (expansions > 0)
-					printf("Succeeded. Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
+					cprintf(-3, "Succeeded. Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
 				else
-					printf("Failed for now... Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
+					cprintf(2, "Failed for now... Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
 
-				//currentDebugLevel=-4;
+				currentDebugLevel=-4;
 
 				eh = (eres.empty() ? NULL : v2h(*(*eres.rbegin())->getVtree().begin()));
 
@@ -811,7 +811,7 @@ printf("axioms loaded");fflush(stdout);
 				etv->getMean()			< t->maxTV->getMean()
 				);
 		
-				printf("TEST Expansion phase %d over.\n", s_i);
+				cprintf(-2, "TEST Expansion phase %d over.\n", s_i);
 			}
 			while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT && !passed);
 		}

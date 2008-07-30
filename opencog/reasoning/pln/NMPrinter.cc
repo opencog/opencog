@@ -119,6 +119,13 @@ void NMPrinter::toStream(ostream& out, const NMPrintable p, int indentationLevel
             out << endl;
             if (printToFile) fprintf(logFile, "\n");
         }
+    } else if (isVtreeIterator(p)) {
+        //printf("PRINTING VTREE from Iterator:\n");
+        printVTree(out, boost::get<vtree::iterator_base>(p), indentationLevel);
+        if (printOptions & NMP_BRACKETED) {
+            out << endl;
+            if (printToFile) fprintf(logFile, "\n");
+        }
     } else {
         printf("NMPrinter::toStream(): Got an invalid NMPrintable!\n");
     }
@@ -343,6 +350,7 @@ bool NMPrinter::areFromSameType(NMPrintable p1, NMPrintable p2) const{
 
 NMPrintable HANDLE_NM_PRINTABLE_EXAMPLE = (Handle) NULL;
 NMPrintable VTREE_NM_PRINTABLE_EXAMPLE = mva((Handle) NULL);
+NMPrintable VTREE_ITERATOR_NM_PRINTABLE_EXAMPLE = vtree::iterator_base();
 
 bool NMPrinter::isHandle(NMPrintable p) const {
     bool result = areFromSameType(p,HANDLE_NM_PRINTABLE_EXAMPLE);
@@ -353,3 +361,9 @@ bool NMPrinter::isVtree(NMPrintable p) const {
     bool result = areFromSameType(p,VTREE_NM_PRINTABLE_EXAMPLE);
     return result;
 }
+
+bool NMPrinter::isVtreeIterator(NMPrintable p) const {
+    bool result = areFromSameType(p,VTREE_ITERATOR_NM_PRINTABLE_EXAMPLE);
+    return result;
+}
+

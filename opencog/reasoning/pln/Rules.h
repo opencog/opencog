@@ -7,7 +7,7 @@
 #include "CoreWrapper.h"
 #include "Ptlatom.h"
 #include "PTLFormulas.h"
-//#include "NMPrinter.h"
+#include "NMPrinter.h"
 
 #include <Atom.h>
 #include <ClassServer.h>
@@ -68,6 +68,7 @@ Vertex CreateVar(iAtomTableWrapper* atw);
 
 BBvtree atomWithNewType(const tree<Vertex>& v, Type T);
 BBvtree atomWithNewType(Handle h, Type T);
+BBvtree atomWithNewType(const Vertex& v, Type T);
 	
 Rule::setOfMPs makeSingletonSet(Btr<Rule::MPs> mp);
 
@@ -262,7 +263,7 @@ public:
 		assert(1==h.size());
 
 		meta ret = atomWithNewType(h[0], DEST_LINK);
-printf(3,"i2otype() outputs: ");
+cprintf(3,"i2otype() outputs: ");
 #if 0
 rawPrint(*ret, ret->begin(), 3);
 #else
@@ -332,18 +333,16 @@ public:
 	{
 		assert(1==h.size());
 
-		meta ret; // = atomWithNewType((Handle)h[0], (Type)DEST_LINK);
-printf("i2otype() outputs: ");
+		meta ret = atomWithNewType(h[0], DEST_LINK);
+cprintf(3,"i2otype() outputs: ");
 #if 0
 rawPrint(*ret, ret->begin(), 3);
 #else
-#if 0
 	NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME, 
                       NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION, 
                       NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE,
 					  3);
     printer.print(ret->begin());
-#endif
 #endif
 
 		return ret;
@@ -475,9 +474,9 @@ public:
 	{
 		assert(1==h.size());
 		Handle h0 = boost::get<Handle>(h[0]);
-/*printf(1,"INV OLD ATOM:\n");
+/*cprintf(1,"INV OLD ATOM:\n");
 printTree(boost::get<Handle>(h[0]),0,1);
-printf(1,"INV New order:\n");
+cprintf(1,"INV New order:\n");
 printTree(child(boost::get<Handle>(h[0]),1),0,1);
 printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
 		return	meta(new tree<Vertex>(mva((Handle)CogServer::getAtomSpace()->getType(h0),
@@ -605,7 +604,7 @@ public:
 		
 		for (tree<Vertex>::sibling_iterator i =outh->begin(top);
 									i!=outh->end  (top); i++)
-			ret.push_back(BBvtree(new BoundVTree()));
+			ret.push_back(BBvtree(new BoundVTree(i)));
 
 		overrideInputFilter = true;
 		
@@ -864,11 +863,10 @@ class DeductionRule : public GenericRule<DeductionFormula>
 		assert(nm->getOutgoing(v2h(h[0]),0));
 		assert(nm->getOutgoing(v2h(h[1]),1));
 	
-	//	//return meta(new tree<Vertex>(mva((Handle)InclusionLink, 
-	//					Vertex(nm->getOutgoing(v2h(h[0]),0)),
-	//					Vertex(nm->getOutgoing(v2h(h[1]),1))
-	//			)));
-        return meta();
+		return meta(new tree<Vertex>(mva(InclusionLink, 
+						vtree(Vertex(nm->getOutgoing(v2h(h[0]),0))),
+						vtree(Vertex(nm->getOutgoing(v2h(h[1]),1)))
+				)));
 	}
 	bool validate2				(Rule::MPs& args) const
 	{
@@ -887,11 +885,11 @@ class DeductionRule : public GenericRule<DeductionFormula>
 
 		if (CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE && !equal(nodesAB[1], nodesBC[0]))
 		{
-			printf("Invalid deduction arguments:\n");
+			cprintf(0, "Invalid deduction arguments:\n");
 #if 0            
 			printTree(v2h(premiseArray[0]),0,0);
 			printTree(v2h(premiseArray[1]),0,0);
- 
+#else 
             NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
             printer.print(v2h(premiseArray[0]));
             printer.print(v2h(premiseArray[1]));

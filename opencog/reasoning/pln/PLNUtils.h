@@ -289,6 +289,12 @@ protected:
 	vtree my_std_tree;
 public:
 	BoundVTree() {}
+    
+    // Joel: Had to add constructors to route to the parent
+    // How this compiled in Novamente without them, I have no idea.
+    BoundVTree(const vtree::iterator_base& i) : vtree(i) {}
+    BoundVTree(const Vertex& v) : vtree(v) {}
+
 	BoundVTree(const ModifiedVTree& rhs)
 	{
 		(*(ModifiedVTree*)this) = rhs;
