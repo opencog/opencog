@@ -729,9 +729,10 @@ public:
      * @return The set of atoms of a given type (subclasses optionally).
      *
      * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     *          Example of call to this method, which would return all entries in TimeServer, sorted by STI:
      *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     *         AttentionValue::STISort stiSort;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
      */
     template <typename OutputIterator, typename Compare> OutputIterator
     getSortedHandleSet(OutputIterator result,
@@ -740,8 +741,9 @@ public:
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         // get the handle set as a vector and sort it.
-        vector<Handle> hs;
-        getSortedHandleSet(back_inserter(hs), type, subclass, vh);
+        vector<Handle> hs;   
+    
+        getHandleSet(back_inserter(hs), type, subclass, vh);
         sort(hs.begin(), hs.end(), compare);
         
         // copy the vector and return the iterator.
