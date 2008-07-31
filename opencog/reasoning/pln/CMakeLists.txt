@@ -4,83 +4,82 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 ADD_LIBRARY (pln STATIC
-	PTLFormulaeKit.cc
-	IndefinitePLNFormulas.cc
-	BackInferenceTreeNode.cc
-	BackwardInferenceTask.cc
+    PTLFormulaeKit.cc
+    IndefinitePLNFormulas.cc
+    BackInferenceTreeNode.cc
+    BackwardInferenceTask.cc
     Ptlatom.cc
     Grim.cc
-	XMLNode.cc
-	PLNUtils.cc
+    XMLNode.cc
+    PLNUtils.cc
     spacetime.cc
-    BOASimulatorAgent.cc
-	RuleProvider.cc
-	PLNShell.cc
-	Tester.cc
-	Rules.cc
+    #BOASimulatorAgent.cc
+    RuleProvider.cc
+    PLNShell.cc
+    Tester.cc
+    Rules.cc
     RuleApp.cc
-	AtomTableWrapper.cc
-    #	BackInferenceTree.cc
-	XMLNodeLoader.cc
-	deductionLookupTable.cc
+    AtomTableWrapper.cc
+    XMLNodeLoader.cc
+    deductionLookupTable.cc
     # for later:
-    # CrispUnificationRule.cc
+    #CrispUnificationRule.cc
     # convert to OpenCog specific class:
     NMPrinter.cc
     TimeStamp.cc
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/util
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/xml
-	${OPENCOG_SOURCE_DIR}/src/server
-	${OPENCOG_SOURCE_DIR}/src/guile
-	${OPENCOG_SOURCE_DIR}/src/nlp/wsd
-	${OPENCOG_SOURCE_DIR}/src/persist
-	${OPENCOG_SOURCE_DIR}/src/query
-	${OPENCOG_SOURCE_DIR}/src/reasoning
-	${CSOCKETS_INCLUDE_DIRS}
-	${OPENSSL_INCLUDE_DIR}
-	${IODBC_INCLUDE_DIRS}
-	${GSL_INCLUDE_DIR}
+    ${OPENCOG_SOURCE_DIR}/src/util
+    ${OPENCOG_SOURCE_DIR}/src/atomspace
+    ${OPENCOG_SOURCE_DIR}/src/xml
+    ${OPENCOG_SOURCE_DIR}/src/server
+    ${OPENCOG_SOURCE_DIR}/src/guile
+    ${OPENCOG_SOURCE_DIR}/src/nlp/wsd
+    ${OPENCOG_SOURCE_DIR}/src/persist
+    ${OPENCOG_SOURCE_DIR}/src/query
+    ${OPENCOG_SOURCE_DIR}/src/reasoning
+    ${CSOCKETS_INCLUDE_DIRS}
+    ${OPENSSL_INCLUDE_DIR}
+    ${IODBC_INCLUDE_DIRS}
+    ${GSL_INCLUDE_DIR}
 )
 
 ADD_EXECUTABLE(PLNFormulaUTest PLNFormulaUTest.cc)
 ADD_EXECUTABLE(PLNShell PLNShell.cc)
 
 TARGET_LINK_LIBRARIES(pln
-	atomspace
-	server
-	xml
-	util
-	query
-	schemes
-	wsd
-	persist
-	${IODBC_LIBRARIES}
-	${CSOCKETS_LIBRARIES}
-	${OPENSSL_LIBRARIES}
-	${EXPAT_LIBRARIES}
-	${GUILE_LIBRARIES}
-	${GSL_LIBRARIES}
+    atomspace
+    server
+    xml
+    util
+    query
+    schemes
+    wsd
+    persist
+    ${IODBC_LIBRARIES}
+    ${CSOCKETS_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+    ${EXPAT_LIBRARIES}
+    ${GUILE_LIBRARIES}
+    ${GSL_LIBRARIES}
 )
 
 TARGET_LINK_LIBRARIES(PLNFormulaUTest pln)
 TARGET_LINK_LIBRARIES(PLNShell pln
-	atomspace
-	server
-	xml
-	util
-	query
-	schemes
-	wsd
-	persist
-	${IODBC_LIBRARIES}
-	${CSOCKETS_LIBRARIES}
-	${OPENSSL_LIBRARIES}
-	${EXPAT_LIBRARIES}
-	${GUILE_LIBRARIES}
-	${GSL_LIBRARIES}
+    atomspace
+    server
+    xml
+    util
+    query
+    schemes
+    wsd
+    persist
+    ${IODBC_LIBRARIES}
+    ${CSOCKETS_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+    ${EXPAT_LIBRARIES}
+    ${GUILE_LIBRARIES}
+    ${GSL_LIBRARIES}
 )
 

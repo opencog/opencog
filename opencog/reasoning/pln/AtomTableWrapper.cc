@@ -174,9 +174,9 @@ namespace reasoning
 
 	Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
 	{
-//		HandleEntry* results = 
-//			AS_PTR->getHandleSet((Type)t, true);
-//			
+		//HandleEntry* results = 
+		//	AS_PTR->getHandleSet((Type)t, true);
+			
 //		while (results && !equal(results->handle->getOutgoingSet(), outgoing))
 //			results = results->next;
 //      Handle ret = (results ? results->handle : NULL);
@@ -185,6 +185,18 @@ namespace reasoning
 		return AS_PTR->getHandle(t,outgoing);
 	}
 
+    void AtomTableWrapper::reset()
+    {
+        std::vector<Handle> allAtoms;
+        std::vector<Handle>::iterator i;
+        std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
+
+        AS_PTR->getHandleSet(outputI, ATOM, true);
+
+        for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
+            AS_PTR->removeAtom(*i,false);
+        }
+    }
 }
 
 #endif
@@ -621,7 +633,7 @@ bool ok_forall=false;
 			&& a->getType(hs[1]) != IMPLICATION_LINK)
 	{
 		LOG(0, "AND => Implication");
-		printf(0,"%d\n",a->getType(hs[1]));
+		cprintf(0,"%d\n",nm->getType(hs[1]));
 		getc(stdin);
 		
 		TruthValue **tvs = new TruthValue *[3];
@@ -635,7 +647,7 @@ bool ok_forall=false;
 		new_hs.push_back(addLink(T,hs,tvn,fresh,managed));
 		new_hs.push_back(addLink(IMPLICATION_LINK,hs,impTV,fresh,managed));
 		
-		printf(0,"EEE %d\n",a->getType(new_hs[1]));
+		cprintf(0,"EEE %d\n",nm->getType(new_hs[1]));
 		
 		ret = addLink(AND_LINK, new_hs, TruthValue::TRUE_TV(), fresh,managed);
 
@@ -1092,7 +1104,7 @@ void LocalATW::ClearAtomSpace()
 		}
 		m->second->clear();
 	}	
-printf("%d entries freed (%.2f Mb).\n", count, (count * sizeof(Link))/1048576.0 );
+cprintf(1, "%d entries freed (%.2f Mb).\n", count, (count * sizeof(Link))/1048576.0 );
 }
 
 
@@ -1154,7 +1166,7 @@ Handle LocalATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, boo
 
 Handle LocalATW::addNode(Type T, const std::string& name, const TruthValue& tvn, bool fresh, bool managed)
 {
-//LOG(4,"Adding node..");	
+LOG(4,"Adding node..");	
 
 	Handle ret = NULL;
 	
@@ -1206,7 +1218,7 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fr
 Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn, bool fresh, bool managed)
 {
 	AtomSpace *as = AS_PTR;
-	printf("Handle AtomTableWrapper::addAtom...");
+	cprintf(3,"Handle AtomTableWrapper::addAtom...");
 	rawPrint(a,it,3);
 	
 	vector<Handle> handles;
@@ -1283,7 +1295,7 @@ assert(1);
 	if (inheritsType(T, LINK) && !arity && T != FORALL_LINK)
 	{
 		printTree(ret,0,1);
-		printf("inheritsType(T, LINK) && !arity\n");
+		cprintf(1,"inheritsType(T, LINK) && !arity\n");
 	}	
 	
 	if (!haxx::AllowFW_VARIABLENODESinCore)
@@ -1293,7 +1305,7 @@ assert(1);
 			if (a->getType(ch) == FW_VARIABLE_NODE)
 			{
 				printTree(ret,0,-10);
-				printf("ATW: a->getType(ch) == FW_VARIABLE_NODE!");
+				cprintf(-10,"ATW: a->getType(ch) == FW_VARIABLE_NODE!");
 				getc(stdin);getc(stdin);
 			}
 //				throw string("a->getType(ch) == FW_VARIABLE_NODE") + i2str(ret);
@@ -1361,6 +1373,8 @@ assert(1);
 		
 	}	
 	Node* node = new Node( T,  name,  tvn);
+    //TODO: fresh = true bug
+	//Handle ret = MindDBProxy::getInstance()->add(node, fresh);
 	Handle ret = a->addRealAtom(*node);
 	
 #if HANDLE_MANAGEMENT_HACK	

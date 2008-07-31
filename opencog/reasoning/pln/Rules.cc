@@ -77,7 +77,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 
 BBvtree atomWithNewType(const Vertex& v, Type T)
 {
-    Handle *ph = (Handle*)v2h(v);
+    Handle *ph = (Handle*) v2h(&v);
     AtomSpace *nm = CogServer::getAtomSpace();
     if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
     {
@@ -143,11 +143,11 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
 
     Btr<bindingsT> bindings_of_all_args(new bindingsT);
 
-    for(vector<BoundVertex>::const_iterator bv = h.begin(); bv != h.end(); bv++)
-        if (bv->bindings)
+    for(vector<BoundVertex>::const_iterator bv = h.begin(); bv != h.end(); bv++) {
+        if (bv->bindings) {
             insert_with_consistency_check(*bindings_of_all_args, bv->bindings->begin(), bv->bindings->end());
 
-/*          cprintf(3,"Bind [%d]:\n", v2h(bv->value));
+          cprintf(3,"Bind [%d]:\n", v2h(bv->value));
 
             foreach(hpair phh, *bv->bindings)
             {
@@ -156,8 +156,9 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
                 printTree(phh.second,0,3);
             }
         }
+    }
 
-*/
+
 
     return BoundVertex(compute(rule_args, CX), bindings_of_all_args);
 }

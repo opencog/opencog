@@ -187,7 +187,7 @@ void test_core_TVs()
 void test_nm_reset()
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
-	//nm->Reset(NULL);
+	((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
     std::list<Handle> ret;
     nm->getHandleSet(back_inserter(ret), EVALUATION_LINK, "");
     assert(ret.size() == 0);
@@ -212,14 +212,15 @@ void PLNShell_RunLoop(int argc, char** args)
 	try {
 		puts("Initializing PLN test env...");
 
-        // Temporary, make PLN functional without using the CogServer
+        /// @TODO: make PLN functional without using the CogServer
+        // using Pseudocore instead.
         // Initialise CogServer
         opencog::server();
 
 #ifdef USE_PSEUDOCORE
 		RunPLNtest = (argc>1 && args[1][0] == 't');
 
-		// \todo: check the following
+		/// @TODO: check the following
 		if (argc>2)
 			tempar = atoi(args[2]);
 #endif
@@ -227,11 +228,11 @@ void PLNShell_RunLoop(int argc, char** args)
 		RECORD_TRAILS = true;
 		haxx::printRealAtoms = true;
 
-		currentDebugLevel=4;
+		currentDebugLevel=100;
 
 		foo_pretest();
 
-		printf("Creating AtomTableWrappers...");
+		LOG(2, "Creating AtomTableWrappers...");
 		
 #if LOCAL_ATW
 		haxx::defaultAtomTableWrapper = &LocalATW::getInstance();
@@ -405,8 +406,9 @@ struct inhlink {
 };
 
 void fw_beta (void) {
+  AtomSpace *nm = CogServer::getAtomSpace();
   //nm->Reset(NULL);
-AtomSpace *nm = CogServer::getAtomSpace();
+  ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
   vector<Handle> nodes=nm->filter_type(NODE);
   for (vector<Handle>::iterator i=nodes.begin(); i!=nodes.end(); i++)
     printf ("_node %d, %s, TV %s\n",nm->getType(*i),nm->getName(*i).c_str(),printTV(*i).c_str());
@@ -909,12 +911,12 @@ printf("BITNodeRoot init ok\n");
 						state->print_parents((BITNode*)h);
 						break;
 			case 'b': cin >> h;
-						logger().info("Target:\n");
+						cprintf(-10, "Target:\n");
 						((BackInferenceTreeRootT*)h)->printTarget();
-						logger().info("Results:\n");
+						cprintf(-10, "Results:\n");
 						((BackInferenceTreeRootT*)h)->printResults();
 
-						logger().info("parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
+						cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
 
 						 break;
 /*			case 'B': cin >> h; cprintf(0, "Node has results & bindings:\n");
@@ -979,10 +981,10 @@ printf("BITNodeRoot init ok\n");
 
 			case 'h': PLNhelp(); break;
 			case 'q': exit(0); break;
-			case '=': cin >> h; cin >> h2; printf(((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
+			case '=': cin >> h; cin >> h2; cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
 			case 'p': cin >> h; printTree((Handle)h,0,0); break;
 			case 'e':	try { state->evaluate(); }
-						catch(string s) { printf(s.c_str()); }
+						catch(string s) { cprintf(0,s.c_str()); }
 						break;
 			
 			case 'E': cin >> h;
@@ -1011,7 +1013,7 @@ printf("BITNodeRoot init ok\n");
 			case 'O':	cin >> h;
 //						((BITNode*)h)->PrintUsers();
 						foreach(const parent_link<BITNode>& p, ((BITNode*)h)->GetParents())
-							printf("User Node = %lu\n", (ulong) p.link);
+							cprintf(-10,"User Node = %lu\n", (ulong) p.link);
 						break;
 //			case 'l': cprintf(0,"%d\n", state->exec_pool.size()); break;
 				
@@ -1044,26 +1046,26 @@ printf("BITNodeRoot init ok\n");
 						state = Bstate.get();
 						using_root = true;
 
-						printf("Now evaluating: ");
+						cprintf(0,"Now evaluating: ");
 						rawPrint(*tests[test_i],tests[test_i]->begin(),0);
-						printf("\n");
+						cprintf(0,"\n");
 						
 //						state->expandNextLevel();
 						break;
 			case 'x': //puts("Give the XML input file name: "); 
 							cin >> temps;
 						haxx::ArchiveTheorems = true; 
-                        // TODO: fix/implement reset
 						//nm->Reset(NULL);
-					 	  axioms_ok = TheNM.LoadAxioms(temps);
-						  haxx::ArchiveTheorems = false;
-						  puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
+                        ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
+					 	axioms_ok = TheNM.LoadAxioms(temps);
+						haxx::ArchiveTheorems = false;
+						puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
 			
 						puts("Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");
 
 						break;
 			case 'c': RECORD_TRAILS = !RECORD_TRAILS;
-						printf("RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
+						cprintf(0, "RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
 						break;
 			case '-': cin >> h; currentDebugLevel = -(int)h; break;
 

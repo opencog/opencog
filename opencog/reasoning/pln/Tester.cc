@@ -69,17 +69,17 @@ namespace reasoning {
     extern FitnessEvalutorT FitnessEvaluator;
 }
 
+// These are now in PLNUtils.h
 //#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
-#define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
+//#define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
+
 #define maketest(test_description,a,b,c,d) RunPLNTest(Btr<PLNTest>(new PLNTest(test_description,a,b,c,d)))
 
-float getcount(float c)
+float getCount(float c)
 {
 	float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-	return -KKK*c/(c-1);
+    return -KKK*c/(c-1);
 }
-
-#define getCount getcount
 
 namespace haxx
 {
@@ -281,11 +281,11 @@ void MacroRuleTest()
 					mva(nm->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
 
 	Handle h0 = nm->addAtom(v0, 
-			SimpleTruthValue(0.40f, getcount(0.80f)));
+			SimpleTruthValue(0.40f, getCount(0.80f)));
 	Handle h1 = nm->addAtom(v1,
-			SimpleTruthValue(0.60f, getcount(0.90f)));
+			SimpleTruthValue(0.60f, getCount(0.90f)));
 	Handle h2 = nm->addAtom(v2,
-			SimpleTruthValue(0.98f, getcount(0.95f)));
+			SimpleTruthValue(0.98f, getCount(0.95f)));
 
 	RuleApp* top	= new RuleApp(deduR);
 	RuleApp* child1a= new RuleApp(deduR);
@@ -384,8 +384,8 @@ void RunPLNTestsOnce()
 					NewNode(CONCEPT_NODE, "AlQaeda"),
 					NewNode(CONCEPT_NODE, "terrorist")
 			)),
-			new SimpleTruthValue(0.95f, getcount(0.90f)),
-			new SimpleTruthValue(0.999f, getcount(0.999f)),
+			new SimpleTruthValue(0.95f, getCount(0.90f)),
+			new SimpleTruthValue(0.999f, getCount(0.999f)),
 			500,0);
 
 	//char *buf = new char[8174+2];	
@@ -400,8 +400,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Osama")
 							)
 			)),
-			new SimpleTruthValue(0.5f, getcount(0.5f)),
-			new SimpleTruthValue(0.51f, getcount(0.51f)),
+			new SimpleTruthValue(0.5f, getCount(0.5f)),
+			new SimpleTruthValue(0.51f, getCount(0.51f)),
 			10,0);
 	
 	puts("\nShould fail.");
@@ -414,8 +414,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Osama")
 							)
 			)),
-			new SimpleTruthValue(0.0f, getcount(0.0f)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
+			new SimpleTruthValue(0.0f, getCount(0.0f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
 			10,0);
 
 #endif
@@ -427,8 +427,8 @@ InitAxiomSet("smalldemo.xml");
 							NewNode(FW_VARIABLE_NODE, "$elmerist")
 						)
 					)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			200,0);
 
 	for (int i = 0; i < 5; i++)
@@ -441,8 +441,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Britney"),
 								NewNode(CONCEPT_NODE, "Amir")
 							))),
-			new SimpleTruthValue(0.78f, getcount(0.39f)),
-			new SimpleTruthValue(1.001, getcount(0.999f)),
+			new SimpleTruthValue(0.78f, getCount(0.39f)),
+			new SimpleTruthValue(1.001, getCount(0.999f)),
 			100,0);
 	}
 	
@@ -455,8 +455,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Osama")
 							)
 			)),
-			new SimpleTruthValue(0.5f, getcount(0.5f)),
-			new SimpleTruthValue(0.999f, getcount(0.999f)),
+			new SimpleTruthValue(0.5f, getCount(0.5f)),
+			new SimpleTruthValue(0.999f, getCount(0.999f)),
 		10,0);
 
 	/// Test Generalization for VARIABLE_SCOPE_LINK
@@ -467,8 +467,8 @@ InitAxiomSet("smalldemo.xml");
 					NewNode(FW_VARIABLE_NODE, "$i"),
 					NewNode(CONCEPT_NODE, "terrorist")
 			))),
-			new SimpleTruthValue(0.9f, getcount(0.02f)),
-			new SimpleTruthValue(0.999f, getcount(0.999f)),
+			new SimpleTruthValue(0.9f, getCount(0.02f)),
+			new SimpleTruthValue(0.999f, getCount(0.999f)),
 			10,0);
 
 	/// Test Generalization for FORALL_LINK
@@ -479,8 +479,8 @@ InitAxiomSet("smalldemo.xml");
 					NewNode(FW_VARIABLE_NODE, "$i"),
 					NewNode(CONCEPT_NODE, "terrorist")
 			))),
-			new SimpleTruthValue(0.9f, getcount(0.9f)),
-			new SimpleTruthValue(0.999f, getcount(0.999f)),
+			new SimpleTruthValue(0.9f, getCount(0.9f)),
+			new SimpleTruthValue(0.999f, getCount(0.999f)),
 			15,0);
 
 	InitAxiomSet("smalldemo.xml");
@@ -488,8 +488,8 @@ InitAxiomSet("smalldemo.xml");
 					NewNode(CONCEPT_NODE, "Osama"),
 					NewNode(CONCEPT_NODE, "Abu")
 			)),
-			new SimpleTruthValue(0.0001f, getcount(0.90f)),
-			new SimpleTruthValue(0.999f, getcount(1.01f)),
+			new SimpleTruthValue(0.0001f, getCount(0.90f)),
+			new SimpleTruthValue(0.999f, getCount(1.01f)),
 			20,0);
 
 /// Takes a tad too long with bigdemo
@@ -499,8 +499,8 @@ InitAxiomSet("smalldemo.xml");
 					NewNode(CONCEPT_NODE, "Muhammad"),
 					NewNode(CONCEPT_NODE, "terrorist")
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.20f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.20f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			260,0);
 
 	InitAxiomSet("fetchdemo5.xml");
@@ -517,8 +517,8 @@ InitAxiomSet("smalldemo.xml");
 						)
 					)
 			),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			200,0);
 
 	InitAxiomSet("AnotBdemo.xml");
@@ -530,14 +530,14 @@ InitAxiomSet("smalldemo.xml");
 						NewNode(FW_VARIABLE_NODE, "$1")
 					)
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			10000,0);
 /*
 	maketest(makemeta(mva(
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.90f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.90f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			100);
 */
@@ -547,8 +547,8 @@ InitAxiomSet("smalldemo.xml");
 					NewNode(PREDICATE_NODE, "+++")
 				)
 			),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(0.94f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(0.94f)),
 			200,0);
 			
 /*
@@ -564,8 +564,8 @@ InitAxiomSet("smalldemo.xml");
 							)										
 						)
 					))),
-			new SimpleTruthValue(0.01f, getcount(0.90f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.90f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"fetchdemo4.xml",
 			10,0);
 */
@@ -576,14 +576,14 @@ InitAxiomSet("smalldemo.xml");
 						NewNode(WORD_NODE, "blockword"),
 						NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
 					)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			500,0);
 
 /*	maketest(makemeta(mva(
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.90f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.90f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			100);*/
 
@@ -598,8 +598,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Osama")
 							)
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			10,0);
 
@@ -609,8 +609,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Osama")
 							)
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			10,0);
 */
@@ -621,15 +621,15 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(FW_VARIABLE_NODE, "$OsamaFriend"),
 								NewNode(CONCEPT_NODE, "Osama")
 							))),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			10,0);*/
 /*	maketest(makemeta(mva((Handle)INHERITANCE_LINK,
 					NewNode(CONCEPT_NODE, "Osama"),
 					NewNode(CONCEPT_NODE, "AlQaeda")
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			10,0);
 	maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -639,8 +639,8 @@ InitAxiomSet("smalldemo.xml");
 								NewNode(CONCEPT_NODE, "Osama")
 							)
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			10,0);
 	maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -655,15 +655,15 @@ InitAxiomSet("smalldemo.xml");
 							)										
 						)
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"fetchdemo4.xml",
 			10,0);
 	maketest(makemeta(mva((Handle)EVALUATION_LINK,
 					NewNode(PREDICATE_NODE, "+++")
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"fetchdemo4.xml",
 			10,0);
 	maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -673,8 +673,8 @@ InitAxiomSet("smalldemo.xml");
 						)
 					)
 			),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"fetchdemo4.xml",
 			10,0);
 	maketest(makemeta(mva((Handle)IMPLICATION_LINK,
@@ -683,21 +683,21 @@ InitAxiomSet("smalldemo.xml");
 					NewNode(PREDICATE_NODE, "+++")
 				)
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"fetchdemo4.xml",
 			10,0);
 */
 /*	maketest(makemeta(mva(
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"fetchdemo4.xml",
 			10,0);
 	maketest(makemeta(mva(
 			)),
-			new SimpleTruthValue(0.01f, getcount(0.01f)),
-			new SimpleTruthValue(1.01f, getcount(1.01f)),
+			new SimpleTruthValue(0.01f, getCount(0.01f)),
+			new SimpleTruthValue(1.01f, getCount(1.01f)),
 			"bigdemo.xml",
 			10,0);
 */
@@ -712,6 +712,7 @@ InitAxiomSet("smalldemo.xml");
 	{
 		AtomSpace *nm = CogServer::getAtomSpace();
 		//nm->Reset(NULL); //base_core);
+        ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
 		
 		haxx::ArchiveTheorems = true;
 		haxx::AllowFW_VARIABLENODESinCore = true;
@@ -892,6 +893,7 @@ currentDebugLevel=-4;
 
         if (etv != NULL) delete etv;
 		//nm->Reset(NULL); //base_core);		
+        ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
 /*puts("buf alloc test...");fflush(stdout);
 char *tbuf = new char[8174+2];	
 puts("buf allo ok");

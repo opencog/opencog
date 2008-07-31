@@ -90,37 +90,36 @@ public:
 		
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
 	{
-		const int n = (const int)premiseArray.size();
-		printf("<Generic rule args>");
-		for (int j=0;j<n;j++)
-		{
+		const int n = (const int) premiseArray.size();
+
+		printf("<Generic rule args> ");
+		for (int j=0;j<n;j++) {
 			const Handle *ph = boost::get<Handle>(&premiseArray[j]);
-			printf("[%lu]\n", (ph?*ph:0));
+			printf("[%lu] ", (ph?*ph:0));
+            //printTree(premiseArray[j],0,3);
 		}
-			//printTree(premiseArray[j],0,3);
-		printf("</Generic rule args>");
+		printf(" </Generic rule args>\n");
 
 		assert(validate(premiseArray));
-printf("formatTVarray...\n");
-		int TVN = f.TVN;
 
+        printf("formatTVarray...\n");
+		int TVN = f.TVN;
 		TruthValue** tvs = formatTVarray(premiseArray, &TVN);
-printf("formatTVarray OK\n");
-		if (!tvs)
-		{
+        printf("formatTVarray OK\n");
+
+		if (!tvs) {
 			printf("Warning only: GenericRule: TV array formatting failure.");
 			return Vertex((Handle)NULL);
 		}
-		printf("Computing TV\n");
 
+		printf("Computing TV... \n");
 		TruthValue* retTV = f.compute(tvs, TVN);
-		printf("TV computation ok");
+		printf("TV computation ok\n");
 
 		delete[] tvs;
-		printf("Res freed.");
+		printf("Res freed.\n");
 
 		/// i2otype gives the atom skeleton (tree) w/o TV. addLink attaches it to Core with TV
-
 		Handle ret = destTable->addAtom(*i2oType(premiseArray),
 			*retTV,
 			true);	
@@ -334,15 +333,15 @@ public:
 		assert(1==h.size());
 
 		meta ret = atomWithNewType(h[0], DEST_LINK);
-cprintf(3,"i2otype() outputs: ");
+        cprintf(3,"i2otype() outputs: ");
 #if 0
-rawPrint(*ret, ret->begin(), 3);
+        rawPrint(*ret, ret->begin(), 3);
 #else
-	NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME, 
+        NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME, 
                       NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION, 
                       NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE,
 					  3);
-    printer.print(ret->begin());
+        printer.print(ret->begin());
 #endif
 
 		return ret;

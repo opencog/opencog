@@ -254,7 +254,7 @@ protected:
 			foreach(hpair phh, *bindings_of_all_args)
 			{
 				printTree(phh.first,0,3);
-				printf("=>");
+				cprintf(3,"=>");
 				printTree(phh.second,0,3);
 			}			
 

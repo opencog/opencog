@@ -47,8 +47,10 @@ public:
 	Handle getHandle(Type t,const std::string& str) const;
     Handle getHandle(Type t,const HandleSeq& outgoing) const;
 
+    void reset();
+
 	AtomTableWrapper() : USize(800) {}
-	~AtomTableWrapper() {}
+	virtual ~AtomTableWrapper() {}
 //	combo::NMCore* getCore() const { return core; }
 
 	bool LoadAxioms(const string& path);

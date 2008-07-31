@@ -209,7 +209,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     if (rp)
       rp = new DefaultVariableRuleProvider;
     assert(!rp->empty());
-    printf("rp ok\n");
+	cprintf(3, "rp ok\n");
     haxx::bitnoderoot = this;
 
     vtree::iterator target_it = _target->begin();
@@ -238,10 +238,10 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 //  rawPrint(*raw_target, raw_target->begin(), -1);
 
     children.push_back(set<ParametrizedBITNode>());
-    printf("scoper...\n");
+	cprintf(3, "scoper...\n");
     BITNode* root_variable_scoper = CreateChild(0, NULL, dummy_args, Btr<BoundVTree>(new BoundVTree(make_vtree((Handle)NODE))),
             bindingsT(), NO_SIBLING_SPAWNING);
-    printf("scoper ok\n");
+	cprintf(3, "scoper ok\n");
     set<Vertex> vars;
     copy_if(    raw_target->begin(),
                 raw_target->end(),
@@ -253,7 +253,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
         varOwner[v].insert(root_variable_scoper);
 
     eval_results.push_back(set<VtreeProvider*>());
-    printf("Root ok\n");
+	cprintf(3, "Root ok\n");
 }
 
 /// The complexity here results from bindings and virtuality.
@@ -269,7 +269,7 @@ void BITNode::ForceTargetVirtual(spawn_mode spawning)
     
     if (ph && nm->isReal(*ph) && nm->getType(*ph) != FW_VARIABLE_NODE)
     {
-        printf("ForceTargetVirtual: Arg [%ld] (exists).\n", (long)*ph);
+        cprintf(2,"ForceTargetVirtual: Arg [%ld] (exists).\n", (long)*ph);
         
         boost::shared_ptr<set<BoundVertex> > directResult(new set<BoundVertex>);
         
@@ -330,7 +330,7 @@ Btr<set<BoundVertex> > results;
     }
     else
     {
-        printf("Results:\n");
+        cprintf(0, "Results:\n");
         const float min_confidence = 0.0001f;
         Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
@@ -366,9 +366,9 @@ BITNode::~BITNode() {
         assert(root);
 
         if (root == this)
-            printf("Dying root...");
+			cprintf(3, "Dying root...");
 
-        printf("Dying... %ld => %ld\n", root->InferenceNodes, root->InferenceNodes-1);
+        cprintf(4,"Dying... %ld => %ld\n", root->InferenceNodes, root->InferenceNodes-1);
         root->InferenceNodes--;
     }
 /*
@@ -452,8 +452,9 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
             assert(0);
         }
 
-        if (!root->rp) {
-            //root->rp = new DefaultVariableRuleProvider();
+        if (!root->rp)
+        {
+            root->rp = new DefaultVariableRuleProvider();
             tlog(3, "Default RuleProvider created.\n");
         }
         else tlog(3, "Parent passed on my RuleProvider.\n");
@@ -648,7 +649,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
     
     if (spawning && DIRECT_RESULTS_SPAWN)
     {
-        printf("SPAWN...\n");
+		cprintf(1,"SPAWN...\n");
 
         /// Insert to pool the bound versions of all the other arguments of the parent
         foreach(const BoundVertex& bv, *directResult)
@@ -733,8 +734,8 @@ bool BITNode::ObeysPoolPolicy(Rule *new_rule, meta _target)
                 (Type)FW_VARIABLE_NODE ))
             > 1)
         {
-            printf("Dis-obeys pool policy:\n");
-            rawPrint(*_target, _target->begin(), -1);
+			cprintf(-1, "Dis-obeys pool policy:\n");
+			rawPrint(*_target, _target->begin(), -1);
 //          getc(stdin);
 
             return false;
@@ -869,7 +870,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
             if (!STLhas2(*_target, v))
             {
                 root->varOwner[v].insert(new_node);
-                printf("[%ld] owns %s\n", (long)new_node, nm->getName(v2h(v)).c_str());
+                cprintf(0,"[%ld] owns %s\n", (long)new_node, nm->getName(v2h(v)).c_str());
             }
 
         return new_node;
@@ -896,7 +897,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
     typedef pair<BITNode*, bindingsT> o2bT;
     foreach(const o2bT& owner2binds, clone_binds)
     {
-        printf("spawn next[%ld]:\n", (long)owner2binds.first);
+        cprintf(-1,"spawn next[%ld]:\n", (long)owner2binds.first);
 
         foreach(hpair b, owner2binds.second)
             owner2binds.first->TryClone(b);
@@ -1086,7 +1087,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
 
     BITNode* variableScoper = children[0].begin()->prover;
 
-    printf("children %ud\n", (unsigned int) children.size());
+    cprintf(0,"children %ud\n", (unsigned int) children.size());
 
     // These are not supposed to propagate higher than variableScoper
     //assert(eval_results.empty());
@@ -1402,7 +1403,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
 
     if (!bvs->empty())
     {
-        printf("\n");
+		cprintf(0,"\n");
         tlog(0,"Generalizing results:\n");
 
         foreach(const BoundVertex& b, *bvs)
@@ -1615,7 +1616,7 @@ void BITNode::expandFittest()
                 if (all_best_fitness > best_fitness)
                     all_best_fitness = best_fitness;
 
-                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.4f / %.4f", all_best_fitness, best_fitness);
+				cprintf(-2, "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.4f / %.4f", all_best_fitness, best_fitness);
             }
 
             bisse->expandNextLevel();
@@ -1776,12 +1777,12 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
     //      return;
     //}
 
-    #define prlog printf
+    #define prlog cprintf
 
     if (rule)
     {
         if (compact)
-            prlog("%s%s\n", repeatc(' ', depth*3).c_str(), rule->name.c_str());
+			prlog(loglevel, "%s%s\n", repeatc(' ', depth*3).c_str(), rule->name.c_str());
         else
         {
             string cbuf("[ ");
@@ -1790,15 +1791,15 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
                 cbuf += i2str((int)v2h(bv.value)) + " ";
             if (cbuf.empty())
                 cbuf = "[]";
-            prlog("%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
-            prlog("%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
+            prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
+            prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
         }
     }
     else
-        prlog("root\n");
+		prlog(loglevel,"root\n");
     
     if (STLhas2(*UsedBITNodes, this))
-        prlog("%s(loop)\n", repeatc(' ', (depth+1)*3).c_str());
+		prlog(loglevel,  "%s(loop)\n", repeatc(' ', (depth+1)*3).c_str());
     else
     {
         UsedBITNodes->insert((BITNode*)this);
@@ -1807,11 +1808,11 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
         for (vector<set<ParametrizedBITNode> >::const_iterator i =  children.begin(); i!=children.end(); i++)
         {
             if (compact)
-                prlog("%s#%d\n", repeatc(' ', (depth+1)*3).c_str(), ccount++);
+				prlog(loglevel,  "%s#%d\n", repeatc(' ', (depth+1)*3).c_str(), ccount++);
             else
             {
-                prlog("%sARG #%d:\n", repeatc(' ', (depth+1)*3).c_str(), ccount);
-                prlog("%s---\n", repeatc(' ', (depth+1)*3).c_str());
+				prlog(loglevel, "%sARG #%d:\n", repeatc(' ', (depth+1)*3).c_str(), ccount);
+				prlog(loglevel, "%s---\n", repeatc(' ', (depth+1)*3).c_str());
                 ccount++;
             }
 
@@ -1870,7 +1871,7 @@ void BITNodeRoot::print_trail(Handle h, unsigned int level) const //, int decima
 
 void BITNode::printArgs() const
 {
-    printf("%u args:\n", (unsigned int) args.size());
+    cprintf(-2,"%u args:\n", (unsigned int) args.size());
 //  for_each(args.begin(), args.end(), NMPrinter(NMP_ALL));
    foreach(meta _arg, args)
       NMPrinter(NMP_ALL).print(*_arg, -2);
@@ -1960,10 +1961,10 @@ void BITNode::printChildrenSizes() const
 
 void BITNode::printTarget() const
 {
-    printf("Raw target:\n");
-    rawPrint(*raw_target, raw_target->begin(),0);
-    printf("Bound target:\n");
-    rawPrint(*GetTarget(), GetTarget()->begin(),0);
+	cprintf(0, "Raw target:\n");
+	rawPrint(*raw_target, raw_target->begin(),0);
+	cprintf(0, "Bound target:\n");
+	rawPrint(*GetTarget(), GetTarget()->begin(),0);
 }
 
 
