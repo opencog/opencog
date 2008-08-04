@@ -715,6 +715,34 @@ public:
     }
 
     /**
+     * Gets a set of handles in the Attentional Focus that matches with the given type
+     * (subclasses optionally).
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer:
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSetInAttentionalFocus(OutputIterator result,
+                 Type type,
+                 bool subclass,
+                 VersionHandle vh = NULL_VERSION_HANDLE) const {
+ 
+        HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
+        //return (toOutputIterator(result, handleEntry));
+        
+    }
+
+    /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally), sorted according to the given comparison
      * structure.
@@ -913,6 +941,17 @@ public:
         while ((next = _getNextAtom()) != 0)
             if (compare(next) && containsVersionedTV(next, vh))
                 result.push_back(next);
+        return result;
+    }
+
+    template<typename Predicate, typename InputIterator>
+    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare, VersionHandle vh =
+          NULL_VERSION_HANDLE) {
+        HandleSeq result;
+        Handle h;
+        for (; h = *(begin++); begin != end)
+            if (compare(h) && containsVersionedTV(h, vh))
+                result.push_back(h);
         return result;
     }
 
