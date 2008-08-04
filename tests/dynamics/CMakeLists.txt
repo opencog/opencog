@@ -15,4 +15,5 @@ LINK_DIRECTORIES(
 LINK_LIBRARIES(util atomspace server attention)
 
 ADD_CXXTEST(ImportanceUpdatingAgentUTest)
+ADD_CXXTEST(ForgettingAgentUTest)
 ADD_CXXTEST(STIDecayingAgentUTest)

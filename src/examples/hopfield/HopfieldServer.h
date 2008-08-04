@@ -107,14 +107,26 @@ public:
      *
      * @param pattern is the pattern to match
      * @param numCycles is the number of lobe cycles to wait for retrieval
+     * @param spreadCycles is the number of times to spread importance per
+     * retrieval cycle.
+     * @return closest matching pattern in network.
      */
-    Pattern retrievePattern(Pattern pattern, int numCycles);
+    Pattern retrievePattern(Pattern pattern, int numCycles, int spreadCycles);
 
     /**
+     * Perform a single retrieval update on the AtomTable
      *
+     * @param spreadCycles is the number of times to spread importance per
+     * retrieval cycle.
      */
     void updateAtomTableForRetrieval(int spreadCycles);
 
+    /**
+     * Convert a vector of Number into a String representing a grid of outputs.
+     *
+     * @param p vector to translate.
+     * @return string representing p.
+     */
     template<typename Number> std::string patternToString(std::vector<Number> p) {
         std::stringstream ss;
         Number col = 0;
@@ -163,7 +175,7 @@ public:
      * @return vector with the hamming similarity of the retrieved pattern after
      * each imprint
      */
-    std::vector<float> imprintAndTestPattern(Pattern p, int imprint, int retrieve, float mutate);
+    std::vector<float> imprintAndTestPattern(Pattern p, int imprint, int retrieve, Pattern c, float mutate);
 
     /**
      * imprint a pattern once. After, try

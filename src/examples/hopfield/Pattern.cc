@@ -174,7 +174,7 @@ std::vector< Pattern > Pattern::loadPatterns( std::string fn, int size)
                 if (x == 'O') {
                     p[row*size + col] = 1;
                     col++;
-                } else if (x == ' ') {
+                } else if (x == ' ' || x == '.') {
                     p[row*size + col] = 0;
                     col++;
                 } else if (x == '\n') {

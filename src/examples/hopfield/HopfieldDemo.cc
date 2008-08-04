@@ -79,14 +79,39 @@ std::vector< Pattern > getPatterns()
 
 }
 
+std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
+{
+    std::vector< Pattern > cs;
+    if (ps.size() == 0) {
+        cout << "Load original patterns before cue patterns!" << endl;
+        return cs;
+    }
+
+    if (o->fileCue.size() > 0) {
+        cs = Pattern::loadPatterns(o->fileCue, hServer.height);
+        assert((unsigned int) o->nPatterns == cs.size());
+
+    } else {
+        for (std::vector< Pattern >::iterator i = ps.begin();
+                i != ps.end(); i++) {
+            cs.push_back( (*i).mutatePattern(o->cueErrorRate));
+        }
+
+    }
+    return cs;
+}
+
 void testHopfieldNetworkInterleave()
 {
 # define HDEMO_NORESULT -100
     std::vector< Pattern > patterns;
+    std::vector< Pattern > cuePatterns;
     std::vector< std::vector < float > > results;
     int totalCycles;
 
     patterns = getPatterns();
+    cuePatterns = getCuePatterns(patterns);
+
     totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
 
     if (o->showMatrixFlag) {
@@ -124,11 +149,19 @@ void testHopfieldNetworkInterleave()
         for (unsigned int j = 0; j < patterns.size(); j++) {
             float rSim;
             if (j <= (unsigned int) endPattern) {
-                Pattern c = patterns[j].mutatePattern(o->cueErrorRate);
-                Pattern rPattern = hServer.retrievePattern(c, o->retrieveCycles);
+                Pattern c(0,0);
+                if (!o->cueGenerateOnce) {
+                    if (o->fileCue.size() > 0) {
+                        c = cuePatterns[j].mutatePattern(o->cueErrorRate);
+                    } else {
+                        c = patterns[j].mutatePattern(o->cueErrorRate);
+                    }
+                } 
+                Pattern rPattern = hServer.retrievePattern(cuePatterns[j],
+                        o->retrieveCycles, o->spreadCycles);
                 rSim = patterns[j].hammingSimilarity(rPattern);
                 cycleResults.push_back(rSim);
-                cout << setw(4) << rSim << "(" << setw(5) << rSim - patterns[j].hammingSimilarity(c) << ")" << ", ";
+                cout << setw(4) << rSim << "(" << setw(5) << rSim - patterns[j].hammingSimilarity(cuePatterns[j]) << ")" << ", ";
                 if (o->showMatrixFlag) {
                     toPrint.push_back(rPattern);
                 }
@@ -150,15 +183,17 @@ void testHopfieldNetworkInterleave()
 void testHopfieldNetworkRolling()
 {
     std::vector< Pattern > patterns;
+    std::vector< Pattern > cuePatterns;
     std::vector< std::vector<float> > results;
     std::vector<float> diffs;
 
     patterns = getPatterns();
+    cuePatterns = getCuePatterns(patterns);
 
     for (unsigned int i = 0; i < patterns.size(); i++) {
         if (o->resetFlag)
             hServer.reset();
-        results.push_back(hServer.imprintAndTestPattern(patterns[i], o->imprintCycles, o->retrieveCycles, o->cueErrorRate));
+        results.push_back(hServer.imprintAndTestPattern(patterns[i], o->imprintCycles, o->retrieveCycles, cuePatterns[i], o->cueErrorRate));
         if (!o->verboseFlag) cout << " - pattern " << i << " done" << endl;
         if (o->recordToFile) {
             o->beforeFile << endl;
@@ -175,60 +210,6 @@ void testHopfieldNetworkRolling()
 
     if (o->totalFlag) {
         // output mean performace
-        float total = 0.0f;
-        for (unsigned int i = 0; i < diffs.size(); i++)
-            total += diffs[i];
-        cout << total / diffs.size() << endl;
-
-    }
-
-}
-
-void testHopfieldNetworkRollingOld()
-{
-    std::vector< Pattern > patterns;
-    std::vector< Pattern > cuePatterns;
-    std::vector< Pattern > rPatterns;
-    Pattern result(hServer.width, hServer.height);
-    std::vector<float> diffs;
-
-    patterns = getPatterns();
-
-    cuePatterns = Pattern::mutatePatterns(patterns, o->cueErrorRate);
-
-    for (unsigned int i = 0; i < patterns.size(); i++) {
-        hServer.imprintPattern(patterns[i], o->imprintCycles);
-        logger().info("Encoded pattern and ran server for %d loops", o->imprintCycles);
-    }
-
-    for (unsigned int i = 0; i < patterns.size(); i++) {
-        result = hServer.retrievePattern(cuePatterns[i], o->retrieveCycles);
-        logger().info("Updated Atom table for retrieval");
-        rPatterns.push_back(result);
-    }
-
-    if (! o->totalFlag) cout << "-----------------------" << endl;
-    for (unsigned int i = 0; i < patterns.size(); i++) {
-        float before, after, diff;
-
-        if (o->showMatrixFlag) {
-            std::vector< Pattern > toPrint;
-            toPrint.push_back(patterns[i]);
-            toPrint.push_back(cuePatterns[i]);
-            toPrint.push_back(rPatterns[i]);
-            hServer.printMatrixResult(toPrint);
-        }
-
-        before = patterns[i].hammingSimilarity(cuePatterns[i]);
-        after = patterns[i].hammingSimilarity(rPatterns[i]);
-        diff = after - before;
-        diffs.push_back(diff);
-
-        if (! o->totalFlag) cout << "=== similarity before/after/diff: " <<
-            before << "/" << after << "/" << diff << endl;
-    }
-
-    if (o->totalFlag) {
         float total = 0.0f;
         for (unsigned int i = 0; i < diffs.size(); i++)
             total += diffs[i];

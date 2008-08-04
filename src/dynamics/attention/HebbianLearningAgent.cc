@@ -21,6 +21,7 @@
 #include "HebbianLearningAgent.h"
 
 #include <AtomSpace.h>
+#include <Link.h>
 #include <CogServer.h>
 #include <SimpleTruthValue.h>
 
@@ -78,19 +79,46 @@ void HebbianLearningAgent::hebbianLearningUpdate()
         if (convertLinks && a->getLTI(h) < conversionThreshold) {
             // If mind agent is set to convert hebbian links then
             // inverse and symmetric links will convert between one
-            // another when conjunction between sti values is right
+            // another when conjunction between sti values is correct
             // (initially for hopfield emulation, but could
             // be useful in other cases)
             if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK) {
-                tc = (tcDecayRate * -new_tc) + ( (1.0f - tcDecayRate) * old_tc);
-                if (tc < 0) {
-                    // Inverse link no longer representative
-                    // change to symmetric hebbian link
-                    logger().fine("HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
-                    a->removeAtom(h);
-                    h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
+                // if inverse normalised sti of source is negative
+                // (i.e. hebbian link is pointing in the wrong direction)
+                if (a->getNormalisedSTI(outgoing[0]) < 0.0f) {
+                    tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
+                    if (tc < 0) {
+                        // link no longer representative
+                        // swap inverse hebbian link direction
+                        logger().fine("HebLearn: swap direction of inverse link %s", TLB::getAtom(h)->toString().c_str());
+                        // save STI/LTI
+                        AttentionValue backupAV = a->getAV(h);
+                        a->removeAtom(h);
+                        outgoing = moveSourceToFront(outgoing);
+                        h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 0));
+                        // restore STI/LTI
+                        a->setAV(h,backupAV);
+                    }
+                // else source is +ve, as it should be
                 } else {
-                    a->setMean(h, tc);
+                    // Work out whether to convert to symmetric, if not, just
+                    // update weight
+                    tc = (tcDecayRate * -new_tc) + ( (1.0f - tcDecayRate) * old_tc);
+
+                    if (tc < 0) {
+                        // Inverse link no longer representative
+                        // change to symmetric hebbian link
+                        logger().fine("HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
+                        // save STI/LTI
+                        AttentionValue backupAV = a->getAV(h);
+                        a->removeAtom(h);
+                        h = a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 1));
+                        // restore STI/LTI
+                        a->setAV(h,backupAV);
+                    } else {
+                        // link type is fine, just update TV
+                        a->setMean(h, tc);
+                    }
                 }
             } else {
                 tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
@@ -98,18 +126,27 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     // link no longer representative
                     // change to inverse hebbian link
                     logger().fine("HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
+                    // save STI/LTI
+                    AttentionValue backupAV = a->getAV(h);
                     a->removeAtom(h);
                     outgoing = moveSourceToFront(outgoing);
                     h = a->addLink(INVERSE_HEBBIAN_LINK, outgoing, SimpleTruthValue(-tc, 0));
+                    // restore STI/LTI
+                    a->setAV(h,backupAV);
                 } else {
+                    // link type is fine, just update TV
                     a->setMean(h, tc);
                 }
             }
 
         } else {
             // otherwise just update link weights
-            if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK)
+            // if inverse normalised sti of source is positive
+            // (i.e. hebbian link is pointing in the right direction)
+            if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK &&
+                    a->getNormalisedSTI(outgoing[0]) < 0.0f) {
 				new_tc = -new_tc;
+            }
             tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
             if (tc < 0.0f) tc = 0.0f;
             a->setMean(h, tc);
@@ -180,7 +217,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 			inAttention = true;
 		}
 
-        // normalise each sti and multiple each
+        // normalise each sti and multiply each
         normsti = a->getNormalisedSTI(h);
 
         // For debugging:

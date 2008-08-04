@@ -45,22 +45,20 @@
 using namespace opencog;
 using namespace std;
 
-std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint, int retrieve = 10, float mutate = 0.0f)
+std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint, int retrieve, Pattern cue, float mutate = 0.0f)
 {
     std::vector<float> result;
     std::vector<int> rPattern;
-    Pattern c(width, height);
-
-    if (options->cueGenerateOnce)
-        c = p.mutatePattern(mutate);
 
     for (int i = 0; i < imprint; i++) {
 
         float iResult;
-        if (options->cueGenerateOnce)
-            iResult = singleImprintAndTestPattern(p, retrieve, mutate, c);
-        else
-            iResult = singleImprintAndTestPattern(p, retrieve, mutate, c);
+        if (options->cueGenerateOnce) {
+            iResult = singleImprintAndTestPattern(p, retrieve, mutate, cue);
+        } else {
+            cue = p.mutatePattern(mutate);
+            iResult = singleImprintAndTestPattern(p, retrieve, mutate, cue);
+        }
 
         result.push_back(iResult);
         if (!options->verboseFlag) cout << "." << flush;
@@ -76,7 +74,7 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
 
 }
 
-float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 10, float mutate = 0.0f, Pattern c = Pattern(0, 0))
+float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, float mutate = 0.0f, Pattern c = Pattern(0, 0))
 {
     float result;
     float before = 0.0;
@@ -95,7 +93,7 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 10, 
         options->beforeFile << before;
     }
 
-    rPattern = retrievePattern(c, retrieve);
+    rPattern = retrievePattern(c, retrieve, options->spreadCycles);
     result = p.hammingSimilarity(rPattern);
     if (options->recordToFile) {
         options->afterFile << result;
@@ -145,7 +143,7 @@ HopfieldServer::HopfieldServer()
     spreadAgent = new ImportanceSpreadingAgent();
 #endif
     forgetAgent = new ForgettingAgent();
-    forgetAgent->forgetPercentage = 0.10f;
+    forgetAgent->forgetPercentage = 0.05f;
 
 
     plugInMindAgent(importUpdateAgent, 1);
@@ -182,8 +180,8 @@ void HopfieldServer::init(int width, int height, int numLinks)
     }
 
     // Tune mind agents from command line options
-    spreadAgent->setSpreadThreshold(options->spreadThreshold);
-    spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
+    //spreadAgent->setSpreadThreshold(options->spreadThreshold);
+    //spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
 
     // Create nodes
     for (int i = 0; i < this->width; i++) {
@@ -319,12 +317,13 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         logger().fine("---Imprint:Hebbian learning");
         hebLearnAgent->run(this);
 
-        logger().fine("---Imprint:Importance spreading");
-#ifdef HAVE_GSL
-        diffuseAgent->run(this);
-#else
-        spreadAgent->run(this);
-#endif
+// Unnecessary
+//        logger().fine("---Imprint:Importance spreading");
+//#ifdef HAVE_GSL
+//        diffuseAgent->run(this);
+//#else
+//        spreadAgent->run(this);
+//#endif
 
         if (first)
             first = false;
@@ -362,7 +361,7 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 
 }
 
-Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles)
+Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles, int spreadCycles)
 {
     std::string logString;
 
@@ -376,7 +375,7 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles)
         logger().fine("---Retrieve:Encoding pattern");
         encodePattern(partialPattern, patternStimulus);
         printStatus();
-        updateAtomTableForRetrieval(2);
+        updateAtomTableForRetrieval(spreadCycles);
         printStatus();
 
         numCycles--;

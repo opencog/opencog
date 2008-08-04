@@ -62,6 +62,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     delete atoms;
 
     removalAmount = (int) (atomsVector.size() * proportion);
+    logger().fine("Will attempt to remove %d atoms", removalAmount);
 
     for (unsigned int i = 0; i < atomsVector.size() ; i++) {
         if (TLB::getAtom(atomsVector[i]) == NULL) {

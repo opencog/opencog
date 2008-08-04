@@ -38,6 +38,7 @@ HopfieldOptions::HopfieldOptions()
     nPatterns = HDEMO_DEFAULT_NPATTERNS;
     genPatternDensity = HDEMO_DEFAULT_PATTERN_DENSITY;
     retrieveCycles = HDEMO_DEFAULT_RETRIEVE_CYCLES;
+    spreadCycles = HDEMO_DEFAULT_SPREAD_CYCLES;
     imprintCycles = HDEMO_DEFAULT_IMPRINT_CYCLES;
     cueErrorRate = HDEMO_DEFAULT_CUE_ERROR;
     cueGenerateOnce = HDEMO_DEFAULT_CUE_GENERATE_ONCE;
@@ -84,6 +85,7 @@ void HopfieldOptions::printHelp()
         "                  \t   compared to original stored pattern.\n"
         "   -c --imprint N \t Number of cycles to imprint pattern.\n"
         "   -r --retrieve N \t Number of cycles to retrieve pattern for.\n"
+        "   -y --spread N \t Number of times to spread importance during each retrieve cycle.\n"
         "   -t --spread-threshold N  The minimum threshold of atom STI before it gets spread.\n"
         "   -q --spread-multiplier N  multiplier for importance spread, if 0 then evenly\n"
         "                  \t spread across links.\n"
@@ -91,7 +93,7 @@ void HopfieldOptions::printHelp()
         "   -p --patterns N \t Number of patterns to test.\n"
         "   -g --gen-density N \t Density of generated patterns (active/inactive nodes).\n"
         "   -e --error N \t Probability of error in each bit of cue pattern.\n"
-        "   -E --one-cue \t Only generate a cue file once for a pattern and reuse it.\n"
+        "   -E --one-cue \t Only generate a cue once for a pattern and reuse it.\n"
         "      --train-file <x> \t load patterns from file, must use -n to specify pattern size.\n"
         "      --cue-file <x> \t load patterns from file, must use -n to specify pattern size.\n";
     cout << helpOutput;
@@ -105,7 +107,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
 
     while (1) {
         static const char *optString =
-            "vDw:h:n:l:d:s:t:z:f:p:g:c:r:mi:e:oq:a:CR?E";
+            "vDw:h:n:l:d:s:t:z:f:p:g:c:r:y:mi:e:oq:a:CR?E";
 
 		static const struct option longOptions[] = {
                 {"verbose", 0, &verboseFlag, 1},
@@ -123,6 +125,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"gen-denisty", required_argument, 0, 'g'},
                 {"imprint", required_argument, 0, 'c'}, // # of imprint _c_ycles
                 {"retrieve", required_argument, 0, 'r'},    // # of retrieve iterations
+                {"spread", required_argument, 0, 'y'},    // # of spread iterations
                 {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
                 {"interleave", optional_argument, 0, 'i'},  // interleave imprint of each pattern
                 {"error", required_argument, 0, 'e'},   // cue error rate
@@ -203,6 +206,9 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             break;
         case 'r':
             retrieveCycles = atoi(optarg);
+            break;
+        case 'y':
+            spreadCycles = atoi(optarg);
             break;
         case 'e':
             cueErrorRate = (float) atof(optarg);

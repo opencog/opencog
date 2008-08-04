@@ -1,0 +1,253 @@
+/*
+ * tests/dynamics/ForgettingAgentUTest.cxxtest
+ *
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Written by Joel Pitt <joel@fruitionnz.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "CogServer.h"
+#include "MindAgent.h"
+#include "ForgettingAgent.h"
+#include "SimpleTruthValue.h"
+
+#include <vector>
+#include <string>
+#include <iostream>
+#include <sstream>
+
+using namespace opencog;
+
+vector<Handle> createNodes(AtomSpace* atomSpace, std::string baseName, int number)
+{
+    vector<Handle> testAtoms;
+
+    for (int i = 0; i < number; i++) {
+        std::ostringstream buf;
+        SimpleTruthValue tv1(0.5f, 0.99f);
+        buf << baseName << i;
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf.str().c_str(), tv1);
+        //printf("add atom %d: %s\n", i, buf.str().c_str());
+        testAtoms.push_back(h1);
+    }
+    return testAtoms;
+}
+
+vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+{
+    char buf[256];
+    vector<Handle> testAtoms;
+    int baseNameLength;
+
+    memset(buf,0,256);
+    baseNameLength = strlen(baseName);
+    strcpy(buf,baseName);
+
+    SimpleTruthValue tv1(0.5f, 0.99f);
+    buf[baseNameLength] = '1';
+    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+    buf[baseNameLength] = '2';
+    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+    buf[baseNameLength] = '3';
+    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+
+    HandleSeq outgoing1;
+    outgoing1.push_back(h2);
+    outgoing1.push_back(h3);
+    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1, tv1);
+    HandleSeq outgoing2;
+    outgoing2.push_back(h1);
+    outgoing2.push_back(l1);
+    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv1);
+
+    testAtoms.push_back(h1);
+    testAtoms.push_back(h2);
+    testAtoms.push_back(h3);
+    testAtoms.push_back(l1);
+    testAtoms.push_back(l2);
+
+    return testAtoms;
+}
+
+class ForgettingAgentUTest :  public CxxTest::TestSuite {
+
+    private:
+    opencog::ForgettingAgent *agent;
+    opencog::CogServer server;
+
+    public:
+
+    ForgettingAgentUTest(){
+        agent = new opencog::ForgettingAgent();
+        server.plugInMindAgent(agent, 1);
+        logger().setLevel(Logger::FINE);
+	    logger().setPrintToStdoutFlag(true);
+        logger().enable();
+    }
+
+    ~ForgettingAgentUTest(){
+        delete agent;
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testPercentForget() {
+        std::vector<Handle> atoms;
+        printf("Testing forgetting based on percentage\n");
+
+        agent->forgetPercentage = 0.10;
+
+        int count = 100;
+        atoms = createNodes(server.getAtomSpace(), "forgetPercent", count);
+
+        server.unitTestServerLoop(1);
+        count = count * (1.0f - agent->forgetPercentage);
+
+        // Case: 100 atoms, 10% loss, all same LTI
+        // Result: 10 random atom lost
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+
+        // --
+        agent->forgetPercentage = 0.0f;
+        server.unitTestServerLoop(1);
+
+        // Case: 90 atoms, 0% loss, all same LTI
+        // Result: 0 random atom lost
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        
+        // --
+        agent->forgetPercentage = 1.0f;
+        server.unitTestServerLoop(1);
+        count = 0;
+
+        // Case: 90 atoms, 100% loss, all same LTI
+        // Result: all atoms lost
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+
+        // Test to make sure atoms are removed in the right order:
+        count = 10;
+        atoms = createNodes(server.getAtomSpace(), "forgetPercent", count);
+        for (int i = 0; i < count; i++) {
+            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t) i);
+        }
+
+        agent->forgetPercentage = 0.20;
+        server.unitTestServerLoop(1);
+        // First two handles should now be invalid...
+        TS_ASSERT(!TLB::getAtom(atoms[0]));
+        TS_ASSERT(!TLB::getAtom(atoms[1]));
+
+        // Forget all
+        agent->forgetPercentage = 1.0f;
+        server.unitTestServerLoop(1);
+        count = 0;
+
+    }
+
+    void testThresholdForget() {
+        std::vector<Handle> atoms;
+        printf("Testing forgetting based on threshold\n");
+
+        agent->forgetPercentage = 1.0f;
+        agent->forgetThreshold = (AttentionValue::lti_t) -10;
+
+        int count = 100;
+        atoms = createNodes(server.getAtomSpace(), "forgetThreshold", count);
+
+        // Case: 100 atoms, none below threshold
+        // Result: Nothing lost
+        server.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+
+        // Case: 100 atoms, 10 below threshold (ranging from threshold to
+        // threshold - 10 LTI)
+        // Result: 90 left, first 10 handles in array invalid
+        for (int i = 0; i < 10; i++) {
+            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
+                agent->forgetThreshold - i);
+        }
+        count = 90;
+
+        server.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        for (int i = 0; i < 10; i++) {
+            TS_ASSERT(!TLB::getAtom(atoms[i]));
+        }
+
+        // Forget all
+        agent->forgetThreshold = AttentionValue::MAXLTI;
+        server.unitTestServerLoop(1);
+        count = 0;
+
+    }
+
+    void testBothPercentAndThreshold() {
+        int numRemoved = 0;
+        std::vector<Handle> atoms;
+        printf("Testing forgetting based on percentage and threshold\n");
+
+        agent->forgetPercentage = 0.10f;
+        agent->forgetThreshold = (AttentionValue::lti_t) -10;
+
+        int count = 100;
+        atoms = createNodes(server.getAtomSpace(), "forgetBoth", count);
+
+        // Case: 100 atoms, only 5 below threshold
+        // Result: only 5 lost, first five invalid
+        for (int i = 0; i < 5; i++) {
+            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
+                agent->forgetThreshold);
+        }
+        count = 95;
+        server.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        for (int i = 0; i < 5; i++) {
+            TS_ASSERT(!TLB::getAtom(atoms[i]));
+        }
+
+        // Case: 95 atoms, 15 below threshold
+        // Result: 9 removed, 86 left, first 14 handles in array invalid
+        for (int i = 5; i < 20; i++) {
+            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
+                agent->forgetThreshold);
+        }
+        count = 86;
+        server.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        numRemoved = 0;
+        for (int i = 5; i < 20; i++) {
+            if (!TLB::getAtom(atoms[i])) {
+                numRemoved++;
+            }
+        }
+        TS_ASSERT_EQUALS(9, numRemoved);
+
+        // Forget all
+        agent->forgetPercentage = 1.0f;
+        agent->forgetThreshold = AttentionValue::MINLTI;
+        server.unitTestServerLoop(1);
+        count = 0;
+
+    }
+};

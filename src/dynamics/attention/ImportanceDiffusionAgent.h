@@ -79,7 +79,20 @@ private:
     //! print a gsl vector to stdout
     void printVector(gsl_vector *m);
 
+    //! Set the STI of h from a scaled 0..1 STI value
     void setScaledSTI(Handle h, float scaledSTI);
+
+    //! Map each atom involved in important diffusion with an index
+    int makeDiffusionAtomsMap(std::map<Handle,int> &i,std::vector<Handle> links);
+
+    //! Make vector of original scaled STI values
+    void makeSTIVector(gsl_vector* &stiVector, int totalDiffusionAtoms,
+            std::map<Handle,int> diffusionAtomsMap);
+
+    //! Construct matrix representing HebbianLinks between all atoms
+    //! in diffusionAtomsMap.
+    void makeConnectionMatrix(gsl_matrix* &connections, int totalDiffusionAtoms,
+            std::map<Handle,int> diffusionAtomsMap, std::vector<Handle> links);
 
 public:
 

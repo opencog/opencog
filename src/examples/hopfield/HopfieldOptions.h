@@ -48,6 +48,7 @@
 #define HDEMO_DEFAULT_RECORD_TO_FILE false
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 1
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 0
+#define HDEMO_DEFAULT_SPREAD_CYCLES 1
 
 namespace opencog
 {
@@ -70,8 +71,11 @@ public:
     int totalFlag;
     int nPatterns;
     float genPatternDensity;
+
     int retrieveCycles;
+    int spreadCycles;
     int imprintCycles;
+
     float cueErrorRate;
     int cueGenerateOnce;
     float importanceSpreadingMultiplier;

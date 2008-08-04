@@ -31,6 +31,7 @@
 #include <CogServer.h>
 #include <Link.h>
 
+#define DEBUG
 namespace opencog
 {
 
@@ -63,28 +64,15 @@ void ImportanceDiffusionAgent::run(CogServer* server)
     spreadImportance();
 }
 
-void ImportanceDiffusionAgent::spreadImportance()
+int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffusionAtomsMap,
+        std::vector<Handle> links)
 {
-    gsl_matrix* connections;
-    gsl_vector* stiVector;
-    gsl_vector* result;
-    int errorNo;
-
-    // The source and destinations of STI
-    std::map<Handle,int> diffusionAtomsMap;
     int totalDiffusionAtoms = 0;
-
-    std::vector<Handle> links;
     std::vector<Handle>::iterator hi;
-    std::back_insert_iterator< std::vector<Handle> > out_hi(links);
 
 #ifdef DEBUG
-    logger().debug("Begin diffusive importance spread.\n");
-#endif
-    // Get all HebbianLinks
-    a->getHandleSet(out_hi, HEBBIAN_LINK, true);
-
     logger().fine("Finding atoms involved with STI diffusion and their matrix indices");
+#endif
     for (hi = links.begin(); hi != links.end(); hi++) {
         // Get all atoms in outgoing set of links
         std::vector<Handle> targets;
@@ -113,15 +101,21 @@ void ImportanceDiffusionAgent::spreadImportance()
     }
     // diffusionAtomsMap now contains all atoms involved in spread as keys and
     // their matrix indices as values.
+    return totalDiffusionAtoms;
     
-#ifdef DEBUG
-    logger().debug("%d total diffusion atoms.\n", totalDiffusionAtoms);
-    logger().fine("Creating norm sti vector.\n");
-#endif
+}
+
+void ImportanceDiffusionAgent::makeSTIVector(gsl_vector* &stiVector,
+        int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap) {
     // go through diffusionAtomsMap and add each to the STI vector.
     // position in stiVector matches set (set is ordered and won't change
     // unless you add to it.
+    
+    // alloc
     stiVector = gsl_vector_alloc(totalDiffusionAtoms);
+    // zero vector
+    gsl_vector_set_zero(stiVector);
+
     for (std::map<Handle,int>::iterator i=diffusionAtomsMap.begin();
             i != diffusionAtomsMap.end(); i++) {
         Handle dAtom = (*i).first;
@@ -130,14 +124,21 @@ void ImportanceDiffusionAgent::spreadImportance()
     
 #ifdef DEBUG
     if (logger().getLevel() >= Logger::FINE) {
-        logger().fine("Initial normalised STI values\n");
+        logger().fine("Initial normalised STI values");
         printVector(stiVector);
     }
 #endif
+}
 
+void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
+        int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
+        std::vector<Handle> links)
+{
+    std::vector<Handle>::iterator hi;
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
     connections = gsl_matrix_alloc(totalDiffusionAtoms, totalDiffusionAtoms);
+    gsl_matrix_set_zero(connections);
 
     for (hi=links.begin(); hi != links.end(); hi++) {
         // Get all atoms in outgoing set of link
@@ -161,18 +162,18 @@ void ImportanceDiffusionAgent::spreadImportance()
 
             // Add only the source index
             sourcePosItr = diffusionAtomsMap.find(targets[0]);
+#ifdef DEBUG
+            if (sourcePosItr == diffusionAtomsMap.end()) {
+                // This case should never occur
+                logger().warn("Can't find source in list of diffusionNodes. "
+                        "Something odd has happened");
+            }
+#endif
             sourceHandle = (*sourcePosItr).first;
             // If source atom isn't within diffusionThreshold, then skip
             if (a->getNormalisedZeroToOneSTI(sourceHandle) < diffusionThreshold) {
                 continue;
             }
-#ifdef DEBUG
-            if (== (* targets.end())) {
-                // This case should never occur
-                logger.warning("Can't find source in list of diffusionNodes. "
-                        "Something odd has happened");
-            }
-#endif
             sourceIndex = (*sourcePosItr).second;
 #ifdef DEBUG
             logger().fine("Ordered link with source index %d.", sourceIndex);
@@ -218,13 +219,14 @@ void ImportanceDiffusionAgent::spreadImportance()
     // Make sure columns sum to 1.0 and that no more than maxSpreadPercentage
     // is taken from source atoms
 #ifdef DEBUG
-    logger.fine("Sum probability for column:");
+    logger().fine("Sum probability for column:");
 #endif
     for (unsigned int j = 0; j < connections->size2; j++) {
-        float sumProb = 0.0f;
+        double sumProb = 0.0f;
         for (unsigned int i = 0; i < connections->size1; i++) {
             if (i != j) sumProb += gsl_matrix_get(connections,i,j);
         }
+        logger().fine("%d before - %1.3f", j, sumProb);
         if (sumProb > maxSpreadPercentage) {
             for (unsigned int i = 0; i < connections->size1; i++) {
                 gsl_matrix_set( connections,i,j,gsl_matrix_get(connections,i,j)
@@ -233,17 +235,55 @@ void ImportanceDiffusionAgent::spreadImportance()
             sumProb = maxSpreadPercentage;
         }
 #ifdef DEBUG
-        logger.fine("%d - %1.3f\n", j, sumProb);
+        logger().fine("%d after - %1.3f", j, sumProb);
 #endif
         gsl_matrix_set(connections,j,j,1.0-sumProb);
     }
     
 #ifdef DEBUG
-    logger.debug("Hebbian connection matrix\n");
+    logger().debug("Hebbian connection matrix");
     if (logger().getLevel() >= Logger::FINE) {
         printMatrix(connections);
     }
 #endif
+}
+
+void ImportanceDiffusionAgent::spreadImportance()
+{
+    gsl_matrix* connections;
+    gsl_vector* stiVector;
+    gsl_vector* result;
+    int errorNo;
+
+    // The source and destinations of STI
+    std::map<Handle,int> diffusionAtomsMap;
+    int totalDiffusionAtoms = 0;
+
+    std::vector<Handle> links;
+    std::vector<Handle>::iterator hi;
+    std::back_insert_iterator< std::vector<Handle> > out_hi(links);
+
+#ifdef DEBUG
+    logger().debug("Begin diffusive importance spread.");
+#endif
+
+    // Get all HebbianLinks
+    a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+
+    totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);
+
+    // No Hebbian Links or atoms?
+    if (totalDiffusionAtoms == 0) { return; }
+
+#ifdef DEBUG
+    logger().debug("%d total diffusion atoms.", totalDiffusionAtoms);
+    logger().fine("Creating norm sti vector.");
+#endif
+
+    makeSTIVector(stiVector,totalDiffusionAtoms,diffusionAtomsMap);
+
+    makeConnectionMatrix(connections, totalDiffusionAtoms, diffusionAtomsMap, links);
+
     result = gsl_vector_alloc(totalDiffusionAtoms);
     errorNo = gsl_blas_dgemv(CblasNoTrans,1.0,connections,stiVector,0.0,result);
     if (errorNo) {
