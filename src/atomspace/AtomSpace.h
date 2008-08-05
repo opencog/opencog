@@ -945,13 +945,11 @@ public:
     }
 
     template<typename Predicate, typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare, VersionHandle vh =
-          NULL_VERSION_HANDLE) {
+    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) {
         HandleSeq result;
-        Handle h;
-        for (; h = *(begin++); begin != end)
-            if (compare(h) && containsVersionedTV(h, vh))
-                result.push_back(h);
+        for (; begin != end; begin++)//h = *(begin++))
+            if (compare(*begin))
+                result.push_back(*begin);
         return result;
     }
 
@@ -989,6 +987,49 @@ public:
 
         return it;
     }
+
+    template<typename Predicate, typename InputIterator>
+    HandleSeq filter_inAttentionalFocus(InputIterator begin, InputIterator end) {
+          return filter(begin, end, InAttentionalFocus(&this));
+    }
+    struct InAttentionalFocus {
+        InAttentionalFocus(AtomSpace* a) : atomSpace(a) {}
+    
+        bool operator()(const Handle& h) {
+            return atomSpace->getSTI(h) > atomSpace->getAttentionalFocusBoundary();
+        }
+        
+        AtomSpace* atomSpace;
+    };
+    
+    template<typename Predicate, typename InputIterator>
+    HandleSeq filter_STI(InputIterator begin, InputIterator end, AttentionValue::sti_t sti) {
+          return filter(begin, end, STIAboveThreshold(sti, &this));
+    }
+    struct STIAboveThreshold {
+        STIAboveThreshold(const AttentionValue::sti_t t, AtomSpace* a) : threshold (t), atomSpace(a) {}
+    
+        bool operator()(const Handle& h) {
+            return atomSpace->getSTI(h) > threshold;
+        }
+        AttentionValue::sti_t threshold;
+        AtomSpace* atomSpace;
+    };
+
+    template<typename Predicate, typename InputIterator>
+    HandleSeq filter_LTI(InputIterator begin, InputIterator end, AttentionValue::lti_t lti) {
+          return filter(begin, end, LTIAboveThreshold(lti, &this));
+    }
+    struct LTIAboveThreshold {
+        LTIAboveThreshold(const AttentionValue::lti_t t, AtomSpace* a) : threshold (t), atomSpace(a) {}
+    
+        bool operator()(const Handle& h) {
+            return atomSpace->getLTI(h) > threshold;
+            //return TLB::getAtom(h1)->getAttentionValue().getSTI() > threshold;
+        }
+        AttentionValue::lti_t threshold;
+        AtomSpace* atomSpace;
+    };
 
 protected:
 
