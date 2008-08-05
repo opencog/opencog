@@ -392,7 +392,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     HandleEntry* h;
 
     const AtomTable& at = a->getAtomTable();
-    inFocus = at.getHandleSet(a->getAttentionalFocusBoundary() + 5, AttentionValue::MAXSTI);
+    inFocus = at.getHandleSet(a->getAttentionalFocusBoundary() + amnesty, AttentionValue::MAXSTI);
 
     attentionalFocusSize.update(inFocus->getSize());
 

@@ -306,13 +306,13 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
         // then update with learning
 
+        logger().fine("---Imprint:Adding random links");
+        addRandomLinks();
+
         // ImportanceUpdating with links
         logger().fine("---Imprint:Running Importance update");
         importUpdateAgent->run(this);
         printStatus();
-
-        logger().fine("---Imprint:Adding random links");
-        addRandomLinks();
 
         logger().fine("---Imprint:Hebbian learning");
         hebLearnAgent->run(this);

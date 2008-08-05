@@ -1,0 +1,168 @@
+/*
+ * tests/dynamics/ImportanceDiffusionAgentUTest.cxxtest
+ *
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Written by Joel Pitt <joel@fruitionnz.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as 
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "CogServer.h"
+#include "MindAgent.h"
+#include "ImportanceDiffusionAgent.h"
+#include "SimpleTruthValue.h"
+
+#include <vector>
+#include <string>
+#include <iostream>
+#include <sstream>
+
+using namespace opencog;
+
+vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
+{
+    vector<Handle> testAtoms;
+    int number = 4;
+
+    for (int i = 0; i < number; i++) {
+        std::ostringstream buf;
+        SimpleTruthValue tv1(0.5f, 0.99f);
+        buf << baseName << i;
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf.str().c_str(), tv1);
+        //printf("add atom %d: %s\n", i, buf.str().c_str());
+        testAtoms.push_back(h1);
+    }
+
+    SimpleTruthValue tv2(0.1f, 0.99f);
+
+    HandleSeq outgoing1;
+    outgoing1.push_back(testAtoms[0]);
+    outgoing1.push_back(testAtoms[1]);
+    Handle l1 = atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing1, tv2);
+
+    HandleSeq outgoing2;
+    outgoing2.push_back(testAtoms[2]);
+    outgoing2.push_back(testAtoms[3]);
+    Handle l2 = atomSpace->addLink(INVERSE_HEBBIAN_LINK, outgoing2, tv2);
+
+    testAtoms.push_back(l1);
+    testAtoms.push_back(l2);
+
+    return testAtoms;
+}
+
+void removeAll(AtomSpace* atomSpace)
+{
+    std::vector<Handle> allAtoms;
+    std::vector<Handle>::iterator i;
+    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
+
+    server().getAtomSpace()->getHandleSet(outputI, ATOM, true);
+
+    for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
+        server().getAtomSpace()->removeAtom(*i,false);
+    }
+
+}
+
+class ImportanceDiffusionAgentUTest :  public CxxTest::TestSuite {
+
+    private:
+
+    CogServer server;
+    ImportanceDiffusionAgent* agent;
+    std::vector<Handle> atoms;
+
+    public:
+
+	ImportanceDiffusionAgentUTest(){
+        agent = new opencog::ImportanceDiffusionAgent();
+        server.plugInMindAgent(agent, 1);
+        logger().setLevel(Logger::FINE);
+	    logger().setPrintToStdoutFlag(true);
+        logger().enable();
+    }
+
+	void setUp() {
+        std::vector< Handle >::iterator i;
+        AttentionValue::sti_t val = 0;
+        
+	    atoms = createHebbianGraph(server.getAtomSpace(), "diffuse");
+        for (i = atoms.begin(); i != atoms.end(); i++) {
+            if (server.getAtomSpace()->getType(*i) == CONCEPT_NODE) {
+                server.getAtomSpace()->setSTI(*i, val);
+                server.getAtomSpace()->updateMaxSTI(val);
+                val += 100;
+            }
+        }
+        server.getAtomSpace()->setAttentionalFocusBoundary(0);
+
+    }
+
+	void tearDown(){
+        removeAll(server.getAtomSpace());
+    
+    }
+
+    void testGetSetMaxPercentage() {
+        float percent;
+        percent = agent->getMaxSpreadPercentage();
+        TS_ASSERT_EQUALS(percent, MA_DEFAULT_MAX_SPREAD_PERCENTAGE);
+        percent = 0.5;
+        agent->setMaxSpreadPercentage(percent);
+        TS_ASSERT_EQUALS(percent, agent->getMaxSpreadPercentage());
+    }
+
+    void testGetSetDiffusionThreshold() {
+        float percent;
+        percent = agent->getDiffusionThreshold();
+        TS_ASSERT_EQUALS(percent, MA_DEFAULT_DIFFUSION_THRESHOLD);
+        percent = 0.5;
+        agent->setDiffusionThreshold(percent);
+        TS_ASSERT_EQUALS(percent, agent->getDiffusionThreshold());
+    }
+
+	void testRun() {
+        agent->setDiffusionThreshold(0.0);
+	    server.unitTestServerLoop(1);
+	    
+        TS_ASSERT_EQUALS(10,server.getAtomSpace()->getSTI(atoms[0]));
+        TS_ASSERT_EQUALS(90,server.getAtomSpace()->getSTI(atoms[1]));
+        TS_ASSERT_EQUALS(230,server.getAtomSpace()->getSTI(atoms[2]));
+        TS_ASSERT_EQUALS(270,server.getAtomSpace()->getSTI(atoms[3]));
+
+        // 1. check atoms less than diffusion threshold are not spread from
+        agent->setDiffusionThreshold(0.5);
+	    server.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(10,server.getAtomSpace()->getSTI(atoms[0]));
+        TS_ASSERT_EQUALS(90,server.getAtomSpace()->getSTI(atoms[1]));
+        TS_ASSERT_EQUALS(257,server.getAtomSpace()->getSTI(atoms[2]));
+        TS_ASSERT_EQUALS(243,server.getAtomSpace()->getSTI(atoms[3]));
+
+        // 2. no more than max percentage is spread, even if Hebbian link is
+        // strong
+        agent->setMaxSpreadPercentage(0.05);
+	    server.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(269,server.getAtomSpace()->getSTI(atoms[2]));
+        TS_ASSERT_EQUALS(230,server.getAtomSpace()->getSTI(atoms[3]));
+       
+	}
+
+    
+
+};

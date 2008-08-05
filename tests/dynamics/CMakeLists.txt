@@ -12,8 +12,9 @@ LINK_DIRECTORIES(
 	${OPENCOG_BINARY_DIR}/src/util
 )
 
-LINK_LIBRARIES(util atomspace server attention)
+LINK_LIBRARIES(util atomspace server attention ${GSL_LIBRARIES})
 
 ADD_CXXTEST(ImportanceUpdatingAgentUTest)
 ADD_CXXTEST(ForgettingAgentUTest)
+ADD_CXXTEST(ImportanceDiffusionAgentUTest)
 ADD_CXXTEST(STIDecayingAgentUTest)
