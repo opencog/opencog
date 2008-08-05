@@ -944,15 +944,6 @@ public:
         return result;
     }
 
-    template<typename Predicate, typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) {
-        HandleSeq result;
-        for (; begin != end; begin++)//h = *(begin++))
-            if (compare(*begin))
-                result.push_back(*begin);
-        return result;
-    }
-
     template<typename OutputIterator, typename Predicate>
     OutputIterator filter(OutputIterator it, Predicate compare, VersionHandle vh = NULL_VERSION_HANDLE) {
         _getNextAtomPrepare();
@@ -963,6 +954,26 @@ public:
 
         return it;
     }
+
+    template<typename Predicate, typename InputIterator>
+    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) {
+        HandleSeq result;
+        for (; begin != end; begin++)
+            if (compare(*begin))
+                result.push_back(*begin);
+                
+        return result;
+    }
+
+    template<typename OutputIterator, typename Predicate>
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, Predicate compare) {
+        for (; begin != end; begin++)
+            if (compare(*begin))
+                * it++ = next;
+
+        return it;
+    }
+
 
 // ---- custom filter templates
 
