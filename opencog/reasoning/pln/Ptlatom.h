@@ -28,7 +28,7 @@
 #define __NOT					173
 
 //#include "PLNUtils.h"
-//#include "Rule.h" 
+//#include "PLNRules/Rule.h" 
 #include "iAtomTableWrapper.h"
 #include <boost/smart_ptr.hpp>
 

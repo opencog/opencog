@@ -7,7 +7,7 @@
 #include "AtomTableWrapper.h"
 #include "XMLNode.h"
 #include "XMLNodeLoader.h"
-#include "Rules.h"
+#include "PLNRules/Rules.h"
 #include <utils2.h>
 
 using namespace opencog;

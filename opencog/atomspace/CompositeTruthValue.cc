@@ -202,7 +202,7 @@ std::string CompositeTruthValue::toString() const
  * NOTE: string representation of tv types, VersionHandles and tv attributes cannot have '{', '}' or ';',
  * which are separators
  */
-
+#ifdef WIN32
 CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (InvalidParamException)
 {
     char* buff;
@@ -251,7 +251,7 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     free(s);
     return result;
 }
-
+#endif
 
 CompositeTruthValue* CompositeTruthValue::clone() const
 {

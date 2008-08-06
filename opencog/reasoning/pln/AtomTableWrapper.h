@@ -2,13 +2,17 @@
 #define ATW_H
 
 #include <time.h>
-#include "Rule.h"
+#include "PLNRules/Rule.h"
 #include "fim.h"
-#include "CoreWrapper.h"
+//#include "CoreWrapper.h"
 #include <queue>
 #include "iAtomTableWrapper.h"
 #include <boost/smart_ptr.hpp>
 #include "Singleton.h"
+
+Handle child(Handle h, int i);
+bool isSubType(Handle h, Type T);
+bool inheritsType(Type T1, Type T2);
 
 namespace reasoning
 {

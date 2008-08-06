@@ -4,7 +4,7 @@
 #include <queue>
 #include <set>
 #include <tree.h>
-#include "Rule.h"
+#include "PLNRules/Rule.h"
 #include "PLN.h"
 
 #define LOCAL_ATW 0
@@ -27,6 +27,7 @@ namespace simple_evaluator
 struct RuleProvider
 {
 	virtual const std::vector<RULE>& get()=0;
+    virtual ~RuleProvider() {};
 };
 
 class DefaultRuleProvider : public RuleProvider

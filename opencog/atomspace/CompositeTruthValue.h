@@ -31,10 +31,19 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/VersionHandle.h>
 
+#ifdef __APPLE__
+#include <ext/hash_map>
+using __gnu_cxx::hash_map;
+#endif
+
 namespace opencog
 {
 
+#ifdef __APPLE__
+typedef hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+#else
 typedef std::tr1::unordered_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+#endif /* __APPLE__ */
 
 class CompositeTruthValue: public TruthValue
 {
@@ -79,9 +88,9 @@ public:
     CompositeTruthValue& operator=(const CompositeTruthValue& rhs) throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
-
+#ifdef WIN32
     static CompositeTruthValue* fromString(const char*) throw (InvalidParamException);
-
+#endif
     float getMean() const;
     float getCount() const;
     float getConfidence() const;

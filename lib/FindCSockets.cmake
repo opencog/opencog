@@ -13,7 +13,8 @@
 FIND_PATH(CSOCKETS_INCLUDE_DIR Sockets/sockets-config.h)
 
 # Look for the library
-FIND_LIBRARY(CSOCKETS_LIBRARY NAMES Sockets PATH /usr/lib /usr/lib/Sockets /usr/local/lib /usr/local/lib/Sockets)
+FIND_LIBRARY(CSOCKETS_LIBRARY NAMES Sockets PATH /usr/lib /usr/lib/Sockets
+	/usr/local/lib /usr/local/lib/Sockets /opt/local/lib)
 
 # Copy the results to the output variables.
 IF (CSOCKETS_INCLUDE_DIR AND CSOCKETS_LIBRARY)

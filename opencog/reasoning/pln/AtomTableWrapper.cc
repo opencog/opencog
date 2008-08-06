@@ -1,7 +1,7 @@
 #include "AtomTableWrapper.h"
 #include "PLN.h"
 #include "XMLNodeLoader.h"
-#include "Rules.h"
+#include "PLNRules/Rules.h"
 #include <SimpleTruthValue.h>
 #include <CogServer.h> // To get access of AtomSpace
 #include <tree.h>
@@ -223,11 +223,17 @@ bool AtomTableWrapper::Prepare()
 bool AtomTableWrapper::LoadAxioms(const string& path)
 {
     // TODO: check exists works on WIN32
-	string fname(path);
-	string fname2("../tests/reasoning/" + path);
-	if (!exists(fname.c_str())) {
+	string fname("../../../tests/reasoning/" + path);
+	string fname2("../../tests/reasoning/" + path);
+	string fname3("../../../../tests/reasoning/" + path);
+	
+    if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());
 		fname = fname2;
+    }
+    if (!exists(fname.c_str())) {
+        printf("File %s doesn't exist.\n", fname.c_str());
+		fname = fname3;
     }
 	if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());

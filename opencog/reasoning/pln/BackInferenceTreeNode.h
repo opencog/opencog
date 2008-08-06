@@ -10,7 +10,7 @@
 #include <boost/bind.hpp>
 #include <stack>
 #include <boost/foreach.hpp>
-#include "RuleApp.h"
+#include "PLNRules/RuleApp.h"
 #include "NMPrinter.h"
 
 namespace reasoning

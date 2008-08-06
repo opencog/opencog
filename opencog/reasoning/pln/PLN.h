@@ -38,7 +38,7 @@
 
 // PLN includes
 //#include "CoreWrapper.h"
-//#include "Rule.h"
+//#include "PLNRules/Rule.h"
 //#include "iAtomTableWrapper.h"
 
 // PLN utility includes

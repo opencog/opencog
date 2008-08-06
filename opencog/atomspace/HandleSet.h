@@ -29,6 +29,10 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/platform.h>
 
+//#ifdef __APPLE__
+//#else
+//#include <tr1/unordered_set>
+
 namespace opencog
 {
 
@@ -42,8 +46,11 @@ private:
     /**
      * Defines a hash set used to store handles.
      */
+    #ifdef __APPLE__
+    typedef hash_set<Handle, hashHandle, eqHandle> InternalHandleSet;
+    #else
     typedef std::tr1::unordered_set<Handle> InternalHandleSet;
-
+    #endif
 
 public:
 

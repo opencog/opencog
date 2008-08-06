@@ -1,5 +1,5 @@
 #include "PLN.h"
-#include "Rules.h"
+#include "PLNRules/Rules.h"
 
 #define BackInferenceTreeRootT BITNodeRoot
 
@@ -7,7 +7,7 @@
 #include "BackInferenceTreeNode.h"
 #include "PLNShell.h"
 
-#include "RuleApp.h"
+#include "PLNRules/RuleApp.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -15,7 +15,7 @@
 	#include <sys/time.h>
 #endif
 
-#include "RuleProvider.h"
+#include "PLNRules/RuleProvider.h"
 //#include "../core/TimeServer.h"
 //#include "../core/HandleTemporalPairEntry.h"
 //#include "PLNShell.h"
@@ -268,22 +268,28 @@ void MacroRuleTest()
 	InversionRule<INHERITANCE_LINK> *invR = new InversionRule<INHERITANCE_LINK>(parent);
 	DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK> *deduR = new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent);
 
+    printf("v0\n");
 	vtree v0(mva((Handle)INHERITANCE_LINK,
 					mva(nm->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
 					mva(nm->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
 					));
+    printf("v1\n");
 	vtree v1(mva((Handle)INHERITANCE_LINK,
 					mva(nm->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
 					mva(nm->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
 					));
+    printf("v2\n");
 	vtree v2(mva((Handle)INHERITANCE_LINK,
 					mva(nm->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
 					mva(nm->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
 
+    printf("h0\n");
 	Handle h0 = nm->addAtom(v0, 
 			SimpleTruthValue(0.40f, getCount(0.80f)));
+    printf("h1\n");
 	Handle h1 = nm->addAtom(v1,
 			SimpleTruthValue(0.60f, getCount(0.90f)));
+    printf("h2\n");
 	Handle h2 = nm->addAtom(v2,
 			SimpleTruthValue(0.98f, getCount(0.95f)));
 
@@ -292,7 +298,7 @@ void MacroRuleTest()
 
 	child1a->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
 	child1a->Bind(1, new VtreeProviderWrapper(Vertex(h1)));
-	child1a->compute();
+    child1a->compute();
 
 	top->Bind(0, child1a);
 	top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
@@ -361,6 +367,7 @@ void MacroRuleTest()
 	const TruthValue& tvD = nm->getTV(v2h(resD.value));
 	assert( within(tvB.getMean(), tvD.getMean(), 0.001));
 	assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
+    printf("finish MacroRuleTest\n");
 }
 
 void RunPLNTestsOnce()
@@ -388,6 +395,7 @@ void RunPLNTestsOnce()
 			new SimpleTruthValue(0.999f, getCount(0.999f)),
 			500,0);
 
+    printf("maketest 2\n");
 	//char *buf = new char[8174+2];	
 InitAxiomSet("smalldemo.xml");
 

@@ -14,11 +14,11 @@
 
 #include "PLN.h"
 
-#include "Rules.h"
+#include "PLNRules/Rules.h"
 #include "PTLEvaluator.h"
-#include "spacetime.h"
+//#include "spacetime.h"
 #include "AtomTableWrapper.h"
-#include "TimeStamp.h"
+//#include "TimeStamp.h"
 #include "Ptlatom.h"
 #include "BackInferenceTreeNode.h"
 
@@ -733,7 +733,8 @@ cprintf(2,"TableGather:\n");
                                         cout << "got a matching element for A: " << matchingHandle << endl;
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long tLong = atol(nm->getName(tHandle).c_str());
-                                        TimeStamp* ts = new TimeStamp(false, tLong);
+                                        //TimeStamp* ts = new TimeStamp(false, tLong);
+                                        Temporal* ts = new Temporal(false, tLong, tLong);
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries with the exact timestamp: " << ts->toString() << endl;
                                         nm->getTimeServer().get(back_inserter(timeEntries), matchingHandle, *ts, TemporalTable::EXACT);

@@ -154,9 +154,11 @@ TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (I
     case INDEFINITE_TRUTH_VALUE:
         return IndefiniteTruthValue::fromString(tvStr);
         break;
+#ifdef WIN32
     case COMPOSITE_TRUTH_VALUE:
         return CompositeTruthValue::fromString(tvStr);
         break;
+#endif
     default:
         throw InvalidParamException(TRACE_INFO,
                                     "TruthValue - Invalid Truth Value type in factory(...): '%d'.", type);
