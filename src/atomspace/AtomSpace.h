@@ -727,7 +727,7 @@ public:
      * @return The set of atoms of a given type (subclasses optionally).
      *
      * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     *          Example of call to this method, which would return all entries in TimeServer in the AttentionalFocus:
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      */
@@ -738,8 +738,11 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
  
         HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
-        //return (toOutputIterator(result, handleEntry));
-        
+        vector<Handle> hs;
+        // these two lines could be replaced using a function that filters
+        // a handleEntry list into an arbitrary sequence
+        toOutputIterator(hs, handleEntry);
+        return filter_InAttentionalFocus(hs.begin(), hs.end(), result);       
     }
 
     /**
@@ -965,11 +968,11 @@ public:
         return result;
     }
 
-    template<typename OutputIterator, typename Predicate>
+    template<typename InputIterator, typename OutputIterator, typename Predicate>
     OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, Predicate compare) {
         for (; begin != end; begin++)
             if (compare(*begin))
-                * it++ = next;
+                * it++ = *begin;
 
         return it;
     }
