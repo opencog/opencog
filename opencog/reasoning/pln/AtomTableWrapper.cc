@@ -223,17 +223,11 @@ bool AtomTableWrapper::Prepare()
 bool AtomTableWrapper::LoadAxioms(const string& path)
 {
     // TODO: check exists works on WIN32
-	string fname("../../../tests/reasoning/" + path);
-	string fname2("../../tests/reasoning/" + path);
-	string fname3("../../../../tests/reasoning/" + path);
-	
-    if (!exists(fname.c_str())) {
+	string fname(path);
+	string fname2("../tests/reasoning/" + path);
+	if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());
 		fname = fname2;
-    }
-    if (!exists(fname.c_str())) {
-        printf("File %s doesn't exist.\n", fname.c_str());
-		fname = fname3;
     }
 	if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());

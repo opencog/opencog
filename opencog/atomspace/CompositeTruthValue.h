@@ -88,9 +88,7 @@ public:
     CompositeTruthValue& operator=(const CompositeTruthValue& rhs) throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
-#ifdef WIN32
     static CompositeTruthValue* fromString(const char*) throw (InvalidParamException);
-#endif
     float getMean() const;
     float getCount() const;
     float getConfidence() const;

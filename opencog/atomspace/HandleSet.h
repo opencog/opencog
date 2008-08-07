@@ -32,6 +32,8 @@
 //#ifdef __APPLE__
 //#else
 //#include <tr1/unordered_set>
+//#ifndef WIN32
+//#endif
 
 namespace opencog
 {
