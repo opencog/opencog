@@ -180,8 +180,8 @@ std::string SchemeShell::prt(SCM node)
 #endif
 	else
 	{
-		fprintf (stderr, "Error: unhandled type for guile printing: %x\n", 
-			(unsigned int) node);
+		fprintf (stderr, "Error: unhandled type for guile printing: %p\n",
+			node);
 		return "#opencog-guile-error: unknown type";
 	}
 
