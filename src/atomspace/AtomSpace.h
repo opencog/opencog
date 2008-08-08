@@ -736,13 +736,43 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
+                 
+        //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);         
+        return getHandleSet(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
+
+    }
+
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally) and a given criterion.
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param A criterion for including atoms. It must be something that returns a bool when called.
+     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer beyond 500 LTI:
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+     */
+    template <typename OutputIterator, typename Predicate> OutputIterator
+    getHandleSetFiltered(OutputIterator result,
+                 Type type,
+                 bool subclass,
+                 Predicate compare,
+                 VersionHandle vh = NULL_VERSION_HANDLE) const {
  
         HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
         vector<Handle> hs;
         // these two lines could be replaced using a function that filters
         // a handleEntry list into an arbitrary sequence
         toOutputIterator(hs, handleEntry);
-        return filter_InAttentionalFocus(hs.begin(), hs.end(), result);       
+        return filter(hs.begin(), hs.end(), result, compare);
     }
 
     /**
@@ -959,7 +989,7 @@ public:
     }
 
     template<typename Predicate, typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) {
+    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) const {
         HandleSeq result;
         for (; begin != end; begin++)
             if (compare(*begin))
@@ -969,7 +999,7 @@ public:
     }
 
     template<typename InputIterator, typename OutputIterator, typename Predicate>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, Predicate compare) {
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, Predicate compare) const {
         for (; begin != end; begin++)
             if (compare(*begin))
                 * it++ = *begin;
@@ -1003,46 +1033,27 @@ public:
     }
 
     template<typename Predicate, typename InputIterator>
-    HandleSeq filter_inAttentionalFocus(InputIterator begin, InputIterator end) {
-          return filter(begin, end, InAttentionalFocus(&this));
+    HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
+        return filter(begin, end, STIAboveThreshold(getAttentionalFocusBoundary()));
     }
-    struct InAttentionalFocus {
-        InAttentionalFocus(AtomSpace* a) : atomSpace(a) {}
-    
-        bool operator()(const Handle& h) {
-            return atomSpace->getSTI(h) > atomSpace->getAttentionalFocusBoundary();
-        }
-        
-        AtomSpace* atomSpace;
-    };
-    
-    template<typename Predicate, typename InputIterator>
-    HandleSeq filter_STI(InputIterator begin, InputIterator end, AttentionValue::sti_t sti) {
-          return filter(begin, end, STIAboveThreshold(sti, &this));
-    }
-    struct STIAboveThreshold {
-        STIAboveThreshold(const AttentionValue::sti_t t, AtomSpace* a) : threshold (t), atomSpace(a) {}
-    
-        bool operator()(const Handle& h) {
-            return atomSpace->getSTI(h) > threshold;
-        }
-        AttentionValue::sti_t threshold;
-        AtomSpace* atomSpace;
-    };
 
     template<typename Predicate, typename InputIterator>
-    HandleSeq filter_LTI(InputIterator begin, InputIterator end, AttentionValue::lti_t lti) {
-          return filter(begin, end, LTIAboveThreshold(lti, &this));
-    }
-    struct LTIAboveThreshold {
-        LTIAboveThreshold(const AttentionValue::lti_t t, AtomSpace* a) : threshold (t), atomSpace(a) {}
+    struct STIAboveThreshold {
+        STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
     
         bool operator()(const Handle& h) {
-            return atomSpace->getLTI(h) > threshold;
-            //return TLB::getAtom(h1)->getAttentionValue().getSTI() > threshold;
+            return TLB::getAtom(h)->getAttentionValue().getSTI() > threshold;
+        }
+        AttentionValue::sti_t threshold;
+    };
+
+    struct LTIAboveThreshold {
+        LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
+    
+        bool operator()(const Handle& h) {
+            return TLB::getAtom(h)->getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
-        AtomSpace* atomSpace;
     };
 
 protected:

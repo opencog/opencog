@@ -267,6 +267,12 @@ public:
 
             vector<Handle> all;
             atomSpace->filter(back_inserter(all), everything(), VHs[vhIdx]);
+            
+            vector<Handle> AF_nodes = atomSpace->filter_InAttentionalFocus(nodes.begin(), nodes.end());
+            vector<Handle> AF_links = atomSpace->filter_InAttentionalFocus(links.begin(), links.end());
+
+            TS_ASSERT(AF_nodes.size() == 0);
+            TS_ASSERT(AF_links.size() == 0);
 
             switch (vhIdx) {
             case 0:
@@ -1479,7 +1485,47 @@ public:
         cout << "END TEST: getSortedHandleSet" << endl;
     }
 
+    /**
+     * Method tested:
+     *
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally) and a given criterion.
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param A criterion for including atoms. It must be something that returns a bool when called.
+     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer beyond 500 LTI:
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+     */
+    void testgetHandleSetFiltered() {
+        vector<Handle> atoms;
+        cout << "BEGIN TEST: getHandleSetFiltered" << endl;
+        atoms = createSimpleGraph(atomSpace, "hs_filt\0");
+        
+        cout << "STIAboveThreshold" << endl;
 
+        vector<Handle> highSTI;
+        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, AtomSpace::STIAboveThreshold(1000));
+        TS_ASSERT_EQUALS(highSTI.size(), 1);
+        TS_ASSERT_EQUALS(highSTI[0], atoms[0]);
+        
+        cout << "LTIAboveThreshold" << endl;
+        
+        /*
+        vector<Handle> highLTI;
+        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, AtomSpace::LTIAboveThreshold(800));
+        TS_ASSERT_EQUALS(highLTI.size(), 1);
+        TS_ASSERT_EQUALS(highLTI[0], atoms[1]);
+        */
+        cout << "END TEST: getHandleSetFiltered" << endl;
 };
 
 AtomSpace *AtomSpaceUTest::atomSpace = NULL;
