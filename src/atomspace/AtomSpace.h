@@ -1037,7 +1037,6 @@ public:
         return filter(begin, end, STIAboveThreshold(getAttentionalFocusBoundary()));
     }
 
-    template<typename Predicate, typename InputIterator>
     struct STIAboveThreshold {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
     
