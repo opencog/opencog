@@ -116,56 +116,5 @@ public:
 
 }; // class
 
-struct ImportanceSpreadSTISort {
-    bool operator()(const Handle& h1, const Handle& h2) {
-        return TLB::getAtom(h1)->getAttentionValue().getSTI() > TLB::getAtom(h2)->getAttentionValue().getSTI();
-    }
-};
-
-struct ImportanceSpreadLTIAndTVAscendingSort {
-    bool operator()(const Handle& h1, const Handle& h2) {
-        AttentionValue::lti_t lti1, lti2;
-        float tv1, tv2;
-
-        tv1 = fabs(TLB::getAtom(h1)->getTruthValue().getMean());
-        tv2 = fabs(TLB::getAtom(h2)->getTruthValue().getMean());
-
-        lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
-        lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
-
-        if (lti1 < 0)
-            tv1 = lti1 * (1.0f - tv1);
-        else
-            tv1 = lti1 * tv1;
-
-        if (lti2 < 0)
-            tv2 = lti2 * (1.0f - tv2);
-        else
-            tv2 = lti2 * tv2;
-
-
-        return tv1 < tv2;
-    }
-
-};
-
-struct ImportanceSpreadLTIThenTVAscendingSort {
-    bool operator()(const Handle& h1, const Handle& h2) {
-        AttentionValue::lti_t lti1, lti2;
-        float tv1, tv2;
-
-        lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
-        lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
-
-        tv1 = TLB::getAtom(h1)->getTruthValue().getMean();
-        tv2 = TLB::getAtom(h2)->getTruthValue().getMean();
-
-        if (lti1 != lti2) return lti1 < lti2;
-
-        else return tv1 < tv2;
-    }
-
-};
-
 }; // namespace
 #endif // _IMPORTANCE_SPREADING_AGENT_H

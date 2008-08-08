@@ -52,6 +52,14 @@ VersionHandle VHs[NUM_VHS] = {
 #define NUM_FORCEUSER_LINKS 4
 #define NUM_HUMAN_LINKS 4
 
+// deliberately out of order to test getSortedHandleSet.
+#define AV1_STI 20000
+#define AV2_STI 500
+#define AV3_STI 0
+#define AV1_LTI 0
+#define AV2_LTI 30000
+#define AV3_LTI 700
+
 void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
 {
     int array_size = 0;
@@ -80,10 +88,16 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     SimpleTruthValue tv3(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
+    atomSpace->setSTI(h1, AV1_STI);
+    atomSpace->setLTI(h1, AV1_LTI);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
+    atomSpace->setSTI(h2, AV2_STI);
+    atomSpace->setLTI(h2, AV2_LTI);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
+    atomSpace->setSTI(h3, AV3_STI);
+    atomSpace->setLTI(h3, AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
@@ -1408,6 +1422,62 @@ public:
         cout << "END TEST: resetStimulus" << endl;
     }
 
+    /**
+     * Method tested:
+     *
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally), sorted according to the given comparison
+     * structure.
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param The comparison struct to use in the sort.
+     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer, sorted by STI:
+     *         std::list<Handle> ret;
+     *         AttentionValue::STISort stiSort;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
+     */
+    void testgetSortedHandleSet() {
+        vector<Handle> atoms;
+        cout << "BEGIN TEST: getSortedHandleSet" << endl;
+        atoms = createSimpleGraph(atomSpace, "stim_sortedHandleSet\0");
+        
+        cout << "STISort" << endl;
+
+        AttentionValue::STISort sSort;
+        vector<Handle> sAtoms;
+        atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, sSort);
+        for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
+            TS_ASSERT_EQUALS(sSort(sAtoms[i + 1], sAtoms[i]), false);
+        }
+        
+        cout << "LTIAndTVAscendingSort" << endl;
+        
+        AttentionValue::LTIAndTVAscendingSort latvSort;
+        vector<Handle> latvAtoms;
+        atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, latvSort);
+        for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
+            TS_ASSERT_EQUALS(latvSort(latvAtoms[i + 1], latvAtoms[i]), false);
+        }
+        
+        cout << "LTIThenTVAscendingSort" << endl;
+        
+        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        vector<Handle> lttvAtoms;
+        atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, lttvSort);
+        for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
+            TS_ASSERT_EQUALS(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]), false);
+        }
+
+        cout << "END TEST: getSortedHandleSet" << endl;
+    }
 
 
 };

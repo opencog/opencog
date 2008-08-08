@@ -100,6 +100,22 @@ public:
     // elements are equal false otherwise
     // @param none
     virtual bool operator==(const AttentionValue& av) const;
+    
+    struct STISort {
+        bool operator()(const Handle& h1, const Handle& h2);
+        
+    };
+
+    struct LTIAndTVAscendingSort {
+        bool operator()(const Handle& h1, const Handle& h2);
+
+    };
+
+    struct LTIThenTVAscendingSort {
+        bool operator()(const Handle& h1, const Handle& h2);
+
+    };
+
 
     // STATIC METHODS
 
