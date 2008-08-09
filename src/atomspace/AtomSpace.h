@@ -935,7 +935,7 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary();
+    AttentionValue::sti_t getAttentionalFocusBoundary() const;
 
     /**
      * Change the attentional focus boundary. Some situations
@@ -1032,7 +1032,7 @@ public:
         return it;
     }
 
-    template<typename Predicate, typename InputIterator>
+    template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
         return filter(begin, end, STIAboveThreshold(getAttentionalFocusBoundary()));
     }

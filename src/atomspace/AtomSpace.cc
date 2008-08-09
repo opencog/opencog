@@ -975,7 +975,7 @@ stim_t AtomSpace::getAtomStimulus(Handle h)
     }
 }
 
-AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary()
+AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
 {
     return attentionalFocusBoundary;
 }
