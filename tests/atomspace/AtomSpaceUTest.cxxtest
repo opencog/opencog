@@ -1508,23 +1508,73 @@ public:
     void testgetHandleSetFiltered() {
         vector<Handle> atoms;
         cout << "BEGIN TEST: getHandleSetFiltered" << endl;
+        
         atoms = createSimpleGraph(atomSpace, "hs_filt\0");
         
         cout << "STIAboveThreshold" << endl;
 
         vector<Handle> highSTI;
         atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, AtomSpace::STIAboveThreshold(1000));
+        for (unsigned int i = 0; i < highSTI.size(); i++) {
+            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
+        }
         TS_ASSERT_EQUALS(highSTI.size(), 1);
         TS_ASSERT_EQUALS(highSTI[0], atoms[0]);
-        
+
         cout << "LTIAboveThreshold" << endl;
         
         vector<Handle> highLTI;
         atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, AtomSpace::LTIAboveThreshold(800));
+        for (unsigned int i = 0; i < highLTI.size(); i++) {
+            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
+        }
         TS_ASSERT_EQUALS(highLTI.size(), 1);
         TS_ASSERT_EQUALS(highLTI[0], atoms[1]);
         cout << "END TEST: getHandleSetFiltered" << endl;
     }
+
+    /**
+     * Method tested:
+     *
+     * Filter handles from a sequence according to the given criterion.
+     *
+     * @param begin iterator for the sequence
+     * @param end iterator for the sequence
+     * @param struct or function embodying the criterion
+     * @return The handles in the sequence that match the criterion.
+     */
+    void testfilter() {
+        vector<Handle> atoms;
+        cout << "BEGIN TEST: filter" << endl;
+        
+        atomSpace->print(cout, NODE, true);
+        atomSpace->print(cout, LINK, true);
+        
+        atoms = createSimpleGraph(atomSpace, "filt\0");
+
+        atomSpace->print(cout, NODE, true);
+        atomSpace->print(cout, LINK, true);
+        
+        cout << "STIAboveThreshold" << endl;
+
+        vector<Handle> highSTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpace::STIAboveThreshold(1000));
+        for (unsigned int i = 0; i < highSTI.size(); i++) {
+            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
+        }
+        TS_ASSERT_EQUALS(highSTI.size(), 1);
+        TS_ASSERT_EQUALS(highSTI[0], atoms[0]);
+                
+        cout << "LTIAboveThreshold" << endl;
+        
+        vector<Handle> highLTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpace::LTIAboveThreshold(800));
+        for (unsigned int i = 0; i < highLTI.size(); i++) {
+            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
+        }
+        TS_ASSERT_EQUALS(highLTI.size(), 1);
+        TS_ASSERT_EQUALS(highLTI[0], atoms[1]);
+        cout << "END TEST: filter" << endl;
+    }
+
 };
 
 AtomSpace *AtomSpaceUTest::atomSpace = NULL;

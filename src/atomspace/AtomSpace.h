@@ -771,7 +771,7 @@ public:
         vector<Handle> hs;
         // these two lines could be replaced using a function that filters
         // a handleEntry list into an arbitrary sequence
-        toOutputIterator(result, handleEntry);
+        toOutputIterator(back_inserter(hs), handleEntry);
         return filter(hs.begin(), hs.end(), result, compare);
     }
 
@@ -988,6 +988,14 @@ public:
         return it;
     }
 
+    /**
+     * Filter handles from a sequence according to the given criterion.
+     *
+     * @param begin iterator for the sequence
+     * @param end iterator for the sequence
+     * @param struct or function embodying the criterion
+     * @return The handles in the sequence that match the criterion.
+     */
     template<typename Predicate, typename InputIterator>
     HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) const {
         HandleSeq result;
