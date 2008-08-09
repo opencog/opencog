@@ -771,7 +771,7 @@ public:
         vector<Handle> hs;
         // these two lines could be replaced using a function that filters
         // a handleEntry list into an arbitrary sequence
-        toOutputIterator(hs, handleEntry);
+        toOutputIterator(result, handleEntry);
         return filter(hs.begin(), hs.end(), result, compare);
     }
 

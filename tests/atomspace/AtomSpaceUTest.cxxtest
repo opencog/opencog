@@ -1519,12 +1519,10 @@ public:
         
         cout << "LTIAboveThreshold" << endl;
         
-        /*
         vector<Handle> highLTI;
         atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, AtomSpace::LTIAboveThreshold(800));
         TS_ASSERT_EQUALS(highLTI.size(), 1);
         TS_ASSERT_EQUALS(highLTI[0], atoms[1]);
-        */
         cout << "END TEST: getHandleSetFiltered" << endl;
 };
 
