@@ -143,6 +143,28 @@ The links then are:
   VectorSimilarityLink
   WupSimilarityLink
 
+Quality of Measures
+-------------------
+According to Budanitsky and Hirst[1], the "best" relatedness measure is
+jcn, followed by lin and lch. Worst are hso and res.
+
+According to Sinha and Mihalcea[2], the "best" for nouns is jcn, the
+best for verbs is lch.
+
+
+Normalization
+-------------
+Per Sinha and Mihalcea[2]: For the lesk measure, we
+observed that the edge weights were in a range from 0 up
+to an arbitrary large number. Consequently, values greater
+than 240 were set to 1, and the rest were mapped onto the
+interval [0,1]. Similarly, the jcn values were found to range
+from 0.04 to 0.2, and thus the normalization was done with
+respect to this range. Finally, since the lch values ranged
+from 0.34 to 3.33, they were normalized and mapped to the
+[0,1] scale using this interval.
+
+
 
 Working notes
 -------------
@@ -154,3 +176,14 @@ Currently, Linas loads data as follows:
 Curently loads 243K WordNode's -- many of these are numerical garbage,
 many are foreign words; some fair amount is confused punctuation.  This
 results in a cogserver instance of 158M, or 158M/243K=650 bytes/word.
+
+References
+----------
+[1] Alexander Budanitsky and Graeme Hirst, "Semantic distance in WordNet:
+    An experimental, application-oriented evaluation of five measures"
+    (2001) In ''Proceedings of the NAACL Workshop on WordNet and Other 
+    Lexical Resources'', Pittsburgh, 2001.
+
+[2] Ravi Sinha and Rada Mihalcea, "Unsupervised Graph-based Word Sense
+    Disambiguation Using Measures of Word Semantic Similarity", (2005)
+
