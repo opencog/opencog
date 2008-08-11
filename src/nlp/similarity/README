@@ -151,6 +151,11 @@ jcn, followed by lin and lch. Worst are hso and res.
 According to Sinha and Mihalcea[2], the "best" for nouns is jcn, the
 best for verbs is lch.
 
+jcn is IC(p_1, p_2) -H(p_1) - H(p_2) and is thus "correct" from the 
+information-theory point of view. By contrast, lin, while combining
+mutual information and entropy, does so in an akward manner, from the 
+information theory point of view.
+
 
 Normalization
 -------------
