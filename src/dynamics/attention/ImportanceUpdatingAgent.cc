@@ -60,6 +60,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     acceptableLobeLTIRange[1] = targetLobeLTI + config().get_int("LTI_FUNDS_BUFFER");
 
     lobeSTIOutOfBounds = false;
+    lobeLTIOutOfBounds = false;
 
     STICap = AttentionValue::MAXSTI / 2;
     LTICap = AttentionValue::MAXLTI / 2;
@@ -179,6 +180,11 @@ void ImportanceUpdatingAgent::run(CogServer *server)
         log->debug("Lobe STI was out of bounds, updating STI rent");
         updateSTIRent(a);
     }
+    /* Not sure whether LTI rent should be updated */
+    //if (lobeLTIOutOfBounds) {
+    //    log->debug("Lobe LTI was out of bounds, updating LTI rent");
+    //    updateLTIRent(a);
+    //}
 
     /* Reset Stimulus */
     a->resetStimulus();
@@ -219,6 +225,7 @@ bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
                acceptableLobeLTIRange[0], acceptableLobeLTIRange[1]);
     if (!inRange(a->getLTIFunds(), acceptableLobeLTIRange)) {
         log->debug("Lobe LTI funds out of bounds, re-adjusting.");
+        lobeLTIOutOfBounds = true;
         adjustLTIFunds(a);
 		adjustmentMade = true;
     }
@@ -382,6 +389,33 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
     log->fine("STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
 
     lobeSTIOutOfBounds = false;
+}
+
+void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
+{
+    AttentionValue::lti_t oldLTIAtomRent;
+    float focusSize = a->Nodes();
+    // LTIAtomRent must be adapted based on total AtomSpace size, or else balance btw
+    // lobe LTI wealth and node/link LTI wealth will not be maintained
+
+    oldLTIAtomRent = LTIAtomRent;
+
+    if (!updateLinks) {
+        if (focusSize > 0)
+            LTIAtomRent = (AttentionValue::sti_t) ceil((float) LTIAtomWage \
+                    * (float) totalStimulusSinceReset.recent \
+                    / (float) focusSize);
+    } else {
+        focusSize += a->Links();
+        if (focusSize > 0)
+            LTIAtomRent = (AttentionValue::sti_t)ceil((float) LTIAtomWage \
+                    * (float) totalStimulusSinceReset.recent \
+                    / (float) focusSize);
+    }
+
+    log->fine("LTIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldLTIAtomRent, LTIAtomRent, focusSize, LTIAtomWage, totalStimulusSinceReset.recent);
+
+    lobeLTIOutOfBounds = false;
 }
 
 

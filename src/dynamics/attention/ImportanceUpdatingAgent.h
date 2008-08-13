@@ -155,6 +155,8 @@ private:
 
     //! Indicates whether STI has gone out of acceptable range during this run.
     bool lobeSTIOutOfBounds;
+    //! Indicates whether LTI has gone out of acceptable range during this run.
+    bool lobeLTIOutOfBounds;
 
     /** Collect STI rent for atoms within attentional focus 
      * and pay wages based on amount of stimulus.
@@ -194,6 +196,12 @@ private:
      * @param a The AtomSpace the MindAgent is working on.
 	 */
     void updateSTIRent(AtomSpace* a);
+
+	/** Recalculate the LTI Rent to charge atoms.
+	 *
+     * @param a The AtomSpace the MindAgent is working on.
+	 */
+    void updateLTIRent(AtomSpace* a);
 
     /** Check whether AtomSpace funds are within limits, and make changes
      * if not.
