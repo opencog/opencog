@@ -187,15 +187,7 @@ namespace reasoning
 
     void AtomTableWrapper::reset()
     {
-        std::vector<Handle> allAtoms;
-        std::vector<Handle>::iterator i;
-        std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
-
-        AS_PTR->getHandleSet(outputI, ATOM, true);
-
-        for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-            AS_PTR->removeAtom(*i,false);
-        }
+        AS_PTR->clear();
     }
 }
 

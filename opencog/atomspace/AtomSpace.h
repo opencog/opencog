@@ -1011,6 +1011,9 @@ public:
 
     bool containsVersionedTV(Handle h, VersionHandle vh) const;
 
+    //! Clear the atomspace, remove all atoms
+    void clear();
+
 // ---- filter templates
 
     template<typename Predicate>

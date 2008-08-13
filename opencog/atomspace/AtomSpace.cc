@@ -1045,3 +1045,14 @@ AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
     }
 }
 
+void AtomSpace::clear()
+{
+    std::vector<Handle> allAtoms;
+    std::vector<Handle>::iterator i;
+    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
+
+    getHandleSet(outputI, ATOM, true);
+
+    for (i = allAtoms.begin(); i != allAtoms.end(); i++)
+        removeAtom(*i,false);
+}
