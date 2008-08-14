@@ -73,3 +73,4 @@ public:
 
 } // namespace reasoning
 #endif // GENERICRULE_H
+

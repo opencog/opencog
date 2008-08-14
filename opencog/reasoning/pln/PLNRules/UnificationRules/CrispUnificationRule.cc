@@ -301,3 +301,4 @@ map<string,atom>* bindings = res.begin()->bindings;
 }
 
 } //namespace reasoning
+

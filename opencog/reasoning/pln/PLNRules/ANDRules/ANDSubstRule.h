@@ -20,3 +20,4 @@ public:
 
 } // namespace reasoning
 #endif // ANDSUBSTRULE_H
+

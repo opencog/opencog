@@ -106,3 +106,4 @@ public:
 
 } // namespace reasoning
 #endif // ANDBREAKDOWNRULE_H
+
