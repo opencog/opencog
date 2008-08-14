@@ -1,5 +1,5 @@
 #include "PLN.h"
-#include "PLNRules/Rules.h"
+#include "rules/Rules.h"
 
 #define BackInferenceTreeRootT BITNodeRoot
 
@@ -7,7 +7,7 @@
 #include "BackInferenceTreeNode.h"
 #include "PLNShell.h"
 
-#include "PLNRules/RuleApp.h"
+#include "rules/RuleApp.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -15,11 +15,11 @@
 	#include <sys/time.h>
 #endif
 
-#include "PLNRules/RuleProvider.h"
+#include "rules/RuleProvider.h"
+
 //#include "../core/TimeServer.h"
 //#include "../core/HandleTemporalPairEntry.h"
 //#include "PLNShell.h"
-
 
 using namespace reasoning;	
 
@@ -754,7 +754,7 @@ InitAxiomSet("smalldemo.xml");
 cprintf(-1, "axioms loaded");fflush(stdout);
 currentDebugLevel=-4;
 		Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
-			/*PTLEvaluator::BIT_evaluate(
+			/*PLNEvaluator::BIT_evaluate(
 			InferenceTaskParameters(new DefaultVariableRuleProvider(),t->target));*/
 
 		uint s_i=0;
@@ -915,7 +915,7 @@ delete[] tbuf;*/
 #if 0
 
 #include "Rules.h"
-#include "PTLEvaluator.h"
+#include "PLNEvaluator.h"
 #include "HandleEntry.h"
 #include "InferenceMindAgent.h"
 #include "Rules.h"
@@ -1118,8 +1118,8 @@ return;
 			), true, false, true);*/
 
 
-//	printf("\nUnprovable atoms: %d\n", PTL::haxx::Unprovable().size());
-//	printf("\nProvable atoms: %d\n", PTL::haxx::Provable().size());
+//	printf("\nUnprovable atoms: %d\n", reasoning::haxx::Unprovable().size());
+//	printf("\nProvable atoms: %d\n", reasoning::haxx::Provable().size());
 
 		printf("\nReserved atoms: %d\n", atom_alloc_count);
 		printf("\nReserved InferenceNodes: %d\n", inode_alloc_count);

@@ -7,13 +7,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "PLNRules/RuleProvider.h"
-#include "PLNRules/Rules.h"
+#include "rules/RuleProvider.h"
+#include "rules/Rules.h"
 //#include "spacetime.h"
 #include "AtomTableWrapper.h"
 #include <CogServer.h>
 #include <utils2.h>
-//#include "PTLEvaluator.h"
 #include "BackInferenceTreeNode.h"
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>

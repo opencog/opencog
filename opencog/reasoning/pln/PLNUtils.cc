@@ -14,13 +14,14 @@
 
 #include "PLN.h"
 
-#include "PLNRules/Rules.h"
-#include "PTLEvaluator.h"
-//#include "spacetime.h"
+#include "rules/Rules.h"
+#include "PLNEvaluator.h"
 #include "AtomTableWrapper.h"
-//#include "TimeStamp.h"
-#include "Ptlatom.h"
+#include "PLNatom.h"
 #include "BackInferenceTreeNode.h"
+
+//#include "spacetime.h"
+//#include "TimeStamp.h"
 
 #include "PLNUtils.h"
 

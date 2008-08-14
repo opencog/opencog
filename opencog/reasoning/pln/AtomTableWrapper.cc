@@ -1,7 +1,8 @@
 #include "AtomTableWrapper.h"
 #include "PLN.h"
-#include "XMLNodeLoader.h"
-#include "PLNRules/Rules.h"
+#include "utils/XMLNodeLoader.h"
+#include "rules/Rules.h"
+
 #include <SimpleTruthValue.h>
 #include <CogServer.h> // To get access of AtomSpace
 #include <tree.h>

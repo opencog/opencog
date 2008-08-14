@@ -53,7 +53,7 @@
 //#include <classes.h>
 //#include "NMCore.h"
 #include "AtomLookupProvider.h"
-#include "Ptlatom.h"
+#include "PLNatom.h"
 
 // OpenCog has these, but are their interfaces the same?
 //#include <Temporal.h>

@@ -7,11 +7,12 @@
 	This is prototypical code by Ari A. Heljakka Sep/2006.
 */
 
-#include <boost/bind.hpp>
 #include <stack>
+#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
-#include "PLNRules/RuleApp.h"
-#include "NMPrinter.h"
+
+#include "rules/RuleApp.h"
+#include "utils/NMPrinter.h"
 
 namespace reasoning
 {
@@ -431,7 +432,7 @@ public:
 	
 /**
 	Basic usage: 
-	Btr<BITNodeRoot> state = reasoning::PTLEvaluator::BIT_evaluate(reasoning::InferenceTaskParameters(NULL,target));
+	Btr<BITNodeRoot> state = reasoning::PLNEvaluator::BIT_evaluate(reasoning::InferenceTaskParameters(NULL,target));
 or you can create the BITNodeRoot directly.
 
 	state->infer(ProofResources, minConfidenceForAlternativeAction, minConfidenceForAction);

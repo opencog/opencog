@@ -1,7 +1,7 @@
 #ifndef _PLNSHELL_H
 #define _PLNSHELL_H
 
-#include "Singleton.h"
+#include "utils/Singleton.h"
 
 #ifdef __cplusplus
 extern "C"

@@ -1,8 +1,8 @@
-#include "StdAfx.h"
-#include "PTLutils.h"
-#include "PTLFormulas.h"
-#include "AtomTableWrapper.h"
-#include "XMLNodeLoader.h"
+#include <PLN.h>
+#include <utils.h>
+#include <AtomTableWrapper.h>
+#include <formulas/Formulas.h>
+#include <XMLNodeLoader.h>
 
 extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
 
@@ -86,6 +86,11 @@ char* types_1[] = {
 "EvaluationLink"
 };
     
+namespace haxx
+{
+    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+}
+
 class XMLNodeLoaderUTest : public CxxTest::TestSuite{
 
 
@@ -94,9 +99,9 @@ class XMLNodeLoaderUTest : public CxxTest::TestSuite{
     }
 
     void testLoadXMLInput(){
-        using namespace PTL;
-        DirectATW::Instance();
-        haxx::defaultAtomTableWrapper = &NormalizingATW::Instance();
+        using namespace reasoning;
+        DirectATW::getInstance();
+        haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
         Handle U = LoadXMLInput(haxx::defaultAtomTableWrapper, XML_DATA);
         
         Atom* atom = TLB::getAtom(U);

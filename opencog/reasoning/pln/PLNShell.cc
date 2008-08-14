@@ -104,13 +104,13 @@ These should be bug-free, but there's no type checking of parameters, so providi
 */
 
 #include "PLN.h"
-#include "PLNRules/Rules.h"
+#include "rules/Rules.h"
 
 #define BackInferenceTreeRootT BITNodeRoot
 
 //#include "PTLEvaluator.h"
 
-#include "PLNRules/RuleProvider.h"
+#include "rules/RuleProvider.h"
 #include "AtomTableWrapper.h"
 #include "BackInferenceTreeNode.h"
 #include "PLNShell.h"

@@ -4,53 +4,54 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 ADD_LIBRARY (pln STATIC
-    PLNFormulas/PLNFormulas.cc
-    PLNFormulas/PLNFormulasIndefinite.cc
-    PLNFormulas/deductionLookupTable.cc
+	AtomTableWrapper.cc
     BackInferenceTreeNode.cc
-	#BackwardInferenceTask.cc
-    Ptlatom.cc
-    Grim.cc
-    XMLNode.cc
+    PLNatom.cc
     PLNUtils.cc
-    #BOASimulatorAgent.cc
     PLNShell.cc
     Tester.cc
-	PLNRules/Rule.cc
-    PLNRules/RuleApp.cc
-    PLNRules/RuleProvider.cc
-	PLNRules/RuleFunctions.cc
-	PLNRules/NOTRules/NotEvaluatorRule.cc
-	PLNRules/ORRules/ORPartitionRule.cc
-	PLNRules/ORRules/ORRule.cc
-	PLNRules/AuxiliarRules/SubsetEvalRule.cc
-	PLNRules/AuxiliarRules/CrispTheoremRule.cc
-	PLNRules/AuxiliarRules/LookupRule.cc
-	PLNRules/AuxiliarRules/ScholemFunctionProductionRule.cc
-	PLNRules/AuxiliarRules/UnorderedLinkPermutationRule.cc
-	PLNRules/UnificationRules/BaseCrispUnificationRule.cc
-	PLNRules/UnificationRules/CustomCrispUnificationRule.cc
-	PLNRules/UnificationRules/CustomCrispUnificationRuleComposer.cc
-	PLNRules/UnificationRules/StrictCrispUnificationRule.cc
-	PLNRules/ANDRules/ANDRuleArityFree.cc
-	PLNRules/ANDRules/ANDRule.cc
-	PLNRules/ANDRules/ANDPartitionRule.cc
-	PLNRules/ANDRules/ANDSubstRule.cc
-	PLNRules/ANDRules/ANDBreakdownRule.cc
-	PLNRules/ImplicationRules/ImplicationTailExpansionRule.cc
-	PLNRules/ImplicationRules/ImplicationBreakdownRule.cc
-	PLNRules/ImplicationRules/StrictImplicationBreakdownRule.cc
-	PLNRules/ImplicationRules/ImplicationConstructionRule.cc
-	PLNRules/InferenceRules/HypothesisRule.cc
-	PLNRules/ConversionRules/Equi2ImpRule.cc
-	PLNRules/SimSubstRules/SimSubstRule2.cc
-	PLNRules/SimSubstRules/SimSubstRule1.cc
-	AtomTableWrapper.cc
-    XMLNodeLoader.cc
+# Formulas:
+    formulas/Formulas.cc
+    formulas/FormulasIndefinite.cc
+    formulas/DeductionLookupTable.cc
+# Rules:
+	rules/Rule.cc
+    rules/RuleApp.cc
+    rules/RuleProvider.cc
+	rules/RuleFunctions.cc
+	rules/not/NotEvaluatorRule.cc
+	rules/or/ORPartitionRule.cc
+	rules/or/ORRule.cc
+	rules/auxiliary/SubsetEvalRule.cc
+	rules/auxiliary/CrispTheoremRule.cc
+	rules/auxiliary/LookupRule.cc
+	rules/auxiliary/ScholemFunctionProductionRule.cc
+	rules/auxiliary/UnorderedLinkPermutationRule.cc
+	rules/unify/BaseCrispUnificationRule.cc
+	rules/unify/CustomCrispUnificationRule.cc
+	rules/unify/CustomCrispUnificationRuleComposer.cc
+	rules/unify/StrictCrispUnificationRule.cc
+	rules/and/ANDRuleArityFree.cc
+	rules/and/ANDRule.cc
+	rules/and/ANDPartitionRule.cc
+	rules/and/ANDSubstRule.cc
+	rules/and/ANDBreakdownRule.cc
+	rules/implication/ImplicationTailExpansionRule.cc
+	rules/implication/ImplicationBreakdownRule.cc
+	rules/implication/StrictImplicationBreakdownRule.cc
+	rules/implication/ImplicationConstructionRule.cc
+	rules/inference/HypothesisRule.cc
+	rules/convert/Equi2ImpRule.cc
+	rules/simsubst/SimSubstRule2.cc
+	rules/simsubst/SimSubstRule1.cc
+# Utils
+    utils/Grim.cc
+    utils/XMLNode.cc
+    utils/XMLNodeLoader.cc
+    utils/NMPrinter.cc
     # for later:
     #CrispUnificationRule.cc
     # convert to OpenCog specific class:
-    NMPrinter.cc
 	#TimeStamp.cc
 	#spacetime.cc
 )
@@ -71,8 +72,7 @@ INCLUDE_DIRECTORIES (
     ${GSL_INCLUDE_DIR}
 )
 
-ADD_EXECUTABLE(PLNFormulaUTest PLNFormulas/PLNFormulaUTest.cc)
-ADD_EXECUTABLE(PLNShell PLNShell.cc)
+ADD_EXECUTABLE(plnshell PLNShell.cc)
 
 TARGET_LINK_LIBRARIES(pln
     atomspace
@@ -91,8 +91,7 @@ TARGET_LINK_LIBRARIES(pln
     ${GSL_LIBRARIES}
 )
 
-TARGET_LINK_LIBRARIES(PLNFormulaUTest pln)
-TARGET_LINK_LIBRARIES(PLNShell pln
+TARGET_LINK_LIBRARIES(plnshell pln
     atomspace
     server
     xml

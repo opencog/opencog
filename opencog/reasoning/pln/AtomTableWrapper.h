@@ -2,13 +2,14 @@
 #define ATW_H
 
 #include <time.h>
-#include "PLNRules/Rule.h"
-#include "fim.h"
-//#include "CoreWrapper.h"
 #include <queue>
-#include "iAtomTableWrapper.h"
 #include <boost/smart_ptr.hpp>
-#include "Singleton.h"
+
+#include "iAtomTableWrapper.h"
+#include "rules/Rule.h"
+#include "utils/fim.h"
+#include "utils/Singleton.h"
+//#include "CoreWrapper.h"
 
 Handle child(Handle h, int i);
 bool isSubType(Handle h, Type T);
