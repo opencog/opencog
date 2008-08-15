@@ -32,6 +32,7 @@ typedef union _tscreg_t {
 /* TSC access code */
 static inline void get_tsc(tscreg_t *t)
 {
+
     __asm__ __volatile__ (
         "rdtsc"
         : "=a" (t->l.high), "=d" (t->l.low));

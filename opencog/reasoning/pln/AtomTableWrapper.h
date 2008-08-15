@@ -12,7 +12,8 @@
 //#include "CoreWrapper.h"
 
 // Each of the below merely passes through to an appropriate AtomSpace
-// function, should be placed in AtomTableWrapper
+// function
+// TODO: should be placed in AtomTableWrapper class
 //! return the handle of atom that has index i in h's outgoing set
 Handle child(Handle h, int i);
 //! returns whether the type of h is T or inherits from T
