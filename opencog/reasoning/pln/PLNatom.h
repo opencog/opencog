@@ -1,6 +1,9 @@
 #ifndef PTLATOM_H
 #define PTLATOM_H
 
+// ARI: In a previous screencast you mention that PLNatom is legacy class and
+// should be replaced. In what way should it be improved or reworked?
+
 // ARI: What does this define represent? Shouldn't one just use the same
 // name everywhere, or is atom sometimes used in a special way which
 // justifies naming it differently in the code?
@@ -48,6 +51,8 @@ public:
     Type T;
     int arity;
     std::string name;
+
+    /// cx doesn't seem to be used.
     Handle cx;
 
     std::vector<boost::shared_ptr<atom> > hs;

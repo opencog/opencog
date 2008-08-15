@@ -45,7 +45,8 @@ bool isSubType(Handle h, Type T)
 #endif
 	
 Handle child(Handle h, int i) { 
-	return AS_PTR->getOutgoing(h, i); }
+	return AS_PTR->getOutgoing(h, i);
+}
 	
 namespace haxx
 {
@@ -84,11 +85,10 @@ vtree reasoning::make_vtree(Handle h)
 
 float ContradictionLimit = 0.1f; //Below the limit, we just revise the differences.
 
-bool inheritsType(Type T1, Type T2)
+bool inheritsType(Type subT, Type superT) 
 {
-	return ClassServer::isAssignableFrom(T2, T1);
+	return ClassServer::isAssignableFrom(superT, subT);
 }
-
 
 const TruthValue& getTruthValue(Handle h)
 {

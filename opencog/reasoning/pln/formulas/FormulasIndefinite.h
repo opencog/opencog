@@ -347,7 +347,7 @@ public:
 		vector<float> valuesAB = vector<float>(n1,0.0f);
 		vector<float> valuesCB = vector<float>(n1,0.0f);
 		
-		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
+		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5f;
 		float beta=alpha;
 		//generate n1 consistency values for each TV
 		for(int i=0; i<n1; i++)
@@ -462,8 +462,8 @@ public:
 		float center=TVA->getL()+width/2;
 //		float L_ = center - ((width*IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor)/2);
 //		float U_ = center + ((width*IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor)/2);
-		float L_ = center - ((width*1.2)/2);
-		float U_ = center + ((width*1.2)/2);		
+		float L_ = center - ((width*1.2f)/2);
+		float U_ = center + ((width*1.2f)/2);		
 		truncate(L_);
 		truncate(U_);
 		IndefiniteTruthValue* result=new IndefiniteTruthValue(L_,U_);
@@ -501,7 +501,7 @@ public:
 		vector<float> valuesC = vector<float>(n1,0.0f);
 		vector<float> valuesAC = vector<float>(n1,0.0f);
 		
-		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
+		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5f;
 		float beta=alpha;
 		
 		//generate n1 consistency values for each TV
@@ -606,7 +606,7 @@ public:
 		vector<float> valuesAB = vector<float>(n1,0.0f);
 		vector<float> valuesBC = vector<float>(n1,0.0f);
 		
-		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
+		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5f;
 		float beta=alpha;	
 		int consistencyCount=0;
 		//generate n1 consistency values for each TV
@@ -774,7 +774,7 @@ public:
 		vector<float> distributionAC = vector<float>(n2,0.0f);
         
 		//float distributionA,distributionB,distributionC,distributionAB,distributionBC,distributionAC;		
-		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5;
+		float alpha=IndefiniteTruthValue::DEFAULT_K*0.5f;
 		float beta=alpha;
 		float A,B,C,AB,BC;
 		

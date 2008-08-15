@@ -2,12 +2,16 @@
 #include "Formulas.h"
 #include "FormulasIndefinite.h"
 
+#include <memory>
+
 #define TV_MIN 0.000001f
 
 #define fmax_(a,b) (( (a)>(b) ) ? (a) : (b))
 #define fmin_(a,b) (( (a)<(b) ) ? (a) : (b))
 
 //	#define Abs(a) ( ((a)>0) ? (a) : (-a))
+
+using namespace std;
 
 const bool PTLdebug = true;
 
@@ -560,7 +564,7 @@ TruthValue* ORFormula::simpleCompute(TruthValue** TV,int N, long U) const
 		printf( "#%d:%s ", k, TV[k]->toString().c_str());
 	printf("\n");
 
-	auto_ptr<TruthValue> res1, res2;
+    auto_ptr<TruthValue> res1, res2;
 	  
 	if (N>2)
 	{
@@ -919,7 +923,7 @@ TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
         delete primaryResult;
         for (VersionedTruthValueMap::const_iterator itr = versionHandles.begin(); itr != versionHandles.end(); itr++) {
             VersionHandle vh = itr->first;
-			auto_ptr<TruthValue*> versionedTVs(new TruthValue*[N]);
+			std::auto_ptr<TruthValue*> versionedTVs(new TruthValue*[N]);
             int numberOfCompatibleTvs = 0;
             for (int i = 0; i < N; i++) {
                 if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {

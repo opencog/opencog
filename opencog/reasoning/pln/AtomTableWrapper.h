@@ -11,9 +11,14 @@
 #include "utils/Singleton.h"
 //#include "CoreWrapper.h"
 
+// Each of the below merely passes through to an appropriate AtomSpace
+// function, should be placed in AtomTableWrapper
+//! return the handle of atom that has index i in h's outgoing set
 Handle child(Handle h, int i);
+//! returns whether the type of h is T or inherits from T
 bool isSubType(Handle h, Type T);
-bool inheritsType(Type T1, Type T2);
+//! returns whether 
+bool inheritsType(Type subT, Type superT);
 
 namespace reasoning
 {
