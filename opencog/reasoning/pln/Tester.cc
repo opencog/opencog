@@ -729,7 +729,7 @@ InitAxiomSet("smalldemo.xml");
 
 		cprintf(-2,"loading...\n");		
 		
- 		bool axioms_ok = TheNM.LoadAxioms(premiseFile);
+ 		bool axioms_ok = TheNM.loadAxioms(premiseFile);
 		
 		cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 		assert(axioms_ok);		

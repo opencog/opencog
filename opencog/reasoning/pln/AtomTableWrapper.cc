@@ -1,10 +1,11 @@
 #include "AtomTableWrapper.h"
 #include "PLN.h"
+
 #include "utils/XMLNodeLoader.h"
 #include "rules/Rules.h"
 
 #include <SimpleTruthValue.h>
-#include <CogServer.h> // To get access of AtomSpace
+#include <CogServer.h> // To get access to AtomSpace
 #include <tree.h>
 #include <utils2.h>
 #include <utils.h>
@@ -14,10 +15,16 @@
 #include  <boost/foreach.hpp>
 boost::variant<int, char> bv;
 
+// Mind Shadow is an atom cache system but no longer used
 #define USE_MIND_SHADOW 0
 #define HANDLE_MANAGEMENT_HACK 0
 #define ARCHIVE_THEOREMS 1
 
+// MACRO for getting the AtomSpace
+// @todo: this should be replaced with initialising the ATW with a AtomSpace
+// pointer/reference and using that. This should actually store an interface
+// that AtomSpace provides but OpenCog currently doesn't indicate what this
+// should be.
 #define AS_PTR (CogServer::getAtomSpace())
 
 using namespace std;
@@ -29,19 +36,19 @@ bool isSubType(Handle h, Type T)
 }
 
 #ifndef USE_PSEUDOCORE
-	void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
-	{	
-		int array_size=0;
-		Handle *dest_array = new Handle[1000];
-	
-		src.toHandleVector(dest_array, array_size);
-		for (int i =0;i<array_size;i++)
-		{
-			dest.push_back(dest_array[i]);
-		}
+void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
+{	
+    int array_size=0;
+    Handle *dest_array = new Handle[1000];
 
-		delete dest_array;
-	}
+    src.toHandleVector(dest_array, array_size);
+    for (int i =0;i<array_size;i++)
+    {
+        dest.push_back(dest_array[i]);
+    }
+
+    delete dest_array;
+}
 #endif
 	
 Handle child(Handle h, int i) { 
@@ -50,10 +57,20 @@ Handle child(Handle h, int i) {
 	
 namespace haxx
 {
+    // TODO: make this accessable as a Singleton from a static member of AtomTableWrapper?
 	reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
-	set<Handle> atomRemoveSet;
+
+    // TODELETE, not used
+	// set<Handle> atomRemoveSet;
+    
+    //! childOf records what atoms are connected by inheritance links, 1st is
+    //! parent, second is child (I think...)
 	multimap<Handle,Handle> childOf;
+
+    //! Whether to stores variable nodes as atoms in the AtomSpace
 	bool AllowFW_VARIABLENODESinCore = true;
+
+    //! ?
 	map<string,Handle> variableShadowMap;
 	bool ArchiveTheorems = true;
 	
@@ -118,16 +135,16 @@ Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
 
 #else
 
-	void HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest)
-	{	
-		std::vector<Handle> dest_array;
-	
-		src.toHandleVector(dest_array);
-		for (unsigned int i =0;i<dest_array.size();i++)
-		{
-			dest.insert(dest_array[i]);
-		}
-	}
+void HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest)
+{	
+    std::vector<Handle> dest_array;
+
+    src.toHandleVector(dest_array);
+    for (unsigned int i =0;i<dest_array.size();i++)
+    {
+        dest.insert(dest_array[i]);
+    }
+}
 
 bool inheritsType(Type T1, Type T2)
 {
@@ -142,55 +159,57 @@ const TruthValue& getTruthValue(Handle h)
 
 namespace reasoning
 {
-	shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
-	{
-		HandleEntry* result = 
-			(name.empty()
-				? AS_PTR->getAtomTable().getHandleSet((Type) T, subclass)
-				: AS_PTR->getAtomTable().getHandleSet(name.c_str(), (Type) T, subclass));
-		shared_ptr<set<Handle> > ret(new set<Handle>);
 
-		HandleEntry2HandleSet(*result, *ret);
+shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
+{
+    HandleEntry* result = 
+        (name.empty()
+            ? AS_PTR->getAtomTable().getHandleSet((Type) T, subclass)
+            : AS_PTR->getAtomTable().getHandleSet(name.c_str(), (Type) T, subclass));
+    shared_ptr<set<Handle> > ret(new set<Handle>);
 
-		delete result;
-		return ret;
-	}
+    HandleEntry2HandleSet(*result, *ret);
 
-	Handle AtomTableWrapper::getHandle(Type t,const string& name) const
-	{
-		return AS_PTR->getAtomTable().getHandle(name.c_str(), (Type)t);
-	}
-	
-	bool equal(const HandleSeq& lhs, const HandleSeq& rhs)
-	{
-		size_t lhs_arity = lhs.size();
-		if (lhs_arity != rhs.size())
-			return false;
-			
-		for (unsigned int i = 0; i < lhs_arity; i++)
-			if (lhs[i] != rhs[i])
-				return false;
-		return true;			
-	}
+    delete result;
+    return ret;
+}
 
-	Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
-	{
-		//HandleEntry* results = 
-		//	AS_PTR->getHandleSet((Type)t, true);
-			
+Handle AtomTableWrapper::getHandle(Type t,const string& name) const
+{
+    return AS_PTR->getAtomTable().getHandle(name.c_str(), (Type)t);
+}
+
+bool equal(const HandleSeq& lhs, const HandleSeq& rhs)
+{
+    size_t lhs_arity = lhs.size();
+    if (lhs_arity != rhs.size())
+        return false;
+        
+    for (unsigned int i = 0; i < lhs_arity; i++)
+        if (lhs[i] != rhs[i])
+            return false;
+    return true;			
+}
+
+Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
+{
+    //HandleEntry* results = 
+    //	AS_PTR->getHandleSet((Type)t, true);
+        
 //		while (results && !equal(results->handle->getOutgoingSet(), outgoing))
 //			results = results->next;
 //      Handle ret = (results ? results->handle : NULL);
 //		delete results;
-		
-		return AS_PTR->getHandle(t,outgoing);
-	}
-
-    void AtomTableWrapper::reset()
-    {
-        AS_PTR->clear();
-    }
+    
+    return AS_PTR->getHandle(t,outgoing);
 }
+
+void AtomTableWrapper::reset()
+{
+    AS_PTR->clear();
+}
+
+} // end namespace reasoning
 
 #endif
 
@@ -205,15 +224,14 @@ extern bool linkNotifications;
 
 static Handle U;
 
-bool AtomTableWrapper::Prepare()
+bool AtomTableWrapper::prepare()
 {
 	srand(12345678);
 	linkNotifications = true;
-
 	return true;
 }
 
-bool AtomTableWrapper::LoadAxioms(const string& path)
+bool AtomTableWrapper::loadAxioms(const string& path)
 {
     // TODO: check exists works on WIN32
 	string fname(path);
@@ -230,7 +248,7 @@ bool AtomTableWrapper::LoadAxioms(const string& path)
 	try {
         printf("Loading axioms from: %s \n", fname.c_str());
 		U = LoadXMLFile(this, fname);
-		LoadedFiles.insert(fname);
+		loadedFiles.insert(fname);
     } catch(string s) { 
         LOG(0, s); 
         return false; 
@@ -242,7 +260,7 @@ bool AtomTableWrapper::LoadAxioms(const string& path)
 	return true;
 }
 
-bool AtomTableWrapper::LoadOther(const string& path, bool ReplaceOld)
+bool AtomTableWrapper::loadOther(const string& path, bool ReplaceOld)
 {
 	string buf;
 	LoadTextFile(path, buf);
@@ -285,7 +303,7 @@ bool AtomTableWrapper::LoadOther(const string& path, bool ReplaceOld)
 		}
 	}
 
-	LoadedFiles.insert(path);
+	loadedFiles.insert(path);
 
 	return true;
 }
@@ -431,11 +449,11 @@ LOG(5, b);
 
 bool linkNotifications=false;
 
-bool AtomTableWrapper::binary_true(Handle h)
+bool AtomTableWrapper::binaryTrue(Handle h)
 {
 	const TruthValue& tv = getTruthValue(h);
 
-	return (tv.getMean() > 0.989);
+	return (tv.getMean() > PLN_TRUE_MEAN);
 }
 
 bool symmetricLink(Type T)
@@ -507,7 +525,8 @@ Handle AtomTableWrapper::freshened(Handle h, bool managed)
 
 #define BL 2
 
-Handle NormalizingATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,bool fresh,bool managed)
+Handle NormalizingATW::addLink(Type T, const HandleSeq& hs,
+        const TruthValue& tvn,bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
 	Handle ret=0;
@@ -654,7 +673,7 @@ bool ok_forall=false;
 			&& !hs.empty()
 			&& inheritsType(a->getType(hs[0]), NOT_LINK)
 			&& tvn.getMean() > 0.989
-			&& binary_true(hs[0]) )
+			&& binaryTrue(hs[0]) )
 	{
 		LOG(BL, "~~A <---> A");
 
@@ -662,14 +681,14 @@ bool ok_forall=false;
 		assert(relevant_args.size() == 1);
 		Type relevant_type = a->getType(relevant_args[0]);
 
-		//if (tvn.getMean() > 0.989 && binary_true(relevant_args[0]) )
+		//if (tvn.getMean() > 0.989 && binaryTrue(relevant_args[0]) )
 		ret = a->getOutgoing(hs[0])[0]; //addLink(relevant_type, relevant_args,TruthValue::TRUE_TV(),fresh);
 	}
 	else if (T == AND_LINK
 			&& !hs.empty()
 			&& tvn.getMean() > 0.989
 			&& getFirstIndexOfType(hs, AND_LINK) >= 0
-			&& binary_true(hs[getFirstIndexOfType(hs, AND_LINK)]) )
+			&& binaryTrue(hs[getFirstIndexOfType(hs, AND_LINK)]) )
 			//&& inheritsType(a->getType(hs[0]), AND_LINK))
 	{
 		LOG(BL, "AND(AND(B), AND(A)) <---> AND(B,A)");
@@ -683,7 +702,7 @@ bool ok_forall=false;
 //			printTree(hs[ii],0,4);
 
 			if (inheritsType(a->getType(hs[ii]), AND_LINK)
-				&& binary_true(hs[ii]))
+				&& binaryTrue(hs[ii]))
 			{
 				HandleSeq args1 = a->getOutgoing(hs[ii]);
 
@@ -789,7 +808,7 @@ bool ok_forall=false;
 /*	else if (T == IMPLICATION_LINK
 			&& hs.size()==2
 			&& tvn.getMean() > 0.989
-			&& binary_true(hs[1])
+			&& binaryTrue(hs[1])
 			&& inheritsType(a->getType(hs[1]), IMPLICATION_LINK))
 	{
 		LOG(0, "(A=>(B=>C))	--->	((A&B) => C)");
@@ -921,7 +940,7 @@ int zz=ImpTarget1.size();
 	else if (T == FORALL_LINK
 			&& hs.size() == 2
 			&& inheritsType(a->getType(hs[1]), AND_LINK)
-			&& binary_true(hs[1])
+			&& binaryTrue(hs[1])
 			&& a->getArity(hs[1]) > 1)
 	{
 		unsigned int AND_arity = a->getArity(hs[1]);
@@ -931,6 +950,7 @@ int zz=ImpTarget1.size();
 		for (unsigned int i = 0; i < AND_arity; i++)
 		{
 			HandleSeq fora_hs;
+            // ARI: How come for all links need the source to be freshened?
 			fora_hs.push_back(freshened(hs[0],managed));
 			fora_hs.push_back(child(hs[1],i));
 
@@ -995,7 +1015,6 @@ ok_forall=true;
 
 		LOG(5, "Adding to Core...");
 
-        // TODO: OpenCog port: remove FIM
 		ret = FIMATW::addLink(T,hs,tvn,fresh,managed);
 		//ret = a->addLink(T,hs,tvn,fresh,managed);
 
@@ -1203,12 +1222,12 @@ NormalizingATW::NormalizingATW()
 {
 }
 
-Handle AtomTableWrapper::addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fresh, bool managed)
+Handle AtomTableWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed)
 {
 	return addAtom(a,a.begin(),tvn,fresh,managed);
 }
 
-Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn, bool fresh, bool managed)
+Handle AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue& tvn, bool fresh, bool managed)
 {
 	AtomSpace *as = AS_PTR;
 	cprintf(3,"Handle AtomTableWrapper::addAtom...");
@@ -1221,17 +1240,16 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, con
 	
 	if (as->isReal(head_type))
 	{
-		LOG(1, "Warning! Adding a real atom with addAtom(tree<Vertex>& a)!\n");
+		LOG(1, "Warning! Adding a real atom with addAtom(vtree& a)!\n");
 		return head_type;
 	}
 
-	for (tree<Vertex>::sibling_iterator i = a.begin(it); i!=a.end(it); i++)
+	for (vtree::sibling_iterator i = a.begin(it); i!=a.end(it); i++)
 	{
 		Handle *h_ptr = boost::get<Handle>(&*i);
 
-		handles.push_back((h_ptr && as->isReal(*h_ptr))
-								? (*h_ptr)
-								: addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed));
+		handles.push_back((h_ptr && as->isReal(*h_ptr)) ?
+                (*h_ptr) : addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed));
 	}
 
 /*	/// We cannot add non-existent nodes this way!
@@ -1240,12 +1258,14 @@ Handle AtomTableWrapper::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, con
 	return addLink((Type)(int)head_type, handles, tvn, fresh,managed);
 }
 
-Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh,bool managed)
+Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+        bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
 	if (tvn.isNullTv())
 	{
-		LOG(0, "I don't like FactoryTruthValues, so passin NULL as TruthValue causes exit in AtomTableWrapper.cc.");
+		LOG(0, "I don't like FactoryTruthValues, so passing "
+                "NULL as TruthValue causes exit in AtomTableWrapper.cc.");
 		exit(0);
 	}
 
@@ -1255,7 +1275,7 @@ assert(1);
 	uint arity = hs.size();
 	
     if (T == INHERITANCE_LINK && arity==2)
-        haxx::childOf.insert(pair<Handle,Handle>(hs[1], hs[0]));
+        haxx::childOf.insert(hpair(hs[1], hs[0]));
 
 	Handle ret;
 
@@ -1323,7 +1343,7 @@ LOG(3, "Add ok.");
 	return ret;
 }
 
-int AtomTableWrapper::ImplicationConstruction()
+int AtomTableWrapper::implicationConstruction()
 {
 	return 0;
 /*	Btr<set<Handle> > links = getHandleSet(AND_LINK,"");
@@ -1367,7 +1387,9 @@ assert(1);
 	}	
 	Node* node = new Node( T,  name,  tvn);
     //TODO: fresh = true bug
-	//Handle ret = MindDBProxy::getInstance()->add(node, fresh);
+	// old line: Handle ret = MindDBProxy::getInstance()->add(node, fresh);
+    // check if equivalent node already exists, if so and fresh==true, then
+    // addViaContext
 	Handle ret = a->addRealAtom(*node);
 	
 #if HANDLE_MANAGEMENT_HACK	
@@ -1475,7 +1497,7 @@ Handle FIMATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool 
 }
 
 
-Handle AtomTableWrapper::GetRandomHandle(Type T)
+Handle AtomTableWrapper::getRandomHandle(Type T)
 {
 	AtomSpace *a = AS_PTR;
 /*#ifdef USE_PSEUDOCORE	
@@ -1655,10 +1677,17 @@ bool equal(Handle A, Handle B)
 	return true;
 }
 
-Handle AtomTableWrapper::OR2ANDLink(Handle& andL) { return AND2ORLink(andL, OR_LINK, AND_LINK); }
-Handle AtomTableWrapper::AND2ORLink(Handle& andL) { return AND2ORLink(andL, AND_LINK, OR_LINK); }
+Handle AtomTableWrapper::OR2ANDLink(Handle& andL)
+{
+    return AND2ORLink(andL, OR_LINK, AND_LINK);
+}
 
-Handle AtomTableWrapper::Invert(Handle h)
+Handle AtomTableWrapper::AND2ORLink(Handle& andL)
+{
+    return AND2ORLink(andL, AND_LINK, OR_LINK);
+}
+
+Handle AtomTableWrapper::invert(Handle h)
 {
 	HandleSeq hs;
 	hs.push_back(h);
@@ -1671,12 +1700,11 @@ Handle AtomTableWrapper::AND2ORLink(Handle& andL, Type _ANDLinkType, Type _ORLin
 	assert(a->getType(andL) == _ANDLinkType);
 
 	HandleSeq ORtarget;
-
    	const vector<Handle> _ANDtargets = a->getOutgoing(andL);
 
-	for (vector<Handle>::const_iterator i = _ANDtargets.begin(); i != _ANDtargets.end(); i++)
-	{
-		ORtarget.push_back(Invert(*i));
+	for (vector<Handle>::const_iterator i = _ANDtargets.begin();
+            i != _ANDtargets.end(); i++) {
+		ORtarget.push_back(invert(*i));
 	}
 
 	const TruthValue& outerTV = getTruthValue(andL);
@@ -1743,7 +1771,7 @@ Handle AtomTableWrapper::Exist2ForAllLink(Handle& exL)
 
 	for (vector<Handle>::const_iterator i = ExistTarget.begin(); i != ExistTarget.end(); i++)
 	{
-		ForAllTarget.push_back(Invert(*i));
+		ForAllTarget.push_back(invert(*i));
 	}
 
 	const TruthValue& outerTV = getTruthValue(exL);

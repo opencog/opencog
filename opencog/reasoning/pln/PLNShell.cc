@@ -253,25 +253,25 @@ void PLNShell_RunLoop(int argc, char** args)
 
 	haxx::ArchiveTheorems = true;
  
-  	bool axioms_ok = TheNM.LoadAxioms("bigdemo.xml");
+  	bool axioms_ok = TheNM.loadAxioms("bigdemo.xml");
 
-//	bool axioms_ok = TheNM.LoadAxioms("inverse_binding.xml");
+//	bool axioms_ok = TheNM.loadAxioms("inverse_binding.xml");
 
-//	bool axioms_ok = TheNM.LoadAxioms("fetch10.xml");
+//	bool axioms_ok = TheNM.loadAxioms("fetch10.xml");
 
-//	bool axioms_ok = TheNM.LoadAxioms("mediumdemo.xml");
-//	bool axioms_ok = TheNM.LoadAxioms("smalldemo.xml");
-//	 bool axioms_ok = TheNM.LoadAxioms("smalldemo28.xml");
-//	 bool axioms_ok = TheNM.LoadAxioms("smalldemo28b.xml");
+//	bool axioms_ok = TheNM.loadAxioms("mediumdemo.xml");
+//	bool axioms_ok = TheNM.loadAxioms("smalldemo.xml");
+//	 bool axioms_ok = TheNM.loadAxioms("smalldemo28.xml");
+//	 bool axioms_ok = TheNM.loadAxioms("smalldemo28b.xml");
 
- 	  //bool axioms_ok = TheNM.LoadAxioms("smalldemo8.xml");
-// 	  bool axioms_ok = TheNM.LoadAxioms("smalldemo8b.xml");  
-//	bool axioms_ok = TheNM.LoadAxioms("smalldemo8c.xml");
+ 	  //bool axioms_ok = TheNM.loadAxioms("smalldemo8.xml");
+// 	  bool axioms_ok = TheNM.loadAxioms("smalldemo8b.xml");  
+//	bool axioms_ok = TheNM.loadAxioms("smalldemo8c.xml");
 
-// 	  bool axioms_ok = TheNM.LoadAxioms("AnotBdemo.xml");
-//	  bool axioms_ok = TheNM.LoadAxioms("fetchdemo5.xml");
-// 	  bool axioms_ok = TheNM.LoadAxioms("fetchdemo.xml");
-//   	  bool axioms_ok = TheNM.LoadAxioms("woademo.xml");
+// 	  bool axioms_ok = TheNM.loadAxioms("AnotBdemo.xml");
+//	  bool axioms_ok = TheNM.loadAxioms("fetchdemo5.xml");
+// 	  bool axioms_ok = TheNM.loadAxioms("fetchdemo.xml");
+//   	  bool axioms_ok = TheNM.loadAxioms("woademo.xml");
 	  assert(axioms_ok);
 
 	  haxx::ArchiveTheorems = false;
@@ -1056,7 +1056,7 @@ printf("BITNodeRoot init ok\n");
 						haxx::ArchiveTheorems = true; 
 						//nm->Reset(NULL);
                         ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
-					 	axioms_ok = TheNM.LoadAxioms(temps);
+					 	axioms_ok = TheNM.loadAxioms(temps);
 						haxx::ArchiveTheorems = false;
 						puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
 			
