@@ -157,6 +157,9 @@ public:
     //! Convert from AND to OR link
 	Handle AND2ORLink(Handle& andL);
 	
+    //! Add atom using dummy contexts if it already exists
+    Handle addAtomDC(Atom *a, bool fresh);
+
 // ARI: ok to delete this? TODELETE
 /*	void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
 					 set<subst>* forbiddenBindings);				 */

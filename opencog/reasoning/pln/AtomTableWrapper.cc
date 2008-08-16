@@ -1410,6 +1410,22 @@ haxx::mindShadowMap[T].push_back(ret);
 #endif
 }
 
+Handle AtomTableWrapper::addAtomDC(Atom *a, bool fresh)
+{
+    //is fresh true?
+    //1.yes:
+    // See if atom exists already
+    // if not, then just add normally
+    // if it does exist, then go through each dummy context until NULL_TV is
+    // returned, when NULL_TV is returned, this is a free dummy context. if it
+    // isn't returned before running out of dummy contexts, create a new dummy
+    // context and use that.
+    //2.no:
+    // if it does then just add it and let AtomSpace deal with merging it
+    return 0;
+
+}
+
 Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
