@@ -511,7 +511,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 {
     //printf("AtomSpace::addRealAtom\n");
     const TruthValue& newTV = (tvn.isNullTv()) ? atom.getTruthValue() : tvn;
-    // Check if the given handle (Joel: shouldn't this be atom?) is of an atom
+    // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
     Handle result;

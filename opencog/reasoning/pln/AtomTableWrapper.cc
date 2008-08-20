@@ -1258,7 +1258,7 @@ Handle AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue&
 	return addLink((Type)(int)head_type, handles, tvn, fresh,managed);
 }
 
-Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+Handle AtomTableWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
@@ -1283,7 +1283,7 @@ assert(1);
 		T == IMPLICATION_LINK && a->getType(hs[0]) == AND_LINK && tvn.getConfidence() > 0.98999f)
 		{
 			vector<Handle> args = a->getOutgoing(hs[0]);
-			printf("THM for:");
+			cprintf(-3,"THM for:");
 
 			vtree thm_target(make_vtree(hs[1]));
 
@@ -1298,12 +1298,10 @@ assert(1);
 			}
 			
 			///warning "Return value will be invalid!"
-            // TODO: fresh bug
-			ret = a->addLink( FALSE_LINK, hs, tvn);
+			ret = addLinkDC( FALSE_LINK, hs, tvn, fresh, managed);
 		}
 	else	
-        // TODO: fresh bug
-		ret = a->addLink( T, hs,  tvn);
+		ret = addLinkDC( T, hs,  tvn, fresh, managed);
 
 	if (inheritsType(T, LINK) && !arity && T != FORALL_LINK)
 	{
@@ -1385,12 +1383,8 @@ assert(1);
 			return existingHandle->second;
 		
 	}	
-	Node* node = new Node( T,  name,  tvn);
-    //TODO: fresh = true bug
-	// old line: Handle ret = MindDBProxy::getInstance()->add(node, fresh);
-    // check if equivalent node already exists, if so and fresh==true, then
-    // addViaContext
-	Handle ret = a->addRealAtom(*node);
+	Node node( T,  name,  tvn);
+	Handle ret = addAtomDC(node, fresh, managed);
 	
 #if HANDLE_MANAGEMENT_HACK	
 	/// haxx:: // Due to core relic
@@ -1410,19 +1404,97 @@ haxx::mindShadowMap[T].push_back(ret);
 #endif
 }
 
-Handle AtomTableWrapper::addAtomDC(Atom *a, bool fresh)
+Handle AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
+        bool fresh, bool managed)
 {
-    //is fresh true?
-    //1.yes:
-    // See if atom exists already
-    // if not, then just add normally
-    // if it does exist, then go through each dummy context until NULL_TV is
-    // returned, when NULL_TV is returned, this is a free dummy context. if it
-    // isn't returned before running out of dummy contexts, create a new dummy
-    // context and use that.
-    //2.no:
-    // if it does then just add it and let AtomSpace deal with merging it
-    return 0;
+    AtomSpace *a = AS_PTR;
+    // Construct a Link then use addAtomDC
+    Link l(t,hs);
+    return addAtomDC(l, fresh, managed);
+}
+
+Handle AtomTableWrapper::addNodeDC(Type t, const string& name, const TruthValue& tvn,
+        bool fresh, bool managed)
+{
+	AtomSpace *a = AS_PTR;
+    // Construct a Node then use addAtomDC
+    Node n(t, name, tvn);
+    return addAtomDC(n, fresh, managed);
+}
+
+Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
+{
+    // ARI: what to do with managed? I can't find documentation in the Novamente
+    // code, the header documentation just skips describing it.
+	AtomSpace *a = AS_PTR;
+    Handle result;
+    // check if fresh true
+    if (fresh) {
+        // yes:
+        // See if atom exists already
+        HandleSeq outgoing;
+        Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
+        if (nnn) {
+            const Node& node = (const Node&) atom;
+            result = getHandle(node.getType(), node.getName());
+            if (TLB::isInvalidHandle(result)) {
+                // if the atom doesn't exist already, then just add normally
+                return a->addNode(node.getType(), node.getName(), node.getTruthValue());
+            }
+        } else {
+            const Link& link = (const Link&) atom;
+            for (int i = 0; i < link.getArity(); i++) {
+                outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
+            }
+            result = getHandle(link.getType(), outgoing);
+            if (TLB::isInvalidHandle(result)) {
+                // if the atom doesn't exist already, then just add normally
+                return a->addLink(link.getType(), outgoing, link.getTruthValue());
+            }
+        }
+        // if it does exist, then go through each dummy context until NULL_TV is
+        // returned, when NULL_TV is returned, this is a free dummy context. if it
+        // isn't returned before running out of dummy contexts, create a new dummy
+        // context and use that.
+
+        // result should contain a handle to existing atom
+        set<VersionHandle>::iterator dc;
+        VersionHandle vh;
+        for (dc = dummyContexts.begin(); dc != dummyContexts.end(); dc++) {
+            if (a->getTV(result,*dc).isNullTv()) {
+                vh = *dc;
+                break;
+            }
+        }
+        if (dc == dummyContexts.end()) {
+            // reached end of dummyContexts, so we need a new one
+            stringstream dcName;
+            dcName << contextPrefix << dummyContexts.size();
+            // add context node
+            Handle contextNode = a->addNode(CONCEPT_NODE,dcName.str());
+            // add context link
+            // it's possible we might get away without a context link but it
+            // breaks the expected structure of the OpenCog graph. Adding the
+            // context link to be safe.
+            HandleSeq cOut;
+            cOut.push_back(contextNode);
+            cOut.push_back(result);
+            a->addLink(CONTEXT_LINK,cOut);
+            
+            // add version handle to dummyContexts
+            vh = VersionHandle(CONTEXTUAL,contextNode);
+        } 
+        // vh is now a version handle for a free context
+        // for which we can set a truth value
+        a->setTV(result, atom.getTruthValue(), vh);
+    } else {
+        // no:
+        // just add it and let AtomSpace deal with merging it
+        result = a->addRealAtom(atom);
+    }
+    // return version handle instead so that the correct Handle can be retrieved
+    // in future?
+    return result;
 
 }
 
@@ -1441,7 +1513,7 @@ Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool f
     const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f);
     const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv; 
 
-	Handle ret = a->addNode( T, name, mod_tvn, fresh,managed);
+	Handle ret = addNode( T, name, mod_tvn, fresh,managed);
 #else
 	
 LOG(3,"FIMATW::addNode");
@@ -1456,13 +1528,13 @@ LOG(3,"FIMATW::addNode");
 		
 	}	
 
-	Node* node = new Node( T,  name,  tvn);
-LOG(3,"FIMATW: AtomSpace->add");	
-    // TODO: fresh bug
-    Handle ret = AS_PTR->addRealAtom(*node);
+	Node node( T,  name,  tvn);
+LOG(3,"FIMATW: addAtomDC");	
+    // fresh bug, done?
+    Handle ret = addAtomDC(node,fresh,managed);
 
 #if HANDLE_MANAGEMENT_HACK
-LOG(3,"FIMATW: AtomSpace->add OK, checking for Handle release needed");		
+LOG(3,"FIMATW: addAtomDC OK, checking for Handle release needed");		
 	/// haxx:: // Due to core relic
 	if (ret != node)
 		delete node;

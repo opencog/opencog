@@ -49,9 +49,12 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! multiple atoms with either the same type, name and/or outgoing set, we
     //! create a number of dummy PLN contexts, each providing a different
     //! VersionHandle with which to store multiple TruthValues in an Atom.
-    //! This parameter indicates the maximum number dummy contexts that have
-    //! been needed so far.
-    int dummyContexts;
+    //! This parameter indicates the name of the dummy contexts that have
+    //! been used so far.
+    std::set<VersionHandle> dummyContexts;
+    
+    //! This string is the prefix of PLN dummy contexts 
+    std::string contextPrefix;
 
     // ARI: is this a correct description?
     //! Add a tree of non real atoms to AtomSpace.
@@ -96,7 +99,7 @@ public:
     void reset();
 
     //! Initialize new AtomSpaceWrapper with const universe size
-	AtomTableWrapper() : USize(800), USizeMode(CONST_SIZE), dummyContexts(0) {}
+	AtomTableWrapper() : USize(800), USizeMode(CONST_SIZE), contextPrefix("__PLN__") {}
 	virtual ~AtomTableWrapper() {}
 
 // TODELETE, replace with getAtomSpace()
@@ -157,8 +160,17 @@ public:
     //! Convert from AND to OR link
 	Handle AND2ORLink(Handle& andL);
 	
-    //! Add atom using dummy contexts if it already exists
-    Handle addAtomDC(Atom *a, bool fresh);
+    //! Add Link via dummy contexts method
+    Handle addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
+            bool fresh, bool managed);
+    //! Add Node via dummy contexts method
+    Handle addNodeDC(Type t, const string& name, const TruthValue& tvn,
+            bool fresh, bool managed);
+    //! Add concrete atom using dummy contexts if it already exists
+    Handle addAtomDC(Atom &a, bool fresh, bool managed);
+
+    Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+        bool fresh,bool managed);
 
 // ARI: ok to delete this? TODELETE
 /*	void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
