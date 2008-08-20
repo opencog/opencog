@@ -373,6 +373,7 @@ Handle atom::attach(iAtomTableWrapper* core) const
 //printf("atom::attach()\n");
 	::test::attachs++;
 
+    AtomTableWrapper* at = (AtomTableWrapper*) core;
 	SimpleTruthValue tvn(1.0, 0.0);
 
 LOG(4, "Attaching...");
@@ -382,13 +383,12 @@ LOG(4, "Attaching...");
 	if (inheritsType(T, NODE))
 	{
 //printf("atom::attach: it's a node: type: %d, name: %s, core: %p\n", T, name.c_str(), core);
-        real = CogServer::getAtomSpace()->getHandle(T, name);
+        real = at->getHandle(T, name);
 //printf("atom::attach: real = %p\n", real);
 		if (!real)
 		{
 //printf("atom::attach: real is null => adding node\n");
-// TODO: fresh bug
-            real = CogServer::getAtomSpace()->addNode(T, name, tvn);
+            real = at->addNode(T, name, tvn, true);
 cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real);
 		}
 	}
@@ -402,11 +402,10 @@ cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real);
 		}
 cprintf(4, "Attaching %d entries...\n", outg.size());
 		
-        if (!(real = CogServer::getAtomSpace()->getHandle(T, outg)))
+        if (!(real = at->getHandle(T, outg)))
 		{
 cprintf(4, "Not exist.\n");
-            //TODO: fresh bug
-            real = CogServer::getAtomSpace()->addLink(T, outg, tvn);
+            real = at->addLink(T, outg, tvn, true);
 		}
 	}
 	

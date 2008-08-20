@@ -114,11 +114,11 @@ const TruthValue& getTruthValue(Handle h)
 
 namespace reasoning
 {
-	shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
-	{
-		vector<Handle> hs(AS_PTR->getHandleSet(T,name,subclass));
-		return shared_ptr<set<Handle> >(new set<Handle>(hs.begin(), hs.end()));
-	}
+shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
+{
+    vector<Handle> hs(AS_PTR->getHandleSet(T,name,subclass));
+    return shared_ptr<set<Handle> >(new set<Handle>(hs.begin(), hs.end()));
+}
 
 Handle AtomTableWrapper::getHandle(Type t,const string& str) const
 {

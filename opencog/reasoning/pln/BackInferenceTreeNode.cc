@@ -23,8 +23,6 @@ enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
 int haxxUsedProofResources = 0;
 float temperature = 0.01;
 
-extern int tempar;
-
 namespace test
 {
     long bigcount=0;

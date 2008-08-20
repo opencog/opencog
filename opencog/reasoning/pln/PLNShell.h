@@ -8,12 +8,6 @@ extern "C"
 {
 #endif
 
-/*	
-	namespace reasoning
-	{
-		void RunPLNTests();
-	}
-*/
 class PLNShell : public Singleton<PLNShell>
 {
 	void Init();

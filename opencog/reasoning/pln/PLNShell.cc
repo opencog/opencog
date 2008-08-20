@@ -57,24 +57,24 @@ In either case, the TV is meaningless.
 - In CrispUnification of ForAllLinks, subtrees must be proved separately.
 Eg. consider
 ForAll<tv1>
-	List($X)
-	Implies
-		And
-			F
-			$X
-		$X.
+    List($X)
+    Implies
+        And
+            F
+            $X
+        $X.
 
 Once I substitute A<tv2> for X, I get
-	Implies<tv1>
-		And<tv3>
-			F
-			A<tv2>
-		A<tv2>.
+    Implies<tv1>
+        And<tv3>
+            F
+            A<tv2>
+        A<tv2>.
 
 But in order to find out tv3, I must also FindTV of
- 		And
-			F
-			A<tv2>.
+        And
+            F
+            A<tv2>.
 
 NOTE 5: On Unification
 0. A "simple MP" = an atom A that is not a MP, but will implicitly be considered as the complex MP "EqualTo(A)". Also an MP atom whose outgoing set contains no variables is considered a simple one, since it can no longer be used as a "real" MP.
@@ -126,67 +126,66 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #endif // _MSC_VER
 
 using namespace reasoning;
+
+//! debug level, @todo replaced by opencog log system
 extern int currentDebugLevel;
 
+//! Run tests at start up
 bool RunPLNtest=true;
+//! Variable to store command line option of what temperature to run tests at
 int tempar=0;
 
 namespace haxx
 {
-	extern multimap<Handle,Handle> childOf;
-	extern bool AllowFW_VARIABLENODESinCore;
-	extern bool ArchiveTheorems;
-	extern bool printRealAtoms;
-	extern map<Handle,vector<Handle> >* inferred_from;
+    extern multimap<Handle,Handle> childOf;
+    extern bool AllowFW_VARIABLENODESinCore;
+    extern bool ArchiveTheorems;
+    extern bool printRealAtoms;
+    extern map<Handle,vector<Handle> >* inferred_from;
     extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
-}
 
-namespace haxx
-{
-	uint maxDepth = 250;
+    uint maxDepth = 250;
 }
 
 namespace reasoning
 {
-	extern bool RECORD_TRAILS;
-	void footest();
-	void foo_pretest();
+    extern bool RECORD_TRAILS;
+    void footest();
+    void foo_pretest();
     void RunPLNTests();
 
-	int varcount=0;
-	int addlinks=0;
-	int gethandles=0;	
+    int varcount=0;
+    int addlinks=0;
+    int gethandles=0;   
 }
 
 namespace test
 {
-	FILE *logfile=NULL;
-	int _test_count = 0;
-	bool debugger_control = false;
-	int attachs=0;
+    FILE *logfile=NULL;
+    int _test_count = 0;
+    bool debugger_control = false;
+    int attachs=0;
 }
-
-void AgentTest();
 
 void test_core_TVs()
 {
-	Btr<set<Handle> > ts =  ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->getHandleSet((Type)77,"");
-	foreach(Handle ti, *ts)
-	{
-		if (CogServer::getAtomSpace()->getTV(ti).isNullTv())
-		{
-			puts("NULL TV !!!");
-			getc(stdin);
-		}
-		printTree(ti,0,-5);
-//		getc(stdin);
-	}			
+    Btr<set<Handle> > ts =  ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->getHandleSet((Type)77,"");
+    foreach(Handle ti, *ts)
+    {
+        if (CogServer::getAtomSpace()->getTV(ti).isNullTv())
+        {
+            puts("NULL TV !!!");
+            getc(stdin);
+        }
+        printTree(ti,0,-5);
+//      getc(stdin);
+    }           
 }
 
 void test_nm_reset()
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
-	((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
+    AtomSpace *nm = CogServer::getAtomSpace();
+    ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
     std::list<Handle> ret;
     nm->getHandleSet(back_inserter(ret), EVALUATION_LINK, "");
     assert(ret.size() == 0);
@@ -202,14 +201,14 @@ void PLNShell_RunLoop(int argc, char** args);
 //void PseudoCore::RunLoop(int argc, char** args) const
 int main(int argc, char** args)
 {
-	puts("PseudoCore::RunLoop");
- 	PLNShell_RunLoop(argc,args);
+    puts("PseudoCore::RunLoop");
+    PLNShell_RunLoop(argc,args);
 }
 
 void PLNShell_RunLoop(int argc, char** args)
 {
-	try {
-		puts("Initializing PLN test env...");
+    try {
+        puts("Initializing PLN test env...");
 
         /// @TODO: make PLN functional without using the CogServer
         // using Pseudocore instead.
@@ -217,70 +216,70 @@ void PLNShell_RunLoop(int argc, char** args)
         opencog::server();
 
 #ifdef USE_PSEUDOCORE
-		RunPLNtest = (argc>1 && args[1][0] == 't');
+        RunPLNtest = (argc>1 && args[1][0] == 't');
 
-		/// @TODO: check the following
-		if (argc>2)
-			tempar = atoi(args[2]);
+        /// @TODO: check the following
+        if (argc>2)
+            tempar = atoi(args[2]);
 #endif
 
-		RECORD_TRAILS = true;
-		haxx::printRealAtoms = true;
+        RECORD_TRAILS = true;
+        haxx::printRealAtoms = true;
 
-		currentDebugLevel=100;
+        currentDebugLevel=100;
 
-		foo_pretest();
+        foo_pretest();
 
-		LOG(2, "Creating AtomTableWrappers...");
-		
+        LOG(2, "Creating AtomTableWrappers...");
+        
 #if LOCAL_ATW
-		haxx::defaultAtomTableWrapper = &LocalATW::getInstance();
+        haxx::defaultAtomTableWrapper = &LocalATW::getInstance();
 #else
-		DirectATW::getInstance();
-		haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
+        DirectATW::getInstance();
+        haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
 #endif
-		AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
-				
-		if (RunPLNtest)
-		{
+        AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+                
+        if (RunPLNtest)
+        {
             puts("Running PLNTests...");
-			reasoning::RunPLNTests();
-			exit(0);
-		}
-//		AgentTest();
-		
+            reasoning::RunPLNTests();
+            exit(0);
+        }
+//      AgentTest();
+        
 #if 1 //Loading Osama or set axioms here.
 
-	haxx::ArchiveTheorems = true;
+    haxx::ArchiveTheorems = true;
  
-  	bool axioms_ok = TheNM.loadAxioms("bigdemo.xml");
+    bool axioms_ok = TheNM.loadAxioms("bigdemo.xml");
 
-//	bool axioms_ok = TheNM.loadAxioms("inverse_binding.xml");
+//  bool axioms_ok = TheNM.loadAxioms("inverse_binding.xml");
 
-//	bool axioms_ok = TheNM.loadAxioms("fetch10.xml");
+//  bool axioms_ok = TheNM.loadAxioms("fetch10.xml");
 
-//	bool axioms_ok = TheNM.loadAxioms("mediumdemo.xml");
-//	bool axioms_ok = TheNM.loadAxioms("smalldemo.xml");
-//	 bool axioms_ok = TheNM.loadAxioms("smalldemo28.xml");
-//	 bool axioms_ok = TheNM.loadAxioms("smalldemo28b.xml");
+//  bool axioms_ok = TheNM.loadAxioms("mediumdemo.xml");
+//  bool axioms_ok = TheNM.loadAxioms("smalldemo.xml");
+//   bool axioms_ok = TheNM.loadAxioms("smalldemo28.xml");
+//   bool axioms_ok = TheNM.loadAxioms("smalldemo28b.xml");
 
- 	  //bool axioms_ok = TheNM.loadAxioms("smalldemo8.xml");
-// 	  bool axioms_ok = TheNM.loadAxioms("smalldemo8b.xml");  
-//	bool axioms_ok = TheNM.loadAxioms("smalldemo8c.xml");
+      //bool axioms_ok = TheNM.loadAxioms("smalldemo8.xml");
+//    bool axioms_ok = TheNM.loadAxioms("smalldemo8b.xml");  
+//  bool axioms_ok = TheNM.loadAxioms("smalldemo8c.xml");
 
-// 	  bool axioms_ok = TheNM.loadAxioms("AnotBdemo.xml");
-//	  bool axioms_ok = TheNM.loadAxioms("fetchdemo5.xml");
-// 	  bool axioms_ok = TheNM.loadAxioms("fetchdemo.xml");
-//   	  bool axioms_ok = TheNM.loadAxioms("woademo.xml");
-	  assert(axioms_ok);
+//    bool axioms_ok = TheNM.loadAxioms("AnotBdemo.xml");
+//    bool axioms_ok = TheNM.loadAxioms("fetchdemo5.xml");
+//    bool axioms_ok = TheNM.loadAxioms("fetchdemo.xml");
+//        bool axioms_ok = TheNM.loadAxioms("woademo.xml");
+      assert(axioms_ok);
 
-	  haxx::ArchiveTheorems = false;
+      haxx::ArchiveTheorems = false;
 #endif
-	  logger().debug("PTL Initialized.");
+      logger().debug("PTL Initialized.");
 
-		logger().info("Running footest()...\n");
-		footest();
-		logger().info("footest() complete.\n");
+        logger().info("Running footest()...\n");
+        footest();
+        logger().info("footest() complete.\n");
 
   } catch(std::string s)
   {
@@ -288,28 +287,28 @@ void PLNShell_RunLoop(int argc, char** args)
   }
   catch(PLNexception e)
   {
-	  logger().error("at root level while RunLoop initializing.");
+      logger().error("at root level while RunLoop initializing.");
   }
   catch(...)
   {
-	  logger().error("Unknown exception at root level while RunLoop initializing. ");
+      logger().error("Unknown exception at root level while RunLoop initializing. ");
   }
 
-	try
-	{
-		//RunPLNTests();
-		ThePLNShell.Launch();
+    try
+    {
+        //RunPLNTests();
+        ThePLNShell.Launch();
 
-		return;
-	}
-	catch(string s) {
-		printf("Exception in ThePLNShell.Launch(): %s\n", s.c_str()); }
-	catch(boost::bad_get bg) {
-		printf("Bad boost::get in ThePLNShell.Launch(): %s\n", bg.what()); }
-	catch(...) {
-		puts("Exception in ThePLNShell.Launch()."); }
+        return;
+    }
+    catch(string s) {
+        printf("Exception in ThePLNShell.Launch(): %s\n", s.c_str()); }
+    catch(boost::bad_get bg) {
+        printf("Bad boost::get in ThePLNShell.Launch(): %s\n", bg.what()); }
+    catch(...) {
+        puts("Exception in ThePLNShell.Launch()."); }
   
-	getc(stdin);
+    getc(stdin);
 }
 
 
@@ -333,38 +332,38 @@ Rule combinations. Known examples are:
 
 void childOfDump()
 {
-	using namespace haxx;
-	typedef pair<Handle,Handle> hpair;
-	foreach(hpair crel, childOf)
-	{
-		cout << "#" << (int)crel.first << " is child of " << (int)crel.second << "\n";
-	}
+    using namespace haxx;
+    typedef pair<Handle,Handle> hpair;
+    foreach(hpair crel, childOf)
+    {
+        cout << "#" << (int)crel.first << " is child of " << (int)crel.second << "\n";
+    }
 }
 
 void PLNhelp();
 
 void save_log()
 {
-	fclose(test::logfile);
-	test::logfile=fopen("pln.log","at+");
+    fclose(test::logfile);
+    test::logfile=fopen("pln.log","at+");
 }
 
 map<int, Btr<vtree > > tests;
 
 void PLNShell::Init()
 {
-	#if LOCAL_ATW
-	haxx::defaultAtomTableWrapper = &reasoning::LocalATW::getInstance();
-	((LocalATW*)haxx::defaultAtomTableWrapper)->SetCapacity(10000);
-	#endif	
-	
-	#if LOG_ON_FILE
-	 test::logfile=fopen("pln.log","wt");
-	 cout << "LOGGING TO FILE pln.log!\n";
-	#endif
+    #if LOCAL_ATW
+    haxx::defaultAtomTableWrapper = &reasoning::LocalATW::getInstance();
+    ((LocalATW*)haxx::defaultAtomTableWrapper)->SetCapacity(10000);
+    #endif  
+    
+    #if LOG_ON_FILE
+     test::logfile=fopen("pln.log","wt");
+     cout << "LOGGING TO FILE pln.log!\n";
+    #endif
 
-	haxx::printRealAtoms = true;
-	haxx::ArchiveTheorems = false;
+    haxx::printRealAtoms = true;
+    haxx::ArchiveTheorems = false;
 }
 
 string printTV (Handle h) {
@@ -392,71 +391,73 @@ void printOutgoing (Handle out) {
 
 struct min_conf { 
   bool operator()(Handle h) {
-	AtomSpace *nm = CogServer::getAtomSpace();
+    AtomSpace *nm = CogServer::getAtomSpace();
     return nm->getTV(h).getConfidence()>0.8;
   }
 };
 
 struct inhlink { 
   bool operator()(Handle h) {
-	AtomSpace *nm = CogServer::getAtomSpace();
-  	  return nm->inheritsType (nm->getType(h),INHERITANCE_LINK);
+    AtomSpace *nm = CogServer::getAtomSpace();
+      return nm->inheritsType (nm->getType(h),INHERITANCE_LINK);
   }
 };
 
 void fw_beta (void) {
   AtomSpace *nm = CogServer::getAtomSpace();
-  //nm->Reset(NULL);
-  ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
+  AtomTableWrapper *at = (AtomTableWrapper*) haxx::defaultAtomTableWrapper;
+
+  at->reset();
   vector<Handle> nodes=nm->filter_type(NODE);
   for (vector<Handle>::iterator i=nodes.begin(); i!=nodes.end(); i++)
     printf ("_node %d, %s, TV %s\n",nm->getType(*i),nm->getName(*i).c_str(),printTV(*i).c_str());
 
   vector<Handle> inhlink=nm->filter_type(INHERITANCE_LINK);
   for (vector<Handle>::iterator i=inhlink.begin(); i!=inhlink.end(); i++) {
-	vector<Handle> out=nm->getOutgoing(*i);
-	printf ("_link %d: %s ",nm->getType(*i),printTV(*i).c_str());
-	foreach (Handle h,out)
-	  cout << "<" << nm->getType(h) << "," << nm->getName(h) << ">,";
-	cout<<'\n';
+    vector<Handle> out=nm->getOutgoing(*i);
+    printf ("_link %d: %s ",nm->getType(*i),printTV(*i).c_str());
+    foreach (Handle h,out)
+      cout << "<" << nm->getType(h) << "," << nm->getName(h) << ">,";
+    cout<<'\n';
   }
   printf ("teste: %d\n",nm->inheritsType(INHERITANCE_LINK,LINK));
   printf ("teste: %d\n",nm->inheritsType(INHERITANCE_LINK,NODE));
   return;
-  //return ;
+  // From the above return it looks like the following is never run?
+  // ARI: safe TODELETE ?
   ForwardTestRuleProvider *rp=new ForwardTestRuleProvider();
   AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
-      Handle h1=nm->addNode (CONCEPT_NODE,"Human",tv);
-      Handle h2=nm->addNode (CONCEPT_NODE,"Mortal",tv);
-      Handle h3=nm->addNode (CONCEPT_NODE,"Socrates",tv);
-      std::vector<Handle> p1(2),p2(2);
-      p1[0]=h1; p1[1]=h2;
-      p2[0]=h3; p2[1]=h1;
-      Handle L1=nm->addLink(INHERITANCE_LINK,p1,tv);
-      Handle L2=nm->addLink(INHERITANCE_LINK,p2,tv);
+  Handle h1=at->addNode (CONCEPT_NODE,string("Human"),tv,true);
+  Handle h2=at->addNode (CONCEPT_NODE,string("Mortal"),tv,true);
+  Handle h3=at->addNode (CONCEPT_NODE,string("Socrates"),tv,true);
+  std::vector<Handle> p1(2),p2(2);
+  p1[0]=h1; p1[1]=h2;
+  p2[0]=h3; p2[1]=h1;
+  Handle L1=at->addLink(INHERITANCE_LINK,p1,tv,true);
+  Handle L2=at->addLink(INHERITANCE_LINK,p2,tv,true);
 
 
   Handle out,seed;
   do {
-		Rule *r=(*rp)[ 1 ];
-		Handle nextH;
-		vector<Vertex> args;
-		do
-		{
-			//int bah; cin >> bah;
-			//if (args.size()>=2) args.clear();
-			args.clear();
-			//seed = TheNM.GetRandomHandle(INHERITANCE_LINK);
-			args.push_back(L2);
-			args.push_back(L1);
-		}
-		while (!r->validate(args));
-		Vertex V=((r->compute(args)).GetValue());
-		out=get<Handle>(V);
-		const TruthValue& tv=nm->getTV(out);
-		cout<<printTV(out)<<'\n';
-		printOutgoing(out);
+        Rule *r=(*rp)[ 1 ];
+        Handle nextH;
+        vector<Vertex> args;
+        do
+        {
+            //int bah; cin >> bah;
+            //if (args.size()>=2) args.clear();
+            args.clear();
+            //seed = TheNM.GetRandomHandle(INHERITANCE_LINK);
+            args.push_back(L2);
+            args.push_back(L1);
+        }
+        while (!r->validate(args));
+        Vertex V=((r->compute(args)).GetValue());
+        out=get<Handle>(V);
+        const TruthValue& tv=nm->getTV(out);
+        cout<<printTV(out)<<'\n';
+        printOutgoing(out);
   } while (tv.isNullTv() || tv.getCount()<0.1);
 
   cout<<"Input:\n";
@@ -467,632 +468,632 @@ void fw_beta (void) {
 
 void PLNShell::Launch()
 {
-	Init();
-	Launch(NULL);
+    Init();
+    Launch(NULL);
 }
 
 void PLNShell::Launch(vtree *target)
 {
-	AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+    AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
 
-/*	vector<Vertex> targs, targs2;
-	targs.push_back(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "A"),
-					NewNode(CONCEPT_NODE, "B")
-			));
-	targs.push_back(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "B"),
-					NewNode(CONCEPT_NODE, "C")
-			));
-	targs2.push_back(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "A"),
-					NewNode(CONCEPT_NODE, "D")
-			));
-	targs2.push_back(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "B"),
-					NewNode(CONCEPT_NODE, "C")
-			));
+/*  vector<Vertex> targs, targs2;
+    targs.push_back(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "A"),
+                    NewNode(CONCEPT_NODE, "B")
+            ));
+    targs.push_back(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "B"),
+                    NewNode(CONCEPT_NODE, "C")
+            ));
+    targs2.push_back(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "A"),
+                    NewNode(CONCEPT_NODE, "D")
+            ));
+    targs2.push_back(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "B"),
+                    NewNode(CONCEPT_NODE, "C")
+            ));
 */
-//	assert(RuleRepository::Instance().rule[Deduction]->validate(targs));
-//	assert(!RuleRepository::Instance().rule[Deduction]->validate(targs));
+//  assert(RuleRepository::Instance().rule[Deduction]->validate(targs));
+//  assert(!RuleRepository::Instance().rule[Deduction]->validate(targs));
 
-	//AgentTest();
+    //AgentTest();
 
-/*	tests[31] = Btr<vtree > (new vtree(
-		mva((Handle)IMP,
-			mva((Handle)EXECUTION_LINK, CreateVar(haxx::defaultAtomTableWrapper)),
-			make_vtree(reward))));
+/*  tests[31] = Btr<vtree > (new vtree(
+        mva((Handle)IMP,
+            mva((Handle)EXECUTION_LINK, CreateVar(haxx::defaultAtomTableWrapper)),
+            make_vtree(reward))));
 */
-			/// Requires test/reasoning/bigdemo.xml 
+            /// Requires test/reasoning/bigdemo.xml 
 AtomSpace *nm = CogServer::getAtomSpace();
 int testi=0;
 printf("Insert test %d\n", testi++);
-			tests[0] = Btr<vtree > (new vtree(mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "Osama"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			)));
+            tests[0] = Btr<vtree > (new vtree(mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "Osama"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            )));
 
 printf("Insert test %d\n", testi++);
-			tests[1] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Amir"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)));
+            tests[1] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Amir"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )));
 printf("Insert test %d\n", testi++);
-			tests[2] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "wasKilled"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)));
+            tests[2] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "wasKilled"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )));
 printf("Insert test %d\n", testi++);
-			tests[3] = Btr<vtree >(new vtree(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								NewNode(FW_VARIABLE_NODE, "$OsamaFriend"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)));
+            tests[3] = Btr<vtree >(new vtree(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(FW_VARIABLE_NODE, "$OsamaFriend"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )));
 printf("Insert test %d\n", testi++);
-			tests[4] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Osama"),
-					NewNode(CONCEPT_NODE, "AlQaeda")
-			)));
+            tests[4] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Osama"),
+                    NewNode(CONCEPT_NODE, "AlQaeda")
+            )));
 printf("Insert test %d\n", testi++);
-			tests[5] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Osama"),
-					NewNode(CONCEPT_NODE, "Abu")
-			)));
+            tests[5] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Osama"),
+                    NewNode(CONCEPT_NODE, "Abu")
+            )));
 printf("Insert test %d\n", testi++);
-			tests[6] = Btr<vtree >(new vtree(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "AlQaeda"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			)));
+            tests[6] = Btr<vtree >(new vtree(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "AlQaeda"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            )));
 printf("Insert test %d\n", testi++);
-			tests[7] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Muhammad"),
-					NewNode(CONCEPT_NODE, "Osama")
-			)));
-			tests[8] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Muhammad"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			)));
-			
-			tests[9] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "killed"),
-					mva((Handle)LIST_LINK,
-								NewNode(FW_VARIABLE_NODE, "$killeri"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)));
-			
-			
-			/// Maybe broken:
+            tests[7] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Muhammad"),
+                    NewNode(CONCEPT_NODE, "Osama")
+            )));
+            tests[8] = Btr<vtree > (new vtree(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Muhammad"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            )));
+            
+            tests[9] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "killed"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(FW_VARIABLE_NODE, "$killeri"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )));
+            
+            
+            /// Maybe broken:
 printf("Insert test %d\n", testi++);
-			tests[10] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++") /*,
-					mva((Handle)LIST_LINK)*/
-			)));
-			
-			/// Requires test/reasoning/fetchdemo.xml 
+            tests[10] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++") /*,
+                    mva((Handle)LIST_LINK)*/
+            )));
+            
+            /// Requires test/reasoning/fetchdemo.xml 
 
-			tests[11] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
-				mva((Handle)AND_LINK,
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "teacher_say"),
-						mva((Handle)LIST_LINK,
-							NewNode(WORD_NODE, "fetch")
-						)
-					),
-					NewNode(FW_VARIABLE_NODE, "$1")					
-				),
-				mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++")
-				)
-			)));
+            tests[11] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
+                mva((Handle)AND_LINK,
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "teacher_say"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(WORD_NODE, "fetch")
+                        )
+                    ),
+                    NewNode(FW_VARIABLE_NODE, "$1")                 
+                ),
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++")
+                )
+            )));
 
-			tests[12] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
-				mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "C"),
-					NewNode(CONCEPT_NODE, "A")
-				),
-				mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "C"),
-					NewNode(CONCEPT_NODE, "B")
-				)
-			)));
+            tests[12] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
+                mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "C"),
+                    NewNode(CONCEPT_NODE, "A")
+                ),
+                mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "C"),
+                    NewNode(CONCEPT_NODE, "B")
+                )
+            )));
 
-			tests[13] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
-				mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "A"),
-					NewNode(CONCEPT_NODE, "C")
-				),
-				mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "C"),
-					NewNode(CONCEPT_NODE, "B")
-				)
-			)));
+            tests[13] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
+                mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "A"),
+                    NewNode(CONCEPT_NODE, "C")
+                ),
+                mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "C"),
+                    NewNode(CONCEPT_NODE, "B")
+                )
+            )));
 printf("Insert test %d\n", testi++);
-			tests[14] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
-				mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "A"),
-					NewNode(CONCEPT_NODE, "C")
-				),
-				mva((Handle)AND_LINK,
-					NewNode(CONCEPT_NODE, "B"),
-					NewNode(CONCEPT_NODE, "C")
-				)
-			)));
+            tests[14] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
+                mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "A"),
+                    NewNode(CONCEPT_NODE, "C")
+                ),
+                mva((Handle)AND_LINK,
+                    NewNode(CONCEPT_NODE, "B"),
+                    NewNode(CONCEPT_NODE, "C")
+                )
+            )));
 
-			tests[15] = Btr<vtree > (new vtree(
-				mva((Handle)IMPLICATION_LINK,
-					NewNode(FW_VARIABLE_NODE, "$1"),
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "teacher_say"),
-						mva((Handle)LIST_LINK,
-							NewNode(WORD_NODE, "fetch")
-						)					
-					)
-			)));
+            tests[15] = Btr<vtree > (new vtree(
+                mva((Handle)IMPLICATION_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$1"),
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "teacher_say"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(WORD_NODE, "fetch")
+                        )                   
+                    )
+            )));
 
-			tests[16] = Btr<vtree > (new vtree(
-				mva((Handle)IMPLICATION_LINK,
-					NewNode(FW_VARIABLE_NODE, "$1"),
-					mva((Handle)AND_LINK,
-						mva((Handle)EVALUATION_LINK,
-							NewNode(PREDICATE_NODE, "teacher_say"),
-							mva((Handle)LIST_LINK,
-								NewNode(WORD_NODE, "fetch")
-							)					
-						),
-						mva((Handle)EVALUATION_LINK,
-							NewNode(PREDICATE_NODE, "just_done"),
-							mva((Handle)LIST_LINK,
-								mva((Handle)EVALUATION_LINK,
-									NewNode(SCHEMA_NODE, "give"),
-									mva((Handle)LIST_LINK,
-										NewNode(CONCEPT_NODE, "ball"),
-										NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					)
-					)					
-				)
-			));
+            tests[16] = Btr<vtree > (new vtree(
+                mva((Handle)IMPLICATION_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$1"),
+                    mva((Handle)AND_LINK,
+                        mva((Handle)EVALUATION_LINK,
+                            NewNode(PREDICATE_NODE, "teacher_say"),
+                            mva((Handle)LIST_LINK,
+                                NewNode(WORD_NODE, "fetch")
+                            )                   
+                        ),
+                        mva((Handle)EVALUATION_LINK,
+                            NewNode(PREDICATE_NODE, "just_done"),
+                            mva((Handle)LIST_LINK,
+                                mva((Handle)EVALUATION_LINK,
+                                    NewNode(SCHEMA_NODE, "give"),
+                                    mva((Handle)LIST_LINK,
+                                        NewNode(CONCEPT_NODE, "ball"),
+                                        NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    )
+                    )                   
+                )
+            ));
 printf("Insert test %d\n", testi++);
-			tests[17] = Btr<vtree > (new vtree(
-				mva((Handle)IMPLICATION_LINK,
-					NewNode(FW_VARIABLE_NODE, "$1"),
-					mva((Handle)AND_LINK,
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "teacher_say"),
-						mva((Handle)LIST_LINK,
-							NewNode(WORD_NODE, "fetch")
-						)					
-					),
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "can_do"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "walktowards"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					)
-					)					
-				)
-			));
+            tests[17] = Btr<vtree > (new vtree(
+                mva((Handle)IMPLICATION_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$1"),
+                    mva((Handle)AND_LINK,
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "teacher_say"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(WORD_NODE, "fetch")
+                        )                   
+                    ),
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "can_do"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "walktowards"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    )
+                    )                   
+                )
+            ));
 
-			tests[18] = Btr<vtree > (new vtree(
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "just_done"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "give"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "ball"),
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					)
-			));
+            tests[18] = Btr<vtree > (new vtree(
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "just_done"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "give"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "ball"),
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    )
+            ));
 
-			tests[19] = Btr<vtree > (new vtree(
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "do"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "give"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "ball"),
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					)
-			));
-			
-		tests[20] = Btr<vtree > (new vtree(
-				mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++")
-				)
-			));
+            tests[19] = Btr<vtree > (new vtree(
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "do"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "give"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "ball"),
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    )
+            ));
+            
+        tests[20] = Btr<vtree > (new vtree(
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++")
+                )
+            ));
 
-		tests[21] = Btr<vtree > (new vtree(
-				mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "test2"),
-					mva((Handle)LIST_LINK,
-						NewNode(CONCEPT_NODE, "Osama")
-					)
-				)
-			));
+        tests[21] = Btr<vtree > (new vtree(
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "test2"),
+                    mva((Handle)LIST_LINK,
+                        NewNode(CONCEPT_NODE, "Osama")
+                    )
+                )
+            ));
 printf("Insert test %d\n", testi++);
-		tests[22] = Btr<vtree > (new vtree(
-			mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "just_done"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "give"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "ball"),
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					)
-				));
+        tests[22] = Btr<vtree > (new vtree(
+            mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "just_done"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "give"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "ball"),
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    )
+                ));
 
-			tests[23] = Btr<vtree > (new vtree(
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "near"),
-						mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "teacher")
-						)
-					)					
-				)
-			);
+            tests[23] = Btr<vtree > (new vtree(
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "near"),
+                        mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "teacher")
+                        )
+                    )                   
+                )
+            );
 
-			tests[24] = Btr<vtree > (new vtree(
-					mva((Handle)SIMULTANEOUS_AND_LINK,
-						NewNode(WORD_NODE, "blockword"),
-						NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
-					)					
-				)
-			);
+            tests[24] = Btr<vtree > (new vtree(
+                    mva((Handle)SIMULTANEOUS_AND_LINK,
+                        NewNode(WORD_NODE, "blockword"),
+                        NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
+                    )                   
+                )
+            );
 
-			tests[25] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
-				NewNode(FW_VARIABLE_NODE, "$1"),
-				mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++")
-				)
-			)));
+            tests[25] = Btr<vtree > (new vtree(mva((Handle)IMPLICATION_LINK,
+                NewNode(FW_VARIABLE_NODE, "$1"),
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++")
+                )
+            )));
 
-			tests[26] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-				NewNode(PREDICATE_NODE, "found_under"),
-					mva((Handle)LIST_LINK,
-						NewNode(CONCEPT_NODE, "toy_6"),
-						NewNode(FW_VARIABLE_NODE, "$1")
-					)
-			)));
+            tests[26] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                NewNode(PREDICATE_NODE, "found_under"),
+                    mva((Handle)LIST_LINK,
+                        NewNode(CONCEPT_NODE, "toy_6"),
+                        NewNode(FW_VARIABLE_NODE, "$1")
+                    )
+            )));
 printf("Insert test %d\n", testi++);
-			  tests[27] = Btr<vtree > (new vtree(mva((Handle)AND_LINK,
-				mva((Handle)INHERITANCE_LINK,				
-					NewNode(CONCEPT_NODE, "toy_6"),
-					NewNode(CONCEPT_NODE, "toy")),
-				mva((Handle)INHERITANCE_LINK,				
-					NewNode(CONCEPT_NODE, "red_bucket_6"),
-					NewNode(CONCEPT_NODE, "bucket")),
-				mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "placed_under"),
-						mva((Handle)LIST_LINK,
-							NewNode(CONCEPT_NODE, "toy_6"),
-							NewNode(CONCEPT_NODE, "red_bucket_6")
-						)
-				)
-			)));
+              tests[27] = Btr<vtree > (new vtree(mva((Handle)AND_LINK,
+                mva((Handle)INHERITANCE_LINK,               
+                    NewNode(CONCEPT_NODE, "toy_6"),
+                    NewNode(CONCEPT_NODE, "toy")),
+                mva((Handle)INHERITANCE_LINK,               
+                    NewNode(CONCEPT_NODE, "red_bucket_6"),
+                    NewNode(CONCEPT_NODE, "bucket")),
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "placed_under"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(CONCEPT_NODE, "toy_6"),
+                            NewNode(CONCEPT_NODE, "red_bucket_6")
+                        )
+                )
+            )));
 
-			tests[28] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Britney"),
-								NewNode(CONCEPT_NODE, "Amir")
-			))));
+            tests[28] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Britney"),
+                                NewNode(CONCEPT_NODE, "Amir")
+            ))));
 
-			tests[29] = Btr<vtree > (new vtree(mva((Handle)FORALL_LINK,
-				mva((Handle)LIST_LINK), //empty dummy
-				mva((Handle)INHERITANCE_LINK,
-					NewNode(FW_VARIABLE_NODE, "$i"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			))));
+            tests[29] = Btr<vtree > (new vtree(mva((Handle)FORALL_LINK,
+                mva((Handle)LIST_LINK), //empty dummy
+                mva((Handle)INHERITANCE_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$i"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            ))));
 
-			tests[30] = Btr<vtree > (new vtree(mva((Handle)VARIABLE_SCOPE_LINK,
-				mva((Handle)LIST_LINK), //empty dummy
-				mva((Handle)INHERITANCE_LINK,
-					NewNode(FW_VARIABLE_NODE, "$i"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			))));
+            tests[30] = Btr<vtree > (new vtree(mva((Handle)VARIABLE_SCOPE_LINK,
+                mva((Handle)LIST_LINK), //empty dummy
+                mva((Handle)INHERITANCE_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$i"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            ))));
 
-			tests[31] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
-						NewNode(CONCEPT_NODE, "Possible"),
-						mva((Handle)LIST_LINK,
-							NewNode(FW_VARIABLE_NODE, "$elmerist")
-						)
-					)));
+            tests[31] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+                        NewNode(CONCEPT_NODE, "Possible"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(FW_VARIABLE_NODE, "$elmerist")
+                        )
+                    )));
 
 printf("Insert tests init\n");
-	Btr<BackInferenceTreeRootT> Bstate (new BITNodeRoot(
-		(target ? meta(target) : tests[0]),
-		new DefaultVariableRuleProvider));
+    Btr<BackInferenceTreeRootT> Bstate (new BITNodeRoot(
+        (target ? meta(target) : tests[0]),
+        new DefaultVariableRuleProvider));
 printf("BITNodeRoot init ok\n");
-	BackInferenceTreeRootT* temp_state, *state = Bstate.get();
+    BackInferenceTreeRootT* temp_state, *state = Bstate.get();
 
-	int a1T, a2T, bT, tempi=0;
-	string a10, a11, a20, a21, b1, b2;
-	vtree avt1, avt2, bvt;
-	int qrule=NULL;
-	Rule::MPs rule_args;
-	bindingsT new_bindings;
+    int a1T, a2T, bT, tempi=0;
+    string a10, a11, a20, a21, b1, b2;
+    vtree avt1, avt2, bvt;
+    int qrule=NULL;
+    Rule::MPs rule_args;
+    bindingsT new_bindings;
 
  try {
-		printf("Root = %ld\n", (long)state);
-		
-	while (1)
-	{
-		puts("(h = help):");
-		char c = getc(stdin);
-		char temps[1000];
-		long h=0, h2=0;
+        printf("Root = %ld\n", (long)state);
+        
+    while (1)
+    {
+        puts("(h = help):");
+        char c = getc(stdin);
+        char temps[1000];
+        long h=0, h2=0;
         int j;
-		int test_i=0;
-		int s_i=0, tempi;
-		bool axioms_ok;
-		boost::shared_ptr<set<Handle> > ts;
-		Vertex v;
-		Handle eh=NULL;
-		bool using_root = true;
-		
-		#if LOG_ON_FILE
-			save_log();
-		#endif
-		
-		haxx::AllowFW_VARIABLENODESinCore = true; //false;
+        int test_i=0;
+        int s_i=0, tempi;
+        bool axioms_ok;
+        boost::shared_ptr<set<Handle> > ts;
+        Vertex v;
+        Handle eh=NULL;
+        bool using_root = true;
+        
+        #if LOG_ON_FILE
+            save_log();
+        #endif
+        
+        haxx::AllowFW_VARIABLENODESinCore = true; //false;
         //iAtomTableWrapper* defaultAtomTableWrapper;
         AtomTableWrapper& TheNM = *((AtomTableWrapper*) haxx::defaultAtomTableWrapper);
-		
-		switch (c)
-		{
-		case 'm': printf("%d\n", test::_test_count); break;
-			case 'd':
+        
+        switch (c)
+        {
+        case 'm': printf("%d\n", test::_test_count); break;
+            case 'd':
 #if LOCAL_ATW
-			((LocalATW*)haxx::defaultAtomTableWrapper)->DumpCore(CONCEPT_NODE);
+            ((LocalATW*)haxx::defaultAtomTableWrapper)->DumpCore(CONCEPT_NODE);
 #else
-			cin >> h;
-			ts = 
-			((AtomTableWrapper*)haxx::defaultAtomTableWrapper)->getHandleSet((Type)h,"");
-			foreach(Handle ti, *ts)
-			{
-				if (nm->getTV(ti).isNullTv())
-				{
-					puts("NULL TV !!!");
-					getc(stdin);
-				}
-				printTree(ti,0,0);
-			}			
+            cin >> h;
+            ts = 
+            ((AtomTableWrapper*)haxx::defaultAtomTableWrapper)->getHandleSet((Type)h,"");
+            foreach(Handle ti, *ts)
+            {
+                if (nm->getTV(ti).isNullTv())
+                {
+                    puts("NULL TV !!!");
+                    getc(stdin);
+                }
+                printTree(ti,0,0);
+            }           
 #endif
-				 break;
-			case 'k': state->LoopCheck(); break;
-			case 'D': test::debugger_control = (test::debugger_control?false:true);
-/*						for (int zz=0;zz<1000;zz++)
-							RuleRepository::Instance().rule[ForAll]->o2iMeta(
-								meta(new vtree(mva((Handle)EVALUATION_LINK,
-								NewNode(PREDICATE_NODE, "friendOf"),
-								mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Britney"),
-								NewNode(CONCEPT_NODE, "Amir")
-								)))));
+                 break;
+            case 'k': state->LoopCheck(); break;
+            case 'D': test::debugger_control = (test::debugger_control?false:true);
+/*                      for (int zz=0;zz<1000;zz++)
+                            RuleRepository::Instance().rule[ForAll]->o2iMeta(
+                                meta(new vtree(mva((Handle)EVALUATION_LINK,
+                                NewNode(PREDICATE_NODE, "friendOf"),
+                                mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Britney"),
+                                NewNode(CONCEPT_NODE, "Amir")
+                                )))));
 
-							//nm->getHandle(NODE, "temmpo");
-						puts("...");*/
-						break;
-			case 'a': cin >> h; state->extract_plan((Handle)h); break;
-			case 'A': cin >> h;
-							((BackInferenceTreeRootT*)h)->printArgs();
-							
-							break;
-			case 'U': cin >> h;
-						//((BackInferenceTreeRootT*)state->children[0].begin()->prover)
-						state->print_parents((BITNode*)h);
-						break;
-			case 'b': cin >> h;
-						cprintf(-10, "Target:\n");
-						((BackInferenceTreeRootT*)h)->printTarget();
-						cprintf(-10, "Results:\n");
-						((BackInferenceTreeRootT*)h)->printResults();
+                            //nm->getHandle(NODE, "temmpo");
+                        puts("...");*/
+                        break;
+            case 'a': cin >> h; state->extract_plan((Handle)h); break;
+            case 'A': cin >> h;
+                            ((BackInferenceTreeRootT*)h)->printArgs();
+                            
+                            break;
+            case 'U': cin >> h;
+                        //((BackInferenceTreeRootT*)state->children[0].begin()->prover)
+                        state->print_parents((BITNode*)h);
+                        break;
+            case 'b': cin >> h;
+                        cprintf(-10, "Target:\n");
+                        ((BackInferenceTreeRootT*)h)->printTarget();
+                        cprintf(-10, "Results:\n");
+                        ((BackInferenceTreeRootT*)h)->printResults();
 
-						cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
+                        cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
 
-						 break;
-/*			case 'B': cin >> h; cprintf(0, "Node has results & bindings:\n");
-						foreach(const BoundVertex& bv, *((BackInferenceTreeRootT*)h)->direct_results)
-						{
-							cprintf(0,"[%d]\n", v2h(bv.value));
-							if (bv.bindings)
-								foreach(hpair phh, *bv.bindings)
-								{
-									printTree(phh.first,0,0);
-									cprintf(0,"=>");
-									printTree(phh.second,0,0);
-								}
-							}
-						 break;*/
-			case 'H': 
-				//cin >> h; cprintf(0,"Origin Node #%d\n", state->hsource[(Handle)h]); break;
-						fflush(stdin);
-						cin >> bT; cin >> b1; cin >> b2;
-						cin >> a1T; cin >> a10; cin >> a11;
-						cin >> a2T; cin >> a20; cin >> a21;
-						puts("Enter Rule #: ");
-						cin >> qrule;
+                         break;
+/*          case 'B': cin >> h; cprintf(0, "Node has results & bindings:\n");
+                        foreach(const BoundVertex& bv, *((BackInferenceTreeRootT*)h)->direct_results)
+                        {
+                            cprintf(0,"[%d]\n", v2h(bv.value));
+                            if (bv.bindings)
+                                foreach(hpair phh, *bv.bindings)
+                                {
+                                    printTree(phh.first,0,0);
+                                    cprintf(0,"=>");
+                                    printTree(phh.second,0,0);
+                                }
+                            }
+                         break;*/
+            case 'H': 
+                //cin >> h; cprintf(0,"Origin Node #%d\n", state->hsource[(Handle)h]); break;
+                        fflush(stdin);
+                        cin >> bT; cin >> b1; cin >> b2;
+                        cin >> a1T; cin >> a10; cin >> a11;
+                        cin >> a2T; cin >> a20; cin >> a21;
+                        puts("Enter Rule #: ");
+                        cin >> qrule;
 
-						bvt = (mva((Handle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
-						avt1 = (mva((Handle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
-						avt2 = (mva((Handle)a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
+                        bvt = (mva((Handle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
+                        avt1 = (mva((Handle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
+                        avt2 = (mva((Handle)a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
 
-						rawPrint(bvt, bvt.begin(), -2);
-						rawPrint(avt1, avt1.begin(), -2);
-						rawPrint(avt2, avt2.begin(), -2);
+                        rawPrint(bvt, bvt.begin(), -2);
+                        rawPrint(avt1, avt1.begin(), -2);
+                        rawPrint(avt2, avt2.begin(), -2);
 
-						rule_args.clear();
-						rule_args.push_back(BBvtree(new BoundVTree(avt1)));
-						if (a2T)
-							rule_args.push_back(BBvtree(new BoundVTree(avt2)));
-						else
-							puts("Passing 1 arg.");
+                        rule_args.clear();
+                        rule_args.push_back(BBvtree(new BoundVTree(avt1)));
+                        if (a2T)
+                            rule_args.push_back(BBvtree(new BoundVTree(avt2)));
+                        else
+                            puts("Passing 1 arg.");
 
-						printf("BITNode %ld.", (long) state->FindNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
+                        printf("BITNode %ld.", (long) state->FindNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
 
-						break;
-			case 'F':	tempi = currentDebugLevel;
-						currentDebugLevel = 10;
-						state->printFitnessPool(); break;
-						currentDebugLevel = tempi;
-			case 'W':	if (using_root)
-							{
-								temp_state = state;
-								cin >> h;
-								state = (BackInferenceTreeRootT*)h;
+                        break;
+            case 'F':   tempi = currentDebugLevel;
+                        currentDebugLevel = 10;
+                        state->printFitnessPool(); break;
+                        currentDebugLevel = tempi;
+            case 'W':   if (using_root)
+                            {
+                                temp_state = state;
+                                cin >> h;
+                                state = (BackInferenceTreeRootT*)h;
 
-								using_root = false;
-							}
-							else
-							{
-								state = temp_state;
+                                using_root = false;
+                            }
+                            else
+                            {
+                                state = temp_state;
 
-								using_root = true;
-							}
-							break;
+                                using_root = true;
+                            }
+                            break;
 
-			case 'h': PLNhelp(); break;
-			case 'q': exit(0); break;
-			case '=': cin >> h; cin >> h2; cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
-			case 'p': cin >> h; printTree((Handle)h,0,0); break;
-			case 'e':	try { state->evaluate(); }
-						catch(string s) { cprintf(0,s.c_str()); }
-						break;
-			
-			case 'E': cin >> h;
-						if (h == 0)
-							h = (long)state;
-//							h = (int)state->children[0].begin()->prover;
-						((BackInferenceTreeRootT*)h)->printResults();
-/*						foreach(const set<BoundVertex>& eval_res_set, ((BackInferenceTreeRootT*)h)->GetEvalResults())
-							foreach(const BoundVertex& eval_res, eval_res_set)
-								printTree(v2h(eval_res.value),0,-10);*/
-						break;
-			case 'i': cin >> h;
-						((BackInferenceTreeRootT*)h)->expandNextLevel();
-/*						foreach(const parent_link& p, ((BackInferenceTreeRootT*)h)->GetParents())
-							p.link->removeIfFailure((BackInferenceTreeRootT*)h);*/
-						break;
+            case 'h': PLNhelp(); break;
+            case 'q': exit(0); break;
+            case '=': cin >> h; cin >> h2; cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
+            case 'p': cin >> h; printTree((Handle)h,0,0); break;
+            case 'e':   try { state->evaluate(); }
+                        catch(string s) { cprintf(0,s.c_str()); }
+                        break;
+            
+            case 'E': cin >> h;
+                        if (h == 0)
+                            h = (long)state;
+//                          h = (int)state->children[0].begin()->prover;
+                        ((BackInferenceTreeRootT*)h)->printResults();
+/*                      foreach(const set<BoundVertex>& eval_res_set, ((BackInferenceTreeRootT*)h)->GetEvalResults())
+                            foreach(const BoundVertex& eval_res, eval_res_set)
+                                printTree(v2h(eval_res.value),0,-10);*/
+                        break;
+            case 'i': cin >> h;
+                        ((BackInferenceTreeRootT*)h)->expandNextLevel();
+/*                      foreach(const parent_link& p, ((BackInferenceTreeRootT*)h)->GetParents())
+                            p.link->removeIfFailure((BackInferenceTreeRootT*)h);*/
+                        break;
 
-			case 'n': state->expandNextLevel(); break;
-			case 't': cin >> h; state->print_trail((Handle)h); break;
-			case 'f': state->expandFittest(); break;
+            case 'n': state->expandNextLevel(); break;
+            case 't': cin >> h; state->print_trail((Handle)h); break;
+            case 'f': state->expandFittest(); break;
 
-			case 'P': cin >> h;
-						if (h == 0)
-							h = (long) state->children[0].begin()->prover;
-						((BackInferenceTreeRootT*)h)->print(); break;
-			case 'O':	cin >> h;
-//						((BITNode*)h)->PrintUsers();
-						foreach(const parent_link<BITNode>& p, ((BITNode*)h)->GetParents())
-							cprintf(-10,"User Node = %lu\n", (ulong) p.link);
-						break;
-//			case 'l': cprintf(0,"%d\n", state->exec_pool.size()); break;
-				
-			case 's':	cin >> h; //Give max nr of steps that we can take.
+            case 'P': cin >> h;
+                        if (h == 0)
+                            h = (long) state->children[0].begin()->prover;
+                        ((BackInferenceTreeRootT*)h)->print(); break;
+            case 'O':   cin >> h;
+//                      ((BITNode*)h)->PrintUsers();
+                        foreach(const parent_link<BITNode>& p, ((BITNode*)h)->GetParents())
+                            cprintf(-10,"User Node = %lu\n", (ulong) p.link);
+                        break;
+//          case 'l': cprintf(0,"%d\n", state->exec_pool.size()); break;
+                
+            case 's':   cin >> h; //Give max nr of steps that we can take.
                         j = (long) h;
-				
-						printf("\nTemporarily killing the log with level -3.\n");
-			
-						tempi = currentDebugLevel;
-						currentDebugLevel = -3;
-			
-						state->infer(j, 0.000001f, 0.01f);
-						state->printResults();
-						printf("\n%ld $ remaining.\n", h);
-			
-						currentDebugLevel = tempi;
+                
+                        printf("\nTemporarily killing the log with level -3.\n");
+            
+                        tempi = currentDebugLevel;
+                        currentDebugLevel = -3;
+            
+                        state->infer(j, 0.000001f, 0.01f);
+                        state->printResults();
+                        printf("\n%ld $ remaining.\n", h);
+            
+                        currentDebugLevel = tempi;
 
-						break;
-										
-			case 'S':	s_i=0;
-						cin >> h;
-			
-						for (int k=0;k<h;k++)
-							state->expandFittest();
+                        break;
+                                        
+            case 'S':   s_i=0;
+                        cin >> h;
+            
+                        for (int k=0;k<h;k++)
+                            state->expandFittest();
 
-						break;
-		
-			case 'r': cin >> test_i;
-						Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider));
-						state = Bstate.get();
-						using_root = true;
+                        break;
+        
+            case 'r': cin >> test_i;
+                        Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider));
+                        state = Bstate.get();
+                        using_root = true;
 
-						cprintf(0,"Now evaluating: ");
-						rawPrint(*tests[test_i],tests[test_i]->begin(),0);
-						cprintf(0,"\n");
-						
-//						state->expandNextLevel();
-						break;
-			case 'x': //puts("Give the XML input file name: "); 
-							cin >> temps;
-						haxx::ArchiveTheorems = true; 
-						//nm->Reset(NULL);
+                        cprintf(0,"Now evaluating: ");
+                        rawPrint(*tests[test_i],tests[test_i]->begin(),0);
+                        cprintf(0,"\n");
+                        
+//                      state->expandNextLevel();
+                        break;
+            case 'x': //puts("Give the XML input file name: "); 
+                            cin >> temps;
+                        haxx::ArchiveTheorems = true; 
+                        //nm->Reset(NULL);
                         ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
-					 	axioms_ok = TheNM.loadAxioms(temps);
-						haxx::ArchiveTheorems = false;
-						puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
-			
-						puts("Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");
+                        axioms_ok = TheNM.loadAxioms(temps);
+                        haxx::ArchiveTheorems = false;
+                        puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
+            
+                        puts("Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");
 
-						break;
-			case 'c': RECORD_TRAILS = !RECORD_TRAILS;
-						cprintf(0, "RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
-						break;
-			case '-': cin >> h; currentDebugLevel = -(int)h; break;
+                        break;
+            case 'c': RECORD_TRAILS = !RECORD_TRAILS;
+                        cprintf(0, "RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
+                        break;
+            case '-': cin >> h; currentDebugLevel = -(int)h; break;
 
-			case 'R':
-				fw_beta();
-				break;
-			default: c = c-'0';
-					if (c >= 0 && c <= 10)
-						currentDebugLevel = c;
-					break;
-		}
-	}
+            case 'R':
+                fw_beta();
+                break;
+            default: c = c-'0';
+                    if (c >= 0 && c <= 10)
+                        currentDebugLevel = c;
+                    break;
+        }
+    }
  } catch( exception& e )
     {
         cout << endl << "Exception: "
              << e.what() << endl;
-    }	
+    }   
 }
 
 void PLNhelp()
 {
-	puts("Relevant shell commands:\n\
+    puts("Relevant shell commands:\n\
 \n\
 (NOTE THE DIFFERENCE BETWEEN ARG TYPES:\n\
 Some commands take Handles, some take BITNodes.\n\
 \n\
 q - quit\n\
--3 - Minimal log level	\n\
+-3 - Minimal log level  \n\
 0 - normal log level\n\
 2 - recommended maximally informative log level\n\
 r #n - Load in a new pre-defined target #n (from PLNShell.cc)\n\
@@ -1118,5 +1119,5 @@ n - expand the tree's whole next level (usually not recommended)\n\
 e - manually evaluate the current tree (usually not recommended)\n\
 \n\
 These should be bug-free, but there's no type checking of parameters, so providing eg. BIT node number instead of Handle number will SegFault.");
-	
+    
 }
