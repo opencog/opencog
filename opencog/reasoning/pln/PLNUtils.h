@@ -96,8 +96,10 @@ using namespace std;
 
 /// meta is a tree of Vertices wrapped in a boost::shared_ptr
 typedef Btr<tree<Vertex> > meta;
-/// hpair is a pair of Handles
-typedef pair<Handle,Handle> hpair;
+/// hpair is a pair of Handles 
+//typedef pair<Handle,Handle> hpair;
+/// two vhpairs (explicit links to versioned TruthValues)
+typedef pair<vhpair,vhpair> hpair;
 
 /** 
  * vector2 appears to provide an easy way to instantiate vectors with 1-4 items.
@@ -144,7 +146,7 @@ void rawPrint(tree<Vertex>::iterator top, int _rloglevel);
 // Check whether things are equivalent?
 bool unifiesTo(const vtree& lhs, const vtree& rhs, map<Handle, vtree>& Lbindings, map<Handle, vtree>& Rbindings, bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-				map<Handle,Handle>& bindings);
+				map<vhpair,vhpair>& bindings);
 
 // Make a string with count # of the char c
 string repeatc(const char c, const int count);
@@ -255,8 +257,8 @@ std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix)
 
 #endif
 
-typedef std::map<Handle, Handle> bindingsT;
-typedef std::map<Handle, vtree>  bindingsVTreeT;
+typedef std::map<vhpair, vhpair> bindingsT;
+typedef std::map<vhpair, vtree>  bindingsVTreeT;
 
 struct ModifiedVTree : public vtree
 {
@@ -529,7 +531,7 @@ bool vectorHas(std::vector<T> box, T key)
 /*template<typename T>
 void swap(T* a, T* b) { T temp = *a; *a = *b; *b = temp; }*/
 
-void printTree(Handle h, int level = 0, int LogLevel = 5);
+void printTree(vhpair h, int level = 0, int LogLevel = 5);
 std::string GetRandomString(int size);
 
 bool equal(Handle A, Handle B);
@@ -587,7 +589,7 @@ class DropVertexBindings
 		if (!rhs.bindings)
 			return rhs.value;
 		
-		bindingsT::const_iterator i = rhs.bindings->find(boost::get<Handle>(rhs.value));
+		bindingsT::const_iterator i = rhs.bindings->find(boost::get<vhpair>(rhs.value));
 		
 		/// The variable may be bound to another variable, so we have to call this recursively.
 		
@@ -647,7 +649,7 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target, i
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomTableWrapper* table);
 
 void bind(BoundVTree& bbvt, hpair new_bind);
-meta bind_vtree(vtree &targ, const map<Handle, Handle>& binds);
+meta bind_vtree(vtree &targ, const bindingsT& binds);
 void bind_Bvtree(meta arg, const bindingsVTreeT& binds);
 void removeRecursionFromHandleHandleMap(bindingsT& ret_bindings);
 
@@ -738,7 +740,7 @@ printf("removeRecursionFromMap OK!\n");
 void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret);
 
 bool substitutableTo(Handle from,Handle to,
-						map<Handle,Handle>& bindings);
+						bindingsT& bindings);
 
 } // namespace reasoning
 

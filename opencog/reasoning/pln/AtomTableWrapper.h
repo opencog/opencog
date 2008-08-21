@@ -63,7 +63,7 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! @param what truth value they should be given?
     //! @param fresh allows atoms to be added with the same name/outgoing set
     //! @param some kind of mechanism to manage memory?
-	Handle addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
+	vhpair addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
 public:
     //! Which XML files have been loaded by PLN to populate the AtomSpace
 	set<std::string> loadedFiles;
@@ -121,13 +121,13 @@ public:
 	int implicationConstruction();
 
     //! Add atom from tree vertex
-	Handle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh,
+	vhpair addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh,
             bool managed);
     //! Add link
-	virtual Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+	virtual vhpair addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true)=0;
     //! Add node
-	virtual Handle addNode(Type T, const std::string& name,
+	virtual vhpair addNode(Type T, const std::string& name,
             const TruthValue& tvn, bool fresh, bool managed=true)=0;
 
 // TODELETE not called from anywhere
@@ -137,10 +137,16 @@ public:
     //! return a random handle of type T
 	Handle getRandomHandle(Type T);
 
+    //! Adds vhpair h and linked nodes (if h is a link) to AtomSpace again with
+    //! fresh set to true
+	vhpair freshened(vhpair h, bool managed);
     //! Adds handle h and linked nodes (if h is a link) to AtomSpace again with
     //! fresh set to true
-	Handle freshened(Handle h, bool managed);
+	vhpair freshened(Handle h, bool managed);
 
+    //! Whether the vhpair h has high enough TruthValue to be consider a binary True.
+    //! @todo move to TruthValue classes
+	bool binaryTrue(vhpair h);
     //! Whether the handle h has high enough TruthValue to be consider a binary True.
     //! @todo move to TruthValue classes
 	bool binaryTrue(Handle h);
@@ -148,28 +154,28 @@ public:
     //! @todo Move the below conversion tools in a Converter class
     
     //! Wrap h in a NOT_LINK and return that 
-	Handle invert(Handle h);
+	vhpair invert(vhpair h);
     //! Convert from AND to OR link
-	Handle AND2ORLink(Handle& andL, Type _ANDLinkType, Type _ORLinkType);
+	vhpair AND2ORLink(vhpair& andL, Type _ANDLinkType, Type _ORLinkType);
     //! Convert from Equivalence to Implication link
-	hpair Equi2ImpLink(Handle& exL);
+	hpair Equi2ImpLink(vhpair& exL);
     //! Convert from Existance to For All link
-	Handle Exist2ForAllLink(Handle& exL);
+	vhpair Exist2ForAllLink(vhpair& exL);
     //! Convert from OR to AND link
-	Handle OR2ANDLink(Handle& andL);
+	vhpair OR2ANDLink(vhpair& andL);
     //! Convert from AND to OR link
-	Handle AND2ORLink(Handle& andL);
+	vhpair AND2ORLink(vhpair& andL);
 	
     //! Add Link via dummy contexts method
-    Handle addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
+    vhpair addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed);
     //! Add Node via dummy contexts method
-    Handle addNodeDC(Type t, const string& name, const TruthValue& tvn,
+    vhpair addNodeDC(Type t, const string& name, const TruthValue& tvn,
             bool fresh, bool managed);
     //! Add concrete atom using dummy contexts if it already exists
-    Handle addAtomDC(Atom &a, bool fresh, bool managed);
+    vhpair addAtomDC(Atom &a, bool fresh, bool managed);
 
-    Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+    vhpair directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);
 
 // ARI: ok to delete this? TODELETE
@@ -194,9 +200,9 @@ public:
 	FIMATW() : next_free_pat_id(30001) {}
 	virtual ~FIMATW() {}
 
-	Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+	vhpair addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true);
-	Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
+	vhpair addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
 };
 
@@ -212,9 +218,9 @@ public:
 		return *instance;
     }
     
-	Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+	vhpair addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true);
-	Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
+	vhpair addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
 	Btr<set<Handle> > getHandleSet(Type,const string&,bool = false);
 
@@ -232,9 +238,9 @@ public:
 		return *instance;
     }
     
-	Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+	vhpair addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true);
-	Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
+	vhpair addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
 	Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
 

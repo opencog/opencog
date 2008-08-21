@@ -42,7 +42,7 @@ public:
 		delete[] tvs;
 
 //haxx::
-		Handle ret = destTable->addLink(OUTPUT_LINK_TYPE, HandleSeq(),
+		vhpair ret = destTable->addLink(OUTPUT_LINK_TYPE, HandleSeq(),
 				*retTV,
 				RuleResultFreshness);	
 //				false);

@@ -80,3 +80,18 @@ bool eqVersionHandle::operator()(VersionHandle vh1, VersionHandle vh2) const
             !CoreUtils::compare(vh1.substantive, vh2.substantive));
 }
 
+bool VersionHandle::operator==(const VersionHandle &other) const
+{
+    struct eqVersionHandle comp;
+    return comp(*this, other);
+}
+
+bool VersionHandle::operator<(const VersionHandle &other) const {
+    // doesn't really matter
+    return substantive < other.substantive;
+}
+
+bool VersionHandle::operator>(const VersionHandle &other) const {
+    // doesn't really matter
+    return substantive > other.substantive;
+}

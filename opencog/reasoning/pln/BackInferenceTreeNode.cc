@@ -262,7 +262,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 void BITNode::ForceTargetVirtual(spawn_mode spawning)
 {
     AtomSpace *nm = CogServer::getAtomSpace();
-    Handle *ph = v2h(&(*raw_target->begin()));
+    Handle *ph = v2hPtr(&(*raw_target->begin()));
     
     if (ph && nm->isReal(*ph) && nm->getType(*ph) != FW_VARIABLE_NODE)
     {
@@ -271,7 +271,8 @@ void BITNode::ForceTargetVirtual(spawn_mode spawning)
         boost::shared_ptr<set<BoundVertex> > directResult(new set<BoundVertex>);
         
         /// Though the target was conceived directly, it is under my pre-bindings!
-        directResult->insert(BoundVertex(*ph, Btr<bindingsT>(new bindingsT)));
+        directResult->insert(BoundVertex(vhpair(*ph,NULL_VERSION_HANDLE),
+                    Btr<bindingsT>(new bindingsT)));
 
         addDirectResult(directResult, spawning);
         
@@ -332,9 +333,9 @@ Btr<set<BoundVertex> > results;
         Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
         foreach(const BoundVertex& new_result, *results)
-            if (getTruthValue(v2h(new_result.value)).getConfidence() > min_confidence)
+            if (getTruthValue(v2v(new_result.value)).getConfidence() > min_confidence)
             {
-                printTree(v2h(new_result.value),0,0);
+                printTree(v2v(new_result.value),0,0);
 
                 nontrivial_results->insert(new_result);
             }
@@ -610,7 +611,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
     foreach(const BoundVertex& bv, *directResult)
     {
         tlog(-2, "Added direct result:\n");
-        printTree(v2h(bv.value), 0, -2);
+        printTree(v2v(bv.value), 0, -2);
     }
 
     foreach(const BoundVertex& bv, *directResult)
@@ -1016,11 +1017,11 @@ void BITNode::TryClone(hpair binding) const
 tlog(-2, "TryClone next...\n");
 
 /// when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
-
-        map<Handle, Handle>::const_iterator it = find_if(p.bindings->begin(), p.bindings->end(),
-                bind(equal_to<Handle>(),
-                    bind(&second<Handle,Handle>, _1),
-                    binding.first));
+        bindingsT::const_iterator it =
+            find_if(p.bindings->begin(), p.bindings->end(),
+            bind(equal_to<vhpair>(),
+                boost::bind(&second<vhpair,vhpair>, _1),
+                binding.first));
 
         if (p.bindings->end() != it)
         {
@@ -1394,7 +1395,7 @@ next_args:;
 BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) const
 {
     vector<Vertex> ForAllArgs;
-    BoundVertex new_result((Handle)ATOM);
+    BoundVertex new_result(vhpair((Handle)ATOM,NULL_VERSION_HANDLE));
 
     const float min_confidence = 0.0001f;
 
@@ -1404,9 +1405,9 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
         tlog(0,"Generalizing results:\n");
 
         foreach(const BoundVertex& b, *bvs)
-            if (getTruthValue(v2h(b.value)).getConfidence() > min_confidence)
+            if (getTruthValue(v2v(b.value)).getConfidence() > min_confidence)
             {
-                printTree(v2h(b.value),0,0);
+                printTree(v2v(b.value),0,0);
                 ForAllArgs.push_back(b.value);
             }
 
@@ -1416,7 +1417,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
             new_result = PLNPredicateRule(::haxx::defaultAtomTableWrapper, NULL).compute(ForAllArgs);
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());
-        printTree(v2h(new_result.value),0,0);
+        printTree(v2v(new_result.value),0,0);
     }
     else
         tlog(1,"NO Results for the root query.\n");
@@ -1661,7 +1662,7 @@ void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template,
             if (unifiesTo(do_template, make_vtree((Handle) arg_h), bindings, bindings, true))
             {
                 puts("Satisfies do_template:");
-                printTree(arg_h,level+1,0);
+                printTree(vhpair(arg_h,NULL_VERSION_HANDLE),level+1,0);
                 plan.push_back(arg_h);
             }
         
@@ -1682,7 +1683,7 @@ void BITNodeRoot::extract_plan(Handle h) const
     extract_plan(h,0,do_template,plan);
 puts("PLAN BEGIN");
     for (vector<Handle>::reverse_iterator i = plan.rbegin(); i!=plan.rend(); i++)
-        printTree(*i,0,-10);
+        printTree(vhpair(*i,NULL_VERSION_HANDLE),0,-10);
 puts("PLAN END");   
     if (plan.size()>0)
     {
@@ -1753,7 +1754,7 @@ void BITNode::printResults() const
     {
         printf("[ ");
         foreach(VtreeProvider* vtp, vset)
-            printTree(v2h(*vtp->getVtree().begin()),0,-10);
+            printTree(v2v(*vtp->getVtree().begin()),0,-10);
 //          printf("%d ", v2h(bv.value));
         printf("\n");
     }
@@ -1904,7 +1905,7 @@ void BITNode::printFitnessPool()
 
 void BITNodeRoot::print_trail(Handle h) const
 {
-    printTree(h,0,0);
+    printTree(vhpair(h,NULL_VERSION_HANDLE),0,0);
     print_trail(h,0);
 }
 

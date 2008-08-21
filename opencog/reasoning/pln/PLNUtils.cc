@@ -105,7 +105,8 @@ if (!hptr)
                 fprintf(test::logfile, "[%d]\n", (int)*hptr);
         }
         else
-            reasoning::printTree(*hptr, level, _rloglevel);
+            reasoning::printTree(vhpair(*hptr,NULL_VERSION_HANDLE),
+                    level, _rloglevel);
         
         return;
     }
@@ -168,7 +169,8 @@ if (!hptr)
 				fprintf(test::logfile, "[%d]\n", (int)*hptr);
 		}
 		else
-			reasoning::printTree(*hptr, level, _rloglevel);
+            reasoning::printTree(vhpair(*hptr,NULL_VERSION_HANDLE),
+                    level, _rloglevel);
 		
 		return;
 	}
@@ -210,13 +212,13 @@ string repeatc(const char c, const int count)
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 				vtree::sibling_iterator	ltop, vtree::sibling_iterator rtop,
-				map<Handle,Handle>& bindings);
+				bindingsT& bindings);
 
 void unifiesWithVariableChangeTo_TEST()
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
-	map<Handle,Handle> bindings;
+	bindingsT bindings;
 
 	assert( unifiesWithVariableChangeTo(
 					mva((Handle)AND_LINK,
@@ -276,7 +278,7 @@ void unifiesWithVariableChangeTo_TEST()
 
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-				map<Handle,Handle>& bindings)
+				bindingsT& bindings)
 {
 //	bindings.clear();
 	return unifiesWithVariableChangeTo(lhs_t, rhs_t, lhs_t.begin(), rhs_t.begin(), bindings);
@@ -284,7 +286,7 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 				vtree::sibling_iterator	ltop, vtree::sibling_iterator rtop,
-				map<Handle,Handle>& bindings)
+				bindingsT& bindings)
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
@@ -299,8 +301,8 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 	
 	if (!((*rtop) == (*ltop)))
 	{
-		Handle *ph_ltop = v2h(&*ltop);
-		Handle *ph_rtop = v2h(&*rtop);
+		Handle *ph_ltop = v2hPtr(&*ltop);
+		Handle *ph_rtop = v2hPtr(&*rtop);
 		
 		if (!ph_ltop || !ph_rtop)
 			return false;
@@ -320,12 +322,14 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 		if (!rhs_is_var)
 			return false;
 
-		map<Handle, Handle>::const_iterator s = bindings.find(*ph_ltop);
+		bindingsT::const_iterator s = bindings.find(vhpair(*ph_ltop,NULL_VERSION_HANDLE));
 
-		if (s == bindings.end())
-			return (bool)(bindings[*ph_ltop] = *ph_rtop); //heh
-		else
-			return s->second == *ph_rtop;
+		if (s == bindings.end()) {
+            vhpair v(*ph_ltop,NULL_VERSION_HANDLE);
+			bindings[v] = v; //heh
+            return (bool) bindings[v].first;
+        } else
+			return s->second == vhpair(*ph_rtop,NULL_VERSION_HANDLE);
 	}
 
 	vtree::sibling_iterator	rit = rhs_t.begin(rtop);
@@ -811,7 +815,8 @@ cprintf(2,"TableGather:\n");
 											Handle evalLink = nm->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f))); //, true, true);
 											
 											cprintf(1, "Created new atInterval link:\n");
-											printTree(evalLink,0, 1);
+											printTree(vhpair(evalLink,NULL_VERSION_HANDLE),
+                                                    0, 1);
                                             if (itr->bindings) { 
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
@@ -844,7 +849,7 @@ void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 {
 	for (tree<Vertex>::iterator v = value->begin(); v != value->end(); v++)
 	{
-		Handle *ph = boost::get<Handle>(&*v);
+		Handle *ph = v2hPtr(&*v);
 		if (ph && (inheritsType((Type)(int)(*ph), NODE)))
 		{
 			bindingsT::iterator substed = bindings->find(*ph);
@@ -1069,7 +1074,7 @@ void printNode1(Handle h, int level, int LogLevel)
 //	LOG0(LogLevel, repeatc(' ', level*3) + buf);
 }
 
-void printTree(Handle h, int level, int LogLevel)
+void printTree(vhpair h, int level, int LogLevel)
 {
 	AtomSpace *nm = CogServer::getAtomSpace();
 
@@ -1965,9 +1970,9 @@ public:
 */
 
 bool substitutableTo(Handle from,Handle to,
-						map<Handle,Handle>& bindings)
+						bindingsT& bindings)
 {
-	return ttsubstitutableTo<Handle,handleNoOp,map<Handle,Handle>::iterator>(from, to, bindings, handleNoOp());
+	return ttsubstitutableTo<Handle,handleNoOp,bindingsT::iterator>(from, to, bindings, handleNoOp());
 }
 
 char unnamed_type[] = "unnamed-type";
@@ -1987,7 +1992,7 @@ Handle make_real(vtree& vt)
 	return ::haxx::defaultAtomTableWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false);
 }
 
-void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
+void recursiveBind(Vertex& v, const bindingsT& binds)
 {
 	Handle *ph = v2h(&v);
 	if (ph)
@@ -2002,7 +2007,7 @@ void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
 	}
 }
 
-meta bind_vtree(vtree &targ, const map<Handle, Handle>& binds)
+meta bind_vtree(vtree &targ, const bindingsT& binds)
 {
 	meta thm_substed(new BoundVTree(targ));
 

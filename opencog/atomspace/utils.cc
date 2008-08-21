@@ -299,6 +299,7 @@ tree<Vertex> MakeVirtualAtom_slow(Type T)
 }
 #endif
 
+#if 0
 tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3, tree<Vertex> t4)
 {
     tree<Vertex> ret;
@@ -426,17 +427,74 @@ tree<Vertex> MakeVirtualAtom_slow(Vertex T)
     }
     return ret;
 }
+#endif
 
 bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const
 {
     return (*this)(lhs, rhs, lhs.begin(), rhs.begin());
 }
+
+// These two visitor classes are needed for comparison now, because Vertex
+// contains a vhpair instead of a Handle now
+class less_than_vertex_visitor
+    : public boost::static_visitor<bool>
+{
+public:
+
+    template <typename T, typename U>
+    bool operator()( const T &, const U & ) const
+    {
+        return 0; // cannot compare different types
+    }
+
+    bool operator()( const vhpair & lhs, const vhpair & rhs ) const
+    {
+        return lhs.first < rhs.first;
+    }
+
+    template <typename T>
+    bool operator()( const T & lhs, const T & rhs ) const
+    {
+        return lhs < rhs;
+    }
+
+};
+
+class greater_than_vertex_visitor
+    : public boost::static_visitor<bool>
+{
+public:
+
+    template <typename T, typename U>
+    bool operator()( const T &, const U & ) const
+    {
+        return 0; // cannot compare different types
+    }
+
+    bool operator()( const vhpair & lhs, const vhpair & rhs ) const
+    {
+        return lhs.first > rhs.first;
+    }
+
+    template <typename T>
+    bool operator()( const T & lhs, const T & rhs ) const
+    {
+        return lhs > rhs;
+    }
+
+};
+
 bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs,
                                   tree<Vertex>::iterator ltop,
                                   tree<Vertex>::iterator rtop) const
 {
+    // Use apply visitor to convert left and right to int.
+    //if (boost::apply_visitor(less_than_vertex_visitor(), *ltop, *rtop))
+    //    return true;
     if (*ltop < *rtop)
         return true;
+    //if (boost::apply_visitor(greater_than_vertex_visitor(), *ltop, *rtop))
+    //    return false;
     if (*rtop < *ltop)
         return false;
 

@@ -20,7 +20,7 @@ public:
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
 	{
 		assert(0);
-		return Vertex((Handle)NULL);
+		return Vertex(vhpair((Handle)NULL,NULL_VERSION_HANDLE));
 	}
 
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const

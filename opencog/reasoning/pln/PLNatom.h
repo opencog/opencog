@@ -45,7 +45,7 @@ struct less_subst;
 struct atom //: public BoundHandle
 {
 public:
-    mutable Handle real;
+    mutable vhpair real;
     mutable std::map<std::string,atom>* bindings;
 
     Type T;
@@ -64,6 +64,7 @@ public:
 
     void setHandle(Handle h);   
 
+    explicit atom(vhpair h);
     explicit atom(Handle h);
     atom();
     atom(const atom& rhs);
@@ -87,7 +88,7 @@ public:
     /// Create a copy of this wrapper into the core, regardless whether this
     /// was created from a core handle.
 
-    Handle attach(iAtomTableWrapper* core) const;
+    vhpair attach(iAtomTableWrapper* core) const;
     //{
     //  return cx;
     //};
@@ -117,7 +118,7 @@ public:
 
     /** Metapredicate operation */
 
-    bool operator()(Handle h) const;
+    bool operator()(vhpair h) const;
 
     static bool ValidMetaPredicate(Type T);
 

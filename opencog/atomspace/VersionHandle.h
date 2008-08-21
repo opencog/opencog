@@ -40,6 +40,11 @@ struct VersionHandle {
     VersionHandle();
     VersionHandle(IndicatorType ind, Handle subs);
 
+    // Needed for comparison within vtree
+    bool operator<(const VersionHandle &other) const;
+    bool operator>(const VersionHandle &other) const;
+    bool operator==(const VersionHandle &other) const;
+
     static const char* indicatorToStr(IndicatorType) throw (InvalidParamException);
     static IndicatorType strToIndicator(const char*) throw (InvalidParamException);
 };

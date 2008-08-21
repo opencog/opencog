@@ -6,7 +6,7 @@ namespace reasoning
 {
 
 const bool RuleResultFreshness = true;
-Handle UnorderedCcompute(iAtomTableWrapper *destTable,
+vhpair UnorderedCcompute(iAtomTableWrapper *destTable,
 					Type linkT, const ArityFreeFormula<TruthValue,
 			       TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX=NULL);
 
@@ -60,10 +60,9 @@ public:
 			printTree(v2h(v),0,-3);
 	*/
 		//currentDebugLevel = 3;
-		Handle ret = ((N>1)
-			      ? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
-			      : destTable->addLink(AND_LINK, dummy_outgoing, getTruthValue(v2h(premiseArray[0])),
-				RuleResultFreshness));
+		vhpair ret = ((N > 1)? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
+			      : destTable->addLink(AND_LINK, dummy_outgoing,
+                      getTruthValue(v2v(premiseArray[0])), RuleResultFreshness));
 		    delete[] hs;
 
 		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());

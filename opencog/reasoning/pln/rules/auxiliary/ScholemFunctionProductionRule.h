@@ -17,7 +17,7 @@ protected:
 	{
 		assert(0);
 
-		return Vertex((Handle)NULL);
+		return Vertex(vhpair((Handle)NULL,NULL_VERSION_HANDLE));
 	}
 public:
 	ScholemFunctionProductionRule(iAtomTableWrapper *_destTable)

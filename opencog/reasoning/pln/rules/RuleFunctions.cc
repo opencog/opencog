@@ -222,7 +222,7 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
     return ret;
 }
 
-Handle UnorderedCcompute(iAtomTableWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
+vhpair UnorderedCcompute(iAtomTableWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
              TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX)
 {
         TruthValue** tvs = new TruthValue*[n];
