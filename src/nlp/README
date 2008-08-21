@@ -30,3 +30,8 @@ probabilities for the word-sense verticies. The verticies with the
 highest scores are then the most likely meaning for a word.
 
 -----------------------------------------------------------------
+References:
+"To verbize one's nouns" -- the concept of "Lexical Implication Rules": 
+N. Ostler, B.T.S.Atkins, "Predictable Meaning Shift: Some Linguistic
+Properties of Lexical Implication Rules", (1991) Proceedings of the
+First SIGLEX Workshop on Lexical Semantics and Knowledge Representation
