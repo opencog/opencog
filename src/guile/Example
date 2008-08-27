@@ -75,4 +75,12 @@ After the above, the rather sweeter form is possible:
 	(ConceptNode "artist"))
 
 
+The simple truth values can appear either before, or after the nodes, 
+thus:
 
+(ExtensionalImplicationLink 
+	(ConceptNode "Britney")
+	(ConceptNode "artist")
+	(stv 0.99 0.99))
+
+will also work.
