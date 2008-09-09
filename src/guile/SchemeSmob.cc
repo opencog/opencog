@@ -273,9 +273,28 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		ret += " \"";
 		ret += node->getName();
 		ret += "\"";
+
+		// Print the truth value only after the node name
+		const TruthValue &tv = atom->getTruthValue();
+		if (tv != TruthValue::DEFAULT_TV())
+		{
+			ret += " ";
+			ret += tv_to_string (&tv);
+		}
+		ret += ")";
+		return ret;
 	}
 	else if (link)
 	{
+		// If there's a truth value, print it before the other atoms
+		const TruthValue &tv = atom->getTruthValue();
+		if (tv != TruthValue::DEFAULT_TV())
+		{
+			ret += " ";
+			ret += tv_to_string (&tv);
+		}
+
+		// print the outgoing link set.
 		std::vector<Handle> oset = link->getOutgoingSet();
 		unsigned int arity = oset.size();
 		for (unsigned int i=0; i<arity; i++)
@@ -284,15 +303,10 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 			ret += handle_to_string(oset[i], (0==i)?0:indent+1);
 			if (i != arity-1) ret += "\n";
 		}
+		ret += ")";
+		return ret;
 	}
 
-	const TruthValue &tv = atom->getTruthValue();
-	if (tv != TruthValue::DEFAULT_TV())
-	{
-		ret += " ";
-		ret += tv_to_string (&tv);
-	}
-	ret += ")";
 	return ret;
 }
 
@@ -479,21 +493,23 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 		SCM satom = SCM_CAR(sl);
 
 		// Verify that the contents of the list are actual atoms.
-		if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
+		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		{
-			// Fish out a truth value, if its there.
-			tv = get_tv_from_list(sl);
-			if (tv != NULL) break;
-
-			// If its not an atom, and its not a truth value, its bad
-			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
+			// Get the handle  ... should we check for valid handles here?
+			SCM shandle = SCM_SMOB_OBJECT(satom);
+			Handle h = scm_to_ulong(shandle);
+			outgoing_set.push_back(h);
 		}
-
-		// Get the handle  ... should we check for valid handles here?
-		SCM shandle = SCM_SMOB_OBJECT(satom);
-		Handle h = scm_to_ulong(shandle);
-
-		outgoing_set.push_back(h);
+		else
+		{
+			// Its legit to have enmbedded truth values, just skip them.
+			tv = get_tv_from_list(sl);
+			if (tv == NULL)
+			{
+				// If its not an atom, and its not a truth value, its bad
+				scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
+			}
+		}
 		sl = SCM_CDR(sl);
 		pos++;
 	}
