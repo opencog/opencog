@@ -157,7 +157,7 @@ Type ClassServer::getType(const char *typeName)
     return it->second;
 }
 
-std::string ClassServer::getTypeName(Type type)
+const std::string& ClassServer::getTypeName(Type type)
 {
     int t = (int) type;
     if ((t < 0) || (t >=  NUMBER_OF_CLASSES)) {
