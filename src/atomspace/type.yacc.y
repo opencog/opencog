@@ -258,7 +258,10 @@ static void gen_scm(void)
   int i,j;
 
   f=fopen ("type_constructors.scm","w");
-  fprintf (f,"; Automatically generated scheme functions\n\n");
+  fprintf (f,"scm\n\n");
+  fprintf (f,"; Automatically generated scheme functions\n");
+  fprintf (f,"; Issue the following at terminal to load:\n");
+  fprintf (f,"; cat type_constructors.scm |telnet localhost 17001\n");
   for (i=1; i<maxtypes; i++) 
   {
     int parent = types[i].parent;
@@ -273,6 +276,8 @@ static void gen_scm(void)
     else 
       fprintf (f, "\t(apply cog-new-link (append (list '%s) x)))\n",types[i].id);
   }
+  fprintf (f,".\n");
+  fprintf (f,"exit\n");
   fclose (f);
 }
 
