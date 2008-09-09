@@ -48,9 +48,9 @@ Enter the above at the scheme shell prompt, and then exit the shell
 type 'ls'; this will reveal what was created.
 
 The above can be prettied up with some "syntactic sugar."
-First, define some wrapper functions (in the future, similar wrapper
-functions might be automatically included; however, these need to be
-manually entered at this time):
+First, define some wrapper functions (these can be found in
+"src/atomspace/type_constructors.scm" and are automatically 
+generated from the atoms listed in "type.script") 
 
 (define (stv x y) (cog-new-stv x y))
 (define (ConceptNode . x) 
