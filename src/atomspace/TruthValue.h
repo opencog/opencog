@@ -58,7 +58,7 @@ class TruthValue
     friend class SavingLoading;
     friend class Atom;
 
-    friend class ::TruthValueUTest;
+    friend class ::TruthValueUTest; // WTF is this ?? XXX FIXME
 
 public:
 
