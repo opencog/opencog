@@ -17,6 +17,7 @@
 #include <libguile.h>
 
 #include "types.h"
+#include "TruthValue.h"
 
 namespace opencog {
 
@@ -63,6 +64,7 @@ class SchemeSmob
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
+		static std::string tv_to_string(const TruthValue *stv);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:

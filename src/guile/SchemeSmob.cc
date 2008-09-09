@@ -272,6 +272,12 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 	{
 		ret += " \"";
 		ret += node->getName();
+		const TruthValue &tv = node->getTruthValue();
+		if (tv != TruthValue::DEFAULT_TV())
+		{
+			ret += " ";
+			ret += tv_to_string (&tv);
+		}
 		ret += "\")";
 		return ret;
 	}
@@ -300,26 +306,30 @@ std::string SchemeSmob::handle_to_string(SCM node)
 	return handle_to_string(h, 0) + "\n";
 }
 
+std::string SchemeSmob::tv_to_string(const TruthValue *stv)
+{
+	std::string ret = "(stv ";
+	ret += stv->getMean();
+	ret += " ";
+	ret += stv->getConfidence();
+	ret += ")";
+	return ret;
+}
+
 std::string SchemeSmob::misc_to_string(SCM node)
 {
-	std::string ret = "#<";
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
 	switch (misctype)
 	{
 		case COG_SIMPLE_TV:
 			SimpleTruthValue *stv;
 			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
-			ret += "SimpleTruthValue ";
-			ret += stv->toString();
-			break;
+			return tv_to_string(stv);
 
 		default:
-			ret += "unknown opencog type";
-			break;
+			return "#<unknown opencog type>\n";
 	}
-
-	ret += ">\n";
-	return ret;
+	return "";
 }
 
 /* ============================================================== */
