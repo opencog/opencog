@@ -272,14 +272,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 	{
 		ret += " \"";
 		ret += node->getName();
-		const TruthValue &tv = node->getTruthValue();
-		if (tv != TruthValue::DEFAULT_TV())
-		{
-			ret += " ";
-			ret += tv_to_string (&tv);
-		}
-		ret += "\")";
-		return ret;
+		ret += "\"";
 	}
 	else if (link)
 	{
@@ -291,10 +284,15 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 			ret += handle_to_string(oset[i], (0==i)?0:indent+1);
 			if (i != arity-1) ret += "\n";
 		}
-		ret += ")";
-		return ret;
 	}
 
+	const TruthValue &tv = atom->getTruthValue();
+	if (tv != TruthValue::DEFAULT_TV())
+	{
+		ret += " ";
+		ret += tv_to_string (&tv);
+	}
+	ret += ")";
 	return ret;
 }
 
@@ -308,11 +306,13 @@ std::string SchemeSmob::handle_to_string(SCM node)
 
 std::string SchemeSmob::tv_to_string(const TruthValue *stv)
 {
-	std::string ret = "(stv ";
-	ret += stv->getMean();
-	ret += " ";
-	ret += stv->getConfidence();
-	ret += ")";
+	// They're only floats, not doubles, so print with 8 digits
+	char buff[40];
+	std::string ret = "";
+	snprintf(buff, 40, "(stv %.8g ", stv->getMean());
+	ret += buff;
+	snprintf(buff, 40, "%.8g)", stv->getConfidence());
+	ret += buff;
 	return ret;
 }
 
