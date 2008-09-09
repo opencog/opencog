@@ -131,6 +131,8 @@ public:
      * NULL_TV, TRUE_TV, FALSE_TV, etc.
      */
     virtual bool operator==(const TruthValue& rhs) const = 0;
+    inline bool operator!=(const TruthValue& rhs) const 
+         { return !(*this == rhs); }
 
 // VIRTUAL METHODS:
 
