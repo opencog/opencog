@@ -22,10 +22,10 @@ typedef struct {
   int parent;
 } nmtype;
 
-nmtype types[MAXTYPES];
-int maxtypes=0;
+static nmtype types[MAXTYPES];
+static int maxtypes=0;
 
-void check_alias (void);
+static void check_alias (void);
 char *reparse (char *);
 
 %}
@@ -115,7 +115,7 @@ int yyerror (char *error) {
   exit (1);
 }
 
-void check_alias(void) {
+static void check_alias(void) {
   int i;
     if (total_names>1) {
       for (i=1; i<total_names; i++)
@@ -125,7 +125,7 @@ void check_alias(void) {
     else types[maxtypes].aliassize=0; 
 }
 
-void gen_defines(void) {
+static void gen_defines(void) {
   FILE *f;
   int i,j;
 
@@ -159,7 +159,7 @@ char *reparse (char *str) {
   return name;
 }
 
-void gen_names(void) {
+static void gen_names(void) {
   FILE *f;
   int i;
 
@@ -171,7 +171,7 @@ void gen_names(void) {
   fclose (f);
 }
 
-void gen_classint(void) {
+static void gen_classint(void) {
   FILE *f;
   int i;
 
@@ -183,7 +183,7 @@ void gen_classint(void) {
   fclose (f);
 }
 
-void gen_intclass(void) {
+static void gen_intclass(void) {
   FILE *f;
   int i;
 
@@ -227,7 +227,7 @@ void fill_level (int i) {
   types[i].parent = reverse(types[i].super[0]);
 }
 
-void gen_inheritance(void) {
+static void gen_inheritance(void) {
   FILE *f;
   int i,maxlevel=0,j,k;
 
@@ -252,6 +252,9 @@ void gen_inheritance(void) {
   fclose (f);
 }
 
+/**
+ * Generate scheme syntactic sugar for atom creation
+ */
 static void gen_scm(void)
 {
   FILE *f;
