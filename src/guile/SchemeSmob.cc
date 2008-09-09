@@ -30,7 +30,7 @@ using namespace opencog;
  * The cog_misc_tag is used to store all other structures, such
  * as truth values. It is assumed that these structures are all
  * ephemeral (garbage-collected); this is in contrast to handles,
- * which are never garbage collected. Thus, opencog atoms have a 
+ * which are never garbage collected. Thus, opencog atoms have a
  * concrete existence outside of the scheme shell. By contrast,
  * truth values created by the scheme shell are garbage collected
  * by the shell.
@@ -66,7 +66,7 @@ int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
 {
 	std::string str = handle_to_string(node);
 	scm_puts (str.c_str(), port);
-	return 1; //non-zero meanss success
+	return 1; //non-zero means success
 }
 
 SCM SchemeSmob::equalp_atom(SCM a, SCM b)
@@ -78,7 +78,7 @@ SCM SchemeSmob::equalp_atom(SCM a, SCM b)
 
 size_t SchemeSmob::free_atom(SCM node)
 {
-	// Nothing to do here; the atom handles are stored as 
+	// Nothing to do here; the atom handles are stored as
 	// immediate values in the SMOB's.
 	return 0;
 }
@@ -118,7 +118,7 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_SIMPLE_TV:
 			SimpleTruthValue *stv;
 			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (stv, 
+			scm_gc_unregister_collectable_memory (stv,
 			                  sizeof(SimpleTruthValue), "opencog simple tv");
 			delete stv;
 			return 0;
@@ -355,7 +355,7 @@ static Type validate_node (SCM stype, const char *subrname)
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
 
-   char * ct = scm_to_locale_string(stype);
+	char * ct = scm_to_locale_string(stype);
 	Type t = ClassServer::getType(ct);
 	free(ct);
 
@@ -436,7 +436,7 @@ static Type verify_link (SCM stype, const char * subrname)
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
 
-   char * ct = scm_to_locale_string(stype);
+	char * ct = scm_to_locale_string(stype);
 	Type t = ClassServer::getType(ct);
 	free(ct);
 
@@ -453,7 +453,7 @@ static Type verify_link (SCM stype, const char * subrname)
 /**
  * Convert argument into a list of handles.
  */
-std::vector<Handle> 
+std::vector<Handle>
 SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 {
 	// Verify that second arg is an actual list
@@ -479,7 +479,7 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 			scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
 		}
 
-		// Get the handle  ... should we check for valid handles here? 
+		// Get the handle  ... should we check for valid handles here?
 		SCM shandle = SCM_SMOB_OBJECT(satom);
 		Handle h = scm_to_ulong(shandle);
 
@@ -516,8 +516,8 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 }
 
 /**
- * Return the indicated link, of named type stype, holding the 
- * indicated atom list, if it exists; else return nil if 
+ * Return the indicated link, of named type stype, holding the
+ * indicated atom list, if it exists; else return nil if
  * it does not exist.
  */
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
@@ -658,7 +658,7 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 
 	float cnt = SimpleTruthValue::confidenceToCount(confidence);
 	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
-	scm_gc_register_collectable_memory (stv, 
+	scm_gc_register_collectable_memory (stv,
 	                 sizeof(SimpleTruthValue), "opencog simple tv");
 
 	SCM smob;
