@@ -19,6 +19,7 @@ typedef struct {
   char super[MAXNAMES][MAXSIZE];
   char id[MAXSIZE];
   int aliassize, supersize, level;
+  int parent;
 } nmtype;
 
 nmtype types[MAXTYPES];
@@ -223,6 +224,7 @@ void fill_level (int i) {
       maxlevel=types[reverse(types[i].super[j])].level;
   }
   types[i].level=1+maxlevel;
+  types[i].parent = reverse(types[i].super[0]);
 }
 
 void gen_inheritance(void) {
@@ -257,10 +259,19 @@ static void gen_scm(void)
 
   f=fopen ("type_constructors.scm","w");
   fprintf (f,"; Automatically generated scheme functions\n\n");
-  for (i=0; i<maxtypes; i++) 
+  for (i=1; i<maxtypes; i++) 
   {
-    fprintf (f,"(define (%s . x)\n",types[i].id);
-    fprintf (f,"\t(apply cog-new-node (append (list '%s) x)))\n",types[i].id);
+    int parent = types[i].parent;
+    if (0 == parent) parent = i;
+    while (parent !=1 && parent != 2)
+    {
+      parent = types[parent].parent;
+    }
+    fprintf (f, "(define (%s . x)\n",types[i].id);
+    if (parent == 1)
+      fprintf (f, "\t(apply cog-new-node (append (list '%s) x)))\n",types[i].id);
+    else 
+      fprintf (f, "\t(apply cog-new-link (append (list '%s) x)))\n",types[i].id);
   }
   fclose (f);
 }
