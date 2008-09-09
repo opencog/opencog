@@ -243,22 +243,60 @@ std::string SchemeSmob::to_string(SCM node)
 	return "";
 }
 
+std::string SchemeSmob::handle_to_string(Handle h, int indent)
+{
+	if (UNDEFINED_HANDLE == h) return "#<Undefined atom handle>";
+
+	if (h <= NOTYPE) return "#<non-real atom>";
+
+	Atom *atom = TLB::getAtom(h);
+	if (NULL == atom) return "#<Invalid handle>";
+	Node *node = dynamic_cast<Node *>(atom);
+	Link *link = dynamic_cast<Link *>(atom);
+
+#ifdef CRYPTIC_STYLE
+	// output the olde-style opencog notation
+	std::string ret = "#<";
+	ret += atom->toString();
+	ret += ">\n";
+#endif
+
+	// Print a scheme expression, so that the output can be saved
+	// to file, and then restored, as needed.
+	std::string ret = "";
+	for (int i=0; i< indent; i++) ret += "   ";
+	ret += "(";
+	ret += ClassServer::getTypeName(atom->getType());
+	if (node)
+	{
+		ret += " \"";
+		ret += node->getName();
+		ret += "\")";
+		return ret;
+	}
+	else if (link)
+	{
+		std::vector<Handle> oset = link->getOutgoingSet();
+		unsigned int arity = oset.size();
+		for (unsigned int i=0; i<arity; i++)
+		{
+			ret += " ";
+			ret += handle_to_string(oset[i], (0==i)?0:indent+1);
+			if (i != arity-1) ret += "\n";
+		}
+		ret += ")";
+		return ret;
+	}
+
+	return ret;
+}
+
 std::string SchemeSmob::handle_to_string(SCM node)
 {
 	SCM shandle = SCM_SMOB_OBJECT(node);
 	Handle h = scm_to_ulong(shandle);
 
-	if (UNDEFINED_HANDLE == h) return "Undefined atom handle";
-
-	if (h <= NOTYPE) return "non-real atom";
-
-	Atom *atom = TLB::getAtom(h);
-	if (NULL == atom) return "Invalid handle";
-
-	std::string ret = "#<";
-	ret += atom->toString();
-	ret += ">\n";
-	return ret;
+	return handle_to_string(h, 0) + "\n";
 }
 
 std::string SchemeSmob::misc_to_string(SCM node)

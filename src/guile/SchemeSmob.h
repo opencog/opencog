@@ -61,6 +61,7 @@ class SchemeSmob
 		// Misc utilities
 		static std::string to_string(SCM);
 		static std::string handle_to_string(SCM);
+		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
