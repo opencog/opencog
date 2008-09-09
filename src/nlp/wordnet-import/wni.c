@@ -129,74 +129,128 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 
 	/* Hypernym */
 	SENSE (HYPERPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<InheritanceLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</InheritanceLink>\n");
+#else
+		printf("(InheritanceLink ");
+		printf("(WordSenseNode \"%s\")\n", sense_key);
+		printf("   (WordSenseNode \"%s\"))\n", buff);
+#endif
 	}))
 
 	/* Hyponym */
 	SENSE (HYPOPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<InheritanceLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</InheritanceLink>\n");
+#else
+		printf("(InheritanceLink ");
+		printf("(WordSenseNode \"%s\")\n", buff);
+		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+#endif
 	}))
 
 	/* Similarity */
 	SENSE (SIMPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<SimilarityLink strength=\"0.8\" confidence=\"0.95\">\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</SimilarityLink>\n");
+#else
+		printf("(SimilarityLink ");
+		printf("(WordSenseNode \"%s\")\n", sense_key);
+		printf("   (WordSenseNode \"%s\"))\n", buff);
+#endif
 	}))
 
 	/* Member holonym */
 	SENSE (ISMEMBERPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<HolonymLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
+#else
+		printf("(HolonymLink ");
+		printf("(WordSenseNode \"%s\")\n", sense_key);
+		printf("   (WordSenseNode \"%s\"))\n", buff);
+#endif
 	}))
 
 	/* Substance holonym */
 	SENSE (ISSTUFFPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<HolonymLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
+#else
+		printf("(HolonymLink ");
+		printf("(WordSenseNode \"%s\")\n", sense_key);
+		printf("   (WordSenseNode \"%s\"))\n", buff);
+#endif
 	}))
 
 	/* Substance holonym */
 	SENSE (ISPARTPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<HolonymLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
+#else
+		printf("(HolonymLink ");
+		printf("(WordSenseNode \"%s\")\n", sense_key);
+		printf("   (WordSenseNode \"%s\"))\n", buff);
+#endif
 	}))
 
 	/* Member meronym */
 	SENSE (HASMEMBERPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<HolonymLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
+#else
+		printf("(HolonymLink ");
+		printf("(WordSenseNode \"%s\")\n", buff);
+		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+#endif
 	}))
 
 	/* Substance meronym */
 	SENSE (HASSTUFFPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<HolonymLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
+#else
+		printf("(HolonymLink ");
+		printf("(WordSenseNode \"%s\")\n", buff);
+		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+#endif
 	}))
 
 	/* Substance meronym */
 	SENSE (HASPARTPTR, ({
+#ifdef GENERATE_NMXML
 		printf("<HolonymLink>\n");
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
+#else
+		printf("(HolonymLink ");
+		printf("(WordSenseNode \"%s\")\n", buff);
+		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+#endif
 	}))
 
 #if LATER
@@ -246,11 +300,17 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 			exit(1);
 	}
 
+#ifdef GENERATE_NMXML
 	printf("<WordSenseNode name = \"%s\" />\n", sense_key);
 	printf("<PartOfSpeechLink>\n");
 	printf("   <Element class=\"WordSenseNode\" name = \"%s\" />\n", sense_key);
 	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", posstr);
 	printf("</PartOfSpeechLink>\n");
+#else
+	printf("(PartOfSpeechLink ");
+	printf("(WordSenseNode \"%s\")\n", sense_key);
+	printf("   (ConceptNode \"%s\"))\n", posstr);
+#endif
 
 	// Don't print gloss - some glosses have double-dash, 
 	// which drives XML parser nuts.
@@ -261,11 +321,17 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 	{
 		if (0 == do_export(synp->words[i])) continue;
 
+#ifdef GENERATE_NMXML
 		printf("<WordNode name = \"%s\" />\n", synp->words[i]);
 		printf("<WordSenseLink>\n");
 		printf("   <Element class=\"WordNode\" name = \"%s\" />\n", synp->words[i]);
 		printf("   <Element class=\"WordSenseNode\" name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
+#else
+		printf("(WordSenseLink ");
+		printf("(WordNode \"%s\")\n", synp->words[i]);
+		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+#endif
 
 		print_nyms(sense_key, synp->words[i], synp->wnsns[i], synp);
 	}
@@ -316,11 +382,17 @@ static int show_index(char * index_entry)
 		fprintf(stderr, "sense=%s pos=%d off=%d\n", sense_key, ipos, offset);
 	}
 
+#ifdef GENERATE_NMXML
 	printf("data\n");
 	printf("<list>\n");
 	print_synset(sense_key, sense_num, synp);
 	printf("</list>\n");
 	printf("%c\n", 0x4);
+#else
+	printf("scm\n");
+	print_synset(sense_key, sense_num, synp);
+	printf(".\n");
+#endif
 
 	// free_synset() only frees one sysnet, not the whole chain of them.
 	free_syns(synp);
@@ -362,6 +434,7 @@ main (int argc, char * argv[])
 	exit(0);
 #endif
 
+#ifdef GENERATE_NMXML
 	printf("data\n");
 	printf("<list>\n");
 	printf("<ConceptNode name = \"noun\" />\n");
@@ -370,6 +443,14 @@ main (int argc, char * argv[])
 	printf("<ConceptNode name = \"adv\" />\n");
 	printf("</list>\n");
 	printf("%c\n", 0x4);
+#else
+	printf("scm\n");
+	printf("(ConceptNode \"noun\")\n");
+	printf("(ConceptNode \"verb\")\n");
+	printf("(ConceptNode \"adj\")\n");
+	printf("(ConceptNode \"adv\")\n");
+	printf(".\n");
+#endif
 
 	int cnt = 0;
 	while (1)
@@ -383,6 +464,8 @@ main (int argc, char * argv[])
 		// printf("<!-- %d -->\n", cnt);
 		if (cnt % 1000 == 0) fprintf(stderr, "Info: done processing %d word senes\n", cnt);
 	}
+
+	printf("exit\n");
 
 	fprintf(stderr, "Info: finished loading %d word senses\n", cnt);
 }
