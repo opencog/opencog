@@ -250,6 +250,21 @@ void gen_inheritance(void) {
   fclose (f);
 }
 
+static void gen_scm(void)
+{
+  FILE *f;
+  int i,j;
+
+  f=fopen ("type_constructors.scm","w");
+  fprintf (f,"; Automatically generated scheme functions\n\n");
+  for (i=0; i<maxtypes; i++) 
+  {
+    fprintf (f,"(define (%s . x)\n",types[i].id);
+    fprintf (f,"\t(apply cog-new-node (append (list '%s) x)))\n",types[i].id);
+  }
+  fclose (f);
+}
+
 int main (int argc, char **argv) {
   yyparse();
 
@@ -258,5 +273,6 @@ int main (int argc, char **argv) {
   gen_classint();
   gen_intclass();
   gen_inheritance();
+  gen_scm();
   return 0;
 }
