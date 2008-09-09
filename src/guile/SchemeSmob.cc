@@ -64,7 +64,8 @@ SchemeSmob::SchemeSmob(void)
 
 int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
 {
-	scm_puts ("#<atom>", port);
+	std::string str = handle_to_string(node);
+	scm_puts (str.c_str(), port);
 	return 1; //non-zero meanss success
 }
 
