@@ -329,9 +329,9 @@ NMXML and Scheme.
 
 wc on the NMXML output results in: 16350243 45025227 648664672
 So NMXML requires 16M lines in 648 MBytes; this bzip2's down to 
-a 16MB file.  By contrast, the scm output has a wc of 6428138  
-15977036 301264264 i.e. 6.4M lines occupying 301 MByess. This 
-bzip2's down to 10.8 MBytes
+a 16MB file.  By contrast, the scm output has a wc of 3307375 
+14804016 189058447 i.e. 3.3M lines occupying 189 MByess. This 
+bzip2's down to 8.1 MBytes
 
 load 186605 senses 
 NMXML: in  4:18 secs CPU on cogserver and 1.1g RAM usage
@@ -339,4 +339,7 @@ scheme: excess of 3GB ... not clear why. experiments show
        that the guile GC is not leaking, the only remaining
        explanation is severe memory fragmentation! Yech.. 
        this is bad.
+
+
+define: 755 only
 

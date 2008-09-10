@@ -25,7 +25,7 @@
  * If defined, generate output for the various relations (holo/hypernym,
  * etc.) Otherise, only the sense-keys are generated.
  */
-// #define GENERATE_NYMS 1
+#define GENERATE_NYMS 1
 
 /**
  * Skip processing of colocations if this flag is set to 1
@@ -147,9 +147,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</InheritanceLink>\n");
 #else
-		printf("(InheritanceLink ");
-		printf("(WordSenseNode \"%s\")\n", sense_key);
-		printf("   (WordSenseNode \"%s\"))\n", buff);
+		printf("(InheritanceLink s (WordSenseNode \"%s\"))\n", buff);
 #endif
 	}))
 
@@ -162,9 +160,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</InheritanceLink>\n");
 #else
-		printf("(InheritanceLink ");
-		printf("(WordSenseNode \"%s\")\n", buff);
-		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+		printf("(InheritanceLink (WordSenseNode \"%s\") s)\n", buff);
 #endif
 	}))
 
@@ -177,9 +173,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</SimilarityLink>\n");
 #else
-		printf("(SimilarityLink ");
-		printf("(WordSenseNode \"%s\")\n", sense_key);
-		printf("   (WordSenseNode \"%s\"))\n", buff);
+		printf("(SimilarityLink s (WordSenseNode \"%s\"))\n", buff);
 #endif
 	}))
 
@@ -192,9 +186,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 #else
-		printf("(HolonymLink ");
-		printf("(WordSenseNode \"%s\")\n", sense_key);
-		printf("   (WordSenseNode \"%s\"))\n", buff);
+		printf("(HolonymLink s (WordSenseNode \"%s\"))\n", buff);
 #endif
 	}))
 
@@ -207,9 +199,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 #else
-		printf("(HolonymLink ");
-		printf("(WordSenseNode \"%s\")\n", sense_key);
-		printf("   (WordSenseNode \"%s\"))\n", buff);
+		printf("(HolonymLink s (WordSenseNode \"%s\"))\n", buff);
 #endif
 	}))
 
@@ -222,9 +212,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", buff);
 		printf("</HolonymLink>\n");
 #else
-		printf("(HolonymLink ");
-		printf("(WordSenseNode \"%s\")\n", sense_key);
-		printf("   (WordSenseNode \"%s\"))\n", buff);
+		printf("(HolonymLink s (WordSenseNode \"%s\"))\n", buff);
 #endif
 	}))
 
@@ -237,9 +225,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 #else
-		printf("(HolonymLink ");
-		printf("(WordSenseNode \"%s\")\n", buff);
-		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+		printf("(HolonymLink (WordSenseNode \"%s\") s)\n", buff);
 #endif
 	}))
 
@@ -252,9 +238,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 #else
-		printf("(HolonymLink ");
-		printf("(WordSenseNode \"%s\")\n", buff);
-		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+		printf("(HolonymLink (WordSenseNode \"%s\") s)\n", buff);
 #endif
 	}))
 
@@ -267,9 +251,7 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
 		printf("   <Element class=\"WordSenseNode\" name=\"%s\" />\n", sense_key);
 		printf("</HolonymLink>\n");
 #else
-		printf("(HolonymLink ");
-		printf("(WordSenseNode \"%s\")\n", buff);
-		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+		printf("(HolonymLink (WordSenseNode \"%s\") s)\n", buff);
 #endif
 	}))
 
@@ -327,9 +309,8 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 	printf("   <Element class=\"ConceptNode\" name = \"%s\" />\n", posstr);
 	printf("</PartOfSpeechLink>\n");
 #else
-	printf("(PartOfSpeechLink ");
-	printf("(WordSenseNode \"%s\") ", sense_key);
-	printf("(ConceptNode \"%s\"))\n", posstr);
+	printf("(define s (WordSenseNode \"%s\")) ", sense_key);
+	printf("(PartOfSpeechLink s %s)\n", posstr);
 #endif
 
 	// Don't print gloss - some glosses have double-dash, 
@@ -348,9 +329,8 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 		printf("   <Element class=\"WordSenseNode\" name = \"%s\" />\n", sense_key);
 		printf("</WordSenseLink>\n");
 #else
-		printf("(WordSenseLink ");
-		printf("(WordNode \"%s\") ", synp->words[i]);
-		printf("(WordSenseNode \"%s\"))\n", sense_key);
+		printf("(define x (WordNode \"%s\")) ", synp->words[i]);
+		printf("(WordSenseLink x s)\n");
 #endif
 
 #ifdef GENERATE_NYMS
@@ -466,6 +446,10 @@ main (int argc, char * argv[])
 	printf("%c\n", 0x4);
 #else
 	printf("scm\n");
+	printf("(define noun (ConceptNode \"noun\"))\n");
+	printf("(define verb (ConceptNode \"verb\"))\n");
+	printf("(define adj (ConceptNode \"adj\"))\n");
+	printf("(define adv (ConceptNode \"adv\"))\n");
 #endif
 
 	int cnt = 0;
