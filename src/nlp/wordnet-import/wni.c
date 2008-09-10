@@ -14,7 +14,18 @@
 #include <string.h>
 
 #define BUFSZ 300
+
+/**
+ * If defined, generate the NMXML output, otherwise generate scheme
+ * output.
+ */
 // #define GENERATE_NMXML 1
+
+/**
+ * If defined, generate output for the various relations (holo/hypernym,
+ * etc.) Otherise, only the sense-keys are generated.
+ */
+// #define GENERATE_NYMS 1
 
 /**
  * Skip processing of colocations if this flag is set to 1
@@ -317,8 +328,8 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 	printf("</PartOfSpeechLink>\n");
 #else
 	printf("(PartOfSpeechLink ");
-	printf("(WordSenseNode \"%s\")\n", sense_key);
-	printf("   (ConceptNode \"%s\"))\n", posstr);
+	printf("(WordSenseNode \"%s\") ", sense_key);
+	printf("(ConceptNode \"%s\"))\n", posstr);
 #endif
 
 	// Don't print gloss - some glosses have double-dash, 
@@ -338,11 +349,13 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 		printf("</WordSenseLink>\n");
 #else
 		printf("(WordSenseLink ");
-		printf("(WordNode \"%s\")\n", synp->words[i]);
-		printf("   (WordSenseNode \"%s\"))\n", sense_key);
+		printf("(WordNode \"%s\") ", synp->words[i]);
+		printf("(WordSenseNode \"%s\"))\n", sense_key);
 #endif
 
+#ifdef GENERATE_NYMS
 		print_nyms(sense_key, synp->words[i], synp->wnsns[i], synp);
+#endif
 	}
 }
 
