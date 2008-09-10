@@ -453,10 +453,6 @@ main (int argc, char * argv[])
 	printf("%c\n", 0x4);
 #else
 	printf("scm\n");
-	printf("(ConceptNode \"noun\")\n");
-	printf("(ConceptNode \"verb\")\n");
-	printf("(ConceptNode \"adj\")\n");
-	printf("(ConceptNode \"adv\")\n");
 #endif
 
 	int cnt = 0;
