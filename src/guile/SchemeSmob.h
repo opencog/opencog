@@ -65,6 +65,7 @@ class SchemeSmob
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
 		static std::string tv_to_string(const TruthValue *stv);
+		static TruthValue *get_tv_from_list(SCM);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:

@@ -212,15 +212,18 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
  * Return the truth value if found, else return null.
  * Throw errors if the list is not stictly just key-value pairs
  */
-static TruthValue *get_tv_from_list(SCM slist)
+TruthValue * SchemeSmob::get_tv_from_list(SCM slist)
 {
 	while (scm_is_pair(slist))
 	{
 		SCM sval = SCM_CAR(slist);
-		scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-		if (misctype == COG_SIMPLE_TV)
+		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sval))
 		{
-			return ((TruthValue *) SCM_SMOB_DATA(sval));
+			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
+			if (misctype == COG_SIMPLE_TV)
+			{
+				return ((TruthValue *) SCM_SMOB_DATA(sval));
+			}
 		}
 
 		slist = SCM_CDR(slist);
