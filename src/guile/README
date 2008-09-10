@@ -103,7 +103,7 @@ interface.
           guile> (define x (cog-new-node 'ConceptNode "abc"))
           guile> (define y (cog-new-node 'ConceptNode "def"))
 
-          ; Does a node with these tow links exist?
+          ; Does a node with these two links exist?
           guile> (cog-link 'Link x y)
           ()
 
