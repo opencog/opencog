@@ -32,9 +32,15 @@ SchemeShell::SchemeShell(void)
 
 	funcs = new SchemeSmob();
 	pending_input = false;
+	show_output = true;
 	input_line = "";
 	normal_prompt = "guile> ";
 	pending_prompt = "... ";
+}
+
+void SchemeShell::hush_output(bool hush)
+{
+	show_output = !hush;
 }
 
 /* ============================================================== */
@@ -283,27 +289,41 @@ std::string SchemeShell::eval(const std::string &expr)
 
 	if (pending_input)
 	{
-		return pending_prompt;
+		if (show_output)
+			return pending_prompt;
+		else
+			return "";
 	}
 	pending_input = false;
 	input_line = "";
 
-	std::string rv;
 	if (caught_error)
 	{
+		std::string rv;
 		rc = scm_get_output_string(error_string_port);
 		char * str = scm_to_locale_string(rc);
 		rv = str;
 		free(str);
 		scm_close_port(error_string_port);
+
+		rv += "\n";
+		rv += normal_prompt;
+		return rv;
 	}
 	else
 	{
-		rv = prt(rc);
+		if (show_output)
+		{
+			std::string rv;
+			rv = prt(rc);
+			rv += "\n";
+			rv += normal_prompt;
+			return rv;
+		}
+		else
+			return "";
 	}
-	rv += "\n";
-	rv += normal_prompt;
-	return rv;
+	return "#<Error: Unreachable statement reached>";
 }
 
 #endif

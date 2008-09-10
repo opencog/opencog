@@ -25,7 +25,7 @@ class SchemeShell
 		std::string pending_prompt;
 		std::string input_line;
 		bool pending_input;
-
+		bool show_output;
 
 		// Error handling stuff
 		SCM error_string_port;
@@ -40,6 +40,7 @@ class SchemeShell
 
 	public:
 		SchemeShell(void);
+		void hush_output(bool);
 		std::string eval(const std::string &);
 };
 
