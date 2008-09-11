@@ -333,14 +333,13 @@ Handle AtomTable::getHandle(const char* name, Type type) const
         return UNDEFINED_HANDLE;
     }
 #ifdef USE_ATOM_HASH_SET
-    Node* node = new Node(type, name);
-    AtomHashSet::iterator it = atomSet->find(node);
+    Node node(type, name); // alloc on stack, avoid memory frag
+    AtomHashSet::iterator it = atomSet->find(&node);
     Handle result = UNDEFINED_HANDLE;
     if (it != atomSet->end()) {
         Atom* resultAtom = *it;
         result = TLB::getHandle(resultAtom);
     }
-    delete node;
     return result;
 #else
     // creates a set with all atoms whose names have the same hash value as
@@ -439,8 +438,8 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         //printf("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
         if (hasAllHandles && !subclass) {
             //printf("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());
-            Link* link = new Link(type, handles);
-            AtomHashSet::iterator it = atomSet->find(link);
+            Link link(type, handles); // local var on stack, avoid malloc
+            AtomHashSet::iterator it = atomSet->find(&link);
             Handle h = UNDEFINED_HANDLE;
             if (it != atomSet->end()) {
                 h = TLB::getHandle(*it);
@@ -449,7 +448,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             if (TLB::isValidHandle(h)) {
                 result = new HandleEntry(h);
             }
-            delete link;
             //cprintf(NORMAL, "Returning HandleSet by using atom hash_set!\n");
             return result;
         }
