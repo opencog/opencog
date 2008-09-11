@@ -334,13 +334,7 @@ Handle AtomTable::getHandle(const char* name, Type type) const
     }
 #ifdef USE_ATOM_HASH_SET
     Node node(type, name); // alloc on stack, avoid memory frag
-    AtomHashSet::iterator it = atomSet->find(&node);
-    Handle result = UNDEFINED_HANDLE;
-    if (it != atomSet->end()) {
-        Atom* resultAtom = *it;
-        result = TLB::getHandle(resultAtom);
-    }
-    return result;
+    return getHandle(&node);
 #else
     // creates a set with all atoms whose names have the same hash value as
     // the name key
@@ -360,6 +354,23 @@ Handle AtomTable::getHandle(const char* name, Type type) const
 #endif
 }
 
+// This call is nearly identical to that above.
+// This call signature avoids one string copy in the 
+// that would otherwise occur oncall to getHandle
+Handle AtomTable::getHandle(const Node *node) const
+{
+#ifdef USE_ATOM_HASH_SET
+    AtomHashSet::const_iterator it = atomSet->find(node);
+    Handle result = UNDEFINED_HANDLE;
+    if (it != atomSet->end()) {
+        const Atom* resultAtom = *it;
+        result = TLB::getHandle(resultAtom);
+    }
+    return result;
+#else
+    return getHandle(node->getName().c_str(), node->getType());
+#endif
+}
 HandleEntry* AtomTable::buildSet(Type type, bool subclass,
                                  Handle(AtomTable::*f)(Type) const,
                                  int index) const
@@ -700,7 +711,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Link * lll = dynamic_cast<Link *>(atom);
     if (nnn) {
         // checks if the node handle already exists.
-        existingHandle = getHandle(nnn->getName().c_str(), atom->getType());
+        existingHandle = getHandle(nnn);
     } else if (lll) {
         // New link may already exist.
         std::vector<Handle> outgoing(lll->getArity());
@@ -871,7 +882,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
 #ifdef USE_ATOM_HASH_SET
     for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
-        Atom* atom = *it;
+        const Atom* atom = *it;
         bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
@@ -1353,11 +1364,11 @@ void AtomTable::scrubIncoming(void)
 {
 #ifdef USE_ATOM_HASH_SET
     for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
-        Atom* atom = *it;
+        const Atom* atom = *it;
         Handle handle = TLB::getHandle(atom);
 
         // Updates incoming set of all targets.
-        Link * link = dynamic_cast<Link *>(atom);
+        const Link * link = dynamic_cast<const Link *>(atom);
         if (link) {
             for (int i = 0; i < link->getArity(); i++) {
                 Atom *oa = link->getOutgoingAtom(i);
@@ -1371,14 +1382,14 @@ void AtomTable::scrubIncoming(void)
 #endif
 }
 
-std::size_t opencog::atom_ptr_hash::operator()(Atom* const& x) const
+std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const
 {
     std::size_t hc = static_cast<std::size_t>(x->hashCode());
     return hc;
 }
 
-//bool opencog::atom_ptr_equal_to::operator()(Atom* const& x, Atom* const& y) const
-bool opencog::atom_ptr_equal_to::operator()(Atom* const& x, Atom* const& y) const
+bool opencog::atom_ptr_equal_to::operator()(const Atom* const& x, 
+                                            const Atom* const& y) const
 {
     bool rv = x->equals(y);
     return rv;

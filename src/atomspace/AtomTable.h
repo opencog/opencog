@@ -43,16 +43,17 @@
 namespace opencog
 {
 
-struct atom_ptr_hash : public std::unary_function<Atom*, std::size_t>
+struct atom_ptr_hash : public std::unary_function<const Atom*, std::size_t>
 {
-    std::size_t operator()(Atom* const& x) const;
+    std::size_t operator()(const Atom* const& x) const;
 };
-struct atom_ptr_equal_to : public std::binary_function<Atom*, Atom*, bool>
+struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*, bool>
 {
-    bool operator()(Atom* const& x, Atom* const& y) const;
+    bool operator()(const Atom* const& x, const Atom* const& y) const;
 };
-typedef std::tr1::unordered_set< Atom*, atom_ptr_hash, atom_ptr_equal_to > AtomHashSet;
+typedef std::tr1::unordered_set< const Atom*, atom_ptr_hash, atom_ptr_equal_to > AtomHashSet;
 
+class Node;
 class HandleEntry;
 class HandleIterator;
 class SavingLoading;
@@ -346,6 +347,7 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(const char*, Type) const;
+    Handle getHandle(const Node*) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -597,9 +599,9 @@ public:
      * specifically, does not insert or remove atoms from the atom table.
      */
     template<class T>
-    inline bool foreach_atom(bool (T::*cb)(Atom *), T *data) const {
+    inline bool foreach_atom(bool (T::*cb)(const Atom *), T *data) const {
         for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
-            Atom* atom = *it;
+            const Atom* atom = *it;
             bool rc = (data->*cb)(atom);
             if (rc) return rc;
         }
