@@ -429,6 +429,21 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
     return set;
 }
 
+Handle AtomTable::getHandle(const Link *link) const
+{
+    const std::vector<Handle>& handles = link->getOutgoingSet();
+    for (int i = 0; i < link->getArity(); i++) {
+        if(false == TLB::isValidHandle(handles[i])) return UNDEFINED_HANDLE;
+    }
+
+    AtomHashSet::const_iterator it = atomSet->find(link);
+    Handle h = UNDEFINED_HANDLE;
+    if (it != atomSet->end()) {
+        h = TLB::getHandle(*it);
+    }
+    return h;
+}
+
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      Type* types,
                                      bool* subclasses,
@@ -440,7 +455,9 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
 
 #ifdef USE_ATOM_HASH_SET
     // Check if it is the special case of looking for an specific atom
-    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0 || !handles.empty())) {
+    if (ClassServer::isAssignableFrom(LINK, type) && 
+        (arity == 0 || !handles.empty()))
+    {
         //printf("special case\n");
         bool hasAllHandles = true;
         for (int i = 0; hasAllHandles && i < arity; i++) {
@@ -448,7 +465,8 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         }
         //printf("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
         if (hasAllHandles && !subclass) {
-            //printf("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());
+            //printf("building link for lookup: type = %d, "
+            // "handles.size() = %d\n", type, handles.size());
             Link link(type, handles); // local var on stack, avoid malloc
             AtomHashSet::iterator it = atomSet->find(&link);
             Handle h = UNDEFINED_HANDLE;
@@ -713,18 +731,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         // checks if the node handle already exists.
         existingHandle = getHandle(nnn);
     } else if (lll) {
-        // New link may already exist.
-        std::vector<Handle> outgoing(lll->getArity());
-        for (int i = 0; i < lll->getArity(); i++) {
-            outgoing[i] = lll->getOutgoingSet()[i];
-        }
-        HandleEntry* head = getHandleSet(outgoing, NULL, NULL, lll->getArity(), atom->getType(), false);
-        // if the link handle already exists.
-        if (head != NULL) {
-            // gets the existing handle
-            existingHandle = head->handle;
-        }
-        delete(head);
+        existingHandle = getHandle(lll);
     }
 
     if (TLB::isValidHandle(existingHandle)) {
