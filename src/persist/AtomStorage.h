@@ -31,14 +31,14 @@ class AtomStorage
 
 		Atom * makeAtom (Response &, Handle h);
 
-		int height(Atom *);
+		int height(const Atom *);
 		int max_height;
 		void setMaxHeight(void);
 		int getMaxHeight(void);
 
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
-		bool store_cb(Atom *);
+		bool store_cb(const Atom *);
 		unsigned long load_count;
 		unsigned long store_count;
 
@@ -76,7 +76,7 @@ class AtomStorage
 		            const char * authentication);
 		~AtomStorage();
 
-		void storeAtom(Atom *);
+		void storeAtom(const Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
 

@@ -447,9 +447,9 @@ TruthValue* AtomStorage::getTV(int tvid)
 /**
  * return largest distance from this atom to any node under it.
  */
-int AtomStorage::height(Atom *atom)
+int AtomStorage::height(const Atom *atom)
 {
-	Link *l = dynamic_cast<Link *>(atom);
+	const Link *l = dynamic_cast<const Link *>(atom);
 	if (NULL == l) return 0;
 
 	int maxd = 0;
@@ -483,7 +483,7 @@ void escape_single_quotes(std::string &str)
  * Store the indicated atom.
  * Store its truth values too.
  */
-void AtomStorage::storeAtom(Atom *atom)
+void AtomStorage::storeAtom(const Atom *atom)
 {
 	store_typemap();
 
@@ -528,7 +528,7 @@ void AtomStorage::storeAtom(Atom *atom)
 		STMTI("type", dbtype);
 	
 		// Store the node name, if its a node
-		Node *n = dynamic_cast<Node *>(atom);
+		const Node *n = dynamic_cast<const Node *>(atom);
 		if (n)
 		{
 			std::string qname = n->getName();
@@ -547,7 +547,7 @@ void AtomStorage::storeAtom(Atom *atom)
 			STMTI("height", hei);
 
 #ifdef USE_INLINE_EDGES
-			Link *l = dynamic_cast<Link *>(atom);
+			const Link *l = dynamic_cast<const Link *>(atom);
 			if (l)
 			{
 				int arity = l->getArity();
@@ -856,7 +856,7 @@ void AtomStorage::load(AtomTable &table)
 	fprintf(stderr, "Finished loading %lu atoms in total\n", load_count);
 }
 
-bool AtomStorage::store_cb(Atom *atom)
+bool AtomStorage::store_cb(const Atom *atom)
 {
 	storeAtom(atom);
 	store_count ++;
