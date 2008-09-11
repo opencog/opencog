@@ -346,6 +346,17 @@ scm: 690 MB in 45 seconds
 XML: 359 MB in 71 seconds
 SQL: 271 MB in 25 seconds
 
-since the SQL loader is the cleanest., this strongly suggests 
+since the SQL loader is the cleanest, this strongly suggests 
 severe memory fragmentation.
 
+Some variants: let: 1.4GB in 5:21
+               let*: 1.2GB in 1:55
+
+sensenode x 186605
+poslink x 186605
+wordnode x 137450
+senselink x 462640
+
+total 324055 height 0 = (186605 + 137450) nodes
+total 649245 height 1 = (462640 + 186605) links
+total 973300 atoms

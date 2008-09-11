@@ -19,7 +19,7 @@
  * If defined, generate the NMXML output, otherwise generate scheme
  * output.
  */
-#define GENERATE_NMXML 1
+// #define GENERATE_NMXML 1
 
 /**
  * If defined, generate output for the various relations (holo/hypernym,
@@ -287,6 +287,8 @@ static void print_nyms(char * sense_key, char * word, int sense_num, Synset *syn
  * Next, associate the part-of-speech to the word-sense index.
  * Finally, traverse the set of synset relations, and print those.
  */
+static int syn_count = 0;
+
 static void print_synset(char * sense_key, int sense_num, Synset *synp)
 {
 	char * posstr = "";
@@ -336,6 +338,7 @@ static void print_synset(char * sense_key, int sense_num, Synset *synp)
 #ifdef GENERATE_NYMS
 		print_nyms(sense_key, synp->words[i], synp->wnsns[i], synp);
 #endif
+		syn_count ++;
 	}
 }
 
@@ -469,4 +472,6 @@ main (int argc, char * argv[])
 	printf("exit\n");
 
 	fprintf(stderr, "Info: finished loading %d word senses\n", cnt);
+	double avg = ((double) syn_count) / ((double) cnt);
+	fprintf(stderr, "Info: %d syns avg=%g\n", syn_count, avg);
 }
