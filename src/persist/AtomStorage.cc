@@ -853,6 +853,7 @@ void AtomStorage::load(AtomTable &table)
 #endif
 		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
+	fprintf(stderr, "Finished loading %lu atoms in total\n", load_count);
 }
 
 bool AtomStorage::store_cb(Atom *atom)
@@ -906,9 +907,8 @@ void AtomStorage::store(const AtomTable &table)
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
 
-	fprintf(stderr, "\tStored %lu atoms.\n", store_count);
-
 	setMaxHeight();
+	fprintf(stderr, "\tFinished storing %lu atoms total.\n", store_count);
 }
 
 void AtomStorage::rename_tables(void)

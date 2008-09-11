@@ -509,7 +509,11 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     std::queue<std::string> args = request->getArgs();
 
     std::string answer;
+
 #ifdef HAVE_GUILE
+    // Before doing anything else at all, look-see if we are in the
+    // scheme shell mode. If so, then pass the command line, unmolested
+    // to the shell. This block returns to caller.
     if (shell_mode) {
         if (command == "scm-exit") {
             shell_mode = false;
@@ -522,23 +526,46 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         return;
     }
 #endif /* HAVE_GUILE */
-    if (command == "data") {
+
+    // Trim off leading whitespace.
+    int nw = command.find_first_not_of(" \t\v\f");
+    if (0 < nw) command = command.substr(nw);
+
+    // Ignore empty/blank lines.
+    if (0 == command.size()) {
+        answer = "";
+    }
+
+    // Ignore comments.
+    else if ('#' == command[0]) {
+        answer = "";
+    }
+
+    // Process streaming XML data.
+    else if (command == "data") {
         if (args.size() != 1) {
             answer = "data: invalid command syntax";
         } else {
             answer = data(args.front());
         }
-    } else if (command == "help") {
+    }
+
+    // Print a help message.
+    else if (command == "help") {
         if (args.size() == 0) answer = help("");
         else answer = help(args.front());
-    } else if (command == "load") {
+    }
+
+    // Do something, whatever this is ... ?
+    else if (command == "load") {
         if (args.size() != 1) {
             answer = "load: invalid command syntax";
         } else {
             answer = load(args.front());
         }
+    }
 #ifndef WIN32
-    } else if (command == "dlopen") {
+    else if (command == "dlopen") {
         if (args.size() != 1) {
             answer = "dlopen: invalid command syntax";
         } else {
@@ -550,8 +577,11 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = dlclose(args.front());
         }
+    }
 #endif
-    } else if (command == "ls") {
+
+    // Print all atoms in the hypergraph
+    else if (command == "ls") {
         if (args.size() == 0) {
             answer = ls();
         } else if (args.size() == 1) {
@@ -564,7 +594,10 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = "ls: invalid command syntax";
         }
-    } else if (command == "shutdown") {
+    }
+
+    // Stop the server.
+    else if (command == "shutdown") {
         if (args.size() != 0) {
             answer = "shutdown: invalid command syntax";
         } else {
@@ -575,18 +608,24 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             // do not call setAnswer and callBack to avoid printing the prompt
             return;
         }
+    }
+
 #ifdef HAVE_GUILE
-    } else if (command == "scm") {
+    // Enter the scheme shell 
+    else if (command == "scm") {
         shell_mode = true;
         answer = "Entering scheme shell mode; enter \".\" to leave\nguile> ";
         request->setAnswer(answer);
         request->callBack();
         return;
+    }
 #endif /* HAVE_GUILE */
+
 #ifdef HAVE_SQL_STORAGE
-    } else if (command == "sql-open") {
+    else if (command == "sql-open") {
         if (args.size() < 2) {
-            answer = "sql-open: invalid command syntax";
+            answer = "sql-open: invalid command syntax\n"
+                     "Usage: sql-open <dbname> <username> <auth>";
         } else if (args.size() == 2) {
             std::string dbname = args.front();
             args.pop();
@@ -618,9 +657,11 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = sql_store();
         }
+    }
 #endif /* HAVE_SQL_STORAGE */
+
 #ifdef HAVE_LIBMEMCACHED
-    } else if (command == "cache-open") {
+    else if (command == "cache-open") {
         if (args.size() < 2) {
             answer = "cache-open: invalid command syntax";
         } else if (args.size() == 2) {
@@ -647,8 +688,12 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
         } else {
             answer = cache_store();
         }
+    }
 #endif /* HAVE_LIBMEMCACHED */
-    } else if (!externalCommand(command, args, answer)) {
+
+    // If we got to hear, none of the other case statements 
+    // handled the commmand -- its an unknown command.
+    else if (!externalCommand(command, args, answer)) {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: ";
 #ifdef HAVE_LIBMEMCACHED
@@ -658,9 +703,9 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
 #ifdef HAVE_GUILE
         answer += " scm";
 #endif /* HAVE_GUILE */
-        answer += " shutdown";
+        answer += "\n\tshutdown";
 #ifdef HAVE_SQL_STORAGE
-        answer += "\n\tsql-open sql-close sql-store sql-load";
+        answer += " sql-open sql-close sql-store sql-load";
 #endif
         if (!args.empty())
             answer += "\tArgs: " + args.front();

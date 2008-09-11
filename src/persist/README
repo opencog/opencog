@@ -106,6 +106,13 @@ The database password can be set by doing:
 
    $ psql -c "ALTER USER linas WITH PASSWORD 'asdf'" -d template1
 
+(Substitute you name and some appropriate passwrd; it does not need to
+be your login password, and probably shouldn't be.)
+
+The ODBC stanza is below. You MUST create one of these for EACH
+repositry you plan to use! This is to be placed in the ~/.odbc.ini
+file in your home directory.
+
 [opencog]
 Description    = PostgreSQL
 Driver      = PostgreSQL
@@ -122,7 +129,6 @@ ShowSystemTables     = Yes
 ShowOidColumn     = Yes
 FakeOidIndex      = Yes
 ConnSettings      =
-
 
 Next, the postgres default configuration needs to be tweaked for 
 performance. Failure to do this will result in disastrous load and
@@ -146,6 +152,41 @@ usage has been exceeded. This can be fixed by:
    kernel.shmmax = 440100100
 (save file contents, then)
    sysctl -p /etc/sysctl.conf
+
+Bulk save and restore
+---------------------
+At last! bulk save of atoms that were previous created is done by
+issueing getting to the opencog prompt (netcat localhost 17001) and
+issuing the commands:
+
+    opencog> ?
+    unknown command >>?<<
+            Available commands: data dlopen dlclose exit help load ls scm
+            shutdown sql-open sql-close sql-store sql-load
+    opencog> sql-open
+    sql-open: invalid command syntax
+    Usage: sql-open <dbname> <username> <auth>
+
+    opencog> sql-open nlp linas asdf
+    Opened "nlp" as user "linas"
+
+    opencog> sql-store
+    SQL data store thread started
+
+at this point, a progress indicator will be printed by the opencog 
+server, on the servers stdout. It  will say something like:
+Stored 236000 atoms.
+
+opencog> sql-close
+
+Next time, you can load the data with:
+
+    opencog> sql-load
+    SQL loader thread started
+
+The completion message will be on the server output, for example:
+
+    Finished loading 973300 atoms in total 
 
 
 Experimental Diary & Results

@@ -340,6 +340,12 @@ scheme: excess of 3GB ... not clear why. experiments show
        explanation is severe memory fragmentation! Yech.. 
        this is bad.
 
+For the case of senses+POS only, this creates 973300 atoms.
 
-define: 755 only
+scm: 690 MB in 45 seconds
+XML: 359 MB in 71 seconds
+SQL: 271 MB in 25 seconds
+
+since the SQL loader is the cleanest., this strongly suggests 
+severe memory fragmentation.
 

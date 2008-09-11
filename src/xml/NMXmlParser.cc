@@ -501,7 +501,11 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
             logger().fine("First pass: processing file %s\n",
                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) i / (xmlReaders.size() * 2))));
+        // please don't log -- this will spew millions of messages when
+        // there are millions of files to be loaded, as would be the 
+        // case when the xml is auto-generated and piped over from
+        // another process.
+        // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) i / (xmlReaders.size() * 2))));
         parser.parse(xmlReaders[i], PARSE_NODES);
     }
     //timeval e;
@@ -516,7 +520,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
             logger().fine("Second pass: processing file %s\n",
                            ((FileXMLBufferReader*) xmlReaders[i])->getFilename());
         }
-        logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
+        // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
         Handle uh = UNDEFINED_HANDLE;
         if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &uh)) {

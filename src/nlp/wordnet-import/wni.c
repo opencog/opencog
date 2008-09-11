@@ -19,13 +19,13 @@
  * If defined, generate the NMXML output, otherwise generate scheme
  * output.
  */
-// #define GENERATE_NMXML 1
+#define GENERATE_NMXML 1
 
 /**
  * If defined, generate output for the various relations (holo/hypernym,
  * etc.) Otherise, only the sense-keys are generated.
  */
-#define GENERATE_NYMS 1
+// #define GENERATE_NYMS 1
 
 /**
  * Skip processing of colocations if this flag is set to 1
