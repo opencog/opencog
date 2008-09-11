@@ -18,18 +18,19 @@ public:
     /**
      * Outputs a dotty node for an atom.
      */
-    bool do_nodes(Atom *a)
+    bool do_nodes(const Atom *a)
     {
         std::ostringstream ost;
         ost << TLB::getHandle(a) << " [";
         if (!space->isNode(a->getType()))
             ost << "shape=\"diamond\" ";
         ost << "label=\"[" << ClassServer::getTypeName(a->getType()) << "]";
-        if (space->isNode(a->getType())) {
-            Node *n = (Node*)a;
+
+        const Node *n = dynamic_cast<const Node *>(a);
+        if (n) {
             ost << " " << n->getName();
         } else {
-            Link *l = (Link*)a;
+            const Link *l = dynamic_cast<const Link *>(a);
             l = l; // TODO: anything to output for links?
         }
         ost << "\"];\n";
@@ -40,7 +41,7 @@ public:
     /**
      * Outputs dotty links for an atom's outgoing connections.
      */
-    bool do_links(Atom *a)
+    bool do_links(const Atom *a)
     {
         Handle h = TLB::getHandle(a);
         std::ostringstream ost;
