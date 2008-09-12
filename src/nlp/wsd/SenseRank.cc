@@ -50,21 +50,12 @@ SenseRank::~SenseRank()
  */
 void SenseRank::rank_sentence(Handle h)
 {
-	foreach_parse(h, &SenseRank::init_parse, this);
 	foreach_parse(h, &SenseRank::rank_parse_f, this);
 }
 
 /**
- * Assign equal probability to each sense of each word of this parse.
- */
-bool SenseRank::init_parse(Handle h)
-{
-	foreach_word_instance(h, &SenseRank::init_word, this);
-	return false;
-}
-
-/**
  * Assign equal probability to each sense of each word.
+ * That is, initially, all senses are equi-probabile.
  */
 bool SenseRank::init_word(Handle h)
 {
@@ -91,7 +82,6 @@ bool SenseRank::init_senses(Handle word_sense_h,
 	SimpleTruthValue stv((float) prob, 1.0f);
 	stv.setConfidence(sense->getTruthValue().getConfidence());
 	sense->setTruthValue(stv);
-printf("duuude assing initial prob=%g\n", prob);
 	return false;
 }
 
@@ -105,6 +95,7 @@ printf("duuude assing initial prob=%g\n", prob);
 void SenseRank::rank_parse(Handle h)
 {
 	converge = 1.0;
+	foreach_word_instance(h, &SenseRank::init_word, this);
 	foreach_word_instance(h, &SenseRank::start_word, this);
 }
 
@@ -124,7 +115,6 @@ bool SenseRank::start_word(Handle h)
 	if (converge < convergence_limit) return true;
 
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
-
 	return false;
 }
 
