@@ -162,6 +162,10 @@ std::string SchemeShell::prt(SCM node)
 	{
 		return "";
 	}
+	else if (scm_is_true(scm_dynamic_object_p(node))) 
+	{
+		return "#<dynamic object (XXX add name here)>";
+	}
 #if 0
 	else if (scm_is_true(scm_procedure_p(node))) 
 	{
