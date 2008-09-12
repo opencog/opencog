@@ -1,0 +1,9 @@
+
+                      scm
+                      ---
+
+This repository contains misc scheme scripts.
+
+Before using the opencog sheme interpreter, you will want to run
+the shell file "load.sh" in order to load various basic opencog-related 
+definitions and modules.

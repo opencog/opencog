@@ -11,10 +11,12 @@
 #      type_classint.h
 #      type_intclass.h
 #      type_inheritance.h
+#      ../scm/type_constructors.scm
 #
 
 all: type-definer
 	cat type.script |./type-definer
+	mv type_constructors.scm ../scm
 
 type-definer: type.yacc.o type.lex.o
 	cc -o $@ $^ -lfl
