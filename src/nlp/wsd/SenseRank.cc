@@ -45,6 +45,8 @@ SenseRank::~SenseRank()
 
 /**
  * For each parse of the sentence, perform the ranking algo.
+ * This routine returns after the graph, as a whole, has converged
+ * to a stationary state.
  */
 void SenseRank::rank_sentence(Handle h)
 {
@@ -52,16 +54,15 @@ void SenseRank::rank_sentence(Handle h)
 }
 
 /**
- * For each parse, find some place to start. Since (at this point),
- * noun sense ranking and verb sense ranking are disjoint, start 
- * off on every word. That is, as of right now, the graph consists
- * of multplie connected components.
+ * For each parse, find some place to start. There is some chance
+ * that the graph may have multiple, disconnected components (which 
+ * is bad, but we have no strategy for handling this yet), and so
+ * we'll give it a whirlstarting at each word. That way, at least
+ * we'll sample each disconnected component. 
  */
 void SenseRank::rank_parse(Handle h)
 {
 	converge = 1.0;
-	noun_converge = 1.0;
-	verb_converge = 1.0;
 	foreach_word_instance(h, &SenseRank::start_word, this);
 }
 
@@ -78,35 +79,10 @@ bool SenseRank::rank_parse_f(Handle h)
  */
 bool SenseRank::start_word(Handle h)
 {
-	// Only noun-senses and verb-senses get ranked.
-	std::string pos = get_part_of_speech(h);
-	if (0 == pos.compare("noun"))
-	{
-		converge = noun_converge;
-	}
-	else if (0 == pos.compare("verb"))
-	{
-		converge = verb_converge;
-	}
-	else
-	{
-		return false;
-	}
-	if ((noun_converge < convergence_limit) && 
-	    (verb_converge < convergence_limit)) return true;
-
-	if (converge < convergence_limit) return false;
+	if (converge < convergence_limit) return true;
 
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
 
-	if (0 == pos.compare("noun"))
-	{
-		noun_converge = converge;
-	}
-	else
-	{
-		verb_converge = converge;
-	}
 	return false;
 }
 
@@ -137,7 +113,12 @@ bool SenseRank::start_sense(Handle word_sense_h,
  * The handle argument points at a (word-inst,word-sense) pair.
  * The page rank is defined as
  *
- * P(a) = (1-d) + d* sum_b w_ba / (sum_c w_bc) P(b)
+ * P(a) = (1-d) + d* (sum_b w_ba / (sum_c w_bc)) P(b)
+ *
+ * where a,b,c are (word-inst-word-sense) pairs,
+ * P(a) is the rank of a,
+ * w_ba is the weight of edges joining b to a
+ * sum_b is a sum over all possible values of b.
  */
 void SenseRank::rank_sense(Handle h)
 {
@@ -152,7 +133,7 @@ void SenseRank::rank_sense(Handle h)
 #ifdef DEBUG
 	std::vector<Handle> oset = sense->getOutgoingSet();
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
-	printf ("sense %s was %g new %g delta=%g\n", n->getName().c_str(),
+	printf ("; sense %s was %g new %g delta=%g\n", n->getName().c_str(),
 	        old_rank, rank_sum, fabs(rank_sum - old_rank));
 #endif
 
@@ -161,6 +142,7 @@ void SenseRank::rank_sense(Handle h)
 	converge *= (1.0-convergence_damper);
 	converge += convergence_damper * fabs(rank_sum - old_rank);
 
+	// Update the truth likelyhood for this sense.
 	SimpleTruthValue stv((float) rank_sum, 1.0f);
 	stv.setConfidence(sense->getTruthValue().getConfidence());
 	sense->setTruthValue(stv);

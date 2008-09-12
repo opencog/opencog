@@ -33,8 +33,6 @@ class SenseRank
 		Handle next_sense;
 
 		double converge;
-		double noun_converge;
-		double verb_converge;
 		double convergence_damper;
 		double convergence_limit;
 

@@ -16,7 +16,7 @@
 #include "SenseSimilaritySQL.h"
 #include "SimpleTruthValue.h"
 
-#define DEBUG
+// #define DEBUG
 
 using namespace opencog;
 
@@ -68,7 +68,7 @@ void MihalceaEdge::annotate_parse(Handle h)
 		}
 	}
 #ifdef DEBUG
-	printf("Done adding %d edges for %d word pairs\n",
+	printf("; Done adding %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
 }
@@ -91,7 +91,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	foreach_word_instance(hb, &MihalceaEdge::look_at_word, this);
 
 #ifdef DEBUG
-	printf ("========================= start sent pair (%zu x %zu) words\n",
+	printf ("; ========================= start sent pair (%zu x %zu) words\n",
 	        pa_words.size(), words.size());
 #endif
 	// At this point, "pa_words" contains all of the relex-participating
@@ -109,8 +109,8 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 		}
 	}
 #ifdef DEBUG
-	printf ("========================= end sent pair\n");
-	printf("Sent pair: Done adding %d edges for %d word pairs\n",
+	printf ("; ========================= end sent pair\n");
+	printf ("; Sent pair: Done adding %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
 }
@@ -156,7 +156,7 @@ bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
 	const std::string &fn = f->getName();
 	const std::string &sn = s->getName();
-	printf("WordPair %d: (%s, %s)\n", word_pair_count, fn.c_str(), sn.c_str());
+	printf ("; WordPair %d: (%s, %s)\n", word_pair_count, fn.c_str(), sn.c_str());
 #endif
 
 	second_word_inst = second;

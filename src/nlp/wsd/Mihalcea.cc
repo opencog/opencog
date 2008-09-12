@@ -59,7 +59,8 @@ void Mihalcea::process_sentence(Handle h)
 	edger->annotate_parse(top_parse);
 	// nn_adjuster->adjust_parse(top_parse);
 
-	// Link sentences together ... 
+	// Link sentences together, since presumably the next 
+	// sentence deals with similar topics to the previous one.
 	if (UNDEFINED_HANDLE != previous_parse)
 	{
 		edger->annotate_parse_pair(previous_parse, top_parse);

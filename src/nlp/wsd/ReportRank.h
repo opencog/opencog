@@ -18,9 +18,10 @@ class ReportRank
 		int parse_cnt;
 		bool report_parse_f(Handle);
 		bool report_word(Handle);
-		double hi_score;
-		Handle hi_scorer;
-		bool choose_sense(Handle, Handle);
+
+		double normalization;
+		bool sum_score(Handle, Handle);
+		bool renorm_score(Handle, Handle);
 
 	public:
 		ReportRank(void);

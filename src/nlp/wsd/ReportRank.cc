@@ -41,7 +41,9 @@ void ReportRank::report_sentence(Handle h)
  */
 void ReportRank::report_parse(Handle h)
 {
-	printf ("Parse %d:\n", parse_cnt);
+#ifdef DEBUG
+	printf ("; Parse %d:\n", parse_cnt);
+#endif
 	foreach_word_instance(h, &ReportRank::report_word, this);
 	parse_cnt ++;
 }
@@ -57,41 +59,45 @@ bool ReportRank::report_parse_f(Handle h)
  */
 bool ReportRank::report_word(Handle h)
 {
-	// Only noun-senses and verb-senses get ranked.
-	std::string pos = get_part_of_speech(h);
-	if (pos.compare("noun") && pos.compare("verb")) return false;
+	normalization = 0.0;
+	foreach_word_sense_of_inst(h, &ReportRank::sum_score, this);
+printf("duude norm was %g\n", normalization);
 
-	hi_score = 0.0;
-	hi_scorer = UNDEFINED_HANDLE;
-	foreach_word_sense_of_inst(h, &ReportRank::choose_sense, this);
-
-	Node *word = dynamic_cast<Node *>(TLB::getAtom(h));
-	if (hi_scorer != UNDEFINED_HANDLE)
+	if (1.0e-6 >= normalization)
 	{
-		Node *sense = dynamic_cast<Node *>(TLB::getAtom(hi_scorer));
-		printf ("%s sense %s score=%g\n", 
-		        word->getName().c_str(), sense->getName().c_str(), hi_score);
-	}
-	else
-	{
-		printf ("No word sense found for %s\n", word->getName().c_str());
+		Node *word = dynamic_cast<Node *>(TLB::getAtom(h));
+		printf ("; No word sense found for %s\n", word->getName().c_str());
+		return false;
 	}
 
+	normalization = 1.0 / normalization;
+	foreach_word_sense_of_inst(h, &ReportRank::renorm_score, this);
 	return false;
 }
 
-bool ReportRank::choose_sense(Handle word_sense_h,
+bool ReportRank::sum_score(Handle word_sense_h,
+                              Handle sense_link_h)
+{
+	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
+	normalization += l->getTruthValue().getMean();
+	return false;
+}
+
+bool ReportRank::renorm_score(Handle word_sense_h,
                               Handle sense_link_h)
 {
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double score = l->getTruthValue().getMean();
+	score *= normalization;
+
+	// Update the truth value, so that it now functions as a
+	// normalized probability
+	SimpleTruthValue stv((float) score, 1.0f);
+	stv.setConfidence(l->getTruthValue().getConfidence());
+	l->setTruthValue(stv);
+
 Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
-printf ("word sense=%s score=%f hi=%f\n", n->getName().c_str(), score, hi_score);
-	if (hi_score < score)
-	{
-		hi_score = score;
-		hi_scorer = word_sense_h;
-	}
+printf ("duu word sense=%s score=%f\n", n->getName().c_str(), score);
 	return false;
 }
 
