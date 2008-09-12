@@ -11,6 +11,8 @@
 #ifndef OPENCOG_SENSE_SIMILARITY_SQL_H
 #define OPENCOG_SENSE_SIMILARITY_SQL_H
 
+#include "odbcxx.h"
+
 #include "SenseSimilarity.h"
 #include "SimpleTruthValue.h"
 
@@ -19,6 +21,8 @@ namespace opencog {
 class SenseSimilaritySQL :
 	public SenseSimilarity
 {
+	private:
+		ODBCConnection *db_conn;
 
 	public:
 		SenseSimilaritySQL(void);

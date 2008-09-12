@@ -8,11 +8,13 @@ ADD_LIBRARY (wsd STATIC
 	SenseCache.cc
 	SenseRank.cc
 	SenseSimilarityLCH.cc
+	SenseSimilaritySQL.cc
 	WordSenseProcessor.cc
 )
 
 INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/persist
 	${OPENCOG_SOURCE_DIR}/src/server
 	${OPENCOG_SOURCE_DIR}/src/util
 )

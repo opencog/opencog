@@ -10,9 +10,10 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "ForeachWord.h"
 #include "SenseSimilaritySQL.h"
+#include "ForeachWord.h"
 #include "Node.h"
+#include "odbcxx.h"
 #include "SimpleTruthValue.h"
 
 using namespace opencog;
@@ -21,10 +22,18 @@ using namespace opencog;
 
 SenseSimilaritySQL::SenseSimilaritySQL(void)
 {
+	// XXX fix me no hard coded information, please ...
+	const char * dbname = "lexat";
+	const char * username = "linas";
+	const char * authentication = "asdf";
+
+   db_conn = new ODBCConnection(dbname, username, authentication);
 }
 
 SenseSimilaritySQL::~SenseSimilaritySQL()
 {
+	// Deleting will close the open connection
+	delete db_conn;
 }
 
 SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
@@ -32,9 +41,6 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 	Handle first_sense = fs;
 	Handle second_sense = ss;
 
-	// If the parts-of-speech don't match, the similarity is zero.
-	// If either one is an adjective or adverb, they're unrelated.
-	// (Although we are not very confident of that!)
 	std::string first_pos = get_part_of_speech(first_sense);
 	std::string second_pos = get_part_of_speech(second_sense);
 
@@ -48,8 +54,14 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 	}
 #endif
 
-	printf ("Ola !!\n");
+	printf ("Ola !! %s %s \n", first_pos.c_str(), second_pos.c_str());
 
+	Node *fn = dynamic_cast<Node *>(TLB::getAtom(first_sense));
+	Node *sn = dynamic_cast<Node *>(TLB::getAtom(second_sense));
+	std::string fk = fn->getName();
+	std::string sk = sn->getName();
+
+	printf ("Yeahhh %s %s\n", fk.c_str(), sk.c_str());
 
 	double sim = 0.5;
 	SimpleTruthValue stv((float) sim, 0.9f);
