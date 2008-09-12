@@ -14,7 +14,7 @@
 #include "Node.h"
 #include "SimpleTruthValue.h"
 
-#define DEBUG
+// #define DEBUG
 
 using namespace opencog;
 
@@ -49,8 +49,8 @@ void MihalceaLabel::annotate_parse(Handle h)
 	total_labels = 0;
 	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
 #ifdef DEBUG
-	printf("Applied %d word-sense labels to %d words\n", total_labels, total_words);
-	printf("---------------------------------\n");
+	printf("; Applied %d word-sense labels to %d words\n", total_labels, total_words);
+	printf("; ---------------------------------\n");
 #endif
 }
 
@@ -85,10 +85,10 @@ bool MihalceaLabel::annotate_word(Handle h)
 #ifdef DEBUG
 	total_words ++;
 	Node *n = dynamic_cast<Node *>(word_instance);
-	printf("found word-inst %s\n",  n->toString().c_str());
-	printf("\thas inst-pos %s\n",  word_inst_pos.c_str());
+	printf("; found word-inst %s\n",  n->toString().c_str());
+	printf(";\thas inst-pos %s\n",  word_inst_pos.c_str());
 	n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
-	printf("\thas word-dict %s\n",  n->toString().c_str());
+	printf(";\thas word-dict %s\n",  n->toString().c_str());
 #endif
 
 	// loop over all word senses with this part-of-speech.
@@ -112,7 +112,7 @@ bool MihalceaLabel::annotate_word_sense(Handle h)
 
 #ifdef DEBUG
 	Node *n = dynamic_cast<Node *>(word_sense);
-	printf("\thas word-sense %s\n",  n->toString().c_str());
+	printf(";\thas word-sense %s\n",  n->toString().c_str());
 	total_labels++;
 #endif
 

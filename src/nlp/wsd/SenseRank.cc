@@ -50,7 +50,49 @@ SenseRank::~SenseRank()
  */
 void SenseRank::rank_sentence(Handle h)
 {
+	foreach_parse(h, &SenseRank::init_parse, this);
 	foreach_parse(h, &SenseRank::rank_parse_f, this);
+}
+
+/**
+ * Assign equal probability to each sense of each word of this parse.
+ */
+bool SenseRank::init_parse(Handle h)
+{
+	foreach_word_instance(h, &SenseRank::init_word, this);
+	return false;
+}
+
+/**
+ * Assign equal probability to each sense of each word.
+ */
+bool SenseRank::init_word(Handle h)
+{
+	prob = 0.0;
+	foreach_word_sense_of_inst(h, &SenseRank::count_senses, this);
+	if (prob < 0.5) return false;
+
+	prob = 1.0 / prob;
+	foreach_word_sense_of_inst(h, &SenseRank::init_senses, this);
+	return false;
+}
+
+bool SenseRank::count_senses(Handle word_sense_h,
+                            Handle sense_link_h)
+{
+	prob += 1.0;
+	return false;
+}
+
+bool SenseRank::init_senses(Handle word_sense_h,
+                            Handle sense_link_h)
+{
+	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
+	SimpleTruthValue stv((float) prob, 1.0f);
+	stv.setConfidence(sense->getTruthValue().getConfidence());
+	sense->setTruthValue(stv);
+printf("duuude assing initial prob=%g\n", prob);
+	return false;
 }
 
 /**
@@ -113,12 +155,21 @@ bool SenseRank::start_sense(Handle word_sense_h,
  * The handle argument points at a (word-inst,word-sense) pair.
  * The page rank is defined as
  *
- * P(a) = (1-d) + d* (sum_b w_ba / (sum_c w_bc)) P(b)
+ * P(a) = (1-d) + d* sum_b (w_ba / (sum_c w_bc)) P(b)
  *
  * where a,b,c are (word-inst-word-sense) pairs,
  * P(a) is the rank of a,
  * w_ba is the weight of edges joining b to a
  * sum_b is a sum over all possible values of b.
+ *
+ * Note that if we write
+ *   t_ba = w_ba / (sum_c w_bc)
+ * then we have the identity that
+ *   1 = sum_a t_ba
+ * so we can interpret t_ba as an entry in the transition matrix of
+ * a Markov chain: that is, passing the probability through the Markov
+ * chain is (should be) conserved. Any given P(b) will be pread
+ * uniformly across the possible P(a)'s.
  */
 void SenseRank::rank_sense(Handle h)
 {

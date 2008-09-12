@@ -15,6 +15,12 @@ namespace opencog {
 class SenseRank
 {
 	private:
+		bool init_parse(Handle);
+		bool init_word(Handle);
+		double prob;
+		bool count_senses(Handle, Handle);
+		bool init_senses(Handle, Handle);
+
 		bool rank_parse_f(Handle);
 		bool start_word(Handle);
 		bool start_sense(Handle, Handle);
