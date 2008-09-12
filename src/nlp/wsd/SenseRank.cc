@@ -145,30 +145,36 @@ bool SenseRank::start_sense(Handle word_sense_h,
  * The handle argument points at a (word-inst,word-sense) pair.
  * The page rank is defined as
  *
- * P(a) = (1-d) + d* sum_b (w_ba / (sum_c w_bc)) P(b)
+ * P(a) = (1-d) + d* sum_b (w_ab / (sum_c w_cb)) P(b)
  *
  * where a,b,c are (word-inst-word-sense) pairs,
  * P(a) is the rank of a,
- * w_ba is the weight of edges joining b to a
+ * w_ab is the weight of edges joining b to a
  * sum_b is a sum over all possible values of b.
  *
  * Note that if we write
- *   t_ba = w_ba / (sum_c w_bc)
+ *   t_ab = w_ab / (sum_c w_cb)
  * then we have the identity that
- *   1 = sum_a t_ba
- * so we can interpret t_ba as an entry in the transition matrix of
+ *   1 = sum_a t_ab
+ * so we can interpret t_ab as an entry in the transition matrix of
  * a Markov chain: that is, passing the probability through the Markov
  * chain is (should be) conserved. Any given P(b) will be pread
  * uniformly across the possible P(a)'s.
+ *
+ * The quantity (sum_c w_cb) is called "edge_sum" and is computed 
+ * by inner_sum() 
+ *
+ * The quantity t_ab is computed inside of outer_sum(), where all values
+ * of b are summed over.
  */
-void SenseRank::rank_sense(Handle h)
+void SenseRank::rank_sense(Handle sense_link_h)
 {
 	rank_sum = 0.0;
-	foreach_sense_edge(h, &SenseRank::outer_sum, this);
+	foreach_sense_edge(sense_link_h, &SenseRank::outer_sum, this);
 	rank_sum *= damping_factor;
 	rank_sum += 1.0-damping_factor;
 
-	Link *sense = dynamic_cast<Link *>(TLB::getAtom(h));
+	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double old_rank = sense->getTruthValue().getMean();
 
 #ifdef DEBUG
@@ -192,21 +198,22 @@ void SenseRank::rank_sense(Handle h)
 /**
  * Perform the outermost sum of the page-rank algorithm.
  */
-bool SenseRank::outer_sum(Handle h, Handle hedge)
+bool SenseRank::outer_sum(Handle sense_b_h, Handle hedge)
 {
 	// Get the weight of the edge
 	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
-	double weight_ba = edge->getTruthValue().getMean();
+	double weight_ab = edge->getTruthValue().getMean();
 
-	// Normalize the weight by the sum of competitors.
+	// Normalize the weight_ab summing over all c's weight_cb
+	// The sum over 'c' runs over all edges pointing to link "b"
 	edge_sum = 0.0;
-	foreach_sense_edge(h, &SenseRank::inner_sum, this);
-	double weight = weight_ba / edge_sum; 
+	foreach_sense_edge(sense_b_h, &SenseRank::inner_sum, this);
+	double t_ab = weight_ab / edge_sum; 
 
 	// Get the word-sense probability
-	Link *bee = dynamic_cast<Link *>(TLB::getAtom(h));
+	Link *bee = dynamic_cast<Link *>(TLB::getAtom(sense_b_h));
 	double p_b = bee->getTruthValue().getMean();
-	weight *= p_b;
+	double weight = t_ab * p_b;
 
 	rank_sum += weight;
 	// printf("outer sum h=%ld w=%g sum=%g\n", h, weight, rank_sum);
@@ -218,9 +225,9 @@ bool SenseRank::outer_sum(Handle h, Handle hedge)
  * This sum simply computes the normalization that will be used to
  * adjust an edge weight. 
  */
-bool SenseRank::inner_sum(Handle h, Handle hedge)
+bool SenseRank::inner_sum(Handle sense_c_h, Handle hedge_bc)
 {
-	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge));
+	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge_bc));
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
 	// printf("inner sum h=%ld, %g %g\n", h, weight_to_b, edge_sum);
