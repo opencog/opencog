@@ -15,6 +15,7 @@
 
 #include "Atom.h"
 #include "AtomSpace.h"
+#include "SenseSimilarity.h"
 
 namespace opencog {
 
@@ -22,6 +23,7 @@ class MihalceaEdge
 {
 	private:
 		AtomSpace *atom_space;
+		SenseSimilarity *sen_sim;
 		bool annotate_parse_f(Handle);
 
 		std::set<Handle> words;

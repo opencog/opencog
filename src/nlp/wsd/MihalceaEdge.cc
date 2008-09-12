@@ -13,6 +13,7 @@
 #include "MihalceaEdge.h"
 #include "SenseCache.h"
 #include "SenseSimilarityLCH.h"
+#include "SenseSimilaritySQL.h"
 #include "SimpleTruthValue.h"
 
 #define DEBUG
@@ -22,11 +23,14 @@ using namespace opencog;
 MihalceaEdge::MihalceaEdge(void)
 {
 	atom_space = NULL;
+	// sen_sim = new SenseSimilarityLCH();
+	sen_sim = new SenseSimilaritySQL();
 }
 
 MihalceaEdge::~MihalceaEdge()
 {
 	atom_space = NULL;
+	delete sen_sim;
 }
 
 void MihalceaEdge::set_atom_space(AtomSpace *as)
@@ -215,8 +219,7 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 	{
 		// Use a word-sense similarity/relationship measure to assign an 
 		// initial truth value to the edge.
-		SenseSimilarityLCH ss;
-		stv = ss.similarity(first_word_sense, second_word_sense_h);
+		stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
 		Link * l = sc.set_similarity(first_word_sense, second_word_sense_h, stv);
 		atom_space->addRealAtom(*l);
 		delete l;
