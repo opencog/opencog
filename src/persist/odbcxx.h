@@ -104,4 +104,21 @@ class ODBCRecordSet
 		}
 };
 
+/**
+ * Handy-dandy utility function: since SQL uses single-quotes
+ * for delimiting strings, the strings themselves need to have 
+ * any single-quotes escaped, to avoid bad syntax.
+ */
+inline void escape_single_quotes(std::string &str)
+{
+	std::string::size_type pos = 0;
+	pos = str.find ('\'', pos);
+	while (pos != std::string::npos)
+	{
+		str.insert(pos, 1, '\'');
+		pos += 2;
+		pos = str.find('\'', pos);
+	}
+}
+
 #endif /* PERSISTENT_ODBC_DRIVER_H_ */

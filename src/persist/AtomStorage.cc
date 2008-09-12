@@ -467,18 +467,6 @@ int AtomStorage::height(const Atom *atom)
 
 /* ================================================================ */
 
-void escape_single_quotes(std::string &str)
-{
-	std::string::size_type pos = 0;
-	pos = str.find ('\'', pos);
-	while (pos != std::string::npos)
-	{
-		str.insert(pos, 1, '\'');
-		pos += 2;
-		pos = str.find('\'', pos);
-	}
-}
-
 /**
  * Store the indicated atom.
  * Store its truth values too.
