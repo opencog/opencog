@@ -1,5 +1,5 @@
 /*
- * SenseSimilarity.cc
+ * SenseSimilarityLCH.cc
  *
  * Implements various wordnet-based sense-similarity measures.
  * Currently implements only Leacock-Chodorow, however, Wu-Palmer
@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "ForeachWord.h"
-#include "SenseSimilarity.h"
+#include "SenseSimilarityLCH.h"
 #include "Node.h"
 #include "SimpleTruthValue.h"
 
@@ -20,7 +20,7 @@ using namespace opencog;
 
 #define DEBUG
 
-SenseSimilarity::SenseSimilarity(void)
+SenseSimilarityLCH::SenseSimilarityLCH(void)
 {
 	// Set 'max_follow_holo' to a small number to limit the total number
 	// of holonym relations to be followed. Setting this to a large number
@@ -31,7 +31,7 @@ SenseSimilarity::SenseSimilarity(void)
 	max_follow_holo = 1;
 }
 
-SenseSimilarity::~SenseSimilarity()
+SenseSimilarityLCH::~SenseSimilarityLCH()
 {
 }
 
@@ -68,7 +68,7 @@ SenseSimilarity::~SenseSimilarity()
  * Note that currently, only the "mean" is used to nindicate similarity;
  * whereas teh confidence is set to the arbitrary 0.9
  */
-SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
+SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 {
 	first_sense = fs;
 	second_sense = ss;
@@ -105,10 +105,10 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	join_candidate = first_sense;
 	second_cnt = 0;
 	foreach_binary_link(second_sense, INHERITANCE_LINK,
-	                         &SenseSimilarity::up_second, this);
+	                         &SenseSimilarityLCH::up_second, this);
 	follow_holo_cnt = 1;
 	foreach_binary_link(second_sense, HOLONYM_LINK,
-	                         &SenseSimilarity::up_second, this);
+	                         &SenseSimilarityLCH::up_second, this);
 	follow_holo_cnt = 0;
 
 	// Now look to see if there is an alternate, shorter, path,
@@ -116,10 +116,10 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	// (This also catches the case where the first sense is
 	// immediately above the second sense).
 	foreach_binary_link(first_sense, INHERITANCE_LINK,
-	                         &SenseSimilarity::up_first, this);
+	                         &SenseSimilarityLCH::up_first, this);
 	follow_holo_cnt = 1;
 	foreach_binary_link(first_sense, HOLONYM_LINK,
-	                         &SenseSimilarity::up_first, this);
+	                         &SenseSimilarityLCH::up_first, this);
 	follow_holo_cnt = 0;
 
 	// At this point, min_cnt will contain the shortest distance between
@@ -142,7 +142,7 @@ SimpleTruthValue SenseSimilarity::lch_similarity(Handle fs, Handle ss)
 	return stv;
 }
 
-bool SenseSimilarity::up_first(Handle up)
+bool SenseSimilarityLCH::up_first(Handle up)
 {
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(up));
 	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
@@ -166,23 +166,23 @@ bool SenseSimilarity::up_first(Handle up)
 	join_candidate = up;
 	second_cnt = 0;
 	foreach_binary_link(second_sense, INHERITANCE_LINK,
-	                         &SenseSimilarity::up_second, this);
+	                         &SenseSimilarityLCH::up_second, this);
 	if (follow_holo_cnt < max_follow_holo)
 	{
 		follow_holo_cnt ++;
 		foreach_binary_link(second_sense, HOLONYM_LINK,
-		                         &SenseSimilarity::up_second, this);
+		                         &SenseSimilarityLCH::up_second, this);
 		follow_holo_cnt --;
 	}
 
 	// Go up, see if there are shorter paths
 	foreach_binary_link(up, INHERITANCE_LINK,
-	                         &SenseSimilarity::up_first, this);
+	                         &SenseSimilarityLCH::up_first, this);
 	if (follow_holo_cnt < max_follow_holo)
 	{
 		follow_holo_cnt ++;
 		foreach_binary_link(up, HOLONYM_LINK,
-		                         &SenseSimilarity::up_first, this);
+		                         &SenseSimilarityLCH::up_first, this);
 		follow_holo_cnt --;
 	}
 	first_cnt --;
@@ -190,7 +190,7 @@ bool SenseSimilarity::up_first(Handle up)
 	return false;
 }
 
-bool SenseSimilarity::up_second(Handle up)
+bool SenseSimilarityLCH::up_second(Handle up)
 {
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(up));
 	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
@@ -218,14 +218,14 @@ bool SenseSimilarity::up_second(Handle up)
 
 	// Else, if no match, search upwards in the hypernym tree.
 	foreach_binary_link(up, INHERITANCE_LINK,
-	                         &SenseSimilarity::up_second, this);
+	                         &SenseSimilarityLCH::up_second, this);
 
 	// Give the holonym heirarchy a spin, too.
 	if (follow_holo_cnt < max_follow_holo)
 	{
 		follow_holo_cnt ++;
 		foreach_binary_link(up, HOLONYM_LINK,
-		                         &SenseSimilarity::up_second, this);
+		                       &SenseSimilarityLCH::up_second, this);
 		follow_holo_cnt --;
 	}
 

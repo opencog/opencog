@@ -1,8 +1,7 @@
 /*
  * SenseSimilarity.h
  *
- * Implements word-sense similarity measures, starting with
- * the Leacock and Chodorow algorithm.
+ * Interface class for similarity measures.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -16,25 +15,11 @@ namespace opencog {
 
 class SenseSimilarity
 {
-	private:
-		Handle first_sense;
-		Handle second_sense;
-		int first_cnt;
-		int second_cnt;
-		int min_cnt;
-
-		int follow_holo_cnt;
-		int max_follow_holo;
-		Handle join_candidate; // aka least common subsumer
-		bool up_first(Handle);
-		bool up_second(Handle);
-
-
 	public:
-		SenseSimilarity(void);
-		~SenseSimilarity();
+		SenseSimilarity(void) {};
+		virtual ~SenseSimilarity() {};
 
-		SimpleTruthValue lch_similarity(Handle, Handle);
+		virtual SimpleTruthValue similarity(Handle, Handle) = 0;
 };
 }
 

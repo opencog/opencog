@@ -7,7 +7,7 @@ ADD_LIBRARY (wsd STATIC
 	ReportRank.cc
 	SenseCache.cc
 	SenseRank.cc
-	SenseSimilarity.cc
+	SenseSimilarityLCH.cc
 	WordSenseProcessor.cc
 )
 

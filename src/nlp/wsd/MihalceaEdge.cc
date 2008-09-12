@@ -12,7 +12,7 @@
 #include "ForeachWord.h"
 #include "MihalceaEdge.h"
 #include "SenseCache.h"
-#include "SenseSimilarity.h"
+#include "SenseSimilarityLCH.h"
 #include "SimpleTruthValue.h"
 
 #define DEBUG
@@ -215,8 +215,8 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 	{
 		// Use a word-sense similarity/relationship measure to assign an 
 		// initial truth value to the edge.
-		SenseSimilarity ss;
-		stv = ss.lch_similarity(first_word_sense, second_word_sense_h);
+		SenseSimilarityLCH ss;
+		stv = ss.similarity(first_word_sense, second_word_sense_h);
 		Link * l = sc.set_similarity(first_word_sense, second_word_sense_h, stv);
 		atom_space->addRealAtom(*l);
 		delete l;
