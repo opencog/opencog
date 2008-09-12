@@ -25,7 +25,7 @@
  * If defined, generate output for the various relations (holo/hypernym,
  * etc.) Otherise, only the sense-keys are generated.
  */
-// #define GENERATE_NYMS 1
+#define GENERATE_NYMS 1
 
 /**
  * Skip processing of colocations if this flag is set to 1
@@ -466,6 +466,10 @@ main (int argc, char * argv[])
 
 		// printf("<!-- %d -->\n", cnt);
 		if (cnt % 1000 == 0) fprintf(stderr, "Info: done processing %d word senes\n", cnt);
+
+		// XXX !!! sleep, intentionally slow it down, so that 
+		// the tcp socket doesn't choke.
+		if (cnt % 4000 == 0) sleep(1);
 	}
 
 	printf(".\n");

@@ -334,11 +334,14 @@ a 16MB file.  By contrast, the scm output has a wc of 3307375
 bzip2's down to 8.1 MBytes
 
 load 186605 senses 
-NMXML: in  4:18 secs CPU on cogserver and 1.1g RAM usage
-scheme: excess of 3GB ... not clear why. experiments show 
-       that the guile GC is not leaking, the only remaining
-       explanation is severe memory fragmentation! Yech.. 
-       this is bad.
+NMXML:  in 4:18 mins CPU on cogserver and 1.1g RAM usage
+scheme: in 2:42 mins CPU on cogserver, and 417G RAM usage.
+
+Can probably decrease the NMXML usage to same as scheme, by 
+slowing down the load rate -- there's a bug, maybe a mem
+leak, in the tcpip code. Slowing the rate of traffic on the
+socket decreases the ram usage. See below for forensics,
+or the wiki page/email for the bug report.
 
 For the case of senses+POS only, this creates 973300 atoms.
 
@@ -351,6 +354,7 @@ onstack local variable allocation, instead of new/delete.
 That saved 131 MB of fragmentation!  WOW!!!!
 
 Now down to 451 MB
+Now down to 271 MB
 
 since the SQL loader is the cleanest, this strongly suggests 
 severe memory fragmentation.
