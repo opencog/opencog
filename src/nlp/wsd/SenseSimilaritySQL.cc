@@ -2,7 +2,10 @@
  * SenseSimilaritySQL.cc
  *
  * Fetches wordnet-based sense-similarity measures from database.
- * These had been previous pre-computed.
+ * These had been previously pre-computed. The database is generated
+ * by scripts in the 'lexical attraction' package, which can be 
+ * found on launchpad. The input to those scripts is, in turn, a
+ * large selection of previously parsed text. 
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -36,9 +39,17 @@ class SenseSimilaritySQL::Response
 		double vector;
 		double wup;
 
+		bool have_data;
+
+		Response(void)
+		{
+			have_data = false;
+		}
+
 		bool row_cb(void)
 		{
 			rs->foreach_column(&Response::column_cb, this);
+			have_data = true;
 			return false;
 		}
 
@@ -110,18 +121,28 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 	std::string fk = fn->getName();
 	std::string sk = sn->getName();
 
+	escape_single_quotes(fk);
+	escape_single_quotes(sk);
+
 #define BUFSZ 500
 	char qry[BUFSZ];
 	snprintf(qry, BUFSZ, "SELECT * FROM SensePairScores WHERE "
 		"sense_idx_a = \'%s\' AND sense_idx_b = \'%s\';",
 		fk.c_str(), sk.c_str());
 
-	printf ("Yeahhh %s\n", qry);
-
 	Response rp;
 	rp.rs = db_conn->exec(qry);
 	rp.rs->foreach_row(&Response::row_cb, &rp);
 	rp.rs->release();
+
+	// If no data, return similarity of zero!
+	// XXX however, what we should really do is to not that we have no
+	// data, and maybe try to gather some.
+	if (!rp.have_data)
+	{
+		SimpleTruthValue stv(0.0f, 0.9f);
+		return stv;
+	}
 
 	std::string first_pos = get_part_of_speech(first_sense);
 	std::string second_pos = get_part_of_speech(second_sense);
@@ -134,23 +155,27 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 			// for nouns, jcn is best, per Sinha & Mihalcea
 			// Also .. use thier normalization, section 5.2
 			sim = (rp.jcn - 0.04) / (0.2-0.04);
-printf ("duude jcn=%g sim=%g\n", rp.jcn, sim);
 		}
 		else if (0 == first_pos.compare("verb"))
 		{
 			// for verbs, lch is best, per Sinha & Mihalcea
 			sim = (rp.lch - 0.34) / (3.33 - 0.34);
-printf ("duude lch=%g sim=%g\n", rp.lch, sim);
 		}
 	}
 	else
 	{
 		// For all else, use lesk
 		sim = rp.lesk / 240.0;
-printf ("duude lesk=%g sim=%g\n", rp.lesk, sim);
 	}
 	if (sim < 0.0) sim = 0.0;
 	if (1.0 < sim) sim = 1.0;
+
+#ifdef DEBUG
+	if (0.0 < sim) {
+		printf ("%s\n", qry);
+		printf ("sim=%g\n", sim);
+	}
+#endif
 
 	SimpleTruthValue stv((float) sim, 0.9f);
 	return stv;
