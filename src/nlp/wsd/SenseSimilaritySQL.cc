@@ -25,6 +25,7 @@ class SenseSimilaritySQL::Response
 
 		// These names exactly mirror those of the WordNet::Similarity
 		// package (and were computed by that package, and stuffed into DB)
+		// They are also used in the literature, in e.g. Mihalcea papers.
 		double hso;
 		double jcn;
 		double lch;
@@ -43,10 +44,41 @@ class SenseSimilaritySQL::Response
 
 		bool column_cb(const char *colname, const char * colvalue)
 		{
-			if (!strcmp(colname, "lch"))
+			if (!strcmp(colname, "hso"))
+			{
+				hso = atof(colvalue);
+			}
+			else if (!strcmp(colname, "jcn"))
+			{
+				jcn = atof(colvalue);
+			}
+			else if (!strcmp(colname, "lch"))
 			{
 				lch = atof(colvalue);
-printf ("duuude lch=%g\n", lch);
+			}
+			else if (!strcmp(colname, "lesk"))
+			{
+				lesk = atof(colvalue);
+			}
+			else if (!strcmp(colname, "lin"))
+			{
+				lin = atof(colvalue);
+			}
+			else if (!strcmp(colname, "path"))
+			{
+				path = atof(colvalue);
+			}
+			else if (!strcmp(colname, "res"))
+			{
+				res = atof(colvalue);
+			}
+			else if (!strcmp(colname, "vector"))
+			{
+				vector = atof(colvalue);
+			}
+			else if (!strcmp(colname, "wup"))
+			{
+				wup = atof(colvalue);
 			}
 			return false;
 		}
@@ -94,17 +126,32 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 	std::string first_pos = get_part_of_speech(first_sense);
 	std::string second_pos = get_part_of_speech(second_sense);
 
+	double sim;
 	if (0 == first_pos.compare(second_pos))
 	{
 		if (0 == first_pos.compare("noun"))
 		{
+			// for nouns, jcn is best, per Sinha & Mihalcea
+			// Also .. use thier normalization, section 5.2
+			sim = (rp.jcn - 0.04) / (0.2-0.04);
+printf ("duude jcn=%g sim=%g\n", rp.jcn, sim);
 		}
 		else if (0 == first_pos.compare("verb"))
 		{
+			// for verbs, lch is best, per Sinha & Mihalcea
+			sim = (rp.lch - 0.34) / (3.33 - 0.34);
+printf ("duude lch=%g sim=%g\n", rp.lch, sim);
 		}
 	}
+	else
+	{
+		// For all else, use lesk
+		sim = rp.lesk / 240.0;
+printf ("duude lesk=%g sim=%g\n", rp.lesk, sim);
+	}
+	if (sim < 0.0) sim = 0.0;
+	if (1.0 < sim) sim = 1.0;
 
-	double sim = 0.5;
 	SimpleTruthValue stv((float) sim, 0.9f);
 	return stv;
 }
