@@ -333,6 +333,24 @@ foreach_relex_relation(Handle h,
 	foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
 }
 
+/**
+ * Return the word-instance correspondng to a given word-sense-link
+ *
+ * Each word-sense-link is assumed to be link a word instance to a 
+ * sense node:
+ *
+ *    <InheritanceLink>
+ *      <ConceptNode name="bark_144" />
+ *      <WordSenseNode name="bark_sense_23" />
+ *    </InheritanceLink>
+ */
+inline Handle get_word_instance_of_sense_link(Handle h)
+{
+	const Link * sense_link = dynamic_cast<const Link *>(TLB::getAtom(h));
+	std::vector<Handle> v = sense_link->getOutgoingSet();
+	return v[0];
+}
+
 }
 
 #endif /* OPENCOG_FOREACH_WORD_H */
