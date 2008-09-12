@@ -24,6 +24,8 @@ class SenseSimilaritySQL :
 	private:
 		ODBCConnection *db_conn;
 
+		class Response;
+
 	public:
 		SenseSimilaritySQL(void);
 		virtual ~SenseSimilaritySQL();
