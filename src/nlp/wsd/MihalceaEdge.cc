@@ -56,6 +56,8 @@ void MihalceaEdge::annotate_parse(Handle h)
 
 	// At this point, "words" contains all of the relex-participating
 	// words in the parse. Loop over word-pairs, and annotate them.
+	word_pair_count = 0;
+	edge_count = 0;
 	std::set<Handle>::const_iterator f;
 	for (f = words.begin(); f != words.end(); f++)
 	{
@@ -65,6 +67,10 @@ void MihalceaEdge::annotate_parse(Handle h)
 			annotate_word_pair(*f, *s);
 		}
 	}
+#ifdef DEBUG
+	printf("Done adding %d edges for %d word pairs\n",
+		edge_count, word_pair_count);
+#endif
 }
 
 bool MihalceaEdge::annotate_parse_f(Handle h)
@@ -91,6 +97,8 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	// At this point, "pa_words" contains all of the relex-participating
 	// words in parse ha, and "words" contains those of parse hb.
 	// Loop over word-pairs, and annotate them.
+	word_pair_count = 0;
+	edge_count = 0;
 	std::set<Handle>::const_iterator ia;
 	for (ia = pa_words.begin(); ia != pa_words.end(); ia++)
 	{
@@ -102,13 +110,15 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	}
 #ifdef DEBUG
 	printf ("========================= end sent pair\n");
+	printf("Sent pair: Done adding %d edges for %d word pairs\n",
+		edge_count, word_pair_count);
 #endif
 }
 
 /**
  * For each word-instance loop over all syntactic relationships.
  * (i.e. _subj, _obj, _nn, _amod, and so on). Generate a list of all
- * words that participate in relationships. 
+ * words that participate in relationships.
  */
 bool MihalceaEdge::look_at_word(Handle h)
 {
@@ -135,8 +145,8 @@ bool MihalceaEdge::look_at_relation(const std::string &relname, Handle first, Ha
  * over all senses of each word, and creating an edge between them.
  *
  * All of the current word-sense similarity algorithms report zero
- * similarity when the two words are different parts of speech. 
- * Therefore, in order to improve performance, this routine does not 
+ * similarity when the two words are different parts of speech.
+ * Therefore, in order to improve performance, this routine does not
  * create any edges between words of differing parts-of-speech.
  */
 bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
@@ -146,21 +156,13 @@ bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
 	const std::string &fn = f->getName();
 	const std::string &sn = s->getName();
-	printf("(%s, %s)\n", fn.c_str(), sn.c_str());
+	printf("WordPair %d: (%s, %s)\n", word_pair_count, fn.c_str(), sn.c_str());
 #endif
-
-	// Don't bother linking words with different parts-of-speech;
-	// the similarity measures don't support these.
-	std::string first_pos = get_part_of_speech(first);
-	std::string second_pos = get_part_of_speech(second);
-	if (0 != first_pos.compare(second_pos))
-	{
-		return false;
-	}
 
 	second_word_inst = second;
 	foreach_word_sense_of_inst(first, &MihalceaEdge::sense_of_first_inst, this);
-	
+
+	word_pair_count ++;
 	return false;
 }
 
@@ -175,7 +177,7 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
 	first_word_sense = first_word_sense_h;
 
 	// printf("first sense %s\n", sense->getName().c_str());
-	// Get the handle of the link itself .. 
+	// Get the handle of the link itself ...
 	first_sense_link = first_sense_link_h;
 
 	foreach_word_sense_of_inst(second_word_inst,
@@ -187,7 +189,7 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
  * Called for every pair (word-instance,word-sense) of the second
  * word-instance of a relex relationship. This routine is the last,
  * most deeply nested loop of all of this set of nested loops.  This
- * routine now has possession of both pairs, and can now create a 
+ * routine now has possession of both pairs, and can now create a
  * Mihalcea-graph edge between these pairs.
  *
  * As discussed in the README file, the resulting structure is:
@@ -198,7 +200,7 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
  *          <ConceptNode name="tree_99" />
  *          <WordSenseNode name="tree_sense_12" />
  *       </InheritanceLink>
- *       
+ *
  *       <InheritanceLink strength=0.9 confidence=0.1>
  *          <ConceptNode name="bark_144" />
  *          <WordSenseNode name="bark_sense_23" />
@@ -209,23 +211,27 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
 	// printf("second sense %s!\n", sense->getName().c_str());
-	
-	// Get the similarity between the two word senses out of the 
+
+	// Get the similarity between the two word senses out of the
 	// cache (if it exists).
 	SenseCache sc;
 	SimpleTruthValue stv(0.5,0.5);
 	stv = sc.similarity(first_word_sense, second_word_sense_h);
 	if (stv == TruthValue::DEFAULT_TV())
 	{
-		// Use a word-sense similarity/relationship measure to assign an 
-		// initial truth value to the edge.
+		// Similarity was not found in the cache. Go fetch a value
+		// from the database.
+		//
+		// Use a word-sense similarity/relationship measure to assign an
+		// initial truth value to the edge. Create an edge only if the
+		// relationship is greater than zero.
 		stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
 		Link * l = sc.set_similarity(first_word_sense, second_word_sense_h, stv);
 		atom_space->addRealAtom(*l);
 		delete l;
 	}
 
-	// Skip making edges between utterly unrelated nodes. 
+	// Skip making edges between utterly unrelated nodes.
 	if (stv.getMean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
@@ -234,6 +240,7 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 	out.push_back(second_sense_link);
 
 	atom_space->addLink(COSENSE_LINK, out, stv);
+	edge_count ++;
 
 	return false;
 }

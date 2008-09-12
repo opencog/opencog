@@ -66,7 +66,6 @@ void Mihalcea::process_sentence(Handle h)
 	}
 	previous_parse = top_parse;
 
-
 	sense_ranker->rank_parse(top_parse);
 	reporter->report_parse(top_parse);
 }
