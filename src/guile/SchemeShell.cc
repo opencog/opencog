@@ -28,6 +28,7 @@ SchemeShell::SchemeShell(void)
 		scm_init_guile();
 		scm_init_debug();
 		scm_init_backtrace();
+		scm_init_strports(); // is this really needed ?
 	}
 
 	funcs = new SchemeSmob();
@@ -36,6 +37,9 @@ SchemeShell::SchemeShell(void)
 	input_line = "";
 	normal_prompt = "guile> ";
 	pending_prompt = "... ";
+
+	outport = scm_open_output_string();
+	scm_set_current_output_port(outport);
 }
 
 void SchemeShell::hush_output(bool hush)
@@ -320,9 +324,19 @@ std::string SchemeShell::eval(const std::string &expr)
 	{
 		if (show_output)
 		{
+			// First, we print the "interpreter" output.
 			std::string rv;
 			rv = prt(rc);
 			rv += "\n";
+
+			// Next, we get the contents of the output port,
+			// and pass that on.
+			rc = scm_get_output_string(outport);
+			char * str = scm_to_locale_string(rc);
+			rv += str;
+			free(str);
+			scm_truncate_file(outport, scm_from_uint16(0));
+
 			rv += normal_prompt;
 			return rv;
 		}

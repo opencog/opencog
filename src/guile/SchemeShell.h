@@ -36,6 +36,9 @@ class SchemeShell
 		// printfing of basic types
 		std::string prt(SCM);
 
+		// output port
+		SCM outport;
+
 		SchemeSmob *funcs;
 
 	public:
