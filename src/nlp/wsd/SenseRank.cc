@@ -23,8 +23,7 @@ using namespace opencog;
 SenseRank::SenseRank(void)
 {
 	// The page-rank damping factor. Normally taken to be quite large.
-	damping_factor = 0.85;
-	damping_factor = 1.0;
+	damping_factor = 0.95;
 
 	// The convergence damping factor, used to determine when the page
 	// rank has converged. This is used to create an exponentially 
@@ -55,13 +54,12 @@ void SenseRank::rank_sentence(Handle h)
 }
 
 /**
- * Assign equal probability to each sense of each word.
- * That is, initially, all senses are equi-probabile.
+ * Assign equal probability to all senses of all words.
+ * Initially, all senses are equi-probabile.
  */
 bool SenseRank::init_word(Handle h)
 {
 	foreach_word_sense_of_inst(h, &SenseRank::init_senses, this);
-	norm_word(h);
 	return false;
 }
 
@@ -75,59 +73,17 @@ bool SenseRank::init_senses(Handle word_sense_h,
 }
 
 /**
- * Renormalize the probability vector associated with the given word
- * Done in two steps: total up all the probabilities; and then divide 
- * each probability by that total.
- */
-bool SenseRank::norm_word(Handle word_h)
-{
-	norm = 0.0;
-	foreach_word_sense_of_inst(word_h, &SenseRank::count_senses, this);
-	if (norm < 1.0e-8) return false;
-printf("duude norm=%g\n", norm);
-	norm = 1.0 / norm;
-	foreach_word_sense_of_inst(word_h, &SenseRank::renorm_senses, this);
-	return false;
-}
-
-bool SenseRank::count_senses(Handle word_sense_h,
-                            Handle sense_link_h)
-{
-	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	norm += sense->getTruthValue().getMean();
-	return false;
-}
-
-bool SenseRank::renorm_senses(Handle word_sense_h,
-                            Handle sense_link_h)
-{
-	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	double prob = sense->getTruthValue().getMean();
-	prob *= norm;
-	SimpleTruthValue stv((float) prob, 1.0f);
-	stv.setConfidence(sense->getTruthValue().getConfidence());
-	sense->setTruthValue(stv);
-	return false;
-}
-
-/**
  * For each parse, find some place to start. There is some chance
  * that the graph may have multiple, disconnected components (which 
  * is bad, but we have no strategy for handling this yet), and so
  * we'll give it a whirlstarting at each word. That way, at least
  * we'll sample each disconnected component. 
  */
-static bool do_show = false;
 void SenseRank::rank_parse(Handle h)
 {
 	converge = 1.0;
 	foreach_word_instance(h, &SenseRank::init_word, this);
 	foreach_word_instance(h, &SenseRank::start_word, this);
-//xxxxxxx normalize now xxxxxxxx
-	foreach_word_instance(h, &SenseRank::norm_word, this);
-do_show = true;
-converge = 1.0;
-foreach_word_instance(h, &SenseRank::start_word, this);
 }
 
 bool SenseRank::rank_parse_f(Handle h)
@@ -189,8 +145,13 @@ bool SenseRank::start_sense(Handle word_sense_h,
  *   1 = sum_a t_ab
  * so we can interpret t_ab as an entry in the transition matrix of
  * a Markov chain: that is, passing the probability through the Markov
- * chain is (should be) conserved. Any given P(b) will be pread
- * uniformly across the possible P(a)'s.
+ * chain is (should be) conserved. Any given P(b) will be spread
+ * uniformly across the possible P(a)'s. 
+ *
+ * The value of P(a) can be interpreted as a probability, if it is
+ * normalized -- it would be the Markov chain staionary vector
+ * (eigenvector). Note that P(a) ranges or *all* senses of all words:
+ * the total of senses of any individual word is *not* normalized.
  *
  * The quantity (sum_c w_cb) is called "edge_sum" and is computed 
  * by inner_sum() 
@@ -208,14 +169,11 @@ void SenseRank::rank_sense(Handle sense_link_h)
 	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double old_rank = sense->getTruthValue().getMean();
 
-// #ifdef DEBUG
-#if 1
-if(do_show) {
+#ifdef DEBUG
 	std::vector<Handle> oset = sense->getOutgoingSet();
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
 	printf ("; sense %s was %g new %g delta=%g\n", n->getName().c_str(),
 	        old_rank, rank_sum, fabs(rank_sum - old_rank));
-}
 #endif
 
 	// Compute convergence criterion to determine when the 
@@ -227,16 +185,6 @@ if(do_show) {
 	SimpleTruthValue stv((float) rank_sum, 1.0f);
 	stv.setConfidence(sense->getTruthValue().getConfidence());
 	sense->setTruthValue(stv);
-
-	// We want the probability of *all* senses of this word to sum 
-	// to one. The above operation bumped it up above one, so push
-	// prob of all senses back down, so they total to one.
-if(0) {
-	Handle word_h = get_word_instance_of_sense_link(sense_link_h);
-Node *nw=dynamic_cast<Node*>(TLB::getAtom(word_h));
-printf ("duude word is %s\n", nw->getName().c_str());
-	norm_word(word_h);
-}
 }
 
 /**

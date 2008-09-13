@@ -18,11 +18,6 @@ class SenseRank
 		bool init_word(Handle);
 		bool init_senses(Handle, Handle);
 
-		bool norm_word(Handle);
-		double norm;
-		bool count_senses(Handle, Handle);
-		bool renorm_senses(Handle, Handle);
-
 		bool rank_parse_f(Handle);
 		bool start_word(Handle);
 		bool start_sense(Handle, Handle);
