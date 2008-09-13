@@ -17,11 +17,14 @@ class ReportRank
 	private:
 		int parse_cnt;
 		bool report_parse_f(Handle);
-		bool report_word(Handle);
 
+		bool count_word(Handle);
+		bool count_sense(Handle, Handle);
 		double normalization;
-		bool sum_score(Handle, Handle);
-		bool renorm_score(Handle, Handle);
+		double sense_count;
+		bool renorm_parse(Handle);
+		bool renorm_word(Handle);
+		bool renorm_sense(Handle, Handle);
 
 	public:
 		ReportRank(void);

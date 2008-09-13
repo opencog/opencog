@@ -44,8 +44,16 @@ void ReportRank::report_parse(Handle h)
 #ifdef DEBUG
 	printf ("; Parse %d:\n", parse_cnt);
 #endif
-	foreach_word_instance(h, &ReportRank::report_word, this);
 	parse_cnt ++;
+
+	normalization = 0.0;
+	sense_count = 0.0;
+	foreach_word_instance(h, &ReportRank::count_word, this);
+
+printf("duude norm=%g senses=%g\n", normalization, sense_count);
+
+	normalization = 1.0 / normalization;
+	foreach_word_instance(h, &ReportRank::renorm_word, this);
 }
 
 bool ReportRank::report_parse_f(Handle h)
@@ -54,44 +62,37 @@ bool ReportRank::report_parse_f(Handle h)
 	return false;
 }
 
-/**
- * Report the parse rank for this word.
- */
-bool ReportRank::report_word(Handle h)
+bool ReportRank::count_word(Handle h)
 {
-	normalization = 0.0;
-	foreach_word_sense_of_inst(h, &ReportRank::sum_score, this);
-printf("duude norm was %g\n", normalization);
-
-	if (1.0e-6 >= normalization)
-	{
-		Node *word = dynamic_cast<Node *>(TLB::getAtom(h));
-		printf ("; No word sense found for %s\n", word->getName().c_str());
-		return false;
-	}
-
-	normalization = 1.0 / normalization;
-	foreach_word_sense_of_inst(h, &ReportRank::renorm_score, this);
+	foreach_word_sense_of_inst(h, &ReportRank::count_sense, this);
 	return false;
 }
 
-bool ReportRank::sum_score(Handle word_sense_h,
-                              Handle sense_link_h)
+bool ReportRank::renorm_word(Handle h)
+{
+	foreach_word_sense_of_inst(h, &ReportRank::renorm_sense, this);
+	return false;
+}
+
+bool ReportRank::count_sense(Handle word_sense_h,
+                             Handle sense_link_h)
 {
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	normalization += l->getTruthValue().getMean();
+	sense_count += 1.0;
 	return false;
 }
 
-bool ReportRank::renorm_score(Handle word_sense_h,
+bool ReportRank::renorm_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double score = l->getTruthValue().getMean();
-	score *= normalization;
+	score *= normalization * sense_count;
+	score -= 1.0;
 
-	// Update the truth value, so that it now functions as a
-	// normalized probability
+	// Update the truth value, it will store deviation
+	// from average
 	SimpleTruthValue stv((float) score, 1.0f);
 	stv.setConfidence(l->getTruthValue().getConfidence());
 	l->setTruthValue(stv);
