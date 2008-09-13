@@ -170,28 +170,26 @@ std::string SchemeShell::prt(SCM node)
 	{
 		return "#<port (XXX add name here)>";
 	}
-#if 0
 	else if (scm_is_true(scm_procedure_p(node))) 
 	{
-		return "procedure";
+		return "#<port (XXX add name here)>";
 	}
 	else if (scm_subr_p(node)) 
 	{
-		return "subr";
+		return "#<subr (XXX add name here)>";
 	}
 	else if (scm_is_true(scm_operator_p(node))) 
 	{
-		return "operator";
+		return "#<operator (XXX add name here)>";
 	}
 	else if (scm_is_true(scm_entity_p(node))) 
 	{
-		return "entity";
+		return "#<entity (XXX add name here)>";
 	}
 	else if (scm_is_true(scm_variable_p(node))) 
 	{
-		return "variable";
+		return "#<variable (XXX add name here)>";
 	}
-#endif
 	else
 	{
 		fprintf (stderr, "Error: unhandled type for guile printing: %p\n",
