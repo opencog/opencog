@@ -16,6 +16,10 @@
 (define my-connect 
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 ;
+; display the connect status
+;
+(display my-connect) (newline)
+;
 ; Alternately, one can use a unix-domain socket, located in
 ; /var/run/postgresql
 ; (define my-connect 
@@ -24,13 +28,17 @@
 ; Perform the datbase query
 (dbi-query my-connect "SELECT * FROM pairs WHERE left_word='motorcycle'")
 ;
-; print each row
+; Display the query status
+;
+(display my-connect) (newline)
+;
+; Print each row inside a loop
+; Each row will be an associative array
+;
 (define row #f)
 (set! row (dbi-get_row my-connect))
 (while (not (equal? row #f))
 	(display row) (newline)
 	(set! row (dbi-get_row my-connect))
-   )
+)
 
-(define c 10)
-(while (> c 0) (set! c (- c 1 )) (display c) (newline))
