@@ -28,7 +28,7 @@ protected:
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!inheritsType((Type)(int)boost::get<Handle>(*outh->begin()), InclusionLink))
+		if (!GET_ATW->inheritsType((Type)(int)boost::get<Handle>(*outh->begin()), InclusionLink))
 			return Rule::setOfMPs();
 		
 		Rule::MPs ret;
@@ -66,8 +66,8 @@ cprintf(1,"INV New order:\n");
 printTree(child(boost::get<Handle>(h[0]),1),0,1);
 printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
 		return	meta(new tree<Vertex>(mva((Handle)CogServer::getAtomSpace()->getType(h0),
-						mva(child(h0,1)),
-						mva(child(h0,0))
+						mva(GET_ATW->child(h0,1)),
+						mva(GET_ATW->child(h0,0))
 				)));
 	}
 	NO_DIRECT_PRODUCTION;

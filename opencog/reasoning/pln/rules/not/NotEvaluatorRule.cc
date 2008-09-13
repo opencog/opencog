@@ -30,8 +30,7 @@ meta NotEvaluatorRule::i2oType(const vector<Vertex>& h) const
 // Private method    
 Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-        AtomSpace *nm = CogServer::getAtomSpace();
-        if (!inheritsType(nm->getType(v2h(*outh->begin())), NOT_LINK))
+        if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), NOT_LINK))
             return Rule::setOfMPs();
 
 		LOG(-10, "SHOULD NOT BE HERE!");

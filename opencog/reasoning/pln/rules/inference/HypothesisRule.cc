@@ -16,11 +16,10 @@ Handle _v2h(const Vertex& v) { return v2h(v); }
 
 boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh)
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
     set<BoundVertex>* ret = new set<BoundVertex>;
     
-    Type t = nm->getTypeV(*outh);
-    bool hyp_link = inheritsType(t, HYPOTHETICAL_LINK);
+    Type t = GET_ATW->getTypeV(*outh);
+    bool hyp_link = GET_ATW->inheritsType(t, HYPOTHETICAL_LINK);
 
 	if (HYPRULE_MAKES_ZERO_CONFIDENCE_ATOMS || hyp_link)
         if (!hasFW_VAR(*outh))

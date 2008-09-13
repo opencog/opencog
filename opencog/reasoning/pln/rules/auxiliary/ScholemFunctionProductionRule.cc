@@ -32,11 +32,9 @@ Rule::setOfMPs ScholemFunctionProductionRule::o2iMetaExtra(meta outh, bool& over
 
 boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDirectProduction(meta outh)
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
-
     boost::shared_ptr<set<BoundVertex > > ret;
     
-    if (!inheritsType(nm->getType(v2h(*outh->begin())), SCHOLEM_LINK))
+    if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), SCHOLEM_LINK))
         return ret;
 
     //assert(outh->begin().number_of_children() == 2);
@@ -61,14 +59,14 @@ haxx::AllowFW_VARIABLENODESinCore = true;
     
 //  assert(!inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE));
 //  assert(!inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE));
-    if (inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE))
+    if (GET_ATW->inheritsType(GET_ATW->getType(v2h(*child1)), VARIABLE_NODE))
     {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child1 problem.");
         printer.print(v2h(*child1), 2);
     }
     
-    if (inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE))
+    if (GET_ATW->inheritsType(GET_ATW->getType(v2h(*child2)), VARIABLE_NODE))
     {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child2 problem.");

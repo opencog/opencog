@@ -13,7 +13,6 @@ NOTE:
 - LookUpRule automatically omits elements with confidence 0.
 - PostCondition in GenericEvaluator.cpp prevents confidence-0 atoms entering via other rules,
 too.
-- TheNM is a hack that only functions with a system with a single AtomTable.
 - Normalization is non-trivial with fuzzy TVs. Degree of allowable loss-of-info L must be
 decided (=policy), and only [TV.strength > 1.0-L] should be considered TRUE, etc.
 - No Nested ForAlls => "defined($X) @ node" currently fails.
@@ -169,10 +168,12 @@ namespace test
 
 void test_core_TVs()
 {
-    Btr<set<Handle> > ts =  ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->getHandleSet((Type)77,"");
+    AtomTableWrapper *atw = GET_ATW;
+    //! Why get type 77 instead of actual name? 
+    Btr<set<Handle> > ts =  atw->getHandleSet((Type)77,"");
     foreach(Handle ti, *ts)
     {
-        if (CogServer::getAtomSpace()->getTV(ti).isNullTv())
+        if (atw->getTV(ti).isNullTv())
         {
             puts("NULL TV !!!");
             getc(stdin);
@@ -182,16 +183,16 @@ void test_core_TVs()
     }           
 }
 
-void test_nm_reset()
+void test_atw_reset()
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
-    ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
-    std::list<Handle> ret;
-    nm->getHandleSet(back_inserter(ret), EVALUATION_LINK, "");
-    assert(ret.size() == 0);
+    AtomTableWrapper *atw = GET_ATW;
+    atw->reset();
+    Btr<set<Handle> > ret;
+    ret = atw->getHandleSet(EVALUATION_LINK, "");
+    assert(ret->size() == 0);
     // if above assert is true, then ret will still be empty
-    nm->getHandleSet(back_inserter(ret), LIST_LINK, "");
-    assert(ret.size() == 0);
+    ret = atw->getHandleSet(LIST_LINK, "");
+    assert(ret->size() == 0);
 }
 
 
@@ -210,8 +211,6 @@ void PLNShell_RunLoop(int argc, char** args)
     try {
         puts("Initializing PLN test env...");
 
-        /// @TODO: make PLN functional without using the CogServer
-        // using Pseudocore instead.
         // Initialise CogServer
         opencog::server();
 
@@ -238,7 +237,7 @@ void PLNShell_RunLoop(int argc, char** args)
         DirectATW::getInstance();
         haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
 #endif
-        AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+        AtomTableWrapper& atw = *GET_ATW;
                 
         if (RunPLNtest)
         {
@@ -252,25 +251,21 @@ void PLNShell_RunLoop(int argc, char** args)
 
     haxx::ArchiveTheorems = true;
  
-    bool axioms_ok = TheNM.loadAxioms("bigdemo.xml");
+    bool axioms_ok = atw.loadAxioms("bigdemo.xml");
 
-//  bool axioms_ok = TheNM.loadAxioms("inverse_binding.xml");
-
-//  bool axioms_ok = TheNM.loadAxioms("fetch10.xml");
-
-//  bool axioms_ok = TheNM.loadAxioms("mediumdemo.xml");
-//  bool axioms_ok = TheNM.loadAxioms("smalldemo.xml");
-//   bool axioms_ok = TheNM.loadAxioms("smalldemo28.xml");
-//   bool axioms_ok = TheNM.loadAxioms("smalldemo28b.xml");
-
-      //bool axioms_ok = TheNM.loadAxioms("smalldemo8.xml");
-//    bool axioms_ok = TheNM.loadAxioms("smalldemo8b.xml");  
-//  bool axioms_ok = TheNM.loadAxioms("smalldemo8c.xml");
-
-//    bool axioms_ok = TheNM.loadAxioms("AnotBdemo.xml");
-//    bool axioms_ok = TheNM.loadAxioms("fetchdemo5.xml");
-//    bool axioms_ok = TheNM.loadAxioms("fetchdemo.xml");
-//        bool axioms_ok = TheNM.loadAxioms("woademo.xml");
+//  bool axioms_ok = atw.loadAxioms("inverse_binding.xml");
+//  bool axioms_ok = atw.loadAxioms("fetch10.xml");
+//  bool axioms_ok = atw.loadAxioms("mediumdemo.xml");
+//  bool axioms_ok = atw.loadAxioms("smalldemo.xml");
+//  bool axioms_ok = atw.loadAxioms("smalldemo28.xml");
+//  bool axioms_ok = atw.loadAxioms("smalldemo28b.xml");
+//  bool axioms_ok = atw.loadAxioms("smalldemo8.xml");
+//  bool axioms_ok = atw.loadAxioms("smalldemo8b.xml");  
+//  bool axioms_ok = atw.loadAxioms("smalldemo8c.xml");
+//  bool axioms_ok = atw.loadAxioms("AnotBdemo.xml");
+//  bool axioms_ok = atw.loadAxioms("fetchdemo5.xml");
+//  bool axioms_ok = atw.loadAxioms("fetchdemo.xml");
+//  bool axioms_ok = atw.loadAxioms("woademo.xml");
       assert(axioms_ok);
 
       haxx::ArchiveTheorems = false;
@@ -368,22 +363,22 @@ void PLNShell::Init()
 
 string printTV (Handle h) {
   char str[500];
-  AtomSpace *nm = CogServer::getAtomSpace();
-  const TruthValue& tv = nm->getTV(h);
+  AtomTableWrapper *atw = GET_ATW;
+  const TruthValue& tv = atw->getTV(h);
   if (tv.isNullTv()) 
       sprintf (str,"(TruthValue::NULL_TV())");
   else
-      sprintf (str,"(%f,%f)",nm->getTV(h).getMean(),nm->getTV(h).getCount());
+      sprintf (str,"(%f,%f)",atw->getTV(h).getMean(),atw->getTV(h).getCount());
   string s(str);
   return s;
 }
 
 void printOutgoing (Handle out) {
-  AtomSpace *nm = CogServer::getAtomSpace();
- vector<Handle> list=nm->getOutgoing(out);
+  AtomTableWrapper *atw = GET_ATW;
+ vector<Handle> list=atw->getOutgoing(out);
   cout<<printTV(out);
   foreach (Handle h,list)
-    cout << "<" << nm->getType(h) << "," << nm->getName(h) << ">,";
+    cout << "<" << atw->getType(h) << "," << atw->getName(h) << ">,";
   cout<<'\n';
   foreach (Handle h,list)
     printOutgoing(h);
@@ -391,51 +386,50 @@ void printOutgoing (Handle out) {
 
 struct min_conf { 
   bool operator()(Handle h) {
-    AtomSpace *nm = CogServer::getAtomSpace();
-    return nm->getTV(h).getConfidence()>0.8;
+      AtomTableWrapper *atw = GET_ATW;
+      return atw->getTV(h).getConfidence()>0.8;
   }
 };
 
 struct inhlink { 
   bool operator()(Handle h) {
-    AtomSpace *nm = CogServer::getAtomSpace();
-      return nm->inheritsType (nm->getType(h),INHERITANCE_LINK);
+      AtomTableWrapper *atw = GET_ATW;
+      return atw->inheritsType (atw->getType(h),INHERITANCE_LINK);
   }
 };
 
 void fw_beta (void) {
-  AtomSpace *nm = CogServer::getAtomSpace();
-  AtomTableWrapper *at = (AtomTableWrapper*) haxx::defaultAtomTableWrapper;
+  AtomTableWrapper *atw = GET_ATW;
 
-  at->reset();
-  vector<Handle> nodes=nm->filter_type(NODE);
+  atw->reset();
+  vector<Handle> nodes=atw->filter_type(NODE);
   for (vector<Handle>::iterator i=nodes.begin(); i!=nodes.end(); i++)
-    printf ("_node %d, %s, TV %s\n",nm->getType(*i),nm->getName(*i).c_str(),printTV(*i).c_str());
+    printf ("_node %d, %s, TV %s\n",atw->getType(*i),atw->getName(*i).c_str(),printTV(*i).c_str());
 
-  vector<Handle> inhlink=nm->filter_type(INHERITANCE_LINK);
+  vector<Handle> inhlink=atw->filter_type(INHERITANCE_LINK);
   for (vector<Handle>::iterator i=inhlink.begin(); i!=inhlink.end(); i++) {
-    vector<Handle> out=nm->getOutgoing(*i);
-    printf ("_link %d: %s ",nm->getType(*i),printTV(*i).c_str());
+    vector<Handle> out=atw->getOutgoing(*i);
+    printf ("_link %d: %s ",atw->getType(*i),printTV(*i).c_str());
     foreach (Handle h,out)
-      cout << "<" << nm->getType(h) << "," << nm->getName(h) << ">,";
+      cout << "<" << atw->getType(h) << "," << atw->getName(h) << ">,";
     cout<<'\n';
   }
-  printf ("teste: %d\n",nm->inheritsType(INHERITANCE_LINK,LINK));
-  printf ("teste: %d\n",nm->inheritsType(INHERITANCE_LINK,NODE));
+  printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,LINK));
+  printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,NODE));
   return;
-  // From the above return it looks like the following is never run?
+  // From the above return it looks like the following is not needed?
   // ARI: safe TODELETE ?
   ForwardTestRuleProvider *rp=new ForwardTestRuleProvider();
-  AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+  //AtomTableWrapper& atw = *GET_ATW;
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
-  Handle h1=at->addNode (CONCEPT_NODE,string("Human"),tv,true);
-  Handle h2=at->addNode (CONCEPT_NODE,string("Mortal"),tv,true);
-  Handle h3=at->addNode (CONCEPT_NODE,string("Socrates"),tv,true);
+  Handle h1=atw->addNode (CONCEPT_NODE,string("Human"),tv,true);
+  Handle h2=atw->addNode (CONCEPT_NODE,string("Mortal"),tv,true);
+  Handle h3=atw->addNode (CONCEPT_NODE,string("Socrates"),tv,true);
   std::vector<Handle> p1(2),p2(2);
   p1[0]=h1; p1[1]=h2;
   p2[0]=h3; p2[1]=h1;
-  Handle L1=at->addLink(INHERITANCE_LINK,p1,tv,true);
-  Handle L2=at->addLink(INHERITANCE_LINK,p2,tv,true);
+  Handle L1=atw->addLink(INHERITANCE_LINK,p1,tv,true);
+  Handle L2=atw->addLink(INHERITANCE_LINK,p2,tv,true);
 
 
   Handle out,seed;
@@ -448,14 +442,14 @@ void fw_beta (void) {
             //int bah; cin >> bah;
             //if (args.size()>=2) args.clear();
             args.clear();
-            //seed = TheNM.GetRandomHandle(INHERITANCE_LINK);
+            //seed = atw.GetRandomHandle(INHERITANCE_LINK);
             args.push_back(L2);
             args.push_back(L1);
         }
         while (!r->validate(args));
         Vertex V=((r->compute(args)).GetValue());
         out=get<Handle>(V);
-        const TruthValue& tv=nm->getTV(out);
+        const TruthValue& tv=atw->getTV(out);
         cout<<printTV(out)<<'\n';
         printOutgoing(out);
   } while (tv.isNullTv() || tv.getCount()<0.1);
@@ -474,7 +468,7 @@ void PLNShell::Launch()
 
 void PLNShell::Launch(vtree *target)
 {
-    AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+    AtomTableWrapper* atw = GET_ATW;
 
 /*  vector<Vertex> targs, targs2;
     targs.push_back(mva((Handle)INHERITANCE_LINK,
@@ -505,7 +499,6 @@ void PLNShell::Launch(vtree *target)
             make_vtree(reward))));
 */
             /// Requires test/reasoning/bigdemo.xml 
-AtomSpace *nm = CogServer::getAtomSpace();
 int testi=0;
 printf("Insert test %d\n", testi++);
             tests[0] = Btr<vtree > (new vtree(mva((Handle)AND_LINK,
@@ -863,22 +856,19 @@ printf("BITNodeRoot init ok\n");
         #endif
         
         haxx::AllowFW_VARIABLENODESinCore = true; //false;
-        //iAtomTableWrapper* defaultAtomTableWrapper;
-        AtomTableWrapper& TheNM = *((AtomTableWrapper*) haxx::defaultAtomTableWrapper);
         
         switch (c)
         {
         case 'm': printf("%d\n", test::_test_count); break;
             case 'd':
 #if LOCAL_ATW
-            ((LocalATW*)haxx::defaultAtomTableWrapper)->DumpCore(CONCEPT_NODE);
+            ((LocalATW*)atw)->DumpCore(CONCEPT_NODE);
 #else
             cin >> h;
-            ts = 
-            ((AtomTableWrapper*)haxx::defaultAtomTableWrapper)->getHandleSet((Type)h,"");
+            ts = atw->getHandleSet((Type)h,"");
             foreach(Handle ti, *ts)
             {
-                if (nm->getTV(ti).isNullTv())
+                if (atw->getTV(ti).isNullTv())
                 {
                     puts("NULL TV !!!");
                     getc(stdin);
@@ -898,7 +888,7 @@ printf("BITNodeRoot init ok\n");
                                 NewNode(CONCEPT_NODE, "Amir")
                                 )))));
 
-                            //nm->getHandle(NODE, "temmpo");
+                            //atw->getHandle(NODE, "temmpo");
                         puts("...");*/
                         break;
             case 'a': cin >> h; state->extract_plan((Handle)h); break;
@@ -1055,9 +1045,8 @@ printf("BITNodeRoot init ok\n");
             case 'x': //puts("Give the XML input file name: "); 
                             cin >> temps;
                         haxx::ArchiveTheorems = true; 
-                        //nm->Reset(NULL);
-                        ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
-                        axioms_ok = TheNM.loadAxioms(temps);
+                        atw->reset();
+                        axioms_ok = atw->loadAxioms(temps);
                         haxx::ArchiveTheorems = false;
                         puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
             

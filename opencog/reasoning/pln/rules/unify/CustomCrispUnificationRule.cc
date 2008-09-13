@@ -21,9 +21,8 @@ bool UnificationRuleResultFreshness = true; //false;
 
 Btr<set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta outh)
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
-    if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
-        inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), FORALL_LINK) ||
+        GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Btr<set<BoundVertex > >();
 
 #if 0
@@ -62,9 +61,9 @@ cprintf(3,"FindMatchingUniversals OK!\n");
     bind_Bvtree(rootAtom, *i->bindings);
     Handle topologicalStub = destTable->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
 
-    Handle ret_h = destTable->addLink(  nm->getType(topologicalStub),
-                                nm->getOutgoing(topologicalStub),
-                                getTruthValue(i->original_handle),
+    Handle ret_h = destTable->addLink(  GET_ATW->getType(topologicalStub),
+                                GET_ATW->getOutgoing(topologicalStub),
+                                GET_ATW->getTV(i->original_handle),
                                 UnificationRuleResultFreshness);    
     
     ret->insert(BoundVertex(ret_h, pre_binds));

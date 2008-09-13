@@ -6,7 +6,7 @@ namespace reasoning
 {
 
 const bool RuleResultFreshness = true;
-vhpair UnorderedCcompute(iAtomTableWrapper *destTable,
+Handle UnorderedCcompute(iAtomTableWrapper *destTable,
 					Type linkT, const ArityFreeFormula<TruthValue,
 			       TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX=NULL);
 
@@ -27,7 +27,7 @@ public:
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!inheritsType(CogServer::getAtomSpace()->	getType(boost::get<Handle>(*outh->begin())), AND_LINK)
+		if (!GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(boost::get<Handle>(*outh->begin())), AND_LINK)
 			|| outh->begin().number_of_children() != N)
 			return Rule::setOfMPs();
 		
@@ -60,9 +60,10 @@ public:
 			printTree(v2h(v),0,-3);
 	*/
 		//currentDebugLevel = 3;
-		vhpair ret = ((N > 1)? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
-			      : destTable->addLink(AND_LINK, dummy_outgoing,
-                      getTruthValue(v2v(premiseArray[0])), RuleResultFreshness));
+		Handle ret = ((N>1)
+			      ? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
+			      : destTable->addLink(AND_LINK, dummy_outgoing, GET_ATW->getTV(v2h(premiseArray[0])),
+				RuleResultFreshness));
 		    delete[] hs;
 
 		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());

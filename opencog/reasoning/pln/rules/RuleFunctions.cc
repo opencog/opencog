@@ -65,7 +65,7 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 // Redundant, hopefully:
 BBvtree atomWithNewType(Handle h, Type T)
 {
-    assert(inheritsType(T, LINK));
+    assert(GET_ATW->inheritsType(T, LINK));
     AtomSpace *nm = CogServer::getAtomSpace();
     vector<Handle> children = nm->getOutgoing(h);
     BBvtree ret_m(new BoundVTree(mva((Handle)T)));
@@ -91,7 +91,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
-        assert(inheritsType(T, LINK));
+        assert(GET_ATW->inheritsType(T, LINK));
 
         vector<Handle> children = nm->getOutgoing(*ph);
         BBvtree ret_m(new BoundVTree(mva((Handle)T)));
@@ -117,7 +117,7 @@ BBvtree atomWithNewType(const Vertex& v, Type T)
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
-        assert(inheritsType(T, LINK));
+        assert(GET_ATW->inheritsType(T, LINK));
 
         vector<Handle> children = nm->getOutgoing(*ph);
         BBvtree ret_m(new BoundVTree(mva((Handle)T)));
@@ -134,8 +134,8 @@ BBvtree atomWithNewType(const Vertex& v, Type T)
 bool UnprovableType(Type T)
 {
     return  //inheritsType(T, OR_LINK) ||
-            inheritsType(T, CONCEPT_NODE) ||
-            inheritsType(T, FORALL_LINK);
+            GET_ATW->inheritsType(T, CONCEPT_NODE) ||
+            GET_ATW->inheritsType(T, FORALL_LINK);
 }
 
 template<Type T>
@@ -222,12 +222,12 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
     return ret;
 }
 
-vhpair UnorderedCcompute(iAtomTableWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
+Handle UnorderedCcompute(iAtomTableWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
              TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX)
 {
         TruthValue** tvs = new TruthValue*[n];
         for (int i = 0; i < n; i++)
-            tvs[i] = (TruthValue*) &(getTruthValue(premiseArray[i]));
+            tvs[i] = (TruthValue*) &(GET_ATW->getTV(premiseArray[i]));
             //tvs[i] = (TruthValue*) destTable->getTruthValue(premiseArray[i]);
 //puts("Computing formula");
         TruthValue* retTV = fN.compute(tvs, n);
@@ -250,10 +250,9 @@ vhpair UnorderedCcompute(iAtomTableWrapper *destTable, Type linkT, const ArityFr
     
 Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, Type OutLinkType)
 {
-        AtomSpace *nm = CogServer::getAtomSpace();
         const int N = outh->begin().number_of_children();
         
-        if (!inheritsType(nm->getType(v2h(*outh->begin())), OutLinkType) ||
+        if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), OutLinkType) ||
             N <= MAX_ARITY_FOR_PERMUTATION)
             return Rule::setOfMPs();
 

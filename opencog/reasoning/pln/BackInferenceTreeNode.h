@@ -238,7 +238,7 @@ protected:
 			printSubsts(new_result, -1);
 		assert(!new_result.bindings ||new_result.bindings->empty());
 
-		if ((ph = v2hPtr(&new_result.value)) && !*ph)
+		if ((ph = v2h(&new_result.value)) && !*ph)
 		{
 			puts("Rule returned NULL! Args were:\n");
 
@@ -266,7 +266,7 @@ protected:
 		else
 		{
 			tlog(2,"::compute() resulted in: \n");
-			printTree(v2v(new_result.value),0,2);
+			printTree(v2h(new_result.value),0,2);
 			printSubsts(new_result,2);
 
 			return true;

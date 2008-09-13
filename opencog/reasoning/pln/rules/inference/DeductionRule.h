@@ -87,7 +87,7 @@ public:
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (	!inheritsType((Type)(int)v2h(*outh->begin()), InclusionLink))
+		if (	!GET_ATW->inheritsType((Type)(int)v2h(*outh->begin()), InclusionLink))
 			return Rule::setOfMPs();
 
 		std::string varname = ("$"+GetRandomString(10));

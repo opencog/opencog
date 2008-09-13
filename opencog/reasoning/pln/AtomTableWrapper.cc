@@ -5,15 +5,14 @@
 #include "rules/Rules.h"
 
 #include <SimpleTruthValue.h>
+#include <Logger.h>
 #include <CogServer.h> // To get access to AtomSpace
 #include <tree.h>
 #include <utils2.h>
 #include <utils.h>
 
-#if 1 //000
-
 #include  <boost/foreach.hpp>
-//boost::variant<int, char> bv;
+//boost::variant<int, char> bv; //TODELETE
 
 // Mind Shadow is an atom cache system but no longer used
 #define USE_MIND_SHADOW 0
@@ -30,32 +29,22 @@
 using namespace std;
 using namespace opencog;
 
-bool isSubType(Handle h, Type T)
-{
-	return inheritsType(AS_PTR->getType(h), T);
-}
-
-#ifndef USE_PSEUDOCORE
-void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
-{	
-    int array_size=0;
-    Handle *dest_array = new Handle[1000];
-
-    src.toHandleVector(dest_array, array_size);
-    for (int i =0;i<array_size;i++)
-    {
-        dest.push_back(dest_array[i]);
-    }
-
-    delete dest_array;
-}
-#endif
-	
-//! Get the outgoing atom of a link with index i
-Handle child(Handle h, int i) { 
-	return AS_PTR->getOutgoing(h, i);
-}
-	
+// TODELETE Not used anywhere
+//#ifndef USE_PSEUDOCORE
+//void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
+//{	
+//    int array_size=0;
+//    Handle *dest_array = new Handle[1000];
+//
+//    src.toHandleVector(dest_array, array_size);
+//    for (int i =0;i<array_size;i++)
+//    {
+//        dest.push_back(dest_array[i]);
+//    }
+//
+//    delete dest_array;
+//}
+//#endif
 namespace haxx
 {
     // TODO: make this accessable as a Singleton from a static member of AtomTableWrapper?
@@ -66,7 +55,7 @@ namespace haxx
     
     //! childOf records what atoms are connected by inheritance links, 1st is
     //! parent, second is child (I think...)
-	multimap<vhpair,vhpair> childOf;
+	multimap<Handle,Handle> childOf;
 
     //! Whether to stores variable nodes as atoms in the AtomSpace
 	bool AllowFW_VARIABLENODESinCore = true;
@@ -81,90 +70,61 @@ namespace haxx
 #endif
 }
 
-#ifdef USE_PSEUDOCORE
+//static map<Handle,vtree> h2vtree_cache;
+vtree reasoning::make_vtree(Handle h)
+{
+    // Makes vtree for internal PLN use, so don't convert to real Handles
+    
+    /// @todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
+    /* map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
+       if (i != h2vtree_cache.end())
+          return i->second;*/
+    vtree ret;
+    reasoning::makeHandletree(h, true, ret);
+    // h2vtree_cache[h] = ret;
+
+    reasoning::printTree(h,0,0);
+    rawPrint(ret, ret.begin(), 0);
+
+    return ret;
+}
+
+//#ifdef USE_PSEUDOCORE
 
 float ContradictionLimit = 0.1f; //Below the limit, we just revise the differences.
 
-bool inheritsType(Type subT, Type superT) 
-{
-	return ClassServer::isAssignableFrom(superT, subT);
-}
+//const TruthValue& AtomTableWrapper::getTV(Handle h)
+//{
+//	return AS_PTR->getTV(h);
+//}
 
-const TruthValue& getTruthValue(vhpair h)
-{
-	return AS_PTR->getTV(h.first, h.second);
-}
+//namespace reasoning
+//{
+//shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
+//{
+//    vector<Handle> hs(AS_PTR->getHandleSet(T,name,subclass));
+//    return shared_ptr<set<Handle> >(new set<Handle>(hs.begin(), hs.end()));
+//}
+//
+//Handle AtomTableWrapper::getHandle(Type t,const string& str) const
+//{
+//	AtomSpace *a = AS_PTR;
+//	return AS_PTR->getHandle(t, str);
+//}
+
+//Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
+//{
+//	return AS_PTR->getHandle(t, outgoing);
+//}
+
+//}; //namespace reasoning
+
+//#else
 
 namespace reasoning
 {
 
-//static map<Handle,vtree> h2vtree_cache;
-vtree make_vtree(vhpair h)
-{
-/// \todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
-/*    map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
-       if (i != h2vtree_cache.end())
-               return i->second;*/
-       
-   vtree ret;
-   makeHandletree(h, true, ret);
-/*    h2vtree_cache[h] = ret;*/
-
-   printTree(h,0,0);
-   rawPrint(ret, ret.begin(), 0);
-
-   return ret;
-}
-
-struct vhpairsFromHandle {
-    vector<vhpair> result;
-    void operator()(Handle h) {
-        // get truth value
-        const TruthValue& tv = AS_PTR->getTruthValue(h);
-        // is it composite?
-        if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
-            // yes, then
-            // getNumberOfVersionedTVs
-            for (int i;
-                 i < ((const CompositeTruthValue&) tv).getNumberOfVersionedTVs();
-                 i++) {
-                // go through each with getVersionHandle and add a pair to result
-                result.push_back(vhpair(h,
-                        ((const CompositeTruthValue&) tv).getVersionHandle(i)));
-            aa}
-
-        } else {
-            // no, then add single item to result, with NULL_VERSION_HANDLE
-            result.push_back(vhpair(h, NULL_VERSION_HANDLE));
-        }
-    }
-}
-
-shared_ptr<set<vhpair> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
-{
-    struct vhpairsFromHandle vpairsOut;
-    vector<Handle> hs(AS_PTR->getHandleSet(T,name,subclass));
-    for_each(hs.begin(), hs.end(), vpairsOut);
-    return shared_ptr<set<vhpair> >( new set<vhpair>(
-                vpairsOut.result.begin(), vpairsOut.result.end()));
-}
-
-Handle AtomTableWrapper::getHandle(Type t,const string& str) const
-{
-	AtomSpace *a = AS_PTR;
-	return AS_PTR->getHandle(t, str);
-}
-
-Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
-{
-	return AS_PTR->getHandle(t, outgoing);
-}
-
-}; //namespace reasoning
-
-#else
-
-void HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest)
+void AtomTableWrapper::HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest) const
 {	
     std::vector<Handle> dest_array;
 
@@ -175,20 +135,99 @@ void HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest)
     }
 }
 
-bool inheritsType(Type T1, Type T2)
+bool AtomTableWrapper::inheritsType(Type T1, Type T2)
 {
 	return ClassServer::isAssignableFrom(T2, T1);
 }
 
-const TruthValue& getTruthValue(vhpair h)
+
+bool AtomTableWrapper::isSubType(Handle h, Type T)
 {
-    AtomSpace* a = AS_PTR;
-	return (h.first ? (a->getTV(h.first, h.second))
-            : TruthValue::TRIVIAL_TV());
+    Handle r = fakeToRealHandle(h).first;
+	return inheritsType(AS_PTR->getType(r), T);
 }
 
-namespace reasoning
+Handle AtomTableWrapper::child(Handle h, int i) { 
+    vhpair r = fakeToRealHandle(h);
+	Handle o = AS_PTR->getOutgoing(r.first, i);
+    // will require the child to have a version handle with the same context as
+    // h.
+    // check that VersionHandle in r.second exists, unless it is
+    // NULL_VERSION_HANDLE
+    if (r.second == NULL_VERSION_HANDLE) {
+        return o;
+    } else {
+        // check a version handle r.second exists in o
+        // TODO: check subcontexts for the context of r.second
+        if (!AS_PTR->getTV(o,r.second).isNullTv()) {
+            return realToFakeHandle(o,r.second);
+        } else {
+            // if not, return a NULL_HANDLE
+            throw RuntimeException(TRACE_INFO, "no child with same context at position %d", i);
+        }
+    }
+}
+
+vhpair AtomTableWrapper::fakeToRealHandle(const Handle h) const
 {
+    vhmap_t::const_iterator i = vhmap.find(h);
+    if (i != vhmap.end()) {
+        // return existing fake handle
+        // TODO: check that real Handle is still valid
+        return i->second;
+    } else {
+        throw RuntimeException(TRACE_INFO, "Invalid fake handle %u", h);
+    }
+
+}
+
+Handle AtomTableWrapper::realToFakeHandle(Handle h, VersionHandle vh)
+{
+    // check if already exists
+    //vhmap_t::left_const_iterator l = vhmap.left.find(vhpair(h,vh));
+    vhmap_t::const_iterator i = findValueInMap(vhmap,vhpair(h,vh));
+    if (i != vhmap.end()) {
+        // return existing fake handle
+        return i->first;
+    } else {
+        // add to vhmap
+        Handle fakeHandle = vhmap.size() + mapOffset;
+        if (fakeHandle < mapOffset) {
+            // Error: too many version to handle mappings!
+            Logger().error("too many version-to-handle mappings!");
+            exit(-1);
+        }
+        vhmap.insert( vhmap_pair_t(fakeHandle, vhpair(h,vh)) );
+        return fakeHandle;
+    }
+
+}
+
+Handle AtomTableWrapper::realToFakeHandle(Handle h) {
+    return realToFakeHandle(h, NULL_VERSION_HANDLE);
+}
+
+std::vector< Handle > AtomTableWrapper::realToFakeHandle(std::vector< Handle > hs, bool expand) {
+    std::vector<Handle> result;
+    foreach (Handle h, hs) {
+        result.push_back(realToFakeHandle(h));
+        foreach(VersionHandle vh, dummyContexts) {
+            // if dummyContext is a VersionHandle for h
+            if (AS_PTR->containsVersionedTV(h, vh)) {
+                result.push_back( realToFakeHandle(h, vh));
+            }
+        }
+    
+    }
+    return result;
+
+}
+
+const TruthValue& AtomTableWrapper::getTV(Handle h)
+{
+    AtomSpace* a = AS_PTR;
+	return (h ? (a->getTV(h)) : TruthValue::TRIVIAL_TV());
+}
 
 shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& name, bool subclass) const
 {
@@ -209,7 +248,7 @@ Handle AtomTableWrapper::getHandle(Type t,const string& name) const
     return AS_PTR->getAtomTable().getHandle(name.c_str(), (Type)t);
 }
 
-bool equal(const HandleSeq& lhs, const HandleSeq& rhs)
+bool AtomTableWrapper::equal(const HandleSeq& lhs, const HandleSeq& rhs)
 {
     size_t lhs_arity = lhs.size();
     if (lhs_arity != rhs.size())
@@ -225,7 +264,6 @@ Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing) const
 {
     //HandleEntry* results = 
     //	AS_PTR->getHandleSet((Type)t, true);
-        
 //		while (results && !equal(results->handle->getOutgoingSet(), outgoing))
 //			results = results->next;
 //      Handle ret = (results ? results->handle : NULL);
@@ -239,12 +277,9 @@ void AtomTableWrapper::reset()
     AS_PTR->clear();
 }
 
-} // end namespace reasoning
 
-#endif
+//#endif
 
-namespace reasoning
-{
 extern int atom_alloc_count;
 void initArbitraryAtoms();
 void printUtable();
@@ -260,7 +295,6 @@ bool AtomTableWrapper::prepare()
 	linkNotifications = true;
 	return true;
 }
-
 bool AtomTableWrapper::loadAxioms(const string& path)
 {
     // TODO: check exists works on WIN32
@@ -408,17 +442,17 @@ bool cutVector(const vector<T>& src, int index, vector<T>& dest)
 	return index < src.size();
 }
 
-vhpair NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn,bool fresh,bool managed)
+Handle NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn,bool fresh,bool managed)
 {
 	//Handle ret = a->addNode(T, name, tvn, fresh);
 
-	vhpair ret = FIMATW::addNode(T, name, tvn, fresh,managed);
+	Handle ret = FIMATW::addNode(T, name, tvn, fresh,managed);
 	//Handle ret = FIMATW::addNode(T, name, tvn, fresh);
 
 	return ret;
 }
 
-int getFirstIndexOfType(HandleSeq hs, Type T)
+int AtomTableWrapper::getFirstIndexOfType(HandleSeq hs, Type T)
 {
 	AtomSpace *a = AS_PTR;
 	for (unsigned int i = 0; i < hs.size(); i++)
@@ -481,30 +515,25 @@ bool linkNotifications=false;
 
 bool AtomTableWrapper::binaryTrue(Handle h)
 {
-	return (binaryTrue(vhpair(h, NULL_VERSION_HANDLE)));
-}
-
-bool AtomTableWrapper::binaryTrue(vhpair h)
-{
-	const TruthValue& tv = getTruthValue(h);
+	const TruthValue& tv = getTV(h);
 
 	return (tv.getMean() > PLN_TRUE_MEAN);
 }
 
-bool symmetricLink(Type T)
+bool AtomTableWrapper::symmetricLink(Type T)
 {
 	return inheritsType(T, AND_LINK) || inheritsType(T, LIST_LINK)
 			|| inheritsType(T, OR_LINK);
 }
 
-bool is_empty_link(Handle h)
+bool AtomTableWrapper::is_empty_link(Handle h)
 {
 	AtomSpace *a = AS_PTR;
 	return !inheritsType(a->getType(h), NODE)
 			&& a->getArity(h) == 0;
 }
 
-bool hasFalsum(HandleSeq hs)
+bool AtomTableWrapper::hasFalsum(HandleSeq hs)
 {
 	AtomSpace *a = AS_PTR;
 //	return false;
@@ -529,7 +558,7 @@ bool hasFalsum(HandleSeq hs)
 	return false;
 }
 
-bool containsNegation(Handle ANDlink, Handle h)
+bool AtomTableWrapper::containsNegation(Handle ANDlink, Handle h)
 {
 	AtomSpace *a =  AS_PTR;
 	HandleSeq hs = a->getOutgoing(ANDlink);
@@ -539,27 +568,20 @@ bool containsNegation(Handle ANDlink, Handle h)
 	return hasFalsum(hs);
 }
 
-vhpair AtomTableWrapper::freshened(Handle h, bool managed)
-{
-    return freshened(vhpair(h,NULL_VERSION_HANDLE),managed);
-}
-
-vhpair AtomTableWrapper::freshened(vhpair h, bool managed)
+Handle AtomTableWrapper::freshened(Handle h, bool managed)
 {
 	AtomSpace *a = AS_PTR;
-    Handle handle = h.first;
-	Type T = a->getType(handle);
-	HandleSeq hs = a->getOutgoing(handle);
-	string name = a->getName(handle);
-	const TruthValue& tv = getTruthValue(h);
+	Type T = a->getType(h);
+	HandleSeq hs = a->getOutgoing(h);
+	string name = a->getName(h);
+	const TruthValue& tv = getTV(h);
 
 	if (inheritsType(T, NODE))
 		return addNode(T, name, tv, true,managed);
 	else
 	{
 		for (unsigned int i = 0; i < hs.size(); i++)
-			hs[i] = freshened(vhpair(hs[i],NULL_VERSION_HANDLE),
-                    managed).first;
+			hs[i] = freshened(hs[i], managed);
 
 		return addLink(T, hs, tv, true, managed);
 	}
@@ -567,13 +589,11 @@ vhpair AtomTableWrapper::freshened(vhpair h, bool managed)
 
 #define BL 2
 
-vhpair NormalizingATW::addLink(Type T, const HandleSeq& hs,
+Handle NormalizingATW::addLink(Type T, const HandleSeq& hs,
         const TruthValue& tvn,bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
-	vhpair ret;
-    ret.first = 0;
-    ret.second = NULL_VERSION_HANDLE;
+	Handle ret=0;
 
 bool ok_forall=false;
 
@@ -694,8 +714,8 @@ bool ok_forall=false;
 		
 		TruthValue **tvs = new TruthValue *[3];
 		tvs[0] = &tvn;
-		tvs[1] = getTruthValue(hs[0]);
-		tvs[2] = getTruthValue(hs[1]);
+		tvs[1] = getTV(hs[0]);
+		tvs[2] = getTV(hs[1]);
 		
 		TruthValue *impTV = ImplicationConstructionFormula().compute(tvs,3);
 
@@ -965,17 +985,17 @@ int zz=ImpTarget1.size();
 		
 		assert(ImpTarget2.size()==2);
 		
-//		const TruthValue& outerTV = getTruthValue(exL);
+//		const TruthValue& outerTV = getTV(exL);
 		
-        HandleSeq ANDargs;
+		HandleSeq ANDargs;
 
 		ANDargs.push_back( addLink(IMPLICATION_LINK, ImpTarget1,
 			tvn,
-			true,managed).first );
+			true,managed));
 
 		ANDargs.push_back( addLink(IMPLICATION_LINK, ImpTarget2,
 			tvn,
-			true,managed).first );
+			true,managed));
 
 //		reverse(ANDargs.begin(), ANDargs.end());
 
@@ -994,13 +1014,13 @@ int zz=ImpTarget1.size();
 		for (unsigned int i = 0; i < AND_arity; i++)
 		{
 			HandleSeq fora_hs;
-            // ARI: How come FORALL_LINKs need the source to be freshened?
-			fora_hs.push_back(freshened(hs[0],managed).first);
+            // ARI: How come for all links need the source to be freshened?
+			fora_hs.push_back(freshened(hs[0],managed));
 			fora_hs.push_back(child(hs[1],i));
 
 			fa_list.push_back( addLink(FORALL_LINK, fora_hs,
 				tvn,
-				fresh,managed).first );
+				fresh,managed) );
 		}
 
 		assert(fa_list.size() == AND_arity);
@@ -1044,7 +1064,7 @@ ok_forall=true;
 		ret = addLink(FORALL_LINK, forall_args, TruthValue::TRUE_TV(), fresh,managed);
 	}*/
 #endif
-	if (!ret.first)
+	if (!ret)
 	{
 //		if (symmetricLink(T))
 //			remove_if(hs.begin(), hs.end(), is_empty_link);
@@ -1266,23 +1286,23 @@ NormalizingATW::NormalizingATW()
 {
 }
 
-vhpair AtomTableWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed)
+Handle AtomTableWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed)
 {
 	return addAtom(a,a.begin(),tvn,fresh,managed);
 }
 
-vhpair AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue& tvn, bool fresh, bool managed)
+Handle AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue& tvn, bool fresh, bool managed)
 {
 	AtomSpace *as = AS_PTR;
 	cprintf(3,"Handle AtomTableWrapper::addAtom...");
 	rawPrint(a,it,3);
 	
 	vector<Handle> handles;
-	vhpair head_type = v2v(*it);
+	Handle head_type = boost::get<Handle>(*it);
 	
 	//assert(haxx::AllowFW_VARIABLENODESinCore || head_type != (Handle)FW_VARIABLE_NODE);
 	
-	if (as->isReal(head_type.first))
+	if (as->isReal(head_type))
 	{
 		LOG(1, "Warning! Adding a real atom with addAtom(vtree& a)!\n");
 		return head_type;
@@ -1290,19 +1310,19 @@ vhpair AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue&
 
 	for (vtree::sibling_iterator i = a.begin(it); i!=a.end(it); i++)
 	{
-		Handle *h_ptr = v2hPtr(&*i);
+		Handle *h_ptr = boost::get<Handle>(&*i);
 
 		handles.push_back((h_ptr && as->isReal(*h_ptr)) ?
-                (*h_ptr) : addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed).first);
+                (*h_ptr) : addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed));
 	}
 
 /*	/// We cannot add non-existent nodes this way!
 	assert (!inheritsType(head_type, NODE));*/
 	
-	return addLink((Type)(int)head_type.first, handles, tvn, fresh,managed);
+	return addLink((Type)(int)head_type, handles, tvn, fresh,managed);
 }
 
-vhpair AtomTableWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+Handle AtomTableWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
@@ -1319,10 +1339,9 @@ assert(1);
 	uint arity = hs.size();
 	
     if (T == INHERITANCE_LINK && arity==2)
-        haxx::childOf.insert(hpair(vhpair(hs[1],NULL_VERSION_HANDLE),
-                    vhpair(hs[0],NULL_VERSION_HANDLE)));
+        haxx::childOf.insert(hpair(hs[1], hs[0]));
 
-	vhpair ret;
+	Handle ret;
 
 	if (haxx::ArchiveTheorems &&
 		T == IMPLICATION_LINK && a->getType(hs[0]) == AND_LINK && tvn.getConfidence() > 0.98999f)
@@ -1375,13 +1394,13 @@ assert(1);
 LOG(3, "Add ok.");
 
 /*	if (!tvn.isNullTv())
-		if (Abs(a->getTruthValue(ret)->getMean() - tvn.getMean()) > 0.0001)
+		if (Abs(a->getTV(ret)->getMean() - tvn.getMean()) > 0.0001)
 		{
-			printf("ATW: %s / %s\n", a->getTruthValue(ret)->toString().c_str(),
+			printf("ATW: %s / %s\n", a->getTV(ret)->toString().c_str(),
 				tvn.toString().c_str());
 		}*/
 	
-//	assert(Abs(a->getTruthValue(ret)->getMean() - tvn.getMean()) < 0.0001);
+//	assert(Abs(a->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
 
 	return ret;
 }
@@ -1395,12 +1414,12 @@ int AtomTableWrapper::implicationConstruction()
 	}*/
 }
 
-vhpair DirectATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh, bool managed)
+Handle DirectATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh, bool managed)
 {
 	return directAddLink(T, hs, tvn, fresh,managed);
 }
 
-vhpair DirectATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
+Handle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
 	assert(!tvn.isNullTv());
@@ -1425,11 +1444,11 @@ assert(1);
 	
 		map<string,Handle>::iterator existingHandle = haxx::variableShadowMap.find(name);
 		if (existingHandle != haxx::variableShadowMap.end())
-			return vhpair(existingHandle->second,NULL_VERSION_HANDLE);
+			return existingHandle->second;
 		
 	}	
 	Node node( T,  name,  tvn);
-	vhpair ret = addAtomDC(node, fresh, managed);
+	Handle ret = addAtomDC(node, fresh, managed);
 	
 #if HANDLE_MANAGEMENT_HACK	
 	/// haxx:: // Due to core relic
@@ -1439,7 +1458,7 @@ assert(1);
 	LOG(3, "Add ok.");
 	
 	if (inheritsType(T, FW_VARIABLE_NODE))
-		haxx::variableShadowMap[name] = ret.first;
+		haxx::variableShadowMap[name] = ret;
 	
 #if USE_MIND_SHADOW
 haxx::mindShadow.push_back(ret);	
@@ -1449,7 +1468,7 @@ haxx::mindShadowMap[T].push_back(ret);
 #endif
 }
 
-vhpair AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
+Handle AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh, bool managed)
 {
     AtomSpace *a = AS_PTR;
@@ -1458,7 +1477,7 @@ vhpair AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
     return addAtomDC(l, fresh, managed);
 }
 
-vhpair AtomTableWrapper::addNodeDC(Type t, const string& name, const TruthValue& tvn,
+Handle AtomTableWrapper::addNodeDC(Type t, const string& name, const TruthValue& tvn,
         bool fresh, bool managed)
 {
 	AtomSpace *a = AS_PTR;
@@ -1467,12 +1486,13 @@ vhpair AtomTableWrapper::addNodeDC(Type t, const string& name, const TruthValue&
     return addAtomDC(n, fresh, managed);
 }
 
-vhpair AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
+Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
 {
     // ARI: what to do with managed? I can't find documentation in the Novamente
     // code, the header documentation just skips describing it.
 	AtomSpace *a = AS_PTR;
     Handle result;
+    Handle fakeHandle;
     // check if fresh true
     if (fresh) {
         // yes:
@@ -1484,8 +1504,7 @@ vhpair AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             result = getHandle(node.getType(), node.getName());
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
-                return vhpair(a->addNode(node.getType(), node.getName(),
-                            node.getTruthValue()),NULL_VERSION_HANDLE);
+                return a->addNode(node.getType(), node.getName(), node.getTruthValue());
             }
         } else {
             const Link& link = (const Link&) atom;
@@ -1495,8 +1514,7 @@ vhpair AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             result = getHandle(link.getType(), outgoing);
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
-                return vhpair(a->addLink(link.getType(), outgoing,
-                        link.getTruthValue()), NULL_VERSION_HANDLE);
+                return a->addLink(link.getType(), outgoing, link.getTruthValue());
             }
         }
         // if it does exist, then go through each dummy context until NULL_TV is
@@ -1534,18 +1552,25 @@ vhpair AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
         // vh is now a version handle for a free context
         // for which we can set a truth value
         a->setTV(result, atom.getTruthValue(), vh);
+
+        // Link <handle,vh> to a long int
+        fakeHandle = realToFakeHandle(result,vh);
     } else {
         // no:
         // just add it and let AtomSpace deal with merging it
         result = a->addRealAtom(atom);
+        // Link <handle, NULL_VERSION_HANDLE> with long int, long int is the
+        // vector index.
+        fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
+        
     }
     // return version handle instead so that the correct Handle can be retrieved
     // in future?
-    return vhpair(result,NULL_VERSION_HANDLE);
+    return fakeHandle;
 
 }
 
-vhpair FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
+Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
 	AtomSpace *a = AS_PTR;
 /// The method should be, AFAIK, identical to the one in DirectATW, unless FIM is actually in use.
@@ -1571,19 +1596,19 @@ LOG(3,"FIMATW::addNode");
 	
 		map<string,Handle>::iterator existingHandle = haxx::variableShadowMap.find(name);
 		if (existingHandle != haxx::variableShadowMap.end())
-			return vhpair(existingHandle->second,NULL_VERSION_HANDLE);
+			return existingHandle->second;
 		
 	}	
 
 	Node node( T,  name,  tvn);
 LOG(3,"FIMATW: addAtomDC");	
     // fresh bug, done?
-    vhpair ret = addAtomDC(node,fresh,managed);
+    Handle ret = addAtomDC(node,fresh,managed);
 
 #if HANDLE_MANAGEMENT_HACK
 LOG(3,"FIMATW: addAtomDC OK, checking for Handle release needed");		
 	/// haxx:: // Due to core relic
-	if (ret.first != node)
+	if (ret != node)
 		delete node;
 #endif
 	
@@ -1592,11 +1617,11 @@ LOG(3,"FIMATW: addAtomDC OK, checking for Handle release needed");
 #endif
 
 	if (inheritsType(T, FW_VARIABLE_NODE))
-		haxx::variableShadowMap[name] = ret.first;
+		haxx::variableShadowMap[name] = ret;
 	
 #if USE_MIND_SHADOW
-haxx::mindShadow.push_back(ret.first);	
-haxx::mindShadowMap[T].push_back(ret.first);
+haxx::mindShadow.push_back(ret);	
+haxx::mindShadowMap[T].push_back(ret);
 #endif
 
 
@@ -1611,9 +1636,9 @@ haxx::mindShadowMap[T].push_back(ret.first);
 	return ret;
 }
 
-vhpair FIMATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh,bool managed)
+Handle FIMATW::addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh,bool managed)
 {
-	vhpair ret = directAddLink(T, hs, tvn, fresh,managed);	
+	Handle ret = directAddLink(T, hs, tvn, fresh,managed);	
 
 #if 0
 	if (PLN_CONFIG_FIM)
@@ -1756,7 +1781,7 @@ puts("Dump disabled");
 #endif*/
   vector<Handle> LM=a->filter_type(LINK);
   for (vector<Handle>::iterator i = LM.begin(); i != LM.end(); i++)
-    printTree(vhpair(*i,NULL_VERSION_HANDLE),0,logLevel);
+    printTree(*i,0,logLevel);
 }
 
 void AtomTableWrapper::DumpCoreNodes(int logLevel)
@@ -1772,7 +1797,7 @@ puts("Dump disabled");
 #endif*/
   vector<Handle> LM=a->filter_type(NODE);
   for (vector<Handle>::iterator i = LM.begin(); i != LM.end(); i++)
-    printTree(vhpair(*i,NULL_VERSION_HANDLE),0,logLevel);
+    printTree(*i,0,logLevel);
 }
 
 void AtomTableWrapper::DumpCore(Type T)
@@ -1791,7 +1816,7 @@ Handle singular(HandleSeq hs) {
 	return addLink(LIST_LINK, hs, TruthValue::TRUE_TV(),false);
 }*/
 
-bool equal(Handle A, Handle B)
+bool AtomTableWrapper::equal(Handle A, Handle B)
 {
 	AtomSpace *a = AS_PTR;
 	if (a->getType(A) != a->getType(B))
@@ -1812,44 +1837,44 @@ bool equal(Handle A, Handle B)
 	return true;
 }
 
-vhpair AtomTableWrapper::OR2ANDLink(vhpair& andL)
+Handle AtomTableWrapper::OR2ANDLink(Handle& andL)
 {
     return AND2ORLink(andL, OR_LINK, AND_LINK);
 }
 
-vhpair AtomTableWrapper::AND2ORLink(vhpair& andL)
+Handle AtomTableWrapper::AND2ORLink(Handle& andL)
 {
     return AND2ORLink(andL, AND_LINK, OR_LINK);
 }
 
-vhpair AtomTableWrapper::invert(vhpair h)
+Handle AtomTableWrapper::invert(Handle h)
 {
 	HandleSeq hs;
-	hs.push_back(h.first);
+	hs.push_back(h);
 	return addLink(NOT_LINK, hs, TruthValue::TRUE_TV(), true);
 }
 
-vhpair AtomTableWrapper::AND2ORLink(vhpair& andL, Type _ANDLinkType, Type _ORLinkType)
+Handle AtomTableWrapper::AND2ORLink(Handle& andL, Type _ANDLinkType, Type _ORLinkType)
 {
 	AtomSpace *a = AS_PTR;
-	assert(a->getType(andL.first) == _ANDLinkType);
+	assert(a->getType(andL) == _ANDLinkType);
 
 	HandleSeq ORtarget;
-   	const vector<Handle> _ANDtargets = a->getOutgoing(andL.first);
+   	const vector<Handle> _ANDtargets = a->getOutgoing(andL);
 
 	for (vector<Handle>::const_iterator i = _ANDtargets.begin();
             i != _ANDtargets.end(); i++) {
-		ORtarget.push_back(invert(vhpair(*i,NULL_VERSION_HANDLE)).first);
+		ORtarget.push_back(invert(*i));
 	}
 
-	const TruthValue& outerTV = getTruthValue(andL);
+	const TruthValue& outerTV = getTV(andL);
 
 	HandleSeq NOTarg;
-	vhpair newORAND = addLink(_ORLinkType, ORtarget,
+	Handle newORAND = addLink(_ORLinkType, ORtarget,
 				outerTV,
 				true);
 
-	NOTarg.push_back(newORAND.first);
+	NOTarg.push_back(newORAND);
 
 puts("---------");
 printTree(newORAND,0,0);
@@ -1859,17 +1884,17 @@ printTree(newORAND,0,0);
 				true);
 }
 
-hpair AtomTableWrapper::Equi2ImpLink(vhpair& exL)
+pair<Handle, Handle> AtomTableWrapper::Equi2ImpLink(Handle& exL)
 {
 	AtomSpace *a = AS_PTR;
-	printf("((%d))\n", a->getType(exL.first));
+	printf("((%d))\n", a->getType(exL));
 	printTree(exL,0,0);
 
-	assert(a->getType(exL.first) == EXTENSIONAL_EQUIVALENCE_LINK);
+	assert(a->getType(exL) == EXTENSIONAL_EQUIVALENCE_LINK);
 
 	HandleSeq ImpTarget1, ImpTarget2;
 
-   	const vector<Handle> EquiTarget = a->getOutgoing(exL.first);
+   	const vector<Handle> EquiTarget = a->getOutgoing(exL);
 
 	for (vector<Handle>::const_iterator i = EquiTarget.begin(); i != EquiTarget.end(); i++)
 		ImpTarget1.push_back((*i));
@@ -1881,9 +1906,9 @@ hpair AtomTableWrapper::Equi2ImpLink(vhpair& exL)
 
 	assert(ImpTarget2.size()==2);
 
-	const TruthValue& outerTV = getTruthValue(exL);
+	const TruthValue& outerTV = getTV(exL);
 
-	hpair ret;
+	pair<Handle, Handle> ret;
 
 	ret.first = addLink(IMPLICATION_LINK, ImpTarget1,
 				outerTV,
@@ -1895,6 +1920,73 @@ hpair AtomTableWrapper::Equi2ImpLink(vhpair& exL)
 
 	return ret;
 }
+
+bool AtomTableWrapper::isReal(const Handle h) const
+{
+    return AS_PTR->isReal(fakeToRealHandle(h).first);
+}
+
+const TimeServer& AtomTableWrapper::getTimeServer() const
+{
+    return AS_PTR->getTimeServer();
+}
+
+int AtomTableWrapper::getArity(Handle h) const
+{
+    // get neighbours
+    vhpair v = fakeToRealHandle(h);
+    // check neighbours have TV with same VersionHandle
+    HandleSeq hs = AS_PTR->getOutgoing(v.first);
+    int arity = 0;
+    foreach (Handle h, hs) {
+        if (!AS_PTR->getTV(v.first,v.second).isNullTv()) {
+            arity += 1;
+        }
+    }
+    return arity;
+
+}
+
+HandleSeq AtomTableWrapper::filter_type(Type t) 
+{
+    HandleSeq s;
+    s = AS_PTR->filter_type(t);
+    return realToFakeHandle(s, true);
+
+
+}
+
+std::vector<Handle> AtomTableWrapper::getOutgoing(const Handle h) const
+{
+    vhpair v = fakeToRealHandle(h);
+    HandleSeq s1,s2;
+    s1 = AS_PTR->getOutgoing(v.first);
+    foreach (Handle h, s1) {
+        if (!AS_PTR->getTV(v.first,v.second).isNullTv()) {
+            s2.push_back(h);
+        }
+    }
+    return s2;
+
+}
+
+Type AtomTableWrapper::getType(const Handle h) const
+{
+    return AS_PTR->getType(fakeToRealHandle(h).first);
+}
+
+std::string AtomTableWrapper::getName(const Handle h) const
+{
+    return AS_PTR->getName(fakeToRealHandle(h).first);
+}
+
+Type AtomTableWrapper::getTypeV(const tree<Vertex>& _target) const
+{
+    // fprintf(stdout,"Atom space address: %p\n", this);
+    // fflush(stdout);
+    return getType(v2h(*_target.begin()));
+}
+
 /*
 Handle AtomTableWrapper::Exist2ForAllLink(Handle& exL)
 {
@@ -1909,7 +2001,7 @@ Handle AtomTableWrapper::Exist2ForAllLink(Handle& exL)
 		ForAllTarget.push_back(invert(*i));
 	}
 
-	const TruthValue& outerTV = getTruthValue(exL);
+	const TruthValue& outerTV = getTV(exL);
 
 	HandleSeq NOTarg;
 	NOTarg.push_back(addLink(FORALL_LINK, ForAllTarget,
@@ -1923,4 +2015,3 @@ Handle AtomTableWrapper::Exist2ForAllLink(Handle& exL)
 */
 } //~namespace
 
-#endif //000

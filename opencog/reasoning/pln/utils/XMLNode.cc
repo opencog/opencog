@@ -50,7 +50,7 @@ void XMLNode::SetName(string n)
 }
 
 XMLNode::XMLNode(const string& rawdata, XMLNode* _super)
-: ok(false), super(_super), bytesconsumed(0)
+: ok(false), bytesconsumed(0), super(_super)
 {
 	bytesconsumed = ExpandLevel(rawdata,tagdata,sub,this);
 	ok = bytesconsumed > 0;
@@ -355,7 +355,7 @@ std::string IntXMLValue::Value2String() const
 std::string FloatXMLValue::Value2String() const
 {
 	char temp[100];
-	sprintf(temp, "%.2f", temp);
+	sprintf(temp, "%.2f", value);
 	return temp;
 }
 

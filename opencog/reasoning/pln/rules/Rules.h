@@ -2,6 +2,7 @@
 #define RULES_H
 
 #include "../iAtomTableWrapper.h"
+#include "../AtomTableWrapper.h"
 //#include "../CoreWrapper.h"
 #include "../PLNatom.h"
 #include "../formulas/Formulas.h"
@@ -26,6 +27,11 @@
 
 	And inputFilter must be initialized in the constructor!
 */
+
+namespace haxx
+{
+	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+}
 
 #include "and/ANDBreakdownRule.h"
 #include "and/ANDPartitionRule.h"

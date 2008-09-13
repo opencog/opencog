@@ -8,12 +8,12 @@ namespace reasoning
 
 struct iAtomTableWrapper : public ::AtomLookupProvider
 {
-	virtual vhpair addAtom(tree<Vertex>&, const TruthValue& tvn,
+	virtual Handle addAtom(tree<Vertex>&, const TruthValue& tvn,
             bool fresh, bool managed = true)=0;
-	virtual vhpair addLink(Type T, const HandleSeq& hs,
-            const TruthValue& tvn, bool fresh, bool managed = true)=0;
-	virtual vhpair addNode(Type T, const std::string& name,
-            const TruthValue& tvn, bool fresh, bool managed = true)=0;
+	virtual Handle addLink(Type T, const HandleSeq& hs,
+            const TruthValue& tvn, bool fresh=false, bool managed = true)=0;
+	virtual Handle addNode(Type T, const std::string& name,
+            const TruthValue& tvn, bool fresh=false, bool managed = true)=0;
 
 	virtual unsigned int getUniverseSize() const=0;
 };

@@ -25,7 +25,7 @@
 #include <TruthValue.h>
 #include "../PLNUtils.h"
 
-const TruthValue& getTruthValue(vhpair h); 
+const TruthValue& getTruthValue(Handle h); 
 #define NO_DIRECT_PRODUCTION Btr<set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<set<BoundVertex> >(); }
 
 /** Reasoning namespace is being used instead of opencog while

@@ -29,29 +29,18 @@
 #include "tree.h"
 #include "types.h"
 #include "Temporal.h"
-#include "VersionHandle.h"
+
+typedef unsigned int uint;
+typedef unsigned long ulong;
 
 /// Note! This does not re-define std::for_each!
 #define foreach BOOST_FOREACH
 
+/// Convert a boost::variant into a Handle
+#define v2h(v) boost::get<Handle>(v)
+
 namespace opencog
 {
-
-//typedef unsigned int uint;
-typedef unsigned long ulong;
-
-typedef pair<Handle,VersionHandle> vhpair;
-/// Get the vhpair from the Vertex variant
-#define v2v(v) (boost::get<vhpair>(v))
-/// Convert a boost::variant Vertex into a Handle
-#define v2h(v) (boost::get<vhpair>(v).first)
-/// Convert a boost::variant Vertex pointer into a Handle pointer
-#define v2hPtr(v) ((Handle*)boost::get<vhpair>(v)->first)
-
-/// Convert a boost::variant Vertex into a VersionHandle
-#define v2vh(v) (boost::get<vhpair>(v).second) 
-/// Convert a boost::variant Vertex pointer into a VersionHandle pointer
-#define v2vhPtr(v) ((VersionHandle*)boost::get<vhpair>(v)->second)
 
 template<typename T>
 struct TypeWrapper {
@@ -86,7 +75,7 @@ typedef TypeWrapper<signed char> CharWrapper;
 typedef TypeWrapper<short int> ShortIntegerWrapper;
 //typedef TypeWrapper<ShortFloat> ShortFloatWrapper;
 
-typedef boost::variant <vhpair,
+typedef boost::variant <Handle,
                         TimeStampWrapper,
                         IntegerWrapper,
                         FloatWrapper,

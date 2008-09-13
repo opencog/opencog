@@ -17,10 +17,9 @@ ORRule::ORRule(iAtomTableWrapper *_destTable)
 
 Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-        AtomSpace *nm = CogServer::getAtomSpace();
         tree<Vertex>::iterator top = outh->begin();
         
-        if (!inheritsType(nm->getType(v2h(*top)), OR_LINK) ||
+        if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*top)), OR_LINK) ||
             top.number_of_children() > 2)
             return Rule::setOfMPs();
 
@@ -54,7 +53,7 @@ cprintf(3, "ORRule::formatTVarray...");
         int i = 0, ii=0;
         for (i = 0; i < N; i++)
         {
-            tvs[ii++] = (TruthValue*) &(getTruthValue(v2h(premiseArray[i])));
+            tvs[ii++] = (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[i])));
 cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
         }
         

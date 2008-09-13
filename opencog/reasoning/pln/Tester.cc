@@ -259,7 +259,7 @@ void RunPLNTests()
 
 void MacroRuleTest()
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomTableWrapper *atw = GET_ATW;
 	//typedef InversionRule RuleT1;
 	//typedef DeductionRule RuleT2;
 	iAtomTableWrapper* parent = ::haxx::defaultAtomTableWrapper;
@@ -270,27 +270,27 @@ void MacroRuleTest()
 
     printf("v0\n");
 	vtree v0(mva((Handle)INHERITANCE_LINK,
-					mva(nm->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
-					mva(nm->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
+					mva(atw->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
+					mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
 					));
     printf("v1\n");
 	vtree v1(mva((Handle)INHERITANCE_LINK,
-					mva(nm->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
-					mva(nm->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
+					mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
+					mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
 					));
     printf("v2\n");
 	vtree v2(mva((Handle)INHERITANCE_LINK,
-					mva(nm->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
-					mva(nm->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
+					mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
+					mva(atw->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
 
     printf("h0\n");
-	Handle h0 = nm->addAtom(v0, 
+	Handle h0 = atw->addAtom(v0, 
 			SimpleTruthValue(0.40f, getCount(0.80f)));
     printf("h1\n");
-	Handle h1 = nm->addAtom(v1,
+	Handle h1 = atw->addAtom(v1,
 			SimpleTruthValue(0.60f, getCount(0.90f)));
     printf("h2\n");
-	Handle h2 = nm->addAtom(v2,
+	Handle h2 = atw->addAtom(v2,
 			SimpleTruthValue(0.98f, getCount(0.95f)));
 
 	RuleApp* top	= new RuleApp(deduR);
@@ -304,7 +304,7 @@ void MacroRuleTest()
 	top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
 
 	BoundVertex res1a = top->compute();
-	const TruthValue& tvA = nm->getTV(v2h(res1a.value));
+	const TruthValue& tvA = atw->getTV(v2h(res1a.value));
 	assert(tvA.getMean() > 0.01);
 	assert(tvA.getConfidence() > 0.01);
 
@@ -320,7 +320,7 @@ void MacroRuleTest()
 	BoundVertex res1b = topb->compute();
 	assert(res1a.value == res1b.value);
 
-	const TruthValue& tvB = nm->getTV(v2h(res1a.value));
+	const TruthValue& tvB = atw->getTV(v2h(res1a.value));
 	assert(within(tvB.getMean(), tvA.getMean(), 0.001));
 	assert(within(tvB.getConfidence(), tvA.getConfidence(), 0.001));
 
@@ -329,11 +329,11 @@ void MacroRuleTest()
 	RuleApp* top3 = new RuleApp(invR);
 	top3->Bind(0, top2);
 
-	const TruthValue& tv2 = nm->getTV(v2h(top2->compute().value));
+	const TruthValue& tv2 = atw->getTV(v2h(top2->compute().value));
 	assert(!within(tvB.getMean(), tv2.getMean(), 0.001));
 //	assert(!within(tvB.getConfidence(), tv2.getConfidence(), 0.001));
 
-	const TruthValue& tv3 = nm->getTV(v2h(top3->compute().value));
+	const TruthValue& tv3 = atw->getTV(v2h(top3->compute().value));
 	assert( within(tvB.getMean(), tv3.getMean(), 0.001));
 	assert( within(tvB.getConfidence(), tv3.getConfidence(), 0.001));
 
@@ -351,7 +351,7 @@ void MacroRuleTest()
 	BoundVertex resC = topc->compute(args.begin(), args.end());
 
 	assert(resC.value == res1b.value);
-	const TruthValue& tvC = nm->getTV(v2h(resC.value));
+	const TruthValue& tvC = atw->getTV(v2h(resC.value));
 	assert( within(tvB.getMean(), tvC.getMean(), 0.001));
 	assert( within(tvB.getConfidence(), tvC.getConfidence(), 0.001));
 
@@ -364,7 +364,7 @@ void MacroRuleTest()
 	BoundVertex resD = topd->compute(args.begin(), args.end());
 
 	assert(resD.value == res1b.value);
-	const TruthValue& tvD = nm->getTV(v2h(resD.value));
+	const TruthValue& tvD = atw->getTV(v2h(resD.value));
 	assert( within(tvB.getMean(), tvD.getMean(), 0.001));
 	assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
     printf("finish MacroRuleTest\n");
@@ -372,7 +372,7 @@ void MacroRuleTest()
 
 void RunPLNTestsOnce()
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomTableWrapper *atw = GET_ATW;
 	INstats.clear();
 
 	puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
@@ -718,8 +718,8 @@ InitAxiomSet("smalldemo.xml");
 
 	void InitAxiomSet(string premiseFile)
 	{
-		AtomSpace *nm = CogServer::getAtomSpace();
-		//nm->Reset(NULL); //base_core);
+		AtomTableWrapper *atw = GET_ATW;
+		//atw->Reset(NULL); //base_core);
         ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
 		
 		haxx::ArchiveTheorems = true;
@@ -737,7 +737,7 @@ InitAxiomSet("smalldemo.xml");
 
 	void RunPLNTest(Btr<PLNTest> t)
 	{
-		AtomSpace *nm = CogServer::getAtomSpace();
+		AtomTableWrapper *atw = GET_ATW;
 		stats::Instance().ITN2atom.clear();
 
 		rawPrint(*t->target, t->target->begin(), -2);
@@ -796,7 +796,7 @@ currentDebugLevel=-4;
 				eh = (eres.empty() ? NULL : v2h(*(*eres.rbegin())->getVtree().begin()));
 
 				if (eh)
-					etv = nm->getTV(eh).clone();
+					etv = atw->getTV(eh).clone();
 				else
 					etv = new SimpleTruthValue(0.0f,0.0f);
 
@@ -836,7 +836,7 @@ currentDebugLevel=-4;
 			eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
 			if (eh) {
                 if (etv != NULL) delete etv;
-				etv = nm->TV(eh).clone();
+				etv = atw->TV(eh).clone();
             }
 
 			passed = (eh && etv &&
@@ -868,7 +868,7 @@ currentDebugLevel=-4;
 			printf("Test results: [");
 			foreach(VtreeProvider* bv, eres) // state->child_results[0])
 			{
-				const TruthValue& tv = nm->getTV(vt2h(*bv));
+				const TruthValue& tv = atw->getTV(vt2h(*bv));
 				if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
 					printf("%d ", (int)vt2h(*bv));
 			}
@@ -900,7 +900,7 @@ currentDebugLevel=-4;
 		stats::Instance().print(stats::triviality_filterT());
 
         if (etv != NULL) delete etv;
-		//nm->Reset(NULL); //base_core);		
+		//atw->Reset(NULL); //base_core);		
         ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
 /*puts("buf alloc test...");fflush(stdout);
 char *tbuf = new char[8174+2];	

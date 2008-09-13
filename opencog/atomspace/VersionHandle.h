@@ -26,6 +26,7 @@
 #define _OPENCOG_VERSIONHANDLE_H
 
 #include <opencog/atomspace/CoreUtils.h>
+#include <boost/functional/hash.hpp>
 
 namespace opencog
 {
@@ -54,6 +55,8 @@ struct VersionHandle {
 struct hashVersionHandle {
     int operator()(VersionHandle vh) const;
 };
+
+std::size_t hash_value(VersionHandle const& b);
 
 struct eqVersionHandle {
     bool operator()(VersionHandle vh1, VersionHandle vh2) const;

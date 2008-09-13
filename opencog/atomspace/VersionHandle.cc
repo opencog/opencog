@@ -68,10 +68,18 @@ IndicatorType VersionHandle::strToIndicator(const char* indicatorStr) throw (Inv
                                 "VersionHandle - Invalid IndicatorType name: '%s'.", indicatorStr);
 }
 
-int hashVersionHandle::operator()(VersionHandle vh) const
+int hashVersionHandle::operator()(VersionHandle const vh) const
 {
     int hashCode =  vh.indicator + std::tr1::hash<Handle>()(vh.substantive);
     return(hashCode);
+}
+
+std::size_t hash_value(VersionHandle const& b)
+{
+    std::size_t seed = 0; 
+    boost::hash_combine(seed,b.indicator);
+    boost::hash_combine(seed,b.substantive);
+    return seed;
 }
 
 bool eqVersionHandle::operator()(VersionHandle vh1, VersionHandle vh2) const

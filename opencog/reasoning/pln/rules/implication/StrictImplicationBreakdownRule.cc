@@ -110,14 +110,14 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
     }
 #endif
     
-        std::vector<Handle> args = nm->getOutgoing(v2h(premiseArray[0]));
-        Type T = nm->getType(args[1]);
+        std::vector<Handle> args = GET_ATW->getOutgoing(v2h(premiseArray[0]));
+        Type T = GET_ATW->getType(args[1]);
         std::string pname = nm->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(getTruthValue(v2h(premiseArray[0]))),
-            (TruthValue*) &(getTruthValue(v2h(premiseArray[1]))),
-            (TruthValue*) &(getTruthValue(args[1]))
+            (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[0]))),
+            (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[1]))),
+            (TruthValue*) &(GET_ATW->getTV(args[1]))
         };
         
         TruthValue* retTV =
@@ -127,7 +127,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
 
         Handle ret=NULL;
     
-        assert (!(inheritsType(T, NODE)));
+        assert (!(GET_ATW->inheritsType(T, NODE)));
 
         ret = destTable->addLink(T, new_args,
                     *retTV,

@@ -12,6 +12,11 @@ namespace test
 	extern int attachs;
 }
 
+namespace haxx
+{
+	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+}
+
 namespace reasoning
 {
 int atom_alloc_count=0;
@@ -23,10 +28,10 @@ bool existMPin(const vector<Btr<atom> >& hs);
 
 bool atom::ValidMetaPredicate(Type T)
 {
-	return inheritsType(T, RESTRICTOR) ||
-		inheritsType(T, AND_LINK) ||
-		inheritsType(T, __OR) ||
-		inheritsType(T, NOT_LINK);
+	return GET_ATW->inheritsType(T, RESTRICTOR) ||
+		GET_ATW->inheritsType(T, AND_LINK) ||
+		GET_ATW->inheritsType(T, __OR) ||
+		GET_ATW->inheritsType(T, NOT_LINK);
 }
 
 bool lessatom::operator()(const atom& lhs, const atom& rhs) const
@@ -62,7 +67,7 @@ bool lessatom::operator()(const atom& lhs, const atom& rhs) const
 }
 
 //bool MetaPredicate::operator()(HandleType h) const
-bool atom::operator()(vhpair h) const
+bool atom::operator()(Handle h) const
 {
 	uint s=0;
 
@@ -73,7 +78,7 @@ bool echo=false;
 	if (T == ATOM)
 		return true;
 	
-	if (inheritsType(T, RESTRICTOR))
+	if (GET_ATW->inheritsType(T, RESTRICTOR))
 	{
 		bool unnormed_ret = false;
 		bool normal_form = (T == __INSTANCEOF_N || T == __EQUALS_N);
@@ -81,7 +86,7 @@ bool echo=false;
 		switch(T)
 		{
 		case __INSTANCEOF_N:
-			unnormed_ret = inheritsType(CogServer::getAtomSpace()->getType(h.first), hs[0]->T);
+			unnormed_ret = GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(h), hs[0]->T);
 			
 			break;
 			
@@ -94,10 +99,9 @@ bool echo=false;
 		
 		if (!unnormed_ret && normal_form)
 		{
-			if (inheritsType(CogServer::getAtomSpace()->getType(h.first), FORALL_LINK))
-				return (*this)(vhpair(CogServer::getAtomSpace()->getOutgoing(h.first)[1],
-                            NULL_VERSION_HANDLE));
-			else if (inheritsType(hs[0]->T, FORALL_LINK))
+			if (GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(h), FORALL_LINK))
+				return (*this)(CogServer::getAtomSpace()->getOutgoing(h)[1]);
+			else if (GET_ATW->inheritsType(hs[0]->T, FORALL_LINK))
 				return ( *((MetaPredicate*)hs[1].get()) )(h);
 			else
 				return false;
@@ -150,21 +154,14 @@ atom::~atom()
 }
 
 atom::atom()
-:real(0,NULL_VERSION_HANDLE), bindings(0), T(ATOM), arity(0), forbiddenBindings(0)
+:real(0), bindings(0), T(ATOM), arity(0), forbiddenBindings(0)
 {
 	atom_alloc_count++;
 }
 
 atom::atom(Type _T, vector<Btr<atom> > _hs)
-: real(0,NULL_VERSION_HANDLE), bindings(0), T(_T), hs(_hs), forbiddenBindings(0)
+: real(0), bindings(0), T(_T), hs(_hs), forbiddenBindings(0)
 {
-	atom_alloc_count++;
-}
-
-atom::atom(vhpair h)
-: bindings(0), forbiddenBindings(0)
-{
-	setHandle(h.first);
 	atom_alloc_count++;
 }
 
@@ -174,7 +171,6 @@ atom::atom(Handle h)
 	setHandle(h);
 	atom_alloc_count++;
 }
-
 
 atom::atom(const atom& rhs)
 :   real(rhs.real), bindings(rhs.bindings), T(rhs.T), arity(rhs.arity),
@@ -186,7 +182,7 @@ forbiddenBindings(rhs.forbiddenBindings)
 }
 
 atom::atom(Type _T, string _name)
-: real(0,NULL_VERSION_HANDLE),bindings(0), T(_T), arity(0), name(_name), 
+: real(0),bindings(0), T(_T), arity(0), name(_name), 
 forbiddenBindings(0)
 {
 	atom_alloc_count++;
@@ -199,7 +195,7 @@ forbiddenBindings(0)
 */
 
 atom::atom(Type _T, int _arity, ...)
-: real(0,NULL_VERSION_HANDLE), bindings(0), T(_T), arity(_arity), forbiddenBindings(0)
+: real(0), bindings(0), T(_T), arity(_arity), forbiddenBindings(0)
 {
 LOG(5, "Variable arity argument list processing...");
 	try
@@ -272,7 +268,7 @@ void atom::setHandle(Handle h)
 	for (unsigned int i = 0; i < _hs.size(); i++)
 		hs.push_back(Btr<atom>(new atom(_hs[i])));
 
-	real = vhpair(h,NULL_VERSION_HANDLE);
+	real = h;
 	//SetOutgoing(_hs);
 }
 
@@ -286,7 +282,7 @@ Handle atom::bindHandle(iAtomTableWrapper* table) const
 			i++)
 			target.substitute(i->second, i->first);
 
-	return target.attach(table).first;
+	return target.attach(table);
 }
 
 void atom::getWithActualizedSubstitutions(atom& target) const
@@ -304,7 +300,7 @@ void atom::getWithActualizedSubstitutions(atom& target) const
 
 	target.real = this->real;
 
-	if (target.real.first)
+	if (target.real)
 	{
 		LOG(4, "Warning! Substituted the atom though it's attached to Core!");
 	}
@@ -313,7 +309,7 @@ void atom::getWithActualizedSubstitutions(atom& target) const
 
 void atom::detach() const
 {
-	real = vhpair(NULL,NULL_VERSION_HANDLE);
+	real = NULL;
 
 	for (unsigned int i = 0; i < hs.size(); i++)
 		hs[i]->detach();
@@ -377,7 +373,7 @@ int atom::asIntegerArray(unsigned int* dest, unsigned int patlen, map<atom,int,l
 }
 #endif
 
-vhpair atom::attach(iAtomTableWrapper* core) const
+Handle atom::attach(iAtomTableWrapper* core) const
 {
 //printf("atom::attach()\n");
 	::test::attachs++;
@@ -389,16 +385,16 @@ LOG(4, "Attaching...");
 
 //	assert (!inheritsType(T, FW_VARIABLE_NODE));
 
-	if (inheritsType(T, NODE))
+	if (GET_ATW->inheritsType(T, NODE))
 	{
 //printf("atom::attach: it's a node: type: %d, name: %s, core: %p\n", T, name.c_str(), core);
-        real = vhpair(at->getHandle(T, name), NULL_VERSION_HANDLE);
+        real = at->getHandle(T, name);
 //printf("atom::attach: real = %p\n", real);
-		if (!real.first)
+		if (!real)
 		{
 //printf("atom::attach: real is null => adding node\n");
             real = at->addNode(T, name, tvn, true);
-cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real.first);
+cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real);
 		}
 	}
 	else
@@ -407,12 +403,11 @@ cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real.first);
 
 		for (unsigned int i = 0; i < hs.size(); i++)
 		{		
-			outg.push_back(hs[i]->attach(core).first);
+			outg.push_back(hs[i]->attach(core));
 		}
 cprintf(4, "Attaching %d entries...\n", outg.size());
-
-		real = vhpair(at->getHandle(T, outg),NULL_VERSION_HANDLE);
-        if (!real.first)
+		
+        if (!(real = at->getHandle(T, outg)))
 		{
 cprintf(4, "Not exist.\n");
             real = at->addLink(T, outg, tvn, true);
@@ -421,7 +416,7 @@ cprintf(4, "Not exist.\n");
 	
 LOG(4, "Attached.");
 
-	assert(real.first);
+	assert(real);
 
 	return real;
 }
@@ -461,7 +456,7 @@ vector<Btr<atom> > atom::execOutTree() const
 {
 //	if (inheritsType(T, __INDEXER) && hs.size() > (T - __INDEX1))
 //		return hs[T - __INDEX1].execOutTree();
-	if (inheritsType(T, RESTRICTOR))
+	if (GET_ATW->inheritsType(T, RESTRICTOR))
 		return vector<Btr<atom> >();
 
 	return hs;
@@ -476,7 +471,8 @@ bool atom::matchType(Type rhsT) const
 {
 	Type lhsT = this->execType();
 
-	return lhsT == rhsT || inheritsType(lhsT, rhsT) || inheritsType(rhsT, lhsT);
+	return lhsT == rhsT || GET_ATW->inheritsType(lhsT, rhsT)
+        || GET_ATW->inheritsType(rhsT, lhsT);
 }
 
 bool atom::operator<(const atom& rhs) const
@@ -542,7 +538,7 @@ vector<Handle> atom::convertVector(const vector<Btr<atom> >& hs, iAtomTableWrapp
 	vector<Handle> ret;		
 
 	for (unsigned int i = 0; i < hs.size(); i++)
-		ret.push_back(hs[i]->real.first ? hs[i]->real.first : hs[i]->attach(table).first);
+		ret.push_back(hs[i]->real ? hs[i]->real : hs[i]->attach(table));
 
 	return ret;
 
@@ -590,7 +586,7 @@ void makeHandletree(Handle real, iAtomTableWrapper* table, bool fullVirtual, tre
 */
 
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top);
-void makeHandletree(vhpair real, bool fullVirtual, tree<Vertex>& ret)
+void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret)
 {
 	ret.set_head(real);
 	expandHandletree(fullVirtual, ret, ret.begin());
@@ -598,19 +594,18 @@ void makeHandletree(vhpair real, bool fullVirtual, tree<Vertex>& ret)
 
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top)
 {
-	vhpair real = v2v(*ret_top);
-	Type T=CogServer::getAtomSpace()->getType(real.first);
+	Handle real = v2h(*ret_top);
+	Type T=CogServer::getAtomSpace()->getType(real);
 
 	/// If virtual link, then we keep expanding
-	if (fullVirtual && !inheritsType(T, NODE))
+	if (fullVirtual && !GET_ATW->inheritsType(T, NODE))
 	{
-		*ret_top = Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE));
+		*ret_top = Vertex((Handle)T);
 	
-		HandleSeq _hs = CogServer::getAtomSpace()->getOutgoing(real.first);
+		HandleSeq _hs = CogServer::getAtomSpace()->getOutgoing(real);
 		foreach(Handle child_h, _hs)
 		{
-			tree<Vertex>::iterator next_i = ret.append_child(ret_top,
-                    vhpair(child_h,NULL_VERSION_HANDLE));
+			tree<Vertex>::iterator next_i = ret.append_child(ret_top, child_h);
 			expandHandletree(fullVirtual, ret, next_i);
 		}
 	}
@@ -619,14 +614,14 @@ void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_t
 tree<Vertex> atom::makeHandletree(iAtomTableWrapper* table, bool fullVirtual) const
 {
 	tree<Vertex> ret;
-	vhpair top;
+	Handle top = 0;
 	
-	if (real.first && (!fullVirtual || inheritsType(CogServer::getAtomSpace()->getType(real.first), FW_VARIABLE_NODE)))
+	if (real && (!fullVirtual || GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(real), FW_VARIABLE_NODE)))
 		top = real;
 	else
-		top = (inheritsType(T, NODE)
+		top = (GET_ATW->inheritsType(T, NODE)
 					? attach(table)
-					: vhpair((Handle)T,NULL_VERSION_HANDLE));
+					: (Handle)T);
 
 	ret.set_head(top);
 	
@@ -668,12 +663,12 @@ atom::atom(const tree<Btr<atom> >& a, tree<Btr<atom> >::iterator parent_node, bo
 	name = (*parent_node)->name;
 	real = (*parent_node)->real;
 
-	if (!inheritsType(T, NODE)) //nodes have no children...
+	if (!GET_ATW->inheritsType(T, NODE)) //nodes have no children...
 		for (tree<Btr<atom> >::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
 		{	
 			Btr<atom> b(new atom);
 			
-			if (s.number_of_children() > 0 && !inheritsType((*s)->T, NODE) )
+			if (s.number_of_children() > 0 && !GET_ATW->inheritsType((*s)->T, NODE) )
 				b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 			
 			b->T = (*s)->T;
@@ -698,21 +693,21 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 
 	T = CogServer::getAtomSpace()->getType(boost::get<Handle>(*parent_node));
 	name = CogServer::getAtomSpace()->getName(boost::get<Handle>(*parent_node));
-	real = v2v(*parent_node);
+	real = boost::get<Handle>(*parent_node);
 	
 //cprintf(4,"REAL: %d\n", real);
 	
-	if (!inheritsType(T, NODE)) //nodes have no children...
+	if (!GET_ATW->inheritsType(T, NODE)) //nodes have no children...
 		for (tree<Vertex>::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
 		{	
 			Btr<atom> b(new atom);
 			
-			if (s.number_of_children() > 0 && !inheritsType(CogServer::getAtomSpace()->getType(boost::get<Handle>(*s)), NODE) )
+			if (s.number_of_children() > 0 && !GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(boost::get<Handle>(*s)), NODE) )
 				b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 
 			b->T = CogServer::getAtomSpace()->getType(boost::get<Handle>(*s));
 			b->name = CogServer::getAtomSpace()->getName(boost::get<Handle>(*s));
-			b->real = v2v(*s);
+			b->real = boost::get<Handle>(*s);
 //cprintf(4,"REAL SUB: %d\n", b.real);			
 			hs.push_back(b);
 		}
@@ -720,27 +715,27 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 
 bool atom::containsVar() const
 { 
-	if (!inheritsType(T, NODE))
+	if (!GET_ATW->inheritsType(T, NODE))
 	{
 		for (unsigned int i=0; i<hs.size(); ++i)
 			if (hs[i]->containsVar())
 				return true;
 			return false;
 	}
-	return inheritsType(T, VARIABLE_NODE);
+	return GET_ATW->inheritsType(T, VARIABLE_NODE);
 }
 
 
 bool atom::containsFWVar() const
 { 
-	if (!inheritsType(T, NODE))
+	if (!GET_ATW->inheritsType(T, NODE))
 	{
 		for (unsigned int i=0; i<hs.size(); ++i)
 			if (hs[i]->containsFWVar())
 				return true;
 			return false;
 	}
-	return inheritsType(T, FW_VARIABLE_NODE);
+	return GET_ATW->inheritsType(T, FW_VARIABLE_NODE);
 }
 
 const int MAX_VARIABLE_NUMBER = 5;
@@ -752,7 +747,7 @@ void addatomcopy(const tree<Btr<atom> >& a, set<atom, lessatom_ignoreVarNameDiff
 
 void atom::extractVars(set<string>& vars) const
 {
-	if (inheritsType(T, VARIABLE_NODE))
+	if (GET_ATW->inheritsType(T, VARIABLE_NODE))
 	{
 		vars.insert(name);
 	}
@@ -763,7 +758,7 @@ void atom::extractVars(set<string>& vars) const
 
 void atom::extractFWVars(set<string>& vars) const
 {
-	if (inheritsType(T, FW_VARIABLE_NODE))
+	if (GET_ATW->inheritsType(T, FW_VARIABLE_NODE))
 	{
 		vars.insert(name);
 	}

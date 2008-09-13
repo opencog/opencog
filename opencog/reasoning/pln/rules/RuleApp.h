@@ -208,7 +208,7 @@ public:
 					{
 						if (!root_rule->hasFreeInputArity())
 						{
-							result = BoundVertex(vhpair((Handle)NULL,NULL_VERSION_HANDLE));
+							result = BoundVertex((Handle)NULL);
 							goto out;
 						}
 						else // If no more arg information, and free input arity.
@@ -222,10 +222,10 @@ public:
 			}
 
 			#if !FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
-				if (bv.value == Vertex(vhpair((Handle)NULL,NULL_VERSION_HANDLE)))
+				if (bv.value == Vertex((Handle)NULL))
 				{
 					nextUnusedArg = end;
-					result = BoundVertex(vhpair((Handle)NULL,NULL_VERSION_HANDLE));
+					result = BoundVertex((Handle)NULL);
 					goto out;
 				}
 			#endif

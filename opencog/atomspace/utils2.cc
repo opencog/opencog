@@ -57,7 +57,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, 
     printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree, vtree\n");
     try {
         vtree ret;
-        ret.set_head(Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE)));
+        ret.set_head(Vertex((Handle)T));
         pre_it head_it = ret.begin();
         ret.replace(ret.append_child(head_it), t1.begin());
         ret.replace(ret.append_child(head_it), t2.begin());
@@ -76,7 +76,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, 
     printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree\n");
     try {
         vtree ret;
-        ret.set_head(Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE)));
+        ret.set_head(Vertex((Handle)T));
         pre_it head_it = ret.begin();
         ret.replace(ret.append_child(head_it), t1.begin());
         ret.replace(ret.append_child(head_it), t2.begin());
@@ -94,7 +94,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, 
     printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree\n");
     try {
         vtree ret;
-        ret.set_head(Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE)));
+        ret.set_head(Vertex((Handle)T));
         pre_it head_it = ret.begin();
         ret.replace(ret.append_child(head_it), t1.begin());
         ret.replace(ret.append_child(head_it), t2.begin());
@@ -112,7 +112,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
     printf("MakeVirtualAtom_slow Handle, vtree, vtree\n");
     try {
         vtree ret;
-        ret.set_head(Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE)));
+        ret.set_head(Vertex((Handle)T));
         pre_it head_it = ret.begin();
         ret.replace(ret.append_child(head_it), t1.begin());
         ret.replace(ret.append_child(head_it), t2.begin());
@@ -129,7 +129,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1)
     printf("MakeVirtualAtom_slow Handle, vtree\n");
     try {
         vtree ret;
-        ret.set_head(Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE)));
+        ret.set_head(Vertex((Handle)T));
         pre_it head_it = ret.begin();
         ret.replace(ret.append_child(head_it), t1.begin());
 
@@ -145,7 +145,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T)
     printf("MakeVirtualAtom_slow Handle\n");
     try {
         vtree ret;
-        ret.set_head(Vertex(vhpair((Handle)T,NULL_VERSION_HANDLE)));
+        ret.set_head(Vertex((Handle)T));
 
         return ret;
 
