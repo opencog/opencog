@@ -69,8 +69,5 @@ void Mihalcea::process_sentence(Handle h)
 
 	sense_ranker->rank_parse(top_parse);
 	reporter->report_parse(top_parse);
-
-fflush (stdout);
-sleep (100000);
 }
 
