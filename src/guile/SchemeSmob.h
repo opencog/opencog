@@ -58,6 +58,7 @@ class SchemeSmob
 		static SCM ss_link(SCM, SCM);
 		static SCM ss_delete(SCM);
 		static SCM ss_delete_recursive(SCM);
+		static SCM ss_atom_p(SCM);
 
 		// Atoms to ints, and back.
 		static SCM ss_atom(SCM);
@@ -74,6 +75,7 @@ class SchemeSmob
 
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);
+		static SCM ss_tv_p(SCM);
 
 		// Misc utilities
 		static std::string to_string(SCM);

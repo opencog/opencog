@@ -96,6 +96,7 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-link",              1, 0, 1, C(ss_link));
 	scm_c_define_gsubr("cog-delete",            1, 0, 0, C(ss_delete));
 	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 0, C(ss_delete_recursive));
+	scm_c_define_gsubr("cog-atom?",             1, 0, 1, C(ss_atom_p));
 
 	// property getters
 	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
@@ -105,6 +106,7 @@ void SchemeSmob::register_procs(void)
 
 	// Truth-values
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
+	scm_c_define_gsubr("cog-tv?",               1, 0, 0, C(ss_tv_p));
 
 	// iterators
 	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));

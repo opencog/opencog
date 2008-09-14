@@ -134,6 +134,14 @@ SCM SchemeSmob::ss_handle (SCM satom)
 
 /* ============================================================== */
 
+SCM SchemeSmob::ss_atom_p (SCM s)
+{
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, s))
+		return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
 /**
  * Check that the arguments represent a value node, else throw errors.
  * Return the node type.

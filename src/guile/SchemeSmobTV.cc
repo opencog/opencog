@@ -200,5 +200,26 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 	return smob;
 }
 
+/* ============================================================== */
+/**
+ * Return true if the scm is a truth value
+ */
+SCM SchemeSmob::ss_tv_p (SCM s)
+{
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	{
+		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
+		switch (misctype)
+		{
+			case COG_SIMPLE_TV:
+				return SCM_BOOL_T;
+
+			default:
+				return SCM_BOOL_F;
+		}
+	}
+	return SCM_BOOL_F;
+}
+
 #endif
 /* ===================== END OF FILE ============================ */
