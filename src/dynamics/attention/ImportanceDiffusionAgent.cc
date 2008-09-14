@@ -27,18 +27,31 @@
 #include "ImportanceDiffusionAgent.h"
 
 #include <platform.h>
+#include <time.h>
+#include <math.h>
 
 #include <CogServer.h>
 #include <Link.h>
+#include <mt19937ar.h>
 
 #define DEBUG
 namespace opencog
 {
 
-ImportanceDiffusionAgent::ImportanceDiffusionAgent()
+ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
 {
     maxSpreadPercentage=MA_DEFAULT_MAX_SPREAD_PERCENTAGE;
     diffusionThreshold=MA_DEFAULT_DIFFUSION_THRESHOLD;
+
+    switch (decisionFunction) {
+    case HYPERBOLIC:
+        spreadDecider = (SpreadDecider*) new HyperbolicDecider(0.5);
+        break;
+    case STEP:
+        spreadDecider = (SpreadDecider*) new StepDecider();
+        break;
+    }
+
 }
 
 ImportanceDiffusionAgent::~ImportanceDiffusionAgent()
@@ -61,6 +74,7 @@ float ImportanceDiffusionAgent::getDiffusionThreshold() const
 void ImportanceDiffusionAgent::run(CogServer* server)
 {
     a = server->getAtomSpace();
+    spreadDecider->focusBoundary = a->getAttentionalFocusBoundary();
     spreadImportance();
 }
 
@@ -171,7 +185,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
 #endif
             sourceHandle = (*sourcePosItr).first;
             // If source atom isn't within diffusionThreshold, then skip
-            if (a->getNormalisedZeroToOneSTI(sourceHandle) < diffusionThreshold) {
+            if (!spreadDecider->spreadDecision(a->getSTI(sourceHandle))) {
                 continue;
             }
             sourceIndex = (*sourcePosItr).second;
@@ -202,7 +216,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
                 Handle sourceHandle;
                 sourceHandle = (*sourceItr);
                 // If source atom isn't within diffusionThreshold, then skip
-                if (a->getNormalisedZeroToOneSTI(sourceHandle) < diffusionThreshold) {
+                if (!spreadDecider->spreadDecision(a->getSTI(sourceHandle))) {
                     continue;
                 }
                 for (targetItr = targets.begin(); targetItr != targets.end();
@@ -343,5 +357,33 @@ void ImportanceDiffusionAgent::printVector(gsl_vector* m) {
     printf("]\n");
 }
 
+// Static/Shared random number generator
+RandGen* SpreadDecider::rng = NULL;
+
+bool SpreadDecider::spreadDecision(AttentionValue::sti_t s)
+{
+    if (getRNG()->randfloat() < function(s))
+        return true;
+    else
+        return false;
+}
+
+RandGen* SpreadDecider::getRNG() {
+    if (!rng)
+        rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
+    return rng;
+}
+
+float HyperbolicDecider::function(AttentionValue::sti_t s)
+{
+    return (tanh(shape*(s-focusBoundary))+1.0f)/2.0f;
+}
+
+float StepDecider::function(AttentionValue::sti_t s)
+{
+    return (s>focusBoundary ? 1.0f : 0.0f);
+}
+
 };
+
 #endif // HAVE_GSL

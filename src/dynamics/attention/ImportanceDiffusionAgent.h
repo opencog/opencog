@@ -31,6 +31,7 @@
 #include <gsl/gsl_vector.h>
 
 #include <Logger.h>
+#include <RandGen.h>
 
 #include <AtomSpace.h>
 #include <MindAgent.h>
@@ -45,6 +46,41 @@ const float MA_DEFAULT_DIFFUSION_THRESHOLD = 0.5f;
 const float MA_DEFAULT_MAX_SPREAD_PERCENTAGE = 0.5f;
 
 class CogServer;
+
+class SpreadDecider
+{
+    virtual float function(AttentionValue::sti_t s) = 0;
+
+protected:
+    static RandGen *rng;
+
+public:
+    SpreadDecider(int _f, float _s):
+        shape(_s), focusBoundary(_f) { }
+
+    float shape;
+    int focusBoundary;
+    RandGen* getRNG();
+
+    bool spreadDecision(AttentionValue::sti_t s);
+};
+
+class HyperbolicDecider : SpreadDecider
+{
+    float function(AttentionValue::sti_t s);
+public:
+    HyperbolicDecider(float _s):
+        SpreadDecider(0,_s) {}
+};
+
+class StepDecider : SpreadDecider
+{
+    float function(AttentionValue::sti_t s);
+
+public:
+    StepDecider():
+        SpreadDecider(0,0.0f) {}
+};
 
 /** Spreads short term importance along HebbianLinks using a diffusion approach.
  *
@@ -94,9 +130,13 @@ private:
     void makeConnectionMatrix(gsl_matrix* &connections, int totalDiffusionAtoms,
             std::map<Handle,int> diffusionAtomsMap, std::vector<Handle> links);
 
+    SpreadDecider* spreadDecider;
+
 public:
 
-    ImportanceDiffusionAgent();
+    enum { HYPERBOLIC, STEP };
+
+    ImportanceDiffusionAgent(int decisionFunction=HYPERBOLIC);
     virtual ~ImportanceDiffusionAgent();
     virtual void run(CogServer *server);
 
