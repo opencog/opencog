@@ -316,6 +316,8 @@ std::string SchemeShell::eval(const std::string &expr)
 		free(str);
 		scm_close_port(error_string_port);
 
+		scm_truncate_file(outport, scm_from_uint16(0));
+
 		rv += "\n";
 		rv += normal_prompt;
 		return rv;
