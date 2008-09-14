@@ -24,6 +24,9 @@
 (define (prt-stuff h) (display h) #t)
 (define (prt-inc h) (display (cog-incoming-set h)) #t)
 
+; =============================================================
+; Assorted sentence, parse, word, word-sense wrangling utilities below.
+;
 ; map-parses proc sent
 ; Call proceedure 'proc' on every parse of the sentence 'sent' 
 ; 
@@ -31,14 +34,12 @@
 ; of the parses of a sentence. It is connected via ParseLink's to 
 ; each of the individual parses of the sentence. So, look for 
 ; ParseAnchor's, which anchor the parses.
+;
 (define (map-parses proc sent) 
-	(define (get-parse p)
-		(cog-filter ParseAnchor proc (cog-outgoing-set p))
-		#f
+	(cog-map-chase-link 'ParseLink ParseAnchor
+		" ========= end of sentence ============ \n" ""
+		proc sent
 	)
-	(cog-filter 'ParseLink get-parse (cog-incoming-set sent))
-	(display " ========= end of sentence ============ \n")
-	#f
 )
 
 ; map-word-instances proc parse
@@ -47,14 +48,12 @@
 ; Expected input is a ParseAnchor, which serves as an anchor
 ; to all of the word instances in a parse. The ParseAnchor is
 ; connnected via a ParseInstanceLink to the individual words.
+; 
 (define (map-word-instances proc parse) 
-	(define (get-word-inst w)
-		(cog-filter WordAnchor proc (cog-outgoing-set w))
-		#f
+	(cog-map-chase-link 'ParseInstanceLink WordAnchor
+		" --------- end of parse ------------ \n" ""
+		proc parse
 	)
-	(cog-filter 'ParseInstanceLink get-word-inst (cog-incoming-set parse))
-	(display " --------- end of parse ------------ \n")
-	#f
 )
 
 ; map-word-node proc word-inst
@@ -63,34 +62,43 @@
 ; Expected input is a WordAnchor, which serves as an anchor
 ; to a word instance. The WordAnchor is connnected via a ReferenceLink
 ; to the actual word node.
+;
 (define (map-word-node proc word-inst) 
-	(define (get-word w)
-		(cog-filter 'WordNode proc (cog-outgoing-set w))
-		; (display " --------- found word ------------ \n")
-		#f
-	)
-	(cog-filter 'ReferenceLink get-word (cog-incoming-set word-inst))
-	#f
-)
-
-(define (map-chase link-type node-type dbg-link dbg-node proc anchor)
-	(define (get-node w)
-		(cog-filter node-type proc (cog-outgoing-set w))
-		dbg-node
-		#f
-	)
-	(cog-filter link-type get-node (cog-incoming-set anchor))
-	dbg-link
-	#f
-)
-
-(define (map-word-node proc word-inst) 
-	(map-chase 'ReferenceLink 'WordNode 
-		#f (display " --------- found word ------------ \n") 
+	(cog-map-chase-link 'ReferenceLink 'WordNode 
+		"" ""  ; " --------- word-found ------------ \n"
 		proc word-inst
 	)
 )
 
+; cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
+;
+; Chase 'link-type' to 'endpoint-type' and apply proc to what is found there.
+;
+; It is presmued that 'anchor' points to some atom (typically a node),
+; and that it has many links in its incoming set. So, loop over all of
+; the links of 'link-type' in this set. They presumably link to all 
+; sorts of things. Find all of the things that are of 'endpoint-type'
+; and then call 'proc' on each of these endpoints. Optionally, print
+; some debugging msgs.
+;
+; Example usage:
+; (cog-map-chase-link 'ReferenceLink 'WordNode '() '() proc word-inst)
+; Given a 'word-inst', this will chase all ReferenceLink's to all 
+; WordNode's, and then will call 'proc' on these WordNodes.
+;
+(define (cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
+	(define (get-endpoint w)
+		(cog-filter endpoint-type proc (cog-outgoing-set w))
+		(display dbg-emsg)
+		#f
+	)
+	(cog-filter link-type get-endpoint (cog-incoming-set anchor))
+	(display dbg-lmsg)
+	#f
+)
+
+
+; =============================================================
 
 ; Loop over all atoms of type SentenceNode, processing 
 ; each corresponding parse.
