@@ -120,63 +120,6 @@ interface.
           #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
 
 
-== cog-atom handle
-      Reference the atom identified by the integer-valued handle
-== cog-handle atom
-      Return the handle (which is an integer) of the atom
-
-      Example:
-         ; Create two atoms, and get thier handles:
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-node 'ConceptNode "def"))
-         guile> (cog-handle x)
-         113
-         guile> (cog-handle y)
-         114
-
-         ; Get the atom corresponding to handle number 114
-         guile> (cog-atom 114)
-         #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
-
-         ; Verify that handles are truly integers
-         guile> (integer? x)
-         #f
-         guile> (integer? (cog-handle x))
-         #t
-
-
-== cog-incoming-set atom
-== cog-outgoing-set atom
-      Return the incoming and outgoing sets, respectively, of the atom.
-      These sets are returned as ordinary scheme lists.
-
-      Example:
-         ; Define two nodes and a link between them:
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-node 'ConceptNode "def"))
-         guile> (define l (cog-new-link 'Link x y))
-
-         ; Get the incoming sets of nodes x and y (which is the link l):
-         guile> (cog-incoming-set x)
-         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
-         guile> (cog-incoming-set y)
-         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
-
-         ; Verify that the both incoming sets are really one and the
-         ; same link:
-         guile> (equal? (cog-incoming-set x) (cog-incoming-set y))
-         #t
-
-         ; The returned values are lists, and not singleton atoms.
-         ; Thus, the incoming set of x is a list containing l:
-         guile> (equal? (cog-incoming-set x) (list l))
-         #t
-
-         ; Verify that the returned value is a true list:
-         guile> (list? (cog-incoming-set x))
-         #t
-
-
 == cog-delete atom
       Delete the indicated atom, but only if it has no incoming links.
 == cog-delete-recursive atom
@@ -216,6 +159,73 @@ interface.
          ; Verify that the node y still exists:
          guile> y
          #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
+
+== cog-name atom
+      Return the name of the node. If the atom is not a node, 
+      returns NIL.
+
+      Example:
+         ; Define a node
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (cog-name x)
+
+         "abc"
+
+== cog-incoming-set atom
+== cog-outgoing-set atom
+      Return the incoming and outgoing sets, respectively, of the atom.
+      These sets are returned as ordinary scheme lists.
+
+      Example:
+         ; Define two nodes and a link between them:
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define y (cog-new-node 'ConceptNode "def"))
+         guile> (define l (cog-new-link 'Link x y))
+
+         ; Get the incoming sets of nodes x and y (which is the link l):
+         guile> (cog-incoming-set x)
+         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
+         guile> (cog-incoming-set y)
+         (#<link[2 sti:(0,0) tv:(0.000000,0.000000) <[3 abc],[3 def]>]>)
+
+         ; Verify that the both incoming sets are really one and the
+         ; same link:
+         guile> (equal? (cog-incoming-set x) (cog-incoming-set y))
+         #t
+
+         ; The returned values are lists, and not singleton atoms.
+         ; Thus, the incoming set of x is a list containing l:
+         guile> (equal? (cog-incoming-set x) (list l))
+         #t
+
+         ; Verify that the returned value is a true list:
+         guile> (list? (cog-incoming-set x))
+         #t
+
+
+== cog-atom handle
+      Reference the atom identified by the integer-valued handle
+== cog-handle atom
+      Return the handle (which is an integer) of the atom
+
+      Example:
+         ; Create two atoms, and get thier handles:
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define y (cog-new-node 'ConceptNode "def"))
+         guile> (cog-handle x)
+         113
+         guile> (cog-handle y)
+         114
+
+         ; Get the atom corresponding to handle number 114
+         guile> (cog-atom 114)
+         #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
+
+         ; Verify that handles are truly integers
+         guile> (integer? x)
+         #f
+         guile> (integer? (cog-handle x))
+         #t
 
 
 == cog-new-stv mean confidence
