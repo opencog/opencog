@@ -15,27 +15,16 @@
 ; (use-modules (dbi dbi))
 ; (define db-connection (dbi-open "postgresql" db-login))
 
-; Loop over SentenceNode
-(define (prt-sent h) (display h) #f)
+(define (do-stuff h) (display "zoom\n") #f)
 
-(define (prt-stuff h) (display (cog-incoming-set h)) #f)
+; Look for ParseLink's in the incoming set
+(define (process-parses h) 
+	(cog-filter 'ParseLink do-stuff (cog-incoming-set h))
+	#f
+)
 
-(cog-map-type prt-stuff  'SentenceNode)
-
-; need to look for ParseLink in the incoming set
-
-(define (filter-plink proc data) 
-	(cond 
-		((null? data) #f)
-		((eq? (caar data) 'ParseLink) 
-			(display "hola") ) 
-		(else (display "boogaloo") )
-	)
-	(filter-plink proc (cdr data))
-	#f)
-
-(define (filter-plink proc data) (display data) #f)
-(define (filter-plink proc data) (display (pair? (car data))) #f)
+; Loop over all atoms of type SentenceNode, processing 
+; each corresponding parse.
+(cog-map-type process-parses 'SentenceNode)
 
 
-(define (prt-stuff h) (filter-plink #t (cog-incoming-set h)) #f)
