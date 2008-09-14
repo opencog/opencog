@@ -7,8 +7,11 @@ This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on word sense
 disambiguation.
 
-The lexical-attraction directory contains a (pre-protype) implementation
-of Yuret's lexical attraction algorithm.
+The lexical-attraction directory contains a REAME file containing a
+short overview of Yuret's lexical attraction algorithm. A variant of
+this algo was implemented in java, in the lextat project on launchpad.
+
+The scm directory contains some scheme scripts.
 
 The semcor directory contains some trite SemCor utilities. SemCor
 is a WSJ corpus marked up with word senses.
