@@ -70,34 +70,6 @@
 	)
 )
 
-; cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
-;
-; Chase 'link-type' to 'endpoint-type' and apply proc to what is found there.
-;
-; It is presmued that 'anchor' points to some atom (typically a node),
-; and that it has many links in its incoming set. So, loop over all of
-; the links of 'link-type' in this set. They presumably link to all 
-; sorts of things. Find all of the things that are of 'endpoint-type'
-; and then call 'proc' on each of these endpoints. Optionally, print
-; some debugging msgs.
-;
-; Example usage:
-; (cog-map-chase-link 'ReferenceLink 'WordNode '() '() proc word-inst)
-; Given a 'word-inst', this will chase all ReferenceLink's to all 
-; WordNode's, and then will call 'proc' on these WordNodes.
-;
-(define (cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
-	(define (get-endpoint w)
-		(cog-filter endpoint-type proc (cog-outgoing-set w))
-		(display dbg-emsg)
-		#f
-	)
-	(cog-filter link-type get-endpoint (cog-incoming-set anchor))
-	(display dbg-lmsg)
-	#f
-)
-
-
 ; =============================================================
 
 ; Loop over all atoms of type SentenceNode, processing 
