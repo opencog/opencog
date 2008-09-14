@@ -15,11 +15,34 @@
 ; (use-modules (dbi dbi))
 ; (define db-connection (dbi-open "postgresql" db-login))
 
-(define (do-stuff h) (display "zoom\n") #f)
+; Right now, every parse of a sentence is anchored to a ConceptNode
+(define ParseAnchor 'ConceptNode)
 
-; Look for ParseLink's in the incoming set
+; Every word of a parse is also a concept node.
+(define WordAnchor 'ConceptNode)
+
+(define (prt-stuff h) (display h) #t)
+(define (prt-words h) 
+	(define (get-word w)
+		(cog-filter WordAnchor prt-stuff (cog-outgoing-set w))
+		#f
+	)
+	(cog-filter 'ParseInstanceLink get-word (cog-incoming-set h))
+	(display " --------- end of parse ------------ \n")
+	#f
+)
+
+; Expected input is a SentenceNode, which serves as an anchor to all
+; of the parses of a sentence. It is connected via ParseLink's to 
+; each of the individual parses of the sentence. So, look for 
+; ParseAnchor's, which anchor the parses.
 (define (process-parses h) 
-	(cog-filter 'ParseLink do-stuff (cog-incoming-set h))
+	(define (get-parse p)
+		(cog-filter ParseAnchor prt-words (cog-outgoing-set p))
+		#f
+	)
+	(cog-filter 'ParseLink get-parse (cog-incoming-set h))
+	(display " ========= end of sentence ============ \n")
 	#f
 )
 
