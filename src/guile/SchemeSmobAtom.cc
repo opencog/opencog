@@ -43,6 +43,38 @@ const Atom * SchemeSmob::verify_atom (SCM satom, const char * subrname)
 
 /* ============================================================== */
 /**
+ * Return the string name of the atom
+ */
+SCM SchemeSmob::ss_name (SCM satom)
+{
+	const Atom *atom = verify_atom(satom, "cog-name");
+	const Node *node = dynamic_cast<const Node *>(atom);
+	if (NULL == node) return SCM_EOL;
+	std::string name = node->getName();
+	SCM str = scm_from_locale_string(name.c_str());
+	return str;
+}
+
+SCM SchemeSmob::ss_type (SCM satom)
+{
+	const Atom *atom = verify_atom(satom, "cog-type");
+	Type t = atom->getType();
+	const std::string &tname = ClassServer::getTypeName(t);
+	SCM str = scm_from_locale_string(tname.c_str());
+	SCM sym = scm_string_to_symbol(str);
+
+	return sym;
+}
+
+SCM SchemeSmob::ss_tv (SCM satom)
+{
+	const Atom *atom = verify_atom(satom, "cog-tv");
+	const TruthValue &tv = atom->getTruthValue();
+	return SCM_EOL;
+}
+
+/* ============================================================== */
+/**
  * Convert the outgoing set of an atom into a list; return the list.
  */
 SCM SchemeSmob::ss_outgoing_set (SCM satom)
@@ -94,25 +126,6 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	}
 
 	return head;
-}
-
-/* ============================================================== */
-/**
- * Return the string name of the atom
- */
-SCM SchemeSmob::ss_name (SCM satom)
-{
-	const Atom *atom = verify_atom(satom, "cog-name");
-	const Node *node = dynamic_cast<const Node *>(atom);
-	if (NULL == node) return SCM_EOL;
-	std::string name = node->getName();
-	SCM str = scm_from_locale_string(name.c_str());
-	return str;
-}
-
-SCM SchemeSmob::ss_tv (SCM satom)
-{
-	return SCM_EOL;
 }
 
 /* ============================================================== */

@@ -182,8 +182,19 @@ interface.
          ; Define a node
          guile> (define x (cog-new-node 'ConceptNode "abc"))
          guile> (cog-name x)
-
          "abc"
+
+
+== cog-type atom
+      Return the type of the atom. 
+
+      Example:
+         ; Define a node
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (cog-type x)
+         ConceptNode
+         guile> (eq? 'ConceptNode (cog-type x))
+         #t
 
 
 == cog-incoming-set atom
