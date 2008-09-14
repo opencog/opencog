@@ -37,7 +37,7 @@
 (define (filter-plink proc data) (display data) #f)
 (define (filter-plink proc data) (display (pair? (car data))) #f)
 
-need cog-atom? cog-stv? and also, type, name, 
+need cog-atom? cog-stv? and also, type, 
 
 
 (define (prt-stuff h) (filter-plink #t (cog-incoming-set h)) #f)

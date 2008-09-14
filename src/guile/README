@@ -160,6 +160,20 @@ interface.
          guile> y
          #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
 
+
+== cog-atom? exp
+      Return #t if exp is an atom, else return #f
+
+      Example:
+         ; Define a node
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define y (+ 2 2))
+         guile> (cog-atom? x)
+         #t
+         guile> (cog-atom? y)
+         #f
+
+
 == cog-name atom
       Return the name of the node. If the atom is not a node, 
       returns NIL.
@@ -170,6 +184,7 @@ interface.
          guile> (cog-name x)
 
          "abc"
+
 
 == cog-incoming-set atom
 == cog-outgoing-set atom
@@ -238,6 +253,18 @@ interface.
       Example:
           ; Create a new simple truth value:
           guile> (cog-new-stv 0.7 0.9)
+
+== cog-tv? exp
+      Return #t if exp is a truth value, else return #f
+
+      Example:
+         ; Define a node
+         guile> (define x (cog-new-stv 0.7 0.9))
+         guile> (define y (+ 2 2))
+         guile> (cog-tv? x)
+         #t
+         guile> (cog-tv? y)
+         #f
 
 
 == cog-map-type proc type
