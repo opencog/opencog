@@ -70,7 +70,8 @@ SCM SchemeSmob::ss_tv (SCM satom)
 {
 	const Atom *atom = verify_atom(satom, "cog-tv");
 	const TruthValue &tv = atom->getTruthValue();
-	return SCM_EOL;
+	SimpleTruthValue *stv = new SimpleTruthValue(tv);
+	return take_stv(stv);
 }
 
 /* ============================================================== */

@@ -17,6 +17,7 @@
 #include <libguile.h>
 
 #include "types.h"
+#include "SimpleTruthValue.h"
 #include "TruthValue.h"
 
 namespace opencog {
@@ -77,6 +78,7 @@ class SchemeSmob
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);
 		static SCM ss_tv_p(SCM);
+		static SCM take_stv(SimpleTruthValue *);
 
 		// Misc utilities
 		static std::string to_string(SCM);

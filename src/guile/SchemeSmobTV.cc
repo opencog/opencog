@@ -184,13 +184,8 @@ std::string SchemeSmob::misc_to_string(SCM node)
 /**
  * Create a new simple truth value, with indicated mean and confidence.
  */
-SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
+SCM SchemeSmob::take_stv (SimpleTruthValue *stv)
 {
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-
-	float cnt = SimpleTruthValue::confidenceToCount(confidence);
-	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
 	scm_gc_register_collectable_memory (stv,
 	                 sizeof(SimpleTruthValue), "opencog simple tv");
 
@@ -198,6 +193,20 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 	SCM_NEWSMOB (smob, cog_misc_tag, stv);
 	SCM_SET_SMOB_FLAGS(smob, COG_SIMPLE_TV);
 	return smob;
+}
+
+/* ============================================================== */
+/**
+ * Create a new simple truth value, with indicated mean and confidence.
+ */
+SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
+{
+	double mean = scm_to_double(smean);
+	double confidence = scm_to_double(sconfidence);
+
+	float cnt = SimpleTruthValue::confidenceToCount(confidence);
+	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
+	return take_stv(stv);
 }
 
 /* ============================================================== */
