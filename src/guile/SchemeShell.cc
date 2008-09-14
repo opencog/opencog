@@ -291,6 +291,13 @@ std::string SchemeShell::eval(const std::string &expr)
 {
 	input_line += expr;
 
+	/* The #$%^& opecong command shell processor cuts off the 
+	 * newline character. Re-insert it; otherwise, comments within
+	 * proceedures will have the effect of commenting out the rest
+	 * of the proceedure, leading to garbage.
+	 */
+	input_line += "\n";
+
 	caught_error = false;
 	pending_input = false;
 	SCM rc = scm_internal_catch (SCM_BOOL_T,
