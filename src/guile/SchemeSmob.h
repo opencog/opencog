@@ -82,6 +82,9 @@ class SchemeSmob
 		static std::string misc_to_string(SCM);
 		static std::string tv_to_string(const TruthValue *stv);
 		static TruthValue *get_tv_from_list(SCM);
+
+		static Type validate_atom(SCM, const char *);
+		static Type validate_node(SCM, const char *);
 		static const Atom * verify_atom(SCM, const char *);
 		static Handle verify_handle(SCM, const char *);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);

@@ -23,3 +23,21 @@
 (cog-map-type prt-stuff  'SentenceNode)
 
 ; need to look for ParseLink in the incoming set
+
+(define (filter-plink proc data) 
+	(cond 
+		((null? data) #f)
+		((eq? (caar data) 'ParseLink) 
+			(display "hola") ) 
+		(else (display "boogaloo") )
+	)
+	(filter-plink proc (cdr data))
+	#f)
+
+(define (filter-plink proc data) (display data) #f)
+(define (filter-plink proc data) (display (pair? (car data))) #f)
+
+need cog-atom? cog-stv? and also, type, name, 
+
+
+(define (prt-stuff h) (filter-plink #t (cog-incoming-set h)) #f)
