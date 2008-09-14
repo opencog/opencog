@@ -324,18 +324,18 @@ std::string SchemeShell::eval(const std::string &expr)
 	{
 		if (show_output)
 		{
-			// First, we print the "interpreter" output.
 			std::string rv;
-			rv = prt(rc);
-			rv += "\n";
-
-			// Next, we get the contents of the output port,
+			// First, we get the contents of the output port,
 			// and pass that on.
-			rc = scm_get_output_string(outport);
-			char * str = scm_to_locale_string(rc);
-			rv += str;
+			SCM out = scm_get_output_string(outport);
+			char * str = scm_to_locale_string(out);
+			rv = str;
 			free(str);
 			scm_truncate_file(outport, scm_from_uint16(0));
+
+			// Next, we append the "interpreter" output
+			rv += prt(rc);
+			rv += "\n";
 
 			rv += normal_prompt;
 			return rv;
