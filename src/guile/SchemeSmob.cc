@@ -575,16 +575,31 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 /* ============================================================== */
 /**
+ * Convert SCM to atom pointer
+ */
+Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
+		scm_wrong_type_arg_msg(subrname, 1, satom, "opencog atom");
+
+	SCM shandle = SCM_SMOB_OBJECT(satom);
+	Handle h = scm_to_ulong(shandle);
+	return h;
+}
+
+const Atom * SchemeSmob::verify_atom (SCM satom, const char * subrname)
+{
+	return TLB::getAtom(verify_handle(satom, subrname));
+}
+
+/* ============================================================== */
+/**
  * Convert the outgoing set of an atom into a list; return the list.
  */
 SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
-		scm_wrong_type_arg_msg("cog-outgoing-set", 1, satom, "opencog atom");
-
-	SCM shandle = SCM_SMOB_OBJECT(satom);
-	Handle h = scm_to_ulong(shandle);
-	Link *l = dynamic_cast<Link*>(TLB::getAtom(h));
+	const Atom *atom = verify_atom(satom, "cog-outgoing-set");
+	const Link *l = dynamic_cast<const Link *>(atom);
 	if (l == NULL) return SCM_EOL;  // only links have outgoing sets.
 
 	const std::vector<Handle> &oset = l->getOutgoingSet();
@@ -608,12 +623,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
  */
 SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
-		scm_wrong_type_arg_msg("cog-incoming-set", 1, satom, "opencog atom");
-
-	SCM shandle = SCM_SMOB_OBJECT(satom);
-	Handle h = scm_to_ulong(shandle);
-	Atom *atom = TLB::getAtom(h);
+	const Atom *atom = verify_atom(satom, "cog-incoming-set");
 
 	HandleEntry *he = atom->getIncomingSet();
 	if (!he) return SCM_EOL;
@@ -639,15 +649,30 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 
 /* ============================================================== */
 /**
+ * Return the string name of the atom
+ */
+SCM SchemeSmob::ss_name (SCM satom)
+{
+	const Atom *atom = verify_atom(satom, "cog-name");
+	const Node *node = dynamic_cast<const Node *>(atom);
+	if (NULL == node) return SCM_EOL;
+	std::string name = node->getName();
+	SCM str = scm_from_locale_string(name.c_str());
+	return str;
+}
+
+SCM SchemeSmob::ss_tv (SCM satom)
+{
+	return SCM_EOL;
+}
+
+/* ============================================================== */
+/**
  * delete the atom, but only if it has no incoming links.
  */
 SCM SchemeSmob::ss_delete (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
-		scm_wrong_type_arg_msg("cog-delete", 1, satom, "opencog atom");
-
-	SCM shandle = SCM_SMOB_OBJECT(satom);
-	Handle h = scm_to_ulong(shandle);
+	Handle h = verify_handle(satom, "cog-delete");
 
 	AtomSpace *as = CogServer::getAtomSpace();
 	bool rc = as->removeAtom(h, false);
@@ -662,11 +687,7 @@ SCM SchemeSmob::ss_delete (SCM satom)
  */
 SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
-		scm_wrong_type_arg_msg("cog-delete-recursive", 1, satom, "opencog atom");
-
-	SCM shandle = SCM_SMOB_OBJECT(satom);
-	Handle h = scm_to_ulong(shandle);
+	Handle h = verify_handle(satom, "cog-delete-recursive");
 
 	AtomSpace *as = CogServer::getAtomSpace();
 	bool rc = as->removeAtom(h, true);
@@ -674,7 +695,6 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
-
 
 /* ============================================================== */
 /**
@@ -742,10 +762,14 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
 	scm_c_define_gsubr("cog-node",              2, 0, 1, C(ss_node));
 	scm_c_define_gsubr("cog-link",              1, 0, 1, C(ss_link));
-	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
-	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	scm_c_define_gsubr("cog-delete",            1, 0, 0, C(ss_delete));
 	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 0, C(ss_delete_recursive));
+
+	// property getters
+	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
+	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
+	scm_c_define_gsubr("cog-tv",                1, 0, 0, C(ss_tv));
 
 	// Truth-values
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));

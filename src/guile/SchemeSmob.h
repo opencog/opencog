@@ -49,12 +49,18 @@ class SchemeSmob
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_node(SCM, SCM, SCM);
 		static SCM ss_link(SCM, SCM);
-		static SCM ss_atom(SCM);
-		static SCM ss_handle(SCM);
-		static SCM ss_incoming_set(SCM);
-		static SCM ss_outgoing_set(SCM);
 		static SCM ss_delete(SCM);
 		static SCM ss_delete_recursive(SCM);
+
+		// Atoms to ints, and back.
+		static SCM ss_atom(SCM);
+		static SCM ss_handle(SCM);
+
+		// Atom properties
+		static SCM ss_name(SCM);
+		static SCM ss_tv(SCM);
+		static SCM ss_incoming_set(SCM);
+		static SCM ss_outgoing_set(SCM);
 
 		// AtomTable query functions
 		static SCM ss_map_type(SCM, SCM);
@@ -69,6 +75,8 @@ class SchemeSmob
 		static std::string misc_to_string(SCM);
 		static std::string tv_to_string(const TruthValue *stv);
 		static TruthValue *get_tv_from_list(SCM);
+		static const Atom * verify_atom(SCM, const char *);
+		static Handle verify_handle(SCM, const char *);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:
