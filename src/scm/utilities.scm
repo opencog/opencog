@@ -1,3 +1,4 @@
+scm
 ;
 ; utilities.scm
 ;
@@ -31,3 +32,7 @@
 	rc
 )
 
+
+; exit scheme shell, exit opencog shell.
+.
+exit
