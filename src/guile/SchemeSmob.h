@@ -36,7 +36,7 @@ class SchemeSmob
 		// as truth values, which are ephemeral (garbage-collected)
 		static scm_t_bits cog_misc_tag;
 
-		// Initializatino functions
+		// Initialization functions
 		void init_smob_type(void);
 		static int print_atom(SCM, SCM, scm_print_state *);
 		static SCM equalp_atom(SCM, SCM);
@@ -55,6 +55,9 @@ class SchemeSmob
 		static SCM ss_outgoing_set(SCM);
 		static SCM ss_delete(SCM);
 		static SCM ss_delete_recursive(SCM);
+
+		// AtomTable query functions
+		static SCM ss_map_type(SCM, SCM);
 
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);

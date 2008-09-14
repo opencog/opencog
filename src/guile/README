@@ -260,10 +260,8 @@ default port for the cogserver).
 ToDo
 ----
 -- support readline/editline (uparrows, etc.) on input.
--- enable module loading
 
--- change cog-delete to also accept a list of atoms
--- change printed output so that it's valid scheme
+-- change cog-delete to also accept a list of atoms 
 -- change cog-delete to return null, not #t (?why?)
 
 

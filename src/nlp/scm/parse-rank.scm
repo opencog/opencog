@@ -12,3 +12,7 @@
 ; login information and database
 (define db-login "linas:asdf:lexat:tcp:localhost:5432")
 
+; (use-modules (dbi dbi))
+; (define db-connection (dbi-open "postgresql" db-login)
+
+; Loop over SentenceNode

@@ -82,7 +82,7 @@ void WordSenseProcessor::run(CogServer *server)
 	               &WordSenseProcessor::do_sentence, this);
 
 	// XXX we are being called too often. this needs to be fixed.
-	// in truyth, should only poll on new input.
+	// in truth, should only poll on new input.
 	usleep(50*1000);
 }
 

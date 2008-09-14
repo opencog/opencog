@@ -698,6 +698,40 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 
 /* ============================================================== */
 
+/**
+ * Apply proceedure proc to all atoms of type stype
+ * If the proceedure returns something other than #f, 
+ * terminate the loop.
+ */
+SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
+{
+	Type t = validate_node (stype, "cog-map-type");
+
+	// Get all of the handles of the indicated type
+	std::list<Handle> handle_set;
+	AtomSpace *as = CogServer::getAtomSpace();
+	as->getHandleSet(back_inserter(handle_set), t, false);
+
+	// Loop over all handles in the handle set.
+	// Call proc on each handle, in turn.
+	// Break out of the loop if proc returns anything other than #f
+	std::list<Handle>::iterator i;
+	for (i = handle_set.begin(); i != handle_set.end(); i++)
+	{
+		Handle h = *i;
+
+		SCM shandle = scm_from_ulong(h);
+		SCM smob;
+		SCM_NEWSMOB(smob, cog_handle_tag, shandle);
+		SCM rc = scm_call_1(proc, smob);
+		if (!scm_is_false(rc)) return rc;
+	}
+
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+
 #define C(X) ((SCM (*) ()) X)
 
 void SchemeSmob::register_procs(void)
@@ -715,6 +749,10 @@ void SchemeSmob::register_procs(void)
 
 	// Truth-values
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
+
+	// iterators
+	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
+	
 }
 
 #endif
