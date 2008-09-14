@@ -26,6 +26,13 @@ class SchemeSmob
 	friend class SchemeShell;
 
 	private:
+
+		enum
+		{
+			COG_HANDLE = 1,
+			COG_SIMPLE_TV,
+		};
+
 		static bool is_inited;
 		void register_procs(void);
 

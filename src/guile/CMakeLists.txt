@@ -1,6 +1,7 @@
 ADD_LIBRARY (schemes STATIC
 	SchemeShell.cc
 	SchemeSmob.cc
+	SchemeSmobTV.cc
 )
 
 INCLUDE_DIRECTORIES (

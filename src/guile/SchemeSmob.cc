@@ -39,13 +39,6 @@ using namespace opencog;
  * thus, handling is dispatched based on these flags.
  */
 
-enum
-{
-	COG_HANDLE = 1,
-	COG_SIMPLE_TV,
-};
-
-
 bool SchemeSmob::is_inited = false;
 scm_t_bits SchemeSmob::cog_handle_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
@@ -83,55 +76,6 @@ size_t SchemeSmob::free_atom(SCM node)
 	return 0;
 }
 
-SCM SchemeSmob::mark_misc(SCM misc_smob)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(misc_smob);
-
-	switch (misctype)
-	{
-		case COG_SIMPLE_TV: // Nothing to do here ...
-			return SCM_BOOL_F;
-		default:
-			fprintf(stderr, "Error: opencog-guile: "
-			        "don't know how to mark this type: %d\n",
-			        (int) misctype);
-			break;
-	}
-
-	return SCM_BOOL_F;
-}
-
-/**
- * Free the memory associated with an opencog guile object.
- * This routine is called by the guile garbage collector, from time to
- * time. For testing purposes, you can force the garbage collector to
- * run by saying (gc), while, for stats, try (gc-stats) and
- * (gc-live-object-stats). The later should show both "opencog-handle"
- * and "opencog-misc" stats.
- */
-size_t SchemeSmob::free_misc(SCM node)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
-
-	switch (misctype)
-	{
-		case COG_SIMPLE_TV:
-			SimpleTruthValue *stv;
-			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (stv,
-			                  sizeof(SimpleTruthValue), "opencog simple tv");
-			delete stv;
-			return 0;
-
-		default:
-			fprintf(stderr, "Error: opencog-guile: "
-			        "don't know how to free this type: %d\n",
-			        (int) misctype);
-			break;
-	}
-	return 0;
-}
-
 void SchemeSmob::init_smob_type(void)
 {
 	// a SMOB type for atom handles
@@ -144,92 +88,6 @@ void SchemeSmob::init_smob_type(void)
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_mark (cog_misc_tag, mark_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
-}
-
-/* ============================================================== */
-
-#ifdef USE_KEYWORD_LIST_NOT_USED
-/**
- * Search for a truth value (demarked by #:tv) in a list of key-value
- * pairs.  Return the truth value if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
- *
- * XXX This code is not currently used, since it seems pointless
- * to have key-value pairs for this function. After all, an atom
- * can only have one truth value ever -- if we find a truth value, we
- * use it. We don't really need a key to tell us that its a truth value.
- * So punt, and get truth values implicitly. Meanwhile, this code is
- * stubbed out, for a rainy tay, in case we need to resurrect key-value
- * pairs in the future.
- */
-static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
-{
-	if (!scm_is_pair(kvp)) return NULL;
-
-	do
-	{
-		SCM skey = SCM_CAR(kvp);
-
-		// Verify that the first item is a keyword.
-		if (!scm_is_keyword(skey))
-			scm_wrong_type_arg_msg(subrname, pos, skey, "keyword");
-
-		skey = scm_keyword_to_symbol(skey);
-		skey = scm_symbol_to_string(skey);
-		char * key = scm_to_locale_string(skey);
-
-		kvp = SCM_CDR(kvp);
-		pos ++;
-		if (!scm_is_pair(kvp))
-		{
-			free(key);
-			scm_wrong_type_arg_msg(subrname, pos, kvp, "value following keyword");
-		}
-
-		if (0 == strcmp(key, "tv"))
-		{
-			SCM sval = SCM_CAR(kvp);
-			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			if (misctype != COG_SIMPLE_TV)
-				scm_wrong_type_arg_msg(subrname, pos, sval, "opencog truth value");
-			TruthValue *tv;
-			tv = (TruthValue *) SCM_SMOB_DATA(sval);
-			return tv;
-		}
-		free(key);
-
-		kvp = SCM_CDR(kvp);
-		pos ++;
-	}
-	while (scm_is_pair(kvp));
-
-	return NULL;
-}
-#endif
-
-/**
- * Search for a truth value in a list of values.
- * Return the truth value if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
- */
-TruthValue * SchemeSmob::get_tv_from_list(SCM slist)
-{
-	while (scm_is_pair(slist))
-	{
-		SCM sval = SCM_CAR(slist);
-		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sval))
-		{
-			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			if (misctype == COG_SIMPLE_TV)
-			{
-				return ((TruthValue *) SCM_SMOB_DATA(sval));
-			}
-		}
-
-		slist = SCM_CDR(slist);
-	}
-
-	return NULL;
 }
 
 /* ============================================================== */
@@ -319,34 +177,6 @@ std::string SchemeSmob::handle_to_string(SCM node)
 	Handle h = scm_to_ulong(shandle);
 
 	return handle_to_string(h, 0) + "\n";
-}
-
-std::string SchemeSmob::tv_to_string(const TruthValue *stv)
-{
-	// They're only floats, not doubles, so print with 8 digits
-	char buff[40];
-	std::string ret = "";
-	snprintf(buff, 40, "(stv %.8g ", stv->getMean());
-	ret += buff;
-	snprintf(buff, 40, "%.8g)", stv->getConfidence());
-	ret += buff;
-	return ret;
-}
-
-std::string SchemeSmob::misc_to_string(SCM node)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
-	switch (misctype)
-	{
-		case COG_SIMPLE_TV:
-			SimpleTruthValue *stv;
-			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
-			return tv_to_string(stv);
-
-		default:
-			return "#<unknown opencog type>\n";
-	}
-	return "";
 }
 
 /* ============================================================== */
@@ -694,26 +524,6 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
 
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
-/**
- * Create a new simple truth value, with indicated mean and confidence.
- */
-SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
-{
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-
-	float cnt = SimpleTruthValue::confidenceToCount(confidence);
-	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
-	scm_gc_register_collectable_memory (stv,
-	                 sizeof(SimpleTruthValue), "opencog simple tv");
-
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, stv);
-	SCM_SET_SMOB_FLAGS(smob, COG_SIMPLE_TV);
-	return smob;
 }
 
 /* ============================================================== */
