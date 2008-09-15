@@ -61,7 +61,7 @@
 		(dbi-query db-connection qstr)
 		(set! row (dbi-get_row db-connection))
 		(if (eq? row #f)
-			(cons pr 0.0)
+			'()
 			(cons pr (cdr (assoc "mutual_info" row)))
 		)
 	)
@@ -71,12 +71,14 @@
 	(define (score-pairs pair-list slist)
 		(if (eq? pair-list '())
 			slist
-			(score-pairs (cdr pair-list)
-				(cons (score-pair (car pair-list)) slist)
+			(let ((score (score-pair (car pair-list))))
+				(if (eq? score '())
+					(score-pairs (cdr pair-list) slist)
+					(score-pairs (cdr pair-list) (cons score slist))
+				)
 			)
 		)
 	)
-
 
 	; Create a list of all of the word instances in the parse.
 	(map-word-instances (lambda (z) (map-word-node add-to-word-list z)) h)
