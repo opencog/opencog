@@ -6,9 +6,11 @@ DartTestfile.txt
 *.a
 *UTest.cpp
 *UTest
-src/server/cogserver
+src/atomspace/type-definer
 src/examples/hopfield/hopfield
 src/persist/sniff
+src/scm/type_constructors.scm
+src/server/cogserver
 opencog.log
 tests/Testing/
 
