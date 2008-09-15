@@ -104,8 +104,16 @@
 	; Iterate over a list graph edges, and return the edge with the 
 	; highest weight.
 	(define (find-highest-score edge-list)
-		; (define (find-hig edge-
-		#f
+		(define (find-hig elist best)
+			(if (eq? elist '())
+				best
+				(if (< (cdr best) (cdr (car elist)))
+					(find-hig (cdr elist) (car elist))
+					(find-hig (cdr elist) best)
+				)
+			)
+		)
+		(find-hig (cdr edge-list) (car edge-list))
 	)
 		
 
@@ -114,7 +122,8 @@
 
 	; (display word-list)
 	; (display (make-word-pairs word-list) )
-	(display (score-graph (make-word-pairs word-list)) )
+	; (display (score-graph (make-word-pairs word-list)))
+	(display (find-highest-score (score-graph (make-word-pairs word-list))))
 	(newline)
 	#f
 )
