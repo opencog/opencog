@@ -1,34 +1,28 @@
+#######################################################################
+Instalation and dependency resolution for Gentoo (circa Sep. 2008)
+#######################################################################
 
-#############################################################################
-Instalation and dependency resolution for Gentoo (circa September 2008)
-#############################################################################
+Opencog depends on the following packages:
 
-Opencog depends on the following packages that are not necessarily
-installed by default:
+  dev-util/cmake dev-libs/openssl dev-libs/boost dev-libs/expat
 
-  cmake openssl boost expat
+----------------------------------------------------------
 
-Opencog depends on the following package in a supposedly optional
-manner, but I haven't checked the optional part:
+Additionally, it depends on the following non-official packages:
 
-  libiodbc
+  cxxtest csockets
 
-opencog also can make use of these.  They may even be mandatory:
+which are available in the 'vendor' directory. To install them, issue
+the following commands:
 
-  guile
+  prompt# cd <opencog-base-dir>
+  prompt# ebuild vendor/csockets/gentoo/dev-cpp/csockets/csockets*.ebuild install qmerge
+  prompt# ebuild vendor/cxxtest/gentoo/dev-cpp/cxxtest/cxxtest*.ebuild install qmerge
 
+----------------------------------------------------------
 
-All the above can just be emerge'd.
+Opencog also _optionally_ depends on the following packages:
 
-There's also a dependency on C++ Sockets, which are not on portage.
-It may be on someone's overlay somewhere but it is easy enough to do the
-following:
+  dev-db/libiodbc  dev-scheme/guile
 
-Grab latest version from http://www.alhem.net/Sockets/  (v2.3 tested here) 
-Untar somewhere  ( tar -xvzf Sockets-2.3.tar.gz )
-Go into directory  (cd Sockets-2.3 )
-Look at Makefile and see if the Platform matches your system (less Makefile) 
-make (as root) make install
-
-
-From then on, you can follow the standard make instructions on the README file.
+----------------------------------------------------------
