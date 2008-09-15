@@ -12,14 +12,16 @@
 ; login information and database
 (define db-login "linas:asdf:lexat:tcp:localhost:5432")
 
-; (use-modules (dbi dbi))
+(use-modules (dbi dbi))
 (define db-connection (dbi-open "postgresql" db-login))
 
+; misc debugging crap
 (define (prt-stuff h) (display h) #f)
 (define (prt-inc h) (display (cog-incoming-set h)) #t)
-
 (define (prt-word h) (display (cog-name h)) (newline) #f)
 
+;
+; provde a score for the parse
 (define (score-parse h)
 
 	; Accumulate words into a list; called from a deep nested loop.
@@ -46,7 +48,7 @@
 		)
 	)
 
-	; Given a word-pair, look it up in the datapase, and assign
+	; Given a word-pair, look it up in the database, and assign
 	; a mutal info score to it
 	(define (score-pair pr)
 		(define qstr 
@@ -58,12 +60,13 @@
 		; (display qstr) (newline)
 		(dbi-query db-connection qstr)
 		(set! row (dbi-get_row db-connection))
-		(display row) (newline)
-		; ahh whatever.
-		(cons 0.5 pr)
+		(if (eq? row #f)
+			(cons pr 0.0)
+			(cons pr (cdr (assoc "mutual_info" row)))
+		)
 	)
 
-	; a function that iterates over a list of pairs, and fetches
+	; A function that iterates over a list of pairs, and fetches
 	; word-pair scores from the SQL database
 	(define (score-pairs pair-list slist)
 		(if (eq? pair-list '())
