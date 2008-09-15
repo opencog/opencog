@@ -39,10 +39,10 @@ using namespace std;
 
 // returns a string with leading/trailing characters of a set stripped
 static char const* blank_chars = " \t\f\v\n\r";
-static string strip(string const& str)
+static string strip(string const& str, char const *strip_chars = blank_chars)
 {
-    string::size_type const first = str.find_first_not_of(blank_chars);
-    return (first == string::npos) ? string() : str.substr(first, str.find_last_not_of(blank_chars) - first + 1);
+    string::size_type const first = str.find_first_not_of(strip_chars);
+    return (first == string::npos) ? string() : str.substr(first, str.find_last_not_of(strip_chars) - first + 1);
 }
 
 Config::~Config()
@@ -97,6 +97,7 @@ void Config::load(const char* filename)
             // strip them
             name  = strip(name);
             value = strip(value);
+            value = strip(value, "\"");
             // finally, store the entries
             table[name] = value;
         } else if (line.find_first_not_of(blank_chars) != string::npos) {
