@@ -26,7 +26,7 @@
 ;
 (define (map-parses proc sent) 
 	(cog-map-chase-link 'ParseLink ParseAnchor
-		" ========= end of sentence ============ \n" ""
+		" ========= sentence ============ \n" ""
 		proc sent
 	)
 )
@@ -40,7 +40,7 @@
 ; 
 (define (map-word-instances proc parse) 
 	(cog-map-chase-link 'ParseInstanceLink WordAnchor
-		" --------- end of parse ------------ \n" ""
+		" --------- parse ------------ \n" ""
 		proc parse
 	)
 )
