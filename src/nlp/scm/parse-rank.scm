@@ -12,7 +12,7 @@
 ; login information and database
 (define db-login "linas:asdf:lexat:tcp:localhost:5432")
 
-(use-modules (dbi dbi))
+; (use-modules (dbi dbi))
 (define db-connection (dbi-open "postgresql" db-login))
 
 (define (prt-stuff h) (display h) #f)
@@ -49,6 +49,17 @@
 	; Given a word-pair, look it up in the datapase, and assign
 	; a mutal info score to it
 	(define (score-pair pr)
+		(define qstr 
+			(string-append
+				"SELECT * FROM pairs WHERE left_word='"
+				(car pr) "' AND right_word='" (cdr pr) "'"))
+
+		(define row #f)
+		; (display qstr) (newline)
+		(dbi-query db-connection qstr)
+		(set! row (dbi-get_row db-connection))
+		(display row) (newline)
+		; ahh whatever.
 		(cons 0.5 pr)
 	)
 
@@ -68,7 +79,8 @@
 	(map-word-instances (lambda (z) (map-word-node add-to-word-list z)) h)
 
 	; (display word-list)
-	(display (mk-prs word-list '()))
+	; (display (mk-prs word-list '()) )
+	(display (score-pairs (mk-prs word-list '()) '()) )
 	(newline)
 	#f
 )
