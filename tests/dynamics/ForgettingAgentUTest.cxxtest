@@ -7,9 +7,9 @@
  * Written by Joel Pitt <joel@fruitionnz.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,15 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CogServer.h"
-#include "MindAgent.h"
-#include "ForgettingAgent.h"
-#include "SimpleTruthValue.h"
-
-#include <vector>
-#include <string>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/dynamics/attention/ForgettingAgent.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/server/MindAgent.h>
 
 using namespace opencog;
 
@@ -93,7 +93,7 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
 
     public:
 
-    ForgettingAgentUTest(){
+    ForgettingAgentUTest() {
         agent = new opencog::ForgettingAgent();
         server.plugInMindAgent(agent, 1);
         logger().setLevel(Logger::FINE);
@@ -101,9 +101,8 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         logger().enable();
     }
 
-    ~ForgettingAgentUTest(){
+    ~ForgettingAgentUTest() {
         delete agent;
-
     }
 
     void setUp() {
@@ -136,7 +135,7 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         // Case: 90 atoms, 0% loss, all same LTI
         // Result: 0 random atom lost
         TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
-        
+
         // --
         agent->forgetPercentage = 1.0f;
         server.unitTestServerLoop(1);

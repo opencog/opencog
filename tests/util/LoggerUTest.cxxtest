@@ -1,5 +1,5 @@
 /*
- * tests/Util/LoggerUTest.cxxtest
+ * tests/util/LoggerUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
@@ -24,11 +24,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <fstream>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
 
-#include "Logger.h"
+#include <opencog/util/Logger.h>
 
 using namespace opencog;
 

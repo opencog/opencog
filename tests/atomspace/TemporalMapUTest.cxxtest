@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/TemporalMapUTest.cxxtest
+ * tests/atomspace/TemporalMapUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,11 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <TemporalMap.h>
-#include <TemporalEntry.h>
-#include <exceptions.h>
-#include "numeric.h"
-#include "mt19937ar.h"
+#include <opencog/atomspace/TemporalEntry.h>
+#include <opencog/atomspace/TemporalMap.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/numeric.h>
 
 using namespace opencog;
 

@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/ClassServerUTest.cxxtest
+ * tests/atomspace/ClassServerUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <ClassServer.h>
+#include <opencog/atomspace/ClassServer.h>
 
 using namespace opencog;
 

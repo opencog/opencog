@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY (hopfield)
+ADD_SUBDIRECTORY (extending)

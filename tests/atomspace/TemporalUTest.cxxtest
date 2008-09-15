@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/TemporalUTest.cxxtest
+ * tests/atomspace/TemporalUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -26,8 +26,8 @@
 
 #include <limits.h>
 
-#include "Temporal.h"
-#include "exceptions.h"
+#include <opencog/atomspace/Temporal.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 

@@ -1,16 +1,36 @@
 /**
- * NMXmlParserExperiment.h
+ * tests/xml/NMXmlParserExperiment.h
  *
+ * Copyright (C) 2002-2007 Novamente LLC
  *
+ * Written by Rodrigo Barra
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
  * Copyright(c) 2003 Rodrigo Barra
  * All rights reserved.
  */
 
-#ifndef NMXMLPARSEREXPERIMENT_H
-#define NMXMLPARSEREXPERIMENT_H
-#include <types.h>
-#include <AtomSpace.h>
-#include <HandleEntry.h>
+#ifndef _OPENCOG_NM_XML_PARSER_EXPERIMENT_H
+#define _OPENCOG_NM_XML_PARSER_EXPERIMENT_H
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/HandleEntry.h>
+#include <opencog/atomspace/types.h>
 
 #define NNMXMLXMLEXPERIMENTS 1
 
@@ -46,4 +66,4 @@ public:
     static opencog::AtomSpace* getAtomSpace();
 };
 
-#endif //NMXMLPARSEREXPERIMENT_H
+#endif // _OPENCOG_NM_XML_PARSER_EXPERIMENT_H

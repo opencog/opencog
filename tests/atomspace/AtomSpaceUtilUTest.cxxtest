@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/AtomSpaceUtilUTest.cxxtest
+ * tests/atomspace/AtomSpaceUtilUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomSpaceUtil.h"
-#include "SimpleTruthValue.h"
+#include <opencog/atomspace/AtomSpaceUtil.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace opencog;
 

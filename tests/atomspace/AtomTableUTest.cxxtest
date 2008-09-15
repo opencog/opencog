@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/AtomTableUTest.cxxtest
+ * tests/atomspace/AtomTableUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
@@ -24,28 +24,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
-#include "AtomSpace.h"
-#include "AtomTable.h"
-#include "Node.h"
-#include "FileXMLBufferReader.h"
-#include "HandleEntry.h"
-#include "TLB.h"
-#include "NMXmlParser.h"
-#include "SimpleTruthValue.h"
-#include "CompositeTruthValue.h"
-#include "AtomSpaceDefinitions.h"
-#include "ClassServer.h"
-#include "Link.h"
-#include "Logger.h"
-#include "Config.h"
-
 #include <iostream>
 #include <fstream>
 
-// File path assumes that this test case is being run in the bin
-// directory (which is not where this file is located).
-#define ATOM_TABLE_TEST_XML_FILE "../../../tests/atomspace/cw_proxy_1.xml"
+// We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
+// ensure we find the file whether or not we're building using a separate build
+// dir
+#define ATOM_TABLE_TEST_XML_FILE OPENCOG_SOURCE_DIR"/tests/atomspace/cw_proxy_1.xml"
+
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/HandleEntry.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
+#include <opencog/xml/FileXMLBufferReader.h>
+#include <opencog/xml/NMXmlParser.h>
 
 using namespace opencog;
 

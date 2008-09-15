@@ -1,5 +1,5 @@
 /*
- * tests/NMXml/NMXmlParserUTest.cxxtest
+ * tests/xml/NMXmlParserUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -27,12 +27,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "AtomSpace.h"
-#include "FileXMLBufferReader.h"
-#include "NMXmlParser.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/xml/FileXMLBufferReader.h>
+#include <opencog/xml/NMXmlParser.h>
 #include "NMXmlParserExperiment.h"
-#include "Logger.h"
-#include "exceptions.h"
 
 using namespace opencog;
 

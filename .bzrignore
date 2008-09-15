@@ -6,13 +6,15 @@ DartTestfile.txt
 *.a
 *UTest.cpp
 *UTest
-src/atomspace/type-definer
-src/examples/hopfield/hopfield
-src/persist/sniff
-src/scm/type_constructors.scm
-src/server/cogserver
+opencog/server/cogserver
+opencog/atomspace/type-definer
+opencog/scm/type_constructors.scm
+opencog/persist/sniff
 opencog.log
 tests/Testing/
+install_manifest.txt
+examples/extending/derivedserver
+examples/hopfield/hopfield
 
 # WIN32 specific
 *.lib

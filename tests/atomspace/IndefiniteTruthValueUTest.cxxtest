@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/IndefiniteTruthValueUTest.cxxtest
+ * tests/atomspace/IndefiniteTruthValueUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -25,10 +25,10 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "CompositeTruthValue.h"
-#include "IndefiniteTruthValue.h"
-#include "SimpleTruthValue.h"
-#include "exceptions.h"
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 

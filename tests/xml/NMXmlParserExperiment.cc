@@ -1,23 +1,40 @@
-/**
- * NMXmlParserExperiment.cc
+/*
+ * opencog/xml/StringXMLBufferReader.cc
  *
+ * Copyright (C) 2002-2007 Novamente LLC
  *
- * Copyright(c) 2003 Rodrigo Barra
- * All rights reserved.
+ * Written by Rodrigo Barra
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
-#include <NMXmlParserExperiment.h>
-#include <ClassServer.h>
+#include "NMXmlParserExperiment.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <exceptions.h>
-#include <Link.h>
-#include <TLB.h>
+
 #include <cxxtest/TestSuite.h>
 
-#include <cstdlib>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/platform.h>
 
 using namespace std;
 using namespace opencog;
@@ -39,7 +56,6 @@ int mkstemp(char *tmpl)
     ret = open(tmpl, O_RDWR | O_BINARY | O_CREAT | O_EXCL | _O_SHORT_LIVED, _S_IREAD | _S_IWRITE);
     return ret;
 }
-
 #endif
 
 bool NMXmlParserExperiment::noCheck = false;

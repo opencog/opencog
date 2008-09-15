@@ -7,9 +7,9 @@
  * Written by Joel Pitt <joel@fruitionnz.com>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as 
+ * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses 
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,15 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CogServer.h"
-#include "MindAgent.h"
-#include "ImportanceDiffusionAgent.h"
-#include "SimpleTruthValue.h"
-
-#include <vector>
-#include <string>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/server/MindAgent.h>
 
 using namespace opencog;
 
@@ -77,7 +77,6 @@ void removeAll(AtomSpace* atomSpace)
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
         server().getAtomSpace()->removeAtom(*i,false);
     }
-
 }
 
 class ImportanceDiffusionAgentUTest :  public CxxTest::TestSuite {
@@ -90,19 +89,19 @@ class ImportanceDiffusionAgentUTest :  public CxxTest::TestSuite {
 
     public:
 
-	ImportanceDiffusionAgentUTest(){
+    ImportanceDiffusionAgentUTest(){
         agent = new opencog::ImportanceDiffusionAgent();
         server.plugInMindAgent(agent, 1);
         logger().setLevel(Logger::FINE);
-	    logger().setPrintToStdoutFlag(true);
+        logger().setPrintToStdoutFlag(true);
         logger().enable();
     }
 
-	void setUp() {
+    void setUp() {
         std::vector< Handle >::iterator i;
         AttentionValue::sti_t val = 0;
-        
-	    atoms = createHebbianGraph(server.getAtomSpace(), "diffuse");
+
+        atoms = createHebbianGraph(server.getAtomSpace(), "diffuse");
         for (i = atoms.begin(); i != atoms.end(); i++) {
             if (server.getAtomSpace()->getType(*i) == CONCEPT_NODE) {
                 server.getAtomSpace()->setSTI(*i, val);
@@ -111,12 +110,10 @@ class ImportanceDiffusionAgentUTest :  public CxxTest::TestSuite {
             }
         }
         server.getAtomSpace()->setAttentionalFocusBoundary(0);
-
     }
 
-	void tearDown(){
+    void tearDown(){
         removeAll(server.getAtomSpace());
-    
     }
 
     void testGetSetMaxPercentage() {

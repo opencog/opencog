@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/HandleEntryUTest.cxxtest
+ * tests/atomspace/HandleEntryUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,11 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
-#include "Node.h"
-#include "CompositeTruthValue.h"
-#include "TLB.h"
-#include "Link.h"
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 

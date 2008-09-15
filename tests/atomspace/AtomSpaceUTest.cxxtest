@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/AtomSpaceUTest.cxxtest
+ * tests/atomspace/AtomSpaceUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -23,17 +23,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
-
 #include <algorithm>
 
 #include <math.h>
 #include <string.h>
 
-#include "AtomSpace.h"
-#include "Node.h"
-#include "SimpleTruthValue.h"
-#include "TLB.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 using std::find;

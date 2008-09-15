@@ -22,13 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CogServer.h"
-#include "MindAgent.h"
-#include "ImportanceUpdatingAgent.h"
-#include "SimpleTruthValue.h"
-
 #include <vector>
 #include <string>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/server/MindAgent.h>
+#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 
 using namespace opencog;
 

@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/AttentionValueUTest.cxxtest
+ * tests/atomspace/AttentionValueUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,11 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AttentionValue.h"
-// for testing the AttentionValue comparison structures
-#include "AtomSpace.h"
-#include "Node.h"
-#include "SimpleTruthValue.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
@@ -147,15 +147,12 @@ public:
     }
 
     void testComparisons() {
-        // assumption: that the values #defined above are in sequence (not required for DEFAULTATOMSTI etc)
-        
-        cout << "BEGIN TEST: " << endl;
+        logger().debug("BEGIN TEST:");
         
         AtomSpace* atomSpace = new AtomSpace();
-        
         vector<Handle> atoms = createSimpleGraph(atomSpace, "comparisons");
         
-        cout << "STISort" << endl;
+        logger().debug("STISort");
 
         AttentionValue::STISort sSort;
         
@@ -167,7 +164,7 @@ public:
         TS_ASSERT_EQUALS(sSort(atoms[2], atoms[1]), false);
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[2]), false);
         
-        cout << "LTIAndTVAscendingSort" << endl;
+        logger().debug("LTIAndTVAscendingSort");
 
         AttentionValue::LTIAndTVAscendingSort latvSort;
         
@@ -179,7 +176,7 @@ public:
         TS_ASSERT_EQUALS(latvSort(atoms[2], atoms[1]), false);
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[2]), false);
 
-        cout << "LTIThenTVAscendingSort" << endl;
+        logger().debug("LTIThenTVAscendingSort");
         
         AttentionValue::LTIThenTVAscendingSort lttvSort;
 
@@ -195,11 +192,11 @@ public:
         // two atoms with the same LTI: the one with higher TV is not strictly before the one with lower TV
         TS_ASSERT_EQUALS(lttvSort(atoms[3], atoms[2]), false);
         
-        cout << "END TEST: getSortedHandleSet" << endl;
+        logger().debug("END TEST:");
     }
-    // copied from AtomSpaceUTest.cxxtest, but modified for testing comparisons.
-    vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
-    {
+
+    // copied from AtomSpaceUTest.cxxtest, but modified for the test testComparisons 
+    vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName) {
         char buf[256];
         vector<Handle> testAtoms;
         int baseNameLength;
@@ -236,7 +233,6 @@ public:
 
         return testAtoms;
     }
-
 
     void testgetDefault() {
         const AttentionValue& av = AttentionValue::getDefaultAV();

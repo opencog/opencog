@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/utilsUTest.cxxtest
+ * tests/atomspace/utilsUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <utils.h>
+#include <opencog/atomspace/utils.h>
 
 using namespace opencog;
 

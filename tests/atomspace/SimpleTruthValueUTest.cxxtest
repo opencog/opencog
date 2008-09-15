@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/SimpleTruthValueUTest.cxxtest
+ * tests/atomspace/SimpleTruthValueUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,11 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimpleTruthValue.h"
-#include "IndefiniteTruthValue.h"
-#include "CompositeTruthValue.h"
-#include "exceptions.h"
 #include <math.h>
+
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 

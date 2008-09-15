@@ -22,11 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Config.h"
-#include "CogServer.h"
-#include "AtomSpace.h"
-#include "Node.h"
-#include "STIDecayingAgent.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/dynamics/attention/STIDecayingAgent.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -55,8 +55,9 @@ public:
         h = as->getHandle(node->getType(), node->getName());
         TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == (min_sti + 5));
 
-        server().plugInMindAgent(new STIDecayingAgent(), 1);
-        server().unitTestServerLoop(5);
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        cogserver.plugInMindAgent(new STIDecayingAgent(), 1);
+        cogserver.unitTestServerLoop(5);
 
         // we're on the verge of removing the node; check if its sti equals
         // min_sti
@@ -64,7 +65,7 @@ public:
         TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == min_sti);
 
         // run another cycle and check whether the atom has been removed
-        server().unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         h = as->getHandle(node->getType(), node->getName());
         TS_ASSERT(TLB::isInvalidHandle(h));
     }

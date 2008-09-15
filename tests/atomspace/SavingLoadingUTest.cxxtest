@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/SavingLoadingUTest.cxxtest
+ * tests/atomspace/SavingLoadingUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -23,20 +23,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimpleTruthValue.h"
-#include "IndefiniteTruthValue.h"
-#include "CompositeTruthValue.h"
-#include "StatisticsMonitor.h"
-#include "AttentionValue.h"
-#include "TLB.h"
 #include <math.h>
-#include <cstdlib>
+#include <stdlib.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SavingLoading.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/StatisticsMonitor.h>
+#include <opencog/atomspace/TLB.h>
 
 using namespace std;
 using namespace opencog;
-
-#include <SavingLoading.h>
-#include <AtomSpace.h>
 
 #define DUMP_FILENAME "SavingLoadingUTest.dump"
 

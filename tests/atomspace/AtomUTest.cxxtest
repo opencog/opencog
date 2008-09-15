@@ -1,5 +1,5 @@
 /*
- * tests/AtomSpace/AtomUTest.cxxtest
+ * tests/atomspace/AtomUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,9 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "platform.h"
-#include "Atom.h"
-#include "Link.h"
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 
