@@ -11,13 +11,19 @@ To build and run OpenCog, the following pacakges are required:
 cmake       -- a build management tool -- http://www.cmake.org/
 cxxtest     -- a test framework -- http://cxxtest.sourceforge.net/
 
-libxmlparse -- an XML parsing library - provided by the Debian/Ubuntu 
-               package libxmltok1-dev
+expat       -- an XML parsing library - 
+               http://www.jclark.com/xml/expat.html (version 1.2)
+               Debian/Ubuntu package libxmltok1-dev (supplies expat v1.2)
+               Version 2 seems to work as well.  http://expat.sourceforge.net/
+
 C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
                http://www.alhem.net/Sockets/
 
 openssl     -- SSL sockets library 
                Debian/Ubuntu package libssl-dev
+
+iodbc       -- http://www.iodbc.org/
+               Debian/Ubuntu packages iodbc-dev or unixodbc-dev
 
 To build opencog:
 -----------------

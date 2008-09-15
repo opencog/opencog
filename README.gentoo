@@ -1,0 +1,34 @@
+
+#############################################################################
+Instalation and dependency resolution for Gentoo (circa September 2008)
+#############################################################################
+
+Opencog depends on the following packages that are not necessarily
+installed by default:
+
+  cmake openssl boost expat
+
+Opencog depends on the following package in a supposedly optional
+manner, but I haven't checked the optional part:
+
+  libiodbc
+
+opencog also can make use of these.  They may even be mandatory:
+
+  guile
+
+
+All the above can just be emerge'd.
+
+There's also a dependency on C++ Sockets, which are not on portage.
+It may be on someone's overlay somewhere but it is easy enough to do the
+following:
+
+Grab latest version from http://www.alhem.net/Sockets/  (v2.3 tested here) 
+Untar somewhere  ( tar -xvzf Sockets-2.3.tar.gz )
+Go into directory  (cd Sockets-2.3 )
+Look at Makefile and see if the Platform matches your system (less Makefile) 
+make (as root) make install
+
+
+From then on, you can follow the standard make instructions on the README file.
