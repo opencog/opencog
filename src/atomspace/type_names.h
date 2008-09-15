@@ -118,6 +118,7 @@
 #define SL_AVATAR_NODE_CLASS "SLAvatarNode"
 #define SL_STRUCTURE_NODE_CLASS "SLStructureNode"
 #define SL_ACCESSORY_NODE_CLASS "SLAccessoryNode"
+#define SL_HUMANOID_NODE_CLASS "SLHumanoidNode"
 #define AT_TIME_LINK_CLASS "AtTimeLink"
 #define TIME_NODE_CLASS "TimeNode"
 #define SPACE_MAP_NODE_CLASS "SpaceMapNode"

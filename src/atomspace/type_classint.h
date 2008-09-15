@@ -118,6 +118,7 @@ class_to_int[(*getClassName()) [SL_PET_NODE]] = SL_PET_NODE;
 class_to_int[(*getClassName()) [SL_AVATAR_NODE]] = SL_AVATAR_NODE;
 class_to_int[(*getClassName()) [SL_STRUCTURE_NODE]] = SL_STRUCTURE_NODE;
 class_to_int[(*getClassName()) [SL_ACCESSORY_NODE]] = SL_ACCESSORY_NODE;
+class_to_int[(*getClassName()) [SL_HUMANOID_NODE]] = SL_HUMANOID_NODE;
 class_to_int[(*getClassName()) [AT_TIME_LINK]] = AT_TIME_LINK;
 class_to_int[(*getClassName()) [TIME_NODE]] = TIME_NODE;
 class_to_int[(*getClassName()) [SPACE_MAP_NODE]] = SPACE_MAP_NODE;
