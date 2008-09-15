@@ -28,7 +28,8 @@
 	(define word-list '())
 	(define (add-to-word-list h) (set! word-list (cons (cog-name h) word-list))  #f)
 
-	; A function that makes a list of pairs out of 'word' and 'word-list'
+	; Make a list of pairs out of 'word' and 'word-list'
+	; Return this list of pairs.
 	(define (mk-pair word wd-list prs) 
 		(if (eq? wd-list '())
 			prs
@@ -38,8 +39,12 @@
 		)
 	)
 
-	; A function that makes a list of pairs of all words in 'alist'
-	; on the right, and 'blist' on the left.
+	; Make a list of left-right pairs of all words in 'wlist'
+	; That is, the right word of each pair must be to the right of the
+	; left word in each pair (in sentential order). So, for example,
+	; "Hello world" will produce only one pair: (hello . world) and
+	; "Good moring world" produces three pairs: (good . morning)
+	; (good . world) (morning . world)
 	(define (mk-prs wlist prl)
 		(if (eq? wlist '())
 			prl
@@ -48,8 +53,10 @@
 		)
 	)
 
-	; Given a word-pair, look it up in the database, and assign
-	; a mutal info score to it
+	; Given a word-pair, look it up in the frequency/mutal-info database,
+	; and associate a mutal info score to it. Return the scored pair, 
+	; else return empty list.  So, example, the pair (pile .of) produces
+	; ((pile . of) . 3.73598462236839) 
 	(define (score-pair pr)
 		(define qstr 
 			(string-append
@@ -66,8 +73,8 @@
 		)
 	)
 
-	; A function that iterates over a list of pairs, and fetches
-	; word-pair scores from the SQL database
+	; Iterate over a list of pairs, and fetch word-pair scores from 
+	; the SQL database. Returns an association list of scored pairs.
 	(define (score-pairs pair-list slist)
 		(if (eq? pair-list '())
 			slist
@@ -79,6 +86,9 @@
 			)
 		)
 	)
+
+	; Iterate over a list of scored pairs, and return the highest-scoring
+	; pair in the list.
 
 	; Create a list of all of the word instances in the parse.
 	(map-word-instances (lambda (z) (map-word-node add-to-word-list z)) h)
