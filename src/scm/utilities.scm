@@ -53,15 +53,16 @@ scm
 ; WordNode's, and then will call 'proc' on these WordNodes.
 ;
 (define (cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
-	(define rc #f)
 	(define (get-endpoint w)
-		(set! rc (cog-filter endpoint-type proc (cog-outgoing-set w)))
 		(display dbg-emsg)
-		rc
+		; cog-filter returns the return value from proc, we pass it on
+		; in turn, so make sure this is last statement
+		(cog-filter endpoint-type proc (cog-outgoing-set w))
 	)
-	(set! rc (cog-filter link-type get-endpoint (cog-incoming-set anchor)))
 	(display dbg-lmsg)
-	rc
+	; cog-filter returns the return value from proc, we pass it on
+	; in turn, so make sure this is last statement
+	(cog-filter link-type get-endpoint (cog-incoming-set anchor))
 )
 
 ; -----------------------------------------------------------------------
