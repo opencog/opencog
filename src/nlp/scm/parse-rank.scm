@@ -28,36 +28,45 @@
 	(define word-list '())
 	(define (add-to-word-list h) (set! word-list (cons (cog-name h) word-list))  #f)
 
-	; Make a list of pairs out of 'word' and 'word-list'
-	; Return this list of pairs.
-	(define (mk-pair word wd-list prs) 
-		(if (eq? wd-list '())
-			prs
-			(mk-pair word (cdr wd-list) 
-				(cons (cons word (car wd-list)) prs)
-			)
-		)
-	)
-
-	; Make a list of left-right pairs of all words in 'wlist'
+	; Make a list of left-right pairs of all words in 'word-list'
 	; That is, the right word of each pair must be to the right of the
 	; left word in each pair (in sentential order). So, for example,
 	; "Hello world" will produce only one pair: (hello . world) and
 	; "Good moring world" produces three pairs: (good . morning)
 	; (good . world) (morning . world)
-	(define (mk-prs wlist prl)
-		(if (eq? wlist '())
-			prl
-			(mk-prs (cdr wlist)
-				(mk-pair (car wlist) (cdr wlist) prl))
+	;
+	; This list of pairs should be thought of as a graph, whose
+	; edges are the pairs, and whose vertexes are the individual words.
+	(define (make-word-pairs word-list)
+		; Make a list of pairs out of 'word' and 'word-list'
+		; Return this list of pairs.
+		(define (mk-pair word wd-list prs) 
+			(if (eq? wd-list '())
+				prs
+				(mk-pair word (cdr wd-list) 
+					(cons (cons word (car wd-list)) prs)
+				)
+			)
 		)
+		; tail-recursive helper function to make the actual list
+		(define (mk-prs wlist prl)
+			(if (eq? wlist '())
+				prl
+				(mk-prs (cdr wlist)
+					(mk-pair (car wlist) (cdr wlist) prl))
+			)
+		)
+		(mk-prs word-list '())
 	)
 
 	; Given a word-pair, look it up in the frequency/mutal-info database,
 	; and associate a mutal info score to it. Return the scored pair, 
 	; else return empty list.  So, example, the pair (pile .of) produces
 	; ((pile . of) . 3.73598462236839) 
-	(define (score-pair pr)
+	;
+	; The score should be understood to be a weight assciated with the
+	; graph edge.
+	(define (score-edge pr)
 		(define qstr 
 			(string-append
 				"SELECT * FROM pairs WHERE left_word='"
@@ -75,27 +84,37 @@
 
 	; Iterate over a list of pairs, and fetch word-pair scores from 
 	; the SQL database. Returns an association list of scored pairs.
-	(define (score-pairs pair-list slist)
-		(if (eq? pair-list '())
-			slist
-			(let ((score (score-pair (car pair-list))))
-				(if (eq? score '())
-					(score-pairs (cdr pair-list) slist)
-					(score-pairs (cdr pair-list) (cons score slist))
+	; The returned list should be understood to be a list of weighted
+	; graph edges.
+	(define (score-graph pair-list)
+		(define (sc-graph pairlist edge-list)
+			(if (eq? pairlist '())
+				edge-list
+				(let ((score (score-edge (car pairlist))))
+					(if (eq? score '())
+						(sc-graph (cdr pairlist) edge-list)
+						(sc-graph (cdr pairlist) (cons score edge-list))
+					)
 				)
 			)
 		)
+		(sc-graph pair-list '())
 	)
 
-	; Iterate over a list of scored pairs, and return the highest-scoring
-	; pair in the list.
+	; Iterate over a list graph edges, and return the edge with the 
+	; highest weight.
+	(define (find-highest-score edge-list)
+		; (define (find-hig edge-
+		#f
+	)
+		
 
 	; Create a list of all of the word instances in the parse.
 	(map-word-instances (lambda (z) (map-word-node add-to-word-list z)) h)
 
 	; (display word-list)
-	; (display (mk-prs word-list '()) )
-	(display (score-pairs (mk-prs word-list '()) '()) )
+	; (display (make-word-pairs word-list) )
+	(display (score-graph (make-word-pairs word-list)) )
 	(newline)
 	#f
 )
