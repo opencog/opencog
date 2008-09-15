@@ -6,7 +6,7 @@
 ;
 ; Requires access to a database containing previously computed word-pair
 ; mutual information values.
-; 
+;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; login information and database
@@ -40,10 +40,10 @@
 	(define (make-word-pairs word-list)
 		; Make a list of pairs out of 'word' and 'word-list'
 		; Return this list of pairs.
-		(define (mk-pair word wd-list prs) 
+		(define (mk-pair word wd-list prs)
 			(if (eq? wd-list '())
 				prs
-				(mk-pair word (cdr wd-list) 
+				(mk-pair word (cdr wd-list)
 					(cons (cons word (car wd-list)) prs)
 				)
 			)
@@ -60,14 +60,14 @@
 	)
 
 	; Given a word-pair, look it up in the frequency/mutal-info database,
-	; and associate a mutal info score to it. Return the scored pair, 
+	; and associate a mutal info score to it. Return the scored pair,
 	; else return empty list.  So, example, the pair (pile .of) produces
-	; ((pile . of) . 3.73598462236839) 
+	; ((pile . of) . 3.73598462236839)
 	;
 	; The score should be understood to be a weight assciated with the
 	; graph edge.
 	(define (score-edge pr)
-		(define qstr 
+		(define qstr
 			(string-append
 				"SELECT * FROM pairs WHERE left_word='"
 				(car pr) "' AND right_word='" (cdr pr) "'"))
@@ -82,7 +82,7 @@
 		)
 	)
 
-	; Iterate over a list of pairs, and fetch word-pair scores from 
+	; Iterate over a list of pairs, and fetch word-pair scores from
 	; the SQL database. Returns an association list of scored pairs.
 	; The returned list should be understood to be a list of weighted
 	; graph edges.
@@ -101,8 +101,12 @@
 		(sc-graph pair-list '())
 	)
 
-	; Iterate over a list graph edges, and return the edge with the 
+	; Iterate over a list graph edges, and return the edge with the
 	; highest weight.
+	; XXX Umm, actually, this routine was intended for a
+	; maximum-spanning-tree algorithm, but we don't actually need that
+	; algo to properly rank parse scores. So this is actually some dead
+	; code that we're not using just right now ...
 	(define (find-highest-score edge-list)
 		(define (find-hig elist best)
 			(if (eq? elist '())
@@ -115,7 +119,7 @@
 		)
 		(find-hig (cdr edge-list) (car edge-list))
 	)
-		
+
 
 	; Create a list of all of the word instances in the parse.
 	(map-word-instances (lambda (z) (map-word-node add-to-word-list z)) h)
@@ -130,9 +134,9 @@
 
 ; =============================================================
 
-; Loop over all atoms of type SentenceNode, processing 
+; Loop over all atoms of type SentenceNode, processing
 ; each corresponding parse.
-(cog-map-type 
+(cog-map-type
 	(lambda (x) (map-parses score-parse x))
 	'SentenceNode
 )
