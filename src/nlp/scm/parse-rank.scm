@@ -54,6 +54,16 @@ scm
 		#f
 	)
 
+	(define (reverse-list l)
+		(define (rl ol nl)
+			(if (eq? ol '())
+				nl
+				(rl (cdr ol) (cons (car ol) nl))
+			)
+		)
+		(rl l '())
+	)
+
 	; Make a list of left-right pairs of all words in 'word-list'
 	; That is, the right word of each pair must be to the right of the
 	; left word in each pair (in sentential order). So, for example,
@@ -160,7 +170,11 @@ scm
 	; (display word-list)
 	; (display (make-word-pairs word-list) )
 	; (display (score-graph (make-word-pairs word-list)))
-	(display (find-highest-score (score-graph (make-word-pairs word-list))))
+	(display (find-highest-score 
+		(score-graph 
+			(make-word-pairs 
+				(reverse-list word-list)
+	))))
 	(newline)
 	#f
 )
