@@ -72,6 +72,7 @@
 #define PARSE_LINK_CLASS "ParseLink"
 #define PARSE_INSTANCE_LINK_CLASS "ParseInstanceLink"
 #define REFERENCE_LINK_CLASS "ReferenceLink"
+#define LINK_GRAMMAR_RELATIONSHIP_NODE_CLASS "LinkGrammarRelationshipNode"
 #define DEFINED_LINGUISTIC_CONCEPT_NODE_CLASS "DefinedLinguisticConceptNode"
 #define DEFINED_LINGUISTIC_RELATIONSHIP_NODE_CLASS "DefinedLinguisticRelationshipNode"
 #define DEFINED_FRAME_NODE_CLASS "DefinedFrameNode"
