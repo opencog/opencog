@@ -151,7 +151,7 @@ Type SchemeSmob::validate_atom (SCM stype, const char *subrname)
 	if (scm_is_true(scm_symbol_p(stype)))
 		stype = scm_symbol_to_string(stype);
 
-	if (scm_is_false(scm_symbol_p(stype)))
+	if (scm_is_false(scm_string_p(stype)))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
 
 	char * ct = scm_to_locale_string(stype);
