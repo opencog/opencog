@@ -12,7 +12,9 @@ scm
 ;
 ; Apply the proceedure 'proc' to every atom of 'atom-list' that is
 ; of type 'atom-type'. Application halts if proc returns any value 
-; other than #f
+; other than #f. Return the last value returned by proc; that is,
+; return #f if proc always returned #f, otherwise return the value
+; that halted the application.
 ;
 ; Exmaple usage:
 ; (cog-filter 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
@@ -45,7 +47,9 @@ scm
 ; and then call 'proc' on each of these endpoints. Optionally, print
 ; some debugging msgs.
 ;
-; The link-chasing halts if proc returns any value other than #f
+; The link-chasing halts if proc returns any value other than #f.
+; Returns the last value returned by proc, i.e. #f, or the value that
+; halted the iteration.
 ;
 ; Example usage:
 ; (cog-map-chase-link 'ReferenceLink 'WordNode "" "" proc word-inst)
