@@ -15,6 +15,28 @@
 (use-modules (dbi dbi))
 (define db-connection (dbi-open "postgresql" db-login))
 
+;
+; The parse ranker works by adding up the mutual-information scores
+; associated with each link-grammar link. The higher the total mutual
+; information, the higher the parse is ranked.
+;
+; Link-grammar structure
+; ----------------------
+; The code below assumes that opencog contains the link-grammar links 
+; describing the parse. The assumed format for these links is as in 
+; the following example:
+; 
+;   (EvaluationLink
+;      (LinkGrammarRelationshipNode "EB")
+;      (ListLink
+;         (ConceptNode "consist@79aac665-c59f-41e2-9ab6-af75b768b5c4")
+;         (ConceptNode "mostly@69de3109-9e54-4acc-8aef-66e9da304078")
+;      )
+;   )
+;
+; where "mostly@69de3109-9e54-4acc-8aef-66e9da304078" is a typical 
+; word-instance node.
+
 ; misc debugging crap
 (define (prt-stuff h) (display h) #f)
 (define (prt-inc h) (display (cog-incoming-set h)) #t)
