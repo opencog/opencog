@@ -163,6 +163,7 @@ ENTROPY_LINK <- ORDERED_LINK
 // New relex nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.
 SENTENCE_NODE <- CONCEPT_NODE
+SENTENCE_LINK <- ORDERED_LINK
 PARSE_LINK <- ASSOCIATIVE_LINK
 PARSE_INSTANCE_LINK <- ASSOCIATIVE_LINK
 

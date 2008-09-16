@@ -69,6 +69,7 @@
 #define DISTINGUISHED_NODE_CLASS "DistinguishedNode"
 #define ENTROPY_LINK_CLASS "EntropyLink"
 #define SENTENCE_NODE_CLASS "SentenceNode"
+#define SENTENCE_LINK_CLASS "SentenceLink"
 #define PARSE_LINK_CLASS "ParseLink"
 #define PARSE_INSTANCE_LINK_CLASS "ParseInstanceLink"
 #define REFERENCE_LINK_CLASS "ReferenceLink"
