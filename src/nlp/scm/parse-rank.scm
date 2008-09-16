@@ -45,11 +45,14 @@ scm
 
 ;
 ; provde a score for the parse
-(define (score-parse h)
+(define (get-mutual-info sentence)
 
 	; Accumulate words into a list; called from a deep nested loop.
 	(define word-list '())
-	(define (add-to-word-list h) (set! word-list (cons (cog-name h) word-list))  #f)
+	(define (add-to-word-list h)
+		(set! word-list (cons (cog-name h) word-list))
+		#f
+	)
 
 	; Make a list of left-right pairs of all words in 'word-list'
 	; That is, the right word of each pair must be to the right of the
@@ -145,7 +148,14 @@ scm
 
 
 	; Create a list of all of the word instances in the parse.
-	(map-word-instances (lambda (z) (map-word-node add-to-word-list z)) h)
+	; (cog-outgoing-set sentence) is a list of all of the word-instances
+	; in the sentence. Get those (filter on ConceptNode in order
+	; to ignore the SentenceNode), then map these to word nodes, 
+	; and then tack them onto our list.
+	(cog-filter 'ConceptNode 
+		(lambda (x) (map-word-node add-to-word-list x))
+		(cog-outgoing-set sentence)
+	)
 
 	; (display word-list)
 	; (display (make-word-pairs word-list) )
@@ -159,9 +169,12 @@ scm
 
 ; Loop over all atoms of type SentenceNode, processing
 ; each corresponding parse.
-(cog-map-type
-	(lambda (x) (map-parses score-parse x))
-	'SentenceNode
-)
+; (cog-map-type
+;	(lambda (x) (map-parses score-parse x))
+;	'SentenceNode
+;)
+
+(cog-map-type get-mutual-info 'SentenceLink)
+
 
 .
