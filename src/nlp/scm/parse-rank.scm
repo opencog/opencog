@@ -177,7 +177,8 @@ scm
 
 	; Validate our input -- we're expecting a SentenceLink
 	(if (not (eq? (cog-type sentence) 'SentenceLink))
-		(throw 'wrong-atom-type "Error: expecting SentenceLink")
+		(throw 'wrong-atom-type 'get-mutual-info
+			 "Error: expecting SentenceLink" sentence)
 	)
 
 	; Create a list of all of the word instances in the parse.
@@ -215,6 +216,7 @@ scm
 	)
 	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
 
+	; peek
 	mi-edge-list
 )
 

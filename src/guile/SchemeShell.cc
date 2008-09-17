@@ -11,6 +11,7 @@
 
 #include <libguile.h>
 #include <libguile/backtrace.h>
+#include <libguile/debug.h>
 #include <libguile/lang.h>
 
 #include "platform.h"
@@ -26,9 +27,10 @@ SchemeShell::SchemeShell(void)
 	{
 		is_inited = true;
 		scm_init_guile();
-		scm_init_debug();
-		scm_init_backtrace();
-		scm_init_strports(); // is this really needed ?
+		// DO NOT call scm_init_debug(), this will mess up debugging!
+		// scm_init_debug();
+		// scm_init_backtrace();
+		// scm_init_strports(); // is this really needed ?
 	}
 
 	funcs = new SchemeSmob();
@@ -176,7 +178,12 @@ std::string SchemeShell::prt(SCM node)
 	}
 	else if (scm_is_true(scm_procedure_p(node))) 
 	{
-		return "#<port (XXX add name here)>";
+		std::string str = "#<procedure ";
+		str += prt(scm_procedure_name(node));
+		str += " ";
+		str += prt(SCM_CADR(scm_procedure_source(node)));
+		str += ">";
+		return str;
 	}
 	else if (scm_subr_p(node)) 
 	{
@@ -232,7 +239,6 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 		}
 		return SCM_EOL;
 	}
-	free(restr);
 
 	// If its not a read error, then its a regular error; report it.
 	caught_error = true;
@@ -241,13 +247,20 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	error_string_port = scm_open_output_string();
 	SCM port = error_string_port;
 
-	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 4))
+	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 2))
 	{
-		SCM stack   = scm_make_stack (SCM_BOOL_T, SCM_EOL);
+		long nargs = scm_ilength(throw_args);
 		SCM subr    = SCM_CAR (throw_args);
 		SCM message = SCM_CADR (throw_args);
-		SCM parts   = SCM_CADDR (throw_args);
-		SCM rest    = SCM_CADDDR (throw_args);
+		SCM parts   = SCM_EOL;
+		if (nargs >= 3)
+			parts   = SCM_CADDR (throw_args);
+		SCM rest    = SCM_EOL;
+		if (nargs >= 4)
+			rest    = SCM_CADDDR (throw_args);
+
+		SCM stack   = scm_make_stack (SCM_BOOL_T, SCM_EOL);
+printf ("duuuude stacky is %s\n", prt(stack).c_str());
 		if (scm_is_true (stack))
 		{
 			SCM highlights;
@@ -258,21 +271,32 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 			else
 				highlights = SCM_EOL;
 
-			scm_puts ("Backtrace:\n", port);
+			scm_puts ("duude -- Backtrace:\n", port);
 			scm_display_backtrace_with_highlights (stack, port,
 			      SCM_BOOL_F, SCM_BOOL_F, highlights);
 			scm_newline (port);
 		}
-		scm_i_display_error (stack, port, subr, message, parts, rest);
+		scm_display_error (stack, port, subr, message, parts, rest);
 	}
 	else
 	{
-		printf("ERROR: thow args are unexpectedly short!\n");
+		scm_puts ("ERROR: thow args are unexpectedly short!\n", port);
+		std::string thargs = prt(throw_args);
+		scm_puts (thargs.c_str(), port);
 	}
+	scm_puts("ABORT: ", port);
+	scm_puts(restr, port);
+	free(restr);
 
-#if 0
+#if 1
+std::string fl = prt(scm_the_last_stack_fluid_var);
+printf("flu %s\n", fl.c_str());
+std::string ca = prt(SCM_CAR(scm_the_last_stack_fluid_var));
+printf("fluca %s\n", ca.c_str());
 	/* find the stack, and conditionally display it */
 	SCM the_stack = scm_fluid_ref(SCM_CDR(scm_the_last_stack_fluid_var));
+std::string st = prt(the_stack);
+printf("sticky %s\n", st.c_str());
 	if (the_stack != SCM_BOOL_F)
 	{
 		scm_display_backtrace(the_stack, port, SCM_UNDEFINED, SCM_UNDEFINED);
@@ -293,8 +317,8 @@ std::string SchemeShell::eval(const std::string &expr)
 
 	/* The #$%^& opecong command shell processor cuts off the 
 	 * newline character. Re-insert it; otherwise, comments within
-	 * proceedures will have the effect of commenting out the rest
-	 * of the proceedure, leading to garbage.
+	 * procedures will have the effect of commenting out the rest
+	 * of the procedure, leading to garbage.
 	 */
 	input_line += "\n";
 
