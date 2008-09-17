@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES (
 	${CSOCKETS_INCLUDE_DIRS}
 )
 
-ADD_LIBRARY(persist SHARED
+ADD_LIBRARY (persist SHARED
 	odbcxx.cc
 	AtomStorage.cc
 	PersistModule.cc

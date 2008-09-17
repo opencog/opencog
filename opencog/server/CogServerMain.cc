@@ -39,9 +39,8 @@ using namespace opencog;
 static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
-    DATADIR,
+    CONFDIR,
 #ifndef WIN32
-    DATADIR"/etc",
     "/etc",
 #endif // !WIN32
     NULL
