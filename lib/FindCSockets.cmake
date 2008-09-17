@@ -11,11 +11,9 @@
 
 # Look for the header file
 FIND_PATH(CSOCKETS_INCLUDE_DIR Sockets/sockets-config.h)
-#MARK_AS_ADVANCED(CSOCKETS_INCLUDE_DIR)
 
 # Look for the library
 FIND_LIBRARY(CSOCKETS_LIBRARY NAMES Sockets PATH /usr/lib /usr/lib/Sockets /usr/local/lib /usr/local/lib/Sockets)
-#MARK_AS_ADVANCED(CSOCKETS_LIBRARY)
 
 # Copy the results to the output variables.
 IF(CSOCKETS_INCLUDE_DIR AND CSOCKETS_LIBRARY)
