@@ -13,6 +13,7 @@ scm
 ; login information and database
 (define db-login "linas:asdf:lexat:tcp:localhost:5432")
 
+(turn-on-debugging)
 (use-modules (dbi dbi))
 (define db-connection (dbi-open "postgresql" db-login))
 

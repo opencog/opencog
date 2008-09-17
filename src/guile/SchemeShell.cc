@@ -53,7 +53,22 @@ void SchemeShell::hush_output(bool hush)
 
 std::string SchemeShell::prt(SCM node)
 {
-	if (scm_is_pair(node))
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+	{
+		return SchemeSmob::handle_to_string(node);
+	}
+
+	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
+	{
+		return SchemeSmob::misc_to_string(node);
+	}
+
+	else if (scm_is_eq(node, SCM_UNSPECIFIED))
+	{
+		return "";
+	}
+#if CUSTOM_PRINTING_WHY_DO_WE_HAVE_THIS_DELETE_ME
+	else if (scm_is_pair(node))
 	{
 		std::string str = "(";
       SCM node_list = node;
@@ -96,17 +111,6 @@ std::string SchemeShell::prt(SCM node)
 		free(str);
 		return rv;
 	}
-
-	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
-	{
-		return SchemeSmob::handle_to_string(node);
-	}
-
-	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
-	{
-		return SchemeSmob::misc_to_string(node);
-	}
-
 	else if (scm_is_number(node)) 
 	{
 		#define NUMBUFSZ 60
@@ -164,52 +168,18 @@ std::string SchemeShell::prt(SCM node)
 	{
 		return "eof";
 	}
-	else if (scm_is_eq(node, SCM_UNSPECIFIED))
-	{
-		return "";
-	}
-	else if (scm_is_true(scm_dynamic_object_p(node))) 
-	{
-		return "#<dynamic object (XXX add name here)>";
-	}
-	else if (scm_is_true(scm_port_p(node))) 
-	{
-		return "#<port (XXX add name here)>";
-	}
-	else if (scm_is_true(scm_procedure_p(node))) 
-	{
-		std::string str = "#<procedure ";
-		str += prt(scm_procedure_name(node));
-		str += " ";
-		str += prt(SCM_CADR(scm_procedure_source(node)));
-		str += ">";
-		return str;
-	}
-	else if (scm_subr_p(node)) 
-	{
-		return "#<subr (XXX add name here)>";
-	}
-	else if (scm_is_true(scm_operator_p(node))) 
-	{
-		return "#<operator (XXX add name here)>";
-	}
-	else if (scm_is_true(scm_entity_p(node))) 
-	{
-		return "#<entity (XXX add name here)>";
-	}
-	else if (scm_is_true(scm_variable_p(node))) 
-	{
-		return "#<variable (XXX add name here)>";
-	}
-	else if (scm_is_true(scm_stack_p(node))) 
-	{
-		return "#<stack>";
-	}
+#endif
 	else
 	{
-		fprintf (stderr, "Error: unhandled type for guile printing: %p\n",
-			node);
-		return "#opencog-guile-error: unknown type";
+		// Let SCM display do the rest of the work.
+		SCM port = scm_open_output_string();
+		scm_display (node, port);
+		SCM rc = scm_get_output_string(port);
+		char * str = scm_to_locale_string(rc);
+		std::string rv = str;
+		free(str);
+		scm_close_port(port);
+		return rv;
 	}
 
 	return "";
