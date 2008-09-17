@@ -18,7 +18,8 @@ ADD_LIBRARY (builtinreqs SHARED
 
 TARGET_LINK_LIBRARIES(builtinreqs
     xml
-) 
+    ${EXPAT_LIBRARIES}
+)
 
 ADD_LIBRARY (server SHARED
     BaseServer
@@ -33,16 +34,22 @@ TARGET_LINK_LIBRARIES(server
 	atomspace
 )
 
+# to ease testing/debugging modules on the source tree
+SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty:${OPENCOG_BINARY_DIR}/opencog/dynamics/attention:${OPENCOG_BINARY_DIR}/opencog/guile:${OPENCOG_BINARY_DIR}/opencog/nlp/wsd:${OPENCOG_BINARY_DIR}/opencog/persist:${OPENCOG_BINARY_DIR}/opencog/query:${OPENCOG_BINARY_DIR}/opencog/server:${OPENCOG_BINARY_DIR}/opencog/util
+)
+
 ADD_EXECUTABLE(cogserver
     CogServerMain
 )
 
 TARGET_LINK_LIBRARIES(cogserver
     server
+    boost_filesystem-mt
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
 )
 
+SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_DIRECTORIES "${BOOST_LIBRARY_DIRS}")
 IF (WIN32)
 	SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
 ENDIF (WIN32)

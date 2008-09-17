@@ -16,6 +16,11 @@ install_manifest.txt
 examples/extending/derivedserver
 examples/hopfield/hopfield
 examples/server/derivedserver
+CPackConfig.cmake
+CPackSourceConfig.cmake
+_CPack_Packages/
+*.tgz
+*.tar.gz
 
 # WIN32 specific
 *.lib

@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/filesystem/operations.hpp>
+
 #include <opencog/query/QueryProcessor.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/server/CogServer.h>
@@ -33,6 +35,17 @@
 #include <opencog/util/misc.h>
 
 using namespace opencog;
+
+static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
+static const char* DEFAULT_CONFIG_PATHS[] = 
+{
+    DATADIR,
+#ifndef WIN32
+    DATADIR"/etc",
+    "/etc",
+#endif // !WIN32
+    NULL
+};
 
 static void usage(char* progname)
 {
@@ -50,6 +63,22 @@ int main(int argc, char *argv[])
             } catch (RuntimeException &e) {
                 std::cerr << e.getMessage() << std::endl;
                 return 1;
+            }
+        } else {
+            // search for configuration file on default locations
+            for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
+                boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
+                configPath /= DEFAULT_CONFIG_FILENAME;
+                if (boost::filesystem::exists(configPath)) {
+                    try {
+                        config().load(configPath.string().c_str());
+                        fprintf(stderr, "loaded configuration from file \"%s\"\n", configPath.string().c_str());
+                        break;
+                    } catch (RuntimeException &e) {
+                        std::cerr << e.getMessage() << std::endl;
+                        return 1;
+                    }
+                }
             }
         }
 
