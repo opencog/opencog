@@ -9,6 +9,16 @@ scm
 ;
 (define (stv mean conf) (cog-new-stv mean conf))
 
+; analogs of car, cdr, etc. but for atoms.
+(define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
+(define (gdr x) (if (cog-atom? x) (cdr (cog-outgoing-set x)) (cdr x)))
+(define (gadr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cadr x)))
+(define (gaddr x) (if (cog-atom? x) (caddr (cog-outgoing-set x)) (caddr x)))
+
+; A more agressive way of doing the above:
+; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
+;
+
 ; -----------------------------------------------------------------------
 ; cog-filter atom-type proc atom-list
 ;
@@ -28,12 +38,13 @@ scm
 		((eq? (cog-type (car atom-list)) atom-type) 
 			(set! rc (proc (car atom-list))) 
 			(if (eq? #f rc) 
-				(cog-filter atom-type proc (cdr atom-list)))
+				(cog-filter atom-type proc (cdr atom-list))
+				rc
+			)
 		) 
 		(else (cog-filter atom-type proc (cdr atom-list))
 		)
 	)
-	rc
 )
 
 ; -----------------------------------------------------------------------
