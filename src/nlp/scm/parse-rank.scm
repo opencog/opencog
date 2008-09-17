@@ -215,14 +215,45 @@ scm
 		(set! mi-edge-list (get-mutual-info sent-link))
 		#f
 	)
+
+	; Invoke procedure 'proc' on each link-grammar link.
+	; Expects as input a ParseAnchor (node anchoring a parse)
+	; Returns whatever proc returns, as an or-map.
+	(define (map-links proc parse-inst)
+   	(cog-map-chase-link 'LinkGrammarLinkageLink 'EvaluationLink
+      	""  " --------- linkage-found ------------ \n"
+      	proc parse-inst
+   	)
+	)
+
+	; build a word pair
+	; Expects as input a link-grammar link
+	(define (make-lg-pair lg-link)
+		; strip off EvaluationLink, and then ListLink
+		(let* (
+				(raw-pair (cog-outgoing-set (cadr (cog-outgoing-set lg-link))))
+				(left-raw (car raw-pair))
+				(right-raw (cadr raw-pair))
+			)
+			(display left-raw)
+			(display right-raw)
+			(newline)
+		)
+		#f
+	)
+
 	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
 
+	; (display mi-edge-list) (newline)
 	; peek
-	mi-edge-list
+	(display sent-node)
+
+
+	(map-parses (lambda (x) (map-links make-lg-pair x)) sent-node)
 )
 
 (define (wrapper x)
-	(display (score-sentence x))
+	(score-sentence x)
 	#f
 )
 

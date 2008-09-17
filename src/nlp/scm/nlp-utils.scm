@@ -25,7 +25,15 @@ scm
 ; each of the individual parses of the sentence. So, look for 
 ; ParseAnchor's, which anchor the parses.
 ;
+; Just as an or-map, the recursion will stop if proc returns something
+; other than #f. This routine returns the last value that stopped the
+; recusrsion.
+;
 (define (map-parses proc sent) 
+   (if (not (eq? (cog-type sent) 'SentenceNode))
+      (throw 'wrong-atom-type 'map-parses
+          "Error: expecting SentenceNode" sent)
+   )
 	(cog-map-chase-link 'ParseLink ParseAnchor
 		" ========= sentence ============ \n" ""
 		proc sent
