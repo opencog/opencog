@@ -29,7 +29,10 @@ class SchemeShell
 
 		// Error handling stuff
 		SCM error_string_port;
+		SCM captured_stack;
+		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
+		SCM preunwind_handler(SCM, SCM);
 		SCM catch_handler(SCM, SCM);
 		bool caught_error;
 

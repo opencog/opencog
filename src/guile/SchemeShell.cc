@@ -201,6 +201,10 @@ std::string SchemeShell::prt(SCM node)
 	{
 		return "#<variable (XXX add name here)>";
 	}
+	else if (scm_is_true(scm_stack_p(node))) 
+	{
+		return "#<stack>";
+	}
 	else
 	{
 		fprintf (stderr, "Error: unhandled type for guile printing: %p\n",
@@ -213,10 +217,26 @@ std::string SchemeShell::prt(SCM node)
 
 /* ============================================================== */
 
+SCM SchemeShell::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
+{
+	SchemeShell *ss = (SchemeShell *)data;
+	return ss->preunwind_handler(tag, throw_args);
+	return SCM_EOL;
+}
+
 SCM SchemeShell::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
 	SchemeShell *ss = (SchemeShell *)data;
 	return ss->catch_handler(tag, throw_args);
+}
+
+SCM SchemeShell::preunwind_handler (SCM tag, SCM throw_args)
+{
+	// We can only record the stack before it is unwound. 
+	// The normal catch handler body runs only *after* the stack
+	// has been unwound.
+	captured_stack = scm_make_stack (SCM_BOOL_T, SCM_EOL);
+	return SCM_EOL;
 }
 
 SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
@@ -247,11 +267,13 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	error_string_port = scm_open_output_string();
 	SCM port = error_string_port;
 
-	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 2))
+	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 1))
 	{
 		long nargs = scm_ilength(throw_args);
 		SCM subr    = SCM_CAR (throw_args);
-		SCM message = SCM_CADR (throw_args);
+		SCM message = SCM_EOL;
+		if (nargs >= 2)
+			message = SCM_CADR (throw_args);
 		SCM parts   = SCM_EOL;
 		if (nargs >= 3)
 			parts   = SCM_CADDR (throw_args);
@@ -259,9 +281,7 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 		if (nargs >= 4)
 			rest    = SCM_CADDDR (throw_args);
 
-		SCM stack   = scm_make_stack (SCM_BOOL_T, SCM_EOL);
-printf ("duuuude stacky is %s\n", prt(stack).c_str());
-		if (scm_is_true (stack))
+		if (scm_is_true (captured_stack))
 		{
 			SCM highlights;
 
@@ -271,37 +291,20 @@ printf ("duuuude stacky is %s\n", prt(stack).c_str());
 			else
 				highlights = SCM_EOL;
 
-			scm_puts ("duude -- Backtrace:\n", port);
-			scm_display_backtrace_with_highlights (stack, port,
+			scm_puts ("Backtrace:\n", port);
+			scm_display_backtrace_with_highlights (captured_stack, port,
 			      SCM_BOOL_F, SCM_BOOL_F, highlights);
 			scm_newline (port);
 		}
-		scm_display_error (stack, port, subr, message, parts, rest);
+		scm_display_error (captured_stack, port, subr, message, parts, rest);
 	}
 	else
 	{
 		scm_puts ("ERROR: thow args are unexpectedly short!\n", port);
-		std::string thargs = prt(throw_args);
-		scm_puts (thargs.c_str(), port);
 	}
 	scm_puts("ABORT: ", port);
 	scm_puts(restr, port);
 	free(restr);
-
-#if 1
-std::string fl = prt(scm_the_last_stack_fluid_var);
-printf("flu %s\n", fl.c_str());
-std::string ca = prt(SCM_CAR(scm_the_last_stack_fluid_var));
-printf("fluca %s\n", ca.c_str());
-	/* find the stack, and conditionally display it */
-	SCM the_stack = scm_fluid_ref(SCM_CDR(scm_the_last_stack_fluid_var));
-std::string st = prt(the_stack);
-printf("sticky %s\n", st.c_str());
-	if (the_stack != SCM_BOOL_F)
-	{
-		scm_display_backtrace(the_stack, port, SCM_UNDEFINED, SCM_UNDEFINED);
-	}
-#endif
 
 	return SCM_BOOL_F;
 }
@@ -324,9 +327,16 @@ std::string SchemeShell::eval(const std::string &expr)
 
 	caught_error = false;
 	pending_input = false;
+#if 0
 	SCM rc = scm_internal_catch (SCM_BOOL_T,
 	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
 	            SchemeShell::catch_handler_wrapper, this);
+#endif
+	captured_stack = SCM_BOOL_F;
+	SCM rc = scm_c_catch (SCM_BOOL_T,
+	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
+	            SchemeShell::catch_handler_wrapper, this,
+	            SchemeShell::preunwind_handler_wrapper, this);
 
 	if (pending_input)
 	{
