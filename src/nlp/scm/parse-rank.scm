@@ -175,6 +175,10 @@ scm
 		(find-hig (cdr edge-list) (car edge-list))
 	)
 
+	; Validate our input -- we're expecting a SentenceLink
+	(if (not (eq? (cog-type sentence) 'SentenceLink))
+		(throw 'wrong-atom-type "Error: expecting SentenceLink")
+	)
 
 	; Create a list of all of the word instances in the parse.
 	; (cog-outgoing-set sentence) is a list of all of the word-instances
@@ -199,13 +203,6 @@ scm
 
 ; =============================================================
 
-; Loop over all atoms of type SentenceNode, processing
-; each corresponding parse.
-; (cog-map-type
-;	(lambda (x) (map-parses score-parse x))
-;	'SentenceNode
-;)
-
 ; Adjust the parse ranking of each parse.
 ; Accepts an atom of type SentenceNode as input
 (define (score-sentence sent-node)
@@ -213,7 +210,7 @@ scm
 	; Get the list of weighted edges
 	(define mi-edge-list '())
 	(define (get-mi sent-link)
-		(set! mi-edge-list (get-mutual-info sent-node))
+		(set! mi-edge-list (get-mutual-info sent-link))
 		#f
 	)
 	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
@@ -226,5 +223,7 @@ scm
 	#f
 )
 
+; Loop over all atoms of type SentenceNode, processing
+; each corresponding parse.
 (cog-map-type wrapper 'SentenceNode)
 
