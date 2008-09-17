@@ -209,6 +209,9 @@ scm
 ; Accepts an atom of type SentenceNode as input
 (define (score-sentence sent-node)
 
+	; Total score for this parse
+	(define total-mi 0.0)
+
 	; Get the list of weighted edges
 	(define mi-edge-list '())
 	(define (get-mi sent-link)
@@ -229,25 +232,37 @@ scm
 	; build a word pair
 	; Expects as input a link-grammar link
 	(define (make-lg-pair lg-link)
-		; strip off EvaluationLink, and then ListLink
-		(let* (
-				(raw-pair (cog-outgoing-set (cadr (cog-outgoing-set lg-link))))
-				(left-raw (car raw-pair))
-				(right-raw (cadr raw-pair))
+		(let*
+			(
+				; strip off EvaluationLink, and then ListLink
+				(raw-pair (gadr (cog-outgoing-set lg-link)))
+				(left-raw (gar raw-pair))
+				(right-raw (gadr raw-pair))
+				(left-node (get-word left-raw))
+				(right-node (get-word right-raw))
+
+				; build the actual pair of word-strings
+				(word-pair
+					(if (and (cog-atom? left-node) (cog-atom? right-node))
+						(cons (cog-name left-node)
+							(cog-name right-node))
+						#f
+					)
+				)
+				; look up the mutual info for this pair
+				(score (assoc word-pair mi-edge-list))
 			)
-			(display left-raw)
-			(display right-raw)
-			(newline)
+			(if score
+				(set! total-mi (+ total-mi (cdr score)))
+         )
 		)
 		#f
 	)
 
+	; Get the mutual information for the various word-pairs
 	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
 
 	; (display mi-edge-list) (newline)
-	; peek
-	(display sent-node)
-
 
 	(map-parses (lambda (x) (map-links make-lg-pair x)) sent-node)
 )
@@ -261,3 +276,5 @@ scm
 ; each corresponding parse.
 (cog-map-type wrapper 'SentenceNode)
 
+
+; peek
