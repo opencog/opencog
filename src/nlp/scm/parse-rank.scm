@@ -43,8 +43,22 @@ scm
 (define (prt-inc h) (display (cog-incoming-set h)) #t)
 (define (prt-word h) (display (cog-name h)) (newline) #f)
 
+
+; Get the mutual info for word-pairs in a sentence.
+; Expects an atom of type SentenceLink as input.
+; Returns a list of MI-weighted word-pairs for the sentence.
+; 
+; Consider the set of all pairs of words in a sentence (with the left
+; word of the pair appearing to the left in the sentence of the right
+; word in the pair).  This list of pairs can be thought to be a list of
+; edges for a graph (whose vertices are the words themselves).  The
+; graph is a clique.
 ;
-; provde a score for the parse
+; This routine will look up the mutual-information scores for each
+; word-pair from a database, and associate that score with the word-pair.
+; If there's no score in the database, the word-pair is omitted from 
+; the list. This routine returns that association list.
+;
 (define (get-mutual-info sentence)
 
 	; Accumulate words into a list; called from a deep nested loop.
@@ -54,6 +68,7 @@ scm
 		#f
 	)
 
+	; Given list l, return the list in reverse order
 	(define (reverse-list l)
 		(define (rl ol nl)
 			(if (eq? ol '())
@@ -70,6 +85,8 @@ scm
 	; "Hello world" will produce only one pair: (hello . world) and
 	; "Good moring world" produces three pairs: (good . morning)
 	; (good . world) (morning . world)
+	;
+	; Returns a list of pairs.
 	;
 	; This list of pairs should be thought of as a graph, whose
 	; edges are the pairs, and whose vertexes are the individual words.
@@ -99,6 +116,8 @@ scm
 	; and associate a mutal info score to it. Return the scored pair,
 	; else return empty list.  So, example, the pair (pile .of) produces
 	; ((pile . of) . 3.73598462236839)
+	;
+	; Returns the triple (the weighted edge)
 	;
 	; The score should be understood to be a weight assciated with the
 	; graph edge.
@@ -169,14 +188,13 @@ scm
 
 	; (display word-list)
 	; (display (make-word-pairs word-list) )
-	; (display (score-graph (make-word-pairs word-list)))
-	(display (find-highest-score 
-		(score-graph 
-			(make-word-pairs 
-				(reverse-list word-list)
-	))))
-	(newline)
-	#f
+	; (display (score-graph (make-word-pairs (reverse-list word-list))))
+	; (display (find-highest-score 
+	;	(score-graph (make-word-pairs (reverse-list word-list)))))
+	; (newline)
+	
+	; Return a list of weighted edges for the graph.
+	(score-graph (make-word-pairs (reverse-list word-list)))
 )
 
 ; =============================================================
@@ -188,7 +206,25 @@ scm
 ;	'SentenceNode
 ;)
 
-(cog-map-type get-mutual-info 'SentenceLink)
+; Adjust the parse ranking of each parse.
+; Accepts an atom of type SentenceNode as input
+(define (score-sentence sent-node)
 
+	; Get the list of weighted edges
+	(define mi-edge-list '())
+	(define (get-mi sent-link)
+		(set! mi-edge-list (get-mutual-info sent-node))
+		#f
+	)
+	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
 
-.
+	mi-edge-list
+)
+
+(define (wrapper x)
+	(display (score-sentence x))
+	#f
+)
+
+(cog-map-type wrapper 'SentenceNode)
+
