@@ -6,6 +6,8 @@ scm
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
+;
+(define (stv mean conf) (cog-new-stv mean conf))
 
 ; -----------------------------------------------------------------------
 ; cog-filter atom-type proc atom-list
