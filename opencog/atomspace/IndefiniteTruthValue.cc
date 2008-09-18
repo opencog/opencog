@@ -34,6 +34,41 @@ using namespace opencog;
 
 float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9f;
 float IndefiniteTruthValue::DEFAULT_K = 2.0f;
+float IndefiniteTruthValue::diffError = 0.001f;
+float IndefiniteTruthValue::s = 0.5f;
+
+// Formula defined in the integral of step one [(x-L1)^ks * (U1-x)^k(1-s)
+static double integralFormula (double x, void * params) {
+	double L_, U_,k_,s_;
+	double *in_params = static_cast<double*>(params);
+	L_ = in_params[0];
+	U_ = in_params[1];
+	k_ = in_params[2];
+	s_ = in_params[3];
+	double f = (pow((x-L_),(k_*s_))) * pow((U_-x),(k_*(1-s_)));
+	return f;
+}
+
+static float DensityIntegral(float lower, float upper, 
+						float L_, float U_, float k_, float s_) {
+	double params[4];
+	int status = 0; size_t neval = 0;
+	double result = 0, abserr = 0 ;
+	gsl_function F;
+
+	params[0] = L_; 
+	params[1] = U_; 
+	params[2] = k_; 
+	params[3] = s_;
+
+	F.function = &integralFormula;
+	F.params = &params;
+
+	status = gsl_integration_qng (&F, lower, upper, 
+			1e-1, 0.0, &result, &abserr, &neval) ;
+
+	return (float) result;
+}
 
 void IndefiniteTruthValue::init(float l, float u, float c)
 {
@@ -41,7 +76,8 @@ void IndefiniteTruthValue::init(float l, float u, float c)
     L = l;
     U = u;
     confidenceLevel = c;
-    diff = 0.0f;
+    diff = -1.0f;
+	firstOrderDistribution.clear();
     symmetric = true;
 }
 
@@ -107,9 +143,27 @@ float IndefiniteTruthValue::getU() const
 {
     return U;
 }
-float IndefiniteTruthValue::getDiff() const
+float IndefiniteTruthValue::getDiff()
 {
-    return diff;
+	if (diff >= 0) return diff; // previously calculated
+	float L_, U_, expected , result=0.0, numerator=0.0, denominator=0.0;
+	float idiff = 0.01;
+
+	expected = (1-confidenceLevel)/2;
+	while 	((result < expected - diffError) 
+		 ||  (result > expected + diffError)) {
+			U_ = U + idiff;
+			L_ = L + idiff;
+			numerator = DensityIntegral(U,U_,L_,U_,DEFAULT_K,s);
+			denominator = DensityIntegral(L_,U_,L_,U_,DEFAULT_K,s);		
+			if (denominator > 0) result = numerator / denominator;
+			else result = 0.0;
+
+			if (result < expected - diffError) idiff = idiff + idiff/2;
+			if (result > expected + diffError) idiff = idiff - idiff/2;
+	}
+	this->diff = idiff;
+	return idiff;
 }
 float IndefiniteTruthValue::getConfidenceLevel() const
 {
@@ -177,7 +231,7 @@ float IndefiniteTruthValue::getMean() const
 float IndefiniteTruthValue::getCount() const
 {
     float W = W();
-    W = max(W, 0.000001f); // to avoid division by zero
+    W = max(W, 0.0000001f); // to avoid division by zero
     float c = (DEFAULT_K * (1 - W) / W);
     return c;
 }
@@ -217,4 +271,3 @@ float IndefiniteTruthValue::toFloat() const
 {
     return getMean();
 }
-

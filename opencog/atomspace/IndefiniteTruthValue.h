@@ -27,6 +27,8 @@
 #define _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 
 #include <vector>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_integration.h>
 
 #include <opencog/atomspace/TruthValue.h>
 
@@ -69,7 +71,7 @@ public:
     float getU() const;
     float getL() const;
     float getConfidenceLevel() const;
-    float getDiff() const;
+    float getDiff();
     std::vector<float*> getFirstOrderDistribution() const;
 
     void setMean(float);
@@ -91,6 +93,8 @@ public:
 
     static float DEFAULT_CONFIDENCE_LEVEL;
     static float DEFAULT_K;
+	static float diffError;
+	static float s;
     static void setDefaultConfidenceLevel(float c) {
         DEFAULT_CONFIDENCE_LEVEL = c;
     }
