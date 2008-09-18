@@ -1,12 +1,8 @@
 /**
- * IndefinitePLNFormulaUTest.cxxtest
- *
- * Author: Fabricio - 2007-01-08
+ * IndefiniteRuleTest.cc
  */
 
-//#include <Formula.h>
-//#include <PTLFormulas.h>
-#include "IndefinitePLNFormulas.h"
+#include "FormulasIndefinite.h"
 #include <math.h>
 #include <vector>
 #include <ctime>

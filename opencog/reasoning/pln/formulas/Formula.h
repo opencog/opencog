@@ -117,7 +117,6 @@ class ArityFreeFormula
 		}
 		
 		if ((IS_NAN(tv->getMean()))||(IS_NAN(tv->getCount()))) {
-			//Mike commented out for gcc comatability: ||(isinf(tv->getMean()))||(isinf(tv->getCount()))) {
 			return NULL;
 		}
 		

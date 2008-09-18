@@ -1,7 +1,7 @@
 #include "../PLN.h"
-#include "Formulas.h"
 #include "FormulasIndefinite.h"
-
+#include "Formulas.h"
+#include <assert.h>
 #include <memory>
 
 #define TV_MIN 0.000001f
