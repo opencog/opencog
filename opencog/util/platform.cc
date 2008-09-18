@@ -22,6 +22,42 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifdef __APPLE__
+
+#include <sys/timeb.h>
+#include <math.h>
+
+#include "platform.h"
+
+namespace opencog
+{
+
+#ifndef HAVE_STRTOK_R
+#define HAVE_STRTOK_R 1
+
+char* __strtok_r(char *s1, const char *s2, char **lasts)
+{
+    char *ret;
+
+    if (s1 == NULL)
+        s1 = *lasts;
+    while (*s1 && strchr(s2, *s1))
+        ++s1;
+    if (*s1 == '\0')
+        return NULL;
+    ret = s1;
+    while (*s1 && !strchr(s2, *s1))
+        ++s1;
+    if (*s1)
+        *s1++ = '\0';
+    *lasts = s1;
+    return ret;
+}
+
+#endif /* HAVE_STRTOK_R */
+} // namespace opencog
+#endif
+
 #ifdef WIN32
 
 #include <sys/timeb.h>
