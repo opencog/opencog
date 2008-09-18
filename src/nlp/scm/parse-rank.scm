@@ -207,6 +207,11 @@ scm
 
 ; Adjust the parse ranking of each parse.
 ; Accepts an atom of type SentenceNode as input
+; Returns #f
+;
+; This routine will examine each parse of the indicated sentence, and
+; will assign that parse a score, based on the total mutual information
+; of each of the link-grammar links in that parse.
 (define (score-sentence sent-node)
 
 	; Total score for this parse
@@ -229,8 +234,13 @@ scm
    	)
 	)
 
-	; build a word pair
-	; Expects as input a link-grammar link
+	; Accumulate mutual info for a word pair
+	; Expects as input a single link-grammar link
+	; Returns #f
+	; Looks up the mutual info score in the list of weighted edges,
+	; and then adds this sore to 'total-mi'. This routine is meant
+	; to be called from within a loop.
+	;
 	(define (make-lg-pair lg-link)
 		(let*
 			(
@@ -259,22 +269,27 @@ scm
 		#f
 	)
 
+	; Compute the total mutual information for a parse
+	; Input should be a single parse-instance
+	(define (score-one-parse parse-inst)
+		(set! total-mi 0.0)
+		(display parse-inst)
+		(map-links make-lg-pair parse-inst)
+		(display total-mi) (newline)
+		#f
+	)
+
 	; Get the mutual information for the various word-pairs
 	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
 
 	; (display mi-edge-list) (newline)
 
-	(map-parses (lambda (x) (map-links make-lg-pair x)) sent-node)
-)
-
-(define (wrapper x)
-	(score-sentence x)
+	; Score each of the parses in the sentence
+	(map-parses score-one-parse sent-node)
 	#f
 )
 
 ; Loop over all atoms of type SentenceNode, processing
-; each corresponding parse.
-(cog-map-type wrapper 'SentenceNode)
+; handing them to 'score sentence' for scoring.
+(cog-map-type score-sentence 'SentenceNode)
 
-
-; peek
