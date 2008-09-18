@@ -48,25 +48,24 @@ Rule::setOfMPs ImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideI
 	
 BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
-        AtomSpace *nm = CogServer::getAtomSpace();
         assert(validate(premiseArray));
 
 //printTree(premiseArray[0],0,1);
 
-        std::vector<Handle> args = nm->getOutgoing(v2h(premiseArray[0]));
-        Type T = nm->getType(args[1]);
-        std::string pname = nm->getName(args[1]);
+        std::vector<Handle> args = GET_ATW->getOutgoing(v2h(premiseArray[0]));
+        Type T = GET_ATW->getType(args[1]);
+        std::string pname = GET_ATW->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(getTruthValue(v2h(premiseArray[0]))),
-            (TruthValue*) &(getTruthValue(args[0])),
-            (TruthValue*) &(getTruthValue(args[1]))
+            (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[0]))),
+            (TruthValue*) &(GET_ATW->getTV(args[0])),
+            (TruthValue*) &(GET_ATW->getTV(args[1]))
         };
         
         TruthValue* retTV =
             ImplicationBreakdownFormula().compute(tvs, 3);
 
-        std::vector<Handle> new_args = nm->getOutgoing(args[1]);
+        std::vector<Handle> new_args = GET_ATW->getOutgoing(args[1]);
 
         Handle ret=NULL;
 

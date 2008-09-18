@@ -86,7 +86,7 @@ bool echo=false;
 		switch(T)
 		{
 		case __INSTANCEOF_N:
-			unnormed_ret = GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(h), hs[0]->T);
+			unnormed_ret = GET_ATW->inheritsType(GET_ATW->getType(h), hs[0]->T);
 			
 			break;
 			
@@ -99,8 +99,8 @@ bool echo=false;
 		
 		if (!unnormed_ret && normal_form)
 		{
-			if (GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(h), FORALL_LINK))
-				return (*this)(CogServer::getAtomSpace()->getOutgoing(h)[1]);
+			if (GET_ATW->inheritsType(GET_ATW->getType(h), FORALL_LINK))
+				return (*this)(GET_ATW->getOutgoing(h)[1]);
 			else if (GET_ATW->inheritsType(hs[0]->T, FORALL_LINK))
 				return ( *((MetaPredicate*)hs[1].get()) )(h);
 			else
@@ -258,9 +258,9 @@ void atom::setHandle(Handle h)
             return;
     }
 */
-	T=CogServer::getAtomSpace()->getType(h);
-	name=CogServer::getAtomSpace()->getName(h);
-	HandleSeq _hs = CogServer::getAtomSpace()->getOutgoing(h);
+	T=GET_ATW->getType(h);
+	name=GET_ATW->getName(h);
+	HandleSeq _hs = GET_ATW->getOutgoing(h);
 //	arity= _hs.size();
 	cx=NULL;
 
@@ -567,7 +567,7 @@ void prn(tree< Btr<atom> >& tr)
 void makeHandletree(Handle real, iAtomTableWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
 {
 	Handle top=(Handle)0;
-	Type T=CogServer::getAtomSpace()->getType(real);
+	Type T=GET_ATW->getType(real);
 
 	if (!fullVirtual || inheritsType(T, NODE))
 		ret.set_head(real);
@@ -575,7 +575,7 @@ void makeHandletree(Handle real, iAtomTableWrapper* table, bool fullVirtual, tre
 	{
 		ret.set_head((Handle)T);
 	
-		HandleSeq _hs = CogServer::getAtomSpace()->getOutgoing(real);
+		HandleSeq _hs = GET_ATW->getOutgoing(real);
 		foreach(Handle child_h, hs)
 		{
 			tree<Vertex> child = makeHandletree(child_h, table, fullVirtual);
@@ -595,14 +595,14 @@ void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret)
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top)
 {
 	Handle real = v2h(*ret_top);
-	Type T=CogServer::getAtomSpace()->getType(real);
+	Type T=GET_ATW->getType(real);
 
 	/// If virtual link, then we keep expanding
 	if (fullVirtual && !GET_ATW->inheritsType(T, NODE))
 	{
 		*ret_top = Vertex((Handle)T);
 	
-		HandleSeq _hs = CogServer::getAtomSpace()->getOutgoing(real);
+		HandleSeq _hs = GET_ATW->getOutgoing(real);
 		foreach(Handle child_h, _hs)
 		{
 			tree<Vertex>::iterator next_i = ret.append_child(ret_top, child_h);
@@ -616,7 +616,7 @@ tree<Vertex> atom::makeHandletree(iAtomTableWrapper* table, bool fullVirtual) co
 	tree<Vertex> ret;
 	Handle top = 0;
 	
-	if (real && (!fullVirtual || GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(real), FW_VARIABLE_NODE)))
+	if (real && (!fullVirtual || GET_ATW->inheritsType(GET_ATW->getType(real), FW_VARIABLE_NODE)))
 		top = real;
 	else
 		top = (GET_ATW->inheritsType(T, NODE)
@@ -691,8 +691,8 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 	if (parent_node == a.end())
 		return;
 
-	T = CogServer::getAtomSpace()->getType(boost::get<Handle>(*parent_node));
-	name = CogServer::getAtomSpace()->getName(boost::get<Handle>(*parent_node));
+	T = GET_ATW->getType(boost::get<Handle>(*parent_node));
+	name = GET_ATW->getName(boost::get<Handle>(*parent_node));
 	real = boost::get<Handle>(*parent_node);
 	
 //cprintf(4,"REAL: %d\n", real);
@@ -702,11 +702,11 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 		{	
 			Btr<atom> b(new atom);
 			
-			if (s.number_of_children() > 0 && !GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(boost::get<Handle>(*s)), NODE) )
+			if (s.number_of_children() > 0 && !GET_ATW->inheritsType(GET_ATW->getType(boost::get<Handle>(*s)), NODE) )
 				b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 
-			b->T = CogServer::getAtomSpace()->getType(boost::get<Handle>(*s));
-			b->name = CogServer::getAtomSpace()->getName(boost::get<Handle>(*s));
+			b->T = GET_ATW->getType(boost::get<Handle>(*s));
+			b->name = GET_ATW->getName(boost::get<Handle>(*s));
 			b->real = boost::get<Handle>(*s);
 //cprintf(4,"REAL SUB: %d\n", b.real);			
 			hs.push_back(b);

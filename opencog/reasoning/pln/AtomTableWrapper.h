@@ -16,19 +16,20 @@
 #include <TimeServer.h>
 #include <type_codes.h>
 
+#include "PLN.h"
+
 #include "iAtomTableWrapper.h"
 #include "rules/Rule.h"
 #include "utils/fim.h"
 #include "utils/Singleton.h"
-//#include "CoreWrapper.h"
 
 //! The value at which PLN considers a TV a binary True.
 #define PLN_TRUE_MEAN 0.989
 
+//using namespace boost::bimaps;
+
 //! TODO: use static accessor method within AtomTableWrapper class instead of global
 #define GET_ATW ((AtomTableWrapper*) ::haxx::defaultAtomTableWrapper)
-
-//using namespace boost::bimaps;
 
 namespace reasoning
 {
@@ -71,7 +72,8 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! TODO: Handle is used, but eventually all references to Handle in PLN
     //! should be replaced by pHandle (typedefded to long int) to ensure
     //! distinctness from general OpenCog Handles... which could potentially change from
-    //! long int to another type in the future.
+    //! long int to another type in the future. OR, PLN should be adapted to
+    //! use vhpairs directly instead of relying on the AtomTableWrapper.
     // vhmap_t vhmap;
     
     typedef std::map< Handle, vhpair > vhmap_t;
@@ -107,18 +109,21 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! @param some kind of mechanism to manage memory?
     Handle addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
 
-    Handle realToFakeHandle(const Handle hs);
     Handle realToFakeHandle(const Handle h, const VersionHandle vh);
+    std::vector< Handle > realToFakeHandle(const Handle hs);
     std::vector< Handle > realToFakeHandle(std::vector< Handle > hs, bool expand=false);
 
     vhpair fakeToRealHandle(const Handle f) const;
+    bool hasAppropriateContext(const Handle o, VersionHandle& vh) const;
+    bool isSubcontextOf(const Handle sub, const Handle super);
+    Handle getSuperContext(const Handle sub) const;
 
     //! used by filter_type to merge collections of handles.
     template<class T>
-    T mergeCopy(const T& a, const T& b) {
-        T ret(a);
-        copy(b.begin(), b.end(), back_inserter(ret));
-        return ret;
+    void mergeCopy(T& a, const T& b) {
+        //T ret(a);
+        copy(b.begin(), b.end(), back_inserter(a));
+        //return ret;
     }
 
 public:
@@ -146,13 +151,14 @@ public:
 
     //! Get handles with type t and name str optionally subtypes as well
     virtual Btr<set<Handle> > getHandleSet(Type T, const string& name,
-            bool subclass = false) const;
+            bool subclass = false);
     //! Get handle of node with type t and name str
-    Handle getHandle(Type t,const std::string& str) const;
+    Handle getHandle(Type t,const std::string& str);
     //! Get handle of link with type t and outgoing set 
-    Handle getHandle(Type t,const HandleSeq& outgoing) const;
+    Handle getHandle(Type t,const HandleSeq& outgoing);
 
     std::vector<Handle> getOutgoing(const Handle h) const;
+    Handle getOutgoingAtIndex(const Handle h, const int i);
     Type getType(const Handle h) const;
     std::string getName(const Handle h) const;
 
@@ -179,7 +185,7 @@ public:
     bool prepare();
         
 // TODELETE does nothing
-    int implicationConstruction();
+    //int implicationConstruction();
 
     //! Add atom from tree vertex
     Handle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
@@ -234,7 +240,7 @@ public:
         bool fresh,bool managed);
 
     //! return the handle of atom that has index i in h's outgoing set
-    Handle child(Handle h, int i);
+    Handle child(const Handle h, const int i);
     //! returns whether the type of h is T or inherits from T
     bool isSubType(Handle h, Type T);
     //! returns whether 
@@ -255,7 +261,7 @@ public:
     bool equal(const HandleSeq& lhs, const HandleSeq& rhs);
     bool equal(Handle A, Handle B);
 
-    int getFirstIndexOfType(HandleSeq hs, Type T);
+    int getFirstIndexOfType(HandleSeq hs, Type T) const;
     bool symmetricLink(Type T);
     bool is_empty_link(Handle h);
     bool hasFalsum(HandleSeq hs);
@@ -306,7 +312,7 @@ public:
             bool fresh, bool managed=true);
     Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
-    Btr<set<Handle> > getHandleSet(Type,const string&,bool = false);
+    //Btr<set<Handle> > getHandleSet(Type,const string&,bool = false);
 
 };
 
@@ -326,7 +332,7 @@ public:
             bool fresh, bool managed=true);
     Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
-    Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
+    //Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
 
 };
 

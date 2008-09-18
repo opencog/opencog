@@ -206,12 +206,12 @@ cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());
 LOG(4, "ANDRule:: getLargestIntersection OK!");
         TruthValue** tvs = new TruthValue*[1 + DiSubsets.size()];
         
-        tvs[0] = (TruthValue*) &(getTruthValue(*i));
+        tvs[0] = (TruthValue*) &(GET_ATW->getTV(*i));
     
         int h=0;
         set<Handle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
-            tvs[h+1] = (TruthValue*) &(getTruthValue(*ss));
+            tvs[h+1] = (TruthValue*) &(GET_ATW->getTV(*ss));
 LOG(4, "R ANDRule::compute");
 
 /*      if (DiSubsets.size()>0)

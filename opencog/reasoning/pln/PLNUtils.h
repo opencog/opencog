@@ -1,7 +1,6 @@
 /*
  * Fri Feb 18 11:35:16 2005
  * Copyright (C) 2005  Ari A. Heljakka <heljakka at gmail.com>  / Novamente LLC
- *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
  * All Rights Reserved
@@ -22,17 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PTL_UTILS_H
-#define PTL_UTILS_H
+#ifndef PLN_UTILS_H
+#define PLN_UTILS_H
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 
-// What's this for? - possibly not needed?
-#ifndef WIN32
-//	#include <string.h>
-//	#include <dirent.h>
-#else
+#ifdef WIN32
 	#pragma warning (disable: 4786)
 #endif
 
@@ -49,20 +44,6 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/bind.hpp>
 
-// What are the equivalents in OpenCog ???
-//#include <classes.h>
-//#include "NMCore.h"
-#include "AtomLookupProvider.h"
-#include "PLNatom.h"
-
-// OpenCog has these, but are their interfaces the same?
-//#include <Temporal.h>
-//#include <TruthValue.h>
-
-// This is a 3rd party tree template library
-#include <tree.h>
-#include <utils2.h>
-
 // AtomSpace 
 #include <Atom.h>
 #include <ClassServer.h>
@@ -71,13 +52,18 @@
 #include <Node.h>
 #include <TLB.h>
 
-using namespace opencog;
+// This is a 3rd party tree template library
+#include <tree.h>
+#include <utils2.h>
 
-// These should probably be moved into the reasoning namespace
-typedef unsigned char byte;
-typedef unsigned short int word;
-typedef unsigned long int dword;
-typedef tree<Vertex> vtree;
+#include "PLN.h"
+
+#include "AtomLookupProvider.h"
+//#include "PLNatom.h"
+//#include "AtomTableWrapper.h"
+
+using namespace std;
+using namespace opencog;
 
 #undef STLhas
 #define STLhas(container, entity) ((container).find(entity) != (container).end())
@@ -86,14 +72,12 @@ typedef tree<Vertex> vtree;
 #define Btr boost::shared_ptr
 #define DeclareBtr(__T, __varname) Btr< __T > __varname(new __T)
 
-namespace haxx
-{
-const int STD_VARS = 100;
+namespace haxx {
+    const int STD_VARS = 100;
 }
 
-// added by ricbit
-using namespace std;
-
+/// vtree
+typedef tree<Vertex> vtree;
 /// meta is a tree of Vertices wrapped in a boost::shared_ptr
 typedef Btr<tree<Vertex> > meta;
 /// hpair is a pair of Handles
@@ -618,16 +602,13 @@ bool deref_equal(T a, T b) { return *a == *b; }
 
 Handle _v2h(const Vertex& v);
 
-struct getOutgoingFun : public binary_function<Handle, int, Handle> 
+struct getOutgoingFun : public binary_function<Handle, int, Handle>
 {
-	Handle operator()(Handle h, int i)
-	{
-		return CogServer::getAtomSpace()->getOutgoing(h,i);
-	}
+    Handle operator()(Handle h, int i);
 };
 
-#define getTypeFun std::bind1st(std::mem_fun(&AtomSpace::getType), CogServer::getAtomSpace())
-//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpace::getOutgoing), CogServer::getAtomSpace())
+#define getTypeFun std::bind1st(std::mem_fun(&AtomTableWrapper::getType), GET_ATW)
+//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomTableWrapper::getOutgoing),GET_ATW)
 #define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
 #define getFW_VAR(vt) (find_if((vt).begin(), (vt).end(), \

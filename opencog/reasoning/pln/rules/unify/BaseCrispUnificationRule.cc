@@ -13,7 +13,6 @@ namespace reasoning
 BoundVertex BaseCrispUnificationRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
     const int n = premiseArray.size();
-    AtomSpace *nm = CogServer::getAtomSpace();
     
 	cprintf(4, "BaseCrispUnificationRule::compute:");
 #if 0    
@@ -25,16 +24,16 @@ BoundVertex BaseCrispUnificationRule::compute(const vector<Vertex>& premiseArray
         printer.print(v2h(premiseArray[i]), 4);
 #endif
     
-    assert(nm->getType(v2h(premiseArray[0])) == FORALL_LINK);
-    assert(nm->getType(v2h(premiseArray[n-1])) == HYPOTHETICAL_LINK);
+    assert(GET_ATW->getType(v2h(premiseArray[0])) == FORALL_LINK);
+    assert(GET_ATW->getType(v2h(premiseArray[n-1])) == HYPOTHETICAL_LINK);
 
-    Handle topologicalStub = nm->getOutgoing(v2h(premiseArray[n-1]))[0];
+    Handle topologicalStub = GET_ATW->getOutgoing(v2h(premiseArray[n-1]))[0];
 
-    const TruthValue& tv = getTruthValue(v2h(premiseArray[0]));
+    const TruthValue& tv = GET_ATW->getTV(v2h(premiseArray[0]));
     
     
-    Handle ret= destTable->addLink( nm->getType(topologicalStub),
-                                nm->getOutgoing(topologicalStub),
+    Handle ret= destTable->addLink( GET_ATW->getType(topologicalStub),
+                                GET_ATW->getOutgoing(topologicalStub),
                                 tv,
                                 RuleResultFreshness);   
 

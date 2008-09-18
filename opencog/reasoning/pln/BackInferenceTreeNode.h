@@ -210,9 +210,9 @@ protected:
 		}
 		}
 		}	*/
-		AtomSpace *nm = CogServer::getAtomSpace();
+		//AtomSpace *nm = CogServer::getAtomSpace();
 		for(IterT bv = rule_args_begin; bv != rule_args_end; bv++)
-			if (nm->getType(v2h(*(*bv)->getVtree().begin())) == FW_VARIABLE_NODE)
+			if (GET_ATW->getType(v2h(*(*bv)->getVtree().begin())) == FW_VARIABLE_NODE)
 			{
 /*				LOG(0, "FW_VARIABLE_NODE found on Rule args: "+string(nm->getName(v2h(bv->value))));
 

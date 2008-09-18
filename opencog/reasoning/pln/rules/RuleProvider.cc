@@ -21,7 +21,7 @@ void delete_op(T* r) { delete r; }
 void RuleProvider::AddRule(Rule* r, float priority)
 {
 	push_back(r);
-	//r->SetPriority(priority);
+	r->setPriority(priority);
 }
 
 RuleProvider::~RuleProvider(void)
@@ -52,7 +52,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 	foreach(Handle fah, *ForAll_handles)
 		AddRule(new CustomCrispUnificationRule(fah, parent), 7.5f);
 
-	printf("Added %u CrispUnificationRules.\n", (unsigned int) size());
+	cprintf(-1, "Added %u CrispUnificationRules.\n", (unsigned int) size());
 
 	AddRule(new LookupRule(parent), 20.0f);
 
@@ -107,16 +107,15 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 
 	/* The rest of the Rules have rarely or never been used. Some of them just won't work. */
 
-//	AddRule(new UnorderedLinkPermutationRule(parent), 10.0f);
-/*	AddRule(new VariableInstantiationRule(parent), 10.0f);
+/*	AddRule(new UnorderedLinkPermutationRule(parent), 10.0f);
+	AddRule(new VariableInstantiationRule(parent), 10.0f);
 	AddRule(new NOTEliminationRule(parent), 10.0f
 	AddRule(new Equi2ImplRule(parent), 10.0f
 	AddRule(new Equi2Sim(parent), 10.0f;
 	AddRule(new Inh2SimRule(parent), 10.0f;
 	AddRule(new Sim2InhRule(parent), 10.0f;
-*/	
 
-/*	AddRule(new RevisionRule(parent);	
+	AddRule(new RevisionRule(parent);	
 	AddRule(new MetaPredicateExecutionRule(parent);
 	AddRule(new SubSetEvalRule<CONCEPT_NODE>(parent)
 	AddRule(new Equi2SimRule(parent);
@@ -124,14 +123,15 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 	AddRule(new Inh2ImpRule(parent);
 	AddRule(new Imp2InhRule(parent);
 	AddRule(new Mem2EvalRule(parent);
-	AddRule(new Inh2EvalRule(parent);*/
+	AddRule(new Inh2EvalRule(parent);
 
-/*	AddRule(new ExtImpl2SubsetRule(parent)
-	AddRule(new ExtEqui2ExtSimRule(parent)
-	AddRule(new TautologyRule(parent)
-	AddRule(new OR2ANDRule(parent)
-	AddRule(new Exist2ForAllRule(parent)
-	AddRule(new ExistRule(parent)*/
+	AddRule(new ExtImpl2SubsetRule(parent);
+	AddRule(new ExtEqui2ExtSimRule(parent);
+	AddRule(new TautologyRule(parent);
+	AddRule(new OR2ANDRule(parent);
+	AddRule(new Exist2ForAllRule(parent);
+	AddRule(new ExistRule(parent);
+*/
 }
 
 DefaultVariableRuleProvider::~DefaultVariableRuleProvider(void)

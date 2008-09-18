@@ -18,7 +18,6 @@
 #include <boost/foreach.hpp>
 
 enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
-//#include "../common/core/NMPrinter.h"
 
 int haxxUsedProofResources = 0;
 float temperature = 0.01;

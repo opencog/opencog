@@ -249,45 +249,44 @@ void PLNShell_RunLoop(int argc, char** args)
         
 #if 1 //Loading Osama or set axioms here.
 
-    haxx::ArchiveTheorems = true;
- 
-    bool axioms_ok = atw.loadAxioms("bigdemo.xml");
+        haxx::ArchiveTheorems = true;
+     
+    //  bool axioms_ok = atw.loadAxioms("bigdemo.xml");
+    //  bool axioms_ok = atw.loadAxioms("inverse_binding.xml");
+    //  bool axioms_ok = atw.loadAxioms("fetch10.xml");
+    //  bool axioms_ok = atw.loadAxioms("mediumdemo.xml");
+        bool axioms_ok = atw.loadAxioms("smalldemo.xml");
+    //  bool axioms_ok = atw.loadAxioms("smalldemo28.xml");
+    //  bool axioms_ok = atw.loadAxioms("smalldemo28b.xml");
+    //  bool axioms_ok = atw.loadAxioms("smalldemo8.xml");
+    //  bool axioms_ok = atw.loadAxioms("smalldemo8b.xml");  
+    //  bool axioms_ok = atw.loadAxioms("smalldemo8c.xml");
+    //  bool axioms_ok = atw.loadAxioms("AnotBdemo.xml");
+    //  bool axioms_ok = atw.loadAxioms("fetchdemo5.xml");
+    //  bool axioms_ok = atw.loadAxioms("fetchdemo.xml");
+    //  bool axioms_ok = atw.loadAxioms("woademo.xml");
+        assert(axioms_ok);
 
-//  bool axioms_ok = atw.loadAxioms("inverse_binding.xml");
-//  bool axioms_ok = atw.loadAxioms("fetch10.xml");
-//  bool axioms_ok = atw.loadAxioms("mediumdemo.xml");
-//  bool axioms_ok = atw.loadAxioms("smalldemo.xml");
-//  bool axioms_ok = atw.loadAxioms("smalldemo28.xml");
-//  bool axioms_ok = atw.loadAxioms("smalldemo28b.xml");
-//  bool axioms_ok = atw.loadAxioms("smalldemo8.xml");
-//  bool axioms_ok = atw.loadAxioms("smalldemo8b.xml");  
-//  bool axioms_ok = atw.loadAxioms("smalldemo8c.xml");
-//  bool axioms_ok = atw.loadAxioms("AnotBdemo.xml");
-//  bool axioms_ok = atw.loadAxioms("fetchdemo5.xml");
-//  bool axioms_ok = atw.loadAxioms("fetchdemo.xml");
-//  bool axioms_ok = atw.loadAxioms("woademo.xml");
-      assert(axioms_ok);
-
-      haxx::ArchiveTheorems = false;
+        haxx::ArchiveTheorems = false;
 #endif
-      logger().debug("PTL Initialized.");
+        logger().debug("PTL Initialized.");
 
         logger().info("Running footest()...\n");
         footest();
         logger().info("footest() complete.\n");
 
-  } catch(std::string s)
-  {
-      logger().error("at root level while RunLoop initializing.");
-  }
-  catch(PLNexception e)
-  {
-      logger().error("at root level while RunLoop initializing.");
-  }
-  catch(...)
-  {
-      logger().error("Unknown exception at root level while RunLoop initializing. ");
-  }
+    }
+    catch(std::string s) {
+        logger().error("at root level while RunLoop initializing.");
+    }
+    catch(PLNexception e)
+    {
+        logger().error("at root level while RunLoop initializing.");
+    }
+    catch(...)
+    {
+        logger().error("Unknown exception at root level while RunLoop initializing. ");
+    }
 
     try
     {

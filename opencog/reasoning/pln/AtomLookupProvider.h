@@ -24,17 +24,17 @@ public:
      * not returned!
      */
     virtual boost::shared_ptr<set<Handle> > getHandleSet(Type T, const string&
-            name, bool subclass = false) const =0 ;
+            name, bool subclass = false) =0 ;
 
     /** Return the set of all nodes with type T and the name str
      * NOTE! atoms with confidence < 0.0000001 are not returned!
      */
-    virtual Handle getHandle(Type t,const std::string& str) const=0;
+    virtual Handle getHandle(Type t,const std::string& str) =0;
 
     /** return the set of all links with type T and the given outgoing set
       * NOTE! atoms with confidence < 0.0000001 are not returned!
       */
-    virtual Handle getHandle(Type t,const HandleSeq& outgoing) const=0;
+    virtual Handle getHandle(Type t,const HandleSeq& outgoing) =0;
 	virtual ~AtomLookupProvider() { };
 };
 

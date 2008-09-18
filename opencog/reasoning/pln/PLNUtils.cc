@@ -77,7 +77,7 @@ void rawPrint(tree<Vertex>::iterator top, int _rloglevel)
 
 void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
 {
-	AtomSpace *atw = CogServer::getAtomSpace();
+	AtomTableWrapper *atw = GET_ATW;
     if (_rloglevel > currentDebugLevel)
         return;
 
@@ -349,6 +349,11 @@ string make_subst_buf(const BoundVertex& a);
 	{
 	}
 };*/
+
+Handle getOutgoingFun::operator()(Handle h, int i)
+{
+    return GET_ATW->getOutgoingAtIndex(h,i);
+}
 
 bool equal_vectors(Handle* lhs, int lhs_arity, Handle* rhs)
 {

@@ -83,7 +83,7 @@ BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseA
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
     
-    return Vertex(destTable->addAtom(res, getTruthValue(v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
+    return Vertex(destTable->addAtom(res, GET_ATW->getTV(v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
 }
 
 } // namespace reasoning

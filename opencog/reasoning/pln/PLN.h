@@ -14,35 +14,28 @@
 #include <stdarg.h>
 
 // C++ includes
-#include <set>
-#include <algorithm>
-#include <stack>
-#include <string>
-#include <map>
-#include <stack>
+//#include <set>
+//#include <algorithm>
+//#include <stack>
+//#include <string>
+//#include <map>
+//#include <stack>
 
 // Boost includes
 #include <boost/smart_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lambda/lambda.hpp>
-#include <boost/bind.hpp>
+//#include <boost/bind.hpp>
 
 // OpenCog includes
-#include <AtomSpace.h>
-#include <Link.h>
-#include <Atom.h>
-#include <Node.h>
-#include <TLB.h>
-#include <classes.h>
-#include <SimpleTruthValue.h>
+//#include <AtomSpace.h>
+//#include <Link.h>
+//#include <Atom.h>
+//#include <Node.h>
+//#include <TLB.h>
+//#include <classes.h>
+//#include <SimpleTruthValue.h>
 
-// PLN includes
-//#include "CoreWrapper.h"
-//#include "rules/Rule.h"
-//#include "iAtomTableWrapper.h"
-
-// PLN utility includes
-#include "PLNUtils.h"
 #include <utils2.h>
 #include <utils.h>
 
@@ -54,10 +47,18 @@
 #define foreach BOOST_FOREACH
 #define Btr boost::shared_ptr
 
+using namespace opencog;
+
 namespace reasoning {
+    typedef unsigned char byte;
+    typedef unsigned short int word;
+    typedef unsigned long int dword;
+    typedef tree<Vertex> vtree;
+
     typedef unsigned long ulong;
     enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
     enum MetaProperty { NONE, STRENGTH, CONFIDENCE, STRENGTH_CONFIDENCE, LTI, STI };
+
 }
 
 #endif // _PLN_H

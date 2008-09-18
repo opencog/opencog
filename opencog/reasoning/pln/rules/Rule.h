@@ -23,9 +23,10 @@
 #define _INFERENCE_RULE_H
 
 #include <TruthValue.h>
+#include "../PLN.h"
 #include "../PLNUtils.h"
 
-const TruthValue& getTruthValue(Handle h); 
+const TruthValue& getTV(Handle h); 
 #define NO_DIRECT_PRODUCTION Btr<set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<set<BoundVertex> >(); }
 
 /** Reasoning namespace is being used instead of opencog while
