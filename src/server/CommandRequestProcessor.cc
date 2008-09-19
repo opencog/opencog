@@ -149,6 +149,12 @@ std::string CommandRequestProcessor::load(std::string fileName)
     return loadXML(new FileXMLBufferReader(fileName.c_str()));
 }
 
+#ifdef HAVE_MODULES
+// XXX This code is a pre-alpha prototype of a module system;
+// It does not actually do anything yet. See bug report 
+// https://bugs.launchpad.net/opencog/+bug/272184
+// For details, and requirements for what it *should* do.
+
 #ifndef WIN32
 /**
  * Load a dynamic module and run it
@@ -210,6 +216,7 @@ bool CommandRequestProcessor::externalCommand(std::string command, std::queue<st
 	return false;
 }
 #endif // IFNDEF WIN32
+#endif /* HAVE_MODULES */
 
 /**
  * Read XML data from a string
@@ -564,6 +571,7 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             answer = load(args.front());
         }
     }
+#ifdef HAVE_MODULES
 #ifndef WIN32
     else if (command == "dlopen") {
         if (args.size() != 1) {
@@ -578,7 +586,8 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
             answer = dlclose(args.front());
         }
     }
-#endif
+#endif /* WIN32 */
+#endif /* HAVE_MODULES */
 
     // Print all atoms in the hypergraph
     else if (command == "ls") {
@@ -691,14 +700,22 @@ void CommandRequestProcessor::processRequest(CogServerRequest *req)
     }
 #endif /* HAVE_LIBMEMCACHED */
 
-    // If we got to hear, none of the other case statements 
+#ifdef HAVE_MODULES
+    else if (!externalCommand(command, args, answer))
+    {
+       // ???
+    }
+#endif /* HAVE_MODULES */
+
+    // If we got to here, none of the other case statements 
     // handled the commmand -- its an unknown command.
-    else if (!externalCommand(command, args, answer)) {
+    else
+    {
         answer = "unknown command >>" + command + "<<\n" +
                  "\tAvailable commands: ";
 #ifdef HAVE_LIBMEMCACHED
         answer += "cache-open cache-close cache-store cache-load\n\t";
-#endif
+#endif 
         answer += "data dlopen dlclose exit help load ls";
 #ifdef HAVE_GUILE
         answer += " scm";

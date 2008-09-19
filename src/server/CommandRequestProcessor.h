@@ -61,9 +61,11 @@ private:
     std::string data(std::string);
     std::string help(std::string);
     std::string load(std::string);
+#ifdef HAVE_MODULES
     std::string dlopen(std::string);
     std::string dlclose(std::string);
     bool externalCommand(std::string, std::queue<std::string>&, std::string&);
+#endif /* HAVE_MODULES */
     std::string ls(std::string, std::string);
     std::string ls(std::string);
     std::string ls(Handle);
