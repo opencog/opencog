@@ -32,7 +32,11 @@
 using namespace opencog;
 
 // Low-lying values are reserved for "non-real" atoms.
-unsigned long TLB::uuid = NOTYPE + 1;
+// Leave a large gap between the highest "non-real" atom,
+// and the first "real" handle.  This allows new atom types
+// to be added, while still not overlapping with handles
+// in older persistent storage.
+unsigned long TLB::uuid = NOTYPE + 1000;
 
 std::map<Handle, Atom *> TLB::handle_map;
 std::map<Atom *, Handle> TLB::atom_map;
