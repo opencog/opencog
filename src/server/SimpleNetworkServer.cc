@@ -52,6 +52,11 @@ SimpleNetworkServer::SimpleNetworkServer(CogServer *cs, int pn)
     portNumber = pn;
     cogServer = cs;
     shell_mode = false;
+
+    // XXX Fixme, this is the wrong prompt to display -- 
+    // when the shell server is in a mode other than the 
+    // normal opencog mode. The prompt needs to be taken 
+    // from the command processor, rather than here.
     prompt = "opencog> ";
 }
 
@@ -163,14 +168,25 @@ void *SimpleNetworkServer::portListener(void *arg)
  * @command -- output, contains first non-whitespace part of input string
  * @args -- output, queue of space-separated tokens split from the input string.
  *
- * XXX ?? what is the purpose of this?? gnu getopt is an better/more general way to get
- * args from a command line.
+ * XXX ?? what is the purpose of this?? gnu getopt is an better/more general
+ * way to get args from a command line.
+ *
+ * Anyway, command line processing should be moved to the 
+ * CommandRequestProcessor since it is not correct to always process all
+ * input streams (some input streams are not commands, they're data. 
+ * XXX Fix this!
  */
-void SimpleNetworkServer::parseCommandLine(const std::string &line,
+void SimpleNetworkServer::parseCommandLine(const std::string &_line,
         std::string &command,
         std::queue<std::string> &args)
 {
     std::string::size_type pos1, pos2;
+    std::string line;
+
+    // Trim off leading whitespace.
+    line = _line;
+    int nw = line.find_first_not_of(" \t\v\f");
+    if (0 < nw) line = line.substr(nw);
 
     pos1 = line.find(' ', 0);
     if (pos1 == line.npos) {
