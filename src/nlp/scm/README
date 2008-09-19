@@ -1,0 +1,11 @@
+
+                  Assorted Scheme scripts
+                  -----------------------
+
+ * nlp-utils: some minir nlp-related utilities, mostly for pointer 
+   chasing nlp-specific structures.
+
+ * parse-rank.scm: tweak link-grammar parse-ranking scores, based
+   on the mutual informationcontained in word pairs.
+
+ * disjunct.scm: build lists of link-grammar disjuncts.
