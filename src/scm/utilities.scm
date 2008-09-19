@@ -71,12 +71,12 @@ scm
 ;
 (define (cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
 	(define (get-endpoint w)
-		(display dbg-emsg)
+		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
 		; cog-filter returns the return value from proc, we pass it on
 		; in turn, so make sure this is last statement
 		(cog-filter endpoint-type proc (cog-outgoing-set w))
 	)
-	(display dbg-lmsg)
+	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
 	; cog-filter returns the return value from proc, we pass it on
 	; in turn, so make sure this is last statement
 	(cog-filter link-type get-endpoint (cog-incoming-set anchor))
