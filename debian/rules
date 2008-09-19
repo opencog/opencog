@@ -1,0 +1,64 @@
+#!/usr/bin/make -f
+# -* makefile -*-
+
+BUILD_TYPE = 'RelWithDebInfo'
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	BUILD_TYPE = 'Debug'
+endif
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	BUILD_TYPE = 'Debug'
+endif
+
+# shared library versions, option 1
+version=0.1.0
+major=0
+
+build: build-stamp
+build-stamp:
+	touch build-stamp
+	dh_testdir
+
+	# Add here commands to compile the package.
+	cmake -DCMAKE_INSTALL_PREFIX:STRING=/usr -DCONFDIR=/etc -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) .
+	$(MAKE)
+
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) clean
+
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+
+	# Add here commands to install the package into debian/tmp
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir -a
+	dh_testroot -a
+	dh_installdocs
+	dh_installchangelogs
+	dh_installdirs -a
+	dh_install -a --sourcedir=debian/tmp --autodest
+	dh_strip --dbg-package=opencog-dbg
+	dh_compress -a
+	dh_fixperms -a
+	dh_installdeb -a
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary: binary-arch
+.PHONY: build clean binary-arch binary install

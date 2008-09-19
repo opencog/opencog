@@ -1,0 +1,34 @@
+This package was debianized by Gustavo Machado Campagnani Gama <gama@vettalabs.com> on
+Mon, 21 Aug 2008 14:22:00 -0300.
+
+Copyright: 
+
+    Copyright (C) 2002-2007 Novamente LLC
+    Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+
+License:
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License v3 as
+    published by the Free Software Foundation and including the exceptions
+    at http://opencog.org/wiki/Licenses
+    
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with this program; if not, write to:
+    Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+The complete text of the GNU Affero General Public License can be found in
+http://www.gnu.org/licenses/agpl-3.0.txt
+
+The Debian packaging is (C) 2008, Gustavo Machado Campagnani Gama
+<gama@vettalabs.com> and is licensed under the Affero GPL v3, see above.
+
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

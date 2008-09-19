@@ -1,0 +1,11 @@
+opencog (0.1.1-0ubuntu1~gama2) hardy; urgency=low
+
+  * Add amd64 as a supported arch.
+
+ -- Gustavo Machado Campagnani Gama <gama@vettalabs.com>  Fri, 19 Sep 2008 03:43:50 -0300
+
+opencog (0.1.1-0ubuntu1~gama1) hardy; urgency=low
+
+  * Initial Release.
+
+ -- Gustavo Machado Campagnani Gama <gama@vettalabs.com>  Fri, 19 Sep 2008 03:18:48 -0300
