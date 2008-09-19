@@ -2,8 +2,17 @@ scm
 ;
 ; parse-rank.scm
 ;
-; Provide a score for a link-grammar parse, based on how well it matches
-; a minimum spanning tree formed from word-pair mutual information.
+; Provide a score for a link-grammar parse, based on the total 
+; word-pair mutual information for all word-pairs linked by
+; link-grammar links. That is, every link-grammar link is looked
+; up in a database of mutual information, and the total MI is
+; added up for the indicated parse. It is presumed that a higher
+; MI corresponds to a better parse.
+;
+; An alternate, possibly better(?) strategy, which is not used, is to
+; obtain the maximum-spanning-tree for a given sentence, and then
+; compare the link-gramar linakge to that tree. (Some initial code
+; for the MST approach is below)
 ;
 ; Requires access to a database containing previously computed word-pair
 ; mutual information values.
