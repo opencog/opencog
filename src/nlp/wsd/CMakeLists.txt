@@ -12,6 +12,8 @@ ADD_LIBRARY (wsd STATIC
 	WordSenseProcessor.cc
 )
 
+# ADD_DEFINITIONS(-DDEBUG)
+
 INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/src/atomspace
 	${OPENCOG_SOURCE_DIR}/src/persist
