@@ -93,7 +93,7 @@ void WordSenseProcessor::run(CogServer *server)
  *
  * XXX This routine does not guarentee that sentences are found in
  * order. Once found, they are handled in serial order, in the order
- * in which they wre found. But they could have beenm found in "random"
+ * in which they were found. But they could have been found in "random"
  * order. This needs a long term fix.
  */
 bool WordSenseProcessor::do_sentence(Handle h)

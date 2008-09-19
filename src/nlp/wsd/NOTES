@@ -4,6 +4,9 @@
 See the README file to learn about word-sense disambiguation.
 This file contains some random junk pertaining to a test case.
 
+Current database containing only wordnet poles:
+sql-open nlp linas asdf
+sql-load
 
 Completed setences are INHERITANCE_LINKed to a node named "#WSD_completed".
 

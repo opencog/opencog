@@ -661,6 +661,15 @@ Ideas/TODO
 ----------
 -- Build test framework 
 
+-- Sentences are not processed in sentence order, but in "random"
+   order. This needs to be fixed.
+
+-- Need to fix main dispatcher; right now, WSD is called 100 times
+   a second, no matter what.
+
+-- Processed sentences need to be discarded when they are old enough.
+   Can't afford to clutter RAM with lots of sentences.
+
 -- use framenet for sense-similarity scoring!?
 
 -- do some common-sense reasoning from the wordnet ontology.
