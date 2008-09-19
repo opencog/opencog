@@ -12,8 +12,17 @@ scm
 (define (prt-stuff h) (display h) #f)
 
 (define (get-sentence-disjuncts sent-node)
+
+
+	(define (dj-per-word word)
+		; (display word)
+		(display (cog-incoming-set word))
+		#f
+	)
 	
-	(display sent-node)
+	; loop over all the words in the sentence
+	(cog-map-chase-link 'SentenceLink 'ConceptNode "" "" dj-per-word sent-node)
+	
 	#f
 )
 
