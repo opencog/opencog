@@ -56,4 +56,71 @@
 ; code for crawling hypergraphs and fetching particular values out of them.
 ; I'm hoping that this will provide a simpler, cleaner framework.
 ; The results of this experiment are TBD.
+; 
+; Some deeper conceptual remarks:
+; Of course, a wire should be understood to be a particular type of Link,
+; lets say "WireLink".
+;
+
+; Create a new wire
+; Along the lines of "make-connector", SICP 3.3.5
+(define (make-wire)
+	(let ((value '())
+		(informant #f)
+		(endpoints '()))
+
+		(define (connect new-endpoint)
+			(if (not (memq new-endpoint endpoints))
+				(set! endpoints (cons new-endpoint endpoints))
+			)
+			'done
+		)
+
+		(define (me request)
+			(cond 
+				((eq? request 'value) 'value)
+				(else (error "Unknown operation -- make-wire" request))
+			)
+		)
+
+		; return the command dispatcher.
+		me
+	)
+)
+
+; return the value of the wire.
+(define (wire-get-value wire) (wire 'value))
+
+; Basic messages
+; "assert" means "put a message on this bus"
+; "float"  means "leave the bus in a floating (unasserted) state"
+(define wire-assert-value 'I-have-a-value)
+(define wire-float-value  'I-lost-my-value)
+
+(define (wire-probe probe-name wire)
+	(define (prt-val value)
+		(display "Probe" )
+		(display probe-name)
+		(display " = ")
+		(display value)
+		(newline)
+	)
+
+	(define (me request)
+		(cond 
+			((eq? request wire-assert-value)
+				(prt-val (wire 'value)) 
+			)
+			((eq? request wire-float-value)
+				(prt-val (wire 'value)) 
+			)
+			(else
+				(error "unkonwn request -- wire-probe" request)
+			)
+		)
+	)
+
+	; return the command dispatcher.
+	me
+)
 
