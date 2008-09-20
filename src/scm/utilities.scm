@@ -17,7 +17,25 @@ scm
 
 ; A more agressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
-;
+
+
+; for-each-except 
+; standard for-each loop, except that anything matchin "except" is skipped
+(define (for-each-except exclude proc lst)
+	(define (loop items)
+		(cond
+			((null? items) #f)
+			((eq? exclude (car items))
+				(loop (cdr items))
+			)
+			(else
+				(proc (car items))
+				(loop (cdr items))
+			)
+		)
+	)
+	(loop lst)
+)
 
 ; -----------------------------------------------------------------------
 ; cog-filter atom-type proc atom-list

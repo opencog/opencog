@@ -65,7 +65,9 @@ scm
 ; Implementation notes:
 ; By analogy to electrical engineering, can also think of wires as "buses";
 ; values are asserted onto the bus by one master, and all other parties
-; on the bus must hold it "floating". (this can probably be relaxed)
+; on the bus must hold it "floating". Currently, the wire only grants 
+; access to one bus-master; its might be possible to relax this.
+; May need to create a specific grant/revoke protocal for the bus?
 
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
@@ -74,14 +76,30 @@ scm
 		(busmaster #f)    ; "informant" in SICP
 		(endpoints '()))  ; "constraints" in SICP
 
+		; Connect a new endpoint to the bus.
+		; If the endpoint is asserting,
+		; propagate the assertion onto the bus
 		(define (connect new-endpoint)
 			(if (not (memq new-endpoint endpoints))
 				(set! endpoints (cons new-endpoint endpoints))
 			)
 
 			; XXX If I have a value then inform
-			; (if (not (eq? value '()))
+			; (if (not (null? value)
 			'done
+		)
+
+		; Let "master" assert a value onto the bus
+		(define (set-value! newval master)
+			(cond 
+				((null? value) ; if the bus is floating, then grant
+					(set! value newval)
+					(set! busmaster master)
+					(for-each-except master deliver-msg endpoints)
+				)
+				; XXX if multiple masters, make sure thier values
+				; agree, else flag an error
+			)
 		)
 
 		(define (me request)
@@ -91,6 +109,7 @@ scm
 					(if busmaster #t #f)
 				)
 				((eq? request 'connect) connect)
+				((eq? request 'set-value!) set-value!)
 				(else (error "Unknown operation -- make-wire" request))
 			)
 		)
@@ -113,8 +132,10 @@ scm
 ; Basic messages
 ; "assert" means "put a message on this bus"
 ; "float"  means "leave the bus in a floating (unasserted) state"
-(define wire-assert-value 'I-have-a-value)
-(define wire-float-value  'I-lost-my-value)
+(define wire-assert-msg 'I-have-a-value)
+(define wire-float-msg  'I-lost-my-value)
+
+(define (deliver-msg endpoint) (endpoint wire-assert-msg))
 
 ; Display the value on a bus
 (define (wire-probe probe-name wire)
@@ -128,7 +149,7 @@ scm
 
 	(define (me request)
 		(cond 
-			((eq? request wire-assert-value)
+			((eq? request wire-assert-msg)
 				(prt-val (wire 'value)) 
 			)
 			((eq? request wire-float-value)
