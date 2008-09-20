@@ -17,6 +17,10 @@ scm
 ; Requires access to a database containing previously computed word-pair
 ; mutual information values.
 ;
+; NOTE ON PRORGRAMMING STYLE: this file makes heavy use of callbacks.
+; which is maybe not that good an idea ... its sort of a confusing
+; programming style. Maybe should redo this with streams.
+;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; login information and database
