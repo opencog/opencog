@@ -1,3 +1,4 @@
+scm
 ;
 ; wiring.scm
 ;
@@ -61,24 +62,35 @@
 ; Of course, a wire should be understood to be a particular type of Link,
 ; lets say "WireLink".
 ;
+; Implementation notes:
+; By analogy to electrical engineering, can also think of wires as "buses";
+; values are asserted onto the bus by one master, and all other parties
+; on the bus must hold it "floating". (this can probably be relaxed)
 
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
 (define (make-wire)
 	(let ((value '())
-		(informant #f)
-		(endpoints '()))
+		(busmaster #f)    ; "informant" in SICP
+		(endpoints '()))  ; "constraints" in SICP
 
 		(define (connect new-endpoint)
 			(if (not (memq new-endpoint endpoints))
 				(set! endpoints (cons new-endpoint endpoints))
 			)
+
+			; XXX If I have a value then inform
+			; (if (not (eq? value '()))
 			'done
 		)
 
 		(define (me request)
 			(cond 
 				((eq? request 'value) 'value)
+				((eq? request 'has-value?)
+					(if busmaster #t #f)
+				)
+				((eq? request 'connect) connect)
 				(else (error "Unknown operation -- make-wire" request))
 			)
 		)
@@ -90,6 +102,13 @@
 
 ; return the value of the wire.
 (define (wire-get-value wire) (wire 'value))
+(define (wire-has-value? wire) (wire 'has-value?))
+(define (wire-set-value! wire value endpoint)
+	((wire 'set-value!) value endpoint)
+)
+(define (wire-connect wire endpoint)
+	((wire 'connect) endpoint)
+)
 
 ; Basic messages
 ; "assert" means "put a message on this bus"
@@ -97,6 +116,7 @@
 (define wire-assert-value 'I-have-a-value)
 (define wire-float-value  'I-lost-my-value)
 
+; Display the value on a bus
 (define (wire-probe probe-name wire)
 	(define (prt-val value)
 		(display "Probe" )
@@ -124,3 +144,17 @@
 	me
 )
 
+; Place a constant value onto a bus
+(define (wire-constant value wire)
+	(define (me request)
+		(error "Unknown request -- wire-constant" request)
+	)
+	(wire-connect wire me)
+	(wire-set-value! wire value me)
+
+	; return the command dispatcher.
+	me
+)
+
+.
+exit
