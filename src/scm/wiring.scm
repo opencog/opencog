@@ -84,6 +84,7 @@ scm
 				(set! endpoints (cons new-endpoint endpoints))
 			)
 
+(display "duude enpoint connected\n")
 			; XXX If I have a value then inform
 			; (if (not (null? value)
 			'done
@@ -91,6 +92,7 @@ scm
 
 		; Let "master" assert a value onto the bus
 		(define (set-value! newval master)
+(display "duude set value called\n");
 			(cond 
 				((null? value) ; if the bus is floating, then grant
 					(set! value newval)
@@ -104,7 +106,7 @@ scm
 
 		(define (me request)
 			(cond 
-				((eq? request 'value) 'value)
+				((eq? request 'value) value)
 				((eq? request 'has-value?)
 					(if busmaster #t #f)
 				)
@@ -138,9 +140,11 @@ scm
 (define (deliver-msg endpoint) (endpoint wire-assert-msg))
 
 ; Display the value on a bus
+; Attach an endpoint to the bus, this enpoiint is a read-only endpoint
+; It prints any values asserted onto the bus.
 (define (wire-probe probe-name wire)
 	(define (prt-val value)
-		(display "Probe" )
+		(display "Probe: " )
 		(display probe-name)
 		(display " = ")
 		(display value)
@@ -152,14 +156,17 @@ scm
 			((eq? request wire-assert-msg)
 				(prt-val (wire 'value)) 
 			)
-			((eq? request wire-float-value)
-				(prt-val (wire 'value)) 
+			((eq? request wire-float-msg)
+				(prt-val "floating") 
 			)
 			(else
 				(error "unkonwn request -- wire-probe" request)
 			)
 		)
 	)
+
+	; hook me up
+	(wire-connect wire me)
 
 	; return the command dispatcher.
 	me
