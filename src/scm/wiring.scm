@@ -110,7 +110,8 @@ scm
 (display "duude endpoint connected\n")
 			; If there is a master on this wire, 
 			; then tell the new endpoint about it.
-			(if (not (stream-null? value))
+			(if (stream-null? value)
+				(float-msg new-endpoint)
 				(deliver-msg new-endpoint)
 			)
 			'done
@@ -165,6 +166,7 @@ scm
 (define wire-float-msg  'I-lost-my-value)
 
 (define (deliver-msg endpoint) (endpoint wire-assert-msg))
+(define (float-msg endpoint) (endpoint wire-float-msg))
 
 ; Display the value on a bus
 ; Attach an endpoint to the bus, this enpoiint is a read-only endpoint
@@ -205,7 +207,10 @@ scm
 	(define (toggle state) (cons state (not state)))
 
 	(define (me request)
-		(error "Unknown request -- clock-source" request)
+		(cond 
+			((eq? request wire-float-msg) (lambda () #f)) ; ignore float message
+			(else (error "Unknown request -- clock-source" request))
+		)
 	)
 
 	(wire-connect wire me)
@@ -220,7 +225,10 @@ scm
 (define (wire-source-list wire lst)
 
 	(define (me request)
-		(error "Unknown request -- list-source" request)
+		(cond 
+			((eq? request wire-float-msg) (lambda () #f)) ; ignore float message
+			(else (error "Unknown request -- list-source" request))
+		)
 	)
 
 	(wire-connect wire me)
