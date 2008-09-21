@@ -56,4 +56,17 @@ scm
 (list-get-sentence-list-disjuncts (cog-get-atoms 'SentenceNode))
 
 ;===========================
+; wire-style
+
+(define (wire-it)
+
+	; Create a wire to transport sentences
+	(define sentences (make-wire))
+
+	; Put the sentences on the wire
+	(cog-wire-atoms sentences 'SentenceNode)
+	(wire-probe "sent-list" sentences)
+)
+
+;===========================
 
