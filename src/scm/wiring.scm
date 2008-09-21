@@ -150,9 +150,9 @@ scm
 )
 
 ; return the value of the wire.
-(define (wire-get-value wire) (wire 'value))
-(define (wire-has-value? wire) (wire 'has-value?))
-(define (wire-set-value! wire value endpoint)
+(define (wire-get-stream wire) (wire 'value))       ; SICP get-value
+(define (wire-has-stream? wire) (wire 'has-value?)) ; SICP has-value?
+(define (wire-set-stream! wire value endpoint)      ; SICP set-value!
 	((wire 'set-value!) value endpoint)
 )
 (define (wire-connect wire endpoint)
@@ -225,7 +225,7 @@ scm
 	)
 
 	(wire-connect wire me)
-	(wire-set-value! wire (make-stream toggle #f) me)
+	(wire-set-stream! wire (make-stream toggle #f) me)
 
 	; return the command dispatcher.
 	me
@@ -237,13 +237,15 @@ scm
 
 	(define (me request)
 		(cond 
+
+
 			((eq? request wire-float-msg) (lambda () #f)) ; ignore float message
 			(else (error "Unknown request -- list-source" request))
 		)
 	)
 
 	(wire-connect wire me)
-	(wire-set-value! wire (list->stream lst) me)
+	(wire-set-stream! wire (list->stream lst) me)
 
 	; return the command dispatcher.
 	me
