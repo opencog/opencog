@@ -40,6 +40,26 @@ scm
 )
 
 ; -----------------------------------------------------------------------
+;
+; cog-get-atoms atom-type
+; Return a list of all atoms in the atomspace that are of type 'atom-type'
+;
+; Example usage:
+; (display (cog-get-atoms 'ConceptNode))
+; will return and display all atoms of type 'ConceptNode
+;
+(define (cog-get-atoms atom-type)
+	(let ((lst '()))
+		(define (mklist atom)
+			(set! lst (cons atom lst))
+			#f
+		)
+		(cog-map-type mklist atom-type)
+		lst
+	)
+)
+;
+; -----------------------------------------------------------------------
 ; cog-filter atom-type proc atom-list
 ;
 ; Apply the proceedure 'proc' to every atom of 'atom-list' that is

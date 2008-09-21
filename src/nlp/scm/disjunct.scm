@@ -28,17 +28,32 @@ scm
 	#f
 )
 
+; Do it callback-style
+; (cog-map-type cb-get-sentence-disjuncts 'SentenceNode)
 
-; List-style disjuncts
-(define (list-get-sentence-disjuncts sent-node)
-
-	; Get list of all words in the sentence
-	(define word-list (cog-chase-link 'SentenceLink 'ConceptNode sent-node))
-	(display word-list)
-
-	#f
+;===========================
+; Return a list of all of the link-grammar links the word particpates in
+(define (get-lgl word)
+	
+	'()
 )
 
+(define (list-get-sentence-disjuncts sent-node)
+	; Get list of all words in the sentence
+	(define (get-word-list sent)
+		(cog-chase-link 'SentenceLink 'ConceptNode sent)
+	)
 
-(cog-map-type cb-get-sentence-disjuncts 'SentenceNode)
-(cog-map-type list-get-sentence-disjuncts 'SentenceNode)
+	(display (get-word-list sent-node))
+)
+
+; List-style disjuncts
+(define (list-get-sentence-list-disjuncts sent-list)
+	(for-each list-get-sentence-disjuncts sent-list)
+)
+
+; Do it list-style
+(list-get-sentence-list-disjuncts (cog-get-atoms 'SentenceNode))
+
+;===========================
+
