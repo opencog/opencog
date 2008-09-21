@@ -60,12 +60,18 @@ scm
 
 (define (wire-it)
 
-	; Create a wire to transport sentences
+	; Create a wire to transport a stream of sentences
 	(define sentences (make-wire))
 
+	; A wire to transport sentence parts
+	(define sentence-parts (make-wire))
+
 	; Put the sentences on the wire
-	(cog-wire-atoms sentences 'SentenceNode)
-	(wire-probe "sent-list" sentences)
+	(cgw-source-atoms sentences 'SentenceNode)
+
+	(cgw-xfer sentences sentence-parts)
+
+	(wire-probe "sent-list" sentence-parts)
 )
 
 ;===========================
