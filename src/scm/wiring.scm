@@ -80,7 +80,17 @@ scm
 ; over won't be too hard.
 ;
 (use-modules (ice-9 streams))
-(define stream-null '())
+(define stream-null (make-stream (lambda (x) '()) '()))
+
+; Simple example code:
+;
+; (define w (make-wire))
+; (wire-probe "w-probe" w)
+; (wire-source-list w (list 1 2 3 4 5))
+;
+; The above will create a wire w, attach a probe to the wire (the probe
+; will print the values it sees on the wire) and then it will place a 
+; sequence of numbers on the wire, which the probe will print out.
 
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
@@ -90,16 +100,19 @@ scm
 		(endpoints '()))  ; "constraints" in SICP
 
 		; Connect a new endpoint to the bus.
-		; If the endpoint is asserting,
-		; propagate the assertion onto the bus
+		; If theres' a master on the bus, then
+		; let the new endpoint know about it.
 		(define (connect new-endpoint)
 			(if (not (memq new-endpoint endpoints))
 				(set! endpoints (cons new-endpoint endpoints))
 			)
 
 (display "duude endpoint connected\n")
-			; XXX If I have a value then inform
-			; (if (not (null? value)
+			; If there is a master on this wire, 
+			; then tell the new endpoint about it.
+			(if (not (stream-null? value))
+				(deliver-msg new-endpoint)
+			)
 			'done
 		)
 
@@ -107,9 +120,10 @@ scm
 		(define (set-value! newval master)
 (display "duude set value called\n");
 			(cond 
-				((null? value) ; if the bus is floating, then grant
+				((stream-null? value) ; if the bus is floating, then grant
 					(set! value newval)
 					(set! busmaster master)
+(display "duude gonna call\n")
 					(for-each-except master deliver-msg endpoints)
 				)
 				; XXX if multiple masters, make sure thier values
@@ -155,7 +169,7 @@ scm
 ; Display the value on a bus
 ; Attach an endpoint to the bus, this enpoiint is a read-only endpoint
 ; It prints any values asserted onto the bus.
-(define (wire-probe probe-name count wire)
+(define (wire-probe probe-name wire)
 	(define (prt-val value)
 		(display "Probe: " )
 		(display probe-name)
@@ -167,7 +181,7 @@ scm
 	(define (me request)
 		(cond 
 			((eq? request wire-assert-msg)
-				(prt-val (wire 'value)) 
+				(stream-for-each prt-val (wire 'value)) 
 			)
 			((eq? request wire-float-msg)
 				(prt-val "floating") 
@@ -185,36 +199,35 @@ scm
 	me
 )
 
-; Place a constant value onto a bus
-; XXX convert to a stream
-(define (wire-constant value wire)
-	(define (me request)
-		(error "Unknown request -- wire-constant" request)
-	)
-	(wire-connect wire me)
-	(wire-set-value! wire value me)
-
-	; return the command dispatcher.
-	me
-)
-
 ; Place a clock source on a wire
+; This generates an infinite sequence of alternating #t, #f values
 (define (clock-source wire)
 	(define (toggle state) (cons state (not state)))
 
 	(define (me request)
-		(error "Unknown request -- clock-sourse" request)
+		(error "Unknown request -- clock-source" request)
 	)
 
-	(let ( (bitstream (make-stream toggle #f)) )
-
-		(wire-connect wire me)
-		(wire-set-value! wire bitstream me)
-	)
+	(wire-connect wire me)
+	(wire-set-value! wire (make-stream toggle #f) me)
 
 	; return the command dispatcher.
 	me
 )
 
+; Place a list onto a wire
+; This creates a bus-master; the list will be clocked onto the bus.
+(define (wire-source-list wire lst)
+
+	(define (me request)
+		(error "Unknown request -- list-source" request)
+	)
+
+	(wire-connect wire me)
+	(wire-set-value! wire (list->stream lst) me)
+
+	; return the command dispatcher.
+	me
+)
 .
 exit
