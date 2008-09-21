@@ -9,6 +9,7 @@ scm
 ;
 (define (stv mean conf) (cog-new-stv mean conf))
 
+; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.
 (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
 (define (gdr x) (if (cog-atom? x) (cdr (cog-outgoing-set x)) (cdr x)))
@@ -19,6 +20,7 @@ scm
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
 
 
+; -----------------------------------------------------------------------
 ; for-each-except 
 ; standard for-each loop, except that anything matchin "except" is skipped
 (define (for-each-except exclude proc lst)
@@ -67,6 +69,29 @@ scm
 
 ; -----------------------------------------------------------------------
 ;
+; cog-chase-link link-type endpoint-type anchor
+;
+; Starting at the atom 'anchor', chase its incoming links of
+; 'link-type', and return a list of all of the 'node-type' in
+; those links.
+;
+; It is presumed that 'anchor' points to some atom (typically a node),
+; and that it has many links in its incoming set. So, loop over all of
+; the links of 'link-type' in this set. They presumably link to all 
+; sorts of things. Find all of the things that are of 'endpoint-type'.
+; Return a list of all of these.
+;
+(define (cog-chase-link link-type endpoint-type anchor)
+	(let ((lst '()))
+		(define (mklist inst)
+			(set! lst (cons inst lst))
+			#f
+		)
+		(cog-map-chase-link link-type endpoint-type '() '() mklist anchor)
+		lst
+	)
+)
+
 ; cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
 ;
 ; Chase 'link-type' to 'endpoint-type' and apply proc to what is found there.

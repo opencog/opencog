@@ -12,14 +12,12 @@ scm
 (define (prt-stuff h) (display h) #f)
 
 
-; disjunct stuff.
-(define (get-sentence-disjuncts sent-node)
+; callback-style disjunct stuff.
+(define (cb-get-sentence-disjuncts sent-node)
 
 	(define (dj-per-word word)
 		(display word)
 		; (display (cog-incoming-set word))
-		(define ?rel '())
-		(define ?rword '())
 	
 		#f
 	)
@@ -31,4 +29,16 @@ scm
 )
 
 
-(cog-map-type get-sentence-disjuncts 'SentenceNode)
+; List-style disjuncts
+(define (list-get-sentence-disjuncts sent-node)
+
+	; Get list of all words in the sentence
+	(define word-list (cog-chase-link 'SentenceLink 'ConceptNode sent-node))
+	(display word-list)
+
+	#f
+)
+
+
+(cog-map-type cb-get-sentence-disjuncts 'SentenceNode)
+(cog-map-type list-get-sentence-disjuncts 'SentenceNode)
