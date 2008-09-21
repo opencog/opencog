@@ -401,25 +401,24 @@ void fw_beta (void) {
   AtomTableWrapper *atw = GET_ATW;
 
   atw->reset();
-  vector<Handle> nodes=atw->filter_type(NODE);
-  for (vector<Handle>::iterator i=nodes.begin(); i!=nodes.end(); i++)
-    printf ("_node %d, %s, TV %s\n",atw->getType(*i),atw->getName(*i).c_str(),printTV(*i).c_str());
+  // Code to ensure AtomSpace was reset:
+  //vector<Handle> nodes=atw->filter_type(NODE);
+  //for (vector<Handle>::iterator i=nodes.begin(); i!=nodes.end(); i++)
+  //  printf ("_node %d, %s, TV %s\n",atw->getType(*i),atw->getName(*i).c_str(),printTV(*i).c_str());
 
-  vector<Handle> inhlink=atw->filter_type(INHERITANCE_LINK);
-  for (vector<Handle>::iterator i=inhlink.begin(); i!=inhlink.end(); i++) {
-    vector<Handle> out=atw->getOutgoing(*i);
-    printf ("_link %d: %s ",atw->getType(*i),printTV(*i).c_str());
-    foreach (Handle h,out)
-      cout << "<" << atw->getType(h) << "," << atw->getName(h) << ">,";
-    cout<<'\n';
-  }
-  printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,LINK));
-  printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,NODE));
-  return;
-  // From the above return it looks like the following is not needed?
-  // ARI: safe TODELETE ?
+  //vector<Handle> inhlink=atw->filter_type(INHERITANCE_LINK);
+  //for (vector<Handle>::iterator i=inhlink.begin(); i!=inhlink.end(); i++) {
+  //  vector<Handle> out=atw->getOutgoing(*i);
+  //  printf ("_link %d: %s ",atw->getType(*i),printTV(*i).c_str());
+  //  foreach (Handle h,out)
+  //    cout << "<" << atw->getType(h) << "," << atw->getName(h) << ">,";
+  //  cout<<'\n';
+  //}
+  // Code to test INHERITANCE_LINK inherits only from LINK
+  //printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,LINK));
+  //printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,NODE));
+
   ForwardTestRuleProvider *rp=new ForwardTestRuleProvider();
-  //AtomTableWrapper& atw = *GET_ATW;
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
   Handle h1=atw->addNode (CONCEPT_NODE,string("Human"),tv,true);
   Handle h2=atw->addNode (CONCEPT_NODE,string("Mortal"),tv,true);

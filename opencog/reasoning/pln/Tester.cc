@@ -377,7 +377,7 @@ void RunPLNTestsOnce()
 
 	puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
 
-	MacroRuleTest();
+	//MacroRuleTest();
 
 
 #if RUN_FAILURE_TESTS

@@ -222,6 +222,10 @@ bool AtomTableWrapper::isSubcontextOf(const Handle sub, const Handle super)
 
 vhpair AtomTableWrapper::fakeToRealHandle(const Handle h) const
 {
+    // Don't map Handles that are Types
+    if ((long) h <= NOTYPE) {
+        return vhpair(h,NULL_VERSION_HANDLE);
+    }
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
         // return existing fake handle
@@ -343,6 +347,9 @@ Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing)
 
 void AtomTableWrapper::reset()
 {
+    dummyContexts.clear();
+    vhmap.clear();
+    ::haxx::childOf.clear();
     AS_PTR->clear();
 }
 
@@ -1549,8 +1556,16 @@ Handle AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
         bool fresh, bool managed)
 {
     AtomSpace *a = AS_PTR;
+    HandleSeq hsReal;
+    // Convert outgoing links to real Handles
+    foreach(Handle h, hs) {
+        hsReal.push_back(fakeToRealHandle(h).first);
+    }
+    // TODO: check that all vhpairs have the same Context... otherwise, create a
+    // new one
+    
     // Construct a Link then use addAtomDC
-    Link l(t,hs);
+    Link l(t,hsReal);
     return addAtomDC(l, fresh, managed);
 }
 
@@ -1581,7 +1596,9 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             result = getHandle(node.getType(), node.getName());
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
-                return a->addNode(node.getType(), node.getName(), node.getTruthValue());
+                return realToFakeHandle(a->addNode(node.getType(),
+                        node.getName(), node.getTruthValue()),
+                        NULL_VERSION_HANDLE);
             }
         } else {
             const Link& link = (const Link&) atom;
@@ -1591,7 +1608,9 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             result = getHandle(link.getType(), outgoing);
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
-                return a->addLink(link.getType(), outgoing, link.getTruthValue());
+                return realToFakeHandle(a->addLink(link.getType(),
+                        outgoing, link.getTruthValue()),
+                        NULL_VERSION_HANDLE);
             }
         }
         // if it does exist, then go through each dummy context until NULL_TV is
@@ -1984,14 +2003,14 @@ HandleSeq AtomTableWrapper::filter_type(Type t)
 
 }
 
-std::vector<Handle> AtomTableWrapper::getOutgoing(const Handle h) const
+std::vector<Handle> AtomTableWrapper::getOutgoing(const Handle h)
 {
     vhpair v = fakeToRealHandle(h);
     HandleSeq s1,s2;
     s1 = AS_PTR->getOutgoing(v.first);
-    foreach (Handle h, s1) {
-        if (!AS_PTR->getTV(v.first,v.second).isNullTv()) {
-            s2.push_back(h);
+    foreach (Handle h1, s1) {
+        if (!AS_PTR->getTV(h1,v.second).isNullTv()) {
+            s2.push_back(realToFakeHandle(h1,v.second));
         }
     }
     return s2;

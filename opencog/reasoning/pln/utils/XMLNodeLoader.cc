@@ -41,8 +41,8 @@ Handle LoadXMLInput(iAtomTableWrapper* table, string buf)
 {
 #define L(A, B) name2type[A] = B; type2name[B] = A;
 
-LOG(1, "Loading XML Input...");
 //currentDebugLevel = 5; 
+LOG(1, "Loading XML Input...");
 
     // Use all standard atom type codes and names from ClassServer.h 
     L(ClassServer::getTypeName(CONCEPT_NODE), CONCEPT_NODE);

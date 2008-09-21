@@ -955,7 +955,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     HandleEntry* result = NULL;
 
     Atom *atom = TLB::getAtom(handle);
-    if (atom->isMarkedForRemoval()) return result;
+    if (!atom || atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
 
     // if recursive-flag is set, also extract all the links in the atom's incoming set

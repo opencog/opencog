@@ -54,7 +54,7 @@ typedef vtree::iterator pre_it;
 
 vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
 {
-    printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(Vertex((Handle)T));
@@ -73,7 +73,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, 
 }
 vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
-    printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(Vertex((Handle)T));
@@ -91,7 +91,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, 
 }
 vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
-    printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(Vertex((Handle)T));
@@ -109,7 +109,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, 
 
 vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
 {
-    printf("MakeVirtualAtom_slow Handle, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(Vertex((Handle)T));
@@ -126,7 +126,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
 
 vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1)
 {
-    printf("MakeVirtualAtom_slow Handle, vtree\n");
+    //printf("MakeVirtualAtom_slow Handle, vtree\n");
     try {
         vtree ret;
         ret.set_head(Vertex((Handle)T));
@@ -142,7 +142,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1)
 
 vtree opencog::MakeVirtualAtom_slow(Handle T)
 {
-    printf("MakeVirtualAtom_slow Handle\n");
+    //printf("MakeVirtualAtom_slow Handle\n");
     try {
         vtree ret;
         ret.set_head(Vertex((Handle)T));
@@ -155,7 +155,7 @@ vtree opencog::MakeVirtualAtom_slow(Handle T)
 }
 vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
 {
-    printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(T);
@@ -174,7 +174,7 @@ vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, 
 }
 vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
-    printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(T);
@@ -192,7 +192,7 @@ vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, 
 }
 vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
-    printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(T);
@@ -210,7 +210,7 @@ vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, 
 
 vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
 {
-    printf("MakeVirtualAtom_slow Vertex, vtree, vtree\n");
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree\n");
     try {
         vtree ret;
         ret.set_head(T);
@@ -227,7 +227,7 @@ vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
 
 vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1)
 {
-    printf("MakeVirtualAtom_slow Vertex, vtree\n");
+    //printf("MakeVirtualAtom_slow Vertex, vtree\n");
     try {
         vtree ret;
         ret.set_head(T);
@@ -243,7 +243,7 @@ vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1)
 
 vtree opencog::MakeVirtualAtom_slow(Vertex T)
 {
-    printf("MakeVirtualAtom_slow Vertex\n");
+    //printf("MakeVirtualAtom_slow Vertex\n");
     try {
         vtree ret;
         ret.set_head(T);

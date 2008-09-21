@@ -203,7 +203,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     rule = NULL;
     root = this;
     bound_target = meta(new vtree);
-    if (rp)
+    if (!rp) // changed to NOT rp... otherwise we are overwriting the provider rp
       rp = new DefaultVariableRuleProvider;
     assert(!rp->empty());
 	cprintf(3, "rp ok\n");
@@ -311,9 +311,10 @@ BITNode* BITNodeRoot::CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule:
 
 Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 {
-assert(0);
+    //TODO: why is there an assert zero and below results commented out?
+    assert(0);
 
-Btr<set<BoundVertex> > results;
+    Btr<set<BoundVertex> > results;
 
 //  Btr<set<BoundVertex> > results = (*children[0].begin()).prover->evaluate(chain);
 

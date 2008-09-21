@@ -157,7 +157,7 @@ public:
     //! Get handle of link with type t and outgoing set 
     Handle getHandle(Type t,const HandleSeq& outgoing);
 
-    std::vector<Handle> getOutgoing(const Handle h) const;
+    std::vector<Handle> getOutgoing(const Handle h);
     Handle getOutgoingAtIndex(const Handle h, const int i);
     Type getType(const Handle h) const;
     std::string getName(const Handle h) const;
@@ -200,7 +200,6 @@ public:
 // TODELETE not called from anywhere
     bool hasFalsum(float minAllowedError = 0.5) { return false; }
 
-// TODELETE not called from anywhere
     //! return a random handle of type T
     Handle getRandomHandle(Type T);
 

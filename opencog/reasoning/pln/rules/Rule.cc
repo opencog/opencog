@@ -117,13 +117,15 @@ bool Rule::validate(const vector<Vertex>& h) const
         return false;
     }
     
-    typedef weak_atom<boost::shared_ptr<tree<Vertex> > > vertex_wrapper;
+    // A vertex wrapper contains a vtree in a weak_atom
+    //typedef weak_atom<boost::shared_ptr<tree<Vertex> > > vertex_wrapper;
+    typedef weak_atom< meta > vertex_wrapper;
 
     for (uint i = 0; i < n; i++)
     {
         vertex_wrapper mp(inputFilter[i]);
-        
-        if (!(mp(v2h(myh[i]))))
+        Handle h2 = v2h(myh[i]);
+        if (!(mp(h2)))
         {
             uint    r=0;
             for (   r = i+1;
