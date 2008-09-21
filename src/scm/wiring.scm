@@ -162,15 +162,20 @@ scm
 ; Basic messages
 ; "assert" means "put a message on this bus"
 ; "float"  means "leave the bus in a floating (unasserted) state"
-(define wire-assert-msg 'I-have-a-value)
-(define wire-float-msg  'I-lost-my-value)
+(define wire-assert-msg 'I-want-to-xmit) ; I-have-a-value in SICP
+(define wire-float-msg  'Ready-to-recv)  ; I-lost-my-value in SICP
 
 (define (deliver-msg endpoint) (endpoint wire-assert-msg))
 (define (float-msg endpoint) (endpoint wire-float-msg))
 
 ; Display the value on a bus
-; Attach an endpoint to the bus, this enpoiint is a read-only endpoint
+; Attach an endpoint to the bus, this enpoint is a read-only endpoint
 ; It prints any values asserted onto the bus.
+;
+; This also clocks the bus, as well as printing the value. So 
+; this is a "active" probe.
+; XXX need to have a passive probe that doesn't clock the bus.
+;
 (define (wire-probe probe-name wire)
 	(define (prt-val value)
 		(display "Probe: " )
@@ -203,6 +208,12 @@ scm
 
 ; Place a clock source on a wire
 ; This generates an infinite sequence of alternating #t, #f values
+;
+; Do *not* use this with the current opencog scheme interpreter.
+; The problem is that this goes into an infinite loop. Worse,
+; the output is buffered, and is invisible. Worse still, there's
+; no way to ctrl-C this, since the shell server isn't properly
+; threaded for i/o. Bummer. Should be fixed someday.
 (define (clock-source wire)
 	(define (toggle state) (cons state (not state)))
 
