@@ -2,6 +2,10 @@ scm
 ;
 ; wiring.scm
 ;
+; Implements the wiring-together of opencog predicates.
+;
+; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
+;
 ; Implement a constraint-type wiring system, inspired by SICP sections
 ; 3.3 (constraints) and 3.5 (streams), where SICP is "Structure and
 ; Interpretation of Computer Programs", Abelson & Sussman. Note that
@@ -68,11 +72,20 @@ scm
 ; on the bus must hold it "floating". Currently, the wire only grants 
 ; access to one bus-master; its might be possible to relax this.
 ; May need to create a specific grant/revoke protocal for the bus?
+;
+; Unfortunately, ice-9 streams are significantly different than srfi-41
+; streams, but, for expediancy, I'll be using ice-9 streams, for now.
+; The biggest difference is that ice-9 doesn't have stream-cons, it has
+; make-stream instead; so the semantics is different. Hopefully, porting 
+; over won't be too hard.
+;
+(use-modules (ice-9 streams))
+(define stream-null '())
 
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
 (define (make-wire)
-	(let ((value '())
+	(let ((value stream-null) ; only be streams are allowed
 		(busmaster #f)    ; "informant" in SICP
 		(endpoints '()))  ; "constraints" in SICP
 
@@ -84,7 +97,7 @@ scm
 				(set! endpoints (cons new-endpoint endpoints))
 			)
 
-(display "duude enpoint connected\n")
+(display "duude endpoint connected\n")
 			; XXX If I have a value then inform
 			; (if (not (null? value)
 			'done
@@ -142,7 +155,7 @@ scm
 ; Display the value on a bus
 ; Attach an endpoint to the bus, this enpoiint is a read-only endpoint
 ; It prints any values asserted onto the bus.
-(define (wire-probe probe-name wire)
+(define (wire-probe probe-name count wire)
 	(define (prt-val value)
 		(display "Probe: " )
 		(display probe-name)
@@ -173,12 +186,31 @@ scm
 )
 
 ; Place a constant value onto a bus
+; XXX convert to a stream
 (define (wire-constant value wire)
 	(define (me request)
 		(error "Unknown request -- wire-constant" request)
 	)
 	(wire-connect wire me)
 	(wire-set-value! wire value me)
+
+	; return the command dispatcher.
+	me
+)
+
+; Place a clock source on a wire
+(define (clock-source wire)
+	(define (toggle state) (cons state (not state)))
+
+	(define (me request)
+		(error "Unknown request -- clock-sourse" request)
+	)
+
+	(let ( (bitstream (make-stream toggle #f)) )
+
+		(wire-connect wire me)
+		(wire-set-value! wire bitstream me)
+	)
 
 	; return the command dispatcher.
 	me
