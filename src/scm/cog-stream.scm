@@ -7,17 +7,62 @@ scm
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
+;; -------------------------------------------------------------------------
+; 
 ; Place all atoms in the atomspace, of type 'atom-type', onto wire
 (define (cgw-source-atoms wire atom-type)
 	(wire-source-list wire (cog-get-atoms atom-type))
 )
 
+;; -------------------------------------------------------------------------
+;
+; Print types of atoms on a wire
+;
+(define (cgw-display-atom-type a-wire b-wire)
+	(define (show atom)
+		(display "Atom type: ")
+		(display (cog-type atom))
+		(newline)
+		(list atom)
+	)
+	(cgw-transceiver a-wire b-wire show show)
+)
+
+;; -------------------------------------------------------------------------
+;
 ; Transform an atom to its incoming/outgoing list
 ; For every atom placed on the up-wire, that atom's outgoing set will
 ; be placed on the down-wire.  For every atom placed on the down-wire,
 ; that atom's incoming set will be placed in the up-wire.
 (define (cgw-xfer up-wire down-wire)
 	(cgw-transceiver up-wire down-wire cog-outgoing-set cog-incoming-set)
+)
+
+;; -------------------------------------------------------------------------
+;
+; Filter based on atom types. Is the atoms presenting on the wires are 
+; of the given type, then the atoms can pass through, else they are discarded.
+;
+(define (cgw-filter-atom-type a-wire b-wire atom-type)
+	(cgw-filter a-wire b-wire (lambda (atom) (eq? atom-type (cog-type atom))))
+)
+
+;; -------------------------------------------------------------------------
+;
+; Passive filter -- block everything on the wire that doesn't satisfy
+; the predicate. That is, if there is a stream of elements on either
+; the A or B wires, then apply the predicate to each element. If
+; the predicate returns true, then allow the element to pass to the
+; other wire, else discard the element.
+;
+(define (cgw-filter A-wire B-wire predicate)
+	(define (filter atom)
+		(if (predicate atom)
+			(list atom)
+			'()
+		)
+	)
+	(cgw-transceiver A-wire B-wire filter filter)
 )
 
 ;; -------------------------------------------------------------------------
