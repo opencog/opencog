@@ -92,19 +92,43 @@ scm
 
 ; Simple example code:
 ;
-; (define w (make-wire "my-wire-name"))  ; wire name used only for debugging
+; (define w (make-wire))
 ; (wire-probe "w-probe" w)
 ; (wire-source-list w (list 1 2 3 4 5))
 ;
 ; The above will create a wire w, attach a probe to the wire (the probe
 ; will print the values it sees on the wire) and then it will place a 
 ; sequence of numbers on the wire, which the probe will print out.
+;
+; Alternately, 
+; (define w (make-wire "my whizbang wire" #t))
+; will create a wire with a name, and with debugging turned on.
 
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
-(define (make-wire wire-dbg-name)
+(define (make-wire . rest)
+
+	; Parse the optional arguments
+	; Expect a wire-name as the first optional argument
+	(define wire-dbg-name
+		(if (not (null? rest))
+			(car rest)
+			"default-wire-name"
+		)
+	)
+
+	; Expect a debugging flag as the second optional argument
+	(define debug-tracing
+		(if (not (null? rest))
+			(if (not (null? (cdr rest)))
+				(cadr rest)
+				#f
+			)
+			#f
+		)
+	)
+
 	(let (
-		(debug-tracing #t) ; control debug tracing
 		(strm stream-null) ; only be streams are allowed
 		(busmaster #f)    ; "informant" in SICP
 		(endpoints '()))  ; "constraints" in SICP
