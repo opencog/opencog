@@ -22,52 +22,46 @@ scm
 			(input-stream stream-null)
 		)
 
+		; Define a producer function for a stream. This producer pulls
+		; atoms off the input stream, and posts the incoming set of 
+		; each atom.
 		(define (get-incoming state)
+			(producer state cog-incoming-set)
+		)
+
+		; Define a producer function for a stream. This producer pulls
+		; atoms off the input stream, and posts the outgoing set of 
+		; each atom.
+		(define (get-outgoing state)
+			(producer state cog-outgoing-set)
+		)
+
+		; Define a generic producer function for a stream. This producer 
+		; pulls atoms off the input stream, and applies the function 
+		; 'cog-func'. This function should produce a list of atoms; these
+		; atoms are then posted
+		(define (producer state cog-func)
 			; If we are here, we're being forced.
 			(if (null? state)
 				(if (stream-null? input-stream)
-(begin (display "no more atoms!\n")
 					#f ; we are done, the stream has been drained dry
-)
-					; else grab an atom from the up-stream
+					; else grab an atom from the input-stream
 					(let ((atom (stream-car input-stream)))
 						(set! input-stream (stream-cdr input-stream))
 						(if (null? atom)
 							(error "Unexpected empty stream! cgw-xfer up-wire")
-(begin (display "posting incoming set\n")
-							(cog-incoming-set atom) ;; spool out the incoming-set
-)
+							(cog-func atom) ;; spool out the (incoming or outgoing) set
+							; XXX need to handle the case of empty list!
 						)
 					)
 				)
 				; else state is a list of atoms, so keep letting 'er rip.
-(begin (display "rip one off\n")
 				state
-)
 			)
 		)
 
-		(define (xget-incoming state)
-			; If we are here, we're being forced.
-			(if (null? state)
-(begin
-(display "duude nullo\n")
-				(let ((atom (stream-car input-stream)))
-(display "duude atomo is\n")
-(display input-stream)
-(newline)
-(display (stream-null? input-stream))
-(newline)
-(display (stream-car input-stream))
-(newline)
-				)
-)
-			)
-			#f
-		)
-
-
-		; Pull atoms off the up-stream.
+		; Pull atoms off the up-stream, get thier incoming set, and post
+		; the incoming seet to the down-stream.
 		(define (make-down-stream)
 			(if (not (wire-has-stream? up-wire))
 				(error "Impossible condition: up-wire has no stream! -- cgw-xfer")
@@ -76,7 +70,7 @@ scm
 			(if (stream-null? input-stream)
 				(error "inut stream is unexpectedly empty - cgw-xfer")
 			)
-			; (list->stream (list 'a 'b 'c)) 
+			; (list->stream (list 'a 'b 'c))  ; sample test gen
 			(make-stream get-incoming '())
 		)
 
