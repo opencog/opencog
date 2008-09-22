@@ -73,6 +73,10 @@ scm
 ; access to one bus-master; its might be possible to relax this.
 ; May need to create a specific grant/revoke protocal for the bus?
 ;
+; Current implementation only allows *two* endpoints on the bus, not many.
+; This is because the recever takes the stream from the sender. This seems
+; like the most efficient way to proceed at the moment.
+;
 ; Unfortunately, ice-9 streams are significantly different than srfi-41
 ; streams, but, for expediancy, I'll be using ice-9 streams, for now.
 ; The biggest difference is that ice-9 doesn't have stream-cons, it has
@@ -95,13 +99,17 @@ scm
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
 (define (make-wire)
-	(let ((value stream-null) ; only be streams are allowed
+	(let ((strm stream-null) ; only be streams are allowed
 		(busmaster #f)    ; "informant" in SICP
 		(endpoints '()))  ; "constraints" in SICP
 
 		; Connect a new endpoint to the bus.
 		; If theres' a master on the bus, then
 		; let the new endpoint know about it.
+		; XXX In the current design, the downstream device
+		; always "takes" the stream, so in fact, the wire
+		; can have only *two* enpoints, not many. The two
+		; would be the master (source) and the slave (sink)
 		(define (connect new-endpoint)
 			(if (not (memq new-endpoint endpoints))
 				(set! endpoints (cons new-endpoint endpoints))
@@ -110,19 +118,32 @@ scm
 (display "duude endpoint connected\n")
 			; If there is a master on this wire, 
 			; then tell the new endpoint about it.
-			(if (stream-null? value)
+			(if (stream-null? strm)
 				(float-msg new-endpoint)
 				(deliver-msg new-endpoint)
 			)
 			'done
 		)
 
+		; Give the entire stream to the receving endpoint.
+		; Clear the local copy, unset the busmaster
+		(define (take-stream)
+			(let ((local-strm strm))
+				(set! busmaster #f)
+				(set! strm #f)
+			local-strm)
+
+			; Note that when the stream is taken, the wire is left floating.
+			; Howeve, no float-msg is sent, since presumalby the taker 
+			; knows about it already ... 
+		)
+
 		; Let "master" assert a value onto the bus
 		(define (set-value! newval master)
 (display "duude set value called\n");
 			(cond 
-				((stream-null? value) ; if the bus is floating, then grant
-					(set! value newval)
+				((stream-null? strm) ; if the bus is floating, then grant
+					(set! strm newval)
 					(set! busmaster master)
 (display "duude gonna call\n")
 					(for-each-except master deliver-msg endpoints)
@@ -134,7 +155,7 @@ scm
 
 		(define (me request)
 			(cond 
-				((eq? request 'value) value)
+				((eq? request 'value) (take-stream))
 				((eq? request 'has-value?)
 					(if busmaster #t #f)
 				)
