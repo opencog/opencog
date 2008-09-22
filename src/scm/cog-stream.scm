@@ -90,6 +90,7 @@ scm
 				((eq? msg wire-assert-msg)
 					; If we are here, there's a stream on the up-wire. 
 					; transform it and send it.
+		(display "abbout to hooky the dwony wire !!!!!!\n")
 					(wire-set-stream! down-wire (make-down-stream) down-me)
 				)
 				
@@ -105,6 +106,7 @@ scm
 					; If we are here, there's a stream on the down-wire. 
 					; transform it and send it.
 					; (wire-set-stream! up-wire (make-up-stream) up-me)
+	(display "wtfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n")
 				)
 				((eq? msg wire-float-msg)
 					;; Ignore the float message

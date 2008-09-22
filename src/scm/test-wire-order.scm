@@ -5,8 +5,8 @@ scm
 ; of the operations.
 
 (define (wire-it-a)
-	(define sentences (make-wire))
-	(define sentence-parts (make-wire))
+	(define sentences (make-wire "up-wire"))
+	(define sentence-parts (make-wire "down-wire"))
 
 	(cgw-xfer sentences sentence-parts)
 	(wire-probe "sent-list" sentence-parts)
@@ -14,8 +14,8 @@ scm
 )
 
 (define (wire-it-b)
-	(define sentences (make-wire))
-	(define sentence-parts (make-wire))
+	(define sentences (make-wire "up-wire"))
+	(define sentence-parts (make-wire "down-wire"))
 
 	(cgw-xfer sentences sentence-parts)
 	(cgw-source-atoms sentences 'SentenceNode)
@@ -23,8 +23,8 @@ scm
 )
 
 (define (wire-it-c)
-	(define sentences (make-wire))
-	(define sentence-parts (make-wire))
+	(define sentences (make-wire "up-wire"))
+	(define sentence-parts (make-wire "down-wire"))
 
 	(wire-probe "sent-list" sentence-parts)
 	(cgw-source-atoms sentences 'SentenceNode)
@@ -32,8 +32,8 @@ scm
 )
 
 (define (wire-it-d)
-	(define sentences (make-wire))
-	(define sentence-parts (make-wire))
+	(define sentences (make-wire "up-wire"))
+	(define sentence-parts (make-wire "down-wire"))
 
 	(cgw-source-atoms sentences 'SentenceNode)
 	(wire-probe "sent-list" sentence-parts)
@@ -41,8 +41,8 @@ scm
 )
 
 (define (wire-it-e)
-	(define sentences (make-wire))
-	(define sentence-parts (make-wire))
+	(define sentences (make-wire "up-wire"))
+	(define sentence-parts (make-wire "down-wire"))
 
 	(wire-probe "sent-list" sentence-parts)
 	(cgw-xfer sentences sentence-parts)
@@ -50,8 +50,8 @@ scm
 )
 
 (define (wire-it-f)
-	(define sentences (make-wire))
-	(define sentence-parts (make-wire))
+	(define sentences (make-wire "up-wire"))
+	(define sentence-parts (make-wire "down-wire"))
 
 	(cgw-source-atoms sentences 'SentenceNode)
 	(cgw-xfer sentences sentence-parts)

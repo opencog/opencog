@@ -92,7 +92,7 @@ scm
 
 ; Simple example code:
 ;
-; (define w (make-wire))
+; (define w (make-wire "my-wire-name"))  ; wire name used only for debugging
 ; (wire-probe "w-probe" w)
 ; (wire-source-list w (list 1 2 3 4 5))
 ;
@@ -102,8 +102,10 @@ scm
 
 ; Create a new wire
 ; Along the lines of "make-connector", SICP 3.3.5
-(define (make-wire)
-	(let ((strm stream-null) ; only be streams are allowed
+(define (make-wire wire-dbg-name)
+	(let (
+		(debug-tracing #t) ; control debug tracing
+		(strm stream-null) ; only be streams are allowed
 		(busmaster #f)    ; "informant" in SICP
 		(endpoints '()))  ; "constraints" in SICP
 
@@ -119,7 +121,13 @@ scm
 				(set! endpoints (cons new-endpoint endpoints))
 			)
 
-(display "duude endpoint connected\n")
+			(if debug-tracing
+				(begin
+					(display "Endpoint connected on ")
+					(display wire-dbg-name) (newline)
+				)
+			)
+
 			; If there is a master on this wire, 
 			; then tell the new endpoint about it.
 			(if (stream-null? strm)
@@ -138,23 +146,27 @@ scm
 			local-strm)
 
 			; Note that when the stream is taken, the wire is left floating.
-			; Howeve, no float-msg is sent, since presumalby the taker 
+			; However, no float-msg is sent, since presumably the taker 
 			; knows about it already ... 
 		)
 
 		; Let "master" assert a value onto the bus
 		(define (set-value! newval master)
-(display "duude set value called\n");
-			(cond 
-				((stream-null? strm) ; if the bus is floating, then grant
-					(set! strm newval)
-					(set! busmaster master)
-(display "duude gonna call\n")
-					(for-each-except master deliver-msg endpoints)
+
+			(if debug-tracing
+				(begin
+					(display "Set-value called on ")
+					(display wire-dbg-name) (newline)
 				)
-				; XXX if multiple masters, make sure thier values
-				; agree, else flag an error
 			)
+			(if (not (stream-null? strm)) 
+				(error "Stream already set on this wire" wire-dbg-name)
+			)
+
+			; The bus is floating, so grant
+			(set! strm newval)
+			(set! busmaster master)
+			(for-each-except master deliver-msg endpoints)
 		)
 
 		(define (me request)
@@ -165,7 +177,7 @@ scm
 				)
 				((eq? request 'connect) connect)
 				((eq? request 'set-value!) set-value!)
-				(else (error "Unknown operation -- make-wire" request))
+				(else (error "Unknown operation -- make-wire" wire-dbg-name request))
 			)
 		)
 
