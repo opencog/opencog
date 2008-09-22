@@ -76,6 +76,10 @@ scm
 ; Current implementation only allows *two* endpoints on the bus, not many.
 ; This is because the recever takes the stream from the sender. This seems
 ; like the most efficient way to proceed at the moment.
+; The receiver is also called the "consumer", the transmitter is the "producer"
+; Some of the words below refer to a bus, implying multiple endpoints, this
+; no longer holds as the appropriate paradigm. -- The wire is purely 
+; point-to-point.
 ;
 ; Unfortunately, ice-9 streams are significantly different than srfi-41
 ; streams, but, for expediancy, I'll be using ice-9 streams, for now.
@@ -171,7 +175,7 @@ scm
 )
 
 ; return the value of the wire.
-(define (wire-get-stream wire) (wire 'value))       ; SICP get-value
+(define (wire-take-stream wire) (wire 'value))      ; SICP get-value
 (define (wire-has-stream? wire) (wire 'has-value?)) ; SICP has-value?
 (define (wire-set-stream! wire value endpoint)      ; SICP set-value!
 	((wire 'set-value!) value endpoint)
@@ -189,13 +193,12 @@ scm
 (define (deliver-msg endpoint) (endpoint wire-assert-msg))
 (define (float-msg endpoint) (endpoint wire-float-msg))
 
-; Display the value on a bus
-; Attach an endpoint to the bus, this enpoint is a read-only endpoint
-; It prints any values asserted onto the bus.
+; Display a stream
+; This is a "consumer" endpoint, it takes the stream off the wire
+; and displays the contents of the stream.  (It consumes the stream).
 ;
-; This also clocks the bus, as well as printing the value. So 
-; this is a "active" probe.
-; XXX need to have a passive probe that doesn't clock the bus.
+; XXX Need to have a passive probe that can snoop on the wire.
+; XXX this would probably have to be a special, snooping-wire.
 ;
 (define (wire-probe probe-name wire)
 	(define (prt-val value)
@@ -209,7 +212,7 @@ scm
 	(define (me request)
 		(cond 
 			((eq? request wire-assert-msg)
-				(stream-for-each prt-val (wire 'value)) 
+				(stream-for-each prt-val (wire-take-stream wire)) 
 			)
 			((eq? request wire-float-msg)
 				(prt-val "floating") 

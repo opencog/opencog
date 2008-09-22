@@ -19,11 +19,65 @@ scm
 
 	(let ((up-state wire-float-msg)
 			(down-state wire-float-msg)
+			(input-stream stream-null)
 		)
 
-		(define (do-stuff x)
-			; (wire-set-value! down-wire xxx down-me)
-			'()
+		(define (get-incoming state)
+			; If we are here, we're being forced.
+			(if (null? state)
+				(if (stream-null? input-stream)
+(begin (display "no more atoms!\n")
+					#f ; we are done, the stream has been drained dry
+)
+					; else grab an atom from the up-stream
+					(let ((atom (stream-car input-stream)))
+						(set! input-stream (stream-cdr input-stream))
+						(if (null? atom)
+							(error "Unexpected empty stream! cgw-xfer up-wire")
+(begin (display "posting incoming set\n")
+							(cog-incoming-set atom) ;; spool out the incoming-set
+)
+						)
+					)
+				)
+				; else state is a list of atoms, so keep letting 'er rip.
+(begin (display "rip one off\n")
+				state
+)
+			)
+		)
+
+		(define (xget-incoming state)
+			; If we are here, we're being forced.
+			(if (null? state)
+(begin
+(display "duude nullo\n")
+				(let ((atom (stream-car input-stream)))
+(display "duude atomo is\n")
+(display input-stream)
+(newline)
+(display (stream-null? input-stream))
+(newline)
+(display (stream-car input-stream))
+(newline)
+				)
+)
+			)
+			#f
+		)
+
+
+		; Pull atoms off the up-stream.
+		(define (make-down-stream)
+			(if (not (wire-has-stream? up-wire))
+				(error "Impossible condition: up-wire has no stream! -- cgw-xfer")
+			)
+			(set! input-stream (wire-take-stream up-wire))
+			(if (stream-null? input-stream)
+				(error "inut stream is unexpectedly empty - cgw-xfer")
+			)
+			; (list->stream (list 'a 'b 'c)) 
+			(make-stream get-incoming '())
 		)
 
 		(define (up-me msg)
@@ -37,7 +91,7 @@ scm
 						(begin
 							(set! up-state msg)
 							;; XXX do something here this is wrong
-							; (stream-for-each do-stuff (wire-get-stream wire))
+							; (stream-for-each do-stuff (wire-take-stream wire))
 						)
 					)
 				)
@@ -58,13 +112,17 @@ scm
 					;; XXX do something here
 				)
 				((eq? msg wire-float-msg)
+					(set! down-state msg)
 					; transmit on the down wire, if we have something to xmit
 					(if (eq? up-state wire-assert-msg)
 						(begin
+							; If we are here, there's a stream on the up-wire. 
+							; transform it and send it.
 							(display "got stuff on up, neet to send down\n")
-							(wire-set-stream! down-wire (list->stream (list 'a 'b 'c)) down-me) ;; XX the wrong messge
+							(wire-set-stream! down-wire (make-down-stream) down-me)
 						)
-						; else XXX ?? 
+						; else the up-wire state is floating, 
+						; and we don't do anything here.
 					)
 				)
 				(else (error "Unknown message -- cgw-xfer down-wire"))
