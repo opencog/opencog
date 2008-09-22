@@ -12,29 +12,18 @@ scm
 	(wire-source-list wire (cog-get-atoms atom-type))
 )
 
+(define (cgw-xfer up-wire down-wire)
+	(cgw-transceiver up-wire down-wire cog-incoming-set cog-outgoing-set)
+)
 
 ; Transform an atom to its incoming/outgoing list
 ; So if ...
-(define (cgw-xfer up-wire down-wire)
+(define (cgw-transceiver up-wire down-wire up-to-down-proc down-to-up-proc)
 
 	(let ( 
 		(up-not-connected #t)
 		(down-not-connected #t)
 		(input-stream stream-null) )
-
-		; Define a producer function for a stream. This producer pulls
-		; atoms off the input stream, and posts the incoming set of 
-		; each atom.
-		(define (get-incoming state)
-			(producer state cog-incoming-set)
-		)
-
-		; Define a producer function for a stream. This producer pulls
-		; atoms off the input stream, and posts the outgoing set of 
-		; each atom.
-		(define (get-outgoing state)
-			(producer state cog-outgoing-set)
-		)
 
 		; Define a generic producer function for a stream. This producer 
 		; pulls atoms off the input stream, and applies the function 
@@ -71,6 +60,14 @@ scm
 			(make-stream proc '())
 		)
 
+		(define (pull-from-up state)
+			(producer state up-to-down-proc)
+		)
+
+		(define (pull-from-down state)
+			(producer state down-to-up-proc)
+		)
+
 		(define (do-connect-up)
 			(if up-not-connected
 				(begin
@@ -95,7 +92,7 @@ scm
 					; If we are here, there's a stream on the up-wire. 
 					; transform it and send it.
 					(do-connect-down) ;; but first, make sure the down wire is connected!
-					(wire-set-stream! down-wire (make-wire-stream up-wire get-incoming) down-me)
+					(wire-set-stream! down-wire (make-wire-stream up-wire pull-from-up) down-me)
 				)
 				
 				((eq? msg wire-float-msg)
@@ -110,7 +107,7 @@ scm
 					; If we are here, there's a stream on the down-wire. 
 					; transform it and send it.
 					(do-connect-up) ;; but first, make sure the up wire is connected!
-					(wire-set-stream! up-wire (make-wire-stream down-wire get-outgoing) up-me)
+					(wire-set-stream! up-wire (make-wire-stream down-wire pull-from-down) up-me)
 				)
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
