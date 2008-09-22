@@ -12,12 +12,40 @@ scm
 	(wire-source-list wire (cog-get-atoms atom-type))
 )
 
+; Transform an atom to its incoming/outgoing list
+; For every atom placed on the up-wire, that atom's incoming set will
+; be placed on the down-wire.  For every atom placed on the down-wire,
+; that atom's outgoing set will be placed in the up-wire.
 (define (cgw-xfer up-wire down-wire)
 	(cgw-transceiver up-wire down-wire cog-incoming-set cog-outgoing-set)
 )
 
-; Transform an atom to its incoming/outgoing list
-; So if ...
+;; -------------------------------------------------------------------------
+;
+; cgw-transceiver up-wire down-wire up-to-down-proc down-to-up-proc
+;
+; Generic transceiver component for transforming data between two wires.
+; This component attaches between two wires, called "up" and "down".
+; If there is a stream on the up-wire, then that stream is taken, and 
+; the "up-to-down-proc" is called on the stream elements, and a new 
+; stream is generated on the down-wire, which contains the results of
+; applying the "up-to-down-proc" on the stream elements.  it can also 
+; work in the opposire direction, so that if it is the down-wire that
+; has a producer on it, then the "down-to-up-proc" is called, and the
+; results are posted on the up-wire.
+;
+; The two procs must be able to take elements of the steam, and must
+; produce lists of elements suitable for the stream (including the null
+; list). Typically, the stream elements are presumed to be opencog atoms;
+; however, nothing in the implementation presumes this. In particular,
+; the transceiver *could* be used to perform transformations on truth
+; values; alternately, it could be used to convert a stream of atoms
+; into a stream of truth values.
+;
+; The only requirement is that the up-to-down-proc must accept as
+; input the elements of the up-wire, and must produce lists of elements
+; appropriate for the down-wire.
+;
 (define (cgw-transceiver up-wire down-wire up-to-down-proc down-to-up-proc)
 
 	(let ( 
@@ -26,15 +54,15 @@ scm
 		(input-stream stream-null) )
 
 		; Define a generic producer function for a stream. This producer 
-		; pulls atoms off the input stream, and applies the function 
-		; 'cog-func'. This function should produce a list of atoms; these
-		; atoms are then posted
+		; pulls elements off the input stream, and applies the function 
+		; 'cog-func'. This function should produce a list of elements; 
+		; these are then posted.
 		(define (producer state cog-func)
 			; If we are here, we're being forced.
 			(if (null? state)
 				(if (stream-null? input-stream)
 					#f ; we are done, the stream has been drained dry
-					; else grab an atom from the input-stream
+					; else grab an element from the input-stream
 					(let ((atom (stream-car input-stream)))
 						(set! input-stream (stream-cdr input-stream))
 						(if (null? atom)
@@ -44,7 +72,7 @@ scm
 						)
 					)
 				)
-				; else state is a list of atoms, so keep letting 'er rip.
+				; else state is a list of elements, so keep letting 'er rip.
 				state
 			)
 		)
@@ -124,6 +152,7 @@ scm
 	'()
 )
 
+;; -------------------------------------------------------------------------
 
 .
 exit
