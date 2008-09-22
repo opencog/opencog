@@ -78,8 +78,8 @@ scm
 	; Get the word-nodes associated with the word-instances.
 	; (cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
 	
-	(cgw-filter-incoming word-instances misc-a 'ListLink)
-	(cgw-outgoing-nth misc-a misc-b 1)
+	; (cgw-filter-incoming word-instances misc-a 'ListLink)
+	(cgw-assoc word-instances misc-b 'ListLink 0 1)
 
 	; print things out
 	(wire-probe "stuff" misc-b)

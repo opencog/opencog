@@ -30,7 +30,48 @@ scm
 	(cgw-transceiver a-wire b-wire get-nth get-nth)
 )
 
-; (define (cgw-is-nth a-wire b-wire position)
+; 
+; Given a stream of atoms
+;
+(define (cgw-assoc in-wire out-wire link-type in-pos out-pos)
+
+	; Return true iff the atom is of 'link-type'
+	(define (is-desired-type? atom)
+		(eq? link-type (cog-type atom))
+	)
+
+	(define (get-out-atom in-atom)
+
+		; Get the atom in the n-th position of the link
+		(define (get-nth link position)
+			(list-ref (cog-outgoing-set link) position)
+		)
+
+		; Return #t iff the input atom is in location in-pos
+		(define (is-in-slot? link)
+			; Use equal? not eq? to correctly compare atoms.
+			(equal? in-atom (get-nth link in-pos))
+		)
+
+		; A list of all links where in-atom in in location in-pos
+		(define (good-links)
+			(filter is-in-slot? 
+				(filter is-desired-type?
+					(cog-incoming-set in-atom)
+				)
+			)
+		)
+
+		; Get the out-pos'th atom in the link
+		(define (get-out link)
+			(get-nth link out-pos)
+		)
+
+		; Now get the atoms in the out-pos
+		(map get-out (good-links))
+	)
+	(cgw-transceiver in-wire out-wire get-out-atom get-out-atom)
+)
 
 
 .
