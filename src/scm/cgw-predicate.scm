@@ -7,8 +7,8 @@ scm
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
+; --------------------------------------------------------------------
 ;
-
 ; cgw-outgoing-nth a-wire b-wire position
 ;
 ; Get the n'th atom in the ougoing set.
@@ -30,7 +30,9 @@ scm
 	(cgw-transceiver a-wire b-wire get-nth get-nth)
 )
 
-; cgw-assoc in-wire out-wire link-type in-pos out-pos
+; --------------------------------------------------------------------
+;
+; cgw-assoc-uni in-wire out-wire link-type in-pos out-pos
 ;
 ; Produce a stream of atoms depending on thier position in a link.
 ; Given a stream of atoms in the in-wire, produce a stream of atoms
@@ -47,7 +49,7 @@ scm
 ; See also:
 ;    cgw-follow-link for similar non-position-dependent function.
 ;
-(define (cgw-assoc in-wire out-wire link-type in-pos out-pos)
+(define (cgw-assoc-uni in-wire out-wire link-type in-pos out-pos)
 
 	; Return true iff the atom is of 'link-type'
 	(define (is-desired-type? atom)
@@ -87,6 +89,52 @@ scm
 	(cgw-transceiver in-wire out-wire get-out-atom get-out-atom)
 )
 
+;
+; A bidirectional version of the above
+;
+(define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
 
+	(define (a-me msg)
+		(cond
+			((eq? msg wire-assert-msg)
+(display "a ire assert") (newline)
+			)
+			((eq? msg wire-float-msg)
+				;; Ignore the float message
+			)
+			(else (error "Unknown message -- cgw-assoc a-wire"))
+		)
+	)
+
+	(define (b-me msg)
+		(cond
+			((eq? msg wire-assert-msg)
+(display "bv ire assert") (newline)
+			)
+			((eq? msg wire-float-msg)
+				;; Ignore the float message
+			)
+			(else (error "Unknown message -- cgw-assoc a-wire"))
+		)
+	)
+
+	(wire-connect a-wire a-me)
+	(wire-connect b-wire b-me)
+)
+
+; --------------------------------------------------------------------
+;
+; Generalized predicate
+;
+(define (cgw-predicate wire-a wire-b wire-c)
+
+	(cgw-triplet wire-a wire-b wire-c 'EvaluationLink 'ListLink)
+)
+
+(define (cgw-triplet wire-a wire-b wire-c link-hi link-lo)
+
+	(define w1 (make-wire)
+
+)
 .
 exit
