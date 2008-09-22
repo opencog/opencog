@@ -134,7 +134,7 @@ scm
 		(define (take-stream)
 			(let ((local-strm strm))
 				(set! busmaster #f)
-				(set! strm #f)
+				(set! strm stream-null)
 			local-strm)
 
 			; Note that when the stream is taken, the wire is left floating.

@@ -97,7 +97,7 @@ scm
 					(if (eq? down-state wire-assert-msg)
 						(error "Both inputs asserted - cgw-xfer up-wire" )
 						(begin
-							(set! up-state msg)
+							(set! up-state wire-float-msg) ;; XX hey ...
 							; If we are here, there's a stream on the up-wire. 
 							; transform it and send it.
 	(display "too agot stuff on up, need to send down\n")
