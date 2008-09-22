@@ -63,22 +63,19 @@ scm
 	; Create a wire to transport a stream of sentences
 	(define sentences (make-wire))
 
-	; A wire to transport sentence parts
-	(define sentence-parts (make-wire))
-
+	; A wire to transport sentence links
 	(define sentence-links (make-wire))
+	(define sentence-words (make-wire))
 
 	; Put the sentences on the wire
 	(cgw-source-atoms sentences 'SentenceNode)
 
 	; Get the incoming links.
-	(cgw-incoming sentence-parts sentences)
+	(cgw-filter-incoming sentences sentence-links 'SentenceLink)
 	
-	; Reject everything that is not a SentenceLink
-	; (cgw-display-atom-type sentence-links sentence-parts)
-	(cgw-filter-atom-type sentence-links sentence-parts 'SentenceLink)
+	(cgw-filter-outgoing sentence-links sentence-words 'ConceptNode)
 
-	(wire-probe "sent-list" sentence-links)
+	(wire-probe "sent-list" sentence-words)
 )
 
 ;===========================

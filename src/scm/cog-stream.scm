@@ -72,6 +72,21 @@ scm
 	(cgw-filter a-wire b-wire (lambda (atom) (eq? atom-type (cog-type atom))))
 )
 
+; Get the incoming set on the a-waire, and filter it by atom-type
+; presenting the results on the b-wire.
+;
+(define (cgw-filter-incoming a-wire b-wire atom-type)
+	(define mid (make-wire))
+	(cgw-incoming a-wire mid)
+	(cgw-filter-atom-type mid b-wire atom-type)
+)
+
+(define (cgw-filter-outgoing a-wire b-wire atom-type)
+	(define mid (make-wire))
+	(cgw-outgoing a-wire mid)
+	(cgw-filter-atom-type mid b-wire atom-type)
+)
+
 ;; -------------------------------------------------------------------------
 ;
 ; Passive filter -- block everything on the wire that doesn't satisfy
