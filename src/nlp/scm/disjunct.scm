@@ -66,12 +66,14 @@ scm
 	; A wire to transport sentence parts
 	(define sentence-parts (make-wire))
 
-	; Put the sentences on the wire
-	(cgw-source-atoms sentences 'SentenceNode)
+	(wire-probe "sent-list" sentence-parts)
 
 	(cgw-xfer sentences sentence-parts)
 
-	(wire-probe "sent-list" sentence-parts)
+	; Put the sentences on the wire
+	(cgw-source-atoms sentences 'SentenceNode)
+
+
 )
 
 ;===========================

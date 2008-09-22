@@ -61,17 +61,31 @@ scm
 		)
 
 		; Pull atoms off the up-stream, get thier incoming set, and post
-		; the incoming seet to the down-stream.
+		; the incoming set to the down-stream.
 		(define (make-down-stream)
 			(if (not (wire-has-stream? up-wire))
 				(error "Impossible condition: up-wire has no stream! -- cgw-xfer")
 			)
 			(set! input-stream (wire-take-stream up-wire))
 			(if (stream-null? input-stream)
-				(error "inut stream is unexpectedly empty - cgw-xfer")
+				(error "input stream is unexpectedly empty - cgw-xfer")
 			)
 			; (list->stream (list 'a 'b 'c))  ; sample test gen
 			(make-stream get-incoming '())
+		)
+
+		; Pull atoms off the down-stream, get thier outgoing set, and post
+		; the outgoing set to the up-stream.
+		(define (make-up-stream)
+			(if (not (wire-has-stream? down-wire))
+				(error "Impossible condition: down-wire has no stream! -- cgw-xfer")
+			)
+			(set! input-stream (wire-take-stream down-wire))
+			(if (stream-null? input-stream)
+				(error "input stream is unexpectedly empty - cgw-xfer")
+			)
+			; (list->stream (list 'a 'b 'c))  ; sample test gen
+			(make-stream get-outgoing '())
 		)
 
 		(define (up-me msg)
@@ -84,8 +98,10 @@ scm
 						(error "Both inputs asserted - cgw-xfer up-wire" )
 						(begin
 							(set! up-state msg)
-							;; XXX do something here this is wrong
-							; (stream-for-each do-stuff (wire-take-stream wire))
+							; If we are here, there's a stream on the up-wire. 
+							; transform it and send it.
+	(display "too agot stuff on up, need to send down\n")
+							(wire-set-stream! down-wire (make-down-stream) down-me)
 						)
 					)
 				)
@@ -112,7 +128,7 @@ scm
 						(begin
 							; If we are here, there's a stream on the up-wire. 
 							; transform it and send it.
-							(display "got stuff on up, neet to send down\n")
+	(display "got stuff on up, need to send down\n")
 							(wire-set-stream! down-wire (make-down-stream) down-me)
 						)
 						; else the up-wire state is floating, 
