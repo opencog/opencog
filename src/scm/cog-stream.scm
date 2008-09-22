@@ -13,11 +13,11 @@ scm
 )
 
 ; Transform an atom to its incoming/outgoing list
-; For every atom placed on the up-wire, that atom's incoming set will
+; For every atom placed on the up-wire, that atom's outgoing set will
 ; be placed on the down-wire.  For every atom placed on the down-wire,
-; that atom's outgoing set will be placed in the up-wire.
+; that atom's incoming set will be placed in the up-wire.
 (define (cgw-xfer up-wire down-wire)
-	(cgw-transceiver up-wire down-wire cog-incoming-set cog-outgoing-set)
+	(cgw-transceiver up-wire down-wire cog-outgoing-set cog-incoming-set)
 )
 
 ;; -------------------------------------------------------------------------

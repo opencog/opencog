@@ -8,7 +8,7 @@ scm
 	(define sentences (make-wire "up-wire"))
 	(define sentence-parts (make-wire "down-wire"))
 
-	(cgw-xfer sentences sentence-parts)
+	(cgw-xfer sentence-parts sentences)
 	(wire-probe "sent-list" sentence-parts)
 	(cgw-source-atoms sentences 'SentenceNode)
 )
@@ -17,7 +17,7 @@ scm
 	(define sentences (make-wire "up-wire"))
 	(define sentence-parts (make-wire "down-wire"))
 
-	(cgw-xfer sentences sentence-parts)
+	(cgw-xfer sentence-parts sentences)
 	(cgw-source-atoms sentences 'SentenceNode)
 	(wire-probe "sent-list" sentence-parts)
 )
@@ -28,7 +28,7 @@ scm
 
 	(wire-probe "sent-list" sentence-parts)
 	(cgw-source-atoms sentences 'SentenceNode)
-	(cgw-xfer sentences sentence-parts)
+	(cgw-xfer sentence-parts sentences)
 )
 
 (define (wire-it-d)
@@ -37,7 +37,7 @@ scm
 
 	(cgw-source-atoms sentences 'SentenceNode)
 	(wire-probe "sent-list" sentence-parts)
-	(cgw-xfer sentences sentence-parts)
+	(cgw-xfer sentence-parts sentences)
 )
 
 (define (wire-it-e)
@@ -45,7 +45,7 @@ scm
 	(define sentence-parts (make-wire "down-wire"))
 
 	(wire-probe "sent-list" sentence-parts)
-	(cgw-xfer sentences sentence-parts)
+	(cgw-xfer sentence-parts sentences)
 	(cgw-source-atoms sentences 'SentenceNode)
 )
 
@@ -54,7 +54,7 @@ scm
 	(define sentence-parts (make-wire "down-wire"))
 
 	(cgw-source-atoms sentences 'SentenceNode)
-	(cgw-xfer sentences sentence-parts)
+	(cgw-xfer sentence-parts sentences)
 	(wire-probe "sent-list" sentence-parts)
 )
 
