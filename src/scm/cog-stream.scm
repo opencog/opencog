@@ -66,9 +66,8 @@ scm
 					(let ((atom (stream-car input-stream)))
 						(set! input-stream (stream-cdr input-stream))
 						(if (null? atom)
-							(error "Unexpected empty stream! cgw-xfer up-wire")
-							(cog-func atom) ;; spool out the (incoming or outgoing) set
-							; XXX need to handle the case of empty list!
+							(error "Unexpected empty stream! cgw-transceiver")
+							(producer (cog-func atom) cog-func)
 						)
 					)
 				)
@@ -82,7 +81,7 @@ scm
 		(define (make-wire-stream wire proc)
 			(set! input-stream (wire-take-stream wire))
 			(if (stream-null? input-stream)
-				(error "Impossible condition: down-wire has no stream! -- cgw-xfer")
+				(error "Impossible condition: wire has no stream! -- cgw-transciever")
 			)
 			; (list->stream (list 'a 'b 'c))  ; sample test gen
 			(make-stream proc '())
@@ -126,7 +125,7 @@ scm
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
 				)
-				(else (error "Unknown message -- cgw-xfer up-wire"))
+				(else (error "Unknown message -- cgw-transceiver up-wire"))
 			)
 		)
 		(define (down-me msg)
@@ -140,7 +139,7 @@ scm
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
 				)
-				(else (error "Unknown message -- cgw-xfer down-wire"))
+				(else (error "Unknown message -- cgw-transceiver down-wire"))
 			)
 		)
 
