@@ -73,19 +73,33 @@ scm
 	(cgw-filter a-wire b-wire (lambda (atom) (eq? atom-type (cog-type atom))))
 )
 
-; Get the incoming set on the a-waire, and filter it by atom-type
-; presenting the results on the b-wire.
+; Get the incoming-set of the atoms on the input-wire, and filter it
+; by atom-type presenting the results on the output-wire.
 ;
-(define (cgw-filter-incoming a-wire b-wire atom-type)
+(define (cgw-filter-incoming input-wire output-wire atom-type)
 	(define mid (make-wire))
-	(cgw-incoming a-wire mid)
-	(cgw-filter-atom-type mid b-wire atom-type)
+	(cgw-incoming input-wire mid)
+	(cgw-filter-atom-type mid output-wire atom-type)
 )
 
-(define (cgw-filter-outgoing a-wire b-wire atom-type)
+(define (cgw-filter-outgoing input-wire output-wire atom-type)
 	(define mid (make-wire))
-	(cgw-outgoing a-wire mid)
-	(cgw-filter-atom-type mid b-wire atom-type)
+	(cgw-outgoing input-wire mid)
+	(cgw-filter-atom-type mid output-wire atom-type)
+)
+
+; cgw-follow-link input-wire output-wire link-type target-type
+;
+; Follow a link to a target atom type. 
+; Starting with the atom on input-wire, examine its incoming-set,
+; selecting only those with 'link-type'. Then examine the 
+; outgoing-set of the link, selecting only those atoms of 
+; 'target-type'. Place those atoms on the output-wire. 
+;
+(define (cgw-follow-link input-wire output-wire link-type target-type)
+	(define mid (make-wire))
+	(cgw-filter-incoming input-wire mid link-type)
+	(cgw-filter-outgoing mid output-wire target-type)
 )
 
 ;; -------------------------------------------------------------------------

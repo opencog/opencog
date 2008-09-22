@@ -64,19 +64,20 @@ scm
 	(define sentences (make-wire))
 
 	; More wires to transport various bits and peices.
-	(define sentence-links (make-wire))
-	(define sentence-words (make-wire))
+	(define word-instances (make-wire))
+	(define word-nodes (make-wire))
 
 	; Put the sentences on the wire
 	(cgw-source-atoms sentences 'SentenceNode)
 
 	; Get the incoming links.
-	(cgw-filter-incoming sentences sentence-links 'SentenceLink)
+	(cgw-follow-link sentences word-instances 'SentenceLink 'ConceptNode)
 	
-	(cgw-filter-outgoing sentence-links sentence-words 'ConceptNode)
+	; Get the word-nodes associated with the word-instances.
+	(cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
 
 	; print things out
-	(wire-probe "sent-list" sentence-words)
+	(wire-probe "sent-list" word-nodes)
 )
 
 ;===========================

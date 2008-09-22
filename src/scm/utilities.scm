@@ -18,7 +18,7 @@ scm
 
 ; A more agressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
-
+; But this would probably lead to various painful debugging situations.
 
 ; -----------------------------------------------------------------------
 ; for-each-except 
@@ -71,6 +71,8 @@ scm
 ; Exmaple usage:
 ; (cog-filter 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
 ; 
+; See also: cgw-filter-atom-type, which does the same thing, but for wires.
+;
 (define (cog-filter atom-type proc atom-list) 
 	(define rc #f)
 	(cond 
@@ -100,6 +102,8 @@ scm
 ; the links of 'link-type' in this set. They presumably link to all 
 ; sorts of things. Find all of the things that are of 'endpoint-type'.
 ; Return a list of all of these.
+;
+; See also: cgw-follow-link, which does the same thing, but for wires.
 ;
 (define (cog-chase-link link-type endpoint-type anchor)
 	(let ((lst '()))
