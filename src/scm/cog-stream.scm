@@ -60,32 +60,15 @@ scm
 			)
 		)
 
-		; Pull atoms off the up-stream, get thier incoming set, and post
-		; the incoming set to the down-stream.
-		(define (make-down-stream)
-			(if (not (wire-has-stream? up-wire))
-				(error "Impossible condition: up-wire has no stream! -- cgw-xfer")
-			)
-			(set! input-stream (wire-take-stream up-wire))
+		; Pull a stream off the wire, and create a new stream which will
+		; apply 'proc' to the input-stream to generate the output stream.
+		(define (make-wire-stream wire proc)
+			(set! input-stream (wire-take-stream wire))
 			(if (stream-null? input-stream)
-				(error "input stream is unexpectedly empty - cgw-xfer")
-			)
-			; (list->stream (list 'a 'b 'c))  ; sample test gen
-			(make-stream get-incoming '())
-		)
-
-		; Pull atoms off the down-stream, get thier outgoing set, and post
-		; the outgoing set to the up-stream.
-		(define (make-up-stream)
-			(if (not (wire-has-stream? down-wire))
 				(error "Impossible condition: down-wire has no stream! -- cgw-xfer")
 			)
-			(set! input-stream (wire-take-stream down-wire))
-			(if (stream-null? input-stream)
-				(error "input stream is unexpectedly empty - cgw-xfer")
-			)
 			; (list->stream (list 'a 'b 'c))  ; sample test gen
-			(make-stream get-outgoing '())
+			(make-stream proc '())
 		)
 
 		(define (do-connect-up)
@@ -112,7 +95,7 @@ scm
 					; If we are here, there's a stream on the up-wire. 
 					; transform it and send it.
 					(do-connect-down) ;; but first, make sure the down wire is connected!
-					(wire-set-stream! down-wire (make-down-stream) down-me)
+					(wire-set-stream! down-wire (make-wire-stream up-wire get-incoming) down-me)
 				)
 				
 				((eq? msg wire-float-msg)
@@ -127,7 +110,7 @@ scm
 					; If we are here, there's a stream on the down-wire. 
 					; transform it and send it.
 					(do-connect-up) ;; but first, make sure the up wire is connected!
-					(wire-set-stream! up-wire (make-up-stream) up-me)
+					(wire-set-stream! up-wire (make-wire-stream down-wire get-outgoing) up-me)
 				)
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
