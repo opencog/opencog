@@ -1,8 +1,9 @@
 scm
 ;
-; cog-stream.scm
+; cgw-filter.scm
 ;
-; Streams and stream-processors of cog atoms. See wiring.scm for details.
+; Basic two-wire filtering and transformation components.
+; See cgw-wire.scm for an overview.
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;

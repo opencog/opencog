@@ -63,7 +63,7 @@ scm
 	; Create a wire to transport a stream of sentences
 	(define sentences (make-wire))
 
-	; A wire to transport sentence links
+	; More wires to transport various bits and peices.
 	(define sentence-links (make-wire))
 	(define sentence-words (make-wire))
 
@@ -75,6 +75,7 @@ scm
 	
 	(cgw-filter-outgoing sentence-links sentence-words 'ConceptNode)
 
+	; print things out
 	(wire-probe "sent-list" sentence-words)
 )
 

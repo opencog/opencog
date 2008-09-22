@@ -1,6 +1,6 @@
 scm
 ;
-; wiring.scm
+; cgw-wire.scm
 ;
 ; Implements the wiring-together of opencog predicates.
 ;
