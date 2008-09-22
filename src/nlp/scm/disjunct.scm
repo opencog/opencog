@@ -68,11 +68,9 @@ scm
 
 	; Put the sentences on the wire
 
-	(cgw-source-atoms sentences 'SentenceNode)
 	(cgw-xfer sentences sentence-parts)
 	(wire-probe "sent-list" sentence-parts)
-
-
+	(cgw-source-atoms sentences 'SentenceNode)
 )
 
 ;===========================

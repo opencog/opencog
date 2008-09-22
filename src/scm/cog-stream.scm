@@ -17,7 +17,7 @@ scm
 ; So if ...
 (define (cgw-xfer up-wire down-wire)
 
-	(let ((up-state wire-float-msg)
+	(let (
 			(down-state wire-float-msg)
 			(input-stream stream-null)
 		)
@@ -97,7 +97,6 @@ scm
 					(if (eq? down-state wire-assert-msg)
 						(error "Both inputs asserted - cgw-xfer up-wire" )
 						(begin
-							(set! up-state wire-float-msg) ;; XX hey ...
 							; If we are here, there's a stream on the up-wire. 
 							; transform it and send it.
 	(display "too agot stuff on up, need to send down\n")
@@ -107,7 +106,6 @@ scm
 				)
 				
 				((eq? msg wire-float-msg)
-					(set! up-state msg)
 					; XXX anything else here?
 				)
 				(else (error "Unknown message -- cgw-xfer up-wire"))
@@ -123,17 +121,6 @@ scm
 				)
 				((eq? msg wire-float-msg)
 					(set! down-state msg)
-					; transmit on the down wire, if we have something to xmit
-					(if (eq? up-state wire-assert-msg)
-						(begin
-							; If we are here, there's a stream on the up-wire. 
-							; transform it and send it.
-	(display "got stuff on up, need to send down\n")
-							(wire-set-stream! down-wire (make-down-stream) down-me)
-						)
-						; else the up-wire state is floating, 
-						; and we don't do anything here.
-					)
 				)
 				(else (error "Unknown message -- cgw-xfer down-wire"))
 			)
