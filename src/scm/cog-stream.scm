@@ -17,10 +17,7 @@ scm
 ; So if ...
 (define (cgw-xfer up-wire down-wire)
 
-	(let (
-			(down-state wire-float-msg)
-			(input-stream stream-null)
-		)
+	(let ( (input-stream stream-null) )
 
 		; Define a producer function for a stream. This producer pulls
 		; atoms off the input stream, and posts the incoming set of 
@@ -89,38 +86,28 @@ scm
 		)
 
 		(define (up-me msg)
-			(display "up duude: ")
-			(display msg)
-			(newline)
 			(cond 
 				((eq? msg wire-assert-msg)
-					(if (eq? down-state wire-assert-msg)
-						(error "Both inputs asserted - cgw-xfer up-wire" )
-						(begin
-							; If we are here, there's a stream on the up-wire. 
-							; transform it and send it.
-	(display "too agot stuff on up, need to send down\n")
-							(wire-set-stream! down-wire (make-down-stream) down-me)
-						)
-					)
+					; If we are here, there's a stream on the up-wire. 
+					; transform it and send it.
+					(wire-set-stream! down-wire (make-down-stream) down-me)
 				)
 				
 				((eq? msg wire-float-msg)
-					; XXX anything else here?
+					;; Ignore the float message
 				)
 				(else (error "Unknown message -- cgw-xfer up-wire"))
 			)
 		)
 		(define (down-me msg)
-			(display "down duude: ")
-			(display msg)
-			(newline)
 			(cond
 				((eq? msg wire-assert-msg)
-					;; XXX do something here
+					; If we are here, there's a stream on the down-wire. 
+					; transform it and send it.
+					; (wire-set-stream! up-wire (make-up-stream) up-me)
 				)
 				((eq? msg wire-float-msg)
-					(set! down-state msg)
+					;; Ignore the float message
 				)
 				(else (error "Unknown message -- cgw-xfer down-wire"))
 			)
