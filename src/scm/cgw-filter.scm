@@ -82,6 +82,11 @@ scm
 	(cgw-filter-atom-type mid output-wire atom-type)
 )
 
+; Get the outgoing-set of the atoms on the input-wire, and filter it
+; by atom-type presenting the results on the output-wire. Of course,
+; only links have outgoing sets, so any nodes on the input-wire will
+; get discarded.
+;
 (define (cgw-filter-outgoing input-wire output-wire atom-type)
 	(define mid (make-wire))
 	(cgw-outgoing input-wire mid)

@@ -66,6 +66,8 @@ scm
 	; More wires to transport various bits and peices.
 	(define word-instances (make-wire))
 	(define word-nodes (make-wire))
+	(define misc-a (make-wire))
+	(define misc-b (make-wire))
 
 	; Put the sentences on the wire
 	(cgw-source-atoms sentences 'SentenceNode)
@@ -74,10 +76,13 @@ scm
 	(cgw-follow-link sentences word-instances 'SentenceLink 'ConceptNode)
 	
 	; Get the word-nodes associated with the word-instances.
-	(cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
+	; (cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
+	
+	(cgw-filter-incoming word-instances misc-a 'ListLink)
+	(cgw-outgoing-nth misc-a misc-b 1)
 
 	; print things out
-	(wire-probe "sent-list" word-nodes)
+	(wire-probe "stuff" misc-b)
 )
 
 ;===========================
