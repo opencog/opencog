@@ -110,7 +110,7 @@ scm
 
 	; Parse the optional arguments
 	; Expect a wire-name as the first optional argument
-	(define wire-dbg-name
+	(define wire-name-arg
 		(if (not (null? rest))
 			(car rest)
 			"default-wire-name"
@@ -118,7 +118,7 @@ scm
 	)
 
 	; Expect a debugging flag as the second optional argument
-	(define debug-tracing
+	(define debug-arg
 		(if (not (null? rest))
 			(if (not (null? (cdr rest)))
 				(cadr rest)
@@ -129,6 +129,8 @@ scm
 	)
 
 	(let (
+		(debug-tracing debug-arg) ; set tracing from arg list
+		(wire-dbg-name wire-name-arg) ; set wirename from arg
 		(strm stream-null) ; only be streams are allowed
 		(busmaster #f)    ; "informant" in SICP
 		(endpoints '()))  ; "constraints" in SICP
@@ -193,6 +195,10 @@ scm
 			(for-each-except master deliver-msg endpoints)
 		)
 
+		(define (set-name! name)
+			(set! wire-dbg-name name)
+		)
+
 		(define (me request)
 			(cond 
 				((eq? request 'value) (take-stream))
@@ -201,6 +207,9 @@ scm
 				)
 				((eq? request 'connect) connect)
 				((eq? request 'set-value!) set-value!)
+				((eq? request 'debug-on!) (set! debug-tracing #t))
+				((eq? request 'debug-off!) (set! debug-tracing #f))
+				((eq? request 'set-name!) set-name!)
 				(else (error "Unknown operation -- make-wire" wire-dbg-name request))
 			)
 		)
@@ -218,6 +227,11 @@ scm
 )
 (define (wire-connect wire endpoint)
 	((wire 'connect) endpoint)
+)
+(define (wire-enable-debug wire) (wire 'debug-on!))
+(define (wire-disable-debug wire) (wire 'debug-off!))
+(define (wire-set-name wire name)
+	((wire 'set-name!) name)
 )
 
 ; Basic messages

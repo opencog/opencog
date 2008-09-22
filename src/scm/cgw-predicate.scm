@@ -118,6 +118,11 @@ scm
 		)
 	)
 
+	(wire-set-name a-wire "yow a-wire")
+	(wire-set-name b-wire "yow b-wire")
+	(wire-enable-debug a-wire)
+	(wire-enable-debug b-wire)
+
 	(wire-connect a-wire a-me)
 	(wire-connect b-wire b-me)
 )
@@ -133,7 +138,7 @@ scm
 
 (define (cgw-triplet wire-a wire-b wire-c link-hi link-lo)
 
-	(define w1 (make-wire)
+	(define w1 (make-wire))
 
 )
 .
