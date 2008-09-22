@@ -72,7 +72,7 @@ scm
 	(cgw-source-atoms sentences 'SentenceNode)
 
 	; Get the incoming links.
-	(cgw-xfer sentence-parts sentences)
+	(cgw-incoming sentence-parts sentences)
 	
 	; Reject everything that is not a SentenceLink
 	; (cgw-display-atom-type sentence-links sentence-parts)

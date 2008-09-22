@@ -30,10 +30,35 @@ scm
 
 ;; -------------------------------------------------------------------------
 ;
+; cgw-incoming a-wire b-wire
+;
+; Given a stream of atoms on a wire, the incoming set of those atoms
+; are presented on the other wire.
+;
+(define (cgw-incoming a-wire b-wire)
+	(cgw-transceiver a-wire b-wire cog-incoming-set cog-incoming-set)
+)
+
+; cgw-outgoing a-wire b-wire
+;
+; Given a stream of atoms on a wire, the outgoing set of those atoms
+; are presented on the other wire.
+;
+(define (cgw-outgoing a-wire b-wire)
+	(cgw-transceiver a-wire b-wire cog-outgoing-set cog-outgoing-set)
+)
+
+; cgw-xfer up-wire down-wire
+;
 ; Transform an atom to its incoming/outgoing list
 ; For every atom placed on the up-wire, that atom's outgoing set will
 ; be placed on the down-wire.  For every atom placed on the down-wire,
 ; that atom's incoming set will be placed in the up-wire.
+;
+; Note, this routine is dangerous, in that its easy to make mistakes
+; about which wire is which.  Suggest using the simpler, less error
+; print routines 'cgw-incoming' or 'cgw-outoing'.
+;
 (define (cgw-xfer up-wire down-wire)
 	(cgw-transceiver up-wire down-wire cog-outgoing-set cog-incoming-set)
 )
