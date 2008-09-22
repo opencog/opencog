@@ -17,7 +17,10 @@ scm
 ; So if ...
 (define (cgw-xfer up-wire down-wire)
 
-	(let ( (input-stream stream-null) )
+	(let ( 
+		(up-not-connected #t)
+		(down-not-connected #t)
+		(input-stream stream-null) )
 
 		; Define a producer function for a stream. This producer pulls
 		; atoms off the input stream, and posts the incoming set of 
@@ -85,12 +88,30 @@ scm
 			(make-stream get-outgoing '())
 		)
 
+		(define (do-connect-up)
+			(if up-not-connected
+				(begin
+					(wire-connect up-wire up-me)
+					(set! up-not-connected #f)
+				)
+			)
+		)
+
+		(define (do-connect-down)
+			(if down-not-connected
+				(begin
+					(wire-connect down-wire down-me)
+					(set! down-not-connected #f)
+				)
+			)
+		)
+
 		(define (up-me msg)
 			(cond 
 				((eq? msg wire-assert-msg)
 					; If we are here, there's a stream on the up-wire. 
 					; transform it and send it.
-		(display "abbout to hooky the dwony wire !!!!!!\n")
+					(do-connect-down) ;; but first, make sure the down wire is connected!
 					(wire-set-stream! down-wire (make-down-stream) down-me)
 				)
 				
@@ -105,8 +126,8 @@ scm
 				((eq? msg wire-assert-msg)
 					; If we are here, there's a stream on the down-wire. 
 					; transform it and send it.
-					; (wire-set-stream! up-wire (make-up-stream) up-me)
-	(display "wtfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n")
+					(do-connect-up) ;; but first, make sure the up wire is connected!
+					(wire-set-stream! up-wire (make-up-stream) up-me)
 				)
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
@@ -115,8 +136,9 @@ scm
 			)
 		)
 
-		(wire-connect up-wire up-me)
-		(wire-connect down-wire down-me)
+		;; connect the wires, if not already done so
+		(do-connect-up)
+		(do-connect-down)
 	)
 
 	'()
