@@ -30,8 +30,22 @@ scm
 	(cgw-transceiver a-wire b-wire get-nth get-nth)
 )
 
-; 
-; Given a stream of atoms
+; cgw-assoc in-wire out-wire link-type in-pos out-pos
+;
+; Produce a stream of atoms depending on thier position in a link.
+; Given a stream of atoms in the in-wire, produce a stream of atoms
+; on the out-wire, such that a given in-atom is connected to the
+; corresponding out-atom by a link of 'link-type', and such that 
+; the in-atom appears in position 'in-pos' of the link, and the 
+; out-atom appears in position 'out-pos' of the link.
+;
+; Example:
+;   (cgw-assoc in-wire out-wire 'ListLink 0 1)
+; will return the atoms in position 1 of all ListLinks where the 
+; input atom was in position 0.
+;
+; See also:
+;    cgw-follow-link for similar non-position-dependent function.
 ;
 (define (cgw-assoc in-wire out-wire link-type in-pos out-pos)
 

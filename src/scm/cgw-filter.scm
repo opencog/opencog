@@ -101,6 +101,9 @@ scm
 ; outgoing-set of the link, selecting only those atoms of 
 ; 'target-type'. Place those atoms on the output-wire. 
 ;
+; See also:
+;    cgw-assoc for a similar, position-dependent link-chase
+;
 (define (cgw-follow-link input-wire output-wire link-type target-type)
 	(define mid (make-wire))
 	(cgw-filter-incoming input-wire mid link-type)
