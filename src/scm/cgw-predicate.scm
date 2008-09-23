@@ -103,34 +103,41 @@ scm
 ; up to the uni-directional version, with the transmitter on the
 ; input side.
 ;
-; XXX This is a one-use component: it cannot be used again later,
-; with the data going in the other direction! Perhaps this should
-; be fixed.
-;
 (define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
-	(let ((do-connect #t))
+	(let ((device (wire-null-device)))
 
 		(define (process-msg)
 			(cond
-				; input on a-wire, output on b-wire
+				; Input on a-wire, output on b-wire. Disconnect ourself, connect
+				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
 					(wire-disconnect a-wire me)
 					(wire-disconnect b-wire me)
-					(cgw-assoc-uni a-wire b-wire link-type a-pos b-pos)
+					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos b-pos))
 				)
 
-				; input on b-wire, output on a-wire
+				; Input on b-wire, output on a-wire. Disconnect ourself, connect
+				; the uni-directional part in the right direction.
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
 					(wire-disconnect a-wire me)
 					(wire-disconnect b-wire me)
-					(cgw-assoc-uni b-wire a-wire link-type b-pos a-pos)
+					(set! device (cgw-assoc-uni b-wire a-wire link-type b-pos a-pos))
 				)
 
-				; both wires floating
+				; Both wires floating. Disconnect the device, if previously attached,
+				; and re-connect ourselves, so as to hear about anything new.
 				((and (not (wire-has-stream? a-wire)) (not (wire-has-stream? b-wire)))
-					; (wire-connect a-wire me)
-					; (wire-connect b-wire me)
+					(wire-disconnect a-wire device)
+					(wire-disconnect b-wire device)
+					(set! device (wire-null-device))
+					(wire-connect a-wire me)
+					(wire-connect b-wire me)
 					(display "duuude both floating !\n")
+				)
+
+				; Error condition
+				((and (wire-has-stream? a-wire) (wire-has-stream? b-wire))
+					(error "Both wires have streams! -- cgw-assoc")
 				)
 			)
 		)
@@ -145,6 +152,7 @@ scm
 				)
 				(else (error "Unknown message -- cgw-assoc a-wire"))
 			)
+			'ok
 		)
 
 		; Handy debugging prints
@@ -153,15 +161,8 @@ scm
 		(wire-enable-debug a-wire)
 		(wire-enable-debug b-wire)
 	
-		; Two sequential tests, because the act of connecting wire-a might
-		; cause the wire-assert on a, and then a do-connect of false in
-		; time for the b-wire test.
-		(if do-connect
-			(wire-connect a-wire me)
-		)
-		(if do-connect
-			(wire-connect b-wire me)
-		)
+		(wire-connect a-wire me)
+		(wire-connect b-wire me)
 		me
 	)
 )
