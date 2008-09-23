@@ -236,6 +236,9 @@ scm
 				
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
+					;; XXX unclear -- perhaps we should set the input stream
+					;; to null, if both wires are floating? e.g. if they are
+					;; later disconnected?
 				)
 				(else (error "Unknown message -- wire-transceiver"))
 			)
