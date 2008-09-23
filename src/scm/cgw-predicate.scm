@@ -90,9 +90,14 @@ scm
 	(wire-transceiver in-wire out-wire get-out-atom get-out-atom)
 )
 
+; --------------------------------------------------------------------
+;
 ; cgw-assoc a-wire b-wire link-type a-pos b-pos
 ;
-; A bidirectional version of the above.
+; A bidirectional version of cgw-assoc-uni. That is, it functions
+; just as cgw-assoc-uni does, but either wire can be the input wire;
+; the other wire will be the output wire.
+;
 ; This is implemented by listening for transmit messages. When
 ; a transmit message is overheard, then that wire is hooked up
 ; up to the uni-directional version, with the transmitter on the
@@ -164,8 +169,13 @@ scm
 
 (define (cgw-triplet wire-a wire-b wire-c link-hi link-lo)
 
-	(define lopar (make-wire))
-	(cgw-assoc wire-a lopar link-hi 0 1)
+	(define lopair (make-wire))
+	(define lotype (make-wire))
+
+	(cgw-assoc wire-a lopair link-hi 0 1)
+	(cgw-filter-atom-type lopair lotype)
+
+	(wire-fan-out lotype wire-b wire-c)
 
 )
 .
