@@ -194,6 +194,7 @@ scm
 			(make-stream proc '())
 		)
 
+		; Simple wrappers for thw two producer functions
 		(define (pull-from-up state)
 			(producer state up-to-down-proc)
 		)
@@ -202,45 +203,50 @@ scm
 			(producer state down-to-up-proc)
 		)
 
-		(define (up-me msg)
-			(cond 
-				((eq? msg wire-assert-msg)
+		(define (process-msg)
+			(cond
+				((and (wire-has-stream? up-wire) (not (wire-has-stream? down-wire)))
 					; If we are here, there's a stream on the up-wire. 
 					; transform it and send it.
 					;; but first, make sure the down wire is connected!
-					(wire-connect down-wire down-me)
-					(wire-set-stream! down-wire (make-wire-stream up-wire pull-from-up) down-me)
+					(wire-connect down-wire me)
+					(wire-set-stream! down-wire (make-wire-stream up-wire pull-from-up) me)
+				)
+
+				((and (not (wire-has-stream? up-wire)) (wire-has-stream? down-wire))
+					; If we are here, there's a stream on the down-wire. 
+					; transform it and send it.
+					;; but first, make sure the up wire is connected!
+					(wire-connect up-wire me)
+					(wire-set-stream! up-wire (make-wire-stream down-wire pull-from-down) me)
+				)
+
+				((and (wire-has-stream? up-wire) (wire-has-stream? down-wire))
+					(error "Both wires have streams! -- wire-transceiver")
+				)
+			)
+		)
+
+		; Message dispatcher
+		(define (me msg)
+			(cond 
+				((eq? msg wire-assert-msg)
+					(process-msg)
 				)
 				
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
 				)
-				(else (error "Unknown message -- wire-transceiver up-wire"))
-			)
-		)
-
-		(define (down-me msg)
-			(cond
-				((eq? msg wire-assert-msg)
-					; If we are here, there's a stream on the down-wire. 
-					; transform it and send it.
-					;; but first, make sure the up wire is connected!
-					(wire-connect up-wire up-me)
-					(wire-set-stream! up-wire (make-wire-stream down-wire pull-from-down) up-me)
-				)
-				((eq? msg wire-float-msg)
-					;; Ignore the float message
-				)
-				(else (error "Unknown message -- wire-transceiver down-wire"))
+				(else (error "Unknown message -- wire-transceiver"))
 			)
 		)
 
 		;; connect the wires, if not already done so
-		(wire-connect up-wire up-me)
-		(wire-connect down-wire down-me)
-	)
+		(wire-connect up-wire me)
+		(wire-connect down-wire me)
 
-	'()
+		me
+	)
 )
 
 ;; -------------------------------------------------------------------------
