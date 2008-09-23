@@ -144,21 +144,23 @@ scm
 		; would be the master (source) and the slave (sink)
 		(define (connect new-endpoint)
 			(if (not (memq new-endpoint endpoints))
-				(set! endpoints (cons new-endpoint endpoints))
-			)
-
-			(if debug-tracing
 				(begin
-					(display "Endpoint connected on ")
-					(display wire-dbg-name) (newline)
-				)
-			)
+					(set! endpoints (cons new-endpoint endpoints))
 
-			; If there is a master on this wire, 
-			; then tell the new endpoint about it.
-			(if (stream-null? strm)
-				(float-msg new-endpoint)
-				(deliver-msg new-endpoint)
+					(if debug-tracing
+						(begin
+							(display "Endpoint connected on ")
+							(display wire-dbg-name) (newline)
+						)
+					)
+
+					; If there is a master on this wire, 
+					; then tell the new endpoint about it.
+					(if (stream-null? strm)
+						(float-msg new-endpoint)
+						(deliver-msg new-endpoint)
+					)
+				)
 			)
 			'done
 		)
