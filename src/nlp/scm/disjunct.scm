@@ -79,7 +79,8 @@ scm
 	; (cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
 	
 	; (cgw-filter-incoming word-instances misc-a 'ListLink)
-	(cgw-assoc word-instances misc-b 'ListLink 0 1)
+	; (cgw-assoc word-instances misc-b 'ListLink 0 1)
+	(cgw-assoc misc-b word-instances 'ListLink 1 0)
 
 	; print things out
 	(wire-probe "stuff" misc-b)

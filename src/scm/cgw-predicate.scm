@@ -47,6 +47,7 @@ scm
 ; input atom was in position 0.
 ;
 ; See also:
+;    cgw-assoc for a bi-directiional equivalant of this routine.
 ;    cgw-follow-link for similar non-position-dependent function.
 ;
 (define (cgw-assoc-uni in-wire out-wire link-type in-pos out-pos)
@@ -89,42 +90,59 @@ scm
 	(cgw-transceiver in-wire out-wire get-out-atom get-out-atom)
 )
 
+; cgw-assoc a-wire b-wire link-type a-pos b-pos
 ;
 ; A bidirectional version of the above
 ;
 (define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
+	(let ((do-connect #t))
 
-	(define (a-me msg)
-		(cond
-			((eq? msg wire-assert-msg)
-(display "a ire assert") (newline)
+		(define (a-me msg)
+			(cond
+				((eq? msg wire-assert-msg)
+					(wire-disconnect a-wire a-me)
+					(wire-disconnect b-wire b-me)
+					(set! do-connect #f)
+					(cgw-assoc-uni a-wire b-wire link-type a-pos b-pos)
+				)
+				((eq? msg wire-float-msg)
+					;; Ignore the float message
+				)
+				(else (error "Unknown message -- cgw-assoc a-wire"))
 			)
-			((eq? msg wire-float-msg)
-				;; Ignore the float message
+		)
+	
+		(define (b-me msg)
+			(cond
+				((eq? msg wire-assert-msg)
+					(wire-disconnect a-wire a-me)
+					(wire-disconnect b-wire b-me)
+					(set! do-connect #f)
+					(cgw-assoc-uni b-wire a-wire link-type b-pos a-pos)
+				)
+				((eq? msg wire-float-msg)
+					;; Ignore the float message
+				)
+				(else (error "Unknown message -- cgw-assoc a-wire"))
 			)
-			(else (error "Unknown message -- cgw-assoc a-wire"))
+		)
+
+		; Handy debugging prints
+		; (wire-set-name a-wire "yow a-wire")
+		; (wire-set-name b-wire "yow b-wire")
+		; (wire-enable-debug a-wire)
+		; (wire-enable-debug b-wire)
+	
+		; Two sequential tests, because the act of connecting wire-a might
+		; cause the wire-assert on a, and then a do-connect of false in
+		; time for the b-wire test.
+		(if do-connect
+			(wire-connect a-wire a-me)
+		)
+		(if do-connect
+			(wire-connect b-wire b-me)
 		)
 	)
-
-	(define (b-me msg)
-		(cond
-			((eq? msg wire-assert-msg)
-(display "bv ire assert") (newline)
-			)
-			((eq? msg wire-float-msg)
-				;; Ignore the float message
-			)
-			(else (error "Unknown message -- cgw-assoc a-wire"))
-		)
-	)
-
-	(wire-set-name a-wire "yow a-wire")
-	(wire-set-name b-wire "yow b-wire")
-	(wire-enable-debug a-wire)
-	(wire-enable-debug b-wire)
-
-	(wire-connect a-wire a-me)
-	(wire-connect b-wire b-me)
 )
 
 ; --------------------------------------------------------------------
