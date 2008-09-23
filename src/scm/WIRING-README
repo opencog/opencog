@@ -120,7 +120,6 @@ cgw-display-atom-type - Display the type of the atoms pasing through.
 cgw-incoming          - Present the incoming-set of an atom
 cgw-outgoing          - Present the outgoing-set of an atom
 
-cgw-xfer              - Provide incoming/outgoing sets
 cgw-filter-atom-type  - Only let the indicate atom types through.
 cgw-filter-incoming   - Present the atoms in the incoming set,
                         matching a given atom type.

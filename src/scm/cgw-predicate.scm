@@ -27,7 +27,7 @@ scm
 			)
 		)
 	)
-	(wire-transceiver a-wire b-wire get-nth get-nth)
+	(wire-transceiver a-wire b-wire get-nth)
 )
 
 ; --------------------------------------------------------------------
@@ -87,7 +87,7 @@ scm
 		; Now get the atoms in the out-pos
 		(map get-out (good-links))
 	)
-	(wire-transceiver in-wire out-wire get-out-atom get-out-atom)
+	(wire-transceiver in-wire out-wire get-out-atom)
 )
 
 ; --------------------------------------------------------------------

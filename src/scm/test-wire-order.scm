@@ -3,6 +3,9 @@ scm
 ; wire-order tests
 ; test that the results of wiring are independent of the order 
 ; of the operations.
+;
+; XXX the cgw-xfer function exists non more, its been replaced by
+; cgw-incoming and cgw-outgoing.
 
 (define (wire-it-a)
 	(define sentences (make-wire "up-wire"))

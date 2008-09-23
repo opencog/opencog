@@ -26,7 +26,7 @@ scm
 		(newline)
 		(list atom)
 	)
-	(wire-transceiver a-wire b-wire show show)
+	(wire-transceiver a-wire b-wire show)
 )
 
 ;; -------------------------------------------------------------------------
@@ -37,7 +37,7 @@ scm
 ; are presented on the other wire.
 ;
 (define (cgw-incoming a-wire b-wire)
-	(wire-transceiver a-wire b-wire cog-incoming-set cog-incoming-set)
+	(wire-transceiver a-wire b-wire cog-incoming-set)
 )
 
 ; cgw-outgoing a-wire b-wire
@@ -46,22 +46,7 @@ scm
 ; are presented on the other wire.
 ;
 (define (cgw-outgoing a-wire b-wire)
-	(wire-transceiver a-wire b-wire cog-outgoing-set cog-outgoing-set)
-)
-
-; cgw-xfer up-wire down-wire
-;
-; Transform an atom to its incoming/outgoing list
-; For every atom placed on the up-wire, that atom's outgoing set will
-; be placed on the down-wire.  For every atom placed on the down-wire,
-; that atom's incoming set will be placed in the up-wire.
-;
-; Note, this routine is dangerous, in that its easy to make mistakes
-; about which wire is which.  Suggest using the simpler, less error
-; print routines 'cgw-incoming' or 'cgw-outoing'.
-;
-(define (cgw-xfer up-wire down-wire)
-	(wire-transceiver up-wire down-wire cog-outgoing-set cog-incoming-set)
+	(wire-transceiver a-wire b-wire cog-outgoing-set)
 )
 
 ;; -------------------------------------------------------------------------
@@ -127,36 +112,29 @@ scm
 			'()
 		)
 	)
-	(wire-transceiver A-wire B-wire filter filter)
+	(wire-transceiver A-wire B-wire filter)
 )
 
 ;; -------------------------------------------------------------------------
 ;
-; wire-transceiver up-wire down-wire up-to-down-proc down-to-up-proc
+; wire-transceiver a-wire b-wire xform-proc
 ;
 ; Generic transceiver component for transforming data between two wires.
-; This component attaches between two wires, called "up" and "down".
-; If there is a stream on the up-wire, then that stream is taken, and 
-; the "up-to-down-proc" is called on the stream elements, and a new 
-; stream is generated on the down-wire, which contains the results of
-; applying the "up-to-down-proc" on the stream elements.  It can also 
-; work in the opposire direction, so that if it is the down-wire that
-; has a producer on it, then the "down-to-up-proc" is called, and the
-; results are posted on the up-wire.
+; This component applies the proceedure 'proc' to all data flowing
+; between the two wires (in either direction). One wire (either wire)
+; is taken as input, the other will then present the output. 
 ;
-; The two procs must be able to take elements of the steam, and must
-; produce lists of elements suitable for the stream (including the null
-; list). Typically, the stream elements are presumed to be opencog atoms;
+; The procedure "proc" is called on each stream element. It should take
+; a single element as input, and produce a list of elements as output;
+; it may produce a null list, or a list with one or more elements.
+;
+; Typically, the stream elements are presumed to be opencog atoms;
 ; however, nothing in the implementation presumes this. In particular,
 ; the transceiver *could* be used to perform transformations on truth
 ; values; alternately, it could be used to convert a stream of atoms
-; into a stream of truth values.
+; into a stream of truth values, and so on.
 ;
-; The only requirement is that the up-to-down-proc must accept as
-; input the elements of the up-wire, and must produce lists of elements
-; appropriate for the down-wire.
-;
-(define (wire-transceiver up-wire down-wire up-to-down-proc down-to-up-proc)
+(define (wire-transceiver up-wire down-wire xform-proc)
 
 	(let ((input-stream stream-null)
 			(myname "")
@@ -185,24 +163,15 @@ scm
 			)
 		)
 
-		; Pull a stream off the wire, and create a new stream which will
-		; apply 'proc' to the input-stream to generate the output stream.
-		(define (make-wire-stream wire proc)
-			(set! input-stream (wire-take-stream wire))
-			(if (stream-null? input-stream)
-				(error "Impossible condition: wire has no stream! -- wire-transciever")
-			)
+		; create a stream, useing the producer function
+		(define (mkstrm)
+			(make-stream (lambda (state) (producer state xform-proc)) '())
 			; (list->stream (list 'a 'b 'c))  ; sample test gen
-			(make-stream proc '())
 		)
 
-		; Simple wrappers for the two producer functions.
-		(define (pull-from-up state)
-			(producer state up-to-down-proc)
-		)
-
-		(define (pull-from-down state)
-			(producer state down-to-up-proc)
+		(define (hookup in-wire out-wire)
+			(set! input-stream (wire-take-stream in-wire))
+			(wire-set-stream! out-wire (mkstrm) me)
 		)
 
 		(define (process-msg)
@@ -212,7 +181,7 @@ scm
 					; transform it and send it.
 					;; but first, make sure the down wire is connected!
 					(wire-connect down-wire me)
-					(wire-set-stream! down-wire (make-wire-stream up-wire pull-from-up) me)
+					(hookup up-wire down-wire)
 				)
 
 				((and (not (wire-has-stream? up-wire)) (wire-has-stream? down-wire))
@@ -220,7 +189,7 @@ scm
 					; transform it and send it.
 					;; but first, make sure the up wire is connected!
 					(wire-connect up-wire me)
-					(wire-set-stream! up-wire (make-wire-stream down-wire pull-from-down) me)
+					(hookup down-wire up-wire)
 				)
 
 				((and (wire-has-stream? up-wire) (wire-has-stream? down-wire))
