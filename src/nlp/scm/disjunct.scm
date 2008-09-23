@@ -68,6 +68,7 @@ scm
 	(define word-nodes (make-wire))
 	(define misc-a (make-wire))
 	(define misc-b (make-wire))
+	(define misc-c (make-wire))
 
 	; Put the sentences on the wire
 	(cgw-source-atoms sentences 'SentenceNode)
@@ -81,10 +82,12 @@ scm
 	; (cgw-filter-incoming word-instances misc-a 'ListLink)
 	; (cgw-assoc word-instances misc-b 'ListLink 0 1)
 	(cgw-assoc misc-b word-instances 'ListLink 1 0)
+	(wire-fan-out misc-a misc-b misc-c)
 	; (cgw-predicate )
 
 	; print things out
-	(wire-probe "stuff" misc-b)
+	(wire-probe "stuff-a" misc-a)
+	(wire-probe "stuff-c" misc-c)
 )
 
 ;===========================

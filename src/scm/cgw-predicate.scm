@@ -184,20 +184,21 @@ scm
 ; --------------------------------------------------------------------
 ;
 ; Link splitter
-
+; Given a stream of links on the 'in-link-wire', generate two streams
+; of atoms, with the first stream, on the 'a-out-wire', consisting of
+; atoms occuppying position 'a-pos' in the link, and the 'b-out-wire'
+; getting the atoms in position 'b-pos' of the same link.
+;
+; Here, 'a-pos' and 'b-pos' are integers, denoting positions in the 
+; outgoing-set of a link, starting with position 0.
+;
 (define (cgw-splitter in-link-wire a-out-wire b-out-wire a-pos b-pos)
 
-	(define (me msg)
-		(cond
-			((eq? msg wire-assert-msg)
-			)
-		)
-		'ok
-	)
-
-	(wire-connect a-out-wire me)
-	(wire-connect b-out-wire me)
-	me
+	(define aw (make-wire))
+	(define bw (make-wire))
+	(wire-fan-out in-link-wire aw bw)
+	(cgw-outgoing-nth aw a-out-wire a-pos)
+	(cgw-outgoing-nth bw b-out-wire b-pos)
 )
 
 ; --------------------------------------------------------------------
