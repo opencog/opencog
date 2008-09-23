@@ -155,16 +155,6 @@ scm
 
 ; --------------------------------------------------------------------
 ;
-; fan-out
-;
-; Given a stream on the input, creates two identical streams of output
-;
-(define (cgw-fan-out in-wire a-out-wire b-out-wire)
-	; take the input stream
-)
-
-; --------------------------------------------------------------------
-;
 ; Generalized predicate
 ;
 (define (cgw-predicate wire-a wire-b wire-c)

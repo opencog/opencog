@@ -7,7 +7,7 @@ scm
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
-; --------------------------------------------------------------
+; --------------------------------------------------------------------
 ; wire-probe probe-name wire
 ;
 ; Display a stream pulled from a wire.
@@ -47,7 +47,7 @@ scm
 	me
 )
 
-; --------------------------------------------------------------
+; --------------------------------------------------------------------
 ; clock-source wire
 ;
 ; Place a clock source on a wire
@@ -75,7 +75,7 @@ scm
 	me
 )
 
-; --------------------------------------------------------------
+; --------------------------------------------------------------------
 ; wire-source-list wire lis
 ;
 ; Place a list onto a wire
@@ -98,6 +98,39 @@ scm
 	me
 )
 
-; --------------------------------------------------------------
+; --------------------------------------------------------------------
+;
+; wire-fan-out in-wire a-out-wire b-out-wire
+;
+; Given a stream on the input, creates two identical streams of output
+;
+(define (wire-fan-out in-wire a-out-wire b-out-wire)
+
+	(define (me msg)
+		(cond 
+			((eq? msg wire-assert-msg)
+				; Take the input stream, pass it to the output streams.
+				(let ((in-stream (wire-take-stream in-wire)))
+					(wire-connect a-out-wire me)
+					(wire-connect b-out-wire me)
+					(wire-set-stream! a-out-wire in-stream me)
+					(wire-set-stream! b-out-wire in-stream me)
+				)
+			)
+			((eq? msg wire-float-msg)
+				;; do nothing
+			)
+			(else
+				(error "unkonwn message -- wire-fan-out" msg)
+			)
+		)
+	)
+
+	(wire-connect a-out-wire me)
+	(wire-connect b-out-wire me)
+	me
+)
+
+; --------------------------------------------------------------------
 .
 exit
