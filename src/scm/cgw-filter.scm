@@ -26,7 +26,7 @@ scm
 		(newline)
 		(list atom)
 	)
-	(cgw-transceiver a-wire b-wire show show)
+	(wire-transceiver a-wire b-wire show show)
 )
 
 ;; -------------------------------------------------------------------------
@@ -37,7 +37,7 @@ scm
 ; are presented on the other wire.
 ;
 (define (cgw-incoming a-wire b-wire)
-	(cgw-transceiver a-wire b-wire cog-incoming-set cog-incoming-set)
+	(wire-transceiver a-wire b-wire cog-incoming-set cog-incoming-set)
 )
 
 ; cgw-outgoing a-wire b-wire
@@ -46,7 +46,7 @@ scm
 ; are presented on the other wire.
 ;
 (define (cgw-outgoing a-wire b-wire)
-	(cgw-transceiver a-wire b-wire cog-outgoing-set cog-outgoing-set)
+	(wire-transceiver a-wire b-wire cog-outgoing-set cog-outgoing-set)
 )
 
 ; cgw-xfer up-wire down-wire
@@ -61,20 +61,22 @@ scm
 ; print routines 'cgw-incoming' or 'cgw-outoing'.
 ;
 (define (cgw-xfer up-wire down-wire)
-	(cgw-transceiver up-wire down-wire cog-outgoing-set cog-incoming-set)
+	(wire-transceiver up-wire down-wire cog-outgoing-set cog-incoming-set)
 )
 
 ;; -------------------------------------------------------------------------
 ;
 ; Filter based on atom types. Is the atoms presenting on the wires are 
 ; of the given type, then the atoms can pass through, else they are discarded.
+; This filter is bi-directional (works in either direction).
 ;
 (define (cgw-filter-atom-type a-wire b-wire atom-type)
-	(cgw-filter a-wire b-wire (lambda (atom) (eq? atom-type (cog-type atom))))
+	(wire-filter a-wire b-wire (lambda (atom) (eq? atom-type (cog-type atom))))
 )
 
 ; Get the incoming-set of the atoms on the input-wire, and filter it
 ; by atom-type presenting the results on the output-wire.
+; This filter is uni-directional, with a stated input and output.
 ;
 (define (cgw-filter-incoming input-wire output-wire atom-type)
 	(define mid (make-wire))
@@ -118,19 +120,19 @@ scm
 ; the predicate returns true, then allow the element to pass to the
 ; other wire, else discard the element.
 ;
-(define (cgw-filter A-wire B-wire predicate)
+(define (wire-filter A-wire B-wire predicate)
 	(define (filter atom)
 		(if (predicate atom)
 			(list atom)
 			'()
 		)
 	)
-	(cgw-transceiver A-wire B-wire filter filter)
+	(wire-transceiver A-wire B-wire filter filter)
 )
 
 ;; -------------------------------------------------------------------------
 ;
-; cgw-transceiver up-wire down-wire up-to-down-proc down-to-up-proc
+; wire-transceiver up-wire down-wire up-to-down-proc down-to-up-proc
 ;
 ; Generic transceiver component for transforming data between two wires.
 ; This component attaches between two wires, called "up" and "down".
@@ -154,7 +156,7 @@ scm
 ; input the elements of the up-wire, and must produce lists of elements
 ; appropriate for the down-wire.
 ;
-(define (cgw-transceiver up-wire down-wire up-to-down-proc down-to-up-proc)
+(define (wire-transceiver up-wire down-wire up-to-down-proc down-to-up-proc)
 
 	(let ( (input-stream stream-null) )
 
@@ -171,7 +173,7 @@ scm
 					(let ((atom (stream-car input-stream)))
 						(set! input-stream (stream-cdr input-stream))
 						(if (null? atom)
-							(error "Unexpected empty stream! cgw-transceiver")
+							(error "Unexpected empty stream! wire-transceiver")
 							(producer (cog-func atom) cog-func)
 						)
 					)
@@ -186,7 +188,7 @@ scm
 		(define (make-wire-stream wire proc)
 			(set! input-stream (wire-take-stream wire))
 			(if (stream-null? input-stream)
-				(error "Impossible condition: wire has no stream! -- cgw-transciever")
+				(error "Impossible condition: wire has no stream! -- wire-transciever")
 			)
 			; (list->stream (list 'a 'b 'c))  ; sample test gen
 			(make-stream proc '())
@@ -213,7 +215,7 @@ scm
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
 				)
-				(else (error "Unknown message -- cgw-transceiver up-wire"))
+				(else (error "Unknown message -- wire-transceiver up-wire"))
 			)
 		)
 
@@ -229,7 +231,7 @@ scm
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
 				)
-				(else (error "Unknown message -- cgw-transceiver down-wire"))
+				(else (error "Unknown message -- wire-transceiver down-wire"))
 			)
 		)
 

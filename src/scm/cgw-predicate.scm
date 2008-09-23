@@ -11,7 +11,7 @@ scm
 ;
 ; cgw-outgoing-nth a-wire b-wire position
 ;
-; Get the n'th atom in the ougoing set.
+; Get the n'th atom in the outgoing set.
 ; Given a stream of atoms on either of the wires, the n'th
 ; atom from the outgoing set is passed to the other wire.
 ; Counting starts from zero: a link with two atoms has those
@@ -27,14 +27,14 @@ scm
 			)
 		)
 	)
-	(cgw-transceiver a-wire b-wire get-nth get-nth)
+	(wire-transceiver a-wire b-wire get-nth get-nth)
 )
 
 ; --------------------------------------------------------------------
 ;
 ; cgw-assoc-uni in-wire out-wire link-type in-pos out-pos
 ;
-; Produce a stream of atoms depending on thier position in a link.
+; Produce a stream of atoms depending on thier position in a Link.
 ; Given a stream of atoms in the in-wire, produce a stream of atoms
 ; on the out-wire, such that a given in-atom is connected to the
 ; corresponding out-atom by a link of 'link-type', and such that 
@@ -87,7 +87,7 @@ scm
 		; Now get the atoms in the out-pos
 		(map get-out (good-links))
 	)
-	(cgw-transceiver in-wire out-wire get-out-atom get-out-atom)
+	(wire-transceiver in-wire out-wire get-out-atom get-out-atom)
 )
 
 ; cgw-assoc a-wire b-wire link-type a-pos b-pos

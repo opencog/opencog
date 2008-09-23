@@ -94,3 +94,41 @@ to the wire, if all that they want to do is to snoop for messages. However,
 only one device is allowed to take a stream ... since if two devices
 attempted to take the stream, there would be a race, and one would loose.)
 
+
+Generic Devices
+---------------
+These devices can carry any sort of stream, not just atoms.
+
+; make-wire        - Create a wire
+; wire-source-list - Place a list of items onto a wire.
+; wire-probe       - Display stream pulled from wire.
+; wire-fan-out     - Given a stream on the input, creates two identical
+                     streams of output.
+; wire-transceiver - Apply a function to transform an input stream into 
+                     the output stream.
+; wire-filter      - Pass input to output only if test returns true.  
+
+
+Atomic Devices
+--------------
+These devices can process only streams of atoms.
+
+cgw-source-atoms      - Present all atoms in the atom space, of a
+                        given type.
+cgw-display-atom-type - Display the type of the atoms pasing through.
+cgw-incoming          - Present the incoming-set of an atom
+cgw-outgoing          - Present the outgoing-set of an atom
+
+cgw-xfer              - Provide incoming/outgoing sets
+cgw-filter-atom-type  - Only let the indicate atom types through.
+cgw-filter-incoming   - Present the atoms in the incoming set,
+                        matching a given atom type.
+cgw-filter-outgoing   - Present the atoms in the outgoing set,
+                        matching a given atom type.
+cgw-follow-link       - Follow a link to a target atom type.
+
+cgw-outgoing-nth      - Get the n'th atom in the outgoing set.
+cgw-assoc             - Produce a stream of atoms, depending on thier
+                        position in a Link.
+
+
