@@ -110,28 +110,35 @@ scm
 (define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
 	(let ((do-connect #t))
 
-		(define (a-me msg)
+		(define (process-msg)
 			(cond
-				((eq? msg wire-assert-msg)
-					(wire-disconnect a-wire a-me)
-					(wire-disconnect b-wire b-me)
-					(set! do-connect #f)
+				; input in a-wire, output on b-wire
+				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
+					(wire-disconnect a-wire me)
+					(wire-disconnect b-wire me)
 					(cgw-assoc-uni a-wire b-wire link-type a-pos b-pos)
 				)
-				((eq? msg wire-float-msg)
-					;; Ignore the float message
+
+				; input in b-wire, output on a-wire
+				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
+					(wire-disconnect a-wire me)
+					(wire-disconnect b-wire me)
+					(cgw-assoc-uni b-wire a-wire link-type b-pos a-pos)
 				)
-				(else (error "Unknown message -- cgw-assoc a-wire"))
+
+				; both wires floating
+				((and (not (wire-has-stream? a-wire)) (not (wire-has-stream? b-wire)))
+					; (wire-connect a-wire me)
+					; (wire-connect b-wire me)
+					(display "duuude both floating !\n")
+				)
 			)
 		)
-	
-		(define (b-me msg)
+
+		(define (me msg)
 			(cond
 				((eq? msg wire-assert-msg)
-					(wire-disconnect a-wire a-me)
-					(wire-disconnect b-wire b-me)
-					(set! do-connect #f)
-					(cgw-assoc-uni b-wire a-wire link-type b-pos a-pos)
+					(process-msg)
 				)
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
@@ -141,20 +148,21 @@ scm
 		)
 
 		; Handy debugging prints
-		; (wire-set-name a-wire "yow a-wire")
-		; (wire-set-name b-wire "yow b-wire")
-		; (wire-enable-debug a-wire)
-		; (wire-enable-debug b-wire)
+		(wire-set-name a-wire "yow a-wire")
+		(wire-set-name b-wire "yow b-wire")
+		(wire-enable-debug a-wire)
+		(wire-enable-debug b-wire)
 	
 		; Two sequential tests, because the act of connecting wire-a might
 		; cause the wire-assert on a, and then a do-connect of false in
 		; time for the b-wire test.
 		(if do-connect
-			(wire-connect a-wire a-me)
+			(wire-connect a-wire me)
 		)
 		(if do-connect
-			(wire-connect b-wire b-me)
+			(wire-connect b-wire me)
 		)
+		me
 	)
 )
 
