@@ -2,7 +2,7 @@ scm
 ;
 ; cgw-fan.scm
 ;
-; Implements fanouts and fan-ins
+; Implements fanouts, comparators and fan-ins
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -77,12 +77,19 @@ scm
 ;
 ; wire-fan-in a-wire b-wire c-wire
 ;
-; Given a stream on any two wires, repeat only those parts
-; of the stream that agree with each-other on the third wire.
+; Given a stream on any two wires, compare the two streams,
+; and repeat only those parts of the streams that agree with
+; each-other on the third wire.
 ;
 (define (wire-fan-in a-wire b-wire c-wire)
+	(define (compare-func elt-one elt-two)
+		(if (eq? elt-one elt-two)
+			(list elt-one)
+			'()
+		)
+	)
+	(wire-comparator a-wire b-wire c-wire compare-func)
 )
-
 
 ; --------------------------------------------------------------------
 ;
@@ -130,10 +137,16 @@ scm
 			)
 		)
 
+		; create a stream, useing the producer function
+		(define (mkstrm)
+			(make-stream (lambda (state) (producer state compare-func)) '())
+		)
+
 		; Compare two input streams, only allow matches to pass
 		(define (fan-in a-in-wire b-in-wire out-wire)
 			(set! a-in-steam (wire-take-stream a-in-wire))
 			(set! b-in-steam (wire-take-stream b-in-wire))
+			(wire-set-stream! out-wire (mkstrm) me)
 		)
 	
 		(define (process-msg)
