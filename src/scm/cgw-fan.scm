@@ -81,8 +81,25 @@ scm
 ; and repeat only those parts of the streams that agree with
 ; each-other on the third wire.
 ;
+; Example usage:
+; Combining fan-out with fan-in should have no effect, so that, 
+; for example, the code 
+;
+;   (define wire-one (make-wire))
+;   (define wire-two (make-wire))
+;   (wire-fan-in out-wire wire-one wire-two)
+;   (wire-fan-out wire-two wire-in wire-one)
+;
+; results in wire-out having exactly the same stream as wire-in.
+;
 (define (wire-fan-in a-wire b-wire c-wire)
 	(define (compare-func elt-one elt-two)
+
+		;; a bit o debugging code
+		;;(if (eq? elt-one elt-two)
+		;;	(display "Bravo! match!\n")
+		;;	(display "Oh No Mr. Bill!! mis-match!\n")
+		;;)
 		(if (eq? elt-one elt-two)
 			(list elt-one)
 			'()
@@ -144,8 +161,8 @@ scm
 
 		; Compare two input streams, only allow matches to pass
 		(define (fan-in a-in-wire b-in-wire out-wire)
-			(set! a-in-steam (wire-take-stream a-in-wire))
-			(set! b-in-steam (wire-take-stream b-in-wire))
+			(set! a-in-stream (wire-take-stream a-in-wire))
+			(set! b-in-stream (wire-take-stream b-in-wire))
 			(wire-set-stream! out-wire (mkstrm) me)
 		)
 	
