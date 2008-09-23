@@ -203,13 +203,44 @@ scm
 )
 
 ; Basic messages
-; "assert" means "put a message on this bus"
-; "float"  means "leave the bus in a floating (unasserted) state"
+; "assert" means "there is a stream on this wire"
+; "float"  means "there is no (longer any) stream on this wire"
 (define wire-assert-msg 'I-want-to-xmit) ; I-have-a-value in SICP
 (define wire-float-msg  'Ready-to-recv)  ; I-lost-my-value in SICP
+(define wire-devname-msg  'get-device-name)
+(define wire-setname-msg  'set-device-name)
+(define wire-devtype-msg  'get-device-type)
 
 (define (deliver-msg endpoint) (endpoint wire-assert-msg))
 (define (float-msg endpoint) (endpoint wire-float-msg))
+
+(define (default-dispatcher device dispatcher)
+	(define (me msg)
+		(let ((devname "")
+				(result (dispatcher msg))
+			)
+			(define (set-name! name)
+				(set! devname name)
+			)
+
+			; If the device dispatcher didn't handle the message,
+			; then perhaps we can.
+			(if result
+				result
+				(cond
+					((eq? msg wire-devtype-msg) device)
+					((eq? msg wire-devname-msg) devname)
+					((eq? msg wire-setname-msg) set-name!)
+					(else
+						(error "Unkown device message " device devname)
+					)
+				)
+			)
+			result   ; not reachable
+		)
+	)
+	me
+)
 
 ; --------------------------------------------------------------------
 
