@@ -12,15 +12,13 @@ scm
 ;
 ; Generic null device. Ignores all messages.
 ;
-(define (wire-null-device wire)
+(define (wire-null-device)
 
 	; Trivial command dispatcher, accepts all commands and
 	; does nothing at all.
 	(define (me msg)
 		'ok
 	)
-
-	(wire-connect wire me)
 
 	; Return the command dispatcher.
 	me
@@ -57,6 +55,7 @@ scm
 				(error "unkonwn message -- wire-probe" request)
 			)
 		)
+		'ok
 	)
 
 	; hook me up
@@ -89,6 +88,7 @@ scm
 			((eq? request wire-float-msg) (lambda () #f)) ; ignore float message
 			(else (error "Unknown request -- clock-source" request))
 		)
+		'ok
 	)
 
 	(wire-connect wire me)
@@ -112,6 +112,7 @@ scm
 			((eq? request wire-float-msg) (lambda () #f)) ; ignore float message
 			(else (error "Unknown message -- wire-source-list" request))
 		)
+		'ok
 	)
 
 	(wire-connect wire me)
@@ -147,6 +148,7 @@ scm
 				(error "unkonwn message -- wire-fan-out" msg)
 			)
 		)
+		'ok
 	)
 
 	(wire-connect a-out-wire me)

@@ -242,6 +242,7 @@ scm
 				)
 				(else (error "Unknown message -- wire-transceiver"))
 			)
+			'ok
 		)
 
 		;; connect the wires, if not already done so
