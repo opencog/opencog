@@ -165,6 +165,22 @@ scm
 			'done
 		)
 
+		; Disconnect a wire
+		(define (disconnect old-endpoint)
+			(if (memq old-endpoint endpoints)
+				(begin
+					(if debug-tracing
+						(begin
+							(display "Endpoint disconnected from ")
+							(display wire-dbg-name) (newline)
+						)
+					)
+					(set! endpoints (delete! old-endpoint endpoints))
+					(float-msg old-endpoint)
+				)
+			)
+		)
+
 		; Give the entire stream to the receving endpoint.
 		; Clear the local copy, unset the busmaster
 		(define (take-stream)
@@ -208,6 +224,7 @@ scm
 					(if busmaster #t #f)
 				)
 				((eq? request 'connect) connect)
+				((eq? request 'disconnect) disconnect)
 				((eq? request 'set-value!) set-value!)
 				((eq? request 'debug-on!) (set! debug-tracing #t))
 				((eq? request 'debug-off!) (set! debug-tracing #f))
@@ -229,6 +246,9 @@ scm
 )
 (define (wire-connect wire endpoint)
 	((wire 'connect) endpoint)
+)
+(define (wire-disconnect wire endpoint)
+	((wire 'disconnect) endpoint)
 )
 (define (wire-enable-debug wire) (wire 'debug-on!))
 (define (wire-disable-debug wire) (wire 'debug-off!))
