@@ -139,7 +139,7 @@ scm
 ; If there is a stream on the up-wire, then that stream is taken, and 
 ; the "up-to-down-proc" is called on the stream elements, and a new 
 ; stream is generated on the down-wire, which contains the results of
-; applying the "up-to-down-proc" on the stream elements.  it can also 
+; applying the "up-to-down-proc" on the stream elements.  It can also 
 ; work in the opposire direction, so that if it is the down-wire that
 ; has a producer on it, then the "down-to-up-proc" is called, and the
 ; results are posted on the up-wire.
@@ -164,9 +164,9 @@ scm
 
 		; Define a generic producer function for a stream. This producer 
 		; pulls elements off the input stream, and applies the function 
-		; 'cog-func'. This function should produce a list of elements; 
+		; 'xform-func'. This function should produce a list of elements; 
 		; these are then posted.
-		(define (producer state cog-func)
+		(define (producer state xform-func)
 			; If we are here, we're being forced.
 			(if (null? state)
 				(if (stream-null? input-stream)
@@ -176,7 +176,7 @@ scm
 						(set! input-stream (stream-cdr input-stream))
 						(if (null? atom)
 							(error "Unexpected empty stream! wire-transceiver")
-							(producer (cog-func atom) cog-func)
+							(producer (xform-func atom) xform-func)
 						)
 					)
 				)
@@ -196,7 +196,7 @@ scm
 			(make-stream proc '())
 		)
 
-		; Simple wrappers for thw two producer functions
+		; Simple wrappers for the two producer functions.
 		(define (pull-from-up state)
 			(producer state up-to-down-proc)
 		)
