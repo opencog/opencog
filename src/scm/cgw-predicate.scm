@@ -105,6 +105,7 @@ scm
 ;
 (define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
 	(let ((device (wire-null-device))
+			(do-connect #t)
 			(myname "")
 		)
 
@@ -113,8 +114,9 @@ scm
 				; Input on a-wire, output on b-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
-					(wire-disconnect b-wire me)
 					(wire-disconnect a-wire me)
+					(wire-disconnect b-wire me)
+					(set! do-connect #f)
 					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos b-pos))
 				)
 
@@ -123,6 +125,7 @@ scm
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
 					(wire-disconnect a-wire me)
 					(wire-disconnect b-wire me)
+					(set! do-connect #f)
 					(set! device (cgw-assoc-uni b-wire a-wire link-type b-pos a-pos))
 				)
 
@@ -159,13 +162,22 @@ scm
 		)
 
 		; Handy debugging prints
-		(wire-set-name a-wire "cgw-assoc a-wire")
-		(wire-set-name b-wire "cgw-assoc b-wire")
-		(wire-enable-debug a-wire)
-		(wire-enable-debug b-wire)
+		; (set! myname "being-manually-debugged")
+		; (wire-set-name a-wire "cgw-assoc a-wire")
+		; (wire-set-name b-wire "cgw-assoc b-wire")
+		; (wire-enable-debug a-wire)
+		; (wire-enable-debug b-wire)
 	
-		(wire-connect a-wire me)
-		(wire-connect b-wire me)
+		; Two distinct checks of 'do-connect' are made, because the
+		; act of connecting the a-wire could trigger a message that
+		; hooks up the actual processor (and thus should leave 
+		; wire-b not connected here)
+		(if do-connect
+			(wire-connect a-wire me)
+		)
+		(if do-connect
+			(wire-connect b-wire me)
+		)
 	)
 )
 
