@@ -111,8 +111,8 @@ scm
 				; Input on a-wire, output on b-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
-					(wire-disconnect a-wire me)
 					(wire-disconnect b-wire me)
+					(wire-disconnect a-wire me)
 					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos b-pos))
 				)
 
@@ -132,7 +132,7 @@ scm
 					(set! device (wire-null-device))
 					(wire-connect a-wire me)
 					(wire-connect b-wire me)
-					(display "duuude both floating !\n")
+		(display "duuude both floating !\n")
 				)
 
 				; Error condition
@@ -150,21 +150,42 @@ scm
 				((eq? msg wire-float-msg)
 					;; Ignore the float message
 				)
-				(else (error "Unknown message -- cgw-assoc a-wire"))
+				(else
+					(let ((myname ""))
+						(default-dispatcher msg 'cgw-assoc myname)
+					)
+ 				)
 			)
-			'ok
 		)
 
 		; Handy debugging prints
-		(wire-set-name a-wire "yow a-wire")
-		(wire-set-name b-wire "yow b-wire")
+		(wire-set-name a-wire "cgw-assoc a-wire")
+		(wire-set-name b-wire "cgw-assoc b-wire")
 		(wire-enable-debug a-wire)
 		(wire-enable-debug b-wire)
 	
 		(wire-connect a-wire me)
 		(wire-connect b-wire me)
-		me
 	)
+)
+
+; --------------------------------------------------------------------
+;
+; Link splitter
+
+(define (cgw-splitter in-link-wire a-out-wire b-out-wire a-pos b-pos)
+
+	(define (me msg)
+		(cond
+			((eq? msg wire-assert-msg)
+			)
+		)
+		'ok
+	)
+
+	(wire-connect a-out-wire me)
+	(wire-connect b-out-wire me)
+	me
 )
 
 ; --------------------------------------------------------------------

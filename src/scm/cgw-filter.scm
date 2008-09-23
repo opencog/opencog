@@ -240,15 +240,17 @@ scm
 					;; to null, if both wires are floating? e.g. if they are
 					;; later disconnected?
 				)
-				(else (error "Unknown message -- wire-transceiver"))
+				(else 
+					(let ((myname ""))
+						(default-dispatcher msg 'wire-transceiver myname)
+					)
+				)
 			)
-			'ok
 		)
 
 		;; connect the wires, if not already done so
 		(wire-connect up-wire me)
 		(wire-connect down-wire me)
-
 		me
 	)
 )

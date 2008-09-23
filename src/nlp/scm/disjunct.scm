@@ -81,7 +81,7 @@ scm
 	; (cgw-filter-incoming word-instances misc-a 'ListLink)
 	; (cgw-assoc word-instances misc-b 'ListLink 0 1)
 	(cgw-assoc misc-b word-instances 'ListLink 1 0)
-	; (cgw-predicate 
+	; (cgw-predicate )
 
 	; print things out
 	(wire-probe "stuff" misc-b)

@@ -93,8 +93,13 @@ scm
 
 					(if debug-tracing
 						(begin
-							(display "Endpoint connected on ")
-							(display wire-dbg-name) (newline)
+							(display "Wire <")
+							(display wire-dbg-name)
+							(display "> connected to endpoint ")
+							(display (wire-device-get-type new-endpoint))
+							(display " <")
+							(display (wire-device-get-name new-endpoint))
+							(display ">\n")
 						)
 					)
 
@@ -115,8 +120,13 @@ scm
 				(begin
 					(if debug-tracing
 						(begin
-							(display "Endpoint disconnected from ")
-							(display wire-dbg-name) (newline)
+							(display "Wire <")
+							(display wire-dbg-name)
+							(display "> disconnected from endpoint ")
+							(display (wire-device-get-type old-endpoint))
+							(display " <")
+							(display (wire-device-get-name old-endpoint))
+							(display ">\n")
 						)
 					)
 					(set! endpoints (delete! old-endpoint endpoints))
@@ -143,8 +153,13 @@ scm
 
 			(if debug-tracing
 				(begin
-					(display "Set-value called on ")
-					(display wire-dbg-name) (newline)
+					(display "Device ")
+					(display (wire-device-get-type master))
+					(display " <")
+					(display (wire-device-get-name master))
+					(display "> issued set-value on wire <")
+					(display wire-dbg-name)
+					(display ">\n")
 				)
 			)
 			(if (not (stream-null? strm)) 
@@ -214,32 +229,33 @@ scm
 (define (deliver-msg endpoint) (endpoint wire-assert-msg))
 (define (float-msg endpoint) (endpoint wire-float-msg))
 
-(define (default-dispatcher device dispatcher)
-	(define (me msg)
-		(let ((devname "")
-				(result (dispatcher msg))
-			)
-			(define (set-name! name)
-				(set! devname name)
-			)
+(define (default-dispatcher msg device devname)
 
-			; If the device dispatcher didn't handle the message,
-			; then perhaps we can.
-			(if result
-				result
-				(cond
-					((eq? msg wire-devtype-msg) device)
-					((eq? msg wire-devname-msg) devname)
-					((eq? msg wire-setname-msg) set-name!)
-					(else
-						(error "Unkown device message " device devname)
-					)
-				)
-			)
-			result   ; not reachable
+	(define (set-name! name)
+		(set! devname name)
+	)
+
+	; If the device dispatcher didn't handle the message,
+	; then perhaps we can.
+	(cond
+		((eq? msg wire-devtype-msg) device)
+		((eq? msg wire-devname-msg) devname)
+		((eq? msg wire-setname-msg) set-name!)
+		(else
+			(error "Unkown device message " device devname msg)
 		)
 	)
-	me
+)
+
+; Basic device debugging support
+(define (wire-device-get-type dev)
+	(dev wire-devtype-msg)
+)
+(define (wire-device-get-name dev)
+	(dev wire-devname-msg)
+)
+(define (wire-device-set-name! dev name)
+	((dev wire-setname-msg) name)
 )
 
 ; --------------------------------------------------------------------

@@ -52,7 +52,9 @@ scm
 				(prt-val "floating") 
 			)
 			(else
-				(error "unkonwn message -- wire-probe" request)
+				(let ((myname ""))
+					(default-dispatcher request 'wire-probe myname)
+				)
 			)
 		)
 		'ok
