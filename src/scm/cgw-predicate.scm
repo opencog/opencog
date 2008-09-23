@@ -112,14 +112,14 @@ scm
 
 		(define (process-msg)
 			(cond
-				; input in a-wire, output on b-wire
+				; input on a-wire, output on b-wire
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
 					(wire-disconnect a-wire me)
 					(wire-disconnect b-wire me)
 					(cgw-assoc-uni a-wire b-wire link-type a-pos b-pos)
 				)
 
-				; input in b-wire, output on a-wire
+				; input on b-wire, output on a-wire
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
 					(wire-disconnect a-wire me)
 					(wire-disconnect b-wire me)

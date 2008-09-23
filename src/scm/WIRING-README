@@ -102,6 +102,7 @@ These devices can carry any sort of stream, not just atoms.
 ; make-wire        - Create a wire
 ; wire-source-list - Place a list of items onto a wire.
 ; wire-probe       - Display stream pulled from wire.
+; wire-null-device - Ignores all messages, does nothing.
 ; wire-fan-out     - Given a stream on the input, creates two identical
                      streams of output.
 ; wire-transceiver - Apply a function to transform an input stream into 

@@ -8,6 +8,25 @@ scm
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; --------------------------------------------------------------------
+; wire-null-device
+;
+; Generic null device. Ignores all messages.
+;
+(define (wire-null-device wire)
+
+	; Trivial command dispatcher, accepts all commands and
+	; does nothing at all.
+	(define (me msg)
+		'ok
+	)
+
+	(wire-connect wire me)
+
+	; Return the command dispatcher.
+	me
+)
+
+; --------------------------------------------------------------------
 ; wire-probe probe-name wire
 ;
 ; Display a stream pulled from a wire.
@@ -58,6 +77,10 @@ scm
 ; the output is buffered, and is invisible. Worse still, there's
 ; no way to ctrl-C this, since the shell server isn't properly
 ; threaded for i/o. Bummer. Should be fixed someday.
+;
+; XXX this device is more of an "example" device, it it not
+; actually used anywhere, and probably shouldn't be used.
+;
 (define (clock-source wire)
 	(define (toggle state) (cons state (not state)))
 
