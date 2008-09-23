@@ -87,7 +87,8 @@ scm
 	(wire-fan-in misc-a misc-d misc-c)
 
 	; print things out
-	(wire-probe "stuff-d" misc-d)
+	; (wire-probe "stuff-d" misc-d)
+	(wire-drain misc-d)
 )
 
 ;===========================

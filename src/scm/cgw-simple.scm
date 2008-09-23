@@ -25,6 +25,38 @@ scm
 )
 
 ; --------------------------------------------------------------------
+; wire-drain wire
+;
+; Drain a stream from a wire.
+; This is a "consumer" endpoint, it takes the stream off the wire
+; and silently discards it.  (It consumes the stream). Do not use
+; with infinite streams, or an infinite loop (hang) will result.
+;
+(define (wire-drain wire)
+	(let ((myname ""))
+		(define (me msg)
+			(cond 
+				((eq? msg wire-assert-msg)
+					(stream-for-each (lambda (x) #f) (wire-take-stream wire)) 
+				)
+				((eq? msg wire-float-msg)
+					; ignore this message
+				)
+				(else
+					(default-dispatcher msg 'wire-drain myname)
+				)
+			)
+		)
+
+		; hook me up
+		(wire-connect wire me)
+	
+		; return the command dispatcher.
+		me
+	)
+)
+
+; --------------------------------------------------------------------
 ; wire-probe probe-name wire
 ;
 ; Display a stream pulled from a wire.
