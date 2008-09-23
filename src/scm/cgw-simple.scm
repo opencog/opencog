@@ -52,12 +52,9 @@ scm
 				(prt-val "floating") 
 			)
 			(else
-				(let ((myname ""))
-					(default-dispatcher request 'wire-probe myname)
-				)
+				(default-dispatcher request 'wire-probe probe-name)
 			)
 		)
-		'ok
 	)
 
 	; hook me up

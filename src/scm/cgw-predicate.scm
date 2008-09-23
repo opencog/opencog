@@ -104,7 +104,9 @@ scm
 ; input side.
 ;
 (define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
-	(let ((device (wire-null-device)))
+	(let ((device (wire-null-device))
+			(myname "")
+		)
 
 		(define (process-msg)
 			(cond
@@ -151,9 +153,7 @@ scm
 					;; Ignore the float message
 				)
 				(else
-					(let ((myname ""))
-						(default-dispatcher msg 'cgw-assoc myname)
-					)
+					(default-dispatcher msg 'cgw-assoc myname)
  				)
 			)
 		)

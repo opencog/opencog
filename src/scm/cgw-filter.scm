@@ -158,7 +158,9 @@ scm
 ;
 (define (wire-transceiver up-wire down-wire up-to-down-proc down-to-up-proc)
 
-	(let ( (input-stream stream-null) )
+	(let ((input-stream stream-null)
+			(myname "")
+		)
 
 		; Define a generic producer function for a stream. This producer 
 		; pulls elements off the input stream, and applies the function 
@@ -241,9 +243,7 @@ scm
 					;; later disconnected?
 				)
 				(else 
-					(let ((myname ""))
-						(default-dispatcher msg 'wire-transceiver myname)
-					)
+					(default-dispatcher msg 'wire-transceiver myname)
 				)
 			)
 		)
