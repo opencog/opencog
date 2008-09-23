@@ -92,7 +92,15 @@ scm
 
 ; cgw-assoc a-wire b-wire link-type a-pos b-pos
 ;
-; A bidirectional version of the above
+; A bidirectional version of the above.
+; This is implemented by listening for transmit messages. When
+; a transmit message is overheard, then that wire is hooked up
+; up to the uni-directional version, with the transmitter on the
+; input side.
+;
+; XXX This is a one-use component: it cannot be used again later,
+; with the data going in the other direction! Perhaps this should
+; be fixed.
 ;
 (define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
 	(let ((do-connect #t))
@@ -147,6 +155,16 @@ scm
 
 ; --------------------------------------------------------------------
 ;
+; fan-out
+;
+; Given a stream on the input, creates two identical streams of output
+;
+(define (cgw-fan-out in-wire a-out-wire b-out-wire)
+	; take the input stream
+)
+
+; --------------------------------------------------------------------
+;
 ; Generalized predicate
 ;
 (define (cgw-predicate wire-a wire-b wire-c)
@@ -156,7 +174,8 @@ scm
 
 (define (cgw-triplet wire-a wire-b wire-c link-hi link-lo)
 
-	(define w1 (make-wire))
+	(define lopar (make-wire))
+	(cgw-assoc wire-a lopar link-hi 0 1)
 
 )
 .

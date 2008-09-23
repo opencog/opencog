@@ -79,7 +79,10 @@ scm
 ; The receiver is also called the "consumer", the transmitter is the "producer"
 ; Some of the words below refer to a bus, implying multiple endpoints, this
 ; no longer holds as the appropriate paradigm. -- The wire is purely 
-; point-to-point.
+; point-to-point. (Note, however, multiple devices are allowed to connect
+; to the wire, if all that they want to do is to snoop for messages. However,
+; only one device is allowed to take a stream ... since if two devices
+; attempted to take the stream, there would be a race, and one would loose.)
 ;
 ; Unfortunately, ice-9 streams are significantly different than srfi-41
 ; streams, but, for expediancy, I'll be using ice-9 streams, for now.
