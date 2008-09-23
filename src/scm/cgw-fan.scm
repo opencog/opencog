@@ -4,14 +4,21 @@ scm
 ;
 ; Implements fanouts, comparators and fan-ins
 ;
+; Fan-out simple repeats an incoming stream onto two outgoing streams
+; Fan-in compares two input streams, and copies one to the output only
+;    if the two inputs agree.
+; The comparator applies a function to a pair of input streams, to
+;    produce an output.
+;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; --------------------------------------------------------------------
 ;
 ; wire-fan-out a-wire b-wire c-wire
 ;
-; Given a stream on any one of the wires, repeat it onto
-; the other two.
+; Given a stream on any one of the wires, repeat it onto the other two.
+; This function is the "inverse" of wire-fan-in, in that it makes two
+; copies of a stream, whereas wire-fan-in reassembles the two copies.
 ;
 (define (wire-fan-out a-wire b-wire c-wire)
 

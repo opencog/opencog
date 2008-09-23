@@ -99,15 +99,19 @@ Generic Devices
 ---------------
 These devices can carry any sort of stream, not just atoms.
 
-; make-wire        - Create a wire
-; wire-source-list - Place a list of items onto a wire.
-; wire-probe       - Display stream pulled from wire.
-; wire-null-device - Ignores all messages, does nothing.
-; wire-fan-out     - Given a stream on the input, creates two identical
+make-wire        - Create a wire
+wire-source-list - Place a list of items onto a wire.
+wire-probe       - Display stream pulled from wire.
+wire-null-device - Ignores all messages, does nothing.
+wire-fan-out     - Given a stream on the input, creates two identical
                      streams of output.
-; wire-transceiver - Apply a function to transform an input stream into 
+wire-transceiver - Apply a function to transform an input stream into 
                      the output stream.
-; wire-filter      - Pass input to output only if test returns true.  
+wire-filter      - Pass input to output only if test returns true.  
+wire-comparator  - Apply a function to a pair of input streams to
+                     produce an output stream.
+wire-fan-in      - Compare elements from two input streams; if they
+                     match, the match is copied to the output.
 
 
 Atomic Devices
