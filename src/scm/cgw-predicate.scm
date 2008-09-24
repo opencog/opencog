@@ -123,13 +123,15 @@ scm
 						(not (wire-has-stream? a-wire))
 						(not (wire-has-stream? b-wire))
 					)
-					(define aw (make-wire))
-					(define bw (make-wire))
-					(define lw (make-wire))
-					(set! l-device (cgw-filter-atom-type link-wire lw link-type))
-					(wire-fan-out lw aw bw)
-					(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
-					(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
+					(let ((aw (make-wire))
+							(bw (make-wire))
+							(lw (make-wire))
+						)
+						(set! l-device (cgw-filter-atom-type link-wire lw link-type))
+						(wire-fan-out lw aw bw)
+						(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
+						(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
+					)
 				)
 
 				;; input on a-wire only
@@ -137,15 +139,17 @@ scm
 						(wire-has-stream? a-wire)
 						(not (wire-has-stream? b-wire))
 					)
-					(define lw (make-wire))
-					(define bw (make-wire))
-					(define ar (make-wire))
-					(set! a-device (cgw-filter-incoming-pos-uni a-wire lw link-type a-pos))
-					(wire-fan-out lw ar bw)
-					;; The arity filter prevents us from returning links
-					;; which can't have a b-pos.
-					(set! l-device (cgw-filter-arity ar link-wire (+ b-pos 1)))
-					(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
+					(let ((lw (make-wire))
+							(bw (make-wire))
+							(ar (make-wire))
+						)
+						(set! a-device (cgw-filter-incoming-pos-uni a-wire lw link-type a-pos))
+						(wire-fan-out lw ar bw)
+						;; The arity filter prevents us from returning links
+						;; which can't have a b-pos.
+						(set! l-device (cgw-filter-arity ar link-wire (+ b-pos 1)))
+						(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
+					)
 				)
 
 				;; input on b-wire only
@@ -153,15 +157,17 @@ scm
 						(not (wire-has-stream? a-wire))
 						(wire-has-stream? b-wire)
 					)
-					(define lw (make-wire))
-					(define aw (make-wire))
-					(define ar (make-wire))
-					(set! b-device (cgw-filter-incoming-pos-uni b-wire lw link-type b-pos))
-					(wire-fan-out lw ar aw)
-					;; The arity filter prevents us from returning links
-					;; which can't have an a-pos.
-					(set! l-device (cgw-filter-arity ar link-wire (+ a-pos 1)))
-					(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
+					(let ((lw (make-wire))
+							(aw (make-wire))
+							(ar (make-wire))
+						)
+						(set! b-device (cgw-filter-incoming-pos-uni b-wire lw link-type b-pos))
+						(wire-fan-out lw ar aw)
+						;; The arity filter prevents us from returning links
+						;; which can't have an a-pos.
+						(set! l-device (cgw-filter-arity ar link-wire (+ a-pos 1)))
+						(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
+					)
 				)
 			)
 		)
