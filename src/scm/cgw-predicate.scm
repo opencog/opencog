@@ -91,6 +91,32 @@ scm
 
 ; --------------------------------------------------------------------
 ;
+; cgw-filter-link-pos in-atom-wire in-link-wire out-link-wire atom-pos
+;
+; Pass through links where the atom appears in the indicated position.
+; Given two wires, one containing an input stream of atoms, and a second
+; of links, pass through only those links where the atom appeared in the
+; indicated position.
+;
+(define (cgw-filter-link-pos in-atom-wire in-link-wire out-link-wire atom-pos)
+
+	(define (pos-comp atom link pos)
+		(if (>= position (cog-arity link))
+			'()
+			; Must use equal to compare atoms!
+			(if (equal? atom (list-ref (cog-outgoing-set link) pos))
+				(list link)
+				'()
+			)
+		)
+	)
+	(wire-comparator in-atom-wire in-link-wire out-link-wire 
+		(lambda (a b) (pos-comp a b atom-pos))
+	)
+)
+
+; --------------------------------------------------------------------
+;
 ; Link splitter
 ; Given a stream of links on the 'in-link-wire', generate two streams
 ; of atoms, with the first stream, on the 'a-out-wire', consisting of
@@ -127,6 +153,7 @@ scm
 							(bw (make-wire))
 							(lw (make-wire))
 						)
+						; Make sure the link-wire really does have the desired type on it.
 						(set! l-device (cgw-filter-atom-type link-wire lw link-type))
 						(wire-fan-out lw aw bw)
 						(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
@@ -168,6 +195,57 @@ scm
 						(set! l-device (cgw-filter-arity ar link-wire (+ a-pos 1)))
 						(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
 					)
+				)
+
+				;; input on link-wire and a-wire 
+				((and (wire-has-stream? link-wire)
+						(wire-has-stream? a-wire)
+						(not (wire-has-stream? b-wire))
+					)
+					(let* ((lw (make-wire))
+							(flw (make-wire))
+							(dev (cgw-filter-link-pos a-wire link-wire lw a-pos))
+						)
+						(set! a-device dev)
+						(set! l-device dev)
+						; Make sure the link-wire really does have the desired type on it.
+						(cgw-filter-atom-type lw flw link-type))
+						(set! b-device (cgw-outgoing-nth flw b-wire b-pos))
+					)
+				)
+
+				;; input on link-wire and b-wire 
+				((and (wire-has-stream? link-wire)
+						(not (wire-has-stream? a-wire))
+						(wire-has-stream? b-wire)
+					)
+					(let* ((lw (make-wire))
+							(flw (make-wire))
+							(dev (cgw-filter-link-pos b-wire link-wire lw b-pos))
+						)
+						(set! b-device dev)
+						(set! l-device dev)
+						; Make sure the link-wire really does have the desired type on it.
+						(cgw-filter-atom-type lw flw link-type))
+						(set! a-device (cgw-outgoing-nth flw a-wire a-pos))
+					)
+				)
+
+				;; input on a-wire and b-wire
+				((and (not (wire-has-stream? link-wire))
+						(wire-has-stream? a-wire)
+						(wire-has-stream? b-wire)
+					)
+					; xxx
+					(display "NOOOOOOOOOOOOOO T IMPLEMENTED\n")
+				)
+
+				;; input on all wires is an error
+				((and (wire-has-stream? link-wire)
+						(wire-has-stream? a-wire)
+						(wire-has-stream? b-wire)
+					)
+					(error "Input on all three wires! -- cgw-splitter")
 				)
 			)
 		)
