@@ -32,6 +32,21 @@ scm
 
 ; --------------------------------------------------------------------
 ;
+; cgw-filter-arity
+;
+; Filter a stream based on whether it's outgoing set has at least n items.
+; That is, an atom, presenting on input, must be a link, just in order to 
+; have an outgoing set, and it must have an arity of at least n.
+;
+(define (cgw-filter-arity a-wire b-wire arity)
+	(define (has-arity? link)
+		(<= arity (cog-arity link))
+	)
+	(wire-filter a-wire b-wire has-arity?)
+)
+
+; --------------------------------------------------------------------
+;
 ; cgw-assoc-uni in-wire out-wire link-type in-pos out-pos
 ;
 ; Produce links that contains the given atoms in the n-th position. 
@@ -235,10 +250,30 @@ scm
 						(not (wire-has-stream? b-wire))
 					)
 					(define lw (make-wire))
-					(define flw (make-wire))
-					(cgw-incoming a-wire lw)
-					(cgw-filter-atom-type lw flw link-type)
-					;; ummm
+					(define bw (make-wire))
+					(define ar (make-wire))
+					(set! a-device (cgw-assoc-uni a-wire lw link-type a-pos))
+					(wire-fan-out lw ar bw)
+					;; The arity filter prevents us from returning links
+					;; which can't have a b-pos.
+					(set! l-device (cgw-filter-arity ar link-wire (+ b-pos 1)))
+					(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
+				)
+
+				;; input on b-wire only
+				((and (not (wire-has-stream? link-wire))
+						(not (wire-has-stream? a-wire))
+						(wire-has-stream? b-wire)
+					)
+					(define lw (make-wire))
+					(define aw (make-wire))
+					(define ar (make-wire))
+					(set! b-device (cgw-assoc-uni b-wire lw link-type b-pos))
+					(wire-fan-out lw ar aw)
+					;; The arity filter prevents us from returning links
+					;; which can't have an a-pos.
+					(set! l-device (cgw-filter-arity ar link-wire (+ a-pos 1)))
+					(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
 				)
 			)
 		)
