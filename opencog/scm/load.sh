@@ -6,7 +6,7 @@
 #
 
 HOST=localhost
-PORT=17001
+PORT=17002
 
 cat type_constructors.scm |netcat $HOST $PORT
 cat utilities.scm |netcat $HOST $PORT

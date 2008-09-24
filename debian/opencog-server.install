@@ -1,0 +1,4 @@
+etc/*
+usr/bin/*
+usr/lib/opencog/libbuiltinreqs.so
+usr/lib/opencog/libserver.so

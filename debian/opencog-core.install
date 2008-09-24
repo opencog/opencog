@@ -1,0 +1,6 @@
+usr/lib/opencog/libattention.so
+usr/lib/opencog/libpersist.so
+usr/lib/opencog/libquery.so
+usr/lib/opencog/libscheme.so
+usr/lib/opencog/libwsd.so
+usr/share/opencog/scm/*

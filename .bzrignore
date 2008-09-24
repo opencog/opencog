@@ -1,28 +1,46 @@
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-DartTestfile.txt
 *.a
-*UTest.cpp
-*UTest
 opencog/server/cogserver
 opencog/atomspace/type-definer
 opencog/scm/type_constructors.scm
 opencog/persist/sniff
 opencog.log
-tests/Testing/
-install_manifest.txt
 examples/extending/derivedserver
 examples/hopfield/hopfield
 examples/server/derivedserver
+
+# cmake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+
+# ctest
+tests/Testing/
+DartTestfile.txt
+*UTest.cpp
+*UTest
+
+# cpack
+install_manifest.txt
 CPackConfig.cmake
 CPackSourceConfig.cmake
 _CPack_Packages/
 *.tgz
 *.tar.gz
 
-# WIN32 specific
+# deb packaging
+build-stamp
+debian/files
+debian/libatomspace/
+debian/libatomspace-dev/
+debian/opencog-core/
+debian/opencog-core-dev/
+debian/opencog-dbg/
+debian/opencog-server/
+debian/opencog-server-dev/
+debian/tmp/
+
+# win32
 *.lib
 *.pdb
 *.exe*

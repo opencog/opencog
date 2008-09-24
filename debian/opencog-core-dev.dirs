@@ -1,0 +1,5 @@
+usr/include/opencog/dynamics
+usr/include/opencog/guile
+usr/include/opencog/nlp
+usr/include/opencog/persist
+usr/include/opencog/query

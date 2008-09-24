@@ -12,5 +12,5 @@ INSTALL (FILES
 	FindSTLPort.cmake
 	FindUnixODBC.cmake
 	OpenCogConfig.cmake
-	DESTINATION "${DATADIR}"
+	DESTINATION "${DATADIR}/cmake"
 )
