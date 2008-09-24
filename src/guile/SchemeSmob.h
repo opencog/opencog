@@ -68,6 +68,7 @@ class SchemeSmob
 		// Atom properties
 		static SCM ss_name(SCM);
 		static SCM ss_type(SCM);
+		static SCM ss_arity(SCM);
 		static SCM ss_tv(SCM);
 		static SCM ss_incoming_set(SCM);
 		static SCM ss_outgoing_set(SCM);

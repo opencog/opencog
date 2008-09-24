@@ -66,6 +66,18 @@ SCM SchemeSmob::ss_type (SCM satom)
 	return sym;
 }
 
+SCM SchemeSmob::ss_arity (SCM satom)
+{
+	const Atom *atom = verify_atom(satom, "cog-arity");
+	Arity ari = 0;
+	const Link *l = dynamic_cast<const Link *>(atom);
+	if (l) ari = l->getArity();
+
+	/* Arity is currently an unsigned short */
+	SCM sari = scm_from_ushort(ari);
+	return sari;
+}
+
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	const Atom *atom = verify_atom(satom, "cog-tv");

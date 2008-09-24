@@ -101,6 +101,7 @@ void SchemeSmob::register_procs(void)
 	// property getters
 	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
 	scm_c_define_gsubr("cog-type",              1, 0, 0, C(ss_type));
+	scm_c_define_gsubr("cog-arity",             1, 0, 0, C(ss_arity));
 	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	scm_c_define_gsubr("cog-tv",                1, 0, 0, C(ss_tv));

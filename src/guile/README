@@ -196,6 +196,17 @@ interface.
          guile> (eq? 'ConceptNode (cog-type x))
          #t
 
+== cog-arity atom
+      Return the arity of the atom.
+
+      Example:
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (cog-arity x)
+         0
+         guile> (define l (cog-new-link 'Link x x x))
+         guile> (cog-arity l)
+         3
+
 
 == cog-incoming-set atom
 == cog-outgoing-set atom
