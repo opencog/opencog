@@ -115,7 +115,7 @@ scm
 			;; and so disconnect whatever we were previously attached to.
 			(wire-disconnect a-wire a-device)
 			(wire-disconnect b-wire b-device)
-			(wire-disconnect l-wire l-device)
+			(wire-disconnect link-wire l-device)
 			(do-connect #f)
 			(cond
 				;; input on link-wire only
