@@ -98,6 +98,8 @@ attempted to take the stream, there would be a race, and one would loose.)
 Generic Devices
 ---------------
 These devices can carry any sort of stream, not just atoms.
+They provide fairly generic services for performing transformations
+on streams, as well as filtering them and comparing them.
 
 make-wire        - Create a wire
 wire-source-list - Place a list of items onto a wire.
@@ -112,6 +114,8 @@ wire-comparator  - Apply a function to a pair of input streams to
                      produce an output stream.
 wire-fan-in      - Compare elements from two input streams; if they
                      match, the match is copied to the output.
+wire-bidi        - Given a unidirectional device, create a 
+                     bi-directional device.
 
 
 Atomic Devices
@@ -124,7 +128,7 @@ cgw-display-atom-type - Display the type of the atoms pasing through.
 cgw-incoming          - Present the incoming-set of an atom
 cgw-outgoing          - Present the outgoing-set of an atom
 
-cgw-filter-atom-type  - Only let the indicate atom types through.
+cgw-filter-atom-type  - Only let the indicated atom types through.
 cgw-filter-incoming   - Present the links in the incoming set,
                         matching a given link type.
 cgw-filter-incoming-pos - Present the incoming set, depending
