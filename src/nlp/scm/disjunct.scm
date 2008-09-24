@@ -66,11 +66,12 @@ scm
 	; More wires to transport various bits and peices.
 	(define word-instances (make-wire))
 	(define word-nodes (make-wire))
+	(define wa (make-wire))
+	(define wb (make-wire))
 	(define misc-a (make-wire))
 	(define misc-b (make-wire))
 	(define misc-c (make-wire))
 	(define misc-d (make-wire))
-	(define misc-e (make-wire))
 
 	; Put the sentences on the wire
 	(cgw-source-atoms sentences 'SentenceNode)
@@ -85,15 +86,18 @@ scm
 	; (cgw-follow-link-pos word-instances misc-b 'ListLink 0 1)
 	; (wire-fan-out misc-a misc-b misc-c)
 	; (wire-fan-in misc-a misc-d misc-c)
-	(cgw-splitter misc-a misc-b word-instances 'ListLink 0 0)
-	;
+	; (cgw-splitter misc-a misc-b word-instances 'ListLink 0 0)
 	; (cgw-splitter misc-a word-instances misc-b 'ListLink 0 1)
-	; (cgw-splitter misc-a misc-c misc-b 'ListLink 0 1)
+	; (cgw-splitter misc-a misc-b misc-c 'ListLink 1 0)
+	;
+	(wire-fan-out word-instances wa wb)
+	(cgw-splitter misc-a wa misc-b 'ListLink 0 1)
+	(cgw-splitter misc-c wb misc-b 'ListLink 0 1)
 
 	; print things out
 	; (wire-probe "links" misc-a)
-	; (wire-probe "back" misc-c)
-	(display (wire-drain-count misc-b))
+	(wire-probe "back" misc-c)
+	; (display (wire-drain-count misc-b))
 	; (wire-drain misc-d)
 )
 

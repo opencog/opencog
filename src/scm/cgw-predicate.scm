@@ -237,8 +237,16 @@ scm
 						(wire-has-stream? a-wire)
 						(wire-has-stream? b-wire)
 					)
-					; xxx
-					(display "NOOOOOOOOOOOOOO T IMPLEMENTED\n")
+					(let ((alw (make-wire))
+						(blw (make-wire))
+						(lw (make-wire))
+						)
+						(set! a-device (cgw-filter-incoming-pos-uni a-wire alw link-type a-pos))
+						(set! b-device (cgw-filter-incoming-pos-uni b-wire blw link-type b-pos))
+						(wire-fan-in alw blw lw)
+						; Make sure the link-wire really does have the desired type on it.
+						(set! l-device (cgw-filter-atom-type lw link-wire link-type))
+					)
 				)
 
 				;; input on all wires is an error
