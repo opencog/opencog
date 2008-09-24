@@ -116,7 +116,7 @@ scm
 			(wire-disconnect a-wire a-device)
 			(wire-disconnect b-wire b-device)
 			(wire-disconnect link-wire l-device)
-			(do-connect #f)
+			(set! do-connect #f)
 			(cond
 				;; input on link-wire only
 				((and (wire-has-stream? link-wire)
