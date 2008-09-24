@@ -207,7 +207,7 @@ scm
 ; Here, 'a-pos' and 'b-pos' are integers, denoting positions in the 
 ; outgoing-set of a link, starting with position 0.
 ;
-(define (cgw-splitter link-wire a-wire b-wire a-pos b-pos)
+(define (cgw-splitter link-wire a-wire b-wire link-type a-pos b-pos)
 	(let (
 			(l-device (wire-null-device))
 			(a-device (wire-null-device))
@@ -223,6 +223,7 @@ scm
 			(wire-disconnect a-wire a-device)
 			(wire-disconnect b-wire b-device)
 			(wire-disconnect l-wire l-device)
+			(do-connect #f)
 			(cond
 				;; input on link-wire only
 				((and (wire-has-stream? link-wire)
@@ -231,18 +232,34 @@ scm
 					)
 					(define aw (make-wire))
 					(define bw (make-wire))
-					(set! l-device (wire-fan-out link-wire aw bw))
+					(define lw (make-wire))
+					(set! l-device (cgw-filter-atom-type link-wire lw link-type))
+					(wire-fan-out lw aw bw)
 					(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
 					(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
+				)
+
+				;; input on a-wire only
+				((and (not (wire-has-stream? link-wire))
+						(wire-has-stream? a-wire)
+						(not (wire-has-stream? b-wire))
+					)
+					(define lw (make-wire))
+					(define flw (make-wire))
+					(cgw-incoming a-wire lw)
+					(cgw-filter-atom-type lw flw link-type)
+					;; ummm
 				)
 			)
 		)
 
 		(define (me msg)
 			(cond
-				((or (eq? msg wire-assert-msg)
-					(eq? msg wire-float-msg))
+				((eq? msg wire-assert-msg)
 					(process-msg)
+				)
+				((eq? msg wire-float-msg)
+					;; XXX ignore for now ... 
 				)
 				(else
 					(default-dispatcher msg 'cgw-assoc myname)
