@@ -51,6 +51,8 @@ scm
 
 ;; -------------------------------------------------------------------------
 ;
+; cgw-filter-atom-type a-wire b-wire atom-type
+;
 ; Filter based on atom types. Is the atoms presenting on the wires are 
 ; of the given type, then the atoms can pass through, else they are discarded.
 ; This filter is bi-directional (works in either direction).
@@ -59,6 +61,25 @@ scm
 	(wire-filter a-wire b-wire (lambda (atom) (eq? atom-type (cog-type atom))))
 )
 
+;; --------------------------------------------------------------------
+;
+; cgw-filter-arity
+;
+; Filter a stream based on whether it's outgoing set has at least n items.
+; That is, an atom, presenting on input, must be a link, just in order to 
+; have an outgoing set, and it must have an arity of at least n.
+;
+(define (cgw-filter-arity a-wire b-wire arity)
+	(define (has-arity? link)
+		(<= arity (cog-arity link))
+	)
+	(wire-filter a-wire b-wire has-arity?)
+)
+
+;; --------------------------------------------------------------------
+;
+; cgw-filter-incoming input-wire output-wire link-type
+;
 ; Get the incoming-set of the atoms on the input-wire, and filter it
 ; by link-type, presenting the results on the output-wire. Of course,
 ; for any given atom, its incoming set consists entirely of links.
@@ -74,6 +95,10 @@ scm
 	(cgw-filter-atom-type mid output-wire link-type)
 )
 
+;; --------------------------------------------------------------------
+;
+; cgw-filter-outgoing input-wire output-wire atom-type
+;
 ; Get the outgoing-set of the atoms on the input-wire, and filter it
 ; by atom-type presenting the results on the output-wire. Of course,
 ; only links have outgoing sets, so any nodes on the input-wire will
@@ -85,6 +110,8 @@ scm
 	(cgw-filter-atom-type mid output-wire atom-type)
 )
 
+;; --------------------------------------------------------------------
+;
 ; cgw-follow-link input-wire output-wire link-type target-type
 ;
 ; Follow a link to a target atom type. 
@@ -97,6 +124,22 @@ scm
 	(define mid (make-wire))
 	(cgw-filter-incoming input-wire mid link-type)
 	(cgw-filter-outgoing mid output-wire target-type)
+)
+
+;; --------------------------------------------------------------------
+;
+; cgw-follow-link-pos input-wire output-wire link-type in-pos out-pos
+;
+; Follow a link to an atom located in a certain position.
+; Starting with the atom on input-wire, examine its incoming-set,
+; selecting only those with type 'link-type', and where the incoming
+; atom appears in position 'in-pos'. Place on the output wire those
+; atoms which appear in the 'out-pos' slot of the link.
+;
+(define (cgw-follow-link-pos input-wire output-wire link-type in-pos out-pos)
+	(define mid (make-wire))
+	(cgw-filter-incoming-pos-uni input-wire mid link-type in-pos)
+	(cgw-outgoing-nth mid output-wire out-pos)
 )
 
 ;; -------------------------------------------------------------------------

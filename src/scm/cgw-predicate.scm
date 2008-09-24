@@ -30,21 +30,6 @@ scm
 
 ; --------------------------------------------------------------------
 ;
-; cgw-filter-arity
-;
-; Filter a stream based on whether it's outgoing set has at least n items.
-; That is, an atom, presenting on input, must be a link, just in order to 
-; have an outgoing set, and it must have an arity of at least n.
-;
-(define (cgw-filter-arity a-wire b-wire arity)
-	(define (has-arity? link)
-		(<= arity (cog-arity link))
-	)
-	(wire-filter a-wire b-wire has-arity?)
-)
-
-; --------------------------------------------------------------------
-;
 ; cgw-filter-incoming-pos-uni in-wire out-wire link-type in-pos out-pos
 ;
 ; Produce links that contains the given atoms in the n-th position. 
