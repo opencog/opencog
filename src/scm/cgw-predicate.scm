@@ -83,12 +83,29 @@ scm
 ; functions just as cgw-filter-incoming-pos-uni does, but either wire
 ; can be the input wire; the other wire will be the output wire.
 ;
+(define (cgw-filter-incoming-pos a-wire b-wire link-type a-pos)
+	(wire-bidi a-wire b-wire
+		(lambda (aw bw) (cgw-filter-incoming-pos-uni aw bw link-type a-pos))
+	)
+)
+
+; --------------------------------------------------------------------
+;
+; wire-bidi a-wire b-wire uni-device
+;
+; Given a uni-directional device, build a bi-directional device.
+; If 'uni-device' is a device that only takes input on the first wire,
+; and only generates output on the second wire, then this device will
+; implement the same function, but accept input on either wire, and 
+; output on the other wire.
+;
 ; This is implemented by listening for transmit messages. When
 ; a transmit message is overheard, then that wire is hooked up
 ; up to the uni-directional version, with the transmitter on the
 ; input side.
 ;
-(define (cgw-filter-incoming-posa-wire b-wire link-type a-pos)
+(define (wire-bidi a-wire b-wire uni-device)
+
 	(let ((device (wire-null-device))
 			(do-connect #t)
 			(myname "")
@@ -123,18 +140,18 @@ scm
 				; Input on a-wire, output on b-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
-					(set! device (cgw-filter-incoming-pos-uni a-wire b-wire link-type a-pos))
+					(set! device (uni-device a-wire b-wire))
 				)
 
 				; Input on b-wire, output on a-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
-					(set! device (cgw-filter-incoming-pos-uni b-wire a-wire link-type a-pos))
+					(set! device (uni-device b-wire a-wire))
 				)
 
 				; Error condition
 				((and (wire-has-stream? a-wire) (wire-has-stream? b-wire))
-					(error "Both wires have streams! -- cgw-filter-incoming-pos")
+					(error "Both wires have streams! -- wire-bidi")
 				)
 			)
 		)
@@ -156,7 +173,6 @@ scm
 			)
 		)
 
-
 		(define (me msg)
 			(cond
 				((eq? msg wire-assert-msg)
@@ -166,15 +182,15 @@ scm
 					(process-disco-msg)
 				)
 				(else
-					(default-dispatcher msg 'cgw-filter-incoming-pos myname)
+					(default-dispatcher msg 'wire-bidi myname)
  				)
 			)
 		)
 
 		; Handy debugging prints
 		; (set! myname "being-manually-debugged")
-		; (wire-set-name a-wire "cgw-incoming-pos a-wire")
-		; (wire-set-name b-wire "cgw-incoming-pos b-wire")
+		; (wire-set-name a-wire "wire-bidi a-wire")
+		; (wire-set-name b-wire "wire-bidi b-wire")
 		; (wire-enable-debug a-wire)
 		; (wire-enable-debug b-wire)
 
