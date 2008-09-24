@@ -84,15 +84,14 @@ scm
 	; (cgw-follow-link-pos word-instances misc-b 'ListLink 0 1)
 	; (wire-fan-out misc-a misc-b misc-c)
 	; (wire-fan-in misc-a misc-d misc-c)
-	; (cgw-splitter misc-a word-instances misc-b 'ListLink 0 1)
-	(cgw-splitter misc-a word-instances misc-b 'ListLink 1 0)
-	; (cgw-splitter misc-a misc-b word-instances 'ListLink 0 1)
-	; (cgw-splitter misc-a misc-b word-instances 'ListLink 1 0)
 	; (cgw-splitter misc-a misc-b word-instances 'ListLink 0 0)
+	;
+	(cgw-splitter misc-a word-instances misc-b 'ListLink 0 1)
+	(cgw-splitter misc-a misc-c misc-b 'ListLink 0 1)
 
 	; print things out
-	(wire-probe "links" misc-a)
-	(wire-probe "assoc" misc-b)
+	; (wire-probe "links" misc-a)
+	(wire-probe "back" misc-c)
 	; (wire-drain misc-d)
 )
 

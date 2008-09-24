@@ -101,7 +101,7 @@ scm
 (define (cgw-filter-link-pos in-atom-wire in-link-wire out-link-wire atom-pos)
 
 	(define (pos-comp atom link pos)
-		(if (>= position (cog-arity link))
+		(if (>= pos (cog-arity link))
 			'()
 			; Must use equal to compare atoms!
 			(if (equal? atom (list-ref (cog-outgoing-set link) pos))
@@ -209,7 +209,7 @@ scm
 						(set! a-device dev)
 						(set! l-device dev)
 						; Make sure the link-wire really does have the desired type on it.
-						(cgw-filter-atom-type lw flw link-type))
+						(cgw-filter-atom-type lw flw link-type)
 						(set! b-device (cgw-outgoing-nth flw b-wire b-pos))
 					)
 				)
@@ -226,7 +226,7 @@ scm
 						(set! b-device dev)
 						(set! l-device dev)
 						; Make sure the link-wire really does have the desired type on it.
-						(cgw-filter-atom-type lw flw link-type))
+						(cgw-filter-atom-type lw flw link-type)
 						(set! a-device (cgw-outgoing-nth flw a-wire a-pos))
 					)
 				)
