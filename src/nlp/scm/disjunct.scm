@@ -71,6 +71,11 @@ scm
 	(define misc-c (make-wire))
 	(define misc-d (make-wire))
 
+	(define (w-assoc w1 w2 ty ap bp)
+		(define l (make-wire))
+		(cgw-assoc w1 l ty ap)
+		(cgw-outgoing-nth l w2 bp)
+	)
 	; Put the sentences on the wire
 	(cgw-source-atoms sentences 'SentenceNode)
 
@@ -81,8 +86,8 @@ scm
 	; (cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
 	
 	; (cgw-filter-incoming word-instances misc-a 'ListLink)
-	; (cgw-assoc word-instances misc-b 'ListLink 0 1)
-	(cgw-assoc misc-b word-instances 'ListLink 1 0)
+	; (w-assoc word-instances misc-b 'ListLink 0 1)
+	(w-assoc misc-b word-instances 'ListLink 1 0)
 	(wire-fan-out misc-a misc-b misc-c)
 	(wire-fan-in misc-a misc-d misc-c)
 

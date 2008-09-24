@@ -20,12 +20,20 @@ scm
 (define (cgw-outgoing-nth a-wire b-wire position)
 
 	(define (get-nth link)
+		(if (>= position (cog-arity link))
+			(begin
+(display "WTFFF  !! linky is \n")
+(display link)
+(newline)
+				'()
+			)
 		(let ((atom (list-ref (cog-outgoing-set link) position)))
 			(if (null? atom)
 				'()
 				(list atom)
 			)
 		)
+	)
 	)
 	(wire-transceiver a-wire b-wire get-nth)
 )
@@ -157,13 +165,17 @@ scm
 		)
 
 		(define (process-disco-msg)
-			(wire-disconnect a-wire device)
-			(wire-disconnect b-wire device)
-			(set! do-connect #t)
 			(cond
 				; Both wires floating. Disconnect the device, if previously attached,
 				; and re-connect ourselves, so as to hear about anything new.
-				((and (not (wire-has-stream? a-wire)) (not (wire-has-stream? b-wire)))
+				((and 
+						(not do-connect)
+						(not (wire-has-stream? a-wire)) 
+						(not (wire-has-stream? b-wire))
+					)
+					(wire-disconnect a-wire device)
+					(wire-disconnect b-wire device)
+					(set! do-connect #t)
 					(connect-me)
 				)
 			)
