@@ -82,6 +82,26 @@ scm
 
 ; --------------------------------------------------------------------
 ;
+; wire-pair-fan-out
+;
+; Given an incoming stream of pairs, split it into two streams, with 
+; the car part sent out on the 'out-car-wire' and the cdr part sent
+; out on the 'out-cdr-wire'.
+;
+(define (wire-pair-fan-out in-pair-wire out-car-wire out-cdr-wire)
+
+	(define (carfilter item) (list (car item)))
+	(define (cdrfilter item) (list (cdr item)))
+	(define carw (make-wire))
+	(define cdrw (make-wire))
+	(wire-transceiver carw out-car-wire carfilter)
+	(wire-transceiver cdrw out-cdr-wire cdrfilter)
+	(wire-fan-out (in-pair-wire carw cdrw))
+)
+
+;
+; --------------------------------------------------------------------
+;
 ; wire-fan-in a-wire b-wire c-wire
 ;
 ; Given a stream on any two wires, compare the two streams,
