@@ -86,8 +86,7 @@ scm
 	; (cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)
 	
 	; (cgw-filter-incoming word-instances misc-a 'ListLink)
-	; (w-assoc word-instances misc-b 'ListLink 0 1)
-	(w-assoc misc-b word-instances 'ListLink 1 0)
+	(w-assoc word-instances misc-b 'ListLink 0 1)
 	(wire-fan-out misc-a misc-b misc-c)
 	(wire-fan-in misc-a misc-d misc-c)
 
