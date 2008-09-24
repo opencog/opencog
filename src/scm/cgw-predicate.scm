@@ -109,35 +109,42 @@ scm
 			(myname "")
 		)
 
+		(define (connect-me)
+			; Two distinct checks of 'do-connect' are made, because the
+			; act of connecting the a-wire could trigger a message that
+			; hooks up the actual processor (and thus should leave 
+			; wire-b not connected here)
+			(if do-connect
+				(begin
+					(set! device me)
+					(wire-connect a-wire me)
+				)
+			)
+			(if do-connect
+				(begin
+					(set! device me)
+					(wire-connect b-wire me)
+				)
+			)
+		)
+
 		(define (process-msg)
+			;;
+			;; State-change: Disconnect whateve the wires were previously connected to.
+			(wire-disconnect a-wire device)
+			(wire-disconnect b-wire device)
+			(set! do-connect #f)
 			(cond
 				; Input on a-wire, output on b-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
-					(wire-disconnect a-wire me)
-					(wire-disconnect b-wire me)
-					(set! do-connect #f)
 					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos b-pos))
 				)
 
 				; Input on b-wire, output on a-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
-					(wire-disconnect a-wire me)
-					(wire-disconnect b-wire me)
-					(set! do-connect #f)
 					(set! device (cgw-assoc-uni b-wire a-wire link-type b-pos a-pos))
-				)
-
-				; Both wires floating. Disconnect the device, if previously attached,
-				; and re-connect ourselves, so as to hear about anything new.
-				((and (not (wire-has-stream? a-wire)) (not (wire-has-stream? b-wire)))
-					(wire-disconnect a-wire device)
-					(wire-disconnect b-wire device)
-					(set! device (wire-null-device))
-					(wire-connect a-wire me)
-					(wire-connect b-wire me)
-		(display "duuude both floating !\n")
 				)
 
 				; Error condition
@@ -147,11 +154,27 @@ scm
 			)
 		)
 
+		(define (process-disco-msg)
+			(wire-disconnect a-wire device)
+			(wire-disconnect b-wire device)
+			(set! do-connect #t)
+			(cond
+				; Both wires floating. Disconnect the device, if previously attached,
+				; and re-connect ourselves, so as to hear about anything new.
+				((and (not (wire-has-stream? a-wire)) (not (wire-has-stream? b-wire)))
+					(connect-me)
+				)
+			)
+		)
+
+
 		(define (me msg)
 			(cond
-				((or (eq? msg wire-assert-msg)
-					(eq? msg wire-float-msg))
+				((eq? msg wire-assert-msg)
 					(process-msg)
+				)
+				((eq? msg wire-float-msg)
+					(process-disco-msg)
 				)
 				(else
 					(default-dispatcher msg 'cgw-assoc myname)
@@ -165,17 +188,11 @@ scm
 		; (wire-set-name b-wire "cgw-assoc b-wire")
 		; (wire-enable-debug a-wire)
 		; (wire-enable-debug b-wire)
-	
-		; Two distinct checks of 'do-connect' are made, because the
-		; act of connecting the a-wire could trigger a message that
-		; hooks up the actual processor (and thus should leave 
-		; wire-b not connected here)
-		(if do-connect
-			(wire-connect a-wire me)
-		)
-		(if do-connect
-			(wire-connect b-wire me)
-		)
+
+		(connect-me)
+
+		; Return the dispatcher
+		me
 	)
 )
 
@@ -214,9 +231,9 @@ scm
 					)
 					(define aw (make-wire))
 					(define bw (make-wire))
-					(wire-fan-out link-wire aw bw)
-					(cgw-outgoing-nth aw a-wire a-pos)
-					(cgw-outgoing-nth bw b-wire b-pos)
+					(set! l-device (wire-fan-out link-wire aw bw))
+					(set! a-device (cgw-outgoing-nth aw a-wire a-pos))
+					(set! b-device (cgw-outgoing-nth bw b-wire b-pos))
 				)
 			)
 		)
@@ -238,9 +255,15 @@ scm
 		; hooks up the actual processor.
 		(if do-connect
 			(wire-connect a-wire me)
+			(set! a-device me)
 		)
 		(if do-connect
 			(wire-connect b-wire me)
+			(set! b-device me)
+		)
+		(if do-connect
+			(wire-connect link-wire me)
+			(set! l-device me)
 		)
 		me
 	)
