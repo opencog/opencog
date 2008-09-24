@@ -34,12 +34,10 @@ scm
 ;
 ; cgw-assoc-uni in-wire out-wire link-type in-pos out-pos
 ;
-; Produce a stream of atoms depending on thier position in a Link.
-; Given a stream of atoms in the in-wire, produce a stream of atoms
-; on the out-wire, such that a given in-atom is connected to the
-; corresponding out-atom by a link of 'link-type', and such that 
-; the in-atom appears in position 'in-pos' of the link, and the 
-; out-atom appears in position 'out-pos' of the link.
+; Produce links that contains the given atoms in the n-th position. 
+; Given a stream of atoms in the in-wire, produce a stream of links
+; on the out-wire, such that a given in-atom appears in position
+; 'atom-pos' of the link, and the link is of 'link-type'.
 ;
 ; Example:
 ;   (cgw-assoc in-wire out-wire 'ListLink 0 1)
@@ -50,7 +48,7 @@ scm
 ;    cgw-assoc for a bi-directiional equivalant of this routine.
 ;    cgw-follow-link for similar non-position-dependent function.
 ;
-(define (cgw-assoc-uni in-wire out-wire link-type in-pos out-pos)
+(define (cgw-assoc-uni in-wire out-wire link-type atom-pos)
 
 	; Return true iff the atom is of 'link-type'
 	(define (is-desired-type? atom)
@@ -67,7 +65,7 @@ scm
 		; Return #t iff the input atom is in location in-pos
 		(define (is-in-slot? link)
 			; Use equal? not eq? to correctly compare atoms.
-			(equal? in-atom (get-nth link in-pos))
+			(equal? in-atom (get-nth link atom-pos))
 		)
 
 		; A list of all links where in-atom in in location in-pos
@@ -78,16 +76,8 @@ scm
 				)
 			)
 		)
-
-		; Get the out-pos'th atom in the link
-		(define (get-out link)
-			(get-nth link out-pos)
-		)
-
-		; Now get the atoms in the out-pos
-		(map get-out (good-links))
 	)
-	(wire-transceiver in-wire out-wire get-out-atom)
+	(wire-transceiver in-wire out-wire good-links)
 )
 
 ; --------------------------------------------------------------------
@@ -103,7 +93,7 @@ scm
 ; up to the uni-directional version, with the transmitter on the
 ; input side.
 ;
-(define (cgw-assoc a-wire b-wire link-type a-pos b-pos)
+(define (cgw-assoc a-wire b-wire link-type a-pos)
 	(let ((device (wire-null-device))
 			(do-connect #t)
 			(myname "")
@@ -138,13 +128,13 @@ scm
 				; Input on a-wire, output on b-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
-					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos b-pos))
+					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos))
 				)
 
 				; Input on b-wire, output on a-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
-					(set! device (cgw-assoc-uni b-wire a-wire link-type b-pos a-pos))
+					(set! device (cgw-assoc-uni b-wire a-wire link-type a-pos))
 				)
 
 				; Error condition
