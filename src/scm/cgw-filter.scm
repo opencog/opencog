@@ -151,9 +151,9 @@ scm
 ; other wire, else discard the element.
 ;
 (define (wire-filter A-wire B-wire predicate)
-	(define (filter atom)
-		(if (predicate atom)
-			(list atom)
+	(define (filter elt)
+		(if (predicate elt)
+			(list elt)
 			'()
 		)
 	)

@@ -24,6 +24,17 @@ scm
 	me
 )
 
+;; -------------------------------------------------------------------------
+;
+; wire-trivial-filter a-wire b-wire
+;
+; The trivial filter -- let everything on wire-a to pass to wire-b, 
+; and vice-versa.
+
+(define (wire-trivial-filter a-wire b-wire)
+	(wire-filter a-wire b-wire (lambda (elt) #t))
+)
+
 ; --------------------------------------------------------------------
 ; wire-drain wire
 ;

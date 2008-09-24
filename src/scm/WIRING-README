@@ -110,6 +110,7 @@ wire-fan-out     - Given a stream on the input, creates two identical
 wire-transceiver - Apply a function to transform an input stream into 
                      the output stream.
 wire-filter      - Pass input to output only if test returns true.  
+wire-trivial-filter - Pass all traffic between two wires.
 wire-comparator  - Apply a function to a pair of input streams to
                      produce an output stream.
 wire-fan-in      - Compare elements from two input streams; if they
