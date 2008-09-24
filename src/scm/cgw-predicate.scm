@@ -132,6 +132,7 @@ scm
 			(a-device (wire-null-device))
 			(b-device (wire-null-device))
 			(do-connect #t)
+			(do-ignore #f) ;; prevent recursion on the connect messages.
 			(myname "")
 		)
 
@@ -253,7 +254,15 @@ scm
 		(define (me msg)
 			(cond
 				((eq? msg wire-assert-msg)
-					(process-msg)
+
+					;; Avoid infinite recursion on the wire connection messages
+					(if (not do-ignore)
+						(begin
+							(set! do-ignore #t)
+							(process-msg)
+							(set! do-ignore #f)
+						)
+					)
 				)
 				((eq? msg wire-float-msg)
 					;; XXX ignore for now ... 
