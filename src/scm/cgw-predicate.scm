@@ -70,13 +70,12 @@ scm
 		(eq? link-type (cog-type atom))
 	)
 
-	(define (get-out-atom in-atom)
+	; Get the atom in the n-th position of the link
+	(define (get-nth link position)
+		(list-ref (cog-outgoing-set link) position)
+	)
 
-		; Get the atom in the n-th position of the link
-		(define (get-nth link position)
-			(list-ref (cog-outgoing-set link) position)
-		)
-
+	(define (good-links in-atom)
 		; Return #t iff the input atom is in location in-pos
 		(define (is-in-slot? link)
 			; Use equal? not eq? to correctly compare atoms.
@@ -84,11 +83,9 @@ scm
 		)
 
 		; A list of all links where in-atom in in location in-pos
-		(define (good-links)
-			(filter is-in-slot? 
-				(filter is-desired-type?
-					(cog-incoming-set in-atom)
-				)
+		(filter is-in-slot? 
+			(filter is-desired-type?
+				(cog-incoming-set in-atom)
 			)
 		)
 	)
