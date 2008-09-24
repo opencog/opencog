@@ -60,13 +60,18 @@ scm
 )
 
 ; Get the incoming-set of the atoms on the input-wire, and filter it
-; by atom-type presenting the results on the output-wire.
+; by link-type, presenting the results on the output-wire. Of course,
+; for any given atom, its incoming set consists entirely of links.
 ; This filter is uni-directional, with a stated input and output.
 ;
-(define (cgw-filter-incoming input-wire output-wire atom-type)
+; See also:
+;    cgw-filter-incoming-pos for a routine that also requires the 
+;    input atom to appear in a specific position in the link.
+;
+(define (cgw-filter-incoming input-wire output-wire link-type)
 	(define mid (make-wire))
 	(cgw-incoming input-wire mid)
-	(cgw-filter-atom-type mid output-wire atom-type)
+	(cgw-filter-atom-type mid output-wire link-type)
 )
 
 ; Get the outgoing-set of the atoms on the input-wire, and filter it
@@ -87,9 +92,6 @@ scm
 ; selecting only those with 'link-type'. Then examine the 
 ; outgoing-set of the link, selecting only those atoms of 
 ; 'target-type'. Place those atoms on the output-wire. 
-;
-; See also:
-;    cgw-assoc for a similar, position-dependent link-chase
 ;
 (define (cgw-follow-link input-wire output-wire link-type target-type)
 	(define mid (make-wire))

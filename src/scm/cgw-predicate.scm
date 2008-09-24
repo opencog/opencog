@@ -45,23 +45,23 @@ scm
 
 ; --------------------------------------------------------------------
 ;
-; cgw-assoc-uni in-wire out-wire link-type in-pos out-pos
+; cgw-filter-incoming-pos-uni in-wire out-wire link-type in-pos out-pos
 ;
 ; Produce links that contains the given atoms in the n-th position. 
-; Given a stream of atoms in the in-wire, produce a stream of links
+; Given a stream of atoms on the in-wire, produce a stream of links
 ; on the out-wire, such that a given in-atom appears in position
 ; 'atom-pos' of the link, and the link is of 'link-type'.
 ;
 ; Example:
-;   (cgw-assoc in-wire out-wire 'ListLink 0 1)
-; will return the atoms in position 1 of all ListLinks where the 
-; input atom was in position 0.
+;   (cgw-filter-incoming-pos-uni in-wire out-wire 'ListLink 1)
+; will return the all links of type "ListLink" where the input atom
+; was in position 1.
 ;
 ; See also:
-;    cgw-assoc for a bi-directiional equivalant of this routine.
-;    cgw-follow-link for similar non-position-dependent function.
+;    cgw-filter-incoming-pos for a bi-directiional equivalant of this routine.
+;    cgw-filter-incoming for a similar non-position-dependent function.
 ;
-(define (cgw-assoc-uni in-wire out-wire link-type atom-pos)
+(define (cgw-filter-incoming-pos-uni in-wire out-wire link-type atom-pos)
 
 	; Return true iff the atom is of 'link-type'
 	(define (is-desired-type? atom)
@@ -92,18 +92,18 @@ scm
 
 ; --------------------------------------------------------------------
 ;
-; cgw-assoc a-wire b-wire link-type a-pos b-pos
+; cgw-filter-incoming-pos a-wire b-wire link-type a-pos b-pos
 ;
-; A bidirectional version of cgw-assoc-uni. That is, it functions
-; just as cgw-assoc-uni does, but either wire can be the input wire;
-; the other wire will be the output wire.
+; A bidirectional version of cgw-filter-incoming-pos-uni. That is, it
+; functions just as cgw-filter-incoming-pos-uni does, but either wire
+; can be the input wire; the other wire will be the output wire.
 ;
 ; This is implemented by listening for transmit messages. When
 ; a transmit message is overheard, then that wire is hooked up
 ; up to the uni-directional version, with the transmitter on the
 ; input side.
 ;
-(define (cgw-assoc a-wire b-wire link-type a-pos)
+(define (cgw-filter-incoming-posa-wire b-wire link-type a-pos)
 	(let ((device (wire-null-device))
 			(do-connect #t)
 			(myname "")
@@ -138,18 +138,18 @@ scm
 				; Input on a-wire, output on b-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (wire-has-stream? a-wire) (not (wire-has-stream? b-wire)))
-					(set! device (cgw-assoc-uni a-wire b-wire link-type a-pos))
+					(set! device (cgw-filter-incoming-pos-uni a-wire b-wire link-type a-pos))
 				)
 
 				; Input on b-wire, output on a-wire. Disconnect ourself, connect
 				; the uni-directional part in the right direction.
 				((and (not (wire-has-stream? a-wire)) (wire-has-stream? b-wire))
-					(set! device (cgw-assoc-uni b-wire a-wire link-type a-pos))
+					(set! device (cgw-filter-incoming-pos-uni b-wire a-wire link-type a-pos))
 				)
 
 				; Error condition
 				((and (wire-has-stream? a-wire) (wire-has-stream? b-wire))
-					(error "Both wires have streams! -- cgw-assoc")
+					(error "Both wires have streams! -- cgw-filter-incoming-pos")
 				)
 			)
 		)
@@ -181,15 +181,15 @@ scm
 					(process-disco-msg)
 				)
 				(else
-					(default-dispatcher msg 'cgw-assoc myname)
+					(default-dispatcher msg 'cgw-filter-incoming-pos myname)
  				)
 			)
 		)
 
 		; Handy debugging prints
 		; (set! myname "being-manually-debugged")
-		; (wire-set-name a-wire "cgw-assoc a-wire")
-		; (wire-set-name b-wire "cgw-assoc b-wire")
+		; (wire-set-name a-wire "cgw-incoming-pos a-wire")
+		; (wire-set-name b-wire "cgw-incoming-pos b-wire")
 		; (wire-enable-debug a-wire)
 		; (wire-enable-debug b-wire)
 
@@ -251,7 +251,7 @@ scm
 					(define lw (make-wire))
 					(define bw (make-wire))
 					(define ar (make-wire))
-					(set! a-device (cgw-assoc-uni a-wire lw link-type a-pos))
+					(set! a-device (cgw-filter-incoming-pos-uni a-wire lw link-type a-pos))
 					(wire-fan-out lw ar bw)
 					;; The arity filter prevents us from returning links
 					;; which can't have a b-pos.
@@ -267,7 +267,7 @@ scm
 					(define lw (make-wire))
 					(define aw (make-wire))
 					(define ar (make-wire))
-					(set! b-device (cgw-assoc-uni b-wire lw link-type b-pos))
+					(set! b-device (cgw-filter-incoming-pos-uni b-wire lw link-type b-pos))
 					(wire-fan-out lw ar aw)
 					;; The arity filter prevents us from returning links
 					;; which can't have an a-pos.
@@ -286,7 +286,7 @@ scm
 					;; XXX ignore for now ... 
 				)
 				(else
-					(default-dispatcher msg 'cgw-assoc myname)
+					(default-dispatcher msg 'cgw-splitter myname)
  				)
 			)
 		)
@@ -324,7 +324,7 @@ scm
 	(define lopair (make-wire))
 	(define lotype (make-wire))
 
-	(cgw-assoc wire-a lopair link-hi 0 1)
+	(cgw-filter-incoming-pos wire-a lopair link-hi 0 1)
 	(cgw-filter-atom-type lopair lotype)
 
 	(wire-fan-out lotype wire-b wire-c)

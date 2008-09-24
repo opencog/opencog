@@ -125,15 +125,16 @@ cgw-incoming          - Present the incoming-set of an atom
 cgw-outgoing          - Present the outgoing-set of an atom
 
 cgw-filter-atom-type  - Only let the indicate atom types through.
-cgw-filter-incoming   - Present the atoms in the incoming set,
-                        matching a given atom type.
+cgw-filter-incoming   - Present the links in the incoming set,
+                        matching a given link type.
+cgw-filter-incoming-pos - Present the incoming set, depending
+                        on the link's type and atom's position.
 cgw-filter-outgoing   - Present the atoms in the outgoing set,
                         matching a given atom type.
+cgw-filter-arity      - Pass through links with a minimum arity.
 cgw-follow-link       - Follow a link to a target atom type.
 
 cgw-outgoing-nth      - Get the n'th atom in the outgoing set.
-cgw-assoc             - Produce a stream of atoms, depending on thier
-                        position in a Link.
 
 
 Unwiring

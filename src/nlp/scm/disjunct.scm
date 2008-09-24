@@ -73,7 +73,7 @@ scm
 
 	(define (w-assoc w1 w2 ty ap bp)
 		(define l (make-wire))
-		(cgw-assoc w1 l ty ap)
+		(cgw-filter-incoming-pos-uni w1 l ty ap)
 		(cgw-outgoing-nth l w2 bp)
 	)
 	; Put the sentences on the wire
