@@ -133,7 +133,7 @@ cgw-filter-outgoing   - Present the atoms in the outgoing set,
                         matching a given atom type.
 cgw-filter-arity      - Pass through links with a minimum arity.
 cgw-follow-link       - Follow a link to a target atom type.
-
+cgw-follow-link-pos   - Follow a link to an atom in a given position.
 cgw-outgoing-nth      - Get the n'th atom in the outgoing set.
 
 

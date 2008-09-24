@@ -95,6 +95,13 @@ scm
 ; the car part sent out on the 'out-car-wire' and the cdr part sent
 ; out on the 'out-cdr-wire'.
 ;
+; XXX If you feel you need this function, you are proabably wrong;
+; there is probably a simpler design for what you want to acheive.
+; This function is "bad" for two reasons: it encourages the use of
+; the fan-out, and it also encourages the use of different kinds of
+; data on the wires.  Programing wires to hold only a limited set
+; of data types will probably result in less overall confusion!
+;
 (define (wire-pair-fan-out in-pair-wire out-car-wire out-cdr-wire)
 
 	(define (carfilter item) (list (car item)))
@@ -106,7 +113,6 @@ scm
 	(wire-fan-out (in-pair-wire carw cdrw))
 )
 
-;
 ; --------------------------------------------------------------------
 ;
 ; wire-fan-in a-wire b-wire c-wire
