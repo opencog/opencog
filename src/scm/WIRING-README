@@ -146,3 +146,11 @@ essentially a bug; The devices could be fixed to support such reuse
 and reconnection, and could be fixed without changing the API, however,
 I've just not bothered to focus on this potential problem.
 
+
+Performance
+-----------
+Many of the more important devices will split an input stream into 
+two. This has the result of doubling the the processing time and 
+memory use for everything that came upstream.  This can have
+un-intended performance reprecussions, and result in NP-complexity
+with wiring up circuits with N nodes.

@@ -20,6 +20,13 @@ scm
 ; This function is the "inverse" of wire-fan-in, in that it makes two
 ; copies of a stream, whereas wire-fan-in reassembles the two copies.
 ;
+; Caution: if both streams are actually used, it will *double* the
+; processing time, and the memory usage, upstream. That is because the
+; act of splitting a stream into two also splits all upstream components
+; into two as well, resulting in muiltiple data pulls through the
+; processing pipelines.  By contrast, ignoring one of the two created
+; endpoints will not have this doubling effect.
+;
 (define (wire-fan-out a-wire b-wire c-wire)
 
 	(let ((myname ""))
