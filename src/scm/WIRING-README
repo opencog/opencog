@@ -136,3 +136,13 @@ cgw-assoc             - Produce a stream of atoms, depending on thier
                         position in a Link.
 
 
+Unwiring
+--------
+Currently some/many of the devices do not properly react to being
+disconnected from a wire. Thus, it is not recommended that a device
+be created, used with data flowing through it in one direction, and
+then re-used with data flowing in a different direction. This is 
+essentially a bug; The devices could be fixed to support such reuse
+and reconnection, and could be fixed without changing the API, however,
+I've just not bothered to focus on this potential problem.
+

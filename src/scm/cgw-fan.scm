@@ -193,6 +193,10 @@ scm
 			(wire-set-stream! out-wire (mkstrm) me)
 		)
 	
+		; XXX Bug/mem-leak: If this device is used once, then unwired,
+		; then re-wired, there is a good chance that it will leak memory,
+		; and mis-behave in general, because it does not capture or
+		; deal with unhook/disconnnect messages properly.
 		(define (process-msg)
 			(cond
 				((and 
