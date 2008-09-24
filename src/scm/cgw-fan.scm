@@ -150,6 +150,58 @@ scm
 
 ; --------------------------------------------------------------------
 ;
+; wire-drain-compare
+;
+; Compare two streams, return #t if they match, return #f on mis-match.
+; The compared streams are drained (i.e. the comparison proceeds until
+; the streams are empty). Do not use on infinite streams!
+;
+; If the two input streams are un-equal in length, then this function
+; returns true if the shorter stream matches the begining of the 
+; longer stream. Caution! This means the null stream matches any stream! 
+;
+(define (wire-drain-compare a-wire b-wire)
+	(let ((mismatch #f))
+
+		(define (scmp a b)
+			(if (not (equal? a b))
+				(set! mismatch #t)
+			)
+			'()
+		)
+
+		(define drain (make-wire))
+		(wire-comparator a-wire b-wire drain scmp)
+		(wire-drain drain)
+		(not mismatch)
+	)
+)
+
+; --------------------------------------------------------------------
+;
+; wire-drain-count
+;
+; Count the number of elements in a finite stream; return the length of
+; that stream. Counting proceeds until the stream is empty. Do not use
+; on infinite streams!
+;
+(define (wire-drain-count wire)
+	(let ((cnt 0))
+
+		(define (scnt a)
+			(set! cnt (+ cnt 1))
+			'()
+		)
+
+		(define drain (make-wire))
+		(wire-transceiver wire drain scnt)
+		(wire-drain drain)
+		cnt
+	)
+)
+
+; --------------------------------------------------------------------
+;
 ; wire-comparator a-wire b-wire c-wire
 ;
 ; Compare input streams on any two wires, presenting an output stream
