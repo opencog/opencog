@@ -149,11 +149,9 @@ scm
 
 		(define (me msg)
 			(cond
-				((eq? msg wire-assert-msg)
+				((or (eq? msg wire-assert-msg)
+					(eq? msg wire-float-msg))
 					(process-msg)
-				)
-				((eq? msg wire-float-msg)
-					;; Ignore the float message
 				)
 				(else
 					(default-dispatcher msg 'cgw-assoc myname)
@@ -192,13 +190,60 @@ scm
 ; Here, 'a-pos' and 'b-pos' are integers, denoting positions in the 
 ; outgoing-set of a link, starting with position 0.
 ;
-(define (cgw-splitter in-link-wire a-out-wire b-out-wire a-pos b-pos)
+(define (cgw-splitter link-wire a-wire b-wire a-pos b-pos)
+	(let (
+			(l-device (wire-null-device))
+			(a-device (wire-null-device))
+			(b-device (wire-null-device))
+			(do-connect #t)
+			(myname "")
+		)
 
-	(define aw (make-wire))
-	(define bw (make-wire))
-	(wire-fan-out in-link-wire aw bw)
-	(cgw-outgoing-nth aw a-out-wire a-pos)
-	(cgw-outgoing-nth bw b-out-wire b-pos)
+		(define (process-msg)
+			;;
+			;; The message is almost surely telling us to change the wiring;
+			;; and so disconnect whatever we were previously attached to.
+			(wire-disconnect a-wire a-device)
+			(wire-disconnect b-wire b-device)
+			(wire-disconnect l-wire l-device)
+			(cond
+				;; input on link-wire only
+				((and (wire-has-stream? link-wire)
+						(not (wire-has-stream? a-wire))
+						(not (wire-has-stream? b-wire))
+					)
+					(define aw (make-wire))
+					(define bw (make-wire))
+					(wire-fan-out link-wire aw bw)
+					(cgw-outgoing-nth aw a-wire a-pos)
+					(cgw-outgoing-nth bw b-wire b-pos)
+				)
+			)
+		)
+
+		(define (me msg)
+			(cond
+				((or (eq? msg wire-assert-msg)
+					(eq? msg wire-float-msg))
+					(process-msg)
+				)
+				(else
+					(default-dispatcher msg 'cgw-assoc myname)
+ 				)
+			)
+		)
+
+		; Three distinct checks of 'do-connect' are made, because the
+		; act of connecting the wires could trigger a message that
+		; hooks up the actual processor.
+		(if do-connect
+			(wire-connect a-wire me)
+		)
+		(if do-connect
+			(wire-connect b-wire me)
+		)
+		me
+	)
 )
 
 ; --------------------------------------------------------------------
