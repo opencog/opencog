@@ -60,19 +60,40 @@ scm
 )
 
 ; -----------------------------------------------------------------------
-;
-; cog-get-partner
+; cog-get-partner pair atom
 ;
 ; If 'pare' is a link containing two atoms, and 'wrd' is one of the
 ; two atoms, then this returns the other atom in the link.
 ;
-(define (cog-get-partner pare wrd)
+(define (cog-get-partner pare atom)
 	(let ((plist (cog-outgoing-set pare)))
-		(if (equal? wrd (car plist))
+		(if (equal? atom (car plist))
 			(cdr plist)
 			(car plist)
 		)
 	)
+)
+
+; -----------------------------------------------------------------------
+; cog-pred-get-partner pred atom
+;
+; Get the partner to the atom in the opencog predicate.
+; An opencog predicate is assumed to be structured as follows:
+;
+;    EvaluationLink
+;        SomeAtom  "relation-name"
+;        ListLink
+;            AnotherAtom  "some atom"
+;            AnotherAtom  "some other atom"
+;
+; Assuming this structure, then, given the top-level link, and one
+; of the two atoms in the ListLink, then return the other atom in the
+; listLink.
+;
+(define (cog-pred-get-partner rel atom)
+	; The 'car' appears here because 'cog-filter-outgoing' is returning
+	; a list, and we want just one atom (the only one in the list)
+	(cog-get-partner (car (cog-filter-outgoing 'ListLink rel)) atom)
 )
 
 ; -----------------------------------------------------------------------
