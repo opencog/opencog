@@ -136,6 +136,10 @@ scm
 ; atom appears in position 'in-pos'. Place on the output wire those
 ; atoms which appear in the 'out-pos' slot of the link.
 ;
+; See also:
+; This is equivalent to using cgw-binary-link, and leaving the
+; link-wire disconnected.
+;
 (define (cgw-follow-link-pos input-wire output-wire link-type in-pos out-pos)
 	(define mid (make-wire))
 	(cgw-filter-incoming-pos-uni input-wire mid link-type in-pos)

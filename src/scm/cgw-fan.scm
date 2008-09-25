@@ -136,11 +136,13 @@ scm
 	(define (compare-func elt-one elt-two)
 
 		;; a bit o debugging code
-		;;(if (eq? elt-one elt-two)
-		;;	(display "Bravo! match!\n")
-		;;	(display "Oh No Mr. Bill!! mis-match!\n")
-		;;)
-		(if (eq? elt-one elt-two)
+		;; (display elt-one)
+		;; (display elt-two)
+		;; (if (equal? elt-one elt-two)
+		;; 	(display "Bravo! match!\n")
+		;; 	(display "Oh No Mr. Bill!! mis-match!\n")
+		;; )
+		(if (equal? elt-one elt-two)
 			(list elt-one)
 			'()
 		)

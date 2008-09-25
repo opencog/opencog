@@ -118,15 +118,25 @@ scm
 ; --------------------------------------------------------------------
 ;
 ; Link splitter
-; Given a stream of links on the 'in-link-wire', generate two streams
-; of atoms, with the first stream, on the 'a-out-wire', consisting of
-; atoms occuppying position 'a-pos' in the link, and the 'b-out-wire'
-; getting the atoms in position 'b-pos' of the same link.
+; Given a stream of atoms on any one or two inputs, generate output
+; on the third. The input and output are related by means of links.
+; The relation is such that any link on the link-wire will have 
+; a corresponding atom on the a-wire, occupying position a-pos in
+; the link's outgoing set, and an atom on b-wire, occupying position
+; b-pos in the link's outgoing set.
+;
+; Thus, for example, if there is a stream of incoming links on the
+; 'link-wire', then this function generates two streams of atoms,
+; with the first stream, on the 'a-wire', consisting of atoms
+; occuppying position 'a-pos' in the link, and the 'b-wire' getting
+; the atoms in position 'b-pos' of the same link.  In the general
+; case, the direction of flow does not matter, the relationships,
+; however, are maintained.
 ;
 ; Here, 'a-pos' and 'b-pos' are integers, denoting positions in the 
 ; outgoing-set of a link, starting with position 0.
 ;
-(define (cgw-splitter link-wire a-wire b-wire link-type a-pos b-pos)
+(define (cgw-binary-link link-wire a-wire b-wire link-type a-pos b-pos)
 	(let (
 			(l-device (wire-null-device))
 			(a-device (wire-null-device))
@@ -304,21 +314,28 @@ scm
 ;
 ; Generalized predicate
 ;
+; The structure of the generalized predicate is:
+;
+;    EvaluationLink
+;        wire-a
+;        ListLink
+;            wire-b
+;            wire-c
+;
+; The wires are bi-directional; atoms can flow in, or out.
+;
 (define (cgw-predicate wire-a wire-b wire-c)
 
 	(cgw-triplet wire-a wire-b wire-c 'EvaluationLink 'ListLink)
 )
 
-(define (cgw-triplet wire-a wire-b wire-c link-hi link-lo)
+(define (cgw-triplet wire-a wire-b wire-c type-hi type-lo)
 
 	(define lopair (make-wire))
-	(define lotype (make-wire))
-
-	(cgw-filter-incoming-pos wire-a lopair link-hi 0 1)
-	(cgw-filter-atom-type lopair lotype)
-
-	(wire-fan-out lotype wire-b wire-c)
-
+	(define hipair (make-wire))
+	
+	(cgw-binary-link hipair wire-a lopair type-hi 0 1)
+	(cgw-binary-link lopair wire-b wire-c type-lo 0 1)
 )
 .
 exit
