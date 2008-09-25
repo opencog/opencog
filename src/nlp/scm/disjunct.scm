@@ -84,14 +84,28 @@ scm
 	)
 )
 
-(define (process-disjunct word sent-node)
+; Return a list of all of the LinkGrammarRelationshipNode's for the
+; word in the sentence. This list will be in sorted according to
+; sentence word-order.
+(define (get-disjunct-nodes word sent-node)
+	(let ((sorted-rels (get-lg-rels-sorted word sent-node)))
+		(define (get-dj rel)
+			(car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel))
+		)
+		(map get-dj sorted-rels)
+	)
+)
 
+;
+; Process the disjuncts for a single word in a sentence
+;
+(define (process-disjunct word sent-node)
 (display "duuude: \n")
 (display (get-word-list sent-node))
 (display "err: \n")
-(display		(get-lg-rels-sorted word sent-node))
+; (display		sorted-rels)
+(display (get-disjunct-nodes word sent-node))
 (display "\n")
-		
 )
 
 ; Given a single sentence, process the disjuncts for that sentence
