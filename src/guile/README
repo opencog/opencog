@@ -1,7 +1,6 @@
 
                         Scheme Scripting
                         ----------------
-
                     Linas Vepstas, May 2008
 
 
@@ -13,10 +12,31 @@ place a single . on the line, and hit enter. Alternately, hit ^D.
 Currently, only a small number of primitives have been implemented.
 
 This binding is intended to be used for day-to-day maintenance
-activities, and for experimentation. it is not meant to be used for any
-sort of serious calculation, simply because it is not (and cannot be) a
-high-performance interface. The shell is implemented in guile; guile is
-an interpreter, not a compiler. There is no bytecode or virtual machine.
+activities, experimentation and MindAgent development.  The shell is
+implemented in guile; guile is an interpreter, not a compiler; there
+are various associated performance penalties. Guile does have an
+associated bytecode and virtual machine in development.
+
+Documented below are the core interface functions implemented by the
+guile binding -- these provide for the creation and deletion of OpenCog
+Nodes, Links and TruthValues, as well as ways to get properties (such
+as the names of Nodes, or the outoing sets of Links).  Although the 
+core interface is documented below, it is important to notice that
+scheme makes "syntactic sugar" very easy to use; thus the interface
+below can be simplified, and has been simplified (in the  file
+src/scm/type_constructors.scm) Thus, atom creation can be as simple as
+the following example:
+
+   (ReferenceLink (stv 0.987 0.234)
+       (ConceptNode "dog-instance-1") (WordNode "dog"))
+
+which creates a link connnecting a concept node and a word node, having
+a simple truth value. Any valid node or link name can be used in this way.
+
+A number of utilities and handy functions can be found in the directory
+src/scm. The shell script src/scm/load.sh can be use to load the utilities.
+Additional NLP-related utilities and MindAgents are located in src/nlp/scm.
+
 
 Core Functions
 --------------
