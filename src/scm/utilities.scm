@@ -67,7 +67,7 @@ scm
 ; two atoms, then this returns the other atom in the link.
 ;
 (define (cog-get-partner pare wrd)
-	(let ((plist (cog-ougoing-set pare)))
+	(let ((plist (cog-outgoing-set pare)))
 		(if (equal? wrd (car plist))
 			(cdr plist)
 			(car plist)
