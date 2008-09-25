@@ -36,11 +36,15 @@ scm
 ;
 ; Return a list of all of the link-grammar links the word particpates in
 (define (get-lgl word)
-	(display "duuude: ")
-	; (cog-for-each 'ListLink 
-	(display word)
-	(newline)
-	'()
+
+	(let* ((word-pairs (cog-filter-incoming 'ListLink word))
+			)
+		; (cog-filter-incoming
+		(display "duuude: ")
+		(display word-pairs)
+		(newline)
+	
+	)
 )
 
 ; Given a single sentence, process the disjuncts for that sentence

@@ -60,7 +60,7 @@ scm
 )
 ;
 ; -----------------------------------------------------------------------
-; cog-filter-for-each atom-type proc atom-list
+; cog-filter-map atom-type proc atom-list
 ;
 ; Apply the proceedure 'proc' to every atom of 'atom-list' that is
 ; of type 'atom-type'. Application halts if proc returns any value 
@@ -69,22 +69,22 @@ scm
 ; that halted the application.
 ;
 ; Exmaple usage:
-; (cog-filter-for-each 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
+; (cog-filter-map 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
 ; 
 ; See also: cgw-filter-atom-type, which does the same thing, but for wires.
 ;
-(define (cog-filter-for-each atom-type proc atom-list) 
+(define (cog-filter-map atom-type proc atom-list) 
 	(define rc #f)
 	(cond 
 		((null? atom-list) #f)
 		((eq? (cog-type (car atom-list)) atom-type) 
 			(set! rc (proc (car atom-list))) 
 			(if (eq? #f rc) 
-				(cog-filter-for-each atom-type proc (cdr atom-list))
+				(cog-filter-map atom-type proc (cdr atom-list))
 				rc
 			)
 		) 
-		(else (cog-filter-for-each atom-type proc (cdr atom-list))
+		(else (cog-filter-map atom-type proc (cdr atom-list))
 		)
 	)
 )
@@ -148,14 +148,14 @@ scm
 (define (cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
 	(define (get-endpoint w)
 		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
-		; cog-filter-for-each returns the return value from proc, we pass it on
+		; cog-filter-map returns the return value from proc, we pass it on
 		; in turn, so make sure this is last statement
-		(cog-filter-for-each endpoint-type proc (cog-outgoing-set w))
+		(cog-filter-map endpoint-type proc (cog-outgoing-set w))
 	)
 	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
-	; cog-filter-for-each returns the return value from proc, we pass it on
+	; cog-filter-map returns the return value from proc, we pass it on
 	; in turn, so make sure this is last statement
-	(cog-filter-for-each link-type get-endpoint (cog-incoming-set anchor))
+	(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
 )
 
 ; -----------------------------------------------------------------------
