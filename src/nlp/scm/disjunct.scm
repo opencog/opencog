@@ -37,13 +37,16 @@ scm
 ; Return a list of all of the link-grammar links the word particpates in
 (define (get-lgl word)
 
+	(define (get-rel word-pair)
+		(cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair)
+	)
+
 	(let* ((word-pairs (cog-filter-incoming 'ListLink word))
+			(lg-rels (map get-rel word-pairs))
 			)
-		; (cog-filter-incoming
 		(display "duuude: ")
-		(display word-pairs)
+		(display lg-rels)
 		(newline)
-	
 	)
 )
 
@@ -66,7 +69,10 @@ scm
 )
 
 ; Do it list-style
-(list-get-sentence-list-disjuncts (cog-get-atoms 'SentenceNode))
+(define (list-it) 
+	(list-get-sentence-list-disjuncts (cog-get-atoms 'SentenceNode))
+)
+
 
 ; ===========================
 ; wire-style

@@ -185,7 +185,7 @@ scm
 ; Thus, for example, suppose the atom-space contains a link of the
 ; form (ReferenceLink (ConcpetNode "asdf") (WordNode "pqrs"))
 ; Then, the call 
-;    (cog-top-link 'ReferenceLink 'ConcpetNode (WordNode "pqrs"))
+;    (cog-get-link 'ReferenceLink 'ConcpetNode (WordNode "pqrs"))
 ; will return that link. Note that "endpoint-type" need not occur
 ; in the first position in the link; it can appear anywhere.
 ;
