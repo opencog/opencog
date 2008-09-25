@@ -68,7 +68,7 @@ scm
 (define (cog-get-partner pare atom)
 	(let ((plist (cog-outgoing-set pare)))
 		(if (equal? atom (car plist))
-			(cdr plist)
+			(cadr plist)
 			(car plist)
 		)
 	)
