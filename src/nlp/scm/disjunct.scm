@@ -35,10 +35,12 @@ scm
 ; List-style disjuncts
 ;
 ; Return a list of all of the link-grammar links the word particpates in
-(define (get-lgl word)
+(define (get-lg-rels word)
 
 	(define (get-rel word-pair)
-		(cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair)
+		;; Take the car, because cog-get-link returns a list of links.
+		;; We expect this list to only contain one element, in total.
+		(car (cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair))
 	)
 
 	(map get-rel (cog-filter-incoming 'ListLink word))
@@ -49,11 +51,47 @@ scm
 	(reverse! (cog-chase-link 'SentenceLink 'ConceptNode sent))
 )
 
-(define (process-disjunct word-rel-list sent-node)
+; Given a word, and the sentence in which the word appears, return
+; a list of the ling-grammar relations in which the word appears. 
+; The relations are sorted in sentence word-order.
+;
+; Similar to get-lg-rels, but sorted.
+;
+(define (get-lg-rels-sorted word sent-node)
+
+	; rel-list is a list of the link-grammar relations.
+	(let ((rel-list (get-lg-rels word)))
+
+		; Compare two link-grammar relations, and determine thier sentence
+		; word order.
+		(define (wless? rel-a rel-b)
+
+			; Return the index of the word in a sentence
+			(define (windex wrd)
+				(if (equal? "LEFT-WALL" (cog-name wrd))
+					-1
+					(list-index (lambda (w) (equal? wrd w)) (get-word-list sent-node))
+				)
+			)
+
+			(let ((word-a (cog-pred-get-partner rel-a word))
+					(word-b (cog-pred-get-partner rel-b word))
+				)
+				(< (windex word-a) (windex word-b))
+			)
+		)
+		(sort rel-list wless?)
+	)
+)
+
+(define (process-disjunct word sent-node)
+
 (display "duuude: \n")
-	(display (get-word-list sent-node))
-	(display word-rel-list)
+(display (get-word-list sent-node))
+(display "err: \n")
+(display		(get-lg-rels-sorted word sent-node))
 (display "\n")
+		
 )
 
 ; Given a single sentence, process the disjuncts for that sentence
@@ -61,7 +99,7 @@ scm
 
 	; process the disjunct for this word.
 	(define (make-disjunct word)
-		(process-disjunct (get-lgl word) sent-node)
+		(process-disjunct word sent-node)
 	)
 
 	(for-each make-disjunct (get-word-list sent-node))
