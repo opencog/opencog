@@ -27,6 +27,11 @@ scm
 ; processing pipelines.  By contrast, ignoring one of the two created
 ; endpoints will not have this doubling effect.
 ;
+; If this ever becomes an issue, it can be addressed by coding up a 
+; buffering fan-out device. That is, a device that buffers data pulled
+; from one stream, and with this buffer presented to the other stream
+; on-demand.
+;
 (define (wire-fan-out a-wire b-wire c-wire)
 
 	(let ((myname ""))
