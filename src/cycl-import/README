@@ -6,7 +6,14 @@ The actual implmention of the CycL import code is in the
 lillybot package. Download it. Compile it. It works, as 
 of February 2008.
 
-Proposed mapping from CycL to OpenCog. Working notes.
+Lillybot is a prototype opencyc-chatbot; it can answer simple
+questions posed on IRC, by performing simple inferencing on the
+OpenCyc dataset. It is no longer under active development.
+Lillybot source code is available at
+http://lillybot.wiki.sourceforge.net/
+
+Below follows a proposed mapping from CycL to OpenCog.
+Working notes.
 
 Basic Nodes and Links
 ----------------------
