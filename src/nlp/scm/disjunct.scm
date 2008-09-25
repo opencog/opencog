@@ -37,7 +37,7 @@ scm
 ; Return a list of all of the link-grammar links the word particpates in
 (define (get-lgl word)
 	(display "duuude: ")
-	;(cog-
+	; (cog-for-each 'ListLink 
 	(display word)
 	(newline)
 	'()
