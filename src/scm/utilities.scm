@@ -158,6 +158,21 @@ scm
 	(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
 )
 
+; cog-map-apply-link link-type endpoint-type proc anchor
+;
+; Similar to cog-map-chase-link, except that the proc is not called
+; on the endpoint, but rather on the link leading to the endpoint.
+;
+(define (cog-map-apply-link link-type endpoint-type proc anchor)
+	(define (get-link l)
+		(define (apply-link e)
+			(proc l)
+		)
+		(cog-filter-map endpoint-type apply-link (cog-outgoing-set l))
+	)
+	(cog-filter-map link-type get-link (cog-incoming-set anchor))
+)
+
 ; -----------------------------------------------------------------------
 ; exit scheme shell, exit opencog shell.
 .
