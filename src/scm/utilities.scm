@@ -158,6 +158,8 @@ scm
 	(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
 )
 
+; -----------------------------------------------------------------------
+;
 ; cog-map-apply-link link-type endpoint-type proc anchor
 ;
 ; Similar to cog-map-chase-link, except that the proc is not called
@@ -171,6 +173,31 @@ scm
 		(cog-filter-map endpoint-type apply-link (cog-outgoing-set l))
 	)
 	(cog-filter-map link-type get-link (cog-incoming-set anchor))
+)
+
+;
+; cog-get-link link-type endpoint-type anchor
+;
+; Return a list if links, of type 'link-type', which contain some
+; atom of type 'endpoint-type', and also specifically contain the 
+; atom 'anchor'.
+;
+; Thus, for example, suppose the atom-space contains a link of the
+; form (ReferenceLink (ConcpetNode "asdf") (WordNode "pqrs"))
+; Then, the call 
+;    (cog-top-link 'ReferenceLink 'ConcpetNode (WordNode "pqrs"))
+; will return that link. Note that "endpoint-type" need not occur
+; in the first position in the link; it can appear anywhere.
+;
+(define (cog-get-link link-type endpoint-type anchor)
+	(let ((lst '()))
+		(define (mklist inst)
+			(set! lst (cons inst lst))
+			#f
+		)
+		(cog-map-apply-link link-type endpoint-type mklist anchor)
+		lst
+	)
 )
 
 ; -----------------------------------------------------------------------
