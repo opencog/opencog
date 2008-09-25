@@ -87,12 +87,22 @@ scm
 ; Return a list of all of the LinkGrammarRelationshipNode's for the
 ; word in the sentence. This list will be in sorted according to
 ; sentence word-order.
-(define (get-disjunct-nodes word sent-node)
-	(let ((sorted-rels (get-lg-rels-sorted word sent-node)))
-		(define (get-dj rel)
-			(car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel))
+(define (make-disjunct sorted-rels)
+	(define (get-dj rel)
+		(car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel))
+	)
+
+	(define (mk-dj-string name-list str)
+		(if (null? name-list)
+			str
+			(mk-dj-string (cdr name-list) (string-append str (car name-list) " "))
 		)
-		(map get-dj sorted-rels)
+	)
+
+	(let* ((dj-list (map get-dj sorted-rels))
+			(dj-names (map cog-name dj-list))
+		)
+		(mk-dj-string dj-names "")
 	)
 )
 
@@ -104,7 +114,7 @@ scm
 (display (get-word-list sent-node))
 (display "err: \n")
 ; (display		sorted-rels)
-(display (get-disjunct-nodes word sent-node))
+(display (make-disjunct (get-lg-rels-sorted word sent-node)))
 (display "\n")
 )
 
