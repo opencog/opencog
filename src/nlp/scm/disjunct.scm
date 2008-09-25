@@ -84,14 +84,19 @@ scm
 	)
 )
 
-; Return a list of all of the LinkGrammarRelationshipNode's for the
-; word in the sentence. This list will be in sorted according to
-; sentence word-order.
+; Return a string listing all of the link-grammar relations for the
+; word in the sentence. This string will be in proper sorted order,
+; according to the appearence of the words in the sentence word-order.
 (define (make-disjunct sorted-rels)
-	(define (get-dj rel)
-		(car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel))
+
+	; Given a single opencog predicate (EvaluationLink) triple
+	; containing a link-grammar relation, just return the relation name,
+	; as a string.
+	(define (get-name rel)
+		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
 	)
 
+	; Given a list of names, create a string, padding it with blanks.
 	(define (mk-dj-string name-list str)
 		(if (null? name-list)
 			str
@@ -99,21 +104,21 @@ scm
 		)
 	)
 
-	(let* ((dj-list (map get-dj sorted-rels))
-			(dj-names (map cog-name dj-list))
-		)
-		(mk-dj-string dj-names "")
-	)
+	(mk-dj-string (map get-name sorted-rels) "")
 )
 
 ;
 ; Process the disjuncts for a single word in a sentence
 ;
 (define (process-disjunct word sent-node)
-(display "duuude: \n")
-(display (get-word-list sent-node))
-(display "err: \n")
-; (display		sorted-rels)
+
+	; Return the word string associated with the wor-instance
+	(define (get-word word-inst)
+		(cog-name (car (cog-chase-link 'ReferenceLink 'WordNode word-inst)))
+	)
+(display "Word: ")
+(display (get-word word))
+(display " -- ")
 (display (make-disjunct (get-lg-rels-sorted word sent-node)))
 (display "\n")
 )
@@ -122,11 +127,11 @@ scm
 (define (list-get-sentence-disjuncts sent-node)
 
 	; process the disjunct for this word.
-	(define (make-disjunct word)
+	(define (mk-disjunct word)
 		(process-disjunct word sent-node)
 	)
 
-	(for-each make-disjunct (get-word-list sent-node))
+	(for-each mk-disjunct (get-word-list sent-node))
 )
 
 ; Given a list of sentences, process each sentence to extract disjuncts
