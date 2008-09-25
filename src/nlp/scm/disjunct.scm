@@ -41,13 +41,12 @@ scm
 		(cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair)
 	)
 
-	(let* ((word-pairs (cog-filter-incoming 'ListLink word))
-			(lg-rels (map get-rel word-pairs))
-			)
-		(display "duuude: ")
-		(display lg-rels)
-		(newline)
-	)
+	(map get-rel (cog-filter-incoming 'ListLink word))
+)
+
+(define (process-disjunct word-rel-list sent-node)
+(display "duuude: ")
+	(display word-rel-list)
 )
 
 ; Given a single sentence, process the disjuncts for that sentence
@@ -58,7 +57,12 @@ scm
 		(cog-chase-link 'SentenceLink 'ConceptNode sent)
 	)
 
-	(for-each get-lgl (get-word-list sent-node))
+	; process the disjunct for this word.
+	(define (make-disjunct word)
+		(process-disjunct (get-lgl word) sent-node)
+	)
+
+	(for-each make-disjunct (get-word-list sent-node))
 )
 
 ; Given a list of sentences, process each sentence to extract disjuncts
