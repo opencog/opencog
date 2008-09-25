@@ -44,18 +44,20 @@ scm
 	(map get-rel (cog-filter-incoming 'ListLink word))
 )
 
+; Get list of all words in the sentence
+(define (get-word-list sent)
+	(reverse! (cog-chase-link 'SentenceLink 'ConceptNode sent))
+)
+
 (define (process-disjunct word-rel-list sent-node)
-(display "duuude: ")
+(display "duuude: \n")
+	(display (get-word-list sent-node))
 	(display word-rel-list)
+(display "\n")
 )
 
 ; Given a single sentence, process the disjuncts for that sentence
 (define (list-get-sentence-disjuncts sent-node)
-
-	; Get list of all words in the sentence
-	(define (get-word-list sent)
-		(cog-chase-link 'SentenceLink 'ConceptNode sent)
-	)
 
 	; process the disjunct for this word.
 	(define (make-disjunct word)
