@@ -58,7 +58,23 @@ scm
 		lst
 	)
 )
+
+; -----------------------------------------------------------------------
 ;
+; cog-get-partner
+;
+; If 'pare' is a link containing two atoms, and 'wrd' is one of the
+; two atoms, then this returns the other atom in the link.
+;
+(define (cog-get-partner pare wrd)
+	(let ((plist (cog-ougoing-set pare)))
+		(if (equal? wrd (car plist))
+			(cdr plist)
+			(car plist)
+		)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; cog-filter-map atom-type proc atom-list
 ;
@@ -89,13 +105,22 @@ scm
 	)
 )
 
+; Given a list of atoms, return a list of atoms that are of 'atom-type'
 (define (cog-filter atom-type atom-list) 
 	(define (is-type? atom) (eq? atom-type (cog-type atom)))
 	(filter is-type? atom-list)
 )
 
+; Given an atom, return a list of atoms from its incoming set that 
+; are of type 'atom-type'
 (define (cog-filter-incoming atom-type atom)
 	(cog-filter atom-type (cog-incoming-set atom))
+)
+
+; Given an atom, return a list of atoms from its outgoing set that 
+; are of type 'atom-type'
+(define (cog-filter-outgoing atom-type atom)
+	(cog-filter atom-type (cog-outgoing-set atom))
 )
 
 ; -----------------------------------------------------------------------
