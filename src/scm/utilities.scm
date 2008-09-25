@@ -94,6 +94,10 @@ scm
 	(filter is-type? atom-list)
 )
 
+(define (cog-filter-incoming atom-type atom)
+	(cog-filter atom-type (cog-incoming-set atom))
+)
+
 ; -----------------------------------------------------------------------
 ;
 ; cog-chase-link link-type endpoint-type anchor
