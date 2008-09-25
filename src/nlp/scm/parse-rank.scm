@@ -200,7 +200,7 @@ scm
 	; in the sentence. Get those (filter on ConceptNode in order
 	; to ignore the SentenceNode), then map these to word nodes, 
 	; and then tack them onto our list.
-	(cog-filter 'ConceptNode 
+	(cog-for-each 'ConceptNode 
 		(lambda (x) (map-word-node add-to-word-list x))
 		(cog-outgoing-set sentence)
 	)
@@ -293,7 +293,7 @@ scm
 	)
 
 	; Get the mutual information for the various word-pairs
-	(cog-filter 'SentenceLink get-mi (cog-incoming-set sent-node))
+	(cog-for-each 'SentenceLink get-mi (cog-incoming-set sent-node))
 
 	; (display mi-edge-list) (newline)
 
