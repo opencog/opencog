@@ -59,7 +59,7 @@ protected:
 				TruthValue::TRUE_TV(),
 				false);
 
-		AtomSpace *nm = CogServer::getAtomSpace();
+		AtomTableWrapper *nm = GET_ATW;
 		HandleSeq hs = nm->getOutgoing(premiseArray[0]);
 
 		std::vector<Handle> psat;

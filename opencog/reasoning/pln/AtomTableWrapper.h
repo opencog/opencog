@@ -158,7 +158,12 @@ public:
     Handle getHandle(Type t,const HandleSeq& outgoing);
 
     std::vector<Handle> getOutgoing(const Handle h);
+
+    //! Both below are the same, code should be cleaned to remove ..AtIndex
+    //! version
+    Handle getOutgoing(const Handle h, const int i);
     Handle getOutgoingAtIndex(const Handle h, const int i);
+
     Type getType(const Handle h) const;
     std::string getName(const Handle h) const;
 

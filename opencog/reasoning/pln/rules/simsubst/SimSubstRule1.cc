@@ -71,7 +71,7 @@ Links are assumed not inheritable either.
 
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
 
     Handle h0 = v2h(h[0]);
     Handle h1 = v2h(h[1]);

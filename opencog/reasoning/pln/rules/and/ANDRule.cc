@@ -12,7 +12,7 @@ namespace reasoning
 
 Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
 
     //return Rule::setOfMPs();
     
@@ -81,7 +81,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
 BoundVertex ANDRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     const int n = premiseArray.size();
   try
   {     

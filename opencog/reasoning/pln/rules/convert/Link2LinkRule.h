@@ -48,7 +48,7 @@ public:
 
 		assert(premiseArray.size()==1);
 
-		tvs[0] = (TruthValue*) &(CogServer::getAtomSpace()->getTV(boost::get<Handle>(premiseArray[0])));
+		tvs[0] = (TruthValue*) &(GET_ATW->getTV(boost::get<Handle>(premiseArray[0])));
 
 		return tvs;
 	}

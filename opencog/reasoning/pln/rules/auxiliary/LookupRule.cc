@@ -13,7 +13,7 @@ namespace reasoning
 unsigned long now_interval_len = 50000;
 bool ExpandEvaluationLinks(vtree& target, iAtomTableWrapper* destTable)
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     bool is_changed = false;
     
     for(vtree::iterator i = target.begin(); i != target.end(); i++)

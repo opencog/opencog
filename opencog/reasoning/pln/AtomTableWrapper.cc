@@ -1565,7 +1565,7 @@ Handle AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
     // new one
     
     // Construct a Link then use addAtomDC
-    Link l(t,hsReal);
+    Link l(t,hsReal,tvn);
     return addAtomDC(l, fresh, managed);
 }
 
@@ -2015,6 +2015,11 @@ std::vector<Handle> AtomTableWrapper::getOutgoing(const Handle h)
     }
     return s2;
 
+}
+
+Handle AtomTableWrapper::getOutgoing(const Handle h, const int i) 
+{
+    return child(h, i);
 }
 
 Handle AtomTableWrapper::getOutgoingAtIndex(const Handle h, const int i) 

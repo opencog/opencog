@@ -35,7 +35,7 @@ public:
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
 		int i;
 		for (i = 0; i < n; i++)
-			tvs[i] = (TruthValue*) &(CogServer::getAtomSpace()->getTV(boost::get<Handle>(premiseArray[i])));
+			tvs[i] = (TruthValue*) &(GET_ATW->getTV(boost::get<Handle>(premiseArray[i])));
 
 		TruthValue* retTV = f.compute(tvs, n);	
 

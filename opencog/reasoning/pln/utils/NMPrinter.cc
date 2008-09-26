@@ -1,11 +1,17 @@
 #include "NMPrinter.h"
 
 #include <ClassServer.h>
-#include <AtomSpace.h>
 #include <CogServer.h>
+
+#include "../AtomTableWrapper.h"
 
 FILE* NMPrinter::logFile = NULL;
 int NMPrinter::numberOfPrintersUsingLogFile = 0;
+
+namespace haxx
+{
+        extern iAtomTableWrapper* defaultAtomTableWrapper;
+}
 
 #define CLOSE_LOG_FILE_AUTOMATICALLY
 
@@ -188,17 +194,17 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
 void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
     //printf("NMPrinter::printHandle()\n");
 //    printf("NMPrinter::printHandle(%p): printOptions = %X\n", h, printOptions);
-    AtomSpace *nm = CogServer::getAtomSpace();
-    
-    bool isNode = nm->isNode(h); 
-    Type type = nm->getType(h);
-    if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (nm->getArity(h) == 1)) {
-        Handle newH = nm->getOutgoing(h, 0);
+    AtomTableWrapper* atw = GET_ATW; 
+
+    bool isNode = atw->isSubType(h,NODE); 
+    Type type = atw->getType(h);
+    if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (atw->getArity(h) == 1)) {
+        Handle newH = atw->getOutgoingAtIndex(h, 0);
         printHandle(out, newH, indentationLevel);
     } else {
         if (!(printOptions & NMP_BRACKETED)) printSpaces(out, indentationLevel);
         if (isNode) {
-            char* nodeName = strdup(nm->getName(h).c_str());
+            char* nodeName = strdup(atw->getName(h).c_str());
             if (printOptions & NMP_NODE_NAME) { 
                 out << "\"" << nodeName << "\"";
                 if (printToFile) fprintf(logFile, "\"%s\"", nodeName);
@@ -229,7 +235,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
             if (printToFile) fprintf(logFile, "[address=%p]", (void*) h);
         }
         if (printOptions & NMP_TRUTH_VALUE) {
-            const TruthValue& tv = nm->getTV(h);
+            const TruthValue& tv = atw->getTV(h);
             if (tv.isNullTv()) {
                 if (!(printOptions & NMP_NO_TV_WITH_NO_CONFIDENCE)) {
                     out << " <NULL TV>";
@@ -263,13 +269,13 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
                 out << "(";
                 if (printToFile) fprintf(logFile, "(");
             }
-            int arity = nm->getArity(h);
+            int arity = atw->getArity(h);
             for (int i = 0; i < arity; i++) {
                 if (i > 0 && (printOptions & NMP_BRACKETED)) {
                     out << ",";
                     if (printToFile) fprintf(logFile, ",");
                 }
-                Handle newH = nm->getOutgoing(h, i);
+                Handle newH = atw->getOutgoingAtIndex(h, i);
                 printHandle(out, newH, indentationLevel+1);
             }
             if (printOptions & NMP_BRACKETED) {
@@ -292,7 +298,7 @@ void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLev
         return;
     }
 
-    if (CogServer::getAtomSpace()->isReal(h))
+    if (GET_ATW->isReal(h))
     {
         printHandle(out, h, indentationLevel);
     } else {

@@ -15,7 +15,7 @@ protected:
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
 
 		assert(premiseArray.size()==1);
-		AtomSpace *nm = CogServer::getAtomSpace();
+		AtomTableWrapper *nm = GET_ATW;
 		std::vector<Handle> nodes = nm->getOutgoing(boost::get<Handle>(premiseArray[0]));
 
 		tvs[0] = (TruthValue*) &(nm->getTV(boost::get<Handle>(premiseArray[0])));
@@ -65,7 +65,7 @@ printTree(boost::get<Handle>(h[0]),0,1);
 cprintf(1,"INV New order:\n");
 printTree(child(boost::get<Handle>(h[0]),1),0,1);
 printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
-		return	meta(new tree<Vertex>(mva((Handle)CogServer::getAtomSpace()->getType(h0),
+		return	meta(new tree<Vertex>(mva((Handle)GET_ATW->getType(h0),
 						mva(GET_ATW->child(h0,1)),
 						mva(GET_ATW->child(h0,0))
 				)));

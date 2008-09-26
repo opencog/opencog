@@ -32,7 +32,7 @@ public:
 	}
 	virtual bool valid(Handle* premiseArray, const int n) const
 	{
-		AtomSpace *nm = CogServer::getAtomSpace();
+		AtomTableWrapper *nm = GET_ATW;
 		return (linkInherits(InclusionLink, IMPLICATION_LINK)
 			|| linkInherits(InclusionLink,INHERITANCE_LINK))
 			&& (nm->getOutgoing(premiseArray[0],0) == nm->getOutgoingng(premiseArray[1],1)

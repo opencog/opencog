@@ -54,7 +54,7 @@ Rule::~Rule()
 BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
 {
     bindingsT h_b;
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     foreach(const BoundVertex& bv, h)
     {
         if (!nm->isReal(v2h(bv.value)))

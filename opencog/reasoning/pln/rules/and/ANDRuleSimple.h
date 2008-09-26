@@ -27,7 +27,7 @@ public:
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ATW->inheritsType(CogServer::getAtomSpace()->getType(boost::get<Handle>(*outh->begin())), AND_LINK)
+		if (!GET_ATW->inheritsType(GET_ATW->getType(boost::get<Handle>(*outh->begin())), AND_LINK)
 			|| outh->begin().number_of_children() != N)
 			return Rule::setOfMPs();
 		

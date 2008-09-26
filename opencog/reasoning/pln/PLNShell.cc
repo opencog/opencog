@@ -429,10 +429,9 @@ void fw_beta (void) {
   Handle L1=atw->addLink(INHERITANCE_LINK,p1,tv,true);
   Handle L2=atw->addLink(INHERITANCE_LINK,p2,tv,true);
 
-
   Handle out,seed;
   do {
-        Rule *r=(*rp)[ 1 ];
+        Rule *r=(*rp)[ 2 ];
         Handle nextH;
         vector<Vertex> args;
         do
@@ -452,8 +451,8 @@ void fw_beta (void) {
         printOutgoing(out);
   } while (tv.isNullTv() || tv.getCount()<0.1);
 
-  cout<<"Input:\n";
-  printOutgoing(seed);
+//  cout<<"Input:\n";
+//  printOutgoing(seed);
   cout<<"Output\n";
   printOutgoing(out);
 }

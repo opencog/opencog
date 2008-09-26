@@ -44,7 +44,7 @@ namespace haxx
 		{
 printf("dovar3: Next candidate...");
 			atom target(unsubsted_target); //'target' will experiece substs
-			AtomSpace *nm = CogServer::getAtomSpace();
+			AtomTableWrapper *nm = GET_ATW;
 			if (nm->getArity(candidates[i]) < 2)
 				continue;
 
@@ -182,7 +182,7 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomTableWrapper *nm = GET_ATW;
 	if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
 		inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
 		return Rule::setOfMPs();

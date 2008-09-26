@@ -55,7 +55,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
 
 BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
-        AtomSpace *nm = CogServer::getAtomSpace();
+        AtomTableWrapper *nm = GET_ATW;
         assert(validate(premiseArray));
 
 //printTree(premiseArray[0],0,1);

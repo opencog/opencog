@@ -70,7 +70,7 @@ if (hs.size() < 2)
 }
 #endif
 
-AtomSpace *as = CogServer::getAtomSpace();
+AtomTableWrapper *as = GET_ATW;
 nocase_string procedure_name = as->getName(hs[0]);
 
 //	puts(("Launching " + procedure_name).c_str());
@@ -206,7 +206,7 @@ sprintf(buff, "%d", N);
 //		TruthValue::TRIVIAL_TV()));
 
 // TODO: fresh bug
-return CogServer::getAtomSpace()->addNode(NUMBER_NODE, strdup(buff),
+return GET_ATW->addNode(NUMBER_NODE, strdup(buff),
     TruthValue::TRIVIAL_TV());//,false,true);
 }
 
@@ -224,8 +224,8 @@ return (interval
 */
 // Alternatively: assumes that the name of the handle gives the timestamp.
 
-if (inheritsType(CogServer::getAtomSpace()->getType(t), NODE))
-    return (timeUnit)atof(CogServer::getAtomSpace()->getName(t).c_str());
+if (inheritsType(GET_ATW->getType(t), NODE))
+    return (timeUnit)atof(GET_ATW->getName(t).c_str());
     //return (timeUnit)atof(((Node*) TLB::getAtom(t))->getName().c_str());
 else
     return 0;
@@ -248,8 +248,8 @@ if (!interval)
 //Assumes interval is in the form LinkType(Start, End)
 
 //Atom* intervalAtom = TLB::getAtom(interval); 
-vector<Handle> intervalOutgoingSet = CogServer::getAtomSpace()->getOutgoing(interval);
-int arity = CogServer::getAtomSpace()->getArity(interval); 
+vector<Handle> intervalOutgoingSet = GET_ATW->getOutgoing(interval);
+int arity = GET_ATW->getArity(interval); 
 
 exec_assert(arity == 2);
 
@@ -269,8 +269,8 @@ if (!interval)
 
 
 //        Atom* intervalAtom = TLB::getAtom(interval); 
-vector<Handle> intervalOutgoingSet = CogServer::getAtomSpace()->getOutgoing(interval);
-int arity = CogServer::getAtomSpace()->getArity(interval); 
+vector<Handle> intervalOutgoingSet = GET_ATW->getOutgoing(interval);
+int arity = GET_ATW->getArity(interval); 
 exec_assert(arity == 2);
 
 if (intervalOutgoingSet.empty())
@@ -341,7 +341,7 @@ if (!h)
 { cprintf(2, ("NULL input at " + sname).c_str()); return false; }
 
 //    Atom* atom = TLB::getAtom(h);
-return (CogServer::getAtomSpace()->getType(h) == NUMBER_NODE);
+return (GET_ATW->getType(h) == NUMBER_NODE);
 }
 
 int intFromNumberNode(Handle h)
@@ -352,7 +352,7 @@ if (!h)
 { cprintf(2, ("NULL input at " + sname).c_str()); return 0; }
 
 //       Node* numberNode = (Node*) TLB::getAtom(h);
-return atoi(inheritsType(CogServer::getAtomSpace()->getType(h), NODE) ? CogServer::getAtomSpace()->getName(h).c_str() : "0");
+return atoi(GET_ATW->inheritsType(GET_ATW->getType(h), NODE) ? GET_ATW->getName(h).c_str() : "0");
 }
 
 Handle TimeApparatus::timeDiff(Handle F, Handle interval,int sign)
@@ -373,8 +373,8 @@ if (!args_start[0] || !args_end[0])
     return NULL;
 
 // TODO: fresh bug
-Handle arglist1 = CogServer::getAtomSpace()->addLink(LIST_LINK, args_start, TruthValue::NULL_TV()); //, false, true);
-Handle arglist2 = CogServer::getAtomSpace()->addLink(LIST_LINK, args_end, TruthValue::NULL_TV()); //, false, true);
+Handle arglist1 = GET_ATW->addLink(LIST_LINK, args_start, TruthValue::NULL_TV()); //, false, true);
+Handle arglist2 = GET_ATW->addLink(LIST_LINK, args_end, TruthValue::NULL_TV()); //, false, true);
 
 Handle hs_start[] = { F, arglist1 };
 Handle hs_end[] = { F, arglist2 };
@@ -408,10 +408,10 @@ argsList.push_back(arg2); // [time]
 
 std::vector<Handle> argsEval;
 // TODO: fresh bug
-argsEval.push_back(CogServer::getAtomSpace()->addNode(PREDICATE_NODE, predName, TruthValue::NULL_TV())); //, false,true));
-argsEval.push_back(CogServer::getAtomSpace()->addLink(LIST_LINK, argsList, TruthValue::NULL_TV())); //, false,true));
+argsEval.push_back(GET_ATW->addNode(PREDICATE_NODE, predName, TruthValue::NULL_TV())); //, false,true));
+argsEval.push_back(GET_ATW->addLink(LIST_LINK, argsList, TruthValue::NULL_TV())); //, false,true));
 
-return CogServer::getAtomSpace()->addLink(EVALUATION_LINK, argsEval,
+return GET_ATW->addLink(EVALUATION_LINK, argsEval,
         SimpleTruthValue((float)tv, MAX_TV_COUNT)); //, false,true);
 }
 
@@ -448,7 +448,7 @@ struct moment_equal : public binary_function<reasoning::BoundVertex, timeUnit, b
 	bool operator()(reasoning::BoundVertex h, timeUnit t) const
 	{
         std::list<HandleTemporalPair> intervals;
-        CogServer::getAtomSpace()->getTimeServer().get(back_inserter(intervals),
+        GET_ATW->getTimeServer().get(back_inserter(intervals),
                 boost::get<Handle>(h.value));
 		return (intervals.size() > 0
 				? (intervals.front().getTemporal()->getA() == t)

@@ -58,7 +58,7 @@ public:
 
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
   {
-	AtomSpace *nm = CogServer::getAtomSpace();
+	AtomTableWrapper *nm = GET_ATW;
 	std::vector<Handle> hs = nm->getOutgoing(v2h(premiseArray[0]));
 
 	assert(premiseArray.size() == 2);

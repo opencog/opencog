@@ -22,7 +22,7 @@ protected:
 		tvs[0] = new SimpleTruthValue(0,0); //nm->getTV(premiseArray[0]);
 		// TODO: create the TrivialTV to use here
 #endif
-		tvs[1] = (TruthValue*) &(CogServer::getAtomSpace()->getTV(boost::get<Handle>(premiseArray[0])));
+		tvs[1] = (TruthValue*) &(GET_ATW->getTV(boost::get<Handle>(premiseArray[0])));
 		return tvs;
 	}
 

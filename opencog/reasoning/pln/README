@@ -8,12 +8,7 @@ as other quite important tasks.
 
 * Fresh = true bug.
 * Integrate PLN atoms types with the rest of opencog in atomspace/types
-* Ask about changing the name of AtomTableWrapper to AtomSpaceWrapper
-* Replace CogServer::getAtomSpace with a call to AtomTableWrapper::getAtomSpace,
-    also implement a way to set the AtomSpace. Perhaps this is provided by the
-    Pseudocore? investigate...
-
-
+* Changing the name of AtomTableWrapper to AtomSpaceWrapper
 
 === Moderate
 

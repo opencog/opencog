@@ -66,7 +66,7 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 BBvtree atomWithNewType(Handle h, Type T)
 {
     assert(GET_ATW->inheritsType(T, LINK));
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     vector<Handle> children = nm->getOutgoing(h);
     BBvtree ret_m(new BoundVTree(mva((Handle)T)));
     foreach(Handle c, children)
@@ -81,7 +81,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 {
     Handle *ph = v2h(&*v.begin());
 // TODO just call the overloaded Vertex version below
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
     {
     
@@ -107,7 +107,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 BBvtree atomWithNewType(const Vertex& v, Type T)
 {
     Handle *ph = (Handle*) v2h(&v);
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
     {
     
@@ -461,7 +461,7 @@ struct converter  : public binary_function<T,T,void>
 
 Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomTableWrapper* table)
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
 
     Btr<vtree> ret(new vtree(vt_const));
 /// USE THIS IF YOU WISH TO CONVERT VARIABLE_NODEs to FW_VARIABLE_NODEs!

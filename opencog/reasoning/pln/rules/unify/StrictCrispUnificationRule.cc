@@ -44,7 +44,7 @@ combined, no conflict will be found!
 
 Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpace *nm = CogServer::getAtomSpace();
+    AtomTableWrapper *nm = GET_ATW;
     if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
         inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();

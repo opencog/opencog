@@ -30,7 +30,7 @@ public:
 		a1 = destTable->getType(premiseArray[0]);
 		a2 = destTable->getType(premiseArray[1]);
 
-		AtomSpace *nm = CogServer::getAtomSpace();
+		AtomTableWrapper *nm = GET_ATW;
 		return	a1 == a2 &&
 				nm->getOutgoing(premiseArray[0]) == nm->getOutgoing(premiseArray[1]);
 	}
@@ -50,7 +50,7 @@ protected:
 	void SortTVs(Handle* premiseArray, const int n, TruthValue*** retTVs, int* retn) const
 	{
 	    for (int i = 0; i < n; i++)
-			(*retTVs)[i] = (TruthValue*) CogServer::getAtomSpace()->getTV(premiseArray[i]);
+			(*retTVs)[i] = (TruthValue*) GET_ATW->getTV(premiseArray[i]);
 
 		*retn = n;
 	}
@@ -71,7 +71,7 @@ protected:
 	}
 	virtual std::vector<Handle> ProductLinkSequence(Handle* premiseArray) const
 	{
-		return CogServer::getAtomSpace()->getOutgoing(premiseArray[0]);
+		return GET_ATW->getOutgoing(premiseArray[0]);
 	}
 };
 #endif

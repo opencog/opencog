@@ -1614,7 +1614,7 @@ void BITNode::expandFittest()
                 if (all_best_fitness > best_fitness)
                     all_best_fitness = best_fitness;
 
-				cprintf(-2, "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%.4f / %.4f", all_best_fitness, best_fitness);
+				cprintf(-2, "%.4f / %.4f\n", all_best_fitness, best_fitness);
             }
 
             bisse->expandNextLevel();

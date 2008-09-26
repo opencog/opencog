@@ -50,6 +50,11 @@ one to $1). Etc.
 
 */
 
+namespace haxx
+{
+    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+}
+
 namespace reasoning
 {
 class RuleApp;
@@ -231,7 +236,7 @@ public:
 			#endif
 
 			//assert(v2h(bv.value)->isReal());
-			assert(CogServer::getAtomSpace()->isReal(v2h(bv.value)));
+			assert(GET_ATW->isReal(v2h(bv.value)));
 
 			bound_args.push_back(bv);
 		}
@@ -241,7 +246,7 @@ public:
         /// This used to be below out, but when args are empty so is
         //result.value and isReal is false
 		//assert(v2h(result.value)->isReal());
-		assert(CogServer::getAtomSpace()->isReal(v2h(result.value)));
+		assert(GET_ATW->isReal(v2h(result.value)));
 out:
 
 

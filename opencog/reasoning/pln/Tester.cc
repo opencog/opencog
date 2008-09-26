@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <time.h>
 #ifndef WIN32
-	#include <sys/time.h>
+    #include <sys/time.h>
 #endif
 
 #include "rules/RuleProvider.h"
@@ -21,7 +21,7 @@
 //#include "../core/HandleTemporalPairEntry.h"
 //#include "PLNShell.h"
 
-using namespace reasoning;	
+using namespace reasoning;  
 
 extern int tempar;
 extern float temperature;
@@ -57,9 +57,9 @@ int gettimeofday(struct timeval* tp, void* tzp) {
 
 namespace test
 {
-	extern FILE *logfile;
-	extern double custom_duration;
-	extern double custom_duration2;
+    extern FILE *logfile;
+    extern double custom_duration;
+    extern double custom_duration2;
 }
 
 enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
@@ -77,25 +77,25 @@ namespace reasoning {
 
 float getCount(float c)
 {
-	float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+    float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     return -KKK*c/(c-1);
 }
 
 namespace haxx
 {
-	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
-	extern bool printRealAtoms;
-	extern Handle VarTypes[STD_VARS];
-	extern multimap<Handle,Handle> childOf;
-	extern bool AllowFW_VARIABLENODESinCore;
-	extern bool ArchiveTheorems;
-	extern bool printRealAtoms;
+    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern bool printRealAtoms;
+    extern Handle VarTypes[STD_VARS];
+    extern multimap<Handle,Handle> childOf;
+    extern bool AllowFW_VARIABLENODESinCore;
+    extern bool ArchiveTheorems;
+    extern bool printRealAtoms;
 }
 
 namespace reasoning
 {
-	extern bool RECORD_TRAILS;
-	extern unsigned long now_interval_len	;
+    extern bool RECORD_TRAILS;
+    extern unsigned long now_interval_len   ;
 }
 
 vector< vector<vector<int> > >  INstatsVT;
@@ -106,41 +106,41 @@ static int AllTestsInferenceNodes=0;
 
 namespace reasoning
 {
-	void foo_pretest() {}
-	void footest() {}
-	extern map<int, Btr<tree<Vertex> > > tests;
+    void foo_pretest() {}
+    void footest() {}
+    extern map<int, Btr<tree<Vertex> > > tests;
 
-		/**
-		The tests
+        /**
+        The tests
 load in various xml axiom sets and run until the target with a
 specific confidence minimum has been reached (or max. nr of steps have
 been exceeded, resulting in failure.)
-		*/
-		
+        */
+        
 struct PLNTest
 {
-	meta target;
-	TruthValue* minTV, *maxTV;
+    meta target;
+    TruthValue* minTV, *maxTV;
 
-	uint minEvalsOfFittestBIT; //Divided by ten
-	uint minExhaustiveEvals; //Use either this one or the prev one
-	PLNTest(	meta _target,
-				TruthValue* _minTV,
-				TruthValue* _maxTV,
-				uint _minEvalsOfFittestBIT,
-				uint _minExhaustiveEvals)
-		: target(_target), minTV(_minTV), maxTV(_maxTV),
-		minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
-		minExhaustiveEvals(_minExhaustiveEvals)
-	{}
+    uint minEvalsOfFittestBIT; //Divided by ten
+    uint minExhaustiveEvals; //Use either this one or the prev one
+    PLNTest(    meta _target,
+                TruthValue* _minTV,
+                TruthValue* _maxTV,
+                uint _minEvalsOfFittestBIT,
+                uint _minExhaustiveEvals)
+        : target(_target), minTV(_minTV), maxTV(_maxTV),
+        minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
+        minExhaustiveEvals(_minExhaustiveEvals)
+    {}
 };
 
 void RunPLNTest(Btr<PLNTest> t);
 
 void finger_print_test(vtree& v)
 {
-	BoundVTree bvt(v);
-	printf("Finger print: %lu\n", bvt.getFingerPrint());
+    BoundVTree bvt(v);
+    printf("Finger print: %lu\n", bvt.getFingerPrint());
 }
 
 set<Btr<PLNTest> > PLNTests;
@@ -149,7 +149,7 @@ set<Btr<PLNTest> > PLNTests;
 
 namespace goal
 {
-	void WalkTest();
+    void WalkTest();
 }
 
 namespace reasoning
@@ -169,7 +169,7 @@ void InitPLNTests()
     haxx::printRealAtoms = true;
     haxx::ArchiveTheorems = true;
 
-/*	/// Test atom identity works
+/*  /// Test atom identity works
     Handle h1 = haxx::defaultAtomTableWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
     Handle h2 = haxx::defaultAtomTableWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
 
@@ -186,727 +186,729 @@ bool satSetTest();
 void RunPLNTestsOnce();
 
 float temperature = 0.1f;
-float temperatures[] = {	0.00005, 0.00007, 10,
-							0.0001, 0.0003, 0.0005,
-							0.001, 0.003, 0.005,
-							0.01, 0.03, 0.05,
-							0.1, 0.3, 0.5,
-							1, 3, 5 };
+float temperatures[] = {    0.00005, 0.00007, 10,
+                            0.0001, 0.0003, 0.0005,
+                            0.001, 0.003, 0.005,
+                            0.01, 0.03, 0.05,
+                            0.1, 0.3, 0.5,
+                            1, 3, 5 };
 const int temperaturesN = 7; //3*5;
 //const int temperaturesN = 2;
 
 void RunPLNTests()
 {
-//	goal::WalkTest();
-//	return;
-	
-//	satSetTest();
+//  goal::WalkTest();
+//  return;
+    
+//  satSetTest();
 
-	InitPLNTests();
+    InitPLNTests();
 
-	/// You can run the tests multiple times, which makes sense if
-	/// the heuristics function is not deterministic (eg. SoftMax)
+    /// You can run the tests multiple times, which makes sense if
+    /// the heuristics function is not deterministic (eg. SoftMax)
 
-	const int TestRepeats = 1;
-	int seed = 11111;
+    const int TestRepeats = 1;
+    int seed = 11111;
 
-	FILE *f = fopen("results.txt","a");
+    FILE *f = fopen("results.txt","a");
 
-	int tempi=tempar;
+    int tempi=tempar;
 
-//	for (int tempi = 0; tempi < temperaturesN; tempi++)
-	{
-		INstatsV.clear();
+//  for (int tempi = 0; tempi < temperaturesN; tempi++)
+    {
+        INstatsV.clear();
 
-		temperature = temperatures[tempi];
+        temperature = temperatures[tempi];
 
-		for (int t=0; t < TestRepeats; t++)
-		{
-			//		time_t seconds;
-			//		time(&seconds);
-			int seconds = 1;
-			srand((unsigned int) seconds+(seed++));
-			AllTestsInferenceNodes = 0;
+        for (int t=0; t < TestRepeats; t++)
+        {
+            //      time_t seconds;
+            //      time(&seconds);
+            int seconds = 1;
+            srand((unsigned int) seconds+(seed++));
+            AllTestsInferenceNodes = 0;
 
-			RunPLNTestsOnce();
-			INstatsV[t].push_back(AllTestsInferenceNodes);
+            RunPLNTestsOnce();
+            INstatsV[t].push_back(AllTestsInferenceNodes);
 
-			if (FitnessEvaluator != SOFTMAX)
-			{
-				//No need to play with temperatures or multiple test repeats.
-				if (FitnessEvaluator != RANDOM)
-					t = TestRepeats;
-				tempi = temperaturesN;
-			}
-		}
-		INstatsVT.push_back(INstatsV);
-	}
+            if (FitnessEvaluator != SOFTMAX)
+            {
+                //No need to play with temperatures or multiple test repeats.
+                if (FitnessEvaluator != RANDOM)
+                    t = TestRepeats;
+                tempi = temperaturesN;
+            }
+        }
+        INstatsVT.push_back(INstatsV);
+    }
 
-	for (uint v=0; v < INstatsV[0].size(); v++)
-	{
-		fprintf(f, "\n");
-		for (int t=0; t < ( (FitnessEvaluator!=DETERMINISTIC) ? TestRepeats : 1); t++)
-			fprintf(f, "%d ", INstatsV[t][v]);
-	}
+    for (uint v=0; v < INstatsV[0].size(); v++)
+    {
+        fprintf(f, "\n");
+        for (int t=0; t < ( (FitnessEvaluator!=DETERMINISTIC) ? TestRepeats : 1); t++)
+            fprintf(f, "%d ", INstatsV[t][v]);
+    }
 
-	fclose(f);
+    fclose(f);
 
-/*	puts("\n\nTests over. Press enter.");
-	getc(stdin);*/
+/*  puts("\n\nTests over. Press enter.");
+    getc(stdin);*/
 
-	currentDebugLevel=0;
+    currentDebugLevel=0;
 }
 
 void MacroRuleTest()
 {
-	AtomTableWrapper *atw = GET_ATW;
-	//typedef InversionRule RuleT1;
-	//typedef DeductionRule RuleT2;
-	iAtomTableWrapper* parent = ::haxx::defaultAtomTableWrapper;
+    AtomTableWrapper *atw = GET_ATW;
+    //typedef InversionRule RuleT1;
+    //typedef DeductionRule RuleT2;
+    iAtomTableWrapper* parent = ::haxx::defaultAtomTableWrapper;
 
-//	DefaultVariableRuleProvider rp;
-	InversionRule<INHERITANCE_LINK> *invR = new InversionRule<INHERITANCE_LINK>(parent);
-	DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK> *deduR = new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent);
+//  DefaultVariableRuleProvider rp;
+    InversionRule<INHERITANCE_LINK> *invR = new InversionRule<INHERITANCE_LINK>(parent);
+    DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK> *deduR = new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent);
 
     printf("v0\n");
-	vtree v0(mva((Handle)INHERITANCE_LINK,
-					mva(atw->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
-					mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
-					));
+    vtree v0(mva((Handle)INHERITANCE_LINK,
+                    mva(atw->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
+                    mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
+                    ));
     printf("v1\n");
-	vtree v1(mva((Handle)INHERITANCE_LINK,
-					mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
-					mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
-					));
+    vtree v1(mva((Handle)INHERITANCE_LINK,
+                    mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
+                    mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
+                    ));
     printf("v2\n");
-	vtree v2(mva((Handle)INHERITANCE_LINK,
-					mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
-					mva(atw->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
+    vtree v2(mva((Handle)INHERITANCE_LINK,
+                    mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
+                    mva(atw->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
 
     printf("h0\n");
-	Handle h0 = atw->addAtom(v0, 
-			SimpleTruthValue(0.40f, getCount(0.80f)));
+    Handle h0 = atw->addAtom(v0, 
+            SimpleTruthValue(0.40f, getCount(0.80f)));
     printf("h1\n");
-	Handle h1 = atw->addAtom(v1,
-			SimpleTruthValue(0.60f, getCount(0.90f)));
+    Handle h1 = atw->addAtom(v1,
+            SimpleTruthValue(0.60f, getCount(0.90f)));
     printf("h2\n");
-	Handle h2 = atw->addAtom(v2,
-			SimpleTruthValue(0.98f, getCount(0.95f)));
+    Handle h2 = atw->addAtom(v2,
+            SimpleTruthValue(0.98f, getCount(0.95f)));
 
-	RuleApp* top	= new RuleApp(deduR);
-	RuleApp* child1a= new RuleApp(deduR);
+    RuleApp* top    = new RuleApp(deduR);
+    RuleApp* child1a= new RuleApp(deduR);
 
-	child1a->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
-	child1a->Bind(1, new VtreeProviderWrapper(Vertex(h1)));
+    child1a->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
+    child1a->Bind(1, new VtreeProviderWrapper(Vertex(h1)));
     child1a->compute();
 
-	top->Bind(0, child1a);
-	top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
+    top->Bind(0, child1a);
+    top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
 
-	BoundVertex res1a = top->compute();
-	const TruthValue& tvA = atw->getTV(v2h(res1a.value));
-	assert(tvA.getMean() > 0.01);
-	assert(tvA.getConfidence() > 0.01);
+    BoundVertex res1a = top->compute();
+    const TruthValue& tvA = atw->getTV(v2h(res1a.value));
+    assert(tvA.getMean() > 0.01);
+    assert(tvA.getConfidence() > 0.01);
 
-	RuleApp* topb	= new RuleApp(deduR);
-//	RuleApp* child1b= vtree(Vertex(h0));
-	RuleApp* child2b= new RuleApp(deduR);
+    RuleApp* topb   = new RuleApp(deduR);
+//  RuleApp* child1b= vtree(Vertex(h0));
+    RuleApp* child2b= new RuleApp(deduR);
 
-	child2b->Bind(0, new VtreeProviderWrapper(Vertex(h1)));
-	child2b->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
-	topb->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
-	topb->Bind(1, child2b);
+    child2b->Bind(0, new VtreeProviderWrapper(Vertex(h1)));
+    child2b->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
+    topb->Bind(0, new VtreeProviderWrapper(Vertex(h0)));
+    topb->Bind(1, child2b);
 
-	BoundVertex res1b = topb->compute();
-	assert(res1a.value == res1b.value);
+    BoundVertex res1b = topb->compute();
+    assert(res1a.value == res1b.value);
 
-	const TruthValue& tvB = atw->getTV(v2h(res1a.value));
-	assert(within(tvB.getMean(), tvA.getMean(), 0.001));
-	assert(within(tvB.getConfidence(), tvA.getConfidence(), 0.001));
+    const TruthValue& tvB = atw->getTV(v2h(res1a.value));
+    assert(within(tvB.getMean(), tvA.getMean(), 0.001));
+    assert(within(tvB.getConfidence(), tvA.getConfidence(), 0.001));
 
-	RuleApp* top2 = new RuleApp(invR);
-	top2->Bind(0, topb);
-	RuleApp* top3 = new RuleApp(invR);
-	top3->Bind(0, top2);
+    RuleApp* top2 = new RuleApp(invR);
+    top2->Bind(0, topb);
+    RuleApp* top3 = new RuleApp(invR);
+    top3->Bind(0, top2);
 
-	const TruthValue& tv2 = atw->getTV(v2h(top2->compute().value));
-	assert(!within(tvB.getMean(), tv2.getMean(), 0.001));
-//	assert(!within(tvB.getConfidence(), tv2.getConfidence(), 0.001));
+    const TruthValue& tv2 = atw->getTV(v2h(top2->compute().value));
+    assert(!within(tvB.getMean(), tv2.getMean(), 0.001));
+//  assert(!within(tvB.getConfidence(), tv2.getConfidence(), 0.001));
 
-	const TruthValue& tv3 = atw->getTV(v2h(top3->compute().value));
-	assert( within(tvB.getMean(), tv3.getMean(), 0.001));
-	assert( within(tvB.getConfidence(), tv3.getConfidence(), 0.001));
-
-
-	vector<VtreeProvider*> args;
-	args.push_back(new VtreeProviderWrapper(Vertex(h0)));
-	args.push_back(new VtreeProviderWrapper(Vertex(h1)));
-	args.push_back(new VtreeProviderWrapper(Vertex(h2)));
-
-	RuleApp* topc	= new RuleApp(deduR);
-	RuleApp* child2c= new RuleApp(deduR);
-
-	topc->Bind(1, child2c);
-
-	BoundVertex resC = topc->compute(args.begin(), args.end());
-
-	assert(resC.value == res1b.value);
-	const TruthValue& tvC = atw->getTV(v2h(resC.value));
-	assert( within(tvB.getMean(), tvC.getMean(), 0.001));
-	assert( within(tvB.getConfidence(), tvC.getConfidence(), 0.001));
+    const TruthValue& tv3 = atw->getTV(v2h(top3->compute().value));
+    assert( within(tvB.getMean(), tv3.getMean(), 0.001));
+    assert( within(tvB.getConfidence(), tv3.getConfidence(), 0.001));
 
 
-	RuleApp* topd	= new RuleApp(deduR);
-	RuleApp* child1d= new RuleApp(deduR);
+    vector<VtreeProvider*> args;
+    args.push_back(new VtreeProviderWrapper(Vertex(h0)));
+    args.push_back(new VtreeProviderWrapper(Vertex(h1)));
+    args.push_back(new VtreeProviderWrapper(Vertex(h2)));
 
-	topd->Bind(0, child1d);
+    RuleApp* topc   = new RuleApp(deduR);
+    RuleApp* child2c= new RuleApp(deduR);
 
-	BoundVertex resD = topd->compute(args.begin(), args.end());
+    topc->Bind(1, child2c);
 
-	assert(resD.value == res1b.value);
-	const TruthValue& tvD = atw->getTV(v2h(resD.value));
-	assert( within(tvB.getMean(), tvD.getMean(), 0.001));
-	assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
+    BoundVertex resC = topc->compute(args.begin(), args.end());
+
+    assert(resC.value == res1b.value);
+    const TruthValue& tvC = atw->getTV(v2h(resC.value));
+    assert( within(tvB.getMean(), tvC.getMean(), 0.001));
+    assert( within(tvB.getConfidence(), tvC.getConfidence(), 0.001));
+
+
+    RuleApp* topd   = new RuleApp(deduR);
+    RuleApp* child1d= new RuleApp(deduR);
+
+    topd->Bind(0, child1d);
+
+    BoundVertex resD = topd->compute(args.begin(), args.end());
+
+    assert(resD.value == res1b.value);
+    const TruthValue& tvD = atw->getTV(v2h(resD.value));
+    assert( within(tvB.getMean(), tvD.getMean(), 0.001));
+    assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
     printf("finish MacroRuleTest\n");
 }
 
 void RunPLNTestsOnce()
 {
-	AtomTableWrapper *atw = GET_ATW;
-	INstats.clear();
+    AtomTableWrapper *atw = GET_ATW;
+    INstats.clear();
 
-	puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
+    puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
 
-	//MacroRuleTest();
+    //MacroRuleTest();
 
 
 #if RUN_FAILURE_TESTS
-	/// The test which is supposed to fail
+    /// The test which is supposed to fail
 
-	InitAxiomSet("bigdemo.xml");
+    InitAxiomSet("bigdemo.xml");
 
-	puts("\nShould fail. The test for whether TV checks work.\n");
+    puts("\nShould fail. The test for whether TV checks work.\n");
 
-	maketest(makemeta(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "AlQaeda"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			)),
-			new SimpleTruthValue(0.95f, getCount(0.90f)),
-			new SimpleTruthValue(0.999f, getCount(0.999f)),
-			500,0);
+    maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "AlQaeda"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            )),
+            new SimpleTruthValue(0.95f, getCount(0.90f)),
+            new SimpleTruthValue(0.999f, getCount(0.999f)),
+            500,0);
 
     printf("maketest 2\n");
-	//char *buf = new char[8174+2];	
+    //char *buf = new char[8174+2]; 
 InitAxiomSet("smalldemo.xml");
 
-	puts("\nShould fail. The test for whether random TVs come out too high:\n");
+    puts("\nShould fail. The test for whether random TVs come out too high:\n");
 
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "killed"),
-					mva((Handle)LIST_LINK,
-								NewNode(FW_VARIABLE_NODE, "$killeri"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)),
-			new SimpleTruthValue(0.5f, getCount(0.5f)),
-			new SimpleTruthValue(0.51f, getCount(0.51f)),
-			10,0);
-	
-	puts("\nShould fail.");
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "killed"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(FW_VARIABLE_NODE, "$killeri"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )),
+            new SimpleTruthValue(0.5f, getCount(0.5f)),
+            new SimpleTruthValue(0.51f, getCount(0.51f)),
+            10,0);
+    
+    puts("\nShould fail.");
 
-	InitAxiomSet("smalldemo.xml");
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "symmetricRelation"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Amir"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)),
-			new SimpleTruthValue(0.0f, getCount(0.0f)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			10,0);
+    InitAxiomSet("smalldemo.xml");
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "symmetricRelation"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Amir"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )),
+            new SimpleTruthValue(0.0f, getCount(0.0f)),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            10,0);
 
 #endif
 
-	InitAxiomSet("inverse_binding.xml");
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "Possible"),
-						mva((Handle)LIST_LINK,
-							NewNode(FW_VARIABLE_NODE, "$elmerist")
-						)
-					)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			200,0);
+    InitAxiomSet("inverse_binding.xml");
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "Possible"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(FW_VARIABLE_NODE, "$elmerist")
+                        )
+                    )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            200,0);
 
-	for (int i = 0; i < 5; i++)
-	{
-		/// Basic spawning test
-		InitAxiomSet("smalldemo.xml");
-		maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Britney"),
-								NewNode(CONCEPT_NODE, "Amir")
-							))),
-			new SimpleTruthValue(0.78f, getCount(0.39f)),
-			new SimpleTruthValue(1.001, getCount(0.999f)),
-			100,0);
-	}
-	
-	/// Test for multiple roots spawning
-	InitAxiomSet("smalldemo.xml");
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "killed"),
-					mva((Handle)LIST_LINK,
-								NewNode(FW_VARIABLE_NODE, "$killeri"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)),
-			new SimpleTruthValue(0.5f, getCount(0.5f)),
-			new SimpleTruthValue(0.999f, getCount(0.999f)),
-		10,0);
+    for (int i = 0; i < 5; i++)
+    {
+        /// Basic spawning test
+        InitAxiomSet("smalldemo.xml");
+        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Britney"),
+                                NewNode(CONCEPT_NODE, "Amir")
+                            ))),
+            new SimpleTruthValue(0.78f, getCount(0.39f)),
+            new SimpleTruthValue(1.001, getCount(0.999f)),
+            100,0);
+    }
+    
+    /// Test for multiple roots spawning
+    InitAxiomSet("smalldemo.xml");
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "killed"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(FW_VARIABLE_NODE, "$killeri"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )),
+            new SimpleTruthValue(0.5f, getCount(0.5f)),
+            new SimpleTruthValue(0.999f, getCount(0.999f)),
+        10,0);
 
-	/// Test Generalization for VARIABLE_SCOPE_LINK
-	InitAxiomSet("smalldemo.xml");
-	maketest(makemeta(mva((Handle)VARIABLE_SCOPE_LINK,
-				mva((Handle)LIST_LINK), //empty dummy
-				mva((Handle)INHERITANCE_LINK,
-					NewNode(FW_VARIABLE_NODE, "$i"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			))),
-			new SimpleTruthValue(0.9f, getCount(0.02f)),
-			new SimpleTruthValue(0.999f, getCount(0.999f)),
-			10,0);
+    /// Test Generalization for VARIABLE_SCOPE_LINK
+    InitAxiomSet("smalldemo.xml");
+    maketest(makemeta(mva((Handle)VARIABLE_SCOPE_LINK,
+                mva((Handle)LIST_LINK), //empty dummy
+                mva((Handle)INHERITANCE_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$i"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            ))),
+            new SimpleTruthValue(0.9f, getCount(0.02f)),
+            new SimpleTruthValue(0.999f, getCount(0.999f)),
+            10,0);
 
-	/// Test Generalization for FORALL_LINK
-	InitAxiomSet("smalldemo.xml");
-	maketest(makemeta(mva((Handle)FORALL_LINK,
-				mva((Handle)LIST_LINK), //empty dummy
-				mva((Handle)INHERITANCE_LINK,
-					NewNode(FW_VARIABLE_NODE, "$i"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			))),
-			new SimpleTruthValue(0.9f, getCount(0.9f)),
-			new SimpleTruthValue(0.999f, getCount(0.999f)),
-			15,0);
+    /// Test Generalization for FORALL_LINK
+    InitAxiomSet("smalldemo.xml");
+    maketest(makemeta(mva((Handle)FORALL_LINK,
+                mva((Handle)LIST_LINK), //empty dummy
+                mva((Handle)INHERITANCE_LINK,
+                    NewNode(FW_VARIABLE_NODE, "$i"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            ))),
+            new SimpleTruthValue(0.9f, getCount(0.9f)),
+            new SimpleTruthValue(0.999f, getCount(0.999f)),
+            15,0);
 
-	InitAxiomSet("smalldemo.xml");
-	maketest(makemeta(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Osama"),
-					NewNode(CONCEPT_NODE, "Abu")
-			)),
-			new SimpleTruthValue(0.0001f, getCount(0.90f)),
-			new SimpleTruthValue(0.999f, getCount(1.01f)),
-			20,0);
+    InitAxiomSet("smalldemo.xml");
+    maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Osama"),
+                    NewNode(CONCEPT_NODE, "Abu")
+            )),
+            new SimpleTruthValue(0.0001f, getCount(0.90f)),
+            new SimpleTruthValue(0.999f, getCount(1.01f)),
+            20,0);
 
 /// Takes a tad too long with bigdemo
-//		InitAxiomSet("smalldemo.xml");
-		InitAxiomSet("bigdemo.xml");
-		maketest(makemeta(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Muhammad"),
-					NewNode(CONCEPT_NODE, "terrorist")
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.20f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			260,0);
+//      InitAxiomSet("smalldemo.xml");
+        InitAxiomSet("bigdemo.xml");
+        maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Muhammad"),
+                    NewNode(CONCEPT_NODE, "terrorist")
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.20f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            260,0);
 
-	InitAxiomSet("fetchdemo5.xml");
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "just_done"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "give"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "ball"),
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					)
-			),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			200,0);
+    InitAxiomSet("fetchdemo5.xml");
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "just_done"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "give"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "ball"),
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    )
+            ),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            200,0);
 
-	InitAxiomSet("AnotBdemo.xml");
+    InitAxiomSet("AnotBdemo.xml");
 
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-				NewNode(PREDICATE_NODE, "found_under"),
-					mva((Handle)LIST_LINK,
-						NewNode(CONCEPT_NODE, "toy_6"),
-						NewNode(FW_VARIABLE_NODE, "$1")
-					)
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			10000,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                NewNode(PREDICATE_NODE, "found_under"),
+                    mva((Handle)LIST_LINK,
+                        NewNode(CONCEPT_NODE, "toy_6"),
+                        NewNode(FW_VARIABLE_NODE, "$1")
+                    )
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            10000,0);
 /*
-	maketest(makemeta(mva(
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.90f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			100);
+    maketest(makemeta(mva(
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.90f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            100);
 */
 
-	InitAxiomSet("fetchdemo5.xml");
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++")
-				)
-			),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(0.94f)),
-			200,0);
-			
+    InitAxiomSet("fetchdemo5.xml");
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++")
+                )
+            ),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(0.94f)),
+            200,0);
+            
 /*
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "just_done"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "give"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "ball"),
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-					))),
-			new SimpleTruthValue(0.01f, getCount(0.90f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"fetchdemo4.xml",
-			10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "just_done"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "give"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "ball"),
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+                    ))),
+            new SimpleTruthValue(0.01f, getCount(0.90f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "fetchdemo4.xml",
+            10,0);
 */
 
-//	InitAxiomSet("smalldemo.xml");
-	InitAxiomSet("woademo.xml");
-	maketest(makemeta(mva((Handle)SIMULTANEOUS_AND_LINK,
-						NewNode(WORD_NODE, "blockword"),
-						NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
-					)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			500,0);
+//  InitAxiomSet("smalldemo.xml");
+    InitAxiomSet("woademo.xml");
+    maketest(makemeta(mva((Handle)SIMULTANEOUS_AND_LINK,
+                        NewNode(WORD_NODE, "blockword"),
+                        NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
+                    )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            500,0);
 
-/*	maketest(makemeta(mva(
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.90f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			100);*/
+/*  maketest(makemeta(mva(
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.90f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            100);*/
 
 
 
-/*	/// Untested with current PLN implementation:
+/*  /// Untested with current PLN implementation:
 
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Amir"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Amir"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            10,0);
 
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "wasKilled"),
-					mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "wasKilled"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            10,0);
 */
-/*		InitAxiomSet("bigdemo.xml");
-		maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								NewNode(FW_VARIABLE_NODE, "$OsamaFriend"),
-								NewNode(CONCEPT_NODE, "Osama")
-							))),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			10,0);*/
-/*	maketest(makemeta(mva((Handle)INHERITANCE_LINK,
-					NewNode(CONCEPT_NODE, "Osama"),
-					NewNode(CONCEPT_NODE, "AlQaeda")
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			10,0);
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "killed"),
-					mva((Handle)LIST_LINK,
-								NewNode(FW_VARIABLE_NODE, "$killeri"),
-								NewNode(CONCEPT_NODE, "Osama")
-							)
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			10,0);
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "do"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EVALUATION_LINK,
-								NewNode(SCHEMA_NODE, "give"),
-								mva((Handle)LIST_LINK,
-									NewNode(CONCEPT_NODE, "ball"),
-									NewNode(CONCEPT_NODE, "teacher")
-								)
-							)										
-						)
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"fetchdemo4.xml",
-			10,0);
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++")
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"fetchdemo4.xml",
-			10,0);
-	maketest(makemeta(mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "near"),
-						mva((Handle)LIST_LINK,
-								NewNode(CONCEPT_NODE, "teacher")
-						)
-					)
-			),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"fetchdemo4.xml",
-			10,0);
-	maketest(makemeta(mva((Handle)IMPLICATION_LINK,
-				NewNode(FW_VARIABLE_NODE, "$1"),
-				mva((Handle)EVALUATION_LINK,
-					NewNode(PREDICATE_NODE, "+++")
-				)
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"fetchdemo4.xml",
-			10,0);
+/*      InitAxiomSet("bigdemo.xml");
+        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(FW_VARIABLE_NODE, "$OsamaFriend"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            ))),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            10,0);*/
+/*  maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+                    NewNode(CONCEPT_NODE, "Osama"),
+                    NewNode(CONCEPT_NODE, "AlQaeda")
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "killed"),
+                    mva((Handle)LIST_LINK,
+                                NewNode(FW_VARIABLE_NODE, "$killeri"),
+                                NewNode(CONCEPT_NODE, "Osama")
+                            )
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "do"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EVALUATION_LINK,
+                                NewNode(SCHEMA_NODE, "give"),
+                                mva((Handle)LIST_LINK,
+                                    NewNode(CONCEPT_NODE, "ball"),
+                                    NewNode(CONCEPT_NODE, "teacher")
+                                )
+                            )                                       
+                        )
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "fetchdemo4.xml",
+            10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++")
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "fetchdemo4.xml",
+            10,0);
+    maketest(makemeta(mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "near"),
+                        mva((Handle)LIST_LINK,
+                                NewNode(CONCEPT_NODE, "teacher")
+                        )
+                    )
+            ),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "fetchdemo4.xml",
+            10,0);
+    maketest(makemeta(mva((Handle)IMPLICATION_LINK,
+                NewNode(FW_VARIABLE_NODE, "$1"),
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "+++")
+                )
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "fetchdemo4.xml",
+            10,0);
 */
-/*	maketest(makemeta(mva(
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"fetchdemo4.xml",
-			10,0);
-	maketest(makemeta(mva(
-			)),
-			new SimpleTruthValue(0.01f, getCount(0.01f)),
-			new SimpleTruthValue(1.01f, getCount(1.01f)),
-			"bigdemo.xml",
-			10,0);
+/*  maketest(makemeta(mva(
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "fetchdemo4.xml",
+            10,0);
+    maketest(makemeta(mva(
+            )),
+            new SimpleTruthValue(0.01f, getCount(0.01f)),
+            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            "bigdemo.xml",
+            10,0);
 */
 
-	INstatsV.push_back(INstats);
+    INstatsV.push_back(INstats);
 }
 
 
-//	NMCore *base_core = new PseudoCore(*(PseudoCore*)nm);
+//  NMCore *base_core = new PseudoCore(*(PseudoCore*)nm);
 
-	void InitAxiomSet(string premiseFile)
-	{
-		AtomTableWrapper *atw = GET_ATW;
-		//atw->Reset(NULL); //base_core);
+    void InitAxiomSet(string premiseFile)
+    {
+        AtomTableWrapper *atw = GET_ATW;
+        //atw->Reset(NULL); //base_core);
         ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
-		
-		haxx::ArchiveTheorems = true;
-		haxx::AllowFW_VARIABLENODESinCore = true;
+        
+        haxx::ArchiveTheorems = true;
+        haxx::AllowFW_VARIABLENODESinCore = true;
 
-		AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+        AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
 
-		cprintf(-2,"loading...\n");		
-		
- 		bool axioms_ok = TheNM.loadAxioms(premiseFile);
-		
-		cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
-		assert(axioms_ok);		
-	}
+        cprintf(-2,"loading...\n");     
+        
+        bool axioms_ok = TheNM.loadAxioms(premiseFile);
+        
+        cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
+        assert(axioms_ok);      
+    }
 
-	void RunPLNTest(Btr<PLNTest> t)
-	{
-		AtomTableWrapper *atw = GET_ATW;
-		stats::Instance().ITN2atom.clear();
+    void RunPLNTest(Btr<PLNTest> t)
+    {
+        AtomTableWrapper *atw = GET_ATW;
+        stats::Instance().ITN2atom.clear();
 
-		rawPrint(*t->target, t->target->begin(), -2);
-		
-	   clock_t start, finish;
-	   double  duration;
+        rawPrint(*t->target, t->target->begin(), -2);
+        
+        clock_t start, finish;
+        double duration;
 
-		test::custom_duration = 0.0;
-		start = clock();
-		
-		haxx::ArchiveTheorems = false;
-		haxx::AllowFW_VARIABLENODESinCore = true; //false;
-		
-cprintf(-1, "axioms loaded");fflush(stdout);
-currentDebugLevel=-4;
-		Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
-			/*PLNEvaluator::BIT_evaluate(
-			InferenceTaskParameters(new DefaultVariableRuleProvider(),t->target));*/
+        test::custom_duration = 0.0;
+        start = clock();
+        
+        haxx::ArchiveTheorems = false;
+        haxx::AllowFW_VARIABLENODESinCore = true; //false;
+        
+        cprintf(-1, "axioms loaded");
+        fflush(stdout);
+        currentDebugLevel=-4;
 
-		uint s_i=0;
-		Handle eh=0;
+        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
+        /*PLNEvaluator::BIT_evaluate(
+            InferenceTaskParameters(new DefaultVariableRuleProvider(),t->target));*/
+
+        uint s_i=0;
+        Handle eh=0;
         TruthValue* etv = NULL;
-		bool passed=false;
+        bool passed=false;
 
-		set<VtreeProvider*> eres;
+        set<VtreeProvider*> eres;
 
-		t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
+        t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
 
-		const int expansions_per_run = 1000;
+        const int expansions_per_run = 1000;
 
-		if (t->minEvalsOfFittestBIT > 0)
-		{
-			do
-			{
+        if (t->minEvalsOfFittestBIT > 0)
+        {
+            do
+            {
 
-/*				for (int k=0;k<expansions_per_run;k++)
-					state->expandFittest();
-				
-				eres = state->evaluate();*/
+/*              for (int k=0;k<expansions_per_run;k++)
+                    state->expandFittest();
+                
+                eres = state->evaluate();*/
 
-				cprintf(-3, "\n    Evaluating...\n");
-				
-				if (foo42)
-					currentDebugLevel=4;
-				
-				int expansions = expansions_per_run;
-				eres = state->infer(expansions, 0.000001f, 0.01f);		
-				
-				if (expansions > 0)
-					cprintf(-3, "Succeeded. Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
-				else
-					cprintf(2, "Failed for now... Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
+                cprintf(-3, "\n    Evaluating...\n");
+                
+                if (foo42)
+                    currentDebugLevel=4;
+                
+                int expansions = expansions_per_run;
+                eres = state->infer(expansions, 0.000001f, 0.01f);      
+                
+                if (expansions > 0)
+                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
+                else
+                    cprintf(2, "Failed for now... Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
 
-				currentDebugLevel=-4;
+                currentDebugLevel=-4;
 
-				eh = (eres.empty() ? NULL : v2h(*(*eres.rbegin())->getVtree().begin()));
+                eh = (eres.empty() ? NULL : v2h(*(*eres.rbegin())->getVtree().begin()));
 
-				if (eh)
-					etv = atw->getTV(eh).clone();
-				else
-					etv = new SimpleTruthValue(0.0f,0.0f);
+                if (eh)
+                    etv = atw->getTV(eh).clone();
+                else
+                    etv = new SimpleTruthValue(0.0f,0.0f);
 
-				float c1=t->minTV->getConfidence();
-				float c2=t->maxTV->getConfidence();
-				float m1=t->minTV->getMean();
-				float m2=t->maxTV->getMean();
+                float c1=t->minTV->getConfidence();
+                float c2=t->maxTV->getConfidence();
+                float m1=t->minTV->getMean();
+                float m2=t->maxTV->getMean();
 
-/*				if (etv)
-				{
-					printf("%f / %f\n", etv->getConfidence() , t->minTV->getConfidence());
-					printf("%f / %f\n", etv->getMean()			, t->minTV->getMean());
-					printf("%f / %f\n", etv->getConfidence() , t->maxTV->getConfidence());
-					printf("%f / %f\n", etv->getMean()			, t->maxTV->getMean());
-				}*/
-				
-				passed = (eh && etv &&
-				etv->getConfidence() > t->minTV->getConfidence() &&
-				etv->getMean()			> t->minTV->getMean() &&
-				etv->getConfidence() < t->maxTV->getConfidence() &&
-				etv->getMean()			< t->maxTV->getMean()
-				);
-		
-				cprintf(-2, "TEST Expansion phase %d over.\n", s_i);
-			}
-			while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT && !passed);
-		}
-		else if (t->minExhaustiveEvals > 0)
-		{
-			assert(0);
-			/// This should be updated to reflect the new BITNode interface
-			/*
-			for (uint L=0;L<t->minExhaustiveEvals;L++)
-				state->expandNextLevel();
+/*              if (etv)
+                {
+                    printf("%f / %f\n", etv->getConfidence() , t->minTV->getConfidence());
+                    printf("%f / %f\n", etv->getMean()          , t->minTV->getMean());
+                    printf("%f / %f\n", etv->getConfidence() , t->maxTV->getConfidence());
+                    printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
+                }*/
+                
+                passed = (eh && etv &&
+                etv->getConfidence() > t->minTV->getConfidence() &&
+                etv->getMean()          > t->minTV->getMean() &&
+                etv->getConfidence() < t->maxTV->getConfidence() &&
+                etv->getMean()          < t->maxTV->getMean()
+                );
+        
+                cprintf(-2, "TEST Expansion phase %d over.\n", s_i);
+            }
+            while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT && !passed);
+        }
+        else if (t->minExhaustiveEvals > 0)
+        {
+            assert(0);
+            /// This should be updated to reflect the new BITNode interface
+            /*
+            for (uint L=0;L<t->minExhaustiveEvals;L++)
+                state->expandNextLevel();
 
-			eres = state->evaluate();
-			eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
-			if (eh) {
+            eres = state->evaluate();
+            eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
+            if (eh) {
                 if (etv != NULL) delete etv;
-				etv = atw->TV(eh).clone();
+                etv = atw->TV(eh).clone();
             }
 
-			passed = (eh && etv &&
-				etv->getConfidence() > t->minTV->getConfidence() &&
-				etv->getMean()			> t->minTV->getMean()
-				);*/
-		}
-		else
-			puts("ERROR IN TEST SETTINGS");
+            passed = (eh && etv &&
+                etv->getConfidence() > t->minTV->getConfidence() &&
+                etv->getMean()          > t->minTV->getMean()
+                );*/
+        }
+        else
+            puts("ERROR IN TEST SETTINGS");
 
-		if (passed)
-		{
-			printf("**********************************************\n\npassed: %s.\n**********************************************\n\n",
-			(etv?etv->toString().c_str():"(null TV)"));
+        if (passed)
+        {
+            printf("**********************************************\n\npassed: %s.\n**********************************************\n\n",
+            (etv?etv->toString().c_str():"(null TV)"));
 
-		finish = clock();
-			duration = (double)(finish - start) / CLOCKS_PER_SEC;
-			printf( "Test took %2.2f seconds TOTAL.\n", duration );
+        finish = clock();
+            duration = (double)(finish - start) / CLOCKS_PER_SEC;
+            printf( "Test took %2.2f seconds TOTAL.\n", duration );
 
-			printf( "Custom test time was %3.3f seconds.\n", test::custom_duration );
-			printf( "Custom test time was %3.3f seconds.\n", test::custom_duration2 );
-		}
-		else
-		{
-			printf("**********************************************\n\nFAILED: %s!\n**********************************************\n\n",
-			(etv?etv->toString().c_str():"(null TV)"));
-		}
+            printf( "Custom test time was %3.3f seconds.\n", test::custom_duration );
+            printf( "Custom test time was %3.3f seconds.\n", test::custom_duration2 );
+        }
+        else
+        {
+            printf("**********************************************\n\nFAILED: %s!\n**********************************************\n\n",
+            (etv?etv->toString().c_str():"(null TV)"));
+        }
 
-			printf("Test results: [");
-			foreach(VtreeProvider* bv, eres) // state->child_results[0])
-			{
-				const TruthValue& tv = atw->getTV(vt2h(*bv));
-				if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-					printf("%d ", (int)vt2h(*bv));
-			}
-			printf("]\n");
+            printf("Test results: [");
+            foreach(VtreeProvider* bv, eres) // state->child_results[0])
+            {
+                const TruthValue& tv = atw->getTV(vt2h(*bv));
+                if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
+                    printf("%d ", (int)vt2h(*bv));
+            }
+            printf("]\n");
 
-		if (passed)
-		{
-			AllTestsInferenceNodes += state->InferenceNodes;
+        if (passed)
+        {
+            AllTestsInferenceNodes += state->InferenceNodes;
 
-			INstats.push_back(state->InferenceNodes);
+            INstats.push_back(state->InferenceNodes);
 
-			//		printf("\n\n\nExec pool size: %d\n", state->exec_pool.size());
-			printf("\n\n\nInferenceNodes: %ld / %d\n", state->InferenceNodes, AllTestsInferenceNodes);
-		}
-		else
-			INstats.push_back(0);
+            //      printf("\n\n\nExec pool size: %d\n", state->exec_pool.size());
+            printf("\n\n\nInferenceNodes: %ld / %d\n", state->InferenceNodes, AllTestsInferenceNodes);
+        }
+        else
+            INstats.push_back(0);
 
 #if WAIT_KEY_ON_FAILURE
-		if (!passed)
-			getc(stdin);
+        if (!passed)
+            getc(stdin);
 #endif
 
-/*		if (etv)
-		{
-			string stv(etv->toString());
-			puts(stv.c_str());
-		}*/
+/*      if (etv)
+        {
+            string stv(etv->toString());
+            puts(stv.c_str());
+        }*/
 
-		stats::Instance().print(stats::triviality_filterT());
+        stats::Instance().print(stats::triviality_filterT());
 
         if (etv != NULL) delete etv;
-		//atw->Reset(NULL); //base_core);		
+        //atw->Reset(NULL); //base_core);       
         ((AtomTableWrapper*) haxx::defaultAtomTableWrapper)->reset();
 /*puts("buf alloc test...");fflush(stdout);
-char *tbuf = new char[8174+2];	
+char *tbuf = new char[8174+2];  
 puts("buf allo ok");
 delete[] tbuf;*/
-	}
+    }
 
 } //namespace reasoning
 
@@ -937,199 +939,199 @@ using namespace reasoning;
 
 struct run1
 {
-	bool echo_process,  echo_result,  target;
+    bool echo_process,  echo_result,  target;
 
-	run1(bool _target, bool _echo_process, bool _echo_result)
-	: echo_process(_echo_process), echo_result(_echo_result), target(_target)
-	{
-	}
+    run1(bool _target, bool _echo_process, bool _echo_result)
+    : echo_process(_echo_process), echo_result(_echo_result), target(_target)
+    {
+    }
 
-	bool operator()(tree<Vertex> target1)
-	{
-		tree<boost::shared_ptr<InferenceNode> > treetrail;
-		
-		Handle res=0;		
-	
-		if (echo_result)
-		{
-			LOG(0,"Proving:");
-			rawPrint(target1, target1.begin(),0);
-		}
+    bool operator()(tree<Vertex> target1)
+    {
+        tree<boost::shared_ptr<InferenceNode> > treetrail;
+        
+        Handle res=0;       
+    
+        if (echo_result)
+        {
+            LOG(0,"Proving:");
+            rawPrint(target1, target1.begin(),0);
+        }
 
-		try {
-			if	(res = complexEvaluator->Evaluate(
-					target1.maketree(), treetrail, echo_process))
-			{
-				if (echo_result)
-				{
-					LOG(0, "\nSuccess!\n");
-					rawPrint(res, res.begin(),0);
-					LOG(0, "\n\nIs producible by the chain:\n");
-			
-//					for_each<tree<boost::shared_ptr<InferenceNode> >::post_order_iterator, printInferenceNode>
-//						(treetrail.begin_post(), treetrail.end_post(), printInferenceNode());
-				}
-			}
-			else
-			{
-				if (echo_result)
-					puts("\nFalse. Targetnproducible.\n");
-			}
-		} catch(InferenceException e) { puts(e.msg.c_str()); }
-		catch(...) { puts("UNKNOWN EXCEPTION!!!"); }
+        try {
+            if  (res = complexEvaluator->Evaluate(
+                    target1.maketree(), treetrail, echo_process))
+            {
+                if (echo_result)
+                {
+                    LOG(0, "\nSuccess!\n");
+                    rawPrint(res, res.begin(),0);
+                    LOG(0, "\n\nIs producible by the chain:\n");
+            
+//                  for_each<tree<boost::shared_ptr<InferenceNode> >::post_order_iterator, printInferenceNode>
+//                      (treetrail.begin_post(), treetrail.end_post(), printInferenceNode());
+                }
+            }
+            else
+            {
+                if (echo_result)
+                    puts("\nFalse. Targetnproducible.\n");
+            }
+        } catch(InferenceException e) { puts(e.msg.c_str()); }
+        catch(...) { puts("UNKNOWN EXCEPTION!!!"); }
 
-		bool result = (res!=NULL);
-	
-		if (result != target)
-		{
-			LOG(0, "Unexpected proof result for:");
-			rawPrint(target1, target1.begin(),0);
-		}
+        bool result = (res!=NULL);
+    
+        if (result != target)
+        {
+            LOG(0, "Unexpected proof result for:");
+            rawPrint(target1, target1.begin(),0);
+        }
 
-/*		if (echo_result || (result != target))
-		{
-			char t[20];
-			gets(t);
-		}*/
+/*      if (echo_result || (result != target))
+        {
+            char t[20];
+            gets(t);
+        }*/
 
-		return (result == target);
-	}
+        return (result == target);
+    }
 };
 
 struct Tester : public map<tree<Vertex>, bool>
 {
-	void run_all(bool echo_process, bool echo_result)
-	{
-		for (map<tree<Vertex>, bool>::iterator entry = begin(); entry != end(); entry++)
-			run1(entry->second, echo_process, echo_result)(entry->first);
-	}
-	void run_one(tree<Vertex> a, bool target, bool echo_process, bool echo_result)
-	{
-		run1(target, echo_process, echo_result)(a);
-	}
+    void run_all(bool echo_process, bool echo_result)
+    {
+        for (map<tree<Vertex>, bool>::iterator entry = begin(); entry != end(); entry++)
+            run1(entry->second, echo_process, echo_result)(entry->first);
+    }
+    void run_one(tree<Vertex> a, bool target, bool echo_process, bool echo_result)
+    {
+        run1(target, echo_process, echo_result)(a);
+    }
 };
 
 void BackwardOsamaProofTest()
 {
 puts("BackwardOsamaProofTest running...");
 
-//	assert(STLhas(TheNM.LoadedFiles, "bigdemo.xml"));
+//  assert(STLhas(TheNM.LoadedFiles, "bigdemo.xml"));
 
-	Tester tester;
-	
-	tester	[tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Amir"),
-								mva((Handle)CONCEPT_NODE, "Amir")
-							)
-			))] = false;
+    Tester tester;
+    
+    tester  [tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Amir"),
+                                mva((Handle)CONCEPT_NODE, "Amir")
+                            )
+            ))] = false;
 
-	tester	[tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "wasKilled"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Osama")
-							)
-			))] = true;
+    tester  [tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "wasKilled"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Osama")
+                            )
+            ))] = true;
 
-	tester	[tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Amir"),
-								mva((Handle)CONCEPT_NODE, "Osama")
-							)
-			))] = true;
-	tester	[tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)FW_VARIABLE_NODE, "$OsamaFriend"),
-								mva((Handle)CONCEPT_NODE, "Osama")
-							)
-			))] = true;
+    tester  [tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Amir"),
+                                mva((Handle)CONCEPT_NODE, "Osama")
+                            )
+            ))] = true;
+    tester  [tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)FW_VARIABLE_NODE, "$OsamaFriend"),
+                                mva((Handle)CONCEPT_NODE, "Osama")
+                            )
+            ))] = true;
 
-	tester	[tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Britney"),
-								mva((Handle)CONCEPT_NODE, "Amir")
-							)
-			))] = true;
+    tester  [tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Britney"),
+                                mva((Handle)CONCEPT_NODE, "Amir")
+                            )
+            ))] = true;
 
-	tester	[tree<Vertex>(mva((Handle)INHERITANCE_LINK,
-					mva((Handle)CONCEPT_NODE, "Osama"),
-					mva((Handle)CONCEPT_NODE, "AlQaeda")
-			))] = true;
+    tester  [tree<Vertex>(mva((Handle)INHERITANCE_LINK,
+                    mva((Handle)CONCEPT_NODE, "Osama"),
+                    mva((Handle)CONCEPT_NODE, "AlQaeda")
+            ))] = true;
 
-	tester	[tree<Vertex>(mva((Handle)INHERITANCE_LINK,
-					mva((Handle)CONCEPT_NODE, "AlQaeda"),
-					mva((Handle)CONCEPT_NODE, "terrorist")
-			))] = true;
+    tester  [tree<Vertex>(mva((Handle)INHERITANCE_LINK,
+                    mva((Handle)CONCEPT_NODE, "AlQaeda"),
+                    mva((Handle)CONCEPT_NODE, "terrorist")
+            ))] = true;
 
-	tester	[tree<Vertex>(mva((Handle)INHERITANCE_LINK,
-					mva((Handle)CONCEPT_NODE, "Muhammad"),
-					mva((Handle)CONCEPT_NODE, "terrorist")
-			))] = true;
+    tester  [tree<Vertex>(mva((Handle)INHERITANCE_LINK,
+                    mva((Handle)CONCEPT_NODE, "Muhammad"),
+                    mva((Handle)CONCEPT_NODE, "terrorist")
+            ))] = true;
 
-	tester.run_all(false, false);
+    tester.run_all(false, false);
 return;
-	for (int _t=0; _t<1; _t++)
-	{
-		LOG(1, "Run #" + i2str(_t));
-		tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Amir"),
-								mva((Handle)CONCEPT_NODE, "Osama")
-							)
-			), true, true, true);
+    for (int _t=0; _t<1; _t++)
+    {
+        LOG(1, "Run #" + i2str(_t));
+        tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Amir"),
+                                mva((Handle)CONCEPT_NODE, "Osama")
+                            )
+            ), true, true, true);
 
-/*		tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Amir"),
-								mva((Handle)CONCEPT_NODE, "Amir")
-							)
-			), true, true, true);
+/*      tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Amir"),
+                                mva((Handle)CONCEPT_NODE, "Amir")
+                            )
+            ), true, true, true);
 */
-/*		tester.run_one(tree<Vertex>(mva((Handle)INHERITANCE_LINK,
-//					mva((Handle)CONCEPT_NODE, "Muhammad"),
-					mva((Handle)CONCEPT_NODE, "AlQaeda"),
-					mva((Handle)CONCEPT_NODE, "terrorist") //"Osama")
-			), true, true, true);
+/*      tester.run_one(tree<Vertex>(mva((Handle)INHERITANCE_LINK,
+//                  mva((Handle)CONCEPT_NODE, "Muhammad"),
+                    mva((Handle)CONCEPT_NODE, "AlQaeda"),
+                    mva((Handle)CONCEPT_NODE, "terrorist") //"Osama")
+            ), true, true, true);
 */
-/*		tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					mva((Handle)PREDICATE_NODE, "friendOf"),
-					mva((Handle)LIST_LINK,
-								mva((Handle)CONCEPT_NODE, "Britney"),
-								mva((Handle)CONCEPT_NODE, "Amir")
-							)
-			), true, true, true);*/
+/*      tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    mva((Handle)PREDICATE_NODE, "friendOf"),
+                    mva((Handle)LIST_LINK,
+                                mva((Handle)CONCEPT_NODE, "Britney"),
+                                mva((Handle)CONCEPT_NODE, "Amir")
+                            )
+            ), true, true, true);*/
 
-/*		tester.run_one(tree<Vertex>(mva((Handle)INHERITANCE_LINK,
-					mva((Handle)CONCEPT_NODE, "Britney"),
-					mva((Handle)CONCEPT_NODE, "terrorist")
-			), true, true, true);*/
+/*      tester.run_one(tree<Vertex>(mva((Handle)INHERITANCE_LINK,
+                    mva((Handle)CONCEPT_NODE, "Britney"),
+                    mva((Handle)CONCEPT_NODE, "terrorist")
+            ), true, true, true);*/
 
-/*	tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
-					atom(PREDICATE_NODE, "wasKilled"),
-					atom(LIST_LINK,
-								atom(CONCEPT_NODE, "Osama")
-							)
-			), true, false, true);*/
+/*  tester.run_one(tree<Vertex>(mva((Handle)EVALUATION_LINK,
+                    atom(PREDICATE_NODE, "wasKilled"),
+                    atom(LIST_LINK,
+                                atom(CONCEPT_NODE, "Osama")
+                            )
+            ), true, false, true);*/
 
 
-//	printf("\nUnprovable atoms: %d\n", reasoning::haxx::Unprovable().size());
-//	printf("\nProvable atoms: %d\n", reasoning::haxx::Provable().size());
+//  printf("\nUnprovable atoms: %d\n", reasoning::haxx::Unprovable().size());
+//  printf("\nProvable atoms: %d\n", reasoning::haxx::Provable().size());
 
-		printf("\nReserved atoms: %d\n", atom_alloc_count);
-		printf("\nReserved InferenceNodes: %d\n", inode_alloc_count);
+        printf("\nReserved atoms: %d\n", atom_alloc_count);
+        printf("\nReserved InferenceNodes: %d\n", inode_alloc_count);
 
-		freehaxx();
+        freehaxx();
 
-		puts("After killing the haxx tree");
-		printf("\nReserved atoms: %d\n", atom_alloc_count);
-		printf("\nReserved InferenceNodes: %d\n", inode_alloc_count);
-	}
+        puts("After killing the haxx tree");
+        printf("\nReserved atoms: %d\n", atom_alloc_count);
+        printf("\nReserved InferenceNodes: %d\n", inode_alloc_count);
+    }
 }
 
 void SetProofTest();
@@ -1149,305 +1151,305 @@ Handle Ass(iAtomTableWrapper *destTable, Handle h, std::vector<Handle>& ret);
 
 void TestAssociatedSets()
 {
-/* 	  Testing associated sets*/
-	
-/*		AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
-	
-  	  Handle h1 = Ass(&TheNM, atom(CONCEPT_NODE, "terrorist").attach(haxx::defaultAtomTableWrapper), testv);
-	  Handle h2 = Ass(&TheNM, atom(CONCEPT_NODE, "Muhammad").attach(haxx::defaultAtomTableWrapper), testv);
-	  Handle hs[] = {h1,h2};
+/*    Testing associated sets*/
+    
+/*      AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+    
+      Handle h1 = Ass(&TheNM, atom(CONCEPT_NODE, "terrorist").attach(haxx::defaultAtomTableWrapper), testv);
+      Handle h2 = Ass(&TheNM, atom(CONCEPT_NODE, "Muhammad").attach(haxx::defaultAtomTableWrapper), testv);
+      Handle hs[] = {h1,h2};
 
-	  SubsetEvalRule ser(&TheNM);
-	  Handle IntInhSet = ser.compute(hs,2);
+      SubsetEvalRule ser(&TheNM);
+      Handle IntInhSet = ser.compute(hs,2);
 
-	  printTree(IntInhSet,0,1);*/
+      printTree(IntInhSet,0,1);*/
 }
 
 void InferenceTests()
 {
-	try {	
-	  map<string,Handle> bindings;
+    try {   
+      map<string,Handle> bindings;
 
-/*			Handle t5 = atom(IMPLICATION_LINK, 2, 
-					new atom(AND_LINK, 2,
-						new atom(SUBSET_LINK, 2,
-							new atom(CONCEPT_NODE, "D"),
-							new atom(CONCEPT_NODE, "Z")
-						),
-						new atom(EVALUATION_LINK, 2, 
-							new atom(PREDICATE_NODE, "union"),
-							new atom(LIST_LINK, 3,
-								new atom(CONCEPT_NODE, "W"),
-								new atom(CONCEPT_NODE, "C"),
-								new atom(FW_VARIABLE_NODE, "$1")
-							)
-						)
-					),
-					new atom(SUBSET_LINK, 2,
-						new atom(FW_VARIABLE_NODE, "$2"),
-						new atom(CONCEPT_NODE, "Z")
-					)
-				).attach(((AtomTableWrapper*)haxx::defaultAtomTableWrapper));
+/*          Handle t5 = atom(IMPLICATION_LINK, 2, 
+                    new atom(AND_LINK, 2,
+                        new atom(SUBSET_LINK, 2,
+                            new atom(CONCEPT_NODE, "D"),
+                            new atom(CONCEPT_NODE, "Z")
+                        ),
+                        new atom(EVALUATION_LINK, 2, 
+                            new atom(PREDICATE_NODE, "union"),
+                            new atom(LIST_LINK, 3,
+                                new atom(CONCEPT_NODE, "W"),
+                                new atom(CONCEPT_NODE, "C"),
+                                new atom(FW_VARIABLE_NODE, "$1")
+                            )
+                        )
+                    ),
+                    new atom(SUBSET_LINK, 2,
+                        new atom(FW_VARIABLE_NODE, "$2"),
+                        new atom(CONCEPT_NODE, "Z")
+                    )
+                ).attach(((AtomTableWrapper*)haxx::defaultAtomTableWrapper));
 */
-/*	Handle t0 = atom(IMPLICATION_LINK, 2, 
-					new atom(AND_LINK, 2,
-						new atom(SUBSET_LINK, 2,
-							new atom(CONCEPT_NODE, "D"),
-							new atom(CONCEPT_NODE, "Z")
-						),
-						new atom(EVALUATION_LINK, 2, 
-							new atom(PREDICATE_NODE, "union"),
-							new atom(LIST_LINK, 3,
-								new atom(CONCEPT_NODE, "Q"),
-								new atom(CONCEPT_NODE, "C"),
-								new atom(FW_VARIABLE_NODE, "$1")
-							)
-						)
-					),
-					new atom(SUBSET_LINK, 2,
-						new atom(FW_VARIABLE_NODE, "$2"),
-						new atom(CONCEPT_NODE, "Z")
-					)
-				).attach(((AtomTableWrapper*)haxx::defaultAtomTableWrapper));
-		
-	Handle t1 = atom(IMPLICATION_LINK, 2, 
-					new atom(AND_LINK, 2,
-						new atom(SUBSET_LINK, 2,
-							new atom(CONCEPT_NODE, "D"),
-							new atom(CONCEPT_NODE, "Z")
-						),
-						new atom(EVALUATION_LINK, 2, 
-							new atom(PREDICATE_NODE, "union"),
-							new atom(LIST_LINK, 3,
-								new atom(CONCEPT_NODE, "Q"),
-								new atom(CONCEPT_NODE, "C"),
-								new atom(CONCEPT_NODE, "Z")
-							)
-						)
-					),
-					new atom(SUBSET_LINK, 2,
-						new atom(CONCEPT_NODE, "D"),
-						new atom(CONCEPT_NODE, "Z")
-					)
-				).attach(((AtomTableWrapper*)haxx::defaultAtomTableWrapper));
-		Handle t2 = t1;
-	  
-//	bool s1 = substitutableTo(t1, t2, bindings);
-//	bool s5 = substitutableTo(t5, t2, bindings);
+/*  Handle t0 = atom(IMPLICATION_LINK, 2, 
+                    new atom(AND_LINK, 2,
+                        new atom(SUBSET_LINK, 2,
+                            new atom(CONCEPT_NODE, "D"),
+                            new atom(CONCEPT_NODE, "Z")
+                        ),
+                        new atom(EVALUATION_LINK, 2, 
+                            new atom(PREDICATE_NODE, "union"),
+                            new atom(LIST_LINK, 3,
+                                new atom(CONCEPT_NODE, "Q"),
+                                new atom(CONCEPT_NODE, "C"),
+                                new atom(FW_VARIABLE_NODE, "$1")
+                            )
+                        )
+                    ),
+                    new atom(SUBSET_LINK, 2,
+                        new atom(FW_VARIABLE_NODE, "$2"),
+                        new atom(CONCEPT_NODE, "Z")
+                    )
+                ).attach(((AtomTableWrapper*)haxx::defaultAtomTableWrapper));
+        
+    Handle t1 = atom(IMPLICATION_LINK, 2, 
+                    new atom(AND_LINK, 2,
+                        new atom(SUBSET_LINK, 2,
+                            new atom(CONCEPT_NODE, "D"),
+                            new atom(CONCEPT_NODE, "Z")
+                        ),
+                        new atom(EVALUATION_LINK, 2, 
+                            new atom(PREDICATE_NODE, "union"),
+                            new atom(LIST_LINK, 3,
+                                new atom(CONCEPT_NODE, "Q"),
+                                new atom(CONCEPT_NODE, "C"),
+                                new atom(CONCEPT_NODE, "Z")
+                            )
+                        )
+                    ),
+                    new atom(SUBSET_LINK, 2,
+                        new atom(CONCEPT_NODE, "D"),
+                        new atom(CONCEPT_NODE, "Z")
+                    )
+                ).attach(((AtomTableWrapper*)haxx::defaultAtomTableWrapper));
+        Handle t2 = t1;
+      
+//  bool s1 = substitutableTo(t1, t2, bindings);
+//  bool s5 = substitutableTo(t5, t2, bindings);
 
 LOG(0,"\n-------\n");
-	
-	bool s0 = substitutableTo(t0, t2, bindings);
-	*/
-	//if (s1) puts("True!");
-	//else puts("0!"); 
-	/*if (s5) puts("True!");
-	else puts("0!"); */
-/*	if (s0) puts("True!");
-	else puts("0!"); 	*/
+    
+    bool s0 = substitutableTo(t0, t2, bindings);
+    */
+    //if (s1) puts("True!");
+    //else puts("0!"); 
+    /*if (s5) puts("True!");
+    else puts("0!"); */
+/*  if (s0) puts("True!");
+    else puts("0!");    */
   } catch(std::string s)
   {
-	  LOG(0, s + " at root level.");
+      LOG(0, s + " at root level.");
   }
   catch(...)
   {
-	  LOG(0, "Unknown exception at root level. ");
+      LOG(0, "Unknown exception at root level. ");
   }
 }
 
 void GeneralTests()
 {
-/*	LOG(2, "Dumping Core...");
-	
-	 TheNM.DumpCoreLinks(1);*/
+/*  LOG(2, "Dumping Core...");
+    
+     TheNM.DumpCoreLinks(1);*/
 /*
 puts("Osama:terrorist");
-	  TableGather fa(atom(INHERITANCE_LINK, 2,
-					new atom(CONCEPT_NODE, "Osama"),
-					new atom(CONCEPT_NODE, "terrorist") //"Osama")
-			));
+      TableGather fa(atom(INHERITANCE_LINK, 2,
+                    new atom(CONCEPT_NODE, "Osama"),
+                    new atom(CONCEPT_NODE, "terrorist") //"Osama")
+            ));
 
-	  for_each<std::vector<Handle>::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());
+      for_each<std::vector<Handle>::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());
 
 atom(INHERITANCE_LINK, 2,
-								new atom(CONCEPT_NODE, "Osama"),
-								new atom(CONCEPT_NODE, "Amir")
-			).attach(haxx::defaultAtomTableWrapper);
-	  for_each<std::vector<Handle>::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());
-	*/
-/*puts("LL2:");			
-	  TableGather LL(atom(LIST_LINK, 2,
-								new atom(CONCEPT_NODE, "Amir"),
-								new atom(CONCEPT_NODE, "Amir")
-			));
-	  for_each<std::vector<Handle>::iterator, handle_print<0> >(LL.begin(), LL.end(), handle_print<0>());
+                                new atom(CONCEPT_NODE, "Osama"),
+                                new atom(CONCEPT_NODE, "Amir")
+            ).attach(haxx::defaultAtomTableWrapper);
+      for_each<std::vector<Handle>::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());
+    */
+/*puts("LL2:");         
+      TableGather LL(atom(LIST_LINK, 2,
+                                new atom(CONCEPT_NODE, "Amir"),
+                                new atom(CONCEPT_NODE, "Amir")
+            ));
+      for_each<std::vector<Handle>::iterator, handle_print<0> >(LL.begin(), LL.end(), handle_print<0>());
 puts(":");
 
-	atom(CONCEPT_NODE, "Gibson").attach(haxx::defaultAtomTableWrapper);
-	Node *node = new Node(CONCEPT_NODE, strdup("Gibson"));
-	MindDBProxy::getInstance()->add(node, true);
-	printTree(haxx::defaultAtomTableWrapper->getHandle(CONCEPT_NODE, "Gibson"),0,0);
-	  TableGather gg(atom(CONCEPT_NODE, "Gibson"));
-	  for_each<std::vector<Handle>::iterator, handle_print<0> >(gg.begin(), gg.end(), handle_print<0>());
+    atom(CONCEPT_NODE, "Gibson").attach(haxx::defaultAtomTableWrapper);
+    Node *node = new Node(CONCEPT_NODE, strdup("Gibson"));
+    MindDBProxy::getInstance()->add(node, true);
+    printTree(haxx::defaultAtomTableWrapper->getHandle(CONCEPT_NODE, "Gibson"),0,0);
+      TableGather gg(atom(CONCEPT_NODE, "Gibson"));
+      for_each<std::vector<Handle>::iterator, handle_print<0> >(gg.begin(), gg.end(), handle_print<0>());
 getc(stdin);*/
 
-//	BackwardOsamaProofTest();
+//  BackwardOsamaProofTest();
 
-	  //TheNM.DumpCore(FORALL_LINK);
+      //TheNM.DumpCore(FORALL_LINK);
 
 /* // Dump universally-quantified expressions:
-	  TableGather fa(atom(__INSTANCEOF_N,1,
-							new atom(FORALL_LINK,0)
-					));
-	  for_each<TableGather::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());*/
+      TableGather fa(atom(__INSTANCEOF_N,1,
+                            new atom(FORALL_LINK,0)
+                    ));
+      for_each<TableGather::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());*/
 
-//	  BOATest();
-//	  ForwardOsamaProofTest();
+//    BOATest();
+//    ForwardOsamaProofTest();
 
-/*	HandleEntry* result = MindDBProxy::getInstance()->getHandleSet((Type)INHERITANCE_LINK, true);
-			printf("%d results direct\n", result->getSize());*/
+/*  HandleEntry* result = MindDBProxy::getInstance()->getHandleSet((Type)INHERITANCE_LINK, true);
+            printf("%d results direct\n", result->getSize());*/
 
-	//FIMTest();
+    //FIMTest();
 
-//	NewChainerTest();
+//  NewChainerTest();
 }
 
 void AgentTest2()
 {
-	using namespace reasoning;
-	
-	InitAxiomSet("fetch.xml");
+    using namespace reasoning;
+    
+    InitAxiomSet("fetch.xml");
 #if 1
-	set<MindAgent*> agents;
-	AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
+    set<MindAgent*> agents;
+    AtomTableWrapper& TheNM = *((AtomTableWrapper*)haxx::defaultAtomTableWrapper);
 
-	vtree rewardt(mva((Handle)EVALUATION_LINK,
-				NewNode(PREDICATE_NODE, "+++")));
-	Handle reward = NewAtom(rewardt);
+    vtree rewardt(mva((Handle)EVALUATION_LINK,
+                NewNode(PREDICATE_NODE, "+++")));
+    Handle reward = NewAtom(rewardt);
 
-	/// the addAtom interface needs improvement!
-	vtree mediatort(mva((Handle)EVALUATION_LINK, NewNode(PREDICATE_NODE,"mediator")));
-//	vtree walkt(mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.forward"), NewNode(NUMBER_NODE, "2.0")));
-//	vtree walkbackt(mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.backward"), NewNode(NUMBER_NODE, "2.0")));
-	vtree walkt(mva((Handle)EVALUATION_LINK,
-						//NewNode(PREDICATE_NODE,"just_done"),
-						NewNode(PREDICATE_NODE,"do"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.forward 2.0")))
-				));
-	vtree walkbackt(mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE,"do"),
-//						NewNode(PREDICATE_NODE,"just_done"),
-						mva((Handle)LIST_LINK,
-							mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.backward 2.0")))
-					));
-	vtree runt(mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.forward 0.1")));
-	Handle mediator = NewAtom(mediatort);
-//	Handle walk		= NewAtom(walkt);
-	Handle walk_back= TheNM.addAtom(
-			walkbackt,
-			new SimpleTruthValue(0.5,0.5), true, false);
-	Handle walk = TheNM.addAtom(
-			walkt,
-			new SimpleTruthValue(0.5,0.5), true, false);
-	//NewAtom(walkbackt);
-	Handle run = NewAtom(runt);
+    /// the addAtom interface needs improvement!
+    vtree mediatort(mva((Handle)EVALUATION_LINK, NewNode(PREDICATE_NODE,"mediator")));
+//  vtree walkt(mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.forward"), NewNode(NUMBER_NODE, "2.0")));
+//  vtree walkbackt(mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.backward"), NewNode(NUMBER_NODE, "2.0")));
+    vtree walkt(mva((Handle)EVALUATION_LINK,
+                        //NewNode(PREDICATE_NODE,"just_done"),
+                        NewNode(PREDICATE_NODE,"do"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.forward 2.0")))
+                ));
+    vtree walkbackt(mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE,"do"),
+//                      NewNode(PREDICATE_NODE,"just_done"),
+                        mva((Handle)LIST_LINK,
+                            mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.backward 2.0")))
+                    ));
+    vtree runt(mva((Handle)EXECUTION_LINK, NewNode(PREDICATE_NODE,"move.forward 0.1")));
+    Handle mediator = NewAtom(mediatort);
+//  Handle walk     = NewAtom(walkt);
+    Handle walk_back= TheNM.addAtom(
+            walkbackt,
+            new SimpleTruthValue(0.5,0.5), true, false);
+    Handle walk = TheNM.addAtom(
+            walkt,
+            new SimpleTruthValue(0.5,0.5), true, false);
+    //NewAtom(walkbackt);
+    Handle run = NewAtom(runt);
 
-/*	vtree walk_to_reward(mva((Handle)IMP,
-				mva(walk),
-				mva(reward)));
-	vtree run_tp_mediate(mva((Handle)IMP,
-				mva(run),
-				mva(mediator)));
-	vtree mediate_to_reward(mva((Handle)IMP,
-				mva(mediator),
-				mva(reward)));
-		
-	printTree(TheNM.addAtom(
-i			walk_to_reward,
-			new SimpleTruthValue(0.2,0.2), true, false), 0,-3);*/
+/*  vtree walk_to_reward(mva((Handle)IMP,
+                mva(walk),
+                mva(reward)));
+    vtree run_tp_mediate(mva((Handle)IMP,
+                mva(run),
+                mva(mediator)));
+    vtree mediate_to_reward(mva((Handle)IMP,
+                mva(mediator),
+                mva(reward)));
+        
+    printTree(TheNM.addAtom(
+i           walk_to_reward,
+            new SimpleTruthValue(0.2,0.2), true, false), 0,-3);*/
 /*
-	printTree(TheNM.addAtom(
-			run_tp_mediate,
-			new SimpleTruthValue(0.1,0.9), true, false), 0,-3);
-	
-	printTree(TheNM.addAtom(
-			mediate_to_reward,
-			new SimpleTruthValue(0.1,0.9), true, false), 0,-3);
+    printTree(TheNM.addAtom(
+            run_tp_mediate,
+            new SimpleTruthValue(0.1,0.9), true, false), 0,-3);
+    
+    printTree(TheNM.addAtom(
+            mediate_to_reward,
+            new SimpleTruthValue(0.1,0.9), true, false), 0,-3);
 */
 
 #ifndef WIN32
-	/*	timeval currentTime;
+    /*  timeval currentTime;
     gettimeofday(&currentTime, NULL);
     long now_stamp = currentTime.tv_sec*1000 + currentTime.tv_usec/1000;*/
-	long now_stamp = getElapsedMillis();
-	long now_interval = 1000;
+    long now_stamp = getElapsedMillis();
+    long now_interval = 1000;
 #else
     long now_stamp = 3000;
-	long now_interval = 1000;
+    long now_interval = 1000;
 #endif
-	char end_stamp_s[100], begin_stamp_s[100];
-	sprintf(begin_stamp_s, "%ul", now_stamp-now_interval);
-	sprintf(end_stamp_s, "%ul", now_stamp);
+    char end_stamp_s[100], begin_stamp_s[100];
+    sprintf(begin_stamp_s, "%ul", now_stamp-now_interval);
+    sprintf(end_stamp_s, "%ul", now_stamp);
 
-	char startNodeName[100], endNodeName[100];
+    char startNodeName[100], endNodeName[100];
     sprintf(startNodeName, "%ul", 0);
     sprintf(endNodeName, "%ul", 1000000);
 
-	/**
+    /**
 Timestamps denote the number of milliseconds since (00:00:00 UTC, January
 1, 1970), which is the Epoch used by time_t time(time_t *t) C function.
 See the manual for it by typing "man 2 time" in your Linux prompt.
 */
 
-			vtree heard_sound(
-				mva((Handle)EVALUATION_LINK,
-				    NewNode(PREDICATE_NODE, "atInterval"),
-				    mva((Handle)LIST_LINK,
-					mva((Handle)EVALUATION_LINK,
-						NewNode(PREDICATE_NODE, "AGISIM_quality"),
-						mva((Handle)LIST_LINK,
-							NewNode(AGISIM_SOUND_NODE, ""),
-							NewNode(NUMBER_NODE, "1000")
-						    )
-					    ),
-					NewNode(NUMBER_NODE, startNodeName),
-//					NewNode(NUMBER_NODE, endNodeName),					
-//					NewNode(CONCEPT_NODE, "!whileago"),
-					NewNode(CONCEPT_NODE, "!now")
-				    )
-				));
-				
-	vtree back_when_sound(mva((Handle)IMP,
-			mva((Handle)AND_LINK,
-				heard_sound,
-				mva(walk_back)),
-			mva(reward)));
+            vtree heard_sound(
+                mva((Handle)EVALUATION_LINK,
+                    NewNode(PREDICATE_NODE, "atInterval"),
+                    mva((Handle)LIST_LINK,
+                    mva((Handle)EVALUATION_LINK,
+                        NewNode(PREDICATE_NODE, "AGISIM_quality"),
+                        mva((Handle)LIST_LINK,
+                            NewNode(AGISIM_SOUND_NODE, ""),
+                            NewNode(NUMBER_NODE, "1000")
+                            )
+                        ),
+                    NewNode(NUMBER_NODE, startNodeName),
+//                  NewNode(NUMBER_NODE, endNodeName),                  
+//                  NewNode(CONCEPT_NODE, "!whileago"),
+                    NewNode(CONCEPT_NODE, "!now")
+                    )
+                ));
+                
+    vtree back_when_sound(mva((Handle)IMP,
+            mva((Handle)AND_LINK,
+                heard_sound,
+                mva(walk_back)),
+            mva(reward)));
 
-	vtree target(mva((Handle)EVALUATION_LINK,
-			NewNode(PREDICATE_NODE, "+++")));
+    vtree target(mva((Handle)EVALUATION_LINK,
+            NewNode(PREDICATE_NODE, "+++")));
 
-/*	
-	vtree forward_when_no_sound(mva((Handle)IMP,
-			mva((Handle)AND_LINK,
-				mva((Handle)NOT_LINK,
-					heard_sound),
-				mva(walk_back)),
-			mva(reward)));
-	
-	printTree(TheNM.addAtom(
-		forward_when_no_sound,
-		new SimpleTruthValue(0.95,0.95), true, false)
-	,0,-3);
+/*  
+    vtree forward_when_no_sound(mva((Handle)IMP,
+            mva((Handle)AND_LINK,
+                mva((Handle)NOT_LINK,
+                    heard_sound),
+                mva(walk_back)),
+            mva(reward)));
+    
+    printTree(TheNM.addAtom(
+        forward_when_no_sound,
+        new SimpleTruthValue(0.95,0.95), true, false)
+    ,0,-3);
 */
-	printTree(TheNM.addAtom(
-		back_when_sound,
-		new SimpleTruthValue(0.95,0.95), true, false)
-	,0,-3);
+    printTree(TheNM.addAtom(
+        back_when_sound,
+        new SimpleTruthValue(0.95,0.95), true, false)
+    ,0,-3);
 
-	//	puts("start agents");
-	//	while (1)
-	//	for_each(agents.begin(), agents.end(), mem_fun(&MindAgent::execute));
+    //  puts("start agents");
+    //  while (1)
+    //  for_each(agents.begin(), agents.end(), mem_fun(&MindAgent::execute));
 #endif
 }
 

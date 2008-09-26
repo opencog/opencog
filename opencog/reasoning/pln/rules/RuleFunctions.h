@@ -32,7 +32,7 @@ Handle OR2ANDLink(Handle& andL);
 Handle AND2ORLink(Handle& andL);
 Handle Exist2ForAllLink(Handle& exL);
 pair<Handle,Handle> Equi2ImpLink(Handle&);
-#define LINKTYPE_ASSERT(__cLink, __cLinkType) assert(inheritsType(CogServer::getAtomSpace()->getType(__cLink), __cLinkType))
+#define LINKTYPE_ASSERT(__cLink, __cLinkType) assert(inheritsType(GET_ATW->getType(__cLink), __cLinkType))
 
 } // namespace reasoning
 #endif // RULEFUNCTION_H
