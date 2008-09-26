@@ -88,11 +88,19 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 {
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double score = l->getTruthValue().getMean();
+
 	score *= normalization * sense_count;
 	score -= 1.0;
 
-	// Update the truth value, it will store deviation
-	// from average
+	// Update the truth value, it will store deviation from average.
+	// That is, initially, each word sense of each word instance is
+	// assigned a (denormalized) probability of 1.0. Solving the
+	// Markov chain/page rank causes the some of this to flow away
+	// from less likely to more likely senses. The scoring is 
+	// relative to this initial value: thus, unlikely scores will
+	// go negative, likely scores will go positive.  "Typical"
+	// distributions seem to go from -0.8 to +3.5 or there-abouts.
+	//
 	SimpleTruthValue stv((float) score, 1.0f);
 	stv.setConfidence(l->getTruthValue().getConfidence());
 	l->setTruthValue(stv);
