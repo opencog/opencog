@@ -28,7 +28,7 @@ class WordSenseProcessor : public MindAgent
 
 		int cnt;
 		AtomSpace *atom_space;
-		bool do_sentence(Handle h);
+		bool do_document(Handle h);
 
 		Handle completion_handle;
 		bool check_done(Handle h);

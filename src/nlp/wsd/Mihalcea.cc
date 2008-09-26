@@ -71,3 +71,7 @@ void Mihalcea::process_sentence(Handle h)
 	reporter->report_parse(top_parse);
 }
 
+void Mihalcea::process_document(Handle h)
+{
+	printf ("hellow rold!\n");
+}

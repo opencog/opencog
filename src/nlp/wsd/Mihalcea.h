@@ -35,12 +35,13 @@ class Mihalcea
 
 		std::vector<Handle> sentence_list;
 		Handle previous_parse;
+		void process_sentence(Handle);
 
 	public:
 		Mihalcea(void);
 		~Mihalcea();
 		void set_atom_space(AtomSpace *as);
-		void process_sentence(Handle);
+		void process_document(Handle);
 };
 }
 

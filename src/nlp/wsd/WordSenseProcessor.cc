@@ -65,7 +65,7 @@ void WordSenseProcessor::work_thread(void)
 		work_queue.pop();
 		pthread_mutex_unlock(&queue_lock);
 
-		wsd->process_sentence(h);
+		wsd->process_document(h);
 	}
 }
 
@@ -78,8 +78,8 @@ void WordSenseProcessor::run(CogServer *server)
 	wsd->set_atom_space(atom_space);
 
 	// Look for recently entered text
-	atom_space->foreach_handle_of_type("SentenceNode",
-	               &WordSenseProcessor::do_sentence, this);
+	atom_space->foreach_handle_of_type("DocumentNode",
+	               &WordSenseProcessor::do_document, this);
 
 	// XXX we are being called too often. this needs to be fixed.
 	// in truth, should only poll on new input.
@@ -87,40 +87,36 @@ void WordSenseProcessor::run(CogServer *server)
 }
 
 /**
- * Process a sentence fed into the system. This routine is called on
- * every sentence encountered in the system.  It looks for sentences
- * that are not tagged as being "finished."
- *
- * XXX This routine does not guarentee that sentences are found in
- * order. Once found, they are handled in serial order, in the order
- * in which they were found. But they could have been found in "random"
- * order. This needs a long term fix.
+ * Process a document fed into the system. A document is taken to be
+ * an ordered list of sentences, discussing some topic or set of 
+ * connected ideas.  The sentences composing the document are handled
+ * in order.
  */
-bool WordSenseProcessor::do_sentence(Handle h)
+bool WordSenseProcessor::do_document(Handle h)
 {
 	// Obtain the handle which indicates that the processing of a
- 	// sentence is complete. 
+ 	// document is complete. 
 	Node node(DISTINGUISHED_NODE, "#WSD_completed");
 	completion_handle = atom_space->addRealAtom(node);
 
-	// Look to see if the sentence is associated with the
+	// Look to see if the document is associated with the
 	// completion indicator.
 	bool rc = foreach_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_done, this);
 
 	if (rc) return false;
 
-	// If we are here, then there's a fresh sentence to work on.
+	// If we are here, then there's a fresh document to work on.
 	cnt++;
 	printf ("WordSenseProcessor found sentence %d handle=%lu\n", cnt, (unsigned long) h);
 
-	// Mark this sentence as being completed.
+	// Mark this document as being completed.
 	std::vector<Handle> out;
 	out.push_back(h);
 	out.push_back(completion_handle);
 
 	atom_space->addLink(INHERITANCE_LINK, out);
 
-	// Now queue the sentence for actual processing.
+	// Now queue the document for actual processing.
 	pthread_mutex_lock(&queue_lock);
 	work_queue.push(h);
 
