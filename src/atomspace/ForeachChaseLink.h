@@ -1,11 +1,64 @@
 /**
- * PrivateUseOnlyChaseLink.h
+ * ForeachChaseLink.h
+ *
+ * This file implements a numbeer of link-chasing routines.
+ * By "link-chasing", it is meant: given an input atom, find
+ * all links of some given link-type that contain it, and then,
+ * call a callback on each of the other elements in that link.
+ *
+ * Thus, for example, given the hypergraph
+ *
+ *   SomeLink
+ *       FirstAtom
+ *       SecondAtom
+ *
+ * then, given a handle to "FirstAtom", the the link type "SomeLink",
+ * the "foreach_binary_link" will call the callback on "SecondAtom".
+ *
+ * The link-chasing is order dependent; if, instead, one has
+ * "SecondAtom" and one wants "FirstAtom", then use the
+ * "foreach_reverse_binary_link" routine.
+ *
+ * The "foreach_unordered_binary_link" is not order-dependent; given
+ * either atom in the link, it will return the other.
+ *
+ * The "foreach_link" routine provides the analogous service for N-ary
+ * links.
+ *
+ * To summarize: 
+ * foreach_binary_link -- follow an ordered, binary link.
+ * foreach_reverse_binary_link - follow binary link in reverse.
+ * foreach_link -- follow an ordered N-ary link.
+ * foreach_unordered_binary_link - chase link from one to other atom.
+ *
+ * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ */
+
+#ifndef OPENCOG_LINK_CHASE_H_
+#define OPENCOG_LINK_CHASE_H_
+
+#include "Atom.h"
+#include "Link.h"
+#include "Foreach.h"
+#include "TLB.h"
+
+namespace opencog
+{
+
+/**
+ * This class is not meant for external use, it is meant to be a
+ * private utility for the use of the helper functions below.
+ * Unfortunately, C++ does not give any way of hiding this from the
+ * namespace. Too bad :-( 
+ *
+ * However, following this "private" definition are several public
+ * callback iterators, which *are* intended for general use.
  *
  * This template class implements a foreach iterator that iterates over
  * all atoms associated with a given atom via a certain link type.
  * It does this by iterating over all links containing the given atom,
  * and then invoking a callback for a corresponding atom in that link.
- * Two utility methods are provided: follow a binary link in the foreard
+ * Two utility methods are provided: follow a binary link in the foreward
  * direction, and in the reverse direction.
  *
  * If there is only one link of the given type, for the given atom, then
@@ -33,25 +86,6 @@
  * that is at the far end of an inheritence link containing the input
  * handle h.
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
- */
-
-#ifndef OPENCOG_LINK_CHASE_H_
-#define OPENCOG_LINK_CHASE_H_
-
-#include "Atom.h"
-#include "Link.h"
-#include "Foreach.h"
-#include "TLB.h"
-
-namespace opencog
-{
-
-/**
- * This class is not meant for external use, it is meant to be a
- * private utility for the use of the helper functions below.
- * Unfortunately, C++ does not give any way of hiding this from the
- * namespace. Too bad :-(
  */
 template <typename T>
 class PrivateUseOnlyChaseLink
@@ -229,6 +263,8 @@ inline bool foreach_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Hand
 }
 
 /**
+ * foreach_reverse_binary_link - follow binary link in reverse.
+ *
  * Same as above, except that the link is followed in the
  * reverse direction.
  */
@@ -283,6 +319,9 @@ inline bool foreach_link(Handle h, Type ltype, int from, int to,
     return cl.follow_link_lh(h, ltype, from, to, cb, data);
 }
 
+/**
+ * foreach_unordered_binary_link - chase link from one to other atom.
+ */
 template <typename T>
 inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
 {
