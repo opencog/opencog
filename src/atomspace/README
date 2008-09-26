@@ -1,6 +1,24 @@
 
+                   AtomSpace README
+                   ----------------
+
+The README contains miscellaneous notes about the atomspace.  Most of
+this file is denotes to the for-each iterators.
+
+
                    Foreach Iterators
                    -----------------
+What follows is a propsoal for a set of "for-each" iterators that call a
+callback for every atom, link, or subhypergraph of some given simple
+form. The callback paradigm provides many powerful benefits, but it also
+has a significant drawback: it inverts the order of control. Many
+programmers are simply not comfortable with control inversion. Thus, the
+discussion below, and its implementation, should be supplemented with an
+implementation of iterators using the standard C++ iterator interfaces.
+Currently, ony the callback-style is implemented. From the abstract
+point of view, C++ iterators are best understood as "continuations",
+and so, the return to the control section of a loop is a just a 
+call-with-current-continuation into the iterator.
 
 When iterating over the incoming and outgoing sets of an atom,
 please make use of the "foreach" iterators to do so.  The "foreach"
