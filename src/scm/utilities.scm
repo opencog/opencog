@@ -247,6 +247,23 @@ scm
 )
 
 ; -----------------------------------------------------------------------
+; Given a refernce structure, return the referenced list entries.
+; That is, given a structure of the form
+;
+;    ReferenceLink
+;        SomeAtom
+;        ListLink
+;           AnotherAtom
+;           AnotherAtom
+;           ...
+;
+; Then, given, as input, "SomeAtom", this rturns a list of the "OtherAtom"
+;
+(define (cog-get-reference refptr)
+   (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink refptr)))
+)
+
+; -----------------------------------------------------------------------
 ; exit scheme shell, exit opencog shell.
 .
 exit
