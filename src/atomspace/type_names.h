@@ -71,6 +71,7 @@
 #define DOCUMENT_NODE_CLASS "DocumentNode"
 #define SENTENCE_NODE_CLASS "SentenceNode"
 #define SENTENCE_LINK_CLASS "SentenceLink"
+#define PARSE_NODE_CLASS "ParseNode"
 #define PARSE_LINK_CLASS "ParseLink"
 #define PARSE_INSTANCE_LINK_CLASS "ParseInstanceLink"
 #define REFERENCE_LINK_CLASS "ReferenceLink"

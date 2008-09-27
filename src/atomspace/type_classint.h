@@ -71,6 +71,7 @@ class_to_int[(*getClassName()) [ENTROPY_LINK]] = ENTROPY_LINK;
 class_to_int[(*getClassName()) [DOCUMENT_NODE]] = DOCUMENT_NODE;
 class_to_int[(*getClassName()) [SENTENCE_NODE]] = SENTENCE_NODE;
 class_to_int[(*getClassName()) [SENTENCE_LINK]] = SENTENCE_LINK;
+class_to_int[(*getClassName()) [PARSE_NODE]] = PARSE_NODE;
 class_to_int[(*getClassName()) [PARSE_LINK]] = PARSE_LINK;
 class_to_int[(*getClassName()) [PARSE_INSTANCE_LINK]] = PARSE_INSTANCE_LINK;
 class_to_int[(*getClassName()) [REFERENCE_LINK]] = REFERENCE_LINK;
