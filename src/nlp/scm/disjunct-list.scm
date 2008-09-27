@@ -120,15 +120,15 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Given a single sentence, process the disjuncts for that sentence
-(define (list-get-sentence-disjuncts sent-node)
+; Given a single parse, process the disjuncts for that parse
+(define (list-get-parse-disjuncts parse-node)
 
 	; process the disjunct for this word.
 	(define (mk-disjunct word)
-		(process-disjunct word sent-node)
+		(process-disjunct word parse-node)
 	)
 
-	(for-each mk-disjunct (get-word-list sent-node))
+	(for-each mk-disjunct (get-word-list parse-node))
 )
 
 ; ---------------------------------------------------------------------
@@ -139,13 +139,31 @@ scm
 	(for-each list-get-sentence-disjuncts sent-list)
 )
 
-
 ; ---------------------------------------------------------------------
 ; Do it list-style
 (define (list-it) 
 	(list-get-sentence-list-disjuncts (cog-get-atoms 'SentenceNode))
 )
+; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
+; XXX Evertyhing above the X's is subtly wrong in various ways.
 
+; ---------------------------------------------------------------------
+; Given a sentence, return a list of parses in that sentence
+(define (sentenc-get-parses sent-node)
+	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink doco)))
+)
+
+(define (ldj-process-sentence sent-node)
+	(display sent-node)
+)
+
+(define (ldj-process-document doco)
+	(for-each ldj-process-sentence (document-get-sentences doco))
+)
+
+(define (ldj-it) 
+	(for-each ldj-process-document (cog-get-atoms 'DocumentNode))
+)
 ; =====================================================================
 
 .
