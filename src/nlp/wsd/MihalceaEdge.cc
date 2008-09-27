@@ -2,7 +2,11 @@
  * MihalceaEdge.cc
  *
  * Implements the edge creation portion of the Rada Mihalcea
- * word-sense disambiguation algorithm.
+ * word-sense disambiguation algorithm. Basically, for every
+ * word instance pair, there is a list of associatated senses
+ * for each word instance. This class creates edges between
+ * each pair of word senses, thus creating a biclique or 
+ * complete bipartite graph between the two lists of word senses.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -195,17 +199,14 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
  * As discussed in the README file, the resulting structure is:
  *
  *    <!-- the word "tree" occured in the sentence -->
- *    <CosenseLink strength=0.49 confidence=0.3>
- *       <InheritanceLink strength=0.9 confidence=0.6>
- *          <ConceptNode name="tree_99" />
- *          <WordSenseNode name="tree_sense_12" />
- *       </InheritanceLink>
+ *    CosenseLink strength=0.49 confidence=0.3
+ *       InheritanceLink strength=0.9 confidence=0.6
+ *          ConceptNode "tree_99"
+ *          WordSenseNode "tree_sense_12"
  *
- *       <InheritanceLink strength=0.9 confidence=0.1>
- *          <ConceptNode name="bark_144" />
- *          <WordSenseNode name="bark_sense_23" />
- *       </InheritanceLink>
- *    </CosenseLink>
+ *       InheritanceLink strength=0.9 confidence=0.1
+ *          ConceptNode name="bark_144"
+ *          WordSenseNode name="bark_sense_23"
  */
 bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
