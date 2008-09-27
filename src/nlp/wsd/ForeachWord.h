@@ -44,7 +44,7 @@ inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
  *
  *    ParseInstanceLink
  *       ConceptNode "bark_169"
- *       ConceptNode "parse_3"
+ *       ParseNode "parse_3"
  */
 template <class T>
 inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
@@ -293,7 +293,7 @@ class PrivateUseOnlyRelexRelationFinder
 			(user_data->*user_cb)(relname, outset[0], outset[1]);
 			return false;
 		}
-		
+
 	public:
 		Handle first_arg;
 		bool (T::*user_cb)(const std::string &, Handle, Handle);
