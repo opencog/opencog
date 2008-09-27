@@ -18,6 +18,8 @@
 
 using namespace opencog;
 
+#define DEBUG
+
 Mihalcea::Mihalcea(void)
 {
 	atom_space = NULL;
@@ -53,6 +55,10 @@ bool Mihalcea::process_sentence(Handle h)
 {
 	Handle top_parse = parse_ranker->get_top_ranked_parse(h);
 
+#ifdef DEBUG
+	printf("; Handling parse %lx for sentence %lx\n", top_parse, h); 
+#endif
+
 	labeller->annotate_parse(top_parse);
 	edger->annotate_parse(top_parse);
 	// nn_adjuster->adjust_parse(top_parse);
@@ -77,5 +83,5 @@ bool Mihalcea::process_sentence_list(Handle h)
 
 void Mihalcea::process_document(Handle h)
 {
-	foreach_binary_link(h, EVALUATION_LINK, &Mihalcea::process_sentence_list, this);
+	foreach_binary_link(h, REFERENCE_LINK, &Mihalcea::process_sentence_list, this);
 }

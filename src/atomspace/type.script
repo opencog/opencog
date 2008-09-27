@@ -98,7 +98,7 @@ EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
 EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
 
 // Older parsing and language handling nodes;
-// Commented out, as these are currently unusued,
+// Commented out, as these are currently unused,
 // and are being replaced by newer relex forms.
 // Some of these may be revived. See below.
 //
@@ -115,7 +115,7 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 // SPECIFIC_ENTITY_NODE <- CONCEPT_NODE
 // 
 // short for "WordReferenceLink"
-WR_LINK <- ASSOCIATIVE_LINK "WRLink"
+// WR_LINK <- ASSOCIATIVE_LINK "WRLink"
 // WS_LINK <- ASSOCIATIVE_LINK "WSLink"
 // WORD_SENSE_CANDIDATE_LINK <- ASSOCIATIVE_LINK
 // WSC_BASIC_LINK <- WORD_SENSE_CANDIDATE_LINK "WSCBasicLink"
