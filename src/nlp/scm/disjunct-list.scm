@@ -11,6 +11,8 @@ scm
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
+(use-modules (srfi srfi-1))
+
 ; =============================================================
 ; List-style disjuncts
 ;
@@ -57,6 +59,8 @@ scm
 		(define (wless? rel-a rel-b)
 
 			; Return the index of the word in a sentence
+			; Caution! ice-9/boot-9.scm loads a *different* list-index than
+			; that defined in srfi-1. We want the srfi-1 variant.
 			(define (windex wrd)
 				(if (equal? "LEFT-WALL" (cog-name wrd))
 					-1
