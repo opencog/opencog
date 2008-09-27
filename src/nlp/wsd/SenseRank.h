@@ -42,8 +42,9 @@ class SenseRank
 	public:
 		SenseRank(void);
 		~SenseRank();
-		void rank_sentence(Handle);
+		void init_parse(Handle);
 		void rank_parse(Handle);
+		void rank_sentence(Handle);
 
 };
 }

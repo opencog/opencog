@@ -54,31 +54,46 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 bool Mihalcea::process_sentence(Handle h)
 {
 	Handle top_parse = parse_ranker->get_top_ranked_parse(h);
+	parse_list.push_back(top_parse);
 
 #ifdef DEBUG
 	printf("; Handling parse %lx for sentence %lx\n", top_parse, h); 
 #endif
 
+	// Attach senses to word instances
 	labeller->annotate_parse(top_parse);
+
+	// Create edges between sense pairs
 	edger->annotate_parse(top_parse);
+
+	// Tweak, based on parser markup
 	// nn_adjuster->adjust_parse(top_parse);
 
 	// Link sentences together, since presumably the next 
-	// sentence deals with similar topics to the previous one.
+	// sentence deals with topics similar to the previous one.
 	if (UNDEFINED_HANDLE != previous_parse)
 	{
 		edger->annotate_parse_pair(previous_parse, top_parse);
 	}
 	previous_parse = top_parse;
 
-	sense_ranker->rank_parse(top_parse);
-	reporter->report_parse(top_parse);
+	// Assign initial probabilities to each sense.
+	sense_ranker->init_parse(top_parse);
 	return false;
 }
 
 bool Mihalcea::process_sentence_list(Handle h)
 {
-	return foreach_outgoing_handle(h, &Mihalcea::process_sentence, this);
+	foreach_outgoing_handle(h, &Mihalcea::process_sentence, this);
+
+	// Iterate over parse list
+	vector<Handle>::const_iterator i;
+	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	{
+		sense_ranker->rank_parse(*i);
+	}
+	// reporter->report_parse(top_parse);
+	return false;
 }
 
 void Mihalcea::process_document(Handle h)

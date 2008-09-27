@@ -34,6 +34,7 @@ class Mihalcea
 		ReportRank *reporter;
 
 		Handle previous_parse;
+		std::vector<Handle> parse_list;
 		bool process_sentence_list(Handle);
 		bool process_sentence(Handle);
 

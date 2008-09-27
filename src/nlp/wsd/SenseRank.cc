@@ -73,6 +73,15 @@ bool SenseRank::init_senses(Handle word_sense_h,
 }
 
 /**
+ * Assign initial probabilities to each word sense.
+ */ 
+void SenseRank::init_parse(Handle h)
+{
+	converge = 1.0;
+	foreach_word_instance(h, &SenseRank::init_word, this);
+}
+
+/**
  * For each parse, find some place to start. There is some chance
  * that the graph may have multiple, disconnected components (which 
  * is bad, but we have no strategy for handling this yet), and so
@@ -81,8 +90,6 @@ bool SenseRank::init_senses(Handle word_sense_h,
  */
 void SenseRank::rank_parse(Handle h)
 {
-	converge = 1.0;
-	foreach_word_instance(h, &SenseRank::init_word, this);
 	foreach_word_instance(h, &SenseRank::start_word, this);
 }
 
