@@ -49,11 +49,8 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 	edger->set_atom_space(as);
 }
 
-void Mihalcea::process_sentence(Handle h)
+bool Mihalcea::process_sentence(Handle h)
 {
-	// Add handle to sentence to our running list.
-	sentence_list.push_back(h);
-
 	Handle top_parse = parse_ranker->get_top_ranked_parse(h);
 
 	labeller->annotate_parse(top_parse);
@@ -70,12 +67,12 @@ void Mihalcea::process_sentence(Handle h)
 
 	sense_ranker->rank_parse(top_parse);
 	reporter->report_parse(top_parse);
+	return false;
 }
 
 bool Mihalcea::process_sentence_list(Handle h)
 {
-	printf ("hellow rold!\n");
-	return false;
+	return foreach_outgoing_handle(h, &Mihalcea::process_sentence, this);
 }
 
 void Mihalcea::process_document(Handle h)
