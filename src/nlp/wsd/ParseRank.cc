@@ -19,6 +19,8 @@
 
 using namespace opencog;
 
+// #define DEBUG
+
 ParseRank::ParseRank(void)
 {
 }
@@ -30,7 +32,7 @@ ParseRank::~ParseRank()
 /**
  * For each parse of the sentence, perform the ranking algo.
  * The input handle is assumed to point to a sentence.
- * The returned value is the highest-ranked parse of the 
+ * The returned value is the highest-ranked parse of the
  * bunch.
  */
 Handle ParseRank::get_top_ranked_parse(Handle h)
@@ -42,11 +44,15 @@ Handle ParseRank::get_top_ranked_parse(Handle h)
 }
 
 /**
+ * Get the parse ranking for a given parse.
  */
 bool ParseRank::lookat_parse(Handle h)
 {
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(h));
 	double rank = n->getTruthValue().getConfidence();
+#ifdef DEBUG
+	printf("; ParseRank::lookat_parse parse=%lx rank=%f\n", (unsigned long) h, rank);
+#endif
 	if (top_rank < rank)
 	{
 		top_rank = rank;
