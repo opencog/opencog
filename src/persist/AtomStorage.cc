@@ -288,6 +288,11 @@ AtomStorage::AtomStorage(const char * dbname,
 {
 	db_conn = new ODBCConnection(dbname, username, authentication);
 	type_map_was_loaded = false;
+
+	for (int i=0; i< TYPEMAP_SZ; i++)
+	{
+		db_typename[i] = NULL;
+	}
 }
 
 AtomStorage::AtomStorage(const std::string dbname,
@@ -296,12 +301,22 @@ AtomStorage::AtomStorage(const std::string dbname,
 {
 	db_conn = new ODBCConnection(dbname.c_str(), username.c_str(), authentication.c_str());
 	type_map_was_loaded = false;
+
+	for (int i=0; i< TYPEMAP_SZ; i++)
+	{
+		db_typename[i] = NULL;
+	}
 }
 
 AtomStorage::~AtomStorage()
 {
 	setMaxUUID(TLB::uuid);
 	delete db_conn;
+
+	for (int i=0; i< TYPEMAP_SZ; i++)
+	{
+		if (db_typename[i]) free(db_typename[i]);
+	}
 }
 
 /* ================================================================ */
@@ -632,6 +647,15 @@ void AtomStorage::load_typemap(void)
 	if (type_map_was_loaded) return;
 	type_map_was_loaded = true;
 
+	// Be careful to initialize the typemap with invalid types,
+	// in case there are unexpected holes in the map!
+	for (int i=0; i< TYPEMAP_SZ; i++)
+	{
+		loading_typemap[i] = NOTYPE;
+		storing_typemap[i] = -1;
+		db_typename[i] = NULL;
+	}
+
 	Response rp;
 	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
 	rp.store = this;
@@ -644,6 +668,7 @@ void AtomStorage::set_typemap(int dbval, const char * tname)
 	Type realtype = ClassServer::getType(tname);
 	loading_typemap[dbval] = realtype;
 	storing_typemap[realtype] = dbval;
+	db_typename[dbval] = strdup(tname);
 }
 
 /* ================================================================ */
@@ -739,6 +764,15 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	// Now that we know everything about an atom, actually construct one.
 	Atom *atom = TLB::getAtom(h);
 	Type realtype = loading_typemap[rp.itype];
+
+	if (NOTYPE == realtype)
+	{
+		fprintf(stderr,
+			"Fatal Error: database contents too old!\n"
+			"\tThe type %s does not exist in this server\n",
+			db_typename[rp.itype]);
+		return NULL;
+	}
 
 	if (NULL == atom)
 	{

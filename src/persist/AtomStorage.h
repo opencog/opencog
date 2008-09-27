@@ -52,9 +52,11 @@ class AtomStorage
 		unsigned long getMaxUUID(void);
 		void setMaxUUID(unsigned long);
 
-		// XXX assume there are fewer than 500 atom types.
-		int  storing_typemap[500];
-		Type loading_typemap[500];
+		// Reserve extra space for future growth -- 200 should be enough.
+		#define TYPEMAP_SZ (NUMBER_OF_CLASSES + 200)
+		int  storing_typemap[TYPEMAP_SZ];
+		Type loading_typemap[TYPEMAP_SZ];
+		char * db_typename[TYPEMAP_SZ];
 		bool type_map_was_loaded;
 		void load_typemap(void);
 		void store_typemap(void);
