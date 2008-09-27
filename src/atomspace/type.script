@@ -180,6 +180,9 @@ FRAME_ELEMENT_LINK <- ORDERED_LINK
 
 // New wordnet-import nodes, added by Linas.
 // These are subject to change, pending review.
+// The links should almost certainly be replaced by
+// a predicate-style construction (where the relation
+// is explicitly named)
 WORD_SENSE_NODE <- CONCEPT_NODE
 WORD_SENSE_LINK <- ASSOCIATIVE_LINK
 PART_OF_SPEECH_NODE <- CONCEPT_NODE
@@ -187,19 +190,6 @@ PART_OF_SPEECH_LINK <- ORDERED_LINK
 LEMMA_NODE <- CONCEPT_NODE
 LEMMA_LINK <- ORDERED_LINK
 HOLONYM_LINK <- INHERITANCE_LINK
-
-// Different types of similarity links between word senses
-// These are named after the standard similarity measures
-// used in the WordNet::Similarity package.
-PATH_SIMILARITY_LINK <- SIMILARITY_LINK
-HSO_SIMILARITY_LINK <- SIMILARITY_LINK
-LCH_SIMILARITY_LINK <- SIMILARITY_LINK
-LESK_SIMILARITY_LINK <- SIMILARITY_LINK
-LIN_SIMILARITY_LINK <- SIMILARITY_LINK
-JCN_SIMILARITY_LINK <- SIMILARITY_LINK
-RES_SIMILARITY_LINK <- SIMILARITY_LINK
-VECTOR_SIMILARITY_LINK <- SIMILARITY_LINK
-WUP_SIMILARITY_LINK <- SIMILARITY_LINK
 
 // New word-sense-disambiguation nodes, added by Linas
 COSENSE_LINK <- UNORDERED_LINK
