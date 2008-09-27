@@ -42,7 +42,7 @@ void ReportRank::report_sentence(Handle h)
 void ReportRank::report_parse(Handle h)
 {
 #ifdef DEBUG
-	printf ("; Parse %d:\n", parse_cnt);
+	printf ("; Sentence %d:\n", parse_cnt);
 #endif
 	parse_cnt ++;
 
