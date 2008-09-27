@@ -2,7 +2,11 @@
  * MihalceaLabel.cc
  *
  * Implements the word-instance labelling portion of the Rada Mihalcea
- * word-sense disambiguation algorithm.
+ * word-sense disambiguation algorithm. For each word-instance in a
+ * sentence, one of several possible word-senses are attached. It is
+ * assumed that the running opencog server already has a number of 
+ * possible word senses loaded for a given word; this code merely
+ * looks those up, and attaches them to a word instance. 
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -79,12 +83,12 @@ bool MihalceaLabel::annotate_word(Handle h)
 	if (0 == word_inst_pos.compare("prep")) return false;
 	if (0 == word_inst_pos.compare("punctuation")) return false;
 
-
 	Handle dict_word_h = get_dict_word_of_word_instance(h);
 
 #ifdef DEBUG
 	total_words ++;
 	Node *n = dynamic_cast<Node *>(word_instance);
+	printf(" MihalceaLabel::annotate_word(%lx)\n", (unsigned long) h);
 	printf("; found word-inst %s\n",  n->toString().c_str());
 	printf(";\thas inst-pos %s\n",  word_inst_pos.c_str());
 	n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
