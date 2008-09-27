@@ -40,6 +40,7 @@ scm
 	)
 )
 
+; ---------------------------------------------------------------------
 ; map-word-instances proc parse
 ; Call proceedure 'proc' on each word-instance of 'parse'
 ;
@@ -54,6 +55,7 @@ scm
 	)
 )
 
+; ---------------------------------------------------------------------
 ; map-word-node proc word-inst
 ; Call proceedure 'proc' on the word-node associated to 'word-inst'
 ;
@@ -68,10 +70,18 @@ scm
 	)
 )
 
+; ---------------------------------------------------------------------
 ; Return the WordNode associated with 'word-inst'
 ;
 (define (get-word word-inst)
 	(map-word-node (lambda (x) x) word-inst)
+)
+
+; ---------------------------------------------------------------------
+; Given a document, return a list of sentences in that document
+;
+(define (document-get-sentences doco)
+	(cog-get-reference doco)
 )
 
 ; =============================================================
