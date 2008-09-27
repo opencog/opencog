@@ -84,6 +84,14 @@ scm
 	(cog-get-reference doco)
 )
 
+; ---------------------------------------------------------------------
+; Given a sentence, return a list of parses in that sentence
+; Basically, chase a ParseLink to a ParseNode
+;
+(define (sentence-get-parses sent-node)
+	(cog-chase-link 'ParseLink 'ParseNode sent-node)
+)
+
 ; =============================================================
 .
 exit
