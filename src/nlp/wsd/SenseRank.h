@@ -10,6 +10,8 @@
 #ifndef OPENCOG_SENSE_RANK_H
 #define OPENCOG_SENSE_RANK_H
 
+#include <vector>
+
 namespace opencog {
 
 class SenseRank
@@ -45,6 +47,7 @@ class SenseRank
 		void init_parse(Handle);
 		void rank_parse(Handle);
 		void rank_sentence(Handle);
+		void rank_document(const std::vector<Handle> &);
 
 };
 }

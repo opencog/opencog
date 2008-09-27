@@ -31,6 +31,7 @@ class ReportRank
 		~ReportRank();
 		void report_sentence(Handle);
 		void report_parse(Handle);
+		void report_document(const std::vector<Handle> &);
 
 };
 }

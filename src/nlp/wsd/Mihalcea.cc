@@ -77,8 +77,6 @@ bool Mihalcea::process_sentence(Handle h)
 	}
 	previous_parse = top_parse;
 
-	// Assign initial probabilities to each sense.
-	sense_ranker->init_parse(top_parse);
 	return false;
 }
 
@@ -86,13 +84,12 @@ bool Mihalcea::process_sentence_list(Handle h)
 {
 	foreach_outgoing_handle(h, &Mihalcea::process_sentence, this);
 
-	// Iterate over parse list
-	vector<Handle>::const_iterator i;
-	for (i = parse_list.begin(); i != parse_list.end(); i++)
-	{
-		sense_ranker->rank_parse(*i);
-	}
-	// reporter->report_parse(top_parse);
+	// Solve the page-rank equations for the whole set of sentences.
+	sense_ranker->rank_document(parse_list);
+
+	// Report the results.
+	reporter->report_document(parse_list);
+
 	return false;
 }
 

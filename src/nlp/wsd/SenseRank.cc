@@ -53,6 +53,20 @@ void SenseRank::rank_sentence(Handle h)
 	foreach_parse(h, &SenseRank::rank_parse_f, this);
 }
 
+void SenseRank::rank_document(const std::vector<Handle> &parse_list)
+{
+	// Iterate over list of parses making up a "document"
+	std::vector<Handle>::const_iterator i;
+	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	{
+		init_parse(*i);
+	}
+	for (i = parse_list.begin(); i != parse_list.end(); i++)
+	{
+		rank_parse(*i);
+	}
+}
+
 /**
  * Assign equal probability to all senses of all words.
  * Initially, all senses are equi-probabile.
