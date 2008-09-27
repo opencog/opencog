@@ -35,6 +35,7 @@ class Mihalcea
 
 		std::vector<Handle> sentence_list;
 		Handle previous_parse;
+		bool process_sentence_list(Handle);
 		void process_sentence(Handle);
 
 	public:

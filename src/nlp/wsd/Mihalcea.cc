@@ -8,6 +8,7 @@
 #include "platform.h"
 #include <stdio.h>
 
+#include "ForeachChaseLink.h"
 #include "Mihalcea.h"
 #include "MihalceaEdge.h"
 #include "MihalceaLabel.h"
@@ -71,7 +72,13 @@ void Mihalcea::process_sentence(Handle h)
 	reporter->report_parse(top_parse);
 }
 
-void Mihalcea::process_document(Handle h)
+bool Mihalcea::process_sentence_list(Handle h)
 {
 	printf ("hellow rold!\n");
+	return false;
+}
+
+void Mihalcea::process_document(Handle h)
+{
+	foreach_binary_link(h, EVALUATION_LINK, &Mihalcea::process_sentence_list, this);
 }
