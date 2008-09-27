@@ -57,7 +57,7 @@ bool Mihalcea::process_sentence(Handle h)
 	parse_list.push_back(top_parse);
 
 #ifdef DEBUG
-	printf("; Handling parse %lx for sentence %lx\n", top_parse, h); 
+	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n", top_parse, h); 
 #endif
 
 	// Attach senses to word instances

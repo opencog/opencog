@@ -52,6 +52,9 @@ void * WordSenseProcessor::thread_start(void *data)
 
 void WordSenseProcessor::work_thread(void)
 {
+	Node node(DISTINGUISHED_NODE, "#WSD_completed");
+	completion_handle = atom_space->addRealAtom(node);
+
 	while (1)
 	{
 		pthread_mutex_lock(&queue_lock);
@@ -66,6 +69,12 @@ void WordSenseProcessor::work_thread(void)
 		pthread_mutex_unlock(&queue_lock);
 
 		wsd->process_document(h);
+
+		// Mark this document as being completed.
+		std::vector<Handle> out;
+		out.push_back(h);
+		out.push_back(completion_handle);
+		atom_space->addLink(INHERITANCE_LINK, out);
 	}
 }
 
@@ -94,14 +103,14 @@ void WordSenseProcessor::run(CogServer *server)
  */
 bool WordSenseProcessor::do_document(Handle h)
 {
-	// Obtain the handle which indicates that the processing of a
- 	// document is complete. 
-	Node node(DISTINGUISHED_NODE, "#WSD_completed");
-	completion_handle = atom_space->addRealAtom(node);
+	// Obtain the handle which indicates that the WSD processing of a
+ 	// document has started. 
+	Node node(DISTINGUISHED_NODE, "#WSD_started");
+	start_handle = atom_space->addRealAtom(node);
 
 	// Look to see if the document is associated with the
-	// completion indicator.
-	bool rc = foreach_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_done, this);
+	// start indicator.
+	bool rc = foreach_binary_link(h, INHERITANCE_LINK, &WordSenseProcessor::check_start, this);
 
 	if (rc) return false;
 
@@ -109,11 +118,10 @@ bool WordSenseProcessor::do_document(Handle h)
 	cnt++;
 	printf ("WordSenseProcessor found document %d handle=%lx\n", cnt, (unsigned long) h);
 
-	// Mark this document as being completed.
+	// Mark this document as being started.
 	std::vector<Handle> out;
 	out.push_back(h);
-	out.push_back(completion_handle);
-
+	out.push_back(start_handle);
 	atom_space->addLink(INHERITANCE_LINK, out);
 
 	// Now queue the document for actual processing.
@@ -130,9 +138,9 @@ bool WordSenseProcessor::do_document(Handle h)
 	return false;
 }
 
-bool WordSenseProcessor::check_done(Handle h)
+bool WordSenseProcessor::check_start(Handle h)
 {
-	if (h == completion_handle) return true;
+	if (h == start_handle) return true;
 	return false;
 }
 

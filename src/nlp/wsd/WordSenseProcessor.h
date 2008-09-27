@@ -30,8 +30,9 @@ class WordSenseProcessor : public MindAgent
 		AtomSpace *atom_space;
 		bool do_document(Handle h);
 
+		Handle start_handle;
 		Handle completion_handle;
-		bool check_done(Handle h);
+		bool check_start(Handle h);
 
 		Mihalcea *wsd;
 

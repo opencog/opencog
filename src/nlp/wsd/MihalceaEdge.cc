@@ -7,6 +7,10 @@
  * for each word instance. This class creates edges between
  * each pair of word senses, thus creating a biclique or 
  * complete bipartite graph between the two lists of word senses.
+ * 
+ * Some word senses may be unrelated, in which case the edge
+ * between these to senses is ommited, rather than being assigned
+ * a score of zero.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
