@@ -742,7 +742,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 
 	if (NULL == atom)
 	{
-		if (ClassServer::isAssignableFrom(NODE, rp.itype))
+		if (ClassServer::isAssignableFrom(NODE, realtype))
 		{
 			atom = new Node(realtype, rp.name);
 		}
