@@ -20,10 +20,18 @@ scm
 	(define (get-rel word-pair)
 		;; Take the car, because cog-get-link returns a list of links.
 		;; We expect this list to only contain one element, in total.
-		(car (cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair))
+		(let ((rel-list (cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair)))
+			(if (null? rel-list)
+				'()
+				(car rel-list)
+			)
+		)
 	)
 
-	(map get-rel (cog-filter-incoming 'ListLink word))
+	; Be sure to remove any nulls that showed up.
+	(filter (lambda (x) (not (null? x))) 
+		(map get-rel (cog-filter-incoming 'ListLink word))
+	)
 )
 
 ; ---------------------------------------------------------------------
