@@ -29,7 +29,7 @@ scm
 ; ---------------------------------------------------------------------
 ; Get list of all words in the sentence
 (define (get-word-list sent)
-	(reverse! (cog-chase-link 'SentenceLink 'ConceptNode sent))
+	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink sent)))
 )
 
 ; ---------------------------------------------------------------------
