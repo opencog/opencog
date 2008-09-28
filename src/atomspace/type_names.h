@@ -65,6 +65,7 @@
 #define EXTENDED_SIMPLEX_PREDICTOR_NODE_CLASS "ExtendedSimplexPredictorNode"
 #define EVENTUAL_SEQUENTIAL_AND_LINK_CLASS "EventualSequentialAND"
 #define EVENTUAL_PREDICTIVE_IMPLICATION_LINK_CLASS "EventualSequentialImplication"
+#define WR_LINK_CLASS "WRLink"
 #define DISTINGUISHED_NODE_CLASS "DistinguishedNode"
 #define ENTROPY_LINK_CLASS "EntropyLink"
 #define DOCUMENT_NODE_CLASS "DocumentNode"

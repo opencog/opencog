@@ -115,7 +115,9 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 // SPECIFIC_ENTITY_NODE <- CONCEPT_NODE
 // 
 // short for "WordReferenceLink"
-// WR_LINK <- ASSOCIATIVE_LINK "WRLink"
+// XXX Not used anywhere, excpet by test cases. The test cases should
+// be modified to stop using this link type!
+WR_LINK <- ASSOCIATIVE_LINK "WRLink"
 // WS_LINK <- ASSOCIATIVE_LINK "WSLink"
 // WORD_SENSE_CANDIDATE_LINK <- ASSOCIATIVE_LINK
 // WSC_BASIC_LINK <- WORD_SENSE_CANDIDATE_LINK "WSCBasicLink"
