@@ -92,6 +92,14 @@ scm
 	(cog-chase-link 'ParseLink 'ParseNode sent-node)
 )
 
+; ---------------------------------------------------------------------
+; Given a parse, return a list of all the link-grammar linkage relations
+; for that parse.
+;
+(define (parse-get-lg-relations parse-node)
+   (cog-get-reference parse-node)
+)
+
 ; =============================================================
 .
 exit
