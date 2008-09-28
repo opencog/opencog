@@ -16,42 +16,6 @@ scm
 ; =============================================================
 ; List-style disjuncts
 ; ---------------------------------------------------------------------
-; Given a word, and the sentence in which the word appears, return
-; a list of the ling-grammar relations in which the word appears. 
-; The relations are sorted in sentence word-order.
-;
-; Similar to get-lg-rels, but sorted.
-;
-(define (get-lg-rels-sorted word sent-node)
-
-	; rel-list is a list of the link-grammar relations.
-	(let ((rel-list (get-lg-rels word)))
-
-		; Compare two link-grammar relations, and determine thier sentence
-		; word order.
-		(define (wless? rel-a rel-b)
-
-			; Return the index of the word in a sentence
-			; Caution! ice-9/boot-9.scm loads a *different* list-index than
-			; that defined in srfi-1. We want the srfi-1 variant.
-			(define (windex wrd)
-				(if (equal? "LEFT-WALL" (cog-name wrd))
-					-1
-					(list-index (lambda (w) (equal? wrd w)) (sentence-get-words sent-node))
-				)
-			)
-
-			(let ((word-a (cog-pred-get-partner rel-a word))
-					(word-b (cog-pred-get-partner rel-b word))
-				)
-				(< (windex word-a) (windex word-b))
-			)
-		)
-		(sort rel-list wless?)
-	)
-)
-
-; ---------------------------------------------------------------------
 ; Return a string listing all of the link-grammar relations for the
 ; word in the sentence. This string will be in proper sorted order,
 ; according to the appearence of the words in the sentence word-order.
@@ -95,9 +59,47 @@ scm
 ; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
 ; XXX Evertyhing above the X's is subtly wrong in various ways.
 ;
+; ---------------------------------------------------------------------
+; Given a word, and the sentence in which the word appears, return
+; a list of the ling-grammar relations in which the word appears. 
+; The relations are sorted in sentence word-order.
+;
+; Sort a list of link-grammar relations, according to the
+; order in which they appear in a sentence
+;
+(define (ldj-sort-rels word sent-node rel-list)
+
+	; rel-list is a list of the link-grammar relations.
+	(let ((snt-wrds (sentence-get-words sent-node)))
+
+		; Compare two link-grammar relations, and determine thier sentence
+		; word order.
+		(define (wless? rel-a rel-b)
+
+			; Return the index of the word in a sentence
+			; Caution! ice-9/boot-9.scm loads a *different* list-index than
+			; that defined in srfi-1. We want the srfi-1 variant.
+			(define (windex wrd)
+				(if (equal? "LEFT-WALL" (cog-name wrd))
+					-1
+					(list-index (lambda (w) (equal? wrd w)) snt-wrds)
+				)
+			)
+
+			(let ((word-a (cog-pred-get-partner rel-a word))
+					(word-b (cog-pred-get-partner rel-b word))
+				)
+				(< (windex word-a) (windex word-b))
+			)
+		)
+		(sort rel-list wless?)
+	)
+)
+
+; ---------------------------------------------------------------------
 ;
 ; Return a list of all of the link-grammar links the word particpates in
-(define (get-lg-rels word rel-list)
+(define (ldj-get-lg-rels word rel-list)
 	(define (is-word-in-rel? word rel)
 		(let* ((lnk (cog-filter-outgoing 'ListLink rel))
 				(wds (cog-outgoing-set (car lnk))) 
@@ -113,15 +115,19 @@ scm
 )
 
 ; Assemble all the disjuncts this one word participaes in.
-(define (ldj-process-disjunct word rel-list)
-	(display (get-lg-rels word rel-list))
+(define (ldj-process-disjunct word rel-list sent-node)
+	(let* ((dj-rels (ldj-get-lg-rels word rel-list))
+			(sorted-dj-rels (ldj-sort-rels word sent-node dj-rels))
+		)
+		(display sorted-dj-rels)
+	)
 )
 
 ; Given a single parse, process the disjuncts for that parse
-(define (ldj-process-parse word-list parse-node)
+(define (ldj-process-parse word-list parse-node sent-node)
 	(let ((rel-list (parse-get-lg-relations parse-node)))
 		(for-each
-			(lambda (word) (ldj-process-disjunct word rel-list))
+			(lambda (word) (ldj-process-disjunct word rel-list sent-node))
 			word-list
 		)
 	)
@@ -131,7 +137,7 @@ scm
 (define (ldj-process-sentence sent-node)
 	(let ((word-list (sentence-get-words sent-node)))
 		(for-each
-			(lambda (prs) (ldj-process-parse word-list prs))
+			(lambda (prs) (ldj-process-parse word-list prs sent-node))
 			(sentence-get-parses sent-node)
 		)
 	)
