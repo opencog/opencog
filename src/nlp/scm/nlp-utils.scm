@@ -93,14 +93,8 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Given a parse, return a list of all the link-grammar linkage relations
-; for that parse.
-;
-(define (parse-get-lg-relations parse-node)
-   (cog-get-reference parse-node)
-)
-
 ; Given a parse, return a list of all words in the parse
+;
 (define (parse-get-words parse-node)
 	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink parse-node)))
 )

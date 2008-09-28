@@ -96,19 +96,8 @@ scm
 ; ---------------------------------------------------------------------
 ; Return a list of all of the link-grammar links the word particpates in
 ;
-(define (ldj-get-lg-rels word rel-list)
-	(define (is-word-in-rel? word rel)
-		(let* ((lnk (cog-filter-outgoing 'ListLink rel))
-				(wds (cog-outgoing-set (car lnk))) 
-			)
-			(cond
-				((equal? word (car wds)) #t)
-				((equal? word (cadr wds)) #t)
-				(else #f)
-			)
-		)
-	)
-	(filter (lambda (rel) (is-word-in-rel? word rel)) rel-list)
+(define (ldj-get-lg-rels word)
+	(cog-get-pred word 'LinkGrammarRelationshipNode)
 )
 
 ; ---------------------------------------------------------------------
@@ -117,16 +106,16 @@ scm
 ; sentence, this will extract only those relations that this word
 ; participates in and sort them in sentence order.
 ;
-(define (ldj-get-disjuncts word rel-list parse-node)
+(define (ldj-get-disjuncts word parse-node)
 
 	(ldj-sort-rels word parse-node 
-		(ldj-get-lg-rels word rel-list)
+		(ldj-get-lg-rels word)
 	)
 )
 
 ; ---------------------------------------------------------------------
 ; Process a disjunt -- stuff into database, whatever.
-(define (ldj-process-disjunct word rel-list parse-node)
+(define (ldj-process-disjunct word parse-node)
 
 	; Return the word string associated with the word-instance
 	(define (get-word-str word-inst)
@@ -136,7 +125,7 @@ scm
 (display "Word: ")
 (display (get-word-str word))
 (display " -- ")
-(display (ldj-make-disjunct-string (ldj-get-disjuncts word rel-list parse-node)))
+(display (ldj-make-disjunct-string (ldj-get-disjuncts word parse-node)))
 (display "\n")
 )
 
@@ -144,14 +133,11 @@ scm
 ; Given a single parse, process the disjuncts for that parse
 ;
 (define (ldj-process-parse parse-node)
-	(let ((rel-list (parse-get-lg-relations parse-node))
-			(word-list (parse-get-words parse-node))
+	(let ( (word-list (parse-get-words parse-node)))
+		(for-each
+			(lambda (word) (ldj-process-disjunct word parse-node))
+			word-list
 		)
-(display rel-list)
-;		(for-each
-;			(lambda (word) (ldj-process-disjunct word rel-list parse-node))
-;			word-list
-;		)
 	)
 )
 
