@@ -16,50 +16,6 @@ scm
 ; =============================================================
 ; List-style disjuncts
 ; ---------------------------------------------------------------------
-; Return a string listing all of the link-grammar relations for the
-; word in the sentence. This string will be in proper sorted order,
-; according to the appearence of the words in the sentence word-order.
-(define (make-disjunct sorted-rels)
-
-	; Given a single opencog predicate (EvaluationLink) triple
-	; containing a link-grammar relation, just return the relation name,
-	; as a string.
-	(define (get-name rel)
-		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
-	)
-
-	; Given a list of names, create a string, padding it with blanks.
-	(define (mk-dj-string name-list str)
-		(if (null? name-list)
-			str
-			(mk-dj-string (cdr name-list) (string-append str (car name-list) " "))
-		)
-	)
-
-	(mk-dj-string (map get-name sorted-rels) "")
-)
-
-; ---------------------------------------------------------------------
-;
-; Process the disjuncts for a single word in a sentence
-;
-(define (process-disjunct word sent-node)
-
-	; Return the word string associated with the word-instance
-	(define (get-word word-inst)
-		(cog-name (car (cog-chase-link 'ReferenceLink 'WordNode word-inst)))
-	)
-(display "Word: ")
-(display (get-word word))
-(display " -- ")
-(display (make-disjunct (get-lg-rels-sorted word sent-node)))
-(display "\n")
-)
-
-; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
-; XXX Evertyhing above the X's is subtly wrong in various ways.
-;
-; ---------------------------------------------------------------------
 ; Given a word, and the sentence in which the word appears, return
 ; a list of the ling-grammar relations in which the word appears. 
 ; The relations are sorted in sentence word-order.
@@ -97,6 +53,40 @@ scm
 )
 
 ; ---------------------------------------------------------------------
+; Given a list of link-grammar relation hypergraph, return a string 
+; listing all of the link-grammar relations. That is, given a list
+; of items of the form
+;
+;    EvaluationLink
+;        LinkGrammarRelationshipNode
+;        ListLink
+;            ConceptNode
+;            ConceptNode
+;
+; it will return a string holding the names of the 
+; LinkGrammarRelationshipNode's
+;
+(define (ldj-make-disjunct sorted-rels)
+
+	; Given a single opencog predicate (EvaluationLink) triple
+	; containing a link-grammar relation, just return the relation name,
+	; as a string.
+	(define (get-name rel)
+		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
+	)
+
+	; Given a list of names, create a string, padding it with blanks.
+	(define (mk-dj-string name-list str)
+		(if (null? name-list)
+			str
+			(mk-dj-string (cdr name-list) (string-append str (car name-list) " "))
+		)
+	)
+
+	(mk-dj-string (map get-name sorted-rels) "")
+)
+
+; ---------------------------------------------------------------------
 ;
 ; Return a list of all of the link-grammar links the word particpates in
 (define (ldj-get-lg-rels word rel-list)
@@ -116,10 +106,21 @@ scm
 
 ; Assemble all the disjuncts this one word participaes in.
 (define (ldj-process-disjunct word rel-list sent-node)
+
+	; Return the word string associated with the word-instance
+	(define (get-word-str word-inst)
+		(cog-name (car (get-word word-inst)))
+	)
+
 	(let* ((dj-rels (ldj-get-lg-rels word rel-list))
 			(sorted-dj-rels (ldj-sort-rels word sent-node dj-rels))
 		)
-		(display sorted-dj-rels)
+
+(display "Word: ")
+(display (get-word-str word))
+(display " -- ")
+(display (ldj-make-disjunct sorted-dj-rels))
+(display "\n")
 	)
 )
 
