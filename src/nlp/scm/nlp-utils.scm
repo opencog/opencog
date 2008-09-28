@@ -74,7 +74,7 @@ scm
 ; Return the WordNode associated with 'word-inst'
 ;
 (define (get-word word-inst)
-	(map-word-node (lambda (x) x) word-inst)
+	(cog-chase-link 'ReferenceLink 'WordNode word-inst)
 )
 
 ; ---------------------------------------------------------------------
