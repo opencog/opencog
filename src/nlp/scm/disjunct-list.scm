@@ -108,7 +108,7 @@ scm
 ;
 (define (process-disjunct word sent-node)
 
-	; Return the word string associated with the wor-instance
+	; Return the word string associated with the word-instance
 	(define (get-word word-inst)
 		(cog-name (car (cog-chase-link 'ReferenceLink 'WordNode word-inst)))
 	)
@@ -147,14 +147,12 @@ scm
 ; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
 ; XXX Evertyhing above the X's is subtly wrong in various ways.
 
-; ---------------------------------------------------------------------
-; Given a sentence, return a list of parses in that sentence
-(define (sentenc-get-parses sent-node)
-	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink doco)))
+(define (ldj-process-parse parse-node)
+	(display (parse-get-lg-relations parse-node))
 )
 
 (define (ldj-process-sentence sent-node)
-	(display sent-node)
+	(for-each ldj-process-parse (sentence-get-parses sent-node))
 )
 
 (define (ldj-process-document doco)
