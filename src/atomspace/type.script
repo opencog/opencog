@@ -167,11 +167,7 @@ ENTROPY_LINK <- ORDERED_LINK
 // These are subject to change or deletion pending review.
 // Some of the link types may go away.
 
-// ReferenceLink and ReferenceNode are meant to be used for
-// generic object referencing -- i.e. as pointers to things
 REFERENCE_LINK <- ASSOCIATIVE_LINK
-REFERENCE_NODE <- PREDICATE_NODE
-
 DOCUMENT_NODE <- CONCEPT_NODE
 SENTENCE_NODE <- CONCEPT_NODE
 PARSE_NODE <- CONCEPT_NODE

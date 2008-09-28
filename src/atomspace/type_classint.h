@@ -69,7 +69,6 @@ class_to_int[(*getClassName()) [WR_LINK]] = WR_LINK;
 class_to_int[(*getClassName()) [DISTINGUISHED_NODE]] = DISTINGUISHED_NODE;
 class_to_int[(*getClassName()) [ENTROPY_LINK]] = ENTROPY_LINK;
 class_to_int[(*getClassName()) [REFERENCE_LINK]] = REFERENCE_LINK;
-class_to_int[(*getClassName()) [REFERENCE_NODE]] = REFERENCE_NODE;
 class_to_int[(*getClassName()) [DOCUMENT_NODE]] = DOCUMENT_NODE;
 class_to_int[(*getClassName()) [SENTENCE_NODE]] = SENTENCE_NODE;
 class_to_int[(*getClassName()) [PARSE_NODE]] = PARSE_NODE;
