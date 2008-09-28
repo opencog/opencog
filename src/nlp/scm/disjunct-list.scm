@@ -16,12 +16,19 @@ scm
 ; =============================================================
 ; List-style disjuncts
 ; ---------------------------------------------------------------------
-; Given a word, and the sentence in which the word appears, return
-; a list of the ling-grammar relations in which the word appears. 
-; The relations are sorted in sentence word-order.
+; Given a list of relations, sort the relations in "sentence order"
+; (or "parse order"). The "sent-node" argument provides the 
+; sentence by whitch to sort the relations, and the "word" argument
+; gives the word relative to which the sort should be done.
+; So, for example, given 
 ;
-; Sort a list of link-grammar relations, according to the
-; order in which they appear in a sentence
+;        +---Os---+
+;        |    +-Ds+
+;        |    |   | 
+;     heard.v a dog.
+;
+; and the word "dog" and the relations "Ds Os", this will return "Os Ds"
+; because "heard" comes before "a", and so "Os" comes before "Ds".
 ;
 (define (ldj-sort-rels word sent-node rel-list)
 
@@ -53,7 +60,7 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Given a list of link-grammar relation hypergraph, return a string 
+; Given a list of link-grammar relation hypergraphs, return a string 
 ; listing all of the link-grammar relations. That is, given a list
 ; of items of the form
 ;
@@ -63,10 +70,10 @@ scm
 ;            ConceptNode
 ;            ConceptNode
 ;
-; it will return a string holding the names of the 
+; this routine will return a string holding the names of the 
 ; LinkGrammarRelationshipNode's
 ;
-(define (ldj-make-disjunct sorted-rels)
+(define (ldj-make-disjunct-string sorted-rels)
 
 	; Given a single opencog predicate (EvaluationLink) triple
 	; containing a link-grammar relation, just return the relation name,
@@ -87,8 +94,8 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-;
 ; Return a list of all of the link-grammar links the word particpates in
+;
 (define (ldj-get-lg-rels word rel-list)
 	(define (is-word-in-rel? word rel)
 		(let* ((lnk (cog-filter-outgoing 'ListLink rel))
@@ -104,7 +111,21 @@ scm
 	(filter (lambda (rel) (is-word-in-rel? word rel)) rel-list)
 )
 
-; Assemble all the disjuncts this one word participaes in.
+; ---------------------------------------------------------------------
+; Assemble all the disjuncts this one word participates in.
+; That is, given a word, and a list of *all* of the relations in the
+; sentence, this will extract only those relations that this word
+; participates in and sort them in sentence order.
+;
+(define (ldj-get-disjuncts word rel-list sent-node)
+
+	(ldj-sort-rels word sent-node 
+		(ldj-get-lg-rels word rel-list)
+	)
+)
+
+; ---------------------------------------------------------------------
+; Process a disjunt -- stuff into database, whatever.
 (define (ldj-process-disjunct word rel-list sent-node)
 
 	; Return the word string associated with the word-instance
@@ -112,19 +133,16 @@ scm
 		(cog-name (car (get-word word-inst)))
 	)
 
-	(let* ((dj-rels (ldj-get-lg-rels word rel-list))
-			(sorted-dj-rels (ldj-sort-rels word sent-node dj-rels))
-		)
-
 (display "Word: ")
 (display (get-word-str word))
 (display " -- ")
-(display (ldj-make-disjunct sorted-dj-rels))
+(display (ldj-make-disjunct-string (ldj-get-disjuncts word rel-list sent-node)))
 (display "\n")
-	)
 )
 
+; ---------------------------------------------------------------------
 ; Given a single parse, process the disjuncts for that parse
+;
 (define (ldj-process-parse word-list parse-node sent-node)
 	(let ((rel-list (parse-get-lg-relations parse-node)))
 		(for-each
@@ -134,7 +152,9 @@ scm
 	)
 )
 
+; ---------------------------------------------------------------------
 ; Process a single sentence
+;
 (define (ldj-process-sentence sent-node)
 	(let ((word-list (sentence-get-words sent-node)))
 		(for-each
@@ -144,7 +164,9 @@ scm
 	)
 )
 
+; ---------------------------------------------------------------------
 ; Process each of the sentences in a document
+;
 (define (ldj-process-document doco)
 	(for-each ldj-process-sentence (document-get-sentences doco))
 )
