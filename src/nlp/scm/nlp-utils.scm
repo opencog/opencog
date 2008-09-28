@@ -92,6 +92,11 @@ scm
 	(cog-chase-link 'ParseLink 'ParseNode sent-node)
 )
 
+; Given a sentence, return a list of all words in the sentence
+(define (sentence-get-words sent)
+	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink sent)))
+)
+
 ; ---------------------------------------------------------------------
 ; Given a parse, return a list of all the link-grammar linkage relations
 ; for that parse.

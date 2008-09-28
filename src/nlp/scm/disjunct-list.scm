@@ -37,12 +37,6 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Get list of all words in the sentence
-(define (get-word-list sent)
-	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink sent)))
-)
-
-; ---------------------------------------------------------------------
 ; Given a word, and the sentence in which the word appears, return
 ; a list of the ling-grammar relations in which the word appears. 
 ; The relations are sorted in sentence word-order.
@@ -64,7 +58,7 @@ scm
 			(define (windex wrd)
 				(if (equal? "LEFT-WALL" (cog-name wrd))
 					-1
-					(list-index (lambda (w) (equal? wrd w)) (get-word-list sent-node))
+					(list-index (lambda (w) (equal? wrd w)) (sentence-get-words sent-node))
 				)
 			)
 
@@ -128,24 +122,12 @@ scm
 		(process-disjunct word parse-node)
 	)
 
-	(for-each mk-disjunct (get-word-list parse-node))
+	(for-each mk-disjunct (sentence-get-words parse-node))
 )
 
-; ---------------------------------------------------------------------
-; Given a list of sentences, process each sentence to extract disjuncts
-(define (list-get-sentence-list-disjuncts sent-list)
-
-	; Loop over a list of sentences, getting disjuncts for each sentence.
-	(for-each list-get-sentence-disjuncts sent-list)
-)
-
-; ---------------------------------------------------------------------
-; Do it list-style
-(define (list-it) 
-	(list-get-sentence-list-disjuncts (cog-get-atoms 'SentenceNode))
-)
 ; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
 ; XXX Evertyhing above the X's is subtly wrong in various ways.
+;
 
 (define (ldj-process-parse parse-node)
 	(display (parse-get-lg-relations parse-node))
