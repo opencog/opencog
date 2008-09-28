@@ -15,27 +15,6 @@ scm
 
 ; =============================================================
 ; List-style disjuncts
-;
-; Return a list of all of the link-grammar links the word particpates in
-(define (get-lg-rels word)
-
-	(define (get-rel word-pair)
-		;; Take the car, because cog-get-link returns a list of links.
-		;; We expect this list to only contain one element, in total.
-		(let ((rel-list (cog-get-link 'EvaluationLink 'LinkGrammarRelationshipNode word-pair)))
-			(if (null? rel-list)
-				'()
-				(car rel-list)
-			)
-		)
-	)
-
-	; Be sure to remove any nulls that showed up.
-	(filter (lambda (x) (not (null? x))) 
-		(map get-rel (cog-filter-incoming 'ListLink word))
-	)
-)
-
 ; ---------------------------------------------------------------------
 ; Given a word, and the sentence in which the word appears, return
 ; a list of the ling-grammar relations in which the word appears. 
@@ -113,30 +92,45 @@ scm
 (display "\n")
 )
 
-; ---------------------------------------------------------------------
-; Given a single parse, process the disjuncts for that parse
-(define (list-get-parse-disjuncts parse-node)
-
-	; process the disjunct for this word.
-	(define (mk-disjunct word)
-		(process-disjunct word parse-node)
-	)
-
-	(for-each mk-disjunct (sentence-get-words parse-node))
-)
-
 ; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
 ; XXX Evertyhing above the X's is subtly wrong in various ways.
 ;
-
-(define (ldj-process-parse parse-node)
-	(display (parse-get-lg-relations parse-node))
+;
+; Return a list of all of the link-grammar links the word particpates in
+(define (get-lg-rels rel-list word)
+	(define (is-word-in-rel? word rel)
+		(display "ola\n")
+		#t
+	)
+	(filter is-word-in-rel? rel-ist)
 )
 
+; Assemble all the disjuncts this one word participaes in.
+(define (ldj-process-disjunct word rel-list)
+	(display word)
+)
+
+; Given a single parse, process the disjuncts for that parse
+(define (ldj-process-parse word-list parse-node)
+	(let ((rel-list (parse-get-lg-relations parse-node)))
+		(for-each
+			(lambda (word) (ldj-process-disjunct word rel-list))
+			word-list
+		)
+	)
+)
+
+; Process a single sentence
 (define (ldj-process-sentence sent-node)
-	(for-each ldj-process-parse (sentence-get-parses sent-node))
+	(let ((word-list (sentence-get-words sent-node)))
+		(for-each
+			(lambda (prs) (ldj-process-parse word-list prs))
+			(sentence-get-parses sent-node)
+		)
+	)
 )
 
+; Process each of the sentences in a document
 (define (ldj-process-document doco)
 	(for-each ldj-process-sentence (document-get-sentences doco))
 )
