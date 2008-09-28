@@ -30,10 +30,10 @@ scm
 ; and the word "dog" and the relations "Ds Os", this will return "Os Ds"
 ; because "heard" comes before "a", and so "Os" comes before "Ds".
 ;
-(define (ldj-sort-rels word sent-node rel-list)
+(define (ldj-sort-rels word parse-node rel-list)
 
 	; rel-list is a list of the link-grammar relations.
-	(let ((snt-wrds (sentence-get-words sent-node)))
+	(let ((snt-wrds (parse-get-words parse-node)))
 
 		; Compare two link-grammar relations, and determine thier sentence
 		; word order.
@@ -117,16 +117,16 @@ scm
 ; sentence, this will extract only those relations that this word
 ; participates in and sort them in sentence order.
 ;
-(define (ldj-get-disjuncts word rel-list sent-node)
+(define (ldj-get-disjuncts word rel-list parse-node)
 
-	(ldj-sort-rels word sent-node 
+	(ldj-sort-rels word parse-node 
 		(ldj-get-lg-rels word rel-list)
 	)
 )
 
 ; ---------------------------------------------------------------------
 ; Process a disjunt -- stuff into database, whatever.
-(define (ldj-process-disjunct word rel-list sent-node)
+(define (ldj-process-disjunct word rel-list parse-node)
 
 	; Return the word string associated with the word-instance
 	(define (get-word-str word-inst)
@@ -136,17 +136,20 @@ scm
 (display "Word: ")
 (display (get-word-str word))
 (display " -- ")
-(display (ldj-make-disjunct-string (ldj-get-disjuncts word rel-list sent-node)))
+(display (ldj-make-disjunct-string (ldj-get-disjuncts word rel-list parse-node)))
 (display "\n")
 )
 
 ; ---------------------------------------------------------------------
 ; Given a single parse, process the disjuncts for that parse
 ;
-(define (ldj-process-parse word-list parse-node sent-node)
-	(let ((rel-list (parse-get-lg-relations parse-node)))
+(define (ldj-process-parse parse-node)
+	(let ((rel-list (parse-get-lg-relations parse-node))
+			(word-list (parse-get-words parse-node))
+		)
+(display word-list)
 		(for-each
-			(lambda (word) (ldj-process-disjunct word rel-list sent-node))
+			(lambda (word) (ldj-process-disjunct word rel-list parse-node))
 			word-list
 		)
 	)
@@ -156,12 +159,7 @@ scm
 ; Process a single sentence
 ;
 (define (ldj-process-sentence sent-node)
-	(let ((word-list (sentence-get-words sent-node)))
-		(for-each
-			(lambda (prs) (ldj-process-parse word-list prs sent-node))
-			(sentence-get-parses sent-node)
-		)
-	)
+	(for-each ldj-process-parse (sentence-get-parses sent-node))
 )
 
 ; ---------------------------------------------------------------------
