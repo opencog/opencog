@@ -73,13 +73,24 @@ scm
 ; this routine will return a string holding the names of the 
 ; LinkGrammarRelationshipNode's
 ;
-(define (ldj-make-disjunct-string sorted-rels)
+(define (ldj-make-disjunct-string word sorted-rels)
 
 	; Given a single opencog predicate (EvaluationLink) triple
 	; containing a link-grammar relation, just return the relation name,
 	; as a string.
 	(define (get-name rel)
 		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
+	)
+
+	(define (get-direction rel)
+		(if (equal? word
+			(car (cog-outgoing-set (car (cog-filter-outgoing 'ListLink rel)))))
+			"+" "-"
+		)
+	)
+
+	(define (get-nd rel)
+		(string-append (get-name rel) (get-direction rel))
 	)
 
 	; Given a list of names, create a string, padding it with blanks.
@@ -90,7 +101,7 @@ scm
 		)
 	)
 
-	(mk-dj-string (map get-name sorted-rels) "")
+	(mk-dj-string (map get-nd sorted-rels) "")
 )
 
 ; ---------------------------------------------------------------------
@@ -125,7 +136,7 @@ scm
 (display "Word: ")
 (display (get-word-str word))
 (display " -- ")
-(display (ldj-make-disjunct-string (ldj-get-disjuncts word parse-node)))
+(display (ldj-make-disjunct-string word (ldj-get-disjuncts word parse-node)))
 (display "\n")
 )
 
