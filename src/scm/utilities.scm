@@ -247,7 +247,24 @@ scm
 )
 
 ; -----------------------------------------------------------------------
-; Given a refernce structure, return the referenced list entries.
+; Given a predicate structure, return the associated list entries.
+; That is, given a structure of the form
+;
+;    EvaluationLink
+;        SomeAtom
+;        ListLink
+;           AnotherAtom
+;           AnotherAtom
+;           ...
+;
+; Then, given, as input, "SomeAtom", this returns a list of the "OtherAtom"
+;
+(define (cog-get-pred-list refptr)
+   (cog-outgoing-set (car (cog-chase-link 'EvaluationLink 'ListLink refptr)))
+)
+
+; -----------------------------------------------------------------------
+; Given a reference structure, return the referenced list entries.
 ; That is, given a structure of the form
 ;
 ;    ReferenceLink
@@ -257,7 +274,7 @@ scm
 ;           AnotherAtom
 ;           ...
 ;
-; Then, given, as input, "SomeAtom", this rturns a list of the "OtherAtom"
+; Then, given, as input, "SomeAtom", this returns a list of the "OtherAtom"
 ;
 (define (cog-get-reference refptr)
    (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink refptr)))
