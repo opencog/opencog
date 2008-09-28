@@ -157,20 +157,26 @@ WR_LINK <- ASSOCIATIVE_LINK "WRLink"
 // NEW_SEMANTIC_LINK <- ORDERED_LINK
 // FLAG_NODE <- NODE
 
+// XXXX ??? Are these used anywhere ???
 DISTINGUISHED_NODE <- NODE
-ENTROPY_LINK <- ORDERED_LINK
+ENTROPY_LINK <- ORDERED_LINK 
 
 // FREQUENCY_LINK <- INHERITANCE_LINK
 
 // New relex nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.
 // Some of the link types may go away.
+
+// ReferenceLink and ReferenceNode are meant to be used for
+// generic object referencing -- i.e. as pointers to things
+REFERENCE_LINK <- ASSOCIATIVE_LINK
+REFERENCE_NODE <- PREDICATE_NODE
+
 DOCUMENT_NODE <- CONCEPT_NODE
 SENTENCE_NODE <- CONCEPT_NODE
 PARSE_NODE <- CONCEPT_NODE
 PARSE_LINK <- ASSOCIATIVE_LINK
 
-REFERENCE_LINK <- ASSOCIATIVE_LINK
 LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE
 DEFINED_LINGUISTIC_CONCEPT_NODE <- CONCEPT_NODE
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE

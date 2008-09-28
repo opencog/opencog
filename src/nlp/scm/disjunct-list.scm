@@ -147,11 +147,11 @@ scm
 	(let ((rel-list (parse-get-lg-relations parse-node))
 			(word-list (parse-get-words parse-node))
 		)
-(display word-list)
-		(for-each
-			(lambda (word) (ldj-process-disjunct word rel-list parse-node))
-			word-list
-		)
+(display rel-list)
+;		(for-each
+;			(lambda (word) (ldj-process-disjunct word rel-list parse-node))
+;			word-list
+;		)
 	)
 )
 
