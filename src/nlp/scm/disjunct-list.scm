@@ -97,17 +97,24 @@ scm
 ;
 ;
 ; Return a list of all of the link-grammar links the word particpates in
-(define (get-lg-rels rel-list word)
+(define (get-lg-rels word rel-list)
 	(define (is-word-in-rel? word rel)
-		(display "ola\n")
-		#t
+		(let* ((lnk (cog-filter-outgoing 'ListLink rel))
+				(wds (cog-outgoing-set (car lnk))) 
+			)
+			(cond
+				((equal? word (car wds)) #t)
+				((equal? word (cadr wds)) #t)
+				(else #f)
+			)
+		)
 	)
-	(filter is-word-in-rel? rel-ist)
+	(filter (lambda (rel) (is-word-in-rel? word rel)) rel-list)
 )
 
 ; Assemble all the disjuncts this one word participaes in.
 (define (ldj-process-disjunct word rel-list)
-	(display word)
+	(display (get-lg-rels word rel-list))
 )
 
 ; Given a single parse, process the disjuncts for that parse
