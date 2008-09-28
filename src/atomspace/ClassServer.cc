@@ -161,7 +161,8 @@ const std::string& ClassServer::getTypeName(Type type)
 {
     int t = (int) type;
     if ((t < 0) || (t >=  NUMBER_OF_CLASSES)) {
-        return NULL;
+        static std::string null_string = "";
+        return null_string;
     }
     return (*getClassName())[type];
 }
