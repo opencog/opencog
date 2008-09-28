@@ -224,7 +224,7 @@ scm
 ;
 ; cog-get-link link-type endpoint-type anchor
 ;
-; Return a list if links, of type 'link-type', which contain some
+; Return a list of links, of type 'link-type', which contain some
 ; atom of type 'endpoint-type', and also specifically contain the 
 ; atom 'anchor'.
 ;
@@ -246,21 +246,29 @@ scm
 	)
 )
 
-; -----------------------------------------------------------------------
-; Given a predicate structure, return the associated list entries.
-; That is, given a structure of the form
+; ---------------------------------------------------------------------
+; Return a list of predicates, of the given type, that an instance 
+; participates in.  That is, given a "predicate" of the form:
 ;
 ;    EvaluationLink
-;        SomeAtom
-;        ListLink
-;           AnotherAtom
-;           AnotherAtom
-;           ...
+;       SomeAtom
+;       ListLink
+;           AnotherAtom "abc"
+;           AnotherAtom "def"
 ;
-; Then, given, as input, "SomeAtom", this returns a list of the "OtherAtom"
+; then given the instance (AnotherAtom "def") and pred-type 'SomeAtom
+; then return a list of all of the EvalutaionLink's in which this
+; instance appears.
 ;
-(define (cog-get-pred-list refptr)
-   (cog-outgoing-set (car (cog-chase-link 'EvaluationLink 'ListLink refptr)))
+(define (cog-get-pred inst pred-type)
+	(concatenate!
+		(append!
+			(map
+				(lambda (lnk) (cog-get-link 'EvaluationLink pred-type lnk))
+				(append! (cog-filter-incoming 'ListLink inst)) ;; append removes null's
+			)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------
@@ -275,6 +283,9 @@ scm
 ;           ...
 ;
 ; Then, given, as input, "SomeAtom", this returns a list of the "OtherAtom"
+;
+; XXX! Caution/error! This implictly assumes that there is only one 
+; such ReferenceLink in the system, total. This is wrong !!!
 ;
 (define (cog-get-reference refptr)
    (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink refptr)))
