@@ -150,6 +150,59 @@ scm
 			(row #f)
 		)
 
+		; Generic table update frame
+		; select-str and insert-str are static strings;
+		; while update-proc should return an update string.
+		(define (update-table select-str update-proc insert-str)
+			(dbi-query db-connection select-str)
+
+			(set! row (dbi-get_row db-connection))
+			(if row
+				(begin
+					; flush the rows, else the update will fail.
+					(dbi-get_row db-connection)
+					(dbi-query db-connection (proc row))
+				)
+				(dbi-query db-connection insert-str)
+			)
+			; Flush the db status
+			(set! row (dbi-get_row db-connection))
+		)
+
+		; This routine will update the marginal table.
+		;
+		; The inflected table has the form:
+		; CREATE TABLE InflectMarginal (
+		;    inflected_word TEXT NOT NULL UNIQUE,
+		;    count FLOAT,
+		;    probability FLOAT )
+		;
+		(define (update-marginal-table i-word p-score)
+
+			(define (update-proc srow)
+				(let ((up-score (+ p-score (assoc-ref srow "count"))))
+					(string-append
+						"UPDATE InflectMarginal SET count = "
+						(number->string up-score)
+						" WHERE inflected_word = '" i-word "'"
+					)
+				)
+			)
+
+			(update-table
+				(string-append
+					"SELECT * FROM InflectMarginal WHERE inflected_word='"
+					i-word "'"
+				)
+				update-proc
+				(string-append
+					"INSERT INTO InflectMarginal (inflected_word, count) VALUES ('"
+					i-word "', " (number->string p-score) ")"
+				)
+			)
+		)
+
+		; Update the disjunct table
 		; The disjunct table has the form:
 		;
 		; CREATE TABLE Disjuncts (
@@ -159,18 +212,11 @@ scm
 		;    cond_probability FLOAT
 		; );
 		;
-		; The inflected tables has the form:
-		; CREATE TABLE InflectMarginal (
-		;    inflected_word TEXT NOT NULL UNIQUE,
-		;    count FLOAT,
-		;    probability FLOAT,
-		; );
-		;
-		; This routine will update the marginal table.
-		(define (update-marginal i-word p-score)
+		(define (update-disjunct-table i-word disj-str p-score)
 			(dbi-query db-connection
-				(string-append "SELECT * FROM InflectMarginal WHERE inflected_word='"
-				i-word "'")
+				(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
+					i-word "' AND disjunct = '" disj-str "'"
+				)
 			)
 
 			(set! row (dbi-get_row db-connection))
@@ -180,16 +226,17 @@ scm
 					(dbi-get_row db-connection)
 					(dbi-query db-connection
 						(string-append
-							"UPDATE InflectMarginal SET count = "
+							"UPDATE Disjuncts SET count = "
 							(number->string up-score)
-							" WHERE inflected_word = '" i-word "'"
+							" WHERE inflected_word = '" i-word
+							"' AND disjunct = '" disj-str "'"
 						)
 					)
 				)
 				(dbi-query db-connection
 					(string-append
-						"INSERT INTO InflectMarginal (inflected_word, count) VALUES ('"
-						i-word "', " (number->string p-score) ")"
+						"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES ('"
+						i-word "', '" disj-str "', " (number->string p-score) ")"
 					)
 				)
 			)
@@ -197,7 +244,8 @@ scm
 			(set! row (dbi-get_row db-connection))
 		)
 
-		(update-marginal iword score)
+		(update-marginal-table iword score)
+		(update-disjunct-table iword djstr score)
 
 (display "Word: ")
 (display iword)
