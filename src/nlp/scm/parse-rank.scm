@@ -261,8 +261,8 @@ scm
 				(raw-pair (gadr (cog-outgoing-set lg-link)))
 				(left-raw (gar raw-pair))
 				(right-raw (gadr raw-pair))
-				(left-node (get-word left-raw))
-				(right-node (get-word right-raw))
+				(left-node (word-inst-get-word left-raw))
+				(right-node (word-inst-get-word right-raw))
 
 				; build the actual pair of word-strings
 				(word-pair

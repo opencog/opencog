@@ -82,6 +82,8 @@ scm
 		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
 	)
 
+	; Get the direction of the link -- 
+	; It is either to the left(-) or right(+)
 	(define (get-direction rel)
 		(if (equal? word
 			(car (cog-outgoing-set (car (cog-filter-outgoing 'ListLink rel)))))
@@ -128,13 +130,8 @@ scm
 ; Process a disjunt -- stuff into database, whatever.
 (define (ldj-process-disjunct word parse-node)
 
-	; Return the word string associated with the word-instance
-	(define (get-word-str word-inst)
-		(cog-name (car (get-word word-inst)))
-	)
-
 (display "Word: ")
-(display (get-word-str word))
+(display (word-inst-get-inflected-word-str  word))
 (display " -- ")
 (display (ldj-make-disjunct-string word (ldj-get-disjuncts word parse-node)))
 (display "\n")

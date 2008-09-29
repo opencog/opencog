@@ -73,8 +73,55 @@ scm
 ; ---------------------------------------------------------------------
 ; Return the WordNode associated with 'word-inst'
 ;
-(define (get-word word-inst)
+(define (word-inst-get-word word-inst)
 	(cog-chase-link 'ReferenceLink 'WordNode word-inst)
+)
+
+; ---------------------------------------------------------------------
+; Return the word string associated with the word-instance
+(define (word-inst-get-word-str word-inst)
+	(cog-name (car (word-inst-get-word word-inst)))
+)
+
+; ---------------------------------------------------------------------
+; Given a word instance, return the lemma for of the word.
+(define (word-inst-get-lemma word-inst)
+	(car (cog-chase-link 'LemmaLink 'ConceptNode word-inst))
+)
+
+; ---------------------------------------------------------------------
+; Given a word instance, return a list of attributes for the word.
+(define (word-inst-get-attr word-inst)
+	(cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode 
+		(word-inst-get-lemma word-inst)
+	)
+)
+
+; ---------------------------------------------------------------------
+; Given a word instance, return the inflection string for it.
+(define (word-inst-get-inflection-str word-inst)
+	; all inflections start with a period as the first character.
+	(define (inflection? tag)
+		(if (char=? #\. (string-ref (cog-name tag) 0))
+			#t #f
+		)
+	)
+	(let ((infl (filter! inflection? (word-inst-get-attr word-inst))))
+		(if (null? infl)
+			""
+			(cog-name (car infl))
+		)
+	)
+)
+
+; ---------------------------------------------------------------------
+; Given a word instance, return the inflected word
+; For example, "events.n" or "offered.v"
+(define (word-inst-get-inflected-word-str word-inst)
+	(string-append
+		(word-inst-get-word-str word-inst)
+		(word-inst-get-inflection-str word-inst)
+	)
 )
 
 ; ---------------------------------------------------------------------
