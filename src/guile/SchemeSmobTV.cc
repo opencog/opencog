@@ -230,5 +230,38 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 	return SCM_BOOL_F;
 }
 
+/* ============================================================== */
+/**
+ * Return scheme-accessible numerical value of a truth value
+ */
+SCM SchemeSmob::ss_tv_get_value (SCM s)
+{
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	{
+		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
+		switch (misctype)
+		{
+			// Return association list
+			case COG_SIMPLE_TV:
+			{
+				SimpleTruthValue *stv;
+				stv = (SimpleTruthValue *) SCM_SMOB_DATA(s);
+				SCM mean = scm_from_double(stv->getMean());
+				SCM conf = scm_from_double(stv->getConfidence());
+				SCM smean = scm_from_locale_symbol("mean");
+				SCM sconf = scm_from_locale_symbol("confidence");
+				
+				return scm_cons2(
+					scm_cons(smean, mean),
+					scm_cons(sconf, conf), 
+					SCM_EOL);
+			}
+			default:
+				return SCM_EOL;
+		}
+	}
+	return SCM_EOL;
+}
+
 #endif
 /* ===================== END OF FILE ============================ */

@@ -322,6 +322,14 @@ interface.
          guile> (cog-tv? (cog-tv x))
          #t
 
+== cog-tv->alist
+      Convert a truth value to an association list (alist).
+
+      Example:
+         guile> (define x (cog-new-stv 0.7 0.9))
+         guile> (cog-tv->alist x)
+         ((mean . 0.699999988079071) (confidence . 0.899999976158142))
+
 
 == cog-map-type proc type
       Call proceedure proc for each atom in the atomspace that is of 

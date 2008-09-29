@@ -80,6 +80,7 @@ class SchemeSmob
 		static SCM ss_new_stv(SCM, SCM);
 		static SCM ss_tv_p(SCM);
 		static SCM take_stv(SimpleTruthValue *);
+		static SCM ss_tv_get_value(SCM);
 
 		// Misc utilities
 		static std::string to_string(SCM);

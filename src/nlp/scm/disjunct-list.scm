@@ -130,10 +130,15 @@ scm
 ; Process a disjunt -- stuff into database, whatever.
 (define (ldj-process-disjunct word parse-node)
 
+	(define (parse-get-score pn)
+		(cog-tv->alist (cog-tv pn))
+	)
+
 (display "Word: ")
 (display (word-inst-get-inflected-word-str  word))
 (display " -- ")
 (display (ldj-make-disjunct-string word (ldj-get-disjuncts word parse-node)))
+(display (parse-get-score parse-node))
 (display "\n")
 )
 
