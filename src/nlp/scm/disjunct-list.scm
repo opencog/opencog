@@ -161,7 +161,7 @@ scm
 				(begin
 					; flush the rows, else the update will fail.
 					(dbi-get_row db-connection)
-					(dbi-query db-connection (proc row))
+					(dbi-query db-connection (update-proc row))
 				)
 				(dbi-query db-connection insert-str)
 			)
@@ -213,46 +213,39 @@ scm
 		; );
 		;
 		(define (update-disjunct-table i-word disj-str p-score)
-			(dbi-query db-connection
-				(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
-					i-word "' AND disjunct = '" disj-str "'"
+			(define (update-proc srow)
+				(let ((up-score (+ p-score (assoc-ref srow "count"))))
+					(string-append
+						"UPDATE Disjuncts SET count = "
+						(number->string up-score)
+						" WHERE inflected_word = '" i-word
+						"' AND disjunct = '" disj-str "'"
+					)
 				)
 			)
 
-			(set! row (dbi-get_row db-connection))
-			(if row
-				(let ((up-score (+ p-score (assoc-ref row "count"))))
-					; flush the rows, else the update will fail.
-					(dbi-get_row db-connection)
-					(dbi-query db-connection
-						(string-append
-							"UPDATE Disjuncts SET count = "
-							(number->string up-score)
-							" WHERE inflected_word = '" i-word
-							"' AND disjunct = '" disj-str "'"
-						)
-					)
+			(update-table
+				(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
+					i-word "' AND disjunct = '" disj-str "'"
 				)
-				(dbi-query db-connection
-					(string-append
-						"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES ('"
-						i-word "', '" disj-str "', " (number->string p-score) ")"
-					)
+				update-proc
+
+				(string-append
+					"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES ('"
+					i-word "', '" disj-str "', " (number->string p-score) ")"
 				)
 			)
-			; Flush the db status
-			(set! row (dbi-get_row db-connection))
 		)
 
 		(update-marginal-table iword score)
 		(update-disjunct-table iword djstr score)
 
-(display "Word: ")
-(display iword)
-(display " -- ")
-(display djstr)
-(display score)
-(display "\n")
+		; (display "Word: ")
+		; (display iword)
+		; (display " -- ")
+		; (display djstr)
+		; (display score)
+		; (display "\n")
 	)
 )
 
