@@ -99,6 +99,11 @@ scm
 
 ; ---------------------------------------------------------------------
 ; Given a word instance, return the inflection string for it.
+; The "inflection string" is the part that follows the period in
+; the link-grammar dictionary. Thus, for the dictionary entry
+; "red.a" the ".a" is the inflection.  Note that not all link-grammar
+; dictionary entries will have an inflection.
+;
 (define (word-inst-get-inflection-str word-inst)
 	; all inflections start with a period as the first character.
 	(define (inflection? tag)
@@ -115,8 +120,11 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Given a word instance, return the inflected word
-; For example, "events.n" or "offered.v"
+; Given a word instance, return the inflected word.
+; Here, "inflected words" are link-grammar dictionary entries, for 
+; example, "events.n" or "offered.v". Note that not all link-grammar
+; dictionary entries will have an inflection.
+;
 (define (word-inst-get-inflected-word-str word-inst)
 	(string-append
 		(word-inst-get-word-str word-inst)
