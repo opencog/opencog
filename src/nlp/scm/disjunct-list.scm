@@ -12,6 +12,15 @@ scm
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 (use-modules (srfi srfi-1))
+(use-modules (dbi dbi))
+;
+;; username is 'linas' in this example, passwd is 'asdf' and the
+;; databasse is 'lexat', running on the local machine
+;; The postgres server is at port 5432, which can be gotten from
+;; /etc/postgresql/8.3/main/postgresql.conf
+;; 
+(define db-connection
+	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ; =============================================================
 ; List-style disjuncts
@@ -135,12 +144,63 @@ scm
 		(assq-ref (cog-tv->alist (cog-tv pn)) 'confidence)
 	)
 
+	(let ((iword (word-inst-get-inflected-word-str word))
+			(djstr (ldj-make-disjunct-string word (ldj-get-disjuncts word parse-node)))
+			(score (parse-get-score parse-node))
+			(row #f)
+		)
+
+		; The disjunct table has the form:
+		;
+		; CREATE TABLE Disjuncts (
+		;    inflected_word TEXT NOT NULL,
+		;    disjunct TEXT NOT NULL,
+		;    count FLOAT,
+		;    cond_probability FLOAT
+		; );
+		;
+		; The inflected tables has the form:
+		; CREATE TABLE InflectMarginal (
+		;    inflected_word TEXT NOT NULL UNIQUE,
+		;    count FLOAT,
+		;    probability FLOAT,
+		; );
+		;
+		(dbi-query db-connection
+			(string-append "SELECT * FROM InflectMarginal WHERE inflected_word='"
+			iword "'")
+		)
+
+		(set! row (dbi-get_row db-connection))
+(display "row=") (display row) (newline)
+		(if row
+			(begin (display "need to update\n") )
+			(begin
+(display (string-append "need to insert " (number->string score) "\n"))
+				(dbi-query db-connection
+					(string-append
+						"INSERT INTO InflectMarginal (inflected_word count) VALUES ('"
+						iword "', " (number->string score) ")"
+					)
+				)
+			)
+		)
+(display "conne stat=") (display (dbi-get_status db-connection)) (newline)
+		(set! row (dbi-get_row db-connection))
+(display "pos instr row=") (display row) (newline)
+(display "nex conne stat=") (display (dbi-get_status db-connection)) (newline)
+		;(while (not (equal? row #f))
+	;		(display row) (newline)
+	;		(set! row (dbi-get_row db-connection))
+	;	)
+
 (display "Word: ")
-(display (word-inst-get-inflected-word-str  word))
+(display iword)
 (display " -- ")
-(display (ldj-make-disjunct-string word (ldj-get-disjuncts word parse-node)))
-(display (parse-get-score parse-node))
+(display djstr)
+(display score)
 (display "\n")
+	)
 )
 
 ; ---------------------------------------------------------------------
