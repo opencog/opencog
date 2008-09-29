@@ -166,33 +166,38 @@ scm
 		;    probability FLOAT,
 		; );
 		;
-		(dbi-query db-connection
-			(string-append "SELECT * FROM InflectMarginal WHERE inflected_word='"
-			iword "'")
-		)
+		; This routine will update the marginal table.
+		(define (update-marginal i-word p-score)
+			(dbi-query db-connection
+				(string-append "SELECT * FROM InflectMarginal WHERE inflected_word='"
+				i-word "'")
+			)
 
-		(set! row (dbi-get_row db-connection))
-(display "row=") (display row) (newline)
-		(if row
-			(begin (display "need to update\n") )
-			(begin
-(display (string-append "need to insert " (number->string score) "\n"))
+			(set! row (dbi-get_row db-connection))
+			(if row
+				(let ((up-score (+ p-score (assoc-ref row "count"))))
+					; flush the rows, else the update will fail.
+					(dbi-get_row db-connection)
+					(dbi-query db-connection
+						(string-append
+							"UPDATE InflectMarginal SET count = "
+							(number->string up-score)
+							" WHERE inflected_word = '" i-word "'"
+						)
+					)
+				)
 				(dbi-query db-connection
 					(string-append
-						"INSERT INTO InflectMarginal (inflected_word count) VALUES ('"
-						iword "', " (number->string score) ")"
+						"INSERT INTO InflectMarginal (inflected_word, count) VALUES ('"
+						i-word "', " (number->string p-score) ")"
 					)
 				)
 			)
+			; Flush the db status
+			(set! row (dbi-get_row db-connection))
 		)
-(display "conne stat=") (display (dbi-get_status db-connection)) (newline)
-		(set! row (dbi-get_row db-connection))
-(display "pos instr row=") (display row) (newline)
-(display "nex conne stat=") (display (dbi-get_status db-connection)) (newline)
-		;(while (not (equal? row #f))
-	;		(display row) (newline)
-	;		(set! row (dbi-get_row db-connection))
-	;	)
+
+		(update-marginal iword score)
 
 (display "Word: ")
 (display iword)
