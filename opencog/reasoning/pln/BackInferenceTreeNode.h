@@ -17,7 +17,7 @@
 namespace reasoning
 {
 class BITNode;
-class BITNodeRoot;
+class BITNodeRoot; // Root of a BIT
 class RuleProvider;
 
 enum spawn_mode { NO_SIBLING_SPAWNING = 0, ALLOW_SIBLING_SPAWNING };
@@ -32,7 +32,6 @@ struct BITNode_fitness_comp : public binary_function<BITNode*, BITNode*, bool>
 	and which variable-to-variable bindings the parent is applying to me,
 	ie. "How does the parent view me"
 */
-
 template<typename T>
 struct parent_link
 {
@@ -54,7 +53,9 @@ struct parent_link
 };
 
 /// The generic BITNode in which some variables may be bound to other variables
-
+/// A single ParametrizedBITNode can be used to represent various trees by using
+/// different variable bindings. These bindings are for variables internal to
+/// the PLN backward chainer as opposed to the variables within PLN theory.
 class ParametrizedBITNode
 {
 public:
@@ -86,11 +87,15 @@ protected:
 	/// For heuristics; store the nr so you don't have to re-count.
 	uint counted_number_of_free_variables_in_target;
 
+    /// parent_links refer upwards in the BIT.
+    /// A set is used to store the parent links because a node can have
+    /// multiple parents when the parent node has different
+    /// bindings (ARI: is this correct?).
 	mutable set<parent_link<BITNode> > parents;
 
 	/// The results produced by combining all the possible results
-	/// in my argument sets.
-
+	/// for my arguments (contained as sets), with an entry in the vector for
+    /// each argument.
 	vector<set<VtreeProvider*> > eval_results;
 
 	unsigned int depth;
@@ -99,10 +104,11 @@ protected:
 	bool Expanded;
 
 	/// The Rule that the child_results of this state object's child_results will be
-	/// associated with.
+	/// associated with. This BITNode can be thought of as an implementation of
+    /// this Rule
 	Rule *rule;
 	
-    /// bdrum = The best (confidence of) direct result under me
+    /// bdrum = the Best (confidence of) Direct Result Under Me
 	float my_bdrum;
 	
 	typedef set<vtree, less_tree_vertex> vtreeset;
@@ -111,10 +117,13 @@ protected:
 	vtreeset target_chain;
 
 	/// The direct results stored in this node. This approach is somewhat
-	/// clumsy but gets the job done.
+	/// clumsy but gets the job done. The direct results that do not need
+    /// evaluation. Could be referred to as "generators". One example is
+    /// the LookUp rule which just checks if an atom exists.
 	Btr<set<BoundVertex> > direct_results;
 
 	/// The vector of targets of my children, which will then become Rule arguments.
+    /// Refers downwards in the BIT.
 	Rule::MPs args;
 
 	/* METHODS */
@@ -164,12 +173,15 @@ protected:
 	bool NotifyParentOfResult(VtreeProvider* new_result) const;
 	
 	/// Evaluate the Rule with the given new result as arg #arg_i
+    /// Allows one to add arguments one by one and evaluating when all slots
+    /// filled. Alternatively there has been discussion to evaluate empty slots
+    /// as arguments with 0 confidence.
 	void EvaluateWith(unsigned int arg_i, VtreeProvider* new_result);
 	
 	/// Creation of child nodes
 	/// Normally arg = args[rule_arg_i], but children with differently-bound targets
 	/// may also be created.
-
+    /// == expansion of the BIT.
 	BITNode* CreateChild(unsigned int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 	bool CreateChildren(int rule_arg_i, BBvtree arg, Btr<bindingsT> bindings, spawn_mode);
@@ -273,6 +285,7 @@ protected:
 		}
 	}
 
+    /// Completely and exhaustively expand tree to the bottom.
 	template<typename VectorT, typename SetT, typename VectorOfSetsIterT>
 	void WithLog_expandVectorSet(const std::vector<Btr<SetT> >& child_results,
 								 set<VectorT>& argVectorSet) const
@@ -319,7 +332,6 @@ protected:
 	
 	/// If target is a Handle, push it to the result set and replace
 	/// the target with its virtual counter-part.
-
 	void ForceTargetVirtual(spawn_mode spawning);
 	
 	/// Fitness-for-being-selected-for-expansion-next.
@@ -345,7 +357,8 @@ protected:
 
 public:
 	/// Set of possible inputs for each index of the input vectors of the Rule
-	/// associated with this node.
+	/// associated with this node. Contains the BITNodes, as opposed to the
+    /// results as in direct_results
 	vector<set<ParametrizedBITNode> > children;
 
 	BITNode();
@@ -391,15 +404,12 @@ public:
 	bool eq(Rule* r,  const Rule::MPs& _args, meta _target, const bindingsT& _pre_bindings) const;
 
 	/// Expand whole tree level. Typically not called externally
-	
 	void expandNextLevel();
 	
 	/// Typically not called externally
-	
 	void expandFittest();
 
 	// Printing utilities
-	
 	int tlog(int debugLevel, const char *format, ...) const;
 	
 	void printChildrenSizes() const;
@@ -441,9 +451,9 @@ or you can create the BITNodeRoot directly.
 	\param minConfidenceForStorage = the conf. threshold for storing an inference result
 	\param minConfidenceForAbort = the conf. threshold for finishing the inference once "good enough" result found
 */
-
-	const set<VtreeProvider*>& infer(int& resources, float minConfidenceForStorage = 0.000001f, float minConfidenceForAbort = 1.00f);
-
+	const set<VtreeProvider*>& infer(int& resources,
+            float minConfidenceForStorage = 0.000001f,
+            float minConfidenceForAbort = 1.00f);
 
 	/// Manual evaluation. Should not be needed anymore.
 
@@ -507,8 +517,8 @@ protected:
 };
 
 /// A BITNode results of which are produced by (slow) manual evaluation
-/// Obsolete but works.
-
+/// Obsolete but works. Contains interesting stats class, although the RuleApp
+/// can generate richer statistics now.
 class ExplicitlyEvaluatedBITNode : public BITNode
 {
 public:
