@@ -130,8 +130,9 @@ scm
 ; Process a disjunt -- stuff into database, whatever.
 (define (ldj-process-disjunct word parse-node)
 
+	; return the parse score for this parse.
 	(define (parse-get-score pn)
-		(cog-tv->alist (cog-tv pn))
+		(assq-ref (cog-tv->alist (cog-tv pn)) 'confidence)
 	)
 
 (display "Word: ")
