@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "platform.h"
 #include "FileXMLBufferReader.h"
@@ -49,7 +50,9 @@ void FileXMLBufferReader::open() throw (IOException)
 {
     file = fopen(filename, "r");
     if (file == NULL) {
-        throw IOException(TRACE_INFO, "FileXMLBufferReader - unable to open file '%s'.", filename);
+        char buff[1000];
+        getcwd(buff, 1000);
+        throw IOException(TRACE_INFO, "FileXMLBufferReader - unable to open file '%s' in '%s'.", filename, buff);
     }
 }
 
