@@ -43,7 +43,9 @@
 #include <iostream>
 #include <fstream>
 
-#define ATOM_TABLE_TEST_XML_FILE "cw_proxy_1.xml"
+// File path assumes that this test case is being run in the bin
+// directory (which is not where this file is located).
+#define ATOM_TABLE_TEST_XML_FILE "../../../tests/atomspace/cw_proxy_1.xml"
 
 using namespace opencog;
 
@@ -72,11 +74,18 @@ public:
     void setUp() {
         /* load xml files with all necessary nodes and links  */
         std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
+
+        // XXX FIXME: the FileXMLBufferReader class can throw a "file
+        // not found" exception. Since this exception is not caught,
+        // then we never reach this statement. Thus, table can end up
+        // being a null pointer, and the rest of the test will crash
+        // painfully.
         atomSpace = new AtomSpace();
+        table = (AtomTable*) & (atomSpace->getAtomTable());
+
         // Check for existing links because there are 2 identical links in the test xml file
         HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
         delete result;
-        table = (AtomTable*) & (atomSpace->getAtomTable());
         delete readers[0];
     }
 
