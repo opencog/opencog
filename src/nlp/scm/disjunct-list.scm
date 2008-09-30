@@ -69,8 +69,12 @@ scm
 
 ; ---------------------------------------------------------------------
 ; Given a list of link-grammar relation hypergraphs, return a string 
-; listing all of the link-grammar relations. That is, given a list
-; of items of the form
+; listing all of the link-grammar connectors. A "connector" is a 
+; link-grammar link (relation), together with a direction (to the left,
+; or to the right) which specifies which direction the connector plugs
+; in.
+;
+; That is, given a list of items of the form
 ;
 ;    EvaluationLink
 ;        LinkGrammarRelationshipNode
@@ -79,7 +83,8 @@ scm
 ;            ConceptNode
 ;
 ; this routine will return a string holding the names of the 
-; LinkGrammarRelationshipNode's
+; LinkGrammarRelationshipNode's, appeneded with a + or - to indicate
+; which direction the relation went in.
 ;
 (define (ldj-make-disjunct-string word sorted-rels)
 
@@ -122,12 +127,12 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Assemble all the disjuncts this one word participates in.
+; Assemble all the connectors this one word participates in.
 ; That is, given a word, and a list of *all* of the relations in the
 ; sentence, this will extract only those relations that this word
 ; participates in and sort them in sentence order.
 ;
-(define (ldj-get-disjuncts word parse-node)
+(define (ldj-get-connectors word parse-node)
 
 	(ldj-sort-rels word parse-node 
 		(ldj-get-lg-rels word)
@@ -144,7 +149,7 @@ scm
 	)
 
 	(let ((iword (word-inst-get-inflected-word-str word))
-			(djstr (ldj-make-disjunct-string word (ldj-get-disjuncts word parse-node)))
+			(djstr (ldj-make-disjunct-string word (ldj-get-connectors word parse-node)))
 			(score (parse-get-score parse-node))
 			(row #f)
 		)
