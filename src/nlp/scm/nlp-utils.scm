@@ -86,14 +86,14 @@ scm
 ; ---------------------------------------------------------------------
 ; Given a word instance, return the lemma for of the word.
 (define (word-inst-get-lemma word-inst)
-	(car (cog-chase-link 'LemmaLink 'ConceptNode word-inst))
+	(car (cog-chase-link 'LemmaLink 'WordNode word-inst))
 )
 
 ; ---------------------------------------------------------------------
 ; Given a word instance, return a list of attributes for the word.
 (define (word-inst-get-attr word-inst)
 	(cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode 
-		(word-inst-get-lemma word-inst)
+		word-inst
 	)
 )
 
