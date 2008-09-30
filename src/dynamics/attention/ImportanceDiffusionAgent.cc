@@ -41,7 +41,6 @@ namespace opencog
 ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
 {
     maxSpreadPercentage=MA_DEFAULT_MAX_SPREAD_PERCENTAGE;
-    diffusionThreshold=MA_DEFAULT_DIFFUSION_THRESHOLD;
 
     switch (decisionFunction) {
     case HYPERBOLIC:
@@ -51,6 +50,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
         spreadDecider = (SpreadDecider*) new StepDecider();
         break;
     }
+    setDiffusionThreshold(MA_DEFAULT_DIFFUSION_THRESHOLD);
 
 }
 
@@ -66,7 +66,9 @@ float ImportanceDiffusionAgent::getMaxSpreadPercentage() const
 { return maxSpreadPercentage; }
 
 void ImportanceDiffusionAgent::setDiffusionThreshold(float p)
-{ diffusionThreshold = p; }
+{
+    diffusionThreshold = p;
+}
 
 float ImportanceDiffusionAgent::getDiffusionThreshold() const
 { return diffusionThreshold; }
@@ -74,7 +76,7 @@ float ImportanceDiffusionAgent::getDiffusionThreshold() const
 void ImportanceDiffusionAgent::run(CogServer* server)
 {
     a = server->getAtomSpace();
-    spreadDecider->focusBoundary = a->getAttentionalFocusBoundary();
+    spreadDecider->focusBoundary = diffusionThreshold * a->getMaxSTI();
     spreadImportance();
 }
 

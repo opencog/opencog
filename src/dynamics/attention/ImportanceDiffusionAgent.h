@@ -136,7 +136,7 @@ public:
 
     enum { HYPERBOLIC, STEP };
 
-    ImportanceDiffusionAgent(int decisionFunction=HYPERBOLIC);
+    ImportanceDiffusionAgent(int decisionFunction=STEP);
     virtual ~ImportanceDiffusionAgent();
     virtual void run(CogServer *server);
 
