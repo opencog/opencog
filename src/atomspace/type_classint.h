@@ -65,7 +65,6 @@ class_to_int[(*getClassName()) [SEQUENTIAL_AND_LINK]] = SEQUENTIAL_AND_LINK;
 class_to_int[(*getClassName()) [EXTENDED_SIMPLEX_PREDICTOR_NODE]] = EXTENDED_SIMPLEX_PREDICTOR_NODE;
 class_to_int[(*getClassName()) [EVENTUAL_SEQUENTIAL_AND_LINK]] = EVENTUAL_SEQUENTIAL_AND_LINK;
 class_to_int[(*getClassName()) [EVENTUAL_PREDICTIVE_IMPLICATION_LINK]] = EVENTUAL_PREDICTIVE_IMPLICATION_LINK;
-class_to_int[(*getClassName()) [WR_LINK]] = WR_LINK;
 class_to_int[(*getClassName()) [DISTINGUISHED_NODE]] = DISTINGUISHED_NODE;
 class_to_int[(*getClassName()) [ENTROPY_LINK]] = ENTROPY_LINK;
 class_to_int[(*getClassName()) [REFERENCE_LINK]] = REFERENCE_LINK;

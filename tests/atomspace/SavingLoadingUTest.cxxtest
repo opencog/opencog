@@ -135,7 +135,7 @@ public:
         outgoing.clear();
         outgoing.push_back(h10);
         outgoing.push_back(h11);
-        atomSpace.addLink(WR_LINK, outgoing);
+        atomSpace.addLink(ASSOCIATIVE_LINK, outgoing);
         Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
         TS_ASSERT(h11 == h12);
 
@@ -309,7 +309,7 @@ public:
         outgoing.clear();
         outgoing.push_back(h10);
         outgoing.push_back(h11);
-        TS_ASSERT(atomSpace.getHandle(WR_LINK, outgoing));
+        TS_ASSERT(atomSpace.getHandle(ASSOCIATIVE_LINK, outgoing));
 
         Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
         TS_ASSERT(h11 == h12);

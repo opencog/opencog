@@ -103,7 +103,6 @@ init_inheritance(map, GROUNDED_PROCEDURE_NODE, GROUNDED_SCHEMA_NODE);
 init_inheritance(map, GROUNDED_PROCEDURE_NODE, COMPOUND_TERM_NODE);
 init_inheritance(map, SCHEMA_NODE, PREDICATE_NODE);
 init_inheritance(map, INHERITANCE_LINK, SCHEMA_EXECUTION_LINK);
-init_inheritance(map, ASSOCIATIVE_LINK, WR_LINK);
 init_inheritance(map, ASSOCIATIVE_LINK, REFERENCE_LINK);
 init_inheritance(map, ASSOCIATIVE_LINK, PARSE_LINK);
 init_inheritance(map, ASSOCIATIVE_LINK, WORD_SENSE_LINK);
