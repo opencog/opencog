@@ -277,12 +277,43 @@ scm
 ;
 (define (ldj-process-document doco)
 	(for-each ldj-process-sentence (document-get-sentences doco))
+	(InheritanceLink doco (DistinguishedNode "#LDJ_completed"))
 )
 
-(define (ldj-it) 
-	(for-each ldj-process-document (cog-get-atoms 'DocumentNode))
+; ---------------------------------------------------------------------
+; Return all of the documents for which WSD has been completed,
+; but disjunct processing has not been.
+;
+(define (ldj-find-docs)
+
+	; ldj-not-done? is doco not in the "ldj completed" list?
+	(define (ldj-not-done? doco)
+		(define (gotit? d2)
+			(if (equal? doco d2) #t #f)
+		)
+		(not
+			(any gotit?
+				(cog-chase-link 'InheritanceLink 'DocumentNode 
+					(DistinguishedNode "#LDJ_completed")
+				)
+			)
+		)
+	)
+	; Look for WSD_completed documents that are not marked LDJ_completed
+	(filter! ldj-not-done?
+		(cog-chase-link 'InheritanceLink 'DocumentNode
+			(DistinguishedNode "#WSD_completed")
+		)
+	)
 )
+
+; ---------------------------------------------------------------------
+; Process every document for which disjunct processing has not
+; yet been done.
+(define (ldj-process) 
+	(for-each ldj-process-document (ldj-find-docs))
+)
+
 ; =====================================================================
-
 .
 exit
