@@ -1,9 +1,12 @@
 INSTALL (FILES
-	cog-stream.scm
+	cgw-fan.scm
+	cgw-filter.scm
+	cgw-predicate.scm
+	cgw-simple.scm
+	cgw-wire.scm
 	example-dbi.scm
 	load.sh
-	README
+	test-wire-order.scm
 	utilities.scm
-	wiring.scm
 	DESTINATION "${DATADIR}/scm"
 )
