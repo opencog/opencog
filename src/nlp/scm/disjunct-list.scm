@@ -140,7 +140,111 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Process a disjunt -- stuff into database, whatever.
+; Process a disjunct -- put the "plain" disjunct into the database.
+; This is the "simple" routine, in that it only updates the simple
+; word-disjunt pair database; it ignores word seneses.
+;
+; Arguments:
+; iword - inflected word
+; djstr - disjunct string
+; score - parse score
+;
+(define (ldj-process-disjunct-simple iword djstr score)
+
+	; Generic table update frame
+	; select-str and insert-str are static strings;
+	; while update-proc should return an update string.
+	(define (update-table select-str update-proc insert-str)
+		(define row #f)
+		(dbi-query db-connection select-str)
+
+		(set! row (dbi-get_row db-connection))
+		(if row
+			(begin
+				; flush the rows, else the update will fail.
+				(dbi-get_row db-connection)
+				(dbi-query db-connection (update-proc row))
+			)
+			(dbi-query db-connection insert-str)
+		)
+		; Flush the db status
+		(set! row (dbi-get_row db-connection))
+	)
+
+	; This routine will update the marginal table.
+	;
+	; The inflected table has the form:
+	; CREATE TABLE InflectMarginal (
+	;    inflected_word TEXT NOT NULL UNIQUE,
+	;    count FLOAT,
+	;    probability FLOAT )
+	;
+	(define (update-marginal-table i-word p-score)
+
+		(define (update-proc srow)
+			(let ((up-score (+ p-score (assoc-ref srow "count"))))
+				(string-append
+					"UPDATE InflectMarginal SET count = "
+					(number->string up-score)
+					" WHERE inflected_word = '" i-word "'"
+				)
+			)
+		)
+
+		(update-table
+			(string-append
+				"SELECT * FROM InflectMarginal WHERE inflected_word='"
+				i-word "'"
+			)
+			update-proc
+			(string-append
+				"INSERT INTO InflectMarginal (inflected_word, count) VALUES ('"
+				i-word "', " (number->string p-score) ")"
+			)
+		)
+	)
+
+	; Update the disjunct table
+	; The disjunct table has the form:
+	;
+	; CREATE TABLE Disjuncts (
+	;    inflected_word TEXT NOT NULL,
+	;    disjunct TEXT NOT NULL,
+	;    count FLOAT,
+	;    cond_probability FLOAT
+	; );
+	;
+	(define (update-disjunct-table i-word disj-str p-score)
+		(define (update-proc srow)
+			(let ((up-score (+ p-score (assoc-ref srow "count"))))
+				(string-append
+					"UPDATE Disjuncts SET count = "
+					(number->string up-score)
+					" WHERE inflected_word = '" i-word
+					"' AND disjunct = '" disj-str "'"
+				)
+			)
+		)
+
+		(update-table
+			(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
+				i-word "' AND disjunct = '" disj-str "'"
+			)
+			update-proc
+
+			(string-append
+				"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES ('"
+				i-word "', '" disj-str "', " (number->string p-score) ")"
+			)
+		)
+	)
+
+	(update-marginal-table iword score)
+	(update-disjunct-table iword djstr score)
+)
+
+; ---------------------------------------------------------------------
+; Process a disjunct -- stuff into database, whatever.
 (define (ldj-process-disjunct word parse-node)
 
 	; return the parse score for this parse.
@@ -151,98 +255,9 @@ scm
 	(let ((iword (word-inst-get-inflected-word-str word))
 			(djstr (ldj-make-disjunct-string word (ldj-get-connectors word parse-node)))
 			(score (parse-get-score parse-node))
-			(row #f)
 		)
 
-		; Generic table update frame
-		; select-str and insert-str are static strings;
-		; while update-proc should return an update string.
-		(define (update-table select-str update-proc insert-str)
-			(dbi-query db-connection select-str)
-
-			(set! row (dbi-get_row db-connection))
-			(if row
-				(begin
-					; flush the rows, else the update will fail.
-					(dbi-get_row db-connection)
-					(dbi-query db-connection (update-proc row))
-				)
-				(dbi-query db-connection insert-str)
-			)
-			; Flush the db status
-			(set! row (dbi-get_row db-connection))
-		)
-
-		; This routine will update the marginal table.
-		;
-		; The inflected table has the form:
-		; CREATE TABLE InflectMarginal (
-		;    inflected_word TEXT NOT NULL UNIQUE,
-		;    count FLOAT,
-		;    probability FLOAT )
-		;
-		(define (update-marginal-table i-word p-score)
-
-			(define (update-proc srow)
-				(let ((up-score (+ p-score (assoc-ref srow "count"))))
-					(string-append
-						"UPDATE InflectMarginal SET count = "
-						(number->string up-score)
-						" WHERE inflected_word = '" i-word "'"
-					)
-				)
-			)
-
-			(update-table
-				(string-append
-					"SELECT * FROM InflectMarginal WHERE inflected_word='"
-					i-word "'"
-				)
-				update-proc
-				(string-append
-					"INSERT INTO InflectMarginal (inflected_word, count) VALUES ('"
-					i-word "', " (number->string p-score) ")"
-				)
-			)
-		)
-
-		; Update the disjunct table
-		; The disjunct table has the form:
-		;
-		; CREATE TABLE Disjuncts (
-		;    inflected_word TEXT NOT NULL,
-		;    disjunct TEXT NOT NULL,
-		;    count FLOAT,
-		;    cond_probability FLOAT
-		; );
-		;
-		(define (update-disjunct-table i-word disj-str p-score)
-			(define (update-proc srow)
-				(let ((up-score (+ p-score (assoc-ref srow "count"))))
-					(string-append
-						"UPDATE Disjuncts SET count = "
-						(number->string up-score)
-						" WHERE inflected_word = '" i-word
-						"' AND disjunct = '" disj-str "'"
-					)
-				)
-			)
-
-			(update-table
-				(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
-					i-word "' AND disjunct = '" disj-str "'"
-				)
-				update-proc
-
-				(string-append
-					"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES ('"
-					i-word "', '" disj-str "', " (number->string p-score) ")"
-				)
-			)
-		)
-
-		(update-marginal-table iword score)
-		(update-disjunct-table iword djstr score)
+		(ldj-process-disjunct-simple iword djstr score)
 
 		; (display "Word: ")
 		; (display iword)
@@ -257,7 +272,7 @@ scm
 ; Given a single parse, process the disjuncts for that parse
 ;
 (define (ldj-process-parse parse-node)
-	(let ( (word-list (parse-get-words parse-node)))
+	(let ((word-list (parse-get-words parse-node)))
 		(for-each
 			(lambda (word) (ldj-process-disjunct word parse-node))
 			word-list
