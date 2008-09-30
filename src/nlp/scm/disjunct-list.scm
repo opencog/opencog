@@ -2,11 +2,11 @@ scm
 ; 
 ; disjunct-list.scm
 ;
-; Build lists of link-grammar disjuncts; update the SQL
-; database counts with the results.
+; Build lists of link-grammar disjuncts; update the SQL database counts
+; with the results.
 ;
 ; This is also a part of a test exploring different coding styles.
-; Similar fuunctionality is (paritally) implemented in disjunct.scm,
+; Similar functionality is (partially) implemented in disjunct.scm,
 ; but using a different approach.
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
@@ -22,8 +22,7 @@ scm
 (define db-connection
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
-; =============================================================
-; List-style disjuncts
+; =====================================================================
 ; ---------------------------------------------------------------------
 ; Given a list of relations, sort the relations in "sentence order"
 ; (or "parse order"). The "sent-node" argument provides the 
