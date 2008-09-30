@@ -284,6 +284,10 @@ scm
 ; Return all of the documents for which WSD has been completed,
 ; but disjunct processing has not been.
 ;
+; XXX The method used here, of tagging documents with "finished"
+; tags, is rather ad-hoc, and is meant to be a stop-gap until
+; opencog offers some way of defining a processing pipeline.
+;
 (define (ldj-find-docs)
 
 	; ldj-not-done? is doco not in the "ldj completed" list?
