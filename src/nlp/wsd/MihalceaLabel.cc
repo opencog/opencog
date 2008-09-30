@@ -77,6 +77,7 @@ bool MihalceaLabel::annotate_word(Handle h)
 	std::string word_inst_pos = get_part_of_speech(h);
 
 	// Reject some unwanted parts-of-speech.
+	if (0 == word_inst_pos.compare("")) return false;
 	if (0 == word_inst_pos.compare("WORD")) return false;
 	if (0 == word_inst_pos.compare("det")) return false;
 	if (0 == word_inst_pos.compare("particle")) return false;
@@ -88,9 +89,9 @@ bool MihalceaLabel::annotate_word(Handle h)
 #ifdef DEBUG
 	total_words ++;
 	Node *n = dynamic_cast<Node *>(word_instance);
-	printf(" MihalceaLabel::annotate_word(%lx)\n", (unsigned long) h);
+	printf("; MihalceaLabel::annotate_word(%lx)\n", (unsigned long) h);
 	printf("; found word-inst %s\n",  n->toString().c_str());
-	printf(";\thas inst-pos %s\n",  word_inst_pos.c_str());
+	printf(";\thas inst-POS %s\n",  word_inst_pos.c_str());
 	n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
 	printf(";\thas word-dict %s\n",  n->toString().c_str());
 #endif
