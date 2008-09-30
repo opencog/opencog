@@ -112,6 +112,7 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 // equivalence
 EQUIVALENCE_LINK <- UNORDERED_LINK
 // 
+ENTROPY_LINK <- ORDERED_LINK
 // New relex nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.
 // Some of the link types may go away.

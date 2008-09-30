@@ -49,6 +49,7 @@
 #define EVENTUAL_SEQUENTIAL_AND_LINK_CLASS "EventualSequentialAND"
 #define EVENTUAL_PREDICTIVE_IMPLICATION_LINK_CLASS "EventualSequentialImplication"
 #define EQUIVALENCE_LINK_CLASS "EquivalenceLink"
+#define ENTROPY_LINK_CLASS "EntropyLink"
 #define DISTINGUISHED_NODE_CLASS "DistinguishedNode"
 #define WORD_NODE_CLASS "WordNode"
 #define REFERENCE_LINK_CLASS "ReferenceLink"

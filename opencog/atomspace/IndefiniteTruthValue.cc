@@ -149,11 +149,14 @@ float IndefiniteTruthValue::getDiff()
 	float L_, U_, expected , result=0.0, numerator=0.0, denominator=0.0;
 	float idiff = 0.01;
 
+    if (U == L) {
+        return 0.0f;
+    }
 	expected = (1-confidenceLevel)/2;
 	while 	((result < expected - diffError) 
 		 ||  (result > expected + diffError)) {
 			U_ = U + idiff;
-			L_ = L + idiff;
+			L_ = L - idiff; // Joel: Changed to - this is correct yah?
 			numerator = DensityIntegral(U,U_,L_,U_,DEFAULT_K,s);
 			denominator = DensityIntegral(L_,U_,L_,U_,DEFAULT_K,s);		
 			if (denominator > 0) result = numerator / denominator;
