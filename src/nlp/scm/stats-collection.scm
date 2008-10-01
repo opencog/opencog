@@ -18,6 +18,36 @@ scm
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ; ---------------------------------------------------------------------
+; Generic SQL table update framework. Given some data, we want to 
+; create a new database ecord, if it does not already exist; otherwise
+; we want to update the existing record.  There's no convenient way to 
+; do this in SQL, so its done "manually" here.
+;
+; select-str and insert-str are static strings; while update-proc should
+; return an update string. select-str should select for a record,
+; insert-str should insert a record.  update-proc is passed the record
+; found by select; if no record was found, then the insrt-str is run.
+; This framework assumes that the result of select is either zero, or
+; one record; it will (silently) break if there are two or more.
+;
+(define (sql-update-table select-str update-proc insert-str)
+	(define row #f)
+	(dbi-query db-connection select-str)
+
+	(set! row (dbi-get_row db-connection))
+	(if row
+		(begin
+			; flush the rows, else the update will fail.
+			(dbi-get_row db-connection)
+			(dbi-query db-connection (update-proc row))
+		)
+		(dbi-query db-connection insert-str)
+	)
+	; Flush the db status
+	(set! row (dbi-get_row db-connection))
+)
+
+; ---------------------------------------------------------------------
 ; Process a disjunct -- put the "plain" disjunct into the database.
 ; This is the "simple" routine, in that it only updates the simple
 ; word-disjunt pair database; it ignores word seneses.
@@ -28,26 +58,6 @@ scm
 ; score - parse score
 ;
 (define (ldj-process-disjunct-simple iword djstr score)
-
-	; Generic table update frame
-	; select-str and insert-str are static strings;
-	; while update-proc should return an update string.
-	(define (update-table select-str update-proc insert-str)
-		(define row #f)
-		(dbi-query db-connection select-str)
-
-		(set! row (dbi-get_row db-connection))
-		(if row
-			(begin
-				; flush the rows, else the update will fail.
-				(dbi-get_row db-connection)
-				(dbi-query db-connection (update-proc row))
-			)
-			(dbi-query db-connection insert-str)
-		)
-		; Flush the db status
-		(set! row (dbi-get_row db-connection))
-	)
 
 	; This routine will update the marginal table.
 	;
@@ -69,7 +79,7 @@ scm
 			)
 		)
 
-		(update-table
+		(sql-update-table
 			(string-append
 				"SELECT * FROM InflectMarginal WHERE inflected_word='"
 				i-word "'"
@@ -104,7 +114,7 @@ scm
 			)
 		)
 
-		(update-table
+		(sql-update-table
 			(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
 				i-word "' AND disjunct = '" disj-str "'"
 			)
