@@ -1,13 +1,8 @@
 scm
 ; 
-; disjunct-list.scm
+; stats-collection.scm
 ;
-; Build lists of link-grammar disjuncts; update the SQL database counts
-; with the results.
-;
-; This is also a part of a test exploring different coding styles.
-; Similar functionality is (partially) implemented in disjunct.scm,
-; but using a different approach.
+; Update the SQL database with counts of disjuncts, word senses, etc.
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
