@@ -1,12 +1,12 @@
 ###############################################################################
-Instalation and dependency resolution for OpenSUSE 10.3 users
+Instalation and dependency resolution for OpenSUSE 11.0 users
 ###############################################################################
 
 Opencog depends on the following packages:
 
    gcc-c++ make cmake openssl-devel boost-devel libexpat-devel
 
-----------------------------------------------------------
+-------------------------------------------------------------------------------
 
 Additionally, it depends on the following non-official packages:
 
@@ -20,16 +20,10 @@ They may be downloaded and installed using the following commands:
 
    sudo rpm -Uhv cxxtest-3.10.1-1.noarch.rpm csockets-2.2.5-1.1.i586.rpm
    
+-------------------------------------------------------------------------------
 
-----------------------------------------------------------
+Opencog also optionally depends on the following packages:
 
-Opencog also optionally depends on libiodbc, which may be downloaded and
-installed by executing:
+   unixODBC-devel guile-devel gsl-devel
 
-   wget http://downloads.sourceforge.net/iodbc/libiodbc-3.52.6-1.i386.rpm
-
-   wget http://downloads.sourceforge.net/iodbc/libiodbc-devel-3.52.6-1.i386.rpm
-
-   sudo rpm -Uhv libiodbc-3.52.6-1.i386.rpm libiodbc-devel-3.52.6-1.i386.rpm
-
-----------------------------------------------------------
+-------------------------------------------------------------------------------

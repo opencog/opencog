@@ -1,5 +1,5 @@
 ###############################################################################
-Instalation and dependency resolution for Fedora 8 users
+Instalation and dependency resolution for Fedora 9 users
 ###############################################################################
 
 Opencog depends on the following packages:
@@ -26,13 +26,8 @@ They may be downloaded and installed using the following commands:
 
 ----------------------------------------------------------
 
-Opencog also optionally depends on libiodbc, which may be downloaded and
-installed by executing:
+Opencog also optionally depends on the following packages:
 
-   wget http://downloads.sourceforge.net/iodbc/libiodbc-3.52.6-1.i386.rpm
-
-   wget http://downloads.sourceforge.net/iodbc/libiodbc-devel-3.52.6-1.i386.rpm
-
-   sudo yum --nogpgcheck localinstall libiodbc-3.52.6-1.i386.rpm libiodbc-devel-3.52.6-1.i386.rpm
+   unixODBC-devel guile-devel gsl-devel
 
 ----------------------------------------------------------

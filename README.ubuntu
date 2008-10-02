@@ -4,7 +4,7 @@ Instalation and dependency resolution for Ubuntu 8.04 (hardy) users
 
 Opencog depends on the following packages:
 
-   g++ make cmake libssl-dev libboost-dev libexpat-dev
+   g++ make cmake libssl-dev libboost-dev libboost-filesystem-dev libexpat-dev
 
 ----------------------------------------------------------
 
@@ -12,12 +12,14 @@ Additionally, it depends on the following non-official packages:
 
    cxxtest csockets csockets-dev
 
-which are available at the 'vendor' directory.
+which are available at the folowing PPA:
+
+   https://launchpad.net/~gama/+archive
 
 ----------------------------------------------------------
 
 Opencog also _optionally_ depends on the following packages:
 
-   libiodbc2-dev.
+   libiodbc2-dev libgsl0-dev guile-1.8-dev
 
 ----------------------------------------------------------
