@@ -20,8 +20,10 @@ LINK_LIBRARIES (
     ${OPENSSL_LIBRARIES}
 )
 
-ADD_CXXTEST(ImportanceUpdatingAgentUTest)
 ADD_CXXTEST(ForgettingAgentUTest)
-ADD_CXXTEST(ImportanceDiffusionAgentUTest)
 ADD_CXXTEST(HebbianLearningAgentUTest)
+ADD_CXXTEST(ImportanceUpdatingAgentUTest)
+IF (GSL_FOUND)
+	ADD_CXXTEST(ImportanceDiffusionAgentUTest)
+ENDIF (GSL_FOUND)
 ADD_CXXTEST(STIDecayingAgentUTest)
