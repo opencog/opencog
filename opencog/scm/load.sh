@@ -19,4 +19,3 @@ cat cgw-predicate.scm |netcat $HOST $PORT
 
 # Session doesn't work over telnet.
 # echo -e "scm\n(use-modules (ice-9 session))\n.\nexit\n"  |netcat $HOST $PORT
-

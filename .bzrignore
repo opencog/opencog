@@ -27,6 +27,7 @@ CPackSourceConfig.cmake
 _CPack_Packages/
 *.tgz
 *.tar.gz
+*.tar.bz2
 
 # deb packaging
 build-stamp

@@ -13,7 +13,7 @@ ADD_LIBRARY(query SHARED
 )
 
 INSTALL (TARGETS query
-	LIBRARY DESTINATION "lib/opencog"
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 

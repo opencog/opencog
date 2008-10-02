@@ -57,7 +57,7 @@ ENDIF (WIN32)
 
 INSTALL (TARGETS server cogserver builtinreqs
 	RUNTIME DESTINATION "bin"
-	LIBRARY DESTINATION "lib/opencog"
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
