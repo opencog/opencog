@@ -158,8 +158,8 @@ class ImportanceDiffusionAgentUTest :  public CxxTest::TestSuite {
         // strong
         agent->setMaxSpreadPercentage(0.05);
 	    server.unitTestServerLoop(1);
-        TS_ASSERT_EQUALS(269,server.getAtomSpace()->getSTI(atoms[2]));
-        TS_ASSERT_EQUALS(230,server.getAtomSpace()->getSTI(atoms[3]));
+        TS_ASSERT(abs(269-server.getAtomSpace()->getSTI(atoms[2]))<1);
+        TS_ASSERT(abs(230-server.getAtomSpace()->getSTI(atoms[3]))<1);
        
 	}
 

@@ -122,13 +122,14 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         atoms = createNodes(server.getAtomSpace(), "forgetPercent", count);
 
         server.unitTestServerLoop(1);
-        count = count * (1.0f - agent->forgetPercentage);
+        count = count - (int) (count * agent->forgetPercentage);
 
         // Case: 100 atoms, 10% loss, all same LTI
         // Result: 10 random atom lost
         TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
 
         // --
+        count = server.getAtomSpace()->Nodes();
         agent->forgetPercentage = 0.0f;
         server.unitTestServerLoop(1);
 
