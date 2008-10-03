@@ -11,6 +11,8 @@
 #ifndef _OPENCOG_SENSE_SIMILARITY_SQL_H
 #define _OPENCOG_SENSE_SIMILARITY_SQL_H
 
+#ifdef HAVE_SQL_STORAGE
+
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/SenseSimilarity.h>
 #include <opencog/persist/odbcxx.h>
@@ -33,5 +35,7 @@ class SenseSimilaritySQL :
 };
 
 } // namespace opencog
+
+#endif // HAVE_SQL_STORAGE
 
 #endif // _OPENCOG_SENSE_SIMILARITY_SQL_H

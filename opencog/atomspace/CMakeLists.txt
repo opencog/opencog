@@ -1,35 +1,35 @@
 ADD_LIBRARY (atomspace SHARED
-	Atom.cc			
-	AtomSpace.cc 
-	AtomTable.cc   
+	Atom.cc
+	AtomSpace.cc
+	AtomTable.cc
 	AttentionValue.cc
 	ClassServer.cc
-	CompositeTruthValue.cc	
-	CoreUtils.cc   
-	HandleEntry.cc	   
-	HandleIterator.cc  
-	HandleSet.cc	 
-	HandleTemporalPair.cc 
-	HandleTemporalPairEntry.cc	
+	CompositeTruthValue.cc
+	CoreUtils.cc
+	HandleEntry.cc
+	HandleIterator.cc
+	HandleSet.cc
+	HandleTemporalPair.cc
+	HandleTemporalPairEntry.cc
 	HandleToTemporalEntryMap.cc
-	IndefiniteTruthValue.cc  
-	Link.cc   
-	md5.c	
-	Node.cc  
-	NullTruthValue.cc	  
-	SavingLoading.cc 
-	SimpleTruthValue.cc 
-	StatisticsMonitor.cc 
+	IndefiniteTruthValue.cc
+	Link.cc
+	md5.c
+	Node.cc
+	NullTruthValue.cc
+	SavingLoading.cc
+	SimpleTruthValue.cc
+	StatisticsMonitor.cc
 	Temporal.cc
 	TemporalEntry.cc
-	TemporalMap.cc 
-	TemporalTable.cc  
+	TemporalMap.cc
+	TemporalTable.cc
 	TemporalToHandleSetMap.cc
 	TimeServer.cc
 	TLB.cc
-	Trail.cc	   
+	Trail.cc
 	TruthValue.cc
-	types.cc 
+	types.cc
 	VersionHandle.cc
 )
 

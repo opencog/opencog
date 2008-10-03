@@ -9,6 +9,9 @@
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
+
+#ifdef HAVE_SQL_STORAGE
+
 #include <stdio.h>
 #include <math.h>
 
@@ -182,3 +185,5 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 }
 
 /* ============================== END OF FILE ====================== */
+
+#endif // HAVE_SQL_STORAGE

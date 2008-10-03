@@ -34,8 +34,11 @@ using namespace opencog;
 MihalceaEdge::MihalceaEdge(void)
 {
 	atom_space = NULL;
-	// sen_sim = new SenseSimilarityLCH();
+#ifdef HAVE_SQL_STORAGE
 	sen_sim = new SenseSimilaritySQL();
+#else
+	sen_sim = new SenseSimilarityLCH();
+#endif
 }
 
 MihalceaEdge::~MihalceaEdge()
