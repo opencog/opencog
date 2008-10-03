@@ -1,5 +1,5 @@
 /*
- * opencog/server/BuiltinRequests.h
+ * opencog/server/BuiltinRequestsModule.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BUILTIN_REQUESTS_H
-#define _OPENCOG_BUILTIN_REQUESTS_H
+#ifndef _OPENCOG_BUILTIN_REQUESTS_MODULE_H
+#define _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 
 #include <opencog/server/DataRequest.h>
 #include <opencog/server/ExitRequest.h>
@@ -39,7 +39,7 @@
 namespace opencog
 {
 
-class BuiltinRequests : public Module
+class BuiltinRequestsModule : public Module
 {
 
 private:
@@ -56,16 +56,16 @@ private:
 public:
 
     static inline const char* id() {
-        static const char* _id = "opencog::BuiltinRequests";
+        static const char* _id = "opencog::BuiltinRequestsModule";
         return _id;
     }
 
-    BuiltinRequests();
-    virtual ~BuiltinRequests();
+    BuiltinRequestsModule();
+    virtual ~BuiltinRequestsModule();
     virtual void init();
 
 }; // class
 
 }  // namespace
 
-#endif // _OPENCOG_BUILTIN_REQUESTS_H
+#endif // _OPENCOG_BUILTIN_REQUESTS_MODULE_H

@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (builtinreqs SHARED
-    BuiltinRequests
+    BuiltinRequestsModule
     Request
     DataRequest
     ExitRequest

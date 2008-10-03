@@ -1,5 +1,5 @@
 /*
- * opencog/server/BuiltinRequests.cc
+ * opencog/server/BuiltinRequestsModule.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,18 +22,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BuiltinRequests.h"
+#include "BuiltinRequestsModule.h"
 
 #include <opencog/server/CogServer.h>
 
 using namespace opencog;
 
 // load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()                   { return BuiltinRequests::id(); }
-extern "C" Module*     opencog_module_load()                 { return new BuiltinRequests(); }
+extern "C" const char* opencog_module_id()                   { return BuiltinRequestsModule::id(); }
+extern "C" Module*     opencog_module_load()                 { return new BuiltinRequestsModule(); }
 extern "C" void        opencog_module_unload(Module* module) { delete module; }
 
-BuiltinRequests::BuiltinRequests()
+BuiltinRequestsModule::BuiltinRequestsModule()
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(ListRequest::info().id,         &listFactory); 
@@ -46,7 +46,7 @@ BuiltinRequests::BuiltinRequests()
     cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
 }
 
-BuiltinRequests::~BuiltinRequests()
+BuiltinRequestsModule::~BuiltinRequestsModule()
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.unregisterRequest(ListRequest::info().id);
@@ -59,6 +59,6 @@ BuiltinRequests::~BuiltinRequests()
     cogserver.unregisterRequest(UnloadModuleRequest::info().id);
 }
 
-void BuiltinRequests::init()
+void BuiltinRequestsModule::init()
 {
 }

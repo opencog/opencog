@@ -28,56 +28,6 @@
 
 using namespace opencog;
 
-class REQ : public CogServerRequest
-{
-
-    RequestProcessor * proc;
-public:
-
-    std::string name;
-    std::string type;
-
-    REQ(std::string type, std::string name, RequestProcessor *rp) {
-        this->type = type;
-        this->name = name;
-        this->proc = rp;
-    }
-
-    std::string getName() {
-        return name;
-    }
-
-    void setRequestProcessor(RequestProcessor * rp) {
-        proc = rp;
-    }
-    RequestProcessor * getRequestProcessor() {
-        return proc;
-    }
-
-    void callBack() {
-    }
-};
-
-class RP : public RequestProcessor
-{
-
-public:
-
-    std::string name;
-    int count;
-
-    RP(std::string name) {
-        this->name = name;
-        count = 0;
-
-    }
-    void processRequest(CogServerRequest *req) {
-        //REQ *request = (REQ *) req;
-        //printf("executed %s on %s(%s)\n", name.c_str(), request->getName().c_str(), request->getType().c_str());
-        count++;
-    }
-};
-
 class MyAgent : public Agent
 {
 

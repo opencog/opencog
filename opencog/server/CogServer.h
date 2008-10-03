@@ -36,20 +36,15 @@
 
 #include <opencog/server/Agent.h>
 #include <opencog/server/BaseServer.h>
-#include <opencog/server/CogServerRequest.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/Registry.h>
-#include <opencog/server/RequestProcessor.h>
 
 namespace opencog
 {
 
 class CogServer : public BaseServer, public Registry<Agent>, public Registry<Request>
 {
-
-// forward declarations
-class CogServerRequest;
 
 protected:
 
