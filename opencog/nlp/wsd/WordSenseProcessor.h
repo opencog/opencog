@@ -2,7 +2,7 @@
  * WordSenseProcessor.h
  *
  * Main entry point for word-sense disambiguation. This class inherits
- * from MindAgent; it scans for new input sentences, and then invokes
+ * from Agent; it scans for new input sentences, and then invokes
  * the disambiguation algorithms on it.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -14,11 +14,13 @@
 #include <pthread.h>
 
 #include <opencog/nlp/wsd/Mihalcea.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
+#include <opencog/server/Factory.h>
+#include <opencog/server/Module.h>
 
 namespace opencog {
 
-class WordSenseProcessor : public MindAgent
+class WordSenseProcessor : public Agent, public Module
 {
 	private:
 
@@ -40,6 +42,14 @@ class WordSenseProcessor : public MindAgent
 		Mihalcea *wsd;
 
 	public:
+		static Factory<WordSenseProcessor, Agent> factory;
+
+		virtual const ClassInfo& classinfo() const { return info(); }
+		static const ClassInfo& info() {
+			static const ClassInfo _ci("opencog::WordSenseProcessor");
+			return _ci;
+		}
+
 		WordSenseProcessor(void);
 		virtual ~WordSenseProcessor();
 		virtual void run(CogServer *server);

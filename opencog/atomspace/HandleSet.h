@@ -27,11 +27,7 @@
 
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/utils.h>
-
-#ifndef WIN32
-#include <tr1/unordered_set>
-#endif
+#include <opencog/util/platform.h>
 
 namespace opencog
 {

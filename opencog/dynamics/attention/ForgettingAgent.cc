@@ -25,10 +25,11 @@
 
 #include <algorithm>
 
+#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/server/Factory.h>
 
-namespace opencog
-{
+using namespace opencog;
 
 ForgettingAgent::ForgettingAgent()
 {
@@ -40,14 +41,12 @@ ForgettingAgent::ForgettingAgent()
 
 ForgettingAgent::~ForgettingAgent()
 {
-
 }
 
 void ForgettingAgent::run(CogServer *c)
 {
     a = c->getAtomSpace();
     forget(forgetPercentage);
-
 }
 
 void ForgettingAgent::forget(float proportion = 0.10f)
@@ -91,5 +90,3 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     }
 
 }
-
-}; //namespace

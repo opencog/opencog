@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/recent_val.h>
@@ -51,7 +51,7 @@ class CogServer;
 
 /** ImportantUpdatingAgent updates the AttentionValues of atoms.
  * 
- * This MindAgent carries out:
+ * This Agent carries out:
  *   - stimulus to STI and LTI conversion
  *   - rent collection
  *   - rent adjustment and taxing when AtomSpace funds go out of
@@ -60,8 +60,8 @@ class CogServer;
  * See http://www.opencog.org/wiki/ImportanceUpdatingAgent
  *
  * As atoms are used in mind processes they are endowed with stimulus.
- * MindAgents should explicit grant atoms stimulus when they make use of them,
- * although it's left up to the MindAgent to decide how best to do this.
+ * Agents should explicit grant atoms stimulus when they make use of them,
+ * although it's left up to the Agent to decide how best to do this.
  *
  * The ImportanceUpdatingAgent takes this stimulus and pays wages to atoms. So
  * in a sense, the stimulus is a record of how much work the atom has been
@@ -103,7 +103,7 @@ class CogServer;
  * recalculates the optimal rent based on decaying measures of the AtomSpace
  * size and number of atoms in the attentional focus.
  */
-class ImportanceUpdatingAgent : public MindAgent
+class ImportanceUpdatingAgent : public Agent
 {
 
     friend class ::ImportanceUpdatingAgentUTest;
@@ -114,13 +114,13 @@ private:
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
     
     AttentionValue::sti_t amnesty; //!< Amnesty is used in calculating rent.
-	
+
     /** Calculate the rent to apply to an atom with sti \a c.
      *
      * @param a The AtomSpace to work on.
      * @param c The STI of the atom to calculate rent for.
      */
-	AttentionValue::sti_t calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c);
+    AttentionValue::sti_t calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c);
 
     
     AttentionValue::sti_t STIAtomWage; //!< Atom STI wage per stimulus
@@ -131,7 +131,7 @@ private:
 
     bool updateLinks; //!< Update links or not
 
-    Logger *log; //!< Logger object for MindAgent
+    Logger *log; //!< Logger object for Agent
 
     /**
      * Randomly stimulate atoms in the AtomSpace
@@ -163,40 +163,40 @@ private:
     /** Collect STI rent for atoms within attentional focus 
      * and pay wages based on amount of stimulus.
      *
-     * @param a The AtomSpace the MindAgent is working on.
+     * @param a The AtomSpace the Agent is working on.
      * @param h The Handle of the atom to update.
      */
     void updateAtomSTI(AtomSpace* a, Handle h);
 
     /** Collect LTI rent for all atoms and pay wages based on stimulation
      *
-     * @param a The AtomSpace the MindAgent is working on.
+     * @param a The AtomSpace the Agent is working on.
      * @param h The Handle of the atom to update.
      */
     void updateAtomLTI(AtomSpace* a, Handle h);
 
     /** Cap STI values to the maximum to prevent atoms
-	 * becoming all important.
+     * becoming all important.
      *
-     * @param a The AtomSpace the MindAgent is working on.
+     * @param a The AtomSpace the Agent is working on.
      * @param h The Handle of the atom to update.
      * @return Whether any atoms had an STI above the cap.
      */
     bool enforceSTICap(AtomSpace* a, Handle h);
 
     /** Cap LTI values to the maximum to prevent atoms
-	 * becoming all important.
+     * becoming all important.
      *
-     * @param a The AtomSpace the MindAgent is working on.
+     * @param a The AtomSpace the Agent is working on.
      * @param h The Handle of the atom to update.
      * @return Whether any atoms had an LTI above the cap.
      */
     bool enforceLTICap(AtomSpace* a, Handle h);
 
-	/** Recalculate the STI Rent to charge atoms.
-	 *
-     * @param a The AtomSpace the MindAgent is working on.
-	 */
+    /** Recalculate the STI Rent to charge atoms.
+     *
+     * @param a The AtomSpace the Agent is working on.
+     */
     void updateSTIRent(AtomSpace* a);
 
 	/** Recalculate the LTI Rent to charge atoms.
@@ -209,7 +209,7 @@ private:
      * if not.
      *
      * @param a The AtomSpace to work in.
-	 * @return Whether the funds were in the homeostatic bounds.
+     * @return Whether the funds were in the homeostatic bounds.
      */
     bool checkAtomSpaceFunds(AtomSpace* a);
 
@@ -223,45 +223,45 @@ private:
     bool inRange(long val, long range[2]) const;
 
     /** If STI funds are outside of acceptable limits, then the STI funds
-	 * are adjusted accordingly by applying an AtomSpace wide tax/rebate.
+     * are adjusted accordingly by applying an AtomSpace wide tax/rebate.
      *
      * @param a The AtomSpace to work in.
      */
     void adjustSTIFunds(AtomSpace* a);
 
     /** If LTI funds are outside of acceptable limits, then the LTI funds
-	 * are adjusted accordingly by applying an AtomSpace wide tax/rebate.
+     * are adjusted accordingly by applying an AtomSpace wide tax/rebate.
      *
      * @param a The AtomSpace to work in
      */
     void adjustLTIFunds(AtomSpace* a);
 
     /** Get the amount of tax/rebate to apply based on a mean tax/rebate
-	 * value.
-	 *
+     * value.
+     *
      * When adjusting funds, use the \a mean value to stochastically
      * determine how much rent to charge an atom. (This is because STI/LTI
      * are integers and the tax amount will possibly be < 1 in any reasonable
      * sized OpenCog instance.)
      *
      * Internally takes the integer component of the mean, and samples
-	 * from a Poisson distribution for the remainder.
+     * from a Poisson distribution for the remainder.
      *
      * @param mean The mean tax that would be charged if STI/LTI were a float.
      * @return An integer amount of tax to charge
      */
     int getTaxAmount(double mean);
 
-    /** Get Random number generator associated with MindAgent,
-	 * and instantiate if it does not already exist.
-	 *
-	 * @return Pointer to the internal random number generator.
+    /** Get Random number generator associated with Agent,
+     * and instantiate if it does not already exist.
+     *
+     * @return Pointer to the internal random number generator.
      */
     opencog::RandGen* getRandGen();
     opencog::RandGen* rng; //!< Random number generator pointer.
 
     /** Update the attentional focus size variables needed for
-	 * tuning attention dynamics.
+     * tuning attention dynamics.
      *
      * @param a The AtomSpace to work on
      */
@@ -269,7 +269,7 @@ private:
 
     /** Initialise iterative variables with suitable starting values.
      *
-     * @param server A pointer to the \a CogServer running the MindAgent.
+     * @param server A pointer to the \a CogServer running the Agent.
      */
     void init(CogServer *server);
 
@@ -282,35 +282,39 @@ private:
      */
     void updateTotalStimulus(AtomSpace* a);
 
-	/** Gets either all Atoms or all Nodes, depending on \a updateLinks.
-	 *
+    /** Gets either all Atoms or all Nodes, depending on \a updateLinks.
+     *
      * @param a The AtomSpace to work on.
-	 * @return The Handles to process/update.
-	 */
+     * @return The Handles to process/update.
+     */
     HandleEntry* getHandlesToUpdate(AtomSpace* a);
 
 public:
 
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::ImportanceUpdatingAgent");
+        return _ci;
+    }
+
     ImportanceUpdatingAgent();
-
     virtual ~ImportanceUpdatingAgent();
-
     virtual void run(CogServer *server);
 
     virtual string toString();
 
-	/** Return the agent's logger object
-	 *
-	 * @return A logger object.
-	 */
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
     Logger* getLogger();
 
-	/** Set the agent's logger object
-	 *
-	 * Note, this will be deleted when this agent is.
-	 *
-	 * @param l The logger to associate with the agent.
-	 */
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
     void setLogger(Logger* l);
 
     /** Set whether to randomly stimulate atoms.
@@ -325,9 +329,9 @@ public:
     long targetLobeSTI; //!< homeostatic centre for AtomSpace STI funds
     long targetLobeLTI; //!< homeostatic centre for AtomSpace STI funds
 
-	//! the interval to keep AtomSpace STI funds within
+    //! the interval to keep AtomSpace STI funds within
     long acceptableLobeSTIRange[2];
-	//! the interval to keep AtomSpace LTI funds within
+    //! the interval to keep AtomSpace LTI funds within
     long acceptableLobeLTIRange[2];
 
     /** Set whether link atoms should be updated.
@@ -343,19 +347,19 @@ public:
     bool getUpdateLinksFlag();
 
     inline AttentionValue::sti_t getSTIAtomWage()
-		{ return STIAtomWage; }
+        { return STIAtomWage; }
     inline AttentionValue::lti_t getLTIAtomWage()
-		{ return LTIAtomWage; }
+        { return LTIAtomWage; }
 
-	/** The different ways rent can be calculated 
-	 * for atoms in the attentional focus.
-	 */
-	int rentType;
-	enum {
-		RENT_FLAT, //!< Use a flat rent 
-		RENT_EXP, //!< Use a exponential rent
-		RENT_LOG //!< Use a logarithmic rent
-	};
+    /** The different ways rent can be calculated 
+     * for atoms in the attentional focus.
+     */
+    int rentType;
+    enum {
+        RENT_FLAT, //!< Use a flat rent 
+        RENT_EXP, //!< Use a exponential rent
+        RENT_LOG //!< Use a logarithmic rent
+    };
 
 }; // class
 

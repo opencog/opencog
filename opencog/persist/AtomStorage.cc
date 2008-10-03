@@ -295,9 +295,9 @@ AtomStorage::AtomStorage(const char * dbname,
 	}
 }
 
-AtomStorage::AtomStorage(const std::string dbname,
-                         const std::string username,
-                         const std::string authentication)
+AtomStorage::AtomStorage(const std::string& dbname,
+                         const std::string& username,
+                         const std::string& authentication)
 {
 	db_conn = new ODBCConnection(dbname.c_str(), username.c_str(), authentication.c_str());
 	type_map_was_loaded = false;

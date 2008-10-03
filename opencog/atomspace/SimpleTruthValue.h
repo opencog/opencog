@@ -28,7 +28,6 @@
 #define _OPENCOG_SIMPLE_TRUTH_VALUE_H_
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/utils.h>
 
 namespace opencog
 {

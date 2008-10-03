@@ -69,9 +69,9 @@ class AtomStorage
 #endif /* OUT_OF_LINE_TVS */
 
 	public:
-		AtomStorage(const std::string dbname, 
-		            const std::string username,
-		            const std::string authentication);
+		AtomStorage(const std::string& dbname, 
+		            const std::string& username,
+		            const std::string& authentication);
 		AtomStorage(const char * dbname, 
 		            const char * username,
 		            const char * authentication);

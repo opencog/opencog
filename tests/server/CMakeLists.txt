@@ -13,6 +13,10 @@ LINK_DIRECTORIES(
 	${OPENCOG_BINARY_DIR}/src/server
 )
 
-LINK_LIBRARIES(CogServerUTest server)
+LINK_LIBRARIES(CogServerUTest
+    server
+    ${CSOCKETS_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+)
 
 ADD_CXXTEST(CogServerUTest)

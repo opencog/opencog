@@ -30,7 +30,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 
 using namespace opencog;
 
@@ -88,21 +88,22 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 class ForgettingAgentUTest :  public CxxTest::TestSuite {
 
     private:
-    opencog::ForgettingAgent *agent;
-    opencog::CogServer server;
+    Factory<ForgettingAgent, Agent> factory;
+    CogServer& cogserver;
+    ForgettingAgent* agent;
 
     public:
 
-    ForgettingAgentUTest() {
-        agent = new opencog::ForgettingAgent();
-        server.plugInMindAgent(agent, 1);
+    ForgettingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+        cogserver.registerAgent(ForgettingAgent::info().id, &factory);
+        agent = static_cast<ForgettingAgent*>(cogserver.createAgent(ForgettingAgent::info().id, true));
         logger().setLevel(Logger::FINE);
 	    logger().setPrintToStdoutFlag(true);
         logger().enable();
     }
 
     ~ForgettingAgentUTest() {
-        delete agent;
+        cogserver.unregisterAgent(ForgettingAgent::info().id);
     }
 
     void setUp() {
@@ -118,49 +119,49 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         agent->forgetPercentage = 0.10;
 
         int count = 100;
-        atoms = createNodes(server.getAtomSpace(), "forgetPercent", count);
+        atoms = createNodes(cogserver.getAtomSpace(), "forgetPercent", count);
 
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         count = count - (int) (count * agent->forgetPercentage);
 
         // Case: 100 atoms, 10% loss, all same LTI
         // Result: 10 random atom lost
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 
         // --
-        count = server.getAtomSpace()->Nodes();
+        count = cogserver.getAtomSpace()->Nodes();
         agent->forgetPercentage = 0.0f;
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
 
         // Case: 90 atoms, 0% loss, all same LTI
         // Result: 0 random atom lost
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 
         // --
         agent->forgetPercentage = 1.0f;
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         count = 0;
 
         // Case: 90 atoms, 100% loss, all same LTI
         // Result: all atoms lost
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 
         // Test to make sure atoms are removed in the right order:
         count = 10;
-        atoms = createNodes(server.getAtomSpace(), "forgetPercent", count);
+        atoms = createNodes(cogserver.getAtomSpace(), "forgetPercent", count);
         for (int i = 0; i < count; i++) {
-            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t) i);
+            cogserver.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t) i);
         }
 
         agent->forgetPercentage = 0.20;
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         // First two handles should now be invalid...
         TS_ASSERT(!TLB::getAtom(atoms[0]));
         TS_ASSERT(!TLB::getAtom(atoms[1]));
 
         // Forget all
         agent->forgetPercentage = 1.0f;
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         count = 0;
 
     }
@@ -173,31 +174,31 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         agent->forgetThreshold = (AttentionValue::lti_t) -10;
 
         int count = 100;
-        atoms = createNodes(server.getAtomSpace(), "forgetThreshold", count);
+        atoms = createNodes(cogserver.getAtomSpace(), "forgetThreshold", count);
 
         // Case: 100 atoms, none below threshold
         // Result: Nothing lost
-        server.unitTestServerLoop(1);
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        cogserver.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 
         // Case: 100 atoms, 10 below threshold (ranging from threshold to
         // threshold - 10 LTI)
         // Result: 90 left, first 10 handles in array invalid
         for (int i = 0; i < 10; i++) {
-            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
+            cogserver.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
                 agent->forgetThreshold - i);
         }
         count = 90;
 
-        server.unitTestServerLoop(1);
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        cogserver.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
         for (int i = 0; i < 10; i++) {
             TS_ASSERT(!TLB::getAtom(atoms[i]));
         }
 
         // Forget all
         agent->forgetThreshold = AttentionValue::MAXLTI;
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         count = 0;
 
     }
@@ -211,17 +212,17 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         agent->forgetThreshold = (AttentionValue::lti_t) -10;
 
         int count = 100;
-        atoms = createNodes(server.getAtomSpace(), "forgetBoth", count);
+        atoms = createNodes(cogserver.getAtomSpace(), "forgetBoth", count);
 
         // Case: 100 atoms, only 5 below threshold
         // Result: only 5 lost, first five invalid
         for (int i = 0; i < 5; i++) {
-            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
+            cogserver.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
                 agent->forgetThreshold);
         }
         count = 95;
-        server.unitTestServerLoop(1);
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        cogserver.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
         for (int i = 0; i < 5; i++) {
             TS_ASSERT(!TLB::getAtom(atoms[i]));
         }
@@ -229,12 +230,12 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         // Case: 95 atoms, 15 below threshold
         // Result: 9 removed, 86 left, first 14 handles in array invalid
         for (int i = 5; i < 20; i++) {
-            server.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
+            cogserver.getAtomSpace()->setLTI(atoms[i], (AttentionValue::lti_t)
                 agent->forgetThreshold);
         }
         count = 86;
-        server.unitTestServerLoop(1);
-        TS_ASSERT_EQUALS(server.getAtomSpace()->Nodes(), count);
+        cogserver.unitTestServerLoop(1);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
         numRemoved = 0;
         for (int i = 5; i < 20; i++) {
             if (!TLB::getAtom(atoms[i])) {
@@ -246,7 +247,7 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         // Forget all
         agent->forgetPercentage = 1.0f;
         agent->forgetThreshold = AttentionValue::MINLTI;
-        server.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
         count = 0;
 
     }

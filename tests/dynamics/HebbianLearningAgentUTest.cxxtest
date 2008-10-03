@@ -30,7 +30,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/dynamics/attention/HebbianLearningAgent.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 
 using namespace opencog;
 
@@ -117,35 +117,39 @@ void removeAll(AtomSpace* atomSpace)
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
         server().getAtomSpace()->removeAtom(*i,false);
     }
-
 }
 
 class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
 
     private:
 
-    CogServer server;
+    Factory<HebbianLearningAgent, Agent> factory;
     HebbianLearningAgent* agent;
+    CogServer& cogserver;
     std::vector<Handle> atoms;
 
     public:
 
-	HebbianLearningAgentUTest(){
-        agent = new opencog::HebbianLearningAgent();
-        server.plugInMindAgent(agent, 1);
+	HebbianLearningAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+        cogserver.registerAgent(HebbianLearningAgent::info().id, &factory);
+        agent = static_cast<HebbianLearningAgent*>(cogserver.createAgent(HebbianLearningAgent::info().id, true));
         logger().setLevel(Logger::FINE);
 	    logger().setPrintToStdoutFlag(true);
         logger().enable();
     }
 
+    ~HebbianLearningAgentUTest() {
+        cogserver.unregisterAgent(HebbianLearningAgent::info().id);
+    }
+
 	void setUp() {
         std::vector< Handle >::iterator i;
-        server.getAtomSpace()->setAttentionalFocusBoundary(0);
+        cogserver.getAtomSpace()->setAttentionalFocusBoundary(0);
 
     }
 
 	void tearDown(){
-        removeAll(server.getAtomSpace());
+        removeAll(cogserver.getAtomSpace());
     }
 
 //    void testGetSetMaxPercentage() {
@@ -158,7 +162,7 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
 //    }
 
 	void testRunWithLinkConversion() {
-        AtomSpace* a = server.getAtomSpace();
+        AtomSpace* a = cogserver.getAtomSpace();
         agent->convertLinks = true;
         std::vector<Handle> in_in_norm;
         std::vector<Handle> in_in_inv;
@@ -173,7 +177,7 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
         in_out_inv = createCase(true, 10, false, -10, true, 0.1, "inoutinv");
         out_in_norm = createCase(false, -10, true, 10, false, 0.1, "outinnorm");
         out_in_inv = createCase(false, -10, true, 10, true, 0.1, "outininv");
-	    server.unitTestServerLoop(1);
+	    cogserver.unitTestServerLoop(1);
 
         // replaced links, so handles no longer valid. find links through
         // outgoing sets.

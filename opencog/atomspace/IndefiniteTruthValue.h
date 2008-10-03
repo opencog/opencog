@@ -29,7 +29,6 @@
 #include <vector>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/utils.h>
 
 namespace opencog
 {

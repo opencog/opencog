@@ -26,6 +26,7 @@
 
 #include "Logger.h"
 
+#include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
 

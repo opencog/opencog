@@ -23,37 +23,30 @@
 
 #include "ImportanceSpreadingAgent.h"
 
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/platform.h>
 
-namespace opencog
-{
+using namespace opencog;
 
 ImportanceSpreadingAgent::ImportanceSpreadingAgent()
 {
     spreadThreshold = MA_DEFAULT_SPREAD_THRESHOLD;
-
 }
 
 ImportanceSpreadingAgent::~ImportanceSpreadingAgent()
 {
-
 }
 
 void ImportanceSpreadingAgent::run(CogServer* server)
 {
-
     a = server->getAtomSpace();
     spreadImportance();
-
-
 }
 
 
 void ImportanceSpreadingAgent::spreadImportance()
 {
-
     AttentionValue::sti_t current;
 
     std::vector<Handle> atoms;
@@ -75,7 +68,6 @@ void ImportanceSpreadingAgent::spreadImportance()
 
         hi++;
     }
-
 }
 
 // for a bunch of links from the source, get links passed as pointer
@@ -260,6 +252,3 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     delete links;
 
 }
-
-};
-

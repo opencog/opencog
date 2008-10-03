@@ -101,8 +101,6 @@ void HopfieldOptions::printHelp()
         "      --train-file <x> \t load patterns from file, must use -n to specify pattern size.\n"
         "      --cue-file <x> \t load patterns from file, must use -n to specify pattern size.\n";
     cout << helpOutput;
-
-
 }
 
 void HopfieldOptions::parseOptions (int argc, char *argv[])

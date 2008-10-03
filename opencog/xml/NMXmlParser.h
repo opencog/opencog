@@ -28,14 +28,12 @@
 
 #include <vector>
 
-#include <opencog/util/platform.h>
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/platform.h>
 #include <opencog/xml/XMLBufferReader.h>
 
 namespace opencog

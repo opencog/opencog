@@ -1,2 +1,3 @@
 ADD_SUBDIRECTORY (hopfield)
-ADD_SUBDIRECTORY (extending)
+ADD_SUBDIRECTORY (modules)
+ADD_SUBDIRECTORY (server)

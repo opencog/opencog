@@ -24,24 +24,70 @@
 
 #include "CogServer.h"
 
-#include <memory>
+#include <tr1/memory>
+#include <tr1/functional>
 
 #include <time.h>
 #ifdef WIN32
 #include <winsock2.h>
 #else
+#include <dlfcn.h>
 #include <unistd.h>
 #include <sys/time.h>
 #endif
 
-#include <opencog/server/SimpleNetworkServer.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/Agent.h>
+#include <opencog/server/ConsoleSocket.h>
+#include <opencog/server/NetworkServer.h>
+#include <opencog/server/Request.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 
 using namespace opencog;
 
-CogServer::CogServer() : cycleCount(1), networkServer(NULL)
+namespace opencog {
+struct equal_to_id : public std::binary_function<const Agent*, const std::string&, bool>
+{
+    bool operator()(const Agent* a, const std::string& cid) const {
+        return (a->classinfo().id != cid);
+    }
+};
+}
+
+CogServer* CogServer::createInstance() {
+    return new CogServer();
+}
+
+CogServer::~CogServer()
+{
+    disableNetworkServer();
+
+    // unload all modules
+    for (ModuleMap::iterator it = modules.begin(); it != modules.end(); ++it) {
+        // retest the key because it might have been removed already
+        if (modules.find(it->first) != modules.end()) {
+            logger().debug("[CogServer] removing module %s\"", it->first.c_str());
+            ModuleData mdata = it->second;
+
+            // cache filename and id to erase the entries from the modules map
+            std::string filename = mdata.filename;
+            std::string id = mdata.id;
+
+            // invoke the module's unload function
+            (*mdata.unloadFunction)(mdata.module);
+
+            // erase the map entries (one with the filename as key, and one with the module)
+            // id as key
+            modules.erase(filename);
+            modules.erase(id);
+        }
+    }
+}
+
+CogServer::CogServer() : cycleCount(1)
 {
     if (atomSpace != NULL) delete atomSpace;
     atomSpace = new AtomSpace();
@@ -49,27 +95,21 @@ CogServer::CogServer() : cycleCount(1), networkServer(NULL)
     pthread_mutex_init(&messageQueueLock, NULL);
 }
 
-CogServer::~CogServer()
+NetworkServer& CogServer::networkServer()
 {
-    disableNetworkServer();
-}
-
-CogServer* CogServer::createInstance() {
-    return new CogServer();
+    return _networkServer;
 }
 
 void CogServer::enableNetworkServer()
 {
-    if (networkServer == NULL)
-        networkServer = new SimpleNetworkServer(this, config().get_int("SERVER_PORT"));
+    _networkServer.start();
+    _networkServer.addListener<ConsoleSocket>(config().get_int("SERVER_PORT"));
+
 }
 
 void CogServer::disableNetworkServer()
 {
-    if (networkServer != NULL) {
-        delete networkServer;
-        networkServer = NULL;
-    }
+    _networkServer.stop();
 }
 
 void CogServer::serverLoop()
@@ -78,23 +118,16 @@ void CogServer::serverLoop()
     time_t elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
 
-    if (networkServer != NULL) networkServer->start();
     logger().info("opencog server ready.");
 
     gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
 
-        bool had_input = false;
         if (getRequestQueueSize() != 0) {
             processRequests();
-            had_input = true;
         }
 
-        // Only run the input handlers if there was actual input.
-        if (had_input) {
-            processInput();
-        }
-        processMindAgents();
+        processAgents();
 
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
@@ -112,42 +145,104 @@ void CogServer::serverLoop()
 
 void CogServer::processRequests(void)
 {
-    int countDown = getRequestQueueSize();
-    while (countDown != 0) {
-        CogServerRequest *request = popRequest();
-        request->processRequest();
+    Request* request;
+    while ((request = popRequest()) != NULL) {
+        request->execute();
         delete request;
-        countDown--;
     }
 }
 
-void CogServer::processMindAgents(void)
+void CogServer::processAgents(void)
 {
-    for (unsigned int i = 0; i < mindAgents.size(); i++) {
-        if ((cycleCount % mindAgents[i].frequency) == 0) {
-            (mindAgents[i].agent)->run(this);
-        }
+    std::vector<Agent*>::const_iterator it;
+    for (it = agents.begin(); it != agents.end(); ++it) {
+        Agent* agent = *it;
+        if ((cycleCount % agent->frequency()) == 0)
+            agent->run(this);
     }
 }
 
-void CogServer::processInput(void)
+bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> const* factory)
 {
-    for (unsigned int i = 0; i < inputHandlers.size(); i++) {
-        inputHandlers[i]->run(this);
-    }
+    return Registry<Agent>::register_(id, factory);
 }
 
-void CogServer::plugInMindAgent(MindAgent *agent, int frequency)
+bool CogServer::unregisterAgent(const std::string& id)
 {
-    ScheduledMindAgent newScheduledAgent;
-    newScheduledAgent.agent = agent;
-    newScheduledAgent.frequency = frequency;
-    mindAgents.push_back(newScheduledAgent);
+    destroyAllAgents(id);
+    return Registry<Agent>::unregister(id);
 }
 
-void CogServer::plugInInputHandler(MindAgent *handler)
+std::list<const char*> CogServer::agentIds() const
 {
-    inputHandlers.push_back(handler);
+    return Registry<Agent>::all();
+}
+
+Agent* CogServer::createAgent(const std::string& id, const bool start)
+{
+    Agent* a = Registry<Agent>::create(id);
+    if (start) startAgent(a);
+    return a; 
+}
+
+void CogServer::startAgent(Agent* agent)
+{
+    agents.push_back(agent);
+}
+
+void CogServer::stopAgent(Agent* agent)
+{
+    agents.erase(std::find(agents.begin(), agents.end(), agent));
+}
+
+void CogServer::destroyAgent(Agent *agent)
+{
+    stopAgent(agent);
+    delete agent;
+}
+
+void CogServer::destroyAllAgents(const std::string& id)
+{
+    // place agents with classinfo().id == id at the end of the container
+    std::vector<Agent*>::iterator last = 
+        std::partition(agents.begin(), agents.end(),
+                       std::tr1::bind(equal_to_id(), std::tr1::placeholders::_1, id));
+
+    // save the agents that should be deleted on a temporary container
+    std::vector<Agent*> to_delete(last, agents.end());
+
+    // remove those agents from the main container
+    agents.erase(last, agents.end());
+
+    // delete the selected agents; NOTE: we must ensure that this is executed
+    // after the 'agents.erase' call above, because the agent's destructor might
+    // include a recursive call to destroyAllAgents
+    std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
+}
+
+bool CogServer::registerRequest(const std::string& name, AbstractFactory<Request> const* factory)
+{
+    return Registry<Request>::register_(name, factory);
+}
+
+bool CogServer::unregisterRequest(const std::string& name)
+{
+    return Registry<Request>::unregister(name);
+}
+
+Request* CogServer::createRequest(const std::string& name)
+{
+    return Registry<Request>::create(name);
+}
+
+const RequestClassInfo& CogServer::requestInfo(const std::string& name) const
+{
+    return static_cast<const RequestClassInfo&>(Registry<Request>::classinfo(name));
+}
+
+std::list<const char*> CogServer::requestIds() const
+{
+    return Registry<Request>::all();
 }
 
 long CogServer::getCycleCount()
@@ -160,10 +255,10 @@ void CogServer::stop()
     running = false;
 }
 
-CogServerRequest *CogServer::popRequest()
+Request* CogServer::popRequest()
 {
 
-    CogServerRequest *request;
+    Request* request;
 
     pthread_mutex_lock(&messageQueueLock);
     if (requestQueue.empty()) {
@@ -177,7 +272,7 @@ CogServerRequest *CogServer::popRequest()
     return request;
 }
 
-void CogServer::pushRequest(CogServerRequest *request)
+void CogServer::pushRequest(Request* request)
 {
     pthread_mutex_lock(&messageQueueLock);
     requestQueue.push(request);
@@ -192,12 +287,139 @@ int CogServer::getRequestQueueSize()
     return size;
 }
 
+bool CogServer::loadModule(const std::string& filename)
+{
+    if (modules.find(filename) !=  modules.end()) {
+        logger().info("Module \"%s\" is already loaded.", filename.c_str());
+        return false;
+    }
+
+    // reset error
+    dlerror();
+
+    logger().info("Loading module \"%s\"", filename.c_str());
+    void *dynLibrary = dlopen(filename.c_str(), RTLD_LAZY);
+    const char* dlsymError = dlerror();
+    if ((dynLibrary == NULL) || (dlsymError)) {
+        logger().error("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
+        return false;
+    }
+
+    // reset error
+    dlerror();
+
+    // search for id function
+    Module::IdFunction* id_func = (Module::IdFunction*) dlsym(dynLibrary, "opencog_module_id");
+    dlsymError = dlerror();
+    if (dlsymError) {
+        logger().error("Unable to find symbol \"opencog_module_id\": %s (module %s)", dlsymError, filename.c_str());
+        return false;
+    }
+
+    // get and check module id
+    const char *module_id = (*id_func)();
+    if (module_id == NULL) {
+        logger().error("Invalid module id (module \"%s\")", filename.c_str());
+        return false;
+    }
+
+    // search for 'load' & 'unload' symbols
+    Module::LoadFunction* load_func = (Module::LoadFunction*) dlsym(dynLibrary, "opencog_module_load");
+    dlsymError = dlerror();
+    if (dlsymError) {
+        logger().error("Unable to find symbol \"opencog_module_load\": %s", dlsymError);
+        return false;
+    }
+
+    Module::UnloadFunction* unload_func = (Module::UnloadFunction*) dlsym(dynLibrary, "opencog_module_unload");
+    dlsymError = dlerror();
+    if (dlsymError) {
+        logger().error("Unable to find symbol \"opencog_module_unload\": %s", dlsymError);
+        return false;
+    }
+
+    // load and init module
+    Module* module = (Module*) (*load_func)();
+
+    // store two entries in the module map:
+    //    1: filename => <struct module data>
+    //    2: moduleid => <struct module data>
+    // we rely on the assumption that no module id will match the filename of
+    // another module (and vice-versa). This is probably reasonable since most
+    // module filenames should have a .dll or .so suffix, and module ids should
+    // (by convention) be prefixed with its class namespace (i.e., "opencog::")
+    std::string i = module_id;
+    std::string f = filename;
+    ModuleData mdata = {module, i, f, load_func, unload_func, dynLibrary};
+    modules[i] = mdata;
+    modules[f] = mdata;
+
+    // after registration, call the module's init() method
+    module->init();
+ 
+    return true;
+}
+
+bool CogServer::unloadModule(const std::string& moduleId)
+{
+    logger().info("[CogServer] unloadModule(%s)", moduleId.c_str());
+    ModuleMap::const_iterator it = modules.find(moduleId);
+    if (it == modules.end()) {
+        logger().info("[CogServer::unloadModule] module \"%s\" is not loaded.", moduleId.c_str());
+        return false;
+    }
+    ModuleData mdata = it->second;
+
+    // cache filename, id and handle
+    std::string filename = mdata.filename;
+    std::string id       = mdata.id;
+    void*       handle   = mdata.handle;
+
+    // invoke the module's unload function
+    (*mdata.unloadFunction)(mdata.module);
+
+    // erase the map entries (one with the filename as key, and one with the module
+    // id as key
+    modules.erase(filename);
+    modules.erase(id);
+
+    // unload dynamically loadable library
+    logger().info("Unloading module \"%s\"", filename.c_str());
+
+    dlerror(); // reset error
+    if (dlclose(handle) != 0) {
+        const char* dlsymError = dlerror();
+        if (dlsymError) {
+            logger().error("Unable to unload module \"%s\": %s", filename.c_str(), dlsymError);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+CogServer::ModuleData CogServer::getModuleData(const std::string& moduleId)
+{
+    ModuleMap::const_iterator it = modules.find(moduleId);
+    if (it == modules.end()) {
+        logger().info("[CogServer::getModuleData] module \"%s\" was not found.", moduleId.c_str());
+        ModuleData nulldata = {NULL, "", "", NULL, NULL, NULL};
+        return nulldata;
+    }
+    return it->second;
+}
+
+Module* CogServer::getModule(const std::string& moduleId)
+{
+    return getModuleData(moduleId).module;
+}
+
 // Used for debug purposes on unit tests
 void CogServer::unitTestServerLoop(int nCycles)
 {
     for (int i = 0; (nCycles == 0) || (i < nCycles); ++i) {
         processRequests();
-        processMindAgents();
+        processAgents();
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
     }

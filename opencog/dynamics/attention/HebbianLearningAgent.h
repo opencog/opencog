@@ -28,7 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 
 namespace opencog
@@ -36,10 +36,10 @@ namespace opencog
 
 class CogServer;
 
-/** MindAgent that carries out simple Hebbian learning. Only updates
+/** Agent that carries out simple Hebbian learning. Only updates
  * existing HebbianLinks.
  */
-class HebbianLearningAgent : public MindAgent
+class HebbianLearningAgent : public Agent
 {
 
 private:
@@ -76,6 +76,13 @@ private:
     std::vector<Handle>& moveSourceToFront(std::vector<Handle> &outgoing);
 
 public:
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::HebbianLearningAgent");
+        return _ci;
+    }
+
     //! Whether to convert links to/from InverseHebbianLinks as necessary.
     bool convertLinks;
 

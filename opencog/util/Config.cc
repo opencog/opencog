@@ -58,9 +58,9 @@ void Config::reset()
 {
     table.clear();
     // load default configuration
-    for (unsigned int i = 0; DEFAULT_CONFIG[i] != ""; i += 2) {
-        if (table.find(DEFAULT_CONFIG[i]) == table.end()) {
-            table[DEFAULT_CONFIG[i]] = DEFAULT_CONFIG[i + 1];
+    for (unsigned int i = 0; DEFAULT()[i] != ""; i += 2) {
+        if (table.find(DEFAULT()[i]) == table.end()) {
+            table[DEFAULT()[i]] = DEFAULT()[i + 1];
         }
     }
 }
@@ -104,6 +104,11 @@ void Config::load(const char* filename)
         }
     }
     fin.close();
+}
+
+const bool Config::has(const string &name) const
+{
+    return (table.find(name) != table.end());
 }
 
 const string& Config::get(const string &name) const

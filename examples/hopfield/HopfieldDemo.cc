@@ -19,10 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HopfieldServer.h"
-
 #include <fstream>
 #include <iomanip>
+#include <iostream>
+
+#include "HopfieldServer.h"
+#include "HopfieldOptions.h"
 
 using namespace opencog;
 

@@ -43,14 +43,14 @@ using namespace opencog;
  */
 void StandardException::parseErrorMessage(const char* fmt, va_list ap)
 {
-    char    buf[1024];
+    char buf[1024];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
     opencog::logger().error(buf);
     setMessage(buf);
 }
 
-void StandardException::parseErrorMessage(const char * trace, const char * msg, va_list ap)
+void StandardException::parseErrorMessage(const char *trace, const char * msg, va_list ap)
 {
     size_t tlen = 0;
     if (trace) tlen = strlen(trace);

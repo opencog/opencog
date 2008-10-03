@@ -11,7 +11,10 @@
 #define _OPENCOG_SCHEME_SHELL_H
 
 #include <string>
+
 #include <libguile.h>
+
+#include <opencog/guile/SchemeSocket.h>
 
 namespace opencog {
 
@@ -19,9 +22,10 @@ class SchemeSmob;
 
 class SchemeShell
 {
-	private:
-		static bool is_inited;
+	friend class SchemeModule;
+	friend class SchemeSocket;
 
+	private:
 		std::string normal_prompt;
 		std::string pending_prompt;
 		std::string input_line;
@@ -31,24 +35,21 @@ class SchemeShell
 		// Error handling stuff
 		SCM error_string_port;
 		SCM captured_stack;
-		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
-		static SCM catch_handler_wrapper(void *, SCM, SCM);
-		SCM preunwind_handler(SCM, SCM);
-		SCM catch_handler(SCM, SCM);
 		bool caught_error;
 
 		// printfing of basic types
 		std::string prt(SCM);
 
-		// output port
-		SCM outport;
-
-		SchemeSmob *funcs;
+        // output port
+        SCM outport;                                                                                             
 
 	public:
-		SchemeShell(void);
+		SchemeShell();
+		~SchemeShell();
 		void hush_output(bool);
-		std::string eval(const std::string &);
+		SCM preunwind_handler(SCM, SCM);
+		SCM catch_handler(SCM, SCM);
+		void eval(const std::string &, SchemeSocket&);
 };
 
 }

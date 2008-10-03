@@ -27,19 +27,16 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/server/CogServer.h>
 
-namespace opencog
-{
+using namespace opencog;
 
 HebbianLearningAgent::HebbianLearningAgent()
 {
     convertLinks = false;
     conversionThreshold = 15;
-
 }
 
 HebbianLearningAgent::~HebbianLearningAgent()
 {
-
 }
 
 void HebbianLearningAgent::run(CogServer *server)
@@ -245,5 +242,3 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     return tc;
 
 }
-
-};

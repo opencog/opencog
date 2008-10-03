@@ -26,8 +26,9 @@
 #include <string>
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Factory.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 
 using namespace opencog;
@@ -70,117 +71,81 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     return testAtoms;
 }
 
-class ImportanceUpdatingAgentUTest :  public CxxTest::TestSuite {
+class ImportanceUpdatingAgentUTest : public CxxTest::TestSuite {
 
-    private:
+private:
+    Factory<ImportanceUpdatingAgent, Agent>  factory;
+    CogServer& cogserver;
+    opencog::ImportanceUpdatingAgent* agent;
 
-    public:
+public:
 
-	ImportanceUpdatingAgentUTest(){}
+	ImportanceUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+        cogserver.registerAgent(ImportanceUpdatingAgent::info().id, &factory);
+    }
 
-	void setUp() {}
+	~ImportanceUpdatingAgentUTest() {
+        cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
+    }
 
-	void tearDown(){}
-
-	void testRun() {
-	    opencog::ImportanceUpdatingAgent *agent;
-	    opencog::CogServer server;
-
-	    agent = new opencog::ImportanceUpdatingAgent();
+	void setUp() {
+	    agent = (ImportanceUpdatingAgent*) cogserver.createAgent(ImportanceUpdatingAgent::info().id);
 
 	    agent->getLogger()->enable();
 	    agent->getLogger()->setLevel(opencog::Logger::FINE);
-	    agent->getLogger()->setPrintToStdoutFlag(true);
+	    //agent->getLogger()->setPrintToStdoutFlag(true);
 	    
-	    server.plugInMindAgent(agent, 1);
-	    createSimpleGraph(server.getAtomSpace(), "import-update");
+	    cogserver.startAgent(agent);
+	    createSimpleGraph(cogserver.getAtomSpace(), "import-update");
+    }
 
-	    printf("Running agent without noise\n");
-	    server.unitTestServerLoop(20);
-	    
-	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
-		    server.getAtomSpace()->getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getSTIFunds(), \
-		    agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], \
-		    server.getAtomSpace()->getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
-		    agent->acceptableLobeLTIRange[1]);
-
+	void tearDown() {
 	    // erase the log file if no assertions failed
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-		std::remove(agent->getLogger()->getFilename().c_str());
+            std::remove(agent->getLogger()->getFilename().c_str());
+	    cogserver.stopAgent(agent);
 	    delete agent;
+    }
+
+	void testRun() {
+        logger().debug("Running agent without noise");
+	    cogserver.unitTestServerLoop(20);
+    
+        AtomSpace* as = cogserver.getAtomSpace();
+	    // Check AtomSpace funds within bounds
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 
 	void testNoise() {
-	    opencog::ImportanceUpdatingAgent *agent;
-	    opencog::CogServer server;
-
-	    agent = new opencog::ImportanceUpdatingAgent();
-
-	    agent->getLogger()->enable();
-	    agent->getLogger()->setLevel(opencog::Logger::FINE);
-	    agent->getLogger()->setPrintToStdoutFlag(true);
-	    
-	    server.plugInMindAgent(agent, 1);
-	    createSimpleGraph(server.getAtomSpace(), "import-update");
-
-	    printf("Running agent with noise\n");
+	    logger().debug("Running agent with noise");
 	    agent->setNoiseFlag(true);
-	    server.unitTestServerLoop(20);
+	    cogserver.unitTestServerLoop(20);
 
+        AtomSpace* as = cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
-		    server.getAtomSpace()->getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getSTIFunds(), \
-		    agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], \
-		    server.getAtomSpace()->getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
-		    agent->acceptableLobeLTIRange[1]);
-
-	    // erase the log file if no assertions failed
-	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-		std::remove(agent->getLogger()->getFilename().c_str());
-	    delete agent;
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 
 	void testNoLinks() {
-	    opencog::ImportanceUpdatingAgent *agent;
-	    opencog::CogServer server;
-
-	    agent = new opencog::ImportanceUpdatingAgent();
-
-	    agent->getLogger()->enable();
-	    agent->getLogger()->setLevel(opencog::Logger::FINE);
-	    agent->getLogger()->setPrintToStdoutFlag(true);
-	    
-	    server.plugInMindAgent(agent, 1);
-	    createSimpleGraph(server.getAtomSpace(), "import-update");
-
-	    printf("Running agent excluding links\n");
+	    logger().debug("Running agent excluding links");
 	    agent->setUpdateLinksFlag(false);
-	    server.unitTestServerLoop(10);
+	    cogserver.unitTestServerLoop(10);
 
-	    printf("Running agent excluding links, with noise\n");
+	    logger().debug("Running agent excluding links, with noise");
 	    agent->setNoiseFlag(true);
-	    server.unitTestServerLoop(20);
+	    cogserver.unitTestServerLoop(20);
 
+        AtomSpace* as = cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], \
-		    server.getAtomSpace()->getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getSTIFunds(), \
-		    agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], \
-		    server.getAtomSpace()->getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(server.getAtomSpace()->getLTIFunds(), \
-		    agent->acceptableLobeLTIRange[1]);
-
-	    // erase the log file if no assertions failed
-	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-		std::remove(agent->getLogger()->getFilename().c_str());
-	    delete agent;
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 };

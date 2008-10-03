@@ -26,6 +26,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/dynamics/attention/STIDecayingAgent.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/server/Factory.h>
 #include <opencog/util/Config.h>
 
 using namespace opencog;
@@ -34,10 +35,19 @@ class STIDecayingAgentUTest : public CxxTest::TestSuite
 {
 
 private:
+    Factory<STIDecayingAgent, Agent> factory;
+    CogServer& cogserver;
 
 public:
 
-    STIDecayingAgentUTest() {}
+    STIDecayingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+        cogserver.registerAgent(STIDecayingAgent::info().id, &factory);
+    }
+
+    ~STIDecayingAgentUTest() {
+        cogserver.unregisterAgent(STIDecayingAgent::info().id);
+    }
+
     void setUp() {}
     void tearDown() {}
 
@@ -45,7 +55,7 @@ public:
         logger().setLevel(Logger::DEBUG);
         AttentionValue::sti_t min_sti = config().get_int("MIN_STI");
 
-        AtomSpace *as = server().getAtomSpace();
+        AtomSpace *as = cogserver.getAtomSpace();
         Handle h = as->addNode(WORD_NODE, "test");
         Node *node = dynamic_cast<Node*>(TLB::getAtom(h));
         node->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
@@ -55,8 +65,7 @@ public:
         h = as->getHandle(node->getType(), node->getName());
         TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == (min_sti + 5));
 
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        cogserver.plugInMindAgent(new STIDecayingAgent(), 1);
+        cogserver.createAgent(STIDecayingAgent::info().id, true);
         cogserver.unitTestServerLoop(5);
 
         // we're on the verge of removing the node; check if its sti equals

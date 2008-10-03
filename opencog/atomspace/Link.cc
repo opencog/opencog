@@ -37,7 +37,6 @@
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Trail.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 

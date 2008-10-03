@@ -32,7 +32,7 @@
 #define _OPENCOG_STI_DECAYING_AGENT_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 
 namespace opencog
@@ -40,10 +40,17 @@ namespace opencog
 
 class CogServer;
 
-class STIDecayingAgent : public MindAgent
+class STIDecayingAgent : public Agent
 {
 
 public:
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::STIDecayingAgent");
+        return _ci;
+    }
+
     STIDecayingAgent();
     virtual ~STIDecayingAgent();
     virtual void run(CogServer *server);

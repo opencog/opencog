@@ -30,13 +30,16 @@ using namespace opencog;
 
 STIDecayingAgent::STIDecayingAgent()
 {
+    logger().info("[STIDecayingAgent] constructor");
 }
 
 STIDecayingAgent::~STIDecayingAgent()
 {
+    logger().info("[STIDecayingAgent] destructor");
 }
 
 void STIDecayingAgent::run(CogServer *cogserver)
 {
+    logger().info("[STIDecayingAgent] run");
     cogserver->getAtomSpace()->decayShortTermImportance();;
 }

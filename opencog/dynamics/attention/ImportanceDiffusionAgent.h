@@ -34,7 +34,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 
@@ -92,7 +92,7 @@ public:
  * using sparse matrices or directly using the STI values to generate a
  * temporary sparse matrix
  */
-class ImportanceDiffusionAgent : public MindAgent
+class ImportanceDiffusionAgent : public Agent
 {
 
 private:
@@ -134,6 +134,12 @@ private:
     SpreadDecider* spreadDecider;
 
 public:
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::ImportanceDiffusionAgent");
+        return _ci;
+    }
 
     enum { HYPERBOLIC, STEP };
 

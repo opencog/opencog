@@ -30,7 +30,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 
 namespace opencog
@@ -48,7 +48,7 @@ class CogServer;
  * @todo Spread along asymmetric hebbian links too.
  * @todo Optionally spread long term importance.
  */
-class ImportanceSpreadingAgent : public MindAgent
+class ImportanceSpreadingAgent : public Agent
 {
 
 private:
@@ -91,6 +91,12 @@ private:
             float weight);
 
 public:
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::ImportanceSpreadingAgent");
+        return _ci;
+    }
 
     ImportanceSpreadingAgent();
     virtual ~ImportanceSpreadingAgent();

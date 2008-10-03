@@ -78,22 +78,29 @@ public:
     }
 };
 
-class MA : public MindAgent
+class MyAgent : public Agent
 {
+
+private:
+
+    std::string  _name;
+    unsigned int _count;
 
 public:
 
-    std::string name;
-    int count;
-
-    MA(std::string name) {
-        this->name = name;
-        count = 0;
-
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::MyAgent");
+        return _ci;
     }
+
+    MyAgent() : Agent() { _count = 0; }
+    void setFrequency(int f) { _frequency = f; }
+    void setName(const std::string& n) { _name = n; }
+    unsigned int count() { return _count; }
     void run(CogServer *server) {
-        //printf("%ld: executed %s\n", server->getCycleCount(), name.c_str());
-        count++;
+        logger().debug("%ld: executed %s", server->getCycleCount(), _name.c_str());
+        _count++;
     }
 };
 
@@ -106,6 +113,14 @@ private:
 public:
 
     CogServerUTest() {
+        logger().setLevel(Logger::DEBUG);
+        //logger().setPrintToStdoutFlag(true);
+    }
+
+    ~CogServerUTest() {
+	    // erase the log file if no assertions failed
+	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().getFilename().c_str());
     }
 
     void setUp() {
@@ -114,55 +129,27 @@ public:
     void tearDown() {
     }
 
-    void testProcessMindAgents() {
+    void testProcessAgents() {
+        Factory<MyAgent, Agent> factory;
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        cogserver.registerAgent(MyAgent::info().id, &factory);
 
-        CogServer server;
-        MA *ma1 = new MA("MA1");
-        MA *ma2 = new MA("MA2");
-        MA *ma3 = new MA("MA3");
-        MA *ma4 = new MA("MA4");
-        MA *ma5 = new MA("MA5");
+        MyAgent* a[5];
+        for (int i = 0; i < 5; ++i) {
+            a[i] = static_cast<MyAgent*>(cogserver.createAgent(MyAgent::info().id));
+            std::ostringstream oss; oss << "Agent" << i;
+            a[i]->setName(oss.str());
+            a[i]->setFrequency(i+1);
+            cogserver.startAgent(a[i]);
+        }
 
-        server.plugInMindAgent(ma1, 1);
-        server.plugInMindAgent(ma2, 2);
-        server.plugInMindAgent(ma3, 3);
-        server.plugInMindAgent(ma4, 4);
-        server.plugInMindAgent(ma5, 5);
-        server.unitTestServerLoop(50);
+        cogserver.unitTestServerLoop(50);
 
-        TS_ASSERT(ma1->count == 50);
-        TS_ASSERT(ma2->count == 25);
-        TS_ASSERT(ma3->count == 16);
-        TS_ASSERT(ma4->count == 12);
-        TS_ASSERT(ma5->count == 10);
-    }
-
-    void testProcessRequests() {
-        CogServer server;
-
-        RP *rp1 = new RP("rp1");
-        RP *rp2 = new RP("rp2");
-
-        server.pushRequest(new REQ("type1", "req1", rp1));
-        server.pushRequest(new REQ("type2", "req2", rp2));
-        server.pushRequest(new REQ("type3", "req3", rp1));
-        server.pushRequest(new REQ("type4", "req4", rp2));
-        server.pushRequest(new REQ("type5", "req5", rp1));
-        server.pushRequest(new REQ("type2", "req6", rp2));
-        server.pushRequest(new REQ("type3", "req7", rp1));
-        server.pushRequest(new REQ("type4", "req8", rp2));
-        server.pushRequest(new REQ("type5", "req9", rp1));
-        server.pushRequest(new REQ("type3", "req10", rp1));
-        server.pushRequest(new REQ("type4", "req11", rp2));
-        server.pushRequest(new REQ("type5", "req12", rp1));
-        server.pushRequest(new REQ("type4", "req13", rp2));
-        server.pushRequest(new REQ("type5", "req14", rp1));
-        server.pushRequest(new REQ("type5", "req15", rp1));
-
-        server.unitTestServerLoop(50);
-
-        TS_ASSERT(rp1->count == 9);
-        TS_ASSERT(rp2->count == 6);
+        TS_ASSERT(a[0]->count() == 50);
+        TS_ASSERT(a[1]->count() == 25);
+        TS_ASSERT(a[2]->count() == 16);
+        TS_ASSERT(a[3]->count() == 12);
+        TS_ASSERT(a[4]->count() == 10);
     }
 
 };

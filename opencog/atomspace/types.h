@@ -30,10 +30,15 @@
 #ifndef _OPENCOG_TYPES_H
 #define _OPENCOG_TYPES_H
 
+#include <vector>
+
 #include <stdio.h>
 #include <string.h>
 
+#include <boost/variant.hpp>
+
 #include <opencog/util/platform.h>
+#include <opencog/atomspace/Temporal.h>
 
 namespace opencog
 {
@@ -41,6 +46,8 @@ namespace opencog
 // Definition of a handle. Opaque type.
 // Will change when system is reworked for distributed computing.
 typedef unsigned long Handle;
+
+typedef std::vector< Handle, std::allocator<Handle> > HandleSeq;
 
 //#ifdef WIN32
 //typedef hash_map<Handle, void *> HandleVoidPointerHashMap;
@@ -69,6 +76,8 @@ typedef float ShortFloat;
 
 typedef std::tr1::unordered_map<std::string, int> ClassTypeHashMap;
 typedef std::tr1::unordered_map<int, std::string> ClassNameHashMap;
+
+typedef short stim_t;
 
 /**
  * This class provides basic operations over the ShortFloat type.
@@ -111,6 +120,25 @@ struct AtomEntry {
     AtomEntry *next;
     Atom *atom;
 };
+
+template<typename T>
+struct TypeWrapper {
+    T value;
+    explicit TypeWrapper(T _val) : value(_val) {}
+    T operator=(const TypeWrapper& rhs) {
+        return (value = rhs.value);
+    }
+    bool operator==(const TypeWrapper& rhs) const {
+        return value == rhs.value;
+    }
+    bool operator<(const TypeWrapper& rhs) const {
+        return value < rhs.value;
+    }
+};
+typedef TypeWrapper<Temporal> TimeStampWrapper;
+
+typedef boost::variant<Handle, TimeStampWrapper, int, unsigned int, float, bool,
+                       unsigned char, char, short int> Vertex;
 
 } // namespace opencog
 

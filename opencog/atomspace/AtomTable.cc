@@ -885,6 +885,20 @@ int AtomTable::getSize() const
     return(size);
 }
 
+void AtomTable::log(Logger& logger, Type type, bool subclass) const
+{
+#ifdef USE_ATOM_HASH_SET
+    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
+        const Atom* atom = *it;
+        bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
+        if (matched) logger.debug("%d: %s", TLB::getHandle(atom), atom->toString().c_str());
+    }
+#else
+    logger().error("AtomTable::log() method is not implemented when USE_ATOM_HASH_SET is disabled");
+#endif
+
+}
+
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
 #ifdef USE_ATOM_HASH_SET
@@ -894,7 +908,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
 #else
-    output << "Sorry, AtomTable::print() method is not implemented when USE_ATOM_HASH_SET is disabled" << endl;
+    output << "[ERROR] AtomTable::print() method is not implemented when USE_ATOM_HASH_SET is disabled" << endl;
 #endif
 }
 

@@ -32,7 +32,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 

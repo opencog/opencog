@@ -30,7 +30,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/MindAgent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 
 namespace opencog
@@ -64,16 +64,23 @@ class CogServer;
  * of the AtomSpace will always be forgotten regardless of their LTI, or, any atom
  * that drops below the maximum forgetting LTI will be forgotten. 
  */
-class ForgettingAgent : public MindAgent
+class ForgettingAgent : public Agent
 {
 
 private:
     AtomSpace* a;
 
 public:
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::ForgettingAgent");
+        return _ci;
+    }
+
     //! Maximum LTI of a link that can be forgot.
     AttentionValue::lti_t forgetThreshold;
-	//! Percentage of AtomSpace to forget.
+    //! Percentage of AtomSpace to forget.
     float forgetPercentage;
 
     ForgettingAgent();

@@ -1,0 +1,14 @@
+INCLUDE_DIRECTORIES (
+	${CSOCKETS_INCLUDE_DIRS}
+	${OPENSSL_INCLUDE_DIR}
+	${ODBC_INCLUDE_DIRS}
+)
+
+ADD_LIBRARY (samplemodule SHARED
+	SampleAgent
+)
+
+ADD_LIBRARY (singleagentmodule SHARED
+    SingleAgentModule
+)
+

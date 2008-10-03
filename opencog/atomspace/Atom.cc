@@ -41,9 +41,9 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 
 //#define USE_SHARED_DEFAULT_TV
 

@@ -1,4 +1,13 @@
-ADD_LIBRARY (wsd STATIC
+# ADD_DEFINITIONS(-DDEBUG)
+
+INCLUDE_DIRECTORIES (
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/server
+	${OPENCOG_SOURCE_DIR}/src/util
+    ${CSOCKETS_INCLUDE_DIRS}
+)
+
+ADD_LIBRARY (wsd SHARED
 	Mihalcea.cc
 	MihalceaEdge.cc
 	MihalceaLabel.cc
@@ -12,12 +21,21 @@ ADD_LIBRARY (wsd STATIC
 	WordSenseProcessor.cc
 )
 
-# ADD_DEFINITIONS(-DDEBUG)
+INSTALL (TARGETS wsd
+	LIBRARY DESTINATION "lib/opencog"
+)
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/persist
-	${OPENCOG_SOURCE_DIR}/src/server
-	${OPENCOG_SOURCE_DIR}/src/util
-	${ODBC_INCLUDE_DIRS}
+INSTALL (FILES
+	ForeachWord.h
+	MihalceaEdge.h
+	Mihalcea.h
+	MihalceaLabel.h
+	NNAdjust.h
+	ParseRank.h
+	ReportRank.h
+	SenseCache.h
+	SenseRank.h
+	SenseSimilarity.h
+	WordSenseProcessor.h
+	DESTINATION "include/opencog/nlp/wsd"
 )

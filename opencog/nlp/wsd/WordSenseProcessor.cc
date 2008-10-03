@@ -21,13 +21,33 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>
+#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/MindAgent.h>
 
 using namespace opencog;
 
-// ----------------------------------------
+// load/unload functions for the Module interface
+extern "C" const char* opencog_module_id()
+{
+    return WordSenseProcessor::info().id.c_str();
+}
 
+extern "C" Module* opencog_module_load()
+{
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    cogserver.registerAgent(WordSenseProcessor::info().id, &WordSenseProcessor::factory);
+    return static_cast<WordSenseProcessor*>(cogserver.createAgent(WordSenseProcessor::info().id, true));
+}
+
+extern "C" void opencog_module_unload(Module* module)
+{
+    WordSenseProcessor* agent = static_cast<WordSenseProcessor*>(module);
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    cogserver.stopAgent(agent);
+    delete agent;
+}
+
+// ----------------------------------------
 WordSenseProcessor::WordSenseProcessor(void)
 {
 	pthread_mutex_init(&queue_lock, NULL);

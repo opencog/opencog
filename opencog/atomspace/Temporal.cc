@@ -30,7 +30,6 @@
 #include <stdlib.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/utils.h>
 
 using namespace opencog;
 

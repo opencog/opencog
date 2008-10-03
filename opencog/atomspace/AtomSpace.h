@@ -27,19 +27,21 @@
 #ifndef _OPENCOG_ATOMSPACE_H
 #define _OPENCOG_ATOMSPACE_H
 
-#include <vector>
-#include <set>
 #include <algorithm>
+#include <list>
+#include <set>
+#include <vector>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/utils2.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 #include <opencog/util/recent_val.h>
+#include <opencog/util/tree.h>
 
 #ifndef WIN32
 /*
@@ -875,7 +877,7 @@ public:
     /**
      * Decays STI of all atoms (one cycle of importance decay).
      * Deprecated, importance updating should be done by ImportanceUpdating
-     * MindAgent.
+     * Agent.
      */
     void decayShortTermImportance();
 

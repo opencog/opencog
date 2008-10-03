@@ -1,0 +1,68 @@
+/*
+ * src/server/AgentFactory.h
+ *
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Written by Gustavo Gama <gama@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+/* simple implementation of a AbstractFactory + Factory pattern */
+
+#ifndef _OPENCOG_FACTORY_H
+#define _OPENCOG_FACTORY_H
+
+#include <string>
+
+namespace opencog
+{
+
+// stores class specific info
+struct ClassInfo
+{
+    std::string id;
+
+    ClassInfo() {};
+    ClassInfo(const char* s) : id(s) {};
+    ClassInfo(const std::string& s) : id(s) {};
+};
+ 
+template< typename _BaseType >
+class AbstractFactory
+{
+public:
+    explicit AbstractFactory() {};
+    virtual ~AbstractFactory() {}
+    virtual _BaseType* create() const = 0;
+    virtual const ClassInfo& info() const = 0;
+}; 
+
+template< typename _Type, typename _BaseType >
+class Factory : public AbstractFactory<_BaseType>
+{
+public:
+    explicit Factory() : AbstractFactory<_BaseType>() {}
+    virtual ~Factory() {}
+    virtual _BaseType* create() const { return new _Type; }
+    virtual const ClassInfo& info() const { return _Type::info(); }
+}; 
+
+
+} // namespace opencog
+
+#endif // _OPENCOG_FACTORY_H

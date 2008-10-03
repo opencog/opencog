@@ -28,6 +28,7 @@
 
 #include <string>
 #include <iostream>
+#include <list>
 
 #include <stdlib.h>
 
@@ -141,10 +142,10 @@ bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::Tempo
 {
     //printf("AtomSpace::removeTimeInfo(%s, %s, %d, %s, %d, %d)\n", TLB::getHandle(h)->toString().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
 
-    list<HandleTemporalPair> existingEntries;
+    std::list<HandleTemporalPair> existingEntries;
     timeServer.get(back_inserter(existingEntries), h, t, criterion);
     bool result = !existingEntries.empty();
-    for (list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
+    for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
             itr != existingEntries.end(); itr++) {
         Handle atTimeLink = getAtTimeLink(*itr);
         //printf("Got atTimeLink = %p\n", atTimeLink);
@@ -213,7 +214,7 @@ Type AtomSpace::getTypeV(const tree<Vertex>& _target) const
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflush(stdout);
 
-    return getType(v2h(*_target.begin()));
+    return getType(boost::get<Handle>(*_target.begin()));
 }
 
 bool AtomSpace::isReal(Handle h) const
@@ -804,7 +805,7 @@ int AtomSpace::Nodes(VersionHandle vh) const
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    /* This is too expensive and depending on a MindAgent that may be disabled.
+    /* This is too expensive and depending on an Agent that may be disabled.
      * Besides it does not have statistics by VersionHandles
      DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
      agent->reevaluateAllStatistics();
@@ -878,7 +879,7 @@ int AtomSpace::Links(VersionHandle vh) const
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    /* This is too expensive and depending on a MindAgent that may be disabled.
+    /* This is too expensive and depending on an Agent that may be disabled.
      * Besides it does not have statistics by VersionHandles
      DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
      agent->reevaluateAllStatistics();

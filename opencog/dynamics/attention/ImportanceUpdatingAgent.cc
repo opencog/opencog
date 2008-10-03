@@ -31,8 +31,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/mt19937ar.h>
 
-namespace opencog
-{
+using namespace opencog;
 
 ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 {
@@ -100,7 +99,7 @@ void ImportanceUpdatingAgent::setLogger(Logger* log)
 {
     if (this->log) delete this->log;
     this->log = log;
-    log->fine("Set new logger for ImportanceUpdatingMindAgent");
+    log->fine("Set new logger for ImportanceUpdatingAgent");
 }
 
 Logger* ImportanceUpdatingAgent::getLogger()
@@ -615,5 +614,3 @@ string ImportanceUpdatingAgent::toString()
 //{
 //	return LTIAtomWage;
 //}
-
-} // namespace opencog

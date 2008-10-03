@@ -1,38 +1,36 @@
 ADD_LIBRARY (atomspace SHARED
-	TLB.cc
 	Atom.cc			
-	CompositeTruthValue.cc	
-	HandleEntry.cc	   
-	IndefiniteTruthValue.cc  
-	NullTruthValue.cc	  
-	Trail.cc	   
-	utils2.cc
+	AtomSpace.cc 
 	AtomTable.cc   
-	CoreUtils.cc   
-	HandleIterator.cc  
-	Link.cc   
-	SimpleTruthValue.cc 
-	TruthValue.cc
-	utils.cc
+	AttentionValue.cc
 	ClassServer.cc
+	CompositeTruthValue.cc	
+	CoreUtils.cc   
+	HandleEntry.cc	   
+	HandleIterator.cc  
+	HandleSet.cc	 
+	HandleTemporalPair.cc 
+	HandleTemporalPairEntry.cc	
+	HandleToTemporalEntryMap.cc
+	IndefiniteTruthValue.cc  
+	Link.cc   
+	md5.c	
 	Node.cc  
+	NullTruthValue.cc	  
+	SavingLoading.cc 
+	SimpleTruthValue.cc 
 	StatisticsMonitor.cc 
+	Temporal.cc
+	TemporalEntry.cc
+	TemporalMap.cc 
+	TemporalTable.cc  
+	TemporalToHandleSetMap.cc
+	TimeServer.cc
+	TLB.cc
+	Trail.cc	   
+	TruthValue.cc
 	types.cc 
 	VersionHandle.cc
-	md5.c	
-	Temporal.cc
-	AttentionValue.cc
-	HandleSet.cc	 
-	HandleTemporalPairEntry.cc	
-	TemporalEntry.cc
-	TemporalTable.cc  
-	TimeServer.cc
-	HandleTemporalPair.cc 
-	HandleToTemporalEntryMap.cc
-	TemporalMap.cc 
-	TemporalToHandleSetMap.cc
-	AtomSpace.cc 
-	SavingLoading.cc 
 )
 
 LINK_DIRECTORIES (
@@ -88,14 +86,12 @@ INSTALL (FILES
 	TLB.h
 	Trail.h
 	TruthValue.h
-    type_classint.h
-    type_codes.h
-    type_inheritance.h
-    type_intclass.h
-    type_names.h
+	type_classint.h
+	type_codes.h
+	type_inheritance.h
+	type_intclass.h
+	type_names.h
 	types.h
-	utils2.h
-	utils.h
 	VersionHandle.h
 	DESTINATION "include/opencog/atomspace"
 )

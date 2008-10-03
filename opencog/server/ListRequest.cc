@@ -1,0 +1,130 @@
+/*
+ * opencog/server/ListRequest.cc
+ *
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Written by Gustavo Gama <gama@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "ListRequest.h"
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/server/CogServer.h>
+
+using namespace opencog;
+
+ListRequest::ListRequest()
+{
+}
+
+ListRequest::~ListRequest()
+{
+    logger().debug("[ListRequest] destructor");
+}
+
+bool ListRequest::syntaxError()
+{
+    _error << "invalid syntax" << std::endl;
+    sendError();
+    return false;
+}
+
+bool ListRequest::execute()
+{
+    std::string name = "";
+    Type type = NOTYPE;
+    Handle handle = UNDEFINED_HANDLE;
+    bool subtypes = false;
+    AtomSpace* as = server().getAtomSpace();
+    std::ostringstream err;
+
+    std::list<std::string>::const_iterator it;
+    for (it = _parameters.begin(); it != _parameters.end(); ++it) {
+        if (*it == "-h") { // filter by handle
+            ++it;
+            if (it == _parameters.end()) return syntaxError();
+            handle = strtol((*it).c_str(), NULL, 0);
+            if (TLB::isInvalidHandle(handle)) {
+                _error << "invalid handle" << std::endl;
+                sendError();
+                return false;
+            }
+            _handles.push_back(handle);
+        } else if (*it == "-n")  { // filter by name
+            ++it;
+            if (it == _parameters.end()) return syntaxError();
+            name.assign(*it);
+        } else if (*it == "-t") { // filter by type, excluding subtypes
+            ++it;
+            if (it == _parameters.end()) return syntaxError();
+            type = ClassServer::getType((*it).c_str());
+            if (type == NOTYPE) {
+                _error << "invalid type" << std::endl;
+                sendError();
+                return false;
+            }
+        } else if (*it == "-T") { // filter by type, including subtypes
+            ++it;
+            if (it == _parameters.end()) return syntaxError();
+            type = ClassServer::getType((*it).c_str());
+            if (type == NOTYPE) {
+                _error << "invalid type" << std::endl;
+                sendError();
+                return false;
+            }
+            subtypes = true;
+        }
+    }
+    if (name != "" && type != NOTYPE) { // filter by name & type
+        _handles.push_back(as->getHandle(type, name.c_str()));
+    } else if (name != "") {     // filter by name
+        as->getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
+    } else if (type != NOTYPE) { // filter by type
+        as->getHandleSet(std::back_inserter(_handles), type, subtypes);
+    } else {
+        as->getHandleSet(back_inserter(_handles), ATOM, true);
+    }
+    sendOutput();
+    return true;
+}
+
+void ListRequest::sendOutput() const
+{
+    std::ostringstream oss;
+
+    if (_mimeType == "text/plain") {
+        std::vector<Handle>::const_iterator it; 
+        for (it = _handles.begin(); it != _handles.end(); ++it) {
+            Atom* atom = TLB::getAtom(*it);
+            oss << atom->toString() << std::endl;
+        }
+    } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s", _mimeType.c_str());
+
+    send(oss.str());
+}
+
+void ListRequest::sendError() const
+{
+    if (_mimeType != "text/plain")
+        throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s", _mimeType.c_str());
+    send(_error.str());
+}

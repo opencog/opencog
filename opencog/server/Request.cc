@@ -1,0 +1,80 @@
+/*
+ * opencog/server/Request.cc
+ *
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Written by Gustavo Gama <gama@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "Request.h"
+
+#include <Sockets/Lock.h>
+#include <Sockets/ISocketHandler.h>
+#include <Sockets/Socket.h>
+
+#include <opencog/server/IHasMimeType.h>
+#include <opencog/server/IRPCSocket.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+Request::Request() : _sock(NULL)
+{
+}
+
+Request::~Request()
+{
+    logger().debug("[Request] destructor");
+    if (_sock) {
+        IRPCSocket* _rpcsock = dynamic_cast<IRPCSocket*>(_sock);
+        if (_rpcsock) {
+            _rpcsock->OnRequestComplete();
+        }
+    }
+}
+
+void Request::setSocket(TcpSocket* s)
+{
+    logger().debug("[Request] setting socket: %p", s);
+    _sock = s;
+    IHasMimeType* ihmt = dynamic_cast<IHasMimeType*>(_sock);
+    if (ihmt == NULL)
+        throw RuntimeException(TRACE_INFO, "invalid socket: it does not have a mime-type.");
+    _mimeType = ihmt->mimeType();
+}
+
+void Request::send(const std::string& msg) const
+{
+    logger().debug("[Request] send\n");
+    if (_sock) {
+        Lock l(_sock->MasterHandler().GetMutex());
+        _sock->Send(msg);
+    }
+}
+
+void Request::setParameters(const std::list<std::string>& params)
+{
+    _parameters.assign(params.begin(), params.end());
+}
+
+void Request::addParameter(const std::string& param)
+{
+    _parameters.push_back(param);
+}

@@ -24,11 +24,9 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
-#include <opencog/util/platform.h>
-
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/utils.h>
+#include <opencog/util/platform.h>
 
 #include <stdlib.h>
 #include <vector>

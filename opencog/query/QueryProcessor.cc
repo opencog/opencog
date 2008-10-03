@@ -20,10 +20,31 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/query/FrameQuery.h>
 #include <opencog/query/RelexQuery.h>
+#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/MindAgent.h>
 
 using namespace opencog;
+
+// load/unload functions for the Module interface
+extern "C" const char* opencog_module_id()
+{
+    return QueryProcessor::info().id.c_str();
+}
+
+extern "C" Module* opencog_module_load()
+{
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    cogserver.registerAgent(QueryProcessor::info().id, &QueryProcessor::factory);
+    return static_cast<QueryProcessor*>(cogserver.createAgent(QueryProcessor::info().id, true));
+}
+
+extern "C" void opencog_module_unload(Module* module)
+{
+    QueryProcessor* agent = static_cast<QueryProcessor*>(module);
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    cogserver.stopAgent(agent);
+    delete agent;
+}
 
 // ----------------------------------------
 QueryProcessor::QueryProcessor(void)

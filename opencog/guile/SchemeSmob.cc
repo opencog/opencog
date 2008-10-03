@@ -12,9 +12,10 @@
 
 #include <libguile.h>
 
+#include <opencog/atomspace/AtomSpace.h>
+
 using namespace opencog;
 
-/* ============================================================== */
 /**
  * Two scheme smob types are used to impelment the interface.
  *
@@ -31,18 +32,13 @@ using namespace opencog;
  * thus, handling is dispatched based on these flags.
  */
 
-bool SchemeSmob::is_inited = false;
 scm_t_bits SchemeSmob::cog_handle_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 
-SchemeSmob::SchemeSmob(void)
+void SchemeSmob::init(void)
 {
-	if (!is_inited)
-	{
-		is_inited = true;
-		init_smob_type();
-		register_procs();
-	}
+	init_smob_type();
+	register_procs();
 }
 
 /* ============================================================== */

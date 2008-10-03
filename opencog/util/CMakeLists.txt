@@ -8,8 +8,9 @@ ADD_LIBRARY(util
 	Config
 	exceptions
 	Logger
+	misc
 	mt19937ar
-	platform.cc
+	platform
 	StringTokenizer
 	tree
 	${WIN32_GETOPT_FILES}
@@ -22,8 +23,8 @@ INSTALL (FILES
 	hashing.h
 	hash_map.h
 	hash_set.h
-	lazy_random_selector.h
 	Logger.h
+	misc.h
 	mt19937ar.h
 	numeric.h
 	platform.h

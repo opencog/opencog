@@ -29,12 +29,14 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 
 using namespace opencog;
 
 static void usage(char* progname)
 {
-    cerr << "Usage: " << progname << " [-c <config-file>]\n\n";
+    std::cerr << "Usage: " << progname << " [-c <config-file>]\n\n";
 }
 
 int main(int argc, char *argv[])
@@ -46,7 +48,7 @@ int main(int argc, char *argv[])
             try {
                 config().load(argv[2]);
             } catch (RuntimeException &e) {
-                cerr << e.getMessage() << std::endl;
+                std::cerr << e.getMessage() << std::endl;
                 return 1;
             }
         }
@@ -55,14 +57,17 @@ int main(int argc, char *argv[])
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+        //logger().setLevel(Logger::DEBUG);
 
-        // cheapo hack to get the query processory up and running.
-        // It would be more correct to have this loaded by a script
-        // executed from the command shell, rather than hard-coded
-        // into the C++ source.
         CogServer& cogserver = static_cast<CogServer&>(server());
-        cogserver.plugInInputHandler(new QueryProcessor());
-        cogserver.plugInInputHandler(new WordSenseProcessor());
+
+        // load modules specified in the config file
+        std::vector<std::string> modules;
+        tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
+        for (std::vector<std::string>::const_iterator it = modules.begin();
+             it != modules.end(); ++it) {
+            cogserver.loadModule(*it);
+        }
 
         // enable the network server and run the server's main loop
         cogserver.enableNetworkServer();

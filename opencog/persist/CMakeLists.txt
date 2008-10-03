@@ -2,12 +2,19 @@
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 INCLUDE_DIRECTORIES (
+	${OPENCOG_SOURCE_DIR}/src/server
 	${ODBC_INCLUDE_DIRS}
+	${CSOCKETS_INCLUDE_DIRS}
 )
 
-ADD_LIBRARY(persist STATIC
+ADD_LIBRARY(persist SHARED
 	odbcxx.cc
 	AtomStorage.cc
+	PersistModule.cc
+	SQLOpenRequest.cc
+	SQLCloseRequest.cc
+	SQLLoadRequest.cc
+	SQLStoreRequest.cc
 )
 
 ADD_EXECUTABLE(sniff
@@ -21,5 +28,23 @@ TARGET_LINK_LIBRARIES(persist
 TARGET_LINK_LIBRARIES(sniff
 	persist
 	atomspace
+	server
 	${ODBC_LIBRARIES}
+	${CSOCKETS_LIBRARIES}
+	${OPENSSL_LIBRARIES}
+)
+
+INSTALL (TARGETS persist
+	LIBRARY DESTINATION "lib/opencog"
+)
+
+INSTALL (FILES
+	AtomStorage.h
+	odbcxx.h
+	PersistModule.h
+	SQLCloseRequest.h
+	SQLLoadRequest.h
+	SQLOpenRequest.h
+	SQLStoreRequest.h
+	DESTINATION "include/opencog/persist"
 )

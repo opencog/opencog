@@ -1,10 +1,11 @@
-ADD_LIBRARY(attention STATIC
-    ImportanceUpdatingAgent.cc
-    ImportanceSpreadingAgent.cc
+ADD_LIBRARY(attention SHARED
+    AttentionModule
+    ForgettingAgent
+    HebbianLearningAgent
+    ImportanceSpreadingAgent
     ImportanceDiffusionAgent.cc
-    HebbianLearningAgent.cc
-    ForgettingAgent.cc
-    STIDecayingAgent.cc
+    ImportanceUpdatingAgent
+    STIDecayingAgent
 )
 
 INCLUDE_DIRECTORIES(
@@ -15,3 +16,18 @@ INCLUDE_DIRECTORIES(
 )
 
 TARGET_LINK_LIBRARIES(attention server)
+
+INSTALL (TARGETS attention
+	LIBRARY DESTINATION "lib/opencog"
+)
+
+INSTALL (FILES
+	AttentionModule.h
+	ForgettingAgent.h
+	HebbianLearningAgent.h
+	ImportanceSpreadingAgent.h
+	ImportanceDiffusionAgent.h
+	ImportanceUpdatingAgent.h
+	STIDecayingAgent.h
+	DESTINATION "include/opencog/dynamics/attention"
+)

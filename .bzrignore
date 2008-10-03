@@ -15,6 +15,7 @@ tests/Testing/
 install_manifest.txt
 examples/extending/derivedserver
 examples/hopfield/hopfield
+examples/server/derivedserver
 
 # WIN32 specific
 *.lib

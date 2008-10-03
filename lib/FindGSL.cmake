@@ -2,23 +2,23 @@
 # Permission obtained from Jan Woetzel to use under a BSD-style license
 # (left to OpenCog to determine the specific BSD license, but this file should
 # be included in CMake proper soon...).
-# 
+#
 # Look for the header file
 # Try to find gnu scientific library GSL
-# See 
-# http://www.gnu.org/software/gsl/  and 
+# See
+# http://www.gnu.org/software/gsl/  and
 # http://gnuwin32.sourceforge.net/packages/gsl.htm
 #
-# Once run this will define: 
-# 
+# Once run this will define:
+#
 # GSL_FOUND       = system has GSL lib
 #
 # GSL_LIBRARIES   = full path to the libraries
 #    on Unix/Linux with additional linker flags from "gsl-config --libs"
-# 
+#
 # CMAKE_GSL_CXX_FLAGS  = Unix compiler flags for GSL, essentially "`gsl-config --cxxflags`"
 #
-# GSL_INCLUDE_DIR      = where to find headers 
+# GSL_INCLUDE_DIR      = where to find headers
 #
 # GSL_LINK_DIRECTORIES = link directories, useful for rpath on Unix
 # GSL_EXE_LINKER_FLAGS = rpath on Unix
@@ -35,7 +35,7 @@ IF(WIN32)
     ${GSL_ROOT_DIR}
     $ENV{GSL_ROOT_DIR}
     ${GSL_DIR}
-    ${GSL_HOME}    
+    ${GSL_HOME}
     $ENV{GSL_DIR}
     $ENV{GSL_HOME}
     $ENV{EXTRA}
@@ -46,19 +46,19 @@ IF(WIN32)
     PATH_SUFFIXES include
     DOC "GSL header include dir"
     )
-  
+
   FIND_LIBRARY(GSL_GSL_LIBRARY
     NAMES gsl libgsl
     PATHS  ${GSL_POSSIBLE_ROOT_DIRS}
     PATH_SUFFIXES lib
-    DOC "GSL library dir" )  
-  
+    DOC "GSL library dir" )
+
   FIND_LIBRARY(GSL_GSLCBLAS_LIBRARY
     NAMES gslcblas libgslcblas
     PATHS  ${GSL_POSSIBLE_ROOT_DIRS}
     PATH_SUFFIXES lib
     DOC "GSL cblas library dir" )
-  
+
   SET(GSL_LIBRARIES ${GSL_GSL_LIBRARY})
 
   #MESSAGE("DBG\n"
@@ -67,24 +67,24 @@ IF(WIN32)
   #  "GSL_LIBRARIES=${GSL_LIBRARIES}")
 
 ELSE(WIN32)
-  
-  IF(UNIX) 
-    SET(GSL_CONFIG_PREFER_PATH 
+
+  IF(UNIX)
+    SET(GSL_CONFIG_PREFER_PATH
       "$ENV{GSL_DIR}/bin"
       "$ENV{GSL_DIR}"
-      "$ENV{GSL_HOME}/bin" 
-      "$ENV{GSL_HOME}" 
+      "$ENV{GSL_HOME}/bin"
+      "$ENV{GSL_HOME}"
       CACHE STRING "preferred path to GSL (gsl-config)")
     FIND_PROGRAM(GSL_CONFIG gsl-config
       ${GSL_CONFIG_PREFER_PATH}
       /usr/bin/
       )
     # MESSAGE("DBG GSL_CONFIG ${GSL_CONFIG}")
-    
-    IF (GSL_CONFIG) 
+
+    IF (GSL_CONFIG)
       # set CXXFLAGS to be fed into CXX_FLAGS by the user:
       SET(GSL_CXX_FLAGS "`${GSL_CONFIG} --cflags`")
-      
+
       # set INCLUDE_DIRS to prefix+include
       EXEC_PROGRAM(${GSL_CONFIG}
         ARGS --prefix
@@ -96,8 +96,8 @@ ELSE(WIN32)
         ARGS --libs
         OUTPUT_VARIABLE GSL_LIBRARIES)
       #SET(GSL_LIBRARIES "`${GSL_CONFIG} --libs`")
-      
-      # extract link dirs for rpath  
+
+      # extract link dirs for rpath
       EXEC_PROGRAM(${GSL_CONFIG}
         ARGS --libs
         OUTPUT_VARIABLE GSL_CONFIG_LIBS )
@@ -105,13 +105,13 @@ ELSE(WIN32)
       # split off the link dirs (for rpath)
       # use regular expression to match wildcard equivalent "-L*<endchar>"
       # with <endchar> is a space or a semicolon
-      STRING(REGEX MATCHALL "[-][L]([^ ;])+" 
-        GSL_LINK_DIRECTORIES_WITH_PREFIX 
+      STRING(REGEX MATCHALL "[-][L]([^ ;])+"
+        GSL_LINK_DIRECTORIES_WITH_PREFIX
         "${GSL_CONFIG_LIBS}" )
       #      MESSAGE("DBG  GSL_LINK_DIRECTORIES_WITH_PREFIX=${GSL_LINK_DIRECTORIES_WITH_PREFIX}")
 
       # remove prefix -L because we need the pure directory for LINK_DIRECTORIES
-      
+
       IF (GSL_LINK_DIRECTORIES_WITH_PREFIX)
         STRING(REGEX REPLACE "[-][L]" "" GSL_LINK_DIRECTORIES ${GSL_LINK_DIRECTORIES_WITH_PREFIX} )
       ENDIF (GSL_LINK_DIRECTORIES_WITH_PREFIX)
@@ -128,8 +128,8 @@ ELSE(WIN32)
         GSL_LINK_DIRECTORIES
         GSL_DEFINITIONS
       )
-      MESSAGE(STATUS "Using GSL from ${GSL_PREFIX}")
-      
+  	  #MESSAGE(STATUS "Using GSL from ${GSL_PREFIX}")
+
     ELSE(GSL_CONFIG)
       MESSAGE("FindGSL.cmake: gsl-config not found. Please set it manually. GSL_CONFIG=${GSL_CONFIG}")
     ENDIF(GSL_CONFIG)

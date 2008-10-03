@@ -15,7 +15,8 @@ ADD_EXECUTABLE (hopfield
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
+	${GSL_LIBRARIES}
 	${CSOCKETS_LIBRARIES}
-	gsl
-    gslcblas
+	${OPENSSL_LIBRARIES}
+	${EXPAT_LIBRARIES}
 )

@@ -27,9 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <opencog/util/platform.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 

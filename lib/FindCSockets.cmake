@@ -10,7 +10,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 # Look for the header file
-FIND_PATH(CSOCKETS_INCLUDE_DIR sockets-config.h /usr/include /usr/include/Sockets /usr/local/include /usr/local/include/Sockets)
+FIND_PATH(CSOCKETS_INCLUDE_DIR Sockets/sockets-config.h)
 #MARK_AS_ADVANCED(CSOCKETS_INCLUDE_DIR)
 
 # Look for the library
@@ -40,3 +40,8 @@ IF(NOT CSOCKETS_FOUND)
     ENDIF(CSOCKETS_FIND_REQUIRED)
   ENDIF(NOT CSOCKETS_FIND_QUIETLY)
 ENDIF(NOT CSOCKETS_FOUND)
+
+MARK_AS_ADVANCED(
+    CSOCKETS_INCLUDE_DIR
+    CSOCKETS_LIBRARY
+)

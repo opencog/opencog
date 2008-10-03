@@ -37,7 +37,7 @@ class CogServerRequest
 public:
     virtual ~CogServerRequest() {}
     virtual void callBack() = 0;
-    virtual RequestProcessor * getRequestProcessor() = 0;
+    virtual RequestProcessor* getRequestProcessor() = 0;
     virtual void processRequest() {
         getRequestProcessor()->processRequest(this);
     }

@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_HOPFIELD_SERVER_H
 #define _OPENCOG_HOPFIELD_SERVER_H
 
+#include <sstream>
 #include <vector>
 
 #include <math.h>
@@ -36,7 +37,6 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/RandGen.h>
 
-#include "HopfieldOptions.h"
 #include "Pattern.h"
 
 #define HDEMO_DEFAULT_WIDTH 3
@@ -48,9 +48,14 @@ namespace opencog
 {
 
 class HopfieldOptions;
+class ForgettingAgent;
+class HebbianLearningAgent;
+class ImportanceDiffusionAgent;
+class ImportanceSpreadingAgent;
+class ImportanceUpdatingAgent;
 
 /** Emulates a hopfield network using OpenCog dynamics */
-class HopfieldServer : public opencog::CogServer
+class HopfieldServer : public CogServer
 {
 
 private:
@@ -60,20 +65,19 @@ private:
      */
     std::vector<Handle> hGrid;
 
-    opencog::RandGen* rng;
+    RandGen* rng;
 
 public:
     // Amount of stimulus to apply across a pattern
     stim_t patternStimulus;
 
-    opencog::ImportanceUpdatingAgent *importUpdateAgent;
-    opencog::HebbianLearningAgent *hebLearnAgent;
-    opencog::ImportanceSpreadingAgent *spreadAgent;
+    ForgettingAgent *forgetAgent;
+    HebbianLearningAgent *hebLearnAgent;
 #ifdef HAVE_GSL
-    opencog::ImportanceDiffusionAgent *diffuseAgent;
+    ImportanceDiffusionAgent *diffuseAgent;
 #endif
-    opencog::ForgettingAgent *forgetAgent;
-
+    ImportanceSpreadingAgent *spreadAgent;
+    ImportanceUpdatingAgent *importUpdateAgent;
     HopfieldOptions *options;
 
     int width, height, links;

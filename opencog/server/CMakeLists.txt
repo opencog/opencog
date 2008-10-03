@@ -3,53 +3,77 @@ INCLUDE_DIRECTORIES (
 	${ODBC_INCLUDE_DIRS}
 )
 
+ADD_LIBRARY (builtinreqs SHARED
+    BuiltinRequests
+    Request
+    DataRequest
+    ExitRequest
+    HelpRequest
+    LoadRequest
+    LoadModuleRequest
+    ListRequest
+    ShutdownRequest
+    UnloadModuleRequest
+)
+
+TARGET_LINK_LIBRARIES(builtinreqs
+    xml
+) 
+
 ADD_LIBRARY (server SHARED
-    BaseServer.cc
-	CogServer.cc 
-	SimpleNetworkServer.cc 
-	ServerSocket.cc 
-	CommandRequest.cc 
-	CommandRequestProcessor.cc 
+    BaseServer
+	CogServer
+    Request
+	NetworkServer
+	ConsoleSocket
 )
 
 TARGET_LINK_LIBRARIES(server
+	util
 	atomspace
-	xml
-	query
-	schemes
-	wsd
-	persist
-	${ODBC_LIBRARIES}
-	${CSOCKETS_LIBRARIES}
-	${OPENSSL_LIBRARIES}
-	${EXPAT_LIBRARIES}
-	${GUILE_LIBRARIES}
-	${LIBMEMCACHED_LIBRARIES}
 )
 
-ADD_EXECUTABLE(cogserver CogServerMain.cc)
+ADD_EXECUTABLE(cogserver
+    CogServerMain
+)
 
-TARGET_LINK_LIBRARIES(cogserver server)
+TARGET_LINK_LIBRARIES(cogserver
+    server
+    ${CSOCKETS_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+)
+
 IF (WIN32)
 	SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
 ENDIF (WIN32)
 
-INSTALL (TARGETS server cogserver
+INSTALL (TARGETS server cogserver builtinreqs
 	RUNTIME DESTINATION "bin"
 	LIBRARY DESTINATION "lib/opencog"
 )
 
 INSTALL (FILES
+    Agent.h
     BaseServer.h
-	CallBackInterface.h
-	CogServer.h
-	CogServerRequest.h
-	CommandRequest.h
-	CommandRequestProcessor.h
-	MindAgent.h
-	NetworkServer.h
-	RequestProcessor.h
-	ServerSocket.h
-	SimpleNetworkServer.h
+    BuiltinRequests.h
+    CogServer.h
+    CogServerRequest.h
+    ConsoleSocket.h
+    DataRequest.h
+    ExitRequest.h
+    Factory.h
+    HelpRequest.h
+    IHasMimeType.h
+    IRPCSocket.h
+    ListRequest.h
+    LoadModuleRequest.h
+    LoadRequest.h
+    Module.h
+    NetworkServer.h
+    Registry.h
+    Request.h
+    RequestProcessor.h
+    ShutdownRequest.h
+    UnloadModuleRequest.h
 	DESTINATION "include/opencog/server"
 )

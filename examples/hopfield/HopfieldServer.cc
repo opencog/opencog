@@ -1,4 +1,6 @@
 /*
+ * examples/hopfield/HopfieldServer.cc
+ *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
  * All Rights Reserved
@@ -30,11 +32,13 @@
 #include <sys/time.h>
 #endif
 
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
+
+#include "HopfieldOptions.h"
 
 using namespace opencog;
 using namespace std;
@@ -128,20 +132,19 @@ HopfieldServer::HopfieldServer()
     options = new HopfieldOptions();
     options->setServer(this);
 
-    importUpdateAgent = new ImportanceUpdatingAgent();
-    hebLearnAgent = new HebbianLearningAgent();
-    hebLearnAgent->convertLinks = true;
+
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(cogserver.createAgent(ImportanceUpdatingAgent::info().id, true));
+    hebLearnAgent     = static_cast<HebbianLearningAgent*>(cogserver.createAgent(HebbianLearningAgent::info().id, true));
 #ifdef HAVE_GSL
-    diffuseAgent = new ImportanceDiffusionAgent();
+    diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(cogserver.createAgent(ImportanceDiffusionAgent::info().id, true));
 #else
-    spreadAgent = new ImportanceSpreadingAgent();
+    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(cogserver.createAgent(ImportanceSpreadingAgent::info().id, true));
 #endif
-    forgetAgent = new ForgettingAgent();
-    forgetAgent->forgetPercentage = 0.05f;
+    forgetAgent       = static_cast<ForgettingAgent*>(cogserver.createAgent(ForgettingAgent::info().id, true));
 
-
-    plugInMindAgent(importUpdateAgent, 1);
-    plugInMindAgent(hebLearnAgent, 1);
+    hebLearnAgent->convertLinks = true;
+    forgetAgent->forgetPercentage = 0.10f;
 }
 
 HopfieldServer::~HopfieldServer()
@@ -149,7 +152,6 @@ HopfieldServer::~HopfieldServer()
     delete importUpdateAgent;
     delete hebLearnAgent;
     delete rng;
-
 }
 
 void HopfieldServer::init(int width, int height, int numLinks)
