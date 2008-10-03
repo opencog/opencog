@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/* Simple implementation of a factory registry */
-
 #ifndef _OPENCOG_REGISTRY_H
 #define _OPENCOG_REGISTRY_H
 
@@ -39,6 +37,10 @@
 namespace opencog
 {
 
+/**
+ * This template implements a simplified Factory registry, following some of the
+ * guidelines provided by the book 'Modern C++ Design' by Andrei Alexandrescu.
+ */
 template< typename _BaseType >
 class Registry
 {
@@ -56,18 +58,21 @@ public:
     Registry() {}
     virtual ~Registry() {}
 
+    /** Registers a factory identified by 'id' */
     virtual bool register_(const std::string& id, AbstractFactory<_BaseType> const* factory)
     {
         logger().debug("registering %s \"%s\"", demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return factories.insert(FactoryMapValueType(id, factory)).second;
     }
 
+    /** Unregisters the factory identified by 'id' */
     virtual bool unregister(const std::string& id)
     {
         logger().debug("unregistering %s \"%s\"", demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return factories.erase(id) == 1;
     }
 
+    /** Creates a new instance using the factory identified by 'id' */
     virtual _BaseType* create(const std::string& id)
     {
         FactoryMapConstIterator it = factories.find(id);
@@ -81,6 +86,7 @@ public:
         return it->second->create();
     }
 
+    /** Returns the metadata associated with the factory identified by 'id' */
     const ClassInfo& classinfo(const std::string& id) const
     {
         static ClassInfo emptyClassInfo;
@@ -95,6 +101,7 @@ public:
         return it->second->info();
     }
 
+    /** Returns a list with all the ids from the registered factories */
     virtual std::list<const char*> all(void) const
     {
         logger().debug("listing all %ss", demangle(typeid(_BaseType).name()).c_str());

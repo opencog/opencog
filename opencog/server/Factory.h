@@ -1,5 +1,5 @@
 /*
- * src/server/AgentFactory.h
+ * src/server/Factory.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -32,7 +32,8 @@
 namespace opencog
 {
 
-// stores class specific info
+/* Defines the base class metadata information. For the base class, this
+ * consists of the class' id only. */
 struct ClassInfo
 {
     std::string id;
@@ -42,6 +43,8 @@ struct ClassInfo
     ClassInfo(const std::string& s) : id(s) {};
 };
  
+/* Defines an abstract factory template, following Alexandrescu's pattern from
+ * 'Modern C++ Design' */
 template< typename _BaseType >
 class AbstractFactory
 {
@@ -52,6 +55,8 @@ public:
     virtual const ClassInfo& info() const = 0;
 }; 
 
+/* Defines a factory template, following Alexandrescu's pattern from 'Modern
+ * C++ Design' */
 template< typename _Type, typename _BaseType >
 class Factory : public AbstractFactory<_BaseType>
 {

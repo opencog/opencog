@@ -33,6 +33,19 @@ class BaseServer;
 
 typedef BaseServer* ServerFactory(void);
 
+/**
+ * This class implements a base server class that provides basic functionality
+ * for third parties who might wish to use their custom server.
+ * There are only two primitives provided by this class: an atomspace instance
+ * and a factory method.
+ *
+ * Applications extending the BaseServer must ensure that:
+ *      1. the derived server overrides the factory method 'createInstance'
+ *      2. the first call to the 'opencog::server()' global function explicitly
+ *         passes the derived server's factory method as parameter.
+ *
+ * See the files CogServerMain.cc, CogServerh and CogServercc for examples.
+ */
 class BaseServer
 {
 
@@ -42,7 +55,10 @@ protected:
 
 public:
 
+    /** Returns the atomspace instance. */
     static AtomSpace* getAtomSpace();
+
+    /** Returns a new BaseServer instance. */
     static BaseServer* createInstance(void);
 
     BaseServer(void);

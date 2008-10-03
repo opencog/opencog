@@ -63,9 +63,8 @@ INSTALL (TARGETS server cogserver builtinreqs
 INSTALL (FILES
     Agent.h
     BaseServer.h
-    BuiltinRequests.h
+    BuiltinRequestsModule.h
     CogServer.h
-    CogServerRequest.h
     ConsoleSocket.h
     DataRequest.h
     ExitRequest.h
@@ -80,7 +79,6 @@ INSTALL (FILES
     NetworkServer.h
     Registry.h
     Request.h
-    RequestProcessor.h
     ShutdownRequest.h
     UnloadModuleRequest.h
 	DESTINATION "include/opencog/server"

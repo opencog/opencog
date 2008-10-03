@@ -2,9 +2,11 @@
  * opencog/server/CogServer.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
  * Written by Andre Senna <senna@vettalabs.com>
+ *            Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -309,7 +311,7 @@ bool CogServer::loadModule(const std::string& filename)
     dlerror();
 
     // search for id function
-    Module::IdFunction* id_func = (Module::IdFunction*) dlsym(dynLibrary, "opencog_module_id");
+    Module::IdFunction* id_func = (Module::IdFunction*) dlsym(dynLibrary, Module::id_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_id\": %s (module %s)", dlsymError, filename.c_str());
@@ -324,14 +326,14 @@ bool CogServer::loadModule(const std::string& filename)
     }
 
     // search for 'load' & 'unload' symbols
-    Module::LoadFunction* load_func = (Module::LoadFunction*) dlsym(dynLibrary, "opencog_module_load");
+    Module::LoadFunction* load_func = (Module::LoadFunction*) dlsym(dynLibrary, Module::load_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_load\": %s", dlsymError);
         return false;
     }
 
-    Module::UnloadFunction* unload_func = (Module::UnloadFunction*) dlsym(dynLibrary, "opencog_module_unload");
+    Module::UnloadFunction* unload_func = (Module::UnloadFunction*) dlsym(dynLibrary, Module::unload_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_unload\": %s", dlsymError);
