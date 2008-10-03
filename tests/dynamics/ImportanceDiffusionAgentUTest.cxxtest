@@ -142,16 +142,16 @@ class ImportanceDiffusionAgentUTest :  public CxxTest::TestSuite {
         agent->setDiffusionThreshold(0.0);
 	    server.unitTestServerLoop(1);
 	    
-        TS_ASSERT(abs(10-server.getAtomSpace()->getSTI(atoms[0]));
-        TS_ASSERT(abs(90-server.getAtomSpace()->getSTI(atoms[1]));
-        TS_ASSERT(abs(230-server.getAtomSpace()->getSTI(atoms[2]));
-        TS_ASSERT(abs(270-server.getAtomSpace()->getSTI(atoms[3]));
+        TS_ASSERT(abs(10-server.getAtomSpace()->getSTI(atoms[0]))<STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(90-server.getAtomSpace()->getSTI(atoms[1]))<STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(230-server.getAtomSpace()->getSTI(atoms[2]))<STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(270-server.getAtomSpace()->getSTI(atoms[3]))<STI_ALLOWABLE_ERROR);
 
         // 1. check atoms less than diffusion threshold are not spread from
         agent->setDiffusionThreshold(0.5);
 	    server.unitTestServerLoop(1);
-        TS_ASSERT(abs(10-server.getAtomSpace()->getSTI(atoms[0]));
-        TS_ASSERT(abs(90-server.getAtomSpace()->getSTI(atoms[1]));
+        TS_ASSERT(abs(10-server.getAtomSpace()->getSTI(atoms[0]))<STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(90-server.getAtomSpace()->getSTI(atoms[1]))<STI_ALLOWABLE_ERROR);
         TS_ASSERT(abs(257-server.getAtomSpace()->getSTI(atoms[2]))<STI_ALLOWABLE_ERROR);
         TS_ASSERT(abs(243-server.getAtomSpace()->getSTI(atoms[3]))<STI_ALLOWABLE_ERROR);
 
