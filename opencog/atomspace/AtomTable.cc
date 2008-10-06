@@ -737,6 +737,10 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (TLB::isValidHandle(existingHandle)) {
         //printf("Merging existing Atom with the Atom being added ...\n");
         merge(TLB::getAtom(existingHandle), atom);
+
+        // emit add atom signal
+        _addAtomSignal(existingHandle);
+
         return existingHandle;
     }
 
@@ -842,6 +846,11 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (useDSA) {
         StatisticsMonitor::getInstance()->add(atom);
     }
+
+    // emit add atom signal
+    _addAtomSignal(handle);
+
+    logger().debug("[AtomTable] add: %d", handle);
 
     return handle;
 }
@@ -1019,17 +1028,16 @@ bool AtomTable::remove(Handle handle, bool recursive)
 
 void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 {
-    if (extractedHandles) {
-        HandleEntry* currentEntry = extractedHandles;
-        while (currentEntry) {
-            Handle h = currentEntry->handle;
-            Atom* atom = TLB::getAtom(h);
-            TLB::removeAtom(atom);
-            delete atom;
-            currentEntry = currentEntry->next;
-        }
-        delete extractedHandles;
+    if (extractedHandles == NULL) return;
+    for (HandleEntry *it = extractedHandles; it != NULL; it = it->next) {
+        // emit remove atom signal
+        _removeAtomSignal(it->handle);
+
+        Atom* atom = TLB::getAtom(it->handle);
+        TLB::removeAtom(atom);
+        delete atom;
     }
+    delete extractedHandles;
 }
 
 void AtomTable::removeFromIndex(Atom *victim,
@@ -1414,4 +1422,14 @@ bool opencog::atom_ptr_equal_to::operator()(const Atom* const& x,
 {
     bool rv = x->equals(y);
     return rv;
+}
+
+boost::signal<void (Handle)>& AtomTable::addAtomSignal()
+{
+    return _addAtomSignal;
+}
+
+boost::signal<void (Handle)>& AtomTable::removeAtomSignal()
+{
+    return _removeAtomSignal;
 }

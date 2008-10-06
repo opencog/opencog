@@ -15,6 +15,7 @@ LINK_DIRECTORIES (
 LINK_LIBRARIES (
     server
     attention
+	boost_signals-mt
 	${GSL_LIBRARIES}
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}

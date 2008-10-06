@@ -28,8 +28,9 @@
 #define _OPENCOG_ATOMTABLE_H
 
 #include <iostream>
+#include <vector>
 
-#include <opencog/util/platform.h>
+#include <boost/signal.hpp>
 
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/HandleEntry.h>
@@ -40,6 +41,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/platform.h>
 
 namespace opencog
 {
@@ -113,6 +115,9 @@ private:
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_t iteratorsLock;
 #endif
+
+    boost::signal<void (Handle)> _addAtomSignal;
+    boost::signal<void (Handle)> _removeAtomSignal;
 
     void removeFromIndex(Atom *, std::vector<Handle>&, int, int)
     throw (RuntimeException);
@@ -632,6 +637,9 @@ public:
      * and set up all incoming sets of each atom.
      */
     void scrubIncoming(void);
+
+    boost::signal<void (Handle)>& addAtomSignal();
+    boost::signal<void (Handle)>& removeAtomSignal();
 };
 
 } //namespace opencog

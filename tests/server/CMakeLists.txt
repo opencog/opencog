@@ -15,6 +15,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(CogServerUTest
     server
+	boost_signals-mt
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
 )

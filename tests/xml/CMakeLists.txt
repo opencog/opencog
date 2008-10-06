@@ -7,7 +7,11 @@ INCLUDE_DIRECTORIES(
 
 LINK_DIRECTORIES(${OPENCOG_BINARY_DIR})
 
-LINK_LIBRARIES(atomspace xml ${EXPAT_LIBRARIES})
+LINK_LIBRARIES(atomspace
+	xml
+	boost_signals-mt
+	${EXPAT_LIBRARIES}
+)
 
 ADD_CXXTEST(NMXmlParserUTest NMXmlParserExperiment.cc)
 ADD_CXXTEST(NMXmlExporterUTest NMXmlParserExperiment.cc)

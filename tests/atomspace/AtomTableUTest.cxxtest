@@ -27,6 +27,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <tr1/functional>
+
 // We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
 // ensure we find the file whether or not we're building using a separate build
 // dir
@@ -49,6 +51,7 @@
 #include <opencog/xml/NMXmlParser.h>
 
 using namespace opencog;
+using namespace std::tr1::placeholders;
 
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
@@ -464,4 +467,47 @@ public:
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
     }
 
+    int __testSignalsCounter;
+
+    void atomAdded1(Handle h) {
+        TS_ASSERT(table->getSize() == 1); 
+        logger().info("atomAdded1: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter += 1;
+    }
+
+    void atomAdded2(Handle h) {
+        TS_ASSERT(table->getSize() == 1); 
+        logger().info("atomAdded2: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter += 2;
+    }
+
+    void atomRemoved1(Handle h) {
+        TS_ASSERT(table->getSize() == 0); 
+        logger().info("atomRemoved1: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter -= 4;
+    }
+
+    void atomRemoved2(Handle h) {
+        TS_ASSERT(table->getSize() == 0); 
+        logger().info("atomRemoved2: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter -= 5;
+    }
+
+    void testSignals() {
+        AtomTable atomTable;
+        table = &atomTable; // save pointer in class member
+
+        // connect signals
+        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded1, this, _1));
+        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded2, this, _1));
+        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved1, this, _1));
+        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, _1));
+
+        /* add and remove a simple node */
+        __testSignalsCounter = 0;
+        Handle wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
+        TS_ASSERT(__testSignalsCounter == 3);
+        atomTable.remove(wnHandle);
+        TS_ASSERT(__testSignalsCounter == -6);
+    }
 };

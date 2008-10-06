@@ -29,6 +29,7 @@ TARGET_LINK_LIBRARIES(sniff
 	persist
 	atomspace
 	server
+	boost_signals-mt
 	${ODBC_LIBRARIES}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}

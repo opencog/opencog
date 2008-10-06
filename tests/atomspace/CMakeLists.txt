@@ -9,7 +9,10 @@ LINK_DIRECTORIES(
 	${OPENCOG_BINARY_DIR}/src/xml
 )
 
-LINK_LIBRARIES(atomspace)
+LINK_LIBRARIES(
+    atomspace
+    boost_signals-mt
+)
 
 ADD_CXXTEST(AtomTableUTest)
 TARGET_LINK_LIBRARIES(AtomTableUTest xml ${EXPAT_LIBRARIES})
