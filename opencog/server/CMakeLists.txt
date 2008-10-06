@@ -45,8 +45,8 @@ ADD_EXECUTABLE(cogserver
 
 TARGET_LINK_LIBRARIES(cogserver
     server
-    boost_filesystem-mt
-    boost_signals-mt
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SIGNALS_LIBRARY}
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
 )

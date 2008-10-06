@@ -4,6 +4,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
+	FindBoost.cmake
 	FindCSockets.cmake
 	FindCxxtest.cmake
 	FindGuile.cmake

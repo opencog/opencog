@@ -9,7 +9,7 @@ LINK_DIRECTORIES(${OPENCOG_BINARY_DIR})
 
 LINK_LIBRARIES(atomspace
 	xml
-	boost_signals-mt
+	${Boost_SIGNALS_LIBRARY}
 	${EXPAT_LIBRARIES}
 )
 

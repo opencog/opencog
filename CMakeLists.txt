@@ -34,10 +34,15 @@ ELSE (WIN32)
 	LINK_LIBRARIES(pthread)
 	SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
 ENDIF (WIN32)
+
 FIND_PACKAGE(EXPAT REQUIRED)
 FIND_PACKAGE(CSockets REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
-FIND_PACKAGE(Boost REQUIRED)
+
+SET(Boost_USE_STATIC_LIBS ON)
+SET(Boost_USE_MULTITHREAD ON)
+FIND_PACKAGE(Boost COMPONENTS filesystem signals REQUIRED)
+
 # FIND_PACKAGE(LibMemCached)
 # Enable the use of SQL storage, if either iodbc of unixodbc is found.
 # Caution: this can also increase RAM usage significantly!

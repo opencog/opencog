@@ -11,7 +11,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
     atomspace
-    boost_signals-mt
+	${Boost_SIGNALS_LIBRARY}
 )
 
 ADD_CXXTEST(AtomTableUTest)
