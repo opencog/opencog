@@ -41,6 +41,32 @@
 namespace opencog
 {
 
+/**
+ * This class implements the entity responsible for managing all the opencog
+ * network servers. It uses alhem's sockets library
+ * (http://www.alhem.net/Sockets/) to handle the low level network sockets.
+ *
+ * The network server runs on its own thread (thus freeing the cogserver's main
+ * loop to deal with requests and agents only). And it may be enabled/disabled
+ * at will so that a cogserver may run in networkless mode if desired.
+ * 
+ * The network server supports multiple server sockets. Client applications
+ * should use the 'addListener' functor and the 'removeListener' method to
+ * add/remove custom server sockets. Currently, the network server doesn't
+ * support selecting the network interface that the server socket will bind to
+ * (every server sockets binds to 0.0.0.0, i.e., all interfaces). Thus,
+ * server sockets are identified/selected by the port they bind to.
+ *
+ * Another limitation of the network server is that is adds a delay to certain
+ * network operations. Due to the way the alhem's sockets library async loop is
+ * built around 'select', some operations (such as forwarding a client socket to
+ * a separate thread) take a few mili-seconds to complete. This delay is
+ * proportional to the timeout T supplied to the sockets library by the network
+ * server. Currently we use T == * 0.2 seconds, which doesn't seem to increase
+ * latency too much. The downside is that the opencog server inhibits proper
+ * power manager by the OS, as it wakes up the processor at a relatively high
+ * frequency.
+ */
 class NetworkServer
 {
 
@@ -55,13 +81,31 @@ protected:
 
 public:
 
+    /** NetworkServer's contructor. Initializes the threading control
+     *  class members. */
     NetworkServer();
+
+    /** NetworkServer's destructor. */
     virtual ~NetworkServer();
 
+    /** Starts the NetworkServer by creating a new pthread and (indirectly)
+     *  calling the method 'run' -- which is essentially a loop around the
+     *  SocketHandler.Select method (from alhem's Sockets library). */
     virtual void start();
-    virtual void stop();
-    virtual void run();
 
+    /** Stops the NetworkServer by flipping the flag that controls the main
+     *  loop. */
+    virtual void stop();
+
+    /** The network server's thread main method. It should not be called by
+     *  external classes and is only declared as public because we use a 'extern
+     *  "C"' wrapper when calling pthread_create (many C++ 'best practices'
+     *  guiles state that directly using the C++ 'run' is unsafe) */
+    void run();
+
+    /** Instantiates a listener socket (i.e. server socket) of class '_Socket'
+     *  and binds it to port 'port'. Returns 'true' if successful an 'false'
+     *  otherwise. */
     template<class _Socket>
     bool addListener(const unsigned int port) {
         logger().debug("adding listener to socket %d", port);
@@ -80,6 +124,8 @@ public:
         return true;
     }
 
+    /** Closes the listener socket bound to port 'port'. Returns 'true' if
+     *  successful and 'false' otherwise. */
     bool removeListener(const unsigned short port);
 
 }; // class

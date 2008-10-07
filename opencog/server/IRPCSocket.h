@@ -30,6 +30,16 @@
 namespace opencog
 {
 
+/**
+ * This class defines an interface that sockets compatible with opencog requests
+ * must implement. It just defines an extra callback -- OnRequestComplete() --
+ * which is used by the request to notify the client socket that it has
+ * finished.
+ *
+ * This mechanism is required to enable the request to be processed in one thread
+ * (the main cogserver thread) while the socket handling is handled by a
+ * separate thread.
+ */
 class IRPCSocket
 {
 

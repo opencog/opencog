@@ -1,5 +1,5 @@
 /*
- * src/server/HasMimeType.h
+ * src/server/IHasMimeType.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -30,6 +30,18 @@
 namespace opencog
 {
 
+/**
+ * This class defines an interface that sockets compatible with opencog requests
+ * must implement. It just defines a 'mimetype' attribute which the socket must
+ * set. This is just to allow a request's implementation to render a different
+ * view based on which client it is talking to.
+ *
+ * For instance, a plain text command line server socket would declare its
+ * mime-type 'text/plain' so that the requests would print the output in plain
+ * text. And a web-service based server socket would declare its mime-type as
+ * 'application/xml' or 'text/html' so that the requests would print the output
+ * in XMl or HTML.
+ */
 class IHasMimeType
 {
 
