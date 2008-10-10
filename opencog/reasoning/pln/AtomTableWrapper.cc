@@ -157,8 +157,13 @@ Handle AtomTableWrapper::child(const Handle h, const int i) {
     if (hasAppropriateContext(o,r.second)) {
         return realToFakeHandle(o,r.second);
     } else {
+        return realToFakeHandle(o,NULL_VERSION_HANDLE);
+        // Below is incorrect... if a atom is being duplicated due to
+        // fresh=true, then the links are still the same. If there is no direct
+        // PLN context inheritance, then the default TV should be used (as
+        // above).
         // if not, return a NULL_HANDLE
-        throw RuntimeException(TRACE_INFO, "no child with same context at position %d", i);
+        //throw RuntimeException(TRACE_INFO, "no child with same context at position %d", i);
     }
 }
 

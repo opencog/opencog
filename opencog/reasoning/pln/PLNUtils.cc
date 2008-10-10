@@ -1099,23 +1099,22 @@ void printTree(Handle h, int level, int LogLevel)
 	{
 		char buf[500];
 
-		sprintf(buf, "Virtual %s (%d) [%d]", reasoning::Type2Name((Type)(int)h), (Type)(int)h,  (int)h);
+		sprintf(buf, "Virtual %s (%d) [%d]\n", reasoning::Type2Name((Type)(int)h), (Type)(int)h,  (int)h);
 		
 		if (test::logfile && LogLevel >= currentDebugLevel)
-			fprintf(test::logfile, "%s\n", buf);
+			fprintf(test::logfile, "%s", buf);
 
 		printf((repeatc(' ', level*3) + buf ).c_str());
 		return;		
 	}
 	
-	vector<Handle> hs = atw->getOutgoing(h);
-
 	if (atw->getArity(h) == 0)
 	{
 		printNode1(h, level,LogLevel);
 	}
 	else
 	{
+        vector<Handle> hs = atw->getOutgoing(h);
 		Type t = atw->getType(h);
 		const TruthValue& tv = atw->getTV(h);
 
@@ -1130,10 +1129,11 @@ void printTree(Handle h, int level, int LogLevel)
 			fprintf(test::logfile, "%s\n", buf);
 		
         LOG(LogLevel, (repeatc(' ', level*3) + buf ).c_str());
+
+        for (vector<Handle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
+            printTree(*hi, level+1,LogLevel);
 	}
 
-	for (vector<Handle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
-		printTree(*hi, level+1,LogLevel);
 }
 
 map<int, Type> counter;
@@ -1598,11 +1598,11 @@ LOG(4,"Unify1:");
 printTree(lhs,0,3);		
 		
 		bool lhs_is_node = atw->inheritsType(lhs_T, NODE);
-
-		string lhs_name(lhs_is_node ? atw->getName(lhs) : "");
-cprintf(4, "Node name: %s\n",lhs_name.c_str());		
+        string lhs_name(lhs_is_node ? atw->getName(lhs) : "");
 		if (lhs_is_node)
 		{
+            cprintf(4, "Node name: %s\n",lhs_name.c_str());		
+
 			bindingsT::const_iterator s = bindings.find(lhs);
 		
 			if (s != bindings.end())
@@ -1613,17 +1613,24 @@ cprintf(4, "Node name: %s\n",lhs_name.c_str());
 					printAtomTree(s->second,0,3);
 				}
 				assert(lhs.name != s->second.name);*/
-					LOG(4, "Binding found. eq...");
+                LOG(4, "Binding found. eq...");
 				bool ret = equal_atom_ignoreVarNameDifferences(atom(s->second), rhs);
 				LOG(4, "equal_atom_ignoreVarNameDifferences ok");
 				return ret;
 			}
+            LOG(4, "Binding NOT found.");
 		}
-		LOG(4, "Binding NOT found.");
-		if (rhs.T!=lhs_T ||
+		if ( // Check whether not the same type
+             rhs.T!=lhs_T || 
+             // If a node, then check if the names are different 
 			 (lhs_is_node && rhs.name!=lhs_name) ||
-			 (atw->isReal(lhs) && !MPunifyHandle(lhs, rhs, bindings, forbiddenBindings, restart, VarT))
-			||(!atw->isReal(lhs)&& !MPunifyVector(lhs_t, lhs_ti, rhs.hs, bindings, forbiddenBindings, restart, VarT)))
+             // If lhs is a real atom, check whether lhs and rhs cannot be unified
+			 (atw->isReal(lhs) && !MPunifyHandle(lhs, rhs, bindings,
+                     forbiddenBindings, restart, VarT)) ||
+             // If lhs isn't a real atom, check whether lhs and rhs cannot be unified
+             // based on the atoms pointed to by rhs.
+			 (!atw->isReal(lhs) && !MPunifyVector(lhs_t, lhs_ti, rhs.hs,
+                     bindings, forbiddenBindings, restart, VarT)))
 		{
 			LOG(4, "Difference found.");
 			
@@ -1988,7 +1995,8 @@ bool substitutableTo(Handle from,Handle to,
 char unnamed_type[] = "unnamed-type";
 const char* Type2Name(Type t)
 {
-	return NULL;
+
+    return ClassServer::getTypeName(t).c_str();
 /*
 	return  (STLhas(*ClassServer::class_name, t)
 				? (*ClassServer::class_name)[t]
