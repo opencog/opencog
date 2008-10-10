@@ -361,7 +361,7 @@ public:
     }
 
     void testPrint() {
-        const char *filename = "AtomTableUText.log";
+        const char *filename = OPENCOG_BINARY_DIR"/tests/atomspace/AtomTableUTest.log";
         std::ofstream out(filename);
 
         out << "All Atoms:" << endl;
