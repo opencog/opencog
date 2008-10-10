@@ -117,6 +117,7 @@ These should be bug-free, but there's no type checking of parameters, so providi
 
 #include <Logger.h>
 #include <SchemeShell.h>
+#include <TulipWriter.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
@@ -434,6 +435,10 @@ void fw_beta (void) {
   foreach (Handle h, results) {
       np(h);
   }
+
+  TulipWriter tlp(std::string("fwd_chain_result.tlp"));
+  tlp.write();
+  
   
 }
 

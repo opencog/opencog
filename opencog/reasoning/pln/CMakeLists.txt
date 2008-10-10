@@ -63,6 +63,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/src/xml
     ${OPENCOG_SOURCE_DIR}/src/server
     ${OPENCOG_SOURCE_DIR}/src/guile
+    ${OPENCOG_SOURCE_DIR}/src/adaptors/tulip
     ${OPENCOG_SOURCE_DIR}/src/nlp/wsd
     ${OPENCOG_SOURCE_DIR}/src/persist
     ${OPENCOG_SOURCE_DIR}/src/query
@@ -85,6 +86,7 @@ TARGET_LINK_LIBRARIES(pln
     schemes
     wsd
     persist
+    adaptor-tulip
     ${IODBC_LIBRARIES}
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
@@ -102,6 +104,7 @@ TARGET_LINK_LIBRARIES(plnshell pln
     schemes
     wsd
     persist
+    adaptor-tulip
     ${IODBC_LIBRARIES}
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
@@ -119,6 +122,7 @@ TARGET_LINK_LIBRARIES(indeftest pln
     schemes
     wsd
     persist
+    adaptor-tulip
     ${IODBC_LIBRARIES}
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
