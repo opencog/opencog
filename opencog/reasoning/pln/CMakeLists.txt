@@ -10,6 +10,7 @@ ADD_LIBRARY (pln STATIC
     PLNUtils.cc
     PLNShell.cc
     Tester.cc
+    ForwardChainer.cc
 # Formulas:
     formulas/Formulas.cc
     formulas/FormulasIndefinite.cc

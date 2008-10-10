@@ -750,7 +750,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
                  
         //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);         
-        return getHandleSet(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
+        return getHandleSetFiltered(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
 
     }
 

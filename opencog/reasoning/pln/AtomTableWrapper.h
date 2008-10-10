@@ -126,6 +126,14 @@ class AtomTableWrapper : public iAtomTableWrapper
         //return ret;
     }
 
+    //! Used by getImportantHandles
+    struct compareSTI {
+        // Warning, uses real atomspace handles in comparison
+        bool operator()(const Handle& a, const Handle& b) {
+            return TLB::getAtom(a)->getAttentionValue().getSTI() >
+                TLB::getAtom(b)->getAttentionValue().getSTI();
+        }
+    };
 public:
     //! Which XML files have been loaded by PLN to populate the AtomSpace
     set<std::string> loadedFiles;
@@ -207,6 +215,9 @@ public:
 
     //! return a random handle of type T
     Handle getRandomHandle(Type T);
+
+    //! get a number of high STI handles
+    std::vector<Handle> getImportantHandles(int number);
 
     //! Adds handle h and linked nodes (if h is a link) to AtomSpace again with
     //! fresh set to true

@@ -1050,18 +1050,26 @@ void AtomSpace::clear()
     std::vector<Handle> allAtoms;
     std::vector<Handle>::iterator i;
     std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
+    bool result;
 
     getHandleSet(outputI, ATOM, true);
+#if 0
     printf("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
     printf("atoms in allAtoms: %d\n",allAtoms.size());
+#endif 
     logger().enable();
     logger().setLevel(Logger::DEBUG);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-        if (removeAtom(*i,true))
+        result = removeAtom(*i,true);
+#if 0
+        if (result) {
             printf("Atom removed, %d nodes %d links left to delete\n",
                 Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
+        }
+#endif
+
     }
 
 }

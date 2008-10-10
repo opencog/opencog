@@ -113,8 +113,10 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #include "AtomTableWrapper.h"
 #include "BackInferenceTreeNode.h"
 #include "PLNShell.h"
+#include "ForwardChainer.h"
 
 #include <Logger.h>
+#include <SchemeShell.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
@@ -130,7 +132,7 @@ using namespace reasoning;
 extern int currentDebugLevel;
 
 //! Run tests at start up
-bool RunPLNtest=true;
+bool RunPLNtest=false;
 //! Variable to store command line option of what temperature to run tests at
 int tempar=0;
 
@@ -401,24 +403,11 @@ void fw_beta (void) {
   AtomTableWrapper *atw = GET_ATW;
 
   atw->reset();
-  // Code to ensure AtomSpace was reset:
-  //vector<Handle> nodes=atw->filter_type(NODE);
-  //for (vector<Handle>::iterator i=nodes.begin(); i!=nodes.end(); i++)
-  //  printf ("_node %d, %s, TV %s\n",atw->getType(*i),atw->getName(*i).c_str(),printTV(*i).c_str());
 
-  //vector<Handle> inhlink=atw->filter_type(INHERITANCE_LINK);
-  //for (vector<Handle>::iterator i=inhlink.begin(); i!=inhlink.end(); i++) {
-  //  vector<Handle> out=atw->getOutgoing(*i);
-  //  printf ("_link %d: %s ",atw->getType(*i),printTV(*i).c_str());
-  //  foreach (Handle h,out)
-  //    cout << "<" << atw->getType(h) << "," << atw->getName(h) << ">,";
-  //  cout<<'\n';
-  //}
-  // Code to test INHERITANCE_LINK inherits only from LINK
-  //printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,LINK));
-  //printf ("teste: %d\n",atw->inheritsType(INHERITANCE_LINK,NODE));
-
-  ForwardTestRuleProvider *rp=new ForwardTestRuleProvider();
+  // Load word pair data
+  //SchemeShell shell();
+  
+  //ForwardChainerRuleProvider *rp=new ForwardChainerRuleProvider();
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
   Handle h1=atw->addNode (CONCEPT_NODE,string("Human"),tv,true);
   Handle h2=atw->addNode (CONCEPT_NODE,string("Mortal"),tv,true);
@@ -429,32 +418,23 @@ void fw_beta (void) {
   Handle L1=atw->addLink(INHERITANCE_LINK,p1,tv,true);
   Handle L2=atw->addLink(INHERITANCE_LINK,p2,tv,true);
 
-  Handle out,seed;
-  do {
-        Rule *r=(*rp)[ 2 ];
-        Handle nextH;
-        vector<Vertex> args;
-        do
-        {
-            //int bah; cin >> bah;
-            //if (args.size()>=2) args.clear();
-            args.clear();
-            //seed = atw.GetRandomHandle(INHERITANCE_LINK);
-            args.push_back(L2);
-            args.push_back(L1);
-        }
-        while (!r->validate(args));
-        Vertex V=((r->compute(args)).GetValue());
-        out=get<Handle>(V);
-        const TruthValue& tv=atw->getTV(out);
-        cout<<printTV(out)<<'\n';
-        printOutgoing(out);
-  } while (tv.isNullTv() || tv.getCount()<0.1);
+  ForwardChainer fw;
 
-//  cout<<"Input:\n";
-//  printOutgoing(seed);
-  cout<<"Output\n";
-  printOutgoing(out);
+  cout << "FWBETA Adding handles to seed stack" << endl;
+  fw.seedStack.push_back(L1);
+  fw.seedStack.push_back(L2);
+  fw.seedStack.push_back(h1);
+  fw.seedStack.push_back(h2);
+  fw.seedStack.push_back(h3);
+  cout << "FWBETA adding to seed stack finished" << endl;
+  HandleSeq results = fw.fwdChainStack();
+  //opencog::logger().info("Finish chaining on seed stack");
+  cout << "FWBETA Chaining on seed stack finished, results:" << endl;
+  NMPrinter np;
+  foreach (Handle h, results) {
+      np(h);
+  }
+  
 }
 
 void PLNShell::Launch()

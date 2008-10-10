@@ -1593,7 +1593,7 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
         Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
         if (nnn) {
             const Node& node = (const Node&) atom;
-            result = getHandle(node.getType(), node.getName());
+            result = a->getHandle(node.getType(), node.getName());
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
                 return realToFakeHandle(a->addNode(node.getType(),
@@ -1605,7 +1605,7 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             for (int i = 0; i < link.getArity(); i++) {
                 outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
             }
-            result = getHandle(link.getType(), outgoing);
+            result = a->getHandle(link.getType(), outgoing);
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
                 return realToFakeHandle(a->addLink(link.getType(),
@@ -1633,14 +1633,12 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             dcName << contextPrefix << dummyContexts.size();
             // add context node
             Handle contextNode = a->addNode(CONCEPT_NODE,dcName.str());
-            // add context link
-            // it's possible we might get away without a context link but it
-            // breaks the expected structure of the OpenCog graph. Adding the
-            // context link to be safe.
-            HandleSeq cOut;
-            cOut.push_back(contextNode);
-            cOut.push_back(result);
-            a->addLink(CONTEXT_LINK,cOut);
+
+            // context link isn't needed, it's implicit in VersionHandles
+            //HandleSeq cOut;
+            //cOut.push_back(contextNode);
+            //cOut.push_back(result);
+            //a->addLink(CONTEXT_LINK,cOut);
             
             // add version handle to dummyContexts
             vh = VersionHandle(CONTEXTUAL,contextNode);
@@ -1660,8 +1658,6 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
         fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
         
     }
-    // return version handle instead so that the correct Handle can be retrieved
-    // in future?
     return fakeHandle;
 
 }
@@ -1761,7 +1757,25 @@ Handle AtomTableWrapper::getRandomHandle(Type T)
   if (handles.size()==0)
     return Handle(0);
 
-  return handles[rand()%handles.size()];
+  return realToFakeHandle(handles[rand()%handles.size()], NULL_VERSION_HANDLE);
+}
+
+std::vector<Handle> AtomTableWrapper::getImportantHandles(int number)
+{
+    AtomSpace *a = AS_PTR;
+    std::vector<Handle> hs;
+
+    a->getHandleSetInAttentionalFocus(back_inserter(hs), ATOM, true);
+    int toRemove = hs.size() - number;
+    if (toRemove > 0) {
+        sort(hs.begin(), hs.end(), compareSTI());
+        while (toRemove > 0) {
+            hs.pop_back();
+            toRemove--;
+        }
+    }
+    return realToFakeHandle(hs);
+
 }
 
 #if 0
