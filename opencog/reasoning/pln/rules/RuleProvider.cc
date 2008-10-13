@@ -206,10 +206,10 @@ public:
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
 	iAtomTableWrapper* parent = ::haxx::defaultAtomTableWrapper;
-	AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
-
+	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
+	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
+	//AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
+	AddRule(new DeductionRule<DeductionSimpleFormula, ASSOCIATIVE_LINK>(parent), 8.0f);
     reset();
 }
 

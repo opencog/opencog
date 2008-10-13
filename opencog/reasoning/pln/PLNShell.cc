@@ -400,6 +400,15 @@ struct inhlink {
   }
 };
 
+//! Used by forward chainer 
+struct compareStrength {
+    // Warning, uses fake atomspace handles in comparison
+    bool operator()(const Handle& a, const Handle& b) {
+        return GET_ATW->getTV(a).getMean() >
+            GET_ATW->getTV(b).getMean();
+    }
+};
+
 void fw_beta (void) {
   AtomTableWrapper *atw = GET_ATW;
 
@@ -421,12 +430,28 @@ void fw_beta (void) {
 
   ForwardChainer fw;
 
+  // Load data from scm file
+
   cout << "FWBETA Adding handles to seed stack" << endl;
-  fw.seedStack.push_back(L1);
-  fw.seedStack.push_back(L2);
-  fw.seedStack.push_back(h1);
-  fw.seedStack.push_back(h2);
-  fw.seedStack.push_back(h3);
+  //fw.seedStack.push_back(L1);
+  //fw.seedStack.push_back(L2);
+  //
+// Push all links to seed stack in order of strength
+// . get links
+    shared_ptr<set<Handle> > linksSet = atw->getHandleSet(LINK, "", true);
+    HandleSeq links;
+    copy(linksSet->begin(), linksSet->end(), back_inserter(links));
+// . sort links based on strength
+    sort(links->begin(), links->end(), compareStrength);
+// . add in order
+    foreach(Handle l, links) {
+        fw.seedStack.push_back(l);
+    }
+// Change prob of non seed stack selection to zero
+// TODO: make method based to normalise probabilities.
+  fw.probGlobal = 0.0f;
+  fw.probStack = 1.0f;
+
   cout << "FWBETA adding to seed stack finished" << endl;
   HandleSeq results = fw.fwdChainStack();
   //opencog::logger().info("Finish chaining on seed stack");

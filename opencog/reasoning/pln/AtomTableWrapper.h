@@ -135,6 +135,7 @@ class AtomTableWrapper : public iAtomTableWrapper
         }
     };
 public:
+
     //! Which XML files have been loaded by PLN to populate the AtomSpace
     set<std::string> loadedFiles;
     

@@ -87,6 +87,16 @@ Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
     return a;
 }
 
+Handle ForwardChainer::getLocalLink(Handle lh, const std::vector< Vertex > &args) {
+// Make seed selection exploit locality of deduction rule
+// . make vector of links to node.
+// . sort based on strength. (optional)
+// . exponentially (optional) random index selection 
+//
+// (TODO... seed selection should be based on locality. There are
+// few if any rules that will use completely distinct parts of the hypergraph)
+}
+
 HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
 {
     // 4. For each remaining arg slot of R, find an atom A with 
