@@ -7,6 +7,7 @@ INSTALL (FILES
 	FindCSockets.cmake
 	FindCxxtest.cmake
 	FindGuile.cmake
+	FindGSL.cmake
 	FindIODBC.cmake
 	FindPthreads.cmake
 	FindSTLPort.cmake
