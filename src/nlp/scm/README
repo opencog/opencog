@@ -2,10 +2,23 @@
                   Assorted Scheme scripts
                   -----------------------
 
- * nlp-utils: some minir nlp-related utilities, mostly for pointer 
+Currently, the primary focus of work in this directory is to update
+a database of statistics based on running word-sense disambiguation
+together with parse results. This is implemented in stats-collection.scm.
+
+The actual SQL tables are defined and created by a different project 
+(sorry!), the 'lexical attraction' package on launchpad.  See, in
+particular, src/sql/disjunct.sql from that package.
+
+ * nlp-utils: some mini nlp-related utilities, mostly for pointer 
    chasing nlp-specific structures.
 
+ * stats-collection.scm: look for documents for which word-sense
+   disambiguation has been performed; use these to update a database
+   of statistics that associates link-grammar parses with wsd results.
+
  * parse-rank.scm: tweak link-grammar parse-ranking scores, based
-   on the mutual informationcontained in word pairs.
+   on the mutual information contained in word pairs. (Not currently
+   used)
 
  * disjunct.scm: build lists of link-grammar disjuncts.
