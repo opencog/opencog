@@ -6,6 +6,7 @@ ADD_LIBRARY (server STATIC
 	ServerSocket.cc 
 	CommandRequest.cc 
 	CommandRequestProcessor.cc 
+	SchemeShell.cc 
 )
 
 INCLUDE_DIRECTORIES (
