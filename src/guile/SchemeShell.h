@@ -10,7 +10,6 @@
 #ifdef HAVE_GUILE
 
 #include <string>
-#include <libguile.h>
 #include "SchemeEval.h"
 
 namespace opencog {

@@ -34,18 +34,36 @@ std::string SchemeShell::eval(const std::string &expr)
 	// Don't evaluate if the line is terminated by 
 	// escape (^[), cancel (^X) or quit (^C)
 	size_t len = expr.length();
-	char c = expr[len-2];
-	if ((0x6 == c) || (0x16 == c) || (0x18 == c) || (0x1b == c))
+	if (1 <= len) 
 	{
-		evaluator.clear_pending();
-		return "";
+		char c = expr[len-1];
+		if ((0x6 == c) || (0x16 == c) || (0x18 == c) || (0x1b == c))
+		{
+			evaluator.clear_pending();
+			return normal_prompt;
+		}
 	}
 
-	c = expr[len-1];
-	if ((0x6 == c) || (0x16 == c) || (0x18 == c) || (0x1b == c))
+	if (2 <= len) 
 	{
-		evaluator.clear_pending();
-		return "";
+		char c = expr[len-2];
+		if ((0x6 == c) || (0x16 == c) || (0x18 == c) || (0x1b == c))
+		{
+			evaluator.clear_pending();
+			return normal_prompt;
+		}
+	}
+
+	if (0 == len) 
+	{
+		if (evaluator.input_pending())
+		{
+			return pending_prompt;
+		}
+		else
+		{
+			return normal_prompt;
+		}
 	}
 
 	/* The #$%^& opecog command shell processor cuts off the 
