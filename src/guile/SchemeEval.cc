@@ -40,6 +40,8 @@ SchemeEval::SchemeEval(void)
 	pending_input = false;
 	caught_error = false;
 	input_line = "";
+	error_string_port = SCM_EOL;
+	captured_stack = SCM_EOL;
 }
 
 /* ============================================================== */
