@@ -24,7 +24,8 @@ namespace opencog {
 
 class SchemeSmob
 {
-	friend class SchemeShell;
+	friend class SchemeShell;  // XXX get rid of this
+	friend class SchemeEval;
 
 	private:
 

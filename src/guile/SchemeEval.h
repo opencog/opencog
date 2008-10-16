@@ -21,6 +21,9 @@ class SchemeEval
 	private:
 		static bool is_inited;
 
+		std::string input_line;
+		bool pending_input;
+
 		// Error handling stuff
 		SCM error_string_port;
 		SCM captured_stack;

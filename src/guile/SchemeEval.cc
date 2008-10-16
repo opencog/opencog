@@ -1,13 +1,13 @@
 /*
- * SchemeShell.c
+ * SchemeEval.c
  *
- * Simple scheme shell
+ * Simple scheme evaluator
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
 
-#include "SchemeShell.h"
+#include "SchemeEval.h"
 
 #include <libguile.h>
 #include <libguile/backtrace.h>
@@ -19,9 +19,9 @@
 
 using namespace opencog;
 
-bool SchemeShell::is_inited = false;
+bool SchemeEval::is_inited = false;
 
-SchemeShell::SchemeShell(void)
+SchemeEval::SchemeEval(void)
 {
 	if (!is_inited)
 	{
@@ -34,24 +34,14 @@ SchemeShell::SchemeShell(void)
 	}
 
 	funcs = new SchemeSmob();
-	pending_input = false;
-	show_output = true;
-	input_line = "";
-	normal_prompt = "guile> ";
-	pending_prompt = "... ";
 
 	outport = scm_open_output_string();
 	scm_set_current_output_port(outport);
 }
 
-void SchemeShell::hush_output(bool hush)
-{
-	show_output = !hush;
-}
-
 /* ============================================================== */
 
-std::string SchemeShell::prt(SCM node)
+std::string SchemeEval::prt(SCM node)
 {
 	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
 	{
@@ -187,20 +177,20 @@ std::string SchemeShell::prt(SCM node)
 
 /* ============================================================== */
 
-SCM SchemeShell::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
+SCM SchemeEval::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-	SchemeShell *ss = (SchemeShell *)data;
+	SchemeEval *ss = (SchemeEval *)data;
 	return ss->preunwind_handler(tag, throw_args);
 	return SCM_EOL;
 }
 
-SCM SchemeShell::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
+SCM SchemeEval::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-	SchemeShell *ss = (SchemeShell *)data;
+	SchemeEval *ss = (SchemeEval *)data;
 	return ss->catch_handler(tag, throw_args);
 }
 
-SCM SchemeShell::preunwind_handler (SCM tag, SCM throw_args)
+SCM SchemeEval::preunwind_handler (SCM tag, SCM throw_args)
 {
 	// We can only record the stack before it is unwound. 
 	// The normal catch handler body runs only *after* the stack
@@ -209,7 +199,7 @@ SCM SchemeShell::preunwind_handler (SCM tag, SCM throw_args)
 	return SCM_EOL;
 }
 
-SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
+SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 {
 	// Check for read error. If a read error, then wait for user to correct it.
 	SCM re = scm_symbol_to_string(tag);
@@ -219,14 +209,6 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 	{
 		pending_input = true;
 		free(restr);
-
-		// quit accumulating text on escape (^[), cancel (^X) or ^C
-		char c = input_line[input_line.length()-2];
-		if ((0x6 == c) || (0x16 == c) || (0x18 == c) || (0x1b == c))
-		{
-			pending_input = false;
-			input_line = "";
-		}
 		return SCM_EOL;
 	}
 
@@ -284,36 +266,26 @@ SCM SchemeShell::catch_handler (SCM tag, SCM throw_args)
 /**
  * Evaluate the expression
  */
-std::string SchemeShell::eval(const std::string &expr)
+std::string SchemeEval::eval(const std::string &expr)
 {
 	input_line += expr;
-
-	/* The #$%^& opecong command shell processor cuts off the 
-	 * newline character. Re-insert it; otherwise, comments within
-	 * procedures will have the effect of commenting out the rest
-	 * of the procedure, leading to garbage.
-	 */
-	input_line += "\n";
 
 	caught_error = false;
 	pending_input = false;
 #if 0
 	SCM rc = scm_internal_catch (SCM_BOOL_T,
 	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
-	            SchemeShell::catch_handler_wrapper, this);
+	            SchemeEval::catch_handler_wrapper, this);
 #endif
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
-	            SchemeShell::catch_handler_wrapper, this,
-	            SchemeShell::preunwind_handler_wrapper, this);
+	            SchemeEval::catch_handler_wrapper, this,
+	            SchemeEval::preunwind_handler_wrapper, this);
 
 	if (pending_input)
 	{
-		if (show_output)
-			return pending_prompt;
-		else
-			return "";
+		return "";
 	}
 	pending_input = false;
 	input_line = "";
@@ -329,32 +301,24 @@ std::string SchemeShell::eval(const std::string &expr)
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 
-		rv += "\n";
-		rv += normal_prompt;
 		return rv;
 	}
 	else
 	{
-		if (show_output)
-		{
-			std::string rv;
-			// First, we get the contents of the output port,
-			// and pass that on.
-			SCM out = scm_get_output_string(outport);
-			char * str = scm_to_locale_string(out);
-			rv = str;
-			free(str);
-			scm_truncate_file(outport, scm_from_uint16(0));
+		std::string rv;
+		// First, we get the contents of the output port,
+		// and pass that on.
+		SCM out = scm_get_output_string(outport);
+		char * str = scm_to_locale_string(out);
+		rv = str;
+		free(str);
+		scm_truncate_file(outport, scm_from_uint16(0));
 
-			// Next, we append the "interpreter" output
-			rv += prt(rc);
-			rv += "\n";
+		// Next, we append the "interpreter" output
+		rv += prt(rc);
+		rv += "\n";
 
-			rv += normal_prompt;
-			return rv;
-		}
-		else
-			return "";
+		return rv;
 	}
 	return "#<Error: Unreachable statement reached>";
 }

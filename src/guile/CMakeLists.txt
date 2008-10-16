@@ -1,4 +1,5 @@
 ADD_LIBRARY (schemes STATIC
+	SchemeEval.cc
 	SchemeShell.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
