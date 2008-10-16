@@ -132,24 +132,51 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Process a disjunct -- put the disjunct+word-sense into the database.
-; This is the "full" routine, in that it updates the word, word-sense,
-; word-disjunct table.
+; Process a single word sense -- put the disjunct and its associated
+; word-sense into the database. This is the "full" routine, in that
+; it updates the word, word-sense and sense-disjunct tables.
 ;
 ; Arguments:
+; word  - word instance
 ; iword - inflected word
 ; djstr - disjunct string
-; score - parse score
+; parse-score - parse score
+; sense - word sense
 ;
-(define (ldj-process-disjunct-senses word iword djstr score)
+(define (ldj-process-one-sense word iword djstr parse-score sense)
+
+	(let ((sense-score (word-inst-sense-score word sense)))
+
 		(display "dudsely Word: ")
 		(display iword)
 		(display " -- ")
 		(display djstr)
-		(display score)
+		(display parse-score)
+		(display " -- ")
+		(display (cog-name sense))
+		(display sense-score)
 		(display "\n")
+	)
+)
+
+; ---------------------------------------------------------------------
+; Process a disjunct -- put the disjunct and all of its word-senses
+; into the database. This is the "full" routine, in that it updates
+; the word, word-sense and sense-disjunct tables.
+;
+; Arguments:
+; word  - word instance
+; iword - inflected word
+; djstr - disjunct string
+; score - parse score
+;
+(define (ldj-process-disjunct-senses word iword djstr parse-score)
+
+	; loop over all of the word-senses associated with this word.
 	(for-each 
-		(lambda (sense) (display (word-inst-sense-score word sense)))
+		(lambda (sense)
+			(ldj-process-one-sense word iword djstr parse-score sense)
+		)
 		(word-inst-get-senses word)
 	)
 )
