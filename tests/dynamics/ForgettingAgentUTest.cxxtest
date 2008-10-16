@@ -156,8 +156,17 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         agent->forgetPercentage = 0.20;
         cogserver.unitTestServerLoop(1);
         // First two handles should now be invalid...
+#ifdef USE_TLB_MAP 
         TS_ASSERT(!TLB::getAtom(atoms[0]));
         TS_ASSERT(!TLB::getAtom(atoms[1]));
+#else
+        HandleSeq result;
+        cogserver.getAtomSpace()->getHandleSet(back_inserter(result),ATOM,true);
+        for (unsigned int i = 0; i < result.size(); i++) {
+            TS_ASSERT(result[i] != atoms[0]);
+            TS_ASSERT(result[i] != atoms[1]);
+        }
+#endif
 
         // Forget all
         agent->forgetPercentage = 1.0f;
@@ -192,9 +201,19 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
 
         cogserver.unitTestServerLoop(1);
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
+#ifdef USE_TLB_MAP
         for (int i = 0; i < 10; i++) {
             TS_ASSERT(!TLB::getAtom(atoms[i]));
         }
+#else
+        HandleSeq result;
+        cogserver.getAtomSpace()->getHandleSet(back_inserter(result),ATOM,true);
+        for (unsigned int i = 0; i < result.size(); i++) {
+            for (int j = 0; j < 10; j++) {
+                TS_ASSERT(result[i] != atoms[j]);
+            }
+        }
+#endif
 
         // Forget all
         agent->forgetThreshold = AttentionValue::MAXLTI;
@@ -223,9 +242,19 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         count = 95;
         cogserver.unitTestServerLoop(1);
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
+#ifdef USE_TLB_MAP
         for (int i = 0; i < 5; i++) {
             TS_ASSERT(!TLB::getAtom(atoms[i]));
         }
+#else
+        HandleSeq result;
+        cogserver.getAtomSpace()->getHandleSet(back_inserter(result),ATOM,true);
+        for (unsigned int i = 0; i < result.size(); i++) {
+            for (int j = 0; j < 5; j++) {
+                TS_ASSERT(result[i] != atoms[j]);
+            }
+        }
+#endif
 
         // Case: 95 atoms, 15 below threshold
         // Result: 9 removed, 86 left, first 14 handles in array invalid
@@ -237,11 +266,26 @@ class ForgettingAgentUTest :  public CxxTest::TestSuite {
         cogserver.unitTestServerLoop(1);
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
         numRemoved = 0;
+#ifdef USE_TLB_MAP
         for (int i = 5; i < 20; i++) {
             if (!TLB::getAtom(atoms[i])) {
                 numRemoved++;
             }
         }
+#else
+        result.clear();
+        cogserver.getAtomSpace()->getHandleSet(back_inserter(result),ATOM,true);
+        for (int j = 5; j < 20; j++) {
+            bool removed = true;
+            for (unsigned int i = 0; i < result.size(); i++) {
+                if(result[i] == atoms[j]) {
+                    removed = false;
+                    break;
+                }
+            }
+            if (removed) numRemoved++;
+        }
+#endif
         TS_ASSERT_EQUALS(9, numRemoved);
 
         // Forget all
