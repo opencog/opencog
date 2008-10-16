@@ -208,7 +208,7 @@ void ServerSocket::CBI::callBack(const std::string &message)
 
         // The "nl" mechanism prints a new-line, except after
         // the last line (unless, of course, the message had one there.)
-        // Basically, it reinserts all the newlines tht getline stripped out.
+        // Basically, it reinserts all the newlines that getline stripped out.
         std::string nl = "";
         while (getline(stream, line)) {
             sock->Send(nl + line);
