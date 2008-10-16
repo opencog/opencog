@@ -11,6 +11,7 @@
 
 #include <string>
 #include <libguile.h>
+#include "SchemeEval.h"
 
 namespace opencog {
 
@@ -19,7 +20,7 @@ class SchemeSmob;
 class SchemeShell
 {
 	private:
-		static bool is_inited;
+		SchemeEval evaluator;
 
 		std::string normal_prompt;
 		std::string pending_prompt;
@@ -35,9 +36,6 @@ class SchemeShell
 		SCM preunwind_handler(SCM, SCM);
 		SCM catch_handler(SCM, SCM);
 		bool caught_error;
-
-		// printfing of basic types
-		std::string prt(SCM);
 
 		// output port
 		SCM outport;
