@@ -23,9 +23,15 @@
 #ifndef OPENCOG_SERVER_LOAD_FILE_H_
 #define OPENCOG_SERVER_LOAD_FILE_H_
 
+
+namespace opencog {
+
 #ifdef HAVE_GUILE
-
-int load_scm_file (char * filename);
-
+int load_scm_file (const char * filename);
+#else 
+static inline int load_scm_file (const char *) {}
 #endif /* HAVE_GUILE */
+
+};
+
 #endif /* OPENCOG_SERVER_LOAD_FILE_H */

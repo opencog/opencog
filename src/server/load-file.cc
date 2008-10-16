@@ -37,7 +37,7 @@ namespace opencog {
  *
  * Return errno if file cannot be opened.
  */
-int load_scm_file (char * filename)
+int load_scm_file (const char * filename)
 {
 #define BUFSZ 400
 	char buff[BUFSZ];
@@ -62,7 +62,7 @@ int load_scm_file (char * filename)
 
 		if (evaluator.eval_error())
 		{
-			fprintf(stderr, "Scheme error at line=%d\n", lineno);
+			fprintf(stderr, "File: %s line: %d\n", filename, lineno);
 			fprintf(stderr, "%s\n", rv.c_str());
 		}
 		lineno ++;
