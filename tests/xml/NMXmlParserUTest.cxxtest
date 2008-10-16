@@ -38,8 +38,11 @@ using namespace opencog;
 
 class NMXmlParserUTest: public CxxTest::TestSuite
 {
+
 private:
+
     AtomSpace* atomSpace;
+
 public:
 
     NMXmlParserUTest() {
@@ -47,6 +50,10 @@ public:
         atomSpace = new AtomSpace();
         logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
+    }
+
+    ~NMXmlParserUTest() {
+        delete atomSpace;
     }
 
     void tearDown() {
