@@ -31,6 +31,7 @@
 #include <list>
 
 #include <stdlib.h>
+#include <tr1/functional>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleEntry.h>
@@ -47,7 +48,9 @@ using std::string;
 using std::cerr;
 using std::cout;
 using std::endl;
+using namespace std::tr1::placeholders;
 using namespace opencog;
+
 
 const char* AtomSpace::SPACE_MAP_NODE_NAME = "SpaceMap";
 
@@ -58,8 +61,35 @@ AtomSpace::~AtomSpace()
     if (_handle_iterator) {
         delete (_handle_iterator);
     }
+    //delete (_handle_entry);
+}
 
-//    delete (_handle_entry);
+void AtomSpace::atomAdded(Handle h) {
+    //logger().debug("AtomSpace::atomAdded(%p): %s", h, TLB::getAtom(h)->toString().c_str());
+    if (getType(h) == AT_TIME_LINK) {
+        // Add corresponding TimeServer entry
+        if (getArity(h) == 2) {
+            Handle timeNode = getOutgoing(h, 0);
+            if (getType(timeNode) == TIME_NODE) {
+                const string& timeNodeName = getName(timeNode);
+                Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
+                Handle timed_h = getOutgoing(h, 1);
+                timeServer.add(timed_h, t);
+            } else logger().warn("AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", ClassServer::getTypeName(getType(timeNode)).c_str());
+        } else logger().warn("AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n", getArity(h));
+    }
+}
+
+void AtomSpace::atomRemoved(Handle h) {
+    //logger().debug("AtomSpace::atomAdded(%p): %s", h, TLB::getAtom(h)->toString().c_str());
+    Type type = getType(h);
+    if (type == AT_TIME_LINK) {
+        cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::decayShortTermImportance(): Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
+        Handle timeNode = getOutgoing(h, 0);
+        cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::removeAtom: Got no TimeNode node at the first position of the AtTimeLink\n");
+        Handle timedAtom = getOutgoing(h, 1);
+        timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
+    }
 }
 
 AtomSpace::AtomSpace()
@@ -82,6 +112,10 @@ AtomSpace::AtomSpace()
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
     fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
+
+    //connect signals
+    atomTable.addAtomSignal().connect(std::tr1::bind(&AtomSpace::atomAdded, this, _1));
+    atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomSpace::atomRemoved, this, _1));
 }
 
 const AtomTable& AtomSpace::getAtomTable() const
@@ -380,17 +414,6 @@ bool AtomSpace::removeAtom(Handle h, bool recursive)
         HandleEntry* currentEntry = extractedHandles;
         while (currentEntry) {
             Handle h = currentEntry->handle;
-            Type type = getType(h);
-            if (type == AT_TIME_LINK) {
-                cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::removeAtom: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
-
-                Handle timeNode = getOutgoing(h, 0);
-                //printf("Got timeNode = %p\n", timeNode);
-                cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::removeAtom: Got no TimeNode node at the first position of the AtTimeLink\n");
-
-                Handle timedAtom = getOutgoing(h, 1);
-                timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
-            }
 
             // Also refund sti/lti to AtomSpace funds pool
             fundsSTI += getSTI(h);
@@ -487,33 +510,6 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing, const TruthValue& t
 
         Link* l = new Link(t, outgoing, tvn);
         result = atomTable.add(l);
-        if (l->getType() == AT_TIME_LINK) {
-            // Add corresponding TimeServer entry
-            if (l->getArity() == 2) {
-                Atom* timeAtom = l->getOutgoingAtom(0);
-                if (timeAtom->getType() == TIME_NODE) {
-                    const string& timeNodeName = ((Node*) timeAtom)->getName();
-
-                    // USED TO SEEK MEMORY LEAK
-                    //if(uniqueTimestamp.find(timeNodeName) == uniqueTimestamp.end()){
-                    //    uniqueTimestamp.insert(timeNodeName);
-                    //    cout << "Total unique timestamps: " << uniqueTimestamp.size() << endl;
-                    //}
-
-                    Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
-                    Handle h = TLB::getHandle(l->getOutgoingAtom(1));
-                    timeServer.add(h, t);
-                } else {
-                    logger().warn(
-                        "AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n",
-                        ClassServer::getTypeName(timeAtom->getType()).c_str());
-                }
-            } else {
-                logger().warn(
-                    "AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n",
-                    l->getArity());
-            }
-        }
     }
     return result;
 }
@@ -1051,3 +1047,4 @@ AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
         return minSTI.val;
     }
 }
+

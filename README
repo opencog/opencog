@@ -37,9 +37,10 @@ libs will be built into each src subdirectory.
 
 Unit tests:
 -----------
-To run unit tests type (from the bin directory):
+To build and run the unit tests, from the bin directory enter (after building
+opencog as bellow): 
 
-../scripts/run_utests.sh
+make test
 
 Running the server:
 -------------------

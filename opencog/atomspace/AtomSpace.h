@@ -1194,6 +1194,16 @@ private:
      */
     Handle addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv = TruthValue::NULL_TV());
 
+    /**
+     * Handler of the 'atom removed' signal from AtomTable
+     */
+    void atomRemoved(Handle h);
+
+    /**
+     * Handler of the 'atom added' signal from AtomTable
+     */
+    void atomAdded(Handle h);
+
 };
 
 } // namespace opencog

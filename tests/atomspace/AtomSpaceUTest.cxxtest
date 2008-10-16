@@ -34,6 +34,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 using std::find;
@@ -863,6 +864,32 @@ public:
 
     }
 
+    void testTimeAtomsRemovalByDecay() {
+        AtomSpace atomSpace;
+
+        Handle node = atomSpace.addNode(CONCEPT_NODE, "test");
+        Handle atTimeLink = atomSpace.addTimeInfo(node, 1000);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+
+        vector<HandleTemporalPair> res;
+        atomSpace.getTimeInfo(back_inserter(res), node);
+        TS_ASSERT(!res.empty());
+
+        // Change STI so that all atoms are removed quickly by decay method. 
+        unsigned int ncycles = 5;
+        AttentionValue::sti_t sti = config().get_int("MIN_STI") + ncycles;
+        atomSpace.setSTI(atTimeLink, sti);
+        atomSpace.setSTI(atomSpace.getOutgoing(atTimeLink, 0), sti);
+        atomSpace.setSTI(atomSpace.getOutgoing(atTimeLink, 1), sti);
+
+        for (unsigned int i = 0; i < (ncycles + 1); ++i) atomSpace.decayShortTermImportance();
+
+        // Check if related time info was removed from TimeServer properly
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.empty());
+    }
+
     void testRemoveTimeInfo() {
         AtomSpace atomSpace;
         Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
@@ -1372,9 +1399,9 @@ public:
         for (unsigned int i = 0; i < atoms.size(); i++) {
             atomSpace->stimulateAtom(atoms[i], stimValue);
             //av = (EconomicAttentionValue) atoms[i]->getAttentionValue();
-            TS_ASSERT_EQUALS(atomSpace->getAtomStimulus(atoms[i]), stimValue);
+            TS_ASSERT(atomSpace->getAtomStimulus(atoms[i]) == stimValue);
         }
-        TS_ASSERT_EQUALS(atomSpace->getTotalStimulus(), stimValue * (stim_t) atoms.size());
+        TS_ASSERT(atomSpace->getTotalStimulus() ==  (stimValue * (stim_t) atoms.size()));
         logger().debug("END TEST: stimulateAtom");
     }
 
@@ -1398,10 +1425,10 @@ public:
 
         atomSpace->stimulateAtom(list, stimValue);
         for (unsigned int i = 0; i < atoms.size(); i++) {
-            TS_ASSERT_EQUALS(atomSpace->getAtomStimulus(atoms[i]), 20);
+            TS_ASSERT(atomSpace->getAtomStimulus(atoms[i]) == 20);
         }
 
-        TS_ASSERT_EQUALS(atomSpace->getTotalStimulus(), stimValue);
+        TS_ASSERT(atomSpace->getTotalStimulus() == stimValue);
 
         delete list;
         logger().debug("END TEST: stimulateList");
@@ -1428,7 +1455,7 @@ public:
         atomSpace->stimulateAtom(list, stimValue);
         atomSpace->resetStimulus();
         for (unsigned int i = 0; i < atoms.size(); i++) {
-            TS_ASSERT_EQUALS(atomSpace->getAtomStimulus(atoms[i]), 0);
+            TS_ASSERT(atomSpace->getAtomStimulus(atoms[i]) == 0);
         }
 
         delete list;
@@ -1468,7 +1495,7 @@ public:
         vector<Handle> sAtoms;
         atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, sSort);
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
-            TS_ASSERT_EQUALS(sSort(sAtoms[i + 1], sAtoms[i]), false);
+            TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
         }
         
         logger().debug("LTIAndTVAscendingSort");
@@ -1477,7 +1504,7 @@ public:
         vector<Handle> latvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
-            TS_ASSERT_EQUALS(latvSort(latvAtoms[i + 1], latvAtoms[i]), false);
+            TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
         }
         
         logger().debug("LTIThenTVAscendingSort");
@@ -1486,7 +1513,7 @@ public:
         vector<Handle> lttvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, lttvSort);
         for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
-            TS_ASSERT_EQUALS(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]), false);
+            TS_ASSERT(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]) == false);
         }
 
         logger().debug("END TEST: getSortedHandleSet");
@@ -1525,8 +1552,8 @@ public:
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
         }
-        TS_ASSERT_EQUALS(highSTI.size(), 1);
-        TS_ASSERT_EQUALS(highSTI[0], atoms[0]);
+        TS_ASSERT(highSTI.size() == 1U);
+        TS_ASSERT(highSTI[0] == atoms[0]);
 
         logger().debug("LTIAboveThreshold");
         
@@ -1535,8 +1562,8 @@ public:
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
         }
-        TS_ASSERT_EQUALS(highLTI.size(), 1);
-        TS_ASSERT_EQUALS(highLTI[0], atoms[1]);
+        TS_ASSERT(highLTI.size() == 1U);
+        TS_ASSERT(highLTI[0] == atoms[1]);
         logger().debug("END TEST: getHandleSetFiltered");
     }
 
@@ -1568,8 +1595,8 @@ public:
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
         }
-        TS_ASSERT_EQUALS(highSTI.size(), 1);
-        TS_ASSERT_EQUALS(highSTI[0], atoms[0]);
+        TS_ASSERT(highSTI.size() == 1U);
+        TS_ASSERT(highSTI[0] == atoms[0]);
                 
         logger().debug("LTIAboveThreshold");
         
@@ -1577,8 +1604,8 @@ public:
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
         }
-        TS_ASSERT_EQUALS(highLTI.size(), 1);
-        TS_ASSERT_EQUALS(highLTI[0], atoms[1]);
+        TS_ASSERT(highLTI.size() == 1U);
+        TS_ASSERT(highLTI[0] == atoms[1]);
         logger().debug("END TEST: filter");
     }
 

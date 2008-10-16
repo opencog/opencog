@@ -69,6 +69,7 @@ private:
 
     AtomTable* table;
     AtomSpace* atomSpace;
+    int        __testSignalsCounter;
 
 public:
 
@@ -410,65 +411,6 @@ public:
         TS_ASSERT(TLB::getAtom(linkHandle)->getAttentionValue().getSTI() == 490);
     }
 
-    void testRemovalByDecay() {
-        AtomTable atomTable;
-        AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
-
-        /* add a simple tree of links & nodes */
-        Node* wordNode = new Node(WORD_NODE, "test");
-        wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 7)));
-        Handle wnHandle = atomTable.add(wordNode);
-
-        Node* senseNode = new Node(WORD_SENSE_NODE, "28675194");
-        senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
-        Handle snHandle = atomTable.add(senseNode);
-
-        std::vector<Handle> os;
-        os.push_back(wnHandle);
-        os.push_back(snHandle);
-        Link* inheritanceLink = new Link(INHERITANCE_LINK, os);
-        inheritanceLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 6)));
-        atomTable.add(inheritanceLink);
-
-        Link* listLink = new Link(LIST_LINK, os);
-        listLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
-        atomTable.add(listLink);
-
-        // decay sti up to the threshold where the least important atoms
-        // should be about to be removed
-        for (int i = 0; i < 5; i++) atomTable.decayShortTermImportance();
-        // and test the existance of each atom
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        != NULL);
-
-        // run another decaying cycle; the list link node should have been
-        // removed
-        atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
-
-        // an another one; the inheritance link and the sense node should have
-        // been removed
-        atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
-
-        // and another, final one; by now all nodes should have been removed
-        atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
-    }
-
-    int __testSignalsCounter;
-
     void atomAdded1(Handle h) {
         TS_ASSERT(table->getSize() == 1); 
         logger().info("atomAdded1: %s", TLB::getAtom(h)->toShortString().c_str());
@@ -498,16 +440,132 @@ public:
         table = &atomTable; // save pointer in class member
 
         // connect signals
-        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded1, this, _1));
-        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded2, this, _1));
-        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved1, this, _1));
-        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, _1));
+        boost::signals::connection add1 = 
+            atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded1, this, _1));
+        boost::signals::connection add2 = 
+            atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded2, this, _1));
+        boost::signals::connection remove1 = 
+            atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved1, this, _1));
+        boost::signals::connection remove2 = 
+            atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, _1));
 
         /* add and remove a simple node */
         __testSignalsCounter = 0;
-        Handle wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
+        Handle wnHandle = atomTable.add(new Node(WORD_NODE, "test1"));
         TS_ASSERT(__testSignalsCounter == 3);
         atomTable.remove(wnHandle);
         TS_ASSERT(__testSignalsCounter == -6);
+
+        /* add a simple node and let decayShortTermImportance remove it */
+        wnHandle = atomTable.add(new Node(WORD_NODE, "test2"));
+        TS_ASSERT(__testSignalsCounter == -3);
+        Atom* atom = TLB::getAtom(wnHandle);
+        AttentionValue av(config().get_int("MIN_STI") + 10, atom->getAttentionValue().getLTI(), atom->getAttentionValue().getVLTI());
+        atom->setAttentionValue(av);
+        // Keep calling decay until node1 is removed...
+        long count = 0;
+        long MAX_DECAY_CALLS = 100;
+        while (atomTable.getSize() > 0) {
+            atomTable.decayShortTermImportance();
+            if (++count > MAX_DECAY_CALLS) {
+                TS_ASSERT(false);
+                break;
+            }
+        }
+        TS_ASSERT(__testSignalsCounter == -12);
+
+        // test disconnections
+        add1.disconnect();
+        remove1.disconnect();
+        wnHandle = atomTable.add(new Node(WORD_NODE, "test3"));
+        TS_ASSERT(__testSignalsCounter == -10);
+        atomTable.remove(wnHandle);
+        TS_ASSERT(__testSignalsCounter == -15);
+
+        add2.disconnect();
+        remove2.disconnect();
+        wnHandle = atomTable.add(new Node(WORD_NODE, "test4"));
+        TS_ASSERT(__testSignalsCounter == -15);
+        atomTable.remove(wnHandle);
+        TS_ASSERT(__testSignalsCounter == -15);
+    }
+
+    void atomAdded3(Handle h) {
+        logger().info("atomAdded3: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter += 1;
+    }
+
+    void atomRemoved3(Handle h) {
+        logger().info("atomRemoved3: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter -= 1;
+    }
+
+    void testRemovalByDecay() {
+        AtomTable atomTable;
+        AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
+
+        // connect signals and reset counter
+        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded3, this, _1));
+        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved3, this, _1));
+        __testSignalsCounter = 0;
+
+        /* add a simple tree of links & nodes */
+        Node* wordNode = new Node(WORD_NODE, "test");
+        wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 7)));
+        Handle wnHandle = atomTable.add(wordNode);
+
+        Node* senseNode = new Node(WORD_SENSE_NODE, "28675194");
+        senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
+        Handle snHandle = atomTable.add(senseNode);
+
+        std::vector<Handle> os;
+        os.push_back(wnHandle);
+        os.push_back(snHandle);
+        Link* inheritanceLink = new Link(INHERITANCE_LINK, os);
+        inheritanceLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 6)));
+        atomTable.add(inheritanceLink);
+
+        Link* listLink = new Link(LIST_LINK, os);
+        listLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
+        atomTable.add(listLink);
+
+        // test we added 4 atoms
+        TS_ASSERT(__testSignalsCounter == 4);
+
+        // decay sti up to the threshold where the least important atoms
+        // should be about to be removed
+        for (int i = 0; i < 5; i++) atomTable.decayShortTermImportance();
+        // and test the existance of each atom
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        != NULL);
+        TS_ASSERT(__testSignalsCounter == 4); // no atoms removed yet
+
+        // run another decaying cycle; the list link node should have been
+        // removed
+        atomTable.decayShortTermImportance();
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+        TS_ASSERT(__testSignalsCounter == 3); // 1 atom removed
+
+        // an another one; the inheritance link and the sense node should have
+        // been removed
+        atomTable.decayShortTermImportance();
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+        TS_ASSERT(__testSignalsCounter == 1); // 2 more atoms removed
+
+        // and another, final one; by now all nodes should have been removed
+        atomTable.decayShortTermImportance();
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+        TS_ASSERT(__testSignalsCounter == 0); // last one removed
     }
 };

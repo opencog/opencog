@@ -586,11 +586,12 @@ public:
 
     /**
      * Decays importance of all atoms in the table, reindexing
-     * importanceIndex accordingly and removing the atom that fall
+     * importanceIndex accordingly and extracting the atoms that fall
      * below the "LOWER_STI_VALUE" threshold.
+     * @return the list of the handles of the extracted atoms.
      */
     //void decayShortTermImportance() throw (RuntimeException) __attribute__ ((deprecated));
-    HandleEntry* decayShortTermImportance();
+    void decayShortTermImportance();
 
     /**
      * Returns whether DynamicsStatisticsAgent is to be used with

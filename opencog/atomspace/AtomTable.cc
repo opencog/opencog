@@ -965,9 +965,9 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (recursive) {
         HandleEntry* next = NULL;
         for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = next) {
-            next = in->next;
             if (TLB::getAtom(in->handle)->isMarkedForRemoval() == false)
                 result = HandleEntry::concatenation(extract(in->handle, true), result);
+            next = in->next;
         }
     }
     if (atom->getIncomingSet()) {
@@ -1029,15 +1029,21 @@ bool AtomTable::remove(Handle handle, bool recursive)
 void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 {
     if (extractedHandles == NULL) return;
-    for (HandleEntry *it = extractedHandles; it != NULL; it = it->next) {
-        // emit remove atom signal
-        _removeAtomSignal(it->handle);
 
-        Atom* atom = TLB::getAtom(it->handle);
+    // We must to iterate from the end to the begining of the list of atoms so that 
+    // link's target atoms are not removed before the link   
+    HandleSeq hs;
+    extractedHandles->toHandleVector(hs);
+    delete extractedHandles;
+
+    for (HandleSeq::reverse_iterator it = hs.rbegin(); it < hs.rend(); ++it) {
+        // emit remove atom signal
+        _removeAtomSignal(*it);
+
+        Atom* atom = TLB::getAtom(*it);
         TLB::removeAtom(atom);
         delete atom;
     }
-    delete extractedHandles;
 }
 
 void AtomTable::removeFromIndex(Atom *victim,
@@ -1109,7 +1115,7 @@ void AtomTable::removeFromPredicateIndex(Atom *atom)
     delete[](predicateIndices);
 }
 
-HandleEntry* AtomTable::decayShortTermImportance()
+void AtomTable::decayShortTermImportance()
 {
     for (unsigned int band = 0; band < (unsigned int) IMPORTANCE_INDEX_SIZE; band++) {
         Handle current = importanceIndex[band];
@@ -1152,7 +1158,6 @@ HandleEntry* AtomTable::decayShortTermImportance()
 
     // clone is copied to the real importance index lists.
     if (oldAtoms) clearIndexesAndRemoveAtoms(oldAtoms);
-    return oldAtoms;
 }
 
 void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID)
@@ -1228,7 +1233,8 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
-        Atom* atom = TLB::getAtom(curr->handle);
+        Handle h = curr->handle;
+        Atom* atom = TLB::getAtom(h);
 #ifdef USE_ATOM_HASH_SET
         //Extracts atom from hash_set
         atomSet->erase(atom);
@@ -1244,7 +1250,7 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
         for (int i = 0; i < atom->getArity(); i++) {
             Atom *outgoing = atom->getOutgoingAtom(i);
             if (outgoing)
-                outgoing->removeIncomingHandle(curr->handle);
+                outgoing->removeIncomingHandle(h);
         }
 
         // remove from iterators
@@ -1255,11 +1261,9 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
             removeFromIterator(atom, iterators[i]);
         }
         unlockIterators();
-
-        // remove from TLB
-        TLB::removeAtom(atom);
     }
-    delete extractedHandles;
+
+    removeExtractedHandles(extractedHandles);
 }
 
 void AtomTable::removeFromIterator(Atom *atom, HandleIterator *iterator)
