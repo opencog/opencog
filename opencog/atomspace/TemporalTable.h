@@ -54,8 +54,8 @@ public:
      *  - ENDS_BEFORE         => u < l'
      *  - ENDS_WITHIN         => l' <= u <= u'
      *  - ENDS_AFTER          => u > u'
-     *  - OVERLAP             => STARTS_WITHIN || ENDS_WITHIN => l' <= u && l <= u' (since l <= u && l' <= u')
-  	 *  - INCLUDE             => l <= l' && u >= u'
+	 *  - OVERLAPS            => STARTS_WITHIN || ENDS_WITHIN => l' <= u && l <= u' (since l <= u && l' <= u') 
+	 *  - INCLUDES            => l <= l' && u >= u'
      *  - NEXT_AFTER_START_OF => next time T whose l > l'
      *  - NEXT_AFTER_END_OF   => next time T whose l > u'
      *  - PREVIOUS_BEFORE_START_OF => previous time T whose l < l'
@@ -69,12 +69,12 @@ public:
         ENDS_BEFORE,
         ENDS_WITHIN,
         ENDS_AFTER,
-        OVERLAP,
-        INCLUDE,
+        OVERLAPS, 
+        INCLUDES, 
         NEXT_AFTER_START_OF,
         NEXT_AFTER_END_OF,
         PREVIOUS_BEFORE_START_OF,
-        PREVIOUS_BEFORE_END_OF
+        PREVIOUS_BEFORE_END_OF,
     } TemporalRelationship;
 
     /**
@@ -86,7 +86,7 @@ public:
     /**
      * Adds into this TemporalTable an entry composed by the given Atom Handle and Temporal object.
      */
-    void add(Handle, const Temporal&) throw (RuntimeException);
+    void add(Handle, const Temporal&);
 
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle.
@@ -148,7 +148,7 @@ public:
      * @param the file pointer where the TemporalTable is stored.
      * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
      */
-    void load(FILE *, HandleMap<Atom *> *) throw (InconsistenceException);
+    void load(FILE *, HandleMap<Atom *> *);
 
 
 private:
@@ -169,9 +169,9 @@ private:
     int replaceIndexTablePosition(int pos, TemporalEntry* newEntry);
     TemporalEntry* getPreviousTemporalEntry(const Temporal&);
     void removeFromSortedEntries(const Temporal& t);
-    HandleTemporalPairEntry* get(const Temporal& t, TemporalRelationship criterion = EXACT) throw (RuntimeException);
+    HandleTemporalPairEntry* get(const Temporal& t, TemporalRelationship criterion = EXACT);
     bool remove(const Temporal& t, TemporalRelationship criterion = EXACT);
-    bool matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished) throw (RuntimeException);
+    bool matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished);
 
 };
 

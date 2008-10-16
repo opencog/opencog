@@ -618,14 +618,24 @@ public:
         TS_ASSERT(*(res.front().getTemporal()) == t2);
 
         res.clear();
-        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::OVERLAP);
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::OVERLAPS);
         TS_ASSERT(res.empty());
-        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::OVERLAP);
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::OVERLAPS);
         TS_ASSERT(res.size() == 2);
         TS_ASSERT(res.front().getHandle() == node1);
         TS_ASSERT(*(res.front().getTemporal()) == t1);
         TS_ASSERT(res.back().getHandle() == node1);
         TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(2500,3000), TemporalTable::INCLUDES);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
 
         res.clear();
         atomSpace.getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF);
@@ -737,9 +747,9 @@ public:
         TS_ASSERT(res.front().getHandle() != res.back().getHandle());
 
         res.clear();
-        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500), TemporalTable::OVERLAP);
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(1500), TemporalTable::OVERLAPS);
         TS_ASSERT(res.empty());
-        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::OVERLAP);
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::OVERLAPS);
         TS_ASSERT(res.size() == 3);
         TS_ASSERT(res[0].getHandle() == node1);
         TS_ASSERT(*(res[0].getTemporal()) == t1);
@@ -750,6 +760,17 @@ public:
         TS_ASSERT(res[1].getHandle() != res[2].getHandle());
 
         res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(2500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT((res[0].getHandle() == node1 && res[1].getHandle() == node2)
+                  || (res[0].getHandle() == node2 && res[1].getHandle() == node1));
+        TS_ASSERT(*(res[0].getTemporal()) == t2);
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 3000), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+
         atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF);
         TS_ASSERT(res.size() == 1);
         TS_ASSERT(res.front().getHandle() == node1);
@@ -1067,7 +1088,7 @@ public:
         atomSpace.addTimeInfo(node1, t2);
         atomSpace.addTimeInfo(node2, t2);
 
-        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::OVERLAP));
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::OVERLAPS));
         res.clear();
         atomSpace.getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.size() == 2);
@@ -1076,7 +1097,7 @@ public:
         TS_ASSERT(res.back().getHandle() == node1);
         TS_ASSERT(*(res.back().getTemporal()) == t2);
 
-        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::OVERLAP));
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::OVERLAPS));
         res.clear();
         atomSpace.getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.empty());
@@ -1085,6 +1106,31 @@ public:
         atomSpace.addTimeInfo(node1, t2);
         atomSpace.addTimeInfo(node2, t2);
 
+        TS_ASSERT(!atomSpace.removeTimeInfo(node1, Temporal(1500), TemporalTable::INCLUDES));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(1000), TemporalTable::INCLUDES));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(2500), TemporalTable::INCLUDES));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+        
         TS_ASSERT(atomSpace.removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF));
         res.clear();
         atomSpace.getTimeInfo(back_inserter(res), node1);
@@ -1285,7 +1331,7 @@ public:
         atomSpace.addTimeInfo(node1, t2);
         atomSpace.addTimeInfo(node2, t2);
 
-        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::OVERLAP));
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::OVERLAPS));
         res.clear();
         atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
         TS_ASSERT(res.size() == 3);
@@ -1297,7 +1343,38 @@ public:
         TS_ASSERT(*(res[2].getTemporal()) == t2);
         TS_ASSERT(res[1].getHandle() != res[2].getHandle());
 
-        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::OVERLAP));
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(500, 2500), TemporalTable::OVERLAPS));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.empty());
+
+        atomSpace.addTimeInfo(node1, t1);
+        atomSpace.addTimeInfo(node1, t2);
+        atomSpace.addTimeInfo(node2, t2);
+
+        TS_ASSERT(!atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1500), TemporalTable::INCLUDES));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(1000), TemporalTable::INCLUDES));
+        res.clear();
+        atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res[0].getHandle() == node1 || res[0].getHandle() == node2);
+        TS_ASSERT(*(res[0].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[0].getHandle() != res[1].getHandle());
+
+        TS_ASSERT(atomSpace.removeTimeInfo(UNDEFINED_HANDLE, Temporal(2500), TemporalTable::INCLUDES));
         res.clear();
         atomSpace.getTimeInfo(back_inserter(res), UNDEFINED_HANDLE);
         TS_ASSERT(res.empty());

@@ -55,6 +55,8 @@ TemporalTable::~TemporalTable()
         Handle nextKey = keys->next();
         tailHandleMap->remove(nextKey);
     }
+    delete(keys);
+    
     delete(tailHandleMap);
 
     delete(handleMap);
@@ -75,7 +77,7 @@ TemporalTable::~TemporalTable()
     }
 }
 
-void TemporalTable::add(Handle h, const Temporal& t) throw (RuntimeException)
+void TemporalTable::add(Handle h, const Temporal& t)
 {
 
 //    logger().debug("TemporalTable::add - init.");
@@ -186,7 +188,7 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
     return result;
 }
 
-HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelationship criterion) throw (RuntimeException)
+HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelationship criterion)
 {
     //cprintf(NORMAL, "TemporalTable::get(%s, %d)\n", t.toString().c_str(), criterion);
 
@@ -258,7 +260,7 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
             }
             break;
         } // EXACT
-        case OVERLAP: {
+        case OVERLAPS: {
             if (sortedTemporalList != NULL) {
                 // Get all Temporal entries that insersects with the given time interval of t
                 // => all Temporal time where (time->lowerBound <= t.upperBound) && (time->upperBound >= t.lowerBound)
@@ -308,7 +310,7 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                 }
             }
             break;
-        } // OVERLAP
+        } // OVERLAPS
         default: {
             HandleTemporalPairEntry* tail = NULL;
             bool searchFinished = false;
@@ -526,11 +528,11 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
             }
             break;
         } // EXACT
-        case OVERLAP: {
+        case OVERLAPS: {
             if (sortedTemporalList != NULL) {
                 //printf("Non ExactMatch!\n");
-                // Get all Temporal entries that is contained by the given time interval of t
-                // => all Temporal time where (time->lowerBound >= t.lowerBound) && (time->upperBound <= t.upperBound)
+                // Get all Temporal entries that overlaps the given time interval of t
+                // => all Temporal time where (time->lowerBound <= t.upperBound) && (time->upperBound >= t.lowerBound)
 
                 // Eliminates the linear lower bound tests in the beggining of the list
                 // by using binary search to find the upper limit in the list.
@@ -568,7 +570,7 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
                 }
             }
             break;
-        } // OVERLAP
+        } // OVERLAPS
         /* 
          * Comment from Nil Geisweiller
          * That case is not correct, it makes the wrong assumptions
@@ -877,7 +879,7 @@ TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t)
     }
 }
 
-bool TemporalTable::matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished) throw (RuntimeException)
+bool TemporalTable::matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished)
 {
     bool matches = false;
     switch (criterion) {
@@ -887,13 +889,13 @@ bool TemporalTable::matchesTimeCriterion(const Temporal& time, const Temporal& t
             searchFinished = true;
         }
         break;
-    case OVERLAP:
+    case OVERLAPS:
         matches = (t.getLowerBound() <= time.getUpperBound()) && (t.getUpperBound() >= time.getLowerBound());
         if (!matches && (time.getLowerBound() > t.getUpperBound())) {
             searchFinished = true;
         }
         break;
-    case INCLUDE:
+    case INCLUDES:
         matches = (time.getLowerBound() <= t.getLowerBound()) && (time.getUpperBound() >= t.getUpperBound());
         if (!matches && (time.getLowerBound() > t.getLowerBound())) {
             searchFinished = true;
@@ -968,11 +970,11 @@ const char* TemporalTable::getTemporalRelationshipStr(TemporalRelationship crite
     case EXACT:
         return "EXACT";
         break;
-    case OVERLAP:
-        return "OVERLAP";
+    case OVERLAPS:
+        return "OVERLAPS";
         break;
-    case INCLUDE:
-        return "INCLUDE";
+    case INCLUDES:
+        return "INCLUDES";
         break;
     case STARTS_BEFORE:
         return "STARTS_BEFORE";
@@ -1009,7 +1011,7 @@ const char* TemporalTable::getTemporalRelationshipStr(TemporalRelationship crite
 
 }
 
-void TemporalTable::load(FILE *fp, HandleMap<Atom *> *conv) throw (InconsistenceException)
+void TemporalTable::load(FILE *fp, HandleMap<Atom *> *conv)
 {
     int size;
     // reads the table size (number of temporal entries)
