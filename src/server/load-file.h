@@ -1,7 +1,7 @@
 /*
  * load-file.h
  *
- * Load scheme code from a file
+ * Utility helper function -- load scheme code from a file
  * Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
