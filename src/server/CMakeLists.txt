@@ -7,6 +7,7 @@ ADD_LIBRARY (server STATIC
 	CommandRequest.cc 
 	CommandRequestProcessor.cc 
 	SchemeShell.cc 
+	load-file.cc
 )
 
 INCLUDE_DIRECTORIES (
