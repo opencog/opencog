@@ -35,7 +35,7 @@ bool SchemeSmob::is_inited = false;
 scm_t_bits SchemeSmob::cog_handle_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 
-SchemeSmob::SchemeSmob(void)
+void SchemeSmob::init(void)
 {
 	if (!is_inited)
 	{
@@ -43,6 +43,11 @@ SchemeSmob::SchemeSmob(void)
 		init_smob_type();
 		register_procs();
 	}
+}
+
+SchemeSmob::SchemeSmob(void)
+{
+	init();
 }
 
 /* ============================================================== */

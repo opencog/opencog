@@ -36,7 +36,7 @@ class SchemeSmob
 		};
 
 		static bool is_inited;
-		void register_procs(void);
+		static void register_procs(void);
 
 		// The handle tag is for opencog handles, only.
 		static scm_t_bits cog_handle_tag;
@@ -46,7 +46,7 @@ class SchemeSmob
 		static scm_t_bits cog_misc_tag;
 
 		// Initialization functions
-		void init_smob_type(void);
+		static void init_smob_type(void);
 		static int print_atom(SCM, SCM, scm_print_state *);
 		static SCM equalp_atom(SCM, SCM);
 		static size_t free_atom(SCM);
@@ -98,6 +98,7 @@ class SchemeSmob
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:
+		static void init(void);
 		SchemeSmob(void);
 };
 
