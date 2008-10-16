@@ -141,19 +141,65 @@ scm
 ; djstr - disjunct string
 ; parse-score - parse score
 ; sense - word sense
-; senses-score - word sense score
+; sense-score - word sense score
 ;
 (define (ldj-process-one-sense iword djstr parse-score sense sense-score)
 
-		(display "dudsely Word: ")
-		(display iword)
-		(display " -- ")
-		(display djstr)
-		(display parse-score)
-		(display " -- ")
-		(display (cog-name sense))
-		(display sense-score)
-		(display "\n")
+	; Update the word-sense-disjunct table
+	; This table has the form:
+	;
+	; CREATE TABLE DisjunctSenses (
+	;    word_sense TEXT NOT NULL,
+	;    inflected_word TEXT NOT NULL,
+	;    disjunct TEXT NOT NULL,
+	;    count FLOAT,
+	;    log_cond_probability FLOAT
+	; );
+	;
+	(define (update-disjunct-table w-sense i-word disj-str p-score)
+		(define (update-proc srow)
+			(let ((up-score (+ p-score (assoc-ref srow "count"))))
+				(string-append
+					"UPDATE DisjunctSenses SET count = "
+					(number->string up-score)
+					" WHERE word_sense = '" w-sense
+					"' AND inflected_word = '" i-word
+					"' AND disjunct = '" disj-str "'"
+				)
+			)
+		)
+
+		(sql-update-table
+			(string-append "SELECT * FROM DisjunctSenses "
+				"WHERE word_sense='" w-sense 
+				"' AND inflected_word='" i-word
+				"' AND disjunct = '" disj-str "'"
+			)
+			update-proc
+
+			(string-append
+				"INSERT INTO DisjunctSenses (word_sense, inflected_word, disjunct, count) VALUES ('"
+				w-sense "', '" i-word "', '" disj-str "', " (number->string p-score) ")"
+			)
+		)
+	)
+
+	(display "Word: ")
+	(display iword)
+	(display " -- ")
+	(display djstr)
+	(display parse-score)
+	(display " -- ")
+	(display (cog-name sense))
+	(display sense-score)
+	(display "\n")
+
+	(let ((w-sense (cog-name sense))
+			(tot-score (* parse-score sense-score))
+		)
+
+		(update-disjunct-table w-sense iword djstr tot-score)
+	)
 )
 
 ; ---------------------------------------------------------------------
