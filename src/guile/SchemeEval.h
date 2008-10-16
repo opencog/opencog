@@ -33,6 +33,8 @@ class SchemeEval
 		SCM catch_handler(SCM, SCM);
 		bool caught_error;
 
+		// printing of basic types
+		std::string prt(SCM);
 
 		// output port
 		SCM outport;
@@ -41,9 +43,9 @@ class SchemeEval
 		SchemeEval(void);
 		std::string eval(const std::string &);
 
-		// XXX make private!?
-		// printing of basic types
-		std::string prt(SCM);
+		bool input_pending(void);
+		void clear_pending(void);
+		bool eval_error(void);
 };
 
 }
