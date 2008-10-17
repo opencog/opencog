@@ -29,17 +29,6 @@
 
 using namespace opencog;
 
-int hashHandle::operator()(Handle h) const
-{
-    int hashCode =  hash<unsigned long>()((unsigned long) h);
-    return(hashCode);
-}
-
-bool eqHandle::operator()(Handle h1, Handle h2) const
-{
-    return (h1 == h2);
-}
-
 float ShortFloatOps::getValue(const ShortFloat *x)
 {
     return(*x);

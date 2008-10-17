@@ -42,6 +42,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/type_codes.h>
 
+#define OBFUSCATE (0x55555555UL)
+
 namespace opencog
 {
 
@@ -57,8 +59,8 @@ class TLB
 private:
 
 #ifdef USE_TLB_MAP
-    static std::map<Handle, Atom *> handle_map;
-    static std::map<Atom *, Handle> atom_map;
+    static std::map<Handle, const Atom*> handle_map;
+    static std::map<const Atom *, Handle> atom_map;
 #endif
 
     /**
@@ -67,12 +69,11 @@ private:
     TLB() {}
 
 public:
+
 #ifdef USE_TLB_MAP
     static unsigned long uuid;
 #endif
 
-#define OBFUSCATE 0x55555555
-// #define OBFUSCATE 0x0
     /**
      * Maps a handle to its corresponding atom.
      *
@@ -80,18 +81,16 @@ public:
      * @return Corresponding atom for the given handle. Returns NULL if handle
      * isn't found.
      */
-    static inline Atom* getAtom(Handle handle) {
+    static inline Atom* getAtom(const Handle& handle) {
 #ifdef USE_TLB_MAP
-        std::map<Handle, Atom *>::iterator i;
-        if (handle <= NOTYPE) return (Atom *) handle; // check for "non-real" atoms
-        i = handle_map.find(handle);
-        if (i == handle_map.end()) {
-            return NULL;
-        } else {
-            return (Atom *) i->second;
-        }
+        if (handle.value() <= NOTYPE) // check for "non-real" atoms
+            return reinterpret_cast<Atom*>(handle.value());
+
+        std::map<Handle, const Atom*>::iterator it = handle_map.find(handle);
+        if (it == handle_map.end()) return NULL;
+        else return const_cast<Atom*>(it->second);
 #else
-        return (Atom *) (handle ^ OBFUSCATE);
+        return reinterpret_cast<Atom*>(handle.value() ^ OBFUSCATE);
 #endif
     }
 
@@ -103,18 +102,18 @@ public:
      */
     static inline Handle getHandle(const Atom* atom) {
 #ifdef USE_TLB_MAP
-        Handle h = (Handle) atom;
-        if (h <= NOTYPE) return h; // check for "non-real" atoms
+        Handle h(reinterpret_cast<unsigned long>(atom));
+        if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
 
-        h = atom_map[(Atom *) atom];
-        if (h != 0) return h;
+        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
+        if (it != atom_map.end()) return it->second;
 #ifdef CHECK_MAP_CONSISTENCY
-        return UndefinedHandle();
+        return Handle::UNDEFINED;
 #else
         return addAtom(atom);
 #endif
 #else
-        return ((Handle) atom) ^ OBFUSCATE;
+        return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
 #endif
     }
 
@@ -124,26 +123,26 @@ public:
      * @param Atom to be added.
      * @return Handle of the newly added atom.
      */
-    static inline Handle addAtom(const Atom* atom, Handle h = 0) {
+    static inline Handle addAtom(const Atom* atom, Handle handle = Handle::UNDEFINED) {
 #ifdef USE_TLB_MAP
-        Handle ht = (Handle) atom;
-        if (ht <= NOTYPE) return ht; // check for "non-real" atoms
+        Handle h(reinterpret_cast<unsigned long>(atom));
+        if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
 
-        Atom *a = (Atom *) atom;
-        Handle ha = atom_map[a];
-        if (ha != 0) {
+        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
+        if (it != atom_map.end()) {
 #ifdef CHECK_MAP_CONSISTENCY
-            if (h != ha) throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
-#endif
-            return ha;
-        }
-        if (h == 0) h = uuid;
-        handle_map[h] = a;
-        atom_map[a] = h;
-        uuid++;
-        return h;
+            if (handle != it->second) throw InvalidParamException(TRACE_INFO, "Atom is already in the TLB");
 #else
-        return ((Handle) atom) ^ OBFUSCATE;
+            return it->second;
+#endif
+        }
+        if (handle == Handle::UNDEFINED) handle = Handle(uuid);
+        handle_map[handle] = atom;
+        atom_map[atom] = handle;
+        uuid++;
+        return handle;
+#else
+        return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
 #endif
     }
 
@@ -153,49 +152,40 @@ public:
      * @param Atom to be removed.
      * @return Removed atom.
      */
-    static inline Atom* removeAtom(Atom* atom) {
+    static inline const Atom* removeAtom(const Atom* atom) {
 #ifdef USE_TLB_MAP
-        Handle h = (Handle) atom;
-        if (h <= NOTYPE) return atom; // check for "non-real" atoms
+        Handle h(reinterpret_cast<unsigned long>(atom));
+        if (h.value() <= NOTYPE) return atom; // check for "non-real" atoms
 
-        h = atom_map[atom];
-        if (h == 0) {
+        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
+        if (it == atom_map.end()) {
 #ifdef CHECK_MAP_CONSISTENCY
             throw InvalidParamException(TRACE_INFO, "Atom is not in the TLB");
 #endif
             return atom;
         }
+        logger().info("removing atom: %s (%d)", atom->toString().c_str(), it->second.value());
         atom_map.erase(atom);
-        handle_map.erase(h);
+        handle_map.erase(it->second);
 #endif
         return atom;
     }
 
-    static inline bool isInvalidHandle(Handle h) {
+    static inline bool isInvalidHandle(const Handle& h) {
 #ifdef USE_TLB_MAP
-        return (h == 0) || (h >= uuid);
+        return (h == Handle::UNDEFINED) || (h.value() >= uuid);
 #else
-        return (h == OBFUSCATE);
+        return (h == Handle::UNDEFINED);
 #endif
     }
 
     static inline bool isValidHandle(Handle h) {
 #ifdef USE_TLB_MAP
-        return (h != 0) && (h < uuid);
+        return (h != Handle::UNDEFINED) && (h.value() < uuid);
 #else
-        return (h != OBFUSCATE);
+        return (h != Handle::UNDEFINED);
 #endif
     }
-
-    static inline Handle UndefinedHandle(void) {
-#ifdef USE_TLB_MAP
-        return 0;
-#else
-        return OBFUSCATE;
-#endif
-    }
-
-#define UNDEFINED_HANDLE (TLB::UndefinedHandle())
 };
 
 } // namespace opencog

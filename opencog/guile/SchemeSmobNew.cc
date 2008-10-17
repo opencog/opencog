@@ -40,9 +40,9 @@ std::string SchemeSmob::to_string(SCM node)
 
 std::string SchemeSmob::handle_to_string(Handle h, int indent)
 {
-	if (UNDEFINED_HANDLE == h) return "#<Undefined atom handle>";
+	if (Handle::UNDEFINED == h) return "#<Undefined atom handle>";
 
-	if (h <= NOTYPE) return "#<non-real atom>";
+	if (h.value() <= NOTYPE) return "#<non-real atom>";
 
 	Atom *atom = TLB::getAtom(h);
 	if (NULL == atom) return "#<Invalid handle>";
@@ -107,7 +107,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 std::string SchemeSmob::handle_to_string(SCM node)
 {
 	SCM shandle = SCM_SMOB_OBJECT(node);
-	Handle h = scm_to_ulong(shandle);
+	Handle h(scm_to_ulong(shandle));
 
 	return handle_to_string(h, 0) + "\n";
 }
@@ -203,7 +203,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addNode(t, name, *tv);
 
-	SCM shandle = scm_from_ulong(h);
+	SCM shandle = scm_from_ulong(h.value());
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
@@ -231,7 +231,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 		atom->setTruthValue(*tv);
 	}
 
-	SCM shandle = scm_from_ulong(h);
+	SCM shandle = scm_from_ulong(h.value());
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
@@ -281,7 +281,7 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 		{
 			// Get the handle  ... should we check for valid handles here?
 			SCM shandle = SCM_SMOB_OBJECT(satom);
-			Handle h = scm_to_ulong(shandle);
+			Handle h(scm_to_ulong(shandle));
 			outgoing_set.push_back(h);
 		}
 		else
@@ -320,7 +320,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addLink(t, outgoing_set, *tv);
 
-	SCM shandle = scm_from_ulong(h);
+	SCM shandle = scm_from_ulong(h.value());
 
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
@@ -350,7 +350,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 		atom->setTruthValue(*tv);
 	}
 
-	SCM shandle = scm_from_ulong(h);
+	SCM shandle = scm_from_ulong(h.value());
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 

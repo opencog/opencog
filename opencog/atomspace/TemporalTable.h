@@ -90,7 +90,7 @@ public:
 
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle.
-     * If the passed Handle object is UNDEFINED_HANDLE, it matches any Handle.
+     * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
      * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
      * to restrict the return to only HandleTemporalPair objects whose Temporal
      * matches with it, according to the temporal relationship (search criteria) argument to
@@ -99,8 +99,8 @@ public:
      *
      * NOTE1: If the search criterion is of form NEXT_<CONDITION> or PREVIOUS_<CONDITION>
      *        there are 2 different situations:
-     *        1) if the given Handle argument *is not* UNDEFINED_HANDLE, it will return at most 1 entry.
-     *        2) if the given Handle argument *is* UNDEFINED_HANDLE, it may return many entries. In this case,
+     *        1) if the given Handle argument *is not* Handle::UNDEFINED, it will return at most 1 entry.
+     *        2) if the given Handle argument *is* Handle::UNDEFINED, it may return many entries. In this case,
      *           all returned entries have the exact same Temporal value, but each one with a different handle.
      *
      * NOTE2: The caller must take care of deletion of the HandleTemporalPairEntry object.
@@ -109,7 +109,7 @@ public:
 
     /**
      * Removes HandleTemporalPair objects related to a given Atom Handle.
-     * If the passed Handle object is UNDEFINED_HANDLE, it matches any Handle.
+     * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
      * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
      * to restrict the removal to only HandleTemporalPair objects whose Temporal
      * matches with it, according to the temporal relationship (search criteria) argument to
@@ -119,8 +119,8 @@ public:
      *
      * NOTE: If the search criterion is of form NEXT_<CONDITION> or PREVIOUS_<CONDITION>
      *       there are 2 different situations:
-     *       1) if the given Handle argument *is not* UNDEFINED_HANDLE, it will remove at most 1 entry.
-     *       2) if the given Handle argument *is* UNDEFINED_HANDLE, it may remove many entries. In this case,
+     *       1) if the given Handle argument *is not* Handle::UNDEFINED, it will remove at most 1 entry.
+     *       2) if the given Handle argument *is* Handle::UNDEFINED, it may remove many entries. In this case,
      *          the removed entries have the exact same Temporal value, but each one with a different handle.
      *       This is not a typical removal case though!
      */

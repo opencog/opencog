@@ -206,7 +206,7 @@ bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::Tempo
 
 Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const
 {
-    Handle result = UNDEFINED_HANDLE;
+    Handle result = Handle::UNDEFINED;
 
     const Temporal& t = *(htp.getTemporal());
     Handle h = htp.getHandle();
@@ -566,7 +566,7 @@ Handle AtomSpace::getHandle(Type t, const HandleSeq& outgoing) const
     // fflush(stdout);
 
     HandleEntry* he = atomTable.getHandleSet(outgoing, NULL, NULL, outgoing.size(), t, false);
-    Handle ret = he ? he->handle : UNDEFINED_HANDLE;
+    Handle ret = he ? he->handle : Handle::UNDEFINED;
     delete he;
     return ret;
 }
@@ -903,7 +903,7 @@ Handle AtomSpace::_getNextAtom()
     else {
         delete _handle_iterator;
         _handle_iterator = NULL;
-        return Handle(0);
+        return Handle::UNDEFINED;
     }
 }
 
@@ -921,7 +921,7 @@ Handle AtomSpace::_getNextAtom_type(Type type)
     //fflus(stdout);
 
     if (_handle_entry == NULL)
-        return Handle(0);
+        return Handle::UNDEFINED;
     Handle h = _handle_entry->handle;
     _handle_entry = _handle_entry->next;
     return h;

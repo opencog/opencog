@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TLB.cc
+ * opencog/atomspace/Handle.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -23,23 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TLB.h"
+#include "Handle.h"
+#include <climits>
 
-#include <opencog/util/platform.h>
-#include <opencog/atomspace/type_codes.h>
-
-#ifdef USE_TLB_MAP
-
-using namespace opencog;
-
-// Low-lying values are reserved for "non-real" atoms.
-// Leave a large gap between the highest "non-real" atom,
-// and the first "real" handle.  This allows new atom types
-// to be added, while still not overlapping with handles
-// in older persistent storage.
-unsigned long TLB::uuid = NOTYPE + 1000;
-
-std::map<Handle, const Atom*> TLB::handle_map;
-std::map<const Atom*, Handle> TLB::atom_map;
-
-#endif
+const opencog::Handle opencog::Handle::UNDEFINED(ULONG_MAX);

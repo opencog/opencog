@@ -70,14 +70,14 @@ public:
     void testAdd() {
         for (int i = 0; i < N_TIMES; i++) {
             TS_ASSERT(!temporalTable->get(handles[i]));
-            TS_ASSERT(!temporalTable->get(UNDEFINED_HANDLE, *(times[i])));
+            TS_ASSERT(!temporalTable->get(Handle::UNDEFINED, *(times[i])));
         }
         for (int i = 0; i < N_TIMES; i++) {
             temporalTable->add(handles[i], *(times[i]));
             HandleTemporalPairEntry* result = temporalTable->get(handles[i]);
             TS_ASSERT(result);
             delete result;
-            result = temporalTable->get(UNDEFINED_HANDLE, *(times[i]));
+            result = temporalTable->get(Handle::UNDEFINED, *(times[i]));
             TS_ASSERT(result);
             delete result;
         }
@@ -97,7 +97,7 @@ public:
             TS_ASSERT(!hte->next);
             delete result;
             // Check handles by time
-            result = temporalTable->get(UNDEFINED_HANDLE, *(times[i]));
+            result = temporalTable->get(Handle::UNDEFINED, *(times[i]));
             hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
@@ -358,7 +358,7 @@ public:
         }
         // Exact match
         for (int i = 0; i < N_TIMES; i++) {
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(times[i]));
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
@@ -367,7 +367,7 @@ public:
         }
         // Overlap match
         for (int i = 0; i < N_TIMES; i++) {
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(times[i]), TemporalTable::OVERLAPS);
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
@@ -380,7 +380,7 @@ public:
             temporalTable->add(handles[i], *(times[0]));
         }
         // Exact match
-        HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(times[0]));
+        HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[0]));
         HandleTemporalPairEntry* hte = result;
         for (int i = 0; i < N_TIMES; i++) {
             TS_ASSERT(hte);
@@ -391,7 +391,7 @@ public:
         TS_ASSERT(!hte);
         delete result;
         // Overlap match
-        result = temporalTable->get(UNDEFINED_HANDLE, *(times[0]), TemporalTable::OVERLAPS);
+        result = temporalTable->get(Handle::UNDEFINED, *(times[0]), TemporalTable::OVERLAPS);
         hte = result;
         for (int i = 0; i < N_TIMES; i++) {
             TS_ASSERT(hte);
@@ -407,19 +407,19 @@ public:
     void testGetByTemporalSpecialCase1() {
         Temporal time(0, 20);
         // Check if TemporalTable is empty
-        TS_ASSERT(!temporalTable->get(UNDEFINED_HANDLE, time));
-        TS_ASSERT(!temporalTable->get(UNDEFINED_HANDLE, time, TemporalTable::OVERLAPS));
+        TS_ASSERT(!temporalTable->get(Handle::UNDEFINED, time));
+        TS_ASSERT(!temporalTable->get(Handle::UNDEFINED, time, TemporalTable::OVERLAPS));
         // Inserts new time
         temporalTable->add(handles[0], time);
         // Gets time with exact match
-        HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, time);
+        HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, time);
         HandleTemporalPairEntry* hte = result;
         TS_ASSERT(hte);
         TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
         TS_ASSERT(!(hte->next));
         delete result;
         // Gets time with Overlap match
-        result = temporalTable->get(UNDEFINED_HANDLE, time, TemporalTable::OVERLAPS);
+        result = temporalTable->get(Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
         hte = result;
         TS_ASSERT(hte);
         TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
@@ -428,9 +428,9 @@ public:
         // Lookups using several different times whose interval is contained by the interval of the inserted time
         for (int i = 0; i < N_TIMES; i++) {
             // Exact match does not return anything
-            TS_ASSERT(!temporalTable->get(UNDEFINED_HANDLE, *(times[i])));
+            TS_ASSERT(!temporalTable->get(Handle::UNDEFINED, *(times[i])));
             // Overlap match return one entry for all times
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(times[i]), TemporalTable::OVERLAPS);
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
@@ -448,9 +448,9 @@ public:
         }
         Temporal time(N_TIMES, N_TIMES);
         // Exact match
-        TS_ASSERT(!temporalTable->get(UNDEFINED_HANDLE, time));
+        TS_ASSERT(!temporalTable->get(Handle::UNDEFINED, time));
         // Overlap match
-        HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, time, TemporalTable::OVERLAPS);
+        HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
         HandleTemporalPairEntry* hte = result;
         for (int i = 0; i < N_TIMES / 2; i++) {
             TS_ASSERT(hte);
@@ -474,14 +474,14 @@ public:
         }
         for (int i = 0; i < N_TIMES / 2; i++) {
             // Exact match
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]));
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
-            result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAPS);
+            result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             hte = result;
             for (int j = 0; j < N_TIMES / 2; j++) {
                 TS_ASSERT(hte);
@@ -506,14 +506,14 @@ public:
         }
         for (int i = 0; i < N_TIMES / 2; i++) {
             // Exact match
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]));
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
-            result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAPS);
+            result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             hte = result;
             for (int j = 0; j < N_TIMES / 2; j++) {
                 TS_ASSERT(hte);
@@ -538,14 +538,14 @@ public:
         }
         for (int i = 0; i < N_TIMES / 2; i++) {
             // Exact match
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]));
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
-            result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAPS);
+            result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             hte = result;
             int howManyIntersections = (i > 0 && i < (N_TIMES / 2 - 1)) ? (N_TIMES / 2) : (N_TIMES / 2 - 1);
             for (int j = 0; j < howManyIntersections; j++) {
@@ -571,14 +571,14 @@ public:
         }
         for (int i = 0; i < N_TIMES / 2; i++) {
             // Exact match
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]));
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
-            result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAPS);
+            result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             hte = result;
             int howManyIntersections = (i > 0 && i < (N_TIMES / 2 - 1)) ? 3 : 2;
             for (int j = 0; j < howManyIntersections; j++) {
@@ -604,7 +604,7 @@ public:
         }
         for (int i = 0; i < N_TIMES / 2; i++) {
             // Exact match
-            HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]));
+            HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
@@ -612,7 +612,7 @@ public:
             delete result;
             // Overlap match
             // Exact match
-            result = temporalTable->get(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAPS);
+            result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             hte = result;
             TS_ASSERT(hte);
             TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
@@ -634,7 +634,7 @@ public:
 
         for (int t = 0; t < NUMBER_OF_SEARCH_INTERVALS; t++) {
             for (int c = 0; c < NUMBER_OF_CRITERIA; c++) {
-                HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE, search_intervals[t], criteria[c]);
+                HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, search_intervals[t], criteria[c]);
                 HandleTemporalPairEntry* hte = result;
                 int numberOfReturnedEntries = hte->getSize();
                 int totalExpectedNumberOfEntries =
@@ -756,7 +756,7 @@ public:
             }
         }
         // Check if they are all removed.
-        HandleTemporalPairEntry* hte = temporalTable->get(UNDEFINED_HANDLE);
+        HandleTemporalPairEntry* hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
         // Adds entries again
         for (int i = 0; i < N_TIMES; i++) {
@@ -783,7 +783,7 @@ public:
             }
         }
         // Check if they are all removed.
-        hte = temporalTable->get(UNDEFINED_HANDLE);
+        hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
         // Now adds two entries for each handle
         for (int i = 0; i < N_TIMES; i++) {
@@ -815,7 +815,7 @@ public:
             }
         }
         // Check if they are all removed.
-        hte = temporalTable->get(UNDEFINED_HANDLE);
+        hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
     }
 
@@ -878,7 +878,7 @@ public:
             }
         }
         // Check if they are all removed.
-        HandleTemporalPairEntry* hte = temporalTable->get(UNDEFINED_HANDLE);
+        HandleTemporalPairEntry* hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
     }
 
@@ -942,7 +942,7 @@ public:
             }
         }
         // Check if they are all removed.
-        HandleTemporalPairEntry* hte = temporalTable->get(UNDEFINED_HANDLE);
+        HandleTemporalPairEntry* hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
 
         // TEST OTHER SPECIFIC CASES
@@ -967,10 +967,10 @@ public:
             delete result;
         }
         /*
-        printf("All entries in TemporalTable = %s\n", temporalTable->get(UNDEFINED_HANDLE)->toString().c_str());
+        printf("All entries in TemporalTable = %s\n", temporalTable->get(Handle::UNDEFINED)->toString().c_str());
         Temporal specialTime(0, (N_TIMES-1)*2); // overlaps any inserted time
         printf("specialTime = %s\n", specialTime.toString().c_str());
-        temporalTable->remove(UNDEFINED_HANDLE, specialTime, TemporalTable::OVERLAPS);
+        temporalTable->remove(Handle::UNDEFINED, specialTime, TemporalTable::OVERLAPS);
         */
         // Removes the entries and check
         for (int i = 0; i < N_TIMES - 1; i++) {
@@ -997,7 +997,7 @@ public:
             }
         }
         // Check if they are all removed.
-        hte = temporalTable->get(UNDEFINED_HANDLE);
+        hte = temporalTable->get(Handle::UNDEFINED);
         //printf("All entries in TemporalTable = %s\n", hte->toString().c_str());
         TS_ASSERT(!hte);
         for (int i = 0; i < N_TIMES; i++) {
@@ -1025,7 +1025,7 @@ public:
         // Removes each time and check
         for (int i = 0; i < N_TIMES; i++) {
 //printf("i = %d\n", i);
-            temporalTable->remove(UNDEFINED_HANDLE, *(times[i]));
+            temporalTable->remove(Handle::UNDEFINED, *(times[i]));
             for (int j = 0; j < N_TIMES - 1; j++) {
 //printf("j = %d\n", j);
                 HandleTemporalPairEntry* result = temporalTable->get(handles[j]);
@@ -1046,7 +1046,7 @@ public:
             }
         }
         // Check if they are all removed.
-        HandleTemporalPairEntry* hte = temporalTable->get(UNDEFINED_HANDLE);
+        HandleTemporalPairEntry* hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
     }
 
@@ -1070,7 +1070,7 @@ public:
         }
         // Removes each time and check
         for (int i = 0; i < N_TIMES; i++) {
-            temporalTable->remove(UNDEFINED_HANDLE, *(times[i]), TemporalTable::OVERLAPS);
+            temporalTable->remove(Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             for (int j = 0; j < N_TIMES - 1; j++) {
                 HandleTemporalPairEntry* result = temporalTable->get(handles[j]);
                 HandleTemporalPairEntry* hte = result;
@@ -1089,7 +1089,7 @@ public:
             }
         }
         // Check if they are all removed.
-        HandleTemporalPairEntry* hte = temporalTable->get(UNDEFINED_HANDLE);
+        HandleTemporalPairEntry* hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
 
         // TEST OTHER SPECIFIC CASES
@@ -1115,7 +1115,7 @@ public:
         }
         // Removes the entries and check
         for (int i = 0; i < N_TIMES; i++) {
-            temporalTable->remove(UNDEFINED_HANDLE, *(specialTimes[i]), TemporalTable::OVERLAPS);
+            temporalTable->remove(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             for (int j = 0; j < N_TIMES - 1; j++) {
                 HandleTemporalPairEntry* result = temporalTable->get(handles[j]);
                 HandleTemporalPairEntry* hte = result;
@@ -1138,7 +1138,7 @@ public:
             }
         }
         // Check if they are all removed.
-        hte = temporalTable->get(UNDEFINED_HANDLE);
+        hte = temporalTable->get(Handle::UNDEFINED);
         TS_ASSERT(!hte);
         for (int i = 0; i < N_TIMES; i++) {
             delete specialTimes[i];
@@ -1157,7 +1157,7 @@ public:
                         temporalTable->add(handles[i], Temporal(i, i + 2)); // [0,2]    [1,3]
                     }
                     int totalNumberOfEntries = NUMBER_OF_HANDLES * 3;
-                    HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE);
+                    HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED);
                     HandleTemporalPairEntry* hte = result;
                     TS_ASSERT(totalNumberOfEntries == hte->getSize());
                     delete result;
@@ -1166,7 +1166,7 @@ public:
                     temporalTable->remove(handles[h], search_intervals[t], criteria[c]);
 
                     // Check if the entries were removed
-                    result = temporalTable->get(UNDEFINED_HANDLE);
+                    result = temporalTable->get(Handle::UNDEFINED);
                     hte = result;
                     int numberOfReturnedEntries = hte->getSize();
                     if (numberOfReturnedEntries != (totalNumberOfEntries - expectedNumberOfEntries[h][t][c])) {
@@ -1239,16 +1239,16 @@ public:
                     temporalTable->add(handles[i], Temporal(i, i + 2)); // [0,2]    [1,3]
                 }
                 int totalNumberOfEntries = NUMBER_OF_HANDLES * 3;
-                HandleTemporalPairEntry* result = temporalTable->get(UNDEFINED_HANDLE);
+                HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED);
                 HandleTemporalPairEntry* hte = result;
                 TS_ASSERT(totalNumberOfEntries == hte->getSize());
                 delete result;
 
                 // Remove the entries
-                temporalTable->remove(UNDEFINED_HANDLE, search_intervals[t], criteria[c]);
+                temporalTable->remove(Handle::UNDEFINED, search_intervals[t], criteria[c]);
 
                 // Check if the entries were removed
-                result = temporalTable->get(UNDEFINED_HANDLE);
+                result = temporalTable->get(Handle::UNDEFINED);
                 hte = result;
                 int numberOfReturnedEntries = hte->getSize();
                 int totalExpectedNumberOfEntries = totalNumberOfEntries - (

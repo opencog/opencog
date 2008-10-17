@@ -28,9 +28,9 @@
 
 #include <opencog/util/platform.h>
 
+#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TemporalEntry.h>
-#include <opencog/atomspace/CoreUtils.h>
 
 using namespace opencog;
 
@@ -274,7 +274,7 @@ int HandleTemporalPairEntry::nextMatch(std::vector<std::vector<HandleTemporalPai
     for (;;) {
 
         bool fail = false;
-        HandleTemporalPair localmax(0, NULL);  // Temporal's pointer as NULL is considered the smallest Temporal value in compare method
+        HandleTemporalPair localmax(Handle::UNDEFINED, NULL);  // Temporal's pointer as NULL is considered the smallest Temporal value in compare method
         // if current positions stored in cursors is not a match, the largest
         // value pointed by cursors is computed to reposition cursors
         // accordingly

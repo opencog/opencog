@@ -170,5 +170,5 @@ const std::string& ClassServer::getTypeName(Type type)
 // TODO: Implement smarter mapping from atom types to BuiltInTypeHandle IDs?
 Handle ClassServer::typeDesignatorHandle(Type T)
 {
-    return (Handle)T;
+    return Handle(T);
 }

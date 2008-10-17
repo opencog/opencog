@@ -24,6 +24,8 @@
 
 namespace opencog {
 
+class Atom;
+
 class SchemeSmob
 {
 	friend class SchemeShell;

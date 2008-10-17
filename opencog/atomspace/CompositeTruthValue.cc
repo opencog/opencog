@@ -187,7 +187,7 @@ std::string CompositeTruthValue::toString() const
         VersionHandle key = itr->first;
         TruthValue* tv = itr->second;
         //printf("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
-        sprintf(buffer, "{%lu;%s;%s;%s}", (unsigned long) key.substantive, VersionHandle::indicatorToStr(key.indicator),
+        sprintf(buffer, "{%lu;%s;%s;%s}", key.substantive.value(), VersionHandle::indicatorToStr(key.indicator),
                 TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
         result += buffer;
     }

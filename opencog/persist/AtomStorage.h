@@ -44,7 +44,7 @@ class AtomStorage
 		void rename_tables(void);
 		void create_tables(void);
 
-		std::set<unsigned long> local_id_cache;
+		std::set<Handle> local_id_cache;
 		void get_ids(void);
 		bool idExists(const char *);
 

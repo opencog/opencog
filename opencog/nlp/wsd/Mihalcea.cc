@@ -32,7 +32,7 @@ Mihalcea::Mihalcea(void)
 	sense_ranker = new SenseRank();
 	reporter = new ReportRank();
 
-	previous_parse = UNDEFINED_HANDLE;
+	previous_parse = Handle::UNDEFINED;
 }
 
 Mihalcea::~Mihalcea()
@@ -59,7 +59,7 @@ bool Mihalcea::process_sentence(Handle h)
 	parse_list.push_back(top_parse);
 
 #ifdef DEBUG
-	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n", top_parse, h); 
+	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n", top_parse.value(), h.value()); 
 #endif
 
 	// Attach senses to word instances
@@ -73,7 +73,7 @@ bool Mihalcea::process_sentence(Handle h)
 
 	// Link sentences together, since presumably the next 
 	// sentence deals with topics similar to the previous one.
-	if (UNDEFINED_HANDLE != previous_parse)
+	if (Handle::UNDEFINED != previous_parse)
 	{
 		edger->annotate_parse_pair(previous_parse, top_parse);
 	}

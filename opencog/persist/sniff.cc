@@ -45,7 +45,7 @@ int atomCompare(Atom *a, Atom *b)
 			if (outa[i] != outb[i])
 			{
 				fprintf(stderr, "Error, outgoing set mis-match, "
-				        "i=%d a=%lx b=%lx\n", i, outa[i], outb[i]);
+				        "i=%d a=%lx b=%lx\n", i, outa[i].value(), outb[i].value());
 				rc --;
 			}
 		}

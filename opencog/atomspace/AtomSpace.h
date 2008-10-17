@@ -145,7 +145,7 @@ public:
      * removeDisconnectedTimeNodes argument is explicitly set to false).
      *
      * @param atom the Handle of the atom to be associated to
-     *        the timestamp. This argument cannot be an UNDEFINED_HANDLE.
+     *        the timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If it is, a RuntimeException is thrown.
      * @param timestamp The timestamp to be associated to the atom.
      *        This argument cannot be an UNDEFINED_TEMPORAL. If
@@ -183,7 +183,7 @@ public:
      * NOTE2: The TimeNode that corresponds to the given removed time info is also removed if its incoming set becomes empty
      *        after the removal of an AtTimeLink link (unless the removeDisconnectedTimeNodes argument is explicitly set to false).
      *
-     * @param atom the Handle of the atom to be associated to the timestamp. This argument cannot be an UNDEFINED_HANDLE.
+     * @param atom the Handle of the atom to be associated to the timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If so, it throws a RuntimeException.
      * @param t The Temporal object to be associated to the atom. This argument cannot be an UNDEFINED_TEMPORAL.
      *        If so, it throws a RuntimeException.
@@ -221,7 +221,7 @@ public:
      * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
      *          Example of call to this method, which would return all entries in TimeServer:
      *         std::list<HandleTemporalPair> ret;
-     *         timeServer.get(back_inserter(ret), UNDEFINED_HANDLE);
+     *         timeServer.get(back_inserter(ret), Handle::UNDEFINED);
      */
     template<typename OutputIterator> OutputIterator
     getTimeInfo(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
@@ -1032,7 +1032,7 @@ public:
         HandleSeq result;
         _getNextAtomPrepare();
         Handle next;
-        while ((next = _getNextAtom()) != 0)
+        while ((next = _getNextAtom()) != Handle::UNDEFINED)
             if (compare(next) && containsVersionedTV(next, vh))
                 result.push_back(next);
         return result;
@@ -1042,7 +1042,7 @@ public:
     OutputIterator filter(OutputIterator it, Predicate compare, VersionHandle vh = NULL_VERSION_HANDLE) {
         _getNextAtomPrepare();
         Handle next;
-        while ((next = _getNextAtom()) != 0)
+        while ((next = _getNextAtom()) != Handle::UNDEFINED)
             if (compare(next) && containsVersionedTV(next, vh))
                 * it++ = next;
 
@@ -1083,7 +1083,7 @@ public:
         HandleSeq result;
         _getNextAtomPrepare_type(type);
         Handle next;
-        while ((next = _getNextAtom_type(type)) != 0)
+        while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
             if (containsVersionedTV(next, vh))
                 result.push_back(next);
 
@@ -1094,7 +1094,7 @@ public:
     OutputIterator filter_type(OutputIterator it, Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
         _getNextAtomPrepare_type(type);
         Handle next;
-        while ((next = _getNextAtom_type(type)) != 0)
+        while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
             if (containsVersionedTV(next, vh))
                 * it++ = next;
 

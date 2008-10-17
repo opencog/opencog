@@ -56,7 +56,7 @@ public:
      * @param The initial primary or versioned TV of this composite TV. If it is NULL_TV(), a
      *        default tv will be created internally.
      * @param The VersionHandle the passed TV is associated to. For primary TV, its substantive
-     *        component must be UNDEFINED_HANDLE (you can use NULL_VERSION_HANDLE constant).
+     *        component must be Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
      *        In this case its indicator component does not matter.
      * NOTE: This object will take care of memory deallocation of the TruthValue object
      * passed as argument to this method. So, caller should not delete it outside.
@@ -95,7 +95,7 @@ public:
      * @param TruthValue object to be set. If it is a NULL_TV(), a default tv will be created
      *        internally.
      * @param The VersionHandle the passed TV is associated to. For primary TV, its substantive
-     *        component must be UNDEFINED_HANDLE (you can use NULL_VERSION_HANDLE constant).
+     *        component must be Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
      *        In this case its indicator component does not matter.
      * NOTE: This object will take care of memory deallocation of the TruthValue object
      * passed as argument to this method. So, caller should not delete it outside.

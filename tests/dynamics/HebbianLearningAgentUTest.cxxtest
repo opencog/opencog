@@ -186,37 +186,37 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
         i.push_back(in_in_norm[1]); 
         in_in_norm[2] = a->getHandle(SYMMETRIC_HEBBIAN_LINK, i);
         i.clear();
-        TS_ASSERT(in_in_norm[2]);
+        TS_ASSERT(in_in_norm[2] != Handle::UNDEFINED);
 
         i.push_back(in_in_inv[0]); 
         i.push_back(in_in_inv[1]); 
         in_in_inv[2] = a->getHandle(SYMMETRIC_HEBBIAN_LINK, i);
         i.clear();
-        TS_ASSERT(in_in_inv[2]);
+        TS_ASSERT(in_in_inv[2] != Handle::UNDEFINED);
 
         i.push_back(out_in_inv[1]); 
         i.push_back(out_in_inv[0]); 
         out_in_inv[2] = a->getHandle(INVERSE_HEBBIAN_LINK, i);
         i.clear();
-        TS_ASSERT(out_in_inv[2]);
+        TS_ASSERT(out_in_inv[2] != Handle::UNDEFINED);
 
         i.push_back(out_in_norm[1]); 
         i.push_back(out_in_norm[0]); 
         out_in_norm[2] = a->getHandle(INVERSE_HEBBIAN_LINK, i);
         i.clear();
-        TS_ASSERT(out_in_norm[2]);
+        TS_ASSERT(out_in_norm[2] != Handle::UNDEFINED);
 
         i.push_back(in_out_inv[0]); 
         i.push_back(in_out_inv[1]); 
         in_out_inv[2] = a->getHandle(INVERSE_HEBBIAN_LINK, i);
         i.clear();
-        TS_ASSERT(in_out_inv[2]);
+        TS_ASSERT(in_out_inv[2] != Handle::UNDEFINED);
 
         i.push_back(in_out_norm[0]); 
         i.push_back(in_out_norm[1]); 
         in_out_norm[2] = a->getHandle(INVERSE_HEBBIAN_LINK, i);
         i.clear();
-        TS_ASSERT(in_out_norm[2]);
+        TS_ASSERT(in_out_norm[2] != Handle::UNDEFINED);
 
         TS_ASSERT_DELTA(a->getTV(in_in_norm[2]).getMean(), 0.19f, 0.001);
         TS_ASSERT_DELTA(a->getTV(in_in_inv[2]).getMean(), 0.01f, 0.001);

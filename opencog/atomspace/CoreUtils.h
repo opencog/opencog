@@ -33,6 +33,8 @@
 namespace opencog
 {
 
+class Atom;
+
 /** Module for including any core-specific common utilities */
 class CoreUtils
 {

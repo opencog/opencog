@@ -144,7 +144,7 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
     //printf("get(h, t = %s, criterion = %s\n", t.toString().c_str(), getTemporalRelationshipStr(criterion));
 //    logger().debug("TemporalTable::getHandle - init.");
 
-    if (!CoreUtils::compare(h, UNDEFINED_HANDLE)) {
+    if (!CoreUtils::compare(h, Handle::UNDEFINED)) {
         return get(t, criterion);
     }
     TemporalEntry* te = handleMap->get(h);
@@ -382,7 +382,7 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
 //printf("TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship criterion)\n");
 //    logger().debug("TemporalTable::removeHandle - init.");
 
-    if (!CoreUtils::compare(h, UNDEFINED_HANDLE)) {
+    if (!CoreUtils::compare(h, Handle::UNDEFINED)) {
         return remove(t, criterion);
     }
     std::set<Temporal*> toBeDeleted;

@@ -53,7 +53,7 @@ private:
     /**
      * Defines an iterator to the map.
      */
-    typedef typename std::map<Handle, T> InternalMap;
+    typedef typename std::map< Handle, T, std::less<Handle> > InternalMap;
     typedef typename InternalMap::iterator InternalIterator;
 
     /**
@@ -141,7 +141,7 @@ public:
         if (!contains(key)) {
             (*handle_map)[key] = element;
         } else {
-            throw RuntimeException(TRACE_INFO, "attempting to insert duplicated key %d in hash map", key);
+            throw RuntimeException(TRACE_INFO, "attempting to insert duplicated key %d in hash map", key.value());
         }
 
         unlock();

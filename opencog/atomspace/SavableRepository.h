@@ -34,6 +34,8 @@
 namespace opencog
 {
 
+class Atom;
+
 /**
  * This interface should be implemented by any
  * Repositories that want to be called by the
@@ -43,12 +45,16 @@ namespace opencog
  */
 class SavableRepository
 {
+
 protected:
+
     /**
      * Protected constructor so that this class is abstract.
      */
     SavableRepository() {}
+
 public:
+
     virtual ~SavableRepository() {}
 
     /**
@@ -68,7 +74,7 @@ public:
      *
      * @param The file from where the repository should be loaded.
      */
-    virtual void loadRepository(FILE *, HandleMap<Atom *> *) = 0;
+    virtual void loadRepository(FILE *, HandleMap<Atom*>*) = 0;
 
 
     /**

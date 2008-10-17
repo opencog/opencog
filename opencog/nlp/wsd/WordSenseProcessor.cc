@@ -138,7 +138,7 @@ bool WordSenseProcessor::do_document(Handle h)
 
 	// If we are here, then there's a fresh document to work on.
 	cnt++;
-	printf ("WordSenseProcessor found document %d handle=%lx\n", cnt, (unsigned long) h);
+	printf ("WordSenseProcessor found document %d handle=%lx\n", cnt, h.value());
 
 	// Mark this document as being started.
 	std::vector<Handle> out;

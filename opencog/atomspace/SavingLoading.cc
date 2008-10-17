@@ -439,8 +439,8 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     Handle* targetTypeIndexCache = (Handle*) malloc(sizeof(Handle) * dumpToCore.size());
 
     for (int i = 0; i < numTypes; i++) {
-        atomTable.typeIndex[i] = UNDEFINED_HANDLE;
-        atomTable.targetTypeIndex[i] = UNDEFINED_HANDLE;
+        atomTable.typeIndex[i] = Handle::UNDEFINED;
+        atomTable.targetTypeIndex[i] = Handle::UNDEFINED;
     }
 
     // reads the handle of each index list head from the file
@@ -664,7 +664,7 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
 
     if (handles != NULL) {
         handles->add(atomHandle, atom);
-        logger().fine("Added handles in map: %p => %p (type = %d)", atomHandle, atom, atom->getType());
+        logger().fine("Added handles in map: %p => %p (type = %d)", atomHandle.value(), atom, atom->getType());
     } else {
         logger().warn("No HandleMap while reading atom from file: %p (type = %d)", atom, atom->getType());
     }

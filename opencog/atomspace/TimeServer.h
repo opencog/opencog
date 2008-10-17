@@ -66,7 +66,7 @@ public:
 
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle.
-     * If the passed Handle object is UNDEFINED_HANDLE, it matches any Handle.
+     * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
      * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
      * to restrict the return to only HandleTemporalPair objects whose Temporal
      * matches with it, according to the temporal relationship (search criteria) argument to
@@ -76,7 +76,7 @@ public:
      * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
      *          Example of call to this method, which would return all entries in TimeServer:
      *         std::list<HandleTemporalPair> ret;
-     *         timeServer->get(back_inserter(ret), UNDEFINED_HANDLE);
+     *         timeServer->get(back_inserter(ret), Handle::UNDEFINED);
      */
     template<typename OutputIterator> OutputIterator
     get(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
@@ -96,7 +96,7 @@ public:
 
     /**
      * Removes HandleTemporalPair objects related to a given Atom Handle.
-     * If the passed Handle object is UNDEFINED_HANDLE, it matches any Handle.
+     * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
      * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
      * to restrict the removal to only HandleTemporalPair objects whose Temporal
      * matches with it, according to the temporal relationship (search criteria) argument to

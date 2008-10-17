@@ -52,7 +52,7 @@ bool ListRequest::execute()
 {
     std::string name = "";
     Type type = NOTYPE;
-    Handle handle = UNDEFINED_HANDLE;
+    Handle handle = Handle::UNDEFINED;
     bool subtypes = false;
     AtomSpace* as = server().getAtomSpace();
     std::ostringstream err;
@@ -62,7 +62,7 @@ bool ListRequest::execute()
         if (*it == "-h") { // filter by handle
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            handle = strtol((*it).c_str(), NULL, 0);
+            handle = Handle(strtol((*it).c_str(), NULL, 0));
             if (TLB::isInvalidHandle(handle)) {
                 _error << "invalid handle" << std::endl;
                 sendError();

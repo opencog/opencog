@@ -61,7 +61,6 @@ class Node;
 class HandleEntry;
 class HandleIterator;
 class SavingLoading;
-
 class PredicateEvaluator;
 
 /**
@@ -359,7 +358,7 @@ public:
     /**
      * Returns the exact atom for the given name and type.
      * Note: Type must inherit from NODE. Otherwise, it returns
-     * UNDEFINED_HANDLE.
+     * Handle::UNDEFINED.
      *
      * @param The name of the desired atom.
      * @param The type of the desired atom.

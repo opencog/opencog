@@ -34,7 +34,7 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 		scm_wrong_type_arg_msg(subrname, 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
-	Handle h = scm_to_ulong(shandle);
+	Handle h(scm_to_ulong(shandle));
 	return h;
 }
 
@@ -104,7 +104,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 	for (int i = oset.size()-1; i >= 0; i--)
 	{
 		Handle h = oset[i];
-		SCM sh = scm_from_ulong(h);
+		SCM sh = scm_from_ulong(h.value());
 		SCM smob;
 		SCM_NEWSMOB (smob, cog_handle_tag, sh);
 		list = scm_cons (smob, list);
@@ -124,7 +124,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	HandleEntry *he = atom->getIncomingSet();
 	if (!he) return SCM_EOL;
 
-	SCM sh = scm_from_ulong(he->handle);
+	SCM sh = scm_from_ulong(he->handle.value());
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_handle_tag, sh);
 	SCM head = scm_cons (smob, SCM_EOL);
@@ -132,7 +132,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	he = he->next;
 	while (he)
 	{
-		SCM sh = scm_from_ulong(he->handle);
+		SCM sh = scm_from_ulong(he->handle.value());
 		SCM_NEWSMOB (smob, cog_handle_tag, sh);
 		SCM pair = scm_cons (smob, SCM_EOL);
 		scm_set_cdr_x(tail, pair);
@@ -167,7 +167,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 	{
 		Handle h = *i;
 
-		SCM shandle = scm_from_ulong(h);
+		SCM shandle = scm_from_ulong(h.value());
 		SCM smob;
 		SCM_NEWSMOB(smob, cog_handle_tag, shandle);
 		SCM rc = scm_call_1(proc, smob);

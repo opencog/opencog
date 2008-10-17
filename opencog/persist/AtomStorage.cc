@@ -82,7 +82,7 @@ class AtomStorage::Response
 			}
 			else if (!strcmp(colname, "uuid"))
 			{
-				handle = strtoul(colvalue, NULL, 10);
+				handle = Handle(strtoul(colvalue, NULL, 10));
 			}
 			return false;
 		}
@@ -212,7 +212,7 @@ class AtomStorage::Response
 		bool note_id_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ...
-			Handle h = strtoul(colvalue, NULL, 10);
+			Handle h(strtoul(colvalue, NULL, 10));
 			id_set->insert(h);
 			return false;
 		}
@@ -499,7 +499,7 @@ void AtomStorage::storeAtom(const Atom *atom)
 
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
-	snprintf(uuidbuff, BUFSZ, "%lu", (unsigned long) h);
+	snprintf(uuidbuff, BUFSZ, "%lu", h.value());
 
 	bool update = atomExists(h);
 	if (update)
@@ -564,7 +564,7 @@ void AtomStorage::storeAtom(const Atom *atom)
 						Handle h = out[i];
 						if (i != 0) vals += ", ";
 						char buff[BUFSZ];
-						snprintf(buff, BUFSZ, "%lu", h);
+						snprintf(buff, BUFSZ, "%lu", h.value());
 						vals += buff;
 					}
 					vals += "}\'";
@@ -746,7 +746,7 @@ Atom * AtomStorage::getAtom(Handle h)
 {
 	load_typemap();
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", h.value());
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);
@@ -808,7 +808,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		{
 			fprintf(stderr,
 				"Error: mismatched atom type for existing atom! uuid=%lu\n",
-				(unsigned long) h);
+				h.value());
 		}
 	}
 

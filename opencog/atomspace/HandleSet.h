@@ -42,7 +42,6 @@ private:
     /**
      * Defines a hash set used to store handles.
      */
-    //typedef hash_set<Handle, hashHandle, eqHandle> InternalHandleSet;
     typedef std::tr1::unordered_set<Handle> InternalHandleSet;
 
 

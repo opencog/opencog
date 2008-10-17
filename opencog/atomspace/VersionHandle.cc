@@ -32,7 +32,7 @@ using namespace opencog;
 VersionHandle::VersionHandle()
 {
     indicator = UNKNOWN;
-    substantive = UNDEFINED_HANDLE;
+    substantive = Handle::UNDEFINED;
 }
 
 VersionHandle::VersionHandle(IndicatorType ind, Handle subs)
@@ -70,7 +70,7 @@ IndicatorType VersionHandle::strToIndicator(const char* indicatorStr) throw (Inv
 
 int hashVersionHandle::operator()(VersionHandle vh) const
 {
-    int hashCode =  vh.indicator + hashHandle()(vh.substantive);
+    int hashCode =  vh.indicator + std::tr1::hash<Handle>()(vh.substantive);
     return(hashCode);
 }
 

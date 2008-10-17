@@ -37,33 +37,16 @@
 
 #include <boost/variant.hpp>
 
-#include <opencog/util/platform.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Temporal.h>
+#include <opencog/util/platform.h>
 
 namespace opencog
 {
 
-// Definition of a handle. Opaque type.
-// Will change when system is reworked for distributed computing.
-typedef unsigned long Handle;
-
 typedef std::vector< Handle, std::allocator<Handle> > HandleSeq;
 
-//#ifdef WIN32
-//typedef hash_map<Handle, void *> HandleVoidPointerHashMap;
-//#else
-struct hashHandle {
-    int operator()(Handle h) const;
-};
-
-struct eqHandle {
-    bool operator()(Handle h1, Handle h2) const;
-};
-
-//typedef hash_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
-//typedef unordered_map<Handle, void *, hashHandle, eqHandle> HandleVoidPointerHashMap;
 typedef std::tr1::unordered_map<Handle, void *> HandleVoidPointerHashMap;
-//#endif
 
 // type and arity of Atoms, represented as short integers (16 bits)
 typedef unsigned short Type;
@@ -110,17 +93,10 @@ public:
     static void setValue(ShortFloat*, float);
 };
 
-class Atom;
-
 /**
  * Structure used to return a linked-list of atoms instead of the standard
  * linked-list of handles (HandleEntry)
  */
-struct AtomEntry {
-    AtomEntry *next;
-    Atom *atom;
-};
-
 template<typename T>
 struct TypeWrapper {
     T value;

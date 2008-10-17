@@ -65,12 +65,12 @@ AtomTable::AtomTable(bool dsa)
     // is NUMBER_OF_CLASSES+2 because NOTYPE is NUMBER_OF_CLASSES+1
     // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
     // (because ClassServer::getType() returns NOTYPE in this case).
-    typeIndex.resize(ClassServer::getNumberOfClasses() + 2, UNDEFINED_HANDLE);
-    targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, UNDEFINED_HANDLE);
-    nameIndex.resize(NAME_INDEX_SIZE, UNDEFINED_HANDLE);
-    importanceIndex.resize(IMPORTANCE_INDEX_SIZE, UNDEFINED_HANDLE);
-    predicateIndex.resize(MAX_PREDICATE_INDICES, UNDEFINED_HANDLE);
-    predicateHandles.resize(MAX_PREDICATE_INDICES, UNDEFINED_HANDLE);
+    typeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
+    targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
+    nameIndex.resize(NAME_INDEX_SIZE, Handle::UNDEFINED);
+    importanceIndex.resize(IMPORTANCE_INDEX_SIZE, Handle::UNDEFINED);
+    predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
+    predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
     numberOfPredicateIndices = 0;
     predicateHandles2Indices = new HandleMap<int>();
@@ -113,38 +113,38 @@ bool AtomTable::isCleared() const
     }
 
     for (int i = 0; i < ClassServer::getNumberOfClasses(); i++) {
-        if (typeIndex[i] != 0) {
-            //printf("typeIndex[%d] is not 0\n", i);
+        if (typeIndex[i] != Handle::UNDEFINED) {
+            //printf("typeIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
-        if (targetTypeIndex[i] != 0) {
-            //printf("targetTypeIndex[%d] is not 0\n", i);
+        if (targetTypeIndex[i] != Handle::UNDEFINED) {
+            //printf("targetTypeIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
     }
     for (int i = 0; i < NAME_INDEX_SIZE; i++) {
-        if (nameIndex[i] != 0) {
-            //printf("nameIndex[%d] is not 0\n", i);
+        if (nameIndex[i] != Handle::UNDEFINED) {
+            //printf("nameIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
     }
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
-        if (importanceIndex[i] != 0) {
-            //printf("importanceIndex[%d] is not 0\n", i);
+        if (importanceIndex[i] != Handle::UNDEFINED) {
+            //printf("importanceIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
     }
     for (int i = 0; i < MAX_PREDICATE_INDICES; i++) {
-        if (predicateIndex[i] != 0) {
-            //printf("predicateIndex[%d] is not 0\n", i);
+        if (predicateIndex[i] != Handle::UNDEFINED) {
+            //printf("predicateIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
-        if (predicateHandles[i] != 0) {
-            //printf("predicateHandles[%d] is not 0\n", i);
+        if (predicateHandles[i] != Handle::UNDEFINED) {
+            //printf("predicateHandles[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
         if (predicateEvaluators[i] != 0) {
-            //printf("predicateEvaluators[%d] is not 0\n", i);
+            //printf("predicateEvaluators[%d] is not Handle::UNDEFINED\n", i);
             return false;
         }
     }
@@ -176,7 +176,7 @@ throw (InvalidParamException)
     }
     if (predicateHandles2Indices->contains(predicateHandle)) {
         throw InvalidParamException(TRACE_INFO,
-                                    "AtomTable - There is already an index for predicate handle %p", predicateHandle);
+                                    "AtomTable - There is already an index for predicate handle %p", predicateHandle.value());
     }
 
     // Ok, add it.
@@ -330,7 +330,7 @@ HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) con
 Handle AtomTable::getHandle(const char* name, Type type) const
 {
     if (!ClassServer::isAssignableFrom(NODE, type)) {
-        return UNDEFINED_HANDLE;
+        return Handle::UNDEFINED;
     }
 #ifdef USE_ATOM_HASH_SET
     Node node(type, name); // alloc on stack, avoid memory frag
@@ -345,7 +345,7 @@ Handle AtomTable::getHandle(const char* name, Type type) const
 
     // if any atom is left on the set, there exists a matching atom which is
     // returned
-    Handle result = UNDEFINED_HANDLE;
+    Handle result = Handle::UNDEFINED;
     if (set != NULL) {
         result = set->handle;
         delete set;
@@ -361,7 +361,7 @@ Handle AtomTable::getHandle(const Node *node) const
 {
 #ifdef USE_ATOM_HASH_SET
     AtomHashSet::const_iterator it = atomSet->find(node);
-    Handle result = UNDEFINED_HANDLE;
+    Handle result = Handle::UNDEFINED;
     if (it != atomSet->end()) {
         const Atom* resultAtom = *it;
         result = TLB::getHandle(resultAtom);
@@ -433,11 +433,11 @@ Handle AtomTable::getHandle(const Link *link) const
 {
     const std::vector<Handle>& handles = link->getOutgoingSet();
     for (int i = 0; i < link->getArity(); i++) {
-        if(false == TLB::isValidHandle(handles[i])) return UNDEFINED_HANDLE;
+        if(false == TLB::isValidHandle(handles[i])) return Handle::UNDEFINED;
     }
 
     AtomHashSet::const_iterator it = atomSet->find(link);
-    Handle h = UNDEFINED_HANDLE;
+    Handle h = Handle::UNDEFINED;
     if (it != atomSet->end()) {
         h = TLB::getHandle(*it);
     }
@@ -469,7 +469,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             // "handles.size() = %d\n", type, handles.size());
             Link link(type, handles); // local var on stack, avoid malloc
             AtomHashSet::iterator it = atomSet->find(&link);
-            Handle h = UNDEFINED_HANDLE;
+            Handle h = Handle::UNDEFINED;
             if (it != atomSet->end()) {
                 h = TLB::getHandle(*it);
             }
@@ -724,7 +724,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         // Atom is already inserted
         return  TLB::getHandle(atom);
     }
-    Handle existingHandle = UNDEFINED_HANDLE;
+    Handle existingHandle = Handle::UNDEFINED;
     Node * nnn = dynamic_cast<Node *>(atom);
     Link * lll = dynamic_cast<Link *>(atom);
     if (nnn) {
@@ -850,7 +850,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // emit add atom signal
     _addAtomSignal(handle);
 
-    logger().debug("[AtomTable] add: %d", handle);
+    logger().debug("[AtomTable] add: %p", handle.value());
 
     return handle;
 }
@@ -900,7 +900,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
     for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
         const Atom* atom = *it;
         bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
-        if (matched) logger.debug("%d: %s", TLB::getHandle(atom), atom->toString().c_str());
+        if (matched) logger.debug("%d: %s", TLB::getHandle(atom).value(), atom->toString().c_str());
     }
 #else
     logger().error("AtomTable::log() method is not implemented when USE_ATOM_HASH_SET is disabled");
@@ -1056,7 +1056,7 @@ throw (RuntimeException)
     //logger().fine("victim = %s", victim?victim->toString().c_str():"NULL");
 
     Handle p = index[headIndex];
-    Handle q = UNDEFINED_HANDLE;
+    Handle q = Handle::UNDEFINED;
     while (p != victimHandle) {
         if (TLB::isInvalidHandle(p)) {
             throw RuntimeException(TRACE_INFO,
@@ -1078,7 +1078,7 @@ throw (RuntimeException)
         qatom->setNext(indexID, patom->next(indexID));
     }
 
-    victim->setNext(indexID, UNDEFINED_HANDLE);
+    victim->setNext(indexID, Handle::UNDEFINED);
 }
 
 void AtomTable::removeFromTargetTypeIndex(Atom *atom)
@@ -1165,7 +1165,7 @@ void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int index
     //visit all atoms in index
     for (unsigned int i = 0; i < index.size(); i++) {
         Handle p = index[i];
-        Handle q = UNDEFINED_HANDLE;
+        Handle q = Handle::UNDEFINED;
         while (!TLB::isInvalidHandle(p)) {
             Atom *patom = TLB::getAtom(p);
             //found marked element
@@ -1174,7 +1174,7 @@ void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int index
                 while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
                     p = patom->next(indexID);
                     //clear old index
-                    patom->setNext(indexID, UNDEFINED_HANDLE);
+                    patom->setNext(indexID, Handle::UNDEFINED);
                     patom = TLB::getAtom(p);
                 }
                 // it is the first element of list
@@ -1195,7 +1195,7 @@ void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, i
     for (unsigned int i = 0; i < index.size(); i++) {
         int targetIndexID = indexID | i;
         Handle p = index[i];
-        Handle q = UNDEFINED_HANDLE;
+        Handle q = Handle::UNDEFINED;
         while (!TLB::isInvalidHandle(p)) {
             Atom *patom = TLB::getAtom(p);
             //found marked element
@@ -1204,7 +1204,7 @@ void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, i
                 while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
                     p = patom->next(targetIndexID);
                     //clear old index
-                    patom->setNext(targetIndexID, UNDEFINED_HANDLE);
+                    patom->setNext(targetIndexID, Handle::UNDEFINED);
                     patom = TLB::getAtom(p);
                 }
                 // it is the first element of list

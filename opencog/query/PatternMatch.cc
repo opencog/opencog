@@ -180,7 +180,7 @@ bool PatternMatch::soln_up(Handle hsoln)
 		// If there are no further predicates to solve,
 		// we are really done! Report the solution via callback.
 		bool found = false;
-		if (UNDEFINED_HANDLE == curr_root)
+		if (Handle::UNDEFINED == curr_root)
 		{
 			dbgprt ("==================== FINITO!\n");
 			found = pmc->solution(predicate_solution, var_solution);
@@ -256,8 +256,8 @@ void PatternMatch::get_next_unsolved_pred(void)
 	// Search for an as-yet unsolved/unmatched predicate.
 	// For each solved node, look up root to see if root is solved.
 	// If not, start working on that.
-	Handle pursue = UNDEFINED_HANDLE;
-	Handle unsolved_pred = UNDEFINED_HANDLE;
+	Handle pursue = Handle::UNDEFINED;
+	Handle unsolved_pred = Handle::UNDEFINED;
 	RootMap::iterator k;
 	for (k=root_map.begin(); k != root_map.end(); k++)
 	{

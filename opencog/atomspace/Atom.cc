@@ -287,7 +287,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
 #ifdef PEFORM_INVALID_HANDLE_CHECKS
     // Make sure that garbage is not being passed in.
     // We'd like to perform a test for valid values here, but it seems
-    // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
+    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
     // which it hopefully repairs later on ...
     for (int i = 0; i < outgoingVector.size(); i++) {
         if (TLB::isInvalidHandle(outgoingVector[i])) {
@@ -311,7 +311,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
         for (int i = 0; i < arity; i++) {
 #ifdef PEFORM_INVALID_HANDLE_CHECKS
             // We'd like to perform a test for valid values here, but it seems
-            // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
+            // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
             // which it hopefully repairs later on ...
             if (TLB::isInvalidHandle(outgoingVector[i])) {
                 throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
@@ -330,7 +330,7 @@ void Atom::addOutgoingAtom(Handle h)
 {
 #ifdef PEFORM_INVALID_HANDLE_CHECKS
     // We'd like to perform a test for valid values here, but it seems
-    // the NMXmlParser code intentionally adds UNDEFINED_HANDLE to link nodes,
+    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
     // which it hopefully repairs later on ...
     if (TLB::isInvalidHandle(h))
         throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
@@ -563,7 +563,7 @@ void Atom::merge(Atom* other) throw (InconsistenceException)
         if (link) {
             std::vector<Handle> outgoingSet = link->getOutgoingSet();
             for (int i = 0; i < link->getArity(); i++) {
-                if (eqHandle()(outgoingSet[i], otherHandle)) {
+                if (outgoingSet[i] == otherHandle) {
                     outgoingSet[i] = thisHandle;
                 }
             }

@@ -62,10 +62,10 @@ bool NMXmlParserExperiment::noCheck = false;
 char *NMXmlParserExperiment::currentFileName = NULL;
 int NMXmlParserExperiment::currentExperiment = -1;
 
-Handle NMXmlParserExperiment::sport = UNDEFINED_HANDLE;
-Handle NMXmlParserExperiment::soccer = UNDEFINED_HANDLE;
-Handle NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
-Handle NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
+Handle NMXmlParserExperiment::sport = Handle::UNDEFINED;
+Handle NMXmlParserExperiment::soccer = Handle::UNDEFINED;
+Handle NMXmlParserExperiment::link_sport_socker = Handle::UNDEFINED;
+Handle NMXmlParserExperiment::hihger_order_link = Handle::UNDEFINED;
 AtomSpace* NMXmlParserExperiment::atomSpace = NULL;
 
 void NMXmlParserExperiment::initStaticVars()
@@ -74,10 +74,10 @@ void NMXmlParserExperiment::initStaticVars()
     NMXmlParserExperiment::currentFileName = NULL;
     NMXmlParserExperiment::currentExperiment = -1;
 
-    NMXmlParserExperiment::sport = UNDEFINED_HANDLE;
-    NMXmlParserExperiment::soccer = UNDEFINED_HANDLE;
-    NMXmlParserExperiment::link_sport_socker = UNDEFINED_HANDLE;
-    NMXmlParserExperiment::hihger_order_link = UNDEFINED_HANDLE;
+    NMXmlParserExperiment::sport = Handle::UNDEFINED;
+    NMXmlParserExperiment::soccer = Handle::UNDEFINED;
+    NMXmlParserExperiment::link_sport_socker = Handle::UNDEFINED;
+    NMXmlParserExperiment::hihger_order_link = Handle::UNDEFINED;
     NMXmlParserExperiment::atomSpace = NULL;
 }
 
@@ -223,7 +223,7 @@ bool NMXmlParserExperiment::checkExp1()
 
     TS_ASSERT(entry == NULL);
 
-    link_sport_socker = UNDEFINED_HANDLE;
+    link_sport_socker = Handle::UNDEFINED;
     Atom *atom = NULL;
     std::vector<Handle>::iterator it;
     for (it = handles.begin(); it != handles.end(); it++) {

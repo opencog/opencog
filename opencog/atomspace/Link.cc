@@ -139,8 +139,8 @@ std::string Link::toString(void) const
                 answer += lll->toString();
             }
         } else {
-            logger().error("Link::toString() => invalid handle %lu "
-                           "in position %d of ougoing set!", h, i);
+            logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
+                           h.value(), i);
             answer += "INVALID_HANDLE!";
         }
     }
@@ -259,7 +259,7 @@ int Link::hashCode(void) const
     long result = type + (getArity() << 8);
 
     for (int i = 0; i < getArity(); i++) {
-        result = result  ^ (((long) outgoing[i]) << i);
+        result = result  ^ (((long) outgoing[i].value()) << i);
     }
     return (int) result;
 }

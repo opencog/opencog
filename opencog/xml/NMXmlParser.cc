@@ -278,7 +278,7 @@ throw (RuntimeException, InconsistenceException)
                 Link *link = dynamic_cast<Link *>(currentAtom);
                 if (link) {
                     if (r != NULL) {
-                        NMXmlParser::addOutgoingAtom(link, UNDEFINED_HANDLE);
+                        NMXmlParser::addOutgoingAtom(link, Handle::UNDEFINED);
                     } else {
                         throw RuntimeException(TRACE_INFO, "fatal error: NULL inner link");
                     }
@@ -323,7 +323,7 @@ throw (RuntimeException, InconsistenceException)
             logger().fine("Getting existing node (%s,%s)", n, t);
             //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
             h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
-            logger().fine(" => h = %p", h);
+            logger().fine(" => h = %p", h.value());
             if (TLB::isValidHandle(h)) {
                 logger().fine(TLB::getAtom(h)->toString().c_str());
                 Link *link = dynamic_cast<Link *>(currentAtom);
@@ -523,7 +523,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
         }
         // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
-        Handle uh = UNDEFINED_HANDLE;
+        Handle uh(Handle::UNDEFINED);
         if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &uh)) {
             result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
         }
@@ -545,7 +545,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
     int done;
     UserData userData;
 
-    userData.lastInsertedHandle = UNDEFINED_HANDLE;
+    userData.lastInsertedHandle = Handle::UNDEFINED;
     //userData.atomTable = atomSpace->getAtomTable();
     userData.atomSpace = atomSpace;
 
@@ -580,7 +580,7 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
             fflush(stderr);
             fprintf(stderr, "\n");
             fflush(stderr);
-            userData.lastInsertedHandle = UNDEFINED_HANDLE;
+            userData.lastInsertedHandle = Handle::UNDEFINED;
             break;
         }
     } while (!done);
@@ -592,14 +592,14 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
 
 Handle NMXmlParser::parse(XMLBufferReader* xmlReader, NMXmlParseType pass)
 {
-    Handle h = UNDEFINED_HANDLE;
+    Handle h = Handle::UNDEFINED;
     if (pass == PARSE_NODES) {
 
         logger().fine("Parsing nodes...\n");
 
         // FIRST PASS - creates relationships with arity == 0 (nodes)
         h = parse_pass(xmlReader, pass);
-        if (h == UNDEFINED_HANDLE) return UNDEFINED_HANDLE;
+        if (h == Handle::UNDEFINED) return Handle::UNDEFINED;
 
     } else if (pass == PARSE_LINKS) {
 

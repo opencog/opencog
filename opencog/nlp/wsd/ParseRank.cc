@@ -39,7 +39,7 @@ ParseRank::~ParseRank()
  */
 Handle ParseRank::get_top_ranked_parse(Handle h)
 {
-	top = UNDEFINED_HANDLE;
+	top = Handle::UNDEFINED;
 	top_rank = -123456.0;
 	foreach_parse(h, &ParseRank::lookat_parse, this);
 	return top;

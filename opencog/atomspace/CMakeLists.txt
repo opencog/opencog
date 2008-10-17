@@ -6,6 +6,7 @@ ADD_LIBRARY (atomspace SHARED
 	ClassServer.cc
 	CompositeTruthValue.cc
 	CoreUtils.cc
+	Handle.cc
 	HandleEntry.cc
 	HandleIterator.cc
 	HandleSet.cc
