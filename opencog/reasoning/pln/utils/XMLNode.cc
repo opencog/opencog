@@ -1,12 +1,3 @@
-/***************************************************************************
- *          
- *  Project: AgiSim
- *
- *  Fri Feb 18 11:35:16 2005
- *  Copyright  2005  Ari A. Heljakka
- *  Email [heljakka at iki dot fi]
- ****************************************************************************/
-
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,8 +15,8 @@
  */
 #include "../PLN.h"
 #include "XMLNode.h"
-#include <utils.h>
-#include <utils2.h>
+#include <opencog/atomspace/utils.h>
+#include <opencog/atomspace/utils2.h>
 //#include "PTLutils.h"
 
 namespace reasoning

@@ -2,7 +2,7 @@
 #define RULEAPP_H
 
 #include "Rule.h"
-#include <Atom.h>
+#include <opencog/atomspace/Atom.h>
 
 /**
 BITNode class implements a compact inference tree representation, where each BITNode encapsulates

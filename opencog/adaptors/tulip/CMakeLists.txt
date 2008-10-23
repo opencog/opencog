@@ -3,9 +3,9 @@ ADD_LIBRARY(adaptor-tulip STATIC
 )
 
 INCLUDE_DIRECTORIES(
-    ${OPENCOG_SOURCE_DIR}/src/util
-    ${OPENCOG_SOURCE_DIR}/src/atomspace
-    ${OPENCOG_SOURCE_DIR}/src/server
+    ${OPENCOG_SOURCE_DIR}/opencog/util
+    ${OPENCOG_SOURCE_DIR}/opencog/atomspace
+    ${OPENCOG_SOURCE_DIR}/opencog/server
 )
 
 TARGET_LINK_LIBRARIES(adaptor-tulip server)

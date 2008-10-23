@@ -9,8 +9,8 @@
 
 #include <boost/variant.hpp>
 
-#include <types.h>
-#include <utils2.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/utils2.h>
 #include "../PLNUtils.h"
 
 //#include "PLNatom.h"

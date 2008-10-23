@@ -1,7 +1,8 @@
 #ifndef _TULIP_WRITER_H
 #define _TULIP_WRITER_H
 
-#include <types.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include <iostream>
 #include <fstream>
@@ -17,6 +18,7 @@ class TulipWriter {
     //bool writeLink(Handle h);
 
     std::string getDateString();
+    void writeNodes(HandleSeq hs);
 
 public:
 
@@ -25,7 +27,7 @@ public:
 
     //! Eventually support writing only a certain depth from a node.
     //! At the moment just out put everything
-    bool write(Handle seed = 0, int depth = -1);
+    bool write(Handle seed = 0, int depth = -1, Handle setLink = NULL);
 
 };
 

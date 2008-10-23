@@ -2,7 +2,7 @@
 #include "Rules.h"
 #include "RuleProvider.h"
 
-#include <Logger.h>
+#include <opencog/util/Logger.h>
 
 #include <boost/foreach.hpp>
 

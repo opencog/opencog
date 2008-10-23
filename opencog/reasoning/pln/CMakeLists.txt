@@ -82,9 +82,9 @@ TARGET_LINK_LIBRARIES(pln
     server
     xml
     util
-    query
-    schemes
-    wsd
+    #query
+    scheme
+    #wsd
     persist
     adaptor-tulip
     ${IODBC_LIBRARIES}
@@ -93,16 +93,17 @@ TARGET_LINK_LIBRARIES(pln
     ${EXPAT_LIBRARIES}
     ${GUILE_LIBRARIES}
     ${GSL_LIBRARIES}
+    boost_signals-mt
 )
 
 TARGET_LINK_LIBRARIES(plnshell pln
-    atomspace
+    #atomspace
     server
     xml
     util
-    query
-    schemes
-    wsd
+    #query
+    scheme
+    #wsd
     persist
     adaptor-tulip
     ${IODBC_LIBRARIES}
@@ -111,6 +112,7 @@ TARGET_LINK_LIBRARIES(plnshell pln
     ${EXPAT_LIBRARIES}
     ${GUILE_LIBRARIES}
     ${GSL_LIBRARIES}
+    boost_signals-mt
 )
 
 TARGET_LINK_LIBRARIES(indeftest pln
@@ -118,9 +120,9 @@ TARGET_LINK_LIBRARIES(indeftest pln
     server
     xml
     util
-    query
-    schemes
-    wsd
+    #query
+    scheme
+    #wsd
     persist
     adaptor-tulip
     ${IODBC_LIBRARIES}
@@ -129,4 +131,5 @@ TARGET_LINK_LIBRARIES(indeftest pln
     ${EXPAT_LIBRARIES}
     ${GUILE_LIBRARIES}
     ${GSL_LIBRARIES}
+    boost_signals-mt
 )

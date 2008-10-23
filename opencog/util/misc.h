@@ -41,6 +41,9 @@
 namespace opencog
 {
 
+/**
+ * Counts the number of bits in 1 in the given unsigned long argument.
+ */
 unsigned int bitcount(unsigned long n);
 
 template <typename _OutputIterator>

@@ -8,8 +8,7 @@
 
 #define fmax_(a,b) (( (a)>(b) ) ? (a) : (b))
 #define fmin_(a,b) (( (a)<(b) ) ? (a) : (b))
-
-//	#define Abs(a) ( ((a)>0) ? (a) : (-a))
+#define Abs(a) ( ((a)>0) ? (a) : (-a))
 
 using namespace std;
 
@@ -918,7 +917,8 @@ TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
             }
         }
     }
-    if (hasCompositeTruthValue) {
+    // Temporary ForwardChainer demo hack
+    if (0) { //hasCompositeTruthValue) {
         CompositeTruthValue* compositeResult = new CompositeTruthValue(*primaryResult, NULL_VERSION_HANDLE);
         delete primaryResult;
         for (VersionedTruthValueMap::const_iterator itr = versionHandles.begin(); itr != versionHandles.end(); itr++) {

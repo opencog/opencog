@@ -1,5 +1,5 @@
-#include <SimpleTruthValue.h>
-#include <utils.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/utils.h>
 
 #include "PLN.h"
 #include "AtomTableWrapper.h"

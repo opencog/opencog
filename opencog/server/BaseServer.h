@@ -66,7 +66,7 @@ public:
 }; // class
 
 // singleton instance (following meyer's design pattern)
-BaseServer& server(const ServerFactory* = BaseServer::createInstance);
+BaseServer& server(ServerFactory* = BaseServer::createInstance);
 
 }  // namespace
 

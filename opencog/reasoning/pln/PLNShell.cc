@@ -115,9 +115,9 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #include "PLNShell.h"
 #include "ForwardChainer.h"
 
-#include <Logger.h>
-#include <SchemeShell.h>
-#include <TulipWriter.h>
+#include <opencog/util/Logger.h>
+#include <opencog/guile/SchemeShell.h>
+#include <opencog/adaptors/tulip/TulipWriter.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
@@ -215,7 +215,12 @@ void PLNShell_RunLoop(int argc, char** args)
         puts("Initializing PLN test env...");
 
         // Initialise CogServer
-        opencog::server();
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        // Load builtinreqs
+        cogserver.loadModule(std::string("libbuiltinreqs.so"));
+        //cogserver.loadModule(std::string("libscheme.so"));
+        // Open network port
+        //cogserver.enableNetworkServer();
 
 #ifdef USE_PSEUDOCORE
         RunPLNtest = (argc>1 && args[1][0] == 't');
@@ -404,8 +409,8 @@ struct inhlink {
 struct compareStrength {
     // Warning, uses fake atomspace handles in comparison
     bool operator()(const Handle& a, const Handle& b) {
-        return GET_ATW->getTV(a).getMean() >
-            GET_ATW->getTV(b).getMean();
+        return GET_ATW->getTV(a).getConfidence() >
+            GET_ATW->getTV(b).getConfidence();
     }
 };
 
@@ -414,23 +419,34 @@ void fw_beta (void) {
 
   atw->reset();
 
-  // Load word pair data
-  //SchemeShell shell();
-  
   //ForwardChainerRuleProvider *rp=new ForwardChainerRuleProvider();
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
+#if 0
   Handle h1=atw->addNode (CONCEPT_NODE,string("Human"),tv,true);
   Handle h2=atw->addNode (CONCEPT_NODE,string("Mortal"),tv,true);
   Handle h3=atw->addNode (CONCEPT_NODE,string("Socrates"),tv,true);
   std::vector<Handle> p1(2),p2(2);
   p1[0]=h1; p1[1]=h2;
   p2[0]=h3; p2[1]=h1;
-  Handle L1=atw->addLink(INHERITANCE_LINK,p1,tv,true);
-  Handle L2=atw->addLink(INHERITANCE_LINK,p2,tv,true);
+  Handle L1=atw->addLink(ASSOCIATIVE_LINK,p1,tv,true);
+  Handle L2=atw->addLink(ASSOCIATIVE_LINK,p2,tv,true);
+#endif
 
   ForwardChainer fw;
 
-  // Load data from scm file
+  // Load data from xml wordpairs file
+  atw->reset();
+  bool axioms_ok = atw->loadAxioms(std::string("wordpairs.xml"));
+  if (!axioms_ok) {
+      cout << "load failed" <<endl;
+      exit(1);
+  }
+  // Remove the dummy list link (added because the xml loader is silly)
+  shared_ptr<set<Handle> > ll = atw->getHandleSet(LIST_LINK, "", false);
+  foreach(Handle l, *ll) {
+      atw->removeAtom(l);
+  }
+
 
   cout << "FWBETA Adding handles to seed stack" << endl;
   //fw.seedStack.push_back(L1);
@@ -442,27 +458,41 @@ void fw_beta (void) {
     HandleSeq links;
     copy(linksSet->begin(), linksSet->end(), back_inserter(links));
 // . sort links based on strength
-    sort(links->begin(), links->end(), compareStrength);
+    std::sort(links.begin(), links.end(), compareStrength());
 // . add in order
     foreach(Handle l, links) {
         fw.seedStack.push_back(l);
     }
 // Change prob of non seed stack selection to zero
-// TODO: make method based to normalise probabilities.
+// TODO: make set method so it will normalise probabilities.
   fw.probGlobal = 0.0f;
   fw.probStack = 1.0f;
 
   cout << "FWBETA adding to seed stack finished" << endl;
-  HandleSeq results = fw.fwdChainStack();
+  HandleSeq results = fw.fwdChainStack(10000);
   //opencog::logger().info("Finish chaining on seed stack");
   cout << "FWBETA Chaining on seed stack finished, results:" << endl;
   NMPrinter np;
   foreach (Handle h, results) {
       np(h);
   }
+  cout << "Removing results that just repeat existing links" << endl;
+  int totalSize = results.size();
+  HandleSeq::iterator i,j;
+  for (i = results.begin(); i != results.end(); i++) {
+      vhpair v = atw->fakeToRealHandle(*i);
+      if (! (v.second == NULL_VERSION_HANDLE)) {
+          j = i;
+          i--;
+          results.erase(j);
+      }
+  }
+  cout << "Removed " << totalSize - results.size() << " results that just " <<
+      "repeat existing links, " << results.size() << " results left." << endl;
+  Handle setLink = atw->addLinkDC(SET_LINK, results, tv, false, false);
 
   TulipWriter tlp(std::string("fwd_chain_result.tlp"));
-  tlp.write();
+  tlp.write(0,0,atw->fakeToRealHandle(setLink).first);
   
   
 }
@@ -866,7 +896,8 @@ printf("BITNodeRoot init ok\n");
         
         switch (c)
         {
-        case 'm': printf("%d\n", test::_test_count); break;
+            case 'm':
+                printf("%d\n", test::_test_count); break;
             case 'd':
 #if LOCAL_ATW
             ((LocalATW*)atw)->DumpCore(CONCEPT_NODE);
@@ -1067,6 +1098,12 @@ printf("BITNodeRoot init ok\n");
 
             case 'R':
                 fw_beta();
+                break;
+            case 'Y':
+                // Temporary for loading data via telnet
+                //cout << "running server loop" << endl;
+                //static_cast<CogServer&>(server()).unitTestServerLoop(1);
+                //cout << "finished server loop" << endl;
                 break;
             default: c = c-'0';
                     if (c >= 0 && c <= 10)

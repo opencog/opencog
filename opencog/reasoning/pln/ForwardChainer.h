@@ -4,7 +4,7 @@
 #include "PLN.h"
 #include "rules/RuleProvider.h"
 
-#include <RandGen.h>
+#include <opencog/util/RandGen.h>
 
 namespace reasoning
 {
@@ -66,6 +66,8 @@ public:
     static RandGen* rng;
     RandGen* getRNG();
 
+    HandleSeq getLocalLink(Handle lh, const std::vector< Vertex > &args);
+    void printVertexVectorHandles(std::vector< Vertex > hs);
 };
 
 } // namespace reasoning

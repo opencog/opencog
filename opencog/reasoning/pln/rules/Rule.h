@@ -22,7 +22,7 @@
 #ifndef _INFERENCE_RULE_H
 #define _INFERENCE_RULE_H
 
-#include <TruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
 #include "../PLN.h"
 #include "../PLNUtils.h"
 

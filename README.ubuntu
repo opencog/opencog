@@ -4,7 +4,8 @@ Instalation and dependency resolution for Ubuntu 8.04 (hardy) users
 
 Opencog depends on the following packages:
 
-   g++ make cmake libssl-dev libboost-dev libboost-filesystem-dev libexpat-dev libgsl0-dev
+   g++ make cmake libssl-dev libboost-dev libboost-filesystem-dev libexpat-dev \
+       libboost-signals-dev libgsl0-dev
 
 ----------------------------------------------------------
 

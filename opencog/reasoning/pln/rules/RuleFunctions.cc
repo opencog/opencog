@@ -1,4 +1,4 @@
-#include <platform.h>
+#include <opencog/util/platform.h>
 #include "../PLN.h"
 
 #include "Rule.h"

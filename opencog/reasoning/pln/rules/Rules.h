@@ -8,13 +8,13 @@
 #include "../formulas/Formulas.h"
 #include "../utils/NMPrinter.h"
 
-#include <SimpleTruthValue.h>
-#include <Atom.h>
-#include <ClassServer.h>
-#include <CogServer.h>
-#include <Link.h>
-#include <Node.h>
-#include <TLB.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
 
 #include "Rule.h"
 #include "GenericRule.h"

@@ -34,7 +34,7 @@
 #endif
 
 #include "utils.h"
-#include "platform.h"
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 
@@ -215,17 +215,17 @@ const char* opencog::nextLine(const char *from, std::string &line)
 }
 
 // TODO: Review this method for both 32/64-bit processor compatibility
-int opencog::bitcount(unsigned long n)
-{
+//int opencog::bitcount(unsigned long n)
+//{
     /* works for 32-bit numbers only    */
     /* fix last line for 64-bit numbers */
 
-    register unsigned long tmp;
+ //   register unsigned long tmp;
 
-    tmp = n - ((n >> 1) & 033333333333)
-          - ((n >> 2) & 011111111111);
-    return ((tmp + (tmp >> 3)) & 030707070707) % 63;
-}
+  //  tmp = n - ((n >> 1) & 033333333333)
+    //      - ((n >> 2) & 011111111111);
+   // return ((tmp + (tmp >> 3)) & 030707070707) % 63;
+//}
 
 /** Additions by Ari (March 20) */
 

@@ -45,16 +45,16 @@
 #include <boost/bind.hpp>
 
 // AtomSpace 
-#include <Atom.h>
-#include <ClassServer.h>
-#include <CogServer.h>
-#include <Link.h>
-#include <Node.h>
-#include <TLB.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
 
 // This is a 3rd party tree template library
-#include <tree.h>
-#include <utils2.h>
+#include <opencog/util/tree.h>
+#include <opencog/atomspace/utils2.h>
 
 #include "PLN.h"
 

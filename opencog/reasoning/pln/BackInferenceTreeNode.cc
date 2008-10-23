@@ -11,8 +11,9 @@
 #include "rules/Rules.h"
 //#include "spacetime.h"
 #include "AtomTableWrapper.h"
-#include <CogServer.h>
-#include <utils2.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 #include "BackInferenceTreeNode.h"
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
@@ -1243,16 +1244,10 @@ void BITNode::expandNextLevel()
   } catch(...) { tlog(0,"Exception in ExpandNextLevel()"); throw; }
 }
 
-
-
 /* Algorithm: Evaluation */
-
-
-
 bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 {
     AtomTableWrapper *atw = GET_ATW;
-    //assert(vt2h(*new_result)->isReal());
     assert(atw->isReal(vt2h(*new_result)));
 
     stats::Instance().ITN2atom[(BITNode*)this].insert(*new_result->getVtree().begin());
@@ -1326,9 +1321,8 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
                 int s2 = rule_args.size();
 
-                RuleApp* ruleApp = (RuleApp*)NULL;
                 indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider > ii;
-            
+                RuleApp* ruleApp;
                 ValidateRuleArgs(rule_args.begin(), rule_args.end());
 
                 foreach(VtreeProvider* ra, rule_args)
@@ -1350,8 +1344,10 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 ii = rule_args.begin();
 
                 if (ValidRuleResult(next_result,
-                        indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider>(rule_args.begin()),
-                        indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider>(rule_args.end()),
+                        indirect_iterator<vector<VtreeProvider*>::const_iterator,
+                            const VtreeProvider>(rule_args.begin()),
+                        indirect_iterator<vector<VtreeProvider*>::const_iterator,
+                            const VtreeProvider>(rule_args.end()),
                         Btr<bindingsT>(new bindingsT())))
                 {
                     NotifyParentOfResult(ruleApp);

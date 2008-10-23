@@ -1,4 +1,4 @@
-#include <exceptions.h>
+#include <opencog/util/exceptions.h>
 
 #ifdef WIN32
 #pragma warning(disable : 4996)
@@ -8,9 +8,9 @@
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
 
-#include <HandleTemporalPair.h>
-#include <ClassServer.h>
-#include <utils2.h>
+#include <opencog/atomspace/HandleTemporalPair.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/utils2.h>
 
 #include "PLN.h"
 
@@ -26,7 +26,7 @@
 #include "PLNUtils.h"
 
 #ifndef USE_PSEUDOCORE
-	#include "TimeServer.h"
+	#include "opencog/atomspace/TimeServer.h"
 #endif
 
 //class HandleEntry;
@@ -352,7 +352,7 @@ string make_subst_buf(const BoundVertex& a);
 
 Handle getOutgoingFun::operator()(Handle h, int i)
 {
-    return GET_ATW->getOutgoingAtIndex(h,i);
+    return GET_ATW->getOutgoing(h,i);
 }
 
 bool equal_vectors(Handle* lhs, int lhs_arity, Handle* rhs)

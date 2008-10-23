@@ -5,8 +5,8 @@
 
 #include <set>
 
-#include <AtomSpace.h>
-#include <types.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/types.h>
 
 #ifdef WIN32
 #include <string>

@@ -3,12 +3,12 @@
 #include "utils/XMLNodeLoader.h"
 #include "rules/Rules.h"
 
-#include <SimpleTruthValue.h>
-#include <Logger.h>
-#include <CogServer.h> // To get access to AtomSpace
-#include <tree.h>
-#include <utils2.h>
-#include <utils.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/server/CogServer.h> // To get access to AtomSpace
+#include <opencog/util/tree.h>
+#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 
 #include  <boost/foreach.hpp>
 //boost::variant<int, char> bv; //TODELETE
@@ -194,7 +194,7 @@ Handle AtomTableWrapper::getSuperContext(const Handle sub) const
     Handle h;
     HandleEntry::filterSet(he,CONCEPT_NODE,false); 
     if (he->getSize() > 1) {
-        throw RuntimeException(TRACE_INFO, "multiple super/parent contexts, %d in fact",
+        throw RuntimeException(TRACE_INFO, "multiple (%d) super/parent contexts",
                 he->getSize());
     }
     if (he->getSize() == 0) {
@@ -246,10 +246,10 @@ Handle AtomTableWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 {
     // check if already exists
     //vhmap_t::left_const_iterator l = vhmap.left.find(vhpair(h,vh));
-    vhmap_t::const_iterator i = findValueInMap(vhmap,vhpair(h,vh));
-    if (i != vhmap.end()) {
+    vhmap_reverse_t::const_iterator i = vhmap_reverse.find(vhpair(h,vh));
+    if (i != vhmap_reverse.end()) {
         // return existing fake handle
-        return i->first;
+        return i->second;
     } else {
         // add to vhmap
         Handle fakeHandle = vhmap.size() + mapOffset;
@@ -259,6 +259,7 @@ Handle AtomTableWrapper::realToFakeHandle(Handle h, VersionHandle vh)
             exit(-1);
         }
         vhmap.insert( vhmap_pair_t(fakeHandle, vhpair(h,vh)) );
+        vhmap_reverse.insert( vhmap_reverse_pair_t(vhpair(h,vh), fakeHandle) );
         return fakeHandle;
     }
 
@@ -276,12 +277,40 @@ std::vector< Handle > AtomTableWrapper::realToFakeHandle(const Handle h) {
     return result;
 }
 
-std::vector< Handle > AtomTableWrapper::realToFakeHandle(std::vector< Handle > hs, bool expand) {
+std::vector< Handle > AtomTableWrapper::realToFakeHandles(std::vector< Handle > hs, bool expand) {
     std::vector<Handle> result;
     foreach (Handle h, hs) {
-        mergeCopy(result,realToFakeHandle(h));
+        if (expand) 
+            mergeCopy(result,realToFakeHandle(h));
+        else
+            result.push_back(realToFakeHandle(h,NULL_VERSION_HANDLE));
     }
     return result;
+}
+
+HandleSeq AtomTableWrapper::realToFakeHandles(const HandleSeq hs, const VersionHandle v)
+{
+    HandleSeq results;
+    // hs are REAL atoms, not PLN fake atoms
+    foreach (Handle h1, hs) {
+        Handle context = v.substantive;
+        while (context) {
+            VersionHandle vh = VersionHandle(CONTEXTUAL,context);
+            if (!AS_PTR->getTV(h1,vh).isNullTv()) {
+                results.push_back(realToFakeHandle(h1,vh));
+                break;
+            } else {
+                context = getSuperContext(context);
+            }
+        }
+        // Use default TV if no appropriate context
+        if (!context) {
+            results.push_back(realToFakeHandle(h1,NULL_VERSION_HANDLE));
+        }
+    }
+    // returns fake handles
+    return results; 
+
 }
 
 const TruthValue& AtomTableWrapper::getTV(Handle h)
@@ -354,6 +383,7 @@ void AtomTableWrapper::reset()
 {
     dummyContexts.clear();
     vhmap.clear();
+    vhmap_reverse.clear();
     ::haxx::childOf.clear();
     AS_PTR->clear();
 }
@@ -1667,6 +1697,45 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
 
 }
 
+bool AtomTableWrapper::removeAtom(Handle h)
+{
+    AtomSpace *a = AS_PTR;
+    // remove atom
+    vhpair v = fakeToRealHandle(h);
+    if (v.second == NULL_VERSION_HANDLE) {
+        a->removeAtom(v.first);
+    } else {
+        const TruthValue& currentTv = getTV(v.first);
+        CompositeTruthValue ctv = CompositeTruthValue(
+                (const CompositeTruthValue&) currentTv);
+        ctv.removeVersionedTV(v.second);
+    }
+    // remove fake handle
+    vhmap_t::iterator j, i;
+    vhmap_reverse_t::iterator ir;
+    i = vhmap.find(h);
+    if (i != vhmap.end()) {
+        vhmap.erase(i);
+        ir = vhmap_reverse.find(i->second);
+        if (ir != vhmap_reverse.end()) {
+            vhmap_reverse.erase(ir);
+        }
+    }
+    // check map to see whether real handles are still valid (because removing
+    // an atom might remove links connecting to it)
+    for ( i = vhmap.begin(); i != vhmap.end(); i++ ) {
+        if (!TLB::getAtom(i->second.first)) {
+            j = i;
+            i--;
+            vhmap.erase(j);
+            ir = vhmap_reverse.find(j->second);
+            if ( ir != vhmap_reverse.end() ) vhmap_reverse.erase(ir);
+        }
+    }
+    // TODO - also remove unused dummy contexts?
+    return true;
+}
+
 Handle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
     AtomSpace *a = AS_PTR;
@@ -1767,6 +1836,7 @@ Handle AtomTableWrapper::getRandomHandle(Type T)
 
 std::vector<Handle> AtomTableWrapper::getImportantHandles(int number)
 {
+    // TODO: check all VersionHandles for the highest importance
     AtomSpace *a = AS_PTR;
     std::vector<Handle> hs;
 
@@ -1779,7 +1849,7 @@ std::vector<Handle> AtomTableWrapper::getImportantHandles(int number)
             toRemove--;
         }
     }
-    return realToFakeHandle(hs);
+    return realToFakeHandles(hs);
 
 }
 
@@ -2017,23 +2087,16 @@ HandleSeq AtomTableWrapper::filter_type(Type t)
 {
     HandleSeq s;
     s = AS_PTR->filter_type(t);
-    return realToFakeHandle(s, true);
-
+    return realToFakeHandles(s, true);
 
 }
 
 std::vector<Handle> AtomTableWrapper::getOutgoing(const Handle h)
 {
     vhpair v = fakeToRealHandle(h);
-    HandleSeq s1,s2;
+    HandleSeq s1;
     s1 = AS_PTR->getOutgoing(v.first);
-    foreach (Handle h1, s1) {
-        if (!AS_PTR->getTV(h1,v.second).isNullTv()) {
-            s2.push_back(realToFakeHandle(h1,v.second));
-        }
-    }
-    return s2;
-
+    return realToFakeHandles(s1, v.second);
 }
 
 Handle AtomTableWrapper::getOutgoing(const Handle h, const int i) 
@@ -2041,9 +2104,12 @@ Handle AtomTableWrapper::getOutgoing(const Handle h, const int i)
     return child(h, i);
 }
 
-Handle AtomTableWrapper::getOutgoingAtIndex(const Handle h, const int i) 
+HandleSeq AtomTableWrapper::getIncoming(const Handle h) 
 {
-    return child(h, i);
+    vhpair v = fakeToRealHandle(h);
+    HandleSeq s1;
+    s1 = AS_PTR->getIncoming(v.first);
+    return realToFakeHandles(s1, v.second);
 }
 
 Type AtomTableWrapper::getType(const Handle h) const

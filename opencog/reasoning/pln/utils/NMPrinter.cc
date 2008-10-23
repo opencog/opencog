@@ -1,7 +1,7 @@
 #include "NMPrinter.h"
 
-#include <ClassServer.h>
-#include <CogServer.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/server/CogServer.h>
 
 #include "../AtomTableWrapper.h"
 
@@ -199,7 +199,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
     bool isNode = atw->isSubType(h,NODE); 
     Type type = atw->getType(h);
     if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (atw->getArity(h) == 1)) {
-        Handle newH = atw->getOutgoingAtIndex(h, 0);
+        Handle newH = atw->getOutgoing(h, 0);
         printHandle(out, newH, indentationLevel);
     } else {
         if (!(printOptions & NMP_BRACKETED)) printSpaces(out, indentationLevel);
@@ -275,7 +275,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
                     out << ",";
                     if (printToFile) fprintf(logFile, ",");
                 }
-                Handle newH = atw->getOutgoingAtIndex(h, i);
+                Handle newH = atw->getOutgoing(h, i);
                 printHandle(out, newH, indentationLevel+1);
             }
             if (printOptions & NMP_BRACKETED) {

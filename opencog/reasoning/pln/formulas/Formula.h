@@ -4,11 +4,11 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
-#include <TruthValue.h>
-#include <SimpleTruthValue.h>
-#include <IndefiniteTruthValue.h>
-#include <CompositeTruthValue.h>
-#include <exceptions.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/util/exceptions.h>
 
 #define LIMIT_TRUTH_VALUES 1
 #define IS_NAN(f) (!((f)==(f)))

@@ -23,7 +23,7 @@
 #define _INDEFINITEPLNFORMULAS_H
 
 #include "Formula.h"
-#include <IndefiniteTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <vector>
 
 using namespace std;

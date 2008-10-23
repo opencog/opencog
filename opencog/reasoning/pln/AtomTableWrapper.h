@@ -13,8 +13,8 @@
 //#include <map>
 //#include <boost/bimap/bimap.hpp>
 
-#include <TimeServer.h>
-#include <type_codes.h>
+#include <opencog/atomspace/TimeServer.h>
+#include <opencog/atomspace/type_codes.h>
 
 #include "PLN.h"
 
@@ -78,23 +78,25 @@ class AtomTableWrapper : public iAtomTableWrapper
     
     typedef std::map< Handle, vhpair > vhmap_t;
     typedef vhmap_t::value_type vhmap_pair_t;
-    //! Instead of above bimap, we will temporarily use a normal map, which is
-    //! slower but simpler until PLN is fully functional.
+    typedef std::map< vhpair, Handle > vhmap_reverse_t;
+    typedef vhmap_reverse_t::value_type vhmap_reverse_pair_t;
+    //! Instead of above bimap stuff, we will temporarily use two normal maps
     vhmap_t vhmap;
+    vhmap_reverse_t vhmap_reverse;
 
     //! template to search a map for a value (instead of a key) this is to be
     //! removed once bimap is integrated
-    template < typename M, typename T > 
-    typename M::const_iterator findValueInMap (const M m, const T value) const
-    {
-        typename M::const_iterator i;
-        for (i = vhmap.begin(); i != vhmap.end(); i++) {
-            if (i->second == value) {
-                return i;
-            }
-        }
-        return i;
-    }
+    //template < typename M, typename T > 
+    //typename M::const_iterator findValueInMap (const M m, const T value) const
+    //{
+    //    typename M::const_iterator i;
+    //    for (i = vhmap.begin(); i != vhmap.end(); i++) {
+    //        if (i->second == value) {
+    //            return i;
+    //        }
+    //    }
+    //    return i;
+    //}
 
     // TODO: +1000 to be safe, but should check that no extra types are
     // defined elsewhere and just use +1.
@@ -109,11 +111,6 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! @param some kind of mechanism to manage memory?
     Handle addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
 
-    Handle realToFakeHandle(const Handle h, const VersionHandle vh);
-    std::vector< Handle > realToFakeHandle(const Handle hs);
-    std::vector< Handle > realToFakeHandle(std::vector< Handle > hs, bool expand=false);
-
-    vhpair fakeToRealHandle(const Handle f) const;
     bool hasAppropriateContext(const Handle o, VersionHandle& vh) const;
     bool isSubcontextOf(const Handle sub, const Handle super);
     Handle getSuperContext(const Handle sub) const;
@@ -135,6 +132,13 @@ class AtomTableWrapper : public iAtomTableWrapper
         }
     };
 public:
+
+    Handle realToFakeHandle(const Handle h, const VersionHandle vh);
+    HandleSeq realToFakeHandle(const Handle hs);
+    HandleSeq realToFakeHandles(HandleSeq hs, bool expand=false);
+    HandleSeq realToFakeHandles(HandleSeq hs, VersionHandle v);
+
+    vhpair fakeToRealHandle(const Handle f) const;
 
     //! Which XML files have been loaded by PLN to populate the AtomSpace
     set<std::string> loadedFiles;
@@ -168,10 +172,10 @@ public:
 
     std::vector<Handle> getOutgoing(const Handle h);
 
-    //! Both below are the same, code should be cleaned to remove ..AtIndex
-    //! version
     Handle getOutgoing(const Handle h, const int i);
-    Handle getOutgoingAtIndex(const Handle h, const int i);
+
+    //! Get the incoming set for an atom
+    HandleSeq getIncoming(const Handle h);
 
     Type getType(const Handle h) const;
     std::string getName(const Handle h) const;
@@ -210,6 +214,9 @@ public:
     //! Add node
     virtual Handle addNode(Type T, const std::string& name,
             const TruthValue& tvn, bool fresh=false, bool managed=true)=0;
+
+    //! Remove Atom
+    virtual bool removeAtom(Handle h);
 
 // TODELETE not called from anywhere
     bool hasFalsum(float minAllowedError = 0.5) { return false; }

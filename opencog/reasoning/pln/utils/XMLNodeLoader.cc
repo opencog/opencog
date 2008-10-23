@@ -7,7 +7,8 @@
 #include "XMLNodeLoader.h"
 #include "../AtomTableWrapper.h"
 #include "../rules/Rules.h"
-#include <utils2.h>
+#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 
 using namespace opencog;
 #define ELEMENT_NODE 1000
@@ -32,7 +33,7 @@ Handle LoadXMLFile(iAtomTableWrapper* table, string fname)
 	CrispTheoremRule::thms.clear();
   cprintf(5, "LoadTextFile...");
 	string buf;
-	LoadTextFile(fname.c_str(), buf);
+    LoadTextFile(fname.c_str(), buf);
   cprintf(5, "LoadXMLInput...");
 	return LoadXMLInput(table, buf);
 }
@@ -111,6 +112,9 @@ LOG(1, "Loading XML Input...");
 	L("InstanceOf", INSTANCEOF_R); // defined in PLNatom.h
 	L("In", IN_R); // defined in PLNatom.h
 	L("Contains", HAS_R); // defined in PLNatom.h
+    
+    // Associative Link
+	L("AssociativeLink", ASSOCIATIVE_LINK); // defined in PLNatom.h
 
 	set<string> free_names;
 	std::map<string, string>  returning_names;

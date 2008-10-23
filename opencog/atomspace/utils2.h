@@ -26,7 +26,7 @@
 #include <boost/variant.hpp>
 #include <boost/foreach.hpp>
 
-#include "tree.h"
+#include <opencog/util/tree.h>
 #include "types.h"
 #include "Temporal.h"
 
@@ -42,7 +42,8 @@ typedef unsigned long ulong;
 namespace opencog
 {
 
-template<typename T>
+// Now in types.h
+/*template<typename T>
 struct TypeWrapper {
     T value;
     explicit TypeWrapper(T _val) : value(_val) {}
@@ -55,7 +56,7 @@ struct TypeWrapper {
     bool operator<(const TypeWrapper& rhs) const {
         return value < rhs.value;
     }
-};
+};*/
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const TypeWrapper<T>&);
@@ -74,17 +75,6 @@ typedef TypeWrapper<unsigned char> ByteWrapper;
 typedef TypeWrapper<signed char> CharWrapper;
 typedef TypeWrapper<short int> ShortIntegerWrapper;
 //typedef TypeWrapper<ShortFloat> ShortFloatWrapper;
-
-typedef boost::variant <Handle,
-                        TimeStampWrapper,
-                        IntegerWrapper,
-                        FloatWrapper,
-                        BoolWrapper,
-                        ByteWrapper,
-                        CharWrapper,
-                        ShortIntegerWrapper> Vertex;
-//ShortFloatWrapper> Vertex; since ShortFloat is
-//typedef'ed to float, this is a mistake
 
 #define mva MakeVirtualAtom_slow
 
