@@ -98,7 +98,7 @@ public:
      * all links are read from XML. The second pass can only be executed
      * after the first pass has been executed for all XML files in a set,
      * so that all nodes pointed to by links have been inserted.
-     * @return the Handle of the last atomm inserted/merged into the atom table. Or UNDEFINED_HANDLE, if no atom was inserted/merged.
+     * @return the Handle of the last atomm inserted/merged into the atom table. Or Handle::UNDEFINED, if no atom was inserted/merged.
      */
     Handle parse(XMLBufferReader*, NMXmlParseType);
 

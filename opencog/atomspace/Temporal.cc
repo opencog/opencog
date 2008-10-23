@@ -89,7 +89,7 @@ Temporal Temporal::UndefinedTemporalFactory()
 
 const Temporal& Temporal::undefined_temporal()
 {
-    static const Temporal& instance = UndefinedTemporalFactory();
+    static const Temporal instance = UndefinedTemporalFactory();
     return instance;
 }
 
@@ -201,18 +201,18 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 
 int Temporal::compareTo(const Temporal* other) const
 {
-    long low1 = this->getLowerBound();
-    long low2 = other->getLowerBound();
-    long lowDiff = low1 - low2;
-    if (lowDiff != 0) {
-        return (lowDiff > 0) ? 1 : -1;
-    }
-    long up1 = this->getUpperBound();
-    long up2 = other->getUpperBound();
-    long upDiff = up1 - up2;
-    if (upDiff != 0) {
-        return (upDiff > 0) ? 1 : -1;
-    }
+    unsigned long low1 = this->getLowerBound();
+    unsigned long low2 = other->getLowerBound();
+    if(low1 < low2)
+        return -1;
+    else if(low2 < low1)
+        return 1;
+    unsigned long up1 = this->getUpperBound();
+    unsigned long up2 = other->getUpperBound();
+    if(up1 < up2)
+        return -1;
+    else if(up2 < up1)
+        return 1;
     // if lower and upper bounds are equal, make distinction if
     // they have different distribution (nomal < uniform)
     int result;

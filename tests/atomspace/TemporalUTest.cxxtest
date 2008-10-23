@@ -31,6 +31,8 @@
 
 using namespace opencog;
 
+#define BIG_TIMESTAMP (UINT_MAX/2-1)
+
 class TemporalUTest :  public CxxTest::TestSuite
 {
 private:
@@ -293,6 +295,47 @@ public:
         TS_ASSERT(times1[2].compareTo(&(times3[1])) == 0);
         TS_ASSERT(times2[3].compareTo(&(times3[1])) > 0);
 
+        // Test special case where time values are greater than UINT_MAX/2
+        // Just does the first test with greater values:
+        Temporal times4[] = {
+            Temporal(0, 0, true), // [0,0]
+            Temporal(0, BIG_TIMESTAMP, false), // [0,BIG_TIMESTAMP] uniform
+            Temporal(BIG_TIMESTAMP, BIG_TIMESTAMP, true), // [0,2*BIG_TIMESTAMP]
+            Temporal(BIG_TIMESTAMP, 0, true)  // [BIG_TIMESTAMP,BIG_TIMESTAMP]
+        };
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                const Temporal& t1 = times4[i];
+                const Temporal& t2 = times4[j];
+                if (i == j) {
+                    TS_ASSERT(t1.compareTo(&t2) == 0);
+                    TS_ASSERT(!(t1 < t2));
+                    TS_ASSERT(!(t1 > t2));
+                    TS_ASSERT(t1 <= t2);
+                    TS_ASSERT(t1 >= t2);
+                    TS_ASSERT(t1 == t2);
+                    TS_ASSERT(!(t1 != t2));
+                } else if (i > j) {
+                    TS_ASSERT(t1.compareTo(&t2) > 0);
+                    TS_ASSERT(!(t1 < t2));
+                    TS_ASSERT(t1 > t2);
+                    TS_ASSERT(!(t1 <= t2));
+                    TS_ASSERT(t1 >= t2);
+                    TS_ASSERT(!(t1 == t2));
+                    TS_ASSERT(t1 != t2);
+                } else {
+                    TS_ASSERT(t1.compareTo(&t2) < 0);
+                    TS_ASSERT(t1 < t2);
+                    TS_ASSERT(!(t1 > t2));
+                    TS_ASSERT(t1 <= t2);
+                    TS_ASSERT(!(t1 >= t2));
+                    TS_ASSERT(!(t1 == t2));
+                    TS_ASSERT(t1 != t2);
+                }
+            }
+        }
+
     }
 
     void testClone() {
@@ -313,7 +356,6 @@ public:
     }
 
     void testTimeNodeNameConversionMethods() {
-#define BIG_TIMESTAMP (UINT_MAX/2-1)
         Temporal times[9] = {Temporal(0, 0), Temporal(0, 1), Temporal(1, 0, true), Temporal(1, 1, true),
                              Temporal(0, 0), Temporal(0, BIG_TIMESTAMP),
                              Temporal(BIG_TIMESTAMP, 0, true), Temporal(BIG_TIMESTAMP, BIG_TIMESTAMP, true),

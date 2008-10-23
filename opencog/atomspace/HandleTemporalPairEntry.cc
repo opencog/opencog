@@ -36,7 +36,7 @@ using namespace opencog;
 
 int HandleTemporalPairEntry::existingObjects = 0;
 
-HandleTemporalPairEntry::HandleTemporalPairEntry(HandleTemporalPair _handleTemporalPair): handleTemporalPair(_handleTemporalPair)
+HandleTemporalPairEntry::HandleTemporalPairEntry(const HandleTemporalPair& htp) : handleTemporalPair(htp)
 {
 
     ++existingObjects;
@@ -112,7 +112,7 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::last()
     return current;
 }
 
-bool HandleTemporalPairEntry::contains(HandleTemporalPair t)
+bool HandleTemporalPairEntry::contains(const HandleTemporalPair& t)
 {
     HandleTemporalPairEntry *current = this;
     while (current != NULL) {
@@ -143,7 +143,7 @@ int HandleTemporalPairEntry::handleTemporalPairCompare(const void* e1, const voi
     return HandleTemporalPairEntry::compare(*ht1, *ht2);
 }
 
-int HandleTemporalPairEntry::compare(HandleTemporalPair ht1, HandleTemporalPair ht2)
+int HandleTemporalPairEntry::compare(const HandleTemporalPair& ht1, const HandleTemporalPair& ht2)
 {
     int handleDiff = CoreUtils::compare(ht1.getHandle(), ht2.getHandle());
     if (handleDiff != 0) {
@@ -153,7 +153,7 @@ int HandleTemporalPairEntry::compare(HandleTemporalPair ht1, HandleTemporalPair 
     }
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::remove(HandleTemporalPairEntry* set, HandleTemporalPair t)
+HandleTemporalPairEntry* HandleTemporalPairEntry::remove(HandleTemporalPairEntry* set, const HandleTemporalPair& t)
 {
     HandleTemporalPairEntry* buffer;
     // The search for invalid elements need to be done in two steps because
@@ -182,7 +182,7 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::remove(HandleTemporalPairEntry
     return head;
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::add(HandleTemporalPairEntry* sortedSet, HandleTemporalPair ht)
+HandleTemporalPairEntry* HandleTemporalPairEntry::add(HandleTemporalPairEntry* sortedSet, const HandleTemporalPair& ht)
 {
     HandleTemporalPairEntry* current = sortedSet;
     HandleTemporalPairEntry* previous = NULL;

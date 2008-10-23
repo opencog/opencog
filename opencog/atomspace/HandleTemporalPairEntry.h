@@ -44,6 +44,20 @@ namespace opencog
 class HandleTemporalPairEntry
 {
 
+private:
+    /**
+     * HandleTemporalPair sort criterion used by qsort. It returns a negative value,
+     * zero or a positive value if the first argument is respectively
+     * smaller than, equal to, or larger then the second argument.
+     *
+     * @param The first handleTemporalPair element.
+     * @param The second handleTemporalPair element.
+     * @return A negative value, zero or a positive value if the first
+     * argument is respectively smaller than, equal to, or larger then the
+     * second argument.
+     */
+    static int compare(const HandleTemporalPair&, const HandleTemporalPair&);
+
 public:
 
     static int existingObjects;
@@ -63,7 +77,7 @@ public:
      *
      * @param Cell data.
      */
-    HandleTemporalPairEntry(HandleTemporalPair);
+    HandleTemporalPairEntry(const HandleTemporalPair&);
 
     /**
      * Constructor for this class.
@@ -103,7 +117,7 @@ public:
     /**
      * Returns true iff this list contains the given handleTemporalPair.
      */
-    bool contains(HandleTemporalPair);
+    bool contains(const HandleTemporalPair&);
 
     /**
      * Returns a string representation of the list that starts in the
@@ -147,7 +161,7 @@ public:
      * NOTE: The handleTemporalPair argument to be added will be cloned internally.
      * So, the caller must take care of delete such argument when it is not used anymore.
      */
-    static HandleTemporalPairEntry* add(HandleTemporalPairEntry*, HandleTemporalPair);
+    static HandleTemporalPairEntry* add(HandleTemporalPairEntry*, const HandleTemporalPair&);
 
     /**
      * Removes a handleTemporalPair from the list.
@@ -156,7 +170,7 @@ public:
      *        list
      * @return The filtered linked list
      */
-    static HandleTemporalPairEntry* remove(HandleTemporalPairEntry*, HandleTemporalPair);
+    static HandleTemporalPairEntry* remove(HandleTemporalPairEntry*, const HandleTemporalPair&);
 
     /**
      * Returns the intersection between two linked-lists. The two
@@ -223,19 +237,6 @@ public:
      * second argument.
      */
     static int handleTemporalPairCompare(const void*, const void*);
-
-    /**
-     * HandleTemporalPair sort criterion used by qsort. It returns a negative value,
-     * zero or a positive value if the first argument is respectively
-     * smaller than, equal to, or larger then the second argument.
-     *
-     * @param The first handleTemporalPair element.
-     * @param The second handleTemporalPair element.
-     * @return A negative value, zero or a positive value if the first
-     * argument is respectively smaller than, equal to, or larger then the
-     * second argument.
-     */
-    static int compare(HandleTemporalPair, HandleTemporalPair);
 
     class SortComparison
     {

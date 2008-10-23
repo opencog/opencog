@@ -15,7 +15,7 @@ Makefile
 cmake_install.cmake
 
 # ctest
-tests/Testing/
+Testing/
 DartTestfile.txt
 *UTest.cpp
 *UTest
