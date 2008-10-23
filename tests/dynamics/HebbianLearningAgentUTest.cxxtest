@@ -121,20 +121,23 @@ void removeAll(AtomSpace* atomSpace)
 
 class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
 
-    private:
+private:
 
     Factory<HebbianLearningAgent, Agent> factory;
     HebbianLearningAgent* agent;
     CogServer& cogserver;
     std::vector<Handle> atoms;
 
-    public:
+public:
 
-	HebbianLearningAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+    static HebbianLearningAgentUTest* createSuite() { return new HebbianLearningAgentUTest(); }
+    static void destroySuite(HebbianLearningAgentUTest* suite) { delete suite; }
+
+    HebbianLearningAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
         cogserver.registerAgent(HebbianLearningAgent::info().id, &factory);
         agent = static_cast<HebbianLearningAgent*>(cogserver.createAgent(HebbianLearningAgent::info().id, true));
         logger().setLevel(Logger::FINE);
-	    logger().setPrintToStdoutFlag(true);
+        logger().setPrintToStdoutFlag(true);
         logger().enable();
     }
 
@@ -142,13 +145,13 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
         cogserver.unregisterAgent(HebbianLearningAgent::info().id);
     }
 
-	void setUp() {
+    void setUp() {
         std::vector< Handle >::iterator i;
         cogserver.getAtomSpace()->setAttentionalFocusBoundary(0);
 
     }
 
-	void tearDown(){
+    void tearDown(){
         removeAll(cogserver.getAtomSpace());
     }
 
@@ -161,7 +164,7 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
 //        TS_ASSERT_EQUALS(percent, agent->getMaxSpreadPercentage());
 //    }
 
-	void testRunWithLinkConversion() {
+    void testRunWithLinkConversion() {
         AtomSpace* a = cogserver.getAtomSpace();
         agent->convertLinks = true;
         std::vector<Handle> in_in_norm;
@@ -177,7 +180,7 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
         in_out_inv = createCase(true, 10, false, -10, true, 0.1, "inoutinv");
         out_in_norm = createCase(false, -10, true, 10, false, 0.1, "outinnorm");
         out_in_inv = createCase(false, -10, true, 10, true, 0.1, "outininv");
-	    cogserver.unitTestServerLoop(1);
+        cogserver.unitTestServerLoop(1);
 
         // replaced links, so handles no longer valid. find links through
         // outgoing sets.
@@ -226,7 +229,7 @@ class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
         TS_ASSERT_DELTA(a->getTV(in_out_norm[2]).getMean(), 0.01f, 0.001);
 
        
-	}
+    }
 
     
 

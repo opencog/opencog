@@ -87,12 +87,16 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 
 class ForgettingAgentUTest :  public CxxTest::TestSuite {
 
-    private:
+private:
+
     Factory<ForgettingAgent, Agent> factory;
     CogServer& cogserver;
     ForgettingAgent* agent;
 
-    public:
+public:
+
+    static ForgettingAgentUTest* createSuite() { return new ForgettingAgentUTest(); }
+    static void destroySuite(ForgettingAgentUTest* suite) { delete suite; }
 
     ForgettingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
         cogserver.registerAgent(ForgettingAgent::info().id, &factory);

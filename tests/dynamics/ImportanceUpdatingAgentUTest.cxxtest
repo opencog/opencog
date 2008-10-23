@@ -74,11 +74,15 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 class ImportanceUpdatingAgentUTest : public CxxTest::TestSuite {
 
 private:
+
     Factory<ImportanceUpdatingAgent, Agent>  factory;
     CogServer& cogserver;
     opencog::ImportanceUpdatingAgent* agent;
 
 public:
+
+    static ImportanceUpdatingAgentUTest* createSuite() { return new ImportanceUpdatingAgentUTest(); }
+    static void destroySuite(ImportanceUpdatingAgentUTest* suite) { delete suite; }
 
 	ImportanceUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
         cogserver.registerAgent(ImportanceUpdatingAgent::info().id, &factory);
