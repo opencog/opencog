@@ -217,7 +217,7 @@ void PLNShell_RunLoop(int argc, char** args)
         // Initialise CogServer
         CogServer& cogserver = static_cast<CogServer&>(server());
         // Load builtinreqs
-        cogserver.loadModule(std::string("libbuiltinreqs.so"));
+        //cogserver.loadModule(std::string("libbuiltinreqs.so"));
         //cogserver.loadModule(std::string("libscheme.so"));
         // Open network port
         //cogserver.enableNetworkServer();

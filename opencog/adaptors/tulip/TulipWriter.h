@@ -2,7 +2,6 @@
 #define _TULIP_WRITER_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include <iostream>
 #include <fstream>
