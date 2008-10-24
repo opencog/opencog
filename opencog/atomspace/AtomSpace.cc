@@ -99,11 +99,7 @@ AtomSpace::AtomSpace()
     //fflush(stdout);
     emptyName = "";
 
-#ifdef USE_ATOM_HASH_MAP
     stimulatedAtoms = new AtomHashMap();
-#else
-    stimulatedAtoms = new AtomMap();
-#endif
     totalStimulus = 0;
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&stimulatedAtomsLock, NULL);

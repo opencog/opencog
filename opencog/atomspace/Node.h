@@ -97,16 +97,23 @@ public:
 
     /**
      * Returns whether a given atom is equal to the current node.
-     * @param Node to be tested.
+     * @param Atom to be tested.
      * @return true if they are equal, false otherwise.
      */
-    virtual bool equals(const Atom*) const;
+    virtual bool operator==(const Atom&) const;
 
     /**
-    * Returns the hashCode of the Node.
-    * @return a integer value as the hashCode of the Node.
-    */
-    virtual int hashCode(void) const;
+     * Returns whether a given atom is different from the current node.
+     * @param Atom to be tested.
+     * @return true if they are different, false otherwise.
+     */
+    virtual bool operator!=(const Atom&) const;
+
+    /**
+     * Returns the hashCode of the node.
+     * @return a integer value as the hashCode of the node.
+     */
+    virtual size_t hashCode(void) const;
 };
 
 } // namespace opencog

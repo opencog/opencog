@@ -31,6 +31,7 @@
 #include <list>
 #include <set>
 #include <vector>
+#include <tr1/unordered_map>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/AtomTable.h>
@@ -43,17 +44,6 @@
 #include <opencog/util/recent_val.h>
 #include <opencog/util/tree.h>
 
-#ifndef WIN32
-/*
-#include <ext/hash_map>
-using __gnu_cxx::hash_map;
-*/
-#include <tr1/unordered_map>
-#define USE_ATOM_HASH_MAP
-#else
-#include <map>
-#endif
-
 namespace opencog
 {
 
@@ -62,12 +52,7 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 
 typedef short stim_t;
 
-#ifdef USE_ATOM_HASH_MAP
-//typedef hash_map<Atom*, stim_t, hashAtom, eqAtom> AtomHashMap;
-typedef std::tr1::unordered_map<Atom*, stim_t, atom_ptr_hash, atom_ptr_equal_to > AtomHashMap;
-#else
-typedef map<Atom*, stim_t> AtomMap;
-#endif
+typedef std::tr1::unordered_map<const Atom*, stim_t> AtomHashMap;
 
 class AtomSpace
 {
@@ -1142,12 +1127,8 @@ private:
 
     // Total stimulus given out to atoms
     stim_t totalStimulus;
-#ifdef USE_ATOM_HASH_MAP
     // Hash table of atoms given stimulus since reset
     AtomHashMap* stimulatedAtoms;
-#else
-    AtomMap* stimulatedAtoms;
-#endif
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_t stimulatedAtomsLock;

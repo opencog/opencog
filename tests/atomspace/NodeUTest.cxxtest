@@ -23,6 +23,7 @@
  */
 
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -33,6 +34,8 @@ private:
 
 public:
     NodeUTest() {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
     }
 
     void setUp() {
@@ -50,19 +53,18 @@ public:
         Node* n6 = new Node(CONCEPT_NODE, "");
         Node* n7 = new Node(PREDICATE_NODE, "");
 
-        TS_ASSERT(n1->equals(n2));
-        TS_ASSERT(!n1->equals(n3));
-        TS_ASSERT(!n3->equals(n4));
+        TS_ASSERT(*n1 == *n2);
+        TS_ASSERT(*n1 != *n3);
+        TS_ASSERT(*n3 != *n4);
 
-        TS_ASSERT(!n1->equals(n5));
-        TS_ASSERT(!n1->equals(n7));
-        TS_ASSERT(!n3->equals(n5));
-        TS_ASSERT(!n3->equals(n7));
-        TS_ASSERT(!n4->equals(n5));
-        TS_ASSERT(!n4->equals(n7));
+        TS_ASSERT(*n1 != *n5);
+        TS_ASSERT(*n1 != *n7);
+        TS_ASSERT(*n3 != *n5);
+        TS_ASSERT(*n3 != *n7);
+        TS_ASSERT(*n4 != *n5);
+        TS_ASSERT(*n4 != *n7);
 
-        TS_ASSERT(n5->equals(n6));
-        TS_ASSERT(!n5->equals(n7));
+        TS_ASSERT(*n5 == *n6);
+        TS_ASSERT(*n5 != *n7);
     }
-
 };

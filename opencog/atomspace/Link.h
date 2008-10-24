@@ -220,16 +220,23 @@ public:
 
     /**
      * Returns whether a given atom is equal to the current link.
-     * @param Link to be tested.
+     * @param Atom to be tested.
      * @return true if they are equal, false otherwise.
      */
-    virtual bool equals(const Atom *) const;
+    virtual bool operator==(const Atom&) const;
 
     /**
-    * Returns the hashCode of the Link.
-    * @return a integer value as the hashCode of the Link.
-    */
-    virtual int hashCode(void) const;
+     * Returns whether a given atom is different from the current link.
+     * @param Atom to be tested.
+     * @return true if they are different, false otherwise.
+     */
+    virtual bool operator!=(const Atom&) const;
+
+    /**
+     * Returns the hashCode of the link.
+     * @return an unsigned integer value as the hashCode of the link.
+     */
+    virtual size_t hashCode(void) const;
 };
 
 } // namespace opencog

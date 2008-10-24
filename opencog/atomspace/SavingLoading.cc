@@ -575,7 +575,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         if (t->getSize()) {
             //logger().fine("SavingLoading::updateHandles: trails");
             Trail *newTrail = new Trail();
-            for (int i = 0; i < t->getSize(); i++) {
+            for (size_t i = 0; i < t->getSize(); i++) {
                 Handle handle = t->getElement(i);
                 CoreUtils::updateHandle(&handle, handles);
                 newTrail->insert(handle);

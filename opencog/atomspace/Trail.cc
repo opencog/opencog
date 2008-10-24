@@ -74,24 +74,18 @@ Trail::~Trail()
 
 bool Trail::isInTrail(Handle link)
 {
-
     if (trail == NULL) return false;
-
-    for (int i = 0; i < (int)trail->size(); i++) {
-        if ((TLB::getAtom(link)->equals(TLB::getAtom((*trail)[i])))) {
+    for (size_t i = 0; i < trail->size(); i++) {
+        if (TLB::getAtom(link) == TLB::getAtom((*trail)[i]))
             return(true);
-        }
     }
-
     return false;
 }
 
-int Trail::getSize()
+size_t Trail::getSize()
 {
-
     if (trail == NULL) return 0;
-
-    return (int)trail->size();
+    return trail->size();
 }
 
 void Trail::insert(Handle link, bool fresh)
@@ -136,7 +130,7 @@ void Trail::append(Trail* t)
 
     if (trail == NULL) init(1, maxSize);
 
-    for (int i = 0; i < t->getSize(); i++) {
+    for (unsigned int i = 0; i < t->getSize(); i++) {
         Handle link = t->getElement(i);
         insert(link);
     }

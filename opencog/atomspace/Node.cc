@@ -71,10 +71,7 @@ void Node::setName(const std::string& cname) throw (RuntimeException)
 
 void Node::merge(Atom* atom) throw (InconsistenceException)
 {
-    if (!equals(atom)) {
-        throw InconsistenceException(TRACE_INFO, "Node - Different nodes cannot be merged");
-    }
-
+    if (*this != *atom) throw InconsistenceException(TRACE_INFO, "Node - Different nodes cannot be merged");
     Atom::merge(atom);
 }
 
@@ -99,20 +96,18 @@ std::string Node::toString() const
     return buf;
 }
 
-bool Node::equals(const Atom* other) const
+bool Node::operator==(const Atom& other) const
 {
-    bool result = false;
-    if (other != NULL && (type == other->getType())) {
-        const Node* onode = dynamic_cast<const Node*>(other);
-        result = !strcmp(name.c_str(), onode->getName().c_str());
-    }
-    return(result);
+    return (getType() == other.getType()) &&
+           (getName() == dynamic_cast<const Node&>(other).getName());
 }
 
-int Node::hashCode() const
+bool Node::operator!=(const Atom& other) const
 {
-    int result = Atom::hashCode();
-    result += hash<std::string>()(name);
-    return result;
+    return !(*this == other);
 }
 
+size_t Node::hashCode() const
+{
+    return getType() ^ hash<std::string>()(name);
+}

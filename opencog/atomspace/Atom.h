@@ -504,16 +504,22 @@ public:
     virtual std::string toShortString(void) const = 0;
 
     /**
-    * Returns whether to atoms are equal.
-    * @return true if the atom are equals, false otherwise.
-    */
-    virtual bool equals(const Atom *) const;
+     * Returns whether two atoms are equal.
+     * @return true if the atoms are equal, false otherwise.
+     */
+    virtual bool operator==(const Atom&) const = 0;
 
     /**
-    * Returns the hashCode of the Atom.
-    * @return a integer value as the hashCode of the Atom.
-    */
-    virtual int hashCode(void) const;
+     * Returns whether two atoms are different.
+     * @return true if the atoms are different, false otherwise.
+     */
+    virtual bool operator!=(const Atom&) const = 0;
+
+    /**
+     * Returns the hashCode of the Atom.
+     * @return an unsigned integer value as the hashCode of the Atom.
+     */
+    virtual size_t hashCode(void) const = 0;
 };
 
 } // namespace opencog

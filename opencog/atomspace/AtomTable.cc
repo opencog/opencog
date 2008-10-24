@@ -750,13 +750,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
 #ifdef USE_ATOM_HASH_SET
     // Adds to the hash_set
-    // printf("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode());
-    // printf("INSERTING ATOM (%p, type=%d, arity=%d) INTO ATOMSET:\n", atom, atom->getType(), lll->getArity());
-    // NMPrinter p;
-    // p.print(atom);
-    //printf("%s\n", atom->toString().c_str());
+    // logger().debug("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode());
     atomSet->insert(atom);
-    //printf("AtomTable::atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
+    //logger().debug("[AtomTable::add] atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
 #endif
 
     // Checks for null outgoing set members.
@@ -1417,15 +1413,13 @@ void AtomTable::scrubIncoming(void)
 
 std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const
 {
-    std::size_t hc = static_cast<std::size_t>(x->hashCode());
-    return hc;
+    return x->hashCode();
 }
 
 bool opencog::atom_ptr_equal_to::operator()(const Atom* const& x, 
                                             const Atom* const& y) const
 {
-    bool rv = x->equals(y);
-    return rv;
+    return *x == *y;
 }
 
 boost::signal<void (Handle)>& AtomTable::addAtomSignal()

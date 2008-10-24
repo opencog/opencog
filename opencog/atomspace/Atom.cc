@@ -545,9 +545,7 @@ void Atom::addNextPredicateIndex(int index, Handle nextHandle)
 void Atom::merge(Atom* other) throw (InconsistenceException)
 {
 
-    if (!equals(other)) {
-        throw InconsistenceException(TRACE_INFO, "Different atoms cannot be merged");
-    }
+    if (*this != *other) throw InconsistenceException(TRACE_INFO, "Different atoms cannot be merged");
 
     // Merges the incoming set and updates the outgoingSets
     Handle thisHandle = TLB::getHandle(this);
@@ -738,18 +736,6 @@ bool Atom::isOld(const AttentionValue::sti_t threshold) const
             (attentionValue->getLTI() < 1));
 }
 
-// This is a virtual function, overloaded by Link class and Node class.
-bool Atom::equals(const Atom* other) const
-{
-    bool rv = (type == other->type);
-    return rv;
-}
-
-// This is a virtual function, overloaded by Link class and Node class.
-int Atom::hashCode() const
-{
-    return (int) type;
-}
 
 HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const
 {

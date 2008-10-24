@@ -48,13 +48,13 @@ namespace opencog
 
 struct atom_ptr_hash : public std::unary_function<const Atom*, std::size_t>
 {
-    std::size_t operator()(const Atom* const& x) const;
+    std::size_t operator()(const Atom* const& __x) const;
 };
 struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*, bool>
 {
-    bool operator()(const Atom* const& x, const Atom* const& y) const;
+    bool operator()(const Atom* const& __x, const Atom* const& __y) const;
 };
-typedef std::tr1::unordered_set< const Atom*, atom_ptr_hash, atom_ptr_equal_to > AtomHashSet;
+typedef std::tr1::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
 
 class Link;
 class Node;

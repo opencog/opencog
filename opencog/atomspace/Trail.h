@@ -57,7 +57,7 @@ public:
 
     void append(Trail*);
 
-    int getSize();
+    size_t getSize();
 
     void print();
     void print(FILE*);

@@ -79,8 +79,8 @@ public:
 
 namespace std { namespace tr1 {
     template<>
-    struct hash<opencog::Handle> : public std::unary_function<opencog::Handle, std::size_t> {
-        std::size_t operator()(opencog::Handle h) const
+    struct hash<opencog::Handle> : public std::unary_function<const opencog::Handle&, std::size_t> {
+        std::size_t operator()(const opencog::Handle& h) const
         { return static_cast<std::size_t>(h.value()); }
     };
 }} //namespace std::tr1

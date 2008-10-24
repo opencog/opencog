@@ -67,10 +67,10 @@ void tokenize(const std::string& str,
 template<typename _T>
 struct safe_deleter : public std::unary_function<_T*&, void>
 {
-    void operator()(_T*& ptr) {
-        if (ptr) {
-            delete ptr;
-            ptr = 0;
+    void operator()(_T*& __ptr) {
+        if (__ptr) {
+            delete __ptr;
+            __ptr = 0;
         }
     }
 };

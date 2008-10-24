@@ -240,27 +240,25 @@ bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
     }
 }
 
-bool Link::equals(const Atom* other) const
+bool Link::operator==(const Atom& other) const
 {
-    if (type != other->getType()) return false;
-
-    const Link* olink = dynamic_cast<const Link*>(other);
-    if (getArity() != olink->getArity()) return false;
-
-    for (int i = 0; i < getArity(); i++) {
-        if (outgoing[i] != olink->outgoing[i]) return false;
-    }
-
+    if (getType() != other.getType()) return false;
+    const Link& olink = dynamic_cast<const Link&>(other);
+    if (getArity() != olink.getArity()) return false;
+    for (unsigned int i = 0; i < getArity(); i++)
+        if (outgoing[i] != olink.outgoing[i]) return false;
     return true;
 }
 
-int Link::hashCode(void) const
+bool Link::operator!=(const Atom& other) const
 {
-    long result = type + (getArity() << 8);
-
-    for (int i = 0; i < getArity(); i++) {
-        result = result  ^ (((long) outgoing[i].value()) << i);
-    }
-    return (int) result;
+    return !(*this == other);
 }
 
+size_t Link::hashCode(void) const
+{
+    size_t result = getType() + (getArity() << 8);
+    for (unsigned int i = 0; i < getArity(); i++)
+        result = result  ^ (((long) outgoing[i].value()) << i);
+    return result;
+}

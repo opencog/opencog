@@ -72,37 +72,37 @@ public:
         TS_ASSERT(l7->getArity() == 2);
         TS_ASSERT(l8->getArity() == 2);
 
-        TS_ASSERT(l1->equals(l2));
-        TS_ASSERT(l3->equals(l4));
-        TS_ASSERT(l5->equals(l6));
-        TS_ASSERT(l7->equals(l8));
+        TS_ASSERT(*l1 == *l2);
+        TS_ASSERT(*l3 == *l4);
+        TS_ASSERT(*l5 == *l6);
+        TS_ASSERT(*l7 == *l8);
 
-        TS_ASSERT(!l1->equals(l3));
-        TS_ASSERT(!l1->equals(l4));
-        TS_ASSERT(!l1->equals(l5));
-        TS_ASSERT(!l1->equals(l6));
-        TS_ASSERT(!l1->equals(l7));
-        TS_ASSERT(!l1->equals(l8));
+        TS_ASSERT(*l1 != *l3);
+        TS_ASSERT(*l1 != *l4);
+        TS_ASSERT(*l1 != *l5);
+        TS_ASSERT(*l1 != *l6);
+        TS_ASSERT(*l1 != *l7);
+        TS_ASSERT(*l1 != *l8);
 
-        TS_ASSERT(!l3->equals(l1));
-        TS_ASSERT(!l3->equals(l2));
-        TS_ASSERT(!l3->equals(l5));
-        TS_ASSERT(!l3->equals(l6));
-        TS_ASSERT(!l3->equals(l7));
-        TS_ASSERT(!l3->equals(l8));
+        TS_ASSERT(*l3 != *l1);
+        TS_ASSERT(*l3 != *l2);
+        TS_ASSERT(*l3 != *l5);
+        TS_ASSERT(*l3 != *l6);
+        TS_ASSERT(*l3 != *l7);
+        TS_ASSERT(*l3 != *l8);
 
-        TS_ASSERT(!l5->equals(l1));
-        TS_ASSERT(!l5->equals(l2));
-        TS_ASSERT(!l5->equals(l3));
-        TS_ASSERT(!l5->equals(l4));
-        TS_ASSERT(!l5->equals(l7));
-        TS_ASSERT(!l5->equals(l8));
+        TS_ASSERT(*l5 != *l1);
+        TS_ASSERT(*l5 != *l2);
+        TS_ASSERT(*l5 != *l3);
+        TS_ASSERT(*l5 != *l4);
+        TS_ASSERT(*l5 != *l7);
+        TS_ASSERT(*l5 != *l8);
 
-        TS_ASSERT(!l7->equals(l1));
-        TS_ASSERT(!l7->equals(l2));
-        TS_ASSERT(!l7->equals(l3));
-        TS_ASSERT(!l7->equals(l4));
-        TS_ASSERT(!l7->equals(l5));
-        TS_ASSERT(!l7->equals(l6));
+        TS_ASSERT(*l7 != *l1);
+        TS_ASSERT(*l7 != *l2);
+        TS_ASSERT(*l7 != *l3);
+        TS_ASSERT(*l7 != *l4);
+        TS_ASSERT(*l7 != *l5);
+        TS_ASSERT(*l7 != *l6);
     }
 };
