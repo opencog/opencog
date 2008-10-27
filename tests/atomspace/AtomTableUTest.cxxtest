@@ -413,25 +413,25 @@ public:
 
     void atomAdded1(Handle h) {
         TS_ASSERT(table->getSize() == 1); 
-        logger().info("atomAdded1: %s", TLB::getAtom(h)->toShortString().c_str());
+        logger().debug("atomAdded1: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomAdded2(Handle h) {
         TS_ASSERT(table->getSize() == 1); 
-        logger().info("atomAdded2: %s", TLB::getAtom(h)->toShortString().c_str());
+        logger().debug("atomAdded2: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter += 2;
     }
 
     void atomRemoved1(Handle h) {
         TS_ASSERT(table->getSize() == 0); 
-        logger().info("atomRemoved1: %s", TLB::getAtom(h)->toShortString().c_str());
+        logger().debug("atomRemoved1: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter -= 4;
     }
 
     void atomRemoved2(Handle h) {
         TS_ASSERT(table->getSize() == 0); 
-        logger().info("atomRemoved2: %s", TLB::getAtom(h)->toShortString().c_str());
+        logger().debug("atomRemoved2: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter -= 5;
     }
 
@@ -491,12 +491,12 @@ public:
     }
 
     void atomAdded3(Handle h) {
-        logger().info("atomAdded3: %s", TLB::getAtom(h)->toShortString().c_str());
+        logger().debug("atomAdded3: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomRemoved3(Handle h) {
-        logger().info("atomRemoved3: %s", TLB::getAtom(h)->toShortString().c_str());
+        logger().debug("atomRemoved3: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter -= 1;
     }
 
@@ -567,5 +567,39 @@ public:
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
         TS_ASSERT(__testSignalsCounter == 0); // last one removed
+    }
+
+    /* test the fix for the bug triggered whenever we had a link pointing to the
+     * same atom twice (or more) */
+    void testDoubleLink() {
+        AtomTable atomTable;
+        Node* n1 = new Node(WORD_NODE, "the");
+        Node* n2 = new Node(WORD_NODE, "of");
+        Handle hn1 = atomTable.add(n1);
+        Handle hn2 = atomTable.add(n2);
+
+        std::vector<Handle> os; os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
+        Link* l1 = new Link(LIST_LINK, os);
+        Handle hl1 = atomTable.add(l1);
+
+        atomTable.remove(hn1, true);
+    }
+
+    void testMerge() {
+        AtomTable atomTable;
+
+        Node* n1 = new Node(WORD_NODE, "the", SimpleTruthValue(0.1f, 0.2f));
+        Handle hn1 = atomTable.add(n1);
+
+        Node* n2 = new Node(WORD_NODE, "the", SimpleTruthValue(0.3f, 0.4f));
+        TS_ASSERT_THROWS_NOTHING(atomTable.add(n2));
+
+        Node* n3 = new Node(WORD_NODE, "the", SimpleTruthValue(0.8f, 0.3f));
+        TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
+
+        Handle h = atomTable.getHandle("the", WORD_NODE);
+        TS_ASSERT(h == hn1);
+        TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getMean(), 0.3f, 0.000001);
+        TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getCount(), 0.4f, 0.000001);
     }
 };

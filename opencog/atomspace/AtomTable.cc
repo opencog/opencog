@@ -26,6 +26,8 @@
 
 #include "AtomTable.h"
 
+#include <set>
+
 #include <stdlib.h>
 #include <pthread.h>
 
@@ -714,7 +716,6 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
 void AtomTable::merge(Atom *original, Atom *copy)
 {
     original->merge(copy);
-    TLB::removeAtom(copy);
     delete copy;
 }
 
@@ -959,11 +960,20 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
 
     // if recursive-flag is set, also extract all the links in the atom's incoming set
     if (recursive) {
-        HandleEntry* next = NULL;
-        for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = next) {
-            if (TLB::getAtom(in->handle)->isMarkedForRemoval() == false)
-                result = HandleEntry::concatenation(extract(in->handle, true), result);
-            next = in->next;
+        /* we need to make a copy of the incoming set because the 'incoming set'
+         * container is actually a list, so the same link may appear twice in an
+         * incoming set. Hopefully we'll eventually use the right container */
+        std::set<Handle> is;
+        for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
+            is.insert(in->handle);
+
+        std::set<Handle>::iterator is_it;
+        for (is_it = is.begin(); is_it != is.end(); ++is_it) {
+            logger().debug("[AtomTable::extract] incoming set: %s", TLB::isValidHandle(*is_it) ? TLB::getAtom(*is_it)->toString().c_str() : "INVALID HANDLE");
+            if (TLB::getAtom(*is_it)->isMarkedForRemoval() == false) {
+                logger().debug("[AtomTable::extract] marked for removal is false");
+                result = HandleEntry::concatenation(extract(*is_it, true), result);
+            }
         }
     }
     if (atom->getIncomingSet()) {
@@ -1004,7 +1014,8 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // remove from iterators
     lockIterators();
     for (unsigned int i = 0; i < iterators.size(); i++) {
-        // TODO: CAN THIS REALLY BE CALLED AFTER THE ATOM HAS BEEN REMOVED FROM TYPE INDEX ALREADY ?
+        // TODO: CAN THIS REALLY BE CALLED AFTER THE ATOM HAS BEEN REMOVED FROM
+        // TYPE INDEX ALREADY ?
         removeFromIterator(atom, iterators[i]);
     }
     unlockIterators();
