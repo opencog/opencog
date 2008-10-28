@@ -25,6 +25,8 @@
 
 using namespace opencog;
 
+Factory<QueryProcessor, Agent> QueryProcessor::factory;
+
 // load/unload functions for the Module interface
 extern "C" const char* opencog_module_id()
 {

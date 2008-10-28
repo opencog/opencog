@@ -26,6 +26,8 @@
 
 using namespace opencog;
 
+Factory<WordSenseProcessor, Agent> WordSenseProcessor::factory;
+
 // load/unload functions for the Module interface
 extern "C" const char* opencog_module_id()
 {
