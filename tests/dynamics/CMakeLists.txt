@@ -13,12 +13,12 @@ LINK_DIRECTORIES (
 )
 
 LINK_LIBRARIES (
-    server
-    attention
+	server
+	attention
 	${Boost_SIGNALS_LIBRARY}
 	${GSL_LIBRARIES}
-    ${CSOCKETS_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
+	${CSOCKETS_LIBRARIES}
+	${OPENSSL_LIBRARIES}
 )
 
 ADD_CXXTEST(ForgettingAgentUTest)

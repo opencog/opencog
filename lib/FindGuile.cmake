@@ -1,18 +1,15 @@
+# Copyright (c) 2008, OpenCog.org (http://opencog.org)
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+
 # - Try to find Guile; Once done this will define
 #
 # GUILE_FOUND - system has the GUILE library
 # GUILE_INCLUDE_DIRS - the GUILE include directory
 # GUILE_LIBRARIES - The libraries needed to use GUILE
-#
-# XXX --- need to have guile-1.8, since the code uses some API
-# functions that are not in guile-1.6 However, its not clear
-# how to use CMake to skip searching for guile-1.6
 
 
-# Copyright (c) 2008, OpenCog.org (http://opencog.org)
-#
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 # Look for the header file
 FIND_PATH(GUILE_INCLUDE_DIR libguile.h /usr/include /usr/local/include /usr/include/libguile /usr/local/include/libguile)

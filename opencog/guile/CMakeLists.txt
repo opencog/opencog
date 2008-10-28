@@ -4,8 +4,8 @@ ADD_LIBRARY (scheme SHARED
 	SchemeSmobAtom.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
-    SchemeSocket.cc
-    SchemeModule.cc
+	SchemeSocket.cc
+	SchemeModule.cc
 )
 
 TARGET_LINK_LIBRARIES(scheme

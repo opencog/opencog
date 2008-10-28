@@ -1,18 +1,18 @@
 ADD_LIBRARY(attention SHARED
-    AttentionModule
-    ForgettingAgent
-    HebbianLearningAgent
-    ImportanceSpreadingAgent
-    ImportanceDiffusionAgent.cc
-    ImportanceUpdatingAgent
-    STIDecayingAgent
+	AttentionModule
+	ForgettingAgent
+	HebbianLearningAgent
+	ImportanceSpreadingAgent
+	ImportanceDiffusionAgent.cc
+	ImportanceUpdatingAgent
+	STIDecayingAgent
 )
 
 INCLUDE_DIRECTORIES(
-    ${OPENCOG_SOURCE_DIR}/src/util
-    ${OPENCOG_SOURCE_DIR}/src/atomspace
-    ${OPENCOG_SOURCE_DIR}/src/server
-    ${OPENCOG_SOURCE_DIR}/src/query
+	${OPENCOG_SOURCE_DIR}/src/util
+	${OPENCOG_SOURCE_DIR}/src/atomspace
+	${OPENCOG_SOURCE_DIR}/src/server
+	${OPENCOG_SOURCE_DIR}/src/query
 )
 
 TARGET_LINK_LIBRARIES(attention server)

@@ -10,7 +10,7 @@ LINK_DIRECTORIES(
 )
 
 LINK_LIBRARIES(
-    atomspace
+	atomspace
 	${Boost_SIGNALS_LIBRARY}
 )
 

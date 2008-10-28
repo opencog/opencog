@@ -4,27 +4,27 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (builtinreqs SHARED
-    BuiltinRequestsModule
-    Request
-    DataRequest
-    ExitRequest
-    HelpRequest
-    LoadRequest
-    LoadModuleRequest
-    ListRequest
-    ShutdownRequest
-    UnloadModuleRequest
+	BuiltinRequestsModule
+	Request
+	DataRequest
+	ExitRequest
+	HelpRequest
+	LoadRequest
+	LoadModuleRequest
+	ListRequest
+	ShutdownRequest
+	UnloadModuleRequest
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
-    xml
-    ${EXPAT_LIBRARIES}
+	xml
+	${EXPAT_LIBRARIES}
 )
 
 ADD_LIBRARY (server SHARED
-    BaseServer
+	BaseServer
 	CogServer
-    Request
+	Request
 	NetworkServer
 	ConsoleSocket
 )
@@ -40,15 +40,15 @@ IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 ADD_EXECUTABLE(cogserver
-    CogServerMain
+	CogServerMain
 )
 
 TARGET_LINK_LIBRARIES(cogserver
-    server
+	server
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SIGNALS_LIBRARY}
-    ${CSOCKETS_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
+	${CSOCKETS_LIBRARIES}
+	${OPENSSL_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_DIRECTORIES "${BOOST_LIBRARY_DIRS}")
@@ -62,25 +62,25 @@ INSTALL (TARGETS server cogserver builtinreqs
 )
 
 INSTALL (FILES
-    Agent.h
-    BaseServer.h
-    BuiltinRequestsModule.h
-    CogServer.h
-    ConsoleSocket.h
-    DataRequest.h
-    ExitRequest.h
-    Factory.h
-    HelpRequest.h
-    IHasMimeType.h
-    IRPCSocket.h
-    ListRequest.h
-    LoadModuleRequest.h
-    LoadRequest.h
-    Module.h
-    NetworkServer.h
-    Registry.h
-    Request.h
-    ShutdownRequest.h
-    UnloadModuleRequest.h
+	Agent.h
+	BaseServer.h
+	BuiltinRequestsModule.h
+	CogServer.h
+	ConsoleSocket.h
+	DataRequest.h
+	ExitRequest.h
+	Factory.h
+	HelpRequest.h
+	IHasMimeType.h
+	IRPCSocket.h
+	ListRequest.h
+	LoadModuleRequest.h
+	LoadRequest.h
+	Module.h
+	NetworkServer.h
+	Registry.h
+	Request.h
+	ShutdownRequest.h
+	UnloadModuleRequest.h
 	DESTINATION "include/opencog/server"
 )

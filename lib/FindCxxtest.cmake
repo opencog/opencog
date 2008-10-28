@@ -1,20 +1,22 @@
-#  CXXTEST_FOUND   - system has cxxtest
-#  CXXTEST_GEN - the binary used to generate the tests
-
 # Copyright (c) 2008, OpenCog.org (http://opencog.org)
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+
+# The following values are defined
+# CXXTEST_FOUND - system has cxxtest
+# CXXTEST_GEN   - the binary used to generate the tests
+
 
 # Find path to the cxxtestgen.py script (NB: this stuff should move to FindCXXTEST.cmake)
 # CXXTEST_BIN_DIR enviroment variable must have been defined already
 
 FIND_PACKAGE(PythonInterp)
 FIND_PATH(CXXTEST_BIN_DIR cxxtestgen.py
-    $ENV{CXXTEST_BIN_DIR}
-    /usr/bin
-    /usr/local/bin
-    DOC "Where is cxxtest located?"
+	$ENV{CXXTEST_BIN_DIR}
+	/usr/bin
+	/usr/local/bin
+	DOC "Where is cxxtest located?"
 )
 IF (PYTHONINTERP_FOUND AND CXXTEST_BIN_DIR)
 	SET(CXXTEST_FOUND 1)
