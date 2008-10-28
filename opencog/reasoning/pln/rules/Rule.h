@@ -129,13 +129,13 @@ public:
      * object must take care of ordering them.
      *
      * @param h The vertices to compute on.
-     * @param CX ???
+     * @param CX ??? ARI: what is this?
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */
     virtual BoundVertex compute(const vector<Vertex>& h, Handle CX = NULL) const=0;
 
-    //! A concrete computation method for generic Rule?
+    //! A concrete computation method for generic rule
     BoundVertex compute(const vector<BoundVertex>& h, Handle CX = NULL) const;
 
     //! Whether to attempt direct production.
@@ -154,7 +154,7 @@ public:
      */
     bool validate(const vector<Vertex>& h) const;
 
-    /** Another alternative for checking validity. ???
+    /** ARI: Another alternative for checking validity. ???
      *
      * @param args The vertices to check validity for.
      * @return Whether the provided vertices fit the rule requirements or not.

@@ -1,4 +1,10 @@
 
+Notes:
+Skolemization (conversion of premises with variables to be encompassed by a
+ForAll quantifier) is requred of axioms. Results of inference currently don't
+create atoms with a form that requires for Skolemization but when it does, this
+process should be automated.
+
 == TODO
 
 There are a lot of potential design changes that it'd be nice to make, as well
@@ -6,15 +12,17 @@ as other quite important tasks.
 
 === Important
 
-* Fresh = true bug.
-* Integrate PLN atoms types with the rest of opencog in atomspace/types
 * Changing the name of AtomTableWrapper to AtomSpaceWrapper
+* Fresh = true bug. This is mostly done through the alteration of the
+AtomTableWrapper. The tests still have to be validated and made to run though.
+* Make PLN a loadable module
+* Register PLN atoms types with the new ClassServer on module load
+* Merge PLN shell requests into the CogServer Request processor.
 
 === Moderate
 
 * Allow PLN to use general OpenCog XML loader instead of it's own special one.
 Either by modifying the OpenCog loader or by adapting how PLN saves XML and
 loads XML.
-
 
 === Nice to have

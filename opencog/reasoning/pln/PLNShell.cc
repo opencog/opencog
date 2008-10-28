@@ -915,7 +915,7 @@ printf("BITNodeRoot init ok\n");
             }           
 #endif
                  break;
-            case 'k': state->LoopCheck(); break;
+            case 'k': state->loopCheck(); break;
             case 'D': test::debugger_control = (test::debugger_control?false:true);
 /*                      for (int zz=0;zz<1000;zz++)
                             RuleRepository::Instance().rule[ForAll]->o2iMeta(
@@ -944,7 +944,7 @@ printf("BITNodeRoot init ok\n");
                         cprintf(-10, "Results:\n");
                         ((BackInferenceTreeRootT*)h)->printResults();
 
-                        cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->GetParents().begin()->parent_arg_i);
+                        cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->getParents().begin()->parent_arg_i);
 
                          break;
 /*          case 'B': cin >> h; cprintf(0, "Node has results & bindings:\n");
@@ -984,7 +984,7 @@ printf("BITNodeRoot init ok\n");
                         else
                             puts("Passing 1 arg.");
 
-                        printf("BITNode %ld.", (long) state->FindNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
+                        printf("BITNode %ld.", (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
 
                         break;
             case 'F':   tempi = currentDebugLevel;
@@ -1031,7 +1031,7 @@ printf("BITNodeRoot init ok\n");
                         break;
 
             case 'n': state->expandNextLevel(); break;
-            case 't': cin >> h; state->print_trail((Handle)h); break;
+            case 't': cin >> h; state->printTrail((Handle)h); break;
             case 'f': state->expandFittest(); break;
 
             case 'P': cin >> h;
@@ -1040,7 +1040,7 @@ printf("BITNodeRoot init ok\n");
                         ((BackInferenceTreeRootT*)h)->print(); break;
             case 'O':   cin >> h;
 //                      ((BITNode*)h)->PrintUsers();
-                        foreach(const parent_link<BITNode>& p, ((BITNode*)h)->GetParents())
+                        foreach(const parent_link<BITNode>& p, ((BITNode*)h)->getParents())
                             cprintf(-10,"User Node = %lu\n", (ulong) p.link);
                         break;
 //          case 'l': cprintf(0,"%d\n", state->exec_pool.size()); break;

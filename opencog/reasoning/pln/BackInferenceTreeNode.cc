@@ -346,7 +346,7 @@ Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 
 
 
-int BITNode::TotalChildren() const
+int BITNode::totalChildren() const
 {
     int c=0;
     for (vector<set<ParametrizedBITNode> >::const_iterator i =  children.begin(); i!=children.end(); i++)
@@ -399,7 +399,7 @@ void BITNode::SetTarget(meta _target, Btr<bindingsT> binds)
     counted_number_of_free_variables_in_target = number_of_free_variables_in_target();
 }
 
-void BITNode::Create()
+void BITNode::create()
 {
     assert(children.empty());
 
@@ -466,7 +466,7 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 
         if (_create) {
             tlog(2, "Creating...\n");
-            Create();
+            create();
         }
     } catch(string s) {
       printf("EXCEPTION IN BITNode::BITNode! %s\n",s.c_str());
@@ -551,7 +551,7 @@ void BITNode::addNewParent(parent_link<BITNode> new_parent)
     root->users[this].insert(root->users[new_parent.link].begin(), root->users[new_parent.link].end());
 }
 
-BITNode* BITNode::FindNode(BITNode* new_child) const
+BITNode* BITNode::findNode(BITNode* new_child) const
 {
     BITNode* ret = NULL;
 tlog(0,"Finding...\n");
@@ -562,14 +562,14 @@ tlog(0,"Finding...\n");
     //foreach (const set<BITNode*>& sBIT, children)
     for (uint i=0; i<children.size();i++)
         foreach(const ParametrizedBITNode& c, children[i])
-            if ((ret=c.prover->FindNode(new_child)) != NULL)
+            if ((ret=c.prover->findNode(new_child)) != NULL)
                 return ret;
 
     return NULL;
 }
 
 
-BITNode* BITNode::FindNode(Rule* new_rule, meta _target,
+BITNode* BITNode::findNode(Rule* new_rule, meta _target,
     const Rule::MPs& rule_args, const bindingsT& _pre_bindings) const
 {
     /// _target has to be ForceAllLinksVirtual()ized beforehand!
@@ -583,7 +583,7 @@ BITNode* BITNode::FindNode(Rule* new_rule, meta _target,
     //foreach (const set<BITNode*>& sBIT, children)
     for (uint i=0; i<children.size();i++)
         foreach(const ParametrizedBITNode& c, children[i])
-            if ((ret=c.prover->FindNode(new_rule, _target, rule_args, _pre_bindings)) != NULL)
+            if ((ret=c.prover->findNode(new_rule, _target, rule_args, _pre_bindings)) != NULL)
                 return ret;
 
     return NULL;
@@ -707,7 +707,7 @@ bool BITNode::inferenceLoop(Rule::MPs reqs)
 
 // Filter
 
-bool BITNode::ObeysSubtreePolicy(Rule *new_rule, meta _target)
+bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 {
 //  return !(atw->inheritsType(atw->getTypeV(*_target), NODE)
 //      && new_rule->computable());
@@ -717,7 +717,7 @@ bool BITNode::ObeysSubtreePolicy(Rule *new_rule, meta _target)
 
 // Filter
 
-bool BITNode::ObeysPoolPolicy(Rule *new_rule, meta _target)
+bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
 {
     AtomTableWrapper *atw = GET_ATW;
     if (atw->inheritsType(atw->getTypeV(*_target), FW_VARIABLE_NODE))
@@ -744,7 +744,7 @@ bool BITNode::ObeysPoolPolicy(Rule *new_rule, meta _target)
     return true;
 }
 
-void BITNode::FindTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const
+void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const
 {
     foreach(BITNode* bit, root->BITNodeTemplates)
         if (bit->rule == new_node->rule && new_node->args.size() == bit->args.size())
@@ -812,7 +812,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
         
         if (new_rule && new_rule->isComputable()) //&& new_rule->name != "CrispUnificationRule")
         {
-            FindTemplateBIT(new_node, template_node, *template_binds);
+            findTemplateBIT(new_node, template_node, *template_binds);
 
             if (template_node)
             {
@@ -820,7 +820,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
 
                 delete new_node;
 
-                if (this == template_node || HasAncestor(template_node))
+                if (this == template_node || hasAncestor(template_node))
                     return NULL;
 
                 /// If I already have this node as a child
@@ -844,11 +844,11 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
 
         root->used_nodes.insert(new_node);
 
-        new_node->Create();
+        new_node->create();
 
         tlog(2, "Created new BIT child [%ld]\n", (long)new_node);
 
-        if (ObeysPoolPolicy(new_rule, _target))
+        if (obeysPoolPolicy(new_rule, _target))
         {
             root->exec_pool.push_back(new_node);
             root->exec_pool_sorted = false;
@@ -899,7 +899,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
         cprintf(-1,"spawn next[%ld]:\n", (long)owner2binds.first);
 
         foreach(hpair b, owner2binds.second)
-            owner2binds.first->TryClone(b);
+            owner2binds.first->tryClone(b);
     }
 }
 
@@ -932,7 +932,7 @@ bool BITNode::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bind
             tlog(-2, "Indirect producer expanding: %s\n", new_rule->name.c_str());
             rawPrint(*_target, _target->begin(), 2);
 
-            if (!ObeysSubtreePolicy(new_rule, _target))
+            if (!obeysSubtreePolicy(new_rule, _target))
             {
                 tlog(3, "Our policy is to filter this kind of BIT nodes out.\n");
                 return false;
@@ -1011,7 +1011,7 @@ test::custom_duration += (double)(test::custom_finish - test::custom_start) / CL
       return ret;
 }
 
-void BITNode::TryClone(hpair binding) const
+void BITNode::tryClone(hpair binding) const
 {
     foreach(const parent_link<BITNode>& p, parents)
     {
@@ -1026,7 +1026,7 @@ tlog(-2, "TryClone next...\n");
 
         if (p.bindings->end() != it)
         {
-            p.link->TryClone(hpair(it->first, binding.second));
+            p.link->tryClone(hpair(it->first, binding.second));
         }
         else
         {
@@ -1060,7 +1060,7 @@ tlog(-2, "TryClone next...\n");
     }
 }
 
-bool BITNode::HasAncestor(const BITNode* const _p) const
+bool BITNode::hasAncestor(const BITNode* const _p) const
 {
     return this != root && STLhas(root->users[(BITNode*)this], (BITNode*)_p);
 }
@@ -1113,7 +1113,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
         tlog(0, "infer() ok\n");
     }
 
-    const vector<set<VtreeProvider*> >& eval_res_vector_set = variableScoper->GetEvalResults();
+    const vector<set<VtreeProvider*> >& eval_res_vector_set = variableScoper->getEvalResults();
     
     assert(!eval_res_vector_set.empty());
 
@@ -1322,7 +1322,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 int s2 = rule_args.size();
 
                 indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider > ii;
-                RuleApp* ruleApp;
+                RuleApp* ruleApp = NULL;
                 ValidateRuleArgs(rule_args.begin(), rule_args.end());
 
                 foreach(VtreeProvider* ra, rule_args)
@@ -1689,16 +1689,16 @@ puts("PLAN END");
 }
 
 static set<BITNode*> loop_t;
-void BITNode::LoopCheck() const
+void BITNode::loopCheck() const
 {
     loop_t.insert((BITNode*)(long)this);
 //  printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%d / %d\n", loop_t.size(), root->InferenceNodes);
-    printf("%d %ld:     %d\n", depth, (long)this,  TotalChildren());
+    printf("%d %ld:     %d\n", depth, (long)this,  totalChildren());
     getc(stdin);
     for (vector<set<ParametrizedBITNode> >::const_iterator i =  children.begin(); i!=children.end(); i++)
     {
         foreach(const ParametrizedBITNode& pbit, *i)
-            pbit.prover->LoopCheck();
+            pbit.prover->loopCheck();
     }
 }
 
@@ -1710,7 +1710,7 @@ void test_pool_policy()
 */
     Rule* deductionR2 = NULL; //Should have no effect
 
-    assert(ObeysPoolPolicy(deductionR2,
+    assert(obeysPoolPolicy(deductionR2,
         Btr<tree<Vertex> > (new tree<Vertex>(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "killed"),
                     mva((Handle)LIST_LINK,
@@ -1719,7 +1719,7 @@ void test_pool_policy()
                             )
             )))));
 
-    assert(!ObeysPoolPolicy(deductionR2,
+    assert(!obeysPoolPolicy(deductionR2,
         Btr<tree<Vertex> > (new tree<Vertex>(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "killed"),
                     mva((Handle)LIST_LINK,
@@ -1728,7 +1728,7 @@ void test_pool_policy()
                             )
             )))));
 
-    assert(ObeysPoolPolicy(deductionR2,
+    assert(obeysPoolPolicy(deductionR2,
         Btr<tree<Vertex> > (new tree<Vertex>(mva((Handle)EVALUATION_LINK,
                     NewNode(FW_VARIABLE_NODE, "$action"),,
                     mva((Handle)LIST_LINK,
@@ -1825,7 +1825,7 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
 
 static int _trail_print_more_count = 0;
 
-void BITNodeRoot::print_trail(Handle h, unsigned int level) const //, int decimal_places) const
+void BITNodeRoot::printTrail(Handle h, unsigned int level) const //, int decimal_places) const
 {
     AtomTableWrapper *atw = GET_ATW;
     if (!h || !atw->isReal(h))
@@ -1849,7 +1849,7 @@ void BITNodeRoot::print_trail(Handle h, unsigned int level) const //, int decima
               h_use_count++;*/
         NMPrinter(NMP_ALL, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
 //      NMPrinter(((h_use_count>1)?NMP_HANDLE:0)|NMP_TYPE_NAME|NMP_NODE_NAME| NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
-            print_trail(arg_h, level+1);
+            printTrail(arg_h, level+1);
         }
     }
     else
@@ -1899,10 +1899,10 @@ void BITNode::printFitnessPool()
     }
 }
 
-void BITNodeRoot::print_trail(Handle h) const
+void BITNodeRoot::printTrail(Handle h) const
 {
     printTree(h,0,0);
-    print_trail(h,0);
+    printTrail(h,0);
 }
 
 static bool bigcounter = true;

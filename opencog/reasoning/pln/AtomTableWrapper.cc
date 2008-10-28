@@ -173,7 +173,7 @@ bool AtomTableWrapper::hasAppropriateContext(const Handle o, VersionHandle& vh) 
         return true;
     } else {
         // else check super/parent contexts
-        // TODO: perhaps only the immediate parent context is needed?
+        // TODO: only the immediate parent context should be checked?
         Handle super = vh.substantive;
         while ( (super = getSuperContext(super)) ) {
             VersionHandle vh2(CONTEXTUAL, super);
@@ -193,6 +193,8 @@ Handle AtomTableWrapper::getSuperContext(const Handle sub) const
             INHERITANCE_LINK);
     Handle h;
     HandleEntry::filterSet(he,CONCEPT_NODE,false); 
+    // TODO: this should allow more than one super context... two super contexts
+    // in the case of links between nodes with two different versionhandles.
     if (he->getSize() > 1) {
         throw RuntimeException(TRACE_INFO, "multiple (%d) super/parent contexts",
                 he->getSize());
@@ -375,6 +377,15 @@ Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing)
 //          results = results->next;
 //      Handle ret = (results ? results->handle : NULL);
 //      delete results;
+    HandleSeq outgoingReal;
+    foreach (Handle h, outgoing) {
+        outgoingReal.push_back(fakeToRealHandle(h).first);
+    }
+    // TODO get real handle, and then check whether link has appropriate context
+    // compared to outgoing set, otherwise return NULL_VERSION_HANDLE link
+    // in order to find appropriate context you also need to find the common
+    // context of the outgoing set. either that or a context that inherits from
+    // all the contexts of outgoing set.
     
     return realToFakeHandle(AS_PTR->getHandle(t,outgoing),NULL_VERSION_HANDLE);
 }

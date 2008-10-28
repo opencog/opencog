@@ -338,19 +338,19 @@ protected:
 	float fitness() const;
 	
 	/// If inserting the rule invocation node in the subtree obeys our policy
-	static bool ObeysSubtreePolicy(Rule *new_rule, meta arg);
+	static bool obeysSubtreePolicy(Rule *new_rule, meta arg);
 
 	/// If inserting the rule invocation node in the expansion pool obeys our policy
-	static bool ObeysPoolPolicy(Rule *new_rule, meta arg);
+	static bool obeysPoolPolicy(Rule *new_rule, meta arg);
 
 	/// Find if we already have a BITNode like this such that we can re-use it by some
 	/// template_bindings which are returned to the caller.
-	void FindTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const;
+	void findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const;
 
 	/// Try to clone this BITNode (under its existing parents) with a new binding applied.
 	/// The cloning may fail if the result causes the arguments of the associated Rule to
 	/// go invalid, but I think the check is not really made rigorously here.
-	void TryClone(hpair binding) const;
+	void tryClone(hpair binding) const;
 
 	/// Find the fittest BITNode for expansion. \todo This method should be moved to the root class.
 	void findFittest(BITNode*& bisse, float& best_fitness);
@@ -377,27 +377,27 @@ public:
 
 	/// After construction, the object is comparable to others by
 	/// using eq() methods. After Create(), it becomes fully usable.
-	void Create();	
+	void create();	
 
 	/// Use for debugging
-	void LoopCheck() const;
+	void loopCheck() const;
 	
 	/// Use for debugging
-	int TotalChildren() const;
+	int totalChildren() const;
 	
 	/// Use for debugging
-	bool HasAncestor(const BITNode* const _p) const;
+	bool hasAncestor(const BITNode* const _p) const;
 
-	bool IsComputable() const { return rule->isComputable(); }
+	bool isComputable() const { return rule->isComputable(); }
 
-	const vector<set<VtreeProvider*> >& GetEvalResults() const { return eval_results; }
-	const set<parent_link<BITNode> >& GetParents() const { return parents; }
+	const vector<set<VtreeProvider*> >& getEvalResults() const { return eval_results; }
+	const set<parent_link<BITNode> >& getParents() const { return parents; }
 	
 	/// Look for a node equal to an existing dummy node
-	BITNode* FindNode(BITNode* new_child) const;
+	BITNode* findNode(BITNode* new_child) const;
 
 	/// Look for a node based on certain defining characteristics
-	BITNode* FindNode(Rule* new_rule, meta _target, const Rule::MPs& rule_args, const bindingsT& new_bindings) const;
+	BITNode* findNode(Rule* new_rule, meta _target, const Rule::MPs& rule_args, const bindingsT& new_bindings) const;
 
 	/// helpers
 	bool eq(BITNode* rhs) const;
@@ -474,7 +474,7 @@ or you can create the BITNodeRoot directly.
 	map<Handle,BITNode*> hsource;
 	long InferenceNodes;
 
-	void print_trail(Handle h) const;
+	void printTrail(Handle h) const;
 
 	void print_users(BITNode* b);
 	void print_parents(BITNode* b);
@@ -511,7 +511,7 @@ protected:
 	BITNode* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 						
-	void print_trail(Handle h, unsigned int level) const;
+	void printTrail(Handle h, unsigned int level) const;
 
 	friend class BITNode;
 };
@@ -538,7 +538,7 @@ public:
 		T filteredBegin, filteredEnd;
 		nofilter() {}
 		nofilter(T begin, T end) : filteredBegin(begin), filteredEnd(end) {}
-		void Create(T begin, T end) {
+		void create(T begin, T end) {
 			filteredBegin = begin;
 			filteredEnd = end;
 		}
@@ -550,9 +550,9 @@ public:
 		T2 filtered;
 		triviality_filter() {}
 		triviality_filter(T begin, T end) { Create(begin, end); }
-		void Create(T begin, T end) {
+		void create(T begin, T end) {
 			for(T i = begin; i != end; ++i)
-				if (i->first->IsComputable())
+				if (i->first->isComputable())
 					filtered.insert(*i);
 
 //			remove_copy_if(begin, end, inserter(filtered, filtered.begin()), mem_fun(&T2::IsComputable));
@@ -588,7 +588,7 @@ public:
 		{
 
 		puts("stats::print()\n");
-		filter.Create(ITN2atom.begin(), ITN2atom.end());
+		filter.create(ITN2atom.begin(), ITN2atom.end());
 
 		for (map<BITNode*, set<Vertex> >::const_iterator	i = filter.filteredBegin;
 															i!= filter.filteredEnd; i++)

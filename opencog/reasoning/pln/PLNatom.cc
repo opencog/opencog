@@ -594,6 +594,7 @@ void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret)
 
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top)
 {
+    // Although it's called real, it's a fake PLN handle
 	Handle real = v2h(*ret_top);
 	Type T=GET_ATW->getType(real);
 
