@@ -1029,7 +1029,7 @@ void AtomSpace::updateMaxSTI(AttentionValue::sti_t m)
 AttentionValue::sti_t AtomSpace::getMaxSTI(bool average) const
 {
     if (average) {
-        return maxSTI.recent;
+        return (AttentionValue::sti_t) maxSTI.recent;
     } else {
         return maxSTI.val;
     }
@@ -1041,7 +1041,7 @@ void AtomSpace::updateMinSTI(AttentionValue::sti_t m)
 AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
 {
     if (average) {
-        return minSTI.recent;
+        return (AttentionValue::sti_t) minSTI.recent;
     } else {
         return minSTI.val;
     }
