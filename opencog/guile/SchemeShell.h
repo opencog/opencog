@@ -13,6 +13,7 @@
 #include <string>
 
 #include <libguile.h>
+#include "SchemeEval.h"
 
 #include <opencog/guile/SchemeSocket.h>
 
@@ -26,6 +27,8 @@ class SchemeShell
 	friend class SchemeSocket;
 
 	private:
+		SchemeEval evaluator;
+
 		std::string normal_prompt;
 		std::string pending_prompt;
 		std::string input_line;
@@ -37,11 +40,10 @@ class SchemeShell
 		SCM captured_stack;
 		bool caught_error;
 
-		// printfing of basic types
-		std::string prt(SCM);
+		// output port
+		SCM outport;
 
-        // output port
-        SCM outport;                                                                                             
+		SchemeSmob *funcs;
 
 	public:
 		SchemeShell();

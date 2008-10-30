@@ -31,9 +31,8 @@ SchemeEval::SchemeEval(void)
 		// scm_init_debug();
 		// scm_init_backtrace();
 		// scm_init_strports(); // is this really needed ?
+		SchemeSmob::init();
 	}
-
-	funcs = new SchemeSmob();
 
 	outport = scm_open_output_string();
 	scm_set_current_output_port(outport);
