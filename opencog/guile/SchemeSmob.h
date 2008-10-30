@@ -28,7 +28,6 @@ class Atom;
 
 class SchemeSmob
 {
-	friend class SchemeShell;  // XXX get rid of this
 	friend class SchemeEval;
 
 	private:
