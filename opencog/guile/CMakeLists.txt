@@ -4,8 +4,6 @@ ADD_LIBRARY (smob SHARED
 	SchemeSmobAtom.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
-	SchemeSocket.cc
-	SchemeModule.cc
 )
 
 TARGET_LINK_LIBRARIES(smob
@@ -17,10 +15,7 @@ INSTALL (TARGETS smob
 )
 
 INSTALL (FILES
-	SchemeModule.h
 	SchemeEval.h
 	SchemeSmob.h
-	SchemeSocket.h
-	ShemeModule.h
 	DESTINATION "include/opencog/guile"
 )

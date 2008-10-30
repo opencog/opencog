@@ -22,7 +22,8 @@
 
 #ifdef HAVE_GUILE
 
-#include "platform.h"
+#include <opencog/util/platform.h>
+
 #include "SchemeShell.h"
 
 using namespace opencog;

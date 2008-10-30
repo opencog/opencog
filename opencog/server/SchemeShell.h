@@ -26,9 +26,8 @@
 #define _OPENCOG_SCHEME_SHELL_H
 
 #include <string>
-#include "SchemeEval.h"
 
-#include <opencog/guile/SchemeSocket.h>
+#include <opencog/guile/SchemeEval.h>
 
 namespace opencog {
 
