@@ -41,6 +41,11 @@ void SchemeSmob::init(void)
 	register_procs();
 }
 
+SchemeSmob::SchemeSmob(void)
+{
+	init();
+}
+
 /* ============================================================== */
 
 int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
