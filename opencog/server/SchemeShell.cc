@@ -22,6 +22,8 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/socket/GenericSocket.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
 #include "SchemeShell.h"
@@ -70,11 +72,17 @@ const std::string& SchemeShell::get_prompt(void)
 }
 
 /* ============================================================== */
+void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
+{
+	std::string retstr = do_eval(expr);
+	logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
+	socket.Send(retstr);
+}
 
 /**
  * Evaluate the expression
  */
-void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
+std::string SchemeShell::do_eval(const std::string &expr)
 {
 	size_t len = expr.length();
 	if (0 == len) 
@@ -138,11 +146,10 @@ void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
 
 	if (evaluator.input_pending())
 	{
-		if (show_output) {
-			oss << pending_prompt << std::endl;
-			socket.Send(oss.str());
-			return;
-		}
+		if (show_output)
+			return pending_prompt;
+		else
+			return "";
 	}
 
 	if (show_output || evaluator.eval_error())
@@ -155,8 +162,6 @@ void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
 		return "";
 	}
 
-	logger().debug("[SchemeShell] response: [%s]", oss.str().c_str());
-	socket.Send(oss.str());
 }
 
 #endif
