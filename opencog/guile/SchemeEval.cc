@@ -36,6 +36,10 @@ SchemeEval::SchemeEval(void)
 
 	outport = scm_open_output_string();
 	scm_set_current_output_port(outport);
+
+	pending_input = false;
+	caught_error = false;
+	input_line = "";
 }
 
 /* ============================================================== */
