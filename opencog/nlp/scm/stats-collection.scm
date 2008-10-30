@@ -19,7 +19,7 @@ scm
 
 ; ---------------------------------------------------------------------
 ; Generic SQL table update framework. Given some data, we want to 
-; create a new database ecord, if it does not already exist; otherwise
+; create a new database record, if it does not already exist; otherwise
 ; we want to update the existing record.  There's no convenient way to 
 ; do this in SQL, so its done "manually" here.
 ;
@@ -193,7 +193,7 @@ scm
 ;
 (define (ldj-find-docs)
 
-	; ldj-not-done? is doco not in the "ldj completed" list?
+	; ldj-not-done? returns true if doco not in the "ldj completed" list.
 	(define (ldj-not-done? doco)
 		(define (gotit? d2)
 			(if (equal? doco d2) #t #f)
