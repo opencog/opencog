@@ -52,6 +52,10 @@ SchemeShell::SchemeShell(void)
 	abort_prompt += normal_prompt;
 }
 
+SchemeShell::~SchemeShell()
+{
+}
+
 void SchemeShell::hush_output(bool hush)
 {
 	show_output = !hush;

@@ -36,15 +36,20 @@ extern "C" const char* opencog_module_id()                   { return GenericMod
 extern "C" Module*     opencog_module_load()                 { return new GenericModule(); }
 extern "C" void        opencog_module_unload(Module* module) { delete module; }
 
-GenericModule::GenericModule() : _port(DEFAULT_PORT)
+GenericModule::GenericModule(void) : _port(DEFAULT_PORT)
 {
     logger().debug("[GenericModule] constructor");
     if (config().has("GENERIC_PORT"))
         _port = config().get_int("GENERIC_PORT");
+
+    _shell = NULL;
+
+#if 0
     if (config().has("GENERIC_PROMPT"))
         _shell->normal_prompt = config()["GENERIC_PROMPT"];
     if (config().has("GENERIC_PENDING_PROMPT"))
         _shell->pending_prompt = config()["GENERIC_PENDING_PROMPT"];
+#endif
 }
 
 GenericModule::~GenericModule()
@@ -55,7 +60,7 @@ GenericModule::~GenericModule()
     ns.removeListener(_port);
 }
 
-void GenericModule::init()
+void GenericModule::init(void)
 {
     logger().debug("[GenericModule] init");
     // the socket instantiation must be done in the 'init' method (instead of
@@ -66,7 +71,7 @@ void GenericModule::init()
     ns.addListener<GenericSocket>(_port);
 }
 
-GenericShell* GenericModule::shell()
+GenericShell* GenericModule::shell(void)
 {
     return _shell;
 }

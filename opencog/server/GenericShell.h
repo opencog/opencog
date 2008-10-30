@@ -43,7 +43,7 @@ class GenericShell
 	public:
 		GenericShell(void);
 		virtual ~GenericShell() = 0; // pure virtual
-		virtual void eval(const std::string &, GenericSocket&);
+		virtual void eval(const std::string &, GenericSocket&) = 0;
 };
 
 }
