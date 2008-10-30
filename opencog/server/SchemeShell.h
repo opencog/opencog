@@ -27,6 +27,8 @@ class SchemeShell
 
 		std::string normal_prompt;
 		std::string pending_prompt;
+		std::string abort_prompt;
+		const std::string& get_prompt(void);
 		bool show_output;
 
 	public:
