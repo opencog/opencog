@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "SchemeEval.h"
+#include <opencog/guile/SchemeEval.h>
 
 namespace opencog {
 
