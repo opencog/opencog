@@ -1,15 +1,5 @@
 SET(CMAKE_BUILD_TYPE Debug)
 
-ADD_LIBRARY (server STATIC
-	CogServer.cc 
-	SimpleNetworkServer.cc 
-	ServerSocket.cc 
-	CommandRequest.cc 
-	CommandRequestProcessor.cc 
-	SchemeShell.cc 
-	load-file.cc
-)
-
 INCLUDE_DIRECTORIES (
 	${CSOCKETS_INCLUDE_DIRS}
 	${ODBC_INCLUDE_DIRS}
@@ -39,6 +29,8 @@ ADD_LIBRARY (server SHARED
 	Request
 	NetworkServer
 	ConsoleSocket
+	SchemeShell
+	load-file
 )
 
 TARGET_LINK_LIBRARIES(server
