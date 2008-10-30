@@ -300,6 +300,7 @@ std::string SchemeEval::eval(const std::string &expr)
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 
+		rv += "\n";
 		return rv;
 	}
 	else
@@ -320,6 +321,35 @@ std::string SchemeEval::eval(const std::string &expr)
 		return rv;
 	}
 	return "#<Error: Unreachable statement reached>";
+}
+
+/* ============================================================== */
+
+/**
+ * Return true if the expression was incomplete, and more is expected
+ * (for example, more closing parens are expected)
+ */
+bool SchemeEval::input_pending(void)
+{
+	return pending_input;
+}
+
+/**
+ * Return true if an error occured during the evaluation of the expression
+ */
+bool SchemeEval::eval_error(void)
+{
+	return caught_error;
+}
+
+/**
+ * Clear the error state, the input buffers, etc.
+ */
+void SchemeEval::clear_pending(void)
+{
+	input_line = "";
+	pending_input = false;
+	caught_error = false;
 }
 
 #endif
