@@ -8,17 +8,17 @@ ADD_LIBRARY (smob SHARED
 	SchemeModule.cc
 )
 
-TARGET_LINK_LIBRARIES(scheme
+TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
 )
 
-INSTALL (TARGETS scheme
+INSTALL (TARGETS smob
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
 	SchemeModule.h
-	SchemeShell.h
+	SchemeEval.h
 	SchemeSmob.h
 	SchemeSocket.h
 	ShemeModule.h
