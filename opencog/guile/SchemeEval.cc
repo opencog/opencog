@@ -14,7 +14,7 @@
 #include <libguile/debug.h>
 #include <libguile/lang.h>
 
-#include "platform.h"
+#include <opencog/util/platform.h>
 #include "SchemeSmob.h"
 
 using namespace opencog;

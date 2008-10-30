@@ -21,6 +21,7 @@ ADD_LIBRARY (builtinreqs SHARED
 TARGET_LINK_LIBRARIES(builtinreqs
 	xml
 	${EXPAT_LIBRARIES}
+	smob
 )
 
 ADD_LIBRARY (server SHARED
@@ -29,6 +30,7 @@ ADD_LIBRARY (server SHARED
 	Request
 	NetworkServer
 	ConsoleSocket
+	GenericShell
 	SchemeShell
 	load-file
 )
