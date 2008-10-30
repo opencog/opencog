@@ -1,4 +1,5 @@
-ADD_LIBRARY (scheme SHARED
+ADD_LIBRARY (smob SHARED
+	SchemeEval.cc
 	SchemeShell.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
