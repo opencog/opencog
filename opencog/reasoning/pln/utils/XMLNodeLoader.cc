@@ -308,7 +308,7 @@ LOG(5,"HandleXMLInputNodexx:");
 				/// A special treatment is given to Listed ForAlls. Others, just add to da std::vector.
 				if (   !GET_ATW->isSubType(new_node, LIST_LINK)
 					|| GET_ATW->getArity(new_node) <= 0
-					|| !GET_ATW->isSubType(GET_ATW->child(new_node,0), FORALL_LINK))
+					|| !GET_ATW->isSubType(GET_ATW->getOutgoing(new_node,0), FORALL_LINK))
 				{
 					children.push_back(new_node);
 helper2=5;
@@ -316,7 +316,7 @@ helper2=5;
 				else
 				{
 					for (int fl=0;fl<GET_ATW->getArity(new_node);fl++)
-						children.push_back(GET_ATW->child(new_node, fl));
+						children.push_back(GET_ATW->getOutgoing(new_node, fl));
 helper2=3;
 				}
 				/// The next level's names will be forgotten, unless next level was ListLink.

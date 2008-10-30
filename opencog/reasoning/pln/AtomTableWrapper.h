@@ -62,8 +62,8 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! been used so far.
     std::set<VersionHandle> dummyContexts;
     
-    //! This string is the prefix of PLN dummy contexts 
-    std::string contextPrefix;
+    //! This string is the prefix of PLN dummy context root Node
+    std::string rootContext;
 
     // typedef bimap< unordered_set_of< vhpair >, set_of<Handle> > vhmap_t;
     // typedef vhmap_t::value_type vhmap_pair_t;
@@ -111,9 +111,8 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! @param some kind of mechanism to manage memory?
     Handle addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
 
-    bool hasAppropriateContext(const Handle o, VersionHandle& vh) const;
+    bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
     bool isSubcontextOf(const Handle sub, const Handle super);
-    Handle getSuperContext(const Handle sub) const;
 
     //! used by filter_type to merge collections of handles.
     template<class T>
@@ -133,10 +132,15 @@ class AtomTableWrapper : public iAtomTableWrapper
     };
 public:
 
+    //! Convert a specific VersionHandled TruthValue to a fake handle
     Handle realToFakeHandle(const Handle h, const VersionHandle vh);
+    //! Convert a a real handle into a fake handle for each VersionedHandled TV
     HandleSeq realToFakeHandle(const Handle hs);
+    //! Convert a HandleSeq of fake handles to real, optionally expanding to
+    //! include every VersionHandled TV in each real handle
     HandleSeq realToFakeHandles(HandleSeq hs, bool expand=false);
-    HandleSeq realToFakeHandles(HandleSeq hs, VersionHandle v);
+    //! Match each context in the outgoing set of "context" with the handles
+    HandleSeq realToFakeHandles(Handle h, Handle context);
 
     vhpair fakeToRealHandle(const Handle f) const;
 
@@ -184,7 +188,7 @@ public:
     void reset();
 
     //! Initialize new AtomSpaceWrapper with const universe size
-    AtomTableWrapper() : USize(800), USizeMode(CONST_SIZE), contextPrefix("__PLN__") {}
+    AtomTableWrapper();
     virtual ~AtomTableWrapper() {}
 
 // TODELETE, replace with getAtomSpace()
@@ -262,8 +266,6 @@ public:
     Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);
 
-    //! return the handle of atom that has index i in h's outgoing set
-    Handle child(const Handle h, const int i);
     //! returns whether the type of h is T or inherits from T
     bool isSubType(Handle h, Type T);
     //! returns whether 
@@ -286,7 +288,7 @@ public:
 
     int getFirstIndexOfType(HandleSeq hs, Type T) const;
     bool symmetricLink(Type T);
-    bool is_empty_link(Handle h);
+    bool isEmptyLink(Handle h);
     bool hasFalsum(HandleSeq hs);
     bool containsNegation(Handle ANDlink, Handle h);
     Type getTypeV(const tree<Vertex>& _target) const;
@@ -323,6 +325,19 @@ public:
 class NormalizingATW : public FIMATW
 {
     NormalizingATW();
+
+    template<typename T>
+    bool cutVector(const vector<T>& src, int index, vector<T>& dest)
+    {
+        dest.clear();
+
+        for (int i = 0; i < src.size(); i++)
+            if (i != index)
+                dest.push_back(src[i]);
+
+        return index < src.size();
+    }
+
 public:
     virtual ~NormalizingATW() {}
        

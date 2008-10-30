@@ -66,8 +66,8 @@ cprintf(1,"INV New order:\n");
 printTree(child(boost::get<Handle>(h[0]),1),0,1);
 printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
 		return	meta(new tree<Vertex>(mva((Handle)GET_ATW->getType(h0),
-						mva(GET_ATW->child(h0,1)),
-						mva(GET_ATW->child(h0,0))
+						mva(GET_ATW->getOutgoing(h0,1)),
+						mva(GET_ATW->getOutgoing(h0,0))
 				)));
 	}
 	NO_DIRECT_PRODUCTION;
