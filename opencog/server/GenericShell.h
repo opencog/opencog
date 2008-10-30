@@ -36,8 +36,9 @@ class GenericShell
 	friend class GenericSocket;
 
 	public:
-		GenericShell();
-		~GenericShell();
+		GenericShell(void);
+		virtual ~GenericShell();
+		virtual void eval(const std::string &, GenericSocket&);
 };
 
 }

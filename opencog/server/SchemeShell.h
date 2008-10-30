@@ -47,10 +47,10 @@ class SchemeShell : public GenericShell
 		std::string do_eval(const std::string &);
 
 	public:
-		SchemeShell();
-		~SchemeShell();
+		SchemeShell(void);
+		virtual ~SchemeShell();
 		void hush_output(bool);
-		void eval(const std::string &, GenericSocket&);
+		virtual void eval(const std::string &, GenericSocket&);
 };
 
 }

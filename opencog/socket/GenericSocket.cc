@@ -1,5 +1,5 @@
 /*
- * opencog/guile/GenericSocket.cc
+ * opencog/socket/GenericSocket.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -27,8 +27,7 @@
 #include <string>
 #include <sstream>
 
-#include <opencog/guile/GenericModule.h>
-#include <opencog/guile/GenericSmob.h>
+#include <opencog/socket/GenericModule.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
@@ -65,11 +64,7 @@ void GenericSocket::OnDetached()
     logger().debug("[GenericSocket] OnDetached (t: 0x%x)", pthread_self());
     SetNonblocking(true);
 
-    /* init guile on this thread */
-    scm_init_guile();
-    GenericSmob::init();
-
-    Send(_shell->normal_prompt);
+    Send("prompt-string>>>");
 }
 
 void GenericSocket::OnLine(const std::string& line)
