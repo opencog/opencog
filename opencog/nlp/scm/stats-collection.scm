@@ -137,15 +137,13 @@ scm
 ; it updates the word, word-sense and sense-disjunct tables.
 ;
 ; Arguments:
-; word  - word instance
 ; iword - inflected word
 ; djstr - disjunct string
 ; parse-score - parse score
 ; sense - word sense
+; senses-score - word sense score
 ;
-(define (ldj-process-one-sense word iword djstr parse-score sense)
-
-	(let ((sense-score (word-inst-sense-score word sense)))
+(define (ldj-process-one-sense iword djstr parse-score sense sense-score)
 
 		(display "dudsely Word: ")
 		(display iword)
@@ -156,7 +154,6 @@ scm
 		(display (cog-name sense))
 		(display sense-score)
 		(display "\n")
-	)
 )
 
 ; ---------------------------------------------------------------------
@@ -172,11 +169,17 @@ scm
 ;
 (define (ldj-process-disjunct-senses word iword djstr parse-score)
 
-	; loop over all of the word-senses associated with this word.
-	(for-each 
-		(lambda (sense)
-			(ldj-process-one-sense word iword djstr parse-score sense)
+	; skip over any senses which have negative scores
+	(define (skip-sense sense)
+		(let ((sense-score (word-inst-sense-score word sense)))
+			(if (< 0.0 sense-score)
+				(ldj-process-one-sense iword djstr parse-score sense sense-score)
+			)
 		)
+	)
+
+	; loop over all of the word-senses associated with this word.
+	(for-each skip-sense
 		(word-inst-get-senses word)
 	)
 )
