@@ -145,6 +145,41 @@ scm
 ;
 (define (ldj-process-one-sense iword djstr parse-score sense sense-score)
 
+	; This routine will update the marginal table.
+	;
+	; This table has the form:
+	; CREATE TABLE WordSenseFreq (
+	;    word_sense TEXT NOT NULL,
+	;    inflected_word TEXT NOT NULL,
+	;    count FLOAT,
+	;    log_probability FLOAT,
+	;    log_cond_probability FLOAT
+	;
+	(define (update-marginal-table w-sense i-word p-score)
+
+		(define (update-proc srow)
+			(let ((up-score (+ p-score (assoc-ref srow "count"))))
+				(string-append
+					"UPDATE WordSenseFreq SET count = "
+					(number->string up-score)
+					" WHERE word_sense = '" w-sense
+					"' AND inflected_word='" i-word "'")
+			)
+		)
+
+		(sql-update-table
+			(string-append
+				"SELECT * FROM WordSenseFreq WHERE word_sense='" 
+				w-sense "' AND inflected_word='" i-word "'"
+			)
+			update-proc
+			(string-append
+				"INSERT INTO WordSenseFreq (word_sense, inflected_word, count) VALUES ('"
+				w-sense "', '" i-word "', " (number->string p-score) ")"
+			)
+		)
+	)
+
 	; Update the word-sense-disjunct table
 	; This table has the form:
 	;
@@ -184,20 +219,21 @@ scm
 		)
 	)
 
-	(display "Word: ")
-	(display iword)
-	(display " -- ")
-	(display djstr)
-	(display parse-score)
-	(display " -- ")
-	(display (cog-name sense))
-	(display sense-score)
-	(display "\n")
+	; (display "Word: ")
+	; (display iword)
+	; (display " -- ")
+	; (display djstr)
+	; (display parse-score)
+	; (display " -- ")
+	; (display (cog-name sense))
+	; (display sense-score)
+	; (display "\n")
 
 	(let ((w-sense (cog-name sense))
 			(tot-score (* parse-score sense-score))
 		)
 
+		(update-marginal-table w-sense iword tot-score)
 		(update-disjunct-table w-sense iword djstr tot-score)
 	)
 )
