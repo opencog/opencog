@@ -123,9 +123,9 @@ void CogServer::serverLoop()
 
     // XXX I've hard-coded a file path here, it assumes that the
     // cog server is running from the "bin" directory, (where "make"
-    // was typed). Iwithout a more general file-path mangling mechanism,
+    // was typed). Without a more general file-path mangling mechanism,
     // I am not sure what else to do. But this should be fixed XXX.
-    load_scm_file("../src/scm/type_constructors.scm");
+    load_scm_file("../opencog/scm/type_constructors.scm");
 
     logger().info("opencog server ready.");
 
