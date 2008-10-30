@@ -41,7 +41,7 @@ SchemeEval::SchemeEval(void)
 	caught_error = false;
 	input_line = "";
 	error_string_port = SCM_EOL;
-	captured_stack = SCM_EOL;
+	captured_stack = SCM_BOOL_F;
 }
 
 /* ============================================================== */
@@ -303,6 +303,8 @@ std::string SchemeEval::eval(const std::string &expr)
 		rv = str;
 		free(str);
 		scm_close_port(error_string_port);
+		error_string_port = SCM_EOL;
+		captured_stack = SCM_BOOL_F;
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 
