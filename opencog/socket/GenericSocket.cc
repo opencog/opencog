@@ -1,5 +1,5 @@
 /*
- * opencog/guile/SchemeSocket.cc
+ * opencog/guile/GenericSocket.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,58 +22,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SchemeSocket.h"
+#include "GenericSocket.h"
 
 #include <string>
 #include <sstream>
 
-#include <opencog/guile/SchemeModule.h>
-#include <opencog/guile/SchemeSmob.h>
+#include <opencog/guile/GenericModule.h>
+#include <opencog/guile/GenericSmob.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
 
-SchemeSocket::SchemeSocket(ISocketHandler &handler)
+GenericSocket::GenericSocket(ISocketHandler &handler)
     : TcpSocket(handler)
 {
-    logger().debug("[SchemeSocket] constructor (t: 0x%x)", pthread_self());
+    logger().debug("[GenericSocket] constructor (t: 0x%x)", pthread_self());
     SetLineProtocol(true);
     CogServer& cogserver = static_cast<CogServer&>(server());
-    SchemeModule* module =
-            static_cast<SchemeModule*>(cogserver.getModule(SchemeModule::id()));
+    GenericModule* module =
+            static_cast<GenericModule*>(cogserver.getModule(GenericModule::id()));
     if (module) _shell = module->shell();
-    else logger().error("[SchemeSocket] constructor: module \"%s\" has not been loaded");
+    else logger().error("[GenericSocket] constructor: module \"%s\" has not been loaded");
 }
 
-SchemeSocket::~SchemeSocket()
+GenericSocket::~GenericSocket()
 {
-    logger().debug("[SchemeSocket] destructor (t: 0x%x)", pthread_self());
+    logger().debug("[GenericSocket] destructor (t: 0x%x)", pthread_self());
 }
 
-void SchemeSocket::OnAccept()
+void GenericSocket::OnAccept()
 {   
-    logger().debug("[SchemeSocket] OnAccept (t: 0x%x)", pthread_self());
+    logger().debug("[GenericSocket] OnAccept (t: 0x%x)", pthread_self());
     if (Detach() == false) {
         logger().error("Unable to detach socket.");
         return;
     }
 }
 
-void SchemeSocket::OnDetached()
+void GenericSocket::OnDetached()
 {
-    logger().debug("[SchemeSocket] OnDetached (t: 0x%x)", pthread_self());
+    logger().debug("[GenericSocket] OnDetached (t: 0x%x)", pthread_self());
     SetNonblocking(true);
 
     /* init guile on this thread */
     scm_init_guile();
-    SchemeSmob::init();
+    GenericSmob::init();
 
     Send(_shell->normal_prompt);
 }
 
-void SchemeSocket::OnLine(const std::string& line)
+void GenericSocket::OnLine(const std::string& line)
 {
-    logger().debug("[SchemeSocket] OnLine [%s]", line.c_str());
+    logger().debug("[GenericSocket] OnLine [%s]", line.c_str());
     _shell->eval(line, *this);
 }

@@ -1,5 +1,5 @@
 /*
- * opencog/guile/SchemeModule.h
+ * opencog/guile/GenericModule.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,10 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SCHEME_MODULE_H
-#define _OPENCOG_SCHEME_MODULE_H
+#ifndef _OPENCOG_GENERIC_MODULE_H
+#define _OPENCOG_GENERIC_MODULE_H
 
-#include <opencog/guile/SchemeShell.h>
+#include <opencog/guile/GenericShell.h>
 #include <opencog/server/Module.h>
 
 namespace opencog
@@ -33,31 +33,31 @@ namespace opencog
 
 class AtomStorage;
 
-class SchemeModule : public Module
+class GenericModule : public Module
 {
 
 private:
 
     static const unsigned int DEFAULT_PORT = 17002;
 
-    SchemeShell _shell;
+    GenericShell _shell;
     unsigned short _port;
 
 public:
 
     static inline const char* id() {
-        static const char* _id = "opencog::SchemeModule";
+        static const char* _id = "opencog::GenericModule";
         return _id;
     }
 
-    SchemeModule();
-    virtual ~SchemeModule();
+    GenericModule();
+    virtual ~GenericModule();
 
     virtual void         init  (void);
-    virtual SchemeShell* shell (void);
+    virtual GenericShell* shell (void);
 
 }; // class
 
 }  // namespace
 
-#endif // _OPENCOG_SCHEME_MODULE_H
+#endif // _OPENCOG_GENERIC_MODULE_H

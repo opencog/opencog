@@ -1,5 +1,5 @@
 /*
- * opencog/guile/SchemeModule.cc
+ * opencog/guile/GenericModule.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,10 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SchemeModule.h"
+#include "GenericModule.h"
 
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/guile/SchemeSocket.h>
+#include <opencog/guile/GenericSmob.h>
+#include <opencog/guile/GenericSocket.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/util/Config.h>
@@ -33,41 +33,41 @@
 using namespace opencog;
 
 // load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()                   { return SchemeModule::id(); }
-extern "C" Module*     opencog_module_load()                 { return new SchemeModule(); }
+extern "C" const char* opencog_module_id()                   { return GenericModule::id(); }
+extern "C" Module*     opencog_module_load()                 { return new GenericModule(); }
 extern "C" void        opencog_module_unload(Module* module) { delete module; }
 
-SchemeModule::SchemeModule() : _port(DEFAULT_PORT)
+GenericModule::GenericModule() : _port(DEFAULT_PORT)
 {
-    logger().debug("[SchemeModule] constructor");
-    if (config().has("SCHEME_PORT"))
-        _port = config().get_int("SCHEME_PORT");
-    if (config().has("SCHEME_PROMPT"))
-        _shell.normal_prompt = config()["SCHEME_PROMPT"];
-    if (config().has("SCHEME_PENDING_PROMPT"))
-        _shell.pending_prompt = config()["SCHEME_PENDING_PROMPT"];
+    logger().debug("[GenericModule] constructor");
+    if (config().has("GENERIC_PORT"))
+        _port = config().get_int("GENERIC_PORT");
+    if (config().has("GENERIC_PROMPT"))
+        _shell.normal_prompt = config()["GENERIC_PROMPT"];
+    if (config().has("GENERIC_PENDING_PROMPT"))
+        _shell.pending_prompt = config()["GENERIC_PENDING_PROMPT"];
 }
 
-SchemeModule::~SchemeModule()
+GenericModule::~GenericModule()
 {
-    logger().debug("[SchemeModule] destructor");
+    logger().debug("[GenericModule] destructor");
     CogServer& cogserver = static_cast<CogServer&>(server());
     NetworkServer& ns = cogserver.networkServer();
     ns.removeListener(_port);
 }
 
-void SchemeModule::init()
+void GenericModule::init()
 {
-    logger().debug("[SchemeModule] init");
+    logger().debug("[GenericModule] init");
     // the socket instantiation must be done in the 'init' method (instead of
-    // the constructor) because the SchemeSocket constructor accesses the
-    // SchemeModule object
+    // the constructor) because the GenericSocket constructor accesses the
+    // GenericModule object
     CogServer& cogserver = static_cast<CogServer&>(server());
     NetworkServer& ns = cogserver.networkServer();
-    ns.addListener<SchemeSocket>(_port);
+    ns.addListener<GenericSocket>(_port);
 }
 
-SchemeShell* SchemeModule::shell()
+GenericShell* GenericModule::shell()
 {
     return &_shell;
 }

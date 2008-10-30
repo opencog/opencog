@@ -1,5 +1,5 @@
 /*
- * opencog/guile/SchemeSocket.h
+ * opencog/guile/GenericSocket.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SCHEME_SOCKET_H
-#define _OPENCOG_SCHEME_SOCKET_H
+#ifndef _OPENCOG_GENERIC_SOCKET_H
+#define _OPENCOG_GENERIC_SOCKET_H
 
 #include <string>
 #include <sstream>
@@ -38,19 +38,19 @@ namespace opencog
 {
 
 class Command;
-class SchemeShell;
+class GenericShell;
 
-class SchemeSocket : public TcpSocket
+class GenericSocket : public TcpSocket
 {
 
 protected:
 
-    SchemeShell* _shell;
+    GenericShell* _shell;
 
 public:
 
-    SchemeSocket(ISocketHandler &handler);
-    virtual ~SchemeSocket();
+    GenericSocket(ISocketHandler &handler);
+    virtual ~GenericSocket();
 
     virtual void OnAccept          (void);
     virtual void OnDetached        (void);
@@ -60,4 +60,4 @@ public:
 
 }  // namespace
 
-#endif // _OPENCOG_SCHEME_SOCKET_H
+#endif // _OPENCOG_GENERIC_SOCKET_H
