@@ -74,7 +74,7 @@ const std::string& SchemeShell::get_prompt(void)
 /**
  * Evaluate the expression
  */
-void SchemeShell::eval(const std::string &expr, SchemeSocket& socket)
+void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
 {
 	size_t len = expr.length();
 	if (0 == len) 

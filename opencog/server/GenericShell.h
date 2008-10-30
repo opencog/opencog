@@ -1,7 +1,7 @@
 /*
- * SchemeShell.h
+ * GenericShell.h
  *
- * Simple scheme shell
+ * Template for a generic shell
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,39 +20,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_GUILE
-
-#ifndef _OPENCOG_SCHEME_SHELL_H
-#define _OPENCOG_SCHEME_SHELL_H
+#ifndef _OPENCOG_GENERIC_SHELL_H
+#define _OPENCOG_GENERIC_SHELL_H
 
 #include <string>
 
-#include <opencog/guile/SchemeEval.h>
 #include <opencog/socket/GenericSocket.h>
 #include <opencog/socket/GenericModule.h>
 
 namespace opencog {
 
-class SchemeShell : public GenericShell
+class GenericShell
 {
-	private:
-		SchemeEval evaluator;
-
-		std::string normal_prompt;
-		std::string pending_prompt;
-		std::string abort_prompt;
-		const std::string& get_prompt(void);
-		bool show_output;
+	friend class GenericModule;
+	friend class GenericSocket;
 
 	public:
-		SchemeShell();
-		~SchemeShell();
-		void hush_output(bool);
-		void eval(const std::string &, GenericSocket&);
+		GenericShell();
+		~GenericShell();
 };
 
 }
 
-#endif // _OPENCOG_SCHEME_SHELL_H
-
-#endif // HAVE_GUILE
+#endif // _OPENCOG_GENERIC_SHELL_H

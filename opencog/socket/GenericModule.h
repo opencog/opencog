@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_GENERIC_MODULE_H
 #define _OPENCOG_GENERIC_MODULE_H
 
-#include <opencog/guile/GenericShell.h>
+#include <opencog/server/GenericShell.h>
 #include <opencog/server/Module.h>
 
 namespace opencog
@@ -40,7 +40,7 @@ private:
 
     static const unsigned int DEFAULT_PORT = 17002;
 
-    GenericShell _shell;
+    GenericShell _shell;   
     unsigned short _port;
 
 public:
