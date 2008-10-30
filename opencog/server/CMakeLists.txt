@@ -38,6 +38,7 @@ ADD_LIBRARY (server SHARED
 TARGET_LINK_LIBRARIES(server
 	util
 	atomspace
+	smob
 )
 
 # to ease testing/debugging modules on the source tree
