@@ -84,7 +84,7 @@ void SchemeShell::eval(const std::string &expr, SchemeSocket& socket)
 	// Handle Telnet RFC 854 IAC format
 	// Basically, we're looking for telnet-encoded abort or interrupt
 	// characters, starting at the end of the input string. If they
-	// are there, then don't process input, and clar out the evaluator.
+	// are there, then don't process input, and clear out the evaluator.
 	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
 	// doesn't sit there flushing output forever.
 	//
