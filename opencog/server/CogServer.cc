@@ -47,6 +47,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
+#include "load-file.h"
 
 using namespace opencog;
 
@@ -119,6 +120,12 @@ void CogServer::serverLoop()
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
+
+    // XXX I've hard-coded a file path here, it assumes that the
+    // cog server is running from the "bin" directory, (where "make"
+    // was typed). Iwithout a more general file-path mangling mechanism,
+    // I am not sure what else to do. But this should be fixed XXX.
+    load_scm_file("../src/scm/type_constructors.scm");
 
     logger().info("opencog server ready.");
 
