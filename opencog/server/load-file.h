@@ -29,7 +29,7 @@ namespace opencog {
 #ifdef HAVE_GUILE
 int load_scm_file (const char * filename);
 #else 
-static inline int load_scm_file (const char *) {}
+static inline int load_scm_file (const char *) { return 0; }
 #endif /* HAVE_GUILE */
 
 };
