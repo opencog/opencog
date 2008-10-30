@@ -155,31 +155,6 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Given a word instance, return a list of the word-senses associated with the word.
-(define (word-inst-get-senses word-inst)
-	(cog-chase-link 'InheritanceLink 'WordSenseNode word-inst)
-)
-
-; ---------------------------------------------------------------------
-; Given a word-instance and a word-sense, return the numerical 
-; word-sense ranking score. The rank is stored as the "mean" part of the
-; simple truth value of the InheritanceLink connecting the two: i.e. in
-; the structure
-;
-;     InheritanceLink (stv -0.006025 1.0)
-;        ConceptNode "day@171506d8f3"
-;        WordSenseNode "daylight%1:28:00::"
-;
-(define (word-inst-sense-score word-inst word-sense)
-	(let ((slink (cog-link 'InheritanceLink word-inst word-sense)))
-		(if (null? slink)
-			-1.0
-			(cdr (assoc 'mean (cog-tv->alist (cog-tv slink))))
-		)
-	)
-) 
-
-; ---------------------------------------------------------------------
 ; Process a disjunct -- stuff into database, whatever.
 (define (ldj-process-disjunct word parse-node)
 
