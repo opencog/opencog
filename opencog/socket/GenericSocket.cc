@@ -64,7 +64,7 @@ void GenericSocket::OnDetached()
     logger().debug("[GenericSocket] OnDetached (t: 0x%x)", pthread_self());
     SetNonblocking(true);
 
-    Send("prompt-string>>>");
+    Send(_shell->normal_prompt);
 }
 
 void GenericSocket::OnLine(const std::string& line)

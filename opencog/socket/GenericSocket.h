@@ -1,5 +1,5 @@
 /*
- * opencog/guile/GenericSocket.h
+ * opencog/socket/GenericSocket.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved

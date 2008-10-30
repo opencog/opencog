@@ -1,5 +1,5 @@
 /*
- * opencog/guile/GenericModule.cc
+ * opencog/socket/GenericModule.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -24,8 +24,7 @@
 
 #include "GenericModule.h"
 
-#include <opencog/guile/GenericSmob.h>
-#include <opencog/guile/GenericSocket.h>
+#include <opencog/socket/GenericSocket.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/util/Config.h>

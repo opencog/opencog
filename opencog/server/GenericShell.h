@@ -35,6 +35,10 @@ class GenericShell
 	friend class GenericModule;
 	friend class GenericSocket;
 
+	protected:
+		std::string normal_prompt;
+		std::string pending_prompt;
+
 	public:
 		GenericShell(void);
 		virtual ~GenericShell();
