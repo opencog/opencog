@@ -36,12 +36,13 @@ class GenericShell
 	friend class GenericSocket;
 
 	protected:
+		std::string abort_prompt;
 		std::string normal_prompt;
 		std::string pending_prompt;
 
 	public:
 		GenericShell(void);
-		virtual ~GenericShell();
+		virtual ~GenericShell() = 0; // pure virtual
 		virtual void eval(const std::string &, GenericSocket&);
 };
 

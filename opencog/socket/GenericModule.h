@@ -40,7 +40,7 @@ private:
 
     static const unsigned int DEFAULT_PORT = 17002;
 
-    GenericShell _shell;   
+    GenericShell * _shell;   
     unsigned short _port;
 
 public:

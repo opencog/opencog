@@ -42,9 +42,9 @@ GenericModule::GenericModule() : _port(DEFAULT_PORT)
     if (config().has("GENERIC_PORT"))
         _port = config().get_int("GENERIC_PORT");
     if (config().has("GENERIC_PROMPT"))
-        _shell.normal_prompt = config()["GENERIC_PROMPT"];
+        _shell->normal_prompt = config()["GENERIC_PROMPT"];
     if (config().has("GENERIC_PENDING_PROMPT"))
-        _shell.pending_prompt = config()["GENERIC_PENDING_PROMPT"];
+        _shell->pending_prompt = config()["GENERIC_PENDING_PROMPT"];
 }
 
 GenericModule::~GenericModule()
@@ -68,5 +68,5 @@ void GenericModule::init()
 
 GenericShell* GenericModule::shell()
 {
-    return &_shell;
+    return _shell;
 }
