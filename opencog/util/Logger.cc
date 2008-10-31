@@ -80,6 +80,7 @@ Logger::Level Logger::getLevel() const
 void Logger::setFilename(const std::string& s)
 {
     fileName.assign(s);
+    if (f != NULL) fclose(f);
     f = NULL;
     enable();
 }
