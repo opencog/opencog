@@ -51,9 +51,6 @@ using std::endl;
 using namespace std::tr1::placeholders;
 using namespace opencog;
 
-
-const char* AtomSpace::SPACE_MAP_NODE_NAME = "SpaceMap";
-
 AtomSpace::~AtomSpace()
 {
 
