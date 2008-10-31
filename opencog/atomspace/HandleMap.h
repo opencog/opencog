@@ -161,9 +161,11 @@ public:
 
         InternalIterator ti = handle_map->find(key);
 
-        // if the key is not found, return NULL.
-        if (ti == handle_map->end())
-            return ((T) NULL); // double cast doesn't work in 64bit
+        // assert the key exists. Otherwise throws an exception.
+        if (ti == handle_map->end()) {
+            unlock();
+            throw AssertionException("HandleMap: key (%d) does not exist in this map", key.value());  
+        }
         ret = ti->second;
 
         unlock();

@@ -54,7 +54,8 @@ void HandleToTemporalEntryMap::add(Handle key, TemporalEntry* obj)
 
 TemporalEntry* HandleToTemporalEntryMap::get(Handle key)
 {
-    return(internalMap->get(key));
+    if (internalMap->contains(key)) return(internalMap->get(key));
+    else return(NULL);
 }
 
 bool HandleToTemporalEntryMap::contains(Handle key)

@@ -298,7 +298,7 @@ PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const
 {
     PredicateEvaluator* result = NULL;
     if (predicateHandles2Indices->contains(gpnHandle)) {
-        int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
+        int index = predicateHandles2Indices->get(gpnHandle);
         result = predicateEvaluators[index];
     }
     return result;
