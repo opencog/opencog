@@ -74,6 +74,9 @@ public:
         out << "LOG_TO_STDOUT    = false\n";
         out.close();
 
+        // reset configuration to default parameters
+        config().reset();
+
         // check default parameters before and after loading file
         TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 10000);
         TS_ASSERT(config().get_int("LTI_FUNDS_BUFFER") == 10000);
@@ -96,4 +99,17 @@ public:
         // finally, remove the temporary file and free the string with its name
         std::remove(config_file_name);
     }
+
+    void testSet() {
+        // reset configuration to default parameters
+        config().reset();
+
+        // check default parameters before and setting the new value
+        TS_ASSERT(config().get("STI_FUNDS_BUFFER") == "10000");
+        TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 10000);
+        config().set("STI_FUNDS_BUFFER", "200");
+        TS_ASSERT(config().get("STI_FUNDS_BUFFER") == "200");
+        TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 200);
+    }
+
 }; // class

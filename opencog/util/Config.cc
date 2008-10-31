@@ -74,7 +74,7 @@ void Config::load(const char* filename)
     // reset to default values
     reset();
 
-    // finally, read and process the config file
+    // then, read and process the config file
     ifstream fin(filename);
     if (!fin || !fin.good() || !fin.is_open()) throw IOException(TRACE_INFO, "[ERROR] unable to open file \"%s\"", filename);
 
@@ -110,6 +110,11 @@ void Config::load(const char* filename)
 const bool Config::has(const string &name) const
 {
     return (table.find(name) != table.end());
+}
+
+void Config::set(const std::string &parameter_name, const std::string &parameter_value)
+{
+    table[parameter_name] = parameter_value;
 }
 
 const string& Config::get(const string &name) const

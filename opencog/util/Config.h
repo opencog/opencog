@@ -75,6 +75,9 @@ public:
     // Checks whether a parameter exists
     const bool has(const std::string &parameter_name) const;
 
+    // Set the value of a given parameter.
+    void set(const std::string &parameter_name, const std::string &parameter_value);
+
     // Return current value of a given parameter.
     const std::string& get(const std::string &parameter_name) const;
     const std::string& operator[](const std::string &name) const;
