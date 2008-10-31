@@ -412,27 +412,39 @@ public:
     }
 
     void atomAdded1(Handle h) {
-        TS_ASSERT(table->getSize() == 1); 
+        TS_ASSERT(table->getSize() == 1);
         logger().debug("atomAdded1: %s", TLB::getAtom(h)->toShortString().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomAdded2(Handle h) {
-        TS_ASSERT(table->getSize() == 1); 
+        TS_ASSERT(table->getSize() == 1);
         logger().debug("atomAdded2: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 2;
+        __testSignalsCounter += 10;
+    }
+
+    void atomMerged1(Handle h) {
+        TS_ASSERT(table->getSize() == 1);
+        logger().debug("atomMerged1: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter += 100;
+    }
+
+    void atomMerged2(Handle h) {
+        TS_ASSERT(table->getSize() == 1);
+        logger().debug("atomMerged2: %s", TLB::getAtom(h)->toShortString().c_str());
+        __testSignalsCounter += 1000;
     }
 
     void atomRemoved1(Handle h) {
-        TS_ASSERT(table->getSize() == 0); 
+        TS_ASSERT(table->getSize() == 0);
         logger().debug("atomRemoved1: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter -= 4;
+        __testSignalsCounter += 10000;
     }
 
     void atomRemoved2(Handle h) {
-        TS_ASSERT(table->getSize() == 0); 
+        TS_ASSERT(table->getSize() == 0);
         logger().debug("atomRemoved2: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter -= 5;
+        __testSignalsCounter += 100000;
     }
 
     void testSignals() {
@@ -440,54 +452,64 @@ public:
         table = &atomTable; // save pointer in class member
 
         // connect signals
-        boost::signals::connection add1 = 
+        boost::signals::connection add1 =
             atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded1, this, _1));
-        boost::signals::connection add2 = 
+        boost::signals::connection add2 =
             atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded2, this, _1));
-        boost::signals::connection remove1 = 
+        boost::signals::connection merge1 =
+            atomTable.mergeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomMerged1, this, _1));
+        boost::signals::connection merge2 =
+            atomTable.mergeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomMerged2, this, _1));
+        boost::signals::connection remove1 =
             atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved1, this, _1));
-        boost::signals::connection remove2 = 
+        boost::signals::connection remove2 =
             atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, _1));
+
 
         /* add and remove a simple node */
         __testSignalsCounter = 0;
-        Handle wnHandle = atomTable.add(new Node(WORD_NODE, "test1"));
-        TS_ASSERT(__testSignalsCounter == 3);
+        logger().debug("before first atom add");
+        Handle wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
+        TS_ASSERT(__testSignalsCounter == 11);
+        logger().debug("before second atom add");
+        atomTable.add(new Node(WORD_NODE, "test"));
+        TS_ASSERT(__testSignalsCounter == 1111);
+        logger().debug("before atom remove");
         atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == -6);
+        TS_ASSERT(__testSignalsCounter == 111111);
 
         /* add a simple node and let decayShortTermImportance remove it */
-        wnHandle = atomTable.add(new Node(WORD_NODE, "test2"));
-        TS_ASSERT(__testSignalsCounter == -3);
-        Atom* atom = TLB::getAtom(wnHandle);
-        AttentionValue av(config().get_int("MIN_STI") + 10, atom->getAttentionValue().getLTI(), atom->getAttentionValue().getVLTI());
-        atom->setAttentionValue(av);
-        // Keep calling decay until node1 is removed...
-        long count = 0;
-        long MAX_DECAY_CALLS = 100;
-        while (atomTable.getSize() > 0) {
+        __testSignalsCounter = 0;
+        Node *node = new Node(WORD_NODE, "test");
+        wnHandle = atomTable.add(node);
+        TS_ASSERT(__testSignalsCounter == 11);
+        node->setAttentionValue(AttentionValue(config().get_int("MIN_STI") + 10,
+                                node->getAttentionValue().getLTI(),
+                                node->getAttentionValue().getVLTI()));
+        for (unsigned int i = 0; i <= 10; ++i)
             atomTable.decayShortTermImportance();
-            if (++count > MAX_DECAY_CALLS) {
-                TS_ASSERT(false);
-                break;
-            }
-        }
-        TS_ASSERT(__testSignalsCounter == -12);
+        TS_ASSERT(__testSignalsCounter == 110011);
 
         // test disconnections
+        __testSignalsCounter = 0;
         add1.disconnect();
+        merge1.disconnect();
         remove1.disconnect();
-        wnHandle = atomTable.add(new Node(WORD_NODE, "test3"));
-        TS_ASSERT(__testSignalsCounter == -10);
+        wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
+        atomTable.add(new Node(WORD_NODE, "test"));
+        TS_ASSERT(__testSignalsCounter == 1010);
         atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == -15);
+        TS_ASSERT(__testSignalsCounter == 101010);
 
+        __testSignalsCounter = 0;
         add2.disconnect();
+        merge2.disconnect();
         remove2.disconnect();
-        wnHandle = atomTable.add(new Node(WORD_NODE, "test4"));
-        TS_ASSERT(__testSignalsCounter == -15);
+        wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
+        atomTable.add(new Node(WORD_NODE, "test"));
+        TS_ASSERT(__testSignalsCounter == 0);
         atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == -15);
+        TS_ASSERT(__testSignalsCounter == 0);
     }
 
     void atomAdded3(Handle h) {

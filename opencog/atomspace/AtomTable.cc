@@ -739,8 +739,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         //printf("Merging existing Atom with the Atom being added ...\n");
         merge(TLB::getAtom(existingHandle), atom);
 
-        // emit add atom signal
-        _addAtomSignal(existingHandle);
+        // emit "merge atom" signal
+        _mergeAtomSignal(existingHandle);
 
         return existingHandle;
     }
@@ -1441,4 +1441,9 @@ boost::signal<void (Handle)>& AtomTable::addAtomSignal()
 boost::signal<void (Handle)>& AtomTable::removeAtomSignal()
 {
     return _removeAtomSignal;
+}
+
+boost::signal<void (Handle)>& AtomTable::mergeAtomSignal()
+{
+    return _mergeAtomSignal;
 }

@@ -117,6 +117,7 @@ private:
 
     boost::signal<void (Handle)> _addAtomSignal;
     boost::signal<void (Handle)> _removeAtomSignal;
+    boost::signal<void (Handle)> _mergeAtomSignal;
 
     void removeFromIndex(Atom *, std::vector<Handle>&, int, int)
     throw (RuntimeException);
@@ -640,6 +641,7 @@ public:
 
     boost::signal<void (Handle)>& addAtomSignal();
     boost::signal<void (Handle)>& removeAtomSignal();
+    boost::signal<void (Handle)>& mergeAtomSignal();
 };
 
 } //namespace opencog
