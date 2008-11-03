@@ -81,8 +81,9 @@ void MihalceaEdge::annotate_parse(Handle h)
 			annotate_word_pair(*f, *s);
 		}
 	}
-#ifdef DEBUG
-	printf("; Done adding %d edges for %d word pairs\n",
+// #ifdef DEBUG
+#if 1
+	printf("; MihalceaEdge: added %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
 }

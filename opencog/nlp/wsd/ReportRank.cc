@@ -131,8 +131,11 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	stv.setConfidence(l->getTruthValue().getConfidence());
 	l->setTruthValue(stv);
 
+if (0.0 < score) {
 Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 printf ("duu word sense=%s score=%f\n", n->getName().c_str(), score);
+fflush (stdout);
+}
 	return false;
 }
 

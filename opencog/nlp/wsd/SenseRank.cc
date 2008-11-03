@@ -52,6 +52,9 @@ SenseRank::~SenseRank()
  */
 void SenseRank::rank_sentence(Handle h)
 {
+#ifdef DEBUG
+	printf ("; SenseRank rank sentence %x\n", h); 
+#endif
 	foreach_parse(h, &SenseRank::rank_parse_f, this);
 }
 
@@ -65,6 +68,9 @@ void SenseRank::rank_document(const std::vector<Handle> &parse_list)
 	}
 	for (i = parse_list.begin(); i != parse_list.end(); i++)
 	{
+#ifdef DEBUG
+	printf ("; SenseRank document sentence parse %x\n", (Handle) *i); 
+#endif
 		rank_parse(*i);
 	}
 }
@@ -101,11 +107,14 @@ void SenseRank::init_parse(Handle h)
  * For each parse, find some place to start. There is some chance
  * that the graph may have multiple, disconnected components (which 
  * is bad, but we have no strategy for handling this yet), and so
- * we'll give it a whirlstarting at each word. That way, at least
+ * we'll give it a whirl, starting at each word. That way, at least
  * we'll sample each disconnected component. 
  */
 void SenseRank::rank_parse(Handle h)
 {
+#ifdef DEBUG
+	printf ("; SenseRank rank parse %x\n", h); 
+#endif
 	foreach_word_instance(h, &SenseRank::start_word, this);
 }
 
@@ -122,8 +131,10 @@ bool SenseRank::rank_parse_f(Handle h)
  */
 bool SenseRank::start_word(Handle h)
 {
-	if (converge < convergence_limit) return true;
-
+#ifdef DEBUG
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(h));
+	printf ("; SenseRank: start at word %s\n", n->getName().c_str());
+#endif
 	foreach_word_sense_of_inst(h, &SenseRank::start_sense, this);
 	return false;
 }
@@ -135,17 +146,28 @@ bool SenseRank::start_sense(Handle word_sense_h,
                             Handle sense_link_h)
 {
 	// Make sure that this word sense is actually connected to something.
-	// If its not, return, and better lunk next time.
+	// If its not, return, and better luck next time.
 	edge_sum = 0.0;
 	foreach_sense_edge(sense_link_h, &SenseRank::inner_sum, this);
-	if (edge_sum < 1.0e-10) return false;
+	if (edge_sum < 1.0e-10)
+	{
+#ifdef DEBUG
+		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+		printf ("; SenseRank disconnnected sense %s\n", n->getName().c_str());
+#endif
+		return false;
+	}
+#ifdef DEBUG
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+	printf ("; SenseRank start at %s\n", n->getName().c_str());
+#endif
 
 	// Walk randomly over the connected component 
-	while (convergence_limit < converge)
+	do
 	{
 		rank_sense(sense_link_h);
 		sense_link_h = pick_random_edge(sense_link_h);
-	}
+	} while (convergence_limit < converge);
 
 	return false;
 }
@@ -195,7 +217,7 @@ void SenseRank::rank_sense(Handle sense_link_h)
 #ifdef DEBUG
 	std::vector<Handle> oset = sense->getOutgoingSet();
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(oset[1]));
-	printf ("; sense %s was %g new %g delta=%g\n", n->getName().c_str(),
+	printf ("; SenseRank: sense %s was %g new %g delta=%g\n", n->getName().c_str(),
 	        old_rank, rank_sum, fabs(rank_sum - old_rank));
 #endif
 
