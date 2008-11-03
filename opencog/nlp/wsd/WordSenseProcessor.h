@@ -52,6 +52,7 @@ class WordSenseProcessor : public Agent, public Module
 
 		WordSenseProcessor(void);
 		virtual ~WordSenseProcessor();
+		virtual void init(void);
 		virtual void run(CogServer *server);
 };
 

@@ -86,7 +86,7 @@ public:
     typedef void        UnloadFunction(Module*);
 
     virtual ~Module() {};
-    virtual void init(void) {}
+    virtual void init(void) = 0;
 
 }; // class
 

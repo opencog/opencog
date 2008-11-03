@@ -48,6 +48,10 @@ extern "C" void opencog_module_unload(Module* module)
     delete agent;
 }
 
+void QueryProcessor::init(void)
+{
+}
+
 // ----------------------------------------
 QueryProcessor::QueryProcessor(void)
 {

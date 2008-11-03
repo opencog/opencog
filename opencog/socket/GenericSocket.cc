@@ -38,11 +38,22 @@ GenericSocket::GenericSocket(ISocketHandler &handler)
 {
     logger().debug("[GenericSocket] constructor (t: 0x%x)", pthread_self());
     SetLineProtocol(true);
+    _shell = NULL;
+#ifdef OLD_WAY_MAYBE_OBSOLETE
     CogServer& cogserver = static_cast<CogServer&>(server());
+
+    // XXX unclear ... 
+    // what is the point of this lookup from id?
     GenericModule* module =
-            static_cast<GenericModule*>(cogserver.getModule(GenericModule::id()));
+            static_cast<GenericModule*>(cogserver.getModule(GenericModule::id());
     if (module) _shell = module->shell();
     else logger().error("[GenericSocket] constructor: module \"%s\" has not been loaded");
+#endif
+}
+
+void GenericSocket::DeclareShell(GenericShell *s)
+{
+	_shell = s;
 }
 
 GenericSocket::~GenericSocket()

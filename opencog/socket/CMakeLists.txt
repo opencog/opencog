@@ -1,6 +1,6 @@
 ADD_LIBRARY (gsocket SHARED
 	GenericSocket.cc
-	GenericModule.cc
+	# GenericModule.cc
 )
 
 TARGET_LINK_LIBRARIES(gsocket
@@ -12,6 +12,6 @@ INSTALL (TARGETS gsocket
 
 INSTALL (FILES
 	GenericSocket.h
-	GenericModule.h
+	# GenericModule.h
 	DESTINATION "include/opencog/socket"
 )

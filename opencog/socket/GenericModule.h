@@ -38,14 +38,14 @@ class GenericModule : public Module
 
 private:
 
-    static const unsigned int DEFAULT_PORT = 17002;
+    static const unsigned int DEFAULT_PORT = 17001;
 
     GenericShell * _shell;   
     unsigned short _port;
 
 public:
 
-    static inline const char* id() {
+    virtual const char* id(void) {
         static const char* _id = "opencog::GenericModule";
         return _id;
     }

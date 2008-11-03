@@ -27,12 +27,26 @@ ADD_LIBRARY (server SHARED
 	Request
 	NetworkServer
 	ConsoleSocket
+	GenericShell
+#  XXX  need to re-enable loading of files, for Joel.
+#	load-file
 )
 
 TARGET_LINK_LIBRARIES(server
 	util
 	atomspace
 )
+
+ADD_LIBRARY (scheme-shell SHARED
+	SchemeShell
+)
+
+TARGET_LINK_LIBRARIES(scheme-shell
+	util
+	atomspace
+	smob
+)
+
 
 # to ease testing/debugging modules on the source tree
 IF (CMAKE_BUILD_TYPE STREQUAL "Debug")

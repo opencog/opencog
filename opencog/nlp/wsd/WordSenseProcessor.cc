@@ -49,6 +49,10 @@ extern "C" void opencog_module_unload(Module* module)
     delete agent;
 }
 
+void WordSenseProcessor::init(void)
+{
+}
+
 // ----------------------------------------
 WordSenseProcessor::WordSenseProcessor(void)
 {

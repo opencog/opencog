@@ -34,5 +34,7 @@ ToDo/Bugs:
 * The load-file.c will load a scheme file on startup; however, the
   way it uses file paths is unsatisfactory.  This needs to be fixed.
 
+* Need to document how module loading actually works.
+
 
 

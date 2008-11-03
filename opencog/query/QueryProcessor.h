@@ -42,6 +42,7 @@ public:
 	QueryProcessor(void);
 	virtual ~QueryProcessor();
 	virtual void run(CogServer *server);
+	virtual void init(void);
 
 };
 

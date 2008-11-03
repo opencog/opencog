@@ -37,7 +37,6 @@
 namespace opencog
 {
 
-class Command;
 class GenericShell;
 
 class GenericSocket : public TcpSocket
@@ -51,6 +50,8 @@ public:
 
     GenericSocket(ISocketHandler &handler);
     virtual ~GenericSocket();
+
+    void DeclareShell(GenericShell*);
 
     virtual void OnAccept          (void);
     virtual void OnDetached        (void);
