@@ -33,6 +33,7 @@
 #endif
 
 #include <opencog/atomspace/Link.h>
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>

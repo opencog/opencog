@@ -27,7 +27,6 @@
 #include <stdlib.h>
 
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/type_codes.h>
 #include <opencog/util/platform.h>
 
 //#define USE_SHARED_DEFAULT_TV

@@ -31,7 +31,6 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/classes.h>
 
 using namespace opencog;
 
@@ -54,7 +53,7 @@ void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle
         // first index that matches subclass criteria
         currentType = 0;
         while (currentType < ClassServer::getNumberOfClasses()) {
-            if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
+            if ((ClassServer::isA(currentType, desiredType)) &&
                     !TLB::isInvalidHandle(table->getTypeIndexHead(currentType))) {
                 break;
             } else {
@@ -99,7 +98,7 @@ Handle HandleIterator::next()
         if (desiredTypeSubclass) {
             currentType++;
             while (currentType < ClassServer::getNumberOfClasses()) {
-                if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
+                if ((ClassServer::isA(currentType, desiredType)) &&
                         !TLB::isInvalidHandle(table->getTypeIndexHead(currentType))) {
                     break;
                 } else {

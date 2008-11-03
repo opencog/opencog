@@ -42,6 +42,7 @@ class WordSenseProcessor : public Agent, public Module
 		Mihalcea *wsd;
 
 	public:
+
 		static Factory<WordSenseProcessor, Agent> factory;
 
 		virtual const ClassInfo& classinfo() const { return info(); }

@@ -1,6 +1,10 @@
+SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM true)
+OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
+
 ADD_LIBRARY (atomspace SHARED
 	Atom.cc
 	AtomSpace.cc
+	AtomSpaceInit.cc
 	AtomTable.cc
 	AttentionValue.cc
 	ClassServer.cc
@@ -15,7 +19,6 @@ ADD_LIBRARY (atomspace SHARED
 	HandleToTemporalEntryMap.cc
 	IndefiniteTruthValue.cc
 	Link.cc
-	md5.c
 	Node.cc
 	NullTruthValue.cc
 	SavingLoading.cc
@@ -30,12 +33,10 @@ ADD_LIBRARY (atomspace SHARED
 	TLB.cc
 	Trail.cc
 	TruthValue.cc
-	types.cc
 	VersionHandle.cc
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/util
+	atom_types.h
+	md5.c
+	types.cc
 )
 
 TARGET_LINK_LIBRARIES(atomspace
@@ -51,8 +52,8 @@ INSTALL (FILES
 	AtomSpaceDefinitions.h
 	AtomSpace.h
 	AtomTable.h
+	atom_types.h
 	AttentionValue.h
-	classes.h
 	ClassServer.h
 	CompositeTruthValue.h
 	CoreUtils.h
@@ -61,6 +62,7 @@ INSTALL (FILES
 	ForeachChaseLink.h
 	Foreach.h
 	ForeachTwo.h
+    Handle.h
 	HandleEntry.h
 	HandleIterator.h
 	HandleMap.h
@@ -70,7 +72,6 @@ INSTALL (FILES
 	HandleToTemporalEntryMap.h
 	IndefiniteTruthValue.h
 	Link.h
-	md5.h
 	Node.h
 	NullTruthValue.h
 	PredicateEvaluator.h
@@ -87,12 +88,9 @@ INSTALL (FILES
 	TLB.h
 	Trail.h
 	TruthValue.h
-	type_classint.h
-	type_codes.h
-	type_inheritance.h
-	type_intclass.h
-	type_names.h
-	types.h
 	VersionHandle.h
+	atom_types.h
+	md5.h
+	types.h
 	DESTINATION "include/opencog/atomspace"
 )

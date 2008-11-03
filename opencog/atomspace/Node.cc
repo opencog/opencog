@@ -43,7 +43,7 @@ Node::Node(Type type,
 throw (InvalidParamException, AssertionException)
         : Atom(type, std::vector<Handle>(), tv)
 {
-    if (!ClassServer::isAssignableFrom(NODE, type)) {
+    if (!ClassServer::isA(type, NODE)) {
         throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
     }
     name = cname;
@@ -79,8 +79,9 @@ std::string Node::toShortString() const
 {
 #define BUFSZ 1024
     char buf[BUFSZ];
-    snprintf(buf, BUFSZ, "node[%d:%s%s]",
-             type, name.c_str(), (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
+    snprintf(buf, BUFSZ, "node[%s:%s%s]",
+             ClassServer::getTypeName(type).c_str(), name.c_str(),
+             (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
     return buf;
 }
 
@@ -88,8 +89,8 @@ std::string Node::toString() const
 {
     char buf[BUFSZ];
     //activation here at 0: can be replace with LTI
-    snprintf(buf, BUFSZ, "node[%d:%s] sti:(%d,%d) tv:(%f,%f)",
-             type, name.c_str(),
+    snprintf(buf, BUFSZ, "node[%s:%s] sti:(%d,%d) tv:(%f,%f)",
+             ClassServer::getTypeName(type).c_str(), name.c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().getMean(), getTruthValue().getConfidence());

@@ -26,9 +26,10 @@
 #ifndef _OPENCOG_HANDLE_ITERATOR_H
 #define _OPENCOG_HANDLE_ITERATOR_H
 
-#include <opencog/atomspace/classes.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/VersionHandle.h>
+#include <opencog/atomspace/types.h>
 
 namespace opencog {
 

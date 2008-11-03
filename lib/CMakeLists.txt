@@ -13,6 +13,7 @@ INSTALL (FILES
 	FindPthreads.cmake
 	FindSTLPort.cmake
 	FindUnixODBC.cmake
+	OpenCogAtomTypes.cmake
 	OpenCogConfig.cmake
 	DESTINATION "${DATADIR}/cmake"
 )

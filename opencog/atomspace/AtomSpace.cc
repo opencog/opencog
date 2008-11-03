@@ -41,6 +41,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/types.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -53,7 +54,6 @@ using namespace opencog;
 
 AtomSpace::~AtomSpace()
 {
-
     // check if has already been deleted. See in code where it can be delete.
     if (_handle_iterator) {
         delete (_handle_iterator);
@@ -114,14 +114,14 @@ AtomSpace::AtomSpace()
 const AtomTable& AtomSpace::getAtomTable() const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
     return atomTable;
 }
 
 const TimeServer& AtomSpace::getTimeServer() const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     return timeServer;
 }
@@ -148,14 +148,14 @@ Handle AtomSpace::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
 
 Handle AtomSpace::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv)
 {
-//    logger().debug("AtomSpace::addTimeInfo - temp init");
+    //logger().debug("AtomSpace::addTimeInfo - temp init");
     Handle timeNode = addNode(TIME_NODE, timeNodeName.c_str());
-//    logger().debug("AtomSpace::addTimeInfo - temp 1");
+    //logger().debug("AtomSpace::addTimeInfo - temp 1");
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
     atTimeLinkOutgoing.push_back(h);
     Handle atTimeLink = addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv);
-//    logger().debug("AtomSpace::addTimeInfo - temp end");
+    //logger().debug("AtomSpace::addTimeInfo - temp end");
     return atTimeLink;
 }
 
@@ -240,7 +240,6 @@ Type AtomSpace::getTypeV(const tree<Vertex>& _target) const
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflush(stdout);
-
     return getType(boost::get<Handle>(*_target.begin()));
 }
 
@@ -254,14 +253,14 @@ bool AtomSpace::isReal(Handle h) const
 Type AtomSpace::getType(Handle h) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
     return TLB::getAtom(h)->getType();
 }
 
 Type AtomSpace::getAtomType(const string& str) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     return ClassServer::getType(const_cast<char*>(str.c_str()));
 }
@@ -269,10 +268,10 @@ Type AtomSpace::getAtomType(const string& str) const
 bool AtomSpace::inheritsType(Type t1, Type t2) const
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflus(stdout);
+    // fflush(stdout);
 
     // printf("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2);
-    bool result = ClassServer::isAssignableFrom(t2, t1);
+    bool result = ClassServer::isA(t1, t2);
     // printf("AtomSpace::inheritsType result = %d\n", result);
     return result;
 }
@@ -288,11 +287,13 @@ bool AtomSpace::isNode(Type t) const
 string AtomSpace::getName(Type t) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
+    /*
     if (ClassServer::getClassName()->find(t) == ClassServer::getClassName()->end()) {
         cassert(TRACE_INFO, false, "AtomSpace::getName(): Unknown atom type.");
     }
+    */
     return ClassServer::getTypeName(t);
 }
 
@@ -396,7 +397,7 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
 Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
     return addAtom(a, a.begin(), tvn);
 }
 
@@ -437,7 +438,7 @@ HandleSeq AtomSpace::getOutgoing(Handle h) const
 #endif
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     HandleSeq hs;
     Link *link = dynamic_cast<Link *>(TLB::getAtom(h));
@@ -448,7 +449,7 @@ HandleSeq AtomSpace::getOutgoing(Handle h) const
 Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     Handle result = atomTable.getHandle(name.c_str(), t);
     if (TLB::isValidHandle(result)) {
@@ -470,7 +471,6 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 
         // Add Node
         result = atomTable.add(new Node(t, name, tvn));
-
     }
     return result;
 }
@@ -478,7 +478,7 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing, const TruthValue& tvn)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     Handle result;
     HandleEntry* he = atomTable.getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), t, false);
@@ -547,7 +547,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 Handle AtomSpace::getHandle(Type t, const string& str) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     Handle h = atomTable.getHandle(str.c_str(), t);
     return h;
@@ -579,7 +579,7 @@ const string& AtomSpace::getName(Handle h) const
 Handle AtomSpace::getOutgoing(Handle h, int idx) const
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflus(stdout);
+    // fflush(stdout);
     Atom* a = TLB::getAtom(h);
     if (idx >= a->getArity())
         throw new IndexErrorException(TRACE_INFO, "Invalid outgoing set index: %d (atom: %s)\n",
@@ -590,7 +590,7 @@ Handle AtomSpace::getOutgoing(Handle h, int idx) const
 int AtomSpace::getArity(Handle h) const
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflus(stdout);
+    // fflush(stdout);
 
     return TLB::getAtom(h)->getArity();
 }
@@ -598,7 +598,7 @@ int AtomSpace::getArity(Handle h) const
 void AtomSpace::setName(Handle h, const string& name)
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflus(stdout);
+    // fflush(stdout);
 
     Node *nnn = dynamic_cast<Node*>(TLB::getAtom(h));
     cassert(TRACE_INFO, nnn != NULL, "AtomSpace::setName(): Handle h should be of 'Node' type.");
@@ -621,7 +621,7 @@ HandleSeq AtomSpace::getIncoming(Handle h) const
 void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     const TruthValue& currentTv = getTV(h);
     if (!isNullVersionHandle(vh)) {
@@ -645,7 +645,7 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     if (TLB::isInvalidHandle(h)) return TruthValue::NULL_TV();
 
@@ -787,7 +787,7 @@ AttentionValue::vlti_t AtomSpace::getVLTI(Handle h) const
 float AtomSpace::getCount(Handle h) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     return TLB::getAtom(h)->getTruthValue().getCount();
 }
@@ -795,7 +795,7 @@ float AtomSpace::getCount(Handle h) const
 int AtomSpace::Nodes(VersionHandle vh) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     /* This is too expensive and depending on an Agent that may be disabled.
      * Besides it does not have statistics by VersionHandles
@@ -813,7 +813,7 @@ int AtomSpace::Nodes(VersionHandle vh) const
 void AtomSpace::decayShortTermImportance()
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     atomTable.decayShortTermImportance();
 }
@@ -869,7 +869,7 @@ long AtomSpace::getLTIFunds() const
 int AtomSpace::Links(VersionHandle vh) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     /* This is too expensive and depending on an Agent that may be disabled.
      * Besides it does not have statistics by VersionHandles
@@ -887,7 +887,7 @@ int AtomSpace::Links(VersionHandle vh) const
 void AtomSpace::_getNextAtomPrepare()
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
+    //fflush(stdout);
 
     _handle_iterator = atomTable.getHandleIterator(ATOM, true);
 }
@@ -906,16 +906,14 @@ Handle AtomSpace::_getNextAtom()
 void AtomSpace::_getNextAtomPrepare_type(Type type)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
+    //fflush(stdout);
     _handle_entry = atomTable.getHandleSet(type, true);
 }
 
 Handle AtomSpace::_getNextAtom_type(Type type)
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
+    //fflush(stdout);
     if (_handle_entry == NULL)
         return Handle::UNDEFINED;
     Handle h = _handle_entry->handle;

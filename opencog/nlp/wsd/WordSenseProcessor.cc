@@ -24,6 +24,8 @@
 #include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 
+#include "atom_types.definitions"
+
 using namespace opencog;
 
 Factory<WordSenseProcessor, Agent> WordSenseProcessor::factory;
@@ -167,5 +169,39 @@ bool WordSenseProcessor::check_start(Handle h)
 	if (h == start_handle) return true;
 	return false;
 }
+
+
+// dynamic library initialization
+#if defined(WIN32) && defined(_DLL)
+namespace win {
+#include <windows.h>
+}
+win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
+                           win::DWORD fdwReason,     // reason for calling function
+                           win::LPVOID lpvReserved)  // reserved
+{
+    System::setModuleHandle(hinstDLL);
+    switch(fdwReason) {
+        case DLL_PROCESS_ATTACH:
+            #include "atom_types.inheritance"
+            break;
+        case DLL_THREAD_ATTACH:
+            break;
+        case DLL_THREAD_DETACH:
+            break;
+        case DLL_PROCESS_DETACH:
+            break;
+    }
+    return TRUE;
+}
+#elif __GNUC__
+static __attribute__ ((constructor)) void _init(void)
+{
+    #include "atom_types.inheritance"
+}
+static __attribute__ ((constructor)) void _fini(void)
+{
+}
+#endif
 
 /* ======================= END OF FILE ==================== */

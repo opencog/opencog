@@ -63,12 +63,14 @@ AtomTable::AtomTable(bool dsa)
     atomSet = new AtomHashSet();
 
     // There are four indices. One for types, one for target types,
-    // one for names and one for importance ranges. The typeIndex
-    // is NUMBER_OF_CLASSES+2 because NOTYPE is NUMBER_OF_CLASSES+1
-    // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
+    // one for names and one for importance ranges.
+
+    // The typeIndex is NOTYPE+1 because NOTYPE is the id of the last possible
+    // type // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
     // (because ClassServer::getType() returns NOTYPE in this case).
-    typeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
-    targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
+    typeIndex.resize(NOTYPE + 1, Handle::UNDEFINED);
+    targetTypeIndex.resize(NOTYPE + 1, Handle::UNDEFINED);
+
     nameIndex.resize(NAME_INDEX_SIZE, Handle::UNDEFINED);
     importanceIndex.resize(IMPORTANCE_INDEX_SIZE, Handle::UNDEFINED);
     predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
@@ -114,7 +116,7 @@ bool AtomTable::isCleared() const
         return false;
     }
 
-    for (int i = 0; i < ClassServer::getNumberOfClasses(); i++) {
+    for (unsigned int i = 0; i < ClassServer::getNumberOfClasses(); i++) {
         if (typeIndex[i] != Handle::UNDEFINED) {
             //printf("typeIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
@@ -331,7 +333,7 @@ HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) con
 
 Handle AtomTable::getHandle(const char* name, Type type) const
 {
-    if (!ClassServer::isAssignableFrom(NODE, type)) {
+    if (!ClassServer::isA(type, NODE)) {
         return Handle::UNDEFINED;
     }
 #ifdef USE_ATOM_HASH_SET
@@ -383,13 +385,13 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass,
     if (subclass) {
         // If subclasses are accepted, the subclasses are returned in the
         // array types.
-        int n;
-        Type *types = ClassServer::getChildren(type, n);
+        std::vector<Type> types;
+        ClassServer::getChildren(type, std::back_inserter(types));
 
-        //printf("Checking %d subclasses:\n", n);
+        //printf("Checking %d subclasses:\n", types.size());
 
         // for all subclasses found, a set is concatenated to the answer set
-        for (int i = 0; i < n; i++) {
+        for (unsigned int i = 0; i < types.size(); i++) {
             //printf("%d\n", i);
             if (index && TARGET_TYPE_INDEX) {
                 index = types[i] & TARGET_TYPE_INDEX;
@@ -398,7 +400,7 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass,
             set = makeSet(set, (this->*f)(types[i]), index);
         }
         //printf("\n");
-        delete[](types);
+        //delete[](types);
     }
 
     return set;
@@ -457,7 +459,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
 
 #ifdef USE_ATOM_HASH_SET
     // Check if it is the special case of looking for an specific atom
-    if (ClassServer::isAssignableFrom(LINK, type) && 
+    if (ClassServer::isA(type, LINK) && 
         (arity == 0 || !handles.empty()))
     {
         //printf("special case\n");
@@ -485,7 +487,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     }
 #endif
 
-    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0)) {
+    if (ClassServer::isA(type, LINK) && (arity == 0)) {
         HandleEntry* result = getHandleSet(type, subclass);
         result = HandleEntry::filterSet(result, arity);
         return result;
@@ -611,16 +613,16 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
                 if (sub) {
                     // if subclasses are accepted, the subclasses are returned in the
                     // array types.
-                    int n;
+                    std::vector<Type> subTypes;
 
-                    Type *subTypes = ClassServer::getChildren(types[i], n);
+                    ClassServer::getChildren(types[i], std::back_inserter(subTypes));
 
                     // for all subclasses found, a set is concatenated to the answer set
-                    for (int j = 0; j < n; j++) {
+                    for (unsigned int j = 0; j < subTypes.size(); j++) {
                         HandleEntry *subSet = getHandleSet(names[i], subTypes[j], type, subclass);
                         sets[i] = HandleEntry::concatenation(sets[i], subSet);
                     }
-                    delete[](subTypes);
+                    //delete[](subTypes);
                 }
                 sets[i] = HandleEntry::filterSet(sets[i], names[i], types[i], sub, i, arity);
             } else {
@@ -847,8 +849,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // emit add atom signal
     _addAtomSignal(handle);
 
-    logger().debug("[AtomTable] add: %p", handle.value());
-
+    //logger().debug("[AtomTable] add: %d", handle);
     return handle;
 }
 
@@ -896,7 +897,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
 #ifdef USE_ATOM_HASH_SET
     for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
         const Atom* atom = *it;
-        bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
+        bool matched = (subclass && ClassServer::isA(atom->getType(), type)) || type == atom->getType();
         if (matched) logger.debug("%d: %s", TLB::getHandle(atom).value(), atom->toString().c_str());
     }
 #else
@@ -910,7 +911,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 #ifdef USE_ATOM_HASH_SET
     for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
         const Atom* atom = *it;
-        bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
+        bool matched = (subclass && ClassServer::isA(atom->getType(), type)) || type == atom->getType();
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
 #else

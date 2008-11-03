@@ -26,7 +26,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/type_codes.h>
 #include <opencog/persist/odbcxx.h>
 
 using namespace opencog;
@@ -625,7 +624,7 @@ void AtomStorage::store_typemap(void)
 	char buff[BUFSZ];
 	Type t;
 
-	for (t=0; t<NUMBER_OF_CLASSES; t++)
+	for (t=0; t<ClassServer::getNumberOfClasses(); t++)
 	{
 		snprintf(buff, BUFSZ,
 		         "INSERT INTO TypeCodes (type, typename) "
@@ -776,7 +775,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 
 	if (NULL == atom)
 	{
-		if (ClassServer::isAssignableFrom(NODE, realtype))
+		if (ClassServer::isA(realtype, NODE))
 		{
 			atom = new Node(realtype, rp.name);
 		}

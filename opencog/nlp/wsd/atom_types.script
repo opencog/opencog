@@ -1,0 +1,43 @@
+// new relex nodes, added by Linas per names used by Ben
+// these are subject to change or deletion pending review.
+// some of the link types may go away.
+
+// Synchronization primitive, used to mark stages of a processing
+// pipeline; used as a fence or guard barrier, make sure that earlier
+// stages have completed processing before later ones start.
+DISTINGUISHED_NODE <- NODE
+
+// Universe of discourse
+CONTEXT_LINK <- ORDERED_LINK
+
+// nlp related atoms
+WORD_NODE <- NODE
+REFERENCE_LINK <- ASSOCIATIVE_LINK
+DOCUMENT_NODE <- CONCEPT_NODE
+SENTENCE_NODE <- CONCEPT_NODE
+PARSE_NODE <- CONCEPT_NODE
+PARSE_LINK <- ASSOCIATIVE_LINK
+
+// Custom atoms to identify features, relations
+LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE
+DEFINED_LINGUISTIC_CONCEPT_NODE <- CONCEPT_NODE
+DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE
+DEFINED_FRAME_NODE <- CONCEPT_NODE
+DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
+FRAME_ELEMENT_LINK <- ORDERED_LINK
+
+// New wordnet-import nodes, added by Linas.
+// These are subject to change, pending review.
+// The links should almost certainly be replaced by
+// a predicate-style construction (where the relation
+// is explicitly named)
+WORD_SENSE_NODE <- CONCEPT_NODE
+WORD_SENSE_LINK <- ASSOCIATIVE_LINK
+PART_OF_SPEECH_NODE <- CONCEPT_NODE
+PART_OF_SPEECH_LINK <- ORDERED_LINK
+LEMMA_NODE <- CONCEPT_NODE
+LEMMA_LINK <- ORDERED_LINK
+HOLONYM_LINK <- INHERITANCE_LINK
+
+// New word-sense-disambiguation nodes, added by Linas
+COSENSE_LINK <- UNORDERED_LINK

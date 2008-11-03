@@ -393,8 +393,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     // differently from invalid elements found in its begining.
 
     while ((set != NULL) &&
-            ((ClassServer::isAssignableFrom(LINK, set->getAtom()->getType())) ||
-             (ClassServer::isAssignableFrom(NODE, set->getAtom()->getType()) &&
+            ((ClassServer::isA(set->getAtom()->getType(), LINK)) ||
+             (ClassServer::isA(set->getAtom()->getType(), NODE) &&
               (strcmp(((Node*) set->getAtom())->getName().c_str(), name))))) {
         buffer = set;
         set = set->next;
@@ -407,8 +407,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     HandleEntry* head = set;
     while (set->next != NULL) {
         Atom *itAtom = set->next->getAtom();
-        if (((ClassServer::isAssignableFrom(LINK, itAtom->getType())) ||
-                (ClassServer::isAssignableFrom(NODE, itAtom->getType()) &&
+        if (((ClassServer::isA(itAtom->getType(), LINK)) ||
+                (ClassServer::isA(itAtom->getType(), NODE) &&
                  (strcmp(((Node*) itAtom)->getName().c_str(), name))))) {
             buffer = set->next;
             set->next = set->next->next;
@@ -438,7 +438,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 
     while ((set != NULL) &&
             ((!subclass && (type != set->getAtom()->getType())) ||
-             (subclass && !ClassServer::isAssignableFrom(type, set->getAtom()->getType())))) {
+             (subclass && !ClassServer::isA(set->getAtom()->getType(), type)))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -450,7 +450,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
     HandleEntry* head = set;
     while (set->next != NULL) {
         if ((!subclass && (type != set->next->getAtom()->getType())) ||
-                (subclass && !ClassServer::isAssignableFrom(type, set->next->getAtom()->getType()))) {
+            (subclass && !ClassServer::isA(set->next->getAtom()->getType(), type))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -467,7 +467,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type type, bool subclass)
 {
 
-    if ((name != NULL) && (!ClassServer::isAssignableFrom(NODE, type))) {
+    if ((name != NULL) && (!ClassServer::isA(type, NODE))) {
         delete set;
         return NULL;
     }
@@ -480,8 +480,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
 
     while ((set != NULL) &&
             ((!subclass && (type != set->getAtom()->getType())) ||
-             (subclass && !ClassServer::isAssignableFrom(type, set->getAtom()->getType())) ||
-             ((name != NULL) && (ClassServer::isAssignableFrom(NODE, set->getAtom()->getType())) &&
+             (subclass && !ClassServer::isA(set->getAtom()->getType(), type)) ||
+             ((name != NULL) && (ClassServer::isA(set->getAtom()->getType(), NODE)) &&
               (strcmp(((Node*) set->getAtom())->getName().c_str(), name))))) {
 
         buffer = set;
@@ -500,8 +500,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
 
     while (set->next != NULL) {
         if ((!subclass && (type != set->next->getAtom()->getType())) ||
-                (subclass && !ClassServer::isAssignableFrom(type, set->next->getAtom()->getType())) ||
-                ((name != NULL) && (ClassServer::isAssignableFrom(NODE, set->getAtom()->getType())) &&
+                (subclass && !ClassServer::isA(set->next->getAtom()->getType(), type)) ||
+                ((name != NULL) && (ClassServer::isA(set->getAtom()->getType(), NODE)) &&
                  (strcmp(((Node*) set->getAtom())->getName().c_str(), name)))) {
             buffer = set->next;
             set->next = set->next->next;
@@ -585,7 +585,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             for (position = 0; position < arity; position++) {
                 if ((target = set->getAtom()->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
-                         (subclass && ClassServer::isAssignableFrom(type, target)))) {
+                         (subclass && ClassServer::isA(target, type)))) {
                     break;
                 }
             }
@@ -615,7 +615,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             for (position = 0; position < arity; position++) {
                 if ((target = set->next->getAtom()->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
-                         (subclass && ClassServer::isAssignableFrom(type, target)))) {
+                         (subclass && ClassServer::isA(target, type)))) {
                     break;
                 }
             }
@@ -651,7 +651,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             ((set->getAtom()->getArity() != arity) ||
              (target = set->getAtom()->getOutgoingAtom(position)->getType(),
               ((!subclass && (type != target)) ||
-               (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
+               (subclass && !ClassServer::isA(target, type)))))) {
 
         buffer = set;
         set = set->next;
@@ -666,7 +666,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         if (((set->next->getAtom()->getArity() != arity) ||
                 (target = set->next->getAtom()->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
-                  (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
+                  (subclass && !ClassServer::isA(target, type)))))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -694,8 +694,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
             ((set->getAtom()->getArity() != arity) ||
              (target = set->getAtom()->getOutgoingAtom(position)->getType(),
               ((!subclass && (type != target)) ||
-               (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
-             (ClassServer::isAssignableFrom(NODE, target) ?
+               (subclass && !ClassServer::isA(target, type)))) ||
+             (ClassServer::isA(target, NODE) ?
               (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
               name != NULL))) {
 
@@ -712,8 +712,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
         if (((set->next->getAtom()->getArity() != arity) ||
                 (target = set->next->getAtom()->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
-                  (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
-                (ClassServer::isAssignableFrom(NODE, target) ?
+                  (subclass && !ClassServer::isA(target, type)))) ||
+                (ClassServer::isA(target, NODE) ?
                  (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
                  name != NULL))) {
             buffer = set->next;
@@ -740,7 +740,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
 
     while ((set != NULL) &&
             ((set->getAtom()->getArity() != arity) ||
-             (ClassServer::isAssignableFrom(NODE, set->next->getAtom()->getOutgoingAtom(position)->getType()) ?
+             (ClassServer::isA(set->next->getAtom()->getOutgoingAtom(position)->getType(), NODE) ?
               (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
               name != NULL))) {
 
@@ -755,7 +755,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
     HandleEntry* head = set;
     while (set->next != NULL) {
         if (((set->next->getAtom()->getArity() != arity) ||
-                (ClassServer::isAssignableFrom(NODE, set->next->getAtom()->getOutgoingAtom(position)->getType()) ?
+                (ClassServer::isA(set->next->getAtom()->getOutgoingAtom(position)->getType(), NODE) ?
                  (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
                  name != NULL))) {
             buffer = set->next;
@@ -859,7 +859,7 @@ bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, V
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
                 !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
             if (targetSubclasses) {
-                result = ClassServer::isAssignableFrom(targetType, target->getType());
+                result = ClassServer::isA(target->getType(), targetType);
             } else {
                 result = targetType == target->getType();
             }
@@ -988,9 +988,9 @@ std::string HandleEntry::toString()
     for (HandleEntry* current = this; current != NULL; current = current->next) {
         Atom* atom = TLB::getAtom(current->handle);
         if (atom != NULL) {
-            if (ClassServer::isAssignableFrom(NODE, atom->getType())) {
+            if (ClassServer::isA(atom->getType(), NODE)) {
                 answer += ((Node*) atom)->getName();
-            } else if (ClassServer::isAssignableFrom(LINK, atom->getType())) {
+            } else if (ClassServer::isA(atom->getType(), LINK)) {
                 answer += ((Link*) atom)->toShortString();
             }
             //char buf[1024];

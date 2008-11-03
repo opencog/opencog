@@ -35,7 +35,6 @@ private:
 
 public:
     LinkUTest() {
-        printf("sizeof(Trail) = %u\n", (unsigned int) sizeof(Trail));
     }
 
     void setUp() {}

@@ -37,7 +37,6 @@
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
-#include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>

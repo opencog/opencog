@@ -33,16 +33,19 @@ using namespace opencog;
 
 class HandleSetUTest :  public CxxTest::TestSuite
 {
-private:
-    Handle handles[N_HANDLES];
 
+private:
+
+    Handle handles[N_HANDLES];
     HandleSet *handleSet;
+
 public:
+
     HandleSetUTest() {
         for (int i = 0; i < N_HANDLES; i++) {
             char name[1<<16];
-            sprintf(name, "name-%d", i);
-            Node *n = new Node(WORD_NODE, strdup(name));
+            sprintf(name, "%d", i);
+            Node *n = new Node(NUMBER_NODE, strdup(name));
             handles[i] = TLB::addAtom(n);
         }
     }

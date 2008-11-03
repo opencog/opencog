@@ -14,7 +14,7 @@ LINK_DIRECTORIES (
 
 LINK_LIBRARIES (
 	server
-	attention
+    attention
 	${Boost_SIGNALS_LIBRARY}
 	${GSL_LIBRARIES}
 	${CSOCKETS_LIBRARIES}

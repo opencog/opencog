@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY (atomtypes)
 ADD_SUBDIRECTORY (hopfield)
 ADD_SUBDIRECTORY (modules)
 ADD_SUBDIRECTORY (server)

@@ -28,6 +28,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
 using namespace opencog;
@@ -90,7 +91,7 @@ public:
 
     //static std::string typeToStr(TruthValueType t);
     void testTypeToStr() {
-        //printf("testTypeToStr()\n");
+        //logger().debug("testTypeToStr()");
         TS_ASSERT(!strcmp(TruthValue::typeToStr(SIMPLE_TRUTH_VALUE), "SIMPLE_TRUTH_VALUE"));
         TS_ASSERT(!strcmp(TruthValue::typeToStr(INDEFINITE_TRUTH_VALUE), "INDEFINITE_TRUTH_VALUE"));
         TS_ASSERT(!strcmp(TruthValue::typeToStr(COMPOSITE_TRUTH_VALUE), "COMPOSITE_TRUTH_VALUE"));
@@ -99,7 +100,7 @@ public:
 
     //static const TruthValueType strToType(char* s);
     void testStrToType() {
-        //printf("testStrToType()\n");
+        //logger().debug("testStrToType()");
         TS_ASSERT(TruthValue::strToType("SIMPLE_TRUTH_VALUE") == SIMPLE_TRUTH_VALUE);
         TS_ASSERT(TruthValue::strToType("INDEFINITE_TRUTH_VALUE") == INDEFINITE_TRUTH_VALUE);
         TS_ASSERT(TruthValue::strToType("COMPOSITE_TRUTH_VALUE") == COMPOSITE_TRUTH_VALUE);
@@ -107,7 +108,7 @@ public:
     }
 
     void testFactoryCharPtr() {
-        //printf("testFactoryCharPtr()\n");
+        //logger().debug("testFactoryCharPtr()");
         std::string tvStr;
         for (int i = 0; i < NUM_TVS; i++) {
             tvStr = TruthValue::typeToStr(tvs[i]->getType());
@@ -123,7 +124,7 @@ public:
 
     //static TruthValue* factory(TruthValueType, char *);
     void testFactoryTruthValueTypeCharPtr() {
-        //printf("testFactoryTruthValueTypeCharPtr()\n");
+        //logger().debug("testFactoryTruthValueTypeCharPtr()");
         for (int i = 0; i < NUM_TVS; i++) {
             TruthValue* tv = TruthValue::factory(tvs[i]->getType(), tvs[i]->toString().c_str());
             TS_ASSERT(tv->getType() == tvs[i]->getType());
@@ -134,7 +135,7 @@ public:
     }
 
     void testMerge() {
-        printf("testMerge()\n");
+        //logger().debug("testMerge()");
         TruthValue* mergedTv;
         TruthValue* simpleTvs[NUM_TVS];
         float simpleMeans[NUM_TVS];
@@ -158,13 +159,13 @@ public:
                     TS_ASSERT(mergedTv != simpleTvs[i]);
                     TS_ASSERT(mergedTv != simpleTvs[j]);
                     TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[j]) <= FLOAT_ACCEPTABLE_ERROR);
-                    //printf("mergedTv->getCount() = %f, simpleCounts[j] = %f\n", mergedTv->getCount(), simpleCounts[j]);
+                    //logger().debug("mergedTv->getCount() = %f, simpleCounts[j] = %f", mergedTv->getCount(), simpleCounts[j]);
                     TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[j]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[j] ) <= FLOAT_ACCEPTABLE_ERROR);
                     delete mergedTv;
                 } else {
                     TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                    //printf("mergedTv->getCount() = %f, simpleCounts[i] = %f\n", mergedTv->getCount(), simpleCounts[i]);
+                    //logger().debug("mergedTv->getCount() = %f, simpleCounts[i] = %f", mergedTv->getCount(), simpleCounts[i]);
                     TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[i]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[i] ) <= FLOAT_ACCEPTABLE_ERROR);
                 }
@@ -220,14 +221,14 @@ public:
             indefiniteConfidences[i] = indefiniteTvs[i]->getConfidence();
         }
         for (int i = 0; i < NUM_TVS; i++) {
-            //printf("calling indefiniteTvs[%d]->merge(...)\n", i);
+            //logger().debug("calling indefiniteTvs[%d]->merge(...)", i);
             TruthValue* tv = tvs[i];
             TruthValue* indefiniteTv = indefiniteTvs[i];
             TruthValue* mergedTv = tv->merge(*indefiniteTv);
             if (indefiniteConfidences[i] > confidences[i]) {
                 TS_ASSERT(mergedTv != indefiniteTv);
                 TS_ASSERT(fabs(mergedTv->getMean()  - indefiniteMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
-//printf("mergedTv->getCount() =%f, indefiniteCounts[i] = %f\n", mergedTv->getCount(), indefiniteCounts[i]);
+                //logger().debug("mergedTv->getCount() =%f, indefiniteCounts[i] = %f", mergedTv->getCount(), indefiniteCounts[i]);
                 TS_ASSERT(fabs(mergedTv->getCount() - indefiniteCounts[i]) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
                 TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
                 if (tvs[i]->getType() != COMPOSITE_TRUTH_VALUE) {
@@ -238,7 +239,7 @@ public:
                     TS_ASSERT(mergedTv->getType() == COMPOSITE_TRUTH_VALUE);
                 }
             } else {
-                //printf("mergedTv->getType() = %d(%s), tv->getType() = %d(%s)\n", mergedTv->getType(), TruthValue::typeToStr(mergedTv->getType()), tv->getType(), TruthValue::typeToStr(tv->getType()).c_str());
+                //logger().debug("mergedTv->getType() = %d(%s), tv->getType() = %d(%s)", mergedTv->getType(), TruthValue::typeToStr(mergedTv->getType()), tv->getType(), TruthValue::typeToStr(tv->getType()).c_str());
                 TS_ASSERT(mergedTv->getType() == tv->getType());
                 TS_ASSERT(fabs(mergedTv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(mergedTv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);

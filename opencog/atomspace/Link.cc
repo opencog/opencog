@@ -44,7 +44,7 @@ using namespace opencog;
 
 void Link::init(void) throw (InvalidParamException)
 {
-    if (!ClassServer::isAssignableFrom(LINK, type)) {
+    if (!ClassServer::isA(type, LINK)) {
 #ifndef USE_STD_VECTOR_FOR_OUTGOING
         if (outgoing) free(outgoing);
 #endif
@@ -87,14 +87,15 @@ std::string Link::toShortString(void) const
 #define BUFSZ 1024
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "[%d %s", type, (getFlag(HYPOTETHICAL_FLAG) ? "h " : ""));
+    snprintf(buf, BUFSZ, "[%s %s", ClassServer::getTypeName(type).c_str(),
+             (getFlag(HYPOTETHICAL_FLAG) ? "h " : ""));
     answer += buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
-        answer += ClassServer::isAssignableFrom(NODE, TLB::getAtom(outgoing[i])->getType()) ?
+        answer += ClassServer::isA(TLB::getAtom(outgoing[i])->getType(), NODE) ?
                   ((Node*) TLB::getAtom(outgoing[i]))->getName() :
                   ((Link*) TLB::getAtom(outgoing[i]))->toShortString();
     }
@@ -112,7 +113,8 @@ std::string Link::toString(void) const
     std::string answer;
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "link[%d sti:(%d,%d) tv:(%f,%f) ", type,
+    snprintf(buf, BUFSZ, "link[%s sti:(%d,%d) tv:(%f,%f) ",
+             ClassServer::getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().getMean(),
@@ -130,7 +132,8 @@ std::string Link::toString(void) const
             Atom *a = TLB::getAtom(outgoing[i]);
             Node *nnn = dynamic_cast<Node *>(a);
             if (nnn) {
-                snprintf(buf, BUFSZ, "[%d ", a->getType());
+                snprintf(buf, BUFSZ, "[%s ",
+                         ClassServer::getTypeName(a->getType()).c_str());
                 answer += buf;
                 answer += nnn->getName();
                 answer += "]";
@@ -158,9 +161,9 @@ bool Link::isSource(Handle handle) throw (InvalidParamException)
     // On ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the handle given is equal to the first position,
     // true is returned.
-    if (ClassServer::isAssignableFrom(ORDERED_LINK, type)) {
+    if (ClassServer::isA(type, ORDERED_LINK)) {
         return getArity() > 0 && outgoing[0] == handle;
-    } else if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+    } else if (ClassServer::isA(type, UNORDERED_LINK)) {
         // if the links is unordered, the outgoing set is scanned, and the
         // method returns true if any position is equal to the handle given.
         for (int i = 0; i < getArity(); i++) {
@@ -183,9 +186,9 @@ bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
 
     // on ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the int passed is 0, true is returned.
-    if (ClassServer::isAssignableFrom(ORDERED_LINK, type)) {
+    if (ClassServer::isA(type, ORDERED_LINK)) {
         return i == 0;
-    } else if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+    } else if (ClassServer::isA(type, UNORDERED_LINK)) {
         // on unordered links, the only thing that matter is if the int passed
         // is valid (if it is within 0..arity).
         return true;
@@ -200,14 +203,14 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     // source of the link. The other positions are targets. So, it scans the
     // outgoing set from the second position searching for the given handle. If
     // it is found, true is returned.
-    if (ClassServer::isAssignableFrom(ORDERED_LINK, type)) {
+    if (ClassServer::isA(type, ORDERED_LINK)) {
         for (int i = 1; i < getArity(); i++) {
             if (outgoing[i] == handle) {
                 return true;
             }
         }
         return false;
-    } else if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+    } else if (ClassServer::isA(type, UNORDERED_LINK)) {
         // if the links is unordered, all the outgoing set is scanned.
         for (int i = 0; i < getArity(); i++) {
             if (outgoing[i] == handle) {
@@ -229,9 +232,9 @@ bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
 
     // on ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets.
-    if (ClassServer::isAssignableFrom(ORDERED_LINK, type)) {
+    if (ClassServer::isA(type, ORDERED_LINK)) {
         return i != 0;
-    } else if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+    } else if (ClassServer::isA(type, UNORDERED_LINK)) {
         // on unorderd links, the only thing that matter is if the position is
         // valid.
         return true;

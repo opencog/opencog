@@ -29,12 +29,13 @@
 
 #include <string>
 
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/classes.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/HandleEntry.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
 
 // #define USE_STD_VECTOR_FOR_OUTGOING

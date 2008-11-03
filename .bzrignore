@@ -7,6 +7,9 @@ opencog.log
 examples/extending/derivedserver
 examples/hopfield/hopfield
 examples/server/derivedserver
+examples/atomtypes/atom_types.definitions
+examples/atomtypes/atom_types.h
+examples/atomtypes/atom_types.inheritance
 
 # cmake
 CMakeCache.txt
