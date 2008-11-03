@@ -288,7 +288,12 @@ scm
 ; such ReferenceLink in the system, total. This is wrong !!!
 ;
 (define (cog-get-reference refptr)
-   (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink refptr)))
+   (let ((lst (cog-chase-link 'ReferenceLink 'ListLink refptr)))
+		(if (null? lst)
+			'()
+   		(cog-outgoing-set (car lst))
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------
