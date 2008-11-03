@@ -11,4 +11,5 @@ PORT=17001
 cat nlp-utils.scm |netcat $HOST $PORT
 cat disjunct-list.scm |netcat $HOST $PORT
 cat stats-collection.scm |netcat $HOST $PORT
+cat file-process.scm |netcat $HOST $PORT
 
