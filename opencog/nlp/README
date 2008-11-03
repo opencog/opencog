@@ -32,6 +32,16 @@ chain, and is solved as such, looking for a stationary vector of
 probabilities for the word-sense verticies. The verticies with the 
 highest scores are then the most likely meaning for a word.
 
+Input file format
+-----------------
+This style of input may be produced in one of two ways. It is produced
+directly by RelEx, when using the opencog output format: the -o flag
+appeneded to the relex.RelationExtractor executable. The other way is
+indirect, but can be considerably more convenient: First, parse text
+using the  relex.WebFormat module, to create the "compact file format".
+Then, use the relex/src/perl/cff-to-opencog.pl perl script to convert 
+this to the final output. 
+
 -----------------------------------------------------------------
 References:
 "To verbize one's nouns" -- the concept of "Lexical Implication Rules": 
