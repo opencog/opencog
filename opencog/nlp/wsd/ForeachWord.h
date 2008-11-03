@@ -228,6 +228,24 @@ inline Handle get_dict_word_of_word_instance(Handle h)
 }
 
 /**
+ * Return the dictionary-word, in lemma form, correspondng to a given word-instance.
+ *
+ * Each word-instance is assumed to be link to a single WordNode via
+ * a LemmaLink:
+ *
+ *    LemmaLink
+ *      ConceptNode "was@169"
+ *      WordNode "is"
+ */
+inline Handle get_lemma_of_word_instance(Handle h)
+{
+	Atom *word_instance = TLB::getAtom(h);
+	FollowLink fl;
+	Atom *dict_word = fl.follow_binary_link(word_instance, LEMMA_LINK);
+	return TLB::getHandle(dict_word);
+}
+
+/**
  * Follow sense edges.
  * It is assumed that the incoming handle is a (inst,sense) pair.
  * The callback is invoked for each edge, passing the far pair

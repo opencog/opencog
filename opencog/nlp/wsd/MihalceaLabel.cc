@@ -55,7 +55,7 @@ void MihalceaLabel::annotate_parse(Handle h)
 	total_labels = 0;
 	foreach_word_instance(h, &MihalceaLabel::annotate_word, this);
 #ifdef DEBUG
-	printf("; Applied %d word-sense labels to %d words\n", total_labels, total_words);
+	printf("; MihalceaLabel: Applied %d word-sense labels to %d words\n", total_labels, total_words);
 	printf("; ---------------------------------\n");
 #endif
 }
@@ -86,7 +86,7 @@ bool MihalceaLabel::annotate_word(Handle h)
 	if (0 == word_inst_pos.compare("prep")) return false;
 	if (0 == word_inst_pos.compare("punctuation")) return false;
 
-	Handle dict_word_h = get_dict_word_of_word_instance(h);
+	Handle lemma_h = get_lemma_of_word_instance(h);
 
 #ifdef DEBUG
 	total_words ++;
@@ -94,12 +94,12 @@ bool MihalceaLabel::annotate_word(Handle h)
 	printf("; MihalceaLabel::annotate_word(%lx)\n", (unsigned long) h);
 	printf("; found word-inst %s\n",  n->toString().c_str());
 	printf(";\thas inst-POS %s\n",  word_inst_pos.c_str());
-	n = dynamic_cast<Node *>(TLB::getAtom(dict_word_h));
+	n = dynamic_cast<Node *>(TLB::getAtom(lemma_h));
 	printf(";\thas word-dict %s\n",  n->toString().c_str());
 #endif
 
 	// loop over all word senses with this part-of-speech.
-	foreach_dict_word_sense_pos(dict_word_h, word_inst_pos,
+	foreach_dict_word_sense_pos(lemma_h, word_inst_pos,
 	                        &MihalceaLabel::annotate_word_sense, this);
 	return false;
 }
