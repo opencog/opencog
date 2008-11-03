@@ -12,27 +12,32 @@ scm
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
 
-(define (cvt-file filename)
+; ---------------------------------------------------------------------
+; Read in data from RelEx "compact file format" file, convert it to
+; opencog format (using the perl script "cff-to-opencog.pl"), and
+; then load it into opencog.
+;
+(define (load-cff-data filename)
 
-	(define (suck-in-data port str)
+	; Suck in a bunch of ASCII text off of a port, until the port is
+	; empty (#eof) and return a string holding the port (file) contents.
+	(define (suck-in-text port str)
 		(let ((one-line (read-line port)))
 			(if (eof-object? one-line)
 				str
-				(suck-in-data port 
+				(suck-in-text port 
 					(string-join (list str one-line "\n"))
 				)
 			)
 		)
 	)
 
-	; (cmd (string-join (list "cat" filename " | " cff-to-opencog-exe)))
-	(let* ((cmd (string-join (list "cat" filename)))
+	(let* ((cmd (string-join (list "cat" filename " | " cff-to-opencog-exe)))
 			(port (open-input-pipe cmd))
+			(data (suck-in-text port ""))
 		)
-(display
-		(suck-in-data port "")
-)
 		(close-pipe port)
+		(eval-string data)
 	)
 )
 
