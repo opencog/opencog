@@ -68,7 +68,7 @@ scm
 		)
 	)
 
-	(let* ((cmd (string-join (list "cat" filename " | " cff-to-opencog-exe)))
+	(let* ((cmd (string-join (list "cat \"" filename "\" | " cff-to-opencog-exe) ""))
 			(port (open-input-pipe cmd))
 			(data (suck-in-text port ""))
 		)
@@ -96,7 +96,7 @@ scm
 			(display filename) (newline)
 			(load-cff-data fullname)
 			(ldj-process)
-			(system (string-join (list "mv" fullname donename)))
+			(system (string-join (list "mv \"" fullname "\" \"" donename "\"") ""))
 		)
 	)
 	

@@ -9,3 +9,6 @@ the shell file "load.sh" in order to load various basic opencog-related
 definitions and modules.
 
 The "wiring" or "cgw" subsystem is explained in "WIRING-README"
+
+Handy hints:
+(turn-on-debugging)
