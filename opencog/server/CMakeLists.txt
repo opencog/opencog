@@ -1,5 +1,3 @@
-SET(CMAKE_BUILD_TYPE Debug)
-
 INCLUDE_DIRECTORIES (
 	${CSOCKETS_INCLUDE_DIRS}
 	${ODBC_INCLUDE_DIRS}
@@ -21,7 +19,6 @@ ADD_LIBRARY (builtinreqs SHARED
 TARGET_LINK_LIBRARIES(builtinreqs
 	xml
 	${EXPAT_LIBRARIES}
-	smob
 )
 
 ADD_LIBRARY (server SHARED
@@ -30,15 +27,11 @@ ADD_LIBRARY (server SHARED
 	Request
 	NetworkServer
 	ConsoleSocket
-	GenericShell
-	SchemeShell
-	load-file
 )
 
 TARGET_LINK_LIBRARIES(server
 	util
 	atomspace
-	smob
 )
 
 # to ease testing/debugging modules on the source tree
@@ -52,7 +45,6 @@ ADD_EXECUTABLE(cogserver
 
 TARGET_LINK_LIBRARIES(cogserver
 	server
-	smob
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
