@@ -35,7 +35,7 @@ discover such rules, as best as possible, assign them likelyhoods and
 weights that correspond to thier suitability in any given linguistic
 situation.
 
-There are then four practical considerations to aceiving the above
+There are then four practical considerations to acheiving the above
 program:
 1) Understanding how to represent "rules" as OpenCog hypergraphs
 2) Having a "rule engine" that can apply these rules.
@@ -61,5 +61,68 @@ progress, and are thus tackled first.
 
 Representing IF...THEN constructs in Opencog
 ============================================
+The core idea is to find patterns in text, and then create new patterns
+as a result. As the simplest example, a "pattern" would be finding all
+instances of a noun in some block of text, assuming that all of these
+nouns refer to the same thing, and so creating a ConceptNode that
+encompases all of these noun instances.  This can be crudely represented
+as the pseudo-code:
 
+   IF (for-all parses of all sentences in same document)
+       AND (word-instance-1 == noun)
+       AND (word-of-word-instance-2 == word-of-word-instance-1) 
+       AND ...
+       AND (word-of-word-instance-k == word-of-word-instance-1)
+   THEN (create concept-node encompassing word-instances 1 thru k)
 
+It would be "easiest" to code up above in C++ or Scheme (or Java or 
+Python or ...) but this missses the point: The opencog system will 
+need to be able to modify the above rule (or algorithm) based on
+learned, statistical experience, for example, by adding more 
+AND-clauses to refine the action. 
+
+Another example: The consistency of this reference assignment can be 
+checked using the following pseudo-code:
+
+   IF (word-instance-1 is-grouped-wth word-instance-2 in same concept)
+      AND (word-instance-1 has property-A)
+      AND (word-instance-2 has property-B)
+      AND (property-A is inconnsistent with property-B)
+   THEN (word-instance-1 and word-instance-2 should be ungrouped,
+        and are probably distinct concepts)
+
+The above pseudocode would help resolve text such as "Jurate held a red
+balloon. Kastytis held a green balloon." The intitial reference
+resolution would assign both word instances to the same object-instance
+(i.e. assume that both words refer to just one balloon). The consistency
+checker would note that the the color property is inconsistent, and thus
+conclude that these are probably not refering to the same object. (And
+tus, the combined-concept should be assigned a truth value close to
+"false", and two new, distinct object-instance-concepts should be
+created.
+
+The core OpenCog nodes and links to be used to represent such rules are:
+   VariableNode  -- to indicate a variable
+   ImplicationLink -- to represent an if..then.. relationship.
+
+Thus
+
+   "If the case is near the mouse and the cat is hungry, the cat will
+   eat the mouse".
+
+   ImplicationLink
+   ___ANDLink
+   ______ Inheritance $var0 cat
+   ______ Inheritance $var0 hungry
+   ______ EvaluationLink
+   ___________ Node near
+   ___________ ListLink
+   _______________VariableNode $var1
+   _______________VariableNode $var0
+   ______ InheritanceLink $var1 mouse
+   ___EvaluationLink
+   ______Node eat
+   ___________VariableNode $var0
+   ___________VaraibleNode $var1
+   
+   
