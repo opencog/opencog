@@ -1,8 +1,8 @@
 
-                    Reference Resolution
-                    --------------------
-                        October 2008
-                        Linas Vepstas
+                         Reference Resolution
+                         --------------------
+                             October 2008
+                             Linas Vepstas
 
 The core problem of reference resolution is determining when two words
 in a text refer to the same concept. Thus, for example, the same noun,
@@ -14,5 +14,52 @@ This README file contains some working notes on how reference resolution
 might be accomplished within the current OpenCog infrastructure. These
 notes may at times be incoherent or disconnnected; this is a
 work-in-progress.
+
+Overview
+========
+The current plan is to perform reference resolution using a collection
+of "rules" or "proceedures" to recognize likely co-referents, and then
+to check for reference consistency using reasoning. An example of a set
+of rules is the "Hobbs algorithm" for anaphora resolution. 
+
+The goal here is to implement all of these rules/algorithms as a set of 
+OpenCog hypergraphs. The reason for doing this is to allow the system to
+automatically learn, reinforce, and modify these sets of rules.  Thus,
+for example, the Hobbs algo has been implemented in Java, as a part of 
+the RelEx package. However, if changes are needed to this algorithm are
+needed, then only a human programmer is capable of performing these
+changes, as only a human programmer can (currently) understand Java and 
+make meaningful modifications to Java code.  By contrast, the goal here
+is to perform a statistical analysis of text, and to automatically
+discover such rules, as best as possible, assign them likelyhoods and
+weights that correspond to thier suitability in any given linguistic
+situation.
+
+There are then four practical considerations to aceiving the above
+program:
+1) Understanding how to represent "rules" as OpenCog hypergraphs
+2) Having a "rule engine" that can apply these rules.
+3) Having a persistent database that can accumulate statistical
+   information about the usage of these rules,
+4) Having a "perception" system that can spot rules ("features") 
+   that have been useful, and further refine them, or spot weak
+   rules, and reject them.
+
+The fourth step seems to be the vaguest at this point. I hope to
+combine ideas making use of mutual information, Markov networks and
+Markov logic networks, and heirarchical feature selection to accomplish
+this. The general idea is to be able to spot commonly-occuring patterns
+or features, in much the same way that one might find patterns in
+genetic data. 
+
+It is expected that the system will be initially primed with a number
+of hand-generated rules.
+
+The first three issues are significant, practical barrirers to further
+progress, and are thus tackled first.
+
+
+Representing IF...THEN constructs in Opencog
+============================================
 
 
