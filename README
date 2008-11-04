@@ -7,23 +7,41 @@ It currently consists of only the barest of essentials.
 
 Prerequisites:
 --------------
-To build and run OpenCog, the following pacakges are required:
-cmake       -- a build management tool -- http://www.cmake.org/
-cxxtest     -- a test framework -- http://cxxtest.sourceforge.net/
+To build and run OpenCog, the following pacakges are required. With a
+few exceptions, most Linux distributions will have these packages.
+
+cmake       -- a build management tool
+               http://www.cmake.org/
+               Debian/Ubuntu package cmake
+
+cxxtest     -- a test framework
+               http://cxxtest.sourceforge.net/
+               (Not available in Debian/Ubuntu, must be downloaded)
+
+boost       -- a C++ utilities package -
+               http://www.boost.org/
+               Debian/Ubuntu package libboost-dev
+
+C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
+               http://www.alhem.net/Sockets/
+               (Not available in Debian/Ubuntu, must be downloaded)
 
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
                Debian/Ubuntu package libxmltok1-dev (supplies expat v1.2)
                Version 2 seems to work as well.  http://expat.sourceforge.net/
 
-C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
-               http://www.alhem.net/Sockets/
+guile       -- Embedded scheme interperter
+               http://www.gnu.org/software/guile/guile.html
+               Debian/Ubuntu package guile-1.8-dev
+
+iodbc       -- Generic SQL Database client access libraries
+               http://www.iodbc.org/
+               Debian/Ubuntu packages iodbc-dev or unixodbc-dev
 
 openssl     -- SSL sockets library 
                Debian/Ubuntu package libssl-dev
 
-iodbc       -- http://www.iodbc.org/
-               Debian/Ubuntu packages iodbc-dev or unixodbc-dev
 
 To build opencog:
 -----------------
