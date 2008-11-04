@@ -124,5 +124,68 @@ Thus
    ______Node eat
    ___________VariableNode $var0
    ___________VaraibleNode $var1
+
+
+In practical terms, this could be verbose. Consider two word instances,
+using the current RelEx output format.
+
+In the following, we will use the word "axiom" for "rule".
+
+	(VariableScopeLink
+		; A list of the variables in the "rule" or "axiom".
+		; This list essentially acts as a type declaration for 
+		; the variables in thins axiom.
+		(ListLink
+			; Type declaration: $word-inst-0 is a word instance
+			(WordInstanceNode $word-inst-0)
+			(WordInstanceNode $word-inst-1)
+
+			; The variable $word *must* be a WordNode
+			(WordNode $word)
+		)
+
+		; What follows is a conjunction of expressions
+		; that must be satisfied for this "axiom" to hold.
+   	(AndLink 
+
+			; The word-instance must be nouns.
+      	(PartOfSpeechLink
+         	(VariableNode $word-inst-0)
+         	(DefinedLinguisticConceptNode "noun")
+      	)
+      	(PartOfSpeechLink
+         	(VariableNode $word-inst-1)
+         	(DefinedLinguisticConceptNode "noun")
+      	)
+
+			; The word-instances must refer to the same word.
+      	(LemmaLink
+         	(VariableNode $word-inst-0)
+         	(VariableNode $word)
+      	)
+      	(LemmaLink
+         	(VariableNode $word-inst-1)
+         	(VariableNode $word)
+      	)
+      
+			; The word-instances must belone to the same document
+         (ReferenceLink
+            (ParseNode $parse-0)
+				(ListLink
+					(VariableNode $word-inst-0)
+				)
+			)
+
+xxxxxxxxxx unfinished
+ 
    
    
+   
+Application of Rules
+====================
+Possibilities:
+1) Adapt existing "query" code, which does general pattern matching,
+   (i.e. is capable of matching to VariableNodes) to be able to apply
+   above rules.
+
+2) Make use of PLN forward or backward chainers to do same.
