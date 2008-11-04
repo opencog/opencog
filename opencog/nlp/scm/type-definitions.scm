@@ -14,13 +14,14 @@ scm
 ; The list of inflections is incomplete.
 ; The list of entities (person, locatin, date, money) is incomplete.
 ; The place to check for completeness is on the RelEx wiki page,
-; documenting these things.
+; documenting these things. See
+; http://opencog.org/wiki/RelEx_Semantic_Relationship_Extractor
 ; 
 ; In alphabetic order.
 ;
 ;; -------------------------------------------------------------------
 ; DEFINITE-FLAG in RelEx
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "definite")
 	(ConceptNode "DefinedLinguisticConcept-Determiner")
 )
@@ -28,17 +29,17 @@ scm
 ;; -------------------------------------------------------------------
 ; gender in RelEx
 ;
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "feminine")
 	(ConceptNode "DefinedLinguisticConcept-Gender")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "masculine")
 	(ConceptNode "DefinedLinguisticConcept-Gender")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "neuter")
 	(ConceptNode "DefinedLinguisticConcept-Gender")
 )
@@ -46,7 +47,7 @@ scm
 ;; -------------------------------------------------------------------
 ; HYP in RelEx
 ;
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "hyp")
 	(ConceptNode "DefinedLinguisticConcept-Hypothetical")
 )
@@ -56,85 +57,85 @@ scm
 ;
 ; XXX these should probably be replaced by a new InflectionNode,
 ; as there will likely be a lot of these, too many to list ? XXX
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode ".a")
 	(ConceptNode "DefinedLinguisticConcept-Inflection")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode ".f")
 	(ConceptNode "DefinedLinguisticConcept-Inflection")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode ".g")
 	(ConceptNode "DefinedLinguisticConcept-Inflection")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode ".n")
 	(ConceptNode "DefinedLinguisticConcept-Inflection")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode ".v")
 	(ConceptNode "DefinedLinguisticConcept-Inflection")
 )
 
 ;; -------------------------------------------------------------------
 ; noun_number in RelEx
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "plural")
 	(ConceptNode "DefinedLinguisticConcept-NounNumber")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "singular")
 	(ConceptNode "DefinedLinguisticConcept-NounNumber")
 )
 
 ;; -------------------------------------------------------------------
 ; Part-of-speech
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "det")
 	(ConceptNode "DefinedLinguisticConcept-PartOfSpeech")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "noun")
 	(ConceptNode "DefinedLinguisticConcept-PartOfSpeech")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "prep")
 	(ConceptNode "DefinedLinguisticConcept-PartOfSpeech")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "punctuation")
 	(ConceptNode "DefinedLinguisticConcept-PartOfSpeech")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "verb")
 	(ConceptNode "DefinedLinguisticConcept-PartOfSpeech")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "WORD")
 	(ConceptNode "DefinedLinguisticConcept-PartOfSpeech")
 )
 
 ;; -------------------------------------------------------------------
 ; person-FLAG in RelEx
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "person")
 	(ConceptNode "DefinedLinguisticConcept-Person")
 )
 
 ;; -------------------------------------------------------------------
 ; PRONOUN-FLAG in RelEx
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "pronoun")
 	(ConceptNode "DefinedLinguisticConcept-Pronoun")
 )
@@ -143,17 +144,17 @@ scm
 ; tense in RelEx
 ; XXX this list is highly incomplete
 ;
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "past")
 	(ConceptNode "DefinedLinguisticConcept-Tense")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "present")
 	(ConceptNode "DefinedLinguisticConcept-Tense")
 )
 
-(InheritenceLink
+(InheritanceLink
 	(DefinedLinguisticConceptNode "progressive")
 	(ConceptNode "DefinedLinguisticConcept-Tense")
 )
