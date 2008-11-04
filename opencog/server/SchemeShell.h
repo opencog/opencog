@@ -49,8 +49,12 @@ class SchemeShell : public GenericShell
 	public:
 		SchemeShell(void);
 		virtual ~SchemeShell();
-		void hush_output(bool);
+
+		virtual const char *id(void);
+		virtual void init(void);
 		virtual void eval(const std::string &, GenericSocket&);
+
+		void hush_output(bool);
 };
 
 }

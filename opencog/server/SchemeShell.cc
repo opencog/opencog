@@ -39,6 +39,8 @@ using namespace opencog;
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
 
+DECLARE_MODULE(SchemeShell);
+
 SchemeShell::SchemeShell(void)
 {
 	show_output = true;
@@ -50,6 +52,10 @@ SchemeShell::SchemeShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
+}
+
+void SchemeShell::init(void)
+{
 }
 
 SchemeShell::~SchemeShell()

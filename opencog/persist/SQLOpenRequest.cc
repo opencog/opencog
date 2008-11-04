@@ -55,7 +55,7 @@ bool SQLOpenRequest::execute()
         if (store) {
             CogServer& cogserver = static_cast<CogServer&>(server());
             PersistModule* persist =
-                static_cast<PersistModule*>(cogserver.getModule(PersistModule::id()));
+                static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
             persist->setStore(store);
 
             oss << "done" << std::endl;

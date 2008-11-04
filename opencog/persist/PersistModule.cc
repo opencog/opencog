@@ -28,12 +28,9 @@
 
 using namespace opencog;
 
-// load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()                   { return PersistModule::id(); }
-extern "C" Module*     opencog_module_load()                 { return new PersistModule(); }
-extern "C" void        opencog_module_unload(Module* module) { delete module; }
+DECLARE_MODULE(PersistModule);
 
-PersistModule::PersistModule() : store(NULL)
+PersistModule::PersistModule(void) : store(NULL)
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(SQLOpenRequest::info().id,  &sqlopenFactory);
@@ -51,7 +48,7 @@ PersistModule::~PersistModule()
     cogserver.unregisterRequest(SQLStoreRequest::info().id);
 }
 
-void PersistModule::init()
+void PersistModule::init(void)
 {
 }
 
@@ -60,7 +57,7 @@ void PersistModule::setStore(AtomStorage* as)
     store = as;
 }
 
-AtomStorage* PersistModule::getStore()
+AtomStorage* PersistModule::getStore(void)
 {
     return store;
 }

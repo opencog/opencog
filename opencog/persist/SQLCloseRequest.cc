@@ -50,7 +50,7 @@ bool SQLCloseRequest::execute()
     if (_parameters.empty()) {
         CogServer& cogserver = static_cast<CogServer&>(server());
         PersistModule* persist =
-            static_cast<PersistModule*>(cogserver.getModule(PersistModule::id()));
+            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
         AtomStorage* store = persist->getStore();
         if (store == NULL) oss << "error: invalid SQL storage" << std::endl;
         else {

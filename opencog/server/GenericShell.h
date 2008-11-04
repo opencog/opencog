@@ -27,10 +27,11 @@
 
 #include <opencog/socket/GenericSocket.h>
 #include <opencog/socket/GenericModule.h>
+#include "Module.h"
 
 namespace opencog {
 
-class GenericShell
+class GenericShell : public Module
 {
 	friend class GenericModule;
 	friend class GenericSocket;
@@ -42,8 +43,9 @@ class GenericShell
 
 	public:
 		GenericShell(void);
-		// virtual ~GenericShell() = 0; // pure virtual
 		virtual ~GenericShell() {}
+
+		virtual const char *id(void) = 0;
 		virtual void eval(const std::string &, GenericSocket&) = 0;
 };
 

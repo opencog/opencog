@@ -51,10 +51,13 @@ private:
 
 public:
 
+    const char* id(void);
+#if 0
     static inline const char* id() {
         static const char* _id = "opencog::PersistModule";
         return _id;
     }
+#endif
 
     PersistModule();
     virtual ~PersistModule();
