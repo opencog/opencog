@@ -139,6 +139,10 @@ Notationally, these forms should be considered to be "equivalent"
 although there is a bunch of actual code that depends on the one or
 the other, cand cannot freely intermingle these cases.
 
+Not everything in the RelEx export gets its own specially-declared
+node or link type. Those that do not are explicitly declared in the
+file "src/nlp/scm/type-defninitions.scm"
+
 ======================================================================
 References:
 -----------
