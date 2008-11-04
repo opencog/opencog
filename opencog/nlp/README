@@ -50,22 +50,29 @@ the same concept.
 
 scm
 ---
-The scm directory contains some scheme scripts.
+The scm directory contains some scheme scripts. This includes scripts
+for pulling out link-grammar disjuncts from parse data, and
+storing/updating disjunct frequency counts in an SQL database. These
+frequency counts are tied to word senses, obtained via the Mihalcea
+word-sense disambiguation algo.
 
 semcor
 ------
 The semcor directory contains some trite SemCor utilities. SemCor
-is a WSJ corpus marked up with word senses.
+is a WSJ corpus marked up with word senses.  This directory is nearly
+empty and is not currently used.
 
 similarity
 ----------
-The similarity directory contains code related to similarity.
+The similarity directory contains code related to similarity of word
+senses.  Describes plans/code for storing wordnet-derived similarity
+measures within OpenCog.
 
 wordnet-import
 --------------
 The wordnet-import directory contains stand-alone code (i.e. not a part
 of opencog) that will walk over the wordnet database, and convert it 
-into OpenCog NMXML that can be leaded into opencog.
+into OpenCog Scheme, which can then be easily loaded into OpenCog.
 
 wsd
 ---
