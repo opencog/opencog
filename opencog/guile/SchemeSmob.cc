@@ -115,6 +115,7 @@ void SchemeSmob::register_procs(void)
 	// iterators
 	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
 	
+	scm_c_define_gsubr("cog-ad-hoc",            1, 0, 0, C(ss_ad_hoc));
 }
 
 #endif

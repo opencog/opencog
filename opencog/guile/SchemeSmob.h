@@ -87,7 +87,11 @@ class SchemeSmob
 		static SCM take_stv(SimpleTruthValue *);
 		static SCM ss_tv_get_value(SCM);
 
+		// Callback into misc C++ code.
+		static SCM ss_ad_hoc(SCM);
+
 		// Misc utilities
+		static std::string decode_string (SCM, const char *);
 		static std::string to_string(SCM);
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);

@@ -177,7 +177,7 @@ Type SchemeSmob::validate_node (SCM stype, const char *subrname)
 	return t;
 }
 
-static std::string decode_string (SCM sname, const char *subrname)
+std::string SchemeSmob::decode_string (SCM sname, const char *subrname)
 {
 	if (scm_is_false(scm_string_p(sname)))
 		scm_wrong_type_arg_msg(subrname, 2, sname, "string name for the node");
