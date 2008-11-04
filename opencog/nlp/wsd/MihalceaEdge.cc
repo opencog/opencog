@@ -37,8 +37,12 @@ MihalceaEdge::MihalceaEdge(void)
 #ifdef HAVE_SQL_STORAGE
 	sen_sim = new SenseSimilaritySQL();
 #else
+	fprintf (stderr, 
+		"Warning/Error: MihalceaEdge: proper operation of word-sense \n"
+		"disambiguation requires precomputed sense similarities to be\n"
+		"pulled from SQL stoarage.\n");
 	sen_sim = new SenseSimilarityLCH();
-#endif
+#endif /* HAVE_SQL_STORAGE */
 }
 
 MihalceaEdge::~MihalceaEdge()

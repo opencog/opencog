@@ -36,6 +36,5 @@ class SenseSimilaritySQL :
 
 } // namespace opencog
 
-#endif // HAVE_SQL_STORAGE
-
+#endif /* HAVE_SQL_STORAGE */
 #endif // _OPENCOG_SENSE_SIMILARITY_SQL_H

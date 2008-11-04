@@ -184,6 +184,6 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 	return stv;
 }
 
-/* ============================== END OF FILE ====================== */
+#endif /* HAVE_SQL_STORAGE */
 
-#endif // HAVE_SQL_STORAGE
+/* ============================== END OF FILE ====================== */
