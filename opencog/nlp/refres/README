@@ -41,19 +41,17 @@ program:
 2) Having a "rule engine" that can apply these rules.
 3) Having a persistent database that can accumulate statistical
    information about the usage of these rules,
-4) Having a "perception" system that can spot rules ("features")
-   that have been useful, and further refine them, or spot weak
-   rules, and reject them.
+4) Having a "perception" (or "cluster analysis" or "feature extraction")
+   system that can spot the rules that have been useful, and further
+   refine them, or spot weak rules, and reject them.
 
 The fourth step seems to be the vaguest at this point. I hope to
 combine ideas making use of mutual information, Markov networks and
 Markov logic networks, and heirarchical feature selection to accomplish
 this. The general idea is to be able to spot commonly-occuring patterns
 or features, in much the same way that one might find patterns in
-genetic data. See, for example, 
-http://en.wikipedia.org/wiki/Feature_extraction and
-http://en.wikipedia.org/wiki/Cluster_analysis
-and in particular [HCMI] (see refs at end)
+genetic data. See, [FEAT], and in particular [HCMI] (square brackets
+denote references at end of text, below).
 
 It is expected that the system will be initially primed with a number
 of hand-generated rules.
@@ -315,15 +313,20 @@ References
 ==========
 Some background reading for various keywords used here:
 
-[IMPL] Implication: See
-   http://en.wikipedia.org/wiki/Logical_implication
-
 [APPL] Apply: See
    http://en.wikipedia.org/wiki/Apply
    Also, Abelson, Sussman, SICP, section 4.1 the Meta-circular evaluator
    http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html
 
+[FEAT] Feature extraction. See
+   http://en.wikipedia.org/wiki/Feature_extraction
+   http://en.wikipedia.org/wiki/Cluster_analysis
+
 [HCMI]
    Alexander Kraskov, Harald Stögbauer, Ralph G. Andrzejak,
    Peter Grassberger, "Hierarchical Clustering Based on Mutual
    Information" (2003) http://arxiv.org/abs/q-bio/0311039
+
+[IMPL] Implication: See
+   http://en.wikipedia.org/wiki/Logical_implication
+
