@@ -66,7 +66,7 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     // parse command line
     std::list<std::string> params;
-    tokenize(line, std::back_inserter(params), " ");
+    tokenize(line, std::back_inserter(params), " \t\v\f");
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
