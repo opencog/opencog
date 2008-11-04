@@ -27,7 +27,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command)
 {
 	std::string cmdname = decode_string (command, "cog-ad-hoc");
 
-	if (cmdname.compare("do-wsd"))
+	if (0 == cmdname.compare("do-wsd"))
 	{
 		WordSenseProcessor wsp;
 		wsp.use_threads(false);
