@@ -31,24 +31,27 @@ namespace opencog
 {
 
 /**
- * This class defines the base abstract class that should be extended by all
- * opencog modules.
+ * This class defines the base abstract class that should be extended
+ * by all opencog modules.
  *
- * Since dlopen & co. provide a C API that uses runtime symbols (i.e. strings)
- * to load and unload the modules, it's not possible to enforce full compliance
- * at compile type by inheritance. The class typedefs the function signatures
- * for convenience and declares the symbol names that must be used by derived
- * modules, but the actual creation and destruction functions cannot checked at
- * compile time. The only compile time check that is made is the init() method,
- * which is a late initialization entry point that modules can use to initialize
- * structures that depend on the module's constructor being completed and/or the
- * module's metadata (id, filename, function pointers, etc).
+ * Since dlopen & co. provide a C API that uses runtime symbols
+ * (i.e. strings) to load and unload the modules, it's not possible to
+ * enforce full compliance at compile type by inheritance. The class
+ * typedefs the function signatures for convenience and declares the
+ * symbol names that must be used by derived modules, but the actual
+ * creation and destruction functions cannot checked at compile time.
+ * The only compile time check that is made is the init() method,
+ * which is a late initialization entry point that modules can use to
+ * initialize structures that depend on the module's constructor being
+ * completed and/or the module's metadata (id, filename, function 
+ * pointers, etc).
  *
- * That said, creating a proper module is fairly simple and only requires 2 simple
- * steps:
+ * That said, creating a proper module is fairly simple and only
+ * requires 2 simple steps:
  *
- * 1. Define a class that derives from opencog::Module. It must provide a static
- * 'const char*' member which will be used to identify this module.
+ * 1. Define a class that derives from opencog::Module. It must provide
+ * a static 'const char*' member which will be used to identify this
+ * module.
  *
  * // DerivedModule.h
  * #include <opencog/server/Module.h>
@@ -62,14 +65,17 @@ namespace opencog
  *
  * // DerivedModule.cc
  * #include "DerivedModule.h"
- * extern "C" const char* opencog_module_id()              { return DerivedModule::id; }
- * extern "C" Module*     opencog_module_load()            { return new DerivedModule(); }
- * extern "C" void        opencog_module_unload(Module* m) { delete m; }
+ * extern "C" const char* opencog_module_id()              
+ *          { return DerivedModule::id; }
+ * extern "C" Module*     opencog_module_load()
+ *          { return new DerivedModule(); }
+ * extern "C" void        opencog_module_unload(Module* m)
+ *          { delete m; }
  *
- * To implement the module's functionality, you will probably want to write
- * a custom constructor and destructor and perhaps overrite the init() method
- * (which is called by the cogserver) after the module's initialization has
- * finished and the meta-data properly set.
+ * To implement the module's functionality, you will probably want to
+ * write a custom constructor and destructor and perhaps overrite the
+ * init() method (which is called by the cogserver) after the module's
+ * initialization has finished and the meta-data properly set.
  */
 
 class Module
@@ -77,9 +83,21 @@ class Module
 
 public:
 
-    static const char* id_function_name()     { static const char* s = "opencog_module_id";     return s; }
-    static const char* load_function_name()   { static const char* s = "opencog_module_load";   return s; }
-    static const char* unload_function_name() { static const char* s = "opencog_module_unload"; return s; }
+    static const char* id_function_name(void)
+    {
+         static const char* s = "opencog_module_id";
+         return s;
+    }
+    static const char* load_function_name(void)
+    {
+        static const char* s = "opencog_module_load";
+        return s;
+    }
+    static const char* unload_function_name(void)
+    {
+        static const char* s = "opencog_module_unload";
+        return s;
+    }
 
     typedef const char* IdFunction    (void);
     typedef Module*     LoadFunction  (void);
