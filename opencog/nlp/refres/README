@@ -1,0 +1,18 @@
+
+                    Reference Resolution
+                    --------------------
+                        October 2008
+                        Linas Vepstas
+
+The core problem of reference resolution is determining when two words
+in a text refer to the same concept. Thus, for example, the same noun,
+used in neighboring sentences, probably refers to the same concept.
+Alternately, anaphora (he, she, it, etc.) may also be used to refer to
+the same concept.
+
+This README file contains some working notes on how reference resolution
+might be accomplished within the current OpenCog infrastructure. These
+notes may at times be incoherent or disconnnected; this is a
+work-in-progress.
+
+

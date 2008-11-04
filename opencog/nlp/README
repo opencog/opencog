@@ -5,23 +5,65 @@
 
 This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on word sense
-disambiguation.
+disambiguation and reference resolution.
 
+How-To
+======
+The current code "doesn't do anything yet"; rather, it is a platform for
+running experiments. Thus, what is contained here should be thought of
+as a "bag of parts".  It is up to you to figure out what these parts
+are, and to assemble them into something meaningful.
+
+Currently, the basic experimental flow is as follows:
+ * Download and compile opencog, relex, lexical-attraction from
+   launchpad.
+ * Create a bunch of SQL tables, as specified in the lexical-attr 
+   package.
+ * Parse a bunch of English text, using relex, to obtain frequency
+   counts.
+ * Run the scripts in the wordnet-import directory to load opencog
+   with basic wordnet relationships.
+ * Run "src/scm/load.sh" and "src/nlp/scm/load-nlp.sh" to load basic
+   scheme utilities.
+ * Get to the scheme prompt, and run "(doit)". This will run the
+   current word-sense disambiguation code, and will populate the 
+   databases with statistical results.  Caution; this is extremely 
+   CPU-intensive.
+
+
+Subdirectories (in alphabetical order)
+======================================
+lexical_attraction
+------------------
 The lexical-attraction directory contains a REAME file containing a
 short overview of Yuret's lexical attraction algorithm. A variant of
 this algo was implemented in java, in the lextat project on launchpad.
 
+refres
+------
+Some working notes on reference resolution.
+
+scm
+---
 The scm directory contains some scheme scripts.
 
+semcor
+------
 The semcor directory contains some trite SemCor utilities. SemCor
 is a WSJ corpus marked up with word senses.
 
+similarity
+----------
 The similarity directory contains code related to similarity.
 
+wordnet-import
+--------------
 The wordnet-import directory contains stand-alone code (i.e. not a part
 of opencog) that will walk over the wordnet database, and convert it 
 into OpenCog NMXML that can be leaded into opencog.
 
+wsd
+---
 The wsd directory contains code that implements the Rada Mihalcea 
 word-sense disambiguation algorithm.  The Mihalcea algorithm assigns
 senses to the words in a sentence, and constructs links between these
@@ -31,6 +73,8 @@ whose edges are these links.  The graph is essentially just a Markov
 chain, and is solved as such, looking for a stationary vector of 
 probabilities for the word-sense verticies. The verticies with the 
 highest scores are then the most likely meaning for a word.
+
+======================================================================
 
 Input file format
 -----------------
@@ -42,8 +86,9 @@ using the  relex.WebFormat module, to create the "compact file format".
 Then, use the relex/src/perl/cff-to-opencog.pl perl script to convert 
 this to the final output. 
 
------------------------------------------------------------------
+======================================================================
 References:
+-----------
 "To verbize one's nouns" -- the concept of "Lexical Implication Rules": 
 N. Ostler, B.T.S.Atkins, "Predictable Meaning Shift: Some Linguistic
 Properties of Lexical Implication Rules", (1991) Proceedings of the
