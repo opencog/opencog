@@ -55,6 +55,7 @@
 #define SENTENCE_NODE_CLASS "SentenceNode"
 #define PARSE_NODE_CLASS "ParseNode"
 #define PARSE_LINK_CLASS "ParseLink"
+#define WORD_INSTANCE_NODE_CLASS "WordInstanceNode"
 #define LINK_GRAMMAR_RELATIONSHIP_NODE_CLASS "LinkGrammarRelationshipNode"
 #define DEFINED_LINGUISTIC_CONCEPT_NODE_CLASS "DefinedLinguisticConceptNode"
 #define DEFINED_LINGUISTIC_RELATIONSHIP_NODE_CLASS "DefinedLinguisticRelationshipNode"

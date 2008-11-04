@@ -61,6 +61,7 @@ init_inheritance(map, ORDERED_LINK, EVENTUAL_PREDICTIVE_IMPLICATION_LINK);
 init_inheritance(map, CONCEPT_NODE, DOCUMENT_NODE);
 init_inheritance(map, CONCEPT_NODE, SENTENCE_NODE);
 init_inheritance(map, CONCEPT_NODE, PARSE_NODE);
+init_inheritance(map, CONCEPT_NODE, WORD_INSTANCE_NODE);
 init_inheritance(map, CONCEPT_NODE, DEFINED_LINGUISTIC_CONCEPT_NODE);
 init_inheritance(map, CONCEPT_NODE, DEFINED_FRAME_NODE);
 init_inheritance(map, ORDERED_LINK, FRAME_ELEMENT_LINK);

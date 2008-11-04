@@ -220,6 +220,11 @@ be created/modified.
       ; instances, implying that they all refer the to same overall
       ; concept.
 
+		(ExtensionalInheritanceLink
+			(ConceptNode 
+			(WordInstanceNode
+		)
+
 xxxxxxxxxx unfinished
 
 

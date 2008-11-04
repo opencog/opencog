@@ -55,6 +55,7 @@ class_to_int[(*getClassName()) [DOCUMENT_NODE]] = DOCUMENT_NODE;
 class_to_int[(*getClassName()) [SENTENCE_NODE]] = SENTENCE_NODE;
 class_to_int[(*getClassName()) [PARSE_NODE]] = PARSE_NODE;
 class_to_int[(*getClassName()) [PARSE_LINK]] = PARSE_LINK;
+class_to_int[(*getClassName()) [WORD_INSTANCE_NODE]] = WORD_INSTANCE_NODE;
 class_to_int[(*getClassName()) [LINK_GRAMMAR_RELATIONSHIP_NODE]] = LINK_GRAMMAR_RELATIONSHIP_NODE;
 class_to_int[(*getClassName()) [DEFINED_LINGUISTIC_CONCEPT_NODE]] = DEFINED_LINGUISTIC_CONCEPT_NODE;
 class_to_int[(*getClassName()) [DEFINED_LINGUISTIC_RELATIONSHIP_NODE]] = DEFINED_LINGUISTIC_RELATIONSHIP_NODE;
