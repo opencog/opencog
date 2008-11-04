@@ -58,6 +58,7 @@ WordSenseProcessor::WordSenseProcessor(void)
 {
 	pthread_mutex_init(&queue_lock, NULL);
 	thread_running = false;
+	do_use_threads = true;
 	cnt = 0;
 	wsd = new Mihalcea();
 }
@@ -69,6 +70,10 @@ WordSenseProcessor::~WordSenseProcessor()
 	wsd = NULL;
 }
 
+void WordSenseProcessor::use_threads(bool use)
+{
+	do_use_threads = use;
+}
 // ----------------------------------------
 
 void * WordSenseProcessor::thread_start(void *data)
@@ -108,7 +113,7 @@ void WordSenseProcessor::work_thread(void)
 
 // ----------------------------------------
 
-void WordSenseProcessor::run(CogServer *server)
+void WordSenseProcessor::run_no_delay(CogServer *server)
 {
 	atom_space = server->getAtomSpace();
 
@@ -117,6 +122,11 @@ void WordSenseProcessor::run(CogServer *server)
 	// Look for recently entered text
 	atom_space->foreach_handle_of_type("DocumentNode",
 	               &WordSenseProcessor::do_document, this);
+}
+
+void WordSenseProcessor::run(CogServer *server)
+{
+	run_no_delay(server);
 
 	// XXX we are being called too often. this needs to be fixed.
 	// in truth, should only poll on new input.
@@ -156,13 +166,19 @@ bool WordSenseProcessor::do_document(Handle h)
 	pthread_mutex_lock(&queue_lock);
 	work_queue.push(h);
 
-	if (false == thread_running)
+	if (do_use_threads && (false == thread_running))
 	{
 		thread_running = true;
 		pthread_create (&worker, NULL, &WordSenseProcessor::thread_start, this);
 	}
 
 	pthread_mutex_unlock(&queue_lock);
+
+	// If not using threads, then process it now.
+	if (false == do_use_threads)
+	{
+		work_thread();
+	}
 	return false;
 }
 

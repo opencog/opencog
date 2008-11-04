@@ -24,6 +24,7 @@ class WordSenseProcessor : public Agent, public Module
 {
 	private:
 
+		bool do_use_threads;
 		pthread_t worker;
 		static void * thread_start(void *);
 		std::queue<Handle> work_queue;
@@ -54,6 +55,8 @@ class WordSenseProcessor : public Agent, public Module
 		virtual ~WordSenseProcessor();
 		virtual void init(void);
 		virtual void run(CogServer *server);
+		virtual void run_no_delay(CogServer *server);
+		void use_threads(bool);
 };
 
 } // namespace opencog
