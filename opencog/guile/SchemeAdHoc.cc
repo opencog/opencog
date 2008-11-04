@@ -10,6 +10,9 @@
 
 #include <libguile.h>
 
+#include <opencog/server/CogServer.h>
+#include <opencog/nlp/wsd/WordSenseProcessor.h>
+
 #include "SchemeSmob.h"
 
 using namespace opencog;
@@ -18,7 +21,15 @@ using namespace opencog;
 
 SCM SchemeSmob::ss_ad_hoc(SCM command)
 {
-	std::string name = decode_string (command, "cog-ad-hoc");
+	std::string cmdname = decode_string (command, "cog-ad-hoc");
+
+	if (cmdname.compare("do-wsd"))
+	{
+		WordSenseProcessor wsp;
+		wsp.use_threads(false);
+		wsp.run_no_delay(CogServer::createInstance()); // XXX What an ugly interface. Alas.
+		return SCM_BOOL_T;
+	}
 
 	return SCM_BOOL_F;
 }
