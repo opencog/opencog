@@ -31,7 +31,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command)
 	{
 		WordSenseProcessor wsp;
 		wsp.use_threads(false);
-		wsp.run_no_delay(CogServer::createInstance()); // XXX What an ugly interface. Alas.
+		wsp.run_no_delay(static_cast<CogServer *>(&server())); // XXX What an ugly interface. Alas.
 		return SCM_BOOL_T;
 	}
 
