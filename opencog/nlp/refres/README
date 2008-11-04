@@ -50,7 +50,10 @@ combine ideas making use of mutual information, Markov networks and
 Markov logic networks, and heirarchical feature selection to accomplish
 this. The general idea is to be able to spot commonly-occuring patterns
 or features, in much the same way that one might find patterns in
-genetic data.
+genetic data. See, for example, 
+http://en.wikipedia.org/wiki/Feature_extraction and
+http://en.wikipedia.org/wiki/Cluster_analysis
+and in particular [HCMI] (see refs at end)
 
 It is expected that the system will be initially primed with a number
 of hand-generated rules.
@@ -304,19 +307,23 @@ etc. needs to be defined.
 ----------------------
 
 Need to store:
--- mutual information ... 
+-- mutual information ...  See ref [HCMI]
 
 
 
 References
 ==========
 Some background reading for various keywords used here:
-Implication: See
+
+[IMPL] Implication: See
    http://en.wikipedia.org/wiki/Logical_implication
 
-Apply: See
+[APPL] Apply: See
    http://en.wikipedia.org/wiki/Apply
    Also, Abelson, Sussman, SICP, section 4.1 the Meta-circular evaluator
    http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html
 
-
+[HCMI]
+   Alexander Kraskov, Harald Stögbauer, Ralph G. Andrzejak,
+   Peter Grassberger, "Hierarchical Clustering Based on Mutual
+   Information" (2003) http://arxiv.org/abs/q-bio/0311039
