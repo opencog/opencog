@@ -19,7 +19,7 @@
 
 using namespace opencog;
 
-#define DEBUG
+#define DEBUG 1
 
 ReportRank::ReportRank(void)
 {
@@ -44,6 +44,7 @@ void ReportRank::report_document(const std::vector<Handle> &parse_list)
 {
 	normalization = 0.0;
 	sense_count = 0.0;
+	choosen_sense_count = 0.0;
 
 	// Iterate over all the parses in the document.
 	std::vector<Handle>::const_iterator i;
@@ -53,7 +54,9 @@ void ReportRank::report_document(const std::vector<Handle> &parse_list)
 		foreach_word_instance(h, &ReportRank::count_word, this);
 	}
 
-printf("duude norm=%g senses=%g\n", normalization, sense_count);
+#ifdef DEBUG
+	printf("report_document: norm=%g senses=%g\n", normalization, sense_count);
+#endif
 
 	normalization = 1.0 / normalization;
 
@@ -62,6 +65,11 @@ printf("duude norm=%g senses=%g\n", normalization, sense_count);
 		Handle h = *i;
 		foreach_word_instance(h, &ReportRank::renorm_word, this);
 	}
+#ifdef DEBUG
+	printf("report_document: chose=%g of senses=%g (%g persent)\n",
+		choosen_sense_count, sense_count, 100.0*choosen_sense_count/sense_count);
+	fflush(stdout);
+#endif
 }
 
 /**
@@ -70,12 +78,13 @@ printf("duude norm=%g senses=%g\n", normalization, sense_count);
 void ReportRank::report_parse(Handle h)
 {
 #ifdef DEBUG
-	printf ("; Sentence %d:\n", parse_cnt);
+	printf ("; ReportRank: Sentence %d:\n", parse_cnt);
 #endif
 	parse_cnt ++;
 
 	normalization = 0.0;
 	sense_count = 0.0;
+	choosen_sense_count = 0.0;
 	foreach_word_instance(h, &ReportRank::count_word, this);
 
 	normalization = 1.0 / normalization;
@@ -131,11 +140,17 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	stv.setConfidence(l->getTruthValue().getConfidence());
 	l->setTruthValue(stv);
 
-if (0.0 < score) {
+#ifdef DEBUG
+	if (0.0 < score) {
+		choosen_sense_count += 1.0;
+#if 0
 Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 printf ("duu word sense=%s score=%f\n", n->getName().c_str(), score);
 fflush (stdout);
-}
+#endif
+	}
+#endif
+
 	return false;
 }
 
