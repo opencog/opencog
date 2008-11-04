@@ -20,15 +20,15 @@ Overview
 The current plan is to perform reference resolution using a collection
 of "rules" or "proceedures" to recognize likely co-referents, and then
 to check for reference consistency using reasoning. An example of a set
-of rules is the "Hobbs algorithm" for anaphora resolution. 
+of rules is the "Hobbs algorithm" for anaphora resolution.
 
-The goal here is to implement all of these rules/algorithms as a set of 
+The goal here is to implement all of these rules/algorithms as a set of
 OpenCog hypergraphs. The reason for doing this is to allow the system to
 automatically learn, reinforce, and modify these sets of rules.  Thus,
-for example, the Hobbs algo has been implemented in Java, as a part of 
+for example, the Hobbs algo has been implemented in Java, as a part of
 the RelEx package. However, if changes are needed to this algorithm are
 needed, then only a human programmer is capable of performing these
-changes, as only a human programmer can (currently) understand Java and 
+changes, as only a human programmer can (currently) understand Java and
 make meaningful modifications to Java code.  By contrast, the goal here
 is to perform a statistical analysis of text, and to automatically
 discover such rules, as best as possible, assign them likelyhoods and
@@ -41,7 +41,7 @@ program:
 2) Having a "rule engine" that can apply these rules.
 3) Having a persistent database that can accumulate statistical
    information about the usage of these rules,
-4) Having a "perception" system that can spot rules ("features") 
+4) Having a "perception" system that can spot rules ("features")
    that have been useful, and further refine them, or spot weak
    rules, and reject them.
 
@@ -50,7 +50,7 @@ combine ideas making use of mutual information, Markov networks and
 Markov logic networks, and heirarchical feature selection to accomplish
 this. The general idea is to be able to spot commonly-occuring patterns
 or features, in much the same way that one might find patterns in
-genetic data. 
+genetic data.
 
 It is expected that the system will be initially primed with a number
 of hand-generated rules.
@@ -70,18 +70,18 @@ as the pseudo-code:
 
    IF (for-all parses of all sentences in same document)
        AND (word-instance-1 == noun)
-       AND (word-of-word-instance-2 == word-of-word-instance-1) 
+       AND (word-of-word-instance-2 == word-of-word-instance-1)
        AND ...
        AND (word-of-word-instance-k == word-of-word-instance-1)
    THEN (create concept-node encompassing word-instances 1 thru k)
 
-It would be "easiest" to code up above in C++ or Scheme (or Java or 
-Python or ...) but this missses the point: The opencog system will 
+It would be "easiest" to code up above in C++ or Scheme (or Java or
+Python or ...) but this missses the point: The opencog system will
 need to be able to modify the above rule (or algorithm) based on
-learned, statistical experience, for example, by adding more 
-AND-clauses to refine the action. 
+learned, statistical experience, for example, by adding more
+AND-clauses to refine the action.
 
-Another example: The consistency of this reference assignment can be 
+Another example: The consistency of this reference assignment can be
 checked using the following pseudo-code:
 
    IF (word-instance-1 is-grouped-wth word-instance-2 in same concept)
@@ -105,7 +105,7 @@ The core OpenCog nodes and links to be used to represent such rules are:
    VariableNode  -- to indicate a variable
    ImplicationLink -- to represent an if..then.. relationship.
 
-Thus
+Below is an example of the use of the ImplicationLink.
 
    "If the case is near the mouse and the cat is hungry, the cat will
    eat the mouse".
@@ -123,64 +123,108 @@ Thus
    ___EvaluationLink
    ______Node eat
    ___________VariableNode $var0
-   ___________VaraibleNode $var1
+   ___________VariableNode $var1
 
 
-In practical terms, this could be verbose. Consider two word instances,
-using the current RelEx output format.
+In practical terms, as the above shows, the encoding of rules will
+likely be quite verbose. For the next example, consider two word
+instances, using the current RelEx output format.
 
 In the following, we will use the word "axiom" for "rule".
+Each such rule has the structure of an implication, in Skolemized form,
+with a list of variables up front, an antecedent (the "if" clause),
+and a consequent (the "then" clause).  The antecedent is a list of
+clauses that must be satisfied, the consequent is a set of nodes to
+be created/modified.
 
-	(VariableScopeLink
-		; A list of the variables in the "rule" or "axiom".
-		; This list essentially acts as a type declaration for 
-		; the variables in thins axiom.
-		(ListLink
-			; Type declaration: $word-inst-0 is a word instance
-			(WordInstanceNode $word-inst-0)
-			(WordInstanceNode $word-inst-1)
+   (VariableScopeLink
+      ; A list of the variables in the "rule" or "axiom".
+      ; This list essentially acts as a type declaration for
+      ; the variables in this axiom.
+      (ListLink
+         ; Type declaration: $word-inst-0 is a word instance
+         (WordInstanceNode $word-inst-0)
+         (WordInstanceNode $word-inst-1)
+         (ParseNode $parse-0)
+         (ParseNode $parse-1)
+         (SentenceNode $sentence-0)
+         (SentenceNode $sentence-1)
+         (DocumentNode $document)
 
-			; The variable $word *must* be a WordNode
-			(WordNode $word)
-		)
+         ; The variable $word *must* be a WordNode
+         (WordNode $word)
+      )
 
-		; What follows is a conjunction of expressions
-		; that must be satisfied for this "axiom" to hold.
-   	(AndLink 
+      ; What follows is a conjunction of expressions
+      ; that must be satisfied for this "axiom" to hold.
+      (AndLink
 
-			; The word-instance must be nouns.
-      	(PartOfSpeechLink
-         	(VariableNode $word-inst-0)
-         	(DefinedLinguisticConceptNode "noun")
-      	)
-      	(PartOfSpeechLink
-         	(VariableNode $word-inst-1)
-         	(DefinedLinguisticConceptNode "noun")
-      	)
+         ; The word-instance must be nouns.
+         (PartOfSpeechLink
+            (VariableNode $word-inst-0)
+            (DefinedLinguisticConceptNode "noun")
+         )
+         (PartOfSpeechLink
+            (VariableNode $word-inst-1)
+            (DefinedLinguisticConceptNode "noun")
+         )
 
-			; The word-instances must refer to the same word.
-      	(LemmaLink
-         	(VariableNode $word-inst-0)
-         	(VariableNode $word)
-      	)
-      	(LemmaLink
-         	(VariableNode $word-inst-1)
-         	(VariableNode $word)
-      	)
-      
-			; The word-instances must belone to the same document
+         ; The word-instances must refer to the same word.
+         (LemmaLink
+            (VariableNode $word-inst-0)
+            (VariableNode $word)
+         )
+         (LemmaLink
+            (VariableNode $word-inst-1)
+            (VariableNode $word)
+         )
+
+         ; The word-instances must belong to the same document.
+         ; This is done by making sure that they belong to parses,
+         ; which belong to sentences, which belong to documents.
+         ;
+         ; XXX to-do: the number of words in a sentence is variable.
+         ; Its not clear how to match this, given the structure below!
          (ReferenceLink
             (ParseNode $parse-0)
-				(ListLink
-					(VariableNode $word-inst-0)
-				)
-			)
+            (ListLink
+               (VariableNode $word-inst-0)
+            )
+         )
+         (ParseLink
+            (ParseNode $parse-0)
+            (SentenceNode $sentence-0)
+         )
+         (ReferenceLink
+            (ParseNode $parse-1)
+            (ListLink
+               (VariableNode $word-inst-1)
+            )
+         )
+         (ParseLink
+            (ParseNode $parse-1)
+            (SentenceNode $sentence-1)
+         )
+         (ReferenceLink
+            (DocumentNode $document)
+            (ListLink
+               (SentenceNode $sentence-0)
+               (SentenceNode $sentence-1)
+            )
+         )
+      ) ; end of AndLink (the antecedent, or "if" clause)
+      ; Above is the conjunction of clauses that must hold
+
+      ; Next the consequent, or "then" clause.
+      ; Create a single concept, which encompases each of these word
+      ; instances, implying that they all refer the to same overall
+      ; concept.
 
 xxxxxxxxxx unfinished
- 
-   
-   
-   
+
+
+
+
 Application of Rules
 ====================
 Possibilities:
