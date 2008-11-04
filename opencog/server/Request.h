@@ -52,31 +52,35 @@ struct RequestClassInfo : public ClassInfo
     RequestClassInfo() {};
     RequestClassInfo(const char* i, const char *d, const char* h)
         : ClassInfo(i), description(d), help(h) {};
-    RequestClassInfo(const std::string& i, const std::string& d, const std::string& h)
+    RequestClassInfo(const std::string& i, 
+                     const std::string& d,
+                     const std::string& h)
         : ClassInfo(i), description(d), help(h) {};
 };
 
 /**
- * This class defines the base abstract class that should be extended by all
- * opencog requests. It handles the underlying network socket and provides
- * common members used by most requests, such as the list of request parameters.
+ * This class defines the base abstract class that should be extended
+ * by all opencog requests. It handles the underlying network socket
+ * and provides common members used by most requests, such as the list
+ * of request parameters.
  *
- * A typical derived request only has to override/implement two methods: 'info'
- * and 'execute'.
+ * A typical derived request only has to override/implement two methods:
+ * 'info' and 'execute'.
  *
- * Since requests are registered with the cogserver using the Registry+Factory
- * pattern, request classes must implement a static 'info' method which uniquelly
- * identifies its class. Note that the Request class uses an extended 'info'
- * class (RequestClassInfo) which should add a description attribute and some
- * text about the request's usage.
+ * Since requests are registered with the cogserver using the
+ * Registry+Factory pattern, request classes must implement a static
+ * 'info' method which uniquelly identifies its class. Note that the
+ * Request class uses an extended 'info' class (RequestClassInfo)
+ * which should add a description attribute and some text about the
+ * request's usage.
  *
- * The 'execute' method must be overriden by derived requests and implement the
- * actual request behavior. It should retrieve the set of parameters from the
- * '_parameters' member and use the 'send()' method to send its output (or error
- * message) back to the client.
+ * The 'execute' method must be overriden by derived requests and
+ * implement the actual request behavior. It should retrieve the set of
+ * parameters from the '_parameters' member and use the 'send()' method
+ * to send its output (or error message) back to the client.
  *
- * A typical derived Request declaration and initialization would thus look as
- * follows:
+ * A typical derived Request declaration and initialization would thus
+ * look as follows:
  *
  * // MyRequest.h
  * #include <opencog/server/Request.h>
