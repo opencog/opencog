@@ -25,7 +25,7 @@ using namespace opencog;
 SenseRank::SenseRank(void)
 {
 	// The page-rank damping factor. Normally taken to be quite large.
-	damping_factor = 0.95;
+	damping_factor = 0.90;
 
 	// The convergence damping factor, used to determine when the page
 	// rank has converged. This is used to create an exponentially 
@@ -34,11 +34,11 @@ SenseRank::SenseRank(void)
 	// that N == total number of word-senses in graph. For now, this
 	// is assumed to be 20 (i.e. a single-sentence-worth of senses.)
 	// For multi-sentence use, this should probably be pumped up.
-	double N = 50;
+	double N = 30;
 	convergence_damper = 1.0/N;
 
 	// The absolute value to which convergence is desired.
-	convergence_limit = 0.01;
+	convergence_limit = 0.03;
 }
 
 SenseRank::~SenseRank()
