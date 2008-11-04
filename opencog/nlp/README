@@ -98,6 +98,47 @@ using the  relex.WebFormat module, to create the "compact file format".
 Then, use the relex/src/perl/cff-to-opencog.pl perl script to convert 
 this to the final output. 
 
+
+A Side-note About Syntatactic Sugar
+===================================
+This has been said before, but it bears repeating. Consider the node
+type WordInstanceNode, for example:
+
+   (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+
+This custom-defined node type should be thought of as syntatctic sugar
+for the more "primitive" graph:
+
+   (InheritenceLink
+		(ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+		(ConceptNode "WordInstance")
+	)
+
+The above InheritenceLink essentially assigns a "type" to the word
+instance. This type can be used in the same way that types are
+ordinarily used in other programming langauges.
+
+Similarly, for links, we use the syntactic sugar
+
+	(PartOfSpeechLink
+	   (ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+	   (DefinedLinguisticConceptNode "noun")
+	)
+
+which stands for the more "primitive" construct:
+
+	(EvaluationLink
+		(PredicateNode "PartOfSpeech"
+		(ListLink
+			(ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+			(DefinedLinguisticConceptNode "noun")
+		)
+	)
+
+Notationally, these forms should be considered to be "equivalent"
+although there is a bunch of actual code that depends on the one or
+the other, cand cannot freely intermingle these cases.
+
 ======================================================================
 References:
 -----------
