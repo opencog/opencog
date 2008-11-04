@@ -55,7 +55,7 @@ void ReportRank::report_document(const std::vector<Handle> &parse_list)
 	}
 
 #ifdef DEBUG
-	printf("report_document: norm=%g senses=%g\n", normalization, sense_count);
+	printf("; report_document: norm=%g senses=%g\n", normalization, sense_count);
 #endif
 
 	normalization = 1.0 / normalization;
@@ -66,7 +66,7 @@ void ReportRank::report_document(const std::vector<Handle> &parse_list)
 		foreach_word_instance(h, &ReportRank::renorm_word, this);
 	}
 #ifdef DEBUG
-	printf("report_document: chose=%g of senses=%g (%g persent)\n",
+	printf("; report_document: chose=%g senses out of %g (%g persent)\n",
 		choosen_sense_count, sense_count, 100.0*choosen_sense_count/sense_count);
 	fflush(stdout);
 #endif
