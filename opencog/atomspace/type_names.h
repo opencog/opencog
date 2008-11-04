@@ -48,6 +48,7 @@
 #define SIMULTANEOUS_AND_LINK_CLASS "SimultaneousAndLink"
 #define EVENTUAL_SEQUENTIAL_AND_LINK_CLASS "EventualSequentialAND"
 #define EVENTUAL_PREDICTIVE_IMPLICATION_LINK_CLASS "EventualSequentialImplication"
+#define DISTINGUISHED_NODE_CLASS "DistinguishedNode"
 #define WORD_NODE_CLASS "WordNode"
 #define REFERENCE_LINK_CLASS "ReferenceLink"
 #define DOCUMENT_NODE_CLASS "DocumentNode"

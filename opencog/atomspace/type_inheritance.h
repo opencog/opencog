@@ -8,6 +8,7 @@ init_inheritance(map, LINK, ORDERED_LINK);
 init_inheritance(map, LINK, UNORDERED_LINK);
 init_inheritance(map, NODE, VARIABLE_NODE);
 init_inheritance(map, NODE, PROCEDURE_NODE);
+init_inheritance(map, NODE, DISTINGUISHED_NODE);
 init_inheritance(map, NODE, WORD_NODE);
 init_inheritance(map, NODE, AGISIM_SOUND_NODE);
 init_inheritance(map, NODE, AGISIM_TASTE_NODE);

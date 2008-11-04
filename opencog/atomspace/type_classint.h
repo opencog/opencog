@@ -48,6 +48,7 @@ class_to_int[(*getClassName()) [SEQUENTIAL_AND_LINK]] = SEQUENTIAL_AND_LINK;
 class_to_int[(*getClassName()) [SIMULTANEOUS_AND_LINK]] = SIMULTANEOUS_AND_LINK;
 class_to_int[(*getClassName()) [EVENTUAL_SEQUENTIAL_AND_LINK]] = EVENTUAL_SEQUENTIAL_AND_LINK;
 class_to_int[(*getClassName()) [EVENTUAL_PREDICTIVE_IMPLICATION_LINK]] = EVENTUAL_PREDICTIVE_IMPLICATION_LINK;
+class_to_int[(*getClassName()) [DISTINGUISHED_NODE]] = DISTINGUISHED_NODE;
 class_to_int[(*getClassName()) [WORD_NODE]] = WORD_NODE;
 class_to_int[(*getClassName()) [REFERENCE_LINK]] = REFERENCE_LINK;
 class_to_int[(*getClassName()) [DOCUMENT_NODE]] = DOCUMENT_NODE;
