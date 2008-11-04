@@ -19,6 +19,10 @@ using namespace opencog;
 
 /* ============================================================== */
 
+/**
+ * Dispatcher to invoke various miscellaneous C++ riff-raff from
+ * scheme code. 
+ */
 SCM SchemeSmob::ss_ad_hoc(SCM command)
 {
 	std::string cmdname = decode_string (command, "cog-ad-hoc");
