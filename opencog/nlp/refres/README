@@ -59,7 +59,7 @@ The first three issues are significant, practical barrirers to further
 progress, and are thus tackled first.
 
 
-Representing IF...THEN constructs in Opencog
+Representing IF...THEN constructs in OpenCog
 ============================================
 The core idea is to find patterns in text, and then create new patterns
 as a result. As the simplest example, a "pattern" would be finding all
@@ -150,6 +150,7 @@ be created/modified.
          (SentenceNode $sentence-0)
          (SentenceNode $sentence-1)
          (DocumentNode $document)
+         (ConceptNode $concept)
 
          ; The variable $word *must* be a WordNode
          (WordNode $word)
@@ -220,14 +221,18 @@ be created/modified.
       ; instances, implying that they all refer the to same overall
       ; concept.
 
-		(ExtensionalInheritanceLink
-			(ConceptNode 
-			(WordInstanceNode
-		)
-
-xxxxxxxxxx unfinished
-
-
+      ; XXX somehow generate a new UUID for this new concept!
+      ; use a combo tof the word, and the document, to help identify it.
+      (ConceptNode $concept)
+      (ExtensionalInheritanceLink
+         (ConceptNode $concept)
+         (WordInstanceNode $word-inst-0)
+      )
+      (ExtensionalInheritanceLink
+         (ConceptNode $concept)
+         (WordInstanceNode $word-inst-1)
+      )
+   )
 
 
 Application of Rules
