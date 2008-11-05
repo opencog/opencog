@@ -68,11 +68,11 @@ public:
     virtual ~PersistModule();
 
     virtual void         init    (void);
-    virtual void         setStore(AtomStorage *);
-    virtual AtomStorage* getStore(void); // XXX get rid of this
 
-    std::string on_close(std::list<std::string>);
-    std::string on_load(std::list<std::string>);
+    std::string do_close(std::list<std::string>);
+    std::string do_load(std::list<std::string>);
+    std::string do_open(std::list<std::string>);
+    std::string do_store(std::list<std::string>);
 
 }; // class
 
@@ -138,18 +138,18 @@ public:
     }                                                                 \
 };
 
-DECLARE_REQUEST_CB(PersistModule, sqlclose, on_close, 
+DECLARE_REQUEST_CB(PersistModule, sqlclose, do_close, 
              "close the SQL database", "sqlclose")
 
-DECLARE_REQUEST_CB(PersistModule, sqlload, on_load,
+DECLARE_REQUEST_CB(PersistModule, sqlload, do_load,
             "load the contents of the SQL database to the atomtable",
             "sqlload")
 
-DECLARE_REQUEST_EXE(sqlopen, 
+DECLARE_REQUEST_CB(PersistModule, sqlopen, do_open,
             "open connection to SQL storage",
             "sqlopen <dbname> <username> <auth>")
 
-DECLARE_REQUEST_EXE(sqlstore, 
+DECLARE_REQUEST_CB(PersistModule, sqlstore, do_store,
             "save the contents of the atomtable on the SQL database",
             "sqlstore")
 

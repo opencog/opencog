@@ -54,18 +54,7 @@ void PersistModule::init(void)
 {
 }
 
-void PersistModule::setStore(AtomStorage* as)
-{
-    store = as;
-}
-
-AtomStorage* PersistModule::getStore(void)
-{
-    return store;
-}
-
-
-std::string PersistModule::on_close(std::list<std::string> args)
+std::string PersistModule::do_close(std::list<std::string> args)
 {
 	if (!args.empty()) 
 		return "sqlclose: Wrong num args";
@@ -78,7 +67,7 @@ std::string PersistModule::on_close(std::list<std::string> args)
 	return "database closed";
 }
 
-std::string PersistModule::on_load(std::list<std::string> args)
+std::string PersistModule::do_load(std::list<std::string> args)
 {
 	if (!args.empty()) 
 		return "sqlload: Wrong num args";
@@ -92,49 +81,31 @@ std::string PersistModule::on_load(std::list<std::string> args)
 }
 
 
-bool sqlopenRequest::execute()
+std::string PersistModule::do_open(std::list<std::string> args)
 {
-    logger().debug("[sqlopenRequest] execute");
-    std::ostringstream oss;
+	if (args.size() != 3)
+		return "sqlload: Wrong num args";
 
-    if (_parameters.size() == 3) {
-        std::string dbname   = _parameters.front(); _parameters.pop_front();
-        std::string username = _parameters.front(); _parameters.pop_front();
-        std::string auth     = _parameters.front(); _parameters.pop_front();
+	std::string dbname   = args.front(); args.pop_front();
+	std::string username = args.front(); args.pop_front();
+	std::string auth	   = args.front(); args.pop_front();
 
-        AtomStorage* store = new AtomStorage(dbname, username, auth);
-        if (store) {
-            CogServer& cogserver = static_cast<CogServer&>(server());
-            PersistModule* persist =
-                static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
-            persist->setStore(store);
+	store = new AtomStorage(dbname, username, auth);
+	if (!store)
+		return "sqlopen: Unable to open the database";
 
-            oss << "done" << std::endl;
-        } else oss << "error: unable to open db \"" << dbname << "\"" << std::endl;
-    } else oss << info().help << std::endl;
-
-    if (_mimeType == "text/plain")
-        send(oss.str());
-
-    return true;
+	return "database opened";
 }
 
-bool sqlstoreRequest::execute()
+std::string PersistModule::do_store(std::list<std::string> args)
 {
-    logger().debug("[sqlstoreRequest] execute");
-    std::ostringstream oss;
+	if (!args.empty()) 
+		return "sqlstore: Wrong num args";
 
-    if (_parameters.empty()) {
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        PersistModule* persist =
-            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
-        AtomStorage* store = persist->getStore();
-        if (store == NULL) oss << "error: invalid SQL storage" << std::endl;
-        else store->store(cogserver.getAtomSpace()->getAtomTable());
-    } else oss << info().help << std::endl;
+	if (store == NULL)
+		return "sqlstore: database not open";
 
-    if (_mimeType == "text/plain")
-        send(oss.str());
+	store->store(atomtable());
 
-    return true;
+	return "database store started";
 }
