@@ -65,14 +65,18 @@ AtomStorage* PersistModule::getStore(void)
 }
 
 
-static void on_close(PersistModule* persist)
+static std::string on_close(PersistModule* persist, std::list<std::string> args)
 {
-    AtomStorage* store = persist->getStore();
-    if (store == NULL) return;
-    else {
-        delete store;
-        persist->setStore(NULL);
-    }
+	if (!args.empty()) 
+		return "sqlclose: Wrong num args";
+
+	AtomStorage* store = persist->getStore();
+	if (store == NULL)
+		return "sqlclose: database not open";
+
+	delete store;
+	persist->setStore(NULL);
+	return "database closed";
 }
 
 bool sqlcloseRequest::execute()
@@ -80,12 +84,11 @@ bool sqlcloseRequest::execute()
     logger().debug("[sqlcloseRequest] execute");
     std::ostringstream oss;
 
-    if (_parameters.empty()) {
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        PersistModule* persist =
-            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
-        on_close(persist);
-    } else oss << info().help << std::endl;
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    PersistModule* persist =
+        static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
+    std::string rs = on_close(persist, _parameters);
+    oss << rs << std::endl;
 
     if (_mimeType == "text/plain")
         send(oss.str());
