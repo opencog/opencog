@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SQLStoreRequest.h"
-
 #include <sstream>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -33,14 +31,6 @@
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
-
-SQLStoreRequest::SQLStoreRequest()
-{
-}
-
-SQLStoreRequest::~SQLStoreRequest()
-{
-}
 
 bool SQLStoreRequest::execute()
 {

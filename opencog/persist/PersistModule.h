@@ -25,10 +25,10 @@
 #ifndef _OPENCOG_PERSIST_MODULE_H
 #define _OPENCOG_PERSIST_MODULE_H
 
-#include <opencog/persist/SQLOpenRequest.h>
-#include <opencog/persist/SQLCloseRequest.h>
-#include <opencog/persist/SQLLoadRequest.h>
-#include <opencog/persist/SQLStoreRequest.h>
+#include <vector>
+#include <string>
+
+#include <opencog/server/Request.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
 
@@ -36,6 +36,77 @@ namespace opencog
 {
 
 class AtomStorage;
+class ConsoleSocket;
+
+class SQLCloseRequest : public Request
+{
+public:
+    static inline const RequestClassInfo& info() {
+        static const RequestClassInfo _cci(
+            "sqlclose",
+            "close the SQL database",
+            "sqlclose"
+        );
+        return _cci;
+    }
+
+    SQLCloseRequest() {};
+    virtual ~SQLCloseRequest() {};
+    virtual bool execute(void);
+};
+
+
+class SQLLoadRequest : public Request
+{
+public:
+    static inline const RequestClassInfo& info() {
+        static const RequestClassInfo _cci(
+            "sqlload",
+            "load the contents of the SQL database to the atomtable",
+            "sqlload"
+        );
+        return _cci;
+    }
+
+    SQLLoadRequest() {};
+    virtual ~SQLLoadRequest() {};
+    virtual bool execute(void);
+};
+
+
+class SQLOpenRequest : public Request
+{
+public:
+    static inline const RequestClassInfo& info() {
+        static const RequestClassInfo _cci(
+            "sqlopen",
+            "open connection to SQL storage",
+            "sqlopen <dbname> <username> <auth>"
+        );
+        return _cci;
+    }
+
+    SQLOpenRequest() {};
+    virtual ~SQLOpenRequest() {};
+    virtual bool execute(void);
+};
+
+class SQLStoreRequest : public Request
+{
+public:
+    static inline const RequestClassInfo& info() {
+        static const RequestClassInfo _cci(
+            "sqlstore",
+            "save the contents of the atomtable on the SQL database",
+            "sqlstore"
+        );
+        return _cci;
+    }
+
+    SQLStoreRequest() {};
+    virtual ~SQLStoreRequest() {};
+    virtual bool execute(void);
+};
 
 class PersistModule : public Module
 {

@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SQLOpenRequest.h"
-
 #include <sstream>
 
 #include <opencog/persist/AtomStorage.h>
@@ -32,14 +30,6 @@
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
-
-SQLOpenRequest::SQLOpenRequest()
-{
-}
-
-SQLOpenRequest::~SQLOpenRequest()
-{
-}
 
 bool SQLOpenRequest::execute()
 {

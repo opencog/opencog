@@ -42,9 +42,5 @@ INSTALL (FILES
 	AtomStorage.h
 	odbcxx.h
 	PersistModule.h
-	SQLCloseRequest.h
-	SQLLoadRequest.h
-	SQLOpenRequest.h
-	SQLStoreRequest.h
 	DESTINATION "include/opencog/persist"
 )

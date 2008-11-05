@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SQLCloseRequest.h"
-
 #include <sstream>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -33,14 +31,6 @@
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
-
-SQLCloseRequest::SQLCloseRequest()
-{
-}
-
-SQLCloseRequest::~SQLCloseRequest()
-{
-}
 
 bool SQLCloseRequest::execute()
 {
