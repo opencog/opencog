@@ -80,7 +80,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     _request = cogserver.createRequest(cmdName);
     if (_request == NULL) {
         char msg[256];
-        sprintf(msg, "command \"%s\" not found\n", cmdName.c_str());
+        snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
         logger().error(msg);
         Send(msg);
 
