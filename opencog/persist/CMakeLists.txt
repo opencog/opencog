@@ -10,10 +10,6 @@ ADD_LIBRARY (persist SHARED
 	odbcxx.cc
 	AtomStorage.cc
 	PersistModule.cc
-	SQLOpenRequest.cc
-	SQLCloseRequest.cc
-	SQLLoadRequest.cc
-	SQLStoreRequest.cc
 )
 
 ADD_EXECUTABLE(sniff

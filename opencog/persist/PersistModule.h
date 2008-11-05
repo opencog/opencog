@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 
+#include "AtomStorage.h"
 #include <opencog/server/Request.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
@@ -35,9 +36,13 @@
 namespace opencog
 {
 
-class AtomStorage;
 class ConsoleSocket;
 
+// Declare a command to the module command processing system.
+// This should robably be implemented as a template, rather than a
+// macro, but for now, a macro will serve as a quick-n-dirty solution
+// to the problem of automatiing this stuff.
+//
 #define DECLARE_REQUEST(cmd,cmd_help,cmd_fmt)                         \
    class cmd##Request : public Request {                              \
       public:                                                         \

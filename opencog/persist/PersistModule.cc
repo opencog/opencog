@@ -23,8 +23,10 @@
  */
 
 #include "PersistModule.h"
+#include "AtomStorage.h"
 
 #include <opencog/server/CogServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
@@ -60,4 +62,101 @@ void PersistModule::setStore(AtomStorage* as)
 AtomStorage* PersistModule::getStore(void)
 {
     return store;
+}
+
+
+static void on_close(PersistModule* persist)
+{
+    AtomStorage* store = persist->getStore();
+    if (store == NULL) return;
+    else {
+        delete store;
+        persist->setStore(NULL);
+    }
+}
+
+bool sqlcloseRequest::execute()
+{
+    logger().debug("[sqlcloseRequest] execute");
+    std::ostringstream oss;
+
+    if (_parameters.empty()) {
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        PersistModule* persist =
+            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
+        on_close(persist);
+    } else oss << info().help << std::endl;
+
+    if (_mimeType == "text/plain")
+        send(oss.str());
+
+    return true;
+}
+
+bool sqlloadRequest::execute()
+{
+    logger().debug("[sqlloadRequest] execute");
+    std::ostringstream oss;
+
+    if (_parameters.empty()) {
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        PersistModule* persist =
+            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
+        AtomStorage* store = persist->getStore();
+        if (store == NULL) oss << "error: invalid SQL storage" << std::endl;
+        else store->load(const_cast<AtomTable&>(cogserver.getAtomSpace()->getAtomTable()));
+    } else oss << info().help << std::endl;
+
+    if (_mimeType == "text/plain")
+        send(oss.str());
+
+    return true;
+}
+
+
+bool sqlopenRequest::execute()
+{
+    logger().debug("[sqlopenRequest] execute");
+    std::ostringstream oss;
+
+    if (_parameters.size() == 3) {
+        std::string dbname   = _parameters.front(); _parameters.pop_front();
+        std::string username = _parameters.front(); _parameters.pop_front();
+        std::string auth     = _parameters.front(); _parameters.pop_front();
+
+        AtomStorage* store = new AtomStorage(dbname, username, auth);
+        if (store) {
+            CogServer& cogserver = static_cast<CogServer&>(server());
+            PersistModule* persist =
+                static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
+            persist->setStore(store);
+
+            oss << "done" << std::endl;
+        } else oss << "error: unable to open db \"" << dbname << "\"" << std::endl;
+    } else oss << info().help << std::endl;
+
+    if (_mimeType == "text/plain")
+        send(oss.str());
+
+    return true;
+}
+
+bool sqlstoreRequest::execute()
+{
+    logger().debug("[sqlstoreRequest] execute");
+    std::ostringstream oss;
+
+    if (_parameters.empty()) {
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        PersistModule* persist =
+            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
+        AtomStorage* store = persist->getStore();
+        if (store == NULL) oss << "error: invalid SQL storage" << std::endl;
+        else store->store(cogserver.getAtomSpace()->getAtomTable());
+    } else oss << info().help << std::endl;
+
+    if (_mimeType == "text/plain")
+        send(oss.str());
+
+    return true;
 }
