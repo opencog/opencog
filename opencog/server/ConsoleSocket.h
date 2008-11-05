@@ -43,7 +43,7 @@ class Request;
 /**
  * This class implements the server socket that handles the primary
  * interface of the cogserver: the plain text command line. It is implemented
- * using the callback-based API of the TcpSocket class (from alhem's Sockets
+ * using the callback-based API of the TcpSocket class (from Alhem's Sockets
  * library).
  *
  * The ConsoleSocket uses the 'Detach()' method and the 'OnDetached()' callback
