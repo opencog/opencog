@@ -22,12 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "GenericModule.h"
 #include "GenericSocket.h"
 
 #include <string>
 #include <sstream>
 
-#include <opencog/socket/GenericModule.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 

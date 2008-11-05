@@ -28,8 +28,8 @@
 #include <string>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/socket/GenericSocket.h>
-#include <opencog/socket/GenericModule.h>
+#include <opencog/shell/GenericSocket.h>
+#include <opencog/shell/GenericModule.h>
 
 namespace opencog {
 

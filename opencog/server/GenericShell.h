@@ -25,8 +25,8 @@
 
 #include <string>
 
-#include <opencog/socket/GenericSocket.h>
-#include <opencog/socket/GenericModule.h>
+#include <opencog/shell/GenericSocket.h>
+#include <opencog/shell/GenericModule.h>
 #include "Module.h"
 
 namespace opencog {

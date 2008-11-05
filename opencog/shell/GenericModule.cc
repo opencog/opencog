@@ -23,8 +23,8 @@
  */
 
 #include "GenericModule.h"
+#include "GenericSocket.h"
 
-#include <opencog/socket/GenericSocket.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/util/Config.h>
