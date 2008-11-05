@@ -28,14 +28,25 @@
 #include <string>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/shell/GenericSocket.h>
-#include <opencog/shell/GenericModule.h>
+#include <opencog/server/Request.h>
+#include <opencog/server/CogServer.h>
+
+#include "GenericSocket.h"
+#include "GenericModule.h"
 
 namespace opencog {
 
 class SchemeShell : public GenericShell
 {
 	private:
+		DECLARE_CMD_REQUEST(SchemeShell, "scm", shellout,
+			"Enter the scheme shell",
+			"Usage: scm\n\n"
+			"Enter the scheme interpreter shell. This shell provides a rich\n"
+			"and easy-to-use envirnoment for creating, deleting and manipulating\n"
+			"OpenCog atoms and truth values. It provides a full R5RS-compliant\n"
+			"interactive scheme shell, based on the GNU Guile extension language.")
+
 		SchemeEval evaluator;
 
 		std::string normal_prompt;

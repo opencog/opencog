@@ -56,10 +56,12 @@ SchemeShell::SchemeShell(void)
 
 void SchemeShell::init(void)
 {
+	shellout_register();
 }
 
 SchemeShell::~SchemeShell()
 {
+	shellout_unregister();
 }
 
 void SchemeShell::hush_output(bool hush)
@@ -82,6 +84,7 @@ const std::string& SchemeShell::get_prompt(void)
 }
 
 /* ============================================================== */
+
 void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
 {
 	std::string retstr = do_eval(expr);
@@ -172,6 +175,12 @@ std::string SchemeShell::do_eval(const std::string &expr)
 		return "";
 	}
 
+}
+
+std::string SchemeShell::shellout(std::list<std::string> args)
+{
+	printf("Hello world\n");
+	return "exit scm";
 }
 
 #endif
