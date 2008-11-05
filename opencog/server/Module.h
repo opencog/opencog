@@ -31,6 +31,26 @@ namespace opencog
 {
 
 /**
+ * DECLARE_MODULE -- Declare a new module, called MODNAME
+ * This macro implements the various routines to allow the module
+ * system to work. 
+ */
+#define DECLARE_MODULE(MODNAME)                                       \
+    /* load/unload functions for the Module interface */              \
+    extern "C" const char* opencog_module_id(void) {                  \
+       return "opencog::" #MODNAME;                                   \
+    }                                                                 \
+    extern "C" Module * opencog_module_load(void) {                   \
+       return new MODNAME();                                          \
+    }                                                                 \
+    extern "C" void opencog_module_unload(Module * m) {               \
+       delete m;                                                      \
+    }                                                                 \
+    inline const char * MODNAME::id(void) {                           \
+        return "opencog::" #MODNAME;                                  \
+    }
+
+/**
  * This class defines the base abstract class that should be extended
  * by all opencog modules.
  *
@@ -72,21 +92,6 @@ namespace opencog
  * init() method (which is called by the cogserver) after the module's
  * initialization has finished and the meta-data properly set.
  */
-
-#define DECLARE_MODULE(MODNAME)                                       \
-    /* load/unload functions for the Module interface */              \
-    extern "C" const char* opencog_module_id(void) {                  \
-       return "opencog::" #MODNAME;                                   \
-    }                                                                 \
-    extern "C" Module * opencog_module_load(void) {                   \
-       return new MODNAME();                                          \
-    }                                                                 \
-    extern "C" void opencog_module_unload(Module * m) {               \
-       delete m;                                                      \
-    }                                                                 \
-    inline const char * MODNAME::id(void) {                           \
-        return "opencog::" #MODNAME;                                  \
-    }
 
 
 class Module
