@@ -34,7 +34,7 @@ PersistModule::PersistModule(void) : store(NULL)
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(SQLOpenRequest::info().id,  &sqlopenFactory);
-    cogserver.registerRequest(SQLCloseRequest::info().id, &sqlcloseFactory);
+    cogserver.registerRequest(sqlcloseRequest::info().id, &sqlcloseFactory);
     cogserver.registerRequest(SQLLoadRequest::info().id,  &sqlloadFactory);
     cogserver.registerRequest(SQLStoreRequest::info().id, &sqlstoreFactory);
 }
@@ -43,7 +43,7 @@ PersistModule::~PersistModule()
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.unregisterRequest(SQLOpenRequest::info().id);
-    cogserver.unregisterRequest(SQLCloseRequest::info().id);
+    cogserver.unregisterRequest(sqlcloseRequest::info().id);
     cogserver.unregisterRequest(SQLLoadRequest::info().id);
     cogserver.unregisterRequest(SQLStoreRequest::info().id);
 }

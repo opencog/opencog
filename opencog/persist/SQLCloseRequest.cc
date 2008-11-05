@@ -1,5 +1,5 @@
 /*
- * opencog/persist/SQLCloseRequest.cc
+ * opencog/persist/sqlcloseRequest.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -32,9 +32,9 @@
 
 using namespace opencog;
 
-bool SQLCloseRequest::execute()
+bool sqlcloseRequest::execute()
 {
-    logger().debug("[SQLCloseRequest] execute");
+    logger().debug("[sqlcloseRequest] execute");
     std::ostringstream oss;
 
     if (_parameters.empty()) {

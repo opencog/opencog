@@ -38,23 +38,20 @@ namespace opencog
 class AtomStorage;
 class ConsoleSocket;
 
-class SQLCloseRequest : public Request
-{
-public:
-    static inline const RequestClassInfo& info() {
-        static const RequestClassInfo _cci(
-            "sqlclose",
-            "close the SQL database",
-            "sqlclose"
-        );
-        return _cci;
-    }
-
-    SQLCloseRequest() {};
-    virtual ~SQLCloseRequest() {};
-    virtual bool execute(void);
+#define DECLARE_REQUEST(cmd,cmd_help,cmd_fmt)                         \
+   class cmd##Request : public Request {                              \
+      public:                                                         \
+          static inline const RequestClassInfo& info(void) {          \
+              static const RequestClassInfo _cci(#cmd,                \
+                                                 cmd_help, cmd_fmt);  \
+              return _cci;                                            \
+    }                                                                 \
+    cmd##Request(void) {};                                            \
+    virtual ~cmd##Request() {};                                       \
+    virtual bool execute(void);                                       \
 };
 
+DECLARE_REQUEST(sqlclose, "close the SQL database", "sqlclose")
 
 class SQLLoadRequest : public Request
 {
@@ -116,7 +113,7 @@ private:
     AtomStorage* store;
 
     Factory<SQLOpenRequest,  Request> sqlopenFactory;
-    Factory<SQLCloseRequest, Request> sqlcloseFactory;
+    Factory<sqlcloseRequest, Request> sqlcloseFactory;
     Factory<SQLLoadRequest,  Request> sqlloadFactory;
     Factory<SQLStoreRequest, Request> sqlstoreFactory;
 
