@@ -77,17 +77,19 @@ namespace opencog
  *
  * class MyModule: public Module {
  *    private:
- *        DECLARE_CMD_REQUEST(MyModule, stirfry, do_stirfry,
- *            "stirfry:  Make the OpenCog server cook Chinese food.",
- *            "stirfry:  <rice> <sesame-oil> <etc>")
+ *        DECLARE_CMD_REQUEST(MyModule, "stir-fry", do_stirfry,
+ *            "stir-fry:  Make the OpenCog server cook Chinese food.",
+ *            "Usage: stir-fry <rice> <sesame-oil> <etc>\n\n"
+ *            "This is a very super-intellgent cooking command.\n"
+ *            "It even makes coffee!!!")
  * };
  *
- * MyModule::MyModule() {
- *     do_stirfry_register();   // the command must be registered!
+ * MyModule::MyModule() {       // In the constructor, or duing init
+ *     do_stirfry_register();   // The command must be registered!
  * }
  *
- * MyModule::~MyModule() {
- *     do_stirfry_unregister();  // the command must be unregistered!
+ * MyModule::~MyModule() {       // In the destructor, or earlier if desired
+ *     do_stirfry_unregister();  // The command must be unregistered!
  * }
  *
  * std::string MyModule::do_stirfry(std::list<std::string> args) {
