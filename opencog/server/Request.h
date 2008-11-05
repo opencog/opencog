@@ -4,7 +4,8 @@
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
- * Written by Gustavo Gama <gama@vettalabs.com>
+ * Written by Gustavo Gama <gama@vettalabs.com>,
+ * Simple-API implementation by Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -30,11 +31,125 @@
 #include <list>
 
 #include <Sockets/TcpSocket.h>
-
 #include <opencog/server/Factory.h>
 
 namespace opencog
 {
+
+/**
+ * The DECLARE_CMD_REQUEST macro provides a simple, easy-to-use interface
+ * to the creation of new modules, while also sheilding the module writer
+ * from the guts and inner workings of the module loading and command
+ * processing system.
+ *
+ * To be clear: the basic design goals of these macros are:
+ * 1) A module implementation that is isolated from the detailed inner
+ *    guts and workings of the module loading mechanism. This allows
+ *    changes to the module loading and command-request processing 
+ *    system to be made, without also having to refactor each and every
+ *    module that has ever been created.
+ *
+ * 2) Individual modules now have a simple, straight-forward interface
+ *    for specifying a command, and what should be done in reaction to
+ *    that command. In particular, the person creating a new module 
+ *    does not have to learn how the command processing system works;
+ *    they can focus all thier energies on creating the module.
+ *
+ */
+
+/**
+ * DECLARE_CMD_REQUEST -- Declare command to the command processing system.
+ *
+ * This wrapper declares a shell command to the loadable module 
+ * command processing subsystem. This includes the name of the command,
+ * the name of a method to call when the user invokes the command, and
+ * the command summary and formatting strings that are printed at the
+ * shell prompt.
+ *
+ * Arguments:
+ * mod_type:  typename of the class that implements the module.
+ * cmd_str:   the string name of the command
+ * do_cmd:    name of the method to call to run the command.
+ * cmd_sum:   a short string to be printed as a command summary.
+ * cmd_desc:  a long string describing the command in detail.
+ *
+ * Example usage:
+ *
+ * class MyModule: public Module {
+ *    private:
+ *        DECLARE_CMD_REQUEST(MyModule, stirfry, do_stirfry,
+ *            "stirfry:  Make the OpenCog server cook Chinese food.",
+ *            "stirfry:  <rice> <sesame-oil> <etc>")
+ * };
+ *
+ * MyModule::MyModule() {
+ *     do_stirfry_register();   // the command must be registered!
+ * }
+ *
+ * MyModule::~MyModule() {
+ *     do_stirfry_unregister();  // the command must be unregistered!
+ * }
+ *
+ * std::string MyModule::do_stirfry(std::list<std::string> args) {
+ *     if (args.size() != 23)
+ *         return "stirfry: Error: 23 ingredients must be specified";
+ *
+ *     std::string first_ingredient = args.front(); args.pop_front();
+ *
+ *     // Now do some cooking ...
+ *
+ *     return "Your meal is now ready to be eaten!";
+ * }
+ *
+ * The above is all there's to it! Just register and unregister the 
+ * commands with the command processing subsystem, implement the "do"
+ * routine, and go. A module may declare as many commands as desired.
+ * Be sure to register and unregister each command.
+ */
+#define DECLARE_CMD_REQUEST(mod_type,cmd_str,do_cmd,cmd_sum,cmd_desc) \
+                                                                      \
+   class do_cmd##Request : public Request {                           \
+      public:                                                         \
+          static inline const RequestClassInfo& info(void) {          \
+              static const RequestClassInfo _cci(cmd_str,             \
+                                              cmd_sum, cmd_desc);     \
+              return _cci;                                            \
+    }                                                                 \
+    do_cmd##Request(void) {};                                         \
+    virtual ~do_cmd##Request() {};                                    \
+    virtual bool execute(void) {                                      \
+        logger().debug("[" cmd_str " Request] execute");              \
+        std::ostringstream oss;                                       \
+                                                                      \
+        CogServer& cogserver = static_cast<CogServer&>(server());     \
+        mod_type* mod =                                               \
+            static_cast<mod_type *>(cogserver.getModule(              \
+                 "opencog::" #mod_type));                             \
+                                                                      \
+        std::string rs = mod->do_cmd(_parameters);                    \
+        oss << rs << std::endl;                                       \
+                                                                      \
+        if (_mimeType == "text/plain")                                \
+            send(oss.str());                                          \
+        return true;                                                  \
+    }                                                                 \
+};                                                                    \
+                                                                      \
+    /* Declare the factory to manage this request */                  \
+    Factory<do_cmd##Request, Request> do_cmd##Factory;                \
+                                                                      \
+    /* Declare the method that performs the actual action */          \
+    std::string do_cmd(std::list<std::string>);                       \
+                                                                      \
+    /* Declare routines to register and unregister the factories */   \
+    void do_cmd##_register(void) {                                    \
+        cogserver().registerRequest(do_cmd##Request::info().id,       \
+                                    & do_cmd##Factory);               \
+    }                                                                 \
+    void do_cmd##_unregister(void) {                                  \
+        cogserver().unregisterRequest(do_cmd##Request::info().id);    \
+    }
+
 
 /**
  * This struct defines the extended set of attributes used by opencog requests.
