@@ -29,46 +29,18 @@
 #include <string>
 
 #include "AtomStorage.h"
-#include <opencog/server/Request.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
+#include <opencog/server/Request.h>
 
 namespace opencog
 {
 
-class ConsoleSocket;
-
-// Declare a command to the module command processing system.
-// This should robably be implemented as a template, rather than a
-// macro, but for now, a macro will serve as a quick-n-dirty solution
-// to the problem of automatiing this stuff.
-//
-#define DECLARE_REQUEST(cmd,cmd_help,cmd_fmt)                         \
-   class cmd##Request : public Request {                              \
-      public:                                                         \
-          static inline const RequestClassInfo& info(void) {          \
-              static const RequestClassInfo _cci(#cmd,                \
-                                                 cmd_help, cmd_fmt);  \
-              return _cci;                                            \
-    }                                                                 \
-    cmd##Request(void) {};                                            \
-    virtual ~cmd##Request() {};                                       \
-    virtual bool execute(void);                                       \
-};
-
-DECLARE_REQUEST(sqlclose, "close the SQL database", "sqlclose")
-
-DECLARE_REQUEST(sqlload, 
-            "load the contents of the SQL database to the atomtable",
-            "sqlload")
-
-DECLARE_REQUEST(sqlopen, 
-            "open connection to SQL storage",
-            "sqlopen <dbname> <username> <auth>")
-
-DECLARE_REQUEST(sqlstore, 
-            "save the contents of the atomtable on the SQL database",
-            "sqlstore")
+class sqlcloseRequest;
+class sqlloadRequest;
+class sqlopenRequest;
+class sqlstoreRequest;
 
 class PersistModule : public Module
 {
@@ -100,6 +72,69 @@ public:
     virtual AtomStorage* getStore(void);
 
 }; // class
+// Declare a command to the module command processing system.
+// This should robably be implemented as a template, rather than a
+// macro, but for now, a macro will serve as a quick-n-dirty solution
+// to the problem of automatiing this stuff.
+//
+#define DECLARE_REQUEST_EXE(cmd,cmd_help,cmd_fmt)                     \
+   class cmd##Request : public Request {                              \
+      public:                                                         \
+          static inline const RequestClassInfo& info(void) {          \
+              static const RequestClassInfo _cci(#cmd,                \
+                                                 cmd_help, cmd_fmt);  \
+              return _cci;                                            \
+    }                                                                 \
+    cmd##Request(void) {};                                            \
+    virtual ~cmd##Request() {};                                       \
+    virtual bool execute(void);                                       \
+};
+
+#define DECLARE_REQUEST_CB(cmd,do_cmd,cmd_help,cmd_fmt)               \
+	std::string do_cmd(PersistModule*, std::list<std::string>);        \
+                                                                      \
+   class cmd##Request : public Request {                              \
+      public:                                                         \
+          static inline const RequestClassInfo& info(void) {          \
+              static const RequestClassInfo _cci(#cmd,                \
+                                                 cmd_help, cmd_fmt);  \
+              return _cci;                                            \
+    }                                                                 \
+    cmd##Request(void) {};                                            \
+    virtual ~cmd##Request() {};                                       \
+    virtual bool execute(void) {                                      \
+        logger().debug("[Request] execute");                          \
+        std::ostringstream oss;                                       \
+                                                                      \
+        CogServer& cogserver = static_cast<CogServer&>(server());     \
+        PersistModule* persist =                                      \
+            static_cast<PersistModule*>(cogserver.getModule(          \
+                 "opencog::PersistModule"));                          \
+                                                                      \
+        std::string rs = do_cmd(persist, _parameters);                \
+        oss << rs << std::endl;                                       \
+                                                                      \
+        if (_mimeType == "text/plain")                                \
+            send(oss.str());                                          \
+        return true;                                                  \
+    }                                                                 \
+};
+
+DECLARE_REQUEST_CB(sqlclose, on_close, 
+             "close the SQL database", "sqlclose")
+
+DECLARE_REQUEST_EXE(sqlload, 
+            "load the contents of the SQL database to the atomtable",
+            "sqlload")
+
+DECLARE_REQUEST_EXE(sqlopen, 
+            "open connection to SQL storage",
+            "sqlopen <dbname> <username> <auth>")
+
+DECLARE_REQUEST_EXE(sqlstore, 
+            "save the contents of the atomtable on the SQL database",
+            "sqlstore")
+
 
 }  // namespace
 
