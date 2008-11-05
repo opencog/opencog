@@ -34,6 +34,21 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
+// The following two macros provide a simple interface to the module
+// subsystem, allowing modules to be created with a minimum of effort 
+// and overhead.  The basic design goals of these macros are:
+//
+// 1) A module implementation is isolated from the detailed inner guts
+//    and workings of the module loading mechanism. This allows changes
+//    to the module loading mechanism to be made, without also having
+//    to refactor each and every module out there.
+//
+// 2) Individual modules now have a simple, straightforward interface
+//    for specifying a command, and what should be done in reaction to
+//    that command. In particular, the person creating a new module 
+//    does not have to learn how the module system works; they can 
+//    focus all thier energies on creating the module.
+
 // Declare a command to the module command processing system.
 //
 // Arguments:
