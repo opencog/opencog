@@ -53,57 +53,17 @@ class ConsoleSocket;
 
 DECLARE_REQUEST(sqlclose, "close the SQL database", "sqlclose")
 
-class SQLLoadRequest : public Request
-{
-public:
-    static inline const RequestClassInfo& info() {
-        static const RequestClassInfo _cci(
-            "sqlload",
+DECLARE_REQUEST(sqlload, 
             "load the contents of the SQL database to the atomtable",
-            "sqlload"
-        );
-        return _cci;
-    }
+            "sqlload")
 
-    SQLLoadRequest() {};
-    virtual ~SQLLoadRequest() {};
-    virtual bool execute(void);
-};
-
-
-class SQLOpenRequest : public Request
-{
-public:
-    static inline const RequestClassInfo& info() {
-        static const RequestClassInfo _cci(
-            "sqlopen",
+DECLARE_REQUEST(sqlopen, 
             "open connection to SQL storage",
-            "sqlopen <dbname> <username> <auth>"
-        );
-        return _cci;
-    }
+            "sqlopen <dbname> <username> <auth>")
 
-    SQLOpenRequest() {};
-    virtual ~SQLOpenRequest() {};
-    virtual bool execute(void);
-};
-
-class SQLStoreRequest : public Request
-{
-public:
-    static inline const RequestClassInfo& info() {
-        static const RequestClassInfo _cci(
-            "sqlstore",
+DECLARE_REQUEST(sqlstore, 
             "save the contents of the atomtable on the SQL database",
-            "sqlstore"
-        );
-        return _cci;
-    }
-
-    SQLStoreRequest() {};
-    virtual ~SQLStoreRequest() {};
-    virtual bool execute(void);
-};
+            "sqlstore")
 
 class PersistModule : public Module
 {
@@ -112,10 +72,10 @@ private:
 
     AtomStorage* store;
 
-    Factory<SQLOpenRequest,  Request> sqlopenFactory;
     Factory<sqlcloseRequest, Request> sqlcloseFactory;
-    Factory<SQLLoadRequest,  Request> sqlloadFactory;
-    Factory<SQLStoreRequest, Request> sqlstoreFactory;
+    Factory<sqlloadRequest,  Request> sqlloadFactory;
+    Factory<sqlopenRequest,  Request> sqlopenFactory;
+    Factory<sqlstoreRequest, Request> sqlstoreFactory;
 
 public:
 

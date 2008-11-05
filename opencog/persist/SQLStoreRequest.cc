@@ -1,5 +1,5 @@
 /*
- * opencog/persist/SQLStoreRequest.cc
+ * opencog/persist/sqlstoreRequest.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -32,9 +32,9 @@
 
 using namespace opencog;
 
-bool SQLStoreRequest::execute()
+bool sqlstoreRequest::execute()
 {
-    logger().debug("[SQLStoreRequest] execute");
+    logger().debug("[sqlstoreRequest] execute");
     std::ostringstream oss;
 
     if (_parameters.empty()) {

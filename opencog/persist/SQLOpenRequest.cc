@@ -1,5 +1,5 @@
 /*
- * opencog/persist/SQLOpenRequest.cc
+ * opencog/persist/sqlopenRequest.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -31,9 +31,9 @@
 
 using namespace opencog;
 
-bool SQLOpenRequest::execute()
+bool sqlopenRequest::execute()
 {
-    logger().debug("[SQLOpenRequest] execute");
+    logger().debug("[sqlopenRequest] execute");
     std::ostringstream oss;
 
     if (_parameters.size() == 3) {
