@@ -43,20 +43,32 @@ private:
     AtomStorage* store;
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-close", do_close, 
-             "Close the SQL database", 
-             "Close the currently open SQL database")
+       "Close the SQL database", 
+       "Usage: sql-close\n\n"
+       "Close the currently open SQL database")
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-load", do_load,
-            "Load contents of SQL database",
-            "Load the contents of the SQL database to the atomtable")
+       "Load contents of SQL database",
+       "Usage: sql-load\n\n"
+       "Load the contents of the currently open SQL database to the\n"
+       "atomtable. A database must have been previously opened. The load\n"
+       "is a bulk load -- *all* atoms in the database will be loaded.\n"
+       "The loading ocurrs in a distinct thread; this command only initiates\n"
+       "the loading.")
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-open", do_open,
-            "Open connection to SQL storage",
-            "Usage: sqlopen <dbname> <username> <auth>")
+       "Open connection to SQL storage",
+       "Usage: sql-open <dbname> <username> <auth-passwd>\n\n"
+       "Open a connection to an SQL database, for saving or restoring\n"
+       "atomtable contents. If the tables needed to hold atomtable\n"
+       "information do not yet exist, they will be created.")
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-store", do_store,
-            "Save the atomtable on the SQL database",
-            "Save the contents of the atomtable on the SQL database")
+       "Save the atomtable on the SQL database",
+       "Usage: sql-store\n\n"
+       "Save the contents of the atomtable into the currently open SQL\n"
+       "database.  This is a bulk-save -- all atoms will be saved. They can\n"
+       "be loaded at a later time with the sql-load command.")
 
 public:
     const char* id(void);
