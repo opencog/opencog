@@ -34,20 +34,18 @@ DECLARE_MODULE(PersistModule);
 
 PersistModule::PersistModule(void) : store(NULL)
 {
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.registerRequest(sqlopenRequest::info().id,  &sqlopenFactory);
-    cogserver.registerRequest(sqlcloseRequest::info().id, &sqlcloseFactory);
-    cogserver.registerRequest(sqlloadRequest::info().id,  &sqlloadFactory);
-    cogserver.registerRequest(sqlstoreRequest::info().id, &sqlstoreFactory);
+	do_close_register();
+	do_load_register();
+	do_open_register();
+	do_store_register();
 }
 
 PersistModule::~PersistModule()
 {
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.unregisterRequest(sqlopenRequest::info().id);
-    cogserver.unregisterRequest(sqlcloseRequest::info().id);
-    cogserver.unregisterRequest(sqlloadRequest::info().id);
-    cogserver.unregisterRequest(sqlstoreRequest::info().id);
+	do_close_unregister();
+	do_load_unregister();
+	do_open_unregister();
+	do_store_unregister();
 }
 
 void PersistModule::init(void)

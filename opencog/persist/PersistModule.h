@@ -34,54 +34,12 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
-namespace opencog
-{
-
-class sqlcloseRequest;
-class sqlloadRequest;
-class sqlopenRequest;
-class sqlstoreRequest;
-
-class PersistModule : public Module
-{
-
-private:
-
-    AtomStorage* store;
-
-    Factory<sqlcloseRequest, Request> sqlcloseFactory;
-    Factory<sqlloadRequest,  Request> sqlloadFactory;
-    Factory<sqlopenRequest,  Request> sqlopenFactory;
-    Factory<sqlstoreRequest, Request> sqlstoreFactory;
-
-public:
-
-    const char* id(void);
-#if 0
-    static inline const char* id() {
-        static const char* _id = "opencog::PersistModule";
-        return _id;
-    }
-#endif
-
-    PersistModule();
-    virtual ~PersistModule();
-
-    virtual void         init    (void);
-
-    std::string do_close(std::list<std::string>);
-    std::string do_load(std::list<std::string>);
-    std::string do_open(std::list<std::string>);
-    std::string do_store(std::list<std::string>);
-
-}; // class
-
 // Declare a command to the module command processing system.
 //
 // Arguments:
-// cmd:      the name of the command
-// cmd_sum:  a string to be printed as a command summary.
-// cmd_fmt:  a string illustrating the command and its paramters.
+// cmd:       the name of the command
+// cmd_sum:   a string to be printed as a command summary.
+// cmd_fmt:   a string illustrating the command and its paramters.
 //
 // This should probably be implemented as a template, rather than a
 // macro, but for now, a macro will serve as a quick-n-dirty solution
@@ -98,7 +56,10 @@ public:
     cmd##Request(void) {};                                            \
     virtual ~cmd##Request() {};                                       \
     virtual bool execute(void);                                       \
-};
+};                                                                    \
+                                                                      \
+    /* Also declare the factory to manage this request */             \
+    Factory<cmd##Request, Request> cmd##Factory;
 
 // Declare a command to the module command processing system.
 //
@@ -106,7 +67,7 @@ public:
 // is now a generic wrapper, providing a generic service.
 //
 // Arguments:
-// mode_name: name of the class that implements the module.
+// mod_type:  typename of the class that implements the module.
 // do_cmd:    name of the method to call to run the command.
 //
 #define DECLARE_REQUEST_CB(mod_type,cmd,do_cmd,cmd_sum,cmd_fmt)       \
@@ -136,23 +97,55 @@ public:
             send(oss.str());                                          \
         return true;                                                  \
     }                                                                 \
-};
+};                                                                    \
+                                                                      \
+    /* Declare the factory to manage this request */                  \
+    Factory<cmd##Request, Request> cmd##Factory;                      \
+                                                                      \
+    /* Declare the method that performs the actual action */          \
+    std::string do_cmd(std::list<std::string>);                       \
+                                                                      \
+    /* Declare routines to register and unregister the factories */   \
+    void do_cmd##_register(void) {                                    \
+        cogserver().registerRequest(cmd##Request::info().id,          \
+                                    & cmd##Factory);                  \
+    }                                                                 \
+    void do_cmd##_unregister(void) {                                  \
+        cogserver().unregisterRequest(cmd##Request::info().id);       \
+    }
 
-DECLARE_REQUEST_CB(PersistModule, sqlclose, do_close, 
+namespace opencog
+{
+
+class PersistModule : public Module
+{
+private:
+    AtomStorage* store;
+
+    DECLARE_REQUEST_CB(PersistModule, sqlclose, do_close, 
              "close the SQL database", "sqlclose")
 
-DECLARE_REQUEST_CB(PersistModule, sqlload, do_load,
+    DECLARE_REQUEST_CB(PersistModule, sqlload, do_load,
             "load the contents of the SQL database to the atomtable",
             "sqlload")
 
-DECLARE_REQUEST_CB(PersistModule, sqlopen, do_open,
+    DECLARE_REQUEST_CB(PersistModule, sqlopen, do_open,
             "open connection to SQL storage",
             "sqlopen <dbname> <username> <auth>")
 
-DECLARE_REQUEST_CB(PersistModule, sqlstore, do_store,
+    DECLARE_REQUEST_CB(PersistModule, sqlstore, do_store,
             "save the contents of the atomtable on the SQL database",
             "sqlstore")
 
+public:
+    const char* id(void);
+
+    PersistModule(void);
+    virtual ~PersistModule();
+
+    virtual void init(void);
+
+}; // class
 
 }  // namespace
 
