@@ -69,20 +69,30 @@ public:
 
     virtual void         init    (void);
     virtual void         setStore(AtomStorage *);
-    virtual AtomStorage* getStore(void);
+    virtual AtomStorage* getStore(void); // XXX get rid of this
+
+    std::string on_close(std::list<std::string>);
+    std::string on_load(std::list<std::string>);
 
 }; // class
+
 // Declare a command to the module command processing system.
-// This should robably be implemented as a template, rather than a
-// macro, but for now, a macro will serve as a quick-n-dirty solution
-// to the problem of automatiing this stuff.
 //
-#define DECLARE_REQUEST_EXE(cmd,cmd_help,cmd_fmt)                     \
+// Arguments:
+// cmd:      the name of the command
+// cmd_sum:  a string to be printed as a command summary.
+// cmd_fmt:  a string illustrating the command and its paramters.
+//
+// This should probably be implemented as a template, rather than a
+// macro, but for now, a macro will serve as a quick-n-dirty solution
+// to the problem of automating this stuff.
+//
+#define DECLARE_REQUEST_EXE(cmd,cmd_sum,cmd_fmt)                      \
    class cmd##Request : public Request {                              \
       public:                                                         \
           static inline const RequestClassInfo& info(void) {          \
               static const RequestClassInfo _cci(#cmd,                \
-                                                 cmd_help, cmd_fmt);  \
+                                                 cmd_sum, cmd_fmt);   \
               return _cci;                                            \
     }                                                                 \
     cmd##Request(void) {};                                            \
@@ -90,14 +100,22 @@ public:
     virtual bool execute(void);                                       \
 };
 
-#define DECLARE_REQUEST_CB(cmd,do_cmd,cmd_help,cmd_fmt)               \
-	std::string do_cmd(PersistModule*, std::list<std::string>);        \
+// Declare a command to the module command processing system.
+//
+// Similar to DECLARE_REQUEST_EXE, except that the execute() method
+// is now a generic wrapper, providing a generic service.
+//
+// Arguments:
+// mode_name: name of the class that implements the module.
+// do_cmd:    name of the method to call to run the command.
+//
+#define DECLARE_REQUEST_CB(mod_type,cmd,do_cmd,cmd_sum,cmd_fmt)       \
                                                                       \
    class cmd##Request : public Request {                              \
       public:                                                         \
           static inline const RequestClassInfo& info(void) {          \
               static const RequestClassInfo _cci(#cmd,                \
-                                                 cmd_help, cmd_fmt);  \
+                                              cmd_sum, cmd_fmt);      \
               return _cci;                                            \
     }                                                                 \
     cmd##Request(void) {};                                            \
@@ -107,11 +125,11 @@ public:
         std::ostringstream oss;                                       \
                                                                       \
         CogServer& cogserver = static_cast<CogServer&>(server());     \
-        PersistModule* persist =                                      \
-            static_cast<PersistModule*>(cogserver.getModule(          \
-                 "opencog::PersistModule"));                          \
+        mod_type* mod =                                               \
+            static_cast<mod_type *>(cogserver.getModule(              \
+                 "opencog::" #mod_type));                             \
                                                                       \
-        std::string rs = do_cmd(persist, _parameters);                \
+        std::string rs = mod->do_cmd(_parameters);                    \
         oss << rs << std::endl;                                       \
                                                                       \
         if (_mimeType == "text/plain")                                \
@@ -120,10 +138,10 @@ public:
     }                                                                 \
 };
 
-DECLARE_REQUEST_CB(sqlclose, on_close, 
+DECLARE_REQUEST_CB(PersistModule, sqlclose, on_close, 
              "close the SQL database", "sqlclose")
 
-DECLARE_REQUEST_EXE(sqlload, 
+DECLARE_REQUEST_CB(PersistModule, sqlload, on_load,
             "load the contents of the SQL database to the atomtable",
             "sqlload")
 

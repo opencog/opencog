@@ -65,39 +65,30 @@ AtomStorage* PersistModule::getStore(void)
 }
 
 
-std::string opencog::on_close(PersistModule* persist, std::list<std::string> args)
+std::string PersistModule::on_close(std::list<std::string> args)
 {
 	if (!args.empty()) 
 		return "sqlclose: Wrong num args";
 
-	AtomStorage* store = persist->getStore();
 	if (store == NULL)
 		return "sqlclose: database not open";
 
 	delete store;
-	persist->setStore(NULL);
+	store = NULL;
 	return "database closed";
 }
 
-
-bool sqlloadRequest::execute()
+std::string PersistModule::on_load(std::list<std::string> args)
 {
-    logger().debug("[sqlloadRequest] execute");
-    std::ostringstream oss;
+	if (!args.empty()) 
+		return "sqlload: Wrong num args";
 
-    if (_parameters.empty()) {
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        PersistModule* persist =
-            static_cast<PersistModule*>(cogserver.getModule("opencog::PersistModule"));
-        AtomStorage* store = persist->getStore();
-        if (store == NULL) oss << "error: invalid SQL storage" << std::endl;
-        else store->load(const_cast<AtomTable&>(cogserver.getAtomSpace()->getAtomTable()));
-    } else oss << info().help << std::endl;
+	if (store == NULL)
+		return "sqlload: database not open";
 
-    if (_mimeType == "text/plain")
-        send(oss.str());
+	store->load(atomtable());
 
-    return true;
+	return "database load started";
 }
 
 
