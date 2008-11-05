@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/shell/GenericSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
+#include "GenericSocket.h"
 #include "GenericShell.h"
 
 using namespace opencog;

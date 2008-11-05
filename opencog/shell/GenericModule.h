@@ -1,5 +1,5 @@
 /*
- * opencog/socket/GenericModule.h
+ * opencog/shell/GenericModule.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_GENERIC_MODULE_H
 #define _OPENCOG_GENERIC_MODULE_H
 
-#include <opencog/server/GenericShell.h>
 #include <opencog/server/Module.h>
+#include "GenericShell.h"
 
 namespace opencog
 {
