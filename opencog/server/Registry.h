@@ -89,7 +89,18 @@ public:
     /** Returns the metadata associated with the factory identified by 'id' */
     const ClassInfo& classinfo(const std::string& id) const
     {
-        static ClassInfo emptyClassInfo;
+        // XXX It is common for cogserver code to upcast, without any 
+        // runtime checking, (i.e. without using dynamic_cast) to class 
+        // RequestClassInfo, and then dereference the "help" string. 
+        // This occurs, for example, when the user types "help asdf" at
+        // the command shell, and the "asdf" command does not exist. 
+        // The unchecked cast and access causes a crash. The correct fix 
+        // would be to not cast all over the place. But that's a lot of
+        // work, since & not * is used all over the place. So, for now,
+        // this fix will do the trick.  XXX
+        //
+        static RequestClassInfo emptyClassInfo;
+        emptyClassInfo.help = "Error: No such command";
         FactoryMapConstIterator it = factories.find(id);
         if (it == factories.end()) {
             // not found
