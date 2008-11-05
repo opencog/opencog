@@ -13,7 +13,9 @@ INSTALL (TARGETS gshell
 
 INSTALL (FILES
 	GenericSocket.h
-	# GenericModule.h
+	GenericModule.h
+   GeneericShell.h
+   SchemeShell.h
 	DESTINATION "include/opencog/shell"
 )
 
@@ -24,6 +26,7 @@ ADD_LIBRARY (scheme-shell SHARED
 TARGET_LINK_LIBRARIES(scheme-shell
    util
    atomspace
+   gshell
    smob
 )
 
