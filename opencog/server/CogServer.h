@@ -34,6 +34,8 @@
 
 #include <pthread.h>
 
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/BaseServer.h>
 #include <opencog/server/Module.h>
@@ -234,6 +236,18 @@ public:
     virtual void unitTestServerLoop(int limitNumberOfCycles);
 
 }; // class
+
+// Handy dandy utiities
+static inline CogServer& cogserver(void)
+{
+    return static_cast<CogServer&>(server());
+}
+
+class AtomTable;
+static inline AtomTable& atomtable(void)
+{
+    return const_cast<AtomTable&>(cogserver().getAtomSpace()->getAtomTable());
+}
 
 }  // namespace
 
