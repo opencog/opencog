@@ -52,7 +52,7 @@ void PersistModule::init(void)
 {
 }
 
-std::string PersistModule::do_close(std::list<std::string> args)
+std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
 		return "sqlclose: Wrong num args";
@@ -65,7 +65,7 @@ std::string PersistModule::do_close(std::list<std::string> args)
 	return "database closed";
 }
 
-std::string PersistModule::do_load(std::list<std::string> args)
+std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
 		return "sqlload: Wrong num args";
@@ -79,7 +79,7 @@ std::string PersistModule::do_load(std::list<std::string> args)
 }
 
 
-std::string PersistModule::do_open(std::list<std::string> args)
+std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 {
 	if (args.size() != 3)
 		return "sqlload: Wrong num args";
@@ -95,7 +95,7 @@ std::string PersistModule::do_open(std::list<std::string> args)
 	return "database opened";
 }
 
-std::string PersistModule::do_store(std::list<std::string> args)
+std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
 		return "sqlstore: Wrong num args";

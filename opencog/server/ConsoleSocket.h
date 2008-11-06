@@ -72,6 +72,7 @@ private:
 
     Request* _request;
     std::stringstream _buffer;
+    bool multiline_mode;
 
 public:
 

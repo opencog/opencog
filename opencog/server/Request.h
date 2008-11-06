@@ -67,11 +67,17 @@ namespace opencog
  * shell prompt.
  *
  * Arguments:
- * mod_type:  typename of the class that implements the module.
- * cmd_str:   the string name of the command
- * do_cmd:    name of the method to call to run the command.
- * cmd_sum:   a short string to be printed as a command summary.
- * cmd_desc:  a long string describing the command in detail.
+ * mod_type:  Typename of the class that implements the module.
+ * cmd_str:   The string name of the command
+ * do_cmd:    Name of the method to call to run the command.
+ *            The signature of the method mus be as follows (see also
+ *            exmple):
+ *            std::string mod_type::do_cmd(Request *, std::list<std::string>)
+ *            The first arg is the original request; most users will not
+ *            need this. The second arg is the parsed command line,
+ *            presented as a list of strings.
+ * cmd_sum:   A short string to be printed as a command summary.
+ * cmd_desc:  A long string describing the command in detail.
  *
  * Example usage:
  *
@@ -92,7 +98,7 @@ namespace opencog
  *     do_stirfry_unregister();  // The command must be unregistered!
  * }
  *
- * std::string MyModule::do_stirfry(std::list<std::string> args) {
+ * std::string MyModule::do_stirfry(Request *r, std::list<std::string> args) {
  *     if (args.size() != 23)
  *         return "stirfry: Error: 23 ingredients must be specified";
  *
@@ -128,7 +134,7 @@ namespace opencog
             static_cast<mod_type *>(cogserver.getModule(              \
                  "opencog::" #mod_type));                             \
                                                                       \
-        std::string rs = mod->do_cmd(_parameters);                    \
+        std::string rs = mod->do_cmd(this, _parameters);              \
         oss << rs << std::endl;                                       \
                                                                       \
         if (_mimeType == "text/plain")                                \
@@ -141,7 +147,7 @@ namespace opencog
     Factory<do_cmd##Request, Request> do_cmd##Factory;                \
                                                                       \
     /* Declare the method that performs the actual action */          \
-    std::string do_cmd(std::list<std::string>);                       \
+    std::string do_cmd(Request *, std::list<std::string>);            \
                                                                       \
     /* Declare routines to register and unregister the factories */   \
     void do_cmd##_register(void) {                                    \
@@ -263,6 +269,9 @@ public:
 
     /** Stores the client socket. */
     virtual void setSocket(TcpSocket*);
+
+    /** Return the client socket. */
+    virtual TcpSocket* getSocket(void) { return _sock; }
 
     /** sets the command's parameter list. */
     virtual void setParameters(const std::list<std::string>& params);

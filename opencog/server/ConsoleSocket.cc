@@ -38,6 +38,7 @@ ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
     : TcpSocket(handler), IHasMimeType("text/plain")
 {
     SetLineProtocol(true);
+    multiline_mode = false;
 }
 
 ConsoleSocket::~ConsoleSocket()

@@ -177,9 +177,11 @@ std::string SchemeShell::do_eval(const std::string &expr)
 
 }
 
-std::string SchemeShell::shellout(std::list<std::string> args)
+/* ============================================================== */
+
+std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 {
-	printf("Hello world\n");
+	printf("Hello world this is what we got: %p\n", req->getSocket());
 	return "exit scm";
 }
 
