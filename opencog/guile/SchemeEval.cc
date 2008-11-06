@@ -273,6 +273,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  */
 std::string SchemeEval::eval(const std::string &expr)
 {
+	// XXX This is a defacto string buffer copy, could probably be avoided
+	// in most cases. FIXME.  i.e. no copy needed when no peding input.
 	input_line += expr;
 
 	caught_error = false;

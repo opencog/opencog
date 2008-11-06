@@ -64,6 +64,18 @@ SchemeShell::~SchemeShell()
 	shellout_unregister();
 }
 
+/**
+ * Register this shell with the console.
+ */
+std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
+{
+	ConsoleSocket *cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
+	if(cs) cs->SetShell(this);
+	return "Entering the scheme shell";
+}
+
+/* ============================================================== */
+
 void SchemeShell::hush_output(bool hush)
 {
 	show_output = !hush;
@@ -88,7 +100,8 @@ const std::string& SchemeShell::get_prompt(void)
 void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
 {
 	std::string retstr = do_eval(expr);
-	logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
+	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
+	//
 	socket->Send(retstr);
 }
 
@@ -146,10 +159,13 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	}
 
 
-	/* The #$%^& opecog command shell processor cuts off the 
-	 * newline character. Re-insert it; otherwise, comments within
-	 * procedures will have the effect of commenting out the rest
-	 * of the procedure, leading to garbage.
+	/* The #$%^& Alhem CSockets code cuts off the newline character.
+	 * (It also leaks memory like a seive, 1/2 Gig in 20 seconds under
+	 * the right conditions. Grrr)
+	 *
+	 * Re-insert it; otherwise, comments within procedures will
+	 * have the effect of commenting out the rest of the procedure,
+	 * leading to garbage.
 	 *
 	 * (This is a pointless string copy, it should be eliminated)
 	 */
@@ -175,21 +191,6 @@ std::string SchemeShell::do_eval(const std::string &expr)
 		return "";
 	}
 
-}
-
-/* ============================================================== */
-
-std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
-{
-	ConsoleSocket *cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
-	printf("Hello world this is what we got: %p\n", cs);
-
-	if(cs) cs->SetShell(this);
-
-	std::string &s = args.front();
-   printf("duuude arg=%s\n", s.c_str()); 
-
-	return "entering the scheme shell";
 }
 
 #endif
