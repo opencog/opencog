@@ -38,7 +38,7 @@ ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
     : TcpSocket(handler), IHasMimeType("text/plain")
 {
     SetLineProtocol(true);
-    multiline_mode = false;
+    _shell = NULL;
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -63,26 +63,17 @@ void ConsoleSocket::OnDetached()
 
 void ConsoleSocket::OnLine(const std::string& line)
 {
-    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
-    CogServer& cogserver = static_cast<CogServer&>(server());
-
-    // If the system is in multiline mode, dispatch the existing request,
-    // without creating a new request, and without parsing the command line. 
-    // XXX However, we are still incurring the CPU overhead of creating
-    // a new request. Its not clear why this is needed, and should
-    // proably be eliminated, as this is a clear performance bottleneck
-    // for streaming data. FWIW, the scheme data flows via the multiline
-    // mode, and the datastream can be hundreds of gigabytes in the course
-    // of hours, so processing overhead should be avoided. XXXX. 
-    if (multiline_mode) {
-        std::list<std::string> params;
-        params.push_front(line);
-        _request = cogserver.createRequest(cmdName);
-        _request->setSocket(this);
-        _request->setParameters(params);
-        cogserver.pushRequest(_request);
+    // If a shell processor has been designated, then defer all
+    // processing to the shell.  In particular, avoid as much overhead
+    // as possible, since the shell needs to be able to handle a
+    // high-speed data feeed with as little getting in the way as
+    // possible.
+    if (_shell) {
+        _shell->eval(line, this);
         return;
     }
+
+    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
 
     // parse command line
     std::list<std::string> params;
@@ -93,9 +84,10 @@ void ConsoleSocket::OnLine(const std::string& line)
         OnRequestComplete();
         return;
     }
-    cmdName = params.front();
+    std::string cmdName = params.front();
     params.pop_front();
 
+    CogServer& cogserver = static_cast<CogServer&>(server());
     _request = cogserver.createRequest(cmdName);
     if (_request == NULL) {
         char msg[256];
@@ -115,7 +107,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     _request->setSocket(this);
     _request->setParameters(params);
 
-    if (false == multiline_mode) {
+    if (LineProtocol()) {
         // we only add the command to the processing queue
         // if it hasn't disabled the line protocol
         cogserver.pushRequest(_request);
@@ -158,7 +150,6 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
             CogServer& cogserver = static_cast<CogServer&>(server());
             cogserver.pushRequest(_request);
             SetLineProtocol(true);
-            multiline_mode = false;
         }
     } else {
         logger().error("unable to retrieve last 3 chars (buffer contents=[%s])", _buffer.str().c_str());
@@ -171,7 +162,7 @@ void ConsoleSocket::OnRequestComplete()
     Send(config()["PROMPT"]);
 }
 
-void ConsoleSocket::SetMultilineMode(bool m)
+void ConsoleSocket::SetShell(GenericShell *g)
 {
-    multiline_mode = m;
+    _shell = g;
 }

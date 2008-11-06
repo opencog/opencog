@@ -31,9 +31,6 @@
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
 
-#include "GenericSocket.h"
-#include "GenericModule.h"
-
 namespace opencog {
 
 class SchemeShell : public GenericShell
@@ -63,7 +60,7 @@ class SchemeShell : public GenericShell
 
 		virtual const char *id(void);
 		virtual void init(void);
-		virtual void eval(const std::string &, GenericSocket&);
+		virtual void eval(const std::string &, ConsoleSocket *);
 
 		void hush_output(bool);
 };

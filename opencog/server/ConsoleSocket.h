@@ -34,6 +34,7 @@
 
 #include <opencog/server/IHasMimeType.h>
 #include <opencog/server/IRPCSocket.h>
+#include <opencog/shell/GenericShell.h>
 
 namespace opencog
 {
@@ -72,8 +73,7 @@ private:
 
     Request* _request;
     std::stringstream _buffer;
-    std::string cmdName;
-    bool multiline_mode;
+    GenericShell *_shell;
 
 public:
 
@@ -139,14 +139,10 @@ public:
      */
     void OnRequestComplete ();
 
-    /** SetMultilineMode: Set multiline mode. This determines the kind
-     *  of line processing offered by the console. When multiline mode
-     *  is enabled, then command-line parsing is disabled, since it is
-     *  assummed that multiple lines of data will follow (and should not
-     *  be parsed).  When multiline mode is disabled (the default), 
-     *  ordinary command-line parsing is done.
+    /** SetShell: Declare an alternate shell, that will perform all
+     *  command line processing.
      */
-    void SetMultilineMode(bool);
+    void SetShell(GenericShell *);
 
 }; // class
 

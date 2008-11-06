@@ -26,16 +26,13 @@
 #include <string>
 
 #include <opencog/server/Module.h>
-#include "GenericSocket.h"
-#include "GenericModule.h"
 
 namespace opencog {
 
+class ConsoleSocket;
+
 class GenericShell : public Module
 {
-	friend class GenericModule;
-	friend class GenericSocket;
-
 	protected:
 		std::string abort_prompt;
 		std::string normal_prompt;
@@ -46,7 +43,7 @@ class GenericShell : public Module
 		virtual ~GenericShell() {}
 
 		virtual const char *id(void) = 0;
-		virtual void eval(const std::string &, GenericSocket&) = 0;
+		virtual void eval(const std::string &, ConsoleSocket *) = 0;
 };
 
 }

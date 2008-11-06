@@ -86,11 +86,11 @@ const std::string& SchemeShell::get_prompt(void)
 
 /* ============================================================== */
 
-void SchemeShell::eval(const std::string &expr, GenericSocket& socket)
+void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
 {
 	std::string retstr = do_eval(expr);
 	logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
-	socket.Send(retstr);
+	socket->Send(retstr);
 }
 
 /**
@@ -185,7 +185,7 @@ std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 	ConsoleSocket *cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
 	printf("Hello world this is what we got: %p\n", cs);
 
-	if(cs) cs->SetMultilineMode(true);
+	if(cs) cs->SetShell(this);
 
 	std::string &s = args.front();
    printf("duuude arg=%s\n", s.c_str()); 
