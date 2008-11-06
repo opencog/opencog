@@ -44,7 +44,7 @@ class SchemeShell : public GenericShell
 			"OpenCog atoms and truth values. It provides a full R5RS-compliant\n"
 			"interactive scheme shell, based on the GNU Guile extension language.")
 
-		SchemeEval evaluator;
+		SchemeEval *evaluator;
 
 		std::string normal_prompt;
 		std::string pending_prompt;

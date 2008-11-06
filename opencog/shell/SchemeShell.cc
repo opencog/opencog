@@ -52,6 +52,7 @@ SchemeShell::SchemeShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
+	evaluator = NULL;
 }
 
 void SchemeShell::init(void)
@@ -62,6 +63,7 @@ void SchemeShell::init(void)
 SchemeShell::~SchemeShell()
 {
 	shellout_unregister();
+	if (evaluator) delete evaluator;
 }
 
 /**
@@ -85,7 +87,7 @@ const std::string& SchemeShell::get_prompt(void)
 {
 	// Use different prompts, depending on whether there is pending
 	// input or not.
-	if (evaluator.input_pending())
+	if (evaluator->input_pending())
 	{
 		return pending_prompt;
 	}
@@ -99,6 +101,17 @@ const std::string& SchemeShell::get_prompt(void)
 
 void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
 {
+	// XXX A subtle but important point: the way that socket handling
+	// works in OpenCog is that socket-listen/accept happens in one
+	// thread, while socket receive is in another. In particular, the
+	// constructor for this class, the init() method, and the shellout()
+	// method run in a *different* thread than this method does.  Now, 
+	// guile is thread-aware, but it has to be inited in each thread,
+	// otherwise it crashes. Thus, we *must* create the evaluator here,
+	// rather than earlier, because this is the first place where we
+	// are gaurenteed to be in the right thread.
+	if (!evaluator) evaluator = new SchemeEval();
+
 	std::string retstr = do_eval(expr);
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
@@ -135,7 +148,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
-				evaluator.clear_pending();
+				evaluator->clear_pending();
 				return abort_prompt;
 			}
 
@@ -154,7 +167,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((0x16 == c) || (0x18 == c) || (0x1b == c))
 	{
-		evaluator.clear_pending();
+		evaluator->clear_pending();
 		return "\n" + normal_prompt;
 	}
 
@@ -171,9 +184,9 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	 */
 	std::string input = expr + "\n";
 
-	std::string result = evaluator.eval(input.c_str());
+	std::string result = evaluator->eval(input.c_str());
 
-	if (evaluator.input_pending())
+	if (evaluator->input_pending())
 	{
 		if (show_output)
 			return pending_prompt;
@@ -181,7 +194,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 			return "";
 	}
 
-	if (show_output || evaluator.eval_error())
+	if (show_output || evaluator->eval_error())
 	{
 		result += normal_prompt;
 		return result;
