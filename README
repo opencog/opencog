@@ -76,12 +76,20 @@ bin/src/CogServer/cogServer.  From another terminal, run
 to see all the nodes and links.
 
 
+Config file
+-----------
+The operation of the server can be altered by means of a config file.
+This config file is in lib/opencog.conf. To make use of it, say 
+"cogserver -c <config-filename>" when starting the server.
+
 Scheme shell
 ------------
 The cog server also includes a built-in scheme shell. The shell can be
 started by typing "scm" after entering the opencog server shell. It can
-be exited by placing a single . on a line by itself.  Documentation for
-the available opencog commands can be found in src/guile/README.
+be exited by placing a single . on a line by itself.  This shell allows
+opencog atoms and truth values to be created, manipulated and destroyed
+using a very simple but powerful interface.  Examples and documentation
+for the available OpenCog commands can be found in src/guile/README.
 
 
 Modifying the list of basic types
