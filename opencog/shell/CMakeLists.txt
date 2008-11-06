@@ -1,11 +1,16 @@
-ADD_LIBRARY (gshell SHARED
+
+ADD_LIBRARY (scheme-shell SHARED
    GenericShell
+   SchemeShell
 )
 
-TARGET_LINK_LIBRARIES(gshell
+TARGET_LINK_LIBRARIES(scheme-shell
+   util
+   atomspace
+   smob
 )
 
-INSTALL (TARGETS gshell
+INSTALL (TARGETS scheme-shell
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -13,16 +18,5 @@ INSTALL (FILES
    GenericShell.h
    SchemeShell.h
 	DESTINATION "include/opencog/shell"
-)
-
-ADD_LIBRARY (scheme-shell SHARED
-   SchemeShell
-)
-
-TARGET_LINK_LIBRARIES(scheme-shell
-   util
-   atomspace
-   gshell
-   smob
 )
 
