@@ -1,7 +1,5 @@
 ADD_LIBRARY (gshell SHARED
    GenericShell
-	# GenericSocket.cc
-	# GenericModule.cc
 )
 
 TARGET_LINK_LIBRARIES(gshell
@@ -12,8 +10,6 @@ INSTALL (TARGETS gshell
 )
 
 INSTALL (FILES
-	# GenericSocket.h
-	# GenericModule.h
    GenericShell.h
    SchemeShell.h
 	DESTINATION "include/opencog/shell"

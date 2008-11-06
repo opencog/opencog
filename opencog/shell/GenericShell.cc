@@ -23,7 +23,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
-#include "GenericSocket.h"
 #include "GenericShell.h"
 
 using namespace opencog;
