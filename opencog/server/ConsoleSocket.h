@@ -72,6 +72,7 @@ private:
 
     Request* _request;
     std::stringstream _buffer;
+    std::string cmdName;
     bool multiline_mode;
 
 public:
@@ -137,6 +138,15 @@ public:
      *  "PROMPT") to the client.
      */
     void OnRequestComplete ();
+
+    /** SetMultilineMode: Set multiline mode. This determines the kind
+     *  of line processing offered by the console. When multiline mode
+     *  is enabled, then command-line parsing is disabled, since it is
+     *  assummed that multiple lines of data will follow (and should not
+     *  be parsed).  When multiline mode is disabled (the default), 
+     *  ordinary command-line parsing is done.
+     */
+    void SetMultilineMode(bool);
 
 }; // class
 

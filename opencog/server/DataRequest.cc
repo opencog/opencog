@@ -23,6 +23,7 @@
  */
 
 #include "DataRequest.h"
+#include "ConsoleSocket.h"
 
 #include <vector>
 
@@ -47,6 +48,9 @@ void DataRequest::setSocket(TcpSocket* s)
 {
     Request::setSocket(s);
     s->SetLineProtocol(false);
+
+    ConsoleSocket *cs = dynamic_cast<ConsoleSocket *>(s);
+    if (cs) cs->SetMultilineMode(true);
 }
 
 bool DataRequest::execute()

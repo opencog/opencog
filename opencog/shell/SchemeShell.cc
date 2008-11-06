@@ -23,6 +23,7 @@
 #ifdef HAVE_GUILE
 
 #include <opencog/shell/GenericSocket.h>
+#include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
@@ -181,8 +182,15 @@ std::string SchemeShell::do_eval(const std::string &expr)
 
 std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 {
-	printf("Hello world this is what we got: %p\n", req->getSocket());
-	return "exit scm";
+	ConsoleSocket *cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
+	printf("Hello world this is what we got: %p\n", cs);
+
+	if(cs) cs->SetMultilineMode(true);
+
+	std::string &s = args.front();
+   printf("duuude arg=%s\n", s.c_str()); 
+
+	return "entering the scheme shell";
 }
 
 #endif
