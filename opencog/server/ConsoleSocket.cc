@@ -46,7 +46,7 @@ ConsoleSocket::~ConsoleSocket()
 }
 
 void ConsoleSocket::OnAccept()
-{   
+{
     logger().debug("[ConsoleSocket] OnAccept");
     if (Detach() == false) {
         logger().error("Unable to detach socket.");
@@ -66,7 +66,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     // If a shell processor has been designated, then defer all
     // processing to the shell.  In particular, avoid as much overhead
     // as possible, since the shell needs to be able to handle a
-    // high-speed data feeed with as little getting in the way as
+    // high-speed data feed with as little getting in the way as
     // possible.
     if (_shell) {
         _shell->eval(line, this);
