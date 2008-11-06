@@ -52,6 +52,7 @@ class SchemeShell : public GenericShell
 		const std::string& get_prompt(void);
 		bool show_output;
 
+		ConsoleSocket *cs;
 		std::string do_eval(const std::string &);
 
 	public:

@@ -53,6 +53,7 @@ SchemeShell::SchemeShell(void)
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
 	evaluator = NULL;
+	cs = NULL;
 }
 
 void SchemeShell::init(void)
@@ -71,9 +72,10 @@ SchemeShell::~SchemeShell()
  */
 std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 {
-	ConsoleSocket *cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
-	if(cs) cs->SetShell(this);
-	return "Entering the scheme shell";
+	cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
+	if (cs) cs->SetShell(this);
+	return "Entering the scheme shell; use ^D or a single . on a\n"
+	       "line by itself to exit.";
 }
 
 /* ============================================================== */
@@ -112,6 +114,7 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
 	// are gaurenteed to be in the right thread.
 	if (!evaluator) evaluator = new SchemeEval();
 
+	cs = socket;
 	std::string retstr = do_eval(expr);
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
@@ -171,6 +174,15 @@ std::string SchemeShell::do_eval(const std::string &expr)
 		return "\n" + normal_prompt;
 	}
 
+	// Look for either an isolated control-D, or a single period on a line
+	// by itself. This means "leave the shell". We leave the shell by
+	// unsetting the shell pointer in the ConsoleSocket.
+	if ((false == evaluator->input_pending()) &&
+	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
+	{
+		if (cs) cs->SetShell(NULL);
+		return "Exiting the scheme shell\n";
+	}
 
 	/* The #$%^& Alhem CSockets code cuts off the newline character.
 	 * (It also leaks memory like a seive, 1/2 Gig in 20 seconds under
