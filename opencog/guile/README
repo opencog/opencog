@@ -37,6 +37,17 @@ A number of utilities and handy functions can be found in the directory
 src/scm. The shell script src/scm/load.sh can be use to load the utilities.
 Additional NLP-related utilities and MindAgents are located in src/nlp/scm.
 
+Multi-threading
+---------------
+Guile is multi-threading-capable, and can be used with multiple threads
+just fine, with just a few caveats: it must be initialized in *each*
+thread in which it is to be used. The class SchemeEval initializes guile
+only in the *current* thread: therefore, one must *not* create this C++
+class in one thread, but use it in another. This can happen
+unintenitionally in OpenCog, because the server socket connection handling
+happens in one thread, while socket data is in another thread. So...
+Caveat Emptor.
+
 
 Core Functions
 --------------
