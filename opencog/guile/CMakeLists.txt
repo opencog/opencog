@@ -9,7 +9,7 @@ ADD_LIBRARY (smob SHARED
 
 TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
-	${OPENCOG_SOURCE_DIR}/opencog/nlp/wsd
+	wsd
 )
 
 INSTALL (TARGETS smob
