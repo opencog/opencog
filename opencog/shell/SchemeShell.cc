@@ -64,7 +64,12 @@ void SchemeShell::init(void)
 
 SchemeShell::~SchemeShell()
 {
-	if (holder) holder->SetShell(NULL);
+	if (holder)
+	{
+		holder->SetShell(NULL);
+		holder->AtomicInc(-1);
+		holder = NULL;
+	}
 	shellout_unregister();
 	if (evaluator) delete evaluator;
 }
@@ -75,7 +80,12 @@ SchemeShell::~SchemeShell()
 std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 {
 	SocketHolder *h = req->getSocketHolder();
-	h->SetShell(this);
+	if (NULL == holder)
+	{
+		holder = h;
+		holder->AtomicInc(+1);
+		holder->SetShell(this);
+	}
 
 	if (evaluator) evaluator->thread_init();
 	return "Entering scheme shell; use ^D or a single . on a "
@@ -119,7 +129,11 @@ void SchemeShell::eval(const std::string &expr, SocketHolder *h)
 	// multiple times).
 	if (evaluator)	evaluator->thread_init();
 
-	holder = h;
+	if (NULL == holder)
+	{
+		holder = h;
+		holder->AtomicInc(+1);
+	}
 	std::string retstr = do_eval(expr);
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
@@ -185,7 +199,12 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	if ((false == evaluator->input_pending()) &&
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
-		if (holder) holder->SetShell(NULL);
+		if (holder) 
+		{
+			holder->SetShell(NULL);
+			holder->AtomicInc(-1);
+			holder = NULL;
+		}
 		return "Exiting the scheme shell\n";
 	}
 
