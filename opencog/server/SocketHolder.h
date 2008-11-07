@@ -2,6 +2,8 @@
 #ifndef _OPENCOG_SOCKET_HOLDER_H
 #define _OPENCOG_SOCKET_HOLDER_H
 
+#include <Sockets/TcpSocket.h>
+
 namespace opencog
 {
 
@@ -24,6 +26,16 @@ namespace opencog
 
 class SocketHolder
 {
+    private:
+        TcpSocket *_sock;
+
+    public:
+        SocketHolder(void);
+        ~SocketHolder();
+
+        void setSocket(TcpSocket *s);
+        TcpSocket *getSocket(void);
+        void send(const std::string& msg) const;
 
 }; // class
 
