@@ -34,6 +34,7 @@
 
 #include <opencog/server/IHasMimeType.h>
 #include <opencog/server/IRPCSocket.h>
+#include <opencog/server/SocketHolder.h>
 #include <opencog/shell/GenericShell.h>
 
 namespace opencog
@@ -73,6 +74,7 @@ private:
 
     Request* _request;
     std::stringstream _buffer;
+    SocketHolder *holder;
     GenericShell *_shell;
 
 public:

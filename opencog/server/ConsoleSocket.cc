@@ -37,12 +37,23 @@ using namespace opencog;
 ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
     : TcpSocket(handler), IHasMimeType("text/plain")
 {
+printf("duuude console %p is new\n", this);
     SetLineProtocol(true);
+
+    // Hmm. Attempt to keep this instance from self-destructing on 
+    // socket close.
+    // SetCloseAndDelete(false);
+    // SetDeleteByHandler(false);
+    // SetDeleteOnExit(false);
     _shell = NULL;
+    holder = new SocketHolder();
+    holder->setSocket(this);
 }
 
 ConsoleSocket::~ConsoleSocket()
 {
+    holder->setSocket(NULL);
+printf("duuude console %p is being destroyed\n", this);
 }
 
 void ConsoleSocket::OnAccept()

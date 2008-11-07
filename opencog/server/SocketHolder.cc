@@ -18,6 +18,11 @@ SocketHolder::~SocketHolder()
 {
 }
 
+void SocketHolder::setSocket (TcpSocket *s)
+{
+    _sock = s;
+}
+
 void SocketHolder::send(const std::string& msg) const
 {
     logger().debug("[SocketHolder] send\n");
