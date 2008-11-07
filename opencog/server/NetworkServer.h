@@ -88,24 +88,30 @@ public:
     /** NetworkServer's destructor. */
     virtual ~NetworkServer();
 
-    /** Starts the NetworkServer by creating a new pthread and (indirectly)
-     *  calling the method 'run' -- which is essentially a loop around the
-     *  SocketHandler.Select method (from alhem's Sockets library). */
+    /** Starts the NetworkServer by creating a new pthread and
+     * (indirectly) calling the method 'run' -- which is essentially
+     * a loop around the SocketHandler.Select method (from Alhem's
+     * Sockets library).
+     */
     virtual void start();
 
-    /** Stops the NetworkServer by flipping the flag that controls the main
-     *  loop. */
+    /** Stops the NetworkServer by flipping the flag that controls the
+     * main loop.
+     */
     virtual void stop();
 
-    /** The network server's thread main method. It should not be called by
-     *  external classes and is only declared as public because we use a 'extern
-     *  "C"' wrapper when calling pthread_create (many C++ 'best practices'
-     *  guiles state that directly using the C++ 'run' is unsafe) */
+    /** The network server's thread main method. It should not be
+     * called by external classes and is only declared as public
+     * because we use a 'extern "C"' wrapper when calling 
+     * pthread_create (many C++ 'best practices' guides state that
+     * directly using the C++ 'run' is unsafe)
+     */
     void run();
 
-    /** Instantiates a listener socket (i.e. server socket) of class '_Socket'
-     *  and binds it to port 'port'. Returns 'true' if successful an 'false'
-     *  otherwise. */
+    /** Instantiates a listener socket (i.e. server socket) of class
+     * '_Socket' and binds it to port 'port'. Returns 'true' if
+     * successful an 'false' otherwise.
+     */
     template<class _Socket>
     bool addListener(const unsigned int port) {
         logger().debug("adding listener to socket %d", port);
@@ -124,8 +130,9 @@ public:
         return true;
     }
 
-    /** Closes the listener socket bound to port 'port'. Returns 'true' if
-     *  successful and 'false' otherwise. */
+    /** Closes the listener socket bound to port 'port'. Returns 'true'
+     * if successful and 'false' otherwise.
+     */
     bool removeListener(const unsigned short port);
 
 }; // class
