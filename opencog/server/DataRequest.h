@@ -34,8 +34,6 @@
 namespace opencog
 {
 
-class ConsoleSocket;
-
 class DataRequest : public Request
 {
 

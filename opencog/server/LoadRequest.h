@@ -33,8 +33,6 @@
 namespace opencog
 {
 
-class ConsoleSocket;
-
 class LoadRequest : public Request
 {
 
