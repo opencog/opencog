@@ -8,14 +8,14 @@
 HOST=localhost
 PORT=17001
 
-cat type_constructors.scm |netcat $HOST $PORT
-cat utilities.scm |netcat $HOST $PORT
-cat cgw-wire.scm |netcat $HOST $PORT
-cat cgw-simple.scm |netcat $HOST $PORT
-cat cgw-fan.scm |netcat $HOST $PORT
-cat cgw-filter.scm |netcat $HOST $PORT
-cat cgw-bidi.scm |netcat $HOST $PORT
-cat cgw-predicate.scm |netcat $HOST $PORT
+cat type_constructors.scm |netcat -q0 $HOST $PORT
+cat utilities.scm         |netcat -q0 $HOST $PORT
+cat cgw-wire.scm          |netcat -q0 $HOST $PORT
+cat cgw-simple.scm        |netcat -q0 $HOST $PORT
+cat cgw-fan.scm           |netcat -q0 $HOST $PORT
+cat cgw-filter.scm        |netcat -q0 $HOST $PORT
+cat cgw-bidi.scm          |netcat -q0 $HOST $PORT
+cat cgw-predicate.scm     |netcat -q0 $HOST $PORT
 
 # Session doesn't work over telnet.
-# echo -e "scm\n(use-modules (ice-9 session))\n.\nexit\n"  |netcat $HOST $PORT
+# echo -e "scm\n(use-modules (ice-9 session))\n.\nexit\n"  |netcat -q0 $HOST $PORT
