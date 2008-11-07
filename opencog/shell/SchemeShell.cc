@@ -53,7 +53,7 @@ SchemeShell::SchemeShell(void)
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
 	evaluator = NULL;
-	cs = NULL;
+	holder = NULL;
 }
 
 void SchemeShell::init(void)
@@ -64,7 +64,7 @@ void SchemeShell::init(void)
 
 SchemeShell::~SchemeShell()
 {
-	if (cs) cs->SetShell(NULL);
+	if (holder) holder->SetShell(NULL);
 	shellout_unregister();
 	if (evaluator) delete evaluator;
 }
@@ -105,7 +105,7 @@ const std::string& SchemeShell::get_prompt(void)
 
 /* ============================================================== */
 
-void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
+void SchemeShell::eval(const std::string &expr, SocketHolder *h)
 {
 	// XXX A subtle but important point: the way that socket handling
 	// works in OpenCog is that socket-listen/accept happens in one
@@ -119,11 +119,11 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
 	// multiple times).
 	if (evaluator)	evaluator->thread_init();
 
-	cs = socket;
+	holder = h;
 	std::string retstr = do_eval(expr);
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
-	socket->Send(retstr);
+	holder->send(retstr);
 }
 
 /**
@@ -185,7 +185,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	if ((false == evaluator->input_pending()) &&
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
-		if (cs) cs->SetShell(NULL);
+		if (holder) holder->SetShell(NULL);
 		return "Exiting the scheme shell\n";
 	}
 

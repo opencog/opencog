@@ -80,7 +80,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     // high-speed data feed with as little getting in the way as
     // possible.
     if (_shell) {
-        _shell->eval(line, this);
+        _shell->eval(line, holder);
         return;
     }
 

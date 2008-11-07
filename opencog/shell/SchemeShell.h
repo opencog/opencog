@@ -52,7 +52,7 @@ class SchemeShell : public GenericShell
 		const std::string& get_prompt(void);
 		bool show_output;
 
-		ConsoleSocket *cs;
+		SocketHolder *holder;
 		std::string do_eval(const std::string &);
 
 	public:
@@ -61,7 +61,7 @@ class SchemeShell : public GenericShell
 
 		virtual const char *id(void);
 		virtual void init(void);
-		virtual void eval(const std::string &, ConsoleSocket *);
+		virtual void eval(const std::string &, SocketHolder *);
 
 		void hush_output(bool);
 };
