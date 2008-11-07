@@ -34,11 +34,18 @@ using namespace opencog;
 
 scm_t_bits SchemeSmob::cog_handle_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
+bool SchemeSmob::is_inited = false;
 
 void SchemeSmob::init(void)
 {
-	init_smob_type();
-	register_procs();
+	// XXX It would be ever so slightly more correct to use
+	// pthread_once() here, but that currently seems like overkill.
+	if (!is_inited)
+	{
+		is_inited = true;
+		init_smob_type();
+		register_procs();
+	}
 }
 
 SchemeSmob::SchemeSmob(void)

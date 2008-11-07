@@ -58,11 +58,13 @@ SchemeShell::SchemeShell(void)
 
 void SchemeShell::init(void)
 {
+	if (!evaluator) evaluator = new SchemeEval();
 	shellout_register();
 }
 
 SchemeShell::~SchemeShell()
 {
+	if (cs) cs->SetShell(NULL);
 	shellout_unregister();
 	if (evaluator) delete evaluator;
 }
@@ -74,6 +76,7 @@ std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 {
 	cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
 	if (cs) cs->SetShell(this);
+	if (evaluator) evaluator->thread_init();
 	return "Entering the scheme shell; use ^D or a single . on a\n"
 	       "line by itself to exit.";
 }
@@ -109,10 +112,11 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *socket)
 	// constructor for this class, the init() method, and the shellout()
 	// method run in a *different* thread than this method does.  Now, 
 	// guile is thread-aware, but it has to be inited in each thread,
-	// otherwise it crashes. Thus, we *must* create the evaluator here,
+	// otherwise it crashes. Thus, we *must* init the evaluator here,
 	// rather than earlier, because this is the first place where we
-	// are gaurenteed to be in the right thread.
-	if (!evaluator) evaluator = new SchemeEval();
+	// are gaurenteed to be in the right thread. (Its OK to re-init
+	// multiple times).
+	if (evaluator)	evaluator->thread_init();
 
 	cs = socket;
 	std::string retstr = do_eval(expr);

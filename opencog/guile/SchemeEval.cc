@@ -13,26 +13,51 @@
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
 #include <libguile/lang.h>
+#include <pthread.h>
 
 #include <opencog/util/platform.h>
 #include "SchemeSmob.h"
 
 using namespace opencog;
 
-bool SchemeEval::is_inited = false;
+// The is_inited key will tell us if scheme has ever been initialized
+// in this thread. We need to create this key once, one time only.
+static pthread_key_t is_inited;
+static pthread_once_t is_inited_key_once = PTHREAD_ONCE_INIT;
 
-SchemeEval::SchemeEval(void)
+static void is_inited_key_alloc(void)
 {
-	if (!is_inited)
+   pthread_key_create(&is_inited, NULL);
+}
+
+/**
+ * thread_init -- initialize scheme for use in this thread
+ * It is safe to call this function more than once in a given
+ * thread; however, it must be called *at least once* in every
+ * thread where scheme is used.
+ */
+void SchemeEval::thread_init(void)
+{
+	pthread_once(&is_inited_key_once, is_inited_key_alloc);
+
+	// The goal here is to initialize scheme once per thread.
+	// The core problem being addressed here is that threads
+	// are being created and destroyed all over the place by
+	// cog-server, and so ... we just have to deal with it.
+   if (NULL == pthread_getspecific(is_inited))
 	{
-		is_inited = true;
+		pthread_setspecific(is_inited, (const void *)0x1);
+
 		scm_init_guile();
 		// DO NOT call scm_init_debug(), this will mess up debugging!
 		// scm_init_debug();
-		// scm_init_backtrace();
-		// scm_init_strports(); // is this really needed ?
 		SchemeSmob::init();
 	}
+}
+
+SchemeEval::SchemeEval(void)
+{
+	thread_init();
 
 	outport = scm_open_output_string();
 	scm_set_current_output_port(outport);

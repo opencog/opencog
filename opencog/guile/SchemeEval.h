@@ -19,8 +19,6 @@ class SchemeSmob;
 class SchemeEval
 {
 	private:
-		static bool is_inited;
-
 		std::string input_line;
 		bool pending_input;
 
@@ -41,6 +39,7 @@ class SchemeEval
 
 	public:
 		SchemeEval(void);
+		void thread_init(void);
 		std::string eval(const std::string &);
 
 		bool input_pending(void);
