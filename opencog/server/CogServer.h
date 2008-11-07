@@ -112,7 +112,6 @@ protected:
     bool running;
 
     void processAgents();
-    void processRequests();
 
     pthread_mutex_t messageQueueLock;
     std::queue<Request*> requestQueue;
@@ -231,6 +230,9 @@ public:
 
     /** Returns the requests queue size. */
     virtual int getRequestQueueSize(void);
+
+    /** Force drain of all outstanding requests */
+    void processRequests(void);
 
     // used for debug purposes in unit tests
     virtual void unitTestServerLoop(int limitNumberOfCycles);

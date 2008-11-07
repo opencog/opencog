@@ -118,9 +118,16 @@ void ConsoleSocket::OnLine(const std::string& line)
     _request->setParameters(params);
 
     if (LineProtocol()) {
-        // we only add the command to the processing queue
+        // We only add the command to the processing queue
         // if it hasn't disabled the line protocol
         cogserver.pushRequest(_request);
+
+        // Force a drain of all outstanding requests. This is because
+        // any one of the requests could be a request to enter shell mode,
+        // in which case, we *must* enter shell mode before handling any
+        // additional input from the socket (since that input is almost
+        // surely intended for the shell, and not for the cogserver).
+        cogserver.processRequests();
     }
 }
 
