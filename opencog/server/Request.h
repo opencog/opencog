@@ -32,6 +32,7 @@
 
 #include <Sockets/TcpSocket.h>
 #include <opencog/server/Factory.h>
+#include <opencog/server/SocketHolder.h>
 
 namespace opencog
 {
@@ -247,7 +248,7 @@ class Request
 
 protected:
 
-    TcpSocket*             _sock;
+    SocketHolder*          _holder;
     std::list<std::string> _parameters;
     std::string            _mimeType;
 
@@ -268,10 +269,8 @@ public:
     virtual void send(const std::string& msg) const;
 
     /** Stores the client socket. */
-    virtual void setSocket(TcpSocket*);
-
-    /** Return the client socket. */
-    virtual TcpSocket* getSocket(void) { return _sock; }
+    virtual void setSocketHolder(SocketHolder*);
+    virtual SocketHolder *getSocketHolder(void) {return _holder; }
 
     /** sets the command's parameter list. */
     virtual void setParameters(const std::list<std::string>& params);

@@ -30,6 +30,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/SocketHolder.h>
 
 namespace opencog
 {
@@ -51,7 +52,7 @@ public:
     DataRequest();
     virtual ~DataRequest();
 
-    virtual void setSocket(TcpSocket*);
+    virtual void setSocketHolder(SocketHolder*);
     virtual bool execute(void);
 };
 

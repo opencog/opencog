@@ -115,7 +115,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
-    _request->setSocket(this);
+    _request->setSocketHolder(holder);
     _request->setParameters(params);
 
     if (LineProtocol()) {

@@ -35,38 +35,28 @@
 
 using namespace opencog;
 
-Request::Request() : _sock(NULL)
+Request::Request() : _holder(NULL)
 {
 }
 
 Request::~Request()
 {
     logger().debug("[Request] destructor");
-    if (_sock) {
-        IRPCSocket* _rpcsock = dynamic_cast<IRPCSocket*>(_sock);
-        if (_rpcsock) {
-            _rpcsock->OnRequestComplete();
-        }
-    }
+    _holder->AtomicInc(-1);
 }
 
-void Request::setSocket(TcpSocket* s)
+void Request::setSocketHolder(SocketHolder* h)
 {
-    logger().debug("[Request] setting socket: %p", s);
-    _sock = s;
-    IHasMimeType* ihmt = dynamic_cast<IHasMimeType*>(_sock);
-    if (ihmt == NULL)
-        throw RuntimeException(TRACE_INFO, "invalid socket: it does not have a mime-type.");
-    _mimeType = ihmt->mimeType();
+    logger().debug("[Request] setting socket: %p", h);
+    _holder = h;
+    _holder->AtomicInc(+1);
+    _mimeType = _holder->mimeType();
 }
 
 void Request::send(const std::string& msg) const
 {
-    logger().debug("[Request] send\n");
-    if (_sock) {
-        Lock l(_sock->MasterHandler().GetMutex());
-        _sock->Send(msg);
-    }
+    // logger().debug("[Request] send\n");
+    _holder->send(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)

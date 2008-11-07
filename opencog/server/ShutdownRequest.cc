@@ -47,7 +47,7 @@ bool ShutdownRequest::execute()
 
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.stop();
-    _sock->SetCloseAndDelete();
+    _holder->SetCloseAndDelete();
 
     return true;
 }

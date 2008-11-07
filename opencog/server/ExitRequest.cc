@@ -38,6 +38,6 @@ ExitRequest::~ExitRequest()
 
 bool ExitRequest::execute()
 {
-    _sock->SetCloseAndDelete();
+    _holder->SetCloseAndDelete();
     return true;
 }

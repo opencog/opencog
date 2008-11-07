@@ -3,6 +3,7 @@
 #define _OPENCOG_SOCKET_HOLDER_H
 
 #include <Sockets/TcpSocket.h>
+#include <opencog/shell/GenericShell.h>
 
 namespace opencog
 {
@@ -34,8 +35,16 @@ class SocketHolder
         ~SocketHolder();
 
         void setSocket(TcpSocket *s);
-        TcpSocket *getSocket(void);
+        int AtomicInc(int inc);
+
+        // Misc OpenCog socket things.
+        std::string mimeType(void);
+        void SetShell(GenericShell *);
+
+        // The following are "wrappers" around TcpSocket calls
         void send(const std::string& msg) const;
+        void SetCloseAndDelete(void);
+        void SetLineProtocol(bool);
 
 }; // class
 
