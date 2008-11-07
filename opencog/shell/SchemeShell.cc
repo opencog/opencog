@@ -80,12 +80,15 @@ SchemeShell::~SchemeShell()
 std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 {
 	SocketHolder *h = req->getSocketHolder();
-	if (NULL == holder)
+	if (holder)
 	{
-		holder = h;
-		holder->AtomicInc(+1);
-		holder->SetShell(this);
+		holder->SetShell(NULL);
+		holder->AtomicInc(-1);
 	}
+
+	holder = h;
+	holder->AtomicInc(+1);
+	holder->SetShell(this);
 
 	if (evaluator) evaluator->thread_init();
 	return "Entering scheme shell; use ^D or a single . on a "
@@ -199,12 +202,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	if ((false == evaluator->input_pending()) &&
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
-		if (holder) 
-		{
-			holder->SetShell(NULL);
-			holder->AtomicInc(-1);
-			holder = NULL;
-		}
+		holder->SetShell(NULL);
 		return "Exiting the scheme shell\n";
 	}
 

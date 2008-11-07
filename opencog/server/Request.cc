@@ -42,21 +42,25 @@ Request::Request() : _holder(NULL)
 Request::~Request()
 {
     logger().debug("[Request] destructor");
-    _holder->AtomicInc(-1);
+    if (_holder) _holder->AtomicInc(-1);
 }
 
 void Request::setSocketHolder(SocketHolder* h)
 {
     logger().debug("[Request] setting socket: %p", h);
-    _holder = h;
-    _holder->AtomicInc(+1);
-    _mimeType = _holder->mimeType();
+    if (NULL == _holder) {
+        _holder = h;
+        _holder->AtomicInc(+1);
+        _mimeType = _holder->mimeType();
+    } else
+        throw RuntimeException(TRACE_INFO,
+            "Bad idea to try to set the socket more than once.");
 }
 
 void Request::send(const std::string& msg) const
 {
     // logger().debug("[Request] send\n");
-    _holder->send(msg);
+    if (_holder) _holder->send(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)
