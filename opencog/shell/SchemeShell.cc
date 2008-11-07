@@ -77,7 +77,7 @@ std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 	cs = dynamic_cast<ConsoleSocket *>(req->getSocket());
 	if (cs) cs->SetShell(this);
 	if (evaluator) evaluator->thread_init();
-	return "Entering the scheme shell; use ^D or a single . on a\n"
+	return "Entering scheme shell; use ^D or a single . on a "
 	       "line by itself to exit.";
 }
 
