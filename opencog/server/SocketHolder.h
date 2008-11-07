@@ -37,14 +37,24 @@ namespace opencog
  * destructor on the TcpSocket class. Thus, any code that holds a
  * pointer to a TcpSocket instance (such as class Request, which
  * interacts with ConsoleSocket), and was hoping to send data, would
- * end up calling methods on a non-existant object .. i.e.  * would be
+ * end up calling methods on a non-existant object .. i.e. would be
  * dereferencing a garbage pointer, and crashing.
  *
- * This class manages that pointer, and continues to live after the
- * socket has disappeared. It accomplishes this by means of reference-
- * counting: it maintains a use count, and self-destructs when that
- * use-count has gone to zero. (This is one example where garbage
- * collection inside of OpenCog would make life simpler and safer.)
+ * Thus, generically, it is not safe for just about any part of OpenCog
+ * to try to access an Alhem socket, since it might not actually be
+ * there at the time of access.  This class provides a safe "wrapper"
+ * around the Alhem Sockets, and continues to live on even if the socket
+ * is gone.  Thus, all OpenCog code should access socket functions only
+ * through this wrapper.
+ *
+ * Any user of this class may hold a pointer to an instance of it; but,
+ * if it does so, it must increment its use-count for as long as it
+ * holds on. When done with this instance, the user should decrement the
+ * use count. After decrementing the use count, the instance may vanish,
+ * and so should not be used again.
+ *
+ * (This class is one example where garbage collection inside of OpenCog
+ * would make life simpler and safer.)
  */
 
 class SocketHolder
