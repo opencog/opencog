@@ -90,7 +90,6 @@ std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 	holder->AtomicInc(+1);
 	holder->SetShell(this);
 
-	if (evaluator) evaluator->thread_init();
 	return "Entering scheme shell; use ^D or a single . on a "
 	       "line by itself to exit.";
 }
@@ -124,20 +123,13 @@ void SchemeShell::eval(const std::string &expr, SocketHolder *h)
 	// works in OpenCog is that socket-listen/accept happens in one
 	// thread, while socket receive is in another. In particular, the
 	// constructor for this class, the init() method, and the shellout()
-	// method run in a *different* thread than this method does.  Now, 
-	// guile is thread-aware, but it has to be inited in each thread,
-	// otherwise it crashes. Thus, we *must* init the evaluator here,
-	// rather than earlier, because this is the first place where we
-	// are gaurenteed to be in the right thread. (Its OK to re-init
-	// multiple times).
-	if (evaluator)	evaluator->thread_init();
-
+	// method run in a *different* thread than this method does.
 	if (NULL == holder)
 	{
 		holder = h;
 		holder->AtomicInc(+1);
 	}
-	std::string retstr = do_eval(expr);
+	const std::string &retstr = do_eval(expr);
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
 	holder->send(retstr);

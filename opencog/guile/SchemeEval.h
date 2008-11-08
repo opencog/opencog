@@ -19,6 +19,14 @@ class SchemeSmob;
 class SchemeEval
 {
 	private:
+		void init(void);
+		static void * c_wrap_init(void *);
+
+		std::string do_eval(const std::string &);
+		static void * c_wrap_eval(void *);
+		const std::string *pexpr;
+		std::string answer;
+
 		std::string input_line;
 		bool pending_input;
 
@@ -39,7 +47,6 @@ class SchemeEval
 
 	public:
 		SchemeEval(void);
-		void thread_init(void);
 		std::string eval(const std::string &);
 
 		bool input_pending(void);

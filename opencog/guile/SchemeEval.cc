@@ -20,44 +20,9 @@
 
 using namespace opencog;
 
-// The is_inited key will tell us if scheme has ever been initialized
-// in this thread. We need to create this key once, one time only.
-static pthread_key_t is_inited;
-static pthread_once_t is_inited_key_once = PTHREAD_ONCE_INIT;
-
-static void is_inited_key_alloc(void)
+void SchemeEval::init(void)
 {
-   pthread_key_create(&is_inited, NULL);
-}
-
-/**
- * thread_init -- initialize scheme for use in this thread
- * It is safe to call this function more than once in a given
- * thread; however, it must be called *at least once* in every
- * thread where scheme is used.
- */
-void SchemeEval::thread_init(void)
-{
-	pthread_once(&is_inited_key_once, is_inited_key_alloc);
-
-	// The goal here is to initialize scheme once per thread.
-	// The core problem being addressed here is that threads
-	// are being created and destroyed all over the place by
-	// cog-server, and so ... we just have to deal with it.
-   if (NULL == pthread_getspecific(is_inited))
-	{
-		pthread_setspecific(is_inited, (const void *)0x1);
-
-		scm_init_guile();
-		// DO NOT call scm_init_debug(), this will mess up debugging!
-		// scm_init_debug();
-		SchemeSmob::init();
-	}
-}
-
-SchemeEval::SchemeEval(void)
-{
-	thread_init();
+	SchemeSmob::init();
 
 	outport = scm_open_output_string();
 	scm_set_current_output_port(outport);
@@ -67,6 +32,19 @@ SchemeEval::SchemeEval(void)
 	input_line = "";
 	error_string_port = SCM_EOL;
 	captured_stack = SCM_BOOL_F;
+	pexpr = NULL;
+}
+
+void * SchemeEval::c_wrap_init(void *p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	self->init();
+	return self;
+}
+
+SchemeEval::SchemeEval(void)
+{
+	scm_with_guile(c_wrap_init, this);
 }
 
 /* ============================================================== */
@@ -297,6 +275,20 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  * Evaluate the expression
  */
 std::string SchemeEval::eval(const std::string &expr)
+{
+	pexpr = &expr;
+	scm_with_guile(c_wrap_eval, this);
+	return answer;
+}
+
+void * SchemeEval::c_wrap_eval(void * p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	self->answer = self->do_eval(*(self->pexpr));
+	return self;
+}
+
+std::string SchemeEval::do_eval(const std::string &expr)
 {
 	// XXX This is a defacto string buffer copy, could probably be avoided
 	// in most cases. FIXME.  i.e. no copy needed when no peding input.
