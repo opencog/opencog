@@ -22,6 +22,23 @@ allowing generic scripting to be done. See the README in the
 src/guile directory for more info, and src/scm for various 
 scriptlets.
 
+Creating Loadable Modules
+-------------------------
+Loadable modules are shared libraries that implement some function. The
+"loadmodule" command in to cogserver command processor will load a module.
+
+Modules can be automatically loaded on server startup by modifying the 
+lib/opencopg.conf file, and adding the module name to the list therein.
+
+Loadable modules will typically need to expose new commands. There are two 
+ways of doing this: either by using DECLARE_CMD_REQUEST or by using the
+GenericShell class.  When only a small number of new commands are needed, 
+then DECLARE_CMD_REQUEST macro provides the simplest, easiest interface to
+add these commands. However, if the module requires a large number of
+commands, or if these commands have a complex syntax, then the GenericShell
+should be used.  The GenericShell bypasses OpenCog's command processor, 
+and passes input data over to a generic "eval()" method, which is then free
+to interprete the input in any way.
 
 ToDo/Bugs:
 ----------
