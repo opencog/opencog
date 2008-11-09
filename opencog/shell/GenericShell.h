@@ -27,6 +27,20 @@
 
 #include <opencog/server/Module.h>
 
+/**
+ * The GenericShell class implements an "escape" from the default cogserver
+ * command processor. It is useful when a module has a large number of
+ * commands, or a peculiar and complex syntax that must be handled. It
+ * works by by-passing all of the command-processing apparatus in the 
+ * cogserver, and instead passing all socket I/O to the "eval" method
+ * in this class. The eval method is then free to parse the input in 
+ * any way desired.
+ *
+ * If instead a module has only a small number of simple commands that
+ * need to be implemented, then the DECLARE_CMD_REQUEST function, defined
+ * in Request.h, provides a simpler and easier way implementing comands.
+ */
+
 namespace opencog {
 
 class SocketHolder;

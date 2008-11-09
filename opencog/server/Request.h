@@ -56,6 +56,10 @@ namespace opencog
  *    does not have to learn how the command processing system works;
  *    they can focus all thier energies on creating the module.
  *
+ * 3) A module has only a small number of regular, simple commands that
+ *    it needs implemented.  If the module has a large number of
+ *    commands, or they have a sophisticated syntax, then using the
+ *    class GenericShell will be more suitable.
  */
 
 /**
@@ -114,6 +118,8 @@ namespace opencog
  * commands with the command processing subsystem, implement the "do"
  * routine, and go. A module may declare as many commands as desired.
  * Be sure to register and unregister each command.
+ *
+ * See also: persist/PersistModule.cc as a working real-life example.
  */
 #define DECLARE_CMD_REQUEST(mod_type,cmd_str,do_cmd,cmd_sum,cmd_desc) \
                                                                       \
