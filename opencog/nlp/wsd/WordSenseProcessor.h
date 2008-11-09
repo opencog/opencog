@@ -12,15 +12,12 @@
 #define _OPENCOG_WORD_SENSE_PROCESSOR_H
 
 #include <pthread.h>
-
+#include <opencog/server/CogServer.h>
 #include <opencog/nlp/wsd/Mihalcea.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
 
 namespace opencog {
 
-class WordSenseProcessor : public Agent, public Module
+class WordSenseProcessor 
 {
 	private:
 
@@ -43,13 +40,6 @@ class WordSenseProcessor : public Agent, public Module
 		Mihalcea *wsd;
 
 	public:
-		static Factory<WordSenseProcessor, Agent> factory;
-
-		virtual const ClassInfo& classinfo() const { return info(); }
-		static const ClassInfo& info() {
-			static const ClassInfo _ci("opencog::WordSenseProcessor");
-			return _ci;
-		}
 
 		WordSenseProcessor(void);
 		virtual ~WordSenseProcessor();
