@@ -58,7 +58,6 @@ SchemeShell::SchemeShell(void)
 
 void SchemeShell::init(void)
 {
-	if (!evaluator) evaluator = new SchemeEval();
 	shellout_register();
 }
 
@@ -90,6 +89,7 @@ std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 	holder->AtomicInc(+1);
 	holder->SetShell(this);
 
+	if (!evaluator) evaluator = new SchemeEval();
 	return "Entering scheme shell; use ^D or a single . on a "
 	       "line by itself to exit.";
 }
