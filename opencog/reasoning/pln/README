@@ -2,8 +2,19 @@
 Notes:
 Skolemization (conversion of premises with variables to be encompassed by a
 ForAll quantifier) is requred of axioms. Results of inference currently don't
-create atoms with a form that requires for Skolemization but when it does, this
-process should be automated.
+create atoms with a Skolemized form but when it does, this process should be automated.
+
+== Screencasts explaining code details
+
+Ari gratiously put together a few videos explaining aspects of the code. Note
+that these refer to a particular snapshot of the code a while ago, so some of it
+may have changed. In particular the MPUnify methods need to be unified
+(ironically).
+
+http://www.dreambroker.fi/w/6ac7926ef - High level overview of PLN files.
+http://www.dreambroker.fi/w/1786cbe13 - BackInferenceTreeNodes.
+http://www.dreambroker.fi/w/2e990eb8fa - MPUnify methods, substitute variable
+methods, TableGather::gather method.
 
 == TODO
 
@@ -15,6 +26,8 @@ as other quite important tasks.
 * Changing the name of AtomTableWrapper to AtomSpaceWrapper
 * Fresh = true bug. This is mostly done through the alteration of the
 AtomTableWrapper. The tests still have to be validated and made to run though.
+* unify the unify methods: MPUnify1, MPUnifyVector, MPUnifyHandle -> MPUnify
+* remove the atom class and replace with vtree.
 * Make PLN a loadable module
 * Register PLN atoms types with the new ClassServer on module load
 * Merge PLN shell requests into the CogServer Request processor.

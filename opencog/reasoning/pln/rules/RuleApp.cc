@@ -5,16 +5,19 @@
 namespace reasoning
 {
 // Was:
-//const vtree& RuleApp::getVtree() const
-//{
-//    vt_result = compute(NULL).value;
-//	return vt_result;
-//}
 const vtree& RuleApp::getVtree() const
 {
-    vt_result = make_vtree(boost::get<Handle>((compute(NULL).value)));
+    vt_result = vtree(compute(NULL).value);
 	return vt_result;
 }
+/*const vtree& RuleApp::getVtree() const
+{
+    Vertex v = compute(NULL).value;
+    Handle h = boost::get<Handle>(v);
+	vt_result.set_head(h);
+    //vt_result = make_vtree(h);
+	return vt_result;
+}*/
 
 BoundVertex RuleApp::compute(const vector<Vertex>& h, Handle CX) const
 {

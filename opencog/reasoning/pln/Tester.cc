@@ -77,8 +77,9 @@ namespace reasoning {
 
 float getCount(float c)
 {
-    float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-    return -KKK*c/(c-1);
+    return SimpleTruthValue::confidenceToCount(c);
+//    float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+//    return -KKK*c/(c-1);
 }
 
 namespace haxx
@@ -159,13 +160,12 @@ bool foo42=false;
 
 void InitPLNTests()
 {
-    #if LOG_ON_FILE
+#if LOG_ON_FILE
     test::logfile=fopen("pln.log","wt");
-        cout << "LOGGING TO FILE pln.log!\n";
-    #endif
+    cout << "LOGGING TO FILE pln.log!\n";
+#endif
 
     //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
-
     haxx::printRealAtoms = true;
     haxx::ArchiveTheorems = true;
 
@@ -175,7 +175,7 @@ void InitPLNTests()
 
     assert(h1 == h2);
 */
-    currentDebugLevel=-3;
+    currentDebugLevel=100;
 }
 
 bool satSetTest();
@@ -251,10 +251,7 @@ void RunPLNTests()
 
     fclose(f);
 
-/*  puts("\n\nTests over. Press enter.");
-    getc(stdin);*/
-
-    currentDebugLevel=0;
+    cout << "\n\nTests complete.\n";
 }
 
 void MacroRuleTest()
@@ -393,7 +390,7 @@ void RunPLNTestsOnce()
             )),
             new SimpleTruthValue(0.95f, getCount(0.90f)),
             new SimpleTruthValue(0.999f, getCount(0.999f)),
-            500,0);
+            50,0);
 
     printf("maketest 2\n");
     //char *buf = new char[8174+2]; 
@@ -436,7 +433,7 @@ InitAxiomSet("smalldemo.xml");
                         )
                     )),
             new SimpleTruthValue(0.01f, getCount(0.01f)),
-            new SimpleTruthValue(1.01f, getCount(1.01f)),
+            new SimpleTruthValue(1.0f, getCount(1.0f)), // was conf 1.01???
             200,0);
 
     for (int i = 0; i < 5; i++)
@@ -478,6 +475,8 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.9f, getCount(0.02f)),
             new SimpleTruthValue(0.999f, getCount(0.999f)),
             10,0);
+    //TulipWriter tlp(std::string("gen_var.tlp"));
+    //tlp.write(0,0,atw->fakeToRealHandle(setLink).first);
 
     /// Test Generalization for FORALL_LINK
     InitAxiomSet("smalldemo.xml");
@@ -756,8 +755,6 @@ InitAxiomSet("smalldemo.xml");
         currentDebugLevel=-4;
 
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
-        /*PLNEvaluator::BIT_evaluate(
-            InferenceTaskParameters(new DefaultVariableRuleProvider(),t->target));*/
 
         uint s_i=0;
         Handle eh=0;
@@ -802,24 +799,24 @@ InitAxiomSet("smalldemo.xml");
                 else
                     etv = new SimpleTruthValue(0.0f,0.0f);
 
-                float c1=t->minTV->getConfidence();
+               /* float c1=t->minTV->getConfidence();
                 float c2=t->maxTV->getConfidence();
                 float m1=t->minTV->getMean();
-                float m2=t->maxTV->getMean();
+                float m2=t->maxTV->getMean(); */
 
-/*              if (etv)
+              if (etv)
                 {
                     printf("%f / %f\n", etv->getConfidence() , t->minTV->getConfidence());
                     printf("%f / %f\n", etv->getMean()          , t->minTV->getMean());
                     printf("%f / %f\n", etv->getConfidence() , t->maxTV->getConfidence());
                     printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
-                }*/
+                }
                 
                 passed = (eh && etv &&
-                etv->getConfidence() > t->minTV->getConfidence() &&
-                etv->getMean()          > t->minTV->getMean() &&
-                etv->getConfidence() < t->maxTV->getConfidence() &&
-                etv->getMean()          < t->maxTV->getMean()
+                etv->getConfidence() >= t->minTV->getConfidence() &&
+                etv->getMean()          >= t->minTV->getMean() &&
+                etv->getConfidence() <= t->maxTV->getConfidence() &&
+                etv->getMean()          <= t->maxTV->getMean()
                 );
         
                 cprintf(-2, "TEST Expansion phase %d over.\n", s_i);
@@ -851,7 +848,7 @@ InitAxiomSet("smalldemo.xml");
 
         if (passed)
         {
-            printf("**********************************************\n\npassed: %s.\n**********************************************\n\n",
+            printf("\n**********************************************\npassed: %s.\n**********************************************\n",
             (etv?etv->toString().c_str():"(null TV)"));
 
         finish = clock();
@@ -863,7 +860,7 @@ InitAxiomSet("smalldemo.xml");
         }
         else
         {
-            printf("**********************************************\n\nFAILED: %s!\n**********************************************\n\n",
+            printf("\n**********************************************\nFAILED: %s!\n**********************************************\n",
             (etv?etv->toString().c_str():"(null TV)"));
         }
 

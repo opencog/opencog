@@ -1,16 +1,13 @@
 #ifndef PTLATOM_H
 #define PTLATOM_H
 
-// ARI: In a previous screencast you mention that PLNatom is legacy class and
-// should be replaced. In what way should it be improved or reworked?
+// TODO: remove need for the atom class in the unification methods.
 
-// ARI: What does this define represent? Shouldn't one just use the same
-// name everywhere, or is atom sometimes used in a special way which
-// justifies naming it differently in the code?
+// TODO: remove extra definition
 #define MetaPredicate atom
 
-// ARI: I want to move these PLN types into the opencog type.script
-// Should they be NODES or LINKS? Do they follow any hierarchy?
+// TODO: use class server and add these to it. search for each to
+// see if they should be a node or a link
 #define RESTRICTOR   158
 #define INSTANCEOF_R 159
 #define HAS_R        160

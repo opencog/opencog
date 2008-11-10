@@ -200,9 +200,11 @@ public:
 			BoundVertex bv;
 			RuleApp* ra;
 
-			if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL) //A bound a arg is a RuleApp
+			if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL)
+                //A bound a arg is a RuleApp
 				bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX);
-			else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != /*(VtreeProviderWrapper*)*/NULL) //A bound arg has type VtreeProviderWrapper
+			else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != NULL)
+                //A bound arg has type VtreeProviderWrapper
 				bv = *((*ai)->getVtree().begin());
 			else  //A bound arg not found
 			{
@@ -244,8 +246,7 @@ public:
 		result = root_rule->compute(bound_args);
 
         /// This used to be below out, but when args are empty so is
-        //result.value and isReal is false
-		//assert(v2h(result.value)->isReal());
+        ///result.value and isReal is false
 		assert(GET_ATW->isReal(v2h(result.value)));
 out:
 

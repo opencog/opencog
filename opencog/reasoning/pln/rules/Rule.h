@@ -129,7 +129,7 @@ public:
      * object must take care of ordering them.
      *
      * @param h The vertices to compute on.
-     * @param CX ??? ARI: what is this?
+     * @param CX Context to use for rule computation. Currently unused.
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */

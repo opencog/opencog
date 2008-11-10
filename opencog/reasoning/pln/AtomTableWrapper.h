@@ -100,15 +100,14 @@ class AtomTableWrapper : public iAtomTableWrapper
 
     // TODO: +1000 to be safe, but should check that no extra types are
     // defined elsewhere and just use +1.
-    const static unsigned int mapOffset = NOTYPE + 1000;
+    const static unsigned int mapOffset = NOTYPE + 100000;
 
-    // ARI: is this a correct description?
     //! Add a tree of non real atoms to AtomSpace.
     //! @param vtree of atoms to add.
     //! @param iterator to start adding atoms from
-    //! @param what truth value they should be given?
+    //! @param what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
-    //! @param some kind of mechanism to manage memory?
+    //! @param some kind of mechanism to manage memory
     Handle addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
 
     bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
@@ -130,7 +129,13 @@ class AtomTableWrapper : public iAtomTableWrapper
                 TLB::getAtom(b)->getAttentionValue().getSTI();
         }
     };
+
+    bool linkNotifications;
+
 public:
+
+    //! Test AtomTableWrapper
+    bool testAtomTableWrapper();
 
     //! Convert a specific VersionHandled TruthValue to a fake handle
     Handle realToFakeHandle(const Handle h, const VersionHandle vh);
@@ -191,23 +196,10 @@ public:
     AtomTableWrapper();
     virtual ~AtomTableWrapper() {}
 
-// TODELETE, replace with getAtomSpace()
-//  combo::NMCore* getCore() const { return core; }
-
     //! Load axioms from given xml filename
     bool loadAxioms(const string& path);
     //! Load other axioms from given xml filename and optionally replace?
     bool loadOther(const std::string& path, bool replaceOld);
-// TODELETE?
-//  std::vector<atom> LoadAnds(const std::string& path);
-
-    /// Makes sure that the loaded stuff is in a correct normal form etc.
-    // ARI: Currently this just sets the random seed and sets link notifications
-    // to true... can we merge it with the constructor?
-    bool prepare();
-        
-// TODELETE does nothing
-    //int implicationConstruction();
 
     //! Add atom from tree vertex
     Handle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
@@ -221,9 +213,6 @@ public:
 
     //! Remove Atom
     virtual bool removeAtom(Handle h);
-
-// TODELETE not called from anywhere
-    bool hasFalsum(float minAllowedError = 0.5) { return false; }
 
     //! return a random handle of type T
     Handle getRandomHandle(Type T);
@@ -261,7 +250,7 @@ public:
     Handle addNodeDC(Type t, const string& name, const TruthValue& tvn,
             bool fresh, bool managed);
     //! Add concrete atom using dummy contexts if it already exists
-    Handle addAtomDC(Atom &a, bool fresh, bool managed);
+    Handle addAtomDC(Atom &a, bool fresh, bool managed, HandleSeq contexts = HandleSeq());
 
     Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);
@@ -293,25 +282,28 @@ public:
     bool containsNegation(Handle ANDlink, Handle h);
     Type getTypeV(const tree<Vertex>& _target) const;
 
-// ARI: ok to delete this? TODELETE
-/*  void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
-                     set<subst>* forbiddenBindings);                 */
+// TODELETE
+//  combo::NMCore* getCore() const { return core; }
+//  std::vector<atom> LoadAnds(const std::string& path);
+//  int implicationConstruction();
+//  bool hasFalsum(float minAllowedError = 0.5) { return false; }
+//  void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
+//                     set<subst>* forbiddenBindings);
+
 };
 
-// ARI: you said that this isn't used, however NormalizingATW inherits from
-// it...
 /** Passes the atoms via FIM analyzer. To turn this off, set FIM=0 in Config.
 */
 class FIMATW : public AtomTableWrapper
 {
+    fim::pat_id next_free_pat_id;
+
 // TODELETE
 //  std::map<atom,int,lessatom> node2pat_id;
-    fim::pat_id next_free_pat_id;
 public:
     /// Semi-haxx::
     fim::grim myfim;
 
-//  FIMATW(combo::NMCore* core) : AtomTableWrapper(core), next_free_pat_id(30001) {}
     FIMATW() : next_free_pat_id(30001) {}
     virtual ~FIMATW() {}
 
@@ -319,6 +311,8 @@ public:
             bool fresh, bool managed=true);
     Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
+// TODELETE:
+//  FIMATW(combo::NMCore* core) : AtomTableWrapper(core), next_free_pat_id(30001) {}
 };
 
 /** Normalizes atoms before passing forward */
@@ -350,6 +344,8 @@ public:
             bool fresh, bool managed=true);
     Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
+
+    // TODELETE:
     //Btr<set<Handle> > getHandleSet(Type,const string&,bool = false);
 
 };
@@ -374,9 +370,6 @@ public:
 
 };
 
-
-// ARI: Can we get rid of this? The implementation was commented out so I have
-// done the same with the definition...
 // TODELETE
 /*using namespace boost;
 class LocalATW : public AtomTableWrapper, public Singleton<LocalATW>

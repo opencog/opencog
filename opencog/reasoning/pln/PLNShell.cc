@@ -133,7 +133,7 @@ using namespace reasoning;
 extern int currentDebugLevel;
 
 //! Run tests at start up
-bool RunPLNtest=false;
+bool RunPLNtest=true;
 //! Variable to store command line option of what temperature to run tests at
 int tempar=0;
 
@@ -1048,16 +1048,15 @@ printf("BITNodeRoot init ok\n");
             case 's':   cin >> h; //Give max nr of steps that we can take.
                         j = (long) h;
                 
-                        printf("\nTemporarily killing the log with level -3.\n");
-            
-                        tempi = currentDebugLevel;
-                        currentDebugLevel = -3;
+                        //printf("\nTemporarily killing the log with level -3.\n");
+                        //tempi = currentDebugLevel;
+                        //currentDebugLevel = -3;
             
                         state->infer(j, 0.000001f, 0.01f);
                         state->printResults();
                         printf("\n%ld $ remaining.\n", h);
             
-                        currentDebugLevel = tempi;
+                        //currentDebugLevel = tempi;
 
                         break;
                                         
@@ -1097,6 +1096,9 @@ printf("BITNodeRoot init ok\n");
             case '-': cin >> h; currentDebugLevel = -(int)h; break;
 
             case 'R':
+                int testdone;
+                atw->testAtomTableWrapper();
+                cin >> testdone;
                 fw_beta();
                 break;
             case 'Y':

@@ -89,8 +89,8 @@ namespace reasoning
 {
 typedef pair<Rule*, vtree> directProductionArgs;
 
-//FitnessEvalutorT FitnessEvaluator = SOFTMAX; //DETERMINISTIC;
 FitnessEvalutorT FitnessEvaluator = DETERMINISTIC;
+//FitnessEvalutorT FitnessEvaluator = SOFTMAX;
 //FitnessEvalutorT FitnessEvaluator = RANDOM;
 
 struct less_dpargs : public binary_function<directProductionArgs, directProductionArgs, bool>
@@ -1104,7 +1104,6 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
         foreach(VtreeProvider* vtp, *eval_res_vector_set.begin())
         {
             tlog(0, "get next TV\n");
-            //assert(vt2h(*vtp)->isReal());
             assert(atw->isReal(vt2h(*vtp)));
             const TruthValue& etv = atw->getTV(vt2h(*vtp));
             if (!etv.isNullTv() && etv.getConfidence() > minConfidenceForAbort)
@@ -1248,9 +1247,11 @@ void BITNode::expandNextLevel()
 bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 {
     AtomTableWrapper *atw = GET_ATW;
-    assert(atw->isReal(vt2h(*new_result)));
+    Vertex v = *(*new_result).getVtree().begin();
+    Handle h = v2h(v);
+    assert(atw->isReal(h)); //vt2h(*new_result)));
 
-    stats::Instance().ITN2atom[(BITNode*)this].insert(*new_result->getVtree().begin());
+    stats::Instance().ITN2atom[(BITNode*)this].insert(v); //*new_result->getVtree().begin());
 
     foreach(const parent_link<BITNode>& p, parents)
         p.link->EvaluateWith(p.parent_arg_i, new_result);
@@ -1336,8 +1337,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 tlog(-1, "Evaluating...\n");
 
                 ruleApp = new RuleApp(rule);
-                
-                next_result = ruleApp->compute(rule_args.begin(), rule_args.end()); //rule->compute(rule_args);
+                next_result = ruleApp->compute(rule_args.begin(), rule_args.end());
 
                 assert(atw->isReal(v2h(next_result.value)));
                 
@@ -1511,8 +1511,8 @@ void BITNode::expandFittest()
         //foreach(BackInferenceTreeNode* b, exec_pool)
         //  partition += 
 
+        // Get the fitness of all nodes in the execution pool
         vector<double> fitnesses;
-
         transform(root->exec_pool.begin(), root->exec_pool.end(), back_inserter(fitnesses), mem_fun(&BITNode::fitness));
 
         //float partition = o;
@@ -1847,7 +1847,7 @@ void BITNodeRoot::printTrail(Handle h, unsigned int level) const //, int decimal
             if (find(hvh.second.begin(), hvh.second.end(), arg_h)
             != hvh.second.end())
               h_use_count++;*/
-        NMPrinter(NMP_ALL, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
+        NMPrinter(NMP_ALL, 0, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
 //      NMPrinter(((h_use_count>1)?NMP_HANDLE:0)|NMP_TYPE_NAME|NMP_NODE_NAME| NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
             printTrail(arg_h, level+1);
         }

@@ -128,6 +128,10 @@ USize(800), USizeMode(CONST_SIZE)
     rootContext = "___PLN___";
     // Add dummy root NULL context node
     AS_PTR->addNode(CONCEPT_NODE, rootContext);
+
+    // TODO: Replace srand with opencog::RandGen
+    srand(12345678);
+    linkNotifications = true;
 }
 
 void AtomTableWrapper::HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest) const
@@ -160,13 +164,21 @@ HandleSeq AtomTableWrapper::getOutgoing(const Handle h)
         return HandleSeq();
     } else {
         vhpair v = fakeToRealHandle(h);
-        return realToFakeHandles(v.first, v.second.substantive);
+        if (v.second.substantive != UNDEFINED_HANDLE)
+            return realToFakeHandles(v.first, v.second.substantive);
+        else
+            return realToFakeHandles(AS_PTR->getOutgoing(v.first));
     }
 }
 
 Handle AtomTableWrapper::getOutgoing(const Handle h, const int i) 
 {
-    return getOutgoing(h)[i];
+    if (i < getArity(h))
+        return getOutgoing(h)[i];
+    else
+        cout << "no outgoing set!" << endl;
+        printTree(h,0,0);
+        return UNDEFINED_HANDLE;
 }
 
 HandleSeq AtomTableWrapper::getIncoming(const Handle h) 
@@ -176,6 +188,12 @@ HandleSeq AtomTableWrapper::getIncoming(const Handle h)
     HandleSeq inLinks;
     HandleSeq results;
     inLinks = AS_PTR->getIncoming(v.first);
+    cout << "getIncoming for " << h << endl; 
+    cout << "inLinks size " << inLinks.size() << endl;
+    foreach (Handle h2, inLinks) {
+        cout << "arity = " << AS_PTR->getArity(h2) << " h= " << h2 << endl;
+    }
+
     // For each link in incoming, check that the context of h is
     // in the right position of the outgoing set of the link
     foreach (Handle l, inLinks) {
@@ -187,22 +205,26 @@ HandleSeq AtomTableWrapper::getIncoming(const Handle h)
             vhpair v2= fakeToRealHandle(ml);
             // check the outgoing set of the context
             HandleSeq outgoing = AS_PTR->getOutgoing(v2.first);
-            HandleSeq contexts = AS_PTR->getOutgoing(v2.second.substantive);
-            assert (outgoing.size() == contexts.size());
-            bool match = true;
-            for (uint i = 0; i < outgoing.size(); i++) {
-                if (outgoing[i] == v.first) {
-                    Handle c = contexts[i];
-                    if (AS_PTR->getName(c) == rootContext)
-                        c = UNDEFINED_HANDLE;
-                    if (sourceContext != c) {
-                        match = false;
+            if (v2.second.substantive != UNDEFINED_HANDLE) {
+                HandleSeq contexts = AS_PTR->getOutgoing(v2.second.substantive);
+                assert (outgoing.size() == contexts.size());
+                bool match = true;
+                for (uint i = 0; i < outgoing.size(); i++) {
+                    if (outgoing[i] == v.first) {
+                        Handle c = contexts[i];
+                        if (AS_PTR->getName(c) == rootContext)
+                            c = UNDEFINED_HANDLE;
+                        if (sourceContext != c) {
+                            match = false;
+                        }
                     }
-                }
 
-            }
-            if (match)
+                }
+                if (match)
+                    results.push_back(ml);
+            } else {
                 results.push_back(ml);
+            }
         }
 
     }
@@ -297,12 +319,14 @@ Handle AtomTableWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 std::vector< Handle > AtomTableWrapper::realToFakeHandle(const Handle h) {
     std::vector< Handle > result;
     result.push_back(realToFakeHandle(h, NULL_VERSION_HANDLE));
-    const CompositeTruthValue ctv = dynamic_cast<const CompositeTruthValue&> (AS_PTR->getTV(h));
-    for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
-        VersionHandle vh = ctv.getVersionHandle(i);
-        if (dummyContexts.find(vh) != dummyContexts.end()) {
-            // if dummyContext contains a VersionHandle for h
-            result.push_back( realToFakeHandle(h, vh));
+    if (AS_PTR->getTV(h).getType() == COMPOSITE_TRUTH_VALUE) {
+        const CompositeTruthValue ctv = dynamic_cast<const CompositeTruthValue&> (AS_PTR->getTV(h));
+        for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
+            VersionHandle vh = ctv.getVersionHandle(i);
+            if (dummyContexts.find(vh) != dummyContexts.end()) {
+                // if dummyContext contains a VersionHandle for h
+                result.push_back( realToFakeHandle(h, vh));
+            }
         }
     }
     return result;
@@ -322,16 +346,14 @@ std::vector< Handle > AtomTableWrapper::realToFakeHandles(std::vector< Handle > 
 HandleSeq AtomTableWrapper::realToFakeHandles(const Handle h, const Handle c)
 {
     // c is a context whose outgoing set of contexts matches contexts of each
-    // handle in hs.
-    vhpair v = fakeToRealHandle(h);
-    HandleSeq contexts = AS_PTR->getOutgoing(v.second.substantive);
-    HandleSeq outgoing = AS_PTR->getOutgoing(v.first);
-    assert(contexts.size() == outgoing.size());
+    // handle in outgoing of real handle h.
+    HandleSeq contexts = AS_PTR->getOutgoing(c);
+    HandleSeq outgoing = AS_PTR->getOutgoing(h);
     HandleSeq results;
 
     // Check that all contexts match... they should
     bool match = true;
-    for (unsigned int i; match && i < outgoing.size(); i++) {
+    for (unsigned int i=0; match && i < outgoing.size(); i++) {
         if (AS_PTR->getName(contexts[i]) == rootContext)
             contexts[i] = UNDEFINED_HANDLE;
         VersionHandle vh(CONTEXTUAL, contexts[i]);
@@ -372,8 +394,8 @@ shared_ptr<set<Handle> > AtomTableWrapper::getHandleSet(Type T, const string& na
 
     shared_ptr<set<Handle> > retFake(new set<Handle>);
     foreach (Handle h, *ret) {
-        foreach(Handle h, realToFakeHandle(h)) {
-            (*retFake).insert(h); 
+        foreach(Handle h2, realToFakeHandle(h)) {
+            (*retFake).insert(h2); 
         }
     }
     return retFake;
@@ -399,13 +421,6 @@ bool AtomTableWrapper::equal(const HandleSeq& lhs, const HandleSeq& rhs)
 
 Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing)
 {
-    
-    //HandleEntry* results = 
-    //  AS_PTR->getHandleSet((Type)t, true);
-//      while (results && !equal(results->handle->getOutgoingSet(), outgoing))
-//          results = results->next;
-//      Handle ret = (results ? results->handle : NULL);
-//      delete results;
     HandleSeq outgoingReal;
     std::vector<VersionHandle> vhs;
     foreach (Handle h, outgoing) {
@@ -421,20 +436,23 @@ Handle AtomTableWrapper::getHandle(Type t,const HandleSeq& outgoing)
     Handle real = AS_PTR->getHandle(t,outgoingReal);
     // Find a a versionhandle with a context that has the same order of contexts as
     // vhs, otherwise return default
-    const CompositeTruthValue ctv = dynamic_cast<const CompositeTruthValue&> (AS_PTR->getTV(real));
-    for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
-        VersionHandle vh = ctv.getVersionHandle(i);
-        HandleSeq hs = AS_PTR->getOutgoing(vh.substantive);
-        bool matches = true;
-        assert(hs.size() == vhs.size());
-        for (unsigned int j = 0; j < hs.size(); j++) {
-            if (hs[j] != vhs[j].substantive) {
-                matches = false;
-                break;
+    const TruthValue& tv = AS_PTR->getTV(real);
+    if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
+        const CompositeTruthValue ctv = dynamic_cast<const CompositeTruthValue&> (tv);
+        for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
+            VersionHandle vh = ctv.getVersionHandle(i);
+            HandleSeq hs = AS_PTR->getOutgoing(vh.substantive);
+            bool matches = true;
+            assert(hs.size() == vhs.size());
+            for (unsigned int j = 0; j < hs.size(); j++) {
+                if (hs[j] != vhs[j].substantive) {
+                    matches = false;
+                    break;
+                }
             }
+            if (matches)
+                return realToFakeHandle(real,vh);
         }
-        if (matches)
-            return realToFakeHandle(real,vh);
     }
     return realToFakeHandle(real,NULL_VERSION_HANDLE);
 }
@@ -446,6 +464,7 @@ void AtomTableWrapper::reset()
     vhmap_reverse.clear();
     ::haxx::childOf.clear();
     AS_PTR->clear();
+    AS_PTR->addNode(CONCEPT_NODE, rootContext);
 }
 
 //#endif
@@ -455,18 +474,8 @@ extern int atom_alloc_count;
 //void printUtable();
 //void SetTheoremTest();
 //void existence2universality();
-//extern bool linkNotifications;
-bool linkNotifications=false;
-
 static Handle U;
 
-bool AtomTableWrapper::prepare()
-{
-    // TODO: Replace srand with opencog::RandGen
-    srand(12345678);
-    linkNotifications = true;
-    return true;
-}
 bool AtomTableWrapper::loadAxioms(const string& path)
 {
     // TODO: check exists works on WIN32
@@ -662,9 +671,9 @@ bool AtomTableWrapper::binaryTrue(Handle h)
 
 bool AtomTableWrapper::symmetricLink(Type T)
 {
-    // ARI: there is a symmetric link super class...
-    // perhaps we should just check for that? Or is it
-    // PLN specific?
+    /// Only used by obsolete code in NormalizingATW::addLink
+    // TODO: either remove or replace with a symmetric link super class...
+    // or make sure it's equivalent.
     return inheritsType(T, AND_LINK) || inheritsType(T, LIST_LINK)
             || inheritsType(T, OR_LINK);
 }
@@ -741,7 +750,7 @@ Handle AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue&
     
     HandleSeq handles;
     Handle head_type = boost::get<Handle>(*it);
-    set<Handle> contexts;
+    //vector<Handle> contexts;
     
     //assert(haxx::AllowFW_VARIABLENODESinCore || head_type != (Handle)FW_VARIABLE_NODE);
     
@@ -755,23 +764,18 @@ Handle AtomTableWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue&
     {
         Handle *h_ptr = boost::get<Handle>(&*i);
 
-        // ARI: These additions have false true, and a trivial TruthValue, does
-        // this mean that the AtomSpace deals with merging them, but the new
-        // TruthValue is heavily discounted?
         Handle added = (h_ptr && isReal(*h_ptr)) ?
             (*h_ptr) : addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed);
         handles.push_back(added);
-        contexts.insert(fakeToRealHandle(added).second.substantive);
     }
 
 /*  /// We cannot add non-existent nodes this way!
     assert (!inheritsType(head_type, NODE));*/
     
-    if (contexts.size() > 1) {
-        // TODO: uh oh, the contexts of the children are different, have to create a
-        // new context that inherits from all of them
-        LOG(1, "Contexts are different, implement me!\n");
-    }
+    /// Comment out because addLink should handle the contexts
+    //if (contexts.size() > 1) {
+    //    LOG(1, "Contexts are different, implement me!\n");
+    //}
     // Provide new context to addLink function
     return addLink((Type)(int)head_type, handles, tvn, fresh,managed);
 }
@@ -819,12 +823,8 @@ Handle AtomTableWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthV
                 CrispTheoremRule::thms[thm_target].push_back(arg_tree);
             }
             
-            ///warning "Return value will be invalid!"
-            // ARI: what does the above means?
-            // TODO: check the contexts of the linked atoms
             ret = addLinkDC( FALSE_LINK, hs, tvn, fresh, managed);
     } else {
-        // TODO: check the contexts of the linked atoms
         ret = addLinkDC( T, hs,  tvn, fresh, managed);
     }
 
@@ -881,16 +881,21 @@ Handle AtomTableWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
 {
     AtomSpace *a = AS_PTR;
     HandleSeq hsReal;
+    HandleSeq contexts;
     // Convert outgoing links to real Handles
     foreach(Handle h, hs) {
-        hsReal.push_back(fakeToRealHandle(h).first);
+        vhpair v = fakeToRealHandle(h);
+        hsReal.push_back(v.first);
+        if (v.second.substantive == UNDEFINED_HANDLE) {
+            contexts.push_back(AS_PTR->getHandle(CONCEPT_NODE, rootContext));
+        } else {
+            contexts.push_back(v.second.substantive);
+        }
     }
-    // TODO: check that all vhpairs have the same Context... otherwise, create a
-    // new one
     
     // Construct a Link then use addAtomDC
     Link l(t,hsReal,tvn);
-    return addAtomDC(l, fresh, managed);
+    return addAtomDC(l, fresh, managed, contexts);
 }
 
 Handle AtomTableWrapper::addNodeDC(Type t, const string& name, const TruthValue& tvn,
@@ -902,18 +907,15 @@ Handle AtomTableWrapper::addNodeDC(Type t, const string& name, const TruthValue&
     return addAtomDC(n, fresh, managed);
 }
 
-Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
+Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleSeq contexts)
 {
-    // ARI: what to do with managed? I can't find documentation in the Novamente
-    // code, the header documentation just skips describing it.
     AtomSpace *a = AS_PTR;
     Handle result;
     Handle fakeHandle;
     // check if fresh true
     if (fresh) {
-        // yes:
         // See if atom exists already
-        HandleSeq outgoing;
+        //const HandleSeq outgoing;
         Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
         if (nnn) {
             const Node& node = (const Node&) atom;
@@ -926,15 +928,30 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
             }
         } else {
             const Link& link = (const Link&) atom;
-            for (int i = 0; i < link.getArity(); i++) {
-                outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
-            }
-            result = a->getHandle(link.getType(), outgoing);
+            //for (int i = 0; i < link.getArity(); i++) {
+            //    outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
+            //}
+            //outgoing = link.getOutgoingSet();
+            result = a->getHandle(link.getType(), link.getOutgoingSet());
             if (TLB::isInvalidHandle(result)) {
-                // if the atom doesn't exist already, then just add normally
-                return realToFakeHandle(a->addLink(link.getType(),
-                        outgoing, link.getTruthValue()),
-                        NULL_VERSION_HANDLE);
+                // if the atom doesn't exist already, then add normally
+                bool allNull = true;
+                // if all null context
+                for (HandleSeq::iterator i = contexts.begin();
+                        allNull && i != contexts.end();
+                        i++) {
+                    if (AS_PTR->getName(*i) != rootContext) allNull = false;
+                }
+                result = a->addLink(link.getType(), link.getOutgoingSet(),
+                        TruthValue::TRIVIAL_TV());
+                fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
+                if (allNull) {
+                    return fakeHandle;
+                }
+                //else {
+                    // create link context
+                //    link.getTruthValue();
+                //}
             }
         }
         // if it does exist, then go through each dummy context until NULL_TV is
@@ -943,30 +960,23 @@ Handle AtomTableWrapper::addAtomDC(Atom &atom, bool fresh, bool managed)
         // context and use that.
 
         // result should contain a handle to existing atom
-        set<VersionHandle>::iterator dc;
         VersionHandle vh;
-        for (dc = dummyContexts.begin(); dc != dummyContexts.end(); dc++) {
-            if (a->getTV(result,*dc).isNullTv()) {
-                vh = *dc;
-                break;
-            }
-        }
-        if (dc == dummyContexts.end()) {
-            // reached end of dummyContexts, so we need a new one
-            stringstream dcName;
-            dcName << contextPrefix << dummyContexts.size();
-            // add context node
-            Handle contextNode = a->addNode(CONCEPT_NODE,dcName.str());
 
-            // context link isn't needed, it's implicit in VersionHandles
-            //HandleSeq cOut;
-            //cOut.push_back(contextNode);
-            //cOut.push_back(result);
-            //a->addLink(CONTEXT_LINK,cOut);
-            
-            // add version handle to dummyContexts
-            vh = VersionHandle(CONTEXTUAL,contextNode);
-        } 
+        // build context link's outgoingset if necessary
+        // if this is a node with nothing in contexts
+        if (contexts.size() == 0) {
+            assert(nnn);
+            contexts.push_back(AS_PTR->getHandle(CONCEPT_NODE, rootContext));
+        }
+        // Replace NULL version handle contexts with rootContext
+        
+        
+        // add context node
+        Handle newContext = a->addLink(ORDERED_LINK,contexts);
+        dummyContexts.insert(VersionHandle(CONTEXTUAL,newContext));
+
+        // add version handle to dummyContexts
+        vh = VersionHandle(CONTEXTUAL,newContext);
         // vh is now a version handle for a free context
         // for which we can set a truth value
         a->setTV(result, atom.getTruthValue(), vh);
@@ -1011,9 +1021,10 @@ bool AtomTableWrapper::removeAtom(Handle h)
         }
     }
     // check map to see whether real handles are still valid (because removing
-    // an atom might remove links connecting to it)
+    // an atom might remove links connecting to it, and removing a
+    // NULL_VERSION_HANDLE atom will remove all the versions of an atom)
     for ( i = vhmap.begin(); i != vhmap.end(); i++ ) {
-        if (!TLB::getAtom(i->second.first)) {
+        if (TLB::getAtom(i->second.first)) {
             j = i;
             i--;
             vhmap.erase(j);
@@ -1021,7 +1032,7 @@ bool AtomTableWrapper::removeAtom(Handle h)
             if ( ir != vhmap_reverse.end() ) vhmap_reverse.erase(ir);
         }
     }
-    // TODO - also remove unused dummy contexts?
+    // TODO - also remove freed dummy contexts
     return true;
 }
 
@@ -1029,12 +1040,12 @@ bool AtomTableWrapper::removeAtom(Handle h)
 Handle AtomTableWrapper::getRandomHandle(Type T)
 {
     AtomSpace *a = AS_PTR;
-  vector<Handle> handles=a->filter_type(T);
+    vector<Handle> handles=a->filter_type(T);
 
-  if (handles.size()==0)
-    return Handle(0);
+    if (handles.size()==0)
+        return Handle(0);
 
-  return realToFakeHandle(handles[rand()%handles.size()], NULL_VERSION_HANDLE);
+    return realToFakeHandle(handles[rand()%handles.size()], NULL_VERSION_HANDLE);
 }
 
 std::vector<Handle> AtomTableWrapper::getImportantHandles(int number)
@@ -1045,8 +1056,8 @@ std::vector<Handle> AtomTableWrapper::getImportantHandles(int number)
 
     a->getHandleSetInAttentionalFocus(back_inserter(hs), ATOM, true);
     int toRemove = hs.size() - number;
+    sort(hs.begin(), hs.end(), compareSTI());
     if (toRemove > 0) {
-        sort(hs.begin(), hs.end(), compareSTI());
         while (toRemove > 0) {
             hs.pop_back();
             toRemove--;
@@ -1275,13 +1286,13 @@ int AtomTableWrapper::getArity(Handle h) const
     // get neighbours
     vhpair v = fakeToRealHandle(h);
     // check neighbours have TV with same VersionHandle
-    HandleSeq hs = AS_PTR->getOutgoing(v.first);
-    int arity = 0;
-    foreach (Handle h, hs) {
+    // HandleSeq hs = AS_PTR->getOutgoing(v.first);
+    int arity = AS_PTR->getArity(v.first);
+    /*foreach (Handle h, hs) {
         if (!AS_PTR->getTV(v.first,v.second).isNullTv()) {
             arity += 1;
         }
-    }
+    }*/
     return arity;
 
 }
@@ -1776,9 +1787,10 @@ printTree(ret,0,1);
         for (unsigned int i = 0; i < AND_arity; i++)
         {
             HandleSeq fora_hs;
-            // ARI: How come for all links need the source to be freshened?
+            // How come for all links need the source to be freshened?
+            // Probably no longer required... TODO: remove
             fora_hs.push_back(freshened(hs[0],managed));
-            fora_hs.push_back(child(hs[1],i));
+            fora_hs.push_back(getOutgoing(hs[1],i));
 
             fa_list.push_back( addLink(FORALL_LINK, fora_hs,
                 tvn,
@@ -2188,5 +2200,78 @@ haxx::mindShadowMap[T].push_back(ret);
     return ret;
 #endif
 }
+
+bool AtomTableWrapper::testAtomTableWrapper()
+{
+    SimpleTruthValue tv(0.8, 0.9);
+    SimpleTruthValue tv2(0.4, 0.9);
+    cout << "test add nodes" << endl;
+    Handle h1 = addNode(CONCEPT_NODE, "test1", tv);
+    Handle h2 = addNode(CONCEPT_NODE, "test2", tv);
+    HandleSeq outgoing;
+    outgoing.push_back(h1);
+    outgoing.push_back(h2);
+
+    cout << "test add link to NULL version nodes" << endl;
+    Handle l1 = addLink(LINK, outgoing, tv);
+
+    cout << "test getoutgoing: " << endl;
+    foreach (Handle i, getOutgoing(l1)) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    cout << "test getincoming: " << endl;
+    foreach (Handle i, getIncoming(h1)) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    cout << "test add duplicate nodes (fresh = false)" << endl;
+    addNode(CONCEPT_NODE, "test1", tv2, false, true);
+    addNode(CONCEPT_NODE, "test2", tv2, false, true);
+
+    cout << "test add nodes fresh=true" << endl;
+    Handle h3 = addNode(CONCEPT_NODE, "test1", tv, true, true);
+    Handle h4 = addNode(CONCEPT_NODE, "test2", tv, true, true);
+
+    cout << "test add link to one versioned node" << endl;
+    outgoing.clear();
+    outgoing.push_back(h1);
+    outgoing.push_back(h4);
+    Handle l2 = addLink(LINK, outgoing, tv, true, true);
+    cout << "test getoutgoing: " << endl;
+    foreach (Handle i, getOutgoing(l2)) {
+        cout << i << " ";
+    }
+    cout << endl;
+    cout << "test add link to both versioned nodes" << endl;
+    outgoing.clear();
+    outgoing.push_back(h3);
+    outgoing.push_back(h4);
+    Handle l3 = addLink(LINK, outgoing, tv, true, true);
+    cout << "test getoutgoing: " << endl;
+    foreach (Handle i, getOutgoing(l3)) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    cout << "test getincoming of unversioned again: " << endl;
+    foreach (Handle i, getIncoming(h1)) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    cout << "test getincoming versioned: " << endl;
+    foreach (Handle i, getIncoming(h4)) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    reset();
+    return true;
+
+}
+
 } //~namespace
 

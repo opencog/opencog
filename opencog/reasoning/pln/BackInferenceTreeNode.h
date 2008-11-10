@@ -90,7 +90,7 @@ protected:
     /// parent_links refer upwards in the BIT.
     /// A set is used to store the parent links because a node can have
     /// multiple parents when the parent node has different
-    /// bindings (ARI: is this correct?).
+    /// bindings
 	mutable set<parent_link<BITNode> > parents;
 
 	/// The results produced by combining all the possible results

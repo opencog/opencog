@@ -512,8 +512,9 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,int N, long U) co
     }
 
     float sAND = sTot;
-	float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-    float nAND = KKK * conTot / (1 - conTot); /// Da standard count=>confidence formula!
+    float nAND = SimpleTruthValue::confidenceToCount(conTot);
+	//float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+    //KKK * conTot / (1 - conTot); /// The standard count=>confidence formula!
 
 //  printf(" = %f\n", sAND);
 

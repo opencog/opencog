@@ -18,6 +18,7 @@ class TulipWriter {
 
     std::string getDateString();
     void writeNodes(HandleSeq hs);
+    void writeHeader(std::string comment);
 
 public:
 
