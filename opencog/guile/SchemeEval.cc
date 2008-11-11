@@ -44,9 +44,14 @@ void * SchemeEval::c_wrap_init(void *p)
 
 #define WORK_AROUND_GUILE_185_BUG
 #ifdef WORK_AROUND_GUILE_185_BUG
+void * SchemeEval::c_wrap_init_bogus(void *p)
+{
+	scm_c_eval_string ("(+ 2 2)\n");
+	return p;
+}
 void * SchemeEval::c_wrap_init_thread(void *p)
 {
-	scm_with_guile(c_wrap_init, p);
+	scm_with_guile(c_wrap_init_bogus, p);
 	return p;
 }
 
@@ -55,23 +60,17 @@ void * SchemeEval::c_wrap_init_thread(void *p)
  * simply saying "(set-current-module the-root-module)" is not enough
  * to fix it.
  */
-void * SchemeEval::c_wrap_init_again(void *p)
-{
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_t t;
-	pthread_create(&t, &attr, c_wrap_init_thread, p);
-	return p;
-}
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
 SchemeEval::SchemeEval(void)
 {
 #ifdef WORK_AROUND_GUILE_185_BUG
-	scm_with_guile(c_wrap_init_again, this);
-#else
-	scm_with_guile(c_wrap_init, this);
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_t t;
+	pthread_create(&t, &attr, c_wrap_init_thread, this);
 #endif
+	scm_with_guile(c_wrap_init, this);
 }
 
 /* ============================================================== */
