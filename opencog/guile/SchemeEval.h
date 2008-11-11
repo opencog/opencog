@@ -21,6 +21,8 @@ class SchemeEval
 	private:
 		void init(void);
 		static void * c_wrap_init(void *);
+		static void * c_wrap_init_thread(void *);
+		static void * c_wrap_init_again(void *);
 
 		std::string do_eval(const std::string &);
 		static void * c_wrap_eval(void *);

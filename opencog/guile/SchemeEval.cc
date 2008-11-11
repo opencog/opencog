@@ -42,9 +42,36 @@ void * SchemeEval::c_wrap_init(void *p)
 	return self;
 }
 
+#define WORK_AROUND_GUILE_185_BUG
+#ifdef WORK_AROUND_GUILE_185_BUG
+void * SchemeEval::c_wrap_init_thread(void *p)
+{
+	scm_with_guile(c_wrap_init, p);
+	return p;
+}
+
+/* We need to bounce to a different thread, in order to work around
+ * a guile bug (as of 1.8.5) where current-module is wrong, and
+ * simply saying "(set-current-module the-root-module)" is not enough
+ * to fix it.
+ */
+void * SchemeEval::c_wrap_init_again(void *p)
+{
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_t t;
+	pthread_create(&t, &attr, c_wrap_init_thread, p);
+	return p;
+}
+#endif /* WORK_AROUND_GUILE_185_BUG */
+
 SchemeEval::SchemeEval(void)
 {
+#ifdef WORK_AROUND_GUILE_185_BUG
+	scm_with_guile(c_wrap_init_again, this);
+#else
 	scm_with_guile(c_wrap_init, this);
+#endif
 }
 
 /* ============================================================== */
