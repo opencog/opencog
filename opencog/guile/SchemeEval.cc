@@ -69,6 +69,7 @@ SchemeEval::SchemeEval(void)
 	pthread_attr_init(&attr);
 	pthread_t t;
 	pthread_create(&t, &attr, c_wrap_init_thread, this);
+	pthread_join(t, NULL);
 #endif
 	scm_with_guile(c_wrap_init, this);
 }
