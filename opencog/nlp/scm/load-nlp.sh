@@ -9,8 +9,12 @@ HOST=localhost
 PORT=17001
 
 cat type-definitions.scm |netcat -q0 $HOST $PORT
+sleep 1;
 cat nlp-utils.scm        |netcat -q0 $HOST $PORT
+sleep 1;
 cat disjunct-list.scm    |netcat -q0 $HOST $PORT
+sleep 1;
 cat stats-collection.scm |netcat -q0 $HOST $PORT
+sleep 1;
 cat file-process.scm     |netcat -q0 $HOST $PORT
 
