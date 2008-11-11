@@ -321,6 +321,15 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	// in most cases. FIXME.  i.e. no copy needed when no peding input.
 	input_line += expr;
 
+#define GUIL_185_CURRENT_PORT_BUG
+#ifdef GUIL_185_CURRENT_PORT_BUG
+	// It appears that guile-1.8.5 looses track of the current port
+	// setting with each new thread. So, for every new thread, we
+	// need to set this.  Doing this on every call has some performance
+	// impact.
+	scm_set_current_output_port(outport);
+#endif
+
 	caught_error = false;
 	pending_input = false;
 #if 0
