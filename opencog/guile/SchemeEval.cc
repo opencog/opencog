@@ -25,6 +25,7 @@ void SchemeEval::init(void)
 	SchemeSmob::init();
 
 	outport = scm_open_output_string();
+	outport = scm_permanent_object(outport);
 	scm_set_current_output_port(outport);
 
 	pending_input = false;
@@ -321,8 +322,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	// in most cases. FIXME.  i.e. no copy needed when no peding input.
 	input_line += expr;
 
-#define GUIL_185_CURRENT_PORT_BUG
-#ifdef GUIL_185_CURRENT_PORT_BUG
+#define GUILE_185_CURRENT_PORT_BUG
+#ifdef GUILE_185_CURRENT_PORT_BUG
 	// It appears that guile-1.8.5 looses track of the current port
 	// setting with each new thread. So, for every new thread, we
 	// need to set this.  Doing this on every call has some performance
