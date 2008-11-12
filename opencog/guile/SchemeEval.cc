@@ -45,34 +45,60 @@ void * SchemeEval::c_wrap_init(void *p)
 
 #define WORK_AROUND_GUILE_185_BUG
 #ifdef WORK_AROUND_GUILE_185_BUG
-void * SchemeEval::c_wrap_init_bogus(void *p)
+/* There's a bug in guile-1.8.5, where the first thread to run in guile
+ * mode gets a bogus/broken current-module.  This cannot be worked
+ * around by anything as simple as saying 
+ * "(set-current-module the-root-module)" 
+ * So we work around it here, by creating a completely new thread, 
+ * going into guile mode in it, doing something bogus, and exiting.
+ */
+static pthread_once_t workaround_once = PTHREAD_ONCE_INIT;
+
+static void * do_bogus_scm(void *p)
 {
 	scm_c_eval_string ("(+ 2 2)\n");
 	return p;
 }
-void * SchemeEval::c_wrap_init_thread(void *p)
+
+static void * bogus_thread(void *p)
 {
-	scm_with_guile(c_wrap_init_bogus, p);
+	scm_with_guile(do_bogus_scm, p);
 	return p;
 }
 
-/* We need to bounce to a different thread, in order to work around
- * a guile bug (as of 1.8.5) where current-module is wrong, and
- * simply saying "(set-current-module the-root-module)" is not enough
- * to fix it.
- */
+static void first_time_only(void)
+{
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_t t;
+	pthread_create(&t, &attr, bogus_thread, NULL);
+	pthread_join(t, NULL);
+}
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
 SchemeEval::SchemeEval(void)
 {
-#ifdef WORK_AROUND_GUILE_185_BUG
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_t t;
-	pthread_create(&t, &attr, c_wrap_init_thread, this);
-	pthread_join(t, NULL);
-#endif
+	pthread_once(&workaround_once, first_time_only);
+   pthread_key_create(&tid_key, NULL);
+	pthread_setspecific(tid_key, 0x0);
 	scm_with_guile(c_wrap_init, this);
+}
+
+/* This should be called once for every new thread. */
+void SchemeEval::per_thread_init(void)
+{
+	/* Avoid more than one call per thread. */
+	if (0x2 == (int) pthread_getspecific(tid_key)) return;
+	pthread_setspecific(tid_key, (const void *) 0x2);
+
+	// Guile implements the current port as a fluid on each thread.
+	// So, for every new thread, we need to set this.  
+	scm_set_current_output_port(outport);
+}
+
+SchemeEval::~SchemeEval()
+{
+	pthread_key_delete(tid_key);
 }
 
 /* ============================================================== */
@@ -318,18 +344,11 @@ void * SchemeEval::c_wrap_eval(void * p)
 
 std::string SchemeEval::do_eval(const std::string &expr)
 {
+	per_thread_init();
+
 	// XXX This is a defacto string buffer copy, could probably be avoided
 	// in most cases. FIXME.  i.e. no copy needed when no peding input.
 	input_line += expr;
-
-#define GUILE_185_CURRENT_PORT_BUG
-#ifdef GUILE_185_CURRENT_PORT_BUG
-	// It appears that guile-1.8.5 looses track of the current port
-	// setting with each new thread. So, for every new thread, we
-	// need to set this.  Doing this on every call has some performance
-	// impact.
-	scm_set_current_output_port(outport);
-#endif
 
 	caught_error = false;
 	pending_input = false;

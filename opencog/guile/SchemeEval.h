@@ -10,6 +10,7 @@
 #ifdef HAVE_GUILE
 
 #include <string>
+#include <pthread.h>
 #include <libguile.h>
 
 namespace opencog {
@@ -19,11 +20,13 @@ class SchemeSmob;
 class SchemeEval
 {
 	private:
+		// Initialization stuff
 		void init(void);
 		static void * c_wrap_init(void *);
-		static void * c_wrap_init_thread(void *);
-		static void * c_wrap_init_bogus(void *);
+		void per_thread_init(void);
+		pthread_key_t tid_key;
 
+		// Things related to evaluation
 		std::string do_eval(const std::string &);
 		static void * c_wrap_eval(void *);
 		const std::string *pexpr;
@@ -49,6 +52,7 @@ class SchemeEval
 
 	public:
 		SchemeEval(void);
+		~SchemeEval();
 		std::string eval(const std::string &);
 
 		bool input_pending(void);
