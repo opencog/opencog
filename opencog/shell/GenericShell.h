@@ -57,6 +57,7 @@ class GenericShell
 		virtual ~GenericShell() {}
 
 		virtual void eval(const std::string &, SocketHolder *) = 0;
+		virtual void socketClosed(void) = 0;
 };
 
 }

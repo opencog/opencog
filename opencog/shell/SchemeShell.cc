@@ -40,7 +40,6 @@ using namespace opencog;
 
 SchemeShell::SchemeShell(void)
 {
-printf ("duud cureate a new shell at %p\n", this);
 	show_output = true;
 	normal_prompt = "guile> ";
 	pending_prompt = "... ";
@@ -57,7 +56,6 @@ printf ("duud cureate a new shell at %p\n", this);
 
 SchemeShell::~SchemeShell()
 {
-printf ("duud shel destroy %p\n", this);
 	if (holder)
 	{
 		holder->SetShell(NULL);
@@ -81,9 +79,22 @@ void SchemeShell::set_holder(SocketHolder *h)
 	holder = h;
 	holder->AtomicInc(+1);
 	holder->SetShell(this);
-printf("shel %p has holder %p\n", this, holder);
 
 	if (!evaluator) evaluator = new SchemeEval();
+}
+
+void SchemeShell::socketClosed(void)
+{
+	// As of right now, the only thing that calls methods on us is the
+	// console socket. Thus, when the console socket closes, no one
+	// else will ever call a method on this instance ever again. Thus,
+	// we should self-destruct. Two remarks:
+	// 1) This wouldn't be needed if we had garbage collection, and
+	// 2) If this feels hacky to you, well, it is, but I simply do not
+	//    see a solution that is easier/better/simpler within the 
+	//    confines of the current module/socket/request design. (I can
+	//    envision all sorts of complicated solutions, but none easy).
+	delete this;
 }
 
 /* ============================================================== */
@@ -126,6 +137,8 @@ void SchemeShell::eval(const std::string &expr, SocketHolder *h)
 	//
 	holder->send(retstr);
 
+	// The user is exiting the shell. No one will ever call a method on
+	// this instance ever again. So stop hogging space, and self-destruct.
 	if (self_destruct)
 	{
 		holder->SetShell(NULL);

@@ -51,6 +51,11 @@ ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
 
 ConsoleSocket::~ConsoleSocket()
 {
+    logger().debug("[ConsoleSocket] destructor");
+
+    // If there's a shell, let them know that we are going away.
+    // This wouldn't be needed if we had garbage collection.
+    if (_shell) _shell->socketClosed();
     holder->setSocket(NULL);
     holder->AtomicInc(-1);
 }

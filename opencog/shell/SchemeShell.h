@@ -58,6 +58,7 @@ class SchemeShell : public GenericShell
 		virtual ~SchemeShell();
 
 		virtual void eval(const std::string &, SocketHolder *);
+		virtual void socketClosed(void);
 
 		void hush_output(bool);
 };

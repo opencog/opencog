@@ -55,8 +55,6 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 	SocketHolder *h = req->getSocketHolder();
 	sh->set_holder(h);
 
-printf("just created a new shell\n");
-
 	return "Entering scheme shell; use ^D or a single . on a "
 	       "line by itself to exit.";
 }
