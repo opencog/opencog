@@ -48,6 +48,7 @@ class SchemeShell : public GenericShell
 
 		SocketHolder *holder;
 		std::string do_eval(const std::string &);
+		bool self_destruct;
 
 	protected:
 		void set_holder(SocketHolder *);

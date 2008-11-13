@@ -52,10 +52,12 @@ printf ("duud cureate a new shell at %p\n", this);
 	abort_prompt += normal_prompt;
 	evaluator = NULL;
 	holder = NULL;
+	self_destruct = false;
 }
 
 SchemeShell::~SchemeShell()
 {
+printf ("duud shel destroy %p\n", this);
 	if (holder)
 	{
 		holder->SetShell(NULL);
@@ -112,8 +114,8 @@ void SchemeShell::eval(const std::string &expr, SocketHolder *h)
 	// XXX A subtle but important point: the way that socket handling
 	// works in OpenCog is that socket-listen/accept happens in one
 	// thread, while socket receive is in another. In particular, the
-	// constructor for this class, the init() method, and the shellout()
-	// method run in a *different* thread than this method does.
+	// constructor for this class runs in a *different* thread than 
+	// this method does.
 	if (NULL == holder)
 	{
 		holder = h;
@@ -123,6 +125,12 @@ void SchemeShell::eval(const std::string &expr, SocketHolder *h)
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
 	holder->send(retstr);
+
+	if (self_destruct)
+	{
+		holder->SetShell(NULL);
+		delete this;
+	}
 }
 
 /**
@@ -184,7 +192,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	if ((false == evaluator->input_pending()) &&
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
-		holder->SetShell(NULL);
+		self_destruct = true;
 		return "Exiting the scheme shell\n";
 	}
 
