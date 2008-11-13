@@ -1,5 +1,5 @@
 /*
- * SchemeShell.h
+ * SchemeShellModule.cc
  *
  * Simple scheme shell
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -22,47 +22,44 @@
 
 #ifdef HAVE_GUILE
 
-#ifndef _OPENCOG_SCHEME_SHELL_H
-#define _OPENCOG_SCHEME_SHELL_H
+#include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
 
-#include <string>
+#include "SchemeShellModule.h"
 
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/server/SocketHolder.h>
+using namespace opencog;
 
-namespace opencog {
+DECLARE_MODULE(SchemeShellModule);
 
-class SchemeShellModule;
-
-class SchemeShell : public GenericShell
+SchemeShellModule::SchemeShellModule(void)
 {
-	friend class SchemeShellModule;
-	private:
-		SchemeEval *evaluator;
-
-		std::string normal_prompt;
-		std::string pending_prompt;
-		std::string abort_prompt;
-		const std::string& get_prompt(void);
-		bool show_output;
-
-		SocketHolder *holder;
-		std::string do_eval(const std::string &);
-
-	protected:
-		void set_holder(SocketHolder *);
-
-	public:
-		SchemeShell(void);
-		virtual ~SchemeShell();
-
-		virtual void eval(const std::string &, SocketHolder *);
-
-		void hush_output(bool);
-};
-
 }
 
-#endif // _OPENCOG_SCHEME_SHELL_H
+void SchemeShellModule::init(void)
+{
+	shellout_register();
+}
 
-#endif // HAVE_GUILE
+SchemeShellModule::~SchemeShellModule()
+{
+	shellout_unregister();
+}
+
+/**
+ * Register this shell with the console.
+ */
+std::string SchemeShellModule::shellout(Request *req, std::list<std::string> args)
+{
+	SchemeShell *sh = new SchemeShell();
+
+	SocketHolder *h = req->getSocketHolder();
+	sh->set_holder(h);
+
+printf("just created a new shell\n");
+
+	return "Entering scheme shell; use ^D or a single . on a "
+	       "line by itself to exit.";
+}
+
+#endif
+/* ===================== END OF FILE ============================ */

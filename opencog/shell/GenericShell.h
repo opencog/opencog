@@ -45,7 +45,7 @@ namespace opencog {
 
 class SocketHolder;
 
-class GenericShell : public Module
+class GenericShell 
 {
 	protected:
 		std::string abort_prompt;
@@ -56,7 +56,6 @@ class GenericShell : public Module
 		GenericShell(void);
 		virtual ~GenericShell() {}
 
-		virtual const char *id(void) = 0;
 		virtual void eval(const std::string &, SocketHolder *) = 0;
 };
 

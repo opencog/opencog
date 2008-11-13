@@ -2,6 +2,7 @@
 ADD_LIBRARY (scheme-shell SHARED
    GenericShell
    SchemeShell
+   SchemeShellModule
 )
 
 TARGET_LINK_LIBRARIES(scheme-shell
@@ -17,6 +18,7 @@ INSTALL (TARGETS scheme-shell
 INSTALL (FILES
    GenericShell.h
    SchemeShell.h
+   SchemeShellModule.h
 	DESTINATION "include/opencog/shell"
 )
 

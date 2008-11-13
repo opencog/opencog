@@ -1,5 +1,5 @@
 /*
- * SchemeShell.c
+ * SchemeShell.cc
  *
  * Simple scheme shell
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -22,7 +22,6 @@
 
 #ifdef HAVE_GUILE
 
-#include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
@@ -39,10 +38,9 @@ using namespace opencog;
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
 
-DECLARE_MODULE(SchemeShell);
-
 SchemeShell::SchemeShell(void)
 {
+printf ("duud cureate a new shell at %p\n", this);
 	show_output = true;
 	normal_prompt = "guile> ";
 	pending_prompt = "... ";
@@ -56,11 +54,6 @@ SchemeShell::SchemeShell(void)
 	holder = NULL;
 }
 
-void SchemeShell::init(void)
-{
-	shellout_register();
-}
-
 SchemeShell::~SchemeShell()
 {
 	if (holder)
@@ -69,16 +62,14 @@ SchemeShell::~SchemeShell()
 		holder->AtomicInc(-1);
 		holder = NULL;
 	}
-	shellout_unregister();
 	if (evaluator) delete evaluator;
 }
 
 /**
  * Register this shell with the console.
  */
-std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
+void SchemeShell::set_holder(SocketHolder *h)
 {
-	SocketHolder *h = req->getSocketHolder();
 	if (holder)
 	{
 		holder->SetShell(NULL);
@@ -88,10 +79,9 @@ std::string SchemeShell::shellout(Request *req, std::list<std::string> args)
 	holder = h;
 	holder->AtomicInc(+1);
 	holder->SetShell(this);
+printf("shel %p has holder %p\n", this, holder);
 
 	if (!evaluator) evaluator = new SchemeEval();
-	return "Entering scheme shell; use ^D or a single . on a "
-	       "line by itself to exit.";
 }
 
 /* ============================================================== */

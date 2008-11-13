@@ -1,7 +1,7 @@
 /*
- * SchemeShell.h
+ * SchemeShellModule.h
  *
- * Simple scheme shell
+ * Module for starting up scheme shells
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,47 +22,38 @@
 
 #ifdef HAVE_GUILE
 
-#ifndef _OPENCOG_SCHEME_SHELL_H
-#define _OPENCOG_SCHEME_SHELL_H
+#ifndef _OPENCOG_SCHEME_SHELL_MODULE_H
+#define _OPENCOG_SCHEME_SHELL_MODULE_H
 
 #include <string>
 
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/server/SocketHolder.h>
+#include <opencog/shell/SchemeShell.h>
+#include <opencog/server/Request.h>
+#include <opencog/server/CogServer.h>
 
 namespace opencog {
 
-class SchemeShellModule;
-
-class SchemeShell : public GenericShell
+class SchemeShellModule : public Module
 {
-	friend class SchemeShellModule;
 	private:
-		SchemeEval *evaluator;
-
-		std::string normal_prompt;
-		std::string pending_prompt;
-		std::string abort_prompt;
-		const std::string& get_prompt(void);
-		bool show_output;
-
-		SocketHolder *holder;
-		std::string do_eval(const std::string &);
-
-	protected:
-		void set_holder(SocketHolder *);
+		DECLARE_CMD_REQUEST(SchemeShellModule, "scm", shellout,
+			"Enter the scheme shell",
+			"Usage: scm\n\n"
+			"Enter the scheme interpreter shell. This shell provides a rich\n"
+			"and easy-to-use envirnoment for creating, deleting and manipulating\n"
+			"OpenCog atoms and truth values. It provides a full R5RS-compliant\n"
+			"interactive scheme shell, based on the GNU Guile extension language.")
 
 	public:
-		SchemeShell(void);
-		virtual ~SchemeShell();
+		SchemeShellModule(void);
+		virtual ~SchemeShellModule();
 
-		virtual void eval(const std::string &, SocketHolder *);
-
-		void hush_output(bool);
+		virtual const char *id(void);
+		virtual void init(void);
 };
 
 }
 
-#endif // _OPENCOG_SCHEME_SHELL_H
+#endif // _OPENCOG_SCHEME_SHELL_MODULE_H
 
 #endif // HAVE_GUILE
