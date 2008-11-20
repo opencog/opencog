@@ -8,6 +8,13 @@
 HOST=localhost
 PORT=17001
 
+echo -e "scm\n(turn-on-debugging)\n.\nexit\n"  |netcat -q0 $HOST $PORT
+
+# the sleeps are to work-around a guile bug in 1.8.5 involving
+# multi-threaded defines. The current opencog design is highly
+# multi-threaded just right now. :-/
+sleep 1
+
 cat type_constructors.scm |netcat -q0 $HOST $PORT
 sleep 2;
 cat utilities.scm         |netcat -q0 $HOST $PORT
