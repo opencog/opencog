@@ -8,7 +8,7 @@ namespace reasoning
 class PrintRule : public Rule
 {
 public:
-	PrintRule(iAtomTableWrapper *_destTable)
+	PrintRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,false,true,"PrintRule")
 	{
 		inputFilter.push_back(meta(

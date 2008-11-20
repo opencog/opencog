@@ -11,7 +11,7 @@ namespace reasoning
 #if 0
 class NotEliminationRule : public Rule
 {
-	NotEliminationRule(iAtomTableWrapper *_destTable); 
+	NotEliminationRule(iAtomSpaceWrapper *_destTable); 
 };
 #endif
 

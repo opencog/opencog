@@ -2,7 +2,7 @@
 
 #include "PLNRules/Rule.h"
 #include "Rules.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 
 namespace reasoning
@@ -16,7 +16,7 @@ bool substitutableTo(atom& from, atom& to,
 
 namespace haxx
 {
-	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
 	static int localcount=0;
 	using namespace reasoning;
@@ -26,7 +26,7 @@ namespace haxx
 	void dovar3(tree<Btr<atom> >& ta,
 		set<atom,lessatom_ignoreVarNameDifferences>& res,
 		set<subst>* forbiddenBindings,
-		iAtomTableWrapper* table)
+		iAtomSpaceWrapper* table)
 	{
 		vector<Handle> candidates;
 		atom unsubsted_target(ta, ta.begin());
@@ -44,7 +44,7 @@ namespace haxx
 		{
 printf("dovar3: Next candidate...");
 			atom target(unsubsted_target); //'target' will experiece substs
-			AtomTableWrapper *nm = GET_ATW;
+			AtomSpaceWrapper *nm = GET_ATW;
 			if (nm->getArity(candidates[i]) < 2)
 				continue;
 
@@ -144,8 +144,8 @@ printf("dovar3: substitutableTo:");
 							*v);
 					}
 					
-					vtree vt(unsubsted_ForAll_candidate.makeHandletree(::haxx::defaultAtomTableWrapper, true));
-					//vtree vt(ForAll_candidate.makeHandletree(::haxx::defaultAtomTableWrapper, true));
+					vtree vt(unsubsted_ForAll_candidate.makeHandletree(::haxx::defaultAtomSpaceWrapper, true));
+					//vtree vt(ForAll_candidate.makeHandletree(::haxx::defaultAtomSpaceWrapper, true));
 					
 					rawPrint(vt, vt.begin(), 4);
 //					getc(stdin);
@@ -182,7 +182,7 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-	AtomTableWrapper *nm = GET_ATW;
+	AtomSpaceWrapper *nm = GET_ATW;
 	if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
 		inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
 		return Rule::setOfMPs();
@@ -192,7 +192,7 @@ Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInput
 	/// Gather hints:
 printf("VariableMPforms...");
 //printAtomTree(outh, 0,0);
-	//((AtomTableWrapper*)(destTable))->VariableMPforms(atom(*outh,outh->begin()), varforms, outh.forbiddenBindings);
+	//((AtomSpaceWrapper*)(destTable))->VariableMPforms(atom(*outh,outh->begin()), varforms, outh.forbiddenBindings);
 	
 	set<subst> unused_forbiddenBindings;
 	
@@ -287,7 +287,7 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 	printAtomTree(src,0,4);
 
-	haxx::dovar3(tsrc, res, forbiddenBindings, ::haxx::defaultAtomTableWrapper);
+	haxx::dovar3(tsrc, res, forbiddenBindings, ::haxx::defaultAtomSpaceWrapper);
 
 printf("dovar3 ok.");
 

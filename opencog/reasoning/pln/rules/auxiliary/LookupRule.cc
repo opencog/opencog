@@ -4,7 +4,7 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
@@ -12,9 +12,9 @@ namespace reasoning
 {
 
 unsigned long now_interval_len = 50000;
-bool ExpandEvaluationLinks(vtree& target, iAtomTableWrapper* destTable)
+bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     bool is_changed = false;
     
     for(vtree::iterator i = target.begin(); i != target.end(); i++)

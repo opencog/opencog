@@ -14,10 +14,10 @@ class SubsetEvalRule
 	protected:
 
 		MPs inputFilter;
-		iAtomTableWrapper *destTable;
+		iAtomSpaceWrapper *destTable;
 public:
 	virtual ~SubsetEvalRule() {}
-	SubsetEvalRule(iAtomTableWrapper *_destTable);
+	SubsetEvalRule(iAtomSpaceWrapper *_destTable);
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{

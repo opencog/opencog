@@ -17,7 +17,7 @@
 
 #include "PLN.h"
 #include "PTLEvaluator.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 
 #define INPUT_CHECK(msg)
@@ -35,7 +35,7 @@ using namespace reasoning;
 
 extern map<Type, vector<Handle> > mindShadowMap;
 
-extern iAtomTableWrapper* defaultAtomTableWrapper;
+extern iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
 Handle exec(vector<Handle>& hs);
 
@@ -70,7 +70,7 @@ if (hs.size() < 2)
 }
 #endif
 
-AtomTableWrapper *as = GET_ATW;
+AtomSpaceWrapper *as = GET_ATW;
 nocase_string procedure_name = as->getName(hs[0]);
 
 //	puts(("Launching " + procedure_name).c_str());
@@ -437,7 +437,7 @@ return timeDiff(F, interval, -1);
 
 namespace haxx
 {
-extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 /// TODO: TimeServer has not yet been implemented for PseudoCore!!!
@@ -474,11 +474,11 @@ float pos(Handle pixel, Handle t)
 		new reasoning::atom(PREDICATE_NODE, 0, "CW_position"),
 		args);
 	
-	tree<Vertex> queryt(eval.makeHandletree(haxx::defaultAtomTableWrapper));
+	tree<Vertex> queryt(eval.makeHandletree(haxx::defaultAtomSpaceWrapper));
 
 	/// TODO: Take advantage of the fact that only 1 result needed.
 	
-	reasoning::TableGather all_res(queryt,haxx::defaultAtomTableWrapper,-1);
+	reasoning::TableGather all_res(queryt,haxx::defaultAtomSpaceWrapper,-1);
 	reasoning::TableGather::iterator res =
 			find_if(all_res.begin(), all_res.end(),
 				bind2nd(moment_equal(), intFromNumberNode(t)));

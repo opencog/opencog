@@ -19,7 +19,7 @@ class Rule;
 class InferenceNode2;
 class BackwardInferenceTask;
 class InferenceNode;
-struct iAtomTableWrapper;
+struct iAtomSpaceWrapper;
 //class BITNodeRoot;
 
 namespace simple_evaluator

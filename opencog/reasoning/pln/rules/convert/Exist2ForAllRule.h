@@ -7,7 +7,7 @@ namespace reasoning
 #if 0
 class Exist2ForAllRule : public Rule
 {
-	Exist2ForAllRule(iAtomTableWrapper *_destTable)
+	Exist2ForAllRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable)
 	{
 		inputFilter.push_back(new atom(__INSTANCEOF_N, ExistLink));

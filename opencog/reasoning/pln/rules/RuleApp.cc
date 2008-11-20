@@ -1,5 +1,5 @@
 #include "../PLN.h"
-#include "../AtomTableWrapper.h"
+#include "../AtomSpaceWrapper.h"
 #include "RuleApp.h"
 
 namespace reasoning
@@ -42,7 +42,7 @@ RuleApp::~RuleApp() {
     foreach(VtreeProvider* vtp, args)
         delete vtp;
 }
-RuleApp::RuleApp(//iAtomTableWrapper *_destTable,
+RuleApp::RuleApp(//iAtomSpaceWrapper *_destTable,
         Rule *_root_rule)
         :	Rule(_root_rule->destTable, false, true, "Inference Pathway"),
          result((Handle)NULL), arg_changes_since_last_compute(true), root_rule(_root_rule)

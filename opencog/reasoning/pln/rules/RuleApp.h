@@ -52,7 +52,7 @@ one to $1). Etc.
 
 namespace haxx
 {
-    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 namespace reasoning

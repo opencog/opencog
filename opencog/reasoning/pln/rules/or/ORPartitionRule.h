@@ -13,7 +13,7 @@ class ORPartitionRule : public Rule
 	ORRule* regularOR;
 public:
 
-	ORPartitionRule(iAtomTableWrapper *_destTable)
+	ORPartitionRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable, true, true, "ORPartitionRule") 
 	{
 		regularOR = new ORRule(_destTable);

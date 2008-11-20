@@ -6,7 +6,7 @@ namespace reasoning
 {
 
 const bool RuleResultFreshness = true;
-Handle UnorderedCcompute(iAtomTableWrapper *destTable,
+Handle UnorderedCcompute(iAtomSpaceWrapper *destTable,
 					Type linkT, const ArityFreeFormula<TruthValue,
 			       TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX=NULL);
 
@@ -14,7 +14,7 @@ template<int N>
 class SimpleANDRule : public ArityFreeANDRule
 {
 public:
-	SimpleANDRule(iAtomTableWrapper *_destTable)
+	SimpleANDRule(iAtomSpaceWrapper *_destTable)
 	: ArityFreeANDRule(_destTable)
 	{
 		name = "Simple AND Rule";

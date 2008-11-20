@@ -10,7 +10,7 @@ public:
 	static map<vtree, vector<vtree> ,less_vtree> thms;
 	NO_DIRECT_PRODUCTION;
 
-	CrispTheoremRule(iAtomTableWrapper *_destTable);
+	CrispTheoremRule(iAtomSpaceWrapper *_destTable);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
 

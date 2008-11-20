@@ -3,14 +3,14 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
 namespace reasoning
 {
 
-StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(iAtomTableWrapper *_destTable)
+StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(iAtomSpaceWrapper *_destTable)
 : Rule(_destTable,false,true,"ModusPonensRule")
 {
         inputFilter.push_back(meta(
@@ -55,7 +55,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
 
 BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
-        AtomTableWrapper *nm = GET_ATW;
+        AtomSpaceWrapper *nm = GET_ATW;
         assert(validate(premiseArray));
 
 //printTree(premiseArray[0],0,1);

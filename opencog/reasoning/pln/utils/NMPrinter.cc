@@ -3,14 +3,14 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/server/CogServer.h>
 
-#include "../AtomTableWrapper.h"
+#include "../AtomSpaceWrapper.h"
 
 FILE* NMPrinter::logFile = NULL;
 int NMPrinter::numberOfPrintersUsingLogFile = 0;
 
 namespace haxx
 {
-        extern iAtomTableWrapper* defaultAtomTableWrapper;
+        extern iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 #define CLOSE_LOG_FILE_AUTOMATICALLY
@@ -194,7 +194,7 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
 void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
     //printf("NMPrinter::printHandle()\n");
 //    printf("NMPrinter::printHandle(%p): printOptions = %X\n", h, printOptions);
-    AtomTableWrapper* atw = GET_ATW; 
+    AtomSpaceWrapper* atw = GET_ATW; 
 
     bool isNode = atw->isSubType(h,NODE); 
     Type type = atw->getType(h);

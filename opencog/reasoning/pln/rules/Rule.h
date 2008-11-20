@@ -74,7 +74,7 @@ protected:
     bool freeInputArity;
 
     //! Atom table interface
-    iAtomTableWrapper *destTable;
+    iAtomSpaceWrapper *destTable;
 
     //! Whether the the Rule can be computed?
     bool computable;
@@ -103,7 +103,7 @@ public:
      * @param _freeInputArity Are the number of arguments predetermined?
      * @param _name The name of the rule.
      */
-    Rule(iAtomTableWrapper *_destTable,
+    Rule(iAtomSpaceWrapper *_destTable,
         bool _freeInputArity,
         bool _computable,
         std::string _name = "");

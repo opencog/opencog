@@ -6,7 +6,7 @@ namespace reasoning
 #if 0
 class AND2ORRule : public Rule
 {
-	AND2ORRule(iAtomTableWrapper *_destTable)
+	AND2ORRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable, false, true, "AND2ORRule")
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(AndLink))));

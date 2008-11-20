@@ -7,7 +7,7 @@ namespace reasoning
 class ANDSubstRule : public Rule
 {
 protected:
-	ANDSubstRule(iAtomTableWrapper *_destTable)
+	ANDSubstRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,true,true,"ANDSubstRule")
 	{}
 public:

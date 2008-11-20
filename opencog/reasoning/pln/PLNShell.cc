@@ -110,7 +110,7 @@ These should be bug-free, but there's no type checking of parameters, so providi
 //#include "PTLEvaluator.h"
 
 #include "rules/RuleProvider.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include "BackInferenceTreeNode.h"
 #include "PLNShell.h"
 #include "ForwardChainer.h"
@@ -144,7 +144,7 @@ namespace haxx
     extern bool ArchiveTheorems;
     extern bool printRealAtoms;
     extern map<Handle,vector<Handle> >* inferred_from;
-    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
     uint maxDepth = 250;
 }
@@ -171,7 +171,7 @@ namespace test
 
 void test_core_TVs()
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     //! Why get type 77 instead of actual name? 
     Btr<set<Handle> > ts =  atw->getHandleSet((Type)77,"");
     foreach(Handle ti, *ts)
@@ -188,7 +188,7 @@ void test_core_TVs()
 
 void test_atw_reset()
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     atw->reset();
     Btr<set<Handle> > ret;
     ret = atw->getHandleSet(EVALUATION_LINK, "");
@@ -237,15 +237,15 @@ void PLNShell_RunLoop(int argc, char** args)
 
         foo_pretest();
 
-        LOG(2, "Creating AtomTableWrappers...");
+        LOG(2, "Creating AtomSpaceWrappers...");
         
 #if LOCAL_ATW
-        haxx::defaultAtomTableWrapper = &LocalATW::getInstance();
+        haxx::defaultAtomSpaceWrapper = &LocalATW::getInstance();
 #else
         DirectATW::getInstance();
-        haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
+        haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
 #endif
-        AtomTableWrapper& atw = *GET_ATW;
+        AtomSpaceWrapper& atw = *GET_ATW;
                 
         if (RunPLNtest)
         {
@@ -294,6 +294,7 @@ void PLNShell_RunLoop(int argc, char** args)
     catch(...)
     {
         logger().error("Unknown exception at root level while RunLoop initializing. ");
+        cout << "Unknown exception at root level while RunLoop initializing. "<< endl;
     }
 
     try
@@ -355,8 +356,8 @@ map<int, Btr<vtree > > tests;
 void PLNShell::Init()
 {
     #if LOCAL_ATW
-    haxx::defaultAtomTableWrapper = &reasoning::LocalATW::getInstance();
-    ((LocalATW*)haxx::defaultAtomTableWrapper)->SetCapacity(10000);
+    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
+    ((LocalATW*)haxx::defaultAtomSpaceWrapper)->SetCapacity(10000);
     #endif  
     
     #if LOG_ON_FILE
@@ -370,7 +371,7 @@ void PLNShell::Init()
 
 string printTV (Handle h) {
   char str[500];
-  AtomTableWrapper *atw = GET_ATW;
+  AtomSpaceWrapper *atw = GET_ATW;
   const TruthValue& tv = atw->getTV(h);
   if (tv.isNullTv()) 
       sprintf (str,"(TruthValue::NULL_TV())");
@@ -381,7 +382,7 @@ string printTV (Handle h) {
 }
 
 void printOutgoing (Handle out) {
-  AtomTableWrapper *atw = GET_ATW;
+  AtomSpaceWrapper *atw = GET_ATW;
  vector<Handle> list=atw->getOutgoing(out);
   cout<<printTV(out);
   foreach (Handle h,list)
@@ -393,14 +394,14 @@ void printOutgoing (Handle out) {
 
 struct min_conf { 
   bool operator()(Handle h) {
-      AtomTableWrapper *atw = GET_ATW;
+      AtomSpaceWrapper *atw = GET_ATW;
       return atw->getTV(h).getConfidence()>0.8;
   }
 };
 
 struct inhlink { 
   bool operator()(Handle h) {
-      AtomTableWrapper *atw = GET_ATW;
+      AtomSpaceWrapper *atw = GET_ATW;
       return atw->inheritsType (atw->getType(h),INHERITANCE_LINK);
   }
 };
@@ -415,7 +416,7 @@ struct compareStrength {
 };
 
 void fw_beta (void) {
-  AtomTableWrapper *atw = GET_ATW;
+  AtomSpaceWrapper *atw = GET_ATW;
 
   atw->reset();
 
@@ -505,7 +506,7 @@ void PLNShell::Launch()
 
 void PLNShell::Launch(vtree *target)
 {
-    AtomTableWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ATW;
 
 /*  vector<Vertex> targs, targs2;
     targs.push_back(mva((Handle)INHERITANCE_LINK,
@@ -532,7 +533,7 @@ void PLNShell::Launch(vtree *target)
 
 /*  tests[31] = Btr<vtree > (new vtree(
         mva((Handle)IMP,
-            mva((Handle)EXECUTION_LINK, CreateVar(haxx::defaultAtomTableWrapper)),
+            mva((Handle)EXECUTION_LINK, CreateVar(haxx::defaultAtomSpaceWrapper)),
             make_vtree(reward))));
 */
             /// Requires test/reasoning/bigdemo.xml 
@@ -1097,7 +1098,7 @@ printf("BITNodeRoot init ok\n");
 
             case 'R':
                 int testdone;
-                atw->testAtomTableWrapper();
+                atw->testAtomSpaceWrapper();
                 cin >> testdone;
                 fw_beta();
                 break;

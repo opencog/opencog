@@ -3,14 +3,14 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
 namespace reasoning
 {
 
-CrispTheoremRule::CrispTheoremRule(reasoning::iAtomTableWrapper *_destTable)
+CrispTheoremRule::CrispTheoremRule(reasoning::iAtomSpaceWrapper *_destTable)
 : Rule(_destTable, true, true, "RewritingRule")
 {
     /// SHOULD NOT BE USED FOR FORWARD INFERENCE!
@@ -69,7 +69,7 @@ break_inner:
 
 Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     set<MPs> ret;   
 bool htemp=false;
     
@@ -234,7 +234,7 @@ bool htemp=false;
 
 BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
 
     /*vtree res(mva((Handle)IMPLICATION_LINK,
         mva(nm->getOutgoing(v2h(premiseArray[0]))[0]),

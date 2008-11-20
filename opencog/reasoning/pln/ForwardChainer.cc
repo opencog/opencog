@@ -1,5 +1,5 @@
 #include "ForwardChainer.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include "utils/NMPrinter.h"
 
 #include <opencog/util/Logger.h>
@@ -9,7 +9,7 @@
 #include <time.h>
 
 namespace haxx {
-    extern reasoning::iAtomTableWrapper *defaultAtomTableWrapper;
+    extern reasoning::iAtomSpaceWrapper *defaultAtomSpaceWrapper;
 }
 
 namespace reasoning {
@@ -89,7 +89,7 @@ Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
 }
 
 HandleSeq ForwardChainer::getLocalLink(Handle lh, const std::vector< Vertex > &args) {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     HandleSeq choices;
     cout << "get local link" <<endl;
     // foreach outgoing dest (currently only supports target of lh)

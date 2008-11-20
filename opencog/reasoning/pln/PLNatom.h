@@ -28,7 +28,7 @@
 #define __AND        172
 #define __NOT        173
 
-#include "iAtomTableWrapper.h"
+#include "iAtomSpaceWrapper.h"
 #include <boost/smart_ptr.hpp>
 
 namespace reasoning
@@ -84,7 +84,7 @@ public:
     /// Create a copy of this wrapper into the core, regardless whether this
     /// was created from a core handle.
 
-    Handle attach(iAtomTableWrapper* core) const;
+    Handle attach(iAtomSpaceWrapper* core) const;
     //{
     //  return cx;
     //};
@@ -119,7 +119,7 @@ public:
     static bool ValidMetaPredicate(Type T);
 
     static std::vector<Handle> convertVector(const std::vector<boost::shared_ptr<atom> >& hs,
-                                        iAtomTableWrapper* table);
+                                        iAtomSpaceWrapper* table);
 
     void substitute(Handle rhs, std::string varname);
     void substitute(Handle dest, atom src);
@@ -129,12 +129,12 @@ public:
     /// TODO: Write proper visitor object!
     tree< boost::shared_ptr<atom> > maketree() const; //tree<atom>& dest);
     
-    tree<Vertex> makeHandletree(iAtomTableWrapper* table, bool fullVirtual=false) const; //tree<atom>& dest);
+    tree<Vertex> makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual=false) const; //tree<atom>& dest);
 
     /// Actualize the substitution from bindings, delete forbiddenBindings, on new instance..
 
     void getWithActualizedSubstitutions(atom& target) const;
-    Handle bindHandle(iAtomTableWrapper* table) const;
+    Handle bindHandle(iAtomSpaceWrapper* table) const;
 
     void extractVars(set<std::string>& vars) const;
     void extractFWVars(set<std::string>& vars) const;
@@ -252,6 +252,6 @@ atom* neBoundVertexWithNewType(Handle h, Type T);
 
 } //namespace
 
-//#include "iAtomTableWrapper.h"
+//#include "iAtomSpaceWrapper.h"
 
 #endif

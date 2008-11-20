@@ -15,7 +15,7 @@ protected:
 	}
 public:
 	bool validate2				(MPs& args) const { return true; }
-	HypothesisRule(iAtomTableWrapper *_destTable)
+	HypothesisRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable, false, false, "Hypothesis")
 	{
 		//inputFilter.push_back(new atom(result));

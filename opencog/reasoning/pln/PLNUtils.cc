@@ -16,7 +16,7 @@
 
 #include "rules/Rules.h"
 #include "PLNEvaluator.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 #include "BackInferenceTreeNode.h"
 
@@ -37,7 +37,7 @@ extern FILE *logfile;
 
 namespace haxx
 {
-	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 	bool printRealAtoms = false;
 	Handle VarTypes[STD_VARS];
 }
@@ -77,7 +77,7 @@ void rawPrint(tree<Vertex>::iterator top, int _rloglevel)
 
 void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
 {
-	AtomTableWrapper *atw = GET_ATW;
+	AtomSpaceWrapper *atw = GET_ATW;
     if (_rloglevel > currentDebugLevel)
         return;
 
@@ -139,7 +139,7 @@ if (!hptr)
 
 void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	if (_rloglevel > currentDebugLevel)
 		return;
@@ -214,7 +214,7 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 				map<Handle,Handle>& bindings);
 void unifiesWithVariableChangeTo_TEST()
 {
-	AtomTableWrapper *atw = GET_ATW;
+	AtomSpaceWrapper *atw = GET_ATW;
 
 	map<Handle,Handle> bindings;
 
@@ -286,16 +286,16 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 				vtree::sibling_iterator	ltop, vtree::sibling_iterator rtop,
 				map<Handle,Handle>& bindings)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
-	cprintf(4,"Empty checks...\n");
+	cprintf(5,"Empty checks...\n");
 
 	if (lhs_t.empty() && rhs_t.empty())
 		return true;
 	if (lhs_t.empty() || rhs_t.empty())
 		return false;
 	
-	cprintf(4,"Empty checks ok\n");				
+	cprintf(5,"Empty checks ok\n");				
 	
 	if (!((*rtop) == (*ltop)))
 	{
@@ -512,7 +512,7 @@ bool substitutableTo(atom& from, atom& to,
 		cprintf(0, "Warning! FW_VARIABLE_NODE substitution to the wrong direction was used!");*/
 	/// This would complicate things...
 //	assert(!atw->inheritsType(from.T, FW_VARIABLE_NODE));
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	if (atw->inheritsType(to.T, FW_VARIABLE_NODE) && to.name == from.name)
 		return true;
@@ -578,7 +578,7 @@ const float MIN_CONFIDENCE = 0.0000001f;
 	
 void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const Type VarT, int index)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	LOG(3,"BEGIN GATHER for:");
 	rawPrint(_MP, _MP.begin(),3);
@@ -839,14 +839,14 @@ cprintf(2,"TableGather:\n");
 TableGather::TableGather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const Type VarT, int index)
 {
 //printf("Gather...\n");
-	gather(_MP, (aprovider ? aprovider : haxx::defaultAtomTableWrapper), VarT, index);
+	gather(_MP, (aprovider ? aprovider : haxx::defaultAtomSpaceWrapper), VarT, index);
 //	printf("----------------------\n");
 }
 
 template<>
 void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 	for (tree<Vertex>::iterator v = value->begin(); v != value->end(); v++)
 	{
 		Handle *ph = boost::get<Handle>(&*v);
@@ -967,7 +967,7 @@ bool echo=false;
 
 bool existMPin(const vector<Btr<atom> >& hs)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 	for (vector<Btr<atom> >::const_iterator i = hs.begin(); i != hs.end(); i++)
 		if (atw->inheritsType((*i)->T, RESTRICTOR))
 			return true;
@@ -985,7 +985,7 @@ bool existMPin(const vector<Btr<atom> >& hs)
 
 bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& link_set, Handle& result)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
     int max_size=0;
 
@@ -1021,7 +1021,7 @@ bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& l
 bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
 							const std::vector<Handle>& link_set, std::vector<Btr<atom> >& result)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	if (keyelem_set.empty())
 		return false;
@@ -1055,7 +1055,7 @@ bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
 
 void printNode1(Handle h, int level, int LogLevel)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	Type t = atw->getType(h);
 	const TruthValue& tv = atw->getTV(h);
@@ -1078,7 +1078,7 @@ void printNode1(Handle h, int level, int LogLevel)
 
 void printTree(Handle h, int level, int LogLevel)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	if (LogLevel > currentDebugLevel) 
 		return;
@@ -1142,7 +1142,7 @@ struct countAtom
 {
 	static bool exec(Handle h, int level)
 	{
-		AtomTableWrapper* atw = GET_ATW;
+		AtomSpaceWrapper* atw = GET_ATW;
 		Type t = atw->getType(h);
 		counter[t]++;
 
@@ -1453,7 +1453,7 @@ namespace reasoning
 
 namespace haxx
 {
-	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 	bool MPunifyHandle(Handle lhs,
@@ -1462,7 +1462,7 @@ namespace haxx
 				set<hsubst>** forbiddenBindings,
 				bool* restart, const Type VarT)
 	{
-		AtomTableWrapper* atw = GET_ATW;
+		AtomSpaceWrapper* atw = GET_ATW;
 
 		assert(atw->isReal(lhs));
 		
@@ -1503,7 +1503,7 @@ cprintf(4, "MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_n
 				
 					cprintf(4, "Request rhs handle...\n");
 				
-					Handle rhs_h = rhs.attach(::haxx::defaultAtomTableWrapper);
+					Handle rhs_h = rhs.attach(::haxx::defaultAtomSpaceWrapper);
 					if (!rhs_h)
 					{
 						cprintf(0, "Could not add handle!\n");
@@ -1575,7 +1575,7 @@ LOG(4, "MPunifyHandle: restart reqsted...");
 				set<hsubst>** forbiddenBindings,
 				bool* restart, const Type VarT)
 	{
-		AtomTableWrapper* atw = GET_ATW;
+		AtomSpaceWrapper* atw = GET_ATW;
 
 		*restart = false; //We would not be here if restart was really pending.
 
@@ -1641,7 +1641,7 @@ printTree(lhs,0,3);
 				
 				cprintf(4, "Request rhs handle...\n");
 				
-				Handle rhs_h = rhs.attach(::haxx::defaultAtomTableWrapper);
+				Handle rhs_h = rhs.attach(::haxx::defaultAtomSpaceWrapper);
 				if (!rhs_h)
 				{
 					cprintf(0, "Could not add handle!\n");
@@ -1728,7 +1728,7 @@ LOG(4, "UnifyVector: restart reqsted...");
  * 3) Any type of link with no arity => any link of that type
  */
 inline bool isVariableAtom(string name, Type type, int arity) {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
     return (atw->inheritsType(type, FW_VARIABLE_NODE) ||
            (name.empty() && atw->inheritsType(type, NODE)) || 
            (!arity && atw->inheritsType(type, LINK)));
@@ -1736,7 +1736,7 @@ inline bool isVariableAtom(string name, Type type, int arity) {
 
 string condensed_form(const atom& a)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 	if (atw->inheritsType(a.T, NODE))
 		return a.name;
 	else
@@ -1769,7 +1769,7 @@ class getNameOp
 {
 public:
 	string operator()(Handle h) { 
-		AtomTableWrapper* atw = GET_ATW;
+		AtomSpaceWrapper* atw = GET_ATW;
 		return string(atw->getName(h)); }
 };
 
@@ -1794,7 +1794,7 @@ bool ttsubstitutableTo(Handle from,Handle to,
 						map<BindKeyT,Handle>& bindings,
 						BindKeyOpT bind_key_op)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	if (!from && !to)
 		return true;
@@ -2006,8 +2006,8 @@ const char* Type2Name(Type t)
 
 Handle make_real(vtree& vt)
 {
-	//printTree(haxx::defaultAtomTableWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false),0,0);
-	return ::haxx::defaultAtomTableWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false);
+	//printTree(haxx::defaultAtomSpaceWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false),0,0);
+	return ::haxx::defaultAtomSpaceWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false);
 }
 
 void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
@@ -2136,7 +2136,7 @@ const vtree& BoundVTree::getStdTree()
 
 void BoundVTree::createMyStdTree()
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	bindingsT varmap;
 
@@ -2170,7 +2170,7 @@ void BoundVTree::createMyStdTree()
 
 bool equalVariableStructure(const vtree& lhs, const vtree& rhs)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	bindingsT varmap;
 	if (lhs.size() != rhs.size())
@@ -2219,7 +2219,7 @@ bool equalVariableStructure2(BBvtree lhs, BBvtree rhs)
 
 void ForceVirtual(meta _target, vtree::iterator& vit)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	Handle *ph = v2h(&(*vit));
 	//Type t = atw->getType(*ph);
@@ -2259,7 +2259,7 @@ meta ForceAllLinksVirtual(meta _target)
 
 meta ForceRootLinkVirtual(meta _target)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	Handle *ph = v2h(&(*_target->begin()));
 	
@@ -2283,7 +2283,7 @@ void print_progress()
 
 bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	Handle *ph = v2h(&(*_target->begin()));
 	if (ph && atw->isReal(*ph))
@@ -2346,7 +2346,7 @@ void printBinding(const pair<string, Handle> p)
 
 void pr(pair<Handle, Handle> i)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	string s1 = atw->inheritsType(atw->getType(i.first), NODE) ? atw->getName(i.first) : i2str((int)i.first);
 	string s2 = atw->inheritsType(atw->getType(i.second), NODE) ? atw->getName(i.second) : i2str((int)i.second);
@@ -2364,7 +2364,7 @@ void printSubsts(BoundVertex a, int LogLevel)
 string make_subst_buf(const BoundVertex& a)
 {
 	string subst_buf;
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	if (a.bindings)
 		for (bindingsT::const_iterator	si = a.bindings->begin();
@@ -2385,7 +2385,7 @@ Vertex transitive_produce(	const containerT& chain,
  rule_args.push_back(v2h(last_result) ? last_result : (*next_it++));
  rule_args.push_back(*next_it++);
  
- Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula,TRANSITIVE_LINK_TYPE>(::haxx::defaultAtomTableWrapper).compute(rule_args);
+ Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula,TRANSITIVE_LINK_TYPE>(::haxx::defaultAtomSpaceWrapper).compute(rule_args);
  
  return (next_it != chain.end())
             ? transitive_produce<TRANSITIVE_LINK_TYPE>(chain, next_it, my_result)
@@ -2401,7 +2401,7 @@ Vertex transitive_produce(	const containerT& chain,
 
 bool IsIdenticalHigherConfidenceAtom(Handle a, Handle b)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 	/// \todo Speed-optimize!
 
@@ -2420,18 +2420,18 @@ bool unifiesTo(	const vtree & lhs_t, const vtree & rhs_t,
 				bool allow_rhs_binding,
 				Type VarType)
 {
-	AtomTableWrapper* atw = GET_ATW;
+	AtomSpaceWrapper* atw = GET_ATW;
 
 //cprintf(0,"U: %d %d\n", 	
 	
-	cprintf(4,"Empty checks...\n");				
+	cprintf(5,"Empty checks...\n");				
 
 	if (lhs_t.empty() && rhs_t.empty())
 		return true;
 	if (lhs_t.empty() || rhs_t.empty())
 		return false;
 	
-	cprintf(4,"Empty checks ok\n");				
+	cprintf(5,"Empty checks ok\n");				
 	
 //	if (lhs_t.number_of_children(ltop) != rhs_t.number_of_children(rtop))
 //		return false;

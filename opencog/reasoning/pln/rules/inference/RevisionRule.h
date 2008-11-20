@@ -8,7 +8,7 @@ namespace reasoning
 class RevisionRule : public GenericRule<RevisionFormula>
 {
 public:
-	RevisionRule(iAtomTableWrapper *_destTable)
+	RevisionRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<RevisionFormula>(_destTable, false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(ANY, 0)));
@@ -30,7 +30,7 @@ public:
 		a1 = destTable->getType(premiseArray[0]);
 		a2 = destTable->getType(premiseArray[1]);
 
-		AtomTableWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ATW;
 		return	a1 == a2 &&
 				nm->getOutgoing(premiseArray[0]) == nm->getOutgoing(premiseArray[1]);
 	}

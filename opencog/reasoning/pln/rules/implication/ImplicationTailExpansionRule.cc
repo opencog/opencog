@@ -3,14 +3,14 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
 namespace reasoning
 {
 
-ImplicationTailExpansionRule::ImplicationTailExpansionRule(reasoning::iAtomTableWrapper *_destTable)
+ImplicationTailExpansionRule::ImplicationTailExpansionRule(reasoning::iAtomSpaceWrapper *_destTable)
 : Rule(_destTable, false, true, "ImplicationTailExpansionRule")
 {
     inputFilter.push_back(meta(
@@ -31,7 +31,7 @@ ImplicationTailExpansionRule::ImplicationTailExpansionRule(reasoning::iAtomTable
 
 Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     if (!inheritsType(nm->getType(v2h(*outh->begin())), IMPLICATION_LINK))
         return Rule::setOfMPs();
         
@@ -66,7 +66,7 @@ cprintf(0,"T:%d\n", (Type)(int)v2h(*hs1));
 
 BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
 
 /*  for (int i=0;i<premiseArray.size();i++)
         printTree(v2h(premiseArray[i]),0,0);

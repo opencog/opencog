@@ -8,7 +8,7 @@
 
 namespace haxx
 {
-    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 namespace reasoning
@@ -42,13 +42,13 @@ VariableRuleProvider::~VariableRuleProvider(void)
 /*
 void VariableRuleProvider::CreateCustomCrispUnificationRules()
 {
-	iAtomTableWrapper* parent = haxx::defaultAtomTableWrapper;
+	iAtomSpaceWrapper* parent = haxx::defaultAtomSpaceWrapper;
 	
 }
 */
 DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 {
-	iAtomTableWrapper* parent = ::haxx::defaultAtomTableWrapper;
+	iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
 
 	Btr<set<Handle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
 	
@@ -154,7 +154,7 @@ public:
 	
 	~GenericRule2() {}
 	/// Always computable
-	GenericRule2(iAtomTableWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
+	GenericRule2(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
 		
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
@@ -189,7 +189,7 @@ protected:
 	}
 
 public:
-	InversionRule2(iAtomTableWrapper *_destTable)
+	InversionRule2(iAtomSpaceWrapper *_destTable)
 	: GenericRule2/*<InversionFormula>*/ (_destTable, false, "InversionRule")
 	{
 	}
@@ -205,7 +205,7 @@ public:
 
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
-	iAtomTableWrapper* parent = ::haxx::defaultAtomTableWrapper;
+	iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
 	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
 	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
 	//AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);

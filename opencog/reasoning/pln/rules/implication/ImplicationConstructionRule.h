@@ -8,7 +8,7 @@ namespace reasoning
 class ImplicationConstructionRule : public GenericRule<Implication>
 {
 public:
-	ImplicationConstructionRule(iAtomTableWrapper *_destTable)
+	ImplicationConstructionRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<Implication>(_destTable, false, "ImplicationConstructionRule")
 	{ }
 

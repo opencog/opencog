@@ -8,7 +8,7 @@ namespace reasoning
 class Eval2MemRule : public GenericRule<TautologyFormula>
 {
 public:
-	Eval2MemRule(iAtomTableWrapper *_destTable)
+	Eval2MemRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<TautologyFormula>(_destTable, false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));

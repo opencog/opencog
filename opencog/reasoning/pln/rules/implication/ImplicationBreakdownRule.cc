@@ -3,14 +3,14 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
 namespace reasoning
 {
 
-ImplicationBreakdownRule::ImplicationBreakdownRule(iAtomTableWrapper *_destTable)
+ImplicationBreakdownRule::ImplicationBreakdownRule(iAtomSpaceWrapper *_destTable)
 : Rule(_destTable,false,true,"ImplicationBreakdown")
 {
 		inputFilter.push_back(meta(

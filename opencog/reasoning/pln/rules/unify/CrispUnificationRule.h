@@ -8,7 +8,7 @@ class CrispUnificationRule : public BaseCrispUnificationRule
 {
 public:
 
-	CrispUnificationRule(iAtomTableWrapper *_destTable)
+	CrispUnificationRule(iAtomSpaceWrapper *_destTable)
 	: BaseCrispUnificationRule(_destTable) {}
 		
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;

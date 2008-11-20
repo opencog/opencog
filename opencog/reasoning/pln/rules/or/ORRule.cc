@@ -3,14 +3,14 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
 namespace reasoning
 {
 
-ORRule::ORRule(iAtomTableWrapper *_destTable)
+ORRule::ORRule(iAtomSpaceWrapper *_destTable)
 : GenericRule<ORFormula>(_destTable, true, "OR Rule")
 {
 }

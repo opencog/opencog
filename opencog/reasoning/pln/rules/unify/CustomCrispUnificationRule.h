@@ -10,7 +10,7 @@ protected:
 	Handle ForallLink;
 public:
 
-	CustomCrispUnificationRule(Handle _ForallLink, iAtomTableWrapper *_destTable)
+	CustomCrispUnificationRule(Handle _ForallLink, iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,false,false,"CrispUnificationRule"), ForallLink(_ForallLink)
 	{
 		inputFilter.push_back(meta(

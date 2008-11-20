@@ -29,7 +29,7 @@ protected:
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
 public:
-	NotEvaluatorRule(iAtomTableWrapper *_destTable);
+	NotEvaluatorRule(iAtomSpaceWrapper *_destTable);
 	meta i2oType(const vector<Vertex>& h) const;
 
 	bool validate2				(MPs& args) const { return true; }

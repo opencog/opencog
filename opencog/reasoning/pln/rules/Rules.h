@@ -1,8 +1,8 @@
 #ifndef RULES_H
 #define RULES_H
 
-#include "../iAtomTableWrapper.h"
-#include "../AtomTableWrapper.h"
+#include "../iAtomSpaceWrapper.h"
+#include "../AtomSpaceWrapper.h"
 //#include "../CoreWrapper.h"
 #include "../PLNatom.h"
 #include "../formulas/Formulas.h"
@@ -30,7 +30,7 @@
 
 namespace haxx
 {
-	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 #include "and/ANDBreakdownRule.h"

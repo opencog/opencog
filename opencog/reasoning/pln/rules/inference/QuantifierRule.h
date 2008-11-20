@@ -12,7 +12,7 @@ class QuantifierRule : public Rule
 public:
 	bool validate2				(MPs& args) const { return true; }
 
-	QuantifierRule(iAtomTableWrapper *_destTable, const Handle& _domain)
+	QuantifierRule(iAtomSpaceWrapper *_destTable, const Handle& _domain)
 	: Rule(_destTable, false, true, "QuantifierRule"),
 	domain(_domain) {
 		inputFilter.push_back(meta(

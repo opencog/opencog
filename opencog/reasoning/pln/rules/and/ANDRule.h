@@ -7,7 +7,7 @@ namespace reasoning
 class ANDRule : public ArityFreeANDRule
 {
 public:
-	ANDRule(iAtomTableWrapper *_destTable)
+	ANDRule(iAtomSpaceWrapper *_destTable)
 	: ArityFreeANDRule(_destTable)
 	{
 		name = "AND Evaluator Rule";

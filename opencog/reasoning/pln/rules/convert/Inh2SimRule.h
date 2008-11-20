@@ -25,14 +25,14 @@ protected:
 	}
 
 public:
-	Inh2SimRule(iAtomTableWrapper *_destTable)
+	Inh2SimRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<Inh2SimFormula>(_destTable, false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(INHERITANCE_LINK))));
 	}
 	virtual bool valid(Handle* premiseArray, const int n) const
 	{
-		AtomTableWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ATW;
 		return (linkInherits(InclusionLink, IMPLICATION_LINK)
 			|| linkInherits(InclusionLink,INHERITANCE_LINK))
 			&& (nm->getOutgoing(premiseArray[0],0) == nm->getOutgoingng(premiseArray[1],1)

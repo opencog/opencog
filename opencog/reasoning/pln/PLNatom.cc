@@ -2,7 +2,7 @@
 #include <opencog/atomspace/utils.h>
 
 #include "PLN.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 
 using namespace std;
@@ -14,7 +14,7 @@ namespace test
 
 namespace haxx
 {
-	extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 namespace reasoning
@@ -273,7 +273,7 @@ void atom::setHandle(Handle h)
 }
 
 
-Handle atom::bindHandle(iAtomTableWrapper* table) const
+Handle atom::bindHandle(iAtomSpaceWrapper* table) const
 {
 	atom target(*this);
 
@@ -373,12 +373,12 @@ int atom::asIntegerArray(unsigned int* dest, unsigned int patlen, map<atom,int,l
 }
 #endif
 
-Handle atom::attach(iAtomTableWrapper* core) const
+Handle atom::attach(iAtomSpaceWrapper* core) const
 {
 //printf("atom::attach()\n");
 	::test::attachs++;
 
-    AtomTableWrapper* at = (AtomTableWrapper*) core;
+    AtomSpaceWrapper* at = (AtomSpaceWrapper*) core;
 	SimpleTruthValue tvn(1.0, 0.0);
 
 LOG(4, "Attaching...");
@@ -533,7 +533,7 @@ void atom::substitute(Handle rhs, string varname)
 	substitute(rhs, atom(FW_VARIABLE_NODE, varname));
 }
 
-vector<Handle> atom::convertVector(const vector<Btr<atom> >& hs, iAtomTableWrapper* table)
+vector<Handle> atom::convertVector(const vector<Btr<atom> >& hs, iAtomSpaceWrapper* table)
 {
 	vector<Handle> ret;		
 
@@ -564,7 +564,7 @@ void prn(tree< Btr<atom> >& tr)
       }
 }
 /*
-void makeHandletree(Handle real, iAtomTableWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
+void makeHandletree(Handle real, iAtomSpaceWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
 {
 	Handle top=(Handle)0;
 	Type T=GET_ATW->getType(real);
@@ -612,7 +612,7 @@ void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_t
 	}
 }
 
-tree<Vertex> atom::makeHandletree(iAtomTableWrapper* table, bool fullVirtual) const
+tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) const
 {
 	tree<Vertex> ret;
 	Handle top = 0;

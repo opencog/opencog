@@ -9,7 +9,7 @@ template<Type LinkType>
 class Inclusion2EvalRule : public GenericRule<TautologyFormula>
 {
 public:
-	Inclusion2EvalRule(iAtomTableWrapper *_destTable)
+	Inclusion2EvalRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<TautologyFormula>(_destTable,false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(LinkType))));
@@ -59,7 +59,7 @@ protected:
 				TruthValue::TRUE_TV(),
 				false);
 
-		AtomTableWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ATW;
 		HandleSeq hs = nm->getOutgoing(premiseArray[0]);
 
 		std::vector<Handle> psat;

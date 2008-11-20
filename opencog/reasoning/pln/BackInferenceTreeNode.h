@@ -299,7 +299,7 @@ protected:
 							child_results.end(),
 							inserter(argVectorSet, argVectorSet.begin()));
 
-		tlog(2, 	"RESULT FROm expandVectorSet(child_results, argVectorSet) ((%d,%d), %d,%d)...\n", (child_results.size()>0?child_results[0]->size():0), 
+		tlog(2, 	"RESULT FROM expandVectorSet(child_results, argVectorSet) ((%d,%d), %d,%d)...\n", (child_results.size()>0?child_results[0]->size():0), 
 			(child_results.size()>1?child_results[1]->size():0), argVectorSet.size(),	(argVectorSet.empty() ? 0 : argVectorSet.begin()->size()) );	
 
 		if (!child_results.empty())

@@ -3,7 +3,7 @@
 
 #include "Rule.h"
 #include "Rules.h"
-#include "../AtomTableWrapper.h"
+#include "../AtomSpaceWrapper.h"
 #include "../PLNatom.h"
 #include "../BackInferenceTreeNode.h"
 
@@ -38,7 +38,7 @@ namespace reasoning
 
 extern int varcount;
 
-Vertex CreateVar(iAtomTableWrapper* atw, std::string varname)
+Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname)
 {
     Handle ret = atw->addNode(FW_VARIABLE_NODE,varname,
         TruthValue::TRIVIAL_TV(),false,false);
@@ -50,7 +50,7 @@ cprintf(4, "CreateVar Added node as NEW: %s / [%lu]\n", varname.c_str(), (ulong)
     return Vertex(ret);
 }
 
-Vertex CreateVar(iAtomTableWrapper* atw)
+Vertex CreateVar(iAtomSpaceWrapper* atw)
 {
     return CreateVar(atw, "$"+GetRandomString(10));
 }
@@ -66,7 +66,7 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 BBvtree atomWithNewType(Handle h, Type T)
 {
     assert(GET_ATW->inheritsType(T, LINK));
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     vector<Handle> children = nm->getOutgoing(h);
     BBvtree ret_m(new BoundVTree(mva((Handle)T)));
     foreach(Handle c, children)
@@ -81,7 +81,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 {
     Handle *ph = v2h(&*v.begin());
 // TODO just call the overloaded Vertex version below
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
     {
     
@@ -107,7 +107,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 BBvtree atomWithNewType(const Vertex& v, Type T)
 {
     Handle *ph = (Handle*) v2h(&v);
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
     {
     
@@ -139,7 +139,7 @@ bool UnprovableType(Type T)
 }
 
 template<Type T>
-Handle Join(Handle* h, int N, AtomTableWrapper& atw)
+Handle Join(Handle* h, int N, AtomSpaceWrapper& atw)
 {
     vector<Handle> hs;
     for (int i = 0; i < N; i++)
@@ -222,7 +222,7 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
     return ret;
 }
 
-Handle UnorderedCcompute(iAtomTableWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
+Handle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
              TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX)
 {
         TruthValue** tvs = new TruthValue*[n];
@@ -292,7 +292,7 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, 
 }
 
 /* TODO: Update to BoundVTree
-boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomTableWrapper *destTable,
+boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapper *destTable,
                                         const meta& outh,
                                         ArityFreeANDRule* rule)
     {
@@ -367,7 +367,7 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomTableWrapp
   */
 
 /** TODO: Update to tree<Vertex> && new rule storage (not ATW)
-Handle Ass(iAtomTableWrapper *destTable, Handle h, vector<Handle>& ret)
+Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
 {
     TableGather g(mva((Handle)INHERITANCE_LINK,
         mva(CreateVar(destTable)),
@@ -379,7 +379,7 @@ Handle Ass(iAtomTableWrapper *destTable, Handle h, vector<Handle>& ret)
     for(vector<Handle>::iterator i = reverseg.begin(); i != reverseg.end(); i++)
     {
         Handle hs[] = { *i };
-        *i = AtomTableWrapper::rule[Inversion_Inheritance]->compute(hs,1);
+        *i = AtomSpaceWrapper::rule[Inversion_Inheritance]->compute(hs,1);
     }
     
     ret = reverseg;
@@ -459,9 +459,9 @@ struct converter  : public binary_function<T,T,void>
             _arg = dest; }
 };
 
-Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomTableWrapper* table)
+Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
 
     Btr<vtree> ret(new vtree(vt_const));
 /// USE THIS IF YOU WISH TO CONVERT VARIABLE_NODEs to FW_VARIABLE_NODEs!
@@ -577,7 +577,7 @@ void insert_with_consistency_check_bindingsVTreeT(map<Handle, vtree>& m, map<Han
 
 Btr<set<Handle> > ForAll_handles;
 
-Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomTableWrapper* table)
+Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomSpaceWrapper* table)
 {
 	cprintf(4,"FindMatchingUniversal...");
 	
@@ -660,7 +660,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iA
     return BoundUniversal;
 }
 
-Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomTableWrapper* table)
+Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSpaceWrapper* table)
 {
     DeclareBtr(set<Btr<ModifiedBoundVTree> >, ret);
 
@@ -682,7 +682,7 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomTa
 }
 
 #if 0
-Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomTableWrapper* table)
+Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSpaceWrapper* table)
 {
     DeclareBtr(set<Btr<ModifiedBoundVTree> >, ret);
     Btr< set<Btr<ModifiedVTree> > > ForAllLinkRepo;

@@ -1072,4 +1072,9 @@ void AtomSpace::clear()
 
     }
 
+    allAtoms.clear();
+    std::back_insert_iterator< std::vector<Handle> > output2(allAtoms);
+    getHandleSet(output2, ATOM, true);
+    assert(allAtoms.size() == 0);
+
 }

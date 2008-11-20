@@ -15,7 +15,7 @@ protected:
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
 
 		assert(premiseArray.size()==1);
-		AtomTableWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ATW;
 		std::vector<Handle> nodes = nm->getOutgoing(boost::get<Handle>(premiseArray[0]));
 
 		tvs[0] = (TruthValue*) &(nm->getTV(boost::get<Handle>(premiseArray[0])));
@@ -44,7 +44,7 @@ protected:
 	}
 
 public:
-	InversionRule(iAtomTableWrapper *_destTable)
+	InversionRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<InversionFormula> (_destTable, false, "InversionRule")
 	{
 		inputFilter.push_back(meta(

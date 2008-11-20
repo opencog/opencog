@@ -9,7 +9,7 @@ class BaseCrispUnificationRule : public Rule
 protected:
 public:
 
-	BaseCrispUnificationRule(iAtomTableWrapper *_destTable)
+	BaseCrispUnificationRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,true,true,"CrispUnificationRule")
 	{
 

@@ -3,7 +3,7 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
@@ -44,7 +44,7 @@ combined, no conflict will be found!
 
 Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
         inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();

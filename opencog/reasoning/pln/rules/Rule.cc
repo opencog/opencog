@@ -23,7 +23,7 @@
 #include "../PLN.h"
 #include "Rule.h"
 #include "Rules.h"
-#include "../AtomTableWrapper.h"
+#include "../AtomSpaceWrapper.h"
 #include "../PLNatom.h"
 #include "../BackInferenceTreeNode.h"
 
@@ -31,7 +31,7 @@ using namespace std;
 namespace reasoning
 { 
 
-Rule::Rule(reasoning::iAtomTableWrapper *_destTable,
+Rule::Rule(reasoning::iAtomSpaceWrapper *_destTable,
             bool _FreeInputArity,
             bool _computable,
             std::string _name)
@@ -54,7 +54,7 @@ Rule::~Rule()
 BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
 {
     bindingsT h_b;
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
     foreach(const BoundVertex& bv, h)
     {
         if (!nm->isReal(v2h(bv.value)))

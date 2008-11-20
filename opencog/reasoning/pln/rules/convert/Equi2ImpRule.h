@@ -8,7 +8,7 @@ namespace reasoning
 class Equi2ImpRule : public Rule
 {
 	/// "A<=>B" => "AND(A=>B, B=>A)"
-	Equi2ImpRule(iAtomTableWrapper *_destTable)
+	Equi2ImpRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EQUIVALENCE_LINK))));

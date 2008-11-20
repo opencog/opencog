@@ -13,7 +13,7 @@ class ANDPartitionRule : public Rule
 	SymmetricANDFormula fN;
 
 public:
-	ANDPartitionRule(iAtomTableWrapper *_destTable)
+	ANDPartitionRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,true,true,"ANDPartitionRule")
 	{ }
 	

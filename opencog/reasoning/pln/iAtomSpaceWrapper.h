@@ -6,7 +6,7 @@
 namespace reasoning
 {
 
-struct iAtomTableWrapper : public ::AtomLookupProvider
+struct iAtomSpaceWrapper : public ::AtomLookupProvider
 {
 	virtual Handle addAtom(tree<Vertex>&, const TruthValue& tvn,
             bool fresh, bool managed = true)=0;

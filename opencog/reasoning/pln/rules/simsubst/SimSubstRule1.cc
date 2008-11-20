@@ -3,7 +3,7 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
@@ -71,7 +71,7 @@ Links are assumed not inheritable either.
 
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
-    AtomTableWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ATW;
 
     Handle h0 = v2h(h[0]);
     Handle h1 = v2h(h[1]);

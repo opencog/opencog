@@ -13,7 +13,7 @@ class VarInstantiationRule :	public Sim2InhRule<MEMBER_LINK>, //public Eval2MemR
 /*protected:
 	Sim2InhFormula f;*/
 public:
-	VarInstantiationRule(iAtomTableWrapper *_destTable)
+	VarInstantiationRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
@@ -49,7 +49,7 @@ public:
 	LINKTYPE_ASSERT(premiseArray[3], SIMILARITY_LINK);
 	LINKTYPE_ASSERT(premiseArray[4], EVALUATION_LINK);
 
-	AtomTableWrapper *nm = GET_ATW;
+	AtomSpaceWrapper *nm = GET_ATW;
 	HandleSeq PforB = nm->getOutgoing(premiseArray[4]);
 	Handle hP = PforB[0];
 

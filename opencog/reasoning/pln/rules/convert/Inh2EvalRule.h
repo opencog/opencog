@@ -12,7 +12,7 @@ protected:
 
 public:
 	bool validate2(Rule::MPs& args) const { return true; }
-	Inh2EvalRule(iAtomTableWrapper *_destTable)
+	Inh2EvalRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<TautologyFormula>(_destTable,false,"")
 	{
 		GenericRule<FormulaType>::name = "Inh2Eval";

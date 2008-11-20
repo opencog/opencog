@@ -3,7 +3,7 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
@@ -11,7 +11,7 @@ namespace reasoning
 {
 
 /**
-SubsetEvalRule::SubsetEvalRule(iAtomTableWrapper *_destTable)
+SubsetEvalRule::SubsetEvalRule(iAtomSpaceWrapper *_destTable)
 {
     inputFilter.push_back(boost::shared_ptr<atom>(new atom(__INSTANCEOF_N, 1, new atom(CONCEPT_NODE,0))));
 }

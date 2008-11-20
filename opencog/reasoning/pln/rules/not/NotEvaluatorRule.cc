@@ -3,14 +3,14 @@
 
 #include "../Rule.h"
 #include "../Rules.h"
-#include "../../AtomTableWrapper.h"
+#include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
 namespace reasoning
 {
 
-NotEvaluatorRule::NotEvaluatorRule(reasoning::iAtomTableWrapper *_destTable)
+NotEvaluatorRule::NotEvaluatorRule(reasoning::iAtomSpaceWrapper *_destTable)
 : GenericRule<reasoning::NotFormula>(_destTable, true, "NotEvaluatorRule")
 {
         inputFilter.push_back(meta(

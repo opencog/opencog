@@ -4,7 +4,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 ADD_LIBRARY (pln STATIC
-	AtomTableWrapper.cc
+	AtomSpaceWrapper.cc
     BackInferenceTreeNode.cc
     PLNatom.cc
     PLNUtils.cc

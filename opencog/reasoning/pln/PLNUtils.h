@@ -60,7 +60,7 @@
 
 #include "AtomLookupProvider.h"
 //#include "PLNatom.h"
-//#include "AtomTableWrapper.h"
+//#include "AtomSpaceWrapper.h"
 
 using namespace std;
 using namespace opencog;
@@ -78,8 +78,8 @@ namespace haxx {
 
 /// vtree
 typedef tree<Vertex> vtree;
-/// meta is a tree of Vertices wrapped in a boost::shared_ptr
-typedef Btr<tree<Vertex> > meta;
+/// meta is a vtree wrapped in a boost::shared_ptr
+typedef Btr<vtree> meta;
 /// hpair is a pair of Handles
 typedef pair<Handle,Handle> hpair;
 
@@ -444,7 +444,7 @@ void insert_with_consistency_check_bindingsVTreeT(map<Handle, vtree>& m, map<Han
 
 
 typedef pair<std::string, Handle> hsubst;
-struct iAtomTableWrapper;
+struct iAtomSpaceWrapper;
 
 bool within(float a, float b, float diff);
 bool equal_vectors(Handle* lhs, int lhs_arity, Handle* rhs);
@@ -607,8 +607,8 @@ struct getOutgoingFun : public binary_function<Handle, int, Handle>
     Handle operator()(Handle h, int i);
 };
 
-#define getTypeFun std::bind1st(std::mem_fun(&AtomTableWrapper::getType), GET_ATW)
-//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomTableWrapper::getOutgoing),GET_ATW)
+#define getTypeFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getType), GET_ATW)
+//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getOutgoing),GET_ATW)
 #define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
 #define getFW_VAR(vt) (find_if((vt).begin(), (vt).end(), \
@@ -619,14 +619,14 @@ struct getOutgoingFun : public binary_function<Handle, int, Handle>
 #define hasFW_VAR(vt) (getFW_VAR(vt)	!= (vt).end())
 
 /// VariableNodes not memory-managed.
-Vertex CreateVar(iAtomTableWrapper* atw, std::string varname);
-Vertex CreateVar(iAtomTableWrapper* atw);
+Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname);
+Vertex CreateVar(iAtomSpaceWrapper* atw);
 
 const char* Type2Name(Type t);
 string condensed_form(const atom& a);
 
-Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target, iAtomTableWrapper* table);
-Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomTableWrapper* table);
+Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target, iAtomSpaceWrapper* table);
+Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomSpaceWrapper* table);
 
 void bind(BoundVTree& bbvt, hpair new_bind);
 meta bind_vtree(vtree &targ, const map<Handle, Handle>& binds);

@@ -7,7 +7,7 @@ namespace reasoning
 class ImplicationRedundantExpansionRule : public Rule
 {
 protected:
-	ImplicationRedundantExpansionRule(iAtomTableWrapper *_destTable)
+	ImplicationRedundantExpansionRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,true,true,"ImplicationRedundantExpansionRule")
 	{}
 public:

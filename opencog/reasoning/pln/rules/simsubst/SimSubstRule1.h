@@ -9,7 +9,7 @@ namespace reasoning
 class SimSubstRule1 : public GenericRule<InhSubstFormula>
 {
 public:
-	SimSubstRule1(iAtomTableWrapper *_destTable)
+	SimSubstRule1(iAtomSpaceWrapper *_destTable)
 	: GenericRule<InhSubstFormula>(_destTable, false, "SimSubstRule")
 	{
 		inputFilter.push_back(meta(new tree<Vertex>(mva((Handle)INHERITANCE_LINK,

@@ -15,7 +15,7 @@ class Sim2InhRule : public Rule
 {
 	Sim2InhFormula f;
 public:
-	Sim2InhRule(iAtomTableWrapper *_destTable)
+	Sim2InhRule(iAtomSpaceWrapper *_destTable)
 	
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(SIMILARITY_LINK,0))));

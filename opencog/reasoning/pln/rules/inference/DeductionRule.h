@@ -14,7 +14,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 	meta i2oType(const vector<Vertex>& h) const
 	{
 		assert(h.size()==2);
-		AtomTableWrapper *nm = GET_ATW;	
+		AtomSpaceWrapper *nm = GET_ATW;	
 		assert(nm->getArity(v2h(h[0]))==2);
 		assert(nm->getArity(v2h(h[1]))==2);
 		assert(nm->getOutgoing(v2h(h[0]),0));
@@ -55,7 +55,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 			return NULL;
 		}
 
-		AtomTableWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ATW;
 		tvs[0] = (TruthValue*) &(nm->getTV(v2h(premiseArray[0])));
 		tvs[1] = (TruthValue*) &(nm->getTV(v2h(premiseArray[1])));
 		tvs[2] = (TruthValue*) &(nm->getTV(nodesAB[0]));
@@ -67,7 +67,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 
 public:
 
-	DeductionRule(iAtomTableWrapper *_destTable)
+	DeductionRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule")
 	{
 		/// TODO: should use real variable for the other input.

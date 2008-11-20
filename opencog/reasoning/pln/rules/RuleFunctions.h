@@ -14,8 +14,8 @@ namespace reasoning
   float max(float a, float b);
 #endif
 
-Vertex CreateVar(iAtomTableWrapper* atw, std::string varname);
-Vertex CreateVar(iAtomTableWrapper* atw);
+Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname);
+Vertex CreateVar(iAtomSpaceWrapper* atw);
 
 Rule::setOfMPs makeSingletonSet(Btr<Rule::MPs> mp);
 

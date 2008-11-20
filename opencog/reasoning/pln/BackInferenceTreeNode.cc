@@ -10,7 +10,7 @@
 #include "rules/RuleProvider.h"
 #include "rules/Rules.h"
 //#include "spacetime.h"
-#include "AtomTableWrapper.h"
+#include "AtomSpaceWrapper.h"
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/utils2.h>
 #include <opencog/atomspace/utils.h>
@@ -46,7 +46,7 @@ namespace haxx
     extern bool AllowFW_VARIABLENODESinCore;
     extern uint maxDepth;
     extern reasoning::BITNodeRoot* bitnoderoot;
-    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
     /// \todo This data must persist even if the BITNodeRoot is deleted.
     map<Handle,vector<Handle> > inferred_from;
@@ -191,7 +191,7 @@ void BITNodeRoot::print_parents(BITNode* b)
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 : InferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     /// \todo There's a mystical bug which prevents me from putting users inside the class.
     /// I get some kind of malloc error even if I do nothing but declare the users map in the header!
 //  users.clear();
@@ -204,7 +204,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     rule = NULL;
     root = this;
     bound_target = meta(new vtree);
-    if (!rp) // changed to NOT rp... otherwise we are overwriting the provider rp
+    if (!rp) // changed to NOT rp... otherwise we are overwriting the passed rp
       rp = new DefaultVariableRuleProvider;
     assert(!rp->empty());
 	cprintf(3, "rp ok\n");
@@ -262,7 +262,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 
 void BITNode::ForceTargetVirtual(spawn_mode spawning)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     Handle *ph = v2h(&(*raw_target->begin()));
     
     if (ph && atw->isReal(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE)
@@ -434,7 +434,7 @@ BITNode::BITNode( BITNodeRoot* _root,
 : raw_target(_target), depth(_depth), root(_root), Expanded(false),
 rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     if (_parent)
         addNewParent(parent_link<BITNode>(_parent, _parent_arg_i));
 
@@ -605,7 +605,7 @@ static int count111=0;
 
 void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult, spawn_mode spawning)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
 // If we were to store the results, it would cause inconsistency because we no longer store the prebindings.
 //  direct_results->insert(directResult->begin(), directResult->end());
 
@@ -719,7 +719,7 @@ bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 
 bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     if (atw->inheritsType(atw->getTypeV(*_target), FW_VARIABLE_NODE))
         return false;
 
@@ -769,7 +769,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
     const Rule::MPs& rule_args, BBvtree _target, const bindingsT& new_bindings,
     spawn_mode spawning)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     if (this->depth == haxx::maxDepth)
     {
         puts("haxx::maxDepth !!! "); /*press enter");
@@ -878,16 +878,12 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
     return NULL;
 }
 
-/*
-spawn() is called with all the bindings that were made to produce some direct (eg. lookup) result.
-bind_key_set = all the thus bound vars
-mediated_bindings = the bindings after being mediated 
-*/
-
+/// spawn() is called with all the bindings that were made to produce some direct (eg. lookup) result.
+/// bind_key_set = all the thus bound vars
+/// mediated_bindings = the bindings after being mediated 
 void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 {
     /// Only retain the bindings relevant to the varOwner
-
     map<BITNode*, bindingsT> clone_binds;
     foreach(hpair raw_pair, *bindings) //for $x=>A
         foreach(BITNode* bitn, varOwner[raw_pair.first])
@@ -906,7 +902,6 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 /// If any of the bound vars are owned, we'll spawn.
 /// TODO: Actually Rules should probably not even need to inform us
 /// about the bound vars if they are new, in which case this check would be redundant.
-
 bool BITNodeRoot::spawns(const bindingsT& bindings) const
 {
     foreach(hpair b, bindings)
@@ -1067,7 +1062,7 @@ bool BITNode::hasAncestor(const BITNode* const _p) const
 
 const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenceForStorage, float minConfidenceForAbort)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
 
     if (currentDebugLevel >= 4)
     {
@@ -1130,7 +1125,7 @@ bool BITNode::CreateChildren(int i, BBvtree arg, Btr<bindingsT> bindings, spawn_
 
     if (PREVENT_LOOPS && inferenceLoopWith(arg))
     {
-        HypothesisRule hr(::haxx::defaultAtomTableWrapper);
+        HypothesisRule hr(::haxx::defaultAtomSpaceWrapper);
         expandRule(&hr, i, arg, bindings, spawning);
         tlog(-2,"LOOP! Assumed Hypothetically:");
         rawPrint(*arg, arg->begin(), 2);
@@ -1163,7 +1158,7 @@ void BITNode::CreateChildrenForAllArgs()
 
 bool BITNode::CheckForDirectResults()
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     if (!rule || rule->isComputable())
         return false;
 
@@ -1210,7 +1205,7 @@ bool BITNode::CheckForDirectResults()
 
 void BITNode::expandNextLevel()
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
   try
   {
      tlog(-2, "Expanding with fitness %.4f   In expansion pool: %s\n", fitness(), (STLhas2(root->exec_pool, this)?"YES":"NO"));
@@ -1246,7 +1241,7 @@ void BITNode::expandNextLevel()
 /* Algorithm: Evaluation */
 bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     Vertex v = *(*new_result).getVtree().begin();
     Handle h = v2h(v);
     assert(atw->isReal(h)); //vt2h(*new_result)));
@@ -1261,7 +1256,7 @@ bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 #if 1
 void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
 //  tlog(-1, "ARG %d:\n", arg_i);
 //  printTree(v2h(new_result), 0,-1);
     Handle h_new_result = v2h(*new_result->getVtree().begin());
@@ -1408,9 +1403,9 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
             }
 
         if (_resultT == FORALL_LINK)
-            new_result = FORALLRule(::haxx::defaultAtomTableWrapper, (Handle) NULL).compute(ForAllArgs);
+            new_result = FORALLRule(::haxx::defaultAtomSpaceWrapper, (Handle) NULL).compute(ForAllArgs);
         else
-            new_result = PLNPredicateRule(::haxx::defaultAtomTableWrapper, NULL).compute(ForAllArgs);
+            new_result = PLNPredicateRule(::haxx::defaultAtomSpaceWrapper, NULL).compute(ForAllArgs);
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());
         printTree(v2h(new_result.value),0,0);
@@ -1429,7 +1424,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
 
 int BITNode::number_of_free_variables_in_target() const
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     /// Use set<> to prevent re-counting of the already-found Handles
     
     set<Handle> vars;
@@ -1643,7 +1638,7 @@ bool BITNode_fitness_comp::operator()(BITNode* lhs, BITNode* rhs) const
 
 void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template, vector<Handle>& plan) const
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     map<Handle, vtree> bindings;
     
     if (!h || !atw->isReal(h))
@@ -1669,7 +1664,7 @@ void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template,
 
 void BITNodeRoot::extract_plan(Handle h) const
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     vtree do_template = mva((Handle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
                             mva((Handle)LIST_LINK,
@@ -1752,7 +1747,7 @@ void BITNode::printResults() const
         foreach(VtreeProvider* vtp, vset)
             printTree(v2h(*vtp->getVtree().begin()),0,-10);
 //          printf("%d ", v2h(bv.value));
-        printf("\n");
+        printf("]\n");
     }
 }
 
@@ -1827,7 +1822,7 @@ static int _trail_print_more_count = 0;
 
 void BITNodeRoot::printTrail(Handle h, unsigned int level) const //, int decimal_places) const
 {
-    AtomTableWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ATW;
     if (!h || !atw->isReal(h))
         puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
     map<Handle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);

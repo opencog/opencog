@@ -17,8 +17,14 @@ class TulipWriter {
     //bool writeLink(Handle h);
 
     std::string getDateString();
-    void writeNodes(HandleSeq hs);
+    void writeNodes();
+    void writeEdges();
     void writeHeader(std::string comment);
+    void writeCluster(Handle setLink);
+    void writeShapes();
+    void writeTruthValue();
+    void writeDefaultColouring();
+    void writeNodeNames();
 
 public:
 

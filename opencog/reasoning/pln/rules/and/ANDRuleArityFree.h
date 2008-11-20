@@ -12,7 +12,7 @@ namespace reasoning
 class ArityFreeANDRule : public Rule
 {
 protected:
-	ArityFreeANDRule(iAtomTableWrapper *_destTable)
+	ArityFreeANDRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,true,true,"")
 	{}
 	SymmetricANDFormula fN;

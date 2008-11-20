@@ -8,7 +8,7 @@ namespace reasoning
 class UnorderedLinkPermutationRule : public GenericRule<Permutation??>
 {
 public:
-	UnorderedLinkPermutationRule(iAtomTableWrapper *_destTable)
+	UnorderedLinkPermutationRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<Permutation?>(_destTable, false, "UnorderedLinkPermutationRule")
 	{ }
 

@@ -18,7 +18,7 @@ public:
 	virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const=0;
 	
 	/// Always computable
-	GenericRule(iAtomTableWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
+	GenericRule(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
 		
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const

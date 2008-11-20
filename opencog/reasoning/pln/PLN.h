@@ -1,3 +1,8 @@
+/** General PLN header.
+ *
+ * @defgroup PLN Probabilistic Logic Networks
+ */
+
 #ifdef _PLN_H
 #define _PLN_H
 

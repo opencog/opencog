@@ -20,7 +20,7 @@ protected:
 		return Vertex((Handle)NULL);
 	}
 public:
-	ScholemFunctionProductionRule(iAtomTableWrapper *_destTable)
+	ScholemFunctionProductionRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,false,false,"ScholemFunctionProductionRule")
 	{
 		//inputFilter.push_back(new atom(result));

@@ -5,7 +5,7 @@
 
 #include "XMLNode.h"
 #include "XMLNodeLoader.h"
-#include "../AtomTableWrapper.h"
+#include "../AtomSpaceWrapper.h"
 #include "../rules/Rules.h"
 #include <opencog/atomspace/utils2.h>
 #include <opencog/atomspace/utils.h>
@@ -23,7 +23,7 @@ std::map<std::string, Handle> nodenames;
 
 int xml_level = -1;
 	
-Handle LoadXMLFile(iAtomTableWrapper* table, string fname)
+Handle LoadXMLFile(iAtomSpaceWrapper* table, string fname)
 {
  cprintf(5, "LoadXMLfile...");
 	/// \todo haxx::
@@ -38,7 +38,7 @@ Handle LoadXMLFile(iAtomTableWrapper* table, string fname)
 	return LoadXMLInput(table, buf);
 }
 
-Handle LoadXMLInput(iAtomTableWrapper* table, string buf)
+Handle LoadXMLInput(iAtomSpaceWrapper* table, string buf)
 {
 #define L(A, B) name2type[A] = B; type2name[B] = A;
 
@@ -156,7 +156,7 @@ TruthValue* CreateTVfromArguments(const XMLNode& xml)
 	return tv;
 }
 
-Handle Add1NodeFromXML(iAtomTableWrapper* table,
+Handle Add1NodeFromXML(iAtomSpaceWrapper* table,
 						const XMLNode& xml,
 					   const set<string>& old_free_names,
 					   set<string>& new_free_names,
@@ -227,7 +227,7 @@ LOG(5, "...VAR_CREATION");
 	return ret;
 }
 
-Handle Add1LinkFromXML(iAtomTableWrapper* table, const XMLNode& xml, HandleSeq& children)
+Handle Add1LinkFromXML(iAtomSpaceWrapper* table, const XMLNode& xml, HandleSeq& children)
 {
 	Handle ret;
 LOG(5, "Add1LinkFromXML...");
@@ -264,7 +264,7 @@ LOG(5, "Add1LinkFromXML OK!");
 
 static int helper1=0, helper2=0, helper3=0;
 
-Handle HandleXMLInputNode(iAtomTableWrapper* table, const XMLNode& xml, const set<string>& prev_free_names,
+Handle HandleXMLInputNode(iAtomSpaceWrapper* table, const XMLNode& xml, const set<string>& prev_free_names,
 						  std::map<string, string>& returning_names, std::map<string, string> newVarName)
 {
 	Handle ret;

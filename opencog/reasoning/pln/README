@@ -1,5 +1,47 @@
+= Probabilisitic Logic Networks Technical Implementation Notes
 
-Notes:
+Original version by Ari A. Heljakka. October 6th, 2006.
+
+Port to OpenCog, refactoring, polish and shine by Joel Pitt, Jun.-Nov. 2008.
+
+The implementation is based on the PLN book chapter "Designing a Practical PLN
+Inference Engine"[1].
+
+Classes
+- Class Formula takes TVs as inputs and returns a TV.
+- Class Rule inputs Vertexes (Handles) and returns a Vertex (Handle)
+- Class BITNodeRoot is the main class of the backward chainer
+
+A Vertex is a boost::variant which can be an atom type or a Handle. They are
+also the node type of vtrees (Vertex trees).
+
+[1] Goertzel, B., Iklé, M., Goertzel, I.F., Heljakka, A. 2008. Probabilistic
+Logic Networks: A Comprehensive Framework for Uncertain Inference.
+
+== Normalization
+
+For PLN, AtomSpaceWrapper is used to buffer the insertions to the AtomSpace.
+
+AtomSpaceWrapper takes care of normalizing atoms. Currently these normalizations
+are used:
+
+--- EquivalenceLinks are converted into 2 ImplicationLinks.
+--- ForAll(List, And(A1, A2, ...)) is converted to ForAll(List, A1),
+    ForAll(List, A2), ...
+
+== Quantifiers
+
+ForAll formulas should have the TruthValue (TV) at the ForAllLink, not inside
+it. It's internal ListLink must be there but its contents are not used.
+
+ForAll(List, Implication(And(A1,A2,...,An)), Pat1)<tv1>
+
+will be converted to RewritingRules of the form "if you need to produce Pat1,
+then it's sufficient to produce A1,A2,...,An. The conversion is only made
+if tv1.confidence>=0.99 (ANDFormula will eventually be applied to produced
+atoms to forward-compute the TV). This approach should only be used for
+purely Boolean rewriting, i.e. Boolean theorems.
+
 Skolemization (conversion of premises with variables to be encompassed by a
 ForAll quantifier) is requred of axioms. Results of inference currently don't
 create atoms with a Skolemized form but when it does, this process should be automated.
@@ -23,9 +65,7 @@ as other quite important tasks.
 
 === Important
 
-* Changing the name of AtomTableWrapper to AtomSpaceWrapper
-* Fresh = true bug. This is mostly done through the alteration of the
-AtomTableWrapper. The tests still have to be validated and made to run though.
+* get all tests in Tester.cc functioning.
 * unify the unify methods: MPUnify1, MPUnifyVector, MPUnifyHandle -> MPUnify
 * remove the atom class and replace with vtree.
 * Make PLN a loadable module
@@ -34,8 +74,17 @@ AtomTableWrapper. The tests still have to be validated and made to run though.
 
 === Moderate
 
+* Split Rules in inheriting from a GeneratorRule or ComposerRule class.
+ Generators create atoms but don't require input atoms.
+   This includes ForAll atoms in XML axiom sets are loaded into separate
+   CrispuUnificationRule objects. They are Generators. Other generators include
+   direct lookup, remote lookup, and hypothesis generation.
+ Composers produce atoms from input.
+   
 * Allow PLN to use general OpenCog XML loader instead of it's own special one.
-Either by modifying the OpenCog loader or by adapting how PLN saves XML and
-loads XML.
+Either by modifying the OpenCog loader or by converting the PLN xml data files
+to the OpenCog format. PLN currently loads atoms using its internal XML loader
+written by Ari (at reasoning/pln/util). The functionality of PLN XML loader is
+limited: eg. it does not allow ! or ? marks (or comments, IIRC).
 
 === Nice to have

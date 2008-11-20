@@ -9,7 +9,7 @@ class ImplicationTailExpansionRule : public Rule
 public:
 	NO_DIRECT_PRODUCTION;
 
-	ImplicationTailExpansionRule(iAtomTableWrapper *_destTable);
+	ImplicationTailExpansionRule(iAtomSpaceWrapper *_destTable);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
 

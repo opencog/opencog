@@ -7,7 +7,7 @@ namespace reasoning
 #if 0
 class OR2ANDRule : public Rule
 {
-	OR2ANDRule(iAtomTableWrapper *_destTable)
+	OR2ANDRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(OrLink))));

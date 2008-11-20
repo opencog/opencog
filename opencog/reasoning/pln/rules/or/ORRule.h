@@ -7,7 +7,7 @@ namespace reasoning
 class ORRule : public GenericRule<ORFormula>
 {
 public:
-	ORRule(iAtomTableWrapper *_destTable);
+	ORRule(iAtomSpaceWrapper *_destTable);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	
 	NO_DIRECT_PRODUCTION;

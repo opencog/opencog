@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @author Ari Heljakka
+ *         Joel Pitt
+ * @ingroup PLN
+ */
 #ifndef ATW_H
 #define ATW_H
 
@@ -18,7 +24,7 @@
 
 #include "PLN.h"
 
-#include "iAtomTableWrapper.h"
+#include "iAtomSpaceWrapper.h"
 #include "rules/Rule.h"
 #include "utils/fim.h"
 #include "utils/Singleton.h"
@@ -28,8 +34,8 @@
 
 //using namespace boost::bimaps;
 
-//! TODO: use static accessor method within AtomTableWrapper class instead of global
-#define GET_ATW ((AtomTableWrapper*) ::haxx::defaultAtomTableWrapper)
+//! TODO: use static accessor method within AtomSpaceWrapper class instead of global
+#define GET_ATW ((AtomSpaceWrapper*) ::haxx::defaultAtomSpaceWrapper)
 
 namespace reasoning
 {
@@ -38,11 +44,87 @@ vtree make_vtree(Handle h);
 
 typedef std::pair<Handle,VersionHandle> vhpair;
 
-/** The bridge between the AtomSpace and PLN.
- * @todo rename to AtomSpaceWrapper... AtomSpace is the interface, AtomTable the
- * implementation.
+/** The bridge between the OpenCog AtomSpace and PLN.
+ *
+ * <h2>Fixing Fresh = true</h2>
+ * 
+ * The original version of Probabilistic Logic Networks made improper use of a
+ * parameter in Novemente called \b fresh when adding new atoms to the
+ * AtomSpace. This allowed atoms to be added to the AtomSpace without checking
+ * for duplicates. The end result is that atoms were no longer unique: nodes
+ * with the same name and type, or links that had the same outgoing set and
+ * type, could duplicated. OpenCog does not allow this behaviour.
+ * 
+ * To fix this, all accesses to the AtomSpace now occur through the
+ * AtomSpaceWrapper, which presents fake Handles to PLN and interprets them to a
+ * combination of a real \c Handle and a \c VersionHandle. A system of dummy
+ * contexts is used to emulate the behaviour of allowing duplicate atoms in the
+ * AtomSpace by storing multiple \c TruthValues within a CompositeTruthValue.
+ *
+ * The AtomSpaceWrapper did exist in the original PLN, but it was more for
+ * carrying out normalisation and allowing different AtomSpace backends to be
+ * used for efficiency reasons. 
+ * 
+ * Dummy contexts are represented as directed links. A root dummy context,
+ * represented as a Concept Node with name "___PLN___" is used for the outgoing
+ * set of dummy contexts in duplicate nodes. For links that are duplicates the
+ * outgoing set of their dummy context consists of the dummy context of any
+ * duplicate atoms they refer to, or the root dummy context if they refer to the
+ * original version of an atom.
+ * 
+ * <h3> Node example </h3>
+ *
+ * If a node already exists, then a dummy context is created that links to the
+ * root PLN dummy context.
+ * 
+ * E.g. say we have
+ *
+ * \verbatim
+ *  ConceptNode "x" <0.8, 0.9>
+ * \endverbatim
+ *
+ * and we want to add a new node with the same name and type, but with TV
+ * <0.5,0.5>. To achieve this we create a new dummy context link:
+ *
+ * \verbatim
+ *  dc <- OrderedLink (ConceptNode "___PLN___")
+ * \endverbatim
+ * 
+ * \c dc is then used as the context for the new TV:
+ * 
+ * \verbatim
+ *  ConceptNode "x" <0.8, 0.9> [ Context dc <0.5, 0.5> ]
+ * \endverbatim
+ * 
+ * <h3> Link example </h3>
+ * 
+ * If a link already exists, then the appropriate contexts for each outgoing
+ * atom are linked by a new dummy context link (with the appropriate context
+ * links of each atom in the outgoing set of the link in the same order as the
+ * outgoing set of the existing link).
+ * 
+ * E.g. say we have an InheritanceLink composed of two ConceptNodes that both
+ * have CompositeTruthValues:
+ * 
+ * \verbatim
+ *  dc_x <- OrderedLink (ConceptNode "__PLN__")
+ *  dc_y <- OrderedLink (ConceptNode "__PLN__")
+ *  InheritanceLink <0.8, 0.9>
+ *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
+ *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
+ * \endverbatim
+ * 
+ * If we want to create another link with a different \c TruthValue, but between
+ * the versions of x and y that are under the dummy context (instead of the
+ * original TruthValues) then we get:
+ * 
+ * \verbatim
+ *  dc_x_y <- OrderedLink (dc_x dc_y)
+ *  InheritanceLink <0.8, 0.9> [ Context dc_x_y <0.3, 0.5> ]
+ *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
+ *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
  */
-class AtomTableWrapper : public iAtomTableWrapper
+class AtomSpaceWrapper : public iAtomSpaceWrapper
 {
     //! How to represent the universe size
     // CONST_SIZE = constant value
@@ -73,7 +155,7 @@ class AtomTableWrapper : public iAtomTableWrapper
     //! should be replaced by pHandle (typedefded to long int) to ensure
     //! distinctness from general OpenCog Handles... which could potentially change from
     //! long int to another type in the future. OR, PLN should be adapted to
-    //! use vhpairs directly instead of relying on the AtomTableWrapper.
+    //! use vhpairs directly instead of relying on the AtomSpaceWrapper.
     // vhmap_t vhmap;
     
     typedef std::map< Handle, vhpair > vhmap_t;
@@ -134,8 +216,8 @@ class AtomTableWrapper : public iAtomTableWrapper
 
 public:
 
-    //! Test AtomTableWrapper
-    bool testAtomTableWrapper();
+    //! Test AtomSpaceWrapper
+    bool testAtomSpaceWrapper();
 
     //! Convert a specific VersionHandled TruthValue to a fake handle
     Handle realToFakeHandle(const Handle h, const VersionHandle vh);
@@ -193,8 +275,8 @@ public:
     void reset();
 
     //! Initialize new AtomSpaceWrapper with const universe size
-    AtomTableWrapper();
-    virtual ~AtomTableWrapper() {}
+    AtomSpaceWrapper();
+    virtual ~AtomSpaceWrapper() {}
 
     //! Load axioms from given xml filename
     bool loadAxioms(const string& path);
@@ -294,7 +376,7 @@ public:
 
 /** Passes the atoms via FIM analyzer. To turn this off, set FIM=0 in Config.
 */
-class FIMATW : public AtomTableWrapper
+class FIMATW : public AtomSpaceWrapper
 {
     fim::pat_id next_free_pat_id;
 
@@ -312,7 +394,7 @@ public:
     Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
 // TODELETE:
-//  FIMATW(combo::NMCore* core) : AtomTableWrapper(core), next_free_pat_id(30001) {}
+//  FIMATW(combo::NMCore* core) : AtomSpaceWrapper(core), next_free_pat_id(30001) {}
 };
 
 /** Normalizes atoms before passing forward */
@@ -351,7 +433,7 @@ public:
 };
 
 /** Forwards the requests without normalizing */
-class DirectATW : public AtomTableWrapper
+class DirectATW : public AtomSpaceWrapper
 {
     DirectATW();
 public:
@@ -372,7 +454,7 @@ public:
 
 // TODELETE
 /*using namespace boost;
-class LocalATW : public AtomTableWrapper, public Singleton<LocalATW>
+class LocalATW : public AtomSpaceWrapper, public Singleton<LocalATW>
 {
     LocalATW();
 

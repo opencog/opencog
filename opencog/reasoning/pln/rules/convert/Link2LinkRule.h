@@ -15,7 +15,7 @@ protected:
 
 public:
 	bool validate2				(Rule::MPs& args) const { return true; }
-	Link2LinkRule(iAtomTableWrapper *_destTable)
+	Link2LinkRule(iAtomSpaceWrapper *_destTable)
 	: GenericRule<FormulaType>(_destTable,false,"")
 	{
 		GenericRule<FormulaType>::name = "Link2Link(" + type2name[SRC_LINK] + "=>" + type2name[DEST_LINK] +")";
