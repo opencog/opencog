@@ -43,44 +43,42 @@ void * SchemeEval::c_wrap_init(void *p)
 	return self;
 }
 
+static pthread_once_t workaround_once = PTHREAD_ONCE_INIT;
+static pthread_key_t tid_key = NULL;
+
 #define WORK_AROUND_GUILE_185_BUG
 #ifdef WORK_AROUND_GUILE_185_BUG
-/* There's a bug in guile-1.8.5, where the first thread to run in guile
- * mode gets a bogus/broken current-module.  This cannot be worked
- * around by anything as simple as saying 
- * "(set-current-module the-root-module)" 
- * So we work around it here, by creating a completely new thread, 
- * going into guile mode in it, doing something bogus, and exiting.
+/* There's a bug in guile-1.8.5, where the second and subsequent
+ * threads run in guile mode with a bogus/broken current-module.
+ * This cannot be worked around by anything as simple as saying 
+ * "(set-current-module the-root-module)" because dynwind undoes
+ * any module-setting that we do.
+ *
+ * So we work around it here, by explicitly setting the module
+ * outside of a dynwind context.
  */
-static pthread_once_t workaround_once = PTHREAD_ONCE_INIT;
+static SCM guile_user_module;
 
 static void * do_bogus_scm(void *p)
 {
 	scm_c_eval_string ("(+ 2 2)\n");
 	return p;
 }
-
-static void * bogus_thread(void *p)
-{
-	scm_with_guile(do_bogus_scm, p);
-	return p;
-}
+#endif /* WORK_AROUND_GUILE_185_BUG */
 
 static void first_time_only(void)
 {
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_t t;
-	pthread_create(&t, &attr, bogus_thread, NULL);
-	pthread_join(t, NULL);
-}
+   pthread_key_create(&tid_key, NULL);
+	pthread_setspecific(tid_key, (const void *) 0x42);
+#ifdef WORK_AROUND_GUILE_185_BUG
+	scm_with_guile(do_bogus_scm, NULL);
+	guile_user_module = scm_current_module();
 #endif /* WORK_AROUND_GUILE_185_BUG */
+}
 
 SchemeEval::SchemeEval(void)
 {
 	pthread_once(&workaround_once, first_time_only);
-   pthread_key_create(&tid_key, NULL);
-	pthread_setspecific(tid_key, 0x0);
 	scm_with_guile(c_wrap_init, this);
 }
 
@@ -88,8 +86,12 @@ SchemeEval::SchemeEval(void)
 void SchemeEval::per_thread_init(void)
 {
 	/* Avoid more than one call per thread. */
-	if (0x2 == (int) pthread_getspecific(tid_key)) return;
+	if (((void *) 0x2) == pthread_getspecific(tid_key)) return;
 	pthread_setspecific(tid_key, (const void *) 0x2);
+
+#ifdef WORK_AROUND_GUILE_185_BUG
+	scm_set_current_module(guile_user_module);
+#endif /* WORK_AROUND_GUILE_185_BUG */
 
 	// Guile implements the current port as a fluid on each thread.
 	// So, for every new thread, we need to set this.  
@@ -98,7 +100,6 @@ void SchemeEval::per_thread_init(void)
 
 SchemeEval::~SchemeEval()
 {
-	pthread_key_delete(tid_key);
 }
 
 /* ============================================================== */

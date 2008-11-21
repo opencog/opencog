@@ -24,7 +24,6 @@ class SchemeEval
 		void init(void);
 		static void * c_wrap_init(void *);
 		void per_thread_init(void);
-		pthread_key_t tid_key;
 
 		// Things related to evaluation
 		std::string do_eval(const std::string &);
