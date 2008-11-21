@@ -18,14 +18,11 @@
 #include "rules/RuleProvider.h"
 
 #include <opencog/adaptors/tulip/TulipWriter.h>
-//#include "../core/TimeServer.h"
-//#include "../core/HandleTemporalPairEntry.h"
-//#include "PLNShell.h"
 
 using namespace reasoning;  
 
+//! These should be moved to a test controller class
 extern int tempar;
-extern float temperature;
 
 #if 0
 #include <windows.h>
@@ -196,7 +193,7 @@ float temperatures[] = {    0.00005, 0.00007, 10,
 const int temperaturesN = 7; //3*5;
 //const int temperaturesN = 2;
 
-void RunPLNTests()
+void RunPLNTests(int temp_index)
 {
 //  goal::WalkTest();
 //  return;

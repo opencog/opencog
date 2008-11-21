@@ -48,11 +48,12 @@ namespace haxx
     extern reasoning::BITNodeRoot* bitnoderoot;
     extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
-    /// \todo This data must persist even if the BITNodeRoot is deleted.
+    //! @todo This data must persist even if the BITNodeRoot is deleted.
     map<Handle,vector<Handle> > inferred_from;
     map<Handle,Rule*> inferred_with;
 }
 
+//! ARI: okay to delete design namespace?
 namespace design
 {
 /*  typedef boost::make_recursive_variant<
@@ -62,25 +63,25 @@ namespace design
     >::type BITChild;
     tree<BITChild> newBITRoot;*/
 
-    struct pBITNode : public tree<int>
+/*    struct pBITNode : public tree<int>
     {
         int x;
     };
-
+*/
 /*  typedef boost::make_recursive_variant<
         reasoning::BITNodeRoot*,
         set<reasoning::pBITNode>,
         tree<boost::recursive_variant_ >
     >::type BITChild; */
 
-    typedef boost::make_recursive_variant<
+/*    typedef boost::make_recursive_variant<
         reasoning::BITNodeRoot*,
         //pBITNode,
         reasoning::ParametrizedBITNode,
         set<tree<boost::recursive_variant_> >
     > BITChild;
 
-    tree<BITChild> newBITRoot;
+    tree<BITChild> newBITRoot; */
 
 //  boost::variant<reasoning::BITNodeRoot*, reasoning::set<ParametrizedBITNode>, BITChild> BITChild;
 }
@@ -94,52 +95,35 @@ FitnessEvalutorT FitnessEvaluator = DETERMINISTIC;
 //FitnessEvalutorT FitnessEvaluator = RANDOM;
 
 struct less_dpargs : public binary_function<directProductionArgs, directProductionArgs, bool>
+{
+    bool operator()(const directProductionArgs& lhs, const directProductionArgs& rhs) const
     {
-        bool operator()(const directProductionArgs& lhs, const directProductionArgs& rhs) const
-        {
-            if (lhs.first < rhs.first)
-                return true;
-            if (lhs.first > rhs.first)
-                return false;
-            if (less_vtree()(lhs.second, rhs.second))
-                return true;
-            if (less_vtree()(rhs.second, lhs.second))
-                return false;
-
+        if (lhs.first < rhs.first)
+            return true;
+        if (lhs.first > rhs.first)
             return false;
-        }
-    };
+        if (less_vtree()(lhs.second, rhs.second))
+            return true;
+        if (less_vtree()(rhs.second, lhs.second))
+            return false;
+
+        return false;
+    }
+};
+
 }
 
 namespace haxx
 {
-    using namespace reasoning;
-    static map<directProductionArgs, boost::shared_ptr<set<BoundVertex> >, less_dpargs> DirectProducerCache;
+
+using namespace reasoning;
+static map<directProductionArgs, boost::shared_ptr<set<BoundVertex> >, less_dpargs> DirectProducerCache;
+
 }
 
 namespace reasoning
 {
-/*  void stats::print() const
-    {
-        puts("stats::print()\n");
 
-        for (map<BITNode*, set<Vertex> >::const_iterator    i = ITN2atom.begin();
-                                                            i!= ITN2atom.end(); i++)
-        {
-//          printf("[%d]: ", (int)i->first);
-            i->first->print(-10);
-            foreach(Vertex v, i->second)
-            {
-                printf("%d\n", v2h(v));
-//              printf("%d ", v2h(v));
-//              NMPrinter(NMP_ALL,-10).print(v2h(v));
-                NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
-            }
-            printf("\n");
-        }
-        puts("---\n");
-    }
-*/
 const bool DIRECT_RESULTS_SPAWN = true;
 const bool USE_GENERATOR_CACHE = false; //true; /// This cache gives 30% speed-up
 static const float MIN_CONFIDENCE_FOR_RULE_APPLICATION = 0.00001f;
@@ -192,14 +176,11 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 : InferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    /// \todo There's a mystical bug which prevents me from putting users inside the class.
-    /// I get some kind of malloc error even if I do nothing but declare the users map in the header!
-//  users.clear();
     haxx::DirectProducerCache.clear();
     
     /// All CustomCrispUnificationRules must be re-created
     //ForAll_handles.reset();
-//  RuleRepository::Instance().CreateCustomCrispUnificationRules();
+    //RuleRepository::Instance().CreateCustomCrispUnificationRules();
     
     rule = NULL;
     root = this;
@@ -1487,8 +1468,6 @@ void BITNode::findFittest(BITNode*& bisse, float& best_fitness)
 }
 
 float all_best_fitness = 0.0f;
-
-extern float temperature;
 
 void BITNode::expandFittest()
 {

@@ -666,7 +666,7 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
 
     if (!ForAll_handles)
     {
-            ForAll_handles = table->getHandleSet(FORALL_LINK, "");
+        ForAll_handles = table->getHandleSet(FORALL_LINK, "");
         puts("recreated ForAll_handles");
         getc(stdin);
     }
@@ -681,6 +681,7 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
     return ret;
 }
 
+//! ARI: am I correct in thinking this is a debug version of the above?
 #if 0
 Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSpaceWrapper* table)
 {

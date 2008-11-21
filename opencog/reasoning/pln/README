@@ -15,6 +15,10 @@ Classes
 A Vertex is a boost::variant which can be an atom type or a Handle. They are
 also the node type of vtrees (Vertex trees).
 
+A hypothesis can be represented as either an atom with confidence=0.0f, or as
+embedded in a HypotheticalLink. The former approach is better in general (why is
+this? I'm not sure...).
+
 [1] Goertzel, B., Iklé, M., Goertzel, I.F., Heljakka, A. 2008. Probabilistic
 Logic Networks: A Comprehensive Framework for Uncertain Inference.
 
@@ -74,6 +78,7 @@ as other quite important tasks.
 
 === Moderate
 
+* remove all the temporary hacks in the haxx:: namespace
 * Split Rules in inheriting from a GeneratorRule or ComposerRule class.
  Generators create atoms but don't require input atoms.
    This includes ForAll atoms in XML axiom sets are loaded into separate

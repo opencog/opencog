@@ -79,22 +79,22 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * 
  * E.g. say we have
  *
- * \verbatim
+ * \code
  *  ConceptNode "x" <0.8, 0.9>
- * \endverbatim
+ * \endcode
  *
  * and we want to add a new node with the same name and type, but with TV
  * <0.5,0.5>. To achieve this we create a new dummy context link:
  *
- * \verbatim
+ * \code
  *  dc <- OrderedLink (ConceptNode "___PLN___")
- * \endverbatim
+ * \endcode
  * 
  * \c dc is then used as the context for the new TV:
  * 
- * \verbatim
+ * \code
  *  ConceptNode "x" <0.8, 0.9> [ Context dc <0.5, 0.5> ]
- * \endverbatim
+ * \endcode
  * 
  * <h3> Link example </h3>
  * 
@@ -106,23 +106,24 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * E.g. say we have an InheritanceLink composed of two ConceptNodes that both
  * have CompositeTruthValues:
  * 
- * \verbatim
+ * \code
  *  dc_x <- OrderedLink (ConceptNode "__PLN__")
  *  dc_y <- OrderedLink (ConceptNode "__PLN__")
  *  InheritanceLink <0.8, 0.9>
  *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
  *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
- * \endverbatim
+ * \endcode
  * 
  * If we want to create another link with a different \c TruthValue, but between
  * the versions of x and y that are under the dummy context (instead of the
  * original TruthValues) then we get:
  * 
- * \verbatim
+ * \code
  *  dc_x_y <- OrderedLink (dc_x dc_y)
  *  InheritanceLink <0.8, 0.9> [ Context dc_x_y <0.3, 0.5> ]
  *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
  *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
+ * \endcode
  */
 class AtomSpaceWrapper : public iAtomSpaceWrapper
 {
@@ -151,11 +152,12 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     // typedef vhmap_t::value_type vhmap_pair_t;
     //! Bidrectional map with right index being PLN "handle", left a <handle,
     //! versionhandle> pair.
-    //! TODO: Handle is used, but eventually all references to Handle in PLN
-    //! should be replaced by pHandle (typedefded to long int) to ensure
-    //! distinctness from general OpenCog Handles... which could potentially change from
-    //! long int to another type in the future. OR, PLN should be adapted to
-    //! use vhpairs directly instead of relying on the AtomSpaceWrapper.
+    //!
+    //! @todo Handle is used, but eventually all references to Handle in PLN
+    //! should be replaced by pHandle (typedefed to long int) to ensure
+    //! distinctness from general OpenCog Handles... which will 
+    //! change from long int to another type in the future. Or, PLN should be
+    //! adapted to use vhpairs directly instead of relying on the AtomSpaceWrapper.
     // vhmap_t vhmap;
     
     typedef std::map< Handle, vhpair > vhmap_t;
@@ -185,12 +187,12 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     const static unsigned int mapOffset = NOTYPE + 100000;
 
     //! Add a tree of non real atoms to AtomSpace.
-    //! @param vtree of atoms to add.
-    //! @param iterator to start adding atoms from
-    //! @param what truth value they should be given
+    //! @param v of atoms to add.
+    //! @param vi iterator to start adding atoms from
+    //! @param tvn what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
-    //! @param some kind of mechanism to manage memory
-    Handle addAtom(vtree&, vtree::iterator, const TruthValue& tvn, bool fresh, bool managed);
+    //! @param managed some kind of mechanism to manage memory
+    Handle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn, bool fresh, bool managed);
 
     bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
     bool isSubcontextOf(const Handle sub, const Handle super);

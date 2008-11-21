@@ -4,8 +4,10 @@
 #define FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS 0
 
 /**
-	This is prototypical code by Ari A. Heljakka Sep/2006.
-*/
+ * Original prototype code by Ari A. Heljakka Sep/2006.
+ * Port by Joel Pitt 2008.
+ *
+ */
 
 #include <stack>
 #include <boost/bind.hpp>
@@ -17,8 +19,8 @@
 namespace reasoning
 {
 class BITNode;
-class BITNodeRoot; // Root of a BIT
-class RuleProvider;
+class BITNodeRoot;  // Root of a BIT, controls inference
+class RuleProvider; // Provide rules when expanding the tree
 
 enum spawn_mode { NO_SIBLING_SPAWNING = 0, ALLOW_SIBLING_SPAWNING };
 
@@ -70,10 +72,98 @@ public:
 	}
 };
 
-/// The basic node in the Backward Inference proof Tree
-/// BITNode supports pre-bindings extensively, but it's unclear whether they are
-/// obsolete or not.
-
+/** The basic node in the Backward Inference proof Tree
+ *
+ * Notes about the Backward Inference Tree and the Backward Chaining process.
+ * - Circularity is not tolerated, though the algorithm could probably be
+ *   expressed in a way that would allow for this. However, it turns out that
+ *   circularity is never needed (I am not sure if this can be rigorously
+ *   proven; possibly so).
+ * - Subtrees are recycled by storing them in BITNode "templates". A subtree is
+ *   reached via a channel that has inheritance-bindings associated to it, so
+ *   that if we are already proving Inh(A,$1), we don't need a new tree for
+ *   proving Inh(A,$2), but instead use the same tree with inheritance-binding
+ *   ($1->$2).
+ * - FW_VARIABLE_NODEs are used to denote placeholders for "future atoms that
+ *   the bw chainer finds". Normal VariableNodes denote variables in
+ *   variable-laden links that are real and reside in the AtomSpace.
+ *   FW_VARIABLE_NODEs should normally not be stored in the AtomSpace, but
+ *   currenty there are.
+ *
+ * The basic BW chainer dispatch cycle for expanding the tree with 1 inference
+ * step is (omitting procedures such as the argument place of each BITNode,
+ * result validation, expansion pool filtering etc.):
+ *
+ * -# BITNodeRoot.executionPool.insert(root)
+ * -# currentBITNode = getFittest(root.executionPool)
+ * -# root.executionPool = currentBITNode.expand()
+ * -# if (not sufficient(root.getResults())): goto #2
+ *
+ * where...
+ *
+ * getFittest(pool):
+ * \code
+ * 	 returns the fittest entry in pool. This depends on a fitness function
+ * 	 related to tree pruning algorithm discussed in DAPPIE. 
+ * \endcode
+ * 
+ * currentBITNode.expand():
+ * \code
+ *    For currentBITNode.target, put into RS all Rule objects that could create it
+ *    For each Composer C in RS:
+ *  	   childCreate(C,RS)
+ *  	 For each Generator G in RS:
+ *  	   put into GS all possible atoms produced by G that match currentBITNode.target
+ *    For each Handle H in GS:
+ *      If GS was produced without binding any FW variables:
+ *        put H into currentBITNode.results
+ *      Else For each variable bind (var_i => H_i) made to get H:
+ *        For the owner O of var_i:
+ *          O.tryClone(var_i => H_i)
+ *      C.evaluate(H)
+ * \endcode
+ *
+ * O.tryClone(var_i => H_i):
+ * \code
+ *    For each parent P of O:
+ *      If P has inheritance-bindings (var2_i => var_i):
+ *        P.tryClone(var2_i => H_i)
+ *      Else:
+ *        P.childCreate(a copy of O such that all instances of var_i have been
+ *        replaced with H_i)
+ * \endcode
+ * 
+ * P.childCreate(Rule R, args AS):
+ * \code
+ *    If root.recyclerPool does not contain a BITNode that can be produced as B'
+ *    from (R,AS) by some variable bindings {(Var_i=>Var2_i)} of variables in AS
+ *    to other variables, then:
+ *      Add B' to root.recyclerPool
+ *      B = B'
+ *    Else:
+ *      B = ParametrizedBITNode(B') with inheritance-bindings (Var_i=>Var2_i)
+ *      such that B owns each new variable from R.o2i
+ *      Mark P and all users of P as users of B.
+ *    add B to P.children
+ *    make P the parent of B
+ *    return B
+ * \endcode
+ * 
+ * BITNode.evaluate(latest_result) = try to compute all the results of the Rule
+ * of this BITNode by using latest_result in conjunction with old results.
+ * \code
+ *    For each new_result in results:
+ *      For each parent:
+ *        call parent.Evaluate(new_result). 
+ * \endcode
+ * 
+ *
+ * @todo investigate keeping FW_VARIABLE_NODEs out of the AtomSpace.
+ *
+ * @remarks BITNode supports pre-bindings extensively, but it's unclear whether they are
+ * obsolete or not.
+ *
+ */
 class BITNode
 {
 	friend class BITNode_fitness_comp;
@@ -87,7 +177,7 @@ protected:
 	/// For heuristics; store the nr so you don't have to re-count.
 	uint counted_number_of_free_variables_in_target;
 
-    /// parent_links refer upwards in the BIT.
+    /// parent is the set of parent_links that refer upwards in the BIT.
     /// A set is used to store the parent links because a node can have
     /// multiple parents when the parent node has different
     /// bindings
@@ -490,6 +580,10 @@ protected:
 
 	Rule::MPs dummy_args;
 	
+    /// "Users[b]" list is maintained in order to know which BITNodes directly
+    /// or indirectly use (ie. Have as a subtree, with possibly some
+    /// inheritance-bindings) BITNode b. This information is used (only) to
+    /// prevent circularity: a BITNode cannot indirectly or directly use itself.
 	map<BITNode*, set<BITNode*> > users;
 
 	/// It's too slow to sort the pool after every insertion. Otherwise we'd do this:
@@ -587,22 +681,22 @@ public:
 		void print(filterT filter = nofilterT()) const
 		{
 
-		puts("stats::print()\n");
-		filter.create(ITN2atom.begin(), ITN2atom.end());
+            puts("stats::print()\n");
+            filter.create(ITN2atom.begin(), ITN2atom.end());
 
-		for (map<BITNode*, set<Vertex> >::const_iterator	i = filter.filteredBegin;
-															i!= filter.filteredEnd; i++)
-		{
-//			printf("[%d]: ", (int)i->first);
-			i->first->print(-10, true);
-			foreach(Vertex v, i->second)
-			{
-				printf("%lu\n", v2h(v));
-				NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
-			}
-			printf("\n");
-		}
-		puts("---\n");
+            for (map<BITNode*, set<Vertex> >::const_iterator	i = filter.filteredBegin;
+                                                                i!= filter.filteredEnd; i++)
+            {
+    //			printf("[%d]: ", (int)i->first);
+                i->first->print(-10, true);
+                foreach(Vertex v, i->second)
+                {
+                    printf("%lu\n", v2h(v));
+                    NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
+                }
+                printf("\n");
+            }
+            puts("---\n");
 		}
 	};
 

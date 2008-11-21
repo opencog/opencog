@@ -133,8 +133,10 @@ using namespace reasoning;
 extern int currentDebugLevel;
 
 //! Run tests at start up
+//! @todo move to unit test and allow it to be run from the main shell
 bool RunPLNtest=true;
 //! Variable to store command line option of what temperature to run tests at
+//! @todo move to unit test
 int tempar=0;
 
 namespace haxx
