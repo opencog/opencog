@@ -1,7 +1,7 @@
 /*
- * SchemeSmob.c
+ * SchemeSmobNew.c
  *
- * Scheme small objects (SMOBS) for opencog atoms and truth values.
+ * Scheme small objects (SMOBS) --creating new atoms -- for opencog.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -264,15 +264,16 @@ static Type verify_link (SCM stype, const char * subrname)
 std::vector<Handle>
 SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 {
-	// Verify that second arg is an actual list
-	if (!scm_is_pair(satom_list))
+	// Verify that second arg is an actual list. Allow null list.
+	// (I think that there are legti null lists, right?)
+	if (!scm_is_pair(satom_list) && !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, 2, satom_list, "a list of atoms");
 
 	const TruthValue *tv = NULL;
 	std::vector<Handle> outgoing_set;
 	SCM sl = satom_list;
 	int pos = 2;
-	do
+	while (scm_is_pair(sl))
 	{
 		SCM satom = SCM_CAR(sl);
 
@@ -297,7 +298,6 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 		sl = SCM_CDR(sl);
 		pos++;
 	}
-	while (scm_is_pair(sl));
 
 	return outgoing_set;
 }
