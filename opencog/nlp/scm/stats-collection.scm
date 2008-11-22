@@ -254,7 +254,7 @@ scm
 	; skip over any senses which have negative scores
 	(define (skip-sense sense)
 		(let ((sense-score (word-inst-sense-score word sense)))
-			(if (< 0.0 sense-score)
+			(if (<= 0.0 sense-score)
 				(ldj-process-one-sense iword djstr parse-score sense sense-score)
 			)
 		)
@@ -281,7 +281,10 @@ scm
 		)
 
 		(ldj-process-disjunct-simple iword djstr score)
-		(ldj-process-disjunct-senses word iword djstr score)
+
+		; XXX We are going to pass on dealing with senses right now.
+		; This is because the wsd algorithm takes too long to run.
+		; (ldj-process-disjunct-senses word iword djstr score)
 
 		; (display "Word: ")
 		; (display iword)
