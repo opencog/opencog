@@ -43,6 +43,13 @@
 using namespace opencog;
 using namespace std;
 
+// factory method
+BaseServer* HopfieldServer::derivedCreateInstance()
+{
+    logger().debug("[HopfieldServer] createInstance");
+    return new HopfieldServer();
+}
+
 std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint, int retrieve, Pattern cue, float mutate = 0.0f)
 {
     std::vector<float> result;
@@ -132,31 +139,35 @@ HopfieldServer::HopfieldServer()
     options = new HopfieldOptions();
     options->setServer(this);
 
-
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(cogserver.createAgent(ImportanceUpdatingAgent::info().id, true));
-    hebLearnAgent     = static_cast<HebbianLearningAgent*>(cogserver.createAgent(HebbianLearningAgent::info().id, true));
-#ifdef HAVE_GSL
-    diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(cogserver.createAgent(ImportanceDiffusionAgent::info().id, true));
-#else
-    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(cogserver.createAgent(ImportanceSpreadingAgent::info().id, true));
-#endif
-    forgetAgent       = static_cast<ForgettingAgent*>(cogserver.createAgent(ForgettingAgent::info().id, true));
-
-    hebLearnAgent->convertLinks = true;
-    forgetAgent->forgetPercentage = 0.10f;
 }
 
 HopfieldServer::~HopfieldServer()
 {
-    delete importUpdateAgent;
-    delete hebLearnAgent;
+    unloadModule("libattention.so");
+    //delete importUpdateAgent;
+    //delete hebLearnAgent;
     delete rng;
 }
 
 void HopfieldServer::init(int width, int height, int numLinks)
 {
+    loadModule("libattention.so");
+
+    //CogServer& cogserver = static_cast<CogServer&>(server());
+    importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(this->createAgent(ImportanceUpdatingAgent::info().id, true));
+    hebLearnAgent     = static_cast<HebbianLearningAgent*>(this->createAgent(HebbianLearningAgent::info().id, true));
+#ifdef HAVE_GSL
+    diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(this->createAgent(ImportanceDiffusionAgent::info().id, true));
+#else
+    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
+#endif
+    forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
+
+    hebLearnAgent->convertLinks = true;
+    forgetAgent->forgetPercentage = 0.10f;
+
     AtomSpace* atomSpace = getAtomSpace();
+
     string nodeName = "Hopfield_";
     if (width > 0) {
         this->width = width;

@@ -28,6 +28,7 @@
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/dynamics/attention/HebbianLearningAgent.h>
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
+#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/dynamics/attention/STIDecayingAgent.h>
 #include <opencog/server/Factory.h>
@@ -44,6 +45,9 @@ private:
     Factory<ForgettingAgent, Agent>          forgettingFactory;
     Factory<HebbianLearningAgent, Agent>     hebbianFactory;
     Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
+#ifdef HAVE_GSL
+    Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
+#endif
     Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
     Factory<STIDecayingAgent, Agent>         stidecayingFactory;
 

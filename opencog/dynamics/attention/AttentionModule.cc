@@ -38,6 +38,9 @@ AttentionModule::AttentionModule()
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
     cogserver.registerAgent(HebbianLearningAgent::info().id,     &hebbianFactory);
+#ifdef HAVE_GSL
+    cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
+#endif
     cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
     cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
     cogserver.registerAgent(STIDecayingAgent::info().id,         &stidecayingFactory);
@@ -49,6 +52,9 @@ AttentionModule::~AttentionModule()
     cogserver.unregisterAgent(ForgettingAgent::info().id);
     cogserver.unregisterAgent(HebbianLearningAgent::info().id);
     cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
+#ifdef HAVE_GSL
+    cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
+#endif
     cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
     cogserver.unregisterAgent(STIDecayingAgent::info().id);
 }

@@ -23,6 +23,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <opencog/util/Config.h>
+
 #include "HopfieldServer.h"
 #include "HopfieldOptions.h"
 
@@ -33,22 +35,18 @@ void testHopfieldNetworkRolling();
 void testHopfieldNetworkRollingOld();
 void testHopfieldNetworkInterleave();
 
-HopfieldServer hServer;
-HopfieldOptions *o = hServer.options;
+HopfieldOptions *o;
 
 int main(int argc, char *argv[])
 {
-    //int patternArray[] = { 0, 1, 0, 1, 1, 1, 0, 1, 0 };
-    //std::vector<int> pattern1(patternArray, patternArray + 9);
+    server(HopfieldServer::derivedCreateInstance);
+
+    o = (static_cast<HopfieldServer&>(server())).options;
+
     o->parseOptions(argc, argv);
 
-    if (o->showConfigFlag) {
-        o->printConfiguration();
-        exit(0);
-    }
-
     /* setup logging */
-    logger().setPrintToStdoutFlag(true);
+    logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     if (o->verboseFlag == 1) {
         logger().setLevel(Logger::DEBUG);
     } else if (o->verboseFlag == 2) {
@@ -57,8 +55,12 @@ int main(int argc, char *argv[])
         logger().setLevel(Logger::WARN);
     }
 
-    logger().info("Init HopfieldServer");
-    hServer.init(-1, -1, -1);
+    if (o->showConfigFlag) {
+        o->printConfiguration();
+        exit(0);
+    }
+
+    (static_cast<HopfieldServer&>(server())).init(-1, -1, -1);
 
     if (o->recordToFile) o->openOutputFiles();
 
@@ -68,17 +70,19 @@ int main(int argc, char *argv[])
         testHopfieldNetworkRolling();
 
     if (o->recordToFile) o->closeOutputFiles();
+
+    return 0;
 }
 
 std::vector< Pattern > getPatterns()
 {
     if (o->fileTraining.size() > 0) {
         std::vector< Pattern > ps;
-        ps = Pattern::loadPatterns(o->fileTraining, hServer.height);
+        ps = Pattern::loadPatterns(o->fileTraining, (static_cast<HopfieldServer&>(server())).height);
         o->nPatterns = ps.size();
         return ps;
     } else
-        return Pattern::generateRandomPatterns(o->nPatterns, hServer.width, hServer.height, o->genPatternDensity);
+        return Pattern::generateRandomPatterns(o->nPatterns, (static_cast<HopfieldServer&>(server())).width, (static_cast<HopfieldServer&>(server())).height, o->genPatternDensity);
 
 }
 
@@ -91,7 +95,7 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
     }
 
     if (o->fileCue.size() > 0) {
-        cs = Pattern::loadPatterns(o->fileCue, hServer.height);
+        cs = Pattern::loadPatterns(o->fileCue, (static_cast<HopfieldServer&>(server())).height);
         assert((unsigned int) o->nPatterns == cs.size());
 
     } else {
@@ -118,7 +122,7 @@ void testHopfieldNetworkInterleave()
     totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
 
     if (o->showMatrixFlag) {
-        hServer.printMatrixResult(patterns);
+        (static_cast<HopfieldServer&>(server())).printMatrixResult(patterns);
     }
 
     for (int i = 0; i < totalCycles; i++) {
@@ -144,8 +148,8 @@ void testHopfieldNetworkInterleave()
 
         // Imprint each of them.
         for (unsigned int j = startPattern; j <= (unsigned int) endPattern; j++) {
-            hServer.resetNodes();
-            hServer.imprintPattern(patterns[j], 1);
+            (static_cast<HopfieldServer&>(server())).resetNodes();
+            (static_cast<HopfieldServer&>(server())).imprintPattern(patterns[j], 1);
             //if (!verboseFlag) cout << ".";
         }
 
@@ -160,7 +164,7 @@ void testHopfieldNetworkInterleave()
                         c = patterns[j].mutatePattern(o->cueErrorRate);
                     }
                 } 
-                Pattern rPattern = hServer.retrievePattern(cuePatterns[j],
+                Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(cuePatterns[j],
                         o->retrieveCycles, o->spreadCycles);
                 rSim = patterns[j].hammingSimilarity(rPattern);
                 cycleResults.push_back(rSim);
@@ -175,7 +179,7 @@ void testHopfieldNetworkInterleave()
 
         }
         if (!o->verboseFlag) cout << endl;
-        if (o->showMatrixFlag) hServer.printMatrixResult(toPrint);
+        if (o->showMatrixFlag) (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
         results.push_back(cycleResults);
 
     }
@@ -195,8 +199,8 @@ void testHopfieldNetworkRolling()
 
     for (unsigned int i = 0; i < patterns.size(); i++) {
         if (o->resetFlag)
-            hServer.reset();
-        results.push_back(hServer.imprintAndTestPattern(patterns[i], o->imprintCycles, o->retrieveCycles, cuePatterns[i], o->cueErrorRate));
+            (static_cast<HopfieldServer&>(server())).reset();
+        results.push_back((static_cast<HopfieldServer&>(server())).imprintAndTestPattern(patterns[i], o->imprintCycles, o->retrieveCycles, cuePatterns[i], o->cueErrorRate));
         if (!o->verboseFlag) cout << " - pattern " << i << " done" << endl;
         if (o->recordToFile) {
             o->beforeFile << endl;

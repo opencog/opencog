@@ -3,7 +3,7 @@ ADD_LIBRARY(attention SHARED
 	ForgettingAgent
 	HebbianLearningAgent
 	ImportanceSpreadingAgent
-	ImportanceDiffusionAgent.cc
+	ImportanceDiffusionAgent
 	ImportanceUpdatingAgent
 	STIDecayingAgent
 )

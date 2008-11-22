@@ -68,6 +68,9 @@ private:
     RandGen* rng;
 
 public:
+
+    static opencog::BaseServer* derivedCreateInstance(void);
+
     // Amount of stimulus to apply across a pattern
     stim_t patternStimulus;
 
@@ -83,8 +86,8 @@ public:
     int width, height, links;
     float density;
 
-    ~HopfieldServer();
     HopfieldServer();
+    virtual ~HopfieldServer();
 
     /**
      * Initialise the demo with a lattice of width * height nodes.
