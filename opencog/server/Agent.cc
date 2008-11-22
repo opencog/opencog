@@ -28,7 +28,33 @@
 
 using namespace opencog;
 
+static void Agent::setDefaults() {
+    Config& conf = Config.config();
+     
+    for (unsigned int i = 0; PARAMETERS()[i] != ""; i += 2) {
+        if (!conf.has(PARAMETERS()[i])) {
+           conf.set(PARAMETERS()[i], PARAMETERS()[i + 1]);
+        }
+    }
+}
+
 void Agent::init()
 {
     server().plugInAgent(this, 1);
+    setDefaults();
+}
+
+std::string Agent::to_string() const
+{
+    Config& conf = Config.config();
+
+    std::ostringstream oss;
+    oss << classinfo().id;
+    oss << " {\"";
+    for (unsigned int i = 0; PARAMETERS()[i] != ""; i += 2) {
+        if (i != 0) oss << "\", \"";
+        oss << PARAMETERS()[i] << "\" => \"" << conf[PARAMETERS()[i]];
+    }
+    oss << "\"}";
+    return oss.str();
 }

@@ -91,11 +91,25 @@ class Agent
 
 protected:
 
-    /** The agent's frequency. Determins how often the opencog server should
+    /** The agent's frequency. Determines how often the opencog server should
      *  schedule this agent. A value of 1 (the default) means that the agent
      *  will be executed every server cycle; a value of 2 means that the agent
      *  will be executed every 2 cycles; and so on. */
     int _frequency;
+
+    /** Override this method to specify the list of parameters for this agent,
+     * and their default values. Uses the same format as Config.DEFAULT(). */
+    virtual const std::string* PARAMETERS() {
+        // default implementation with no parameters
+        static const std::string defaultConfig[] = {
+            "", ""
+        };
+        return defaultConfig;
+    }
+    
+    /** If any parameter values are unspecified in the Config singleton, sets them
+     * to the default values. */
+    static void setDefaults();
 
 public:
 
@@ -114,6 +128,10 @@ public:
 
     /** Returns the agent's class info. */
     virtual const ClassInfo& classinfo() const = 0;
+    
+    /** Dumps the agent's name and all its configuration parameters
+     * to a string. */    
+    std::string to_string() const;
 
 }; // class
 
