@@ -4,8 +4,8 @@ scm
 ; Work through a bunch of relex files that are in the compact-file-format,
 ; and import these into opencog. Then run processing on each one, as needed.
 ;
-(define input-filedir "/home/linas/src/novamente/data/enwiki/enwiki-20080524/parsed/E")
-(define done-filedir "/home/linas/src/novamente/data/enwiki/enwiki-20080524/coged/E")
+(define input-filedir "/home2/linas/src/novamente/data/enwiki/enwiki-20080524/parsed/D")
+(define done-filedir "/home2/linas/src/novamente/data/enwiki/enwiki-20080524/coged/D")
 
 (define cff-to-opencog-exe "/home/linas/src/novamente/src/relex-bzr/src/perl/cff-to-opencog.pl")
 
@@ -20,6 +20,22 @@ scm
 (define (load-cff-data filename)
 	(exec-scm-from-cmd 
 		(string-join (list "cat \"" filename "\" | " cff-to-opencog-exe) "")
+	)
+)
+
+; ---------------------------------------------------------------------
+; Delete atoms that belong to particular sentence instances; we don't
+; want to log up the server with grunge text.
+;
+(define (delete-sentences)
+(let ((n 0))
+	; (define (delit atom) (cog-delete-recursive atom) #f)
+	(define (delit atom) (set! n (+ n 1)) #f)
+	(define (delit atom) (cog-delete-recursive atom) (set! n (+ n 1)) #f)
+	(cog-map-type delit 'SentenceNode)
+	(cog-map-type delit 'ParseNode)
+	(cog-map-type delit 'ConceptNode)
+(system (string-join (list "echo deleted: " (number->string n) )))
 	)
 )
 
@@ -51,6 +67,9 @@ scm
 			(system (string-join (list "echo done ldj: \"" filename "\"")))
 			(system "date")
 			(system (string-join (list "mv \"" fullname "\" \"" donename "\"") ""))
+			(delete-sentences)
+			(system (string-join (list "echo done delete: \"" filename "\"")))
+			(system "date")
 		)
 	)
 	
