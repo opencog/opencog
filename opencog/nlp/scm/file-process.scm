@@ -74,12 +74,12 @@ scm
 	; empty (#eof) and return a string holding the port (file) contents.
 	; Use read-string!/partial for speed.
 	(define (speedy-suck-in-text port str)
-		(let* ((one-line (make-string 1123123))
-		       (line-len (read-string!/partial one-line port)))
+		(let* ((str-buff (make-string 1123123))
+		       (line-len (read-string!/partial str-buff port)))
 			(if (eq? #f line-len)
-				(string-join (list str one-line))
+				str 
 				(speedy-suck-in-text port 
-					(string-join (list str one-line))
+					(string-append str (substring/shared str-buff 0 line-len))
 				)
 			)
 		)
