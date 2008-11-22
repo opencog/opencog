@@ -11,7 +11,6 @@ scm
 
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
-(use-modules (ice-9 rw))
 
 ; ---------------------------------------------------------------------
 ; Read in data from RelEx "compact file format" file, convert it to

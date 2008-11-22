@@ -104,7 +104,7 @@ scm
 ; (load-scm-from-file "/tmp/some-file.scm")
 ;
 (define (load-scm-from-file filename)
-	(exec-scm-from-cmd (string-join (list "cat \"" filename "\"" ))
+	(exec-scm-from-cmd (string-join (list "cat \"" filename "\"" ) ""))
 )
 
 .
