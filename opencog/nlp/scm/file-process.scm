@@ -73,17 +73,17 @@ scm
 	; Suck in a bunch of ASCII text off of a port, until the port is
 	; empty (#eof) and return a string holding the port (file) contents.
 	; Use read-string!/partial for speed.
-	(define (speedy-suck-in-text port str)
-		(let* ((one-line (make-string 1123123))
-		       (line-len (read-string!/partial one-line port)))
-			(if (eq? #f line-len)
-				(string-join (list str one-line))
-				(speedy-suck-in-text port 
-					(string-join (list str one-line))
-				)
-			)
-		)
-	)
+;	(define (speedy-suck-in-text port str)
+;		(let* ((one-line (make-string 1123123))
+;		       (line-len (read-string!/partial one-line port)))
+;			(if (eq? #f line-len)
+;				(string-join (list str one-line))
+;				(speedy-suck-in-text port 
+;					(string-join (list str one-line))
+;				)
+;			)
+;		)
+;	)
 
 	(let* ((cmd (string-join (list "cat \"" filename "\" | " cff-to-opencog-exe) ""))
 			(port (open-input-pipe cmd))
