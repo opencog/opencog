@@ -13,6 +13,12 @@ is used to match predicates (triples) in the hypergraph.  It can
 be used as a building to build pattern matching structures of 
 arbitrary complexity.
 
+This code is not being used currently; its harder to use than expected;
+a primary problem is that the number of data items on one wire may
+differ from that on another wire, and so devices which must merge
+data from two ports have a problem with figuring out how many data
+elements to swallow.  This could be fixed, I suppose ....
+
 
 MOTIVATION
 ==========

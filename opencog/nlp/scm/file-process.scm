@@ -14,84 +14,13 @@ scm
 (use-modules (ice-9 rw))
 
 ; ---------------------------------------------------------------------
-; Given a directory, return a list of all of the files in the directory
-; Do not return anything that is a subdirectory, pipe, special file etc.
-;
-(define (listfiles dir)
-
-	(define (isfile? file)
-		(if (eq? 'regular (stat:type (stat 
-				(string-join (list dir file) "/"))))
-			#t
-			#f
-		)
-	)
-
-	; suck all the filenames off a port
-	(define (suck-in-filenames port lst)
-		(let ((one-file (readdir port)))
-			(if (eof-object? one-file)
-				lst
-				(suck-in-filenames port 
-					(if (isfile? one-file)
-						(cons one-file lst)
-						lst
-					)
-				)
-			)
-		)
-	)
-	(let* ((dirport (opendir dir))
-			(filelist (suck-in-filenames dirport '()))
-		)
-		(closedir dirport)
-		filelist
-	)
-)
-
-; ---------------------------------------------------------------------
 ; Read in data from RelEx "compact file format" file, convert it to
 ; opencog format (using the perl script "cff-to-opencog.pl"), and
 ; then load it into opencog.
 ;
 (define (load-cff-data filename)
-
-	; Suck in a bunch of ASCII text off of a port, until the port is
-	; empty (#eof) and return a string holding the port (file) contents.
-	; This is *painfully slowwww* !!!
-;	(define (suck-in-text port str)
-;		(let ((one-line (read-line port)))
-;			(if (eof-object? one-line)
-;				str
-;				(suck-in-text port 
-;					(string-join (list str one-line "\n"))
-;				)
-;			)
-;		)
-;	)
-
-	; Suck in a bunch of ASCII text off of a port, until the port is
-	; empty (#eof) and return a string holding the port (file) contents.
-	; Use read-string!/partial for speed.
-	(define (speedy-suck-in-text port str)
-		(let* ((str-buff (make-string 1123123))
-		       (line-len (read-string!/partial str-buff port)))
-			(if (eq? #f line-len)
-				str 
-				(speedy-suck-in-text port 
-					(string-append str (substring/shared str-buff 0 line-len))
-				)
-			)
-		)
-	)
-
-	(let* ((cmd (string-join (list "cat \"" filename "\" | " cff-to-opencog-exe) ""))
-			(port (open-input-pipe cmd))
-			(data (speedy-suck-in-text port ""))
-		)
-		; (read port)
-		(eval-string data)
-		(close-pipe port)
+	(exec-scm-from-cmd 
+		(string-join (list "cat \"" filename "\" | " cff-to-opencog-exe) "")
 	)
 )
 
@@ -127,7 +56,7 @@ scm
 	)
 	
 	(for-each process-file
-		(listfiles input-dir)
+		(list-files input-dir)
 	)
 )
 
