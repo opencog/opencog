@@ -20,7 +20,11 @@
 
 ;; --------------------------------------------------------------------
 ;;
-(define (tot-inflected)
+;; Sum up the total number of words observed; and return that total.
+;; This is done by going through the InflectMarginal table, and adding
+;; up the "count" column.
+;;
+(define (marginal-tot-inflected)
 	(define row #f)
 	(define row-count 0)
 	(define word-count 0)
@@ -28,11 +32,33 @@
 	(dbi-query db-connection "SELECT count FROM InflectMarginal;")
 	(set! row (dbi-get_row db-connection))
 	(while (not (equal? row #f))
-		(set! word-count (+ word-count 1))
+		(set! row-count (+ row-count 1))
+		(set! word-count (+ word-count (assoc-ref row "count")))
 	   (set! row (dbi-get_row db-connection))
 	)
-	tot-count
 	word-count
 )
 
-(display (tot-inflected))
+;; --------------------------------------------------------------------
+;;
+;; Compute and store the marginal word probabilities
+;; This is done by going through the InflectMarginal table, and dividing
+;; the count for each row by the sum-total of all counts in the table.
+;;
+(define (marginal-set-probabilities)
+	(define row #f)
+	(define tot (marginal-tot-inflected))
+
+	(dbi-query db-connection "SELECT inflected_word, count FROM InflectMarginal;")
+	(set! row (dbi-get_row db-connection))
+	(while (not (equal? row #f))
+(display (assoc-ref row "inflected_word"))
+(display " ")
+		(display (/ (assoc-ref row "count") tot)
+) (newline)
+	   (set! row (dbi-get_row db-connection))
+	)
+
+)
+
+(marginal-set-probabilities)
