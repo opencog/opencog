@@ -15,7 +15,9 @@
 ;; The postgres server is at port 5432, which can be gotten from
 ;; /etc/postgresql/8.3/main/postgresql.conf
 ;;
-(define db-connection
+(define db-select-conn
+   (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+(define db-update-conn
    (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; --------------------------------------------------------------------
@@ -29,12 +31,12 @@
 	(define row-count 0)
 	(define word-count 0)
 
-	(dbi-query db-connection "SELECT count FROM InflectMarginal;")
-	(set! row (dbi-get_row db-connection))
+	(dbi-query db-select-conn "SELECT count FROM InflectMarginal;")
+	(set! row (dbi-get_row db-select-conn))
 	(while (not (equal? row #f))
 		(set! row-count (+ row-count 1))
 		(set! word-count (+ word-count (assoc-ref row "count")))
-	   (set! row (dbi-get_row db-connection))
+	   (set! row (dbi-get_row db-select-conn))
 	)
 	word-count
 )
@@ -46,19 +48,32 @@
 ;; the count for each row by the sum-total of all counts in the table.
 ;;
 (define (marginal-set-probabilities)
-	(define row #f)
+	(define srow #f)
+	(define urow #f)
 	(define tot (marginal-tot-inflected))
 
-	(dbi-query db-connection "SELECT inflected_word, count FROM InflectMarginal;")
-	(set! row (dbi-get_row db-connection))
-	(while (not (equal? row #f))
-(display (assoc-ref row "inflected_word"))
-(display " ")
-		(display (/ (assoc-ref row "count") tot)
-) (newline)
-	   (set! row (dbi-get_row db-connection))
+	(dbi-query db-select-conn 
+		"SELECT inflected_word, count FROM InflectMarginal;"
 	)
 
+	; Loop over all words in the database.
+	(set! srow (dbi-get_row db-select-conn))
+	(while (not (equal? srow #f))
+		(let* ((word (assoc-ref srow "inflected_word"))
+				(lprob (- (log (/ (assoc-ref srow "count") tot))))
+				(sprob (number->string lprob))
+				)
+			(dbi-query db-update-conn 
+				(string-append "UPDATE InflectMarginal SET log_probability = "
+					sprob " WHERE inflected_word = E'" word "'"
+				)
+			)
+			;; Call twice -- once to update, once to flush connection
+			(set! urow (dbi-get_row db-update-conn))
+			(set! urow (dbi-get_row db-update-conn))
+		)
+	   (set! srow (dbi-get_row db-select-conn))
+	)
 )
 
 (marginal-set-probabilities)
