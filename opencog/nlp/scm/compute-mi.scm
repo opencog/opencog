@@ -5,6 +5,12 @@
 ;
 ; Compute the mutual information for the link-grammar disjuncts
 ;
+; Compute the conditional probability for assorted link-grammar
+; disjunct tables. This assumes that the tables have already been
+; populated with raw data, and thus, the raw count fields have
+; meaningful (and final) values. This script merely totals up the
+; counts, and computes the various probabilities.
+;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 (use-modules (srfi srfi-1))

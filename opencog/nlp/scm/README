@@ -10,15 +10,34 @@ The actual SQL tables are defined and created by a different project
 (sorry!), the 'lexical attraction' package on launchpad.  See, in
 particular, src/sql/disjunct.sql from that package.
 
- * nlp-utils: some mini nlp-related utilities, mostly for pointer 
+OpenCog scripts
+---------------
+The following scripts are meant to run within the OpenCog scheme
+interpreter (as they manipulate OpenCog atoms directly). They can be
+loaded with the "load-nlp.sh" shell script.
+
+ * nlp-utils: Some mini nlp-related utilities, mostly for pointer 
    chasing nlp-specific structures.
 
- * stats-collection.scm: look for documents for which word-sense
+ * stats-collection.scm: Look for documents for which word-sense
    disambiguation has been performed; use these to update a database
    of statistics that associates link-grammar parses with wsd results.
 
- * parse-rank.scm: tweak link-grammar parse-ranking scores, based
+ * parse-rank.scm: Tweak link-grammar parse-ranking scores, based
    on the mutual information contained in word pairs. (Not currently
    used)
 
- * disjunct.scm: build lists of link-grammar disjuncts.
+ * disjunct.scm: Build lists of link-grammar disjuncts.
+
+Stand-alone scripts
+-------------------
+The following scripts are meant to be run stand-alone, as they do not
+access any OpenCog atoms directly.  That is, thhey can run within the 
+ordinary guile interpreter.
+
+ * compute-mi.scm: Compute the conditional probability and mutual
+   information for assorted link-grammar disjunct tables. This assumes
+   that the tables have already been populated with raw data, and thus,
+   the raw count fields have meaningful (and final) values. This 
+   script merely totals up the counts, and computes the various
+   probabilities.
