@@ -31,7 +31,18 @@ scm
 (let ((n 0))
 	; (define (delit atom) (cog-delete-recursive atom) #f)
 	(define (delit atom) (set! n (+ n 1)) #f)
-	(define (delit atom) (cog-delete-recursive atom) (set! n (+ n 1)) #f)
+	; (define (delit atom) (cog-delete-recursive atom) (set! n (+ n 1)) #f)
+
+;	(define (delone atom) (cog-delete atom) #f)
+
+;	(cog-map-type delone 'PartOfSpeechLink)
+;	(cog-map-type delone 'LemmaLink)
+;	(cog-map-type delone 'InheritanceLink)
+;	(cog-map-type delone 'ParseLink)
+;	(cog-map-type delone 'EvaluationLink)
+;	(cog-map-type delone 'ReferenceLink)
+;	(cog-map-type delone 'ListLink)
+
 	(cog-map-type delit 'SentenceNode)
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'ConceptNode)
