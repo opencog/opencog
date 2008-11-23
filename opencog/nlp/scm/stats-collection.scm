@@ -74,19 +74,19 @@ scm
 				(string-append
 					"UPDATE InflectMarginal SET count = "
 					(number->string up-score)
-					" WHERE inflected_word = '" i-word "'"
+					" WHERE inflected_word = E'" i-word "'"
 				)
 			)
 		)
 
 		(sql-update-table
 			(string-append
-				"SELECT * FROM InflectMarginal WHERE inflected_word='"
+				"SELECT * FROM InflectMarginal WHERE inflected_word=E'"
 				i-word "'"
 			)
 			update-proc
 			(string-append
-				"INSERT INTO InflectMarginal (inflected_word, count) VALUES ('"
+				"INSERT INTO InflectMarginal (inflected_word, count) VALUES (E'"
 				i-word "', " (number->string p-score) ")"
 			)
 		)
@@ -108,20 +108,20 @@ scm
 				(string-append
 					"UPDATE Disjuncts SET count = "
 					(number->string up-score)
-					" WHERE inflected_word = '" i-word
+					" WHERE inflected_word = E'" i-word
 					"' AND disjunct = '" disj-str "'"
 				)
 			)
 		)
 
 		(sql-update-table
-			(string-append "SELECT * FROM Disjuncts WHERE inflected_word='"
+			(string-append "SELECT * FROM Disjuncts WHERE inflected_word=E'"
 				i-word "' AND disjunct = '" disj-str "'"
 			)
 			update-proc
 
 			(string-append
-				"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES ('"
+				"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES (E'"
 				i-word "', '" disj-str "', " (number->string p-score) ")"
 			)
 		)
@@ -162,20 +162,20 @@ scm
 				(string-append
 					"UPDATE WordSenseFreq SET count = "
 					(number->string up-score)
-					" WHERE word_sense = '" w-sense
-					"' AND inflected_word='" i-word "'")
+					" WHERE word_sense = E'" w-sense
+					"' AND inflected_word=E'" i-word "'")
 			)
 		)
 
 		(sql-update-table
 			(string-append
-				"SELECT * FROM WordSenseFreq WHERE word_sense='" 
-				w-sense "' AND inflected_word='" i-word "'"
+				"SELECT * FROM WordSenseFreq WHERE word_sense=E'" 
+				w-sense "' AND inflected_word=E'" i-word "'"
 			)
 			update-proc
 			(string-append
-				"INSERT INTO WordSenseFreq (word_sense, inflected_word, count) VALUES ('"
-				w-sense "', '" i-word "', " (number->string p-score) ")"
+				"INSERT INTO WordSenseFreq (word_sense, inflected_word, count) VALUES (E'"
+				w-sense "', E'" i-word "', " (number->string p-score) ")"
 			)
 		)
 	)
@@ -197,8 +197,8 @@ scm
 				(string-append
 					"UPDATE DisjunctSenses SET count = "
 					(number->string up-score)
-					" WHERE word_sense = '" w-sense
-					"' AND inflected_word = '" i-word
+					" WHERE word_sense = E'" w-sense
+					"' AND inflected_word = E'" i-word
 					"' AND disjunct = '" disj-str "'"
 				)
 			)
@@ -206,15 +206,15 @@ scm
 
 		(sql-update-table
 			(string-append "SELECT * FROM DisjunctSenses "
-				"WHERE word_sense='" w-sense 
-				"' AND inflected_word='" i-word
+				"WHERE word_sense=E'" w-sense 
+				"' AND inflected_word=E'" i-word
 				"' AND disjunct = '" disj-str "'"
 			)
 			update-proc
 
 			(string-append
-				"INSERT INTO DisjunctSenses (word_sense, inflected_word, disjunct, count) VALUES ('"
-				w-sense "', '" i-word "', '" disj-str "', " (number->string p-score) ")"
+				"INSERT INTO DisjunctSenses (word_sense, inflected_word, disjunct, count) VALUES (E'"
+				w-sense "', E'" i-word "', '" disj-str "', " (number->string p-score) ")"
 			)
 		)
 	)
