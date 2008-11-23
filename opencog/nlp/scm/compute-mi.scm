@@ -23,6 +23,8 @@
 ;;
 (define db-select-conn
    (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+(define db-disjunct-conn
+   (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 (define db-update-conn
    (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
@@ -82,4 +84,63 @@
 	)
 )
 
-(marginal-set-probabilities)
+;; --------------------------------------------------------------------
+;;
+;; Compute the conditional probabilites for the disjunct table.
+;; That is, given a particular (word,disjunct) pair, compute the 
+;; conditional probability of seeing that disjunct, given that the
+;; word is being observed.
+;;
+(define (disjunct-cond-probabilities)
+	(define srow #f)
+	(define drow #f)
+	(define urow #f)
+
+	(dbi-query db-select-conn 
+		"SELECT inflected_word, count FROM InflectMarginal;"
+	)
+
+	; Loop over all words in the database.
+	(set! srow (dbi-get_row db-select-conn))
+	(while (not (equal? srow #f))
+		(let* ((word (assoc-ref srow "inflected_word"))
+				(word-cnt (assoc-ref srow "count"))
+				)
+			(dbi-query db-disjunct-conn 
+				(string-append "SELECT count, disjunct FROM Disjuncts "
+					"WHERE inflected_word = E'" word "'"
+				)
+			)
+			(set! drow (dbi-get_row db-disjunct-conn))
+			(while (not (equal? drow #f))
+				(let* ((dj-cnt (assoc-ref drow "count"))
+						(dj (assoc-ref drow "disjunct"))
+						(dprob (- (log (/ dj-cnt word-cnt))))
+						(sdprob (number->string dprob))
+					)
+					(dbi-query db-update-conn 
+						(string-append "UPDATE Disjuncts SET log_cond_probability = "
+							sdprob " WHERE inflected_word = E'" word 
+							"' AND disjunct = '" dj "'"
+						)
+					)
+
+					;; Call twice -- once to update, once to flush connection
+					(set! urow (dbi-get_row db-update-conn))
+					(set! urow (dbi-get_row db-update-conn))
+				)
+	   		(set! drow (dbi-get_row db-disjunct-conn))
+			)
+		)
+	   (set! srow (dbi-get_row db-select-conn))
+	)
+)
+
+;; --------------------------------------------------------------------
+;;
+;; Compute the marginal probabilities
+; (marginal-set-probabilities)
+; (display "Done computing the marginal probilities\n")
+;
+(disjunct-cond-probabilities)
+(display "Done computing the conditional probabilities\n")
