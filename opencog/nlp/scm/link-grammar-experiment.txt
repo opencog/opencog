@@ -1,0 +1,36 @@
+
+Diary for experiments involving the learning of new link-grammar rules.
+
+From email discussions:
+
+It demonstrated a certain [ word from words.n.3]
+
+to parse, then we would then allow bad parses for:
+acetylene.n allspice.n antimony.n artillery.n
+
+By squinting at the contents of words.n.3, it seems to
+be partitionable into two categories: mass nouns that
+name things (acetylene, etc.) and mass nouns that
+name properties (e.g. allegiance.n aloofness.n)
+
+Once one stares at link-grammar for a while, one
+realizes that these kinds of problems are rife. They
+would take a huge effort to fix, in piecemeal fashion.
+This is why I am so interested in pursuing a statistical
+approach: I want to gather a large database of actual
+usage, counting the frequency of (disjunct, word-pair)
+and then using these to spot groupings.
+
+For example, (with your proposed fix), there should
+be zero occurrances of a Ds link connecting "a" and
+"acetylene".  On the other hand, we should see
+Dmu links for "The acytlene exploded", but not for
+"The adroitness exploded."
+
+Notice that doing this leaks a bit of semantics into
+the grammar: we would no longer be classing words
+purely according to part-of-speech, but according to
+finer divisions.
+
+Some actual data
+
