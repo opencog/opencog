@@ -97,24 +97,25 @@ protected:
      *  will be executed every 2 cycles; and so on. */
     int _frequency;
 
-    /** Override this method to specify the list of parameters for this agent,
-     * and their default values. Uses the same format as Config.DEFAULT(). */
-    virtual const std::string* PARAMETERS() {
-        // default implementation with no parameters
-        static const std::string defaultConfig[] = {
-            "", ""
-        };
-        return defaultConfig;
-    }
-    
-    /** If any parameter values are unspecified in the Config singleton, sets them
-     * to the default values. */
-    static void setDefaults();
+    /** Sets the list of parameters for this agent and their default values.
+     * If any parameter values are unspecified in the Config singleton, sets
+     * them to the default values. */
+    void setParameters(const std::string* params);
+
+    const std::string* PARAMETERS;
 
 public:
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
-    Agent(const unsigned int f = 1) : _frequency(f) {}
+    Agent(const unsigned int f = 1) : _frequency(f) {
+        // an empty set of parameters and defaults (so that various
+        // methods will still work even if none are set in this or a derived
+        // class)
+        static const std::string defaultConfig[] = {
+            "", ""
+        };
+        setParameters(defaultConfig);
+    }
     
     /** Agent's destructor */
     virtual ~Agent() {}

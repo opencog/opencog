@@ -13,7 +13,7 @@ LINK_DIRECTORIES(
 	${OPENCOG_BINARY_DIR}/src/server
 )
 
-LINK_LIBRARIES(CogServerUTest
+LINK_LIBRARIES(#CogServerUTest
 	server
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
@@ -21,3 +21,4 @@ LINK_LIBRARIES(CogServerUTest
 )
 
 ADD_CXXTEST(CogServerUTest)
+ADD_CXXTEST(AgentUTest)

@@ -28,6 +28,7 @@ ADD_LIBRARY (server SHARED
 	NetworkServer
 	ConsoleSocket
 	SocketHolder
+	Agent
 #  XXX  need to re-enable loading of files, for Joel.
 #	load-file
 )
