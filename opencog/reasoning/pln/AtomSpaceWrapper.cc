@@ -947,12 +947,18 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
                         TruthValue::TRIVIAL_TV());
                 fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
                 if (allNull) {
+                    // set TV!!!!
+                    a->setTV(result, atom.getTruthValue(), NULL_VERSION_HANDLE);
                     return fakeHandle;
                 }
-                //else {
+                /// @todo create link context if contexts are not all null
+                else {
+                    printf("Not all contexts of new link are null!");
+                    char c;
+                    cin >> c;
                     // create link context
-                //    link.getTruthValue();
-                //}
+                    //link.getTruthValue();
+                }
             }
         }
         // if it does exist, then go through each dummy context until NULL_TV is

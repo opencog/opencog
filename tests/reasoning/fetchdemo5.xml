@@ -1,5 +1,7 @@
 <ListLink>
 
+<Element class="PredicateNode" name="just_done" strength="1.0" confidence="0.0"/>
+
 <ForAll confidence="0.999">
 <ListLink>
 <Element name="$10000" class="VariableNode"/>

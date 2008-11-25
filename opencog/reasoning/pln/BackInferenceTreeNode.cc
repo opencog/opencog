@@ -601,7 +601,8 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
         if (bv.bindings)
         {
             // Remove un-owned bindings; they are inconsequential.
-            // \todo Possibly the CrispuRule should be prevented from producing them in the 1st place.
+            /// @todo Possibly the CrispUnificationRule should be prevented from
+            /// producing them in the 1st place.
             bindingsT temp_binds(*bv.bindings);
             bv.bindings->clear();
             foreach(hpair hp, temp_binds)
@@ -612,8 +613,8 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
             direct_results->insert(bv);
     }
 
+    // Check whether we need to update the Best Direct Result Under Me
     bool bdrum_changed = false;
-    
     foreach(BoundVertex bv, *directResult)
     {
         float confidence = atw->getTV(v2h(bv.value)).getConfidence();
@@ -624,6 +625,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
         }
     }
     
+    // If necessary, update all nodes under this one with the new my_bdrum value
     if (bdrum_changed)
         ApplyDown(bdrum_updater(my_bdrum));
     
@@ -631,7 +633,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
     {
 		cprintf(1,"SPAWN...\n");
 
-        /// Insert to pool the bound versions of all the other arguments of the parent
+        // Insert to pool the bound versions of all the other arguments of the parent
         foreach(const BoundVertex& bv, *directResult)
             if (bv.bindings && !bv.bindings->empty())
                 root->spawn(bv.bindings);
@@ -639,11 +641,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
             {
                 tlog(0, "Unbound result: notify parent...\n");
                 Handle hh = v2h(bv.value);
-                /*printTree(hh,0,2);
-printf("\r%d", count111++);
-fflush(stdout);
-if (count111 == 9)
-{ currentDebugLevel = 2; }*/
+                /*printTree(hh,0,2); */
                 NotifyParentOfResult(new VtreeProviderWrapper(bv.value));
             }
     }
@@ -860,8 +858,6 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
 }
 
 /// spawn() is called with all the bindings that were made to produce some direct (eg. lookup) result.
-/// bind_key_set = all the thus bound vars
-/// mediated_bindings = the bindings after being mediated 
 void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 {
     /// Only retain the bindings relevant to the varOwner
@@ -869,6 +865,8 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
     foreach(hpair raw_pair, *bindings) //for $x=>A
         foreach(BITNode* bitn, varOwner[raw_pair.first])
             clone_binds[bitn].insert(raw_pair);
+    /// clone_binds now has BITNode owns the variable as a key
+    /// and a mapping from that variable to the binding.
     
     typedef pair<BITNode*, bindingsT> o2bT;
     foreach(const o2bT& owner2binds, clone_binds)
@@ -881,7 +879,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 }
 
 /// If any of the bound vars are owned, we'll spawn.
-/// TODO: Actually Rules should probably not even need to inform us
+/// @todo Actually Rules should probably not even need to inform us
 /// about the bound vars if they are new, in which case this check would be redundant.
 bool BITNodeRoot::spawns(const bindingsT& bindings) const
 {
@@ -991,10 +989,9 @@ void BITNode::tryClone(hpair binding) const
 {
     foreach(const parent_link<BITNode>& p, parents)
     {
-tlog(-2, "TryClone next...\n");
+        tlog(-2, "TryClone next...\n");
 
-/// when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
-
+        // when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
         map<Handle, Handle>::const_iterator it = find_if(p.bindings->begin(), p.bindings->end(),
                 bind(equal_to<Handle>(),
                     bind(&second<Handle,Handle>, _1),
@@ -1002,22 +999,26 @@ tlog(-2, "TryClone next...\n");
 
         if (p.bindings->end() != it)
         {
+            // i.e. go up the tree as far as necessary until source of binding
+            // chain found.
             p.link->tryClone(hpair(it->first, binding.second));
         }
         else
         {
-            /// Create Child with this new binding:
-
+            // Then create a bound VTree from the source.
+            // Create Child with this new binding:
             Rule::MPs new_args;
             Rule::CloneArgs(this->args, new_args);
 
+            // If validate2 fails... (which is only used by deduction)
+            /// @todo get rid of validate2.
             if (p.link && p.link->rule && !p.link->rule->validate2(new_args))
                 continue;
 
             bindingsT single_bind;
             single_bind.insert(binding);
 
-            /// Bind the args
+            // Bind the args
             foreach(BBvtree& bbvt, new_args)
             {
                 bbvt = BBvtree(new BoundVTree(*bind_vtree(*bbvt, single_bind)));
@@ -1082,8 +1083,12 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
             tlog(0, "get next TV\n");
             assert(atw->isReal(vt2h(*vtp)));
             const TruthValue& etv = atw->getTV(vt2h(*vtp));
-            if (!etv.isNullTv() && etv.getConfidence() > minConfidenceForAbort)
-                return *eval_res_vector_set.begin();
+            if (!etv.isNullTv()) {
+                if (etv.getConfidence() > minConfidenceForAbort)
+                    return *eval_res_vector_set.begin();
+                else 
+                    tlog(0,"TV conf too low: %f", etv.getConfidence());
+            }
         }
         tlog(0, "infer() ok\n");
     }
@@ -1187,36 +1192,37 @@ bool BITNode::CheckForDirectResults()
 void BITNode::expandNextLevel()
 {
     AtomSpaceWrapper *atw = GET_ATW;
-  try
-  {
-     tlog(-2, "Expanding with fitness %.4f   In expansion pool: %s\n", fitness(), (STLhas2(root->exec_pool, this)?"YES":"NO"));
-     rawPrint(*GetTarget(), GetTarget()->begin(), -2);
-     printArgs();
-     if (atw->getType(v2h(*GetTarget()->begin())) == FW_VARIABLE_NODE)    
-        tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
-     tlog(0, "Rule:%s: ExpandNextLevel (%d children exist)\n", (rule?(rule->name.c_str()):"(root)"), children.size());
-    
-    root->exec_pool.remove_if(bind2nd(equal_to<BITNode*>(), this));
-    
-    if (!Expanded)
+    try
     {
-        CheckForDirectResults();
-        CreateChildrenForAllArgs();
-        Expanded = true;
-    }
-    else
-        for (uint i = 0; i < args.size(); i++)
-        {   
-            foreach(const ParametrizedBITNode& bisse, children[i])
-                bisse.prover->expandNextLevel();
-            
-            if (children[i].empty())
-            {
-                tlog(1,"Arg %d proof failure.\n",i);        
-                break;
-            }           
-        }       
-  } catch(...) { tlog(0,"Exception in ExpandNextLevel()"); throw; }
+        tlog(-2, "Expanding with fitness %.4f   In expansion pool: %s\n", fitness(), (STLhas2(root->exec_pool, this)?"YES":"NO"));
+        rawPrint(*GetTarget(), GetTarget()->begin(), -2);
+        printArgs();
+        if (atw->getType(v2h(*GetTarget()->begin())) == FW_VARIABLE_NODE)    
+            tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
+        tlog(0, "Rule:%s: ExpandNextLevel (%d children exist)\n", (rule?(rule->name.c_str()):"(root)"), children.size());
+
+        // remove this BITNode from the roots execution pool
+        root->exec_pool.remove_if(bind2nd(equal_to<BITNode*>(), this));
+
+        if (!Expanded)
+        {
+            CheckForDirectResults();
+            CreateChildrenForAllArgs();
+            Expanded = true;
+        }
+        else
+            for (uint i = 0; i < args.size(); i++)
+            {   
+                foreach(const ParametrizedBITNode& bisse, children[i])
+                    bisse.prover->expandNextLevel();
+
+                if (children[i].empty())
+                {
+                    tlog(1,"Arg %d proof failure.\n",i);        
+                    break;
+                }           
+            }       
+    } catch(...) { tlog(0,"Exception in ExpandNextLevel()"); throw; }
 }
 
 /* Algorithm: Evaluation */
@@ -1757,8 +1763,6 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
             if (direct_results)
                 foreach(const BoundVertex& bv, *direct_results)
                 cbuf += i2str((int)v2h(bv.value)) + " ";
-            if (cbuf.empty())
-                cbuf = "[]";
             prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
             prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
         }

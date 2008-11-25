@@ -52,7 +52,7 @@ public:
 		delete[] tvs;
 		printf("Res freed.\n");
 
-		/// i2otype gives the atom skeleton (tree) w/o TV. addLink attaches it to Core with TV
+		/// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
 		Handle ret = destTable->addAtom(*i2oType(premiseArray),
 			*retTV,
 			true);	

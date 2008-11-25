@@ -232,7 +232,6 @@ protected:
 	}
 
 	/// Apply an operator to all nodes below this one (and to this one)
-	
 	template<typename opT> void ApplyDown(opT op)
 	{
 		using namespace boost;

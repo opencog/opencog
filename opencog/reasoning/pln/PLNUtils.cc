@@ -748,12 +748,10 @@ cprintf(2,"TableGather:\n");
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", tLong);
-                                            // TODO fresh bug
                                             Handle tNode = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             vector<Handle> listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(tNode);
-                                            // TODO fresh bug
                                             Handle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
                                             Handle atTimePredNode = atw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
                                             vector<Handle> evalLinkOutgoing;
@@ -793,7 +791,7 @@ cprintf(2,"TableGather:\n");
                                         Temporal* tl = new Temporal(t1Long, t2Long);
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries inside the following temporal: " << tl->toString() << endl;
-                                        // TODO: is STARTS_WITHIN correct?
+                                        //! @TODO: is STARTS_WITHIN correct?
                                         atw->getTimeServer().get(back_inserter(timeEntries),matchingHandle, *tl, TemporalTable::STARTS_WITHIN);
                                         if (timeEntries.size() > 0) {
                                             cout << "matched element satisfies the time condition: " << timeEntries.front().toString() << endl;
@@ -2012,6 +2010,8 @@ Handle make_real(vtree& vt)
 
 void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
 {
+    // Recursive bind steps through the chain of bindings
+    // e.g. when A -> B, but a parent has C -> A
 	Handle *ph = v2h(&v);
 	if (ph)
 	{
@@ -2222,13 +2222,12 @@ void ForceVirtual(meta _target, vtree::iterator& vit)
 	AtomSpaceWrapper* atw = GET_ATW;
 
 	Handle *ph = v2h(&(*vit));
-	//Type t = atw->getType(*ph);
 	if (ph && atw->isReal(*ph) && !atw->inheritsType(atw->getType(*ph), NODE))
 	{
-		//A real link cannot have children in a vtree! That'd screw everything up.
+		// A real link cannot have children in a vtree! That'd screw everything up.
 		assert(!_target->number_of_children(vit));
 
-		/// Save the sib it because the replace() will invalidate 'vit'
+		// Save the sib it because the replace() will invalidate 'vit'
 //		vtree::sibling_iterator next_sib = _target->next_sibling(vit);
 
 		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)*ph);
@@ -2248,9 +2247,8 @@ meta ForceAllLinksVirtual(meta _target)
 /*	for (vtree::sibling_iterator root = _target->begin(); root != _target->end() && root != root->end(); root = _target->begin(root))
 		for (vtree::sibling_iterator vit = _target->begin(root); vit != _target->end(root);)*/
 
-	/// TODO: Don't always just iterate the whole tree again from the beginning after every change,
+	/// @todo Don't always just iterate the whole tree again from the beginning after every change,
 	/// but instead continue from where you were, using something like the above embedded loop pair for that.
-			
 	for (vtree::pre_order_iterator vit = _target->begin(); vit != _target->end();)
 		ForceVirtual(_target, vit);
 

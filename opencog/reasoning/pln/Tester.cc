@@ -21,9 +21,6 @@
 
 using namespace reasoning;  
 
-//! These should be moved to a test controller class
-extern int tempar;
-
 #if 0
 #include <windows.h>
 #include <Mmsystem.h>
@@ -191,9 +188,8 @@ float temperatures[] = {    0.00005, 0.00007, 10,
                             0.1, 0.3, 0.5,
                             1, 3, 5 };
 const int temperaturesN = 7; //3*5;
-//const int temperaturesN = 2;
 
-void RunPLNTests(int temp_index)
+void RunPLNTests()
 {
 //  goal::WalkTest();
 //  return;
@@ -210,7 +206,7 @@ void RunPLNTests(int temp_index)
 
     FILE *f = fopen("results.txt","a");
 
-    int tempi=tempar;
+    int tempi=0;
 
 //  for (int tempi = 0; tempi < temperaturesN; tempi++)
     {
@@ -447,7 +443,7 @@ InitAxiomSet("smalldemo.xml");
                                 NewNode(CONCEPT_NODE, "Amir")
                             ))),
             new SimpleTruthValue(0.78f, getCount(0.39f)),
-            new SimpleTruthValue(1.001, getCount(0.999f)),
+            new SimpleTruthValue(1.001f, getCount(0.999f)),
             100,0);
     }
     
@@ -493,8 +489,6 @@ InitAxiomSet("smalldemo.xml");
     TulipWriter tlp(std::string("small_demo.tlp"));
     tlp.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
-    // Fails:
-    foo42=true;
     printf("\nTest inheritance Osama/Abu.\n");
     InitAxiomSet("smalldemo.xml");
     maketest(makemeta(mva((Handle)INHERITANCE_LINK,
@@ -505,8 +499,6 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.999f, getCount(1.01f)),
             40,0);
 
-    // Fails:
-/*   
     printf("\nTest inheritance Muhummad->Terrorist.\n");
 // Takes a tad too long with bigdemo
     InitAxiomSet("smalldemo.xml");
@@ -520,7 +512,6 @@ InitAxiomSet("smalldemo.xml");
             26,0);
     TulipWriter tlp2(std::string("big_demo.tlp"));
     tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
-    */
 
     // memory overload:
     /*
@@ -542,7 +533,7 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.01f, getCount(0.01f)),
             new SimpleTruthValue(1.01f, getCount(1.01f)),
             200,0);
-    */
+            */
 
     InitAxiomSet("AnotBdemo.xml");
 
@@ -566,7 +557,6 @@ InitAxiomSet("smalldemo.xml");
 */
 
     // memory overload:
-/*
     InitAxiomSet("fetchdemo5.xml");
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "+++")
@@ -575,7 +565,6 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.01f, getCount(0.01f)),
             new SimpleTruthValue(1.01f, getCount(0.94f)),
             200,0);
-            */
             
 /*
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
