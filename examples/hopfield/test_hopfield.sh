@@ -1,5 +1,5 @@
 #!/bin/bash
-h_exe=./hopfield
+h_exe=examples/hopfield/hopfield
 results_dir=hopfield_results
 if [ -d $results_dir ]
 then
