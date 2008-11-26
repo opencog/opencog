@@ -939,34 +939,34 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
                 bool allNull = true;
                 // if all null context
                 for (HandleSeq::iterator i = contexts.begin();
-                        allNull && i != contexts.end();
+                        i != contexts.end();
                         i++) {
-                    if (AS_PTR->getName(*i) != rootContext) allNull = false;
+                    if (AS_PTR->getName(*i) != rootContext) {
+                        allNull = false;
+
+                    }
                 }
                 result = a->addLink(link.getType(), link.getOutgoingSet(),
                         TruthValue::TRIVIAL_TV());
                 fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
                 if (allNull) {
-                    // set TV!!!!
                     a->setTV(result, atom.getTruthValue(), NULL_VERSION_HANDLE);
                     return fakeHandle;
-                }
-                /// @todo create link context if contexts are not all null
-                else {
-                    printf("Not all contexts of new link are null!");
+                } else {
+                    printf("Not all contexts of new link are null! Needs to be "
+                            "implemented in AtomSpaceWrapper...");
                     char c;
                     cin >> c;
+                    /// @todo create link context if contexts are not all null
+                    /// but possibly not needed...
+                    assert(0);
                     // create link context
                     //link.getTruthValue();
                 }
             }
         }
-        // if it does exist, then go through each dummy context until NULL_TV is
-        // returned, when NULL_TV is returned, this is a free dummy context. if it
-        // isn't returned before running out of dummy contexts, create a new dummy
-        // context and use that.
-
-        // result should contain a handle to existing atom
+        // if it does exist then
+        // result contains a handle to existing atom
         VersionHandle vh;
 
         // build context link's outgoingset if necessary
@@ -975,15 +975,22 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
             assert(nnn);
             contexts.push_back(AS_PTR->getHandle(CONCEPT_NODE, rootContext));
         }
-        // Replace NULL version handle contexts with rootContext
-        
-        
-        // add context node
-        Handle newContext = a->addLink(ORDERED_LINK,contexts);
-        dummyContexts.insert(VersionHandle(CONTEXTUAL,newContext));
+        // check context link doesn't already exist, otherwise we are in trouble
+        Handle existingLink = AS_PTR->getHandle(ORDERED_LINK,contexts);
+        //assert(TLB::isInvalidHandle(existingLink));
+        if(!TLB::isInvalidHandle(existingLink)) {
+            printf("\ncontext link %u exists hs=(",(uint)existingLink);
+            foreach (Handle cld, contexts) {
+                printf("%u",(uint)cld);
+            }
+            printf(")\n");
+        }
 
-        // add version handle to dummyContexts
+        // add context link 
+        Handle newContext = a->addLink(ORDERED_LINK,contexts);
         vh = VersionHandle(CONTEXTUAL,newContext);
+        // add version handle to dummyContexts
+        dummyContexts.insert(vh);
         // vh is now a version handle for a free context
         // for which we can set a truth value
         a->setTV(result, atom.getTruthValue(), vh);
@@ -991,10 +998,40 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
         // Link <handle,vh> to a long int
         fakeHandle = realToFakeHandle(result,vh);
     } else {
-        // no:
-        // just add it and let AtomSpace deal with merging it
+        // no fresh:
+        VersionHandle vh = NULL_VERSION_HANDLE;
+        if (contexts.size() != 0) {
+            // if the atom doesn't exist already, then add normally
+            bool allNull = true;
+            // if all null context
+            for (HandleSeq::iterator i = contexts.begin();
+                    i != contexts.end();
+                    i++) {
+                if (AS_PTR->getName(*i) != rootContext) {
+                    allNull = false;
+
+                }
+            }
+            // Get the existing context link if not all contexts are NULL 
+            if (!allNull) {
+                Handle existingContext = AS_PTR->getHandle(ORDERED_LINK,contexts);
+                if (TLB::isInvalidHandle(existingContext)) {
+                    existingContext = a->addLink(ORDERED_LINK,contexts);
+                    vh = VersionHandle(CONTEXTUAL,existingContext);
+                    dummyContexts.insert(vh);
+                } else {
+                    vh = VersionHandle(CONTEXTUAL,existingContext);
+                }
+            }
+        }
+        // add it and let AtomSpace deal with merging it
         result = a->addRealAtom(atom);
-        fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
+        if (vh != NULL_VERSION_HANDLE) {
+            // if it's not for the root context, we still have to
+            // specify the truth value for that VersionHandle
+            AS_PTR->setTV(result, atom.getTruthValue(), vh);
+        }
+        fakeHandle = realToFakeHandle(result, vh);
         
     }
     return fakeHandle;

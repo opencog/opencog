@@ -333,7 +333,13 @@ public:
     //! Add Node via dummy contexts method
     Handle addNodeDC(Type t, const string& name, const TruthValue& tvn,
             bool fresh, bool managed);
-    //! Add concrete atom using dummy contexts if it already exists
+
+    /** Add concrete atom using dummy contexts if it already exists
+     * 
+     * @note Contexts should have actual handles for links, or be empty for
+     * nodes. This can be ensured by using the appropriate addNodeDC or
+     * addNodeDC classes.
+     */
     Handle addAtomDC(Atom &a, bool fresh, bool managed, HandleSeq contexts = HandleSeq());
 
     Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,

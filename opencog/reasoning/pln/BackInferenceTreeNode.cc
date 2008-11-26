@@ -1336,7 +1336,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
                     root->hsource[v2h(next_result.value)] = const_cast<BITNode*>(this);
 
-                    if (RECORD_TRAILS)
+                    if (RECORD_TRAILS) {
                         foreach(VtreeProvider* v, rule_args)
                         {
 //                          root->inferred_from[v2h(next_result.value)].push_back(v2h(v.value));
@@ -1344,6 +1344,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 //                          root->inferred_with[v2h(next_result.value)] = rule;
                             haxx::inferred_with[v2h(next_result.value)] = rule;
                         }                       
+                    }
                 }
 next_args:;
             }
@@ -1760,9 +1761,10 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
         else
         {
             string cbuf("[ ");
-            if (direct_results)
+            if (direct_results) {
                 foreach(const BoundVertex& bv, *direct_results)
-                cbuf += i2str((int)v2h(bv.value)) + " ";
+                    cbuf += i2str((int)v2h(bv.value)) + " ";
+            }
             prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
             prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
         }

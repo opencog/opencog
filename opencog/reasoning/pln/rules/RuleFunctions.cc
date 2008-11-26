@@ -167,10 +167,11 @@ void insertAllANDCombinations(set<atom, lessatom_ignoreVarNameDifferences> head,
         atom neBoundVertex(AND_LINK, 0);
         neBoundVertex.hs = vector<Btr<atom> >(head.size());
 
-        if (!head.empty())
+        if (!head.empty()) {
             foreach(const atom &a, head)
                 neBoundVertex.hs.push_back(Btr<atom>(new atom(a)));
 //          copy(head.begin(), head.end(), neBoundVertex.hs.begin());
+        }
 
         AND_combinations.insert(neBoundVertex);
     }

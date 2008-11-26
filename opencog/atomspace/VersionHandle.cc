@@ -94,6 +94,12 @@ bool VersionHandle::operator==(const VersionHandle &other) const
     return comp(*this, other);
 }
 
+bool VersionHandle::operator!=(const VersionHandle &other) const
+{
+    struct eqVersionHandle comp;
+    return !comp(*this, other);
+}
+
 bool VersionHandle::operator<(const VersionHandle &other) const {
     // doesn't really matter
     return substantive < other.substantive;

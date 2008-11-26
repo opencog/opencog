@@ -369,6 +369,8 @@ void RunPLNTestsOnce()
     puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
 
     //MacroRuleTest();
+    puts("Testing atomspacewrapper");
+    atw->testAtomSpaceWrapper();
 
 
 #if RUN_FAILURE_TESTS
@@ -418,7 +420,6 @@ InitAxiomSet("smalldemo.xml");
             10,0);
 
 #endif
-
     puts("\nInverse Binding test\n");
     InitAxiomSet("inverse_binding.xml");
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -486,8 +487,8 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.9f, getCount(0.9f)),
             new SimpleTruthValue(0.999f, getCount(0.999f)),
             15,0);
-    TulipWriter tlp(std::string("small_demo.tlp"));
-    tlp.write(0,0);//,atw->fakeToRealHandle(setLink).first);
+    //TulipWriter tlp(std::string("small_demo.tlp"));
+    //tlp.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
     printf("\nTest inheritance Osama/Abu.\n");
     InitAxiomSet("smalldemo.xml");
@@ -510,8 +511,8 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.01f, getCount(0.20f)),
             new SimpleTruthValue(1.01f, getCount(1.01f)),
             26,0);
-    TulipWriter tlp2(std::string("big_demo.tlp"));
-    tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
+    //TulipWriter tlp2(std::string("big_demo.tlp"));
+    //tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
     // memory overload:
     /*

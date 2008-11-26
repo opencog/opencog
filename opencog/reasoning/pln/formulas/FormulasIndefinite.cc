@@ -26,6 +26,8 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
+#include <algorithm>
+
 namespace reasoning 
 {
 
@@ -405,7 +407,7 @@ IndefiniteTruthValue* IndefiniteRule::conclusion(pvector d) {
 	qBelow=int(ceil(n1*percentile));
 	qAbove=qBelow;
 	
-	sort(means.begin(), means.end());
+    std::sort(means.begin(), means.end());
 	result->setL(means[qBelow]);
 	result->setU(means[n1-qAbove-1]);
 

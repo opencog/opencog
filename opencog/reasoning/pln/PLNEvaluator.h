@@ -3,7 +3,7 @@
 
 #include <queue>
 #include <set>
-#include <tree.h>
+#include <opencog/util/tree.h>
 #include "rules/Rule.h"
 #include "PLN.h"
 

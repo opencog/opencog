@@ -1054,6 +1054,7 @@ void AtomSpace::clear()
 
     getHandleSet(outputI, ATOM, true);
 #if 0
+    int j = 0;
     printf("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
     printf("atoms in allAtoms: %d\n",allAtoms.size());
@@ -1065,8 +1066,9 @@ void AtomSpace::clear()
         result = removeAtom(*i,true);
 #if 0
         if (result) {
-            printf("Atom removed, %d nodes %d links left to delete\n",
-                Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
+            printf("%d: Atom %u removed, %d nodes %d links left to delete\n",
+                j,*i,Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
+            j++;
         }
 #endif
 

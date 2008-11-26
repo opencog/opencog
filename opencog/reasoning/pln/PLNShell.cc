@@ -134,7 +134,8 @@ extern int currentDebugLevel;
 
 //! Run tests at start up
 //! @todo move to unit test and allow it to be run from the main shell
-bool RunPLNtest=false;
+bool RunPLNtest=true;
+//bool RunPLNtest=false;
 
 namespace haxx
 {
