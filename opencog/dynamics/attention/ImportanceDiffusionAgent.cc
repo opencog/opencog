@@ -32,6 +32,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
@@ -41,7 +42,20 @@ namespace opencog
 
 ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
 {
-    maxSpreadPercentage=MA_DEFAULT_MAX_SPREAD_PERCENTAGE;
+    static const std::string defaultConfig[] = {
+        //! Default value that normalised STI has to be above before
+        //! being spread
+        "ECAN_DIFFUSION_THRESHOLD","0.5",
+        //! Maximum percentage of STI that is spread from an atom
+        "ECAN_MAX_SPREAD_PERCENTAGE","0.5",
+        "",""
+    };
+    setParameters(defaultConfig);
+
+    // TODO won't respond to the parameters being changed later
+    // (not a problem at present, but could get awkward with, for example,
+    // automatic parameter adaptation)
+    maxSpreadPercentage = (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
 
     switch (decisionFunction) {
     case HYPERBOLIC:
@@ -51,7 +65,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
         spreadDecider = (SpreadDecider*) new StepDecider();
         break;
     }
-    setDiffusionThreshold(MA_DEFAULT_DIFFUSION_THRESHOLD);
+    setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
 
 }
 

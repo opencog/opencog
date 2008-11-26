@@ -41,12 +41,6 @@ class ImportanceUpdatingAgentUTest;
 namespace opencog
 {
 
-// Starting values for rent and wage
-const int DEFAULT_ATOM_STI_RENT = 10;
-const int DEFAULT_ATOM_LTI_RENT = 10;
-const int DEFAULT_ATOM_STI_WAGE = 2;
-const int DEFAULT_ATOM_LTI_WAGE = 2;
-
 class CogServer;
 
 /** ImportantUpdatingAgent updates the AttentionValues of atoms.
@@ -144,7 +138,7 @@ private:
     void randomStimulation(AtomSpace *a);
 
     bool noiseOn;     //!< Randomly stimulate atoms?
-    float noiseOdds;  //!< Change of randomly introduced stimulus
+    float noiseOdds;  //!< Chance of randomly introduced stimulus
     stim_t noiseUnit; //!< The default stimulus unit used by random stimulation
 
     //! Recent amount of stimulus given per cycle

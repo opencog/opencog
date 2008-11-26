@@ -41,11 +41,6 @@
 namespace opencog
 {
 
-//! Default value that normalised STI has to be above before being spread
-const float MA_DEFAULT_DIFFUSION_THRESHOLD = 0.5f;
-//! Maximum percentage of STI that is spread from an atom
-const float MA_DEFAULT_MAX_SPREAD_PERCENTAGE = 0.5f;
-
 class CogServer;
 
 class SpreadDecider

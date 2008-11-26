@@ -35,15 +35,27 @@ using namespace opencog;
 
 ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 {
+    // Starting values for rent and wage
+    static const std::string defaultConfig[] = {
+        "ECAN_STARTING_ATOM_STI_RENT", "10",
+        "ECAN_STARTING_ATOM_LTI_RENT", "10",
+        "ECAN_STARTING_ATOM_STI_WAGE", "2",
+        "ECAN_STARTING_ATOM_LTI_WAGE", "2",
+        "ECAN_RENT_TYPE","2", // RENT_LOG
+        "ECAN_RENT_AMNESTY","5",
+        "", ""
+    };
+    setParameters(defaultConfig);
+
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
-    STIAtomRent = DEFAULT_ATOM_STI_RENT;
-    LTIAtomRent = DEFAULT_ATOM_LTI_RENT;
-    STIAtomWage = DEFAULT_ATOM_STI_WAGE;
-    LTIAtomWage = DEFAULT_ATOM_LTI_WAGE;
+    STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
+    LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
 
-	rentType = RENT_LOG; //config().get_int("RENT_TYPE");
-	amnesty = 5; //config().get_int("RENT_AMNESTY");
+	rentType = config().get_int("ECAN_RENT_TYPE");
+	amnesty = config().get_int("ECAN_RENT_AMNESTY");
 
     updateLinks = true;
 

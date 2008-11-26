@@ -26,12 +26,21 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/platform.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
 ImportanceSpreadingAgent::ImportanceSpreadingAgent()
 {
-    spreadThreshold = MA_DEFAULT_SPREAD_THRESHOLD;
+    static const std::string defaultConfig[] = {
+        "ECAN_DEFAULT_SPREAD_THRESHOLD","0",
+        "ECAN_DEFAULT_SPREAD_MULTIPLIER","10.0",
+        "", ""
+    };
+    setParameters(defaultConfig);
+
+    spreadThreshold = (float) (config().get_double
+                               ("ECAN_DEFAULT_SPREAD_THRESHOLD"));
 }
 
 ImportanceSpreadingAgent::~ImportanceSpreadingAgent()

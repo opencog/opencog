@@ -26,13 +26,21 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
 HebbianLearningAgent::HebbianLearningAgent()
 {
-    convertLinks = false;
-    conversionThreshold = 15;
+    static const std::string defaultConfig[] = {
+        "ECAN_CONVERT_LINKS","false",
+        "ECAN_CONVERSION_THRESHOLD","15",
+        "",""
+    };
+    setParameters(defaultConfig);
+
+    convertLinks = config().get_bool("ECAN_CONVERT_LINKS");
+    conversionThreshold = config().get_int("ECAN_CONVERSION_THRESHOLD");
 }
 
 HebbianLearningAgent::~HebbianLearningAgent()

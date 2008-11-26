@@ -24,19 +24,37 @@
 #include "ForgettingAgent.h"
 
 #include <algorithm>
+#include <sstream>
 
 #include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
 ForgettingAgent::ForgettingAgent()
 {
-    // forget 0.1% of atoms
-    forgetPercentage = 0.001f;
-    // No limit to lti of removed atoms
-    forgetThreshold = AttentionValue::MAXLTI;
+    std::string defaultForgetThreshold;
+    std::ostringstream buf;
+
+    // No limit to lti of removed atoms    
+    // Convert MAXLTI to a string for storing in the configuration
+    buf << AttentionValue::MAXLTI;
+    defaultForgetThreshold = buf.str();
+    
+    static const std::string defaultConfig[] = {
+        // forget 0.1% of atoms
+        "ECAN_FORGET_PERCENTAGE", "0.001",
+        "ECAN_FORGET_THRESHOLD", defaultForgetThreshold,
+        "", ""
+    };
+    setParameters(defaultConfig);
+
+    forgetPercentage = (float) (config().get_double("ECAN_FORGET_PERCENTAGE"));
+
+    forgetThreshold = (AttentionValue::lti_t)
+                      (config().get_int("ECAN_FORGET_THRESHOLD"));
 }
 
 ForgettingAgent::~ForgettingAgent()

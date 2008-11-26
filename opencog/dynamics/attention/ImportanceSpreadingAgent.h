@@ -36,9 +36,6 @@
 namespace opencog
 {
 
-const int MA_DEFAULT_SPREAD_THRESHOLD = 0;
-const float MA_DEFAULT_SPREAD_MULTIPLIER = 10.0f;
-
 class CogServer;
 
 /** Spreads short term importance along HebbianLinks.

@@ -31,6 +31,7 @@
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Agent.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -127,7 +128,9 @@ public:
     void testGetSetMaxPercentage() {
         float percent;
         percent = agent->getMaxSpreadPercentage();
-        TS_ASSERT_EQUALS(percent, MA_DEFAULT_MAX_SPREAD_PERCENTAGE);
+        TS_ASSERT_EQUALS(percent, 
+                         (float) (config().get_double
+                         ("ECAN_MAX_SPREAD_PERCENTAGE")));
         percent = 0.5;
         agent->setMaxSpreadPercentage(percent);
         TS_ASSERT_EQUALS(percent, agent->getMaxSpreadPercentage());
@@ -136,7 +139,8 @@ public:
     void testGetSetDiffusionThreshold() {
         float percent;
         percent = agent->getDiffusionThreshold();
-        TS_ASSERT_EQUALS(percent, MA_DEFAULT_DIFFUSION_THRESHOLD);
+        TS_ASSERT_EQUALS(percent, (float) (config().get_double
+                                  ("ECAN_DIFFUSION_THRESHOLD")));
         percent = 0.5;
         agent->setDiffusionThreshold(percent);
         TS_ASSERT_EQUALS(percent, agent->getDiffusionThreshold());
