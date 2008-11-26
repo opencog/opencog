@@ -341,6 +341,7 @@ public:
      * addNodeDC classes.
      */
     Handle addAtomDC(Atom &a, bool fresh, bool managed, HandleSeq contexts = HandleSeq());
+    Handle getNewContextLink(Handle h, HandleSeq destContexts);
 
     Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);

@@ -207,11 +207,11 @@ HandleSeq AtomSpaceWrapper::getIncoming(const Handle h)
             HandleSeq outgoing = AS_PTR->getOutgoing(v2.first);
             if (v2.second.substantive != UNDEFINED_HANDLE) {
                 HandleSeq contexts = AS_PTR->getOutgoing(v2.second.substantive);
-                assert (outgoing.size() == contexts.size());
+                assert ((outgoing.size() + 1) == contexts.size());
                 bool match = true;
                 for (uint i = 0; i < outgoing.size(); i++) {
                     if (outgoing[i] == v.first) {
-                        Handle c = contexts[i];
+                        Handle c = contexts[i+1];
                         if (AS_PTR->getName(c) == rootContext)
                             c = UNDEFINED_HANDLE;
                         if (sourceContext != c) {
@@ -284,7 +284,7 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const Handle h) const
             // return existing fake handle
             return i->second;
         } else {
-            // remove fake Handle
+            //! @todo remove fake Handle
             throw RuntimeException(TRACE_INFO, "fake handle %u points to "
                     "a now invalid handle", h);
         }
@@ -354,9 +354,11 @@ HandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
     // Check that all contexts match... they should
     bool match = true;
     for (unsigned int i=0; match && i < outgoing.size(); i++) {
-        if (AS_PTR->getName(contexts[i]) == rootContext)
-            contexts[i] = UNDEFINED_HANDLE;
-        VersionHandle vh(CONTEXTUAL, contexts[i]);
+        // +1 because first context is for distinguishing dual links using the
+        // same destination contexts.
+        if (AS_PTR->getName(contexts[i+1]) == rootContext)
+            contexts[i+1] = UNDEFINED_HANDLE;
+        VersionHandle vh(CONTEXTUAL, contexts[i+1]);
         if (AS_PTR->getTV(outgoing[i],vh).isNullTv()) {
             match = false;
         } else {
@@ -443,9 +445,9 @@ Handle AtomSpaceWrapper::getHandle(Type t,const HandleSeq& outgoing)
             VersionHandle vh = ctv.getVersionHandle(i);
             HandleSeq hs = AS_PTR->getOutgoing(vh.substantive);
             bool matches = true;
-            assert(hs.size() == vhs.size());
-            for (unsigned int j = 0; j < hs.size(); j++) {
-                if (hs[j] != vhs[j].substantive) {
+            assert(hs.size() == (vhs.size()+1));
+            for (unsigned int j = 0; j < vhs.size()-1; j++) {
+                if (hs[j+1] != vhs[j].substantive) {
                     matches = false;
                     break;
                 }
@@ -970,25 +972,18 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
         VersionHandle vh;
 
         // build context link's outgoingset if necessary
-        // if this is a node with nothing in contexts
+       /* // if this is a node with nothing in contexts
         if (contexts.size() == 0) {
             assert(nnn);
+            // @todo
+            // find and create free context:
+            // find last context in composite truth value, use as dest of new
+            // context
             contexts.push_back(AS_PTR->getHandle(CONCEPT_NODE, rootContext));
-        }
-        // check context link doesn't already exist, otherwise we are in trouble
-        Handle existingLink = AS_PTR->getHandle(ORDERED_LINK,contexts);
-        //assert(TLB::isInvalidHandle(existingLink));
-        if(!TLB::isInvalidHandle(existingLink)) {
-            printf("\ncontext link %u exists hs=(",(uint)existingLink);
-            foreach (Handle cld, contexts) {
-                printf("%u",(uint)cld);
-            }
-            printf(")\n");
-        }
 
-        // add context link 
-        Handle newContext = a->addLink(ORDERED_LINK,contexts);
-        vh = VersionHandle(CONTEXTUAL,newContext);
+        } */
+        Handle contextLink = getNewContextLink(result,contexts);
+        vh = VersionHandle(CONTEXTUAL,contextLink);
         // add version handle to dummyContexts
         dummyContexts.insert(vh);
         // vh is now a version handle for a free context
@@ -1014,6 +1009,7 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
             }
             // Get the existing context link if not all contexts are NULL 
             if (!allNull) {
+                contexts.insert(contexts.begin(),AS_PTR->getHandle(CONCEPT_NODE, rootContext));
                 Handle existingContext = AS_PTR->getHandle(ORDERED_LINK,contexts);
                 if (TLB::isInvalidHandle(existingContext)) {
                     existingContext = a->addLink(ORDERED_LINK,contexts);
@@ -1036,6 +1032,37 @@ Handle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleS
     }
     return fakeHandle;
 
+}
+
+Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
+    // insert root as beginning
+    contexts.insert(contexts.begin(),AS_PTR->getHandle(CONCEPT_NODE, rootContext));
+
+    // check if root context link exists
+    Handle existingLink = AS_PTR->getHandle(ORDERED_LINK,contexts);
+    if(TLB::isInvalidHandle(existingLink)) {
+        return AS_PTR->addLink(ORDERED_LINK,contexts);
+    } else {
+        // if it does exist, check if it's in the contexts of the
+        // given atom
+        if (AS_PTR->getTV(h).getType() == COMPOSITE_TRUTH_VALUE) {
+            const CompositeTruthValue ctv = dynamic_cast<const CompositeTruthValue&> (AS_PTR->getTV(h));
+            bool found = false;
+            do {
+                found = false;
+                for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
+                    VersionHandle vh = ctv.getVersionHandle(i);
+                    if (AS_PTR->getOutgoing(vh.substantive,0) == existingLink) {
+                        existingLink = vh.substantive;
+                        found = true;
+                    }
+                }
+            } while (found);
+            // existingLink is now the furthest from rootContext
+            contexts[0] = existingLink;
+        }
+        return AS_PTR->addLink(ORDERED_LINK,contexts);
+    }
 }
 
 bool AtomSpaceWrapper::removeAtom(Handle h)
@@ -1074,7 +1101,7 @@ bool AtomSpaceWrapper::removeAtom(Handle h)
             if ( ir != vhmap_reverse.end() ) vhmap_reverse.erase(ir);
         }
     }
-    // TODO - also remove freed dummy contexts
+    // @todo - also remove freed dummy contexts
     return true;
 }
 
