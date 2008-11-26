@@ -158,10 +158,6 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             break;
         case 'D':
             verboseFlag = 2;
-            hServer->importUpdateAgent->getLogger()->enable();
-            hServer->importUpdateAgent->getLogger()->setLevel (Logger::FINE);
-            hServer->importUpdateAgent->getLogger()->
-            setPrintToStdoutFlag (true);
             break;
         case 'w':
             hServer->width = atoi(optarg);

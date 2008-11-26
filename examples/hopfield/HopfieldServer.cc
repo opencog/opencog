@@ -163,6 +163,11 @@ void HopfieldServer::init(int width, int height, int numLinks)
 #endif
     forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
 
+    if (options->verboseFlag == 2) {
+        importUpdateAgent->getLogger()->enable();
+        importUpdateAgent->getLogger()->setLevel (Logger::FINE);
+        importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
+    }
     hebLearnAgent->convertLinks = true;
     forgetAgent->forgetPercentage = 0.10f;
 

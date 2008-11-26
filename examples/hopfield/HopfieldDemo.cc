@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
 
     o->parseOptions(argc, argv);
 
+    (static_cast<HopfieldServer&>(server())).init(-1, -1, -1);
+
     /* setup logging */
     logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     if (o->verboseFlag == 1) {
@@ -59,8 +61,6 @@ int main(int argc, char *argv[])
         o->printConfiguration();
         exit(0);
     }
-
-    (static_cast<HopfieldServer&>(server())).init(-1, -1, -1);
 
     if (o->recordToFile) o->openOutputFiles();
 
