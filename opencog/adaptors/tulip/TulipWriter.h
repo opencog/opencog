@@ -33,7 +33,8 @@ public:
 
     //! Eventually support writing only a certain depth from a node.
     //! At the moment just out put everything
-    bool write(Handle seed = 0, int depth = -1, Handle setLink = NULL);
+    bool write(Handle seed = Handle::UNDEFINED, int depth = -1,
+            Handle setLink = Handle::UNDEFINED);
 
 };
 

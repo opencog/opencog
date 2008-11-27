@@ -331,7 +331,7 @@ void childOfDump()
     typedef pair<Handle,Handle> hpair;
     foreach(hpair crel, childOf)
     {
-        cout << "#" << (int)crel.first << " is child of " << (int)crel.second << "\n";
+        cout << "#" << (int)crel.first.value() << " is child of " << (int)crel.second.value() << "\n";
     }
 }
 
@@ -835,7 +835,7 @@ void fw_beta (void) {
   Handle setLink = atw->addLinkDC(SET_LINK, results, tv, false, false);
 
   TulipWriter tlp(std::string("fwd_chain_result.tlp"));
-  tlp.write(0,0,atw->fakeToRealHandle(setLink).first);
+  tlp.write(Handle::UNDEFINED,-1,atw->fakeToRealHandle(setLink).first);
   
   
 }
@@ -900,7 +900,7 @@ printf("BITNodeRoot init ok\n");
         bool axioms_ok;
         boost::shared_ptr<set<Handle> > ts;
         Vertex v;
-        Handle eh=NULL;
+        Handle eh=Handle::UNDEFINED;
         bool using_root = true;
         
         #if LOG_ON_FILE

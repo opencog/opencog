@@ -74,7 +74,7 @@ public:
         NEXT_AFTER_START_OF,
         NEXT_AFTER_END_OF,
         PREVIOUS_BEFORE_START_OF,
-        PREVIOUS_BEFORE_END_OF,
+        PREVIOUS_BEFORE_END_OF
     } TemporalRelationship;
 
     /**

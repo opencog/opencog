@@ -54,7 +54,7 @@ void TulipWriter::writeCluster(Handle setLink)
 
     // Output setLink as a cluster
     std::set<Handle> inSet;
-    if (setLink) {
+    if (setLink != Handle::UNDEFINED) {
         HandleSeq setLinks = a->getOutgoing(setLink);
         foreach (Handle h, setLinks) {
             inSet.insert(h);
@@ -223,7 +223,7 @@ bool TulipWriter::write(Handle seed, int depth, Handle setLink)
 
     writeNodes();
     writeEdges();
-    if (setLink) writeCluster(setLink);
+    if (setLink != Handle::UNDEFINED) writeCluster(setLink);
     writeNodeNames();
     writeDefaultColouring();
 

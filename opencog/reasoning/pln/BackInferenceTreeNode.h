@@ -339,7 +339,7 @@ protected:
 			printSubsts(new_result, -1);
 		assert(!new_result.bindings ||new_result.bindings->empty());
 
-		if ((ph = v2h(&new_result.value)) && !*ph)
+        if ((ph = v2h(&new_result.value)) && *ph != Handle::UNDEFINED)
 		{
 			puts("Rule returned NULL! Args were:\n");
 
@@ -398,7 +398,7 @@ protected:
 			{
 				bc += "(";
 				foreach(VtreeProvider* bv, vbv)
-					bc += i2str((int)v2h(*bv->getVtree().begin())) + " ";
+					bc += i2str((int)v2h(*bv->getVtree().begin()).value()) + " ";
 				bc += ")\n";
 			}
 			tlog(1, bc.c_str());
@@ -690,7 +690,7 @@ public:
                 i->first->print(-10, true);
                 foreach(Vertex v, i->second)
                 {
-                    printf("%lu\n", v2h(v));
+                    printf("%lu\n", v2h(v).value());
                     NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
                 }
                 printf("\n");

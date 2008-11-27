@@ -29,7 +29,7 @@ public:
 
 	//Domain should be inferred instead from the premis ConceptNodes!!!
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
 	{
 		const int n = (int)premiseArray.size();
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];

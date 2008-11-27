@@ -164,7 +164,7 @@ HandleSeq AtomSpaceWrapper::getOutgoing(const Handle h)
         return HandleSeq();
     } else {
         vhpair v = fakeToRealHandle(h);
-        if (v.second.substantive != UNDEFINED_HANDLE)
+        if (v.second.substantive != Handle::UNDEFINED)
             return realToFakeHandles(v.first, v.second.substantive);
         else
             return realToFakeHandles(AS_PTR->getOutgoing(v.first));
@@ -178,7 +178,7 @@ Handle AtomSpaceWrapper::getOutgoing(const Handle h, const int i)
     else
         cout << "no outgoing set!" << endl;
         printTree(h,0,0);
-        return UNDEFINED_HANDLE;
+        return Handle::UNDEFINED;
 }
 
 HandleSeq AtomSpaceWrapper::getIncoming(const Handle h) 
@@ -205,7 +205,7 @@ HandleSeq AtomSpaceWrapper::getIncoming(const Handle h)
             vhpair v2= fakeToRealHandle(ml);
             // check the outgoing set of the context
             HandleSeq outgoing = AS_PTR->getOutgoing(v2.first);
-            if (v2.second.substantive != UNDEFINED_HANDLE) {
+            if (v2.second.substantive != Handle::UNDEFINED) {
                 HandleSeq contexts = AS_PTR->getOutgoing(v2.second.substantive);
                 assert ((outgoing.size() + 1) == contexts.size());
                 bool match = true;
@@ -213,7 +213,7 @@ HandleSeq AtomSpaceWrapper::getIncoming(const Handle h)
                     if (outgoing[i] == v.first) {
                         Handle c = contexts[i+1];
                         if (AS_PTR->getName(c) == rootContext)
-                            c = UNDEFINED_HANDLE;
+                            c = Handle::UNDEFINED;
                         if (sourceContext != c) {
                             match = false;
                         }
@@ -274,7 +274,7 @@ bool AtomSpaceWrapper::hasAppropriateContext(const Handle o, VersionHandle& vh, 
 vhpair AtomSpaceWrapper::fakeToRealHandle(const Handle h) const
 {
     // Don't map Handles that are Types
-    if ((long) h <= NOTYPE) {
+    if ((long) h.value() <= NOTYPE) {
         return vhpair(h,NULL_VERSION_HANDLE);
     }
     vhmap_t::const_iterator i = vhmap.find(h);
@@ -286,10 +286,10 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const Handle h) const
         } else {
             //! @todo remove fake Handle
             throw RuntimeException(TRACE_INFO, "fake handle %u points to "
-                    "a now invalid handle", h);
+                    "a now invalid handle", h.value());
         }
     } else {
-        throw RuntimeException(TRACE_INFO, "Invalid fake handle %u", h);
+        throw RuntimeException(TRACE_INFO, "Invalid fake handle %u", h.value());
     }
 
 }
@@ -303,8 +303,8 @@ Handle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
         return i->second;
     } else {
         // add to vhmap
-        Handle fakeHandle = vhmap.size() + mapOffset;
-        if (fakeHandle < mapOffset) {
+        Handle fakeHandle(vhmap.size() + mapOffset);
+        if (fakeHandle.value() < mapOffset) {
             // Error: too many version to handle mappings!
             Logger().error("too many version-to-handle mappings!");
             exit(-1);
@@ -357,7 +357,7 @@ HandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
         // +1 because first context is for distinguishing dual links using the
         // same destination contexts.
         if (AS_PTR->getName(contexts[i+1]) == rootContext)
-            contexts[i+1] = UNDEFINED_HANDLE;
+            contexts[i+1] = Handle::UNDEFINED;
         VersionHandle vh(CONTEXTUAL, contexts[i+1]);
         if (AS_PTR->getTV(outgoing[i],vh).isNullTv()) {
             match = false;
@@ -375,7 +375,7 @@ HandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
 const TruthValue& AtomSpaceWrapper::getTV(Handle h)
 {
     AtomSpace* a = AS_PTR;
-    if (h) {
+    if (h != Handle::UNDEFINED) {
         vhpair r = fakeToRealHandle(h);
         return a->getTV(r.first,r.second);
     } else {
@@ -780,7 +780,7 @@ Handle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue&
     //    LOG(1, "Contexts are different, implement me!\n");
     //}
     // Provide new context to addLink function
-    return addLink((Type)(int)head_type, handles, tvn, fresh,managed);
+    return addLink((Type)(int)head_type.value(), handles, tvn, fresh,managed);
 }
 
 Handle AtomSpaceWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
@@ -889,7 +889,7 @@ Handle AtomSpaceWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
     foreach(Handle h, hs) {
         vhpair v = fakeToRealHandle(h);
         hsReal.push_back(v.first);
-        if (v.second.substantive == UNDEFINED_HANDLE) {
+        if (v.second.substantive == Handle::UNDEFINED) {
             contexts.push_back(AS_PTR->getHandle(CONCEPT_NODE, rootContext));
         } else {
             contexts.push_back(v.second.substantive);
@@ -1228,7 +1228,7 @@ void AtomSpaceWrapper::DumpCore(Type T)
 
 Handle singular(HandleSeq hs) {
     assert(hs.size()<=1);
-    return !hs.empty() ? hs[0] : NULL;
+    return !hs.empty() ? hs[0] : Handle::UNDEFINED;
 }
 
 /*Handle list_atom(HandleSeq hs) {  
@@ -1430,7 +1430,7 @@ Handle NormalizingATW::addLink(Type T, const HandleSeq& hs,
         const TruthValue& tvn,bool fresh,bool managed)
 {
     AtomSpace *a = AS_PTR;
-    Handle ret=0;
+    Handle ret=Handle::UNDEFINED;
 
     bool ok_forall=false;
 
@@ -1907,7 +1907,7 @@ ok_forall=true;
         ret = addLink(FORALL_LINK, forall_args, TruthValue::TRUE_TV(), fresh,managed);
     }*/
 #endif
-    if (!ret)
+    if (ret==Handle::UNDEFINED)
     {
 //      if (symmetricLink(T))
 //          remove_if(hs.begin(), hs.end(), isEmptyLink);

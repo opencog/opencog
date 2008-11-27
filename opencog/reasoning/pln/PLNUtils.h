@@ -251,7 +251,7 @@ struct ModifiedVTree : public vtree
 	: original_handle((Handle)0)
 	{}
 
-	ModifiedVTree(const vtree& rhs, Handle _original_handle = 0)
+	ModifiedVTree(const vtree& rhs, Handle _original_handle = Handle::UNDEFINED)
 	: original_handle(_original_handle)
 	{
 		(*(vtree*)this) = rhs;

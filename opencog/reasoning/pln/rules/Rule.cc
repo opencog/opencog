@@ -60,7 +60,7 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
         if (!nm->isReal(v2h(bv.value)))
         {
             puts("!isReal");
-            printf("%lu\n", v2h(bv.value)); 
+            printf("%lu\n", v2h(bv.value).value()); 
             NMPrinter(NMP_ALL)(v2h(bv.value), -10);
         }
 
@@ -77,7 +77,7 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
         if (bv->bindings) {
             insert_with_consistency_check(*bindings_of_all_args, bv->bindings->begin(), bv->bindings->end());
 
-          cprintf(3,"Bind [%d]:\n", v2h(bv->value));
+          cprintf(3,"Bind [%d]:\n", v2h(bv->value).value());
 
             foreach(hpair phh, *bv->bindings)
             {

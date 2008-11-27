@@ -22,10 +22,10 @@ public:
 
 	bool asymmetric(Handle* A, Handle* B) const;
 	//Handle compute(Handle A, Handle B, Handle CX = NULL)  const; //std::vector<Handle> vh)
-	BoundVertex computeSymmetric(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
+	BoundVertex computeSymmetric(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const;
 	void DistinguishNodes(const vector<Vertex>& premiseArray, set<Handle>& ANDlinks, set<Handle>& nodes) const;
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const=0;
+	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const=0;
 };
 
 } // namespace reasoning

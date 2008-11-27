@@ -17,7 +17,7 @@ public:
 				new tree<Vertex>(mva((Handle)ATOM))));
 	}
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
 	{
 		assert(0);
 		return Vertex((Handle)NULL);

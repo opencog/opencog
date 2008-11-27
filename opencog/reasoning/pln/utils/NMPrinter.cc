@@ -231,8 +231,8 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
             if (printToFile) fprintf(logFile, "[typeId=%d]", type);
         }
         if (printOptions & NMP_ATOM_ADDRESS) {
-            out << "[address=" << ((void*) h) << "]"; 
-            if (printToFile) fprintf(logFile, "[address=%p]", (void*) h);
+            out << "[address=" << ((void*) h.value()) << "]"; 
+            if (printToFile) fprintf(logFile, "[address=%p]", (void*) h.value());
         }
         if (printOptions & NMP_TRUTH_VALUE) {
             const TruthValue& tv = atw->getTV(h);
@@ -256,7 +256,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
         }
         if (printOptions & NMP_HANDLE) {
             char str[100];
-            sprintf(str, "%lu", (long) h);
+            sprintf(str, "%lu", (long) h.value());
             out << " [" << str << "]"; 
             if (printToFile) fprintf(logFile, " [%s]", str);
         }
@@ -290,7 +290,7 @@ void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLev
     //printf("NMPrinter::printVTree()\n");
 
     Handle h = boost::get<Handle>(*top);
-    Handle undefined = TLB::UndefinedHandle();
+    Handle undefined; // = TLB::UndefinedHandle();
     if (CoreUtils::handleCompare(&h,&undefined) == 0)
     { 
         out << "null" << endl;
@@ -302,7 +302,7 @@ void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLev
     {
         printHandle(out, h, indentationLevel);
     } else {
-        Type type = (Type)((int)h);
+        Type type = (Type)((int)h.value());
 
         if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (top.number_of_children() == 1)) {
             vtree::sibling_iterator c=top.begin();

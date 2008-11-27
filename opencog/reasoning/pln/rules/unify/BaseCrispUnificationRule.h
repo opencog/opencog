@@ -28,7 +28,7 @@ public:
 		which affect the Arg #2!
 	*/
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
+	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const;
 
 	NO_DIRECT_PRODUCTION;
 };

@@ -17,8 +17,8 @@ class DeductionRule : public GenericRule<DeductionFormula>
 		AtomSpaceWrapper *nm = GET_ATW;	
 		assert(nm->getArity(v2h(h[0]))==2);
 		assert(nm->getArity(v2h(h[1]))==2);
-		assert(nm->getOutgoing(v2h(h[0]),0));
-		assert(nm->getOutgoing(v2h(h[1]),1));
+		assert(nm->getOutgoing(v2h(h[0]),0) != Handle::UNDEFINED);
+		assert(nm->getOutgoing(v2h(h[1]),1) != Handle::UNDEFINED);
 	
 		return meta(new tree<Vertex>(mva(InclusionLink, 
 						vtree(Vertex(nm->getOutgoing(v2h(h[0]),0))),
@@ -87,7 +87,7 @@ public:
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (	!GET_ATW->inheritsType((Type)(int)v2h(*outh->begin()), InclusionLink))
+		if ( !GET_ATW->inheritsType((Type)(int)v2h(*outh->begin()).value(), InclusionLink))
 			return Rule::setOfMPs();
 
 		std::string varname = ("$"+GetRandomString(10));

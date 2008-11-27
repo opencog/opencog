@@ -1,6 +1,8 @@
 #include "../PLN.h"
 #include "fim.h"
+#include <stdio.h>
 
+using namespace std;
 using namespace fim;
 
 grim::grim()
@@ -26,7 +28,7 @@ int grim::create_common_pat(PAT a, PAT b, PAT* ret)
 	int count = 0;
 
 	bool non_trivial = false;
-	uint found_pat_id = 0;
+	unsigned int found_pat_id = 0;
 
 	for (int i = 0; i < PLN_CONFIG_PATTERN_LENGTH; i++)
 		if (a[i] == b[i])
@@ -101,7 +103,7 @@ bool grim::create_next_pat(PAT src, pat_id* ret)
 
 	if (longest_len>0)
 	{
-		uint longest_id = next_free_pat++;
+		unsigned int longest_id = next_free_pat++;
 		pat[(*ret = longest_id)] = longest;
 
 		if (UPDATE_ALL_OLD_PATTERNS_UPON_NEW_INSERTION)

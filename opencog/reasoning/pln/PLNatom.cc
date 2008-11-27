@@ -262,7 +262,7 @@ void atom::setHandle(Handle h)
 	name=GET_ATW->getName(h);
 	HandleSeq _hs = GET_ATW->getOutgoing(h);
 //	arity= _hs.size();
-	cx=NULL;
+	cx=Handle::UNDEFINED;
 
 	hs.clear();
 	for (unsigned int i = 0; i < _hs.size(); i++)
@@ -300,7 +300,7 @@ void atom::getWithActualizedSubstitutions(atom& target) const
 
 	target.real = this->real;
 
-	if (target.real)
+	if (target.real != Handle::UNDEFINED )
 	{
 		LOG(4, "Warning! Substituted the atom though it's attached to Core!");
 	}
@@ -309,7 +309,7 @@ void atom::getWithActualizedSubstitutions(atom& target) const
 
 void atom::detach() const
 {
-	real = NULL;
+	real = Handle::UNDEFINED;
 
 	for (unsigned int i = 0; i < hs.size(); i++)
 		hs[i]->detach();
@@ -390,11 +390,11 @@ LOG(4, "Attaching...");
 //printf("atom::attach: it's a node: type: %d, name: %s, core: %p\n", T, name.c_str(), core);
         real = at->getHandle(T, name);
 //printf("atom::attach: real = %p\n", real);
-		if (!real)
+		if (real == Handle::UNDEFINED)
 		{
 //printf("atom::attach: real is null => adding node\n");
             real = at->addNode(T, name, tvn, true);
-cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real);
+cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real.value());
 		}
 	}
 	else
@@ -407,7 +407,7 @@ cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real);
 		}
 cprintf(4, "Attaching %d entries...\n", outg.size());
 		
-        if (!(real = at->getHandle(T, outg)))
+        if ((real = at->getHandle(T, outg))==Handle::UNDEFINED)
 		{
 cprintf(4, "Not exist.\n");
             real = at->addLink(T, outg, tvn, true);
@@ -416,7 +416,7 @@ cprintf(4, "Not exist.\n");
 	
 LOG(4, "Attached.");
 
-	assert(real);
+	assert(real != Handle::UNDEFINED);
 
 	return real;
 }
@@ -538,7 +538,7 @@ vector<Handle> atom::convertVector(const vector<Btr<atom> >& hs, iAtomSpaceWrapp
 	vector<Handle> ret;		
 
 	for (unsigned int i = 0; i < hs.size(); i++)
-		ret.push_back(hs[i]->real ? hs[i]->real : hs[i]->attach(table));
+		ret.push_back(hs[i]->real != Handle::UNDEFINED? hs[i]->real : hs[i]->attach(table));
 
 	return ret;
 
@@ -615,9 +615,9 @@ void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_t
 tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) const
 {
 	tree<Vertex> ret;
-	Handle top = 0;
+	Handle top = Handle::UNDEFINED;
 	
-	if (real && (!fullVirtual || GET_ATW->inheritsType(GET_ATW->getType(real), FW_VARIABLE_NODE)))
+	if (real != Handle::UNDEFINED && (!fullVirtual || GET_ATW->inheritsType(GET_ATW->getType(real), FW_VARIABLE_NODE)))
 		top = real;
 	else
 		top = (GET_ATW->inheritsType(T, NODE)

@@ -70,15 +70,15 @@ IndicatorType VersionHandle::strToIndicator(const char* indicatorStr) throw (Inv
 
 int hashVersionHandle::operator()(VersionHandle const vh) const
 {
-    int hashCode =  vh.indicator + std::tr1::hash<Handle>()(vh.substantive);
+    int hashCode = (int) hash_value(vh);
     return(hashCode);
 }
 
-std::size_t hash_value(VersionHandle const& b)
+std::size_t opencog::hash_value(VersionHandle const& b)
 {
     std::size_t seed = 0; 
     boost::hash_combine(seed,b.indicator);
-    boost::hash_combine(seed,b.substantive);
+    boost::hash_combine(seed,std::tr1::hash<Handle>()(b.substantive));
     return seed;
 }
 

@@ -7,7 +7,7 @@ namespace reasoning
 // Was:
 const vtree& RuleApp::getVtree() const
 {
-    vt_result = vtree(compute(NULL).value);
+    vt_result = vtree(compute().value);
 	return vt_result;
 }
 /*const vtree& RuleApp::getVtree() const
@@ -66,7 +66,7 @@ bool RuleApp::Bind(int arg_i, VtreeProvider* arg) const
     {
         VtreeProviderWrapper* vtw = dynamic_cast<VtreeProviderWrapper*>(args[arg_i]);
 
-        Handle nh = NULL;
+        Handle nh = Handle::UNDEFINED;
         if (!vtw || vtw->val != vtree(nh))
         {
             assert(0);
@@ -125,7 +125,7 @@ set<Rule::MPs> RuleApp::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
         else //If the arg is a non-fulfilled (ie. ==NULL) vtree, assume it from my own input vector (ret_i)
         {
             const VtreeProviderWrapper* vtw = dynamic_cast<const VtreeProviderWrapper*>(*ai);
-            Handle nh=NULL;
+            Handle nh=Handle::UNDEFINED;
             if (vtw->val == vtree(nh))
                 final_input_args.push_back(*ret_i);
         }

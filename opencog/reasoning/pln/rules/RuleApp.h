@@ -150,18 +150,18 @@ public:
 	/// For Rule interface.
 	/// This method aborts with assert failure if the RuleApp is called
 	/// with a wrong nr of args.
-	BoundVertex compute(const vector<Vertex>& h, Handle CX = NULL) const;
+	BoundVertex compute(const vector<Vertex>& h, Handle CX = Handle::UNDEFINED) const;
 
 	/// Use this when you know that all the args have already been Bound.
 	/// The result is cached so the performance is unproblematic.
-	BoundVertex compute(Handle CX = NULL) const;
+	BoundVertex compute(Handle CX = Handle::UNDEFINED) const;
 	//{
 	//	vector<VtreeProvider*> dummy_vp;
 	//	return compute(dummy_vp.end(), dummy_vp.end(), CX);
 	//}
 
 	template<typename IterT>
-	BoundVertex compute(IterT begin, IterT end, Handle CX = NULL) const
+	BoundVertex compute(IterT begin, IterT end, Handle CX = Handle::UNDEFINED) const
 	{
 		IterT next_unused_arg;
 		BoundVertex ret = compute(begin, end, next_unused_arg, CX);

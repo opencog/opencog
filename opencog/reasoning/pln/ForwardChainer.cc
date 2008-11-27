@@ -48,7 +48,7 @@ Handle ForwardChainer::fwdChainToTarget(Handle target, int maxRuleApps)
 {
     // TODO: Do some intelligent stuff here until the target is reached.
     // although maybe not... isn't this just what backward chaining does?
-    return NULL;
+    return Handle::UNDEFINED;
 }
 
 // Static/Shared random number generator
@@ -62,12 +62,12 @@ RandGen* ForwardChainer::getRNG() {
 
 Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
 {
-    Handle a = NULL;
+    Handle a;
     int counter = 0;
     const int maxTries = 50; // Should only be a problem with very small atomSpaces
                         // but guard against it.
     cout << "FWDCHAIN Getting random handle" << endl;
-    while ((!a) && counter < maxTries) {
+    while (a == Handle::UNDEFINED && counter < maxTries) {
         if (getRNG()->randfloat() <= probStack) {
             a = seedStack[(int) getRNG()->randfloat() * seedStack.size()];
         } else {
@@ -76,7 +76,7 @@ Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
         // Check if a is already in args
         foreach(Vertex v, args) {
             if (boost::get<Handle>(v) == a) {
-                a = NULL;
+                a = Handle::UNDEFINED;
                 break;
             }
         }
@@ -236,7 +236,8 @@ HandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
     cout << "FWDCHAIN Forward chaining through stack - " << seedStackEnd << \
         " seeds to try." << endl;
     Handle seed;
-    while (maxRuleApps && seedStackEnd > 0 && (seed = seedStack.front())) {
+    while (maxRuleApps && seedStackEnd > 0 ) {
+        seed = seedStack.front();
         seedStack.pop_front();
         //opencog::logger().info("Forward chaining on seed %u", seed);
         cout << "FWDCHAIN Forward chaining on seed " << seed << endl;

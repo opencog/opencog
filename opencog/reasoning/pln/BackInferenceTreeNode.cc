@@ -192,9 +192,9 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     haxx::bitnoderoot = this;
 
     vtree::iterator target_it = _target->begin();
-    post_generalize_type = atw->inheritsType((Type)((int)v2h(*target_it)), VARIABLE_SCOPE_LINK)
+    post_generalize_type = atw->inheritsType((Type)(v2h(*target_it).value()), VARIABLE_SCOPE_LINK)
                                     ? VARIABLE_SCOPE_LINK
-                                    : atw->inheritsType((Type)((int)v2h(*target_it)), FORALL_LINK)
+                                    : atw->inheritsType((Type)(v2h(*target_it).value()), FORALL_LINK)
                                         ? FORALL_LINK
                                         : 0;
     if (post_generalize_type)
@@ -248,7 +248,7 @@ void BITNode::ForceTargetVirtual(spawn_mode spawning)
     
     if (ph && atw->isReal(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE)
     {
-        cprintf(2,"ForceTargetVirtual: Arg [%ld] (exists).\n", (long)*ph);
+        cprintf(2,"ForceTargetVirtual: Arg [%ld] (exists).\n", (long)(*ph).value());
         
         boost::shared_ptr<set<BoundVertex> > directResult(new set<BoundVertex>);
         
@@ -1374,7 +1374,7 @@ next_args:;
 BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) const
 {
     vector<Vertex> ForAllArgs;
-    BoundVertex new_result((Handle)ATOM);
+    BoundVertex new_result(Handle(ATOM));
 
     const float min_confidence = 0.0001f;
 
@@ -1391,9 +1391,9 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
             }
 
         if (_resultT == FORALL_LINK)
-            new_result = FORALLRule(::haxx::defaultAtomSpaceWrapper, (Handle) NULL).compute(ForAllArgs);
+            new_result = FORALLRule(::haxx::defaultAtomSpaceWrapper, Handle::UNDEFINED).compute(ForAllArgs);
         else
-            new_result = PLNPredicateRule(::haxx::defaultAtomSpaceWrapper, NULL).compute(ForAllArgs);
+            new_result = PLNPredicateRule(::haxx::defaultAtomSpaceWrapper, Handle::UNDEFINED).compute(ForAllArgs);
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());
         printTree(v2h(new_result.value),0,0);
@@ -1627,7 +1627,7 @@ void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template,
     AtomSpaceWrapper *atw = GET_ATW;
     map<Handle, vtree> bindings;
     
-    if (!h || !atw->isReal(h))
+    if (h == Handle::UNDEFINED || !atw->isReal(h))
         puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
     
     map<Handle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
@@ -1763,7 +1763,7 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
             string cbuf("[ ");
             if (direct_results) {
                 foreach(const BoundVertex& bv, *direct_results)
-                    cbuf += i2str((int)v2h(bv.value)) + " ";
+                    cbuf += i2str((int)v2h(bv.value).value()) + " ";
             }
             prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
             prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
@@ -1808,12 +1808,13 @@ static int _trail_print_more_count = 0;
 void BITNodeRoot::printTrail(Handle h, unsigned int level) const //, int decimal_places) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    if (!h || !atw->isReal(h))
+    if (h == Handle::UNDEFINED || !atw->isReal(h))
         puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
     map<Handle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
-        printf("%s[%ld] was produced by applying %s to:\n", repeatc(' ', level*3).c_str(), (long)h, rule->second->name.c_str());
+        printf("%s[%ld] was produced by applying %s to:\n", repeatc(' ', level*3).c_str(),
+                (long)h.value(), rule->second->name.c_str());
         map<Handle,vector<Handle> >::const_iterator h_it = haxx::inferred_from.find(h);
         assert (h_it != haxx::inferred_from.end());
         foreach(Handle arg_h, h_it->second)

@@ -21,7 +21,7 @@ public:
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	bool validate2				(MPs& args) const { return true; }
 	
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
+	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const;
 	
 	NO_DIRECT_PRODUCTION;
 };

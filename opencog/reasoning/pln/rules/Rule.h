@@ -133,16 +133,16 @@ public:
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */
-    virtual BoundVertex compute(const vector<Vertex>& h, Handle CX = NULL) const=0;
+    virtual BoundVertex compute(const vector<Vertex>& h, Handle CX = Handle::UNDEFINED) const=0;
 
     //! A concrete computation method for generic rule
-    BoundVertex compute(const vector<BoundVertex>& h, Handle CX = NULL) const;
+    BoundVertex compute(const vector<BoundVertex>& h, Handle CX = Handle::UNDEFINED) const;
 
     //! Whether to attempt direct production.
     virtual Btr<set<BoundVertex> > attemptDirectProduction(meta h)=0;
 
     //! Just calls compute()
-    BoundVertex operator() (const vector<Vertex> h, Handle CX = NULL) const
+    BoundVertex operator() (const vector<Vertex> h, Handle CX = Handle::UNDEFINED) const
         { return compute(h,CX); }
 
     /** Check validity.
@@ -167,7 +167,7 @@ public:
      * @param CX ???
      * @return The result of the rule being computed.
      */
-    BoundVertex computeIfValid (const vector<Vertex>& h, Handle CX = NULL) const;
+    BoundVertex computeIfValid (const vector<Vertex>& h, Handle CX = Handle::UNDEFINED) const;
 
     //Handle compute(Handle h1) const;
     //Handle compute(Handle h1, Handle h2) const;

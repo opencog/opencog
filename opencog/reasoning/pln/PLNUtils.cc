@@ -100,9 +100,9 @@ if (!hptr)
 //puts("reasoning::printTree");     
         if (!::haxx::printRealAtoms)
         {
-            cprintf(_rloglevel,"[%lu]\n", *hptr);
+            cprintf(_rloglevel,"[%lu]\n", (*hptr).value());
             if (test::logfile && _rloglevel >= currentDebugLevel)
-                fprintf(test::logfile, "[%d]\n", (int)*hptr);
+                fprintf(test::logfile, "[%lu]\n", (*hptr).value());
         }
         else
             reasoning::printTree(*hptr, level, _rloglevel);
@@ -115,9 +115,9 @@ if (!hptr)
 
     if (hptr)
     {
-        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
+        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)           
-            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
+            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
     }
     else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL)
     {
@@ -163,9 +163,9 @@ if (!hptr)
 //puts("reasoning::printTree");		
 		if (!::haxx::printRealAtoms)
 		{
-			cprintf(_rloglevel, "[%d]\n", *hptr);
+			cprintf(_rloglevel, "[%d]\n", (*hptr).value());
 			if (test::logfile && _rloglevel >= currentDebugLevel)
-				fprintf(test::logfile, "[%d]\n", (int)*hptr);
+				fprintf(test::logfile, "[%lu]\n", (*hptr).value());
 		}
 		else
 			reasoning::printTree(*hptr, level, _rloglevel);
@@ -178,9 +178,9 @@ if (!hptr)
 
 	if (hptr)
 	{
-		cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
+		cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
 		if (test::logfile && _rloglevel >= currentDebugLevel)			
-			fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(int)*hptr), top.number_of_children());
+			fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
 	}
 	else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL)
 	{
@@ -323,7 +323,7 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 		map<Handle, Handle>::const_iterator s = bindings.find(*ph_ltop);
 
 		if (s == bindings.end())
-			return (bool)(bindings[*ph_ltop] = *ph_rtop); //heh
+			return (bindings[*ph_ltop] = *ph_rtop) == Handle::UNDEFINED; //heh
 		else
 			return s->second == *ph_rtop;
 	}
@@ -584,7 +584,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 	rawPrint(_MP, _MP.begin(),3);
 
     Handle *h_ptr = boost::get<Handle>(&*_MP.begin());
-	if (!h_ptr || !*h_ptr)
+	if (!h_ptr || *h_ptr == Handle::UNDEFINED )
 	{
 		LOG(3,"No handle in vertex.");
         //currentDebugLevel = previousDebugLevel;
@@ -630,7 +630,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 
         if (tv.isNullTv())
         {
-            printf("NULL TV! %d\n", (int)*i);	
+            printf("NULL TV! %d\n", (int)i->value());	
             getc(stdin);
             continue;
         }
@@ -848,7 +848,7 @@ void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 	for (tree<Vertex>::iterator v = value->begin(); v != value->end(); v++)
 	{
 		Handle *ph = boost::get<Handle>(&*v);
-		if (ph && (atw->inheritsType((Type)(int)(*ph), NODE)))
+		if (ph && (atw->inheritsType((Type)(ph->value()), NODE)))
 		{
 			bindingsT::iterator substed = bindings->find(*ph);
 			if (substed != bindings->end())
@@ -863,7 +863,7 @@ template<>
 bool weak_atom<Btr<tree<Vertex> > >::operator()(Handle h)
 {
 	///haxx:: ATOM is the completely free variable.
-	if (h == ATOM)
+	if (h.value() == ATOM)
 		return true;
 	
 	bool restart;
@@ -989,7 +989,7 @@ bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& l
 
     for (set<Handle>::const_iterator i = link_set.begin(); i != link_set.end(); i++)
     {
-		if (!*i)
+		if (*i == Handle::UNDEFINED)
 		{
 			LOG(2, "getLargestIntersection(): NULL in input set");
 			continue;
@@ -1061,7 +1061,7 @@ void printNode1(Handle h, int level, int LogLevel)
 	char buf[500];
 
 	if (!tv.isNullTv())
-		sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(), (int)h);
+		sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(), (int)h.value());
 	else
 		sprintf(buf, "NULL TV!");
 
@@ -1086,7 +1086,7 @@ void printTree(Handle h, int level, int LogLevel)
 		level = 20;
 	}
 
-	if (!h)
+	if (h == Handle::UNDEFINED)
 	{
 		//LOG0(LogLevel, repeatc(' ', level*3) + "NULL HANDLE!");
 
@@ -1097,7 +1097,8 @@ void printTree(Handle h, int level, int LogLevel)
 	{
 		char buf[500];
 
-		sprintf(buf, "Virtual %s (%d) [%d]\n", reasoning::Type2Name((Type)(int)h), (Type)(int)h,  (int)h);
+		sprintf(buf, "Virtual %s (%d) [%d]\n", reasoning::Type2Name((Type)(int)h.value()),
+                (Type)(int)h.value(),  (int)h.value());
 		
 		if (test::logfile && LogLevel >= currentDebugLevel)
 			fprintf(test::logfile, "%s", buf);
@@ -1119,7 +1120,9 @@ void printTree(Handle h, int level, int LogLevel)
 		char buf[500];
 
 		if (!tv.isNullTv())
-			sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(), (int)h);
+			sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(),
+                    reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(),
+                    (int)h.value());
 		else
 			sprintf(buf, "NULL TV!");
 
@@ -1310,7 +1313,8 @@ void printNode1(const atom& a, int level, int LogLevel)
 {
 	char buf[500];
 
-	sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), reasoning::Type2Name(a.T), a.T, (int)a.real);
+	sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), reasoning::Type2Name(a.T), a.T,
+            (int)a.real.value());
 
 	string subst_buf = make_subst_buf(a);
 
@@ -1326,7 +1330,8 @@ void printAtomTree(const atom& a, int level, int LogLevel)
 	else
 	{
 		char buf[500];
-		sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), (*ClassServer::getClassName())[a.T].c_str(), a.T, (int)a.real);
+		sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(),
+                (*ClassServer::getClassName())[a.T].c_str(), a.T, (int)a.real.value());
 		string subst_buf = make_subst_buf(a);
 
 		LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
@@ -1502,13 +1507,13 @@ cprintf(4, "MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_n
 					cprintf(4, "Request rhs handle...\n");
 				
 					Handle rhs_h = rhs.attach(::haxx::defaultAtomSpaceWrapper);
-					if (!rhs_h)
+					if (rhs_h == Handle::UNDEFINED)
 					{
 						cprintf(0, "Could not add handle!\n");
 						return false;
 					}
 
-					cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h);
+					cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h.value());
 				
 					if (!forbiddenBindings)
 						cprintf(4, "No forbiddenBindings\n");
@@ -1640,13 +1645,13 @@ printTree(lhs,0,3);
 				cprintf(4, "Request rhs handle...\n");
 				
 				Handle rhs_h = rhs.attach(::haxx::defaultAtomSpaceWrapper);
-				if (!rhs_h)
+				if (rhs_h == Handle::UNDEFINED)
 				{
 					cprintf(0, "Could not add handle!\n");
 					return false;
 				}
 
-				cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h);
+				cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h.value());
 				
 				if (!forbiddenBindings)
 					cprintf(4, "No forbiddenBindings\n");
@@ -1794,9 +1799,9 @@ bool ttsubstitutableTo(Handle from,Handle to,
 {
 	AtomSpaceWrapper* atw = GET_ATW;
 
-	if (!from && !to)
+	if (from == Handle::UNDEFINED && to == Handle::UNDEFINED)
 		return true;
-	if (!from || !to)
+	if (from == Handle::UNDEFINED || to == Handle::UNDEFINED)
 		return false;
 	
 /*LOG(0, "-Source");
@@ -2018,7 +2023,7 @@ void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
 		map<Handle, Handle>::const_iterator it = binds.find(*ph);
 		if (it != binds.end())
 		{
-			cprintf(4,"Bound to %lu", it->second);
+			cprintf(4,"Bound to %lu", it->second.value());
 			v = Vertex(it->second);
 			recursiveBind(v, binds);
 		}
@@ -2112,14 +2117,14 @@ unsigned long BoundVTree::getFingerPrint()
 
 	for (vtree::sibling_iterator i1 = vt.begin(); i1 != vt.end(); i1++)
 	{
-		ret += (unsigned long)v2h(*i1);
+		ret += (unsigned long)v2h(*i1).value();
 
 		for (vtree::sibling_iterator i2 = vt.begin(i1); i2 != vt.end(i1); i2++)
 		{
-			ret += (unsigned long)v2h(*i2)*100;
+			ret += (unsigned long)v2h(*i2).value()*100;
 
 			for (vtree::sibling_iterator i3 = vt.begin(i2); i3 != vt.end(i2); i3++)
-				ret += (unsigned long)v2h(*i3)*10000;
+				ret += (unsigned long)v2h(*i3).value()*10000;
 		}
 	}
 
@@ -2230,7 +2235,7 @@ void ForceVirtual(meta _target, vtree::iterator& vit)
 		// Save the sib it because the replace() will invalidate 'vit'
 //		vtree::sibling_iterator next_sib = _target->next_sibling(vit);
 
-		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)*ph);
+		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)ph->value());
 
 		vtree virtualized_ph(make_vtree(*ph));
 		_target->replace(vit, virtualized_ph.begin());
@@ -2264,7 +2269,7 @@ meta ForceRootLinkVirtual(meta _target)
 	Type t = atw->getType(*ph);
 	if (ph && atw->isReal(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE)
 	{
-		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)*ph);
+		cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)ph->value());
 		
 		return meta(new vtree(make_vtree(*ph)));
 	}
@@ -2286,7 +2291,7 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
 	Handle *ph = v2h(&(*_target->begin()));
 	if (ph && atw->isReal(*ph))
 	{
-		cprintf(2, "Arg [%d] exists.\n", (int)*ph);
+		cprintf(2, "Arg [%d] exists.\n", (int)ph->value());
 		const TruthValue& tv = atw->getTV(*ph);
 		if (tv.isNullTv())
 			cprintf(2, "NO TV!\n");
@@ -2327,27 +2332,27 @@ void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 /// various quick-hack binding printers from the last 6 months.
 
 void pr2(pair<Handle, vtree> i)
-{cprintf(4, "%d => ", (int)i.first);
+{cprintf(4, "%d => ", (int)i.first.value());
 	rawPrint(i.second, i.second.begin(),3);
 }
 
 void print_binding(pair<Handle, vtree> i)
 {
-	printf("%d => ", (int)i.first);
+	printf("%d => ", (int)i.first.value());
 	rawPrint(i.second, i.second.begin(),-1);
 }
 
 void printBinding(const pair<string, Handle> p)
 {
-	cprintf(3, "%s => %d\n", p.first.c_str(), (int)p.second);
+	cprintf(3, "%s => %d\n", p.first.c_str(), (int)p.second.value());
 }
 
 void pr(pair<Handle, Handle> i)
 {
 	AtomSpaceWrapper* atw = GET_ATW;
 
-	string s1 = atw->inheritsType(atw->getType(i.first), NODE) ? atw->getName(i.first) : i2str((int)i.first);
-	string s2 = atw->inheritsType(atw->getType(i.second), NODE) ? atw->getName(i.second) : i2str((int)i.second);
+	string s1 = atw->inheritsType(atw->getType(i.first), NODE) ? atw->getName(i.first) : i2str((int)i.first.value());
+	string s2 = atw->inheritsType(atw->getType(i.second), NODE) ? atw->getName(i.second) : i2str((int)i.second.value());
 
 	cout << s1 << " => " << s2 << "\n";
 //	cout << (int)i.first << " => " << (int)i.second << "\n";

@@ -83,7 +83,7 @@ TARGET_LINK_LIBRARIES(pln
     xml
     util
     #query
-    scheme
+    smob #scheme
     #wsd
     persist
     adaptor-tulip
@@ -102,7 +102,7 @@ TARGET_LINK_LIBRARIES(plnshell pln
     xml
     util
     #query
-    scheme
+    smob #scheme
     #wsd
     persist
     adaptor-tulip
@@ -121,7 +121,7 @@ TARGET_LINK_LIBRARIES(indeftest pln
     xml
     util
     #query
-    scheme
+    smob #scheme
     #wsd
     persist
     adaptor-tulip

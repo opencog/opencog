@@ -8,7 +8,7 @@ namespace reasoning
 const bool RuleResultFreshness = true;
 Handle UnorderedCcompute(iAtomSpaceWrapper *destTable,
 					Type linkT, const ArityFreeFormula<TruthValue,
-			       TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX=NULL);
+			       TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX=Handle::UNDEFINED);
 
 template<int N>
 class SimpleANDRule : public ArityFreeANDRule

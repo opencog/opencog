@@ -40,7 +40,7 @@ Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overr
     tree<Vertex>::sibling_iterator hs11 = outh->begin(hs1);
     tree<Vertex>::sibling_iterator hs10 =hs11++;
 
-cprintf(0,"T:%d\n", (Type)(int)v2h(*hs1));
+cprintf(0,"T:%d\n", (Type)(int)v2h(*hs1).value());
     
     if (hs0  == outh->end(outh->begin()) ||
         hs11 == outh->end(hs1) ||

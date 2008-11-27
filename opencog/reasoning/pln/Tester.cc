@@ -764,7 +764,7 @@ InitAxiomSet("smalldemo.xml");
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
 
         uint s_i=0;
-        Handle eh=0;
+        Handle eh=Handle::UNDEFINED;
         TruthValue* etv = NULL;
         bool passed=false;
 
@@ -799,9 +799,9 @@ InitAxiomSet("smalldemo.xml");
 
                 currentDebugLevel=-4;
 
-                eh = (eres.empty() ? NULL : v2h(*(*eres.rbegin())->getVtree().begin()));
+                eh = (eres.empty() ? Handle::UNDEFINED : v2h(*(*eres.rbegin())->getVtree().begin()));
 
-                if (eh)
+                if (eh != Handle::UNDEFINED )
                     etv = atw->getTV(eh).clone();
                 else
                     etv = new SimpleTruthValue(0.0f,0.0f);
@@ -819,7 +819,7 @@ InitAxiomSet("smalldemo.xml");
                     printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
                 }
                 
-                passed = (eh && etv &&
+                passed = (eh != Handle::UNDEFINED && etv &&
                 etv->getConfidence() >= t->minTV->getConfidence() &&
                 etv->getMean()          >= t->minTV->getMean() &&
                 etv->getConfidence() <= t->maxTV->getConfidence() &&
@@ -876,7 +876,7 @@ InitAxiomSet("smalldemo.xml");
             {
                 const TruthValue& tv = atw->getTV(vt2h(*bv));
                 if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-                    printf("%d ", (int)vt2h(*bv));
+                    printf("%d ", (int)vt2h(*bv).value());
             }
             printf("]\n");
 

@@ -28,7 +28,7 @@ public:
 		printf("<Generic rule args> ");
 		for (int j=0;j<n;j++) {
 			const Handle *ph = boost::get<Handle>(&premiseArray[j]);
-			printf("[%lu] ", (ph?*ph:0));
+			printf("[%lu] ", (ph->value()?ph->value():0));
             //printTree(premiseArray[j],0,3);
 		}
 		printf(" </Generic rule args>\n");
@@ -60,7 +60,7 @@ public:
 		
         delete retTV;
         
-		assert(ret);
+		assert(ret != Handle::UNDEFINED);
 		
 		printf("Atom added.");
 

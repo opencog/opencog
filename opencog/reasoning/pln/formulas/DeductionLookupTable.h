@@ -2,12 +2,15 @@
 #define DEDUCTIONLOOKUPTABLE_H_
 
 #include "VectorLookupTable.h"
+
+#include <stdlib.h>
+#include <math.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <iomanip>
-#include <math.h>
 #include <string>
 
 /**

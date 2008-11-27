@@ -54,7 +54,7 @@ public:
     //! @param target Handle
     //! @param maximum number of rule applications before ending
     //! @param whether target was reached
-    Handle fwdChainToTarget(Handle target = 0, int maxRuleApps = FWD_CHAIN_MAX_APPS);
+    Handle fwdChainToTarget(Handle target = Handle::UNDEFINED, int maxRuleApps = FWD_CHAIN_MAX_APPS);
 
     //! Chain till (current) entire stack has been processed
     //! @param maximum number of rule applications before ending

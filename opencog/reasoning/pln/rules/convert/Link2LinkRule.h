@@ -28,7 +28,7 @@ public:
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ATW->inheritsType((Type)(int)boost::get<Handle>(*outh->begin()), DEST_LINK))
+		if (!GET_ATW->inheritsType((Type)(int)boost::get<Handle>(*outh->begin()).value(), DEST_LINK))
 			return Rule::setOfMPs();
 
 		Rule::MPs ret;

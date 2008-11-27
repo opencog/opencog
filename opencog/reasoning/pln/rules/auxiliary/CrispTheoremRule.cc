@@ -44,7 +44,7 @@ BBvtree bind_vtree(vtree &targ, map<Handle, vtree>& binds)
                             map<Handle, vtree>::iterator it = binds.find(*ph);
                             if (it != binds.end()) {
                             
-                                cprintf(4,"replacing...[%lu]\n", v2h(*vit));
+                                cprintf(4,"replacing...[%lu]\n", v2h(*vit).value());
                                 cprintf(4,"with...\n");
                                 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
                                 printer.print(it->second.begin(),4);
@@ -168,7 +168,7 @@ bool htemp=false;
         
          cprintf(4,"counts: %ld %ld\n", count1, count2);
         
-         cprintf(4,"Unifies to %lu:\n",v2h(*outh->begin()));
+         cprintf(4,"Unifies to %lu:\n",v2h(*outh->begin()).value());
 
          printer.print(outh->begin(), 4);
 
@@ -184,7 +184,7 @@ bool htemp=false;
             
              for (map<Handle, vtree>::iterator ii=binds.begin(); ii!=binds.end(); ii++)
              {
-                cprintf(4,"%lu=>\n", ii->first);
+                cprintf(4,"%lu=>\n", ii->first.value());
                 printer.print(ii->second.begin(), 4);
              }
 
@@ -248,7 +248,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
     
     //vtree res(mva(nm->getOutgoing(v2h(premiseArray[1]))[1]));
     
-    cprintf(3,"CrispTheoremRule::compute... [%lu]\n", nm->getOutgoing(v2h(premiseArray[real_args]))[0]);
+    cprintf(3,"CrispTheoremRule::compute... [%lu]\n", nm->getOutgoing(v2h(premiseArray[real_args]))[0].value());
     
 /*  printTree(nm->getOutgoing(v2h(premiseArray[0]))[0],0,0);
     printTree(nm->getOutgoing(v2h(premiseArray[1]))[0],0,0);

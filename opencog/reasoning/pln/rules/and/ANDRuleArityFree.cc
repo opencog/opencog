@@ -118,7 +118,7 @@ void ArityFreeANDRule::DistinguishNodes(const vector<Vertex>& premiseArray, set<
       const int n = premiseArray.size();
       
     for (int pi = 0; pi < n; pi++)
-        ((((Type)(int)v2h(premiseArray[pi])) == AND_LINK)
+        ((((Type)(int)v2h(premiseArray[pi]).value()) == AND_LINK)
             ? ANDlinks
             : nodes
             ).insert(v2h(premiseArray[pi]));

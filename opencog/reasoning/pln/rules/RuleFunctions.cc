@@ -43,7 +43,7 @@ Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname)
     Handle ret = atw->addNode(FW_VARIABLE_NODE,varname,
         TruthValue::TRIVIAL_TV(),false,false);
     
-cprintf(4, "CreateVar Added node as NEW: %s / [%lu]\n", varname.c_str(), (ulong) ret);
+cprintf(4, "CreateVar Added node as NEW: %s / [%lu]\n", varname.c_str(), (ulong) ret.value());
 
     varcount++;
 

@@ -239,13 +239,13 @@ LOG(5, "Add1LinkFromXML...");
 	}	
 
 	if (!valid(root_type, children))
-		return 0;
+		return Handle::UNDEFINED;
 
     TruthValue* tvn = CreateTVfromArguments(xml);
 	if (children.size() <= 7)
 		ret = table->addLink(root_type, children, *tvn, false);
 	else
-		ret=NULL;
+		ret=Handle::UNDEFINED;
     delete tvn;
 
 LOG(3,"Segfaults here if AtomTableManagementAgent is active:");

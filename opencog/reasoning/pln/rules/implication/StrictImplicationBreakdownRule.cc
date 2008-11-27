@@ -125,7 +125,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
 
         std::vector<Handle> new_args = nm->getOutgoing(args[1]);
 
-        Handle ret=NULL;
+        Handle ret=Handle::UNDEFINED;
     
         assert (!(GET_ATW->inheritsType(T, NODE)));
 

@@ -67,7 +67,7 @@ BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray
 
         std::vector<Handle> new_args = GET_ATW->getOutgoing(args[1]);
 
-        Handle ret=NULL;
+        Handle ret=Handle::UNDEFINED;
 
         /*if (inheritsType(T, NODE))
             ret = destTable->addNode(T, pname,

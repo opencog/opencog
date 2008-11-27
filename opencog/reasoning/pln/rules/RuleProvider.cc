@@ -157,7 +157,7 @@ public:
 	GenericRule2(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
 		
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
 	{
 		return Vertex();
 	}
@@ -266,7 +266,7 @@ Rule* ForwardChainerRuleProvider::nextRule()
 {
     // 1. check seed is set, check if current has a Rule, if so
     // add it to invalidRules, set to NULL.
-    if (!seed) {
+    if (seed == Handle::UNDEFINED) {
         opencog::logger().warn("No seed set, so can't return an appropriate Rule via nextRule.");
         return NULL;
     }
