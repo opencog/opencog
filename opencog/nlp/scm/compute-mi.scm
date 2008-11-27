@@ -139,8 +139,8 @@
 ;; --------------------------------------------------------------------
 ;;
 ;; Compute the marginal probabilities
-; (marginal-set-probabilities)
-; (display "Done computing the marginal probilities\n")
+(marginal-set-probabilities)
+(display "Done computing the marginal probilities\n")
 ;
 (disjunct-cond-probabilities)
 (display "Done computing the conditional probabilities\n")
