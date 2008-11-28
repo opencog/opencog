@@ -10,7 +10,7 @@
 
 #include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 
 #include "PLN.h"
 

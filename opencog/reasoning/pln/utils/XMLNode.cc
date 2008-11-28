@@ -16,7 +16,7 @@
 #include "../PLN.h"
 #include "XMLNode.h"
 #include <opencog/atomspace/utils.h>
-#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 //#include "PTLutils.h"
 
 namespace reasoning

@@ -191,7 +191,7 @@ const char* FileList::getFile(unsigned int i) throw (IndexErrorException)
     return fileList[i];
 }
 
-#endif // !WIN32
+#endif // not WIN32
 
 const char* opencog::nextLine(const char *from, std::string &line)
 {
@@ -227,15 +227,12 @@ const char* opencog::nextLine(const char *from, std::string &line)
    // return ((tmp + (tmp >> 3)) & 030707070707) % 63;
 //}
 
-/** Additions by Ari (March 20) */
+namespace opencog {
 
-#include "utils2.h"
-
-#ifdef WIN32
-
-tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3, tree<Vertex> t4)
+//#ifdef WIN32
+vtree MakeVirtualAtom_slow(Type T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
-	tree<Vertex> ret;
+	vtree ret;
     try {
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
@@ -248,9 +245,9 @@ tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree
 	return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3)
+vtree MakeVirtualAtom_slow(Type T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
-	tree<Vertex> ret;
+	vtree ret;
     try {
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
@@ -262,9 +259,9 @@ tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2, tree
 	return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2)
+vtree MakeVirtualAtom_slow(Type T, const vtree& t1, const vtree& t2)
 {
-	tree<Vertex> ret;
+	vtree ret;
     try {
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
@@ -275,9 +272,9 @@ tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1, tree<Vertex> t2)
 	return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1)
+vtree MakeVirtualAtom_slow(Type T, const vtree& t1)
 {
-	tree<Vertex> ret;
+	vtree ret;
     try {
         ret.set_head(Vertex((Handle)T));
         ret.append_child(ret.begin(), t1.begin());
@@ -287,9 +284,9 @@ tree<Vertex> MakeVirtualAtom_slow(Type T, tree<Vertex> t1)
 	return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Type T)
+vtree MakeVirtualAtom_slow(Type T)
 {
-	tree<Vertex> ret;
+	vtree ret;
     try {
         ret.set_head(Vertex((Handle)T));
     } catch (...) {
@@ -297,11 +294,11 @@ tree<Vertex> MakeVirtualAtom_slow(Type T)
     }
 	return ret;
 }
-#endif
+//#endif
 
-tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3, tree<Vertex> t4)
+/* vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(Vertex((Handle)T));
 		ret.append_child(ret.begin(), t1.begin());
@@ -313,9 +310,9 @@ tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2, tr
     }
     return ret;
 }
-tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3)
+vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(Vertex((Handle)T));
 		ret.append_child(ret.begin(), t1.begin());
@@ -327,9 +324,9 @@ tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2, tr
     return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2)
+vtree MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(Vertex((Handle)T));
 		ret.append_child(ret.begin(), t1.begin());
@@ -340,9 +337,9 @@ tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1, tree<Vertex> t2)
     return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1)
+vtree MakeVirtualAtom_slow(Handle T, const vtree& t1)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(Vertex((Handle)T));
 		ret.append_child(ret.begin(), t1.begin());
@@ -352,19 +349,19 @@ tree<Vertex> MakeVirtualAtom_slow(Handle T, tree<Vertex> t1)
     return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Handle T)
+vtree MakeVirtualAtom_slow(Handle T)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(Vertex((Handle)T));
 	} catch(...) {
         puts("MakeVirtualAtom_slow exception."); getc(stdin);
     }
     return ret;
-}
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3, tree<Vertex> t4)
+} */
+vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try
 	{
 		ret.set_head(T);
@@ -377,9 +374,10 @@ tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1, tree<Vertex> t2, tr
     }
     return ret;
 }
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1, tree<Vertex> t2, tree<Vertex> t3)
+
+vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(T);
 		ret.append_child(ret.begin(), t1.begin());
@@ -391,9 +389,9 @@ tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1, tree<Vertex> t2, tr
     return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1, tree<Vertex> t2)
+vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(T);
 		ret.append_child(ret.begin(), t1.begin());
@@ -404,9 +402,9 @@ tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1, tree<Vertex> t2)
     return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1)
+vtree MakeVirtualAtom_slow(Vertex T, const vtree& t1)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(T);
 		ret.append_child(ret.begin(), t1.begin());
@@ -416,9 +414,9 @@ tree<Vertex> MakeVirtualAtom_slow(Vertex T, tree<Vertex> t1)
     return ret;
 }
 
-tree<Vertex> MakeVirtualAtom_slow(Vertex T)
+vtree MakeVirtualAtom_slow(Vertex T)
 {
-    tree<Vertex> ret;
+    vtree ret;
 	try {
 		ret.set_head(T);
 	} catch(...) {
@@ -427,13 +425,15 @@ tree<Vertex> MakeVirtualAtom_slow(Vertex T)
     return ret;
 }
 
-bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const
+}
+
+bool less_tree_vertex::operator()(const vtree& lhs, const vtree& rhs) const
 {
     return (*this)(lhs, rhs, lhs.begin(), rhs.begin());
 }
-bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs,
-                                  tree<Vertex>::iterator ltop,
-                                  tree<Vertex>::iterator rtop) const
+bool less_tree_vertex::operator()(const vtree& lhs, const vtree& rhs,
+                                  vtree::iterator ltop,
+                                  vtree::iterator rtop) const
 {
     if (*ltop < *rtop)
         return true;
@@ -445,8 +445,8 @@ bool less_tree_vertex::operator()(const tree<Vertex>& lhs, const tree<Vertex>& r
     if (ltop.number_of_children() > rtop.number_of_children())
         return false;
 
-    tree<Vertex>::sibling_iterator r_i = rhs.begin(rtop);
-    for (tree<Vertex>::sibling_iterator i = lhs.begin(ltop);
+    vtree::sibling_iterator r_i = rhs.begin(rtop);
+    for (vtree::sibling_iterator i = lhs.begin(ltop);
             i != lhs.end(ltop);
             i++) {
         if (less_tree_vertex()(lhs, rhs, i, r_i))
@@ -635,17 +635,17 @@ unsigned long opencog::getElapsedMillis()
     return (currentTime.tv_sec -referenceTime.tv_sec)*1000 + (currentTime.tv_usec - referenceTime.tv_usec) / 1000;
 }
 
-bool less_vtree_it( const tree<Vertex> & lhs_t, const tree<Vertex> & rhs_t,
-                    tree<Vertex>::sibling_iterator ltop, tree<Vertex>::sibling_iterator rtop)
+bool less_vtree_it( const vtree & lhs_t, const vtree & rhs_t,
+                    vtree::sibling_iterator ltop, vtree::sibling_iterator rtop)
 {
     if ((*ltop) < (*rtop))
         return true;
     if ((*rtop) < (*ltop))
         return false;
 
-    tree<Vertex>::sibling_iterator rit = rhs_t.begin(rtop);
+    vtree::sibling_iterator rit = rhs_t.begin(rtop);
 
-    for (tree<Vertex>::sibling_iterator lit = lhs_t.begin(ltop);
+    for (vtree::sibling_iterator lit = lhs_t.begin(ltop);
             lit != lhs_t.end  (ltop);
             lit++, rit++)
         if (less_vtree_it(lhs_t, rhs_t, lit, rit))
@@ -656,7 +656,7 @@ bool less_vtree_it( const tree<Vertex> & lhs_t, const tree<Vertex> & rhs_t,
     return false;
 }
 
-bool less_vtree::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const
+bool less_vtree::operator()(const vtree& lhs, const vtree& rhs) const
 {
     if (lhs.size() < rhs.size())
         return true;
@@ -665,4 +665,237 @@ bool less_vtree::operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) co
 
     return less_vtree_it(lhs, rhs, lhs.begin(), rhs.begin());
 }
+
+string opencog::i2str(int d)
+{
+    char temp[20];
+    sprintf(temp, "%d", d);
+    return temp;
+}
+
+bool opencog::visible(char c)
+{
+    return c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != 0;
+}
+
+std::string opencog::XMLembed(const std::string &elem, const std::string &pcdata)
+{
+    return std::string("<")
+           + elem
+           + std::string("> ")
+           + std::string(pcdata)
+           + std::string(" </")
+           + std::string(elem)
+           + std::string(">");
+};
+
+//this typedef is put is the .cc not the .h because that provokes a vtree clash
+//with combo::vtree
+//typedef vtree vtree;
+typedef vtree::iterator pre_it;
+
+/*
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
+{
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(Vertex((Handle)T));
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+        ret.replace(ret.append_child(head_it), t3.begin());
+        ret.replace(ret.append_child(head_it), t4.begin());
+        ret.replace(ret.append_child(head_it), t5.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin); return vtree();
+    }
+}
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
+{
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(Vertex((Handle)T));
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+        ret.replace(ret.append_child(head_it), t3.begin());
+        ret.replace(ret.append_child(head_it), t4.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin); return vtree();
+    }
+}
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3)
+{
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(Vertex((Handle)T));
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+        ret.replace(ret.append_child(head_it), t3.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2)
+{
+    //printf("MakeVirtualAtom_slow Handle, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(Vertex((Handle)T));
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+
+vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1)
+{
+    //printf("MakeVirtualAtom_slow Handle, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(Vertex((Handle)T));
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+
+vtree opencog::MakeVirtualAtom_slow(Handle T)
+{
+    //printf("MakeVirtualAtom_slow Handle\n");
+    try {
+        vtree ret;
+        ret.set_head(Vertex((Handle)T));
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
+{
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(T);
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+        ret.replace(ret.append_child(head_it), t3.begin());
+        ret.replace(ret.append_child(head_it), t4.begin());
+        ret.replace(ret.append_child(head_it), t5.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4)
+{
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(T);
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+        ret.replace(ret.append_child(head_it), t3.begin());
+        ret.replace(ret.append_child(head_it), t4.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2, const vtree& t3)
+{
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(T);
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+        ret.replace(ret.append_child(head_it), t3.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1, const vtree& t2)
+{
+    //printf("MakeVirtualAtom_slow Vertex, vtree, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(T);
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+        ret.replace(ret.append_child(head_it), t2.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+
+vtree opencog::MakeVirtualAtom_slow(Vertex T, const vtree& t1)
+{
+    //printf("MakeVirtualAtom_slow Vertex, vtree\n");
+    try {
+        vtree ret;
+        ret.set_head(T);
+        pre_it head_it = ret.begin();
+        ret.replace(ret.append_child(head_it), t1.begin());
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+
+vtree opencog::MakeVirtualAtom_slow(Vertex T)
+{
+    //printf("MakeVirtualAtom_slow Vertex\n");
+    try {
+        vtree ret;
+        ret.set_head(T);
+
+        return ret;
+
+    } catch (...) {
+        puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
+    }
+}
+*/
 

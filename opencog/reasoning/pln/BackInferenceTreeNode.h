@@ -339,15 +339,15 @@ protected:
 			printSubsts(new_result, -1);
 		assert(!new_result.bindings ||new_result.bindings->empty());
 
-        if ((ph = v2h(&new_result.value)) && *ph != Handle::UNDEFINED)
+        if ((ph = v2h(&new_result.value)) && *ph == Handle::UNDEFINED)
 		{
 			puts("Rule returned NULL! Args were:\n");
 
 			for_each(rule_args_begin, rule_args_end,
 				boost::bind<void>(
-					NMPrinter(	NMP_DEFAULT,NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION,
+					NMPrinter(NMP_DEFAULT,NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION,
 						NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, -2),
-					bind(&VtreeProvider::getVtree, _1)
+                        bind(&VtreeProvider::getVtree, _1)
 					)
 			);
 

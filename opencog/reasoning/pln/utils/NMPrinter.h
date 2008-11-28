@@ -10,7 +10,7 @@
 #include <boost/variant.hpp>
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 #include "../PLNUtils.h"
 
 //#include "PLNatom.h"

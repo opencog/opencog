@@ -31,7 +31,7 @@ ADD_LIBRARY (atomspace SHARED
 	Trail.cc
 	TruthValue.cc
     utils.cc
-    utils2.cc
+    #utils2.cc
 	types.cc
 	VersionHandle.cc
 )
@@ -97,7 +97,7 @@ INSTALL (FILES
 	type_names.h
 	types.h
     utils.h
-    utils2.cc
+    #utils2.h
 	VersionHandle.h
 	DESTINATION "include/opencog/atomspace"
 )

@@ -490,6 +490,7 @@ InitAxiomSet("smalldemo.xml");
     //TulipWriter tlp(std::string("small_demo.tlp"));
     //tlp.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
+    //foo42=true;
     printf("\nTest inheritance Osama/Abu.\n");
     InitAxiomSet("smalldemo.xml");
     maketest(makemeta(mva((Handle)INHERITANCE_LINK,

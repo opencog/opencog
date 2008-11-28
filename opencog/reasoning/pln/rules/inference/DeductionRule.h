@@ -20,7 +20,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 		assert(nm->getOutgoing(v2h(h[0]),0) != Handle::UNDEFINED);
 		assert(nm->getOutgoing(v2h(h[1]),1) != Handle::UNDEFINED);
 	
-		return meta(new tree<Vertex>(mva(InclusionLink, 
+		return meta(new tree<Vertex>(mva(Handle(InclusionLink), 
 						vtree(Vertex(nm->getOutgoing(v2h(h[0]),0))),
 						vtree(Vertex(nm->getOutgoing(v2h(h[1]),1)))
 				)));

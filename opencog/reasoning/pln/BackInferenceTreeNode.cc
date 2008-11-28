@@ -12,7 +12,6 @@
 //#include "spacetime.h"
 #include "AtomSpaceWrapper.h"
 #include <opencog/server/CogServer.h>
-#include <opencog/atomspace/utils2.h>
 #include <opencog/atomspace/utils.h>
 #include "BackInferenceTreeNode.h"
 #include <boost/iterator/indirect_iterator.hpp>
@@ -1222,7 +1221,10 @@ void BITNode::expandNextLevel()
                     break;
                 }           
             }       
-    } catch(...) { tlog(0,"Exception in ExpandNextLevel()"); throw; }
+    } catch(...) {
+        tlog(0,"Exception in ExpandNextLevel()");
+        throw;
+    }
 }
 
 /* Algorithm: Evaluation */
@@ -1636,7 +1638,7 @@ void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template,
     {
         foreach(Handle arg_h, haxx::inferred_from[h])
         {
-            if (unifiesTo(do_template, make_vtree((Handle) arg_h), bindings, bindings, true))
+            if (unifiesTo(do_template, make_vtree(Handle( arg_h)), bindings, bindings, true))
             {
                 puts("Satisfies do_template:");
                 printTree(arg_h,level+1,0);

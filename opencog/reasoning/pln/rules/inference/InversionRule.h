@@ -50,7 +50,7 @@ public:
 		inputFilter.push_back(meta(
 			new tree<Vertex>(
 				mva((Handle)InclusionLink,
-					mva((Handle)ATOM),
+					mva(Handle(ATOM)),
 					mva((Handle)ATOM))
 			)));		
 	}
@@ -65,7 +65,7 @@ printTree(boost::get<Handle>(h[0]),0,1);
 cprintf(1,"INV New order:\n");
 printTree(child(boost::get<Handle>(h[0]),1),0,1);
 printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
-		return	meta(new tree<Vertex>(mva((Handle)GET_ATW->getType(h0),
+		return	meta(new tree<Vertex>(mva(Handle(GET_ATW->getType(h0)),
 						mva(GET_ATW->getOutgoing(h0,1)),
 						mva(GET_ATW->getOutgoing(h0,0))
 				)));

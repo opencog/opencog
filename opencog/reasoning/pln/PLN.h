@@ -41,8 +41,7 @@
 //#include <classes.h>
 //#include <SimpleTruthValue.h>
 
-#include <utils2.h>
-#include <utils.h>
+#include <opencog/atomspace/utils.h>
 
 // The fixed length of a pattern
 #define PLN_CONFIG_PATTERN_LENGTH 13

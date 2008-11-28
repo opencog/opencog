@@ -54,7 +54,7 @@
 
 // This is a 3rd party tree template library
 #include <opencog/util/tree.h>
-#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 
 #include "PLN.h"
 
@@ -76,8 +76,6 @@ namespace haxx {
     const int STD_VARS = 100;
 }
 
-/// vtree
-typedef tree<Vertex> vtree;
 /// meta is a vtree wrapped in a boost::shared_ptr
 typedef Btr<vtree> meta;
 /// hpair is a pair of Handles

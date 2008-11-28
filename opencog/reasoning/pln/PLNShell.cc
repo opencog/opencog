@@ -116,6 +116,7 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #include "ForwardChainer.h"
 
 #include <opencog/util/Logger.h>
+#include <opencog/atomspace/utils.h>
 #include <opencog/guile/SchemeShell.h>
 #include <opencog/adaptors/tulip/TulipWriter.h>
 
@@ -128,6 +129,7 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #endif // _MSC_VER
 
 using namespace reasoning;
+using namespace opencog;
 
 //! debug level, @todo replaced by opencog log system
 extern int currentDebugLevel;
@@ -357,13 +359,13 @@ void initTests()
 */
             /// Requires test/reasoning/bigdemo.xml 
 printf("Insert test %d\n", testi++);
-            tests[0] = Btr<vtree > (new vtree(mva((Handle)AND_LINK,
+            tests[0] = Btr<vtree > (new vtree(mva(AND_LINK,
                     NewNode(CONCEPT_NODE, "Osama"),
                     NewNode(CONCEPT_NODE, "terrorist")
             )));
 
 printf("Insert test %d\n", testi++);
-            tests[1] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+            tests[1] = Btr<vtree > (new vtree(mva(EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "friendOf"),
                     mva((Handle)LIST_LINK,
                                 NewNode(CONCEPT_NODE, "Amir"),
@@ -371,7 +373,7 @@ printf("Insert test %d\n", testi++);
                             )
             )));
 printf("Insert test %d\n", testi++);
-            tests[2] = Btr<vtree > (new vtree(mva((Handle)EVALUATION_LINK,
+            tests[2] = Btr<vtree > (new vtree(mva(EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "wasKilled"),
                     mva((Handle)LIST_LINK,
                                 NewNode(CONCEPT_NODE, "Osama")

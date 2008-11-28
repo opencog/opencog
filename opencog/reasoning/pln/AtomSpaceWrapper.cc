@@ -7,7 +7,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/server/CogServer.h> // To get access to AtomSpace
 #include <opencog/util/tree.h>
-#include <opencog/atomspace/utils2.h>
+#include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/utils.h>
 
 #include  <boost/foreach.hpp>
