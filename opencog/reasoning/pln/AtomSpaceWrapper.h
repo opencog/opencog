@@ -120,7 +120,10 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * If a link already exists, then the appropriate contexts for each outgoing
  * atom are linked by a new dummy context link (with the appropriate context
  * links of each atom in the outgoing set of the link in the same order as the
- * outgoing set of the existing link).
+ * outgoing set of the existing link). This link's outgoing set/list is prefixed
+ * by the root dummy context node if such a context to context link doesn't
+ * exist, if it does exist then the context links are searched for the "bottom"
+ * link and this is used as the prefix.
  * 
  * E.g. say we have an InheritanceLink composed of two ConceptNodes that both
  * have CompositeTruthValues:
@@ -143,6 +146,16 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
  *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
  * \endcode
+ *
+ * Then if we want to create yet another with a different truthvalue, we get:
+ *
+ * \code
+ * dc_x_y_2 <- OrderedLink (dc_x_y dc_x dc_y)
+ * InheritanceLink <0.8, 0.9> (Context dc_x_y_2 <0.777, 0.5>)
+ *   ConceptNode "x" <0.8, 0.9> (Context dc_x <0.5, 0.5>)
+ *   ConceptNode "y" <0.8, 0.9> (Context dc_y <0.1, 0.5>)
+ * \endcode
+ *
  */
 class AtomSpaceWrapper : public iAtomSpaceWrapper
 {
