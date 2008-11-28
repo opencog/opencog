@@ -78,8 +78,13 @@ public:
         TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == min_sti);
 
         // run another cycle and check whether the atom has been removed
+        // Joel: you can't get the type or name when it's been deleted!
+        // save name and type first...
+        std::string name = node->getName();
+        Type t = node->getType();
         cogserver.unitTestServerLoop(1);
-        h = as->getHandle(node->getType(), node->getName());
+
+        h = as->getHandle(t, name);
         TS_ASSERT(TLB::isInvalidHandle(h));
     }
 };
