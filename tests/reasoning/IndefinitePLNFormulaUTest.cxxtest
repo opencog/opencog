@@ -44,27 +44,31 @@ public:
   		return new IndefiniteTruthValue(l,u,b);
   }
  
-/*  void InferenceTrailPaper(){
+  void testInferenceTrailPaper(){
  
   	printf("*** Inference Trail Replication Test ***");
   	
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(10);
 		
-        TruthValue* TVin1 = createTV(0.0f,0.138f,0.8f);//inhib1 - A
-		TruthValue* TVin0 = createTV(0.0f,0.168f,0.8f);//inhib - B
-		TruthValue* TVin2 = createTV(0.0f,0.032f,0.8f);//inhib2 - C
-		TruthValue* TVin10 = createTV(0.95f,1.0f,0.9f);//inh inhib1 inhib - AB
-		TruthValue* TVin20 = createTV(0.95f,1.0f,0.9f);//inh inhib2 inhib - CB
+        IndefiniteTruthValue* TVin1 = createTV(0.0f,0.138f,0.8f);//inhib1 - A
+		IndefiniteTruthValue* TVin0 = createTV(0.0f,0.168f,0.8f);//inhib - B
+		IndefiniteTruthValue* TVin2 = createTV(0.0f,0.032f,0.8f);//inhib2 - C
+		IndefiniteTruthValue* TVin10 = createTV(0.95f,1.0f,0.9f);//inh inhib1 inhib - AB
+		IndefiniteTruthValue* TVin20 = createTV(0.95f,1.0f,0.9f);//inh inhib2 inhib - CB
 // don't use IndefiniteSymmetricAbductionFormula - use a RuleGenerator
 		
 		//TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
-        TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
-		reasoning::IndefiniteSymmetricAbductionFormula fAbduction;
-        IndefiniteTruthValue* TVin12=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));//Inh inhib1 inhib2
+//        TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
+//		reasoning::IndefiniteSymmetricAbductionFormula fAbduction;
+//        IndefiniteTruthValue* TVin12=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));//Inh inhib1 inhib2
+                
+		RuleGenerator<AbductionRule, IndefiniteTruthValue> myCreator;
+	    AbductionRule *a = myCreator.CreateRule(TVin1, TVin0, TVin2, TVin10,TVin20);
+    	IndefiniteTruthValue* TVin12 = a->solve();//Inh inhib1 inhib2
 		//TruthValue* TVin12=fAbduction.compute(TV,5);//Inh inhib1 inhib2
 		
-		printf("\nTVin12:\nL: %.5f - U: %.5f\n",TVin12->getL(),TVin12->getU()); * /
+		printf("\nTVin12:\nL: %.5f - U: %.5f\n",TVin12->getL(),TVin12->getU());
 		
 		TruthValue* TVA = createTV(0.0, 0.168f,0.8f);
 		
@@ -73,11 +77,21 @@ public:
 		reasoning::IndefiniteMem2InhFormula fMem2Inh;
 		TVin1A=(IndefiniteTruthValue*)(fMem2Inh.compute(TV1,1));
 		
+/*		RuleGenerator<Mem2InhRule, IndefiniteTruthValue> myCreator2;
+	    AbductionRule *m = myCreator2.CreateRule(TVin1A);
+    	TVin1A = a->solve();*/
+    	
+		
 		printf("\nTVin1A:\nL: %.5f - U: %.5f\n",TVin1A->getL(),TVin1A->getU());		
 		
 		TruthValue* TV2[3] = {TVin1, TVin2, TVin12};
 		reasoning::IndefiniteSymmetricBayesFormula fBayes;
 		IndefiniteTruthValue* TVin21=(IndefiniteTruthValue*)(fBayes.simpleCompute(TV2,3));//Inh inhib2 inhib1
+		
+//		RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator3;
+//	    BayesRule *b = myCreator3.CreateRule(TVin1, TVin2, TVin12);
+//   	IndefiniteTruthValue* TVin21 = a->solve();//Inh inhib2 inhib1
+
 		
 		printf("\nTVin21:\nL: %.5f - U: %.5f\n",TVin21->getL(),TVin21->getU());		
 
@@ -119,7 +133,7 @@ public:
 		IndefiniteTruthValue* TVPrev1CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TV6,5));//Inh Prev1 causal_event
 					
 		printf("\nTVPrev1CausalEvent:\nL: %.5f - U: %.5f\n",TVPrev1CausalEvent->getL(),TVPrev1CausalEvent->getU());
-  }*/
+  }
   
   	void testSymmetricAndFormula() {
 		
