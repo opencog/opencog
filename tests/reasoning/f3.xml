@@ -1,3 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<list>
+
+  <tagdescription>
+    <tag name="AndLink" value="AndLink"/>
+    <tag name="CWPixelPerceptNode" value="CWPixelPerceptNode"/>
+    <tag name="EvaluationLink" value="EvaluationLink"/>
+    <tag name="PredicateNode" value="PredicateNode"/>
+    <tag name="ListLink" value="ListLink"/>
+    <tag name="CWColorNode" value="CWColorNode"/>
+    <tag name="NumberNode" value="NumberNode"/>
+    <tag name="ImplicationLink" value="ImplicationLink"/>
+  </tagdescription>
+
 
 <ImplicationLink confidence="0.999">
 <And>
@@ -9,3 +23,5 @@
 </ImplicationLink>
 
 </ImplicationLink>
+
+</list>

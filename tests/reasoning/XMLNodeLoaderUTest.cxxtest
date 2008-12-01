@@ -1,10 +1,11 @@
-#include <PLN.h>
-#include <utils.h>
-#include <AtomTableWrapper.h>
-#include <formulas/Formulas.h>
-#include <XMLNodeLoader.h>
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/atomspace/utils.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+#include <opencog/reasoning/pln/formulas/Formulas.h>
+#include <opencog/reasoning/pln/utils/XMLNodeLoader.h>
 
-extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
 char* XML_DATA = 
 "<ListLink>"
@@ -88,7 +89,7 @@ char* types_1[] = {
     
 namespace haxx
 {
-    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 class XMLNodeLoaderUTest : public CxxTest::TestSuite{
@@ -101,22 +102,22 @@ class XMLNodeLoaderUTest : public CxxTest::TestSuite{
     void testLoadXMLInput(){
         using namespace reasoning;
         DirectATW::getInstance();
-        haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
-        Handle U = LoadXMLInput(haxx::defaultAtomTableWrapper, XML_DATA);
+        haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
+        Handle U = LoadXMLInput(haxx::defaultAtomSpaceWrapper, XML_DATA);
         
         Atom* atom = TLB::getAtom(U);
         Type type = atom->getType();
-        printf("Atom type = %s\n", TYPE_TO_STR(type));
+        printf("Atom type = %s\n", ClassServer::getTypeName(type).c_str());
         TS_ASSERT(ClassServer::isAssignableFrom(LINK, type));
         Link* link = (Link*) atom;
         TS_ASSERT(link->getType() == LIST_LINK);
         TS_ASSERT(link->getArity() == ARITY);
-        printf("Atom table id = %d\n" + link->getAtomTable());
+//        printf("Atom table id = %d\n" + link->getAtomTable());
         Atom* outgoing[ARITY];
         for (int i = 0; i < ARITY; i++) {
             outgoing[i] = link->getOutgoingAtom(i);
             //printf("Outgoing %d type = %s\n", i, TYPE_TO_STR(outgoing[i]->getType()));
-            TS_ASSERT(!strcmp(TYPE_TO_STR(outgoing[i]->getType()), types_1[i]));
+            TS_ASSERT(!strcmp(ClassServer::getTypeName(outgoing[i]->getType().c_str()), types_1[i]));
         }
     }
 

@@ -121,7 +121,158 @@ public:
 		printf("\nTVPrev1CausalEvent:\nL: %.5f - U: %.5f\n",TVPrev1CausalEvent->getL(),TVPrev1CausalEvent->getU());
   }*/
   
-  void SymmetricAbductionFormula(){
+  	void testSymmetricAndFormula() {
+		
+		printf("** AND Formula **\n");
+		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
+		IndefiniteTruthValue::setDefaultK(10);
+    	float LA=0.99f; float LB=0.99f;
+    	float UA=1.0f; float UB=1.0f;
+		float expectedL=0.984f;
+		float expectedU=0.993f;
+		float expectedMean=0.990f;
+		float error=0.05;
+		
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValue* result;
+
+	    RuleGenerator<ConjunctionRule, IndefiniteTruthValue> myCreator;
+	    ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
+	    result = a->solve();
+	    printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
+	    printf("Mean: %.3f\n",result->getMean());
+
+		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
+		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
+		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
+
+	    printf("\n** AND Formula **");
+	
+	    float L2A=0.051668044685163f; float L2B=0.731203298626716f;
+	    float U2A=0.264185905611042f; float U2B=0.997599605415954f;
+	    
+	    IndefiniteTruthValue* TV2a=createTV(L2A,U2A);
+	    IndefiniteTruthValue* TV2b=createTV(L2B,U2B);
+	    IndefiniteTruthValue* result2;
+
+	    ConjunctionRule *a2 = myCreator.CreateRule(TV2a, TV2b);
+	    result2 = a2->solve();
+	    printf("\nResult:\nL: %.5f - U: %.5f\n",result2->getL(),result2->getU());
+	    printf("Mean: %.3f\n",result2->getMean());
+		
+        // TODO test on result2 as well
+	}
+  
+  	void testSymmetricImplicationBreakdownFormula(){
+		
+		printf("** Implication Formula **\n");
+		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
+		IndefiniteTruthValue::setDefaultK(10);
+		float LA=0.99f;
+		float LAB=0.99f;
+		float UA=1.0f;
+		float UAB=1.0f;
+		float expectedL=0.97156f;
+		float expectedU=0.99950f;
+		float expectedMean=0.993f;
+		float error=0.05;
+		
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVab=createTV(LAB,UAB);
+	    IndefiniteTruthValue* result;
+
+	    RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
+	    ImplicationRule *a = myCreator.CreateRule(TVa, TVab);
+	    result = a->solve();
+		
+		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
+		printf("Mean: %.3f\n\n",result->getMean());
+		
+		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
+		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
+		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
+		
+		//return result;
+		
+	}
+	
+	void testSymmetricRevisionFormula(){
+		printf("** Revision Formula **\n");
+		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
+		IndefiniteTruthValue::setDefaultK(10);
+		float LA=0.99f;
+		float LB=0.99f;
+		float UA=1.0f;
+		float UB=1.0f;
+		float expectedL=0.99017f;
+		float expectedU=0.99860f;
+		float expectedMean=0.995f;
+		float error=0.05;
+		
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValue* result;
+
+	    RuleGenerator<RevisionRule, IndefiniteTruthValue> myCreator;
+	    RevisionRule *a = myCreator.CreateRule(TVa, TVb);
+	    result = a->solve();
+		
+		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
+		printf("sD: %.3f\n\n",result->getMean());
+		
+		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
+		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
+		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
+		
+	}	
+	
+	void testSymmetricBayesFormula(){
+		
+		printf("** Bayes Formula **\n");
+		IndefiniteTruthValue::setDefaultConfidenceLevel(0.8);
+		IndefiniteTruthValue::setDefaultK(10);
+		float LA=0.0f;
+		float LC=0.0f;
+		float LAC=0.0f;
+		float UA=0.138f;
+		float UC=0.032f;
+		float UAC=0.17975f;		
+		float expectedL=0.00078f;
+		float expectedU=0.24815f;
+		float expectedMean=0.113f;
+		float error=0.05;
+		
+/*		TruthValue* TVA = createTV(0.476190f,0.571428f);//A
+		TruthValue* TVC = createTV(0.380952f,0.571428f);//C
+		TruthValue* TVAC = createTV(0.06f,0.14f);//AC
+		TruthValue* TVRB = createTV(0.06,0.14f);
+	*/
+		
+		IndefiniteTruthValue* TVa=createTV(LA,UA);			
+	    IndefiniteTruthValue* TVc=createTV(LC,UC);
+	    IndefiniteTruthValue* TVac=createTV(LAC,UAC);
+	    IndefiniteTruthValue* result;
+
+	    RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator;
+	    BayesRule *a = myCreator.CreateRule(TVa, TVc, TVac);
+	    result = a->solve();
+		
+		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
+		printf("Mean: %.3f\n\n",result->getMean());
+
+		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
+		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
+		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
+	
+		printf("\n");
+
+		//return result;		
+		
+	}
+
+  
+  void testSymmetricAbductionFormula(){
 		
 		printf("** Abduction Formula **\n");
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
@@ -173,140 +324,7 @@ public:
 		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
   }
   
-  void Mem2InhFormula(){
-  	printf("** Mem2Inh Formula **\n");
-		
-		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
-		IndefiniteTruthValue::setDefaultK(10);
-		float LA=0.95f;
-		float UA=1.0f;
-		float expectedL=0.93750f;
-		float expectedU=1.0f;
-		float expectedMean=0.975f;
-		float error=0.05;		
-		
-		TruthValue* TVA = createTV(LA,UA);
-		
-		TruthValue* TV[1] = {TVA};
-		reasoning::IndefiniteMem2InhFormula fMem2Inh;
-
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fMem2Inh.compute(TV,1));
-		
-		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
-		printf("Mean: %.3f\n\n",result->getMean());
-
-		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
-		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
-		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
-  }
-  
-	void SymmetricAndFormula() {
-		
-		printf("** AND Formula **\n");
-		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
-		IndefiniteTruthValue::setDefaultK(10);
-    	float LA=0.99f; float LB=0.99f;
-    	float UA=1.0f; float UB=1.0f;
-		float expectedL=0.984f;
-		float expectedU=0.993f;
-		float expectedMean=0.990f;
-		float error=0.05;
-		
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVb=createTV(LB,UB);
-	    IndefiniteTruthValue* result;
-
-	    RuleGenerator<ConjunctionRule, IndefiniteTruthValue> myCreator;
-	    ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
-	    result = a->solve();
-	    printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
-	    printf("Mean: %.3f\n",result->getMean());
-
-		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
-		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
-		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
-
-	    printf("\n** AND Formula **");
-	
-	    float L2A=0.051668044685163f; float L2B=0.731203298626716f;
-	    float U2A=0.264185905611042f; float U2B=0.997599605415954f;
-	    
-	    IndefiniteTruthValue* TV2a=createTV(L2A,U2A);
-	    IndefiniteTruthValue* TV2b=createTV(L2B,U2B);
-	    IndefiniteTruthValue* result2;
-
-	    ConjunctionRule *a2 = myCreator.CreateRule(TV2a, TV2b);
-	    result2 = a2->solve();
-	    printf("\nResult:\nL: %.5f - U: %.5f\n",result2->getL(),result2->getU());
-	    printf("Mean: %.3f\n",result2->getMean());
-		
-        // TODO test on result2 as well
-	}
-	
-	void SymmetricImplicationBreakdownFormula(){
-		
-		printf("** Implication Formula **\n");
-		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
-		IndefiniteTruthValue::setDefaultK(10);
-		float LA=0.99f;
-		float LAB=0.99f;
-		float UA=1.0f;
-		float UAB=1.0f;
-		float expectedL=0.97156f;
-		float expectedU=0.99950f;
-		float expectedMean=0.993f;
-		float error=0.05;
-		
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVab=createTV(LAB,UAB);
-	    IndefiniteTruthValue* result;
-
-	    RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
-	    ImplicationRule *a = myCreator.CreateRule(TVa, TVab);
-	    result = a->solve();
-		
-		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
-		printf("Mean: %.3f\n\n",result->getMean());
-		
-		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
-		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
-		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
-		
-		//return result;
-		
-	}
-
-	void SymmetricRevisionFormula(){
-		printf("** Revision Formula **\n");
-		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
-		IndefiniteTruthValue::setDefaultK(10);
-		float LA=0.99f;
-		float LB=0.99f;
-		float UA=1.0f;
-		float UB=1.0f;
-		float expectedL=0.99017f;
-		float expectedU=0.99860f;
-		float expectedMean=0.995f;
-		float error=0.05;
-		
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVb=createTV(LB,UB);
-	    IndefiniteTruthValue* result;
-
-	    RuleGenerator<RevisionRule, IndefiniteTruthValue> myCreator;
-	    RevisionRule *a = myCreator.CreateRule(TVa, TVb);
-	    result = a->solve();
-		
-		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
-		printf("sD: %.3f\n\n",result->getMean());
-		
-		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
-		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
-		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
-		
-	}	
-	
-	void SymmetricDeductionFormula(){
+  	void testSymmetricDeductionFormula(){
 		
 		printf("** Deduction Formula **\n");
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
@@ -392,62 +410,34 @@ public:
 		
 		//return result;
 	}
-
-	void SymmetricBayesFormula(){
+  
+  void testMem2InhFormula(){
+  	printf("** Mem2Inh Formula **\n");
 		
-		printf("** Bayes Formula **\n");
-		IndefiniteTruthValue::setDefaultConfidenceLevel(0.8);
+		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(10);
-		float LA=0.0f;
-		float LC=0.0f;
-		float LAC=0.0f;
-		float UA=0.138f;
-		float UC=0.032f;
-		float UAC=0.17975f;		
-		float expectedL=0.00078f;
-		float expectedU=0.24815f;
-		float expectedMean=0.113f;
-		float error=0.05;
+		float LA=0.95f;
+		float UA=1.0f;
+		float expectedL=0.93750f;
+		float expectedU=1.0f;
+		float expectedMean=0.975f;
+		float error=0.05;		
 		
-/*		TruthValue* TVA = createTV(0.476190f,0.571428f);//A
-		TruthValue* TVC = createTV(0.380952f,0.571428f);//C
-		TruthValue* TVAC = createTV(0.06f,0.14f);//AC
-		TruthValue* TVRB = createTV(0.06,0.14f);
-	*/
+		TruthValue* TVA = createTV(LA,UA);
 		
-		IndefiniteTruthValue* TVa=createTV(LA,UA);			
-	    IndefiniteTruthValue* TVc=createTV(LC,UC);
-	    IndefiniteTruthValue* TVac=createTV(LAC,UAC);
-	    IndefiniteTruthValue* result;
+		TruthValue* TV[1] = {TVA};
+		reasoning::IndefiniteMem2InhFormula fMem2Inh;
 
-	    RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator;
-	    BayesRule *a = myCreator.CreateRule(TVa, TVc, TVac);
-	    result = a->solve();
+		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fMem2Inh.compute(TV,1));
 		
-		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
+		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());
 
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
 		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
-	
-		printf("\n");
-
-		//return result;		
-		
-	}
-	
-    void testFormulas()
-    {	
-		SymmetricAndFormula();
-	    SymmetricImplicationBreakdownFormula();
-	    SymmetricRevisionFormula();
-	    SymmetricBayesFormula();	
-	    SymmetricAbductionFormula();
-	    SymmetricDeductionFormula();
-	    Mem2InhFormula();
-	}
-
+  }
+  
 // reasoning::setSaveDeductionLookupTable isn't available?
 /*	void ReadLookupTable(){
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
