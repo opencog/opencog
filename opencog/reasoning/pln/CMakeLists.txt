@@ -75,7 +75,6 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_EXECUTABLE(plnshell PLNShell.cc)
-ADD_EXECUTABLE(indeftest formulas/IndefiniteRuleTest.cc)
 
 TARGET_LINK_LIBRARIES(pln
     atomspace
@@ -98,25 +97,6 @@ TARGET_LINK_LIBRARIES(pln
 
 TARGET_LINK_LIBRARIES(plnshell pln
     #atomspace
-    server
-    xml
-    util
-    #query
-    smob #scheme
-    #wsd
-    persist
-    adaptor-tulip
-    ${IODBC_LIBRARIES}
-    ${CSOCKETS_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-    ${EXPAT_LIBRARIES}
-    ${GUILE_LIBRARIES}
-    ${GSL_LIBRARIES}
-    boost_signals-mt
-)
-
-TARGET_LINK_LIBRARIES(indeftest pln
-    atomspace
     server
     xml
     util
