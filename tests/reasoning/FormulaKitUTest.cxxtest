@@ -1,8 +1,8 @@
-#include <formulas/Formulas.h>
-#include <TruthValue.h>
-#include <SimpleTruthValue.h>
-#include <CompositeTruthValue.h>
-#include <utils2.h>
+#include <opencog/reasoning/pln/formulas/Formulas.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/utils.h> //#include <utils2.h>
 
 #include <math.h>
 #define NUM_ATOMS 5
