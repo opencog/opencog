@@ -4,13 +4,15 @@
  * Author: Fabrício - 2007-01-08
  */
 
-#include <formulas/Formulas.h>
-#include <formulas/FormulasIndefinite.h>
-#include <formulas/DeductionLookupTable.h>
-#include <utils.h>
+#include <opencog/reasoning/pln/formulas/Formulas.h>
+#include <opencog/reasoning/pln/formulas/FormulasIndefinite.h>
+#include <opencog/reasoning/pln/formulas/DeductionLookupTable.h>
+#include <opencog/atomspace/utils.h>
 
 #include <math.h>
 #include <vector.h>
+
+using namespace reasoning;
 
 float bvalues[6]={0.5, 0.6, 0.7, 0.8, 0.9, 0.95};
 float kvalues[9]={1.0f, 2.0f, 3.0f, 5.0f, 7.0f, 10.0f, 20.0f, 50.0f, 100.0f};
@@ -27,9 +29,9 @@ class IndefinitePLNFormulasUTest :  public CxxTest::TestSuite {
 
 public:
 
-	void setUp() {
+/*	void setUp() {
 		initReferenceTime();
-  }
+  }*/
 
   void tearDown(){
   }
@@ -42,7 +44,7 @@ public:
   		return new IndefiniteTruthValue(l,u,b);
   }
  
-  void InferenceTrailPaper(){
+/*  void InferenceTrailPaper(){
  
   	printf("*** Inference Trail Replication Test ***");
   	
@@ -54,6 +56,7 @@ public:
 		TruthValue* TVin2 = createTV(0.0f,0.032f,0.8f);//inhib2 - C
 		TruthValue* TVin10 = createTV(0.95f,1.0f,0.9f);//inh inhib1 inhib - AB
 		TruthValue* TVin20 = createTV(0.95f,1.0f,0.9f);//inh inhib2 inhib - CB
+// don't use IndefiniteSymmetricAbductionFormula - use a RuleGenerator
 		
 		//TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
         TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
@@ -61,7 +64,7 @@ public:
         IndefiniteTruthValue* TVin12=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));//Inh inhib1 inhib2
 		//TruthValue* TVin12=fAbduction.compute(TV,5);//Inh inhib1 inhib2
 		
-		printf("\nTVin12:\nL: %.5f - U: %.5f\n",TVin12->getL(),TVin12->getU());
+		printf("\nTVin12:\nL: %.5f - U: %.5f\n",TVin12->getL(),TVin12->getU()); * /
 		
 		TruthValue* TVA = createTV(0.0, 0.168f,0.8f);
 		
@@ -116,7 +119,7 @@ public:
 		IndefiniteTruthValue* TVPrev1CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TV6,5));//Inh Prev1 causal_event
 					
 		printf("\nTVPrev1CausalEvent:\nL: %.5f - U: %.5f\n",TVPrev1CausalEvent->getL(),TVPrev1CausalEvent->getU());
-  }
+  }*/
   
   void SymmetricAbductionFormula(){
 		
@@ -139,11 +142,11 @@ public:
 		float error=0.05;
 
 
-		TruthValue* TVA = createTV(LA,UA);
-		TruthValue* TVB = createTV(LB,UB);
-		TruthValue* TVC = createTV(LC,UC);
-		TruthValue* TVAB = createTV(LAB,UAB);
-		TruthValue* TVCB = createTV(LCB,UCB);
+		IndefiniteTruthValue* TVa = createTV(LA,UA);
+		IndefiniteTruthValue* TVb = createTV(LB,UB);
+		IndefiniteTruthValue* TVc = createTV(LC,UC);
+		IndefiniteTruthValue* TVab = createTV(LAB,UAB);
+		IndefiniteTruthValue* TVcb = createTV(LCB,UCB);
 
 /****** Other premises - test may fail **********************/
 /*		
@@ -155,16 +158,15 @@ public:
 */
 /*************************************************************/
 
-		TruthValue* TV[5] = {TVA, TVB, TVC, TVAB,TVCB};
-		reasoning::IndefiniteSymmetricAbductionFormula fAbduction;
-
-		unsigned long time_start=getElapsedMillis();
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));
-		unsigned long time_end=getElapsedMillis();
+		TruthValue* TV[5] = {TVa, TVb, TVc, TVab,TVcb};
+		
+		RuleGenerator<AbductionRule, IndefiniteTruthValue> myCreator;
+	    AbductionRule *a = myCreator.CreateRule(TVa, TVb, TVc, TVab, TVcb);
+    	IndefiniteTruthValue* result = a->solve();
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
+//		printf("Time: %lu\n",time_end - time_start); 
 
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
@@ -188,13 +190,10 @@ public:
 		TruthValue* TV[1] = {TVA};
 		reasoning::IndefiniteMem2InhFormula fMem2Inh;
 
-		unsigned long time_start=getElapsedMillis();
 		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fMem2Inh.compute(TV,1));
-		unsigned long time_end=getElapsedMillis();
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
 
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
@@ -206,38 +205,42 @@ public:
 		printf("** AND Formula **\n");
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(10);
-		float LA=0.99f;
-		float LB=0.99f;
-		float UA=1.0f;
-		float UB=1.0f;
+    	float LA=0.99f; float LB=0.99f;
+    	float UA=1.0f; float UB=1.0f;
 		float expectedL=0.984f;
 		float expectedU=0.993f;
 		float expectedMean=0.990f;
 		float error=0.05;
 		
-/*
-		TruthValue* TVA=createTV(0.95f,1.0f);
-		TruthValue* TVB=createTV(0.0f,0.138f);
-*/
-		TruthValue* TVA=createTV(LA,UA);
-		TruthValue* TVB=createTV(LB,UB);
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValue* result;
 
-		TruthValue* TV[2] = {TVA,TVB};
-		reasoning::IndefiniteSymmetricANDFormula fAND;
+	    RuleGenerator<ConjunctionRule, IndefiniteTruthValue> myCreator;
+	    ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
+	    result = a->solve();
+	    printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
+	    printf("Mean: %.3f\n",result->getMean());
 
-		unsigned long time_start=getElapsedMillis();
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fAND.compute(TV,2));
-		unsigned long time_end=getElapsedMillis();
-		
-		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
-		printf("Mean: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
-		
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
 		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
+
+	    printf("\n** AND Formula **");
+	
+	    float L2A=0.051668044685163f; float L2B=0.731203298626716f;
+	    float U2A=0.264185905611042f; float U2B=0.997599605415954f;
+	    
+	    IndefiniteTruthValue* TV2a=createTV(L2A,U2A);
+	    IndefiniteTruthValue* TV2b=createTV(L2B,U2B);
+	    IndefiniteTruthValue* result2;
+
+	    ConjunctionRule *a2 = myCreator.CreateRule(TV2a, TV2b);
+	    result2 = a2->solve();
+	    printf("\nResult:\nL: %.5f - U: %.5f\n",result2->getL(),result2->getU());
+	    printf("Mean: %.3f\n",result2->getMean());
 		
-        //return result;
+        // TODO test on result2 as well
 	}
 	
 	void SymmetricImplicationBreakdownFormula(){
@@ -254,19 +257,16 @@ public:
 		float expectedMean=0.993f;
 		float error=0.05;
 		
-		TruthValue* TVA=createTV(LA,UA);
-		TruthValue* TVAB=createTV(LAB,UAB);
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVab=createTV(LAB,UAB);
+	    IndefiniteTruthValue* result;
 
-		TruthValue* TV[2] = {TVAB,TVA};
-		reasoning::IndefiniteSymmetricImplicationBreakdownFormula fImplication;
-
-		unsigned long time_start=getElapsedMillis();
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fImplication.compute(TV,2));
-		unsigned long time_end=getElapsedMillis();
+	    RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
+	    ImplicationRule *a = myCreator.CreateRule(TVa, TVab);
+	    result = a->solve();
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
 		
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
@@ -289,25 +289,21 @@ public:
 		float expectedMean=0.995f;
 		float error=0.05;
 		
-		TruthValue* TVA=createTV(LA,UA);
-		TruthValue* TVB=createTV(LB,UB);
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValue* result;
 
-		TruthValue* TV[2] = {TVA,TVB};
-		reasoning::IndefiniteSymmetricRevisionFormula fRevision;
-
-		unsigned long time_start=getElapsedMillis();
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fRevision.compute(TV,2));
-		unsigned long time_end=getElapsedMillis();
+	    RuleGenerator<RevisionRule, IndefiniteTruthValue> myCreator;
+	    RevisionRule *a = myCreator.CreateRule(TVa, TVb);
+	    result = a->solve();
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
 		printf("sD: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
 		
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
 		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
 		
-		//return result;
 	}	
 	
 	void SymmetricDeductionFormula(){
@@ -315,8 +311,8 @@ public:
 		printf("** Deduction Formula **\n");
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2);
-		reasoning::setSaveDeductionLookupTable(false);
-		reasoning::setUseDeductionLookupTable(false);
+//		reasoning::setSaveDeductionLookupTable(false);
+//		reasoning::setUseDeductionLookupTable(false);
 		
 		//DeductionLookupTable::getInstance()->readTable();
 		
@@ -336,11 +332,13 @@ public:
 		float error=0.5;//a lot of error because the lookup table precision
 
 
-		TruthValue* TVA = createTV(LA,UA);
-		TruthValue* TVB = createTV(LB,UB);
-		TruthValue* TVC = createTV(LC,UC);
-		TruthValue* TVAB = createTV(LAB,UAB);
-		TruthValue* TVBC = createTV(LBC,UBC);
+	    IndefiniteTruthValue* TVa=createTV(LA,UA);
+	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValue* TVc=createTV(LC,UC);
+	    IndefiniteTruthValue* TVab=createTV(LAB,UAB);
+	    IndefiniteTruthValue* TVbc=createTV(LBC,UBC);
+	    IndefiniteTruthValue* result;
+
 	
 /*****************************************************************************/
 /* Other premises - tests may fail with them, unless one 
@@ -379,16 +377,13 @@ public:
 		TruthValue* TVBC = createTV(0.7f,1.0f);
 */
 /*****************************************************************************/
-		TruthValue* TV[5] = {TVA, TVB, TVC, TVAB,TVBC};
-		reasoning::IndefiniteSymmetricDeductionFormula fDeduction;
-		unsigned long time_start=getElapsedMillis();		
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fDeduction.compute(TV,5));
+	    RuleGenerator<DeductionRule, IndefiniteTruthValue> myCreator;
+	    DeductionRule *a = myCreator.CreateRule(TVa, TVb, TVc, TVab, TVbc);
+	    result = a->solve();
 
-		unsigned long time_end=getElapsedMillis();
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
 		printf("\n");
 
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
@@ -419,20 +414,18 @@ public:
 		TruthValue* TVAC = createTV(0.06f,0.14f);//AC
 		TruthValue* TVRB = createTV(0.06,0.14f);
 	*/
-		TruthValue* TVA = createTV(LA,UA);//A
-		TruthValue* TVC = createTV(LC,UC);//C
-		TruthValue* TVAC = createTV(LAC,UAC);//AC
+		
+		IndefiniteTruthValue* TVa=createTV(LA,UA);			
+	    IndefiniteTruthValue* TVc=createTV(LC,UC);
+	    IndefiniteTruthValue* TVac=createTV(LAC,UAC);
+	    IndefiniteTruthValue* result;
 
-		TruthValue* TV[3] = {TVA, TVC, TVAC};
-		reasoning::IndefiniteSymmetricBayesFormula fBayes;
-
-		unsigned long time_start=getElapsedMillis();
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fBayes.simpleCompute(TV,3));
-		unsigned long time_end=getElapsedMillis();
+	    RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator;
+	    BayesRule *a = myCreator.CreateRule(TVa, TVc, TVac);
+	    result = a->solve();
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());
-		printf("Time: %lu\n",time_end - time_start);
 
 		TS_ASSERT(result->getL() >= expectedL-error && result->getL() <= expectedL+error); 
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
@@ -444,31 +437,19 @@ public:
 		
 	}
 	
-	IndefiniteTruthValue* SymmetricDeductionFormula(TruthValue* TVA, 
-							       TruthValue* TVB,
-								   TruthValue* TVC,
-        						   TruthValue* TVAB,
-		    				       TruthValue* TVBC)
-	{
-		
-		TruthValue* TV[5] = {TVA, TVB, TVC, TVAB,TVBC};
-		reasoning::IndefiniteSymmetricDeductionFormula fDeduction;
-//		unsigned long time_start=getElapsedMillis();		
-		IndefiniteTruthValue* result=((IndefiniteTruthValue*)fDeduction.compute(TV,5));
-//		unsigned long time_end=getElapsedMillis();
-		
-//		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
-//		printf("sAC: %.3f\n\n",result->getMean());
-//		printf("Time: %lu\n",time_end - time_start);	
-//		printf("\n");
-		
-//		delete TVA; delete TVB; delete TVC; delete TVAB; delete TVBC;
-		
-		return result;
-		
+    void testFormulas()
+    {	
+		SymmetricAndFormula();
+	    SymmetricImplicationBreakdownFormula();
+	    SymmetricRevisionFormula();
+	    SymmetricBayesFormula();	
+	    SymmetricAbductionFormula();
+	    SymmetricDeductionFormula();
+	    Mem2InhFormula();
 	}
 
-	void ReadLookupTable(){
+// reasoning::setSaveDeductionLookupTable isn't available?
+/*	void ReadLookupTable(){
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2.0);
 		reasoning::setSaveDeductionLookupTable(false);
@@ -547,7 +528,7 @@ public:
 //		}
 				
 	}
-	
+*/	
 	void testCreateLookupTable(){
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2.0);
@@ -556,14 +537,13 @@ public:
 		
 		float default_b=0.9f;
 		
-		reasoning::setSaveDeductionLookupTable(true);
-		reasoning::setUseDeductionLookupTable(false);
-		unsigned long time_start=getElapsedMillis();
+//		reasoning::setSaveDeductionLookupTable(true);
+//		reasoning::setUseDeductionLookupTable(false);
+//		unsigned long time_start=getElapsedMillis();
 		//DeductionLookupTable::getInstance()->readTable();
-		reasoning::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
-		fBuildLookupDeduction.compute();
-        unsigned long time_end=getElapsedMillis();
-        printf("Time: %lu\n",time_end - time_start);
+//		reasoning::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
+//		fBuildLookupDeduction.compute();
+//        unsigned long time_end=getElapsedMillis();
 	}
 
     void testEvaluateDeductionLookupTable(){
