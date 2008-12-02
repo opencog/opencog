@@ -41,6 +41,13 @@ namespace reasoning {
 
 const float 
     IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor = 1.5f;
+    
+static bool SAVE_DEDUCTION_LOOKUP_TABLE=true;
+static bool USE_DEDUCTION_LOOKUP_TABLE=false;
+
+static void setSaveDeductionLookupTable(bool b){SAVE_DEDUCTION_LOOKUP_TABLE=b;}
+static void setUseDeductionLookupTable(bool b){USE_DEDUCTION_LOOKUP_TABLE=b;}
+
 
 /* Wrappers that Implement the Formulas */
 class IndefiniteSymmetricBayesFormula : public Formula<3>

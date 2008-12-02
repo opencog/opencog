@@ -452,8 +452,7 @@ public:
 		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
   }
   
-// reasoning::setSaveDeductionLookupTable isn't available?
-/*	void ReadLookupTable(){
+	void ReadLookupTable(){
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2.0);
 		reasoning::setSaveDeductionLookupTable(false);
@@ -478,11 +477,11 @@ public:
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2);
 		
-		TruthValue* TVA;
-		TruthValue* TVB;
-		TruthValue* TVC;
-		TruthValue* TVAB;
-		TruthValue* TVBC;
+		IndefiniteTruthValue* TVA;
+		IndefiniteTruthValue* TVB;
+		IndefiniteTruthValue* TVC;
+		IndefiniteTruthValue* TVAB;
+		IndefiniteTruthValue* TVBC;
 		IndefiniteTruthValue* result;
 		IndefiniteTruthValue* resultLookupTable;
 		float default_b=0.9f;
@@ -517,7 +516,12 @@ public:
 				TVAB = createTV(Ls[i],Us[j],default_b);
 				TVBC = createTV(Ls[i],Us[j],default_b);
 							
-				result=(IndefiniteTruthValue*)SymmetricDeductionFormula(TVA,TVB,TVC, TVAB, TVBC);
+				RuleGenerator<DeductionRule, IndefiniteTruthValue> myCreator;
+	            DeductionRule *d = myCreator.CreateRule(TVA,TVB,TVC, TVAB, TVBC);
+	            result = d->solve();
+
+							
+//				result=(IndefiniteTruthValue*)SymmetricDeductionFormula(TVA,TVB,TVC, TVAB, TVBC);
 				printf("[%.5f, %.5f]\n",result->getL(),result->getU());
 				printf("Result Mean= %.3f\n\n",result->getMean());
 //				resultsLookupTable.push_back(resultLookupTable->getMean());
@@ -532,7 +536,7 @@ public:
 //		}
 				
 	}
-*/	
+	
 	void testCreateLookupTable(){
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2.0);
@@ -541,12 +545,13 @@ public:
 		
 		float default_b=0.9f;
 		
-//		reasoning::setSaveDeductionLookupTable(true);
-//		reasoning::setUseDeductionLookupTable(false);
+		reasoning::setSaveDeductionLookupTable(true);
+		reasoning::setUseDeductionLookupTable(false);
 //		unsigned long time_start=getElapsedMillis();
 		//DeductionLookupTable::getInstance()->readTable();
-//		reasoning::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
-//		fBuildLookupDeduction.compute();
+// Removed because that formula was removed (a new version of it is needed).
+/*		reasoning::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
+		fBuildLookupDeduction.compute();*/
 //        unsigned long time_end=getElapsedMillis();
 	}
 
