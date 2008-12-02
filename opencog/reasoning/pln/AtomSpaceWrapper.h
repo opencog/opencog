@@ -3,6 +3,10 @@
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
+ * Authors:
+ * Ari Heljakka
+ * Joel Pitt
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -19,12 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * @file
- * @author Ari Heljakka
- *         Joel Pitt
- * @ingroup PLN
- */
 #ifndef ATW_H
 #define ATW_H
 
