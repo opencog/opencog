@@ -15,20 +15,19 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/nlp/wsd/SenseSimilarity.h>
+
+#include "EdgeUtils.h"
+#include "SenseSimilarity.h"
 
 namespace opencog {
 
-class MihalceaEdge
+class MihalceaEdge : private EdgeUtils
 {
 	private:
 		AtomSpace *atom_space;
 		SenseSimilarity *sen_sim;
 		bool annotate_parse_f(Handle);
 
-		std::set<Handle> words;
-		bool look_at_word(Handle);
-		bool look_at_relation(const std::string &, Handle, Handle);
 		bool annotate_word_pair(Handle, Handle);
 		int word_pair_count;
 		int edge_count;

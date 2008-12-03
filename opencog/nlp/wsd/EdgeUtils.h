@@ -17,8 +17,10 @@ namespace opencog {
 
 class EdgeUtils
 {
-	protected:
+	public:
 		std::set<Handle> words;
+		bool look_at_relation(const std::string &, Handle, Handle);
+		bool look_at_word(Handle);
 
 };
 

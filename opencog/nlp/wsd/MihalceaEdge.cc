@@ -70,7 +70,7 @@ void MihalceaEdge::annotate_sentence(Handle h)
  */
 void MihalceaEdge::annotate_parse(Handle h)
 {
-	foreach_word_instance(h, &MihalceaEdge::look_at_word, this);
+	foreach_word_instance(h, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 
 	// At this point, "words" contains all of the relex-participating
 	// words in the parse. Loop over word-pairs, and annotate them.
@@ -104,10 +104,10 @@ bool MihalceaEdge::annotate_parse_f(Handle h)
  */
 void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 {
-	foreach_word_instance(ha, &MihalceaEdge::look_at_word, this);
+	foreach_word_instance(ha, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 	std::set<Handle> pa_words = words;
 	words.clear();
-	foreach_word_instance(hb, &MihalceaEdge::look_at_word, this);
+	foreach_word_instance(hb, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 
 #ifdef DEBUG
 	printf ("; ========================= start sent pair (%zu x %zu) words\n",
@@ -132,29 +132,6 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	printf ("; Sent pair: Done adding %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
-}
-
-/**
- * For each word-instance loop over all syntactic relationships.
- * (i.e. _subj, _obj, _nn, _amod, and so on). Generate a list of all
- * words that participate in relationships.
- */
-bool MihalceaEdge::look_at_word(Handle h)
-{
-	foreach_relex_relation(h, &MihalceaEdge::look_at_relation, this);
-	return false;
-}
-
-/**
- * This routine is called for every relation between word-instances in
- * a parse. It simply creates a list of all of the words in a sentence
- * that participate in RelEx relations.
- */
-bool MihalceaEdge::look_at_relation(const std::string &relname, Handle first, Handle second)
-{
-	words.insert(first);
-	words.insert(second);
-	return false;
 }
 
 /**
