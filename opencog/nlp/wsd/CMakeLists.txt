@@ -9,6 +9,7 @@ IF (${ODBC_FOUND})
 ENDIF (${ODBC_FOUND})
 
 ADD_LIBRARY (wsd SHARED
+	EdgeThin.cc
 	EdgeUtils.cc
 	Mihalcea.cc
 	MihalceaEdge.cc

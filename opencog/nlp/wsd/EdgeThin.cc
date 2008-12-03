@@ -1,31 +1,15 @@
 /*
- * EdgeThin.h
+ * EdgeThin.cc
  *
  * Thin out, remove edges between words, sentences.
  *
  * Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
  */
 
-#ifndef _OPENCOG_WSD_THIN_EDGE_H
-#define _OPENCOG_WSD_THIN_EDGE_H
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
 
-namespace opencog {
-
-class EdgeThin
-{
-	private:
-		bool thin_word_pair(Handle, Handle, int);
-
-	public:
-		void thin_parse(Handle, int);
-		void thin_parse_pair(Handle, Handle, int);
-};
-
-}
-
-#endif /* _OPENCOG_WSD_THIN_EDGE_H */
-
-// #include "EdgeThin.h"
+#include "EdgeThin.h"
 
 #define DEBUG
 
