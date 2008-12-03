@@ -50,7 +50,7 @@ scm
 ; ---------------------------------------------------------------------
 ; Process a disjunct -- put the "plain" disjunct into the database.
 ; This is the "simple" routine, in that it only updates the simple
-; word-disjunt pair database; it ignores word seneses.
+; word-disjunct pair database; it ignores word senses.
 ;
 ; Arguments:
 ; iword - inflected word
@@ -281,10 +281,7 @@ scm
 		)
 
 		(ldj-process-disjunct-simple iword djstr score)
-
-		; XXX We are going to pass on dealing with senses right now.
-		; This is because the wsd algorithm takes too long to run.
-		; (ldj-process-disjunct-senses word iword djstr score)
+		(ldj-process-disjunct-senses word iword djstr score)
 
 		; (display "Word: ")
 		; (display iword)

@@ -4,8 +4,8 @@ scm
 ; Work through a bunch of relex files that are in the compact-file-format,
 ; and import these into opencog. Then run processing on each one, as needed.
 ;
-(define input-filedir "/home2/linas/src/novamente/data/enwiki/enwiki-20080524/parsed/B")
-(define done-filedir "/home2/linas/src/novamente/data/enwiki/enwiki-20080524/coged/B")
+(define input-filedir "/home2/linas/src/novamente/data/enwiki/enwiki-20080524/parsed/A")
+(define done-filedir "/home2/linas/src/novamente/data/enwiki/enwiki-20080524/coged/A")
 
 (define cff-to-opencog-exe "/home/linas/src/novamente/src/relex-bzr/src/perl/cff-to-opencog.pl")
 
@@ -66,8 +66,6 @@ scm
 			)
 			(system (string-join (list "echo start article: \"" filename "\"")))
 			(system "date")
-			; (display "Starting: ") 
-			; (display filename) (newline)
 			(load-cff-data fullname)
 			(system (string-join (list "echo done cff: \"" filename "\"")))
 			(system "date")

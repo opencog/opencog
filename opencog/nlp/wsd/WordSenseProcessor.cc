@@ -77,9 +77,7 @@ void WordSenseProcessor::work_thread(void)
 		work_queue.pop();
 		pthread_mutex_unlock(&queue_lock);
 
-// XXX we will punt on this for now, until we fix the very-large-document
-// performance problem.
-// wsd->process_document(h);
+		wsd->process_document(h);
 
 		// Mark this document as being completed.
 		std::vector<Handle> out;

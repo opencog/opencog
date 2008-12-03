@@ -97,7 +97,8 @@ bool Mihalcea::process_sentence_list(Handle h)
 	foreach_outgoing_handle(h, &Mihalcea::process_sentence, this);
 
 	// Solve the page-rank equations for the whole set of sentences.
-	sense_ranker.rank_document(parse_list);
+	// sense_ranker.rank_document(parse_list);
+	// No .. don't. Use the sliding-window mechanism, above.
 
 	// Report the results.
 	reporter.report_document(parse_list);

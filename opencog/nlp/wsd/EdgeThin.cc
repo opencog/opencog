@@ -82,7 +82,7 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
 	const std::string &fn = f->getName();
 	const std::string &sn = s->getName();
-	printf ("; Thin out wordPair (%s, %s)\n", fn.c_str(), sn.c_str());
+	printf ("; Thin out wordPair (%s, %s) to %d\n", fn.c_str(), sn.c_str(), keep);
 #endif
 
 	return false;
