@@ -58,10 +58,10 @@ void SenseRank::rank_sentence(Handle h)
 	foreach_parse(h, &SenseRank::rank_parse_f, this);
 }
 
-void SenseRank::rank_document(const std::vector<Handle> &parse_list)
+void SenseRank::rank_document(const std::deque<Handle> &parse_list)
 {
 	// Iterate over list of parses making up a "document"
-	std::vector<Handle>::const_iterator i;
+	std::deque<Handle>::const_iterator i;
 	for (i = parse_list.begin(); i != parse_list.end(); i++)
 	{
 		init_parse(*i);
@@ -194,7 +194,7 @@ bool SenseRank::start_sense(Handle word_sense_h,
  * uniformly across the possible P(a)'s. 
  *
  * The value of P(a) can be interpreted as a probability, if it is
- * normalized -- it would be the Markov chain staionary vector
+ * normalized -- it would be the Markov chain stationary vector
  * (eigenvector). Note that P(a) ranges or *all* senses of all words:
  * the total of senses of any individual word is *not* normalized.
  *

@@ -12,7 +12,7 @@
 
 #include <opencog/atomspace/types.h>
 
-#include <vector>
+#include <deque>
 
 namespace opencog {
 
@@ -49,7 +49,7 @@ class SenseRank
 		void init_parse(Handle);
 		void rank_parse(Handle);
 		void rank_sentence(Handle);
-		void rank_document(const std::vector<Handle> &);
+		void rank_document(const std::deque<Handle> &);
 
 };
 

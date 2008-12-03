@@ -10,7 +10,7 @@
 #ifndef _OPENCOG_REPORT_RANK_H
 #define _OPENCOG_REPORT_RANK_H
 
-#include <vector>
+#include <deque>
 
 #include <opencog/atomspace/types.h>
 
@@ -37,7 +37,7 @@ class ReportRank
 		~ReportRank();
 		void report_sentence(Handle);
 		void report_parse(Handle);
-		void report_document(const std::vector<Handle> &);
+		void report_document(const std::deque<Handle> &);
 
 };
 

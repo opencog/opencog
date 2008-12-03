@@ -20,6 +20,8 @@
 #include <opencog/nlp/wsd/SenseRank.h>
 #include <opencog/nlp/wsd/ReportRank.h>
 
+#include "EdgeThin.h"
+
 namespace opencog {
 
 class Mihalcea
@@ -28,13 +30,15 @@ class Mihalcea
 		AtomSpace *atom_space;
 		MihalceaLabel *labeller;
 		MihalceaEdge *edger;
+		EdgeThin thinner;
 		NNAdjust *nn_adjuster;
 		ParseRank *parse_ranker;
 		SenseRank *sense_ranker;
 		ReportRank *reporter;
 
 		Handle previous_parse;
-		std::vector<Handle> parse_list;
+		std::deque<Handle> parse_list;
+		std::deque<Handle> short_list;
 		bool process_sentence_list(Handle);
 		bool process_sentence(Handle);
 

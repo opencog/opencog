@@ -59,7 +59,7 @@ bool Mihalcea::process_sentence(Handle h)
 	parse_list.push_back(top_parse);
 
 #ifdef DEBUG
-	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n", top_parse.value(), h.value()); 
+	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n", top_parse.value(), h.value());
 #endif
 
 	// Attach senses to word instances
@@ -71,13 +71,36 @@ bool Mihalcea::process_sentence(Handle h)
 	// Tweak, based on parser markup
 	// nn_adjuster->adjust_parse(top_parse);
 
-	// Link sentences together, since presumably the next 
+	// Link sentences together, since presumably the next
 	// sentence deals with topics similar to the previous one.
 	if (Handle::UNDEFINED != previous_parse)
 	{
 		edger->annotate_parse_pair(previous_parse, top_parse);
 	}
 	previous_parse = top_parse;
+
+#define WINDOW_SIZE 3
+	// Create a short list of the last 3 sentences
+	// This is a sliding window of related words.
+	short_list.push_back(top_parse);
+	if (WINDOW_SIZE < short_list.size())
+	{
+		Handle earliest = short_list.front();
+		short_list.pop_front();
+		Handle first = short_list.front();
+		thinner.thin_parse_pair(earliest, first, 0);
+	}
+#define THICKNESS 2
+	if (WINDOW_SIZE == short_list.size())
+	{
+		Handle first = short_list.front();
+		thinner.thin_parse(first, THICKNESS);
+		Handle next = short_list[1];
+		thinner.thin_parse_pair(first, next, THICKNESS);
+	}
+
+	// Solve the page-rank equations for the short list.
+	sense_ranker->rank_document(short_list);
 
 	return false;
 }

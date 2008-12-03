@@ -20,8 +20,8 @@ using namespace opencog;
  */
 bool EdgeUtils::look_at_word(Handle h)
 {
-   foreach_relex_relation(h, &EdgeUtils::look_at_relation, this);
-   return false;
+	foreach_relex_relation(h, &EdgeUtils::look_at_relation, this);
+	return false;
 }
 
 /**
@@ -31,8 +31,8 @@ bool EdgeUtils::look_at_word(Handle h)
  */
 bool EdgeUtils::look_at_relation(const std::string &relname, Handle first, Handle second)
 {
-   words.insert(first);
-   words.insert(second);
-   return false;
+	words.insert(first);
+	words.insert(second);
+	return false;
 }
 

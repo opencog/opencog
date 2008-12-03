@@ -40,14 +40,14 @@ void ReportRank::report_sentence(Handle h)
 }
 
 
-void ReportRank::report_document(const std::vector<Handle> &parse_list)
+void ReportRank::report_document(const std::deque<Handle> &parse_list)
 {
 	normalization = 0.0;
 	sense_count = 0.0;
 	choosen_sense_count = 0.0;
 
 	// Iterate over all the parses in the document.
-	std::vector<Handle>::const_iterator i;
+	std::deque<Handle>::const_iterator i;
 	for (i = parse_list.begin(); i != parse_list.end(); i++)
 	{
 		Handle h = *i;
