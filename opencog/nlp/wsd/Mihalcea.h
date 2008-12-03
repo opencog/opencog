@@ -28,13 +28,13 @@ class Mihalcea
 {
 	private:
 		AtomSpace *atom_space;
-		MihalceaLabel *labeller;
-		MihalceaEdge *edger;
+		MihalceaLabel labeller;
+		MihalceaEdge edger;
 		EdgeThin thinner;
-		NNAdjust *nn_adjuster;
-		ParseRank *parse_ranker;
-		SenseRank *sense_ranker;
-		ReportRank *reporter;
+		NNAdjust nn_adjuster;
+		ParseRank parse_ranker;
+		SenseRank sense_ranker;
+		ReportRank reporter;
 
 		Handle previous_parse;
 		std::deque<Handle> parse_list;
