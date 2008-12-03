@@ -9,6 +9,7 @@ IF (${ODBC_FOUND})
 ENDIF (${ODBC_FOUND})
 
 ADD_LIBRARY (wsd SHARED
+	EdgeUtils.cc
 	Mihalcea.cc
 	MihalceaEdge.cc
 	MihalceaLabel.cc
@@ -27,6 +28,7 @@ INSTALL (TARGETS wsd
 )
 
 INSTALL (FILES
+	EdgeUtils.h
 	ForeachWord.h
 	MihalceaEdge.h
 	Mihalcea.h
