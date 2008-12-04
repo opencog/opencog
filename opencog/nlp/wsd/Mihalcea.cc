@@ -67,7 +67,7 @@ bool Mihalcea::process_sentence(Handle h)
 
 		// If there are any senses that are not attached to anything,
 		// get rid of them now.
-		thinner.prune_senses(previous_parse);
+		thinner.prune_parse(previous_parse);
 	}
 	previous_parse = top_parse;
 
@@ -79,16 +79,13 @@ bool Mihalcea::process_sentence(Handle h)
 	{
 		Handle earliest = short_list.front();
 		short_list.pop_front();
-		Handle first = short_list.front();
-		thinner.thin_parse_pair(earliest, first, 0);
+		thinner.thin_parse(earliest, 0);
 	}
 #define THICKNESS 2
 	if (WINDOW_SIZE == short_list.size())
 	{
 		Handle first = short_list.front();
 		thinner.thin_parse(first, THICKNESS);
-		Handle next = short_list[1];
-		thinner.thin_parse_pair(first, next, THICKNESS);
 	}
 
 	// Solve the page-rank equations for the short list.

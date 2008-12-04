@@ -62,7 +62,7 @@ bool EdgeThin::prune_word(Handle h)
  * Remove all word senses that are not attached to anything.
  * Argument should be a sentence parse.
  */
-void EdgeThin::prune_senses(Handle h)
+void EdgeThin::prune_parse(Handle h)
 {
 	prune_count = 0;
 	foreach_word_instance(h, &EdgeThin::prune_word, this);
@@ -77,34 +77,14 @@ void EdgeThin::prune_senses(Handle h)
  * Similar to, but opposite of MihalceaEdge::annotate_parse()
  * rather than adding edges, it removes them.
  */
-void EdgeThin::thin_parse(Handle h, int keep)
+void EdgeThin::thin_parse(Handle h, int _keep)
 {
-	foreach_word_instance(h, &EdgeUtils::look_at_word, (EdgeUtils *) this);
-
-	// At this point, "words" contains all of the words in the parse.
-	// Loop over word-pairs, and thin edges.
 	edge_count = 0;
-	word_pair_count = 0;
-	std::set<Handle>::const_iterator f;
-	for (f = words.begin(); f != words.end(); f++)
-	{
-		std::set<Handle>::const_iterator s = f;
-		for (s++; s != words.end(); s++)
-		{
-			thin_word_pair(*f, *s, keep);
-		}
-	}
-}
-
-/**
- * Remove edges between senses between a pair opf parses
- *
- * Similar to, but opposite of MihalceaEdge::annotate_parse_pair()
- * rather than adding edges, it removes them.
- */
-void EdgeThin::thin_parse_pair(Handle e, Handle l, int keep)
-{
-printf ("duude remove all but %d edges from parse pair\n", keep);
+	keep = _keep;
+	foreach_word_instance(h, &EdgeThin::thin_word, this);
+#ifdef DEBUG
+	printf("; EdgeThin::thin_parse deleted %d edges\n", edge_count);
+#endif
 }
 
 /**
@@ -145,21 +125,19 @@ bool EdgeThin::delete_sim(Handle h)
  * Similar to, but opposite to MihalceaEdge::annotate_word_pair()
  * rather than adding edges, it removes them.
  */
-bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
+bool EdgeThin::thin_word(Handle word_h)
 {
 #ifdef DEBUG
-	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
-	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
-	const std::string &fn = f->getName();
-	const std::string &sn = s->getName();
-	printf ("; Thin out wordPair (%s, %s) to %d\n", fn.c_str(), sn.c_str(), keep);
+	Node *w = dynamic_cast<Node *>(TLB::getAtom(word_h));
+	const std::string &wn = w->getName();
+	printf ("; EdgeThin::thin_word %s to %d\n", wn.c_str(), keep);
 #endif
 
 	sense_list.clear();
-	foreach_word_sense_of_inst(first, &EdgeThin::make_sense_list, this);
+	foreach_word_sense_of_inst(word_h, &EdgeThin::make_sense_list, this);
 	sense_list.sort(sense_compare);
 
-	// unque the ones that we will keep
+	// unqueue the ones that we will keep
 	int k = sense_list.size();
 	if (keep < k) k = keep;
 	for (int i=0; i<k; i++) sense_list.pop_front();
@@ -169,7 +147,7 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 	for (it=sense_list.begin(); it != sense_list.end(); it++)
 	{
 		Handle sense_h = *it;
-#ifdef DEBUG
+#ifdef XDEBUG
 		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
 		double sa = la->getTruthValue().getMean();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
@@ -177,15 +155,12 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 		printf ("; deleting sense %s with score %f\n", ws->getName().c_str(), sa);
 #endif
 		foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+
+		// XXX Hmm, should we, or should we not delete the now-disconnected
+		// senses?
 		// atom_space->removeAtom(sense_h, false);
 	}
 
-printf ("duuude deleted %d edges so far\n", edge_count);
-
-	// second_word_inst = second;
-	// foreach_word_sense_of_inst(first, &EdgeThin::sense_of_first_inst, this);
-	
-	word_pair_count ++;
 	return false;
 }
 
