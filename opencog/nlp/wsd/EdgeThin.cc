@@ -47,6 +47,8 @@ void EdgeThin::thin_parse(Handle h, int keep)
 
 	// At this point, "words" contains all of the words in the parse.
 	// Loop over word-pairs, and thin edges.
+	edge_count = 0;
+	word_pair_count = 0;
 	std::set<Handle>::const_iterator f;
 	for (f = words.begin(); f != words.end(); f++)
 	{
@@ -70,12 +72,26 @@ printf ("duude remove all but %d edges from parse pair\n", keep);
 }
 
 /**
+ * Compare two senses, returning true if the first is more likely than
+ * the second.
+ */
+static bool sense_compare(Handle ha, Handle hb)
+{
+	Link *la = dynamic_cast<Link *>(TLB::getAtom(ha));
+	Link *lb = dynamic_cast<Link *>(TLB::getAtom(hb));
+	double sa = la->getTruthValue().getMean();
+	double sb = lb->getTruthValue().getMean();
+	if (sa > sb) return true;
+	return false;
+}
+
+/**
  * Remove edges between senses of a pair of words.
  *
  * Similar to, but opposite to MihalceaEdge::annotate_word_pair()
  * rather than adding edges, it removes them.
  */
-bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
+bool EdgeThin::thin_word_pair(Handle first, Handle second, int nkeep)
 {
 #ifdef DEBUG
 	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
@@ -85,5 +101,21 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 	printf ("; Thin out wordPair (%s, %s) to %d\n", fn.c_str(), sn.c_str(), keep);
 #endif
 
+	sense_list.clear();
+	foreach_word_sense_of_inst(first, &EdgeThin::make_sense_list, this);
+	sense_list.sort(sense_compare);
+
+	// second_word_inst = second;
+	keep = nkeep;
+	// foreach_word_sense_of_inst(first, &EdgeThin::sense_of_first_inst, this);
+	
+	word_pair_count ++;
 	return false;
 }
+
+bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
+{
+	sense_list.push_back(sense_link_h);
+	return false;
+}
+
