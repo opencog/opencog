@@ -30,7 +30,7 @@
 #include <opencog/atomspace/utils.h>
 
 #include <math.h>
-#include <vector.h>
+#include <vector>
 
 using namespace reasoning;
 
