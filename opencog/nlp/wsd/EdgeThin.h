@@ -22,6 +22,10 @@ class EdgeThin : private EdgeUtils
 {
 	private:
 		AtomSpace *atom_space;
+		int prune_count;
+		bool prune_sense(Handle, Handle);
+		bool prune_word(Handle);
+
 		int word_pair_count;
 		int edge_count;
 
@@ -34,6 +38,7 @@ class EdgeThin : private EdgeUtils
 		void set_atom_space(AtomSpace *);
 		void thin_parse(Handle, int);
 		void thin_parse_pair(Handle, Handle, int);
+		void prune_senses(Handle);
 };
 
 }

@@ -64,6 +64,10 @@ bool Mihalcea::process_sentence(Handle h)
 	if (Handle::UNDEFINED != previous_parse)
 	{
 		edger.annotate_parse_pair(previous_parse, top_parse);
+
+		// If there are any senses that are not attached to anything,
+		// get rid of them now.
+		thinner.prune_senses(previous_parse);
 	}
 	previous_parse = top_parse;
 

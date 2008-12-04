@@ -40,6 +40,37 @@ void EdgeThin::set_atom_space(AtomSpace *as)
    atom_space = as;
 }
 
+bool EdgeThin::prune_sense(Handle sense_h, Handle sense_link_h)
+{
+	// If incoming set of this sense link is empty, remove it entirely.
+	Atom *a = TLB::getAtom(sense_link_h);
+	if (NULL == a->getIncomingSet())
+	{
+		atom_space->removeAtom(sense_link_h, false);
+		prune_count ++;
+	}
+	return false;
+}
+
+bool EdgeThin::prune_word(Handle h)
+{
+	foreach_word_sense_of_inst(h, &EdgeThin::prune_sense, this);
+	return false;
+}
+
+/**
+ * Remove all word senses that are not attached to anything.
+ * Argument should be a sentence parse.
+ */
+void EdgeThin::prune_senses(Handle h)
+{
+	prune_count = 0;
+	foreach_word_instance(h, &EdgeThin::prune_word, this);
+#ifdef DEBUG
+	printf("; EdgeThin::prune_senses pruned %d senses\n", prune_count);
+#endif
+}
+
 /**
  * Remove edges between senses in the indicated parse.
  *
@@ -143,7 +174,7 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 		double sa = la->getTruthValue().getMean();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
 		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
-		printf ("; deleteing sense %s with score %f\n", ws->getName(), sa);
+		printf ("; deleting sense %s with score %f\n", ws->getName().c_str(), sa);
 #endif
 		foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
 		// atom_space->removeAtom(sense_h, false);
