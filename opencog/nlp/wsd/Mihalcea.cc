@@ -38,6 +38,7 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 	atom_space = as;
 	labeller.set_atom_space(as);
 	edger.set_atom_space(as);
+	thinner.set_atom_space(as);
 }
 
 bool Mihalcea::process_sentence(Handle h)

@@ -41,7 +41,7 @@ class MihalceaEdge : private EdgeUtils
 	public:
 		MihalceaEdge(void);
 		~MihalceaEdge();
-		void set_atom_space(AtomSpace *as);
+		void set_atom_space(AtomSpace *);
 		void annotate_sentence(Handle);
 		void annotate_parse(Handle);
 		void annotate_parse_pair(Handle, Handle);

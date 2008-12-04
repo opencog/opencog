@@ -35,6 +35,11 @@ using namespace opencog;
  * senses for each word.
  */
 
+void EdgeThin::set_atom_space(AtomSpace *as)
+{
+   atom_space = as;
+}
+
 /**
  * Remove edges between senses in the indicated parse.
  *
@@ -85,13 +90,28 @@ static bool sense_compare(Handle ha, Handle hb)
 	return false;
 }
 
+bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
+{
+	sense_list.push_back(sense_link_h);
+	return false;
+}
+
+bool EdgeThin::delete_sim(Handle h)
+{
+	Link *l = dynamic_cast<Link *>(TLB::getAtom(h));
+	printf("duuude its %s\n", ClassServer::getTypeName(l->getType()).c_str());
+	atom_space->removeAtom(h, false);
+	edge_count ++;
+	return false;
+}
+
 /**
  * Remove edges between senses of a pair of words.
  *
  * Similar to, but opposite to MihalceaEdge::annotate_word_pair()
  * rather than adding edges, it removes them.
  */
-bool EdgeThin::thin_word_pair(Handle first, Handle second, int nkeep)
+bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 {
 #ifdef DEBUG
 	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
@@ -105,17 +125,29 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int nkeep)
 	foreach_word_sense_of_inst(first, &EdgeThin::make_sense_list, this);
 	sense_list.sort(sense_compare);
 
+	// unque the ones that we will keep
+	for (int i=0; i<keep; i++) sense_list.pop_front();
+
+	// delete the rest.
+	std::list<Handle>::iterator it;
+	for (it=sense_list.begin(); it != sense_list.end(); it++)
+	{
+		Handle sense_h = *it;
+#ifdef DEBUG
+		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
+		double sa = la->getTruthValue().getMean();
+		printf ("; deleteing sense with score %f\n", sa);
+#endif
+		foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+		// atom_space->removeAtom(sense_h, false);
+	}
+
+printf ("duuude deleted %d edges so far\n", edge_count);
+
 	// second_word_inst = second;
-	keep = nkeep;
 	// foreach_word_sense_of_inst(first, &EdgeThin::sense_of_first_inst, this);
 	
 	word_pair_count ++;
-	return false;
-}
-
-bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
-{
-	sense_list.push_back(sense_link_h);
 	return false;
 }
 
