@@ -96,10 +96,13 @@ bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
 	return false;
 }
 
+/**
+ * Remove a similarity relation between a pair of word senses.
+ * The arg should be a handle to a CosenseLink, previusly constructed
+ * by MihalceaEdge::sense_of_second_inst().
+ */
 bool EdgeThin::delete_sim(Handle h)
 {
-	Link *l = dynamic_cast<Link *>(TLB::getAtom(h));
-	printf("duuude its %s\n", ClassServer::getTypeName(l->getType()).c_str());
 	atom_space->removeAtom(h, false);
 	edge_count ++;
 	return false;
@@ -126,7 +129,9 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 	sense_list.sort(sense_compare);
 
 	// unque the ones that we will keep
-	for (int i=0; i<keep; i++) sense_list.pop_front();
+	int k = sense_list.size();
+	if (keep < k) k = keep;
+	for (int i=0; i<k; i++) sense_list.pop_front();
 
 	// delete the rest.
 	std::list<Handle>::iterator it;
@@ -136,7 +141,9 @@ bool EdgeThin::thin_word_pair(Handle first, Handle second, int keep)
 #ifdef DEBUG
 		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
 		double sa = la->getTruthValue().getMean();
-		printf ("; deleteing sense with score %f\n", sa);
+		Handle hws = get_word_sense_of_sense_link(sense_h);
+		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
+		printf ("; deleteing sense %s with score %f\n", ws->getName(), sa);
 #endif
 		foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
 		// atom_space->removeAtom(sense_h, false);

@@ -361,6 +361,23 @@ inline Handle get_word_instance_of_sense_link(Handle h)
 	return v[0];
 }
 
+/**
+ * Return the sense node correspondng to a given word-sense-link
+ *
+ * Each word-sense-link is assumed to be link a word instance to a
+ * sense node:
+ *
+ *    InheritanceLink
+ *      ConceptNode "bark@144"
+ *      WordSenseNode "bark_sense_23"
+ */
+inline Handle get_word_sense_of_sense_link(Handle h)
+{
+	const Link * sense_link = dynamic_cast<const Link *>(TLB::getAtom(h));
+	std::vector<Handle> v = sense_link->getOutgoingSet();
+	return v[1];
+}
+
 } // namespace opencog
 
 #endif // _OPENCOG_FOREACH_WORD_H

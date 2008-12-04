@@ -614,13 +614,17 @@ multiple parses, the use of caching provides a major performance boost.
 
 Ideas/TODO
 ----------
+-- Do not create sense links to punctuation (as well as determiners,
+   etc.) Remove sense nodes that have no links attached.
+
 -- Build test framework 
 
 -- Need to fix main dispatcher; right now, WSD is called 100 times
    a second, no matter what.
 
 -- Processed sentences need to be discarded when they are old enough.
-   Can't afford to clutter RAM with lots of sentences.
+   Can't afford to clutter RAM with lots of sentences. Unfortunately,
+   delete performance is terrible.
 
 -- use framenet for sense-similarity scoring!?
 
