@@ -26,8 +26,6 @@
 
 #include "opencog/reasoning/pln/AtomSpaceWrapper.h"
 #include "opencog/reasoning/pln/BackInferenceTreeNode.h"
-// TODO should remove the need for this one
-#include "opencog/reasoning/pln/PLNShell.h"
 
 #include "opencog/reasoning/pln/rules/RuleApp.h"
 
@@ -85,9 +83,10 @@ namespace test
 enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
 
 namespace reasoning {
-    void InitAxiomSet(string premiseFile);
+//    void InitAxiomSet(string premiseFile);
     extern FitnessEvalutorT FitnessEvaluator;
 }
+void InitAxiomSet(string premiseFile);
 
 // These are now in PLNUtils.h
 //#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
@@ -124,21 +123,12 @@ vector<vector<int> > INstatsV;
 vector<int> INstats;
 static int AllTestsInferenceNodes=0;
 
-
-namespace reasoning
-{
-// TODO why do we have these?
-    void foo_pretest() {}
-    void footest() {}
-    extern map<int, Btr<tree<Vertex> > > tests;
-
         /**
         The tests
 load in various xml axiom sets and run until the target with a
 specific confidence minimum has been reached (or max. nr of steps have
 been exceeded, resulting in failure.)
-        */
-        
+        */        
 struct PLNTest
 {
     meta target;
@@ -157,11 +147,17 @@ struct PLNTest
     {}
 };
 
-void RunPLNTest(Btr<PLNTest> t);
+namespace reasoning
+{
+    extern map<int, Btr<tree<Vertex> > > tests;
 
-set<Btr<PLNTest> > PLNTests;
+//void RunPLNTest(Btr<PLNTest> t);
+
+//set<Btr<PLNTest> > PLNTests;
 
 } // namespace reasoning
+
+void RunPLNTest(Btr<PLNTest> t);
 
 namespace goal
 {
@@ -270,7 +266,7 @@ public:
 
             currentDebugLevel=100;
 
-            foo_pretest();
+//            foo_pretest();
 
             LOG(2, "Creating AtomSpaceWrappers...");
             
@@ -283,16 +279,16 @@ public:
             AtomSpaceWrapper& atw = *GET_ATW;
         }
         catch(std::string s) {
-            logger().error("at root level while RunLoop initializing.");
+            logger().error("at root level while initializing.");
         }
         catch(PLNexception e)
         {
-            logger().error("at root level while RunLoop initializing.");
+            logger().error("at root level while initializing.");
         }
         catch(...)
         {
-            logger().error("Unknown exception at root level while RunLoop initializing. ");
-            cout << "Unknown exception at root level while RunLoop initializing. "<< endl;
+            logger().error("Unknown exception at root level while initializing. ");
+            cout << "Unknown exception at root level while initializing. "<< endl;
         }
         
         
@@ -934,8 +930,8 @@ void RunPLNTestsOnce()
 #endif
 
 // no longer appropriate since this file is no longer added into the libpln mess
-namespace reasoning
-{
+//namespace reasoning
+//{
 
 bool foo42=false;
 
@@ -1194,7 +1190,7 @@ puts("buf allo ok");
 delete[] tbuf;*/
     }
 
-} //namespace reasoning
+//} //namespace reasoning
 
 
 

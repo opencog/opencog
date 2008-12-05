@@ -155,10 +155,12 @@ using namespace opencog;
 //! debug level, @todo replaced by opencog log system
 extern int currentDebugLevel;
 
+/*
 //! Run tests at start up
 //! @todo move to unit test and allow it to be run from the main shell
 //bool RunPLNtest=true;
 bool RunPLNtest=false;
+*/
 
 namespace haxx
 {
@@ -175,9 +177,6 @@ namespace haxx
 namespace reasoning
 {
     extern bool RECORD_TRAILS;
-    void footest();
-    void foo_pretest();
-    void RunPLNTests();
 
     int varcount=0;
     int addlinks=0;
@@ -250,8 +249,6 @@ void PLNShell_RunLoop(int argc, char** args)
 
         currentDebugLevel=100;
 
-        foo_pretest();
-
         LOG(2, "Creating AtomSpaceWrappers...");
         
 #if LOCAL_ATW
@@ -262,7 +259,6 @@ void PLNShell_RunLoop(int argc, char** args)
 #endif
         AtomSpaceWrapper& atw = *GET_ATW;
            
-// commented out so this file will compile     
 /*        if (RunPLNtest)
         {
             puts("Running PLNTests...");
@@ -294,11 +290,6 @@ void PLNShell_RunLoop(int argc, char** args)
         haxx::ArchiveTheorems = false;
 #endif
         logger().debug("PTL Initialized.");
-
-        logger().info("Running footest()...\n");
-        footest();
-        logger().info("footest() complete.\n");
-
     }
     catch(std::string s) {
         logger().error("at root level while RunLoop initializing.");

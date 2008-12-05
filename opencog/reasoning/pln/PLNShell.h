@@ -41,7 +41,7 @@ public:
 
 #define LOG_ON_FILE 0
  
-extern bool RunPLNtest;
+//extern bool RunPLNtest;
 
 #ifdef __cplusplus
 }
