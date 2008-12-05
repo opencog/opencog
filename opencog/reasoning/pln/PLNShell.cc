@@ -185,7 +185,7 @@ namespace reasoning
 
 namespace test
 {
-//    FILE *logfile=NULL;
+    extern FILE *logfile;
     int _test_count = 0;
     bool debugger_control = false;
 //    int attachs=0;
