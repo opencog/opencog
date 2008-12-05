@@ -106,7 +106,8 @@ void EdgeThin::thin_parse(Handle h, int _keep)
 	keep = _keep;
 	foreach_word_instance(h, &EdgeThin::thin_word, this);
 #ifdef DEBUG
-	printf("; EdgeThin::thin_parse deleted %d edges\n", edge_count);
+	printf("; EdgeThin::thin_parse %lx keep=%d deleted %d edges\n",
+		h.value(), keep, edge_count);
 #endif
 }
 
@@ -165,7 +166,7 @@ bool EdgeThin::thin_word(Handle word_h)
 	if (keep < k) k = keep;
 	for (int i=0; i<k; i++) sense_list.pop_front();
 
-	// delete the rest.
+	// Delete the rest.
 	std::list<Handle>::iterator it;
 	for (it=sense_list.begin(); it != sense_list.end(); it++)
 	{
@@ -175,7 +176,7 @@ bool EdgeThin::thin_word(Handle word_h)
 		double sa = la->getTruthValue().getMean();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
 		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
-		printf ("; deleting sense %s with score %f\n", ws->getName().c_str(), sa);
+		printf ("; deleting net to %s with score %f\n", ws->getName().c_str(), sa);
 #endif
 
 		// The for-each traversal is not safe against deletion (bummer!)
@@ -185,10 +186,21 @@ bool EdgeThin::thin_word(Handle word_h)
 		{
 			rc = foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
 		}
+	}
 
-		// XXX Hmm, should we, or should we not delete the now-disconnected
-		// senses?
-		// atom_space->removeAtom(sense_h, false);
+	if (0 >= keep) return false;
+
+	// We can be here only if 'keep' was positive.
+	// We'll delete all of the recently disconnected senses. The reason
+	// for this is that we don't want these intering with the final score
+	// determination process: Some of the disconnected senses might end
+	// up with a higher score than the remaining senses, which would be
+	// wrong; it would be an inversion of how scoring is meant to work.
+	// So we get rid of these now.
+	for (it=sense_list.begin(); it != sense_list.end(); it++)
+	{
+		Handle sense_h = *it;
+		atom_space->removeAtom(sense_h, false);
 	}
 
 	return false;

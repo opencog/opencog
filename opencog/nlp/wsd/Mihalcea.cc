@@ -102,6 +102,18 @@ bool Mihalcea::process_sentence_list(Handle h)
 	// sense_ranker.rank_document(parse_list);
 	// No .. don't. Use the sliding-window mechanism, above.
 
+	// Finish up the sliding window processing.
+	// Basically, delete all remaining similarity links.
+	while (0 < short_list.size())
+	{
+		Handle earliest = short_list.front();
+		short_list.pop_front();
+		// double-pass -- first with thickness, to thin senses,
+		// then with no thickness, to remove sim links.
+		thinner.thin_parse(earliest, THICKNESS);
+		thinner.thin_parse(earliest, 0);
+	}
+
 	// Report the results.
 	reporter.report_document(parse_list);
 
