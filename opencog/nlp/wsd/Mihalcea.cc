@@ -91,12 +91,12 @@ bool Mihalcea::process_sentence(Handle h)
 #define THICKNESS 4
 	if (WINDOW_SIZE == short_list.size())
 	{
+		// Solve the page-rank equations for the short list.
+		sense_ranker.rank_document(short_list);
+
 		Handle first = short_list.front();
 		thinner.thin_parse(first, THICKNESS);
 	}
-
-	// Solve the page-rank equations for the short list.
-	sense_ranker.rank_document(short_list);
 
 	return false;
 }

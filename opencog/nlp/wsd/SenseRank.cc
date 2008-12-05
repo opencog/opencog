@@ -34,11 +34,11 @@ SenseRank::SenseRank(void)
 	// that N == total number of word-senses in graph. For now, this
 	// is assumed to be 20 (i.e. a single-sentence-worth of senses.)
 	// For multi-sentence use, this should probably be pumped up.
-	double N = 30;
+	double N = 10;
 	convergence_damper = 1.0/N;
 
 	// The absolute value to which convergence is desired.
-	convergence_limit = 0.03;
+	convergence_limit = 0.1;
 }
 
 SenseRank::~SenseRank()
