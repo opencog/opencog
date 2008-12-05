@@ -55,10 +55,10 @@ void PersistModule::init(void)
 std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
-		return "sqlclose: Wrong num args";
+		return "sql-close: Wrong num args";
 
 	if (store == NULL)
-		return "sqlclose: database not open";
+		return "sql-close: database not open";
 
 	delete store;
 	store = NULL;
@@ -68,10 +68,10 @@ std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
-		return "sqlload: Wrong num args";
+		return "sql-load: Wrong num args";
 
 	if (store == NULL)
-		return "sqlload: database not open";
+		return "sql-load: database not open";
 
 	store->load(atomtable());
 
@@ -82,7 +82,7 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 {
 	if (args.size() != 3)
-		return "sqlload: Wrong num args";
+		return "sql-load: Wrong num args";
 
 	std::string dbname   = args.front(); args.pop_front();
 	std::string username = args.front(); args.pop_front();
@@ -90,7 +90,7 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 
 	store = new AtomStorage(dbname, username, auth);
 	if (!store)
-		return "sqlopen: Unable to open the database";
+		return "sql-open: Unable to open the database";
 
 	return "database opened";
 }
@@ -98,10 +98,10 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
-		return "sqlstore: Wrong num args";
+		return "sql-store: Wrong num args";
 
 	if (store == NULL)
-		return "sqlstore: database not open";
+		return "sql-store: database not open";
 
 	store->store(atomtable());
 
