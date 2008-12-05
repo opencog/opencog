@@ -157,8 +157,8 @@ extern int currentDebugLevel;
 
 //! Run tests at start up
 //! @todo move to unit test and allow it to be run from the main shell
-bool RunPLNtest=true;
-//bool RunPLNtest=false;
+//bool RunPLNtest=true;
+bool RunPLNtest=false;
 
 namespace haxx
 {
@@ -226,11 +226,11 @@ void PLNShell_RunLoop(int argc, char** args);
 
 /// PLNShell is intended to be used with PseudoCore. Main run loop is here.
 //void PseudoCore::RunLoop(int argc, char** args) const
-int main(int argc, char** args)
+/*int main(int argc, char** args)
 {
     puts("PseudoCore::RunLoop");
     PLNShell_RunLoop(argc,args);
-}
+}*/
 
 void PLNShell_RunLoop(int argc, char** args)
 {
@@ -261,13 +261,14 @@ void PLNShell_RunLoop(int argc, char** args)
         haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
 #endif
         AtomSpaceWrapper& atw = *GET_ATW;
-                
-        if (RunPLNtest)
+           
+// commented out so this file will compile     
+/*        if (RunPLNtest)
         {
             puts("Running PLNTests...");
             reasoning::RunPLNTests();
             exit(0);
-        }
+        }*/
 //      AgentTest();
         
 #if 1 //Loading Osama or set axioms here.
