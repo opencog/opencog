@@ -89,13 +89,18 @@ bool Mihalcea::process_sentence(Handle h)
 	// result in taking away too much from an otherwise decent 
 	// alternative.
 #define THICKNESS 4
-	if (WINDOW_SIZE == short_list.size())
+	if (WINDOW_SIZE-1 == short_list.size())
 	{
 		// Solve the page-rank equations for the short list.
 		sense_ranker.rank_document(short_list);
-
+	}
+	if (WINDOW_SIZE == short_list.size())
+	{
 		Handle first = short_list.front();
 		thinner.thin_parse(first, THICKNESS);
+
+		// Solve the page-rank equations for the short list.
+		sense_ranker.rank_document(short_list);
 	}
 
 	return false;
@@ -103,6 +108,7 @@ bool Mihalcea::process_sentence(Handle h)
 
 bool Mihalcea::process_sentence_list(Handle h)
 {
+	short_list.clear();
 	foreach_outgoing_handle(h, &Mihalcea::process_sentence, this);
 
 	// Solve the page-rank equations for the whole set of sentences.
@@ -112,17 +118,21 @@ bool Mihalcea::process_sentence_list(Handle h)
 	// Finish up the sliding window processing.
 	// Treat the tail-end of the document in much the same way as the
 	// start or middle; we don't want to give undue weight to the tail.
-	while (0 < short_list.size())
+	if (0 < short_list.size())
 	{
 		Handle earliest = short_list.front();
 		short_list.pop_front();
-		// double-pass -- first with thickness, to thin senses,
-		// then with no thickness, to remove sim links.
+		thinner.thin_parse(earliest, 0);
+	}
+	while (0 < short_list.size())
+	{
+		Handle earliest = short_list.front();
 		thinner.thin_parse(earliest, THICKNESS);
 
 		// Solve the page-rank equations for the short list.
 		sense_ranker.rank_document(short_list);
 
+		short_list.pop_front();
 		thinner.thin_parse(earliest, 0);
 	}
 
