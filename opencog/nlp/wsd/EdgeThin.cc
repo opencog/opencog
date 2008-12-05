@@ -40,6 +40,14 @@ void EdgeThin::set_atom_space(AtomSpace *as)
    atom_space = as;
 }
 
+#ifdef PRUNE_DEBUG
+bool EdgeThin::count_sense(Handle sense_h, Handle sense_link_h)
+{
+	sense_count ++;
+	return false;
+}
+#endif
+
 bool EdgeThin::prune_sense(Handle sense_h, Handle sense_link_h)
 {
 	// If incoming set of this sense link is empty, remove it entirely.
@@ -60,6 +68,16 @@ bool EdgeThin::prune_word(Handle h)
 	{
 		rc = foreach_word_sense_of_inst(h, &EdgeThin::prune_sense, this);
 	}
+#ifdef PRUNE_DEBUG
+	sense_count = 0;
+	foreach_word_sense_of_inst(h, &EdgeThin::count_sense, this);
+
+	Handle wh = get_dict_word_of_word_instance(h);
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(wh));
+	const char *wd = n->getName().c_str();
+	printf("; post-prune, word = %s has %d senses\n", wd, sense_count);
+	fflush (stdout);
+#endif
 	return false;
 }
 
@@ -132,7 +150,7 @@ bool EdgeThin::delete_sim(Handle h)
  */
 bool EdgeThin::thin_word(Handle word_h)
 {
-#ifdef DEBUG
+#ifdef XDEBUG
 	Node *w = dynamic_cast<Node *>(TLB::getAtom(word_h));
 	const std::string &wn = w->getName();
 	printf ("; EdgeThin::thin_word %s to %d\n", wn.c_str(), keep);

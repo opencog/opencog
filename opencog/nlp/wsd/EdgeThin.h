@@ -24,6 +24,8 @@ class EdgeThin
 		bool prune_sense(Handle, Handle);
 		bool prune_word(Handle);
 
+		int sense_count;
+		bool count_sense(Handle, Handle);
 
 		std::list<Handle> sense_list;
 		bool make_sense_list(Handle, Handle);

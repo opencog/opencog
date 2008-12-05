@@ -25,12 +25,16 @@ class ReportRank
 
 		bool count_word(Handle);
 		bool count_sense(Handle, Handle);
+		int word_count;
 		double normalization;
 		double sense_count;
 		double choosen_sense_count;
 		bool renorm_parse(Handle);
 		bool renorm_word(Handle);
 		bool renorm_sense(Handle, Handle);
+
+		double hi_score;
+		const char *hi_sense;
 
 	public:
 		ReportRank(void);

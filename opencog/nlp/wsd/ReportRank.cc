@@ -45,6 +45,7 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 	normalization = 0.0;
 	sense_count = 0.0;
 	choosen_sense_count = 0.0;
+	word_count = 0;
 
 	// Iterate over all the parses in the document.
 	std::deque<Handle>::const_iterator i;
@@ -55,7 +56,8 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 	}
 
 #ifdef DEBUG
-	printf("; report_document: norm=%g senses=%g\n", normalization, sense_count);
+	printf("; report_document: norm=%g senses=%g words=%d\n",
+		normalization, sense_count, word_count);
 #endif
 
 	normalization = 1.0 / normalization;
@@ -66,7 +68,7 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 		foreach_word_instance(h, &ReportRank::renorm_word, this);
 	}
 #ifdef DEBUG
-	printf("; report_document: chose=%g senses out of %g (%g persent)\n",
+	printf("; report_document: chose=%g senses out of %g (%g percent)\n",
 		choosen_sense_count, sense_count, 100.0*choosen_sense_count/sense_count);
 	fflush(stdout);
 #endif
@@ -99,13 +101,26 @@ bool ReportRank::report_parse_f(Handle h)
 
 bool ReportRank::count_word(Handle h)
 {
+	word_count ++;
 	foreach_word_sense_of_inst(h, &ReportRank::count_sense, this);
 	return false;
 }
 
 bool ReportRank::renorm_word(Handle h)
 {
+#ifdef DEBUG
+	hi_score = -1e10;
+	hi_sense = "(none)";
+#endif
 	foreach_word_sense_of_inst(h, &ReportRank::renorm_sense, this);
+
+#ifdef DEBUG
+	Handle wh = get_dict_word_of_word_instance(h);
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(wh));
+	const char *wd = n->getName().c_str();
+	printf("; hi score=%g word = %s sense=%s\n", hi_score, wd, hi_sense);
+	fflush (stdout);
+#endif
 	return false;
 }
 
@@ -141,8 +156,14 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	l->setTruthValue(stv);
 
 #ifdef DEBUG
+	if (hi_score < score) {
+		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+		hi_sense = n->getName().c_str();
+		hi_score = score;
+	}
 	if (0.0 < score) {
 		choosen_sense_count += 1.0;
+	
 #if 0
 Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 printf ("duu word sense=%s score=%f\n", n->getName().c_str(), score);
