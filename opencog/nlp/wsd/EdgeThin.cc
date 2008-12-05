@@ -48,13 +48,18 @@ bool EdgeThin::prune_sense(Handle sense_h, Handle sense_link_h)
 	{
 		atom_space->removeAtom(sense_link_h, false);
 		prune_count ++;
+		return true;
 	}
 	return false;
 }
 
 bool EdgeThin::prune_word(Handle h)
 {
-	foreach_word_sense_of_inst(h, &EdgeThin::prune_sense, this);
+	bool rc = true;
+	while (rc)
+	{
+		rc = foreach_word_sense_of_inst(h, &EdgeThin::prune_sense, this);
+	}
 	return false;
 }
 
@@ -116,7 +121,7 @@ bool EdgeThin::delete_sim(Handle h)
 {
 	atom_space->removeAtom(h, false);
 	edge_count ++;
-	return false;
+	return true;
 }
 
 /**
@@ -154,7 +159,14 @@ bool EdgeThin::thin_word(Handle word_h)
 		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
 		printf ("; deleting sense %s with score %f\n", ws->getName().c_str(), sa);
 #endif
-		foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+
+		// The for-each traversal is not safe against deletion (bummer!)
+		// and so has to be restarted after each attempt.
+		bool rc = true;
+		while (rc)
+		{
+			rc = foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+		}
 
 		// XXX Hmm, should we, or should we not delete the now-disconnected
 		// senses?

@@ -31,9 +31,9 @@ namespace opencog {
  *        SentenceNode "sentence@22"
  */
 template<class T>
-inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	foreach_reverse_binary_link(h, PARSE_LINK, cb, data);
+	return foreach_reverse_binary_link(h, PARSE_LINK, cb, data);
 }
 
 /**
@@ -49,12 +49,12 @@ inline void foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
  *          ConceptNode "stopped@456"
  */
 template <class T>
-inline void foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 {
 	FollowLink fl;
 	Atom *a = fl.follow_binary_link(TLB::getAtom(h), REFERENCE_LINK);
-	if (a == NULL) return;  // this would be a weird, unexpected error ... 
-	foreach_outgoing_handle (TLB::getHandle(a), cb, data);
+	if (a == NULL) return false;  // this would be a weird, unexpected error ... 
+	return foreach_outgoing_handle (TLB::getHandle(a), cb, data);
 }
 
 /**
@@ -91,12 +91,12 @@ class PrivateUseOnlyEachSense
 };
 
 template<typename T>
-inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), T *data)
+inline bool foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), T *data)
 {
 	PrivateUseOnlyEachSense<T> es;
 	es.user_cb = cb;
 	es.user_data = data;
-	foreach_binary_link(h, INHERITANCE_LINK, &PrivateUseOnlyEachSense<T>::sense_filter, &es);
+	return foreach_binary_link(h, INHERITANCE_LINK, &PrivateUseOnlyEachSense<T>::sense_filter, &es);
 }
 
 /**
@@ -111,9 +111,9 @@ inline void foreach_word_sense_of_inst(Handle h, bool (T::*cb)(Handle, Handle), 
  *       ConceptNode "bark_sense_23"
  */
 template <class T>
-inline void foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_dict_word_sense(Handle h, bool (T::*cb)(Handle), T *data)
 {
-	foreach_binary_link(h, WORD_SENSE_LINK, cb, data);
+	return foreach_binary_link(h, WORD_SENSE_LINK, cb, data);
 }
 
 /**
@@ -164,14 +164,14 @@ class PrivateUseOnlyPOSFilter
 };
 
 template <typename T>
-inline void foreach_dict_word_sense_pos(Handle h, const std::string &pos,
+inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
                                         bool (T::*cb)(Handle), T *data)
 {
 	PrivateUseOnlyPOSFilter<T> pf;
 	pf.user_cb = cb;
 	pf.user_data = data;
 	pf.desired_pos = &pos;
-	foreach_binary_link(h, WORD_SENSE_LINK,
+	return foreach_binary_link(h, WORD_SENSE_LINK,
 	                         &PrivateUseOnlyPOSFilter<T>::pos_filter, &pf);
 }
 
@@ -333,7 +333,7 @@ class PrivateUseOnlyRelexRelationFinder
 };
 
 template <typename T>
-inline void
+inline bool
 foreach_relex_relation(Handle h,
                        bool (T::*cb)(const std::string &, Handle, Handle), T *data)
 {
@@ -341,7 +341,7 @@ foreach_relex_relation(Handle h,
 	rrf.user_cb = cb;
 	rrf.user_data = data;
 	rrf.first_arg = h;
-	foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
+	return foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder<T>::look_for_list_link, &rrf);
 }
 
 /**

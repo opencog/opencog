@@ -15,6 +15,6 @@ sleep 1;
 cat disjunct-list.scm    |netcat -q0 $HOST $PORT
 sleep 1;
 cat stats-collection.scm |netcat -q0 $HOST $PORT
-sleep 1;
+sleep 2;
 cat file-process.scm     |netcat -q0 $HOST $PORT
 
