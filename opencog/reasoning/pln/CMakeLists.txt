@@ -8,7 +8,8 @@ ADD_LIBRARY (pln STATIC
     BackInferenceTreeNode.cc
     PLNatom.cc
     PLNUtils.cc
-    PLNShell.cc
+#    PLNShell.cc
+    PLNGlobals.cc
 #    Tester.cc
     ForwardChainer.cc
 # Formulas:
@@ -74,7 +75,7 @@ INCLUDE_DIRECTORIES (
     ${GSL_INCLUDE_DIR}
 )
 
-#ADD_EXECUTABLE(plnshell PLNShell.cc)
+ADD_EXECUTABLE(plnshell PLNShell.cc)
 
 TARGET_LINK_LIBRARIES(pln
     atomspace
@@ -95,21 +96,21 @@ TARGET_LINK_LIBRARIES(pln
     boost_signals-mt
 )
 
-#TARGET_LINK_LIBRARIES(plnshell pln
-#    #atomspace
-#    server
-#    xml
-#    util
-#    #query
-#    smob #scheme
-#    #wsd
-#    persist
-#    adaptor-tulip
-#    ${IODBC_LIBRARIES}
-#    ${CSOCKETS_LIBRARIES}
-#    ${OPENSSL_LIBRARIES}
-#    ${EXPAT_LIBRARIES}
-#    ${GUILE_LIBRARIES}
-#    ${GSL_LIBRARIES}
-#    boost_signals-mt
-#)
+TARGET_LINK_LIBRARIES(plnshell pln
+    #atomspace
+    server
+    xml
+    util
+    #query
+    smob #scheme
+    #wsd
+    persist
+    adaptor-tulip
+    ${IODBC_LIBRARIES}
+    ${CSOCKETS_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+    ${EXPAT_LIBRARIES}
+    ${GUILE_LIBRARIES}
+    ${GSL_LIBRARIES}
+    boost_signals-mt
+)

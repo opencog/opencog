@@ -171,24 +171,24 @@ namespace haxx
     extern map<Handle,vector<Handle> >* inferred_from;
     extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
-    uint maxDepth = 250;
+//    uint maxDepth = 250;
 }
 
 namespace reasoning
 {
     extern bool RECORD_TRAILS;
 
-    int varcount=0;
+//    int varcount=0;
     int addlinks=0;
     int gethandles=0;   
 }
 
 namespace test
 {
-    FILE *logfile=NULL;
+//    FILE *logfile=NULL;
     int _test_count = 0;
     bool debugger_control = false;
-    int attachs=0;
+//    int attachs=0;
 }
 
 void test_core_TVs()
@@ -225,11 +225,11 @@ void PLNShell_RunLoop(int argc, char** args);
 
 /// PLNShell is intended to be used with PseudoCore. Main run loop is here.
 //void PseudoCore::RunLoop(int argc, char** args) const
-/*int main(int argc, char** args)
+int main(int argc, char** args)
 {
     puts("PseudoCore::RunLoop");
     PLNShell_RunLoop(argc,args);
-}*/
+}
 
 void PLNShell_RunLoop(int argc, char** args)
 {
