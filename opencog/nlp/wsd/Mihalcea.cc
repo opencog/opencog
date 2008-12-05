@@ -81,7 +81,14 @@ bool Mihalcea::process_sentence(Handle h)
 		short_list.pop_front();
 		thinner.thin_parse(earliest, 0);
 	}
-#define THICKNESS 2
+
+	// THICKNESS is the number of senses that we leave attached to a 
+	// given word. We don't want to make this too thin, since the
+	// graph algorithm will suck probability from the least likely
+	// and give it to the most likely.  Getting this too thin can
+	// result in taking away too much from an otherwise decent 
+	// alternative.
+#define THICKNESS 4
 	if (WINDOW_SIZE == short_list.size())
 	{
 		Handle first = short_list.front();
@@ -103,7 +110,8 @@ bool Mihalcea::process_sentence_list(Handle h)
 	// No .. don't. Use the sliding-window mechanism, above.
 
 	// Finish up the sliding window processing.
-	// Basically, delete all remaining similarity links.
+	// Treat the tail-end of the document in much the same way as the
+	// start or middle; we don't want to give undue weight to the tail.
 	while (0 < short_list.size())
 	{
 		Handle earliest = short_list.front();
@@ -111,6 +119,10 @@ bool Mihalcea::process_sentence_list(Handle h)
 		// double-pass -- first with thickness, to thin senses,
 		// then with no thickness, to remove sim links.
 		thinner.thin_parse(earliest, THICKNESS);
+
+		// Solve the page-rank equations for the short list.
+		sense_ranker.rank_document(short_list);
+
 		thinner.thin_parse(earliest, 0);
 	}
 

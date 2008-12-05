@@ -108,13 +108,13 @@ bool ReportRank::count_word(Handle h)
 
 bool ReportRank::renorm_word(Handle h)
 {
-#ifdef DEBUG
+#ifdef HISCORE_DEBUG
 	hi_score = -1e10;
 	hi_sense = "(none)";
 #endif
 	foreach_word_sense_of_inst(h, &ReportRank::renorm_sense, this);
 
-#ifdef DEBUG
+#ifdef HISCORE_DEBUG
 	Handle wh = get_dict_word_of_word_instance(h);
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(wh));
 	const char *wd = n->getName().c_str();
