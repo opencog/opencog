@@ -1,0 +1,3 @@
+This directory contains versions of the PLN test XML files in OpenCog XML (rather than the PLN XML format).
+
+These files are intended to replace the PLN XML files once various PLN code has been adapted to use the OpenCog XML loader.
