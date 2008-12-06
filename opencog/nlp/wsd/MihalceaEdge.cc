@@ -28,7 +28,7 @@
 #include <opencog/nlp/wsd/SenseSimilaritySQL.h>
 
 #define DEBUG
-#define DETAILED_DEBUG
+#define DETAIL_DEBUG
 #define LINK_DEBUG
 
 using namespace opencog;
@@ -106,6 +106,7 @@ bool MihalceaEdge::annotate_parse_f(Handle h)
  */
 void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 {
+	words.clear();
 	foreach_word_instance(ha, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 	std::set<Handle> pa_words = words;
 	words.clear();
