@@ -1,0 +1,238 @@
+<ListLink>
+
+<Element name="red_bucket_6" class="ConceptNode" confidence="0.167"/>
+<Element name="toy_6" class="ConceptNode" confidence="0.167"/>
+
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_0" class="ConceptNode" confidence="0.167"/>
+	<Element name="toy" class="ConceptNode" confidence="0.167"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_1" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_2" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_2" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_3" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_4" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_5" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="toy_6" class="ConceptNode"/>
+	<Element name="toy" class="ConceptNode"/>
+</InheritanceLink>
+
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="blue_bucket_0" class="ConceptNode"/>
+	<Element name="blue_bucket" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="blue_bucket" class="ConceptNode"/>
+	<Element name="bucket" class="ConceptNode"/>
+</InheritanceLink>
+
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_0" class="ConceptNode" confidence="0.167"/>
+	<Element name="red_bucket" class="ConceptNode" confidence="0.167"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_1" class="ConceptNode"/>
+	<Element name="red_bucket" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_2" class="ConceptNode"/>
+	<Element name="red_bucket" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_3" class="ConceptNode"/>
+	<Element name="red_bucket" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_4" class="ConceptNode"/>
+	<Element name="red_bucket" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_6" class="ConceptNode"/>
+	<Element name="red_bucket" class="ConceptNode"/>
+</InheritanceLink>
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="red_bucket_6" class="ConceptNode" strength="1" confidence="0.5"/>
+	<Element name="bucket" class="ConceptNode" strength="1" confidence="0.5"/>
+</InheritanceLink>
+
+<InheritanceLink strength="1" confidence="0.99">
+	<Element name="bucket" class="ConceptNode"/>
+	<Element name="object" class="ConceptNode"/>
+</InheritanceLink>
+
+<ImplicationLink strength="1" confidence="0.5">
+	<EvaluationLink>
+		<Element name="placed_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_0" class="ConceptNode"/>
+			<Element name="red_bucket_0" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="found_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_0" class="ConceptNode"/>
+			<Element name="red_bucket_0" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+<ImplicationLink strength="1" confidence="0.5">
+	<EvaluationLink>
+		<Element name="placed_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_1" class="ConceptNode"/>
+			<Element name="red_bucket_1" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="found_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_1" class="ConceptNode"/>
+			<Element name="red_bucket_1" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+
+<ImplicationLink strength="1" confidence="0.5">
+	<EvaluationLink>
+		<Element name="placed_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_2" class="ConceptNode"/>
+			<Element name="red_bucket_2" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="found_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_2" class="ConceptNode"/>
+			<Element name="red_bucket_2" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+<ImplicationLink strength="1" confidence="0.5">
+	<EvaluationLink>
+		<Element name="placed_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_3" class="ConceptNode"/>
+			<Element name="red_bucket_3" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="found_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_3" class="ConceptNode"/>
+			<Element name="red_bucket_3" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+<ImplicationLink strength="1" confidence="0.5">
+	<EvaluationLink>
+		<Element name="placed_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_4" class="ConceptNode"/>
+			<Element name="red_bucket_4" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+	<EvaluationLink>
+		<Element name="found_under" class="PredicateNode"/>
+		<ListLink>
+			<Element name="toy_4" class="ConceptNode"/>
+			<Element name="red_bucket_4" class="ConceptNode"/>
+		</ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+<EvaluationLink>
+	<Element name="placed_under" class="PredicateNode"/>
+	<ListLink>
+		<Element name="toy_5" class="ConceptNode"/>
+		<Element name="blue_bucket_0" class="ConceptNode"/>
+	</ListLink>
+</EvaluationLink>
+
+		<And confidence="0.90">
+			<InheritanceLink>
+				<Element name="toy_6" class="ConceptNode"/>
+				<Element name="toy" class="ConceptNode"/>
+			</InheritanceLink>
+			<InheritanceLink>
+				<Element name="red_bucket_6" class="ConceptNode"/>
+				<Element name="bucket" class="ConceptNode"/>
+			</InheritanceLink>
+			<EvaluationLink>
+				<Element name="placed_under" class="PredicateNode"/>
+				<ListLink>
+					<Element name="toy_6" class="ConceptNode"/>
+					<Element name="red_bucket_6" class="ConceptNode"/>
+				</ListLink>
+			</EvaluationLink>
+		</And>
+
+<ForAll strength="1" confidence="0.952">
+	<ListLink>
+		<Element name="$t" class="VariableNode"/>
+		<Element name="$b" class="VariableNode"/>
+	</ListLink>
+	<ImplicationLink>
+		<And>
+			<InheritanceLink>
+				<Element name="$t" class="VariableNode"/>
+				<Element name="toy" class="ConceptNode"/>
+			</InheritanceLink>
+			<InheritanceLink>
+				<Element name="$b" class="VariableNode"/>
+				<Element name="bucket" class="ConceptNode"/>
+			</InheritanceLink>
+			<EvaluationLink>
+				<Element name="placed_under" class="PredicateNode"/>
+				<ListLink>
+					<Element name="$t" class="VariableNode"/>
+					<Element name="$b" class="VariableNode"/>
+				</ListLink>
+			</EvaluationLink>
+		</And>
+		<EvaluationLink>
+			<Element name="found_under" class="PredicateNode"/>
+			<ListLink>
+				<Element name="$t" class="VariableNode"/>
+				<Element name="$b" class="VariableNode"/>
+			</ListLink>
+		</EvaluationLink>
+	</ImplicationLink>
+</ForAll>
+
+
+ 		        <EvaluationLink strength="1" confidence="0.999">
+				<Element name="placed_under" class="PredicateNode"/>
+				<ListLink>
+					<Element name="toy_6" class="ConceptNode"/>
+					<Element name="red_bucket_6" class="ConceptNode"/>
+				</ListLink>
+			</EvaluationLink>
+
+
+
+</ListLink>

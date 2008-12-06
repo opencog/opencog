@@ -1,129 +1,150 @@
-<ListLink>
-
-<ImplicationLink strength="0.9" confidence="0.9">
-	<And>
-		<EvaluationLink>
-			<Element name="teacher_say" class="PredicateNode"/>
-			<ListLink>
-				<Element name="fetch" class="WordNode"/>
-			</ListLink>
-		</EvaluationLink>
-		<EvaluationLink>
-			<Element name="just_done" class="PredicateNode"/>
-			<ListLink>
-				<Element name="G" class="ConceptNode"/>
-			</ListLink>
-		</EvaluationLink>
-	</And>
-	<EvaluationLink>
-		<Element name="+++" class="PredicateNode"/>
-	</EvaluationLink>
-</ImplicationLink>
-
-<ForAll>
-<ListLink>
- <Element name="$a" class="VariableNode"/>
- <Element name="$c" class="VariableNode"/>
+<list>
+<PredicateNode strength="1.000000" confidence="0.000000" name="can" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="do" />
+<FWVariableNode strength="1.000000" confidence="0.000000" name="$4" />
+<FWVariableNode strength="1.000000" confidence="0.000000" name="$5" />
+<FWVariableNode strength="1.000000" confidence="0.000000" name="$6" />
+<ConceptNode strength="1.000000" confidence="0.000000" name="H" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<ImplicationLink strength="0.900000" confidence="0.900000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="teacher_say" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="WordNode" name="fetch" />
 </ListLink>
-<ImplicationLink strength="0.999" confidence="0.999">
-	<And>
-		<Element name="$b" class="VariableNode"/>
-		<ImplicationLink>
-			<Element name="$a" class="VariableNode"/>
-			<Element name="$c" class="VariableNode"/>
-		</ImplicationLink>
-	</And>
-	<ImplicationLink>
-		<Element name="$a" class="VariableNode"/>
-		<And>
-			<Element name="$b" class="VariableNode"/>
-			<Element name="$c" class="VariableNode"/>
-		</And>
-	</ImplicationLink>
-</ImplicationLink>
-</ForAll>
-
-<ImplicationLink strength="0.8" confidence="0.999">
-	<And>
-		<EvaluationLink>
-			<Element name="can" class="PredicateNode"/>
-			<ListLink>
-				<Element name="G" class="ConceptNode"/>
-			</ListLink>
-		</EvaluationLink>
-		<EvaluationLink>
-			<Element name="do" class="PredicateNode"/>
-			<ListLink>
-				<Element name="G" class="ConceptNode"/>
-			</ListLink>
-		</EvaluationLink>
-	</And>
-	<EvaluationLink>
-		<Element name="just_done" class="PredicateNode"/>
-		<ListLink>
-			<Element name="G" class="ConceptNode"/>
-		</ListLink>
-	</EvaluationLink>
-</ImplicationLink>
-
-<ImplicationLink strength="0.999" confidence="0.999">
-	<And>
-		<Element name="$4" class="FreeVariableNode"/>
-		<EvaluationLink>
-			<Element name="do" class="PredicateNode"/>
-			<ListLink>
-				<Element name="G" class="ConceptNode"/>
-			</ListLink>
-		</EvaluationLink>
-	</And>
-	<EvaluationLink>
-		<Element name="do" class="PredicateNode"/>
-		<ListLink>
-			<Element name="G" class="ConceptNode"/>
-		</ListLink>
-	</EvaluationLink>
-</ImplicationLink>
-
-<ImplicationLink strength="0.999" confidence="0.999">
-	<And>
-		<And>
-			<Element name="$4" class="FreeVariableNode"/>
-			<Element name="$5" class="FreeVariableNode"/>
-		</And>
-		<ImplicationLink>
-			<Element name="$5" class="FreeVariableNode"/>
-			<Element name="$6" class="FreeVariableNode"/>
-		</ImplicationLink>
-	</And>
-	<ImplicationLink>
-		<And>
-			<Element name="$5" class="FreeVariableNode"/>
-			<Element name="$4" class="FreeVariableNode"/>
-		</And>
-		<Element name="$6" class="FreeVariableNode"/>
-	</ImplicationLink>
-</ImplicationLink>
-
-<ImplicationLink strength="0.999" confidence="0.999">
-	<EvaluationLink>
-		<Element name="just_done" class="PredicateNode"/>
-		<ListLink>
-			<Element name="H" class="ConceptNode"/>
-		</ListLink>
-	</EvaluationLink>
-	<EvaluationLink>
-		<Element name="can" class="PredicateNode"/>
-		<ListLink>
-			<Element name="G" class="ConceptNode"/>
-		</ListLink>
-	</EvaluationLink>
-</ImplicationLink>
-
-<EvaluationLink strength="0.999" confidence="0.999">
-	<Element name="just_done" class="PredicateNode"/>
-	<ListLink>
-		<Element name="H" class="ConceptNode"/>
-	</ListLink>
 </EvaluationLink>
-
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="just_done" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
 </ListLink>
+</EvaluationLink>
+</AndLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="+++" />
+</EvaluationLink>
+</ImplicationLink>
+<ForallLink strength="1.000000" confidence="0.000000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$a" />
+<Element class="VariableNode" name="$c" />
+</ListLink>
+<ImplicationLink strength="0.999000" confidence="0.999000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$b" />
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$a" />
+<Element class="VariableNode" name="$c" />
+</ImplicationLink>
+</AndLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$a" />
+<AndLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$b" />
+<Element class="VariableNode" name="$c" />
+</AndLink>
+</ImplicationLink>
+</ImplicationLink>
+</ForallLink>
+<ImplicationLink strength="0.800000" confidence="0.999000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="can" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="do" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
+</ListLink>
+</EvaluationLink>
+</AndLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="just_done" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+<ImplicationLink strength="0.999000" confidence="0.999000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<Element class="FWVariableNode" name="$4" />
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="do" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
+</ListLink>
+</EvaluationLink>
+</AndLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="do" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+<ImplicationLink strength="0.999000" confidence="0.999000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<Element class="FWVariableNode" name="$4" />
+<Element class="FWVariableNode" name="$5" />
+</AndLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<Element class="FWVariableNode" name="$5" />
+<Element class="FWVariableNode" name="$6" />
+</ImplicationLink>
+</AndLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<Element class="FWVariableNode" name="$5" />
+<Element class="FWVariableNode" name="$4" />
+</AndLink>
+<Element class="FWVariableNode" name="$6" />
+</ImplicationLink>
+</ImplicationLink>
+<ImplicationLink strength="0.999000" confidence="0.999000" >
+<EvaluationLink strength="0.999000" confidence="0.999000" >
+<Element class="PredicateNode" name="just_done" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="H" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="can" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="G" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+<EvaluationLink strength="0.999000" confidence="0.999000" >
+<Element class="PredicateNode" name="just_done" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="H" />
+</ListLink>
+</EvaluationLink>
+</ListLink>
+<ConceptNode strength="0.000000" confidence="0.000000" name="___PLN___" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="teacher_say" />
+<WordNode strength="1.000000" confidence="0.000000" name="fetch" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="just_done" />
+<ConceptNode strength="1.000000" confidence="0.000000" name="G" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="+++" />
+<VariableNode strength="1.000000" confidence="0.000000" name="$a" />
+<VariableNode strength="1.000000" confidence="0.000000" name="$c" />
+<VariableNode strength="1.000000" confidence="0.000000" name="$b" />
+<tagdescription>
+<tag name="ConceptNode" value="ConceptNode" />
+<tag name="ListLink" value="ListLink" />
+<tag name="AndLink" value="AndLink" />
+<tag name="ForallLink" value="ForallLink" />
+<tag name="ImplicationLink" value="ImplicationLink" />
+<tag name="VariableNode" value="VariableNode" />
+<tag name="EvaluationLink" value="EvaluationLink" />
+<tag name="PredicateNode" value="PredicateNode" />
+<tag name="WordNode" value="WordNode" />
+<tag name="FWVariableNode" value="FWVariableNode" />
+</tagdescription>
+</list>

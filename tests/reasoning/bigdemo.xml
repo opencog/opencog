@@ -1,447 +1,454 @@
-<ListLink>
-
-<Element class="ConceptNode" name="Osama" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="Abu" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="Amir" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="Britney" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="Moses" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="Judea" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="Muhammad" strength="0.00001" confidence=".999"/>
-<Element class="ConceptNode" name="AlQaeda" strength="0.0001" confidence="0.999"/>
-<Element class="ConceptNode" name="killer" strength="0.05" confidence=".999"/>
-<Element class="ConceptNode" name="terrorist" strength="0.01" confidence=".999"/>
-
-               <EvaluationLink confidence="0.999">
-	                <Element name="test1" class="PredicateNode"/>
-        	        <ListLink>
-                	    <Element name="Osama" class="ConceptNode"/>
-        	        </ListLink>
-		</EvaluationLink>
-	
-<ForAll strength=".25" confidence=".99">
-  <ListLink>
-     <Element name="X001" class="VariableNode"/>
-  </ListLink>
-  <ImplicationLink confidence="0.0">
-                <EvaluationLink confidence="0">
-	                <Element name="test1" class="PredicateNode"/>
-        	        <ListLink>
-                	    <Element name="X001" class="VariableNode"/>
-        	        </ListLink>
-		</EvaluationLink>
-              <EvaluationLink confidence="0">
-	                <Element name="test3" class="PredicateNode"/>
-        	        <ListLink>
-                	    <Element name="X001" class="VariableNode"/>
-        	        </ListLink>
-		</EvaluationLink>
-  </ImplicationLink>
-</ForAll>
-
-  <ImplicationLink confidence="0.999">
-                <EvaluationLink confidence="0.25">
-	                <Element name="test3" class="PredicateNode"/>
-        	        <ListLink>
-                	    <Element name="Osama" class="ConceptNode"/>
-        	        </ListLink>
-		</EvaluationLink>
-              <EvaluationLink confidence="0">
-	                <Element name="test2" class="PredicateNode"/>
-        	        <ListLink>
-                	    <Element name="Osama" class="ConceptNode"/>
-        	        </ListLink>
-		</EvaluationLink>
-  </ImplicationLink>
-
-<InheritanceLink strength=".98" confidence=".99">
-    <Element name="Osama" class="ConceptNode"/>
-    <Element name="terrorist" class="ConceptNode"/>
-</InheritanceLink>	
-
-<ForAll strength=".25" confidence=".99">
-  <ListLink>
-     <Element name="X001" class="VariableNode"/>
-     <Element name="X002" class="VariableNode"/>
-  </ListLink>
-  <ImplicationLink confidence="0.0">
-            <And>
-                <InheritanceLink confidence="0">
-                    <Element name="X002" class="VariableNode"/>
-                    <Element name="terrorist" class="ConceptNode"/>
-                </InheritanceLink>
-                <EvaluationLink confidence="0">
-	                <Element name="friendOf" class="PredicateNode"/>
-        	        <ListLink>
-                	    <Element name="X001" class="VariableNode"/>
-	                    <Element name="X002" class="VariableNode"/>
-        	        </ListLink>
-		</EvaluationLink>
-            </And>
-    <InheritanceLink confidence="0">
-        <Element name="X001" class="VariableNode"/>
-        <Element name="terrorist" class="ConceptNode"/>
-    </InheritanceLink>
-  </ImplicationLink>
-</ForAll>
-
-<ForAll strength=".25" confidence=".99">
-  <ListLink>
-     <Element name="X001" class="VariableNode"/>
-     <Element name="X002" class="VariableNode"/>
-  </ListLink>
- <ImplicationLink confidence="0.0">
-	<EvaluationLink confidence="0">
-		<Element name="friendOf" class="PredicateNode"/>
-		<ListLink>
-			<Element name="X001" class="VariableNode"/>
-			<Element name="X002" class="VariableNode"/>
-		</ListLink>
-	</EvaluationLink>
-	<EvaluationLink confidence="0">
-		<Element name="friendOf" class="PredicateNode"/>
-		<ListLink>
-		    <Element name="Britney" class="ConceptNode"/>
-		    <Element name="Amir" class="ConceptNode"/>
-		</ListLink>
-	</EvaluationLink>
- </ImplicationLink>
-</ForAll>
-
-
-<EvaluationLink strength=".8" confidence=".2">
-    <Element name="friendOf" class="PredicateNode"/>
-<ListLink>
-    <Element name="Britney2" class="ConceptNode"/>
-    <Element name="Osama2" class="ConceptNode"/>
+<list>
+<ForallLink strength="1.000000" confidence="0.999000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X011" />
+<Element class="VariableNode" name="X010" />
+<Element class="VariableNode" name="X009" />
+<Element class="VariableNode" name="R001" />
+</ListLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<InheritanceLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="R001" />
+<Element class="ConceptNode" name="transitiveRelation" />
+</InheritanceLink>
+<AndLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="R001" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X009" />
+<Element class="VariableNode" name="X010" />
 </ListLink>
 </EvaluationLink>
-
-<EvaluationLink  strength=".99" confidence=".8">
-    <Element name="killed" class="PredicateNode"/>
-    <ListLink>
-        <Element name="Moses" class="ConceptNode"/>
-        <Element name="Osama" class="ConceptNode"/>
-    </ListLink>
-</EvaluationLink>
-
-<ForAll  strength=".99" confidence=".99"> 
-  <ListLink>
-     <Element name="X004" class="VariableNode"/>
-     <Element name="X006" class="VariableNode"/>
-  </ListLink>
-  <EquivalenceLink  confidence="0">
-   <And confidence="0">
-        <EvaluationLink confidence="0">
-            <Element name="killed" class="PredicateNode"/>
-            <ListLink>
-	        <Element name="X006" class="VariableNode"/>
-                <Element name="X004" class="VariableNode"/>
-            </ListLink>
-        </EvaluationLink>
-    	<SFunctionLink name="killedBy"  confidence="0">
-            <Element name="X004" class="VariableNode"/>
-            <Element name="X006" class="VariableNode"/>
-    	</SFunctionLink>
-   </And>
-   <EvaluationLink confidence="0">
-        <Element name="wasKilled" class="PredicateNode"/>
-        <ListLink>
-            <Element name="X004" class="VariableNode"/>
-        </ListLink>
-   </EvaluationLink>
-
-  </EquivalenceLink>
-</ForAll>
-
-<ForAll>
-<ListLink>
-        <Element name="$KILLER" class="VariableNode" confidence="0"/>
-        <Element name="$KILLED" class="VariableNode" confidence="0"/>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="R001" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X010" />
+<Element class="VariableNode" name="X011" />
 </ListLink>
-<ImplicationLink strength = "0.95">
-<EvaluationLink strength = "0.99" confidence="0.8">
-    <Element name="killed" class="PredicateNode"/>
-    <ListLink>
-        <Element name="$KILLER" class="VariableNode" confidence="0"/>
-        <Element name="$KILLED" class="VariableNode" confidence="0"/>
-    </ListLink>
 </EvaluationLink>
-<EvaluationLink strength = "0.2" confidence="0">
-    <Element name="isDead" class="PredicateNode"/>
-    <ListLink>
-        <Element name="$KILLED" class="ConceptNode" confidence="0"/>
-    </ListLink>
+</AndLink>
+</AndLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="R001" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X009" />
+<Element class="VariableNode" name="X011" />
+</ListLink>
 </EvaluationLink>
 </ImplicationLink>
-</ForAll>
-
-<InheritanceLink strength = "0.9">
-<EvaluationLink strength = "0.8">
-    <Element name="killerOf" class="PredicateNode"/>
-    <ListLink>
-        <Element name="Osama" class="ConceptNode" confidence="0"/>
-        <Element name="Moses" class="ConceptNode" confidence="0"/>
-    </ListLink>
-</EvaluationLink>
-<EvaluationLink strength = "0.99" confidence="0.8">
-    <Element name="killed" class="PredicateNode"/>
-    <ListLink>
-        <Element name="Moses" class="ConceptNode" confidence="0"/>
-        <Element name="Osama" class="ConceptNode" confidence="0"/>
-    </ListLink>
-</EvaluationLink>
-</InheritanceLink>
-
-<ForAll confidence=".999"> 
-  <ListLink>
-                <Element name="X011" class="VariableNode"/>
-                <Element name="X010" class="VariableNode"/>
-                <Element name="X009" class="VariableNode"/>
-                <Element name="R001" class="VariableNode"/>
-  </ListLink>
-    <ImplicationLink confidence="0">
-        <And confidence="0">
-	    <InheritanceLink confidence="0">
-	        <Element name="R001" class="VariableNode"/>
-	        <Element name="transitiveRelation" class="ConceptNode"/>
-	    </InheritanceLink>
-<And>          
-            <EvaluationLink confidence="0">
-                <Element name="R001" class="VariableNode"/>
-                <ListLink>
-                    <Element name="X009" class="VariableNode"/>
-                    <Element name="X010" class="VariableNode"/>
-                </ListLink>
-            </EvaluationLink>   
-        
-            <EvaluationLink confidence="0">
-                <Element name="R001" class="VariableNode"/>
-                <ListLink>
-                    <Element name="X010" class="VariableNode"/>
-                    <Element name="X011" class="VariableNode"/>
-                </ListLink>
-            </EvaluationLink>   
-</And>        
-        
-        </And>
-        <EvaluationLink confidence="0">
-            <Element name="R001" class="VariableNode"/>
-            <ListLink>
-                <Element name="X009" class="VariableNode"/>
-                <Element name="X011" class="VariableNode"/>
-            </ListLink>
-        </EvaluationLink>   
-    </ImplicationLink>
-</ForAll>
-
-        <EvaluationLink strength=".87">
-            <Element name="R1" class="ConceptNode" strength=".92"/>
-            <ListLink>
-                <Element name="X1" class="ConceptNode" confidence="0"/>
-            </ListLink>
-        </EvaluationLink>    
-
-<ForAll strength=".99" confidence=".99"> 
-  <ListLink>
-                <Element name="X007" class="VariableNode"/>
-                <Element name="R000" class="VariableNode"/>
-  </ListLink>
-  <ImplicationLink>
-        <EvaluationLink>
-            <Element name="R000" class="VariableNode"/>
-            <ListLink>
-                <Element name="X007" class="VariableNode"/>
-            </ListLink>
-        </EvaluationLink>    
-    <InheritanceLink>
-        <Element name="R000" class="VariableNode"/>
-        <Element name="reflexiveRelation" class="ConceptNode"/>
-    </InheritanceLink>
-  </ImplicationLink>
-</ForAll>
-
-<ExtInhLink strength=".99" confidence=".99">
-    <Element name="Osama" class="ConceptNode"/>
-    <Element name="AlQaeda" class="ConceptNode"/>
-</ExtInhLink>
-
-<ExtInhLink strength=".99" confidence=".99">
-    <Element name="AlQaeda" class="ConceptNode"/>
-    <Element name="Abu" class="ConceptNode"/>
-</ExtInhLink>
-    
-<ExtInhLink strength=".99" confidence=".99">
-    <Element name="Abu" class="ConceptNode"/>
-    <Element name="AlQaeda" class="ConceptNode"/>
-</ExtInhLink>
-
-<ExtInhLink strength=".99" confidence=".99">
-    <Element name="Muhammad" class="ConceptNode"/>
-    <Element name="AlQaeda" class="ConceptNode"/>
-</ExtInhLink>
-
-<InheritanceLink strength=".95" confidence=".99">
-    <Element name="Abu" class="ConceptNode"/>
-    <Element name="terrorist" class="ConceptNode"/>
-</InheritanceLink>
-
-<InheritanceLink strength=".99" confidence=".99">
-    <Element name="Moses" class="ConceptNode"/>
-    <Element name="killer" class="ConceptNode"/>
-</InheritanceLink>
-    
-<InheritanceLink strength=".99" confidence=".99">
-    <Element name="Judea" class="ConceptNode"/>
-    <Element name="killer" class="ConceptNode"/>
-</InheritanceLink>
-
-<EvaluationLink strength=".8" confidence=".4">
-    <Element name="friendOf" class="PredicateNode"/>
-<ListLink>
-    <Element name="Amir" class="ConceptNode"/>
-    <Element name="Britney" class="ConceptNode"/>
+</ForallLink>
+<ConceptNode strength="0.920000" confidence="0.000000" name="R1" />
+<ConceptNode strength="1.000000" confidence="0.000000" name="X1" />
+<EvaluationLink strength="0.870000" confidence="0.000000" >
+<Element class="ConceptNode" name="R1" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="X1" />
 </ListLink>
 </EvaluationLink>
-
-<InheritanceLink strength=".70" confidence=".90">
-    <Element name="friendOf" class="PredicateNode"/>
-    <Element name="symmetricRelation" class="ConceptNode"/>
+<VariableNode strength="1.000000" confidence="0.000000" name="X007" />
+<VariableNode strength="1.000000" confidence="0.000000" name="R000" />
+<ConceptNode strength="1.000000" confidence="0.000000" name="reflexiveRelation" />
+<ForallLink strength="0.990000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X007" />
+<Element class="VariableNode" name="R000" />
+</ListLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="R000" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X007" />
+</ListLink>
+</EvaluationLink>
+<InheritanceLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="R000" />
+<Element class="ConceptNode" name="reflexiveRelation" />
 </InheritanceLink>
-
-<InheritanceLink strength="0.90" confidence=".90">
-    <Element name="friendOf" class="PredicateNode"/>
-    <Element name="transitiveRelation" class="ConceptNode"/>
-</InheritanceLink>
-
-<ImplicationLink strength=".99" confidence=".99">
-    <Element name="wasKilled" class="PredicateNode"/>
-    <Element name="isDead" class="PredicateNode"/>
 </ImplicationLink>
-    
-<EquivalenceLink>
-    <Element name="killed" class="PredicateNode"/>
-    <ExOutLink strength=".99" confidence=".99">
-        <Element name="pastForm" class="PredicateNode"/>
-        <Element name="kill" class="PredicateNode"/>
-    </ExOutLink>
-    
+</ForallLink>
+<ExtensionalInheritanceLink strength="0.990000" confidence="0.990000" >
+<Element class="ConceptNode" name="Osama" />
+<Element class="ConceptNode" name="AlQaeda" />
+</ExtensionalInheritanceLink>
+<ExtensionalInheritanceLink strength="0.990000" confidence="0.990000" >
+<Element class="ConceptNode" name="AlQaeda" />
+<Element class="ConceptNode" name="Abu" />
+</ExtensionalInheritanceLink>
+<ExtensionalInheritanceLink strength="0.990000" confidence="0.990000" >
+<Element class="ConceptNode" name="Abu" />
+<Element class="ConceptNode" name="AlQaeda" />
+</ExtensionalInheritanceLink>
+<ExtensionalInheritanceLink strength="0.990000" confidence="0.990000" >
+<Element class="ConceptNode" name="Muhammad" />
+<Element class="ConceptNode" name="AlQaeda" />
+</ExtensionalInheritanceLink>
+<InheritanceLink strength="0.950000" confidence="0.990000" >
+<Element class="ConceptNode" name="Abu" />
+<Element class="ConceptNode" name="terrorist" />
+</InheritanceLink>
+<InheritanceLink strength="0.990000" confidence="0.990000" >
+<Element class="ConceptNode" name="Moses" />
+<Element class="ConceptNode" name="killer" />
+</InheritanceLink>
+<InheritanceLink strength="0.990000" confidence="0.990000" >
+<Element class="ConceptNode" name="Judea" />
+<Element class="ConceptNode" name="killer" />
+</InheritanceLink>
+<EvaluationLink strength="0.800000" confidence="0.400000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Amir" />
+<Element class="ConceptNode" name="Britney" />
+</ListLink>
+</EvaluationLink>
+<ConceptNode strength="1.000000" confidence="0.000000" name="symmetricRelation" />
+<InheritanceLink strength="0.700000" confidence="0.900000" >
+<Element class="PredicateNode" name="friendOf" />
+<Element class="ConceptNode" name="symmetricRelation" />
+</InheritanceLink>
+<InheritanceLink strength="0.900000" confidence="0.900000" >
+<Element class="PredicateNode" name="friendOf" />
+<Element class="ConceptNode" name="transitiveRelation" />
+</InheritanceLink>
+<ImplicationLink strength="0.990000" confidence="0.990000" >
+<Element class="PredicateNode" name="wasKilled" />
+<Element class="PredicateNode" name="isDead" />
+</ImplicationLink>
+<PredicateNode strength="1.000000" confidence="0.000000" name="pastForm" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="kill" />
+<EquivalenceLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="killed" />
+<ExecutionOutputLink strength="0.990000" confidence="0.990000" >
+<Element class="PredicateNode" name="pastForm" />
+<Element class="PredicateNode" name="kill" />
+</ExecutionOutputLink>
 </EquivalenceLink>
-
-<EvaluationLink strength=".2" confidence=".6">
-        <Element name="isDead" class="PredicateNode"/>
-    <ListLink>
-        <Element name="Britney" class="ConceptNode"/>
-    </ListLink>
-</EvaluationLink>
-
-<ForAll strength=".99" confidence=".99">
- <ListLink>
-        <Element name="X003" class="VariableNode"/>
-        <Element name="X005" class="VariableNode"/>
-        <Element name="T000" class="VariableNode"/>
- </ListLink>
- <EquivalenceLink confidence="0">
-   <And confidence="0">    
-    <InheritanceLink confidence="0">
-        <Element name="X003" class="VariableNode"/>
-        <Element name="killer" class="ConceptNode"/>
-    </InheritanceLink>
-
-    <SFunctionLink  name="killTimeOf">
-                <Element name="X003" class="VariableNode"/>
-                <Element name="T000" class="VariableNode"/>
-    </SFunctionLink>
-    <SFunctionLink name="killed">
-                <Element name="X003" class="VariableNode"/>
-                <Element name="X005" class="VariableNode"/>
-    </SFunctionLink>
-
-   </And>
-    <And confidence="0">
-        <EvaluationLink confidence="0">
-            <Element name="atTime" class="PredicateNode"/>
-         <ListLink>
-            <Element name="T000" class="VariableNode"/>
-            <EvaluationLink confidence="0">
-                <Element name="kill" class="PredicateNode"/>
-                <ListLink>
-                    <Element name="X003" class="VariableNode"/>
-                    <Element name="X005" class="VariableNode"/>
-                </ListLink>
-            </EvaluationLink>
-         </ListLink>
-        </EvaluationLink>
-    </And>
- </EquivalenceLink>
-</ForAll>
-
-<ForAll strength=".99" confidence=".99"> 
-  <ListLink>
-                <Element name="X007" class="VariableNode"/>
-                <Element name="X008" class="VariableNode"/>
-                <Element name="R000" class="VariableNode"/>
-  </ListLink>
-  <ImplicationLink confidence="0">
-   <And>
-    <InheritanceLink confidence="0">
-        <Element name="R000" class="VariableNode"/>
-        <Element name="symmetricRelation" class="ConceptNode"/>
-    </InheritanceLink>
-    <EvaluationLink confidence="0">
-            <Element name="R000" class="VariableNode"/>
-            <ListLink>
-                <Element name="X007" class="VariableNode"/>
-                <Element name="X008" class="VariableNode"/>
-            </ListLink>
-    </EvaluationLink>   
-   </And>
-   <EvaluationLink confidence="0">
-            <Element name="R000" class="VariableNode"/>
-            <ListLink>
-                <Element name="X008" class="VariableNode"/>
-                <Element name="X007" class="VariableNode"/>
-            </ListLink>
-   </EvaluationLink>    
-  </ImplicationLink>
-</ForAll>
-
-    <And>
-        <EvaluationLink>
-            <Element name="wasKilled" class="PredicateNode"/>
-            <ListLink>
-                <Element name="x014" class="ConceptNode"/>
-            </ListLink>
-        </EvaluationLink>
-        <EvaluationLink>
-            <Element name="friendOf" class="PredicateNode"/>
-            <ListLink>
-                <Element name="Amir" class="ConceptNode"/>
-                <Element name="x014" class="ConceptNode"/>
-            </ListLink>
-        </EvaluationLink>
-    </And>
-
-<EvaluationLink>
-    <Element name="friendOf" class="PredicateNode"/>
-<ListLink>
-    <Element name="x012" class="ConceptNode" strength = "0.05" confidence=".99"/>
-    <Element name="Osama" class="ConceptNode"/>
+<EvaluationLink strength="0.200000" confidence="0.600000" >
+<Element class="PredicateNode" name="isDead" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Britney" />
 </ListLink>
 </EvaluationLink>
-
-<EvaluationLink>
-    <Element name="wasKilled" class="PredicateNode"/>
-<ListLink>
-    <Element name="Muhammad" class="ConceptNode"/>
+<VariableNode strength="1.000000" confidence="0.000000" name="X003" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X005" />
+<VariableNode strength="1.000000" confidence="0.000000" name="T000" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="atTime" />
+<ForallLink strength="0.990000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X003" />
+<Element class="VariableNode" name="X005" />
+<Element class="VariableNode" name="T000" />
+</ListLink>
+<EquivalenceLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<InheritanceLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X003" />
+<Element class="ConceptNode" name="killer" />
+</InheritanceLink>
+<ScholemLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X003" />
+<Element class="VariableNode" name="T000" />
+</ScholemLink>
+<ScholemLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X003" />
+<Element class="VariableNode" name="X005" />
+</ScholemLink>
+</AndLink>
+<AndLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="atTime" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="T000" />
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="kill" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X003" />
+<Element class="VariableNode" name="X005" />
 </ListLink>
 </EvaluationLink>
-
-<EvaluationLink>
-    <Element name="isDead" class="PredicateNode"/>
-    <ListLink>
-        <Element name="Amir" class="ConceptNode"/>
-    </ListLink>
-</EvaluationLink>
-
 </ListLink>
-
+</EvaluationLink>
+</AndLink>
+</EquivalenceLink>
+</ForallLink>
+<VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAD" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X008" />
+<VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAE" />
+<ForallLink strength="0.990000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAD" />
+<Element class="VariableNode" name="X008" />
+<Element class="VariableNode" name="$AAAAAAAAE" />
+</ListLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<InheritanceLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAE" />
+<Element class="ConceptNode" name="symmetricRelation" />
+</InheritanceLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAE" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAD" />
+<Element class="VariableNode" name="X008" />
+</ListLink>
+</EvaluationLink>
+</AndLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAE" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X008" />
+<Element class="VariableNode" name="$AAAAAAAAD" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+</ForallLink>
+<ConceptNode strength="1.000000" confidence="0.000000" name="x014" />
+<AndLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="wasKilled" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="x014" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Amir" />
+<Element class="ConceptNode" name="x014" />
+</ListLink>
+</EvaluationLink>
+</AndLink>
+<ConceptNode strength="0.050000" confidence="0.990000" name="x012" />
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="x012" />
+<Element class="ConceptNode" name="Osama" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="wasKilled" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Muhammad" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="isDead" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Amir" />
+</ListLink>
+</EvaluationLink>
+<ConceptNode strength="0.000000" confidence="0.000000" name="___PLN___" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Osama" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Abu" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Amir" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Britney" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Moses" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Judea" />
+<ConceptNode strength="0.000010" confidence="0.999000" name="Muhammad" />
+<ConceptNode strength="0.000100" confidence="0.999000" name="AlQaeda" />
+<ConceptNode strength="0.050000" confidence="0.999000" name="killer" />
+<ConceptNode strength="0.010000" confidence="0.999000" name="terrorist" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="test1" />
+<EvaluationLink strength="1.000000" confidence="0.999000" >
+<Element class="PredicateNode" name="test1" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Osama" />
+</ListLink>
+</EvaluationLink>
+<VariableNode strength="1.000000" confidence="0.000000" name="X001" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="test3" />
+<ForallLink strength="0.250000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X001" />
+</ListLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="test1" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X001" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="test3" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X001" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+</ForallLink>
+<PredicateNode strength="1.000000" confidence="0.000000" name="test2" />
+<ImplicationLink strength="1.000000" confidence="0.999000" >
+<EvaluationLink strength="1.000000" confidence="0.250000" >
+<Element class="PredicateNode" name="test3" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Osama" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="test2" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Osama" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+<InheritanceLink strength="0.980000" confidence="0.990000" >
+<Element class="ConceptNode" name="Osama" />
+<Element class="ConceptNode" name="terrorist" />
+</InheritanceLink>
+<VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAA" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X002" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="friendOf" />
+<ForallLink strength="0.250000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAA" />
+<Element class="VariableNode" name="X002" />
+</ListLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<InheritanceLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X002" />
+<Element class="ConceptNode" name="terrorist" />
+</InheritanceLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAA" />
+<Element class="VariableNode" name="X002" />
+</ListLink>
+</EvaluationLink>
+</AndLink>
+<InheritanceLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAA" />
+<Element class="ConceptNode" name="terrorist" />
+</InheritanceLink>
+</ImplicationLink>
+</ForallLink>
+<VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAB" />
+<VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAC" />
+<ForallLink strength="0.250000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAB" />
+<Element class="VariableNode" name="$AAAAAAAAC" />
+</ListLink>
+<ImplicationLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$AAAAAAAAB" />
+<Element class="VariableNode" name="$AAAAAAAAC" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Britney" />
+<Element class="ConceptNode" name="Amir" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+</ForallLink>
+<ConceptNode strength="1.000000" confidence="0.000000" name="Britney2" />
+<ConceptNode strength="1.000000" confidence="0.000000" name="Osama2" />
+<EvaluationLink strength="0.800000" confidence="0.200000" >
+<Element class="PredicateNode" name="friendOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Britney2" />
+<Element class="ConceptNode" name="Osama2" />
+</ListLink>
+</EvaluationLink>
+<PredicateNode strength="1.000000" confidence="0.000000" name="killed" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X004" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X006" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="wasKilled" />
+<ForallLink strength="0.990000" confidence="0.990000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X004" />
+<Element class="VariableNode" name="X006" />
+</ListLink>
+<EquivalenceLink strength="1.000000" confidence="0.000000" >
+<AndLink strength="1.000000" confidence="0.000000" >
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="killed" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X006" />
+<Element class="VariableNode" name="X004" />
+</ListLink>
+</EvaluationLink>
+<ScholemLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X004" />
+<Element class="VariableNode" name="X006" />
+</ScholemLink>
+</AndLink>
+<EvaluationLink strength="1.000000" confidence="0.000000" >
+<Element class="PredicateNode" name="wasKilled" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="X004" />
+</ListLink>
+</EvaluationLink>
+</EquivalenceLink>
+</ForallLink>
+<VariableNode strength="1.000000" confidence="0.000000" name="$KILLER" />
+<VariableNode strength="1.000000" confidence="0.000000" name="$KILLED" />
+<PredicateNode strength="1.000000" confidence="0.000000" name="isDead" />
+<ForallLink strength="1.000000" confidence="0.000000" >
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$KILLER" />
+<Element class="VariableNode" name="$KILLED" />
+</ListLink>
+<ImplicationLink strength="0.950000" confidence="0.000000" >
+<EvaluationLink strength="0.990000" confidence="0.800000" >
+<Element class="PredicateNode" name="killed" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$KILLER" />
+<Element class="VariableNode" name="$KILLED" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="0.200000" confidence="0.000000" >
+<Element class="PredicateNode" name="isDead" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="VariableNode" name="$KILLED" />
+</ListLink>
+</EvaluationLink>
+</ImplicationLink>
+</ForallLink>
+<PredicateNode strength="1.000000" confidence="0.000000" name="killerOf" />
+<InheritanceLink strength="0.900000" confidence="0.000000" >
+<EvaluationLink strength="0.800000" confidence="0.000000" >
+<Element class="PredicateNode" name="killerOf" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Osama" />
+<Element class="ConceptNode" name="Moses" />
+</ListLink>
+</EvaluationLink>
+<EvaluationLink strength="0.990000" confidence="0.800000" >
+<Element class="PredicateNode" name="killed" />
+<ListLink strength="1.000000" confidence="0.000000" >
+<Element class="ConceptNode" name="Moses" />
+<Element class="ConceptNode" name="Osama" />
+</ListLink>
+</EvaluationLink>
+</InheritanceLink>
+<VariableNode strength="1.000000" confidence="0.000000" name="X011" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X010" />
+<VariableNode strength="1.000000" confidence="0.000000" name="X009" />
+<VariableNode strength="1.000000" confidence="0.000000" name="R001" />
+<ConceptNode strength="1.000000" confidence="0.000000" name="transitiveRelation" />
+<tagdescription>
+<tag name="ConceptNode" value="ConceptNode" />
+<tag name="ListLink" value="ListLink" />
+<tag name="AndLink" value="AndLink" />
+<tag name="ForallLink" value="ForallLink" />
+<tag name="ScholemLink" value="ScholemLink" />
+<tag name="ImplicationLink" value="ImplicationLink" />
+<tag name="VariableNode" value="VariableNode" />
+<tag name="EvaluationLink" value="EvaluationLink" />
+<tag name="InheritanceLink" value="InheritanceLink" />
+<tag name="ExtensionalInheritanceLink" value="ExtensionalInheritanceLink" />
+<tag name="PredicateNode" value="PredicateNode" />
+<tag name="ExecutionOutputLink" value="ExecutionOutputLink" />
+<tag name="EquivalenceLink" value="EquivalenceLink" />
+</tagdescription>
+</list>

@@ -1,0 +1,164 @@
+<ListLink>
+
+
+<ForAll confidence="0.999">
+<ListLink>
+<Element name="$10000" class="VariableNode"/>
+</ListLink>
+		<EvaluationLink>
+			<Element name="can_do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$10000" class="VariableNode"/> </ListLink>
+		</EvaluationLink>
+</ForAll>
+
+<ForAll confidence="0.999">
+<ListLink>
+<Element name="$10000" class="VariableNode"/>
+</ListLink>
+		<EvaluationLink>
+			<Element name="actionTried" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$10000" class="VariableNode"/> </ListLink>
+		</EvaluationLink>
+</ForAll>
+
+
+<ImplicationLink confidence="0.999">
+	<And>
+		<EvaluationLink>
+			<Element name="actionTried" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		</EvaluationLink>
+		<EvaluationLink>
+			<Element name="can_do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		</EvaluationLink>
+	</And>
+	<EvaluationLink>
+		<Element name="actionDone" class="PredicateNode" confidence="0"/>
+		<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+
+
+
+
+
+
+
+
+
+<ForAll confidence="0.999">
+<ListLink>
+<Element name="$10000" class="VariableNode"/>
+</ListLink>
+		<EvaluationLink>
+			<Element name="do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$10000" class="VariableNode"/> </ListLink>
+		</EvaluationLink>
+</ForAll>
+
+
+
+<ImplicationLink confidence="0.999">
+	<And>
+		<EvaluationLink>
+			<Element name="do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		</EvaluationLink>
+		<EvaluationLink>
+			<Element name="can_do" class="PredicateNode" confidence="0"/>
+			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		</EvaluationLink>
+	</And>
+	<EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/>
+		<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+<ImplicationLink confidence="0.999">
+<And>
+	<EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/>
+		<ListLink>
+			<EvaluationLink>
+				<Element name="walktowards" class="SchemaNode" confidence="0"/>		
+				<ListLink> <Element name="$2" class="FreeVariableNode"/> </ListLink>
+			</EvaluationLink>
+		</ListLink>
+	</EvaluationLink>
+</And>
+	<EvaluationLink>
+		<Element name="near" class="PredicateNode" confidence="0"/>
+		<ListLink> <Element name="$2" class="FreeVariableNode"/> </ListLink>
+	</EvaluationLink>
+</ImplicationLink>
+
+
+<EvaluationLink confidence="0.99">
+	<Element name="can_do" class="PredicateNode" confidence="0"/>
+	<ListLink>
+	   <EvaluationLink>
+		<Element name="walktowards" class="SchemaNode" confidence="0"/>
+		<ListLink>
+			<Element name="ball" class="ConceptNode" confidence="0"/>
+		</ListLink>
+  	   </EvaluationLink>
+	</ListLink>
+</EvaluationLink>
+
+<ImplicationLink confidence="0.99">
+	   <EvaluationLink>
+		<Element name="just_done" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="lift" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+	   <EvaluationLink>
+		<Element name="can_do" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="hold" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="ball" class="ConceptNode" confidence="0"/>
+			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+</ImplicationLink>
+
+
+<ForAll confidence="0.8">
+<ListLink>
+	<Element name="$obj" class="VariableNode"/>
+</ListLink>
+<ImplicationLink>
+		<EvaluationLink>
+			<Element name="near" class="PredicateNode" confidence="0"/>
+			<ListLink>
+				<Element name="$obj" class="VariableNode"/>
+			</ListLink>
+		</EvaluationLink>
+
+	   <EvaluationLink>
+		<Element name="can_do" class="PredicateNode" confidence="0"/
+		  <ListLink>
+		  <EvaluationLink>
+			<Element name="lift" class="SchemaNode" confidence="0"/>
+			<ListLink>
+				<Element name="$obj" class="VariableNode"/>
+ 			</ListLink>
+		  </EvaluationLink>
+		  </ListLink>
+	   </EvaluationLink>
+</ImplicationLink>
+</ForAll>
+
+
+</ListLink>

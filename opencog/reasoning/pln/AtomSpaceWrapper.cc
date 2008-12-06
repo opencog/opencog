@@ -30,6 +30,9 @@
 #include <opencog/util/tree.h>
 #include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/utils.h>
+#include <opencog/xml/FileXMLBufferReader.h>
+#include <opencog/xml/XMLBufferReader.h>
+#include <opencog/xml/NMXmlParser.h>
 
 #include  <boost/foreach.hpp>
 //boost::variant<int, char> bv; //TODELETE
@@ -522,8 +525,15 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
     }
     
     try {
-        printf("Loading axioms from: %s \n", fname.c_str());
-        U = LoadXMLFile(this, fname);
+        printf("Loading axioms from: %s \n", fname.c_str());        
+//        U = LoadXMLFile(this, fname);
+        cprintf(5, "thms clear...");
+    	CrispTheoremRule::thms.clear();
+    	
+        std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(fname.c_str()));
+        NMXmlParser::loadXML(readers, AS_PTR);        
+        delete readers[0];
+
         loadedFiles.insert(fname);
     } catch(string s) { 
         LOG(0, s); 
