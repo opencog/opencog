@@ -13,9 +13,10 @@
 #include "ForeachWord.h"
 
 #define DEBUG
-#define PRUNE_DEBUG
-#define THIN_DEBUG
-#define LINK_DEBUG
+// #define PRUNE_DEBUG
+// #define THIN_DEBUG
+// #define LINK_DEBUG
+// #define COUNT_DEBUG
 
 using namespace opencog;
 /**
@@ -99,7 +100,7 @@ void EdgeThin::prune_parse(Handle h)
 
 // ===================================================================
 
-#ifdef DEBUG
+#ifdef COUNT_DEBUG
 bool EdgeThin::dbg_senses(Handle sense_h, Handle sense_link_h)
 {
 	Atom *a = TLB::getAtom(sense_link_h);

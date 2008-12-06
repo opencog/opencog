@@ -80,7 +80,6 @@ bool Mihalcea::process_sentence(Handle h)
 		Handle earliest = short_list.front();
 		short_list.pop_front();
 		thinner.thin_parse(earliest, 0);
-thinner.dbg_parse(earliest);
 	}
 
 	// THICKNESS is the number of senses that we leave attached to a 
@@ -124,7 +123,6 @@ bool Mihalcea::process_sentence_list(Handle h)
 		Handle earliest = short_list.front();
 		short_list.pop_front();
 		thinner.thin_parse(earliest, 0);
-thinner.dbg_parse(earliest);
 	}
 	while (0 < short_list.size())
 	{
@@ -136,16 +134,7 @@ thinner.dbg_parse(earliest);
 
 		short_list.pop_front();
 		thinner.thin_parse(earliest, 0);
-thinner.dbg_parse(earliest);
 	}
-
-printf("and now, the whole enchilada\n");
-std::deque<Handle>::const_iterator i;
-for (i = parse_list.begin(); i != parse_list.end(); i++)
-{
-Handle h = *i; thinner.dbg_parse(h);
-}
-
 
 	// Report the results.
 	reporter.report_document(parse_list);

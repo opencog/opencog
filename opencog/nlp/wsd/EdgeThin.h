@@ -34,14 +34,10 @@ class EdgeThin
 		int keep;
 		int edge_count;
 		bool thin_word(Handle);
-		bool dbg_word(Handle);
-		bool dbg_senses(Handle, Handle);
 	public:
 		void set_atom_space(AtomSpace *);
 		void thin_parse(Handle, int);
 		void prune_parse(Handle);
-
-		void dbg_parse(Handle);
 };
 
 }

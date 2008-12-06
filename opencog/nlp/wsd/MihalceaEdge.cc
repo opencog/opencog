@@ -28,8 +28,8 @@
 #include <opencog/nlp/wsd/SenseSimilaritySQL.h>
 
 #define DEBUG
-#define DETAIL_DEBUG
-#define LINK_DEBUG
+// #define DETAIL_DEBUG
+// #define LINK_DEBUG
 
 using namespace opencog;
 
@@ -90,7 +90,7 @@ void MihalceaEdge::annotate_parse(Handle h)
 		}
 	}
 #ifdef DEBUG
-	printf("; MihalceaEdge: added %d edges for %d word pairs\n",
+	printf("; MihalceaEdge::annotate_parse added %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
 }
@@ -131,9 +131,8 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 			annotate_word_pair(*ia, *ib);
 		}
 	}
-#ifdef DETAIL_DEBUG
-	printf ("; ========================= end sent pair\n");
-	printf ("; Sent pair: Done adding %d edges for %d word pairs\n",
+#ifdef DEBUG
+	printf ("; annotate_parse_pair: added %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
 }
