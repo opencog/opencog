@@ -13,6 +13,9 @@
 #include "ForeachWord.h"
 
 #define DEBUG
+#define PRUNE_DEBUG
+#define THIN_DEBUG
+#define LINK_DEBUG
 
 using namespace opencog;
 /**
@@ -94,6 +97,46 @@ void EdgeThin::prune_parse(Handle h)
 #endif
 }
 
+// ===================================================================
+
+#ifdef DEBUG
+bool EdgeThin::dbg_senses(Handle sense_h, Handle sense_link_h)
+{
+	Atom *a = TLB::getAtom(sense_link_h);
+	if (NULL != a->getIncomingSet())
+	{
+		Node *w = dynamic_cast<Node *>(TLB::getAtom(sense_h));
+		const char* s = w->getName().c_str();
+		printf("non-null incoming set for %s\n", s);
+	}
+	sense_count ++;
+	return false;
+}
+
+bool EdgeThin::dbg_word(Handle word_h)
+{
+	sense_count=0;
+	foreach_word_sense_of_inst(word_h, &EdgeThin::dbg_senses, this);
+
+	if (0 < sense_count)
+	{
+		Node *w = dynamic_cast<Node *>(TLB::getAtom(word_h));
+		const std::string &wn = w->getName();
+		printf ("; EdgeThin::dbg_word %s has %d senses left \n",
+			wn.c_str(), sense_count);
+	}
+	return false;
+}
+
+void EdgeThin::dbg_parse(Handle h)
+{
+	printf ("debug-checking parse %lx\n", h.value());
+	foreach_word_instance(h, &EdgeThin::dbg_word, this);
+}
+
+#endif
+
+// ===================================================================
 /**
  * Remove edges between senses in the indicated parse.
  *
@@ -138,6 +181,30 @@ bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
  */
 bool EdgeThin::delete_sim(Handle h)
 {
+#ifdef LINK_DEBUG
+	Link *l = dynamic_cast<Link *>(TLB::getAtom(h));
+	std::vector<Handle> oset = l->getOutgoingSet();
+	Handle first_sense_link = oset[0];
+	Handle second_sense_link = oset[1];
+
+	Handle fw = get_word_instance_of_sense_link(first_sense_link);
+	Handle fs = get_word_sense_of_sense_link(first_sense_link);
+	Node *nfw = dynamic_cast<Node *>(TLB::getAtom(fw));
+	Node *nfs = dynamic_cast<Node *>(TLB::getAtom(fs));
+	const char *vfw = nfw->getName().c_str();
+	const char *vfs = nfs->getName().c_str();
+
+	Handle sw = get_word_instance_of_sense_link(second_sense_link);
+	Handle ss = get_word_sense_of_sense_link(second_sense_link);
+	Node *nsw = dynamic_cast<Node *>(TLB::getAtom(sw));
+	Node *nss = dynamic_cast<Node *>(TLB::getAtom(ss));
+	const char *vsw = nsw->getName().c_str();
+	const char *vss = nss->getName().c_str();
+
+	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vfw, vsw, vfs, vss); 
+	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vsw, vfw, vss, vfs); 
+#endif
+
 	atom_space->removeAtom(h, false);
 	edge_count ++;
 	return true;
@@ -151,15 +218,17 @@ bool EdgeThin::delete_sim(Handle h)
  */
 bool EdgeThin::thin_word(Handle word_h)
 {
-#ifdef XDEBUG
-	Node *w = dynamic_cast<Node *>(TLB::getAtom(word_h));
-	const std::string &wn = w->getName();
-	printf ("; EdgeThin::thin_word %s to %d\n", wn.c_str(), keep);
-#endif
-
 	sense_list.clear();
 	foreach_word_sense_of_inst(word_h, &EdgeThin::make_sense_list, this);
 	sense_list.sort(sense_compare);
+
+#ifdef THIN_DEBUG
+	Handle wh = get_dict_word_of_word_instance(word_h);
+	Node *w = dynamic_cast<Node *>(TLB::getAtom(wh));
+	const std::string &wn = w->getName();
+	printf ("; EdgeThin::thin_word %s to %d from %d\n",
+		wn.c_str(), keep, sense_list.size());
+#endif
 
 	// unqueue the ones that we will keep
 	int k = sense_list.size();
@@ -171,21 +240,24 @@ bool EdgeThin::thin_word(Handle word_h)
 	for (it=sense_list.begin(); it != sense_list.end(); it++)
 	{
 		Handle sense_h = *it;
-#ifdef XDEBUG
-		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
-		double sa = la->getTruthValue().getMean();
-		Handle hws = get_word_sense_of_sense_link(sense_h);
-		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
-		printf ("; deleting net to %s with score %f\n", ws->getName().c_str(), sa);
-#endif
 
 		// The for-each traversal is not safe against deletion (bummer!)
 		// and so has to be restarted after each attempt.
 		bool rc = true;
+		int deleted_links = 0;
 		while (rc)
 		{
 			rc = foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+			deleted_links ++;
 		}
+#ifdef THIN_DEBUG
+		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
+		double sa = la->getTruthValue().getMean();
+		Handle hws = get_word_sense_of_sense_link(sense_h);
+		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
+		printf ("; delete %s with score %f (%d links)\n",
+			ws->getName().c_str(), sa, deleted_links);
+#endif
 	}
 
 	if (0 >= keep) return false;

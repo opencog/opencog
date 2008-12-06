@@ -37,7 +37,7 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/util/exceptions.h>
 
-// #define USE_STD_VECTOR_FOR_OUTGOING
+#define USE_STD_VECTOR_FOR_OUTGOING
 // #define PUT_OUTGOING_SET_IN_LINKS
 
 namespace opencog

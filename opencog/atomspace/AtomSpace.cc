@@ -439,7 +439,7 @@ HandleSeq AtomSpace::getOutgoing(Handle h) const
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflus(stdout);
 
-    HandleSeq hs;
+    static HandleSeq hs;
     Link *link = dynamic_cast<Link *>(TLB::getAtom(h));
     if (!link) return hs;
     return link->getOutgoingSet();

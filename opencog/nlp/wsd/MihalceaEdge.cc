@@ -27,7 +27,9 @@
 #include <opencog/nlp/wsd/SenseSimilarityLCH.h>
 #include <opencog/nlp/wsd/SenseSimilaritySQL.h>
 
-// #define DEBUG
+#define DEBUG
+#define DETAILED_DEBUG
+#define LINK_DEBUG
 
 using namespace opencog;
 
@@ -77,16 +79,16 @@ void MihalceaEdge::annotate_parse(Handle h)
 	word_pair_count = 0;
 	edge_count = 0;
 	std::set<Handle>::const_iterator f;
-	for (f = words.begin(); f != words.end(); f++)
+	for (f = words.begin(); f != words.end(); ++f)
 	{
 		std::set<Handle>::const_iterator s = f;
-		for (s++; s != words.end(); s++)
+		s++;
+		for (; s != words.end(); ++s)
 		{
 			annotate_word_pair(*f, *s);
 		}
 	}
-// #ifdef DEBUG
-#if 1
+#ifdef DEBUG
 	printf("; MihalceaEdge: added %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
 #endif
@@ -109,7 +111,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	words.clear();
 	foreach_word_instance(hb, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 
-#ifdef DEBUG
+#ifdef DETAIL_DEBUG
 	printf ("; ========================= start sent pair (%zu x %zu) words\n",
 	        pa_words.size(), words.size());
 #endif
@@ -127,7 +129,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 			annotate_word_pair(*ia, *ib);
 		}
 	}
-#ifdef DEBUG
+#ifdef DETAIL_DEBUG
 	printf ("; ========================= end sent pair\n");
 	printf ("; Sent pair: Done adding %d edges for %d word pairs\n",
 		edge_count, word_pair_count);
@@ -147,7 +149,7 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
  */
 bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
 {
-#ifdef DEBUG
+#ifdef DETAIL_DEBUG
 	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
 	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
 	const std::string &fn = f->getName();
@@ -234,6 +236,25 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 
 	atom_space->addLink(COSENSE_LINK, out, stv);
 	edge_count ++;
+
+#ifdef LINK_DEBUG
+	Handle fw = get_word_instance_of_sense_link(first_sense_link);
+	Handle fs = get_word_sense_of_sense_link(first_sense_link);
+	Node *nfw = dynamic_cast<Node *>(TLB::getAtom(fw));
+	Node *nfs = dynamic_cast<Node *>(TLB::getAtom(fs));
+	const char *vfw = nfw->getName().c_str();
+	const char *vfs = nfs->getName().c_str();
+
+	Handle sw = get_word_instance_of_sense_link(second_sense_link);
+	Handle ss = get_word_sense_of_sense_link(second_sense_link);
+	Node *nsw = dynamic_cast<Node *>(TLB::getAtom(sw));
+	Node *nss = dynamic_cast<Node *>(TLB::getAtom(ss));
+	const char *vsw = nsw->getName().c_str();
+	const char *vss = nss->getName().c_str();
+
+	printf("slink: %s ## %s <<-->> %s ## %s add\n", vfw, vsw, vfs, vss); 
+	printf("slink: %s ## %s <<-->> %s ## %s add\n", vsw, vfw, vss, vfs); 
+#endif
 
 	return false;
 }
