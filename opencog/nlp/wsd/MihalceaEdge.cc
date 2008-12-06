@@ -72,6 +72,7 @@ void MihalceaEdge::annotate_sentence(Handle h)
  */
 void MihalceaEdge::annotate_parse(Handle h)
 {
+	words.clear();
 	foreach_word_instance(h, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 
 	// At this point, "words" contains all of the relex-participating
