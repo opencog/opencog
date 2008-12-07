@@ -39,7 +39,7 @@ void ct();
 namespace reasoning
 {
 std::map<nocase_string, int> name2type;
-std::map<int, string> type2name;
+//std::map<int, string> type2name;
 std::map<std::string, Handle> nodenames;
 
 int xml_level = -1;

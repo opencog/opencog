@@ -21,7 +21,7 @@
 
 #include "AtomSpaceWrapper.h"
 
-#include "utils/XMLNodeLoader.h"
+//#include "utils/XMLNodeLoader.h"
 #include "rules/Rules.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>

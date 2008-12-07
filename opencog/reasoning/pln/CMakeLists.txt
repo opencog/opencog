@@ -48,8 +48,8 @@ ADD_LIBRARY (pln STATIC
 	rules/simsubst/SimSubstRule1.cc
 # Utils
     utils/Grim.cc
-    utils/XMLNode.cc
-    utils/XMLNodeLoader.cc
+#    utils/XMLNode.cc
+#    utils/XMLNodeLoader.cc
     utils/NMPrinter.cc
     # for later:
     #CrispUnificationRule.cc

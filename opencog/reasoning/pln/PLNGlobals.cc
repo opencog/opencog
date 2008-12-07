@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <map>
+#include <string>
 
 namespace test
 {
@@ -14,5 +16,8 @@ namespace haxx
 namespace reasoning
 {
     int varcount=0;
+    
+    // TODO This doesn't seem to get initialised anywhere in PLN
+    std::map<int, std::string> type2name;
 }
 
