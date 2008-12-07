@@ -191,36 +191,6 @@ namespace test
 //    int attachs=0;
 }
 
-void test_core_TVs()
-{
-    AtomSpaceWrapper *atw = GET_ATW;
-    //! Why get type 77 instead of actual name? 
-    Btr<set<Handle> > ts =  atw->getHandleSet((Type)77,"");
-    foreach(Handle ti, *ts)
-    {
-        if (atw->getTV(ti).isNullTv())
-        {
-            puts("NULL TV !!!");
-            getc(stdin);
-        }
-        printTree(ti,0,-5);
-//      getc(stdin);
-    }           
-}
-
-void test_atw_reset()
-{
-    AtomSpaceWrapper *atw = GET_ATW;
-    atw->reset();
-    Btr<set<Handle> > ret;
-    ret = atw->getHandleSet(EVALUATION_LINK, "");
-    assert(ret->size() == 0);
-    // if above assert is true, then ret will still be empty
-    ret = atw->getHandleSet(LIST_LINK, "");
-    assert(ret->size() == 0);
-}
-
-
 void PLNShell_RunLoop(int argc, char** args);
 
 /// PLNShell is intended to be used with PseudoCore. Main run loop is here.
@@ -339,16 +309,6 @@ Rule combinations. Known examples are:
 
 
 */
-
-void childOfDump()
-{
-    using namespace haxx;
-    typedef pair<Handle,Handle> hpair;
-    foreach(hpair crel, childOf)
-    {
-        cout << "#" << (int)crel.first.value() << " is child of " << (int)crel.second.value() << "\n";
-    }
-}
 
 void PLNhelp();
 
