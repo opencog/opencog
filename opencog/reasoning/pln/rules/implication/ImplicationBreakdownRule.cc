@@ -97,7 +97,7 @@ BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray
                     false);
         else*/
     
-        assert (!(inheritsType(T, NODE)));
+        assert (!(GET_ATW->inheritsType(T, NODE)));
 
         ret = destTable->addLink(T, new_args,
                     *retTV,

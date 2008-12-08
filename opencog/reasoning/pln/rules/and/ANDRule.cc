@@ -41,14 +41,14 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     
     tree<Vertex>::iterator top = outh->begin();
 
-        if (!inheritsType(nm->getType(v2h(*top)), AND_LINK) ||
+        if (! (nm->inheritsType(nm->getType(v2h(*top)), AND_LINK)) ||
             top.number_of_children() <= 2)  
             return Rule::setOfMPs();
 
         /// This Rule cannot produce nested ANDLinks. Try SimpleANDRule instead.
 
         for (tree<Vertex>::sibling_iterator j = outh->begin(top); j != outh->end(top); j++)
-            if (inheritsType(nm->getType(v2h(*j)), AND_LINK))
+            if (nm->inheritsType(nm->getType(v2h(*j)), AND_LINK))
                 return Rule::setOfMPs();
 
         MPs ret;
@@ -142,7 +142,7 @@ LOG(4, "ANDRule::computeCC");
     {
         std::vector<Handle> inc2;
 
-        if (isSubType(*i, AND_LINK))
+        if (nm->isSubType(*i, AND_LINK))
             inc2 = nm->getOutgoing(*i);
         else
             inc2.push_back(*i);
@@ -165,7 +165,7 @@ LOG(4, "Q ANDRule::compute");
         {
             std::vector<Handle> inc2; // = nm->getOutgoing(*i);
 
-            if (isSubType(*i, AND_LINK))
+            if (nm->isSubType(*i, AND_LINK))
                 inc2 = nm->getOutgoing(*i);
             else
                 inc2.push_back(*i);

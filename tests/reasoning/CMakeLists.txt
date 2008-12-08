@@ -21,6 +21,13 @@ INCLUDE_DIRECTORIES (
     ${GSL_INCLUDE_DIR}
 )
 
+LINK_DIRECTORIES (
+	${OPENCOG_BINARY_DIR}/opencog/atomspace
+	${OPENCOG_BINARY_DIR}/opencog/server
+	${OPENCOG_BINARY_DIR}/opencog/reasoning/pln
+	${OPENCOG_BINARY_DIR}/opencog/util
+)
+
 LINK_LIBRARIES (
     atomspace
     server

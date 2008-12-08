@@ -34,8 +34,8 @@ namespace reasoning
 Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
-    if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
-        inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (nm->inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
+        nm->inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0

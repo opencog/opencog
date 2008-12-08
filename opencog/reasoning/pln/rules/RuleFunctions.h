@@ -25,8 +25,6 @@
 using namespace opencog;
 
 Handle child(Handle h, int i);
-bool isSubType(Handle h, Type T);
-bool inheritsType(Type T1, Type T2);
 
 namespace reasoning
 {
