@@ -23,22 +23,11 @@
 #define _OPENCOG_STRINGINDEX_H
 
 #include <opencog/atomspace/AtomIndex.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog
 {
 
-/**
- * This class provides a simple, generic interface for maintaining 
- * arbitrary indexes of Atoms. Indexes are used whenever a system needs
- * rapid lookup of atoms having some particular type or property.
- *
- * A secondary goal of this interface class is to allow different
- * implementations to use the same interface: implementations as
- * linked-lists, rb-trees, hash tables, etc.
- *
- * Typically, Value will be Handle, possibly PredicateEvaluator*.
- * The Key will typically be an int, string, etc.
- */
 class StringIndex:
 	public AtomIndex<const char *,Handle>
 {

@@ -21,6 +21,7 @@ ADD_LIBRARY (atomspace SHARED
 	SavingLoading.cc
 	SimpleTruthValue.cc
 	StatisticsMonitor.cc
+	StringIndex.cc
 	Temporal.cc
 	TemporalEntry.cc
 	TemporalMap.cc
@@ -51,6 +52,7 @@ INSTALL (TARGETS atomspace
 
 INSTALL (FILES
 	Atom.h
+	AtomIndex.h
 	AtomSpaceDefinitions.h
 	AtomSpace.h
 	AtomTable.h
@@ -81,6 +83,7 @@ INSTALL (FILES
 	SavingLoading.h
 	SimpleTruthValue.h
 	StatisticsMonitor.h
+	StringIndex.h
 	TemporalEntry.h
 	Temporal.h
 	TemporalMap.h

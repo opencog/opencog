@@ -39,10 +39,11 @@ namespace opencog
  * Typically, Value will be Handle, possibly PredicateEvaluator*.
  * The Key will typically be an int, string, etc.
  */
-class AtomIndex<Key,Value>
+template <typename Key, typename Value>
+class AtomIndex
 {
 public:
-		virtual void void insert(Key, Value) = 0;
+		virtual void insert(Key, Value) = 0;
 		virtual Value get(Key) = 0;
 		virtual void remove(Key) = 0;
 };

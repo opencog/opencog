@@ -21,7 +21,7 @@
 
 #include <opencog/atomspace/StringIndex.h>
 
-using opencog;
+using namespace opencog;
 
 void StringIndex::insert(const char * str, Handle h)
 {
@@ -29,7 +29,7 @@ void StringIndex::insert(const char * str, Handle h)
 
 Handle StringIndex::get(const char *str)
 {
-	return UNDEFINED_HANDLE;
+	return Handle::UNDEFINED;
 }
 
 void StringIndex::remove(const char *str)
