@@ -1170,9 +1170,15 @@ void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int index
     }
 }
 
+static bool decayed(const char *atom_name, Handle h)
+{
+    Atom *a = TLB::getAtom(h);
+    return a->getFlag(REMOVED_BY_DECAY);
+}
+
 void AtomTable::removeMarkedAtomsFromNameIndex(void)
 {
-// XXX implement me! xxxxxxxxx
+	nameIndex.remove(decayed);
 }
 
 void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID)

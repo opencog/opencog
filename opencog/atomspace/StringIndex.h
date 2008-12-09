@@ -44,6 +44,7 @@ class StringIndex:
 		virtual Handle get(const char *) const;
 		virtual void remove(const char *);
 		virtual size_t size(void) const;
+		virtual void remove(bool (*)(const char *, Handle));
 };
 
 } //namespace opencog

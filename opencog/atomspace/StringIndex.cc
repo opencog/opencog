@@ -55,3 +55,18 @@ size_t StringIndex::size(void) const
 {
 	return idx.size();
 }
+
+void StringIndex::remove(bool (*filter)(const char *, Handle))
+{
+	std::map<std::string,Handle>::iterator i, j;
+	
+	i = idx.begin();
+	while (i != idx.end())
+	{
+		j = i;
+		i++;
+		if (filter(j->first.c_str(), j->second))
+			idx.erase(j->first.c_str());
+	}
+}
+
