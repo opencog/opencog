@@ -39,6 +39,7 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/StringIndex.h>
+#include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
@@ -101,7 +102,7 @@ private:
     std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
-    FixedIntegerIndex typeIndex;
+    TypeIndex typeIndex;
     StringIndex nameIndex;
 
     // Number of predicate indices.

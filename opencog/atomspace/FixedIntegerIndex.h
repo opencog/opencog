@@ -27,11 +27,9 @@
 
 #include <opencog/atomspace/AtomIndex.h>
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
 
 namespace opencog
 {
-class HandleEntry;
 
 /**
  * Implements an integer index as an RB-tree (C++ map)
@@ -39,7 +37,7 @@ class HandleEntry;
 class FixedIntegerIndex:
 	public AtomIndex<int,Handle>
 {
-	private:
+	protected:
 		std::vector<std::set<Handle> > idx;
 
 	public:
@@ -50,29 +48,6 @@ class FixedIntegerIndex:
 		virtual void remove(bool (*)(Handle));
 
 		void resize(size_t);
-		HandleEntry* getHandleSet(Type type, bool subclass) const;
-
-		class iterator
-		{
-			friend class FixedIntegerIndex;
-			public:
-				iterator(Type, bool);
-				iterator& operator++(int);
-				iterator& operator=(iterator);
-				bool operator==(iterator);
-				bool operator!=(iterator);
-				Handle operator*(void);
-			private:
-				Type type;
-				bool subclass;
-				std::vector<std::set<Handle> >::const_iterator s;
-				std::vector<std::set<Handle> >::const_iterator send;
-				Type currtype;
-				std::set<Handle>::const_iterator se;
-		};
-
-		iterator begin(Type, bool) const;
-		iterator end(void) const;
 };
 
 } //namespace opencog

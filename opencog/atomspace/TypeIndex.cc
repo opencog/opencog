@@ -26,59 +26,6 @@
 
 using namespace opencog;
 
-void TypeIndex::insert(int i, Handle h)
-{
-	std::set<Handle> &s = idx.at(i);
-	s.insert(h);
-}
-
-Handle TypeIndex::get(int i) const
-{
-	return Handle::UNDEFINED;
-}
-
-void TypeIndex::remove(int i, Handle h)
-{
-	std::set<Handle> &s = idx.at(i);
-	s.erase(h);
-}
-
-size_t TypeIndex::size(void) const
-{
-	size_t cnt = 0;
-	std::vector<std::set<Handle> >::const_iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
-	{
-		cnt += s->size();
-	}
-	return cnt;
-}
-
-void TypeIndex::remove(bool (*filter)(Handle))
-{
-	std::vector<std::set<Handle> >::iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
-	{
-		std::set<Handle>::iterator i, j;
-	
-		i = s->begin();
-		while (i != s->end())
-		{
-			j = i;
-			i++;
-			if (filter(*j))
-				s->erase(*j);
-		}
-	}
-}
-
-void TypeIndex::resize(size_t sz)
-{
-	idx.resize(sz);
-}
-
-// ================================================================
-
 HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const
 {
 	iterator it = begin(type, subclass);

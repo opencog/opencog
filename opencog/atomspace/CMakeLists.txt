@@ -33,6 +33,7 @@ ADD_LIBRARY (atomspace SHARED
 	TLB.cc
 	Trail.cc
 	TruthValue.cc
+	TypeIndex.cc
     utils.cc
     #utils2.cc
 	types.cc
@@ -97,6 +98,7 @@ INSTALL (FILES
 	TLB.h
 	Trail.h
 	TruthValue.h
+	TypeIndex.h
 	type_classint.h
 	type_codes.h
 	type_inheritance.h

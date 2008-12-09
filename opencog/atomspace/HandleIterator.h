@@ -28,8 +28,8 @@
 
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/VersionHandle.h>
-#include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog {
 
@@ -47,7 +47,7 @@ private:
 
     AtomTable* table;
 
-    FixedIntegerIndex::iterator it;
+    TypeIndex::iterator it;
 
     VersionHandle desiredVersionHandle;
 
