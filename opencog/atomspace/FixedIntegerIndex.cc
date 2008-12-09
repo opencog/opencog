@@ -84,6 +84,7 @@ HandleEntry * FixedIntegerIndex::getHandleSet(Type type, bool subclass) const
 	iterator it = begin(type, subclass);
 	iterator itend = end();
 
+printf("duude enter handle set ty=%d sub=%d\n", type, subclass);
 	HandleEntry *he = NULL;
 	while (it != itend)
 	{
@@ -112,7 +113,7 @@ FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub) const
 		    (sub && (ClassServer::isAssignableFrom(it.type, it.currtype))))
 		{
 			it.se = it.s->begin();
-			return it;
+			if (it.se != it.s->end()) return it;
 		}
 		it.currtype++;
 		it.s++;
@@ -158,6 +159,7 @@ bool FixedIntegerIndex::iterator::operator==(iterator v)
 
 bool FixedIntegerIndex::iterator::operator!=(iterator v)
 {
+printf ("compare %d and %d\n", v.s==v.send, s==send);
 	if ((v.s == v.send) && (s != send)) return v.se != se;
 	if ((v.s != v.send) && (s == send)) return v.se != se;
 	return false;
