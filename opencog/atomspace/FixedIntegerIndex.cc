@@ -84,11 +84,9 @@ HandleEntry * FixedIntegerIndex::getHandleSet(Type type, bool subclass) const
 	iterator it = begin(type, subclass);
 	iterator itend = end();
 
-printf("duude enter handle set ty=%d sub=%d\n", type, subclass);
 	HandleEntry *he = NULL;
 	while (it != itend)
 	{
-printf("duuude her we are, handle=%lu\n", (*it).value());
 		HandleEntry *nhe = new HandleEntry(*it);
 		nhe->next = he;
 		he = nhe;
@@ -106,7 +104,7 @@ FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub) const
 
 	it.s = idx.begin();
 	it.currtype = 0;
-	while (it.s != idx.end())
+	while (it.s != it.send)
 	{
 		// Find the first type which is a subtype, and start iteration there.
 		if ((it.type == it.currtype) || 
@@ -124,11 +122,10 @@ FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub) const
 
 FixedIntegerIndex::iterator FixedIntegerIndex::end(void) const
 {
-	iterator it(ATOM, false);
-	it.se = idx.at(ATOM).end();
+	iterator it(NOTYPE, false);
+	it.se = idx.at(NOTYPE).end();
 	it.s = idx.end();
 	it.send = idx.end();
-printf ("duuuude the END !!\n");
 	return it;
 }
 
@@ -143,6 +140,7 @@ FixedIntegerIndex::iterator& FixedIntegerIndex::iterator::operator=(iterator v)
 	s = v.s;
 	send = v.send;
 	se = v.se;
+	currtype = v.currtype;
 	return *this;
 }
 
