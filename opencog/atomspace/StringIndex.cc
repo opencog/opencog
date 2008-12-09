@@ -25,14 +25,21 @@ using namespace opencog;
 
 void StringIndex::insert(const char * str, Handle h)
 {
+	idx.insert(std::pair<const char *,Handle>(str,h));
 }
 
 Handle StringIndex::get(const char *str)
 {
+	std::map<const char*,Handle>::iterator it;
+
+	it = idx.find(str);
+	if (it != idx.end()) return it->second;
+
 	return Handle::UNDEFINED;
 }
 
 void StringIndex::remove(const char *str)
 {
+	idx.erase(str);
 }
 

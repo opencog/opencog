@@ -22,16 +22,24 @@
 #ifndef _OPENCOG_STRINGINDEX_H
 #define _OPENCOG_STRINGINDEX_H
 
+#include <map>
+
 #include <opencog/atomspace/AtomIndex.h>
 #include <opencog/atomspace/Handle.h>
 
 namespace opencog
 {
 
+/**
+ * Implements a string index as an RB-tree (C++ map)
+ */
 class StringIndex:
 	public AtomIndex<const char *,Handle>
 {
-public:
+	private:
+		std::map<const char *, Handle> idx;
+
+	public:
 		virtual void insert(const char *, Handle);
 		virtual Handle get(const char *);
 		virtual void remove(const char *);
