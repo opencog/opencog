@@ -68,6 +68,6 @@ int CoreUtils::compare(Handle h1, Handle h2)
 
 bool CoreUtils::HandleComparison::operator()(const Handle& h1, const Handle& h2) const
 {
-    return(CoreUtils::compare(h1, h2) > 0);
+    return (CoreUtils::compare(h1, h2) < 0);
 }
 

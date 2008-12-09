@@ -59,24 +59,24 @@ public:
 
     void testConstructor() {
         std::vector<Handle> outgoing;
-        outgoing.push_back((Handle) 10);
-        outgoing.push_back((Handle) 5);
-        outgoing.push_back((Handle) 9);
+        outgoing.push_back(Handle (10));
+        outgoing.push_back(Handle (5));
+        outgoing.push_back(Handle (9));
 
         Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
         Link *link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
 
         // Specific tests for ordered and unnordered links:
-        TS_ASSERT(link->getOutgoingSet()[0] == (Handle) 10);
-        TS_ASSERT(link->getOutgoingSet()[1] == (Handle) 5);
-        TS_ASSERT(link->getOutgoingSet()[2] == (Handle) 9);
+        TS_ASSERT(link->getOutgoingSet()[0] == Handle (10));
+        TS_ASSERT(link->getOutgoingSet()[1] == Handle (5));
+        TS_ASSERT(link->getOutgoingSet()[2] == Handle (9));
         atom = new ConcreteAtom(UNORDERED_LINK, outgoing);
         link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
-        TS_ASSERT(link->getOutgoingSet()[0] == (Handle) 5);
-        TS_ASSERT(link->getOutgoingSet()[1] == (Handle) 9);
-        TS_ASSERT(link->getOutgoingSet()[2] == (Handle) 10);
+        TS_ASSERT(link->getOutgoingSet()[0] == Handle (5));
+        TS_ASSERT(link->getOutgoingSet()[1] == Handle (9));
+        TS_ASSERT(link->getOutgoingSet()[2] == Handle (10));
     }
 
 };
