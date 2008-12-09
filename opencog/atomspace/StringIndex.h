@@ -42,9 +42,9 @@ class StringIndex:
 	public:
 		virtual void insert(const char *, Handle);
 		virtual Handle get(const char *) const;
-		virtual void remove(const char *);
+		virtual void remove(const char *, Handle);
 		virtual size_t size(void) const;
-		virtual void remove(bool (*)(const char *, Handle));
+		virtual void remove(bool (*)(Handle));
 };
 
 } //namespace opencog

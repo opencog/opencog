@@ -1034,7 +1034,6 @@ public:
         while ((next = _getNextAtom()) != Handle::UNDEFINED)
             if (compare(next) && containsVersionedTV(next, vh))
                 * it++ = next;
-
         return it;
     }
 

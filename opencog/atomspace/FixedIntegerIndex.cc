@@ -126,6 +126,7 @@ FixedIntegerIndex::iterator FixedIntegerIndex::end(void) const
 	it.se = idx.at(NOTYPE).end();
 	it.s = idx.end();
 	it.send = idx.end();
+	it.currtype = NOTYPE;
 	return it;
 }
 
@@ -141,6 +142,8 @@ FixedIntegerIndex::iterator& FixedIntegerIndex::iterator::operator=(iterator v)
 	send = v.send;
 	se = v.se;
 	currtype = v.currtype;
+	type = v.type;
+	subclass = v.subclass;
 	return *this;
 }
 

@@ -35,43 +35,14 @@
 
 using namespace opencog;
 
-HandleIterator::HandleIterator( AtomTable *t, Type type, bool subclass, VersionHandle vh)
+HandleIterator::HandleIterator(AtomTable *t, Type type, bool subclass,
+                               VersionHandle vh) :
+	it(type, subclass)
 {
-    init(t, type, subclass, vh);
-}
-
-void HandleIterator::init( AtomTable *t, Type type, bool subclass, VersionHandle vh)
-{
-
     table = t;
-
-    desiredType = type;
-    desiredTypeSubclass = subclass;
-    desiredVersionHandle = vh;
-
-    if (subclass) {
-        // current handle and type are set to be the first element in the
-        // first index that matches subclass criteria
-        currentType = 0;
-        while (currentType < ClassServer::getNumberOfClasses()) {
-            if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
-                    !TLB::isInvalidHandle(table->getTypeIndexHead(currentType))) {
-                break;
-            } else {
-                currentType++;
-            }
-        }
-        currentHandle = currentType >= ClassServer::getNumberOfClasses() ? Handle::UNDEFINED : table->getTypeIndexHead(currentType);
-    } else {
-        // if no subclasses are allowed, the current handle is simply
-        // the first element of the desired type index.
-        currentHandle = table->getTypeIndexHead(type);
-        currentType = type;
-    }
-
-    // the AtomTable will notify this iterator when some atom is removed to
-    // prevent this iterator from iterating through a removed atom
+    it = table->typeIndex.begin(type, subclass);
     table->registerIterator(this);
+    desiredVersionHandle = vh;
 }
 
 HandleIterator::~HandleIterator()
@@ -79,37 +50,14 @@ HandleIterator::~HandleIterator()
     table->unregisterIterator(this);
 }
 
-bool HandleIterator::hasNext()
+bool HandleIterator::hasNext(void)
 {
-    return !TLB::isInvalidHandle(currentHandle);
+    return it != table->typeIndex.end();
 }
 
-Handle HandleIterator::next()
+Handle HandleIterator::next(void)
 {
-
-    // keep current handle to return it
-    Handle answer = currentHandle;
-
-    // the iterator goes to the next position of the current list.
-    currentHandle = TLB::getAtom(currentHandle)->next(TYPE_INDEX);
-
-    // if the list finishes, it's necessary to move to the next index
-    // that matches subclass criteria
-    if (TLB::isInvalidHandle(currentHandle)) {
-        if (desiredTypeSubclass) {
-            currentType++;
-            while (currentType < ClassServer::getNumberOfClasses()) {
-                if ((ClassServer::isAssignableFrom(desiredType, currentType)) &&
-                        !TLB::isInvalidHandle(table->getTypeIndexHead(currentType))) {
-                    break;
-                } else {
-                    currentType++;
-                }
-            }
-            // currentHandle is the first element of the next index.
-            currentHandle = currentType >= ClassServer::getNumberOfClasses() ? Handle::UNDEFINED : table->getTypeIndexHead(currentType);
-        }
-    }
-
-    return answer;
+    Handle h = *it;
+    it++;
+    return h;
 }

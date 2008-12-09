@@ -67,7 +67,7 @@ AtomTable::AtomTable(bool dsa)
     // is NUMBER_OF_CLASSES+2 because NOTYPE is NUMBER_OF_CLASSES+1
     // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
     // (because ClassServer::getType() returns NOTYPE in this case).
-    typeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
+    typeIndex.resize(ClassServer::getNumberOfClasses() + 2);
     targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
     importanceIndex.resize(IMPORTANCE_INDEX_SIZE, Handle::UNDEFINED);
     predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
@@ -114,10 +114,6 @@ bool AtomTable::isCleared() const
     }
 
     for (int i = 0; i < ClassServer::getNumberOfClasses(); i++) {
-        if (typeIndex[i] != Handle::UNDEFINED) {
-            //printf("typeIndex[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
         if (targetTypeIndex[i] != Handle::UNDEFINED) {
             //printf("targetTypeIndex[%d] is not Handle::UNDEFINED\n", i);
             return false;
@@ -125,6 +121,7 @@ bool AtomTable::isCleared() const
     }
 
     if (nameIndex.size() != 0) return false;
+    if (typeIndex.size() != 0) return false;
 
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
         if (importanceIndex[i] != Handle::UNDEFINED) {
@@ -186,7 +183,6 @@ throw (InvalidParamException)
 
 void AtomTable::registerIterator(HandleIterator* iterator)
 {
-
     lockIterators();
     iterators.push_back(iterator);
     unlockIterators();
@@ -194,7 +190,6 @@ void AtomTable::registerIterator(HandleIterator* iterator)
 
 void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeException)
 {
-
     lockIterators();
 
     std::vector<HandleIterator*>::iterator it = iterators.begin();
@@ -269,11 +264,6 @@ HandleEntry* AtomTable::makeSet(HandleEntry* set,
     }
 
     return set;
-}
-
-Handle AtomTable::getTypeIndexHead(Type type) const
-{
-    return typeIndex[type];
 }
 
 Handle AtomTable::getTargetTypeIndexHead(Type type) const
@@ -380,9 +370,7 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass,
 
 HandleEntry* AtomTable::getHandleSet(Type type, bool subclass) const
 {
-    HandleEntry* set = buildSet(type, subclass,
-                                &AtomTable::getTypeIndexHead, TYPE_INDEX);
-    return set;
+    return typeIndex.getHandleSet(type, subclass);
 }
 
 HandleEntry* AtomTable::getHandleSet(Type type, Type targetType,
@@ -741,11 +729,6 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Handle handle = TLB::getHandle(atom);
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    // Inserts atom in the type index of its type (as head of the list).
-    Type type = atom->getType();
-    atom->setNext(TYPE_INDEX, typeIndex[type]);
-    typeIndex[type] = handle;
-
     // If the atom is a link, the targetIndexTypes list is built. Then, from
     // the atom's arity, it will be checked how many targetTypes are distinct.
     int distinctSize;
@@ -766,6 +749,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (nnn) {
         nameIndex.insert(nnn->getName().c_str(), handle);
     }
+    typeIndex.insert(atom->getType(), handle);
 
     // The atom is placed on its proper importance index list.
     int bin = importanceBin(atom->getAttentionValue().getSTI());
@@ -966,15 +950,15 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
     // remove from indices
-    removeFromIndex(atom, typeIndex, TYPE_INDEX, atom->getType());
     removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, importanceBin(atom->getAttentionValue().getSTI()));
     removeFromTargetTypeIndex(atom);
     removeFromPredicateIndex(atom);
 
     Node *node = dynamic_cast<Node*>(atom);
     if (node) {
-       nameIndex.remove(node->getName().c_str());
+       nameIndex.remove(node->getName().c_str(), handle);
     }
+    typeIndex.remove(atom->getType(), handle);
 
     // remove from incoming sets
     Link* link = dynamic_cast<Link*>(atom);
@@ -984,15 +968,6 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
             target->removeIncomingHandle(handle);
         }
     }
-
-    // remove from iterators
-    lockIterators();
-    for (unsigned int i = 0; i < iterators.size(); i++) {
-        // TODO: CAN THIS REALLY BE CALLED AFTER THE ATOM HAS BEEN REMOVED FROM
-        // TYPE INDEX ALREADY ?
-        removeFromIterator(atom, iterators[i]);
-    }
-    unlockIterators();
 
     return HandleEntry::concatenation(new HandleEntry(handle), result);
 }
@@ -1170,15 +1145,10 @@ void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int index
     }
 }
 
-static bool decayed(const char *atom_name, Handle h)
+static bool decayed(Handle h)
 {
     Atom *a = TLB::getAtom(h);
     return a->getFlag(REMOVED_BY_DECAY);
-}
-
-void AtomTable::removeMarkedAtomsFromNameIndex(void)
-{
-	nameIndex.remove(decayed);
 }
 
 void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID)
@@ -1209,7 +1179,6 @@ void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, i
             }
         }
     }
-
 }
 
 void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
@@ -1218,11 +1187,10 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
 
     // remove from indices
     removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
-    removeMarkedAtomsFromIndex(typeIndex, TYPE_INDEX);
-    removeMarkedAtomsFromNameIndex();
-    removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
     removeMarkedAtomsFromMultipleIndex(targetTypeIndex, TARGET_TYPE_INDEX);
     removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);
+    nameIndex.remove(decayed);
+    typeIndex.remove(decayed);
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;
@@ -1244,26 +1212,11 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
             if (outgoing)
                 outgoing->removeIncomingHandle(h);
         }
-
-        // remove from iterators
-        lockIterators();
-        for (unsigned int i = 0; i < iterators.size(); i++) {
-            // TODO: CAN THIS REALLY BE CALLED AFTER THE ATOM HAS BEEN
-            // REMOVED FROM TYPE INDEX ALREADY ?
-            removeFromIterator(atom, iterators[i]);
-        }
-        unlockIterators();
     }
 
     removeExtractedHandles(extractedHandles);
 }
 
-void AtomTable::removeFromIterator(Atom *atom, HandleIterator *iterator)
-{
-    if (iterator->currentHandle == TLB::getHandle(atom)) {
-        iterator->next();
-    }
-}
 void AtomTable::lockIterators()
 {
 #ifdef HAVE_LIBPTHREAD

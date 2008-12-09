@@ -70,7 +70,6 @@ SavingLoading::SavingLoading()
 
 void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOException)
 {
-
     logger().info("Starting Memory dump");
 
     time_t start = time(NULL);
@@ -151,7 +150,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     // writes nodes to file and increments node counter
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
-        Node* node = (Node*) TLB::getAtom(atomHandle);
+        Node* node = dynamic_cast<Node*>(TLB::getAtom(atomHandle));
         writeNode(f, node);
         numNodes++;
         int percentage = (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR)));
@@ -170,7 +169,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     fwrite(&numNodes, sizeof(int), 1, f);
 
     //updates atomCount
-    atomCount += numNodes;
+    atomCount -= numNodes;
 
     // returns the pointer back to the end of the file
     fseek(f, 0, SEEK_END);
@@ -194,7 +193,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     // writes links to file and increments link counter
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
-        Link* link = (Link*) TLB::getAtom(atomHandle);
+        Link* link = dynamic_cast<Link*>(TLB::getAtom(atomHandle));
         writeLink(f, link);
         numLinks++;
         printf( "Memory dump: %d%% done.\r", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR))));
@@ -210,7 +209,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     fwrite(&numLinks, sizeof(int), 1, f);
 
     // updates the atomCount
-    atomCount += numLinks;
+    atomCount -= numLinks;
 
     // returns the pointer back to the end of the file
     fseek(f, 0, SEEK_END);
@@ -225,23 +224,10 @@ void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
 
     // writes the head of each index list on the file
     for (int i = 0; i < numTypes; i++) {
-        fwrite(&(atomTable.typeIndex[i]), sizeof(Handle), 1, f);
-    }
-    printf( "Memory dump: %d%% done.\r", (int) (100 *
-            (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed)))
-             / (total * INDEX_REPORT_FACTOR))));
-    fflush(stdout);
-
-    for (int i = 0; i < numTypes; i++) {
         fwrite(&(atomTable.targetTypeIndex[i]), sizeof(Handle), 1, f);
     }
     printf( "Memory dump: %d%% done.\r", (int) (100 *
             (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed)))
-             / (total * INDEX_REPORT_FACTOR))));
-    fflush(stdout);
-
-    printf( "Memory dump: %d%% done.\r", (int) (100 *
-            (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed)))
              / (total * INDEX_REPORT_FACTOR))));
     fflush(stdout);
 
@@ -269,7 +255,6 @@ void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
 
 void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (RuntimeException, IOException, InconsistenceException)
 {
-
     clearRepositories();
 
     logger().fine("Starting Memory load");
@@ -333,7 +318,6 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     }
     delete(it);
 
-    //printf( "Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
 
@@ -398,6 +382,11 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
         atomTable.atomSet->insert(node);
 
+        Handle handle = TLB::getHandle(node);
+        if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
+        atomTable.nameIndex.insert(node->getName().c_str(), handle);
+        atomTable.typeIndex.insert(node->getType(), handle);
+
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
@@ -419,6 +408,10 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
         atomTable.atomSet->insert(link);
 
+        Handle handle = TLB::getHandle(link);
+        if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
+        atomTable.typeIndex.insert(link->getType(), handle);
+
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
@@ -432,39 +425,25 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     logger().fine("SavingLoading::loadIndices");
     int numTypes = ClassServer::getNumberOfClasses();
 
-    Handle* typeIndexCache = (Handle*) malloc(sizeof(Handle) * dumpToCore.size());
     Handle* targetTypeIndexCache = (Handle*) malloc(sizeof(Handle) * dumpToCore.size());
 
     for (int i = 0; i < numTypes; i++) {
-        atomTable.typeIndex[i] = Handle::UNDEFINED;
         atomTable.targetTypeIndex[i] = Handle::UNDEFINED;
     }
 
     // reads the handle of each index list head from the file
-    for (unsigned int i = 0; i < dumpToCore.size(); i++) {
-        fread(&(typeIndexCache[i]), sizeof(Handle), 1, f);
-    }
-    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    printProgress("load", (int) (100 * (((float) processed + (0.25 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    fflush(stdout);
     for (unsigned int i = 0; i < dumpToCore.size(); i++) {
         fread(&(targetTypeIndexCache[i]), sizeof(Handle), 1, f);
     }
 
     //updating TypeIndex
     for (unsigned int i = 0; i <  dumpToCore.size(); i++) {
-        atomTable.typeIndex[dumpToCore[i]] = typeIndexCache[i];
         atomTable.targetTypeIndex[dumpToCore[i]] = targetTypeIndexCache[i];
     }
     for (int i = 0; i < numTypes; i++) {
-        CoreUtils::updateHandle(&(atomTable.typeIndex[i]), handles);
         CoreUtils::updateHandle(&(atomTable.targetTypeIndex[i]), handles);
     }
-    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    printProgress("load", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    fflush(stdout);
 
-    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
 
@@ -474,7 +453,6 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
         CoreUtils::updateHandle(&(atomTable.importanceIndex[i]), handles);
     }
-    //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
 
@@ -495,7 +473,6 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
             atomTable.predicateHandles2Indices->add(atomTable.predicateHandles[i],(int*)i);
         }*/
 
-    free(typeIndexCache);
     free(targetTypeIndexCache);
 }
 

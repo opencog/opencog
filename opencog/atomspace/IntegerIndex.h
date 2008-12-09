@@ -44,7 +44,7 @@ class IntegerIndex:
 		virtual Handle get(int) const;
 		virtual void remove(int);
 		virtual size_t size(void) const;
-		virtual void remove(bool (*)(int, Handle));
+		virtual void remove(bool (*)(Handle));
 };
 
 } //namespace opencog

@@ -29,6 +29,7 @@
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/VersionHandle.h>
+#include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog {
 
@@ -40,32 +41,15 @@ class AtomTable;
  */
 class HandleIterator
 {
-
     friend class AtomTable;
 
 private:
 
     AtomTable* table;
 
-    Type currentType;
-
-    Handle currentHandle;
-
-    Type desiredType;
-
-    bool desiredTypeSubclass;
+    FixedIntegerIndex::iterator it;
 
     VersionHandle desiredVersionHandle;
-
-    /**
-     * Internal method that initializes an iterator for atoms of a given
-     * type (subclasses optionally).
-     *
-     * @param Atom type to be iterated.
-     * @param Whether the above type should consider subclasses as well.
-     * @param VersionHandle for filtering the resulting atoms by context. NULL_VERSION_HANDLE indicates no filtering
-     */
-    void init(AtomTable *, Type, bool, VersionHandle);
 
     /**
      * Internal constructor that initializes an iterator for atoms of a
@@ -90,14 +74,14 @@ public:
      *
      * @return Whether there still are atoms to be iterated.
      */
-    bool hasNext();
+    bool hasNext(void);
 
     /**
      * Returns the next atom of the iterator and advances.
      *
      * @return Next atom of the iterator and advances.
      */
-    Handle next();
+    Handle next(void);
 };
 
 } // namespace opencog

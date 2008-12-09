@@ -48,7 +48,7 @@ size_t IntegerIndex::size(void) const
 	return idx.size();
 }
 
-void IntegerIndex::remove(bool (*filter)(int, Handle))
+void IntegerIndex::remove(bool (*filter)(Handle))
 {
 	std::map<int,Handle>::iterator i, j;
 	
@@ -57,7 +57,7 @@ void IntegerIndex::remove(bool (*filter)(int, Handle))
 	{
 		j = i;
 		i++;
-		if (filter(j->first, j->second))
+		if (filter(j->second))
 			idx.erase(j->first);
 	}
 }

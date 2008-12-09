@@ -6,6 +6,7 @@ ADD_LIBRARY (atomspace SHARED
 	ClassServer.cc
 	CompositeTruthValue.cc
 	CoreUtils.cc
+	FixedIntegerIndex.cc
 	Handle.cc
 	HandleEntry.cc
 	HandleIterator.cc
@@ -63,6 +64,7 @@ INSTALL (FILES
 	CompositeTruthValue.h
 	CoreUtils.h
 	Defaults.h
+	FixedIntegerIndex.h
 	FollowLink.h
 	ForeachChaseLink.h
 	Foreach.h

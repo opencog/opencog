@@ -33,6 +33,7 @@
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
@@ -76,6 +77,7 @@ class AtomTable
     friend class ImportanceUpdatingAgent;
     friend class SavingLoading;
     friend class AtomSpace;
+    friend class HandleIterator;
 
 private:
 
@@ -94,12 +96,12 @@ private:
     AttentionValue::sti_t minSTI;
 
     // linked lists for each kind of index
-    std::vector<Handle> typeIndex;
     std::vector<Handle> targetTypeIndex;
     std::vector<Handle> importanceIndex;
     std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
+    FixedIntegerIndex typeIndex;
     StringIndex nameIndex;
 
     // Number of predicate indices.
@@ -124,13 +126,11 @@ private:
     throw (RuntimeException);
     void removeFromTargetTypeIndex(Atom *);
     void removeFromPredicateIndex(Atom *);
-    void removeFromIterator(Atom *, HandleIterator *);
     void lockIterators();
     void unlockIterators();
 
     void removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID);
     void removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID);
-    void removeMarkedAtomsFromNameIndex(void);
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
     /**
@@ -273,14 +273,6 @@ public:
                           bool,
                           Handle(AtomTable::*)(Type) const,
                           int) const;
-
-    /**
-     * Returns the index head for the given type.
-     *
-     * @param The type whose index head will be returned.
-     * @return The index head for the given type.
-     */
-    Handle getTypeIndexHead(Type) const;
 
     /**
      * Returns the index head for the given target type.

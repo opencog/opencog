@@ -46,7 +46,7 @@ Handle StringIndex::get(const char *str) const
 	return Handle::UNDEFINED;
 }
 
-void StringIndex::remove(const char *str)
+void StringIndex::remove(const char *str, Handle h)
 {
 	idx.erase(str);
 }
@@ -56,7 +56,7 @@ size_t StringIndex::size(void) const
 	return idx.size();
 }
 
-void StringIndex::remove(bool (*filter)(const char *, Handle))
+void StringIndex::remove(bool (*filter)(Handle))
 {
 	std::map<std::string,Handle>::iterator i, j;
 	
@@ -65,7 +65,7 @@ void StringIndex::remove(bool (*filter)(const char *, Handle))
 	{
 		j = i;
 		i++;
-		if (filter(j->first.c_str(), j->second))
+		if (filter(j->second))
 			idx.erase(j->first.c_str());
 	}
 }
