@@ -103,30 +103,21 @@ FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub) const
 	iterator it(t, sub);
 	it.send = idx.end();
 
-	if (sub)
+	it.s = idx.begin();
+	it.currtype = 0;
+	while (it.s != idx.end())
 	{
-		it.s = idx.begin();
-		it.currtype = 0;
-		while (it.s != idx.end())
+		// Find the first type which is a subtype, and start iteration there.
+		if ((it.type == it.currtype) || 
+		    (sub && (ClassServer::isAssignableFrom(it.type, it.currtype))))
 		{
-			// Find the first type which is a subtype, and start iteration
-			// there.
-			if (ClassServer::isAssignableFrom(t, it.currtype))
-			{
-				it.se = it.s->begin();
-				return it;
-			}
-			it.currtype++;
-			it.s++;
+			it.se = it.s->begin();
+			return it;
 		}
+		it.currtype++;
+		it.s++;
+	}
 
-	}
-	else
-	{
-		std::set<Handle> ss = idx.at(t);
-		it.se = ss.begin();
-	}
-	
 	return it;
 }
 
@@ -174,31 +165,25 @@ bool FixedIntegerIndex::iterator::operator!=(iterator v)
 
 FixedIntegerIndex::iterator& FixedIntegerIndex::iterator::operator++(int i)
 {
+printf ("duude increment %d\n", s==send);
 	if (s == send) return *this;
 
-	if (subclass)
+	se++;
+	if (se == s->end())
 	{
-		se++;
-		if (se == s->end())
+		do
 		{
-			do
-			{
-				s++;
-				currtype++;
+			s++;
+			currtype++;
 
-				// Find the first type which is a subtype, and start iteration
-				// there.
-				if (ClassServer::isAssignableFrom(type, currtype))
-				{
-					se = s->begin();
-					return *this;
-				}
-			} while (s != send);
-		}
-	}
-	else
-	{
-		se++;
+			// Find the first type which is a subtype, and start iteration there.
+			if ((type == currtype) || 
+			    (subclass && (ClassServer::isAssignableFrom(type, currtype))))
+			{
+				se = s->begin();
+				return *this;
+			}
+		} while (s != send);
 	}
 
 	return *this;
