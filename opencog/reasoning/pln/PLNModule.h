@@ -27,9 +27,11 @@
 
 #include <string>
 
-#include <opencog/server/Agent.h>
+//#include <opencog/server/Agent.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
+#include <opencog/server/Request.h>
 
 namespace opencog
 {
@@ -38,6 +40,13 @@ class CogServer;
 
 class PLNModule : public Module
 {
+private:
+
+    DECLARE_CMD_REQUEST(PLNModule, "pln", do_pln, 
+       "Run a PLN command", 
+       "Usage: pln <command>\n\n"
+       "Run the specified PLN command.")
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -45,6 +54,8 @@ public:
         static const ClassInfo _ci("opencog::PLNModule");
         return _ci;
     }
+    
+    static inline const char* id();
 
     PLNModule();
     ~PLNModule();
