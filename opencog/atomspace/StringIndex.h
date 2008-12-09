@@ -37,12 +37,13 @@ class StringIndex:
 	public AtomIndex<const char *,Handle>
 {
 	private:
-		std::map<const char *, Handle> idx;
+		std::map<std::string, Handle> idx;
 
 	public:
 		virtual void insert(const char *, Handle);
-		virtual Handle get(const char *);
+		virtual Handle get(const char *) const;
 		virtual void remove(const char *);
+		virtual size_t size(void) const;
 };
 
 } //namespace opencog

@@ -37,6 +37,7 @@
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
+#include <opencog/atomspace/StringIndex.h>
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
@@ -95,11 +96,11 @@ private:
     // linked lists for each kind of index
     std::vector<Handle> typeIndex;
     std::vector<Handle> targetTypeIndex;
-    std::vector<Handle> nameIndex;
     std::vector<Handle> importanceIndex;
     std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
+    StringIndex nameIndex;
 
     // Number of predicate indices.
     int numberOfPredicateIndices;
@@ -129,6 +130,7 @@ private:
 
     void removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID);
     void removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID);
+    void removeMarkedAtomsFromNameIndex(void);
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
     /**
@@ -287,14 +289,6 @@ public:
      * @return The index head for the given target type.
      */
     Handle getTargetTypeIndexHead(Type) const;
-
-    /**
-     * Returns the index head for the given name.
-     *
-     * @param The name whose index head will be returned.
-     * @return The index head for the given name.
-     */
-    Handle getNameIndexHead(const char*) const;
 
     /**
      * Returns the index head for the given importance bin.

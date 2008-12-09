@@ -41,13 +41,11 @@
 // AtomTable indices
 
 #define TYPE_INDEX          0
-#define NAME_INDEX          1
-#define IMPORTANCE_INDEX    2
-#define NUMBER_OF_INDICES   3
+#define IMPORTANCE_INDEX    1
+#define NUMBER_OF_INDICES   2
 #define TARGET_TYPE_INDEX   (1UL << 16)
 #define PREDICATE_INDEX     (1UL << 17)
 
-#define NAME_INDEX_SIZE         (1 << 16)
 #define IMPORTANCE_INDEX_SIZE   (1 << 16)
 #define MAX_PREDICATE_INDICES   32
 

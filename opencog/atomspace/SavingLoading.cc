@@ -240,9 +240,6 @@ void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
              / (total * INDEX_REPORT_FACTOR))));
     fflush(stdout);
 
-    for (int i = 0; i < NAME_INDEX_SIZE; i++) {
-        fwrite(&(atomTable.nameIndex[i]), sizeof(Handle), 1, f);
-    }
     printf( "Memory dump: %d%% done.\r", (int) (100 *
             (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed)))
              / (total * INDEX_REPORT_FACTOR))));
@@ -467,12 +464,6 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
     printProgress("load", (int) (100 * (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
 
-    for (int i = 0; i < NAME_INDEX_SIZE; i++) {
-        fread(&(atomTable.nameIndex[i]), sizeof(Handle), 1, f);
-    }
-    for (int i = 0; i < NAME_INDEX_SIZE; i++) {
-        CoreUtils::updateHandle(&(atomTable.nameIndex[i]), handles);
-    }
     //logger().debug("Memory load: %d%% done.\r", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);

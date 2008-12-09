@@ -42,10 +42,11 @@ namespace opencog
 template <typename Key, typename Value>
 class AtomIndex
 {
-public:
+	public:
 		virtual void insert(Key, Value) = 0;
-		virtual Value get(Key) = 0;
+		virtual Value get(Key) const = 0;
 		virtual void remove(Key) = 0;
+		virtual size_t size(void) const = 0;
 };
 
 } //namespace opencog

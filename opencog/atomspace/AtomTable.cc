@@ -69,7 +69,6 @@ AtomTable::AtomTable(bool dsa)
     // (because ClassServer::getType() returns NOTYPE in this case).
     typeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
     targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
-    nameIndex.resize(NAME_INDEX_SIZE, Handle::UNDEFINED);
     importanceIndex.resize(IMPORTANCE_INDEX_SIZE, Handle::UNDEFINED);
     predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
@@ -124,12 +123,9 @@ bool AtomTable::isCleared() const
             return false;
         }
     }
-    for (int i = 0; i < NAME_INDEX_SIZE; i++) {
-        if (nameIndex[i] != Handle::UNDEFINED) {
-            //printf("nameIndex[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
-    }
+
+    if (nameIndex.size() != 0) return false;
+
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
         if (importanceIndex[i] != Handle::UNDEFINED) {
             //printf("importanceIndex[%d] is not Handle::UNDEFINED\n", i);
@@ -239,7 +235,8 @@ unsigned int AtomTable::strHash(const char* name) const
     hash ^= *(((int*) digest) + 2);
     hash ^= *(((int*) digest) + 3);
 
-    return (hash % (NAME_INDEX_SIZE - 1)) + 1;
+#define NAME_HASH_SZ (1<<16)
+    return (hash % (NAME_HASH_SZ - 1)) + 1;
 }
 
 inline unsigned int AtomTable::getNameHash(Atom* atom) const
@@ -282,11 +279,6 @@ Handle AtomTable::getTypeIndexHead(Type type) const
 Handle AtomTable::getTargetTypeIndexHead(Type type) const
 {
     return targetTypeIndex[type];
-}
-
-Handle AtomTable::getNameIndexHead(const char* name) const
-{
-    return nameIndex[strHash(name)];
 }
 
 Handle AtomTable::getPredicateIndexHead(int index) const
@@ -334,26 +326,8 @@ Handle AtomTable::getHandle(const char* name, Type type) const
     if (!ClassServer::isAssignableFrom(NODE, type)) {
         return Handle::UNDEFINED;
     }
-#ifdef USE_ATOM_HASH_SET
     Node node(type, name); // alloc on stack, avoid memory frag
     return getHandle(&node);
-#else
-    // creates a set with all atoms whose names have the same hash value as
-    // the name key
-    HandleEntry* set = makeSet(NULL, getNameIndexHead(name), NAME_INDEX);
-
-    // the set is filtered by name and type
-    set = HandleEntry::filterSet(set, name, type, false);
-
-    // if any atom is left on the set, there exists a matching atom which is
-    // returned
-    Handle result = Handle::UNDEFINED;
-    if (set != NULL) {
-        result = set->handle;
-        delete set;
-    }
-    return result;
-#endif
 }
 
 // This call is nearly identical to that above.
@@ -568,12 +542,8 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
 
 HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass) const
 {
-    // a list of the given names is built.
-    HandleEntry* set = makeSet(NULL, getNameIndexHead(name), NAME_INDEX);
-
-    // then the undesired names, because of a hash table conflict, are removed
-    // from the list by filtering it.
-    set = HandleEntry::filterSet(set, name);
+    Handle h = nameIndex.get(name);
+    HandleEntry* set = new HandleEntry(h);
     return HandleEntry::filterSet(set, type, subclass);
 }
 
@@ -757,7 +727,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 #endif
 
     // Checks for null outgoing set members.
-    Link *link = dynamic_cast<Link *>(atom);
+    Link *link = lll;
     if (link) {
         const std::vector<Handle>& ogs = link->getOutgoingSet();
         for (int i = link->getArity() - 1; i >= 0; i--) {
@@ -793,9 +763,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     delete[](targetTypes);
 
     // The atom is placed on its proper name index list.
-    unsigned int nameHash = getNameHash(atom);
-    atom->setNext(NAME_INDEX, nameIndex[nameHash]);
-    nameIndex[nameHash] = handle;
+    if (nnn) {
+        nameIndex.insert(nnn->getName().c_str(), handle);
+    }
 
     // The atom is placed on its proper importance index list.
     int bin = importanceBin(atom->getAttentionValue().getSTI());
@@ -997,10 +967,14 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
 
     // remove from indices
     removeFromIndex(atom, typeIndex, TYPE_INDEX, atom->getType());
-    removeFromIndex(atom, nameIndex, NAME_INDEX, getNameHash(atom));
     removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, importanceBin(atom->getAttentionValue().getSTI()));
     removeFromTargetTypeIndex(atom);
     removeFromPredicateIndex(atom);
+
+    Node *node = dynamic_cast<Node*>(atom);
+    if (node) {
+       nameIndex.remove(node->getName().c_str());
+    }
 
     // remove from incoming sets
     Link* link = dynamic_cast<Link*>(atom);
@@ -1196,6 +1170,11 @@ void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int index
     }
 }
 
+void AtomTable::removeMarkedAtomsFromNameIndex(void)
+{
+// XXX implement me! xxxxxxxxx
+}
+
 void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID)
 {
     //visit all atoms in index
@@ -1234,7 +1213,7 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     // remove from indices
     removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
     removeMarkedAtomsFromIndex(typeIndex, TYPE_INDEX);
-    removeMarkedAtomsFromIndex(nameIndex, NAME_INDEX);
+    removeMarkedAtomsFromNameIndex();
     removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
     removeMarkedAtomsFromMultipleIndex(targetTypeIndex, TARGET_TYPE_INDEX);
     removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);

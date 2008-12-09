@@ -23,14 +23,22 @@
 
 using namespace opencog;
 
+/*
+ * XXX I suspect that using std:string for the key leads to
+ * a highly inefficient search, with lots of string copying 
+ * going on. Just a guess; I dunno. It would be a *LOT* more
+ * storage efficient if opencog used a string cache, so that
+ * atom names would not be duplicated here, and also in the
+ * atom itself. But that's a project for another day.
+ */
 void StringIndex::insert(const char * str, Handle h)
 {
-	idx.insert(std::pair<const char *,Handle>(str,h));
+	idx.insert(std::pair<std::string,Handle>(str,h));
 }
 
-Handle StringIndex::get(const char *str)
+Handle StringIndex::get(const char *str) const
 {
-	std::map<const char*,Handle>::iterator it;
+	std::map<std::string,Handle>::const_iterator it;
 
 	it = idx.find(str);
 	if (it != idx.end()) return it->second;
@@ -43,3 +51,7 @@ void StringIndex::remove(const char *str)
 	idx.erase(str);
 }
 
+size_t StringIndex::size(void) const
+{
+	return idx.size();
+}
