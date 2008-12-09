@@ -65,14 +65,14 @@ class FixedIntegerIndex:
 			private:
 				Type type;
 				bool subclass;
-				std::vector<std::set<Handle> >::iterator s;
-				std::vector<std::set<Handle> >::iterator send;
+				std::vector<std::set<Handle> >::const_iterator s;
+				std::vector<std::set<Handle> >::const_iterator send;
 				Type currtype;
-				std::set<Handle>::iterator se;
+				std::set<Handle>::const_iterator se;
 		};
 
-		iterator begin(Type, bool);
-		iterator end(void);
+		iterator begin(Type, bool) const;
+		iterator end(void) const;
 };
 
 } //namespace opencog

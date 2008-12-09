@@ -22,6 +22,7 @@
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/type_codes.h>
+#include <opencog/atomspace/HandleEntry.h>
 
 using namespace opencog;
 
@@ -78,9 +79,26 @@ void FixedIntegerIndex::resize(size_t sz)
 
 // ================================================================
 
+HandleEntry * FixedIntegerIndex::getHandleSet(Type type, bool subclass) const
+{
+	iterator it = begin(type, subclass);
+	iterator itend = end();
+
+	HandleEntry *he = NULL;
+	while (it != itend)
+	{
+printf("duuude her we are, handle=%lu\n", (*it).value());
+		HandleEntry *nhe = new HandleEntry(*it);
+		nhe->next = he;
+		he = nhe;
+		it++;
+	}
+	return he;
+}
+
 // ================================================================
 
-FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub)
+FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub) const
 {
 	iterator it(t, sub);
 	it.send = idx.end();
@@ -112,10 +130,13 @@ FixedIntegerIndex::iterator FixedIntegerIndex::begin(Type t, bool sub)
 	return it;
 }
 
-FixedIntegerIndex::iterator FixedIntegerIndex::end(void)
+FixedIntegerIndex::iterator FixedIntegerIndex::end(void) const
 {
 	iterator it(ATOM, false);
 	it.se = idx.at(ATOM).end();
+	it.s = idx.end();
+	it.send = idx.end();
+printf ("duuuude the END !!\n");
 	return it;
 }
 
@@ -140,12 +161,15 @@ Handle FixedIntegerIndex::iterator::operator*(void)
 
 bool FixedIntegerIndex::iterator::operator==(iterator v)
 {
+	if ((v.s == v.send) && (s == send)) return true;
 	return v.se == se;
 }
 
 bool FixedIntegerIndex::iterator::operator!=(iterator v)
 {
-	return v.se != se;
+	if ((v.s == v.send) && (s != send)) return v.se != se;
+	if ((v.s != v.send) && (s == send)) return v.se != se;
+	return false;
 }
 
 FixedIntegerIndex::iterator& FixedIntegerIndex::iterator::operator++(int i)
