@@ -183,7 +183,7 @@ printf ("duude increment %d\n", s==send);
 			    (subclass && (ClassServer::isAssignableFrom(type, currtype))))
 			{
 				se = s->begin();
-				return *this;
+				if (se != s->end()) return *this;
 			}
 		} while (s != send);
 	}
