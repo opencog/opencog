@@ -1,10 +1,12 @@
 /*
- * opencog/reasoning/pln/PLNModule.h
+ * opencog/reasoning/pln/PLNModule.cc
  *
+ * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
  * Written by Jared Wigmore <jared.wigmore@gmail.com>
+ * Contains adapted code from PLNShell.cc
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -66,6 +68,10 @@ PLNModule::~PLNModule() {
     do_pln_unregister();
 }
 
+// state variables for running multiple PLNShell commands.
+Btr<BackInferenceTreeRootT> Bstate;
+BackInferenceTreeRootT* temp_state, *state;
+
 void PLNModule::init()
 {
     logger().info("[PLNModule] init");
@@ -73,6 +79,11 @@ void PLNModule::init()
 	initTestEnv();
     Init();
     initTests();
+    Bstate = Btr<BackInferenceTreeRootT>(new BITNodeRoot(tests[0],
+        new DefaultVariableRuleProvider));
+    printf("BITNodeRoot init ok\n");
+    temp_state = Bstate.get();
+    state = Bstate.get();
 }
 
 std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
@@ -100,23 +111,15 @@ extern int currentDebugLevel;
 
 namespace haxx
 {
-//    extern multimap<Handle,Handle> childOf;
     extern bool AllowFW_VARIABLENODESinCore;
     extern bool ArchiveTheorems;
     extern bool printRealAtoms;
-//    extern map<Handle,vector<Handle> >* inferred_from;
     extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-
-//    uint maxDepth = 250;
 }
 
 namespace reasoning
 {
     extern bool RECORD_TRAILS;
-//
-//    int varcount=0;
-//    int addlinks=0;
-//    int gethandles=0;   
 }
 
 namespace test
@@ -124,7 +127,6 @@ namespace test
     extern FILE *logfile;
     int _test_count = 0;
     bool debugger_control = false;
-//    int attachs=0;
 }
 
 void initTestEnv()
@@ -254,24 +256,20 @@ void RunCommand(std::list<std::string> args)
 //  assert(RuleRepository::Instance().rule[Deduction]->validate(targs));
 //  assert(!RuleRepository::Instance().rule[Deduction]->validate(targs));
 
-    Btr<BackInferenceTreeRootT> Bstate (new BITNodeRoot(tests[0],
-        new DefaultVariableRuleProvider));
-printf("BITNodeRoot init ok\n");
-    BackInferenceTreeRootT* temp_state, *state = Bstate.get();
-
-    int a1T, a2T, bT, tempi=0;
-    string a10, a11, a20, a21, b1, b2;
-    vtree avt1, avt2, bvt;
-    int qrule=NULL;
-    Rule::MPs rule_args;
-    bindingsT new_bindings;
-
  try {
         printf("Root = %ld\n", (long)state);
         
 //    while (1)
 //    {
 //        puts("(h = help):");
+
+        int a1T, a2T, bT, tempi=0;
+        string a10, a11, a20, a21, b1, b2;
+        vtree avt1, avt2, bvt;
+        int qrule=NULL;
+        Rule::MPs rule_args;
+        bindingsT new_bindings;
+
         char c = args.front()[0];
         args.pop_front();
 //        char temps[1000];
@@ -279,7 +277,7 @@ printf("BITNodeRoot init ok\n");
         long h=0, h2=0;
         int j;
         int test_i=0;
-        int s_i=0, tempi;
+        int s_i=0;
         bool axioms_ok;
         boost::shared_ptr<set<Handle> > ts;
         Vertex v;

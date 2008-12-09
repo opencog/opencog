@@ -50,6 +50,101 @@ Skolemization (conversion of premises with variables to be encompassed by a
 ForAll quantifier) is requred of axioms. Results of inference currently don't
 create atoms with a Skolemized form but when it does, this process should be automated.
 
+== General PLN source code notes
+
+Bad Performance:
+- In various unifier methods> if parent is variable, no need to combinate the children.
+- In Rules, input validity check is not currently active.
+
+NOTE:
+
+- FW_VARIABLE_NODEs in o2iMetaExtra() are not memory-managed
+
+- LookUpRule automatically omits elements with confidence 0.
+- PostCondition in GenericEvaluator.cpp prevents confidence-0 atoms entering via other rules,
+too.
+- Normalization is non-trivial with fuzzy TVs. Degree of allowable loss-of-info L must be
+decided (=policy), and only [TV.strength > 1.0-L] should be considered TRUE, etc.
+- No Nested ForAlls => "defined($X) @ node" currently fails.
+- ForAllRule's TV determines the TV of the outest link within the ForAll, not affecting
+the internal ones. All atoms within ForAll should originally have confidence = 0.
+- ORRule is only evaluated to the binary pair exclusion precision (A+B+C-AB-AC-BC).
+- Policy: Rule.o2i methods must make sure they don't waste time. ResMan only guards the
+blocking Rule method calls on a serial manner - it cannot survive a slow o2i implementation
+- Always puts ANDRules before SimpleANDRules, since the latter accept more general output type,
+but don't do the flattening magic.
+- BW chaining UnorderedLinkPermutationRule only works for ANDLinks. Try it with ORLinks and die.
+FW chaining should be ok. The reason is logical...
+- CrispUnificationRule & UnorderedLinkPermutationRule use HYPOTHETICAL_LINKs - pseudo atoms that,
+given as a parameter to the rule, make the rule output the desired kind of outcome
+- Often you can choose to either increase the complexity of a Rule, or make multiple
+versions of the rule (eg. ANDRule<N>).
+- MP that only tests __INSTANCE_OF property is equivalent to a MP construct that uses
+FW_VARIABLE_NODEs, but faster to use (no substitutions needed).
+- ATOM-type MP will always be true for any parameter atom.
+- A non-MP atom x cast into MetaPredicate will amount to EQUAL(x)
+- ListLink TVs don't mean anything.
+- Using log slows down a lot, even if loglevel 0!
+- Shouldn't Handles/TVs recall the way they were produced? Eg. ImplicationLinks
+created by inversion should be rejected if they are later produced another way;
+how about updating the TVs when U size changes?
+- When addLink splits a FORALL_LINK into multiple parts, a ListLink is returned!
+- IF we take a link with arity A & type T be a subtype of link with
+arity A'>A & type T,
+then Atom equals VariableNode, and variable unification is a special case of
+finding the subtype of a given atom.
+
+- predicate <=> type conversion
+
+- Should the TruthValues of any links that contain variables be neglected?
+If so, then should they be embedded always in HypLinks? Probably not.
+But then, every time we query for a link L, we must check
+a) whether it's (_always_) embedded in a HypoLink and
+b) whether it contains variables. (Unless it's a ForAll link!)
+In either case, the TV is meaningless.
+
+- In CrispUnification of ForAllLinks, subtrees must be proved separately.
+Eg. consider
+ForAll<tv1>
+    List($X)
+    Implies
+        And
+            F
+            $X
+        $X.
+
+Once I substitute A<tv2> for X, I get
+    Implies<tv1>
+        And<tv3>
+            F
+            A<tv2>
+        A<tv2>.
+
+But in order to find out tv3, I must also FindTV of
+        And
+            F
+            A<tv2>.
+
+NOTE 5: On Unification
+0. A "simple MP" = an atom A that is not a MP, but will implicitly be considered as the complex MP "EqualTo(A)". Also an MP atom whose outgoing set contains no variables is considered a simple one, since it can no longer be used as a "real" MP.
+1. While BW-chaining, the proof of formulas that are simple MPs but contain variables is never attempted.
+2. The Unifier rule produces, for the desired output, the non-redundant set of all possible combinations of static and variable structures that would, upon unification, produce the output. All these structures will be simple MPs.
+3. No "actual" unification will take place - the results of the inverted Unifier rule will be looked for, and if they aren't found, the proof path is cut.
+4. When a query is made for a MP, it is first considered a simple MP and then a complex one. Ie. first we query the atom table for whether the exact atom designated by the MP exists, and if it doesn't, then we try to actually "run" the MP (in case it has a complex aspect, too), ie. seek atoms that fulfill the MP. 
+
+
+StrictCrispUnification is currently buggy and cannot be used!
+Anyway, if you use it, bool PREVENT_LOOPS = false must hold!
+CrispUnification may be ok, but does not cover all cases!
+
+WHen using exhaustive inference tree expansion, there may arise pathological
+Rule combinations. Known examples are:
+
+- CrispTheorem (with theorems in fetchdemo.xml) with ImplicationBreakdown
+- AND Rules with ANDBreakdown
+- UnorderedLinkPermutation often, esp. with ANDBreakdown / ORBreakdown
+- ChildSubstitution almost always
+
 == Screencasts explaining code details
 
 Ari gratiously put together a few videos explaining aspects of the code. Note
