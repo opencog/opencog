@@ -148,6 +148,7 @@ FixedIntegerIndex::iterator& FixedIntegerIndex::iterator::operator=(iterator v)
 
 Handle FixedIntegerIndex::iterator::operator*(void)
 {
+	if (s == send) return Handle::UNDEFINED;
 	return *se;
 }
 
@@ -159,7 +160,6 @@ bool FixedIntegerIndex::iterator::operator==(iterator v)
 
 bool FixedIntegerIndex::iterator::operator!=(iterator v)
 {
-printf ("compare %d and %d\n", v.s==v.send, s==send);
 	if ((v.s == v.send) && (s != send)) return v.se != se;
 	if ((v.s != v.send) && (s == send)) return v.se != se;
 	return false;
@@ -167,7 +167,6 @@ printf ("compare %d and %d\n", v.s==v.send, s==send);
 
 FixedIntegerIndex::iterator& FixedIntegerIndex::iterator::operator++(int i)
 {
-printf ("duude increment %d\n", s==send);
 	if (s == send) return *this;
 
 	se++;
