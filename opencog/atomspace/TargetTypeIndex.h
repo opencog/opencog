@@ -26,10 +26,10 @@
 #include <vector>
 
 #include <opencog/atomspace/TypeIndex.h>
-#include <opencog/atomspace/Handle.h>
 
 namespace opencog
 {
+class Link;
 
 /**
  * Implements an integer index as an RB-tree (C++ set)
@@ -39,6 +39,8 @@ class TargetTypeIndex:
 {
 	public:
 		TargetTypeIndex(void);
+		void insertLink(const Link &);
+		void removeLink(const Link &);
 };
 
 } //namespace opencog

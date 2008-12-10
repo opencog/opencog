@@ -21,6 +21,8 @@
 
 #include <opencog/atomspace/TargetTypeIndex.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
@@ -31,6 +33,44 @@ TargetTypeIndex::TargetTypeIndex(void)
 	// typename is misspelled, because ClassServer::getType()
 	// returns NOTYPE in this case).
 	resize(ClassServer::getNumberOfClasses() + 2);
+}
+
+void TargetTypeIndex::insertLink(const Link &l)
+{
+	int arity = l.getArity();
+	if (0 == arity) return;
+
+	Handle h = TLB::getHandle(&l);
+	const std::vector<Handle>& oset = l.getOutgoingSet();
+	std::set<Type> done_already;
+	for (int i = 0; i < arity; i++)
+	{
+		Type type = TLB::getAtom(oset[i])->getType();
+		if (done_already.find(type) == done_already.end())
+		{
+			insert(type, h);
+			done_already.insert(type);
+		}
+	}
+}
+
+void TargetTypeIndex::removeLink(const Link &l)
+{
+	int arity = l.getArity();
+	if (0 == arity) return;
+
+	Handle h = TLB::getHandle(&l);
+	const std::vector<Handle>& oset = l.getOutgoingSet();
+	std::set<Type> done_already;
+	for (int i = 0; i < arity; i++)
+	{
+		Type type = TLB::getAtom(oset[i])->getType();
+		if (done_already.find(type) == done_already.end())
+		{
+			remove(type, h);
+			done_already.insert(type);
+		}
+	}
 }
 
 // ================================================================
