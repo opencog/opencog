@@ -26,6 +26,11 @@
 
 using namespace opencog;
 
+TypeIndex::TypeIndex(void)
+{
+	resize(ClassServer::getNumberOfClasses() + 2);
+}
+
 HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const
 {
 	iterator it = begin(type, subclass);

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TypeIndex.h
+ * opencog/atomspace/ImportanceIndex.h
  *
  * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -19,53 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_TYPEINDEX_H
-#define _OPENCOG_TYPEINDEX_H
-
-#include <set>
-#include <vector>
+#ifndef _OPENCOG_IMPORTANCEINDEX_H
+#define _OPENCOG_IMPORTANCEINDEX_H
 
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
 
 namespace opencog
 {
-class HandleEntry;
 
 /**
- * Implements an integer index as an RB-tree (C++ map)
+ * Implements an index with adtional routines needed for managing 
+ * short-term importance.
  */
-class TypeIndex:
+class ImportanceIndex:
 	public FixedIntegerIndex
 {
 	public:
-		TypeIndex(void);
-		HandleEntry* getHandleSet(Type type, bool subclass) const;
-
-		class iterator
-		{
-			friend class TypeIndex;
-			public:
-				iterator(Type, bool);
-				iterator& operator++(int);
-				iterator& operator=(iterator);
-				bool operator==(iterator);
-				bool operator!=(iterator);
-				Handle operator*(void);
-			private:
-				Type type;
-				bool subclass;
-				std::vector<std::set<Handle> >::const_iterator s;
-				std::vector<std::set<Handle> >::const_iterator send;
-				Type currtype;
-				std::set<Handle>::const_iterator se;
-		};
-
-		iterator begin(Type, bool) const;
-		iterator end(void) const;
+		ImportanceIndex(void);
 };
 
 } //namespace opencog
 
-#endif // _OPENCOG_TYPEINDEX_H
+#endif // _OPENCOG_IMPORTANCEINDEX_H

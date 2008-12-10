@@ -20,9 +20,6 @@
  */
 
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/type_codes.h>
-#include <opencog/atomspace/HandleEntry.h>
 
 using namespace opencog;
 
