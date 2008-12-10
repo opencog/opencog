@@ -30,6 +30,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -85,44 +86,142 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 {
 	HandleEntry* oldAtoms = NULL;
 
-#if 0
-    for (unsigned int band = 0; band < (unsigned int) IMPORTANCE_INDEX_SIZE; band++) {
-        Handle current = importanceIndex[band];
-        while (TLB::isValidHandle(current)) {
-            Atom* atom = TLB::getAtom(current);
-            Handle next = atom->next(IMPORTANCE_INDEX);
+	std::vector<std::set<Handle> >::iterator band;
+	unsigned int bin;
+	for (bin = 0, band = idx.begin(); band != idx.end(); band++, bin++)
+	{
+		std::set<Handle>::iterator hit;
+		for (hit = band->begin(); hit != band->end(); hit++)
+		{
+			Atom *atom = TLB::getAtom(*hit);
 
-            // update sti
-            atom->getAVPointer()->decaySTI();
+			// Update sti
+			atom->getAVPointer()->decaySTI();
 
-            // update importanceIndex
-            // potential optimization: if we may reliably assume that all atoms
-            // decrease the sti by one unit (i.e. --sti), we could update the
-            // indexes with "importanceIndex[band - 1] = importanceIndex[band];"
-            updateImportance(atom, band);
+			// Potential optimization: if we may reliably assume that all atoms
+			// decrease the sti by one unit (i.e. --sti), we could update the
+			// indexes with "importanceIndex[band - 1] = importanceIndex[band];"
+			updateImportance(atom, bin);
+		}
+	}
 
-            current = next;
-        }
-    }
+	AttentionValue::sti_t minSTI = config().get_int("MIN_STI");
+	unsigned int lowerStiBand = importanceBin(minSTI);
 
-    // cache the minSTI
-    minSTI = config().get_int("MIN_STI");
-    unsigned int lowerStiBand = importanceBin(minSTI);
+	for (bin = 0, band = idx.begin(); bin <= lowerStiBand; band++, bin++)
+	{
+		std::set<Handle>::iterator hit;
+		for (hit = band->begin(); hit != band->end(); hit++)
+		{
+			Atom *atom = TLB::getAtom(*hit);
 
-    for (unsigned int band = 0; band <= lowerStiBand; band++) {
-        Handle current = importanceIndex[band];
-        while (TLB::isValidHandle(current)) {
-            Atom* atom = TLB::getAtom(current);
-            Handle next = atom->next(IMPORTANCE_INDEX);
-            // remove it if too old
-            if (atom->isOld(minSTI))
-                oldAtoms = HandleEntry::concatenation(extractOld(current, true), oldAtoms);
-            current = next;
-        }
-    }
-#endif
+			// Remove it if too old.
+			if (atom->isOld(minSTI))
+				oldAtoms = HandleEntry::concatenation(
+					extractOld(minSTI, *hit, true), oldAtoms);
+		}
+	}
 
 	return oldAtoms;
+}
+
+HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
+                                         Handle handle, bool recursive)
+{
+	HandleEntry* result = NULL;
+	Atom *atom = TLB::getAtom(handle);
+
+	if (atom->getFlag(REMOVED_BY_DECAY)) return result;
+	else atom->setFlag(REMOVED_BY_DECAY, true);
+
+	// If recursive-flag is set, also extract all the links in the
+	// atom's incoming set.
+	if (recursive)
+	{
+		for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
+		{
+			Atom *a = TLB::getAtom(in->handle);
+			if (a->isOld(minSTI))
+			{
+				result = HandleEntry::concatenation(
+					extractOld(minSTI, in->handle, true), result);
+			}
+		}
+	}
+
+	// Only return if there is at least one incoming atom that is
+	// not marked for removal by decay.
+	for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
+	{
+		if (TLB::getAtom(in->handle)->getFlag(REMOVED_BY_DECAY) == false)
+		{
+			atom->setFlag(REMOVED_BY_DECAY, false);
+			return result;
+		}
+	}
+	result = HandleEntry::concatenation(new HandleEntry(handle), result);
+	return result;
+}
+
+HandleEntry* 
+ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
+                              AttentionValue::sti_t upperBound) const
+{
+	HandleEntry *set = NULL;
+
+	// The indexes for the lower bound and upper bound lists is returned.
+	int lowerBin = importanceBin(lowerBound);
+	int upperBin = importanceBin(upperBound);
+
+	// Build a list of atoms whose importance is equal to the lower bound.
+	std::set<Handle>::const_iterator hit;
+	const std::set<Handle> &sl = idx[lowerBin];
+	for (hit = sl.begin(); hit != sl.end(); hit++)
+	{
+		HandleEntry *he = new HandleEntry(*hit);
+		he->next = set;
+		set = he;
+	}
+
+	// For the lower bound and upper bound index, the list is filtered,
+	// because there may be atoms that have the same importanceIndex
+	// and whose importance is lower than lowerBound or bigger than
+	// upperBound.  XXX This doesn't sound right. Maybe after being 
+	// decayed ... but this should not be generally true.
+	set = HandleEntry::filterSet(set, lowerBound, upperBound);
+
+	if (lowerBin == upperBin)
+	{
+		// If both lower and upper bounds are in the same bin,
+		// Then we are done.
+		return set;
+	}
+
+	// For every index within lowerBound and upperBound,
+	// add to the list.
+	while (++lowerBin < upperBin)
+	{
+		const std::set<Handle> &ss = idx[lowerBin];
+		for (hit = ss.begin(); hit != ss.end(); hit++)
+		{
+			HandleEntry *he = new HandleEntry(*hit);
+			he->next = set;
+			set = he;
+		}
+	}
+
+	HandleEntry *uset = NULL;
+	const std::set<Handle> &su = idx[upperBin];
+	for (hit = su.begin(); hit != su.end(); hit++)
+	{
+		HandleEntry *he = new HandleEntry(*hit);
+		he->next = uset;
+		uset = he;
+	}
+	uset = HandleEntry::filterSet(uset, lowerBound, upperBound);
+
+	// The two lists are concatenated.
+	return HandleEntry::concatenation(uset, set);
 }
 
 // ================================================================

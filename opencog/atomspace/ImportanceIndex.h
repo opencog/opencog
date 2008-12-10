@@ -22,6 +22,7 @@
 #ifndef _OPENCOG_IMPORTANCEINDEX_H
 #define _OPENCOG_IMPORTANCEINDEX_H
 
+#include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog
@@ -36,11 +37,16 @@ class HandleEntry;
 class ImportanceIndex:
 	public FixedIntegerIndex
 {
+	private:
+		static HandleEntry* extractOld(AttentionValue::sti_t,
+		                               Handle, bool recursive = false);
 	public:
 		ImportanceIndex(void);
 
 		void updateImportance(Atom*, int);
 		HandleEntry* decayShortTermImportance(void);
+		HandleEntry* getHandleSet(AttentionValue::sti_t,
+		                          AttentionValue::sti_t) const;
 		static unsigned int importanceBin(short);
 		static float importanceBinMeanValue(unsigned int);
 };
