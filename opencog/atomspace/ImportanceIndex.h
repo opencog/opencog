@@ -26,6 +26,8 @@
 
 namespace opencog
 {
+class Atom;
+class HandleEntry;
 
 /**
  * Implements an index with adtional routines needed for managing 
@@ -36,6 +38,11 @@ class ImportanceIndex:
 {
 	public:
 		ImportanceIndex(void);
+
+		void updateImportance(Atom*, int);
+		HandleEntry* decayShortTermImportance(void);
+		static unsigned int importanceBin(short);
+		static float importanceBinMeanValue(unsigned int);
 };
 
 } //namespace opencog
