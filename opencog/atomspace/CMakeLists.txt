@@ -25,6 +25,7 @@ ADD_LIBRARY (atomspace SHARED
 	SimpleTruthValue.cc
 	StatisticsMonitor.cc
 	StringIndex.cc
+	TargetTypeIndex.cc
 	Temporal.cc
 	TemporalEntry.cc
 	TemporalMap.cc
@@ -91,6 +92,7 @@ INSTALL (FILES
 	SimpleTruthValue.h
 	StatisticsMonitor.h
 	StringIndex.h
+	TargetTypeIndex.h
 	TemporalEntry.h
 	Temporal.h
 	TemporalMap.h
