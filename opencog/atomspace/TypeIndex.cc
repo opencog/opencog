@@ -28,6 +28,10 @@ using namespace opencog;
 
 TypeIndex::TypeIndex(void)
 {
+	// The typeIndex is NUMBER_OF_CLASSES+2 because NOTYPE is 
+	// NUMBER_OF_CLASSES+1 and typeIndex[NOTYPE] is asked for if a
+	// typename is misspelled, because ClassServer::getType()
+	// returns NOTYPE in this case).
 	resize(ClassServer::getNumberOfClasses() + 2);
 }
 
