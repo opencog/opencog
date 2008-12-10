@@ -70,7 +70,9 @@ public:
     // @param int STI: The STI value to set for the atom
     // @param int LTI: The LTI value to set for the atom
     // @param unsigned short VLTI: The VLTI flag value to set for this atom
-    AttentionValue(sti_t STI, lti_t LTI, vlti_t VLTI);
+    AttentionValue(sti_t STI = DEFAULTATOMSTI,
+                   lti_t LTI = DEFAULTATOMLTI,
+                   vlti_t VLTI = DEFAULTATOMVLTI);
 
     // PUBLIC GET/SET PROPERTIES
 

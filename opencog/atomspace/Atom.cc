@@ -76,10 +76,7 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
     // this variable is an array; each position is a pointer to the next
     // element in a target type list that the atom is in
     targetTypeIndex = NULL;
-
     predicateIndexInfo = NULL;
-
-    attentionValue = AttentionValue::factory();
 
 #ifdef USE_SHARED_DEFAULT_TV
     truthValue = NULL;
@@ -113,7 +110,6 @@ Atom::~Atom() throw (RuntimeException)
     //printf("Atom::~Atom() deleting predicateIndexInfo\n");
     delete(predicateIndexInfo);
     //printf("Atom::~Atom() deleting truthValue\n");
-    delete (attentionValue);
 #ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != &(TruthValue::DEFAULT_TV())) {
         delete truthValue;
@@ -155,18 +151,9 @@ bool Atom::isReal() const
 //    StatisticsMonitor::getInstance()->updateHeatSummation(type, getHeat() - old);
 //}
 
-// THIS IS NOT PUBLIC API - don't use if you don't know exactly what you're doing
-// returned AttentionValue object is supposed to be const, as in the method
-// getAttentionValue() below. Don't use this method to change AttentionValue
-// because you may break AtomTable indices.
-AttentionValue* Atom::getAVPointer()
-{
-    return attentionValue;
-}
-
 const AttentionValue& Atom::getAttentionValue() const
 {
-    return *attentionValue;
+    return attentionValue;
 }
 
 const TruthValue& Atom::getTruthValue() const
@@ -208,65 +195,28 @@ void Atom::setTruthValue(const TruthValue& tv)
 
 void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)
 {
-    //// if the value is out of bounds, it is set to either the upper or lower bound
-    //if (value > 1) value = 1;
-    //if (value < 0) value = 0;
+    if (new_av == attentionValue) return;
 
     int oldBin = -1;
     if (atomTable != NULL) {
         // gets current bin
-        oldBin = ImportanceIndex::importanceBin(attentionValue->getSTI());
+        oldBin = ImportanceIndex::importanceBin(attentionValue.getSTI());
     }
 
-    //// this MUST come before updateImportanceIndex
-    //rawSetImportance(value);
-    if (attentionValue != NULL && &new_av != attentionValue)
-        delete attentionValue;
-
-    attentionValue = new_av.clone();
+    attentionValue = new_av;
 
     if (atomTable != NULL) {
         // gets new bin
-        int newBin = ImportanceIndex::importanceBin(attentionValue->getSTI());
+        int newBin = ImportanceIndex::importanceBin(attentionValue.getSTI());
 
         // if the atom importance has changed its bin,
         // updates the importance index
         if (oldBin != newBin) {
-#ifdef USE_MIND_DB_PROXY
-            /* THIS WAS ONLY NEEDED WHEN ATOM HAD NO ATTRIBUTE WITH ITS TABLE ID.
-               AtomTable *table;
-            // cycles trhough all the tables searching for the Atom.
-            // This implementation priviledges the most commom case DEFAULT
-            // We did not use an identifier for the table the atom is inserted in
-            // because of space constraints.
-            AtomTableList t;
-            for (t = DEFAULT; t < ATOM_TABLE_LIST_SIZE; t++){
-            table = MindDBProxy::getInstance()->getAtomTable(t);
-            if (table->updateImportanceIndex(this, oldBin)){
-            break;
-            }
-            }
-            if (t == ATOM_TABLE_LIST_SIZE){
-            throw RuntimeException(TRACE_INFO, "failed to locate atom in importance bin");
-            }
-            StatisticsMonitor::getInstance()->atomChangeImportanceBin(type, oldBin, newBin);
-            */
-#endif
-
             atomTable->updateImportanceIndex(this, oldBin);
             StatisticsMonitor::getInstance()->atomChangeImportanceBin(type, oldBin, newBin);
         }
     }
 }
-
-//void Atom::rawSetImportance(float value) {
-
-//    // if the value is out of bounds, it is set to either the upper or lower bound
-//    if (value > 1) value = 1;
-//    if (value < 0) value = 0;
-
-//    ShortFloatOps::setValue(&importance, value);
-//}
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
 void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (RuntimeException)
@@ -721,8 +671,8 @@ AtomTable *Atom::getAtomTable() const
 
 bool Atom::isOld(const AttentionValue::sti_t threshold) const
 {
-    return ((attentionValue->getSTI() < threshold) &&
-            (attentionValue->getLTI() < 1));
+    return ((attentionValue.getSTI() < threshold) &&
+            (attentionValue.getLTI() < 1));
 }
 
 

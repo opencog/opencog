@@ -103,8 +103,8 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 			// decrease the sti by one unit (i.e. --sti), we could update the
 			// indexes with "importanceIndex[band - 1] = importanceIndex[band];"
 
-			atom->getAVPointer()->decaySTI();
-			unsigned int newbin = importanceBin(atom->getAVPointer()->getSTI());
+			atom->attentionValue.decaySTI();
+			unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
 			if (newbin != bin)
 			{
 				insert(newbin, h);

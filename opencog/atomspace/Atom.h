@@ -78,10 +78,6 @@ private:
     void addOutgoingAtom(Handle h);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    // Used by ImportanceIndex::decayShortTermImportance() and
-    // by EconomicAttentionAllocation.
-    AttentionValue* getAVPointer();
-
     /**
      * Sets the AtomTable in which this Atom is inserted.
      */
@@ -118,19 +114,15 @@ protected:
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     // indices
-    Handle* indices;
     Handle* targetTypeIndex;
     PredicateIndexStruct* predicateIndexInfo;
 
-    // state
-    AttentionValue *attentionValue;
-    TruthValue *truthValue;
-
-    //ShortFloat importance;
-    //ShortFloat heat;
-
+    // Put 6-byte long attentionValue next to flags,
+    // hopefull compiler will put all this in a single 8-byte slot.
+    AttentionValue attentionValue;
     char flags;
 
+    TruthValue *truthValue;
     /**
      * Constructor for this class.
      *
