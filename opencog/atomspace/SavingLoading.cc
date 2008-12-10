@@ -220,18 +220,7 @@ void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
 {
     logger().fine("SavingLoading::saveIndices");
 
-    int numTypes = ClassServer::getNumberOfClasses();
-
     // writes the head of each index list on the file
-    for (int i = 0; i < numTypes; i++) {
-        fwrite(&(atomTable.targetTypeIndex[i]), sizeof(Handle), 1, f);
-    }
-
-    printf( "Memory dump: %d%% done.\r", (int) (100 *
-            (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed)))
-             / (total * INDEX_REPORT_FACTOR))));
-    fflush(stdout);
-
     fwrite(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
     for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
         fwrite(&(atomTable.predicateIndex[i]), sizeof(Handle), 1, f);
@@ -407,6 +396,7 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Handle handle = TLB::getHandle(link);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
         atomTable.typeIndex.insert(link->getType(), handle);
+        atomTable.targetTypeIndex.insertLink(*link);
         int sti = link->getAttentionValue().getSTI();
         int bin = ImportanceIndex::importanceBin(sti);
         atomTable.importanceIndex.insert(bin, handle);
@@ -422,26 +412,6 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
                                 const std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadIndices");
-    int numTypes = ClassServer::getNumberOfClasses();
-
-    Handle* targetTypeIndexCache = (Handle*) malloc(sizeof(Handle) * dumpToCore.size());
-
-    for (int i = 0; i < numTypes; i++) {
-        atomTable.targetTypeIndex[i] = Handle::UNDEFINED;
-    }
-
-    // reads the handle of each index list head from the file
-    for (unsigned int i = 0; i < dumpToCore.size(); i++) {
-        fread(&(targetTypeIndexCache[i]), sizeof(Handle), 1, f);
-    }
-
-    //updating TypeIndex
-    for (unsigned int i = 0; i <  dumpToCore.size(); i++) {
-        atomTable.targetTypeIndex[dumpToCore[i]] = targetTypeIndexCache[i];
-    }
-    for (int i = 0; i < numTypes; i++) {
-        CoreUtils::updateHandle(&(atomTable.targetTypeIndex[i]), handles);
-    }
 
     printProgress("load", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
@@ -462,8 +432,6 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
             atomTable.predicateEvaluators[i] = new TreePredicateEvaluator(atomTable.predicateHandles[i]);
             atomTable.predicateHandles2Indices->add(atomTable.predicateHandles[i],(int*)i);
         }*/
-
-    free(targetTypeIndexCache);
 }
 
 void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
@@ -509,11 +477,6 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 //        printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
     }
 
-    //logger().fine("SavingLoading::updateHandles: targetTypeIndices");
-    int targetTypeSize = atom->getTargetTypeIndexSize();
-    for (int i = 0; i < targetTypeSize; i++) {
-        CoreUtils::updateHandle(&(atom->targetTypeIndex[i]), handles);
-    }
     if (atom->predicateIndexInfo) {
         //logger().fine("SavingLoading::updateHandles: predicateIndices");
         int size = bitcount(atom->predicateIndexInfo->predicateIndexMask);
@@ -710,11 +673,6 @@ void SavingLoading::writeLink(FILE *f, Link *link)
         fwrite(&(link->outgoing[i]), sizeof(Handle), 1, f);
     }
 
-    // the target type indices of the link is written on the file
-    int targetTypeSize = link->getTargetTypeIndexSize();
-    fwrite(&targetTypeSize, sizeof(int), 1, f);
-    fwrite(link->targetTypeIndex, sizeof(Handle), targetTypeSize, f);
-
     // the trail
     Trail *trail = link->getTrail();
 
@@ -810,14 +768,6 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
         fread(&(link->outgoing[i]), sizeof(Handle), 1, f);
     }
 #endif
-
-    // the target type indices is read from the file
-    int targetTypeSize;
-    fread(&targetTypeSize, sizeof(int), 1, f);
-    link->targetTypeIndex = new Handle[targetTypeSize];
-    for (int i = 0; i < targetTypeSize; i++) {
-        fread(&(link->targetTypeIndex[i]), sizeof(Handle), 1, f);
-    }
 
     // the trail
     Trail *trail = link->getTrail();

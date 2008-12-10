@@ -41,6 +41,7 @@
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/StringIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
+#include <opencog/atomspace/TargetTypeIndex.h>
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
@@ -94,13 +95,13 @@ private:
     bool useDSA;
 
     // linked lists for each kind of index
-    std::vector<Handle> targetTypeIndex;
     std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
     TypeIndex typeIndex;
     StringIndex nameIndex;
     ImportanceIndex importanceIndex;
+    TargetTypeIndex targetTypeIndex;
 
     // Number of predicate indices.
     int numberOfPredicateIndices;
@@ -122,7 +123,6 @@ private:
 
     void removeFromIndex(Atom *, std::vector<Handle>&, int, int)
     throw (RuntimeException);
-    void removeFromTargetTypeIndex(Atom *);
     void removeFromPredicateIndex(Atom *);
     void lockIterators();
     void unlockIterators();
@@ -272,14 +272,6 @@ public:
                           int) const;
 
     /**
-     * Returns the index head for the given target type.
-     *
-     * @param The target type whose index head will be returned.
-     * @return The index head for the given target type.
-     */
-    Handle getTargetTypeIndexHead(Type) const;
-
-    /**
      * Adds a new predicate index to this atom table given the Handle of
      * the PredicateNode.
      * @param The handle of the predicate node, whose name is the id
@@ -351,7 +343,10 @@ public:
      * @param Whether type subclasses should be considered.
      * @return The set of atoms of a given type (subclasses optionally).
      */
-    HandleEntry* getHandleSet(Type, bool subclass = false) const;
+    HandleEntry* getHandleSet(Type type, bool subclass = false) const
+    {
+        return typeIndex.getHandleSet(type, subclass);
+    }
 
     /**
      * Returns the set of atoms of a given type which have atoms of a
@@ -364,8 +359,13 @@ public:
      * @return The set of atoms of a given type and target type
      *         (subclasses optionally).
      */
-    HandleEntry* getHandleSet(Type, Type,
-                              bool subclass = false, bool targetSubclass = false) const;
+    HandleEntry* getHandleSet(Type type, Type targetType,
+                              bool subclass = false,
+                              bool targetSubclass = false) const
+    {
+        HandleEntry *set = targetTypeIndex.getHandleSet(targetType,targetSubclass);
+        return HandleEntry::filterSet(set, type, subclass);
+    }
 
     /**
      * Returns the set of atoms with a given target handle in their

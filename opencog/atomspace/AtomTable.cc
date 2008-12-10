@@ -63,7 +63,6 @@ AtomTable::AtomTable(bool dsa)
     atomSet = new AtomHashSet();
 
     // Indices for target types, etc.
-    targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
     predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
@@ -107,16 +106,10 @@ bool AtomTable::isCleared() const
         return false;
     }
 
-    for (int i = 0; i < ClassServer::getNumberOfClasses(); i++) {
-        if (targetTypeIndex[i] != Handle::UNDEFINED) {
-            //printf("targetTypeIndex[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
-    }
-
     if (nameIndex.size() != 0) return false;
     if (typeIndex.size() != 0) return false;
     if (importanceIndex.size() != 0) return false;
+    if (targetTypeIndex.size() != 0) return false;
 
     for (int i = 0; i < MAX_PREDICATE_INDICES; i++) {
         if (predicateIndex[i] != Handle::UNDEFINED) {
@@ -243,11 +236,6 @@ HandleEntry* AtomTable::makeSet(HandleEntry* set,
     return set;
 }
 
-Handle AtomTable::getTargetTypeIndexHead(Type type) const
-{
-    return targetTypeIndex[type];
-}
-
 Handle AtomTable::getPredicateIndexHead(int index) const
 {
     return predicateIndex[index];
@@ -331,11 +319,6 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass,
 
         // for all subclasses found, a set is concatenated to the answer set
         for (int i = 0; i < n; i++) {
-            //printf("%d\n", i);
-            if (index && TARGET_TYPE_INDEX) {
-                index = types[i] & TARGET_TYPE_INDEX;
-            }
-
             set = makeSet(set, (this->*f)(types[i]), index);
         }
         //printf("\n");
@@ -345,28 +328,12 @@ HandleEntry* AtomTable::buildSet(Type type, bool subclass,
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(Type type, bool subclass) const
-{
-    return typeIndex.getHandleSet(type, subclass);
-}
-
-HandleEntry* AtomTable::getHandleSet(Type type, Type targetType,
-                                     bool subclass, bool targetSubclass) const
-{
-    HandleEntry* set = buildSet(targetType, targetSubclass,
-                                &AtomTable::getTargetTypeIndexHead,
-                                TARGET_TYPE_INDEX | targetType);
-    return HandleEntry::filterSet(set, type, subclass);
-}
-
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
                                      bool subclass) const
 {
     HandleEntry* set = TLB::getAtom(handle)->getIncomingSet();
     if (set != NULL) set = set->clone();
     set = HandleEntry::filterSet(set, type, subclass);
-    // Also filter links that do not belong to this table
-    //set = HandleEntry::filterSet(set, tableId);
     return set;
 }
 
@@ -655,10 +622,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 #endif
 
     // Checks for null outgoing set members.
-    Link *link = lll;
-    if (link) {
-        const std::vector<Handle>& ogs = link->getOutgoingSet();
-        for (int i = link->getArity() - 1; i >= 0; i--) {
+    if (lll) {
+        const std::vector<Handle>& ogs = lll->getOutgoingSet();
+        for (int i = lll->getArity() - 1; i >= 0; i--) {
             if (TLB::isInvalidHandle(ogs[i])) {
                 throw RuntimeException(TRACE_INFO,
                                        "AtomTable - Attempting to insert link with invalid (null) outgoing members");
@@ -669,27 +635,14 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Handle handle = TLB::getHandle(atom);
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    // If the atom is a link, the targetIndexTypes list is built. Then, from
-    // the atom's arity, it will be checked how many targetTypes are distinct.
-    int distinctSize;
-    Type* targetTypes = atom->buildTargetIndexTypes(&distinctSize);
-    if (distinctSize > 0) {
-        // Here, the atom is placed on each target index list.
-        Handle* targetIndices = new Handle[distinctSize];
-        for (int i = 0; i < distinctSize; i++) {
-            // Insert it as head of the corresponding list
-            targetIndices[i] = targetTypeIndex[targetTypes[i]];
-            targetTypeIndex[targetTypes[i]] = handle;
-        }
-        atom->setNextTargetTypeIndex(targetIndices);
-    }
-    delete[](targetTypes);
-
     // The atom is placed on its proper name index list.
     if (nnn) {
         nameIndex.insert(nnn->getName().c_str(), handle);
     }
     typeIndex.insert(atom->getType(), handle);
+    if (lll) {
+        targetTypeIndex.insertLink(*lll);
+    }
 
     // The atom is placed on its proper importance index list.
     int bin = ImportanceIndex::importanceBin(atom->getAttentionValue().getSTI());
@@ -720,9 +673,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     }
 
     // Updates incoming set of all targets.
-    if (dont_defer_incoming_links && (link != NULL)) {
-        for (int i = 0; i < link->getArity(); i++) {
-            link->getOutgoingAtom(i)->addIncomingHandle(handle);
+    if (dont_defer_incoming_links && (lll != NULL)) {
+        for (int i = 0; i < lll->getArity(); i++) {
+            lll->getOutgoingAtom(i)->addIncomingHandle(handle);
         }
     }
 
@@ -825,7 +778,6 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
     // remove from indices
-    removeFromTargetTypeIndex(atom);
     removeFromPredicateIndex(atom);
 
     Node *node = dynamic_cast<Node*>(atom);
@@ -836,9 +788,11 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     int sti = atom->getAttentionValue().getSTI();
     importanceIndex.remove(ImportanceIndex::importanceBin(sti), handle);
 
-    // remove from incoming sets
     Link* link = dynamic_cast<Link*>(atom);
     if (link) {
+        targetTypeIndex.removeLink(*link);
+
+        // Remove from incoming sets.
         for (int i = 0; i < link->getArity(); i++) {
             Atom* target = link->getOutgoingAtom(i);
             target->removeIncomingHandle(handle);
@@ -911,20 +865,6 @@ throw (RuntimeException)
     }
 
     victim->setNext(indexID, Handle::UNDEFINED);
-}
-
-void AtomTable::removeFromTargetTypeIndex(Atom *atom)
-{
-    //logger().fine("AtomTable::removeFromTargetTypeIndex(%p)", atom);
-
-    int arraySize;
-    Type *types = atom->buildTargetIndexTypes(&arraySize);
-
-    for (int i = 0; i < arraySize; i++) {
-        removeFromIndex(atom, targetTypeIndex, TARGET_TYPE_INDEX | types[i], types[i]);
-    }
-
-    delete[](types);
 }
 
 void AtomTable::removeFromPredicateIndex(Atom *atom)
@@ -1022,12 +962,13 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
 {
     if (extractedHandles == NULL) return;
 
-    // remove from indices
-    removeMarkedAtomsFromMultipleIndex(targetTypeIndex, TARGET_TYPE_INDEX);
+    // Remove from indices.
     removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);
+
     nameIndex.remove(decayed);
     typeIndex.remove(decayed);
     importanceIndex.remove(decayed);
+    targetTypeIndex.remove(decayed);
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;

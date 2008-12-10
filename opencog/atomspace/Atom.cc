@@ -55,9 +55,7 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
 {
     // resets all flags
     flags = 0;
-
     atomTable = NULL;
-
     incoming = NULL;
     type = t;
 
@@ -69,13 +67,8 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
     setOutgoingSet(outg); // need to call the method to handle specific subclass case
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    //// sets default values
-    //rawSetHeat(Defaults::getDefaultHeat(type));
-    //rawSetImportance(Defaults::getDefaultImportance(type));
-
     // this variable is an array; each position is a pointer to the next
     // element in a target type list that the atom is in
-    targetTypeIndex = NULL;
     predicateIndexInfo = NULL;
 
 #ifdef USE_SHARED_DEFAULT_TV
@@ -105,8 +98,6 @@ Atom::~Atom() throw (RuntimeException)
 #endif
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    //printf("Atom::~Atom() deleting targetTypeIndex\n");
-    delete[](targetTypeIndex);
     //printf("Atom::~Atom() deleting predicateIndexInfo\n");
     delete(predicateIndexInfo);
     //printf("Atom::~Atom() deleting truthValue\n");
@@ -346,21 +337,12 @@ void Atom::setNext(int index, Handle handle)
 {
     //printf("Setting next of index %p, handle=%p\n", index, handle);
     //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
-    //printf("TARGET_TYPE_INDEX = %p!\n", TARGET_TYPE_INDEX);
 
     // the index parameter contains the index of the list that must be
     // traversed by the method. Optionally, the index parameter may bring the
     // index in the target types linked-list to be traversed, in which case it
-    // has its value OR-ed (binary) to the TARGET_TYPE_INDEX flag
-    if (index & TARGET_TYPE_INDEX) {
-        index &= 0x0000ffff;
-        int targetIndex = locateTargetIndexTypes(index);
-        if (targetIndex != -1) {
-            targetTypeIndex[targetIndex] = handle;
-        } else {
-            throw RuntimeException(TRACE_INFO, "could not find target type index");
-        }
-    } else if (index & PREDICATE_INDEX) {
+    // has its value OR-ed (binary) to the PREDICATE_INDEX flag
+    if (index & PREDICATE_INDEX) {
         //cprintf(DEBUG, "setNext(%p,%p) => Predicate index!\n", index, handle);
         if (predicateIndexInfo == NULL) {
             throw RuntimeException(TRACE_INFO, "no info about predicate indices");
@@ -376,42 +358,12 @@ void Atom::setNext(int index, Handle handle)
 }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-Handle* Atom::getTargetTypeIndex() const
-{
-    return targetTypeIndex;
-}
-
-void Atom::setNextTargetTypeIndex(Handle* handles)
-{
-    targetTypeIndex = handles;
-}
-
 Handle Atom::next(int index)
 {
     //printf("Getting next of index %p\n", index);
     //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
-    //printf("TARGET_TYPE_INDEX = %p!\n", TARGET_TYPE_INDEX);
 
-    // the index parameter contains the index of the list that must be
-    // traversed by the method. Optionally, the index parameter may bring the
-    // index in the target types linked-list to be traversed, in which case it
-    // has its value OR-ed (binary) to the TARGET_TYPE_INDEX flag.
-    if (index & TARGET_TYPE_INDEX) {
-        index &= ~TARGET_TYPE_INDEX;
-#ifdef PUT_OUTGOING_SET_IN_LINKS
-        int targetIndex = -1;
-        Link *link = dynamic_cast<Link *>(this);
-        if (link)
-            targetIndex = link->locateTargetIndexTypes(index);
-#else
-        int targetIndex = locateTargetIndexTypes(index);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-        if (targetIndex != -1) {
-            return targetTypeIndex[targetIndex];
-        } else {
-            throw RuntimeException(TRACE_INFO, "could not find target type index");
-        }
-    } else if (index & PREDICATE_INDEX) {
+    if (index & PREDICATE_INDEX) {
         //cprintf(DEBUG,"next(%p) => Predicate index!\n", index);
         if (predicateIndexInfo == NULL) {
             throw RuntimeException(TRACE_INFO, "no info about predicate indices");
@@ -549,7 +501,7 @@ int Atom::locateTargetIndexTypes(Type key) const
 {
     if (getArity() == 0) return -1;
 
-    std::set<unsigned int> checkedTypes;
+    std::set<Type> checkedTypes;
     int j = 0;
     // for each type in the target types array, it checks if it has already
     // been found so that repeated types are not considered. If a type is equal

@@ -39,8 +39,6 @@
 #define REMOVED_BY_DECAY        32 //BIT5
 
 // AtomTable indices
-
-#define TARGET_TYPE_INDEX   (1UL << 16)
 #define PREDICATE_INDEX     (1UL << 17)
 
 #define IMPORTANCE_INDEX_SIZE   (1 << 16)

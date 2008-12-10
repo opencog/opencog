@@ -29,7 +29,6 @@
 
 #include <string>
 
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/classes.h>
@@ -60,7 +59,6 @@ class HandleEntry;
  */
 class Atom
 {
-
     friend class SavingLoading;
     friend class AtomTable;
     friend class ImportanceIndex;
@@ -114,7 +112,6 @@ protected:
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     // indices
-    Handle* targetTypeIndex;
     PredicateIndexStruct* predicateIndexInfo;
 
     // Put 6-byte long attentionValue next to flags,
@@ -219,15 +216,6 @@ public:
 
     /**
      * Sets the AttentionValue object of the atom.
-     *
-     * NOTE: The passed AV object will actually be cloned before
-     * being stored internaly. So, if the given AV object is
-     * dynamically allocated, the caller is its owner and, so, must
-     * take care of memory deallocation.
-     *
-     * XXX Why do we need this note? It should go without
-     * saying, as this is the semantics of the C++ programming
-     * language!
      */
     void setAttentionValue(const AttentionValue&) throw (RuntimeException);
 
@@ -256,29 +244,6 @@ public:
     // * @param The new heat value.
     // */
     //void rawSetHeat(float);
-
-    ///**
-    // * Returns the importance value of the atom.
-    // *
-    // * @return The importance value of the atom.
-    // */
-    //float getImportance();
-
-    ///**
-    // * Changes the importance value.
-    // *
-    // * @param The new importance value.
-    // */
-    //void setImportance(float);
-    //
-    ///**
-    // * Also changes the importance value of this atom, but it does not
-    // * changes the importance linked-list to which it belongs, not does it
-    // * update statistics.
-    // *
-    // * @param float The new importance value.
-    // */
-    //void rawSetImportance(float);
 
     /**
      * Returns a pointer to a linked-list containing the atoms that are
@@ -352,22 +317,6 @@ public:
      */
     void setNext(int, Handle);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    /**
-     * Returns a pointer to the target types index.
-     *
-     * @return A pointer to the target types index.
-     */
-    Handle* getTargetTypeIndex() const;
-
-    /**
-     * Sets the next entries pointed by this atom in the target types
-     * index linked-list.
-     *
-     * @param An array of handles representing the next entries in the
-     * target types index linked-list.
-     */
-    void setNextTargetTypeIndex(Handle*);
 
     /**
      * Adds the next entry pointed by this atom in the given predicate
