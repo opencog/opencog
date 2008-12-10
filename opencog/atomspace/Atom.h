@@ -34,6 +34,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/classes.h>
 #include <opencog/atomspace/HandleEntry.h>
+#include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/util/exceptions.h>
 
@@ -62,6 +63,7 @@ class Atom
 
     friend class SavingLoading;
     friend class AtomTable;
+    friend class ImportanceIndex;
     friend class NMXmlParser;
 
 private:
@@ -76,7 +78,7 @@ private:
     void addOutgoingAtom(Handle h);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    // Used by AtomTable::decayShortTermImportance() and
+    // Used by ImportanceIndex::decayShortTermImportance() and
     // by EconomicAttentionAllocation.
     AttentionValue* getAVPointer();
 

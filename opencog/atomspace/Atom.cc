@@ -73,18 +73,13 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
     //rawSetHeat(Defaults::getDefaultHeat(type));
     //rawSetImportance(Defaults::getDefaultImportance(type));
 
-    // resets all indices
-    indices = (Handle*) calloc(NUMBER_OF_INDICES, sizeof(Handle));
-    //memset(indices, 0, sizeof(Handle) * NUMBER_OF_INDICES);
-
     // this variable is an array; each position is a pointer to the next
     // element in a target type list that the atom is in
     targetTypeIndex = NULL;
 
     predicateIndexInfo = NULL;
 
-    //attentionValue = (AttentionValue*)&AttentionValue::getDefaultAV();
-    attentionValue = (AttentionValue*) AttentionValue::factory();
+    attentionValue = AttentionValue::factory();
 
 #ifdef USE_SHARED_DEFAULT_TV
     truthValue = NULL;
@@ -126,7 +121,6 @@ Atom::~Atom() throw (RuntimeException)
 #else
     delete truthValue;
 #endif
-    free(indices);
     //printf("Atom::~Atom() end\n");
 }
 
@@ -221,7 +215,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
     int oldBin = -1;
     if (atomTable != NULL) {
         // gets current bin
-        oldBin = AtomTable::importanceBin(attentionValue->getSTI());
+        oldBin = ImportanceIndex::importanceBin(attentionValue->getSTI());
     }
 
     //// this MUST come before updateImportanceIndex
@@ -233,7 +227,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 
     if (atomTable != NULL) {
         // gets new bin
-        int newBin = AtomTable::importanceBin(attentionValue->getSTI());
+        int newBin = ImportanceIndex::importanceBin(attentionValue->getSTI());
 
         // if the atom importance has changed its bin,
         // updates the importance index
@@ -259,9 +253,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
             */
 #endif
 
-            if (!atomTable->updateImportanceIndex(this, oldBin)) {
-                throw RuntimeException(TRACE_INFO, "failed to locate atom in importance bin");
-            }
+            atomTable->updateImportanceIndex(this, oldBin);
             StatisticsMonitor::getInstance()->atomChangeImportanceBin(type, oldBin, newBin);
         }
     }
@@ -430,8 +422,6 @@ void Atom::setNext(int index, Handle handle)
             throw RuntimeException(TRACE_INFO, "could not find predicate index");
         }
         setNextHandleInPredicateIndex(index, handle);
-    } else {
-        indices[index] = handle;
     }
 }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
@@ -485,9 +475,8 @@ Handle Atom::next(int index)
         } else {
             throw RuntimeException(TRACE_INFO, "could not find predicate index");
         }
-    } else {
-        return indices[index];
     }
+    return Handle::UNDEFINED;
 }
 
 Handle Atom::getNextHandleInPredicateIndex(int index) const

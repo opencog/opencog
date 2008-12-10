@@ -226,14 +226,7 @@ void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
     for (int i = 0; i < numTypes; i++) {
         fwrite(&(atomTable.targetTypeIndex[i]), sizeof(Handle), 1, f);
     }
-    printf( "Memory dump: %d%% done.\r", (int) (100 *
-            (((float) processed + (0.50 * ((total * INDEX_REPORT_FACTOR) - processed)))
-             / (total * INDEX_REPORT_FACTOR))));
-    fflush(stdout);
 
-    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
-        fwrite(&(atomTable.importanceIndex[i]), sizeof(Handle), 1, f);
-    }
     printf( "Memory dump: %d%% done.\r", (int) (100 *
             (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed)))
              / (total * INDEX_REPORT_FACTOR))));
@@ -386,6 +379,9 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
         atomTable.nameIndex.insert(node->getName().c_str(), handle);
         atomTable.typeIndex.insert(node->getType(), handle);
+        int sti = node->getAttentionValue().getSTI();
+        int bin = ImportanceIndex::importanceBin(sti);
+        atomTable.importanceIndex.insert(bin, handle);
 
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
@@ -411,6 +407,9 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Handle handle = TLB::getHandle(link);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
         atomTable.typeIndex.insert(link->getType(), handle);
+        int sti = link->getAttentionValue().getSTI();
+        int bin = ImportanceIndex::importanceBin(sti);
+        atomTable.importanceIndex.insert(bin, handle);
 
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
@@ -444,15 +443,6 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
         CoreUtils::updateHandle(&(atomTable.targetTypeIndex[i]), handles);
     }
 
-    printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    fflush(stdout);
-
-    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
-        fread(&(atomTable.importanceIndex[i]), sizeof(Handle), 1, f);
-    }
-    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
-        CoreUtils::updateHandle(&(atomTable.importanceIndex[i]), handles);
-    }
     printProgress("load", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
     fflush(stdout);
 
@@ -519,11 +509,6 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 //        printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
     }
 
-    //logger().fine("SavingLoading::updateHandles: indices");
-    // updates the handles for indices
-    for (int i = 0; i < NUMBER_OF_INDICES; i++) {
-        CoreUtils::updateHandle(&(atom->indices[i]), handles);
-    }
     //logger().fine("SavingLoading::updateHandles: targetTypeIndices");
     int targetTypeSize = atom->getTargetTypeIndexSize();
     for (int i = 0; i < targetTypeSize; i++) {
@@ -590,9 +575,6 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     // returns the pointer back to the end of the file
     fseek(f, 0, SEEK_END);
 
-    // writes the indices of the atom
-    fwrite(atom->indices, sizeof(Handle), NUMBER_OF_INDICES, f);
-
     // writes the predicate indices of the atom
     bool hasPredicateIndices = (atom->predicateIndexInfo != NULL);
     fwrite(&hasPredicateIndices, sizeof(bool), 1, f);
@@ -645,11 +627,6 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
         Handle incomingHandle;
         fread(&incomingHandle, sizeof(Handle), 1, f);
         atom->addIncomingHandle(incomingHandle);
-    }
-
-    // reads the atom's indices
-    for (int i = 0; i < NUMBER_OF_INDICES; i++) {
-        fread(&(atom->indices[i]), sizeof(Handle), 1, f);
     }
 
     // reads the predicate indices of the atom

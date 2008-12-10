@@ -37,6 +37,7 @@
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/StringIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
@@ -92,18 +93,14 @@ private:
      */
     bool useDSA;
 
-    // cache the minSTI variable to speed up recursive
-    // removals by decay
-    AttentionValue::sti_t minSTI;
-
     // linked lists for each kind of index
     std::vector<Handle> targetTypeIndex;
-    std::vector<Handle> importanceIndex;
     std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
     TypeIndex typeIndex;
     StringIndex nameIndex;
+    ImportanceIndex importanceIndex;
 
     // Number of predicate indices.
     int numberOfPredicateIndices;
@@ -148,7 +145,6 @@ private:
      * @return A list with the Handles of all extracted Atoms.
      */
     HandleEntry* extract(Handle, bool recursive = false);
-    HandleEntry* extractOld(Handle, bool recursive = false);
 
     /**
      * Removes the previously extracted Handles (using the extract
@@ -282,14 +278,6 @@ public:
      * @return The index head for the given target type.
      */
     Handle getTargetTypeIndexHead(Type) const;
-
-    /**
-     * Returns the index head for the given importance bin.
-     *
-     * @param The importance bin whose index head will be returned.
-     * @return The index head for the given importance bin.
-     */
-    Handle getImportanceIndexHead(int) const;
 
     /**
      * Adds a new predicate index to this atom table given the Handle of
@@ -508,8 +496,11 @@ public:
      * @param Importance range upper bound (inclusive).
      * @return The set of atoms within the given importance range.
      */
-    HandleEntry* getHandleSet(AttentionValue::sti_t,
-                              AttentionValue::sti_t upperBound = 32767) const;
+    HandleEntry* getHandleSet(AttentionValue::sti_t lowerBound,
+                              AttentionValue::sti_t upperBound = 32767) const
+    {
+        return importanceIndex.getHandleSet(lowerBound, upperBound);
+    }
 
 
     /**
@@ -519,7 +510,10 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    bool updateImportanceIndex(Atom*, int);
+    void updateImportanceIndex(Atom* a, int bin)
+    {
+        importanceIndex.updateImportance(a,bin);
+    }
 
     /**
      * Adds an atom to the table, checking for duplicates and merging
@@ -551,25 +545,6 @@ public:
      * @return True if the removal operation was successful. False, otherwise.
      */
     bool remove(Handle, bool recursive = false);
-
-    /**
-     * This method returns which importance bin an atom with the given
-     * importance should be placed.
-     *
-     * @param Importance value to be mapped.
-     * @return The importance bin which an atom of the given importance
-     * should be placed.
-     */
-    static unsigned int importanceBin(short);
-
-    /**
-     * Returns the mean importance value for the given importance bin (the
-     * average between the lower and upper importance bounds for the bin).
-     *
-     * @param Importance bin to be mapped.
-     * @return The mean importance value for the given importance bin.
-     */
-    static float importanceBinMeanValue(unsigned int);
 
     /**
      * Decays importance of all atoms in the table, reindexing

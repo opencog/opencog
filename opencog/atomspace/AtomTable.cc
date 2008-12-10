@@ -62,14 +62,8 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     atomSet = new AtomHashSet();
 
-    // There are four indices. One for types, one for target types,
-    // one for names and one for importance ranges. The typeIndex
-    // is NUMBER_OF_CLASSES+2 because NOTYPE is NUMBER_OF_CLASSES+1
-    // and typeIndex[NOTYPE] is asked for if a typename is misspelled.
-    // (because ClassServer::getType() returns NOTYPE in this case).
-    typeIndex.resize(ClassServer::getNumberOfClasses() + 2);
+    // Indices for target types, etc.
     targetTypeIndex.resize(ClassServer::getNumberOfClasses() + 2, Handle::UNDEFINED);
-    importanceIndex.resize(IMPORTANCE_INDEX_SIZE, Handle::UNDEFINED);
     predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
@@ -122,13 +116,8 @@ bool AtomTable::isCleared() const
 
     if (nameIndex.size() != 0) return false;
     if (typeIndex.size() != 0) return false;
+    if (importanceIndex.size() != 0) return false;
 
-    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++) {
-        if (importanceIndex[i] != Handle::UNDEFINED) {
-            //printf("importanceIndex[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
-    }
     for (int i = 0; i < MAX_PREDICATE_INDICES; i++) {
         if (predicateIndex[i] != Handle::UNDEFINED) {
             //printf("predicateIndex[%d] is not Handle::UNDEFINED\n", i);
@@ -239,18 +228,6 @@ inline unsigned int AtomTable::getNameHash(Atom* atom) const
     Node *nnn = dynamic_cast<Node *>(atom);
     if (NULL == nnn) return strHash(NULL);
     return strHash(nnn->getName().c_str());
-}
-
-unsigned int AtomTable::importanceBin(short importance)
-{
-    // STI is in range of [-32768, 32767] so adding 32768 puts it in
-    // [0, 65535] which is the size of the index
-    return importance + 32768;
-}
-
-float AtomTable::importanceBinMeanValue(unsigned int bin)
-{
-    return (float) ((((float) bin) + 0.5) / ((unsigned int) IMPORTANCE_INDEX_SIZE));
 }
 
 HandleEntry* AtomTable::makeSet(HandleEntry* set,
@@ -628,43 +605,6 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
     return  set;
 }
 
-HandleEntry* AtomTable::getHandleSet(AttentionValue::sti_t lowerBound, AttentionValue::sti_t upperBound) const
-{
-
-    // the indice for the lower bound and upper bound lists is returned.
-    int lowerBin = importanceBin(lowerBound);
-    int upperBin = importanceBin(upperBound);
-
-    // the list of atoms with its importance equal to the lower bound is
-    // returned.
-    HandleEntry* set = makeSet(NULL, importanceIndex[lowerBin], IMPORTANCE_INDEX);
-
-    // for the lower bound and upper bound index, the list is filtered, because
-    // there may be atoms that have the same importanceIndex and whose
-    // importance is lower than lowerBound or bigger than upperBound.
-    set = HandleEntry::filterSet(set, lowerBound, upperBound);
-
-    if (lowerBin == upperBin) {
-        // If both lower and upper bounds are in the same bin,
-        // it can ans must return the already built set.
-        // Otherwise, it will duplicate entries when concatening the upper set latter.
-        return set;
-    }
-
-    // for every index within lowerBound and upperBound, the list is
-    // concatenated.
-    while (++lowerBin < upperBin) {
-        set = makeSet(set, importanceIndex[lowerBin], IMPORTANCE_INDEX);
-    }
-
-    // the list for the upperBin index is built and filtered.
-    HandleEntry* uset = makeSet(NULL, importanceIndex[upperBin], IMPORTANCE_INDEX);
-    uset = HandleEntry::filterSet(uset, lowerBound, upperBound);
-
-    // then the two lists built are concatenated.
-    return HandleEntry::concatenation(uset, set);
-}
-
 HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const
 {
     return getHandleSet((const char**) NULL, types, subclasses, arity, type, subclass);
@@ -752,10 +692,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     typeIndex.insert(atom->getType(), handle);
 
     // The atom is placed on its proper importance index list.
-    int bin = importanceBin(atom->getAttentionValue().getSTI());
+    int bin = ImportanceIndex::importanceBin(atom->getAttentionValue().getSTI());
     //logger().debug("adding handle %p with sti %d into importanceIndex (bin = %d)\n", handle, atom->getAttentionValue().getSTI(), bin);
-    atom->setNext(IMPORTANCE_INDEX, importanceIndex[bin]);
-    importanceIndex[bin] = handle;
+    importanceIndex.insert(bin, handle);
 
     // Checks Atom against predicate indices and inserts it if needed
     for (int i = 0; i < numberOfPredicateIndices; i++) {
@@ -806,43 +745,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     return handle;
 }
 
-bool AtomTable::updateImportanceIndex(Atom* atom, int bin)
-{
-
-    // current receives the first element of the list that the atom is in.
-    Handle current = importanceIndex[bin];
-    Handle wanted = TLB::getHandle(atom);
-
-    // checks if current is valid.
-    if (TLB::isInvalidHandle(current)) {
-        return(false);
-    }
-    // here is checked if the atom is on the first position of its importance
-    // index list.
-    if (current == wanted) {
-        // if so, the new first element will be the next one.
-        importanceIndex[bin] = atom->next(IMPORTANCE_INDEX);
-    } else {
-        // if not, the list will be scanned until the atom is found.
-        Handle p;
-        while ((p = TLB::getAtom(current)->next(IMPORTANCE_INDEX)) != wanted) {
-            current = p;
-            if (TLB::isInvalidHandle(p)) {
-                return(false);
-            }
-        }
-        TLB::getAtom(current)->setNext(IMPORTANCE_INDEX, TLB::getAtom(wanted)->next(IMPORTANCE_INDEX));
-    }
-
-    // the atom is placed on the last position of the new list.
-    atom->setNext(IMPORTANCE_INDEX, importanceIndex[importanceBin(atom->getAttentionValue().getSTI())]);
-    importanceIndex[importanceBin(atom->getAttentionValue().getSTI())] = TLB::getHandle(atom);
-    return(true);
-}
-
 int AtomTable::getSize() const
 {
-    return(size);
+    return size;
 }
 
 void AtomTable::log(Logger& logger, Type type, bool subclass) const
@@ -870,36 +775,6 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 #else
     output << "[ERROR] AtomTable::print() method is not implemented when USE_ATOM_HASH_SET is disabled" << endl;
 #endif
-}
-
-HandleEntry* AtomTable::extractOld(Handle handle, bool recursive)
-{
-    HandleEntry* result = NULL;
-    Atom *atom = TLB::getAtom(handle);
-
-    if (atom->getFlag(REMOVED_BY_DECAY)) return result;
-    else atom->setFlag(REMOVED_BY_DECAY, true);
-
-    // if recursive-flag is set, also extract all the links in the atom's incoming set
-    if (recursive) {
-        for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
-            Atom *a = TLB::getAtom(in->handle);
-            if (a->isOld(minSTI)) {
-                result = HandleEntry::concatenation(extractOld(in->handle, true), result);
-            }
-        }
-    }
-
-    // only return if there is at least one incoming atom that is not marked for
-    // removal by decay
-    for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
-        if (TLB::getAtom(in->handle)->getFlag(REMOVED_BY_DECAY) == false) {
-            atom->setFlag(REMOVED_BY_DECAY, false);
-            return result;
-        }
-    }
-    result = HandleEntry::concatenation(new HandleEntry(handle), result);
-    return result;
 }
 
 HandleEntry* AtomTable::extract(Handle handle, bool recursive)
@@ -950,7 +825,6 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
     // remove from indices
-    removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, importanceBin(atom->getAttentionValue().getSTI()));
     removeFromTargetTypeIndex(atom);
     removeFromPredicateIndex(atom);
 
@@ -959,6 +833,8 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
        nameIndex.remove(node->getName().c_str(), handle);
     }
     typeIndex.remove(atom->getType(), handle);
+    int sti = atom->getAttentionValue().getSTI();
+    importanceIndex.remove(ImportanceIndex::importanceBin(sti), handle);
 
     // remove from incoming sets
     Link* link = dynamic_cast<Link*>(atom);
@@ -1071,48 +947,9 @@ void AtomTable::removeFromPredicateIndex(Atom *atom)
     delete[](predicateIndices);
 }
 
-void AtomTable::decayShortTermImportance()
+void AtomTable::decayShortTermImportance(void)
 {
-    for (unsigned int band = 0; band < (unsigned int) IMPORTANCE_INDEX_SIZE; band++) {
-        Handle current = importanceIndex[band];
-        while (TLB::isValidHandle(current)) {
-            Atom* atom = TLB::getAtom(current);
-            Handle next = atom->next(IMPORTANCE_INDEX);
-
-            // update sti
-            atom->getAVPointer()->decaySTI();
-
-            // update importanceIndex
-            // potential optimization: if we may reliably assume that all atoms
-            // decrease the sti by one unit (i.e. --sti), we could update the
-            // indexes with "importanceIndex[band - 1] = importanceIndex[band];"
-            unsigned int newBand = AtomTable::importanceBin(atom->getAttentionValue().getSTI());
-            removeFromIndex(atom, importanceIndex, IMPORTANCE_INDEX, band);
-            atom->setNext(IMPORTANCE_INDEX, importanceIndex[newBand]);
-            importanceIndex[newBand] = current;
-
-            current = next;
-        }
-    }
-
-    // cache the minSTI
-    minSTI = config().get_int("MIN_STI");
-    unsigned int lowerStiBand = importanceBin(minSTI);
-    HandleEntry* oldAtoms = NULL;
-
-    for (unsigned int band = 0; band <= lowerStiBand; band++) {
-        Handle current = importanceIndex[band];
-        while (TLB::isValidHandle(current)) {
-            Atom* atom = TLB::getAtom(current);
-            Handle next = atom->next(IMPORTANCE_INDEX);
-            // remove it if too old
-            if (atom->isOld(minSTI))
-                oldAtoms = HandleEntry::concatenation(extractOld(current, true), oldAtoms);
-            current = next;
-        }
-    }
-
-    // clone is copied to the real importance index lists.
+    HandleEntry* oldAtoms = importanceIndex.decayShortTermImportance();
     if (oldAtoms) clearIndexesAndRemoveAtoms(oldAtoms);
 }
 
@@ -1186,11 +1023,11 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     if (extractedHandles == NULL) return;
 
     // remove from indices
-    removeMarkedAtomsFromIndex(importanceIndex, IMPORTANCE_INDEX);
     removeMarkedAtomsFromMultipleIndex(targetTypeIndex, TARGET_TYPE_INDEX);
     removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);
     nameIndex.remove(decayed);
     typeIndex.remove(decayed);
+    importanceIndex.remove(decayed);
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;
@@ -1240,11 +1077,6 @@ HandleIterator* AtomTable::getHandleIterator()
 HandleIterator* AtomTable::getHandleIterator(Type type, bool subclass, VersionHandle vh)
 {
     return new HandleIterator(this, type, subclass, vh);
-}
-
-Handle AtomTable::getImportanceIndexHead(int i) const
-{
-    return importanceIndex[i];
 }
 
 bool AtomTable::usesDSA() const

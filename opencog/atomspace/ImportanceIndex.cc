@@ -36,7 +36,7 @@ using namespace opencog;
 
 ImportanceIndex::ImportanceIndex(void)
 {
-	resize(IMPORTANCE_INDEX_SIZE);
+	resize(IMPORTANCE_INDEX_SIZE+1);
 }
 
 /**
@@ -76,9 +76,10 @@ float ImportanceIndex::importanceBinMeanValue(unsigned int bin)
 void ImportanceIndex::updateImportance(Atom* atom, int bin)
 {
 	Handle h = TLB::getHandle(atom);
-	remove(bin, h);
-
 	int newbin = importanceBin(atom->getAttentionValue().getSTI());
+	if (bin == newbin) return;
+
+	remove(bin, h);
 	insert(newbin, h);
 }
 
@@ -86,32 +87,44 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 {
 	HandleEntry* oldAtoms = NULL;
 
-	std::vector<std::set<Handle> >::iterator band;
 	unsigned int bin;
-	for (bin = 0, band = idx.begin(); band != idx.end(); band++, bin++)
+	for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++)
 	{
+		std::set<Handle> move_it;
+		std::set<Handle> & band = idx[bin];
 		std::set<Handle>::iterator hit;
-		for (hit = band->begin(); hit != band->end(); hit++)
+		for (hit = band.begin(); hit != band.end(); hit++)
 		{
-			Atom *atom = TLB::getAtom(*hit);
+			Handle h = *hit;
+			Atom *atom = TLB::getAtom(h);
 
-			// Update sti
-			atom->getAVPointer()->decaySTI();
-
+			// Update STI
 			// Potential optimization: if we may reliably assume that all atoms
 			// decrease the sti by one unit (i.e. --sti), we could update the
 			// indexes with "importanceIndex[band - 1] = importanceIndex[band];"
-			updateImportance(atom, bin);
+
+			atom->getAVPointer()->decaySTI();
+			unsigned int newbin = importanceBin(atom->getAVPointer()->getSTI());
+			if (newbin != bin)
+			{
+				insert(newbin, h);
+				move_it.insert(h);
+			}
+		}
+		for (hit = move_it.begin(); hit != move_it.end(); hit++)
+		{
+			remove(bin, *hit);
 		}
 	}
 
 	AttentionValue::sti_t minSTI = config().get_int("MIN_STI");
 	unsigned int lowerStiBand = importanceBin(minSTI);
 
-	for (bin = 0, band = idx.begin(); bin <= lowerStiBand; band++, bin++)
+	for (bin = 0; bin <= lowerStiBand; bin++)
 	{
 		std::set<Handle>::iterator hit;
-		for (hit = band->begin(); hit != band->end(); hit++)
+		std::set<Handle> & band = idx[bin];
+		for (hit = band.begin(); hit != band.end(); hit++)
 		{
 			Atom *atom = TLB::getAtom(*hit);
 
