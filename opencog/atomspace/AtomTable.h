@@ -67,7 +67,6 @@ class Node;
 class HandleEntry;
 class HandleIterator;
 class SavingLoading;
-class PredicateEvaluator;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
@@ -95,20 +94,11 @@ private:
      */
     bool useDSA;
 
-    // linked lists for each kind of index
-    std::vector<Handle> predicateHandles;
-    std::vector<PredicateEvaluator*> predicateEvaluators;
-
     TypeIndex typeIndex;
     StringIndex nameIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
-
-    // Number of predicate indices.
-    int numberOfPredicateIndices;
-    // Map from each Tree PredicateNode Handle to its corresponding index
-    HandleMap<int>* predicateHandles2Indices;
 
     unsigned int strHash(const char*) const;
     inline unsigned int getNameHash(Atom* atom) const;
@@ -266,15 +256,20 @@ public:
      * NOTE: Does not apply the new predicate index to the atoms
      * inserted previously in the AtomTable.
      */
-    void addPredicateIndex(Handle, PredicateEvaluator*)
-    throw (InvalidParamException);
+    void addPredicateIndex(Handle h, PredicateEvaluator *pe)
+    {
+        predicateIndex.addPredicateIndex(h,pe);
+    }
 
     /**
      * Returns the Predicate evaluator for a given
      * GroundedPredicateNode Handle, if it is being used as a
      * lookup index. Otherwise, returns NULL.
      */
-    PredicateEvaluator* getPredicateEvaluator(Handle gpnHandle) const;
+    PredicateEvaluator* getPredicateEvaluator(Handle h) const
+    {
+        return predicateIndex.getPredicateEvaluator(h);
+    }
 
     /**
      * Returns a list of handles that matches the GroundedPredicateNode
@@ -293,8 +288,11 @@ public:
      * @param VersionHandle for filtering the resulting atoms by
      *       context. NULL_VERSION_HANDLE indicates no filtering
      **/
-    HandleEntry* findHandlesByGPN(Handle,
-                                  VersionHandle = NULL_VERSION_HANDLE) const;
+    HandleEntry* findHandlesByGPN(Handle h,
+                                  VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return predicateIndex.findHandlesByGPN(h, vh);
+    }
 
     /**
      * Returns the exact atom for the given name and type.

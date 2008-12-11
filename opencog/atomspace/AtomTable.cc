@@ -62,12 +62,6 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     atomSet = new AtomHashSet();
 
-    // Indices for predicates, etc.
-    predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
-    predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
-    numberOfPredicateIndices = 0;
-    predicateHandles2Indices = new HandleMap<int>();
-
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
 #endif
@@ -76,7 +70,6 @@ AtomTable::AtomTable(bool dsa)
 
 AtomTable::~AtomTable()
 {
-#ifdef USE_ATOM_HASH_SET
     // remove all atoms from AtomTable
     AtomHashSet::iterator it = atomSet->begin();
 
@@ -87,8 +80,6 @@ AtomTable::~AtomTable()
     }
     atomSet->clear();
     delete (atomSet);
-#endif
-    delete (predicateHandles2Indices);
 }
 
 bool AtomTable::isCleared(void) const
@@ -109,21 +100,6 @@ bool AtomTable::isCleared(void) const
     if (targetTypeIndex.size() != 0) return false;
     if (predicateIndex.size() != 0) return false;
 
-    for (int i = 0; i < MAX_PREDICATE_INDICES; i++) {
-        if (predicateHandles[i] != Handle::UNDEFINED) {
-            //printf("predicateHandles[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
-        if (predicateEvaluators[i] != 0) {
-            //printf("predicateEvaluators[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
-    }
-
-    if (predicateHandles2Indices->getCount() != 0) {
-        //printf("predicateHandles2Indices is not empty\n");
-        return false;
-    }
     for (unsigned int i = 0; i < iterators.size(); i++) {
         if (iterators[i]->hasNext()) {
             //printf("iterators[%d] is not empty\n", i);
@@ -131,26 +107,6 @@ bool AtomTable::isCleared(void) const
         }
     }
     return true;
-}
-
-void AtomTable::addPredicateIndex(Handle predicateHandle, PredicateEvaluator* evaluator)
-throw (InvalidParamException)
-{
-
-    if (numberOfPredicateIndices > MAX_PREDICATE_INDICES) {
-        throw InvalidParamException(TRACE_INFO,
-                                    "AtomTable - Exceeded number of predicate indices = %d", MAX_PREDICATE_INDICES);
-    }
-    if (predicateHandles2Indices->contains(predicateHandle)) {
-        throw InvalidParamException(TRACE_INFO,
-                                    "AtomTable - There is already an index for predicate handle %p", predicateHandle.value());
-    }
-
-    // Ok, add it.
-    predicateHandles2Indices->add(predicateHandle, numberOfPredicateIndices);
-    predicateHandles[numberOfPredicateIndices] = predicateHandle;
-    predicateEvaluators[numberOfPredicateIndices] = evaluator;
-    numberOfPredicateIndices++;
 }
 
 void AtomTable::registerIterator(HandleIterator* iterator)
@@ -213,37 +169,12 @@ inline unsigned int AtomTable::getNameHash(Atom* atom) const
     return strHash(nnn->getName().c_str());
 }
 
-PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const
-{
-    PredicateEvaluator* result = NULL;
-    if (predicateHandles2Indices->contains(gpnHandle)) {
-        int index = predicateHandles2Indices->get(gpnHandle);
-        result = predicateEvaluators[index];
-    }
-    return result;
-}
-
 HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle vh) const
 {
     //printf("AtomTable::findHandlesByGPN(%s)\n", gpnNodeName);
     // Get the GroundPredicateNode with such name
     Handle gpnHandle = getHandle(gpnNodeName, GROUNDED_PREDICATE_NODE);
     HandleEntry* result = findHandlesByGPN(gpnHandle);
-    result = HandleEntry::filterSet(result, vh);
-    return result;
-}
-
-HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const
-{
-    HandleEntry* result = NULL;
-    if (TLB::isValidHandle(gpnHandle)) {
-        //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);
-        if (predicateHandles2Indices->contains(gpnHandle)) {
-            int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
-            //printf("AtomTable::findHandlesByGPN(): found index %d for gpnHandle\n", index);
-            result = predicateIndex.getHandleSet(index);
-        }
-    }
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
@@ -584,25 +515,17 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (nnn) {
         nameIndex.insert(nnn->getName().c_str(), handle);
     }
-    typeIndex.insert(atom->getType(), handle);
     if (lll) {
         targetTypeIndex.insertLink(*lll);
     }
+    typeIndex.insert(atom->getType(), handle);
 
     // The atom is placed on its proper importance index list.
     int bin = ImportanceIndex::importanceBin(atom->getAttentionValue().getSTI());
     //logger().debug("adding handle %p with sti %d into importanceIndex (bin = %d)\n", handle, atom->getAttentionValue().getSTI(), bin);
     importanceIndex.insert(bin, handle);
 
-    // Checks Atom against predicate indices and insert it if needed
-    for (int i = 0; i < numberOfPredicateIndices; i++) {
-        // printf("Processing predicate index %d\n");
-        PredicateEvaluator* evaluator = predicateEvaluators[i];
-        // printf("Evaluating handle %p with PredicateEvaluator  = %p\n", handle, evaluator);
-        if (evaluator->evaluate(handle)) {
-            predicateIndex.insert(i, handle);
-        }
-    }
+    predicateIndex.insertHandle(handle);
 
     // Updates incoming set of all targets.
     if (dont_defer_incoming_links && (lll != NULL)) {

@@ -83,16 +83,6 @@ private:
      */
     void saveLinks(FILE *, AtomTable&, int & );
 
-
-    /**
-     * This method saves all indices in a given file.
-     *
-     * @param File where indices will be written.
-     * @param The table to write.
-     */
-    void saveIndices(FILE *, AtomTable& );
-
-
     /**
      * This method loads ClassServer information for
      * compatibility purposes.
@@ -119,15 +109,6 @@ private:
      * loading.
      */
     void loadLinks(FILE *, HandleMap<Atom *> *, AtomTable& );
-
-    /**
-     * This method loads indices from a given file.
-     *
-     * @param File from where indices will be read.
-     * @param Table that maps from old to new handles, necessary during
-     * loading.
-     */
-    void loadIndices(FILE *, AtomTable&,  HandleMap<Atom *>*, const std::vector<Type>&);
 
     /**
      * This post-loading method translates all occurrences of old handles

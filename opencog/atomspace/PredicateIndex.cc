@@ -1,6 +1,13 @@
 /*
  * opencog/atomspace/PredicateIndex.cc
  *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
+ *            Welter Silva <welter@vettalabs.com>
+ *
  * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,12 +29,30 @@
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/HandleEntry.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/VersionHandle.h>
 
 using namespace opencog;
 
 PredicateIndex::PredicateIndex(void)
 {
 	resize(MAX_PREDICATE_INDICES);
+	predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
+	predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
+	numberOfPredicateIndices = 0;
+}
+
+void PredicateIndex::insertHandle(Handle h)
+{
+	// Checks Atom against predicate indices and insert it if needed
+	for (int i = 0; i < numberOfPredicateIndices; i++)
+	{
+		PredicateEvaluator* evaluator = predicateEvaluators[i];
+		if (evaluator->evaluate(h))
+		{
+			insert(i, h);
+		}
+	}
 }
 
 void PredicateIndex::removeHandle(Handle h)
@@ -52,4 +77,92 @@ HandleEntry * PredicateIndex::getHandleSet(int index) const
 	}
 	return he;
 }
+
+// ================================================================
+/**
+ * Adds a new predicate index to this atom table given the Handle of
+ * the PredicateNode.
+ * @param The handle of the predicate node, whose name is the id
+ *        of the predicate.
+ * @param The evaluator used to check if such predicate is true
+ *        for a given handle.
+ * Throws exception if:
+ *      - the given Handle is not in the AtomTable
+ *      - there is already an index for this predicate id/Handle
+ *      - the predicate index table is full.
+ * NOTE: Does not apply the new predicate index to the atoms
+ * inserted previously in the AtomTable.
+ */
+void PredicateIndex::addPredicateIndex(Handle ph,
+                                       PredicateEvaluator* evaluator)
+      throw (InvalidParamException)
+{
+	if (numberOfPredicateIndices > MAX_PREDICATE_INDICES)
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"AtomTable - Exceeded number of predicate indices = %d",
+			MAX_PREDICATE_INDICES);
+	}
+
+	std::map<Handle, int>::iterator it;
+	it = predicateHandles2Indices.find(ph);
+	if (predicateHandles2Indices.end() != it)
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"AtomTable - There is already an index for predicate handle %p",
+			ph.value());
+	}
+
+	// Ok, add it.
+	predicateHandles2Indices.insert(
+		pair<Handle,int>(ph, numberOfPredicateIndices));
+	predicateHandles[numberOfPredicateIndices] = ph;
+	predicateEvaluators[numberOfPredicateIndices] = evaluator;
+	numberOfPredicateIndices++;
+}
+
+/**
+ * Returns the Predicate evaluator for a given
+ * GroundedPredicateNode Handle, if it is being used as a
+ * lookup index. Otherwise, returns NULL.
+ */
+PredicateEvaluator* PredicateIndex::getPredicateEvaluator(Handle gpnHandle) const
+{
+	PredicateEvaluator* result = NULL;
+
+	std::map<Handle, int>::const_iterator it;
+	it = predicateHandles2Indices.find(gpnHandle);
+	if (predicateHandles2Indices.end() != it)
+	{
+		int index = it->second;
+		result = predicateEvaluators[index];
+	}
+	return result;
+}
+
+/**
+ * Returns a list of handles that matches the GroundedPredicateNode
+ * with the given Handle.
+ * @param the Handle of the predicate node.
+ * @param VersionHandle for filtering the resulting atoms by
+ *       context. NULL_VERSION_HANDLE indicates no filtering
+ **/
+HandleEntry* PredicateIndex::findHandlesByGPN(Handle gpnHandle,
+                                                  VersionHandle vh) const
+{
+	if (!TLB::isValidHandle(gpnHandle)) return NULL;
+
+	HandleEntry* result = NULL;
+
+	std::map<Handle, int>::const_iterator it;
+	it = predicateHandles2Indices.find(gpnHandle);
+	if (predicateHandles2Indices.end() != it)
+	{
+		int index = it->second;
+		result = getHandleSet(index);
+	}
+	result = HandleEntry::filterSet(result, vh);
+	return result;
+}
+
 // ================================================================

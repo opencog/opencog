@@ -97,7 +97,6 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
 
     saveNodes(f, atomTable, atomCount);
     saveLinks(f, atomTable, atomCount);
-    saveIndices(f, atomTable);
 
     atomSpace.timeServer.saveRepository(f);
     saveRepositories(f);
@@ -211,23 +210,6 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     fseek(f, 0, SEEK_END);
 }
 
-
-void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
-{
-    logger().fine("SavingLoading::saveIndices");
-
-    // writes the head of each index list on the file
-    fwrite(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
-
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        fwrite(&(atomTable.predicateHandles[i]), sizeof(Handle), 1, f);
-    }
-// TODO: Save predicate type to rebuild predicateEvaluators when loading dump. For now, assuming always TreePredicateEvaluators
-//    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-//        fwrite(&(atomTable.predicateEvaluators[i]), sizeof(Handle), 1, f);
-//    }
-}
-
 void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (RuntimeException, IOException, InconsistenceException)
 {
     clearRepositories();
@@ -277,7 +259,6 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     loadClassServerInfo(f, dumpToCore);
     loadNodes(f, handles, atomTable);
     loadLinks(f, handles, atomTable);
-    loadIndices(f, atomTable, handles, dumpToCore);
 
     // logger().info("nodes, links and indices loaded. number of handles = %d", handles->getCount());
     // update types in all atoms
@@ -398,29 +379,6 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         fflush(stdout);
     }
     atomTable.size += numLinks;
-}
-
-void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
-                                HandleMap<Atom *>* handles,
-                                const std::vector<Type>& dumpToCore)
-{
-    logger().fine("SavingLoading::loadIndices");
-
-    printProgress("load", (int) (100 * (((float) processed + (1.00 * ((total * INDEX_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    fflush(stdout);
-
-    fread(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        fread(&(atomTable.predicateHandles[i]), sizeof(Handle), 1, f);
-    }
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        CoreUtils::updateHandle(&(atomTable.predicateHandles[i]), handles);
-    }
-    // TODO: Read predicate type to rebuild predicateEvaluators. For now, assuming always TreePredicateEvaluators
-    /*    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-            atomTable.predicateEvaluators[i] = new TreePredicateEvaluator(atomTable.predicateHandles[i]);
-            atomTable.predicateHandles2Indices->add(atomTable.predicateHandles[i],(int*)i);
-        }*/
 }
 
 void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
