@@ -55,7 +55,7 @@ DECLARE_MODULE(PLNModule)
 void initTestEnv();
 void initTests();
 void Init();
-void RunCommand(std::list<std::string> args);
+std::string RunCommand(std::list<std::string> args);
 
 PLNModule::PLNModule() : Module()
 {
@@ -97,9 +97,9 @@ std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
 
 //    initTestEnv(args);
 
-    RunCommand(args);
+    std::string output = RunCommand(args);
 
-	return "ran pln command";
+	return output;
 }
 
 #ifdef _MSC_VER
@@ -125,7 +125,7 @@ namespace reasoning
 namespace test
 {
     extern FILE *logfile;
-    int _test_count = 0;
+//    int _test_count = 0;
     bool debugger_control = false;
 }
 
@@ -231,7 +231,7 @@ T input(T& a, std::list<std::string> args)
     return a;
 }
 
-void RunCommand(std::list<std::string> args)
+std::string RunCommand(std::list<std::string> args)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -256,7 +256,9 @@ void RunCommand(std::list<std::string> args)
 //  assert(RuleRepository::Instance().rule[Deduction]->validate(targs));
 //  assert(!RuleRepository::Instance().rule[Deduction]->validate(targs));
 
- try {
+    std::stringstream ss;
+
+    try {
         printf("Root = %ld\n", (long)state);
         
 //    while (1)
@@ -293,7 +295,8 @@ void RunCommand(std::list<std::string> args)
         switch (c)
         {
             case 'm':
-                printf("%d\n", test::_test_count); break;
+                //printf("%d\n", (int)tests.size()); break;
+                ss << (int)tests.size() << std::endl;
             case 'd':
 #if LOCAL_ATW
             ((LocalATW*)atw)->DumpCore(CONCEPT_NODE);
@@ -305,6 +308,7 @@ void RunCommand(std::list<std::string> args)
                 if (atw->getTV(ti).isNullTv())
                 {
                     puts("NULL TV !!!");
+                    // TODO
                     getc(stdin);
                 }
                 printTree(ti,0,0);
@@ -403,7 +407,10 @@ void RunCommand(std::list<std::string> args)
                                 using_root = true;
                             }
                             break;
-            case '=': input(h, args); input(h2, args); cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
+            case '=': input(h, args); input(h2, args); 
+                      cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
+/*                      ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
+                                "EQ" : "IN-EQ" ) << std::endl;*/
             case 'p': input(h, args); printTree((Handle)h,0,0); break;
             case 'e':   try { state->evaluate(); }
                         catch(string s) { cprintf(0,s.c_str()); }
@@ -488,7 +495,8 @@ void RunCommand(std::list<std::string> args)
 
                         break;
             case 'c': RECORD_TRAILS = !RECORD_TRAILS;
-                        cprintf(0, "RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
+                        //cprintf(0, "RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
+                        ss << "RECORD_TRAILS " << (RECORD_TRAILS?"ON":"OFF") << "\n";
                         break;
             case '-': input(h, args); currentDebugLevel = -(int)h; break;
 
@@ -510,9 +518,11 @@ void RunCommand(std::list<std::string> args)
                     break;
         }
 //    }
- } catch( exception& e )
+    } catch( exception& e )
     {
         cout << endl << "Exception: "
              << e.what() << endl;
-    }   
+    }
+    
+    return ss.str();
 }
