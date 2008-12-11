@@ -27,8 +27,11 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
 {
     Atom *aa = TLB::getAtom(ha);
     Atom *ab = TLB::getAtom(hb);
-    const std::vector<Handle> &va = aa->getOutgoingSet();
-    const std::vector<Handle> &vb = ab->getOutgoingSet();
+    Link *la = dynamic_cast<Link*>(aa);
+    Link *lb = dynamic_cast<Link*>(ab);
+    if (!la || !lb) return false;
+    const std::vector<Handle> &va = la->getOutgoingSet();
+    const std::vector<Handle> &vb = lb->getOutgoingSet();
 
     size_t vasz = va.size();
     size_t vbsz = vb.size();

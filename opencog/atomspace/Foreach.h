@@ -11,6 +11,7 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/TLB.h>
 
 namespace opencog
@@ -23,7 +24,10 @@ template<class T>
 inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
     Atom *atom = TLB::getAtom(h);
-    const std::vector<Handle> &vh = atom->getOutgoingSet();
+    Link *link = dynamic_cast<Link *>(atom);
+    if (NULL == link) return false;
+
+    const std::vector<Handle> &vh = link->getOutgoingSet();
 
     for (size_t i = 0; i < vh.size(); i++) {
         Handle hout = vh[i];
@@ -40,7 +44,10 @@ template<class T>
 inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 {
     Atom *atom = TLB::getAtom(h);
-    const std::vector<Handle> &vh = atom->getOutgoingSet();
+    Link *link = dynamic_cast<Link *>(atom);
+    if (NULL == link) return false;
+
+    const std::vector<Handle> &vh = link->getOutgoingSet();
 
     for (size_t i = 0; i < vh.size(); i++) {
         Handle hout = vh[i];
