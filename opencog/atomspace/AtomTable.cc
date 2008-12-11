@@ -171,25 +171,21 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 
 Handle AtomTable::getHandle(const char* name, Type type) const
 {
+    // XXX It would probably improve performance to skip the
+    // class-server check entirely.
     if (!ClassServer::isAssignableFrom(NODE, type)) {
         return Handle::UNDEFINED;
     }
-    Node node(type, name); // alloc on stack, avoid memory frag
-    return getHandle(&node);
+    Handle h = nameIndex.get(name);
+    if (TLB::isInvalidHandle(h)) return Handle::UNDEFINED;
+    Atom *a = TLB::getAtom(h);
+    if (type != a->getType()) return Handle::UNDEFINED;
+    return h;
 }
 
-// This call is nearly identical to that above.
-// This call signature avoids one string copy in the 
-// that would otherwise occur oncall to getHandle
 Handle AtomTable::getHandle(const Node *node) const
 {
-    AtomHashSet::const_iterator it = atomSet.find(node);
-    Handle result = Handle::UNDEFINED;
-    if (it != atomSet.end()) {
-        const Atom* resultAtom = *it;
-        result = TLB::getHandle(resultAtom);
-    }
-    return result;
+    return getHandle(node->getName().c_str(), node->getType());
 }
 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
