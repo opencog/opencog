@@ -38,7 +38,13 @@
 #define HYPOTETHICAL_FLAG       16 //BIT4
 #define REMOVED_BY_DECAY        32 //BIT5
 
+// XXX This is awfully large ... does importance really need to 
+// be tracked on this fine a scale? Making this too fine will chew up
+// CPU time simply by moving atoms from one index to another ... 
 #define IMPORTANCE_INDEX_SIZE   (1 << 16)
+
+// This can be made orders of magnitude larger, if desired,
+// with relatively little cost.
 #define MAX_PREDICATE_INDICES   32
 
 #endif // _OPENCOG_ATOMSPACE_DEFINITIONS_H_
