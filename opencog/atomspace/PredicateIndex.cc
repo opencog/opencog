@@ -21,6 +21,7 @@
 
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/HandleEntry.h>
 
 using namespace opencog;
 
@@ -29,4 +30,26 @@ PredicateIndex::PredicateIndex(void)
 	resize(MAX_PREDICATE_INDICES);
 }
 
+void PredicateIndex::removeHandle(Handle h)
+{
+	std::vector<std::set<Handle> >::iterator s;
+	for (s = idx.begin(); s != idx.end(); s++)
+	{
+		s->erase(h);
+	}
+}
+
+HandleEntry * PredicateIndex::getHandleSet(int index) const
+{
+	const std::set<Handle> &s = idx.at(index);
+	std::set<Handle>::const_iterator it;
+	HandleEntry *he = NULL;
+	for (it = s.begin(); it != s.end(); it++)
+	{
+		HandleEntry *nhe = new HandleEntry(*it);
+		nhe->next = he;
+		he = nhe;
+	}
+	return he;
+}
 // ================================================================

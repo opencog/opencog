@@ -236,17 +236,14 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const
 {
     HandleEntry* result = NULL;
-#if 0
-xxxxxxxxxxxxxxxxxxxxxxxx
     if (TLB::isValidHandle(gpnHandle)) {
         //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);
         if (predicateHandles2Indices->contains(gpnHandle)) {
             int index = (int)((long) predicateHandles2Indices->get(gpnHandle));
             //printf("AtomTable::findHandlesByGPN(): found index %d for gpnHandle\n", index);
-            result = makeSet(NULL, getPredicateIndexHead(index), PREDICATE_INDEX | index);
+            result = predicateIndex.getHandleSet(index);
         }
     }
-#endif
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
@@ -709,12 +706,6 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
-#if 0
-xxxxxxxxxxxxxxxx
-    // remove from indices
-    removeFromPredicateIndex(atom);
-#endif 
-
     Node *node = dynamic_cast<Node*>(atom);
     if (node) {
        nameIndex.remove(node->getName().c_str(), handle);
@@ -722,6 +713,7 @@ xxxxxxxxxxxxxxxx
     typeIndex.remove(atom->getType(), handle);
     int sti = atom->getAttentionValue().getSTI();
     importanceIndex.remove(ImportanceIndex::importanceBin(sti), handle);
+    predicateIndex.removeHandle(handle);
 
     Link* link = dynamic_cast<Link*>(atom);
     if (link) {

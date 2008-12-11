@@ -26,9 +26,10 @@
 
 namespace opencog
 {
+class HandleEntry;
 
 /**
- * Implements an index with additiona routines needed for managing 
+ * Implements an index with additional routines needed for managing 
  * predicates.
  */
 class PredicateIndex:
@@ -36,6 +37,8 @@ class PredicateIndex:
 {
 	public:
 		PredicateIndex(void);
+		void removeHandle(Handle);
+		HandleEntry * getHandleSet(int) const;
 };
 
 } //namespace opencog

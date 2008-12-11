@@ -475,6 +475,10 @@ public:
         return importanceIndex.getHandleSet(lowerBound, upperBound);
     }
 
+    HandleEntry* getPredicateHandleSet(int index)
+    {
+        return predicateIndex.getHandleSet(index);
+    }
 
     /**
      * Updates the importance index for the given atom. According to the

@@ -104,26 +104,6 @@ bool Atom::isReal() const
     return real;
 }
 
-//float Atom::getHeat() {
-
-//    return ShortFloatOps::getValue(&heat);
-//}
-
-//void Atom::rawSetHeat(float value) {
-
-//    // if the value is out of bounds, it is set to either the upper or lower bound
-//    if (value > 1) value = 1;
-//    if (value < 0) value = 0;
-
-//    ShortFloatOps::setValue(&heat, value);
-//}
-
-//void Atom::setHeat(float value) {
-//    float old = getHeat();
-//    rawSetHeat(value);
-//    StatisticsMonitor::getInstance()->updateHeatSummation(type, getHeat() - old);
-//}
-
 const AttentionValue& Atom::getAttentionValue() const
 {
     return attentionValue;
@@ -371,26 +351,6 @@ void Atom::merge(Atom* other) throw (InconsistenceException)
 
     //cprintf(DEBUG, ">> This atom's truth values after merge: %f %f %f\n", truthValue->getMean(), truthValue->getConfidence(), truthValue->getCount());
 }
-
-#if 0
-xxxxxxxxxxx
-int* Atom::buildPredicateIndices(int *size) const
-{
-    unsigned long mask = predicateIndexInfo->predicateIndexMask;
-    *size = bitcount(mask);
-    int* result = new int[*size ];
-    int pos = 0;
-    int predicateIndex = 0;
-    while (mask) {
-        if (mask & 1) {
-            result[pos++] = predicateIndex;
-        }
-        predicateIndex++;
-        mask >>= 1;
-    }
-    return result;
-}
-#endif
 
 bool Atom::getFlag(int flag) const
 {
