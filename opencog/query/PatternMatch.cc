@@ -111,7 +111,9 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	}
 
 	// The number of outgoing edges must match.
-	if(aa->getArity() != ab->getArity()) return true;
+	Link *la = dynamic_cast<Link *>(aa);
+	Link *lb = dynamic_cast<Link *>(ab);
+	if (la && lb && la->getArity() != lb->getArity()) return true;
 
 	// If one is null, but the other is not, there's clearly no match.
 	if (aa && !ab) return true;
