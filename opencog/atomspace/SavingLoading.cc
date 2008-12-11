@@ -340,9 +340,9 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
         Handle handle = TLB::getHandle(node);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
-        atomTable.nameIndex.insert(node->getName().c_str(), handle);
-        atomTable.typeIndex.insert(node->getType(), handle);
 
+        atomTable.nameIndex.insert(node->getName().c_str(), handle);
+        atomTable.typeIndex.insertHandle(handle);
         atomTable.importanceIndex.insertHandle(handle);
         atomTable.predicateIndex.insertHandle(handle);
 
@@ -369,9 +369,9 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
         Handle handle = TLB::getHandle(link);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
-        atomTable.typeIndex.insert(link->getType(), handle);
-        atomTable.targetTypeIndex.insertLink(*link);
 
+        atomTable.typeIndex.insertHandle(handle);
+        atomTable.targetTypeIndex.insertHandle(handle);
         atomTable.importanceIndex.insertHandle(handle);
         atomTable.predicateIndex.insertHandle(handle);
 

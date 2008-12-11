@@ -497,11 +497,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (nnn) {
         nameIndex.insert(nnn->getName().c_str(), handle);
     }
-    if (lll) {
-        targetTypeIndex.insertLink(*lll);
-    }
 
     typeIndex.insertHandle(handle);
+    targetTypeIndex.insertHandle(handle);
     importanceIndex.insertHandle(handle);
     predicateIndex.insertHandle(handle);
 
@@ -600,14 +598,14 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (node) {
        nameIndex.remove(node->getName().c_str(), handle);
     }
+
     typeIndex.removeHandle(handle);
+    targetTypeIndex.removeHandle(handle);
     importanceIndex.removeHandle(handle);
     predicateIndex.removeHandle(handle);
 
     Link* link = dynamic_cast<Link*>(atom);
     if (link) {
-        targetTypeIndex.removeLink(*link);
-
         // Remove from incoming sets.
         for (int i = 0; i < link->getArity(); i++) {
             Atom* target = link->getOutgoingAtom(i);

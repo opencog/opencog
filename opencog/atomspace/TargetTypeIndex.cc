@@ -35,13 +35,16 @@ TargetTypeIndex::TargetTypeIndex(void)
 	resize(ClassServer::getNumberOfClasses() + 2);
 }
 
-void TargetTypeIndex::insertLink(const Link &l)
+void TargetTypeIndex::insertHandle(Handle h)
 {
-	int arity = l.getArity();
+	Atom *a = TLB::getAtom(h);
+	Link *l = dynamic_cast<Link *>(a);
+	if (!l) return;
+
+	int arity = l->getArity();
 	if (0 == arity) return;
 
-	Handle h = TLB::getHandle(&l);
-	const std::vector<Handle>& oset = l.getOutgoingSet();
+	const std::vector<Handle>& oset = l->getOutgoingSet();
 	std::set<Type> done_already;
 	for (int i = 0; i < arity; i++)
 	{
@@ -54,13 +57,16 @@ void TargetTypeIndex::insertLink(const Link &l)
 	}
 }
 
-void TargetTypeIndex::removeLink(const Link &l)
+void TargetTypeIndex::removeHandle(Handle h)
 {
-	int arity = l.getArity();
+	Atom *a = TLB::getAtom(h);
+	Link *l = dynamic_cast<Link *>(a);
+	if (!l) return;
+
+	int arity = l->getArity();
 	if (0 == arity) return;
 
-	Handle h = TLB::getHandle(&l);
-	const std::vector<Handle>& oset = l.getOutgoingSet();
+	const std::vector<Handle>& oset = l->getOutgoingSet();
 	std::set<Type> done_already;
 	for (int i = 0; i < arity; i++)
 	{

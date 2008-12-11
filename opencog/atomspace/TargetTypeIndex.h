@@ -39,8 +39,8 @@ class TargetTypeIndex:
 {
 	public:
 		TargetTypeIndex(void);
-		void insertLink(const Link &);
-		void removeLink(const Link &);
+		void insertHandle(Handle);
+		void removeHandle(Handle);
 };
 
 } //namespace opencog
