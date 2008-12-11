@@ -87,7 +87,7 @@ std::string Link::toShortString(void) const
 #define BUFSZ 1024
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "[%d %s", type, (getFlag(HYPOTETHICAL_FLAG) ? "h " : ""));
+    snprintf(buf, BUFSZ, "[%s %s", ClassServer::getTypeName(type).c_str(), (getFlag(HYPOTETHICAL_FLAG) ? "h " : ""));
     answer += buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
@@ -112,7 +112,7 @@ std::string Link::toString(void) const
     std::string answer;
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "link[%d sti:(%d,%d) tv:(%f,%f) ", type,
+    snprintf(buf, BUFSZ, "link[%s sti:(%d,%d) tv:(%f,%f) ", ClassServer::getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().getMean(),
@@ -130,7 +130,7 @@ std::string Link::toString(void) const
             Atom *a = TLB::getAtom(outgoing[i]);
             Node *nnn = dynamic_cast<Node *>(a);
             if (nnn) {
-                snprintf(buf, BUFSZ, "[%d ", a->getType());
+                snprintf(buf, BUFSZ, "[%s ", ClassServer::getTypeName(a->getType()).c_str());
                 answer += buf;
                 answer += nnn->getName();
                 answer += "]";
