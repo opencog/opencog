@@ -20,6 +20,8 @@ using namespace opencog;
 int atomCompare(Atom *a, Atom *b)
 {
 	int rc = 0;
+	Link *la = dynamic_cast<Link *>(a);
+	Link *lb = dynamic_cast<Link *>(b);
 	if (NULL == b)
 	{
 		fprintf(stderr, "Error: No atom found\n");
@@ -31,16 +33,16 @@ int atomCompare(Atom *a, Atom *b)
 		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
 		rc --;
 	}
-	if (a->getArity() != b->getArity())
+	if (la->getArity() != lb->getArity())
 	{
-		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", a->getArity(), b->getArity());
+		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", la->getArity(), lb->getArity());
 		rc --;
 	}
-	if (0 < a->getArity())
+	if (0 < la->getArity())
 	{
-		std::vector<Handle> outa = a->getOutgoingSet();
-		std::vector<Handle> outb = b->getOutgoingSet();
-		for (int i =0; i< a->getArity(); i++)
+		std::vector<Handle> outa = la->getOutgoingSet();
+		std::vector<Handle> outb = lb->getOutgoingSet();
+		for (int i =0; i< la->getArity(); i++)
 		{
 			if (outa[i] != outb[i])
 			{
