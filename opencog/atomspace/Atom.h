@@ -35,6 +35,7 @@
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/exceptions.h>
 
 #define USE_STD_VECTOR_FOR_OUTGOING
@@ -187,13 +188,6 @@ public:
     }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    //**
-    // * Returns the heat value of the atom.
-    // *
-    // * @return The heat value of the atom.
-    // */
-    //float getHeat();
-
     /**
      * Returns the AttentionValue object of the atom.
      *
@@ -230,20 +224,6 @@ public:
      * Sets the TruthValue object of the atom.
      */
     void setTruthValue(const TruthValue&);
-
-    ///**
-    // * Changes the heat value.
-    // *
-    // * @param The new heat value.
-    // */
-    //void setHeat(float);
-
-    ///**
-    // * Changes the heat value with no statistics update.
-    // *
-    // * @param The new heat value.
-    // */
-    //void rawSetHeat(float);
 
     /**
      * Returns a pointer to a linked-list containing the atoms that are
@@ -343,35 +323,6 @@ public:
      */
     Handle next(int index);
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    /**
-     * Builds the target type index structure according to the types of
-     * elements in the outgoing set of the given atom.
-     *
-     * @return A pointer to target types array built.
-     * NOTE: The argument size gets the size of the returned array.
-     */
-    Type* buildTargetIndexTypes(int *size);
-
-    /**
-     * Returns the position of a certain type on the reduced array of
-     * target types of an atom.
-     *
-     * @param The type which will be searched in the reduced target types
-     * index array.
-     * @return The position of the given type in the reduced array of
-     * target types.
-     */
-    int locateTargetIndexTypes(Type) const;
-
-    /**
-     * Returns the number of different target types of an atom.
-     *
-     * @return The number of different target types of an atom.
-     */
-    int getTargetTypeIndexSize() const;
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
     /**
      * Indicates if this atom has any predicate index information
      *
@@ -393,7 +344,10 @@ public:
      *
      * @return Whether this atom is marked for removal.
      */
-    bool isMarkedForRemoval() const;
+    bool isMarkedForRemoval() const
+    {
+        return (flags & MARKED_FOR_REMOVAL) != 0;
+    }
 
     /**
      * Returns a desired atom flag. A byte represents all flags. Each bit
@@ -423,7 +377,11 @@ public:
     void unsetRemovalFlag();
 
     /* tests the atom's sti */
-    bool isOld(const AttentionValue::sti_t threshold) const;
+    bool isOld(const AttentionValue::sti_t threshold) const
+    {
+        return ((attentionValue.getSTI() < threshold) &&
+                (attentionValue.getLTI() < 1));
+    }
 
     /**
      * Returns neighboring atoms, following links and returning their

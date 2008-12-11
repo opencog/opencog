@@ -490,81 +490,6 @@ void Atom::merge(Atom* other) throw (InconsistenceException)
     //cprintf(DEBUG, ">> This atom's truth values after merge: %f %f %f\n", truthValue->getMean(), truthValue->getConfidence(), truthValue->getCount());
 }
 
-bool Atom::isMarkedForRemoval() const
-{
-    //printf("Atom::isMarkedForRemoval(): %p\n", this);
-    return (flags & MARKED_FOR_REMOVAL) != 0;
-}
-
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-int Atom::locateTargetIndexTypes(Type key) const
-{
-    if (getArity() == 0) return -1;
-
-    std::set<Type> checkedTypes;
-    int j = 0;
-    // for each type in the target types array, it checks if it has already
-    // been found so that repeated types are not considered. If a type is equal
-    // to the parameter passed, its position in the array is returned
-    for (int i = 0; i < getArity(); i++) {
-        Type type = TLB::getAtom(outgoing[i])->getType();
-        if (checkedTypes.find(type) == checkedTypes.end()) {
-            if (type == key) {
-                return j;
-            }
-            j++;
-            checkedTypes.insert(type);
-        }
-    }
-
-    // if the parameter type is not found in the array returns -1
-    return -1;
-}
-
-Type* Atom::buildTargetIndexTypes(int *size)
-{
-    *size = 0;
-    if (getArity() == 0) {
-        return NULL;
-    }
-
-    // types array has size arity
-    Type* types = new Type[getArity()];
-
-    // keeps a boolean for every possible type
-    std::set<unsigned int> checkedTypes;
-
-    // fills the types array with new entries only, ignoring duplicated types
-    for (int i = 0; i < getArity(); i++) {
-        Type type = TLB::getAtom(outgoing[i])->getType();
-        if (checkedTypes.find(type) == checkedTypes.end()) {
-            types[(*size)++] = type;
-            checkedTypes.insert(type);
-        }
-    }
-
-    return types;
-}
-
-int Atom::getTargetTypeIndexSize() const
-{
-    std::set<unsigned int> checkedTypes;
-    int j = 0;
-    // for each type in the target types array, it checks if it has already
-    // been found so that repeated types are not considered in the counting
-    for (int i = 0; i < getArity(); i++) {
-        Type type = TLB::getAtom(outgoing[i])->getType();
-        if (checkedTypes.find(type) == checkedTypes.end()) {
-            j++;
-            checkedTypes.insert(type);
-        }
-    }
-
-    // returns the number of different target types
-    return j;
-}
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
 bool Atom::hasPredicateIndexInfo()
 {
     return (predicateIndexInfo != NULL);
@@ -620,13 +545,6 @@ AtomTable *Atom::getAtomTable() const
 {
     return(atomTable);
 }
-
-bool Atom::isOld(const AttentionValue::sti_t threshold) const
-{
-    return ((attentionValue.getSTI() < threshold) &&
-            (attentionValue.getLTI() < 1));
-}
-
 
 HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const
 {
