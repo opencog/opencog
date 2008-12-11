@@ -341,7 +341,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Handle handle = TLB::getHandle(node);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
 
-        atomTable.nameIndex.insert(node->getName().c_str(), handle);
+        atomTable.nameIndex.insertHandle(handle);
         atomTable.typeIndex.insertHandle(handle);
         atomTable.importanceIndex.insertHandle(handle);
         atomTable.predicateIndex.insertHandle(handle);

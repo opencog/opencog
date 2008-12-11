@@ -38,9 +38,9 @@
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/ImportanceIndex.h>
+#include <opencog/atomspace/NameIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/PredicateIndex.h>
-#include <opencog/atomspace/StringIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
 #include <opencog/atomspace/classes.h>
@@ -95,7 +95,7 @@ private:
     bool useDSA;
 
     TypeIndex typeIndex;
-    StringIndex nameIndex;
+    NameIndex nameIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -348,7 +348,7 @@ public:
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      */
-    HandleEntry* getHandleSet(Handle,
+    HandleEntry* getHandleSet(Handle h,
                               Type type = ATOM,
                               bool subclass = true) const;
 
@@ -390,8 +390,12 @@ public:
      * @param Whether atom type subclasses should be considered.
      * @return The set of atoms of the given type and name.
      */
-    HandleEntry* getHandleSet(const char*,
-                              Type type = ATOM, bool subclass = true) const;
+    HandleEntry* getHandleSet(const char* name,
+                              Type type = ATOM, bool subclass = true) const
+    {
+        HandleEntry *set = nameIndex.getHandleSet(name);
+        return HandleEntry::filterSet(set, type, subclass);
+    }
 
     /**
      * Returns the set of atoms whose outgoing set contains at least one

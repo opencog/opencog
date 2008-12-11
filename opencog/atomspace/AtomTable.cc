@@ -332,13 +332,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass) const
-{
-    Handle h = nameIndex.get(name);
-    HandleEntry* set = new HandleEntry(h);
-    return HandleEntry::filterSet(set, type, subclass);
-}
-
 HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass) const
 {
 
@@ -493,11 +486,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Handle handle = TLB::getHandle(atom);
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    // The atom is placed on its proper name index list.
-    if (nnn) {
-        nameIndex.insert(nnn->getName().c_str(), handle);
-    }
-
+    nameIndex.insertHandle(handle);
     typeIndex.insertHandle(handle);
     targetTypeIndex.insertHandle(handle);
     importanceIndex.insertHandle(handle);
@@ -594,11 +583,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
-    Node *node = dynamic_cast<Node*>(atom);
-    if (node) {
-       nameIndex.remove(node->getName().c_str(), handle);
-    }
-
+    nameIndex.removeHandle(handle);
     typeIndex.removeHandle(handle);
     targetTypeIndex.removeHandle(handle);
     importanceIndex.removeHandle(handle);

@@ -18,6 +18,7 @@ ADD_LIBRARY (atomspace SHARED
 	IndefiniteTruthValue.cc
 	Link.cc
 	md5.c
+	NameIndex.cc
 	Node.cc
 	NullTruthValue.cc
    PredicateIndex.cc
@@ -83,6 +84,7 @@ INSTALL (FILES
 	ImportanceIndex.h
 	Link.h
 	md5.h
+	NameIndex.h
 	Node.h
 	NullTruthValue.h
 	PredicateEvaluator.h
