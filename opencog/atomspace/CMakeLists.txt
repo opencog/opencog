@@ -16,7 +16,6 @@ ADD_LIBRARY (atomspace SHARED
 	HandleToTemporalEntryMap.cc
 	ImportanceIndex.cc
 	IndefiniteTruthValue.cc
-	IntegerIndex.cc
 	Link.cc
 	md5.c
 	Node.cc
@@ -82,7 +81,6 @@ INSTALL (FILES
 	HandleToTemporalEntryMap.h
 	IndefiniteTruthValue.h
 	ImportanceIndex.h
-	IntegerIndex.h
 	Link.h
 	md5.h
 	Node.h
