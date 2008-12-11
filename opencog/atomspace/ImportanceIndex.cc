@@ -55,18 +55,6 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 }
 
 /**
- * Returns the mean importance value for the given importance bin (the
- * average between the lower and upper importance bounds for the bin).
- *
- * @param Importance bin to be mapped.
- * @return The mean importance value for the given importance bin.
- */
-float ImportanceIndex::importanceBinMeanValue(unsigned int bin)
-{
-	return (((float) bin) + 0.5) / ((float) IMPORTANCE_INDEX_SIZE);
-}
-
-/**
  * Updates the importance index for the given atom. According to the
  * new importance of the atom, it may change importance bins.
  *
@@ -82,6 +70,24 @@ void ImportanceIndex::updateImportance(Atom* atom, int bin)
 	remove(bin, h);
 	insert(newbin, h);
 }
+
+void ImportanceIndex::insertHandle(Handle h)
+{
+	Atom *atom = TLB::getAtom(h);
+	int sti = atom->getAttentionValue().getSTI();
+	int bin = importanceBin(sti);
+	insert(bin, h);
+}
+
+void ImportanceIndex::removeHandle(Handle h)
+{
+	Atom *atom = TLB::getAtom(h);
+	int sti = atom->getAttentionValue().getSTI();
+	int bin = importanceBin(sti);
+	remove(bin, h);
+}
+
+// ================================================================
 
 HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 {

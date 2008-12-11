@@ -42,13 +42,14 @@ class ImportanceIndex:
 		                               Handle, bool recursive = false);
 	public:
 		ImportanceIndex(void);
+		void insertHandle(Handle);
+		void removeHandle(Handle);
 
 		void updateImportance(Atom*, int);
 		HandleEntry* decayShortTermImportance(void);
 		HandleEntry* getHandleSet(AttentionValue::sti_t,
 		                          AttentionValue::sti_t) const;
 		static unsigned int importanceBin(short);
-		static float importanceBinMeanValue(unsigned int);
 };
 
 } //namespace opencog

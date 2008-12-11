@@ -502,11 +502,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     }
     typeIndex.insert(atom->getType(), handle);
 
-    // The atom is placed on its proper importance index list.
-    int bin = ImportanceIndex::importanceBin(atom->getAttentionValue().getSTI());
-    //logger().debug("adding handle %p with sti %d into importanceIndex (bin = %d)\n", handle, atom->getAttentionValue().getSTI(), bin);
-    importanceIndex.insert(bin, handle);
-
+    importanceIndex.insertHandle(handle);
     predicateIndex.insertHandle(handle);
 
     // Updates incoming set of all targets.
@@ -605,8 +601,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
        nameIndex.remove(node->getName().c_str(), handle);
     }
     typeIndex.remove(atom->getType(), handle);
-    int sti = atom->getAttentionValue().getSTI();
-    importanceIndex.remove(ImportanceIndex::importanceBin(sti), handle);
+    importanceIndex.removeHandle(handle);
     predicateIndex.removeHandle(handle);
 
     Link* link = dynamic_cast<Link*>(atom);

@@ -342,9 +342,9 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
         atomTable.nameIndex.insert(node->getName().c_str(), handle);
         atomTable.typeIndex.insert(node->getType(), handle);
-        int sti = node->getAttentionValue().getSTI();
-        int bin = ImportanceIndex::importanceBin(sti);
-        atomTable.importanceIndex.insert(bin, handle);
+
+        atomTable.importanceIndex.insertHandle(handle);
+        atomTable.predicateIndex.insertHandle(handle);
 
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
@@ -371,9 +371,9 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
         atomTable.typeIndex.insert(link->getType(), handle);
         atomTable.targetTypeIndex.insertLink(*link);
-        int sti = link->getAttentionValue().getSTI();
-        int bin = ImportanceIndex::importanceBin(sti);
-        atomTable.importanceIndex.insert(bin, handle);
+
+        atomTable.importanceIndex.insertHandle(handle);
+        atomTable.predicateIndex.insertHandle(handle);
 
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
