@@ -796,10 +796,14 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
             StatisticsMonitor::getInstance()->remove(atom);
 
         // remove from incoming sets
-        for (int i = 0; i < atom->getArity(); i++) {
-            Atom *outgoing = atom->getOutgoingAtom(i);
-            if (outgoing)
-                outgoing->removeIncomingHandle(h);
+        Link *lll = dynamic_cast<Link *>(atom);
+        if (lll) {
+            int arity = lll->getArity();
+            for (int i = 0; i < arity; i++) {
+                Atom *outgoing = lll->getOutgoingAtom(i);
+                if (outgoing)
+                    outgoing->removeIncomingHandle(h);
+            }
         }
     }
 

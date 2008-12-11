@@ -71,8 +71,9 @@ public:
     bool do_links(const Atom *a)
     {
         Handle h = TLB::getHandle(a);
+        const Link *l = dynamic_cast<const Link *>(a);
         std::ostringstream ost;
-        const std::vector<Handle> &out = a->getOutgoingSet();
+        const std::vector<Handle> &out = l->getOutgoingSet();
         for (size_t i = 0; i < out.size(); i++) {
             ost << h << "->" << out[i] << " [label=\"" << i << "\"];\n";
         }

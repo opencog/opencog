@@ -186,11 +186,12 @@ bool NMXmlParserExperiment::checkExp0()
     }
     Atom *atom = TLB::getAtom(handles[0]);
     link_sport_socker = handles[0];
+    Link * link = dynamic_cast<Link*>(atom);
 
-    TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
-    TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
-    if ((atom->getOutgoingSet()[0] != soccer) ||
-            (atom->getOutgoingSet()[1] != sport)) {
+    TS_ASSERT((link->getOutgoingSet()[0]) == soccer);
+    TS_ASSERT((link->getOutgoingSet()[1]) == sport);
+    if ((link->getOutgoingSet()[0] != soccer) ||
+            (link->getOutgoingSet()[1] != sport)) {
         return(false);
     }
 
@@ -235,11 +236,12 @@ bool NMXmlParserExperiment::checkExp1()
     }
     handles.clear();
 
+    Link * link = dynamic_cast<Link *>(atom);
     TS_ASSERT(TLB::isValidHandle(link_sport_socker));
-    TS_ASSERT((atom->getOutgoingSet()[0]) == soccer);
-    TS_ASSERT((atom->getOutgoingSet()[1]) == sport);
-    if ((atom->getOutgoingSet()[0] != soccer) ||
-            (atom->getOutgoingSet()[1] != sport)) {
+    TS_ASSERT((link->getOutgoingSet()[0]) == soccer);
+    TS_ASSERT((link->getOutgoingSet()[1]) == sport);
+    if ((link->getOutgoingSet()[0] != soccer) ||
+            (link->getOutgoingSet()[1] != sport)) {
         return(false);
     }
 
@@ -253,10 +255,11 @@ bool NMXmlParserExperiment::checkExp1()
     atom = TLB::getAtom(handles[0]);
     hihger_order_link = handles[0];
 
-    TS_ASSERT(atom->getOutgoingSet()[0] == link_sport_socker);
-    TS_ASSERT(atom->getOutgoingSet()[1] == soccer);
-    if ((atom->getOutgoingSet()[0] != link_sport_socker) ||
-            (atom->getOutgoingSet()[1] != soccer)) {
+    link = dynamic_cast<Link *>(atom);
+    TS_ASSERT(link->getOutgoingSet()[0] == link_sport_socker);
+    TS_ASSERT(link->getOutgoingSet()[1] == soccer);
+    if ((link->getOutgoingSet()[0] != link_sport_socker) ||
+            (link->getOutgoingSet()[1] != soccer)) {
         return(false);
     }
 

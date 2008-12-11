@@ -77,7 +77,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
         h = current_l->handle;
 
         // get out going set
-        outgoing = TLB::getAtom(h)->getOutgoingSet();
+        outgoing = dynamic_cast<Link *>(TLB::getAtom(h))->getOutgoingSet();
         new_tc = targetConjunction(outgoing);
         // old link strength decays
         old_tc = a->getTV(h).getMean();

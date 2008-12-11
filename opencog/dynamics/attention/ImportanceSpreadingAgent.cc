@@ -113,7 +113,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     // Get outgoing set and sum difference for all non source atoms
     linkWeight = a->getTV(link).toFloat();
     sourceSTI = a->getSTI(source);
-    targets = TLB::getAtom(link)->getOutgoingSet();
+    targets = dynamic_cast<Link*>(TLB::getAtom(link))->getOutgoingSet();
 
 
     if (TLB::getAtom(link)->getType() == INVERSE_HEBBIAN_LINK) {
@@ -214,13 +214,13 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
         const TruthValue &linkTV = a->getTV(lh);
 
         // For the case of an asymmetric link without this atom as a source
-        if (!((Link*)TLB::getAtom(lh))->isSource(h)) {
+        if (!dynamic_cast<Link*>(TLB::getAtom(lh))->isSource(h)) {
             //logger().fine("Link %s does not have this atom as a source.",
             // TLB::getAtom(lh)->toString().c_str() );
             continue;
         }
 
-        targets = TLB::getAtom(lh)->getOutgoingSet();
+        targets = dynamic_cast<Link*>(TLB::getAtom(lh))->getOutgoingSet();
         transferWeight = linkTV.toFloat();
 
         logger().fine("  +Link %s", TLB::getAtom(lh)->toString().c_str() );

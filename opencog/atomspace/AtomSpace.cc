@@ -581,11 +581,15 @@ Handle AtomSpace::getOutgoing(Handle h, int idx) const
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflus(stdout);
-    Atom* a = TLB::getAtom(h);
-    if (idx >= a->getArity())
+    Atom * a = TLB::getAtom(h);
+    Link * l = dynamic_cast<Link *>(a);
+    if (NULL == l)
+        throw new IndexErrorException(TRACE_INFO,
+            "Asked for outgoing set on atom that is not a link!\n");
+    if (idx >= l->getArity())
         throw new IndexErrorException(TRACE_INFO, "Invalid outgoing set index: %d (atom: %s)\n",
                                       idx, a->toString().c_str());
-    return a->getOutgoingSet()[idx];
+    return l->getOutgoingSet()[idx];
 }
 
 int AtomSpace::getArity(Handle h) const
@@ -593,7 +597,11 @@ int AtomSpace::getArity(Handle h) const
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflus(stdout);
 
-    return TLB::getAtom(h)->getArity();
+    Atom * a = TLB::getAtom(h);
+    Link * l = dynamic_cast<Link *>(a);
+    if (NULL == l)
+        return 0;
+    return l->getArity();
 }
 
 void AtomSpace::setName(Handle h, const string& name)

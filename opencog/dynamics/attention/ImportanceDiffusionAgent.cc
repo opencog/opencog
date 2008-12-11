@@ -115,7 +115,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
             continue;
         }
 
-        targets = TLB::getAtom(linkHandle)->getOutgoingSet();
+        targets = dynamic_cast<Link*>(TLB::getAtom(linkHandle))->getOutgoingSet();
 
         for (targetItr = targets.begin(); targetItr != targets.end();
                 targetItr++) {
@@ -187,7 +187,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
         if (val == 0.0f) continue;
         type = TLB::getAtom(*hi)->getType(); 
 
-        targets = TLB::getAtom(*hi)->getOutgoingSet();
+        targets = dynamic_cast<Link*>(TLB::getAtom(*hi))->getOutgoingSet();
         if (ClassServer::isAssignableFrom(ORDERED_LINK,type)) {
             Handle sourceHandle;
 

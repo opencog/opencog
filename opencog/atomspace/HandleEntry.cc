@@ -348,16 +348,18 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, bool deleted)
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
 {
-
-    HandleEntry* buffer;
-
     // The search for invalid elements need to be done in two steps because
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            set->getAtom()->getArity() != arity) {
-        buffer = set;
+    while (set != NULL) {
+        Atom *atom = set->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        int lar = 0;
+        if (link) lar = link->getArity(); 
+        if (lar == arity) break;
+
+        HandleEntry *buffer = set;
         set = set->next;
         buffer->next = NULL;
         delete buffer;
@@ -365,11 +367,14 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
 
     if (set == NULL) return NULL;
 
-
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (set->getAtom()->getArity() != arity) {
-            buffer = set->next;
+        Atom *atom = set->next->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        int lar = 0;
+        if (link) lar = link->getArity(); 
+        if (lar != arity) {
+            HandleEntry * buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
             delete buffer;
@@ -528,30 +533,35 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Handle handle, Arity arity
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, Handle handle, Arity position, Arity arity)
 {
-
-    HandleEntry* buffer;
-
     // The search for invalid elements need to be done in two steps because
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            ((set->getAtom()->getArity() != arity) ||
+    while (set != NULL) {
+        Atom *atom = set->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (link && 
+            ((link->getArity() != arity) ||
              (position >= arity) ||
-             (set->getAtom()->getOutgoingSet()[position] != handle))) {
-        buffer = set;
-        set = set->next;
-        buffer->next = NULL;
-        delete buffer;
+             (link->getOutgoingSet()[position] != handle))) {
+            HandleEntry *buffer = set;
+            set = set->next;
+            buffer->next = NULL;
+            delete buffer;
+        } else {
+            break;
+        }
     }
     if (set == NULL) return NULL;
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if ((set->next->getAtom()->getArity() != arity) ||
+        Atom *atom = set->next->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (link && ((link->getArity() != arity) ||
                 (position >= arity) ||
-                (set->next->getAtom()->getOutgoingSet()[position] != handle)) {
-            buffer = set->next;
+                (link->getOutgoingSet()[position] != handle))) {
+            HandleEntry *buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
             delete buffer;
@@ -575,7 +585,9 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
     // differently from invalid elements found in its begining.
 
     while (set != NULL) {
-        if (set->getAtom()->getArity() != arity) {
+        Atom *atom = set->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (link->getArity() != arity) {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -583,7 +595,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         } else {
             int position;
             for (position = 0; position < arity; position++) {
-                if ((target = set->getAtom()->getOutgoingAtom(position)->getType()) &&
+                if ((target = link->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
                          (subclass && ClassServer::isAssignableFrom(type, target)))) {
                     break;
@@ -605,7 +617,9 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (set->next->getAtom()->getArity() != arity) {
+        Atom *atom = set->next->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (link->getArity() != arity) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -613,7 +627,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         } else {
             int position;
             for (position = 0; position < arity; position++) {
-                if ((target = set->next->getAtom()->getOutgoingAtom(position)->getType()) &&
+                if ((target = link->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
                          (subclass && ClassServer::isAssignableFrom(type, target)))) {
                     break;
@@ -647,24 +661,31 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            ((set->getAtom()->getArity() != arity) ||
-             (target = set->getAtom()->getOutgoingAtom(position)->getType(),
+    while (set != NULL) {
+        Atom *atom = set->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+ 
+        if ((link->getArity() != arity) ||
+             (target = link->getOutgoingAtom(position)->getType(),
               ((!subclass && (type != target)) ||
-               (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
-
-        buffer = set;
-        set = set->next;
-        buffer->next = NULL;
-        delete buffer;
+               (subclass && !ClassServer::isAssignableFrom(type, target))))) {
+            buffer = set;
+            set = set->next;
+            buffer->next = NULL;
+            delete buffer;
+        } else {
+            break;
+        }
     }
 
     if (set == NULL) return NULL;
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (((set->next->getAtom()->getArity() != arity) ||
-                (target = set->next->getAtom()->getOutgoingAtom(position)->getType(),
+        Atom *atom = set->next->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (((link->getArity() != arity) ||
+                (target = link->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
                   (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
             buffer = set->next;
@@ -690,31 +711,38 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type typ
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            ((set->getAtom()->getArity() != arity) ||
-             (target = set->getAtom()->getOutgoingAtom(position)->getType(),
+    while (set != NULL) {
+        Atom *atom = set->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+
+        if ((link->getArity() != arity) ||
+             (target = link->getOutgoingAtom(position)->getType(),
               ((!subclass && (type != target)) ||
                (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
              (ClassServer::isAssignableFrom(NODE, target) ?
-              (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
-              name != NULL))) {
-
-        buffer = set;
-        set = set->next;
-        buffer->next = NULL;
-        delete buffer;
+              (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
+              name != NULL)) {
+            buffer = set;
+            set = set->next;
+            buffer->next = NULL;
+            delete buffer;
+        } else {
+            break;
+        }
     }
 
     if (set == NULL) return NULL;
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (((set->next->getAtom()->getArity() != arity) ||
-                (target = set->next->getAtom()->getOutgoingAtom(position)->getType(),
+        Atom *atom = set->next->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (((link->getArity() != arity) ||
+                (target = link->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
                   (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
                 (ClassServer::isAssignableFrom(NODE, target) ?
-                 (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
+                 (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
                  name != NULL))) {
             buffer = set->next;
             set->next = set->next->next;
@@ -738,25 +766,31 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            ((set->getAtom()->getArity() != arity) ||
-             (ClassServer::isAssignableFrom(NODE, set->next->getAtom()->getOutgoingAtom(position)->getType()) ?
-              (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
-              name != NULL))) {
-
-        buffer = set;
-        set = set->next;
-        buffer->next = NULL;
-        delete buffer;
+    while (set != NULL) {
+        Atom *atom = set->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if ((link->getArity() != arity) ||
+             (ClassServer::isAssignableFrom(NODE, link->getOutgoingAtom(position)->getType()) ?
+              (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
+              name != NULL)) {
+            buffer = set;
+            set = set->next;
+            buffer->next = NULL;
+            delete buffer;
+        } else {
+            break;
+        }
     }
 
     if (set == NULL) return NULL;
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (((set->next->getAtom()->getArity() != arity) ||
-                (ClassServer::isAssignableFrom(NODE, set->next->getAtom()->getOutgoingAtom(position)->getType()) ?
-                 (strcmp(name, ((Node*) set->getAtom()->getOutgoingAtom(position))->getName().c_str())) :
+        Atom *atom = set->next->getAtom();
+        Link *link = dynamic_cast<Link *>(atom);
+        if (((link->getArity() != arity) ||
+                (ClassServer::isAssignableFrom(NODE, link->getOutgoingAtom(position)->getType()) ?
+                 (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
                  name != NULL))) {
             buffer = set->next;
             set->next = set->next->next;
@@ -853,8 +887,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh)
 {
     bool result = false;
-    for (int i = 0; i < atom->getArity() && !result; i++) {
-        const Atom* target = atom->getOutgoingAtom(i);
+    Link *link = dynamic_cast<Link *>(atom);
+    int larry = 0;
+    if (link) larry = link->getArity();
+    for (int i = 0; i < larry && !result; i++) {
+        const Atom* target = link->getOutgoingAtom(i);
         //printf("Checking atom with TYPE = %s, TV = %s\n", ClassServer::getTypeName(target->getType()), target->getTruthValue().toString().c_str());
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
                 !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
@@ -915,8 +952,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type targetType, bool targ
 bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, VersionHandle vh)
 {
     bool result = false;
-    for (int i = 0; i < atom->getArity() && !result; i++) {
-        const Atom* target = atom->getOutgoingAtom(i);
+    Link *link = dynamic_cast<Link *>(atom);
+    int larry = 0;
+    if (link) larry = link->getArity();
+    for (int i = 0; i < larry && !result; i++) {
+        const Atom* target = link->getOutgoingAtom(i);
         //printf("Checking atom with TYPE = %s, TV = %s\n", ClassServer::getTypeName(target->getType()), target->getTruthValue().toString().c_str());
         //if (ClassServer::isAssignableFrom(NODE, target->getType())) {
         //printf("Node name = %s\n", ((Node*) target)->getName().c_str());

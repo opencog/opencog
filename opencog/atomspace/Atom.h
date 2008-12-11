@@ -158,11 +158,7 @@ public:
      */
 #ifndef PUT_OUTGOING_SET_IN_LINKS
     inline Arity getArity(void) const {
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
         return outgoing.size();
-#else
-        return arity;
-#endif
     }
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 

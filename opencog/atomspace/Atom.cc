@@ -172,13 +172,15 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
-void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (RuntimeException)
+void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
+   throw (RuntimeException)
 {
     //printf("Atom::setOutgoingSet\n");
     if (atomTable != NULL) {
-        throw RuntimeException(TRACE_INFO, "Cannot change the OutgoingSet of an atom already inserted into an AtomTable\n");
+        throw RuntimeException(TRACE_INFO, 
+           "Cannot change the OutgoingSet of an atom already "
+           "inserted into an AtomTable\n");
     }
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
 #ifdef PEFORM_INVALID_HANDLE_CHECKS
     // Make sure that garbage is not being passed in.
     // We'd like to perform a test for valid values here, but it seems
@@ -195,30 +197,6 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)  throw (Run
     if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
         std::sort(outgoing.begin(), outgoing.end(), CoreUtils::HandleComparison());
     }
-#else
-    if (outgoing) {
-        free(outgoing);
-        outgoing = NULL;
-    }
-    arity = outgoingVector.size();
-    if (arity > 0) {
-        outgoing = (Handle*) malloc(sizeof(Handle) * arity);
-        for (int i = 0; i < arity; i++) {
-#ifdef PEFORM_INVALID_HANDLE_CHECKS
-            // We'd like to perform a test for valid values here, but it seems
-            // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
-            // which it hopefully repairs later on ...
-            if (TLB::isInvalidHandle(outgoingVector[i])) {
-                throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
-            }
-#endif
-            outgoing[i] = outgoingVector[i];
-        }
-    }
-    if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
-        qsort(outgoing, arity, sizeof(Handle), CoreUtils::handleCompare);
-    }
-#endif
 }
 
 void Atom::addOutgoingAtom(Handle h)
@@ -230,12 +208,7 @@ void Atom::addOutgoingAtom(Handle h)
     if (TLB::isInvalidHandle(h))
         throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
 #endif
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
     outgoing.push_back(h);
-#else
-    outgoing = (Handle*) realloc(outgoing, (arity + 1) * sizeof(Handle));
-    outgoing[arity++] = h;
-#endif
 }
 
 Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
