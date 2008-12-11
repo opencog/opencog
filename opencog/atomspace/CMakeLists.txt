@@ -21,6 +21,7 @@ ADD_LIBRARY (atomspace SHARED
 	md5.c
 	Node.cc
 	NullTruthValue.cc
+   PredicateIndex.cc
 	SavingLoading.cc
 	SimpleTruthValue.cc
 	StatisticsMonitor.cc
@@ -87,6 +88,7 @@ INSTALL (FILES
 	Node.h
 	NullTruthValue.h
 	PredicateEvaluator.h
+	PredicateIndex.h
 	SavableRepository.h
 	SavingLoading.h
 	SimpleTruthValue.h

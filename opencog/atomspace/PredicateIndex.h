@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ImportanceIndex.h
+ * opencog/atomspace/PredicateIndex.h
  *
  * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -19,38 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_IMPORTANCEINDEX_H
-#define _OPENCOG_IMPORTANCEINDEX_H
+#ifndef _OPENCOG_PREDICATEINDEX_H
+#define _OPENCOG_PREDICATEINDEX_H
 
-#include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog
 {
-class Atom;
-class HandleEntry;
 
 /**
- * Implements an index with additional routines needed for managing 
+ * Implements an index with adtional routines needed for managing 
  * short-term importance.
  */
-class ImportanceIndex:
+class PredicateIndex:
 	public FixedIntegerIndex
 {
-	private:
-		static HandleEntry* extractOld(AttentionValue::sti_t,
-		                               Handle, bool recursive = false);
 	public:
-		ImportanceIndex(void);
-
-		void updateImportance(Atom*, int);
-		HandleEntry* decayShortTermImportance(void);
-		HandleEntry* getHandleSet(AttentionValue::sti_t,
-		                          AttentionValue::sti_t) const;
-		static unsigned int importanceBin(short);
-		static float importanceBinMeanValue(unsigned int);
+		PredicateIndex(void);
 };
 
 } //namespace opencog
 
-#endif // _OPENCOG_IMPORTANCEINDEX_H
+#endif // _OPENCOG_PREDICATEINDEX_H
