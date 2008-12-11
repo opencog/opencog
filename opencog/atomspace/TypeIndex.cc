@@ -21,8 +21,9 @@
 
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/type_codes.h>
 #include <opencog/atomspace/HandleEntry.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/type_codes.h>
 
 using namespace opencog;
 
@@ -33,6 +34,20 @@ TypeIndex::TypeIndex(void)
 	// typename is misspelled, because ClassServer::getType()
 	// returns NOTYPE in this case).
 	resize(ClassServer::getNumberOfClasses() + 2);
+}
+
+void TypeIndex::insertHandle(Handle h)
+{
+	Atom *a = TLB::getAtom(h);
+	Type t = a->getType();
+	insert(t,h);
+}
+
+void TypeIndex::removeHandle(Handle h)
+{
+	Atom *a = TLB::getAtom(h);
+	Type t = a->getType();
+	remove(t,h);
 }
 
 HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const

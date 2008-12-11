@@ -500,8 +500,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (lll) {
         targetTypeIndex.insertLink(*lll);
     }
-    typeIndex.insert(atom->getType(), handle);
 
+    typeIndex.insertHandle(handle);
     importanceIndex.insertHandle(handle);
     predicateIndex.insertHandle(handle);
 
@@ -600,7 +600,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (node) {
        nameIndex.remove(node->getName().c_str(), handle);
     }
-    typeIndex.remove(atom->getType(), handle);
+    typeIndex.removeHandle(handle);
     importanceIndex.removeHandle(handle);
     predicateIndex.removeHandle(handle);
 

@@ -41,6 +41,9 @@ class TypeIndex:
 {
 	public:
 		TypeIndex(void);
+		void insertHandle(Handle);
+		void removeHandle(Handle);
+
 		HandleEntry* getHandleSet(Type type, bool subclass) const;
 
 		class iterator
