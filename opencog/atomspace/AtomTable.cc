@@ -48,19 +48,10 @@ extern "C" {
 
 using namespace opencog;
 
-/* By defining USE_ATOM_HASH_SET, AtomTable lookup performance is
- * improved by a hundredfold(!) or more(!) for large atom tables.
- * It does not appear to affect overall memory usage.  Disabling
- * this has been observed to lead to memory corruption; I guess
- * there's a bug somewhere when this is not defined.
- */
-#define USE_ATOM_HASH_SET
-
 AtomTable::AtomTable(bool dsa)
 {
     useDSA = dsa;
     size = 0;
-    atomSet = new AtomHashSet();
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
@@ -71,15 +62,14 @@ AtomTable::AtomTable(bool dsa)
 AtomTable::~AtomTable()
 {
     // remove all atoms from AtomTable
-    AtomHashSet::iterator it = atomSet->begin();
+    AtomHashSet::iterator it = atomSet.begin();
 
-    while (it != atomSet->end()) {
+    while (it != atomSet.end()) {
         //logger().fine("Removing atom %s (atomSet size = %u)", (*it)->toString().c_str(), atomSet->size());
         remove(TLB::getHandle(*it), true);
-        it = atomSet->begin();
+        it = atomSet.begin();
     }
-    atomSet->clear();
-    delete (atomSet);
+    atomSet.clear();
 }
 
 bool AtomTable::isCleared(void) const
@@ -89,7 +79,7 @@ bool AtomTable::isCleared(void) const
         return false;
     }
 
-    if (atomSet->size() != 0) {
+    if (atomSet.size() != 0) {
         //printf("AtomTable[%d]::atomSet is not empty. size =%d\n", tableId, atomSet->size());
         return false;
     }
@@ -193,15 +183,13 @@ Handle AtomTable::getHandle(const char* name, Type type) const
 // that would otherwise occur oncall to getHandle
 Handle AtomTable::getHandle(const Node *node) const
 {
-#ifdef USE_ATOM_HASH_SET
-    AtomHashSet::const_iterator it = atomSet->find(node);
+    AtomHashSet::const_iterator it = atomSet.find(node);
     Handle result = Handle::UNDEFINED;
-    if (it != atomSet->end()) {
+    if (it != atomSet.end()) {
         const Atom* resultAtom = *it;
         result = TLB::getHandle(resultAtom);
     }
     return result;
-#endif
 }
 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
@@ -220,9 +208,9 @@ Handle AtomTable::getHandle(const Link *link) const
         if(false == TLB::isValidHandle(handles[i])) return Handle::UNDEFINED;
     }
 
-    AtomHashSet::const_iterator it = atomSet->find(link);
+    AtomHashSet::const_iterator it = atomSet.find(link);
     Handle h = Handle::UNDEFINED;
-    if (it != atomSet->end()) {
+    if (it != atomSet.end()) {
         h = TLB::getHandle(*it);
     }
     return h;
@@ -235,9 +223,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      Type type,
                                      bool subclass) const
 {
-//printf("AtomTable::getHandleSet()\n");
-
-#ifdef USE_ATOM_HASH_SET
     // Check if it is the special case of looking for an specific atom
     if (ClassServer::isAssignableFrom(LINK, type) && 
         (arity == 0 || !handles.empty()))
@@ -252,9 +237,9 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             //printf("building link for lookup: type = %d, "
             // "handles.size() = %d\n", type, handles.size());
             Link link(type, handles); // local var on stack, avoid malloc
-            AtomHashSet::iterator it = atomSet->find(&link);
+            AtomHashSet::const_iterator it = atomSet.find(&link);
             Handle h = Handle::UNDEFINED;
-            if (it != atomSet->end()) {
+            if (it != atomSet.end()) {
                 h = TLB::getHandle(*it);
             }
             HandleEntry* result = NULL;
@@ -264,13 +249,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             //cprintf(NORMAL, "Returning HandleSet by using atom hash_set!\n");
             return result;
         }
-    }
-#endif
-
-    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0)) {
-        HandleEntry* result = getHandleSet(type, subclass);
-        result = HandleEntry::filterSet(result, arity);
-        return result;
     }
 
     std::vector<HandleEntry*> sets(arity, NULL);
@@ -490,12 +468,10 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // Increment the size of the table
     size++;
 
-#ifdef USE_ATOM_HASH_SET
     // Adds to the hash_set
     // logger().debug("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode());
-    atomSet->insert(atom);
+    atomSet.insert(atom);
     //logger().debug("[AtomTable::add] atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
-#endif
 
     // Checks for null outgoing set members.
     if (lll) {
@@ -555,29 +531,22 @@ int AtomTable::getSize() const
 
 void AtomTable::log(Logger& logger, Type type, bool subclass) const
 {
-#ifdef USE_ATOM_HASH_SET
-    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
+    AtomHashSet::const_iterator it;
+    for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
         bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
         if (matched) logger.debug("%d: %s", TLB::getHandle(atom).value(), atom->toString().c_str());
     }
-#else
-    logger().error("AtomTable::log() method is not implemented when USE_ATOM_HASH_SET is disabled");
-#endif
-
 }
 
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
-#ifdef USE_ATOM_HASH_SET
-    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
+    AtomHashSet::const_iterator it;
+    for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
         bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
-#else
-    output << "[ERROR] AtomTable::print() method is not implemented when USE_ATOM_HASH_SET is disabled" << endl;
-#endif
 }
 
 HandleEntry* AtomTable::extract(Handle handle, bool recursive)
@@ -620,9 +589,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     //decrements the size of the table
     size--;
 
-#ifdef USE_ATOM_HASH_SET
-    atomSet->erase(atom);
-#endif
+    atomSet.erase(atom);
 
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
@@ -705,10 +672,9 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;
         Atom* atom = TLB::getAtom(h);
-#ifdef USE_ATOM_HASH_SET
         //Extracts atom from hash_set
-        atomSet->erase(atom);
-#endif
+        atomSet.erase(atom);
+
         // update the AtomTable's size
         size--;
 
@@ -849,8 +815,8 @@ HandleEntry* AtomTable::getHandleSet(float lowerBound, float upperBound, Version
 
 void AtomTable::scrubIncoming(void)
 {
-#ifdef USE_ATOM_HASH_SET
-    for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
+    AtomHashSet::const_iterator it;
+    for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
         Handle handle = TLB::getHandle(atom);
 
@@ -866,7 +832,6 @@ void AtomTable::scrubIncoming(void)
             }
         }
     }
-#endif
 }
 
 std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const

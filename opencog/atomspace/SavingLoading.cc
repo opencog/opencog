@@ -336,7 +336,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Node* node = readNode(f, handles);
         node->setAtomTable(&atomTable);
 
-        atomTable.atomSet->insert(node);
+        atomTable.atomSet.insert(node);
 
         Handle handle = TLB::getHandle(node);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
@@ -365,7 +365,7 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Link* link = readLink(f, handles);
         link->setAtomTable(&atomTable);
 
-        atomTable.atomSet->insert(link);
+        atomTable.atomSet.insert(link);
 
         Handle handle = TLB::getHandle(link);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
@@ -405,8 +405,8 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         AtomTable& atomTable = *(atom->getAtomTable());
 
         // BUG FIX: Links should be updated in AtomSet because it still uses old handles in its outgoing
-        atomTable.atomSet->erase(atom);
-//        printf("AtomTable[%d]::atomSet->erase(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
+        atomTable.atomSet.erase(atom);
+//        printf("AtomTable[%d]::atomSet.erase(%p) => size = %d\n", t, atom, atomTable.atomSet.size());
         // updates the handles for the atom outgoing set
         for (int i = 0; i < link->getArity(); i++) {
             CoreUtils::updateHandle(&(link->outgoing[i]), handles);
@@ -420,8 +420,8 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 #endif
         }
 
-        atomTable.atomSet->insert(atom);
-//        printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
+        atomTable.atomSet.insert(atom);
+//        printf("AtomTable[%d]::atomSet.insert(%p) => size = %d\n", t, atom, atomTable.atomSet.size());
     }
 
     // updates handles for trail

@@ -86,7 +86,7 @@ private:
 
     int size;
 
-    AtomHashSet* atomSet;
+    AtomHashSet atomSet;
 
     /**
      * Indicates whether DynamicStatisticsAgent should be used
@@ -557,8 +557,10 @@ public:
      * specifically, does not insert or remove atoms from the atom table.
      */
     template<class T>
-    inline bool foreach_atom(bool (T::*cb)(const Atom *), T *data) const {
-        for (AtomHashSet::const_iterator it = atomSet->begin(); it != atomSet->end(); it++) {
+    inline bool foreach_atom(bool (T::*cb)(const Atom *), T *data) const
+    {
+        AtomHashSet::const_iterator it;
+        for (it = atomSet.begin(); it != atomSet.end(); it++) {
             const Atom* atom = *it;
             bool rc = (data->*cb)(atom);
             if (rc) return rc;
