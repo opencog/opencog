@@ -60,16 +60,9 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
     type = t;
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
-#ifndef USE_STD_VECTOR_FOR_OUTGOING
-    outgoing = NULL;
-    arity = 0; // not really needed
-#endif
-    setOutgoingSet(outg); // need to call the method to handle specific subclass case
+    // need to call the method to handle specific subclass case
+    setOutgoingSet(outg);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    // this variable is an array; each position is a pointer to the next
-    // element in a target type list that the atom is in
-    predicateIndexInfo = NULL;
 
 #ifdef USE_SHARED_DEFAULT_TV
     truthValue = NULL;
@@ -91,16 +84,6 @@ Atom::~Atom() throw (RuntimeException)
         throw RuntimeException(TRACE_INFO, "Attempting to remove atom with non-empty incoming set.");
     }
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-#ifndef USE_STD_VECTOR_FOR_OUTGOING
-    //printf("Atom::~Atom() freeing outgoing\n");
-    if (outgoing) free(outgoing);
-#endif
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    //printf("Atom::~Atom() deleting predicateIndexInfo\n");
-    delete(predicateIndexInfo);
-    //printf("Atom::~Atom() deleting truthValue\n");
 #ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != &(TruthValue::DEFAULT_TV())) {
         delete truthValue;
@@ -108,7 +91,6 @@ Atom::~Atom() throw (RuntimeException)
 #else
     delete truthValue;
 #endif
-    //printf("Atom::~Atom() end\n");
 }
 
 bool Atom::isReal() const
@@ -332,111 +314,11 @@ void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
     //printf("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
 }
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-void Atom::setNext(int index, Handle handle)
-{
-    //printf("Setting next of index %p, handle=%p\n", index, handle);
-    //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
-
-    // the index parameter contains the index of the list that must be
-    // traversed by the method. Optionally, the index parameter may bring the
-    // index in the target types linked-list to be traversed, in which case it
-    // has its value OR-ed (binary) to the PREDICATE_INDEX flag
-    if (index & PREDICATE_INDEX) {
-        //cprintf(DEBUG, "setNext(%p,%p) => Predicate index!\n", index, handle);
-        if (predicateIndexInfo == NULL) {
-            throw RuntimeException(TRACE_INFO, "no info about predicate indices");
-        }
-        index &= ~PREDICATE_INDEX;
-        unsigned long indexMask = (1UL << index);
-        //cprintf(DEBUG,"Index = %p (mask = %p)\n", index, indexMask);
-        if (!(predicateIndexInfo->predicateIndexMask & indexMask)) {
-            throw RuntimeException(TRACE_INFO, "could not find predicate index");
-        }
-        setNextHandleInPredicateIndex(index, handle);
-    }
-}
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-Handle Atom::next(int index)
-{
-    //printf("Getting next of index %p\n", index);
-    //printf("PREDICATE_INDEX = %p!\n", PREDICATE_INDEX);
-
-    if (index & PREDICATE_INDEX) {
-        //cprintf(DEBUG,"next(%p) => Predicate index!\n", index);
-        if (predicateIndexInfo == NULL) {
-            throw RuntimeException(TRACE_INFO, "no info about predicate indices");
-        }
-        index &= ~PREDICATE_INDEX;
-        //cprintf(DEBUG,"Index = %p (mask = %p)\n", index, (1UL<<index));
-        if (predicateIndexInfo->predicateIndexMask & (1UL << index)) {
-            Handle result = getNextHandleInPredicateIndex(index);
-            //cprintf(DEBUG,"next = %p\n", result);
-            return result;
-        } else {
-            throw RuntimeException(TRACE_INFO, "could not find predicate index");
-        }
-    }
-    return Handle::UNDEFINED;
-}
-
-Handle Atom::getNextHandleInPredicateIndex(int index) const
-{
-    // NOTE: Here, we know that index exists already.
-    unsigned long maskOfMask = ~(0xFFFFFFFFUL << index);
-    int pos = bitcount(predicateIndexInfo->predicateIndexMask & maskOfMask);
-    //cprintf(DEBUG,"getNextHandleInPredicateIndex(%d) => (maskOfMask = %p, predicateIndexMask = %p) => pos = %d\n", index, maskOfMask, predicateIndexInfo->predicateIndexMask, pos);
-    return predicateIndexInfo->predicateIndex[pos];
-}
-
-void Atom::setNextHandleInPredicateIndex(int index, Handle nextHandle)
-{
-    // NOTE: Here, we know that index exists already.
-    unsigned long maskOfMask = ~(0xFFFFFFFFUL << index);
-    int pos = bitcount(predicateIndexInfo->predicateIndexMask & maskOfMask);
-    //cprintf(DEBUG,"setNextHandleInPredicateIndex(%d,%p) => (maskOfMask = %p, predicateIndexMask = %p) => pos = %d\n", index, nextHandle, maskOfMask, predicateIndexInfo->predicateIndexMask, pos);
-    predicateIndexInfo->predicateIndex[pos] = nextHandle;
-}
-
-void Atom::addNextPredicateIndex(int index, Handle nextHandle)
-{
-    //    printf("Atom(%p)::addNextPredicateIndex(%d, %p)\n", this, index, nextHandle);
-    // NOTE: Here, we know that index is not added yet.
-    if (predicateIndexInfo == NULL) {
-        // first index
-        predicateIndexInfo = new PredicateIndexStruct();
-        predicateIndexInfo->predicateIndexMask = (1UL << index);
-        predicateIndexInfo->predicateIndex = new Handle[1];
-        predicateIndexInfo->predicateIndex[0] = nextHandle;
-    } else {
-        unsigned long mask = predicateIndexInfo->predicateIndexMask;
-        Handle* oldPredicateIndex = predicateIndexInfo->predicateIndex;
-        // Figure out the position of the new predicate index
-        unsigned long maskOfMask = ~(0xFFFFFFFFUL << index);
-        int pos = bitcount(mask & maskOfMask);
-        // Gets the new size and increment it by one
-        int size = bitcount(mask) + 1;
-        // allocates a new array for indices and set its positions
-        Handle* newPredicateIndex = new Handle[size];
-        for (int i = 0; i < size; i++) {
-            if (i < pos) {
-                newPredicateIndex[i] = oldPredicateIndex[i];
-            } else if (i > pos) {
-                newPredicateIndex[i] = oldPredicateIndex[i-1];
-            } else {
-                newPredicateIndex[i] = nextHandle;
-            }
-        }
-        predicateIndexInfo->predicateIndex = newPredicateIndex;
-        predicateIndexInfo->predicateIndexMask |= (1UL << index);
-    }
-}
-
 void Atom::merge(Atom* other) throw (InconsistenceException)
 {
-
-    if (*this != *other) throw InconsistenceException(TRACE_INFO, "Different atoms cannot be merged");
+    if (*this != *other)
+        throw InconsistenceException(TRACE_INFO,
+             "Different atoms cannot be merged");
 
     // Merges the incoming set and updates the outgoingSets
     Handle thisHandle = TLB::getHandle(this);
@@ -490,11 +372,8 @@ void Atom::merge(Atom* other) throw (InconsistenceException)
     //cprintf(DEBUG, ">> This atom's truth values after merge: %f %f %f\n", truthValue->getMean(), truthValue->getConfidence(), truthValue->getCount());
 }
 
-bool Atom::hasPredicateIndexInfo()
-{
-    return (predicateIndexInfo != NULL);
-}
-
+#if 0
+xxxxxxxxxxx
 int* Atom::buildPredicateIndices(int *size) const
 {
     unsigned long mask = predicateIndexInfo->predicateIndexMask;
@@ -511,6 +390,7 @@ int* Atom::buildPredicateIndices(int *size) const
     }
     return result;
 }
+#endif
 
 bool Atom::getFlag(int flag) const
 {

@@ -62,8 +62,7 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     atomSet = new AtomHashSet();
 
-    // Indices for target types, etc.
-    predicateIndex.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
+    // Indices for predicates, etc.
     predicateHandles.resize(MAX_PREDICATE_INDICES, Handle::UNDEFINED);
     predicateEvaluators.resize(MAX_PREDICATE_INDICES, NULL);
     numberOfPredicateIndices = 0;
@@ -92,10 +91,8 @@ AtomTable::~AtomTable()
     delete (predicateHandles2Indices);
 }
 
-bool AtomTable::isCleared() const
+bool AtomTable::isCleared(void) const
 {
-//    tableId = id;
-//    useDSA = dsa;
     if (size != 0) {
         //printf("AtomTable::size is not 0\n");
         return false;
@@ -110,12 +107,9 @@ bool AtomTable::isCleared() const
     if (typeIndex.size() != 0) return false;
     if (importanceIndex.size() != 0) return false;
     if (targetTypeIndex.size() != 0) return false;
+    if (predicateIndex.size() != 0) return false;
 
     for (int i = 0; i < MAX_PREDICATE_INDICES; i++) {
-        if (predicateIndex[i] != Handle::UNDEFINED) {
-            //printf("predicateIndex[%d] is not Handle::UNDEFINED\n", i);
-            return false;
-        }
         if (predicateHandles[i] != Handle::UNDEFINED) {
             //printf("predicateHandles[%d] is not Handle::UNDEFINED\n", i);
             return false;
@@ -126,10 +120,6 @@ bool AtomTable::isCleared() const
         }
     }
 
-    if (numberOfPredicateIndices != 0) {
-        //printf("numberOfPredicateIndices is not 0\n");
-        return false;
-    }
     if (predicateHandles2Indices->getCount() != 0) {
         //printf("predicateHandles2Indices is not empty\n");
         return false;
@@ -223,24 +213,6 @@ inline unsigned int AtomTable::getNameHash(Atom* atom) const
     return strHash(nnn->getName().c_str());
 }
 
-HandleEntry* AtomTable::makeSet(HandleEntry* set,
-                                Handle head, int index) const
-{
-    while (TLB::isValidHandle(head)) {
-        HandleEntry* entry = new HandleEntry(head);
-        entry->next = set;
-        set = entry;
-        head = TLB::getAtom(head)->next(index);
-    }
-
-    return set;
-}
-
-Handle AtomTable::getPredicateIndexHead(int index) const
-{
-    return predicateIndex[index];
-}
-
 PredicateEvaluator* AtomTable::getPredicateEvaluator(Handle gpnHandle) const
 {
     PredicateEvaluator* result = NULL;
@@ -264,6 +236,8 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) const
 {
     HandleEntry* result = NULL;
+#if 0
+xxxxxxxxxxxxxxxxxxxxxxxx
     if (TLB::isValidHandle(gpnHandle)) {
         //printf("AtomTable::findHandlesByGPN(): found gnpHandle = %p\n", gpnHandle);
         if (predicateHandles2Indices->contains(gpnHandle)) {
@@ -272,6 +246,7 @@ HandleEntry* AtomTable::findHandlesByGPN(Handle gpnHandle, VersionHandle vh) con
             result = makeSet(NULL, getPredicateIndexHead(index), PREDICATE_INDEX | index);
         }
     }
+#endif
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
@@ -301,31 +276,6 @@ Handle AtomTable::getHandle(const Node *node) const
 #else
     return getHandle(node->getName().c_str(), node->getType());
 #endif
-}
-HandleEntry* AtomTable::buildSet(Type type, bool subclass,
-                                 Handle(AtomTable::*f)(Type) const,
-                                 int index) const
-{
-    // Builds a set for the given type.
-    HandleEntry* set = makeSet(NULL, (this->*f)(type), index);
-
-    if (subclass) {
-        // If subclasses are accepted, the subclasses are returned in the
-        // array types.
-        int n;
-        Type *types = ClassServer::getChildren(type, n);
-
-        //printf("Checking %d subclasses:\n", n);
-
-        // for all subclasses found, a set is concatenated to the answer set
-        for (int i = 0; i < n; i++) {
-            set = makeSet(set, (this->*f)(types[i]), index);
-        }
-        //printf("\n");
-        delete[](types);
-    }
-
-    return set;
 }
 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
@@ -649,26 +599,13 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     //logger().debug("adding handle %p with sti %d into importanceIndex (bin = %d)\n", handle, atom->getAttentionValue().getSTI(), bin);
     importanceIndex.insert(bin, handle);
 
-    // Checks Atom against predicate indices and inserts it if needed
+    // Checks Atom against predicate indices and insert it if needed
     for (int i = 0; i < numberOfPredicateIndices; i++) {
         // printf("Processing predicate index %d\n");
         PredicateEvaluator* evaluator = predicateEvaluators[i];
         // printf("Evaluating handle %p with PredicateEvaluator  = %p\n", handle, evaluator);
         if (evaluator->evaluate(handle)) {
-            // printf("ADDING HANDLE %p TO THE PREDICATE INDEX %d (HEAD = %p)\n", handle, i, getPredicateIndexHead(i));
-            atom->addNextPredicateIndex(i, predicateIndex[i]);
-            predicateIndex[i] = handle; // adds as head of the linked list
-
-#ifdef DEBUG_PRINTING
-            printf("HEAD AFTER INSERTION = %p\n", getPredicateIndexHead(i));
-            HandleEntry* indexedHandles = makeSet(NULL, getPredicateIndexHead(i), PREDICATE_INDEX | i);
-            printf("Handles in the index %d: \n", i);
-            while (indexedHandles != NULL) {
-                printf("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
-                indexedHandles = indexedHandles->next;
-            }
-            printf("\n");
-#endif /* DEBUG_PRINTING */
+            predicateIndex.insert(i, handle);
         }
     }
 
@@ -678,11 +615,6 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
             lll->getOutgoingAtom(i)->addIncomingHandle(handle);
         }
     }
-
-    // updates statistics
-    //float heat = atom->getHeat();
-    //atom->rawSetHeat(0);
-    //atom->setHeat(heat);
 
     atom->setAtomTable(this);
 
@@ -777,8 +709,11 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
+#if 0
+xxxxxxxxxxxxxxxx
     // remove from indices
     removeFromPredicateIndex(atom);
+#endif 
 
     Node *node = dynamic_cast<Node*>(atom);
     if (node) {
@@ -832,94 +767,10 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
     }
 }
 
-void AtomTable::removeFromIndex(Atom *victim,
-                                std::vector<Handle>& index,
-                                int indexID, int headIndex)
-throw (RuntimeException)
-{
-    //logger().fine("AtomTable::removeFromIndex(): index.size() = %d, indexId = %d(%x), headIndex = %d(%x)", index.size(), indexID, indexID, headIndex, headIndex);
-    Handle victimHandle = TLB::getHandle(victim);
-    //logger().fine("victim = %s", victim?victim->toString().c_str():"NULL");
-
-    Handle p = index[headIndex];
-    Handle q = Handle::UNDEFINED;
-    while (p != victimHandle) {
-        if (TLB::isInvalidHandle(p)) {
-            throw RuntimeException(TRACE_INFO,
-                                   "AtomTable - Unable to remove atom. NULL atom at index 0x%X.", indexID);
-        }
-        Atom *patom = TLB::getAtom(p);
-        //logger().fine("Next atom in index = %s", patom?patom->toString().c_str():"NULL");
-        q = p;
-        p = patom->next(indexID);
-    }
-
-    //cprintf(DEBUG,"removeFromIndex(): found position in the index\n");
-
-    if (victimHandle == index[headIndex]) {
-        index[headIndex] = victim->next(indexID);
-    } else {
-        Atom *qatom = TLB::getAtom(q);
-        Atom *patom = TLB::getAtom(p);
-        qatom->setNext(indexID, patom->next(indexID));
-    }
-
-    victim->setNext(indexID, Handle::UNDEFINED);
-}
-
-void AtomTable::removeFromPredicateIndex(Atom *atom)
-{
-    if (!atom->hasPredicateIndexInfo()) {
-        //logger().fine("removeFromPredicateIndex(%p): No predicate index info", atom);
-        return;
-    }
-    //logger().fine("removeFromPredicateIndex(%p): has predicate index info", atom);
-
-    int arraySize;
-    int *predicateIndices = atom->buildPredicateIndices(&arraySize);
-
-    //cprintf(DEBUG,"Found %d predicate indices\n", arraySize);
-    for (int i = 0; i < arraySize; i++) {
-        //cprintf(DEBUG,"removing from index %d => %p\n", predicateIndices[i], PREDICATE_INDEX | predicateIndices[i]);
-        removeFromIndex(atom, predicateIndex, PREDICATE_INDEX | predicateIndices[i], predicateIndices[i]);
-    }
-
-    delete[](predicateIndices);
-}
-
 void AtomTable::decayShortTermImportance(void)
 {
     HandleEntry* oldAtoms = importanceIndex.decayShortTermImportance();
     if (oldAtoms) clearIndexesAndRemoveAtoms(oldAtoms);
-}
-
-void AtomTable::removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID)
-{
-    //visit all atoms in index
-    for (unsigned int i = 0; i < index.size(); i++) {
-        Handle p = index[i];
-        Handle q = Handle::UNDEFINED;
-        while (!TLB::isInvalidHandle(p)) {
-            Atom *patom = TLB::getAtom(p);
-            //found marked element
-            if (patom->getFlag(REMOVED_BY_DECAY)) {
-                //search next valid atom to put in index
-                while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
-                    p = patom->next(indexID);
-                    //clear old index
-                    patom->setNext(indexID, Handle::UNDEFINED);
-                    patom = TLB::getAtom(p);
-                }
-                // it is the first element of list
-                if (TLB::isInvalidHandle(q)) index[i] = p;
-                else TLB::getAtom(q)->setNext(indexID, p);
-            } else {
-                //save previous element in q
-                q = p;
-                p = patom->next(indexID);
-            }
-        }
-    }
 }
 
 static bool decayed(Handle h)
@@ -928,47 +779,15 @@ static bool decayed(Handle h)
     return a->getFlag(REMOVED_BY_DECAY);
 }
 
-void AtomTable::removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID)
-{
-    //visit all atoms in index
-    for (unsigned int i = 0; i < index.size(); i++) {
-        int targetIndexID = indexID | i;
-        Handle p = index[i];
-        Handle q = Handle::UNDEFINED;
-        while (!TLB::isInvalidHandle(p)) {
-            Atom *patom = TLB::getAtom(p);
-            //found marked element
-            if (patom->getFlag(REMOVED_BY_DECAY)) {
-                //search next valid atom to put in index
-                while (!TLB::isInvalidHandle(p) && patom->getFlag(REMOVED_BY_DECAY)) {
-                    p = patom->next(targetIndexID);
-                    //clear old index
-                    patom->setNext(targetIndexID, Handle::UNDEFINED);
-                    patom = TLB::getAtom(p);
-                }
-                // it is the first element of list
-                if (TLB::isInvalidHandle(q)) index[i] = p;
-                else TLB::getAtom(q)->setNext(targetIndexID, p);
-            } else {
-                //save previous element in q
-                q = p;
-                p = patom->next(targetIndexID);
-            }
-        }
-    }
-}
-
 void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
 {
     if (extractedHandles == NULL) return;
-
-    // Remove from indices.
-    removeMarkedAtomsFromMultipleIndex(predicateIndex, PREDICATE_INDEX);
 
     nameIndex.remove(decayed);
     typeIndex.remove(decayed);
     importanceIndex.remove(decayed);
     targetTypeIndex.remove(decayed);
+    predicateIndex.remove(decayed);
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;

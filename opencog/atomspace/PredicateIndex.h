@@ -28,8 +28,8 @@ namespace opencog
 {
 
 /**
- * Implements an index with adtional routines needed for managing 
- * short-term importance.
+ * Implements an index with additiona routines needed for managing 
+ * predicates.
  */
 class PredicateIndex:
 	public FixedIntegerIndex

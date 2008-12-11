@@ -50,10 +50,6 @@
 
 using namespace opencog;
 
-//#include "../agents/DynamicsStatisticsAgent.h"
-//#include "TreePredicateEvaluator.h"
-//#include "NMPrinter.h"
-
 #define FULL_NETWORK_DUMP          (1 << 0)
 #define ATOM_SET                   (1 << 1)
 #define PHYSICAL_ADDRESSING        (1 << 2)
@@ -222,9 +218,6 @@ void SavingLoading::saveIndices(FILE *f, AtomTable& atomTable)
 
     // writes the head of each index list on the file
     fwrite(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        fwrite(&(atomTable.predicateIndex[i]), sizeof(Handle), 1, f);
-    }
 
     for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
         fwrite(&(atomTable.predicateHandles[i]), sizeof(Handle), 1, f);
@@ -418,13 +411,9 @@ void SavingLoading::loadIndices(FILE *f, AtomTable& atomTable,
 
     fread(&atomTable.numberOfPredicateIndices, sizeof(int), 1, f);
     for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        fread(&(atomTable.predicateIndex[i]), sizeof(Handle), 1, f);
-    }
-    for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
         fread(&(atomTable.predicateHandles[i]), sizeof(Handle), 1, f);
     }
     for (int i = 0; i < atomTable.numberOfPredicateIndices; i++) {
-        CoreUtils::updateHandle(&(atomTable.predicateIndex[i]), handles);
         CoreUtils::updateHandle(&(atomTable.predicateHandles[i]), handles);
     }
     // TODO: Read predicate type to rebuild predicateEvaluators. For now, assuming always TreePredicateEvaluators
@@ -475,14 +464,6 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 
         atomTable.atomSet->insert(atom);
 //        printf("AtomTable[%d]::atomSet->insert(%p) => size = %d\n", t, atom, atomTable.atomSet->size());
-    }
-
-    if (atom->predicateIndexInfo) {
-        //logger().fine("SavingLoading::updateHandles: predicateIndices");
-        int size = bitcount(atom->predicateIndexInfo->predicateIndexMask);
-        for (int i = 0; i < size; i++) {
-            CoreUtils::updateHandle(&(atom->predicateIndexInfo->predicateIndex[i]), handles);
-        }
     }
 
     // updates handles for trail
@@ -538,17 +519,6 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     // returns the pointer back to the end of the file
     fseek(f, 0, SEEK_END);
 
-    // writes the predicate indices of the atom
-    bool hasPredicateIndices = (atom->predicateIndexInfo != NULL);
-    fwrite(&hasPredicateIndices, sizeof(bool), 1, f);
-    if (hasPredicateIndices) {
-        unsigned long mask = atom->predicateIndexInfo->predicateIndexMask;
-        fwrite(&mask, sizeof(unsigned long), 1, f);
-        int size = bitcount(mask);
-        fwrite(&size, sizeof(int), 1, f);
-        fwrite(atom->predicateIndexInfo->predicateIndex, sizeof(Handle), size, f);
-    }
-
     // writes the Attention Value
     writeAttentionValue(f, atom->getAttentionValue());
 
@@ -590,22 +560,6 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
         Handle incomingHandle;
         fread(&incomingHandle, sizeof(Handle), 1, f);
         atom->addIncomingHandle(incomingHandle);
-    }
-
-    // reads the predicate indices of the atom
-    bool hasPredicateIndices;
-    fread(&hasPredicateIndices, sizeof(bool), 1, f);
-    if (hasPredicateIndices) {
-        atom->predicateIndexInfo = new PredicateIndexStruct();
-        unsigned long mask;
-        fread(&mask, sizeof(unsigned long), 1, f);
-        atom->predicateIndexInfo->predicateIndexMask = mask;
-        int size;
-        fread(&size, sizeof(int), 1, f);
-        atom->predicateIndexInfo->predicateIndex = new Handle[size];
-        for (int i = 0; i < size; i++) {
-            fread(&(atom->predicateIndexInfo->predicateIndex[i]), sizeof(Handle), 1, f);
-        }
     }
 
     // reads AttentionValue

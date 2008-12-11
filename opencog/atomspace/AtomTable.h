@@ -39,6 +39,7 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
+#include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/StringIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
@@ -95,13 +96,14 @@ private:
     bool useDSA;
 
     // linked lists for each kind of index
-    std::vector<Handle> predicateIndex;
     std::vector<Handle> predicateHandles;
     std::vector<PredicateEvaluator*> predicateEvaluators;
+
     TypeIndex typeIndex;
     StringIndex nameIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
+    PredicateIndex predicateIndex;
 
     // Number of predicate indices.
     int numberOfPredicateIndices;
@@ -121,14 +123,9 @@ private:
     boost::signal<void (Handle)> _removeAtomSignal;
     boost::signal<void (Handle)> _mergeAtomSignal;
 
-    void removeFromIndex(Atom *, std::vector<Handle>&, int, int)
-    throw (RuntimeException);
-    void removeFromPredicateIndex(Atom *);
     void lockIterators();
     void unlockIterators();
 
-    void removeMarkedAtomsFromIndex(std::vector<Handle>& index, int indexID);
-    void removeMarkedAtomsFromMultipleIndex(std::vector<Handle>& index, int indexID);
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
     /**
@@ -256,22 +253,6 @@ public:
     HandleEntry* makeSet(HandleEntry*, Handle, int) const;
 
     /**
-     * Builds a set of atoms of a given type or with targets of a given
-     * type depending on the given index head function.
-     *
-     * @param The desired type criterion.
-     * @param Whether the given type must also consider its subclasses.
-     * @param A method pointer to either the function that returns a type
-     * index head, or the function that returns a target type index head.
-     * @param Which index to be followed.
-     * @return The set of atoms created based of the given criteria.
-     */
-    HandleEntry* buildSet(Type,
-                          bool,
-                          Handle(AtomTable::*)(Type) const,
-                          int) const;
-
-    /**
      * Adds a new predicate index to this atom table given the Handle of
      * the PredicateNode.
      * @param The handle of the predicate node, whose name is the id
@@ -287,14 +268,6 @@ public:
      */
     void addPredicateIndex(Handle, PredicateEvaluator*)
     throw (InvalidParamException);
-
-    /**
-     * Returns the index head for the given predicate index.
-     *
-     * @param The predicate index whose index head will be returned.
-     * @return The index head for the given importance bin.
-     */
-    Handle getPredicateIndexHead(int index) const;
 
     /**
      * Returns the Predicate evaluator for a given

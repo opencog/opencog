@@ -113,7 +113,11 @@ public:
         HandleEntry* expectedEntries[6];
         //printf("building expectedEntries\n");
         for (int index = 0; index < 6; index++) {
+#if 0
+xxxxxxxxxxxx
             HandleEntry* indexedHandles = table->makeSet(NULL, table->getPredicateIndexHead(index), PREDICATE_INDEX | index);
+#endif
+            HandleEntry* indexedHandles = NULL;
             //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
             expectedEntries[index] = indexedHandles;
             //printf("Handles in the index %d: \n", index);

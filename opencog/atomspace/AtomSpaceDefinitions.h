@@ -38,9 +38,6 @@
 #define HYPOTETHICAL_FLAG       16 //BIT4
 #define REMOVED_BY_DECAY        32 //BIT5
 
-// AtomTable indices
-#define PREDICATE_INDEX     (1UL << 17)
-
 #define IMPORTANCE_INDEX_SIZE   (1 << 16)
 #define MAX_PREDICATE_INDICES   32
 

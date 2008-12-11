@@ -44,11 +44,6 @@
 namespace opencog
 {
 
-typedef struct _predicateIndexStruct {
-    unsigned long predicateIndexMask;
-    Handle* predicateIndex;
-} PredicateIndexStruct;
-
 class AtomTable;
 class HandleEntry;
 
@@ -88,32 +83,18 @@ private:
     AtomTable *getAtomTable() const;
 
 protected:
-
-    // properties
-
     Type type;
 
     AtomTable *atomTable;
 
-    // connectivity
-
-    // Linked-list that dynamically changes as new atoms are inserted.
+    // Linked-list that dynamically changes when new links
+    // point to this atom.
     HandleEntry *incoming;
 
-
 #ifndef PUT_OUTGOING_SET_IN_LINKS
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
     // Array that does not change during atom lifespan.
     std::vector<Handle> outgoing;
-#else
-    Arity arity;
-    // Pointer array that does not change during atom lifespan.
-    Handle *outgoing;
-#endif
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    // indices
-    PredicateIndexStruct* predicateIndexInfo;
 
     // Put 6-byte long attentionValue next to flags,
     // hopefull compiler will put all this in a single 8-byte slot.
@@ -132,9 +113,6 @@ protected:
      */
     Atom(Type, const std::vector<Handle>&,
          const TruthValue& = TruthValue::NULL_TV());
-
-    Handle getNextHandleInPredicateIndex(int index) const;
-    void setNextHandleInPredicateIndex(int index, Handle nextHandle);
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
     /**
@@ -237,7 +215,6 @@ public:
     }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
     /**
      * Returns a const reference to the array containing this
      * atom's outgoing set.
@@ -247,23 +224,6 @@ public:
     inline const std::vector<Handle>& getOutgoingSet() const {
         return outgoing;
     }
-#else
-    /**
-    * Returns a pointer to an array containing this atom's
-    * outgoing set.
-    *
-    * XXX This is rather inefficient, as the -on-stack
-    * allocation requires two (!!) copies.
-    *
-    * @return A pointer to an array containing this atom's outgoing set.
-    */
-    inline std::vector<Handle> getOutgoingSet() const {
-        std::vector<Handle> result;
-        std::copy(&outgoing[0], &outgoing[arity], back_inserter(result));
-        return result;
-    }
-#endif
-
     /**
      * Returns a specific atom in the outgoing set (using the TLB).
      *
@@ -299,45 +259,12 @@ public:
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
-     * Adds the next entry pointed by this atom in the given predicate
-     * index linked-list.
-     *
-     * @param A handle representing the next entry in the
-     * predicate index linked-list.
-     */
-    void addNextPredicateIndex(int, Handle);
-
-    /**
      * Merges two atoms.
      *
      * @param A pointer to the atom that will be merged to the current
      * one.
      */
     virtual void merge(Atom*) throw (InconsistenceException);
-
-    /**
-     * Returns the next entry in one of the indices linked-lists.
-     *
-     * @param Which index will be followed.
-     * @return The next entry in one of the indices linked-lists.
-     */
-    Handle next(int index);
-
-    /**
-     * Indicates if this atom has any predicate index information
-     *
-     * @return true if this atoms is in any predicate index. false otherwise
-     */
-    bool hasPredicateIndexInfo();
-
-    /**
-     * Builds the predicate index structure according to the predicates
-     * matched by the given atom.
-     *
-     * @return A pointer to predicate index array built.
-     * NOTE: The argument size gets the size of the returned array.
-     */
-    int* buildPredicateIndices(int *size) const;
 
     /**
      * Returns whether this atom is marked for removal.
