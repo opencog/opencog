@@ -41,7 +41,11 @@ Node::Node(Type type,
            const std::string& cname,
            const TruthValue& tv)
 throw (InvalidParamException, AssertionException)
+#ifndef PUT_OUTGOING_SET_IN_LINKS
         : Atom(type, std::vector<Handle>(), tv)
+#else
+        : Atom(type, tv)
+#endif
 {
     if (!ClassServer::isAssignableFrom(NODE, type)) {
         throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
@@ -64,14 +68,17 @@ void Node::setName(const std::string& cname) throw (RuntimeException)
 {
     if (atomTable != NULL) {
         throw RuntimeException(TRACE_INFO,
-                               "Node - Cannot change the name of a node already inserted into an AtomTable.");
+            "Node - Cannot change the name of a node already "
+            "inserted into an AtomTable.");
     }
     name = cname;
 }
 
 void Node::merge(Atom* atom) throw (InconsistenceException)
 {
-    if (*this != *atom) throw InconsistenceException(TRACE_INFO, "Node - Different nodes cannot be merged");
+    if (*this != *atom)
+        throw InconsistenceException(TRACE_INFO,
+             "Node - Different nodes cannot be merged");
     Atom::merge(atom);
 }
 
@@ -80,7 +87,8 @@ std::string Node::toShortString() const
 #define BUFSZ 1024
     char buf[BUFSZ];
     snprintf(buf, BUFSZ, "node[%s:%s%s]",
-             ClassServer::getTypeName(type).c_str(), name.c_str(), (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
+             ClassServer::getTypeName(type).c_str(), name.c_str(),
+                    (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
     return buf;
 }
 

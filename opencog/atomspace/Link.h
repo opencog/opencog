@@ -52,7 +52,11 @@ class Link : public Atom
 
 private:
     Trail* trail;
+#ifndef PUT_OUTGOING_SET_IN_LINKS
     void init(void) throw (InvalidParamException);
+#else
+    void init(const std::vector<Handle>&) throw (InvalidParamException);
+#endif
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
     // Adds a new handle to the outgoing set. Note that this is

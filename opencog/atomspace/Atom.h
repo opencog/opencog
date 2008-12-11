@@ -39,7 +39,7 @@
 #include <opencog/util/exceptions.h>
 
 #define USE_STD_VECTOR_FOR_OUTGOING
-// #define PUT_OUTGOING_SET_IN_LINKS
+#define PUT_OUTGOING_SET_IN_LINKS
 
 namespace opencog
 {
@@ -63,7 +63,11 @@ class Atom
 private:
 
     // Called by constructors to init this object
+#ifndef PUT_OUTGOING_SET_IN_LINKS
     void init(Type, const std::vector<Handle>&, const TruthValue&);
+#else
+    void init(Type, const TruthValue&);
+#endif
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
     // Adds a new handle to the outgoing set. Note that this is
@@ -111,8 +115,12 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
+#ifndef PUT_OUTGOING_SET_IN_LINKS
     Atom(Type, const std::vector<Handle>&,
          const TruthValue& = TruthValue::NULL_TV());
+#else
+    Atom(Type, const TruthValue& = TruthValue::NULL_TV());
+#endif
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
     /**

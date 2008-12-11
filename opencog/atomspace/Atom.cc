@@ -51,7 +51,11 @@
 
 using namespace opencog;
 
-void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
+#ifndef PUT_OUTGOING_SET_IN_LINKS
+void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv)
+#else
+void Atom::init(Type t, const TruthValue& tv)
+#endif
 {
     // resets all flags
     flags = 0;
@@ -72,10 +76,17 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv )
 #endif
 }
 
+#ifndef PUT_OUTGOING_SET_IN_LINKS
 Atom::Atom(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv )
 {
     init(type, outgoingVector, tv);
 }
+#else
+Atom::Atom(Type type, const TruthValue& tv )
+{
+    init(type, tv);
+}
+#endif
 
 Atom::~Atom() throw (RuntimeException)
 {

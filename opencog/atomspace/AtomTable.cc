@@ -270,8 +270,6 @@ Handle AtomTable::getHandle(const Node *node) const
         result = TLB::getHandle(resultAtom);
     }
     return result;
-#else
-    return getHandle(node->getName().c_str(), node->getType());
 #endif
 }
 

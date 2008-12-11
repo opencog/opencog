@@ -42,22 +42,38 @@
 
 using namespace opencog;
 
-void Link::init(void) throw (InvalidParamException)
+#ifndef PUT_OUTGOING_SET_IN_LINKS
+void Link::init(void)
+#else
+void Link::init(const std::vector<Handle>& outgoingVector)
+#endif
+	throw (InvalidParamException)
 {
     if (!ClassServer::isAssignableFrom(LINK, type)) {
-#ifndef USE_STD_VECTOR_FOR_OUTGOING
-        if (outgoing) free(outgoing);
-#endif
-        throw InvalidParamException(TRACE_INFO, "Link -  invalid link type: %d", type);
+        throw InvalidParamException(TRACE_INFO,
+             "Link -  invalid link type: %d", type);
     }
     trail = new Trail();
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+    setOutgoingSet(outgoingVector);
+#endif
 }
 
-Link::Link(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv)
+#ifndef PUT_OUTGOING_SET_IN_LINKS
+Link::Link(Type type, const std::vector<Handle>& outgoingVector, 
+           const TruthValue& tv)
         : Atom(type, outgoingVector, tv)
 {
     init();
 }
+#else
+Link::Link(Type type, const std::vector<Handle>& outgoingVector, 
+           const TruthValue& tv)
+        : Atom(type, tv)
+{
+    init(outgoingVector);
+}
+#endif
 
 Link::~Link() throw ()
 {
