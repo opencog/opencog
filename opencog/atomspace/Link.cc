@@ -262,3 +262,55 @@ size_t Link::hashCode(void) const
         result = result  ^ (((long) outgoing[i].value()) << i);
     return result;
 }
+
+#ifdef PUT_OUTGOING_SET_IN_LINKS
+void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
+   throw (RuntimeException)
+{
+    //printf("Atom::setOutgoingSet\n");
+    if (atomTable != NULL) {
+        throw RuntimeException(TRACE_INFO, 
+           "Cannot change the OutgoingSet of an atom already "
+           "inserted into an AtomTable\n");
+    }
+#ifdef PEFORM_INVALID_HANDLE_CHECKS
+    // Make sure that garbage is not being passed in.
+    // We'd like to perform a test for valid values here, but it seems
+    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
+    // which it hopefully repairs later on ...
+    for (int i = 0; i < outgoingVector.size(); i++) {
+        if (TLB::isInvalidHandle(outgoingVector[i])) {
+            throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
+        }
+    }
+#endif
+    outgoing = outgoingVector;
+    // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
+    if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+        std::sort(outgoing.begin(), outgoing.end(), CoreUtils::HandleComparison());
+    }
+}
+
+void Link::addOutgoingAtom(Handle h)
+{
+#ifdef PEFORM_INVALID_HANDLE_CHECKS
+    // We'd like to perform a test for valid values here, but it seems
+    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
+    // which it hopefully repairs later on ...
+    if (TLB::isInvalidHandle(h))
+        throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
+#endif
+    outgoing.push_back(h);
+}
+
+Atom * Link::getOutgoingAtom(int position) const throw (RuntimeException)
+{
+    // checks for a valid position
+    if ((position < getArity()) && (position >= 0)) {
+        return TLB::getAtom(outgoing[position]);
+    } else {
+        throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", position);
+    }
+}
+#endif /* PUT_OUTGOING_SET_IN_LINKS */
+
