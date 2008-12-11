@@ -251,6 +251,12 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         }
     }
 
+    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0)) {
+        HandleEntry* result = getHandleSet(type, subclass);
+        result = HandleEntry::filterSet(result, arity);
+        return result;
+    }
+
     std::vector<HandleEntry*> sets(arity, NULL);
 
     int countdown = 0;
