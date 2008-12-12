@@ -78,12 +78,12 @@ void PLNModule::init()
 //    CogServer& cogserver = static_cast<CogServer&>(server());
 	initTestEnv();
     Init();
-    initTests();
+    /*initTests();*
     Bstate = Btr<BackInferenceTreeRootT>(new BITNodeRoot(tests[0],
         new DefaultVariableRuleProvider));
     printf("BITNodeRoot init ok\n");
     temp_state = Bstate.get();
-    state = Bstate.get();
+    state = Bstate.get();*/
 }
 
 std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
@@ -157,7 +157,7 @@ void initTestEnv()
     //  bool axioms_ok = atw.loadAxioms("inverse_binding.xml");
     //  bool axioms_ok = atw.loadAxioms("fetch10.xml");
     //  bool axioms_ok = atw.loadAxioms("mediumdemo.xml");
-        bool axioms_ok = atw.loadAxioms("smalldemo.xml");
+//        bool axioms_ok = atw.loadAxioms("smalldemo.xml");
     //  bool axioms_ok = atw.loadAxioms("smalldemo28.xml");
     //  bool axioms_ok = atw.loadAxioms("smalldemo28b.xml");
     //  bool axioms_ok = atw.loadAxioms("smalldemo8.xml");
@@ -167,7 +167,7 @@ void initTestEnv()
     //  bool axioms_ok = atw.loadAxioms("fetchdemo5.xml");
     //  bool axioms_ok = atw.loadAxioms("fetchdemo.xml");
     //  bool axioms_ok = atw.loadAxioms("woademo.xml");
-        assert(axioms_ok);
+//        assert(axioms_ok);
 
         haxx::ArchiveTheorems = false;
 #endif
