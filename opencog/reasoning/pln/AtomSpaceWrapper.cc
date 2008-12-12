@@ -688,7 +688,7 @@ LOG(5, b);
 
 bool AtomSpaceWrapper::binaryTrue(Handle h)
 {
-    const TruthValue& tv = getTV(fakeToRealHandle(h).first);
+    const TruthValue& tv = getTV(h);//fakeToRealHandle(h).first);
 
     return (tv.getMean() > PLN_TRUE_MEAN);
 }
@@ -904,6 +904,7 @@ Handle AtomSpaceWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
         bool fresh, bool managed)
 {
     AtomSpace *a = AS_PTR;
+    Handle ret;
     HandleSeq hsReal;
     HandleSeq contexts;
     // Convert outgoing links to real Handles
@@ -919,7 +920,8 @@ Handle AtomSpaceWrapper::addLinkDC(Type t, const HandleSeq& hs, const TruthValue
     
     // Construct a Link then use addAtomDC
     Link l(t,hsReal,tvn);
-    return addAtomDC(l, fresh, managed, contexts);
+    ret = addAtomDC(l, fresh, managed, contexts);
+    return ret;
 }
 
 Handle AtomSpaceWrapper::addNodeDC(Type t, const string& name, const TruthValue& tvn,
@@ -1827,10 +1829,12 @@ printTree(ret,0,1);
 
     }
 #endif
-    else if (T == EXTENSIONAL_EQUIVALENCE_LINK && hs.size()==2)
+    //! @todo Should ExtensionalEquivalenceLinks also be converted
+    //! to ExtensionalImplicationLinks?
+    else if (T == EQUIVALENCE_LINK && hs.size()==2)
     //else if (hs.size()==2)
     {
-        // Convert EXTENSIONAL_EQUIVALENCE_LINK into two IMPLICATION_LINKs
+        // Convert EQUIVALENCE_LINK into two IMPLICATION_LINKs
         // that are mirrored and joined by an AND_LINK.
         const HandleSeq EquiTarget = hs;
         HandleSeq ImpTarget1, ImpTarget2;
@@ -1864,13 +1868,13 @@ printTree(ret,0,1);
     }
     else if (T == FORALL_LINK
             && hs.size() == 2
-            && inheritsType(a->getType(hs[1]), AND_LINK)
+            && inheritsType(getType(hs[1]), AND_LINK)
             && binaryTrue(hs[1])
-            && a->getArity(hs[1]) > 1)
+            && getArity(hs[1]) > 1)
     {
         // FORALL quantifier with AND_LINK is expanded into a LIST of FORALL
         // for each component within the AND.
-        unsigned int AND_arity = a->getArity(hs[1]);
+        unsigned int AND_arity = getArity(hs[1]);
 
         HandleSeq fa_list;
 
@@ -1878,13 +1882,16 @@ printTree(ret,0,1);
         {
             HandleSeq fora_hs;
             // How come for all links need the source to be freshened?
-            // Probably no longer required... TODO: remove
-            fora_hs.push_back(freshened(hs[0],managed));
+            // Probably no longer required... but actually, this freshens
+            // all the variables for the forall link... such that each link has
+            // it's own variable nodes.
+            fora_hs.push_back(hs[0]);//freshened(hs[0],managed));
             fora_hs.push_back(getOutgoing(hs[1],i));
 
-            fa_list.push_back( addLink(FORALL_LINK, fora_hs,
-                tvn,
-                fresh,managed) );
+            // fresh parameter should probably be set as true, since above
+            // freshened links/nodes will not have any links from them yet.
+            fa_list.push_back( addLink(FORALL_LINK, fora_hs, tvn,
+                        fresh, managed) );
         }
 
         assert(fa_list.size() == AND_arity);

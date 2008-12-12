@@ -71,6 +71,8 @@ as other quite important tasks.
 
 * get all tests in Tester.cc functioning.
 * unify the unify methods: MPUnify1, MPUnifyVector, MPUnifyHandle -> MPUnify
+* fix memory leak in BITNode::EvaluateWith ... new RuleApp is not freed (but
+freeing causes a SegFault).
 * remove the atom class and replace with vtree.
 * Make PLN a loadable module
 * Register PLN atoms types with the new ClassServer on module load
@@ -91,5 +93,9 @@ Either by modifying the OpenCog loader or by converting the PLN xml data files
 to the OpenCog format. PLN currently loads atoms using its internal XML loader
 written by Ari (at reasoning/pln/util). The functionality of PLN XML loader is
 limited: eg. it does not allow ! or ? marks (or comments, IIRC).
+* Related to the above. Provide a filter system to the OpenCog XML Loader... so
+that the normalisation that the NormalisingATW used to do, can still be done as
+a filter/translator. Also, provide a normalisingAgent... for dynamic changes to
+the atomspace that come from other modules rather than an XML file.
 
 === Nice to have

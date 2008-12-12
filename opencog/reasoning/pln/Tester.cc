@@ -229,6 +229,7 @@ void RunPLNTests()
 
     int tempi=0;
 
+    unifiesWithVariableChangeTo_TEST();
 //  for (int tempi = 0; tempi < temperaturesN; tempi++)
     {
         INstatsV.clear();
@@ -511,7 +512,6 @@ InitAxiomSet("smalldemo.xml");
     //TulipWriter tlp(std::string("small_demo.tlp"));
     //tlp.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
-    //foo42=true;
     printf("\nTest inheritance Osama/Abu.\n");
     InitAxiomSet("smalldemo.xml");
     maketest(makemeta(mva((Handle)INHERITANCE_LINK,
@@ -524,20 +524,21 @@ InitAxiomSet("smalldemo.xml");
 
     printf("\nTest inheritance Muhummad->Terrorist.\n");
 // Takes a tad too long with bigdemo
-    InitAxiomSet("smalldemo.xml");
-//    InitAxiomSet("bigdemo.xml");
+//    InitAxiomSet("smalldemo.xml");
+    foo42=true;
+    InitAxiomSet("bigdemo.xml");
     maketest(makemeta(mva((Handle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
             )),
             new SimpleTruthValue(0.01f, getCount(0.20f)),
             new SimpleTruthValue(1.01f, getCount(1.01f)),
-            26,0);
+            460,0);
     //TulipWriter tlp2(std::string("big_demo.tlp"));
     //tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
     // memory overload:
-    /*
+   // foo42=true;
     printf("\nTest fetch demo.\n");
     InitAxiomSet("fetchdemo5.xml");
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -556,7 +557,6 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.01f, getCount(0.01f)),
             new SimpleTruthValue(1.01f, getCount(1.01f)),
             200,0);
-            */
 
     InitAxiomSet("AnotBdemo.xml");
 
@@ -580,14 +580,14 @@ InitAxiomSet("smalldemo.xml");
 */
 
     // memory overload:
-    InitAxiomSet("fetchdemo5.xml");
+    /*InitAxiomSet("fetchdemo5.xml");
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "+++")
                 )
             ),
             new SimpleTruthValue(0.01f, getCount(0.01f)),
             new SimpleTruthValue(1.01f, getCount(0.94f)),
-            200,0);
+            200,0);*/
             
 /*
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -825,30 +825,30 @@ InitAxiomSet("smalldemo.xml");
 
                 if (eh != Handle::UNDEFINED )
                     etv = atw->getTV(eh).clone();
-                else
-                    etv = new SimpleTruthValue(0.0f,0.0f);
+                //else
+                //    etv = new SimpleTruthValue(0.0f,0.0f);
 
                /* float c1=t->minTV->getConfidence();
                 float c2=t->maxTV->getConfidence();
                 float m1=t->minTV->getMean();
                 float m2=t->maxTV->getMean(); */
 
-              if (etv)
+                if (etv)
                 {
                     printf("%f / %f\n", etv->getConfidence() , t->minTV->getConfidence());
                     printf("%f / %f\n", etv->getMean()          , t->minTV->getMean());
                     printf("%f / %f\n", etv->getConfidence() , t->maxTV->getConfidence());
                     printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
                 }
-                
                 passed = (eh != Handle::UNDEFINED && etv &&
                 etv->getConfidence() >= t->minTV->getConfidence() &&
                 etv->getMean()          >= t->minTV->getMean() &&
                 etv->getConfidence() <= t->maxTV->getConfidence() &&
                 etv->getMean()          <= t->maxTV->getMean()
                 );
+                
         
-                cprintf(-2, "TEST Expansion phase %d over.\n", s_i);
+                cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
             }
             while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT && !passed);
         }

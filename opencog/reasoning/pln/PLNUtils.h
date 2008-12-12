@@ -545,6 +545,8 @@ template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
 struct atom;
+
+void unifiesWithVariableChangeTo_TEST();
 	
 bool MPunifyHandle(Handle lhs,
 				const atom& rhs,
@@ -669,7 +671,7 @@ template<typename T, typename T2>
 void removeRecursionFromMap(T mbegin, T mend)
 {
 	T mnext = mbegin;
-printf("removeRecursionFromMap...\n");
+cprintf(4,"removeRecursionFromMap...\n");
 	while (mnext != mend)
 	{
 		T2 mnodenext = mnext->second.begin();
@@ -691,7 +693,7 @@ printf("removeRecursionFromMap...\n");
 		}
 		mnext++;
 	}
-printf("removeRecursionFromMap OK!\n");
+cprintf(4,"removeRecursionFromMap OK!\n");
 }
 
 #define NewNode(_T, _NAME) mva(atw->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
@@ -717,7 +719,7 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set);
 template<typename MapIteratorT, typename MapItemT>
 void removeRecursionFromMapSimple(MapIteratorT mbegin, MapIteratorT mend)
 {
-printf("removeRecursionFromMap...\n");
+cprintf(4,"removeRecursionFromMap...\n");
 
 	MapIteratorT mnext = mbegin, next_mapping;
 
@@ -733,7 +735,7 @@ printf("removeRecursionFromMap...\n");
 			mnext++;
 	}
 
-printf("removeRecursionFromMap OK!\n");
+cprintf(4,"removeRecursionFromMap OK!\n");
 }
 
 void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret);
@@ -845,7 +847,7 @@ void createCombinations(	const VectorT& head,
 			{
 				VectorT next_head(head);
 				next_head.push_back(*i);
-//printf(__LLEVEL,"(*i) ok, next_head.size=%d\n", next_head.size());
+//cprintf(__LLEVEL,"(*i) ok, next_head.size=%d\n", next_head.size());
 //				if (consistentBindings(next_head))
 				if (true)
 				{
@@ -918,11 +920,11 @@ void expandVectorSet(	InputIterT multi_input_vector_begin,
 					if (!h_ptr)
 					{	LOG(__LLEVEL,"(non-Handle)"); }
 					else	
-						printf(__LLEVEL,"[%d]\n", (int)*h_ptr);
+						cprintf(__LLEVEL,"[%d]\n", (int)*h_ptr);
 						//printTree(*h_ptr,0,3);		
 					
 					if ((*i)[j].bindings)
-						printf(__LLEVEL, "HAS BINDINGS %d!\n",(*i)[j].bindings->size());
+						cprintf(__LLEVEL, "HAS BINDINGS %d!\n",(*i)[j].bindings->size());
 				}
 				LOG(__LLEVEL, "XXXXXXXXXXXXXXXx-------\n");
 			}*/

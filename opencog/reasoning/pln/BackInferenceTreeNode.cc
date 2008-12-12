@@ -811,6 +811,8 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
         
         if (new_rule && new_rule->isComputable()) //&& new_rule->name != "CrispUnificationRule")
         {
+            if (test::bigcount >= 3175)
+                cout << new_rule->name << endl;
             findTemplateBIT(new_node, template_node, *template_binds);
 
             if (template_node)
@@ -1306,7 +1308,8 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
         }
 
         std::set<vector<VtreeProvider*> > argVectorSet;
-        int s1 = argVectorSet.empty() ? 0 : argVectorSet.begin()->size();
+        // Commented this out, this seems to do nothing... -- Joel
+        //int s1 = argVectorSet.empty() ? 0 : argVectorSet.begin()->size();
 
 //      removeRecursion(child_results);
         WithLog_expandVectorSet<vector<VtreeProvider*>,
@@ -1370,6 +1373,9 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     }
                 }
 next_args:;
+                //! @todo memory leak! Segfaults if we try to free this memory.. not sure why.
+                //! Probably because the destructor deletes rule arguments?
+                // delete ruleApp;
             }
     }
     else

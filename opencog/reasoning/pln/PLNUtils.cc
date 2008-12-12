@@ -343,10 +343,12 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 
 		map<Handle, Handle>::const_iterator s = bindings.find(*ph_ltop);
 
-		if (s == bindings.end())
-			return (bindings[*ph_ltop] = *ph_rtop) == Handle::UNDEFINED; //heh
-		else
+		if (s == bindings.end()) {
+			bindings[*ph_ltop] = *ph_rtop;
+            return true;
+        } else {
 			return s->second == *ph_rtop;
+        }
 	}
 
 	vtree::sibling_iterator	rit = rhs_t.begin(rtop);
