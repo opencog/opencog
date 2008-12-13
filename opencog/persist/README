@@ -109,12 +109,28 @@ The database password can be set by doing:
 (Substitute you name and some appropriate passwrd; it does not need to
 be your login password, and probably shouldn't be.)
 
-The ODBC stanza is below. You MUST create one of these for EACH
-repositry you plan to use! This is to be placed in the ~/.odbc.ini
-file in your home directory.
+Next, odbc and drivers must be installed. Either iodbc or unixodbc will
+work. For debian/uuntu, install the packages odbc-postgresql and iodbc
+(Assuming you want to use postgres). After installing these two, edit
+/etc/odbcinst.ini and put the below in it.
+
+[PostgreSQL]
+Description=PostgreSQL ODBC driver for Linux and Windows (unicode version)
+Driver=/usr/lib/odbc/psqlodbcw.so
+Setup=/usr/lib/odbc/libodbcpsqlS.so
+Debug = 0
+CommLog = 0
+
+The above stanza associates the name 'PostgreSQL' with a particular
+driver, this name is needed below.
+
+Next, edit  ~/.odbc.ini in your home directory to add a stanza of 
+the form below. You MUST create one of these for EACH repositry 
+you plan to use! The name of the stanza, and of the database,
+can be whatever you wish.
 
 [opencog]
-Description    = PostgreSQL
+Description    = My Favorite Database
 Driver      = PostgreSQL
 Trace    = No
 TraceFile      =
