@@ -46,7 +46,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 						vtree(Vertex(nm->getOutgoing(v2h(h[1]),1)))
 				)));
 	}
-	bool validate2				(Rule::MPs& args) const
+	bool validate2 (Rule::MPs& args) const
 	{
 		return (args.size() == 2 && !(*args[0] == *args[1]));
 	}

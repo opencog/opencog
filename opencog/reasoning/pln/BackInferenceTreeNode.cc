@@ -779,7 +779,6 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
     /// If any new requirement can, upon suitable substitutions,
     /// produce a requirement higher in the tree, reject it to avoid
     /// looping.
-
     if ((!PREVENT_LOOPS || !inferenceLoop(rule_args)))
     {
         Btr<bindingsT> bindings(new bindingsT());
@@ -791,7 +790,8 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
         {
             tlog(-1, "Binding INCONSISTENT. Child not created.\n");
 
-            /// \todo Check if coming here actually is allowed by the design, or whether it's a bug.
+            /// @todo Check if coming here actually is allowed by
+            /// the design, or whether it's a bug.
 
             return NULL;
         }
@@ -879,7 +879,8 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
     return NULL;
 }
 
-/// spawn() is called with all the bindings that were made to produce some direct (eg. lookup) result.
+/// spawn() is called with all the bindings that were made to produce some
+/// direct (eg. lookup) result.
 void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 {
     /// Only retain the bindings relevant to the varOwner
