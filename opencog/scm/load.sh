@@ -16,9 +16,9 @@ echo -e "scm\n(turn-on-debugging)\n.\nexit\n"  |netcat -q0 $HOST $PORT
 sleep 1
 
 cat type_constructors.scm |netcat -q0 $HOST $PORT
-sleep 2;
+sleep 4;
 cat utilities.scm         |netcat -q0 $HOST $PORT
-sleep 2;
+sleep 3;
 cat file-utils.scm         |netcat -q0 $HOST $PORT
 
 # The cgw code is not being used at this time. 
