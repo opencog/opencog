@@ -37,6 +37,12 @@ that a a certain word sense is being used almost uniquly/exclusively in a
 certain context. By contrast, if this is close to zero, this indicates that 
 the given sense is almost never used with the disjunct.
 
+Also interesting is the entropy of a disjunct-word pair, summed over senses:
+H(d,w) = - \sum_s p(s|d,w) log_2 p(s|d,w)
+
+The basic idea is that low-entropy word-disjunct pairs imply a strong
+clustering of disjuncts-to-senses.
+
 ---------------
 select * from disjunctsenses order by count desc;
 
