@@ -523,10 +523,9 @@ InitAxiomSet("smalldemo.xml");
             40,0);
 
     printf("\nTest inheritance Muhummad->Terrorist.\n");
-// Takes a tad too long with bigdemo
-//    InitAxiomSet("smalldemo.xml");
-    foo42=true;
-    InitAxiomSet("bigdemo.xml");
+// Takes a tad too long with bigdemo (but tested, and it works now)
+    InitAxiomSet("smalldemo.xml");
+//    InitAxiomSet("bigdemo.xml");
     maketest(makemeta(mva((Handle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
@@ -537,8 +536,7 @@ InitAxiomSet("smalldemo.xml");
     //TulipWriter tlp2(std::string("big_demo.tlp"));
     //tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
 
-    // memory overload:
-   // foo42=true;
+    //foo42=true;
     printf("\nTest fetch demo.\n");
     InitAxiomSet("fetchdemo5.xml");
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -579,15 +577,14 @@ InitAxiomSet("smalldemo.xml");
             100);
 */
 
-    // memory overload:
-    /*InitAxiomSet("fetchdemo5.xml");
+    InitAxiomSet("fetchdemo5.xml");
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "+++")
                 )
             ),
             new SimpleTruthValue(0.01f, getCount(0.01f)),
             new SimpleTruthValue(1.01f, getCount(0.94f)),
-            200,0);*/
+            200,0);
             
 /*
     maketest(makemeta(mva((Handle)EVALUATION_LINK,

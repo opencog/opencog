@@ -831,7 +831,7 @@ Handle AtomSpaceWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthV
     // if we are archiving theorems, and trying to add a implication link
     // composed of AND as a source, and the TruthValue is essentially true
     if (haxx::ArchiveTheorems &&
-        T == IMPLICATION_LINK && a->getType(hs[0]) == AND_LINK &&
+        T == IMPLICATION_LINK && getType(hs[0]) == AND_LINK &&
         tvn.getConfidence() > PLN_TRUE_MEAN) {
             vector<Handle> args = getOutgoing(hs[0]);
             cprintf(-3,"THM for:");
