@@ -20,3 +20,25 @@ In particular, the SQL table definitions are given there, not here. This
 cross-project tie-in is a bit of a mess at the moment;  its not clear how
 to best resolve it.
 
+Overview, Notes
+---------------
+The database contains counts for triples consisting of (sense, disjunct, word)
+where 'sense' is a wordnet sense-key, obtained by the Mihalcea algo, 'disjunct'
+is a link-grammar disjunct that was used to link a given word instance, and 
+'word' is an word instance (as used in some sentence) in 'inflected' form (in
+the form in which it appears in a link-grammar dictionary). The inflections
+are typically '.v' for verbs, '.g' for gerunds, etc.
+
+(Need explanation of why we're doing this)
+
+
+The probability of interest is p(s|d,w). If this is close to 1, this indicates
+that a a certain word sense is being used almost uniquly/exclusively in a
+certain context. By contrast, if this is close to zero, this indicates that 
+the given sense is almost never used with the disjunct.
+
+---------------
+select * from disjunctsenses order by count desc;
+
+select * from disjuncts order by count desc;
+select * from disjuncts where log_cond_probability > 0.0 order by log_cond_probability asc;
