@@ -21,6 +21,7 @@
 
 #include "opencog/reasoning/pln/PLN.h"
 #include "opencog/reasoning/pln/rules/Rules.h"
+#include "opencog/reasoning/pln/PLNUtils.h"
 
 #define BackInferenceTreeRootT BITNodeRoot
 
@@ -122,6 +123,8 @@ vector< vector<vector<int> > >  INstatsVT;
 vector<vector<int> > INstatsV;
 vector<int> INstats;
 static int AllTestsInferenceNodes=0;
+
+bool foo42=false;
 
         /**
         The tests
@@ -655,15 +658,16 @@ public:
     {
         printf("\nTest inheritance Muhummad->Terrorist.\n");
 // Takes a tad too long with bigdemo
-        InitAxiomSet("smalldemo.xml");
-//    InitAxiomSet("bigdemo.xml");
+//        InitAxiomSet("smalldemo.xml");
+        //foo42=true; 
+        InitAxiomSet("bigdemo.xml");
         maketest(makemeta(mva((Handle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
             )),
             new SimpleTruthValue(0.01f, getCount(0.20f)),
             new SimpleTruthValue(1.01f, getCount(1.01f)),
-            26,0);
+            460,0);
         //TulipWriter tlp2(std::string("big_demo.tlp"));
         //tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
     }
@@ -687,8 +691,7 @@ public:
     void testFetchDemo5()
     {    
         // memory overload:
-        /*
-        InitAxiomSet("fetchdemo5.xml");
+        /*InitAxiomSet("fetchdemo5.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "+++")
                     )
@@ -740,6 +743,68 @@ public:
         BoundVTree bvt(v);
         printf("Finger print: %lu\n", bvt.getFingerPrint());
     }
+    
+    void test_unifiesWithVariableChangeTo()
+    {
+	    AtomSpaceWrapper *atw = GET_ATW;
+
+	    map<Handle,Handle> bindings;
+
+	    TS_ASSERT( unifiesWithVariableChangeTo(
+					    mva((Handle)AND_LINK,
+						    NewNode(CONCEPT_NODE, "Osama"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    mva((Handle)AND_LINK,
+						    NewNode(CONCEPT_NODE, "Osama"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    bindings));
+
+	    TS_ASSERT(!unifiesWithVariableChangeTo(
+					    mva((Handle)AND_LINK,
+						    NewNode(CONCEPT_NODE, "Osama"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    mva((Handle)AND_LINK,
+						    NewNode(CONCEPT_NODE, "Osama"),
+						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
+					    bindings));
+
+	    TS_ASSERT(!unifiesWithVariableChangeTo(
+					    mva((Handle)AND_LINK,
+						    NewNode(CONCEPT_NODE, "Osama"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "Osama"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    bindings));
+
+	    TS_ASSERT( unifiesWithVariableChangeTo(
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "1"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "2"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    bindings));
+
+	    TS_ASSERT(!unifiesWithVariableChangeTo(
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "1"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "2"),
+						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
+					    bindings));
+	    TS_ASSERT(!unifiesWithVariableChangeTo(
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "1"),
+						    NewNode(CONCEPT_NODE, "terrorist")),
+					    mva((Handle)AND_LINK,
+						    NewNode(FW_VARIABLE_NODE, "2"),
+						    NewNode(CONCEPT_NODE, "terrorist"),
+						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
+					    bindings));
+    }
+
 };
 
 void InitPLNTests()
@@ -933,8 +998,6 @@ void RunPLNTestsOnce()
 //namespace reasoning
 //{
 
-bool foo42=false;
-
 bool satSetTest();
 
 //void RunPLNTestsOnce();
@@ -1079,22 +1142,22 @@ bool satSetTest();
 
                 if (eh != Handle::UNDEFINED )
                     etv = atw->getTV(eh).clone();
-                else
-                    etv = new SimpleTruthValue(0.0f,0.0f);
+//                else
+//                    etv = new SimpleTruthValue(0.0f,0.0f);
 
                /* float c1=t->minTV->getConfidence();
                 float c2=t->maxTV->getConfidence();
                 float m1=t->minTV->getMean();
                 float m2=t->maxTV->getMean(); */
 
-              if (etv)
+                if (etv)
                 {
                     printf("%f / %f\n", etv->getConfidence() , t->minTV->getConfidence());
                     printf("%f / %f\n", etv->getMean()          , t->minTV->getMean());
                     printf("%f / %f\n", etv->getConfidence() , t->maxTV->getConfidence());
                     printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
                 }
-                
+
                 passed = (eh != Handle::UNDEFINED && etv &&
                 etv->getConfidence() >= t->minTV->getConfidence() &&
                 etv->getMean()          >= t->minTV->getMean() &&
@@ -1102,7 +1165,7 @@ bool satSetTest();
                 etv->getMean()          <= t->maxTV->getMean()
                 );
         
-                cprintf(-2, "TEST Expansion phase %d over.\n", s_i);
+                cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
             }
             while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT && !passed);
         }

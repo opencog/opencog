@@ -233,67 +233,6 @@ namespace reasoning {
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 				vtree::sibling_iterator	ltop, vtree::sibling_iterator rtop,
 				map<Handle,Handle>& bindings);
-void unifiesWithVariableChangeTo_TEST()
-{
-	AtomSpaceWrapper *atw = GET_ATW;
-
-	map<Handle,Handle> bindings;
-
-	assert( unifiesWithVariableChangeTo(
-					mva((Handle)AND_LINK,
-						NewNode(CONCEPT_NODE, "Osama"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					mva((Handle)AND_LINK,
-						NewNode(CONCEPT_NODE, "Osama"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					bindings));
-
-	assert(!unifiesWithVariableChangeTo(
-					mva((Handle)AND_LINK,
-						NewNode(CONCEPT_NODE, "Osama"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					mva((Handle)AND_LINK,
-						NewNode(CONCEPT_NODE, "Osama"),
-						NewNode(CONCEPT_NODE, "terrorist_DIFF")),
-					bindings));
-
-	assert(!unifiesWithVariableChangeTo(
-					mva((Handle)AND_LINK,
-						NewNode(CONCEPT_NODE, "Osama"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "Osama"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					bindings));
-
-	assert( unifiesWithVariableChangeTo(
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "1"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "2"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					bindings));
-
-	assert(!unifiesWithVariableChangeTo(
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "1"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "2"),
-						NewNode(CONCEPT_NODE, "terrorist_DIFF")),
-					bindings));
-	assert(!unifiesWithVariableChangeTo(
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "1"),
-						NewNode(CONCEPT_NODE, "terrorist")),
-					mva((Handle)AND_LINK,
-						NewNode(FW_VARIABLE_NODE, "2"),
-						NewNode(CONCEPT_NODE, "terrorist"),
-						NewNode(CONCEPT_NODE, "terrorist_DIFF")),
-					bindings));
-
-}
 
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
