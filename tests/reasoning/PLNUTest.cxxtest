@@ -21,7 +21,6 @@
 
 #include "opencog/reasoning/pln/PLN.h"
 #include "opencog/reasoning/pln/rules/Rules.h"
-#include "opencog/reasoning/pln/PLNUtils.h"
 
 #define BackInferenceTreeRootT BITNodeRoot
 
@@ -44,6 +43,11 @@ using namespace reasoning;
 
 #define RUN_FAILURE_TESTS 0
 #define WAIT_KEY_ON_FAILURE 1
+
+// We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
+// ensure we find the files whether or not we're building using a separate build
+// dir
+#define PLN_TEST_DIR OPENCOG_SOURCE_DIR"/tests/reasoning/"
 
 #if 0
 #include <windows.h>
@@ -502,7 +506,7 @@ public:
     void testTVChecksWork() {
         /// The test which is supposed to fail
         if(RUN_FAILURE_TESTS) {
-            InitAxiomSet("bigdemo.xml");
+            InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
 
             puts("\nShould fail. The test for whether TV checks work.\n");
 
@@ -520,7 +524,7 @@ public:
         //char *buf = new char[8174+2]; 
         
         if(RUN_FAILURE_TESTS) {
-            InitAxiomSet("smalldemo.xml");
+            InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
 
             puts("\nShould fail. The test for whether random TVs come out too high:\n");
 
@@ -540,7 +544,7 @@ public:
     void testSymmetricRelationFails() {
         if(RUN_FAILURE_TESTS) {
             puts("\nShould fail.");
-            InitAxiomSet("smalldemo.xml");
+            InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
             maketest(makemeta(mva((Handle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "symmetricRelation"),
                             mva((Handle)LIST_LINK,
@@ -558,7 +562,7 @@ public:
     void testInverseBinding()
     {
         puts("\nInverse Binding test\n");
-        InitAxiomSet("inverse_binding.xml");
+        InitAxiomSet(PLN_TEST_DIR"inverse_binding.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "Possible"),
                         mva((Handle)LIST_LINK,
@@ -576,7 +580,7 @@ public:
         {
             printf("\nBasic spawning test %d\n", i);
             /// Basic spawning test
-            InitAxiomSet("smalldemo.xml");
+            InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
             maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "friendOf"),
                         mva((Handle)LIST_LINK,
@@ -593,7 +597,7 @@ public:
     {
         printf("\nTest for multiple roots spawning.\n");
         /// Test for multiple roots spawning
-        InitAxiomSet("smalldemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "killed"),
                         mva((Handle)LIST_LINK,
@@ -610,7 +614,7 @@ public:
     {
         printf("\nTest Generalization for VARIABLE_SCOPE_LINK.\n");
         /// Test Generalization for VARIABLE_SCOPE_LINK
-        InitAxiomSet("smalldemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((Handle)VARIABLE_SCOPE_LINK,
                     mva((Handle)LIST_LINK), //empty dummy
                     mva((Handle)INHERITANCE_LINK,
@@ -626,7 +630,7 @@ public:
     {
         printf("\nTest Generalization for FORALL_LINK.\n");
         /// Test Generalization for FORALL_LINK
-        InitAxiomSet("smalldemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((Handle)FORALL_LINK,
                     mva((Handle)LIST_LINK), //empty dummy
                     mva((Handle)INHERITANCE_LINK,
@@ -644,7 +648,7 @@ public:
     {
         //foo42=true;
         printf("\nTest inheritance Osama/Abu.\n");
-        InitAxiomSet("smalldemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((Handle)INHERITANCE_LINK,
                         NewNode(CONCEPT_NODE, "Osama"),
                         NewNode(CONCEPT_NODE, "Abu")
@@ -658,9 +662,9 @@ public:
     {
         printf("\nTest inheritance Muhummad->Terrorist.\n");
 // Takes a tad too long with bigdemo
-//        InitAxiomSet("smalldemo.xml");
+//        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         //foo42=true; 
-        InitAxiomSet("bigdemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
         maketest(makemeta(mva((Handle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
@@ -674,7 +678,7 @@ public:
 
     void testAnotBdemo()
     {    
-        InitAxiomSet("AnotBdemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"AnotBdemo.xml");
 
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "found_under"),
@@ -691,7 +695,7 @@ public:
     void testFetchDemo5()
     {    
         // memory overload:
-        /*InitAxiomSet("fetchdemo5.xml");
+        /*InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "+++")
                     )
@@ -705,7 +709,7 @@ public:
     {
         /*
         printf("\nTest fetch demo.\n");
-        InitAxiomSet("fetchdemo5.xml");
+        InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "just_done"),
                             mva((Handle)LIST_LINK,
@@ -727,8 +731,8 @@ public:
 
     void testWoaDemo()
     {    
-        //  InitAxiomSet("smalldemo.xml");
-        InitAxiomSet("woademo.xml");
+        //  InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        InitAxiomSet(PLN_TEST_DIR"woademo.xml");
         maketest(makemeta(mva((Handle)SIMULTANEOUS_AND_LINK,
                             NewNode(WORD_NODE, "blockword"),
                             NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
@@ -744,7 +748,7 @@ public:
         printf("Finger print: %lu\n", bvt.getFingerPrint());
     }
     
-    void test_unifiesWithVariableChangeTo()
+    void DISABLEtest_unifiesWithVariableChangeTo()
     {
 	    AtomSpaceWrapper *atw = GET_ATW;
 

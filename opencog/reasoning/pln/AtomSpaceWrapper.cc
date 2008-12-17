@@ -48,11 +48,6 @@
 // should be.
 #define AS_PTR (CogServer::getAtomSpace())
 
-/*// We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
-// ensure we find the files whether or not we're building using a separate build
-// dir
-#define PLN_TEST_DIR OPENCOG_SOURCE_DIR"/tests/reasoning/"*/
-
 using namespace std;
 using namespace opencog;
 
@@ -512,9 +507,9 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
 {
     // TODO: check exists works on WIN32
     string fname(path);
-//    string fname2("../tests/reasoning/" + path);
+    string fname2("../tests/reasoning/" + path);
 //    string fname2(PLN_TEST_DIR + path);
-    string fname2("tests/reasoning/" + path);
+//    string fname2("tests/reasoning/" + path);
     if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());
         fname = fname2;
