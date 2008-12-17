@@ -27,6 +27,7 @@ sub compute_prob
 {
 	my %wdj_freq = ();
 	my %wdj_entropy = ();
+	my %wdj_count = ();
 
 	my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0 ORDER BY count DESC;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
@@ -45,6 +46,7 @@ sub compute_prob
 
 		my $pair = $infword . "%%%" . $disjunct;
 		$wdj_freq{$pair} += $count;
+		$wdj_count{$pair} ++;
 	}
 	print "Total count is $tot_count for $items items\n";
 
@@ -63,13 +65,32 @@ sub compute_prob
 		my $pair = $infword . "%%%" . $disjunct;
 		my $tot = $wdj_freq{$pair};
 		my $prob = $count / $tot;
-		my $ln = log ($prob) * $olog2;
+		my $ln = log ($prob) * $olog_2;
 
 		$wdj_entropy{$pair} += $prob * $ln;
+
 		$update->execute($ln, $sense, $infword, $disjunct)
 			or die "Couldn't execute statement: " . $update->errstr;
 	}
 
 	print "Done updating the probs\n";
+
+	# Now update the entropies and the sense-counts.
+	my $ups = $dbh->prepare(
+		'UPDATE Disjuncts SET entropy = ?, senses_observed = ? WHERE inflected_word = ? AND disjunct = ?');
+	
+	foreach my $pair (keys %wdj_entropy)
+	{
+		my ($infword, $disjunct) = split(/%%%/, $pair);
+		my $entropy = $wdj_entropy{$pair};
+		my $sense_count = $wdj_count{$pair};
+
+		$ups->execute($entropy, $sense_count, $infword, $disjunct)
+			or die "Couldn't execute statement: " . $update->errstr;
+	}
+
+	print "Done updating the entropy\n";
 }
 
+
+compute_prob();
