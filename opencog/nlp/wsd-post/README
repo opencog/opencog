@@ -1,8 +1,8 @@
 
-                             wsd-perl
+                             wsd-post
                              --------
                  Linas Vepstas == December 2008
-  Miscellaneous scripts for processing word-sense disambiguation data.
+  Miscellaneous scripts for post-processing word-sense disambiguation data.
 
 
 The wsd directory contains an implementation of the Rada Mihalcea word-sense
@@ -11,7 +11,7 @@ attach word senses to link-grammar parse disjuncts, and then update the
 corresponding scripts in SQL tables. SQL is used because it can take weeks
 (or months) to accumulat a sufficient amount of statistics to be meaningul.
 This directory contains code that implements the next steps in this processing
-pipeline: script to compute marginal probabilities, obtained from the raw
+pipeline: scripts to compute marginal probabilities, obtained from the raw
 counts stored in the SQL database.
 
 The general analysis framework here is an outgrowth of the code that is found
@@ -42,3 +42,5 @@ select * from disjunctsenses order by count desc;
 
 select * from disjuncts order by count desc;
 select * from disjuncts where log_cond_probability > 0.0 order by log_cond_probability asc;
+
+rattle() package.
