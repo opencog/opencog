@@ -28,10 +28,11 @@ my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0 ORDER
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;
 
+print "sense\tword\tdisjunct\tcount\n";
 for (my $i=0; $i<$select->rows; $i++)
 {
 	my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
-	print "$sense, $infword, $disjunct, $count\n";
+	print "$sense\t$infword\t$disjunct\t$count\n";
 }
 
 
