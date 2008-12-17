@@ -661,10 +661,9 @@ public:
     void testIneritanceMuhummadTerrorist()
     {
         printf("\nTest inheritance Muhummad->Terrorist.\n");
-// Takes a tad too long with bigdemo
-//        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-        //foo42=true; 
-        InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
+// Takes a tad too long with bigdemo (but tested, and it works now)
+    InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+//    InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
         maketest(makemeta(mva((Handle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
@@ -694,20 +693,19 @@ public:
 
     void testFetchDemo5()
     {    
-        // memory overload:
-        /*InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
+        InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "+++")
                     )
                 ),
                 new SimpleTruthValue(0.01f, getCount(0.01f)),
                 new SimpleTruthValue(1.01f, getCount(0.94f)),
-                200,0);*/
+                200,0);
     }
 
     void testFetchDemo5_alt()
     {
-        /*
+        //foo42=true;
         printf("\nTest fetch demo.\n");
         InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
@@ -726,7 +724,6 @@ public:
                 new SimpleTruthValue(0.01f, getCount(0.01f)),
                 new SimpleTruthValue(1.01f, getCount(1.01f)),
                 200,0);
-        */
     }
 
     void testWoaDemo()
