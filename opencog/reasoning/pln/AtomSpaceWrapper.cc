@@ -75,9 +75,10 @@ namespace haxx
     // TODELETE, not used
     // set<Handle> atomRemoveSet;
     
-    //! childOf records what atoms are connected by inheritance links, 1st is
-    //! parent, second is child (I think...)
-    multimap<Handle,Handle> childOf;
+// TODELETE, only modifed, not read
+//    //! childOf records what atoms are connected by inheritance links, 1st is
+//    //! parent, second is child (I think...)
+//    multimap<Handle,Handle> childOf;
 
     //! Whether to stores variable nodes as atoms in the AtomSpace
     bool AllowFW_VARIABLENODESinCore = true;
@@ -488,7 +489,7 @@ void AtomSpaceWrapper::reset()
     dummyContexts.clear();
     vhmap.clear();
     vhmap_reverse.clear();
-    ::haxx::childOf.clear();
+//    ::haxx::childOf.clear();
     ::haxx::variableShadowMap. clear();
     AS_PTR->clear();
     AS_PTR->addNode(CONCEPT_NODE, rootContext);
@@ -833,11 +834,11 @@ Handle AtomSpaceWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthV
     uint arity = hs.size();
     
     if (T == INHERITANCE_LINK && arity==2) {
-        // childOf keeps a record of inheritance
+/*        // childOf keeps a record of inheritance
         // It was tempting to change childOf to use real handles so that maybe
         // fewer of these pairings need to be stored. But this won't work
         // because each Versioned link is specific.
-        haxx::childOf.insert(hpair(hs[1], hs[0]));
+        haxx::childOf.insert(hpair(hs[1], hs[0]));*/
     }
 
     // if we are archiving theorems, and trying to add a implication link

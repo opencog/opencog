@@ -110,11 +110,10 @@ namespace haxx
 {
     extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
     extern bool printRealAtoms;
-    extern Handle VarTypes[STD_VARS];
-    extern multimap<Handle,Handle> childOf;
+//    extern Handle VarTypes[STD_VARS];
+//    extern multimap<Handle,Handle> childOf;
     extern bool AllowFW_VARIABLENODESinCore;
     extern bool ArchiveTheorems;
-    extern bool printRealAtoms;
 }
 
 namespace reasoning
@@ -154,22 +153,7 @@ struct PLNTest
     {}
 };
 
-namespace reasoning
-{
-    extern map<int, Btr<tree<Vertex> > > tests;
-
-//void RunPLNTest(Btr<PLNTest> t);
-
-//set<Btr<PLNTest> > PLNTests;
-
-} // namespace reasoning
-
 void RunPLNTest(Btr<PLNTest> t);
-
-namespace goal
-{
-    void WalkTest();
-}
 
 void InitPLNTests();
 
