@@ -66,7 +66,6 @@ namespace haxx
     extern bool AllowFW_VARIABLENODESinCore;
     extern uint maxDepth;
     extern reasoning::BITNodeRoot* bitnoderoot;
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
     map<Handle,vector<Handle> > inferred_from;
@@ -1134,7 +1133,7 @@ bool BITNode::CreateChildren(int i, BBvtree arg, Btr<bindingsT> bindings, spawn_
 
     if (PREVENT_LOOPS && inferenceLoopWith(arg))
     {
-        HypothesisRule hr(::haxx::defaultAtomSpaceWrapper);
+        HypothesisRule hr(ASW());
         expandRule(&hr, i, arg, bindings, spawning);
         tlog(-2,"LOOP! Assumed Hypothetically:");
         rawPrint(*arg, arg->begin(), 2);
@@ -1421,9 +1420,9 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
             }
 
         if (_resultT == FORALL_LINK)
-            new_result = FORALLRule(::haxx::defaultAtomSpaceWrapper, Handle::UNDEFINED).compute(ForAllArgs);
+            new_result = FORALLRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
         else
-            new_result = PLNPredicateRule(::haxx::defaultAtomSpaceWrapper, Handle::UNDEFINED).compute(ForAllArgs);
+            new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());
         printTree(v2h(new_result.value),0,0);

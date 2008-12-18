@@ -58,7 +58,7 @@ extern FILE *logfile;
 
 namespace haxx
 {
-	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+//	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 	bool printRealAtoms = false;
 	Handle VarTypes[STD_VARS];
 }
@@ -799,7 +799,7 @@ cprintf(2,"TableGather:\n");
 TableGather::TableGather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const Type VarT, int index)
 {
 //printf("Gather...\n");
-	gather(_MP, (aprovider ? aprovider : haxx::defaultAtomSpaceWrapper), VarT, index);
+	gather(_MP, (aprovider ? aprovider : ASW()), VarT, index);
 //	printf("----------------------\n");
 }
 
@@ -1416,11 +1416,6 @@ public:
 namespace reasoning
 {
 
-namespace haxx
-{
-	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 	bool MPunifyHandle(Handle lhs,
 				const atom& rhs,
 				bindingsT& bindings,
@@ -1468,7 +1463,7 @@ cprintf(4, "MPunifyHandle: lhs_is_node = %d, lhs_T =%d, lhs_name: %s\n",lhs_is_n
 				
 					cprintf(4, "Request rhs handle...\n");
 				
-					Handle rhs_h = rhs.attach(::haxx::defaultAtomSpaceWrapper);
+					Handle rhs_h = rhs.attach(ASW());
 					if (rhs_h == Handle::UNDEFINED)
 					{
 						cprintf(0, "Could not add handle!\n");
@@ -1606,7 +1601,7 @@ printTree(lhs,0,3);
 				
 				cprintf(4, "Request rhs handle...\n");
 				
-				Handle rhs_h = rhs.attach(::haxx::defaultAtomSpaceWrapper);
+				Handle rhs_h = rhs.attach(ASW());
 				if (rhs_h == Handle::UNDEFINED)
 				{
 					cprintf(0, "Could not add handle!\n");
@@ -1971,8 +1966,8 @@ const char* Type2Name(Type t)
 
 Handle make_real(vtree& vt)
 {
-	//printTree(haxx::defaultAtomSpaceWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false),0,0);
-	return ::haxx::defaultAtomSpaceWrapper->addAtom(vt, TruthValue::TRIVIAL_TV(), false);
+	//printTree(ASW()->addAtom(vt, TruthValue::TRIVIAL_TV(), false),0,0);
+	return ASW()->addAtom(vt, TruthValue::TRIVIAL_TV(), false);
 }
 
 void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
@@ -2350,7 +2345,7 @@ Vertex transitive_produce(	const containerT& chain,
  rule_args.push_back(v2h(last_result) ? last_result : (*next_it++));
  rule_args.push_back(*next_it++);
  
- Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula,TRANSITIVE_LINK_TYPE>(::haxx::defaultAtomSpaceWrapper).compute(rule_args);
+ Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula,TRANSITIVE_LINK_TYPE>(ASW()).compute(rule_args);
  
  return (next_it != chain.end())
             ? transitive_produce<TRANSITIVE_LINK_TYPE>(chain, next_it, my_result)

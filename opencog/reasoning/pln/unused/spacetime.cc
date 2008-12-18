@@ -56,8 +56,6 @@ using namespace reasoning;
 
 extern map<Type, vector<Handle> > mindShadowMap;
 
-extern iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-
 Handle exec(vector<Handle>& hs);
 
 Handle exec(const vector<BoundVertex>& hs)
@@ -456,11 +454,6 @@ if (!interval || !F)
 return timeDiff(F, interval, -1);
 }
 
-namespace haxx
-{
-extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 /// TODO: TimeServer has not yet been implemented for PseudoCore!!!
 #if USE_TIME_SERVER
 
@@ -495,11 +488,11 @@ float pos(Handle pixel, Handle t)
 		new reasoning::atom(PREDICATE_NODE, 0, "CW_position"),
 		args);
 	
-	tree<Vertex> queryt(eval.makeHandletree(haxx::defaultAtomSpaceWrapper));
+	tree<Vertex> queryt(eval.makeHandletree(ASW()));
 
 	/// TODO: Take advantage of the fact that only 1 result needed.
 	
-	reasoning::TableGather all_res(queryt,haxx::defaultAtomSpaceWrapper,-1);
+	reasoning::TableGather all_res(queryt,ASW(),-1);
 	reasoning::TableGather::iterator res =
 			find_if(all_res.begin(), all_res.end(),
 				bind2nd(moment_equal(), intFromNumberNode(t)));

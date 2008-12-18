@@ -49,11 +49,6 @@
 	And inputFilter must be initialized in the constructor!
 */
 
-namespace haxx
-{
-	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 #include "and/ANDBreakdownRule.h"
 #include "and/ANDPartitionRule.h"
 #include "and/ANDSubstRule.h"

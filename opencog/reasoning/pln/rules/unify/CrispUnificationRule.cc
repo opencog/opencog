@@ -37,8 +37,6 @@ bool substitutableTo(atom& from, atom& to,
 
 namespace haxx
 {
-	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-
 	static int localcount=0;
 	using namespace reasoning;
 
@@ -165,8 +163,8 @@ printf("dovar3: substitutableTo:");
 							*v);
 					}
 					
-					vtree vt(unsubsted_ForAll_candidate.makeHandletree(::haxx::defaultAtomSpaceWrapper, true));
-					//vtree vt(ForAll_candidate.makeHandletree(::haxx::defaultAtomSpaceWrapper, true));
+					vtree vt(unsubsted_ForAll_candidate.makeHandletree(ASW(), true));
+					//vtree vt(ForAll_candidate.makeHandletree(ASW(), true));
 					
 					rawPrint(vt, vt.begin(), 4);
 //					getc(stdin);
@@ -308,7 +306,7 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 	printAtomTree(src,0,4);
 
-	haxx::dovar3(tsrc, res, forbiddenBindings, ::haxx::defaultAtomSpaceWrapper);
+	haxx::dovar3(tsrc, res, forbiddenBindings, ASW());
 
 printf("dovar3 ok.");
 

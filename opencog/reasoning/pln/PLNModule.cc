@@ -114,7 +114,7 @@ namespace haxx
     extern bool AllowFW_VARIABLENODESinCore;
     extern bool ArchiveTheorems;
     extern bool printRealAtoms;
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+//    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
 namespace reasoning
@@ -141,12 +141,12 @@ void initTestEnv()
 
         LOG(2, "Creating AtomSpaceWrappers...");
         
-#if LOCAL_ATW
+/*#if LOCAL_ATW
         haxx::defaultAtomSpaceWrapper = &LocalATW::getInstance();
 #else
         DirectATW::getInstance();
         haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
-#endif
+#endif*/
         AtomSpaceWrapper& atw = *GET_ATW;
         
 #if 1 //Loading Osama or set axioms here.
@@ -206,8 +206,8 @@ void initTestEnv()
 void Init()
 {
     #if LOCAL_ATW
-    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
-    ((LocalATW*)haxx::defaultAtomSpaceWrapper)->SetCapacity(10000);
+//    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
+    ((LocalATW*)ASW())->SetCapacity(10000);
     #endif  
     
     #if LOG_ON_FILE

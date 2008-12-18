@@ -27,11 +27,6 @@
 
 #include <boost/foreach.hpp>
 
-namespace haxx
-{
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 namespace reasoning
 {
 
@@ -63,13 +58,13 @@ VariableRuleProvider::~VariableRuleProvider(void)
 /*
 void VariableRuleProvider::CreateCustomCrispUnificationRules()
 {
-	iAtomSpaceWrapper* parent = haxx::defaultAtomSpaceWrapper;
+	iAtomSpaceWrapper* parent = ASW();
 	
 }
 */
 DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 {
-	iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
+	iAtomSpaceWrapper* parent = ASW();
 
 	Btr<set<Handle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
 	
@@ -226,7 +221,7 @@ public:
 
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
-	iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
+	iAtomSpaceWrapper* parent = ASW();
 	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
 	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
 	//AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);

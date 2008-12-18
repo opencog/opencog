@@ -108,7 +108,6 @@ float getCount(float c)
 
 namespace haxx
 {
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
     extern bool printRealAtoms;
 //    extern Handle VarTypes[STD_VARS];
 //    extern multimap<Handle,Handle> childOf;
@@ -261,12 +260,12 @@ public:
 
             LOG(2, "Creating AtomSpaceWrappers...");
             
-#if LOCAL_ATW
+/*#if LOCAL_ATW
             haxx::defaultAtomSpaceWrapper = &LocalATW::getInstance();
 #else
             DirectATW::getInstance();
             haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
-#endif
+#endif*/
             AtomSpaceWrapper& atw = *GET_ATW;
         }
         catch(std::string s) {
@@ -372,7 +371,7 @@ public:
         AtomSpaceWrapper *atw = GET_ATW;
         //typedef InversionRule RuleT1;
         //typedef DeductionRule RuleT2;
-        iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
+        iAtomSpaceWrapper* parent = ASW();
 
     //  DefaultVariableRuleProvider rp;
         InversionRule<INHERITANCE_LINK> *invR = new InversionRule<INHERITANCE_LINK>(parent);
@@ -804,8 +803,8 @@ void InitPLNTests()
     haxx::ArchiveTheorems = true;
 
 /*  /// Test atom identity works
-    Handle h1 = haxx::defaultAtomSpaceWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
-    Handle h2 = haxx::defaultAtomSpaceWrapper->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+    Handle h1 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+    Handle h2 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
 
     assert(h1 == h2);
 */
@@ -1482,10 +1481,10 @@ Handle Ass(iAtomSpaceWrapper *destTable, Handle h, std::vector<Handle>& ret);
 {
 /*    Testing associated sets*/
     
-/*      AtomSpaceWrapper& TheNM = *((AtomSpaceWrapper*)haxx::defaultAtomSpaceWrapper);
+/*      AtomSpaceWrapper& TheNM = *((AtomSpaceWrapper*)ASW());
     
-      Handle h1 = Ass(&TheNM, atom(CONCEPT_NODE, "terrorist").attach(haxx::defaultAtomSpaceWrapper), testv);
-      Handle h2 = Ass(&TheNM, atom(CONCEPT_NODE, "Muhammad").attach(haxx::defaultAtomSpaceWrapper), testv);
+      Handle h1 = Ass(&TheNM, atom(CONCEPT_NODE, "terrorist").attach(ASW()), testv);
+      Handle h2 = Ass(&TheNM, atom(CONCEPT_NODE, "Muhammad").attach(ASW()), testv);
       Handle hs[] = {h1,h2};
 
       SubsetEvalRule ser(&TheNM);
@@ -1518,7 +1517,7 @@ void InferenceTests()
                         new atom(FW_VARIABLE_NODE, "$2"),
                         new atom(CONCEPT_NODE, "Z")
                     )
-                ).attach(((AtomSpaceWrapper*)haxx::defaultAtomSpaceWrapper));
+                ).attach(((AtomSpaceWrapper*)ASW()));
 */
 /*  Handle t0 = atom(IMPLICATION_LINK, 2, 
                     new atom(AND_LINK, 2,
@@ -1539,7 +1538,7 @@ void InferenceTests()
                         new atom(FW_VARIABLE_NODE, "$2"),
                         new atom(CONCEPT_NODE, "Z")
                     )
-                ).attach(((AtomSpaceWrapper*)haxx::defaultAtomSpaceWrapper));
+                ).attach(((AtomSpaceWrapper*)ASW()));
         
     Handle t1 = atom(IMPLICATION_LINK, 2, 
                     new atom(AND_LINK, 2,
@@ -1560,7 +1559,7 @@ void InferenceTests()
                         new atom(CONCEPT_NODE, "D"),
                         new atom(CONCEPT_NODE, "Z")
                     )
-                ).attach(((AtomSpaceWrapper*)haxx::defaultAtomSpaceWrapper));
+                ).attach(((AtomSpaceWrapper*)ASW()));
         Handle t2 = t1;
       
 //  bool s1 = substitutableTo(t1, t2, bindings);
@@ -1603,7 +1602,7 @@ puts("Osama:terrorist");
 atom(INHERITANCE_LINK, 2,
                                 new atom(CONCEPT_NODE, "Osama"),
                                 new atom(CONCEPT_NODE, "Amir")
-            ).attach(haxx::defaultAtomSpaceWrapper);
+            ).attach(ASW());
       for_each<std::vector<Handle>::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());
     */
 /*puts("LL2:");         
@@ -1614,10 +1613,10 @@ atom(INHERITANCE_LINK, 2,
       for_each<std::vector<Handle>::iterator, handle_print<0> >(LL.begin(), LL.end(), handle_print<0>());
 puts(":");
 
-    atom(CONCEPT_NODE, "Gibson").attach(haxx::defaultAtomSpaceWrapper);
+    atom(CONCEPT_NODE, "Gibson").attach(ASW());
     Node *node = new Node(CONCEPT_NODE, strdup("Gibson"));
     MindDBProxy::getInstance()->add(node, true);
-    printTree(haxx::defaultAtomSpaceWrapper->getHandle(CONCEPT_NODE, "Gibson"),0,0);
+    printTree(ASW()->getHandle(CONCEPT_NODE, "Gibson"),0,0);
       TableGather gg(atom(CONCEPT_NODE, "Gibson"));
       for_each<std::vector<Handle>::iterator, handle_print<0> >(gg.begin(), gg.end(), handle_print<0>());
 getc(stdin);*/
@@ -1650,7 +1649,7 @@ void AgentTest2()
     InitAxiomSet("fetch.xml");
 #if 1
     set<MindAgent*> agents;
-    AtomSpaceWrapper& TheNM = *((AtomSpaceWrapper*)haxx::defaultAtomSpaceWrapper);
+    AtomSpaceWrapper& TheNM = *((AtomSpaceWrapper*)ASW());
 
     vtree rewardt(mva((Handle)EVALUATION_LINK,
                 NewNode(PREDICATE_NODE, "+++")));

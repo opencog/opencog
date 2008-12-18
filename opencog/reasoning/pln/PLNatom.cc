@@ -33,11 +33,6 @@ namespace test
 	extern int attachs;
 }
 
-namespace haxx
-{
-	extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 namespace reasoning
 {
 int atom_alloc_count=0;

@@ -28,10 +28,6 @@
 #include <boost/variant.hpp>
 #include <time.h>
 
-namespace haxx {
-    extern reasoning::iAtomSpaceWrapper *defaultAtomSpaceWrapper;
-}
-
 namespace reasoning {
 
 ForwardChainer::ForwardChainer()

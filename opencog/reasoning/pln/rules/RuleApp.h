@@ -71,11 +71,6 @@ one to $1). Etc.
 
 */
 
-namespace haxx
-{
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 namespace reasoning
 {
 class RuleApp;

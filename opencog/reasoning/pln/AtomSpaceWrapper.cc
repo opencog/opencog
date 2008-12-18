@@ -69,8 +69,7 @@ using namespace opencog;
 //#endif
 namespace haxx
 {
-    // TODO: make this accessable as a Singleton from a static member of AtomSpaceWrapper?
-    reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+//    reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
     // TODELETE, not used
     // set<Handle> atomRemoveSet;
@@ -1453,6 +1452,22 @@ Handle AtomSpaceWrapper::Exist2ForAllLink(Handle& exL)
                 true);
 }
 */
+
+// create and return the single instance
+iAtomSpaceWrapper* ASW()
+{
+    static iAtomSpaceWrapper* instance;
+    if (instance == NULL) {    
+#if LOCAL_ATW
+        instance = &LocalATW::getInstance();
+#else
+        DirectATW::getInstance();
+        instance = &NormalizingATW::getInstance();
+#endif
+    }
+
+    return instance;
+}
 
 /////
 // NormalizingATW methods

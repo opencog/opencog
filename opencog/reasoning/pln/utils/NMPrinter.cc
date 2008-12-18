@@ -29,11 +29,6 @@
 FILE* NMPrinter::logFile = NULL;
 int NMPrinter::numberOfPrintersUsingLogFile = 0;
 
-namespace haxx
-{
-        extern iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-}
-
 #define CLOSE_LOG_FILE_AUTOMATICALLY
 
 NMPrinter::NMPrinter(unsigned long _printOptions, int _tvPrecision, int _indentationTabSize, int _defaultLogLevel, int _initialIndentation)

@@ -53,8 +53,8 @@
 
 //using namespace boost::bimaps;
 
-//! TODO: use static accessor method within AtomSpaceWrapper class instead of global
-#define GET_ATW ((AtomSpaceWrapper*) ::haxx::defaultAtomSpaceWrapper)
+//#define GET_ATW ((AtomSpaceWrapper*) ::haxx::defaultAtomSpaceWrapper)*/
+#define GET_ATW ((AtomSpaceWrapper*) ASW())
 
 namespace reasoning
 {
@@ -414,6 +414,9 @@ public:
 //                     set<subst>* forbiddenBindings);
 
 };
+
+// singleton instance (following meyer's design pattern)
+iAtomSpaceWrapper* ASW();
 
 /** Passes the atoms via FIM analyzer. To turn this off, set FIM=0 in Config.
 */

@@ -7,7 +7,7 @@ void initTests()
     tests.clear();
 /*  tests[31] = Btr<vtree > (new vtree(
         mva((Handle)IMP,
-            mva((Handle)EXECUTION_LINK, CreateVar(haxx::defaultAtomSpaceWrapper)),
+            mva((Handle)EXECUTION_LINK, CreateVar(ASW())),
             make_vtree(reward))));
 */
             /// Requires test/reasoning/bigdemo.xml 
