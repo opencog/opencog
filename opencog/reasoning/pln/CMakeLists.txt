@@ -76,7 +76,7 @@ INCLUDE_DIRECTORIES (
     ${GSL_INCLUDE_DIR}
 )
 
-ADD_EXECUTABLE(plnshell PLNShell.cc)
+#ADD_EXECUTABLE(plnshell PLNShell.cc)
 
 TARGET_LINK_LIBRARIES(pln
     atomspace
@@ -97,24 +97,24 @@ TARGET_LINK_LIBRARIES(pln
     boost_signals-mt
 )
 
-TARGET_LINK_LIBRARIES(plnshell pln
-    #atomspace
-    server
-    xml
-    util
-    #query
-    smob #scheme
-    #wsd
-    persist
-    adaptor-tulip
-    ${IODBC_LIBRARIES}
-    ${CSOCKETS_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-    ${EXPAT_LIBRARIES}
-    ${GUILE_LIBRARIES}
-    ${GSL_LIBRARIES}
-    boost_signals-mt
-)
+#TARGET_LINK_LIBRARIES(plnshell pln
+#    #atomspace
+#    server
+#    xml
+#    util
+#    #query
+#    smob #scheme
+#    #wsd
+#    persist
+#   adaptor-tulip
+#    ${IODBC_LIBRARIES}
+#    ${CSOCKETS_LIBRARIES}
+#    ${OPENSSL_LIBRARIES}
+#    ${EXPAT_LIBRARIES}
+#    ${GUILE_LIBRARIES}
+#    ${GSL_LIBRARIES}
+#    boost_signals-mt
+#)
 
 INSTALL (TARGETS pln
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
@@ -127,6 +127,7 @@ INSTALL (FILES
     PLNatom.h
     PLN.h
     BackInferenceTreeNode.h
+    TestTargets.h
     rules/Rule.h
     rules/implication/ImplicationRedundantExpansionRule.h
     rules/implication/ImplicationBreakdownRule.h
@@ -179,11 +180,11 @@ INSTALL (FILES
     rules/and/ANDRule.h
     rules/and/ANDPartitionRule.h
     AtomSpaceWrapper.h
-    utils/XMLNodeLoader.h
+#    utils/XMLNodeLoader.h
     utils/fim.h
     utils/Singleton.h
     utils/NMPrinter.h
-    utils/XMLNode.h
+#    utils/XMLNode.h
     ForwardChainer.h
     formulas/VectorLookupTable.h
     formulas/FormulasIndefinite.h
@@ -193,6 +194,6 @@ INSTALL (FILES
     formulas/Formulas.h
     iAtomSpaceWrapper.h
     PLNEvaluator.h
-    PLNShell.h
+#    PLNShell.h
 	DESTINATION "include/opencog/reasoning/pln"
 )
