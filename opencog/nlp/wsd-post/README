@@ -43,10 +43,50 @@ H(d,w) = - \sum_s p(s|d,w) log_2 p(s|d,w)
 The basic idea is that low-entropy word-disjunct pairs imply a strong
 clustering of disjuncts-to-senses.
 
+rattle() package.
 ---------------
 select * from disjunctsenses order by count desc;
 
 select * from disjuncts order by count desc;
 select * from disjuncts where log_cond_probability > 0.0 order by log_cond_probability asc;
 
-rattle() package.
+select * from disjuncts where senses_observed>1 order by entropy asc;
+
+select disjuncts.inflected_word, disjuncts.disjunct, disjunctsenses.word_sense,
+disjuncts.entropy, disjuncts.senses_observed, disjunctsenses.count
+from disjuncts,disjunctsenses where
+disjuncts.senses_observed>1 and 
+disjuncts.inflected_word = disjunctsenses.inflected_word and
+disjuncts.disjunct = disjunctsenses.disjunct 
+order by disjuncts.entropy asc;
+
+Candidates:
+  inflected_word   |                        disjunct                        |              word_sense               |       entropy       | senses_observed |        count         
+-------------------+--------------------------------------------------------+---------------------------------------+---------------------+-----------------+----------------------
+ suffers.v         | Ss- Os+ MVp+                                           | have%2:29:05::                        | 0.00591198141479204 |               2 |     1.16565684723427
+ suffers.v         | Ss- Os+ MVp+                                           | get%2:29:11::                         | 0.00591198141479204 |               2 |   0.0005521501501815
+
+Here, have%2:29:05:: is in the same synset as get%2:29:11::
+She suffered a fracture in the accident"; 
+"He suffered an insulin shock after eating three candy bars"; -- "He had an insulin shock after eating three candy bars"; 
+"She suffered a bruise on her leg"; -- "She got a bruise on her leg"; 
+"He got his arm broken in the scuffle"
+
+This is clearly a differnt meaning than:
+The new secretary had to suffer a lot of unprofessional remarks (which is I- Op+)
+She was suffering after the accident,
+She is suffering from the hot weather
+She suffers from a tendency to talk too much (which is Ss- MVp+ MVp+, or MVa+, MVi+, etc.)
+She suffered a terrible fate. (Ss- Os+)
+This author really suffers in translation (Ss- MVp+)
+
+Now, suffers.v is in words.v.2.2 which has the rules
+
+/en/words/words.v.2.2: <verb-s> & <vc-tr,intr>;
+<verb-s>: {@E-} & (Ss- or (RS- & Bs-));
+<vc-tr,intr>: {O+ or B- or [[@MV+ & O*n+]]} & {@MV+};
+
+The suffers.v | Ss- Os+ MVp+ disjuncts mean "transitive verb with a proposition",
+and this seems to strongly indicate that the correct sense is *always* (suffer%2:29:01::)
+for this sentence construction.
+
