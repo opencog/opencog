@@ -211,3 +211,19 @@ ELSE(WIN32 AND NOT UNIX)
 ENDIF(WIN32 AND NOT UNIX)
 SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
 INCLUDE(CPack)
+
+# documentation
+INCLUDE(FindDoxygen)
+IF (DOXYGEN)
+	ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
+	#FILE(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/doxygen)
+	ADD_CUSTOM_TARGET ( doxygen
+		COMMAND doxygen ${OPENCOG_SOURCE_DIR}/Doxyfile 
+		#WORKING_DIRECTORY ${OPENCOG_SOURCE_DIR}/doxygen 
+		WORKING_DIRECTORY doc
+		COMMENT "Generating documentation"
+	) 
+ELSE (DOXYGEN)
+	MESSAGE(STATUS "WARNING: Doxygen not found - Reference manual will not be created")
+ENDIF (DOXYGEN)
+
