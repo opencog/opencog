@@ -52,56 +52,6 @@ using namespace reasoning;
 
 DECLARE_MODULE(PLNModule)
 
-void initTestEnv();
-void initTests();
-void Init();
-std::string RunCommand(std::list<std::string> args);
-
-PLNModule::PLNModule() : Module()
-{
-    logger().info("[PLNModule] constructor");
-	do_pln_register();
-}
-
-PLNModule::~PLNModule() {
-    logger().info("[PLNModule] destructor");
-    do_pln_unregister();
-}
-
-// state variables for running multiple PLNShell commands.
-Btr<BackInferenceTreeRootT> Bstate;
-BackInferenceTreeRootT* temp_state, *state;
-
-void PLNModule::init()
-{
-    logger().info("[PLNModule] init");
-//    CogServer& cogserver = static_cast<CogServer&>(server());
-	initTestEnv();
-    Init();
-    /*initTests();*
-    Bstate = Btr<BackInferenceTreeRootT>(new BITNodeRoot(tests[0],
-        new DefaultVariableRuleProvider));
-    printf("BITNodeRoot init ok\n");
-    temp_state = Bstate.get();
-    state = Bstate.get();*/
-}
-
-std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
-{
-/*	if (args.size() != 3)
-		return "sql-load: Wrong num args";*/
-
-/*	std::string dbname   = args.front(); args.pop_front();
-	std::string username = args.front(); args.pop_front();
-	std::string auth	   = args.front(); args.pop_front();*/
-
-//    initTestEnv(args);
-
-    std::string output = RunCommand(args);
-
-	return output;
-}
-
 #ifdef _MSC_VER
 #pragma warning(disable : 4312)
 #endif // _MSC_VER
@@ -129,6 +79,78 @@ namespace test
     bool debugger_control = false;
 }
 
+//void initTestEnv();
+//void Init();
+std::string RunCommand(std::list<std::string> args);
+
+PLNModule::PLNModule() : Module()
+{
+    logger().info("[PLNModule] constructor");
+	do_pln_register();
+}
+
+PLNModule::~PLNModule() {
+    logger().info("[PLNModule] destructor");
+    do_pln_unregister();
+}
+
+// state variables for running multiple PLNShell commands.
+Btr<BackInferenceTreeRootT> Bstate;
+BackInferenceTreeRootT* temp_state, *state;
+
+void PLNModule::init()
+{
+    logger().info("[PLNModule] init");
+//    CogServer& cogserver = static_cast<CogServer&>(server());
+
+// TODO this should be moved to a separate method so it can
+// also be accessed from PLNUTest
+//	initTestEnv();
+    RECORD_TRAILS = true;
+
+    currentDebugLevel=100;
+	
+//    Init();
+    #if LOCAL_ATW
+//    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
+    ((LocalATW*)ASW())->SetCapacity(10000);
+    #endif  
+    
+    #if LOG_ON_FILE
+     test::logfile=fopen("pln.log","wt");
+     cout << "LOGGING TO FILE pln.log!\n";
+    #endif
+
+    haxx::printRealAtoms = true;
+    haxx::ArchiveTheorems = false;
+
+    // no longer done at module load - it would be inappropriate
+    // for contexts other than testing PLN
+    /*initTests();*
+    Bstate = Btr<BackInferenceTreeRootT>(new BITNodeRoot(tests[0],
+        new DefaultVariableRuleProvider));
+    printf("BITNodeRoot init ok\n");
+    temp_state = Bstate.get();
+    state = Bstate.get();*/
+}
+
+std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
+{
+/*	if (args.size() != 3)
+		return "sql-load: Wrong num args";*/
+
+/*	std::string dbname   = args.front(); args.pop_front();
+	std::string username = args.front(); args.pop_front();
+	std::string auth	   = args.front(); args.pop_front();*/
+
+//    initTestEnv(args);
+
+    std::string output = RunCommand(args);
+
+	return output;
+}
+
+#if 0
 void initTestEnv()
 {
     try {
@@ -141,7 +163,8 @@ void initTestEnv()
 
 //        LOG(2, "Creating AtomSpaceWrappers...");
         
-/*#if LOCAL_ATW
+/*
+#if LOCAL_ATW
         haxx::defaultAtomSpaceWrapper = &LocalATW::getInstance();
 #else
         DirectATW::getInstance();
@@ -202,7 +225,9 @@ void initTestEnv()
   
     getc(stdin);
 }
+#endif
 
+#if 0
 void Init()
 {
     #if LOCAL_ATW
@@ -218,6 +243,7 @@ void Init()
     haxx::printRealAtoms = true;
     haxx::ArchiveTheorems = false;
 }
+#endif
 
 template <typename T>
 T input(T& a, std::list<std::string> args)
