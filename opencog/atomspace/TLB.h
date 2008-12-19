@@ -165,7 +165,6 @@ public:
 #endif
             return atom;
         }
-        logger().info("removing atom: %s (%d)", atom->toString().c_str(), it->second.value());
         atom_map.erase(atom);
         handle_map.erase(it->second);
 #endif
