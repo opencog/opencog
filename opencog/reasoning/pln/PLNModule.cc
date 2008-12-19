@@ -139,7 +139,7 @@ void initTestEnv()
 
         currentDebugLevel=100;
 
-        LOG(2, "Creating AtomSpaceWrappers...");
+//        LOG(2, "Creating AtomSpaceWrappers...");
         
 /*#if LOCAL_ATW
         haxx::defaultAtomSpaceWrapper = &LocalATW::getInstance();
@@ -147,9 +147,9 @@ void initTestEnv()
         DirectATW::getInstance();
         haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
 #endif*/
-        AtomSpaceWrapper& atw = *GET_ATW;
+//        AtomSpaceWrapper& atw = *GET_ATW;
         
-#if 1 //Loading Osama or set axioms here.
+#if 0 //Loading Osama or set axioms here.
 
         haxx::ArchiveTheorems = true;
      
@@ -157,7 +157,7 @@ void initTestEnv()
     //  bool axioms_ok = atw.loadAxioms("inverse_binding.xml");
     //  bool axioms_ok = atw.loadAxioms("fetch10.xml");
     //  bool axioms_ok = atw.loadAxioms("mediumdemo.xml");
-//        bool axioms_ok = atw.loadAxioms("smalldemo.xml");
+        bool axioms_ok = atw.loadAxioms("smalldemo.xml");
     //  bool axioms_ok = atw.loadAxioms("smalldemo28.xml");
     //  bool axioms_ok = atw.loadAxioms("smalldemo28b.xml");
     //  bool axioms_ok = atw.loadAxioms("smalldemo8.xml");
@@ -167,7 +167,7 @@ void initTestEnv()
     //  bool axioms_ok = atw.loadAxioms("fetchdemo5.xml");
     //  bool axioms_ok = atw.loadAxioms("fetchdemo.xml");
     //  bool axioms_ok = atw.loadAxioms("woademo.xml");
-//        assert(axioms_ok);
+        assert(axioms_ok);
 
         haxx::ArchiveTheorems = false;
 #endif

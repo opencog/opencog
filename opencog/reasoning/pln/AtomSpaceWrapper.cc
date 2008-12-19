@@ -1458,6 +1458,7 @@ iAtomSpaceWrapper* ASW()
 {
     static iAtomSpaceWrapper* instance;
     if (instance == NULL) {    
+        LOG(2, "Creating AtomSpaceWrappers...");
 #if LOCAL_ATW
         instance = &LocalATW::getInstance();
 #else
