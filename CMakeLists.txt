@@ -225,10 +225,9 @@ IF (DOXYGEN)
 	CONFIGURE_FILE(Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 	ADD_CUSTOM_TARGET ( doxygen
 		COMMAND doxygen ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-		WORKING_DIRECTORY doc
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
 		COMMENT "Generating documentation"
 	) 
 ELSE (DOXYGEN)
 	MESSAGE(STATUS "WARNING: Doxygen not found - Reference manual will not be created")
 ENDIF (DOXYGEN)
-
