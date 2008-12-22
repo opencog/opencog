@@ -33,10 +33,10 @@ using namespace opencog;
 HopfieldOptions::HopfieldOptions()
 {
     // Set defaults
-
     verboseFlag = HDEMO_DEFAULT_VERBOSE;
-    interleaveFlag = HDEMO_DEFAULT_INTERLEAVE;
+    learningScheme = HDEMO_DEFAULT_SCHEME;
     interleaveAmount = HDEMO_DEFAULT_INTERLEAVEAMOUNT;
+    palimpsestTolerance = HDEMO_DEFAULT_PALIMPSEST_TOLERANCE;
     showMatrixFlag = HDEMO_DEFAULT_SHOW_MATRIX;
     totalFlag = HDEMO_DEFAULT_SHOW_TOTAL;
     nPatterns = HDEMO_DEFAULT_NPATTERNS;
@@ -66,8 +66,10 @@ void HopfieldOptions::printHelp()
         "   [none]      \t Default mode is to imprint, test and repeat.\n"
         "   -R --reset  \t Same as above mode, but completely reset the network between\n"
         "                  \t each imprint and test.\n"
-        "   -i --interleave [N] \t Interleave training of each pattern. Optional spacing\n"
-        "                  \t between imprinting start.\n" "   == Output ==\n"
+        "   -i --interleave <N> \t Interleave training of each pattern with N spacing\n"
+        "                  \t between imprinting start.\n"
+        "   -P --palimpsest <N> \t Palimpsest training with N \% tolerance\n"
+        "   == Output ==\n"
         "   -v, --verbose \t Set to verbose output (log level \"DEBUG\")\n"
         "   -d, --debug   \t Set debug output, traces dynamics (log level \"FINE\")\n"
         "   -m --show-matrix \t Show matrices of stored/cue/retrieved pattern at end.\n"
@@ -96,7 +98,8 @@ void HopfieldOptions::printHelp()
         "   == Pattern commands ==\n"
         "   -p --patterns N \t Number of patterns to test.\n"
         "   -g --gen-density N \t Density of generated patterns (active/inactive nodes).\n"
-        "   -e --error N \t Probability of error in each bit of cue pattern.\n"
+        "   -e --error N \t Probability of error (if N < 1) in each bit of cue pattern or\n"
+        "                \t number of bit errors (if N > 1) in cue pattern.\n"
         "   -E --one-cue \t Only generate a cue once for a pattern and reuse it.\n"
         "      --train-file <x> \t load patterns from file, must use -n to specify pattern size.\n"
         "      --cue-file <x> \t load patterns from file, must use -n to specify pattern size.\n";
@@ -109,7 +112,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
 
     while (1) {
         static const char *optString =
-            "vDw:h:n:l:d:s:t:z:f:p:g:c:r:y:mi:e:oq:a:CR?E";
+            "vDw:h:n:l:d:s:t:z:f:p:g:c:r:y:mi:P:e:oq:a:CR?E";
 
 		static const struct option longOptions[] = {
                 {"verbose", 0, &verboseFlag, 1},
@@ -130,6 +133,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"spread", required_argument, 0, 'y'},    // # of spread iterations
                 {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
                 {"interleave", optional_argument, 0, 'i'},  // interleave imprint of each pattern
+                {"palimpsest", optional_argument, 0, 'P'},  // interleave imprint of each pattern
                 {"error", required_argument, 0, 'e'},   // cue error rate
                 {"total", 0, &totalFlag, 1},    // t_o_tal, reports mean, suitable for batch output
                 {"spread-multiplier", required_argument, 0, 'q'},   // multiplier for importance spread, if 0 then evenly spread across links
@@ -215,10 +219,17 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             showMatrixFlag = 1;
             break;
         case 'i':
-            interleaveFlag = 1;
+            learningScheme = INTERLEAVE;
             if (optarg) {
                 cout << "interleave amount " << optarg << endl;
                 interleaveAmount = atoi(optarg);
+            }
+            break;
+        case 'P':
+            learningScheme = PALIMPSEST;
+            if (optarg) {
+                cout << "palimpsest tolerance " << optarg << endl;
+                palimpsestTolerance = atoi(optarg);
             }
             break;
 
@@ -264,9 +275,13 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
 void HopfieldOptions::printConfiguration()
 {
 
-    if (interleaveFlag) {
+    if (learningScheme == INTERLEAVE) {
         cout << "Continuous interleaved ";
         cout << "learning, amount/gap = " << interleaveAmount;
+        cout << endl;
+    } else if (learningScheme == PALIMPSEST) {
+        cout << "Palimpsest learning. ";
+        cout << "With tolerance = " << palimpsestTolerance << "\%";
         cout << endl;
     } else if (resetFlag) {
         cout << "Pattern by pattern learning (network reset after each)";

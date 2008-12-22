@@ -169,7 +169,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
     }
     hebLearnAgent->convertLinks = true;
-    forgetAgent->forgetPercentage = 0.10f;
+    forgetAgent->forgetPercentage = 0.05f;
 
     AtomSpace* atomSpace = getAtomSpace();
 

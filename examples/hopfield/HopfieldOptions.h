@@ -32,8 +32,9 @@
 #include <opencog/atomspace/AttentionValue.h>
 
 #define HDEMO_DEFAULT_VERBOSE 0
-#define HDEMO_DEFAULT_INTERLEAVE false
+#define HDEMO_DEFAULT_SCHEME SEQUENCE
 #define HDEMO_DEFAULT_INTERLEAVEAMOUNT 5
+#define HDEMO_DEFAULT_PALIMPSEST_TOLERANCE 5
 #define HDEMO_DEFAULT_SHOW_MATRIX false
 #define HDEMO_DEFAULT_SHOW_TOTAL false
 #define HDEMO_DEFAULT_NPATTERNS 1
@@ -60,10 +61,13 @@ private:
     HopfieldServer* hServer;
 
 public:
+    enum learningScheme_t {SEQUENCE = 0, INTERLEAVE, PALIMPSEST };
+    learningScheme_t learningScheme;
+
     int verboseFlag;
     int resetFlag;
-    int interleaveFlag;
     int interleaveAmount;
+    int palimpsestTolerance;
     int showMatrixFlag;
     int showConfigFlag;
     int totalFlag;

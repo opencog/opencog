@@ -84,6 +84,14 @@ public:
      */
     Pattern mutatePattern(float error);
 
+    /**
+     * Mutate a certain number of bits in pattern.
+     *
+     * @param error number of bit errors
+     * @return new mutated pattern
+     */
+    Pattern mutatePattern(unsigned int error);
+
     int getWidth();
     int getHeight();
     bool isEmpty();

@@ -102,6 +102,8 @@ Pattern Pattern::mutatePattern(float error)
     Pattern result(width, height);
     Pattern::iterator r_i = result.begin();
     Pattern::iterator p;
+    if (error >= 1) return mutatePattern((unsigned int)error);
+
     // mutating the pattern so that none of the original
     // nodes are active makes no sense so avoid it.
     int maxToRemove = activity() - 1;
@@ -120,6 +122,36 @@ Pattern Pattern::mutatePattern(float error)
             }
         }
         *r_i = val; r_i++;
+    }
+    return result;
+}
+
+Pattern Pattern::mutatePattern(unsigned int error)
+{
+    Pattern result(*this);
+    // mutating the pattern so that none of the original
+    // nodes are active makes no sense so avoid it.
+    int maxToRemove = activity() - 1;
+    if (error > size()) error = size();
+
+    while (error > 0) {
+        // Get random index to mutate
+        // -1 from size because at least one node should remain
+        int index = (int) (rng->randfloat() * (size() - 1));
+        int val = (*this)[index];
+        // Check if this position has already been mutated
+        if (val != result[index]) continue;
+        // Flip bit
+        if (val) {
+            if (maxToRemove > 0) {
+                val = !val;
+                maxToRemove--;
+            }
+        } else {
+            val = !val;
+        }
+        result[index] = val;
+        error--;
     }
     return result;
 }

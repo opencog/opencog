@@ -31,6 +31,7 @@
 using namespace opencog;
 
 std::vector< Pattern > getPatterns();
+void testHopfieldNetworkPalimpsest();
 void testHopfieldNetworkRolling();
 void testHopfieldNetworkRollingOld();
 void testHopfieldNetworkInterleave();
@@ -64,10 +65,16 @@ int main(int argc, char *argv[])
 
     if (o->recordToFile) o->openOutputFiles();
 
-    if (o->interleaveFlag)
+    switch (o->learningScheme) {
+    case HopfieldOptions::INTERLEAVE:
         testHopfieldNetworkInterleave();
-    else
+        break;
+    case HopfieldOptions::SEQUENCE:
         testHopfieldNetworkRolling();
+        break;
+    case HopfieldOptions::PALIMPSEST:
+        testHopfieldNetworkPalimpsest();
+    }
 
     if (o->recordToFile) o->closeOutputFiles();
 
@@ -106,6 +113,68 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
 
     }
     return cs;
+}
+
+void testHopfieldNetworkPalimpsest()
+{
+# define HDEMO_NORESULT -100
+    std::vector< Pattern > patterns;
+    std::vector< Pattern > cuePatterns;
+    std::vector< std::vector < float > > results;
+    int totalCycles;
+
+    patterns = getPatterns();
+    cuePatterns = getCuePatterns(patterns);
+
+//    totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
+    totalCycles = patterns.size();
+
+    for (int i = 0; i < totalCycles; i++) {
+        int memory = 0;
+        std::vector< float > cycleResults;
+        std::vector< Pattern > toPrint;
+
+        if (o->showMatrixFlag) {
+            std::vector< Pattern > toPrint;
+            cout << endl;
+            toPrint.push_back(patterns[i]);
+            (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
+        }
+        cout << "cycle " << i << " ,\t";
+        (static_cast<HopfieldServer&>(server())).resetNodes();
+        (static_cast<HopfieldServer&>(server())).imprintPattern(patterns[i], o->imprintCycles);
+
+        // Go back until patterns are not recalled withing palimpsest tolerance
+        // level...
+        for (int j = i; j >= 0; j--) {
+            float rSim;
+            Pattern c(0,0);
+            if (!o->cueGenerateOnce) {
+                if (o->fileCue.size() > 0) {
+                    c = cuePatterns[j].mutatePattern(o->cueErrorRate);
+                } else {
+                    c = patterns[j].mutatePattern(o->cueErrorRate);
+                }
+            } 
+            Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(cuePatterns[j],
+                    o->retrieveCycles, o->spreadCycles);
+            rSim = patterns[j].hammingSimilarity(rPattern);
+            if ( (rSim * 100) < (100 - o->palimpsestTolerance) ) {
+                break;
+            }
+            memory++;
+            cycleResults.push_back(rSim);
+            if (o->verboseFlag) {
+                cout << setw(4) << rSim << "(" << setw(5) << rSim - patterns[j].hammingSimilarity(cuePatterns[j]) << ")" << ", ";
+            }
+        }
+        cout << setw(4) << memory << endl;
+        //if (o->showMatrixFlag) (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
+        results.push_back(cycleResults);
+
+    }
+
+
 }
 
 void testHopfieldNetworkInterleave()
