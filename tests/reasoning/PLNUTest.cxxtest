@@ -243,8 +243,8 @@ public:
 
             f = fopen("results.txt","a");
             
-//            // Initialise CogServer
-//            CogServer& cogserver = static_cast<CogServer&>(server());
+            // This access is required to initialise CogServer.
+            CogServer& cogserver = static_cast<CogServer&>(server());
             // Load builtinreqs
             //cogserver.loadModule(std::string("libbuiltinreqs.so"));
             //cogserver.loadModule(std::string("libscheme.so"));
@@ -266,7 +266,8 @@ public:
             DirectATW::getInstance();
             haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
 #endif*/
-//            AtomSpaceWrapper& atw = *GET_ATW;
+            // This is necessary to make sure that the ASW is initialized at the right time.
+            AtomSpaceWrapper& atw = *GET_ATW;
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");
@@ -288,7 +289,8 @@ public:
 
         AllTestsInferenceNodes = 0;
 
-//        /*AtomSpaceWrapper **/atw = GET_ATW;
+        // This next line is also necessary.
+        /*AtomSpaceWrapper **/atw = GET_ATW;
         INstats.clear();
 
         if(RUN_FAILURE_TESTS)
