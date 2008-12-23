@@ -504,7 +504,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // emit add atom signal
     _addAtomSignal(handle);
 
-    logger().debug("[AtomTable] add: %p", handle.value());
+    logger().fine("[AtomTable] add: %p", handle.value());
 
     return handle;
 }
