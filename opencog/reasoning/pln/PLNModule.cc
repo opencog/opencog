@@ -110,10 +110,13 @@ void PLNModule::init()
 
     currentDebugLevel=100;
 	
+	// Make sure that the ASW is initialized on module load
+	iAtomSpaceWrapper* asw = ASW();
+	
 //    Init();
     #if LOCAL_ATW
 //    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
-    ((LocalATW*)ASW())->SetCapacity(10000);
+    ((LocalATW*)asw)->SetCapacity(10000);
     #endif  
     
     #if LOG_ON_FILE
