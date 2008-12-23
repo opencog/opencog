@@ -46,5 +46,6 @@ LINK_LIBRARIES (
 ADD_CXXTEST(FormulaKitUTest)
 #ADD_CXXTEST(XMLNodeLoaderUTest)
 ADD_CXXTEST(IndefinitePLNFormulaUTest)
+ADD_CXXTEST(AtomSpaceWrapperUTest)
 ADD_CXXTEST(PLNUTest)
 

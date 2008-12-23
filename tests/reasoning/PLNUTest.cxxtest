@@ -185,7 +185,6 @@ private:
         // if you want to disable some of these tests,
         // comment out the content in their implementation
         // (so that they won't be run outside of testHeuristic either)
-        testAtomSpaceWrapper();
         testTVChecksWork();
         testRandomTVsTooHigh();
         testSymmetricRelationFails();
@@ -479,11 +478,6 @@ public:
         assert( within(tvB.getMean(), tvD.getMean(), 0.001));
         assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
         printf("finish MacroRuleTest\n");
-    }
-
-    void testAtomSpaceWrapper() {    
-        puts("Testing atomspacewrapper");
-        atw->testAtomSpaceWrapper();
     }
 
 // not possible because CXXtest tries to access the tests anyway
