@@ -41,10 +41,27 @@ HebbianLearningAgent::HebbianLearningAgent()
 
     convertLinks = config().get_bool("ECAN_CONVERT_LINKS");
     conversionThreshold = config().get_int("ECAN_CONVERSION_THRESHOLD");
+
+    // Provide a logger, but disable it initially
+    log = NULL;
+    setLogger(new opencog::Logger("HebbianLearningAgent.log", Logger::WARN, true));
+    log->disable();
 }
 
 HebbianLearningAgent::~HebbianLearningAgent()
 {
+    if (log) delete log;
+}
+
+void HebbianLearningAgent::setLogger(Logger* _log)
+{
+    if (log) delete log;
+    log = _log;
+}
+
+Logger* HebbianLearningAgent::getLogger()
+{
+    return log;
 }
 
 void HebbianLearningAgent::run(CogServer *server)
@@ -61,7 +78,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
     float tc, old_tc, new_tc;
     float tcDecayRate = 0.1f;
 
-    logger().debug("------- Hebbian Learning update "
+    log->info("HebbianLearningAgent::hebbianLearningupdate "
                    "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
@@ -97,7 +114,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     if (tc < 0) {
                         // link no longer representative
                         // swap inverse hebbian link direction
-                        logger().fine("HebLearn: swap direction of inverse link %s", TLB::getAtom(h)->toString().c_str());
+                        log->fine("HebbianLearningAgent: swapping direction of inverse link %s", TLB::getAtom(h)->toString().c_str());
                         // save STI/LTI
                         AttentionValue backupAV = a->getAV(h);
                         a->removeAtom(h);
@@ -115,7 +132,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     if (tc < 0) {
                         // Inverse link no longer representative
                         // change to symmetric hebbian link
-                        logger().fine("HebLearn: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
+                        log->fine("HebbianLearningAgent: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
                         // save STI/LTI
                         AttentionValue backupAV = a->getAV(h);
                         a->removeAtom(h);
@@ -132,7 +149,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                 if (tc < 0) {
                     // link no longer representative
                     // change to inverse hebbian link
-                    logger().fine("HebLearn: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
+                    log->fine("HebbianLearningAgent: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
                     // save STI/LTI
                     AttentionValue backupAV = a->getAV(h);
                     a->removeAtom(h);
@@ -159,7 +176,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
             a->setMean(h, tc);
         }
 		if (isDifferent)
-			logger().fine("HebLearn: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
+			log->fine("HebbianLearningAgent: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 
     }
     // if not enough links, try and create some more either randomly
@@ -190,7 +207,7 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     if (foundTheSource) {
         outgoing.insert(outgoing.begin(), theSource);
     } else {
-        logger().error("Can't find source atom for new Asymmetric Hebbian Link");
+        log->error("Can't find source atom for new Asymmetric Hebbian Link");
     }
     return outgoing;
 
@@ -209,7 +226,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     std::vector<float> normsti_v;
     bool tcInit = true;
 
-	logger().fine("TC: start");
+	log->fine("HebbianLearningAgent::targetConjunction");
 
     for (h_i = handles.begin();
             h_i != handles.end();
@@ -219,7 +236,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 
         // if none in attention return 0 at end
         if (sti > a->getAttentionalFocusBoundary()) {
-			logger().fine("TC: %d in attention, focus boundary = %d", sti,
+			log->fine("HebbianLearningAgent: %d in attention, focus boundary = %d", sti,
 					a->getAttentionalFocusBoundary() );
 			inAttention = true;
 		}
@@ -234,7 +251,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
             tc = normsti;
             tcInit = false;
         } else tc *= normsti;
-		logger().fine("TC: normsti %.3f, tc %.3f", normsti, tc);
+		log->fine("HebbianLearningAgent: normsti %.3f, tc %.3f", normsti, tc);
 
     }
 
@@ -245,7 +262,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
 
-    logger().fine("TC: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
+    log->fine("HebbianLearningAgent: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
 
     return tc;
 

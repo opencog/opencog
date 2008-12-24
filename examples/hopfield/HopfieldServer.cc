@@ -163,11 +163,39 @@ void HopfieldServer::init(int width, int height, int numLinks)
 #endif
     forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
 
-    if (options->verboseLevel >= 2) {
+    if (options->verboseLevel) {
         importUpdateAgent->getLogger()->enable();
-        importUpdateAgent->getLogger()->setLevel (Logger::FINE);
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
+        hebLearnAgent->getLogger()->enable();
+        hebLearnAgent->getLogger()->setPrintToStdoutFlag (true);
+//! @todo make all attention modules use their own logger object or upgrade
+//! logging system to allow hierarchical logs.
+#if 0
+#ifdef HAVE_GSL
+        diffuseAgent->getLogger()->enable();
+        diffuseAgent->getLogger()->setPrintToStdoutFlag (true);
+#else
+        spreadAgent->getLogger()->enable();
+        spreadAgent->getLogger()->setPrintToStdoutFlag (true);
+#endif
+#endif
+        forgetAgent->getLogger()->enable();
+        forgetAgent->getLogger()->setPrintToStdoutFlag (true);
     }
+    switch (options->verboseLevel) {
+    case 1:
+        importUpdateAgent->getLogger()->setLevel (Logger::INFO);
+        break;
+    case 2:
+        importUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
+        break;
+    case 3:
+        importUpdateAgent->getLogger()->setLevel (Logger::FINE);
+        break;
+    default:
+        importUpdateAgent->getLogger()->setLevel (Logger::WARN);
+    }
+
     hebLearnAgent->convertLinks = true;
     forgetAgent->forgetPercentage = 0.05f;
 

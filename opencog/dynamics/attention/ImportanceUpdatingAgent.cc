@@ -87,7 +87,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::DEBUG, true));
+    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::WARN, true));
     log->disable();
 }
 
@@ -102,16 +102,14 @@ void ImportanceUpdatingAgent::init(CogServer *server)
     // Not sure exactly what initial estimates should be made...
     log->fine("ImportanceUpdatingAgent::init");
     initialEstimateMade = true;
-
 	// Perhaps initiate recent_val members to initial
 	// size before the mind process begins.
 }
 
-void ImportanceUpdatingAgent::setLogger(Logger* log)
+void ImportanceUpdatingAgent::setLogger(Logger* _log)
 {
-    if (this->log) delete this->log;
-    this->log = log;
-    log->fine("Set new logger for ImportanceUpdatingAgent");
+    if (log) delete log;
+    log = _log;
 }
 
 Logger* ImportanceUpdatingAgent::getLogger()
@@ -136,7 +134,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
     AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
 
-    log->fine("=========== ImportanceUpdating::run =======");
+    log->fine("=========== ImportanceUpdatingAgent::run =======");
     /* init iterative variables, that can't be calculated in
      * (no pointer to CogServer there) */
     if (!initialEstimateMade) init(server);
@@ -154,7 +152,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     updateTotalStimulus(a);
 
     /* Update atoms: Collect rent, pay wages */
-    log->debug("Collecting rent and paying wages");
+    log->info("Collecting rent and paying wages");
 
     h = getHandlesToUpdate(a);
 

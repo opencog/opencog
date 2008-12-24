@@ -75,6 +75,16 @@ private:
 	 */
     std::vector<Handle>& moveSourceToFront(std::vector<Handle> &outgoing);
 
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -83,15 +93,21 @@ public:
         return _ci;
     }
 
+    HebbianLearningAgent();
+    virtual ~HebbianLearningAgent();
+    virtual void run(CogServer *server);
+
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
+
     //! Whether to convert links to/from InverseHebbianLinks as necessary.
     bool convertLinks;
 
     //! Maximum allowable LTI of a link to be converted.
     AttentionValue::lti_t conversionThreshold;
-
-    HebbianLearningAgent();
-    virtual ~HebbianLearningAgent();
-    virtual void run(CogServer *server);
 
 	//! Update the TruthValues of the HebbianLinks in the AtomSpace.
     void hebbianLearningUpdate();

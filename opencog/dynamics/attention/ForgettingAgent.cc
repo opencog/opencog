@@ -55,14 +55,32 @@ ForgettingAgent::ForgettingAgent()
 
     forgetThreshold = (AttentionValue::lti_t)
                       (config().get_int("ECAN_FORGET_THRESHOLD"));
+
+    // Provide a logger, but disable it initially
+    log = NULL;
+    setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
+    log->disable();
 }
 
 ForgettingAgent::~ForgettingAgent()
 {
+    if (log) delete log;
+}
+
+Logger* ForgettingAgent::getLogger()
+{
+    return log;
+}
+
+void ForgettingAgent::setLogger(Logger* _log)
+{
+    if (log) delete log;
+    log = _log;
 }
 
 void ForgettingAgent::run(CogServer *c)
 {
+    log->fine("=========== ForgettingAgent::run =======");
     a = c->getAtomSpace();
     forget(forgetPercentage);
 }
@@ -81,7 +99,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     delete atoms;
 
     removalAmount = (int) (atomsVector.size() * proportion);
-    logger().fine("Will attempt to remove %d atoms", removalAmount);
+    log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
     for (unsigned int i = 0; i < atomsVector.size() ; i++) {
         if (TLB::getAtom(atomsVector[i]) == NULL) {
@@ -94,10 +112,10 @@ void ForgettingAgent::forget(float proportion = 0.10f)
                 && count < removalAmount) {
             if (a->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE ) {
                 //cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;
-                logger().fine("Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
+                log->fine("Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
                 if (!a->removeAtom(atomsVector[i])) {
-                    logger().error("Couldn't remove atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
-                    logger().error("Aborting forget process");
+                    log->error("Couldn't remove atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
+                    log->error("Aborting forget process");
                     return;
                 }
                 count++;
@@ -106,5 +124,6 @@ void ForgettingAgent::forget(float proportion = 0.10f)
             i = atomsVector.size();
         }
     }
+    log->info("ForgettingAgent::forget - %d atoms removed.", count);
 
 }

@@ -146,7 +146,6 @@ void testHopfieldNetworkPalimpsest()
             toPrint.push_back(patterns[i]);
             (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
         }
-        cout << "cycle " << i << " ,\t";
         (static_cast<HopfieldServer&>(server())).resetNodes();
         (static_cast<HopfieldServer&>(server())).imprintPattern(patterns[i], o->imprintCycles);
 
@@ -164,16 +163,29 @@ void testHopfieldNetworkPalimpsest()
             } 
             Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(cuePatterns[j],
                     o->retrieveCycles, o->spreadCycles);
+
+            if (o->showMatrixFlag) {
+                std::vector< Pattern > toPrint;
+                toPrint.push_back(patterns[j]);
+                toPrint.push_back(c);
+                toPrint.push_back(rPattern);
+                cout << "original | cue | retrieved" << endl;
+                (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
+                cout << "---" << endl;
+            }
+
             rSim = patterns[j].hammingSimilarity(rPattern);
             if ( (rSim * 100) < (100 - o->palimpsestTolerance) ) {
                 break;
             }
+
             memory++;
             cycleResults.push_back(rSim);
-            if (o->verboseLevel) {
-                cout << setw(4) << rSim << "(" << setw(5) << rSim - patterns[j].hammingSimilarity(cuePatterns[j]) << ")" << ", ";
-            }
+
+            logger().debug(" Similarity %.2f ( diff: %.2f )", rSim, rSim - patterns[j].hammingSimilarity(cuePatterns[j]));
+            
         }
+        cout << "cycle " << i << " ,\t";
         cout << setw(4) << memory << endl;
         //if (o->showMatrixFlag) (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
         results.push_back(cycleResults);

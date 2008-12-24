@@ -125,8 +125,6 @@ private:
 
     bool updateLinks; //!< Update links or not
 
-    Logger *log; //!< Logger object for Agent
-
     /**
      * Randomly stimulate atoms in the AtomSpace
      * Simulates a "cognitive process" (e.g. a Novamente lobe)
@@ -283,6 +281,16 @@ private:
      */
     HandleEntry* getHandlesToUpdate(AtomSpace* a);
 
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -302,14 +310,6 @@ public:
      * @return A logger object.
      */
     Logger* getLogger();
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
 
     /** Set whether to randomly stimulate atoms.
      *
