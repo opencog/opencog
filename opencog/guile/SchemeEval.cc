@@ -66,10 +66,26 @@ static void * do_bogus_scm(void *p)
 }
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
+#define WORK_AROUND_GUILE_THREADING_BUG
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+/* There are bugs in guile-1.8.6 and earlier that prevent proper
+ * multi-threaded operation. Currently, the most serious of these is
+ * a prallel-define bug, documented in 
+ * https://savannah.gnu.org/bugs/index.php?24867
+ * Until that bug is fixed and released, this work-around is needed.
+ * The work-around serializes all guile-mode thread execution, by 
+ * means of a mutex lock.
+ */
+static pthread_mutex_t serialize_lock;
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
 static void first_time_only(void)
 {
    pthread_key_create(&tid_key, NULL);
 	pthread_setspecific(tid_key, (const void *) 0x42);
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_init(&serialize_lock, NULL);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_with_guile(do_bogus_scm, NULL);
 	guile_user_module = scm_current_module();
@@ -79,7 +95,17 @@ static void first_time_only(void)
 SchemeEval::SchemeEval(void)
 {
 	pthread_once(&eval_init_once, first_time_only);
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_lock(&serialize_lock);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
 	scm_with_guile(c_wrap_init, this);
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_unlock(&serialize_lock);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
 }
 
 /* This should be called once for every new thread. */
@@ -332,7 +358,17 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 std::string SchemeEval::eval(const std::string &expr)
 {
 	pexpr = &expr;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_lock(&serialize_lock);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
 	scm_with_guile(c_wrap_eval, this);
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_unlock(&serialize_lock);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
 	return answer;
 }
 
@@ -348,7 +384,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	per_thread_init();
 
 	// XXX This is a defacto string buffer copy, could probably be avoided
-	// in most cases. FIXME.  i.e. no copy needed when no peding input.
+	// in most cases. FIXME.  i.e. no copy needed when no pending input.
 	input_line += expr;
 
 	caught_error = false;
