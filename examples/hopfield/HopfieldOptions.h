@@ -64,7 +64,7 @@ public:
     enum learningScheme_t {SEQUENCE = 0, INTERLEAVE, PALIMPSEST };
     learningScheme_t learningScheme;
 
-    int verboseFlag;
+    int verboseLevel;
     int resetFlag;
     int interleaveAmount;
     int palimpsestTolerance;

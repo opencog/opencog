@@ -33,7 +33,7 @@ using namespace opencog;
 HopfieldOptions::HopfieldOptions()
 {
     // Set defaults
-    verboseFlag = HDEMO_DEFAULT_VERBOSE;
+    verboseLevel = HDEMO_DEFAULT_VERBOSE;
     learningScheme = HDEMO_DEFAULT_SCHEME;
     interleaveAmount = HDEMO_DEFAULT_INTERLEAVEAMOUNT;
     palimpsestTolerance = HDEMO_DEFAULT_PALIMPSEST_TOLERANCE;
@@ -70,8 +70,8 @@ void HopfieldOptions::printHelp()
         "                  \t between imprinting start.\n"
         "   -P --palimpsest <N> \t Palimpsest training with N \% tolerance\n"
         "   == Output ==\n"
-        "   -v, --verbose \t Set to verbose output (log level \"DEBUG\")\n"
-        "   -d, --debug   \t Set debug output, traces dynamics (log level \"FINE\")\n"
+        "   -v, --verbose \t Set to verbose output, can be used more than once for more\n"
+        "                 \t detail (log level \"INFO\" -> \"DEBUG\" -> \"FINE\")\n"
         "   -m --show-matrix \t Show matrices of stored/cue/retrieved pattern at end.\n"
         "   -o --total   \t Report the mean performance increase between cue and retrieval.\n"
         "   -a --log-performance [prefix] log the change cue/retrieval/diff similarity to\n"
@@ -112,11 +112,11 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
 
     while (1) {
         static const char *optString =
-            "vDw:h:n:l:d:s:t:z:f:p:g:c:r:y:mi:P:e:oq:a:CR?E";
+            "vw:h:n:l:d:s:t:z:f:p:g:c:r:y:mi:P:e:oq:a:CR?E";
 
 		static const struct option longOptions[] = {
-                {"verbose", 0, &verboseFlag, 1},
-                {"debug", 0, &verboseFlag, 2},
+                {"verbose", 0, &verboseLevel, 1},
+                {"debug", 0, &verboseLevel, 3},
                 {"width", required_argument, 0, 'w'},
                 {"height", required_argument, 0, 'h'},
                 {"size", required_argument, 0, 'n'},
@@ -158,10 +158,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
 
         switch (c) {
         case 'v':
-            verboseFlag = 1;
-            break;
-        case 'D':
-            verboseFlag = 2;
+            verboseLevel++;
             break;
         case 'w':
             hServer->width = atoi(optarg);

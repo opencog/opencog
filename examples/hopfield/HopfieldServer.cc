@@ -66,7 +66,7 @@ std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint,
         }
 
         result.push_back(iResult);
-        if (!options->verboseFlag) cout << "." << flush;
+        if (!options->verboseLevel) cout << "." << flush;
         if (i < imprint - 1 && options->recordToFile) {
             options->beforeFile << ", ";
             options->afterFile << ", ";
@@ -163,7 +163,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
 #endif
     forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
 
-    if (options->verboseFlag == 2) {
+    if (options->verboseLevel >= 2) {
         importUpdateAgent->getLogger()->enable();
         importUpdateAgent->getLogger()->setLevel (Logger::FINE);
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
@@ -471,7 +471,7 @@ void HopfieldServer::printStatus()
 	
 
     int col;
-    if (!options->verboseFlag) return;
+    if (!options->verboseLevel) return;
 
     for (i = 0; i < height; i++) {
         for (col = 0; col < width; col++) {
@@ -490,7 +490,7 @@ void HopfieldServer::printStatus()
     }
 
     // Print out links.
-//  if (options->verboseFlag > 1) {
+//  if (options->verboseLevel > 1) {
 // links = getAtomSpace()->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
 //
 // for (current_l = links; current_l; current_l = current_l->next) {

@@ -50,11 +50,17 @@ int main(int argc, char *argv[])
 
     /* setup logging */
     logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-    if (o->verboseFlag == 1) {
+    switch (o->verboseLevel) {
+    case 1:
+        logger().setLevel(Logger::INFO);
+        break;
+    case 2:
         logger().setLevel(Logger::DEBUG);
-    } else if (o->verboseFlag == 2) {
+        break;
+    case 3:
         logger().setLevel(Logger::FINE);
-    } else {
+        break;
+    default:
         logger().setLevel(Logger::WARN);
     }
 
@@ -164,7 +170,7 @@ void testHopfieldNetworkPalimpsest()
             }
             memory++;
             cycleResults.push_back(rSim);
-            if (o->verboseFlag) {
+            if (o->verboseLevel) {
                 cout << setw(4) << rSim << "(" << setw(5) << rSim - patterns[j].hammingSimilarity(cuePatterns[j]) << ")" << ", ";
             }
         }
@@ -199,7 +205,7 @@ void testHopfieldNetworkInterleave()
         std::vector< float > cycleResults;
         std::vector< Pattern > toPrint;
 
-        if (!o->verboseFlag) cout << "cycle " << i << " ,\t";
+        if (!o->verboseLevel) cout << "cycle " << i << " ,\t";
 
         // Find first pattern for imprinting
         if (o->interleaveAmount > 0) {
@@ -219,7 +225,7 @@ void testHopfieldNetworkInterleave()
         for (unsigned int j = startPattern; j <= (unsigned int) endPattern; j++) {
             (static_cast<HopfieldServer&>(server())).resetNodes();
             (static_cast<HopfieldServer&>(server())).imprintPattern(patterns[j], 1);
-            //if (!verboseFlag) cout << ".";
+            //if (!verboseLevel) cout << ".";
         }
 
         for (unsigned int j = 0; j < patterns.size(); j++) {
@@ -247,7 +253,7 @@ void testHopfieldNetworkInterleave()
             }
 
         }
-        if (!o->verboseFlag) cout << endl;
+        if (!o->verboseLevel) cout << endl;
         if (o->showMatrixFlag) (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
         results.push_back(cycleResults);
 
@@ -270,7 +276,7 @@ void testHopfieldNetworkRolling()
         if (o->resetFlag)
             (static_cast<HopfieldServer&>(server())).reset();
         results.push_back((static_cast<HopfieldServer&>(server())).imprintAndTestPattern(patterns[i], o->imprintCycles, o->retrieveCycles, cuePatterns[i], o->cueErrorRate));
-        if (!o->verboseFlag) cout << " - pattern " << i << " done" << endl;
+        if (!o->verboseLevel) cout << " - pattern " << i << " done" << endl;
         if (o->recordToFile) {
             o->beforeFile << endl;
             o->afterFile << endl;
