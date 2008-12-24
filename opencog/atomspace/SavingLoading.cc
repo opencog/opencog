@@ -336,9 +336,11 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Node* node = readNode(f, handles);
         node->setAtomTable(&atomTable);
 
+        // XXX Why are we not calling atomTable.addAtom() here?
+        // Wouldn't that be the more correct thing to do?
         atomTable.atomSet.insert(node);
 
-        Handle handle = TLB::getHandle(node);
+        Handle handle = TLB::holdsHandle(node);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
 
         atomTable.nameIndex.insertHandle(handle);
@@ -365,9 +367,11 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         Link* link = readLink(f, handles);
         link->setAtomTable(&atomTable);
 
+        // XXX Why are we not calling atomTable.addAtom() here?
+        // Wouldn't that be the more correct thing to do?
         atomTable.atomSet.insert(link);
 
-        Handle handle = TLB::getHandle(link);
+        Handle handle = TLB::holdsHandle(link);
         if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
 
         atomTable.typeIndex.insertHandle(handle);

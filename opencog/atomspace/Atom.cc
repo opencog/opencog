@@ -285,14 +285,29 @@ void Atom::merge(Atom* other) throw (InconsistenceException)
              "Different atoms cannot be merged");
 
     // Merges the incoming set and updates the outgoingSets
+    // XXX Is it really correct to merge incoming sets?  
+    // Normally, the incoming set is fixed up when an atom is added to
+    // the atom table.  So this seems like the wrong palce to do this.
+    // Also, the code below fails to remove 'other' from incoming sets,
+    // and this seems like an un-accounted-for possibility ... !?
+    //
+    // Merging the outgoing sets is also kind-of-weird, as
+    // it breaks the core assumption that atoms are immutable
+    // once they've been added to the atomtable.  So really, 
+    // a merge should be allowed *only* if the 'this' is not
+    // in an atom table! Yet, that is not how merge() is invoked.
+    // I dunno, this whole idea of 'merge' seems awful fishy, 
+    // its not at all clear that any of the semantics implemented
+    // here are correct!
+    //
     Handle thisHandle = TLB::getHandle(this);
-    Handle otherHandle = TLB::getHandle(other);
+    Handle otherHandle = TLB::holdsHandle(other);
 
     HandleEntry *inc = other->getIncomingSet();
     while (inc != NULL) {
         addIncomingHandle(inc->handle);
 
-        // For links, merege the outgoing sets.
+        // For links, merge the outgoing sets.
         Atom *incAtom = TLB::getAtom(inc->handle);
         Link *link = dynamic_cast<Link *>(incAtom);
         if (link) {

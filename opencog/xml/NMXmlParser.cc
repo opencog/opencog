@@ -383,7 +383,7 @@ throw (InconsistenceException)
                             NMXmlParser::setOutgoingSet(link, outgoing);
                         }
                     }
-                    Handle oldHandle = TLB::getHandle(currentAtom);
+                    Handle oldHandle = TLB::holdsHandle(currentAtom);
                     //timeval s1;
                     //gettimeofday(&s1, NULL);
                     logger().fine("currentAtom => %s", currentAtom->toString().c_str());
