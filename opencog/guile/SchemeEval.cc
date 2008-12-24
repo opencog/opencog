@@ -43,7 +43,7 @@ void * SchemeEval::c_wrap_init(void *p)
 	return self;
 }
 
-static pthread_once_t workaround_once = PTHREAD_ONCE_INIT;
+static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
 static pthread_key_t tid_key = NULL;
 
 #define WORK_AROUND_GUILE_185_BUG
@@ -78,7 +78,7 @@ static void first_time_only(void)
 
 SchemeEval::SchemeEval(void)
 {
-	pthread_once(&workaround_once, first_time_only);
+	pthread_once(&eval_init_once, first_time_only);
 	scm_with_guile(c_wrap_init, this);
 }
 
