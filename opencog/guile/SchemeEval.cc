@@ -381,6 +381,7 @@ void * SchemeEval::c_wrap_eval(void * p)
 
 std::string SchemeEval::do_eval(const std::string &expr)
 {
+	bool newin = false;
 	per_thread_init();
 
 	/* Avoid a string buffer copy if there is no pending input */
@@ -393,6 +394,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	else
 	{
 		expr_str = expr.c_str();
+		newin = true;
 	}
 
 	caught_error = false;
@@ -409,7 +411,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	if (pending_input)
 	{
 		/* Save input for later */
-		input_line += expr;
+		if (newin) input_line += expr;
 		return "";
 	}
 	pending_input = false;
