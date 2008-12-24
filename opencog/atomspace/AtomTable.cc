@@ -171,11 +171,6 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 
 Handle AtomTable::getHandle(const char* name, Type type) const
 {
-    // XXX It would probably improve performance to skip the
-    // class-server check entirely.
-    if (!ClassServer::isAssignableFrom(NODE, type)) {
-        return Handle::UNDEFINED;
-    }
     Handle h = nameIndex.get(name);
     if (TLB::isInvalidHandle(h)) return Handle::UNDEFINED;
     Atom *a = TLB::getAtom(h);
@@ -201,7 +196,7 @@ Handle AtomTable::getHandle(const Link *link) const
 {
     const std::vector<Handle>& handles = link->getOutgoingSet();
     for (int i = 0; i < link->getArity(); i++) {
-        if(false == TLB::isValidHandle(handles[i])) return Handle::UNDEFINED;
+        if (false == TLB::isValidHandle(handles[i])) return Handle::UNDEFINED;
     }
 
     AtomHashSet::const_iterator it = atomSet.find(link);
