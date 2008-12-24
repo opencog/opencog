@@ -76,6 +76,7 @@ namespace test
 {
     extern FILE *logfile;
 //    int _test_count = 0;
+    // TODO not used (it's set but nothing responds to it)
     bool debugger_control = false;
 }
 
@@ -313,6 +314,7 @@ std::string RunCommand(std::list<std::string> args)
         boost::shared_ptr<set<Handle> > ts;
         Vertex v;
         Handle eh=Handle::UNDEFINED;
+        // TODELETE doesn't affect anything
         bool using_root = true;
         
         #if LOG_ON_FILE
@@ -324,8 +326,9 @@ std::string RunCommand(std::list<std::string> args)
         switch (c)
         {
             case 'm':
-                //printf("%d\n", (int)tests.size()); break;
-                ss << (int)tests.size() << std::endl;
+//                printf("%d\n", (int)tests.size()); break;
+                ss << tests.size() << std::endl;
+                break;
             case 'd':
 #if LOCAL_ATW
             ((LocalATW*)atw)->DumpCore(CONCEPT_NODE);
@@ -392,12 +395,18 @@ std::string RunCommand(std::list<std::string> args)
             // TODO deal with arguments to this thing
             case 'H': 
                 //input(h, args); cprintf(0,"Origin Node #%d\n", state->hsource[(Handle)h]); break;
-                        fflush(stdin);
-                        input(bT, args); input(b1, args); cin >> b2;
+/*                        fflush(stdin);
+                        cin >> bT; cin >> b1; cin >> b2;
                         cin >> a1T; cin >> a10; cin >> a11;
                         cin >> a2T; cin >> a20; cin >> a21;
                         puts("Enter Rule #: ");
-                        cin >> qrule;
+                        cin >> qrule;*/
+
+                        input(bT, args); input(b1, args); input(b2, args);
+                        input(a1T, args); input(a10, args); input(a11, args);
+                        input(a2T, args); input(a20, args); input(a21, args);
+//                        puts("Enter Rule #: ");
+                        input(qrule, args);
 
                         bvt = (mva((Handle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
                         avt1 = (mva((Handle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
@@ -412,9 +421,11 @@ std::string RunCommand(std::list<std::string> args)
                         if (a2T)
                             rule_args.push_back(BBvtree(new BoundVTree(avt2)));
                         else
-                            puts("Passing 1 arg.");
+//                            puts("Passing 1 arg.");
+                            ss << "Passing 1 arg.\n";
 
-                        printf("BITNode %ld.", (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
+//                        printf("BITNode %ld.", (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
+                        ss << "BITNode " << (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings) << ".\n" ;
 
                         break;
             case 'F':   tempi = currentDebugLevel;
@@ -437,9 +448,10 @@ std::string RunCommand(std::list<std::string> args)
                             }
                             break;
             case '=': input(h, args); input(h2, args); 
-                      cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); break;
-/*                      ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
-                                "EQ" : "IN-EQ" ) << std::endl;*/
+/*                      cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); */
+                      ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
+                                "EQ" : "IN-EQ" ) << std::endl;
+                        break;
             case 'p': input(h, args); printTree((Handle)h,0,0); break;
             case 'e':   try { state->evaluate(); }
                         catch(string s) { cprintf(0,s.c_str()); }
@@ -484,7 +496,7 @@ std::string RunCommand(std::list<std::string> args)
             
                         state->infer(j, 0.000001f, 0.01f);
                         state->printResults();
-                        printf("\n%ld $ remaining.\n", h);
+                        ss << "\n" << h << " $ remaining.\n";
             
                         //currentDebugLevel = tempi;
 
@@ -515,9 +527,9 @@ std::string RunCommand(std::list<std::string> args)
                         atw->reset();
                         axioms_ok = atw->loadAxioms(temps);
                         haxx::ArchiveTheorems = false;
-                        puts(axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
+                        ss << (axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
             
-                        puts("Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");
+                        ss << (" Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");
                         // have to recreate the target vtrees to ensure that the
                         // handles are correct after reloading axioms.
                         initTests();

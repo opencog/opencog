@@ -52,8 +52,9 @@ Some commands take Handles, some take BITNodes.\n\
 -3 - Minimal log level  \n\
 0 - normal log level\n\
 2 - recommended maximally informative log level\n\
-r #n - Load in a new pre-defined target #n (from PLNShell.cc)\n\
-x [path] - Load XML axiom file in 'path'\n\
+m - print the number of inference targets\n\
+r #n - Load in a new pre-defined target #n (from TestTargets.h)\n\
+x <path> - Load XML axiom file in 'path'\n\
 s #s - Infer until result found with conf>0.01 OR 's' inference steps have been taken \n\
 S #n - Execute the #n of the fittest BIT nodes\n\
 i #n - Expand BITNode with id #n\n\
@@ -73,7 +74,11 @@ f - Show the current BIT node expansion pool sorted by heuristics fitness and Ex
 \n\
 n - expand the tree's whole next level (usually not recommended)\n\
 e - manually evaluate the current tree (usually not recommended)\n\
-\n\
+H bT b1 b2   a1T a10 a11   [a2T a20 a21]   <Rule #> - find a BITNode for the given rule with the given parameters\n\
+d t - output links of the given type (or nodes with a blank name)\n\
+k - check for loops\n\
+W #n - switch the root to a different BackInferenceTreeRootT or back\n\
+p #h - print the atom with handle #h\n\
 These should be bug-free, but there's no type checking of parameters, so providing eg. BIT node number instead of Handle number will SegFault.")
 
 public:
