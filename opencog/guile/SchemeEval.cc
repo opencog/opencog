@@ -383,25 +383,33 @@ std::string SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-	// XXX This is a defacto string buffer copy, could probably be avoided
-	// in most cases. FIXME.  i.e. no copy needed when no pending input.
-	input_line += expr;
+	/* Avoid a string buffer copy if there is no pending input */
+	const char *expr_str;
+	if (pending_input)
+	{
+		input_line += expr;
+		expr_str = input_line.c_str();
+	}
+	else
+	{
+		expr_str = expr.c_str();
+	}
 
 	caught_error = false;
 	pending_input = false;
-#if 0
-	SCM rc = scm_internal_catch (SCM_BOOL_T,
-	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
-	            SchemeEval::catch_handler_wrapper, this);
-#endif
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	            (scm_t_catch_body) scm_c_eval_string, (void *) input_line.c_str(),
+	            (scm_t_catch_body) scm_c_eval_string, (void *) expr_str,
 	            SchemeEval::catch_handler_wrapper, this,
 	            SchemeEval::preunwind_handler_wrapper, this);
 
+	/* An error is thrown if the input expression is incomplete,
+	 * in which case the error handler sets the pending_input flag
+	 * to true. */
 	if (pending_input)
 	{
+		/* Save input for later */
+		input_line += expr;
 		return "";
 	}
 	pending_input = false;
