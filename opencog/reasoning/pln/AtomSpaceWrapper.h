@@ -250,9 +250,6 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
 
 public:
 
-    //! Test AtomSpaceWrapper
-    bool testAtomSpaceWrapper();
-
     //! Convert a specific VersionHandled TruthValue to a fake handle
     Handle realToFakeHandle(const Handle h, const VersionHandle vh);
     //! Convert a a real handle into a fake handle for each VersionedHandled TV

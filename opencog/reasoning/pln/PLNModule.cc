@@ -529,12 +529,12 @@ std::string RunCommand(std::list<std::string> args)
                         break;
             case '-': input(h, args); currentDebugLevel = -(int)h; break;
 
-            case 'R':
+/*            case 'R':
                 int testdone;
                 atw->testAtomSpaceWrapper();
                 input(testdone, args);
 //                fw_beta();
-                break;
+                break;*/
             case 'Y':
                 // Temporary for loading data via telnet
                 //cout << "running server loop" << endl;
