@@ -77,7 +77,6 @@ eval - manually evaluate the current tree (usually not recommended)\n\
 find-bitnode bT b1 b2   a1T a10 a11   [a2T a20 a21]   <Rule #> - find a BITNode for the given rule with the given parameters\n\
 atoms #t - output atoms of the given type\n\
 loop-check - check for loops\n\
-W #n - switch the root to a different BackInferenceTreeRootT or back\n\
 atom #h - print the atom with handle #h\n\
 These should be bug-free, but there's no type checking of parameters, so providing eg. BIT node number instead of Handle number will SegFault.")
 

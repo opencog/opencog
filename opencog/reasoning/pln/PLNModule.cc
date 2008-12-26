@@ -76,8 +76,8 @@ namespace test
 {
     extern FILE *logfile;
 //    int _test_count = 0;
-    // TODO not used (it's set but nothing responds to it)
-    bool debugger_control = false;
+    // not used (it's set but nothing responds to it)
+//    bool debugger_control = false;
 }
 
 //void initTestEnv();
@@ -316,7 +316,7 @@ std::string RunCommand(std::list<std::string> args)
         Vertex v;
         Handle eh=Handle::UNDEFINED;
         // TODELETE doesn't affect anything
-        bool using_root = true;
+//        bool using_root = true;
         
         #if LOG_ON_FILE
             save_log();
@@ -349,9 +349,9 @@ std::string RunCommand(std::list<std::string> args)
 #endif
                  }
             else if (c == "loop-check") { state->loopCheck(); }
-            // TODO nothing actually responds to the value of test::debugger_control
-            else if (c == "D") { test::debugger_control = (test::debugger_control?false:true);
-/*                      for (int zz=0;zz<1000;zz++)
+            // nothing actually responds to the value of test::debugger_control
+/*            else if (c == "D") { test::debugger_control = (test::debugger_control?false:true);
+                      for (int zz=0;zz<1000;zz++)
                             RuleRepository::Instance().rule[ForAll]->o2iMeta(
                                 meta(new vtree(mva((Handle)EVALUATION_LINK,
                                 NewNode(PREDICATE_NODE, "friendOf"),
@@ -361,8 +361,8 @@ std::string RunCommand(std::list<std::string> args)
                                 )))));
 
                             //atw->getHandle(NODE, "temmpo");
-                        puts("...");*/
-                        }
+                        puts("...");
+                        }*/
             else if (c == "plan") { input(h, args); state->extract_plan((Handle)h); }
             else if (c == "rule-arguments") { input(h, args);
                             ((BackInferenceTreeRootT*)h)->printArgs();
@@ -435,7 +435,7 @@ std::string RunCommand(std::list<std::string> args)
                         currentDebugLevel = 10;
                         state->printFitnessPool(); }
 //                        currentDebugLevel = tempi;
-            else if (c == "W") {   if (using_root)
+/*            else if (c == "W") {   if (using_root)
                             {
                                 temp_state = state;
                                 input(h, args);
@@ -449,7 +449,7 @@ std::string RunCommand(std::list<std::string> args)
 
                                 using_root = true;
                             }
-                            }
+                            }*/
             else if (c == "=") { input(h, args); input(h2, args); 
 /*                      cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); */
                       ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
@@ -516,7 +516,7 @@ std::string RunCommand(std::list<std::string> args)
             else if (c == "target") { input(test_i, args);
                         Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider));
                         state = Bstate.get();
-                        using_root = true;
+                        //using_root = true;
 
                         cprintf(0,"Now evaluating: ");
                         rawPrint(*tests[test_i],tests[test_i]->begin(),0);
