@@ -302,7 +302,8 @@ std::string RunCommand(std::list<std::string> args)
         Rule::MPs rule_args;
         bindingsT new_bindings;
 
-        char c = args.front()[0];
+//        char c = args.front()[0];
+        string c = args.front();
         args.pop_front();
 //        char temps[1000];
         std::string temps;
@@ -323,13 +324,13 @@ std::string RunCommand(std::list<std::string> args)
         
         haxx::AllowFW_VARIABLENODESinCore = true; //false;
         
-        switch (c)
-        {
-            case 'm':
-//                printf("%d\n", (int)tests.size()); break;
+//        switch (c)
+//        {
+            if (c == "m") {
+//                printf("%d\n", (int)tests.size()); }
                 ss << tests.size() << std::endl;
-                break;
-            case 'd':
+                }
+            else if (c == "d") {
 #if LOCAL_ATW
             ((LocalATW*)atw)->DumpCore(CONCEPT_NODE);
 #else
@@ -346,9 +347,9 @@ std::string RunCommand(std::list<std::string> args)
                 printTree(ti,0,0);
             }           
 #endif
-                 break;
-            case 'k': state->loopCheck(); break;
-            case 'D': test::debugger_control = (test::debugger_control?false:true);
+                 }
+            else if (c == "k") { state->loopCheck(); }
+            else if (c == "D") { test::debugger_control = (test::debugger_control?false:true);
 /*                      for (int zz=0;zz<1000;zz++)
                             RuleRepository::Instance().rule[ForAll]->o2iMeta(
                                 meta(new vtree(mva((Handle)EVALUATION_LINK,
@@ -360,17 +361,17 @@ std::string RunCommand(std::list<std::string> args)
 
                             //atw->getHandle(NODE, "temmpo");
                         puts("...");*/
-                        break;
-            case 'a': input(h, args); state->extract_plan((Handle)h); break;
-            case 'A': input(h, args);
+                        }
+            else if (c == "a") { input(h, args); state->extract_plan((Handle)h); }
+            else if (c == "A") { input(h, args);
                             ((BackInferenceTreeRootT*)h)->printArgs();
                             
-                            break;
-            case 'U': input(h, args);
+                            }
+            else if (c == "U") { input(h, args);
                         //((BackInferenceTreeRootT*)state->children[0].begin()->prover)
                         state->print_parents((BITNode*)h);
-                        break;
-            case 'b': input(h, args);
+                        }
+            else if (c == "b") { input(h, args);
                         cprintf(-10, "Target:\n");
                         ((BackInferenceTreeRootT*)h)->printTarget();
                         cprintf(-10, "Results:\n");
@@ -378,8 +379,8 @@ std::string RunCommand(std::list<std::string> args)
 
                         cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->getParents().begin()->parent_arg_i);
 
-                         break;
-/*          case 'B': input(h, args); cprintf(0, "Node has results & bindings:\n");
+                         }
+/*          else if (c == "B") { input(h, args); cprintf(0, "Node has results & bindings:\n");
                         foreach(const BoundVertex& bv, *((BackInferenceTreeRootT*)h)->direct_results)
                         {
                             cprintf(0,"[%d]\n", v2h(bv.value));
@@ -391,10 +392,10 @@ std::string RunCommand(std::list<std::string> args)
                                     printTree(phh.second,0,0);
                                 }
                             }
-                         break;*/
+                         }*/
             // TODO deal with arguments to this thing
-            case 'H': 
-                //input(h, args); cprintf(0,"Origin Node #%d\n", state->hsource[(Handle)h]); break;
+            else if (c == "H") { 
+                //input(h, args); cprintf(0,"Origin Node #%d\n", state->hsource[(Handle)h]); }
 /*                        fflush(stdin);
                         cin >> bT; cin >> b1; cin >> b2;
                         cin >> a1T; cin >> a10; cin >> a11;
@@ -427,12 +428,12 @@ std::string RunCommand(std::list<std::string> args)
 //                        printf("BITNode %ld.", (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
                         ss << "BITNode " << (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings) << ".\n" ;
 
-                        break;
-            case 'F':   tempi = currentDebugLevel;
+                        }
+            else if (c == "F") {   tempi = currentDebugLevel;
                         currentDebugLevel = 10;
-                        state->printFitnessPool(); break;
-                        currentDebugLevel = tempi;
-            case 'W':   if (using_root)
+                        state->printFitnessPool(); }
+//                        currentDebugLevel = tempi;
+            else if (c == "W") {   if (using_root)
                             {
                                 temp_state = state;
                                 input(h, args);
@@ -446,18 +447,18 @@ std::string RunCommand(std::list<std::string> args)
 
                                 using_root = true;
                             }
-                            break;
-            case '=': input(h, args); input(h2, args); 
+                            }
+            else if (c == "=") { input(h, args); input(h2, args); 
 /*                      cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); */
                       ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
                                 "EQ" : "IN-EQ" ) << std::endl;
-                        break;
-            case 'p': input(h, args); printTree((Handle)h,0,0); break;
-            case 'e':   try { state->evaluate(); }
+                        }
+            else if (c == "p") { input(h, args); printTree((Handle)h,0,0); }
+            else if (c == "e") {   try { state->evaluate(); }
                         catch(string s) { cprintf(0,s.c_str()); }
-                        break;
+                        }
             
-            case 'E': input(h, args);
+            else if (c == "E") { input(h, args);
                         if (h == 0)
                             h = (long)state;
 //                          h = (int)state->children[0].begin()->prover;
@@ -465,29 +466,29 @@ std::string RunCommand(std::list<std::string> args)
 /*                      foreach(const set<BoundVertex>& eval_res_set, ((BackInferenceTreeRootT*)h)->GetEvalResults())
                             foreach(const BoundVertex& eval_res, eval_res_set)
                                 printTree(v2h(eval_res.value),0,-10);*/
-                        break;
-            case 'i': input(h, args);
+                        }
+            else if (c == "i") { input(h, args);
                         ((BackInferenceTreeRootT*)h)->expandNextLevel();
 /*                      foreach(const parent_link& p, ((BackInferenceTreeRootT*)h)->GetParents())
                             p.link->removeIfFailure((BackInferenceTreeRootT*)h);*/
-                        break;
+                        }
 
-            case 'n': state->expandNextLevel(); break;
-            case 't': input(h, args); state->printTrail((Handle)h); break;
-            case 'f': state->expandFittest(); break;
+            else if (c == "n") { state->expandNextLevel(); }
+            else if (c == "t") { input(h, args); state->printTrail((Handle)h); }
+            else if (c == "f") { state->expandFittest(); }
 
-            case 'P': input(h, args);
+            else if (c == "P") { input(h, args);
                         if (h == 0)
                             h = (long) state->children[0].begin()->prover;
-                        ((BackInferenceTreeRootT*)h)->print(); break;
-            case 'O':   input(h, args);
+                        ((BackInferenceTreeRootT*)h)->print(); }
+            else if (c == "O") {   input(h, args);
 //                      ((BITNode*)h)->PrintUsers();
                         foreach(const parent_link<BITNode>& p, ((BITNode*)h)->getParents())
                             cprintf(-10,"User Node = %lu\n", (ulong) p.link);
-                        break;
-//          case 'l': cprintf(0,"%d\n", state->exec_pool.size()); break;
+                        }
+//          else if (c == "l") { cprintf(0,"%d\n", state->exec_pool.size()); }
                 
-            case 's':   input(h, args); //Give max nr of steps that we can take.
+            else if (c == "s") {   input(h, args); //Give max nr of steps that we can take.
                         j = (long) h;
                 
                         //printf("\nTemporarily killing the log with level -3.\n");
@@ -500,17 +501,17 @@ std::string RunCommand(std::list<std::string> args)
             
                         //currentDebugLevel = tempi;
 
-                        break;
+                        }
                                         
-            case 'S':   s_i=0;
+            else if (c == "S") {   s_i=0;
                         input(h, args);
             
                         for (int k=0;k<h;k++)
                             state->expandFittest();
 
-                        break;
+                        }
         
-            case 'r': input(test_i, args);
+            else if (c == "r") { input(test_i, args);
                         Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider));
                         state = Bstate.get();
                         using_root = true;
@@ -520,8 +521,8 @@ std::string RunCommand(std::list<std::string> args)
                         cprintf(0,"\n");
                         
 //                      state->expandNextLevel();
-                        break;
-            case 'x': //puts("Give the XML input file name: "); 
+                        }
+            else if (c == "x") { //puts("Give the XML input file name: "); 
                         input(temps, args);
                         haxx::ArchiveTheorems = true; 
                         atw->reset();
@@ -534,30 +535,30 @@ std::string RunCommand(std::list<std::string> args)
                         // handles are correct after reloading axioms.
                         initTests();
 
-                        break;
-            case 'c': RECORD_TRAILS = !RECORD_TRAILS;
+                        }
+            else if (c == "c") { RECORD_TRAILS = !RECORD_TRAILS;
                         //cprintf(0, "RECORD_TRAILS %s\n", (RECORD_TRAILS?"ON":"OFF"));
                         ss << "RECORD_TRAILS " << (RECORD_TRAILS?"ON":"OFF") << "\n";
-                        break;
-            case '-': input(h, args); currentDebugLevel = -(int)h; break;
+                        }
+            else if (c == "-") { input(h, args); currentDebugLevel = -(int)h; }
 
-/*            case 'R':
+/*            else if (c == "R") {
                 int testdone;
                 atw->testAtomSpaceWrapper();
                 input(testdone, args);
 //                fw_beta();
-                break;*/
-            case 'Y':
+                }*/
+            else if (c == "Y") {
                 // Temporary for loading data via telnet
                 //cout << "running server loop" << endl;
                 //static_cast<CogServer&>(server()).unitTestServerLoop(1);
                 //cout << "finished server loop" << endl;
-                break;
-            default: c = c-'0';
+                }
+/*            else { c = c-'0';
                     if (c >= 0 && c <= 10)
                         currentDebugLevel = c;
-                    break;
-        }
+            }*/
+//        }
 //    }
     } catch( exception& e )
     {
