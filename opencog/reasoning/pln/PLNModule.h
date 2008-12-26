@@ -52,33 +52,33 @@ Some commands take Handles, some take BITNodes.\n\
 -3 - Minimal log level  \n\
 0 - normal log level\n\
 2 - recommended maximally informative log level\n\
-m - print the number of inference targets\n\
-r #n - Load in a new pre-defined target #n (from TestTargets.h)\n\
-x <path> - Load XML axiom file in 'path'\n\
-s #s - Infer until result found with conf>0.01 OR 's' inference steps have been taken \n\
+test-count - print the number of inference targets\n\
+target #n - Load in a new pre-defined target #n (from TestTargets.h)\n\
+load-axioms <path> - Load XML axiom file in 'path'\n\
+infer #s - Infer until result found with conf>0.01 OR 's' inference steps have been taken \n\
 S #n - Execute the #n of the fittest BIT nodes\n\
-i #n - Expand BITNode with id #n\n\
-E #n - Print out the results of the BITnode #n  (0 = root)\n\
-A #n - Print the Rule arguments of BITnode #n\n\
-b #n - Print the Rule target of BITnode #n\n\
-P #n - print the inference (BIT) tree under node #n (0 = root)\n\
-a #h - Show the plan ie. sequence of 'do' statements pertaining to inference result Handle #h\n\
-F - Show the current BIT node expansion pool sorted by heuristic fitness\n\
+expand #n - Expand BITNode with id #n\n\
+results #n - Print out the results of the BITnode #n  (0 = root)\n\
+rule-arguments #n - Print the Rule arguments of BITnode #n\n\
+rule-target #n - Print the Rule target of BITnode #n\n\
+print-bit #n - print the inference (BIT) tree under node #n (0 = root)\n\
+plan #h - Show the plan ie. sequence of 'do' statements pertaining to inference result Handle #h\n\
+pool - Show the current BIT node expansion pool sorted by heuristic fitness\n\
 O #n - show the parent of BITNode #n\n\
-t #h - print the inference trail for Handle #h\n\
+trail #h - print the inference trail for Handle #h\n\
 \n\
-c - switch the recording of inference trails ON/OFF (default: ON)\n\
-B #i - Show the direct results (by lookup or hypothesis) of BIT node #i\n\
+record-trails - switch the recording of inference trails ON/OFF (default: ON)\n\
+direct-results #i - Show the direct results (by lookup or hypothesis) of BIT node #i\n\
 b #i - Show the target atom and pre-bindings of BIT node #i\n\
 f - Show the current BIT node expansion pool sorted by heuristics fitness and Execute the fittest BIT node\n\
 \n\
 n - expand the tree's whole next level (usually not recommended)\n\
-e - manually evaluate the current tree (usually not recommended)\n\
-H bT b1 b2   a1T a10 a11   [a2T a20 a21]   <Rule #> - find a BITNode for the given rule with the given parameters\n\
-d t - output links of the given type (or nodes with a blank name)\n\
-k - check for loops\n\
+eval - manually evaluate the current tree (usually not recommended)\n\
+find-bitnode bT b1 b2   a1T a10 a11   [a2T a20 a21]   <Rule #> - find a BITNode for the given rule with the given parameters\n\
+atoms #t - output atoms of the given type\n\
+loop-check - check for loops\n\
 W #n - switch the root to a different BackInferenceTreeRootT or back\n\
-p #h - print the atom with handle #h\n\
+atom #h - print the atom with handle #h\n\
 These should be bug-free, but there's no type checking of parameters, so providing eg. BIT node number instead of Handle number will SegFault.")
 
 public:
