@@ -40,9 +40,10 @@ class CogServer;
 
 /** Spreads short term importance along HebbianLinks.
  *
- * Currently spread along Symmetric and Inverse HebbianLinks.
+ * Currently only spreads along Symmetric and Inverse HebbianLinks.
  *
  * @todo Spread along asymmetric hebbian links too.
+ * @todo Spread along symmetric inverse hebbian links too.
  * @todo Optionally spread long term importance.
  */
 class ImportanceSpreadingAgent : public Agent

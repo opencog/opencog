@@ -238,11 +238,16 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
                 }
                 for (targetItr = targets.begin(); targetItr != targets.end();
                         targetItr++) {
+                    if (*targetItr == *sourceItr) continue;
                     sourcePosItr = diffusionAtomsMap.find(*sourceItr);
                     sourceIndex = (*sourcePosItr).second;
                     targetPosItr = diffusionAtomsMap.find(*targetItr);
                     targetIndex = (*targetPosItr).second;
-                    gsl_matrix_set(connections,targetIndex,sourceIndex,val);
+                    if (type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
+                        gsl_matrix_set(connections,sourceIndex,targetIndex,val);
+                    } else {
+                        gsl_matrix_set(connections,targetIndex,sourceIndex,val);
+                    }
                 }
             }
         }
