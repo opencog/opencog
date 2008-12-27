@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HEBBIAN_LEARNING_AGENT_H
-#define _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#ifndef _OPENCOG_STORKEY_AGENT_H
+#define _OPENCOG_STORKEY_AGENT_H
 
 #include <string>
 
@@ -46,6 +46,7 @@ class StorkeyAgent : public Agent
 
 private:
     AtomSpace* a;
+    bool verbose;
 
     /** Set the agent's logger object
      *
@@ -63,6 +64,7 @@ private:
     w_t getCurrentWeights();
     void setCurrentWeights(w_t& w);
     bool checkWeightSymmetry(w_t& w);
+    void printWeights(w_t& w);
 
 public:
 
@@ -98,4 +100,4 @@ public:
 
 } // namespace
 
-#endif // _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#endif // _OPENCOG_STORKEY_AGENT_H

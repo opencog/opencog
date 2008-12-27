@@ -22,11 +22,14 @@
  */
 #include "StorkeyAgent.h"
 
+#include <iomanip>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
 
 #include "HopfieldServer.h"
 
@@ -69,6 +72,20 @@ Logger* StorkeyAgent::getLogger()
 //void StorkeyAgent::setPattern(Pattern _epsilon)
 //{ epsilon = _epsilon; }
 
+void StorkeyAgent::printWeights(w_t& w)
+{
+    int n = w.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (w[i][j] != 0.0f)
+                printf("%+.3f ", w[i][j]);
+            else 
+                printf(" ----- ");
+        }
+        cout << endl;
+    }
+}
+
 void StorkeyAgent::run(CogServer *server)
 {
     a = server->getAtomSpace();
@@ -89,13 +106,20 @@ float StorkeyAgent::h(int i, w_t w)
 StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
 {
     int n = (static_cast<HopfieldServer&>(server())).hGrid.size();
-    std::vector<std::vector<float> > w(n);
+    std::vector<std::vector<float> > w;
     for (int i=0; i < n; i++) {
         std::vector<float> iRow(n);
         Handle iHandle = (static_cast<HopfieldServer&>(server())).hGrid[i];
         for (int j=0; j < n; j++) {
-            if (i==j) iRow.push_back(0.0f);
-            else if (j<i) iRow.push_back(w[i][j]);
+            if (i==j) {
+                iRow[j] = 0.0f;
+                continue;
+            } else if (j<i) {
+                //cout << "ij=" << i <<"," << j << " w[j][i]=="<<w[j][i]<<endl;
+                iRow[j] = w[j][i];
+                //cout << "irow[j]" << iRow[j] <<endl;
+                continue;
+            }
 
             Handle jHandle = (static_cast<HopfieldServer&>(server())).hGrid[j];
             HandleSeq outgoing;
@@ -103,13 +127,13 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
             outgoing.push_back(jHandle);
             Handle heb = a->getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
             if (heb != Handle::UNDEFINED) {
-                iRow.push_back(a->getTV(heb).getMean());
+                iRow[j] = a->getTV(heb).getMean();
             } else {
                 heb = a->getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
                 if (heb != Handle::UNDEFINED)
-                    iRow.push_back( -(a->getTV(heb).getMean()) );
+                    iRow[j] = -(a->getTV(heb).getMean());
                 else {
-                    iRow.push_back(0.0f);
+                    iRow[j] = 0.0f;
                 }
             }
         }
@@ -166,9 +190,11 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
 
 bool StorkeyAgent::checkWeightSymmetry(w_t& w) {
     int n = w.size();
-    for (int i; i < n; i++) {
-        for (int j; j < n; j++) {
-            if (w[i][j] != w[j][i]) return false;
+    float err = 0.001;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (w[i][j] < (w[j][i] - err) ||
+                w[i][j] > (w[j][i] + err)) return false;
         }
     }
     return true;
@@ -184,7 +210,10 @@ void StorkeyAgent::storkeyUpdate()
     for (int i = 0; i < n; i++) {
         std::vector<float> iRow;
         for (int j = 0; j < n; j++) {
-            if (i==j) iRow.push_back(0.0f);
+            if (i==j) {
+                iRow.push_back(0.0f);
+                continue;
+            }
             float val = currentWeights[i][j];
             val += (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
                 a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false);
@@ -196,8 +225,10 @@ void StorkeyAgent::storkeyUpdate()
         }
         newWeights.push_back(iRow);
     }
+    if (getLogger()->getLevel() >= Logger::FINE) {
+        printWeights(newWeights);
+    }
 #ifdef DEBUG
-    //printWeights(newWeights);
     assert(checkWeightSymmetry(newWeights));
 #endif
     setCurrentWeights(newWeights);

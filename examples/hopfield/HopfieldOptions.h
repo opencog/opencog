@@ -33,11 +33,13 @@
 
 #define HDEMO_DEFAULT_VERBOSE 0
 #define HDEMO_DEFAULT_SCHEME SEQUENCE
+#define HDEMO_DEFAULT_UPDATE_METHOD CONJUNCTION
 #define HDEMO_DEFAULT_INTERLEAVEAMOUNT 5
 #define HDEMO_DEFAULT_PALIMPSEST_TOLERANCE 5
 #define HDEMO_DEFAULT_SHOW_MATRIX false
 #define HDEMO_DEFAULT_SHOW_TOTAL false
 #define HDEMO_DEFAULT_NPATTERNS 1
+#define HDEMO_DEFAULT_FORGET_PERCENT 0.05 
 #define HDEMO_DEFAULT_PATTERN_DENSITY 0.2f
 #define HDEMO_DEFAULT_RETRIEVE_CYCLES 10
 #define HDEMO_DEFAULT_IMPRINT_CYCLES 15
@@ -64,6 +66,9 @@ public:
     enum learningScheme_t {SEQUENCE = 0, INTERLEAVE, PALIMPSEST };
     learningScheme_t learningScheme;
 
+    enum updateMethod_t {CONJUNCTION = 0, STORKEY };
+    updateMethod_t updateMethod;
+
     int verboseLevel;
     int resetFlag;
     int interleaveAmount;
@@ -77,6 +82,8 @@ public:
     int retrieveCycles;
     int spreadCycles;
     int imprintCycles;
+
+    float forgetPercent;
 
     float cueErrorRate;
     int cueGenerateOnce;

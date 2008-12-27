@@ -24,6 +24,7 @@
 #include "HopfieldServer.h"
 
 #include <sstream>
+#include <iomanip>
 
 #include <math.h>
 #ifdef WIN32
@@ -39,6 +40,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include "HopfieldOptions.h"
+#include "StorkeyAgent.h"
 
 using namespace opencog;
 using namespace std;
@@ -138,6 +140,8 @@ HopfieldServer::HopfieldServer()
     rng = new MT19937RandGen(tv.tv_usec);
     options = new HopfieldOptions();
     options->setServer(this);
+    hebLearnAgent = NULL;
+    storkeyAgent = NULL;
 
 }
 
@@ -155,7 +159,11 @@ void HopfieldServer::init(int width, int height, int numLinks)
 
     //CogServer& cogserver = static_cast<CogServer&>(server());
     importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(this->createAgent(ImportanceUpdatingAgent::info().id, true));
-    hebLearnAgent     = static_cast<HebbianLearningAgent*>(this->createAgent(HebbianLearningAgent::info().id, true));
+    if (options->updateMethod == HopfieldOptions::CONJUNCTION) {
+        hebLearnAgent     = static_cast<HebbianLearningAgent*>(this->createAgent(HebbianLearningAgent::info().id, true));
+    } else {
+        storkeyAgent = new StorkeyAgent();
+    }
 #ifdef HAVE_GSL
     diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(this->createAgent(ImportanceDiffusionAgent::info().id, true));
 #else
@@ -166,8 +174,13 @@ void HopfieldServer::init(int width, int height, int numLinks)
     if (options->verboseLevel) {
         importUpdateAgent->getLogger()->enable();
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
-        hebLearnAgent->getLogger()->enable();
-        hebLearnAgent->getLogger()->setPrintToStdoutFlag (true);
+        if (hebLearnAgent) {
+            hebLearnAgent->getLogger()->enable();
+            hebLearnAgent->getLogger()->setPrintToStdoutFlag (true);
+        } else {
+            storkeyAgent->getLogger()->enable();
+            storkeyAgent->getLogger()->setPrintToStdoutFlag (true);
+        }
 //! @todo make all attention modules use their own logger object or upgrade
 //! logging system to allow hierarchical logs.
 #if 0
@@ -185,19 +198,32 @@ void HopfieldServer::init(int width, int height, int numLinks)
     switch (options->verboseLevel) {
     case 1:
         importUpdateAgent->getLogger()->setLevel (Logger::INFO);
+        forgetAgent->getLogger()->setLevel (Logger::INFO);
+        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::INFO);
+        else storkeyAgent->getLogger()->setLevel (Logger::INFO);
         break;
     case 2:
         importUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
+        forgetAgent->getLogger()->setLevel (Logger::DEBUG);
+        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::DEBUG);
+        else storkeyAgent->getLogger()->setLevel (Logger::DEBUG);
         break;
     case 3:
         importUpdateAgent->getLogger()->setLevel (Logger::FINE);
+        forgetAgent->getLogger()->setLevel (Logger::FINE);
+        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::FINE);
+        else storkeyAgent->getLogger()->setLevel (Logger::FINE);
         break;
     default:
         importUpdateAgent->getLogger()->setLevel (Logger::WARN);
+        forgetAgent->getLogger()->setLevel (Logger::WARN);
+        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::WARN);
+        else storkeyAgent->getLogger()->setLevel (Logger::WARN);
     }
 
-    hebLearnAgent->convertLinks = true;
-    forgetAgent->forgetPercentage = 0.05f;
+    if (hebLearnAgent)
+        hebLearnAgent->convertLinks = true;
+    forgetAgent->forgetPercentage = options->forgetPercent;
 
     AtomSpace* atomSpace = getAtomSpace();
 
@@ -355,7 +381,10 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
 
         logger().fine("---Imprint:Hebbian learning");
-        hebLearnAgent->run(this);
+        if (hebLearnAgent)
+            hebLearnAgent->run(this);
+        else
+            storkeyAgent->run(this);
 
 // Unnecessary
 //        logger().fine("---Imprint:Importance spreading");
