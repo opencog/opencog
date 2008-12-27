@@ -10,6 +10,7 @@ ADD_EXECUTABLE (hopfield
 	HopfieldServer.cc
 	Pattern.cc
 	HopfieldOptions.cc
+	StorkeyAgent.cc
 )
 
 TARGET_LINK_LIBRARIES (hopfield

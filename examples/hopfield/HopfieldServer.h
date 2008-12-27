@@ -60,11 +60,6 @@ class HopfieldServer : public CogServer
 
 private:
 
-    /* Nodes in the Hopfield network can be referenced
-     * through HGrid.
-     */
-    std::vector<Handle> hGrid;
-
     RandGen* rng;
 
 public:
@@ -85,6 +80,11 @@ public:
 
     int width, height, links;
     float density;
+
+    /* Nodes in the Hopfield network can be referenced
+     * through HGrid.
+     */
+    std::vector<Handle> hGrid;
 
     HopfieldServer();
     virtual ~HopfieldServer();

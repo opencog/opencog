@@ -106,3 +106,4 @@ class_to_int[(*getClassName()) [HEBBIAN_LINK]] = HEBBIAN_LINK;
 class_to_int[(*getClassName()) [ASYMMETRIC_HEBBIAN_LINK]] = ASYMMETRIC_HEBBIAN_LINK;
 class_to_int[(*getClassName()) [SYMMETRIC_HEBBIAN_LINK]] = SYMMETRIC_HEBBIAN_LINK;
 class_to_int[(*getClassName()) [INVERSE_HEBBIAN_LINK]] = INVERSE_HEBBIAN_LINK;
+class_to_int[(*getClassName()) [SYMMETRIC_INVERSE_HEBBIAN_LINK]] = SYMMETRIC_INVERSE_HEBBIAN_LINK;
