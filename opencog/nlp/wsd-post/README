@@ -45,11 +45,18 @@ clustering of disjuncts-to-senses.
 
 rattle() package.
 ---------------
+
+
+To update the stats in the db, run ./dj-probs.pl
+------------------------------------------------
+
 select * from disjunctsenses order by count desc;
 
 select * from disjuncts order by count desc;
 select * from disjuncts where log_cond_probability > 0.0 order by log_cond_probability asc;
 
+Low entropy, but multiple senses observed says that there is a strong corellation
+between disjunct and inflected word:
 select * from disjuncts where senses_observed>1 order by entropy asc;
 
 select disjuncts.inflected_word, disjuncts.disjunct, disjunctsenses.word_sense,
@@ -60,13 +67,19 @@ disjuncts.inflected_word = disjunctsenses.inflected_word and
 disjuncts.disjunct = disjunctsenses.disjunct 
 order by disjuncts.entropy asc;
 
+
+Suffers:
+--------
 Candidates:
   inflected_word   |                        disjunct                        |              word_sense               |       entropy       | senses_observed |        count         
 -------------------+--------------------------------------------------------+---------------------------------------+---------------------+-----------------+----------------------
  suffers.v         | Ss- Os+ MVp+                                           | have%2:29:05::                        | 0.00591198141479204 |               2 |     1.16565684723427
  suffers.v         | Ss- Os+ MVp+                                           | get%2:29:11::                         | 0.00591198141479204 |               2 |   0.0005521501501815
 
-Here, have%2:29:05:: is in the same synset as get%2:29:11::
+Here, have%2:29:05:: is in the same synset as get%2:29:11:: (which is suffer%2:29:01::),
+
+Since these both belong to the same synset, they should really be merged.
+
 She suffered a fracture in the accident"; 
 "He suffered an insulin shock after eating three candy bars"; -- "He had an insulin shock after eating three candy bars"; 
 "She suffered a bruise on her leg"; -- "She got a bruise on her leg"; 
@@ -86,7 +99,32 @@ Now, suffers.v is in words.v.2.2 which has the rules
 <verb-s>: {@E-} & (Ss- or (RS- & Bs-));
 <vc-tr,intr>: {O+ or B- or [[@MV+ & O*n+]]} & {@MV+};
 
-The suffers.v | Ss- Os+ MVp+ disjuncts mean "transitive verb with a proposition",
+The suffers.v | Ss- Os+ MVp+ disjuncts mean "transitive verb with a preposition",
 and this seems to strongly indicate that the correct sense is *always* (suffer%2:29:01::)
 for this sentence construction.
 
+How about the past tense?
+
+ suffered.v        | Ss- MVp+                                               | have%2:29:05::                        |   0.0110064468007726 |               2 |      9.8004159256032
+ suffered.v        | Ss- MVp+                                               | get%2:29:11::                         |   0.0110064468007726 |               2 |   0.0094159056457721
+
+
+she suffered a stroke   dj=Ss- Os+ 
+
+
+ towns.n           | Jp- Dmc-                                               | town%1:14:00::                        |  0.00717972910706398 |               2 |  0.00047381451237468
+ towns.n           | Jp- Dmc-                                               | town%1:15:00::                        |  0.00717972910706398 |               2 |    0.802619180446346
+
+
+ battles.n         | Jp- Dmc- Mp+                                           | fight%1:04:01::                       |  0.00727841436704783 |               2 |     2.01007201806988
+ battles.n         | Jp- Dmc- Mp+                                           | battle%1:04:02::                      |  0.00727841436704783 |               2 |  0.00120515153578474
+
+ building.n        | Wd- Ds- Ss+                                            | building%1:06:00::                    |  0.00901884557840178 |               2 |     1.82290246346794
+ building.n        | Wd- Ds- Ss+                                            | building%1:04:00::                    |  0.00901884557840178 |               2 |  0.00139490596324197
+
+
+TODO
+----
+Normalize the synsets -- e.g. suffer is listed witht he wrong synset ... 
+Also -- need to merge the sysnsets.
+Also -- need to make sure the wsd is uzing only one word per sysnet .. ??
