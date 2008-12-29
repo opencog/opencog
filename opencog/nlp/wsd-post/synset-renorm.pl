@@ -50,9 +50,9 @@ sub update_record
 
 	# print "duuude update $sense, $infword, $disjunct, $count\n";
 	$selectup->execute($infword, $disjunct, $sense)
-		 or die "Couldn't execute statement: " . $select->errstr;
+		 or die "Couldn't execute statement: " . $selectup->errstr;
 
-	if ($select->rows == 0)
+	if ($selectup->rows == 0)
 	{
 		$insertup->execute($infword, $disjunct, $sense, $count);
 		$inserted ++;
@@ -60,8 +60,8 @@ sub update_record
 	}
 
 	# update the current count
-	my ($curr_cnt) = $select->fetchrow_array();
-	$count += $cur_cnt;
+	my ($curr_cnt) = $selectup->fetchrow_array();
+	$count += $curr_cnt;
 
 	$updateup->execute($count, $sense, $infword, $disjunct);
 	$updated ++;
