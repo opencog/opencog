@@ -44,10 +44,19 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 bool Mihalcea::process_sentence(Handle h)
 {
 	Handle top_parse = parse_ranker.get_top_ranked_parse(h);
+	if (Handle::UNDEFINED == top_parse)
+	{
+#ifdef DEBUG
+		printf("; Mihalcea::process_sentence: NO PARSES FOR for sentence %lx\n",
+			h.value());
+#endif
+		return false;
+	}
 	parse_list.push_back(top_parse);
 
 #ifdef DEBUG
-	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n", top_parse.value(), h.value());
+	printf("; Mihalcea::process_sentence parse %lx for sentence %lx\n",
+		top_parse.value(), h.value());
 #endif
 
 	// Attach senses to word instances
