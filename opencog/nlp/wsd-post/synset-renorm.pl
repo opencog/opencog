@@ -4,7 +4,11 @@
 #
 # Rework the database contents so as to combine multiple synset entries
 # into one. This step is needed in part because the original WSD code
-# handled synsets in a buggy way ... which still needs to be fixed.
+# failed to realize that multiple senses might belong to the same
+# synset.  ... which still needs to be fixed.
+#
+# Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+#
 
 use utf8;
 binmode STDIN, ':encoding(UTF-8)';
@@ -76,6 +80,8 @@ my $delete = $dbh->prepare(
 
 my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0;')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
+
+print "Starting to renormalize synsets in the DisjunctSenses table\n";
 
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;

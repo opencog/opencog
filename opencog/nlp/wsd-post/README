@@ -47,25 +47,26 @@ rattle() package.
 ---------------
 
 
-To update the stats in the db, run ./dj-probs.pl
+To update the stats in the db, run ./synset-renorm.pl then ./dj-probs.pl
 ------------------------------------------------
 
-select * from disjunctsenses order by count desc;
+   select * from disjunctsenses order by count desc;
 
-select * from disjuncts order by count desc;
-select * from disjuncts where log_cond_probability > 0.0 order by log_cond_probability asc;
+   select * from disjuncts order by count desc;
+   select * from disjuncts where log_cond_probability > 0.0 order by log_cond_probability asc;
 
 Low entropy, but multiple senses observed says that there is a strong corellation
 between disjunct and inflected word:
-select * from disjuncts where senses_observed>1 order by entropy asc;
+   select * from disjuncts where senses_observed>1 order by entropy asc;
 
-select disjuncts.inflected_word, disjuncts.disjunct, disjunctsenses.word_sense,
-disjuncts.entropy, disjuncts.senses_observed, disjunctsenses.count
-from disjuncts,disjunctsenses where
-disjuncts.senses_observed>1 and 
-disjuncts.inflected_word = disjunctsenses.inflected_word and
-disjuncts.disjunct = disjunctsenses.disjunct 
-order by disjuncts.entropy asc;
+Combine the query:
+   select disjuncts.inflected_word, disjuncts.disjunct, disjunctsenses.word_sense,
+   disjuncts.entropy, disjuncts.senses_observed, disjunctsenses.count
+   from disjuncts,disjunctsenses where
+   disjuncts.senses_observed>1 and 
+   disjuncts.inflected_word = disjunctsenses.inflected_word and
+   disjuncts.disjunct = disjunctsenses.disjunct 
+   order by disjuncts.entropy asc;
 
 
 Suffers:
@@ -79,6 +80,7 @@ Candidates:
 Here, have%2:29:05:: is in the same synset as get%2:29:11:: (which is suffer%2:29:01::),
 
 Since these both belong to the same synset, they should really be merged.
+Done, the synset-renorm.pl script merges records that have the same synset.
 
 She suffered a fracture in the accident"; 
 "He suffered an insulin shock after eating three candy bars"; -- "He had an insulin shock after eating three candy bars"; 
@@ -108,8 +110,10 @@ How about the past tense?
  suffered.v        | Ss- MVp+                                               | have%2:29:05::                        |   0.0110064468007726 |               2 |      9.8004159256032
  suffered.v        | Ss- MVp+                                               | get%2:29:11::                         |   0.0110064468007726 |               2 |   0.0094159056457721
 
-
 she suffered a stroke   dj=Ss- Os+ 
+
+Other Candidates
+----------------
 
 
  towns.n           | Jp- Dmc-                                               | town%1:14:00::                        |  0.00717972910706398 |               2 |  0.00047381451237468
