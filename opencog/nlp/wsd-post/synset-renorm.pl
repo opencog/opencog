@@ -48,9 +48,52 @@ sub get_synset
 
 # ----------------------------------------------------------
 
+# get_lemma_sense -- get matching lemma from a synset.
+# Return an alternate sense key that belongs to the same
+# synset ass the input sense key, but has the the lemmatized
+# form $lemma at its root.
+#
+# Thus, for example:
+#
+#      get_lemma_sense("join#v", "connect%2:42:02::");
+#
+# will return "join%2:42:01", because "join%2:42:01" is in the same
+# synset as "connect%2:42:02::", but has "join" as its root. 
+#
+sub get_lemma_sense
+{
+	my ($lemma, $sense) = @_;
+
+	# strip off the part-of-speech marker from the lemma.
+	$lemma =~ m/([\w\.]+)#/;
+	if (defined($1))
+	{
+		$lemma = $1;
+	}
+
+	# Loop over the synset, looking for a matching form.
+	my @synset = get_synset($sense);
+	foreach (@synset)
+	{
+		my $altsense = $_;
+		$altsense =~ m/([\w\.]+)%/;
+		if ($1 eq $lemma)
+		{
+			return $altsense;
+		}
+	}
+
+	my $notfound; # this is undefined!
+	return $notfound;
+}
+
+# ----------------------------------------------------------
+
 sub update_record
 {
 	my ($sense, $infword, $disjunct, $count) = @_;
+
+	print "duuude update $sense, $infword, $disjunct, $count\n";
 }
 
 # ----------------------------------------------------------
@@ -114,20 +157,15 @@ for (my $i=0; $i<$select->rows; $i++)
 		next;
 	}
 
-	my $off = $wn->offset($lemma);
-if(defined ($off)) {
-print "duude ==== unequal $sense, $infword  lem=$lemma off=$off\n";
+	# Find the canonical sense for this word.
+	my $canon_sense = get_lemma_sense($lemma, $sense);
+	if (!defined($canon_sense))
+	{
+		next;
+	}
+
+	# That's it -- we've got a canonical sense. Now update the 
+	# database.
+	update_record ($canon_sense, $infword, $disjunct, $count);
 }
 
-	my $skey = $sk->get_sense_key($off, $lemma);
-
-}
-
-
-my $sense_key = "run_away%2:38:00::";
-my @synset = get_synset($sense_key);
-
-foreach (@synset)
-{
-	print "its $_\n";
-}
