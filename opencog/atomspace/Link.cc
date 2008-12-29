@@ -112,7 +112,7 @@ std::string Link::toString(void) const
     std::string answer;
     char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "link[%s sti:(%d,%d) tv:(%f,%f) ", ClassServer::getTypeName(type).c_str(),
+    snprintf(buf, BUFSZ, "link[%s av:(%d,%d) tv:(%f,%f) ", ClassServer::getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().getMean(),
