@@ -32,6 +32,7 @@
 #include <opencog/server/ListRequest.h>
 #include <opencog/server/LoadModuleRequest.h>
 #include <opencog/server/LoadRequest.h>
+#include <opencog/server/SaveRequest.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/ShutdownRequest.h>
 #include <opencog/server/UnloadModuleRequest.h>
@@ -46,6 +47,7 @@ private:
 
     Factory<ListRequest, Request>         listFactory;
     Factory<LoadRequest, Request>         loadFactory;
+    Factory<SaveRequest, Request>         saveFactory;
     Factory<DataRequest, Request>         dataFactory;
     Factory<HelpRequest, Request>         helpFactory;
     Factory<ExitRequest, Request>         exitFactory;
