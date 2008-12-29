@@ -23,26 +23,67 @@ my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
 # ----------------------------------------------------------
 my $wn_dictionary_location = "/usr/share/wordnet";
 my $wn = WordNet::QueryData->new($wn_dictionary_location);
-my $sk = WordNet::SenseKey->new($wn_dictionary_location);
+my $sk = WordNet::SenseKey->new($wn);
 
 # ----------------------------------------------------------
+my $selectup = $dbh->prepare(
+	'SELECT (count) FROM DisjunctSenses WHERE ' . 
+	'inflected_word = ? AND disjunct = ? AND word_sense = ?')
+	or die "Couldn't prepare statement: " . $dbh->errstr;
+
+my $insertup = $dbh->prepare(
+	'INSERT INTO DisjunctSenses ' .
+	'(inflected_word, disjunct, word_sense, count) VALUES (?,?,?,?)')
+	or die "Couldn't prepare statement: " . $dbh->errstr;
+
+my $updateup = $dbh->prepare(
+	'UPDATE DisjunctSenses SET count = ? WHERE ' .
+	'word_sense = ? AND inflected_word = ? AND disjunct = ?')
+	or die "Couldn't prepare statement: " . $dbh->errstr;
+
+my $inserted = 0;
+my $updated = 0;
 
 sub update_record
 {
 	my ($sense, $infword, $disjunct, $count) = @_;
 
-	print "duuude update $sense, $infword, $disjunct, $count\n";
+	# print "duuude update $sense, $infword, $disjunct, $count\n";
+	$selectup->execute($infword, $disjunct, $sense)
+		 or die "Couldn't execute statement: " . $select->errstr;
+
+	if ($select->rows == 0)
+	{
+		$insertup->execute($infword, $disjunct, $sense, $count);
+		$inserted ++;
+		return;
+	}
+
+	# update the current count
+	my ($curr_cnt) = $select->fetchrow_array();
+	$count += $cur_cnt;
+
+	$updateup->execute($count, $sense, $infword, $disjunct);
+	$updated ++;
 }
 
 # ----------------------------------------------------------
+
+my $delete = $dbh->prepare(
+	'DELETE FROM DisjunctSenses WHERE ' . 
+	'word_sense = ? AND inflected_word = ? AND disjunct = ?')
+	or die "Couldn't prepare statement: " . $dbh->errstr;
+
 my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0;')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;
 
+my $examined = 0;
 for (my $i=0; $i<$select->rows; $i++)
 {
+	$examined ++;
 	my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
 
 	# Extract the lemma form from the sense key, and from the word.
@@ -96,14 +137,16 @@ for (my $i=0; $i<$select->rows; $i++)
 	}
 
 	# Find the canonical sense for this word.
-	my $canon_sense = $sk->get_canonical_sense($wn, $lemma, $sense);
+	my $canon_sense = $sk->get_canonical_sense($lemma, $sense);
 	if (!defined($canon_sense))
 	{
 		next;
 	}
 
 	# That's it -- we've got a canonical sense. Now update the 
-	# database.
+	# database with the new count, and delete the old record.
 	update_record ($canon_sense, $infword, $disjunct, $count);
+	$delete->execute($sense, $infword, $disjunct);
 }
 
+print "In total, examined=$examined updated=$updated inserted=$inserted\n";
