@@ -36,7 +36,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
-#define DEBUG
+//#define DEBUG
 namespace opencog
 {
 
@@ -262,7 +262,10 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
         for (unsigned int i = 0; i < connections->size1; i++) {
             if (i != j) sumProb += gsl_matrix_get(connections,i,j);
         }
+#ifdef DEBUG
         logger().fine("%d before - %1.3f", j, sumProb);
+#endif
+
         if (sumProb > maxSpreadPercentage) {
             for (unsigned int i = 0; i < connections->size1; i++) {
                 gsl_matrix_set( connections,i,j,gsl_matrix_get(connections,i,j)
@@ -299,9 +302,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     std::vector<Handle>::iterator hi;
     std::back_insert_iterator< std::vector<Handle> > out_hi(links);
 
-#ifdef DEBUG
     logger().debug("Begin diffusive importance spread.");
-#endif
 
     // Get all HebbianLinks
     a->getHandleSet(out_hi, HEBBIAN_LINK, true);
@@ -326,12 +327,12 @@ void ImportanceDiffusionAgent::spreadImportance()
         logger().error("%s\n", gsl_strerror (errorNo));
     }
 
-#ifdef DEBUG
     if (logger().getLevel() >= Logger::FINE) {
-        logger().fine("Result\n");
+        float normAF;
+        normAF = (a->getAttentionalFocusBoundary() - a->getMinSTI(false)) / (float) ( a->getMaxSTI(false) - a->getMinSTI(false) );
+        logger().fine("Result (AF at %.3f)\n",normAF);
         printVector(result);
     }
-#endif
 
     // set the sti of all atoms based on new values in results vector from
     // multiplication 

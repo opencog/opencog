@@ -184,8 +184,8 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 
     a->updateMaxSTI(maxSTISeen);
     a->updateMinSTI(minSTISeen);
-    log->debug("Max STI seen is %d, recentMaxSTI is now %f", maxSTISeen, a->getMaxSTI());
-    log->debug("Min STI seen is %d, recentMinSTI is now %f", minSTISeen, a->getMinSTI());
+    log->debug("Max STI seen is %d, recentMaxSTI is now %d", maxSTISeen, a->getMaxSTI());
+    log->debug("Min STI seen is %d, recentMinSTI is now %d", minSTISeen, a->getMinSTI());
 
     /* Check AtomSpace funds are within bounds */
     checkAtomSpaceFunds(a);

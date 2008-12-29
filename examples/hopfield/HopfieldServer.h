@@ -109,6 +109,17 @@ public:
      * @param stimulus amount of stimulus to multiply values in pattern by
      */
     void encodePattern(Pattern pattern, stim_t stimulus);
+    
+    /** Calculate the total energy of the network.
+     *
+     * Total energy is calculated from STI values and Hebbian Link weights...
+     * thus the energy is in terms of STI 
+     *
+     * @return total energy.
+     * @todo implement as an AtomSpace function or AtomTable statistic that
+     * handles HebbianLinks with arity != 2.
+     */
+    float totalEnergy();
 
     /**
      * Retrieve the the closest matching pattern in the network.

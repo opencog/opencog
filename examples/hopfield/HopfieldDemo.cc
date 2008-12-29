@@ -114,9 +114,17 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
     } else {
         for (std::vector< Pattern >::iterator i = ps.begin();
                 i != ps.end(); i++) {
-            cs.push_back( (*i).mutatePattern(o->cueErrorRate));
+            cs.push_back( (*i) );
+            // Cue patterns shouldn't be mutated unless 
+            // .mutatePattern(o->cueErrorRate));
         }
 
+    }
+    if (o->cueGenerateOnce) {
+        for (std::vector< Pattern >::iterator i = cs.begin();
+            i != cs.end(); i++) {
+            (*i) = (*i).mutatePattern(o->cueErrorRate);
+        }
     }
     return cs;
 }
@@ -160,8 +168,10 @@ void testHopfieldNetworkPalimpsest()
                 } else {
                     c = patterns[j].mutatePattern(o->cueErrorRate);
                 }
-            } 
-            Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(cuePatterns[j],
+            } else {
+                c = cuePatterns[j];
+            }
+            Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(c,
                     o->retrieveCycles, o->spreadCycles);
 
             if (o->showMatrixFlag) {
@@ -250,8 +260,10 @@ void testHopfieldNetworkInterleave()
                     } else {
                         c = patterns[j].mutatePattern(o->cueErrorRate);
                     }
-                } 
-                Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(cuePatterns[j],
+                } else {
+                    c = cuePatterns[j];
+                }
+                Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(c,
                         o->retrieveCycles, o->spreadCycles);
                 rSim = patterns[j].hammingSimilarity(rPattern);
                 cycleResults.push_back(rSim);

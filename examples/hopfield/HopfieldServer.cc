@@ -52,6 +52,60 @@ BaseServer* HopfieldServer::derivedCreateInstance()
     return new HopfieldServer();
 }
 
+float HopfieldServer::totalEnergy()
+{
+    int N = hGrid.size();
+    float E = 0.0f;
+    AtomSpace *a = getAtomSpace();
+    // sum for i<j
+    for (int j = 1; j < N; j++) {
+        for (int i = 0; i < j; i++) {
+            if (i==j) continue;
+            HandleSeq outgoing;
+            outgoing.push_back(hGrid[i]);
+            outgoing.push_back(hGrid[j]);
+            
+            HandleSeq ret;
+            a->getHandleSet(back_inserter(ret), outgoing, NULL,
+                    NULL, 2, HEBBIAN_LINK, true);
+            // Get other direction because order affects match in getHandleSet
+            outgoing[0] = hGrid[j];
+            outgoing[1] = hGrid[i];
+            a->getHandleSet(back_inserter(ret), outgoing, NULL,
+                    NULL, 2, HEBBIAN_LINK, true);
+            // Energy formula only designed for arity 2 links.
+            if (ret.size() > 1) {
+                logger().error("More than one Hebbian link between unit s_%d and j_%d "
+                        "while trying to get calculate energy of network.", i, j);
+                return NAN;
+            }
+            switch (a->getType(ret[0])) {
+            case SYMMETRIC_HEBBIAN_LINK:
+                E += a->getTV(ret[0]).getMean() * a->getSTI(hGrid[i]) * a->getSTI(hGrid[j]);
+                break;
+            case INVERSE_HEBBIAN_LINK:
+            case SYMMETRIC_INVERSE_HEBBIAN_LINK:
+                // I think these can both be considered the same, since it
+                // doesn't matter which way the energy away from equilibirum is
+                // going to go, only how far away from equilibrium the network is.
+                E += -(a->getTV(ret[0]).getMean()) * a->getSTI(hGrid[i]) * a->getSTI(hGrid[j]);
+                break;
+            default:
+                logger().error("Unknown Hebbian link type between unit s_%d and j_%d."
+                        " Ignoring.", i, j);
+                break;
+            }
+        }
+    }
+    E = E * -0.5f;
+    float thresholdSum = 0.0f;
+    for (int i = 0; i < N; i++) {
+        thresholdSum += options->vizThreshold * a->getSTI(hGrid[i]);
+    }
+    E += thresholdSum;
+    return E;
+}
+
 std::vector<float> HopfieldServer::imprintAndTestPattern(Pattern p, int imprint, int retrieve, Pattern cue, float mutate = 0.0f)
 {
     std::vector<float> result;
@@ -372,6 +426,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
         // then update with learning
 
+        logger().fine("---Imprint:Energy %f.", totalEnergy());
         logger().fine("---Imprint:Adding random links");
         addRandomLinks();
 
@@ -380,12 +435,13 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         importUpdateAgent->run(this);
         printStatus();
 
-        logger().fine("---Imprint:Hebbian learning");
-        if (hebLearnAgent)
+        if (hebLearnAgent) {
+            logger().fine("---Imprint:Hebbian learning");
             hebLearnAgent->run(this);
-        else
+        } else {
+            logger().fine("---Imprint:Storkey update rule");
             storkeyAgent->run(this);
-
+        }
 // Unnecessary
 //        logger().fine("---Imprint:Importance spreading");
 //#ifdef HAVE_GSL
@@ -397,11 +453,12 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         if (first)
             first = false;
         else
-            logger().fine("---Imprint:Forgetting");
+            logger().fine("---Imprint:Forgetting", totalEnergy());
         forgetAgent->run(this);
 
         printStatus();
 
+        logger().fine("---Imprint:Energy %f.");
         logger().fine("---Imprint:Resetting nodes");
         resetNodes();
     }

@@ -558,10 +558,11 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @note The matched entries are appended to a container whose OutputIterator
+     * is passed as the first argument. Example of call to this method, which
+     * would return all entries in AtomSpace:
+     *     std::list<Handle> ret;
+     *     atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,

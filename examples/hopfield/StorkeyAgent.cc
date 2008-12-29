@@ -165,7 +165,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                 if (w[i][j] < 0.0f) {
                     a->removeAtom(heb, true);
                     a->addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing,
-                            SimpleTruthValue(w[i][j],100));
+                            SimpleTruthValue(-w[i][j],100));
                 } else {
                     a->setMean(heb,w[i][j]);
                 }
@@ -177,7 +177,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                         a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing,
                                 SimpleTruthValue(w[i][j],100));
                     } else {
-                        a->setMean(heb,w[i][j]);
+                        a->setMean(heb,-w[i][j]);
                     }
                 }
                 // If both == Handle::UNDEFINED, then don't add weight. Link
@@ -226,6 +226,7 @@ void StorkeyAgent::storkeyUpdate()
         newWeights.push_back(iRow);
     }
     if (getLogger()->getLevel() >= Logger::FINE) {
+        getLogger()->fine("Weight matrix after Storkey update rule applied:");
         printWeights(newWeights);
     }
 #ifdef DEBUG
