@@ -17,6 +17,9 @@ use WordNet::QueryData;
 use WordNet::SenseKey;
 use DBI;
 
+my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
+   or die "Couldn't connect to database: " . DBI->errstr;
+
 # ----------------------------------------------------------
 my $wn_dictionary_location = "/usr/share/wordnet";
 my $wn = WordNet::QueryData->new($wn_dictionary_location);
@@ -45,9 +48,12 @@ sub get_synset
 
 # ----------------------------------------------------------
 
-my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
-   or die "Couldn't connect to database: " . DBI->errstr;
+sub update_record
+{
+	my ($sense, $infword, $disjunct, $count) = @_;
+}
 
+# ----------------------------------------------------------
 my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0;')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
@@ -59,17 +65,61 @@ for (my $i=0; $i<$select->rows; $i++)
 	my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
 
 	# Extract the lemma form from the sense key, and from the word.
-	$sense =~ m/(\w+)%(\d+)/;
+	$sense =~ m/([\w\.]+)%(\d+)/;
 	my $sense_lemma = $1;
+	my $slemma = $sense_lemma;
 	my $pos = $2;
-	$infword =~ m/(\w+)\.(\w+)/;
-	my $word = $1;
-	my $flect = $2;
 
+	$pos =~ s/1/n/;
+	$pos =~ s/2/v/;
+	$pos =~ s/3/a/;
+	$pos =~ s/4/r/;
+
+	if ($pos =~ /5/)
+	{
+		print "Don't know what to do! $sense $infword $count\n";
+		next;
+	}
+
+	my $word = $infword;
+	$infword =~ m/(\w+)\.(\w+)/;
+	if (defined($1))
+	{
+		$word = $1;
+	}
+
+	# Build a pseudo-word-pos string from the inflected word.
+	if (defined ($pos))
+	{
+		$word = $word . "#" . $pos;
+		$slemma = $slemma . "#" . $pos;
+	}
+
+	# Get its lemmatized form.
 	my @forms = $wn->validForms($word);
 	my $lemma = $forms[0];
 
-print "duude $sense, $infword  $sense_lemma $word $lemma\n";
+	# Very strange, but in rare cases, there's no lemma. Examples:
+	# cannot#v and for#v -- but how these got into the database to
+	# begin with is unclear. Anyway, punt on these.
+	if (!defined($lemma))
+	{
+		# print "wtf no lemma for word=$word (sense=$sense inf=$infword)\n";
+		next;
+	}
+
+	# Are these equal? If so, then we're good. Else, update the stats.
+	if ($slemma eq $lemma)
+	{
+		next;
+	}
+
+	my $off = $wn->offset($lemma);
+if(defined ($off)) {
+print "duude ==== unequal $sense, $infword  lem=$lemma off=$off\n";
+}
+
+	my $skey = $sk->get_sense_key($off, $lemma);
 
 }
 
