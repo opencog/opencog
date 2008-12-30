@@ -375,6 +375,9 @@ public:
     Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);
 
+    // Generate CrispTheoremRules for all crisp theorems
+    void makeTheorems();
+
     //! returns whether the type of h is T or inherits from T
     bool isSubType(Handle h, Type T);
     //! returns whether 

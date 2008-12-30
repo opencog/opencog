@@ -529,6 +529,9 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
         NMXmlParser::loadXML(readers, AS_PTR);        
         delete readers[0];
 
+        // re-generate CrispTheoremRule::thms
+        makeTheorems();
+        
         loadedFiles.insert(fname);
     } catch(string s) { 
         LOG(0, s); 
@@ -840,6 +843,7 @@ Handle AtomSpaceWrapper::directAddLink(Type T, const HandleSeq& hs, const TruthV
         haxx::childOf.insert(hpair(hs[1], hs[0]));*/
     }
 
+    // TODO should this still be here also?
     // if we are archiving theorems, and trying to add a implication link
     // composed of AND as a source, and the TruthValue is essentially true
     if (haxx::ArchiveTheorems &&
@@ -900,6 +904,41 @@ LOG(3, "Add ok.");
 //  assert(Abs(a->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
 
     return ret;
+}
+
+void AtomSpaceWrapper::makeTheorems() {
+    // if we are archiving theorems
+    if (haxx::ArchiveTheorems) {    
+        // for each implication link composed of AND as a source, and whose
+        // TruthValue is essentially true
+        
+        // TODO this could use the index that involves complex atom structure predicates
+        Btr<set<Handle> > links = getHandleSet(IMPLICATION_LINK, "");
+        foreach(Handle h, *links)
+        {
+            const std::vector<Handle> hs = getOutgoing(h);
+            const TruthValue& tvn = getTV(h);
+            
+            if(getType(hs[0]) == AND_LINK &&
+            tvn.getConfidence() > PLN_TRUE_MEAN) {
+                vector<Handle> args = getOutgoing(hs[0]);
+                cprintf(-3,"THM for:");
+
+                vtree thm_target(make_vtree(hs[1]));
+
+                rawPrint(thm_target, thm_target.begin(), 3);
+                LOG(0,"Takes:");
+                
+                foreach(Handle arg, args) {
+                    vtree arg_tree(make_vtree(arg));
+                    rawPrint(arg_tree, arg_tree.begin(), 0);
+                    CrispTheoremRule::thms[thm_target].push_back(arg_tree);
+                }
+                // TODO doesn't convert the ImplicationLink into a FalseLink
+                // (is that necessary / appropriate?)
+            }
+        }
+    }
 }
 
 //int AtomSpaceWrapper::implicationConstruction()
