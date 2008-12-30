@@ -59,7 +59,7 @@ Low entropy, but multiple senses observed says that there is a strong corellatio
 between disjunct and inflected word:
    select * from disjuncts where senses_observed>1 order by entropy asc;
 
-Combine the query:
+Show low-entropy words, as well as the sense count; don't display boring columns:
    select disjuncts.inflected_word, disjuncts.disjunct, disjunctsenses.word_sense,
    disjuncts.entropy, disjuncts.senses_observed, disjunctsenses.count
    from disjuncts,disjunctsenses where
@@ -114,21 +114,161 @@ she suffered a stroke   dj=Ss- Os+
 
 Other Candidates
 ----------------
+Verbs:
+ gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:36:02::                        |  0.00294323663814882 |               2 |     1.09565752530025
+ gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:40:00::                        |  0.00294323663814882 |               2 | 0.000236846846509587
 
+ proposed.v        | Mv- MVp+ MVp+                                          | propose%2:32:00::                     |   0.0050631354101759 |               2 |     1.19945158244393
+ proposed.v        | Mv- MVp+ MVp+                                          | propose%2:32:01::                     |   0.0050631354101759 |               2 | 0.000476899022006969
 
- towns.n           | Jp- Dmc-                                               | town%1:14:00::                        |  0.00717972910706398 |               2 |  0.00047381451237468
+ ends.v            | Ss- MVp+                                               | end%2:42:00::                         |    0.011789696275097 |               2 |     6.02102715971805
+ ends.v            | Ss- MVp+                                               | end%2:42:01::                         |    0.011789696275097 |               2 |  0.00625895238185481
+
+Nouns:
+ dog.n             | AN+                                                    | dog%1:05:00::                         |  0.00512254376849792 |               2 |     1.10869675890655
+ dog.n             | AN+                                                    | dog%1:06:00::                         |  0.00512254376849792 |               2 | 0.000446655405590204
+
  towns.n           | Jp- Dmc-                                               | town%1:15:00::                        |  0.00717972910706398 |               2 |    0.802619180446346
-
-
- battles.n         | Jp- Dmc- Mp+                                           | fight%1:04:01::                       |  0.00727841436704783 |               2 |     2.01007201806988
- battles.n         | Jp- Dmc- Mp+                                           | battle%1:04:02::                      |  0.00727841436704783 |               2 |  0.00120515153578474
+ towns.n           | Jp- Dmc-                                               | town%1:14:00::                        |  0.00717972910706398 |               2 |  0.00047381451237468
 
  building.n        | Wd- Ds- Ss+                                            | building%1:06:00::                    |  0.00901884557840178 |               2 |     1.82290246346794
  building.n        | Wd- Ds- Ss+                                            | building%1:04:00::                    |  0.00901884557840178 |               2 |  0.00139490596324197
 
+ home.n            | Cs- D*u- Ss+                                           | home%1:14:00::                        |     0.01489989871691 |               2 |     1.14445717825025
+ home.n            | Cs- D*u- Ss+                                           | home%1:06:02::                        |     0.01489989871691 |               2 |  0.00155725637510752
+
+Adjectives, adverbs, etc:
+ personal.a        | A+                                                     | personal%3:00:00::                    |   0.0105270084251467 |               2 |     2.05028355814664
+ personal.a        | A+                                                     | personal%3:01:01::                    |   0.0105270084251467 |               2 |   0.0018719470709944
+
+ later             | E+                                                     | later%4:02:01::                       |   0.0158438709016617 |               2 |      9.3855856634763
+ later             | E+                                                     | later%4:02:03::                       |   0.0158438709016617 |               2 |   0.0137091418558027
+
+ however.e         | CO+                                                    | however%4:02:00::                     |   0.0251996594250165 |               2 |     1.96656900377359
+ however.e         | CO+                                                    | however%4:02:02::                     |   0.0251996594250165 |               2 |  0.00492595230112824
+
+ after             | Mgp+ Xc+ CO+                                           | after%4:02:01::                       |    0.051442197937953 |               2 |    0.892771967980748
+ after             | Mgp+ Xc+ CO+                                           | after%4:02:00::                       |    0.051442197937953 |               2 |  0.00520906900520265
+
+ new.a             | A+                                                     | new%3:00:00::                         |   0.0579363661878467 |               2 |     47.9283157543877
+ new.a             | A+                                                     | new%3:00:09::                         |   0.0579363661878467 |               2 |    0.321947934003109
+
+
+Lets look at the verbs
+ gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:36:02::                        |  0.00294323663814882 |               2 |     1.09565752530025
+ gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:40:00::                        |  0.00294323663814882 |               2 | 0.000236846846509587
+
+Example for this disjunct would be:
+
+ She gave a party for the orphans in the orphanage.
+
+which has an object and two prepositions:
+
+       +----------------MVp---------------+           
+       +------MVp------+                  |           
+       +---Os---+      +-----Jp----+      +----Js----+
+ +--Ss-+   +-Ds-+      |    +--Dmc-+      |  +---Ds--+
+ |     |   |    |      |    |      |      |  |       |
+she gave.v a party.n for.p the orphans.n in the orphanage.n 
+
+The sense give%2:36:02:: is (organize or be responsible for; "hold a
+reception"; "have, throw, or make a party"; "give a course")
+
+while give%2:40:00:: is (transfer possession of something concrete or
+abstract to somebody; "I gave her my money"; "can you give me lessons?";
+"She gave the children lots of love and tender loving care")
+
+It seems hard to think of a sentance with an object and two preps
+that would have any other sense for 'give'.
+
+=======================
+Background:
+
+linkparser> She gave a party for the orphans
+Found 2 linkages (2 had no P.P. violations)
+	Linkage 1, cost vector = (CORP=3.7867 UNUSED=0 DIS=0 AND=0 LEN=11)
+
+       +------MVp------+            
+       +---Os---+      +-----Jp----+
+ +--Ss-+   +-Ds-+      |    +--Dmc-+
+ |     |   |    |      |    |      |
+she gave.v a party.n for.p the orphans.n 
+
+
+lexat=# select * from disjunctsenses where inflected_word='gave.v' and disjunct='Ss- Os+ MVp+ ' order by count desc;
+   word_sense   | inflected_word |   disjunct    |       count        | log_cond_probability 
+----------------+----------------+---------------+--------------------+----------------------
+ give%2:36:02:: | gave.v         | Ss- Os+ MVp+  |     2.170205084805 |      1.5718979043102
+ give%2:40:01:: | gave.v         | Ss- Os+ MVp+  |   2.05088588246407 |     1.65348207028009
+ give%2:40:00:: | gave.v         | Ss- Os+ MVp+  |   1.50420148137325 |     2.10073146557915
+ give%2:32:03:: | gave.v         | Ss- Os+ MVp+  |  0.387473482169565 |     4.05755980437411
+ give%2:36:01:: | gave.v         | Ss- Os+ MVp+  |  0.262765684485569 |     4.61788050203826
+ give%2:40:15:: | gave.v         | Ss- Os+ MVp+  | 0.0588864375564308 |     6.77565008049073
+ give%2:40:05:: | gave.v         | Ss- Os+ MVp+  | 0.0175052491366771 |     8.52579788364965
+(7 rows)
+
+Hmm. give%2:40:01:: is (give as a present; make a gift of; "What will you give her for her birthday?")
+while the remaining senses should indeed be considered to be "unlikely".
+
+
+	Linkage 2, cost vector = (CORP=4.4040 UNUSED=0 DIS=1 AND=0 LEN=9)
+
+       +---Os---+      +-----Jp----+
+ +--Ss-+   +-Ds-+--Mp--+    +--Dmc-+
+ |     |   |    |      |    |      |
+she gave.v a party.n for.p the orphans.n 
+
+lexat=# select * from disjunctsenses where inflected_word='gave.v' and disjunct='Ss- Os+ ' order by count desc;
+   word_sense   | inflected_word | disjunct |        count        | log_cond_probability 
+----------------+----------------+----------+---------------------+----------------------
+ give%2:36:02:: | gave.v         | Ss- Os+  |     5.5046642296017 |    0.790359680824649
+ give%2:40:01:: | gave.v         | Ss- Os+  |    1.32115735311106 |      2.8492119412325
+ give%2:40:00:: | gave.v         | Ss- Os+  |   0.844711858956604 |      3.4944830362432
+ give%2:40:06:: | gave.v         | Ss- Os+  |   0.644499839101934 |     3.88476234306743
+ give%2:36:01:: | gave.v         | Ss- Os+  |   0.547392147160068 |     4.12036760341426
+ give%2:40:03:: | gave.v         | Ss- Os+  |   0.339905223753224 |     4.80780980772028
+ give%2:36:00:: | gave.v         | Ss- Os+  |   0.235391632520718 |     5.33787930376052
+ give%2:38:13:: | gave.v         | Ss- Os+  |  0.0567291219804709 |     7.39078090136801
+ give%2:32:03:: | gave.v         | Ss- Os+  |  0.0199347850664697 |     8.89958238585429
+ give%2:34:00:: | gave.v         | Ss- Os+  | 0.00596139208782609 |     10.6411492670705
+(10 rows)
+
+Not at odds with the above.
+
+Can we disprove the above?
+
+linkparser> I gave him instructions on how to use the tool
+Found 2 linkages (2 had no P.P. violations)
+	Linkage 1, cost vector = (CORP=4.0124 UNUSED=0 DIS=2 AND=0 LEN=14)
+
+       +----------MVp----------+                      
+       +------Opn-----+        |          +----Os----+
+ +-Sp*i+-Ox-+         |        +QI+TOn+-I-+    +--Ds-+
+ |     |    |         |        |  |   |   |    |     |
+I.p gave.v him instructions.n on how to use.v the tool.n 
+
+select * from disjunctsenses where inflected_word='gave.v' and disjunct='Sp*i- Ox+ Opn+ MVp+ ' order by count desc;
+ word_sense | inflected_word | disjunct | count | log_cond_probability 
+------------+----------------+----------+-------+----------------------
+(0 rows)
+
+
+	Linkage 2, cost vector = (CORP=5.5181 UNUSED=0 DIS=3 AND=0 LEN=12)
+
+       +------Opn-----+                   +----Os----+
+ +-Sp*i+-Ox-+         +---Mp---+QI+TOn+-I-+    +--Ds-+
+ |     |    |         |        |  |   |   |    |     |
+I.p gave.v him instructions.n on how to use.v the tool.n 
+
+select * from disjunctsenses where inflected_word='gave.v' and disjunct='Sp*i- Ox+ Opn+ ' order by count desc;
+ word_sense | inflected_word | disjunct | count | log_cond_probability 
+------------+----------------+----------+-------+----------------------
+(0 rows)
+
+Oh well, not enough statistics today.
+
+
 
 TODO
 ----
-Normalize the synsets -- e.g. suffer is listed witht he wrong synset ... 
-Also -- need to merge the sysnsets.
-Also -- need to make sure the wsd is uzing only one word per sysnet .. ??
+Also -- need to make sure the wsd is using only one word per sysnet .. !!??

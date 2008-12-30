@@ -24,11 +24,13 @@ Currently, the basic experimental flow is as follows:
  * Run the scripts in the wordnet-import directory to load opencog
    with basic wordnet relationships.
  * Run "src/scm/load.sh" and "src/nlp/scm/load-nlp.sh" to load basic
-   scheme utilities.
+   scheme utilities. Be sure to modify the hard-coded paths to point
+   at the actual location of the parsed data.
  * Get to the scheme prompt, and run "(doit)". This will run the
    current word-sense disambiguation code, and will populate the 
    databases with statistical results.  Caution; this is extremely 
    CPU-intensive.
+ * Read the README in wsd-post for latest info & results.
 
 
 Subdirectories (in alphabetical order)
@@ -85,6 +87,15 @@ whose edges are these links.  The graph is essentially just a Markov
 chain, and is solved as such, looking for a stationary vector of 
 probabilities for the word-sense verticies. The verticies with the 
 highest scores are then the most likely meaning for a word.
+
+wsd-post
+--------
+The wsd-post directory contains miscellaneous post-processing and data
+analysis scripts for analyzing the results of WSD processing.  These 
+results are stored in various SQL tables, and contain wordnet and 
+link-grammar disjunct statistics. The wsd-post directory contains
+scripts to compute conditional probabilities, etc.  See the README
+there for research notes providing more info.
 
 ======================================================================
 
