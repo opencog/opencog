@@ -44,8 +44,8 @@ scm
 ;   (EvaluationLink
 ;      (LinkGrammarRelationshipNode "EB")
 ;      (ListLink
-;         (ConceptNode "consist@79aac665-c59f-41e2-9ab6-af75b768b5c4")
-;         (ConceptNode "mostly@69de3109-9e54-4acc-8aef-66e9da304078")
+;         (WordInstanceNode "consist@79aac665-c59f-41e2-9ab6-af75b768b5c4")
+;         (WordInstanceNode "mostly@69de3109-9e54-4acc-8aef-66e9da304078")
 ;      )
 ;   )
 ;
@@ -197,10 +197,10 @@ scm
 
 	; Create a list of all of the word instances in the parse.
 	; (cog-outgoing-set sentence) is a list of all of the word-instances
-	; in the sentence. Get those (filter on ConceptNode in order
+	; in the sentence. Get those (filter on WordInstanceNode in order
 	; to ignore the SentenceNode), then map these to word nodes, 
 	; and then tack them onto our list.
-	(cog-filter-map 'ConceptNode 
+	(cog-filter-map 'WordInstanceNode 
 		(lambda (x) (map-word-node add-to-word-list x))
 		(cog-outgoing-set sentence)
 	)

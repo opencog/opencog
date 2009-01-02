@@ -69,8 +69,8 @@ scm
 ;    EvaluationLink
 ;        LinkGrammarRelationshipNode
 ;        ListLink
-;            ConceptNode
-;            ConceptNode
+;            WordInstanceNode
+;            WordInstanceNode
 ;
 ; this routine will return a string holding the names of the 
 ; LinkGrammarRelationshipNode's, appeneded with a + or - to indicate

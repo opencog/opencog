@@ -11,6 +11,9 @@ scm
 ; paradigm. This file explores two other paradigms: a 
 ; callback-style program, and a wiring-style implementation.
 ;
+; XXX This file is more or less dead code, and is not beig currently
+; used. XXX
+;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; =============================================================
@@ -29,7 +32,8 @@ scm
 	)
 	
 	; loop over all the words in the sentence
-	(cog-map-chase-link 'SentenceLink 'ConceptNode "" "" dj-per-word sent-node)
+	; XXX this is wrong, this is not how words are indicated
+	; (cog-map-chase-link 'SentenceLink 'WordInstanceNode "" "" dj-per-word sent-node)
 	
 	#f
 )
@@ -55,7 +59,8 @@ scm
 	(cgw-source-atoms sentences 'SentenceNode)
 
 	; Get the incoming links.
-	(cgw-follow-link sentences word-instances 'SentenceLink 'ConceptNode)
+	; XXX this iis wrong, this is not how words are currently handled.
+	; (cgw-follow-link sentences word-instances 'SentenceLink 'WordInstanceNode)
 	
 	; Get the word-nodes associated with the word-instances.
 	; (cgw-follow-link word-instances word-nodes 'ReferenceLink 'WordNode)

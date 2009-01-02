@@ -8,11 +8,11 @@ scm
 ;
 ; =============================================================
 
-; Right now, every parse of a sentence is anchored to a ConceptNode
-(define ParseAnchor 'ConceptNode)
+; Right now, every parse of a sentence is anchored to a ParseNode
+(define ParseAnchor 'ParseNode)
 
-; Every word of a parse is also a concept node.
-(define WordAnchor 'ConceptNode)
+; Every word of a parse is a WordInstance node.
+(define WordAnchor 'WordInstanceNode)
 
 ; =============================================================
 ; Assorted sentence, parse, word, word-sense wrangling utilities below.
@@ -145,7 +145,7 @@ scm
 ; the structure
 ;
 ;     InheritanceLink (stv -0.006025 1.0)
-;        ConceptNode "day@171506d8f3"
+;        WordInstanceNode "day@171506d8f3"
 ;        WordSenseNode "daylight%1:28:00::"
 ;
 ; If there is no such link, return -999 as the score.

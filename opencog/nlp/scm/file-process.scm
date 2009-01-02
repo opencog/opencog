@@ -51,9 +51,7 @@ scm
 	(cog-map-type delit 'DocumentNode)
 	(cog-map-type delit 'SentenceNode)
 	(cog-map-type delit 'ParseNode)
-	; Can't delete concept nodes, as these are used to carry 
-	; word senses too .. 
-	; (cog-map-type delone 'ConceptNode)
+	(cog-map-type delit 'WordInstanceNode)
 (system (string-join (list "echo deleted: " (number->string n) )))
 	)
 )
