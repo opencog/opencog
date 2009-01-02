@@ -29,8 +29,8 @@ SenseSimilarityLCH::SenseSimilarityLCH(void)
 	// of holonym relations to be followed. Setting this to a large number
 	// leads to an exponential explosion of searches performed. Currently,
 	// the best value appears to be '1'.  Numbers larger than 4 can lead
-	// to hours of cpu time per sentence, since cpu time usage is 
-	// proportional to 2^(n-factorial). Wow. 
+	// to hours of cpu time per sentence, since cpu time usage is
+	// proportional to 2^(n-factorial). Wow.
 	max_follow_holo = 1;
 }
 
@@ -47,7 +47,7 @@ SenseSimilarityLCH::~SenseSimilarityLCH()
  * and depth is the total depth (top-to-bottom) of the
  * least-common-subsumer tree containing these two senses.
  *
- * In wordnet 3.0, the total depth (including the root node) of the 
+ * In wordnet 3.0, the total depth (including the root node) of the
  * verb taxonomy is 14, and the total depth of the noun taxonomy is 20.
  * There is no adjective/adverb taxonomy.
  *
@@ -55,15 +55,14 @@ SenseSimilarityLCH::~SenseSimilarityLCH()
  * 1) upwards, via hypernyms
  * 2) upwards, via holonym links
  *
- * The current implementation only explores the hypernym tree. This 
+ * The current implementation only explores the hypernym tree. This
  * seems to be the intended defintion for Leacock-Chodorow similarity.
  *
  * It is assumed that hypernyms are describe via inheritance links:
  *
- *    <InheritanceLink strength=0.8 confidence=0.9 />
- *       <WordSenseNode name="bark_sense_23" />
- *       <WordSenseNode name="covering_sense_42" />
- *    </InheritanceLink>
+ *    InheritanceLink strength=0.8 confidence=0.9
+ *       WordSenseNode "bark_sense_23"
+ *       WordSenseNode "covering_sense_42"
  *
  * Note that, in this algorithm, two words having different parts-of-speech
  * will have zero similarity (infinite distance).
@@ -101,7 +100,7 @@ SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 	first_cnt = 0;
 	min_cnt = 1<<28;
 
-	// Look up the hypernym tree, to see if the seccond sense is 
+	// Look up the hypernym tree, to see if the seccond sense is
 	// immediately above the first sense in either the hypernym (is-a)
 	// or the holonym (has-a) hierarchy.
 	follow_holo_cnt = 0;
@@ -134,7 +133,7 @@ SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 #ifdef DEBUG
 	Node *sense_a = dynamic_cast<Node *>(TLB::getAtom(first_sense));
 	Node *sense_b = dynamic_cast<Node *>(TLB::getAtom(second_sense));
-	printf("(%s, %s) dist=%d sim=%g\n", 
+	printf("(%s, %s) dist=%d sim=%g\n",
 	       sense_a->getName().c_str(),
 	       sense_b->getName().c_str(),
 	       min_cnt, sim);

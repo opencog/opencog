@@ -127,12 +127,14 @@ for the more "primitive" graph:
 
 The above InheritenceLink essentially assigns a "type" to the word
 instance. This type can be used in the same way that types are
-ordinarily used in other programming langauges.
+ordinarily used in other programming langauges. When managing
+hypergraphs, it is almost always easier and faster to locate,
+manipulate and delete narrowly typed atoms.
 
 Similarly, for links, we use the syntactic sugar
 
 	(PartOfSpeechLink
-	   (ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+	   (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
 	   (DefinedLinguisticConceptNode "noun")
 	)
 
@@ -141,7 +143,7 @@ which stands for the more "primitive" construct:
 	(EvaluationLink
 		(PredicateNode "PartOfSpeech"
 		(ListLink
-			(ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+			(WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
 			(DefinedLinguisticConceptNode "noun")
 		)
 	)

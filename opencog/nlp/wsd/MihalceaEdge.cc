@@ -196,12 +196,12 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
  *    <!-- the word "tree" occured in the sentence -->
  *    CosenseLink strength=0.49 confidence=0.3
  *       InheritanceLink strength=0.9 confidence=0.6
- *          ConceptNode "tree_99"
+ *          WordInstanceNode "tree_99"
  *          WordSenseNode "tree_sense_12"
  *
  *       InheritanceLink strength=0.9 confidence=0.1
- *          ConceptNode name="bark_144"
- *          WordSenseNode name="bark_sense_23"
+ *          WordInstanceNode "bark_144"
+ *          WordSenseNode "bark_sense_23"
  */
 bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)

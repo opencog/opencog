@@ -108,10 +108,9 @@ bool MihalceaLabel::annotate_word(Handle h)
  * Create a link coupling a specific word-instance to a possible 
  * word-sense.  The link to be created will resemble the following:
  *
- *   <InheritanceLink strength=0.9 confidence=0.1>
- *      <ConceptNode name="bark_144" />
- *      <WordSenseNode name="bark_sense_23" />
- *   </InheritanceLink>
+ *   InheritanceLink strength=0.9 confidence=0.1
+ *      WordInstanceNode "bark_144"
+ *      WordSenseNode "bark_sense_23"
  */
 bool MihalceaLabel::annotate_word_sense(Handle h)
 {

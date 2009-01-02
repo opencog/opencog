@@ -26,6 +26,23 @@ The primary challenges here are three-fold:
 3) Constructing a data representation that is ameanable to reasoning,
    and to question answering. 
 
+ToDo: Reification of triples ... 
+
+Structures
+----------
+Triples are to follow the existing opencog predicate structure:
+
+   (EvaluationLink
+      (ConceptNode "color_of")
+      (ListLink
+         (ConceptNode "sky")
+         (ConceptNode "blue")
+      )
+   )
+
+is an example of what would be deduced from the copula "The color of the
+sky is blue"
+
 
 References:
 -----------

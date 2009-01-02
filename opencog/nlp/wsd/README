@@ -75,7 +75,7 @@ to the word itself:
 
    WordSenseLink
       WordNode "bark"
-      ConceptNode "bark_sense_23"
+      WordSenseNode "bark_sense_23"
 
 The tag value "bark_sense_23" has no particular meaning in itself,
 it is just some unique string used to identify the sense.
@@ -84,7 +84,7 @@ Word senses can be crudely categorized according to part-of-speech.
 Thus, for example:
 
    PartOfSpeechLink
-      ConceptNode "bark_sense_23"
+      WordSenseNode "bark_sense_23"
       PartOfSpeechNode "noun"
 
 The above introduces a new node type "PartOfSpeechNode", and a new link
@@ -264,9 +264,9 @@ triples.
 This suggests the structure below. Each parse of a sentence is assigned
 an initial parse ranking, and so:
 
-   ConceptNode "parse_1" strength=0.9 confidence=0.6
-   ConceptNode "parse_2" strength=0.8 confidence=0.5
-   ConceptNode "parse_3" strength=0.6 confidence=0.3
+   ParseNode "parse_1" strength=0.9 confidence=0.6
+   ParseNode "parse_2" strength=0.8 confidence=0.5
+   ParseNode "parse_3" strength=0.6 confidence=0.3
 
 Each word in each parse of a sentence gets a unique concept node
 assignment. This is in order to allow the same word-instance be
@@ -279,15 +279,15 @@ nodes:
    EvaluationLink
       PredicateNode "ParseInstance"
       ListLink
-         ConceptNode "bark_144"
-         ConceptNode "parse_2"
+         WordInstanceNode "bark_144"
+         ParseNode "parse_2"
 
    <!-- Identify bark_169 as being parse instance 3 -->
    EvaluationLink
       PredicateNode "ParseInstance"
       ListLink
-         ConceptNode "bark_169"
-         ConceptNode "parse_3"
+         WordInstanceNode "bark_169"
+         ParseNode "parse_3"
 
 As promised by the example, one of these identifies "bark" as a
 noun, the other as verb:
@@ -296,14 +296,14 @@ noun, the other as verb:
    EvaluationLink
       PredicateNode "PartOfSpeech"
       ListLink
-         ConceptNode "bark_144"
+         WordInstanceNode "bark_144"
          PartOfSpeechNode "noun"
 
    <!-- In parse 3, which has bark_169, it is a verb -->
    EvaluationLink
       PredicateNode "PartOfSpeech"
       ListLink
-         ConceptNode "bark_169"
+         WordInstanceNode "bark_169"
          PartOfSpeechNode "verb"
 
 It should be made clear that both concepts "bark_144" and "bark_169"
@@ -312,22 +312,18 @@ refer to the same word in the same sentence.
    <!-- in parse 2, the word "bark" is associated with bark_144 -->
    ReferenceLink
       WordNode "bark"
-      ConceptNode "bark_144"
+      WordInstanceNode "bark_144"
 
    <!-- in parse 3, the word "bark" is associated with bark_169 -->
    ReferenceLink
       WordNode "bark"
-      ConceptNode "bark_169"
+      WordInstanceNode "bark_169"
 
 In the above, the associated WordNode is meant to be the non-lemmatized
 form of the word, since, in principle (though extremely rare in
 practice), the lemmatization might be different for different parses.
 (By "lemmatized form", we mean the infinitive form of a verb, the
 singular of a plural noun, etc.)
-
-[[In the above, "bark_144" and "bark_169" were identified as
-ConceptNodes. However, for clarity, it might be convenient to
-identify these as WordInstanceNodes?]]
 
 [[In the above, a collection of triples were used to specify the
 quadruple relation (parse 2, 'bark', part-of-speech, 'noun'), which can
@@ -346,13 +342,13 @@ forms as entirely equivalent:
    EvaluationLink
       PredicateNode "PartOfSpeech"
       ListLink
-         ConceptNode "bark_144"
+         WordInstance "bark_144"
          PartOfSpeechNode "noun"
 
 That is, the above is (ignoring truth values) *equivalent* to the below:
 
    PartOfSpeechLink
-      ConceptNode "bark_144"
+      WordInstance "bark_144"
       PartOfSpeechNode "noun"
 
 The below uses fewer atoms to represent the information. The above is
@@ -373,17 +369,17 @@ a single sentence. This may be accomplished by declaring a sentence:
 and associating it with each parse:
 
    ParseLink
-      ConceptNode "parse_1" strength=0.9 confidence=0.6
+      ParseNode "parse_1" strength=0.9 confidence=0.6
       SentenceNode "sentence_22"
 
    ParseLink
-      ConceptNode "parse_2" strength=0.8 confidence=0.5
+      ParseNode "parse_2" strength=0.8 confidence=0.5
       SentenceNode "sentence_22" 
 
-and so on. The special node type "SentenceNode" is used in order to
-easily locate new sentences added to the system. After word processing
-has been performed, the sentence node is marked to indicate that
-processing is complete, as so:
+and so on. The special node types "SentenceNode" and ParseNode are used
+so as to easily locate new sentences added to the system. After word
+processing has been performed, the sentence node is marked to indicate
+that processing is complete, as so:
 
    InheritanceLink
       SentenceNode "sentence_22"
@@ -412,7 +408,7 @@ reviewed.
 A naive way of representing word-concept links would be to create links:
 
    InheritanceLink strength=0.9 confidence=0.1
-      ConceptNode "bark_144"
+      WordInstanceNode "bark_144"
       WordSenseNode "bark_sense_23"
 
 The likelihood "bark_sense_23" being the correct sense for the word
@@ -425,11 +421,11 @@ mutually reinforce the most likely meaning of each word.
    <!-- the word "tree" occurred in the sentence -->
    CosenseLink strength=0.49 confidence=0.3
       InheritanceLink strength=0.9 confidence=0.6
-         ConceptNode "tree_99"
+         WordInstanceNode "tree_99"
          WordSenseNode "tree_sense_12"
      
       InheritanceLink strength=0.9 confidence=0.1
-         ConceptNode "bark_144"
+         WordInstanceNode "bark_144"
          WordSenseNode "bark_sense_23"
 
 Note that the set link is unordered: there is no preferred direction in
@@ -440,6 +436,9 @@ for every (word-instance, word-sense) pair, like so:
 
    ConceptNode "bark_pair_1"  strength=0.9 confidence=0.1
 
+This node is essentially the graph-dual to the InheritanceLink above;
+here, "graph-dual" is to be understood in the graph-theory sense.
+
 The likelihood "bark_sense_23" being the correct sense for the word
 "bark" is encoded in the strength of this node. This node is 
 associated with the (word-instance, word-sense) pair as follows:
@@ -449,7 +448,7 @@ associated with the (word-instance, word-sense) pair as follows:
       WordSenseNode "bark_sense_23"
 
    AssociativeLink
-      ConceptNode "bark_144"
+      WordInstanceNode "bark_144"
       ConceptNode "bark_pair_1"  strength=0.9 confidence=0.1
 
 The associative links are not weighted. The pairs-of-pairs are then

@@ -34,10 +34,9 @@ SenseCache::~SenseCache()
  *
  * Sense similarity is stored via similarity links:
  *
- *    <SimilarityLink strength=0.8 confidence=0.9 />
- *       <WordSenseNode name="bark_sense_23" />
- *       <WordSenseNode name="covering_sense_42" />
- *    </SimilarityLink>
+ *    SimilarityLink strength=0.8 confidence=0.9
+ *       WordSenseNode "bark_sense_23"
+ *       WordSenseNode "covering_sense_42"
  */
 const TruthValue& SenseCache::similarity(Handle sense_a, Handle sense_b)
 {
@@ -61,7 +60,7 @@ bool SenseCache::find_sense(Handle sense, Handle link)
 
 /**
  * set_similarity -- create link, holding a similarity measure
- * 
+ *
  * Create a new link, holding the similarity measure between two word
  * senses.  This link is *not* a part of any atom space; it must be
  * aded to an atom space if desired.
