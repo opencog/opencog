@@ -84,6 +84,17 @@ SIMULTANEOUS_AND_LINK <- AND_LINK
 EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
 EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
 
+/// PLN types:
+// These are used in PLN currently, but can perhaps be replaced/removed
+HYPOTHETICAL_LINK <- ORDERED_LINK
+MIXED_IMPLICATION_LINK <- ORDERED_LINK
+EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
+// Should be replaced by entensional and intensional
+// equivalence
+EQUIVALENCE_LINK <- UNORDERED_LINK
+EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
+// 
+
 // Older parsing and language handling nodes;
 // Commented out, as these are currently unused,
 // and are being replaced by newer RelEx forms.
@@ -94,7 +105,6 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 // SEQUENCE_LINK <- ORDERED_LINK
 // 
 // SEMANTIC_SENSE_NODE <- WORD_SENSE_NODE
-// WORD_INSTANCE_NODE <- WORD_NODE
 // 
 // TENSE_LINK <- ORDERED_LINK
 // QUANTITY_LINK <- ORDERED_LINK
@@ -107,19 +117,7 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 // NOUN_NUMBER_LINK <- ORDERED_LINK
 // WORD_GENDER_LINK <- ORDERED_LINK
 // QUERY_VARIABLE_LINK <- ORDERED_LINK
-
-/// PLN types:
-// These are used in PLN currently, but can perhaps be replaced/removed
-HYPOTHETICAL_LINK <- ORDERED_LINK
-MIXED_IMPLICATION_LINK <- ORDERED_LINK
-EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
-// Should be replaced by entensional and intensional
-// equivalence
-EQUIVALENCE_LINK <- UNORDERED_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
-/// 
-
-ENTROPY_LINK <- ORDERED_LINK
+//
 // New relex nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.
 // Some of the link types may go away.
