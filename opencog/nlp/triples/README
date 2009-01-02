@@ -1,0 +1,34 @@
+
+                 Triples
+                 -------
+
+This directory contains some experimental code to extract conceptual 
+entities and semantic triples from English text.  An example of a 
+"conceptual entity" would be the "Great Southern Railroad": a business,
+a railway, that existed at a certain point in space and time. A semantic
+triple is a triple of subject-predicate-object, and is popularly the 
+topic of "Semantic Web RDF" technology discussions[WP-RDF].  An example 
+of a "semantic triple" is "the sky is blue". Written in prefix notation,
+the triple is then "color_of(sky, blue)", with "color_of" beting the
+protpery or predicate, while "sky" and "blue" are the subject and
+object, respectively.
+
+The primary challenges here are three-fold:
+1) Dealing with the diversity of expression in the English language, 
+   where most sentences are not short and to-the-point. For short,
+   simple sentences, ReLex seems to provide enough normalization to
+   extract at least some triples. But it is not clear how far this
+   idea can be pushed.
+2) Learning new relations. It is simple to code up, by hand, "framing"
+   relationships, such as a list of colors, or a list properties that
+   an object can have. It is harder to determine, when encountering a 
+   new word, to determine that it is, for example, a color.
+3) Constructing a data representation that is ameanable to reasoning,
+   and to question answering. 
+
+
+References:
+-----------
+[WP-RDF] Resource Description Framework
+     http://en.wikipedia.org/wiki/Resource_Description_Framework
+
