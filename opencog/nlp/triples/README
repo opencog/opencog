@@ -43,6 +43,33 @@ Triples are to follow the existing opencog predicate structure:
 is an example of what would be deduced from the copula "The color of the
 sky is blue"
 
+Example Rule
+------------
+Input sentence: "The capital of Germany is Berlin."
+Relex output: 
+_subj(be, capital)
+_obj(be, Berlin)
+of(capital, Germany)
+
+Input sentence: "Berlin is the capital of Germany."
+_subj(be, Berlin)
+_obj(be, capital)
+of(capital, Germany)
+
+Input sentence: "The color of the sky is blue."
+of(color, sky)
+_predadj(blue, color)
+
+Each of these relex triples is quite verbose:
+(EvaluationLink
+   (DefinedLinguisticRelationshipNode "of")
+   (ListLink
+      (WordInstanceNode "color@e918598d-41cc-4091-bc7a-3ddcfc94b739")
+      (WordInstanceNode "sky@64895362-6a98-45b7-9e98-f199639d80e6")
+   )
+)
+
+
 
 References:
 -----------
