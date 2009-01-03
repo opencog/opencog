@@ -56,6 +56,7 @@ MihalceaEdge::~MihalceaEdge()
 void MihalceaEdge::set_atom_space(AtomSpace *as)
 {
 	atom_space = as;
+	sense_cache.set_atom_space(as);
 }
 
 /** Loop over all parses for this sentence. */
@@ -210,9 +211,8 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 
 	// Get the similarity between the two word senses out of the
 	// cache (if it exists).
-	SenseCache sc;
 	SimpleTruthValue stv(0.5,0.5);
-	stv = sc.similarity(first_word_sense, second_word_sense_h);
+	stv = sense_cache.similarity(first_word_sense, second_word_sense_h);
 	if (stv == TruthValue::DEFAULT_TV())
 	{
 		// Similarity was not found in the cache. Go fetch a value
@@ -222,7 +222,7 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 		// initial truth value to the edge. Create an edge only if the
 		// relationship is greater than zero.
 		stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
-		Link * l = sc.set_similarity(first_word_sense, second_word_sense_h, stv);
+		Link * l = sense_cache.set_similarity(first_word_sense, second_word_sense_h, stv);
 		atom_space->addRealAtom(*l);
 		delete l;
 	}

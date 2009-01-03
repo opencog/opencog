@@ -20,10 +20,17 @@ using namespace opencog;
 
 SenseCache::SenseCache(void)
 {
+	atom_space = NULL;
 }
 
 SenseCache::~SenseCache()
 {
+	atom_space = NULL;
+}
+
+void SenseCache::set_atom_space(AtomSpace *as)
+{
+	atom_space = as;
 }
 
 /**

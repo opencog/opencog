@@ -17,6 +17,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "EdgeUtils.h"
+#include "SenseCache.h"
 #include "SenseSimilarity.h"
 
 namespace opencog {
@@ -26,6 +27,7 @@ class MihalceaEdge : private EdgeUtils
 	private:
 		AtomSpace *atom_space;
 		SenseSimilarity *sen_sim;
+		SenseCache sense_cache;
 		bool annotate_parse_f(Handle);
 
 		bool annotate_word_pair(Handle, Handle);
