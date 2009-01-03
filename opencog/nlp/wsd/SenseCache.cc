@@ -72,14 +72,16 @@ bool SenseCache::find_sense(Handle sense, Handle link)
  * senses.  This link is *not* a part of any atom space; it must be
  * aded to an atom space if desired.
  */
-Link * SenseCache::set_similarity(Handle sense_a, Handle sense_b, const TruthValue &tv)
+void SenseCache::set_similarity(Handle sense_a, Handle sense_b, const TruthValue &tv)
 {
 	// Create a link connecting the two senses.
 	std::vector<Handle> out;
 	out.push_back(sense_a);
 	out.push_back(sense_b);
 	
-	return new Link(SIMILARITY_LINK, out, tv);
+	Link slink(SIMILARITY_LINK, out, tv);
+
+	atom_space->addRealAtom(slink);
 }
 
 /* ============================== END OF FILE ====================== */

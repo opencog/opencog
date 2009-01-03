@@ -186,6 +186,10 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
 }
 
 /**
+ * Use a word-sense similarity/relationship measure to assign an
+ * initial truth value to the edge. Create an edge only if the
+ * relationship is greater than zero.
+ *
  * Called for every pair (word-instance,word-sense) of the second
  * word-instance of a relex relationship. This routine is the last,
  * most deeply nested loop of all of this set of nested loops.  This
@@ -217,14 +221,8 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 	{
 		// Similarity was not found in the cache. Go fetch a value
 		// from the database.
-		//
-		// Use a word-sense similarity/relationship measure to assign an
-		// initial truth value to the edge. Create an edge only if the
-		// relationship is greater than zero.
 		stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
-		Link * l = sense_cache.set_similarity(first_word_sense, second_word_sense_h, stv);
-		atom_space->addRealAtom(*l);
-		delete l;
+		sense_cache.set_similarity(first_word_sense, second_word_sense_h, stv);
 	}
 
 	// Skip making edges between utterly unrelated nodes.
