@@ -1,8 +1,8 @@
-                    query processing
-                    ---------------
-        Linas Vepstas <linasvepstas@gmail.com>
-                  Created 18 March 2008
-                  Revised on 13 May 2008
+                          query processing
+                          ----------------
+               Linas Vepstas <linasvepstas@gmail.com>
+                        Created 18 March 2008
+                        Revised on 13 May 2008
 
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to perform query processing.

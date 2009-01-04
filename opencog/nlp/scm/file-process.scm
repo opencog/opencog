@@ -48,6 +48,7 @@ scm
 	(cog-map-type delone 'ReferenceLink)
 	(cog-map-type delone 'ListLink)
 	(cog-map-type delone 'CosenseLink)
+	(cog-map-type delone 'SimilarityLink)
 
 	(cog-map-type delit 'DocumentNode)
 	(cog-map-type delit 'SentenceNode)
