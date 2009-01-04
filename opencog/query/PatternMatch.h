@@ -99,7 +99,8 @@ class PatternMatch
 		PatternMatchCallback *pmc;
 
 	public:
-		PatternMatch(AtomSpace *);
+		PatternMatch(void);
+		void set_atomspace(AtomSpace *);
 
 		void match(PatternMatchCallback *,
 		           std::vector<Handle> *preds,

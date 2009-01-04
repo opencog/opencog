@@ -27,29 +27,34 @@ using namespace opencog;
 
 class PatternUTest :  public CxxTest::TestSuite
 {
+private:
+	PatternMatch pm;
+
 public:
 
-    PatternUTest() {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
-    }
+	PatternUTest(void)
+	{
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
+	}
 
-    ~PatternUTest() {
-	    // erase the log file if no assertions failed
-	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
-    }
+	~PatternUTest() {
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().getFilename().c_str());
+	}
 
-    void setUp() {    
-    }
+	void setUp() {
+		pm.set_atomspace(xxx);
+	}
 
-    void tearDown() {
-    }
+	void tearDown() {
+	}
 
-    void testDefault() {
-        logger().debug("BEGIN TEST: Pattern match");
+	void testDefault() {
+		logger().debug("BEGIN TEST: Pattern match");
 
-        logger().debug("END TEST: Pattern match");
-    }
+		logger().debug("END TEST: Pattern match");
+	}
 
 };
