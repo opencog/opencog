@@ -21,6 +21,7 @@
  */
 
 #include <opencog/query/PatternMatch.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -28,7 +29,7 @@ using namespace opencog;
 class PatternUTest :  public CxxTest::TestSuite
 {
 private:
-	PatternMatch pm;
+	AtomSpace *as;
 
 public:
 
@@ -38,23 +39,30 @@ public:
 		logger().setPrintToStdoutFlag(true);
 	}
 
-	~PatternUTest() {
+	~PatternUTest()
+	{
 		// erase the log file if no assertions failed
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().getFilename().c_str());
 	}
 
-	void setUp() {
-		pm.set_atomspace(xxx);
+	void setUp(void)
+	{
+		CogServer& cogserver = static_cast<CogServer&>(server());
+		as = cogserver.getAtomSpace();
 	}
 
-	void tearDown() {
-	}
+	void tearDown(void) { }
 
-	void testDefault() {
-		logger().debug("BEGIN TEST: Pattern match");
-
-		logger().debug("END TEST: Pattern match");
-	}
-
+	void testDefault(void);
 };
+
+void PatternUTest::testDefault(void)
+{
+	logger().debug("BEGIN TEST: Pattern match");
+	PatternMatch *pm = new PatternMatch();
+	pm->set_atomspace(as);
+
+	logger().debug("END TEST: Pattern match");
+}
+
