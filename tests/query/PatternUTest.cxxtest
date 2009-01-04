@@ -70,7 +70,7 @@ class PMCB : public PatternMatchCallback
 bool PMCB::node_match(Atom *a, Atom *b)
 {
 	printf("duuude got an atom %p %p\n", a,b);
-	return true;
+	return false;
 }
 bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
                     std::map<Handle, Handle> &var_soln)
@@ -91,7 +91,7 @@ void PatternUTest::testDefault(void)
 	Node nb(CONCEPT_NODE, "desired solution concept node");
 	Handle hb = as->addRealAtom(nb);
 
-	Node nc(VARIABLE_NODE, "var node");
+	Node nc(VARIABLE_NODE, "variable node");
 	Handle hc = TLB::addAtom(&nc);
 
 	Link ld(INHERITANCE_LINK, ha, hb);

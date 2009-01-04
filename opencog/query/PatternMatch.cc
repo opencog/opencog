@@ -142,7 +142,9 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	if (ab && !aa) return true;
 
 	// If types differ, then no match.
-	if (aa->getType() != ab->getType()) return true;
+	// However, "aatype of "VariableNode" will match any type.
+	Type aatype = aa->getType();
+	if ((aatype != VARIABLE_NODE) && (aatype != ab->getType())) return true;
 
 	dbgprt("depth=%d\n", depth);
 	prtmsg("tree_compare", aa);

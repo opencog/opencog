@@ -28,8 +28,8 @@ class PatternMatchCallback
 
 		/**
 		 * Called when two candidate nodes need to be
-		 * compared. Return true if the nodes match,
-		 * else return false.
+		 * compared. Return false if the nodes match,
+		 * else return true. (i.e. return true if mis-match).
 		 */
 		virtual bool node_match(Atom *, Atom *) = 0;
 
