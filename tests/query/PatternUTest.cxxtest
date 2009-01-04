@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
@@ -28,40 +30,83 @@ using namespace opencog;
 
 class PatternUTest :  public CxxTest::TestSuite
 {
-private:
-	AtomSpace *as;
+	private:
+		AtomSpace *as;
 
-public:
+	public:
 
-	PatternUTest(void)
-	{
-		logger().setLevel(Logger::DEBUG);
-		logger().setPrintToStdoutFlag(true);
-	}
+		PatternUTest(void)
+		{
+			logger().setLevel(Logger::DEBUG);
+			logger().setPrintToStdoutFlag(true);
+		}
 
-	~PatternUTest()
-	{
-		// erase the log file if no assertions failed
-		if (!CxxTest::TestTracker::tracker().suiteFailed())
-			std::remove(logger().getFilename().c_str());
-	}
+		~PatternUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
 
-	void setUp(void)
-	{
-		CogServer& cogserver = static_cast<CogServer&>(server());
-		as = cogserver.getAtomSpace();
-	}
+		void setUp(void)
+		{
+			CogServer& cogserver = static_cast<CogServer&>(server());
+			as = cogserver.getAtomSpace();
+		}
 
-	void tearDown(void) { }
+		void tearDown(void) { }
 
-	void testDefault(void);
+		void testDefault(void);
 };
+
+class PMCB : public PatternMatchCallback
+{
+	public:
+		virtual bool node_match(Atom *, Atom *);
+		virtual bool solution(std::map<Handle, Handle> &pred_soln,
+                            std::map<Handle, Handle> &var_soln);
+};
+
+bool PMCB::node_match(Atom *a, Atom *b)
+{
+	printf("duuude got an atom %p %p\n", a,b);
+	return true;
+}
+bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
+                    std::map<Handle, Handle> &var_soln)
+{
+	printf("duude got a solution\n");
+	return false;
+}
 
 void PatternUTest::testDefault(void)
 {
 	logger().debug("BEGIN TEST: Pattern match");
 	PatternMatch *pm = new PatternMatch();
 	pm->set_atomspace(as);
+
+	Node na(NODE, "const node");
+	Handle ha = TLB::addAtom(&na);
+	Node nb(NODE, "var node");
+	Handle hb = TLB::addAtom(&nb);
+
+	std::vector<Handle> oset;
+	oset.push_back(ha);
+	oset.push_back(hb);
+
+	Link lc(LINK, oset);
+	Handle hc = TLB::addAtom(&lc);
+
+	std::vector<Handle> preds;
+	preds.push_back(hc);
+
+	std::vector<Handle> vars;
+	preds.push_back(hb);
+
+	PMCB pmcb;
+
+	pm->match(&pmcb, &preds, &vars);
+
 
 	logger().debug("END TEST: Pattern match");
 }
