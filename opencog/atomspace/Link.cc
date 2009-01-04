@@ -59,22 +59,6 @@ void Link::init(const std::vector<Handle>& outgoingVector)
 #endif
 }
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-Link::Link(Type type, const std::vector<Handle>& outgoingVector, 
-           const TruthValue& tv)
-        : Atom(type, outgoingVector, tv)
-{
-    init();
-}
-#else
-Link::Link(Type type, const std::vector<Handle>& outgoingVector, 
-           const TruthValue& tv)
-        : Atom(type, tv)
-{
-    init(outgoingVector);
-}
-#endif
-
 Link::~Link() throw ()
 {
     //printf("Link::~Link() begin\n");

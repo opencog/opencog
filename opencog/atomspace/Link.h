@@ -88,12 +88,57 @@ public:
      *
      * @param Link type.
      * @param Outgoing set, which is an array of the atom handles
-     *        referenced by this link (both sources and targets).
+     *        referenced by this link.
      * @param Link truthvalue, which will be cloned before being
      *        stored in this Link.
      */
-    Link(Type, const std::vector<Handle>&,
-         const TruthValue& = TruthValue::NULL_TV());
+    Link(Type t, const std::vector<Handle>& oset,
+         const TruthValue& tv = TruthValue::NULL_TV())
+        : Atom(t, tv)
+    {
+        init(oset);
+    }
+
+    Link(Type t, Handle& h,
+         const TruthValue& tv = TruthValue::NULL_TV()) 
+        : Atom(t, tv)
+    {
+        std::vector<Handle> oset;
+        oset.push_back(h);
+        init(oset);
+    }
+
+    Link(Type t, Handle& ha, Handle &hb,
+         const TruthValue& tv = TruthValue::NULL_TV()) 
+        : Atom(t, tv)
+    {
+        std::vector<Handle> oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        init(oset);
+    }
+
+    Link(Type t, Handle& ha, Handle &hb, Handle &hc,
+         const TruthValue& tv = TruthValue::NULL_TV()) 
+        : Atom(t, tv)
+    {
+        std::vector<Handle> oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        oset.push_back(hc);
+        init(oset);
+    }
+    Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
+         const TruthValue& tv = TruthValue::NULL_TV()) 
+        : Atom(t, tv)
+    {
+        std::vector<Handle> oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        oset.push_back(hc);
+        oset.push_back(hd);
+        init(oset);
+    }
 
     /**
      * Destructor for this class.

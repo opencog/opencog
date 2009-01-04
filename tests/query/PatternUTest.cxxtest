@@ -85,23 +85,26 @@ void PatternUTest::testDefault(void)
 	PatternMatch *pm = new PatternMatch();
 	pm->set_atomspace(as);
 
-	Node na(NODE, "const node");
-	Handle ha = TLB::addAtom(&na);
-	Node nb(NODE, "var node");
-	Handle hb = TLB::addAtom(&nb);
+	Node na(CONCEPT_NODE, "some const concept node");
+	Handle ha = as->addRealAtom(na);
 
-	std::vector<Handle> oset;
-	oset.push_back(ha);
-	oset.push_back(hb);
+	Node nb(CONCEPT_NODE, "desired solution concept node");
+	Handle hb = as->addRealAtom(nb);
 
-	Link lc(LINK, oset);
-	Handle hc = TLB::addAtom(&lc);
+	Node nc(VARIABLE_NODE, "var node");
+	Handle hc = TLB::addAtom(&nc);
+
+	Link ld(INHERITANCE_LINK, ha, hb);
+	Handle hd = as->addRealAtom(ld);
+
+	Link le(INHERITANCE_LINK, ha, hc);
+	Handle he = TLB::addAtom(&le);
 
 	std::vector<Handle> preds;
-	preds.push_back(hc);
+	preds.push_back(he);
 
 	std::vector<Handle> vars;
-	preds.push_back(hb);
+	preds.push_back(hc);
 
 	PMCB pmcb;
 
