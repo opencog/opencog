@@ -29,81 +29,21 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/query/OutgoingTree.h>
-#include <opencog/query/PatternMatchCallback.h>
+#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
-typedef std::vector<Handle> RootList;
-typedef std::map<Handle, RootList *> RootMap;
-typedef std::pair<Handle, RootList *> RootPair;
-
-class PatternMatch
+class PatternMatch :
+	public PatternMatchEngine
 {
 	private:
-		AtomSpace *atom_space;
-
-		bool prt(Atom *);
-
-		static void prtmsg(const char *, Atom *);
-		static void prtmsg(const char *, Handle);
-
-		// -------------------------------------------
-		// predicates to be solved.
-		std::vector<Handle> normed_predicate;
-		std::set<Handle> bound_vars;
-
-		// -------------------------------------------
-		// Traversal utilities
-		RootMap root_map;
-		Handle curr_root;
-		bool note_root(Handle);
-		
-		// -------------------------------------------
-		// Examine each candidate for a match, in turn.
-		bool do_candidate(Handle);
-
-		// Recurisve tree comparison algorithm.
-		bool tree_compare(Atom *, Atom *);
-		int depth;  // recursion depth for tree_compare.
-
-		bool pred_up(Handle);
-		bool soln_up(Handle);
-		OutgoingTree ot;
-		Handle curr_soln_handle;
-		Handle curr_pred_handle;
-		void get_next_unsolved_pred(void);
-
-		// Stack used during recursive exploration
-		std::stack<Handle> pred_handle_stack;
-		std::stack<Handle> soln_handle_stack;
-		std::stack<Handle> root_handle_stack;
-		typedef std::map<Handle, Handle> SolnMap;
-		std::stack<SolnMap> pred_solutn_stack;
-
-		// -------------------------------------------
-
-		// Result of solving the predicate
-		std::map<Handle, Handle> var_solution;
-		std::map<Handle, Handle> predicate_solution;
-
-		// callback to report results.
-		PatternMatchCallback *pmc;
 
 	public:
 		PatternMatch(void);
-		void set_atomspace(AtomSpace *);
-
-		void match(PatternMatchCallback *,
-		           std::vector<Handle> *clauses,
-		           std::vector<Handle> *vars);
 
 		void match(PatternMatchCallback *,
 		           Handle clauses,
 		           Handle vars);
-
-		static void print_solution(std::map<Handle, Handle> &preds,
-		                           std::map<Handle, Handle> &vars);
 
 };
 

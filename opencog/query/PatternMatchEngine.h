@@ -1,5 +1,5 @@
 /*
- * PatternMatch.h
+ * PatternMatchEngine.h
  *
  * Author: Linas Vepstas February 2008
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PATTERN_MATCH_H
-#define _OPENCOG_PATTERN_MATCH_H
+#ifndef _OPENCOG_PATTERN_MATCH_ENGINE_H
+#define _OPENCOG_PATTERN_MATCH_ENGINE_H
 
 #include <map>
 #include <stack>
@@ -38,7 +38,7 @@ typedef std::vector<Handle> RootList;
 typedef std::map<Handle, RootList *> RootMap;
 typedef std::pair<Handle, RootList *> RootPair;
 
-class PatternMatch
+class PatternMatchEngine
 {
 	private:
 		AtomSpace *atom_space;
@@ -91,16 +91,12 @@ class PatternMatch
 		PatternMatchCallback *pmc;
 
 	public:
-		PatternMatch(void);
+		PatternMatchEngine(void);
 		void set_atomspace(AtomSpace *);
 
 		void match(PatternMatchCallback *,
 		           std::vector<Handle> *clauses,
 		           std::vector<Handle> *vars);
-
-		void match(PatternMatchCallback *,
-		           Handle clauses,
-		           Handle vars);
 
 		static void print_solution(std::map<Handle, Handle> &preds,
 		                           std::map<Handle, Handle> &vars);
@@ -109,4 +105,4 @@ class PatternMatch
 
 } // namespace opencog
 
-#endif // _OPENCOG_PATTERN_MATCH_H
+#endif // _OPENCOG_PATTERN_MATCH_ENGINE_H

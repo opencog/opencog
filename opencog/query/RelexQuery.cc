@@ -325,7 +325,7 @@ void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 #endif
 
 	// Solve...
-	pm->match(this, &normed_predicate, &bound_vars);
+	pm->PatternMatchEngine::match(this, &normed_predicate, &bound_vars);
 }
 
 /* ======================================================== */

@@ -1,5 +1,5 @@
 /*
- * PatternMatch.cc
+ * PatternMatchEngine.cc
  *
  * Copyright (C) 2008,2009 Linas Vepstas
  *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PatternMatch.h"
+#include "PatternMatchEngine.h"
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Foreach.h>
@@ -48,17 +48,17 @@ using namespace opencog;
 #endif
 #endif
 
-PatternMatch::PatternMatch(void)
+PatternMatchEngine::PatternMatchEngine(void)
 {
 	atom_space = NULL;
 }
 
-void PatternMatch::set_atomspace(AtomSpace *as)
+void PatternMatchEngine::set_atomspace(AtomSpace *as)
 {
 	atom_space = as;
 }
 
-bool PatternMatch::prt(Atom *atom)
+bool PatternMatchEngine::prt(Atom *atom)
 {
 	if (!atom) return false;
 	std::string str = atom->toString();
@@ -66,7 +66,7 @@ bool PatternMatch::prt(Atom *atom)
 	return false;
 }
 
-inline void PatternMatch::prtmsg(const char * msg, Atom *atom)
+inline void PatternMatchEngine::prtmsg(const char * msg, Atom *atom)
 {
 #ifdef DEBUG
 	if (!atom) return;
@@ -75,7 +75,7 @@ inline void PatternMatch::prtmsg(const char * msg, Atom *atom)
 #endif
 }
 
-inline void PatternMatch::prtmsg(const char * msg, Handle h)
+inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 {
 #ifdef DEBUG
 	prtmsg(msg, TLB::getAtom(h));
@@ -103,7 +103,7 @@ inline void PatternMatch::prtmsg(const char * msg, Handle h)
  * the entire tree, without mismatches.  Since a return value of true
  * stops the iteration, true is used to signal a mistmatch.
  */
-bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
+bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 {
 	Handle ha = TLB::getHandle(aa);
 	Handle hb = TLB::getHandle(ab);
@@ -146,7 +146,7 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		// Only links can have non-empty outgoing sets.
 		depth ++;
 		mismatch = foreach_outgoing_atom_pair(ha, hb,
-		              	      &PatternMatch::tree_compare, this);
+		              	      &PatternMatchEngine::tree_compare, this);
 		depth --;
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
@@ -172,7 +172,7 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 
 /* ======================================================== */
 
-bool PatternMatch::soln_up(Handle hsoln)
+bool PatternMatchEngine::soln_up(Handle hsoln)
 {
 	Atom *ap = TLB::getAtom(curr_pred_handle);
 	Atom *as = TLB::getAtom(hsoln);
@@ -249,7 +249,7 @@ bool PatternMatch::soln_up(Handle hsoln)
 	// Move up the predicate, and hunt for a match, again.
 	prtmsg("node has soln, move up:", as);
 	bool found = foreach_incoming_handle(curr_pred_handle,
-	                &PatternMatch::pred_up, this);
+	                &PatternMatchEngine::pred_up, this);
 	dbgprt("after moving up the clause, find =%d\n", found);
 
 	curr_soln_handle = soln_handle_stack.top();
@@ -258,7 +258,7 @@ bool PatternMatch::soln_up(Handle hsoln)
 	return found;
 }
 
-bool PatternMatch::pred_up(Handle h)
+bool PatternMatchEngine::pred_up(Handle h)
 {
 	// Is this link even a part of the predicate we are considering?
 	// If not, try the next atom. 
@@ -270,7 +270,7 @@ bool PatternMatch::pred_up(Handle h)
 	curr_pred_handle = h;
 
 	bool found = foreach_incoming_handle(curr_soln_handle,
-	                     &PatternMatch::soln_up, this);
+	                     &PatternMatchEngine::soln_up, this);
 
 	curr_pred_handle = pred_handle_stack.top();
 	pred_handle_stack.pop();
@@ -279,7 +279,7 @@ bool PatternMatch::pred_up(Handle h)
 	return found;
 }
 
-void PatternMatch::get_next_unsolved_pred(void)
+void PatternMatchEngine::get_next_unsolved_pred(void)
 {
 	// Search for an as-yet unsolved/unmatched predicate.
 	// For each solved node, look up root to see if root is solved.
@@ -330,7 +330,7 @@ void PatternMatch::get_next_unsolved_pred(void)
  * the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
-bool PatternMatch::do_candidate(Handle ah)
+bool PatternMatchEngine::do_candidate(Handle ah)
 {
 	// Don't stare at our navel.
 	std::vector<Handle>::iterator i;
@@ -360,7 +360,7 @@ bool PatternMatch::do_candidate(Handle ah)
  * Create an associative array that gives a list of all of the
  * predicatees that a given node participates in.
  */
-bool PatternMatch::note_root(Handle h)
+bool PatternMatchEngine::note_root(Handle h)
 {
 	RootList *rl = root_map[h];
 	if (NULL == rl)
@@ -370,7 +370,7 @@ bool PatternMatch::note_root(Handle h)
 	}
 	rl->push_back(curr_root);
 
-	foreach_outgoing_handle(h, &PatternMatch::note_root, this);
+	foreach_outgoing_handle(h, &PatternMatchEngine::note_root, this);
 	return false;
 }
 
@@ -380,7 +380,7 @@ bool PatternMatch::note_root(Handle h)
  * with the list of "bound vars" are to be solved for (or "evaluated")
  * bound vars must be, by definition, Nodes.
  */
-void PatternMatch::match(PatternMatchCallback *cb,
+void PatternMatchEngine::match(PatternMatchCallback *cb,
                          std::vector<Handle> *preds,
                          std::vector<Handle> *vars)
 {
@@ -448,66 +448,11 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	// Plunge into the deep end - start looking at all viable
 	// candidates in the AtomSpace.
 	atom_space->foreach_handle_of_type(ptype,
-	      &PatternMatch::do_candidate, this);
+	      &PatternMatchEngine::do_candidate, this);
 
 }
 
-/**
- * Solve a predicate by pattern matching.
- * The predicate is defined in terms of two hypergraphs: one is a
- * hypergraph defining a pattern to be matched for, and the other is a
- * list of bound variables in the first. 
- *
- * The bound variables are, by definition, nodes. (XXX It might be
- * useful to loosen this restriction someday). The list of bound variables
- * is then assumed to be listed using the ListLink type. So, for
- * example:
- *
- *    ListLink
- *        SomeNode "variable 1"
- *        SomeOtherNode "another variable"
- *
- * The predicate hypergraph is assumed to be a list of "clauses", where
- * each "clause" is a tree. The clauses are assumed to be connected,
- * i.e. share common nodes or links.  The algorithm to find solutions 
- * will fail on disconnected hypergraphs.  The list of clauses is
- * specified by means of an AndLink, so, for example:
- *
- *     AndLink
- *        SomeLink ....
- *        SomeOtherLink ...
- *
- * The solution proceeds by requiring each clause to match some part of
- * the atomspace (i.e. of the universe of hypergraphs stored in the
- * atomspace). When a solution is found, PatternMatchCallback::solution
- * method is called, and it is passed two maps: one mapping the bound
- * variables to thier solutions, and the other mapping the pattern 
- * clauses to thier corresponding solution clauses.
- *
- * At this time, the list of clauses is understood to be a single
- * disjunct; that is, all of the clauses must be simultaneously
- * satisfied.  Thus, in principle, one could build a layer on top of
- * this that accepts clauses in disjunctive normal form (and so on...)
- * It is not clear at this time how to benefit from Boolean SAT solver
- * technlogy (or at what point this would be needed).
- */
-void PatternMatch::match(PatternMatchCallback *cb,
-                         Handle hclauses,
-                         Handle hvarbles)
-{
-	Atom * aclauses = TLB::getAtom(hclauses);
-	Atom * avarbles = TLB::getAtom(hvarbles);
-	Link * lclauses = dynamic_cast<Link *>(aclauses);
-	Link * lvarbles = dynamic_cast<Link *>(avarbles);
-
-	// Both must be non-empty.
-	if (!lclauses || !lvarbles) return;
-	
-	std::vector<Handle> clauses;
-	std::vector<Handle> vars;
-}
-
-void PatternMatch::print_solution(std::map<Handle, Handle> &preds,
+void PatternMatchEngine::print_solution(std::map<Handle, Handle> &preds,
                                   std::map<Handle, Handle> &vars)
 {
 	printf("\nSolution atom mapping:\n");
