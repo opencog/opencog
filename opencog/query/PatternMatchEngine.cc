@@ -381,15 +381,15 @@ bool PatternMatchEngine::note_root(Handle h)
  * bound vars must be, by definition, Nodes.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         std::vector<Handle> *preds,
-                         std::vector<Handle> *vars)
+                         const std::vector<Handle> &preds,
+                         const std::vector<Handle> &vars)
 {
 	std::vector<Handle>::const_iterator i;
 
-	normed_predicate = *preds;
+	normed_predicate = preds;
 
-	for (i = vars->begin();
-	     i != vars->end(); i++)
+	for (i = vars.begin();
+	     i != vars.end(); i++)
 	{
 		Handle h = *i;
 		bound_vars.insert(h);
@@ -452,8 +452,9 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 
 }
 
-void PatternMatchEngine::print_solution(std::map<Handle, Handle> &preds,
-                                  std::map<Handle, Handle> &vars)
+void PatternMatchEngine::print_solution(
+	const std::map<Handle, Handle> &preds,
+   const std::map<Handle, Handle> &vars)
 {
 	printf("\nSolution atom mapping:\n");
 

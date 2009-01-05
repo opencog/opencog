@@ -188,7 +188,7 @@ void PatternUTest::test_simple_link(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	PatternMatch *pm = new PatternMatch();
-	pm->set_atomspace(as);
+	pm->PatternMatch::set_atomspace(as);
 
 	// Define the pattern to match against.
 	Node nvar(VARIABLE_NODE, "variable node");
@@ -204,7 +204,7 @@ void PatternUTest::test_simple_link(void)
 	preds.push_back(he);
 
 	PMCB pmcb;
-	pm->match(&pmcb, &preds, &vars);
+	pm->PatternMatchEngine::match(&pmcb, preds, vars);
 
 	// Should find only one solution.
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
@@ -222,7 +222,7 @@ void PatternUTest::test_two_links(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	PatternMatch *pm = new PatternMatch();
-	pm->set_atomspace(as);
+	pm->PatternMatchEngine::set_atomspace(as);
 
 	// Define the pattern to match against.
 	Node nx(VARIABLE_NODE, "variable node x");
@@ -246,7 +246,7 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hly);
 
 	PMCB pmcb;
-	pm->match(&pmcb, &preds, &vars);
+	pm->PatternMatchEngine::match(&pmcb, preds, vars);
 
 	// Should find four solutions:
 	// var_x = soln_b and var_y = soln_b
@@ -265,7 +265,7 @@ void PatternUTest::test_eval(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	PatternMatch *pm = new PatternMatch();
-	pm->set_atomspace(as);
+	pm->PatternMatch::set_atomspace(as);
 
 	// Create a standard-format opencog predicate
 	Node n1(CONCEPT_NODE, "concept kanjiru 1");
@@ -292,7 +292,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(he);
 
 	PMCB pmcb;
-	pm->match(&pmcb, &preds, &vars);
+	pm->PatternMatchEngine::match(&pmcb, preds, vars);
 
 	// Should find one solution
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
@@ -318,7 +318,7 @@ void PatternUTest::test_eval(void)
 	spreds.push_back(hes);
 
 	pmcb.found = 0; // reset the counter !!
-	pm->match(&pmcb, &spreds, &svars);
+	pm->PatternMatchEngine::match(&pmcb, spreds, svars);
 
 	// Should find one solution
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
@@ -330,7 +330,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(hes);
 	vars.push_back(hprns);
 	pmcb.found = 0; // reset the counter !!
-	pm->match(&pmcb, &preds, &vars);
+	pm->PatternMatchEngine::match(&pmcb, preds, vars);
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);

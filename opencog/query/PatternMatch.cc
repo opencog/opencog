@@ -25,6 +25,7 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
@@ -83,8 +84,22 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	// Both must be non-empty.
 	if (!lclauses || !lvarbles) return;
 	
-	std::vector<Handle> clauses;
-	std::vector<Handle> vars;
+	// Types must be as expected
+	Type tclauses = lclauses->getType();
+	Type tvarbles = lvarbles->getType();
+	if (AND_LINK != tclauses)
+	{
+		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
+		return;
+	}
+	if (LIST_LINK != tvarbles)
+	{
+		logger().warn("%s: expected ListLink for bound variable list", __FUNCTION__);
+		return;
+	}
+
+	PatternMatchEngine::match(cb, lclauses->getOutgoingSet(),
+	                              lvarbles->getOutgoingSet());
 }
 
 /* ===================== END OF FILE ===================== */
