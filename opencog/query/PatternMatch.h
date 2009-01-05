@@ -95,8 +95,12 @@ class PatternMatch
 		void set_atomspace(AtomSpace *);
 
 		void match(PatternMatchCallback *,
-		           std::vector<Handle> *preds,
+		           std::vector<Handle> *clauses,
 		           std::vector<Handle> *vars);
+
+		void match(PatternMatchCallback *,
+		           Handle clauses,
+		           Handle vars);
 
 		static void print_solution(std::map<Handle, Handle> &preds,
 		                           std::map<Handle, Handle> &vars);
