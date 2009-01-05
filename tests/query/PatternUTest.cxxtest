@@ -41,6 +41,13 @@ class PatternUTest :  public CxxTest::TestSuite
 		Handle hpred_b;
 		Handle hpred_c;
 
+		Handle hitem_1;
+		Handle hitem_2;
+		Handle hitem_3;
+		Handle hlist;
+		Handle hprnode;
+		Handle hoc;
+
 	public:
 
 		PatternUTest(void)
@@ -62,6 +69,7 @@ class PatternUTest :  public CxxTest::TestSuite
 
 		void test_simple_link(void);
 		void test_two_links(void);
+		void test_eval(void);
 };
 
 class PMCB : public PatternMatchCallback
@@ -133,6 +141,22 @@ void PatternUTest::setUp(void)
 	Link ldw(ASSOCIATIVE_LINK, hconst, hwrong);
 	as->addRealAtom(ldw);
 
+	// Create a standard-format opencog predicate
+	Node n1(CONCEPT_NODE, "concept kanjiru 1");
+	hitem_1 = as->addRealAtom(n1);
+	Node n2(CONCEPT_NODE, "concept kangaeru 2");
+	hitem_2 = as->addRealAtom(n2);
+	Node n3(CONCEPT_NODE, "concept nihongo 3");
+	hitem_3 = as->addRealAtom(n3);
+
+	Link pl(LIST_LINK, hitem_1, hitem_2, hitem_3);
+	hlist = as->addRealAtom(pl);
+
+	Node pr(PREDICATE_NODE, "relationship blaupunkt");
+	hprnode = as->addRealAtom(pr);
+
+	Link pe(EVALUATION_LINK, hprnode, hlist);
+	hoc = as->addRealAtom(pe);
 }
 
 void PatternUTest::test_simple_link(void)
@@ -207,6 +231,49 @@ void PatternUTest::test_two_links(void)
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 4);
 	// TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
 	// TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
+
+	delete pm;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void PatternUTest::test_eval(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	PatternMatch *pm = new PatternMatch();
+	pm->set_atomspace(as);
+
+	// Create a standard-format opencog predicate
+	Node n1(CONCEPT_NODE, "concept kanjiru 1");
+	Handle h1 = as->addRealAtom(n1);
+	Node n2(VARIABLE_NODE, "concept variable");
+	Handle h2 = as->addRealAtom(n2);
+	Node n3(CONCEPT_NODE, "concept nihongo 3");
+	Handle h3 = as->addRealAtom(n3);
+
+	Link pl(LIST_LINK, h1, h2, h3);
+	Handle hl = as->addRealAtom(pl);
+
+	Node pr(VARIABLE_NODE, "relationship variable");
+	Handle hprn = as->addRealAtom(pr);
+
+	Link pe(EVALUATION_LINK, hprn, hl);
+	Handle he = as->addRealAtom(pe);
+
+	std::vector<Handle> vars;
+	vars.push_back(hprn);
+	vars.push_back(h2);
+
+	std::vector<Handle> preds;
+	preds.push_back(he);
+
+	PMCB pmcb;
+	pm->match(&pmcb, &preds, &vars);
+
+	// Should find one solution
+	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
+	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
+	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
+	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[he]);
 
 	delete pm;
 	logger().debug("END TEST: %s", __FUNCTION__);
