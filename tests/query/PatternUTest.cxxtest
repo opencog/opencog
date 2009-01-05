@@ -87,7 +87,6 @@ bool PMCB::node_match(Atom *a, Atom *b)
 	Handle ha = TLB::getHandle(a);
 	Handle hb = TLB::getHandle(b);
 	logger().debug("Compare nodes %lu %lu\n", ha.value(), hb.value());
-	printf("wtf -- Compare nodes %lu %lu\n", ha.value(), hb.value());
 	return false;
 }
 
@@ -95,7 +94,6 @@ bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
                     std::map<Handle, Handle> &var_soln)
 {
 	found ++;
-	printf ("duude found the %d soln\n", found);
 	preds = pred_soln;
 	vars = var_soln;
 	return false;
@@ -201,11 +199,14 @@ void PatternUTest::test_two_links(void)
 	PMCB pmcb;
 	pm->match(&pmcb, &preds, &vars);
 
-printf ("duuude found %d solutions\n", pmcb.found);
-	// Should find only one solution.
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 2);
-	TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
-	TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
+	// Should find four solutions:
+	// var_x = soln_b and var_y = soln_b
+	// var_x = soln_b and var_y = soln_c
+	// var_x = soln_c and var_y = soln_b
+	// var_x = soln_c and var_y = soln_c
+	TSM_ASSERT("wrong number of solutions", pmcb.found == 4);
+	// TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
+	// TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
 
 	delete pm;
 	logger().debug("END TEST: %s", __FUNCTION__);
