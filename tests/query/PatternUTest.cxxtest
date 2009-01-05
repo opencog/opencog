@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
@@ -76,7 +76,7 @@ class PatternUTest :  public CxxTest::TestSuite
 		void test_eval(void);
 };
 
-class PMCB : public PatternMatchCallback
+class PMCB : public DefaultPatternMatchCB
 {
 	public:
 		PMCB(void);

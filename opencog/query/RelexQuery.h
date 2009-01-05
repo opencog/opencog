@@ -28,11 +28,12 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/FollowLink.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
 
-class RelexQuery : public PatternMatchCallback
+class RelexQuery : 
+	public DefaultPatternMatchCB
 {
 	private:
 		// Help determine if assertion is a query.

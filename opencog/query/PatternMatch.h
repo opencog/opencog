@@ -27,11 +27,26 @@ class PatternMatchCallback
 		virtual ~PatternMatchCallback() {};
 
 		/**
-		 * Called when two candidate nodes need to be
-		 * compared. Return false if the nodes match,
-		 * else return true. (i.e. return true if mis-match).
+		 * Called when a node in the template pattern
+		 * needs to be compared to a possibly matching
+		 * node in the atomspace. The first argument
+		 * is a node from the pattern, and the second
+		 * is a possible solution node from the atomspace.
+		 * Return false if the nodes match, else return
+		 * true. (i.e. return true if mis-match).
 		 */
 		virtual bool node_match(Atom *, Atom *) = 0;
+
+		/**
+		 * Called when a link in the template pattern
+		 * needs to be compared to a possibly matching
+		 * link in the atomspace. The first argument
+		 * is a link from the pattern, and the second
+		 * is a possible solution link from the atomspace.
+		 * Return false if the links match, else return
+		 * true. (i.e. return true if mis-match).
+		 */
+		virtual bool link_match(Atom *, Atom *) = 0;
 
 		/**
 		 * Called when a solution is found. Should 

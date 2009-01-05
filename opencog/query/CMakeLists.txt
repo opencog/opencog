@@ -16,6 +16,7 @@ INSTALL (TARGETS query
 )
 
 INSTALL (FILES
+	DefaultPatternMatchCB.h
 	FrameQuery.h
 	OutgoingTree.h
 	PatternMatch.h
