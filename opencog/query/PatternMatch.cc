@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -213,6 +213,7 @@ bool PatternMatch::soln_up(Handle hsoln)
 		}
 		else
 		{
+			// Else, start solving the next unsolved clause
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = var_solution[curr_pred_handle];
 			found = soln_up(curr_soln_handle);
@@ -413,12 +414,15 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 #ifdef DEBUG
 	// Print out the predicate ...
-	printf("\nPredicate is\n");
+	printf("\nPredicate consists of the following clauses:\n");
+	int cl = 0;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
 	{
+		printf("Clause %d: ", cl)
 		Handle h = *i;
-		foreach_outgoing_atom(h, &PatternMatch::prt, this);
+		prt(TLB::getAtom(h));
+		cl++;
 	}
 
 	// Print out the bound variables in the predicate.
@@ -430,7 +434,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		Node *n = dynamic_cast<Node *>(a);
 		if (n)
 		{
-			printf(" bound var: "); prt(a);
+			printf(" Bound var: "); prt(a);
 		}
 	}
 #endif

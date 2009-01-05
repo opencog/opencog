@@ -33,8 +33,13 @@ class PatternUTest :  public CxxTest::TestSuite
 	private:
 		AtomSpace *as;
 		Handle hconst;
-		Handle hsoln;
-		Handle hpred;
+		Handle hsoln_a;
+		Handle hsoln_b;
+		Handle hsoln_c;
+
+		Handle hpred_a;
+		Handle hpred_b;
+		Handle hpred_c;
 
 	public:
 
@@ -56,6 +61,7 @@ class PatternUTest :  public CxxTest::TestSuite
 		void tearDown(void) { }
 
 		void test_simple_link(void);
+		void test_two_links(void);
 };
 
 class PMCB : public PatternMatchCallback
@@ -81,6 +87,7 @@ bool PMCB::node_match(Atom *a, Atom *b)
 	Handle ha = TLB::getHandle(a);
 	Handle hb = TLB::getHandle(b);
 	logger().debug("Compare nodes %lu %lu\n", ha.value(), hb.value());
+	printf("wtf -- Compare nodes %lu %lu\n", ha.value(), hb.value());
 	return false;
 }
 
@@ -88,6 +95,7 @@ bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
                     std::map<Handle, Handle> &var_soln)
 {
 	found ++;
+	printf ("duude found the %d soln\n", found);
 	preds = pred_soln;
 	vars = var_soln;
 	return false;
@@ -99,14 +107,26 @@ void PatternUTest::setUp(void)
 	as = cogserver.getAtomSpace();
 
 	// create a gnarly graph
-	Node na(CONCEPT_NODE, "some const concept node");
-	hconst = as->addRealAtom(na);
+	Node ncon(CONCEPT_NODE, "some const concept node");
+	hconst = as->addRealAtom(ncon);
 
-	Node nb(CONCEPT_NODE, "desired solution concept node");
-	hsoln = as->addRealAtom(nb);
+	Node na(CONCEPT_NODE, "desired solution concept node a");
+	hsoln_a = as->addRealAtom(na);
 
-	Link ld(INHERITANCE_LINK, hconst, hsoln);
-	hpred = as->addRealAtom(ld);
+	Node nb(CONCEPT_NODE, "desired solution concept node b");
+	hsoln_b = as->addRealAtom(nb);
+
+	Node nc(CONCEPT_NODE, "desired solution concept node c");
+	hsoln_c = as->addRealAtom(nc);
+
+	Link la(INHERITANCE_LINK, hconst, hsoln_a);
+	hpred_a = as->addRealAtom(la);
+
+	Link lb(LIST_LINK, hconst, hsoln_b);
+	hpred_b = as->addRealAtom(lb);
+
+	Link lc(LIST_LINK, hconst, hsoln_c);
+	hpred_c = as->addRealAtom(lc);
 
 	// create a confounding link, like above, but different
 	Node nbw(CONCEPT_NODE, "incorrect solution concept node");
@@ -141,8 +161,47 @@ void PatternUTest::test_simple_link(void)
 
 	// Should find only one solution.
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
-	TSM_ASSERT("incorrect solution", hsoln == pmcb.vars[hc]);
-	TSM_ASSERT("incorrect predicate", hpred == pmcb.preds[he]);
+	TSM_ASSERT("incorrect solution", hsoln_a == pmcb.vars[hc]);
+	TSM_ASSERT("incorrect predicate", hpred_a == pmcb.preds[he]);
+
+	delete pm;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void PatternUTest::test_two_links(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	PatternMatch *pm = new PatternMatch();
+	pm->set_atomspace(as);
+
+	// Define the pattern to match against.
+	Node nx(VARIABLE_NODE, "variable node x");
+	Handle hx = TLB::addAtom(&nx);
+
+	Node ny(VARIABLE_NODE, "variable node y");
+	Handle hy = TLB::addAtom(&ny);
+
+	Link lx(LIST_LINK, hconst, hx);
+	Handle hlx = TLB::addAtom(&lx);
+
+	Link ly(LIST_LINK, hconst, hy);
+	Handle hly = TLB::addAtom(&ly);
+
+	std::vector<Handle> vars;
+	vars.push_back(hx);
+	vars.push_back(hy);
+
+	std::vector<Handle> preds;
+	preds.push_back(hlx);
+	preds.push_back(hly);
+
+	PMCB pmcb;
+	pm->match(&pmcb, &preds, &vars);
+
+	// Should find only one solution.
+	TSM_ASSERT("wrong number of solutions", pmcb.found == 2);
+	TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
+	TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
 
 	delete pm;
 	logger().debug("END TEST: %s", __FUNCTION__);
