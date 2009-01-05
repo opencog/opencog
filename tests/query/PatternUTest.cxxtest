@@ -144,14 +144,14 @@ void PatternUTest::test_simple_link(void)
 	pm->set_atomspace(as);
 
 	// Define the pattern to match against.
-	Node nc(VARIABLE_NODE, "variable node");
-	Handle hc = TLB::addAtom(&nc);
+	Node nvar(VARIABLE_NODE, "variable node");
+	Handle hvar = as->addRealAtom(nvar);
 
-	Link le(INHERITANCE_LINK, hconst, hc);
-	Handle he = TLB::addAtom(&le);
+	Link le(INHERITANCE_LINK, hconst, hvar);
+	Handle he = as->addRealAtom(le);
 
 	std::vector<Handle> vars;
-	vars.push_back(hc);
+	vars.push_back(hvar);
 
 	std::vector<Handle> preds;
 	preds.push_back(he);
@@ -161,9 +161,12 @@ void PatternUTest::test_simple_link(void)
 
 	// Should find only one solution.
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
-	TSM_ASSERT("incorrect solution", hsoln_a == pmcb.vars[hc]);
+	TSM_ASSERT("incorrect solution", hsoln_a == pmcb.vars[hvar]);
 	TSM_ASSERT("incorrect predicate", hpred_a == pmcb.preds[he]);
 
+	// Remove garbage, just in case ... 
+	as->removeAtom(he);
+	as->removeAtom(hvar);
 	delete pm;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -176,16 +179,16 @@ void PatternUTest::test_two_links(void)
 
 	// Define the pattern to match against.
 	Node nx(VARIABLE_NODE, "variable node x");
-	Handle hx = TLB::addAtom(&nx);
+	Handle hx = as->addRealAtom(nx);
 
 	Node ny(VARIABLE_NODE, "variable node y");
-	Handle hy = TLB::addAtom(&ny);
+	Handle hy = as->addRealAtom(ny);
 
 	Link lx(LIST_LINK, hconst, hx);
-	Handle hlx = TLB::addAtom(&lx);
+	Handle hlx = as->addRealAtom(lx);
 
 	Link ly(LIST_LINK, hconst, hy);
-	Handle hly = TLB::addAtom(&ly);
+	Handle hly = as->addRealAtom(ly);
 
 	std::vector<Handle> vars;
 	vars.push_back(hx);
@@ -198,6 +201,7 @@ void PatternUTest::test_two_links(void)
 	PMCB pmcb;
 	pm->match(&pmcb, &preds, &vars);
 
+printf ("duuude found %d solutions\n", pmcb.found);
 	// Should find only one solution.
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 2);
 	TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);

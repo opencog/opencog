@@ -110,25 +110,26 @@ inline void PatternMatch::prtmsg(const char * msg, Handle h)
 bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 {
 	Handle ha = TLB::getHandle(aa);
+	Handle hb = TLB::getHandle(ab);
 
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.count(ha))
 	{
-		// If ab is the very same var, then its a mismatch.
-		if (aa == ab) return true;
+		// If ab happens to also be a bound var, then its a mismatch.
+		if (bound_vars.count(hb)) return true;
 
 		// Else, we have a candidate solution.
 		// Make a record of it.
-		var_solution[ha] = TLB::getHandle(ab);
+		var_solution[ha] = hb;
 		return false;
 	}
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if ab is not one of the predicates itself.
-	if ((aa == ab) && (TLB::getHandle(ab) != curr_root))
+	if ((ha == hb) && (hb != curr_root))
 	{
-		var_solution[ha] = TLB::getHandle(ab);
+		var_solution[ha] = hb;
 		return false;
 	}
 
@@ -175,8 +176,8 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 
 bool PatternMatch::soln_up(Handle hsoln)
 {
-	Atom *as = TLB::getAtom(hsoln);
 	Atom *ap = TLB::getAtom(curr_pred_handle);
+	Atom *as = TLB::getAtom(hsoln);
 	depth = 1;
 	bool no_match = tree_compare(ap, as);
 
@@ -242,6 +243,8 @@ bool PatternMatch::soln_up(Handle hsoln)
 		return found;
 	}
 
+	// If we are here, then we are somwhere in the middle of a clause,
+	// and everything below us matches. So need to move up.
 	soln_handle_stack.push(curr_soln_handle);
 	curr_soln_handle = TLB::getHandle(as);
 
@@ -249,7 +252,7 @@ bool PatternMatch::soln_up(Handle hsoln)
 	prtmsg("node has soln, move up:", as);
 	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatch::pred_up, this);
-	dbgprt("up pred find =%d\n", found);
+	dbgprt("after moving up the clause, find =%d\n", found);
 
 	curr_soln_handle = soln_handle_stack.top();
 	soln_handle_stack.pop();
@@ -259,12 +262,12 @@ bool PatternMatch::soln_up(Handle hsoln)
 
 bool PatternMatch::pred_up(Handle h)
 {
-	// Is this atom even a part of the predicate we are considering?
-	// If not, try the next atom.
+	// Is this link even a part of the predicate we are considering?
+	// If not, try the next atom. 
 	bool valid = ot.is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
-	// Now, move up the solution outgoing set, looking for a match.
+	// Move up the solution outgoing set, looking for a match.
 	pred_handle_stack.push(curr_pred_handle);
 	curr_pred_handle = h;
 
@@ -419,7 +422,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
 	{
-		printf("Clause %d: ", cl)
+		printf("Clause %d: ", cl);
 		Handle h = *i;
 		prt(TLB::getAtom(h));
 		cl++;
