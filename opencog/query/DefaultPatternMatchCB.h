@@ -8,9 +8,9 @@
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
 

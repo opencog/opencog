@@ -20,6 +20,7 @@ INSTALL (FILES
 	FrameQuery.h
 	OutgoingTree.h
 	PatternMatch.h
+	PatternMatchCallback.h
 	QueryProcessor.h
 	RelexQuery.h
 	DESTINATION "include/opencog/query"

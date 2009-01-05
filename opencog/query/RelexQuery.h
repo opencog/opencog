@@ -29,6 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/FollowLink.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatch.h>
 
 namespace opencog {
 
