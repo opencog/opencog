@@ -371,10 +371,11 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
  * XXX
  *
  * Current mapping is:
- *   <ReferenceLink>
- *      <WordNode name="#bark">
- *      <ConceptNode name="bark_169" />
- *   </ReferenceLink>
+ *   ReferenceLink
+ *      WordNode "bark"
+ *      ConceptNode "bark_169"
+ *
+ *  XXX should be "WordInstanceNode" now XXX
  *
  */
 bool RelexQuery::is_word_instance(Atom *atom, const char * word)
@@ -400,66 +401,62 @@ bool RelexQuery::is_word_instance(Atom *atom, const char * word)
  * Return true to signify a mismatch,
  * Return false to signify equivalence.
  */
-bool RelexQuery::node_match(Atom *aa, Atom *ab)
+bool RelexQuery::node_match(Node *npat, Node *nsoln)
 {
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
-	Type ntype = aa->getType();
+	Type pattype = npat->getType();
+	Type soltype = nsoln->getType();
+	if (pattype != soltype) return true;
 
 	// DefinedLinguisticRelation nodes must match exactly;
 	// so if we are here, there's already a mismatch.
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == ntype) return true;
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype) return true;
 
 	// Concept nodes can match if they inherit from the same concept.
-	if (CONCEPT_NODE == ntype)
+	if (CONCEPT_NODE == soltype)
 	{
-		bool mismatch = concept_match(aa, ab);
+		bool mismatch = concept_match(npat, nsoln);
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE == ntype)
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == soltype)
 	{
 		/* We force agreement for gender, etc.
 		 * be have more relaxed agreement for tense...
 		 * i.e. match #past to #past_infinitive, etc.
 		 */
-		Node *na = dynamic_cast<Node *>(aa);
-		Node *nb = dynamic_cast<Node *>(ab);
-		if (na && nb)
+		const char * sa = npat->getName().c_str();
+		const char * sb = nsoln->getName().c_str();
+		const char * ua = strchr(sa, '_');
+		if (ua)
 		{
-			const char * sa = na->getName().c_str();
-			const char * sb = nb->getName().c_str();
-			const char * ua = strchr(sa, '_');
-			if (ua)
-			{
-				size_t len = ua-sa;
-				char * s = (char *) alloca(len+1);
-				strncpy(s,sa,len);
-				s[len] = 0x0;
-				sa = s;
-			}
-			const char * ub = strchr(sb, '_');
-			if (ub)
-			{
-				size_t len = ub-sb;
-				char * s = (char *) alloca(len+1);
-				strncpy(s,sb,len);
-				s[len] = 0x0;
-				sb = s;
-			}
-			if (!strcmp(sa, sb)) return false;
-			return true;
+			size_t len = ua-sa;
+			char * s = (char *) alloca(len+1);
+			strncpy(s,sa,len);
+			s[len] = 0x0;
+			sa = s;
 		}
+		const char * ub = strchr(sb, '_');
+		if (ub)
+		{
+			size_t len = ub-sb;
+			char * s = (char *) alloca(len+1);
+			strncpy(s,sb,len);
+			s[len] = 0x0;
+			sb = s;
+		}
+		if (!strcmp(sa, sb)) return false;
 		return true;
 	}
 
-	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
-	        ClassServer::getTypeName(ntype).c_str());
+	fprintf(stderr, "Error: unexpected node type %d %s\n", soltype,
+	        ClassServer::getTypeName(soltype).c_str());
 
-	std::string sa = aa->toString();
-	std::string sb = ab->toString();
+	std::string sa = npat->toString();
+	std::string sb = nsoln->toString();
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 

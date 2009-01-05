@@ -87,25 +87,21 @@ inline void PatternMatch::prtmsg(const char * msg, Handle h)
 /**
  * tree_compare compares two trees, side-by-side.
  *
- * Compare two incidence trees, side-by-side. It is assumed
- * that the first of these is the predicate, and so the
- * comparison is between the predicate, and a candidate
- * graph. 
+ * Compare two incidence trees, side-by-side. It is assumed that the 
+ * first of these is a clause in the predicate, and so the comparison
+ * is between the clause, and a candidate graph. 
  *
- * The graph/tree refered to here is the incidence 
- * graph/tree (aka Levi graph) of the hypergraph.
- * (and not the hypergraph itself).
- * The incidence graph is given by the "outgoing set"
- * of the atom.
+ * The graph/tree refered to here is the incidence graph/tree (aka 
+ * Levi graph) of the hypergraph (and not the hypergraph itself).
+ * The incidence graph is given by the "outgoing set" of the atom.
  *
- * This routine is recursive, calling itself on each
- * subtree of the predicate, performing comparisions until
- * a match is found (or not found).
+ * This routine is recursive, calling itself on each subtree of the 
+ * predicate clause, performing comparisions until a match is found 
+ * (or not found).
  *
- * Return true if there's a mis-match. The goal here
- * is to iterate the entire tree, without mismatches.
- * Since a return value of true stops the iteration,
- * true is used to signal a mistmatch.
+ * Return true if there's a mis-match. The goal here is to walk over
+ * the entire tree, without mismatches.  Since a return value of true
+ * stops the iteration, true is used to signal a mistmatch.
  */
 bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 {
@@ -138,17 +134,16 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	Link *lb = dynamic_cast<Link *>(ab);
 	if (la && lb)
 	{
+		// Let the callback perform basic checking.
 		bool mismatch = pmc->link_match(la, lb);
 		if (mismatch) return true;
-
-		// The recursion step: traverse down the tree.
-		// Only links can have non-empty outgoing sets.
-		Handle hb = TLB::getHandle(ab);
 
 		dbgprt("depth=%d\n", depth);
 		prtmsg("tree_compare", aa);
 		prtmsg("          to", ab);
 
+		// The recursion step: traverse down the tree.
+		// Only links can have non-empty outgoing sets.
 		depth ++;
 		mismatch = foreach_outgoing_atom_pair(ha, hb,
 		              	      &PatternMatch::tree_compare, this);
@@ -164,13 +159,8 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 	Node *nb = dynamic_cast<Node *>(ab);
 	if (na && nb)
 	{
-		// If types differ, then no match.
-		// However, "aatype of "VariableNode" will match any type.
-		Type aatype = aa->getType();
-		if ((aatype != VARIABLE_NODE) && (aatype != ab->getType())) return true;
-
 		// Call the callback to make the final determination.
-		bool mismatch = pmc->node_match(aa, ab);
+		bool mismatch = pmc->node_match(na, nb);
 		if (false == mismatch) var_solution[ha] = hb;
 		return mismatch;
 	}

@@ -80,7 +80,7 @@ class PMCB : public DefaultPatternMatchCB
 {
 	public:
 		PMCB(void);
-		virtual bool node_match(Atom *, Atom *);
+		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
                             std::map<Handle, Handle> &var_soln);
 
@@ -94,17 +94,21 @@ PMCB::PMCB(void)
 	found = 0;
 }
 
-bool PMCB::node_match(Atom *a, Atom *b)
+bool PMCB::node_match(Node *npat, Node *nsoln)
 {
-	Handle ha = TLB::getHandle(a);
-	Handle hb = TLB::getHandle(b);
-	Node *na = dynamic_cast<Node *>(a);
-	Node *nb = dynamic_cast<Node *>(b);
-	logger().debug("Compare (%lu) %s ==== (%lu) %s", 
-		ha.value(), na->getName().c_str(),
-		hb.value(), nb->getName().c_str());
+	Type pattype = npat->getType();
+	Type soltype = nsoln->getType();
 
-	if (a == b) return false;
+	// Reject obvioius misatches
+	if (pattype != soltype) return true;
+
+	Handle ha = TLB::getHandle(npat);
+	Handle hb = TLB::getHandle(nsoln);
+	logger().debug("Compare (%lu) %s ==== (%lu) %s", 
+		ha.value(), npat->getName().c_str(),
+		hb.value(), nsoln->getName().c_str());
+
+	if (npat == nsoln) return false;
 	return true;
 }
 

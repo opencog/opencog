@@ -13,6 +13,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/query/OutgoingTree.h>
 
 namespace opencog {
@@ -35,7 +36,7 @@ class PatternMatchCallback
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool node_match(Atom *, Atom *) = 0;
+		virtual bool node_match(Node *, Node *) = 0;
 
 		/**
 		 * Called when a link in the template pattern

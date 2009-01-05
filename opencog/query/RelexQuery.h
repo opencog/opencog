@@ -80,7 +80,7 @@ class RelexQuery :
 		virtual void solve(AtomSpace *, Handle);
 
 		/* Callbacks called from PatternMatch */
-		virtual bool node_match(Atom *, Atom *);
+		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
 };

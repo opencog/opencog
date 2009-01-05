@@ -32,11 +32,21 @@ class DefaultPatternMatchCB :
 		 * is a possible solution node from the atomspace.
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
+		 *
+		 * By default, the types must be the same.
 		 */
-		virtual bool node_match(Atom *apat, Atom *asoln)
+		virtual bool node_match(Node *npat, Node *nsoln)
 		{
-			if (apat == asoln) return false;
-			return true;
+			if (npat == nsoln) return false;
+
+			Type pattype = npat->getType();
+			Type soltype = nsoln->getType();
+
+			// If types differ, no match,
+			if ((pattype != VARIABLE_NODE) && 
+			    (pattype != soltype)) return true;
+
+			return false;
 		}
 
 
@@ -54,10 +64,13 @@ class DefaultPatternMatchCB :
 		 */
 		virtual bool link_match(Link *lpat, Link *lsoln)
 		{
+			if (lpat == lsoln) return false;
+
 			if (lpat->getArity() != lsoln->getArity()) return true;
 			Type pattype = lpat->getType();
 			Type soltype = lsoln->getType();
 
+			// If types differ, no match,
 			if ((pattype != VARIABLE_SCOPE_LINK) && 
 			    (pattype != soltype)) return true;
 			return false;

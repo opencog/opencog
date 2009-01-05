@@ -219,7 +219,7 @@ bool FrameQuery::assemble_predicate(Atom *atom)
  * Return true to signify a mismatch,
  * Return false to signify equivalence.
  */
-bool FrameQuery::node_match(Atom *aa, Atom *ab)
+bool FrameQuery::node_match(Node *aa, Node *ab)
 {
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the

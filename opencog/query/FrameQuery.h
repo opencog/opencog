@@ -34,7 +34,7 @@ class FrameQuery : public RelexQuery
 		virtual ~FrameQuery();
 
 		/* Callbacks called from PatternMatch */
-		virtual bool node_match(Atom *, Atom *);
+		virtual bool node_match(Node *, Node *);
 };
 
 } // namespace opencog
