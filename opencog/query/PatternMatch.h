@@ -46,7 +46,7 @@ class PatternMatchCallback
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool link_match(Atom *, Atom *) = 0;
+		virtual bool link_match(Link *, Link *) = 0;
 
 		/**
 		 * Called when a solution is found. Should 

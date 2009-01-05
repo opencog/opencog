@@ -48,9 +48,18 @@ class DefaultPatternMatchCB :
 		 * is a possible solution link from the atomspace.
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
+		 *
+		 * By default, the link arity and the 
+		 * link types must match.
 		 */
-		virtual bool link_match(Atom *lpat, Atom *lsoln)
+		virtual bool link_match(Link *lpat, Link *lsoln)
 		{
+			if (lpat->getArity() != lsoln->getArity()) return true;
+			Type pattype = lpat->getType();
+			Type soltype = lsoln->getType();
+
+			if ((pattype != VARIABLE_SCOPE_LINK) && 
+			    (pattype != soltype)) return true;
 			return false;
 		}
 

@@ -133,43 +133,51 @@ bool PatternMatch::tree_compare(Atom *aa, Atom *ab)
 		return false;
 	}
 
-	// The number of outgoing edges must match.
+	// If both are links, compare them as such.
 	Link *la = dynamic_cast<Link *>(aa);
 	Link *lb = dynamic_cast<Link *>(ab);
-	if (la && lb && la->getArity() != lb->getArity()) return true;
-
-	// If one is null, but the other is not, there's clearly no match.
-	if (aa && !ab) return true;
-	if (ab && !aa) return true;
-
-	// If types differ, then no match.
-	// However, "aatype of "VariableNode" will match any type.
-	Type aatype = aa->getType();
-	if ((aatype != VARIABLE_NODE) && (aatype != ab->getType())) return true;
-
-	dbgprt("depth=%d\n", depth);
-	prtmsg("tree_compare", aa);
-	prtmsg("          to", ab);
-
-	// The recursion step: traverse down the tree.
-	// Only links should have non-empty outgoing sets.
-	if (dynamic_cast<Link *>(aa))
+	if (la && lb)
 	{
+		bool mismatch = pmc->link_match(la, lb);
+		if (mismatch) return true;
+
+		// The recursion step: traverse down the tree.
+		// Only links can have non-empty outgoing sets.
 		Handle hb = TLB::getHandle(ab);
 
+		dbgprt("depth=%d\n", depth);
+		prtmsg("tree_compare", aa);
+		prtmsg("          to", ab);
+
 		depth ++;
-		bool mismatch = foreach_outgoing_atom_pair(ha, hb,
+		mismatch = foreach_outgoing_atom_pair(ha, hb,
 		              	      &PatternMatch::tree_compare, this);
 		depth --;
-		if (false == mismatch) var_solution[ha] = TLB::getHandle(ab);
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
+
+		if (false == mismatch) var_solution[ha] = hb;
 		return mismatch;
 	}
 
-	// Call the callback to make the final determination.
-	bool mismatch = pmc->node_match(aa, ab);
-	if (false == mismatch) var_solution[ha] = TLB::getHandle(ab);
-	return mismatch;
+	// If both are nodes, compare them as such.
+	Node *na = dynamic_cast<Node *>(aa);
+	Node *nb = dynamic_cast<Node *>(ab);
+	if (na && nb)
+	{
+		// If types differ, then no match.
+		// However, "aatype of "VariableNode" will match any type.
+		Type aatype = aa->getType();
+		if ((aatype != VARIABLE_NODE) && (aatype != ab->getType())) return true;
+
+		// Call the callback to make the final determination.
+		bool mismatch = pmc->node_match(aa, ab);
+		if (false == mismatch) var_solution[ha] = hb;
+		return mismatch;
+	}
+
+	// If we got to here, there is a clear mismatch
+	// (probably because one is a node, and the other a link)
+	return true;
 }
 
 /* ======================================================== */
