@@ -112,7 +112,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.count(ha))
 	{
-		// If ab happens to also be a bound var, then its a mismatch.
+		// But... if ab happens to also be a bound var, then its a mismatch.
 		if (bound_vars.count(hb)) return true;
 
 		// Else, we have a candidate solution.
@@ -125,9 +125,10 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only if ab is not one of the predicates itself.
-	if ((ha == hb) && (hb != curr_root))
+	// ... but only if ab is not a subclause of the current clause.
+	if ((ha == hb) && (hb != curr_pred_handle))
 	{
+		var_solution[ha] = hb;
 		return false;
 	}
 
@@ -230,12 +231,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			// We continue our search at the atom that "joins" (is shared in common)
 			// between the previous (solved) clause, and this clause. If the "join"
 			// was a variable, look up its grounding; else the join is a 'real' atom.
-			// curr_soln_handle = var_solution[curr_pred_handle];
-			std::map<Handle,Handle>::const_iterator it;
-			it = var_solution.find(curr_pred_handle);
-			if (it != var_solution.end()) curr_soln_handle = it->second;
-			else curr_soln_handle = curr_pred_handle;
-
+			curr_soln_handle = var_solution[curr_pred_handle];
 			found = soln_up(curr_soln_handle);
 
 			curr_soln_handle = soln_handle_stack.top();
@@ -496,11 +492,6 @@ void PatternMatchEngine::print_solution(
 			printf("atom %s maps to %s\n", 
 			       nv->getName().c_str(), ns->getName().c_str());
 		}
-		else
-		{
-			if (!nv) printf("Error: variable handle %lu not a node!\n", var.value());
-			if (!ns) printf("Error: ground term handle %lu not a node!\n", soln.value());
-		}
 	}
 
 	// Print out the full binding to all of the preds.
@@ -508,8 +499,7 @@ void PatternMatchEngine::print_solution(
 	std::map<Handle, Handle>::const_iterator m;
 	for (m = preds.begin(); m != preds.end(); m++) 
 	{
-		std::pair<Handle, Handle> pm = *m;
-		std::string str = TLB::getAtom(pm.second)->toString();
+		std::string str = TLB::getAtom(m->second)->toString();
 		printf ("   %s\n", str.c_str());
 	}
 	printf ("\n");
