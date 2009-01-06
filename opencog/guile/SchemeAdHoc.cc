@@ -12,6 +12,7 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
+#include <opencog/query/PatternMatch.h>
 
 #include "SchemeSmob.h"
 
@@ -23,7 +24,7 @@ using namespace opencog;
  * Dispatcher to invoke various miscellaneous C++ riff-raff from
  * scheme code. 
  */
-SCM SchemeSmob::ss_ad_hoc(SCM command)
+SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 {
 	std::string cmdname = decode_string (command, "cog-ad-hoc");
 
@@ -35,6 +36,20 @@ SCM SchemeSmob::ss_ad_hoc(SCM command)
 		return SCM_BOOL_T;
 	}
 
+	// Run implication, assuming that the argument is a handle to 
+	// an ImplicationLink
+	if (0 == cmdname.compare("do-implication"))
+	{
+		// XXX we should also allow opt-args to be a list of handles
+		Handle h = verify_handle(optargs, "cog-ad-hoc do-implication");
+
+		CogServer *s = static_cast<CogServer *>(&server());
+		AtomSpace *as = s->getAtomSpace();
+
+		PatternMatch pm;
+		pm.set_atom_space(as);
+		pm.imply(h);
+	}
 	return SCM_BOOL_F;
 }
 

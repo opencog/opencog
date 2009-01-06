@@ -40,6 +40,10 @@ class PatternMatch :
 
 	public:
 		PatternMatch(void);
+		void set_atom_space(AtomSpace *as)
+		{
+			atom_space = as;
+		}
 
 		void match(PatternMatchCallback *,
 		           Handle clauses,
