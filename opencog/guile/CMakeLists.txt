@@ -9,6 +9,7 @@ ADD_LIBRARY (smob SHARED
 
 TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
+	query
 	wsd
 )
 
