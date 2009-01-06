@@ -117,6 +117,9 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 
 		// Else, we have a candidate solution.
 		// Make a record of it.
+		dbgprt("Found grounding of variable:\n");
+		prtmsg("$$ variable:    ", ha);
+		prtmsg("$$ ground term: ", hb);
 		var_solution[ha] = hb;
 		return false;
 	}
@@ -125,7 +128,6 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	// ... but only if ab is not one of the predicates itself.
 	if ((ha == hb) && (hb != curr_root))
 	{
-		var_solution[ha] = hb;
 		return false;
 	}
 
@@ -139,8 +141,8 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		if (mismatch) return true;
 
 		dbgprt("depth=%d\n", depth);
-		prtmsg("tree_compare", aa);
-		prtmsg("          to", ab);
+		prtmsg("> tree_compare", aa);
+		prtmsg(">           to", ab);
 
 		// The recursion step: traverse down the tree.
 		// Only links can have non-empty outgoing sets.
@@ -161,7 +163,13 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	{
 		// Call the callback to make the final determination.
 		bool mismatch = pmc->node_match(na, nb);
-		if (false == mismatch) var_solution[ha] = hb;
+		if (false == mismatch)
+		{
+			dbgprt("Found matching nodes\n");
+			prtmsg("# pattern: ", ha);
+			prtmsg("# match:   ", hb);
+			var_solution[ha] = hb;
+		}
 		return mismatch;
 	}
 
@@ -208,6 +216,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		if (Handle::UNDEFINED == curr_root)
 		{
 			dbgprt ("==================== FINITO!\n");
+#ifdef DEBUG
+			print_solution(predicate_solution, var_solution);
+#endif
 			found = pmc->solution(predicate_solution, var_solution);
 		}
 		else
@@ -474,6 +485,11 @@ void PatternMatchEngine::print_solution(
 		{
 			printf("atom %s maps to %s\n", 
 			       nv->getName().c_str(), ns->getName().c_str());
+		}
+		else
+		{
+			if (!nv) printf("Error: variable handle %lu not a node!\n", var.value());
+			if (!ns) printf("Error: ground term handle %lu not a node!\n", soln.value());
 		}
 	}
 
