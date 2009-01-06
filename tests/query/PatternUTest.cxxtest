@@ -463,8 +463,28 @@ void PatternUTest::test_implication(void)
 
 	pm.imply(him);
 
-	// Remove the parse link, so that the other wone is easier to find.
-	// as->removeAtom(hpa);
+	// Remove the parse link, so that the other one is easier to find.
+	as->removeAtom(him);
+	as->removeAtom(hpa);
+
+	// At this point, the AtomSpace should contain a structure
+	// that looks like the below. Look for it.
+	//
+	//   ParseLink
+	//      ConceptNode "concept kangaeru 2"        ;; hitem_2
+	//
+	// Be sure to expl;icitly check that we got hitem_2 as the result
+
+	std::vector<Handle> ret;
+	as->getHandleSet(back_inserter(ret), PARSE_LINK);
+
+	TSM_ASSERT("incorrect implication", 1 == ret.size());
+	Atom *apl = TLB::getAtom(ret[0]);
+	Link *lpl = dynamic_cast<Link *>(apl);
+	TSM_ASSERT("null pointer", NULL != lpl);
+
+	Handle solution = lpl->getOutgoingSet()[0];
+	TSM_ASSERT("incorrect solution", hitem_2 == solution);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
