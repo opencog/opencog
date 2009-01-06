@@ -33,6 +33,7 @@ PatternMatch::PatternMatch(void)
 {
 }
 
+/* ================================================================= */
 /**
  * Solve a predicate by pattern matching.
  * The predicate is defined in terms of two hypergraphs: one is a
@@ -100,6 +101,75 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	PatternMatchEngine::match(cb, lclauses->getOutgoingSet(),
 	                              lvarbles->getOutgoingSet());
+}
+
+/* ================================================================= */
+/**
+ * Evaluate an ImplicationLink.
+ * Given an ImplicationLink, this method will "evaluate" it, matching
+ * the predicate, and creating the implicand, assuming the predicate can
+ * be satisfied. Thus, for example, given the structure
+ *
+ *    ImplicationLink
+ *       AndList
+ *          EvaluationList
+ *             PredicateNode "_obj"
+ *             ListLink
+ *                ConceptNode "make"
+ *                VariableNode $var0
+ *          EvaluationList
+ *             PredicateNode "from"
+ *             ListLink
+ *                ConceptNode "make"
+ *                VariableNode $var1"
+ *       EvaluationList
+ *          PredicateNode "make_from"
+ *          ListLink
+ *             VariableNode $var0
+ *             VariableNode $var1
+ *
+ * Then, if the atomspace also contains a parsed version of the English
+ * sentence "Pottery is made from clay", that is, if it contains the
+ * hypergraph
+ *
+ *    EvaluationList
+ *       PredicateNode "_obj"
+ *       ListLink
+ *          ConceptNode "make"
+ *          ConceptNode "pottery"
+ *
+ * and the hypergraph 
+ *
+ *    EvaluationList
+ *       PredicateNode "from"
+ *       ListLink
+ *          ConceptNode "make"
+ *          ConceptNode "clay"
+ *
+ * Then, by pattern matching, the predicate part of the ImplicationLink
+ * can be fulfilled, binding $var0 to "pottery" and $var1 to "clay".
+ * These bindings are refered to as the 'solutions' to the variables.
+ * So, e.g. $var0 is 'solved' by "pottery". 
+ *
+ * Next, the implicand is then created; that is, the following hypergraph
+ * is created and added to the atomspace:
+ *
+ *    EvaluationList
+ *       PredicateNode "make_from"
+ *       ListLink
+ *          ConceptNode "pottery"
+ *          ConceptNode "clay"
+ *                
+ * As the above example illustrates, this function expects that the
+ * input handle is an implication link. It expects the implication link
+ * to consist entirely of one disjunct (one AndList) and one implicand.
+ * All variables are implicit, and are identified by VariableNodes (they
+ * are not explicitly called out). Variable substitution in the
+ * implicand copies over the types of the solutions to the variables.
+ */
+
+Handle imply (Handle implication)
+{
 }
 
 /* ===================== END OF FILE ===================== */
