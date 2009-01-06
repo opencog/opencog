@@ -58,6 +58,7 @@ class SchemeSmob
 		static size_t free_misc(SCM);
 
 		// Atom creation and deletion functions
+		static SCM handle_to_scm (Handle);
 		static SCM ss_new_node(SCM, SCM, SCM);
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_node(SCM, SCM, SCM);

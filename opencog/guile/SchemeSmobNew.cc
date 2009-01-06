@@ -114,6 +114,18 @@ std::string SchemeSmob::handle_to_string(SCM node)
 
 /* ============================================================== */
 /**
+ * Wrapper -- given a handle, return the corresponding scheme object.
+ * Note that smobs hold the integer value of the handle, and not the
+ * C++ handle object itself.
+ */
+SCM SchemeSmob::handle_to_scm (Handle h)
+{
+	SCM shandle = scm_from_ulong(h.value());
+	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+}
+
+/* ============================================================== */
+/**
  * Create a new scheme object, holding the atom handle
  */
 SCM SchemeSmob::ss_atom (SCM shandle)
@@ -203,8 +215,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addNode(t, name, *tv);
 
-	SCM shandle = scm_from_ulong(h.value());
-	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+	return handle_to_scm (h);
 }
 
 /**
@@ -230,9 +241,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 		Atom *atom = TLB::getAtom(h);
 		atom->setTruthValue(*tv);
 	}
-
-	SCM shandle = scm_from_ulong(h.value());
-	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+	return handle_to_scm (h);
 }
 
 /* ============================================================== */
@@ -319,10 +328,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	// Now, create the actual link... in the actual atom space.
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addLink(t, outgoing_set, *tv);
-
-	SCM shandle = scm_from_ulong(h.value());
-
-	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+	return handle_to_scm (h);
 }
 
 /**
@@ -349,9 +355,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 		Atom *atom = TLB::getAtom(h);
 		atom->setTruthValue(*tv);
 	}
-
-	SCM shandle = scm_from_ulong(h.value());
-	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
+	return handle_to_scm (h);
 }
 
 /* ============================================================== */
