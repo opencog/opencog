@@ -47,7 +47,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		AtomSpace *as = s->getAtomSpace();
 
 		PatternMatch pm;
-		pm.set_atom_space(as);
+		pm.set_atomspace(as);
 		pm.imply(h);
 	}
 	return SCM_BOOL_F;

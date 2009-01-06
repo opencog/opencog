@@ -384,10 +384,11 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
                          const std::vector<Handle> &preds,
                          const std::vector<Handle> &vars)
 {
-	std::vector<Handle>::const_iterator i;
+	if (!atom_space) return;
 
 	normed_predicate = preds;
 
+	std::vector<Handle>::const_iterator i;
 	for (i = vars.begin();
 	     i != vars.end(); i++)
 	{

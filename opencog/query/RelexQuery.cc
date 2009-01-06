@@ -41,13 +41,13 @@ using namespace opencog;
 
 RelexQuery::RelexQuery(void)
 {
-	pm = NULL;
+	pme = NULL;
 }
 
 RelexQuery::~RelexQuery()
 {
-	if (pm) delete pm;
-	pm = NULL;
+	if (pme) delete pme;
+	pme = NULL;
 }
 
 /* ======================================================== */
@@ -303,9 +303,9 @@ bool RelexQuery::assemble_wrapper(Atom *atom)
  */
 void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 {
-	if (pm) delete pm;
-	pm = new PatternMatch();
-	pm->set_atomspace(atom_space);
+	if (pme) delete pme;
+	pme = new PatternMatchEngine();
+	pme->set_atomspace(atom_space);
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
@@ -325,7 +325,7 @@ void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 #endif
 
 	// Solve...
-	pm->PatternMatchEngine::match(this, normed_predicate, bound_vars);
+	pme->match(this, normed_predicate, bound_vars);
 }
 
 /* ======================================================== */
@@ -483,8 +483,7 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
 	}
 
 	printf ("duude have soln\n");
-	PatternMatch ppm;
-	ppm.print_solution(pred_soln, var_soln);
+	PatternMatchEngine::print_solution(pred_soln, var_soln);
 	return false;
 }
 

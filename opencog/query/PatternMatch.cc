@@ -32,6 +32,7 @@ using namespace opencog;
 
 PatternMatch::PatternMatch(void)
 {
+	atom_space = NULL;
 }
 
 /* ================================================================= */
@@ -100,8 +101,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		return;
 	}
 
-	PatternMatchEngine::match(cb, lclauses->getOutgoingSet(),
-	                              lvarbles->getOutgoingSet());
+	pme.match(cb, lclauses->getOutgoingSet(), lvarbles->getOutgoingSet());
 }
 
 /* ================================================================= */
@@ -340,8 +340,7 @@ void PatternMatch::imply (Handle himplication)
 	Implicator impl;
 	impl.implicand = implicand;
 	impl.as = atom_space;
-	PatternMatchEngine::match(&impl, lclauses->getOutgoingSet(),
-	                                 fv.varlist);
+	pme.match(&impl, lclauses->getOutgoingSet(), fv.varlist);
 }
 
 /* ===================== END OF FILE ===================== */

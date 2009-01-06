@@ -33,16 +33,17 @@
 
 namespace opencog {
 
-class PatternMatch :
-	public PatternMatchEngine
+class PatternMatch
 {
 	private:
-
+		AtomSpace *atom_space;
+		PatternMatchEngine pme;
 	public:
 		PatternMatch(void);
-		void set_atom_space(AtomSpace *as)
+		void set_atomspace(AtomSpace *as)
 		{
 			atom_space = as;
+			pme.set_atomspace(as);
 		}
 
 		void match(PatternMatchCallback *,

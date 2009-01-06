@@ -32,6 +32,7 @@ using namespace opencog;
 class PatternUTest :  public CxxTest::TestSuite
 {
 	private:
+		PatternMatchEngine pme;
 		PatternMatch pm;
 		AtomSpace *as;
 
@@ -171,7 +172,8 @@ void PatternUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
-	pm.PatternMatch::set_atomspace(as);
+	pm.set_atomspace(as);
+	pme.set_atomspace(as);
 
 	// create a gnarly graph
 	Node ncon(CONCEPT_NODE, "some const concept node");
@@ -248,10 +250,10 @@ void PatternUTest::test_simple_link(void)
 	preds.push_back(he);
 
 	PMCB pmcb;
-	pm.PatternMatchEngine::match(&pmcb, preds, vars);
+	pme.match(&pmcb, preds, vars);
 
 	// Should find only one solution.
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
+	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hsoln_a == pmcb.vars[hvar]);
 	TSM_ASSERT("incorrect predicate", hpred_a == pmcb.preds[he]);
 
@@ -312,7 +314,7 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hly);
 
 	PMCB pmcb;
-	pm.PatternMatchEngine::match(&pmcb, preds, vars);
+	pme.match(&pmcb, preds, vars);
 
 	// Should find four solutions:
 	// var_x = soln_b and var_y = soln_b
@@ -378,7 +380,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(heval);
 
 	PMCB pmcb;
-	pm.PatternMatchEngine::match(&pmcb, preds, vars);
+	pme.match(&pmcb, preds, vars);
 
 	// Should find one solution
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
@@ -404,7 +406,7 @@ void PatternUTest::test_eval(void)
 	spreds.push_back(hshort_eval);
 
 	pmcb.found = 0; // reset the counter !!
-	pm.PatternMatchEngine::match(&pmcb, spreds, svars);
+	pme.match(&pmcb, spreds, svars);
 
 	// Should find one solution
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
@@ -416,7 +418,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(hshort_eval);
 	vars.push_back(hprns);
 	pmcb.found = 0; // reset the counter !!
-	pm.PatternMatchEngine::match(&pmcb, preds, vars);
+	pme.match(&pmcb, preds, vars);
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);

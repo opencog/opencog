@@ -29,7 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/FollowLink.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
+#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
@@ -71,7 +71,7 @@ class RelexQuery :
 		std::vector<Handle> bound_vars;
 
 		// solver
-		PatternMatch *pm;
+		PatternMatchEngine *pme;
 
 	public:
 		RelexQuery(void);
