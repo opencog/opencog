@@ -137,10 +137,10 @@ class FindVariables
 /**
  * class Instantiator -- create grounded expressions from ungrounded ones.
  * Given an ungrounded expression (i.e. an expression containing variables)
- * and a map between variables and ground terms, it will create a new 
+ * and a map between variables and ground terms, it will create a new
  * expression, with the ground terms substituted for the variables.
  */
-class Instantiator 
+class Instantiator
 {
 	private:
 		std::map<Handle, Handle> *vmap;
@@ -197,7 +197,7 @@ bool Instantiator::walk_tree(Handle expr)
 	return false;
 }
 
-/** 
+/**
  * Given a handle to an ungrounded expression, and a set of groundings,
  * this will create a grounded expression.
  *
@@ -260,8 +260,8 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 /**
  * Evaluate an ImplicationLink.
  * Given an ImplicationLink, this method will "evaluate" it, matching
- * the predicate, and creating the implicand, assuming the predicate can
- * be satisfied. Thus, for example, given the structure
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
  *
  *    ImplicationLink
  *       AndList
@@ -301,11 +301,11 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  *
  * Then, by pattern matching, the predicate part of the ImplicationLink
  * can be fulfilled, binding $var0 to "pottery" and $var1 to "clay".
- * These bindings are refered to as the 'solutions' to the variables.
- * So, e.g. $var0 is 'solved' by "pottery".
+ * These bindings are refered to as the 'groundings' or 'solutions'
+ * to the variables. So, e.g. $var0 is 'grounded' by "pottery".
  *
- * Next, the implicand is then created; that is, the following hypergraph
- * is created and added to the atomspace:
+ * Next, a grounded copy of the implicand is then created; that is,
+ * the following hypergraph is created and added to the atomspace:
  *
  *    EvaluationList
  *       PredicateNode "make_from"
@@ -315,10 +315,23 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  *
  * As the above example illustrates, this function expects that the
  * input handle is an implication link. It expects the implication link
- * to consist entirely of one disjunct (one AndList) and one implicand.
- * All variables are implicit, and are identified by VariableNodes (they
- * are not explicitly called out). Variable substitution in the
- * implicand copies over the types of the solutions to the variables.
+ * to consist entirely of one disjunct (one AndList) and one (ungrounded)
+ * implicand.  All variables are implicit, and are identified by being
+ * VariableNodes.  These variables are interpreted as 'free variables'
+ * having no binding.  The act of pattern-matching to the predicate of
+ * the implication has an implicit 'for-all' flavour to it: the pattern
+ * is matched to 'all' matches in the atomspace.
+ *
+ * When a pattern match is found, the variables can be understood as
+ * being grounded by some explicit ground terms in the atomspace. This
+ * grounding is then used to create a grounded version of the
+ * (ungrounded) implicand. That is, the variables in the implicand are
+ * substituted by thier grounding values.  This method then returns a
+ * list of all of the grounded implicands that were created.
+ *
+ * Note that this method can be used to create a simple forward-chainer:
+ * One need only to take a set of implication links, and call this
+ * method repeatedly on them, until one is exhausted.
  */
 
 Handle PatternMatch::imply (Handle himplication)
