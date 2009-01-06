@@ -321,14 +321,14 @@ void PatternUTest::test_two_links(void)
 	// var_x = soln_b and var_y = soln_c
 	// var_x = soln_c and var_y = soln_b
 	// var_x = soln_c and var_y = soln_c
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 4);
+	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
 	// TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
 	// TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
 
 	// Test the non-std::vector interface also.
 	pmcb.found = 0;
 	pm.match(&pmcb, han, hv);
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 4);
+	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -383,7 +383,7 @@ void PatternUTest::test_eval(void)
 	pme.match(&pmcb, preds, vars);
 
 	// Should find one solution
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
+	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
 	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[heval]);
@@ -409,7 +409,7 @@ void PatternUTest::test_eval(void)
 	pme.match(&pmcb, spreds, svars);
 
 	// Should find one solution
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
+	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hshort_prnode == pmcb.vars[hprns]);
 	TSM_ASSERT("incorrect predicate", hshort_oc == pmcb.preds[hshort_eval]);
@@ -419,7 +419,7 @@ void PatternUTest::test_eval(void)
 	vars.push_back(hprns);
 	pmcb.found = 0; // reset the counter !!
 	pme.match(&pmcb, preds, vars);
-	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
+	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
 	TSM_ASSERT("incorrect pr-node", hshort_prnode == pmcb.vars[hprns]);
@@ -480,7 +480,7 @@ void PatternUTest::test_implication(void)
 	std::vector<Handle> ret;
 	as->getHandleSet(back_inserter(ret), PARSE_LINK);
 
-	TSM_ASSERT("incorrect implication", 1 == ret.size());
+	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
 	Atom *apl = TLB::getAtom(ret[0]);
 	Link *lpl = dynamic_cast<Link *>(apl);
 	TSM_ASSERT("null pointer", NULL != lpl);
