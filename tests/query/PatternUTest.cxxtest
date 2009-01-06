@@ -481,12 +481,15 @@ void PatternUTest::test_implication(void)
 	as->getHandleSet(back_inserter(ret), PARSE_LINK);
 
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
-	Atom *apl = TLB::getAtom(ret[0]);
-	Link *lpl = dynamic_cast<Link *>(apl);
-	TSM_ASSERT("null pointer", NULL != lpl);
+	if (0 < ret.size())
+	{
+		Atom *apl = TLB::getAtom(ret[0]);
+		Link *lpl = dynamic_cast<Link *>(apl);
+		TSM_ASSERT("null pointer", NULL != lpl);
 
-	Handle solution = lpl->getOutgoingSet()[0];
-	TSM_ASSERT("incorrect solution", hitem_2 == solution);
+		Handle solution = lpl->getOutgoingSet()[0];
+		TSM_ASSERT("incorrect solution", hitem_2 == solution);
+	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
