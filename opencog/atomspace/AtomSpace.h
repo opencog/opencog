@@ -461,7 +461,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
                  Type type,
-                 bool subclass,
+                 bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
         HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);

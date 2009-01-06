@@ -417,11 +417,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         }
 
         if (ClassServer::isAssignableFrom(UNORDERED_LINK, atom->type)) {
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
             std::sort(link->outgoing.begin(), link->outgoing.end(), CoreUtils::HandleComparison());
-#else
-            qsort(link->outgoing, link->getArity(), sizeof(Handle), CoreUtils::handleCompare);
-#endif
         }
 
         atomTable.atomSet.insert(atom);
@@ -663,7 +659,6 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
 
     readAtom(f, handles, link);
 
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
     // the link's arity is read from the file
     Arity arity;
     fread(&arity, sizeof(Arity), 1, f);
@@ -674,16 +669,6 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
         fread(&h, sizeof(Handle), 1, f);
         link->outgoing.push_back(h);
     }
-#else
-    // the link's arity is read from the file
-    fread(&link->arity, sizeof(Arity), 1, f);
-
-    // the link's outgoing set is read from the file
-    link->outgoing = (Handle*) malloc(sizeof(Handle) * link->arity);
-    for (int i = 0; i < link->arity; i++) {
-        fread(&(link->outgoing[i]), sizeof(Handle), 1, f);
-    }
-#endif
 
     // the trail
     Trail *trail = link->getTrail();
