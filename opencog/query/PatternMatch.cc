@@ -136,17 +136,35 @@ class FindVariables
 /* ================================================================= */
 // Instantiator.
 
-class Instantiator :
-	public DefaultPatternMatchCB
+class Instantiator 
 {
 	public:
+		Handle instantiate(Handle expr, std::map<Handle, Handle> &vars);
+};
+
+Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
+{
+	printf ("duuude got a solution!!\n");
+	return Handle::UNDEFINED;
+}
+
+/* ================================================================= */
+
+class Implicator :
+	public DefaultPatternMatchCB
+{
+	private:
+		Instantiator inst;
+	public:
+		Handle implicand;
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
 };
 
-bool Instantiator::solution(std::map<Handle, Handle> &pred_soln,
-                            std::map<Handle, Handle> &var_soln)
+bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
+                          std::map<Handle, Handle> &var_soln)
 {
+	inst.instantiate(implicand, var_soln);
 	return false;
 }
 
@@ -260,8 +278,9 @@ void PatternMatch::imply (Handle himplication)
 	fv.find_vars(hclauses);
 
 	// Now perform the search.
-	Instantiator inst;
-	PatternMatchEngine::match(&inst, lclauses->getOutgoingSet(),
+	Implicator impl;
+	impl.implicand = implicand;
+	PatternMatchEngine::match(&impl, lclauses->getOutgoingSet(),
 	                                 fv.varlist);
 }
 
