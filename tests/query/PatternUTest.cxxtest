@@ -34,6 +34,8 @@ class PatternUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
+
+		// These handles are documented below.
 		Handle hconst;
 		Handle hsoln_a;
 		Handle hsoln_b;
@@ -53,6 +55,9 @@ class PatternUTest :  public CxxTest::TestSuite
 		Handle hshort_list;
 		Handle hshort_prnode;
 		Handle hshort_oc;
+
+		Handle heval;
+		Handle hshort_eval;
 
 	public:
 
@@ -326,6 +331,24 @@ void PatternUTest::test_two_links(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/*
+ * This test case creates the following pattern-matching and variable
+ * structures:
+ *
+ *    EvaluationLink                                ;; heval
+ *       VariableNode "3-tuple relationship variable"
+ *       ListLink
+ *          ConceptNode "concept kanjiru 1"         ;; hitem_1
+ *          VariableNode "concept variable"
+ *          ConceptNode "concept nihongo 3"         ;; hitem_3
+ *
+ *    EvaluationLink                                ;; hshort_eval
+ *       VariableNode "2-tuple relationship variable"
+ *       ListLink
+ *          ConceptNode "concept kanjiru 1"         ;; hitem_1
+ *          VariableNode "concept variable"
+ *
+ */
 void PatternUTest::test_eval(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -345,14 +368,14 @@ void PatternUTest::test_eval(void)
 	Handle hprn = as->addRealAtom(pr);
 
 	Link pe(EVALUATION_LINK, hprn, hl);
-	Handle he = as->addRealAtom(pe);
+	heval = as->addRealAtom(pe);
 
 	std::vector<Handle> vars;
 	vars.push_back(hprn);
 	vars.push_back(h2);
 
 	std::vector<Handle> preds;
-	preds.push_back(he);
+	preds.push_back(heval);
 
 	PMCB pmcb;
 	pm.PatternMatchEngine::match(&pmcb, preds, vars);
@@ -361,7 +384,7 @@ void PatternUTest::test_eval(void)
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
-	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[he]);
+	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[heval]);
 
 	// Do it again, but with a truncated list 
 	Link pls(LIST_LINK, h1, h2);
@@ -371,14 +394,14 @@ void PatternUTest::test_eval(void)
 	Handle hprns = as->addRealAtom(prs);
 
 	Link pes(EVALUATION_LINK, hprns, hls);
-	Handle hes = as->addRealAtom(pes);
+	hshort_eval = as->addRealAtom(pes);
 
 	std::vector<Handle> svars;
 	svars.push_back(hprns);
 	svars.push_back(h2);
 
 	std::vector<Handle> spreds;
-	spreds.push_back(hes);
+	spreds.push_back(hshort_eval);
 
 	pmcb.found = 0; // reset the counter !!
 	pm.PatternMatchEngine::match(&pmcb, spreds, svars);
@@ -387,10 +410,10 @@ void PatternUTest::test_eval(void)
 	TSM_ASSERT("wrong number of solutions", pmcb.found == 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hshort_prnode == pmcb.vars[hprns]);
-	TSM_ASSERT("incorrect predicate", hshort_oc == pmcb.preds[hes]);
+	TSM_ASSERT("incorrect predicate", hshort_oc == pmcb.preds[hshort_eval]);
 
 	// And do it again, now matching two clauses
-	preds.push_back(hes);
+	preds.push_back(hshort_eval);
 	vars.push_back(hprns);
 	pmcb.found = 0; // reset the counter !!
 	pm.PatternMatchEngine::match(&pmcb, preds, vars);
@@ -398,18 +421,50 @@ void PatternUTest::test_eval(void)
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);
 	TSM_ASSERT("incorrect pr-node", hshort_prnode == pmcb.vars[hprns]);
-	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[he]);
-	TSM_ASSERT("incorrect predicate", hshort_oc == pmcb.preds[hes]);
-
-	// OK, now use the above to set up the implication test.
-	// Handle
+	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[heval]);
+	TSM_ASSERT("incorrect predicate", hshort_oc == pmcb.preds[hshort_eval]);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/*
+ * This creates the following implication structure
+ *
+ *    ImplicationLink
+ *       AndLink
+ *           EvaluationLink  ;; heval, as given above ... 
+ *           EvaluationLink  ;; hshorteval, as given above ... 
+ *       ParseLink
+ *           VariableNode "concept variable"
+ *
+ * After evaluation, it is expected tht the atom-space will
+ * contain the following:
+ *
+ *    ParseLink
+ *       ConceptNode "concept kangaeru 2"        ;; hitem_2
+ *
+ * Since that is what the variable is expected to bind to.
+ */
 void PatternUTest::test_implication(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Link an(AND_LINK, heval, hshort_eval);
+	Handle han = as->addRealAtom(an);
+
+	Node n2(VARIABLE_NODE, "concept variable");
+	Handle h2 = as->addRealAtom(n2);
+
+	Link pa(PARSE_LINK, h2);
+	Handle hpa = as->addRealAtom(pa);
+
+	Link im(IMPLICATION_LINK, han, hpa);
+	Handle him = as->addRealAtom(im);
+
+	pm.imply(him);
+
+	// Remove the parse link, so that the other wone is easier to find.
+	// as->removeAtom(hpa);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
