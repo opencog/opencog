@@ -50,7 +50,7 @@ class PatternMatch
 		           Handle clauses,
 		           Handle vars);
 
-		void imply(Handle);
+		Handle imply(Handle);
 };
 
 } // namespace opencog

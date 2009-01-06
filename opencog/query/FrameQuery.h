@@ -12,7 +12,6 @@
 #include <map>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/query/RelexQuery.h>
 
 namespace opencog {

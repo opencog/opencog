@@ -134,8 +134,12 @@ class FindVariables
 };
 
 /* ================================================================= */
-// Instantiator.
-
+/**
+ * class Instantiator -- create grounded expressions from ungrounded ones.
+ * Given an ungrounded expression (i.e. an expression containing variables)
+ * and a map between variables and ground terms, it will create a new 
+ * expression, with the ground terms substituted for the variables.
+ */
 class Instantiator 
 {
 	private:
@@ -193,6 +197,17 @@ bool Instantiator::walk_tree(Handle expr)
 	return false;
 }
 
+/** 
+ * Given a handle to an ungrounded expression, and a set of groundings,
+ * this will create a grounded expression.
+ *
+ * The set of groundings is to be passed in with the map 'vars', which
+ * maps variable names to thier groundings -- it maps variable names to
+ * atoms that already exist in the atomspace.  This method will then go
+ * through all of the variables in the expression, and substitute them
+ * with thier values, creating a new expression. The new expression is
+ * added to the atomspace, and its handle is returned.
+ */
 Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 {
 	vmap = &vars;
@@ -207,6 +222,18 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 
 /* ================================================================= */
 
+/**
+ * class Implicator -- pattern matching callback for grounding implicands.
+ *
+ * This class is meant to be used with the pattern matcher. When the
+ * pattern matcher calls the callback, it will do so with a particular
+ * grounding of the search pattern. This class then holds an ungrounded
+ * implicand, and will create a grounded version of the implicand.
+ *
+ * The 'var_soln' argument in the callback contains the map from variables
+ * to ground terms. 'class Instantiator' is used to perform the actual
+ * grounding.  A list of grounded expressions is created in 'result_list'.
+ */
 class Implicator :
 	public DefaultPatternMatchCB
 {
@@ -215,6 +242,7 @@ class Implicator :
 	public:
 		AtomSpace *as;
 		Handle implicand;
+		std::vector<Handle> result_list;
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
 };
@@ -223,7 +251,8 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
 	inst.as = as;
-	inst.instantiate(implicand, var_soln);
+	Handle h = inst.instantiate(implicand, var_soln);
+	result_list.push_back(h);
 	return false;
 }
 
@@ -292,27 +321,27 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * implicand copies over the types of the solutions to the variables.
  */
 
-void PatternMatch::imply (Handle himplication)
+Handle PatternMatch::imply (Handle himplication)
 {
 	Atom * aimpl = TLB::getAtom(himplication);
 	Link * limpl = dynamic_cast<Link *>(aimpl);
 
 	// Must be non-empty.
-	if (!limpl) return;
+	if (!limpl) return Handle::UNDEFINED;
 
 	// Type must be as expected
 	Type timpl = limpl->getType();
 	if (IMPLICATION_LINK != timpl)
 	{
 		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
-		return;
+		return Handle::UNDEFINED;
 	}
 
 	const std::vector<Handle>& oset = limpl->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
-		return;
+		return Handle::UNDEFINED;
 	}
 
 	Handle hclauses = oset[0];
@@ -322,14 +351,14 @@ void PatternMatch::imply (Handle himplication)
 	Link * lclauses = dynamic_cast<Link *>(aclauses);
 
 	// Must be non-empty.
-	if (!lclauses) return;
+	if (!lclauses) return Handle::UNDEFINED;
 
 	// Types must be as expected
 	Type tclauses = lclauses->getType();
 	if (AND_LINK != tclauses)
 	{
 		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-		return;
+		return Handle::UNDEFINED;
 	}
 
 	// Extract a list of variables.
@@ -341,6 +370,12 @@ void PatternMatch::imply (Handle himplication)
 	impl.implicand = implicand;
 	impl.as = atom_space;
 	pme.match(&impl, lclauses->getOutgoingSet(), fv.varlist);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = atom_space->addLink(LIST_LINK, impl.result_list);
+
+	return gl;
 }
 
 /* ===================== END OF FILE ===================== */
