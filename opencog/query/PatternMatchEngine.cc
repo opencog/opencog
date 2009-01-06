@@ -204,11 +204,12 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		predicate_solution[curr_root] = curr_soln_handle;
 		prtmsg("--------------------- \npred:", curr_root);
 		prtmsg("soln:", curr_soln_handle);
+		dbgprt("\n");
 		
 		get_next_unsolved_pred();
 
-		prtmsg("joining handle is", curr_pred_handle);
 		prtmsg("next pred is", curr_root);
+		prtmsg("joining handle is", curr_pred_handle);
 
 		// If there are no further predicates to solve,
 		// we are really done! Report the solution via callback.
@@ -225,7 +226,16 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		{
 			// Else, start solving the next unsolved clause
 			soln_handle_stack.push(curr_soln_handle);
-			curr_soln_handle = var_solution[curr_pred_handle];
+
+			// We continue our search at the atom that "joins" (is shared in common)
+			// between the previous (solved) clause, and this clause. If the "join"
+			// was a variable, look up its grounding; else the join is a 'real' atom.
+			// curr_soln_handle = var_solution[curr_pred_handle];
+			std::map<Handle,Handle>::const_iterator it;
+			it = var_solution.find(curr_pred_handle);
+			if (it != var_solution.end()) curr_soln_handle = it->second;
+			else curr_soln_handle = curr_pred_handle;
+
 			found = soln_up(curr_soln_handle);
 
 			curr_soln_handle = soln_handle_stack.top();
