@@ -40,9 +40,10 @@ typedef std::pair<Handle, RootList *> RootPair;
 
 class PatternMatchEngine
 {
-	private:
+	protected:
 		AtomSpace *atom_space;
 
+	private:
 		bool prt(Atom *);
 
 		static void prtmsg(const char *, Atom *);

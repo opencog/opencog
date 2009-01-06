@@ -138,14 +138,71 @@ class FindVariables
 
 class Instantiator 
 {
+	private:
+		std::map<Handle, Handle> *vmap;
+
+		std::vector<Handle> oset;
+		bool walk_tree(Handle tree);
+
 	public:
+		AtomSpace *as;
 		Handle instantiate(Handle expr, std::map<Handle, Handle> &vars);
 };
 
+bool Instantiator::walk_tree(Handle expr)
+{
+	Atom *a = TLB::getAtom(expr);
+	Type t = a->getType();
+	Node *n = dynamic_cast<Node *>(a);
+	if (n)
+	{
+		if (VARIABLE_NODE != t)
+		{
+			oset.push_back(expr);
+			return false;
+		}
+
+		// If we are here, we found a variable. Look it up.
+		std::map<Handle,Handle>::const_iterator it = vmap->find(expr);
+		if (vmap->end() != it)
+		{
+			Handle soln = it->second;
+			oset.push_back(soln);
+		}
+		else
+		{
+			oset.push_back(expr);
+		}
+		return false;
+	}
+
+	// If we are here, then we have a link. Walk it.
+	std::vector<Handle> save_oset = oset;
+	oset.clear();
+
+	// Walk the subtree, substituting values for variables.
+	foreach_outgoing_handle(expr, &Instantiator::walk_tree, this);
+
+	// Now create a duplicate link, but with an outgoing set where
+	// the variables have been substituted by thier values.
+	Handle sh = as->addLink(t, oset);
+
+	oset = save_oset;
+	oset.push_back(sh);
+
+	return false;
+}
+
 Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 {
-	printf ("duuude got a solution!!\n");
-	return Handle::UNDEFINED;
+	vmap = &vars;
+	walk_tree(expr);
+	if (oset.size() != 1)
+	{
+		logger().warn("%s: outgoing set size %d is insane!",
+			__FUNCTION__, oset.size());
+	}
+	return oset[0];
 }
 
 /* ================================================================= */
@@ -156,6 +213,7 @@ class Implicator :
 	private:
 		Instantiator inst;
 	public:
+		AtomSpace *as;
 		Handle implicand;
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
@@ -164,6 +222,7 @@ class Implicator :
 bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
                           std::map<Handle, Handle> &var_soln)
 {
+	inst.as = as;
 	inst.instantiate(implicand, var_soln);
 	return false;
 }
@@ -280,6 +339,7 @@ void PatternMatch::imply (Handle himplication)
 	// Now perform the search.
 	Implicator impl;
 	impl.implicand = implicand;
+	impl.as = atom_space;
 	PatternMatchEngine::match(&impl, lclauses->getOutgoingSet(),
 	                                 fv.varlist);
 }
