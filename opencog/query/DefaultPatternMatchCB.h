@@ -33,20 +33,19 @@ class DefaultPatternMatchCB :
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 *
-		 * By default, the types must be the same.
+		 * By default, the nodes must be identical,
+		 * or one of them must be a variable.
 		 */
 		virtual bool node_match(Node *npat, Node *nsoln)
 		{
+			// If equality, then a match.
 			if (npat == nsoln) return false;
 
+			// If the ungrounded term is a variable, then OK.
 			Type pattype = npat->getType();
-			Type soltype = nsoln->getType();
+			if (pattype == VARIABLE_NODE) return false;
 
-			// If types differ, no match,
-			if ((pattype != VARIABLE_NODE) && 
-			    (pattype != soltype)) return true;
-
-			return false;
+			return true;
 		}
 
 
