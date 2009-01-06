@@ -18,7 +18,7 @@ class OutgoingTree
 {
 	public:
 		/**
-		 * Return true if the indicated node occurs somwhere in the 
+		 * Return true if the indicated node occurs somewhere in the 
 		 * tree spanned by the outgoing set.
 		 */
 		inline bool is_node_in_tree(Handle tree, Handle node)

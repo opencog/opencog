@@ -22,6 +22,7 @@
  */
 
 #include "PatternMatch.h"
+#include "DefaultPatternMatchCB.h"
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/TLB.h>
@@ -38,7 +39,7 @@ PatternMatch::PatternMatch(void)
  * Solve a predicate by pattern matching.
  * The predicate is defined in terms of two hypergraphs: one is a
  * hypergraph defining a pattern to be matched for, and the other is a
- * list of bound variables in the first. 
+ * list of bound variables in the first.
  *
  * The bound variables are, by definition, nodes. (XXX It might be
  * useful to loosen this restriction someday). The list of bound variables
@@ -51,7 +52,7 @@ PatternMatch::PatternMatch(void)
  *
  * The predicate hypergraph is assumed to be a list of "clauses", where
  * each "clause" is a tree. The clauses are assumed to be connected,
- * i.e. share common nodes or links.  The algorithm to find solutions 
+ * i.e. share common nodes or links.  The algorithm to find solutions
  * will fail on disconnected hypergraphs.  The list of clauses is
  * specified by means of an AndLink, so, for example:
  *
@@ -63,7 +64,7 @@ PatternMatch::PatternMatch(void)
  * the atomspace (i.e. of the universe of hypergraphs stored in the
  * atomspace). When a solution is found, PatternMatchCallback::solution
  * method is called, and it is passed two maps: one mapping the bound
- * variables to thier solutions, and the other mapping the pattern 
+ * variables to thier solutions, and the other mapping the pattern
  * clauses to thier corresponding solution clauses.
  *
  * At this time, the list of clauses is understood to be a single
@@ -84,7 +85,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	// Both must be non-empty.
 	if (!lclauses || !lvarbles) return;
-	
+
 	// Types must be as expected
 	Type tclauses = lclauses->getType();
 	Type tvarbles = lvarbles->getType();
@@ -101,6 +102,52 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	PatternMatchEngine::match(cb, lclauses->getOutgoingSet(),
 	                              lvarbles->getOutgoingSet());
+}
+
+/* ================================================================= */
+// Handy dandy utility class.
+//
+class FindVariables
+{
+	public:
+		std::vector<Handle> varlist;
+
+		/**
+		 * Create a list of all of the VariableNodes that lie in the
+		 * outgoing set of the handle (recursively).
+		 */
+		inline bool find_vars(Handle h)
+		{
+			Atom *a = TLB::getAtom(h);
+			Node *n = dynamic_cast<Node *>(a);
+			if (n)
+			{
+				if (n->getType() == VARIABLE_NODE)
+				{
+					varlist.push_back(h);
+				}
+				return false;
+			}
+
+			return foreach_outgoing_handle(h, &FindVariables::find_vars, this);
+		}
+};
+
+/* ================================================================= */
+// Instantiator.
+
+class Instantiator :
+	public DefaultPatternMatchCB
+{
+	public:
+		virtual bool solution(std::map<Handle, Handle> &pred_soln,
+		                      std::map<Handle, Handle> &var_soln);
+};
+
+bool Instantiator::solution(std::map<Handle, Handle> &pred_soln,
+                            std::map<Handle, Handle> &var_soln)
+{
+	return false;
 }
 
 /* ================================================================= */
@@ -138,7 +185,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
  *          ConceptNode "make"
  *          ConceptNode "pottery"
  *
- * and the hypergraph 
+ * and the hypergraph
  *
  *    EvaluationList
  *       PredicateNode "from"
@@ -149,7 +196,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
  * Then, by pattern matching, the predicate part of the ImplicationLink
  * can be fulfilled, binding $var0 to "pottery" and $var1 to "clay".
  * These bindings are refered to as the 'solutions' to the variables.
- * So, e.g. $var0 is 'solved' by "pottery". 
+ * So, e.g. $var0 is 'solved' by "pottery".
  *
  * Next, the implicand is then created; that is, the following hypergraph
  * is created and added to the atomspace:
@@ -159,7 +206,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
  *       ListLink
  *          ConceptNode "pottery"
  *          ConceptNode "clay"
- *                
+ *
  * As the above example illustrates, this function expects that the
  * input handle is an implication link. It expects the implication link
  * to consist entirely of one disjunct (one AndList) and one implicand.
@@ -168,8 +215,54 @@ void PatternMatch::match(PatternMatchCallback *cb,
  * implicand copies over the types of the solutions to the variables.
  */
 
-Handle imply (Handle implication)
+void PatternMatch::imply (Handle himplication)
 {
+	Atom * aimpl = TLB::getAtom(himplication);
+	Link * limpl = dynamic_cast<Link *>(aimpl);
+
+	// Must be non-empty.
+	if (!limpl) return;
+
+	// Type must be as expected
+	Type timpl = limpl->getType();
+	if (IMPLICATION_LINK != timpl)
+	{
+		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
+		return;
+	}
+
+	const std::vector<Handle>& oset = limpl->getOutgoingSet();
+	if (2 != oset.size())
+	{
+		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
+		return;
+	}
+
+	Handle hclauses = oset[0];
+	Handle implicand = oset[1];
+
+	Atom * aclauses = TLB::getAtom(hclauses);
+	Link * lclauses = dynamic_cast<Link *>(aclauses);
+
+	// Must be non-empty.
+	if (!lclauses) return;
+
+	// Types must be as expected
+	Type tclauses = lclauses->getType();
+	if (AND_LINK != tclauses)
+	{
+		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
+		return;
+	}
+
+	// Extract a list of variables.
+	FindVariables fv;
+	fv.find_vars(hclauses);
+
+	// Now perform the search.
+	Instantiator inst;
+	PatternMatchEngine::match(&inst, lclauses->getOutgoingSet(),
+	                                 fv.varlist);
 }
 
 /* ===================== END OF FILE ===================== */
