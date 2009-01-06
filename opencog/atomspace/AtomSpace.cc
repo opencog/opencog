@@ -430,15 +430,8 @@ bool TValued(Type t)
 }
 
 
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
 const HandleSeq& AtomSpace::getOutgoing(Handle h) const
-#else
-HandleSeq AtomSpace::getOutgoing(Handle h) const
-#endif
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
     static HandleSeq hs;
     Link *link = dynamic_cast<Link *>(TLB::getAtom(h));
     if (!link) return hs;
@@ -447,9 +440,6 @@ HandleSeq AtomSpace::getOutgoing(Handle h) const
 
 Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
     Handle result = atomTable.getHandle(name.c_str(), t);
     if (TLB::isValidHandle(result)) {
         // Just merges the TV
@@ -475,13 +465,13 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
     return result;
 }
 
-Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing, const TruthValue& tvn)
+Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
+                          const TruthValue& tvn)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
     Handle result;
-    HandleEntry* he = atomTable.getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), t, false);
+    HandleEntry* he = atomTable.getHandleSet(outgoing,
+                           (Type*) NULL, (bool*) NULL,
+                           outgoing.size(), t, false);
     if (he) {
         result = he->handle;
         // Just merges the TV

@@ -380,11 +380,7 @@ public:
     bool isReal(Handle h) const;
 
     /** Retrieve the outgoing set of a given link */
-#ifdef USE_STD_VECTOR_FOR_OUTGOING
     const HandleSeq& getOutgoing(Handle h) const;
-#else
-    HandleSeq getOutgoing(Handle h) const;
-#endif
 
     /** Retrieve the incoming set of a given link */
     HandleSeq getIncoming(Handle) const;
