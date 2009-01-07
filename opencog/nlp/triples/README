@@ -1,7 +1,7 @@
 
                                    Triples
                                    -------
-                         Linas vepstas January 2009
+                         Linas Vepstas January 2009
 
 This directory contains some experimental code to extract conceptual 
 entities and semantic triples from English text.  An example of a 
@@ -124,6 +124,45 @@ The hope is that, by encoding the relatively small number of
 prepositional relationships, the much larger set of "real-world"
 knowledge rules can be deduced (via backward or forward chaining).
 
+Learning Semantic Categories
+----------------------------
+Consider the category of "types of motion". Currently, the RelEx frame
+rules include an explicit list of category members:  
+
+$Self_motion
+amble
+bustle
+canter
+clamber
+climb
+clomp
+coast
+crawl
+creep
+
+This list clearly encodes a-priori knowledge about locomotion.  It would
+be better if the members of this category could be deduced by reading.
+There are three ways in which this might be done. One might someday
+read a sentence that asserts "Crawling is a type of locomotion".  This
+seems unlikely, as this is common-sense knowledge, and common-sense
+knowledge is not normally encoded in text. A second possibility is to
+learn the meaning of the word "crawl" the way that children learn it: 
+to have someone point at a centipede and say "gee, look at that thing
+crawl!"  Such experiential, cross-sensory learning would indeed be an
+excellent way to gain new knowledge. However, there are two snags: 
+1) It presumes the existence of a teacher who already knows how to use
+the word "crawl", and 2) It is outside of the scope of what one person
+(i.e. me) can acheive in a limited amount of time.  A third possibility
+is statistical learning: to observe a large number os statements
+containing the word "crawl", and, based on these, deduce that it is a
+type of locomotion.
+
+In the following, the third approach is presumed. This is because the
+author has in hand both the statistical and the linguistic tools that
+would allow such observation and deduction to be made.
+
+Deduction
+---------
 
 Rules
 -----
