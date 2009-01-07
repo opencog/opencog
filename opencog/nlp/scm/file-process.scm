@@ -36,20 +36,31 @@ scm
 	; (define (delone atom) (cog-delete atom) #f)
 	(define (delone atom) (cog-delete atom) (set! n (+ n 1)) #f)
 
+	; Can't delete inheritanceLink, its used to mark wsd completed... 
+	; (cog-map-type delone 'InheritanceLink)
+	; Can't delete EvaluationLink, these are used elsewhere.
+	; (cog-map-type delone 'EvaluationLink)
+	; Can't delete ListLink, these are used in EvaluationLinks.
+	; (cog-map-type delone 'ListLink)
+	
 	; Part of Speech links are used in the word-sense 
 	; database, so cannot delete these.
 	; (cog-map-type delone 'PartOfSpeechLink)
 	(cog-map-type delone 'LemmaLink)
 
-	; Can't delete inheritanceLink, its used to mark wsd completed... 
-	; (cog-map-type delone 'InheritanceLink)
 	(cog-map-type delone 'ParseLink)
-	(cog-map-type delone 'EvaluationLink)
 	(cog-map-type delone 'ReferenceLink)
-	(cog-map-type delone 'ListLink)
+
 	(cog-map-type delone 'CosenseLink)
+
+	; Its sort of a shame to delete the SimilarityLinks, but these
+	; do make the server bloat after a while.
 	(cog-map-type delone 'SimilarityLink)
 
+	; We do delete all the test-processing nodes, recursively.
+	; This should make any links that contain these to go "poof",
+	; and so the above link deletions should not really be needed
+	; (except for the similarity links).
 	(cog-map-type delit 'DocumentNode)
 	(cog-map-type delit 'SentenceNode)
 	(cog-map-type delit 'ParseNode)
