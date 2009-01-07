@@ -235,14 +235,37 @@ is meant to be a short-hand for:
             VariableNode "$var2"
             VariableNode "$var1"
 
-Note the snag of concatenating strings.
+Note the snag of concatenating strings.  The only easy way out of
+this appears to be to salt the atomspace with contractions.  Thus,
+the atomspace would contain a relation:
 
+   EvaluationLink
+      DefinedLinguisticRelationshipNode "capital_of"
+      ListLink
+         ConceptNode "capital"
+         DefinedLinguisticRelationshipNode "of"
 
+The above ImplicationLink would then include a fourth clause in the
+predicate:
 
-Verbosity
----------
+   EvaluationLink
+      VariableNode $phrase
+      ListLink
+         VariableNode $var0
+         VariableNode $prep
 
-Each of these relex triples is quite verbose:
+while the implicand would be written as:
+
+   EvaluationLink
+      VariableNode $phrase
+      ListLink
+         VariableNode "$var2"
+         VariableNode "$var1"
+
+There is one additional complication to the above. The natural output of
+Relex puts a buffer between words and concepts. Thus, and example of the 
+output is:
+
 (EvaluationLink
    (DefinedLinguisticRelationshipNode "of")
    (ListLink
