@@ -10,16 +10,16 @@ a railway, that existed at a certain point in space and time. A semantic
 triple is a triple of subject-predicate-object, and is popularly the 
 topic of "Semantic Web RDF" technology discussions[WP-RDF].  An example 
 of a "semantic triple" is "the sky is blue". Written in prefix notation,
-the triple is then "color_of(sky, blue)", with "color_of" beting the
-protpery or predicate, while "sky" and "blue" are the subject and
+the triple is then "color_of(sky, blue)", with "color_of" being the
+property or predicate, while "sky" and "blue" are the subject and
 object, respectively.
 
 The primary challenges here are three-fold:
 1) Dealing with the diversity of expression in the English language, 
-   where most sentences are not short and to-the-point. For short,
-   simple sentences, ReLex seems to provide enough normalization to
-   extract at least some triples. But it is not clear how far this
-   idea can be pushed.
+   where most sentences are NOT short, to-the-point assertions that
+   something is true. For short, simple sentences, ReLex seems to
+   provide enough normalization to extract at least some triples. But 
+   it is not clear how far this idea can be pushed.
 2) Learning new relations. It is simple to code up, by hand, "framing"
    relationships, such as a list of colors, or a list properties that
    an object can have. It is harder to determine, when encountering a 
@@ -42,10 +42,13 @@ Triples are to follow the existing opencog predicate structure:
    )
 
 is an example of what would be deduced from the copula "The color of the
-sky is blue"
+sky is blue". This example is somewhat over-simplified; this is
+addressed later.
 
-Example Rule
-------------
+Simples Example Sentences
+-------------------------
+First, consider some input sentences:
+
 Input sentence: "The capital of Germany is Berlin."
 Relex output: 
 _subj(be, capital)
@@ -60,6 +63,83 @@ of(capital, Germany)
 Input sentence: "The color of the sky is blue."
 of(color, sky)
 _predadj(blue, color)
+
+Input sentence: "Pottery is made from clay."
+_obj(make, pottery)
+from(make, clay)
+
+Input sentence: "Yarn is spun from fibers."
+_obj(spin, yarn)
+from(spin, fibers)
+
+Input sentence: "Yarn is made of fibers."
+_obj(made_of, yarn)
+_iobj(made_of, fibers)
+
+Input sentence: "Berlin is in Germany."
+The more highly ranked parse gives:
+in(_%copula, in)
+_pobj(in, Germany)
+_psubj(in, Berlin)
+
+A second, but lower-ranked parse, gives:
+in(be, Germany)
+_subj(be, Berlin)
+
+Input sentence: "Berlin is a city in Germany."
+in(be, Germany)
+_subj(be, Berlin)
+_obj(be, city)
+
+A second, but lower-ranked parse, gives:
+in(city, Germany)
+_subj(be, Berlin)
+_obj(be, city)
+
+Clearly, even simple assertions have many different forms.
+
+A priori vs. Deduced Knowledge
+------------------------------
+Consider again the following:
+
+_subj(be, capital)
+_obj(be, Berlin)
+of(capital, Germany)
+
+This sentence references a lot of a-priori knowledge.  We know that
+capitals are cities; thus there is a strong temptation to write a
+processing rule such as "IF ($var0,capital) THEN ($var0,city)".
+Similarly, one has a-priori knowledge that things which have capitals
+are political states, and so one is tempted to write a rule asserting
+this: "IF (capital_of($var0, $var1)) THEN political_state($var1)".
+
+A current working assumption of what follows is that the normalization
+rules will attempt to encode a minimum of a-priori "real-world" knowledge.
+Instead, the goal here is to encode linguistic knowledge, and
+specifically, linguistic knowledge pertaining to prepositions and
+copulas: the copula expresses "is-a" relations, while the preposition
+expresses relationships: "has-a", "next-to", "part-of", "made-of", etc.
+
+The hope is that, by encoding the relatively small number of
+prepositional relationships, the much larger set of "real-world"
+knowledge rules can be deduced (via backward or forward chaining).
+
+
+Rules
+-----
+
+Consider now some processing rules:
+
+# IF _subj(be,$var0) ^ _obj(be,$var1) THEN
+ ^3_Country:Country($var0, $var0)
+ ^3_Country:Capital($var0, $var1)
+
+# IF _psubj(be,$var0) ^ _obj(be,$Color) THEN
+ ^3_Color:Color($Color,$Color) ^1_Color:Entity($var0,$var0)
+
+
+
+
 
 Each of these relex triples is quite verbose:
 (EvaluationLink
