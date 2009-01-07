@@ -36,7 +36,7 @@ scm
 	; (define (delone atom) (cog-delete atom) #f)
 	(define (delone atom) (cog-delete atom) (set! n (+ n 1)) #f)
 
-	; Can't delete inheritanceLink, its used to mark wsd completed... 
+	; Can't delete InheritanceLink, its used to mark wsd completed... 
 	; (cog-map-type delone 'InheritanceLink)
 	; Can't delete EvaluationLink, these are used elsewhere.
 	; (cog-map-type delone 'EvaluationLink)

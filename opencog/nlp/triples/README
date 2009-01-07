@@ -269,10 +269,66 @@ output is:
 (EvaluationLink
    (DefinedLinguisticRelationshipNode "of")
    (ListLink
-      (WordInstanceNode "color@e918598d-41cc-4091-bc7a-3ddcfc94b739")
-      (WordInstanceNode "sky@64895362-6a98-45b7-9e98-f199639d80e6")
+      (WordInstanceNode "capital@cd67b274-9957-463c-aad8-422bec133613")
+      (WordInstanceNode "Germany@75f2f934-91a7-47ba-9bcc-e2a3340c9076")
    )
 )
+
+The word instances are related to thier lammatized forms:
+
+(LemmaLink
+   (WordInstanceNode "capital@cd67b274-9957-463c-aad8-422bec133613")
+   (WordNode "capital")
+)
+(LemmaLink
+   (WordInstanceNode "Germany@75f2f934-91a7-47ba-9bcc-e2a3340c9076")
+   (WordNode "Germany")
+)
+
+Thus, the implication predicate needs to bind word-instances to word
+nodes. 
+
+There is another problem: ImplicationLinks cannot be used to change 
+the type of a node. Thus, while the examples above made reference to
+ConceptNodes, the actual RelEx LemmaLinks specify WordNodes.  There's 
+no immediate, direct way to turn WordNodes into ConceptNodes; this 
+will be fudged for now.
+
+
+Promoting Words to Concepts
+---------------------------
+There is one more aspect to this, which is much deeper: the promotion
+of word-relations to concepts.  Consider the following relationships:
+
+   is_a(bark, sound)
+   part_of(bark, tree)
+
+We know that these two relations refer to different senses of the word
+"bark". Yet, if these two are deduced by reading, how should the system
+recognize that two different concepts are at play?  How should the
+self-consistency of a set of relations be assessed? Assuming that the
+input text is not intentionally lying, then, under what circumstances
+do a set of confflicting assertions require that the underlying word be
+recognized as embodying two different concepts?
+
+Several approaches are possible:
+1) Assign tentative word-senses via the Mihalcea algorithm.
+   Unfortunately, this algorithm is quite slow.  This can be partly
+   worked around using the syntax-tagged senses taken from a database.
+   This is extremely fast, however, its not terribly accurate; nor is
+   the Mihalcea algorithm all that accurate either.  None-the-less
+   its a reasonable starting point, perhaps.
+
+2) Verify consistency via first-order-logic and forward/backward
+   chaining. This has several dificulties. One is the problem of
+   performance, and bounding the search space. Another is that, if
+   an inconsistency is detected, its still not clear what faulty
+   assumption lead to it.  There is no algorithm for classifying 
+   a set of conflicting statements into two groups of self-consistent
+   statements.
+
+   (Possibly need to re-examin Markov Logic Networks?)
+
 
 
 References:
