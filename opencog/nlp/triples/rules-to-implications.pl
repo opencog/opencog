@@ -14,6 +14,50 @@ use strict;
 my $have_rule = 0;
 my $curr_rule = "";
 
+sub print_clause
+{
+	my ($clause, $indent) = @_;
+
+	# Pull the three parts out of the clause.
+	m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
+	my $pred = $1;
+	my $item1 = $2;
+	my $item2 = $3;
+
+	# Print a copy of the original clause for reference
+	print "$indent;; $_\n";
+	print "$indent(EvaluationLink\n";
+	if ($pred =~ /^\$/)
+	{
+		print "$indent   (VariableNode \"$pred\")\n";
+	}
+	else
+	{
+		print "$indent   (DefinedLinguisticRelationshipNode \"$pred\")\n";
+	}
+
+	print "$indent   (ListLink\n";
+	if ($item1 =~ /^\$/)
+	{
+		print "$indent      (VariableNode \"$item1\")\n";
+	}
+	else
+	{
+		print "$indent      (WordNode \"$item1\")\n";
+	}
+
+	if ($item2 =~ /^\$/)
+	{
+		print "$indent      (VariableNode \"$item2\")\n";
+	}
+	else
+	{
+		print "$indent      (WordNode \"$item2\")\n";
+	}
+	print "$indent   )\n";
+	print "$indent)\n";
+}
+
 sub parse_rule
 {
 	my ($rule) = @_;
@@ -27,50 +71,20 @@ sub parse_rule
 	print "   (AndLink\n";
 	foreach (@clauses)
 	{
-
-		# Pull the three parts out of the clause.
-		m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
-		my $pred = $1;
-		my $item1 = $2;
-		my $item2 = $3;
-
-		# Print a copy of the original clause for reference
-		print "      ;; $_\n";
-		print "      (EvaluationLink\n";
-		if ($pred =~ /^\$/)
-		{
-			print "         (VariableNode \"$pred\")\n";
-		}
-		else
-		{
-			print "         (DefinedLinguisticRelationshipNode \"$pred\")\n";
-		}
-
-		print "         (ListLink\n";
-		if ($item1 =~ /^\$/)
-		{
-			print "            (VariableNode \"$item1\")\n";
-		}
-		else
-		{
-			print "            (WordNode \"$item1\")\n";
-		}
-
-		if ($item2 =~ /^\$/)
-		{
-			print "            (VariableNode \"$item2\")\n";
-		}
-		else
-		{
-			print "            (WordNode \"$item2\")\n";
-		}
-		print "         )\n";
-		print "      )\n";
+		print_clause ($_, "      ");
 	}
 	print "   )\n";
 
 	# We are done with the and link. Move on to the implicand.
+	# First, strip out the author tag.
+	while (1)
+	{
+		$implicand =~ m/\^\d+_(.*)/;
+		$implicand = $1;
 	print "hello $implicand\n";
+		print_clause ($implicand, "   ");
+		last;
+	}
 	print ")\n";
 }
 
