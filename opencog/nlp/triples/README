@@ -161,9 +161,6 @@ In the following, the third approach is presumed. This is because the
 author has in hand both the statistical and the linguistic tools that
 would allow such observation and deduction to be made.
 
-Deduction
----------
-
 Rules
 -----
 Consider again the following:
@@ -185,6 +182,10 @@ The following processing rule acheives this:
 The carats ^ in the pedicate denote 'and'. Dollar signs preceed variable
 names. In the predicand, the initial ^3_ denotes the origin of the rule.
 (^1_ denoes framenet, ^2_ denoes David Noziglia, and ^3_ deones Linas).
+The above IF-THEN rule is intended to be identical in syntax to the
+rules that are already used in the RelEx framing code; i.e. the syntax
+is meant to be identical to that of the file "data/frame/mapping_rules.txt"
+in the RelEx source tree.
 
 The above rule cannot be applied to the following:
 
@@ -262,6 +263,12 @@ while the implicand would be written as:
          VariableNode "$var2"
          VariableNode "$var1"
 
+The above would be expressed directly in the rules syntax as:
+
+   # IF _subj(be,$var0) ^ _obj(be,$var1) ^ $prep($var0,$var2) 
+       ^ $phrase($var0, $prep)
+       THEN ^3_$phrase($var2, $var1)
+
 There is one additional complication to the above. The natural output of
 Relex puts a buffer between words and concepts. Thus, and example of the 
 output is:
@@ -329,6 +336,15 @@ Several approaches are possible:
 
    (Possibly need to re-examin Markov Logic Networks?)
 
+
+Deduction
+---------
+Suppose we have a set of (consistent) prepositional relationships. What
+can we do with them?  For example, can we deduce that a certain verb is
+a type of locomotion, based on its use with regard to prepositions?
+
+Hmm. Time to write some rules, and experiment and see what happens.
+Not clear how unambiguous the copulas and preps will be.
 
 
 References:
