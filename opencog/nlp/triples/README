@@ -301,6 +301,10 @@ ConceptNodes, the actual RelEx LemmaLinks specify WordNodes.  There's
 no immediate, direct way to turn WordNodes into ConceptNodes; this 
 will be fudged for now.
 
+The file "rules.txt" contains the current set of rules.  The perl script
+"rules-to-implications.pl" will convert rules into OpenCog
+ImplicationLinks, as described above. 
+
 
 Promoting Words to Concepts
 ---------------------------
