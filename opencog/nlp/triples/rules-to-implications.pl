@@ -8,24 +8,30 @@
 # format used by the RelEx framing code, and generates equivalent
 # OpenCog ImplicationLinks.
 #
+# To use, do the following:
+#
+#    cat some-rule-file.txt | ./rules-to-implications.pl 
+#
 
 use strict;
 
-my $have_rule = 0;
-my $curr_rule = "";
-
+# Print a single clause. 
+# Expects as input a clause, for example, "_subj(be,$var0)", and 
+# some whitespace to indent by. Prints, as output, the standard
+# OpenCog EvaluationLink equivalent of the clause.
+#
 sub print_clause
 {
 	my ($clause, $indent) = @_;
 
 	# Pull the three parts out of the clause.
-	m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
+	$clause =~ m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
 
 	# Print a copy of the original clause for reference
-	print "$indent;; $_\n";
+	print "$indent;; $clause\n";
 	print "$indent(EvaluationLink\n";
 	if ($pred =~ /^\$/)
 	{
@@ -58,6 +64,15 @@ sub print_clause
 	print "$indent)\n";
 }
 
+# Parse a single rule, generate the equivalent OpenCog ImplicationLink.
+#
+# For example, expected input is of the form
+#
+#    IF _subj(be,$var0) ^ _obj(be,$var1)  THEN ^3_blah($var0, $var1)
+#
+# This does no syntax checking; if there are any syntax errors in the 
+# input, the output is undefined.
+#
 sub parse_rule
 {
 	my ($rule) = @_;
@@ -76,18 +91,35 @@ sub parse_rule
 	print "   )\n";
 
 	# We are done with the and link. Move on to the implicand.
-	# First, strip out the author tag.
 	while (1)
 	{
+		# First, strip out the author tag.
 		$implicand =~ m/\^\d+_(.*)/;
 		$implicand = $1;
-	print "hello $implicand\n";
-		print_clause ($implicand, "   ");
+
+		# Now, separate multiple clauses. Unfortunately, the syntax
+		# only uses space separator between clauses, so we must
+		# parse them to find thier boundaries.
+		$implicand =~ m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)(.*)/;
+		my $clause = $1 . "(" . $2 . ", " . $3 . ")";
+		$implicand = $4;
+		print_clause ($clause, "   ");
+
+		# If the rest of the line starts with ^3_, then there's
+		# another clause waiting. Loop around again, else quit.
+		$implicand =~ s/^\s*//;
+		if ($implicand =~ /^\^\d+_/) { next; }
 		last;
 	}
 	print ")\n";
 }
 
+# Global vars -- hold the current fragment of a rule, read from input.
+my $have_rule = 0;
+my $curr_rule = "";
+
+# Read from standard input, until theres no more standard input.
+#
 while(<>)
 {
 	# Ignore comments
@@ -122,7 +154,7 @@ while(<>)
 	$curr_rule = $curr_rule . $line;
 }
 
-# no more input, parse the final line.
+# No more input, parse the final line.
 if ($have_rule)
 {
 	parse_rule($curr_rule);
