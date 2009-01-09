@@ -1,0 +1,211 @@
+/*
+ * tests/server/BiggerPatternUTest.cxxtest
+ *
+ * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatch.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class BiggerPatternUTest :  public CxxTest::TestSuite
+{
+	private:
+		PatternMatch pm;
+		AtomSpace *as;
+
+		Handle imake;
+		Handle hbenode;
+
+	public:
+
+		BiggerPatternUTest(void)
+		{
+			logger().setLevel(Logger::DEBUG);
+			logger().setPrintToStdoutFlag(true);
+		}
+
+		~BiggerPatternUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+
+		void tearDown(void) { }
+
+		void test_prep(void);
+};
+
+/*
+ * This function sets up the following structures:
+ */
+#define an as->addNode
+#define al as->addLink
+void BiggerPatternUTest::setUp(void)
+{
+	CogServer& cogserver = static_cast<CogServer&>(server());
+	as = cogserver.getAtomSpace();
+	pm.set_atomspace(as);
+
+	// Create an implication link that will be tested.
+	imake = 
+	al(IMPLICATION_LINK,
+		al(AND_LINK,
+			// _subj(be,$var0)
+			al(EVALUATION_LINK,
+				an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_subj"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$benode"),
+					an(VARIABLE_NODE, "$var0")
+				)
+			),
+			// _obj(be,$var1)
+			al(EVALUATION_LINK,
+				an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_obj"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$benode"),
+					an(VARIABLE_NODE, "$var1")
+				)
+			),
+			al(LEMMA_LINK,
+				an(VARIABLE_NODE, "$benode"),
+				hbenode = an(WORD_NODE, "be")
+			),
+			//  $prep($var0,$var2)
+			al(EVALUATION_LINK,
+				an(VARIABLE_NODE, "$benode"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$var0"),
+					an(VARIABLE_NODE, "$var2")
+				)
+			),
+			al(LEMMA_LINK,
+				an(VARIABLE_NODE, "$var0"),
+				an(VARIABLE_NODE, "$word0")
+			),
+			//  $phrase($word0, $prep)
+			al(EVALUATION_LINK,
+				an(VARIABLE_NODE, "$phrase"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$word0"),
+					an(VARIABLE_NODE, "$prep")
+				)
+			)
+		),
+		al(LIST_LINK,
+			an(VARIABLE_NODE, "$benode"),
+			an(VARIABLE_NODE, "$var0"),
+			an(VARIABLE_NODE, "$word0"),
+			an(VARIABLE_NODE, "$var1"),
+			an(VARIABLE_NODE, "$var2"),
+			an(VARIABLE_NODE, "$prep"),
+			an(VARIABLE_NODE, "$phrase")
+		)
+	);
+
+	// Create data on which the above pattern should match
+	al(LEMMA_LINK,
+		an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"),
+		an(WORD_NODE, "capital")
+	);
+	al(LEMMA_LINK,
+		an(WORD_INSTANCE_NODE, "of@abb8b1c7-b0c3-4779-9e18-410932dfba69"),
+		an(WORD_NODE, "of")
+	);
+
+	// of (<<capital>>, <<Germany>>)
+	al(EVALUATION_LINK,
+		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of"),
+		al(LIST_LINK,
+			an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"),
+			an(WORD_INSTANCE_NODE, "Germany@372c7cd3-a9c9-44bb-bc7b-5bb356dda358")
+		)
+	);
+
+	// ; _subj (<<be>>, <<capital>>)
+	al(EVALUATION_LINK,
+		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_subj"),
+		al(LIST_LINK,
+			an(WORD_INSTANCE_NODE, "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"),
+			an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682")
+		)
+	);
+
+	// _obj (<<be>>, <<Berlin>>)
+	al(EVALUATION_LINK,
+		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_obj"),
+		al(LIST_LINK,
+			an(WORD_INSTANCE_NODE, "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"),
+			an(WORD_INSTANCE_NODE, "Berlin@614f9e08-42c7-451f-8dea-0e73d5018029")
+		)
+	);
+
+	// prep map
+	al(EVALUATION_LINK,
+		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "capital_of"),
+		al(LIST_LINK,
+			an(WORD_NODE, "capital"),
+			an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of")
+		)
+	);
+
+}
+
+/*
+ * Preposition reasoning test.
+ *
+ * Expect to get the following result, given the above data:
+ *
+ *   ListLink
+ *      $benode = WordInstanceNode "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"
+ *      $var0   = WordInstanceNode "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"
+ *      $word0  = WordNode "capital"
+			an(VARIABLE_NODE, "$var1"),
+			an(VARIABLE_NODE, "$var2"),
+			an(VARIABLE_NODE, "$prep"),
+			an(VARIABLE_NODE, "$phrase")
+ *      ConceptNode "pottery"
+ *      ConceptNode "clay"
+ */
+#define getlink(hand,pos) \
+	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
+
+void BiggerPatternUTest::test_prep(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Result should be a ListLink
+	Handle result = pm.imply(imake);
+
+	Handle vbenode = getlink(result, 0);
+
+	TSM_ASSERT_EQUALS("incorrect benode", hbenode, vbenode);
+	// TSM_ASSERT_EQUALS("incorrect pottery", hpottery, vpottery);
+	// TSM_ASSERT_EQUALS("incorrect clay", hclay, vclay);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
