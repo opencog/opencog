@@ -62,7 +62,18 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 };
 
 /*
- * This function sets up the following structures:
+ * This function sets up both the implicatino link, and the 
+ * input data, for a typical, real-world preposition deduction.
+ *
+ * The actual rule encoded below is
+ * 
+ * # IF _subj(be,$var0) ^ _obj(be,$var1)  ; this is a comment
+ *       ^ $prep($var0,$var2)             ; preposition
+ *       ^ %LemmaLink($var0,$word0)
+ *       ^ $phrase($word0, $prep)          ; convert to phrase
+ *       THEN ^3_$phrase($var2, $var1)
+ *
+ * Note that there is an implicit LemmaLink created for 'be'.
  */
 #define an as->addNode
 #define al as->addLink
