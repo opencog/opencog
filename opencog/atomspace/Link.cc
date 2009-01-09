@@ -303,14 +303,5 @@ void Link::addOutgoingAtom(Handle h)
     outgoing.push_back(h);
 }
 
-Atom * Link::getOutgoingAtom(int position) const throw (RuntimeException)
-{
-    // checks for a valid position
-    if ((position < getArity()) && (position >= 0)) {
-        return TLB::getAtom(outgoing[position]);
-    } else {
-        throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", position);
-    }
-}
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 

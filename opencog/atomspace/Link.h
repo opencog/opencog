@@ -27,6 +27,7 @@
 #define _OPENCOG_LINK_H
 
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Trail.h>
 #include <opencog/atomspace/types.h>
 
@@ -160,12 +161,30 @@ public:
         return outgoing;
     }
     /**
+     * Returns a specific Handle in the outgoing set.
+     *
+     * @param The position of the handle in the array.
+     * @return A specific handle in the outgoing set.
+     */
+    inline Handle getOutgoingHandle(int pos) const throw (RuntimeException)
+    {
+        // Checks for a valid position
+        if ((0 <= pos) && (pos < getArity())) {
+            return outgoing[pos];
+        } else {
+            throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
+        }
+    }
+    /**
      * Returns a specific atom in the outgoing set (using the TLB).
      *
      * @param The position of the atom in the array.
      * @return A specific atom in the outgoing set (using the TLB).
      */
-    Atom * getOutgoingAtom(int) const throw (RuntimeException);
+    inline Atom * getOutgoingAtom(int pos) const
+    {
+        return TLB::getAtom(getOutgoingHandle(pos));
+    }
 
     /**
      * Builds the target type index structure according to the types of

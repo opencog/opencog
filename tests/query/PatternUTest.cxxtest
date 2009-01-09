@@ -60,7 +60,7 @@ class PatternUTest :  public CxxTest::TestSuite
 		Handle heval;
 		Handle hshort_eval;
 
-		Handle hmake_from, hpottery, hclay;
+		Handle imake, hmake_from, hpottery, hclay;
 
 	public:
 
@@ -221,6 +221,7 @@ void PatternUTest::setUp(void)
 void PatternUTest::set_up_prep(void)
 {
 	// Create an implication link that will be tested.
+	imake = 
 	al(IMPLICATION_LINK,
 		al(AND_LINK,
 			al(EVALUATION_LINK,
@@ -485,7 +486,7 @@ void PatternUTest::test_implication(void)
 	//   ParseLink
 	//      ConceptNode "concept kangaeru 2"        ;; hitem_2
 	//
-	// Be sure to expl;icitly check that we got hitem_2 as the result
+	// Be sure to explicitly check that we got hitem_2 as the result
 
 	std::vector<Handle> ret;
 	as->getHandleSet(back_inserter(ret), PARSE_LINK);
@@ -515,9 +516,25 @@ void PatternUTest::test_implication(void)
  *          ConceptNode "pottery"
  *          ConceptNode "clay"
  */
+#define getlink(hand,pos) \
+	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
+
 void PatternUTest::test_prep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Result should be a ListLink
+	Handle result = pm.imply(imake);
+	// Then, evaluationLink, as above.
+	Handle heval = getlink(result, 0);
+	Handle vmake_from = getlink(heval, 0);
+	Handle hlist = getlink(heval, 1);
+	Handle vpottery = getlink(hlist, 0);
+	Handle vclay = getlink(hlist, 1);
+
+	TSM_ASSERT_EQUALS("incorrect make", hmake_from, vmake_from);
+	TSM_ASSERT_EQUALS("incorrect pottery", hpottery, vpottery);
+	TSM_ASSERT_EQUALS("incorrect clay", hclay, vclay);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
