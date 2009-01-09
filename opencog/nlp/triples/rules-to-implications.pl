@@ -81,6 +81,13 @@ sub print_clause
 	print "$indent)\n";
 }
 
+# print_link  -- print a specifically-named link.
+# In some cases, the rules need to make explicit ties of one sort or
+# another. For example, sometimes a word instance needs to be tied to
+# a specific word, *and* that word must be named. Thus, for example,
+# a clause of the form: ^ %LemmaLink($var0,$word0)
+# The key identifier here is the leading percent sign, which says:
+# "interpret what follows literally".
 sub print_link
 {
 	my ($clause, $indent) = @_;
@@ -112,6 +119,13 @@ sub print_link
 	print "$indent)\n";
 }
 
+
+# print_word_instance -- print lemma links joining words to instances.
+# The core problem here is that the frame rules are written in
+# 'general', specifying fixed words if/when needed. However, the 
+# actual relex output has WordInstanceNodes, not WordNodes. So we 
+# need to somehow tie a specific word instance to a specific word.
+#
 sub print_word_instance
 {
 	my ($clause, $cnt, $indent) = @_;
@@ -121,24 +135,27 @@ sub print_word_instance
 	my ($link, $item1, $item2) = parse_clause($clause);
 
 	# Print a copy of the original clause for reference
-	print "$indent;; word-instance lemmas of $clause\n";
-	print "$indent(LemmaLink\n";
 	if (!($item1 =~ /^\$/))
 	{
+		print "$indent;; word-instance lemma of $clause\n";
+		print "$indent(LemmaLink\n";
 		# Some unknow word instance, to be fixed by variable.
 		# print "$indent   (WordInstanceNode \"$item1\")\n";
 		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
 		print "$indent   (WordNode \"$item1\")\n";
+		print "$indent)\n";
 	}
 
 	if (!($item2 =~ /^\$/))
 	{
+		print "$indent;; word-instance lemma of $clause\n";
+		print "$indent(LemmaLink\n";
 		$cnt ++;
 		# Some unknow word instance, to be fixed by variable.
 		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
 		print "$indent   (WordNode \"$item2\")\n";
+		print "$indent)\n";
 	}
-	print "$indent)\n";
 }
 
 # Parse a single rule, generate the equivalent OpenCog ImplicationLink.
