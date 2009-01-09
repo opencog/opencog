@@ -281,7 +281,7 @@ output is:
    )
 )
 
-The word instances are related to thier lammatized forms:
+The word instances are related to thier lemmatized forms:
 
 (LemmaLink
    (WordInstanceNode "capital@cd67b274-9957-463c-aad8-422bec133613")
@@ -304,6 +304,13 @@ will be fudged for now.
 The file "rules.txt" contains the current set of rules.  The perl script
 "rules-to-implications.pl" will convert rules into OpenCog
 ImplicationLinks, as described above. 
+
+Implications can be processed with the scheme interpreter, using the 
+ad-hoc command:
+
+  (cog-ad-hoc "do-implication" stmt)
+
+where the stmt is the implication to evaluate.
 
 
 Promoting Words to Concepts

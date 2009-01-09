@@ -69,7 +69,7 @@ sub print_link
 	my ($clause, $indent) = @_;
 
 	# Pull the three parts out of the clause.
-	$clause =~ m/\s*([\&\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
+	$clause =~ m/\s*\%([\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
 	my $link = $1;
 	my $item1 = $2;
 	my $item2 = $3;
@@ -120,13 +120,13 @@ sub parse_rule
 	foreach (@clauses)
 	{
 		s/^\s*//g;
-		if (/^\$/)
-		{
-			print_clause ($_, "      ");
-		}
 		if (/^\%/)
 		{
 			print_link ($_, "      ");
+		}
+		else
+		{
+			print_clause ($_, "      ");
 		}
 	}
 	print "   )\n";

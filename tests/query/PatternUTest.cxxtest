@@ -176,60 +176,37 @@ void PatternUTest::setUp(void)
 	pme.set_atomspace(as);
 
 	// create a gnarly graph
-	Node ncon(CONCEPT_NODE, "some const concept node");
-	hconst = as->addRealAtom(ncon);
+	hconst = as->addNode(CONCEPT_NODE, "some const concept node");
+	hsoln_a = as->addNode(CONCEPT_NODE, "desired solution concept node a");
+	hsoln_b = as->addNode(CONCEPT_NODE, "desired solution concept node b");
+	hsoln_c = as->addNode(CONCEPT_NODE, "desired solution concept node c");
 
-	Node na(CONCEPT_NODE, "desired solution concept node a");
-	hsoln_a = as->addRealAtom(na);
-
-	Node nb(CONCEPT_NODE, "desired solution concept node b");
-	hsoln_b = as->addRealAtom(nb);
-
-	Node nc(CONCEPT_NODE, "desired solution concept node c");
-	hsoln_c = as->addRealAtom(nc);
-
-	Link la(INHERITANCE_LINK, hconst, hsoln_a);
-	hpred_a = as->addRealAtom(la);
-
-	Link lb(LIST_LINK, hconst, hsoln_b);
-	hpred_b = as->addRealAtom(lb);
-
-	Link lc(LIST_LINK, hconst, hsoln_c);
-	hpred_c = as->addRealAtom(lc);
+	hpred_a = as->addLink(INHERITANCE_LINK, hconst, hsoln_a);
+	hpred_b = as->addLink(LIST_LINK, hconst, hsoln_b);
+	hpred_c = as->addLink(LIST_LINK, hconst, hsoln_c);
 
 	// create a confounding link, like above, but different
-	Node nbw(CONCEPT_NODE, "incorrect solution concept node");
-	Handle hwrong = as->addRealAtom(nbw);
+	Handle hwrong = as->addNode(CONCEPT_NODE, "incorrect solution concept node");
 
-	Link ldw(ASSOCIATIVE_LINK, hconst, hwrong);
-	as->addRealAtom(ldw);
+	as->addLink(ASSOCIATIVE_LINK, hconst, hwrong);
 
 	// Create a standard-format opencog predicate
-	Node n1(CONCEPT_NODE, "concept kanjiru 1");
-	hitem_1 = as->addRealAtom(n1);
-	Node n2(CONCEPT_NODE, "concept kangaeru 2");
-	hitem_2 = as->addRealAtom(n2);
-	Node n3(CONCEPT_NODE, "concept nihongo 3");
-	hitem_3 = as->addRealAtom(n3);
+	hitem_1 = as->addNode(CONCEPT_NODE, "concept kanjiru 1");
+	hitem_2 = as->addNode(CONCEPT_NODE, "concept kangaeru 2");
+	hitem_3 = as->addNode(CONCEPT_NODE, "concept nihongo 3");
 
-	Link pl(LIST_LINK, hitem_1, hitem_2, hitem_3);
-	hlist = as->addRealAtom(pl);
+	hlist = as->addLink(LIST_LINK, hitem_1, hitem_2, hitem_3);
 
-	Node pr(PREDICATE_NODE, "relationship blaupunkt");
-	hprnode = as->addRealAtom(pr);
+	hprnode = as->addNode(PREDICATE_NODE, "relationship blaupunkt");
 
-	Link pe(EVALUATION_LINK, hprnode, hlist);
-	hoc = as->addRealAtom(pe);
+	hoc = as->addLink(EVALUATION_LINK, hprnode, hlist);
 
 	// Same as above, but with only two items in the list.
-	Link pls(LIST_LINK, hitem_1, hitem_2);
-	hshort_list = as->addRealAtom(pls);
+	hshort_list = as->addLink(LIST_LINK, hitem_1, hitem_2);
 
-	Node prs(PREDICATE_NODE, "relationship weltanshaung");
-	hshort_prnode = as->addRealAtom(prs);
+	hshort_prnode = as->addNode(PREDICATE_NODE, "relationship weltanshaung");
 
-	Link pes(EVALUATION_LINK, hshort_prnode, hshort_list);
-	hshort_oc = as->addRealAtom(pes);
+	hshort_oc = as->addLink(EVALUATION_LINK, hshort_prnode, hshort_list);
 }
 
 void PatternUTest::test_simple_link(void)
@@ -287,23 +264,15 @@ void PatternUTest::test_two_links(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define the pattern to match against.
-	Node nx(VARIABLE_NODE, "variable node x");
-	Handle hx = as->addRealAtom(nx);
+	Handle hx = as->addNode(VARIABLE_NODE, "variable node x");
+	Handle hy = as->addNode(VARIABLE_NODE, "variable node y");
 
-	Node ny(VARIABLE_NODE, "variable node y");
-	Handle hy = as->addRealAtom(ny);
+	Handle hlx = as->addLink(LIST_LINK, hconst, hx);
+	Handle hly = as->addLink(LIST_LINK, hconst, hy);
 
-	Link lx(LIST_LINK, hconst, hx);
-	Handle hlx = as->addRealAtom(lx);
+	Handle han = as->addLink(AND_LINK, hlx, hly);
 
-	Link ly(LIST_LINK, hconst, hy);
-	Handle hly = as->addRealAtom(ly);
-
-	Link an(AND_LINK, hlx, hly);
-	Handle han = as->addRealAtom(an);
-
-	Link lv(LIST_LINK, hx, hy);
-	Handle hv = as->addRealAtom(lv);
+	Handle hv = as->addLink(LIST_LINK, hx, hy);
 
 	std::vector<Handle> vars;
 	vars.push_back(hx);
@@ -356,21 +325,15 @@ void PatternUTest::test_eval(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Create a standard-format opencog predicate
-	Node n1(CONCEPT_NODE, "concept kanjiru 1");
-	Handle h1 = as->addRealAtom(n1);
-	Node n2(VARIABLE_NODE, "concept variable");
-	Handle h2 = as->addRealAtom(n2);
-	Node n3(CONCEPT_NODE, "concept nihongo 3");
-	Handle h3 = as->addRealAtom(n3);
+	Handle h1 = as->addNode(CONCEPT_NODE, "concept kanjiru 1");
+	Handle h2 = as->addNode(VARIABLE_NODE, "concept variable");
+	Handle h3 = as->addNode(CONCEPT_NODE, "concept nihongo 3");
 
-	Link pl(LIST_LINK, h1, h2, h3);
-	Handle hl = as->addRealAtom(pl);
+	Handle hl = as->addLink(LIST_LINK, h1, h2, h3);
 
-	Node pr(VARIABLE_NODE, "3-tuple relationship variable");
-	Handle hprn = as->addRealAtom(pr);
+	Handle hprn = as->addNode(VARIABLE_NODE, "3-tuple relationship variable");
 
-	Link pe(EVALUATION_LINK, hprn, hl);
-	heval = as->addRealAtom(pe);
+	heval = as->addLink(EVALUATION_LINK, hprn, hl);
 
 	std::vector<Handle> vars;
 	vars.push_back(hprn);
@@ -389,14 +352,11 @@ void PatternUTest::test_eval(void)
 	TSM_ASSERT("incorrect predicate", hoc == pmcb.preds[heval]);
 
 	// Do it again, but with a truncated list 
-	Link pls(LIST_LINK, h1, h2);
-	Handle hls = as->addRealAtom(pls);
+	Handle hls = as->addLink(LIST_LINK, h1, h2);
 
-	Node prs(VARIABLE_NODE, "2-tuple relationship variable");
-	Handle hprns = as->addRealAtom(prs);
+	Handle hprns = as->addNode(VARIABLE_NODE, "2-tuple relationship variable");
 
-	Link pes(EVALUATION_LINK, hprns, hls);
-	hshort_eval = as->addRealAtom(pes);
+	hshort_eval = as->addLink(EVALUATION_LINK, hprns, hls);
 
 	std::vector<Handle> svars;
 	svars.push_back(hprns);
@@ -451,17 +411,12 @@ void PatternUTest::test_implication(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Link an(AND_LINK, heval, hshort_eval);
-	Handle han = as->addRealAtom(an);
+	Handle han = as->addLink(AND_LINK, heval, hshort_eval);
 
-	Node n2(VARIABLE_NODE, "concept variable");
-	Handle h2 = as->addRealAtom(n2);
+	Handle h2 = as->addNode(VARIABLE_NODE, "concept variable");
 
-	Link pa(PARSE_LINK, h2);
-	Handle hpa = as->addRealAtom(pa);
-
-	Link im(IMPLICATION_LINK, han, hpa);
-	Handle him = as->addRealAtom(im);
+	Handle hpa = as->addLink(PARSE_LINK, h2);
+	Handle him = as->addLink(IMPLICATION_LINK, han, hpa);
 
 	pm.imply(him);
 

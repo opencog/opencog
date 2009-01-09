@@ -234,6 +234,44 @@ public:
      */
     Handle addLink(Type t, const HandleSeq& outgoing,
                    const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    inline Handle addLink(Type t, Handle h,
+                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    {
+        HandleSeq oset;
+        oset.push_back(h);
+        return addLink(t, oset, tvn);
+    }
+
+    inline Handle addLink(Type t, Handle ha, Handle hb,
+                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    {
+        HandleSeq oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        return addLink(t, oset, tvn);
+    }
+
+    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
+                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    {
+        HandleSeq oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        oset.push_back(hc);
+        return addLink(t, oset, tvn);
+    }
+
+    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd,
+                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    {
+        HandleSeq oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        oset.push_back(hc);
+        oset.push_back(hd);
+        return addLink(t, oset, tvn);
+    }
+
 
     /**
      * Add an atom represented by a given handle with an optional
