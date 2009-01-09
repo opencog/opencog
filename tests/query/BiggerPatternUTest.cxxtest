@@ -36,7 +36,8 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 		AtomSpace *as;
 
 		Handle imake;
-		Handle hbenode;
+		Handle hbenode, hvar0, hvar1, hvar2;
+		Handle hword0, hprep, hphrase;
 
 	public:
 
@@ -93,11 +94,12 @@ void BiggerPatternUTest::setUp(void)
 			),
 			al(LEMMA_LINK,
 				an(VARIABLE_NODE, "$benode"),
-				hbenode = an(WORD_NODE, "be")
+				an(WORD_NODE, "be")
 			),
+
 			//  $prep($var0,$var2)
 			al(EVALUATION_LINK,
-				an(VARIABLE_NODE, "$benode"),
+				an(VARIABLE_NODE, "$prep"),
 				al(LIST_LINK,
 					an(VARIABLE_NODE, "$var0"),
 					an(VARIABLE_NODE, "$var2")
@@ -107,6 +109,7 @@ void BiggerPatternUTest::setUp(void)
 				an(VARIABLE_NODE, "$var0"),
 				an(VARIABLE_NODE, "$word0")
 			),
+
 			//  $phrase($word0, $prep)
 			al(EVALUATION_LINK,
 				an(VARIABLE_NODE, "$phrase"),
@@ -130,19 +133,19 @@ void BiggerPatternUTest::setUp(void)
 	// Create data on which the above pattern should match
 	al(LEMMA_LINK,
 		an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"),
-		an(WORD_NODE, "capital")
+		hword0 = an(WORD_NODE, "capital")
 	);
 	al(LEMMA_LINK,
-		an(WORD_INSTANCE_NODE, "of@abb8b1c7-b0c3-4779-9e18-410932dfba69"),
-		an(WORD_NODE, "of")
+		hbenode = an(WORD_INSTANCE_NODE, "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"),
+		an(WORD_NODE, "be")
 	);
 
 	// of (<<capital>>, <<Germany>>)
 	al(EVALUATION_LINK,
-		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of"),
+		hprep = an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of"),
 		al(LIST_LINK,
 			an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"),
-			an(WORD_INSTANCE_NODE, "Germany@372c7cd3-a9c9-44bb-bc7b-5bb356dda358")
+			hvar2 = an(WORD_INSTANCE_NODE, "Germany@372c7cd3-a9c9-44bb-bc7b-5bb356dda358")
 		)
 	);
 
@@ -151,7 +154,7 @@ void BiggerPatternUTest::setUp(void)
 		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_subj"),
 		al(LIST_LINK,
 			an(WORD_INSTANCE_NODE, "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"),
-			an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682")
+			hvar0 = an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682")
 		)
 	);
 
@@ -160,13 +163,13 @@ void BiggerPatternUTest::setUp(void)
 		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_obj"),
 		al(LIST_LINK,
 			an(WORD_INSTANCE_NODE, "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"),
-			an(WORD_INSTANCE_NODE, "Berlin@614f9e08-42c7-451f-8dea-0e73d5018029")
+			hvar1 = an(WORD_INSTANCE_NODE, "Berlin@614f9e08-42c7-451f-8dea-0e73d5018029")
 		)
 	);
 
 	// prep map
 	al(EVALUATION_LINK,
-		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "capital_of"),
+		hphrase = an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "capital_of"),
 		al(LIST_LINK,
 			an(WORD_NODE, "capital"),
 			an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of")
@@ -184,28 +187,63 @@ void BiggerPatternUTest::setUp(void)
  *      $benode = WordInstanceNode "is@a085b454-0d49-414c-b1d1-98d8c5e2cffb"
  *      $var0   = WordInstanceNode "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"
  *      $word0  = WordNode "capital"
-			an(VARIABLE_NODE, "$var1"),
-			an(VARIABLE_NODE, "$var2"),
-			an(VARIABLE_NODE, "$prep"),
-			an(VARIABLE_NODE, "$phrase")
- *      ConceptNode "pottery"
- *      ConceptNode "clay"
+ *      $var1   = WordInstanceNode "Berlin@614f9e08-42c7-451f-8dea-0e73d5018029"
+ *      $var2   = WordInstanceNode "Germany@372c7cd3-a9c9-44bb-bc7b-5bb356dda358"
+ *      $prep   = DefinedLinguisticRelationshipNode "of"
+ *      $phrase = DefinedLinguisticRelationshipNode "capital_of"
  */
 #define getlink(hand,pos) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
+
+#define prtnode(str,hand) \
+	printf("%s %s\n", str, \
+	dynamic_cast<Node *>(TLB::getAtom(hand))->getName().c_str());
 
 void BiggerPatternUTest::test_prep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = pm.imply(imake);
+	Handle imlist = pm.imply(imake);
+
+	Link *rlist = dynamic_cast<Link *>(TLB::getAtom(imlist));
+	int arity = rlist->getArity();
+	TSM_ASSERT_EQUALS("incorrect arity", arity, 1);
+
+	Handle result = getlink(imlist,0);
 
 	Handle vbenode = getlink(result, 0);
+	Handle vvar0 = getlink(result, 1);
+	Handle vword0 = getlink(result, 2);
+	Handle vvar1 = getlink(result, 3);
+	Handle vvar2 = getlink(result, 4);
+	Handle vprep = getlink(result, 5);
+	Handle vphrase = getlink(result, 6);
+
+#if 0
+	prtnode("hbenode is", hbenode);
+	prtnode("vbenode is", vbenode);
+	prtnode("hvar0 is", hvar0);
+	prtnode("vvar0 is", vvar0);
+	prtnode("hword0 is", hword0);
+	prtnode("vword0 is", vword0);
+	prtnode("hvar1 is", hvar1);
+	prtnode("vvar1 is", vvar1);
+	prtnode("hvar2 is", hvar2);
+	prtnode("vvar2 is", vvar2);
+	prtnode("hprep is", hprep);
+	prtnode("vprep is", vprep);
+	prtnode("hphrase is", hphrase);
+	prtnode("vphrase is", vphrase);
+#endif
 
 	TSM_ASSERT_EQUALS("incorrect benode", hbenode, vbenode);
-	// TSM_ASSERT_EQUALS("incorrect pottery", hpottery, vpottery);
-	// TSM_ASSERT_EQUALS("incorrect clay", hclay, vclay);
+	TSM_ASSERT_EQUALS("incorrect var0", hvar0, vvar0);
+	TSM_ASSERT_EQUALS("incorrect word0", hword0, vword0);
+	TSM_ASSERT_EQUALS("incorrect var1", hvar1, vvar1);
+	TSM_ASSERT_EQUALS("incorrect var2", hvar2, vvar2);
+	TSM_ASSERT_EQUALS("incorrect prep", hprep, vprep);
+	TSM_ASSERT_EQUALS("incorrect phrase", hphrase, vphrase);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
