@@ -64,6 +64,39 @@ sub print_clause
 	print "$indent)\n";
 }
 
+sub print_link
+{
+	my ($clause, $indent) = @_;
+
+	# Pull the three parts out of the clause.
+	$clause =~ m/\s*([\&\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
+	my $link = $1;
+	my $item1 = $2;
+	my $item2 = $3;
+
+	# Print a copy of the original clause for reference
+	print "$indent;; $clause\n";
+	print "$indent($link\n";
+	if ($item1 =~ /^\$/)
+	{
+		print "$indent   (VariableNode \"$item1\")\n";
+	}
+	else
+	{
+		print "$indent   (WordNode \"$item1\")\n";
+	}
+
+	if ($item2 =~ /^\$/)
+	{
+		print "$indent   (VariableNode \"$item2\")\n";
+	}
+	else
+	{
+		print "$indent   (WordNode \"$item2\")\n";
+	}
+	print "$indent)\n";
+}
+
 # Parse a single rule, generate the equivalent OpenCog ImplicationLink.
 #
 # For example, expected input is of the form
@@ -86,7 +119,15 @@ sub parse_rule
 	print "   (AndLink\n";
 	foreach (@clauses)
 	{
-		print_clause ($_, "      ");
+		s/^\s*//g;
+		if (/^\$/)
+		{
+			print_clause ($_, "      ");
+		}
+		if (/^\%/)
+		{
+			print_link ($_, "      ");
+		}
 	}
 	print "   )\n";
 
