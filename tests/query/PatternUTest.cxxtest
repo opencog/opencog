@@ -60,8 +60,6 @@ class PatternUTest :  public CxxTest::TestSuite
 		Handle heval;
 		Handle hshort_eval;
 
-		Handle imake, hmake_from, hpottery, hclay;
-
 	public:
 
 		PatternUTest(void)
@@ -78,7 +76,6 @@ class PatternUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-		void set_up_prep(void);
 
 		void tearDown(void) { }
 
@@ -86,7 +83,6 @@ class PatternUTest :  public CxxTest::TestSuite
 		void test_two_links(void);
 		void test_eval(void);
 		void test_implication(void);
-		void test_prep(void);
 };
 
 class PMCB : public DefaultPatternMatchCB
@@ -211,58 +207,6 @@ void PatternUTest::setUp(void)
 	hshort_prnode = as->addNode(PREDICATE_NODE, "relationship weltanshaung");
 
 	hshort_oc = as->addLink(EVALUATION_LINK, hshort_prnode, hshort_list);
-
-	// More setup
-	set_up_prep();
-}
-
-#define an as->addNode
-#define al as->addLink
-void PatternUTest::set_up_prep(void)
-{
-	// Create an implication link that will be tested.
-	imake = 
-	al(IMPLICATION_LINK,
-		al(AND_LINK,
-			al(EVALUATION_LINK,
-				an(PREDICATE_NODE, "_obj"),
-				al(LIST_LINK,
-					an(CONCEPT_NODE, "make"),
-					an(VARIABLE_NODE, "$var0")
-				)
-			),
-			al(EVALUATION_LINK,
-				an(PREDICATE_NODE, "from"),
-				al(LIST_LINK,
-					an(CONCEPT_NODE, "make"),
-					an(VARIABLE_NODE, "$var1")
-				)
-			)
-		),
-		al(EVALUATION_LINK,
-			hmake_from = an(PREDICATE_NODE, "make_from"),
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var0"),
-				an(VARIABLE_NODE, "$var1")
-			)
-		)
-	);
-
-	// Create data on which the above pattern should match
-	al(EVALUATION_LINK,
-		an(PREDICATE_NODE, "_obj"),
-		al(LIST_LINK,
-			an(CONCEPT_NODE, "make"),
-			hpottery = an(CONCEPT_NODE, "pottery")
-		)
-	);
-	al(EVALUATION_LINK,
-		an(PREDICATE_NODE, "from"),
-		al(LIST_LINK,
-			an(CONCEPT_NODE, "make"),
-			hclay = an(CONCEPT_NODE, "clay")
-		)
-	);
 }
 
 void PatternUTest::test_simple_link(void)
@@ -505,36 +449,3 @@ void PatternUTest::test_implication(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-/*
- * preposition reasoning test.
- *
- * Expect to get the following result, given the above data:
- *
- *    EvaluationLink
- *       PredicateNode "make_from"
- *       ListLink
- *          ConceptNode "pottery"
- *          ConceptNode "clay"
- */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
-void PatternUTest::test_prep(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	// Result should be a ListLink
-	Handle result = pm.imply(imake);
-	// Then, evaluationLink, as above.
-	Handle heval = getlink(result, 0);
-	Handle vmake_from = getlink(heval, 0);
-	Handle hlist = getlink(heval, 1);
-	Handle vpottery = getlink(hlist, 0);
-	Handle vclay = getlink(hlist, 1);
-
-	TSM_ASSERT_EQUALS("incorrect make", hmake_from, vmake_from);
-	TSM_ASSERT_EQUALS("incorrect pottery", hpottery, vpottery);
-	TSM_ASSERT_EQUALS("incorrect clay", hclay, vclay);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
