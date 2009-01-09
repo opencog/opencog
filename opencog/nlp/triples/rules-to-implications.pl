@@ -15,6 +15,21 @@
 
 use strict;
 
+sub parse_clause
+{
+	my ($clause) = @_;
+
+	# Pull the three parts out of the clause.
+	$clause =~ m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)(.*)/;
+	my $pred = $1;
+	my $item1 = $2;
+	my $item2 = $3;
+	my $rest = $4;
+
+	my @parts = ($pred, $item1, $item2, $rest);
+	@parts;
+}
+
 # Print a single clause. 
 # Expects as input a clause, for example, "_subj(be,$var0)", and 
 # some whitespace to indent by. Prints, as output, the standard
@@ -22,13 +37,10 @@ use strict;
 #
 sub print_clause
 {
-	my ($clause, $indent) = @_;
+	my ($clause, $cnt, $indent) = @_;
 
 	# Pull the three parts out of the clause.
-	$clause =~ m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
-	my $pred = $1;
-	my $item1 = $2;
-	my $item2 = $3;
+	my ($pred, $item1, $item2) = parse_clause($clause);
 
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
@@ -49,7 +61,9 @@ sub print_clause
 	}
 	else
 	{
-		print "$indent      (WordNode \"$item1\")\n";
+		# Dang, not a word node, but some unknown word-instance node.
+		# print "$indent      (WordNode \"$item1\")\n";
+		print "$indent      (VariableNode \"\$word-instance-$cnt\")\n";
 	}
 
 	if ($item2 =~ /^\$/)
@@ -58,7 +72,10 @@ sub print_clause
 	}
 	else
 	{
-		print "$indent      (WordNode \"$item2\")\n";
+		# Dang, not a word node, but some unknown word-instance node.
+		# print "$indent      (WordNode \"$item2\")\n";
+		$cnt ++;
+		print "$indent      (VariableNode \"\$word-instance-$cnt\")\n";
 	}
 	print "$indent   )\n";
 	print "$indent)\n";
@@ -69,10 +86,8 @@ sub print_link
 	my ($clause, $indent) = @_;
 
 	# Pull the three parts out of the clause.
-	$clause =~ m/\s*\%([\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)/;
-	my $link = $1;
-	my $item1 = $2;
-	my $item2 = $3;
+	$clause =~ s/\s*^\%//;
+	my ($link, $item1, $item2) = parse_clause($clause);
 
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
@@ -92,6 +107,35 @@ sub print_link
 	}
 	else
 	{
+		print "$indent   (WordNode \"$item2\")\n";
+	}
+	print "$indent)\n";
+}
+
+sub print_word_instance
+{
+	my ($clause, $cnt, $indent) = @_;
+
+	# Pull the three parts out of the clause.
+	$clause =~ s/\s*^\%//;
+	my ($link, $item1, $item2) = parse_clause($clause);
+
+	# Print a copy of the original clause for reference
+	print "$indent;; word-instance lemmas of $clause\n";
+	print "$indent(LemmaLink\n";
+	if (!($item1 =~ /^\$/))
+	{
+		# Some unknow word instance, to be fixed by variable.
+		# print "$indent   (WordInstanceNode \"$item1\")\n";
+		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
+		print "$indent   (WordNode \"$item1\")\n";
+	}
+
+	if (!($item2 =~ /^\$/))
+	{
+		$cnt ++;
+		# Some unknow word instance, to be fixed by variable.
+		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
 		print "$indent   (WordNode \"$item2\")\n";
 	}
 	print "$indent)\n";
@@ -117,6 +161,7 @@ sub parse_rule
 
 	print "(ImplicationLink\n";
 	print "   (AndLink\n";
+	my $cnt = 0;
 	foreach (@clauses)
 	{
 		s/^\s*//g;
@@ -126,8 +171,15 @@ sub parse_rule
 		}
 		else
 		{
-			print_clause ($_, "      ");
+			print_clause ($_, $cnt, "      ");
 		}
+		$cnt += 2;
+	}
+	$cnt = 0;
+	foreach (@clauses)
+	{
+		print_word_instance ($_, $cnt, "      ");
+		$cnt += 2;
 	}
 	print "   )\n";
 
@@ -141,13 +193,13 @@ sub parse_rule
 		# Now, separate multiple clauses. Unfortunately, the syntax
 		# only uses space separator between clauses, so we must
 		# parse them to find thier boundaries.
-		$implicand =~ m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)(.*)/;
-		my $clause = $1 . "(" . $2 . ", " . $3 . ")";
+		my ($p, $i1, $i2, $implicand) = parse_clause($implicand);
+		my $clause = $p . "(" . $i1 . ", " . $i2 . ")";
 		$implicand = $4;
-		print_clause ($clause, "   ");
+		print_clause ($clause, 0, "   ");
 
-		# If the rest of the line starts with ^3_, then there's
-		# another clause waiting. Loop around again, else quit.
+		# If the rest of the line starts with ^N_, N a digit, then
+		# there's another clause waiting. Loop around again, else quit.
 		$implicand =~ s/^\s*//;
 		if ($implicand =~ /^\^\d+_/) { next; }
 		last;
