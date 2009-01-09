@@ -6,10 +6,17 @@
 ; The format of this file is supposed to be simialr to, if not identical
 ; to the "mapping_rules.txt" file used in the Relex framing code.
 ;
-; Sample test rule.
-# IF _subj(be,$var0) ^ _obj(be,$var1)  ; this is a comment
+; Sentence: "The capital of Germany is Berlin"
+# IF _subj(be,$var0) ^ _obj(be,$var1)
       ^ $prep($var0,$var2)             ; preposition 
       ^ %LemmaLink($var0,$word0)
       ^ $phrase($word0, $prep)          ; convert to phrase
       THEN ^3_$phrase($var2, $var1) 
+
+; Sentence: "Berlin is the capital of Germany"
+# IF _subj(be,$var0) ^ _obj(be,$var0)  ; flipped over subj, obj
+      ^ $prep($var0,$var2)             ; preposition 
+      ^ %LemmaLink($var0,$word0)
+      ^ $phrase($word0, $prep)          ; convert to phrase
+      THEN ^3_$phrase($var2, $var0) 
 

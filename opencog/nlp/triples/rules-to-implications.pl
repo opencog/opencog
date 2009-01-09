@@ -228,15 +228,19 @@ sub parse_rule
 my $have_rule = 0;
 my $curr_rule = "";
 
+print "scm\n\n";
 # Read from standard input, until theres no more standard input.
 #
+my $rule_cnt = 0;
 while(<>)
 {
-	# Ignore comments
+	# Ignore comments (actually, reproduce them for ease of debugging
 	if(/^;/)
 	{
+		print "$_";
 		next;
 	}
+
 	# New implications are marked by a hash mark at the begining of the
 	# line.
 	if(/^#/)
@@ -244,9 +248,13 @@ while(<>)
 		# If we have a rule, parse it.
 		if ($have_rule)
 		{
+			print "(define frame-rule-$rule_cnt\n";
 			parse_rule($curr_rule);
+			print ")\n";
+			$rule_cnt ++;
 			$curr_rule = "";
 		}
+
 		$have_rule = 1;
 
 		# strip off the leading hash, the traling comment, and any newline
@@ -267,7 +275,12 @@ while(<>)
 # No more input, parse the final line.
 if ($have_rule)
 {
+	print "(define frame-rule-$rule_cnt\n";
 	parse_rule($curr_rule);
+	print ")\n";
+	$rule_cnt ++;
 	$curr_rule = "";
 	$have_rule = 0;
 }
+
+print "; Processed $rule_cnt rules\n";
