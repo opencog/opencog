@@ -301,6 +301,17 @@ ConceptNodes, the actual RelEx LemmaLinks specify WordNodes.  There's
 no immediate, direct way to turn WordNodes into ConceptNodes; this 
 will be fudged for now.
 
+And there is a another problem, a tricky one: it only makes sense to 
+extract relations between words in a sentence (or across sentences, 
+if reference resolution is implemented).  However, it seems to be
+somwhat tricky to specify that the searches should be performed only
+on a certain subset of the atom space -- so, at this point, the
+atomspace can only contain one, single sentence for processing.  
+Otherwise, if it contains multiple sentences, the rules can
+accidentally find matches to relations from different sentences.
+
+Running the current code
+------------------------
 The file "rules.txt" contains the current set of rules.  The perl script
 "rules-to-implications.pl" will convert rules into OpenCog
 ImplicationLinks, as described above. 
