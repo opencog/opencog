@@ -211,6 +211,7 @@ bool Instantiator::walk_tree(Handle expr)
 Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 {
 	vmap = &vars;
+	oset.clear();
 	walk_tree(expr);
 	if (oset.size() != 1)
 	{
