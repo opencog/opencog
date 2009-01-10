@@ -36,7 +36,7 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 		AtomSpace *as;
 
 		Handle imake;
-		Handle hbenode, hvar0, hvar1, hvar2;
+		Handle hbenode, hvar0, hvar1, hvar2, hvar2_france;
 		Handle hword0, hprep, hphrase;
 
 	public:
@@ -160,6 +160,15 @@ void BiggerPatternUTest::setUp(void)
 		)
 	);
 
+	// of (<<capital>>, <<France>>)
+	al(EVALUATION_LINK,
+		hprep = an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of"),
+		al(LIST_LINK,
+			an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"),
+			hvar2_france = an(WORD_INSTANCE_NODE, "France@472c7cd3-a9c9-44bb-bc7b-5bb356dda358")
+		)
+	);
+
 	// ; _subj (<<be>>, <<capital>>)
 	al(EVALUATION_LINK,
 		an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_subj"),
@@ -217,11 +226,15 @@ void BiggerPatternUTest::test_prep(void)
 	// Result should be a ListLink
 	Handle imlist = pm.imply(imake);
 
+	// Expect two answers: Berlin is the capital of Germany, 
+	// and of France. (just for this test case :-)
 	Link *rlist = dynamic_cast<Link *>(TLB::getAtom(imlist));
 	int arity = rlist->getArity();
-	TSM_ASSERT_EQUALS("incorrect arity", arity, 1);
+	TSM_ASSERT_EQUALS("incorrect arity", arity, 2);
 
-	Handle result = getlink(imlist,0);
+	// 0 has France, 1 has Germany
+	Handle result_france = getlink(imlist,0);
+	Handle result = getlink(imlist,1);
 
 	Handle vbenode = getlink(result, 0);
 	Handle vvar0 = getlink(result, 1);
@@ -252,9 +265,25 @@ void BiggerPatternUTest::test_prep(void)
 	TSM_ASSERT_EQUALS("incorrect var0", hvar0, vvar0);
 	TSM_ASSERT_EQUALS("incorrect word0", hword0, vword0);
 	TSM_ASSERT_EQUALS("incorrect var1", hvar1, vvar1);
-	TSM_ASSERT_EQUALS("incorrect var2", hvar2, vvar2);
+	TSM_ASSERT_EQUALS("incorrect var2 - Germany", hvar2, vvar2);
 	TSM_ASSERT_EQUALS("incorrect prep", hprep, vprep);
 	TSM_ASSERT_EQUALS("incorrect phrase", hphrase, vphrase);
+
+	Handle france_benode = getlink(result_france, 0);
+	Handle france_var0 = getlink(result_france, 1);
+	Handle france_word0 = getlink(result_france, 2);
+	Handle france_var1 = getlink(result_france, 3);
+	Handle france_var2 = getlink(result_france, 4);
+	Handle france_prep = getlink(result_france, 5);
+	Handle france_phrase = getlink(result_france, 6);
+
+	TSM_ASSERT_EQUALS("incorrect benode", hbenode, france_benode);
+	TSM_ASSERT_EQUALS("incorrect var0", hvar0, france_var0);
+	TSM_ASSERT_EQUALS("incorrect word0", hword0, france_word0);
+	TSM_ASSERT_EQUALS("incorrect var1", hvar1, france_var1);
+	TSM_ASSERT_EQUALS("incorrect var2 - France", hvar2_france, france_var2);
+	TSM_ASSERT_EQUALS("incorrect prep", hprep, france_prep);
+	TSM_ASSERT_EQUALS("incorrect phrase", hphrase, france_phrase);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
