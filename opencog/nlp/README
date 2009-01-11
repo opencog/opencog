@@ -70,6 +70,18 @@ The similarity directory contains code related to similarity of word
 senses.  Describes plans/code for storing wordnet-derived similarity
 measures within OpenCog.
 
+triples
+-------
+The triples directory contains some experimental code for extracting
+prepositional triples from text. So, for example: "Lisbon is the 
+capital of Portugaul" would be turned into "capital_of(Portugaul,
+Lisbon)".  Such "prepositional relations" extend the usual ontological 
+concepts of "is_a", "has_a", "part_of" and "uses" to more general
+relations.
+
+The directory contains a script to convert RelEx Frame rules into 
+opencog ImplicationLinks.
+
 wordnet-import
 --------------
 The wordnet-import directory contains stand-alone code (i.e. not a part
