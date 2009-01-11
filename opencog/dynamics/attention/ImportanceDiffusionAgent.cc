@@ -210,7 +210,11 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(gsl_matrix* &connections,
             logger().fine("Ordered link with source index %d.", sourceIndex);
 #endif
             // Then spread from index 1 (since source is at index 0)
-            for (targetItr = (targets.begin())++; targetItr != targets.end(); 
+            
+            targetItr = targets.begin();
+            targetItr++;
+            for (; targetItr != targets.end();
+            //for (targetItr = (targets.begin())++; targetItr != targets.end(); 
                      targetItr++) {
                 targetPosItr = diffusionAtomsMap.find(*targetItr);
                 targetIndex = (*targetPosItr).second;

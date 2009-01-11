@@ -24,7 +24,13 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifdef _MSC_VER
+//for _getcwd
+ #include <direct.h>
+ #define getcwd _getcwd
+#else
+ #include <unistd.h>
+#endif
 
 #include <opencog/util/platform.h>
 
@@ -53,7 +59,7 @@ void FileXMLBufferReader::open() throw (IOException)
     if (file == NULL) {
         char buff[1000];
         getcwd(buff, 1000);
-        throw IOException(TRACE_INFO, "FileXMLBufferReader - unable to open file '%s' in '%s'.", filename, buff);
+        throw IOException(TRACE_INFO, "FileXMLBufferReader - unable to open file '%s'. cwd='%s'.", filename, buff);
     }
 }
 
