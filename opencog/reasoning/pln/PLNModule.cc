@@ -532,7 +532,7 @@ std::string RunCommand(std::list<std::string> args)
                         haxx::ArchiveTheorems = false;
                         ss << (axioms_ok ? "Input file was loaded." : "Input file was corrupt.");
             
-                        ss << (" Next you MUST (re)load a target atom with r command! Otherwise things will break.\n");
+                        ss << (" Next you MUST (re)load a target atom with the pln target command! Otherwise things will break.\n");
                         // have to recreate the target vtrees to ensure that the
                         // handles are correct after reloading axioms.
                         initTests();
