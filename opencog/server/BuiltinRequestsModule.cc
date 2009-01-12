@@ -46,6 +46,7 @@ BuiltinRequestsModule::BuiltinRequestsModule()
     cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
     cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
     do_startAgents_register();
+    do_stopAgents_register();
 }
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
@@ -61,6 +62,7 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     cogserver.unregisterRequest(LoadModuleRequest::info().id);
     cogserver.unregisterRequest(UnloadModuleRequest::info().id);
     do_startAgents_unregister();
+    do_stopAgents_unregister();
 }
 
 void BuiltinRequestsModule::init()
@@ -94,3 +96,33 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
     
     return "Successfully started agents";
 }
+
+std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::string> args)
+{
+    std::list<const char*> availableAgents = cogserver().agentIds();
+ 
+    std::vector<std::string> agents;
+
+    for (std::list<std::string>::const_iterator it = args.begin();
+         it != args.end(); ++it) {
+        std::string agent_type = *it;
+        // check that this is a valid type; give an error and return otherwise
+        if (availableAgents.end() ==
+         find(availableAgents.begin(), availableAgents.end(), *it)) {
+            std::ostringstream oss;
+            oss << "Invalid Agent ID (" << *it << ")";
+            return oss.str();
+        }
+        
+        agents.push_back(agent_type);
+     }
+
+    // Not safe to run while the CogServer is running
+    for (std::vector<std::string>::const_iterator it = agents.begin();
+         it != agents.end(); ++it) {
+        cogserver().destroyAllAgents(*it);
+    }
+    
+    return "Successfully stopped agents";
+}
+

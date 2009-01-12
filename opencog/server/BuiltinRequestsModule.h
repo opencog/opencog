@@ -65,6 +65,11 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "start-agents", do_startAgents,
        "Usage: start-agents <agent type> [...]\n\n"
        "Create new agent instances of the specified agent type(s), and start them.\n")
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stop-agents", do_stopAgents, 
+       "Stop some agents running",
+       "Usage: stop-agents <agent type> [...]\n\n"
+       "Stops the agents of the specified classes (class ids).\n")
+
 public:
 
     static inline const char* id() {
