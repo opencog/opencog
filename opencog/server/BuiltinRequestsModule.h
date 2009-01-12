@@ -37,6 +37,9 @@
 #include <opencog/server/ShutdownRequest.h>
 #include <opencog/server/UnloadModuleRequest.h>
 
+#include <opencog/util/Logger.h>
+#include <opencog/server/CogServer.h>
+
 namespace opencog
 {
 
@@ -54,6 +57,13 @@ private:
     Factory<ShutdownRequest, Request>     shutdownFactory;
     Factory<LoadModuleRequest, Request>   loadmoduleFactory;
     Factory<UnloadModuleRequest, Request> unloadmoduleFactory;
+
+// I'm adding the agent control commands via the macro syntax
+// (it's much more convenient than adding several new .cc/.h files). - JaredW
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "start-agents", do_startAgents, 
+       "Start some agents", 
+       "Usage: start-agents <agent type> [...]\n\n"
+       "Create new agent instances of the specified agent type(s), and start them.\n")
 
 public:
 
