@@ -29,6 +29,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/numeric.h>
 
 using namespace opencog;
 
@@ -41,7 +42,7 @@ using namespace opencog;
 #define TV3_U 1.0f
 #define ERROR_THRESHOLD 0.01f
 
-#define FLOAT_ACCEPTABLE_ERROR 0.000001
+#define FLOAT_ACCEPTABLE_ERROR 0.000001f
 
 class IndefiniteTruthValueUTest :  public CxxTest::TestSuite
 {
@@ -106,7 +107,7 @@ public:
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
         //printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
-        TS_ASSERT(fabs(tv->getCount() - expectedCount) <= 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
+        TS_ASSERT(isEqual(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
         for (int i = 0; i < NUM_TVS; i++) {
@@ -116,6 +117,7 @@ public:
             TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
             //TODO replace with proper evaluation of what diff should be.
+	    std::cout << "DIFF : " << tv->getDiff() << std::endl;
             //TS_ASSERT(fabs(tv->getDiff()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(tv->isSymmetric());
             TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
@@ -138,7 +140,7 @@ public:
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
         //printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
-        TS_ASSERT(fabs(tv->getCount() - expectedCount) <= 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
+        TS_ASSERT(isEqual(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
         for (int i = 0; i < NUM_TVS; i++) {

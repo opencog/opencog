@@ -224,15 +224,20 @@ FloatT logsum(size_t n)
     return sums[n];
 }
 
-//compare 2 FloatT with precision EPSILON
-template<typename FloatT> bool isEqual(FloatT x, FloatT y)
-{
-    const FloatT epsilon = EPSILON;
+//compare 2 FloatT with precision epsilon
+template<typename FloatT> bool isEqual(FloatT x, FloatT y, FloatT epsilon) {
     FloatT diff = std::abs(x - y);
     FloatT amp = std::abs(x + y);
     if (amp*amp > epsilon)
         return diff <= epsilon * amp;
-    else return diff <= epsilon;
+    else return diff <= epsilon;    
+}
+
+//compare 2 FloatT with precision EPSILON
+template<typename FloatT> bool isEqual(FloatT x, FloatT y)
+{
+    const FloatT epsilon = EPSILON;
+    return isEqual(x, y, EPSILON);
 }
 
 //compute the binary entropy of probability p

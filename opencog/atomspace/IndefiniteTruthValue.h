@@ -93,8 +93,8 @@ public:
 
     static float DEFAULT_CONFIDENCE_LEVEL;
     static float DEFAULT_K;
-	static float diffError;
-	static float s;
+    static float diffError;
+    static float s;
     static void setDefaultConfidenceLevel(float c) {
         DEFAULT_CONFIDENCE_LEVEL = c;
     }

@@ -77,7 +77,7 @@ void IndefiniteTruthValue::init(float l, float u, float c)
     U = u;
     confidenceLevel = c;
     diff = -1.0f;
-	firstOrderDistribution.clear();
+    firstOrderDistribution.clear();
     symmetric = true;
 }
 
@@ -145,28 +145,28 @@ float IndefiniteTruthValue::getU() const
 }
 float IndefiniteTruthValue::getDiff()
 {
-	if (diff >= 0) return diff; // previously calculated
-	float L_, U_, expected , result=0.0, numerator=0.0, denominator=0.0;
-	float idiff = 0.01;
+    if (diff >= 0) return diff; // previously calculated
+    float L_, U_, expected , result=0.0, numerator=0.0, denominator=0.0;
+    float idiff = 0.01;
 
     if (U == L) {
-        return 0.0f;
+      return 0.0f;
     }
-	expected = (1-confidenceLevel)/2;
-	while 	((result < expected - diffError) 
-		 ||  (result > expected + diffError)) {
-			U_ = U + idiff;
-			L_ = L - idiff; // Joel: Changed to - this is correct yah?
-			numerator = DensityIntegral(U,U_,L_,U_,DEFAULT_K,s);
-			denominator = DensityIntegral(L_,U_,L_,U_,DEFAULT_K,s);		
-			if (denominator > 0) result = numerator / denominator;
-			else result = 0.0;
-
-			if (result < expected - diffError) idiff = idiff + idiff/2;
-			if (result > expected + diffError) idiff = idiff - idiff/2;
-	}
-	this->diff = idiff;
-	return idiff;
+    expected = (1-confidenceLevel)/2;
+    while ((result < expected - diffError) 
+	   ||  (result > expected + diffError)) {
+        U_ = U + idiff;
+	L_ = L - idiff; // Joel: Changed to - this is correct yah?
+	numerator = DensityIntegral(U,U_,L_,U_,DEFAULT_K,s);
+	denominator = DensityIntegral(L_,U_,L_,U_,DEFAULT_K,s);		
+	if (denominator > 0) result = numerator / denominator;
+	else result = 0.0;
+	
+	if (result < expected - diffError) idiff = idiff + idiff/2;
+	if (result > expected + diffError) idiff = idiff - idiff/2;
+    }
+    this->diff = idiff;
+    return idiff;
 }
 float IndefiniteTruthValue::getConfidenceLevel() const
 {
