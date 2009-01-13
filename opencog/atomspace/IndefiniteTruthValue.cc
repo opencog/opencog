@@ -72,7 +72,7 @@ static float DensityIntegral(float lower, float upper,
 
 void IndefiniteTruthValue::init(float l, float u, float c)
 {
-    mean = (l + u) / 2;
+    mean = (l+u)/2;
     L = l;
     U = u;
     confidenceLevel = c;
@@ -132,7 +132,13 @@ IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue & rhs) th
 
 bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
 {
-    return false; // XXX Implement me!
+    const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);
+    if (NULL == itv) {
+      return false;
+    }
+    else {
+      return  U==itv->U && L==itv->L && confidenceLevel==itv->confidenceLevel;
+    }
 }
 
 float IndefiniteTruthValue::getL() const
@@ -194,11 +200,15 @@ float IndefiniteTruthValue::getL_() const
 void IndefiniteTruthValue::setL(float l)
 {
     this->L = l;
+    mean = (L+U)/2; //update mean
+    diff = -1.0f; //this indicates that diff should be recalculated
 }
 
 void IndefiniteTruthValue::setU(float u)
 {
     this->U = u;
+    mean = (L+U)/2; //update mean
+    diff = -1.0f; //this indicates that diff should be recalculated
 }
 
 void IndefiniteTruthValue::setConfidenceLevel(float c)

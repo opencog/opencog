@@ -270,7 +270,7 @@ public:
                 tvs[i]->setL(l);
                 TS_ASSERT(fabs(tv->getL()  - l) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
+                TS_ASSERT(isEqual(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
                 float expectedCount = count(l, us[i]);
                 float expectedConfidence = confidence(l, us[i]);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
@@ -287,7 +287,7 @@ public:
                 tvs[i]->setU(u);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - u) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
+                TS_ASSERT(isEqual(tv->getMean(), (ls[i]+u)/2, ERROR_THRESHOLD));
                 float expectedCount = count(ls[i], u);
                 float expectedConfidence = confidence(ls[i], u);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);

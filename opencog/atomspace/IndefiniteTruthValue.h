@@ -63,6 +63,7 @@ public:
     IndefiniteTruthValue* clone() const;
     IndefiniteTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
 
+    //it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const TruthValue& rhs) const;
 
     static IndefiniteTruthValue* fromString(const char*);
