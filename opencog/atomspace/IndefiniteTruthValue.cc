@@ -50,23 +50,22 @@ static double integralFormula (double x, void * params) {
 }
 
 static float DensityIntegral(float lower, float upper, 
-						float L_, float U_, float k_, float s_) {
+			     float L_, float U_, float k_, float s_) {
 	double params[4];
 	int status = 0; size_t neval = 0;
 	double result = 0, abserr = 0 ;
 	gsl_function F;
 
-	params[0] = L_; 
-	params[1] = U_; 
-	params[2] = k_; 
-	params[3] = s_;
+	params[0] = static_cast<double>(L_); 
+	params[1] = static_cast<double>(U_);
+	params[2] = static_cast<double>(k_);
+	params[3] = static_cast<double>(s_);
 
 	F.function = &integralFormula;
 	F.params = &params;
 
 	status = gsl_integration_qng (&F, lower, upper, 
-			1e-1, 0.0, &result, &abserr, &neval) ;
-
+				      1e-1, 0.0, &result, &abserr, &neval);
 	return (float) result;
 }
 
@@ -149,31 +148,58 @@ float IndefiniteTruthValue::getU() const
 {
     return U;
 }
+
 float IndefiniteTruthValue::getDiff()
 {
-    if (diff >= 0) return diff; // previously calculated
-    float L_, U_, expected , result=0.0, numerator=0.0, denominator=0.0;
-    float idiff = 0.01;
-
-    if (U == L) {
-      return 0.0f;
+  if (diff >= 0) return diff; // previously calculated
+  else {
+    if (U == L) { //Nil: I'm not sure returning 0 is the right thing to do
+      diff = 0.0f;
+      return diff;
     }
-    expected = (1-confidenceLevel)/2;
-    while ((result < expected - diffError) 
-	   ||  (result > expected + diffError)) {
-        U_ = U + idiff;
-	L_ = L - idiff; // Joel: Changed to - this is correct yah?
-	numerator = DensityIntegral(U,U_,L_,U_,DEFAULT_K,s);
-	denominator = DensityIntegral(L_,U_,L_,U_,DEFAULT_K,s);		
-	if (denominator > 0) result = numerator / denominator;
-	else result = 0.0;
-	
-	if (result < expected - diffError) idiff = idiff + idiff/2;
-	if (result > expected + diffError) idiff = idiff - idiff/2;
+    else {
+      float idiff = 0.01; //initial diff suggestion
+      diff = findDiff(idiff);
+      return diff;
     }
-    this->diff = idiff;
-    return idiff;
+  }
 }
+
+float IndefiniteTruthValue::findDiff(float idiff) {
+  float min = 0.0;
+  float max = 0.5; //diff cannot be larger than 1/2 because symmetric case
+  float L1, U1;
+  float numerator, denominator, result;
+  float expected = (1-confidenceLevel)/2;
+  bool lte, gte; //smaller than expected, greater than expected
+
+  //loop until convergence
+  do {
+    U1 = U + idiff;
+    L1 = L - idiff;
+    
+    numerator = DensityIntegral(U,U1,L1,U1,DEFAULT_K,s);
+    denominator = DensityIntegral(L1,U1,L1,U1,DEFAULT_K,s);
+    
+    if (denominator > 0) result = numerator / denominator;
+    else result = 0.0;
+	
+    lte = result < expected - diffError;
+    gte = result > expected + diffError;
+
+    if(lte) {
+      min = idiff;
+      idiff = (idiff+max)/2;
+    }
+    if(gte) {
+      max = idiff;
+      idiff = (min+idiff)/2;
+    }
+  } while(lte || gte);
+
+  return idiff;
+}
+
 float IndefiniteTruthValue::getConfidenceLevel() const
 {
     return confidenceLevel;

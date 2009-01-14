@@ -35,6 +35,7 @@
 namespace opencog
 {
 
+
 /*
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
  * N will be hold constant and thus we have only ([L,U],b).
@@ -54,6 +55,9 @@ private:
 
     void init(float c = 0.0f, float d = 0.0f, float e = DEFAULT_CONFIDENCE_LEVEL);
     void copy(const IndefiniteTruthValue&);
+
+    //find diff by dichotomy
+    float findDiff(float idiff);
 
 public:
     IndefiniteTruthValue();

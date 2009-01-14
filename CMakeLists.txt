@@ -236,3 +236,7 @@ IF (DOXYGEN_FOUND)
 ELSE (DOXYGEN_FOUND)
 	MESSAGE(STATUS "WARNING: Doxygen not found, API documentation will not be generated")
 ENDIF (DOXYGEN_FOUND)
+
+#compiling mode, Debug or Release
+#SET(CMAKE_BUILD_TYPE Debug)
+#SET(CMAKE_BUILD_TYPE Release)
