@@ -197,8 +197,8 @@ class ImplicationRule : public IndefiniteRule {
 		ImplicationRule(IndefiniteTruthValue* const& TVa, 
 						IndefiniteTruthValue* const& TVb);
 		IndefiniteTruthValue* solve();
-		IndefiniteTruthValue* q_r_conclusion(float lower,
-				float upper, vector<vector<float> > d);
+		IndefiniteTruthValue* q_r_conclusion(float lower, float upper,
+						     const vector<vector<float> >& d);
 };
 
 class RevisionRule : public IndefiniteRule {

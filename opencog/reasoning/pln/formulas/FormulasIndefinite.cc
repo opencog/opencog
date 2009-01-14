@@ -504,11 +504,13 @@ IndefiniteTruthValue* ImplicationRule::solve() {
 }
 
 IndefiniteTruthValue* ImplicationRule::q_r_conclusion(float l, float u, 
-						      vector<vector<float> > d) {
+						      const vector<vector<float> >& d) {
 	int middle, count, n1=100;
 	float lower = l, upper = u, middle_d, rate, strength=0;
 	float b=IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-	vector <float> meansQ = d[0], meansR = d[1], meansQR = d[2];
+	const vector<float>& meansQ = d[0];
+	const vector<float>& meansR = d[1];
+	const vector<float>& meansQR = d[2];
 
 	middle_d=floor(b*n1);
 	middle=int(middle_d);
