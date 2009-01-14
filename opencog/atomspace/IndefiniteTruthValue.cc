@@ -205,7 +205,7 @@ float IndefiniteTruthValue::getConfidenceLevel() const
     return confidenceLevel;
 }
 
-vector<float*> IndefiniteTruthValue::getFirstOrderDistribution() const
+const vector<float*>& IndefiniteTruthValue::getFirstOrderDistribution() const
 {
     return firstOrderDistribution;
 }
@@ -247,7 +247,7 @@ void IndefiniteTruthValue::setDiff(float diff)
     this->diff = diff;
 }
 
-void IndefiniteTruthValue::setFirstOrderDistribution(vector<float*> v)
+void IndefiniteTruthValue::setFirstOrderDistribution(const vector<float*>& v)
 {
     this->firstOrderDistribution = v;
 }

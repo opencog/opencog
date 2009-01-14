@@ -72,7 +72,7 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
 	// check if first order distribution is ready
 	distributionA = TVa->getFirstOrderDistribution();	
 	distributionB = TVb->getFirstOrderDistribution();	
-	if (!distributionA.empty() && !distributionB.empty()) return;
+	if(!distributionA.empty() && !distributionB.empty()) return;
 
 	// step 1 - calculate diff on both variables
 	// verify if L_ and U_ were previously calculated
@@ -211,11 +211,11 @@ void Sampler::generateSample   (IndefiniteTruthValue* const& TVa,
 	TVc->setFirstOrderDistribution(distributionAC);
 }
 
-void Sampler::generateSample   (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb,
-								IndefiniteTruthValue* const& TVc,
-								IndefiniteTruthValue* const& TVab,
-								IndefiniteTruthValue* const& TVcb_bc) {
+void Sampler::generateSample(IndefiniteTruthValue* const& TVa, 
+			     IndefiniteTruthValue* const& TVb,
+			     IndefiniteTruthValue* const& TVc,
+			     IndefiniteTruthValue* const& TVab,
+			     IndefiniteTruthValue* const& TVcb_bc) {
 
 	number_t valuesA[100], valuesB[100], 
 			 valuesC[100], valuesAB[100], valuesCB_BC[100];
@@ -353,7 +353,7 @@ void Sampler::generateSample   (IndefiniteTruthValue* const& TVa,
 }
 
 IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb) {
+				IndefiniteTruthValue* const& TVb) {
 	tvset.push_back(TVa);
 	tvset.push_back(TVb);
 	s = new Sampler(BetaDistribution, 100, 100);
@@ -361,8 +361,8 @@ IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
 }
 
 IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb,
-								IndefiniteTruthValue* const& TVc) {
+				IndefiniteTruthValue* const& TVb,
+				IndefiniteTruthValue* const& TVc) {
 	tvset.push_back(TVa);
 	tvset.push_back(TVb);
 	tvset.push_back(TVc);
@@ -371,11 +371,11 @@ IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
 }
 
 IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb,
-								IndefiniteTruthValue* const& TVc,
-								IndefiniteTruthValue* const& TVab,
-								IndefiniteTruthValue* const& TVbc,
-								bool deduction) {
+				IndefiniteTruthValue* const& TVb,
+				IndefiniteTruthValue* const& TVc,
+				IndefiniteTruthValue* const& TVab,
+				IndefiniteTruthValue* const& TVbc,
+				bool deduction) {
 	tvset.push_back(TVa);
 	tvset.push_back(TVb);
 	tvset.push_back(TVc);
@@ -421,8 +421,8 @@ IndefiniteTruthValue* IndefiniteRule::conclusion(const pvector& distributions) {
 }
 
 // Methods Implementations
-ConjunctionRule::ConjunctionRule   (IndefiniteTruthValue* const& TVa, 
-									IndefiniteTruthValue* const& TVb) {
+ConjunctionRule::ConjunctionRule(IndefiniteTruthValue* const& TVa, 
+				 IndefiniteTruthValue* const& TVb) {
 	IndefiniteRule::IndefiniteRule(TVa, TVb);
 
 	// Local variables copy
@@ -434,8 +434,8 @@ IndefiniteTruthValue* ConjunctionRule::solve() {
 	int n1=100; int n2=100;
 	vector <float *> distributionResult;
 	
-	pvector distributionA = tvset[0]->getFirstOrderDistribution();
-	pvector distributionB = tvset[1]->getFirstOrderDistribution();
+	const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+	const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
 
 	for (int i=0;i<n1;i++) {
 		distributionResult.push_back(new float[100]);
@@ -447,8 +447,8 @@ IndefiniteTruthValue* ConjunctionRule::solve() {
 	return IndefiniteRule::conclusion(distributionResult);
 }
 
-ImplicationRule::ImplicationRule   (IndefiniteTruthValue* const& TVa, 
-									IndefiniteTruthValue* const& TVab) {
+ImplicationRule::ImplicationRule(IndefiniteTruthValue* const& TVa, 
+				 IndefiniteTruthValue* const& TVab) {
 	IndefiniteRule::IndefiniteRule(TVa, TVab);
 
 	// Local variables copy
@@ -463,8 +463,8 @@ IndefiniteTruthValue* ImplicationRule::solve() {
 	float meanQ = 0.0, meanR = 0.0, lower = 0.0, upper = 0.0;
 	vector<vector<float> > result;
 
-	pvector distributionA = tvset[0]->getFirstOrderDistribution();
-	pvector distributionB = tvset[1]->getFirstOrderDistribution();
+	const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+	const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
 
 	for (int i=0;i<n1;i++) {
 
@@ -504,7 +504,7 @@ IndefiniteTruthValue* ImplicationRule::solve() {
 }
 
 IndefiniteTruthValue* ImplicationRule::q_r_conclusion(float l, float u, 
-		vector<vector<float> > d) {
+						      vector<vector<float> > d) {
 	int middle, count, n1=100;
 	float lower = l, upper = u, middle_d, rate, strength=0;
 	float b=IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
@@ -539,7 +539,7 @@ IndefiniteTruthValue* ImplicationRule::q_r_conclusion(float l, float u,
 }
 
 RevisionRule::RevisionRule (IndefiniteTruthValue* const& TVa, 
-							IndefiniteTruthValue* const& TVb) {
+			    IndefiniteTruthValue* const& TVb) {
 	IndefiniteRule::IndefiniteRule(TVa, TVb);
 
 	// Local variables copy
@@ -551,8 +551,8 @@ IndefiniteTruthValue* RevisionRule::solve() {
 	int n1=100, n2=100;
 	float w1, w2, n1_, n2_;
 	vector <float *> distributionResult;
-	pvector distributionA = tvset[0]->getFirstOrderDistribution();
-	pvector distributionB = tvset[1]->getFirstOrderDistribution();
+	const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+	const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
 	IndefiniteTruthValue* result;
 
 	w1 = tvset[0]->getU() - tvset[0]->getL();
@@ -575,11 +575,11 @@ IndefiniteTruthValue* RevisionRule::solve() {
 	return result;
 }
 
-AbductionRule::AbductionRule   (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb,
-								IndefiniteTruthValue* const& TVc, 
-								IndefiniteTruthValue* const& TVab,
-								IndefiniteTruthValue* const& TVcb) {
+AbductionRule::AbductionRule(IndefiniteTruthValue* const& TVa, 
+			     IndefiniteTruthValue* const& TVb,
+			     IndefiniteTruthValue* const& TVc, 
+			     IndefiniteTruthValue* const& TVab,
+			     IndefiniteTruthValue* const& TVcb) {
 	IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVcb, false);
 
 	// Local variables copy
@@ -593,11 +593,11 @@ AbductionRule::AbductionRule   (IndefiniteTruthValue* const& TVa,
 IndefiniteTruthValue* AbductionRule::solve() {
 	int n1=100,n2=100;
 	vector <float *> distributionAC;
-	pvector distributionA = tvset[0]->getFirstOrderDistribution();
-	pvector distributionB = tvset[1]->getFirstOrderDistribution();
-	pvector distributionC = tvset[2]->getFirstOrderDistribution();
-	pvector distributionAB = tvset[3]->getFirstOrderDistribution();
-	pvector distributionCB = tvset[4]->getFirstOrderDistribution();
+	const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+	const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
+	const pvector& distributionC = tvset[2]->getFirstOrderDistribution();
+	const pvector& distributionAB = tvset[3]->getFirstOrderDistribution();
+	const pvector& distributionCB = tvset[4]->getFirstOrderDistribution();
 
 	for (int i=0;i<n1;i++) {
 		distributionAC.push_back(new float[100]);
@@ -619,9 +619,9 @@ IndefiniteTruthValue* AbductionRule::solve() {
 	return IndefiniteRule::conclusion(distributionAC);
 }
 
-BayesRule::BayesRule   (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVc,
-						IndefiniteTruthValue* const& TVac) {
+BayesRule::BayesRule(IndefiniteTruthValue* const& TVa, 
+		     IndefiniteTruthValue* const& TVc,
+		     IndefiniteTruthValue* const& TVac) {
 	IndefiniteRule::IndefiniteRule(TVa, TVc, TVac);
 	
 	// Local variables copy
@@ -633,9 +633,9 @@ BayesRule::BayesRule   (IndefiniteTruthValue* const& TVa,
 IndefiniteTruthValue* BayesRule::solve() {
 	int n1=100, n2=100;
 	vector <float *> distributionCA;
-	pvector distributionA = tvset[0]->getFirstOrderDistribution();
-	pvector distributionC = tvset[1]->getFirstOrderDistribution();
-	pvector distributionAC = tvset[2]->getFirstOrderDistribution();
+	const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+	const pvector& distributionC = tvset[1]->getFirstOrderDistribution();
+	const pvector& distributionAC = tvset[2]->getFirstOrderDistribution();
 
 	for (int i=0;i<n1;i++) {
 		distributionCA.push_back(new float[100]);
@@ -651,11 +651,11 @@ IndefiniteTruthValue* BayesRule::solve() {
 	return IndefiniteRule::conclusion(distributionCA);
 }
 
-DeductionRule::DeductionRule   (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb,
-								IndefiniteTruthValue* const& TVc, 
-								IndefiniteTruthValue* const& TVab,
-								IndefiniteTruthValue* const& TVbc) {
+DeductionRule::DeductionRule(IndefiniteTruthValue* const& TVa, 
+			     IndefiniteTruthValue* const& TVb,
+			     IndefiniteTruthValue* const& TVc, 
+			     IndefiniteTruthValue* const& TVab,
+			     IndefiniteTruthValue* const& TVbc) {
 	IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVbc, true);
 	
 	// Local variables copy
@@ -670,11 +670,11 @@ IndefiniteTruthValue* DeductionRule::solve() {
 	int n1=100, n2=100;
 	vector <float *> distributionAC;
 
-	pvector distributionA = tvset[0]->getFirstOrderDistribution();
-	pvector distributionB = tvset[1]->getFirstOrderDistribution();
-	pvector distributionC = tvset[2]->getFirstOrderDistribution();
-	pvector distributionAB = tvset[3]->getFirstOrderDistribution();
-	pvector distributionBC = tvset[4]->getFirstOrderDistribution();
+	const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+	const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
+	const pvector& distributionC = tvset[2]->getFirstOrderDistribution();
+	const pvector& distributionAB = tvset[3]->getFirstOrderDistribution();
+	const pvector& distributionBC = tvset[4]->getFirstOrderDistribution();
 
 	for (int i=0;i<n1;i++) {
 		distributionAC.push_back(new float[100]);
@@ -695,11 +695,11 @@ IndefiniteTruthValue* DeductionRule::solve() {
 TruthValue* IndefiniteSymmetricBayesFormula::simpleCompute(TruthValue** TV, int N, long U) const 
 {
         assert(N == 3);
-	    assert(TV[0]); assert(TV[1]);assert(TV[2]);
-		IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-		IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[1]);
-		IndefiniteTruthValue* TVac = (IndefiniteTruthValue*)(TV[2]);
-		IndefiniteTruthValue* result;
+	assert(TV[0]); assert(TV[1]);assert(TV[2]);
+	IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
+	IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[1]);
+	IndefiniteTruthValue* TVac = (IndefiniteTruthValue*)(TV[2]);
+	IndefiniteTruthValue* result;
 
        	RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator;
     	BayesRule *a = myCreator.CreateRule(TVa, TVc, TVac);
@@ -711,27 +711,27 @@ TruthValue* IndefiniteSymmetricImplicationBreakdownFormula::simpleCompute(TruthV
 {
         assert(N == 2);
         assert(TV[0]); assert(TV[1]);
-		IndefiniteTruthValue* linkAB = (IndefiniteTruthValue*)(TV[0]);
-   		IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[1]);
+	IndefiniteTruthValue* linkAB = (IndefiniteTruthValue*)(TV[0]);
+	IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[1]);
     	IndefiniteTruthValue* result;
 
-	    RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
-	    ImplicationRule *a = myCreator.CreateRule(TVA, linkAB);
-	    result = a->solve();
+	RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
+	ImplicationRule *a = myCreator.CreateRule(TVA, linkAB);
+	result = a->solve();
         return result;
 }
 
 TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    assert(N == 5);
-		assert(TV[0]); assert(TV[1]); 
+        assert(N == 5);
+	assert(TV[0]); assert(TV[1]); 
         assert(TV[2]); assert(TV[3]);assert(TV[4]);
-		IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-		IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
-		IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[2]);
-		IndefiniteTruthValue* TVab = (IndefiniteTruthValue*)(TV[3]);
-		IndefiniteTruthValue* TVbc = (IndefiniteTruthValue*)(TV[4]);
-		IndefiniteTruthValue* result;
+	IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
+	IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
+	IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[2]);
+	IndefiniteTruthValue* TVab = (IndefiniteTruthValue*)(TV[3]);
+	IndefiniteTruthValue* TVbc = (IndefiniteTruthValue*)(TV[4]);
+	IndefiniteTruthValue* result;
 
         RuleGenerator<DeductionRule, IndefiniteTruthValue> myCreator;
     	DeductionRule *a = myCreator.CreateRule(TVa, TVb, TVc, TVab, TVbc);
@@ -742,10 +742,10 @@ TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(TruthValue** TV, 
 TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
         assert(N == 2);
-		assert(TV[0]); assert(TV[1]);
-		IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-		IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
-		IndefiniteTruthValue* result;
+	assert(TV[0]); assert(TV[1]);
+	IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
+	IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
+	IndefiniteTruthValue* result;
 
         RuleGenerator<RevisionRule, IndefiniteTruthValue> myCreator;
     	RevisionRule *a = myCreator.CreateRule(TVa, TVb);
@@ -755,11 +755,11 @@ TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(TruthValue** TV, i
 
 TruthValue* IndefiniteSymmetricANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    assert(N == 2);
-		assert(TV[0]); assert(TV[1]);
-		IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-		IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
-		IndefiniteTruthValue* result;
+        assert(N == 2);
+	assert(TV[0]); assert(TV[1]);
+	IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
+	IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
+	IndefiniteTruthValue* result;
        	RuleGenerator<ConjunctionRule, IndefiniteTruthValue> myCreator;
     	ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
     	result = a->solve();
@@ -768,34 +768,34 @@ TruthValue* IndefiniteSymmetricANDFormula::simpleCompute(TruthValue** TV, int N,
 
 TruthValue* IndefiniteMem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-		assert(N==1);
-		assert(TV[0]);
-		IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
-		float width=TVA->getU() - TVA->getL();
-		float center=TVA->getL()+width/2;
-		float L_ = center - ((width*IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor)/2);
-		float U_ = center + ((width*IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor)/2);
-		truncate(L_);
-		truncate(U_);
-		IndefiniteTruthValue* result= new IndefiniteTruthValue(L_,U_);
-		result->setMean(TVA->getMean());
-		return result;			
+        assert(N==1);
+	assert(TV[0]);
+	IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
+	float width=TVA->getU() - TVA->getL();
+	float center=TVA->getL()+width/2;
+	float L_ = center - ((width*IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor)/2);
+	float U_ = center + ((width*IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor)/2);
+	truncate(L_);
+	truncate(U_);
+	IndefiniteTruthValue* result= new IndefiniteTruthValue(L_,U_);
+	result->setMean(TVA->getMean());
+	return result;			
 }
 
 TruthValue* IndefiniteInh2MemFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-		assert(N==1);
-		assert(TV[0]);
-		IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
-		float width=TVA->getU() - TVA->getL();
-		float center=TVA->getL()+width/2;
-		float L_ = center - ((width*1.2f)/2);
-		float U_ = center + ((width*1.2f)/2);		
-		truncate(L_);
-		truncate(U_);
-		IndefiniteTruthValue* result=new IndefiniteTruthValue(L_,U_);
-		result->setMean(TVA->getMean());
-		return result;			
+  assert(N==1);
+  assert(TV[0]);
+  IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
+  float width=TVA->getU() - TVA->getL();
+  float center=TVA->getL()+width/2;
+  float L_ = center - ((width*1.2f)/2);
+  float U_ = center + ((width*1.2f)/2);		
+  truncate(L_);
+  truncate(U_);
+  IndefiniteTruthValue* result=new IndefiniteTruthValue(L_,U_);
+  result->setMean(TVA->getMean());
+  return result;			
 }
 
 } // namespace reasoning

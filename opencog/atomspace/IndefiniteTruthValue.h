@@ -77,14 +77,14 @@ public:
     float getL() const;
     float getConfidenceLevel() const;
     float getDiff();
-    std::vector<float*> getFirstOrderDistribution() const;
+    const std::vector<float*>& getFirstOrderDistribution() const;
 
     void setMean(float);
     void setU(float);
     void setL(float);
     void setConfidenceLevel(float);
     void setDiff(float);
-    void setFirstOrderDistribution(std::vector<float*>);
+    void setFirstOrderDistribution(const std::vector<float*>&);
 
     float getCount() const;
     float getConfidence() const;
