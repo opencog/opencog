@@ -114,6 +114,7 @@ protected:
     void processAgents();
 
     pthread_mutex_t messageQueueLock;
+    pthread_mutex_t agentsLock;
     std::queue<Request*> requestQueue;
 
     NetworkServer _networkServer;

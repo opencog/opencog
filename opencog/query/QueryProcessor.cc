@@ -44,8 +44,11 @@ extern "C" void opencog_module_unload(Module* module)
 {
     QueryProcessor* agent = static_cast<QueryProcessor*>(module);
     CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.stopAgent(agent);
-    delete agent;
+    // the agent may have been stopped via the stop-agents command
+    if (cogserver.getModule(QueryProcessor::info().id) != NULL) {
+        cogserver.stopAgent(agent);
+        delete agent;
+    }
 }
 
 void QueryProcessor::init(void)

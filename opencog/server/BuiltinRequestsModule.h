@@ -59,16 +59,17 @@ private:
     Factory<UnloadModuleRequest, Request> unloadmoduleFactory;
 
 // I'm adding the agent control commands via the macro syntax
-// (it's much more convenient than adding several new .cc/.h files). - JaredW
+// (it's much more convenient than adding several new .cc/.h files). -- Jared Wigmore
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "start-agents", do_startAgents, 
        "Start some agents", 
        "Usage: start-agents <agent type> [...]\n\n"
        "Create new agent instances of the specified agent type(s), and start them.\n")
 
+// Note: this command currently allows running multiple instances of the same Agent type
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stop-agents", do_stopAgents, 
        "Stop some agents running",
        "Usage: stop-agents <agent type> [...]\n\n"
-       "Stops the agents of the specified classes (class ids).\n")
+       "Stops the agents of the specified classes (class IDs).\n")
 
 public:
 

@@ -116,11 +116,15 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
         
         agents.push_back(agent_type);
      }
+     // doesn't give an error if there is no instance of that agent type running
 
-    // Not safe to run while the CogServer is running
     for (std::vector<std::string>::const_iterator it = agents.begin();
          it != agents.end(); ++it) {
-        cogserver().destroyAllAgents(*it);
+        // Check if this Agent instance is also a module
+        if (cogserver().getModule(*it) != NULL) {
+            // delete the Agent instance if it is not
+            cogserver().destroyAllAgents(*it);
+        }  
     }
     
     return "Successfully stopped agents";

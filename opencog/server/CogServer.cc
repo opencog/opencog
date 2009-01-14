@@ -95,6 +95,7 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
 
     pthread_mutex_init(&messageQueueLock, NULL);
+    pthread_mutex_init(&agentsLock, NULL);
 }
 
 NetworkServer& CogServer::networkServer()
@@ -156,12 +157,14 @@ void CogServer::processRequests(void)
 
 void CogServer::processAgents(void)
 {
+    pthread_mutex_lock(&agentsLock);
     std::vector<Agent*>::const_iterator it;
     for (it = agents.begin(); it != agents.end(); ++it) {
         Agent* agent = *it;
         if ((cycleCount % agent->frequency()) == 0)
             agent->run(this);
     }
+    pthread_mutex_unlock(&agentsLock);
 }
 
 bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> const* factory)
@@ -189,12 +192,16 @@ Agent* CogServer::createAgent(const std::string& id, const bool start)
 
 void CogServer::startAgent(Agent* agent)
 {
+    pthread_mutex_lock(&agentsLock);
     agents.push_back(agent);
+    pthread_mutex_unlock(&agentsLock);
 }
 
 void CogServer::stopAgent(Agent* agent)
 {
+    pthread_mutex_lock(&agentsLock);
     agents.erase(std::find(agents.begin(), agents.end(), agent));
+    pthread_mutex_unlock(&agentsLock);
 }
 
 void CogServer::destroyAgent(Agent *agent)
@@ -205,6 +212,7 @@ void CogServer::destroyAgent(Agent *agent)
 
 void CogServer::destroyAllAgents(const std::string& id)
 {
+    pthread_mutex_lock(&agentsLock);
     // place agents with classinfo().id == id at the end of the container
     std::vector<Agent*>::iterator last = 
         std::partition(agents.begin(), agents.end(),
@@ -220,6 +228,7 @@ void CogServer::destroyAllAgents(const std::string& id)
     // after the 'agents.erase' call above, because the agent's destructor might
     // include a recursive call to destroyAllAgents
     std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
+    pthread_mutex_unlock(&agentsLock);
 }
 
 bool CogServer::registerRequest(const std::string& name, AbstractFactory<Request> const* factory)
