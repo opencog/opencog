@@ -505,22 +505,17 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
     Handle result;
-    Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
-    if (nnn) {
-        const Node& node = (const Node&) atom;
-        result = getHandle(node.getType(), node.getName());
+    const Node *node = dynamic_cast<const Node *>(&atom);
+    if (node) {
+        result = getHandle(node->getType(), node->getName());
         if (TLB::isInvalidHandle(result)) {
-            return addNode(node.getType(), node.getName(), newTV);
+            return addNode(node->getType(), node->getName(), newTV);
         }
     } else {
-        const Link& link = (const Link&) atom;
-        HandleSeq outgoing;
-        for (int i = 0; i < link.getArity(); i++) {
-            outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
-        }
-        result = getHandle(link.getType(), outgoing);
+        const Link *link = dynamic_cast<const Link *>(&atom);
+        result = getHandle(link->getType(), link->getOutgoingSet());
         if (TLB::isInvalidHandle(result)) {
-            return addLink(link.getType(), outgoing, newTV);
+            return addLink(link->getType(), link->getOutgoingSet(), newTV);
         }
     }
     const TruthValue& currentTV = getTV(result);

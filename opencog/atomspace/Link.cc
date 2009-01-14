@@ -273,12 +273,12 @@ void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
            "Cannot change the OutgoingSet of an atom already "
            "inserted into an AtomTable\n");
     }
-#ifdef PEFORM_INVALID_HANDLE_CHECKS
+#ifdef PERFORM_INVALID_HANDLE_CHECKS
     // Make sure that garbage is not being passed in.
     // We'd like to perform a test for valid values here, but it seems
     // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
     // which it hopefully repairs later on ...
-    for (int i = 0; i < outgoingVector.size(); i++) {
+    for (size_t i = 0; i < outgoingVector.size(); i++) {
         if (TLB::isInvalidHandle(outgoingVector[i])) {
             throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
         }
@@ -293,7 +293,7 @@ void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
 
 void Link::addOutgoingAtom(Handle h)
 {
-#ifdef PEFORM_INVALID_HANDLE_CHECKS
+#ifdef PERFORM_INVALID_HANDLE_CHECKS
     // We'd like to perform a test for valid values here, but it seems
     // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
     // which it hopefully repairs later on ...
