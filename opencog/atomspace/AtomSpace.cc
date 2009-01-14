@@ -468,6 +468,13 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
                           const TruthValue& tvn)
 {
+    // Make sure that garbage is not being passed in.
+    for (size_t i = 0; i < outgoing.size(); i++) {
+        if (TLB::isInvalidHandle(outgoing[i])) {
+            throw RuntimeException(TRACE_INFO, "addLink was passed invalid handles\n");
+        }
+    }
+
     Handle result;
     HandleEntry* he = atomTable.getHandleSet(outgoing,
                            (Type*) NULL, (bool*) NULL,
