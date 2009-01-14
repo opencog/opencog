@@ -174,7 +174,7 @@ class IndefiniteRule {
 						bool deduction);
 
 		virtual IndefiniteTruthValue* solve() { return NULL; };
-		IndefiniteTruthValue* conclusion(pvector d);
+		IndefiniteTruthValue* conclusion(const pvector& distribution);
 	
 	protected:	
 		vector<IndefiniteTruthValue *> tvset;

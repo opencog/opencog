@@ -57,8 +57,8 @@ static void truncate(number_t &value) {
 	value=(value<=0.0)?0.000001:(value>=1.0)?0.999999:value;
 }
 
-void Sampler::generateSample   (IndefiniteTruthValue* const& TVa, 
-								IndefiniteTruthValue* const& TVb) {
+void Sampler::generateSample(IndefiniteTruthValue* const& TVa, 
+			     IndefiniteTruthValue* const& TVb) {
 
 	number_t valuesA[100], valuesB[100];
 	float alpha = IndefiniteTruthValue::DEFAULT_K*0.5;
@@ -83,7 +83,7 @@ void Sampler::generateSample   (IndefiniteTruthValue* const& TVa,
 	// step 2 - generate n1 values for each TV
 	// for two TV - no need to check consistency
 	// The parameters alfa=beta=0.5 is 
-	// the defaulf for beta distribution 
+	// the default for beta distribution 
 	
 	args[0] = alpha;
 	args[1] = beta;
@@ -107,14 +107,17 @@ void Sampler::generateSample   (IndefiniteTruthValue* const& TVa,
 	for (int i=0; i<n1; i++) {
 		truncate(valuesA[i]);
 		truncate(valuesB[i]);
-		for (int j=0;j<n2;j++) {
-			args[0] = default_k * valuesA[i]; 
-			args[1] = default_k * (1 - valuesA[i]);
-			distributionA[i][j] = *(number_t*) distribution(args);
+		//fill distributionA
+		args[0] = default_k * valuesA[i]; 
+		args[1] = default_k * (1 - valuesA[i]);
+		for (int j=0; j<n2; j++) {
+		        distributionA[i][j] = *(number_t*) distribution(args);
 			truncate(distributionA[i][j]);
-			
-			args[0] = default_k * valuesB[i]; 
-			args[1] = default_k * (1 - valuesB[i]);
+		}
+		//fill distributionB
+		args[0] = default_k * valuesB[i]; 
+		args[1] = default_k * (1 - valuesB[i]);
+		for (int j=0;j<n2;j++) {
 			distributionB[i][j] = *(number_t*) distribution(args);
 			truncate(distributionB[i][j]);
 		}
@@ -384,12 +387,12 @@ IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
 }
 
 // Common conclusion among IndefiniteRules
-IndefiniteTruthValue* IndefiniteRule::conclusion(pvector d) { 
+IndefiniteTruthValue* IndefiniteRule::conclusion(const pvector& distributions) { 
 
 	int qBelow, qAbove, n1=100, n2=100;
 	float mean = 0.0, strength = 0.0, percentile = 0.0;
 	vector <float> means;
-	pvector distributions = d;
+
 	IndefiniteTruthValue *result = new IndefiniteTruthValue();
 	
 	// Compute Mean of Means from All Distributions
@@ -410,7 +413,7 @@ IndefiniteTruthValue* IndefiniteRule::conclusion(pvector d) {
 	qBelow=int(ceil(n1*percentile));
 	qAbove=qBelow;
 	
-    std::sort(means.begin(), means.end());
+	std::sort(means.begin(), means.end());
 	result->setL(means[qBelow]);
 	result->setU(means[n1-qAbove-1]);
 
