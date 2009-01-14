@@ -41,6 +41,7 @@ HopfieldOptions::HopfieldOptions()
     showMatrixFlag = HDEMO_DEFAULT_SHOW_MATRIX;
     totalFlag = HDEMO_DEFAULT_SHOW_TOTAL;
     nPatterns = HDEMO_DEFAULT_NPATTERNS;
+    keyNodes = HDEMO_DEFAULT_KEY_NODES;
     forgetPercent = HDEMO_DEFAULT_FORGET_PERCENT;
     genPatternDensity = HDEMO_DEFAULT_PATTERN_DENSITY;
     retrieveCycles = HDEMO_DEFAULT_RETRIEVE_CYCLES;
@@ -100,6 +101,7 @@ void HopfieldOptions::printHelp()
         "   -q --spread-multiplier N  multiplier for importance spread, if 0 then evenly\n"
         "                  \t spread across links.\n"
         "   -F --forget N \t percentage of links to forget.\n"
+        "   -k --key N    \t number of key nodes for glocal storage.\n"
         "   == Pattern commands ==\n"
         "   -p --patterns N \t Number of patterns to test.\n"
         "   -g --gen-density N \t Density of generated patterns (active/inactive nodes).\n"
@@ -117,7 +119,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
 
     while (1) {
         static const char *optString =
-            "vw:h:n:l:d:s:u:t:z:f:p:g:c:r:y:mi:P:e:oq:F:a:CR?E";
+            "vw:h:n:l:d:s:u:t:z:f:p:g:c:r:y:mi:P:e:oq:F:a:k:CR?E";
 
 		static const struct option longOptions[] = {
                 {"verbose", 0, &verboseLevel, 1},
@@ -144,6 +146,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"total", 0, &totalFlag, 1},    // t_o_tal, reports mean, suitable for batch output
                 {"spread-multiplier", required_argument, 0, 'q'},   // multiplier for importance spread, if 0 then evenly spread across links
                 {"forget", required_argument, 0, 'F'},
+                {"key", required_argument, 0, 'k'},
                 {"log-performance", optional_argument, 0, 'a'},
                 {"train-file", required_argument, 0, '3'},
                 {"cue-file", required_argument, 0, '4'},
@@ -255,6 +258,9 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             break;
         case 'F':
             forgetPercent = (float) atof(optarg);
+            break;
+        case 'k':
+            keyNodes = atoi(optarg);
             break;
         case 'a':
             recordToFile = true;

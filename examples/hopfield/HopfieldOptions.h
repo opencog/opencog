@@ -50,6 +50,7 @@
 #define HDEMO_DEFAULT_VIZ_THRESHOLD 1
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 0
 #define HDEMO_DEFAULT_SPREAD_CYCLES 1
+#define HDEMO_DEFAULT_KEY_NODES 0
 
 namespace opencog
 {
@@ -77,6 +78,7 @@ public:
     int showConfigFlag;
     int totalFlag;
     int nPatterns;
+    uint keyNodes;
     float genPatternDensity;
 
     int retrieveCycles;

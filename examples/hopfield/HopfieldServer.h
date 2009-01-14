@@ -63,12 +63,22 @@ class HopfieldServer : public CogServer
 private:
 
     RandGen* rng;
+    //! Find which key Node the current distribution of STI is closest to.
+    Handle findKeyNode();
+    //! Update the key node so that links exist to \arg density percent of the
+    //! pattern nodes.
+    void updateKeyNodeLinks(Handle keyHandle, float density = 1.0f);
 
+    //! choose which grid nodes will be replaced by key nodes
+    void chooseKeyNodes();
+    //! get a map of destinations to links from src (when following links
+    //! that inherit from linkType.
+    std::map<Handle,Handle> getDestinationsFrom(Handle src, Type linkType);
 public:
 
     static opencog::BaseServer* derivedCreateInstance(void);
 
-    // Amount of stimulus to apply across a pattern
+    //! Amount of stimulus to apply across a pattern
     stim_t patternStimulus;
 
     ForgettingAgent *forgetAgent;
@@ -84,10 +94,14 @@ public:
     int width, height, links;
     float density;
 
-    /* Nodes in the Hopfield network can be referenced
-     * through HGrid.
-     */
+    //! Nodes in the Hopfield network can be referenced through HGrid.
     std::vector<Handle> hGrid;
+    //! Indication of whether observation nodes in grid are active or key
+    //! nodes.
+    std::vector<bool> hGridKey;
+
+    //! Key nodes for glocal training
+    std::vector<Handle> keyNodes;
 
     HopfieldServer();
     virtual ~HopfieldServer();
