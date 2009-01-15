@@ -44,16 +44,31 @@ class IndefiniteTruthValue : public TruthValue
 {
 
 private:
-    float mean;
+
     float U;
     float L;
     float confidenceLevel; //referred as "b" in the paper
     bool symmetric;
-    float diff;//used in inference rule procedure in order to compute L1 and U1
+
+    // used in inference rule procedure in order to compute L1 and U1
+    // when diff is negative it means that it is outdated and must be
+    // recalculated
+    float diff;
+
+    // below, "mean", "count" and "confidence" are all three attributes
+    // used to translate an indefinite TV into a simple TV.
+    // If "mean" (as well as "count" or "confidence") is negative
+    // it means that it outdated and therefore must be recalculted,
+    // otherwise, i.e. positive of null, it means that the current value
+    // is correct
+    mutable float mean;
+    mutable float count;
+    mutable float confidence;
 
     std::vector<float*> firstOrderDistribution;
 
-    void init(float c = 0.0f, float d = 0.0f, float e = DEFAULT_CONFIDENCE_LEVEL);
+    void init(float c = 0.0f, float d = 0.0f,
+              float e = DEFAULT_CONFIDENCE_LEVEL);
     void copy(const IndefiniteTruthValue&);
 
     //find diff by dichotomy

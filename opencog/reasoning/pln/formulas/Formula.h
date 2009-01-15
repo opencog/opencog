@@ -38,18 +38,19 @@
 
 using namespace opencog;
 
-namespace reasoning {
+namespace reasoning
+{
 
 template<typename TVType, typename ResultType>
 class ArityFreeFormula
 {
-	public:
+public:
 
     /** You should always provide the N argument to prove the compiler
-		that you know how many args this method takes. */
+        that you know how many args this method takes. */
 
     /***
-     * One or more of the following member functions should be 
+     * One or more of the following member functions should be
      * overridden in deriving classes; the general form is:
      *
      *   Result compute(TruthValue* tv1,...,TruthValue* tvN) const;
@@ -59,55 +60,54 @@ class ArityFreeFormula
      *   Result compute(TruthValue** tvs,int N) const;
      ***/
 
-	virtual ResultType compute(TVType**, int N, long U = DefaultU) const = 0;
+    virtual ResultType compute(TVType**, int N, long U = DefaultU) const = 0;
 
-	/**
-		U is the universe size...
-	*/
+    /**
+     U is the universe size...
+    */
 
-    TruthValue* compute(TruthValue** TVsub,int Nsub, 
-				TruthValue** TVsuper,int Nsuper, long U = DefaultU) const
-    {
-			return compute(TVsub, Nsub, U);
+    TruthValue* compute(TruthValue** TVsub, int Nsub,
+                        TruthValue** TVsuper, int Nsuper,
+                        long U = DefaultU) const {
+        return compute(TVsub, Nsub, U);
     }
-    
+
     virtual ResultType compute(TVType* tv1, long U) const {
-			return compute(&tv1,1,U);
+        return compute(&tv1, 1, U);
     }
-    virtual ResultType compute(TVType* tv1,TVType *tv2, long U) const {
-			static TVType* buffer[2];
-			buffer[0]=tv1; buffer[1]=tv2;
-			return compute(buffer,2,U);
+    virtual ResultType compute(TVType* tv1, TVType *tv2, long U) const {
+        static TVType* buffer[2];
+        buffer[0] = tv1; buffer[1] = tv2;
+        return compute(buffer, 2, U);
     }
-    virtual ResultType compute(TVType* tv1,TVType* tv2,
-		TVType* tv3, long U) const {
-			static TVType* buffer[3];
-			buffer[0]=tv1; buffer[1]=tv2; buffer[2]=tv3;
-			return compute(buffer,3,U);
+    virtual ResultType compute(TVType* tv1, TVType* tv2,
+                               TVType* tv3, long U) const {
+        static TVType* buffer[3];
+        buffer[0] = tv1; buffer[1] = tv2; buffer[2] = tv3;
+        return compute(buffer, 3, U);
     }
-    virtual ResultType compute(TVType* tv1,TVType* tv2,
-		TVType* tv3,TVType* tv4, long U) const {
-			static TVType* buffer[4];
-			buffer[0]=tv1; buffer[1]=tv2; buffer[2]=tv3; buffer[3]=tv4;
-			return compute(buffer,4,U);
+    virtual ResultType compute(TVType* tv1, TVType* tv2,
+                               TVType* tv3, TVType* tv4, long U) const {
+        static TVType* buffer[4];
+        buffer[0] = tv1; buffer[1] = tv2; buffer[2] = tv3; buffer[3] = tv4;
+        return compute(buffer, 4, U);
     }
-	
-	public:
 
-	///a simple error hanlder; may be overridden
-	virtual void handleError(const std::string& error) const {
-		cerr << "ERROR: " << error << endl;
-		exit(1);
-	}
+public:
 
-	virtual ~ArityFreeFormula() {};
+    ///a simple error hanlder; may be overridden
+    virtual void handleError(const std::string& error) const {
+        cerr << "ERROR: " << error << endl;
+        exit(1);
+    }
 
-    ResultType checkTruthValue(ResultType tv) const
-	{
-		//if (Log::getDefaultLevel() >= 3) printf("\nRaw result: %f", tv->getMean());
-		
-		if (LIMIT_TRUTH_VALUES) {
-			if (tv->getMean() < 0) {
+    virtual ~ArityFreeFormula() {};
+
+    ResultType checkTruthValue(ResultType tv) const {
+        //if (Log::getDefaultLevel() >= 3) printf("\nRaw result: %f", tv->getMean());
+
+        if (LIMIT_TRUTH_VALUES) {
+            if (tv->getMean() < 0) {
                 if (tv->getType() == SIMPLE_TRUTH_VALUE) {
                     ((SimpleTruthValue*)tv)->setMean(0);
                 } else if (tv->getType() == INDEFINITE_TRUTH_VALUE) {
@@ -116,7 +116,7 @@ class ArityFreeFormula
                     throw new RuntimeException(TRACE_INFO, "Cannot limit truth values of this type of TV\n");
                 }
             }
-			if (tv->getMean() > 1) {
+            if (tv->getMean() > 1) {
                 if (tv->getType() == SIMPLE_TRUTH_VALUE) {
                     ((SimpleTruthValue*)tv)->setMean(1);
                 } else if (tv->getType() == INDEFINITE_TRUTH_VALUE) {
@@ -125,45 +125,49 @@ class ArityFreeFormula
                     throw new RuntimeException(TRACE_INFO, "Cannot limit truth values of this type of TV\n");
                 }
             }
-			if (tv->getCount() < 0) {
+            if (tv->getCount() < 0) {
                 if (tv->getType() == SIMPLE_TRUTH_VALUE) {
                     ((SimpleTruthValue*)tv)->setCount(0);
                 } else {
                     throw new RuntimeException(TRACE_INFO, "Cannot limit truth values of this type of TV\n");
                 }
             }
-		} else {
-			if ((tv->getMean() < 0) || (tv->getMean() > 1) || (tv->getCount() < 0))
-				return NULL;
-		}
-		
-		if ((IS_NAN(tv->getMean()))||(IS_NAN(tv->getCount()))) {
-			return NULL;
-		}
-		
-		return tv;
-	}
-    
+        } else {
+            if ((tv->getMean() < 0)
+                || (tv->getMean() > 1)
+                || (tv->getCount() < 0))
+                return NULL;
+        }
+
+        if ((IS_NAN(tv->getMean())) || (IS_NAN(tv->getCount()))) {
+            return NULL;
+        }
+
+        return tv;
+    }
+
 };
 
 
 /** @class Formula
-	_TVN is the arity.
+ _TVN is the arity.
 */
 
 template<int _TVN>
-class Formula : public ArityFreeFormula<TruthValue,TruthValue*>
+class Formula : public ArityFreeFormula<TruthValue, TruthValue*>
 {
     friend class SubsetEvalFormula;
 public:
     const int TVN;
     Formula() : TVN(_TVN) {}
-    
+
     /**
-     * Simple compute do not handle CompositeTruthValues. It's called by compute() method, 
+     * Simple compute do not handle CompositeTruthValues.
+     * It's called by compute() method,
      * which handles CTVs.
      */
-    virtual TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    virtual TruthValue* simpleCompute(TruthValue** TV,
+                                      int N, long U = DefaultU) const;
 
     /**
      * Partition the TV input to N/TVN groups of TVN entries.
@@ -175,8 +179,10 @@ public:
     TruthValue** multiCompute(TruthValue** TV, int N, long U = DefaultU) const;
 
     /**
-     * Check if there is any CompositeTruthValue object in the array of TruthValues and 
-     * ,if so, computes different results for primaryTVs and for each handle-versioned TVS
+     * Check if there is any CompositeTruthValue object in the array
+     * of TruthValues and,
+     * if so, computes different results for primaryTVs
+     * and for each handle-versioned TVS
      */
     TruthValue* compute(TruthValue** TV, int N, long U = DefaultU) const;
 

@@ -73,22 +73,30 @@ static float DensityIntegral(float lower, float upper,
 
 void IndefiniteTruthValue::init(float l, float u, float c)
 {
-    mean = (l + u) / 2;
     L = l;
     U = u;
     confidenceLevel = c;
+
+    // the next 4 variables are initalized to -1 to indicate that they must
+    // be calculated when accessed (using getDiff, etc)
     diff = -1.0f;
+    mean = -1.0f;
+    count = -1.0f;
+    confidence = -1.0f;
+
     firstOrderDistribution.clear();
     symmetric = true;
 }
 
 void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
 {
-    mean = source.mean;
     L = source.L;
     U = source.U;
     confidenceLevel = source.confidenceLevel;
     diff = source.diff;
+    mean = source.mean;
+    count = source.count;
+    confidence = source.confidence;
     symmetric = source.symmetric;
 }
 
@@ -232,15 +240,25 @@ float IndefiniteTruthValue::getL_() const
 void IndefiniteTruthValue::setL(float l)
 {
     this->L = l;
-    mean = (L + U) / 2; //update mean
-    diff = -1.0f; //this indicates that diff should be recalculated
+
+    // the next 4 variables are set to -1 to indicate that they must
+    // be recalculated
+    diff = -1.0f;
+    mean = -1.0f;
+    count = -1.0f;
+    confidence = -1.0f;
 }
 
 void IndefiniteTruthValue::setU(float u)
 {
     this->U = u;
-    mean = (L + U) / 2; //update mean
-    diff = -1.0f; //this indicates that diff should be recalculated
+
+    // the next 4 variables are set to -1 to indicate that they must
+    // be recalculated
+    diff = -1.0f;
+    mean = -1.0f;
+    count = -1.0f;
+    confidence = -1.0f;
 }
 
 void IndefiniteTruthValue::setConfidenceLevel(float c)
@@ -270,21 +288,29 @@ void IndefiniteTruthValue::setMean(float m)
 
 float IndefiniteTruthValue::getMean() const
 {
+    if (mean < 0) { // must be updated
+        mean = (L + U) / 2;
+    }
     return mean;
 }
 
 float IndefiniteTruthValue::getCount() const
 {
-    float W = W();
-    W = max(W, 0.0000001f); // to avoid division by zero
-    float c = (DEFAULT_K * (1 - W) / W);
-    return c;
+    if (count < 0) { // must be updated
+        float W = W();
+        W = max(W, 0.0000001f); // to avoid division by zero
+        count = (DEFAULT_K * (1 - W) / W);
+    }
+    return count;
 }
 
 float IndefiniteTruthValue::getConfidence() const
 {
-    float count = getCount();
-    return (count / (count + DEFAULT_K));
+    if (confidence < 0) { // must be updated
+        float c = getCount();
+        confidence = c / (c + DEFAULT_K);
+    }
+    return confidence;
 }
 
 bool IndefiniteTruthValue::isSymmetric() const

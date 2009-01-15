@@ -86,11 +86,13 @@ TruthValue& TruthValue::operator=(const TruthValue & rhs)
 TruthValue* TruthValue::merge(const TruthValue& other) const
 {
 #if 1
-    // TODO: Use the approach with dynamic cast bellow if we're going to have subclasses
-    // of CompositeTruthValue. For now, this approach using getType() is more efficient.
+    // TODO: Use the approach with dynamic cast bellow
+    // if we're going to have subclasses of CompositeTruthValue.
+    // For now, this approach using getType() is more efficient.
     if (other.getType() == COMPOSITE_TRUTH_VALUE) {
 #else
-    const CompositeTruthValue *otherCTv = dynamic_cast<const CompositeTruthValue *>(&other);
+    const CompositeTruthValue *otherCTv =
+        dynamic_cast<const CompositeTruthValue *>(&other);
     if (otherCTv) {
 #endif
         return other.merge(*this);
