@@ -58,227 +58,249 @@ typedef vector<number_t> dvector;
 typedef vector<number_t*> pvector;
 typedef vector<vector<number_t> > dmatrix;
 
-namespace reasoning {
-
-const float 
-    IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor = 1.5f;
+namespace reasoning
+{
     
-static bool SAVE_DEDUCTION_LOOKUP_TABLE=true;
-static bool USE_DEDUCTION_LOOKUP_TABLE=false;
+const float
+IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor = 1.5f;
 
-static void setSaveDeductionLookupTable(bool b){SAVE_DEDUCTION_LOOKUP_TABLE=b;}
-static void setUseDeductionLookupTable(bool b){USE_DEDUCTION_LOOKUP_TABLE=b;}
+static bool SAVE_DEDUCTION_LOOKUP_TABLE = true;
+static bool USE_DEDUCTION_LOOKUP_TABLE = false;
+
+static void setSaveDeductionLookupTable(bool b)
+{
+    SAVE_DEDUCTION_LOOKUP_TABLE = b;
+}
+static void setUseDeductionLookupTable(bool b)
+{
+    USE_DEDUCTION_LOOKUP_TABLE = b;
+}
 
 
 /* Wrappers that Implement the Formulas */
 class IndefiniteSymmetricBayesFormula : public Formula<3>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricImplicationBreakdownFormula : public Formula<2>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricDeductionFormula : public Formula<5>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricRevisionFormula : public Formula<2>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricANDFormula : public Formula<2>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 class IndefiniteMem2InhFormula : public Formula<1>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 class IndefiniteInh2MemFormula : public Formula<1>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
 };
 
 // ***************************************************
 // Decouple Sampling and Constraints From Core Indefinite Rules
-class Sampler {
-	public:
-		Sampler(void *(*function)(void *), int n1_, int n2_) {
-			distribution = function;
-			n1 = n1_;
-			n2 = n2_;
-			deduction = false;
-		};
+class Sampler
+{
+public:
+    Sampler(void *(*function)(void *), int n1_, int n2_) {
+        distribution = function;
+        n1 = n1_;
+        n2 = n2_;
+        deduction = false;
+    };
 
-		void generateSample(IndefiniteTruthValue* const& TVa, 
-				IndefiniteTruthValue* const& TVb);
+    void generateSample(IndefiniteTruthValue* const& TVa,
+                        IndefiniteTruthValue* const& TVb);
 
-		void generateSample(IndefiniteTruthValue* const& TVa, 
-				IndefiniteTruthValue* const& TVb, 
-				IndefiniteTruthValue* const& TVc);
+    void generateSample(IndefiniteTruthValue* const& TVa,
+                        IndefiniteTruthValue* const& TVb,
+                        IndefiniteTruthValue* const& TVc);
 
-		void generateSample(IndefiniteTruthValue* const& TVa, 
-				IndefiniteTruthValue* const& TVb, 
-				IndefiniteTruthValue* const& TVc,
-				IndefiniteTruthValue* const& TVab, 
-				IndefiniteTruthValue* const& TVbc);
-		
-		void setDimensions(int n1_, int n2_) { 
-			n1 = n1_;
-			n2 = n2_;
-		};
+    void generateSample(IndefiniteTruthValue* const& TVa,
+                        IndefiniteTruthValue* const& TVb,
+                        IndefiniteTruthValue* const& TVc,
+                        IndefiniteTruthValue* const& TVab,
+                        IndefiniteTruthValue* const& TVbc);
 
-		void setDeduction(bool b) {
-			deduction = b;
-		}
-		
-	private:
-		bool deduction;
-		int n1, n2;
-		void *(*distribution)(void *arg);
+    void setDimensions(int n1_, int n2_) {
+        n1 = n1_;
+        n2 = n2_;
+    };
+
+    void setDeduction(bool b) {
+        deduction = b;
+    }
+
+private:
+    bool deduction;
+    int n1, n2;
+    void *(*distribution)(void *arg);
 };
 
 // IndefiniteRule Super-class
 
-class IndefiniteRule {
-	public:
-		IndefiniteRule () { };
-		virtual ~IndefiniteRule () { };
-		
-		IndefiniteRule (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVb);
+class IndefiniteRule
+{
+public:
+    IndefiniteRule () { };
+    virtual ~IndefiniteRule () { };
 
-		IndefiniteRule (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVb, 
-						IndefiniteTruthValue* const& TVc);
+    IndefiniteRule (IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb);
 
-		IndefiniteRule (IndefiniteTruthValue* const& TVa,
-					    IndefiniteTruthValue* const& TVb, 
-						IndefiniteTruthValue* const& TVc,
-						IndefiniteTruthValue* const& TVab, 
-						IndefiniteTruthValue* const& TVbc,
-						bool deduction);
+    IndefiniteRule (IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb,
+                    IndefiniteTruthValue* const& TVc);
 
-		virtual IndefiniteTruthValue* solve() { return NULL; };
-		IndefiniteTruthValue* conclusion(const pvector& distribution);
-	
-	protected:	
-		vector<IndefiniteTruthValue *> tvset;
-		Sampler *s;
+    IndefiniteRule (IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb,
+                    IndefiniteTruthValue* const& TVc,
+                    IndefiniteTruthValue* const& TVab,
+                    IndefiniteTruthValue* const& TVbc,
+                    bool deduction);
+
+    virtual IndefiniteTruthValue* solve() {
+        return NULL;
+    };
+    IndefiniteTruthValue* conclusion(const pvector& distribution);
+
+protected:
+    vector<IndefiniteTruthValue *> tvset;
+    Sampler *s;
 };
 
 // ***************************************************
 // Sub-classes: ConjunctionRule, ImplicationRule, Revision
-// 				AdbductionRule, BayesRule, DeductionRule
+//     AdbductionRule, BayesRule, DeductionRule
 
-class ConjunctionRule : public IndefiniteRule {
-	public:
-		ConjunctionRule(IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVb);
-		IndefiniteTruthValue* solve();
+class ConjunctionRule : public IndefiniteRule
+{
+public:
+    ConjunctionRule(IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb);
+    IndefiniteTruthValue* solve();
 };
 
-class ImplicationRule : public IndefiniteRule {
-	public:
-		ImplicationRule(IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVb);
-		IndefiniteTruthValue* solve();
-		IndefiniteTruthValue* q_r_conclusion(float lower, float upper,
-						     const vector<vector<float> >& d);
+class ImplicationRule : public IndefiniteRule
+{
+public:
+    ImplicationRule(IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb);
+    IndefiniteTruthValue* solve();
+    IndefiniteTruthValue* q_r_conclusion(float lower, float upper,
+                                         const vector<vector<float> >& d);
 };
 
-class RevisionRule : public IndefiniteRule {
-	public:
-		RevisionRule   (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVb);
-		IndefiniteTruthValue* solve();
+class RevisionRule : public IndefiniteRule
+{
+public:
+    RevisionRule   (IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb);
+    IndefiniteTruthValue* solve();
 };
 
-class BayesRule : public IndefiniteRule {
-	public:
-		BayesRule	   (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVc, 
-						IndefiniteTruthValue* const& TVac);
-		IndefiniteTruthValue* solve();
+class BayesRule : public IndefiniteRule
+{
+public:
+    BayesRule    (IndefiniteTruthValue* const& TVa,
+                  IndefiniteTruthValue* const& TVc,
+                  IndefiniteTruthValue* const& TVac);
+    IndefiniteTruthValue* solve();
 };
 
-class AbductionRule : public IndefiniteRule {
-	public:
-		AbductionRule  (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVb, 
-						IndefiniteTruthValue* const& TVc, 
-						IndefiniteTruthValue* const& TVab,
-						IndefiniteTruthValue* const& TVbc);
-		IndefiniteTruthValue* solve();
+class AbductionRule : public IndefiniteRule
+{
+public:
+    AbductionRule  (IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVb,
+                    IndefiniteTruthValue* const& TVc,
+                    IndefiniteTruthValue* const& TVab,
+                    IndefiniteTruthValue* const& TVbc);
+    IndefiniteTruthValue* solve();
 };
 
-class DeductionRule : public IndefiniteRule {
-	public:
-		DeductionRule  (IndefiniteTruthValue* const& TVa, 
-						IndefiniteTruthValue* const& TVc, 
-						IndefiniteTruthValue* const& TVb, 
-						IndefiniteTruthValue* const& TVab,
-						IndefiniteTruthValue* const& TVbc);
-		IndefiniteTruthValue* solve();
+class DeductionRule : public IndefiniteRule
+{
+public:
+    DeductionRule  (IndefiniteTruthValue* const& TVa,
+                    IndefiniteTruthValue* const& TVc,
+                    IndefiniteTruthValue* const& TVb,
+                    IndefiniteTruthValue* const& TVab,
+                    IndefiniteTruthValue* const& TVbc);
+    IndefiniteTruthValue* solve();
 };
 
 // ***************************************************
 // Factory can create any IndefiniteRule sub-classing
 
 template <typename R, typename T>
-class RuleGenerator {
-	public:
-		R*  CreateRule(T* const& a, 
-					   T* const& b);
+class RuleGenerator
+{
+public:
+    R*  CreateRule(T* const& a,
+                   T* const& b);
 
-		R*  CreateRule(T* const& a, 
-					   T* const& b, 
-					   T* const& c);
+    R*  CreateRule(T* const& a,
+                   T* const& b,
+                   T* const& c);
 
-		R*  CreateRule(T* const& a, 
-					   T* const& b,
-					   T* const& c,
-					   T* const& d,
-					   T* const& e);
+    R*  CreateRule(T* const& a,
+                   T* const& b,
+                   T* const& c,
+                   T* const& d,
+                   T* const& e);
 };
 
 template <typename R, typename T>
-R* 
-	RuleGenerator<R,T>::CreateRule(T* const& a, T* const& b) {
-		return new R(a, b);
+R*
+RuleGenerator<R, T>::CreateRule(T* const& a, T* const& b)
+{
+    return new R(a, b);
 }
 
 template <typename R, typename T>
-R* 
-	RuleGenerator<R,T>::CreateRule(T* const& a, 
-									T* const& b, 
-									T* const& c) {
-		return new R(a, b, c);
+R*
+RuleGenerator<R, T>::CreateRule(T* const& a,
+                                T* const& b,
+                                T* const& c)
+{
+    return new R(a, b, c);
 }
 
 template <typename R, typename T>
-R* 
-	RuleGenerator<R,T>::CreateRule(T* const& a, 
-									T* const& b, 
-									T* const& c,
-									T* const& d,
-									T* const& e) {
-		return new R(a, b, c, d, e);
+R*
+RuleGenerator<R, T>::CreateRule(T* const& a,
+                                T* const& b,
+                                T* const& c,
+                                T* const& d,
+                                T* const& e)
+{
+    return new R(a, b, c, d, e);
 }
 
 } // namespace reasoning
+
 #endif /*INDEFINITEPLNFORMULAS_H */
