@@ -45,21 +45,20 @@ const bool PTLdebug = true;
 ///definine this function, I declared it as inline
 inline bool isAllIndefiniteTruthValueType(TruthValue** TV, int N)
 {
-        for(int i=0; i<N; i++)
-        {
-            if(!(TV[i]->getType() == INDEFINITE_TRUTH_VALUE))
-                return false;
-        }
-        return true;
+    for (int i = 0; i < N; i++) {
+        if (!(TV[i]->getType() == INDEFINITE_TRUTH_VALUE))
+            return false;
+    }
+    return true;
 }
 
 namespace reasoning
 {
 
 
-/*=========================================================================================
-  Macros of common body parts
-=========================================================================================*/ 
+/*=============================================================================
+  Macros of common body parts 
+=============================================================================*/
 
 #define PTLFormulaBodyFor_Link \
     assert(N == 1); \
@@ -67,7 +66,7 @@ namespace reasoning
     TruthValue* linkAB = TV[0]; \
     float sAB = linkAB->getMean(); \
     float nAB = linkAB->getCount(); \
-
+     
 #define PTLFormulaBodyFor_Atom2 \
     assert(N == 2); \
     assert(TV[0]); \
@@ -76,7 +75,7 @@ namespace reasoning
     float nA = TV[0]->getCount(); \
     float sB = TV[1]->getMean(); \
     float nB = TV[1]->getCount(); \
-
+     
 #define PTLFormulaBodyFor_Link1Node2 \
     assert(N == 3); \
     assert(TV[0]); \
@@ -91,7 +90,7 @@ namespace reasoning
     float nAB = linkAB->getCount(); \
     float nA = atomA->getCount(); \
     float nB = atomB->getCount();
- 
+
 #define PTLFormulaBodyFor_Link2Node2 \
     assert(N == 4); \
     assert(TV[0]); \
@@ -110,7 +109,7 @@ namespace reasoning
     float nBA = linkBA->getCount(); \
     float nA = atomA->getCount(); \
     float nB = atomB->getCount();
- 
+
 #define PTLFormulaBodyFor_Link2Node3 \
     assert(N == 5); \
     assert(TV[0]); \
@@ -146,28 +145,29 @@ namespace reasoning
 
 
 
-//=======================================================================================//	
-TruthValue* TautologyFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* TautologyFormula::simpleCompute(TruthValue** TV,
+                                            int N, long U) const
 {
-    assert(N>0);
+    assert(N > 0);
     return TV[0]->clone();
 }
 
-/*=========================================================================================
+/*=============================================================================
     simpleCompute() methods take parameters in the order:
     {link Tvalues}, { node Tvalues }
-=========================================================================================*/ 
+=============================================================================*/
 
-//=======================================================================================// 
-TruthValue* InversionFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
+                                            int N, long U) const
 {
     printf("Invert...\n");
-    
+
     ///IndefiniteTV check
-    if(isAllIndefiniteTruthValueType(TV,N))
-    {
+    if (isAllIndefiniteTruthValueType(TV, N)) {
         printf("IndefiniteSymmetricBayesFormula\n");
-        return IndefiniteSymmetricBayesFormula().simpleCompute(TV,N,U);
+        return IndefiniteSymmetricBayesFormula().simpleCompute(TV, N, U);
     }
 
     PTLFormulaBodyFor_Link1Node2;
@@ -176,81 +176,81 @@ TruthValue* InversionFormula::simpleCompute(TruthValue** TV,int N, long U) const
     float sBA = sAB * sA / fmax_(sB, 0.00001f);
     float nBA = nAB * nB / fmax_(nA, 0.00001f);
 
-    return checkTruthValue( new SimpleTruthValue(sBA,nBA) );
+    return checkTruthValue( new SimpleTruthValue(sBA, nBA) );
 }
 
-//=======================================================================================// 
-TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
+                                                       int N, long U) const
 {
     printf("InferenceMindAgent::ImplicationBreakdown\n");
 
     ///IndefiniteTV check
-    if(isAllIndefiniteTruthValueType(TV,N))
-    {
+    if (isAllIndefiniteTruthValueType(TV, N)) {
         printf("IndefiniteSymmetricImplicationBreakdown\n");
-        return IndefiniteSymmetricImplicationBreakdownFormula().simpleCompute(TV,N,U);
+        return IndefiniteSymmetricImplicationBreakdownFormula().simpleCompute(TV, N, U);
     }
 
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
     float n2 = min(nAB, nA);
-    float s2 = ((n2 + nB)>0)
-                ? ( 2* (sAB * sA * n2   + sB*(1-sA)*nB) //((sAB * sA * n2 + sB*nB)
-				/ fmax_((n2 + nB), 0.00001f))
-                : sB;
+    float s2 = ((n2 + nB) > 0)
+               ? ( 2 * (sAB * sA * n2   + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
+                   / fmax_((n2 + nB), 0.00001f))
+               : sB;
 
-    if (n2 < nB)
-    {
+    if (n2 < nB) {
         s2 = sB;
         n2 = nB;
     }
-    
+
     printf("ImBD: %f %f %f %f %f", s2, n2, (sAB * sA * n2 + sB*nB), sA, sB);
 
-    return checkTruthValue(  new SimpleTruthValue(s2,n2) );
+    return checkTruthValue(  new SimpleTruthValue(s2, n2) );
 }
 
-//=======================================================================================// 
-TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//=======================================================================================//
+TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
+                                                          int N, long U) const
 {
     printf("InferenceMindAgent::ImplicationConstruction\n");
 
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float s2 = ((sA>0) ? (sAB / sA) : 0);
-   
+    float s2 = ((sA > 0) ? (sAB / sA) : 0);
 
-    return checkTruthValue(  new SimpleTruthValue(s2,nAB) );
+
+    return checkTruthValue(  new SimpleTruthValue(s2, nAB) );
 }
 
-//=======================================================================================// 
-TruthValue* NotFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* NotFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("InferenceMindAgent::NotEvaluation\n");
 
     PTLFormulaBodyFor_Atom2;
     DebugPTLBodyFor_Link2;
 
-/*    float s2 = (nA*sA + 1 - nB*sB) / (nA + nB); // s(LINK) - s(NOT)
-    if (s2 < 0.0f) s2 = 0.0f;
-    float n2 = (nA - nB);
-    if (n2 < 0.0f) n2 = 0.0f;*/
+    /*    float s2 = (nA*sA + 1 - nB*sB) / (nA + nB); // s(LINK) - s(NOT)
+        if (s2 < 0.0f) s2 = 0.0f;
+        float n2 = (nA - nB);
+        if (n2 < 0.0f) n2 = 0.0f;*/
 
     return checkTruthValue(  new SimpleTruthValue(1.0f - sB, nB) );
 }
 
-//=======================================================================================// 
-TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
+                                                  int N, long U) const
 {
     printf("InferenceMindAgent::deduct(handleA, linkType, nodeType)\n");
 
     ///IndefiniteTV check
-    if(isAllIndefiniteTruthValueType(TV,N))
-    {
+    if (isAllIndefiniteTruthValueType(TV, N)) {
         printf("IndefiniteSymmetricDeductionFormula\n");
-        return IndefiniteSymmetricDeductionFormula().simpleCompute(TV,N,U);
+        return IndefiniteSymmetricDeductionFormula().simpleCompute(TV, N, U);
     }
 
     TruthValue* linkTEMP = TV[0];
@@ -258,37 +258,46 @@ TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,int N, long U)
     PTLFormulaBodyFor_Link2Node3;
     DebugPTLBodyFor_Link2Node3;
 
-     /// Temporary filtering fix to make sure that nAB >= nA
-     nA = min(nA, nAB);
+    /// Temporary filtering fix to make sure that nAB >= nA
+    nA = min(nA, nAB);
 
     float secondDenominator = fmax_( (1 - sB), TV_MIN);
     float thirdDenominator = fmax_( nB, TV_MIN);
 
     float w1 = DEDUCTION_TERM_WEIGHT;
-    float w2 = 2-w1;
-    float sAC = w1 * sAB * sBC + w2 * (1 - sAB) * (sC - sB * sBC) / secondDenominator;
+    float w2 = 2 - w1;
+    float sAC =
+        w1 * sAB * sBC 
+        + w2 * (1 - sAB) * (sC - sB * sBC) / secondDenominator;
+
     float nAC = IndependenceAssumptionDiscount * nA * nBC / thirdDenominator;
 
-    return checkTruthValue(  new SimpleTruthValue(sAC,nAC) );
+    return checkTruthValue(  new SimpleTruthValue(sAC, nAC) );
 }
 
-//=======================================================================================// 
-float DeductionGeometryFormula::g(float sA, float sB, float sC, float sAB) const
+//===========================================================================//
+float DeductionGeometryFormula::g(float sA, float sB,
+                                  float sC, float sAB) const
 {
-     float p1 = Abs(sA - sB) / fmax_(sA + sB, TV_MIN);
-     float p2 = 1 - fmin_(1+sB - sAB*sA - sC, sA+sB-sAB*sA) + fmax_(sB, 1-sC);
+    float p1 = Abs(sA - sB) / fmax_(sA + sB, TV_MIN);
+    float p2 =
+        1
+        - fmin_(1 + sB - sAB * sA - sC, sA + sB - sAB * sA)
+        + fmax_(sB, 1 - sC);
 
-     return p1+(1-p1)*p2;
+    return p1 + (1 - p1)*p2;
 }
 
-//=======================================================================================// 
-float DeductionGeometryFormula::g2(float sA, float sB, float sC, float sAB) const
+//===========================================================================//
+float DeductionGeometryFormula::g2(float sA, float sB,
+                                   float sC, float sAB) const
 {
-      return 1.0f;
+    return 1.0f;
 }
 
-//=======================================================================================// 
-TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
+                                                    int N, long U) const
 {
     printf("Geom: deduct\n");
 
@@ -300,24 +309,31 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,int N, long 
 
     float sBA = linkBA->getMean();
 
-    float sAC = sAB * sBC * (1 + g(sA,sB,sC,sAB)*fmax_(0, -1 + 1/(fmax_(sBA+sBC, TV_MIN)))) + 
-            (1-sAB)*(1-sBC)*(1 + g(sA,1-sB,sC,sAB)*fmax_(0, -1 + 1/fmax_(1-sBA+1-sBC, TV_MIN)));
-    float nAC = IndependenceAssumptionGeometryDiscount * nA * nBC / fmax_(nB,TV_MIN);
+    float sAC =
+        sAB * sBC
+        * (1 + g(sA, sB, sC, sAB)
+           * fmax_(0, -1 + 1 / (fmax_(sBA + sBC, TV_MIN))))
+        + (1 - sAB) * (1 - sBC)
+        * (1 + g(sA, 1 - sB, sC, sAB)
+           * fmax_(0, -1 + 1 / fmax_(1 - sBA + 1 - sBC, TV_MIN)));
+    float nAC =
+        IndependenceAssumptionGeometryDiscount * nA * nBC
+        / fmax_(nB, TV_MIN);
 
     return NULL;
     //    return checkTruthValue(  new SimpleTruthValue(sAC,nAC) );
 }
 
-//=======================================================================================// 
-TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
+                                           int N, long U) const
 {
     printf("Revision...\n");
 
     ///IndefiniteTV check
-    if(isAllIndefiniteTruthValueType(TV,N))
-    {
+    if (isAllIndefiniteTruthValueType(TV, N)) {
         printf("IndefiniteSymmetricRevisionFormula\n");
-        return IndefiniteSymmetricRevisionFormula().simpleCompute(TV,N,U);
+        return IndefiniteSymmetricRevisionFormula().simpleCompute(TV, N, U);
     }
 
     PTLFormulaBodyFor_Atom2;
@@ -330,41 +346,47 @@ TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,int N, long U) const
     float c_count = REVISION_COUNT_DEPENDENCY;
 
     float s3 = (wA * sA + wB * sB - c_strength * sA * sB);
-    float n3 = fmax_(nA,nB) + c_count * fmin_(nA, nB);
- 
-    return checkTruthValue( new SimpleTruthValue(s3,n3) );
+    float n3 = fmax_(nA, nB) + c_count * fmin_(nA, nB);
+
+    return checkTruthValue( new SimpleTruthValue(s3, n3) );
 }
 
-//=======================================================================================// 
-TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
+                                          int N, long U) const
 {
     printf("Inh2Sim...\n");
 
     PTLFormulaBodyFor_Link2Node2;
     DebugPTLBodyFor_Link2Node2;
 
-    float sABsim = 1 / ( ( 1 + sA / fmax_(sB,TV_MIN)) / fmax_(sAB - 1, TV_MIN));
+    float sABsim =
+        1 / ( ( 1 + sA / fmax_(sB, TV_MIN)) / fmax_(sAB - 1, TV_MIN));
+
     float nABsim = nAB + nBA - sAB * nA;
 
-    return checkTruthValue( new SimpleTruthValue(sABsim,nABsim) );
+    return checkTruthValue( new SimpleTruthValue(sABsim, nABsim) );
 }
 
-//=======================================================================================// 
-TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("Sim2Inh...\n");
 
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float sABinh = (1 + sB/fmax_(sA, TV_MIN))*sAB/(1 + fmax_(sAB, TV_MIN));
-    float nABinh =  (nAB + sAB*nA) * nA / fmax_( nA + nB, TV_MIN );
- 
+    float sABinh =
+        (1 + sB / fmax_(sA, TV_MIN)) * sAB / (1 + fmax_(sAB, TV_MIN));
+
+    float nABinh =  (nAB + sAB * nA) * nA / fmax_( nA + nB, TV_MIN );
+
     return checkTruthValue( new SimpleTruthValue(sABinh, nABinh) );
 }
 
-//=======================================================================================// 
-TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
+                                               int N, long U) const
 {
     printf("ANDbreak...\n");
 
@@ -373,26 +395,27 @@ TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,int N, long U) co
 
     float sA = sAB;
     float nA = nAB;
- 
+
     return checkTruthValue( new SimpleTruthValue(sA, nA) );
 }
 
-//=======================================================================================// 
-TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
+                                              int N, long U) const
 {
     printf("Modus Ponens...\n");
 
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_atom2;
 
-    float sC = sA*sB + DefaultNodeProbability*(1-sA);
+    float sC = sA * sB + DefaultNodeProbability * (1 - sA);
     float nC = nA;
- 
+
     return checkTruthValue( new SimpleTruthValue(sC, nC) );
 }
 
-//=======================================================================================// 
-TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("Inh2Imp...\n");
 
@@ -402,8 +425,8 @@ TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV,int N, long U) const
     return checkTruthValue( new SimpleTruthValue(sAB, nAB) );
 }
 
-//=======================================================================================// 
-TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("Imp2Inh...\n");
 
@@ -412,34 +435,34 @@ TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV,int N, long U) const
 
     //    float sAB = sAB;
     //    float nAB = nAB;
- 
+
     return checkTruthValue( new SimpleTruthValue(sAB, nAB) );
 }
 
-//=======================================================================================// 
-TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("Mem2Inh...\n");
-    
+
     ///IndefiniteTV check
-    if(isAllIndefiniteTruthValueType(TV,N))
-    {
+    if (isAllIndefiniteTruthValueType(TV, N)) {
         printf("IndefiniteMem2InhFormula\n");
-        return IndefiniteMem2InhFormula().simpleCompute(TV,N,U);
+        return IndefiniteMem2InhFormula().simpleCompute(TV, N, U);
     }
-      
-      
+
+
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
-      
+
     float sABinh = sAB;
     float nABinh = nAB * MembershipToExtensionalInheritanceCountDiscountFactor;
 
     return checkTruthValue( new SimpleTruthValue(sABinh, nABinh) );
 }
 
-//=======================================================================================// 
-TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,
+                                           int N, long U) const
 {
     printf("Mem2Eval...\n");
 
@@ -448,12 +471,13 @@ TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,int N, long U) const
 
     //    float sABext = sAB;
     //float nABext = nAB;
- 
+
     return checkTruthValue( new SimpleTruthValue(sAB, nAB) );
 }
 
-//=======================================================================================// 
-TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,
+                                           int N, long U) const
 {
     printf("Eval2Inh...\n");
 
@@ -462,12 +486,12 @@ TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,int N, long U) const
 
     //    float sABext = sAB;
     //float nABext = nAB;
- 
+
     return checkTruthValue( new SimpleTruthValue(sAB, nAB) );
 }
 
-//=======================================================================================// 
-TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("Ext2Int...\n");
 
@@ -476,12 +500,12 @@ TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV,int N, long U) const
 
     float sABint = sAB;
     float nABint = nAB * ExtensionToIntensionCountDiscountFactor;
- 
+
     return checkTruthValue( new SimpleTruthValue(sABint, nABint) );
 }
 
-//=======================================================================================// 
-TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("Int2Ext...\n");
 
@@ -490,43 +514,40 @@ TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV,int N, long U) const
 
     float sABint = sAB;
     float nABint = nAB * IntensionToExtensionCountDiscountFactor;
- 
+
     return checkTruthValue( new SimpleTruthValue(sABint, nABint) );
 }
 
-//=======================================================================================// 
-TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,int N, long U) const
-  {
-      //if (Log::getDefaultLevel() >= 3) printf("Logical AND...\n");
+//===========================================================================//
+TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
+                                               int N, long U) const
+{
+    //if (Log::getDefaultLevel() >= 3) printf("Logical AND...\n");
     printf("SymmetricAND...\n");
 
-        /* Indefinite Formula */    
-    if(isAllIndefiniteTruthValueType(TV, N))
-    {
+    /* Indefinite Formula */
+    if (isAllIndefiniteTruthValueType(TV, N)) {
         printf("IndefiniteSymmetricANDFormula\n");
-        if(N==2)
-        {
-            return IndefiniteSymmetricANDFormula().simpleCompute(TV,N,U);
+        if (N == 2) {
+            return IndefiniteSymmetricANDFormula().simpleCompute(TV, N, U);
         }
-        
+
         IndefiniteTruthValue* _TV[2];
-        IndefiniteTruthValue* result=(IndefiniteTruthValue*)TV[0];
-        for(int i=1; i<N; i++)
-        {
-            _TV[0]=result;
-			_TV[1]=(IndefiniteTruthValue*)TV[i];
-            result=(IndefiniteTruthValue*)IndefiniteSymmetricANDFormula().simpleCompute((TruthValue**)_TV,2,U);
+        IndefiniteTruthValue* result = (IndefiniteTruthValue*)TV[0];
+        for (int i = 1; i < N; i++) {
+            _TV[0] = result;
+            _TV[1] = (IndefiniteTruthValue*)TV[i];
+            result = (IndefiniteTruthValue*)IndefiniteSymmetricANDFormula().simpleCompute((TruthValue**)_TV, 2, U);
         }
         return result;
     }
     /* End of Indefinite Formulas */
-    
+
 
     float sTot = 1.0f;
     float conTot = 1.0f;
 
-    for (int i = 0; i < N; i++)
-    {
+    for (int i = 0; i < N; i++) {
         printf("%f,%f & ", TV[i]->getMean(), TV[i]->getConfidence());
         sTot *= TV[i]->getMean();
         conTot *= TV[i]->getConfidence();
@@ -534,7 +555,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,int N, long U) co
 
     float sAND = sTot;
     float nAND = SimpleTruthValue::confidenceToCount(conTot);
-	//float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+    //float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     //KKK * conTot / (1 - conTot); /// The standard count=>confidence formula!
 
 //  printf(" = %f\n", sAND);
@@ -542,99 +563,97 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,int N, long U) co
 //    assert(nTot <= 1.0f);
 
     TruthValue* retTV = new SimpleTruthValue(sAND, nAND);
-    
- 
+
+
     return checkTruthValue(retTV);
 }
 
-//=======================================================================================// 
-TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
+//===========================================================================//
+TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
+                                                int N, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) printf("Logical AND2...\n");
 
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_Atom2;
 
-    float sAND = sA*sB;
+    float sAND = sA * sB;
     float nAND = nB;
- 
+
     return checkTruthValue( new SimpleTruthValue(sAND, nAND) );
 }
 
-//=======================================================================================// 
-TruthValue* OldANDFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* OldANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("OldAND...\n");
 
 
-    float mean = TV[0]->getMean()* TV[1]->getMean();
+    float mean = TV[0]->getMean() * TV[1]->getMean();
     float count1 = TV[0]->getCount();
     float count2 = TV[1]->getCount();
-    float count = count1 > count2? count2: count1;
+    float count = count1 > count2 ? count2 : count1;
 
     TruthValue* retTV = new SimpleTruthValue(mean, count);
 
     return checkTruthValue(retTV);
 }
 
-//=======================================================================================// 
-TruthValue* ORFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-	printf( "Logical OR with : ");
-	for (int k=0;k<N;k++)
-		printf( "#%d:%s ", k, TV[k]->toString().c_str());
-	printf("\n");
+    printf( "Logical OR with : ");
+    for (int k = 0;k < N;k++)
+        printf( "#%d:%s ", k, TV[k]->toString().c_str());
+    printf("\n");
 
     auto_ptr<TruthValue> res1, res2;
-	  
-	if (N>2)
-	{
-//		TVType* next[2];
-	  
-		int N1 = (int)(N/2);
-		int N2 = (int)(N/2.0 + 0.501);
-		
-		printf( "Division: %d - %d\n", N1, N2);
-		
-		if (N1 == 1) //Either (>1, >1) or (1, >1).
-		{
-			TV[1] = simpleCompute(&TV[N1], N2, U);
-			
-			res1 = auto_ptr<TruthValue>(TV[1]);
-		}
-		else
-		{
-			TV[0] = simpleCompute(TV, N1,U);
-			TV[1] = simpleCompute(&TV[N1], N2, U);
-			
-			res1 = auto_ptr<TruthValue>(TV[0]);
-			res2 = auto_ptr<TruthValue>(TV[1]);
-		}		
-  	}
+
+    if (N > 2) {
+//  TVType* next[2];
+
+        int N1 = (int)(N / 2);
+        int N2 = (int)(N / 2.0 + 0.501);
+
+        printf( "Division: %d - %d\n", N1, N2);
+
+        if (N1 == 1) { //Either (>1, >1) or (1, >1).
+            TV[1] = simpleCompute(&TV[N1], N2, U);
+
+            res1 = auto_ptr<TruthValue>(TV[1]);
+        } else {
+            TV[0] = simpleCompute(TV, N1, U);
+            TV[1] = simpleCompute(&TV[N1], N2, U);
+
+            res1 = auto_ptr<TruthValue>(TV[0]);
+            res2 = auto_ptr<TruthValue>(TV[1]);
+        }
+    }
 
     float sTot = 0.0f;
     float nTot = 0.0f;
 
     for (int i = 0; i < 2; i++)
-		sTot += TV[i]->getMean();
-	
-	float sA = TV[0]->getMean();
-	float sB = TV[1]->getMean();
-	float nA = TV[0]->getCount();
-	float nB = TV[1]->getCount();
+        sTot += TV[i]->getMean();
 
-	float A = sA*nB;
-	float B = sB*nA;
+    float sA = TV[0]->getMean();
+    float sB = TV[1]->getMean();
+    float nA = TV[0]->getCount();
+    float nB = TV[1]->getCount();
 
-	nTot = nA+nB - (A+B)/2;
-	
-	printf( "nA=%.4f nB=%.4f nTot=%.4f\n",nA,nB,nTot);
+    float A = sA * nB;
+    float B = sB * nA;
+
+    nTot = nA + nB - (A + B) / 2;
+
+    printf( "nA=%.4f nB=%.4f nTot=%.4f\n", nA, nB, nTot);
 
     return checkTruthValue( new SimpleTruthValue(sTot, nTot) );
 }
 
-//=======================================================================================// 
-TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
+                                              int N, long U) const
 {
 //  LOG(3, "Logical OR...\n");
 //  int level1N = haxx::contractInclusionExclusionFactorial(N); //2*(int)(sqrt(N)); //inverse of N*(N-1)/2
@@ -644,23 +663,21 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,int N, long U) con
     int level1N = 2;
     assert(N == 3);
 
-    assert(level1N*(level1N+1)/2 == N);
+    assert(level1N*(level1N + 1) / 2 == N);
 
     float sTot = 0.0f;
     float nTot = 0.0f;
 
-    long ptr=0;
+    long ptr = 0;
 
-    for (int i = 0; i < level1N; i++)
-    {
+    for (int i = 0; i < level1N; i++) {
 //      printf("%f & ", TV[i]->getMean());
         sTot += TV[ptr]->getMean();
 //      nTot += TV[ptr]->getCount();
         ptr++;
     }
-    for (int k = 0; k < level1N-1; k++)
-        for (int j = k+1; j < level1N; j++)
-        {
+    for (int k = 0; k < level1N - 1; k++)
+        for (int j = k + 1; j < level1N; j++) {
             if (ptr >= N)
                 break;
             sTot -= TV[ptr]->getMean();
@@ -668,54 +685,51 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,int N, long U) con
             ptr++;
         }
 
-    if (level1N!=2)
-    {
+    if (level1N != 2) {
         assert(0);
         nTot = 0.0f;
         //LOG(0, "OR RULE WRONG NR OF ARGS");
-    }
-    else
-    {
+    } else {
         float sA = TV[0]->getMean();
         float sB = TV[1]->getMean();
         float nA = TV[0]->getCount();
         float nB = TV[1]->getCount();
 
-        float A = sA*nB;
-        float B = sB*nA;
+        float A = sA * nB;
+        float B = sB * nA;
 
-        nTot = nA+nB - (A+B)/2;
+        nTot = nA + nB - (A + B) / 2;
     }
 
     float sOR = sTot;
-	float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+    float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     float nOR = nTot  * KKK;
 
 //  printf(" = %f\n", sAND);
- 
+
     return checkTruthValue( new SimpleTruthValue(sOR, nOR) );
 }
 
-//=======================================================================================// 
-TruthValue* NOTFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-      //if (Log::getDefaultLevel() >= 3) printf("Logical NOT...\n");
+    //if (Log::getDefaultLevel() >= 3) printf("Logical NOT...\n");
 
     PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;    
+    DebugPTLBodyFor_Link;
 
-    float sNOT = 1-sAB;
+    float sNOT = 1 - sAB;
     float nNOT = nAB;
- 
+
     return checkTruthValue( new SimpleTruthValue(sNOT, nNOT) );
 }
 
-//=======================================================================================// 
-TruthValue* ORFormula2::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* ORFormula2::simpleCompute(TruthValue** TV, int N, long U) const
 {
-      //if (Log::getDefaultLevel() >= 3) printf("Logical OR...\n");
+    //if (Log::getDefaultLevel() >= 3) printf("Logical OR...\n");
 
-    NOTFormula notF; 
+    NOTFormula notF;
     TruthValue** NOT_TVs = notF.multiCompute(TV, N, U);
     TruthValue* NOT_ANDTV = SymmetricANDFormula().simpleCompute(NOT_TVs, N, U);
     TruthValue* ORTV = notF.simpleCompute( &NOT_ANDTV, 1, U );
@@ -723,87 +737,89 @@ TruthValue* ORFormula2::simpleCompute(TruthValue** TV,int N, long U) const
     delete NOT_ANDTV;
 
     for (int i = 0; i < N; i++)
-      delete NOT_TVs[i];
-    delete[] NOT_TVs;        
+        delete NOT_TVs[i];
+    delete[] NOT_TVs;
 
     return ORTV;
 }
 
-//=======================================================================================// 
-TruthValue* OldORFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("OldOR...\n");
 
-    float mean = 1 - ((1 - TV[0]->getMean())*(1 - TV[1]->getMean()));
+    float mean = 1 - ((1 - TV[0]->getMean()) * (1 - TV[1]->getMean()));
     float count1 = TV[0]->getCount();
     float count2 = TV[1]->getCount();
-    float count = count1 > count2? count2: count1;
+    float count = count1 > count2 ? count2 : count1;
 
     TruthValue* retTV = new SimpleTruthValue(mean, count);
 
     return checkTruthValue(retTV);
 }
 
-/*=========================================================================================
+/*=============================================================================
    Params: {set1, set2} where sizes are equal.
-=========================================================================================*/ 
+=============================================================================*/
 
-//=======================================================================================// 
+//===========================================================================//
 float SubsetEvalFormula::f1(float a, float b) const
 {
-    return fmin_(a,b);
+    return fmin_(a, b);
 }
 
-//=======================================================================================// 
+//===========================================================================//
 float SubsetEvalFormula::f2(float a, float b) const
 {
     return a*b;
 }
 
-//=======================================================================================// 
-TruthValue* SubsetEvalFormula::compute(TruthValue** TVsub,int Nsub, TruthValue** TVsuper,int Nsuper, long U) const
+//===========================================================================//
+TruthValue* SubsetEvalFormula::compute(TruthValue** TVsub, int Nsub,
+                                       TruthValue** TVsuper, int Nsuper,
+                                       long U) const
 {
     assert(Nsuper == Nsub); //Must be balanced with padded zeros
 
     //if (Log::getDefaultLevel() >= 3) printf("SubSetEval...\n");
-    
+
     float sTot = 1.0f;
     float nTot = 1.0f;
-    
+
     float fs = 0.0f, s = 0.0f;
-    
-    int i=0, n = fmin_(Nsuper, Nsub);
-    for (i = 0; i < n; i++)
-    {
+
+    int i = 0, n = fmin_(Nsuper, Nsub);
+    for (i = 0; i < n; i++) {
         fs += f1(TVsub[i]->getMean(), TVsuper[i]->getMean());
         s += TVsub[i]->getMean();
     }
-    
+
     float sSS = fs / fmax_(s, TV_MIN);
     float nSS = (float)Nsuper;
-    
+
     return new SimpleTruthValue(sSS, nSS);
     //  return checkTruthValue( new SimpleTruthValue(sSS, nSS) );
 }
 
-//=======================================================================================// 
-float SubsetEvalFormula2::f(float a, float b) const 
-{ 
-    return a*b; 
+//===========================================================================//
+float SubsetEvalFormula2::f(float a, float b) const
+{
+    return a*b;
 }
 
-//=======================================================================================// 
-float SubsetEvalFormula1::f(float a, float b) const 
-{ 
-    return fmin_(a, b); 
+//===========================================================================//
+float SubsetEvalFormula1::f(float a, float b) const
+{
+    return fmin_(a, b);
 }
 
-/*=========================================================================================
-   Args: The list of truthvalues of atoms for which the predicate expression has been evaluated
-=========================================================================================*/ 
+/*=============================================================================
+   Args: The list of truthvalues of atoms for which the predicate expression
+   has been evaluated
+=============================================================================*/
 
-//=======================================================================================// 
-TruthValue* FORALLFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* FORALLFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) printf("For all...\n");
 
@@ -811,27 +827,26 @@ TruthValue* FORALLFormula::simpleCompute(TruthValue** TV,int N, long U) const
     float nForAll = 0.0f;
     float wForAll = 0.0f;
 
-    for (int i = 0; i < N; i++)
-    {
-        float n_i = TV[i]->getCount();      
+    for (int i = 0; i < N; i++) {
+        float n_i = TV[i]->getCount();
         float w_i = sqrt(n_i);
         nForAll += n_i;
         wForAll += w_i;
         sForAll += (TV[i]->getMean() * w_i);
     }
-    
+
     return checkTruthValue( new SimpleTruthValue(sForAll / wForAll, nForAll) );
 }
 
-//=======================================================================================// 
-TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,
+                                              int N, long U) const
 {
     float sForAll = 0.0f;
     float nForAll = 0.0f;
 
-    for (int i = 0; i < N; i++)
-    {
-        float n_i = TV[i]->getCount();      
+    for (int i = 0; i < N; i++) {
+        float n_i = TV[i]->getCount();
         nForAll += n_i;
         sForAll += (TV[i]->getMean() * n_i);
     }
@@ -839,9 +854,9 @@ TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,int N, long U) con
     return checkTruthValue( new SimpleTruthValue(sForAll / nForAll, nForAll) );
 }
 
-//=======================================================================================// 
-TruthValue* EXISTFormula::simpleCompute(TruthValue** TV,int N, long U) const
-  {
+//===========================================================================//
+TruthValue* EXISTFormula::simpleCompute(TruthValue** TV, int N, long U) const
+{
     //if (Log::getDefaultLevel() >= 3) printf("Exists...\n");
 
     NotFormula notF;
@@ -852,7 +867,7 @@ TruthValue* EXISTFormula::simpleCompute(TruthValue** TV,int N, long U) const
     delete NOT_EXTV;
 
     for (int i = 0; i < N; i++)
-      delete NOT_TVs[i];
+        delete NOT_TVs[i];
     delete[] NOT_TVs;
 
     return EXTV;
@@ -867,8 +882,9 @@ TruthValue* EXISTFormula::simpleCompute(TruthValue** TV,int N, long U) const
     return checkTruthValue( new SimpleTruthValue(sEx, N) );*/
 }
 
-//=======================================================================================// 
-TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,int N, long U) const
+//===========================================================================//
+TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
+                                           int N, long U) const
 {
     printf("InferenceMindAgent::InhSubstFormula\n");
 
@@ -878,56 +894,58 @@ TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,int N, long U) const
     //float s2 = ((sA>0) ? (sAB / sA) : 0);
 
     float k = 800;
-    float d1 = nA/ (nA+k);
+    float d1 = nA / (nA + k);
     float c_PAT = 0.75;
 
     float n3 = c_PAT * nB * d1 * sA;
     float s3 = sB;
 
-    return checkTruthValue(  new SimpleTruthValue(s3,n3) );
+    return checkTruthValue(  new SimpleTruthValue(s3, n3) );
 }
 
-/*=========================================================================================
+/*=============================================================================
    Implementation of the methods from Formula.h file
-=========================================================================================*/ 
+=============================================================================*/
 
-//=======================================================================================// 
+//===========================================================================//
 template<int _TVN>
-TruthValue* Formula<_TVN>::simpleCompute(TruthValue** TV,int N, long U) const
+TruthValue* Formula<_TVN>::simpleCompute(TruthValue** TV, int N, long U) const
 {
     //printf("Formula<_TVN>::simpleCompute(N = %d)\n", N);
     return this->simpleCompute(TV, N, U);
 }
 
-//=======================================================================================// 
+//===========================================================================//
 template<int _TVN>
 TruthValue** Formula<_TVN>::multiCompute(TruthValue** TV, int N, long U) const
 {
     //printf("Formula<_TVN>::multiCompute(N = %d)\n", N);
-    assert(!(TVN/N));
-  
+    assert(!(TVN / N));
+
     TruthValue** ret = new TruthValue*[N/TVN];
-  
+
     for (int group = 0; group < N / TVN; group++) {
         ret[group] = simpleCompute(&TV[group*TVN], TVN, U);
     }
-  
+
     return ret;
 }
-    
-//=======================================================================================// 
+
+//===========================================================================//
 template<int _TVN>
 TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
 {
     //printf("Formula<_TVN>::compute(N = %d)\n", N);
     TruthValue* result;
     // computation with primary TVS
-    TruthValue* primaryResult = this->simpleCompute(TV, N, U); 
-    // Check for existence of CompositeTruthValues and makes computation for each VersionHandle
+    TruthValue* primaryResult = this->simpleCompute(TV, N, U);
+    // Check for existence of CompositeTruthValues and makes computation
+    // for each VersionHandle
     bool hasCompositeTruthValue = false;
     //std::set<VersionHandle> versionHandles
-    //NOTE: Using VersionedTruthValueMap because set<VersionHandle> caused a lot of weird compiler errors
-    VersionedTruthValueMap versionHandles; 
+    // NOTE: Using VersionedTruthValueMap because set<VersionHandle>
+    // caused a lot of weird compiler errors
+    VersionedTruthValueMap versionHandles;
     for (int i = 0; i < N; i++) {
         if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {
             hasCompositeTruthValue = true;
@@ -941,17 +959,20 @@ TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
     }
     // Temporary ForwardChainer demo hack
     if (0) { //hasCompositeTruthValue) {
-        CompositeTruthValue* compositeResult = new CompositeTruthValue(*primaryResult, NULL_VERSION_HANDLE);
+        CompositeTruthValue* compositeResult =
+            new CompositeTruthValue(*primaryResult, NULL_VERSION_HANDLE);
         delete primaryResult;
         for (VersionedTruthValueMap::const_iterator itr = versionHandles.begin(); itr != versionHandles.end(); itr++) {
             VersionHandle vh = itr->first;
-			std::auto_ptr<TruthValue*> versionedTVs(new TruthValue*[N]);
+            std::auto_ptr<TruthValue*> versionedTVs(new TruthValue*[N]);
             int numberOfCompatibleTvs = 0;
             for (int i = 0; i < N; i++) {
                 if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {
-                    const TruthValue& versionedTV = ((CompositeTruthValue*) TV[i])->getVersionedTV(vh);
+                    const TruthValue& versionedTV =
+                        ((CompositeTruthValue*) TV[i])->getVersionedTV(vh);
                     if (!versionedTV.isNullTv()) {
-                        versionedTVs.get()[numberOfCompatibleTvs++] = (TruthValue*) &versionedTV;
+                        versionedTVs.get()[numberOfCompatibleTvs++]
+                            = (TruthValue*) & versionedTV;
                     }
                 }
             }
@@ -966,7 +987,8 @@ TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
     return result;
 }
 
-// All instantiations of Formula<_TVN> so that link error (undefined reference) does not happen
+// All instantiations of Formula<_TVN> so that link error
+// (undefined reference) does not happen
 template TruthValue* Formula<1>::compute(TruthValue** TV, int N, long U) const;
 template TruthValue* Formula<2>::compute(TruthValue** TV, int N, long U) const;
 template TruthValue* Formula<3>::compute(TruthValue** TV, int N, long U) const;
