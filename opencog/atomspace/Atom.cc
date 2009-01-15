@@ -212,9 +212,14 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
 
 void Atom::addOutgoingAtom(Handle h)
 {
-    HandleSeq replacementOutgoing(outgoing);
-    replacementOutgoing.push_back(h);
-    setOutgoingSet(replacementOutgoing);
+#ifdef PEFORM_INVALID_HANDLE_CHECKS
+    // We'd like to perform a test for valid values here, but it seems
+    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
+    // which it hopefully repairs later on ...
+    if (TLB::isInvalidHandle(h))
+        throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
+#endif
+    outgoing.push_back(h);
 }
 
 Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
