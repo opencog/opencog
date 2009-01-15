@@ -38,40 +38,42 @@ float IndefiniteTruthValue::diffError = 0.001f;
 float IndefiniteTruthValue::s = 0.5f;
 
 // Formula defined in the integral of step one [(x-L1)^ks * (U1-x)^k(1-s)
-static double integralFormula (double x, void * params) {
-	double L_, U_,k_,s_;
-	double *in_params = static_cast<double*>(params);
-	L_ = in_params[0];
-	U_ = in_params[1];
-	k_ = in_params[2];
-	s_ = in_params[3];
-	double f = (pow((x-L_),(k_*s_))) * pow((U_-x),(k_*(1-s_)));
-	return f;
+static double integralFormula (double x, void * params)
+{
+    double L_, U_, k_, s_;
+    double *in_params = static_cast<double*>(params);
+    L_ = in_params[0];
+    U_ = in_params[1];
+    k_ = in_params[2];
+    s_ = in_params[3];
+    double f = (pow((x - L_), (k_ * s_))) * pow((U_ -x), (k_ * (1 - s_)));
+    return f;
 }
 
-static float DensityIntegral(float lower, float upper, 
-			     float L_, float U_, float k_, float s_) {
-	double params[4];
-	int status = 0; size_t neval = 0;
-	double result = 0, abserr = 0 ;
-	gsl_function F;
+static float DensityIntegral(float lower, float upper,
+                             float L_, float U_, float k_, float s_)
+{
+    double params[4];
+    int status = 0; size_t neval = 0;
+    double result = 0, abserr = 0 ;
+    gsl_function F;
 
-	params[0] = static_cast<double>(L_); 
-	params[1] = static_cast<double>(U_);
-	params[2] = static_cast<double>(k_);
-	params[3] = static_cast<double>(s_);
+    params[0] = static_cast<double>(L_);
+    params[1] = static_cast<double>(U_);
+    params[2] = static_cast<double>(k_);
+    params[3] = static_cast<double>(s_);
 
-	F.function = &integralFormula;
-	F.params = &params;
+    F.function = &integralFormula;
+    F.params = &params;
 
-	status = gsl_integration_qng (&F, lower, upper, 
-				      1e-1, 0.0, &result, &abserr, &neval);
-	return (float) result;
+    status = gsl_integration_qng (&F, lower, upper,
+                                  1e-1, 0.0, &result, &abserr, &neval);
+    return (float) result;
 }
 
 void IndefiniteTruthValue::init(float l, float u, float c)
 {
-    mean = (l+u)/2;
+    mean = (l + u) / 2;
     L = l;
     U = u;
     confidenceLevel = c;
@@ -110,9 +112,11 @@ IndefiniteTruthValue* IndefiniteTruthValue::clone() const
     return new IndefiniteTruthValue(*this);
 }
 
-IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue & rhs) throw (RuntimeException)
+IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue & rhs)
+    throw (RuntimeException)
 {
-    const IndefiniteTruthValue* tv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);
+    const IndefiniteTruthValue* tv =
+        dynamic_cast<const IndefiniteTruthValue*>(&rhs);
     if (tv) {
         if (tv != this) { // check if this is the same object first.
             copy(*tv);
@@ -120,10 +124,12 @@ IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue & rhs) th
     } else {
 #if 0
         // The following line was causing a compilation error on MSVC...
-        throw RuntimeException(TRACE_INFO, "Cannot assign a TV of type '%s' to one of type '%s'\n",
+        throw RuntimeException(TRACE_INFO,
+                               "Cannot assign a TV of type '%s' to one of type '%s'\n",
                                typeid(rhs).name(), typeid(*this).name());
 #else
-        throw RuntimeException(TRACE_INFO, "Invalid assignment of a IndefiniteTV object\n");
+        throw RuntimeException(TRACE_INFO,
+                               "Invalid assignment of a IndefiniteTV object\n");
 #endif
     }
     return *this;
@@ -133,10 +139,10 @@ bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
 {
     const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);
     if (NULL == itv) {
-      return false;
-    }
-    else {
-      return  U==itv->U && L==itv->L && confidenceLevel==itv->confidenceLevel;
+        return false;
+    } else {
+        return  (U == itv->U && L == itv->L 
+                 && confidenceLevel == itv->confidenceLevel);
     }
 }
 
@@ -151,53 +157,53 @@ float IndefiniteTruthValue::getU() const
 
 float IndefiniteTruthValue::getDiff()
 {
-  if (diff >= 0) return diff; // previously calculated
-  else {
-    if (U == L) { //Nil: I'm not sure returning 0 is the right thing to do
-      diff = 0.0f;
-      return diff;
-    }
+    if (diff >= 0) return diff; // previously calculated
     else {
-      float idiff = 0.01; //initial diff suggestion
-      diff = findDiff(idiff);
-      return diff;
+        if (U == L) { //Nil: I'm not sure returning 0 is the right thing to do
+            diff = 0.0f;
+            return diff;
+        } else {
+            float idiff = 0.01; //initial diff suggestion
+            diff = findDiff(idiff);
+            return diff;
+        }
     }
-  }
 }
 
-float IndefiniteTruthValue::findDiff(float idiff) {
-  float min = 0.0;
-  float max = 0.5; //diff cannot be larger than 1/2 because symmetric case
-  float L1, U1;
-  float numerator, denominator, result;
-  float expected = (1-confidenceLevel)/2;
-  bool lte, gte; //smaller than expected, greater than expected
+float IndefiniteTruthValue::findDiff(float idiff)
+{
+    float min = 0.0;
+    float max = 0.5; //diff cannot be larger than 1/2 because symmetric case
+    float L1, U1;
+    float numerator, denominator, result;
+    float expected = (1 - confidenceLevel) / 2;
+    bool lte, gte; //smaller than expected, greater than expected
 
-  //loop until convergence
-  do {
-    U1 = U + idiff;
-    L1 = L - idiff;
-    
-    numerator = DensityIntegral(U,U1,L1,U1,DEFAULT_K,s);
-    denominator = DensityIntegral(L1,U1,L1,U1,DEFAULT_K,s);
-    
-    if (denominator > 0) result = numerator / denominator;
-    else result = 0.0;
-	
-    lte = result < expected - diffError;
-    gte = result > expected + diffError;
+    //loop until convergence
+    do {
+        U1 = U + idiff;
+        L1 = L - idiff;
 
-    if(lte) {
-      min = idiff;
-      idiff = (idiff+max)/2;
-    }
-    if(gte) {
-      max = idiff;
-      idiff = (min+idiff)/2;
-    }
-  } while(lte || gte);
+        numerator = DensityIntegral(U, U1, L1, U1, DEFAULT_K, s);
+        denominator = DensityIntegral(L1, U1, L1, U1, DEFAULT_K, s);
 
-  return idiff;
+        if (denominator > 0) result = numerator / denominator;
+        else result = 0.0;
+
+        lte = result < expected - diffError;
+        gte = result > expected + diffError;
+
+        if (lte) {
+            min = idiff;
+            idiff = (idiff + max) / 2;
+        }
+        if (gte) {
+            max = idiff;
+            idiff = (min + idiff) / 2;
+        }
+    } while (lte || gte);
+
+    return idiff;
 }
 
 float IndefiniteTruthValue::getConfidenceLevel() const
@@ -226,14 +232,14 @@ float IndefiniteTruthValue::getL_() const
 void IndefiniteTruthValue::setL(float l)
 {
     this->L = l;
-    mean = (L+U)/2; //update mean
+    mean = (L + U) / 2; //update mean
     diff = -1.0f; //this indicates that diff should be recalculated
 }
 
 void IndefiniteTruthValue::setU(float u)
 {
     this->U = u;
-    mean = (L+U)/2; //update mean
+    mean = (L + U) / 2; //update mean
     diff = -1.0f; //this indicates that diff should be recalculated
 }
 
