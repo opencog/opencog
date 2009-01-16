@@ -236,18 +236,16 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		}
 		else
 		{
-// Hoya xxx save on stack maybe ???
-			// Else, start solving the next unsolved clause
-			soln_handle_stack.push(curr_soln_handle);
-
+			// Else, start solving the next unsolved clause.
 			// We continue our search at the atom that "joins" (is shared in common)
 			// between the previous (solved) clause, and this clause. If the "join"
 			// was a variable, look up its grounding; else the join is a 'real' atom.
+			Handle curr_soln_save = curr_soln_handle;
+
 			curr_soln_handle = var_solution[curr_pred_handle];
 			found = soln_up(curr_soln_handle);
 
-			curr_soln_handle = soln_handle_stack.top();
-			soln_handle_stack.pop();
+			curr_soln_handle = curr_soln_save;
 		}
 
 		// If we failed to find anything at this level,
