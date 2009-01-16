@@ -301,17 +301,14 @@ bool PatternMatchEngine::pred_up(Handle h)
 	bool valid = ot.is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
-// xxxxxhey wtf!!
 	// Move up the solution outgoing set, looking for a match.
-	pred_handle_stack.push(curr_pred_handle);
+	Handle curr_pred_save = curr_pred_handle;
 	curr_pred_handle = h;
 
 	bool found = foreach_incoming_handle(curr_soln_handle,
 	                     &PatternMatchEngine::soln_up, this);
 
-	curr_pred_handle = pred_handle_stack.top();
-	pred_handle_stack.pop();
-
+	curr_pred_handle = curr_pred_save;
 	dbgprt("upward soln find =%d\n", found);
 	return found;
 }
