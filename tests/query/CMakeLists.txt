@@ -22,3 +22,4 @@ LINK_LIBRARIES(#PatternUTest
 ADD_CXXTEST(PatternUTest)
 ADD_CXXTEST(BigPatternUTest)
 ADD_CXXTEST(BiggerPatternUTest)
+ADD_CXXTEST(LoopPatternUTest)

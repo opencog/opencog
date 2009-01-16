@@ -62,7 +62,7 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 };
 
 /*
- * This function sets up both the implicatino link, and the 
+ * This function sets up both the implication link, and the 
  * input data, for a typical, real-world preposition deduction.
  *
  * The actual rule encoded below is

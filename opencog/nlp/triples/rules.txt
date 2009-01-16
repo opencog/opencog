@@ -12,8 +12,8 @@
       ^ $prep($var0,$var2)              ; preposition 
       ^ %LemmaLink($var0,$word0)        ; word of word instance
       ^ $phrase($word0, $prep)          ; convert to phrase
-		; ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
-		; ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+		^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+		^ %WordInstanceLink($var1,$sent)  ; in the same sentence
       THEN ^3_$phrase($var2, $var1) 
 
 ; Sentence: "Lisbon is the capital of Portugaul"
@@ -22,7 +22,7 @@
       ^ $prep($var1,$var2)              ; preposition 
       ^ %LemmaLink($var1,$word1)        ; word of word instance
       ^ $phrase($word1, $prep)          ; convert to phrase
-		; ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
-		; ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+		^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+		^ %WordInstanceLink($var1,$sent)  ; in the same sentence
       THEN ^3_$phrase($var2, $var0) 
 
