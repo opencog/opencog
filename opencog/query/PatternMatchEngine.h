@@ -79,8 +79,11 @@ class PatternMatchEngine
 		std::stack<Handle> pred_handle_stack;
 		std::stack<Handle> soln_handle_stack;
 		std::stack<Handle> root_handle_stack;
+
+		// Stacks containing parial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
 		std::stack<SolnMap> pred_solutn_stack;
+		std::stack<SolnMap> var_solutn_stack;
 
 		// -------------------------------------------
 

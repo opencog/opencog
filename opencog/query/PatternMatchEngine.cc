@@ -210,6 +210,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
 		pred_solutn_stack.push(predicate_solution);
+		var_solutn_stack.push(var_solution);
 
 		curr_soln_handle = TLB::getHandle(as);
 		predicate_solution[curr_root] = curr_soln_handle;
@@ -235,6 +236,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		}
 		else
 		{
+// Hoya xxx save on stack maybe ???
 			// Else, start solving the next unsolved clause
 			soln_handle_stack.push(curr_soln_handle);
 
@@ -259,8 +261,17 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		curr_soln_handle = soln_handle_stack.top();
 		soln_handle_stack.pop();
 
-		predicate_solution = pred_solutn_stack.top();
 		pred_solutn_stack.pop();
+		if (pred_solutn_stack.empty())
+			predicate_solution.clear();
+		else
+			predicate_solution = pred_solutn_stack.top();
+
+		var_solutn_stack.pop();
+		if (var_solutn_stack.empty())
+			var_solution.clear();
+		else
+			var_solution = var_solutn_stack.top();
 
 		prtmsg("pop to joining handle", curr_pred_handle);
 		prtmsg("pop to pred", curr_root);
@@ -268,7 +279,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		return found;
 	}
 
-	// If we are here, then we are somwhere in the middle of a clause,
+	// If we are here, then we are somewhere in the middle of a clause,
 	// and everything below us matches. So need to move up.
 	soln_handle_stack.push(curr_soln_handle);
 	curr_soln_handle = TLB::getHandle(as);
@@ -292,6 +303,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 	bool valid = ot.is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
+// xxxxxhey wtf!!
 	// Move up the solution outgoing set, looking for a match.
 	pred_handle_stack.push(curr_pred_handle);
 	curr_pred_handle = h;
@@ -373,6 +385,7 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while(!root_handle_stack.empty()) root_handle_stack.pop();
 	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
+	while(!var_solutn_stack.empty()) var_solutn_stack.pop();
 
 	curr_root = normed_predicate[0];
 	curr_pred_handle = curr_root;
@@ -423,8 +436,8 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		bound_vars.insert(h);
 	}
 
-	var_solution.clear();
 	predicate_solution.clear();
+	var_solution.clear();
 
 	if (normed_predicate.size() == 0) return;
 
