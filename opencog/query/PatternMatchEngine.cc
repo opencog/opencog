@@ -115,7 +115,17 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		// But... if ab happens to also be a bound var, then its a mismatch.
 		if (bound_vars.count(hb)) return true;
 
-		// Else, we have a candidate solution.
+		// If we already have a grounding for this variable, the new
+		// proposed grounding must match the existing one. Such multiple
+		// groundings can occur when traversing graphs with loops in them.
+		Handle gnd = var_solution[ha];
+		if (TLB::isValidHandle(gnd))
+		{
+			if (gnd != hb) return true;
+			return false;
+		}
+
+		// Else, we have a candidate grounding for this variable.
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", ha);
