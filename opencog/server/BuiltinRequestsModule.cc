@@ -47,6 +47,10 @@ BuiltinRequestsModule::BuiltinRequestsModule()
     cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
     do_startAgents_register();
     do_stopAgents_register();
+    do_stepAgents_register();
+    do_startAgentLoop_register();
+    do_stopAgentLoop_register();
+    do_listAgents_register();
 }
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
@@ -63,6 +67,10 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     cogserver.unregisterRequest(UnloadModuleRequest::info().id);
     do_startAgents_unregister();
     do_stopAgents_unregister();
+    do_stepAgents_unregister();
+    do_startAgentLoop_unregister();
+    do_stopAgentLoop_unregister();
+    do_listAgents_register();
 }
 
 void BuiltinRequestsModule::init()
@@ -130,3 +138,63 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
     return "Successfully stopped agents";
 }
 
+std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::string> args)
+{    
+    std::vector<Agent*> agents = cogserver().runningAgents();
+    
+    if (args.size() == 0) {
+        for (std::vector<Agent*>::const_iterator it = agents.begin();
+             it != agents.end(); ++it) {
+            (*it)->run(&cogserver());
+        }
+        return "Ran a step of each started agent";
+    } else {
+        for (std::list<std::string>::const_iterator it = args.begin();
+             it != args.end(); ++it) {
+            std::string agent_type = *it;
+
+            // try to find an already started agent with that name
+            std::vector<Agent*>::const_iterator tmp = agents.begin();
+            for ( ; tmp!=agents.end() ; tmp++ ) if ( *it == (*tmp)->classinfo().id ) break;
+            
+            Agent* agent;
+            if (agents.end() == tmp) {
+                // construct a temporary agent
+                agent = cogserver().createAgent(*it, false);
+                agent->run(&cogserver());
+                cogserver().destroyAgent(agent);
+            } else {
+                agent = *tmp;
+                agent->run(&cogserver());
+            }
+        }
+        return "Ran a step of each specified agent";
+    }
+}
+
+std::string BuiltinRequestsModule::do_stopAgentLoop(Request *dummy, std::list<std::string> args)
+{
+    cogserver().stopAgentLoop();
+    
+    return "Stopped agent loop";
+}
+
+std::string BuiltinRequestsModule::do_startAgentLoop(Request *dummy, std::list<std::string> args)
+{
+    cogserver().startAgentLoop();
+    
+    return "Started agent loop";
+}
+
+std::string BuiltinRequestsModule::do_listAgents(Request *dummy, std::list<std::string> args)
+{
+    std::vector<Agent*> agents = cogserver().runningAgents();
+    std::ostringstream oss;
+    
+    for (std::vector<Agent*>::const_iterator it = agents.begin();
+         it != agents.end(); ++it) {
+        oss << (*it)->to_string() << endl;
+    }
+    
+    return oss.str();
+}

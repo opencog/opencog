@@ -110,6 +110,8 @@ protected:
 
     long cycleCount;
     bool running;
+    // useful to start and stop the Agents loop via shell commands
+    bool agentsRunning;
 
     void processAgents();
 
@@ -155,7 +157,6 @@ public:
     /** Returns a reference to the network server instance */
     virtual NetworkServer& networkServer(void);
 
-
     /**** Module API ****/
     /** Loads a dynamic library/module. Takes the filename of the library (.so
      * or .dll). On Linux/Unix, it the filename may be absolute or relative to
@@ -187,6 +188,9 @@ public:
     /** Returns a list with the ids of all the registered agent classes. */
     virtual std::list<const char*> agentIds(void) const;
 
+    /** Returns a list of all the currently running agent instances. */
+    virtual std::vector<Agent*> runningAgents(void);
+
     /** Creates and returns a new instance of an agent of class 'id'. If
      *  'start' is true, then the agent will be automatically added to the list
      *  of scheduled agents. */
@@ -204,6 +208,12 @@ public:
 
     /** Destroys all agents from class 'id' */
     virtual void destroyAllAgents(const std::string& id);
+
+    /** Starts running agents as part of the serverLoop (enabled by default) */
+    virtual void startAgentLoop(void);
+
+    /** Stops running agents as part of the serverLoop */
+    virtual void stopAgentLoop(void);
 
     /**** Request Registry API ****/
     /** Register a new request class/type. Takes the class id and a derived

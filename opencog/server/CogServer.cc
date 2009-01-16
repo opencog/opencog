@@ -96,6 +96,8 @@ CogServer::CogServer() : cycleCount(1)
 
     pthread_mutex_init(&messageQueueLock, NULL);
     pthread_mutex_init(&agentsLock, NULL);
+    
+    agentsRunning = true;
 }
 
 NetworkServer& CogServer::networkServer()
@@ -130,7 +132,9 @@ void CogServer::serverLoop()
             processRequests();
         }
 
-        processAgents();
+        if (agentsRunning) {
+            processAgents();
+        }
 
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
@@ -183,6 +187,14 @@ std::list<const char*> CogServer::agentIds() const
     return Registry<Agent>::all();
 }
 
+std::vector<Agent*> CogServer::runningAgents(void)
+{
+    pthread_mutex_lock(&agentsLock);
+    std::vector<Agent*> ret(agents);
+    pthread_mutex_unlock(&agentsLock);
+    return ret;
+}
+
 Agent* CogServer::createAgent(const std::string& id, const bool start)
 {
     Agent* a = Registry<Agent>::create(id);
@@ -229,6 +241,16 @@ void CogServer::destroyAllAgents(const std::string& id)
     // include a recursive call to destroyAllAgents
     std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
     pthread_mutex_unlock(&agentsLock);
+}
+
+void CogServer::startAgentLoop(void)
+{
+    agentsRunning = true;
+}
+
+void CogServer::stopAgentLoop(void)
+{
+    agentsRunning = false;
 }
 
 bool CogServer::registerRequest(const std::string& name, AbstractFactory<Request> const* factory)

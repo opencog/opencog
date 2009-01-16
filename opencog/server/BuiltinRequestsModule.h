@@ -71,6 +71,30 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stop-agents", do_stopAgents,
        "Usage: stop-agents <agent type> [...]\n\n"
        "Stops the agents of the specified classes (class IDs).\n")
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "step-agents", do_stepAgents, 
+       "Run a single cycle of an agent(s)",
+       "Usage: step-agents <agent type> [...]\n"
+       "step-agents\n\n"
+       "With one or more agent types as arguments, runs a single cycle of those agents."
+       "With no arguments, runs one cycle of each agent that has been started."
+       "Only to be run when the agent loop is stopped. Uses the already-started instances"
+       "if available.\n")       
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stop-agent-loop", do_stopAgentLoop, 
+       "Stop the agent loop",
+       "Usage: stop-agent-loop\n\n"
+       "Stop the agent loop (that is, stop running agents during the CogServer loop).\n")
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "start-agent-loop", do_startAgentLoop, 
+       "Start the agent loop",
+       "Usage: start-agent-loop\n\n"
+       "Start the agent loop (that is, start running agents during the CogServer loop).\n")
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "list-agents", do_listAgents, 
+       "List running agents",
+       "Usage: list-agents\n\n"
+       "List all the currently running agents, including their configuration parameters.\n")
+
 public:
 
     static inline const char* id() {
