@@ -499,7 +499,7 @@ std::string RunCommand(std::list<std::string> args)
             
                         state->infer(j, 0.000001f, 0.01f);
                         state->printResults();
-                        ss << "\n" << h << " $ remaining.\n";
+                        ss << "\n" << j << " $ remaining.\n";
             
                         //currentDebugLevel = tempi;
 
