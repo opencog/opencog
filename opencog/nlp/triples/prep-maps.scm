@@ -12,5 +12,21 @@ scm
 	)
 )
 
+(EvaluationLink
+	(DefinedLinguisticRelationshipNode "color_of")
+	(ListLink
+		(WordNode "color")
+		(DefinedLinguisticRelationshipNode "of")
+	)
+)
+
+(EvaluationLink
+	(DefinedLinguisticRelationshipNode "make_from")
+	(ListLink
+		(WordNode "make")
+		(DefinedLinguisticRelationshipNode "from")
+	)
+)
+
 .
 exit
