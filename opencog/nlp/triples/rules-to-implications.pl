@@ -284,3 +284,4 @@ if ($have_rule)
 }
 
 print "; Processed $rule_cnt rules\n";
+print "\n.\nexit\n";

@@ -82,6 +82,12 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 #endif
 }
 
+#define POPTOP(soln,stack) {         \
+   stack.pop();                      \
+   if (stack.empty()) soln.clear();  \
+   else soln = stack.top();          \
+}
+
 /* ======================================================== */
 
 /**
@@ -158,12 +164,19 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		// The recursion step: traverse down the tree.
 		// Only links can have non-empty outgoing sets.
 		depth ++;
+		var_solutn_stack.push(var_solution);
 		mismatch = foreach_outgoing_atom_pair(ha, hb,
 		              	      &PatternMatchEngine::tree_compare, this);
 		depth --;
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
-		if (false == mismatch) var_solution[ha] = hb;
+		if (false == mismatch)
+		{
+			var_solution[ha] = hb;
+			var_solutn_stack.pop();  // pop entry created, but keep current.
+		}
+		else
+			POPTOP(var_solution, var_solutn_stack);
 		return mismatch;
 	}
 
@@ -259,17 +272,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		curr_soln_handle = soln_handle_stack.top();
 		soln_handle_stack.pop();
 
-		pred_solutn_stack.pop();
-		if (pred_solutn_stack.empty())
-			predicate_solution.clear();
-		else
-			predicate_solution = pred_solutn_stack.top();
-
-		var_solutn_stack.pop();
-		if (var_solutn_stack.empty())
-			var_solution.clear();
-		else
-			var_solution = var_solutn_stack.top();
+		// The grounding stacks are handled differently.
+		POPTOP(predicate_solution, pred_solutn_stack);
+		POPTOP(var_solution, var_solutn_stack);
 
 		prtmsg("pop to joining handle", curr_pred_handle);
 		prtmsg("pop to pred", curr_root);
