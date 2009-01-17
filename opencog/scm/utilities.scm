@@ -7,6 +7,9 @@ scm
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ;
+
+(use-modules (srfi srfi-1))
+
 (define (stv mean conf) (cog-new-stv mean conf))
 
 ; -----------------------------------------------------------------------
@@ -82,26 +85,24 @@ scm
 ; -----------------------------------------------------------------------
 ; 
 ; cog-report-counts
-; Print a report of the number of atoms of each type currently in the
-; atomspace. Prints counts only for types with non-zero atom counts.
+; Return an association list holding a report of the number of atoms
+; of each type currently in the atomspace. Counts are included only
+; for types with non-zero atom counts.
 ;
 (define (cog-report-counts)
 	(let ((tlist (cog-get-types)))
 		(define (rpt type)
 			(let ((cnt (cog-count-atoms type)))
 				(if (not (= 0 cnt))
-					(let ()
-						(display type)
-						(display " ")
-						(display cnt)
-						(newline)
-					)
+					(cons type cnt)
+					#f
 				)
 			)
 		)
-		(for-each rpt tlist)
+		(filter-map rpt tlist)
 	)
 )
+
 ; -----------------------------------------------------------------------
 ; cog-get-partner pair atom
 ;

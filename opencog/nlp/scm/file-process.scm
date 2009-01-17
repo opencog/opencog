@@ -66,8 +66,6 @@ scm
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'WordInstanceNode)
 (system (string-join (list "echo deleted: " (number->string n) )))
-	(cog-report-counts)
-	(gc-stats)
 	)
 )
 
@@ -85,6 +83,12 @@ scm
 		(let ((fullname (string-join (list input-dir filename) "/"))
 		      (donename (string-join (list done-dir filename) "/"))
 			)
+			(system (string-join (list "echo \"" (string-join 
+				(map (lambda (x) (string-join (list (object->string x) "\n"))) 
+				(gc-stats))) "\"")))
+			(system (string-join (list "echo \"" (string-join 
+				(map (lambda (x) (string-join (list (object->string x) "\n"))) 
+				(cog-report-counts))) "\"")))
 			(system (string-join (list "echo start article: \"" filename "\"")))
 			(system "date")
 			(load-cff-data fullname)
