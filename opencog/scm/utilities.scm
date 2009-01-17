@@ -60,6 +60,49 @@ scm
 )
 
 ; -----------------------------------------------------------------------
+;
+; cog-count-atoms atom-type
+; Return a count of the number of atoms of the given type 'atom-type'
+;
+; Example usage:
+; (display (cog-count-atoms 'ConceptNode))
+; will display a count of all atoms of type 'ConceptNode
+;
+(define (cog-count-atoms atom-type)
+	(let ((cnt 0))
+		(define (inc atom)
+			(set! cnt (+ cnt 1))
+			#f
+		)
+		(cog-map-type inc atom-type)
+		cnt
+	)
+)
+
+; -----------------------------------------------------------------------
+; 
+; cog-report-counts
+; Print a report of the number of atoms of each type currently in the
+; atomspace. Prints counts only for types with non-zero atom counts.
+;
+(define (cog-report-counts)
+	(let ((tlist (cog-get-types)))
+		(define (rpt type)
+			(let ((cnt (cog-count-atoms type)))
+				(if (not (= 0 cnt))
+					(let ()
+						(display type)
+						(display " ")
+						(display cnt)
+						(newline)
+					)
+				)
+			)
+		)
+		(for-each rpt tlist)
+	)
+)
+; -----------------------------------------------------------------------
 ; cog-get-partner pair atom
 ;
 ; If 'pare' is a link containing two atoms, and 'wrd' is one of the

@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog atom properties
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -167,6 +167,29 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 	}
 
 	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+
+/**
+ * Return a list of all of the atom types in the system.
+ */
+SCM SchemeSmob::ss_get_types (void)
+{
+	SCM list = SCM_EOL;
+
+	Type t = NUMBER_OF_CLASSES;
+	while (1)
+	{
+		t--;
+		const std::string &tname = ClassServer::getTypeName(t);
+		SCM str = scm_from_locale_string(tname.c_str());
+		SCM sym = scm_string_to_symbol(str);
+		list = scm_cons(sym, list);
+		if (0 == t) break;
+	}
+
+	return list;
 }
 
 #endif

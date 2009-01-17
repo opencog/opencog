@@ -66,6 +66,8 @@ scm
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'WordInstanceNode)
 (system (string-join (list "echo deleted: " (number->string n) )))
+	(cog-report-counts)
+	(gc-stats)
 	)
 )
 
