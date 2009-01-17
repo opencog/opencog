@@ -52,6 +52,6 @@
 ; Sentence: "The heart is in the chest." also, "The garage is behind the house"
 ; var1=heart  var2=chest phinst=in
 # IF _psubj($phinst,$var1) ^ _pobj($phinst,$var2)
-       ^ $prep(_%copula, $phinst)   ; xxx we should verify that prep and phinst match up.
+      ^ $prep(_%copula, $phinst)   ; xxx we should verify that prep and phinst match up.
       THEN ^3_$prep($var2, $var1) 
 

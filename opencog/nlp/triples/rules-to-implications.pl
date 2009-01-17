@@ -15,12 +15,13 @@
 
 use strict;
 
+# --------------------------------------------------------------------
 sub parse_clause
 {
 	my ($clause) = @_;
 
 	# Pull the three parts out of the clause.
-	$clause =~ m/\s*([\$\w]+)\s*\(\s*([\$\w]+)\s*\,\s*([\$\w]+)\s*\)(.*)/;
+	$clause =~ m/\s*([\$%\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
@@ -30,6 +31,7 @@ sub parse_clause
 	@parts;
 }
 
+# --------------------------------------------------------------------
 # Print a single clause. 
 # Expects as input a clause, for example, "_subj(be,$var0)", and 
 # some whitespace to indent by. Prints, as output, the standard
@@ -81,6 +83,7 @@ sub print_clause
 	print "$indent)\n";
 }
 
+# --------------------------------------------------------------------
 # print_link  -- print a specifically-named link.
 # In some cases, the rules need to make explicit ties of one sort or
 # another. For example, sometimes a word instance needs to be tied to
@@ -120,6 +123,34 @@ sub print_link
 }
 
 
+# --------------------------------------------------------------------
+# print_lemma_link
+# Print a lemma link to connect a word instance to its word -- but only
+# if neccessary.
+#
+sub print_lemma_link
+{
+	my ($clause, $item, $cnt, $indent) = @_;
+	if (!($item =~ /^\$/))
+	{
+		print "$indent;; word-instance lemma of $clause\n";
+		print "$indent(LemmaLink\n";
+		# Some unknow word instance, to be fixed by variable.
+		# print "$indent   (WordInstanceNode \"$item\")\n";
+		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
+		if ($item =~ /^_%copula/)
+		{
+			print "$indent   (WordNode \"be\")\n";
+		}
+		else
+		{
+			print "$indent   (WordNode \"$item\")\n";
+		}
+		print "$indent)\n";
+	}
+}
+
+# --------------------------------------------------------------------
 # print_word_instance -- print lemma links joining words to instances.
 # The core problem here is that the frame rules are written in
 # 'general', specifying fixed words if/when needed. However, the 
@@ -135,27 +166,8 @@ sub print_word_instance
 	my ($link, $item1, $item2) = parse_clause($clause);
 
 	# Print a copy of the original clause for reference
-	if (!($item1 =~ /^\$/))
-	{
-		print "$indent;; word-instance lemma of $clause\n";
-		print "$indent(LemmaLink\n";
-		# Some unknow word instance, to be fixed by variable.
-		# print "$indent   (WordInstanceNode \"$item1\")\n";
-		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
-		print "$indent   (WordNode \"$item1\")\n";
-		print "$indent)\n";
-	}
-
-	if (!($item2 =~ /^\$/))
-	{
-		print "$indent;; word-instance lemma of $clause\n";
-		print "$indent(LemmaLink\n";
-		$cnt ++;
-		# Some unknow word instance, to be fixed by variable.
-		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
-		print "$indent   (WordNode \"$item2\")\n";
-		print "$indent)\n";
-	}
+	print_lemma_link ($clause, $item1, $cnt, $indent);
+	print_lemma_link ($clause, $item2, $cnt+1, $indent);
 }
 
 # Parse a single rule, generate the equivalent OpenCog ImplicationLink.
