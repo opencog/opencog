@@ -28,5 +28,13 @@ scm
 	)
 )
 
+(EvaluationLink
+	(DefinedLinguisticRelationshipNode "spin_from")
+	(ListLink
+		(WordNode "spin")
+		(DefinedLinguisticRelationshipNode "from")
+	)
+)
+
 .
 exit
