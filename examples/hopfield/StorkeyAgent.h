@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/StorkeyAgent.h
+ * examples/hopfield/StorkeyAgent.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -42,10 +42,9 @@ class CogServer;
  */
 class StorkeyAgent : public Agent
 {
+public:
     typedef std::vector< std::vector<float> > w_t;
-
 private:
-    AtomSpace* a;
     bool verbose;
 
     /** Set the agent's logger object
@@ -60,13 +59,17 @@ private:
 
     //Pattern epsilon; //!< Pattern for updating network weights with
 
-    float h(int i, w_t w); //!< h function in learning rule from Storkey
-    w_t getCurrentWeights();
     void setCurrentWeights(w_t& w);
     bool checkWeightSymmetry(w_t& w);
     void printWeights(w_t& w);
 
 public:
+
+    static float h(int i, w_t& w); //!< h function in learning rule from Storkey
+    //! h function in old palimpsest learning rule from Storkey, needed for
+    //! finding keyNode.
+    static float h(int i, int j, w_t& w);
+    static w_t getCurrentWeights();
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {

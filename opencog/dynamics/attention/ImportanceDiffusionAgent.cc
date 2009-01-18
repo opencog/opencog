@@ -36,7 +36,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
-//#define DEBUG
+#define DEBUG
 namespace opencog
 {
 
@@ -45,16 +45,16 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
     static const std::string defaultConfig[] = {
         //! Default value that normalised STI has to be above before
         //! being spread
-        "ECAN_DIFFUSION_THRESHOLD","0.5",
+        "ECAN_DIFFUSION_THRESHOLD","0.0",
         //! Maximum percentage of STI that is spread from an atom
         "ECAN_MAX_SPREAD_PERCENTAGE","0.5",
         "",""
     };
     setParameters(defaultConfig);
 
-    // TODO won't respond to the parameters being changed later
-    // (not a problem at present, but could get awkward with, for example,
-    // automatic parameter adaptation)
+    //! @todo won't respond to the parameters being changed later
+    //! (not a problem at present, but could get awkward with, for example,
+    //! automatic parameter adaptation)
     maxSpreadPercentage = (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
 
     switch (decisionFunction) {
@@ -91,7 +91,8 @@ float ImportanceDiffusionAgent::getDiffusionThreshold() const
 void ImportanceDiffusionAgent::run(CogServer* server)
 {
     a = server->getAtomSpace();
-    spreadDecider->focusBoundary = diffusionThreshold * a->getMaxSTI();
+    spreadDecider->focusBoundary = diffusionThreshold * (a->getMaxSTI()
+            - a->getAttentionalFocusBoundary());
     spreadImportance();
 }
 

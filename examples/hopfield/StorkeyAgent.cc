@@ -88,12 +88,25 @@ void StorkeyAgent::printWeights(w_t& w)
 
 void StorkeyAgent::run(CogServer *server)
 {
-    a = server->getAtomSpace();
     storkeyUpdate();
 }
 
-float StorkeyAgent::h(int i, w_t w)
+float StorkeyAgent::h(int i, int j, w_t& w)
 {
+    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
+    int n = w.size();
+    float h_sum = 0.0f;
+    for (int k=0; k < n; k++) {
+        if (k == i || k == j) continue;
+        h_sum += ( w[i][k] * a->getNormalisedSTI(
+                    (static_cast<HopfieldServer&>(server())).hGrid[k],false) );
+    }
+    return h_sum;
+}
+
+float StorkeyAgent::h(int i, w_t& w)
+{
+    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = w.size();
     float h_sum = 0.0f;
     for (int k=0; k < n; k++) {
@@ -105,6 +118,7 @@ float StorkeyAgent::h(int i, w_t w)
 
 StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
 {
+    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = (static_cast<HopfieldServer&>(server())).hGrid.size();
     std::vector<std::vector<float> > w;
     for (int i=0; i < n; i++) {
@@ -150,6 +164,7 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
 
 void StorkeyAgent::setCurrentWeights(w_t& w)
 {
+    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = (static_cast<HopfieldServer&>(server())).hGrid.size();
     for (int i=0; i < n; i++) {
         Handle iHandle = (static_cast<HopfieldServer&>(server())).hGrid[i];
@@ -202,6 +217,7 @@ bool StorkeyAgent::checkWeightSymmetry(w_t& w) {
 
 void StorkeyAgent::storkeyUpdate()
 {
+    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     w_t currentWeights;
     w_t newWeights;
 

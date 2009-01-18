@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <float.h>
 
 #include <math.h>
 #ifdef WIN32
@@ -54,12 +55,13 @@ BaseServer* HopfieldServer::derivedCreateInstance()
 
 float HopfieldServer::totalEnergy()
 {
+    //! @warning this return erroneous results... needs to be fixed
     int N = hGrid.size();
     float E = 0.0f;
     AtomSpace *a = getAtomSpace();
     // sum for i<j
     for (int j = 1; j < N; j++) {
-        for (int i = 0; i < j; i++) {
+        for (int i = 0; i < N; i++) {
             if (i==j) continue;
             HandleSeq outgoing;
             outgoing.push_back(hGrid[i]);
@@ -68,35 +70,40 @@ float HopfieldServer::totalEnergy()
             HandleSeq ret;
             a->getHandleSet(back_inserter(ret), outgoing, NULL,
                     NULL, 2, HEBBIAN_LINK, true);
-            // Get other direction because order affects match in getHandleSet
-            outgoing[0] = hGrid[j];
-            outgoing[1] = hGrid[i];
-            a->getHandleSet(back_inserter(ret), outgoing, NULL,
-                    NULL, 2, HEBBIAN_LINK, true);
-            // Energy formula only designed for arity 2 links.
+            // If no links then skip
+            if (ret.size() == 0) { continue; }
             if (ret.size() > 1) {
-                logger().error("More than one Hebbian link between unit s_%d and j_%d "
+                logger().error("More than one Hebbian link from unit i_%d to j_%d "
                         "while trying to get calculate energy of network.", i, j);
+                cout << "ret size=" << ret.size() << " [0]=" << ret[0] << " [1]=" << ret[1] <<endl;
                 return NAN;
             }
-            int AF = a->getAttentionalFocusBoundary();
-            switch (a->getType(ret[0])) {
-            case SYMMETRIC_HEBBIAN_LINK:
-                E += a->getTV(ret[0]).getMean() * ((a->getSTI(hGrid[i]) - AF)
-                    - (a->getSTI(hGrid[j]) - AF));
-                break;
-            case INVERSE_HEBBIAN_LINK:
-            case SYMMETRIC_INVERSE_HEBBIAN_LINK:
-                // I think these can both be considered the same, since it
-                // doesn't matter which way the energy away from equilibirum is
-                // going to go, only how far away from equilibrium the network is.
-                E += -(a->getTV(ret[0]).getMean()) * (a->getSTI(hGrid[i]) - AF)
-                    * (a->getSTI(hGrid[j]) - AF);
-                break;
-            default:
-                logger().error("Unknown Hebbian link type between unit s_%d and j_%d."
-                        " Ignoring.", i, j);
-                break;
+            float iSTI, jSTI;
+            iSTI = a->getNormalisedSTI(hGrid[i],false);
+            jSTI = a->getNormalisedSTI(hGrid[j],false);
+            if (iSTI > 0.0f || jSTI > 0.0f) {
+                switch (a->getType(ret[0])) {
+                case SYMMETRIC_HEBBIAN_LINK:
+                    if (iSTI > jSTI)
+                        E += a->getTV(ret[0]).getMean() * (iSTI - jSTI);
+                    else
+                        E += a->getTV(ret[0]).getMean() * (jSTI - iSTI);
+                    break;
+                case INVERSE_HEBBIAN_LINK:
+                    if (iSTI > 0.0f && iSTI > jSTI)
+                        E += (a->getTV(ret[0]).getMean()) * (iSTI - jSTI);
+                    break;
+                case SYMMETRIC_INVERSE_HEBBIAN_LINK:
+                    if (iSTI > jSTI)
+                        E += (a->getTV(ret[0]).getMean()) * fabs(iSTI - jSTI);
+                    else
+                        E += (a->getTV(ret[0]).getMean()) * fabs(jSTI - iSTI);
+                    break;
+                default:
+                    logger().error("Unknown Hebbian link type between unit s_%d and j_%d."
+                            " Ignoring.", i, j);
+                    break;
+                }
             }
         }
     }
@@ -396,7 +403,15 @@ void HopfieldServer::addRandomLinks()
 
         outgoing.push_back(hGrid[source]);
         outgoing.push_back(hGrid[target]);
-        he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), SYMMETRIC_HEBBIAN_LINK, false);
+        he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        // try links going the other way (because some Hebbian links are
+        // ordered)
+        if (!he) {
+            outgoing.clear();
+            outgoing.push_back(hGrid[target]);
+            outgoing.push_back(hGrid[source]);
+            he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        }
         if (he) {
             //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, TLB::getAtom(he->handle)->toString().c_str());
             delete he;
@@ -446,12 +461,15 @@ void HopfieldServer::resetNodes(bool toDefault)
 void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
 {
     AtomSpace *a = getAtomSpace();
-    //! @TODO: add links to only the active nodes within the pattern
-    //! @TODO: add density % links from the key node
+    //! @todo: add links to only the active nodes within the pattern
+    //! @todo: add density % links from the key node
     HandleSeq tempGrid(hGrid);
 
     // get all links from key node
-    std::map<Handle,Handle> mapDestToLink = getDestinationsFrom(keyHandle, HEBBIAN_LINK);
+    //std::map<Handle,Handle> mapDestToLink = getDestinationsFrom(keyHandle, HEBBIAN_LINK);
+    HandleEntry* heNeighbours = TLB::getAtom(keyHandle)->getNeighbors(true, true, HEBBIAN_LINK);
+    HandleSeq neighbours;
+    heNeighbours->toHandleVector(neighbours);
     
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
@@ -459,7 +477,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
         if (hGridKey[i]) continue;
 
         // check whether destination exists in the map
-        if (mapDestToLink.find(hGrid[i]) == mapDestToLink.end()) {
+        if (find(neighbours.begin(), neighbours.end(), hGrid[i]) == neighbours.end()) {
             // it doesn't, so add it.
             a->addLink(SYMMETRIC_HEBBIAN_LINK, keyHandle, hGrid[i]);
         }
@@ -504,7 +522,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
 std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type linkType)
 {
     //! This only expects arity 2 links, so make generic before placing in
-    //! AtomSpace.
+    //! AtomSpace, by having the dest map keys be of type HandleSeq.
     //! returns in destinations mapped to link that got there.
     std::map<Handle,Handle> result;
     HandleSeq links = getAtomSpace()->getIncoming(src);
@@ -531,22 +549,15 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
 Handle HopfieldServer::findKeyNode() {
     Handle keyHandle;
     AtomSpace *a = getAtomSpace();
-    // if there is space for more key nodes
-    if (keyNodes.size() < options->keyNodes) {
-        // This shouldn't happen in the current design, key nodes added at start.
-        assert(0);
-        logger().fine("---Imprint:Space for new key node, creating...");
-        keyHandle = a->addNode(CONCEPT_NODE,"KeyNode" + to_string(keyNodes.size()));
-
-    } else {
+    if (options->updateMethod == HopfieldOptions::CONJUNCTION) {
         // This could probably be done by diffusing the important, but the simpler
-        // and hopefully quicker way is just to some the weights * stimulus
+        // and hopefully quicker way is just to sum the weights * stimulus
         //
         // Also, there is a formula for selection in the glocal paper...
         
         // find closest matching key node (or unused key node)
         HandleSeq::iterator i;
-        float maxSim = 0.0f;
+        float maxSim = -1;
         for(i = keyNodes.begin(); i != keyNodes.end(); i++) {
             float sim = 0.0f;
             Handle iHandle = *i;
@@ -560,7 +571,7 @@ Handle HopfieldServer::findKeyNode() {
                 HandleSeq lseq = a->getOutgoing(lh);
                 // get handle at other end of the link
                 // TODO: create AtomSpace utility method that returns a map
-                // between link and destination
+                // between link and destination, see getDestinationsFrom
                 for (HandleSeq::iterator k=lseq.begin();
                         k < lseq.end() && patternH == Handle::UNDEFINED; k++) {
                     if (*k != iHandle) {
@@ -568,25 +579,51 @@ Handle HopfieldServer::findKeyNode() {
                     }
                 }
                 // check type of link 
-                if (lt == SYMMETRIC_HEBBIAN_LINK ||
-                    lt == ASYMMETRIC_HEBBIAN_LINK) {
+                switch (lt) {
+                case SYMMETRIC_HEBBIAN_LINK:
                     sim += a->getTV(lh).getMean() * a->getNormalisedSTI(patternH,false);
-
-                } else if (lt == INVERSE_HEBBIAN_LINK ||
-                    lt == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
-                    sim += a->getTV(lh).getMean() * (1.0f - a->getNormalisedSTI(patternH,false));
-
+                    break;
+                case ASYMMETRIC_HEBBIAN_LINK:
+                    logger().error("Asymmetic links are not supported by the Hopfield "
+                            "example, ignoring.");
+                    break;
+                case INVERSE_HEBBIAN_LINK:
+                case SYMMETRIC_INVERSE_HEBBIAN_LINK:
+                    sim += a->getTV(lh).getMean() * -a->getNormalisedSTI(patternH,false);
+                    break;
                 }
             }
+            //cout << sim << endl;;
             if (sim > maxSim) {
                 keyHandle = iHandle;
                 maxSim = sim;
             }
             
         }
+    } else {
+        float minDiff = FLT_MAX;
+        int keyIndex = -1;
+        StorkeyAgent::w_t w(StorkeyAgent::getCurrentWeights());
+        // Use inaccuracy method from glocal paper
+        for(uint i = 0; i < keyNodes.size(); i++) {
+            float diff = 0.0f;
+            for (uint j = 0; j < hGrid.size(); j++) {
+                if (hGridKey[j]) continue;
+                
+                diff += fabs(StorkeyAgent::h(i,j,w) * a->getNormalisedSTI(hGrid[j],false)) +
+                    fabs(StorkeyAgent::h(j,i,w) * a->getNormalisedSTI(hGrid[i],false));
+            }
+            if (diff < minDiff) {
+                minDiff = diff;
+                keyIndex = i;
+            }
+        }
+        if (keyIndex > 0)
+            keyHandle = keyNodes[keyIndex];
+        else
+            keyHandle = keyNodes[0];
     }
     return keyHandle;
-    
 
 }
 
@@ -613,6 +650,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         if (options->keyNodes) {
             logger().fine("---Imprint:Finding key node");
             keyNodeHandle = findKeyNode();
+            // Make key node "Active"
+            getAtomSpace()->setSTI(keyNodeHandle, (AttentionValue::sti_t)
+                    patternStimulus / max(pattern.activity(),1));
         }
 
         if (first)
@@ -664,21 +704,17 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 
 void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 {
-    std::vector<Handle>::iterator it = hGrid.begin();
-    std::vector<int>::iterator p_it = pattern.begin();
 	int activity;
 	
 	activity = pattern.activity();
 	// Avoid floating point exception if blank pattern
 	if (activity == 0)
 		activity = 1;
-	stim_t perUnit = patternStimulus / activity;
+	stim_t perUnit = stimulus / activity;
 
-    while (it != hGrid.end() && p_it != pattern.end()) {
-        Handle h = (*it);
-        int value = (*p_it);
-        getAtomSpace()->stimulateAtom(h, perUnit * value);
-        it++; p_it++;
+    for (size_t i = 0; i < hGrid.size(); i++) {
+        if (options->keyNodes && hGridKey[i]) continue; // Don't encode onto key nodes
+        getAtomSpace()->stimulateAtom(hGrid[i], perUnit * pattern[i]);
     }
 
 }
