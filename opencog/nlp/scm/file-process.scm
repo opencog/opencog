@@ -65,19 +65,28 @@ scm
 	(cog-map-type delit 'SentenceNode)
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'WordInstanceNode)
+
+	; Pointless to elete these, since there should only be 
+	; a few hundred of these, total.
+	; (cog-map-type delit 'LinkGrammarRelationshipNode) 
+	; (cog-map-type delit 'DefinedLinguisticConceptNode) 
+	; (cog-map-type delit 'DefinedLinguisticRelationshipNode) 
+
 (system (string-join (list "echo deleted: " (number->string n) )))
 	)
 )
 
 ; ---------------------------------------------------------------------
-; Process all the files in the input dir, and move them to donedir
+; Perform WSD-disjunct statistics processing.
+;
+; Process 'num-to-do' files in the input dir, and move them to done-dir
 ; The input files are assumed to be RelEx "compact-file format" files.
 ; These are converted into opencog data, and are loaded into opencog.
-; At this point wsd should run automatically; this script then triggers
+; At this point WSD should run automatically; this script then triggers
 ; disjunct processing manually. When this completes, the next file is
 ; processed ... 
 ;
-(define (process-data input-dir done-dir)
+(define (process-data input-dir done-dir num-to-do)
 
 	(define (process-file filename)
 		(let ((fullname (string-join (list input-dir filename) "/"))
@@ -108,11 +117,11 @@ scm
 	)
 	
 	(for-each process-file
-		(list-files input-dir)
+		(take (list-files input-dir) num-to-do)
 	)
 )
 
-(define (doit) (process-data input-filedir done-filedir))
+(define (doit num-to-do) (process-data input-filedir done-filedir num-to-do))
 
 .
 exit
