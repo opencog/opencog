@@ -36,5 +36,19 @@ scm
 	)
 )
 
+
+; ===============================
+(ListLink
+	(DefinedLinguisticRelationshipNode "behind")
+	(WordNode "behind")
+)
+(ListLink
+	(DefinedLinguisticRelationshipNode "inside")
+	(WordNode "inside")
+)
+(ListLink
+	(DefinedLinguisticRelationshipNode "in")
+	(WordNode "in")
+)
 .
 exit

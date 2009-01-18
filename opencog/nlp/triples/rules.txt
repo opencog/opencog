@@ -12,8 +12,8 @@
       ^ $prep($var0,$var2)              ; preposition 
       ^ %LemmaLink($var0,$word0)        ; word of word instance
       ^ $phrase($word0, $prep)          ; convert to phrase
-		^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
-		^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+      ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+      ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
       THEN ^3_$phrase($var2, $var1) 
 
 ; Sentence: "Lisbon is the capital of Portugaul"
@@ -22,8 +22,8 @@
       ^ $prep($var1,$var2)              ; preposition 
       ^ %LemmaLink($var1,$word1)        ; word of word instance
       ^ $phrase($word1, $prep)          ; convert to phrase
-		^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
-		^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+      ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+      ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
       THEN ^3_$phrase($var2, $var0) 
 
 ; Sentence: "The color of the sky is blue."
@@ -52,6 +52,8 @@
 ; Sentence: "The heart is in the chest." also, "The garage is behind the house"
 ; var1=heart  var2=chest phinst=in
 # IF _psubj($phinst,$var1) ^ _pobj($phinst,$var2)
-      ^ $prep(_%copula, $phinst)   ; xxx we should verify that prep and phinst match up.
+      ^ $prep(_%copula, $phinst)
+      ^ %LemmaLink($phinst, $prword)
+      ^ %ListLink($prep,$prword)
       THEN ^3_$prep($var2, $var1) 
 
