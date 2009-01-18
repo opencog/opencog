@@ -84,7 +84,7 @@ bool AtomTable::isCleared(void) const
         return false;
     }
 
-    if (nameIndex.size() != 0) return false;
+    // if (nameIndex.size() != 0) return false;
     if (typeIndex.size() != 0) return false;
     if (importanceIndex.size() != 0) return false;
     if (targetTypeIndex.size() != 0) return false;
@@ -167,20 +167,6 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
     HandleEntry* result = findHandlesByGPN(gpnHandle);
     result = HandleEntry::filterSet(result, vh);
     return result;
-}
-
-Handle AtomTable::getHandle(const char* name, Type type) const
-{
-    Handle h = nameIndex.get(name);
-    if (TLB::isInvalidHandle(h)) return Handle::UNDEFINED;
-    Atom *a = TLB::getAtom(h);
-    if (type != a->getType()) return Handle::UNDEFINED;
-    return h;
-}
-
-Handle AtomTable::getHandle(const Node *node) const
-{
-    return getHandle(node->getName().c_str(), node->getType());
 }
 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
@@ -480,7 +466,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Handle handle = TLB::holdsHandle(atom);
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    nameIndex.insertHandle(handle);
+    nodeIndex.insertHandle(handle);
     typeIndex.insertHandle(handle);
     targetTypeIndex.insertHandle(handle);
     importanceIndex.insertHandle(handle);
@@ -577,7 +563,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
-    nameIndex.removeHandle(handle);
+    nodeIndex.removeHandle(handle);
     typeIndex.removeHandle(handle);
     targetTypeIndex.removeHandle(handle);
     importanceIndex.removeHandle(handle);
@@ -641,7 +627,7 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
 {
     if (extractedHandles == NULL) return;
 
-    nameIndex.remove(decayed);
+    nodeIndex.remove(decayed);
     typeIndex.remove(decayed);
     importanceIndex.remove(decayed);
     targetTypeIndex.remove(decayed);

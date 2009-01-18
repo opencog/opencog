@@ -39,7 +39,7 @@ using namespace opencog;
 
 int HandleEntry::existingObjects = 0;
 
-HandleEntry::HandleEntry(Handle handle)
+void HandleEntry::init(Handle handle)
 {
 
     ++existingObjects;

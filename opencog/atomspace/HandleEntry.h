@@ -69,7 +69,14 @@ public:
      *
      * @param Cell data.
      */
-    HandleEntry(Handle);
+private:
+    void init(Handle);
+public:
+    HandleEntry(Handle h) { init(h); }
+    HandleEntry(Handle h, HandleEntry *he) {
+        init(h);
+        next = he;
+    }
 
     /**
      * Destructor for this class.

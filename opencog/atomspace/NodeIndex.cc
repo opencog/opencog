@@ -76,12 +76,13 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 		int max = ClassServer::getNumberOfClasses();
 		for (Type s = 0; s < max; s++)
 		{
-			// XXX is this 'AssignableFrom' in the right direction??
-			if (ClassServer::isAssignableFrom(s, type))
+			// The 'AssignableFrom' driection is unit-tested in AtomSpaceUTest.cxxtest
+			if (ClassServer::isAssignableFrom(type, s))
 			{
 				const NameIndex &ni = idx[s];
 				Handle h = ni.get(name);
-				he = new HandleEntry(h, he);
+				if (TLB::isValidHandle(h))
+					he = new HandleEntry(h, he);
 			}
 		}
 		return he;

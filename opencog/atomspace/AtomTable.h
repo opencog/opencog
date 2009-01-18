@@ -38,7 +38,8 @@
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/ImportanceIndex.h>
-#include <opencog/atomspace/NameIndex.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
@@ -95,7 +96,7 @@ private:
     bool useDSA;
 
     TypeIndex typeIndex;
-    NameIndex nameIndex;
+    NodeIndex nodeIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -303,8 +304,12 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const char*, Type) const;
-    Handle getHandle(const Node*) const;
+    Handle getHandle(const char* name, Type t) const {
+        return nodeIndex.getHandle(t, name);
+    }
+    Handle getHandle(const Node* n) const {
+        return getHandle(n->getName().c_str(), n->getType());
+    }
     Handle getHandle(const Link*) const;
 
     /**
@@ -393,8 +398,7 @@ public:
     HandleEntry* getHandleSet(const char* name,
                               Type type = ATOM, bool subclass = true) const
     {
-        HandleEntry *set = nameIndex.getHandleSet(name);
-        return HandleEntry::filterSet(set, type, subclass);
+        return nodeIndex.getHandleSet(type, name, subclass);
     }
 
     /**

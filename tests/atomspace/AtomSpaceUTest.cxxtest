@@ -339,7 +339,7 @@ public:
                 HandleSeq nodes;
                 atomSpace->getHandleSet(back_inserter(nodes), NODE, nodeNames[i], true, vh);
                 bool mustMatch = (vhIdx == 0 || (i % 4 == vhIdx));
-                TS_ASSERT(nodes.size() == (mustMatch ? 1 : 0));
+                TS_ASSERT_EQUALS(nodes.size(), (mustMatch ? 1 : 0));
                 for (int j = 0; j < NUM_NODES; j++) {
                     if (i == j && mustMatch) {
                         TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) != nodes.end());
