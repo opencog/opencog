@@ -128,6 +128,8 @@ private:
 
     SpreadDecider* spreadDecider;
 
+    //! For checking that STI is conserved
+    int totalSTI;
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }

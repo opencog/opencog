@@ -36,7 +36,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
-#define DEBUG
+//#define DEBUG
 namespace opencog
 {
 
@@ -93,6 +93,9 @@ void ImportanceDiffusionAgent::run(CogServer* server)
     a = server->getAtomSpace();
     spreadDecider->focusBoundary = diffusionThreshold * (a->getMaxSTI()
             - a->getAttentionalFocusBoundary());
+#ifdef DEBUG
+    totalSTI = 0;
+#endif
     spreadImportance();
 }
 
@@ -152,6 +155,9 @@ void ImportanceDiffusionAgent::makeSTIVector(gsl_vector* &stiVector,
             i != diffusionAtomsMap.end(); i++) {
         Handle dAtom = (*i).first;
         gsl_vector_set(stiVector,(*i).second,a->getNormalisedZeroToOneSTI(dAtom,false));
+#ifdef DEBUG
+        totalSTI += a->getSTI(dAtom);
+#endif
     }
     
 #ifdef DEBUG
@@ -341,12 +347,23 @@ void ImportanceDiffusionAgent::spreadImportance()
 
     // set the sti of all atoms based on new values in results vector from
     // multiplication 
+#ifdef DEBUG
+    int totalSTI_After = 0;
+#endif
     for (std::map<Handle,int>::iterator i=diffusionAtomsMap.begin();
             i != diffusionAtomsMap.end(); i++) {
         Handle dAtom = (*i).first;
         double val = gsl_vector_get(result,(*i).second);
         setScaledSTI(dAtom,val);
+#ifdef DEBUG
+        totalSTI_After += a->getSTI(dAtom);
+#endif
     }
+#ifdef DEBUG
+    if (totalSTI != totalSTI_After) {
+        logger().warn("Total STI before diffusion (%d) != Total STI after (%d)",totalSTI,totalSTI_After);
+    }
+#endif
 
     // free memory!
     gsl_matrix_free(connections);

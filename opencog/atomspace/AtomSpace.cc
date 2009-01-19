@@ -767,7 +767,7 @@ float AtomSpace::getNormalisedZeroToOneSTI(Handle h, bool average, bool clip) co
     if (normaliser == 0) {
         return 0.0f;
     }
-    val = (s - getMinSTI()) / (float) normaliser;
+    val = (s - getMinSTI(average)) / (float) normaliser;
     if (clip) {
         return max(0.0f,min(val,1.0f));
     } else {
