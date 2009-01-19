@@ -57,3 +57,21 @@
       ^ %ListLink($prep,$prword)
       THEN ^3_$prep($var2, $var1) 
 
+; Sentence: "Berlin is in Germany", alternate parse
+; (This becomes the dominant parse for "Berlin is a city in Germany").
+; var1=Berlin var2=Germany $prep=in
+; However, this can't work if defined as simply as this: there are
+; too many bogus matches for 'prep'.
+;# IF _subj(be, $var1) ^ $prep(be, $var2)
+;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+;      THEN ^3_$prep($var2, $var1) 
+
+; Sentence "Berlin is a city"
+; var1=Berlin var2=city
+; This pattern is too simple, it has to exclude preps,
+; e.g. "the captial of Germany is Berlin", where the prep is crucial!
+;# IF _subj(be, $var1) ^ _obj(be, $var2)
+;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+;      THEN ^3_isa($var2, $var1) 
