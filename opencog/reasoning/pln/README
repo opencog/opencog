@@ -184,7 +184,15 @@ as other quite important tasks.
 
 === Important
 
-* get all tests in Tester.cc functioning.
+* Implement a different way of assessing rule application fitness.
+* Allow forward chaining using BIT... by accepting a wildcard target, and only
+accepting results with reasonable confidence.
+* Allow real hypothetical atoms # (those with confidence == 0) to be used as PLN
+targets.
+* related to the above, implement a dynamic normalisation of certain atoms
+types through the ASW.
+    * Normalise Equivalence -> 2 times ImplicationLinks
+    * Represent ContextLinks explicitly 
 * unify the unify methods: MPUnify1, MPUnifyVector, MPUnifyHandle -> MPUnify
 * fix memory leak in BITNode::EvaluateWith ... new RuleApp is not freed (but
 freeing causes a SegFault).
@@ -193,6 +201,11 @@ freeing causes a SegFault).
 
 === Moderate
 
+* Wrap PLN in a MindAgent. Check a Request For Service queue to see if any other
+OpenCog processes need a particular hypothetical atom.
+* Allow backward chaining state to be saved between cycles (it will kind-of
+already) and allow multiple BITs to be chained at once.
+* RevisionMindAgent - to merge the PLN dummy TVs?
 * remove all the temporary hacks in the haxx:: namespace
 * Split Rules in inheriting from a GeneratorRule or ComposerRule class.
  Generators create atoms but don't require input atoms.
@@ -201,14 +214,5 @@ freeing causes a SegFault).
    direct lookup, remote lookup, and hypothesis generation.
  Composers produce atoms from input.
    
-* Allow PLN to use general OpenCog XML loader instead of it's own special one.
-Either by modifying the OpenCog loader or by converting the PLN xml data files
-to the OpenCog format. PLN currently loads atoms using its internal XML loader
-written by Ari (at reasoning/pln/util). The functionality of PLN XML loader is
-limited: eg. it does not allow ! or ? marks (or comments, IIRC).
-* Related to the above. Provide a filter system to the OpenCog XML Loader... so
-that the normalisation that the NormalisingATW used to do, can still be done as
-a filter/translator. Also, provide a normalisingAgent... for dynamic changes to
-the atomspace that come from other modules rather than an XML file.
 
 === Nice to have
