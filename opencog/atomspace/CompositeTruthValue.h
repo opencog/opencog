@@ -89,9 +89,9 @@ public:
 
     virtual bool operator==(const TruthValue& rhs) const;
     static CompositeTruthValue* fromString(const char*) throw (InvalidParamException);
-    float getMean() const;
-    float getCount() const;
-    float getConfidence() const;
+    strength_t getMean() const;
+    count_t getCount() const;
+    confidence_t getConfidence() const;
 
     float toFloat() const;
     std::string toString() const;

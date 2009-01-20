@@ -32,10 +32,10 @@
 
 using namespace opencog;
 
-float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9f;
-float IndefiniteTruthValue::DEFAULT_K = 2.0f;
-float IndefiniteTruthValue::diffError = 0.001f;
-float IndefiniteTruthValue::s = 0.5f;
+float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
+float IndefiniteTruthValue::DEFAULT_K = 2.0;
+float IndefiniteTruthValue::diffError = 0.001;
+float IndefiniteTruthValue::s = 0.5;
 
 // Formula defined in the integral of step one [(x-L1)^ks * (U1-x)^k(1-s)
 static double integralFormula (double x, void * params)
@@ -50,8 +50,9 @@ static double integralFormula (double x, void * params)
     return f;
 }
 
-static float DensityIntegral(float lower, float upper,
-                             float L_, float U_, float k_, float s_)
+static strength_t DensityIntegral(strength_t lower, strength_t upper,
+                                  strength_t L_, strength_t U_,
+                                  count_t k_, strength_t s_)
 {
     double params[4];
     int status = 0; size_t neval = 0;
@@ -68,10 +69,10 @@ static float DensityIntegral(float lower, float upper,
 
     status = gsl_integration_qng (&F, lower, upper,
                                   1e-1, 0.0, &result, &abserr, &neval);
-    return (float) result;
+    return (strength_t) result;
 }
 
-void IndefiniteTruthValue::init(float l, float u, float c)
+void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
 {
     L = l;
     U = u;
@@ -79,10 +80,10 @@ void IndefiniteTruthValue::init(float l, float u, float c)
 
     // the next 4 variables are initalized to -1 to indicate that they must
     // be calculated when accessed (using getDiff, etc)
-    diff = -1.0f;
-    mean = -1.0f;
-    count = -1.0f;
-    confidence = -1.0f;
+    diff = -1.0;
+    mean = -1.0;
+    count = -1.0;
+    confidence = -1.0;
 
     firstOrderDistribution.clear();
     symmetric = true;
@@ -105,7 +106,8 @@ IndefiniteTruthValue::IndefiniteTruthValue()
     init();
 }
 
-IndefiniteTruthValue::IndefiniteTruthValue(float l, float u, float c)
+IndefiniteTruthValue::IndefiniteTruthValue(strength_t l, strength_t u,
+                                           confidence_t c)
 {
     init(l, u, c);
 }
@@ -154,37 +156,37 @@ bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
     }
 }
 
-float IndefiniteTruthValue::getL() const
+strength_t IndefiniteTruthValue::getL() const
 {
     return L;
 }
-float IndefiniteTruthValue::getU() const
+strength_t IndefiniteTruthValue::getU() const
 {
     return U;
 }
 
-float IndefiniteTruthValue::getDiff()
+strength_t IndefiniteTruthValue::getDiff()
 {
     if (diff >= 0) return diff; // previously calculated
     else {
         if (U == L) { //Nil: I'm not sure returning 0 is the right thing to do
-            diff = 0.0f;
+            diff = 0.0;
             return diff;
         } else {
-            float idiff = 0.01; //initial diff suggestion
+            strength_t idiff = 0.01; //initial diff suggestion
             diff = findDiff(idiff);
             return diff;
         }
     }
 }
 
-float IndefiniteTruthValue::findDiff(float idiff)
+strength_t IndefiniteTruthValue::findDiff(strength_t idiff)
 {
-    float min = 0.0;
-    float max = 0.5; //diff cannot be larger than 1/2 because symmetric case
-    float L1, U1;
-    float numerator, denominator, result;
-    float expected = (1 - confidenceLevel) / 2;
+    strength_t min = 0.0;
+    strength_t max = 0.5; //diff cannot be larger than 1/2 cause symmetric case
+    strength_t L1, U1;
+    strength_t numerator, denominator, result;
+    strength_t expected = (1 - confidenceLevel) / 2;
     bool lte, gte; //smaller than expected, greater than expected
 
     //loop until convergence
@@ -214,64 +216,64 @@ float IndefiniteTruthValue::findDiff(float idiff)
     return idiff;
 }
 
-float IndefiniteTruthValue::getConfidenceLevel() const
+confidence_t IndefiniteTruthValue::getConfidenceLevel() const
 {
     return confidenceLevel;
 }
 
-const vector<float*>& IndefiniteTruthValue::getFirstOrderDistribution() const
+const vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution() const
 {
     return firstOrderDistribution;
 }
 
-float IndefiniteTruthValue::getU_() const
+strength_t IndefiniteTruthValue::getU_() const
 {
-    float u = U + diff;
+    strength_t u = U + diff;
 // return (u > 1.0)?1.0f:u;
     return u;
 }
-float IndefiniteTruthValue::getL_() const
+strength_t IndefiniteTruthValue::getL_() const
 {
-    float l = L - diff;
+    strength_t l = L - diff;
 // return (l < 0.0)?0.0f:l;
     return l;
 }
 
-void IndefiniteTruthValue::setL(float l)
+void IndefiniteTruthValue::setL(strength_t l)
 {
     this->L = l;
 
     // the next 4 variables are set to -1 to indicate that they must
     // be recalculated
-    diff = -1.0f;
-    mean = -1.0f;
-    count = -1.0f;
-    confidence = -1.0f;
+    diff = -1.0;
+    mean = -1.0;
+    count = -1.0;
+    confidence = -1.0;
 }
 
-void IndefiniteTruthValue::setU(float u)
+void IndefiniteTruthValue::setU(strength_t u)
 {
     this->U = u;
 
     // the next 4 variables are set to -1 to indicate that they must
     // be recalculated
-    diff = -1.0f;
-    mean = -1.0f;
-    count = -1.0f;
-    confidence = -1.0f;
+    diff = -1.0;
+    mean = -1.0;
+    count = -1.0;
+    confidence = -1.0;
 }
 
-void IndefiniteTruthValue::setConfidenceLevel(float c)
+void IndefiniteTruthValue::setConfidenceLevel(confidence_t c)
 {
     this->confidenceLevel = c;
 }
 
-void IndefiniteTruthValue::setDiff(float diff)
+void IndefiniteTruthValue::setDiff(strength_t diff)
 {
     this->diff = diff;
 }
 
-void IndefiniteTruthValue::setFirstOrderDistribution(const vector<float*>& v)
+void IndefiniteTruthValue::setFirstOrderDistribution(const vector<strength_t*>& v)
 {
     this->firstOrderDistribution = v;
 }
@@ -281,24 +283,25 @@ TruthValueType IndefiniteTruthValue::getType() const
     return INDEFINITE_TRUTH_VALUE;
 }
 
-void IndefiniteTruthValue::setMean(float m)
+void IndefiniteTruthValue::setMean(strength_t m)
 {
     mean = m;
 }
 
-float IndefiniteTruthValue::getMean() const
+strength_t IndefiniteTruthValue::getMean() const
 {
-    if (mean < 0) { // must be updated
+    if (mean < 0) { // mean must be updated
         mean = (L + U) / 2;
     }
     return mean;
 }
 
-float IndefiniteTruthValue::getCount() const
+count_t IndefiniteTruthValue::getCount() const
 {
-    if (count < 0) { // must be updated
-        float W = W();
-        W = max(W, 0.0000001f); // to avoid division by zero
+    if (count < 0) { // count must be updated
+        strength_t W = W();
+        // to avoid division by zero
+        W = max(W, static_cast<strength_t>(0.0000001)); 
         count = (DEFAULT_K * (1 - W) / W);
     }
     return count;
@@ -306,8 +309,8 @@ float IndefiniteTruthValue::getCount() const
 
 float IndefiniteTruthValue::getConfidence() const
 {
-    if (confidence < 0) { // must be updated
-        float c = getCount();
+    if (confidence < 0) { // confidence must be updated
+        count_t c = getCount();
         confidence = c / (c + DEFAULT_K);
     }
     return confidence;
@@ -321,7 +324,13 @@ bool IndefiniteTruthValue::isSymmetric() const
 std::string IndefiniteTruthValue::toString() const
 {
     char buf[1024];
-    sprintf(buf, "[%f,%f,%f,%f,%f,%d]", mean, L, U, confidenceLevel, diff, symmetric);
+    sprintf(buf, "[%f,%f,%f,%f,%f,%d]",
+            static_cast<float>(mean),
+            static_cast<float>(L),
+            static_cast<float>(U),
+            static_cast<float>(confidenceLevel),
+            static_cast<float>(diff),
+            symmetric);
     return buf;
 }
 
@@ -331,14 +340,17 @@ IndefiniteTruthValue* IndefiniteTruthValue::fromString(const char* tvStr)
     int s;
     sscanf(tvStr, "[%f,%f,%f,%f,%f,%d]", &m, &l, &u, &c, &d, &s);
     //printf("IndefiniteTruthValue::fromString(%s) => mean = %f, L = %f, U = %f, confLevel = %f, diff = %f, symmetric = %d\n", tvStr, m, l, u, c, d, s);
-    IndefiniteTruthValue* result = new IndefiniteTruthValue(l, u, c);
-    result->setDiff(d);
+    IndefiniteTruthValue* result =
+        new IndefiniteTruthValue(static_cast<strength_t>(l),
+                                 static_cast<strength_t>(u),
+                                 static_cast<confidence_t>(c));
+    result->setDiff(static_cast<strength_t>(d));
     result->symmetric = s != 0;
-    result->setMean(m);
+    result->setMean(static_cast<strength_t>(m));
     return result;
 }
 
 float IndefiniteTruthValue::toFloat() const
 {
-    return getMean();
+    return static_cast<float>(getMean());
 }

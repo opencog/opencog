@@ -45,15 +45,15 @@ class IndefiniteTruthValue : public TruthValue
 
 private:
 
-    float U;
-    float L;
-    float confidenceLevel; //referred as "b" in the paper
+    strength_t U;
+    strength_t L;
+    confidence_t confidenceLevel; //referred as "b" in the paper
     bool symmetric;
 
     // used in inference rule procedure in order to compute L1 and U1
     // when diff is negative it means that it is outdated and must be
     // recalculated
-    float diff;
+    strength_t diff;
 
     // below, "mean", "count" and "confidence" are all three attributes
     // used to translate an indefinite TV into a simple TV.
@@ -61,22 +61,23 @@ private:
     // it means that it outdated and therefore must be recalculted,
     // otherwise, i.e. positive of null, it means that the current value
     // is correct
-    mutable float mean;
-    mutable float count;
-    mutable float confidence;
+    mutable strength_t mean;
+    mutable count_t count;
+    mutable confidence_t confidence;
 
-    std::vector<float*> firstOrderDistribution;
+    std::vector<strength_t*> firstOrderDistribution;
 
-    void init(float c = 0.0f, float d = 0.0f,
-              float e = DEFAULT_CONFIDENCE_LEVEL);
+    void init(strength_t l = 0.0f, strength_t u = 0.0f,
+              confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     void copy(const IndefiniteTruthValue&);
 
     //find diff by dichotomy
-    float findDiff(float idiff);
+    strength_t findDiff(strength_t idiff);
 
 public:
     IndefiniteTruthValue();
-    IndefiniteTruthValue(float, float, float c = DEFAULT_CONFIDENCE_LEVEL);
+    IndefiniteTruthValue(strength_t l, strength_t u,
+                         confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
 
     IndefiniteTruthValue* clone() const;
@@ -87,38 +88,38 @@ public:
 
     static IndefiniteTruthValue* fromString(const char*);
 
-    float getMean() const;
-    float getU() const;
-    float getL() const;
-    float getConfidenceLevel() const;
-    float getDiff();
-    const std::vector<float*>& getFirstOrderDistribution() const;
+    strength_t getMean() const;
+    strength_t getU() const;
+    strength_t getL() const;
+    confidence_t getConfidenceLevel() const;
+    strength_t getDiff();
+    const std::vector<strength_t*>& getFirstOrderDistribution() const;
 
-    void setMean(float);
-    void setU(float);
-    void setL(float);
-    void setConfidenceLevel(float);
-    void setDiff(float);
-    void setFirstOrderDistribution(const std::vector<float*>&);
+    void setMean(strength_t);
+    void setU(strength_t);
+    void setL(strength_t);
+    void setConfidenceLevel(confidence_t);
+    void setDiff(strength_t);
+    void setFirstOrderDistribution(const std::vector<strength_t*>&);
 
-    float getCount() const;
-    float getConfidence() const;
-    float getU_() const;
-    float getL_() const;
+    count_t getCount() const;
+    confidence_t getConfidence() const;
+    strength_t getU_() const;
+    strength_t getL_() const;
     bool isSymmetric() const;
 
     float toFloat() const;
     std::string toString() const;
     TruthValueType getType() const;
 
-    static float DEFAULT_CONFIDENCE_LEVEL;
-    static float DEFAULT_K;
-    static float diffError;
-    static float s;
-    static void setDefaultConfidenceLevel(float c) {
+    static confidence_t DEFAULT_CONFIDENCE_LEVEL;
+    static count_t DEFAULT_K;
+    static strength_t diffError;
+    static strength_t s; //Nil : not that sure s should be strength_t
+    static void setDefaultConfidenceLevel(confidence_t c) {
         DEFAULT_CONFIDENCE_LEVEL = c;
     }
-    static void setDefaultK(float k) {
+    static void setDefaultK(count_t k) {
         DEFAULT_K = k;
     }
 };

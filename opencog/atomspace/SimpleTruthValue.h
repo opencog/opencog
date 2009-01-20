@@ -37,14 +37,14 @@ class SimpleTruthValue : public TruthValue
 
 protected:
 
-    float mean;
-    float count;
+    strength_t mean;
+    count_t count;
 
-    void init(float mean, float count);
+    void init(strength_t mean, count_t count);
 
 public:
 
-    SimpleTruthValue(float mean, float count);
+    SimpleTruthValue(strength_t mean, count_t count);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(SimpleTruthValue const&);
 
@@ -55,19 +55,19 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
     static SimpleTruthValue* fromString(const char*);
-    static float confidenceToCount(float);
-    static float countToConfidence(float);
+    static count_t confidenceToCount(confidence_t);
+    static confidence_t countToConfidence(count_t);
 
     float toFloat() const;
     std::string toString() const;
     TruthValueType getType() const;
 
-    float getMean() const;
-    float getCount() const;
-    float getConfidence() const;
-    void setMean(float);
-    void setCount(float);
-    void setConfidence(float);
+    strength_t getMean() const;
+    count_t getCount() const;
+    confidence_t getConfidence() const;
+    void setMean(strength_t);
+    void setCount(count_t);
+    void setConfidence(confidence_t);
 };
 
 } // namespace opencog

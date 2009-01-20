@@ -36,10 +36,15 @@ class TruthValueUTest;
 namespace opencog
 {
 
+// define strength, count and confidence types
+typedef float strength_t;
+typedef float count_t;
+typedef float confidence_t;
+
 // TODO: These variables were moved from reasoning/StdAfx.h as they were. Find a better
 // implementation for them...
-const float MAX_TRUTH    =     1.0f;
-const float MAX_TV_COUNT = 10000.0f;
+const strength_t MAX_TRUTH    =     1.0;
+const count_t MAX_TV_COUNT = 10000.0;
 
 // TruthValue types:
 // Warning: NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
@@ -102,9 +107,9 @@ public:
 
 // PURE VIRTUAL METHODS:
 
-    virtual float getMean()  const = 0;
-    virtual float getCount()  const = 0;
-    virtual float getConfidence()  const = 0;
+    virtual strength_t getMean()  const = 0;
+    virtual count_t getCount()  const = 0;
+    virtual confidence_t getConfidence()  const = 0;
 
     virtual float toFloat() const  = 0;
     virtual std::string toString() const  = 0;

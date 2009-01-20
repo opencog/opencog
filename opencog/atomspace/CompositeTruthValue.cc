@@ -143,18 +143,18 @@ const TruthValue& CompositeTruthValue::getPrimaryTV()
     return *primaryTV;
 }
 
-float CompositeTruthValue::getMean()  const
+strength_t CompositeTruthValue::getMean()  const
 {
     return primaryTV->getMean();
 }
 
-float CompositeTruthValue::getCount()  const
+count_t CompositeTruthValue::getCount()  const
 {
     return primaryTV->getCount();
 }
 
 
-float CompositeTruthValue::getConfidence()  const
+confidence_t CompositeTruthValue::getConfidence()  const
 {
     return primaryTV->getConfidence();
 }
@@ -181,13 +181,18 @@ std::string CompositeTruthValue::toString() const
     //printf("type = %d\n", primaryTV->getType());
     //printf("typeStr = %s\n", TruthValue::typeToStr(primaryTV->getType()));
     //printf("{%s;%s}", TruthValue::typeToStr(primaryTV->getType()), primaryTV->toString().c_str());
-    sprintf(buffer, "{%s;%s}", TruthValue::typeToStr(primaryTV->getType()), primaryTV->toString().c_str());
+    sprintf(buffer, "{%s;%s}",
+            TruthValue::typeToStr(primaryTV->getType()),
+            primaryTV->toString().c_str());
     result += buffer;
-    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin(); itr != versionedTVs.end(); itr++) {
+    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
+         itr != versionedTVs.end(); itr++) {
         VersionHandle key = itr->first;
         TruthValue* tv = itr->second;
         //printf("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
-        sprintf(buffer, "{%lu;%s;%s;%s}", key.substantive.value(), VersionHandle::indicatorToStr(key.indicator),
+        sprintf(buffer, "{%lu;%s;%s;%s}",
+                key.substantive.value(),
+                VersionHandle::indicatorToStr(key.indicator),
                 TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
         result += buffer;
     }

@@ -33,9 +33,9 @@
 
 using namespace opencog;
 
-#define KKK 800.0f
+#define KKK 800.0
 
-SimpleTruthValue::SimpleTruthValue(float m, float c)
+SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
 {
     mean = m;
     count = c;
@@ -52,39 +52,39 @@ SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
     count = source.count;
 }
 
-void SimpleTruthValue::setMean(float m)
+void SimpleTruthValue::setMean(strength_t m)
 {
     mean = m;
 }
 
-void SimpleTruthValue::setCount(float c)
+void SimpleTruthValue::setCount(count_t c)
 {
     count = c;
 }
 
-void SimpleTruthValue::setConfidence(float c)
+void SimpleTruthValue::setConfidence(confidence_t c)
 {
     count = confidenceToCount(c);
 }
 
-float SimpleTruthValue::getMean() const
+strength_t SimpleTruthValue::getMean() const
 {
     return mean;
 }
 
-float SimpleTruthValue::getCount() const
+count_t SimpleTruthValue::getCount() const
 {
     return count;
 }
 
-float SimpleTruthValue::getConfidence() const
+confidence_t SimpleTruthValue::getConfidence() const
 {
     return countToConfidence(count);
 }
 
 float SimpleTruthValue::toFloat() const
 {
-    return getMean();
+    return static_cast<float>(getMean());
 }
 
 std::string SimpleTruthValue::toString() const
@@ -94,7 +94,10 @@ std::string SimpleTruthValue::toString() const
     // (Only count is saved). So, for saving memory space
     // in dump files, it should be removed. However, toString
     // is being used for debug purposes, so both need to be shown...
-    sprintf(buf, "[%f,%f=%f]", getMean(), getCount(), getConfidence());
+    sprintf(buf, "[%f,%f=%f]",
+            static_cast<float>(getMean()),
+            static_cast<float>(getCount()),
+            static_cast<float>(getConfidence()));
     return buf;
 }
 
@@ -141,15 +144,15 @@ TruthValueType SimpleTruthValue::getType() const
     return SIMPLE_TRUTH_VALUE;
 }
 
-float SimpleTruthValue::confidenceToCount(float c)
+float SimpleTruthValue::confidenceToCount(confidence_t c)
 {
     c = min(c, 0.9999999f);
-    return (float) (KKK * c / (1.0 - c));
+    return static_cast<count_t>(KKK * c / (1.0 - c));
 }
 
-float SimpleTruthValue::countToConfidence(float c)
+float SimpleTruthValue::countToConfidence(count_t c)
 {
-    return (c / (c + KKK));
+    return static_cast<confidence_t>(c / (c + KKK));
 }
 
 SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
@@ -161,5 +164,6 @@ SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
     // is being used for debug purposes, so both need to be shown...
     sscanf(tvStr, "[%f,%f=%f]", &mean, &count, &conf);
     //printf("SimpleTruthValue::fromString(%s) => mean = %f, count = %f, conf = %f\n", tvStr, mean, count, conf);
-    return new SimpleTruthValue(mean, count);
+    return new SimpleTruthValue(static_cast<strength_t>(mean),
+                                static_cast<count_t>(count));
 }
