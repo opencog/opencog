@@ -36,10 +36,23 @@ class TruthValueUTest;
 namespace opencog
 {
 
-// define strength, count and confidence types
+// define strength_t and strength_seq
 typedef float strength_t;
+typedef std::vector<strength_t> strength_seq;
+typedef strength_seq::iterator strength_seq_it;
+typedef strength_seq::const_iterator strength_seq_const_it;
+
+// define count_t and count_seq
 typedef float count_t;
+typedef std::vector<count_t> count_seq;
+typedef strength_seq::iterator count_seq_it;
+typedef strength_seq::const_iterator count_seq_const_it;
+
+// define confidence_t and confidence_seq
 typedef float confidence_t;
+typedef std::vector<confidence_t> confidence_seq;
+typedef strength_seq::iterator confidence_seq_it;
+typedef strength_seq::const_iterator confidence_seq_const_it;
 
 // TODO: These variables were moved from reasoning/StdAfx.h as they were. Find a better
 // implementation for them...
