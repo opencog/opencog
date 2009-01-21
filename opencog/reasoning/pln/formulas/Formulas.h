@@ -426,10 +426,11 @@ public:
 class SubsetEvalFormula : public ArityFreeFormula<TruthValue,TruthValue*>
 {
 private:
-	float f1(float a, float b) const;
-	float f2(float a, float b) const;
+    float f1(float a, float b) const;
+    float f2(float a, float b) const;
 public:
-	TruthValue* compute(TruthValue** TVsub,int Nsub, TruthValue** TVsuper,int Nsuper, long U = DefaultU) const;
+    TruthValue* compute(TruthValue** TVsub, int Nsub, TruthValue** TVsuper,
+                        int Nsuper, long U = DefaultU) const;
 };
 
 /**
