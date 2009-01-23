@@ -29,14 +29,20 @@
 #include <string>
 
 #include <math.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
+//#include <gsl/gsl_matrix.h>
+//#include <gsl/gsl_vector.h>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
+
+typedef boost::numeric::ublas::vector<float> bvector;
+typedef boost::numeric::ublas::compressed_matrix<float> bmatrix;
 
 namespace opencog
 {
@@ -83,9 +89,6 @@ public:
  * Currently spreads along Symmetric and Inverse HebbianLinks.
  *
  * @todo Optionally spread long term importance?
- * @todo Convert from using GSL matrices to a more efficient approach - either
- * using sparse matrices or directly using the STI values to generate a
- * temporary sparse matrix
  */
 class ImportanceDiffusionAgent : public Agent
 {
@@ -107,9 +110,9 @@ private:
     void spreadImportance();
 
     //! print a gsl matrix to stdout
-    void printMatrix(gsl_matrix *m);
+    void printMatrix(bmatrix *m);
     //! print a gsl vector to stdout
-    void printVector(gsl_vector *m);
+    void printVector(bvector *m);
 
     //! Set the STI of h from a scaled 0..1 STI value
     void setScaledSTI(Handle h, float scaledSTI);
@@ -118,12 +121,12 @@ private:
     int makeDiffusionAtomsMap(std::map<Handle,int> &i,std::vector<Handle> links);
 
     //! Make vector of original scaled STI values
-    void makeSTIVector(gsl_vector* &stiVector, int totalDiffusionAtoms,
+    void makeSTIVector(bvector* &stiVector, int totalDiffusionAtoms,
             std::map<Handle,int> diffusionAtomsMap);
 
     //! Construct matrix representing HebbianLinks between all atoms
     //! in diffusionAtomsMap.
-    void makeConnectionMatrix(gsl_matrix* &connections, int totalDiffusionAtoms,
+    void makeConnectionMatrix(bmatrix* &connections, int totalDiffusionAtoms,
             std::map<Handle,int> diffusionAtomsMap, std::vector<Handle> links);
 
     SpreadDecider* spreadDecider;
