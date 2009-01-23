@@ -168,7 +168,7 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
 #endif
 }
 
-void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections,
+void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
         std::vector<Handle> links)
 {
@@ -176,7 +176,10 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections,
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
 //    connections = gsl_matrix_alloc(totalDiffusionAtoms, totalDiffusionAtoms);
-    connections = new bmatrix(totalDiffusionAtoms, totalDiffusionAtoms, totalDiffusionAtoms * totalDiffusionAtoms);
+    connections_ = new bmatrix(totalDiffusionAtoms, totalDiffusionAtoms, totalDiffusionAtoms * totalDiffusionAtoms);
+    // To avoid having to dereference pointers everywhere
+    bmatrix& connections = *connections_;
+    
     // obviously the use of sparse matrixes means this isn't necessary
 //    gsl_matrix_set_zero(connections);
 
@@ -230,10 +233,10 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections,
                 if (type == INVERSE_HEBBIAN_LINK) {
                     // source and target indices swapped because inverse
                     //gsl_matrix_set(connections,sourceIndex,targetIndex,val);
-                    (*connections)(sourceIndex,targetIndex) = val;
+                    connections(sourceIndex,targetIndex) = val;
                 } else {
                     //gsl_matrix_set(connections,targetIndex,sourceIndex,val);
-                    (*connections)(targetIndex,sourceIndex) = val;
+                    connections(targetIndex,sourceIndex) = val;
                 }
             }
         } else {
@@ -259,9 +262,9 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections,
                     targetPosItr = diffusionAtomsMap.find(*targetItr);
                     targetIndex = (*targetPosItr).second;
                     if (type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
-                        (*connections)(sourceIndex,targetIndex) = val;
+                        connections(sourceIndex,targetIndex) = val;
                     } else {
-                        (*connections)(targetIndex,sourceIndex) = val;
+                        connections(targetIndex,sourceIndex) = val;
                     }
                 }
             }
@@ -272,18 +275,18 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections,
 #ifdef DEBUG
     logger().fine("Sum probability for column:");
 #endif
-    for (unsigned int j = 0; j < connections->size2(); j++) {
+    for (unsigned int j = 0; j < connections.size2(); j++) {
         double sumProb = 0.0f;
-        for (unsigned int i = 0; i < connections->size1(); i++) {
-            if (i != j) sumProb += (*connections)(i,j);
+        for (unsigned int i = 0; i < connections.size1(); i++) {
+            if (i != j) sumProb += connections(i,j);
         }
 #ifdef DEBUG
         logger().fine("%d before - %1.3f", j, sumProb);
 #endif
 
         if (sumProb > maxSpreadPercentage) {
-            for (unsigned int i = 0; i < connections->size1(); i++) {
-                (*connections)(i,j) = (*connections)(i,j)
+            for (unsigned int i = 0; i < connections.size1(); i++) {
+                connections(i,j) = connections(i,j)
                         / (sumProb/maxSpreadPercentage) ;
             }
             sumProb = maxSpreadPercentage;
@@ -292,13 +295,13 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections,
         logger().fine("%d after - %1.3f", j, sumProb);
 #endif
         //gsl_matrix_set(connections,j,j,1.0-sumProb);
-        (*connections)(j,j) = 1.0-sumProb;
+        connections(j,j) = 1.0-sumProb;
     }
     
 #ifdef DEBUG
     logger().debug("Hebbian connection matrix");
     if (logger().getLevel() >= Logger::FINE) {
-        printMatrix(connections);
+        printMatrix(connections_);
     }
 #endif
 }
@@ -307,8 +310,8 @@ void ImportanceDiffusionAgent::spreadImportance()
 {
     bmatrix* connections;
     bvector* stiVector;
-    bvector* result;
-    int errorNo;
+//    bvector* result;
+//    int errorNo;
 
     // The source and destinations of STI
     std::map<Handle,int> diffusionAtomsMap;
@@ -338,9 +341,11 @@ void ImportanceDiffusionAgent::spreadImportance()
     makeConnectionMatrix(connections, totalDiffusionAtoms, diffusionAtomsMap, links);
 
 //    result = gsl_vector_alloc(totalDiffusionAtoms);
-    result = new bvector(totalDiffusionAtoms);
-//    errorNo = gsl_blas_dgemv(CblasNoTrans,1.0,connections,stiVector,0.0,result); // XXX
-    result = new bvector(prod(*connections, *stiVector));
+//    errorNo = gsl_blas_dgemv(CblasNoTrans,1.0,connections,stiVector,0.0,result);
+
+//    result = new bvector(totalDiffusionAtoms);
+//    result = new bvector(prod(*connections, *stiVector));
+    bvector result = prod(*connections, *stiVector);
     
 /*    if (errorNo) {
         logger().error("%s\n", gsl_strerror (errorNo)); // XXX
@@ -350,7 +355,7 @@ void ImportanceDiffusionAgent::spreadImportance()
         float normAF;
         normAF = (a->getAttentionalFocusBoundary() - a->getMinSTI(false)) / (float) ( a->getMaxSTI(false) - a->getMinSTI(false) );
         logger().fine("Result (AF at %.3f)\n",normAF);
-        printVector(result);
+        printVector(&result);
     }
 
     // set the sti of all atoms based on new values in results vector from
@@ -362,7 +367,7 @@ void ImportanceDiffusionAgent::spreadImportance()
             i != diffusionAtomsMap.end(); i++) {
         Handle dAtom = (*i).first;
 //        double val = gsl_vector_get(result,(*i).second);
-        double val = (*result)((*i).second);
+        double val = result((*i).second);
         setScaledSTI(dAtom,val);
 #ifdef DEBUG
         totalSTI_After += a->getSTI(dAtom);
@@ -380,7 +385,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     gsl_vector_free(result);*/
     delete connections;
     delete stiVector;
-    delete result;
+//    delete result;
 }
 
 void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
