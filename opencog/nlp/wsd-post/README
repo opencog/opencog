@@ -47,8 +47,11 @@ rattle() package.
 ---------------
 
 
+------------------------------------------------
 To update the stats in the db, run ./synset-renorm.pl then ./dj-probs.pl
 ------------------------------------------------
+
+Misc notes:
 
    select * from disjunctsenses order by count desc;
 
@@ -72,15 +75,19 @@ Show low-entropy words, as well as the sense count; don't display boring columns
 Suffers:
 --------
 Candidates:
-  inflected_word   |                        disjunct                        |              word_sense               |       entropy       | senses_observed |        count         
--------------------+--------------------------------------------------------+---------------------------------------+---------------------+-----------------+----------------------
- suffers.v         | Ss- Os+ MVp+                                           | have%2:29:05::                        | 0.00591198141479204 |               2 |     1.16565684723427
- suffers.v         | Ss- Os+ MVp+                                           | get%2:29:11::                         | 0.00591198141479204 |               2 |   0.0005521501501815
+  inflected_word   |    disjunct    |    word_sense     |       entropy       | senses_observed |        count         
+-------------------+----------------+-------------------+---------------------+-----------------+----------------------
+ suffers.v         | Ss- Os+ MVp+   | have%2:29:05::    | 0.00591198141479204 |               2 |     1.16565684723427
+ suffers.v         | Ss- Os+ MVp+   | get%2:29:11::     | 0.00591198141479204 |               2 |   0.0005521501501815
 
 Here, have%2:29:05:: is in the same synset as get%2:29:11:: (which is suffer%2:29:01::),
 
 Since these both belong to the same synset, they should really be merged.
 Done, the synset-renorm.pl script merges records that have the same synset.
+
+Now its:
+ suffers.v      | Ss- Os+ MVp+     | suffer%2:29:01:: |                0 |               1 |   1.16620899738445
+
 
 She suffered a fracture in the accident"; 
 "He suffered an insulin shock after eating three candy bars"; -- "He had an insulin shock after eating three candy bars"; 
@@ -107,56 +114,70 @@ for this sentence construction.
 
 How about the past tense?
 
- suffered.v        | Ss- MVp+                                               | have%2:29:05::                        |   0.0110064468007726 |               2 |      9.8004159256032
- suffered.v        | Ss- MVp+                                               | get%2:29:11::                         |   0.0110064468007726 |               2 |   0.0094159056457721
+ suffered.v        | Ss- MVp+       | have%2:29:05::    |   0.0110064468007726 |               2 |      9.8004159256032
+ suffered.v        | Ss- MVp+       | get%2:29:11::     |   0.0110064468007726 |               2 |   0.0094159056457721
+
+Later, though, after more text processing:
+ suffered.v     | Ss- MVp+                     | suffer%2:29:01::  | 0.383730502470793 |               4 |     24.2099497459028
+ suffered.v     | Ss- MVp+                     | suffer%2:39:00::  | 0.383730502470793 |               4 |    0.788057528259323
+ suffered.v     | Ss- MVp+                     | suffer%2:29:00::  | 0.383730502470793 |               4 |    0.454347413874991
+ suffered.v     | Ss- MVp+                     | suffer%2:31:00::  | 0.383730502470793 |               4 |     0.17292852236826
+
 
 she suffered a stroke   dj=Ss- Os+ 
+ suffered.v     | Ss- Os+                      | suffer%2:29:01::  | 0.158424688370868 |               4 |     22.4992459030187
+ suffered.v     | Ss- Os+                      | suffer%2:31:00::  | 0.158424688370868 |               4 |    0.463915849183753
+ suffered.v     | Ss- Os+                      | suffer%2:37:00::  | 0.158424688370868 |               4 |    0.019114227845194
+ suffered.v     | Ss- Os+                      | suffer%2:39:00::  | 0.158424688370868 |               4 |   0.0117731769456313
+
+Clearly,  suffer%2:29:01:: is a big winner accross the board.
+
 
 Other Candidates
 ----------------
 Verbs:
- gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:36:02::                        |  0.00294323663814882 |               2 |     1.09565752530025
- gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:40:00::                        |  0.00294323663814882 |               2 | 0.000236846846509587
+ gave.v            | Ss- Os+ MVp+ MVp+        | give%2:36:02::    |  0.00294323663814882 |               2 |     1.09565752530025
+ gave.v            | Ss- Os+ MVp+ MVp+        | give%2:40:00::    |  0.00294323663814882 |               2 | 0.000236846846509587
 
- proposed.v        | Mv- MVp+ MVp+                                          | propose%2:32:00::                     |   0.0050631354101759 |               2 |     1.19945158244393
- proposed.v        | Mv- MVp+ MVp+                                          | propose%2:32:01::                     |   0.0050631354101759 |               2 | 0.000476899022006969
+ proposed.v        | Mv- MVp+ MVp+            | propose%2:32:00:: |   0.0050631354101759 |               2 |     1.19945158244393
+ proposed.v        | Mv- MVp+ MVp+            | propose%2:32:01:: |   0.0050631354101759 |               2 | 0.000476899022006969
 
- ends.v            | Ss- MVp+                                               | end%2:42:00::                         |    0.011789696275097 |               2 |     6.02102715971805
- ends.v            | Ss- MVp+                                               | end%2:42:01::                         |    0.011789696275097 |               2 |  0.00625895238185481
+ ends.v            | Ss- MVp+                 | end%2:42:00::     |    0.011789696275097 |               2 |     6.02102715971805
+ ends.v            | Ss- MVp+                 | end%2:42:01::     |    0.011789696275097 |               2 |  0.00625895238185481
 
 Nouns:
- dog.n             | AN+                                                    | dog%1:05:00::                         |  0.00512254376849792 |               2 |     1.10869675890655
- dog.n             | AN+                                                    | dog%1:06:00::                         |  0.00512254376849792 |               2 | 0.000446655405590204
+ dog.n             | AN+                      | dog%1:05:00::     |  0.00512254376849792 |               2 |     1.10869675890655
+ dog.n             | AN+                      | dog%1:06:00::     |  0.00512254376849792 |               2 | 0.000446655405590204
 
- towns.n           | Jp- Dmc-                                               | town%1:15:00::                        |  0.00717972910706398 |               2 |    0.802619180446346
- towns.n           | Jp- Dmc-                                               | town%1:14:00::                        |  0.00717972910706398 |               2 |  0.00047381451237468
+ towns.n           | Jp- Dmc-                 | town%1:15:00::    |  0.00717972910706398 |               2 |    0.802619180446346
+ towns.n           | Jp- Dmc-                 | town%1:14:00::    |  0.00717972910706398 |               2 |  0.00047381451237468
 
- building.n        | Wd- Ds- Ss+                                            | building%1:06:00::                    |  0.00901884557840178 |               2 |     1.82290246346794
- building.n        | Wd- Ds- Ss+                                            | building%1:04:00::                    |  0.00901884557840178 |               2 |  0.00139490596324197
+ building.n        | Wd- Ds- Ss+              | building%1:06:00::|  0.00901884557840178 |               2 |     1.82290246346794
+ building.n        | Wd- Ds- Ss+              | building%1:04:00::|  0.00901884557840178 |               2 |  0.00139490596324197
 
- home.n            | Cs- D*u- Ss+                                           | home%1:14:00::                        |     0.01489989871691 |               2 |     1.14445717825025
- home.n            | Cs- D*u- Ss+                                           | home%1:06:02::                        |     0.01489989871691 |               2 |  0.00155725637510752
+ home.n            | Cs- D*u- Ss+             | home%1:14:00::    |     0.01489989871691 |               2 |     1.14445717825025
+ home.n            | Cs- D*u- Ss+             | home%1:06:02::    |     0.01489989871691 |               2 |  0.00155725637510752
 
 Adjectives, adverbs, etc:
- personal.a        | A+                                                     | personal%3:00:00::                    |   0.0105270084251467 |               2 |     2.05028355814664
- personal.a        | A+                                                     | personal%3:01:01::                    |   0.0105270084251467 |               2 |   0.0018719470709944
+ personal.a        | A+                       | personal%3:00:00::|   0.0105270084251467 |               2 |     2.05028355814664
+ personal.a        | A+                       | personal%3:01:01::|   0.0105270084251467 |               2 |   0.0018719470709944
 
- later             | E+                                                     | later%4:02:01::                       |   0.0158438709016617 |               2 |      9.3855856634763
- later             | E+                                                     | later%4:02:03::                       |   0.0158438709016617 |               2 |   0.0137091418558027
+ later             | E+                       | later%4:02:01::   |   0.0158438709016617 |               2 |      9.3855856634763
+ later             | E+                       | later%4:02:03::   |   0.0158438709016617 |               2 |   0.0137091418558027
 
- however.e         | CO+                                                    | however%4:02:00::                     |   0.0251996594250165 |               2 |     1.96656900377359
- however.e         | CO+                                                    | however%4:02:02::                     |   0.0251996594250165 |               2 |  0.00492595230112824
+ however.e         | CO+                      | however%4:02:00:: |   0.0251996594250165 |               2 |     1.96656900377359
+ however.e         | CO+                      | however%4:02:02:: |   0.0251996594250165 |               2 |  0.00492595230112824
 
- after             | Mgp+ Xc+ CO+                                           | after%4:02:01::                       |    0.051442197937953 |               2 |    0.892771967980748
- after             | Mgp+ Xc+ CO+                                           | after%4:02:00::                       |    0.051442197937953 |               2 |  0.00520906900520265
+ after             | Mgp+ Xc+ CO+             | after%4:02:01::   |    0.051442197937953 |               2 |    0.892771967980748
+ after             | Mgp+ Xc+ CO+             | after%4:02:00::   |    0.051442197937953 |               2 |  0.00520906900520265
 
- new.a             | A+                                                     | new%3:00:00::                         |   0.0579363661878467 |               2 |     47.9283157543877
- new.a             | A+                                                     | new%3:00:09::                         |   0.0579363661878467 |               2 |    0.321947934003109
+ new.a             | A+                       | new%3:00:00::     |   0.0579363661878467 |               2 |     47.9283157543877
+ new.a             | A+                       | new%3:00:09::     |   0.0579363661878467 |               2 |    0.321947934003109
 
 
 Lets look at the verbs
- gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:36:02::                        |  0.00294323663814882 |               2 |     1.09565752530025
- gave.v            | Ss- Os+ MVp+ MVp+                                      | give%2:40:00::                        |  0.00294323663814882 |               2 | 0.000236846846509587
+ gave.v            | Ss- Os+ MVp+ MVp+        | give%2:36:02::    |  0.00294323663814882 |               2 |     1.09565752530025
+ gave.v            | Ss- Os+ MVp+ MVp+        | give%2:40:00::    |  0.00294323663814882 |               2 | 0.000236846846509587
 
 Example for this disjunct would be:
 
@@ -210,6 +231,18 @@ lexat=# select * from disjunctsenses where inflected_word='gave.v' and disjunct=
 Hmm. give%2:40:01:: is (give as a present; make a gift of; "What will you give her for her birthday?")
 while the remaining senses should indeed be considered to be "unlikely".
 
+give (give%2:40:00::) (transfer possession of something concrete or abstract to somebody) "I gave her my money"; "can you give me lessons?"; "She gave
+the children lots of love and tender loving care"
+
+After more processing, the top five are now:
+ give%2:36:02:: | gave.v         | Ss- Os+ MVp+  |   9.19687218041551 |    0.971479113216472
+ give%2:40:00:: | gave.v         | Ss- Os+ MVp+  |   3.01082867642231 |     2.58246178547495
+ give%2:40:01:: | gave.v         | Ss- Os+ MVp+  |   2.79092000659383 |      2.6918816285251
+ give%2:40:06:: | gave.v         | Ss- Os+ MVp+  |   1.20031466833253 |     3.90920973802285
+ give%2:40:09:: | gave.v         | Ss- Os+ MVp+  |   1.09324581118626 |     4.04400458227927
+
+Notice the gap between top sense, and the rest, has widened.
+
 
 	Linkage 2, cost vector = (CORP=4.4040 UNUSED=0 DIS=1 AND=0 LEN=9)
 
@@ -235,38 +268,91 @@ lexat=# select * from disjunctsenses where inflected_word='gave.v' and disjunct=
 
 Not at odds with the above.
 
+After more stats, the top four are now:
+ give%2:36:02:: | gave.v         | Ss- Os+  |    18.0263471677313 |    0.351379216004031
+ give%2:40:01:: | gave.v         | Ss- Os+  |    1.75019171085476 |     3.71590143240663
+ give%2:40:00:: | gave.v         | Ss- Os+  |    1.24343275701667 |     4.20908590081861
+ give%2:40:06:: | gave.v         | Ss- Os+  |   0.654998252433946 |     5.13385142910354
+
+Again, teh gap has widened!
+
 Can we disprove the above?
 
-linkparser> I gave him instructions on how to use the tool
+linkparser> John  gave him instructions on how to use the tool
 Found 2 linkages (2 had no P.P. violations)
-	Linkage 1, cost vector = (CORP=4.0124 UNUSED=0 DIS=2 AND=0 LEN=14)
+	Linkage 1, cost vector = (CORP=17.0000 UNUSED=0 DIS=2 AND=0 LEN=14)
 
-       +----------MVp----------+                      
-       +------Opn-----+        |          +----Os----+
- +-Sp*i+-Ox-+         |        +QI+TOn+-I-+    +--Ds-+
- |     |    |         |        |  |   |   |    |     |
-I.p gave.v him instructions.n on how to use.v the tool.n 
+          +----------MVp----------+                      
+          +------Opn-----+        |          +----Os----+
+   +--Ss--+-Ox-+         |        +QI+TOn+-I-+    +--Ds-+
+   |      |    |         |        |  |   |   |    |     |
+John.b gave.v him instructions.n on how to use.v the tool.n 
 
-select * from disjunctsenses where inflected_word='gave.v' and disjunct='Sp*i- Ox+ Opn+ MVp+ ' order by count desc;
+select * from disjunctsenses where inflected_word='gave.v' and disjunct='Ss- Ox+ Opn+ MVp+ ' order by count desc;
  word_sense | inflected_word | disjunct | count | log_cond_probability 
 ------------+----------------+----------+-------+----------------------
 (0 rows)
 
+Still zero, after more stats.
 
-	Linkage 2, cost vector = (CORP=5.5181 UNUSED=0 DIS=3 AND=0 LEN=12)
+	Linkage 2, cost vector = (CORP=17.0000 UNUSED=0 DIS=3 AND=0 LEN=12)
 
-       +------Opn-----+                   +----Os----+
- +-Sp*i+-Ox-+         +---Mp---+QI+TOn+-I-+    +--Ds-+
- |     |    |         |        |  |   |   |    |     |
-I.p gave.v him instructions.n on how to use.v the tool.n 
+          +------Opn-----+                   +----Os----+
+   +--Ss--+-Ox-+         +---Mp---+QI+TOn+-I-+    +--Ds-+
+   |      |    |         |        |  |   |   |    |     |
+John.b gave.v him instructions.n on how to use.v the tool.n 
 
-select * from disjunctsenses where inflected_word='gave.v' and disjunct='Sp*i- Ox+ Opn+ ' order by count desc;
+select * from disjunctsenses where inflected_word='gave.v' and disjunct='Ss- Ox+ Opn+ ' order by count desc;
  word_sense | inflected_word | disjunct | count | log_cond_probability 
 ------------+----------------+----------+-------+----------------------
 (0 rows)
 
-Oh well, not enough statistics today.
+Still zero.
 
+Try alternate:
+
+Found 2 linkages (2 had no P.P. violations)
+	Linkage 1, cost vector = (CORP=17.0000 UNUSED=0 DIS=2 AND=0 LEN=14)
+
+        +----------MVp----------+                      
+        +------Opn-----+        |          +----Os----+
+  +--Sp-+-Ox-+         |        +QI+TOn+-I-+    +--Ds-+
+  |     |    |         |        |  |   |   |    |     |
+they gave.v him instructions.n on how to use.v the tool.n 
+
+select * from disjunctsenses where inflected_word='gave.v' and disjunct='Sp- Ox+ Opn+ MVp+ ' order by count desc;
+Nothing so far -- zero rows
+
+linkparser> 
+	Linkage 2, cost vector = (CORP=17.0000 UNUSED=0 DIS=3 AND=0 LEN=12)
+
+        +------Opn-----+                   +----Os----+
+  +--Sp-+-Ox-+         +---Mp---+QI+TOn+-I-+    +--Ds-+
+  |     |    |         |        |  |   |   |    |     |
+they gave.v him instructions.n on how to use.v the tool.n 
+
+select * from disjunctsenses where inflected_word='gave.v' and disjunct='Sp- Ox+ Opn+ ' order by count desc;
+   word_sense   | inflected_word |   disjunct    |       count       | log_cond_probability 
+----------------+----------------+---------------+-------------------+----------------------
+ give%2:36:02:: | gave.v         | Sp- Ox+ Opn+  |  1.95710706403113 |    0.427502836651755
+ give%2:40:00:: | gave.v         | Sp- Ox+ Opn+  | 0.348671086794809 |     2.91628687764095
+ give%2:40:01:: | gave.v         | Sp- Ox+ Opn+  | 0.210736996086307 |     3.64271000289082
+ give%2:40:06:: | gave.v         | Sp- Ox+ Opn+  |  0.11560531617747 |     4.50894587012378
+
+The sense give%2:36:02:: is (organize or be responsible for; "hold a
+reception"; "have, throw, or make a party"; "give a course")
+
+This time, the choosen sense is incorect; might have expected:
+give (give%2:40:00::) (transfer possession of something concrete or abstract to somebody) 
+"I gave her my money"; "can you give me lessons?"; 
+"She gave the children lots of love and tender loving care"
+
+But ... also .. but maybe not ... ??
+ give (give%2:40:07::) (convey or reveal information) "Give one's name"
+ give (give%2:40:09::), (transmit (knowledge or skills)) "give a secret
+to the Russians"; "leave your name and address here"; "impart a new skill to the students"
+
+However 'give' is a very nuanced word; wordnet lists 43 verb senses for it!!
 
 
 TODO
