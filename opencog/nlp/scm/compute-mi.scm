@@ -27,6 +27,8 @@
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 (define db-update-conn
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+;; (define db-debug-conn
+;; 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; --------------------------------------------------------------------
 ;;
@@ -50,6 +52,26 @@
 )
 
 ;; --------------------------------------------------------------------
+;; debugging utility
+;;
+(define (dbg-approx)
+	(define rc #f)
+	(define row #f)
+
+	(dbi-query db-debug-conn 
+		"SELECT log_probability FROM InflectMarginal WHERE inflected_word = 'approx[?].v';"
+	)
+	(set! row (dbi-get_row db-debug-conn))
+	(while (not (equal? row #f))
+		(if (< 22 (assoc-ref row "log_probability"))
+			(set! rc #t)
+		)
+		(set! row (dbi-get_row db-debug-conn))
+	)
+	rc
+)
+
+;; --------------------------------------------------------------------
 ;;
 ;; Compute and store the marginal word probability for a word.
 ;; Divide the count for each row by a sum-total of all counts.
@@ -64,9 +86,10 @@
 			)
 		(dbi-query db-update-conn 
 			(string-append "UPDATE InflectMarginal SET log_probability = "
-				sprob " WHERE inflected_word = E'" word "'"
+				sprob " WHERE inflected_word = $$" word "$$"
 			)
 		)
+
 		;; Call twice -- once to update, once to flush connection
 		(set! urow (dbi-get_row db-update-conn))
 		(set! urow (dbi-get_row db-update-conn))
@@ -131,9 +154,12 @@
 	(define drow #f)
 	(define urow #f)
 
+	; Use the postgres $$ string delimiter -- the problem is that
+	; some of the database entries contain back-slashes, which are
+	; not escapes.  Treating them as escapes leads to big trouble.
 	(dbi-query db-disjunct-conn 
 		(string-append "SELECT count, disjunct FROM Disjuncts "
-			"WHERE inflected_word = E'" word "'"
+			"WHERE inflected_word = $$" word "$$"
 		)
 	)
 	(set! drow (dbi-get_row db-disjunct-conn))
@@ -145,8 +171,8 @@
 			)
 			(dbi-query db-update-conn 
 				(string-append "UPDATE Disjuncts SET log_cond_probability = "
-					sdprob " WHERE inflected_word = E'" word 
-					"' AND disjunct = '" dj "'"
+					sdprob " WHERE inflected_word = $$" word 
+					"$$ AND disjunct = '" dj "'"
 				)
 			)
 
