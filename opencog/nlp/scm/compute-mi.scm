@@ -11,7 +11,7 @@
 ; meaningful (and final) values. This script merely totals up the
 ; counts, and computes the various probabilities.
 ;
-; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 (use-modules (srfi srfi-1))
 (use-modules (dbi dbi))
