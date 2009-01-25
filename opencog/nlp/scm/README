@@ -41,3 +41,5 @@ ordinary guile interpreter.
    the raw count fields have meaningful (and final) values. This 
    script merely totals up the counts, and computes the various
    probabilities.
+
+ * cluster.scm: Cheapo data clustering algo.
