@@ -51,6 +51,30 @@
 
 ;; --------------------------------------------------------------------
 ;;
+;; Compute and store the marginal word probability for a word.
+;; Divide the count for each row by a sum-total of all counts.
+;; 
+;; Argumnets: word, count for this word, total count.
+;;
+(define (update-marginal-probability word count tot)
+	(define urow #f)
+
+	(let* ((lprob (/ (- (log (/ count tot))) (log 2)))
+				(sprob (number->string lprob))
+			)
+		(dbi-query db-update-conn 
+			(string-append "UPDATE InflectMarginal SET log_probability = "
+				sprob " WHERE inflected_word = E'" word "'"
+			)
+		)
+		;; Call twice -- once to update, once to flush connection
+		(set! urow (dbi-get_row db-update-conn))
+		(set! urow (dbi-get_row db-update-conn))
+	)
+)
+
+;; --------------------------------------------------------------------
+;;
 ;; Compute and store the marginal word probabilities
 ;; This is done by going through the InflectMarginal table, and dividing
 ;; the count for each row by the sum-total of all counts in the table.
@@ -58,7 +82,6 @@
 (define (marginal-set-probabilities)
 	(define cnt 0)
 	(define srow #f)
-	(define urow #f)
 	(define tot (marginal-tot-inflected))
 
 	(dbi-query db-select-conn 
@@ -69,18 +92,13 @@
 	(set! srow (dbi-get_row db-select-conn))
 	(while (not (equal? srow #f))
 		(let* ((word (assoc-ref srow "inflected_word"))
-				(lprob (- (log (/ (assoc-ref srow "count") tot))))
-				(sprob (number->string lprob))
-				)
-			(dbi-query db-update-conn 
-				(string-append "UPDATE InflectMarginal SET log_probability = "
-					sprob " WHERE inflected_word = E'" word "'"
-				)
+				(wcount(assoc-ref srow "count"))
 			)
-			;; Call twice -- once to update, once to flush connection
-			(set! urow (dbi-get_row db-update-conn))
-			(set! urow (dbi-get_row db-update-conn))
+			;; update the table row.
+			(update-marginal-probability word wcount tot)
 		)
+
+		; get the next row
 		(set! srow (dbi-get_row db-select-conn))
 
 		; print a running total, since this takes a long time.
@@ -102,6 +120,44 @@
 
 ;; --------------------------------------------------------------------
 ;;
+;; Update the conditional probability for a single inflected word.
+;; This will loop over all (word,disjunct) pairs, computing the 
+;; conditional probability of seeing that disjunct, given that the
+;; word is being observed.
+;;
+(define (update-disjunct-cond-probability word word-cnt)
+	(define drow #f)
+	(define urow #f)
+
+	(dbi-query db-disjunct-conn 
+		(string-append "SELECT count, disjunct FROM Disjuncts "
+			"WHERE inflected_word = E'" word "'"
+		)
+	)
+	(set! drow (dbi-get_row db-disjunct-conn))
+	(while (not (equal? drow #f))
+		(let* ((dj-cnt (assoc-ref drow "count"))
+				(dj (assoc-ref drow "disjunct"))
+				(dprob (/ (- (log (/ dj-cnt word-cnt))) (log 2)))
+				(sdprob (number->string dprob))
+			)
+			(dbi-query db-update-conn 
+				(string-append "UPDATE Disjuncts SET log_cond_probability = "
+					sdprob " WHERE inflected_word = E'" word 
+					"' AND disjunct = '" dj "'"
+				)
+			)
+
+			;; Call twice -- once to update, once to flush connection
+			(set! urow (dbi-get_row db-update-conn))
+			(set! urow (dbi-get_row db-update-conn))
+		)
+		(set! drow (dbi-get_row db-disjunct-conn))
+	)
+)
+
+;; --------------------------------------------------------------------
+;;
 ;; Compute the conditional probabilites for the disjunct table.
 ;; That is, given a particular (word,disjunct) pair, compute the 
 ;; conditional probability of seeing that disjunct, given that the
@@ -110,8 +166,6 @@
 (define (disjunct-cond-probabilities)
 	(define cnt 0)
 	(define srow #f)
-	(define drow #f)
-	(define urow #f)
 
 	(dbi-query db-select-conn 
 		"SELECT inflected_word, count FROM InflectMarginal;"
@@ -120,35 +174,10 @@
 	; Loop over all words in the database.
 	(set! srow (dbi-get_row db-select-conn))
 	(while (not (equal? srow #f))
-		(let* ((word (assoc-ref srow "inflected_word"))
-				(word-cnt (assoc-ref srow "count"))
-				)
-			(dbi-query db-disjunct-conn 
-				(string-append "SELECT count, disjunct FROM Disjuncts "
-					"WHERE inflected_word = E'" word "'"
-				)
-			)
-			(set! drow (dbi-get_row db-disjunct-conn))
-			(while (not (equal? drow #f))
-				(let* ((dj-cnt (assoc-ref drow "count"))
-						(dj (assoc-ref drow "disjunct"))
-						(dprob (- (log (/ dj-cnt word-cnt))))
-						(sdprob (number->string dprob))
-					)
-					(dbi-query db-update-conn 
-						(string-append "UPDATE Disjuncts SET log_cond_probability = "
-							sdprob " WHERE inflected_word = E'" word 
-							"' AND disjunct = '" dj "'"
-						)
-					)
 
-					;; Call twice -- once to update, once to flush connection
-					(set! urow (dbi-get_row db-update-conn))
-					(set! urow (dbi-get_row db-update-conn))
-				)
-				(set! drow (dbi-get_row db-disjunct-conn))
-			)
-		)
+		; Do a single word.
+		(update-disjunct-cond-probability word word-cnt)
+
 		(set! srow (dbi-get_row db-select-conn))
 
 		; print a running total, since this takes a long time.
