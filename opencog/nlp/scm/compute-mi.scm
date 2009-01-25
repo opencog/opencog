@@ -180,7 +180,7 @@
 		; Do a single word.
 		(update-disjunct-cond-probability 
 			(assoc-ref srow "inflected_word")
-			word-cnt
+			(assoc-ref srow "count")
 		)
 
 		; Get the next row.
@@ -204,9 +204,9 @@
 ;; --------------------------------------------------------------------
 ;;
 ;; Compute the marginal probabilities
-(display "Start computing the marginal probilities\n")
+(display "Start computing the marginal probabilities\n")
 (marginal-set-probabilities)
-(display "Done computing the marginal probilities\n")
+(display "Done computing the marginal probabilities\n")
 ;
 (disjunct-cond-probabilities)
 (display "Done computing the conditional probabilities\n")
