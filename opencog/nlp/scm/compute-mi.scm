@@ -22,11 +22,11 @@
 ;; /etc/postgresql/8.3/main/postgresql.conf
 ;;
 (define db-select-conn
-   (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 (define db-disjunct-conn
-   (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 (define db-update-conn
-   (dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; --------------------------------------------------------------------
 ;;
@@ -44,7 +44,7 @@
 	(while (not (equal? row #f))
 		(set! row-count (+ row-count 1))
 		(set! word-count (+ word-count (assoc-ref row "count")))
-	   (set! row (dbi-get_row db-select-conn))
+		(set! row (dbi-get_row db-select-conn))
 	)
 	word-count
 )
@@ -56,6 +56,7 @@
 ;; the count for each row by the sum-total of all counts in the table.
 ;;
 (define (marginal-set-probabilities)
+	(define cnt 0)
 	(define srow #f)
 	(define urow #f)
 	(define tot (marginal-tot-inflected))
@@ -80,8 +81,23 @@
 			(set! urow (dbi-get_row db-update-conn))
 			(set! urow (dbi-get_row db-update-conn))
 		)
-	   (set! srow (dbi-get_row db-select-conn))
+		(set! srow (dbi-get_row db-select-conn))
+
+		; print a running total, since this takes a long time.
+		(set! cnt (+ cnt 1))
+		(if (eq? 0 (modulo cnt 1000))
+			(let ()
+				(display cnt)
+				(display " words processed\n")
+			)
+		)
 	)
+
+	(display "Inflected words: ")
+	(display cnt)
+	(display " Tot weight: ")
+	(display tot)
+	(newline)
 )
 
 ;; --------------------------------------------------------------------
@@ -92,6 +108,7 @@
 ;; word is being observed.
 ;;
 (define (disjunct-cond-probabilities)
+	(define cnt 0)
 	(define srow #f)
 	(define drow #f)
 	(define urow #f)
@@ -129,11 +146,23 @@
 					(set! urow (dbi-get_row db-update-conn))
 					(set! urow (dbi-get_row db-update-conn))
 				)
-	   		(set! drow (dbi-get_row db-disjunct-conn))
+				(set! drow (dbi-get_row db-disjunct-conn))
 			)
 		)
-	   (set! srow (dbi-get_row db-select-conn))
+		(set! srow (dbi-get_row db-select-conn))
+
+		; print a running total, since this takes a long time.
+		(set! cnt (+ cnt 1))
+		(if (eq? 0 (modulo cnt 1000))
+			(let ()
+				(display cnt)
+				(display " disjuncts processed\n")
+			)
+		)
 	)
+	(display "Total disjuncts: ")
+	(display cnt)
+	(newline)
 )
 
 ;; --------------------------------------------------------------------
