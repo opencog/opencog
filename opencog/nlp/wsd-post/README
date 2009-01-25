@@ -49,6 +49,8 @@ rattle() package.
 
 ------------------------------------------------
 To update the stats in the db, run ./synset-renorm.pl then ./dj-probs.pl
+
+The log_cond_prob column in disjuncts table is computed by compute-mi.scm
 ------------------------------------------------
 
 Misc notes:
@@ -353,6 +355,95 @@ But ... also .. but maybe not ... ??
 to the Russians"; "leave your name and address here"; "impart a new skill to the students"
 
 However 'give' is a very nuanced word; wordnet lists 43 verb senses for it!!
+
+========================================================================
+========================================================================
+========================================================================
+OK, how about syntactic word clustering? Link-grammar organizes words
+into those that have similar rule sets. Can we find and correct 
+(or refine) these clusters? Some words are in too narrow a cluster,
+others might be in too wide a set.  Want to refine both membership
+classes.  In particular, want to widen clusters (to allow more sentences
+to be parsed) also want to refine clusters (so that nly tryuly 'similar'
+words are in a set. So -- lets try by hand ...
+
+In the disjuncts table, log_cond_probability is minus the log_2 of
+the conditional probabilty of seeing this disjunct, given this 
+inflected word.
+
+select * from disjuncts where disjunct='Ss- Ox+ Opn+ ' order by log_cond_probability asc;
+
+
+ inflected_word |   disjunct    |       count        | log_cond_probability |  
+----------------+---------------+--------------------+----------------------+-
+ denies.v       | Ss- Ox+ Opn+  |   2.70718437433243 |     3.09395696205239 |
+ owes.v         | Ss- Ox+ Opn+  |     1.766691416502 |     3.39584024085858 |
+ buys.v         | Ss- Ox+ Opn+  |   1.08895570039749 |     3.76726502765287 |
+ gave.v         | Ss- Ox+ Opn+  |   15.2900903802364 |      4.6935850263336 | 
+ teaches.v      | Ss- Ox+ Opn+  |  0.881453424692153 |     5.04181655775547 | 
+ gives.v        | Ss- Ox+ Opn+  |   5.32094312645492 |     5.59212083110965 | 
+ finds.v        | Ss- Ox+ Opn+  |   1.47437614202499 |     5.71456136184912 | 
+ refuses.v      | Ss- Ox+ Opn+  |  0.459859251976013 |     5.75651750326265 | 
+ read.v         | Ss- Ox+ Opn+  |   1.83886253833771 |     5.82941333216396 | 
+ asked.v        | Ss- Ox+ Opn+  |   1.79761986061931 |     5.87878507916957 | 
+ taught.v       | Ss- Ox+ Opn+  |   3.70534968376159 |     5.99382568059538 | 
+ granted.v      | Ss- Ox+ Opn+  |    4.0402828156948 |     6.07583566445166 | 
+ asks.v         | Ss- Ox+ Opn+  |   1.18346454203128 |     6.08104628882818 | 
+ shows.v        | Ss- Ox+ Opn+  |   1.92236000299453 |     6.27355627951066 | 
+ brought.v      | Ss- Ox+ Opn+  |      2.43976123631 |     6.54762703580705 | 
+ gets.v         | Ss- Ox+ Opn+  |  0.606530666351318 |     6.70894786903452 | 
+ appointed.v    | Ss- Ox+ Opn+  |  0.910481497645378 |     7.25544095246871 | 
+ made.v         | Ss- Ox+ Opn+  |   3.21262238919736 |     7.73259168120915 | 
+ wrote.v        | Ss- Ox+ Opn+  |  0.422241305932403 |     7.90307163730819 | 
+
+No visually obvius clustering.
+
+select * from disjuncts where disjunct='Ss- Ox+ ' and count > 1.0 order by log_cond_probability asc;
+
+   inflected_word   | disjunct |      count       | log_cond_probability |  
+--------------------+----------+------------------+----------------------+--
+ harpoons.v         | Ss- Ox+  | 1.23413008451462 |                    0 | 
+ blacklists.v       | Ss- Ox+  | 1.21693927049637 |                    0 | 
+ deserts.v          | Ss- Ox+  | 1.87540191411972 |                    0 | 
+ brainbustered[!].v | Ss- Ox+  | 1.38029098510743 |                    0 | 
+ overwhelms.v       | Ss- Ox+  |  3.7728200852871 |  0.00388966262389523 | 
+ assaults.v         | Ss- Ox+  | 2.15775206685066 |    0.406605322094401 | 
+ coddles.v          | Ss- Ox+  | 1.91823095083236 |      0.4896415709171 | 
+ pressurises.v      | Ss- Ox+  | 1.05867084860802 |    0.554480230164364 | 
+ legitimised.v      | Ss- Ox+  | 1.09617540240288 |    0.577028231407784 | 
+ hugs.v             | Ss- Ox+  | 1.14638306200504 |    0.689778113607922 | 
+ discards.v         | Ss- Ox+  | 3.46550455689431 |    0.833836762428404 | 
+ muffed.v           | Ss- Ox+  |  1.1338666677475 |    0.954090158106465 | 
+ punishes.v         | Ss- Ox+  | 4.61573058366775 |    0.954881042038653 | 
+ bashes.v           | Ss- Ox+  | 1.08810368180275 |    0.964721274701267 | 
+ inconvenienced.v   | Ss- Ox+  | 1.17411637306213 |     1.02200334909295 | 
+ fumbles.v          | Ss- Ox+  | 1.06313192844391 |     1.05022079574155 | 
+ teases.v           | Ss- Ox+  |  5.4783154539764 |     1.13421908343243 | 
+ corners.v          | Ss- Ox+  | 1.79577225446701 |     1.15891817885022 | 
+ rapes.v            | Ss- Ox+  | 5.62726438790561 |     1.16145451305937 | 
+ handcuffs.v        | Ss- Ox+  | 1.69892004132271 |     1.18468837013388 | 
+ blesses.v          | Ss- Ox+  | 2.77992057800294 |     1.22104640419092 | 
+
+
+No obvious clustering either.
+
+What sort of meteric to assign?
+1) only if count > 1.0
+2) only if log_cond_prob < 5
+3) each dj on own axis.
+4) if dj not present, distance=5 (i.e. cutoff)
+
+ SELECT COUNT(*) FROM disjuncts where count > 1.0;
+The disjuncts table has 1.35M entries, so computing a matrix is infeasible.
+
+SELECT COUNT(*) FROM disjuncts where count > 1.0 and log_cond_probability<5;
+911K rows when clipped.
+
+
+
+wtf:
+approx[?].v    | Sp- | 2.98791804909708 |        -2.09857687036 |
+
 
 
 TODO
