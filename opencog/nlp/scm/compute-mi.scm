@@ -178,16 +178,21 @@
 	(while (not (equal? srow #f))
 
 		; Do a single word.
-		(update-disjunct-cond-probability word word-cnt)
+		(update-disjunct-cond-probability 
+			(assoc-ref srow "inflected_word")
+			word-cnt
+		)
 
+		; Get the next row.
 		(set! srow (dbi-get_row db-select-conn))
 
-		; print a running total, since this takes a long time.
+		; Print a running total, since this takes a long time.
 		(set! cnt (+ cnt 1))
 		(if (eq? 0 (modulo cnt 1000))
 			(let ()
+				(display "finished disjuncts for ")
 				(display cnt)
-				(display " disjuncts processed\n")
+				(display " words\n")
 			)
 		)
 	)
@@ -199,6 +204,7 @@
 ;; --------------------------------------------------------------------
 ;;
 ;; Compute the marginal probabilities
+(display "Start computing the marginal probilities\n")
 (marginal-set-probabilities)
 (display "Done computing the marginal probilities\n")
 ;
