@@ -433,6 +433,8 @@ What sort of meteric to assign?
 3) each dj on own axis.
 4) if dj not present, distance=5 (i.e. cutoff)
 
+The above is implemented in cluster.scm
+
  SELECT COUNT(*) FROM disjuncts where count > 1.0;
 The disjuncts table has 1.35M entries, so computing a matrix is infeasible.
 
@@ -440,9 +442,19 @@ SELECT COUNT(*) FROM disjuncts where count > 1.0 and log_cond_probability<5;
 911K rows when clipped.
 
 
+Some prelim results:
+ parliamentary.a democratic.a statutory.a part-time.a chief.a proprietary.a eHow[?].a anonymous.a
+personalized.v radioactive.a biological.a primary.a rural.a contemporary.a 404.4/sq[?].a exact.a
+widepread[?].a symbolic.a 19th[?].a belching.v Spanish.a daily.a canine.a juvenile.a total.a blazing.v
+midwinter[?].a incredible.a near.a soft.a ignimbrite[?].a propagandistic[?].a Japanese.a pg[?].a
+treacherous.a approaching.g ill-fated.a eikonal[?].a differential.a computational.a medieval.a
+allegorical.a og[?].a principal.a cardinal.a goldmining[!].g free.a heavenly.a moral.a relict[?].a pagan.a
+ritual.a potential.a geographical.a mythological.a northwestern.a natural.a advancing.g para[?].a ornate.a
+coastal.a sigmoidal[?].a formal.a 2001/02[?].a da[?].a electoral.a Irish.a joint.a electrical.a
+particular.a normal.a technical.a bassist[?].a)
 
-wtf:
-approx[?].v    | Sp- | 2.98791804909708 |        -2.09857687036 |
+
+
 
 
 

@@ -21,7 +21,7 @@
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; cluster radius
-(define cluster-radius 2.0)
+(define cluster-radius 3.0)
 
 ;; minimum number of times that a word must have been observed.
 (define min-observed-weight 1.0)
@@ -63,15 +63,44 @@
 )
 
 ;; --------------------------------------------------------------------
+;; create a list of disjuncts by merging those from two coord lists
+;; XXX not tail recursive; get performance boost if it was.
+
+(define (make-dj-list coords-a coords-b)
+	; Add dj to list, but only if not in list
+	(define (add-if-unique lst dj)
+		(if (any (lambda (x) (equal? x dj)) lst)
+			lst
+			(cons dj lst)
+		)
+	)
+
+	; Add disjuncts to list 
+	(define (add-djs coord lst)
+		(if (null? coord)
+			lst
+			(add-djs (cdr coord)
+				(add-if-unique lst (car (car coord)))
+			)
+		)
+	)
+
+	; concatenate the two lists.
+	(add-djs coords-a
+		(add-djs coords-b '())
+	)
+)
+
+;; --------------------------------------------------------------------
 ;; add to an existing cluster
 ;;
 (define (add-to-cluster cluster word coords)
 
-	(display (string-append 
-		"duuude adding " word " to existing cluster "
-			(car (assoc-ref cluster "wordlist")) "\n"
-		)
-	)
+	;(display (string-append 
+	;	"duuude adding " word " to existing cluster "
+	;		(car (assoc-ref cluster "wordlist")) "\n"
+	;	)
+	;)
 
 	;; prepend the word to the cluster's word-list.
 	(set! cluster 
@@ -80,7 +109,6 @@
 		)
 	)
 
-	;; average in the center.
 	;; update the count
 	(set! cluster 
 		(assoc-set! cluster "npts"
@@ -94,8 +122,8 @@
 ;; note a new cluster
 ;;
 (define (note-cluster cluster)
-	(display "duuude new cluster\n")
-	(show-cluster cluster)
+	; (display "duuude new cluster\n")
+	; (show-cluster cluster)
 	(set! cluster-list (cons cluster cluster-list))
 )
 
@@ -111,6 +139,15 @@
 	(newline)
 )
 
+(define (show-clusters clus-lst)
+	(if (not (null? clus-lst))
+		(let ()
+			(show-cluster (car clus-lst))
+			(show-clusters (cdr clus-lst))
+		)
+	)
+)
+
 ;; --------------------------------------------------------------------
 ;; return true if a coordinate point is in a cluster, else return false
 ;;
@@ -118,37 +155,38 @@
 
 	; Given that crds is the point coords, dj a disjunct,
 	; then add the disjunct to the total distance, return distance.
-	(define (sumup crds dj pos tot)
-		(if (null? crds)
-			tot
-			(let* ((val (get-dj-coord crds dj))
-					(diff (- val pos))
-				)
-				(+ tot (* diff diff))
+	(define (sumup coords-a coords-b dj tot)
+		(let* ((val-a (get-dj-coord coords-a dj))
+				(val-b (get-dj-coord coords-b dj))
+				(diff (- val-a val-b))
 			)
+			(+ tot (* diff diff))
 		)
 	)
 
-	; given the cluster coords and a running total
+	; Given a list of disjuncts and a running total,
 	; return the distance of point from center.
-	(define (walk-cc cc tot)
+	(define (walk-cc coords-a coords-b djlist tot)
 		(if (< cluster-radius tot)
 			tot ; if already outside of cluster radius, halt recursion
-			(if (null? cc)
-				tot ; if we are done, return distance
-				(let ((pr (car cc)))
-					(sumup coords (car pr) (cdr pr)
-						(walk-cc (cdr cc) tot)
+			(if (null? djlist)
+				tot 
+				(let ()
+					(sumup coords-a coords-b (car djlist)
+						(walk-cc coords-a coords-b (cdr djlist) tot)
 					)
 				)
 			)
 		)
 	)
 
-	; if the distance is less than the cluster radius,
-	; return true, else return false.
-	(> cluster-radius 
-		(walk-cc (assoc-ref cluster "center") 0.0)
+	(let* ((cc (assoc-ref cluster "center"))
+			(djs (make-dj-list cc coords))
+			(dist (walk-cc cc coords djs 0.0))
+		)
+		; If the distance is less than the cluster radius,
+		; return true, else return false.
+		(> cluster-radius dist)
 	)
 )
 
@@ -236,20 +274,21 @@
 				(let ()
 					(cluster-word word)
 					(set! cnt (+ cnt 1))
+
+					; print a running total, since this takes a long time.
+					(if (eq? 0 (modulo cnt 400))
+						(let ()
+							(display cnt)
+							(display " words processed\n")
+							(show-clusters cluster-list)
+						)
+					)
 				)
 			)
 		)
 
 		; get the next row
 		(set! srow (dbi-get_row db-select-conn))
-
-		; print a running total, since this takes a long time.
-		(if (eq? 0 (modulo cnt 1000))
-			(let ()
-				(display cnt)
-				(display " words processed\n")
-			)
-		)
 	)
 
 	(display "Inflected words: ")
