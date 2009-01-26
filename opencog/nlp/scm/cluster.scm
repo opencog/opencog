@@ -21,7 +21,7 @@
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; cluster radius
-(define cluster-radius 3.0)
+(define cluster-radius 2.0)
 
 ;; minimum number of times that a word must have been observed.
 (define min-observed-weight 1.0)
@@ -46,9 +46,32 @@
 )
 
 ;; --------------------------------------------------------------------
+;; find dj in cluster, return the floating point value associated with it.
+;;
+(define (get-dj-coord coords disjunct)
+	(if (null? coords)
+		max-distance
+		(let* ((pr (car coords))
+				(dj (car pr))
+			)
+			(if (equal? dj disjunct)
+				(cdr pr)
+				(get-dj-coord (cdr coords) disjunct)
+			)
+		)
+	)
+)
+
+;; --------------------------------------------------------------------
 ;; add to an existing cluster
 ;;
 (define (add-to-cluster cluster word coords)
+
+	(display (string-append 
+		"duuude adding " word " to existing cluster "
+			(car (assoc-ref cluster "wordlist")) "\n"
+		)
+	)
 
 	;; prepend the word to the cluster's word-list.
 	(set! cluster 
@@ -71,6 +94,7 @@
 ;; note a new cluster
 ;;
 (define (note-cluster cluster)
+	(display "duuude new cluster\n")
 	(show-cluster cluster)
 	(set! cluster-list (cons cluster cluster-list))
 )
@@ -91,7 +115,41 @@
 ;; return true if a coordinate point is in a cluster, else return false
 ;;
 (define (in-cluster? cluster coords)
-	#f
+
+	; Given that crds is the point coords, dj a disjunct,
+	; then add the disjunct to the total distance, return distance.
+	(define (sumup crds dj pos tot)
+		(if (null? crds)
+			tot
+			(let* ((val (get-dj-coord crds dj))
+					(diff (- val pos))
+				)
+				(+ tot (* diff diff))
+			)
+		)
+	)
+
+	; given the cluster coords and a running total
+	; return the distance of point from center.
+	(define (walk-cc cc tot)
+		(if (< cluster-radius tot)
+			tot ; if already outside of cluster radius, halt recursion
+			(if (null? cc)
+				tot ; if we are done, return distance
+				(let ((pr (car cc)))
+					(sumup coords (car pr) (cdr pr)
+						(walk-cc (cdr cc) tot)
+					)
+				)
+			)
+		)
+	)
+
+	; if the distance is less than the cluster radius,
+	; return true, else return false.
+	(> cluster-radius 
+		(walk-cc (assoc-ref cluster "center") 0.0)
+	)
 )
 
 ;; --------------------------------------------------------------------
@@ -144,7 +202,7 @@
 	(let* ((cluster (find-cluster cluster-list coords)))
 		(if (null? cluster)
 			(note-cluster (new-cluster word coords))
-			(add-to-cluster word coords)
+			(add-to-cluster cluster word coords)
 		)
 	)
 )
