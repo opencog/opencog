@@ -23,6 +23,12 @@
 ;; cluster radius
 (define cluster-radius 3.0)
 
+;; minimum number of times that a word must have been observed.
+(define min-observed-weight 1.0)
+
+;; max distance beyond which a point is "at infinity"
+(define max-distance 5.0)
+
 ;; --------------------------------------------------------------------
 ;; Global variable holding list of clusters
 ;;
@@ -31,7 +37,6 @@
 ;; --------------------------------------------------------------------
 ;; create a new cluster, return it
 ;;
-
 (define (new-cluster word coords)
 	(list
 		(cons "wordlist" (cons word '()))
@@ -43,7 +48,15 @@
 ;; note a new cluster
 ;;
 (define (note-cluster cluster)
+	(show-cluster cluster)
 	(set! cluster-list (cons cluster cluster-list))
+)
+
+;; --------------------------------------------------------------------
+;; add to an existing cluster
+;;
+(define (add-to-cluster cluster word coords)
+	#f
 )
 
 ;; --------------------------------------------------------------------
@@ -56,6 +69,26 @@
 	(display "coords are ")
 	(display (assoc-ref cluster "center"))
 	(newline)
+)
+
+;; --------------------------------------------------------------------
+;; return true if a coordinate point is in a cluster, else return false
+;;
+(define (in-cluster? cluster coords)
+	#f
+)
+
+;; --------------------------------------------------------------------
+;; return the cluster that a point belongs to, else return nil
+;;
+(define (find-cluster clist coords)
+	(if (null? clist)
+		clist
+		(if (in-cluster? (car clist) coords) 
+			(car clist)
+			(find-cluster (cdr clist) coords)
+		)
+	)
 )
 
 ;; --------------------------------------------------------------------
@@ -76,18 +109,27 @@
 		)
 	)
 	
+	; The "coordinates" of the word are simply a list of disjuncts
+	; and thier log cond probs.
 	(set! row (dbi-get_row db-dj-conn))
 	(while (not (equal? row #f))
 		(let* ((dj (assoc-ref row "disjunct"))
 				(lcp (assoc-ref row "log_cond_probability"))
 			)
-			(set! coords (cons (cons dj lcp) coords))
+			; record a distance, but only if its not far away.
+			(if (< lcp max-distance)
+				(set! coords (cons (cons dj lcp) coords))
+			)
 		)
 		(set! row (dbi-get_row db-dj-conn))
 	)
 
-	(show-cluster
-		(new-cluster word coords)
+	; find the cluster
+	(let* ((cluster (find-cluster cluster-list coords)))
+		(if (null? cluster)
+			(note-cluster (new-cluster word coords))
+			(add-to-cluster word coords)
+		)
 	)
 )
 
@@ -100,17 +142,23 @@
 
 	;; Loop over all words in the database
 	(dbi-query db-select-conn 
-		"SELECT inflected_word FROM InflectMarginal;"
+		"SELECT inflected_word, count FROM InflectMarginal;"
 	)
 
 	; Loop over all words in the database.
 	(set! srow (dbi-get_row db-select-conn))
 	(while (not (equal? srow #f))
 		(let* ((word (assoc-ref srow "inflected_word"))
+				(word-count (assoc-ref srow "count"))
 			)
 			;; Cluster the word, but only if it is a word that 
 			;; link-grammar handled (i.e. is not in square brackets)
-			(if (not (equal? #\[ (string-ref word 0)))
+			;; and only if it has been observed a few times -- having
+			;; a count that is more than "min-observed-weight"
+			(if (and 
+					(not (equal? #\[ (string-ref word 0)))
+					(< min-observed-weight word-count)
+					)
 				(let ()
 					(cluster-word word)
 					(set! cnt (+ cnt 1))
