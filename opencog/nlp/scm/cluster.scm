@@ -21,10 +21,10 @@
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; cluster radius
-(define cluster-radius 3.0)
+(define cluster-radius 1.4)
 
 ;; minimum number of times that a word must have been observed.
-(define min-observed-weight 1.0)
+(define min-observed-weight 3.0)
 
 ;; max distance beyond which a point is "at infinity"
 (define max-distance 5.0)
@@ -140,12 +140,20 @@
 )
 
 (define (show-clusters clus-lst)
+	(define cnt 0)
 	(if (not (null? clus-lst))
-		(let ()
-			(show-cluster (car clus-lst))
+		(let* ((cluster (car clus-lst))
+				(sz (assoc-ref cluster "npts"))
+			)
+			(if (< 1 sz) (show-cluster cluster))
 			(show-clusters (cdr clus-lst))
+			(set! cnt (+ cnt 1))
 		)
 	)
+
+	(display "A total of ")
+	(display cnt)
+	(display " were found\n")
 )
 
 ;; --------------------------------------------------------------------
@@ -280,6 +288,7 @@
 						(let ()
 							(display cnt)
 							(display " words processed\n")
+							(display "===========================================================\n")
 							(show-clusters cluster-list)
 						)
 					)

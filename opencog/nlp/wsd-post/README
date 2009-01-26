@@ -453,6 +453,16 @@ ritual.a potential.a geographical.a mythological.a northwestern.a natural.a adva
 coastal.a sigmoidal[?].a formal.a 2001/02[?].a da[?].a electoral.a Irish.a joint.a electrical.a
 particular.a normal.a technical.a bassist[?].a)
 
+Almost all are already in words.adj.1, except for:
+words.v.1.4:belching.v
+words.v.1.4:blazing.v
+words.v.2.5:advancing.g
+words.v.2.5:approaching.g
+
+which indicates that these gerunds are used almost always as adjectives, and not something else.
+Notice that link-grammar correctly guessed "widpread" (a typo), sigmoidal and eikonal, although
+it flopped on bassist.
+
 
 
 
