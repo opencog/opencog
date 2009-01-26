@@ -78,7 +78,7 @@
 ;; Compute and store the marginal word probability for a word.
 ;; Divide the count for each row by a sum-total of all counts.
 ;; 
-;; Argumnets: word, count for this word, total count.
+;; Arguments: word, count for this word, total count.
 ;;
 (define (update-marginal-probability word count tot)
 	(define urow #f)

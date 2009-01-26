@@ -17,6 +17,8 @@
 ;; 
 (define db-select-conn
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
+(define db-dj-conn
+	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; cluster radius
 (define cluster-radius 3.0)
@@ -30,11 +32,10 @@
 ;; create a new cluster, return it
 ;;
 
-(define (new-cluster word)
-
-	(list 
+(define (new-cluster word coords)
+	(list
 		(cons "wordlist" (cons word '()))
-		(cons "center" 0.01)
+		(cons "center" coords)
 	)
 )
 
@@ -50,16 +51,43 @@
 ;;
 (define (show-cluster cluster)
 	(display "word is ")
-	(display (cdr (assoc "wordlist" cluster)))
+	(display (assoc-ref cluster "wordlist"))
+	(newline)
+	(display "coords are ")
+	(display (assoc-ref cluster "center"))
 	(newline)
 )
 
 ;; --------------------------------------------------------------------
 ;; assign single word to a cluster
 ;;
+;; The word coordinates are based on the disjuncts conditional probabilities.
+;; Look these up in the database.
+;;
 (define (cluster-word word)
+	(define row #f)
+	(define coords '())
+
+	; look up word in disjunts table
+	(dbi-query db-dj-conn 
+		(string-append
+			"SELECT disjunct, log_cond_probability FROM Disjuncts WHERE inflected_word=$$"
+			word "$$"
+		)
+	)
+	
+	(set! row (dbi-get_row db-dj-conn))
+	(while (not (equal? row #f))
+		(let* ((dj (assoc-ref row "disjunct"))
+				(lcp (assoc-ref row "log_cond_probability"))
+			)
+			(set! coords (cons (cons dj lcp) coords))
+		)
+		(set! row (dbi-get_row db-dj-conn))
+	)
+
 	(show-cluster
-		(new-cluster word)
+		(new-cluster word coords)
 	)
 )
 
