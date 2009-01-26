@@ -24,8 +24,6 @@
 #ifndef _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
 #define _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
 
-#ifdef HAVE_GSL
-
 #include <string>
 
 #include <math.h>
@@ -162,7 +160,5 @@ public:
 }; // class
 
 }; // namespace
-
-#endif // HAVE_GSL
 
 #endif // _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H

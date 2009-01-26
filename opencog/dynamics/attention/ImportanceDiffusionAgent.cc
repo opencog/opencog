@@ -20,8 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifdef HAVE_GSL
-
 #include "ImportanceDiffusionAgent.h"
 
 #include <time.h>
@@ -450,4 +448,3 @@ float StepDecider::function(AttentionValue::sti_t s)
 
 };
 
-#endif // HAVE_GSL

@@ -84,9 +84,7 @@ public:
     ForgettingAgent *forgetAgent;
     HebbianLearningAgent *hebLearnAgent;
     StorkeyAgent *storkeyAgent;
-#ifdef HAVE_GSL
     ImportanceDiffusionAgent *diffuseAgent;
-#endif
     ImportanceSpreadingAgent *spreadAgent;
     ImportanceUpdatingAgent *importUpdateAgent;
     HopfieldOptions *options;

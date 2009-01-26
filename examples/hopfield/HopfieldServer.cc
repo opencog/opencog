@@ -228,11 +228,8 @@ void HopfieldServer::init(int width, int height, int numLinks)
     } else {
         storkeyAgent = new StorkeyAgent();
     }
-#ifdef HAVE_GSL
     diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(this->createAgent(ImportanceDiffusionAgent::info().id, true));
-#else
-    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
-#endif
+//    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
     forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
 
     if (options->verboseLevel) {
@@ -248,13 +245,11 @@ void HopfieldServer::init(int width, int height, int numLinks)
 //! @todo make all attention modules use their own logger object or upgrade
 //! logging system to allow hierarchical logs.
 #if 0
-#ifdef HAVE_GSL
         diffuseAgent->getLogger()->enable();
         diffuseAgent->getLogger()->setPrintToStdoutFlag (true);
-#else
-        spreadAgent->getLogger()->enable();
-        spreadAgent->getLogger()->setPrintToStdoutFlag (true);
-#endif
+//        spreadAgent->getLogger()->enable();
+//        spreadAgent->getLogger()->setPrintToStdoutFlag (true);
+
 #endif
         forgetAgent->getLogger()->enable();
         forgetAgent->getLogger()->setPrintToStdoutFlag (true);
@@ -686,11 +681,8 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         }
 // Unnecessary
 //        logger().fine("---Imprint:Importance spreading");
-//#ifdef HAVE_GSL
 //        diffuseAgent->run(this);
-//#else
-//        spreadAgent->run(this);
-//#endif
+////        spreadAgent->run(this);
 
         printStatus();
 
@@ -793,11 +785,8 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1)
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
     for (int i = 0; i < spreadCycles; i++) {
         logger().fine("---Retreive:Spreading Importance - cycle %d", i);
-#ifdef HAVE_GSL
         diffuseAgent->run(this);
-#else
-        spreadAgent->run(this);
-#endif
+//        spreadAgent->run(this);
     }
 
     importUpdateAgent->setUpdateLinksFlag(oldLinksFlag);
