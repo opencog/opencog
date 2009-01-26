@@ -80,10 +80,11 @@
 ;; 
 ;; Arguments: word, count for this word, total count.
 ;;
-(define (update-marginal-probability word count tot)
+(define (update-marginal-probability word count-bare tot)
 	(define urow #f)
 
-	(let* ((lprob (/ (- (log (/ count tot))) (log 2)))
+	(let* ((count (if (< 0 count-bare) count-bare 1.0e-30))
+				(lprob (/ (- (log (/ count tot))) (log 2)))
 				(sprob (number->string lprob))
 			)
 		(dbi-query db-update-conn 
@@ -166,8 +167,9 @@
 	)
 	(set! drow (dbi-get_row db-disjunct-conn))
 	(while (not (equal? drow #f))
-		(let* ((dj-cnt (assoc-ref drow "count"))
+		(let* ((dj-cnt-bare (assoc-ref drow "count"))
 				(dj (assoc-ref drow "disjunct"))
+				(dj-cnt (if (< 0 dj-cnt-bare) dj-cnt-bare 1.0e-30))
 				(dprob (/ (- (log (/ dj-cnt word-cnt))) (log 2)))
 				(sdprob (number->string dprob))
 			)
