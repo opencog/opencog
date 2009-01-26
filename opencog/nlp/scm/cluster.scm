@@ -41,7 +41,30 @@
 	(list
 		(cons "wordlist" (cons word '()))
 		(cons "center" coords)
+		(cons "npts" 1)
 	)
+)
+
+;; --------------------------------------------------------------------
+;; add to an existing cluster
+;;
+(define (add-to-cluster cluster word coords)
+
+	;; prepend the word to the cluster's word-list.
+	(set! cluster 
+		(assoc-set! cluster "wordlist"
+			(cons word (assoc-ref cluster "wordlist"))
+		)
+	)
+
+	;; average in the center.
+	;; update the count
+	(set! cluster 
+		(assoc-set! cluster "npts"
+			(+ 1 (assoc-ref cluster "npts"))
+		)
+	)
+	cluster
 )
 
 ;; --------------------------------------------------------------------
@@ -50,13 +73,6 @@
 (define (note-cluster cluster)
 	(show-cluster cluster)
 	(set! cluster-list (cons cluster cluster-list))
-)
-
-;; --------------------------------------------------------------------
-;; add to an existing cluster
-;;
-(define (add-to-cluster cluster word coords)
-	#f
 )
 
 ;; --------------------------------------------------------------------
@@ -94,7 +110,7 @@
 ;; --------------------------------------------------------------------
 ;; assign single word to a cluster
 ;;
-;; The word coordinates are based on the disjuncts conditional probabilities.
+;; The word coordinates are based on the disjunct's conditional probabilities.
 ;; Look these up in the database.
 ;;
 (define (cluster-word word)
@@ -124,7 +140,7 @@
 		(set! row (dbi-get_row db-dj-conn))
 	)
 
-	; find the cluster
+	; Find the cluster
 	(let* ((cluster (find-cluster cluster-list coords)))
 		(if (null? cluster)
 			(note-cluster (new-cluster word coords))
