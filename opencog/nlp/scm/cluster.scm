@@ -18,6 +18,51 @@
 (define db-select-conn
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
+;; cluster radius
+(define cluster-radius 3.0)
+
+;; --------------------------------------------------------------------
+;; Global variable holding list of clusters
+;;
+(define cluster-list '())
+
+;; --------------------------------------------------------------------
+;; create a new cluster, return it
+;;
+
+(define (new-cluster word)
+
+	(list 
+		(cons "wordlist" (cons word '()))
+		(cons "center" 0.01)
+	)
+)
+
+;; --------------------------------------------------------------------
+;; note a new cluster
+;;
+(define (note-cluster cluster)
+	(set! cluster-list (cons cluster cluster-list))
+)
+
+;; --------------------------------------------------------------------
+;; show a cluster
+;;
+(define (show-cluster cluster)
+	(display "word is ")
+	(display (cdr (assoc "wordlist" cluster)))
+	(newline)
+)
+
+;; --------------------------------------------------------------------
+;; assign single word to a cluster
+;;
+(define (cluster-word word)
+	(show-cluster
+		(new-cluster word)
+	)
+)
+
 ;; --------------------------------------------------------------------
 ;; cluster.
 ;;
@@ -35,15 +80,20 @@
 	(while (not (equal? srow #f))
 		(let* ((word (assoc-ref srow "inflected_word"))
 			)
-			;; cluster the word
-			(cluster-word word)
+			;; Cluster the word, but only if it is a word that 
+			;; link-grammar handled (i.e. is not in square brackets)
+			(if (not (equal? #\[ (string-ref word 0)))
+				(let ()
+					(cluster-word word)
+					(set! cnt (+ cnt 1))
+				)
+			)
 		)
 
 		; get the next row
 		(set! srow (dbi-get_row db-select-conn))
 
 		; print a running total, since this takes a long time.
-		(set! cnt (+ cnt 1))
 		(if (eq? 0 (modulo cnt 1000))
 			(let ()
 				(display cnt)
@@ -57,3 +107,6 @@
 	(newline)
 )
 
+;; --------------------------------------------------------------------
+;; do it
+(cluster)
