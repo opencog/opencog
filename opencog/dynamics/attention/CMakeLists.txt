@@ -1,3 +1,6 @@
+# To make Boost ublas much more efficient.
+ADD_DEFINITIONS(-DNDEBUG)
+
 ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent

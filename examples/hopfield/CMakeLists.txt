@@ -1,3 +1,6 @@
+# To make Boost ublas much more efficient.
+ADD_DEFINITIONS(-DNDEBUG)
+
 LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/src/atomspace
 	${OPENCOG_BINARY_DIR}/src/xml
