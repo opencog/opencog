@@ -116,3 +116,11 @@ Some useful CMake's web sites/pages:
  - http://www.cmake.org/Wiki/CMake_HowToFindInstalledSoftware
 
 
+The main CMakeLists.txt currently sets -DNDEBUG. This disables Boost
+matrix/vector debugging code and safety checks, with the benefit of making it
+much faster. Boost sparse matrixes and (dense) vectors are currently used by
+ECAN's ImportanceDiffusionAgent. If you use Boost ublas in other code, it may
+be a good idea to at least temporarily unset NDEBUG. Also if the Boost assert.h
+is used it will be necessary to unset NDEBUG. Boost ublas is intended to
+respond to a specific BOOST_UBLAS_NDEBUG, however this is not available as of
+the current Ubuntu standard version (1.34).
