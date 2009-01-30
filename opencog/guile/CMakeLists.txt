@@ -11,6 +11,7 @@ TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
 	query
 	wsd
+	pln
 )
 
 INSTALL (TARGETS smob

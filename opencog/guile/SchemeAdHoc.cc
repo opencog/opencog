@@ -13,6 +13,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
+#include <opencog/reasoning/pln/PLNModule.h>
 
 #include "SchemeSmob.h"
 
@@ -62,6 +63,20 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		return SCM_BOOL_T;
 	}
 	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+/**
+ * Specify the target atom for PLN backward chaining inference.
+ * Note: Use the cogserver commands to run the inference.
+ */
+SCM SchemeSmob::pln_bc (SCM satom)
+{
+	Handle h = verify_handle(satom, "pln-bc");
+
+    setTarget(h);
+
+    return SCM_BOOL_T;
 }
 
 #endif

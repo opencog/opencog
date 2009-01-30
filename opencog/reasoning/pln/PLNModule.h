@@ -96,6 +96,9 @@ public:
 
 }; // class
 
+//! Takes a real handle, and sets the backward-chaining target to that atom.
+void setTarget(Handle h);
+
 } // namespace opencog
 
 

@@ -154,6 +154,22 @@ std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
 	return output;
 }
 
+void opencog::setTarget(Handle h) {
+    std::vector<Handle> fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    Handle fakeHandle = fakeHandles[0];
+//    vtree target* = new vtree(fakeHandle);
+    Btr<vtree> target(new vtree(fakeHandle));
+    
+//    reasoning::printTree(h,0,0);
+//    rawPrint(ret, ret.begin(), 0);
+
+    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
+
+    printf("BITNodeRoot init ok\n");
+//    temp_state = Bstate.get();
+    state = Bstate.get();
+}
+
 #if 0
 void initTestEnv()
 {

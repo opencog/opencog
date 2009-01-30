@@ -92,6 +92,7 @@ class SchemeSmob
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
+		static SCM pln_bc(SCM);
 
 		// Misc utilities
 		static std::string decode_string (SCM, const char *, const char *);

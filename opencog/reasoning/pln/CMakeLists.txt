@@ -84,7 +84,7 @@ TARGET_LINK_LIBRARIES(pln
     xml
     util
     #query
-    smob #scheme
+#    smob #scheme
     #wsd
     persist
     adaptor-tulip
@@ -92,7 +92,7 @@ TARGET_LINK_LIBRARIES(pln
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
     ${EXPAT_LIBRARIES}
-    ${GUILE_LIBRARIES}
+#    ${GUILE_LIBRARIES}
     ${GSL_LIBRARIES}
     boost_signals-mt
 )
