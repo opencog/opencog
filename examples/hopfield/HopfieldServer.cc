@@ -229,6 +229,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
         storkeyAgent = new StorkeyAgent();
     }
     diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(this->createAgent(ImportanceDiffusionAgent::info().id, true));
+    diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC);
 //    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
     forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
 
@@ -485,7 +486,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     delete heLinks;
     int amountToRemove = links.size() - this->links;
     if (amountToRemove > 0 && keyNodes.size() == 1) {
-        logger().warn("Only one keyNode, so unable to remove any links to "
+        logger().info("Only one keyNode, so unable to remove any links to "
                 "compensate for the extra %d currently present.\n", amountToRemove);
         return;
     }
@@ -696,18 +697,34 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 
 void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 {
-	int activity;
+	//int activity;
 	
-	activity = pattern.activity();
 	// Avoid floating point exception if blank pattern
-	if (activity == 0)
-		activity = 1;
-	stim_t perUnit = stimulus / activity;
+	//activity = pattern.activity();
+	//if (activity == 0)
+    //    activity = 1;
+	//stim_t perUnit = stimulus / activity;
+
+    // x2 because all nodes are -ve to begin with
+	stim_t perUnit = 2 * stimulus / hGrid.size();
 
     for (size_t i = 0; i < hGrid.size(); i++) {
         if (options->keyNodes && hGridKey[i]) continue; // Don't encode onto key nodes
         getAtomSpace()->stimulateAtom(hGrid[i], perUnit * pattern[i]);
     }
+
+}
+
+std::vector<bool> HopfieldServer::checkNeighbourStability(Pattern p, float tolerance)
+{
+    std::vector<bool> stability;
+    for (uint i = 0; i < p.size(); i++ ) {
+        Pattern neighbour(p);
+        neighbour[i]? neighbour[i] = 0: neighbour[i] = 1;
+        Pattern result = retrievePattern(neighbour, options->retrieveCycles, options->spreadCycles);
+        stability.push_back(p.hammingSimilarity(result) > (1.0f - tolerance));
+    }
+    return stability;
 
 }
 
@@ -737,23 +754,26 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles, i
 
     logger().info("---Retrieve:End");
 
-    return getGridSTIAsPattern().binarisePattern(options->vizThreshold);
+    Pattern ret = getGridSTIAsPattern().binarisePattern(options->vizThreshold);
+    if (options->keyNodes)
+        ret.setMask(hGridKey);
+    return ret;
 }
 
 Pattern HopfieldServer::getGridSTIAsPattern()
 {
     Pattern out(width, height);
-    Pattern::iterator out_i = out.begin();
     std::vector<Handle>::iterator i;
 
-    for (i = hGrid.begin(); i != hGrid.end(); i++) {
-        Handle h = *i;
-        AttentionValue::sti_t val;
-        val = getAtomSpace()->getSTI(h); // / getAtomSpace()->getRecentMaxSTI();
-        *out_i = val;
-        out_i++;
+    for (size_t i = 0; i < hGrid.size(); i++) {
+        Handle h = hGrid[i];
+        if (options->keyNodes && hGridKey[i]) {
+            // Keynodes should be blank
+            out[i] = 0;
+        } else {
+            out[i] = getAtomSpace()->getSTI(h);
+        }
     }
-
     return out;
 }
 
@@ -783,9 +803,24 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1)
     importUpdateAgent->run(this);
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
+    //float temp = 1.0;
+    //-- 
+    //diffuseAgent->diffuseTemperature = 1.0f;
+    //--
+    float temp = 30.0;
     for (int i = 0; i < spreadCycles; i++) {
         logger().fine("---Retreive:Spreading Importance - cycle %d", i);
+// Experimenting with some form of self-annealing...
+//        diffuseAgent->setMaxSpreadPercentage(temp);
+//        cout << "set max spread \% to " << temp << endl;
+//--        
+//        diffuseAgent->diffuseTemperature *= (spreadCycles - i)/( (float) spreadCycles + 1 );
+//--
+        diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC,temp);
+        temp *= 1.5;
         diffuseAgent->run(this);
+//        temp *= (spreadCycles - i)/( (float) spreadCycles + 1 );
+// Old spread agent.
 //        spreadAgent->run(this);
     }
 
@@ -846,7 +881,14 @@ std::string HopfieldServer::printMatrixResult(std::vector< Pattern > patterns)
         for (unsigned int j = 0; j < patterns.size(); j++) {
             Pattern current = patterns[j];
             for (col = 0; col < width; col++) {
-                printf("%2d", current[i*width + col]);
+                int index=i*width + col;
+                if (current.isMasked(index))
+                    printf("  ");
+                else if (j == (patterns.size()-1) &&
+                        current[index] != patterns[0][index])
+                    printf(" X");
+                else 
+                    printf("%2d", current[i*width + col]);
             }
             if (j != (patterns.size() - 1)) cout << " | ";
         }

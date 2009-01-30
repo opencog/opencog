@@ -39,6 +39,10 @@ namespace opencog
 class CogServer;
 
 /** Agent that carries out learning rule of Storkey's 1998 paper.
+ *
+ * Only supports SYMMETRIC_HEBBIAN_LINKs and SYMMETRIC_INVERSE_HEBBIAN_LINKs.
+ * If other Hebbian links exist, they are ignored.
+ * 
  */
 class StorkeyAgent : public Agent
 {

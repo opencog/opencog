@@ -41,6 +41,7 @@ private:
     int height;
 
     opencog::RandGen *rng;
+    std::vector<bool> *mask;
 
 public:
 
@@ -54,7 +55,9 @@ public:
     Pattern(int w, int h, float density = 0.0f);
 
     Pattern(const Pattern &src) : std::vector<int>(src), 
-        width(src.width), height(src.height), rng(patternRng) {};
+        width(src.width), height(src.height), rng(patternRng), mask(NULL) {
+            if (src.mask) mask = new std::vector<bool>(*(src.mask));
+        };
 
     ~Pattern();
 
@@ -67,6 +70,14 @@ public:
      */
     float hammingSimilarity(const Pattern &p);
 
+    /**
+     * Number of bits that mismatch between this and another pattern.
+     *
+     * @param p Pattern to compare with.
+     * @return number of mismatching bits.
+     */
+    int bitErrors(const Pattern &p);
+    
     /**
      * binarise pattern by making values > threshold 1, otherwise 0.
      *
@@ -95,6 +106,8 @@ public:
     int getWidth();
     int getHeight();
     bool isEmpty();
+    void setMask(const std::vector<bool>& _mask);
+    bool isMasked(uint i) const;
 
 	int activity();
 
@@ -128,6 +141,8 @@ public:
      * @return the loaded patterns.
      */
     static std::vector< Pattern > loadPatterns( std::string fn, int size);
+
+    bool operator==(const Pattern& b) const;
 };
 
 } // namespace opencog

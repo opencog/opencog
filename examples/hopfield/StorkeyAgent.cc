@@ -231,12 +231,18 @@ void StorkeyAgent::storkeyUpdate()
                 continue;
             }
             float val = currentWeights[i][j];
+/*            cout << " before val = " << val << endl;
+            cout << " hGrid[i] = " << a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false); 
+            cout << " hGrid[j] = " << a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false); 
+            cout << " h_i = " << h(i,currentWeights);
+            cout << " h_j = " << h(j,currentWeights) << endl; */
             val += (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
                 a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false);
             val -= (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
                 h(j,currentWeights);
             val -= (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false) *
                 h(i,currentWeights);
+//            cout << " after val = " << val << endl;
             iRow.push_back(val);
         }
         newWeights.push_back(iRow);

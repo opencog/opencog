@@ -1058,7 +1058,7 @@ public:
      * potentially also be handled by the cogServer.
      *
      * @warning Should only be used by attention allocation system.
-     * @param m New maximum STI
+     * @param m New minimum STI
      */
     void updateMinSTI(AttentionValue::sti_t m);
 
@@ -1068,7 +1068,7 @@ public:
      * potentially also be handled by the cogServer.
      *
      * @warning Should only be used by attention allocation system.
-     * @param m New minimum STI
+     * @param m New maximum STI
      */
     void updateMaxSTI(AttentionValue::sti_t m);
 

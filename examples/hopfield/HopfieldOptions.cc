@@ -245,7 +245,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
         case 'P':
             learningScheme = PALIMPSEST;
             if (optarg) {
-                cout << "palimpsest tolerance " << optarg << endl;
+                //cout << "palimpsest tolerance " << optarg << endl;
                 palimpsestTolerance = atoi(optarg);
             }
             break;

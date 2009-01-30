@@ -34,18 +34,18 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
-//#define DEBUG
+#define DEBUG
 namespace opencog
 {
 
-ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
+ImportanceDiffusionAgent::ImportanceDiffusionAgent()
 {
     static const std::string defaultConfig[] = {
         //! Default value that normalised STI has to be above before
         //! being spread
         "ECAN_DIFFUSION_THRESHOLD","0.0",
         //! Maximum percentage of STI that is spread from an atom
-        "ECAN_MAX_SPREAD_PERCENTAGE","0.5",
+        "ECAN_MAX_SPREAD_PERCENTAGE","1.0",
         "",""
     };
     setParameters(defaultConfig);
@@ -55,16 +55,26 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(int decisionFunction)
     //! automatic parameter adaptation)
     maxSpreadPercentage = (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
 
-    switch (decisionFunction) {
+    setSpreadDecider(STEP);
+    setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
+
+}
+
+void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
+{
+    if (spreadDecider) {
+        delete spreadDecider;
+        spreadDecider = NULL;
+    }
+    switch (type) {
     case HYPERBOLIC:
-        spreadDecider = (SpreadDecider*) new HyperbolicDecider(0.5);
+        spreadDecider = (SpreadDecider*) new HyperbolicDecider(shape);
         break;
     case STEP:
         spreadDecider = (SpreadDecider*) new StepDecider();
         break;
     }
-    setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
-
+    
 }
 
 ImportanceDiffusionAgent::~ImportanceDiffusionAgent()
@@ -89,8 +99,7 @@ float ImportanceDiffusionAgent::getDiffusionThreshold() const
 void ImportanceDiffusionAgent::run(CogServer* server)
 {
     a = server->getAtomSpace();
-    spreadDecider->focusBoundary = diffusionThreshold * (a->getMaxSTI()
-            - a->getAttentionalFocusBoundary());
+    spreadDecider->setFocusBoundary(diffusionThreshold);
 #ifdef DEBUG
     totalSTI = 0;
 #endif
@@ -152,6 +161,9 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
     for (std::map<Handle,int>::iterator i=diffusionAtomsMap.begin();
             i != diffusionAtomsMap.end(); i++) {
         Handle dAtom = (*i).first;
+// For some reason I thought linearising -ve and +ve separately might
+// be a good idea, but this messes up the conservation of STI
+//      (*stiVector)((*i).second) = a->getNormalisedSTI(dAtom,false)+1.0f)/2.0f);
         (*stiVector)((*i).second) = a->getNormalisedZeroToOneSTI(dAtom,false);
 #ifdef DEBUG
         totalSTI += a->getSTI(dAtom);
@@ -170,6 +182,8 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
         std::vector<Handle> links)
 {
+    //! @warning Doesn't handle multiple Hebbian links between two atoms (the
+    //! weights will be set to the weight of whatever link was last processed.
     std::vector<Handle>::iterator hi;
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
@@ -195,6 +209,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
 
         val = a->getTV(*hi).toFloat();
         if (val == 0.0f) continue;
+        //val *= diffuseTemperature;
         type = TLB::getAtom(*hi)->getType(); 
 
         targets = dynamic_cast<Link*>(TLB::getAtom(*hi))->getOutgoingSet();
@@ -353,7 +368,8 @@ void ImportanceDiffusionAgent::spreadImportance()
         float normAF;
         normAF = (a->getAttentionalFocusBoundary() - a->getMinSTI(false)) / (float) ( a->getMaxSTI(false) - a->getMinSTI(false) );
         logger().fine("Result (AF at %.3f)\n",normAF);
-        printVector(&result);
+        printVector(&result,normAF);
+//        printVector(result,0.5f);
     }
 
     // set the sti of all atoms based on new values in results vector from
@@ -371,8 +387,10 @@ void ImportanceDiffusionAgent::spreadImportance()
         totalSTI_After += a->getSTI(dAtom);
 #endif
     }
-#ifdef DEBUG
+#if 0 //def DEBUG
     if (totalSTI != totalSTI_After) {
+        // This warning is often logged because of floating point round offs
+        // when converting from normalised to actual STI values after diffusion.
         logger().warn("Total STI before diffusion (%d) != Total STI after (%d)",totalSTI,totalSTI_After);
     }
 #endif
@@ -391,6 +409,16 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
     AttentionValue::sti_t val;
 
     val = a->getMinSTI(false) + (scaledSTI * ( a->getMaxSTI(false) - a->getMinSTI(false) ));
+/*
+    AtomSpace *a = server().getAtomSpace();
+    float af = a->getAttentionalFocusBoundary();
+    scaledSTI = (scaledSTI * 2) - 1;
+    if (scaledSTI <= 1.0) {
+        val = a->getMinSTI(false) + (scaledSTI * ( a->getMinSTI(false) - af ));
+    } else {
+        val = af + (scaledSTI * (a->getMaxSTI(false) - af ));
+    }
+*/
     a->setSTI(h,val);
     
 }
@@ -409,11 +437,13 @@ void ImportanceDiffusionAgent::printMatrix(bmatrix* m) {
     std::cout << m << std::endl;
 }
 
-void ImportanceDiffusionAgent::printVector(bvector* v) {
-
+void ImportanceDiffusionAgent::printVector(bvector* v, float threshold) {
 /*    printf("[");
     for (unsigned int i = 0; i < m->size; i++) {
-        printf("%4.2f\n ", gsl_vector_get(m,i));;
+        if (gsl_vector_get(m,i) > threshold)
+            printf("%4.2f +\n ", gsl_vector_get(m,i));
+        else
+            printf("%4.2f\n ", gsl_vector_get(m,i));
     }
     printf("]\n");*/
     std::cout << v << std::endl;
@@ -438,12 +468,42 @@ RandGen* SpreadDecider::getRNG() {
 
 float HyperbolicDecider::function(AttentionValue::sti_t s)
 {
-    return (tanh(shape*(s-focusBoundary))+1.0f)/2.0f;
+    AtomSpace *a = server().getAtomSpace();
+    // Convert boundary from -1..1 to 0..1
+    float af = a->getAttentionalFocusBoundary();
+    float minSTI = a->getMinSTI(false);
+    float maxSTI = a->getMaxSTI(false);
+    float norm_b = focusBoundary > 0.0f ?
+        af + (focusBoundary * (maxSTI - af)) :
+        af + (focusBoundary * (af - minSTI ));
+    // norm_b is now the actual STI value, normalise to 0..1
+    norm_b = (norm_b - minSTI) / (float) ( maxSTI - minSTI );
+    // Scale s to 0..1
+    float norm_s = (s - minSTI) / (float) ( maxSTI - minSTI );
+    return (tanh(shape*(norm_s-norm_b))+1.0f)/2.0f;
+}
+
+void HyperbolicDecider::setFocusBoundary(float b)
+{
+    // Store as -1..1 since exact 0..1 mapping of boundary
+    // will change based on min/max STI
+    focusBoundary = b;
 }
 
 float StepDecider::function(AttentionValue::sti_t s)
 {
     return (s>focusBoundary ? 1.0f : 0.0f);
+}
+
+void StepDecider::setFocusBoundary(float b)
+{
+    AtomSpace *a = server().getAtomSpace();
+    // Convert to an exact STI amount
+    float af = a->getAttentionalFocusBoundary();
+    focusBoundary = (b > 0.0f)?
+        (int) (af + (b * (a->getMaxSTI(false) - af))) :
+        (int) (af + (b * (af - a->getMinSTI(false))));
+
 }
 
 };

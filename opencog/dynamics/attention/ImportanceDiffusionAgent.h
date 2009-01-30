@@ -55,11 +55,9 @@ protected:
     static RandGen *rng;
 
 public:
-    SpreadDecider(int _f, float _s):
-        shape(_s), focusBoundary(_f) { }
+    SpreadDecider() {}
 
-    float shape;
-    int focusBoundary;
+    virtual void setFocusBoundary(float b = 0.0f) {};
     RandGen* getRNG();
 
     bool spreadDecision(AttentionValue::sti_t s);
@@ -69,8 +67,11 @@ class HyperbolicDecider : SpreadDecider
 {
     float function(AttentionValue::sti_t s);
 public:
-    HyperbolicDecider(float _s):
-        SpreadDecider(0,_s) {}
+    float shape;
+    float focusBoundary;
+    HyperbolicDecider(float _s=10.0f):
+        shape(_s), focusBoundary(0.0f) {}
+    void setFocusBoundary(float b = 0.0f);
 };
 
 class StepDecider : SpreadDecider
@@ -78,8 +79,9 @@ class StepDecider : SpreadDecider
     float function(AttentionValue::sti_t s);
 
 public:
-    StepDecider():
-        SpreadDecider(0,0.0f) {}
+    int focusBoundary;
+    StepDecider() {}
+    void setFocusBoundary(float b = 0.0f);
 };
 
 /** Spreads short term importance along HebbianLinks using a diffusion approach.
@@ -101,6 +103,7 @@ private:
     float maxSpreadPercentage;
 
     //! Value that normalised STI has to be above before being spread
+    //! Is a normalised value from -1 to 1. 0 == AF
     float diffusionThreshold;
 
     //! Spread importance along Hebbian links.
@@ -110,7 +113,7 @@ private:
     //! print a gsl matrix to stdout
     void printMatrix(bmatrix *m);
     //! print a gsl vector to stdout
-    void printVector(bvector *m);
+    void printVector(bvector *m, float threshold = 1.0f);
 
     //! Set the STI of h from a scaled 0..1 STI value
     void setScaledSTI(Handle h, float scaledSTI);
@@ -140,8 +143,9 @@ public:
     }
 
     enum { HYPERBOLIC, STEP };
+    void setSpreadDecider(int type, float shape = 30);
 
-    ImportanceDiffusionAgent(int decisionFunction=STEP);
+    ImportanceDiffusionAgent();
     virtual ~ImportanceDiffusionAgent();
     virtual void run(CogServer *server);
 

@@ -147,6 +147,16 @@ public:
     Pattern retrievePattern(Pattern pattern, int numCycles, int spreadCycles);
 
     /**
+     * Check the stability of all 1 bit changes to the Pattern. In other words
+     * check the local neighbourhood of the network to see if pattern is a
+     * local minima.
+     *
+     * @param pattern is the pattern to tests
+     * @return whether each bit, when flipped, returns to the original.
+     */
+    std::vector<bool> checkNeighbourStability(Pattern p, float tolerance);
+
+    /**
      * Perform a single retrieval update on the AtomTable
      *
      * @param spreadCycles is the number of times to spread importance per

@@ -45,6 +45,7 @@ Pattern::Pattern(int w, int h, float density)
     width = w;
     height = h;
     rng = patternRng;
+    mask = NULL;
 
     for (int i = 0; i < width*height; i++) {
         push_back(rng->randfloat() < density);
@@ -53,6 +54,7 @@ Pattern::Pattern(int w, int h, float density)
 
 Pattern::~Pattern()
 {
+    if (mask) delete mask; 
 }
 
 
@@ -67,8 +69,30 @@ Pattern Pattern::binarisePattern(AttentionValue::sti_t vizThreshold)
         *out_i = (int) (val >= vizThreshold) ;
         out_i++;
     }
-
     return out;
+}
+
+void Pattern::setMask(const std::vector<bool>& _mask)
+{ mask = new std::vector<bool> (_mask); }
+
+bool Pattern::isMasked(uint i) const
+{
+    if (mask && (*mask)[i]) return true;
+    else return false;
+}
+
+bool Pattern::operator==(const Pattern& b) const
+{
+    if (width != b.width &&
+        height != b.height)
+        return false;
+    for (uint i = 0; i < size(); i++) {
+        if (mask && (*mask)[i]) continue;
+        if (b.mask && (*b.mask)[i]) continue;
+        if (operator[](i) != b[i])
+            return false;
+    }
+    return true;
 }
 
 std::vector< Pattern > Pattern::generateRandomPatterns(int amount, int width, int height, float density)
@@ -160,8 +184,9 @@ bool Pattern::isEmpty()
 {
     Pattern::iterator p;
 
-    for (p = begin(); p != end(); p++) {
-        if (((int) *p) != 0)
+    for (uint p = 0; p < size(); p++) {
+        if (isMasked(p)) continue;
+        if (operator[](p) != 0)
             return false;
     }
     return true;
@@ -169,16 +194,27 @@ bool Pattern::isEmpty()
 
 float Pattern::hammingSimilarity(const Pattern &a)
 {
-    float diff = 0.0f;
-    if (a.size() != size())
-        return -1.0f;
-
-    for (unsigned int i = 0; i < size(); i++) {
-        if ((*this)[i] != a[i]) diff++;
-    }
-
+    float diff = bitErrors(a);
     return 1.0f - (diff / size());
 
+}
+
+int Pattern::bitErrors(const Pattern &a)
+{
+    int errors = 0;
+    if (a.size() != size())
+        return -1;
+
+    for (unsigned int i = 0; i < size(); i++) {
+        // If either pattern is masked for this node,
+        // then don't contribute the difference to
+        // diff
+        if (isMasked(i) || a.isMasked(i)) continue;
+        // If the nodes are not the same, increment diff
+        if ((*this)[i] != a[i]) errors++;
+    }
+
+    return errors;
 }
 
 std::vector< Pattern > Pattern::loadPatterns( std::string fn, int size)
@@ -235,8 +271,9 @@ int Pattern::activity()
     Pattern::iterator p;
 	int total = 0;
 
-    for (p = begin(); p != end(); p++) {
-		total += *p;
+    for (size_t p = 0; p < size(); p++) {
+        if (isMasked(p)) continue;
+		total += operator[](p);
     }
     return total;
 
