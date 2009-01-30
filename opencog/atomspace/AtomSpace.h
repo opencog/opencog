@@ -220,7 +220,7 @@ public:
         \param t     Type of the node
         \param name  Name of the node
         \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
-    Handle addNode(Type t, const string& name, const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    Handle addNode(Type t, const string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
     /**
      * Add a new link to the Atom Table
@@ -481,7 +481,7 @@ public:
      * @param An output iterator.
      * @param the type of the atoms to be searched
      * @param the name of the atoms to be searched.
-     *        For searching only links, use an empty string
+     *        For searching only links, use "" or a search by type.
      * @param if subTypes of the given type are accepted in this search
      * @param if returns only atoms that contains versioned TVS with
      *        the given VersionHandle. If NULL_VERSION_HANDLE is given,
@@ -498,25 +498,12 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
-                 Type t,
+                 Type type,
                  const string& name,
-                 bool acceptSubTypes = true,
+                 bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleEntry *he = NULL;
-        if (name.length() > 0) {
-            // This will get only nodes
-            he = atomTable.getHandleSet(name.c_str(), t, acceptSubTypes, vh);
-        } else {
-            // In this case, use different method, so that only links
-            // are returned.  Check the given type so that it behaves
-            // the same way as the implementation of this method in
-            // PseudoCore.
-            if (t == ATOM)
-                t = LINK;
-            if (!isNode(t))
-                he = atomTable.getHandleSet(t, acceptSubTypes, vh);
-        }
-        return (toOutputIterator(result, he));
+        HandleEntry * handleEntry = atomTable.getHandleSet(name.c_str(), type, subclass, vh);
+        return (toOutputIterator(result, handleEntry));
     }
 
     /**

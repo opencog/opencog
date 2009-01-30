@@ -398,6 +398,11 @@ public:
     HandleEntry* getHandleSet(const char* name,
                               Type type = ATOM, bool subclass = true) const
     {
+        if (name == NULL || *name == 0)
+        {
+            HandleEntry *set = typeIndex.getHandleSet(type, subclass);
+            return HandleEntry::filterSet(set, "");
+        }
         return nodeIndex.getHandleSet(type, name, subclass);
     }
 

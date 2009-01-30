@@ -390,6 +390,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
 {
+    bool noName = (name == NULL || *name == 0);
 
     HandleEntry* buffer;
 
@@ -397,10 +398,12 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            ((ClassServer::isAssignableFrom(LINK, set->getAtom()->getType())) ||
-             (ClassServer::isAssignableFrom(NODE, set->getAtom()->getType()) &&
-              (strcmp(((Node*) set->getAtom())->getName().c_str(), name))))) {
+    while (set != NULL &&
+           (!noName && ClassServer::isLink(set->getAtom()->getType()) ||
+            noName && ClassServer::isNode(set->getAtom()->getType()) &&
+              ((Node*) set->getAtom())->getName() != "" ||
+            !noName && 
+              strcmp(((Node*) set->getAtom())->getName().c_str(), name))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -412,9 +415,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     HandleEntry* head = set;
     while (set->next != NULL) {
         Atom *itAtom = set->next->getAtom();
-        if (((ClassServer::isAssignableFrom(LINK, itAtom->getType())) ||
-                (ClassServer::isAssignableFrom(NODE, itAtom->getType()) &&
-                 (strcmp(((Node*) itAtom)->getName().c_str(), name))))) {
+        if (!noName && ClassServer::isLink(itAtom->getType()) ||
+            noName && ClassServer::isNode(itAtom->getType()) &&
+              ((Node*) itAtom)->getName() != "" ||
+            !noName && 
+              strcmp(((Node*) itAtom)->getName().c_str(), name)) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -471,54 +476,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type type, bool subclass)
 {
-
-    if ((name != NULL) && (!ClassServer::isAssignableFrom(NODE, type))) {
-        delete set;
-        return NULL;
-    }
-
-    HandleEntry* buffer;
-
-    // The search for invalid elements need to be done in two steps because
-    // invalid elements found in the middle of the list need to be treated
-    // differently from invalid elements found in its begining.
-
-    while ((set != NULL) &&
-            ((!subclass && (type != set->getAtom()->getType())) ||
-             (subclass && !ClassServer::isAssignableFrom(type, set->getAtom()->getType())) ||
-             ((name != NULL) && (ClassServer::isAssignableFrom(NODE, set->getAtom()->getType())) &&
-              (strcmp(((Node*) set->getAtom())->getName().c_str(), name))))) {
-
-        buffer = set;
-        set = set->next;
-        buffer->next = NULL;
-        delete buffer;
-    }
-
-    if (set == NULL) return NULL;
-
-    HandleEntry* head = set;
-
-    // The search for invalid elements need to be done in two steps because
-    // invalid elements found in the middle of the list need to be treated
-    // differently from invalid elements found in its begining.
-
-    while (set->next != NULL) {
-        if ((!subclass && (type != set->next->getAtom()->getType())) ||
-                (subclass && !ClassServer::isAssignableFrom(type, set->next->getAtom()->getType())) ||
-                ((name != NULL) && (ClassServer::isAssignableFrom(NODE, set->getAtom()->getType())) &&
-                 (strcmp(((Node*) set->getAtom())->getName().c_str(), name)))) {
-            buffer = set->next;
-            set->next = set->next->next;
-            buffer->next = NULL;
-            delete buffer;
-        } else {
-            set = set->next;
-        }
-    }
-
-    // head contains the filtered list.
-    return head;
+    return filterSet(filterSet(set, type, subclass), name);
 }
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, Handle handle, Arity arity)
@@ -703,62 +661,12 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type type, bool subclass, Arity position, Arity arity)
 {
-
-    HandleEntry* buffer;
-    Type target;
-
-    // The search for invalid elements need to be done in two steps because
-    // invalid elements found in the middle of the list need to be treated
-    // differently from invalid elements found in its begining.
-
-    while (set != NULL) {
-        Atom *atom = set->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
-
-        if ((link->getArity() != arity) ||
-             (target = link->getOutgoingAtom(position)->getType(),
-              ((!subclass && (type != target)) ||
-               (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
-             (ClassServer::isAssignableFrom(NODE, target) ?
-              (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
-              name != NULL)) {
-            buffer = set;
-            set = set->next;
-            buffer->next = NULL;
-            delete buffer;
-        } else {
-            break;
-        }
-    }
-
-    if (set == NULL) return NULL;
-
-    HandleEntry* head = set;
-    while (set->next != NULL) {
-        Atom *atom = set->next->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
-        if (((link->getArity() != arity) ||
-                (target = link->getOutgoingAtom(position)->getType(),
-                 ((!subclass && (type != target)) ||
-                  (subclass && !ClassServer::isAssignableFrom(type, target)))) ||
-                (ClassServer::isAssignableFrom(NODE, target) ?
-                 (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
-                 name != NULL))) {
-            buffer = set->next;
-            set->next = set->next->next;
-            buffer->next = NULL;
-            delete buffer;
-        } else {
-            set = set->next;
-        }
-    }
-
-    // head contains the filtered list.
-    return head;
+    return filterSet(filterSet(set, type, subclass, position, arity), name, position, arity);
 }
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity position, Arity arity)
 {
+    bool noName = (name == NULL || *name == 0);
 
     HandleEntry* buffer;
 
@@ -769,10 +677,15 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
     while (set != NULL) {
         Atom *atom = set->getAtom();
         Link *link = dynamic_cast<Link *>(atom);
-        if ((link->getArity() != arity) ||
-             (ClassServer::isAssignableFrom(NODE, link->getOutgoingAtom(position)->getType()) ?
-              (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
-              name != NULL)) {
+        Atom *itAtom = NULL;
+        if (link->getArity() == arity)
+            itAtom = link->getOutgoingAtom(position);
+        if (itAtom == NULL ||
+             !noName && ClassServer::isLink(itAtom->getType()) ||
+             noName && ClassServer::isNode(itAtom->getType()) &&
+               ((Node*) itAtom)->getName() != "" ||
+             !noName &&
+               strcmp(name, ((Node*) itAtom)->getName().c_str())) {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -788,10 +701,15 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
     while (set->next != NULL) {
         Atom *atom = set->next->getAtom();
         Link *link = dynamic_cast<Link *>(atom);
-        if (((link->getArity() != arity) ||
-                (ClassServer::isAssignableFrom(NODE, link->getOutgoingAtom(position)->getType()) ?
-                 (strcmp(name, dynamic_cast<Node*>(link->getOutgoingAtom(position))->getName().c_str())) :
-                 name != NULL))) {
+        Atom *itAtom = NULL;
+        if (link->getArity() == arity)
+            itAtom = link->getOutgoingAtom(position);
+        if (itAtom == NULL ||
+             !noName && ClassServer::isLink(itAtom->getType()) ||
+             noName && ClassServer::isNode(itAtom->getType()) &&
+               ((Node*) itAtom)->getName() != "" ||
+             !noName &&
+               strcmp(name, ((Node*) itAtom)->getName().c_str())) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;

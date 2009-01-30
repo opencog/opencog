@@ -33,6 +33,9 @@ using namespace opencog;
  */
 void StringIndex::insert(const char * str, Handle h)
 {
+    // don't add unnamed handles
+    if (str == NULL || *str == 0)
+        return;
 	idx.insert(std::pair<std::string,Handle>(str,h));
 }
 

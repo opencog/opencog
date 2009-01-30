@@ -102,6 +102,22 @@ public:
     static bool isAssignableFrom(Type super, Type sub);
 
     /**
+     * Returns true if given class is a Link.
+     *
+     * @param class.
+     * @return Whether a given class is Link.
+     */
+    static bool isLink(Type t) { return isAssignableFrom(LINK, t); }
+
+    /**
+     * Returns true if given class is a Node.
+     *
+     * @param class.
+     * @return Whether a given class is Node.
+     */
+    static bool isNode(Type t) { return isAssignableFrom(NODE, t); }
+
+    /**
      * Returns whether a given class is derived from another.
      *
      * @param Class type name.
