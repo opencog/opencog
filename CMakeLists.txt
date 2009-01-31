@@ -49,6 +49,15 @@ SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost COMPONENTS filesystem signals REQUIRED)
 
+FIND_PACKAGE(LinkGrammar)
+IF (LINK_GRAMMAR_FOUND)
+	ADD_DEFINITIONS(-DHAVE_LINK_GRAMMAR)
+	ADD_DEFINITIONS(-DLINK_GRAMMAR_DATA_DIR=\\"${LINK_GRAMMAR_DATA_DIR}/\\")
+ENDIF (LINK_GRAMMAR_FOUND)
+
+# At this time,. there is no reason to build with memcached for 
+
+
 # FIND_PACKAGE(LibMemCached)
 # Enable the use of SQL storage, if either iodbc of unixodbc is found.
 # Caution: this can also increase RAM usage significantly!
@@ -83,7 +92,7 @@ IF (GSL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GSL)
 ENDIF (GSL_FOUND)
 
-# At this time,. there is no reason to build with memcached for 
+# At this time,. there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
 # IF (LIBMEMCACHED_FOUND)
 #	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
