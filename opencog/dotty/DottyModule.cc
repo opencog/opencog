@@ -1,7 +1,7 @@
 /*
- * src/modules/dotty.cc
+ * opencog/dotty/DottyModule.cc
  *
- * Copyright (C) 2008 by Trent Waddington <trent.waddington@gmail.com>
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
  * Written by Trent Waddington <trent.waddington@gmail.com>
@@ -26,30 +26,46 @@
 #include <sstream>
 #include <string>
 
+#include "DottyModule.h"
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/util/platform.h>
 
 using namespace opencog;
+
+DECLARE_MODULE(DottyModule);
 
 class DottyGrapher
 {
 public:
-    DottyGrapher(AtomSpace *space) : space(space), withIncoming(false) { answer = ""; }
+    DottyGrapher(AtomSpace *space) : space(space), withIncoming(false), compact(false) { answer = ""; }
     AtomSpace *space;
     std::string answer;
     bool withIncoming;
+    bool compact;
 
     /**
      * Outputs a dotty node for an atom.
      */
-    bool do_nodes(const Atom *a)
+    bool do_nodes(Handle h)
     {
+        Atom *a = TLB::getAtom(h);
+
+        if (compact)
+        {
+            // don't make nodes for binary links with no incoming
+            Link *l = dynamic_cast<Link*>(a);
+            if (l && l->getOutgoingSet().size() == 2 &&
+                     l->getIncomingSet() == NULL)
+                return false;
+        }
+
         std::ostringstream ost;
-        ost << TLB::getHandle(a) << " [";
+        ost << h.value() << " [";
         if (!space->isNode(a->getType()))
             ost << "shape=\"diamond\" ";
         ost << "label=\"[" << ClassServer::getTypeName(a->getType()) << "]";
@@ -68,14 +84,27 @@ public:
     /**
      * Outputs dotty links for an atom's outgoing connections.
      */
-    bool do_links(const Atom *a)
+    bool do_links(Handle h)
     {
-        Handle h = TLB::getHandle(a);
-        const Link *l = dynamic_cast<const Link *>(a);
+        Atom *a = TLB::getAtom(h);
         std::ostringstream ost;
-        const std::vector<Handle> &out = l->getOutgoingSet();
-        for (size_t i = 0; i < out.size(); i++) {
-            ost << h << "->" << out[i] << " [label=\"" << i << "\"];\n";
+
+        const Link *l = dynamic_cast<const Link *>(a);
+        if (l)
+        {
+            const std::vector<Handle> &out = l->getOutgoingSet();
+
+            if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
+            {
+                ost << out[0] << " -> " << out[1] << " [label=\""
+                    << ClassServer::getTypeName(a->getType()) << "\"];\n";
+                answer += ost.str();
+                return false;
+            }
+
+            for (size_t i = 0; i < out.size(); i++) {
+                ost << h << "->" << out[i] << " [label=\"" << i << "\"];\n";
+            }
         }
 
         if (withIncoming) {
@@ -95,22 +124,42 @@ public:
     void graph()
     {
         answer += "\ndigraph OpenCog {\n";
-        space->getAtomTable().foreach_atom(&DottyGrapher::do_nodes, this);
-        space->getAtomTable().foreach_atom(&DottyGrapher::do_links, this);
+        space->foreach_handle_of_type((Type)ATOM, &DottyGrapher::do_nodes, this, true);
+        space->foreach_handle_of_type((Type)ATOM, &DottyGrapher::do_links, this, true);
         answer += "}\n";
     }
 
 };
 
-extern "C" std::string cmd_dotty(std::queue<std::string> &args)
+DottyModule::DottyModule() : Module()
+{
+    logger().info("[DottyModule] constructor");
+    do_dotty_register();
+}
+
+DottyModule::~DottyModule()
+{
+    logger().info("[DottyModule] destructor");
+    do_dotty_unregister();
+}
+
+void DottyModule::init()
+{
+    logger().info("[DottyModule] init");
+}
+
+std::string DottyModule::do_dotty(Request *dummy, std::list<std::string> args)
 {
     AtomSpace *space = CogServer::getAtomSpace();
     DottyGrapher g(space);
     while (!args.empty()) {
         if (args.front() == "with-incoming")
             g.withIncoming = true;
-        args.pop();
+        if (args.front() == "--compact")
+            g.compact = true;
+        args.pop_front();
     }
     g.graph();
     return g.answer;
 }
+
