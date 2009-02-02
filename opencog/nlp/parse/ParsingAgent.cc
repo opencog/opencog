@@ -223,10 +223,8 @@ void ParsingAgent::addParsing(Handle hSentenceNode, Sentence sent, Linkage linka
         Handle l = a->addLink(LIST_LINK, wnis[left], wnis[right]);
         Handle hRel = a->addNode(LINK_GRAMMAR_RELATIONSHIP_NODE,
                                    linkage_get_link_label(linkage, i));
-        Handle hRelInst = a->addNode(NODE);
-        a->addLink(EXTENSIONAL_INHERITANCE_LINK, hRelInst, hRel);
-        a->addLink(HOLONYM_LINK, l, hRelInst);
-        a->addLink(HOLONYM_LINK, hRelInst, hParseNode);
+        Handle hEval = a->addLink(EVALUATION_LINK, hRel, l);
+        a->addLink(HOLONYM_LINK, hEval, hParseNode);
     }
 }
 
