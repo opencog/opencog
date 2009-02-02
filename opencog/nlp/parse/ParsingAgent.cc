@@ -52,10 +52,10 @@ ParsingAgent::ParsingAgent()
     log->disable();
 
     opts  = parse_options_create();
-    dict  = dictionary_create(LINK_GRAMMAR_DATA_DIR "4.0.dict", 
-                              LINK_GRAMMAR_DATA_DIR "4.0.knowledge", 
+    dict  = dictionary_create((char*)LINK_GRAMMAR_DATA_DIR "4.0.dict", 
+                              (char*)LINK_GRAMMAR_DATA_DIR "4.0.knowledge", 
                               NULL, 
-                              LINK_GRAMMAR_DATA_DIR "4.0.affix");
+                              (char*)LINK_GRAMMAR_DATA_DIR "4.0.affix");
 }
 
 ParsingAgent::~ParsingAgent()
