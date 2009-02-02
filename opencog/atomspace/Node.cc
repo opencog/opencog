@@ -86,8 +86,11 @@ std::string Node::toShortString() const
 {
 #define BUFSZ 1024
     char buf[BUFSZ];
+    std::string tmpname = name;
+    if (name == "")
+        tmpname = "#" + TLB::getHandle(this).str();
     snprintf(buf, BUFSZ, "node[%s:%s%s]",
-             ClassServer::getTypeName(type).c_str(), name.c_str(),
+             ClassServer::getTypeName(type).c_str(), tmpname.c_str(),
                     (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
     return buf;
 }
@@ -95,9 +98,12 @@ std::string Node::toShortString() const
 std::string Node::toString() const
 {
     char buf[BUFSZ];
+    std::string tmpname = name;
+    if (name == "")
+        tmpname = "#" + TLB::getHandle(this).str();
     //activation here at 0: can be replace with LTI
     snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%f,%f)",
-             ClassServer::getTypeName(type).c_str(), name.c_str(),
+             ClassServer::getTypeName(type).c_str(), tmpname.c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().getMean(), getTruthValue().getConfidence());

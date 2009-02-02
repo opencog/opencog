@@ -128,7 +128,10 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
             sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, ClassServer::getTypeName(atom->getType()).c_str());
             result += aux;
         }
-        sprintf(aux, "%s=\"%s\" />\n", NAME_TOKEN, ((Node *)atom)->getName().c_str());
+        std::string name = ((Node*)atom)->getName();
+        if (name == "")
+            name = "#" + atomHandle.str();
+        sprintf(aux, "%s=\"%s\" />\n", NAME_TOKEN, name.c_str());
         result += aux;
     } else {
         sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());

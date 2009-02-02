@@ -528,6 +528,19 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
             result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
         }
     }
+
+    // finally, null names of unnamed nodes
+    for (HandleEntry *e = result; e; e = e->next)
+    {
+        Atom *a = TLB::getAtom(e->handle);
+        if (ClassServer::isNode(a->getType()))
+        {
+            Node *n = (Node*)a;
+            if (n->getName()[0] == '#')
+                n->setName("");
+        }
+    }
+
     //time_t duration = time(NULL) - start;
     //timeval e;
     //gettimeofday(&e, NULL);

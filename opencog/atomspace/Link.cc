@@ -127,12 +127,15 @@ std::string Link::toString(void) const
         //logger().fine("toString() => type of outgoing[%d] = %d", i, t);
         Handle h = outgoing[i];
         if (TLB::isValidHandle(h)) {
-            Atom *a = TLB::getAtom(outgoing[i]);
+            Atom *a = TLB::getAtom(h);
             Node *nnn = dynamic_cast<Node *>(a);
             if (nnn) {
                 snprintf(buf, BUFSZ, "[%s ", ClassServer::getTypeName(a->getType()).c_str());
                 answer += buf;
-                answer += nnn->getName();
+                if (nnn->getName() == "")
+                    answer += "#" + h.str();
+                else
+                    answer += nnn->getName();
                 answer += "]";
             } else {
                 Link *lll = dynamic_cast<Link *>(a);
