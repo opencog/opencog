@@ -56,6 +56,10 @@ ParsingAgent::ParsingAgent()
                               (char*)LINK_GRAMMAR_DATA_DIR "4.0.knowledge", 
                               NULL, 
                               (char*)LINK_GRAMMAR_DATA_DIR "4.0.affix");
+
+    if (dict == NULL) {
+        fprintf(stderr, "failed to load link-grammar dictionaries.\n");
+    }
 }
 
 ParsingAgent::~ParsingAgent()
@@ -65,7 +69,8 @@ ParsingAgent::~ParsingAgent()
 #endif
 
     if (log) delete log;
-    dictionary_delete(dict);
+    if (dict)
+        dictionary_delete(dict);
     parse_options_delete(opts);
 }
 
@@ -82,6 +87,9 @@ void ParsingAgent::setLogger(Logger* _log)
 
 void ParsingAgent::run(CogServer *c)
 {
+    if (dict == NULL)
+        return;
+
     log->fine("=========== ParsingAgent::run =======");
     a = c->getAtomSpace();
 
