@@ -32,10 +32,10 @@ class StrengthFormula {
 public:
 
     // check formula precondition based on TV strength values
-    // of the different involved atoms TV strengths
+    // of the input atoms TV strengths
     virtual bool checkPrecondition(const strength_seq& ss) const = 0;
 
-    // compute TruthValue strength based on the different involved atoms
+    // compute TruthValue strength based on the input atoms
     // TV strengths
     virtual strength_t computeStrength(const strength_seq& ss) const = 0;
 };

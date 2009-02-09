@@ -31,9 +31,9 @@ class StrengthCountFormula : public StrengthFormula {
 
 public:
 
-    // compute TruthValue count based on the different involved atoms
+    // compute TruthValue count based on the input atoms
     // TV counts
-    virtual count_t computeStrength(const count_seq& cs) const = 0;
+    virtual count_t computeCount(const count_seq& cs) const = 0;
 };
 
 
