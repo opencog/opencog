@@ -255,33 +255,33 @@ void BasicSaveUTest::test_table(void)
 	AtomStorage *store = new AtomStorage(dbname, username, passwd);
 	TSM_ASSERT("Not connected to database", store->connected());
 
-	AtomTable *table = new AtomTable();
-   add_to_table(table, "aaa ");
-   add_to_table(table, "bbb ");
-   add_to_table(table, "ccc ");
-   add_to_table(table, "ddd ");
-   add_to_table(table, "eee ");
+	AtomTable *table1 = new AtomTable();
+   add_to_table(table1, "aaa ");
+   add_to_table(table1, "bbb ");
+   add_to_table(table1, "ccc ");
+   add_to_table(table1, "ddd ");
+   add_to_table(table1, "eee ");
 
-	store->store(*table);
-	delete table;
+	store->store(*table1);
 	delete store;
 
 	// Reopen connection, and load the atom table.
 	store = new AtomStorage(dbname, username, passwd);
 	TSM_ASSERT("Not connected to database", store->connected());
 
-	table = new AtomTable();
+	AtomTable *table2 = new AtomTable();
 
-	store->load(*table);
+	store->load(*table2);
 
-   check_table(table, "aaa ");
-   check_table(table, "bbb ");
-   check_table(table, "ccc ");
-   check_table(table, "ddd ");
-   check_table(table, "eee ");
+   check_table(table2, "aaa ");
+   check_table(table2, "bbb ");
+   check_table(table2, "ccc ");
+   check_table(table2, "ddd ");
+   check_table(table2, "eee ");
 
-	delete table;
 	delete store;
+	delete table1;
+	delete table2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
