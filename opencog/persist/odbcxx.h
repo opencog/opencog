@@ -26,6 +26,7 @@ class ODBCConnection
 	private:
 		std::string dbname;
 		std::string username;
+		bool is_connected;
 		SQLHENV sql_henv;
 		SQLHDBC sql_hdbc;
 		std::stack<ODBCRecordSet *> free_pool;
@@ -37,6 +38,8 @@ class ODBCConnection
 		               const char * username,
 		               const char * authentication);
 		~ODBCConnection();
+
+		bool connected(void);
 
 		ODBCRecordSet *exec(const char * buff);
 };

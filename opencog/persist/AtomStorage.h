@@ -76,6 +76,7 @@ class AtomStorage
 		            const char * username,
 		            const char * authentication);
 		~AtomStorage();
+		bool connected(void);
 
 		void storeAtom(const Atom *);
 		bool atomExists(Handle);

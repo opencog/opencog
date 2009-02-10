@@ -121,6 +121,7 @@ static void atomCompare(Atom *a, Atom *b)
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
 	AtomStorage *store = new AtomStorage(dbname, username, passwd);
+	TSM_ASSERT("Not connected to database", store->connected());
 
 	// Create an atom ... 
 	Atom *a = new Node(SCHEMA_NODE, id + "someNode");
@@ -207,6 +208,7 @@ void BasicSaveUTest::test_table(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	AtomStorage *store = new AtomStorage(dbname, username, passwd);
+	TSM_ASSERT("Not connected to database", store->connected());
 
 	AtomTable *table = new AtomTable();
    add_to_table(table, "aaa ");

@@ -52,6 +52,8 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 {
 	SQLRETURN rc;
 
+	is_connected = false;
+
 	sql_hdbc = NULL;
 	sql_henv = NULL;
 
@@ -114,6 +116,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 
 	dbname = _dbname;
 	username = _username;
+	is_connected = true;
 }
 
 /* =========================================================== */
@@ -139,6 +142,11 @@ ODBCConnection::~ODBCConnection()
 		delete rs;
 		free_pool.pop();
 	}
+}
+
+bool ODBCConnection::connected (void)
+{
+	return is_connected;
 }
 
 /* =========================================================== */
@@ -170,6 +178,8 @@ ODBCConnection::exec(const char * buff)
 {
 	ODBCRecordSet *rs;
 	SQLRETURN rc;
+
+	if (!is_connected) return NULL;
 
 	rs = get_record_set();
 	if (!rs) return NULL;

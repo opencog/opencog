@@ -312,11 +312,21 @@ AtomStorage::~AtomStorage()
 {
 	setMaxUUID(TLB::uuid);
 	delete db_conn;
+	db_conn = NULL;
 
 	for (int i=0; i< TYPEMAP_SZ; i++)
 	{
 		if (db_typename[i]) free(db_typename[i]);
 	}
+}
+
+/**
+ * connected -- return true if a successful connection to the 
+ * database exists; else return false.
+ */
+bool AtomStorage::connected(void)
+{
+	return db_conn->connected();
 }
 
 /* ================================================================ */
