@@ -1,0 +1,11 @@
+Hack for compiling libubigraphclient
+
+The libubigraphclient is included in the UbiGraph distribution, however its Makefile is currently very broken. In the meantime, here are the instructions to compile it.
+
+* Go to the ubigraph/examples/C directory (where ubigraph is the root directory of the UbiGraph distribution).
+* Replace the supplied Makefile with the modified one in this directory.
+* add a link libcurl.so to /usr/lib/libcurl.so.4
+* make libubigraphclient
+* install the client library and the include file (which is in ubigraph/include)
+
+
