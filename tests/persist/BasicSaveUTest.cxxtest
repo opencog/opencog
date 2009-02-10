@@ -85,18 +85,23 @@ static void atomCompare(Atom *a, Atom *b)
 	TSM_ASSERT("No atom found", b != NULL);
 
 	TSM_ASSERT_EQUALS("Type mistmatch", a->getType(), b->getType());
-	TSM_ASSERT_EQUALS("Arity mistmatch", la->getArity(), lb->getArity());
 
-	if (0 < la->getArity())
+	// Only links can have arity
+	if (la && lb)
 	{
-		std::vector<Handle> outa = la->getOutgoingSet();
-		std::vector<Handle> outb = lb->getOutgoingSet();
-		for (int i=0; i< la->getArity(); i++)
+		TSM_ASSERT_EQUALS("Arity mistmatch", la->getArity(), lb->getArity());
+
+		if (0 < la->getArity())
 		{
-			if (outa[i] != outb[i])
+			std::vector<Handle> outa = la->getOutgoingSet();
+			std::vector<Handle> outb = lb->getOutgoingSet();
+			for (int i=0; i< la->getArity(); i++)
 			{
-				TSM_ASSERT_EQUALS("outgoing set mis-match", 
-					outa[i].value(), outb[i].value());
+				if (outa[i] != outb[i])
+				{
+					TSM_ASSERT_EQUALS("outgoing set mis-match", 
+						outa[i].value(), outb[i].value());
+				}
 			}
 		}
 	}
