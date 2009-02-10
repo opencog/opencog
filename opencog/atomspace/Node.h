@@ -44,6 +44,10 @@ private:
     // properties
     std::string name;
 
+    void init(Type, const std::string&,
+         const TruthValue& = TruthValue::NULL_TV())
+        throw (InvalidParamException, AssertionException);
+
 public:
 
     /**
@@ -54,9 +58,17 @@ public:
      *                  the node.  Use empty string for unamed node.
      * @param Node truthvalue A reference to a TruthValue object.
      */
-    Node(Type, const std::string&,
-         const TruthValue& = TruthValue::NULL_TV())
-    throw (InvalidParamException, AssertionException);
+    Node(Type t, const std::string& s,
+         const TruthValue&tv = TruthValue::NULL_TV())
+        : Atom(t,tv) {
+        init(t,s,tv);
+    }
+
+    /** Copy constructor, does not copy atom table membership! */
+    Node(const Node &n) 
+        : Atom(n.getType(),n.getTruthValue()) {
+        init(n.getType(), n.name, n.getTruthValue());
+    }
 
     /**
      * Destructor for this class.

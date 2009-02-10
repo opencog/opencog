@@ -37,15 +37,10 @@
 
 using namespace opencog;
 
-Node::Node(Type type,
+void Node::init(Type type,
            const std::string& cname,
            const TruthValue& tv)
 throw (InvalidParamException, AssertionException)
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-        : Atom(type, std::vector<Handle>(), tv)
-#else
-        : Atom(type, tv)
-#endif
 {
     if (!ClassServer::isAssignableFrom(NODE, type)) {
         throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);

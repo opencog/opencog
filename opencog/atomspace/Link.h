@@ -141,6 +141,13 @@ public:
         init(oset);
     }
 
+    /** Copy constructor, does NOT copy atom table membership! */
+    Link(const Link &l)
+        : Atom(l.getType(), l.getTruthValue())
+    {
+        init(l.getOutgoingSet());
+    }
+
     /**
      * Destructor for this class.
      */
