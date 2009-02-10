@@ -37,6 +37,9 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		const char * dbname;
+		const char * username;
+		const char * passwd;
 
 	public:
 
@@ -44,6 +47,10 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		{
 			logger().setLevel(Logger::DEBUG);
 			logger().setPrintToStdoutFlag(true);
+
+			dbname = "persist-test";
+			username = "linas";
+			passwd = "asdf";
 		}
 
 		~BasicSaveUTest()
@@ -56,6 +63,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		void setUp(void);
 
 		void tearDown(void) { }
+		void single_atom_save_restore(std::string id);
 
 		void test_single_atom(void);
 		void test_table(void);
@@ -68,51 +76,41 @@ void BasicSaveUTest::setUp(void)
 }
 
 // ============================================================
-static int atomCompare(Atom *a, Atom *b)
+
+static void atomCompare(Atom *a, Atom *b)
 {
-	int rc = 0;
 	Link *la = dynamic_cast<Link *>(a);
 	Link *lb = dynamic_cast<Link *>(b);
-	if (NULL == b)
-	{
-		fprintf(stderr, "Error: No atom found\n");
-		return -1;
-	}
 
-	if (a->getType() != b->getType())
-	{
-		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
-		rc --;
-	}
-	if (la->getArity() != lb->getArity())
-	{
-		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", la->getArity(), lb->getArity());
-		rc --;
-	}
+	TSM_ASSERT("No atom found", b != NULL);
+
+	TSM_ASSERT_EQUALS("Type mistmatch", a->getType(), b->getType());
+	TSM_ASSERT_EQUALS("Arity mistmatch", la->getArity(), lb->getArity());
+
 	if (0 < la->getArity())
 	{
 		std::vector<Handle> outa = la->getOutgoingSet();
 		std::vector<Handle> outb = lb->getOutgoingSet();
-		for (int i =0; i< la->getArity(); i++)
+		for (int i=0; i< la->getArity(); i++)
 		{
 			if (outa[i] != outb[i])
 			{
-				fprintf(stderr, "Error, outgoing set mis-match, "
-				        "i=%d a=%lx b=%lx\n", i, outa[i].value(), outb[i].value());
-				rc --;
+				TSM_ASSERT_EQUALS("outgoing set mis-match", 
+					outa[i].value(), outb[i].value());
 			}
 		}
 	}
-	if (!(a->getTruthValue() == b->getTruthValue()))
+
+	const TruthValue &ta = a->getTruthValue();
+	const TruthValue &tb = b->getTruthValue();
+	TSM_ASSERT("Truth value miscompare", ta==tb);
+
+	if (!(ta == tb))
 	{
-		const TruthValue &ta = a->getTruthValue();
-		const TruthValue &tb = b->getTruthValue();
 		fprintf(stderr, "Error, truth value miscompare, "
 		        "ma=%f mb=%f ca=%f cb=%f\n",
 		        ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
-		rc --;
 	}
-	return rc;
 }
 
 // ============================================================
@@ -120,9 +118,9 @@ static int atomCompare(Atom *a, Atom *b)
  * A simple test cases that tests the save and restore of 
  * a couple of nodes and a link. Does not test atomspaces at all.
  */
-static void single_atom_test(std::string id)
+void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
-	AtomStorage *store = new AtomStorage("persist-test", "linas", NULL);
+	AtomStorage *store = new AtomStorage(dbname, username, passwd);
 
 	// Create an atom ... 
 	Atom *a = new Node(SCHEMA_NODE, id + "someNode");
@@ -138,11 +136,7 @@ static void single_atom_test(std::string id)
 	Atom *b = store->getAtom(h);
 
 	// Are they equal ??
-	int rc = atomCompare(a,b);
-	if (!rc) 
-	{
-		printf("atom compare success\n");
-	}
+	atomCompare(a,b);
 
 	// Create a second atom, connect it to the first
 	// with a link. Save it, fetch it ... are they equal?
@@ -159,16 +153,13 @@ static void single_atom_test(std::string id)
 	store->storeAtom(l);
 
 	Atom *lb = store->getAtom(TLB::getHandle(l));
-	rc = atomCompare(l,lb);
-	if (!rc) 
-	{
-		printf("link compare success\n");
-	}
+	atomCompare(l,lb);
 
 	delete store;
 }
 
 // ============================================================
+
 static void add_to_table(AtomTable *table, std::string id)
 {
 	// Create an atom ... 
@@ -202,13 +193,12 @@ void BasicSaveUTest::test_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-#if 0
-   single_atom_test("aaa ");
-   single_atom_test("bbb ");
-   single_atom_test("ccc ");
-   single_atom_test("ddd ");
-   single_atom_test("eee ");
-#endif
+   single_atom_save_restore("aaa ");
+   single_atom_save_restore("bbb ");
+   single_atom_save_restore("ccc ");
+   single_atom_save_restore("ddd ");
+   single_atom_save_restore("eee ");
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -216,8 +206,7 @@ void BasicSaveUTest::test_table(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-#if 0
-	AtomStorage *store = new AtomStorage("persist-test", "linas", NULL);
+	AtomStorage *store = new AtomStorage(dbname, username, passwd);
 
 	AtomTable *table = new AtomTable();
    add_to_table(table, "aaa ");
@@ -229,7 +218,7 @@ void BasicSaveUTest::test_table(void)
 	store->store(*table);
 
 	delete store;
-#endif
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
