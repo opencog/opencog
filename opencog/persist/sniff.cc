@@ -148,11 +148,11 @@ void add_to_table(AtomTable *table, std::string id)
 int main ()
 {
 #if 0
-   single_atom_test("aaa ");
-   single_atom_test("bbb ");
-   single_atom_test("ccc ");
-   single_atom_test("ddd ");
-   single_atom_test("eee ");
+	single_atom_test("aaa ");
+	single_atom_test("bbb ");
+	single_atom_test("ccc ");
+	single_atom_test("ddd ");
+	single_atom_test("eee ");
 #endif
 
 #if 1
@@ -171,11 +171,11 @@ int main ()
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
 
 	AtomTable *table = new AtomTable();
-   add_to_table(table, "aaa ");
-   add_to_table(table, "bbb ");
-   add_to_table(table, "ccc ");
-   add_to_table(table, "ddd ");
-   add_to_table(table, "eee ");
+	add_to_table(table, "aaa ");
+	add_to_table(table, "bbb ");
+	add_to_table(table, "ccc ");
+	add_to_table(table, "ddd ");
+	add_to_table(table, "eee ");
 
 	store->store(*table);
 

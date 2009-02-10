@@ -41,14 +41,14 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		const char * username;
 		const char * passwd;
 
-		Node *n1;
-		Node *n2;
-		Node *n3;
-		Link *l;
-		Atom *a1;
-		Atom *a2;
-		Atom *a3;
-		Atom *al;
+		Node *n1[10];
+		Node *n2[10];
+		Node *n3[10];
+		Link *l[10];
+		Atom *a1[10];
+		Atom *a2[10];
+		Atom *a3[10];
+		Atom *al[10];
 
 	public:
 
@@ -73,8 +73,8 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 		void single_atom_save_restore(std::string id);
-		void add_to_table(AtomTable *, std::string id);
-		void check_table(AtomTable *, std::string id);
+		void add_to_table(int, AtomTable *, std::string id);
+		void check_table(int, AtomTable *, std::string id);
 
 		void test_single_atom(void);
 		void test_table(void);
@@ -177,50 +177,50 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 // ============================================================
 
-void BasicSaveUTest::add_to_table(AtomTable *table, std::string id)
+void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 {
 	// Create an atom ... 
-	n1 = new Node(SCHEMA_NODE, id + "fromNode");
+	n1[idx] = new Node(SCHEMA_NODE, id + "fromNode");
 	SimpleTruthValue stv(0.11, 33);
-	n1->setTruthValue(stv);
-	a1 = n1;
-	table->add(a1);
+	n1[idx]->setTruthValue(stv);
+	a1[idx] = n1[idx];
+	table->add(a1[idx]);
 
-	n2 = new Node(SCHEMA_NODE, id + "toNode");
+	n2[idx] = new Node(SCHEMA_NODE, id + "toNode");
 	SimpleTruthValue stv2(0.22, 66);
-	n2->setTruthValue(stv2);
-	a2 = n2;
-	table->add(a2);
+	n2[idx]->setTruthValue(stv2);
+	a2[idx] = n2[idx];
+	table->add(a2[idx]);
 
-	n3 = new Node(SCHEMA_NODE, id + "third wheel");
+	n3[idx] = new Node(SCHEMA_NODE, id + "third wheel");
 	SimpleTruthValue stv3(0.33, 99);
-	n3->setTruthValue(stv3);
-	a3 = n3;
-	table->add(a3);
+	n3[idx]->setTruthValue(stv3);
+	a3[idx] = n3[idx];
+	table->add(a3[idx]);
 
 	std::vector<Handle> hvec;
-	hvec.push_back(TLB::getHandle(a1));
-	hvec.push_back(TLB::getHandle(a2));
-	hvec.push_back(TLB::getHandle(a3));
+	hvec.push_back(TLB::getHandle(a1[idx]));
+	hvec.push_back(TLB::getHandle(a2[idx]));
+	hvec.push_back(TLB::getHandle(a3[idx]));
 
-	l = new Link(SET_LINK, hvec);
-	al = l;
-	table->add(l);
+	l[idx] = new Link(SET_LINK, hvec);
+	al[idx] = l[idx];
+	table->add(l[idx]);
 }
 
-void BasicSaveUTest::check_table(AtomTable *table, std::string id)
+void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 {
-	Handle hb1 = table->getHandle(n1);
+	Handle hb1 = table->getHandle(n1[idx]);
 	Atom *b1 = TLB::getAtom(hb1);
-	atomCompare(a1, b1);
+	atomCompare(a1[idx], b1);
 
-	Handle hb2 = table->getHandle(n2);
+	Handle hb2 = table->getHandle(n2[idx]);
 	Atom *b2 = TLB::getAtom(hb2);
-	atomCompare(a2, b2);
+	atomCompare(a2[idx], b2);
 
-	Handle hb3 = table->getHandle(n3);
+	Handle hb3 = table->getHandle(n3[idx]);
 	Atom *b3 = TLB::getAtom(hb3);
-	atomCompare(a3, b3);
+	atomCompare(a3[idx], b3);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(TLB::getHandle(b1));
@@ -230,7 +230,7 @@ void BasicSaveUTest::check_table(AtomTable *table, std::string id)
 	Link *lb = new Link(SET_LINK, hvec);
 	Handle hlb = table->getHandle(lb);
 	Atom *bl = TLB::getAtom(hlb);
-	atomCompare(al, bl);
+	atomCompare(al[idx], bl);
 }
 
 // ============================================================
@@ -256,11 +256,12 @@ void BasicSaveUTest::test_table(void)
 	TSM_ASSERT("Not connected to database", store->connected());
 
 	AtomTable *table1 = new AtomTable();
-   add_to_table(table1, "aaa ");
-   add_to_table(table1, "bbb ");
-   add_to_table(table1, "ccc ");
-   add_to_table(table1, "ddd ");
-   add_to_table(table1, "eee ");
+	int idx = 0;
+	add_to_table(idx++, table1, "aaa ");
+	add_to_table(idx++, table1, "bbb ");
+	add_to_table(idx++, table1, "ccc ");
+	add_to_table(idx++, table1, "ddd ");
+	add_to_table(idx++, table1, "eee ");
 
 	store->store(*table1);
 	delete store;
@@ -273,11 +274,12 @@ void BasicSaveUTest::test_table(void)
 
 	store->load(*table2);
 
-   check_table(table2, "aaa ");
-   check_table(table2, "bbb ");
-   check_table(table2, "ccc ");
-   check_table(table2, "ddd ");
-   check_table(table2, "eee ");
+	idx = 0;
+	check_table(idx++, table2, "aaa ");
+	check_table(idx++, table2, "bbb ");
+	check_table(idx++, table2, "ccc ");
+	check_table(idx++, table2, "ddd ");
+	check_table(idx++, table2, "eee ");
 
 	delete store;
 	delete table1;
