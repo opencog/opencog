@@ -29,6 +29,9 @@ using namespace opencog;
 
 class BasicSaveUTest :  public CxxTest::TestSuite
 {
+	private:
+		AtomSpace *as;
+
 	public:
 
 		BasicSaveUTest(void)
