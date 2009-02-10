@@ -1,5 +1,5 @@
 /*
- * tests/server/BiggerPatternUTest.cxxtest
+ * tests/query/BiggerPatternUTest.cxxtest
  *
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved

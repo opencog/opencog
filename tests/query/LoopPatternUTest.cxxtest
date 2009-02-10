@@ -1,5 +1,5 @@
 /*
- * tests/server/LoopPatternUTest.cxxtest
+ * tests/query/LoopPatternUTest.cxxtest
  *
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
