@@ -1,0 +1,22 @@
+Ubigraph module (by Jared Wigmore <jared.wigmore@gmail.com>)
+
+This module displays the atomspace via Ubigraph.
+
+The code for converting the atomspace to a graph was adapted from the DottyModule by Trent Waddington <trent.waddington@gmail.com>.
+
+== Dependencies ==
+
+This module depends on the ubigraph server, and also the C client interface.
+
+XXX add list of other dependencies
+
+== Running the module ==
+
+First start the ubigraph server. Then load the libubigraph.so module in cogserver, and run the "ubigraph" command.
+
+== TODO ==
+
+Respond to add/remove atom signals, updating the graph in real-time.
+
+XXX
+
