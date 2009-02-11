@@ -44,17 +44,31 @@ using namespace opencog;
 
 DECLARE_MODULE(UbigraphModule);
 
+std::string initials(std::string s)
+{
+    std::string ret;
+    foreach (char c,  s) {
+        if (/*isUpperCase(c)*/ Isox(c) == c) {
+            ret += c;
+        }
+    }
+    return ret;
+}
+
 class Ubigrapher
 {
 public:
     // TODO register handlers for the add/remove atom events
-    Ubigrapher(AtomSpace *space) : space(space), withIncoming(false), compact(false)
+    Ubigrapher(AtomSpace *space) : space(space), withIncoming(false), compact(true)
     {
+        compactLabels = true;
         ubigraph_clear();
     }
     AtomSpace *space;
     bool withIncoming;
     bool compact;
+    //! Makes much more compact labels. Currently uses the initials of the typename.
+    bool compactLabels;
 
     /**
      * Outputs a ubigraph node for an atom.
@@ -76,13 +90,22 @@ public:
 //        ost << h.value() << " [";
         int id = (int)h.value();
         int status = ubigraph_new_vertex_w_id(id);
-        if (!space->isNode(a->getType()))
-//            ost << "shape=\"diamond\" ";
+        if (space->isNode(a->getType()))
+            ubigraph_set_vertex_attribute(id, "shape", "sphere");
+        else {
+            //            ost << "shape=\"diamond\" ";
             ubigraph_set_vertex_attribute(id, "shape", "octahedron");
+            ubigraph_set_vertex_attribute(id, "color", "#ff0000");
+        }
 
         std::ostringstream ost;
         //        ost << "label=\"[" << ClassServer::getTypeName(a->getType()) << "]";
-        ost << ClassServer::getTypeName(a->getType());
+        std::string type = ClassServer::getTypeName(a->getType());
+        if (compactLabels) {
+            ost << initials(type);
+        } else {
+            ost << type;
+        }
         
         if (space->isNode(a->getType())) {
             Node *n = (Node*)a;
@@ -114,19 +137,39 @@ public:
 //            // it's later necessary to change this edge
 //            int status = ubigraph_new_edge_w_id(id,x,y);
 
-/*            if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
+            if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
             {
 //                ost << out[0] << " -> " << out[1] << " [label=\""
 //                    << ClassServer::getTypeName(a->getType()) << "\"];\n";
 //                answer += ost.str();
+                int id = ubigraph_new_edge(out[0].value(),out[1].value());
+                
+                std::string type = ClassServer::getTypeName(a->getType());
+                std::ostringstream ost;
+                if (compactLabels) {
+                    ost << initials(type);
+                } else {
+                    ost << type;
+                }
+                ubigraph_set_edge_attribute(id, "label", ost.str().c_str());                
+                
+                ubigraph_set_edge_attribute(id, "arrow", "true");
+                // Makes it easier to see the direction of the arrows (cones),
+                // but hides the type labels
+//                ubigraph_set_edge_attribute(id, "arrow_radius", "1.5");
+                ubigraph_set_edge_attribute(id, "arrow_length", "2.0");
                 return false;
-            }*/
+            }
 
             for (size_t i = 0; i < out.size(); i++) {
                 int id = ubigraph_new_edge(h.value(),out[i].value());
                 ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
                 ubigraph_set_edge_attribute(id, "arrow", "true");
-                ubigraph_set_edge_attribute(id, "arrow-radius", "2.0");
+                // Makes it easier to see the direction of the arrows (cones),
+                // but hides the number labels
+//                ubigraph_set_edge_attribute(id, "arrow_radius", "1.5");
+                ubigraph_set_edge_attribute(id, "arrow_length", "2.0");
+
 //                ost << h << "->" << out[i] << " [label=\"" << i << "\"];\n";
             }
         }
