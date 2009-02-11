@@ -79,6 +79,7 @@ class AtomStorage
 		~AtomStorage();
 		bool connected(void);
 
+		void kill_data(void);
 		void storeAtom(const Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);

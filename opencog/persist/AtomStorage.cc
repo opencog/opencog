@@ -998,16 +998,13 @@ void AtomStorage::create_tables(void)
 	// See the file "atom.sql" for detailed documentation as to the 
 	// structure of teh SQL tables.
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid	INT,"
+	                      "uuid	INT PRIMARY KEY,"
 	                      "type  SMALLINT,"
 	                      "stv_mean FLOAT,"
 	                      "stv_count FLOAT,"
 	                      "height INT,"
 	                      "name    TEXT,"
 	                      "outgoing INT[]);");
-	rp.rs->release();
-
-	rp.rs = db_conn->exec("CREATE INDEX uuid_idx ON Atoms (uuid);");
 	rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
@@ -1027,6 +1024,26 @@ void AtomStorage::create_tables(void)
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_uuid INT,"
 	                      "max_height INT);");
+	rp.rs->release();
+}
+
+/**
+ * kill_data -- destroy data in the database!! Dangerous !!
+ * This routine is meant to be used only for running test cases.
+ * It is extremely dangerous, as it can lead to total data loss.
+ */
+void AtomStorage::kill_data(void)
+{
+	Response rp;
+
+	// See the file "atom.sql" for detailed documentation as to the 
+	// structure of teh SQL tables.
+	rp.rs = db_conn->exec("DELETE from Atoms;");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("UPDATE Global SET max_uuid = 500;");
+	rp.rs->release();
+	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
 	rp.rs->release();
 }
 
