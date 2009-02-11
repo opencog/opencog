@@ -51,11 +51,12 @@ class AtomStorage
 		unsigned long getMaxUUID(void);
 		void setMaxUUID(unsigned long);
 
-		// Reserve extra space for future growth -- 200 should be enough.
-		#define TYPEMAP_SZ (NUMBER_OF_CLASSES + 200)
+		// Reserve extra space for future growth -- 1200 should be enough.
+		#define TYPEMAP_SZ (NUMBER_OF_CLASSES + 1200)
 		int  storing_typemap[TYPEMAP_SZ];
 		Type loading_typemap[TYPEMAP_SZ];
 		char * db_typename[TYPEMAP_SZ];
+
 		bool type_map_was_loaded;
 		void load_typemap(void);
 		void store_typemap(void);

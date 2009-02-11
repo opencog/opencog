@@ -625,27 +625,57 @@ void AtomStorage::storeAtom(const Atom *atom)
  */
 void AtomStorage::store_typemap(void)
 {
-	/* Store the type map only if it has never been stored before.
-	 * Otherwise we risk messing it up.
-	 */
+	/* Only need to store the typemap once. */
 	if (type_map_was_loaded) return;
-	type_map_was_loaded = true;
 
 	Response rp;
 	char buff[BUFSZ];
 	Type t;
 
+	// If we are here, we need to reconcile the types currently in
+	// use, with a possibly pre-existing typemap. New types must be
+	// stored.  So we start by loading a map from SQL (if its there).
+	load_typemap();
+
 	for (t=0; t<NUMBER_OF_CLASSES; t++)
 	{
-		snprintf(buff, BUFSZ,
-		         "INSERT INTO TypeCodes (type, typename) "
-		         "VALUES (%d, \'%s\');",
-		         t, ClassServer::getTypeName(t).c_str());
-		rp.rs = db_conn->exec(buff);
-		rp.rs->release();
+		int sqid = storing_typemap[t];
+		/* If this typename is not yet known, record it */
+		if (-1 == sqid)
+		{
+			const char * tname = ClassServer::getTypeName(t).c_str();
 
-		loading_typemap[t] = t;
-		storing_typemap[t] = t;
+			// Let the sql id be the same as the current type number,
+			// unless this sql number is alrreay in use, in which case
+			// we need to find another, unused one.
+			sqid = t;
+
+			if ((loading_typemap[sqid] != NOTYPE) &&
+			    (loading_typemap[sqid] != t))
+			{
+				// Find some (any) unused type index to use in the
+				// sql table. Use the lowest unused value that we
+				// can find.
+				for (sqid = 0; sqid<TYPEMAP_SZ; sqid++)
+				{
+					if (NOTYPE == loading_typemap[sqid]) break;
+				}
+
+				if (TYPEMAP_SZ <= sqid)
+				{
+					fprintf(stderr, "Fatal Error: type table overflow!\n");
+					abort();
+				}
+			}
+
+			snprintf(buff, BUFSZ,
+			         "INSERT INTO TypeCodes (type, typename) "
+			         "VALUES (%d, \'%s\');",
+			         sqid, tname);
+			rp.rs = db_conn->exec(buff);
+			rp.rs->release();
+			set_typemap(sqid, tname);
+		}
 	}
 }
 
@@ -678,6 +708,7 @@ void AtomStorage::set_typemap(int dbval, const char * tname)
 	Type realtype = ClassServer::getType(tname);
 	loading_typemap[dbval] = realtype;
 	storing_typemap[realtype] = dbval;
+	if (db_typename[dbval] != NULL) free (db_typename[dbval]);
 	db_typename[dbval] = strdup(tname);
 }
 
@@ -817,8 +848,9 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		if (realtype != atom->getType())
 		{
 			fprintf(stderr,
-				"Error: mismatched atom type for existing atom! uuid=%lu\n",
-				h.value());
+				"Error: mismatched atom type for existing atom! "
+				"uuid=%lu real=%d atom=%d\n",
+				h.value(), realtype, atom->getType());
 		}
 	}
 
@@ -987,8 +1019,8 @@ void AtomStorage::create_tables(void)
 #endif /* USE_INLINE_EDGES */
 
 	rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
-	                      "type SMALLINT,"
-	                      "typename TEXT);");
+	                      "type SMALLINT UNIQUE,"
+	                      "typename TEXT UNIQUE);");
 	rp.rs->release();
 	type_map_was_loaded = false;
 

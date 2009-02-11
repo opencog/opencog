@@ -54,8 +54,8 @@ CREATE TABLE Edges (
 -- values in the datase.
 
 CREATE TABLE TypeCodes (
-	type SMALLINT,
-	typename TEXT
+	type SMALLINT UNIQUE,
+	typename TEXT UNIQUE
 );
 -- -----------------------------------------------------------
 -- Global state
