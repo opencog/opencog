@@ -51,6 +51,14 @@ public:
     void run(CogServer *server) {
         logger().debug("%ld: executed %s", server->getCycleCount(), _name.c_str());
         _count++;
+
+        // add some nodes to test the SystemActivityTable
+        char tmp[100];
+        sprintf(tmp, "%s%d", _name.c_str(), _count);
+        Handle h = server->getAtomSpace()->addNode(NODE, tmp);
+        HandleSet *s = new HandleSet();
+        s->add(h);
+        _utilizedHandleSets.push_back(s);
     }
 };
 
@@ -100,6 +108,45 @@ public:
         TS_ASSERT(a[2]->count() == 16);
         TS_ASSERT(a[3]->count() == 12);
         TS_ASSERT(a[4]->count() == 10);
+
+        SystemActivityTable &sat = cogserver.systemActivityTable();
+        AgentActivityTable &aat = sat.agentActivityTable();
+        TS_ASSERT(aat[a[0]].size() == 50);
+        TS_ASSERT(aat[a[1]].size() == 25);
+        TS_ASSERT(aat[a[2]].size() == 16);
+        TS_ASSERT(aat[a[3]].size() == 12);
+        TS_ASSERT(aat[a[4]].size() == 10);
+
+        for (int i = 0; i < 5; i++)
+            for (size_t j = 0; j < aat[a[i]].size(); j++)
+            {
+                Activity *act = aat[a[i]][j];
+                // check nothing takes zero time
+                TS_ASSERT(act->elapsedTime > 0);
+                // or memory (disabled: current implementation not accurate).
+                //TS_ASSERT(act->memUsed > 0);
+                // or atoms
+                TS_ASSERT(act->atomsUsed > 0);
+                // each should have 1 utilized handle set
+                TS_ASSERT(act->utilizedHandleSets.size() == 1);
+                // and one handle in the set
+                TS_ASSERT(act->utilizedHandleSets[0]->getSize() == 1);
+            }
+
+        // removing a handle from the atom space should also remove it from
+        // the sets in the activity tables.
+        Activity *firstAct = aat[a[0]][0];
+        Handle h = firstAct->utilizedHandleSets[0]->keys()->next();
+        cogserver.getAtomSpace()->removeAtom(h);
+        TS_ASSERT(firstAct->utilizedHandleSets[0]->getSize() == 0);
+
+        // test max size of activity seq
+        sat.setMaxAgentActivityTableSeqSize(13);
+        TS_ASSERT(aat[a[0]].size() == 13);
+        TS_ASSERT(aat[a[1]].size() == 13);
+        TS_ASSERT(aat[a[2]].size() == 13);
+        TS_ASSERT(aat[a[3]].size() == 12);
+        TS_ASSERT(aat[a[4]].size() == 10);
     }
 
 };

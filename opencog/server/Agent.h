@@ -28,6 +28,7 @@
 #include <string>
 
 #include <opencog/server/Factory.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -104,6 +105,10 @@ protected:
 
     const std::string* PARAMETERS;
 
+    /** The atoms utilized by the Agent in a single cycle, to be used by the
+     *  System Activity Table to assign credit to this agent. */
+    HandleSetSeq _utilizedHandleSets;
+
 public:
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
@@ -118,7 +123,9 @@ public:
     }
     
     /** Agent's destructor */
-    virtual ~Agent() {}
+    virtual ~Agent() {
+        resetUtilizedHandleSets();
+    }
 
     /** Abstract run method. Should be overriden by a derived agent with the
      *  actual agent's behavior. */
@@ -134,6 +141,15 @@ public:
      * to a string. */    
     std::string to_string() const;
 
+    /** Returns the sequence of handle sets for this cycle that the agent
+     *  would like to claim credit for in the System Activity Table. */
+    virtual const HandleSetSeq& getUtilizedHandleSets() const
+    {
+        return _utilizedHandleSets;
+    }
+
+    /** Resets the utilized handle sets */
+    void resetUtilizedHandleSets();
 }; // class
 
 }  // namespace

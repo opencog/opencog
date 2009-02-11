@@ -39,6 +39,7 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/HandleSet.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/recent_val.h>
@@ -50,6 +51,7 @@ namespace opencog
 
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
+typedef std::vector<HandleSet*> HandleSetSeq;
 
 typedef short stim_t;
 
@@ -78,6 +80,11 @@ public:
      * @return a const reference to the TimeServer object of this AtomSpace
      */
     const TimeServer& getTimeServer() const;
+
+    /**
+     * Return the number of atoms contained in the space.
+     */
+    int getSize() const { return atomTable.getSize(); }
 
     /**
      * Prints atoms of this AtomTable to the given output stream.
@@ -1250,6 +1257,14 @@ private:
      */
     void atomAdded(Handle h);
 
+public:
+    // pass on the signals from the Atom Table
+    boost::signal<void (Handle)>& addAtomSignal() 
+        { return atomTable.addAtomSignal(); }
+    boost::signal<void (Handle)>& removeAtomSignal()
+        { return atomTable.removeAtomSignal(); }
+    boost::signal<void (Handle)>& mergeAtomSignal()
+        { return atomTable.mergeAtomSignal(); }
 };
 
 } // namespace opencog

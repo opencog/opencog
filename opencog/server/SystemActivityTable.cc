@@ -1,0 +1,129 @@
+/*
+ * opencog/server/SystemActivityTable.cc
+ *
+ * Copyright (C) 2009 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Written by Trent Waddington <trent.waddington@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "SystemActivityTable.h"
+
+#include <algorithm>
+#include <tr1/memory>
+#include <tr1/functional>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/platform.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+
+using namespace opencog;
+using namespace std::tr1::placeholders;
+
+SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100)
+{
+    logger().debug("[SystemActivityTable] constructor");
+}
+
+SystemActivityTable::~SystemActivityTable()
+{
+    logger().debug("[SystemActivityTable] destructor");
+    conn.disconnect();
+    clearActivity();
+}
+
+void SystemActivityTable::init(CogServer *cogServer)
+{
+    logger().debug("[SystemActivityTable] init");
+    this->cogServer = cogServer;
+    conn = cogServer->getAtomSpace()->removeAtomSignal().connect(
+            std::tr1::bind(&SystemActivityTable::atomRemoved, this, _1));
+}
+
+void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)
+{
+    _maxAgentActivityTableSeqSize = n;
+
+    for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
+                                      it != _agentActivityTable.end(); it++) {
+        ActivitySeq &seq = it->second;
+        trimActivitySeq(seq, _maxAgentActivityTableSeqSize);
+    }
+}
+
+void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
+{
+    if (seq.size() <= max)
+        return;
+    for (size_t n = max; n < seq.size(); n++)
+        delete seq[n];
+    seq.resize(max);
+}
+
+void SystemActivityTable::atomRemoved(Handle h)
+{
+    for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
+                                      it != _agentActivityTable.end(); it++) {
+        ActivitySeq &seq = it->second;
+        for (size_t n = 0; n < seq.size(); n++) {
+            Activity *a = seq[n];
+            for (size_t i = 0; i < a->utilizedHandleSets.size(); i++) {
+                HandleSet *s = a->utilizedHandleSets[i];
+                if (s->contains(h))
+                    s->remove(h);
+            }
+        }
+    }
+}
+
+void SystemActivityTable::logActivity(Agent *agent, time_t elapsedTime, 
+                                      size_t memUsed, size_t atomsUsed)
+{
+    ActivitySeq &as = _agentActivityTable[agent];
+    as.insert(as.begin(), 
+        new Activity(cogServer->getCycleCount(), elapsedTime, memUsed,
+                 atomsUsed,
+                 agent->getUtilizedHandleSets()));
+    trimActivitySeq(as, _maxAgentActivityTableSeqSize);
+}
+
+void SystemActivityTable::clearActivity(Agent *agent)
+{
+    AgentActivityTable::iterator it = _agentActivityTable.find(agent);
+    if (it == _agentActivityTable.end())
+        return;
+    ActivitySeq &seq = it->second;
+    for (size_t n = 0; n < seq.size(); n++)
+        delete seq[n];
+    _agentActivityTable.erase(it);
+}
+
+void SystemActivityTable::clearActivity()
+{
+    for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
+                                      it != _agentActivityTable.end(); it++) {
+        ActivitySeq &seq = it->second;
+        for (size_t n = 0; n < seq.size(); n++)
+            delete seq[n];
+    }
+    _agentActivityTable.clear();
+}
+

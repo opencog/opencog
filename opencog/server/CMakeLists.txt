@@ -30,6 +30,7 @@ ADD_LIBRARY (server SHARED
 	ConsoleSocket
 	SocketHolder
 	Agent
+    SystemActivityTable
 #  XXX  need to re-enable loading of files, for Joel.
 #	load-file
 )
@@ -84,6 +85,7 @@ INSTALL (FILES
 	SaveRequest.h
 	Module.h
 	NetworkServer.h
+	SystemActivityTable.h
 	Registry.h
 	Request.h
 	ShutdownRequest.h

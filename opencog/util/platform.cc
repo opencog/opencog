@@ -150,3 +150,21 @@ unsigned long long opencog::atoll(const char *str)
 }
 
 #endif // WIN32
+
+#include <stdlib.h>
+#include <unistd.h>
+#include "platform.h"
+
+size_t opencog::getMemUsage() {
+    static void *old_sbrk = 0;
+    void *p = sbrk(0);
+    if (old_sbrk == 0 || old_sbrk > p) 
+    {
+        old_sbrk = p;
+        return 0;
+    }
+    size_t diff = (size_t)p - (size_t)old_sbrk;
+    old_sbrk = p;
+    return diff;
+}
+

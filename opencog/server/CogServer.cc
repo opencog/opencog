@@ -42,6 +42,7 @@
 #include <opencog/server/Agent.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/server/NetworkServer.h>
+#include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Request.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -93,6 +94,7 @@ CogServer::CogServer() : cycleCount(1)
 {
     if (atomSpace != NULL) delete atomSpace;
     atomSpace = new AtomSpace();
+    _systemActivityTable.init(this);
 
     pthread_mutex_init(&messageQueueLock, NULL);
     pthread_mutex_init(&agentsLock, NULL);
@@ -115,6 +117,11 @@ void CogServer::enableNetworkServer()
 void CogServer::disableNetworkServer()
 {
     _networkServer.stop();
+}
+
+SystemActivityTable& CogServer::systemActivityTable()
+{
+    return _systemActivityTable;
 }
 
 void CogServer::serverLoop()
@@ -159,6 +166,41 @@ void CogServer::processRequests(void)
     }
 }
 
+void CogServer::runAgent(Agent *agent)
+{
+    struct timeval timer_start, timer_end;
+    size_t mem_start, mem_end;
+    size_t atoms_start, atoms_end;
+    time_t elapsed_time;
+    size_t mem_used, atoms_used;
+
+    gettimeofday(&timer_start, NULL);
+    mem_start = getMemUsage();
+    atoms_start = atomSpace->getSize();
+
+    agent->resetUtilizedHandleSets();
+    agent->run(this);
+
+    gettimeofday(&timer_end, NULL);
+    mem_end = getMemUsage();
+    atoms_end = atomSpace->getSize();
+     
+    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) 
+                                                    * 1000000) +
+                    (timer_end.tv_usec - timer_start.tv_usec);
+    if (mem_start > mem_end)
+        mem_used = 0;
+    else
+        mem_used = mem_end - mem_start;
+    if (atoms_start > atoms_end)
+        atoms_used = 0;
+    else
+        atoms_used = atoms_end - atoms_start;
+
+    _systemActivityTable.logActivity(agent, elapsed_time, mem_used, 
+                                            atoms_used);
+}
+
 void CogServer::processAgents(void)
 {
     pthread_mutex_lock(&agentsLock);
@@ -166,7 +208,7 @@ void CogServer::processAgents(void)
     for (it = agents.begin(); it != agents.end(); ++it) {
         Agent* agent = *it;
         if ((cycleCount % agent->frequency()) == 0)
-            agent->run(this);
+            runAgent(agent);
     }
     pthread_mutex_unlock(&agentsLock);
 }
@@ -235,6 +277,10 @@ void CogServer::destroyAllAgents(const std::string& id)
 
     // remove those agents from the main container
     agents.erase(last, agents.end());
+
+    // remove their activities
+    for (size_t n = 0; n < to_delete.size(); n++)
+        _systemActivityTable.clearActivity(to_delete[n]);
 
     // delete the selected agents; NOTE: we must ensure that this is executed
     // after the 'agents.erase' call above, because the agent's destructor might

@@ -100,6 +100,8 @@ using std::tr1::hash;
 
 #endif // WIN32!
 
+size_t             getMemUsage();
+
 } // namespace opencog
 
 #endif // _OPENCOG_PLATFORM_H

@@ -40,6 +40,7 @@
 #include <opencog/server/BaseServer.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/NetworkServer.h>
+#include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Registry.h>
 
 namespace opencog
@@ -121,6 +122,8 @@ protected:
 
     NetworkServer _networkServer;
 
+    SystemActivityTable _systemActivityTable;
+
 public:
 
     /** CogServer's constructor. Initializes the mutex, atomspace and cycleCount
@@ -134,6 +137,9 @@ public:
     /** CogServer's destructor. Disables the network server is unloads all
      * modules. */
     virtual ~CogServer(void);
+
+    /** Run an Agent and log its activity. */
+    virtual void runAgent(Agent *agent);
 
     /** Server's main loop. Executed while the 'running' flag is set to true. It
      *  first processes the request queue, then the scheduled agents and finally
@@ -156,6 +162,9 @@ public:
 
     /** Returns a reference to the network server instance */
     virtual NetworkServer& networkServer(void);
+
+    /** Returns a reference to the system activity table instance */
+    virtual SystemActivityTable& systemActivityTable(void);
 
     /**** Module API ****/
     /** Loads a dynamic library/module. Takes the filename of the library (.so

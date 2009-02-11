@@ -57,3 +57,10 @@ std::string Agent::to_string() const
     oss << "\"}";
     return oss.str();
 }
+
+void Agent::resetUtilizedHandleSets()
+{
+    for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
+        delete _utilizedHandleSets[i];
+    _utilizedHandleSets.clear();
+}
