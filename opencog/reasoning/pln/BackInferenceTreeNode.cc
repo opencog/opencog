@@ -1068,6 +1068,13 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
 {
     AtomSpaceWrapper *atw = GET_ATW;
 
+    if (raw_target == NULL) {
+        puts("Target is null, aborting.\n");
+        static set<VtreeProvider*> aborted;
+        return aborted;
+    }
+        
+
     if (currentDebugLevel >= 4)
     {
         puts("Finally proving:");

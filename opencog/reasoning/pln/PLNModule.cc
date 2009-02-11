@@ -254,8 +254,10 @@ T input(T& a, std::list<std::string> args)
 {
 //    T a;
     std::stringstream ss;
-    ss << args.front();
-    args.pop_front();
+    if (args.begin() != args.end()) {
+        ss << args.front();
+        args.pop_front();
+    }
     ss >> a;
     
     return a;
@@ -496,6 +498,10 @@ std::string RunCommand(std::list<std::string> args)
                         //printf("\nTemporarily killing the log with level -3.\n");
                         //tempi = currentDebugLevel;
                         //currentDebugLevel = -3;
+                        if (state == NULL) {
+                            ss << "error: set a target first\n";
+                            return ss.str();
+                        }                       
             
                         state->infer(j, 0.000001f, 0.01f);
                         state->printResults();
@@ -526,6 +532,11 @@ std::string RunCommand(std::list<std::string> args)
                         }
             else if (c == "load-axioms") { //puts("Give the XML input file name: "); 
                         input(temps, args);
+                        if (temps == "") {
+                            ss << "error: expected xml input filename\n";
+                            return ss.str();
+                        }
+                        
                         haxx::ArchiveTheorems = true; 
                         atw->reset();
                         axioms_ok = atw->loadAxioms(temps);
