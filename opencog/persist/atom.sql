@@ -5,8 +5,8 @@
 
 CREATE TABLE Atoms (
 	-- the uuid maps to the atom handle
-	-- Do not build index until after load, to speed storage
-	uuid	INT,
+	-- must be unique, and must be non-null. ergo, primary key.
+	uuid	INT PRIMARY KEY,
 
 	type  SMALLINT,
 
@@ -18,7 +18,7 @@ CREATE TABLE Atoms (
 	stv_count FLOAT,
 
 	-- distance from this link to farthest Node.
-	-- height of Nodes is dy definition zero.
+	-- height of Nodes is by definition zero.
 	-- height of Links containing only nodes is one, etc.
 	height INT,
 
@@ -28,8 +28,6 @@ CREATE TABLE Atoms (
 	-- An array of the ougoing edges; non-empty only for links
 	outgoing INT[]
 );
-
-CREATE INDEX uuid_idx ON Atoms (uuid);
 
 -- -----------------------------------------------------------
 -- Table of the edges of the Levi craph corresponding 
