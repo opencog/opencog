@@ -26,6 +26,8 @@
 #include <queue>
 #include <sstream>
 #include <string>
+#include <tr1/functional>
+using namespace std::tr1::placeholders;
 
 #include "UbigraphModule.h"
 #include <opencog/util/Logger.h>
@@ -62,6 +64,11 @@ public:
     Ubigrapher(AtomSpace *space) : space(space), withIncoming(false), compact(true)
     {
         compactLabels = true;
+
+        space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_vertex, this, _1));
+        space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_edges, this, _1));
+        //space.removeAtomSignal().connect
+        
         ubigraph_clear();
     }
     AtomSpace *space;
@@ -73,7 +80,7 @@ public:
     /**
      * Outputs a ubigraph node for an atom.
      */
-    bool do_nodes(Handle h)
+    bool add_vertex(Handle h)
     {
         Atom *a = TLB::getAtom(h);
 
@@ -123,7 +130,7 @@ public:
     /**
      * Outputs ubigraph links for an atom's outgoing connections.
      */
-    bool do_links(Handle h)
+    bool add_edges(Handle h)
     {
         Atom *a = TLB::getAtom(h);
 //        std::ostringstream ost;
@@ -190,8 +197,8 @@ public:
 
     void graph()
     {
-        space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::do_nodes, this, true);
-        space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::do_links, this, true);
+        space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::add_vertex, this, true);
+        space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::add_edges, this, true);
     }
 
 };
