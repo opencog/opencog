@@ -29,6 +29,7 @@
 
 #include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AttentionValue.h>
 
 namespace opencog
 {
@@ -109,6 +110,9 @@ protected:
      *  System Activity Table to assign credit to this agent. */
     HandleSetSeq _utilizedHandleSets;
 
+    /** Agents have attentional values, like STI and LTI, just like atoms. */
+    AttentionValue attentionValue;
+
 public:
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
@@ -140,6 +144,17 @@ public:
     /** Dumps the agent's name and all its configuration parameters
      * to a string. */    
     std::string to_string() const;
+
+    /** Returns the AttentionValue object of the Agent. 
+      * This is const for consistency with Atom. */
+    const AttentionValue& getAttentionValue() const {
+        return attentionValue;
+    }
+
+    /** Sets the AttentionValue object of the Agent. */
+    void setAttentionValue(const AttentionValue &a) {
+        attentionValue = a;
+    }
 
     /** Returns the sequence of handle sets for this cycle that the agent
      *  would like to claim credit for in the System Activity Table. */
