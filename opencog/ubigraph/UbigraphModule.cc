@@ -60,14 +60,14 @@ std::string initials(std::string s)
 class Ubigrapher
 {
 public:
-    // TODO register handlers for the add/remove atom events
     Ubigrapher(AtomSpace *space) : space(space), withIncoming(false), compact(true)
     {
         compactLabels = true;
 
         space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_vertex, this, _1));
         space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_edges, this, _1));
-        //space.removeAtomSignal().connect
+        space->removeAtomSignal().connect(std::tr1::bind(&Ubigrapher::remove_vertex, this, _1));
+        space->removeAtomSignal().connect(std::tr1::bind(&Ubigrapher::remove_edges, this, _1));
         
         ubigraph_clear();
     }
@@ -149,7 +149,8 @@ public:
 //                ost << out[0] << " -> " << out[1] << " [label=\""
 //                    << ClassServer::getTypeName(a->getType()) << "\"];\n";
 //                answer += ost.str();
-                int id = ubigraph_new_edge(out[0].value(),out[1].value());
+                int id = h.value();
+                int status = ubigraph_new_edge_w_id(id, out[0].value(),out[1].value());
                 
                 std::string type = ClassServer::getTypeName(a->getType());
                 std::ostringstream ost;
@@ -192,6 +193,50 @@ public:
         }*/
 
 //        answer += ost.str();
+        return false;
+    }
+
+    /**
+     * Removes the ubigraph node for an atom.
+     */
+    bool remove_vertex(Handle h)
+    {
+        Atom *a = TLB::getAtom(h);
+
+        if (compact)
+        {
+            // Won't have made a node for a binary link with no incoming
+            Link *l = dynamic_cast<Link*>(a);
+            if (l && l->getOutgoingSet().size() == 2 &&
+                     l->getIncomingSet() == NULL)
+                return false;
+        }
+
+        int id = (int)h.value();
+        int status = ubigraph_remove_vertex(id);
+
+        return false;
+    }
+
+    bool remove_edges(Handle h)
+    {
+        Atom *a = TLB::getAtom(h);
+
+        // This method is only relevant to binary Links with no incoming.
+        // Any other atoms will be represented by vertexes, and the edges
+        // to them will be automatically deleted by ubigraph when the
+        // vertexes are deleted.
+        if (compact)
+        {
+            // Won't have made a node for a binary link with no incoming
+            Link *l = dynamic_cast<Link*>(a);
+            if (l && l->getOutgoingSet().size() == 2 &&
+                     l->getIncomingSet() == NULL)
+            {                     
+                int id = h.value();
+                int status = ubigraph_remove_edge(id);
+            }
+        }
         return false;
     }
 
