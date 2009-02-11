@@ -204,7 +204,7 @@ HopfieldServer::HopfieldServer()
     rng = new MT19937RandGen(tv.tv_usec);
     options = new HopfieldOptions();
     options->setServer(this);
-    hebLearnAgent = NULL;
+    hebUpdateAgent = NULL;
     storkeyAgent = NULL;
 
 }
@@ -213,7 +213,7 @@ HopfieldServer::~HopfieldServer()
 {
     unloadModule("libattention.so");
     //delete importUpdateAgent;
-    //delete hebLearnAgent;
+    //delete hebUpdateAgent;
     delete rng;
 }
 
@@ -224,7 +224,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
     //CogServer& cogserver = static_cast<CogServer&>(server());
     importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(this->createAgent(ImportanceUpdatingAgent::info().id, true));
     if (options->updateMethod == HopfieldOptions::CONJUNCTION) {
-        hebLearnAgent     = static_cast<HebbianLearningAgent*>(this->createAgent(HebbianLearningAgent::info().id, true));
+        hebUpdateAgent     = static_cast<HebbianUpdatingAgent*>(this->createAgent(HebbianUpdatingAgent::info().id, true));
     } else {
         storkeyAgent = new StorkeyAgent();
     }
@@ -236,9 +236,9 @@ void HopfieldServer::init(int width, int height, int numLinks)
     if (options->verboseLevel) {
         importUpdateAgent->getLogger()->enable();
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
-        if (hebLearnAgent) {
-            hebLearnAgent->getLogger()->enable();
-            hebLearnAgent->getLogger()->setPrintToStdoutFlag (true);
+        if (hebUpdateAgent) {
+            hebUpdateAgent->getLogger()->enable();
+            hebUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
         } else {
             storkeyAgent->getLogger()->enable();
             storkeyAgent->getLogger()->setPrintToStdoutFlag (true);
@@ -259,30 +259,30 @@ void HopfieldServer::init(int width, int height, int numLinks)
     case 1:
         importUpdateAgent->getLogger()->setLevel (Logger::INFO);
         forgetAgent->getLogger()->setLevel (Logger::INFO);
-        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::INFO);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::INFO);
         else storkeyAgent->getLogger()->setLevel (Logger::INFO);
         break;
     case 2:
         importUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
         forgetAgent->getLogger()->setLevel (Logger::DEBUG);
-        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::DEBUG);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
         else storkeyAgent->getLogger()->setLevel (Logger::DEBUG);
         break;
     case 3:
         importUpdateAgent->getLogger()->setLevel (Logger::FINE);
         forgetAgent->getLogger()->setLevel (Logger::FINE);
-        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::FINE);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::FINE);
         else storkeyAgent->getLogger()->setLevel (Logger::FINE);
         break;
     default:
         importUpdateAgent->getLogger()->setLevel (Logger::WARN);
         forgetAgent->getLogger()->setLevel (Logger::WARN);
-        if (hebLearnAgent) hebLearnAgent->getLogger()->setLevel (Logger::WARN);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::WARN);
         else storkeyAgent->getLogger()->setLevel (Logger::WARN);
     }
 
-    if (hebLearnAgent)
-        hebLearnAgent->convertLinks = true;
+    if (hebUpdateAgent)
+        hebUpdateAgent->convertLinks = true;
     forgetAgent->forgetPercentage = options->forgetPercent;
 
     AtomSpace* atomSpace = getAtomSpace();
@@ -673,9 +673,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         addRandomLinks();
 
         // then update with learning
-        if (hebLearnAgent) {
+        if (hebUpdateAgent) {
             logger().fine("---Imprint:Hebbian learning");
-            hebLearnAgent->run(this);
+            hebUpdateAgent->run(this);
         } else {
             logger().fine("---Imprint:Storkey update rule");
             storkeyAgent->run(this);

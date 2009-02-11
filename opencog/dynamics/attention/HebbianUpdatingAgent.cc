@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/HebbianLearningAgent.cc
+ * opencog/dynamics/attention/HebbianUpdatingAgent.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -20,7 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "HebbianLearningAgent.h"
+#include "HebbianUpdatingAgent.h"
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-HebbianLearningAgent::HebbianLearningAgent()
+HebbianUpdatingAgent::HebbianUpdatingAgent()
 {
     static const std::string defaultConfig[] = {
         "ECAN_CONVERT_LINKS","false",
@@ -44,33 +44,33 @@ HebbianLearningAgent::HebbianLearningAgent()
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new opencog::Logger("HebbianLearningAgent.log", Logger::WARN, true));
+    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::WARN, true));
     log->disable();
 }
 
-HebbianLearningAgent::~HebbianLearningAgent()
+HebbianUpdatingAgent::~HebbianUpdatingAgent()
 {
     if (log) delete log;
 }
 
-void HebbianLearningAgent::setLogger(Logger* _log)
+void HebbianUpdatingAgent::setLogger(Logger* _log)
 {
     if (log) delete log;
     log = _log;
 }
 
-Logger* HebbianLearningAgent::getLogger()
+Logger* HebbianUpdatingAgent::getLogger()
 {
     return log;
 }
 
-void HebbianLearningAgent::run(CogServer *server)
+void HebbianUpdatingAgent::run(CogServer *server)
 {
     a = server->getAtomSpace();
-    hebbianLearningUpdate();
+    hebbianUpdatingUpdate();
 }
 
-void HebbianLearningAgent::hebbianLearningUpdate()
+void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
     HandleEntry *links, *current_l;
 
@@ -78,7 +78,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
     float tc, old_tc, new_tc;
     float tcDecayRate = 0.1f;
 
-    log->info("HebbianLearningAgent::hebbianLearningupdate "
+    log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
                    "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
@@ -114,7 +114,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     if (tc < 0) {
                         // link no longer representative
                         // swap inverse hebbian link direction
-                        log->fine("HebbianLearningAgent: swapping direction of inverse link %s", TLB::getAtom(h)->toString().c_str());
+                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", TLB::getAtom(h)->toString().c_str());
                         // save STI/LTI
                         AttentionValue backupAV = a->getAV(h);
                         a->removeAtom(h);
@@ -132,7 +132,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                     if (tc < 0) {
                         // Inverse link no longer representative
                         // change to symmetric hebbian link
-                        log->fine("HebbianLearningAgent: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
+                        log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
                         // save STI/LTI
                         AttentionValue backupAV = a->getAV(h);
                         a->removeAtom(h);
@@ -149,7 +149,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
                 if (tc < 0) {
                     // link no longer representative
                     // change to inverse hebbian link
-                    log->fine("HebbianLearningAgent: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
+                    log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
                     // save STI/LTI
                     AttentionValue backupAV = a->getAV(h);
                     a->removeAtom(h);
@@ -176,7 +176,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
             a->setMean(h, tc);
         }
 		if (isDifferent)
-			log->fine("HebbianLearningAgent: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
+			log->fine("HebbianUpdatingAgent: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
 
     }
     // if not enough links, try and create some more either randomly
@@ -187,7 +187,7 @@ void HebbianLearningAgent::hebbianLearningUpdate()
 }
 
 
-std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle> &outgoing)
+std::vector<Handle>& HebbianUpdatingAgent::moveSourceToFront(std::vector<Handle> &outgoing)
 {
     // find source, atom with positive norm_sti, and make first in outgoing
     std::vector<Handle>::iterator outgoing_i;
@@ -212,7 +212,7 @@ std::vector<Handle>& HebbianLearningAgent::moveSourceToFront(std::vector<Handle>
     return outgoing;
 
 }
-float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
+float HebbianUpdatingAgent::targetConjunction(std::vector<Handle> handles)
 {
     // TODO: this won't work for Hebbian Links with arity > 2
 
@@ -226,7 +226,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     std::vector<float> normsti_v;
     bool tcInit = true;
 
-	log->fine("HebbianLearningAgent::targetConjunction");
+	log->fine("HebbianUpdatingAgent::targetConjunction");
 
     for (h_i = handles.begin();
             h_i != handles.end();
@@ -236,7 +236,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
 
         // if none in attention return 0 at end
         if (sti > a->getAttentionalFocusBoundary()) {
-			log->fine("HebbianLearningAgent: %d in attention, focus boundary = %d", sti,
+			log->fine("HebbianUpdatingAgent: %d in attention, focus boundary = %d", sti,
 					a->getAttentionalFocusBoundary() );
 			inAttention = true;
 		}
@@ -251,7 +251,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
             tc = normsti;
             tcInit = false;
         } else tc *= normsti;
-		log->fine("HebbianLearningAgent: normsti %.3f, tc %.3f", normsti, tc);
+		log->fine("HebbianUpdatingAgent: normsti %.3f, tc %.3f", normsti, tc);
 
     }
 
@@ -262,7 +262,7 @@ float HebbianLearningAgent::targetConjunction(std::vector<Handle> handles)
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
 
-    log->fine("HebbianLearningAgent: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
+    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
 
     return tc;
 

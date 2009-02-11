@@ -14,8 +14,6 @@ cycle (assuming the MindAgent has distributed any stimulus or has STI to pay its
 atoms with.
 - Implement HebbianMiningAgent
 - Convert diffusion agent to use sparse matrices
-- Change name of HebbianLearningAgent to HebbianUpdatingAgent. It doesn't learn,
-it just updates the TruthValues.
 
 == Entities involved in attention allocation ==
 
@@ -28,7 +26,7 @@ it just updates the TruthValues.
   - ImportanceDiffusionAgent - spreads STI along HebbianLinks.
   - ImportanceSpreadingAgent - alternative way to spread STI along HebbianLinks.
   - ForgettingAgent - "forgets" atoms with low LTI.
-  - HebbianLearningAgent - updates the weights of HebbianLinks based on what
+  - HebbianUpdatingAgent - updates the weights of HebbianLinks based on what
     is in the Attentional focus of the OpenCog instance at the time it's run. 
   - STIDecayingAgent - legacy forgetting mechanism (Used in Petaverse).
 
@@ -46,7 +44,7 @@ This sections presents how the flow of attention allocation works:
     the ImportanceUpdatingAgent. 
 2. STI is spread between atoms along HebbianLinks, either by the
    ImportanceDiffusionAgent or the ImportanceSpreadingAgent.
-3. The HebbianLearningAgent updates the HebbianLink truth values, based
+3. The HebbianUpdatingAgent updates the HebbianLink truth values, based
    on whether linked atoms are in the Attentional Focus or not.
 4. The ForgettingAgent removes either atoms that are below a threshold LTI,
    or above it.
@@ -61,7 +59,7 @@ attentional focus as well, or at least to prevent it from being forgotten.
 
 HebbianLinks are discovered by the to-be-implemented HebbianMiningAgent.
 
-HebbianLinks have their weights updated by the HebbianLearningAgent.
+HebbianLinks have their weights updated by the HebbianUpdatingAgent.
 
 There are three types of HebbianLinks, Symmetric, Asymmetric, and Inverse:
 

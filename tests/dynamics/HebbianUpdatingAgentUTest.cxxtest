@@ -1,5 +1,5 @@
 /*
- * tests/dynamics/HebbianLearningAgentUTest.cxxtest
+ * tests/dynamics/HebbianUpdatingAgentUTest.cxxtest
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -28,7 +28,7 @@
 #include <vector>
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/dynamics/attention/HebbianLearningAgent.h>
+#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Agent.h>
 
@@ -119,30 +119,30 @@ void removeAll(AtomSpace* atomSpace)
     }
 }
 
-class HebbianLearningAgentUTest :  public CxxTest::TestSuite {
+class HebbianUpdatingAgentUTest :  public CxxTest::TestSuite {
 
 private:
 
-    Factory<HebbianLearningAgent, Agent> factory;
-    HebbianLearningAgent* agent;
+    Factory<HebbianUpdatingAgent, Agent> factory;
+    HebbianUpdatingAgent* agent;
     CogServer& cogserver;
     std::vector<Handle> atoms;
 
 public:
 
-    static HebbianLearningAgentUTest* createSuite() { return new HebbianLearningAgentUTest(); }
-    static void destroySuite(HebbianLearningAgentUTest* suite) { delete suite; }
+    static HebbianUpdatingAgentUTest* createSuite() { return new HebbianUpdatingAgentUTest(); }
+    static void destroySuite(HebbianUpdatingAgentUTest* suite) { delete suite; }
 
-    HebbianLearningAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
-        cogserver.registerAgent(HebbianLearningAgent::info().id, &factory);
-        agent = static_cast<HebbianLearningAgent*>(cogserver.createAgent(HebbianLearningAgent::info().id, true));
+    HebbianUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+        cogserver.registerAgent(HebbianUpdatingAgent::info().id, &factory);
+        agent = static_cast<HebbianUpdatingAgent*>(cogserver.createAgent(HebbianUpdatingAgent::info().id, true));
         logger().setLevel(Logger::FINE);
         logger().setPrintToStdoutFlag(true);
         logger().enable();
     }
 
-    ~HebbianLearningAgentUTest() {
-        cogserver.unregisterAgent(HebbianLearningAgent::info().id);
+    ~HebbianUpdatingAgentUTest() {
+        cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
     }
 
     void setUp() {

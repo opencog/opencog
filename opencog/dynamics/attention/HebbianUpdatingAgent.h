@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/HebbianLearningAgent.h
+ * opencog/dynamics/attention/HebbianUpdatingAgent.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -39,7 +39,7 @@ class CogServer;
 /** Agent that carries out simple Hebbian learning. Only updates
  * existing HebbianLinks.
  */
-class HebbianLearningAgent : public Agent
+class HebbianUpdatingAgent : public Agent
 {
 
 private:
@@ -89,12 +89,12 @@ public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::HebbianLearningAgent");
+        static const ClassInfo _ci("opencog::HebbianUpdatingAgent");
         return _ci;
     }
 
-    HebbianLearningAgent();
-    virtual ~HebbianLearningAgent();
+    HebbianUpdatingAgent();
+    virtual ~HebbianUpdatingAgent();
     virtual void run(CogServer *server);
 
     /** Return the agent's logger object
@@ -110,7 +110,7 @@ public:
     AttentionValue::lti_t conversionThreshold;
 
 	//! Update the TruthValues of the HebbianLinks in the AtomSpace.
-    void hebbianLearningUpdate();
+    void hebbianUpdatingUpdate();
 
 }; // class
 

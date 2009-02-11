@@ -4,7 +4,7 @@ ADD_DEFINITIONS(-DNDEBUG)
 ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent
-	HebbianLearningAgent
+	HebbianUpdatingAgent
 	ImportanceSpreadingAgent
 	ImportanceDiffusionAgent
 	ImportanceUpdatingAgent
@@ -27,7 +27,7 @@ INSTALL (TARGETS attention
 INSTALL (FILES
 	AttentionModule.h
 	ForgettingAgent.h
-	HebbianLearningAgent.h
+	HebbianUpdatingAgent.h
 	ImportanceSpreadingAgent.h
 	ImportanceDiffusionAgent.h
 	ImportanceUpdatingAgent.h

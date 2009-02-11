@@ -22,7 +22,7 @@ LINK_LIBRARIES (
 )
 
 ADD_CXXTEST(ForgettingAgentUTest)
-ADD_CXXTEST(HebbianLearningAgentUTest)
+ADD_CXXTEST(HebbianUpdatingAgentUTest)
 ADD_CXXTEST(ImportanceUpdatingAgentUTest)
 IF (GSL_FOUND)
 	ADD_CXXTEST(ImportanceDiffusionAgentUTest)

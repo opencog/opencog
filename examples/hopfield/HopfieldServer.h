@@ -30,7 +30,7 @@
 #include <math.h>
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
-#include <opencog/dynamics/attention/HebbianLearningAgent.h>
+#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
@@ -50,7 +50,7 @@ namespace opencog
 
 class HopfieldOptions;
 class ForgettingAgent;
-class HebbianLearningAgent;
+class HebbianUpdatingAgent;
 class ImportanceDiffusionAgent;
 class ImportanceSpreadingAgent;
 class ImportanceUpdatingAgent;
@@ -82,7 +82,7 @@ public:
     stim_t patternStimulus;
 
     ForgettingAgent *forgetAgent;
-    HebbianLearningAgent *hebLearnAgent;
+    HebbianUpdatingAgent *hebUpdateAgent;
     StorkeyAgent *storkeyAgent;
     ImportanceDiffusionAgent *diffuseAgent;
     ImportanceSpreadingAgent *spreadAgent;
