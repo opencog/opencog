@@ -229,7 +229,8 @@ class AtomStorage::Response
 		bool note_id_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ...
-			Handle h(strtoul(colvalue, NULL, 10));
+			unsigned long id = strtoul(colvalue, NULL, 10);
+			Handle h(id);
 			id_set->insert(h);
 			return false;
 		}
@@ -1039,8 +1040,9 @@ void AtomStorage::store(const AtomTable &table)
 #endif
 
 	get_ids();
-	setMaxUUID(getMaxUUID());
-	fprintf(stderr, "Max UUID is %lu\n", TLB::getMaxUUID());
+	unsigned long max_uuid = TLB::getMaxUUID();
+	setMaxUUID(max_uuid);
+	fprintf(stderr, "Max UUID is %lu\n", max_uuid);
 
 	setup_typemap();
 
@@ -1070,7 +1072,15 @@ void AtomStorage::store(const AtomTable &table)
 
 	setMaxHeight();
 	fprintf(stderr, "\tFinished storing %lu atoms total.\n", store_count);
+
+	// Now that we're done storing, reserve a more conservative
+	// UUID value, based on what's actually in the database.
+	max_uuid = getMaxObserved();
+	setMaxUUID(max_uuid);
+	fprintf(stderr, "Set Max observed UUID to %lu\n", max_uuid);
 }
+
+/* ================================================================ */
 
 void AtomStorage::rename_tables(void)
 {
@@ -1187,6 +1197,22 @@ int AtomStorage::getMaxHeight(void)
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
 	return rp.intval;
+}
+
+unsigned long AtomStorage::getMaxObserved(void)
+{
+	Response rp;
+	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	rp.rs->release();
+	return rp.intval;
+}
+
+void AtomStorage::reserve(void)
+{
+	unsigned long max_observed_id = getMaxObserved();
+	fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
+	TLB::reserve_range(0, max_observed_id);
 }
 
 #endif /* HAVE_SQL_STORAGE */

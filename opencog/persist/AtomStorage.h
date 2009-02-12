@@ -66,6 +66,7 @@ class AtomStorage
 
 		std::set<Handle> local_id_cache;
 		void get_ids(void);
+		unsigned long getMaxObserved(void);
 		bool idExists(const char *);
 
 		unsigned long getMaxUUID(void);
@@ -116,6 +117,7 @@ class AtomStorage
 
 		void load(AtomTable &);
 		void store(const AtomTable &);
+		void reserve(void);
 };
 
 } // namespace opencog
