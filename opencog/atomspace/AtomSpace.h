@@ -33,13 +33,14 @@
 #include <vector>
 #include <tr1/unordered_map>
 
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/BackingStore.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/HandleSet.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/recent_val.h>
@@ -55,8 +56,12 @@ typedef std::vector<HandleSet*> HandleSetSeq;
 
 class AtomSpace
 {
-
     friend class SavingLoading;
+
+    /**
+     * Used to fetch atoms from disk.
+     */
+    BackingStore *backing_store;
 
 public:
     // USED TO SEEK MEMORY LEAK
@@ -66,6 +71,12 @@ public:
 
     ~AtomSpace();
     AtomSpace();
+
+    /**
+     * Register a provider of backing storage.
+     */
+    void registerBackingStore(BackingStore *);
+    void unregisterBackingStore(BackingStore *);
 
     /**
      * @return a const reference to the AtomTable object of this AtomSpace

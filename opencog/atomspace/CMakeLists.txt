@@ -64,6 +64,7 @@ INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
 	AttentionValue.h
+	BackingStore.h
 	classes.h
 	ClassServer.h
 	CompositeTruthValue.h
