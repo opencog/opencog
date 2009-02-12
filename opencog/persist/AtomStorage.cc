@@ -1202,6 +1202,7 @@ int AtomStorage::getMaxHeight(void)
 unsigned long AtomStorage::getMaxObserved(void)
 {
 	Response rp;
+	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();

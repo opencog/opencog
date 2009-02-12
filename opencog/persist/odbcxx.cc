@@ -57,7 +57,7 @@
 	                                                            \
 	SQLGetDiagRec(HTYPE, HAN, 1, (SQLCHAR *) sql_stat,          \
 	              &err, (SQLCHAR*) msg, sizeof(msg), &msglen);  \
-	PERR("(%ld) %s\n", (long int) err, msg);                               \
+	PERR("(%ld) %s\n", (long int) err, msg);                    \
 }
 
 /* =========================================================== */
@@ -202,11 +202,21 @@ ODBCConnection::exec(const char * buff)
 
 	rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
 
+	/* If query returned no data, its not necessarily an error:
+	 * its simply "no data", that's all.
+	 */
+	if (SQL_NO_DATA == rc)
+	{
+		rs->release();
+		return NULL;
+	}
+
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 	{
-		PERR ("Can't perform query rc=%d", rc);
+		PERR ("Can't perform query rc=%d ", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
 		rs->release();
+		PERR ("\tQuery was: %s\n", buff);
 		return NULL;
 	}
 
@@ -332,6 +342,9 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 void
 ODBCRecordSet::release(void)
 {
+	// 'this' is typically null when an error occurred, or if no data
+	// was returned. We don't want a call to 'release()' to crash for
+	// these cases ... we want to just keep going like normal.
 	if (!this) return;
 
 	// SQLFreeStmt(sql_hstmt, SQL_UNBIND);
