@@ -78,7 +78,6 @@ class SavingLoading;
  */
 class AtomTable
 {
-
     friend class ImportanceUpdatingAgent;
     friend class SavingLoading;
     friend class AtomSpace;
@@ -88,7 +87,14 @@ private:
 
     int size;
 
+    /**
+     * Lookup table ... XXX is this really needed? The various indexes
+     * below should be enough, maybe? This should probably be eliminated
+     * if possible.
+     */
     AtomHashSet atomSet;
+    unsigned int strHash(const char*) const;
+    inline unsigned int getNameHash(Atom* atom) const;
 
     /**
      * Indicates whether DynamicStatisticsAgent should be used
@@ -96,17 +102,19 @@ private:
      */
     bool useDSA;
 
+    /**
+     * Indexes for quick retreival of certain kinds of atoms.
+     */
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
 
-    unsigned int strHash(const char*) const;
-    inline unsigned int getNameHash(Atom* atom) const;
-
+    /** iterators, used in an (incomplete) attempt at thread-safety. */
     std::vector<HandleIterator*> iterators;
-
+    void lockIterators();
+    void unlockIterators();
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_t iteratorsLock;
 #endif
@@ -114,9 +122,6 @@ private:
     boost::signal<void (Handle)> _addAtomSignal;
     boost::signal<void (Handle)> _removeAtomSignal;
     boost::signal<void (Handle)> _mergeAtomSignal;
-
-    void lockIterators();
-    void unlockIterators();
 
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
@@ -147,10 +152,10 @@ private:
      */
     void removeExtractedHandles(HandleEntry* extractedHandles);
 
-public:
-
     // JUST FOR TESTS:
     bool isCleared() const;
+
+public:
 
     /**
      * Constructor and destructor for this class.
@@ -311,6 +316,7 @@ public:
     Handle getHandle(const Node* n) const {
         return getHandle(n->getName().c_str(), n->getType());
     }
+
     Handle getHandle(Type, const std::vector<Handle>&) const;
     Handle getHandle(const Link* l) const {
         return getHandle(l->getType(), l->getOutgoingSet());
