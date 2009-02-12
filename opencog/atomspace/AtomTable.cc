@@ -184,7 +184,7 @@ Handle AtomTable::getHandle(const Link *link) const
     const std::vector<Handle>& handles = link->getOutgoingSet();
     for (int i = 0; i < arity; i++)
     {
-        if (false == TLB::isValidHandle(handles[i])) return Handle::UNDEFINED;
+        if (TLB::isInvalidHandle(handles[i])) return Handle::UNDEFINED;
     }
 
     if (0 == arity) return Handle::UNDEFINED;
