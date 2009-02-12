@@ -172,9 +172,9 @@ public:
      *        successfully removed. False, otherwise (i.e., no
      *        mathing pair or any of them were not removed)
      */
-    bool removeTimeInfo(Handle atom, 
-                        unsigned long timestamp, 
-                        TemporalTable::TemporalRelationship = TemporalTable::EXACT, 
+    bool removeTimeInfo(Handle atom,
+                        unsigned long timestamp,
+                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
 
@@ -183,22 +183,22 @@ public:
      * from the AtomTable and the entry (atom, t) from the TimeServer
      * of the given AtomSpace.
      *
-     * NOTE1: All handles in the incoming set of the corresponding 
+     * NOTE1: All handles in the incoming set of the corresponding
      *        AtTimeLink Atom will also be removed recursively
      *        (unless the recursive argument is explicitely set to false).
-     * NOTE2: The TimeNode that corresponds to the given removed 
+     * NOTE2: The TimeNode that corresponds to the given removed
      *        time info is also removed if its incoming set becomes
      *        empty after the removal of an AtTimeLink link (unless the
      *        removeDisconnectedTimeNodes argument is explicitly set to
      *        false).
      *
-     * @param atom the Handle of the atom to be associated to the 
+     * @param atom the Handle of the atom to be associated to the
      *        timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If so, it throws a RuntimeException.
      * @param t The Temporal object to be associated to the atom. This
      *        argument cannot be an UNDEFINED_TEMPORAL. If so, it throws
      *        a RuntimeException.
-     * @param removeDisconnectedTimeNode Flag to indicate if the 
+     * @param removeDisconnectedTimeNode Flag to indicate if the
      *        TimeNode that corresponds to the given timestamp should
      *        be removed, if its incoming set becomes empty after the
      *        removal of the AtTimeLink link.
@@ -206,7 +206,7 @@ public:
      *        removal operation, if the given Temporal object argument
      *        is not UNDEFINED_TEMPORAL. This method only removes the
      *        time info related to the HandleTemporalPair objects whose
-     *        Temporal matches with this argument (search criteria) 
+     *        Temporal matches with this argument (search criteria)
      *        applied to the given Temporal object argument. The default
      *        temporal relationship is "exact match". See the definition
      *        of TemporalRelationship enumeration to see other possible
@@ -217,12 +217,12 @@ public:
      * @param recursive Flag to indicate if all atoms in the incoming set
      *        of the AtTimeLink link must be removed recursively.
      *
-     * @return True if the matching pairs (Handle, Temporal) were 
+     * @return True if the matching pairs (Handle, Temporal) were
      *         successfully removed. False, otherwise (i.e., no mathing
      *         pair or any of them were not removed)
      */
-    bool removeTimeInfo(Handle atom, 
-                        const Temporal& t = UNDEFINED_TEMPORAL, 
+    bool removeTimeInfo(Handle atom,
+                        const Temporal& t = UNDEFINED_TEMPORAL,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
@@ -253,7 +253,7 @@ public:
      */
     template<typename OutputIterator> OutputIterator
     getTimeInfo(OutputIterator outIt,
-                Handle h, 
+                Handle h,
                 const Temporal& t = UNDEFINED_TEMPORAL,
                 TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
     {
@@ -468,7 +468,7 @@ public:
     AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given AttentionValueHolder. STI above and below threshold 
+     * for a given AttentionValueHolder. STI above and below threshold
      * normalised separately and linearly.
      *
      * @param h The attention value holder to get STI for
@@ -495,7 +495,7 @@ public:
     /** Retrieve the Long-term Importance of a given AttentionValueHolder */
     AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
 
-    /** Retrieve the Very-Long-Term Importance of a given 
+    /** Retrieve the Very-Long-Term Importance of a given
      * AttentionValueHolder */
     AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
 
@@ -928,9 +928,9 @@ public:
     getHandleSetInAttentionalFocus(OutputIterator result,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-                 
-        //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);         
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
         return getHandleSetFiltered(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
 
     }
@@ -959,7 +959,7 @@ public:
                  bool subclass,
                  Predicate compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
- 
+
         HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
         vector<Handle> hs;
         // these two lines could be replaced using a function that filters
@@ -995,11 +995,11 @@ public:
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         // get the handle set as a vector and sort it.
-        vector<Handle> hs;   
-    
+        vector<Handle> hs;
+
         getHandleSet(back_inserter(hs), type, subclass, vh);
         sort(hs.begin(), hs.end(), compare);
-        
+
         // copy the vector and return the iterator.
         return copy(hs.begin(), hs.end(), result);
     }
@@ -1189,7 +1189,7 @@ public:
         for (; begin != end; begin++)
             if (compare(*begin))
                 result.push_back(*begin);
-                
+
         return result;
     }
 
@@ -1234,7 +1234,7 @@ public:
 
     struct STIAboveThreshold {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
-    
+
         bool operator()(const Handle& h) {
             return TLB::getAtom(h)->getAttentionValue().getSTI() > threshold;
         }
@@ -1243,7 +1243,7 @@ public:
 
     struct LTIAboveThreshold {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
-    
+
         bool operator()(const Handle& h) {
             return TLB::getAtom(h)->getAttentionValue().getLTI() > threshold;
         }
@@ -1319,7 +1319,7 @@ private:
 
 public:
     // pass on the signals from the Atom Table
-    boost::signal<void (Handle)>& addAtomSignal() 
+    boost::signal<void (Handle)>& addAtomSignal()
         { return atomTable.addAtomSignal(); }
     boost::signal<void (Handle)>& removeAtomSignal()
         { return atomTable.removeAtomSignal(); }
