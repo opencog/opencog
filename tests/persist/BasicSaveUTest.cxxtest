@@ -84,6 +84,12 @@ void BasicSaveUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
+
+	AtomStorage *store = new AtomStorage(dbname, username, passwd);
+	TSM_ASSERT("Not connected to database", store->connected());
+
+	// Trash the contents of the database.
+	store->kill_data();
 }
 
 // ============================================================
@@ -184,20 +190,20 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 {
 	// Create an atom ... 
-	n1[idx] = new Node(SCHEMA_NODE, id + "fromNode");
-	SimpleTruthValue stv(0.11, 33);
+	n1[idx] = new Node(WORD_NODE, id + "fromNode");
+	SimpleTruthValue stv(0.11, 100+idx);
 	n1[idx]->setTruthValue(stv);
 	a1[idx] = n1[idx];
 	table->add(a1[idx]);
 
-	n2[idx] = new Node(SCHEMA_NODE, id + "toNode");
-	SimpleTruthValue stv2(0.22, 66);
+	n2[idx] = new Node(WORD_NODE, id + "toNode");
+	SimpleTruthValue stv2(0.22, 200+idx);
 	n2[idx]->setTruthValue(stv2);
 	a2[idx] = n2[idx];
 	table->add(a2[idx]);
 
-	n3[idx] = new Node(SCHEMA_NODE, id + "third wheel");
-	SimpleTruthValue stv3(0.33, 99);
+	n3[idx] = new Node(WORD_NODE, id + "third wheel");
+	SimpleTruthValue stv3(0.33, 300+idx);
 	n3[idx]->setTruthValue(stv3);
 	a3[idx] = n3[idx];
 	table->add(a3[idx]);
@@ -207,7 +213,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	hvec.push_back(TLB::getHandle(a2[idx]));
 	hvec.push_back(TLB::getHandle(a3[idx]));
 
-	l[idx] = new Link(SET_LINK, hvec);
+	l[idx] = new Link(PARSE_LINK, hvec);
 	al[idx] = l[idx];
 	table->add(l[idx]);
 }
@@ -227,11 +233,11 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 	atomCompare(a3[idx], b3);
 
 	std::vector<Handle> hvec;
-	hvec.push_back(TLB::getHandle(b1));
-	hvec.push_back(TLB::getHandle(b2));
-	hvec.push_back(TLB::getHandle(b3));
+	hvec.push_back(hb1);
+	hvec.push_back(hb2);
+	hvec.push_back(hb3);
 
-	Link *lb = new Link(SET_LINK, hvec);
+	Link *lb = new Link(PARSE_LINK, hvec);
 	Handle hlb = table->getHandle(lb);
 	Atom *bl = TLB::getAtom(hlb);
 	atomCompare(al[idx], bl);
@@ -265,14 +271,29 @@ void BasicSaveUTest::test_table(void)
 
 	AtomTable *table1 = new AtomTable();
 	int idx = 0;
-	add_to_table(idx++, table1, "aaa ");
-	add_to_table(idx++, table1, "bbb ");
-	add_to_table(idx++, table1, "ccc ");
-	add_to_table(idx++, table1, "ddd ");
-	add_to_table(idx++, table1, "eee ");
+	add_to_table(idx++, table1, "AA-aa-wow ");
+	add_to_table(idx++, table1, "BB-bb-wow ");
+	add_to_table(idx++, table1, "CC-cc-wow ");
+	add_to_table(idx++, table1, "DD-dd-wow ");
+	add_to_table(idx++, table1, "EE-ee-wow ");
 
 	store->store(*table1);
+	// table1->print();
 	delete store;
+
+	// Copy atoms; the original atoms will be blown away
+	// when table1 is deleted. (they're also removed from
+	// the TLB, so this indirectly tests the correctness
+	// of the stored uuid's as well.)
+	int mi = idx;
+	for (idx=0; idx < mi; idx++)
+	{
+		n1[idx] = new Node(*n1[idx]); a1[idx] = n1[idx];
+		n2[idx] = new Node(*n2[idx]); a2[idx] = n2[idx];
+		n3[idx] = new Node(*n3[idx]); a3[idx] = n3[idx];
+		l[idx]  = new Link(*l[idx]);  al[idx] = l[idx];
+	}
+	delete table1;
 
 	// Reopen connection, and load the atom table.
 	store = new AtomStorage(dbname, username, passwd);
@@ -281,6 +302,7 @@ void BasicSaveUTest::test_table(void)
 	AtomTable *table2 = new AtomTable();
 
 	store->load(*table2);
+	// table2->print();
 
 	idx = 0;
 	check_table(idx++, table2, "aaa ");
@@ -290,7 +312,6 @@ void BasicSaveUTest::test_table(void)
 	check_table(idx++, table2, "eee ");
 
 	delete store;
-	delete table1;
 	delete table2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

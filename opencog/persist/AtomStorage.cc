@@ -620,8 +620,12 @@ void AtomStorage::storeAtom(const Atom *atom)
  * The problem being solved here is that the list of atom types might
  * have changed between the last time that data was stored to the database,
  * and the current instance. Thus, all type saving/loading works by type
- * name rather than by integer type value. Of course, the sql db stores
- * an actual short, so this helps add to the confusion.
+ * name rather than by integer type value. Of course, the the sql db 
+ * stores an actual short for the atom type, and so we have *two* 
+ * type indexes: the number used in the sql DB for a given typename,
+ * and the number used by the current opencog for a given typename.
+ * These two type numbers map to one-another via the loading and
+ * storing type-maps.
  */
 void AtomStorage::store_typemap(void)
 {
