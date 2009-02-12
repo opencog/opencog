@@ -86,6 +86,11 @@ void BasicSaveUTest::setUp(void)
 	as = cogserver.getAtomSpace();
 
 	AtomStorage *store = new AtomStorage(dbname, username, passwd);
+    if (!store->connected()) {
+        logger().debug("single_atom_save_restore: cannot connect to db");
+        return;
+    }
+
 	TSM_ASSERT("Not connected to database", store->connected());
 
 	// Trash the contents of the database.
