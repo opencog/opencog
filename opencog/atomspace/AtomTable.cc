@@ -180,17 +180,48 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
 
 Handle AtomTable::getHandle(const Link *link) const
 {
+    int arity = link->getArity();
     const std::vector<Handle>& handles = link->getOutgoingSet();
-    for (int i = 0; i < link->getArity(); i++) {
+    for (int i = 0; i < arity; i++)
+    {
         if (false == TLB::isValidHandle(handles[i])) return Handle::UNDEFINED;
     }
 
-    AtomHashSet::const_iterator it = atomSet.find(link);
-    Handle h = Handle::UNDEFINED;
-    if (it != atomSet.end()) {
-        h = TLB::getHandle(*it);
+    if (0 == arity) return Handle::UNDEFINED;
+
+    // OK. We need to find some link in this atom table that has
+    // the same type, and the same outgoing set. We do this by 
+    // looping over every other link which has the same handle 
+    // in the last position, and checking each, one by one.
+    Type desired_type = link->getType();
+    Handle h = handles[arity-1];
+    Atom *a = TLB::getAtom(h);  // atom can never be null ... 
+    const HandleEntry *he = a->getIncomingSet();
+
+    while(he)
+    {
+        h = he->handle;
+        a = TLB::getAtom(h);
+        if (a->getType() == desired_type)
+        {
+            const Link *l = dynamic_cast<const Link *>(a);
+            if (l->getArity() == arity)
+            {
+                // OK, got thew right type and arity. Do the outgoing
+                // sets actually match?
+                const std::vector<Handle>& lo = l->getOutgoingSet();
+                int i;
+                for (i = 0; i < arity; i++)
+                {
+                   if (handles[i] != lo[i]) break;
+                }
+                if (i == arity) return h; // found it !!
+            }
+        }
+        he = he->next;
     }
-    return h;
+
+    return Handle::UNDEFINED;
 }
 
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
@@ -445,7 +476,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     size++;
 
     // Adds to the hash_set
-    // logger().debug("Inserting atom %p in hash_set (type=%d, hashCode=%d)\n", atom, atom->getType(), atom->hashCode());
+    // logger().debug("Inserting atom %p intoAtomTable (type=%d)\n", atom, atom->getType());
     atomSet.insert(atom);
     //logger().debug("[AtomTable::add] atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
 
