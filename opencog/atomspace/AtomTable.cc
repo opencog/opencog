@@ -186,7 +186,27 @@ Handle AtomTable::getHandle(Type desired_type, const std::vector<Handle>& handle
         if (TLB::isInvalidHandle(handles[i])) return Handle::UNDEFINED;
     }
 
-    if (0 == arity) return Handle::UNDEFINED;
+    // Ohh, yuck. For each type, there can be one single link which has
+    // no members. That's just plain goofy. Take the slow boat to China.
+    // Whoever is doing this is getting performance-penalized badly.
+    if (0 == arity)
+    {
+        HandleEntry *he = typeIndex.getHandleSet(desired_type, false);
+        Handle gotit = Handle::UNDEFINED;
+        while (he)
+        {
+            Atom *a = TLB::getAtom(he->handle);
+            Link *l = static_cast<Link *>(a);
+            if (0 == l->getArity())
+            {
+                gotit = he->handle;
+            }
+            he = he->next;
+        }
+        if (he) delete he;
+
+        return gotit;
+    }
 
     // OK. We need to find some link in this atom table that has
     // the same type, and the same outgoing set. We do this by 
