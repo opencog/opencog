@@ -372,7 +372,9 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const string& str) const;
+    Handle getHandle(Type t, const string& str) const {
+        return atomTable.getHandle(str.c_str(), t);
+    }
 
     /**
      * Retrieve from the Atom Table the Handle of a given link
@@ -380,7 +382,9 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const;
+    Handle getHandle(Type t, const HandleSeq& outgoing) const {
+        return atomTable.getHandle(t, outgoing);
+    }
 
     /** Retrieve the name of a given Handle */
     const string& getName(Handle) const;

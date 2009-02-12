@@ -516,26 +516,6 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-Handle AtomSpace::getHandle(Type t, const string& str) const
-{
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
-    Handle h = atomTable.getHandle(str.c_str(), t);
-    return h;
-}
-
-Handle AtomSpace::getHandle(Type t, const HandleSeq& outgoing) const
-{
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-
-    HandleEntry* he = atomTable.getHandleSet(outgoing, NULL, NULL, outgoing.size(), t, false);
-    Handle ret = he ? he->handle : Handle::UNDEFINED;
-    delete he;
-    return ret;
-}
-
 const string& AtomSpace::getName(Handle h) const
 {
     // fprintf(stdout,"Atom space address: %p\n", this);
