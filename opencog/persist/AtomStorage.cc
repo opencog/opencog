@@ -56,6 +56,7 @@ class AtomStorage::Response
 		double mean;
 		double count;
 		const char *outlist;
+		int height;
 
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
@@ -800,6 +801,7 @@ Atom * AtomStorage::getAtom(Handle h)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
+	rp.height = -1;
 	Atom *atom = makeAtom(rp, h);
 
 	rp.rs->release();
@@ -825,11 +827,12 @@ Node * AtomStorage::getNode(Type t, const char * str)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
+	rp.height = 0;
 	Atom *atom = makeAtom(rp, rp.handle);
 
 	rp.rs->release();
 
-	return dynamic_cast<Node *>(atom);
+	return static_cast<Node *>(atom);
 }
 
 Atom * AtomStorage::makeAtom(Response &rp, Handle h)
@@ -849,7 +852,12 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 
 	if (NULL == atom)
 	{
-		if (ClassServer::isAssignableFrom(NODE, realtype))
+		// All height zero atoms are nodes,
+		// All positive height atoms are links.
+		// A negative height is "unknown" and must be checked.
+		if ((0 == rp.height) || 
+		    ((-1 == rp.height) &&
+		      ClassServer::isAssignableFrom(NODE, realtype)))
 		{
 			atom = new Node(realtype, rp.name);
 		}
@@ -924,6 +932,7 @@ void AtomStorage::load(AtomTable &table)
 #if GET_ONE_BIG_BLOB
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
+		rp.height = hei;
 		rp.rs = db_conn->exec(buff);
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
@@ -942,6 +951,7 @@ void AtomStorage::load(AtomTable &table)
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
 			        "height = %d AND uuid > %lu AND uuid <= %lu;",
 			         hei, rec, rec+STEP);
+			rp.height = hei;
 			rp.rs = db_conn->exec(buff);
 			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 			rp.rs->release();

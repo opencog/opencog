@@ -28,7 +28,7 @@ class AtomStorage
 		class Response;
 		class Outgoing;
 
-		Atom * makeAtom (Response &, Handle h);
+		Atom * makeAtom (Response &, Handle);
 
 		int height(const Atom *);
 		int max_height;
