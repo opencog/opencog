@@ -793,6 +793,24 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 #endif /* USE_INLINE_EDGES */
 
 /* ================================================================ */
+
+/* One-size-fits-all atom fetcher */
+Atom * AtomStorage::getAtom(const char * query, int height)
+{
+	Response rp;
+	rp.handle = Handle::UNDEFINED;
+	rp.rs = db_conn->exec(query);
+	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
+
+	// Did we actually find anything?
+	if (TLB::isInvalidHandle(rp.handle)) return NULL;
+
+	rp.height = height;
+	Atom *atom = makeAtom(rp, rp.handle);
+	rp.rs->release();
+	return atom;
+}
+
 /**
  * Create a new atom, retreived from storage
  *
@@ -806,16 +824,7 @@ Atom * AtomStorage::getAtom(Handle h)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", h.value());
 
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
-
-	rp.height = -1;
-	Atom *atom = makeAtom(rp, h);
-
-	rp.rs->release();
-
-	return atom;
+	return getAtom(buff, -1);
 }
 
 /**
@@ -835,19 +844,7 @@ Node * AtomStorage::getNode(Type t, const char * str)
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
 	    "type = %uh AND name = \'%s\';", storing_typemap[t], str);
 
-	Response rp;
-	rp.handle = Handle::UNDEFINED;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
-
-	// Did we actually find anything?
-	if (TLB::isInvalidHandle(rp.handle)) return NULL;
-
-	rp.height = 0;
-	Atom *atom = makeAtom(rp, rp.handle);
-
-	rp.rs->release();
-
+	Atom *atom = getAtom(buff, 0);
 	return static_cast<Node *>(atom);
 }
 
@@ -871,23 +868,11 @@ Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	    "type = %uh AND outgoing = \'%s\';", 
 	    storing_typemap[t], ostr.c_str());
 
-	Response rp;
-	rp.handle = Handle::UNDEFINED;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
-
-	// Did we actually find anything?
-	if (TLB::isInvalidHandle(rp.handle)) return NULL;
-
-	rp.height = 0;
-	Atom *atom = makeAtom(rp, rp.handle);
-
-	rp.rs->release();
-
+	Atom *atom = getAtom(buff, 1);
 	return static_cast<Link *>(atom);
 }
 
-
+/* Instantiate a new atom, give the response buffer contents */
 Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 {
 	// Now that we know everything about an atom, actually construct one.

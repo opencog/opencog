@@ -31,6 +31,7 @@ class AtomStorage
 		class Outgoing;
 
 		Atom * makeAtom (Response &, Handle);
+		Atom * getAtom (const char *, int);
 
 		int height(const Atom *);
 		int max_height;
