@@ -134,6 +134,25 @@ public:
     static AttentionValue* factory(sti_t sti, lti_t lti, vlti_t vlti);
 };
 
+class AttentionValueHolder
+{
+protected:
+    AttentionValue attentionValue;
+
+    /** Sets the AttentionValue object */
+    void setAttentionValue(const AttentionValue &a) {
+        attentionValue = a;
+    }
+
+    friend class AtomSpace;
+
+public:
+    /** Returns the AttentionValue object */
+    const AttentionValue& getAttentionValue() const {
+        return attentionValue;
+    }
+};
+
 } // namespace opencog 
 
 #endif // _OPENCOG_ATTENTION_VALUE_H

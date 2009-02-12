@@ -52,7 +52,7 @@ class HandleEntry;
  * links are specialization of atoms, that is, they inherit all
  * properties from atoms.
  */
-class Atom
+class Atom : public AttentionValueHolder
 {
     friend class SavingLoading;
     friend class AtomTable;
@@ -99,9 +99,6 @@ protected:
     std::vector<Handle> outgoing;
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
-    // Put 6-byte long attentionValue next to flags,
-    // hopefull compiler will put all this in a single 8-byte slot.
-    AttentionValue attentionValue;
     char flags;
 
     TruthValue *truthValue;

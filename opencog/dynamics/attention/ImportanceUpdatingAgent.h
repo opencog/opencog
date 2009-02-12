@@ -53,7 +53,7 @@ class CogServer;
  *
  * See http://www.opencog.org/wiki/ImportanceUpdatingAgent
  *
- * As atoms are used in mind processes they are endowed with stimulus.
+ * As atoms are used in mind agents they are endowed with stimulus.
  * Agents should explicit grant atoms stimulus when they make use of them,
  * although it's left up to the Agent to decide how best to do this.
  *
@@ -63,8 +63,11 @@ class CogServer;
  * to an atom is in the form of both STI and LTI. The amount of STI and LTI
  * conferred is based both on the total stimulus of the atom, and two internal
  * multipliers that indicate the rate that stimulus is converted into STI and
- * LTI. Atoms also have to pay LTI rent to exist in the the AtomSpace and STI
- * rent to exist in the Attentional focus.
+ * LTI. If an Agent has insufficient funds to pay at these rates, the Agent's 
+ * available funds is divided proportionately among that Atoms it has 
+ * stimulated.  As such, the global multipliers for stimulus act as a "cap", so
+ * Agents need not go broke providing stimulus. Atoms also have to pay LTI rent 
+ * to exist in the the AtomSpace and STI rent to exist in the Attentional focus.
  *
  * STI rent is charged from atoms that are above the Attentional focus boundary
  * and LTI rent for all atoms in the system (conceptually at least, once atoms
@@ -76,7 +79,7 @@ class CogServer;
  * be charged STI rent, but would still be charged LTI rent regardless of the
  * STI or LTI of A1. 
  *
- * Now, since both STI and LTI currency are conserved, the funds that the
+ * Since both STI and LTI currency are conserved, the funds that the
  * ImportanceUpdatingAgent uses to pay wages has to come from somewhere. In an
  * ideal situation, this would be balanced by the rent charged to atoms.
  * However, the number of atoms in the AtomSpace and in the attentional focus
@@ -119,6 +122,15 @@ private:
     
     AttentionValue::sti_t STIAtomWage; //!< Atom STI wage per stimulus
     AttentionValue::lti_t LTIAtomWage; //!< Atom LTI wage per stimulus
+    std::vector<AttentionValue::sti_t> STIAtomWageForAgent;
+    std::vector<AttentionValue::lti_t> LTIAtomWageForAgent;
+
+    /** Calculate the wages to pay to atoms for each agent
+     *
+     * @param a The atom space.
+     * @param agents The list of running agents.
+     */
+    void calculateAtomWages(AtomSpace *a, const AgentSeq &agents);
 
     AttentionValue::sti_t STICap; //!< Cap on STI
     AttentionValue::lti_t LTICap; //!< Cap on LTI
@@ -126,14 +138,15 @@ private:
     bool updateLinks; //!< Update links or not
 
     /**
-     * Randomly stimulate atoms in the AtomSpace
+     * Randomly stimulate atoms in the AtomSpace for a given Agent.
      * Simulates a "cognitive process" (e.g. a Novamente lobe)
      * that stimulates Atoms selectively. May also be useful to
      * introduce a level of noise into the system.
      *
-     * @param AtomSpace to act upon
+     * @param AtomSpace
+     * @param Agent to act upon
      */
-    void randomStimulation(AtomSpace *a);
+    void randomStimulation(AtomSpace *a, Agent *agent);
 
     bool noiseOn;     //!< Randomly stimulate atoms?
     float noiseOdds;  //!< Chance of randomly introduced stimulus
@@ -152,20 +165,38 @@ private:
     //! Indicates whether LTI has gone out of acceptable range during this run.
     bool lobeLTIOutOfBounds;
 
+    /** Collect STI rent for Agents based on processor time they utilize,
+     * and pay wages based on how well they acheive system goals.
+     *
+     * @param a The AtomSpace the Agent is working on.
+     * @param agent The Agent to update.
+     */
+    void updateAgentSTI(AtomSpace* a, Agent *agent);
+
+    /** Collect LTI rent for Agents based on processor time they utilize,
+     * and pay wages based on how well they acheive system goals.
+     *
+     * @param a The AtomSpace the Agent is working on.
+     * @param agent The Agent to update.
+     */
+    void updateAgentLTI(AtomSpace* a, Agent *agent);
+
     /** Collect STI rent for atoms within attentional focus 
      * and pay wages based on amount of stimulus.
      *
      * @param a The AtomSpace the Agent is working on.
+     * @param agents The list of running agents.
      * @param h The Handle of the atom to update.
      */
-    void updateAtomSTI(AtomSpace* a, Handle h);
+    void updateAtomSTI(AtomSpace* a, const AgentSeq &agents, Handle h);
 
     /** Collect LTI rent for all atoms and pay wages based on stimulation
      *
      * @param a The AtomSpace the Agent is working on.
+     * @param agents The list of running agents.
      * @param h The Handle of the atom to update.
      */
-    void updateAtomLTI(AtomSpace* a, Handle h);
+    void updateAtomLTI(AtomSpace* a, const AgentSeq &agents, Handle h);
 
     /** Cap STI values to the maximum to prevent atoms
      * becoming all important.
@@ -270,9 +301,9 @@ private:
 
     /** Update the total stimulus variables.
      *
-     * @param a The AtomSpace to work on.
+     * @param agents The list of running Agents
      */
-    void updateTotalStimulus(AtomSpace* a);
+    void updateTotalStimulus(const AgentSeq &agents);
 
     /** Gets either all Atoms or all Nodes, depending on \a updateLinks.
      *

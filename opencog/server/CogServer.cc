@@ -229,14 +229,6 @@ std::list<const char*> CogServer::agentIds() const
     return Registry<Agent>::all();
 }
 
-std::vector<Agent*> CogServer::runningAgents(void)
-{
-    pthread_mutex_lock(&agentsLock);
-    std::vector<Agent*> ret(agents);
-    pthread_mutex_unlock(&agentsLock);
-    return ret;
-}
-
 Agent* CogServer::createAgent(const std::string& id, const bool start)
 {
     Agent* a = Registry<Agent>::create(id);

@@ -24,10 +24,43 @@
 
 #include "Agent.h"
 
+#include <algorithm>
+#include <tr1/memory>
+#include <tr1/functional>
+
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 
 using namespace opencog;
+using namespace std::tr1::placeholders;
+
+Agent::Agent(const unsigned int f) : _frequency(f)
+{
+    // an empty set of parameters and defaults (so that various
+    // methods will still work even if none are set in this or a derived
+    // class)
+    static const std::string defaultConfig[] = {
+        "", ""
+    };
+    setParameters(defaultConfig);
+
+    stimulatedAtoms = new AtomStimHashMap();
+    totalStimulus = 0;
+
+    conn = server().getAtomSpace()->removeAtomSignal().connect(
+            std::tr1::bind(&Agent::atomRemoved, this, _1));
+}
+
+Agent::~Agent()
+{
+    // give back funds
+    server().getAtomSpace()->setSTI(this, 0);
+    server().getAtomSpace()->setLTI(this, 0);
+
+    resetUtilizedHandleSets();
+    delete stimulatedAtoms;
+    conn.disconnect();
+}
 
 void Agent::setParameters(const std::string* params) {
     PARAMETERS = params;
@@ -38,12 +71,6 @@ void Agent::setParameters(const std::string* params) {
         }
     }
 }
-
-// Some disused method from before
-/*void Agent::init()
-{
-    server().plugInAgent(this, 1);    
-}*/
 
 std::string Agent::to_string() const
 {
@@ -58,9 +85,85 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
+void Agent::atomRemoved(Handle h)
+{
+    for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
+        if (_utilizedHandleSets[i]->contains(h))
+            _utilizedHandleSets[i]->remove(h);
+    removeAtomStimulus(h);
+}
+
 void Agent::resetUtilizedHandleSets()
 {
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         delete _utilizedHandleSets[i];
     _utilizedHandleSets.clear();
 }
+
+
+stim_t Agent::stimulateAtom(Handle h, stim_t amount)
+{
+    // Add atom to the map of atoms with stimulus
+    // and add stimulus to it
+    (*stimulatedAtoms)[h] += amount;
+
+    // update record of total stimulus given out
+    totalStimulus += amount;
+    //logger().fine("%d added to totalStimulus, now %d", amount, totalStimulus);
+    return totalStimulus;
+}
+
+void Agent::removeAtomStimulus(Handle h)
+{
+    stim_t amount;
+    // if handle not in map then return
+    if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
+        return;
+
+    amount = (*stimulatedAtoms)[h];
+    stimulatedAtoms->erase(h);
+
+    // update record of total stimulus given out
+    totalStimulus -= amount;
+}
+
+stim_t Agent::stimulateAtom(HandleEntry* h, stim_t amount)
+{
+    HandleEntry* p;
+    stim_t split;
+
+    // how much to give each atom
+    split = amount / h->getSize();
+
+    p = h;
+    while (p) {
+        stimulateAtom(p->handle, split);
+        p = p->next;
+    }
+
+    // return unused stimulus
+    return amount - (split * h->getSize());
+}
+
+stim_t Agent::resetStimulus()
+{
+    stimulatedAtoms->clear();
+    // reset stimulus counter
+    totalStimulus = 0;
+    return totalStimulus;
+}
+
+stim_t Agent::getTotalStimulus() const
+{
+    return totalStimulus;
+}
+
+stim_t Agent::getAtomStimulus(Handle h) const
+{
+    if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
+        return 0;
+    } else {
+        return (*stimulatedAtoms)[h];
+    }
+}
+

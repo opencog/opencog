@@ -53,10 +53,6 @@ typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
 typedef std::vector<HandleSet*> HandleSetSeq;
 
-typedef short stim_t;
-
-typedef std::tr1::unordered_map<const Atom*, stim_t> AtomHashMap;
-
 class AtomSpace
 {
 
@@ -407,23 +403,85 @@ public:
     /** Change the primary TV's mean of a given Handle */
     void setMean(Handle, float mean) throw (InvalidParamException);
 
+    /** Retrieve the AttentionValue of an attention value holder */
+    const AttentionValue& getAV(AttentionValueHolder *avh) const;
+
+    /** Change the AttentionValue of an attention value holder */
+    void setAV(AttentionValueHolder *avh, const AttentionValue &av);
+
+    /** Change the Short-Term Importance of an attention value holder */
+    void setSTI(AttentionValueHolder *avh, AttentionValue::sti_t);
+
+    /** Change the Long-term Importance of an attention value holder */
+    void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
+
+    /** Change the Very-Long-Term Importance of an attention value holder */
+    void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
+
+    /** Retrieve the Short-Term Importance of an attention value holder */
+    AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
+
+    /** Retrieve the doubly normalised Short-Term Importance between -1..1
+     * for a given AttentionValueHolder. STI above and below threshold 
+     * normalised separately and linearly.
+     *
+     * @param h The attention value holder to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to -1..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between -1..1
+     */
+    float getNormalisedSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
+
+    /** Retrieve the linearly normalised Short-Term Importance between 0..1
+     * for a given AttentionValueHolder.
+     *
+     * @param h The attention value holder to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to 0..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between 0..1
+     */
+    float getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
+
+    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
+    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
+
+    /** Retrieve the Very-Long-Term Importance of a given 
+     * AttentionValueHolder */
+    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
+
     /** Retrieve the AttentionValue of a given Handle */
-    const AttentionValue& getAV(Handle) const;
+    const AttentionValue& getAV(Handle h) const {
+        return getAV(TLB::getAtom(h));
+    }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle, const AttentionValue&);
+    void setAV(Handle h, const AttentionValue &av) {
+        setAV(TLB::getAtom(h), av);
+    }
 
     /** Change the Short-Term Importance of a given Handle */
-    void setSTI(Handle, AttentionValue::sti_t);
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
+        setSTI(TLB::getAtom(h), stiValue);
+    }
 
     /** Change the Long-term Importance of a given Handle */
-    void setLTI(Handle, AttentionValue::lti_t);
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
+        setLTI(TLB::getAtom(h), ltiValue);
+    }
 
     /** Change the Very-Long-Term Importance of a given Handle */
-    void setVLTI(Handle, AttentionValue::vlti_t);
+    void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
+        setVLTI(TLB::getAtom(h), vltiValue);
+    }
 
     /** Retrieve the Short-Term Importance of a given Handle */
-    AttentionValue::sti_t getSTI(Handle) const;
+    AttentionValue::sti_t getSTI(Handle h) const {
+        return getSTI(TLB::getAtom(h));
+    }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately
@@ -436,7 +494,9 @@ public:
      * range can be return if average=true
      * @return normalised STI between -1..1
      */
-    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const;
+    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
+        return getNormalisedSTI(TLB::getAtom(h), average, clip);
+    }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given Handle.
@@ -448,13 +508,19 @@ public:
      * range can be return if average=true
      * @return normalised STI between 0..1
      */
-    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const;
+    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
+        return getNormalisedZeroToOneSTI(TLB::getAtom(h), average, clip);
+    }
 
     /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(Handle) const;
+    AttentionValue::lti_t getLTI(Handle h) const {
+        return getLTI(TLB::getAtom(h));
+    }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(Handle) const;
+    AttentionValue::vlti_t getVLTI(Handle h) const {
+        return getVLTI(TLB::getAtom(h));
+    }
 
     /** Retrieve a single Handle from the outgoing set of a given link */
     Handle getOutgoing(Handle, int idx) const;
@@ -966,49 +1032,6 @@ public:
      */
     long getLTIFunds() const;
 
-    /* Next three methods are for EconomicAttentionAllocation */
-
-    /**
-     * Stimulate a Handle's atom.
-     *
-     * @param atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    stim_t stimulateAtom(Handle h, stim_t amount);
-
-    /**
-     * Stimulate all atoms in HandleEntry list.
-     *
-     * @param linked list of atoms to spread stimulus across.
-     * @param amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    stim_t stimulateAtom(HandleEntry* h, stim_t amount);
-
-    /**
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    stim_t resetStimulus();
-
-    /**
-     * Get total stimulus.
-     *
-     * @return total stimulus since last reset.
-     */
-    stim_t getTotalStimulus() const;
-
-    /**
-     * Get stimulus for Atom.
-     *
-     * @param handle of atom to get stimulus for.
-     * @return total stimulus since last reset.
-     */
-    stim_t getAtomStimulus(Handle h) const;
-
     /**
      * Get attentional focus boundary, generally atoms below
      * this threshold won't be accessed unless search methods
@@ -1196,15 +1219,6 @@ private:
     TimeServer timeServer;
     AtomTable atomTable;
     string emptyName;
-
-    // Total stimulus given out to atoms
-    stim_t totalStimulus;
-    // Hash table of atoms given stimulus since reset
-    AtomHashMap* stimulatedAtoms;
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_t stimulatedAtomsLock;
-#endif
 
     /* Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are

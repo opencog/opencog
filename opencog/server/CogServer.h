@@ -46,6 +46,8 @@
 namespace opencog
 {
 
+typedef std::vector<Agent*> AgentSeq;
+
 /**
  * This class implements the official server used by the opencog framework. It
  * is responsible for managing 4 base structures: cycles, modules, agents and
@@ -107,7 +109,7 @@ protected:
     // containers used to store references to the modules, requests and agents
     ModuleMap modules;
     std::map<const std::string, Request*> requests;
-    std::vector<Agent*> agents;
+    AgentSeq agents;
 
     long cycleCount;
     bool running;
@@ -198,7 +200,7 @@ public:
     virtual std::list<const char*> agentIds(void) const;
 
     /** Returns a list of all the currently running agent instances. */
-    virtual std::vector<Agent*> runningAgents(void);
+    virtual const AgentSeq &runningAgents(void) { return agents; }
 
     /** Creates and returns a new instance of an agent of class 'id'. If
      *  'start' is true, then the agent will be automatically added to the list

@@ -34,6 +34,9 @@
 namespace opencog
 {
 
+typedef short stim_t;
+typedef std::tr1::unordered_map<Handle, stim_t> AtomStimHashMap;
+
 class CogServer;
 
 /**
@@ -88,7 +91,7 @@ class CogServer;
  * cogserver.createAgent(MyAgent::info().id, true);
  */
  
-class Agent
+class Agent : public AttentionValueHolder
 {
 
 protected:
@@ -110,26 +113,24 @@ protected:
      *  System Activity Table to assign credit to this agent. */
     HandleSetSeq _utilizedHandleSets;
 
-    /** Agents have attentional values, like STI and LTI, just like atoms. */
-    AttentionValue attentionValue;
+    /** Total stimulus given out to atoms */
+    stim_t totalStimulus;
+
+    /** Hash table of atoms given stimulus since reset */
+    AtomStimHashMap* stimulatedAtoms;
+
+    boost::signals::connection conn;
+
+    /** called by AtomTable via a boost:signal when an atom is removed. */
+    void atomRemoved(Handle h);
 
 public:
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
-    Agent(const unsigned int f = 1) : _frequency(f) {
-        // an empty set of parameters and defaults (so that various
-        // methods will still work even if none are set in this or a derived
-        // class)
-        static const std::string defaultConfig[] = {
-            "", ""
-        };
-        setParameters(defaultConfig);
-    }
-    
+    Agent(const unsigned int f = 1);    
+
     /** Agent's destructor */
-    virtual ~Agent() {
-        resetUtilizedHandleSets();
-    }
+    virtual ~Agent();
 
     /** Abstract run method. Should be overriden by a derived agent with the
      *  actual agent's behavior. */
@@ -145,17 +146,6 @@ public:
      * to a string. */    
     std::string to_string() const;
 
-    /** Returns the AttentionValue object of the Agent. 
-      * This is const for consistency with Atom. */
-    const AttentionValue& getAttentionValue() const {
-        return attentionValue;
-    }
-
-    /** Sets the AttentionValue object of the Agent. */
-    void setAttentionValue(const AttentionValue &a) {
-        attentionValue = a;
-    }
-
     /** Returns the sequence of handle sets for this cycle that the agent
      *  would like to claim credit for in the System Activity Table. */
     virtual const HandleSetSeq& getUtilizedHandleSets() const
@@ -165,6 +155,58 @@ public:
 
     /** Resets the utilized handle sets */
     void resetUtilizedHandleSets();
+
+    /**
+     * Stimulate a Handle's atom.
+     *
+     * @param atom handle
+     * @param amount of stimulus to give.
+     * @return total stimulus given since last reset.
+     */
+    stim_t stimulateAtom(Handle h, stim_t amount);
+
+    /**
+     * Stimulate all atoms in HandleEntry list.
+     *
+     * @param linked list of atoms to spread stimulus across.
+     * @param amount of stimulus to share.
+     * @return remainder stimulus after equal spread between atoms.
+     */
+    stim_t stimulateAtom(HandleEntry* h, stim_t amount);
+
+    /**
+     * Remove stimulus from a Handle's atom.
+     *
+     * @param atom handle
+     */
+    void removeAtomStimulus(Handle h);
+
+    /**
+     * Reset stimulus.
+     *
+     * @return new stimulus since reset, usually zero unless another
+     * thread adds more.
+     */
+    stim_t resetStimulus();
+
+    /**
+     * Get total stimulus.
+     *
+     * @return total stimulus since last reset.
+     */
+    stim_t getTotalStimulus() const;
+
+    /**
+     * Get stimulus for Atom.
+     *
+     * @param handle of atom to get stimulus for.
+     * @return total stimulus since last reset.
+     */
+    stim_t getAtomStimulus(Handle h) const;
+
+
+
+
 }; // class
 
 }  // namespace

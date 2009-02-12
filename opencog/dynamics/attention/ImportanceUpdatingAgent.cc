@@ -127,8 +127,31 @@ HandleEntry* ImportanceUpdatingAgent::getHandlesToUpdate(AtomSpace *a)
     return h;
 }
 
+void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &agents)
+{
+    STIAtomWageForAgent.clear();
+    LTIAtomWageForAgent.clear();
+    for (size_t n = 0; n < agents.size(); n++) {
+        updateAgentSTI(a, agents[n]);
+        updateAgentLTI(a, agents[n]);
+
+        if (agents[n]->getTotalStimulus() == 0)
+        {
+            STIAtomWageForAgent.push_back(0);
+            LTIAtomWageForAgent.push_back(0);
+            continue;
+        }
+
+        STIAtomWageForAgent.push_back(a->getSTI(agents[n]) / 
+                                      agents[n]->getTotalStimulus());
+        LTIAtomWageForAgent.push_back(a->getLTI(agents[n]) /
+                                      agents[n]->getTotalStimulus());
+    }
+}
+
 void ImportanceUpdatingAgent::run(CogServer *server)
 {
+    AgentSeq agents = server->runningAgents();
     AtomSpace* a = server->getAtomSpace();
     HandleEntry *h, *q;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
@@ -145,21 +168,25 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     /* Random stimulation if on */
     if (noiseOn) {
         log->debug("Random stimulation on, stimulating atoms");
-        randomStimulation(a);
+        for (size_t n = 0; n < agents.size(); n++)
+            randomStimulation(a, agents[n]);
     }
 
     /* Update stimulus totals */
-    updateTotalStimulus(a);
+    updateTotalStimulus(agents);
 
     /* Update atoms: Collect rent, pay wages */
     log->info("Collecting rent and paying wages");
 
     h = getHandlesToUpdate(a);
 
+    /* Calculate STI/LTI atom wages for each agent */
+    calculateAtomWages(a, agents);
+
     q = h;
     while (q) {
-        updateAtomSTI(a, q->handle);
-        updateAtomLTI(a, q->handle);
+        updateAtomSTI(a, agents, q->handle);
+        updateAtomLTI(a, agents, q->handle);
 
         /* Enfore sti and lti caps */
         enforceSTICap(a, q->handle);
@@ -201,13 +228,16 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     //}
 
     /* Reset Stimulus */
-    a->resetStimulus();
-
+    for (size_t n = 0; n < agents.size(); n++)
+        agents[n]->resetStimulus();
 }
 
-void ImportanceUpdatingAgent::updateTotalStimulus(AtomSpace* a)
+void ImportanceUpdatingAgent::updateTotalStimulus(const AgentSeq &agents)
 {
-    totalStimulusSinceReset.update(a->getTotalStimulus());
+    int total = 0;
+    for (size_t n = 0; n < agents.size(); n++)
+        total += agents[n]->getTotalStimulus();
+    totalStimulusSinceReset.update(total);
 }
 
 void ImportanceUpdatingAgent::setNoiseFlag(bool newVal)
@@ -254,7 +284,7 @@ opencog::RandGen* ImportanceUpdatingAgent::getRandGen()
     return rng;
 }
 
-void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
+void ImportanceUpdatingAgent::randomStimulation(AtomSpace *a, Agent *agent)
 {
     int expectedNum, actualNum;
     HandleEntry *h, *q;
@@ -274,7 +304,7 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace* a)
         double r;
         r = rng->randdouble();
         if (r < noiseOdds) {
-            a->stimulateAtom(q->handle, noiseUnit);
+            agent->stimulateAtom(q->handle, noiseUnit);
             actualNum++;
         }
         q = q->next;
@@ -462,19 +492,69 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
 }
 
-void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, Handle h)
+void ImportanceUpdatingAgent::updateAgentSTI(AtomSpace* a, Agent *agent)
+{
+    AttentionValue::sti_t current, exchangeAmount;
+    current = a->getSTI(agent);
+
+    /* TODO
+     *
+     * The wikibook says:
+     *
+     *    Currency flows from Units to MindAgents when Units reward MindAgents 
+     *    for helping achieve system goals.
+     *
+     *    Currency flows from MindAgents to Units when MindAgents pay Units 
+     *    rent for the processor time they utilize.
+     */
+    exchangeAmount = 0;
+
+    // just top up to a fixed amount for now
+    if (current < STIAtomWage * 100)
+        exchangeAmount = STIAtomWage * 100 - current;
+    
+    a->setSTI(agent, current + exchangeAmount);    
+}
+
+void ImportanceUpdatingAgent::updateAgentLTI(AtomSpace* a, Agent *agent)
+{
+    AttentionValue::sti_t current, exchangeAmount;
+    current = a->getLTI(agent);
+
+    // TODO: see above
+    exchangeAmount = 0;
+
+    // just top up to a fixed amount for now
+    if (current < LTIAtomWage * 100)
+        exchangeAmount = LTIAtomWage * 100 - current;
+     
+    a->setLTI(agent, current + exchangeAmount);    
+}
+
+void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents, Handle h)
 {
     AttentionValue::sti_t current, stiRentCharged, exchangeAmount;
-    stim_t s;
 
     current = a->getSTI(h);
 	stiRentCharged = calculateSTIRent(a, current);
 
-    s = a->getAtomStimulus(h);
-    exchangeAmount = - stiRentCharged + (STIAtomWage * s);
+    int total_stim = 0;
+    exchangeAmount = -stiRentCharged;
+    for (size_t n = 0; n < agents.size(); n++) {
+        if (agents[n]->getTotalStimulus() == 0)
+            continue;
+        stim_t s = agents[n]->getAtomStimulus(h);
+        total_stim += s;
+        AttentionValue::sti_t wage = STIAtomWageForAgent[n];
+        if (wage > STIAtomWage)
+            wage = STIAtomWage;
+        exchangeAmount += wage * s;
+
+        a->setSTI(agents[n], a->getSTI(agents[n]) - wage * s); 
+    }
     a->setSTI(h, current + exchangeAmount);
 
-    log->fine("Atom %s stim = %d, STI old = %d, new = %d, rent = %d", a->getName(h).c_str(), s, current, a->getSTI(h), stiRentCharged);
+    log->fine("Atom %s total stim = %d, STI old = %d, new = %d, rent = %d", a->getName(h).c_str(), total_stim, current, a->getSTI(h), stiRentCharged);
 
 }
 
@@ -521,13 +601,24 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 
 }
 
-void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, Handle h)
+void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents, Handle h)
 {
     /* collect LTI */
     AttentionValue::lti_t current, exchangeAmount;
 
     current = a->getLTI(h);
-    exchangeAmount = - LTIAtomRent + (LTIAtomWage * a->getAtomStimulus(h));
+    exchangeAmount = -LTIAtomRent;
+    for (size_t n = 0; n < agents.size(); n++) {
+        if (agents[n]->getTotalStimulus() == 0)
+            continue;
+        stim_t s = agents[n]->getAtomStimulus(h);
+        AttentionValue::lti_t wage = LTIAtomWageForAgent[n];
+        if (wage > LTIAtomWage)
+            wage = LTIAtomWage;
+        exchangeAmount += wage * s;
+
+        a->setLTI(agents[n], a->getLTI(agents[n]) - wage * s); 
+    }
     a->setLTI(h, current + exchangeAmount);
 
     log->fine("Atom %s LTI old = %d, new = %d", a->getName(h).c_str(), current, a->getLTI(h));

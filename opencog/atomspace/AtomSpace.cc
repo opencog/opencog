@@ -96,12 +96,6 @@ AtomSpace::AtomSpace()
     //fflush(stdout);
     emptyName = "";
 
-    stimulatedAtoms = new AtomHashMap();
-    totalStimulus = 0;
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_init(&stimulatedAtomsLock, NULL);
-#endif
-
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
     fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
@@ -412,11 +406,7 @@ bool AtomSpace::removeAtom(Handle h, bool recursive)
             fundsSTI += getSTI(h);
             fundsLTI += getLTI(h);
 
-            // Remove stimulus
-            removeStimulus(h);
-
             currentEntry = currentEntry->next;
-
         }
         atomTable.removeExtractedHandles(extractedHandles);
         return true;
@@ -691,53 +681,51 @@ void AtomSpace::setMean(Handle h, float mean) throw (InvalidParamException)
 }
 
 
-const AttentionValue& AtomSpace::getAV(Handle h) const
+const AttentionValue& AtomSpace::getAV(AttentionValueHolder *avh) const
 {
-    return TLB::getAtom(h)->getAttentionValue();
+    return avh->getAttentionValue();
 }
 
-void AtomSpace::setAV(Handle h, const AttentionValue& av)
+void AtomSpace::setAV(AttentionValueHolder *avh, const AttentionValue& av)
 {
-    const AttentionValue& oldAV = TLB::getAtom(h)->getAttentionValue();
+    const AttentionValue& oldAV = avh->getAttentionValue();
     // Add the old attention values to the AtomSpace funds and
     // subtract the new attention values from the AtomSpace funds
     fundsSTI += (oldAV.getSTI() - av.getSTI());
     fundsLTI += (oldAV.getLTI() - av.getLTI());
 
-    TLB::getAtom(h)->setAttentionValue(av); // setAttentionValue takes care of updating indices
-
+    avh->setAttentionValue(av); // setAttentionValue takes care of updating indices
 }
 
-void AtomSpace::setSTI(Handle h, AttentionValue::sti_t stiValue)
+void AtomSpace::setSTI(AttentionValueHolder *avh, AttentionValue::sti_t stiValue)
 {
-    const AttentionValue& currentAv = getAV(h);
-    setAV(h, AttentionValue(stiValue, currentAv.getLTI(), currentAv.getVLTI()));
-
+    const AttentionValue& currentAv = getAV(avh);
+    setAV(avh, AttentionValue(stiValue, currentAv.getLTI(), currentAv.getVLTI()));
 }
 
-void AtomSpace::setLTI(Handle h, AttentionValue::lti_t ltiValue)
+void AtomSpace::setLTI(AttentionValueHolder *avh, AttentionValue::lti_t ltiValue)
 {
-    const AttentionValue& currentAv = getAV(h);
-    setAV(h, AttentionValue(currentAv.getSTI(), ltiValue, currentAv.getVLTI()));
+    const AttentionValue& currentAv = getAV(avh);
+    setAV(avh, AttentionValue(currentAv.getSTI(), ltiValue, currentAv.getVLTI()));
 }
 
-void AtomSpace::setVLTI(Handle h, AttentionValue::vlti_t vltiValue)
+void AtomSpace::setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t vltiValue)
 {
-    const AttentionValue& currentAv = getAV(h);
-    setAV(h, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vltiValue));
+    const AttentionValue& currentAv = getAV(avh);
+    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vltiValue));
 }
 
-AttentionValue::sti_t AtomSpace::getSTI(Handle h) const
+AttentionValue::sti_t AtomSpace::getSTI(AttentionValueHolder *avh) const
 {
-    return TLB::getAtom(h)->getAttentionValue().getSTI();
+    return avh->getAttentionValue().getSTI();
 }
 
-float AtomSpace::getNormalisedSTI(Handle h, bool average, bool clip) const
+float AtomSpace::getNormalisedSTI(AttentionValueHolder *avh, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
 	int normaliser;
     float val;
-    AttentionValue::sti_t s = getSTI(h);
+    AttentionValue::sti_t s = getSTI(avh);
 	if (s > getAttentionalFocusBoundary()) {
 		normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
         if (normaliser == 0) {
@@ -758,11 +746,11 @@ float AtomSpace::getNormalisedSTI(Handle h, bool average, bool clip) const
     }
 }
 
-float AtomSpace::getNormalisedZeroToOneSTI(Handle h, bool average, bool clip) const
+float AtomSpace::getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average, bool clip) const
 {
 	int normaliser;
     float val;
-    AttentionValue::sti_t s = getSTI(h);
+    AttentionValue::sti_t s = getSTI(avh);
     normaliser = getMaxSTI(average) - getMinSTI(average);
     if (normaliser == 0) {
         return 0.0f;
@@ -775,14 +763,14 @@ float AtomSpace::getNormalisedZeroToOneSTI(Handle h, bool average, bool clip) co
     }
 }
 
-AttentionValue::lti_t AtomSpace::getLTI(Handle h) const
+AttentionValue::lti_t AtomSpace::getLTI(AttentionValueHolder *avh) const
 {
-    return TLB::getAtom(h)->getAttentionValue().getLTI();
+    return avh->getAttentionValue().getLTI();
 }
 
-AttentionValue::vlti_t AtomSpace::getVLTI(Handle h) const
+AttentionValue::vlti_t AtomSpace::getVLTI(AttentionValueHolder *avh) const
 {
-    return TLB::getAtom(h)->getAttentionValue().getVLTI();
+    return avh->getAttentionValue().getVLTI();
 }
 
 float AtomSpace::getCount(Handle h) const
@@ -922,92 +910,6 @@ Handle AtomSpace::_getNextAtom_type(Type type)
     Handle h = _handle_entry->handle;
     _handle_entry = _handle_entry->next;
     return h;
-}
-
-stim_t AtomSpace::stimulateAtom(Handle h, stim_t amount)
-{
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_lock(&stimulatedAtomsLock);
-#endif
-    // Add atom to the map of atoms with stimulus
-    // and add stimulus to it
-    (*stimulatedAtoms)[TLB::getAtom(h)] += amount;
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_unlock(&stimulatedAtomsLock);
-#endif
-
-    // update record of total stimulus given out
-    totalStimulus += amount;
-    //logger().fine("%d added to totalStimulus, now %d", amount, totalStimulus);
-    return totalStimulus;
-}
-
-void AtomSpace::removeStimulus(Handle h)
-{
-    stim_t amount;
-    // if handle not in map then return
-    if (stimulatedAtoms->find(TLB::getAtom(h)) == stimulatedAtoms->end())
-        return;
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_lock(&stimulatedAtomsLock);
-#endif
-    amount = (*stimulatedAtoms)[TLB::getAtom(h)];
-    stimulatedAtoms->erase(TLB::getAtom(h));
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_unlock(&stimulatedAtomsLock);
-#endif
-
-    // update record of total stimulus given out
-    totalStimulus -= amount;
-}
-
-stim_t AtomSpace::stimulateAtom(HandleEntry* h, stim_t amount)
-{
-    HandleEntry* p;
-    stim_t split;
-
-    // how much to give each atom
-    split = amount / h->getSize();
-
-    p = h;
-    while (p) {
-        stimulateAtom(p->handle, split);
-        p = p->next;
-    }
-
-    // return unused stimulus
-    return amount - (split * h->getSize());
-}
-
-stim_t AtomSpace::resetStimulus()
-{
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_lock(&stimulatedAtomsLock);
-#endif
-    stimulatedAtoms->clear();
-    // reset stimulus counter
-    totalStimulus = 0;
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_unlock(&stimulatedAtomsLock);
-#endif
-    return totalStimulus;
-}
-
-stim_t AtomSpace::getTotalStimulus() const
-{
-    return totalStimulus;
-}
-
-stim_t AtomSpace::getAtomStimulus(Handle h) const
-{
-    if (stimulatedAtoms->find(TLB::getAtom(h)) == stimulatedAtoms->end()) {
-        return 0;
-    } else {
-        return (*stimulatedAtoms)[TLB::getAtom(h)];
-    }
 }
 
 AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
