@@ -69,12 +69,11 @@ private:
      */
     TLB() {}
 
-public:
-
 #ifdef USE_TLB_MAP
     static unsigned long uuid;
 #endif
 
+public:
     /**
      * Maps a handle to its corresponding atom.
      *
@@ -226,6 +225,14 @@ public:
         return (h != Handle::UNDEFINED);
 #endif
     }
+
+#ifdef USE_TLB_MAP
+    static unsigned long getMaxUUID(void) { return uuid; }
+    static void reserve_range(unsigned long lo, unsigned long hi)
+    {
+        if (uuid <= hi) uuid = hi+1;
+    }
+#endif
 };
 
 } // namespace opencog

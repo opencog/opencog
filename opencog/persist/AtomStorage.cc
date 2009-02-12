@@ -327,7 +327,7 @@ AtomStorage::AtomStorage(const std::string& dbname,
 
 AtomStorage::~AtomStorage()
 {
-	setMaxUUID(TLB::uuid);
+	setMaxUUID(TLB::getMaxUUID());
 	delete db_conn;
 	db_conn = NULL;
 
@@ -968,8 +968,8 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 void AtomStorage::load(AtomTable &table)
 {
 	unsigned long max_nrec = getMaxUUID();
-	TLB::uuid = max_nrec;
-	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
+	TLB::reserve_range(0,max_nrec);
+	fprintf(stderr, "Max UUID is %lu\n", max_nrec);
 	load_count = 0;
 	max_height = getMaxHeight();
 	fprintf(stderr, "Max Height is %d\n", max_height);
@@ -1039,8 +1039,8 @@ void AtomStorage::store(const AtomTable &table)
 #endif
 
 	get_ids();
-	setMaxUUID(TLB::uuid);
-	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
+	setMaxUUID(getMaxUUID());
+	fprintf(stderr, "Max UUID is %lu\n", TLB::getMaxUUID());
 
 	setup_typemap();
 
