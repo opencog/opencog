@@ -311,6 +311,8 @@ AtomStorage::AtomStorage(const char * dbname,
 	{
 		db_typename[i] = NULL;
 	}
+
+	reserve();
 }
 
 AtomStorage::AtomStorage(const std::string& dbname,
