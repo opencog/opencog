@@ -458,21 +458,11 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
                           const TruthValue& tvn)
 {
-    // Make sure that garbage is not being passed in.
-    for (size_t i = 0; i < outgoing.size(); i++) {
-        if (TLB::isInvalidHandle(outgoing[i])) {
-            throw RuntimeException(TRACE_INFO, "addLink was passed invalid handles\n");
-        }
-    }
-
-    Handle result;
-    HandleEntry* he = atomTable.getHandleSet(outgoing,
-                           (Type*) NULL, (bool*) NULL,
-                           outgoing.size(), t, false);
-    if (he) {
-        result = he->handle;
+    Handle result = atomTable.getHandle(t, outgoing);
+    if (TLB::isValidHandle(result))
+    {
         // Just merges the TV
-        if (TLB::isValidHandle(result) && !tvn.isNullTv()) {
+        if (!tvn.isNullTv()) {
             const TruthValue& currentTV = getTV(result);
             if (currentTV.isNullTv()) {
                 setTV(result, tvn);
@@ -482,7 +472,6 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
                 delete mergedTV;
             }
         }
-        delete he;
     } else {
         // Remove default STI/LTI from AtomSpace Funds
         fundsSTI -= AttentionValue::DEFAULTATOMSTI;
