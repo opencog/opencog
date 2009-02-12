@@ -493,6 +493,24 @@ int AtomStorage::height(const Atom *atom)
 
 /* ================================================================ */
 
+std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
+                                        int arity)
+{ 
+	std::string str;
+	str += "\'{";
+	for (int i=0; i<arity; i++)
+	{
+		Handle h = out[i];
+		if (i != 0) str += ", ";
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ, "%lu", h.value());
+		str += buff;
+	}
+	str += "}\'";
+	return str;
+}
+
+/* ================================================================ */
 /**
  * Store the indicated atom.
  * Store its truth values too.
@@ -568,17 +586,8 @@ void AtomStorage::storeAtom(const Atom *atom)
 				if (arity)
 				{
 					cols += ", outgoing";
-					vals += ", \'{";
-					std::vector<Handle> out = l->getOutgoingSet();
-					for (int i=0; i<arity; i++)
-					{
-						Handle h = out[i];
-						if (i != 0) vals += ", ";
-						char buff[BUFSZ];
-						snprintf(buff, BUFSZ, "%lu", h.value());
-						vals += buff;
-					}
-					vals += "}\'";
+					vals += ", ";
+					vals += oset_to_string(l->getOutgoingSet(), arity);
 				}
 			}
 #endif /* USE_INLINE_EDGES */
@@ -810,7 +819,10 @@ Atom * AtomStorage::getAtom(Handle h)
 }
 
 /**
- * Create a new Node, with the indicated type and name.
+ * Fetch Node from database, with the indicated type and name.
+ * If there is no such node, NULL is returned.
+ * More properly speaking, the point of this routine is really
+ * to fetch the associated TruthValue for this node.
  *
  * This method does *not* register the atom with any atomtable/atomspace
  * However, it does register with the TLB, as the SQL uuids and the
@@ -824,8 +836,12 @@ Node * AtomStorage::getNode(Type t, const char * str)
 	    "type = %uh AND name = \'%s\';", storing_typemap[t], str);
 
 	Response rp;
+	rp.handle = Handle::UNDEFINED;
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
+
+	// Did we actually find anything?
+	if (TLB::isInvalidHandle(rp.handle)) return NULL;
 
 	rp.height = 0;
 	Atom *atom = makeAtom(rp, rp.handle);
@@ -834,6 +850,43 @@ Node * AtomStorage::getNode(Type t, const char * str)
 
 	return static_cast<Node *>(atom);
 }
+
+/**
+ * Fetch Link from database, with the indicated type and outgoing set.
+ * If there is no such link, NULL is returned.
+ * More properly speaking, the point of this routine is really
+ * to fetch the associated TruthValue for this link.
+ *
+ * This method does *not* register the atom with any atomtable/atomspace
+ * However, it does register with the TLB, as the SQL uuids and the
+ * TLB Handles must be kept in sync, or all hell breaks loose.
+ */
+Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
+{
+	setup_typemap();
+
+	const std::string ostr = oset_to_string(oset, oset.size());
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
+	    "type = %uh AND outgoing = \'%s\';", 
+	    storing_typemap[t], ostr.c_str());
+
+	Response rp;
+	rp.handle = Handle::UNDEFINED;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
+
+	// Did we actually find anything?
+	if (TLB::isInvalidHandle(rp.handle)) return NULL;
+
+	rp.height = 0;
+	Atom *atom = makeAtom(rp, rp.handle);
+
+	rp.rs->release();
+
+	return static_cast<Link *>(atom);
+}
+
 
 Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 {
@@ -844,8 +897,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	if (NOTYPE == realtype)
 	{
 		fprintf(stderr,
-			"Fatal Error: database contents too old!\n"
-			"\tThe type %s does not exist in this server\n",
+			"Fatal Error: OpenCog does not have a type called %s\n",
 			db_typename[rp.itype]);
 		return NULL;
 	}

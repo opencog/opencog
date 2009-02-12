@@ -13,6 +13,8 @@
 #include <vector>
 
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/persist/odbcxx.h>
 
@@ -35,6 +37,7 @@ class AtomStorage
 		void setMaxHeight(void);
 		int getMaxHeight(void);
 
+		std::string oset_to_string(const std::vector<Handle>&, int);
 		void storeOutgoing(Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
 		bool store_cb(const Atom *);
@@ -83,12 +86,16 @@ class AtomStorage
 		void storeAtom(const Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
-		Node * getNode(Type t, const char * str);
+		Node * getNode(Type, const char *);
 		Node * getNode(const Node &n)
 		{
 			return getNode(n.getType(), n.getName().c_str());
 		}
-		Link * getLink(const Link &);
+		Link * getLink(Type, const std::vector<Handle>&);
+		Link * getLink(const Link &l)
+		{
+			return getLink(l.getType(), l.getOutgoingSet());
+		}
 
 		void load(AtomTable &);
 		void store(const AtomTable &);
