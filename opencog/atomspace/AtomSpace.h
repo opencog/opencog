@@ -69,8 +69,8 @@ public:
 
     static const char* SPACE_MAP_NODE_NAME;
 
+    AtomSpace(void);
     ~AtomSpace();
-    AtomSpace();
 
     /**
      * Register a provider of backing storage.

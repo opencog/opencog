@@ -51,6 +51,20 @@ using std::endl;
 using namespace std::tr1::placeholders;
 using namespace opencog;
 
+AtomSpace::AtomSpace(void)
+{
+    _handle_iterator = NULL;
+    emptyName = "";
+
+    fundsSTI = config().get_int("STARTING_STI_FUNDS");
+    fundsLTI = config().get_int("STARTING_LTI_FUNDS");
+    attentionalFocusBoundary = 1;
+
+    //connect signals
+    atomTable.addAtomSignal().connect(std::tr1::bind(&AtomSpace::atomAdded, this, _1));
+    atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomSpace::atomRemoved, this, _1));
+}
+
 AtomSpace::~AtomSpace()
 {
 
@@ -87,22 +101,6 @@ void AtomSpace::atomRemoved(Handle h) {
         Handle timedAtom = getOutgoing(h, 1);
         timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
     }
-}
-
-AtomSpace::AtomSpace()
-{
-    _handle_iterator = NULL;
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflush(stdout);
-    emptyName = "";
-
-    fundsSTI = config().get_int("STARTING_STI_FUNDS");
-    fundsLTI = config().get_int("STARTING_LTI_FUNDS");
-    attentionalFocusBoundary = 1;
-
-    //connect signals
-    atomTable.addAtomSignal().connect(std::tr1::bind(&AtomSpace::atomAdded, this, _1));
-    atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomSpace::atomRemoved, this, _1));
 }
 
 const AtomTable& AtomSpace::getAtomTable() const
