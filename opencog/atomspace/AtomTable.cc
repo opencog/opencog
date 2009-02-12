@@ -178,10 +178,9 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
     return set;
 }
 
-Handle AtomTable::getHandle(const Link *link) const
+Handle AtomTable::getHandle(Type desired_type, const std::vector<Handle>& handles) const
 {
-    int arity = link->getArity();
-    const std::vector<Handle>& handles = link->getOutgoingSet();
+    int arity = handles.size();
     for (int i = 0; i < arity; i++)
     {
         if (TLB::isInvalidHandle(handles[i])) return Handle::UNDEFINED;
@@ -193,7 +192,6 @@ Handle AtomTable::getHandle(const Link *link) const
     // the same type, and the same outgoing set. We do this by 
     // looping over every other link which has the same handle 
     // in the last position, and checking each, one by one.
-    Type desired_type = link->getType();
     Handle h = handles[arity-1];
     Atom *a = TLB::getAtom(h);  // atom can never be null ... 
     const HandleEntry *he = a->getIncomingSet();

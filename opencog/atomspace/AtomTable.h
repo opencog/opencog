@@ -38,6 +38,7 @@
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/ImportanceIndex.h>
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
@@ -310,7 +311,10 @@ public:
     Handle getHandle(const Node* n) const {
         return getHandle(n->getName().c_str(), n->getType());
     }
-    Handle getHandle(const Link*) const;
+    Handle getHandle(Type, const std::vector<Handle>&) const;
+    Handle getHandle(const Link* l) const {
+        return getHandle(l->getType(), l->getOutgoingSet());
+    }
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
