@@ -498,7 +498,7 @@ int AtomStorage::height(const Atom *atom)
  */
 void AtomStorage::storeAtom(const Atom *atom)
 {
-	store_typemap();
+	setup_typemap();
 
 	int notfirst = 0;
 	std::string cols;
@@ -617,31 +617,57 @@ void AtomStorage::storeAtom(const Atom *atom)
 /* ================================================================ */
 /**
  * Store the concordance of type names to type values.
- * The problem being solved here is that the list of atom types might
- * have changed between the last time that data was stored to the database,
- * and the current instance. Thus, all type saving/loading works by type
- * name rather than by integer type value. Of course, the the sql db 
- * stores an actual short for the atom type, and so we have *two* 
- * type indexes: the number used in the sql DB for a given typename,
- * and the number used by the current opencog for a given typename.
- * These two type numbers map to one-another via the loading and
- * storing type-maps.
+ *
+ * The concordance is used to match up the type id's stored in 
+ * the SQL database, against those currently in use in the current
+ * version of the opencog server. The basic problem is that types
+ * can be dynamic in OpenCog -- different versions will have 
+ * different types, and will assign different type numbers to some
+ * given type name. To overcome this, the SQL database stores all
+ * atoms according to the type *name* -- although, to save space, it
+ * actually stored type ids; however, the SQL type-name-to-type-id
+ * mapping can be completely different than the OpenCog type-name
+ * to type-id mapping. Thus, tables to convert the one to the other 
+ * id are needed.
+ *
+ * Given an opencog type t, the storing_typemap[t] will contain the
+ * sqlid for the named type. The storing_typemap[t] will *always*
+ * contain a valid value.
+ *
+ * Given an SQL type sq, the loading_typemap[sq] will contain the 
+ * opencog type t for the named type, or NOTYPE is this version of
+ * opencog does not have this kind of atom.
+ *
+ * The typemaps must be constructed before any saving or loading of
+ * atoms can happen. The typemaps will be a superset (union) of the
+ * types used by OpenCog, and stored in the SQL table.
  */
-void AtomStorage::store_typemap(void)
+void AtomStorage::setup_typemap(void)
 {
-	/* Only need to store the typemap once. */
+	/* Only need to set up the typemap once. */
 	if (type_map_was_loaded) return;
-
-	Response rp;
-	char buff[BUFSZ];
-	Type t;
+	type_map_was_loaded = true;
 
 	// If we are here, we need to reconcile the types currently in
 	// use, with a possibly pre-existing typemap. New types must be
 	// stored.  So we start by loading a map from SQL (if its there).
-	load_typemap();
+	//
+	// Be careful to initialize the typemap with invalid types,
+	// in case there are unexpected holes in the map!
+	for (int i=0; i< TYPEMAP_SZ; i++)
+	{
+		loading_typemap[i] = NOTYPE;
+		storing_typemap[i] = -1;
+		db_typename[i] = NULL;
+	}
 
-	for (t=0; t<NUMBER_OF_CLASSES; t++)
+	Response rp;
+	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
+	rp.store = this;
+	rp.rs->foreach_row(&Response::type_cb, &rp);
+	rp.rs->release();
+
+	for (Type t=0; t<NUMBER_OF_CLASSES; t++)
 	{
 		int sqid = storing_typemap[t];
 		/* If this typename is not yet known, record it */
@@ -672,6 +698,7 @@ void AtomStorage::store_typemap(void)
 				}
 			}
 
+			char buff[BUFSZ];
 			snprintf(buff, BUFSZ,
 			         "INSERT INTO TypeCodes (type, typename) "
 			         "VALUES (%d, \'%s\');",
@@ -681,30 +708,6 @@ void AtomStorage::store_typemap(void)
 			set_typemap(sqid, tname);
 		}
 	}
-}
-
-void AtomStorage::load_typemap(void)
-{
-	/* Load the type map only once. If it was previously stored,
-	 * don't load it.
-	 */
-	if (type_map_was_loaded) return;
-	type_map_was_loaded = true;
-
-	// Be careful to initialize the typemap with invalid types,
-	// in case there are unexpected holes in the map!
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		loading_typemap[i] = NOTYPE;
-		storing_typemap[i] = -1;
-		db_typename[i] = NULL;
-	}
-
-	Response rp;
-	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
-	rp.store = this;
-	rp.rs->foreach_row(&Response::type_cb, &rp);
-	rp.rs->release();
 }
 
 void AtomStorage::set_typemap(int dbval, const char * tname)
@@ -789,7 +792,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
  */
 Atom * AtomStorage::getAtom(Handle h)
 {
-	load_typemap();
+	setup_typemap();
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", h.value());
 
@@ -802,6 +805,31 @@ Atom * AtomStorage::getAtom(Handle h)
 	rp.rs->release();
 
 	return atom;
+}
+
+/**
+ * Create a new Node, with the indicated type and name.
+ *
+ * This method does *not* register the atom with any atomtable/atomspace
+ * However, it does register with the TLB, as the SQL uuids and the
+ * TLB Handles must be kept in sync, or all hell breaks loose.
+ */
+Node * AtomStorage::getNode(Type t, const char * str)
+{
+	setup_typemap();
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
+	    "type = %uh AND name = \'%s\';", storing_typemap[t], str);
+
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
+
+	Atom *atom = makeAtom(rp, rp.handle);
+
+	rp.rs->release();
+
+	return dynamic_cast<Node *>(atom);
 }
 
 Atom * AtomStorage::makeAtom(Response &rp, Handle h)
@@ -883,7 +911,7 @@ void AtomStorage::load(AtomTable &table)
 	max_height = getMaxHeight();
 	fprintf(stderr, "Max Height is %d\n", max_height);
 
-	load_typemap();
+	setup_typemap();
 
 	Response rp;
 	rp.table = &table;
@@ -949,7 +977,7 @@ void AtomStorage::store(const AtomTable &table)
 	setMaxUUID(TLB::uuid);
 	fprintf(stderr, "Max UUID is %lu\n", TLB::uuid);
 
-	store_typemap();
+	setup_typemap();
 
 	Response rp;
 

@@ -59,7 +59,7 @@ class AtomStorage
 
 		bool type_map_was_loaded;
 		void load_typemap(void);
-		void store_typemap(void);
+		void setup_typemap(void);
 		void set_typemap(int, const char *);
 
 #ifdef OUT_OF_LINE_TVS
@@ -83,6 +83,12 @@ class AtomStorage
 		void storeAtom(const Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
+		Node * getNode(Type t, const char * str);
+		Node * getNode(const Node &n)
+		{
+			return getNode(n.getType(), n.getName().c_str());
+		}
+		Link * getLink(const Link &);
 
 		void load(AtomTable &);
 		void store(const AtomTable &);
