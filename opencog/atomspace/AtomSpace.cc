@@ -51,10 +51,13 @@ using std::endl;
 using namespace std::tr1::placeholders;
 using namespace opencog;
 
+// ====================================================================
+
 AtomSpace::AtomSpace(void)
 {
     _handle_iterator = NULL;
     emptyName = "";
+    backing_store = NULL;
 
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
     fundsLTI = config().get_int("STARTING_LTI_FUNDS");
@@ -67,15 +70,29 @@ AtomSpace::AtomSpace(void)
 
 AtomSpace::~AtomSpace()
 {
-
-    // check if has already been deleted. See in code where it can be delete.
+    // Check if has already been deleted. See in code where it can be delete.
     if (_handle_iterator) {
         delete (_handle_iterator);
     }
     //delete (_handle_entry);
 }
 
-void AtomSpace::atomAdded(Handle h) {
+// ====================================================================
+
+void AtomSpace::registerBackingStore(BackingStore *bs)
+{
+	backing_store = bs;
+}
+
+void AtomSpace::unregisterBackingStore(BackingStore *bs)
+{
+	if (bs == backing_store) backing_store = NULL;
+}
+
+// ====================================================================
+
+void AtomSpace::atomAdded(Handle h)
+{
     //logger().debug("AtomSpace::atomAdded(%p): %s", h, TLB::getAtom(h)->toString().c_str());
     if (getType(h) == AT_TIME_LINK) {
         // Add corresponding TimeServer entry
@@ -91,7 +108,8 @@ void AtomSpace::atomAdded(Handle h) {
     }
 }
 
-void AtomSpace::atomRemoved(Handle h) {
+void AtomSpace::atomRemoved(Handle h)
+{
     //logger().debug("AtomSpace::atomAdded(%p): %s", h, TLB::getAtom(h)->toString().c_str());
     Type type = getType(h);
     if (type == AT_TIME_LINK) {
@@ -102,6 +120,8 @@ void AtomSpace::atomRemoved(Handle h) {
         timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
     }
 }
+
+// ====================================================================
 
 const AtomTable& AtomSpace::getAtomTable() const
 {
@@ -426,31 +446,44 @@ const HandleSeq& AtomSpace::getOutgoing(Handle h) const
     return link->getOutgoingSet();
 }
 
+void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
+{
+    const TruthValue& currentTV = getTV(h);
+    if (currentTV.isNullTv()) {
+        setTV(h, tvn);
+    } else {
+        TruthValue* mergedTV = currentTV.merge(tvn);
+        setTV(h, *mergedTV);
+        delete mergedTV;
+    }
+}
+
 Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 {
     Handle result = atomTable.getHandle(name.c_str(), t);
-    if (TLB::isValidHandle(result)) {
+    if (TLB::isValidHandle(result))
+    {
         // Just merges the TV
-        if (!tvn.isNullTv()) {
-            const TruthValue& currentTV = getTV(result);
-            if (currentTV.isNullTv()) {
-                setTV(result, tvn);
-            } else {
-                TruthValue* mergedTV = currentTV.merge(tvn);
-                setTV(result, *mergedTV);
-                delete mergedTV;
-            }
-        }
-    } else {
-        // Remove default STI/LTI from AtomSpace Funds
-        fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-        fundsLTI -= AttentionValue::DEFAULTATOMLTI;
-
-        // Add Node
-        result = atomTable.add(new Node(t, name, tvn));
-
+        if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+        return result;
     }
-    return result;
+
+    // Remove default STI/LTI from AtomSpace Funds
+    fundsSTI -= AttentionValue::DEFAULTATOMSTI;
+    fundsLTI -= AttentionValue::DEFAULTATOMLTI;
+
+    // Maybe the backing store knows about this atom.
+    if (backing_store)
+    {
+        result = backing_store->getHandle(t, name.c_str());
+        if (TLB::isValidHandle(result))
+        {
+            if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+            return atomTable.add(TLB::getAtom(result));
+        }
+    }
+
+    return atomTable.add(new Node(t, name, tvn));
 }
 
 Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
@@ -460,25 +493,26 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
     if (TLB::isValidHandle(result))
     {
         // Just merges the TV
-        if (!tvn.isNullTv()) {
-            const TruthValue& currentTV = getTV(result);
-            if (currentTV.isNullTv()) {
-                setTV(result, tvn);
-            } else {
-                TruthValue* mergedTV = currentTV.merge(tvn);
-                setTV(result, *mergedTV);
-                delete mergedTV;
-            }
-        }
-    } else {
-        // Remove default STI/LTI from AtomSpace Funds
-        fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-        fundsLTI -= AttentionValue::DEFAULTATOMLTI;
-
-        Link* l = new Link(t, outgoing, tvn);
-        result = atomTable.add(l);
+        if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+        return result;
     }
-    return result;
+
+    // Remove default STI/LTI from AtomSpace Funds
+    fundsSTI -= AttentionValue::DEFAULTATOMSTI;
+    fundsLTI -= AttentionValue::DEFAULTATOMLTI;
+
+    // Maybe the backing store knows about this atom.
+    if (backing_store)
+    {
+        result = backing_store->getHandle(t, outgoing);
+        if (TLB::isValidHandle(result))
+        {
+            if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+            return atomTable.add(TLB::getAtom(result));
+        }
+    }
+
+    return atomTable.add(new Link(t, outgoing, tvn));
 }
 
 Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)

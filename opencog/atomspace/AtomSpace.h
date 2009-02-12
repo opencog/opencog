@@ -62,6 +62,7 @@ class AtomSpace
      * Used to fetch atoms from disk.
      */
     BackingStore *backing_store;
+    void do_merge_tv(Handle, const TruthValue&);
 
 public:
     // USED TO SEEK MEMORY LEAK
