@@ -872,7 +872,9 @@ Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	return static_cast<Link *>(atom);
 }
 
-/* Instantiate a new atom, give the response buffer contents */
+/** 
+ * Instantiate a new atom, from the response buffer contents
+ */
 Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 {
 	// Now that we know everything about an atom, actually construct one.

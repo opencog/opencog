@@ -40,9 +40,15 @@ namespace opencog
 {
 
 #ifdef __APPLE__
-typedef hash_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+typedef hash_map<VersionHandle,
+                 TruthValue*, 
+                 hashVersionHandle,
+                 eqVersionHandle> VersionedTruthValueMap;
 #else
-typedef std::tr1::unordered_map<VersionHandle, TruthValue*, hashVersionHandle, eqVersionHandle> VersionedTruthValueMap;
+typedef std::tr1::unordered_map<VersionHandle, 
+                                TruthValue*,
+                                hashVersionHandle,
+                                eqVersionHandle> VersionedTruthValueMap;
 #endif /* __APPLE__ */
 
 class CompositeTruthValue: public TruthValue
@@ -51,7 +57,9 @@ class CompositeTruthValue: public TruthValue
 private:
     TruthValue* primaryTV;
     VersionedTruthValueMap versionedTVs;
-    CompositeTruthValue(); // special constructor for being used inside fromString() method.
+
+    // Special constructor for use by the fromString() method.
+    CompositeTruthValue();
 
 protected:
     const TruthValue& getPrimaryTV();
@@ -62,13 +70,16 @@ protected:
 public:
 
     /**
-     * @param The initial primary or versioned TV of this composite TV. If it is NULL_TV(), a
-     *        default tv will be created internally.
-     * @param The VersionHandle the passed TV is associated to. For primary TV, its substantive
-     *        component must be Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
-     *        In this case its indicator component does not matter.
-     * NOTE: This object will take care of memory deallocation of the TruthValue object
-     * passed as argument to this method. So, caller should not delete it outside.
+     * @param The initial primary or versioned TV of this composite TV.
+     *        If it is NULL_TV(), a default tv will be created internally.
+     * @param The VersionHandle the passed TV is associated to. For
+     *        primary TV, its substantive component must be 
+     *        Handle::UNDEFINED (you can use NULL_VERSION_HANDLE
+     *        constant). In this case its indicator component does not
+     *        matter.
+     * NOTE:  This object will take care of memory deallocation of the
+     *        TruthValue object passed as argument to this method. So,
+     *        the caller should not delete it outside.
      */
     CompositeTruthValue(const TruthValue&, VersionHandle);
     CompositeTruthValue(CompositeTruthValue const&);
@@ -77,7 +88,8 @@ public:
     CompositeTruthValue* clone() const;
     TruthValue* merge(const TruthValue&) const;
 
-    CompositeTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
+    CompositeTruthValue& operator=(const TruthValue& rhs)
+        throw (RuntimeException);
 
     // The following operator method was created because when a tv is
     // assigned to a variable declared as CompositeTruthValue, it
@@ -85,10 +97,12 @@ public:
     // "const TruthValue&" argument).
     // Strangely, this does not happen with other TruthValue
     // subclasses (Simple and Indefinite, for instance...)
-    CompositeTruthValue& operator=(const CompositeTruthValue& rhs) throw (RuntimeException);
+    CompositeTruthValue& operator=(const CompositeTruthValue& rhs)
+        throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
-    static CompositeTruthValue* fromString(const char*) throw (InvalidParamException);
+    static CompositeTruthValue* fromString(const char*)
+        throw (InvalidParamException);
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
@@ -99,30 +113,35 @@ public:
 
     /*
      * Sets the primary or a versioned TV in this CTV object.
-     * @param TruthValue object to be set. If it is a NULL_TV(), a default tv will be created
-     *        internally.
-     * @param The VersionHandle the passed TV is associated to. For primary TV, its substantive
-     *        component must be Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
+     * @param TruthValue object to be set. If it is a NULL_TV(), a 
+     *        default tv will be created internally.
+     * @param The VersionHandle the passed TV is associated to. For
+     *        the primary TV, its substantive component must be 
+     *        Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
      *        In this case its indicator component does not matter.
-     * NOTE: This object will take care of memory deallocation of the TruthValue object
-     * passed as argument to this method. So, caller should not delete it outside.
+     * NOTE:  This object will take care of memory deallocation of the
+     *        TruthValue object passed as argument to this method. So,
+     *        caller should not delete it outside.
      */
     void setVersionedTV(const TruthValue&, VersionHandle);
 
     /**
-     * Gets the versioned TruthValue object associated with the given VersionHandle.
-     * If NULL_VERSION_HANDLE is given as argument, returns the primaryTV.
+     * Gets the versioned TruthValue object associated with the given
+     * VersionHandle. If NULL_VERSION_HANDLE is given as argument,
+     * returns the primaryTV.
      */
     const TruthValue& getVersionedTV(VersionHandle) const;
 
     /**
-     * Removes the versioned TruthValue object associated with the given VersionHandle
+     * Removes the versioned TruthValue object associated with the
+     * given VersionHandle.
      */
     void removeVersionedTV(VersionHandle);
 
     /**
-     * Removes all versioned TruthValue objects associated with any VersionHandle whose
-     * substantive component is equals to the given Handle
+     * Removes all versioned TruthValue objects associated with any
+     * VersionHandle whose substantive component is equals to the
+     * given Handle.
      */
     void removeVersionedTVs(Handle);
 
@@ -133,14 +152,15 @@ public:
 
     /**
      * Gets the versioned TV given its index in the internal map.
-     * @param Index of the versioned TV. It must be a number between 0 and
-     * (getNumberOfVersionedTVs()-1). Otherwise, it returns a NULL_VERSION_HANDLE.
+     * @param Index of the versioned TV. It must be a number between
+     *        0 and (getNumberOfVersionedTVs()-1). Otherwise, it
+     *        returns a NULL_VERSION_HANDLE.
      */
     VersionHandle getVersionHandle(int) const;
 
     /**
-     * Updates all VersionHandles of the versioned TVs in this object using the
-     * HandleMap passed as argument.
+     * Updates all VersionHandles of the versioned TVs in this object
+     * using the HandleMap passed as argument.
      * @param A HandleMap that maps old Handles to new ones.
      */
     void updateVersionHandles(HandleMap<Atom *> *handles);
