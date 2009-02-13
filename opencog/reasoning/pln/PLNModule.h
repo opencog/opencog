@@ -98,6 +98,8 @@ public:
 
 //! Takes a real handle, and sets the backward-chaining target to that atom.
 void setTarget(Handle h);
+//! Does steps inference steps on target h. Does not set the BC target used in the PLN commands.
+void infer(Handle h, int &steps);
 
 } // namespace opencog
 

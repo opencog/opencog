@@ -170,6 +170,25 @@ void opencog::setTarget(Handle h) {
     state = Bstate.get();
 }
 
+void opencog::infer(Handle h, int &steps)
+{
+    Btr<BackInferenceTreeRootT> Bstate;
+    BackInferenceTreeRootT *state;
+
+    std::vector<Handle> fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    Handle fakeHandle = fakeHandles[0];
+    Btr<vtree> target(new vtree(fakeHandle));
+
+    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
+
+    printf("BITNodeRoot init ok\n");
+    state = Bstate.get();
+    state->infer(steps, 0.000001f, 0.01f);
+    state->printResults();
+//    ss << "\n" << j << " $ remaining.\n";
+
+}
+
 #if 0
 void initTestEnv()
 {
