@@ -175,10 +175,13 @@ public:
                 "Atom is already in the TLB with a different handle!");
             return it->second;
         }
-        if (handle == Handle::UNDEFINED) handle = Handle(uuid);
+        if (handle == Handle::UNDEFINED)
+        {
+            handle = Handle(uuid);
+            uuid++;
+        }
         handle_map[handle] = atom;
         atom_map[atom] = handle;
-        uuid++;
         return handle;
 #else /* USE_TLB_MAP */
         return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
