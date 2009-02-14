@@ -267,6 +267,11 @@ static inline CogServer& cogserver(void)
     return static_cast<CogServer&>(server());
 }
 
+static inline AtomSpace& atomspace(void)
+{
+    return const_cast<AtomSpace&>(*cogserver().getAtomSpace());
+}
+
 class AtomTable;
 static inline AtomTable& atomtable(void)
 {
