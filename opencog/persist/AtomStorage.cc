@@ -885,7 +885,7 @@ Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	const std::string ostr = oset_to_string(oset, oset.size());
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
-	    "type = %uh AND outgoing = \'%s\';", 
+	    "type = %hu AND outgoing = %s;", 
 	    storing_typemap[t], ostr.c_str());
 
 	Atom *atom = getAtom(buff, 1);
