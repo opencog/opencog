@@ -822,7 +822,8 @@ Atom * AtomStorage::getAtom(const char * query, int height)
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
 	// Did we actually find anything?
-	if (TLB::isInvalidHandle(rp.handle)) return NULL;
+	// DO NOT USE TLB::IsInvalidHandle() HERE! It won't work, duhh!
+	if (rp.handle.value() == Handle::UNDEFINED.value()) return NULL;
 
 	rp.height = height;
 	Atom *atom = makeAtom(rp, rp.handle);

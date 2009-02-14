@@ -145,8 +145,9 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 		return "sql-open: Unable to connect to the database";
 	}
 
-	atomspace().registerBackingStore(backing);
+	store->reserve();
 	backing->set_store(store);
+	atomspace().registerBackingStore(backing);
 
 	return "database opened";
 }
