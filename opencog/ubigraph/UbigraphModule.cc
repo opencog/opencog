@@ -60,7 +60,7 @@ std::string initials(std::string s)
 class Ubigrapher
 {
 public:
-    Ubigrapher(AtomSpace *space) : space(space), withIncoming(false), compact(true)
+    Ubigrapher(AtomSpace *space) : space(space), withIncoming(false), compact(false)
     {
         compactLabels = true;
 
@@ -68,14 +68,35 @@ public:
         space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_edges, this, _1));
         space->removeAtomSignal().connect(std::tr1::bind(&Ubigrapher::remove_vertex, this, _1));
         space->removeAtomSignal().connect(std::tr1::bind(&Ubigrapher::remove_edges, this, _1));
-        
+
         ubigraph_clear();
+
+        // Set the styles for various types of edges and vertexes in the graph        
+        nodeStyle = ubigraph_new_vertex_style(0);
+        ubigraph_set_vertex_style_attribute(nodeStyle, "shape", "sphere");
+        
+        linkStyle = ubigraph_new_vertex_style(0);
+        ubigraph_set_vertex_style_attribute(linkStyle, "shape", "octahedron");
+        ubigraph_set_vertex_style_attribute(linkStyle, "color", "#ff0000");
+
+        outgoingStyle = ubigraph_new_edge_style(0);
+        ubigraph_set_edge_style_attribute(outgoingStyle, "arrow", "true");
+        // Makes it easier to see the direction of the arrows (cones),
+        // but hides the number/type labels
+//      ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_radius", "1.5");
+        ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_length", "2.0");
+        
+        compactLinkStyle = ubigraph_new_edge_style(outgoingStyle);
     }
     AtomSpace *space;
     bool withIncoming;
     bool compact;
     //! Makes much more compact labels. Currently uses the initials of the typename.
     bool compactLabels;
+
+    //! Styles corresponding to different types of Atom,
+    //! except outgoingStyle which is for the edges that collectively represent outgoing sets
+    int nodeStyle, linkStyle, compactLinkStyle, outgoingStyle;
 
     /**
      * Outputs a ubigraph node for an atom.
@@ -93,20 +114,15 @@ public:
                 return false;
         }
 
-//        std::ostringstream ost;
-//        ost << h.value() << " [";
         int id = (int)h.value();
         int status = ubigraph_new_vertex_w_id(id);
         if (space->isNode(a->getType()))
-            ubigraph_set_vertex_attribute(id, "shape", "sphere");
+            ubigraph_change_vertex_style(id, nodeStyle);
         else {
-            //            ost << "shape=\"diamond\" ";
-            ubigraph_set_vertex_attribute(id, "shape", "octahedron");
-            ubigraph_set_vertex_attribute(id, "color", "#ff0000");
+            ubigraph_change_vertex_style(id, linkStyle);
         }
 
         std::ostringstream ost;
-        //        ost << "label=\"[" << ClassServer::getTypeName(a->getType()) << "]";
         std::string type = ClassServer::getTypeName(a->getType());
         if (compactLabels) {
             ost << initials(type);
@@ -122,8 +138,6 @@ public:
             l = l; // TODO: anything to output for links?
         }
         ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
-//        ost << "\"];\n";
-//        answer += ost.str();*/
         return false;
     }
 
@@ -133,7 +147,6 @@ public:
     bool add_edges(Handle h)
     {
         Atom *a = TLB::getAtom(h);
-//        std::ostringstream ost;
 
         const Link *l = dynamic_cast<const Link *>(a);
         if (l)
@@ -146,9 +159,6 @@ public:
 
             if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
             {
-//                ost << out[0] << " -> " << out[1] << " [label=\""
-//                    << ClassServer::getTypeName(a->getType()) << "\"];\n";
-//                answer += ost.str();
                 int id = h.value();
                 int status = ubigraph_new_edge_w_id(id, out[0].value(),out[1].value());
                 
@@ -159,26 +169,15 @@ public:
                 } else {
                     ost << type;
                 }
-                ubigraph_set_edge_attribute(id, "label", ost.str().c_str());                
-                
-                ubigraph_set_edge_attribute(id, "arrow", "true");
-                // Makes it easier to see the direction of the arrows (cones),
-                // but hides the type labels
-//                ubigraph_set_edge_attribute(id, "arrow_radius", "1.5");
-                ubigraph_set_edge_attribute(id, "arrow_length", "2.0");
+                ubigraph_change_edge_style(id, compactLinkStyle);
+                ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
                 return false;
             }
 
             for (size_t i = 0; i < out.size(); i++) {
                 int id = ubigraph_new_edge(h.value(),out[i].value());
+                ubigraph_change_edge_style(id, outgoingStyle);
                 ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
-                ubigraph_set_edge_attribute(id, "arrow", "true");
-                // Makes it easier to see the direction of the arrows (cones),
-                // but hides the number labels
-//                ubigraph_set_edge_attribute(id, "arrow_radius", "1.5");
-                ubigraph_set_edge_attribute(id, "arrow_length", "2.0");
-
-//                ost << h << "->" << out[i] << " [label=\"" << i << "\"];\n";
             }
         }
 
@@ -191,8 +190,6 @@ public:
                 i++;
             }
         }*/
-
-//        answer += ost.str();
         return false;
     }
 
