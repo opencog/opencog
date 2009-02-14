@@ -29,6 +29,7 @@
 #include <string>
 
 #include "AtomStorage.h"
+#include <opencog/atomspace/BackingStore.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
@@ -40,7 +41,8 @@ namespace opencog
 class PersistModule : public Module
 {
 private:
-    AtomStorage* store;
+    AtomStorage *store;
+    BackingStore *backing;
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-close", do_close, 
        "Close the SQL database", 

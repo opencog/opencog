@@ -30,10 +30,45 @@
 
 using namespace opencog;
 
+class SQLBackingStore : public BackingStore
+{
+	private:
+		AtomStorage *store;
+	public:
+		SQLBackingStore(void);
+		void set_store(AtomStorage *);
+
+		virtual Handle getHandle(Type, const char *) const;
+		virtual Handle getHandle(Type, const std::vector<Handle>&) const;
+};
+
+SQLBackingStore::SQLBackingStore(void)
+{
+	store = NULL;
+}
+
+void SQLBackingStore::set_store(AtomStorage *as)
+{
+	store = as;
+}
+
+Handle SQLBackingStore::getHandle(Type t, const char *name) const
+{
+printf ("allo duude %d %s\n", t, name);
+	return Handle::UNDEFINED;
+}
+
+Handle SQLBackingStore::getHandle(Type t, const std::vector<Handle>& oset) const
+{
+printf ("allo duude -- linky %d\n", t);
+	return Handle::UNDEFINED;
+}
+
 DECLARE_MODULE(PersistModule);
 
 PersistModule::PersistModule(void) : store(NULL)
 {
+	backing = new SQLBackingStore();
 	do_close_register();
 	do_load_register();
 	do_open_register();
@@ -46,6 +81,7 @@ PersistModule::~PersistModule()
 	do_load_unregister();
 	do_open_unregister();
 	do_store_unregister();
+	delete backing;
 }
 
 void PersistModule::init(void)
@@ -59,6 +95,8 @@ std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 
 	if (store == NULL)
 		return "sql-close: database not open";
+
+	atomspace().unregisterBackingStore(backing);
 
 	delete store;
 	store = NULL;
@@ -92,6 +130,14 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 	if (!store)
 		return "sql-open: Unable to open the database";
 
+	if (!store->connected())
+	{
+		delete store;
+		store = NULL;
+		return "sql-open: Unable to connect to the database";
+	}
+
+	atomspace().registerBackingStore(backing);
 	return "database opened";
 }
 
