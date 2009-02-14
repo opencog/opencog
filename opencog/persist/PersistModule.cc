@@ -145,6 +145,7 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 		return "sql-open: Unable to connect to the database";
 	}
 
+	// reserve() is critical here, to reserve UUID range.
 	store->reserve();
 	backing->set_store(store);
 	atomspace().registerBackingStore(backing);
