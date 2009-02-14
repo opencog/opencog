@@ -27,9 +27,11 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/BackingStore.h>
 
 using namespace opencog;
 
+namespace opencog {
 class SQLBackingStore : public BackingStore
 {
 	private:
@@ -40,6 +42,7 @@ class SQLBackingStore : public BackingStore
 
 		virtual Handle getHandle(Type, const char *) const;
 		virtual Handle getHandle(Type, const std::vector<Handle>&) const;
+};
 };
 
 SQLBackingStore::SQLBackingStore(void)
@@ -54,14 +57,18 @@ void SQLBackingStore::set_store(AtomStorage *as)
 
 Handle SQLBackingStore::getHandle(Type t, const char *name) const
 {
-printf ("allo duude %d %s\n", t, name);
-	return Handle::UNDEFINED;
+	Node *n = store->getNode(t, name);
+printf ("allo duude %d %s no=%p\n", t, name, n);
+	if (!n) return Handle::UNDEFINED;
+	return TLB::getHandle(n);
 }
 
 Handle SQLBackingStore::getHandle(Type t, const std::vector<Handle>& oset) const
 {
 printf ("allo duude -- linky %d\n", t);
-	return Handle::UNDEFINED;
+	Link *l = store->getLink(t, oset);
+	if (!l) return Handle::UNDEFINED;
+	return TLB::getHandle(l);
 }
 
 DECLARE_MODULE(PersistModule);
@@ -98,6 +105,7 @@ std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 
 	atomspace().unregisterBackingStore(backing);
 
+	backing->set_store(NULL);
 	delete store;
 	store = NULL;
 	return "database closed";
@@ -138,6 +146,8 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 	}
 
 	atomspace().registerBackingStore(backing);
+	backing->set_store(store);
+
 	return "database opened";
 }
 
