@@ -861,7 +861,7 @@ Node * AtomStorage::getNode(Type t, const char * str)
 	setup_typemap();
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
-	    "type = %uh AND name = \'%s\';", storing_typemap[t], str);
+	    "type = %hu AND name = \'%s\';", storing_typemap[t], str);
 
 	Atom *atom = getAtom(buff, 0);
 	return static_cast<Node *>(atom);
