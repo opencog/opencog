@@ -80,6 +80,13 @@ public:
     void unregisterBackingStore(BackingStore *);
 
     /**
+     * Recursively store the atom to the backing store.
+     */
+    void storeAtom(Handle h) {
+        if (backing_store) backing_store->storeAtom(h);
+    }
+
+    /**
      * @return a const reference to the AtomTable object of this AtomSpace
      */
     const AtomTable& getAtomTable() const;

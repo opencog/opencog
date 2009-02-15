@@ -551,6 +551,14 @@ void AtomStorage::storeAtom(const Atom *atom)
 	do_store_atom(atom, h, height);
 }
 
+void AtomStorage::storeAtom(Handle h)
+{
+	get_ids();
+	const Atom *atom = TLB::getAtom(h);
+	int height = get_height(atom);
+	do_store_atom(atom, h, height);
+}
+
 void AtomStorage::do_store_atom(const Atom *atom, Handle h, int height)
 {
 	const Link *l = dynamic_cast<const Link *>(atom);

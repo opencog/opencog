@@ -50,6 +50,17 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		Handle grounded_expressions = pm.imply(h);
 		return handle_to_scm(grounded_expressions);
 	}
+
+	// Store the single atom to the backing store hanging off the atom-space
+	if (0 == cmdname.compare("store-atom"))
+	{
+		// XXX we should also allow opt-args to be a list of handles
+		Handle h = verify_handle(optargs, "cog-ad-hoc store-atom");
+
+		AtomSpace *as = &atomspace();
+		as->storeAtom(h);
+		return SCM_BOOL_T;
+	}
 	return SCM_BOOL_F;
 }
 

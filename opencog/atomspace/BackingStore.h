@@ -47,6 +47,13 @@ class BackingStore
 		 * Return a handle to a node of the indicated type and name,
 		 * if it exists; else return an undefined handle.  */
 		virtual Handle getHandle(Type, const char *) const = 0;
+
+		/**
+		 * Recursively store the atom and anything in it's outgoing set.
+		 * If the atom is already in storage, this will update it's 
+		 * truth value, etc. 
+		 */
+		virtual void storeAtom(Handle) = 0;
 };
 
 } //namespace opencog

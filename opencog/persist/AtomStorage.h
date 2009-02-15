@@ -108,6 +108,7 @@ class AtomStorage
 		void kill_data(void);
 
 		void storeSingleAtom(const Atom *);
+		void storeAtom(Handle);
 		void storeAtom(const Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
