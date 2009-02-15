@@ -193,6 +193,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	Atom *lb = store->getAtom(TLB::getHandle(l));
 	atomCompare(l,lb);
 
+	store->kill_data();
 	delete store;
 }
 
@@ -322,6 +323,7 @@ void BasicSaveUTest::test_table(void)
 	check_table(idx++, table2, "ddd ");
 	check_table(idx++, table2, "eee ");
 
+	store->kill_data();
 	delete store;
 	delete table2;
 	logger().debug("END TEST: %s", __FUNCTION__);
