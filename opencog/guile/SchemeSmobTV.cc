@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for truth values.
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -22,6 +22,8 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 	switch (misctype)
 	{
 		case COG_SIMPLE_TV: // Nothing to do here ...
+		case COG_COUNT_TV:
+		case COG_INDEFINITE_TV:
 			return SCM_BOOL_F;
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
@@ -53,6 +55,22 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_gc_unregister_collectable_memory (stv,
 			                  sizeof(SimpleTruthValue), "opencog simple tv");
 			delete stv;
+			return 0;
+
+		case COG_COUNT_TV:
+			CountTruthValue *ctv;
+			ctv = (CountTruthValue *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (ctv,
+			                  sizeof(CountTruthValue), "opencog count tv");
+			delete ctv;
+			return 0;
+
+		case COG_INDEFINITE_TV:
+			IndefiniteTruthValue *itv;
+			itv = (IndefiniteTruthValue *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (itv,
+			                  sizeof(IndefiniteTruthValue), "opencog indefinite tv");
+			delete itv;
 			return 0;
 
 		default:
@@ -138,9 +156,25 @@ TruthValue * SchemeSmob::get_tv_from_list(SCM slist)
 		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sval))
 		{
 			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			if (misctype == COG_SIMPLE_TV)
+			switch (misctype)
 			{
-				return ((TruthValue *) SCM_SMOB_DATA(sval));
+				case COG_SIMPLE_TV:
+				{
+					SimpleTruthValue *stv = (SimpleTruthValue *) SCM_SMOB_DATA(sval);
+					return static_cast<TruthValue *>(stv);
+				}
+				case COG_COUNT_TV:
+				{
+					CountTruthValue *ctv = (CountTruthValue *) SCM_SMOB_DATA(sval);
+					return static_cast<TruthValue *>(ctv);
+				}
+				case COG_INDEFINITE_TV:
+				{
+					IndefiniteTruthValue *itv = (IndefiniteTruthValue *) SCM_SMOB_DATA(sval);
+					return static_cast<TruthValue *>(itv);
+				}
+				default:
+					break;
 			}
 		}
 
@@ -152,16 +186,50 @@ TruthValue * SchemeSmob::get_tv_from_list(SCM slist)
 
 /* ============================================================== */
 
-std::string SchemeSmob::tv_to_string(const TruthValue *stv)
+std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 {
+#define BUFLEN 120
+	char buff[BUFLEN];
+	TruthValueType tvt = tv->getType();
+
 	// They're only floats, not doubles, so print with 8 digits
-	char buff[40];
 	std::string ret = "";
-	snprintf(buff, 40, "(stv %.8g ", stv->getMean());
-	ret += buff;
-	snprintf(buff, 40, "%.8g)", stv->getConfidence());
-	ret += buff;
-	return ret;
+	switch (tvt)
+	{
+		case SIMPLE_TRUTH_VALUE:
+		{
+			const SimpleTruthValue *stv = static_cast<const SimpleTruthValue *>(tv);
+			snprintf(buff, BUFLEN, "(stv %.8g ", stv->getMean());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g)", stv->getConfidence());
+			ret += buff;
+			return ret;
+		}
+		case COUNT_TRUTH_VALUE:
+		{
+			const CountTruthValue *ctv = static_cast<const CountTruthValue *>(tv);
+			snprintf(buff, BUFLEN, "(ctv %.8g ", ctv->getMean());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g ", ctv->getConfidence());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g)", ctv->getCount());
+			ret += buff;
+			return ret;
+		}
+		case INDEFINITE_TRUTH_VALUE:
+		{
+			const IndefiniteTruthValue *itv = static_cast<const IndefiniteTruthValue *>(tv);
+			snprintf(buff, BUFLEN, "(itv %.8g ", itv->getL());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g ", itv->getU());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g)", itv->getConfidence());
+			ret += buff;
+			return ret;
+		}
+		default:
+			return ret;
+	}
 }
 
 std::string SchemeSmob::misc_to_string(SCM node)
@@ -170,9 +238,11 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	switch (misctype)
 	{
 		case COG_SIMPLE_TV:
-			SimpleTruthValue *stv;
-			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
-			return tv_to_string(stv);
+		case COG_COUNT_TV:
+		case COG_INDEFINITE_TV:
+			TruthValue *tv;
+			tv = (TruthValue *) SCM_SMOB_DATA(node);
+			return tv_to_string(tv);
 
 		default:
 			return "#<unknown opencog type>\n";

@@ -5,7 +5,7 @@
  * This class implements the actual functions the guile shell invokes
  * when it sees the opencog-specific proceedures.
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
  */
 
 #ifdef HAVE_GUILE
@@ -19,6 +19,8 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 
@@ -36,6 +38,8 @@ class SchemeSmob
 		{
 			COG_HANDLE = 1,
 			COG_SIMPLE_TV,
+			COG_COUNT_TV,
+			COG_INDEFINITE_TV,
 		};
 
 		static bool is_inited;
@@ -85,8 +89,12 @@ class SchemeSmob
 
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);
+		static SCM ss_new_ctv(SCM, SCM);
+		static SCM ss_new_itv(SCM, SCM);
 		static SCM ss_tv_p(SCM);
 		static SCM take_stv(SimpleTruthValue *);
+		static SCM take_ctv(CountTruthValue *);
+		static SCM take_itv(IndefiniteTruthValue *);
 		static SCM ss_tv_get_value(SCM);
 
 		// Callback into misc C++ code.
