@@ -108,6 +108,7 @@ static void atomCompare(Atom *a, Atom *b)
 	Link *lb = dynamic_cast<Link *>(b);
 
 	TSM_ASSERT("No atom found", b != NULL);
+	if (NULL == b) return;
 
 	TSM_ASSERT_EQUALS("Type mistmatch", a->getType(), b->getType());
 
