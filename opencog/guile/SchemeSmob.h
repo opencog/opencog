@@ -19,9 +19,6 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 
 namespace opencog {
@@ -37,9 +34,7 @@ class SchemeSmob
 		enum
 		{
 			COG_HANDLE = 1,
-			COG_SIMPLE_TV,
-			COG_COUNT_TV,
-			COG_INDEFINITE_TV,
+			COG_TV,
 		};
 
 		static bool is_inited;
@@ -89,12 +84,10 @@ class SchemeSmob
 
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);
-		static SCM ss_new_ctv(SCM, SCM);
-		static SCM ss_new_itv(SCM, SCM);
+		static SCM ss_new_ctv(SCM, SCM, SCM);
+		static SCM ss_new_itv(SCM, SCM, SCM);
 		static SCM ss_tv_p(SCM);
-		static SCM take_stv(SimpleTruthValue *);
-		static SCM take_ctv(CountTruthValue *);
-		static SCM take_itv(IndefiniteTruthValue *);
+		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
 
 		// Callback into misc C++ code.

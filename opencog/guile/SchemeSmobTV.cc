@@ -10,6 +10,8 @@
 
 #include <libguile.h>
 
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -21,9 +23,7 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 
 	switch (misctype)
 	{
-		case COG_SIMPLE_TV: // Nothing to do here ...
-		case COG_COUNT_TV:
-		case COG_INDEFINITE_TV:
+		case COG_TV: // Nothing to do here ...
 			return SCM_BOOL_F;
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
@@ -49,28 +49,12 @@ size_t SchemeSmob::free_misc(SCM node)
 
 	switch (misctype)
 	{
-		case COG_SIMPLE_TV:
-			SimpleTruthValue *stv;
-			stv = (SimpleTruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (stv,
-			                  sizeof(SimpleTruthValue), "opencog simple tv");
-			delete stv;
-			return 0;
-
-		case COG_COUNT_TV:
-			CountTruthValue *ctv;
-			ctv = (CountTruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (ctv,
-			                  sizeof(CountTruthValue), "opencog count tv");
-			delete ctv;
-			return 0;
-
-		case COG_INDEFINITE_TV:
-			IndefiniteTruthValue *itv;
-			itv = (IndefiniteTruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (itv,
-			                  sizeof(IndefiniteTruthValue), "opencog indefinite tv");
-			delete itv;
+		case COG_TV:
+			TruthValue *tv;
+			tv = (TruthValue *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (tv,
+			                  sizeof(*tv), "opencog tv");
+			delete tv;
 			return 0;
 
 		default:
@@ -158,21 +142,8 @@ TruthValue * SchemeSmob::get_tv_from_list(SCM slist)
 			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
 			switch (misctype)
 			{
-				case COG_SIMPLE_TV:
-				{
-					SimpleTruthValue *stv = (SimpleTruthValue *) SCM_SMOB_DATA(sval);
-					return static_cast<TruthValue *>(stv);
-				}
-				case COG_COUNT_TV:
-				{
-					CountTruthValue *ctv = (CountTruthValue *) SCM_SMOB_DATA(sval);
-					return static_cast<TruthValue *>(ctv);
-				}
-				case COG_INDEFINITE_TV:
-				{
-					IndefiniteTruthValue *itv = (IndefiniteTruthValue *) SCM_SMOB_DATA(sval);
-					return static_cast<TruthValue *>(itv);
-				}
+				case COG_TV:
+					return (TruthValue *) SCM_SMOB_DATA(sval);
 				default:
 					break;
 			}
@@ -237,12 +208,8 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
 	switch (misctype)
 	{
-		case COG_SIMPLE_TV:
-		case COG_COUNT_TV:
-		case COG_INDEFINITE_TV:
-			TruthValue *tv;
-			tv = (TruthValue *) SCM_SMOB_DATA(node);
-			return tv_to_string(tv);
+		case COG_TV:
+			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));
 
 		default:
 			return "#<unknown opencog type>\n";
@@ -254,14 +221,14 @@ std::string SchemeSmob::misc_to_string(SCM node)
 /**
  * Create a new simple truth value, with indicated mean and confidence.
  */
-SCM SchemeSmob::take_stv (SimpleTruthValue *stv)
+SCM SchemeSmob::take_tv (TruthValue *tv)
 {
-	scm_gc_register_collectable_memory (stv,
-	                 sizeof(SimpleTruthValue), "opencog simple tv");
+	scm_gc_register_collectable_memory (tv,
+	                 sizeof(*tv), "opencog tv");
 
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, stv);
-	SCM_SET_SMOB_FLAGS(smob, COG_SIMPLE_TV);
+	SCM_NEWSMOB (smob, cog_misc_tag, tv);
+	SCM_SET_SMOB_FLAGS(smob, COG_TV);
 	return smob;
 }
 
@@ -275,8 +242,28 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 	double confidence = scm_to_double(sconfidence);
 
 	float cnt = SimpleTruthValue::confidenceToCount(confidence);
-	SimpleTruthValue *stv = new SimpleTruthValue(mean, cnt);
-	return take_stv(stv);
+	TruthValue *tv = new SimpleTruthValue(mean, cnt);
+	return take_tv(tv);
+}
+
+SCM SchemeSmob::ss_new_ctv (SCM smean, SCM sconfidence, SCM scount)
+{
+	double mean = scm_to_double(smean);
+	double confidence = scm_to_double(sconfidence);
+	double count = scm_to_double(scount);
+
+	TruthValue *tv = new CountTruthValue(mean, confidence, count);
+	return take_tv(tv);
+}
+
+SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
+{
+	double lower = scm_to_double(slower);
+	double upper = scm_to_double(supper);
+	double confidence = scm_to_double(sconfidence);
+
+	TruthValue *tv = new IndefiniteTruthValue(lower, upper, confidence);
+	return take_tv(tv);
 }
 
 /* ============================================================== */
@@ -290,7 +277,7 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
 		switch (misctype)
 		{
-			case COG_SIMPLE_TV:
+			case COG_TV:
 				return SCM_BOOL_T;
 
 			default:
@@ -312,19 +299,63 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 		switch (misctype)
 		{
 			// Return association list
-			case COG_SIMPLE_TV:
+			case COG_TV:
 			{
-				SimpleTruthValue *stv;
-				stv = (SimpleTruthValue *) SCM_SMOB_DATA(s);
-				SCM mean = scm_from_double(stv->getMean());
-				SCM conf = scm_from_double(stv->getConfidence());
-				SCM smean = scm_from_locale_symbol("mean");
-				SCM sconf = scm_from_locale_symbol("confidence");
+				TruthValue *tv;
+				tv = (TruthValue *) SCM_SMOB_DATA(s);
+				TruthValueType tvt = tv->getType();
+				switch(tvt)
+				{
+					case SIMPLE_TRUTH_VALUE:
+					{
+						SimpleTruthValue *stv = static_cast<SimpleTruthValue *>(tv);
+						SCM mean = scm_from_double(stv->getMean());
+						SCM conf = scm_from_double(stv->getConfidence());
+						SCM smean = scm_from_locale_symbol("mean");
+						SCM sconf = scm_from_locale_symbol("confidence");
 				
-				return scm_cons2(
-					scm_cons(smean, mean),
-					scm_cons(sconf, conf), 
-					SCM_EOL);
+						return scm_cons2(
+							scm_cons(smean, mean),
+							scm_cons(sconf, conf), 
+							SCM_EOL);
+					}
+					case COUNT_TRUTH_VALUE:
+					{
+						CountTruthValue *ctv = static_cast<CountTruthValue *>(tv);
+						SCM mean = scm_from_double(ctv->getMean());
+						SCM conf = scm_from_double(ctv->getConfidence());
+						SCM cont = scm_from_double(ctv->getCount());
+						SCM smean = scm_from_locale_symbol("mean");
+						SCM sconf = scm_from_locale_symbol("confidence");
+						SCM scont = scm_from_locale_symbol("count");
+				
+						return scm_cons(
+							scm_cons(smean, mean),
+							scm_cons2(
+							scm_cons(sconf, conf), 
+							scm_cons(scont, cont), 
+							SCM_EOL));
+					}
+					case INDEFINITE_TRUTH_VALUE:
+					{
+						IndefiniteTruthValue *itv = static_cast<IndefiniteTruthValue *>(tv);
+						SCM lower = scm_from_double(itv->getL());
+						SCM upper = scm_from_double(itv->getU());
+						SCM conf = scm_from_double(itv->getConfidence());
+						SCM slower = scm_from_locale_symbol("lower");
+						SCM supper = scm_from_locale_symbol("upper");
+						SCM sconf = scm_from_locale_symbol("confidence");
+				
+						return scm_cons(
+							scm_cons(slower, lower),
+							scm_cons2(
+							scm_cons(supper, upper),
+							scm_cons(sconf, conf), 
+							SCM_EOL));
+					}
+					default:
+						return SCM_EOL;
+				}
 			}
 			default:
 				return SCM_EOL;
