@@ -701,6 +701,7 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 			STMTF("stv_mean", tv.getMean());
 			STMTF("stv_confidence", tv.getConfidence());
 			STMTF("stv_count", tv.getCount());
+			break;
 		case INDEFINITE_TRUTH_VALUE:
 		{
 			const IndefiniteTruthValue *itv = static_cast<const IndefiniteTruthValue *>(&tv);
