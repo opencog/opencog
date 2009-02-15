@@ -59,14 +59,15 @@ typedef strength_seq::const_iterator confidence_seq_const_it;
 const strength_t MAX_TRUTH    =     1.0;
 const count_t MAX_TV_COUNT = 10000.0;
 
-// TruthValue types:
-// Warning: NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
+// TruthValue types
+// NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
 enum TruthValueType {
-    SIMPLE_TRUTH_VALUE = 0,
+    SIMPLE_TRUTH_VALUE = 1,
     INDEFINITE_TRUTH_VALUE,
     COMPOSITE_TRUTH_VALUE,
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
+#define MAX_TRUTH_VALUE_NAME_LEN 120
 
 class TruthValue
 {

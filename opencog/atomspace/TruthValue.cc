@@ -102,13 +102,15 @@ TruthValue* TruthValue::merge(const TruthValue& other) const
     return clone();
 }
 
-bool TruthValue::isNullTv() const {
+bool TruthValue::isNullTv() const
+{
     return false;
 }
 
 // STATIC METHODS:
 
-const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException) {
+const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException)
+{
     switch (t) {
     case SIMPLE_TRUTH_VALUE:
         return "SIMPLE_TRUTH_VALUE";
@@ -122,9 +124,10 @@ const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException
     }
 }
 
-TruthValueType TruthValue::strToType(const char* str) throw (InvalidParamException) {
+TruthValueType TruthValue::strToType(const char* str) throw (InvalidParamException)
+{
     //printf("TruthValue::strToType(%s)\n", str);
-    TruthValueType t = (TruthValueType) 0;
+    TruthValueType t = SIMPLE_TRUTH_VALUE;
 
     while (t != NUMBER_OF_TRUTH_VALUE_TYPES) {
         if (!strcmp(str, typeToStr(t))) {
@@ -139,15 +142,17 @@ TruthValueType TruthValue::strToType(const char* str) throw (InvalidParamExcepti
 
 // Factories:
 
-TruthValue* TruthValue::factory(const char* fullTvStr) {
+TruthValue* TruthValue::factory(const char* fullTvStr)
+{
     //printf("TruthValue::factory(): fullTvStr = %s\n", fullTvStr);
-    char typeStr[1<<16];
+    char typeStr[MAX_TRUTH_VALUE_NAME_LEN];
     sscanf(fullTvStr, "%s", typeStr);
     TruthValueType type = strToType(typeStr);
     return factory(type, fullTvStr + strlen(typeStr) + 1);
 }
 
-TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (InvalidParamException) {
+TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (InvalidParamException)
+{
     //printf("TruthValue::factory(): type = %s tvStr = %s\n", TruthValue::typeToStr(type), tvStr);
     switch (type) {
     case SIMPLE_TRUTH_VALUE:
@@ -168,7 +173,8 @@ TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (I
 }
 
 
-void TruthValue::DeleteAndSetDefaultTVIfPertinent(TruthValue** tv) {
+void TruthValue::DeleteAndSetDefaultTVIfPertinent(TruthValue** tv)
+{
     if (*tv != &(TruthValue::DEFAULT_TV()) &&
             (*tv)->getType() == DEFAULT_TV().getType() &&
             (*tv)->getMean() == DEFAULT_TV().getMean() &&
