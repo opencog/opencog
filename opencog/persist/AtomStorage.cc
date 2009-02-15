@@ -577,6 +577,7 @@ void AtomStorage::do_store_atom(const Atom *atom, Handle h, int height)
 		// Recurse.
 		do_store_atom(ao, ho, height-1);
 	}
+	do_store_single_atom(atom, h, 0);
 }
 
 /* ================================================================ */
