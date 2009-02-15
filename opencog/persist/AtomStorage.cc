@@ -312,6 +312,9 @@ AtomStorage::AtomStorage(const char * dbname,
 		db_typename[i] = NULL;
 	}
 
+	local_id_cache_is_inited = false;
+	if (!connected()) return;
+
 	reserve();
 }
 
@@ -542,6 +545,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
  */
 void AtomStorage::storeAtom(const Atom *atom)
 {
+	get_ids();
 	Handle h = TLB::getHandle(atom);
 	int height = get_height(atom);
 	do_store_atom(atom, h, height);
@@ -582,6 +586,7 @@ void AtomStorage::do_store_atom(const Atom *atom, Handle h, int height)
  */
 void AtomStorage::storeSingleAtom(const Atom *atom)
 {
+	get_ids();
 	Handle h = TLB::getHandle(atom);
 	int height = get_height(atom);
 	do_store_single_atom(atom, h, height);
@@ -819,6 +824,9 @@ bool AtomStorage::atomExists(Handle h)
  */
 void AtomStorage::get_ids(void)
 {
+	if (local_id_cache_is_inited) return;
+	local_id_cache_is_inited = true;
+
 	local_id_cache.clear();
 
 	// It appears that, when the select statment returns more than

@@ -68,6 +68,7 @@ class AtomStorage
 		void rename_tables(void);
 		void create_tables(void);
 
+		bool local_id_cache_is_inited;
 		std::set<Handle> local_id_cache;
 		void get_ids(void);
 		unsigned long getMaxObserved(void);
