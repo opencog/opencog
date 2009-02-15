@@ -32,6 +32,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/NullTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -114,6 +115,8 @@ const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException
     switch (t) {
     case SIMPLE_TRUTH_VALUE:
         return "SIMPLE_TRUTH_VALUE";
+    case COUNT_TRUTH_VALUE:
+        return "COUNT_TRUTH_VALUE";
     case INDEFINITE_TRUTH_VALUE:
         return "INDEFINITE_TRUTH_VALUE";
     case COMPOSITE_TRUTH_VALUE:
@@ -157,6 +160,9 @@ TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (I
     switch (type) {
     case SIMPLE_TRUTH_VALUE:
         return SimpleTruthValue::fromString(tvStr);
+        break;
+    case COUNT_TRUTH_VALUE:
+        return CountTruthValue::fromString(tvStr);
         break;
     case INDEFINITE_TRUTH_VALUE:
         return IndefiniteTruthValue::fromString(tvStr);

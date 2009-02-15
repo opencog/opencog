@@ -36,7 +36,9 @@
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/Foreach.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -69,7 +71,9 @@ class AtomStorage::Response
 		Handle handle;
 		int itype;
 		const char * name;
+		int tv_type;
 		double mean;
+		double confidence;
 		double count;
 		const char *outlist;
 		int height;
@@ -89,9 +93,17 @@ class AtomStorage::Response
 			{
 				outlist = colvalue;
 			}
+			if (!strcmp(colname, "tv_type"))
+			{
+				tv_type = atoi(colvalue);
+			}
 			else if (!strcmp(colname, "stv_mean"))
 			{
 				mean = atof(colvalue);
+			}
+			else if (!strcmp(colname, "stv_confidence"))
+			{
+				confidence = atof(colvalue);
 			}
 			else if (!strcmp(colname, "stv_count"))
 			{
@@ -685,18 +697,22 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 	switch (tvt)
 	{
 		case SIMPLE_TRUTH_VALUE:
+		case COUNT_TRUTH_VALUE:
 			STMTF("stv_mean", tv.getMean());
 			STMTF("stv_confidence", tv.getConfidence());
 			STMTF("stv_count", tv.getCount());
-			break;
 		case INDEFINITE_TRUTH_VALUE:
-			fprintf(stderr, "Error: Indefinite truth values are not handled\n");
+		{
+			const IndefiniteTruthValue *itv = static_cast<const IndefiniteTruthValue *>(&tv);
+			STMTF("stv_mean", itv->getL());
+			STMTF("stv_count", itv->getU());
+			STMTF("stv_confidence", tv.getConfidence());
 			break;
+		}
 		case COMPOSITE_TRUTH_VALUE:
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			// const SimpleTruthValue *stv = const_cast<const SimpleTruthValue *>(&tv);
 			fprintf(stderr, "Error: Unknown truth value type\n");
 	}
 
@@ -1033,8 +1049,32 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	}
 
 	// Now get the truth value
-	SimpleTruthValue stv(rp.mean, rp.count);
-	atom->setTruthValue(stv);
+	switch (rp.tv_type)
+	{
+		case SIMPLE_TRUTH_VALUE:
+		{
+			SimpleTruthValue stv(rp.mean, rp.count);
+			atom->setTruthValue(stv);
+			break;
+		}
+		case COUNT_TRUTH_VALUE:
+		{
+			CountTruthValue ctv(rp.mean, rp.confidence, rp.count);
+			atom->setTruthValue(ctv);
+			break;
+		}
+		case INDEFINITE_TRUTH_VALUE:
+		{
+			IndefiniteTruthValue itv(rp.mean, rp.count, rp.confidence);
+			atom->setTruthValue(itv);
+			break;
+		}
+		case COMPOSITE_TRUTH_VALUE:
+			fprintf(stderr, "Error: Composite truth values are not handled\n");
+			break;
+		default:
+			fprintf(stderr, "Error: Unknown truth value type\n");
+	}
 
 	load_count ++;
 	if (load_count%10000 == 0)

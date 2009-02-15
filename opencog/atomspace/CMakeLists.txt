@@ -5,6 +5,7 @@ ADD_LIBRARY (atomspace SHARED
 	AttentionValue.cc
 	ClassServer.cc
 	CompositeTruthValue.cc
+	CountTruthValue.cc
 	CoreUtils.cc
 	FixedIntegerIndex.cc
 	Handle.cc
@@ -68,6 +69,7 @@ INSTALL (FILES
 	classes.h
 	ClassServer.h
 	CompositeTruthValue.h
+	CountTruthValue.h
 	CoreUtils.h
 	Defaults.h
 	FixedIntegerIndex.h

@@ -132,7 +132,7 @@ IndefiniteTruthValue& IndefiniteTruthValue::operator=(const TruthValue & rhs)
             copy(*tv);
         }
     } else {
-#if 0
+#ifndef WIN32
         // The following line was causing a compilation error on MSVC...
         throw RuntimeException(TRACE_INFO,
                                "Cannot assign a TV of type '%s' to one of type '%s'\n",

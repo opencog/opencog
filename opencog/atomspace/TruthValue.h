@@ -63,6 +63,7 @@ const confidence_t MAX_CONFIDENCE = 1.0;
 // NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
 enum TruthValueType {
     SIMPLE_TRUTH_VALUE = 1,
+    COUNT_TRUTH_VALUE,
     INDEFINITE_TRUTH_VALUE,
     COMPOSITE_TRUTH_VALUE,
     NUMBER_OF_TRUTH_VALUE_TYPES
