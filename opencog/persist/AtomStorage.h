@@ -49,10 +49,14 @@ class AtomStorage
 		Atom * makeAtom (Response &, Handle);
 		Atom * getAtom (const char *, int);
 
-		int height(const Atom *);
+		int get_height(const Atom *);
 		int max_height;
 		void setMaxHeight(void);
 		int getMaxHeight(void);
+
+		std::map<Handle, const Atom*> local_handle_map;
+		void do_store_atom(const Atom *, Handle, int);
+		void do_store_single_atom(const Atom *, Handle, int);
 
 		std::string oset_to_string(const std::vector<Handle>&, int);
 		void storeOutgoing(Atom *, Handle);
@@ -101,6 +105,8 @@ class AtomStorage
 		bool connected(void);
 
 		void kill_data(void);
+
+		void storeSingleAtom(const Atom *);
 		void storeAtom(const Atom *);
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);

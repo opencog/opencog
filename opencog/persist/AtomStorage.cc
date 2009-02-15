@@ -490,12 +490,14 @@ TruthValue* AtomStorage::getTV(int tvid)
 /* ================================================================== */
 
 /**
- * return largest distance from this atom to any node under it.
+ * Return largest distance from this atom to any node under it.
  */
-int AtomStorage::height(const Atom *atom)
+int AtomStorage::get_height(const Atom *atom)
 {
 	const Link *l = dynamic_cast<const Link *>(atom);
 	if (NULL == l) return 0;
+
+	local_handle_map.clear();
 
 	int maxd = 0;
 	int arity = l->getArity();
@@ -504,7 +506,9 @@ int AtomStorage::height(const Atom *atom)
 	for (int i=0; i<arity; i++)
 	{
 		Handle h = out[i];
-		int d = height(TLB::getAtom(h));
+		Atom *a = TLB::getAtom(h);
+		local_handle_map[h] = a;  // cache this for quicker lookup!
+		int d = get_height(a);
 		if (maxd < d) maxd = d;
 	}
 	return maxd +1;
@@ -531,10 +535,59 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 
 /* ================================================================ */
 /**
- * Store the indicated atom.
- * Store its truth values too.
+ * Recursively store the indicated atom, and all that it points to.
+ * Store its truth values too. The recursive store is unconditional;
+ * its assumed that all sorts of underlying truuth values have changed, 
+ * so that the whole thing needs to be stored.
  */
 void AtomStorage::storeAtom(const Atom *atom)
+{
+	Handle h = TLB::getHandle(atom);
+	int height = get_height(atom);
+	do_store_atom(atom, h, height);
+}
+
+void AtomStorage::do_store_atom(const Atom *atom, Handle h, int height)
+{
+	const Link *l = dynamic_cast<const Link *>(atom);
+	if (NULL == l)
+	{
+		do_store_single_atom(atom, h, 0);
+		return;
+	}
+
+	int arity = l->getArity();
+	std::vector<Handle> out = l->getOutgoingSet();
+	for (int i=0; i<arity; i++)
+	{
+		Handle ho = out[i];
+
+		// Try to lookup the atom from the local cache, which got built
+		// by the height function. This lookup should be faster than 
+		// the full TLB lookup, esp when TLB is large.
+		Atom *ao;
+		std::map<Handle, const Atom*>::iterator it = local_handle_map.find(ho);
+		if (it == local_handle_map.end()) ao = TLB::getAtom(ho);
+		else ao = const_cast<Atom*>(it->second);
+
+		// Recurse.
+		do_store_atom(ao, ho, height-1);
+	}
+}
+
+/* ================================================================ */
+/**
+ * Store the single, indicated atom.
+ * Store its truth values too.
+ */
+void AtomStorage::storeSingleAtom(const Atom *atom)
+{
+	Handle h = TLB::getHandle(atom);
+	int height = get_height(atom);
+	do_store_single_atom(atom, h, height);
+}
+
+void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 {
 	setup_typemap();
 
@@ -542,8 +595,6 @@ void AtomStorage::storeAtom(const Atom *atom)
 	std::string cols;
 	std::string vals;
 	std::string coda;
-
-	Handle h = TLB::getHandle(atom);
 
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
@@ -593,9 +644,8 @@ void AtomStorage::storeAtom(const Atom *atom)
 		}
 		else
 		{
-			int hei = height(atom);
-			if (max_height < hei) max_height = hei;
-			STMTI("height", hei);
+			if (max_height < aheight) max_height = aheight;
+			STMTI("height", aheight);
 
 #ifdef USE_INLINE_EDGES
 			const Link *l = dynamic_cast<const Link *>(atom);
@@ -1023,7 +1073,7 @@ void AtomStorage::load(AtomTable &table)
 
 bool AtomStorage::store_cb(const Atom *atom)
 {
-	storeAtom(atom);
+	storeSingleAtom(atom);
 	store_count ++;
 	if (store_count%1000 == 0)
 	{
