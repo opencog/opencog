@@ -14,7 +14,9 @@ CREATE TABLE Atoms (
 	-- tvid INT, -- not used, just inline the truth value
 
 	-- Inlined (simple) truth values
+	tv_type  SMALLINT,
 	stv_mean FLOAT,
+	stv_confidence FLOAT,
 	stv_count FLOAT,
 
 	-- distance from this link to farthest Node.

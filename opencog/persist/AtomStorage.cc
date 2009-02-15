@@ -679,14 +679,26 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 
 	// Store the truth value
 	const TruthValue &tv = atom->getTruthValue();
-	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
-	if (NULL == stv)
+	TruthValueType tvt = tv.getType();
+	STMTI("tv_type", tvt);
+
+	switch (tvt)
 	{
-		fprintf(stderr, "Error: non-simple truth values are not handled\n");
-		return;
+		case SIMPLE_TRUTH_VALUE:
+			STMTF("stv_mean", tv.getMean());
+			STMTF("stv_confidence", tv.getConfidence());
+			STMTF("stv_count", tv.getCount());
+			break;
+		case INDEFINITE_TRUTH_VALUE:
+			fprintf(stderr, "Error: Indefinite truth values are not handled\n");
+			break;
+		case COMPOSITE_TRUTH_VALUE:
+			fprintf(stderr, "Error: Composite truth values are not handled\n");
+			break;
+		default:
+			// const SimpleTruthValue *stv = const_cast<const SimpleTruthValue *>(&tv);
+			fprintf(stderr, "Error: Unknown truth value type\n");
 	}
-	STMTF("stv_mean", tv.getMean());
-	STMTF("stv_count", tv.getCount());
 
 	std::string qry = cols + vals + coda;
 	Response rp;
