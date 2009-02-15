@@ -610,25 +610,29 @@ HandleSeq AtomSpace::getIncoming(Handle h) const
         ret[i] = temp[i];
     return ret;
 }
+
 void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
     const TruthValue& currentTv = getTV(h);
-    if (!isNullVersionHandle(vh)) {
+    if (!isNullVersionHandle(vh))
+    {
         CompositeTruthValue ctv = (currentTv.getType() == COMPOSITE_TRUTH_VALUE) ?
                                   CompositeTruthValue((const CompositeTruthValue&) currentTv) :
                                   CompositeTruthValue(currentTv, NULL_VERSION_HANDLE);
         ctv.setVersionedTV(tv, vh);
         TLB::getAtom(h)->setTruthValue(ctv); // always call setTruthValue to update indices
-    } else {
+    }
+    else
+    {
         if (currentTv.getType() == COMPOSITE_TRUTH_VALUE &&
-                tv.getType() != COMPOSITE_TRUTH_VALUE) {
+                tv.getType() != COMPOSITE_TRUTH_VALUE)
+        {
             CompositeTruthValue ctv((const CompositeTruthValue&) currentTv);
             ctv.setVersionedTV(tv, vh);
             TLB::getAtom(h)->setTruthValue(ctv);
-        } else {
+        }
+        else
+        {
             TLB::getAtom(h)->setTruthValue(tv);
         }
     }
@@ -636,15 +640,15 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflus(stdout);
-
     if (TLB::isInvalidHandle(h)) return TruthValue::NULL_TV();
 
     const TruthValue& tv  = TLB::getAtom(h)->getTruthValue();
-    if (isNullVersionHandle(vh)) {
+    if (isNullVersionHandle(vh))
+	 {
         return tv;
-    } else if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
+    }
+	 else if (tv.getType() == COMPOSITE_TRUTH_VALUE)
+	 {
         return ((const CompositeTruthValue&) tv).getVersionedTV(vh);
     }
     return TruthValue::NULL_TV();

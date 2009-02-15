@@ -194,7 +194,7 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			ret += buff;
 			snprintf(buff, BUFLEN, "%.8g ", itv->getU());
 			ret += buff;
-			snprintf(buff, BUFLEN, "%.8g)", itv->getConfidence());
+			snprintf(buff, BUFLEN, "%.8g)", itv->getConfidenceLevel());
 			ret += buff;
 			return ret;
 		}

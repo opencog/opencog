@@ -87,7 +87,7 @@ TruthValue& TruthValue::operator=(const TruthValue & rhs)
 TruthValue* TruthValue::merge(const TruthValue& other) const
 {
 #if 1
-    // TODO: Use the approach with dynamic cast bellow
+    // TODO: Use the approach with dynamic cast below
     // if we're going to have subclasses of CompositeTruthValue.
     // For now, this approach using getType() is more efficient.
     if (other.getType() == COMPOSITE_TRUTH_VALUE) {

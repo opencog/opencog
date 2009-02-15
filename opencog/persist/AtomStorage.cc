@@ -707,7 +707,7 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 			const IndefiniteTruthValue *itv = static_cast<const IndefiniteTruthValue *>(&tv);
 			STMTF("stv_mean", itv->getL());
 			STMTF("stv_count", itv->getU());
-			STMTF("stv_confidence", tv.getConfidence());
+			STMTF("stv_confidence", itv->getConfidenceLevel());
 			break;
 		}
 		case COMPOSITE_TRUTH_VALUE:
