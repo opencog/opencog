@@ -26,7 +26,7 @@ using namespace opencog;
  */
 SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 {
-	std::string cmdname = decode_string (command, "cog-ad-hoc");
+	std::string cmdname = decode_string (command, "cog-ad-hoc", "string command name");
 
 	if (0 == cmdname.compare("do-wsd"))
 	{

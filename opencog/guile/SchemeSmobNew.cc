@@ -189,10 +189,10 @@ Type SchemeSmob::validate_node (SCM stype, const char *subrname)
 	return t;
 }
 
-std::string SchemeSmob::decode_string (SCM sname, const char *subrname)
+std::string SchemeSmob::decode_string (SCM sname, const char *subrname, const char * msg)
 {
 	if (scm_is_false(scm_string_p(sname)))
-		scm_wrong_type_arg_msg(subrname, 2, sname, "string name for the node");
+		scm_wrong_type_arg_msg(subrname, 2, sname, msg);
 
 	char * cname = scm_to_locale_string(sname);
 	std::string name = cname;
@@ -206,7 +206,7 @@ std::string SchemeSmob::decode_string (SCM sname, const char *subrname)
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
 	Type t = validate_node(stype, "cog-new-node");
-	std::string name = decode_string (sname, "cog-new-node");
+	std::string name = decode_string (sname, "cog-new-node", "string name for the node");
 
 	// Now, create the actual node... in the actual atom space.
 	const TruthValue *tv = get_tv_from_list(kv_pairs);
@@ -227,7 +227,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
 	Type t = validate_node(stype, "cog-node");
-	std::string name = decode_string (sname, "cog-node");
+	std::string name = decode_string (sname, "cog-node", "string name for the node");
 
 	// Now, look for the actual node... in the actual atom space.
 	AtomSpace *as = CogServer::getAtomSpace();

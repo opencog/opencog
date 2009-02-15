@@ -93,7 +93,7 @@ class SchemeSmob
 		static SCM ss_ad_hoc(SCM, SCM);
 
 		// Misc utilities
-		static std::string decode_string (SCM, const char *);
+		static std::string decode_string (SCM, const char *, const char *);
 		static std::string to_string(SCM);
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
