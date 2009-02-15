@@ -1,4 +1,45 @@
 
+                      Counting Statistics
+                      -------------------
+                   Linas Vepstas February 2009
+
+Until now, statistical data gathering in the OpenCog NLP pipeline has
+required the creation of SQL databases to the collected information.
+These databases have been in purely custom-built to hold information
+on the specific items of interest; they are not general in any way, and
+require considerable effort for each new relation. The goal of the work
+here is to provide a uniform infrastructure for statistical data 
+gathering and processing within OpenCog.
+
+Statistics gathered for NLP input can be used to discern patterns and
+relationships in the input.  An example of such are minimum-spanning-tree
+dependency parsers, such as the Yuret algorithm, described below. More
+generally, the concept of hierarchical mutual information can be used
+to identify data clusters, thus extracting semantic content in a
+statistical manner.
+
+Statistics gathering are to be done using the CountTruthValue class,
+which includes a counter, together with atom persistence, allowing for
+a much larger hypergraph than what can be kept in RAM.  As text is
+processed, the relevent atoms are pulled in from persistent store,
+thier counts updated, and then stored back.  It is eventually planned
+to tie this to the short-term importance mechanism for RAM management.
+
+At this time, all data mining, including the computation of conditional
+probabilities, mutual information, and hierarchical clustering, is 
+envisioned to be done off-line.
+
+Hypergraphs specific to NLP
+---------------------------
+
+sense, inflected-word, disjunct.
+
+link-type, left-word-sense, right-word-sense, left, right disjunct.
+
+
+
+
+
                         Lexical Attraction
                         ------------------
                      Linas Vepstas June 2008

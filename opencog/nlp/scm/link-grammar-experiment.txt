@@ -20,7 +20,7 @@ name properties (e.g. allegiance.n aloofness.n)
 Once one stares at link-grammar for a while, one
 realizes that these kinds of problems are rife. They
 would take a huge effort to fix, in piecemeal fashion.
-This is why I am so interested in pursuing a statistical
+This is why I am interested in pursuing a statistical
 approach: I want to gather a large database of actual
 usage, counting the frequency of (disjunct, word-pair)
 and then using these to spot groupings.
