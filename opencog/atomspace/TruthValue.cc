@@ -55,17 +55,17 @@ const TruthValue& TruthValue::DEFAULT_TV()
     return *instance;
 }
 
-//const TruthValue& TruthValue::TRUE_TV() = SimpleTruthValue(MAX_TRUTH, MAX_TV_COUNT);
+//const TruthValue& TruthValue::TRUE_TV() = SimpleTruthValue(MAX_TRUTH, 1.0e35);
 const TruthValue& TruthValue::TRUE_TV()
 {
-    static TruthValue* instance = new SimpleTruthValue(MAX_TRUTH, MAX_TV_COUNT);
+    static TruthValue* instance = new SimpleTruthValue(MAX_TRUTH, 1.0e35);
     return *instance;
 }
 
-//const TruthValue& TruthValue::FALSE_TV() = SimpleTruthValue(0.0f, MAX_TV_COUNT);
+//const TruthValue& TruthValue::FALSE_TV() = SimpleTruthValue(0.0f, 1.0e35);
 const TruthValue& TruthValue::FALSE_TV()
 {
-    static TruthValue* instance = new SimpleTruthValue(0.0f, MAX_TV_COUNT);
+    static TruthValue* instance = new SimpleTruthValue(0.0f, 1.0e35);
     return *instance;
 }
 

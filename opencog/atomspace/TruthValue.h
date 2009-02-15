@@ -54,10 +54,10 @@ typedef std::vector<confidence_t> confidence_seq;
 typedef strength_seq::iterator confidence_seq_it;
 typedef strength_seq::const_iterator confidence_seq_const_it;
 
-// TODO: These variables were moved from reasoning/StdAfx.h as they were. Find a better
-// implementation for them...
-const strength_t MAX_TRUTH    =     1.0;
-const count_t MAX_TV_COUNT = 10000.0;
+// TODO: This variable was moved from reasoning/StdAfx.h as it was. Find a better
+// implementation for it... (???)
+const strength_t MAX_TRUTH  = 1.0;
+const confidence_t MAX_CONFIDENCE = 1.0;
 
 // TruthValue types
 // NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
@@ -100,12 +100,12 @@ public:
     static const TruthValue& DEFAULT_TV();
     /**
      * The shared reference to a special TRUE (Simple) TruthValue
-     * object with MAX_TRUTH mean and MAX_TV_COUNT count.
+     * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count.
      */
     static const TruthValue& TRUE_TV();
     /**
      * The shared reference to a special FALSE (Simple) TruthValue
-     * object with 0 mean and MAX_TV_COUNT count.
+     * object with 0 mean and MAX_TV_CONFIDENCE count.
      */
     static const TruthValue& FALSE_TV();
     /**
