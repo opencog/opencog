@@ -320,14 +320,36 @@ interface.
 
 == cog-new-stv mean confidence
       Create a SimpleTruthValue with the given mean and confidence.
-      Unlike atoms, simple truth values are ephemeral: they are
-      automatically garbage-collected when no longer needed.
+      Unlike atoms, truth values are ephemeral: they are automatically
+      garbage-collected when no longer needed.
 
       Throws errors if mean and confidence are not floating-point
       values.
       Example:
           ; Create a new simple truth value:
           guile> (cog-new-stv 0.7 0.9)
+
+== cog-new-ctv mean confidence count
+      Create a CountTruthValue with the given mean, confidence and count.
+      Unlike atoms, truth values are ephemeral: they are automatically
+      garbage-collected when no longer needed.
+
+      Throws errors if mean, confidence and count are not floating-point
+      values.
+      Example:
+          ; Create a new count truth value:
+          guile> (cog-new-ctv 0.7 0.9 44.0)
+
+== cog-new-itv lower upper confidence
+      Create an IndefiniteTruthValue with the given lower, upper and confidence.
+      Unlike atoms, truth values are ephemeral: they are automatically
+      garbage-collected when no longer needed.
+
+      Throws errors if lower, upper and confidence are not floating-point
+      values.
+      Example:
+          ; Create a new indefinite truth value:
+          guile> (cog-new-itv 0.7 0.9 0.6)
 
 == cog-tv? exp
       Return #t if exp is a truth value, else return #f
