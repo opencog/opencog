@@ -116,8 +116,8 @@ void SchemeSmob::register_procs(void)
 
 	// Truth-values
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
-	scm_c_define_gsubr("cog-new-ctv",           2, 0, 0, C(ss_new_ctv));
-	scm_c_define_gsubr("cog-new-itv",           2, 0, 0, C(ss_new_itv));
+	scm_c_define_gsubr("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
+	scm_c_define_gsubr("cog-new-itv",           3, 0, 0, C(ss_new_itv));
 	scm_c_define_gsubr("cog-tv?",               1, 0, 0, C(ss_tv_p));
 	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
