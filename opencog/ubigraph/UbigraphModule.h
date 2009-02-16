@@ -1,7 +1,7 @@
 /*
  * opencog/ubigraph/UbigraphModule.h
  *
- * Copyright (C) 2009 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008-2009 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
  * Written by Jared Wigmore <jared.wigmore@gmail.com>
@@ -33,6 +33,8 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
+#include "Ubigrapher.h"
+
 namespace opencog
 {
 
@@ -42,11 +44,13 @@ class UbigraphModule : public Module
 {
 private:
 
-   DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph", do_ubigraph, 
+    DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph", do_ubigraph, 
         "ubigraph prototype command",
         "Usage: ubigraph\n\n"
         "test the ubigraph prototype"
-   )
+    )
+
+    Ubigrapher g;
 
 public:
 

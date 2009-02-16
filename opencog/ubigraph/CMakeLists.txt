@@ -1,5 +1,6 @@
 ADD_LIBRARY (ubigraph SHARED
-	UbigraphModule 
+	UbigraphModule
+	Ubigrapher
 )
 
 INCLUDE_DIRECTORIES (
@@ -26,3 +27,8 @@ INSTALL (TARGETS ubigraph
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
+INSTALL (FILES
+	UbigraphModule.h
+	Ubigrapher.h
+DESTINATION "include/opencog/atomspace"
+)
