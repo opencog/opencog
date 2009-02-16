@@ -25,22 +25,22 @@ using namespace opencog;
 
 void HandleSeqIndex::insert(HandleSeq seq, Handle h)
 {
-	// idx.insert(std::pair<std::string,Handle>(str,h));
+	idx.insert(std::pair<HandleSeq,Handle>(seq,h));
 }
 
 Handle HandleSeqIndex::get(HandleSeq seq) const
 {
-	std::map<std::string,Handle>::const_iterator it;
+	std::map<HandleSeq,Handle>::const_iterator it;
 
-	it = idx.find(str);
+	it = idx.find(seq);
 	if (it != idx.end()) return it->second;
 
 	return Handle::UNDEFINED;
 }
 
-void HandleSeqIndex::remove(HandleSeqstr, Handle h)
+void HandleSeqIndex::remove(HandleSeq seq, Handle h)
 {
-	idx.erase(str);
+	idx.erase(seq);
 }
 
 size_t HandleSeqIndex::size(void) const
@@ -50,7 +50,7 @@ size_t HandleSeqIndex::size(void) const
 
 void HandleSeqIndex::remove(bool (*filter)(Handle))
 {
-	std::map<std::string,Handle>::iterator i, j;
+	std::map<HandleSeq,Handle>::iterator i, j;
 	
 	i = idx.begin();
 	while (i != idx.end())
@@ -58,7 +58,7 @@ void HandleSeqIndex::remove(bool (*filter)(Handle))
 		j = i;
 		i++;
 		if (filter(j->second))
-			idx.erase(j->first.c_str());
+			idx.erase(j->first);
 	}
 }
 

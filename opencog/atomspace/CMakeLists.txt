@@ -11,6 +11,7 @@ ADD_LIBRARY (atomspace SHARED
 	Handle.cc
 	HandleEntry.cc
 	HandleIterator.cc
+	HandleSeqIndex.cc
 	HandleSet.cc
 	HandleTemporalPair.cc
 	HandleTemporalPairEntry.cc
@@ -80,6 +81,7 @@ INSTALL (FILES
 	HandleEntry.h
 	HandleIterator.h
 	HandleMap.h
+	HandleSeqIndex.h
 	HandleSet.h
 	HandleTemporalPairEntry.h
 	HandleTemporalPair.h

@@ -37,7 +37,7 @@ class HandleSeqIndex:
 	public AtomIndex<HandleSeq,Handle>
 {
 	private:
-		std::map<std::string, Handle> idx;
+		std::map<HandleSeq, Handle> idx;
 
 	public:
 		virtual void insert(HandleSeq, Handle);
