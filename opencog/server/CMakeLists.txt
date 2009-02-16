@@ -1,6 +1,6 @@
 INCLUDE_DIRECTORIES (
 	${CSOCKETS_INCLUDE_DIRS}
-	#### ${ODBC_INCLUDE_DIRS}
+	${GUILE_INCLUDE_DIRS}
 )
 
 ADD_LIBRARY (builtinreqs SHARED
@@ -30,15 +30,22 @@ ADD_LIBRARY (server SHARED
 	ConsoleSocket
 	SocketHolder
 	Agent
-    SystemActivityTable
-#  XXX  need to re-enable loading of files, for Joel.
-#	load-file
+	SystemActivityTable
+	load-file
 )
 
-TARGET_LINK_LIBRARIES(server
-	util
-	atomspace
-)
+IF (GUILE_FOUND)
+	TARGET_LINK_LIBRARIES(server
+		util
+		atomspace
+		smob
+	)
+ELSE (GUILE_FOUND)
+	TARGET_LINK_LIBRARIES(server
+		util
+		atomspace
+	)
+ENDIF (GUILE_FOUND)
 
 # to ease testing/debugging modules on the source tree
 IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -55,6 +62,7 @@ TARGET_LINK_LIBRARIES(cogserver
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
+	${GUILE_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_DIRECTORIES "${BOOST_LIBRARY_DIRS}")
