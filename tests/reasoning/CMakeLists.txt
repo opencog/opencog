@@ -43,9 +43,15 @@ LINK_LIBRARIES (
 )
 
 
-ADD_CXXTEST(FormulaKitUTest)
 #ADD_CXXTEST(XMLNodeLoaderUTest)
-ADD_CXXTEST(IndefinitePLNFormulaUTest)
-ADD_CXXTEST(AtomSpaceWrapperUTest)
-ADD_CXXTEST(PLNUTest)
+
+# PLN tests require XML libraries, because libpln.so requires them because AtomSpaceWrapper
+# requires them.  If AtomSpaceWrapper were refactored,this would not be an issue ... 
+IF (EXPAT_FOUND)
+	ADD_CXXTEST(FormulaKitUTest)
+	ADD_CXXTEST(IndefinitePLNFormulaUTest)
+	ADD_CXXTEST(AtomSpaceWrapperUTest)
+	ADD_CXXTEST(PLNUTest)
+ENDIF (EXPAT_FOUND)
+
 

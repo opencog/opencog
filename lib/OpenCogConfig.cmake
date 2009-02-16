@@ -31,7 +31,6 @@ ELSE (WIN32)
 ENDIF (WIN32)
 
 FIND_PACKAGE(CSockets REQUIRED)
-FIND_PACKAGE(EXPAT REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
 
 SET(Boost_USE_STATIC_LIBS OFF)
@@ -71,13 +70,17 @@ IF (GSL_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GSL)
 ENDIF (GSL_FOUND)
 
+# XML parsing library
+FIND_PACKAGE(EXPAT)
+IF (EXPAT_FOUND)
+	ADD_DEFINITIONS(-DHAVE_EXPAT)
+ENDIF (EXPAT_FOUND)
+
 # At this time,. there is no reason to build with memcached for 
 # any "normal" use, so just stub it out.
 # IF (LIBMEMCACHED_FOUND)
 #	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
 # ENDIF (LIBMEMCACHED_FOUND)
-
-
 
 
 # set variables with the dependencies of each opencog component
