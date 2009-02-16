@@ -42,7 +42,7 @@ namespace opencog
  * XXX FixMe! 
  */
 class HandleSeqIndex:
-	public AtomIndex<const HandleSeq,Handle>
+	public AtomIndex<const HandleSeq &,Handle>
 {
 	private:
 		std::map<const HandleSeq, Handle> idx;

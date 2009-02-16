@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleEntry.h>
@@ -41,7 +42,11 @@ void LinkIndex::insertHandle(Handle h)
 	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
-	hsi.insertHandle(h);  // XXX perf optimization if we pass atom not handle!
+
+	Link *l = dynamic_cast<Link *>(a);
+	if (NULL == l) return;
+
+	hsi.insert(l->getOutgoingSet(),h);
 }
 
 void LinkIndex::removeHandle(Handle h)
@@ -49,7 +54,11 @@ void LinkIndex::removeHandle(Handle h)
 	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
-	hsi.removeHandle(h);  // XXX perf optimization if we pass atom not handle!
+
+	Link *l = dynamic_cast<Link *>(a);
+	if (NULL == l) return;
+
+	hsi.remove(l->getOutgoingSet(),h);
 }
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const

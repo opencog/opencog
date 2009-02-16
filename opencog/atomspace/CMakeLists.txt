@@ -19,6 +19,7 @@ ADD_LIBRARY (atomspace SHARED
 	ImportanceIndex.cc
 	IndefiniteTruthValue.cc
 	Link.cc
+	LinkIndex.cc
 	md5.c
 	NameIndex.cc
 	Node.cc
@@ -89,6 +90,7 @@ INSTALL (FILES
 	IndefiniteTruthValue.h
 	ImportanceIndex.h
 	Link.h
+	LinkIndex.h
 	md5.h
 	NameIndex.h
 	Node.h
