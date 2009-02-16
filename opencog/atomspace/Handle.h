@@ -75,6 +75,9 @@ public:
 
 };
 
+typedef std::vector<Handle> HandleSeq;
+typedef std::vector<HandleSeq> HandleSeqSeq;
+
 } // namespace opencog
 
 namespace std { namespace tr1 {

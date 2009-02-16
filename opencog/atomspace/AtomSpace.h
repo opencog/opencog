@@ -50,8 +50,6 @@
 namespace opencog
 {
 
-typedef std::vector<Handle> HandleSeq;
-typedef std::vector<HandleSeq> HandleSeqSeq;
 typedef std::vector<HandleSet*> HandleSetSeq;
 
 class AtomSpace
