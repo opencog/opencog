@@ -22,7 +22,7 @@ CREATE TABLE Atoms (
 	-- distance from this link to farthest Node.
 	-- height of Nodes is by definition zero.
 	-- height of Links containing only nodes is one, etc.
-	height INT,
+	height SMALLINT,
 
 	-- The node name, non-empty only for nodes
 	name    TEXT,

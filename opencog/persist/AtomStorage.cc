@@ -714,7 +714,7 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			fprintf(stderr, "Error: Unknown truth value type\n");
+			fprintf(stderr, "Error: store_single: Unknown truth value type\n");
 	}
 
 	std::string qry = cols + vals + coda;
@@ -1074,7 +1074,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			fprintf(stderr, "Error: Unknown truth value type\n");
+			fprintf(stderr, "Error: makeAtom: Unknown truth value type\n");
 	}
 
 	load_count ++;

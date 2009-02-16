@@ -53,6 +53,26 @@ link, is to avoid garbaging the data by having some other counting
 process accidentally make use of this link, and improperly increment
 its count.
 
+One minimal way of refining the "sense" or "meaning" of a word is to
+identify it's part-of-speech. Thus, one is interested in word-pairs
+tagged with part-of-speech. To generalize this, one considers word
+lemmas (word roots or word stems), tagged with part-of-speech, and
+maybe tagged with tense, number, etc.
+
+	FeatureLink                      ; should this be PartOfSpeechLink?
+		WordNode "refer"
+		DefinedLinguisticConceptNode "verb"   ; part of speech tag
+
+	FeatureLink
+		WordNode "refer"
+		DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
+
+	FeatureLink
+		WordNode "refer"
+		DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
+
+
+
 
 triples of (inflected-word, word-sense, disjunct):
 
@@ -80,8 +100,6 @@ EvaluationLink
 
 
 
-Also, lemma-pos pairs
-Also word-pairs
 
 
 
