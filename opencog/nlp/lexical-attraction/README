@@ -37,7 +37,24 @@ information will be kept by maintaining counts on all of the links and
 nodes.  This should be sufficeint for computing conditional 
 probabilities, mutual information and entropy.
 
-tiples of (inflected-word, word-sense, disjunct):
+Consider first word-pairs:
+
+	WordPairLink  ; CountTruthNode stores count
+		WordNode "red"
+		WordNode "baloon"
+
+To determine the proability P(left,right), one needs only the count
+on the WordPairLink, since P(left,right) = N(left,right) / N(*,*)
+That is, the counts on the individual WordNodes are not needed to 
+obtain the word-pair probabilities, mutual information, etc. 
+
+The reason use a WordPairLink, as opposed to recycling some existing
+link, is to avoid garbaging the data by having some other counting 
+process accidentally make use of this link, and improperly increment
+its count.
+
+
+triples of (inflected-word, word-sense, disjunct):
 
 EvaluationLink
     DisjunctNode "S- O+ "            ; link-grammar disjunct
