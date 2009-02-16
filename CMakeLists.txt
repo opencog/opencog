@@ -98,6 +98,9 @@ IF (LINK_GRAMMAR_FOUND)
 	ADD_DEFINITIONS(-DLINK_GRAMMAR_DATA_DIR=\\"${LINK_GRAMMAR_DATA_DIR}/\\")
 ENDIF (LINK_GRAMMAR_FOUND)
 
+# XML-RPC and Ubigraph client library, used by the ubigraph module
+FIND_PACKAGE(LibUbiGraphClient)
+FIND_PACKAGE(XMLRPC)
 
 # At this time,. there is no reason to build with memcached for
 # any "normal" use, so just stub it out.

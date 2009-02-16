@@ -14,6 +14,7 @@ INSTALL (FILES
 	FindSTLPort.cmake
 	FindUnixODBC.cmake
     FindLinkGrammar.cmake
+    FindLibUbigraphClient.cmake
 	OpenCogConfig.cmake
 	DESTINATION "${DATADIR}/cmake"
 )
