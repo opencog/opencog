@@ -64,7 +64,7 @@ namespace test
 namespace haxx
 {
     extern bool AllowFW_VARIABLENODESinCore;
-    extern uint maxDepth;
+//    extern uint maxDepth;
     extern reasoning::BITNodeRoot* bitnoderoot;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
@@ -768,12 +768,12 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
     spawn_mode spawning)
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    if (this->depth == haxx::maxDepth)
+/*    if (this->depth == haxx::maxDepth)
     {
-        puts("haxx::maxDepth !!! "); /*press enter");
-        getc(stdin);*/
+        puts("haxx::maxDepth !!! "); //press enter");
+        //getc(stdin);
         return NULL;
-    }
+    }*/
 
     /// If any new requirement can, upon suitable substitutions,
     /// produce a requirement higher in the tree, reject it to avoid

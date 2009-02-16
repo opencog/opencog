@@ -8,10 +8,10 @@ namespace test
     int attachs=0;
 }
 
-namespace haxx
-{
-    unsigned int maxDepth = 250;
-}
+//namespace haxx
+//{
+//    unsigned int maxDepth = 250;
+//}
 
 namespace reasoning
 {
