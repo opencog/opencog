@@ -39,6 +39,7 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
@@ -107,6 +108,7 @@ private:
      */
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
+    LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -317,7 +319,9 @@ public:
         return getHandle(n->getName().c_str(), n->getType());
     }
 
-    Handle getHandle(Type, const std::vector<Handle>&) const;
+    Handle getHandle(Type t, const HandleSeq &seq) const {
+        return linkIndex.getHandle(t, seq);
+    }
     Handle getHandle(const Link* l) const {
         return getHandle(l->getType(), l->getOutgoingSet());
     }

@@ -340,9 +340,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         // Wouldn't that be the more correct thing to do?
         atomTable.atomSet.insert(node);
 
-        Handle handle = TLB::holdsHandle(node);
-        if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(node);
-
+        Handle handle = TLB::getHandle(node);
         atomTable.nodeIndex.insertHandle(handle);
         atomTable.typeIndex.insertHandle(handle);
         atomTable.importanceIndex.insertHandle(handle);
@@ -371,10 +369,9 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         // Wouldn't that be the more correct thing to do?
         atomTable.atomSet.insert(link);
 
-        Handle handle = TLB::holdsHandle(link);
-        if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(link);
-
+        Handle handle = TLB::getHandle(link);
         atomTable.typeIndex.insertHandle(handle);
+        atomTable.linkIndex.insertHandle(handle);
         atomTable.targetTypeIndex.insertHandle(handle);
         atomTable.importanceIndex.insertHandle(handle);
         atomTable.predicateIndex.insertHandle(handle);
@@ -509,6 +506,11 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
     } else {
         logger().warn("No HandleMap while reading atom from file: %p (type = %d)", atom, atom->getType());
     }
+
+    // Put it into the atom into the TLB with the correct value!
+    Handle existingHandle = TLB::holdsHandle(atom);
+    if (TLB::isInvalidHandle(existingHandle)) TLB::addAtom(atom, atomHandle);
+    else logger().warn(" Handle already exists in the TLB!!\n");
 
     // reads the incoming set of the atom, including the number of incoming
     // atoms

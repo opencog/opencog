@@ -178,70 +178,6 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
     return set;
 }
 
-Handle AtomTable::getHandle(Type desired_type, const std::vector<Handle>& handles) const
-{
-    int arity = handles.size();
-    for (int i = 0; i < arity; i++)
-    {
-        if (TLB::isInvalidHandle(handles[i])) return Handle::UNDEFINED;
-    }
-
-    // Ohh, yuck. For each type, there can be one single link which has
-    // no members. That's just plain goofy. Take the slow boat to China.
-    // Whoever is doing this is getting performance-penalized badly.
-    if (0 == arity)
-    {
-        HandleEntry *he = typeIndex.getHandleSet(desired_type, false);
-        Handle gotit = Handle::UNDEFINED;
-        while (he)
-        {
-            Atom *a = TLB::getAtom(he->handle);
-            Link *l = static_cast<Link *>(a);
-            if (0 == l->getArity())
-            {
-                gotit = he->handle;
-            }
-            he = he->next;
-        }
-        if (he) delete he;
-
-        return gotit;
-    }
-
-    // OK. We need to find some link in this atom table that has
-    // the same type, and the same outgoing set. We do this by 
-    // looping over every other link which has the same handle 
-    // in the last position, and checking each, one by one.
-    Handle h = handles[arity-1];
-    Atom *a = TLB::getAtom(h);  // atom can never be null ... 
-    const HandleEntry *he = a->getIncomingSet();
-
-    while(he)
-    {
-        h = he->handle;
-        a = TLB::getAtom(h);
-        if (a->getType() == desired_type)
-        {
-            const Link *l = dynamic_cast<const Link *>(a);
-            if (l->getArity() == arity)
-            {
-                // OK, got thew right type and arity. Do the outgoing
-                // sets actually match?
-                const std::vector<Handle>& lo = l->getOutgoingSet();
-                int i;
-                for (i = 0; i < arity; i++)
-                {
-                   if (handles[i] != lo[i]) break;
-                }
-                if (i == arity) return h; // found it !!
-            }
-        }
-        he = he->next;
-    }
-
-    return Handle::UNDEFINED;
-}
-
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      Type* types,
                                      bool* subclasses,
@@ -516,6 +452,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
     nodeIndex.insertHandle(handle);
+    linkIndex.insertHandle(handle);
     typeIndex.insertHandle(handle);
     targetTypeIndex.insertHandle(handle);
     importanceIndex.insertHandle(handle);
@@ -613,6 +550,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
     nodeIndex.removeHandle(handle);
+    linkIndex.removeHandle(handle);
     typeIndex.removeHandle(handle);
     targetTypeIndex.removeHandle(handle);
     importanceIndex.removeHandle(handle);
@@ -677,6 +615,7 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     if (extractedHandles == NULL) return;
 
     nodeIndex.remove(decayed);
+    linkIndex.remove(decayed);
     typeIndex.remove(decayed);
     importanceIndex.remove(decayed);
     targetTypeIndex.remove(decayed);
