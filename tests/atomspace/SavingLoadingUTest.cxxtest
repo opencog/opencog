@@ -113,33 +113,58 @@ public:
         HandleSeq outgoing;
         Handle h6 = atomSpace.addLink(LIST_LINK, outgoing);
         outgoing.push_back(h1);
-        atomSpace.addLink(LIST_LINK, outgoing);
+        Handle h13 = atomSpace.addLink(LIST_LINK, outgoing);
         outgoing.push_back(h2);
         outgoing.push_back(h3);
-        atomSpace.addLink(LIST_LINK, outgoing);
+        Handle h14 = atomSpace.addLink(LIST_LINK, outgoing);
         outgoing.clear();
         outgoing.push_back(h4);
         outgoing.push_back(h5);
         Handle h9 = atomSpace.addLink(LIST_LINK, outgoing);
 
         // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
-        atomSpace.addTimeInfo(h1, Temporal(0, 0));
-        atomSpace.addTimeInfo(h4, Temporal(10, 100));
-        atomSpace.addTimeInfo(h6, Temporal(0, 0));
-        atomSpace.addTimeInfo(h9, Temporal(0, 0));
-        atomSpace.addTimeInfo(h9, Temporal(10, 100));
-        atomSpace.addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
+        Handle h15 = atomSpace.addTimeInfo(h1, Temporal(0, 0));
+        Handle h16 = atomSpace.addTimeInfo(h4, Temporal(10, 100));
+        Handle h17 = atomSpace.addTimeInfo(h6, Temporal(0, 0));
+        Handle h18 = atomSpace.addTimeInfo(h9, Temporal(0, 0));
+        Handle h19 = atomSpace.addTimeInfo(h9, Temporal(10, 100));
+        Handle h20 = atomSpace.addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
 
         Handle h10 = atomSpace.addNode(WORD_NODE, "fido ferraris");
         Handle h11 = atomSpace.addNode(SL_PET_NODE, "fido");
         outgoing.clear();
         outgoing.push_back(h10);
         outgoing.push_back(h11);
-        atomSpace.addLink(ASSOCIATIVE_LINK, outgoing);
+        Handle h21 = atomSpace.addLink(ASSOCIATIVE_LINK, outgoing);
         Handle h12 = atomSpace.addNode(SL_PET_NODE, "fido");
         TS_ASSERT(h11 == h12);
 
         savingLoading.save(DUMP_FILENAME, atomSpace);
+
+        // Clear out the TLB, as otherwise, during the load phase,
+        // the TLB will return atoms from the save phase, and that
+        // basically would just be a mess.
+        TLB::removeAtom(TLB::getAtom(h1));
+        TLB::removeAtom(TLB::getAtom(h2));
+        TLB::removeAtom(TLB::getAtom(h3));
+        TLB::removeAtom(TLB::getAtom(h4));
+        TLB::removeAtom(TLB::getAtom(h5));
+        TLB::removeAtom(TLB::getAtom(h6));
+        // TLB::removeAtom(TLB::getAtom(h7));
+        // TLB::removeAtom(TLB::getAtom(h8));
+        TLB::removeAtom(TLB::getAtom(h9));
+        TLB::removeAtom(TLB::getAtom(h10));
+        TLB::removeAtom(TLB::getAtom(h11));
+        TLB::removeAtom(TLB::getAtom(h12));
+        TLB::removeAtom(TLB::getAtom(h13));
+        TLB::removeAtom(TLB::getAtom(h14));
+        TLB::removeAtom(TLB::getAtom(h15));
+        TLB::removeAtom(TLB::getAtom(h16));
+        TLB::removeAtom(TLB::getAtom(h17));
+        TLB::removeAtom(TLB::getAtom(h18));
+        TLB::removeAtom(TLB::getAtom(h19));
+        TLB::removeAtom(TLB::getAtom(h20));
+        TLB::removeAtom(TLB::getAtom(h21));
         printf("runSaving() ended\n");
     }
 
@@ -318,14 +343,14 @@ public:
     }
 
     void testSavingLoading() {
-        AtomSpace atomSpace1;
-        runSaving(atomSpace1);
-        AtomSpace atomSpace2;
-        runLoading(atomSpace2);
+        AtomSpace *atomSpace1 = new AtomSpace();
+        runSaving(*atomSpace1);
+        AtomSpace *atomSpace2 = new AtomSpace();
+        runLoading(*atomSpace2);
 
-        runSaving(atomSpace2);
-        AtomSpace atomSpace4;
-        runLoading(atomSpace4);
+        runSaving(*atomSpace2);
+        AtomSpace *atomSpace4 = new AtomSpace();
+        runLoading(*atomSpace4);
 
         if (!CxxTest::TestTracker::tracker().testFailed())
             std::remove(DUMP_FILENAME);
