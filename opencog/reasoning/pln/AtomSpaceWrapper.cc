@@ -525,9 +525,15 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
         cprintf(5, "thms clear...");
     	CrispTheoremRule::thms.clear();
     	
+        // Use the XML reader only if XML is available.
+#if HAVE_EXPAT
         std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(fname.c_str()));
         NMXmlParser::loadXML(readers, AS_PTR);        
         delete readers[0];
+#else
+        LOG(0, "Thive version of opencog has no XML support"); 
+        return false;
+#endif /* HAVE_EXPAT */
 
         // re-generate CrispTheoremRule::thms
         makeTheorems();

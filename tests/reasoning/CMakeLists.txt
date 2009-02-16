@@ -43,14 +43,18 @@ LINK_LIBRARIES (
 )
 
 
+# tests that require XML libraries.
+# IF (EXPAT_FOUND)
 #ADD_CXXTEST(XMLNodeLoaderUTest)
+# ENDIF (EXPAT_FOUND)
 
-# PLN tests require XML libraries, because libpln.so requires them because AtomSpaceWrapper
-# requires them.  If AtomSpaceWrapper were refactored,this would not be an issue ... 
+ADD_CXXTEST(FormulaKitUTest)
+ADD_CXXTEST(IndefinitePLNFormulaUTest)
+ADD_CXXTEST(AtomSpaceWrapperUTest)
+
+# At this point, PLNUTest requires libexpat, and will fail without it, since axioms 
+# are loaded from XML files. See AtomSpaceWrapper.cc for details.
 IF (EXPAT_FOUND)
-	ADD_CXXTEST(FormulaKitUTest)
-	ADD_CXXTEST(IndefinitePLNFormulaUTest)
-	ADD_CXXTEST(AtomSpaceWrapperUTest)
 	ADD_CXXTEST(PLNUTest)
 ENDIF (EXPAT_FOUND)
 
