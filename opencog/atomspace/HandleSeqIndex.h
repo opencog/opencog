@@ -32,17 +32,25 @@ namespace opencog
 
 /**
  * Implements a Handle-sequence index as an RB-tree (C++ map)
+ *
+ * XXX Notice that it this wastes a fair amount of RAM by storing a 
+ * copy of a HandleSeq --- it could save a fair amount of space by storing
+ * a pointer to the HandleSeq that is in the Link already (at the cost of
+ * some fragility in Link deletion). Alternately, we could use a "HandleSeq 
+ * cache", analogous to a string cache, to ensure only one copy of a
+ * HandleSeq per system...
+ * XXX FixMe! 
  */
 class HandleSeqIndex:
-	public AtomIndex<HandleSeq,Handle>
+	public AtomIndex<const HandleSeq,Handle>
 {
 	private:
-		std::map<HandleSeq, Handle> idx;
+		std::map<const HandleSeq, Handle> idx;
 
 	public:
-		virtual void insert(HandleSeq, Handle);
-		virtual Handle get(HandleSeq) const;
-		virtual void remove(HandleSeq, Handle);
+		virtual void insert(const HandleSeq &, Handle);
+		virtual Handle get(const HandleSeq &) const;
+		virtual void remove(const HandleSeq &, Handle);
 		virtual size_t size(void) const;
 		virtual void remove(bool (*)(Handle));
 };

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/HandleSeqIndex.cc
+ * opencog/atomspace/LinkIndex.h
  *
  * Copyright (C) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -19,46 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _OPENCOG_LINK_INDEX_H
+#define _OPENCOG_LINK_INDEX_H
+
+#include <set>
+#include <vector>
+
 #include <opencog/atomspace/HandleSeqIndex.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/types.h>
 
-using namespace opencog;
-
-void HandleSeqIndex::insert(const HandleSeq &seq, Handle h)
+namespace opencog
 {
-	idx.insert(std::pair<const HandleSeq,Handle>(seq,h));
-}
+class HandleEntry;
 
-Handle HandleSeqIndex::get(const HandleSeq &seq) const
+/**
+ * Implements an (type, HandleSeq) index array of RB-trees (C++ set)
+ */
+class LinkIndex
 {
-	std::map<const HandleSeq,Handle>::const_iterator it;
+	private:
+		std::vector<HandleSeqIndex> idx;
+	public:
+		LinkIndex(void);
+		void insertHandle(Handle);
+		void removeHandle(Handle);
+		void remove(bool (*)(Handle));
 
-	it = idx.find(seq);
-	if (it != idx.end()) return it->second;
+		Handle getHandle(Type type, const HandleSeq&) const;
+		HandleEntry* getHandleSet(Type type, const HandleSeq &, bool subclass) const;
+};
 
-	return Handle::UNDEFINED;
-}
+} //namespace opencog
 
-void HandleSeqIndex::remove(const HandleSeq &seq, Handle h)
-{
-	idx.erase(seq);
-}
-
-size_t HandleSeqIndex::size(void) const
-{
-	return idx.size();
-}
-
-void HandleSeqIndex::remove(bool (*filter)(Handle))
-{
-	std::map<const HandleSeq,Handle>::iterator i, j;
-	
-	i = idx.begin();
-	while (i != idx.end())
-	{
-		j = i;
-		i++;
-		if (filter(j->second))
-			idx.erase(j->first);
-	}
-}
-
+#endif // _OPENCOG_LINK_INDEX_H

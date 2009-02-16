@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/NodeIndex.cc
+ * opencog/atomspace/LinkIndex.cc
  *
  * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/NodeIndex.h>
+#include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-NodeIndex::NodeIndex(void)
+LinkIndex::LinkIndex(void)
 {
 	// The typeIndex is NUMBER_OF_CLASSES+2 because NOTYPE is 
 	// NUMBER_OF_CLASSES+1 and typeIndex[NOTYPE] is asked for if a
@@ -36,38 +36,38 @@ NodeIndex::NodeIndex(void)
 	idx.resize(ClassServer::getNumberOfClasses() + 2);
 }
 
-void NodeIndex::insertHandle(Handle h)
+void LinkIndex::insertHandle(Handle h)
 {
 	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
-	NameIndex &ni = idx[t];
-	ni.insertHandle(h);  // XXX perf optimization if we pass atom not handle!
+	HandleSeqIndex &hsi = idx[t];
+	hsi.insertHandle(h);  // XXX perf optimization if we pass atom not handle!
 }
 
-void NodeIndex::removeHandle(Handle h)
+void LinkIndex::removeHandle(Handle h)
 {
 	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
-	NameIndex &ni = idx[t];
-	ni.removeHandle(h);  // XXX perf optimization if we pass atom not handle!
+	HandleSeqIndex &hsi = idx[t];
+	hsi.removeHandle(h);  // XXX perf optimization if we pass atom not handle!
 }
 
-Handle NodeIndex::getHandle(Type t, const char *name) const
+Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
-	const NameIndex &ni = idx[t];
-	return ni.get(name);
+	const HandleSeqIndex &hsi = idx[t];
+	return hsi.get(seq);
 }
 
-void NodeIndex::remove(bool (*filter)(Handle))
+void LinkIndex::remove(bool (*filter)(Handle))
 {
-	std::vector<NameIndex>::iterator s;
+	std::vector<HandleSeqIndex>::iterator s;
 	for (s = idx.begin(); s != idx.end(); s++)
 	{
 		s->remove(filter);
 	}
 }
 
-HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass) const
+HandleEntry * LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subclass) const
 {
 	if (subclass)
 	{
@@ -79,8 +79,8 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
 			if (ClassServer::isAssignableFrom(type, s))
 			{
-				const NameIndex &ni = idx[s];
-				Handle h = ni.get(name);
+				const HandleSeqIndex &hsi = idx[s];
+				Handle h = hsi.get(seq);
 				if (TLB::isValidHandle(h))
 					he = new HandleEntry(h, he);
 			}
@@ -89,7 +89,7 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 	}
 	else
 	{
-		return new HandleEntry(getHandle(type, name));
+		return new HandleEntry(getHandle(type, seq));
 	}
 }
 
