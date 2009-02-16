@@ -32,9 +32,40 @@ envisioned to be done off-line.
 Hypergraphs specific to NLP
 ---------------------------
 
-sense, inflected-word, disjunct.
+Below follows some of the relations of current interest. Statistical
+information will be kept by maintaining counts on all of the links and
+nodes.  This should be sufficeint for computing conditional 
+probabilities, mutual information and entropy.
 
-link-type, left-word-sense, right-word-sense, left, right disjunct.
+tiples of (inflected-word, word-sense, disjunct):
+
+EvaluationLink
+    DisjunctNode "S- O+ "            ; link-grammar disjunct
+    ListLink
+       WordNode "blah.n"             ; inflected word
+       WordSense "blah::1:32:0:0.0"  ; wordnet sense
+
+Pairs of above:
+
+EvaluationLink
+    LinkGrammarRelationshipNode "MX"
+    ListLink
+        EvaluationLink
+            DisjunctNode "S- O+ MX+ "
+            ListLink
+               WordNode "blah.n"
+               WordSense "blah::1:32:0:0.0"
+        EvaluationLink
+            DisjunctNode "S- MX- O+ "
+            ListLink
+               WordNode "glub.n"
+               WordSense "glub::1:47:0:0.0"
+
+
+
+Also, lemma-pos pairs
+Also word-pairs
+
 
 
 
