@@ -141,30 +141,6 @@ public:
 
         savingLoading.save(DUMP_FILENAME, atomSpace);
 
-        // Clear out the TLB, as otherwise, during the load phase,
-        // the TLB will return atoms from the save phase, and that
-        // basically would just be a mess.
-        TLB::removeAtom(TLB::getAtom(h1));
-        TLB::removeAtom(TLB::getAtom(h2));
-        TLB::removeAtom(TLB::getAtom(h3));
-        TLB::removeAtom(TLB::getAtom(h4));
-        TLB::removeAtom(TLB::getAtom(h5));
-        TLB::removeAtom(TLB::getAtom(h6));
-        // TLB::removeAtom(TLB::getAtom(h7));
-        // TLB::removeAtom(TLB::getAtom(h8));
-        TLB::removeAtom(TLB::getAtom(h9));
-        TLB::removeAtom(TLB::getAtom(h10));
-        TLB::removeAtom(TLB::getAtom(h11));
-        TLB::removeAtom(TLB::getAtom(h12));
-        TLB::removeAtom(TLB::getAtom(h13));
-        TLB::removeAtom(TLB::getAtom(h14));
-        TLB::removeAtom(TLB::getAtom(h15));
-        TLB::removeAtom(TLB::getAtom(h16));
-        TLB::removeAtom(TLB::getAtom(h17));
-        TLB::removeAtom(TLB::getAtom(h18));
-        TLB::removeAtom(TLB::getAtom(h19));
-        TLB::removeAtom(TLB::getAtom(h20));
-        TLB::removeAtom(TLB::getAtom(h21));
         printf("runSaving() ended\n");
     }
 
@@ -342,15 +318,23 @@ public:
         printf("runLoading() ended\n");
     }
 
-    void testSavingLoading() {
+    void testSavingLoading()
+    {
         AtomSpace *atomSpace1 = new AtomSpace();
         runSaving(*atomSpace1);
+        delete atomSpace1;
+
+        // MUST delete atomspace1 before loading atomspace2,
+        // otherwise atoms in the TLB, which have the same
+        // handles, will end up colliding with one another.
         AtomSpace *atomSpace2 = new AtomSpace();
         runLoading(*atomSpace2);
-
         runSaving(*atomSpace2);
+        delete atomSpace2;
+
         AtomSpace *atomSpace4 = new AtomSpace();
         runLoading(*atomSpace4);
+        delete atomSpace4;
 
         if (!CxxTest::TestTracker::tracker().testFailed())
             std::remove(DUMP_FILENAME);
