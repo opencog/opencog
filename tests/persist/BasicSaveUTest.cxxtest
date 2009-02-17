@@ -67,7 +67,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-printf ("duuude its %s\n", config()["TEST_DB_NAME"].c_str());
+			// Get the database logins & etc from the config file.
 			dbname = config()["TEST_DB_NAME"].c_str();
 			username = config()["TEST_DB_USERNAME"].c_str();
 			passwd = config()["TEST_DB_PASSWD"].c_str();
