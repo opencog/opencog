@@ -31,6 +31,10 @@ CREATE TABLE Atoms (
 	outgoing INT[]
 );
 
+-- Indexes, needed for fast node and link lookup.
+CREATE INDEX nodeidx ON Atoms(type, name);
+CREATE INDEX linkidx ON Atoms(type, outgoing);
+
 -- -----------------------------------------------------------
 -- Table of the edges of the Levi craph corresponding 
 -- to the hypergraph. An edge is a (src,dst) pair. The
