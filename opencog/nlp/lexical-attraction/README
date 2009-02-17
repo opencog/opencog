@@ -39,7 +39,7 @@ probabilities, mutual information and entropy.
 
 Consider first word-pairs:
 
-	WordPairLink  ; CountTruthNode stores count
+	WordPairLink  ; CountTruthValue stores count
 		WordNode "red"
 		WordNode "baloon"
 
@@ -72,36 +72,71 @@ maybe tagged with tense, number, etc.
 		DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
 
 
+The above should be gathered together into a SetLink, as the relative
+order is not important.
+
+Thus, pairs of words might be gathered together as:
+
+	CountLink  ; holds CountTruthValue for counting
+		SetLink
+			FeatureLink
+				WordNode "refer"
+				DefinedLinguisticConceptNode "verb"   ; part of speech tag
+			FeatureLink
+				WordNode "refer"
+				DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
+			FeatureLink
+				WordNode "refer"
+				DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
+		SetLink
+			FeatureLink
+				WordNode "to"
+				DefinedLinguisticConceptNode "prep"   ; part of speech tag
 
 
-triples of (inflected-word, word-sense, disjunct):
+Of some interest is the connection between grammatical usage/construction,
+and word sense.  That is, the occurrence of triples of the form
+(inflected-word, word-sense, disjunct). These are used to narrow down
+the likelyhood of a given word sense, given that it was used with a 
+certain disjunct.  That is, we are interested in the conditional 
+probability P(sense |word, disjunct)
 
-EvaluationLink
-    DisjunctNode "S- O+ "            ; link-grammar disjunct
+CountLink                                ; kind-of-like an evaluation link
+    DisjunctNode "S- O+ "                ; link-grammar disjunct
     ListLink
-       WordNode "blah.n"             ; inflected word
-       WordSense "blah::1:32:0:0.0"  ; wordnet sense
+       WordNode "blah.n"                 ; inflected word
+       WordSenseNode "blah::1:32:0:0.0"  ; wordnet sense
 
-Pairs of above:
+Also of interest is not only how syntax affixes meaning to a single
+word, but also how syntax is used to narrow down meanings of pairs
+of words. In particular, we expect to see a lot of collcations here,
+and in particular, collocations involving noun-modifiers. Link-grammar
+uses "AN+" links to denote noun-modifier phrases, e.g. "hand grip",
+"lead glass", "soup bowl", where the modifier is a noun.
 
-EvaluationLink
+Thus, we are lead to consider pairs of the above:
+
+CountLink
     LinkGrammarRelationshipNode "MX"
-    ListLink
-        EvaluationLink
-            DisjunctNode "S- O+ MX+ "
-            ListLink
-               WordNode "blah.n"
-               WordSense "blah::1:32:0:0.0"
-        EvaluationLink
-            DisjunctNode "S- MX- O+ "
-            ListLink
-               WordNode "glub.n"
-               WordSense "glub::1:47:0:0.0"
+    CountLink
+        DisjunctNode "S- O+ MX+ "
+        ListLink
+           WordNode "blah.n"
+           WordSense "blah::1:32:0:0.0"
+    CountLink
+        DisjunctNode "S- MX- O+ "
+        ListLink
+           WordNode "glub.n"
+           WordSense "glub::1:47:0:0.0"
+
+
+Gathering Statistics
+--------------------
+The statistics are meant to be gathered by
 
 
 
-
-
+=======================================================================
 
 
 
