@@ -26,8 +26,6 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <opencog/query/QueryProcessor.h>
-#include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
