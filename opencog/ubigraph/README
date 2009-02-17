@@ -16,10 +16,18 @@ libm
 == Running the module ==
 
 First start the ubigraph server. Then load the libubigraph.so module in cogserver, and run the "ubigraph" command.
+You should run the ubigraph command once, and then the display will update when atoms are added or removed.
 
 == TODO ==
 
-Respond to add/remove atom signals, updating the graph in real-time.
+* Better error handling, especially for if the ubigraph command is run (or an add/remove atom signal happens) while the ubigraph server is not running.
 
-XXX
+* Possibly having a separate command to start the initial display vs to choose which things to show.
 
+* Being able to choose to display only some of the atoms.
+
+* "Themes" to display TruthValues and AttentionValues visually (e.g. as color or size).
+
+* Make FindXMLRPC work correctly re the XMLRPC_LIBRARIES CMake variable.
+
+* [related] Make the UbiGraph client library easier to compile and install.
