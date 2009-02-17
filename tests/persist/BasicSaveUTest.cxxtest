@@ -30,6 +30,7 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -54,12 +55,22 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		BasicSaveUTest(void)
 		{
-			logger().setLevel(Logger::DEBUG);
-			logger().setPrintToStdoutFlag(true);
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-			dbname = "persist-test";
-			username = "linas";
-			passwd = "asdf";
+printf ("duuude its %s\n", config()["TEST_DB_NAME"].c_str());
+			dbname = config()["TEST_DB_NAME"].c_str();
+			username = config()["TEST_DB_USERNAME"].c_str();
+			passwd = config()["TEST_DB_PASSWD"].c_str();
 		}
 
 		~BasicSaveUTest()

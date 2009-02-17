@@ -70,10 +70,16 @@ void Config::reset()
 static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] =
 {
-    CONFDIR,
+    // A bunch of relative paths, typical for the current opencog setup.
     "./",
     "../",
     "../../",
+    "../../../",
+    "./lib/",
+    "../lib/",
+    "../../lib/",
+    "../../../lib/",
+    CONFDIR,
 #ifndef WIN32
     "/etc",
 #endif // !WIN32
@@ -86,24 +92,25 @@ void Config::load(const char* filename)
 {
     if (filename == NULL) filename = DEFAULT_CONFIG_FILENAME;
 
-    // reset to default values
+    // Reset to default values
     reset();
 
+    // Search for the filename in a bunch of typical locations.
     ifstream fin;
     for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i)
     {
         boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
-        configPath /= DEFAULT_CONFIG_FILENAME;
+        configPath /= filename;
         if (boost::filesystem::exists(configPath))
         {
             // Read and process the config file
-            fin.open(filename);
+            fin.open(configPath.string().c_str());
             if (fin && fin.good() && fin.is_open()) break;
         }
     }
 
     // Whoops, failed.
-    if (!fin || !fin.good() || !fin.is_open()) 
+    if (!fin || !fin.good() || !fin.is_open())
         throw IOException(TRACE_INFO,
              "[ERROR] unable to open file \"%s\"", filename);
 
@@ -179,7 +186,7 @@ double Config::get_double(const string &name) const
     errno = 0;
     int_val = strtod(get(name).c_str(), NULL);
     if (errno != 0)
-        throw InvalidParamException(TRACE_INFO, 
+        throw InvalidParamException(TRACE_INFO,
                 "[ERROR] invalid double parameter (%s: %s)",
                  name.c_str(), get(name).c_str());
     return int_val;
@@ -189,7 +196,7 @@ bool Config::get_bool(const string &name) const
 {
     if (strcasecmp(get(name).c_str(), "true") == 0) return true;
     else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
-    else throw InvalidParamException(TRACE_INFO, 
+    else throw InvalidParamException(TRACE_INFO,
                  "[ERROR] invalid double parameter (%s: %s)",
                  name.c_str(), get(name).c_str());
 }
