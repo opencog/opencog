@@ -31,6 +31,8 @@
 
 #include <errno.h>
 
+#include <boost/filesystem/operations.hpp>
+
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
@@ -65,17 +67,42 @@ void Config::reset()
     }
 }
 
+static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
+static const char* DEFAULT_CONFIG_PATHS[] =
+{
+    CONFDIR,
+    "./",
+    "../",
+    "../../",
+#ifndef WIN32
+    "/etc",
+#endif // !WIN32
+    NULL
+};
+
+
 // constructor
 void Config::load(const char* filename)
 {
-    // quit if no explicit filename was supplied
-    if (filename == NULL) return;
+    if (filename == NULL) filename = DEFAULT_CONFIG_FILENAME;
 
     // reset to default values
     reset();
 
-    // then, read and process the config file
-    ifstream fin(filename);
+    ifstream fin;
+    for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i)
+    {
+        boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
+        configPath /= DEFAULT_CONFIG_FILENAME;
+        if (boost::filesystem::exists(configPath))
+        {
+            // Read and process the config file
+            fin.open(filename);
+            if (fin && fin.good() && fin.is_open()) break;
+        }
+    }
+
+    // Whoops, failed.
     if (!fin || !fin.good() || !fin.is_open()) 
         throw IOException(TRACE_INFO,
              "[ERROR] unable to open file \"%s\"", filename);

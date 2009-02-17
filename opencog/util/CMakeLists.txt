@@ -16,6 +16,10 @@ ADD_LIBRARY(util
 	${WIN32_GETOPT_FILES}
 )
 
+TARGET_LINK_LIBRARIES(util
+	${Boost_FILESYSTEM_LIBRARY}
+)
+
 INSTALL (FILES
 	based_variant.h
 	Config.h
