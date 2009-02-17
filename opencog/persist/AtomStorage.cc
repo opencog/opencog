@@ -667,9 +667,9 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 #else
 			// Use postgres $-quoting to make unicode strings
 			// easier to deal with. 
-			std::string qname = "$ocp$";
+			std::string qname = " $ocp$";
 			qname += n->getName();
-			qname += "$ocp$";
+			qname += "$ocp$ ";
 #endif
 			STMT("name", qname);
 
@@ -968,7 +968,7 @@ Node * AtomStorage::getNode(Type t, const char * str)
 
 	// Use postgres $-quoting to make unicode strings easier to deal with. 
 	int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
-	    "type = %hu AND name = $ocp$%s$ocp$;", storing_typemap[t], str);
+	    "type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
 
 	if (4*BUFSZ-1 <= nc)
 	{
