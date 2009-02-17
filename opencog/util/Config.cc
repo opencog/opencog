@@ -76,7 +76,9 @@ void Config::load(const char* filename)
 
     // then, read and process the config file
     ifstream fin(filename);
-    if (!fin || !fin.good() || !fin.is_open()) throw IOException(TRACE_INFO, "[ERROR] unable to open file \"%s\"", filename);
+    if (!fin || !fin.good() || !fin.is_open()) 
+        throw IOException(TRACE_INFO,
+             "[ERROR] unable to open file \"%s\"", filename);
 
     string line;
     string name;
@@ -101,7 +103,8 @@ void Config::load(const char* filename)
             // finally, store the entries
             table[name] = value;
         } else if (line.find_first_not_of(blank_chars) != string::npos) {
-            throw InvalidParamException(TRACE_INFO, "[ERROR] invalid configuration entry (line %d)", line_number);
+            throw InvalidParamException(TRACE_INFO,
+                  "[ERROR] invalid configuration entry (line %d)", line_number);
         }
     }
     fin.close();
@@ -112,7 +115,8 @@ const bool Config::has(const string &name) const
     return (table.find(name) != table.end());
 }
 
-void Config::set(const std::string &parameter_name, const std::string &parameter_value)
+void Config::set(const std::string &parameter_name,
+                 const std::string &parameter_value)
 {
     table[parameter_name] = parameter_value;
 }
@@ -120,7 +124,9 @@ void Config::set(const std::string &parameter_name, const std::string &parameter
 const string& Config::get(const string &name) const
 {
     map<string, string>::const_iterator it = table.find(name);
-    if (it == table.end()) throw InvalidParamException(TRACE_INFO, "[ERROR] parameter not found (%s)", name.c_str());
+    if (it == table.end())
+       throw InvalidParamException(TRACE_INFO,
+               "[ERROR] parameter not found (%s)", name.c_str());
     return it->second;
 }
 
@@ -134,7 +140,9 @@ int Config::get_int(const string &name) const
     int int_val;
     errno = 0;
     int_val = strtol(get(name).c_str(), NULL, 0);
-    if (errno != 0) throw InvalidParamException(TRACE_INFO, "[ERROR] invalid integer parameter (%s)", name.c_str());
+    if (errno != 0)
+        throw InvalidParamException(TRACE_INFO,
+               "[ERROR] invalid integer parameter (%s)", name.c_str());
     return int_val;
 }
 
@@ -143,7 +151,10 @@ double Config::get_double(const string &name) const
     double int_val;
     errno = 0;
     int_val = strtod(get(name).c_str(), NULL);
-    if (errno != 0) throw InvalidParamException(TRACE_INFO, "[ERROR] invalid double parameter (%s: %s)", name.c_str(), get(name).c_str());
+    if (errno != 0)
+        throw InvalidParamException(TRACE_INFO, 
+                "[ERROR] invalid double parameter (%s: %s)",
+                 name.c_str(), get(name).c_str());
     return int_val;
 }
 
@@ -151,7 +162,9 @@ bool Config::get_bool(const string &name) const
 {
     if (strcasecmp(get(name).c_str(), "true") == 0) return true;
     else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
-    else throw InvalidParamException(TRACE_INFO, "[ERROR] invalid double parameter (%s: %s)", name.c_str(), get(name).c_str());
+    else throw InvalidParamException(TRACE_INFO, 
+                 "[ERROR] invalid double parameter (%s: %s)",
+                 name.c_str(), get(name).c_str());
 }
 
 std::string Config::to_string() const
