@@ -80,9 +80,20 @@ Caveats:
 --------
 Its not at all clear whether this is a good idea; there are several
 major drawbacks to using SQL. These include:
--- Large performance overhead, even if an embedded SQL server were to be used.
--- If/when incremental save/restore is implemented, then there's potentially 
-   large churn, if short-lived atoms are constantly created/destroyed.
+-- Large performance overhead, even if an embedded SQL server were to
+   be used.
+-- If/when incremental save/restore is implemented, then there's
+   potentially large churn, if short-lived atoms are constantly 
+   created/destroyed.
+
+
+Compiling
+---------
+There are two popular packages that provide odbc for Linux: IODBC and 
+UnixODBC. The second is prefered, because it seems that IODBC has
+trouble with UTF-8 strings. It is almost impossible to avoid UTF-8 
+strings in NLP input data.
+
 
 Getting started
 ---------------
