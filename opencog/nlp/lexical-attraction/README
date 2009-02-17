@@ -8,7 +8,7 @@ required the creation of SQL databases to the collected information.
 These databases have been in purely custom-built to hold information
 on the specific items of interest; they are not general in any way, and
 require considerable effort for each new relation. The goal of the work
-here is to provide a uniform infrastructure for statistical data 
+here is to provide a uniform infrastructure for statistical data
 gathering and processing within OpenCog.
 
 Statistics gathered for NLP input can be used to discern patterns and
@@ -26,7 +26,7 @@ thier counts updated, and then stored back.  It is eventually planned
 to tie this to the short-term importance mechanism for RAM management.
 
 At this time, all data mining, including the computation of conditional
-probabilities, mutual information, and hierarchical clustering, is 
+probabilities, mutual information, and hierarchical clustering, is
 envisioned to be done off-line.
 
 Hypergraphs specific to NLP
@@ -34,7 +34,7 @@ Hypergraphs specific to NLP
 
 Below follows some of the relations of current interest. Statistical
 information will be kept by maintaining counts on all of the links and
-nodes.  This should be sufficeint for computing conditional 
+nodes.  This should be sufficeint for computing conditional
 probabilities, mutual information and entropy.
 
 Consider first word-pairs:
@@ -45,11 +45,11 @@ Consider first word-pairs:
 
 To determine the proability P(left,right), one needs only the count
 on the WordPairLink, since P(left,right) = N(left,right) / N(*,*)
-That is, the counts on the individual WordNodes are not needed to 
-obtain the word-pair probabilities, mutual information, etc. 
+That is, the counts on the individual WordNodes are not needed to
+obtain the word-pair probabilities, mutual information, etc.
 
 The reason use a WordPairLink, as opposed to recycling some existing
-link, is to avoid garbaging the data by having some other counting 
+link, is to avoid garbaging the data by having some other counting
 process accidentally make use of this link, and improperly increment
 its count.
 
@@ -97,8 +97,8 @@ Thus, pairs of words might be gathered together as:
 Of some interest is the connection between grammatical usage/construction,
 and word sense.  That is, the occurrence of triples of the form
 (inflected-word, word-sense, disjunct). These are used to narrow down
-the likelyhood of a given word sense, given that it was used with a 
-certain disjunct.  That is, we are interested in the conditional 
+the likelyhood of a given word sense, given that it was used with a
+certain disjunct.  That is, we are interested in the conditional
 probability P(sense |word, disjunct)
 
 CountLink                                ; kind-of-like an evaluation link
@@ -132,7 +132,20 @@ CountLink
 
 Gathering Statistics
 --------------------
-The statistics are meant to be gathered by
+The statistics are meant to be gathered by running the "standard" NLP
+processing pipeline, which currently culminates with word-sense
+identification. After word-sense assignments, CountLinks as defined
+above are to be generated.  The easiest way to assemble these
+particular hypergraphs from the mish-mash of input hypergraphs is to
+use the query/forward-chainer to perform the assembly.  The result
+of assembly will probably be a hypergraph that is sequestered in the
+persistence (SQL) database. This hypergraph will be automatically
+retreived by the atomspace, using the "BackingStore" mechanism. After
+identification and retreival, the count on the count link needs to be
+updated, and then saved back to the backing store.  At this point, its
+acceptable to delete the count link structures, so as to save on RAM
+usage.
+
 
 
 
@@ -147,7 +160,7 @@ The statistics are meant to be gathered by
 
 This directory contains a prototype implementation of Yuret's "lexical
 attraction" algorithm for the discovery of synatctic links between
-words in a sentence [Yuret 1998]. The goal of this algorithm is to 
+words in a sentence [Yuret 1998]. The goal of this algorithm is to
 provide a score for ranking the output of the link-grammar parser.
 
 So far, nothing has been implemented; this is a pre-prototype.
@@ -157,7 +170,7 @@ Data Structures
 ---------------
 The Yuret algorithm requires, as input, the mutual information between
 pairs of words. Computing the mutal information requires performing a
-statistical analysis on a large corpus of sentences. The statistical 
+statistical analysis on a large corpus of sentences. The statistical
 analysis needs to maintain four counts:
 -- n(x,y) = the number of times a word pair was observed
 -- n(x,*) = the number of times a word occured as the left element of a
@@ -180,7 +193,7 @@ The "lexical attraction" is defined by Yuret as [chapter 4, page 40]:
 
    LA(x,y) = log_2 p(x,y) / (p(x,*) p(*,y))
 
-Yuret calls this the "mutual information" for the word pair; however, 
+Yuret calls this the "mutual information" for the word pair; however,
 this usage, while in a certain sense is correct, is also in conflict
 with the common definition of mutual information as the expectation
 value of LA; that is, as:
@@ -207,11 +220,11 @@ Both parses are more or less legitimate, and have valid interpretations.
 References
 ----------
 See also probablistic context-free grammars.
-E. Charniak, 1997. Statistical parsing with a context-free grammar 
+E. Charniak, 1997. Statistical parsing with a context-free grammar
 and word statistics. AAAI 1997.
 
 * Robert B. Ash, ''Information Theory'' (1965) Dover publications.
-* Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical 
+* Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical
   Attraction'' (1998) PhD Thesis
   http://citeseer.ist.psu.edu/yuret98discovery.html
 
