@@ -19,7 +19,7 @@ Currently, the basic experimental flow is as follows:
  * Download and compile opencog, relex, lexical-attraction from
    launchpad.
  * Create a bunch of SQL tables, as specified in the lexical-attr 
-   package.
+   package. Configure locations and passwords in opencog.conf.
  * Parse a bunch of English text, using relex, to obtain frequency
    counts. Alternately, download pre-parsed texts from 
    http://relex.swlabs.org/~linas/ which contains several cpu-years

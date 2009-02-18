@@ -20,6 +20,8 @@
 #include <opencog/persist/odbcxx.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/nlp/wsd/SenseSimilaritySQL.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -100,12 +102,17 @@ class SenseSimilaritySQL::Response
 
 SenseSimilaritySQL::SenseSimilaritySQL(void)
 {
-	// XXX fix me no hard coded information, please ...
-	const char * dbname = "lexat";
-	const char * username = "linas";
-	const char * authentication = "asdf";
+	// Config class reads valuesfrom opencog.conf
+	const char * dbname = config()["SENSE_SIMILARITY_DB_NAME"].c_str();
+	const char * username = config()["SENSE_SIMILARITY_DB_USERNAME"].c_str();
+	const char * authentication = config()["SENSE_SIMILARITY_DB_PASSWD"].c_str();
 
    db_conn = new ODBCConnection(dbname, username, authentication);
+
+	if (!db_conn->connected())
+	{
+		logger().error("Unable to connect to database %s as user %s\n", dbname, username);
+	}
 }
 
 SenseSimilaritySQL::~SenseSimilaritySQL()
