@@ -2,7 +2,7 @@
                    Example Usage
                    -------------
 
-Below follows some examples for using scheme within Opencog.
+Below follow some examples for using scheme to inpute data into Opencog.
 The scheme shell itself is reachable through the opencog shell.
 Thus:
 -- start the opencog server
@@ -48,9 +48,10 @@ Enter the above at the scheme shell prompt, and then exit the shell
 type 'ls'; this will reveal what was created.
 
 The above can be prettied up with some "syntactic sugar."
-First, define some wrapper functions (these can be found in
-"src/atomspace/type_constructors.scm" and are automatically 
-generated from the atoms listed in "type.script") 
+A set of wrapper functions are defined in 
+"src/atomspace/type_constructors.scm", which is loaded using the 
+opencog/scm/load.sh shell script. To get an idea of what these
+are like, some of these wrappers are shown below:
 
 (define (stv x y) (cog-new-stv x y))
 (define (ConceptNode . x) 
@@ -60,7 +61,8 @@ generated from the atoms listed in "type.script")
 (define (ExtensionalImplicationLink . x) 
 	(apply cog-new-link (append (list 'ExtensionalImplicationLink) x)))
 
-After the above, the rather sweeter form is possible:
+After running "load.sh", atoms can be created using the rather sweeter 
+form here:
 
 (InheritanceLink (stv 0.98 0.99)
 	(ConceptNode "famous")

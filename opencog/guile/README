@@ -22,8 +22,9 @@ as the names of Nodes, or the outoing sets of Links).  Although the
 core interface is documented below, it is important to notice that
 scheme makes "syntactic sugar" very easy to use; thus the interface
 below can be simplified, and has been simplified (in the  file
-src/scm/type_constructors.scm) Thus, atom creation can be as simple as
-the following example:
+opencog/scm/type_constructors.scm, which may be loaded by running 
+the shell script opencog/scm/load.sh) Thus, atom creation can be as
+simple as the following example:
 
    (ReferenceLink (stv 0.987 0.234)
        (ConceptNode "dog-instance-1") (WordNode "dog"))
@@ -35,10 +36,10 @@ A number of utilities and handy functions can be found in the directory
 src/scm. The shell script src/scm/load.sh can be use to load the utilities.
 Additional NLP-related utilities and MindAgents are located in src/nlp/scm.
 
-Running
--------
+== Running ==
+--------------
 The shell may be invoked by typing "scm" at the opencog prompt; however,
-the shell is avaialable only if 1) opencog has been compiled with guile
+the shell is available only if 1) opencog has been compiled with guile
 support, and 2) the scheme shell module is loaded!  To load the module,
 start the opencog server as follows:
 
@@ -386,10 +387,10 @@ interface.
          ((mean . 0.699999988079071) (confidence . 0.899999976158142))
 
 == cog-get-types
-		Return a list of all of the atom types in the system.
+      Return a list of all of the atom types in the system.
 
-		Example:
-		guile> (cog-get-types)
+      Example:
+      guile> (cog-get-types)
 
 == cog-map-type proc type
       Call proceedure proc for each atom in the atomspace that is of 
@@ -404,9 +405,10 @@ interface.
 
 Example utilities
 -----------------
-Below follow some examples, in the form of utilities.
+Below follow some examples, in the form of utilities. Additional
+utilities can be found in the opencog/scm file.
 
-== Load scheme data from a file
+== Load scheme data from a file ==
 
 To load scheme code from a file, simply make sure the first 3 characters
 of the file are "scm" followed by a carraige return. Then, at the shell
