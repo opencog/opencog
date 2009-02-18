@@ -68,10 +68,16 @@ CogServer::~CogServer()
 {
     disableNetworkServer();
 
+    std::vector<std::string> moduleKeys;
+
+    for (ModuleMap::iterator it = modules.begin(); it != modules.end(); ++it)
+        moduleKeys.push_back(it->first);
+
     // unload all modules
-    for (ModuleMap::iterator it = modules.begin(); it != modules.end(); ++it) {
+    for (std::vector<std::string>::iterator k = moduleKeys.begin(); k != moduleKeys.end(); ++k) {
         // retest the key because it might have been removed already
-        if (modules.find(it->first) != modules.end()) {
+        ModuleMap::iterator it = modules.find(*k);
+        if (it != modules.end()) {
             logger().debug("[CogServer] removing module %s\"", it->first.c_str());
             ModuleData mdata = it->second;
 

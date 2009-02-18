@@ -70,7 +70,7 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     do_stepAgents_unregister();
     do_startAgentLoop_unregister();
     do_stopAgentLoop_unregister();
-    do_listAgents_register();
+    do_listAgents_unregister();
 }
 
 void BuiltinRequestsModule::init()
