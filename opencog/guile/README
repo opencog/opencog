@@ -6,24 +6,21 @@
 
 This directory contains an implementation of the a Scheme shell for the
 OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
-code to manipulate the contents of an OpenCog AtomSpace.  Currently,
-only basic primitives have been implemented.
+code to manipulate the contents of an OpenCog AtomSpace.  
 
 This binding is intended to be used for day-to-day maintenance
 activities, experimentation and MindAgent development.  The shell is
-implemented in guile; guile is an interpreter, not a compiler; there
-are various associated performance penalties. Guile does have an
-associated bytecode and virtual machine in development.
+implemented in [http://www.gnu.org/software/guile/guile.html guile].
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
 Nodes, Links and TruthValues, as well as ways to get properties (such
-as the names of Nodes, or the outoing sets of Links).  Although the 
+as the names of Nodes, or the outgoing sets of Links).  Although the 
 core interface is documented below, it is important to notice that
 scheme makes "syntactic sugar" very easy to use; thus the interface
 below can be simplified, and has been simplified (in the  file
-opencog/scm/type_constructors.scm, which may be loaded by running 
-the shell script opencog/scm/load.sh) Thus, atom creation can be as
+''opencog/scm/type_constructors.scm'', which may be loaded by running 
+the shell script ''opencog/scm/load.sh'') Thus, atom creation can be as
 simple as the following example:
 
    (ReferenceLink (stv 0.987 0.234)
@@ -33,8 +30,9 @@ which creates a link connnecting a concept node and a word node, having
 a simple truth value. Any valid node or link name can be used in this way.
 
 A number of utilities and handy functions can be found in the directory
-src/scm. The shell script src/scm/load.sh can be use to load the utilities.
-Additional NLP-related utilities and MindAgents are located in src/nlp/scm.
+''src/scm''. The shell script ''src/scm/load.sh'' can be use to load the
+utilities.  Additional NLP-related utilities and MindAgents are located
+in ''src/nlp/scm''.
 
 == Running ==
 --------------
@@ -57,8 +55,8 @@ To get to the opencog shell, say
 To leave the shell, place a single . on the line, and hit enter.
 Alternately, hit ^D.
 
-Multi-threading
----------------
+== Multi-threading ==
+---------------------
 Guile is multi-threading-capable, and can be used with multiple threads
 just fine, with just a few caveats: it must be initialized in *each*
 thread in which it is to be used. The method SchemeEval::thread_init()
@@ -68,12 +66,12 @@ Note that OpenCog has a way of creating threads unexpectedly, in
 particular, in the server socket connection handling. Caveat Emptor.
 
 
-Core Functions
---------------
+== Core Functions ==
+--------------------
 The following are the "core" functions, implemented in the guile-to-C++
 interface.
 
-== cog-new-node node-type node-name
+=== cog-new-node node-type node-name ===
       Create a new node of the given type and name
 
       Optionally, a truth value can follow the node name.
@@ -91,7 +89,7 @@ interface.
           #<node[3:another node] sti:(0,0) tv:(0.800000,0.900000)>
 
 
-== cog-node node-type node-name
+=== cog-node node-type node-name ===
       Returns the node of the given type and name, if it exists, else
       returns null.
 
@@ -120,7 +118,7 @@ interface.
           #<node[3:some node name] sti:(0,0) tv:(0.800000,0.900000)>
 
 
-== cog-new-link link-type atom ... atom
+=== cog-new-link link-type atom ... atom ===
       Create a new link, with the given atoms in the link.
 
       Optionally, a truth value can follow the list of atoms.
@@ -138,7 +136,7 @@ interface.
           guile> (cog-new-link 'Link x y (cog-new-stv 0.7 0.8))
           #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
 
-== cog-link link-type atom ... atom
+=== cog-link link-type atom ... atom ===
       Returns the link of the given type and list of atoms, if it
       exists, else returns null.
 
@@ -170,9 +168,9 @@ interface.
           #<link[2 sti:(0,0) tv:(0.700000,0.800000) <[3 abc],[3 def]>]>
 
 
-== cog-delete atom
+=== cog-delete atom ===
       Delete the indicated atom, but only if it has no incoming links.
-== cog-delete-recursive atom
+=== cog-delete-recursive atom ===
       Delete the incoming atom, and all atoms that point at it.
 
       Both functions return #t on success, else they return #f.
@@ -211,7 +209,7 @@ interface.
          #<node[3:def] sti:(0,0) tv:(0.000000,0.000000)>
 
 
-== cog-atom? exp
+=== cog-atom? exp ===
       Return #t if exp is an atom, else return #f
 
       Example:
@@ -224,7 +222,7 @@ interface.
          #f
 
 
-== cog-name atom
+=== cog-name atom ===
       Return the name of the node. If the atom is not a node, 
       returns NIL.
 
@@ -235,7 +233,7 @@ interface.
          "abc"
 
 
-== cog-type atom
+=== cog-type atom ===
       Return the type of the atom. 
 
       Example:
@@ -246,7 +244,7 @@ interface.
          guile> (eq? 'ConceptNode (cog-type x))
          #t
 
-== cog-arity atom
+=== cog-arity atom ===
       Return the arity of the atom.
 
       Example:
@@ -258,8 +256,8 @@ interface.
          3
 
 
-== cog-incoming-set atom
-== cog-outgoing-set atom
+=== cog-incoming-set atom ===
+=== cog-outgoing-set atom ===
       Return the incoming and outgoing sets, respectively, of the atom.
       These sets are returned as ordinary scheme lists.
 
@@ -290,9 +288,9 @@ interface.
          #t
 
 
-== cog-atom handle
+=== cog-atom handle ===
       Reference the atom identified by the integer-valued handle
-== cog-handle atom
+=== cog-handle atom ===
       Return the handle (which is an integer) of the atom
 
       It may be useful to remember that scheme indicates hexadecimal
@@ -319,7 +317,7 @@ interface.
          #t
 
 
-== cog-new-stv mean confidence
+=== cog-new-stv mean confidence ===
       Create a SimpleTruthValue with the given mean and confidence.
       Unlike atoms, truth values are ephemeral: they are automatically
       garbage-collected when no longer needed.
@@ -330,7 +328,7 @@ interface.
           ; Create a new simple truth value:
           guile> (cog-new-stv 0.7 0.9)
 
-== cog-new-ctv mean confidence count
+=== cog-new-ctv mean confidence count ===
       Create a CountTruthValue with the given mean, confidence and count.
       Unlike atoms, truth values are ephemeral: they are automatically
       garbage-collected when no longer needed.
@@ -341,7 +339,7 @@ interface.
           ; Create a new count truth value:
           guile> (cog-new-ctv 0.7 0.9 44.0)
 
-== cog-new-itv lower upper confidence
+=== cog-new-itv lower upper confidence ===
       Create an IndefiniteTruthValue with the given lower, upper and confidence.
       Unlike atoms, truth values are ephemeral: they are automatically
       garbage-collected when no longer needed.
@@ -352,7 +350,7 @@ interface.
           ; Create a new indefinite truth value:
           guile> (cog-new-itv 0.7 0.9 0.6)
 
-== cog-tv? exp
+=== cog-tv? exp ===
       Return #t if exp is a truth value, else return #f
 
       Example:
@@ -365,7 +363,7 @@ interface.
          #f
 
 
-== cog-tv atom
+=== cog-tv atom ===
       Return the truth-value of the atom. 
 
       Example:
@@ -378,7 +376,7 @@ interface.
          guile> (cog-tv? (cog-tv x))
          #t
 
-== cog-tv->alist
+=== cog-tv->alist ===
       Convert a truth value to an association list (alist).
 
       Example:
@@ -386,13 +384,13 @@ interface.
          guile> (cog-tv->alist x)
          ((mean . 0.699999988079071) (confidence . 0.899999976158142))
 
-== cog-get-types
+=== cog-get-types ===
       Return a list of all of the atom types in the system.
 
       Example:
       guile> (cog-get-types)
 
-== cog-map-type proc type
+=== cog-map-type proc type ===
       Call proceedure proc for each atom in the atomspace that is of 
       type type. If proc returns any value other than #f, then the 
       iteration is terminated.
@@ -402,13 +400,27 @@ interface.
          guile> (define (prt-atom h) (display h) #f)
          guile> (cog-map-type prt-atom 'ConceptNode)
 
+=== cog-ad-hoc command parameters ===
+      The cog-ad-hoc command is actually a command dispatcher for
+      a grab-bag of partial, incomplete, poorly-thought-out or 
+      developement interfaces.  Its an easy way to attach new C++
+      code while pondering a more appropriate long-term solution.
 
-Example utilities
------------------
+      Currently-implemented commands are:
+      do-wsd                -- run word-sense disambiguation
+      do-implication handle -- run forward-chainer on handle.
+                               handle must be an ImplicationLink.
+      store-atom handle     -- store indicated atom to SQL/persistent 
+                               storage.
+
+
+== Example utilities ==
+-----------------------
 Below follow some examples, in the form of utilities. Additional
-utilities can be found in the opencog/scm file.
+utilities can be found in the opencog/scm file. These utilities are
+loaded by the opencog/scm/load.sh shell script.
 
-== Load scheme data from a file ==
+=== Load scheme data from a file ===
 
 To load scheme code from a file, simply make sure the first 3 characters
 of the file are "scm" followed by a carraige return. Then, at the shell
@@ -420,7 +432,7 @@ This assuses the scheme code is in "filename", that the cogserver is
 running on "localhost", and is listening on port 17001 (which is the
 default port for the cogserver).
 
-== Delete a list of atoms:
+=== Delete a list of atoms ===
 
    (define (killall lst)
            (if (null? lst)
