@@ -7,6 +7,9 @@
  * found on launchpad. The input to those scripts is, in turn, a
  * large selection of previously parsed text. 
  *
+ * XXX In the future, this class should be eliminated, by storing  the
+ * the word-sense similarities in an opencog persistent store. XXX
+ *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 

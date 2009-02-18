@@ -1,9 +1,11 @@
 /*
  * SenseSimilaritySQL.h
  *
- * Fetches word-sense similarity measures from an SQL
- * database where a pre-computed set has been previously
- * stored.
+ * Fetches word-sense similarity measures from an SQL database where
+ * a pre-computed set has been previously stored.
+ *
+ * XXX In the future, this class should be eliminated, by storing  the
+ * the word-sense similarities in an opencog persistent store. XXX
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
