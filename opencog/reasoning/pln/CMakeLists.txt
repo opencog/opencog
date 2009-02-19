@@ -80,14 +80,14 @@ INCLUDE_DIRECTORIES (
 
 TARGET_LINK_LIBRARIES(pln
     atomspace
-    server
+#    server
     xml
     util
     #query
 #    smob #scheme
     #wsd
     persist
-    adaptor-tulip
+#    adaptor-tulip
     ${IODBC_LIBRARIES}
     ${CSOCKETS_LIBRARIES}
     ${OPENSSL_LIBRARIES}
