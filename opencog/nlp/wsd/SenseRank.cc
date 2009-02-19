@@ -38,8 +38,10 @@ SenseRank::SenseRank(void)
 	double N = 10;
 	convergence_damper = 1.0/N;
 
-	// The absolute value to which convergence is desired.
-	convergence_limit = 0.1;
+	// The absolute value to which convergence is desired. Should be
+	// smaller than the damper, since even large swings in page rank
+	// are damped by the damper. 
+	convergence_limit = 0.3 * convergence_damper;
 }
 
 SenseRank::~SenseRank()
