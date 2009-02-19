@@ -132,19 +132,24 @@ void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &a
     STIAtomWageForAgent.clear();
     LTIAtomWageForAgent.clear();
     for (size_t n = 0; n < agents.size(); n++) {
+        // cout << agents[n]->to_string() << ": ";
         updateAgentSTI(a, agents[n]);
         updateAgentLTI(a, agents[n]);
 
         if (agents[n]->getTotalStimulus() == 0)
         {
-            STIAtomWageForAgent.push_back(0);
-            LTIAtomWageForAgent.push_back(0);
+           // cout << "no stimulus" << endl;
+
+            STIAtomWageForAgent.push_back(0.0f);
+            LTIAtomWageForAgent.push_back(0.0f);
             continue;
         }
+        //cout << "STI " << (float) a->getSTI(agents[n]);
+        //cout << " stim " << agents[n]->getTotalStimulus() << endl;
 
-        STIAtomWageForAgent.push_back(a->getSTI(agents[n]) / 
+        STIAtomWageForAgent.push_back((float) a->getSTI(agents[n]) / 
                                       agents[n]->getTotalStimulus());
-        LTIAtomWageForAgent.push_back(a->getLTI(agents[n]) /
+        LTIAtomWageForAgent.push_back((float) a->getLTI(agents[n]) /
                                       agents[n]->getTotalStimulus());
     }
 }
@@ -545,12 +550,12 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents
             continue;
         stim_t s = agents[n]->getAtomStimulus(h);
         total_stim += s;
-        AttentionValue::sti_t wage = STIAtomWageForAgent[n];
+        float wage = STIAtomWageForAgent[n];
         if (wage > STIAtomWage)
-            wage = STIAtomWage;
-        exchangeAmount += wage * s;
+            wage = (float) STIAtomWage;
+        exchangeAmount += (AttentionValue::sti_t) wage * s;
 
-        a->setSTI(agents[n], a->getSTI(agents[n]) - wage * s); 
+        a->setSTI(agents[n], a->getSTI(agents[n]) - exchangeAmount); 
     }
     a->setSTI(h, current + exchangeAmount);
 
@@ -612,12 +617,12 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents
         if (agents[n]->getTotalStimulus() == 0)
             continue;
         stim_t s = agents[n]->getAtomStimulus(h);
-        AttentionValue::lti_t wage = LTIAtomWageForAgent[n];
+        float wage = LTIAtomWageForAgent[n];
         if (wage > LTIAtomWage)
-            wage = LTIAtomWage;
-        exchangeAmount += wage * s;
+            wage = (float) LTIAtomWage;
+        exchangeAmount += (AttentionValue::lti_t) (wage * s);
 
-        a->setLTI(agents[n], a->getLTI(agents[n]) - wage * s); 
+        a->setLTI(agents[n], a->getLTI(agents[n]) - exchangeAmount); 
     }
     a->setLTI(h, current + exchangeAmount);
 

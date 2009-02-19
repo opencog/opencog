@@ -120,10 +120,10 @@ private:
     AttentionValue::sti_t calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c);
 
     
-    AttentionValue::sti_t STIAtomWage; //!< Atom STI wage per stimulus
-    AttentionValue::lti_t LTIAtomWage; //!< Atom LTI wage per stimulus
-    std::vector<AttentionValue::sti_t> STIAtomWageForAgent;
-    std::vector<AttentionValue::lti_t> LTIAtomWageForAgent;
+    AttentionValue::sti_t STIAtomWage; //!< Max atom STI wage per stimulus
+    AttentionValue::lti_t LTIAtomWage; //!< Max atom LTI wage per stimulus
+    std::vector<float> STIAtomWageForAgent; //!< Atom STI wage per stimulus for each Agent
+    std::vector<float> LTIAtomWageForAgent; //!< Atom LTI wage per stimulus for each Agent
 
     /** Calculate the wages to pay to atoms for each agent
      *

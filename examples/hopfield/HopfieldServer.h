@@ -38,6 +38,7 @@
 #include <opencog/util/RandGen.h>
 
 #include "StorkeyAgent.h"
+#include "ImprintAgent.h"
 #include "Pattern.h"
 
 #define HDEMO_DEFAULT_WIDTH 3
@@ -55,6 +56,7 @@ class ImportanceDiffusionAgent;
 class ImportanceSpreadingAgent;
 class ImportanceUpdatingAgent;
 class StorkeyAgent;
+class ImprintAgent;
 
 /** Emulates a hopfield network using OpenCog dynamics */
 class HopfieldServer : public CogServer
@@ -84,6 +86,7 @@ public:
     ForgettingAgent *forgetAgent;
     HebbianUpdatingAgent *hebUpdateAgent;
     StorkeyAgent *storkeyAgent;
+    ImprintAgent *imprintAgent;
     ImportanceDiffusionAgent *diffuseAgent;
     ImportanceSpreadingAgent *spreadAgent;
     ImportanceUpdatingAgent *importUpdateAgent;

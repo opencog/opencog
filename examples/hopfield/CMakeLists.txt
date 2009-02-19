@@ -14,6 +14,7 @@ ADD_EXECUTABLE (hopfield
 	Pattern.cc
 	HopfieldOptions.cc
 	StorkeyAgent.cc
+    ImprintAgent.cc
 )
 
 TARGET_LINK_LIBRARIES (hopfield

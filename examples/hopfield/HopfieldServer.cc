@@ -42,6 +42,7 @@
 
 #include "HopfieldOptions.h"
 #include "StorkeyAgent.h"
+#include "ImprintAgent.h"
 
 using namespace opencog;
 using namespace std;
@@ -228,6 +229,8 @@ void HopfieldServer::init(int width, int height, int numLinks)
     } else {
         storkeyAgent = new StorkeyAgent();
     }
+    imprintAgent = new ImprintAgent();
+    startAgent(imprintAgent);
     diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(this->createAgent(ImportanceDiffusionAgent::info().id, true));
     diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC);
 //    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
@@ -252,6 +255,8 @@ void HopfieldServer::init(int width, int height, int numLinks)
 //        spreadAgent->getLogger()->setPrintToStdoutFlag (true);
 
 #endif
+        imprintAgent->getLogger()->enable();
+        imprintAgent->getLogger()->setPrintToStdoutFlag (true);
         forgetAgent->getLogger()->enable();
         forgetAgent->getLogger()->setPrintToStdoutFlag (true);
     }
@@ -261,24 +266,28 @@ void HopfieldServer::init(int width, int height, int numLinks)
         forgetAgent->getLogger()->setLevel (Logger::INFO);
         if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::INFO);
         else storkeyAgent->getLogger()->setLevel (Logger::INFO);
+        imprintAgent->getLogger()->setLevel (Logger::INFO);
         break;
     case 2:
         importUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
         forgetAgent->getLogger()->setLevel (Logger::DEBUG);
         if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
         else storkeyAgent->getLogger()->setLevel (Logger::DEBUG);
+        imprintAgent->getLogger()->setLevel (Logger::INFO);
         break;
     case 3:
         importUpdateAgent->getLogger()->setLevel (Logger::FINE);
         forgetAgent->getLogger()->setLevel (Logger::FINE);
         if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::FINE);
         else storkeyAgent->getLogger()->setLevel (Logger::FINE);
+        imprintAgent->getLogger()->setLevel (Logger::INFO);
         break;
     default:
         importUpdateAgent->getLogger()->setLevel (Logger::WARN);
         forgetAgent->getLogger()->setLevel (Logger::WARN);
         if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::WARN);
         else storkeyAgent->getLogger()->setLevel (Logger::WARN);
+        imprintAgent->getLogger()->setLevel (Logger::INFO);
     }
 
     if (hebUpdateAgent)
@@ -633,8 +642,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         Handle keyNodeHandle;
 
         // encode pattern
-        logger().fine("---Imprint:Encoding pattern");
+        logger().fine("---Imprint:Encoding pattern with ImprintAgent");
         encodePattern(pattern, patternStimulus);
+
         printStatus();
 
         // ImportanceUpdating with links
@@ -706,13 +716,15 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 	//stim_t perUnit = stimulus / activity;
 
     // x2 because all nodes are -ve to begin with
-	stim_t perUnit = 2 * stimulus / hGrid.size();
+//	stim_t perUnit = 2 * stimulus / hGrid.size();
 
-    for (size_t i = 0; i < hGrid.size(); i++) {
-        if (options->keyNodes && hGridKey[i]) continue; // Don't encode onto key nodes
-        getAtomSpace()->stimulateAtom(hGrid[i], perUnit * pattern[i]);
-    }
-
+//    for (size_t i = 0; i < hGrid.size(); i++) {
+//        if (options->keyNodes && hGridKey[i]) continue; // Don't encode onto key nodes
+//        getAtomSpace()->stimulateAtom(hGrid[i], perUnit * pattern[i]);
+//    }
+    getAtomSpace()->setSTI(imprintAgent, patternStimulus);
+    imprintAgent->setPattern(pattern);
+    imprintAgent->run(this);
 }
 
 std::vector<bool> HopfieldServer::checkNeighbourStability(Pattern p, float tolerance)
@@ -785,7 +797,7 @@ std::vector<stim_t> HopfieldServer::getGridStimVector()
     for (i = hGrid.begin(); i != hGrid.end(); i++) {
         Handle h = *i;
         stim_t val;
-        val = getAtomSpace()->getAtomStimulus(h); // / getAtomSpace()->getRecentMaxSTI();
+        val = imprintAgent->getAtomStimulus(h); // / getAtomSpace()->getRecentMaxSTI();
         out.push_back( val );
     }
 
