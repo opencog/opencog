@@ -17,6 +17,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
+#include <opencog/server/CogServer.h>
 
 using namespace opencog;
 
@@ -155,6 +156,9 @@ bool SenseRank::start_sense(Handle word_sense_h,
 		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 		printf ("; SenseRank disconnnected sense %s\n", n->getName().c_str());
 #endif
+		// Well, if its a dead edge, lets delete it, so that we don't
+		// waste time here again.
+		atomspace().removeAtom(word_sense_h);
 		return false;
 	}
 #ifdef DEBUG
