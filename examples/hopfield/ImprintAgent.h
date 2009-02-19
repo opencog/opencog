@@ -38,11 +38,8 @@ namespace opencog
 
 class CogServer;
 
-/** Agent that carries out learning rule of Imprint's 1998 paper.
- *
- * Only supports SYMMETRIC_HEBBIAN_LINKs and SYMMETRIC_INVERSE_HEBBIAN_LINKs.
- * If other Hebbian links exist, they are ignored.
- * 
+/** Agent that imprints Patterns on to the perceptual nodes of the Hopfield
+ * network.
  */
 class ImprintAgent : public Agent
 {
@@ -61,7 +58,7 @@ private:
 
     Logger *log; //!< Logger object for Agent
 
-    Pattern epsilon; //!< Pattern for updating network weights with
+    Pattern epsilon; //!< Pattern for imprinting on the network
 
 public:
 
@@ -81,7 +78,7 @@ public:
      */
     Logger* getLogger();
 
-    //! Set pattern to update weights with
+    //! Set pattern to imprint when Agent runs 
     void setPattern(Pattern _epsilon);
 
 }; // class
