@@ -110,6 +110,13 @@ void SenseRank::init_parse(Handle h)
  * is bad, but we have no strategy for handling this yet), and so
  * we'll give it a whirl, starting at each word. That way, at least
  * we'll sample each disconnected component. 
+ *
+ * Almost all disconnected components are single senses, or simple
+ * cycles. Eliminate these, and most of the problem is taken care of.
+ *
+ * Here's a simple algo to use: start at every node, walk resurisvely.
+ * Use this to find the largest connected component. Remove all edges
+ * that are not a part of the connected component.
  */
 void SenseRank::rank_parse(Handle h)
 {
