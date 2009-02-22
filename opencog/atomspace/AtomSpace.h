@@ -409,8 +409,10 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      *
-     * XXX Please clarify: does this also free memory associated with the
-     * removed atom? Or not? If not, is there a recursive delete call?
+     * When the atom is removed from the atomspace, all memory associated
+     * with it is also deleted; in particular, the atom is removed from
+     * the TLB as well, so that future TLB lookups will now return pointers
+     * to freed memory.
      */
     bool removeAtom(Handle h, bool recursive = false);
 
