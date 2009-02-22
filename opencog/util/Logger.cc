@@ -121,10 +121,12 @@ static void prt_backtrace(FILE *fh)
 
 	// Start printing at a bit into the stack, so as to avoid recording
 	// the logger functions in the stack trace.
+	fprintf(fh, "\tStack Trace:\n");
 	for (int i=2; i< stack_depth; i++)
 	{
-		fprintf(fh, "%s\n", syms[i]);
+		fprintf(fh, "\t%d: %s\n", i, syms[i]);
 	}
+	fprintf(fh, "\n");
 	free(syms);
 }
 
