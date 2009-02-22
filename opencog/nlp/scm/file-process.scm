@@ -61,7 +61,7 @@ scm
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'WordInstanceNode)
 
-	; Pointless to elete these, since there should only be 
+	; Pointless to delete these, since there should only be 
 	; a few hundred of these, total.
 	; (cog-map-type delit 'LinkGrammarRelationshipNode) 
 	; (cog-map-type delit 'DefinedLinguisticConceptNode) 

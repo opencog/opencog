@@ -26,6 +26,7 @@
 
 #include "Logger.h"
 
+#include <execinfo.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
@@ -110,6 +111,23 @@ void Logger::disable()
     logEnabled = false;
 }
 
+static void prt_backtrace(FILE *fh)
+{
+#define BT_BUFSZ 50
+	void *bt_buf[BT_BUFSZ];
+
+	int stack_depth = backtrace(bt_buf, BT_BUFSZ);
+	char **syms = backtrace_symbols(bt_buf, stack_depth);
+
+	// Start printing at a bit into the stack, so as to avoid recording
+	// the logger functions in the stack trace.
+	for (int i=2; i< stack_depth; i++)
+	{
+		fprintf(fh, "%s\n", syms[i]);
+	}
+	free(syms);
+}
+
 void Logger::log(Logger::Level level, const std::string &txt)
 {
     if (!logEnabled) return;
@@ -143,6 +161,12 @@ void Logger::log(Logger::Level level, const std::string &txt)
         if (printToStdout) fprintf(stdout, "[%s] %s\n", getLevelString(level), txt.c_str());
         fflush(f);
 
+        // Print a backtrace for warnings and errors.
+        if (level <= WARN)
+        {
+            prt_backtrace(f);
+        }
+        fflush(f);
         pthread_mutex_unlock(&lock);
     }
 }
