@@ -167,7 +167,7 @@ bool SenseRank::start_sense(Handle word_sense_h,
 #endif
 		// Well, if its a dead edge, lets delete it, so that we don't
 		// waste time here again.
-		atomspace().removeAtom(word_sense_h);
+		atomspace().removeAtom(sense_link_h);
 		return false;
 	}
 #ifdef DEBUG
