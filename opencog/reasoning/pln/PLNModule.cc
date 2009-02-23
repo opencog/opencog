@@ -87,12 +87,14 @@ std::string RunCommand(std::list<std::string> args);
 PLNModule::PLNModule() : Module()
 {
     logger().info("[PLNModule] constructor");
-	do_pln_register();
+	do_pln_register();	
+	cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
 }
 
 PLNModule::~PLNModule() {
     logger().info("[PLNModule] destructor");
     do_pln_unregister();
+    cogserver().unregisterAgent(BackChainingAgent::info().id);
 }
 
 // state variables for running multiple PLNShell commands.

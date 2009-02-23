@@ -33,6 +33,8 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
+#include "BackChainingAgent.h"
+
 namespace opencog
 {
 
@@ -79,6 +81,8 @@ atoms #t - output atoms of the given type\n\
 loop-check - check for loops\n\
 atom #h - print the atom with handle #h\n\
 These should be bug-free, but there's no type checking of parameters, so providing eg. BIT node number instead of Handle number will SegFault.")
+
+    Factory<BackChainingAgent, Agent> backChainingFactory;
 
 public:
 

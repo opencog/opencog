@@ -13,6 +13,7 @@ ADD_LIBRARY (pln SHARED
     PLNGlobals.cc
 #    Tester.cc
     ForwardChainer.cc
+    BackChainingAgent
 # Formulas:
     formulas/Formulas.cc
     formulas/FormulasIndefinite.cc
@@ -126,6 +127,7 @@ INSTALL (FILES
     PLN.h
     BackInferenceTreeNode.h
     TestTargets.h
+    BackChainingAgent.h
     rules/Rule.h
     rules/implication/ImplicationRedundantExpansionRule.h
     rules/implication/ImplicationBreakdownRule.h
