@@ -10,7 +10,14 @@ code to manipulate the contents of an OpenCog AtomSpace.
 
 This binding is intended to be used for day-to-day maintenance
 activities, experimentation and MindAgent development.  The shell is
-implemented in [http://www.gnu.org/software/guile/guile.html guile].
+implemented in [http://www.gnu.org/software/guile/guile.html guile]; 
+the [http://www.gnu.org/software/guile/manual/ guile reference manual
+is here]. The best book on the Scheme programming language (never-mind
+the language, it's one of the best books written on programming, no
+matter what language you like to use) is 
+"[http://mitpress.mit.edu/sicp/full-text/book/book.html Structure and 
+Interpretation of Computer Programs"] by Abelson and Sussman. It is now
+available online for free from MIT Press.
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
