@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <string>
+#include <unistd.h>
 #include <tr1/functional>
 using namespace std::tr1::placeholders;
 
@@ -54,7 +55,7 @@ std::string initials(std::string s)
     return ret;
 }
 
-Ubigrapher::Ubigrapher() : withIncoming(false), compact(false)
+Ubigrapher::Ubigrapher() : pushDelay(1), withIncoming(false), compact(false)
 {
     space = CogServer::getAtomSpace();
 
@@ -89,6 +90,7 @@ bool Ubigrapher::add_vertex(Handle h)
 {
     Atom *a = TLB::getAtom(h);
 
+    usleep(pushDelay);
     if (compact)
     {
         // don't make nodes for binary links with no incoming
@@ -132,6 +134,7 @@ bool Ubigrapher::add_edges(Handle h)
 {
     Atom *a = TLB::getAtom(h);
 
+    usleep(pushDelay);
     const Link *l = dynamic_cast<const Link *>(a);
     if (l)
     {

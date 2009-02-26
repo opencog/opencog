@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <time.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
@@ -30,6 +32,12 @@ namespace opencog
 
 class Ubigrapher
 {
+private:
+    /// Store when last update was
+    struct timeval lastPush;
+    /// Limit requests to occur only once per push delay
+    long pushDelay;
+
 public:
     Ubigrapher();
 
