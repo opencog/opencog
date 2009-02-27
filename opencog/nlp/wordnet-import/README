@@ -330,7 +330,7 @@ NMXML and Scheme.
 wc on the NMXML output results in: 16350243 45025227 648664672
 So NMXML requires 16M lines in 648 MBytes; this bzip2's down to 
 a 16MB file.  By contrast, the scm output has a wc of 3307375 
-14804016 189058447 i.e. 3.3M lines occupying 189 MByess. This 
+14804016 189058447 i.e. 3.3M lines occupying 189 MBytes. This 
 bzip2's down to 8.1 MBytes
 
 load 186605 senses 
