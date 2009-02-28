@@ -599,6 +599,7 @@ public:
     //type properties
     Type getAtomType(const string& typeName) const;
     bool isNode(Type t) const;
+    /** Does t1 inherit from t2 */
     bool inheritsType(Type t1, Type t2) const;
     string getName(Type t) const;
 
