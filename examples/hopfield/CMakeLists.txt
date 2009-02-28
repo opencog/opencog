@@ -8,6 +8,13 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/src/dynamics/attention
 )
 
+INCLUDE_DIRECTORIES (
+	${CSOCKETS_INCLUDE_DIRS}
+	${OPENSSL_INCLUDE_DIR}
+	${ODBC_INCLUDE_DIRS}
+	${UBIGRAPHCLIENT_INCLUDE_DIRS}
+)
+
 ADD_EXECUTABLE (hopfield
 	HopfieldDemo.cc
 	HopfieldServer.cc
@@ -25,4 +32,12 @@ TARGET_LINK_LIBRARIES (hopfield
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${EXPAT_LIBRARIES}
+    curl # TODO currently requires making a library called libcurl.so (linked to a specific version) 
+    ${UBIGRAPHCLIENT_LIBRARIES} #    ubigraphclient
+#    {$XMLRPC_LIBRARIES} #
+    xmlrpc_client
+    xmlrpc
+    xmlrpc_util
+    xmlrpc_xmlparse
+    xmlrpc_xmltok
 )

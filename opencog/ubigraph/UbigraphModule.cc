@@ -63,6 +63,7 @@ std::string UbigraphModule::do_ubigraph(Request *dummy, std::list<std::string> a
             g.compact = true;
         args.pop_front();
     }
+    g.watchSignals();
     g.graph();
     return "";
 }

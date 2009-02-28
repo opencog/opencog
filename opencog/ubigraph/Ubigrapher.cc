@@ -61,13 +61,39 @@ Ubigrapher::Ubigrapher() : pushDelay(1), withIncoming(false), compact(false)
 
     compactLabels = true;
 
-    space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_vertex, this, _1));
-    space->addAtomSignal().connect(std::tr1::bind(&Ubigrapher::add_edges, this, _1));
-    space->removeAtomSignal().connect(std::tr1::bind(&Ubigrapher::remove_vertex, this, _1));
-    space->removeAtomSignal().connect(std::tr1::bind(&Ubigrapher::remove_edges, this, _1));
-
     ubigraph_clear();
+    setStyles();
+}
 
+void Ubigrapher::watchSignals()
+{
+    if (!listening) {
+        c_add = space->addAtomSignal().connect(
+                std::tr1::bind(&Ubigrapher::handleAddSignal, this, _1));
+        c_remove = space->removeAtomSignal().connect(
+                std::tr1::bind(&Ubigrapher::handleRemoveSignal, this, _1));
+        assert(c_add.connected() && c_remove.connected());
+        listening = true;
+    } else {
+        logger().error("[Ubigrapher] Couldn't watch signals, already watching!");
+
+    }
+}
+
+void Ubigrapher::unwatchSignals()
+{
+    if (listening) {
+        c_add.disconnect();
+        c_remove.disconnect();
+        assert(!(c_add.connected() || c_remove.connected()));
+        listening = false;
+    } else {
+        logger().error("[Ubigrapher] Couldn't unwatch signals, none connected!");
+    }
+}
+
+void Ubigrapher::setStyles()
+{
     // Set the styles for various types of edges and vertexes in the graph        
     nodeStyle = ubigraph_new_vertex_style(0);
     ubigraph_set_vertex_style_attribute(nodeStyle, "shape", "sphere");
@@ -86,23 +112,54 @@ Ubigrapher::Ubigrapher() : pushDelay(1), withIncoming(false), compact(false)
     compactLinkStyle = ubigraph_new_edge_style(outgoingStyle);
 }
 
-bool Ubigrapher::add_vertex(Handle h)
+bool Ubigrapher::handleAddSignal(Handle h)
 {
     Atom *a = TLB::getAtom(h);
-
     usleep(pushDelay);
-    if (compact)
-    {
-        // don't make nodes for binary links with no incoming
-        Link *l = dynamic_cast<Link*>(a);
-        if (l && l->getOutgoingSet().size() == 2 &&
-                 l->getIncomingSet() == NULL)
-            return false;
+    if (space->isNode(a->getType()))
+        return addVertex(h);
+    else {
+        if (compact) {
+            // don't make nodes for binary links with no incoming
+            Link *l = dynamic_cast<Link*>(a);
+            if (l && l->getOutgoingSet().size() == 2 &&
+                     l->getIncomingSet() == NULL)
+                return addEdges(h);
+        }
+        return (addVertex(h) || addEdges(h));
     }
+}
+
+bool Ubigrapher::handleRemoveSignal(Handle h)
+{
+    Atom *a = TLB::getAtom(h);
+    usleep(pushDelay);
+    if (space->isNode(a->getType()))
+        return removeVertex(h);
+    else {
+        if (compact) {
+            // don't make nodes for binary links with no incoming
+            Link *l = dynamic_cast<Link*>(a);
+            if (l && l->getOutgoingSet().size() == 2 &&
+                     l->getIncomingSet() == NULL)
+                return removeEdges(h);
+        }
+        return removeVertex(h);
+    }
+
+}
+
+bool Ubigrapher::addVertex(Handle h)
+{
+    Atom *a = TLB::getAtom(h);
+    bool isNode = space->isNode(a->getType());
 
     int id = (int)h.value();
     int status = ubigraph_new_vertex_w_id(id);
-    if (space->isNode(a->getType()))
+    if (status)
+        logger().error("Status was %d", status);
+
+    if (isNode)
         ubigraph_change_vertex_style(id, nodeStyle);
     else {
         ubigraph_change_vertex_style(id, linkStyle);
@@ -116,13 +173,14 @@ bool Ubigrapher::add_vertex(Handle h)
         ost << type;
     }
     
-    if (space->isNode(a->getType())) {
+    if (isNode) {
         Node *n = (Node*)a;
         ost << " " << n->getName();
     } else {
         Link *l = (Link*)a;
         l = l; // TODO: anything to output for links?
     }
+    ost << ":" << space->getTV(h).getMean();
     ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
     return false;
 }
@@ -130,7 +188,7 @@ bool Ubigrapher::add_vertex(Handle h)
 /**
  * Outputs ubigraph links for an atom's outgoing connections.
  */
-bool Ubigrapher::add_edges(Handle h)
+bool Ubigrapher::addEdges(Handle h)
 {
     Atom *a = TLB::getAtom(h);
 
@@ -148,6 +206,8 @@ bool Ubigrapher::add_edges(Handle h)
         {
             int id = h.value();
             int status = ubigraph_new_edge_w_id(id, out[0].value(),out[1].value());
+            if (status)
+                logger().error("Status was %d", status);
             
             std::string type = ClassServer::getTypeName(a->getType());
             std::ostringstream ost;
@@ -156,6 +216,7 @@ bool Ubigrapher::add_edges(Handle h)
             } else {
                 ost << type;
             }
+            ost << ":" << space->getTV(h).getMean();
             ubigraph_change_edge_style(id, compactLinkStyle);
             ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
             return false;
@@ -164,7 +225,7 @@ bool Ubigrapher::add_edges(Handle h)
         for (size_t i = 0; i < out.size(); i++) {
             int id = ubigraph_new_edge(h.value(),out[i].value());
             ubigraph_change_edge_style(id, outgoingStyle);
-            ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
+            //ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
         }
     }
 
@@ -183,7 +244,7 @@ bool Ubigrapher::add_edges(Handle h)
 /**
  * Removes the ubigraph node for an atom.
  */
-bool Ubigrapher::remove_vertex(Handle h)
+bool Ubigrapher::removeVertex(Handle h)
 {
     Atom *a = TLB::getAtom(h);
 
@@ -198,11 +259,13 @@ bool Ubigrapher::remove_vertex(Handle h)
 
     int id = (int)h.value();
     int status = ubigraph_remove_vertex(id);
+    if (status)
+        logger().error("Status was %d", status);
 
     return false;
 }
 
-bool Ubigrapher::remove_edges(Handle h)
+bool Ubigrapher::removeEdges(Handle h)
 {
     Atom *a = TLB::getAtom(h);
 
@@ -218,6 +281,8 @@ bool Ubigrapher::remove_edges(Handle h)
         {                     
             int id = h.value();
             int status = ubigraph_remove_edge(id);
+            if (status)
+                logger().error("Status was %d", status);
         }
     }
     return false;
@@ -225,8 +290,10 @@ bool Ubigrapher::remove_edges(Handle h)
 
 void Ubigrapher::graph()
 {
-    space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::add_vertex, this, true);
-    space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::add_edges, this, true);
+    ubigraph_clear();
+    setStyles();
+    space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::addVertex, this, true);
+    space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::addEdges, this, true);
 }
 
 

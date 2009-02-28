@@ -30,6 +30,14 @@
 namespace opencog
 {
 
+/** Ubigrapher - draws Atoms to the Ubigraph visualisation server.
+ *
+ * \url http://http://ubietylab.net/ubigraph/
+ *
+ * @warning Ubigrapher can listen for signals, but if multiple threads send
+ * signals, then this could confuse the server/connection, and this file should
+ * be modified to check that another signal isn't already being processed.
+ */
 class Ubigrapher
 {
 private:
@@ -38,10 +46,34 @@ private:
     /// Limit requests to occur only once per push delay
     long pushDelay;
 
+    /**
+     * Outputs a ubigraph node for an atom.
+     */
+    bool addVertex(Handle h);
+    /**
+     * Outputs ubigraph links for an atom's outgoing connections.
+     */
+    bool addEdges(Handle h);
+    /**
+     * Removes the ubigraph node for an atom.
+     */
+    bool removeVertex(Handle h);
+    /**
+     * Removes the ubigraph link for an atom.
+     */
+    bool removeEdges(Handle h);
+
+    bool handleAddSignal(Handle h); //! Signal handler for atom adds.
+    bool handleRemoveSignal(Handle h); //! Signal handler for atom removals.
+
+    bool listening; //! Whether the Ubigrapher is listening for AtomSpace signals.
+    boost::signals::connection c_add; //! Connection to add atom signals
+    boost::signals::connection c_remove; //! Connection to remove atom signals
 public:
     Ubigrapher();
 
     AtomSpace *space;
+
     bool withIncoming;
     bool compact;
     //! Makes much more compact labels. Currently uses the initials of the typename.
@@ -51,22 +83,11 @@ public:
     //! except outgoingStyle which is for the edges that collectively represent outgoing sets
     int nodeStyle, linkStyle, compactLinkStyle, outgoingStyle;
 
-    /**
-     * Outputs a ubigraph node for an atom.
-     */
-    bool add_vertex(Handle h);
-    /**
-     * Outputs ubigraph links for an atom's outgoing connections.
-     */
-    bool add_edges(Handle h);
-    /**
-     * Removes the ubigraph node for an atom.
-     */
-    bool remove_vertex(Handle h);
-    /**
-     * Removes the ubigraph link for an atom.
-     */
-    bool remove_edges(Handle h);
+    //! Set the various default styles
+    void setStyles();
+
+    void watchSignals();
+    void unwatchSignals();
 
     void graph();
 };

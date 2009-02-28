@@ -51,6 +51,7 @@
 #define HDEMO_DEFAULT_SPREAD_THRESHOLD 0
 #define HDEMO_DEFAULT_SPREAD_CYCLES 1
 #define HDEMO_DEFAULT_KEY_NODES 0
+#define HDEMO_DEFAULT_UBIGRAPH 0
 
 namespace opencog
 {
@@ -76,6 +77,8 @@ public:
     int palimpsestTolerance;
     int showMatrixFlag;
     int showConfigFlag;
+    int showUbigraph; //! Whether to connect to ubigraph server and visualise
+    int ubigraphDelay; //! Speed of visualisation
     int totalFlag;
     int nPatterns;
     uint keyNodes;
