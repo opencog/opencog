@@ -33,7 +33,7 @@ do
 	logfile=log_n_${n}_d_${d}.txt
 	options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	    -f ${focus_threshold} -z ${viz_threshold} -e ${error} \
-	    -c ${retrieval_cycles} -s ${stimulus} -D \
+	    -c ${retrieval_cycles} -s ${stimulus} -v -v -v \
 	    -g ${gen_density} -p ${npatterns} ${flags}"
 	echo " === Command line:" > $logfile
 	echo $options >> $logfile
@@ -64,7 +64,7 @@ do
     echo "Size $n - density $d"
     options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	-f ${focus_threshold} -z ${viz_threshold} -e ${error} \
-	-c ${retrieval_cycles} -s ${stimulus} -D \
+	-c ${retrieval_cycles} -s ${stimulus} -v -v -v \
 	--train-file=${train_file} \
 	--result-file=${results_file} \
 	--cue-file=${cue_file} ${flags}"
@@ -90,7 +90,7 @@ do
     echo "Size $n - density $d"
     options="-n $n -d $d -a results_n_${n}_d_${d}_ \
 	-f ${focus_threshold} -z ${viz_threshold} -e ${error} \
-	-c ${retrieval_cycles} -s ${stimulus} -D \
+	-c ${retrieval_cycles} -s ${stimulus} -v -v -v \
 	--train-file=${train_file} \
 	--result-file=${results_file} ${flags}"
     echo " === Command line:" > $logfile
