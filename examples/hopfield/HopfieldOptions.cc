@@ -56,6 +56,9 @@ HopfieldOptions::HopfieldOptions()
     resetFlag = false;
 	showConfigFlag = false;
 
+    visualize = HDEMO_DEFAULT_VISUALIZE;
+    visualizeDelay = HDEMO_DEFAULT_VISUALIZE_DELAY;
+
 }
 
 void HopfieldOptions::printHelp()
@@ -81,6 +84,8 @@ void HopfieldOptions::printHelp()
         "                  \t separate files, optionally beginning with [prefix].\n"
         "      --result-file <x> \t output retrieved patterns to this file.\n"
         "   -C --show-config\t Print configuration based on options to stdout and exit.\n"
+        "      --visualize\t Visualise dynamics using Ubigraph (server must be running).\n"
+        "      --vdelay   \t The delay between learning steps to make dynamics easier to follow.\n"
         "   == Network ==\n" "   -w --width N \t Set width of Hopfield network\n"
         "   -h --height N \t Set height of Hopfield network\n"
         "   -n --size N   \t Set width and height of Hopfield network to N\n"
@@ -135,7 +140,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"viz-threshold", required_argument, 0, 'z'},
                 {"focus", required_argument, 0, 'f'},
                 {"patterns", required_argument, 0, 'p'},    // number of patterns to test
-                {"gen-denisty", required_argument, 0, 'g'},
+                {"gen-density", required_argument, 0, 'g'},
                 {"imprint", required_argument, 0, 'c'}, // # of imprint _c_ycles
                 {"retrieve", required_argument, 0, 'r'},    // # of retrieve iterations
                 {"spread", required_argument, 0, 'y'},    // # of spread iterations
@@ -154,6 +159,8 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"show-config", 0, &showConfigFlag, 1},
                 {"reset", 0, &resetFlag, 1},
                 {"one-cue", 0, &cueGenerateOnce, 1},
+                {"visualize", 0, &visualize, 1},
+                {"vdelay", required_argument, 0, '6'},
                 {"help", 0, 0, '?'},
                 {0, 0, 0, 0}
             };
@@ -283,6 +290,9 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             break;
         case 'E':
             cueGenerateOnce = true;
+            break;
+        case '6':
+            visualizeDelay = atoi(optarg);
             break;
         case '?':
             printHelp();

@@ -39,10 +39,15 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/ubigraph/Ubigrapher.h>
 
 #include "HopfieldOptions.h"
 #include "StorkeyAgent.h"
 #include "ImprintAgent.h"
+
+extern "C" {
+    #include <UbigraphAPI.h>
+}
 
 using namespace opencog;
 using namespace std;
@@ -207,7 +212,7 @@ HopfieldServer::HopfieldServer()
     options->setServer(this);
     hebUpdateAgent = NULL;
     storkeyAgent = NULL;
-
+    ubi = NULL;
 }
 
 HopfieldServer::~HopfieldServer()
@@ -223,18 +228,22 @@ void HopfieldServer::init(int width, int height, int numLinks)
     loadModule("libattention.so");
 
     //CogServer& cogserver = static_cast<CogServer&>(server());
-    importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(this->createAgent(ImportanceUpdatingAgent::info().id, true));
+    importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(
+            this->createAgent(ImportanceUpdatingAgent::info().id, true));
     if (options->updateMethod == HopfieldOptions::CONJUNCTION) {
-        hebUpdateAgent     = static_cast<HebbianUpdatingAgent*>(this->createAgent(HebbianUpdatingAgent::info().id, true));
+        hebUpdateAgent = static_cast<HebbianUpdatingAgent*>(
+                this->createAgent(HebbianUpdatingAgent::info().id, true));
     } else {
         storkeyAgent = new StorkeyAgent();
     }
     imprintAgent = new ImprintAgent();
     startAgent(imprintAgent);
-    diffuseAgent      = static_cast<ImportanceDiffusionAgent*>(this->createAgent(ImportanceDiffusionAgent::info().id, true));
+    diffuseAgent = static_cast<ImportanceDiffusionAgent*>(
+            this->createAgent(ImportanceDiffusionAgent::info().id, true));
     diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC);
 //    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
-    forgetAgent       = static_cast<ForgettingAgent*>(this->createAgent(ForgettingAgent::info().id, true));
+    forgetAgent = static_cast<ForgettingAgent*>(
+            this->createAgent(ForgettingAgent::info().id, true));
 
     if (options->verboseLevel) {
         importUpdateAgent->getLogger()->enable();
@@ -318,6 +327,16 @@ void HopfieldServer::init(int width, int height, int numLinks)
     //spreadAgent->setSpreadThreshold(options->spreadThreshold);
     //spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
 
+
+    if (options->visualize) {
+        ubi = new Ubigrapher();
+        ubi->compact = true;
+        ubigraph_set_edge_style_attribute(0, "strength", "0.01");
+        ubigraph_set_edge_style_attribute(0, "stroke", "dashed");
+
+        ubi->watchSignals();
+    }
+    
     // Create nodes
     for (int i = 0; i < this->width; i++) {
         for (int j = 0; j < this->height; j++) {
@@ -330,6 +349,12 @@ void HopfieldServer::init(int width, int height, int numLinks)
             hGrid.push_back(h);
             if (options->keyNodes)
                 hGridKey.push_back(false);
+            /*if (options->visualize) {
+                int id = ubigraph_new_vertex();
+                ubigraph_set_vertex_attribute(id, "visible", "false");
+                int l_id = ubigraph_new_edge(h.value(), id);
+                ubigraph_set_edge_attribute(l_id, "visible", "false");
+            }*/
         }
     }
 
@@ -339,6 +364,10 @@ void HopfieldServer::init(int width, int height, int numLinks)
         return;
     }
 
+/*    if (options->visualize) {
+        ubi->compactLinkStyle = ubigraph_new_edge_style(ubi->compactLinkStyle);
+        ubigraph_set_edge_style_attribute(ubi->compactLinkStyle, "strength", "0.01");
+    }*/
     if (options->keyNodes)
         chooseKeyNodes();
     addRandomLinks();
@@ -416,6 +445,7 @@ void HopfieldServer::addRandomLinks()
             outgoing.push_back(hGrid[target]);
             outgoing.push_back(hGrid[source]);
             he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+
         }
         if (he) {
             //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, TLB::getAtom(he->handle)->toString().c_str());
@@ -423,6 +453,9 @@ void HopfieldServer::addRandomLinks()
             attempts++;
         } else {
             atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
+            //if (options->visualize) {
+            //    ubigraph_set_edge_attribute(newLink.value(), "strength", "0.0001");
+            //}
             amount--;
             attempts = 0;
         }
@@ -652,6 +685,12 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         importUpdateAgent->run(this);
         printStatus();
 
+        if (options->visualize) {
+            unsigned char startRGB[3] = { 50, 50, 50 };
+            unsigned char endRGB[3] = { 255, 100, 80 };
+            ubi->updateColourOfType(CONCEPT_NODE, Ubigrapher::STI, startRGB, endRGB);
+        }
+
         // If using glocal key nodes, find the closest matching
         if (options->keyNodes) {
             logger().fine("---Imprint:Finding key node");
@@ -689,6 +728,14 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         } else {
             logger().fine("---Imprint:Storkey update rule");
             storkeyAgent->run(this);
+        }
+        if (options->visualize) {
+            unsigned char startRGB[3] = { 40, 10, 10 };
+            unsigned char endRGB[3] = { 255, 100, 80 };
+            ubi->updateColourOfType(SYMMETRIC_HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, startRGB, endRGB);
+            unsigned char startRGB2[3] = { 10, 10, 40 };
+            unsigned char endRGB2[3] = { 80, 100, 255 };
+            ubi->updateColourOfType(SYMMETRIC_INVERSE_HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, startRGB2, endRGB2);
         }
 // Unnecessary
 //        logger().fine("---Imprint:Importance spreading");

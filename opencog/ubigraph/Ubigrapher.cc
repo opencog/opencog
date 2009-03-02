@@ -24,8 +24,10 @@
  */
 
 #include <sstream>
+#include <iomanip>
 #include <string>
 #include <unistd.h>
+#include <limits.h>
 #include <tr1/functional>
 using namespace std::tr1::placeholders;
 
@@ -102,14 +104,22 @@ void Ubigrapher::setStyles()
     ubigraph_set_vertex_style_attribute(linkStyle, "shape", "octahedron");
     ubigraph_set_vertex_style_attribute(linkStyle, "color", "#ff0000");
 
-    outgoingStyle = ubigraph_new_edge_style(0);
-    ubigraph_set_edge_style_attribute(outgoingStyle, "arrow", "true");
+    outgoingStyleDirected = ubigraph_new_edge_style(0);
+    ubigraph_set_edge_style_attribute(outgoingStyleDirected, "arrow", "true");
     // Makes it easier to see the direction of the arrows (cones),
     // but hides the number/type labels
 //      ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_radius", "1.5");
-    ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_length", "2.0");
+    ubigraph_set_edge_style_attribute(outgoingStyleDirected, "arrow_length", "2.0");
+    compactLinkStyleDirected = ubigraph_new_edge_style(outgoingStyleDirected);
     
-    compactLinkStyle = ubigraph_new_edge_style(outgoingStyle);
+    outgoingStyle = ubigraph_new_edge_style(0);
+    compactLinkStyle = ubigraph_new_edge_style(0);
+    redStyle = ubigraph_new_edge_style(compactLinkStyle);
+    ubigraph_set_edge_style_attribute(redStyle, "color", "#ff0000");
+    greenStyle = ubigraph_new_edge_style(compactLinkStyle);
+    ubigraph_set_edge_style_attribute(greenStyle, "color", "#00ff00");
+    blueStyle = ubigraph_new_edge_style(compactLinkStyle);
+    ubigraph_set_edge_style_attribute(blueStyle, "color", "#0000ff");
 }
 
 bool Ubigrapher::handleAddSignal(Handle h)
@@ -147,6 +157,117 @@ bool Ubigrapher::handleRemoveSignal(Handle h)
         return removeVertex(h);
     }
 
+}
+
+void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB[3],
+        unsigned char endRGB[3], float hard)
+{
+    // Ubigraph doesn't display color properly when set for individual
+    // links. Instead, we have to use a style for each base color and change the
+    // brightness.
+    HandleSeq hs;
+    int j;
+    float multiplierForTV = 10.0f;
+    std::back_insert_iterator< HandleSeq > out_hi(hs);
+    unsigned char diff[3];
+
+    // Find the range that colour changes over for each component
+    for (j = 0; j < 3; j++)
+        diff[j] = endRGB[j] - startRGB[j];
+    
+    // Get all atoms (and subtypes) of type t
+    space->getHandleSet(out_hi, t, true);
+    // For each, get prop, scale... and 
+    foreach (Handle h, hs) {
+        unsigned char val[3];
+        float scaler;
+        std::ostringstream ost, ost2;
+        ost << "#";
+        switch (p) {
+        case NONE:
+            break;
+        case TV_STRENGTH:
+            scaler = space->getTV(h).getMean();
+            break;
+        case STI:
+            scaler = space->getNormalisedZeroToOneSTI(h,false,true);
+        }
+        if (hard == 0.0f) {
+            if (p == TV_STRENGTH) scaler *= multiplierForTV;
+            for (j = 0; j < 3; j++) val[j] = startRGB[j];
+            if (scaler > 1.0f) scaler = 1.0f;
+            for (j=0; j < 3; j++) {
+                val[j] += (unsigned char) (scaler * diff[j]);
+                ost << hex << setfill('0') << setw(2) << int(val[j]);
+            }
+        } else {
+            if (scaler < hard) {
+                for (j=0; j < 3; j++)
+                    ost << hex << setfill('0') << setw(2) << int(startRGB[j]);
+            } else {
+                for (j=0; j < 3; j++)
+                    ost << hex << setfill('0') << setw(2) << int(endRGB[j]);
+            }
+        }
+
+        Atom *a = TLB::getAtom(h);
+        if (space->inheritsType(t, LINK)) {
+            const Link *l = dynamic_cast<const Link *>(a);
+            const std::vector<Handle> &out = l->getOutgoingSet();
+            if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+                //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
+                ubigraph_set_edge_attribute(h.value(), "color", ost.str().c_str());
+                ubigraph_set_edge_attribute(h.value(), "width", "2");
+                ubigraph_set_edge_attribute(h.value(), "stroke", "solid");
+            } else
+                ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
+        } else {
+            ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
+            ost2 << 1.0 + 4 * space->getNormalisedZeroToOneSTI(h,false,true);
+            ubigraph_set_vertex_attribute(h.value(), "size", ost2.str().c_str());
+        }
+        
+    }
+
+}
+
+void Ubigrapher::applyStyleToType(Type t, int style)
+{
+    applyStyleToTypeGreaterThan(t, style, NONE, 0.0f);
+}
+
+void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit)
+{
+    HandleSeq hs;
+    std::back_insert_iterator< HandleSeq > out_hi(hs);
+
+    // Get all atoms (and subtypes) of type t
+    space->getHandleSet(out_hi, t, true);
+    // For each, get prop, scale... and 
+    foreach (Handle h, hs) {
+        bool okToApply = true;
+        switch (p) {
+        case NONE:
+            break;
+        case TV_STRENGTH:
+            if (space->getTV(h).getMean() < limit) okToApply = false;
+            break;
+        case STI:
+            if (space->getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
+        }
+        if (okToApply) {
+            Atom *a = TLB::getAtom(h);
+            if (space->inheritsType(t, LINK)) {
+                const Link *l = dynamic_cast<const Link *>(a);
+                const std::vector<Handle> &out = l->getOutgoingSet();
+                if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+                    ubigraph_change_vertex_style(h.value(), style);
+                } else
+                    ubigraph_change_vertex_style(h.value(), style);
+            } else 
+                ubigraph_change_vertex_style(h.value(), style);
+        }
+    }
 }
 
 bool Ubigrapher::addVertex(Handle h)
@@ -217,15 +338,21 @@ bool Ubigrapher::addEdges(Handle h)
                 ost << type;
             }
             ost << ":" << space->getTV(h).getMean();
-            ubigraph_change_edge_style(id, compactLinkStyle);
+            int style = compactLinkStyle;
+            if (ClassServer::isAssignableFrom(ORDERED_LINK, a->getType()))
+                style = compactLinkStyleDirected;
+            ubigraph_change_edge_style(id, style);
             ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
             return false;
-        }
-
-        for (size_t i = 0; i < out.size(); i++) {
-            int id = ubigraph_new_edge(h.value(),out[i].value());
-            ubigraph_change_edge_style(id, outgoingStyle);
-            //ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
+        } else {
+            int style = outgoingStyle;
+            if (ClassServer::isAssignableFrom(ORDERED_LINK, a->getType()))
+                style = outgoingStyleDirected;
+            for (size_t i = 0; i < out.size(); i++) {
+                int id = ubigraph_new_edge(h.value(),out[i].value());
+                ubigraph_change_edge_style(id, style);
+                //ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
+            }
         }
     }
 

@@ -74,6 +74,8 @@ public:
 
     AtomSpace *space;
 
+    typedef enum { NONE = 0, TV_STRENGTH, STI } property_t;
+
     bool withIncoming;
     bool compact;
     //! Makes much more compact labels. Currently uses the initials of the typename.
@@ -81,10 +83,19 @@ public:
 
     //! Styles corresponding to different types of Atom,
     //! except outgoingStyle which is for the edges that collectively represent outgoing sets
-    int nodeStyle, linkStyle, compactLinkStyle, outgoingStyle;
+    int nodeStyle, linkStyle, compactLinkStyleDirected,
+        compactLinkStyle, outgoingStyle, outgoingStyleDirected;
 
     //! Set the various default styles
     void setStyles();
+    
+    //! Hack styles to account for Ubigraph color attribute bug
+    int redStyle, blueStyle, greenStyle;
+    //! Update the colors of atoms with type t, based on property p
+    void updateColourOfType(Type t, property_t p, unsigned char startRGB[3],
+            unsigned char endRGB[3], float hard = 0.0f);
+    void applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit);
+    void applyStyleToType(Type t, int style);
 
     void watchSignals();
     void unwatchSignals();
