@@ -105,7 +105,7 @@ public:
         _logger.debug("message");
         _logger.fine ("message");
 
-        TS_ASSERT(countLines(filename) == nLines);
+        TS_ASSERT_LESS_THAN_EQUALS(nLines, countLines(filename));
         remove(filename);
     }
 
