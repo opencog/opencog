@@ -27,6 +27,9 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#ifndef _OPENCOG_UBIGRAPHER
+#define _OPENCOG_UBIGRAPHER
+
 namespace opencog
 {
 
@@ -69,38 +72,57 @@ private:
     bool listening; //! Whether the Ubigrapher is listening for AtomSpace signals.
     boost::signals::connection c_add; //! Connection to add atom signals
     boost::signals::connection c_remove; //! Connection to remove atom signals
+
+protected:
+    //! Initialise the various styles
+    virtual void setStyles();
+    
 public:
     Ubigrapher();
 
     AtomSpace *space;
 
-    typedef enum { NONE = 0, TV_STRENGTH, STI } property_t;
-
     bool withIncoming;
+    //! Whether to squash arity 2 links with no incoming set into a single edge.
     bool compact;
+    //! Whether nodes/links are given labels at all
+    bool labelsOn;
     //! Makes much more compact labels. Currently uses the initials of the typename.
     bool compactLabels;
 
     //! Styles corresponding to different types of Atom,
     //! except outgoingStyle which is for the edges that collectively represent outgoing sets
-    int nodeStyle, linkStyle, compactLinkStyleDirected,
-        compactLinkStyle, outgoingStyle, outgoingStyleDirected;
+    int nodeStyle, linkStyle,
+        compactLinkStyle, compactLinkStyleDirected,
+        outgoingStyle, outgoingStyleDirected;
 
-    //! Set the various default styles
-    void setStyles();
-    
-    //! Hack styles to account for Ubigraph color attribute bug
-    int redStyle, blueStyle, greenStyle;
+    // Hack styles to account for Ubigraph color attribute bug
+    //int redStyle, blueStyle, greenStyle;
+    //! property type for controlling how styles and attributes are applied.
+    typedef enum { NONE = 0, TV_STRENGTH, STI } property_t;
+
     //! Update the colors of atoms with type t, based on property p
     void updateColourOfType(Type t, property_t p, unsigned char startRGB[3],
             unsigned char endRGB[3], float hard = 0.0f);
-    void applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit);
+    //! Update the size of all atoms of type t, based on prop p
+    void updateSizeOfType(Type t, property_t p, float multiplier = 1.0f);
+    //! Apply a given style to all atoms of type t, if normalised p is greater
+    //! than limit.
+    void applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit = 0.0f);
+    //! Apply a given style to all atoms of type t.
     void applyStyleToType(Type t, int style);
 
+    void applyStyleToHandleSeq(HandleSeq hs, int style);
+
+    //! Start watching the AtomSpace add/remove atom signals.
     void watchSignals();
+    //! Stop watching the AtomSpace add/remove atom signals.
     void unwatchSignals();
 
+    //! Redraw the ubigraph, based on the current AtomSpace.
     void graph();
 };
 
 } // namespace opencog
+
+#endif // _OPENCOG_UBIGRAPHER

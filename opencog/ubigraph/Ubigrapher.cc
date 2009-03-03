@@ -62,6 +62,7 @@ Ubigrapher::Ubigrapher() : pushDelay(1), withIncoming(false), compact(false)
     space = CogServer::getAtomSpace();
 
     compactLabels = true;
+    labelsOn = true;
 
     ubigraph_clear();
     setStyles();
@@ -96,6 +97,7 @@ void Ubigrapher::unwatchSignals()
 
 void Ubigrapher::setStyles()
 {
+    //cout << "Ubigrapher setStyles" << endl;
     // Set the styles for various types of edges and vertexes in the graph        
     nodeStyle = ubigraph_new_vertex_style(0);
     ubigraph_set_vertex_style_attribute(nodeStyle, "shape", "sphere");
@@ -114,12 +116,6 @@ void Ubigrapher::setStyles()
     
     outgoingStyle = ubigraph_new_edge_style(0);
     compactLinkStyle = ubigraph_new_edge_style(0);
-    redStyle = ubigraph_new_edge_style(compactLinkStyle);
-    ubigraph_set_edge_style_attribute(redStyle, "color", "#ff0000");
-    greenStyle = ubigraph_new_edge_style(compactLinkStyle);
-    ubigraph_set_edge_style_attribute(greenStyle, "color", "#00ff00");
-    blueStyle = ubigraph_new_edge_style(compactLinkStyle);
-    ubigraph_set_edge_style_attribute(blueStyle, "color", "#0000ff");
 }
 
 bool Ubigrapher::handleAddSignal(Handle h)
@@ -155,6 +151,44 @@ bool Ubigrapher::handleRemoveSignal(Handle h)
                 return removeEdges(h);
         }
         return removeVertex(h);
+    }
+
+}
+
+void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier)
+{
+    HandleSeq hs;
+    std::back_insert_iterator< HandleSeq > out_hi(hs);
+
+    // Get all atoms (and subtypes) of type t
+    space->getHandleSet(out_hi, t, true);
+    // For each, get prop, scale... and 
+    foreach (Handle h, hs) {
+        float scaler;
+        std::ostringstream ost;
+        switch (p) {
+        case NONE:
+            break;
+        case TV_STRENGTH:
+            scaler = space->getTV(h).getMean() * multiplier;
+            break;
+        case STI:
+            scaler = space->getNormalisedZeroToOneSTI(h,false,true)
+                * multiplier;
+        }
+        ost << scaler;
+        Atom *a = TLB::getAtom(h);
+        if (space->inheritsType(t, LINK)) {
+            const Link *l = dynamic_cast<const Link *>(a);
+            const std::vector<Handle> &out = l->getOutgoingSet();
+            if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+                ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
+            } else
+                ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
+        } else {
+            ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
+        }
+        
     }
 
 }
@@ -217,14 +251,14 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
             if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
                 //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
                 ubigraph_set_edge_attribute(h.value(), "color", ost.str().c_str());
-                ubigraph_set_edge_attribute(h.value(), "width", "2");
+                //ubigraph_set_edge_attribute(h.value(), "width", "2");
                 ubigraph_set_edge_attribute(h.value(), "stroke", "solid");
             } else
                 ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
         } else {
             ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
-            ost2 << 1.0 + 4 * space->getNormalisedZeroToOneSTI(h,false,true);
-            ubigraph_set_vertex_attribute(h.value(), "size", ost2.str().c_str());
+//            ost2 << 1.0 + 4 * space->getNormalisedZeroToOneSTI(h,false,true);
+//            ubigraph_set_vertex_attribute(h.value(), "size", ost2.str().c_str());
         }
         
     }
@@ -270,6 +304,22 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
     }
 }
 
+void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
+{
+    // For each, get prop, scale... and 
+    foreach (Handle h, hs) {
+        Atom *a = TLB::getAtom(h);
+        if (space->inheritsType(a->getType(), LINK)) {
+            const Link *l = dynamic_cast<const Link *>(a);
+            const std::vector<Handle> &out = l->getOutgoingSet();
+            if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+                ubigraph_change_vertex_style(h.value(), style);
+            } else
+                ubigraph_change_vertex_style(h.value(), style);
+        } else 
+            ubigraph_change_vertex_style(h.value(), style);
+    }
+}
 bool Ubigrapher::addVertex(Handle h)
 {
     Atom *a = TLB::getAtom(h);
@@ -286,23 +336,25 @@ bool Ubigrapher::addVertex(Handle h)
         ubigraph_change_vertex_style(id, linkStyle);
     }
 
-    std::ostringstream ost;
-    std::string type = ClassServer::getTypeName(a->getType());
-    if (compactLabels) {
-        ost << initials(type);
-    } else {
-        ost << type;
+    if (labelsOn) {
+        std::ostringstream ost;
+        std::string type = ClassServer::getTypeName(a->getType());
+        if (compactLabels) {
+            ost << initials(type);
+        } else {
+            ost << type;
+        }
+        
+        if (isNode) {
+            Node *n = (Node*)a;
+            ost << " " << n->getName();
+        } else {
+            Link *l = (Link*)a;
+            l = l; // TODO: anything to output for links?
+        }
+        ost << ":" << space->getTV(h).getMean();
+        ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
     }
-    
-    if (isNode) {
-        Node *n = (Node*)a;
-        ost << " " << n->getName();
-    } else {
-        Link *l = (Link*)a;
-        l = l; // TODO: anything to output for links?
-    }
-    ost << ":" << space->getTV(h).getMean();
-    ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
     return false;
 }
 
@@ -330,19 +382,21 @@ bool Ubigrapher::addEdges(Handle h)
             if (status)
                 logger().error("Status was %d", status);
             
-            std::string type = ClassServer::getTypeName(a->getType());
-            std::ostringstream ost;
-            if (compactLabels) {
-                ost << initials(type);
-            } else {
-                ost << type;
-            }
-            ost << ":" << space->getTV(h).getMean();
             int style = compactLinkStyle;
             if (ClassServer::isAssignableFrom(ORDERED_LINK, a->getType()))
                 style = compactLinkStyleDirected;
             ubigraph_change_edge_style(id, style);
-            ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
+            if (labelsOn) {
+                std::string type = ClassServer::getTypeName(a->getType());
+                std::ostringstream ost;
+                if (compactLabels) {
+                    ost << initials(type);
+                } else {
+                    ost << type;
+                }
+                ost << ":" << space->getTV(h).getMean();
+                ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
+            }
             return false;
         } else {
             int style = outgoingStyle;

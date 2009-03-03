@@ -61,6 +61,19 @@ public:
 
     ~Pattern();
 
+    Pattern & operator = (const Pattern & other) {
+        if (this != &other) {
+            // protect against invalid self-assignment
+            width = other.width;
+            height = other.height;
+            rng = patternRng;
+            mask = NULL;
+            if (other.mask) mask = new std::vector<bool>(*(other.mask));
+            std::vector<int>::operator=(other);
+        }
+        return *this;
+    }
+
     /**
      * Similarity based on Hamming distance to another Pattern.
      *

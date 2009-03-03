@@ -39,8 +39,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
-#include <opencog/ubigraph/Ubigrapher.h>
 
+#include "HopfieldUbigrapher.h"
 #include "HopfieldOptions.h"
 #include "StorkeyAgent.h"
 #include "ImprintAgent.h"
@@ -328,14 +328,8 @@ void HopfieldServer::init(int width, int height, int numLinks)
     //spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
 
 
-    if (options->visualize) {
-        ubi = new Ubigrapher();
-        ubi->compact = true;
-        ubigraph_set_edge_style_attribute(0, "strength", "0.01");
-        ubigraph_set_edge_style_attribute(0, "stroke", "dashed");
-
-        ubi->watchSignals();
-    }
+    if (options->visualize) 
+        ubi = new HopfieldUbigrapher();
     
     // Create nodes
     for (int i = 0; i < this->width; i++) {
@@ -347,16 +341,13 @@ void HopfieldServer::init(int width, int height, int numLinks)
             // the atoms perceiving the patterns
             atomSpace->setVLTI(h, AttentionValue::NONDISPOSABLE);
             hGrid.push_back(h);
-            if (options->keyNodes)
+            if (options->keyNodes) {
                 hGridKey.push_back(false);
-            /*if (options->visualize) {
-                int id = ubigraph_new_vertex();
-                ubigraph_set_vertex_attribute(id, "visible", "false");
-                int l_id = ubigraph_new_edge(h.value(), id);
-                ubigraph_set_edge_attribute(l_id, "visible", "false");
-            }*/
+            }
         }
     }
+    if (options->visualize)
+        ubi->setGroundNode(hGrid[0]);
 
     // If only 1 node, don't try and connect it
     if (hGrid.size() < 2) {
@@ -364,10 +355,6 @@ void HopfieldServer::init(int width, int height, int numLinks)
         return;
     }
 
-/*    if (options->visualize) {
-        ubi->compactLinkStyle = ubigraph_new_edge_style(ubi->compactLinkStyle);
-        ubigraph_set_edge_style_attribute(ubi->compactLinkStyle, "strength", "0.01");
-    }*/
     if (options->keyNodes)
         chooseKeyNodes();
     addRandomLinks();
@@ -392,6 +379,7 @@ void HopfieldServer::chooseKeyNodes()
             hGridKey[index] = true;
             currentKeyNodes++;
             keyNodes.push_back(hGrid[index]);
+            if (options->visualize) ubi->setAsKeyNode(hGrid[index]);
         }
     }
 
@@ -452,10 +440,10 @@ void HopfieldServer::addRandomLinks()
             delete he;
             attempts++;
         } else {
-            atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
-            //if (options->visualize) {
-            //    ubigraph_set_edge_attribute(newLink.value(), "strength", "0.0001");
-            //}
+            Handle rl = atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
+            if (options->visualize) {
+                ubi->setAsNewRandomLink(rl);
+            }
             amount--;
             attempts = 0;
         }
@@ -671,8 +659,14 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 
     logger().fine("---Imprint:Begin");
     // loop for number of imprinting cyles
-    for (; cycles > 0; cycles--) {
+    for (int currCycles = 0; currCycles < cycles; currCycles++) {
         Handle keyNodeHandle;
+
+        if (options->visualize) {
+            ostringstream o;
+            o << "Imprinting pattern: cycle " << currCycles;
+            ubi->setText(o.str());
+        }
 
         // encode pattern
         logger().fine("---Imprint:Encoding pattern with ImprintAgent");
@@ -686,9 +680,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
 
         if (options->visualize) {
-            unsigned char startRGB[3] = { 50, 50, 50 };
-            unsigned char endRGB[3] = { 255, 100, 80 };
-            ubi->updateColourOfType(CONCEPT_NODE, Ubigrapher::STI, startRGB, endRGB);
+            //unsigned char startRGB[3] = { 50, 50, 50 };
+            //unsigned char endRGB[3] = { 100, 255, 80 };
+            ubi->applyStyleToTypeGreaterThan(CONCEPT_NODE, ubi->patternStyle, Ubigrapher::STI, 0.5);
         }
 
         // If using glocal key nodes, find the closest matching
@@ -698,6 +692,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             // Make key node "Active"
             getAtomSpace()->setSTI(keyNodeHandle, (AttentionValue::sti_t)
                     patternStimulus / max(pattern.activity(),1));
+            if (options->visualize) {
+                ubigraph_change_vertex_style(keyNodeHandle.value(), ubi->activeKeyNodeStyle);
+            }
         }
 
         if (first)
@@ -790,6 +787,7 @@ std::vector<bool> HopfieldServer::checkNeighbourStability(Pattern p, float toler
 Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles, int spreadCycles)
 {
     std::string logString;
+    int i = 0;
 
     logString += "---Retrieve:Initialising " + to_string(numCycles) + " cycle pattern retrieval process.";
     logger().info(logString.c_str());
@@ -797,15 +795,28 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles, i
     logger().fine("---Retrieve:Resetting nodes");
     resetNodes();
 
-    while (numCycles > 0) {
+    if (options->visualize) {
+        ostringstream o;
+        o << "Retrieving pattern for " << numCycles << " cycles";
+        ubi->setText(o.str());
+    }
+    while (i < numCycles) {
         logger().fine("---Retrieve:Encoding pattern");
+        if (options->visualize) {
+            ostringstream o;
+            o << "Retrieving pattern: Cycle " << i;
+            ubi->setText(o.str());
+        }
         encodePattern(partialPattern, patternStimulus);
+        if (options->visualize) {
+            ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
+        }
         printStatus();
         updateAtomTableForRetrieval(spreadCycles);
         printStatus();
 
-        numCycles--;
-        logger().info("---Retreive:Cycles left %d", numCycles);
+        i++;
+        logger().info("---Retreive:Cycles left %d", numCycles - i);
     }
 
     logString = "Cue pattern: \n" + patternToString(partialPattern);

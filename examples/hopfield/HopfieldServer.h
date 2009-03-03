@@ -34,7 +34,6 @@
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
-//#include <opencog/ubigraph/Ubigrapher.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/RandGen.h>
 
@@ -58,7 +57,7 @@ class ImportanceSpreadingAgent;
 class ImportanceUpdatingAgent;
 class StorkeyAgent;
 class ImprintAgent;
-class Ubigrapher;
+class HopfieldUbigrapher;
 
 /** Emulates a hopfield network using OpenCog dynamics */
 class HopfieldServer : public CogServer
@@ -80,7 +79,8 @@ private:
     std::map<Handle,Handle> getDestinationsFrom(Handle src, Type linkType);
 
     //! Ubigrapher for visualising
-    Ubigrapher* ubi;
+    HopfieldUbigrapher* ubi;
+
 public:
 
     static opencog::BaseServer* derivedCreateInstance(void);

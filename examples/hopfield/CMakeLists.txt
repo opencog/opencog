@@ -20,6 +20,7 @@ ADD_EXECUTABLE (hopfield
 	HopfieldServer.cc
 	Pattern.cc
 	HopfieldOptions.cc
+    HopfieldUbigrapher.cc
 	StorkeyAgent.cc
     ImprintAgent.cc
 )
