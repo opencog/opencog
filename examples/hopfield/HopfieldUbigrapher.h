@@ -25,6 +25,8 @@
 
 #include <opencog/ubigraph/Ubigrapher.h>
 
+#include "Pattern.h"
+
 #ifndef _OPENCOG_HOPFIELD_UBIGRAPHER
 #define _OPENCOG_HOPFIELD_UBIGRAPHER
  
@@ -47,9 +49,15 @@ public:
     void setAsNewRandomLink(Handle kn);
     void setGroundNode(Handle h) {groundNode = h;};
 
+    //! Display difference between encoded
+    //! \arg show agreement in green
+    //! \arg show missing in blue
+    //! \arg show extra in red
+    void showDiff(HandleSeq h, Pattern cur, Pattern original);
+
     //! Ubigraph styles
-    int patternStyle, patternErrStyle, notPatternStyle,
-        keyNodeStyle, activeKeyNodeStyle, newEdgeStyle;
+    int patternStyle, patternAddErrStyle, patternMissErrStyle, notPatternStyle,
+        keyNodeStyle, activeKeyNodeStyle, randomLinkStyle;
 
 };
 

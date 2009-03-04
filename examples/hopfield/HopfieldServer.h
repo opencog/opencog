@@ -81,6 +81,7 @@ private:
     //! Ubigrapher for visualising
     HopfieldUbigrapher* ubi;
 
+    HandleSeq recentlyAddedLinks;
 public:
 
     static opencog::BaseServer* derivedCreateInstance(void);
@@ -150,9 +151,11 @@ public:
      * @param numCycles is the number of lobe cycles to wait for retrieval
      * @param spreadCycles is the number of times to spread importance per
      * retrieval cycle.
+     * @param originalPattern for visualisation only.
      * @return closest matching pattern in network.
      */
-    Pattern retrievePattern(Pattern pattern, int numCycles, int spreadCycles);
+    Pattern retrievePattern(Pattern pattern, int numCycles, int spreadCycles,
+            Pattern originalPattern = Pattern(0,0));
 
     /**
      * Check the stability of all 1 bit changes to the Pattern. In other words
@@ -170,7 +173,8 @@ public:
      * @param spreadCycles is the number of times to spread importance per
      * retrieval cycle.
      */
-    void updateAtomTableForRetrieval(int spreadCycles);
+    void updateAtomTableForRetrieval(int spreadCycles, Pattern originalPattern
+            = Pattern(0,0));
 
     /**
      * Convert a vector of Number into a String representing a grid of outputs.

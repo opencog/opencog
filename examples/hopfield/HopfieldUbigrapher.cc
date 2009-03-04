@@ -36,8 +36,8 @@ namespace opencog
 
 HopfieldUbigrapher::HopfieldUbigrapher() : Ubigrapher()
 {
-    patternStyle = patternErrStyle = notPatternStyle =
-        keyNodeStyle = activeKeyNodeStyle = newEdgeStyle = 0;
+    patternStyle = patternAddErrStyle = patternMissErrStyle = notPatternStyle =
+        keyNodeStyle = activeKeyNodeStyle = randomLinkStyle = 0;
     compact = true;
     labelsOn = false;
     setStyles();
@@ -48,7 +48,7 @@ void HopfieldUbigrapher::setAsKeyNode(Handle kn)
 { ubigraph_change_vertex_style(kn.value(), keyNodeStyle); }
 
 void HopfieldUbigrapher::setAsNewRandomLink(Handle kn)
-{ ubigraph_change_edge_style(kn.value(), newEdgeStyle); }
+{ ubigraph_change_edge_style(kn.value(), randomLinkStyle); }
 
 void HopfieldUbigrapher::setText(string s)
 {
@@ -72,35 +72,58 @@ void HopfieldUbigrapher::setStyles()
     //cout << "H Ubigrapher setStyles" << endl;
     //Ubigrapher::setStyles();
 
-    ubigraph_set_edge_style_attribute(0, "strength", "0.005");
-    newEdgeStyle = ubigraph_new_edge_style(0);
-    ubigraph_set_edge_style_attribute(newEdgeStyle, "stroke", "dashed");
+    // When first added, links are red and have low strength
+    ubigraph_set_edge_style_attribute(compactLinkStyle, "strength", "0.005");
+    ubigraph_set_edge_style_attribute(compactLinkStyle, "color", "#ff5530");
 
-    patternStyle = ubigraph_new_vertex_style(nodeStyle);
-    patternErrStyle = ubigraph_new_vertex_style(nodeStyle);
+    // Random links are dashed and gray
+    randomLinkStyle = ubigraph_new_edge_style(compactLinkStyle);
+    ubigraph_set_edge_style_attribute(randomLinkStyle, "stroke", "dashed");
+    ubigraph_set_edge_style_attribute(randomLinkStyle, "color", "#aaaaaa");
+
+    // normal node style: grey spheres
     notPatternStyle = ubigraph_new_vertex_style(nodeStyle);
-
+    ubigraph_set_vertex_style_attribute(notPatternStyle, "color", "#606060");
     nodeStyle = notPatternStyle;
 
-    keyNodeStyle = ubigraph_new_vertex_style(notPatternStyle);
-    activeKeyNodeStyle = ubigraph_new_vertex_style(patternStyle);
-
-    // pattern style: green spheres
+    // pattern node style: green spheres
+    patternStyle = ubigraph_new_vertex_style(notPatternStyle);
     ubigraph_set_vertex_style_attribute(patternStyle, "color", "#80ff32");
 
-    // pattern error style: red spheres
-    ubigraph_set_vertex_style_attribute(patternErrStyle, "color", "#ff8032");
+    // pattern positive error style: red spheres
+    patternAddErrStyle = ubigraph_new_vertex_style(notPatternStyle);
+    ubigraph_set_vertex_style_attribute(patternAddErrStyle, "color", "#ff8032");
 
-    // pattern error style: grey spheres
-    ubigraph_set_vertex_style_attribute(notPatternStyle, "color", "#606060");
+    // pattern negative error style: blue spheres
+    patternMissErrStyle = ubigraph_new_vertex_style(notPatternStyle);
+    ubigraph_set_vertex_style_attribute(patternMissErrStyle, "color", "#3280ff");
 
     // key node style: octahedron
+    keyNodeStyle = ubigraph_new_vertex_style(notPatternStyle);
     ubigraph_set_vertex_style_attribute(keyNodeStyle, "shape", "octahedron");
 
     // active key node style: octahedron
+    activeKeyNodeStyle = ubigraph_new_vertex_style(patternStyle);
     ubigraph_set_vertex_style_attribute(activeKeyNodeStyle, "shape", "octahedron");
 }
 
+void HopfieldUbigrapher::showDiff(HandleSeq hs, Pattern current, Pattern original)
+{
+    for (uint i = 0; i < hs.size(); i++) {
+        string vColor = "#606060";
+        if (current[i] && original[i]) {
+            vColor = "#80ff32";
+        } else if (current[i]) {
+            vColor = "#ff8032";
+        } else if (original[i]) {
+            vColor = "#3280ff";
+        }
+        ubigraph_set_vertex_attribute(hs[i].value(), "color", vColor.c_str());
+
+    }
+
+
+}
 
 } // namespace opencog
 

@@ -155,7 +155,36 @@ bool Ubigrapher::handleRemoveSignal(Handle h)
 
 }
 
-void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier)
+void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, float baseline)
+{
+    float scaler;
+    std::ostringstream ost;
+    switch (p) {
+    case NONE:
+        break;
+    case TV_STRENGTH:
+        scaler = space->getTV(h).getMean() * multiplier;
+        break;
+    case STI:
+        scaler = space->getNormalisedZeroToOneSTI(h,false,true)
+            * multiplier;
+    }
+    ost << baseline + scaler;
+    Atom *a = TLB::getAtom(h);
+    if (space->inheritsType(a->getType(), LINK)) {
+        const Link *l = dynamic_cast<const Link *>(a);
+        const std::vector<Handle> &out = l->getOutgoingSet();
+        if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+            ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
+        } else
+            ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
+    } else {
+        ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
+    }
+
+}
+
+void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float baseline)
 {
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
@@ -164,33 +193,70 @@ void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier)
     space->getHandleSet(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
-        float scaler;
-        std::ostringstream ost;
-        switch (p) {
-        case NONE:
-            break;
-        case TV_STRENGTH:
-            scaler = space->getTV(h).getMean() * multiplier;
-            break;
-        case STI:
-            scaler = space->getNormalisedZeroToOneSTI(h,false,true)
-                * multiplier;
-        }
-        ost << scaler;
-        Atom *a = TLB::getAtom(h);
-        if (space->inheritsType(t, LINK)) {
-            const Link *l = dynamic_cast<const Link *>(a);
-            const std::vector<Handle> &out = l->getOutgoingSet();
-            if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
-                ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
-            } else
-                ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
-        } else {
-            ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
-        }
-        
+        updateSizeOfHandle(h, p, multiplier, baseline);
     }
 
+}
+
+void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char startRGB[3],
+        unsigned char endRGB[3], float hard)
+{
+    unsigned char val[3];
+    float scaler;
+    int j;
+    std::ostringstream ost, ost2;
+    unsigned char diff[3];
+    float multiplierForTV = 10.0f;
+
+    // Find the range that colour changes over for each component
+    for (j = 0; j < 3; j++)
+        diff[j] = endRGB[j] - startRGB[j];
+
+    ost << "#";
+    switch (p) {
+    case NONE:
+        scaler=1.0f;
+        break;
+    case TV_STRENGTH:
+        scaler = space->getTV(h).getMean();
+        break;
+    case STI:
+        scaler = space->getNormalisedZeroToOneSTI(h,false,true);
+    }
+    if (hard == 0.0f) {
+        if (p == TV_STRENGTH) scaler *= multiplierForTV;
+        for (j = 0; j < 3; j++) val[j] = startRGB[j];
+        if (scaler > 1.0f) scaler = 1.0f;
+        for (j=0; j < 3; j++) {
+            val[j] += (unsigned char) (scaler * diff[j]);
+            ost << hex << setfill('0') << setw(2) << int(val[j]);
+        }
+    } else {
+        if (scaler < hard) {
+            for (j=0; j < 3; j++)
+                ost << hex << setfill('0') << setw(2) << int(startRGB[j]);
+        } else {
+            for (j=0; j < 3; j++)
+                ost << hex << setfill('0') << setw(2) << int(endRGB[j]);
+        }
+    }
+
+    Atom *a = TLB::getAtom(h);
+    if (space->inheritsType(a->getType(), LINK)) {
+        const Link *l = dynamic_cast<const Link *>(a);
+        const std::vector<Handle> &out = l->getOutgoingSet();
+        if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+            //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
+            ubigraph_set_edge_attribute(h.value(), "color", ost.str().c_str());
+            //ubigraph_set_edge_attribute(h.value(), "width", "2");
+            ubigraph_set_edge_attribute(h.value(), "stroke", "solid");
+        } else
+            ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
+    } else {
+        ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
+//            ost2 << 1.0 + 4 * space->getNormalisedZeroToOneSTI(h,false,true);
+//            ubigraph_set_vertex_attribute(h.value(), "size", ost2.str().c_str());
+    }
 }
 
 void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB[3],
@@ -200,74 +266,24 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
     // links. Instead, we have to use a style for each base color and change the
     // brightness.
     HandleSeq hs;
-    int j;
-    float multiplierForTV = 10.0f;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
-    unsigned char diff[3];
-
-    // Find the range that colour changes over for each component
-    for (j = 0; j < 3; j++)
-        diff[j] = endRGB[j] - startRGB[j];
     
     // Get all atoms (and subtypes) of type t
     space->getHandleSet(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
-        unsigned char val[3];
-        float scaler;
-        std::ostringstream ost, ost2;
-        ost << "#";
-        switch (p) {
-        case NONE:
-            break;
-        case TV_STRENGTH:
-            scaler = space->getTV(h).getMean();
-            break;
-        case STI:
-            scaler = space->getNormalisedZeroToOneSTI(h,false,true);
-        }
-        if (hard == 0.0f) {
-            if (p == TV_STRENGTH) scaler *= multiplierForTV;
-            for (j = 0; j < 3; j++) val[j] = startRGB[j];
-            if (scaler > 1.0f) scaler = 1.0f;
-            for (j=0; j < 3; j++) {
-                val[j] += (unsigned char) (scaler * diff[j]);
-                ost << hex << setfill('0') << setw(2) << int(val[j]);
-            }
-        } else {
-            if (scaler < hard) {
-                for (j=0; j < 3; j++)
-                    ost << hex << setfill('0') << setw(2) << int(startRGB[j]);
-            } else {
-                for (j=0; j < 3; j++)
-                    ost << hex << setfill('0') << setw(2) << int(endRGB[j]);
-            }
-        }
-
-        Atom *a = TLB::getAtom(h);
-        if (space->inheritsType(t, LINK)) {
-            const Link *l = dynamic_cast<const Link *>(a);
-            const std::vector<Handle> &out = l->getOutgoingSet();
-            if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
-                //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
-                ubigraph_set_edge_attribute(h.value(), "color", ost.str().c_str());
-                //ubigraph_set_edge_attribute(h.value(), "width", "2");
-                ubigraph_set_edge_attribute(h.value(), "stroke", "solid");
-            } else
-                ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
-        } else {
-            ubigraph_set_vertex_attribute(h.value(), "color", ost.str().c_str());
-//            ost2 << 1.0 + 4 * space->getNormalisedZeroToOneSTI(h,false,true);
-//            ubigraph_set_vertex_attribute(h.value(), "size", ost2.str().c_str());
-        }
-        
+        updateColourOfHandle(h, p, startRGB, endRGB, hard);
     }
 
 }
 
 void Ubigrapher::applyStyleToType(Type t, int style)
 {
-    applyStyleToTypeGreaterThan(t, style, NONE, 0.0f);
+    HandleSeq hs;
+    std::back_insert_iterator< HandleSeq > out_hi(hs);
+    // Get all atoms (and subtypes) of type t
+    space->getHandleSet(out_hi, t, true);
+    applyStyleToHandleSeq(hs, style);
 }
 
 void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit)
@@ -295,7 +311,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
                 const Link *l = dynamic_cast<const Link *>(a);
                 const std::vector<Handle> &out = l->getOutgoingSet();
                 if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
-                    ubigraph_change_vertex_style(h.value(), style);
+                    ubigraph_change_edge_style(h.value(), style);
                 } else
                     ubigraph_change_vertex_style(h.value(), style);
             } else 
@@ -313,7 +329,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
             const Link *l = dynamic_cast<const Link *>(a);
             const std::vector<Handle> &out = l->getOutgoingSet();
             if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
-                ubigraph_change_vertex_style(h.value(), style);
+                ubigraph_change_edge_style(h.value(), style);
             } else
                 ubigraph_change_vertex_style(h.value(), style);
         } else 
