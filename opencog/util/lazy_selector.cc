@@ -1,5 +1,5 @@
 /*
- * opencog/util/hash_map.h
+ * opencog/util/lazy_selector.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -20,28 +20,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HASH_MAP_H
-#define _OPENCOG_HASH_MAP_H
+#include "lazy_selector.h"
+#include "exceptions.h"
 
-#include <string>
-#ifdef WIN32
-#include <hash_map>
-#else
-#include <ext/hash_map>
-
-namespace opencog {
-    using __gnu_cxx::hash_map;
-    using __gnu_cxx::hash;
-}
-
-namespace __gnu_cxx
+namespace opencog
 {
-template<> struct hash<std::string> {
-    size_t operator()(const std::string& x) const {
-        return hash<const char*>()(x.c_str());
-    }
-};
-}
-#endif // WIN32
 
-#endif // _OPENCOG_HASH_MAP_H
+int lazy_selector::operator()()
+{
+
+    cassert(TRACE_INFO, !empty(), "lazy_selector - selector is empty.");
+    int idx = select();
+    _n--;
+
+    hash_map<int, int>::iterator it = _map.find(idx);
+    if (idx == _n) {
+        if (it != _map.end()) {
+            idx = it->second;
+            _map.erase(it);
+        }
+        return idx;
+    }
+    int res = (it == _map.end()) ? idx : it->second;
+    hash_map<int, int>::iterator last = _map.find(_n);
+    if (last == _map.end()) {
+        _map.insert(std::make_pair(idx, _n));
+    } else {
+        _map.insert(std::make_pair(idx, last->second));
+        _map.erase(last);
+    }
+    return res;
+}
+
+} //~namespace opencog

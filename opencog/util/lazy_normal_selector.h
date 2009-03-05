@@ -1,5 +1,5 @@
 /*
- * opencog/util/hash_map.h
+ * opencog/util/lazy_normal_selector.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -20,28 +20,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HASH_MAP_H
-#define _OPENCOG_HASH_MAP_H
+#ifndef _OPENCOG_LAZY_NORMAL_SELECTOR_H
+#define _OPENCOG_LAZY_NORMAL_SELECTOR_H
 
-#include <string>
-#ifdef WIN32
-#include <hash_map>
-#else
-#include <ext/hash_map>
+#include "lazy_selector.h"
 
-namespace opencog {
-    using __gnu_cxx::hash_map;
-    using __gnu_cxx::hash;
-}
-
-namespace __gnu_cxx
+namespace opencog
 {
-template<> struct hash<std::string> {
-    size_t operator()(const std::string& x) const {
-        return hash<const char*>()(x.c_str());
-    }
-};
-}
-#endif // WIN32
 
-#endif // _OPENCOG_HASH_MAP_H
+struct lazy_normal_selector : public lazy_selector {
+    lazy_normal_selector(int n) : lazy_selector(n) { }
+    int select();
+};
+
+} //~namespace opencog
+
+#endif

@@ -62,6 +62,8 @@ public:
     //random boolean
     virtual bool randbool() = 0;
 
+    //linear biased random boolean, with b in [0,1]
+    virtual bool biased_randbool(float b)=0;
 };
 
 //choose uniformly randomly an element of the set s

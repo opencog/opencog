@@ -249,6 +249,23 @@ public:
 }; // FatalErrorException
 
 /**
+ * Exception to be called when the searched item was not found
+ */
+class NotFoundException : public StandardException {
+public:
+
+    /**
+     * Constructor
+     *
+     * @param Trace information (filename:line-number). Use TRACE_INFO
+     * macro.
+     * @param Exception message in printf standard format.
+     */
+    NotFoundException(const char*, const char*, ...);
+    
+}; // NotFoundException
+
+/**
  * Exception to be called when a network error  has occured. When catching
  * such exception all state savings should be done.
  */

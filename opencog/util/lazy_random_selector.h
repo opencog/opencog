@@ -1,5 +1,5 @@
 /*
- * opencog/util/hash_map.h
+ * opencog/util/lazy_random_selector.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -20,28 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HASH_MAP_H
-#define _OPENCOG_HASH_MAP_H
+#ifndef _OPENCOG_LAZY_RANDOM_SELECTOR_H
+#define _OPENCOG_LAZY_RANDOM_SELECTOR_H
 
-#include <string>
-#ifdef WIN32
-#include <hash_map>
-#else
-#include <ext/hash_map>
+#include "lazy_selector.h"
+#include "RandGen.h"
 
-namespace opencog {
-    using __gnu_cxx::hash_map;
-    using __gnu_cxx::hash;
-}
-
-namespace __gnu_cxx
+namespace opencog
 {
-template<> struct hash<std::string> {
-    size_t operator()(const std::string& x) const {
-        return hash<const char*>()(x.c_str());
-    }
-};
-}
-#endif // WIN32
 
-#endif // _OPENCOG_HASH_MAP_H
+//a lazy random selector without replacement -
+//lets you select m random integers in [0,n) without replacement each in O(1)
+//and only uses O(m) memory - useful where n is much larger than m
+struct lazy_random_selector : public lazy_selector {
+    lazy_random_selector(int n, opencog::RandGen& _rng) : lazy_selector(n), rng(_rng) { }
+    int select();
+private:
+    opencog::RandGen& rng;
+};
+
+} //~namespace opencog
+
+#endif

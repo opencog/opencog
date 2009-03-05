@@ -254,6 +254,23 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
     return res;
 }
 
+//compute the smallest divisor of n
+template<typename IntT> IntT smallest_divisor(IntT n) {
+    cassert(TRACE_INFO, n > 0, "n must be supperior than 0");
+    if(n<3)
+        return n;
+    else {
+        bool found_divisor = false;
+        IntT i = 2;
+        for(; i*i <= n && !found_divisor; i++) {
+            found_divisor = n%i==0;
+        }
+        if(found_divisor)
+            return i-1;
+        else return n;
+    }
+}
+
 } // namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H

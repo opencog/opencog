@@ -1,5 +1,5 @@
 /*
- * opencog/util/hash_map.h
+ * opencog/util/dorepeat.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -20,28 +20,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HASH_MAP_H
-#define _OPENCOG_HASH_MAP_H
+#ifndef dorepeat
 
-#include <string>
-#ifdef WIN32
-#include <hash_map>
-#else
-#include <ext/hash_map>
+//dorepeat(n) foo
+//repeats foo n times
+//maybe its mean to other people use this, but its certainly nicer that typing
+//for (int i=0;i<n;++i) when you never use i!
 
-namespace opencog {
-    using __gnu_cxx::hash_map;
-    using __gnu_cxx::hash;
-}
+#define __DOREPEAT_CONCAT_3_( a, b ) a##b
+#define __DOREPEAT_CONCAT_2_( a, b ) __DOREPEAT_CONCAT_3_( a, b )
+#define __DOREPEAT_CONCAT( a, b ) __DOREPEAT_CONCAT_2_( a, b )
+#define __DOREPEAT_UNIQUE_NAME __DOREPEAT_CONCAT( DOREPEAT_UNIQUE_NAME_, __LINE__ )
 
-namespace __gnu_cxx
-{
-template<> struct hash<std::string> {
-    size_t operator()(const std::string& x) const {
-        return hash<const char*>()(x.c_str());
-    }
-};
-}
-#endif // WIN32
+#define dorepeat(N) \
+    for (unsigned int __DOREPEAT_UNIQUE_NAME=N; __DOREPEAT_UNIQUE_NAME>0;--__DOREPEAT_UNIQUE_NAME)
 
-#endif // _OPENCOG_HASH_MAP_H
+#endif

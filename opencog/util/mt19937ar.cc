@@ -116,6 +116,16 @@ bool MT19937RandGen::randbool() {
     return result;
 }
 
+//linear biased random bool, b in [0,1]
+//when b tends to 1 the result tends to be true
+bool MT19937RandGen::biased_randbool(float b) {
+    return b > randfloat();
+#ifdef DEBUG_RAND_CALLS
+    logger().debug("MT19937RandGen::biased_randbool() => %s", result?"true":"false");
+#endif
+}
+
+
 // PRIVATE METHODS
 
 /* creates the data structures */

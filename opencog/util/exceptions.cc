@@ -34,6 +34,8 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/Logger.h>
 
+#define MAX_MSG_LENGTH 2048
+
 using namespace opencog;
 
 /**
@@ -43,7 +45,7 @@ using namespace opencog;
  */
 void StandardException::parseErrorMessage(const char* fmt, va_list ap)
 {
-    char buf[1024];
+    char buf[MAX_MSG_LENGTH];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
     opencog::logger().error(buf);
@@ -225,12 +227,25 @@ NetworkException::NetworkException(const char * trace, const char * fmt, ...)
 
 /**
  * ----------------------------------------------------------------------------
+ * NotFoundException class
+ * ----------------------------------------------------------------------------
+ */
+NotFoundException::NotFoundException(const char * trace, const char * fmt, ...)
+{
+    va_list  ap;
+    va_start(ap, fmt);
+    parseErrorMessage(trace, fmt, ap);
+    va_end(ap);
+}
+
+/**
+ * ----------------------------------------------------------------------------
  * AssertionException class
  * ----------------------------------------------------------------------------
  */
 AssertionException::AssertionException(const char* fmt, ...)
 {
-    char    buf[1024];
+    char    buf[MAX_MSG_LENGTH];
 
     va_list        ap;
     va_start(ap, fmt);
@@ -242,7 +257,7 @@ AssertionException::AssertionException(const char* fmt, ...)
 
 AssertionException::AssertionException(const char* fmt, va_list ap)
 {
-    char    buf[1024];
+    char    buf[MAX_MSG_LENGTH];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
     opencog::logger().error(buf);
