@@ -52,6 +52,7 @@ void HopfieldUbigrapher::setAsNewRandomLink(Handle kn)
 
 void HopfieldUbigrapher::setText(string s)
 {
+#if 0
     static int labelVertex = 0;
 
     if (labelVertex == 0) {
@@ -65,6 +66,7 @@ void HopfieldUbigrapher::setText(string s)
         ubigraph_set_edge_attribute(pseudoEdge, "oriented", "true");
     }
     ubigraph_set_vertex_attribute(labelVertex, "label", s.c_str());
+#endif
 }
 
 void HopfieldUbigrapher::setStyles()

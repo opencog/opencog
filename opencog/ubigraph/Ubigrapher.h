@@ -108,9 +108,9 @@ public:
     void updateColourOfType(Type t, property_t p, unsigned char startRGB[3],
             unsigned char endRGB[3], float hard = 0.0f);
     //! Update the size of all atoms of type t, based on prop p
-    void updateSizeOfType(Type t, property_t p, float multiplier = 1.0f, float baseline=0.0f);
+    void updateSizeOfType(Type t, property_t p, float multiplier = 1.0f, float baseline=0.5f);
     //! Update the size of Handle based on prop p
-    void updateSizeOfHandle(Handle hs, property_t p, float multiplier = 1.0f, float baseline=0.0f);
+    void updateSizeOfHandle(Handle hs, property_t p, float multiplier = 1.0f, float baseline=0.5f);
     //! Apply a given style to all atoms of type t, if normalised p is greater
     //! than limit.
     void applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit = 0.0f);

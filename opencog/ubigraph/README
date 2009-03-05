@@ -18,6 +18,28 @@ libm
 First start the ubigraph server. Then load the libubigraph.so module in cogserver, and run the "ubigraph" command.
 You should run the ubigraph command once, and then the display will update when atoms are added or removed.
 
+== A note on screen captures ==
+
+Required software: gtk-recordMyDesktop, mplayer, transcode, ffmpeg
+
+Use gtk-recordMyDesktop. Don't enable compression... just save the ogv file
+somewhere temporary (I found I needed to specify the file to save to before
+doing the recording). Select the ubigraph server window.
+
+Use mplayer to find out the video properties, since recordMyDesktop or the codec
+it uses doesn't set these properly:
+
+$ mplayer -vo null -ao null -frames 0 -identify [filename]
+
+Then find out the width and height and use that in the transcode process:
+
+$ transcode -i [filename] -x mplayer -o output.wmv -y \
+ffmpeg -F wmv1 -g [width]x[height] -f 20
+
+This creates a wmv (Windows mediaplayer video) file.
+
+If you need to trim the borders, you can use the -j transcode option.
+
 == TODO ==
 
 * Better error handling, especially for if the ubigraph command is run (or an add/remove atom signal happens) while the ubigraph server is not running.

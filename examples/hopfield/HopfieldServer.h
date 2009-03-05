@@ -247,6 +247,7 @@ public:
     float singleImprintAndTestPattern(Pattern p, int retrieve, float mutate, Pattern c);
 
     void printStatus();
+    void printLinks();
 };
 
 } // namespace opencog

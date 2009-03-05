@@ -342,13 +342,19 @@ bool Ubigrapher::addVertex(Handle h)
     bool isNode = space->isNode(a->getType());
 
     int id = (int)h.value();
-    int status = ubigraph_new_vertex_w_id(id);
-    if (status)
-        logger().error("Status was %d", status);
 
-    if (isNode)
+    if (isNode) {
+        int status = ubigraph_new_vertex_w_id(id);
+        if (status)
+            logger().error("Status was %d", status);
         ubigraph_change_vertex_style(id, nodeStyle);
-    else {
+    } else {
+        const Link *l = dynamic_cast<const Link *>(a);
+        if (l && compact && l->getOutgoingSet().size() == 2 && l->getIncomingSet() == NULL)
+            return false;
+        int status = ubigraph_new_vertex_w_id(id);
+        if (status)
+            logger().error("Status was %d", status);
         ubigraph_change_vertex_style(id, linkStyle);
     }
 

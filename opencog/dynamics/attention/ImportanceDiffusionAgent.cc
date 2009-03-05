@@ -49,6 +49,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent()
         "",""
     };
     setParameters(defaultConfig);
+    spreadDecider = NULL;
 
     //! @todo won't respond to the parameters being changed later
     //! (not a problem at present, but could get awkward with, for example,

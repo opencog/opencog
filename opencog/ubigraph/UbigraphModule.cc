@@ -30,6 +30,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/mt19937ar.h>
+
 
 #include "UbigraphModule.h"
 
@@ -40,12 +42,16 @@ DECLARE_MODULE(UbigraphModule);
 UbigraphModule::UbigraphModule() : Module()
 {
     logger().info("[UbigraphModule] constructor");
+    do_ubigraphUpdate_register();    
+    do_ubigraphRandomSTI_register();    
     do_ubigraph_register();    
 }
 
 UbigraphModule::~UbigraphModule()
 {
     logger().info("[UbigraphModule] destructor");
+    do_ubigraphUpdate_unregister();    
+    do_ubigraphRandomSTI_unregister();    
     do_ubigraph_unregister();
 }
 
@@ -65,6 +71,31 @@ std::string UbigraphModule::do_ubigraph(Request *dummy, std::list<std::string> a
     }
     g.watchSignals();
     g.graph();
+    return "";
+}
+
+std::string UbigraphModule::do_ubigraphUpdate(Request *dummy, std::list<std::string> args)
+{
+    g.updateSizeOfType(NODE, Ubigrapher::STI, 15.0f);
+    return "";
+}
+
+std::string UbigraphModule::do_ubigraphRandomSTI(Request *dummy, std::list<std::string> args)
+{
+    HandleSeq hs;
+    MT19937RandGen rng(1);
+    std::back_insert_iterator< HandleSeq > out_hi(hs);
+    int nNodes = 2;
+
+    if (!args.empty()) nNodes = atoi(args.front().c_str());
+    server().getAtomSpace()->getHandleSet(out_hi, NODE, true);
+    if (hs.size() == 0) return "";
+    while (nNodes > 0) {
+        server().getAtomSpace()->setSTI(hs[rng.randint(hs.size())], 1000);
+        nNodes--;
+    }
+    server().getAtomSpace()->updateMaxSTI(1000);
+
     return "";
 }
 

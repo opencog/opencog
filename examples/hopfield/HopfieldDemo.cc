@@ -23,6 +23,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <unistd.h>
+#include <math.h>
 #include <boost/foreach.hpp>
 
 #include <opencog/util/Config.h>
@@ -322,6 +324,7 @@ void testHopfieldNetworkRolling()
     patterns = getPatterns();
     cuePatterns = getCuePatterns(patterns);
 
+    sleep(10);
     for (unsigned int i = 0; i < patterns.size(); i++) {
         if (o->resetFlag)
             (static_cast<HopfieldServer&>(server())).reset();

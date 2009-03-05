@@ -33,7 +33,9 @@
 #else
 #include <sys/time.h>
 #endif
+#include <unistd.h>
 
+//#include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/util/Logger.h>
@@ -48,6 +50,9 @@
 extern "C" {
     #include <UbigraphAPI.h>
 }
+
+//! Inserts sleep statements so that visualisation in Ubigraph is clearer 
+#define ENABLE_HOPFIELD_DELAYS 1
 
 using namespace opencog;
 using namespace std;
@@ -160,6 +165,8 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
     imprintPattern(p, 1);
     logger().fine("Encoded pattern for 1 loop");
 
+//    if (options->visualize && ENABLE_HOPFIELD_DELAYS) sleep(5);
+
     if (! options->cueGenerateOnce) {
         c = p.mutatePattern(mutate);
         logger().fine("Mutated pattern");
@@ -176,6 +183,8 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
         options->afterFile << result;
         options->diffFile << (result - before);
     }
+    if (options->visualize && ENABLE_HOPFIELD_DELAYS) sleep(5);
+
     // Nodes are left with STI after retrieval
     resetNodes();
 
@@ -413,7 +422,6 @@ void HopfieldServer::addRandomLinks()
     amount = this->links - links->getSize();
     delete links;
 
-    recentlyAddedLinks.clear();
     logger().fine("Adding %d random Hebbian Links.", amount);
     // Link nodes randomly with amount links
     while (amount > 0 && attempts < maxAttempts) {
@@ -747,6 +755,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
                     Ubigrapher::NONE, startRGB2, endRGB2);
             ubi->updateSizeOfType(HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, 50.0, 0.1);
         }
+        recentlyAddedLinks.clear();
 // Unnecessary
 //        logger().fine("---Imprint:Importance spreading");
 //        diffuseAgent->run(this);
@@ -754,7 +763,8 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 
         printStatus();
 
-        logger().fine("---Imprint:Energy %f.");
+        //logger().fine("---Imprint:Energy.");
+        if (options->visualize && ENABLE_HOPFIELD_DELAYS) sleep(2);
         logger().fine("---Imprint:Resetting nodes");
         resetNodes();
     }
@@ -895,6 +905,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
                         options->vizThreshold), originalPattern);
         }
         ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
+        if (ENABLE_HOPFIELD_DELAYS) sleep(10);
     }
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
@@ -920,6 +931,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
                             options->vizThreshold), originalPattern);
             }
             ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
+            if (ENABLE_HOPFIELD_DELAYS) sleep(2);
         }
 //        temp *= (spreadCycles - i)/( (float) spreadCycles + 1 );
 // Old spread agent.
@@ -1000,3 +1012,16 @@ std::string HopfieldServer::printMatrixResult(std::vector< Pattern > patterns)
 
 }
 
+void HopfieldServer::printLinks()
+{
+    HandleSeq hs;
+    std::back_insert_iterator< HandleSeq > out_hi(hs);
+
+    // Get all atoms (and subtypes) of type t
+    getAtomSpace()->getHandleSet(out_hi, LINK, true);
+    // For each, get prop, scale... and 
+//    foreach (Handle h, hs) {
+//        cout << TLB::getAtom(h)->toString() << endl;
+//    }
+
+}

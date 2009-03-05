@@ -50,6 +50,19 @@ private:
         "test the ubigraph prototype"
     )
 
+    DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph-update-sti", do_ubigraphUpdate, 
+        "update node size in ubigraph based on STI",
+        "Usage: ubigraph-update-nodes\n\n"
+        "Update the nodes, this is a test function for visual demos.\n"
+        "The size of all nodes reflect their relative STI values."
+    )
+
+    DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph-random-sti", do_ubigraphRandomSTI, 
+        "randomly assign STI",
+        "Usage: ubigraph-update-nodes\n\n"
+        "Temp function, sets STI of node.\n"
+    )
+
     Ubigrapher g;
 
 public:
