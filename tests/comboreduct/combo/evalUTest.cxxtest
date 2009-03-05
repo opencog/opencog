@@ -1,0 +1,43 @@
+#include "ComboReduct/combo/vertex.h"
+#include "ComboReduct/combo/type_tree.h"
+#include "ComboReduct/combo/eval.h"
+#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+
+using namespace ant_combo;
+using namespace LADSUtil;
+using namespace std;
+
+class evalUTest :  public CxxTest::TestSuite {
+public:
+  void test_set_bindings1() {
+    combo_tree tr;
+    stringstream ss("+(#1 #2 *)");
+    ss >> tr;
+    std::cout << "TR : " << tr << std::endl;
+    stringstream ss_expected_res("+(1 2 *(3 4)) ");
+
+    //test set_bindings on vertex vector
+    std::vector<vertex> al;
+    al.push_back(1);
+    al.push_back(2);
+    al.push_back(3);
+    al.push_back(4);
+    combo_tree tr_copy(tr);
+    set_bindings(tr, tr.begin(), al, explicit_arity(tr));
+    std::cout << "TR AFTER BINDING : " << tr << std::endl;
+    stringstream ss_res;
+    ss_res << tr;
+    TS_ASSERT_EQUALS(ss_res.str(), ss_expected_res.str());
+
+    //test set_bindings on tree arg_parent/operands
+    combo_tree tmp;
+    stringstream ss_arg("arg_parent(1 2 3 4)");
+    ss_arg >> tmp;
+    set_bindings(tr_copy, tr_copy.begin(), tmp.begin(), explicit_arity(tr_copy));
+    std::cout << "TR_COPY AFTER BINDING : " << tr_copy << std::endl;
+    stringstream ss_copy_res;
+    ss_copy_res << tr_copy;
+    TS_ASSERT_EQUALS(ss_copy_res.str(), ss_expected_res.str());
+  }
+
+};

@@ -1,0 +1,214 @@
+#include <LADSUtil/tree.h>
+#include <LADSUtil/mt19937ar.h>
+
+#include "ComboReduct/combo/vertex.h"
+#include "ComboReduct/combo/eval.h"
+#include "ComboReduct/reduct/reduct.h"
+#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+
+using namespace reduct;
+using namespace ant_combo;
+using namespace LADSUtil;
+using namespace std;
+
+static MT19937RandGen rng(0);
+
+class FullReductUTest : public CxxTest::TestSuite {
+public:
+  void test_stub() { }
+  //test_simplify1 :
+  //or(not(0<(+(#1 #2))) not(0<(#1)) not(0<(#2))) -> or(not(0<(#1)) not(0<(#2)))
+  void test_simplify1() {
+    string tree_str="or(not(0<(+(#1 #2))) not(0<(#1)) not(0<(#2)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    type_tree tr_type = infer_type_tree(tr);
+
+    std::cout << tr_type << std::endl;
+
+    bool ct = is_well_formed(tr_type);
+
+    std::cout << ct << std::endl;
+
+    TS_ASSERT(ct);
+
+    int ca = contin_arity(tr_type);
+    int s = sample_count(ca);
+
+    RndNumTable rnt(s, ca, rng);
+
+    try {
+      mixed_table mt1(tr, rnt, tr_type, rng);
+      full_reduce(tr, rng);
+      mixed_table mt2(tr, rnt, tr_type, rng);
+
+      TS_ASSERT_EQUALS(mt1,mt2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify2 :
+  //or(0<(+(#1 0.3)) 0<(+(#1 -0.3)))
+  void test_simplify2() {
+    string tree_str="or(0<(+(#1 0.3)) 0<(+(#1 -0.3)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    type_tree tr_type = infer_type_tree(tr);
+
+    bool ct = is_well_formed(tr_type);
+
+    TS_ASSERT(ct);
+
+    int ca = contin_arity(tr_type);
+    int s = sample_count(ca);
+
+    RndNumTable rnt(s, ca, rng);
+
+    try {
+      mixed_table mt1(tr, rnt, tr_type, rng);
+      full_reduce(tr, rng);
+      mixed_table mt2(tr, rnt, tr_type, rng);
+
+      TS_ASSERT_EQUALS(mt1,mt2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify3
+  //0<sin(y) -> true  if 0<y -> true and 0<pi-y -> true
+  void test_simplify3() {
+    string tree_str="and(0<(sin(#1)) 0<(#1) 0<(+(*(-1 #1) 3)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    type_tree tr_type = infer_type_tree(tr);
+
+    bool ct = is_well_formed(tr_type);
+
+    TS_ASSERT(ct);
+
+    int ca = contin_arity(tr_type);
+    int s = sample_count(ca);
+
+    RndNumTable rnt(s, ca, rng);
+
+    try {
+      mixed_table mt1(tr, rnt, tr_type, rng);
+      full_reduce(tr, rng);
+      mixed_table mt2(tr, rnt, tr_type, rng);
+
+      TS_ASSERT_EQUALS(mt1,mt2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify4
+  //0<sin(y) -> true  if 1<=y -> true and 0<3-y -> true
+  void test_simplify4() {
+    string tree_str="and(0<(sin(#1)) not(0<(+(1 *(-1 #1)))) 0<(+(*(-1 #1) 3)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    type_tree tr_type = infer_type_tree(tr);
+
+    bool ct = is_well_formed(tr_type);
+
+    TS_ASSERT(ct);
+
+    int ca = contin_arity(tr_type);
+    int s = sample_count(ca);
+
+    RndNumTable rnt(s, ca, rng);
+
+    try {
+      mixed_table mt1(tr, rnt, tr_type, rng);
+      full_reduce(tr, rng);
+      mixed_table mt2(tr, rnt, tr_type, rng);
+
+      TS_ASSERT_EQUALS(mt1,mt2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify5
+  //and(not(0<(*(#1 -1))) 0<(#1)) -> 0<(#1)
+  void test_simplify5() {
+    string tree_str="and(not(0<(*(#1 -1))) 0<(#1))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    type_tree tr_type = infer_type_tree(tr);
+
+    bool ct = is_well_formed(tr_type);
+
+    TS_ASSERT(ct);
+
+    int ca = contin_arity(tr_type);
+    int s = sample_count(ca);
+
+    RndNumTable rnt(s, ca, rng);
+
+    try {
+      mixed_table mt1(tr, rnt, tr_type, rng);
+      full_reduce(tr, rng);
+      mixed_table mt2(tr, rnt, tr_type, rng);
+
+      TS_ASSERT_EQUALS(mt1,mt2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify6
+  //and(not(0<(*(#1 -1))) 0<(+(#1 2))) -> not(0<(*(#1 -1)))
+  void test_simplify6() {
+    string tree_str="and(not(0<(*(#1 -1))) 0<(+(#1 2)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    type_tree tr_type = infer_type_tree(tr);
+
+    bool ct = is_well_formed(tr_type);
+
+    TS_ASSERT(ct);
+
+    int ca = contin_arity(tr_type);
+    int s = sample_count(ca);
+
+    RndNumTable rnt(s, ca, rng);
+
+    try {
+      mixed_table mt1(tr, rnt, tr_type, rng);
+      full_reduce(tr, rng);
+      mixed_table mt2(tr, rnt, tr_type, rng);
+
+      TS_ASSERT_EQUALS(mt1,mt2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+};

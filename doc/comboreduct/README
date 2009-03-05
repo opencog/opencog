@@ -1,0 +1,38 @@
+Description :
+=============
+
+ComboReduct is a library initially developed by Moshe Looks and Novamente LLC used in MOSES. It contains a programmatic language named Combo with reduction and type checker engines.
+
+Requirements :
+==============
+
+Before building ComboReduct, you need to install (or check if it's already installed) the following third-party software packages:
+
+---------------
+-- for users --
+---------------
+
+1) Boost (http://sourceforge.net/projects/boost/) version 1.33.1 or above.
+
+2) LADSUtil
+
+3) CMake (http://www.cmake.org/HTML/Index.html)
+   - see INSTALL for more details on this
+
+-------------------------
+-- for developers only --
+-------------------------
+
+3) CXXTEST (http://sourceforge.net/projects/cxxtest) 
+   - version 3.10.1 (on Windows) and 3.8.4 (on Linux), but it also should work with the latest stable release.
+   - you can either install the rpm package (it works on Debian based distributions as well (like Ubuntu) using alien to convert into debian package or install manually using the tgz package. In case yo install manually you must then do as follows :
+      - after download and install it, you must define an environment variabled called CXXTEST_BIN_DIR and set it to the path where you can find the "cxxtestgen.py" python script. Examples: 
+        - On Linux: export CXXTEST_BIN_DIR=/usr/local/cxxtest/bin   (put this in a script executed on login, like .bashrc)
+        - On Windows: Select "Start->Control Panel->System->Advanced->Environment Variables". Then, click in the "new" button of the "User variables for <username>" group. Finally, enter "CXXTEST_BIN_DIR" for "Variable Name" and "C:\cxxtest" for "Variable Value".
+      - On Linux, you must also add the path to the cxxtest headers (*.h files) to the CPLUS_INCLUDE_PATH environment variable, so that C++ compilers can find them, as in the following example:
+        export CPLUS_INCLUDE_PATH=${CPLUS_INCLUD_PATH}:/usr/local/cxxtest/include
+
+Building and installation :
+===========================
+
+Just read the INSTALL for instruction on that.

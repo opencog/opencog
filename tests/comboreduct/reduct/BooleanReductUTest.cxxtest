@@ -1,0 +1,61 @@
+#include <cxxtest/TestSuite.h>
+#include <string>
+#include <sstream>
+
+#include <LADSUtil/tree.h>
+#include <LADSUtil/mt19937ar.h>
+
+#include "ComboReduct/combo/vertex.h"
+#include "ComboReduct/combo/eval.h"
+#include "ComboReduct/reduct/reduct.h"
+#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+
+using namespace reduct;
+using namespace ant_combo;
+using namespace LADSUtil;
+using namespace std;
+
+static LADSUtil::MT19937RandGen rng(0);
+
+class BbooleanReductUTest : public CxxTest::TestSuite {
+public:
+  void test_simplify1() {
+    string tree_str="and(and(not(not(and(#4 #3))) or(not(or(#5 #4)) or(and(#1 #5) and(#1 #5)))) and(and(and(not(#1) not(#2)) not(not(#3))) or(and(not(#4) not(#5)) or(or(#2 #1) not(#5)))))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    truth_table tt1(tr, rng);
+    logical_reduce(tr);
+    truth_table tt2(tr,integer_log2(tt1.size()),rng);
+
+    TS_ASSERT_EQUALS(tt1,tt2);
+  }
+  void test_simplify2() {
+    string tree_str="not(or(and(and(not(#5) or(#5 #3)) not(or(#5 #2))) and(or(and(#5 #3) or(#5 #3)) not(not(#1)))))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    truth_table tt1(tr,rng);
+    logical_reduce(tr);
+    truth_table tt2(tr,integer_log2(tt1.size()),rng);
+
+    TS_ASSERT_EQUALS(tt1,tt2);
+  };
+  void test_simplify3() {
+    string tree_str="and(or(not(and(or(#5 #3) not(#2))) or(or(or(#1 #2) and(#2 #3)) or(and(#2 #4) not(#5)))) not(not(and(or(#3 #3) or(#3 #4)))))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    truth_table tt1(tr,rng);
+    logical_reduce(tr);
+    truth_table tt2(tr,integer_log2(tt1.size()),rng);
+
+    TS_ASSERT_EQUALS(tt1,tt2);
+  }
+};

@@ -1,0 +1,165 @@
+#include <LADSUtil/tree.h>
+#include <LADSUtil/mt19937ar.h>
+
+#include "ComboReduct/combo/vertex.h"
+#include "ComboReduct/combo/eval.h"
+#include "ComboReduct/reduct/reduct.h"
+#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+
+using namespace reduct;
+using namespace ant_combo;
+using namespace LADSUtil;
+using namespace std;
+
+static MT19937RandGen rng(0);
+
+class ContinReductUTest : public CxxTest::TestSuite {
+public:
+  void test_stub() { }
+  //test_simplify1 :
+  //x+0 -> x
+  //x*1 -> x
+  //x*0 -> 0
+  //x/c -> 1/c * x
+  //x/(c*y) -> 1/c * x/y
+  //0/x -> 0
+  //*(x) -> x
+  //+(x) -> x
+  void test_simplify1() {
+    string tree_str="*(+(*(/(*(+(#1 *(#2 0)) 1) *(5.0 #3)) /(+(#3 /(0 #4)) 5.0))))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);
+
+    RndNumTable rnt(s, a, rng);
+
+    try {
+      contin_table ct1(tr, rnt, rng);
+      contin_reduce(tr, rng);
+      contin_table ct2(tr, rnt, rng);
+
+      TS_ASSERT_EQUALS(ct1,ct2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify2 :
+  //x/z+y/z -> (x+y)/z
+  //x*y+x*z -> x*(y+z)
+  //(x*y)/(x*z) -> y/z
+  void test_simplify2() {
+    string tree_str="/(*(#5 +(*(#4 +(/(#1 #3) /(#2 #3))) *(#5 +(/(#1 #3) /(#2 #3))))) *(#5 #6))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);
+
+    RndNumTable rnt(s, a, rng);
+
+    try {
+      contin_table ct1(tr, rnt, rng);
+      contin_reduce(tr, rng);
+      contin_table ct2(tr, rnt, rng);
+
+      TS_ASSERT_EQUALS(ct1,ct2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify3 :
+  //(x/y)/z -> x/(y*z)
+  //x/(y/z) -> (x*z)/y
+  //x*(y/z) -> (x*y)/z
+  void test_simplify3() {
+    string tree_str="*(/(/(#1 #2) #3) /(#4 /(#5 #6)) /(#7 /(#8 #9)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);//return always 5, for the moment
+
+    RndNumTable rnt(s, a, rng);
+
+    try {
+      contin_table ct1(tr, rnt, rng);
+      contin_reduce(tr, rng);
+      contin_table ct2(tr, rnt, rng);
+
+      TS_ASSERT_EQUALS(ct1,ct2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify4 :
+  //log(x)+log(y) -> log(x*y)
+  //log(x)-log(y) -> log(x/y)
+  //log(c/x) -> -log(c^-1*x)
+  //log(exp(x)*y) -> x+log(y)
+  void test_simplify4() {
+    string tree_str="*(+(log(+(#1 1)) log(+(#2 1))) +(log(+(#3 1)) *(log(+(#4 1)) -1)) log(/(5.0 +(#5 1))) log(*(exp(#6) +(#7 1))))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);
+
+    RndNumTable rnt(s, a, rng);
+
+    try {
+      contin_table ct1(tr, rnt, rng);
+      contin_reduce(tr, rng);
+      contin_table ct2(tr, rnt, rng);
+
+      TS_ASSERT_EQUALS(ct1,ct2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+
+  //test_simplify5 :
+  //prod exp(x_i) -> exp(sum x_i)
+  //x/exp(y) -> x*exp(-y)
+  //exp(log(x)+y) -> x*exp(y)
+  //sin(x+c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
+  void test_simplify5() {
+    string tree_str="+(*(exp(#1) exp(#2) #3 exp(#4)) /(#5 exp(#6)) exp(+(log(+(#7 1)) #8)) sin(+(#9 100.0)))";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);
+
+    RndNumTable rnt(s, a, rng);
+
+    try {
+      contin_table ct1(tr, rnt, rng);
+      contin_reduce(tr, rng);
+      contin_table ct2(tr, rnt, rng);
+
+      TS_ASSERT_EQUALS(ct1,ct2);
+    }
+    catch(EvalException& e) {
+      TS_ASSERT(true);
+    }
+  }
+};

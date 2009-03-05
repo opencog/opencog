@@ -1,0 +1,79 @@
+ADD_SUBDIRECTORY(combo)
+ADD_SUBDIRECTORY(reduct)
+ADD_SUBDIRECTORY(ant_combo_vocabulary)
+ADD_SUBDIRECTORY(main)
+ADD_SUBDIRECTORY(crutil)
+
+ADD_LIBRARY(ComboReduct SHARED
+	crutil/exception
+
+	combo/action
+	combo/builtin_action
+	combo/message	
+	combo/action_symbol
+	combo/definite_object
+	combo/indefinite_object
+	combo/procedure_call
+	combo/procedure_repository
+	combo/assumption
+	combo/complexity
+	combo/eval
+	combo/perception
+	combo/perception_eval
+	combo/tree_generation
+	combo/type_tree_def
+	combo/type_tree
+	combo/vertex
+	combo/using
+	combo/variable_unifier
+
+	reduct/action_reduction
+	reduct/action_rules
+	reduct/clean_reduction
+	reduct/contin_reduction
+	reduct/contin_rules
+	reduct/flat_normal_form
+	reduct/full_reduction
+	reduct/general_rules
+	reduct/logical_reduction
+	reduct/logical_rules
+	reduct/meta_rules
+	reduct/mixed_reduction
+	reduct/mixed_rules
+	reduct/perception_reduction
+	reduct/perception_rules
+	reduct/reduct
+	reduct/using
+
+	ant_combo_vocabulary/ant_builtin_action
+	ant_combo_vocabulary/ant_perception
+	ant_combo_vocabulary/ant_action_symbol
+	ant_combo_vocabulary/ant_indefinite_object
+	ant_combo_vocabulary/ant_combo_vocabulary
+
+)
+
+INCLUDE_DIRECTORIES (
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+LINK_DIRECTORIES (
+    ${CMAKE_BINARY_DIR}/src
+)
+
+#TARGET_LINK_LIBRARIES(ComboReduct
+	#combo
+	#reduct
+	#ant_combo_vocabulary
+	#crutil
+#)
+
+#install library
+INSTALL(TARGETS 
+	${PROJECT_NAME}
+	DESTINATION "lib/${PROJECT_NAME}"
+    PERMISSIONS
+	OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	GROUP_READ GROUP_EXECUTE
+	WORLD_READ WORLD_EXECUTE
+)
