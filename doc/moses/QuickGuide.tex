@@ -1,0 +1,580 @@
+\documentclass{article}
+\usepackage{url}
+
+\newtheorem{class}{class or struct}
+\newtheorem{type}{type}
+
+
+\title{MOSES --- A Quick Guide}
+\author{Predrag Janicic}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+Meta-optimizing semantic evolutionary search (MOSES) is a new approach to
+program evolution, based on representation-building and probabilistic
+modeling. MOSES has been successfully applied to solve hard problems in domains
+such as computational biology, sentiment evaluation, and agent control. Results
+tend to be more accurate, and require less objective function evaluations, in
+comparison to other program evolution systems. Best of all, the result of
+running MOSES is not a large nested structure or numerical vector, but a
+compact and comprehensible program written in a simple Lisp-like
+mini-language. For more information see \url{http://metacog.org/doc.html}.
+
+The list of publications on MOSES is given in the References section.
+Moshe Look's PhD thesis \cite{6} should be the first material to be read
+by someone interested in using or modifying MOSES.
+
+MOSES is implemented in C++ and it heavily uses templates. So, one interested 
+in modifying MOSES must be familiar with C++ and, at least to some extent, to 
+C++ templates.
+
+
+\section{Copyright Notice}
+
+MOSES is Copyright 2005-2008, Moshe Looks and Novamente LLC.
+
+It is licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+\url{http://www.apache.org/licenses/LICENSE-2.0}
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+\section{Installation}
+
+%The code for reproducing all of the published experiments on MOSES 
+%may be found in the moses/ subdirectory. A more nicely architected and
+%performant implementation that is under active development may be found in the
+%moses2/ subdirectory. These two directories are completely independent and use
+%no common files (although identical versions of some files may be found in both
+%subdirectories).
+
+% Go into either moses/ or moses2/ (see above) and do 'make'. You will need to
+% have a recent gcc (4.x or late 3.x) and the boost libraries installed
+% (http://www.boost.org).
+
+For compiling MOSES, you need 
+\begin{itemize}
+\item a recent gcc (4.x or late 3.x); 
+\item the boost libraries (\url{http://www.boost.org});
+\item the CMake package (\url{http://www.cmake.org/HTML/Index.html});
+\item the ComboReduct and LADSUtil libraries (TODO : place the urls).
+\end{itemize}
+
+For compiling MOSES, create a directory \verb|bin| (from the root folder
+of the MOSES distribution), go under it
+and run \verb|"cmake .."|. This will create 
+the needed build files. Then, make the project using "\verb|make|" (again 
+from the directory \verb|bin|).
+Generated executables will be in the folder \verb|bin/src/MosesEda/main|.
+
+
+\section{Basic Ideas and Notions}
+
+MOSES is an approach (and a tool) for program evolution, but it can be
+used for learning different structured expressions, such as, for instance,
+propositional formulas or arithmetic expressions.
+
+Here are some of the basic notions of MOSES:
+
+\begin{description}
+
+\item[Scoring function.] During the learning phase, candidates being explored are scored 
+by a {\em scoring function}, specific for a given problem. 
+For instance, a given problem can be to learn a disjunctive 
+propositional formulae over the given set of propositional 
+variables, e.g., $\#1 \vee \#2 \vee \ldots \vee \#n$. 
+The learning mechanism does not know this formula and instead
+it only has an access to the corresponding scoring function.
+A scoring function for this problem, for a given formula 
+$f$ (over the variables $\#1, \#2, \ldots, \#n$) would return 
+the number of rows in the truth table for $f$ such that 
+the output truth value is equal to the truth value for 
+$\#1 \vee \#2 \vee \ldots \vee \#n$. In this case, the 
+scoring function could return values from $0$ to $2^n$. 
+These values can be normalized or transformed in some other
+way. Usually, the perfect score is $0$, while the worse 
+scores are negative. 
+
+\item[Exemplar and representation-building.] 
+The {\em representation-building} component of MOSES constructs a 
+parameterized representation of a particular region of program 
+space, centered around a single program (the {\em exemplar}) or 
+family of closely related programs. 
+
+\item[Knobs.] 
+A representation built (around an exemplar) is given in terms 
+of {\em knobs}. A {\em knob} is a single dimension of variation 
+relative to an exemplar program tree. It may be discrete or 
+continuous. For example, given the program tree fragment 
+$or(0<(*(\#1,0.5)),\#2)$, a continuous knob might be used to 
+vary the numerical constant. So, setting this knob to $0.7$ would 
+transform the tree fragment to $or(0<(*(\#1,0.7)),\#2)$. A discrete 
+knob with $arity()==3$ might be used to transform the boolean input 
+$\#2$. So, setting this knob to $1$ might transform the tree to 
+$or(0<(*(\#1,0.7)),not(\#2))$, and setting it to $2$ might remove 
+it from the tree (while setting it to $0$ would return to the 
+original tree).
+
+A program in a deme is represented as a list of knob settings
+(these values can be bits, integer values, or real-number values,
+depending on the knob type). The program itself can be easily 
+constructed from such list and the exemplar.
+
+\item[Deme and metapopulation.] 
+A sample of programs within a representation will be referred to 
+herein as a {\em deme}; a set of demes will be referred to as a 
+metapopulation. MOSES operates on a metapopulation, adaptively 
+creating, removing, and allocating optimization effort to 
+various demes. 
+\end{description}
+
+
+
+
+\section{Overall Algorithm}
+
+A basic MOSES algorithm can be described as follows:
+
+\begin{enumerate}
+\item Construct an initial set of knobs (via representation-building) based on 
+some prior (e.g., based on an empty program) and use it to generate an initial 
+random sampling of programs. Add this deme to the metapopulation.
+
+\item Select a deme from the metapopulation and iteratively update its sample, as follows:
+
+\begin{enumerate}
+\item   Select some promising programs from the deme’s existing sample to use for 
+        modeling, according to the scoring function. Ties in the scoring function are broken
+        by preferring smaller programs.
+
+\item   Considering the promising programs as collections of knob settings, generate
+        new collections of knob settings by applying some (competent) optimization algorithm.
+
+\item   Convert the new collections of knob settings into their corresponding programs,
+        evaluate their scores, and integrate them into the deme’s sample, replacing less
+        promising programs.
+\end{enumerate}
+
+\item  For each of the new programs that meet the criteria for creating a new deme, if any:
+
+\begin{enumerate}
+\item   Construct a new set of knobs (via representation-building) to define a region
+        centered around the program (the deme’s exemplar), and use it to generate a
+        new random sampling of programs, producing a new deme.
+
+\item   Integrate the new deme into the metapopulation, possibly displacing less 
+        promising demes.
+\end{enumerate}
+
+\item Repeat from step 2.
+\end{enumerate}
+
+Note that representation-building and optimization algorithm that parametrize
+the above algorithm are vital components of the system and they crucially 
+influence its performance.
+Representation building is specific for each domain (e.g., learning 
+propositional formulae), while optimization algorithm is general. 
+Currently, in MOSES, there is support for representation building 
+for several problem domains (e.g., propositional formulae, 
+actions\footnote{By ``actions'' we mean mini programming languages
+describing actions of a agents such as artificial and \cite{6}. Available
+actions typically cover atomic instructions like ``step forward'',
+``rotate left'', ``rotate right'', ``step forward'', 
+branching instruction such as ,,if-then-else``,
+and loop instruction such as ,,while``.}) 
+and several optimization algorithms. 
+
+
+\section{Source Files and Folders}
+
+In the MOSES distribution, there are the following folders (under \verb|src/MosesEda|) with the source files:
+
+\begin{description}
+\item[moses] this is the folder with the core support for MOSES --- 
+support for representation building, some scoring functions, optimization
+algorithms, etc. 
+
+\item[main] this is the folder with files giving samples of executables 
+demonstrating different features of the MOSES system: representation building, 
+reducing expressions, and, of course, applications of MOSES itself (for 
+instance, there are examples for the "ant problem", for "parity formulae", etc.
+
+\item[eda] support for estimation of distribution algorithms with lower
+level support for optimization algorithms. 
+\end{description}
+
+%MOSES is a part of a bigger project, so there are some functions (or even files)
+%that are not used by MOSES (but are used elsewhere).
+
+%In addition, there are the folders with \verb|scripts|, \verb|sample|, and 
+%\verb|test|.
+
+
+\section{Key Types, Structures, and Classes}
+
+This section briefly discusses technical details about the key elements of MOSES.
+
+\subsection{Structured Expressions}
+
+For representing structured expressions (programs, propositional formulae, etc)
+MOSES relies on the library ComboReduct.
+
+In ComboReduct structured expressions are represented 
+by trees of the type 
+\verb|vtree| as follows:
+
+\verb|typedef Util::tree<vertex> vtree;|
+
+\verb|vertex| is defined in the following way
+(so it can capture different sorts of nodes, for different, but still
+fixed, problem domains):
+
+\begin{verbatim}
+  typedef boost::variant<builtin,
+                         wild_card,
+                         argument,
+                         contin_t,
+                         action,
+                         builtin_action,
+                         perception,
+                         definite_object,
+                         indefinite_object,
+                         message,
+                         procedure_call,
+                         action_symbol> vertex;
+\end{verbatim}
+
+For a detail explanation you can have a look at the doc provided in distribution of the ComboReduct library.
+
+\subsection{Metapopulation}
+
+The metapopulation is described by a structure \verb|metapopulation|
+(declared in \verb|moses/moses.h|) that inherits STL \verb|set|:
+
+\begin{verbatim}
+  struct metapopulation : public set<behavioral_scored_tree,
+				     std::greater<behavioral_scored_tree> > 
+\end{verbatim}
+
+As it can be seen, the metapopulation consists of elements of the type
+\verb|behavioral_scored_tree| which is, in turn, declared in 
+\verb|moses/types.h|):
+
+\begin{verbatim}
+  typedef Util::tagged_item<combo::vtree,
+			    behavioral_tree_score> behavioral_scored_tree;
+\end{verbatim}
+
+The metapopulation will store expressions (as scored trees) that were
+encountered during the learning process (while some of them, dominated
+by existing ones, might be skipped as non-promising). 
+
+For instance, one can iterate through the metapopulation and print 
+all its elements with their scores and complexities in the following way:
+
+\begin{verbatim}
+ for (const_iterator it=begin(); it!=end(); ++it)
+      cout << get_tree(*it) << " " 
+           << get_score(*it) << " " 
+           << get_complexity(*it) << endl;
+\end{verbatim}
+
+The metapopulation is updated in iterations. In each iteration, one 
+of its elements is selected as an exemplar. The exemplar is then
+used for building a new deme (that will, firther, extend the metapopulation).
+
+
+\subsection{Deme}
+
+The metapopulation consists of expressions (stored as scored trees).
+These expressions do not refer to some exemplar. On the other hand,
+during the learning process, new demes are generated. 
+A deme is centered around an exemplar from the metapopulation. 
+However, elements of the deme are not represented as (scored) trees
+but, instead, are represented relative to the exemplar. 
+So, the deme has the type (declared in \verb|eda/instance_set.h|): 
+
+\begin{verbatim}
+eda::instance_set<tree_score>
+\end{verbatim}
+
+\noindent
+where \verb|instance_set| is a set of scored instances, and \verb|instance|
+is declared in \verb|eda/eda.h| is a vector of packed knob settings: 
+
+\begin{verbatim}
+typedef vector<packed_t> instance;
+\end{verbatim}
+
+The basic learning and optimization processes work over these instances,
+and not over trees. So, a suitable way for representing expressions/trees 
+as sequences of bit/integer/real values (relative to the exemplar) enable
+abstract and clean optimization steps, uniform for different domains.
+This representation is based on representation building relative to a
+given exemplar.
+
+
+\subsection{Representation}
+
+A structure describing a representation of a deme (relative to its
+exemplar) is declared 
+in \verb|moses/representation.h|. Its constructor uses as arguments
+a simplification rule, an exemplar, a type tree, a pseudo-number
+generator and, optionally, just for actions (like for the ant problem),
+sets of available operators, perceptions, and actions).
+
+The constructor of this structure, builds knobs with respect to the
+given exemplar (by the method \verb|build_knobs|).
+
+This structure stores the exemplar like a tree (more precisely \verb|vtree|).
+This structure has a method for using a given instance to transform 
+the exemplar (\verb|transform|) providing a new expression tree. 
+
+The structure also has methods for clearing the current version of
+the exemplar (setting all knobs to default values --- zeros) ---
+\verb|clear_exemplar|, for getting the exemplar ---
+\verb|get_clean_exemplar|, and for getting the reduced, simplified 
+version of the exemplar \verb|get_clean_exemplar|.
+
+
+\section{Key Methods}
+
+This section briefly discusses key MOSES's methods.
+
+\subsection{Representation Building}
+
+Representation building is one of the key aspects of the MOSES approach. 
+It is implemented separately for different problem domains (propositional
+formulae, action, etc). Support for several problem domains is given in 
+the file \verb|moses/build_knobs.h/cc|. 
+Representation building starts with an exemplar and add to it new nodes
+and corresponding knobs (see \cite{6}). Knobs can have different settings. 
+If all knobs are set to 0, then we the original exemplar is obtained. 
+
+There are several types of knobs, described in \verb|moses/knobs.h|.
+Some of them are suitable for propositional formulae (so some subexpression
+can be {\em present}, {\em absent}, or {\em negated}. In simple knobs,
+a subexpression can be just {\em present} or {\em absent}.
+In action knobs, a node can have different settings, corresponding
+to atomic or compound actions, sampled as ``perms'' 
+in the method \verb|build_knobs::sample_action_perms|.
+
+The key method is \verb|void build_knobs::build_action(pre_it it)|
+--- it substantially determines the representation building for
+one domain and substantially influence the learning process.
+
+\subsection{Optimization}
+
+The role of optimization is to score elements of the deme, and to 
+process them and to generate new promising instances. The optimization 
+process works over sequences of numbers (i.e., over ``instances'').
+It is invoked in the main procedure, in each iteration of expanding
+(the method \verb|metapopulation::expand|, implemented in the file
+\verb|moses/moses.h|) the metapopulation. The result is a set of 
+instances that are transformed to trees and then added to the 
+metapopulation (if they are not dominated by existing elements).  
+
+Currently, there are two optimization methods implemented
+(implemented in the file \verb|moses/optimization.h|): 
+\begin{description}
+\item[univariate optimization] based on Bayesian optimization (see \cite{6});
+
+\item[iterative hillclimbing] based on a simple greedy iterative process, 
+looking for a better than exemplar instance at distance $1, 2, 3, \ldots$;
+\end{description}
+
+
+In addition, there is support for ``sliced iterative hillclimbing'',
+similar as the one as above, but using a time slicing, so it can be used
+ in some wider context, without leaving other subtasks idle for too long.
+
+Optimization algorithms also have to take care of number of evaluations
+(number of calls to scoring functions) used. Basically, this number
+controls the resources given to the algorithm.
+
+
+\subsection{Scoring}
+
+While the representation building is specific for each problem domain,
+the scoring is specific for each specific problem. For instance, in
+learning propositional formulae, the same representation building
+algorithm is used, but different scoring functions will be used
+for each specific task (for instance, for learning disjunction
+or conjunction over the given set of propositional variables).
+
+There is a 
+\begin{description}
+\item[score function] returning \verb|int|, generally with
+0 as a perfect score, and negative numbers as worse scores;
+\item[behavioral score function] returning a vector of specific 
+values, that is used for comparing expressions on different 
+dimensions and for discarding elements dominated by other elements.
+\end{description}
+
+Technically, these functions are provided as operators within 
+structures. 
+
+The scoring functions are used for instantiating higher-level
+functions used uniformly for different problem domains and different
+problems. 
+
+Some low-level, problem specific, scoring functions are defined in 
+the file (under \verb|src/MosesEda|) \verb|moses/scoring_functions.h|,
+while higher-level support is defined in the file \verb|moses/scoring.h/cc|.
+
+\section{MOSES: Putting It All Together}
+
+With all components briefly described above, this section discusses
+how are they combined in a system MOSES. 
+
+The main moses method is trivial: it only expand the metapopulation 
+in iterations until the given number of evaluations or a perfect
+solution is reached. This method is implemented in \verb|moses/moses.h|,
+in several variations (some with additional arguments corresponding to
+available actions and perceptions, just for the action problem domain). 
+
+Typical usage of MOSES starts by providing scoring functions. For 
+instance, for learning disjunction propositional formula one can 
+use the following declaration (defined in \verb|moses/scoring_functions.h|):
+
+\begin{verbatim}
+disjunction scorer;
+\end{verbatim}
+
+\noindent 
+and for solving the ant problem, one can use the following declaration 
+(defined in \verb|moses/scoring_functions.h|):
+
+\begin{verbatim}
+ant_score scorer;
+\end{verbatim}
+
+Also, the type of expression to be learnt has to be provided 
+\footnote{for a detail explanation of the type system used in ComboReduct
+  see the doc provided with the distribution of ComboReduct}.
+For instance, for the disjunctive formula, one should use:
+
+\begin{verbatim}
+type_tree tt(id::lambda_type);
+tt.append_children(tt.begin(),id::boolean_type,arity+1);
+\end{verbatim}
+
+\noindent 
+where \verb|arity| carries the information of the number of 
+propositional variables to be considered. For the ant problem, 
+one would write: 
+
+\begin{verbatim}
+type_tree tt(id::lambda_type);
+tt.append_children(tt.begin(),id::action_result_type,1);
+\end{verbatim}
+
+Then the metapopulation has to be declared. It is instantiated
+via templates, saying which scoring function, which behavioral scoring
+function, and which optimization algorithm to use. As, arguments
+one has to provide the random generator, the initial exemplar,
+the type tree, simplification procedure, then the scorers and
+the optimization algorithm. This is an example for learning
+the disjunctive formula:
+
+\begin{verbatim}
+metapopulation<logical_score,logical_bscore,univariate_optimization> 
+  metapop(rng, vtree(id::logical_and),tt,logical_reduction(),
+          logical_score(scorer,arity,rng),
+          logical_bscore(scorer,arity,rng),
+          univariate_optimization(rng));
+\end{verbatim}
+
+\noindent 
+and this is an example for the ant problem: 
+
+\begin{verbatim}
+metapopulation<ant_score,ant_bscore,univariate_optimization> 
+  metapop(rng,vtree(id::sequential_and),tt,action_reduction(),
+          scorer,
+          bscorer,
+          univariate_optimization(rng));
+\end{verbatim}
+
+There is also a version of MOSES that uses the sliced interactive
+hillclimbing --- \verb|sliced_moses|. It supports the action domain,
+but can be simply modify to support other domains as well.
+
+These, and several more examples, can be found in the folder \verb|main|.
+The sample programs provided often ask for arguments like the seed for
+the pseudo-random number generation or for the number of evaluations.
+
+
+
+\section{Final Remarks}
+
+MOSES is a rather big system and it cannot be documented in details
+in a few pages. However, the descriptions given above should be 
+helpful when one first encounters MOSES and tries to use it and 
+modify it. 
+
+
+
+\begin{thebibliography}{10}
+
+\bibitem{1}
+Moshe Looks, "Scalable Estimation-of-Distribution Program Evolution",
+Genetic and Evolutionary Computation COnference (GECCO), 2007.
+
+\bibitem{2} 
+Moshe Looks, "On the Behavioral Diversity of Random Programs", Genetic and
+Evolutionary Computation COnference (GECCO), 2007.
+
+\bibitem{3} 
+Moshe Looks, "Meta-Optimizing Semantic Evolutionary Search", Genetic and
+Evolutionary Computation COnference (GECCO), 2007.
+
+\bibitem{4}
+Moshe Looks, Ben Goertzel, Lucio de Souza Coelho, Mauricio Mudado, and
+Cassio Pennachin,"Clustering Gene Expression Data via Mining Ensembles of
+Classification Rules Evolved Using MOSES", Genetic and Evolutionary
+Computation COnference (GECCO), 2007.
+
+\bibitem{5} 
+Moshe Looks, Ben Goertzel, Lucio de Souza Coelho, Mauricio Mudado, and
+Cassio Pennachin, "Understanding Microarray Data through Applying Competent
+Program Evolution", Genetic and Evolutionary Computation COnference (GECCO),
+2007.
+
+\bibitem{6} 
+Moshe Looks, "Competent Program Evolution" Doctoral Dissertation, Washington
+University in St. Louis, 2006.
+
+\bibitem{7} 
+Moshe Looks, "Program Evolution for General Intelligence", Artificial
+General Intelligence Research Institute Workshop (AGIRI), 2006.
+\end{thebibliography}
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
