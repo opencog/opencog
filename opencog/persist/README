@@ -181,6 +181,23 @@ usage has been exceeded. This can be fixed by:
 (save file contents, then)
    sysctl -p /etc/sysctl.conf
 
+How To Pass the Unit Test
+-------------------------
+The collection of OpenCog unit tests includes one that tests the 
+persistance infrastructure. It is called BasicSaveUTest, and it
+will fail unless a test database is set up.  Toe set this up, 
+you'll need to repeat some of the above instructions:
+
+-- Create a new database: e.g. 
+       $ createdb opencog-test
+-- Create the tables:
+       $ cat atom.sql | psql opencog-test
+-- Create an entry in ~/.odbc.ini, as explained above.
+-- Edit lib/opencog-test.conf, and change the database name,
+   username, and password as appropriate.
+
+After the above steps, the BasicSaveUTest should pass.
+
 Bulk save and restore
 ---------------------
 At last! bulk save of atoms that were previous created is done by
