@@ -94,7 +94,7 @@ TARGET_LINK_LIBRARIES(pln
     ${EXPAT_LIBRARIES}
 #    ${GUILE_LIBRARIES}
     ${GSL_LIBRARIES}
-    boost_signals-mt
+    ${Boost_SIGNALS_LIBRARY}
 )
 
 #TARGET_LINK_LIBRARIES(plnshell pln
@@ -113,7 +113,7 @@ TARGET_LINK_LIBRARIES(pln
 #    ${EXPAT_LIBRARIES}
 #    ${GUILE_LIBRARIES}
 #    ${GSL_LIBRARIES}
-#    boost_signals-mt
+#    ${Boost_SIGNALS_LIBRARY}
 #)
 
 INSTALL (TARGETS pln

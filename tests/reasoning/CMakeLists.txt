@@ -3,6 +3,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated -Wno-unused-variable")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
+
 # It is now usual to use the system OpenCog header files so this is unnecessary
 INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/src/util
@@ -26,6 +27,8 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/server
 	${OPENCOG_BINARY_DIR}/opencog/reasoning/pln
 	${OPENCOG_BINARY_DIR}/opencog/util
+#	/opt/boost_1_38_0/lib
+	${Boost_SIGNALS_LIBRARY}
 )
 
 LINK_LIBRARIES (

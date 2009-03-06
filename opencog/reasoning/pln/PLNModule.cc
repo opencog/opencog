@@ -608,7 +608,7 @@ std::string RunCommand(std::list<std::string> args)
             }*/
 //        }
 //    }
-    } catch( exception& e )
+    } catch( std::exception& e )
     {
         cout << endl << "Exception: "
              << e.what() << endl;

@@ -46,7 +46,7 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost COMPONENTS filesystem signals REQUIRED)
+FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals REQUIRED)
 
 # At this time,. there is no reason to build with memcached for 
 
