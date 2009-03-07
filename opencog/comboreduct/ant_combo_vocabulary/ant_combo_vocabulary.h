@@ -1,11 +1,11 @@
 #ifndef _ANT_COMBO_VOCABULARY_H
 #define _ANT_COMBO_VOCABULARY_H
 
-#include "ComboReduct/ant_combo_vocabulary/ant_builtin_action.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_perception.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_action_symbol.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_indefinite_object.h"
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/ant_combo_vocabulary/ant_builtin_action.h"
+#include "comboreduct/ant_combo_vocabulary/ant_perception.h"
+#include "comboreduct/ant_combo_vocabulary/ant_action_symbol.h"
+#include "comboreduct/ant_combo_vocabulary/ant_indefinite_object.h"
+#include "comboreduct/combo/vertex.h"
 
 //this namespace is defined in order to break ambiguities
 //and make coexist several vocabularies

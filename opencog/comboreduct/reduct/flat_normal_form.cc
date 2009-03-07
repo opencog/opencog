@@ -1,4 +1,4 @@
-#include "ComboReduct/reduct/flat_normal_form.h"
+#include "comboreduct/reduct/flat_normal_form.h"
 
 namespace reduct {
 

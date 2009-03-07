@@ -236,7 +236,6 @@ template<typename FloatT> bool isEqual(FloatT x, FloatT y, FloatT epsilon) {
 //compare 2 FloatT with precision EPSILON
 template<typename FloatT> bool isEqual(FloatT x, FloatT y)
 {
-    const FloatT epsilon = EPSILON;
     return isEqual(x, y, EPSILON);
 }
 

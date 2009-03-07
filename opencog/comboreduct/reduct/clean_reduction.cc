@@ -1,6 +1,6 @@
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/reduct/meta_rules.h"
-#include "ComboReduct/reduct/general_rules.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "comboreduct/reduct/general_rules.h"
 
 namespace reduct {
   const rule& clean_reduction() {

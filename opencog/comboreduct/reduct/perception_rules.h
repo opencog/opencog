@@ -1,8 +1,8 @@
 #ifndef _REDUCT_PERCEPTION_RULES_H
 #define _REDUCT_PERCEPTION_RULES_H
 
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/type_tree.h"
 
 namespace reduct {
   

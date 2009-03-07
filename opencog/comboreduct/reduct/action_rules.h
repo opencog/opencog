@@ -1,7 +1,7 @@
 #ifndef _REDUCT_ACTION_RULES_H
 #define _REDUCT_ACTION_RULES_H
 
-#include "ComboReduct/reduct/reduct.h"
+#include "comboreduct/reduct/reduct.h"
 #include <boost/logic/tribool.hpp>
 
 namespace reduct {

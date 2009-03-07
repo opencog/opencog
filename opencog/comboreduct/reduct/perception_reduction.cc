@@ -1,9 +1,9 @@
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/reduct/meta_rules.h"
-#include "ComboReduct/reduct/general_rules.h"
-#include "ComboReduct/reduct/logical_rules.h"
-#include "ComboReduct/reduct/mixed_rules.h"
-#include "ComboReduct/reduct/perception_rules.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "comboreduct/reduct/general_rules.h"
+#include "comboreduct/reduct/logical_rules.h"
+#include "comboreduct/reduct/mixed_rules.h"
+#include "comboreduct/reduct/perception_rules.h"
 
 namespace reduct {
 

@@ -1,18 +1,18 @@
-#include <LADSUtil/mt19937ar.h>
-#include <LADSUtil/tree.h>
+#include "util/mt19937ar.h"
+#include "util/tree.h"
 
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/combo/eval.h"
-#include "ComboReduct/combo/action.h"
-#include "ComboReduct/reduct/action_rules.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/combo/action.h"
+#include "comboreduct/reduct/action_rules.h"
 
 using namespace reduct;
 using namespace combo;
-using namespace LADSUtil;
+using namespace util;
 using namespace std;
 
-static LADSUtil::MT19937RandGen rng(0);
+static opencog::MT19937RandGen rng(0);
 
 class ActionReductUTest : public CxxTest::TestSuite {
 public:

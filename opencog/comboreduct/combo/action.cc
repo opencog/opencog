@@ -1,5 +1,5 @@
-#include "ComboReduct/combo/action.h"
-#include "ComboReduct/combo/descriptions.h"
+#include "comboreduct/combo/action.h"
+#include "comboreduct/combo/descriptions.h"
 
 
 namespace combo

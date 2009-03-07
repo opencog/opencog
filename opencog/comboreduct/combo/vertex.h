@@ -7,18 +7,18 @@
 
 #include <iostream>
 
-#include <LADSUtil/tree.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/exceptions.h>
+#include "util/tree.h"
+#include "util/numeric.h"
+#include "util/exceptions.h"
 
-#include "ComboReduct/combo/action.h"
-#include "ComboReduct/combo/builtin_action.h"
-#include "ComboReduct/combo/action_symbol.h"
-#include "ComboReduct/combo/perception.h"
-#include "ComboReduct/combo/definite_object.h"
-#include "ComboReduct/combo/indefinite_object.h"
-#include "ComboReduct/combo/message.h"
-//#include "ComboReduct/combo/procedure_call.h"
+#include "comboreduct/combo/action.h"
+#include "comboreduct/combo/builtin_action.h"
+#include "comboreduct/combo/action_symbol.h"
+#include "comboreduct/combo/perception.h"
+#include "comboreduct/combo/definite_object.h"
+#include "comboreduct/combo/indefinite_object.h"
+#include "comboreduct/combo/message.h"
+//#include "comboreduct/combo/procedure_call.h"
 
 namespace combo {
 
@@ -68,13 +68,13 @@ namespace combo {
   */
   class argument { 
   public:
-    explicit argument(int i) : idx(i) { LADSUtil::cassert(TRACE_INFO, idx!=0, "idx should be different fro zero."); } 
+    explicit argument(int i) : idx(i) { opencog::cassert(TRACE_INFO, idx!=0, "idx should be different fro zero."); } 
     int idx;
 
     void negate() { idx=-idx; }
     bool is_negated() const { return idx<0; }
     bool operator<(argument rhs) const { 
-      static LADSUtil::absolute_value_order<int> comp;
+      static opencog::absolute_value_order<int> comp;
       return comp(idx,rhs.idx);
     }
     int abs_idx() const {
@@ -344,7 +344,7 @@ namespace boost {
       return tmp;
     }
 
-    LADSUtil::cassert(TRACE_INFO, false, "A case is missing");
+    opencog::cassert(TRACE_INFO, false, "A case is missing");
     return 0;
   }
 } //~namespace boost
@@ -352,7 +352,7 @@ namespace boost {
 namespace combo { 
   //typedef util::hash_set<vertex,boost::hash<vertex> > vset;
   //typedef std::set<vertex> vset;
-  typedef LADSUtil::tree<vertex> combo_tree;
+  typedef opencog::tree<vertex> combo_tree;
 
   template<typename T>
   inline bool is_associative(const T& v) { 
@@ -520,13 +520,13 @@ namespace combo {
     return (b ? id::logical_true : id::logical_false); 
   }
   inline bool vertex_to_bool(const vertex& v) {
-    LADSUtil::cassert(TRACE_INFO, v==id::logical_true || v==id::logical_false, 
+    opencog::cassert(TRACE_INFO, v==id::logical_true || v==id::logical_false, 
             "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
     return (v==id::logical_true);
   }
   //renamed negate_vertex to not enter in conflict with negate(string) of STL
   inline vertex negate_vertex(const vertex& v) {
-    LADSUtil::cassert(TRACE_INFO, v==id::logical_true || v==id::logical_false,
+    opencog::cassert(TRACE_INFO, v==id::logical_true || v==id::logical_false,
             "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
     return (v==id::logical_true ? id::logical_false : id::logical_true);
   }
@@ -567,7 +567,7 @@ namespace combo {
 
   template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
   void str_to_vertex(const std::string& str, vertex& v) {
-    LADSUtil::cassert(TRACE_INFO, !str.empty(), "input to string should not be empty.");
+    opencog::cassert(TRACE_INFO, !str.empty(), "input to string should not be empty.");
     //builtin
     if (str=="and" || str=="logical_and")
       v=id::logical_and;
@@ -638,7 +638,7 @@ namespace combo {
     //argument
     else if (str[0]=='#') {
       int arg = boost::lexical_cast<int>(str.substr(1));
-      LADSUtil::cassert(TRACE_INFO, arg!=0, "arg value should be different from zero.");
+      opencog::cassert(TRACE_INFO, arg!=0, "arg value should be different from zero.");
       v=argument(arg);
     }
     //constant
@@ -708,20 +708,20 @@ namespace combo {
   }
 
   template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
-  void sub_strtree_to_combo_tree(const LADSUtil::tree<std::string>& src,
-			    LADSUtil::tree<std::string>::iterator src_it,
+  void sub_strtree_to_combo_tree(const opencog::tree<std::string>& src,
+			    opencog::tree<std::string>::iterator src_it,
 			    combo_tree& dst, combo_tree::iterator dst_it) {
     dst_it=dst.replace(dst_it, str_to_vertex<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(*src_it));
     dst.erase_children(dst_it);
-    for(LADSUtil::tree<std::string>::sibling_iterator sib = src_it.begin();
+    for(opencog::tree<std::string>::sibling_iterator sib = src_it.begin();
 	sib != src_it.end(); ++sib)
-      sub_strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(src, LADSUtil::tree<std::string>::iterator(sib), dst, dst.append_child(dst_it));
+      sub_strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(src, opencog::tree<std::string>::iterator(sib), dst, dst.append_child(dst_it));
   }
 
   template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
-  void strtree_to_combo_tree(const LADSUtil::tree<std::string>& src, combo_tree& dst) {
+  void strtree_to_combo_tree(const opencog::tree<std::string>& src, combo_tree& dst) {
     dst=combo_tree(vertex());
-    LADSUtil::tree<std::string>::iterator src_it=src.begin();
+    opencog::tree<std::string>::iterator src_it=src.begin();
     combo_tree::iterator dst_it=dst.begin();
     while (src_it!=src.end()) {
       dst_it=dst.insert_after(dst_it, vertex());
@@ -734,7 +734,7 @@ namespace combo {
 
   template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
   std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr) {
-    LADSUtil::tree<std::string> tmp;
+    opencog::tree<std::string> tmp;
     in >> tmp;
     strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(tmp, tr);
     return  in;

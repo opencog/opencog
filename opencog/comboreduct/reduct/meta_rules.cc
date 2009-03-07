@@ -1,6 +1,6 @@
-#include "ComboReduct/reduct/meta_rules.h"
-#include <LADSUtil/foreach.h>
-#include "ComboReduct/combo/assumption.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "util/foreach.h"
+#include "comboreduct/combo/assumption.h"
 
 namespace reduct {
 

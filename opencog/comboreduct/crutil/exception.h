@@ -2,7 +2,7 @@
 #define _COMBOREDUCT_EXCEPTION_H
 
 #include <string>
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/vertex.h"
 
 namespace combo {
 

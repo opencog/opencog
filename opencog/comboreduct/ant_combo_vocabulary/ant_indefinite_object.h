@@ -1,10 +1,10 @@
 #ifndef _ANT_INDEFINITE_OBJECT_H
 #define _ANT_INDEFINITE_OBJECT_H
 
-#include <LADSUtil/numeric.h>
+#include "util/numeric.h"
 
-#include "ComboReduct/combo/indefinite_object.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_operator.h"
+#include "comboreduct/combo/indefinite_object.h"
+#include "comboreduct/ant_combo_vocabulary/ant_operator.h"
 
 namespace combo {
 

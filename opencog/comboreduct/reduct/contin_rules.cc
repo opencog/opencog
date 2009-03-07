@@ -1,5 +1,5 @@
-#include "ComboReduct/reduct/contin_rules.h"
-#include <LADSUtil/exceptions.h>
+#include "comboreduct/reduct/contin_rules.h"
+#include "util/exceptions.h"
 #include <map>
 
 namespace reduct {
@@ -60,12 +60,12 @@ namespace reduct {
     //associated an examplar subtree to its size and
     //and all equal subtrees
     typedef std::map<pre_it, equiv_subtrees,
-      LADSUtil::lexicographic_subtree_order<vertex>
+      opencog::lexicographic_subtree_order<vertex>
       > subtree_partition;
     typedef subtree_partition::iterator subtree_partition_it;
     if(*it==id::plus) {
       subtree_partition sp;
-      LADSUtil::cassert(TRACE_INFO, !it.is_childless(), 
+      opencog::cassert(TRACE_INFO, !it.is_childless(), 
               "combo_tree node should not be childless (reduce_factorize_fraction)." );
       pre_it chosen_factor = tr.end();
       int reduced_size = 0; //size reduced when the factor is chosen_factor
@@ -76,7 +76,7 @@ namespace reduct {
       for(sib_it plus_child = it.begin(); plus_child != it.end();
 	  ++plus_child) {
 	if(*plus_child==id::div) {
-	  LADSUtil::cassert(TRACE_INFO, plus_child.number_of_children()==2, 
+	  opencog::cassert(TRACE_INFO, plus_child.number_of_children()==2, 
               "combo_tree child node should have exactly two children (reduce_factorize_fraction)." );
 	  pre_it denom = tr.child(plus_child, 1);
 	  if(*denom==id::times) {
@@ -106,7 +106,7 @@ namespace reduct {
 		else last_it = es_vec.back();
 		//check that it is not the same parent to avoid factorizing x*x
 		pre_it last_it_parent = tr.parent(last_it);
-		LADSUtil::cassert(TRACE_INFO, tr.is_valid(last_it_parent), 
+		opencog::cassert(TRACE_INFO, tr.is_valid(last_it_parent), 
                 "last combo_tree node invalid (reduce_factorize_fraction).");
 		if(last_it_parent != denom) {
 		  //potential reduced size
@@ -165,10 +165,10 @@ namespace reduct {
 	  //move the key
 	  //------------
 	  pre_it key_parent = tr.parent(key);
-	  LADSUtil::cassert(TRACE_INFO, tr.is_valid(key_parent),
+	  opencog::cassert(TRACE_INFO, tr.is_valid(key_parent),
               "key parent node is invalid (reduce_factorize_fraction).");
 	  pre_it kp_parent = tr.parent(key_parent);
-	  LADSUtil::cassert(TRACE_INFO, tr.is_valid(kp_parent),
+	  opencog::cassert(TRACE_INFO, tr.is_valid(kp_parent),
               "kp parent node is invalid (reduce_factorize_fraction).");
 	  pre_it main_div = tr.end();
 	  pre_it remain_plus = tr.end();
@@ -195,10 +195,10 @@ namespace reduct {
 	      factor_it != es_vec.end(); ++factor_it) {
 	    pre_it factor = *factor_it;
 	    pre_it factor_parent = tr.parent(factor);
-	    LADSUtil::cassert(TRACE_INFO, tr.is_valid(factor_parent), 
+	    opencog::cassert(TRACE_INFO, tr.is_valid(factor_parent), 
               "factor parent node is invalid (reduce_factorize_fraction).");
 	    pre_it fp_parent = tr.parent(factor_parent);
-	    LADSUtil::cassert(TRACE_INFO, tr.is_valid(fp_parent), 
+	    opencog::cassert(TRACE_INFO, tr.is_valid(fp_parent), 
               "fp parent node is invalid (reduce_factorize_fraction).");
 	    tr.erase(factor);
 	    if(*factor_parent==id::div) {
@@ -237,12 +237,12 @@ namespace reduct {
     //associated an examplar subtree to its size and
     //and all equal subtrees
     typedef std::map<pre_it, equiv_subtrees,
-      LADSUtil::lexicographic_subtree_order<vertex>
+      opencog::lexicographic_subtree_order<vertex>
       > subtree_partition;
     typedef subtree_partition::iterator subtree_partition_it;
     if(*it==id::plus) {
       subtree_partition sp;
-      LADSUtil::cassert(TRACE_INFO, !it.is_childless(),
+      opencog::cassert(TRACE_INFO, !it.is_childless(),
               "combo_tree node should not be childless (reduce_factorize)." );
       pre_it chosen_factor = tr.end();
       int reduced_size = 0; //size reduced when the factor is chosen_factor
@@ -254,7 +254,7 @@ namespace reduct {
 	  ++plus_child) {
 	pre_it pos; //position where to look at to find potential factor
 	if(*plus_child==id::div) {
-	  LADSUtil::cassert(TRACE_INFO, plus_child.number_of_children()==2, 
+	  opencog::cassert(TRACE_INFO, plus_child.number_of_children()==2, 
               "combo_tree child node should have exactly two children (reduce_factorize)." );
 	  pos = tr.child(plus_child, 0);
 	}
@@ -286,7 +286,7 @@ namespace reduct {
 	      else last_it = es_vec.back();
 	      //check that it is not the same parent to avoid factorizing x*x
 	      pre_it last_it_parent = tr.parent(last_it);
-	      LADSUtil::cassert(TRACE_INFO, tr.is_valid(last_it_parent), 
+	      opencog::cassert(TRACE_INFO, tr.is_valid(last_it_parent), 
                   "last combo_tree node is invalid (reduce_factorize).");
 	      if(last_it_parent != pos) {
 		//potential reduced size
@@ -347,7 +347,7 @@ namespace reduct {
 	  //then insert a '*' above it and a '+' beside it to put
 	  //the remaining part of what is factorized
 	  pre_it key_parent = tr.parent(key);
-	  LADSUtil::cassert(TRACE_INFO, tr.is_valid(key_parent),
+	  opencog::cassert(TRACE_INFO, tr.is_valid(key_parent),
               "key parent node is invalid (reduce_factorize).");
 	  pre_it kp_parent = tr.parent(key_parent);
 	  pre_it key_div = tr.end(); //position of div if key is under
@@ -385,7 +385,7 @@ namespace reduct {
 	    pre_it factor = *factor_it;
 	    pre_it factor_parent = tr.parent(factor);
 	    tr.erase(factor);
-	    LADSUtil::cassert(TRACE_INFO, tr.is_valid(factor_parent),
+	    opencog::cassert(TRACE_INFO, tr.is_valid(factor_parent),
               "factor parent node is invalid (reduce_factorize).");
 	    pre_it fp_parent = tr.parent(factor_parent);
 	    pre_it factor_div = tr.end(); //position of div if factor is under
@@ -425,7 +425,7 @@ namespace reduct {
   //0/x -> 0
   void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::div) {
-      LADSUtil::cassert(TRACE_INFO, it.number_of_children()==2, 
+      opencog::cassert(TRACE_INFO, it.number_of_children()==2, 
               "combo_tree node should have exactly two children (reduce_invert_constant)." );
       sib_it sib=it.begin();
       if(is_contin(*sib) && get_contin(*sib)==0.0) { //0/x -> 0
@@ -477,11 +477,11 @@ namespace reduct {
   void reduce_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const {
     //associate the number of instances of each subtree encountered
     //on the numerator of the fraction
-    typedef std::multiset<pre_it, LADSUtil::lexicographic_subtree_order<vertex> >
+    typedef std::multiset<pre_it, opencog::lexicographic_subtree_order<vertex> >
       num_counts;
     typedef num_counts::iterator num_counts_it;
     if(*it==id::div) {
-      LADSUtil::cassert(TRACE_INFO, it.number_of_children()==2, 
+      opencog::cassert(TRACE_INFO, it.number_of_children()==2, 
               "combo_tree node should have exactly two children (reduce_fraction)." );
       pre_it numerator = tr.child(it, 0);
       pre_it denominator = tr.child(it, 1);
@@ -545,11 +545,11 @@ namespace reduct {
   //more generally prod x_i * prod y_j/z_j -> (prod x_i * prod y_j)/(prod z_j)
   void reduce_times_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::div) {
-      LADSUtil::cassert(TRACE_INFO, it.number_of_children()==2,
+      opencog::cassert(TRACE_INFO, it.number_of_children()==2,
               "combo_tree node should have exactly two children (reduce_times_div)." );
       sib_it sib = it.begin();
       if(*sib==id::div) { //(x/y)/z -> x/(y*z)
-	LADSUtil::cassert(TRACE_INFO, sib.number_of_children()==2,
+	opencog::cassert(TRACE_INFO, sib.number_of_children()==2,
               "combo_tree sibiling node should have exactly two children (reduce_times_div)." );
 	pre_it y = sib.last_child();
 	pre_it z = it.last_child();
@@ -560,7 +560,7 @@ namespace reduct {
       }
       ++sib;
       if(*sib==id::div) { //x/(y/z) -> (x*z)/y
-	LADSUtil::cassert(TRACE_INFO, sib.number_of_children()==2,
+	opencog::cassert(TRACE_INFO, sib.number_of_children()==2,
             "combo_tree sibiling node should have exactly two children (reduce_times_div).");
 	pre_it x = it.begin();
 	pre_it z = sib.last_child();
@@ -580,14 +580,14 @@ namespace reduct {
       for(sib_it sib = it.begin(); sib != it.end(); ++sib) {
 	if(*sib==id::div) {
 	  if(*it!=id::div) { // div needs to be added to the top/root
-	    LADSUtil::cassert(TRACE_INFO, !it.is_childless(),
+	    opencog::cassert(TRACE_INFO, !it.is_childless(),
                 "combo_tree node should not be childless (reduce_time_div)." );
 	    new_times = tr.prepend_child(it, id::times);
 	    sib_it second_child = tr.child(it, 1);
 	    tr.reparent(new_times, second_child, it.end());
 	    *it = id::div;
 	  }
-	  LADSUtil::cassert(TRACE_INFO, sib.number_of_children()==2, 
+	  opencog::cassert(TRACE_INFO, sib.number_of_children()==2, 
             "combo_tree sibiling node should have exactly two children (reduce_times_div).");
 	  pre_it z_j = sib.last_child();
 	  if(denom==tr.end())
@@ -622,7 +622,7 @@ namespace reduct {
     if(*it==id::plus) {
       sib_it first_log = it.find_child(id::log);
       if(first_log != it.end()) {
-	LADSUtil::cassert(TRACE_INFO, first_log.has_one_child(),
+	opencog::cassert(TRACE_INFO, first_log.has_one_child(),
             "combo_tree node should have exactly one child (reduce_sum_log).");
 	pre_it num = first_log.begin(); //sibling at the numerator of div
 	pre_it denom = tr.end(); //sibling at the denominator of div
@@ -631,7 +631,7 @@ namespace reduct {
 	for(sib_it sib=it.begin(); sib!=it.end();) {
 	  //detect log(x) to add to log(prod x_i)
 	  if(*sib == id::log && sib != first_log) {
-	    LADSUtil::cassert(TRACE_INFO, sib.has_one_child(), 
+	    opencog::cassert(TRACE_INFO, sib.has_one_child(), 
                 "combo_tree sibiling node should have exactly one child (reduce_sum_log).");
 	    if(num_times == tr.end())
 	      num_times = tr.wrap(num, id::times);
@@ -655,11 +655,11 @@ namespace reduct {
 	    }
 	    if(is_minus_log) { //there is -1*log
 	      if(denom == tr.end()) {
-		LADSUtil::cassert(TRACE_INFO, first_log.has_one_child(),
+		opencog::cassert(TRACE_INFO, first_log.has_one_child(),
                 "combo_tree node should have exactly one child (reduce_sum_log).");
 		pre_it tmp_child_log = first_log.begin();
 		pre_it div_node = tr.wrap(tmp_child_log, id::div);
-		LADSUtil::cassert(TRACE_INFO, div_node.has_one_child(),
+		opencog::cassert(TRACE_INFO, div_node.has_one_child(),
                 "combo_tree sibiling node should have exactly one child (reduce_sum_log - div_node).");
 		//below cannot be replace by move_before because it has
 		//to be the second argument of div, i.e. the denominator
@@ -670,7 +670,7 @@ namespace reduct {
 		if(denom_times == tr.end()) {
 		  denom_times = tr.wrap(denom, id::times);
 		}
-		LADSUtil::cassert(TRACE_INFO, log.has_one_child(),
+		opencog::cassert(TRACE_INFO, log.has_one_child(),
                 "combo_tree node (log) should have exactly one child (reduce_sum_log).");
 		tr.move_after(denom, pre_it(log.begin()));
 		sib = tr.erase(sib);
@@ -690,11 +690,11 @@ namespace reduct {
   //or more generally log(prod exp(x_i)*prod y_j) -> sum x_i +log(prod y_j)
   void reduce_log_div_times::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::log) {
-      LADSUtil::cassert(TRACE_INFO, it.has_one_child(), 
+      opencog::cassert(TRACE_INFO, it.has_one_child(), 
              "combo_tree node should have exactly one child (reduce_log_div_times).");
       pre_it log_child = it.begin();
       if(*log_child==id::div) { //log(c/x) -> log(c^1*x)
-	LADSUtil::cassert(TRACE_INFO, log_child.number_of_children()==2,
+	opencog::cassert(TRACE_INFO, log_child.number_of_children()==2,
            "combo_tree child node should have exactly two children (reduce_log_div_times).");
 	pre_it num = log_child.begin();
 	pre_it denom = log_child.last_child();
@@ -716,7 +716,7 @@ namespace reduct {
 	}
       }
       else if(*log_child==id::exp) { //log(exp(x)) -> x
-	LADSUtil::cassert(TRACE_INFO, log_child.has_one_child(),
+	opencog::cassert(TRACE_INFO, log_child.has_one_child(),
             "combo_tree child node should have exactly one child (reduce_log_div_times).");
 	tr.erase(tr.flatten(log_child));
 	*it=*it.begin();
@@ -731,7 +731,7 @@ namespace reduct {
 	      new_log = tr.insert_above(log_child, id::log);
 	      *it = id::plus;
 	    }
-	    LADSUtil::cassert(TRACE_INFO, sib.has_one_child(),
+	    opencog::cassert(TRACE_INFO, sib.has_one_child(),
                "combo_tree sibling node should have exactly one child (reduce_log_div_times).");
 	    //the child of exp is moved under plus beside log
 	    tr.reparent(it, pre_it(sib));
@@ -752,7 +752,7 @@ namespace reduct {
       pre_it x_1 = tr.end(); //first x_i detected
       for(sib_it sib = it.begin(); sib != it.end(); ) {
 	if(*sib==id::exp) {
-	  LADSUtil::cassert(TRACE_INFO, sib.has_one_child(), 
+	  opencog::cassert(TRACE_INFO, sib.has_one_child(), 
              "combo_tree sibling node should have exactly one child (reduce_exp_times).");
 	  if(x_1==tr.end()) {
 	    x_1 = sib.begin();
@@ -773,16 +773,16 @@ namespace reduct {
   //x/exp(y) -> x*exp(-y)
   void reduce_exp_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::div) {
-      LADSUtil::cassert(TRACE_INFO, it.number_of_children()==2,
+      opencog::cassert(TRACE_INFO, it.number_of_children()==2,
               "combo_tree node should have exactly two childrem (reduce_exp_div).");
       pre_it denom = it.last_child();
       if(*denom==id::exp) {
 	*it = id::times;
-	LADSUtil::cassert(TRACE_INFO, denom.has_one_child(),
+	opencog::cassert(TRACE_INFO, denom.has_one_child(),
            "combo_tree node should have exactly one child (reduce_exp_times - demon).");
 	pre_it y = denom.begin();
 	if(*y==id::times) {
-	  LADSUtil::cassert(TRACE_INFO, !y.is_childless(),
+	  opencog::cassert(TRACE_INFO, !y.is_childless(),
              "combo_tree sibling node should have exactly one child (reduce_exp_times - y).");
 	  y = y.begin();
 	}
@@ -796,17 +796,17 @@ namespace reduct {
   //or more generally, exp(sum log(x_i) + sum y_j) -> prod x_i * exp(sum y_j)
   void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::exp) {
-      LADSUtil::cassert(TRACE_INFO, it.has_one_child(), 
+      opencog::cassert(TRACE_INFO, it.has_one_child(), 
              "combo_tree node should have exactly one child (reduce_exp_log).");
       pre_it exp_child = it.begin();
       if(*exp_child==id::plus) {
 	pre_it x_1 = tr.end();
 	pre_it new_exp = tr.end();
-	LADSUtil::cassert(TRACE_INFO, !exp_child.is_childless(),
+	opencog::cassert(TRACE_INFO, !exp_child.is_childless(),
            "combo_tree child node should have exactly one child (reduce_exp_log).");
 	for(sib_it sib = exp_child.begin(); sib != exp_child.end(); ) {
 	  if(*sib==id::log) {
-	    LADSUtil::cassert(TRACE_INFO, sib.has_one_child(), 
+	    opencog::cassert(TRACE_INFO, sib.has_one_child(), 
                 "combo_tree sibling node should have exactly one child (reduce_exp_log).");
 	    if(x_1==tr.end()) {
 	      *it = id::times;
@@ -837,12 +837,12 @@ namespace reduct {
   //sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
   void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::sin) {
-      LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+      opencog::cassert(TRACE_INFO, it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_sin).");
       pre_it c_it = tr.end();
       pre_it sin_child = it.begin();
       if(*sin_child==id::plus) {
-	LADSUtil::cassert(TRACE_INFO, !sin_child.is_childless(), 
+	opencog::cassert(TRACE_INFO, !sin_child.is_childless(), 
             "combo_tree node should have exactly one child (reduce_sin).");
 	for(sib_it sib = sin_child.begin(); sib != sin_child.end(); ) {
 	  if(is_contin(*sib)) {
@@ -861,10 +861,10 @@ namespace reduct {
       else if(is_contin(*sin_child))
 	c_it = sin_child;
       if(c_it!=tr.end()) {
-	LADSUtil::cassert(TRACE_INFO, is_contin(*c_it),
+	opencog::cassert(TRACE_INFO, is_contin(*c_it),
             "sin_child isn't of type contin (reduce_sin).");
 	contin_t c = get_contin(*c_it);
-	LADSUtil::cassert(TRACE_INFO, isfinite(c),
+	opencog::cassert(TRACE_INFO, isfinite(c),
             "contin isn't of infinite (reduce_sin).");
 	if(c <= PI || c > PI)
 	  *c_it = fmod((c+PI), 2.0*PI) - PI;

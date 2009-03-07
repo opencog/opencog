@@ -1,7 +1,7 @@
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 
-#include "ComboReduct/combo/type_tree.h"
-#include "ComboReduct/combo/descriptions.h"
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/combo/descriptions.h"
 
 namespace combo
 {
@@ -192,7 +192,7 @@ type_tree get_type_tree(const vertex& v)
         return get_type_tree(get_wild_card(v));
     //other non handled cases
     else {
-        LADSUtil::cassert(TRACE_INFO, false, "this case isn't handled yet");
+        opencog::cassert(TRACE_INFO, false, "this case isn't handled yet");
         type_tree tmp;
         return tmp;
     }
@@ -225,7 +225,7 @@ type_tree get_output_type_tree(const vertex& v)
     } else {
         std::stringstream out;
         out << v;
-        LADSUtil::cassert(TRACE_INFO, false, "Unhandled case '%s'",
+        opencog::cassert(TRACE_INFO, false, "Unhandled case '%s'",
                           out.str().c_str());
         return type_tree(id::ill_formed_type);
     }
@@ -258,7 +258,7 @@ type_tree get_input_type_tree(const vertex& v, arity_t i)
     } else {
         std::stringstream out;
         out << v;
-        LADSUtil::cassert(TRACE_INFO, false,
+        opencog::cassert(TRACE_INFO, false,
                           "Unhandled case '%s'", out.str().c_str());
         return type_tree(id::ill_formed_type);
     }
@@ -302,12 +302,12 @@ arity_t action_result_arity(const type_tree& ty)
 
 arity_t type_tree_arity(const type_tree& ty)
 {
-    LADSUtil::cassert(TRACE_INFO, !ty.empty(),
+    opencog::cassert(TRACE_INFO, !ty.empty(),
                       "Not sure this assert should not be replaced by a conditional");
     type_tree::iterator ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
         unsigned int noc = ty_it.number_of_children();
-        LADSUtil::cassert(TRACE_INFO, noc > 0, "Lambda must not be childless");
+        opencog::cassert(TRACE_INFO, noc > 0, "Lambda must not be childless");
         type_tree_pre_it ty_last_child = ty_it.last_child();
         if (noc == 1)
             return 0;
@@ -322,12 +322,12 @@ arity_t type_tree_arity(const type_tree& ty)
 
 argument_type_list type_tree_input_arg_types(const type_tree& ty)
 {
-    LADSUtil::cassert(TRACE_INFO, !ty.empty(),
+    opencog::cassert(TRACE_INFO, !ty.empty(),
                       "Not sure this assert should not be replaced by a conditional");
     argument_type_list res;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
-        LADSUtil::cassert(TRACE_INFO, !ty_it.is_childless(),
+        opencog::cassert(TRACE_INFO, !ty_it.is_childless(),
                           "Lambda must not be childless");
         type_tree_sib_it sib = ty_it.begin();
         //setting input argument type trees
@@ -363,7 +363,7 @@ const type_tree& argument_type_list_input_type(const argument_type_list& atl,
 
 type_tree type_tree_output_type_tree(const type_tree& ty)
 {
-    LADSUtil::cassert(TRACE_INFO, !ty.empty(), "ty must not be empty");
+    opencog::cassert(TRACE_INFO, !ty.empty(), "ty must not be empty");
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
         return type_tree(ty_it.last_child());
@@ -398,7 +398,7 @@ arity_t get_arity(const vertex& v)
     else if (is_action_symbol(v))
         return 0;
     else {
-        LADSUtil::cassert(TRACE_INFO, false, "Unhandled case");
+        opencog::cassert(TRACE_INFO, false, "Unhandled case");
         return 0;
     }
 }
@@ -430,7 +430,7 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
         }
         return true;
     } else if (*it2 == id::union_type) {
-        LADSUtil::cassert(TRACE_INFO, *it1 != id::union_type,
+        opencog::cassert(TRACE_INFO, *it1 != id::union_type,
                           "Due to the recursive structure of that function it is impossible that *it1 is id::union_type");
         //the type of it1 must inherit at least one type of the union of it2
         for (type_tree_sib_it sib = it2.begin(); sib != it2.end(); ++sib) {
@@ -465,7 +465,7 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
     }
     //arg_list case
     else if (*it1 == id::arg_list_type && *it2 == id::arg_list_type) {
-        LADSUtil::cassert(TRACE_INFO, it1.has_one_child() && it2.has_one_child(),
+        opencog::cassert(TRACE_INFO, it1.has_one_child() && it2.has_one_child(),
                           "arg_list_type takes only one argument");
         return inherit_type_tree(ty1, type_tree_pre_it(it1.begin()),
                                  ty2, type_tree_pre_it(it2.begin()));
@@ -513,7 +513,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //lambda case
     //-----------
     if (*it == id::lambda_type) {
-        LADSUtil::cassert(TRACE_INFO, !it.is_childless(),
+        opencog::cassert(TRACE_INFO, !it.is_childless(),
                           "lambda_type must have at least a child");
         //if lambda has only one child
         //then reduce lambda(X) -> X
@@ -532,7 +532,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //application case
     //----------------
     else if (*it == id::application_type) {
-        LADSUtil::cassert(TRACE_INFO, !it.is_childless(),
+        opencog::cassert(TRACE_INFO, !it.is_childless(),
                           "application_type must have at least a child");
         type_tree_pre_it it_child = it.begin();
         //if application has only one child
@@ -552,7 +552,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             //application(lambda(T1 arg_list(T2) T3) a1 a2 a3 a4)
             //check that a1 inherits from T1, a2 a3 and a4 inherit from T2
 
-            LADSUtil::cassert(TRACE_INFO, !it_child.is_childless(),
+            opencog::cassert(TRACE_INFO, !it_child.is_childless(),
                               "it_child must have at least one child");
             //cia stands for current input argument
             type_tree_pre_it cia_it = it_child.begin();
@@ -583,7 +583,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                             << " application '"
                             << combo_tree(ct_it)
                             << "' located at pre-order index "
-                            << LADSUtil::pre_order_index(tr, ct_it)
+                            << opencog::pre_order_index(tr, ct_it)
                             << " of procedure '"
                             << proc_name << "'";
                 }
@@ -594,7 +594,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 else
                     message << arg_count << " arguments.";
 
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                opencog::logger().log(opencog::Logger::ERROR,
                                 message.str().c_str());
                 //~log message
 
@@ -634,7 +634,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                         //then check if the ouput argument of arg_app inherits
                         //from cia_it (or cia_it child if cia_it is arg_list)
                         if (*arg_app == id::lambda_type) {
-                            LADSUtil::cassert(TRACE_INFO,
+                            opencog::cassert(TRACE_INFO,
                                               !arg_app.is_childless(),
                                               "lambda must have at least one child");
                             type_tree_pre_it output_it = arg_app.last_child();
@@ -658,7 +658,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                 if(!tr.empty()) { //trace debug info available
                                     message << "'" << combo_tree(ct_it_child)
                                             << "' (located at pre-order index "
-                                            << LADSUtil::pre_order_index(tr,
+                                            << opencog::pre_order_index(tr,
                                                                          ct_it_child)
                                             << " of procedure '"
                                             << proc_name << "')"
@@ -669,7 +669,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                         << type_tree(output_it)
                                         << " which does not inherits from "
                                         << type_tree(input_arg_it);
-                                MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                                opencog::logger().log(opencog::Logger::ERROR,
                                                 message.str().c_str());
                                 //~log message
 
@@ -691,7 +691,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                             if(!tr.empty()) { //trace debug info available
                                 message << "'" << combo_tree(ct_it_child)
                                         << "' (located at pre-order index "
-                                        << LADSUtil::pre_order_index(tr,
+                                        << opencog::pre_order_index(tr,
                                                                      ct_it_child)
                                         << " of procedure '"
                                         << proc_name << "')"
@@ -702,7 +702,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                     << type_tree(arg_app)
                                     << " which does not inherits from "
                                     << type_tree(input_arg_it);
-                            MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                            opencog::logger().log(opencog::Logger::ERROR,
                                             message.str().c_str());
                             //~log message
 
@@ -755,14 +755,14 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             if(!tr.empty()) { // trace debug info available
                 message << "'" << *ct_it
                         << "', located at pre-order index "
-                        << LADSUtil::pre_order_index(tr, ct_it)
+                        << opencog::pre_order_index(tr, ct_it)
                         << " of procedure '"
                         << proc_name << "', ";
             }
             message << "is not typed as a function (that is lambda)"
                     << " but is typed "
                     << type_tree(it_child);
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, message.str().c_str());
+            opencog::logger().log(opencog::Logger::ERROR, message.str().c_str());
             //~log message
 
             *it = id::ill_formed_type;
@@ -774,7 +774,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //union case
     //----------
     else if (*it == id::union_type) {
-        LADSUtil::cassert(TRACE_INFO, !it.is_childless(),
+        opencog::cassert(TRACE_INFO, !it.is_childless(),
                           "union_type must have at least a child");
         std::vector<type_tree> utt;
         //apply reduce recursively to the children of the union
@@ -807,7 +807,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //arg_list case
     //-------------
     else if (*it == id::arg_list_type) {
-        LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+        opencog::cassert(TRACE_INFO, it.has_one_child(),
                           "arg_list_type must have exactly one child");
         reduce_type_tree(tt, type_tree_pre_it(it.begin()), arg_types,
                          tr, ct_it, proc_name);
@@ -833,7 +833,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
 
 type_tree get_intersection(const type_tree& tt1, const type_tree& tt2)
 {
-    LADSUtil::cassert(TRACE_INFO, !tt1.empty() && !tt2.empty(),
+    opencog::cassert(TRACE_INFO, !tt1.empty() && !tt2.empty(),
                       "neither tt1 nor tt2 must be empty");
     type_tree_pre_it head1 = tt1.begin();
     type_tree_pre_it head2 = tt2.begin();
@@ -852,7 +852,7 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
     //check if tt1 and tt2 are unions, if so the intersection of the unions
     //is the union of the interections
     else if (*it1 == id::union_type && *it2 == id::union_type) {
-        std::set<type_tree, LADSUtil::size_tree_order<type_node> > union_of_inter;
+        std::set<type_tree, opencog::size_tree_order<type_node> > union_of_inter;
         for (type_tree_sib_it sib1 = it1.begin(); sib1 != it1.end(); ++sib1) {
             for (type_tree_sib_it sib2 = it2.begin(); sib2 != it2.end(); ++sib2) {
                 type_tree inter_tt = get_intersection(tt1,
@@ -883,7 +883,7 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
     else if (*it1 == id::lambda_type && *it2 == id::lambda_type) {
         unsigned int n1 = it1.number_of_children();
         unsigned int n2 = it2.number_of_children();
-        LADSUtil::cassert(TRACE_INFO, n1 > 0 && n2 > 0,
+        opencog::cassert(TRACE_INFO, n1 > 0 && n2 > 0,
                           "lambda must not be childless");
         if (n1 != n2) {
             return type_tree(id::ill_formed_type);
@@ -938,7 +938,7 @@ void set_arg_type(const type_tree& tt, type_node arg,
 void set_arg_type(const type_tree& tt, unsigned int idx,
                   argument_type_list& arg_types)
 {
-    LADSUtil::cassert(TRACE_INFO, idx > 0);
+    opencog::cassert(TRACE_INFO, idx > 0);
     unsigned int idxfz = idx - 1;
     unsigned int s = arg_types.size();
     if (s < idx)
@@ -1011,7 +1011,7 @@ void infer_arg_type_tree(const combo_tree& tr, argument_type_list& arg_types)
 {
     typedef combo_tree::leaf_iterator leaf_it;
     typedef combo_tree::iterator pre_it;
-    LADSUtil::cassert(TRACE_INFO, !tr.empty(),
+    opencog::cassert(TRACE_INFO, !tr.empty(),
                       "cannot infer arg types on an empty combo_tree");
     for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit) {
         if (is_argument(*lit)) {
@@ -1028,7 +1028,7 @@ void infer_arg_type_tree(const combo_tree& tr, argument_type_list& arg_types)
 void insert_arg_type_tree(const argument_type_list& arg_types,
                           type_tree& tt2)
 {
-    LADSUtil::cassert(TRACE_INFO, !tt2.empty(),
+    opencog::cassert(TRACE_INFO, !tt2.empty(),
                       "tt2 is supposed to contain a type");
     if (!arg_types.empty()) {
         type_tree_pre_it head = tt2.begin();
@@ -1052,10 +1052,10 @@ type_tree get_type_tree(const combo_tree& tr)
 
 type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it)
 {
-    LADSUtil::cassert(TRACE_INFO, !tr.empty(), "tr cannot be empty");
-    LADSUtil::cassert(TRACE_INFO, tr.is_valid(it), "it must be valid");
+    opencog::cassert(TRACE_INFO, !tr.empty(), "tr cannot be empty");
+    opencog::cassert(TRACE_INFO, tr.is_valid(it), "it must be valid");
     type_tree tmp = get_type_tree(*it);
-    LADSUtil::cassert(TRACE_INFO, !tmp.empty(), "tmp cannot be empty");
+    opencog::cassert(TRACE_INFO, !tmp.empty(), "tmp cannot be empty");
     if (it.is_childless()) {
         return tmp;
     } else {
@@ -1097,9 +1097,9 @@ bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n)
 {
     typedef combo_tree::leaf_iterator leaf_it;
     typedef combo_tree::iterator pre_it;
-    LADSUtil::cassert(TRACE_INFO, !tr.empty(),
+    opencog::cassert(TRACE_INFO, !tr.empty(),
                       "cannot infer arg types on an empty combo_tree");
-    LADSUtil::cassert(TRACE_INFO, n >= 0, "Must be positive or null");
+    opencog::cassert(TRACE_INFO, n >= 0, "Must be positive or null");
     std::vector<bool> bv(n, false);
     if (n > 0) {
         for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit) {
@@ -1196,7 +1196,7 @@ std::istream& operator>>(std::istream& in, combo::type_node& n)
     using namespace combo;
     std::string str;
     in >> str;
-    LADSUtil::cassert(TRACE_INFO, !str.empty(),
+    opencog::cassert(TRACE_INFO, !str.empty(),
                       "str representation must not be empty.");
     //type operators
     if (str == "->" || str == "lambda" || str == "lambda_type")
@@ -1232,11 +1232,11 @@ std::istream& operator>>(std::istream& in, combo::type_node& n)
         n = id::ill_formed_type;
     else if (str[0] == '#') {
         int arg = boost::lexical_cast<int>(str.substr(1));
-        LADSUtil::cassert(TRACE_INFO, arg != 0,
+        opencog::cassert(TRACE_INFO, arg != 0,
                           "arg value should be different from zero.");
         n = (type_node)((int)id::argument_type + arg - 1);
     } else {
-        LADSUtil::cassert(TRACE_INFO, false,
+        opencog::cassert(TRACE_INFO, false,
                           "type tree input stream fatal error : %s no such case",
                           str.c_str());
     }

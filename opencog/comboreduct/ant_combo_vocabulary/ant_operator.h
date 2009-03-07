@@ -1,8 +1,8 @@
 #ifndef _ANT_OPERATOR_H
 #define _ANT_OPERATOR_H
 
-#include "ComboReduct/combo/operator_base.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/combo/operator_base.h"
+#include "comboreduct/combo/type_tree.h"
 
 namespace combo {
 
@@ -66,7 +66,7 @@ namespace combo {
   void ant_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENUM oe) {
     const basic_description* bd = get_basic_description_array();
     unsigned int bd_count = get_basic_description_array_count();
-    LADSUtil::cassert(TRACE_INFO, bd_count==(unsigned int)enum_count,
+    opencog::cassert(TRACE_INFO, bd_count==(unsigned int)enum_count,
 	    "there must be entries for all perceptions.");
     bool found = false;
     for(unsigned int i = 0; i < bd_count && !found; ++i) {
@@ -79,7 +79,7 @@ namespace combo {
 	try {
 	  is >> _type_tree;
 	}
-	catch(LADSUtil::InconsistenceException& ie) {
+	catch(opencog::InconsistenceException& ie) {
 	  std::cout << "WARNING : there must be a problem with the type description of " << _name << ", as the interpretation of the type string : " << "\"" << is.str() << "\"" << " has raised the following exception : " << ie.getMessage() << std::endl;
 	}
 	//setting arity
@@ -90,7 +90,7 @@ namespace combo {
 	_arg_type_tree = type_tree_input_arg_types(_type_tree);
       }
     }
-    LADSUtil::cassert(TRACE_INFO, found,
+    opencog::cassert(TRACE_INFO, found,
 	    "ant_perception with enum %d has not been found in pbd", oe);    
   }
 

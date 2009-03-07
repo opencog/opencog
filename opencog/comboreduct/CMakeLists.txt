@@ -4,7 +4,7 @@ ADD_SUBDIRECTORY(ant_combo_vocabulary)
 ADD_SUBDIRECTORY(main)
 ADD_SUBDIRECTORY(crutil)
 
-ADD_LIBRARY(ComboReduct SHARED
+ADD_LIBRARY(comboreduct SHARED
 	crutil/exception
 
 	combo/action
@@ -54,26 +54,19 @@ ADD_LIBRARY(ComboReduct SHARED
 )
 
 INCLUDE_DIRECTORIES (
-    ${CMAKE_SOURCE_DIR}/src
+    ${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
-    ${CMAKE_BINARY_DIR}/src
+    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
 )
-
-#TARGET_LINK_LIBRARIES(ComboReduct
-	#combo
-	#reduct
-	#ant_combo_vocabulary
-	#crutil
-#)
 
 #install library
-INSTALL(TARGETS 
-	${PROJECT_NAME}
-	DESTINATION "lib/${PROJECT_NAME}"
-    PERMISSIONS
-	OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE
-	WORLD_READ WORLD_EXECUTE
-)
+#INSTALL(TARGETS 
+#        ${PROJECT_NAME}
+#        DESTINATION "lib/${PROJECT_NAME}"
+#        PERMISSIONS
+#        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+#        GROUP_READ GROUP_EXECUTE
+#        WORLD_READ WORLD_EXECUTE
+#)

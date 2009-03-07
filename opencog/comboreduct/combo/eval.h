@@ -1,18 +1,18 @@
 #ifndef _COMBO_EVAL_H
 #define _COMBO_EVAL_H
 
-#include <LADSUtil/tree.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/hash_map.h>
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/foreach.h>
-#include <LADSUtil/RandGen.h>
+#include "util/tree.h"
+#include "util/numeric.h"
+#include "util/hash_map.h"
+#include "util/exceptions.h"
+#include "util/foreach.h"
+#include "util/RandGen.h"
 
-#include "ComboReduct/crutil/exception.h"
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/combo/type_tree.h"
-#include "ComboReduct/combo/using.h"
-#include "ComboReduct/combo/variable_unifier.h"
+#include "comboreduct/crutil/exception.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/combo/using.h"
+#include "comboreduct/combo/variable_unifier.h"
 
 #include <exception>
 
@@ -48,7 +48,7 @@ struct Evaluator {
 
 inline boost::variant<vertex, combo_tree::iterator>& binding(int idx)
 {
-    static LADSUtil::hash_map<int, boost::variant<vertex, combo_tree::iterator> > map; //to support lazy evaluation, can also bind to a subtree
+    static opencog::hash_map<int, boost::variant<vertex, combo_tree::iterator> > map; //to support lazy evaluation, can also bind to a subtree
     return map[idx];
 }
 
@@ -74,11 +74,11 @@ void set_bindings(combo_tree& tr, const std::vector<vertex>&);
 void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 
 template<typename It>
-vertex eval_throws(LADSUtil::RandGen& rng,
+vertex eval_throws(opencog::RandGen& rng,
                    It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
-    throw(EvalException, LADSUtil::ComboException,
-          LADSUtil::AssertionException, std::bad_exception)
+    throw(EvalException, opencog::ComboException,
+          opencog::AssertionException, std::bad_exception)
 {
 
     //std::cout << "EVAL: " << combo_tree(it) << std::endl;
@@ -134,7 +134,7 @@ vertex eval_throws(LADSUtil::RandGen& rng,
                 }
             }
 
-            LADSUtil::cassert(TRACE_INFO, vu.empty()
+            opencog::cassert(TRACE_INFO, vu.empty()
                               || vu.isOneVariableActiveTMP(),
                               "Since it returns logical_true from that point"
                               " there should be at least one active variable");
@@ -153,7 +153,7 @@ vertex eval_throws(LADSUtil::RandGen& rng,
                 // wild card case
             } else {
                 
-                LADSUtil::cassert(TRACE_INFO, vu.isOneVariableActiveTMP(),
+                opencog::cassert(TRACE_INFO, vu.isOneVariableActiveTMP(),
                                   "the OR wild_card case relies on the fact"
                                   " that at least one variable is active");
 
@@ -187,7 +187,7 @@ vertex eval_throws(LADSUtil::RandGen& rng,
                     //ASSUMING THAT unify has done actually something
                     //which is only the case if updated is true
                     if(!work_vu.isOneVariableActiveTMP()) {
-                        //LADSUtil::cassert(TRACE_INFO, res,
+                        //opencog::cassert(TRACE_INFO, res,
                         //                "res should be true because work_vu"
                         //                " should start the iteration with"
                         //                " at least one active variable");
@@ -202,7 +202,7 @@ vertex eval_throws(LADSUtil::RandGen& rng,
                         id::logical_false);
             }
         case id::logical_not : {
-            LADSUtil::cassert(TRACE_INFO,
+            opencog::cassert(TRACE_INFO,
                               it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::logical_not)");
@@ -226,12 +226,12 @@ vertex eval_throws(LADSUtil::RandGen& rng,
             return negate_vertex(vx);
         }
         case id::boolean_if : {
-            LADSUtil::cassert(TRACE_INFO, it.number_of_children() == 3,
+            opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
                               "combo_tree node should have exactly three children"
                               " (id::boolean_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_boolean(vcond),
+            opencog::cassert(TRACE_INFO, is_boolean(vcond),
                               "vertex should be a booelan.");
             ++sib;
             if (vcond == id::logical_true) {
@@ -243,12 +243,12 @@ vertex eval_throws(LADSUtil::RandGen& rng,
         }
         //mixed operators
         case id::contin_if : {
-            LADSUtil::cassert(TRACE_INFO, it.number_of_children() == 3,
+            opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
                               "combo_tree node should have exactly three children"
                               " (id::contin_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_boolean(vcond),
+            opencog::cassert(TRACE_INFO, is_boolean(vcond),
                               "vertex should be a boolean.");
             ++sib;
             if (vcond == id::logical_true) {
@@ -261,22 +261,22 @@ vertex eval_throws(LADSUtil::RandGen& rng,
             }
         }
         case id::greater_than_zero : {
-            LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+            opencog::cassert(TRACE_INFO, it.has_one_child(),
                               "combo_tree node should have exactly three children"
                               " (id::greater_than_zero).");
             sib_it sib = it.begin();
             vertex x = eval_throws(rng, sib, pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_contin(x),
+            opencog::cassert(TRACE_INFO, is_contin(x),
                               "vertex should be a contin.");
             return bool_to_vertex(0 < get_contin(x));
         }
         case id::impulse : {
             vertex i;
-            LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+            opencog::cassert(TRACE_INFO, it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::impulse).");
             i = eval_throws(rng, it.begin(), pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_boolean(i),
+            opencog::cassert(TRACE_INFO, is_boolean(i),
                               "vetex should be a boolean).");
             return (i == id::logical_true ? 1.0 : 0.0);
         }
@@ -286,7 +286,7 @@ vertex eval_throws(LADSUtil::RandGen& rng,
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
-                LADSUtil::cassert(TRACE_INFO, is_contin(vres),
+                opencog::cassert(TRACE_INFO, is_contin(vres),
                                   "vertex should be a contin.");
                 res += get_contin(vres);
             }
@@ -299,7 +299,7 @@ vertex eval_throws(LADSUtil::RandGen& rng,
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
-                LADSUtil::cassert(TRACE_INFO, is_contin(vres),
+                opencog::cassert(TRACE_INFO, is_contin(vres),
                                   "vertex should be a contin");
                 res *= get_contin(vres);
             }
@@ -307,17 +307,17 @@ vertex eval_throws(LADSUtil::RandGen& rng,
         }
         case id::div : {
             contin_t x, y;
-            LADSUtil::cassert(TRACE_INFO, it.number_of_children() == 2,
+            opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
                               "combo_tree node should have exactly two children"
                               " (id::div).");
             sib_it sib = it.begin();
             vertex vx = eval_throws(rng, sib, pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_contin(vx),
+            opencog::cassert(TRACE_INFO, is_contin(vx),
                               "vertex should be a contin.");
             x = get_contin(vx);
             ++sib;
             vertex vy = eval_throws(rng, sib, pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_contin(vy),
+            opencog::cassert(TRACE_INFO, is_contin(vy),
                               "vertex should be a contin.");
             y = get_contin(vy);
             contin_t res = x / y;
@@ -325,22 +325,22 @@ vertex eval_throws(LADSUtil::RandGen& rng,
             return res;
         }
         case id::log : {
-            LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+            opencog::cassert(TRACE_INFO, it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::log).");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_contin(vx),
+            opencog::cassert(TRACE_INFO, is_contin(vx),
                               "vertex should be a contin");
             contin_t res = log(get_contin(vx));
             if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
             return res;
         }
         case id::exp : {
-            LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+            opencog::cassert(TRACE_INFO, it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::exp)");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_contin(vx),
+            opencog::cassert(TRACE_INFO, is_contin(vx),
                               "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
             //this may happen in case the argument is too high, then exp will be infty
@@ -348,23 +348,23 @@ vertex eval_throws(LADSUtil::RandGen& rng,
             return res;
         }
         case id::sin : {
-            LADSUtil::cassert(TRACE_INFO, it.has_one_child(),
+            opencog::cassert(TRACE_INFO, it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::sin)");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
-            LADSUtil::cassert(TRACE_INFO, is_contin(vx),
+            opencog::cassert(TRACE_INFO, is_contin(vx),
                               "vertex should be a contin.");
             return sin(get_contin(vx));
         }
         default :
-            LADSUtil::cassert(TRACE_INFO, false,
+            opencog::cassert(TRACE_INFO, false,
                               "That case is not handled");
             return v;
         }
     }
     //action
     else if (is_action(*it) && pe) {
-        LADSUtil::cassert(TRACE_INFO, pe,
+        opencog::cassert(TRACE_INFO, pe,
                           "Non null Evaluator must be provided");
         return pe->eval_action(it, vu);
     }
@@ -378,13 +378,13 @@ vertex eval_throws(LADSUtil::RandGen& rng,
     }
     //indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
-        LADSUtil::cassert(TRACE_INFO, pe,
+        opencog::cassert(TRACE_INFO, pe,
                           "Non null Evaluator must be provided");
         return pe->eval_indefinite_object(*io, vu);
     }
     //definite objects evaluate to themselves
     else if (is_definite_object(*it)) {
-        LADSUtil::cassert(TRACE_INFO, it.is_childless(),
+        opencog::cassert(TRACE_INFO, it.is_childless(),
                           "combo_tree node should be childless (definite_object '%s').",
                           get_definite_object(*it).c_str());
         return v;
@@ -405,9 +405,9 @@ vertex eval_throws(LADSUtil::RandGen& rng,
 }
 
 template<typename It>
-vertex eval(LADSUtil::RandGen& rng, It it)
-     throw(LADSUtil::ComboException,
-           LADSUtil::AssertionException, std::bad_exception)
+vertex eval(opencog::RandGen& rng, It it)
+     throw(opencog::ComboException,
+           opencog::AssertionException, std::bad_exception)
 {
     try {
         return eval_throws(rng, it);
@@ -417,17 +417,17 @@ vertex eval(LADSUtil::RandGen& rng, It it)
 }
 
 template<typename T>
-vertex eval(LADSUtil::RandGen& rng, const LADSUtil::tree<T>& tr)
-     throw(LADSUtil::StandardException, std::bad_exception)
+vertex eval(opencog::RandGen& rng, const opencog::tree<T>& tr)
+     throw(opencog::StandardException, std::bad_exception)
 {
     return eval(rng, tr.begin());
 }
 
 template<typename T>
-vertex eval_throws(LADSUtil::RandGen& rng, const LADSUtil::tree<T>& tr)
+vertex eval_throws(opencog::RandGen& rng, const opencog::tree<T>& tr)
      throw(EvalException,
-           LADSUtil::ComboException,
-           LADSUtil::AssertionException,
+           opencog::ComboException,
+           opencog::AssertionException,
            std::bad_exception)
 {
     return eval_throws(rng, tr.begin());
@@ -435,10 +435,10 @@ vertex eval_throws(LADSUtil::RandGen& rng, const LADSUtil::tree<T>& tr)
 
 //return the arity of a tree
 template<typename T>
-int arity(const LADSUtil::tree<T>& tr)
+int arity(const opencog::tree<T>& tr)
 {
     int a = 0;
-    for (typename LADSUtil::tree<T>::iterator it = tr.begin();
+    for (typename opencog::tree<T>::iterator it = tr.begin();
          it != tr.end(); ++it)
         if (is_argument(*it))
             a = std::max(a, std::abs(get_argument(*it).idx));
@@ -472,20 +472,20 @@ public:
     template<typename It>
     truth_table(It from, It to) : super(from, to) { }
     template<typename T>
-    truth_table(const LADSUtil::tree<T>& t, int arity, LADSUtil::RandGen& rng)
-            : super(LADSUtil::power(2, arity)) {
+    truth_table(const opencog::tree<T>& t, int arity, opencog::RandGen& rng)
+            : super(opencog::power(2, arity)) {
         populate(t, arity, rng);
     }
     template<typename T>
-    truth_table(const LADSUtil::tree<T>& t, LADSUtil::RandGen& rng) {
+    truth_table(const opencog::tree<T>& t, opencog::RandGen& rng) {
         int a = arity(t);
-        this->resize(LADSUtil::power(2, a));
+        this->resize(opencog::power(2, a));
         populate(t, a, rng);
     }
 
     template<typename Func>
-    truth_table(const Func& f, int arity, LADSUtil::RandGen& rng)
-        : super(LADSUtil::power(2, arity)) {
+    truth_table(const Func& f, int arity, opencog::RandGen& rng)
+        : super(opencog::power(2, arity)) {
         iterator it = begin();
         for (int i = 0;it != end();++i, ++it) {
             std::vector<bool> v(arity);
@@ -513,8 +513,8 @@ public:
     size_type hamming_distance(const truth_table& other) const;
 protected:
     template<typename T>
-    void populate(const LADSUtil::tree<T>& tr,
-                  int arity, LADSUtil::RandGen& rng) {
+    void populate(const opencog::tree<T>& tr,
+                  int arity, opencog::RandGen& rng) {
         iterator it = begin();
         for (int i = 0;it != end();++i, ++it) {
             for (int j = 0;j < arity;++j)
@@ -547,7 +547,7 @@ private:
 public:
     //constructor
     RndNumTable() {}
-    RndNumTable(int sample_count, int arity, LADSUtil::RandGen& rng);
+    RndNumTable(int sample_count, int arity, opencog::RandGen& rng);
 
     //access method
     const contin_matrix& matrix() const {
@@ -568,7 +568,7 @@ public:
 
     //constructors
     contin_table() { }
-    contin_table(const combo_tree& t, const RndNumTable& rnt, LADSUtil::RandGen& rng);
+    contin_table(const combo_tree& t, const RndNumTable& rnt, opencog::RandGen& rng);
     template<typename Func>
     contin_table(const Func& f, const RndNumTable& rnt) {
         foreach(const contin_vector& v, rnt.matrix())
@@ -607,7 +607,7 @@ class mixed_table
     int _contin_arg_count; //number of contin arguments
     int _bool_arg_count; //number of boolean arguments
 
-    LADSUtil::hash_map<int, int> _arg_map; //link the argument index with the
+    opencog::hash_map<int, int> _arg_map; //link the argument index with the
     //boolean or contin index, that is
     //for instance if the inputs are
     //(bool, contin, contin, bool, bool)
@@ -652,7 +652,7 @@ public:
     //constructors
     mixed_table() {}
     mixed_table(const combo_tree& tr, const RndNumTable& rnt,
-                const type_tree& prototype, LADSUtil::RandGen& rng) {
+                const type_tree& prototype, opencog::RandGen& rng) {
         _rnt = rnt;
         if (prototype.empty()) {
             type_tree inferred_proto = infer_type_tree(tr);
@@ -687,7 +687,7 @@ public:
             if (boost::get<bool>(&(*il))) {
                 if (boost::get<bool>(*il) != boost::get<bool>(*ir))
                     return false;
-            } else if (!LADSUtil::isEqual(boost::get<contin_t>(*il),
+            } else if (!opencog::isEqual(boost::get<contin_t>(*il),
                                           boost::get<contin_t>(*ir)))
                 return false;
         }
@@ -729,7 +729,7 @@ class mixed_action_table
     int _contin_arg_count; //number of contin arguments
     int _action_arg_count; //number of action_result arguments
 
-    LADSUtil::hash_map<int, int> _arg_map; //link the argument index with the
+    opencog::hash_map<int, int> _arg_map; //link the argument index with the
     //boolean, action_result or contin
     //index, that is
     //for instance if the inputs are
@@ -782,7 +782,7 @@ public:
     //constructors
     mixed_action_table() {}
     mixed_action_table(const combo_tree& tr, const RndNumTable& rnt,
-                       const type_tree& prototype, LADSUtil::RandGen& rng) {
+                       const type_tree& prototype, opencog::RandGen& rng) {
         _rnt = rnt;
         if (prototype.empty()) {
             type_tree inferred_proto = infer_type_tree(tr);
@@ -815,7 +815,7 @@ public:
                 else if (is_contin(e))
                     _vt.push_back(get_contin(e));
                 //should never get to this part
-                else LADSUtil::cassert(TRACE_INFO, false,
+                else opencog::cassert(TRACE_INFO, false,
                                        "should never get to this part.");
             }
         }
@@ -833,7 +833,7 @@ public:
             if (boost::get<bool>(&(*il))) {
                 if (boost::get<bool>(*il) != boost::get<bool>(*ir))
                     return false;
-            } else if (!LADSUtil::isEqual(boost::get<contin_t>(*il),
+            } else if (!opencog::isEqual(boost::get<contin_t>(*il),
                                           boost::get<contin_t>(*ir)))
                 return false;
         }

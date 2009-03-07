@@ -1,8 +1,8 @@
 #ifndef _COMBO_ACTION_SYMBOL_H
 #define _COMBO_ACTION_SYMBOL_H
 
-#include "ComboReduct/combo/operator_base.h"
-#include "ComboReduct/combo/type_tree_def.h"
+#include "comboreduct/combo/operator_base.h"
+#include "comboreduct/combo/type_tree_def.h"
 
 namespace combo {
 

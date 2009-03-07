@@ -1,7 +1,7 @@
 #ifndef _COMBO_ASSUMPTION_H
 #define _COMBO_ASSUMPTION_H
 
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/vertex.h"
 
 namespace combo {
 

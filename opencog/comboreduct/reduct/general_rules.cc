@@ -1,6 +1,6 @@
-#include "ComboReduct/reduct/general_rules.h"
-#include "ComboReduct/combo/eval.h"
-#include "ComboReduct/combo/assumption.h"
+#include "comboreduct/reduct/general_rules.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/combo/assumption.h"
 
 namespace reduct {
   typedef combo_tree::sibling_iterator sib_it;
@@ -38,7 +38,7 @@ namespace reduct {
 	}
       }
       else {
-        LADSUtil::cassert(TRACE_INFO, false, "Not implemented yet");
+        opencog::cassert(TRACE_INFO, false, "Not implemented yet");
       }
     }
     else {
@@ -54,7 +54,7 @@ namespace reduct {
   void reorder_commutative::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_commutative(*it))
       tr.sort_on_subtrees(it.begin(),it.end(),
-			  LADSUtil::lexicographic_subtree_order<vertex>(),false);
+			  opencog::lexicographic_subtree_order<vertex>(),false);
   }
 
   //Get rid of subtrees marked with a null_vertex in their roots

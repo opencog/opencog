@@ -1,13 +1,13 @@
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/reduct/meta_rules.h"
-#include "ComboReduct/reduct/general_rules.h"
-#include "ComboReduct/reduct/logical_rules.h"
-#include "ComboReduct/reduct/contin_rules.h"
-#include "ComboReduct/reduct/mixed_rules.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "comboreduct/reduct/general_rules.h"
+#include "comboreduct/reduct/logical_rules.h"
+#include "comboreduct/reduct/contin_rules.h"
+#include "comboreduct/reduct/mixed_rules.h"
 
 namespace reduct {
 
-  const rule& full_reduction(LADSUtil::RandGen& rng) {
+  const rule& full_reduction(opencog::RandGen& rng) {
     static iterative r_without_reduce_gt_zero_prod;
 
     //This set of rule is defined to avoid infinit recursion of the rule

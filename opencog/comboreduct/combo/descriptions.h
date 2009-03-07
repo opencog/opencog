@@ -1,10 +1,10 @@
 #ifndef _COMBO_DESCRIPTIONS_H
 #define _COMBO_DESCRIPTIONS_H
 
-#include <LADSUtil/numeric.h>
+#include "util/numeric.h"
 
-#include "ComboReduct/combo/action.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/combo/action.h"
+#include "comboreduct/combo/type_tree.h"
 
 namespace builtin_properties {
   using namespace combo;
@@ -87,7 +87,7 @@ namespace builtin_properties {
       
       // setting arities and other properties of single actions
       unsigned int number_of_builtin_descriptions = sizeof(bd)/sizeof(builtin_description);
-      LADSUtil::cassert(TRACE_INFO, number_of_builtin_descriptions==(unsigned int)id::builtin_count,
+      opencog::cassert(TRACE_INFO, number_of_builtin_descriptions==(unsigned int)id::builtin_count,
              "there must be entries for all builtins.");
       // there must be entries for all actions 
       
@@ -95,14 +95,14 @@ namespace builtin_properties {
 
       for(unsigned int i=0;i<number_of_builtin_descriptions;i++) { 
         for(unsigned int j=0;j<i;j++) { 
-          LADSUtil::cassert(TRACE_INFO, bd[i].b!=bd[j].b, 
+          opencog::cassert(TRACE_INFO, bd[i].b!=bd[j].b, 
                   "there must not be two entries for one builtin.");           
           // there must not be two entries for one builtin 
         }
-        LADSUtil::cassert(TRACE_INFO, bd[i].b>=(id::builtin)0, 
+        opencog::cassert(TRACE_INFO, bd[i].b>=(id::builtin)0, 
                 "must be one of the defined builtins.");
         // must be one of the defined builtins
-        LADSUtil::cassert(TRACE_INFO, bd[i].b<id::builtin_count,
+        opencog::cassert(TRACE_INFO, bd[i].b<id::builtin_count,
                 "must be one of the defined builtins.");
         // must be one of the defined builtins
 
@@ -214,7 +214,7 @@ namespace action_properties {
       
       // setting arities and other properties of single actions
       unsigned int number_of_action_descriptions = sizeof(ad)/sizeof(action_description);
-      LADSUtil::cassert(TRACE_INFO, number_of_action_descriptions==(unsigned int)id::action_count,
+      opencog::cassert(TRACE_INFO, number_of_action_descriptions==(unsigned int)id::action_count,
              "there must be entries for all actions.");
       // there must be entries for all actions 
       
@@ -222,14 +222,14 @@ namespace action_properties {
 
       for(unsigned int i=0;i<number_of_action_descriptions;i++) { 
         for(unsigned int j=0;j<i;j++) { 
-          LADSUtil::cassert(TRACE_INFO, ad[i].a!=ad[j].a, 
+          opencog::cassert(TRACE_INFO, ad[i].a!=ad[j].a, 
                   "there must not be two entries for one action.");           
           // there must not be two entries for one action 
         }
-        LADSUtil::cassert(TRACE_INFO, ad[i].a>=(id::action)0, 
+        opencog::cassert(TRACE_INFO, ad[i].a>=(id::action)0, 
                 "must be one of the defined actions.");
         // must be one of the defined actions
-        LADSUtil::cassert(TRACE_INFO, ad[i].a<id::action_count,
+        opencog::cassert(TRACE_INFO, ad[i].a<id::action_count,
                 "must be one of the defined actions.");
         // must be one of the defined actions
 

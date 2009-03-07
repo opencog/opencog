@@ -1,16 +1,16 @@
 #ifndef _COMBO_PROCEDURE_CALL_H
 #define _COMBO_PROCEDURE_CALL_H
 
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/Logger.h>
+#include "util/exceptions.h"
+#include "util/Logger.h"
 
-#include "ComboReduct/combo/type_tree_def.h"
-#include "ComboReduct/combo/common_def.h"
+#include "comboreduct/combo/type_tree_def.h"
+#include "comboreduct/combo/common_def.h"
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include "ComboReduct/combo/operator_base.h"
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/operator_base.h"
+#include "comboreduct/combo/vertex.h"
 
 namespace combo
 {
@@ -98,7 +98,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
         tmp.assign("");
     } while (in.good() && nparen > 0);
     if (nparen != 0) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        opencog::logger().log(opencog::Logger::ERROR, 
                         "procedure_call - Mismatched parenthesis in the arity definition procedure '%s'",
                         str.c_str());
         return NULL;
@@ -108,7 +108,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
     //recognize :=
     in >> tmp;
     if (tmp != ":=" || !in.good()) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        opencog::logger().log(opencog::Logger::ERROR, 
                         "procedure_call - Wrong procedure definition operator '%s' in procedure definition '%s' should be ':=' instead",
                         tmp.c_str(), str.c_str());
         return NULL;
@@ -126,7 +126,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
         tmp.assign("");
     } while (in.good() && nparen > 0);
     if (nparen != 0) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        opencog::logger().log(opencog::Logger::ERROR, 
                         "procedure_call - Mismatched parenthesis in the body of procedure '%s'. The total of parenthesis, with '(' counting for 1 and ')' counting for -1, sums up to %d",
                         str.c_str(), nparen);
         return NULL;
@@ -144,7 +144,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
     try {
         arity = boost::lexical_cast<unsigned int>(arity_str);
     } catch (...) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        opencog::logger().log(opencog::Logger::ERROR, 
                         "procedure_call - Lexical error: '%s' supposed to be an arity in procedure definition '%s' does not correspond to a number",
                         arity_str.c_str(), str.c_str());
         return NULL;
@@ -161,7 +161,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
             if(!arg.is_idx_valid(arity)) {
                 stringstream arg_ss;
                 arg_ss << arg;
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+                opencog::logger().log(opencog::Logger::ERROR, 
                                 "procedure_call - Semantic error: the procedure '%s' has arity '%d' but contains variable argument '%s' out of range",
                                 str.c_str(), arity, arg_ss.str().c_str());
                 return NULL;

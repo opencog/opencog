@@ -1,5 +1,5 @@
-#include "ComboReduct/ant_combo_vocabulary/ant_action_symbol.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/ant_combo_vocabulary/ant_action_symbol.h"
+#include "comboreduct/combo/type_tree.h"
 
 using namespace combo;
 using namespace ant_action_symbol_properties;
@@ -23,7 +23,7 @@ const ant_action_symbol* ant_action_symbol::init_action_symbol() {
 }
 
 void ant_action_symbol::set_action_symbol(ant_action_symbol_enum pase) {
-  LADSUtil::cassert(TRACE_INFO, pase<id::ant_action_symbol_count);
+  opencog::cassert(TRACE_INFO, pase<id::ant_action_symbol_count);
   _enum = pase;
   //fill the various properties using the arrays edited by the developer
   set_basic_description(pase);
@@ -42,7 +42,7 @@ action_symbol ant_action_symbol::instance(const std::string& name) {
 
 action_symbol ant_action_symbol::instance(ant_action_symbol_enum pase) {
   static const ant_action_symbol* action_symbols=init_action_symbol();
-  LADSUtil::cassert(TRACE_INFO, pase<id::ant_action_symbol_count);
+  opencog::cassert(TRACE_INFO, pase<id::ant_action_symbol_count);
   return static_cast<action_symbol>(&action_symbols[pase]);
 }
 

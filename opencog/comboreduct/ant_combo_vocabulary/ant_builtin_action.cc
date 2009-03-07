@@ -1,5 +1,5 @@
-#include "ComboReduct/ant_combo_vocabulary/ant_builtin_action.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/ant_combo_vocabulary/ant_builtin_action.h"
+#include "comboreduct/combo/type_tree.h"
 
 using namespace combo;
 using namespace ant_builtin_action_properties;
@@ -30,7 +30,7 @@ const ant_builtin_action* ant_builtin_action::init_actions() {
 
 void ant_builtin_action::set_action(ant_builtin_action_enum abae,
 				    ant_builtin_action* action_array) {
-  LADSUtil::cassert(TRACE_INFO, abae<id::ant_builtin_action_count);
+  opencog::cassert(TRACE_INFO, abae<id::ant_builtin_action_count);
   _enum = abae;
   //fill the various properties using the arrays edited by the developer
 
@@ -38,7 +38,7 @@ void ant_builtin_action::set_action(ant_builtin_action_enum abae,
   set_basic_description(abae);
   //standard properties specific to action
   unsigned int apd_count = sizeof(apd)/sizeof(action_property_description);
-  LADSUtil::cassert(TRACE_INFO,
+  opencog::cassert(TRACE_INFO,
 	  apd_count==(unsigned int)id::ant_builtin_action_count,
 	  "there must be entries for all actions.");
   bool found = false;
@@ -53,7 +53,7 @@ void ant_builtin_action::set_action(ant_builtin_action_enum abae,
       else _reversal = NULL;
     }
   }
-  LADSUtil::cassert(TRACE_INFO, found,
+  opencog::cassert(TRACE_INFO, found,
 	  "ant_builtin_action with enum %d has not been found in apd", abae);
   //standard properties specific to action argument
   unsigned int aapd_count =
@@ -74,10 +74,10 @@ void ant_builtin_action::set_action(ant_builtin_action_enum abae,
       //take the found index argument off arg_not_found
       arity_t index = aapd[i].argument_index;
       std::set<arity_t>::iterator it = arg_not_found.find(index);
-      LADSUtil::cassert(TRACE_INFO, it==arg_not_found.end(),
+      opencog::cassert(TRACE_INFO, it==arg_not_found.end(),
 	      "Either action %s does not have argument %d or this argument has already been found", _name.c_str(), index);
       arg_not_found.erase(it);
-      LADSUtil::cassert(TRACE_INFO, index<_arity);
+      opencog::cassert(TRACE_INFO, index<_arity);
       _arg_additive[index] = aapd[i].additive;
       _arg_zero_neutral[index] = aapd[i].zero_neutral;
       _arg_modulo[index] = aapd[i].modular;
@@ -85,7 +85,7 @@ void ant_builtin_action::set_action(ant_builtin_action_enum abae,
       _arg_modulo_max[index] = aapd[i].max_value;
     }
   }
-  LADSUtil::cassert(TRACE_INFO, arg_not_found.empty(),
+  opencog::cassert(TRACE_INFO, arg_not_found.empty(),
 	  "Some argument are not found in aapd for action %d", _name.c_str());
   //check if exists additive, zero_neutral
   bool not_exists_additive = true;
@@ -113,7 +113,7 @@ builtin_action ant_builtin_action::instance(const std::string& name) {
 
 builtin_action ant_builtin_action::instance(ant_builtin_action_enum abae) {
   static const ant_builtin_action* actions=ant_builtin_action::init_actions();
-  LADSUtil::cassert(TRACE_INFO, abae<id::ant_builtin_action_count);
+  opencog::cassert(TRACE_INFO, abae<id::ant_builtin_action_count);
   return static_cast<builtin_action>(&actions[abae]);
 }
 
@@ -154,7 +154,7 @@ bool ant_builtin_action::is_idempotent() const {
 }
 
 bool ant_builtin_action::is_additive(arity_t i) const {
-  LADSUtil::cassert(TRACE_INFO, i<_arity);
+  opencog::cassert(TRACE_INFO, i<_arity);
   return _arg_additive[i];
 }
 
@@ -163,7 +163,7 @@ bool ant_builtin_action::exists_additive_argument() const {
 }
 
 bool ant_builtin_action::is_zero_neutral(arity_t i) const {
-  LADSUtil::cassert(TRACE_INFO, i<_arity);
+  opencog::cassert(TRACE_INFO, i<_arity);
   return _arg_zero_neutral[i];
 }
 
@@ -172,17 +172,17 @@ bool ant_builtin_action::exists_zero_neutral_argument() const {
 }
 
 bool ant_builtin_action::is_modulo(arity_t i) const {
-  LADSUtil::cassert(TRACE_INFO, i<_arity);
+  opencog::cassert(TRACE_INFO, i<_arity);
   return _arg_modulo[i];
 }
 
 double ant_builtin_action::modulo_min(arity_t i) const {
-  LADSUtil::cassert(TRACE_INFO, i<_arity);
+  opencog::cassert(TRACE_INFO, i<_arity);
   return _arg_modulo_min[i];
 }
 
 double ant_builtin_action::modulo_max(arity_t i) const {
-  LADSUtil::cassert(TRACE_INFO, i<_arity);
+  opencog::cassert(TRACE_INFO, i<_arity);
   return _arg_modulo_max[i];
 }
 

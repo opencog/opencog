@@ -1,14 +1,14 @@
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/combo/eval.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/combo/type_tree.h"
 #include <iostream>
-#include <LADSUtil/mt19937ar.h>
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "util/mt19937ar.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
 using namespace ant_combo;
 using namespace reduct;
-using namespace LADSUtil;
+using namespace opencog;
 
 int main() {
   MT19937RandGen rng(1);

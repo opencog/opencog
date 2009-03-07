@@ -1,8 +1,8 @@
 #ifndef _META_RULES_H
 #define _META_RULES_H
 
-#include "ComboReduct/combo/type_tree.h"
-#include "ComboReduct/reduct/reduct.h"
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/reduct/reduct.h"
 
 namespace reduct {
 

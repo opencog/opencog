@@ -1,10 +1,10 @@
 #ifndef _ANT_PERCEPTION_H
 #define _ANT_PERCEPTION_H
 
-#include <LADSUtil/numeric.h>
+#include "util/numeric.h"
 
-#include "ComboReduct/combo/perception.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_operator.h"
+#include "comboreduct/combo/perception.h"
+#include "comboreduct/ant_combo_vocabulary/ant_operator.h"
 
 namespace combo {
   

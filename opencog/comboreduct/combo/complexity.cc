@@ -1,7 +1,7 @@
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
-#include "ComboReduct/combo/complexity.h"
-#include "ComboReduct/combo/using.h"
+#include "comboreduct/combo/complexity.h"
+#include "comboreduct/combo/using.h"
 
 namespace combo {
 

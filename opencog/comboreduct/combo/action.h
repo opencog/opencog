@@ -1,12 +1,13 @@
 #ifndef _COMBO_ACTION_H
 #define _COMBO_ACTION_H
 
-#include <LADSUtil/exceptions.h>
-#include "ComboReduct/combo/type_tree_def.h"
+#include "util/exceptions.h"
+#include "comboreduct/combo/type_tree_def.h"
+
 #include <iostream>
 #include <vector>
 //#include <cassert>
-#include "ComboReduct/combo/common_def.h"
+#include "comboreduct/combo/common_def.h"
 
 namespace combo
 {

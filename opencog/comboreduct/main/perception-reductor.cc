@@ -1,9 +1,9 @@
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/combo/eval.h"
-#include "ComboReduct/combo/type_tree.h"
-#include <LADSUtil/mt19937ar.h>
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/combo/type_tree.h"
+#include "util/mt19937ar.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 #include <iostream>
 
@@ -15,7 +15,7 @@ int main() {
 
   combo_tree tr;  
 
-  LADSUtil::MT19937RandGen rng(0);
+  opencog::MT19937RandGen rng(0);
 
   while (cin.good()) {
     cin >> tr;

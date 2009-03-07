@@ -1,10 +1,10 @@
 #ifndef _REDUCT_RULE_H
 #define _REDUCT_RULE_H
 
-#include <LADSUtil/RandGen.h>
+#include "util/RandGen.h"
 
-#include "ComboReduct/reduct/using.h"
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/reduct/using.h"
+#include "comboreduct/combo/vertex.h"
 
 namespace reduct {
 
@@ -28,9 +28,9 @@ namespace reduct {
   };
 
   const rule& logical_reduction();
-  const rule& contin_reduction(LADSUtil::RandGen& rng);
-  const rule& mixed_reduction(LADSUtil::RandGen& rng);
-  const rule& full_reduction(LADSUtil::RandGen& rng);
+  const rule& contin_reduction(opencog::RandGen& rng);
+  const rule& mixed_reduction(opencog::RandGen& rng);
+  const rule& full_reduction(opencog::RandGen& rng);
   const rule& action_reduction();
   const rule& perception_reduction();
 
@@ -42,32 +42,32 @@ namespace reduct {
   }
   inline void logical_reduce(combo_tree& tr) { logical_reduction()(tr); }
 
-  inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, LADSUtil::RandGen& rng) {
+  inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     contin_reduction(rng)(tr,it);
   }
-  inline void contin_reduce(combo_tree& tr, LADSUtil::RandGen& rng) { contin_reduction(rng)(tr); }
+  inline void contin_reduce(combo_tree& tr, opencog::RandGen& rng) { contin_reduction(rng)(tr); }
 
-  inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, LADSUtil::RandGen& rng) {
+  inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     mixed_reduction(rng)(tr,it);
   }
-  inline void mixed_reduce(combo_tree& tr, LADSUtil::RandGen& rng) { mixed_reduction(rng)(tr); }
+  inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng) { mixed_reduction(rng)(tr); }
 
-  inline void full_reduce(combo_tree& tr,combo_tree::iterator it, LADSUtil::RandGen& rng) {
+  inline void full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     full_reduction(rng)(tr,it);
   }
-  inline void full_reduce(combo_tree& tr, LADSUtil::RandGen& rng) { full_reduction(rng)(tr); }
+  inline void full_reduce(combo_tree& tr, opencog::RandGen& rng) { full_reduction(rng)(tr); }
 
   inline void clean_reduce(combo_tree& tr,combo_tree::iterator it) {
     clean_reduction()(tr,it);
   }
   inline void clean_reduce(combo_tree& tr) { clean_reduction()(tr); }
 
-  inline void clean_and_full_reduce(combo_tree& tr,combo_tree::iterator it, LADSUtil::RandGen& rng) {
+  inline void clean_and_full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     //clean_and_full_reduction()(tr,it);
     clean_reduce(tr,it);
     full_reduce(tr,it,rng);
   }
-  inline void clean_and_full_reduce(combo_tree& tr, LADSUtil::RandGen& rng) { 
+  inline void clean_and_full_reduce(combo_tree& tr, opencog::RandGen& rng) { 
     //clean_and_full_reduction()(tr,tr.begin()); 
     clean_reduce(tr);
     full_reduce(tr,rng);

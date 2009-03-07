@@ -1,5 +1,5 @@
-#include "ComboReduct/combo/procedure_repository.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/combo/procedure_repository.h"
+#include "comboreduct/combo/type_tree.h"
 
 #include <boost/graph/strong_components.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -20,7 +20,7 @@ namespace combo {
       //if already exists then check if there are equal in content,
       //if so then do not add it
       //but if not equal in content then raise a cassert
-      LADSUtil::cassert(TRACE_INFO, *(spmi->second)==*pc, "A procedure named %s with a different body function has already been declared, you cannot overwrite it you must first explicitely remove it using the remove method", name.c_str());
+      opencog::cassert(TRACE_INFO, *(spmi->second)==*pc, "A procedure named %s with a different body function has already been declared, you cannot overwrite it you must first explicitely remove it using the remove method", name.c_str());
     }
   }
 
@@ -49,10 +49,10 @@ namespace combo {
 	str_proc_map_const_it proc=_repo.find(*str);
 	if(proc==_repo.end()) {
 	  if(wodo) {
-	    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ComboProcedureRepository - Creating definite_object '%s'. Is this a typo?", str->c_str());
+	    opencog::logger().log(opencog::Logger::DEBUG, "ComboProcedureRepository - Creating definite_object '%s'. Is this a typo?", str->c_str());
 	  }
 	} else {
-	  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ComboProcedureRepository::instantiateProcedureCalls - Replacing procedure name by procedure object (%s)", str->c_str());
+	  opencog::logger().log(opencog::Logger::DEBUG, "ComboProcedureRepository::instantiateProcedureCalls - Replacing procedure name by procedure object (%s)", str->c_str());
 	  *it=proc->second;
 	}
       }
@@ -61,7 +61,7 @@ namespace combo {
 
   std::set<const procedure_call_base*> procedure_repository::procedure_call_dependencies(const procedure_call_base* pc) const {
     std::set<const procedure_call_base*> res;
-    LADSUtil::cassert(TRACE_INFO, pc, "Not that must be an assumption, could return empty set as well");
+    opencog::cassert(TRACE_INFO, pc, "Not that must be an assumption, could return empty set as well");
     const combo_tree& body = pc->get_body();
     for(combo_tree::iterator it = body.begin(); it != body.end(); ++it)
       if(is_procedure_call(*it))
@@ -288,7 +288,7 @@ namespace combo {
 		  + std::string(" (which is ")
 		  + tss.str()
 		  + std::string(") is not well formed");
-		LADSUtil::cassert(TRACE_INFO, false, error_message.c_str());
+		opencog::cassert(TRACE_INFO, false, error_message.c_str());
 	      }
 
 	      //print debug
@@ -315,7 +315,7 @@ namespace combo {
 		  arity_t ia = type_tree_arity(infered_type);
 		  if(pa!=ia)
 		    printf("The arity of %s has been contextually infered at %d which is different from the previously given or infered arity %d\n", pc->get_name().c_str(), ia, pa);
-		  LADSUtil::cassert(TRACE_INFO, pa==ia, "The arity of %s has been contextually infered at %d which is different from the previously given or infered arity %d", pc->get_name().c_str(), ia, pa);
+		  opencog::cassert(TRACE_INFO, pa==ia, "The arity of %s has been contextually infered at %d which is different from the previously given or infered arity %d", pc->get_name().c_str(), ia, pa);
 		  pc->set_type_tree(infered_type);
 		}
 		else {
@@ -331,13 +331,13 @@ namespace combo {
 		  arity_t ia = type_tree_arity(tt);
 		  if(pa!=ia)
 		    printf("The arity of %s has been contextually infered at %d which is different from the previously given or infered arity %d\n", pc->get_name().c_str(), ia, pa);
-		  LADSUtil::cassert(TRACE_INFO, ia==pa, "The arity of %s has been contextually infered at %d which is different from the previously given or infered arity %d", pc->get_name().c_str(), ia, pa);
+		  opencog::cassert(TRACE_INFO, ia==pa, "The arity of %s has been contextually infered at %d which is different from the previously given or infered arity %d", pc->get_name().c_str(), ia, pa);
 		  pc->set_type_tree(tt);
 		  if(!is_well_formed(tt)) {
 		    printf("Something is wrong in the way %s is used in %s\n",
 			   pc->get_name().c_str(),
 			   current_pc->get_name().c_str());
-		    LADSUtil::cassert(TRACE_INFO, false,
+		    opencog::cassert(TRACE_INFO, false,
 			    "Something is wrong in the way %s is used in %s",
 			    pc->get_name().c_str(),
 			    current_pc->get_name().c_str());
@@ -357,7 +357,7 @@ namespace combo {
 		       current_pc->get_name().c_str(),
 		       pc->get_name().c_str(), pc->get_name().c_str(),
 		       ssit.str().c_str(), ssct.str().c_str());
-		LADSUtil::cassert(TRACE_INFO, false,
+		opencog::cassert(TRACE_INFO, false,
 			"Something must be wrong in the way %s is used in %s or in the definition of %s, because the type contextually infered of %s (which is %s) does not inherit its type based on its content (which is %s)",
 			pc->get_name().c_str(),
 			current_pc->get_name().c_str(),
@@ -392,7 +392,7 @@ namespace combo {
 		  + std::string("' (which is ")
 		  + tss.str()
 		  + std::string(") is not well formed");
-		LADSUtil::cassert(TRACE_INFO, false, error_message.c_str());
+		opencog::cassert(TRACE_INFO, false, error_message.c_str());
 	      }
 	      type_tree att = get_arg_type(a, atl);
 	      type_tree itt = get_intersection(att, infered_arg_type);
@@ -445,7 +445,7 @@ namespace combo {
 	  arity_t pa = pc->arity();
 	  arity_t ia = type_tree_arity(tt);
 	  pc->set_type_tree(tt);
-	  LADSUtil::cassert(TRACE_INFO, ia==pa,
+	  opencog::cassert(TRACE_INFO, ia==pa,
                             "The arity of '%s' has been infered in content at %d which is different from the previously given or infered arity %d", pc->get_name().c_str(), ia, pa);
 	}
 	else {
@@ -464,7 +464,7 @@ namespace combo {
                   << ". Have a look at the log for more information on"
                   << " why it failed or above on the standard output if the"
                   << " log has been redirected to it.";
-	  LADSUtil::cassert(TRACE_INFO, false, message.str().c_str());
+	  opencog::cassert(TRACE_INFO, false, message.str().c_str());
 	}
       }
     }

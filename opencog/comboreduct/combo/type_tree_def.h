@@ -1,7 +1,7 @@
 #ifndef _COMBO_TYPE_TREE_DEF_H
 #define _COMBO_TYPE_TREE_DEF_H
 
-#include <LADSUtil/tree.h>
+#include "util/tree.h"
 
 namespace combo {
 
@@ -44,7 +44,7 @@ namespace combo {
   typedef id::type_node type_node;
 
   //structure that codes the type of a tree
-  typedef LADSUtil::tree<type_node> type_tree;
+  typedef opencog::tree<type_node> type_tree;
 
   typedef type_tree::iterator type_tree_pre_it;
   typedef type_tree::sibling_iterator type_tree_sib_it;

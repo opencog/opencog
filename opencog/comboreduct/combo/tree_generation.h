@@ -1,11 +1,11 @@
 #ifndef TREE_GENERATION_H
 #define TREE_GENERATION_H
 
-#include <LADSUtil/tree.h>
+#include "util/tree.h"
 
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/combo/type_tree.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 namespace trees {
 
@@ -16,16 +16,16 @@ namespace trees {
   public:
 
     template<typename Selector>
-    LADSUtil::tree<typename Selector::value_type> operator()(const Selector& sel,
+    opencog::tree<typename Selector::value_type> operator()(const Selector& sel,
 							 int dp) const {
       typename Selector::value_type tmp;
-      LADSUtil::tree<typename Selector::value_type> tr(tmp);
+      opencog::tree<typename Selector::value_type> tr(tmp);
       build(sel,dp,tr,tr.begin());
       return tr;
     }
 
     template<typename Selector,typename T,typename iterator>
-    void build(const Selector& sel,int dp,LADSUtil::tree<T>& tr,iterator it) const {
+    void build(const Selector& sel,int dp,opencog::tree<T>& tr,iterator it) const {
       if (dp==1) {
 	tr.replace(it,sel.select(0));
       } else {

@@ -1,10 +1,10 @@
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/reduct/meta_rules.h"
-#include "ComboReduct/reduct/general_rules.h"
-#include "ComboReduct/reduct/contin_rules.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "comboreduct/reduct/general_rules.h"
+#include "comboreduct/reduct/contin_rules.h"
 
 namespace reduct {
-  const rule& contin_reduction(LADSUtil::RandGen& rng) {
+  const rule& contin_reduction(opencog::RandGen& rng) {
     static iterative r=
       iterative(sequential(downwards(level()),
 			   upwards(eval_constants(rng)),

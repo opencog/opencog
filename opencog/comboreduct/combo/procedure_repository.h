@@ -1,10 +1,11 @@
 #ifndef _COMBO_PROCEDURE_REPOSITORY_H
 #define _COMBO_PROCEDURE_REPOSITORY_H
 
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/Logger.h>
-#include "ComboReduct/combo/procedure_call.h"
-#include "ComboReduct/combo/vertex.h"
+#include "util/exceptions.h"
+#include "util/Logger.h"
+
+#include "comboreduct/combo/procedure_call.h"
+#include "comboreduct/combo/vertex.h"
 
 #include <set>
 #include <map>
@@ -129,12 +130,12 @@ unsigned int load_procedure_repository(std::istream& in,
     if(pc) {
       pr.add(const_cast<combo::procedure_call_base*>(pc));
       ++n;
-      MAIN_LOGGER.log(LADSUtil::Logger::FINE, 
+      opencog::logger().log(opencog::Logger::FINE, 
 		      "procedure_repository - Loaded '%s' with arity '%d'.", 
 		      pc->get_name().c_str(), pc->arity());
       
     } else {
-      MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+      opencog::logger().log(opencog::Logger::ERROR, 
 		      "procedure_repository - Error parsing combo function.");
     }
   }
@@ -144,7 +145,7 @@ unsigned int load_procedure_repository(std::istream& in,
   if(type_checking) {
     bool type_check_success = pr.infer_types_repo();
     if(!type_check_success) {
-      MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+      opencog::logger().log(opencog::Logger::ERROR, 
 		      "procedure_repository - Error type checking.");      
     }
   }

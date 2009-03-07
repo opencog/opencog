@@ -1,8 +1,8 @@
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/algorithm.h>
-#include <LADSUtil/foreach.h>
-#include "ComboReduct/combo/assumption.h"
-#include "ComboReduct/reduct/logical_rules.h"
+#include "util/exceptions.h"
+#include "util/algorithm.h"
+#include "util/foreach.h"
+#include "comboreduct/combo/assumption.h"
+#include "comboreduct/reduct/logical_rules.h"
 
 namespace reduct {
   typedef combo_tree::sibling_iterator sib_it;
@@ -150,7 +150,7 @@ namespace reduct {
   //using the reduce_and_assumptions
   void reduce_or_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::logical_or) {
-      LADSUtil::cassert(TRACE_INFO, !it.is_childless(), "combo_tree node should not be childless (reduce_or_assumptions).");
+      opencog::cassert(TRACE_INFO, !it.is_childless(), "combo_tree node should not be childless (reduce_or_assumptions).");
       *it = id::logical_not;
       pre_it new_or = tr.prepend_child(it, id::logical_or);
       tr.reparent(new_or, tr.next_sibling(it.begin()), it.end());
@@ -327,7 +327,7 @@ namespace reduct {
     tr.sort_on_subtrees(it.begin(),it.end(),comp,true);
     for (up_it p=++tr.begin_upwards(it);
 	 p!=tr.end_upwards() && is_logical_operator(*p);++p) {
-        if (!LADSUtil::is_sorted(make_counting_iterator(p.begin()),
+        if (!opencog::is_sorted(make_counting_iterator(p.begin()),
                                  make_counting_iterator(p.end()),comp))
 	tr.sort_on_subtrees(p.begin(),p.end(),comp);
     }
@@ -371,7 +371,7 @@ namespace reduct {
 	      }
 	  gchild=tr.erase(tr.flatten(gchild));
 	} else {
-	  LADSUtil::cassert(TRACE_INFO, is_argument(*gchild.begin()), "gchild should be an argument.");
+	  opencog::cassert(TRACE_INFO, is_argument(*gchild.begin()), "gchild should be an argument.");
 	  gchild=tr.erase(tr.flatten(gchild));
 	}
       } else {
@@ -385,7 +385,7 @@ namespace reduct {
       if (child.has_one_child() && (*child==id::logical_and ||
 				    *child==id::logical_or)) {
 	if (*child.begin()==id::logical_or) {
-	  LADSUtil::insert_set_complement
+	  opencog::insert_set_complement
 	    (tree_inserter(tr,current),
 	     make_counting_iterator(current.begin()),
 	     make_counting_iterator(current.end()),
@@ -408,7 +408,7 @@ namespace reduct {
   subtree_to_enf::reduce_to_enf::reduce(sib_it current,
 					const subtree_set& dominant,
 					const subtree_set& command) {
-    LADSUtil::cassert(TRACE_INFO, LADSUtil::is_sorted(dominant.begin(),dominant.end(),comp), 
+    opencog::cassert(TRACE_INFO, opencog::is_sorted(dominant.begin(),dominant.end(),comp), 
             "dominant subtree_set should be sorted (reduce)");
 
     //first remove duplicate children
@@ -424,9 +424,9 @@ namespace reduct {
       }
     }
 
-    LADSUtil::cassert(TRACE_INFO, LADSUtil::is_sorted(dominant.begin(),dominant.end(),comp),
+    opencog::cassert(TRACE_INFO, opencog::is_sorted(dominant.begin(),dominant.end(),comp),
             "dominant subtree_set should be sorted (reduce)");
-    LADSUtil::cassert(TRACE_INFO, LADSUtil::is_sorted(command.begin(),command.end(),comp), 
+    opencog::cassert(TRACE_INFO, opencog::is_sorted(command.begin(),command.end(),comp), 
             "command subtree_set should be sorted (reduce).");
 
     if (*current==id::logical_and)
@@ -435,7 +435,7 @@ namespace reduct {
       return reduce_or(current,dominant,command);
 
     //should be an argument or something
-    //LADSUtil::cassert(TRACE_INFO, is_argument(*current));
+    //opencog::cassert(TRACE_INFO, is_argument(*current));
     return Keep;
   }
 
@@ -443,7 +443,7 @@ namespace reduct {
   subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
 					    const subtree_set& dominant,
 					    const subtree_set& command) {
-    LADSUtil::erase_set_intersection(tree_eraser(tr),
+    opencog::erase_set_intersection(tree_eraser(tr),
 				 make_counting_iterator(current.begin()),
 				 make_counting_iterator(current.end()),
 				 dominant.begin(),dominant.end(),comp);
@@ -453,7 +453,7 @@ namespace reduct {
     push_back_negated_arguments(command,negated);
     std::sort(negated.begin(),negated.end(),comp);
 
-    LADSUtil::erase_set_intersection(tree_eraser(tr),
+    opencog::erase_set_intersection(tree_eraser(tr),
 				 make_counting_iterator(current.begin()),
 				 make_counting_iterator(current.end()),
 				 negated.begin(),negated.end(),comp);
@@ -461,7 +461,7 @@ namespace reduct {
     if (current.is_childless())
       return Disconnect; //0subsume
 	
-    if (!LADSUtil::has_empty_intersection
+    if (!opencog::has_empty_intersection
 	(make_counting_iterator(current.begin()),
 	 make_counting_iterator(current.end()),
 	 command.begin(),command.end(),comp))
@@ -473,10 +473,10 @@ namespace reduct {
 	std::list<sib_it>(make_counting_iterator(current.begin()),
 			  make_counting_iterator(current.end()));
 	    	  
-      LADSUtil::cassert(TRACE_INFO, LADSUtil::is_sorted(dominant.begin(),dominant.end(),comp),
+      opencog::cassert(TRACE_INFO, opencog::is_sorted(dominant.begin(),dominant.end(),comp),
             "dominant subtree_set should be sorted (reduce_and)");
 
-      if (!LADSUtil::is_sorted(make_counting_iterator(current.begin()),
+      if (!opencog::is_sorted(make_counting_iterator(current.begin()),
 			   make_counting_iterator(current.end()),comp))
 	tr.sort_on_subtrees(current.begin(),current.end(),comp);
 	  
@@ -499,9 +499,9 @@ namespace reduct {
 	tr.validate(child);
 	tr.validate();
 
-	LADSUtil::cassert(TRACE_INFO, LADSUtil::is_sorted(command.begin(),command.end(),comp),
+	opencog::cassert(TRACE_INFO, opencog::is_sorted(command.begin(),command.end(),comp),
             "command subtree_set should be sorted (reduce_and)");
-	LADSUtil::cassert(TRACE_INFO, LADSUtil::is_sorted(handle_set.begin(),handle_set.end(),comp),
+	opencog::cassert(TRACE_INFO, opencog::is_sorted(handle_set.begin(),handle_set.end(),comp),
             "handle_set subtree_set should be sorted (reduce_and)");
 	subtree_set::iterator tmp_it=handle_set.find(child);
 	sib_it tmp;
@@ -522,12 +522,12 @@ namespace reduct {
 	  break;
 	case Keep:
 
-	  if (!LADSUtil::is_sorted(make_counting_iterator(current.begin()),
+	  if (!opencog::is_sorted(make_counting_iterator(current.begin()),
 			       make_counting_iterator(current.end()),
 			       comp))
 	    tr.sort_on_subtrees(current.begin(),current.end(),comp);
 
-	  LADSUtil::cassert(TRACE_INFO, child.begin()!=child.end(), "child should have siblings"); //not sure if this is ok..
+	  opencog::cassert(TRACE_INFO, child.begin()!=child.end(), "child should have siblings"); //not sure if this is ok..
 	  //make res the disjunction of child's children's guard sets
 	  //important: we use references to the last child because we are
 	  //later going to iterate (left-to-right) removing these iterators
@@ -537,21 +537,21 @@ namespace reduct {
 	  subtree_set res(make_counting_iterator(child.last_child().begin()),
 			  make_counting_iterator(child.last_child().end()));
 	  for (sib_it sib=child.begin();sib!=child.last_child();++sib)
-	    LADSUtil::erase_set_difference(subtree_set_eraser(res),
+	    opencog::erase_set_difference(subtree_set_eraser(res),
 				       res.begin(),res.end(),
 				       make_counting_iterator(sib.begin()),
 				       make_counting_iterator(sib.end()),
 				       comp);
 
 	  if (!res.empty()) {
-	    LADSUtil::insert_set_complement
+	    opencog::insert_set_complement
 	      (tree_inserter(tr,current),
 	       make_counting_iterator(current.begin()),
 	       make_counting_iterator(current.end()),
 	       res.begin(),res.end(),comp);
 		
 	    for (sib_it gchild=child.begin();gchild!=child.end();++gchild)
-	      LADSUtil::erase_set_intersection
+	      opencog::erase_set_intersection
 		(tree_eraser(tr),
 		 make_counting_iterator(gchild.begin()),
 		 make_counting_iterator(gchild.end()),

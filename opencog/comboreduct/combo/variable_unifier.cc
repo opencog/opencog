@@ -1,4 +1,4 @@
-#include "ComboReduct/combo/variable_unifier.h"
+#include "comboreduct/combo/variable_unifier.h"
 
 #include <boost/lexical_cast.hpp>
 

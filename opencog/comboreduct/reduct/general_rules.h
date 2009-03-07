@@ -1,10 +1,10 @@
 #ifndef _REDUCT_GENERAL_RULES_H
 #define _REDUCT_GENERAL_RULES_H
 
-#include <LADSUtil/RandGen.h>
+#include "util/RandGen.h"
 
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/combo/eval.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/eval.h"
 
 namespace reduct {
 
@@ -18,9 +18,9 @@ namespace reduct {
   //if an operator is commutative, op(const,var,const) will become
   //op(op(const,const),var), e.g., +(2,x,1)->+(3,x)
   struct eval_constants : public crule<eval_constants> { 
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     Evaluator* evaluator;
-    eval_constants(LADSUtil::RandGen& _rng, Evaluator* e = NULL)
+    eval_constants(opencog::RandGen& _rng, Evaluator* e = NULL)
       : rng(_rng), evaluator(e) {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };

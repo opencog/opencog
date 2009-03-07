@@ -1,9 +1,9 @@
-#include "ComboReduct/combo/vertex.h"
-#include <LADSUtil/tree.h>
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/combo/vertex.h"
+#include "util/tree.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace ant_combo;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace std;
 
 #define TEST_MESSAGE "yo  man"

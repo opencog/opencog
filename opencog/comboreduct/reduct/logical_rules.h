@@ -2,12 +2,12 @@
 #define _REDUCT_LOGICAL_RULES_H
 
 
-#include <LADSUtil/foreach.h>
-#include <LADSUtil/exceptions.h>
+#include "util/foreach.h"
+#include "util/exceptions.h"
 
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/reduct/flat_normal_form.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/flat_normal_form.h"
+#include "comboreduct/combo/type_tree.h"
 
 namespace reduct {
   //ensure that all arguments and or nodes have an and node as their parent.
@@ -88,7 +88,7 @@ namespace reduct {
       typedef vertex value_type;
       typedef combo_tree::sibling_iterator sib_it;
       typedef combo_tree::upwards_iterator up_it;
-      typedef LADSUtil::lexicographic_subtree_order<value_type> Comp;
+      typedef opencog::lexicographic_subtree_order<value_type> Comp;
       typedef std::set<sib_it,Comp> subtree_set;
 
       combo_tree& tr;
@@ -118,7 +118,7 @@ namespace reduct {
 	      if (sib!=up)
 		*dom_out++=sib;
           } else {
-	    LADSUtil::cassert(TRACE_INFO, *p==id::logical_or);
+	    opencog::cassert(TRACE_INFO, *p==id::logical_or);
 	    for (sib_it sib=p.begin();sib!=p.end();++sib)
 	      if (sib!=up && is_argument(*sib))
 		*cmd_out++=sib;

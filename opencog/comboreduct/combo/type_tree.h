@@ -3,18 +3,18 @@
 
 #include <exception>
 
-#include <LADSUtil/tree.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/hash_map.h>
-#include <LADSUtil/exceptions.h>
+#include "util/tree.h"
+#include "util/numeric.h"
+#include "util/hash_map.h"
+#include "util/exceptions.h"
 
-#include "ComboReduct/crutil/exception.h"
-#include "ComboReduct/combo/type_tree_def.h"
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/combo/using.h"
-#include "ComboReduct/combo/common_def.h"
-#include "ComboReduct/combo/perception.h"
-#include "ComboReduct/combo/procedure_call.h"
+#include "comboreduct/crutil/exception.h"
+#include "comboreduct/combo/type_tree_def.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/using.h"
+#include "comboreduct/combo/common_def.h"
+#include "comboreduct/combo/perception.h"
+#include "comboreduct/combo/procedure_call.h"
 
 namespace combo
 {
@@ -174,19 +174,19 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
 //5) replace a variable by its output type
 //
 //Note that tr and proc_name are only passed for debugging message
-void reduce_type_tree(type_tree& tr,
+void reduce_type_tree(type_tree& tt,
                       const argument_type_list& arg_types,
                       const combo_tree& tr = combo_tree(),
                       const std::string& proc_name = std::string("PROCEDURE NAME UNKNOWN"));
 
 //like above but assums that there is no variable in the type_tree
 //(or that all variables are of type unknown_type)
-void reduce_type_tree(type_tree& tr,
+void reduce_type_tree(type_tree& tt,
                       const combo_tree& tr = combo_tree(),
                       const std::string& proc_name = std::string("PROCEDURE NAME UNKNOWN"));
 
 //reduce chain of application of abstraction and so on
-void reduce_type_tree(type_tree& tr, type_tree_pre_it it,
+void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                       const argument_type_list& arg_types,
                       const combo_tree& tr, combo_tree::iterator ct_it,
                       const std::string& proc_name);

@@ -1,4 +1,4 @@
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/vertex.h"
 
 using namespace combo;
 

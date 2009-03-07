@@ -1,10 +1,10 @@
 #ifndef _COMBO_INDEFINITE_OBJECT_H
 #define _COMBO_INDEFINITE_OBJECT_H
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
-#include "ComboReduct/combo/type_tree_def.h"
-#include "ComboReduct/combo/operator_base.h"
+#include "comboreduct/combo/type_tree_def.h"
+#include "comboreduct/combo/operator_base.h"
 
 namespace combo {
   

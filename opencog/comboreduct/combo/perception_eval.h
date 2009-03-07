@@ -3,11 +3,12 @@
 
 #include <exception>
 
-#include "ComboReduct/combo/vertex.h"
-#include <LADSUtil/exception.h>
-#include "ComboReduct/combo/using.h"
-#include "ComboReduct/combo/type_tree.h"
-#include <LADSUtil/tree.h>
+#include "util/exception.h"
+#include "util/tree.h"
+
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/using.h"
+#include "comboreduct/combo/type_tree.h"
 
 
 namespace combo {

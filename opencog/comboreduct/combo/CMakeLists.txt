@@ -2,8 +2,8 @@
 INSTALL(FILES
 
 	action.h
-    action_eval.h
-    action_symbol.h
+        action_eval.h
+        action_symbol.h
 	builtin_action.h
 	message.h
 	action_symbol.h

@@ -1,4 +1,4 @@
-#include "ComboReduct/crutil/exception.h"
+#include "comboreduct/crutil/exception.h"
 
 using namespace combo;
 

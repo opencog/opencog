@@ -1,4 +1,4 @@
-#include "ComboReduct/combo/definite_object.h"
+#include "comboreduct/combo/definite_object.h"
 
 #define ACTION_NAME_POSTFIX "_action"
 

@@ -1,5 +1,5 @@
-#include "ComboReduct/combo/procedure_repository.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/combo/procedure_repository.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace ant_combo;
 

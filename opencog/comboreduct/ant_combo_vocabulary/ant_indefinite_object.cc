@@ -1,5 +1,5 @@
-#include "ComboReduct/ant_combo_vocabulary/ant_indefinite_object.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/ant_combo_vocabulary/ant_indefinite_object.h"
+#include "comboreduct/combo/type_tree.h"
 
 using namespace combo;
 using namespace ant_indefinite_object_properties;
@@ -23,7 +23,7 @@ const ant_indefinite_object* ant_indefinite_object::init_indefinite_object() {
 }
 
 void ant_indefinite_object::set_indefinite_object(ant_indefinite_object_enum pioe) {
-  LADSUtil::cassert(TRACE_INFO, pioe<id::ant_indefinite_object_count);
+  opencog::cassert(TRACE_INFO, pioe<id::ant_indefinite_object_count);
   _enum = pioe;
   //fill the various properties using the arrays edited by the developer
   set_basic_description(pioe);
@@ -42,7 +42,7 @@ indefinite_object ant_indefinite_object::instance(const std::string& name) {
 
 indefinite_object ant_indefinite_object::instance(ant_indefinite_object_enum pioe) {
   static const ant_indefinite_object* indefinite_objects=init_indefinite_object();
-  LADSUtil::cassert(TRACE_INFO, pioe<id::ant_indefinite_object_count);
+  opencog::cassert(TRACE_INFO, pioe<id::ant_indefinite_object_count);
   return static_cast<indefinite_object>(&indefinite_objects[pioe]);
 }
 

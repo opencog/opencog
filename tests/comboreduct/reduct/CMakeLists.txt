@@ -1,45 +1,45 @@
 INCLUDE_DIRECTORIES(
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/ComboReduct
+    ${OPENCOG_SOURCE_DIR}/opencog
+    ${OPENCOG_SOURCE_DIR}/opencog/comboreduct
 )
 
 LINK_DIRECTORIES(
-    ${CMAKE_BINARY_DIR}/src/ComboReduct
+    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
 )
 
 
 #ADD_CXXTEST(ActionReductUTest)
 #TARGET_LINK_LIBRARIES(ActionReductUTest
-#	ComboReduct
-#   ${LADSUTIL_LIBRARY}
+#	comboreduct
+#   util
 #)
 
 ADD_CXXTEST(BooleanReductUTest)
 TARGET_LINK_LIBRARIES(BooleanReductUTest
-	ComboReduct
-    ${LADSUTIL_LIBRARY}
+	comboreduct
+    util
 )
 
 ADD_CXXTEST(ContinReductUTest)
 TARGET_LINK_LIBRARIES(ContinReductUTest
-	ComboReduct
-    ${LADSUTIL_LIBRARY}
+	comboreduct
+    util
 )
 
 ADD_CXXTEST(FullReductUTest)
 TARGET_LINK_LIBRARIES(FullReductUTest
-	ComboReduct
-    ${LADSUTIL_LIBRARY}
+	comboreduct
+    util
 )
 
 ADD_CXXTEST(MixedReductUTest)
 TARGET_LINK_LIBRARIES(MixedReductUTest
-	ComboReduct
-    ${LADSUTIL_LIBRARY}
+	comboreduct
+    util
 )
 
 #ADD_CXXTEST(PerceptionReductUTest)
 #TARGET_LINK_LIBRARIES(PerceptionReductUTest
-#	ComboReduct
-#   ${LADSUTIL_LIBRARY}
+#	comboreduct
+#   util
 #)

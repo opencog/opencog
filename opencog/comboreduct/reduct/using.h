@@ -8,7 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/vertex.h"
 
 #include <functional>
 #include <algorithm>

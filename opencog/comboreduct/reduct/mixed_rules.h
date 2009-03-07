@@ -1,7 +1,7 @@
 #ifndef _REDUCT_MIXED_RULES_H
 #define _REDUCT_MIXED_RULES_H
 
-#include "ComboReduct/reduct/reduct.h"
+#include "comboreduct/reduct/reduct.h"
 
 namespace reduct {
 

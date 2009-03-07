@@ -7,14 +7,14 @@
 #include <map>
 #include <boost/bind.hpp>
 
-#include <LADSUtil/hash_map.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/tree.h>
+#include "util/hash_map.h"
+#include "util/numeric.h"
+#include "util/tree.h"
 
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/vertex.h"
 
 namespace reduct {
-  typedef std::set<int,LADSUtil::absolute_value_order<int> > clause;
+  typedef std::set<int,opencog::absolute_value_order<int> > clause;
   typedef std::list<clause> nf;
   using namespace combo;
 
@@ -69,11 +69,11 @@ namespace reduct {
   template<typename T>
   class nf_mapper {
   public:
-    typedef LADSUtil::tree<T> tree;
+    typedef opencog::tree<T> tree;
     typedef typename tree::sibling_iterator sib_it;
     typedef std::map<sib_it,int,
-		     LADSUtil::lexicographic_subtree_order<T> > Item2Int;
-    typedef LADSUtil::hash_map<int,tree> Int2Item;
+		     opencog::lexicographic_subtree_order<T> > Item2Int;
+    typedef opencog::hash_map<int,tree> Int2Item;
 
     nf add_cnf(sib_it,sib_it);
     nf add_dnf(sib_it,sib_it);
@@ -172,7 +172,7 @@ namespace reduct {
 	if (*c.begin()<0) {
 	  typename tree::pre_order_iterator tmp=
 	    _int2item.find(-*c.begin())->second.begin();
-	  LADSUtil::cassert(TRACE_INFO, is_argument(*tmp), "Tree node referenced by iterator isn't an argument.");
+	  opencog::cassert(TRACE_INFO, is_argument(*tmp), "Tree node referenced by iterator isn't an argument.");
 	  *sib=*tmp;
 	  get_argument(*sib).negate();
 	} else {

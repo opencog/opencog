@@ -1,6 +1,6 @@
-#include "ComboReduct/combo/vertex.h"
+#include "comboreduct/combo/vertex.h"
 #include <boost/lexical_cast.hpp>
-#include "ComboReduct/combo/procedure_call.h"
+#include "comboreduct/combo/procedure_call.h"
 
 std::ostream& operator<<(std::ostream& out,const combo::builtin& h) {
   using namespace combo;

@@ -1,4 +1,4 @@
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 namespace ant_combo {
 

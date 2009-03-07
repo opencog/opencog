@@ -1,10 +1,10 @@
 #ifndef _ANT_ACTION_SYMBOL_H
 #define _ANT_ACTION_SYMBOL_H
 
-#include <LADSUtil/numeric.h>
+#include "util/numeric.h"
 
-#include "ComboReduct/combo/action_symbol.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_operator.h"
+#include "comboreduct/combo/action_symbol.h"
+#include "comboreduct/ant_combo_vocabulary/ant_operator.h"
 
 namespace combo {
 

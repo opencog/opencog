@@ -1,15 +1,15 @@
 #include <iostream>
 
-#include <LADSUtil/selection.h>
-#include <LADSUtil/mt19937ar.h>
+#include "util/selection.h"
+#include "util/mt19937ar.h"
 
-#include "ComboReduct/combo/tree_generation.h"
+#include "comboreduct/combo/tree_generation.h"
 #include <boost/lexical_cast.hpp>
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 int main(int argc,char** argv) {
   using namespace ant_combo;
-  using namespace LADSUtil;
+  using namespace opencog;
   using namespace trees;
   using namespace boost;
   using namespace std;

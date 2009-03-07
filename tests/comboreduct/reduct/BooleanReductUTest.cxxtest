@@ -2,20 +2,20 @@
 #include <string>
 #include <sstream>
 
-#include <LADSUtil/tree.h>
-#include <LADSUtil/mt19937ar.h>
+#include "util/tree.h"
+#include "util/mt19937ar.h"
 
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/combo/eval.h"
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace reduct;
 using namespace ant_combo;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace std;
 
-static LADSUtil::MT19937RandGen rng(0);
+static opencog::MT19937RandGen rng(0);
 
 class BbooleanReductUTest : public CxxTest::TestSuite {
 public:

@@ -1,5 +1,5 @@
-#include "ComboReduct/ant_combo_vocabulary/ant_perception.h"
-#include "ComboReduct/combo/type_tree.h"
+#include "comboreduct/ant_combo_vocabulary/ant_perception.h"
+#include "comboreduct/combo/type_tree.h"
 
 using namespace combo;
 using namespace ant_perception_properties;
@@ -30,7 +30,7 @@ const ant_perception* ant_perception::init_perceptions() {
 }
 
 void ant_perception::set_perception(ant_perception_enum ape) {
-  LADSUtil::cassert(TRACE_INFO, ape<id::ant_perception_count);
+  opencog::cassert(TRACE_INFO, ape<id::ant_perception_count);
   _enum = ape;
   //fill the various properties using the arrays edited by the developer
 
@@ -38,7 +38,7 @@ void ant_perception::set_perception(ant_perception_enum ape) {
   set_basic_description(ape);
   //standard properties specific to action
   unsigned int ppd_count = sizeof(ppd)/sizeof(perception_property_description);
-  LADSUtil::cassert(TRACE_INFO,
+  opencog::cassert(TRACE_INFO,
 	  ppd_count==(unsigned int)id::ant_perception_count,
 	  "there must be entries for all perceptions.");
   bool found = false;
@@ -53,7 +53,7 @@ void ant_perception::set_perception(ant_perception_enum ape) {
       _identity_of_indiscernibles = ppd[i].identity_of_indiscernibles;
     }
   }
-  LADSUtil::cassert(TRACE_INFO, found,
+  opencog::cassert(TRACE_INFO, found,
 	  "ant_perception with enum %d has not been found in ppd", ape);
 }
 
@@ -70,7 +70,7 @@ const ant_perception* ant_perception::instance(const std::string& name) {
 
 const ant_perception* ant_perception::instance(ant_perception_enum ape) {
   static const ant_perception* perceptions=ant_perception::init_perceptions();
-  LADSUtil::cassert(TRACE_INFO, ape<id::ant_perception_count);
+  opencog::cassert(TRACE_INFO, ape<id::ant_perception_count);
   return &perceptions[ape];
 }
 

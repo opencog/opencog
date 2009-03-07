@@ -1,12 +1,12 @@
-#include "ComboReduct/reduct/reduct.h"
-#include "ComboReduct/combo/eval.h"
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/eval.h"
 #include <iostream>
-#include <LADSUtil/mt19937ar.h>
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "util/mt19937ar.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
 using namespace reduct;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace ant_combo;
 
 int main() {

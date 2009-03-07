@@ -1,10 +1,10 @@
-#include "ComboReduct/combo/vertex.h"
-#include "ComboReduct/combo/type_tree.h"
-#include "ComboReduct/combo/eval.h"
-#include "ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace ant_combo;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace std;
 
 class evalUTest :  public CxxTest::TestSuite {

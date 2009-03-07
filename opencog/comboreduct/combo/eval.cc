@@ -1,4 +1,4 @@
-#include "ComboReduct/combo/eval.h"
+#include "comboreduct/combo/eval.h"
 
 namespace combo
 {
@@ -41,7 +41,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                     } else { //raise an assert
                         std::stringstream ss;
                         ss << *at;
-                        LADSUtil::cassert(TRACE_INFO, false,
+                        opencog::cassert(TRACE_INFO, false,
                                           "There is not enough arguments given"
                                           " in input, %s needs at least %d"
                                           " arguments and only %d are provided",
@@ -100,7 +100,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                     } else { //raise an assert
                         std::stringstream ss;
                         ss << *at;
-                        LADSUtil::cassert(TRACE_INFO, false,
+                        opencog::cassert(TRACE_INFO, false,
                                           "There is not enough arguments given"
                                           " in input, %s needs at least %d"
                                           " arguments and only %d are provided",
@@ -129,7 +129,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent)
 truth_table::size_type
 truth_table::hamming_distance(const truth_table& other) const
 {
-    LADSUtil::cassert(TRACE_INFO, other.size() == size(),
+    opencog::cassert(TRACE_INFO, other.size() == size(),
                       "truth_tables size should be the same.");
 
     size_type res = 0;
@@ -138,7 +138,7 @@ truth_table::hamming_distance(const truth_table& other) const
     return res;
 }
 
-RndNumTable::RndNumTable(int sample_count, int arity, LADSUtil::RandGen& rng)
+RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng)
 {
     //populate the matrix
     for (int i = 0; i < sample_count; ++i) {
@@ -150,7 +150,7 @@ RndNumTable::RndNumTable(int sample_count, int arity, LADSUtil::RandGen& rng)
     }
 }
 
-contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, LADSUtil::RandGen& rng)
+contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, opencog::RandGen& rng)
 {
     for (const_cm_it i = rnt.matrix().begin(); i != rnt.matrix().end(); ++i) {
         int arg = 1;
@@ -159,7 +159,7 @@ contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, LADSUtil
         //assumption : all inputs of t are contin_t
         vertex res = eval_throws(rng, t);
         //assumption : res is contin_t
-        LADSUtil::cassert(TRACE_INFO, is_contin(res),
+        opencog::cassert(TRACE_INFO, is_contin(res),
                           "vertex isn't contin (contin_table)");
         push_back(get_contin(res));
     }
@@ -170,7 +170,7 @@ bool contin_table::operator==(const contin_table& ct) const
     if (ct.size() == size()) {
         const_cv_it ct_i = ct.begin();
         for (const_cv_it i = begin(); i != end(); ++i, ++ct_i) {
-            if (!LADSUtil::isEqual(*i, *ct_i))
+            if (!opencog::isEqual(*i, *ct_i))
                 return false;
         }
         return true;
@@ -180,7 +180,7 @@ bool contin_table::operator==(const contin_table& ct) const
 
 contin_t contin_table::abs_distance(const contin_table& other) const
 {
-    LADSUtil::cassert(TRACE_INFO, other.size() == size(),
+    opencog::cassert(TRACE_INFO, other.size() == size(),
                       "contin_tables should have the same size.");
 
     contin_t res = 0;
