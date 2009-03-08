@@ -751,9 +751,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
                     ubi->compactLinkStyle);
             unsigned char startRGB2[3] = { 10, 10, 40 };
             unsigned char endRGB2[3] = { 80, 100, 255 };
-            ubi->updateColourOfType(SYMMETRIC_INVERSE_HEBBIAN_LINK,
+            ubi->updateColourOfType(INVERSE_HEBBIAN_LINK,
                     Ubigrapher::NONE, startRGB2, endRGB2);
-            ubi->updateSizeOfType(HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, 50.0, 0.1);
+            ubi->updateSizeOfType(HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, 20.0, 0.1);
         }
         recentlyAddedLinks.clear();
 // Unnecessary

@@ -77,6 +77,9 @@ void HopfieldUbigrapher::setStyles()
     // When first added, links are red and have low strength
     ubigraph_set_edge_style_attribute(compactLinkStyle, "strength", "0.005");
     ubigraph_set_edge_style_attribute(compactLinkStyle, "color", "#ff5530");
+    // When first added, links are red and have low strength
+    //ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "strength", "0.005");
+    //ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "color", "#ff5530");
 
     // Random links are dashed and gray
     randomLinkStyle = ubigraph_new_edge_style(compactLinkStyle);

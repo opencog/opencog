@@ -106,16 +106,20 @@ void Ubigrapher::setStyles()
     ubigraph_set_vertex_style_attribute(linkStyle, "shape", "octahedron");
     ubigraph_set_vertex_style_attribute(linkStyle, "color", "#ff0000");
 
-    outgoingStyleDirected = ubigraph_new_edge_style(0);
+    outgoingStyle = ubigraph_new_edge_style(0);
+    compactLinkStyle = ubigraph_new_edge_style(outgoingStyle);
+
+    outgoingStyleDirected = ubigraph_new_edge_style(outgoingStyle);
     ubigraph_set_edge_style_attribute(outgoingStyleDirected, "arrow", "true");
     // Makes it easier to see the direction of the arrows (cones),
     // but hides the number/type labels
-//      ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_radius", "1.5");
+    //ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_radius", "1.5");
     ubigraph_set_edge_style_attribute(outgoingStyleDirected, "arrow_length", "2.0");
-    compactLinkStyleDirected = ubigraph_new_edge_style(outgoingStyleDirected);
+
+    compactLinkStyleDirected = ubigraph_new_edge_style(compactLinkStyle);
+    ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "arrow", "true");
+    ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "arrow_length", "2.0");
     
-    outgoingStyle = ubigraph_new_edge_style(0);
-    compactLinkStyle = ubigraph_new_edge_style(0);
 }
 
 bool Ubigrapher::handleAddSignal(Handle h)
