@@ -53,6 +53,7 @@
 #define HDEMO_DEFAULT_KEY_NODES 0
 #define HDEMO_DEFAULT_VISUALIZE 0
 #define HDEMO_DEFAULT_VIS_DELAY 1.0f
+#define HDEMO_DEFAULT_VIS_PROCESS_LABELS false
 
 namespace opencog
 {
@@ -84,6 +85,9 @@ public:
     //! Speed of visualisation (all in build delays are multiplied
     //! by this).
     float visDelay; 
+    //! Should there be a labelled metavertex whose label shows
+    //! what step of the process the network is carrying out?
+    int visLabel;
 
     int totalFlag;
     int nPatterns;

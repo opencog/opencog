@@ -58,6 +58,7 @@ HopfieldOptions::HopfieldOptions()
 
     visualize = HDEMO_DEFAULT_VISUALIZE;
     visDelay = HDEMO_DEFAULT_VIS_DELAY;
+    visLabel = HDEMO_DEFAULT_VIS_PROCESS_LABELS;
 
 }
 
@@ -85,8 +86,9 @@ void HopfieldOptions::printHelp()
         "      --result-file <x> \t output retrieved patterns to this file.\n"
         "   -C --show-config\t Print configuration based on options to stdout and exit.\n"
         "      --visualize\t Visualise dynamics using Ubigraph (server must be running).\n"
-        "      --vdelay N \t The float multiplier for delays between learning steps to make \n"
+        "      --vdelay N \t The float multiplier for delays between learning steps to make\n"
         "                 \t dynamics easier to follow. Default: 0 (no delays).\n"
+        "      --vlabel  \t Display labels that update to reflect the current learning step.\n"
         "   == Network ==\n" "   -w --width N \t Set width of Hopfield network\n"
         "   -h --height N \t Set height of Hopfield network\n"
         "   -n --size N   \t Set width and height of Hopfield network to N\n"
@@ -162,6 +164,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"one-cue", 0, &cueGenerateOnce, 1},
                 {"visualize", 0, &visualize, 1},
                 {"vdelay", required_argument, 0, '6'},
+                {"vlabel", 0, &visLabel, 1},
                 {"help", 0, 0, '?'},
                 {0, 0, 0, 0}
             };

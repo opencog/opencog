@@ -337,8 +337,10 @@ void HopfieldServer::init(int width, int height, int numLinks)
     //spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
 
 
-    if (options->visualize) 
+    if (options->visualize) {
         ubi = new HopfieldUbigrapher();
+        ubi->showText = options->visLabel;
+    }
     
     // Create nodes
     for (int i = 0; i < this->width; i++) {
