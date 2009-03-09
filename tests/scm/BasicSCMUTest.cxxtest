@@ -27,7 +27,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TLB.h>
 
 #include <opencog/guile/SchemeEval.h>
@@ -130,7 +130,16 @@ void BasicSCMUTest::test_single_atom(void)
 	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 
+	// We should add many more nodes, but I'm feeling lazy ... 
 	check_node("Node", "ola amigos", 0.2, 0.3);
+	check_node("SentenceNode", "Watashi mo sou ooimasu", 0.52, 0.5433);
+	check_node("DocumentNode", "Blamoo yadda", 0.852, 0.95433);
+	check_node("WordNode", "The Bird is the Word", 0.7652, 0.1154);
+	check_node("LemmaNode", "When life gives you lemmas, make conjugations", 0.4765, 0.61154);
+	check_node("PartOfSpeechNode", "はにがうりだそうであってるのかはちょっと不安ですが翻訳ソフトでやくし てみました。", 0.34765, 0.33611);
+	
+
+	// We should also test links ... 
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
