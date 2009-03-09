@@ -339,7 +339,6 @@ void HopfieldServer::init(int width, int height, int numLinks)
 
     if (options->visualize) {
         ubi = new HopfieldUbigrapher();
-        ubi->showText = options->visLabel;
     }
     
     // Create nodes
@@ -357,8 +356,10 @@ void HopfieldServer::init(int width, int height, int numLinks)
             }
         }
     }
-    if (options->visualize)
+    if (options->visualize) {
+        ubi->showText = true;
         ubi->setGroundNode(hGrid[0]);
+    }
 
     // If only 1 node, don't try and connect it
     if (hGrid.size() < 2) {
@@ -832,7 +833,7 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles,
         logger().fine("---Retrieve:Encoding pattern");
         if (options->visualize) {
             ostringstream o;
-            o << "Retrieving pattern: Cycle " << i;
+            o << "Retrieving pattern: cycle " << i;
             ubi->setText(o.str());
         }
         encodePattern(partialPattern, patternStimulus);
@@ -910,6 +911,10 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
         }
         ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 2.0, 1);
         sleep(options->visDelay * SHOW_CUE_PATTERN_DELAY);
+        ostringstream o;
+        o << "Retrieving pattern: cue displayed.";
+        ubi->setText(o.str());
+
     }
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
@@ -938,6 +943,9 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
             }
             ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
             sleep(options->visDelay * AFTER_SPREAD_DELAY);
+            ostringstream o;
+            o << "Retrieving pattern: diffusion (cycle " << i << ")";
+            ubi->setText(o.str());
         }
 //        temp *= (spreadCycles - i)/( (float) spreadCycles + 1 );
 // Old spread agent.

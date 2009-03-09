@@ -64,14 +64,14 @@ void HopfieldUbigrapher::setAsNewRandomLink(Handle kn)
 
 void HopfieldUbigrapher::setGroundNode(Handle h)
 {
-    if (groundNode == Handle::UNDEFINED) return;
+    if (h == Handle::UNDEFINED) return;
     groundNode = h;
     if (labelVertex) {
         // remove existing edge 
         ubigraph_remove_edge(labelEdge);
     } else {
         labelVertex = ubigraph_new_vertex();
-        ubigraph_set_vertex_attribute(labelVertex, "size", "0.001");
+        ubigraph_set_vertex_attribute(labelVertex, "size", "1");
     }
     
     labelEdge = ubigraph_new_edge(labelVertex, groundNode.value());

@@ -329,6 +329,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         Atom *a = TLB::getAtom(h);
+        if (!a) continue;
         if (space->inheritsType(a->getType(), LINK)) {
             const Link *l = dynamic_cast<const Link *>(a);
             const std::vector<Handle> &out = l->getOutgoingSet();
