@@ -22,9 +22,11 @@
  */
 
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
 
 #include <opencog/guile/SchemeEval.h>
 
@@ -69,6 +71,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
+		void check_node(const char *, const char *, float, float);
 		void test_single_atom(void);
 };
 
@@ -82,6 +85,20 @@ void BasicSCMUTest::setUp(void)
 }
 
 // ============================================================
+
+void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
+{
+	char buff[500];
+	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
+	eval.eval(buff);
+	bool eval_err = eval.eval_error();
+	eval.clear_pending();
+	TSM_ASSERT("Failed to create a node", !eval_err);
+
+	Type t = ClassServer::getType(tipo);
+	Handle h = as->getHandle(t, nodename);
+	TSM_ASSERT("Failed to find node", TLB::isValidHandle(h));
+}
 
 void BasicSCMUTest::test_single_atom(void)
 {
@@ -100,10 +117,7 @@ void BasicSCMUTest::test_single_atom(void)
 	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 
-	eval.eval("(Node \"ola amigos\" (stv 0.2 0.3)");
-	eval_err = eval.eval_error();
-	eval.clear_pending();
-	TSM_ASSERT("Failed to create a node", !eval_err);
+	check_node("Node", "ola amigos", 0.2, 0.3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
