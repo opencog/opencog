@@ -25,9 +25,9 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 
 #include <opencog/server/CogServer.h>
+#include <opencog/server/load-file.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
@@ -83,6 +83,9 @@ void BasicSCMUTest::setUp(void)
 void BasicSCMUTest::test_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
+	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 
 
 	logger().debug("END TEST: %s", __FUNCTION__);
