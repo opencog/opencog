@@ -48,36 +48,41 @@ SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals REQUIRED)
 
-# At this time,. there is no reason to build with memcached for 
-
-
+# At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)
-# Enable the use of SQL storage, if either iodbc of unixodbc is found.
-# Caution: this can also increase RAM usage significantly!
-FIND_PACKAGE(IODBC QUIET)
-IF (IODBC_FOUND)
+
+# Enable the hypergraph persistence module, if unixodbc is found.
+# In principle, iODBC could be used; however, iODBC is buggy when
+# used with UTF8/unicode node names, and fails miserably. Thus, 
+# only UnixODBC is supported at this time.
+#
+# FIND_PACKAGE(IODBC QUIET)
+# IF (IODBC_FOUND)
+# 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
+# 	SET(ODBC_FOUND 1)
+# 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
+# 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
+# ENDIF (IODBC_FOUND)
+
+FIND_PACKAGE(UnixODBC QUIET)
+IF (UnixODBC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(ODBC_FOUND 1)
-	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
-	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-ELSE (IODBC_FOUND)
-	FIND_PACKAGE(UnixODBC QUIET)
-	IF (UnixODBC_FOUND)
-		ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-		SET(ODBC_FOUND 1)
-		SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
-		SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-	ELSE (UnixODBC_FOUND)
-		SET(ODBC_FOUND 0)
-		SET(ODBC_DIR_MESSAGE "Neither IODBC or UnixODBC was found. Make sure [Unix|I]ODBC_LIBRARIES and [Unix|I]ODBC_INCLUDE_DIRS are set.")
-		MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
-	ENDIF (UnixODBC_FOUND)
-ENDIF (IODBC_FOUND)
+	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
+	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
+ELSE (UnixODBC_FOUND)
+	SET(ODBC_FOUND 0)
+	SET(ODBC_DIR_MESSAGE "UnixODBC was not found; persistence subsystem will not be built.\nTo over-ride, make sure UnixODBC_LIBRARIES and UnixODBC_INCLUDE_DIRS are set.")
+	MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
+ENDIF (UnixODBC_FOUND)
 
 # Gnu Guile scheme interpreter
 FIND_PACKAGE(Guile 1.8.3)
 IF (GUILE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
+ELSE (GUILE_FOUND)
+	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
+	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND)
 
 # Gnu Scientific Library

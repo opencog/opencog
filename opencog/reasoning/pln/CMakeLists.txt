@@ -85,8 +85,6 @@ TARGET_LINK_LIBRARIES(pln
     util
     #query
 #    smob #scheme
-    #wsd
-    persist
 #    adaptor-tulip
     ${IODBC_LIBRARIES}
     ${CSOCKETS_LIBRARIES}
