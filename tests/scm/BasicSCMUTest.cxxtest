@@ -26,6 +26,8 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
+#include <opencog/guile/SchemeEval.h>
+
 #include <opencog/server/CogServer.h>
 #include <opencog/server/load-file.h>
 #include <opencog/util/Logger.h>
@@ -37,6 +39,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		SchemeEval eval;
 
 	public:
 
@@ -84,9 +87,23 @@ void BasicSCMUTest::test_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	eval.eval("(+ 2 2)");
+	bool eval_err = eval.eval_error();
+	eval.clear_pending();
+	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
+
+	eval.eval("Evaluating this will cause an error to be thrown!");
+	eval_err = eval.eval_error();
+	eval.clear_pending();
+	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
+
 	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 
+	eval.eval("(Node \"ola amigos\" (stv 0.2 0.3)");
+	eval_err = eval.eval_error();
+	eval.clear_pending();
+	TSM_ASSERT("Failed to create a node", !eval_err);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -1,5 +1,9 @@
 ; This file contains basic scheme wrappers for atom creation.
 ;
+(define (stv mean conf) (cog-new-stv mean conf))
+(define (itv mean conf) (cog-new-itv mean conf))
+(define (ctv mean conf) (cog-new-ctv mean conf))
+;
 (define (Node . x)
 	(apply cog-new-node (append (list 'Node) x)))
 (define (Link . x)
