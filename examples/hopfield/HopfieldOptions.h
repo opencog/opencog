@@ -52,7 +52,7 @@
 #define HDEMO_DEFAULT_SPREAD_CYCLES 1
 #define HDEMO_DEFAULT_KEY_NODES 0
 #define HDEMO_DEFAULT_VISUALIZE 0
-#define HDEMO_DEFAULT_VISUALIZE_DELAY 1
+#define HDEMO_DEFAULT_VIS_DELAY 1.0f
 
 namespace opencog
 {
@@ -78,8 +78,13 @@ public:
     int palimpsestTolerance;
     int showMatrixFlag;
     int showConfigFlag;
-    int visualize; //! Whether to connect to ubigraph server and visualise
-    int visualizeDelay; //! Speed of visualisation
+
+    //! Whether to connect to ubigraph server and visualise
+    int visualize;
+    //! Speed of visualisation (all in build delays are multiplied
+    //! by this).
+    float visDelay; 
+
     int totalFlag;
     int nPatterns;
     uint keyNodes;

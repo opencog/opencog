@@ -51,9 +51,6 @@ extern "C" {
     #include <UbigraphAPI.h>
 }
 
-//! Inserts sleep statements so that visualisation in Ubigraph is clearer 
-#define ENABLE_HOPFIELD_DELAYS 1
-
 using namespace opencog;
 using namespace std;
 
@@ -165,7 +162,7 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
     imprintPattern(p, 1);
     logger().fine("Encoded pattern for 1 loop");
 
-//    if (options->visualize && ENABLE_HOPFIELD_DELAYS) sleep(5);
+//    if (options->visualize && options->visDelayOn) sleep(5);
 
     if (! options->cueGenerateOnce) {
         c = p.mutatePattern(mutate);
@@ -183,7 +180,7 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
         options->afterFile << result;
         options->diffFile << (result - before);
     }
-    if (options->visualize && ENABLE_HOPFIELD_DELAYS) sleep(5);
+    if (options->visualize) sleep(5 * options->visDelay);
 
     // Nodes are left with STI after retrieval
     resetNodes();
@@ -764,7 +761,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
 
         //logger().fine("---Imprint:Energy.");
-        if (options->visualize && ENABLE_HOPFIELD_DELAYS) sleep(2);
+        if (options->visualize) sleep( 2 * options->visDelay);
         logger().fine("---Imprint:Resetting nodes");
         resetNodes();
     }
@@ -907,7 +904,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
             ubi->showDiff(hGrid, tp, originalPattern);
         }
         ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 2.0, 1);
-        if (ENABLE_HOPFIELD_DELAYS) sleep(10);
+        sleep(options->visDelay * 10);
     }
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
@@ -935,7 +932,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
                 ubi->showDiff(hGrid, tp, originalPattern);
             }
             ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
-            if (ENABLE_HOPFIELD_DELAYS) sleep(2);
+            sleep(options->visDelay * 2);
         }
 //        temp *= (spreadCycles - i)/( (float) spreadCycles + 1 );
 // Old spread agent.
