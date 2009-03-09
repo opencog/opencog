@@ -200,7 +200,7 @@ public:
         return ss.str();
     }
 
-    Pattern getGridSTIAsPattern();
+    Pattern getGridSTIAsPattern(bool blankKeys = true);
     std::vector<stim_t> getGridStimVector();
 
     /**

@@ -36,37 +36,55 @@ namespace opencog
 
 HopfieldUbigrapher::HopfieldUbigrapher() : Ubigrapher()
 {
-    patternStyle = patternAddErrStyle = patternMissErrStyle = notPatternStyle =
-        keyNodeStyle = activeKeyNodeStyle = randomLinkStyle = 0;
-    compact = true;
-    labelsOn = false;
+    // styles for pattern nodes:
+    patternStyle = patternAddErrStyle = patternMissErrStyle = notPatternStyle = 0;
+    // styles for key nodes:
+    keyNodeStyle = keyNodeActiveStyle = 0;
+    // styles for randomly added links
+    randomLinkStyle = 0;
+    labelVertex = 0;
+
+    compact = true;   // collapse links
+    labelsOn = false; // don't show labels
     setStyles();
     watchSignals();
 }
 
+void HopfieldUbigrapher::setAsPatternNode(Handle kn)
+{ ubigraph_change_vertex_style(kn.value(), notPatternStyle); }
+
 void HopfieldUbigrapher::setAsKeyNode(Handle kn)
 { ubigraph_change_vertex_style(kn.value(), keyNodeStyle); }
+
+void HopfieldUbigrapher::setAsActiveKeyNode(Handle kn)
+{ ubigraph_change_vertex_style(kn.value(), keyNodeActiveStyle); }
 
 void HopfieldUbigrapher::setAsNewRandomLink(Handle kn)
 { ubigraph_change_edge_style(kn.value(), randomLinkStyle); }
 
+void HopfieldUbigrapher::setGroundNode(Handle h)
+{
+    if (groundNode == Handle::UNDEFINED) return;
+    groundNode = h;
+    if (labelVertex) {
+        // remove existing edge 
+        ubigraph_remove_edge(labelEdge);
+    } else {
+        labelVertex = ubigraph_new_vertex();
+        ubigraph_set_vertex_attribute(labelVertex, "size", "0.001");
+    }
+    
+    labelEdge = ubigraph_new_edge(labelVertex, groundNode.value());
+    ubigraph_set_edge_attribute(labelEdge, "strength", "0.01");
+    ubigraph_set_edge_attribute(labelEdge, "visible", "false");
+    ubigraph_set_edge_attribute(labelEdge, "oriented", "true");
+
+}
+
 void HopfieldUbigrapher::setText(string s)
 {
-#if 0
-    static int labelVertex = 0;
-
-    if (labelVertex == 0) {
-        int pseudoEdge;
-        if (groundNode == Handle::UNDEFINED) return;
-        labelVertex = ubigraph_new_vertex();
-//        ubigraph_set_vertex_attribute(labelVertex, "visible", "false");
-        pseudoEdge = ubigraph_new_edge(labelVertex, groundNode.value());
-        ubigraph_set_edge_attribute(pseudoEdge, "strength", "0.01");
-        ubigraph_set_edge_attribute(pseudoEdge, "visible", "false");
-        ubigraph_set_edge_attribute(pseudoEdge, "oriented", "true");
-    }
-    ubigraph_set_vertex_attribute(labelVertex, "label", s.c_str());
-#endif
+    if (showText && labelVertex)
+        ubigraph_set_vertex_attribute(labelVertex, "label", s.c_str());
 }
 
 void HopfieldUbigrapher::setStyles()
@@ -86,6 +104,7 @@ void HopfieldUbigrapher::setStyles()
     ubigraph_set_edge_style_attribute(randomLinkStyle, "stroke", "dashed");
     ubigraph_set_edge_style_attribute(randomLinkStyle, "color", "#aaaaaa");
 
+    // PATTERN node styles
     // normal node style: grey spheres
     notPatternStyle = ubigraph_new_vertex_style(nodeStyle);
     ubigraph_set_vertex_style_attribute(notPatternStyle, "color", "#606060");
@@ -103,20 +122,27 @@ void HopfieldUbigrapher::setStyles()
     patternMissErrStyle = ubigraph_new_vertex_style(notPatternStyle);
     ubigraph_set_vertex_style_attribute(patternMissErrStyle, "color", "#3280ff");
 
+    // KEY node styles
     // key node style: octahedron
     keyNodeStyle = ubigraph_new_vertex_style(notPatternStyle);
     ubigraph_set_vertex_style_attribute(keyNodeStyle, "shape", "octahedron");
 
     // active key node style: octahedron
-    activeKeyNodeStyle = ubigraph_new_vertex_style(patternStyle);
-    ubigraph_set_vertex_style_attribute(activeKeyNodeStyle, "shape", "octahedron");
+    keyNodeActiveStyle = ubigraph_new_vertex_style(patternStyle);
+    ubigraph_set_vertex_style_attribute(keyNodeActiveStyle, "shape", "octahedron");
+    ubigraph_set_vertex_style_attribute(keyNodeActiveStyle, "color", "#63f1ba");
+
 }
 
 void HopfieldUbigrapher::showDiff(HandleSeq hs, Pattern current, Pattern original)
 {
+    // So hs is the grid, current is the binarised STIs (including keyNodes and
+    // with the appropriate mask), original is the original pattern.
     for (uint i = 0; i < hs.size(); i++) {
         string vColor = "#606060";
-        if (current[i] && original[i]) {
+        if (current.isMasked(i)) {
+            if (current[i]) vColor = "#63f1ba";
+        } else if (current[i] && original[i]) {
             vColor = "#80ff32";
         } else if (current[i]) {
             vColor = "#ff8032";

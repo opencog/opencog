@@ -36,7 +36,11 @@ namespace opencog
 
 class HopfieldUbigrapher : public Ubigrapher
 {
-    Handle groundNode; //! For linking general text to
+    //! Ubigraph ids for label vertex and edge
+    int labelVertex, labelEdge;
+    //! For linking general text to
+    Handle groundNode; 
+
 protected:
     void setStyles();
 public:
@@ -44,10 +48,27 @@ public:
     HopfieldUbigrapher();
 //    ~HopfieldUbigrapher();
 
+    //! Whether to show the labels ground node.
+    //! (Also need to setGroundNode() )
+    bool showText;
+
+    //! Display a label that isn't attached to any of the
+    //! Hopfield network nodes, but is instead attached to
+    //! an invisible Vertex and edge that attach to the
+    //! first grid node.
     void setText(string s);
+
+    //! Change node style to a key node
     void setAsKeyNode(Handle kn);
+    void setAsActiveKeyNode(Handle kn);
+    //! Change node style to a pattern node 
+    void setAsPatternNode(Handle kn);
+    //! Change link style to a freshly added random link
+    //! (this isn't the default link style because HebbianUpdatingAgent
+    //! sometimes swaps between link types to/from Inverse Hebbian Link)
     void setAsNewRandomLink(Handle kn);
-    void setGroundNode(Handle h) {groundNode = h;};
+    //! Set which node is the ground node for linking the text Vertex to.
+    void setGroundNode(Handle h) ;
 
     //! Display difference between encoded
     //! \arg show agreement in green
@@ -56,8 +77,9 @@ public:
     void showDiff(HandleSeq h, Pattern cur, Pattern original);
 
     //! Ubigraph styles
-    int patternStyle, patternAddErrStyle, patternMissErrStyle, notPatternStyle,
-        keyNodeStyle, activeKeyNodeStyle, randomLinkStyle;
+    int patternStyle, patternAddErrStyle, patternMissErrStyle, notPatternStyle;
+    int keyNodeActiveStyle, keyNodeStyle;
+    int randomLinkStyle;
 
 };
 

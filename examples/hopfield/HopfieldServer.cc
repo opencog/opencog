@@ -713,7 +713,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
                     patternStimulus / max(pattern.activity(),1));
             if (options->visualize) {
                 // Set active key node style
-                ubigraph_change_vertex_style(keyNodeHandle.value(), ubi->activeKeyNodeStyle);
+                ubi->setAsActiveKeyNode(keyNodeHandle);
             }
         }
 
@@ -854,14 +854,14 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles,
     return ret;
 }
 
-Pattern HopfieldServer::getGridSTIAsPattern()
+Pattern HopfieldServer::getGridSTIAsPattern(bool blankKeys)
 {
     Pattern out(width, height);
     std::vector<Handle>::iterator i;
 
     for (size_t i = 0; i < hGrid.size(); i++) {
         Handle h = hGrid[i];
-        if (options->keyNodes && hGridKey[i]) {
+        if (blankKeys && options->keyNodes && hGridKey[i]) {
             // Keynodes should be blank
             out[i] = 0;
         } else {
@@ -901,10 +901,12 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
             // *** show agreement in green
             // *** show missing in blue if original passed
             // *** show extra in red if original passed
-            ubi->showDiff(hGrid, getGridSTIAsPattern().binarisePattern(
-                        options->vizThreshold), originalPattern);
+            Pattern tp(getGridSTIAsPattern(false).binarisePattern(options->vizThreshold) );
+            if (options->keyNodes)
+                tp.setMask(hGridKey);
+            ubi->showDiff(hGrid, tp, originalPattern);
         }
-        ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
+        ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 2.0, 1);
         if (ENABLE_HOPFIELD_DELAYS) sleep(10);
     }
 
@@ -927,8 +929,10 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
         diffuseAgent->run(this);
         if (options->visualize) {
             if (originalPattern.size() == hGrid.size()) {
-                ubi->showDiff(hGrid, getGridSTIAsPattern().binarisePattern(
-                            options->vizThreshold), originalPattern);
+                Pattern tp(getGridSTIAsPattern(false).binarisePattern(options->vizThreshold) );
+                if (options->keyNodes)
+                    tp.setMask(hGridKey);
+                ubi->showDiff(hGrid, tp, originalPattern);
             }
             ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
             if (ENABLE_HOPFIELD_DELAYS) sleep(2);
