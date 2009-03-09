@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
@@ -97,7 +99,18 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 
 	Type t = ClassServer::getType(tipo);
 	Handle h = as->getHandle(t, nodename);
-	TSM_ASSERT("Failed to find node", TLB::isValidHandle(h));
+	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h));
+
+	Atom *a = TLB::getAtom(h);
+	Node *n = static_cast<Node *>(a);
+	TSM_ASSERT("Failed to find node", n != NULL);
+
+	const TruthValue &tv = n->getTruthValue();
+	float m = tv.getMean();
+	float c = tv.getConfidence();
+
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
 }
 
 void BasicSCMUTest::test_single_atom(void)
