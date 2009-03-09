@@ -60,39 +60,38 @@ private:
 
 // I'm adding the agent control commands via the macro syntax
 // (it's much more convenient than adding several new .cc/.h files). -- Jared Wigmore
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "start-agents", do_startAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start", do_startAgents, 
        "Start some agents", 
-       "Usage: start-agents <agent type> [...]\n\n"
+       "Usage: agents-start <agent type> [...]\n\n"
        "Create new agent instances of the specified agent type(s), and start them.\n")
 
 // Note: this command currently allows running multiple instances of the same Agent type
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stop-agents", do_stopAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-stop", do_stopAgents, 
        "Stop some agents running",
-       "Usage: stop-agents <agent type> [...]\n\n"
+       "Usage: agents-stop <agent type> [...]\n\n"
        "Stops the agents of the specified classes (class IDs).\n")
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "step-agents", do_stepAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-step", do_stepAgents, 
        "Run a single cycle of an agent(s)",
-       "Usage: step-agents <agent type> [...]\n"
-       "step-agents\n\n"
+       "Usage: agents-step <agent type> [...]\n"
        "With one or more agent types as arguments, runs a single cycle of those agents."
        "With no arguments, runs one cycle of each agent that has been started."
        "Only to be run when the agent loop is stopped. Uses the already-started instances"
        "if available.\n")       
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stop-agent-loop", do_stopAgentLoop, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-stop-loop", do_stopAgentLoop, 
        "Stop the agent loop",
-       "Usage: stop-agent-loop\n\n"
+       "Usage: agents-stop-loop\n\n"
        "Stop the agent loop (that is, stop running agents during the CogServer loop).\n")
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "start-agent-loop", do_startAgentLoop, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start-loop", do_startAgentLoop, 
        "Start the agent loop",
-       "Usage: start-agent-loop\n\n"
+       "Usage: agents-start-loop\n\n"
        "Start the agent loop (that is, start running agents during the CogServer loop).\n")
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "list-agents", do_listAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-list", do_listAgents, 
        "List running agents",
-       "Usage: list-agents\n\n"
+       "Usage: agents-list\n\n"
        "List all the currently running agents, including their configuration parameters.\n")
 
 public:
