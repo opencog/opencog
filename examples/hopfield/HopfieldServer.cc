@@ -54,6 +54,11 @@ extern "C" {
 using namespace opencog;
 using namespace std;
 
+#define AFTER_SPREAD_DELAY 2
+#define AFTER_RETRIEVAL_DELAY 5
+#define AFTER_IMPRINT_DELAY 2
+#define SHOW_CUE_PATTERN_DELAY 5 
+
 // factory method
 BaseServer* HopfieldServer::derivedCreateInstance()
 {
@@ -162,8 +167,6 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
     imprintPattern(p, 1);
     logger().fine("Encoded pattern for 1 loop");
 
-//    if (options->visualize && options->visDelayOn) sleep(5);
-
     if (! options->cueGenerateOnce) {
         c = p.mutatePattern(mutate);
         logger().fine("Mutated pattern");
@@ -180,7 +183,7 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
         options->afterFile << result;
         options->diffFile << (result - before);
     }
-    if (options->visualize) sleep(5 * options->visDelay);
+    if (options->visualize) sleep(AFTER_RETRIEVAL_DELAY * options->visDelay);
 
     // Nodes are left with STI after retrieval
     resetNodes();
@@ -761,7 +764,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
 
         //logger().fine("---Imprint:Energy.");
-        if (options->visualize) sleep( 2 * options->visDelay);
+        if (options->visualize) sleep( AFTER_IMPRINT_DELAY * options->visDelay);
         logger().fine("---Imprint:Resetting nodes");
         resetNodes();
     }
@@ -904,7 +907,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
             ubi->showDiff(hGrid, tp, originalPattern);
         }
         ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 2.0, 1);
-        sleep(options->visDelay * 10);
+        sleep(options->visDelay * SHOW_CUE_PATTERN_DELAY);
     }
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
@@ -932,7 +935,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
                 ubi->showDiff(hGrid, tp, originalPattern);
             }
             ubi->updateSizeOfType(CONCEPT_NODE, Ubigrapher::STI, 3.0);
-            sleep(options->visDelay * 2);
+            sleep(options->visDelay * AFTER_SPREAD_DELAY);
         }
 //        temp *= (spreadCycles - i)/( (float) spreadCycles + 1 );
 // Old spread agent.
