@@ -1,16 +1,16 @@
-#include "MosesEda/main/edaopt.h"
-#include <LADSUtil/mt19937ar.h>
+#include "main/edaopt.h"
+#include "util/mt19937ar.h"
 
 int main(int argc,char** argv) { 
   optargs args(argc,argv);
   cout_log_best_and_gen logger;
   field_set fs(field_set::disc_spec(2),args.length); //all boolean
 
-  LADSUtil::MT19937RandGen rng(args.rand_seed);
+  opencog::MT19937RandGen rng(args.rand_seed);
 
   instance_set<int> population(args.popsize,fs);
   foreach(instance& inst,population)
-    generate(fs.begin_bits(inst),fs.end_bits(inst),bind(&LADSUtil::RandGen::randbool,ref(rng)));
+    generate(fs.begin_bits(inst),fs.end_bits(inst),bind(&opencog::RandGen::randbool,ref(rng)));
 
   optimize(population,args.n_select,args.n_generate,args.max_gens,
 	   one_max(),terminate_if_gte<int>(args.length),tournament_selection(2, rng),

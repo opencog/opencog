@@ -1,5 +1,5 @@
-#include "MosesEda/moses/scoring.h"
-#include <LADSUtil/numeric.h>
+#include "moses/scoring.h"
+#include "util/numeric.h"
 #include <cmath>
 
 namespace moses {

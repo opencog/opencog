@@ -1,16 +1,18 @@
 #ifndef _MOSES_USING_H
 #define _MOSES_USING_H
 
-#include <ComboReduct/combo/vertex.h>
 #include <boost/logic/tribool.hpp>
 #include <boost/bind.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/permutation_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
+
 #include <set>
 #include <functional>
 #include <vector>
+
+#include "comboreduct/combo/vertex.h"
 
 // uncomment this line for debug information to be given during execution
 //#define DEBUG_INFO 

@@ -1,27 +1,27 @@
 #ifndef _EDA_INSTANCE_SET_H
 #define _EDA_INSTANCE_SET_H
 
-#include "MosesEda/eda/field_set.h"
-#include "MosesEda/eda/scoring.h"
+#include "eda/field_set.h"
+#include "eda/scoring.h"
 
 namespace eda {
 
   template<typename ScoreT>
   struct instance_set : public vector<scored_instance<ScoreT> > {
     typedef vector<scored_instance<ScoreT> > super;
-    typedef boost::transform_iterator<LADSUtil::select_tag,
+    typedef boost::transform_iterator<opencog::select_tag,
 				      typename super::iterator,
 				      ScoreT&,
 				      ScoreT&> score_iterator;
-    typedef boost::transform_iterator<LADSUtil::select_tag,
+    typedef boost::transform_iterator<opencog::select_tag,
 				      typename super::const_iterator,
 				      const ScoreT&,
 				      const ScoreT&> const_score_iterator;
-    typedef boost::transform_iterator<LADSUtil::select_item,
+    typedef boost::transform_iterator<opencog::select_item,
 				      typename super::iterator,
 				      instance&,
 				      instance&> instance_iterator;
-    typedef boost::transform_iterator<LADSUtil::select_item,
+    typedef boost::transform_iterator<opencog::select_item,
 				      typename super::const_iterator,
 				      const instance&,
 				      const instance&> const_instance_iterator;

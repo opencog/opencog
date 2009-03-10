@@ -1,11 +1,11 @@
 #ifndef _ANT_SCORING_H
 #define _ANT_SCORING_H
 
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/mt19937ar.h>
+#include "util/numeric.h"
+#include "util/mt19937ar.h"
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <comboreduct/combo/vertex.h>
+#include <comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace combo;
 using namespace std;
@@ -139,7 +139,7 @@ struct AntFitnessFunction : unary_function<combo_tree, double> {
       return eval(trail[yn][xn]!=' ' ? b1 : b2, x, y, facing, at_time);
     }
     else {
-      LADSUtil::cassert(TRACE_INFO, is_builtin_action(*it));
+      opencog::cassert(TRACE_INFO, is_builtin_action(*it));
       ++at_time;
       builtin_action a = get_builtin_action(*it);
       if(is_move_forward(a)) { //move forward
@@ -184,7 +184,7 @@ private:
 };
 
 struct AntFitnessEstimator : public AntFitnessFunction {
-  AntFitnessEstimator(LADSUtil::RandGen& _rng, int steps=600, int noise=0)
+  AntFitnessEstimator(opencog::RandGen& _rng, int steps=600, int noise=0)
     : AntFitnessFunction(steps), _noise(noise), rng(_rng) { }
   result_type operator()(argument_type tr) const {
     int error = rng.randint(_noise+1) - _noise/2;
@@ -193,7 +193,7 @@ struct AntFitnessEstimator : public AntFitnessFunction {
 
 private:
   const int _noise;
-  LADSUtil::RandGen& rng;
+  opencog::RandGen& rng;
 
 };
 

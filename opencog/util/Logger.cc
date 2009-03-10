@@ -101,6 +101,11 @@ void Logger::setPrintToStdoutFlag(bool flag)
     printToStdout = flag;
 }
 
+void Logger::setPrintErrorLevelStdout() {
+    setPrintToStdoutFlag(true);
+    setLevel(Logger::ERROR);
+}
+
 void Logger::enable()
 {
     logEnabled = true;

@@ -1,7 +1,7 @@
 #ifndef _MOSES_SCORING_FUNCTIONS_H
 #define _MOSES_SCORING_FUNCTIONS_H
 
-#include "MosesEda/moses/using.h"
+#include "moses/using.h"
 
 using namespace std;
 using namespace boost;

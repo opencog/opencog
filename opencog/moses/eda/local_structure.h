@@ -1,13 +1,13 @@
 #ifndef _EDA_LOCAL_STRUCTURE_H
 #define _EDA_LOCAL_STRUCTURE_H
 
-#include "MosesEda/eda/field_set.h"
-#include <LADSUtil/digraph.h>
+#include "eda/field_set.h"
+#include "util/digraph.h"
 
 namespace eda {
 
   typedef vector<int> dtree_node;
-  typedef LADSUtil::tree<dtree_node> dtree;
+  typedef opencog::tree<dtree_node> dtree;
 
   struct local_structure_model : public nullary_function<instance>,
 				 public vector<dtree> { 
@@ -15,7 +15,7 @@ namespace eda {
     
     //creates a model based on a set of fields and a range of instances
     template<typename It>
-    local_structure_model(const field_set& fields,It from,It to, LADSUtil::RandGen& _rng);
+    local_structure_model(const field_set& fields,It from,It to, opencog::RandGen& _rng);
 
     instance operator()() const; //sample from the model 
 
@@ -27,9 +27,9 @@ namespace eda {
 
     int _instance_length;
     vector<unsigned int> _ordering;
-    LADSUtil::digraph _initial_deps;
+    opencog::digraph _initial_deps;
     field_set _fields;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
 
     //true if the range is uniform on the variable at index idx
     bool is_uniform_on(iptr_iter l,iptr_iter u,int idx);
@@ -73,7 +73,7 @@ namespace eda {
 
   //creates a model based on a set of fields and a range of instances
   template<typename It>
-  local_structure_model::local_structure_model(const field_set& fs,It from,It to, LADSUtil::RandGen& _rng) :
+  local_structure_model::local_structure_model(const field_set& fs,It from,It to, opencog::RandGen& _rng) :
     vector<dtree>(fs.raw_size()),_instance_length(fs.packed_width()),
     _ordering(make_counting_iterator(0),make_counting_iterator(int(size()))),
     _initial_deps(size()),_fields(fs), rng(_rng)
@@ -81,8 +81,8 @@ namespace eda {
     super::iterator dtr=begin();
 
     if (!_fields.contin().empty() || !_fields.onto().empty()) {
-      iptr_seq iptrs(make_transform_iterator(from,LADSUtil::addressof<const instance>),
-		     make_transform_iterator(to,LADSUtil::addressof<const instance>));
+      iptr_seq iptrs(make_transform_iterator(from,opencog::addressof<const instance>),
+		     make_transform_iterator(to,opencog::addressof<const instance>));
 
       foreach(const field_set::onto_spec& o,_fields.onto()) { //onto vars
 	int idx_base=distance(begin(),dtr);
@@ -123,7 +123,7 @@ namespace eda {
 
     //now that we have created all of the dtrees, construct a feasible order
     //that respects the intitial dependencies
-    LADSUtil::randomized_topological_sort(_initial_deps,_ordering.begin());
+    opencog::randomized_topological_sort(_initial_deps,_ordering.begin());
   }
 
   //instance_set is not const so that we can reorder it - the instances
@@ -161,7 +161,7 @@ namespace eda {
       vector<It> pivots(raw_arity+1);
       pivots.front()=from;
       pivots.back()=to;
-      LADSUtil::n_way_partition(from,to,bind(&field_set::get_raw,&fs,_1,dtr->front()),
+      opencog::n_way_partition(from,to,bind(&field_set::get_raw,&fs,_1,dtr->front()),
 			    raw_arity,++pivots.begin());
       for_each(pivots.begin(),--pivots.end(),++pivots.begin(),
 	       make_counting_iterator(dtr.begin()),

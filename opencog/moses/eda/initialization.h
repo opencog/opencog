@@ -1,13 +1,13 @@
 #ifndef _EDA_INITIALIZATION_H
 #define _EDA_INITIALIZATION_H
 
-#include "MosesEda/eda/field_set.h"
-#include <LADSUtil/RandGen.h>
+#include "eda/field_set.h"
+#include "util/RandGen.h"
 
 //various routines for initializing instances
 namespace eda {
   
-  using namespace LADSUtil;
+  using namespace opencog;
 
   //occam randomize a particular contin or onto field
   void occam_randomize(const field_set&,instance&,

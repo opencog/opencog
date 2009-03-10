@@ -1,10 +1,10 @@
 #ifndef _EDA_EDA_H
 #define _EDA_EDA_H
 
-#include "MosesEda/eda/using.h"
+#include "eda/using.h"
 
-#include <LADSUtil/tree.h>
-#include <LADSUtil/foreach.h>
+#include "util/tree.h"
+#include "util/foreach.h"
 
 #include <set>
 #include <climits>
@@ -45,7 +45,7 @@ namespace eda {
   typedef double       contin_t;
   typedef int          disc_t;
   typedef std::string  onto_t;
-  typedef LADSUtil::tree<onto_t> onto_tree;
+  typedef opencog::tree<onto_t> onto_tree;
 
   typedef vector<packed_t> instance;
 

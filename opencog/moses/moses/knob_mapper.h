@@ -2,8 +2,8 @@
 #define _MOSES_KNOB_MAPPER_H
 
 #include <map>
-#include "MosesEda/eda/field_set.h"
-#include "MosesEda/moses/knobs.h"
+#include "eda/field_set.h"
+#include "moses/knobs.h"
 
 namespace moses {
   struct knob_mapper {

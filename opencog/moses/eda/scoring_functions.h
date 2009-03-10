@@ -1,11 +1,11 @@
 #ifndef _EDA_SCORING_FUNCTIONS_H
 #define _EDA_SCORING_FUNCTIONS_H
 
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/RandGen.h>
+#include "util/exceptions.h"
+#include "util/numeric.h"
+#include "util/RandGen.h"
 
-#include "MosesEda/eda/field_set.h"
+#include "eda/field_set.h"
 #include <cmath>
 #include <boost/lexical_cast.hpp>
 
@@ -15,8 +15,8 @@ namespace eda {
     int operator()(const instance& inst) const {
       //operates directly on packed_t
       return accumulate
-	(make_transform_iterator(inst.begin(),LADSUtil::count_bits<packed_t>),
-	 make_transform_iterator(inst.end(),LADSUtil::count_bits<packed_t>),0);
+	(make_transform_iterator(inst.begin(),opencog::count_bits<packed_t>),
+	 make_transform_iterator(inst.end(),opencog::count_bits<packed_t>),0);
     }
   };
 
@@ -38,11 +38,11 @@ namespace eda {
   };
 
   struct contin_uniform : public unary_function<instance,contin_t> {
-    contin_uniform(const field_set& fs,contin_t minval,contin_t maxval, LADSUtil::RandGen& rng)
+    contin_uniform(const field_set& fs,contin_t minval,contin_t maxval, opencog::RandGen& rng)
       : fields(fs),target(fs.n_contin()) {
       generate(target.begin(),target.end(),
 	       bind(std::plus<contin_t>(),
-		  bind(std::multiplies<contin_t>(),bind(&LADSUtil::RandGen::randdouble, ref(rng)),
+		  bind(std::multiplies<contin_t>(),bind(&opencog::RandGen::randdouble, ref(rng)),
 		       maxval-minval),minval));
     }
     contin_t operator()(const instance& inst) const {
@@ -78,7 +78,7 @@ namespace eda {
       for (field_set::const_onto_iterator it=fields.begin_onto(inst);
 	   it!=fields.end_onto(inst);++it) {
 	onto_t s=*it;
-	LADSUtil::cassert(TRACE_INFO, s.length()==2, "onto_t length should be equals to two");
+	opencog::cassert(TRACE_INFO, s.length()==2, "onto_t length should be equals to two");
 	int a=boost::lexical_cast<int>(s[0]);
 	int b=boost::lexical_cast<int>(s[1]);
 	res+=a+b;

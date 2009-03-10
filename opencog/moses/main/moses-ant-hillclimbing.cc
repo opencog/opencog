@@ -3,17 +3,18 @@
 #include <algorithm>
 #include <iostream>
 
-#include <LADSUtil/mt19937ar.h>
-#include <LADSUtil/numeric.h>
+#include "util/mt19937ar.h"
+#include "util/numeric.h"
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
-#include <ComboReduct/reduct/reduct.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/reduct/reduct.h"
 
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/moses/optimization.h"
-#include "MosesEda/moses/scoring_functions.h"
-#include "MosesEda/moses/ant_scoring.h"
+#include "moses/moses.h"
+#include "moses/optimization.h"
+#include "moses/scoring_functions.h"
+#include "moses/ant_scoring.h"
+
 #include <boost/lexical_cast.hpp>
 
 using namespace moses;
@@ -21,13 +22,13 @@ using namespace reduct;
 using namespace boost;
 using namespace ant_combo;
 using namespace std;
-using namespace LADSUtil;
+using namespace opencog;
 
 
 //typedef std::set<combo::vertex> operator_set;
 //typedef operator_set::iterator operator_set_it;  
 
-//typedef std::set<combo::combo_tree, LADSUtil::size_tree_order<combo::vertex> > 
+//typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> > 
 //    combo_tree_ns_set;
 
 int main(int argc,char** argv) { 
@@ -48,7 +49,7 @@ int main(int argc,char** argv) {
   ant_score scorer;
   ant_bscore bscorer;
 
-  LADSUtil::MT19937RandGen rng(rand_seed);
+  opencog::MT19937RandGen rng(rand_seed);
 
   operator_set os;
   combo_tree_ns_set perceptions;

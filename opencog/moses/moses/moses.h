@@ -1,18 +1,18 @@
 #ifndef _MOSES_MOSES_H
 #define _MOSES_MOSES_H
 
-#include <ComboReduct/reduct/reduct.h>
-#include <ComboReduct/reduct/meta_rules.h>
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/meta_rules.h"
 
-#include <LADSUtil/lru_cache.h>
-#include <LADSUtil/selection.h>
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/hash_set.h>
+#include "util/lru_cache.h"
+#include "util/selection.h"
+#include "util/exceptions.h"
+#include "util/hash_set.h"
 
-#include "MosesEda/eda/instance_set.h"
+#include "eda/instance_set.h"
 
-#include "MosesEda/moses/representation.h"
-#include "MosesEda/moses/scoring.h"
+#include "moses/representation.h"
+#include "moses/scoring.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -22,7 +22,7 @@ using std::endl;
 namespace moses {
 
   typedef std::set<combo::vertex> operator_set;
-  typedef std::set<combo::combo_tree, LADSUtil::size_tree_order<combo::vertex> > 
+  typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> > 
      	combo_tree_ns_set;
 
   typedef std::multimap<fitness_t, combo_tree,  std::greater<fitness_t> > ordered_programs;
@@ -56,7 +56,7 @@ namespace moses {
       double scoring_epsilon;
     };
 
-    metapopulation(LADSUtil::RandGen& _rng, const combo_tree& base,const combo::type_tree& t,
+    metapopulation(opencog::RandGen& _rng, const combo_tree& base,const combo::type_tree& t,
 		   const reduct::rule& si,const Scoring& sc,const BScoring& bsc,
 		   const Optimization& opt=Optimization(),
 		   const parameters& pa=parameters()) :
@@ -81,7 +81,7 @@ namespace moses {
 
 
     const_iterator select_exemplar() const {
-      LADSUtil::cassert(TRACE_INFO, !empty(),
+      opencog::cassert(TRACE_INFO, !empty(),
 			"Empty metapopulation in function select_exemplar().");
 
       cout << "METAPOPULATION size : " << size() << endl << endl;
@@ -105,7 +105,7 @@ namespace moses {
       }
       
       const_iterator exemplar=begin();
-      advance(exemplar,distance(probs.begin(),LADSUtil::roulette_select
+      advance(exemplar,distance(probs.begin(),opencog::roulette_select
 				(probs.begin(),probs.end(),sum, rng)));
       return exemplar;
     }
@@ -151,7 +151,7 @@ namespace moses {
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        LADSUtil::hash_map<combo_tree,behavioral_tree_score,boost::hash<combo_tree> > candidates;
+        opencog::hash_map<combo_tree,behavioral_tree_score,boost::hash<combo_tree> > candidates;
         foreach(const eda::scored_instance<tree_score>& inst,deme) {
  
 #ifdef DEBUG_INFO
@@ -295,7 +295,7 @@ namespace moses {
      
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        LADSUtil::hash_map<combo_tree,behavioral_tree_score,boost::hash<combo_tree> > candidates;
+        opencog::hash_map<combo_tree,behavioral_tree_score,boost::hash<combo_tree> > candidates;
 
 
         int i=0;
@@ -377,7 +377,7 @@ namespace moses {
     }
 
 
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     combo::type_tree type;
     const reduct::rule* simplify;
     Scoring score;
@@ -391,7 +391,7 @@ namespace moses {
     tree_score _best_score;
     std::vector<combo_tree> _best_trees;
 
-    LADSUtil::hash_set<combo_tree,boost::hash<combo_tree> > _visited_exemplars;
+    opencog::hash_set<combo_tree,boost::hash<combo_tree> > _visited_exemplars;
 
     // introduced for time-slicing version
     representation* _rep;
@@ -402,7 +402,7 @@ namespace moses {
     
 
   typedef std::set<combo::vertex> operator_set;
-  typedef std::set<combo::combo_tree, LADSUtil::size_tree_order<combo::vertex> > 
+  typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> > 
     combo_tree_ns_set;
 
 

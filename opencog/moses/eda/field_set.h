@@ -1,9 +1,9 @@
 #ifndef _EDA_FIELD_SET_H
 #define _EDA_FIELD_SET_H
 
-#include "MosesEda/eda/eda.h"
+#include "eda/eda.h"
 #include <map>
-#include <LADSUtil/RandGen.h>
+#include "util/RandGen.h"
 
 namespace eda {
   
@@ -115,7 +115,7 @@ namespace eda {
     struct onto_spec { 
       onto_spec(const onto_tree& t)
 	: tr(&t),depth(t.max_depth(t.begin())),
-	  branching(LADSUtil::next_power_of_two(1+t.max_branching(t.begin()))) { }
+	  branching(opencog::next_power_of_two(1+t.max_branching(t.begin()))) { }
       bool operator<(const onto_spec& rhs) const { //sort descending by size
 	return (depth*branching>rhs.depth*rhs.branching);
       }
@@ -471,7 +471,7 @@ namespace eda {
 	  _idx<_fs->onto().size()+_fs->contin().size() ? 3 :
 	  _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
       }
-      void randomize(LADSUtil::RandGen& rng) {
+      void randomize(opencog::RandGen& rng) {
           _fs->set_raw(*_inst,_idx,rng.randint(arity())); 
       }
     protected:
@@ -656,7 +656,7 @@ namespace eda {
     unsigned int offset=0;
     
     foreach(const onto_spec& o,_onto) {
-      size_t width=LADSUtil::nbits_to_pack(o.branching);
+      size_t width=opencog::nbits_to_pack(o.branching);
       size_t total_width=size_t((width*o.depth-1)/
 				bits_per_packed_t+1)*bits_per_packed_t;
       for (arity_t i=0;i<o.depth;++i) {
@@ -687,7 +687,7 @@ namespace eda {
 
     foreach(const disc_spec& d,_disc) {
       *out |= (*from++)<<offset;
-      offset+=LADSUtil::nbits_to_pack(d.arity);
+      offset+=opencog::nbits_to_pack(d.arity);
       if (offset==bits_per_packed_t) {
 	offset=0;
 	++out;

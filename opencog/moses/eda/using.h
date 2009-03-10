@@ -9,11 +9,13 @@
 #include <boost/utility/result_of.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/type_traits.hpp>
-#include <LADSUtil/functional.h>
-#include <LADSUtil/numeric.h>
+
 #include <vector>
 #include <algorithm>
 #include <utility>
+
+#include "util/functional.h"
+#include "util/numeric.h"
 
 /// anything that gets imported into the eda namespace with a using
 /// directive should go here
@@ -28,13 +30,13 @@ namespace eda {
   using boost::next;
   using boost::prior;
 
-  using LADSUtil::begin_generator;
-  using LADSUtil::end_generator;
-  using LADSUtil::make_transform_output_iterator;
+  using opencog::begin_generator;
+  using opencog::end_generator;
+  using opencog::make_transform_output_iterator;
 
-  using LADSUtil::integer_log2;
+  using opencog::integer_log2;
 
-  using LADSUtil::nullary_function;  
+  using opencog::nullary_function;  
   using std::unary_function;
   using std::binary_function;
 
@@ -50,8 +52,8 @@ namespace eda {
   using std::pair;
   using std::make_pair;
 
-  using LADSUtil::select1st;
-  using LADSUtil::select2nd;
+  using opencog::select1st;
+  using opencog::select2nd;
 }
 
 #endif

@@ -1,8 +1,8 @@
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/moses/optimization.h"
-#include "MosesEda/moses/scoring_functions.h"
+#include "moses/moses.h"
+#include "moses/optimization.h"
+#include "moses/scoring_functions.h"
 
-#include <LADSUtil/mt19937ar.h>
+#include "util/mt19937ar.h"
 
 using namespace moses;
 using namespace reduct;
@@ -20,7 +20,7 @@ int main(int argc,char** argv) {
     exit(1);
   }
 
-  LADSUtil::MT19937RandGen rng(rand_seed);
+  opencog::MT19937RandGen rng(rand_seed);
 
   ifstream in(argv[3]);
   CaseBasedBoolean bc(in);

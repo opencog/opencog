@@ -5,13 +5,13 @@
 #include "eda/logging.h"
 #include "eda/optimize.h"
 
-#include <LADSUtil/selection.h>
+#include "util/selection.h"
 
 #include <boost/lexical_cast.hpp>
 
 using namespace eda;
 using namespace std;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace boost;
 
 struct optargs {

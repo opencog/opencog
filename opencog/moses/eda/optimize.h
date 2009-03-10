@@ -1,8 +1,8 @@
 #ifndef _EDA_OPTIMIZE_H
 #define _EDA_OPTIMIZE_H
 
-#include "MosesEda/eda/instance_set.h"
-#include <LADSUtil/foreach.h>
+#include "eda/instance_set.h"
+#include "util/foreach.h"
 
 namespace eda {
 
@@ -26,7 +26,7 @@ namespace eda {
 	       const ProbsLearningPolicy& learn_probs,
 	       const ReplacementPolicy& replace,
 	       LoggingPolicy& write_log, 
-	       LADSUtil::RandGen& rng) 
+	       opencog::RandGen& rng) 
   {
     typedef typename StructureLearningPolicy::model_type model_type;
 

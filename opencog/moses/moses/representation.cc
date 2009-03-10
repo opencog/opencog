@@ -1,20 +1,20 @@
-#include <LADSUtil/lazy_random_selector.h>
+#include "util/lazy_random_selector.h"
 
-#include <ComboReduct/reduct/reduct.h>
-#include <ComboReduct/reduct/meta_rules.h>
-#include <ComboReduct/reduct/logical_rules.h>
-#include <ComboReduct/reduct/general_rules.h>
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "comboreduct/reduct/logical_rules.h"
+#include "comboreduct/reduct/general_rules.h"
 
-#include "MosesEda/moses/using.h"
-#include "MosesEda/moses/representation.h"
-#include "MosesEda/moses/build_knobs.h"
+#include "moses/using.h"
+#include "moses/representation.h"
+#include "moses/build_knobs.h"
 
 namespace moses {
 
   representation::representation(const reduct::rule& simplify,
                                  const combo_tree& exemplar_,
 				 const type_tree& t, 
-                                 LADSUtil::RandGen& _rng,
+                                 opencog::RandGen& _rng,
                                  const operator_set* os,
                                  const combo_tree_ns_set* perceptions,
                                  const combo_tree_ns_set* actions) : _exemplar(exemplar_), rng(_rng), _simplify(&simplify) {

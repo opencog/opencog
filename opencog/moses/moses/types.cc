@@ -1,4 +1,4 @@
-#include "MosesEda/moses/types.h"
+#include "moses/types.h"
 
 namespace moses {
 

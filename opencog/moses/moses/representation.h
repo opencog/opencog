@@ -1,11 +1,11 @@
 #ifndef _MOSES_REPRESENTATION_H
 #define _MOSES_REPRESENTATION_H
 
-#include <ComboReduct/reduct/reduct.h>
-#include <ComboReduct/combo/type_tree.h>
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/type_tree.h"
 
-#include "MosesEda/moses/using.h"
-#include "MosesEda/moses/knob_mapper.h"
+#include "moses/using.h"
+#include "moses/knob_mapper.h"
 #include <boost/utility.hpp>
 
 
@@ -15,7 +15,7 @@ namespace moses {
     typedef eda::instance instance;
     
     typedef std::set<combo::vertex> operator_set;
-    typedef std::set<combo::combo_tree, LADSUtil::size_tree_order<combo::vertex> > 
+    typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> > 
      	combo_tree_ns_set;
 
 
@@ -23,7 +23,7 @@ namespace moses {
     representation(const reduct::rule& simplify,
                    const combo_tree& exemplar_,
 		   const combo::type_tree& t, 
-                   LADSUtil::RandGen& rng,
+                   opencog::RandGen& rng,
                    const operator_set* os=NULL,
                    const combo_tree_ns_set* perceptions=NULL,
                    const combo_tree_ns_set* actions=NULL);
@@ -40,7 +40,7 @@ namespace moses {
   protected:
     combo_tree _exemplar;
     field_set _fields;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     const reduct::rule* _simplify;
   };
 

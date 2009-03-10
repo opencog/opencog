@@ -1,10 +1,10 @@
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/moses/optimization.h"
-#include "MosesEda/moses/scoring_functions.h"
+#include "moses/moses.h"
+#include "moses/optimization.h"
+#include "moses/scoring_functions.h"
 #include <boost/lexical_cast.hpp>
-#include <ComboReduct/reduct/reduct.h>
+#include "comboreduct/reduct/reduct.h"
 #include <iostream>
-#include <LADSUtil/mt19937ar.h>
+#include "util/mt19937ar.h"
 
 using namespace moses;
 using namespace reduct;
@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc,char** argv) { 
     combo_tree tr;
-  LADSUtil::MT19937RandGen rng(0);
+  opencog::MT19937RandGen rng(0);
   while (cin.good()) {
     cin >> tr;
     if (!cin.good())

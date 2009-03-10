@@ -1,6 +1,6 @@
-#include "MosesEda/main/edaopt.h"
-#include "MosesEda/eda/initialization.h"
-#include <LADSUtil/mt19937ar.h>
+#include "main/edaopt.h"
+#include "eda/initialization.h"
+#include "util/mt19937ar.h"
 
 void recbuild(onto_tree& tr,onto_tree::iterator it,
 	      int b,int maxd,int d,int s) {
@@ -14,13 +14,13 @@ void recbuild(onto_tree& tr,onto_tree::iterator it,
 }
 
 int main(int argc,char** argv) { 
-  LADSUtil::cassert(TRACE_INFO, argc==7);
+  opencog::cassert(TRACE_INFO, argc==7);
   optargs args(argc,argv," depth branching");
   int depth=lexical_cast<int>(argv[5]);
   int branching=lexical_cast<int>(argv[6]);
   cout_log_best_and_gen logger;
 
-  LADSUtil::MT19937RandGen rng(args.rand_seed);
+  opencog::MT19937RandGen rng(args.rand_seed);
   
   onto_tree tr("");
   recbuild(tr,tr.begin(),branching,depth,0,0);

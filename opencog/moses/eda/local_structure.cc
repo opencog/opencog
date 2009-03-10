@@ -1,9 +1,9 @@
-#include "MosesEda/eda/local_structure.h"
-#include <LADSUtil/foreach.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/algorithm.h>
-#include <LADSUtil/selection.h>
-#include <LADSUtil/exceptions.h>
+#include "eda/local_structure.h"
+#include "util/foreach.h"
+#include "util/numeric.h"
+#include "util/algorithm.h"
+#include "util/selection.h"
+#include "util/exceptions.h"
 
 namespace eda {
   //true if the range is uniform on the variable at index idx
@@ -28,7 +28,7 @@ namespace eda {
       return;
     }
 
-    LADSUtil::cassert(TRACE_INFO, node->size()==1,
+    opencog::cassert(TRACE_INFO, node->size()==1,
             "dtree node size should be equals to 1.");
     (begin()+idx)->append_children(node,*node,raw_arity);
     node->front()=src_idx;
@@ -37,9 +37,9 @@ namespace eda {
     if (src_idx<idx-1) { //important - needs to match onto_spec::Left/Right
       vector<iptr_iter> pivots(raw_arity);
       pivots.back()=u;
-      LADSUtil::n_way_partition
+      opencog::n_way_partition
 	(l,u,bind(&field_set::get_raw,&_fields,
-		  bind(LADSUtil::valueof<const instance>,_1),src_idx),
+		  bind(opencog::valueof<const instance>,_1),src_idx),
 	 raw_arity,pivots.begin());
 
       //we don't recurse on the leftmost partition - it's onto_spec::Stop
@@ -73,9 +73,9 @@ namespace eda {
 
     if (src_idx<idx-1) { //important - needs to match contin_spec::Left/Right
       vector<iptr_iter> pivots(2);
-      LADSUtil::n_way_partition
+      opencog::n_way_partition
 	(l,u,bind(&field_set::get_raw,&_fields,
-		  bind(LADSUtil::valueof<const instance>,_1),src_idx),
+		  bind(opencog::valueof<const instance>,_1),src_idx),
 	 3,pivots.begin());
       rec_split_contin(pivots[0],pivots[1],src_idx+1,idx,++node.begin());
       rec_split_contin(pivots[1],u,src_idx+1,idx,node.last_child());
@@ -88,7 +88,7 @@ namespace eda {
   
   void local_structure_model::split(int src_idx,int tgt_idx,
 				    dtree::iterator tgt) {
-    LADSUtil::cassert(TRACE_INFO, tgt.number_of_children()==0, 
+    opencog::cassert(TRACE_INFO, tgt.number_of_children()==0, 
             "dtree node should have exactly zero child (split)");
     (begin()+tgt_idx)->append_children(tgt,*tgt,tgt->size()-1);
     *tgt=dtree_node(1,src_idx);
@@ -111,14 +111,14 @@ namespace eda {
     if (dtr.is_childless()) { //a leaf
       if (dtr->back()>0)
 	dst=distance(dtr->begin(),
-		     LADSUtil::roulette_select(dtr->begin(),--(dtr->end()),
+		     opencog::roulette_select(dtr->begin(),--(dtr->end()),
 					   dtr->back(), rng));
       else
 	dst=0;//rng.randint(dtr->size()-1); //if no data, do uniform selection
     } else {
-      LADSUtil::cassert(TRACE_INFO, dtr->size()==1, 
+      opencog::cassert(TRACE_INFO, dtr->size()==1, 
              "dtree node size should be equals to 1.");
-      LADSUtil::cassert(TRACE_INFO, (int)dtr.number_of_children()>margs[dtr->front()],
+      opencog::cassert(TRACE_INFO, (int)dtr.number_of_children()>margs[dtr->front()],
              "dtree node children number grearter than margs.");
       dtree::sibling_iterator child=dtr.begin();
       child+=margs[dtr->front()];

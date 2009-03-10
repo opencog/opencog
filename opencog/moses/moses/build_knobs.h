@@ -2,20 +2,20 @@
 #define _MOSES_BUILD_KNOBS_H
 
 #include <boost/utility.hpp>
-#include "MosesEda/moses/knob_mapper.h"
-#include "MosesEda/moses/using.h"
-#include "MosesEda/eda/field_set.h"
+#include "moses/knob_mapper.h"
+#include "moses/using.h"
+#include "eda/field_set.h"
 
-#include <ComboReduct/combo/type_tree.h>
-#include <ComboReduct/combo/action.h>
-#include <ComboReduct/combo/perception.h>
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/combo/action.h"
+#include "comboreduct/combo/perception.h"
 
 using namespace combo;
 
 typedef std::set<combo::vertex> operator_set;
 typedef operator_set::iterator operator_set_it;  
 
-typedef std::set<combo::combo_tree, LADSUtil::size_tree_order<combo::vertex> > 
+typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> > 
     combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 
@@ -28,7 +28,7 @@ namespace moses {
   struct build_knobs : boost::noncopyable {
 
     // Optional arguments used only for Petbrain and actions
-    build_knobs(LADSUtil::RandGen& rng, combo_tree& exemplar,const combo::type_tree& t,knob_mapper& mapper,
+    build_knobs(opencog::RandGen& rng, combo_tree& exemplar,const combo::type_tree& t,knob_mapper& mapper,
                 const operator_set* os=NULL,
                 const combo_tree_ns_set* perceptions=NULL,
                 const combo_tree_ns_set* actions=NULL,
@@ -39,7 +39,7 @@ namespace moses {
     void build_action(combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
   protected:
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     combo_tree& _exemplar;
     combo::type_tree _type;
     knob_mapper& _mapper;

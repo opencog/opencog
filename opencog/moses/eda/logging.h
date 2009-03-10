@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "MosesEda/eda/field_set.h"
+#include "eda/field_set.h"
 
 namespace eda {
 

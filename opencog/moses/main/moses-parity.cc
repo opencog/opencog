@@ -1,10 +1,10 @@
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/moses/optimization.h"
-#include "MosesEda/moses/scoring_functions.h"
+#include "moses/moses.h"
+#include "moses/optimization.h"
+#include "moses/scoring_functions.h"
 #include <boost/lexical_cast.hpp>
-#include <ComboReduct/reduct/reduct.h>
+#include <comboreduct/reduct/reduct.h>
 #include <iostream>
-#include <LADSUtil/mt19937ar.h>
+#include "util/mt19937ar.h"
 
 using namespace moses;
 using namespace reduct;
@@ -24,7 +24,7 @@ int main(int argc,char** argv) {
     exit(1);
   }
 
-  LADSUtil::MT19937RandGen rng(rand_seed);
+  opencog::MT19937RandGen rng(rand_seed);
  
   type_tree tt(id::lambda_type);
   tt.append_children(tt.begin(),id::boolean_type,arity+1);

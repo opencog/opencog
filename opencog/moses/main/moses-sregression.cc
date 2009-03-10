@@ -1,11 +1,16 @@
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/moses/optimization.h"
-#include "MosesEda/moses/scoring_functions.h"
-#include <boost/lexical_cast.hpp>
-#include <ComboReduct/reduct/reduct.h>
 #include <iostream>
-#include <LADSUtil/mt19937ar.h>
-#include <LADSUtil/Logger.h>
+
+#include <boost/lexical_cast.hpp>
+
+#include "comboreduct/reduct/reduct.h"
+
+#include "util/mt19937ar.h"
+#include "util/Logger.h"
+
+#include "moses/moses.h"
+#include "moses/optimization.h"
+#include "moses/scoring_functions.h"
+
 
 using namespace moses;
 using namespace reduct;
@@ -14,7 +19,7 @@ using namespace std;
 
 int main(int argc,char** argv) { 
   //set flag to print only cassert and other ERROR level logs on stdout
-  MAIN_LOGGER.setPrintErrorLevelStdout();
+  opencog::logger().setPrintErrorLevelStdout();
 
   int order,max_evals,rand_seed;
   int arity=1,nsamples=20;
@@ -29,7 +34,7 @@ int main(int argc,char** argv) {
     exit(1);
   }
 
-  LADSUtil::MT19937RandGen rng(rand_seed);
+  opencog::MT19937RandGen rng(rand_seed);
 
   type_tree tt(id::lambda_type);
   tt.append_children(tt.begin(),id::contin_type,2);

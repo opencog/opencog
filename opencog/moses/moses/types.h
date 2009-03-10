@@ -1,11 +1,11 @@
 #ifndef _MOSES_TYPES_H
 #define _MOSES_TYPES_H
 
-#include <LADSUtil/functional.h>
-#include <LADSUtil/foreach.h>
+#include "util/functional.h"
+#include "util/foreach.h"
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/combo/complexity.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/complexity.h"
 
 namespace moses {
   
@@ -14,12 +14,12 @@ namespace moses {
   typedef combo::complexity_t complexity_t;
 
   typedef std::pair<score_t,complexity_t> tree_score;
-  typedef LADSUtil::tagged_item<combo::combo_tree,tree_score> scored_tree;
+  typedef opencog::tagged_item<combo::combo_tree,tree_score> scored_tree;
 
   typedef std::vector<float> behavioral_score;
 
-  typedef LADSUtil::tagged_item<behavioral_score,tree_score> behavioral_tree_score;
-  typedef LADSUtil::tagged_item<combo::combo_tree,
+  typedef opencog::tagged_item<behavioral_score,tree_score> behavioral_tree_score;
+  typedef opencog::tagged_item<combo::combo_tree,
 			    behavioral_tree_score> behavioral_scored_tree;
   
   extern const tree_score worst_possible_score;

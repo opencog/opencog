@@ -95,6 +95,14 @@ public:
     void setPrintToStdoutFlag(bool flag);
 
     /**
+     * set the main logger to prints only
+     * error level log on stdout (useful when one is only interested
+     * in printing cassert logs)
+     */
+    void setPrintErrorLevelStdout();
+
+
+    /**
      * Logs a message into log file (passed in constructor) if and only if passed level is
      * lower than or equals to the current log level of Logger.
      */

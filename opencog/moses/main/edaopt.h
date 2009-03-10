@@ -1,17 +1,17 @@
-#include "MosesEda/eda/scoring_functions.h"
-#include "MosesEda/eda/termination.h"
-#include "MosesEda/eda/local_structure.h"
-#include "MosesEda/eda/replacement.h"
-#include "MosesEda/eda/logging.h"
-#include "MosesEda/eda/optimize.h"
+#include "eda/scoring_functions.h"
+#include "eda/termination.h"
+#include "eda/local_structure.h"
+#include "eda/replacement.h"
+#include "eda/logging.h"
+#include "eda/optimize.h"
 
-#include <LADSUtil/selection.h>
+#include "util/selection.h"
 
 #include <boost/lexical_cast.hpp>
 
 using namespace eda;
 using namespace std;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace boost;
 
 struct optargs {

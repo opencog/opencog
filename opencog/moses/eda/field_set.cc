@@ -1,7 +1,7 @@
-#include "MosesEda/eda/field_set.h"
+#include "eda/field_set.h"
 #include <sstream>
-#include <LADSUtil/dorepeat.h>
-#include <LADSUtil/exceptions.h>
+#include "util/dorepeat.h"
+#include "util/exceptions.h"
 
 namespace eda {
   const disc_t field_set::contin_spec::Stop=0;
@@ -53,7 +53,7 @@ namespace eda {
       } else if (direction==contin_spec::Left) {
 	stepper.left();
       } else { //direction==contin_spec::Right
-	LADSUtil::cassert(TRACE_INFO, direction==contin_spec::Right,
+	opencog::cassert(TRACE_INFO, direction==contin_spec::Right,
             "direction should be set to contin_spec::Right (get_contin).");
 	stepper.right();
       }
@@ -126,7 +126,7 @@ namespace eda {
 
   void field_set::build_spec(const spec& s,size_t n) {
     if (const disc_spec* d=boost::get<disc_spec>(&s)) {
-      arity_t width=LADSUtil::nbits_to_pack(d->arity);
+      arity_t width=opencog::nbits_to_pack(d->arity);
       size_t base=back_offset();
       for (size_t idx=0;idx<n;++idx)
 	_fields.push_back(field(width,(base+idx*width)/bits_per_packed_t,
@@ -135,7 +135,7 @@ namespace eda {
       if (width==1)
 	_nbool+=n;
     } else if (const contin_spec* c=boost::get<contin_spec>(&s)) {
-      LADSUtil::cassert(TRACE_INFO, c->depth==LADSUtil::next_power_of_two(c->depth), 
+      opencog::cassert(TRACE_INFO, c->depth==opencog::next_power_of_two(c->depth), 
               "must be 2^n"); //must be 2^n
       //all have arity of 3 (left, right, or stop) and hence are 2 wide
       size_t base=back_offset(),width=2;
@@ -147,8 +147,8 @@ namespace eda {
       _contin.insert(_contin.end(),n,*c);
     } else {
       const onto_spec* o=boost::get<onto_spec>(&s);
-      LADSUtil::cassert(TRACE_INFO, o, "Null onto_spec pointer error.");
-      size_t base=back_offset(),width=LADSUtil::nbits_to_pack(o->branching);
+      opencog::cassert(TRACE_INFO, o, "Null onto_spec pointer error.");
+      size_t base=back_offset(),width=opencog::nbits_to_pack(o->branching);
       size_t total_width=size_t((width*o->depth-1)/
 				bits_per_packed_t+1)*bits_per_packed_t;
 

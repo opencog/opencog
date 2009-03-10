@@ -1,9 +1,9 @@
-#include "MosesEda/moses/build_knobs.h"
-#include <ComboReduct/reduct/meta_rules.h>
-#include <ComboReduct/reduct/general_rules.h>
-#include <LADSUtil/lazy_random_selector.h>
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/dorepeat.h>
+#include "moses/build_knobs.h"
+#include "comboreduct/reduct/meta_rules.h"
+#include "comboreduct/reduct/general_rules.h"
+#include "util/lazy_random_selector.h"
+#include "util/exceptions.h"
+#include "util/dorepeat.h"
 
 
 // uncomment this line for debug information to be given during execution
@@ -14,9 +14,9 @@ using namespace std;
 namespace moses {
   typedef combo_tree::sibling_iterator sib_it;
   typedef combo_tree::pre_order_iterator pre_it;
-  using LADSUtil::from_one;
+  using opencog::from_one;
 
-  build_knobs::build_knobs(LADSUtil::RandGen& _rng, 
+  build_knobs::build_knobs(opencog::RandGen& _rng, 
                            combo_tree& exemplar,
                            const combo::type_tree& t,
 			   knob_mapper& mapper,
@@ -42,7 +42,7 @@ namespace moses {
       combo::type_tree(combo::id::contin_type);
     stringstream art_ss; //action_result_type
     art_ss << combo::id::action_result_type;
-    LADSUtil::cassert(TRACE_INFO, (((os!=NULL || perceptions!=NULL || actions!=NULL) && 
+    opencog::cassert(TRACE_INFO, (((os!=NULL || perceptions!=NULL || actions!=NULL) && 
 				    output_type==action_result_type_tree) ||
 				   output_type==boolean_type_tree ||
 				   output_type==contin_type_tree), 
@@ -58,7 +58,7 @@ namespace moses {
       build_action(_exemplar.begin());
       action_cleanup();
     } else {
-      LADSUtil::cassert(TRACE_INFO, output_type==contin_type_tree,
+      opencog::cassert(TRACE_INFO, output_type==contin_type_tree,
               "Types differ. Expected 'combo::id::contin_type', got '%s'", 
               ss.str().c_str());
 
@@ -122,7 +122,7 @@ namespace moses {
       
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    LADSUtil::lazy_random_selector select(_arity*(_arity-1),rng);
+    opencog::lazy_random_selector select(_arity*(_arity-1),rng);
     dorepeat(_arity) {
       //while (!select.empty()) {
       combo_tree v(*it==id::logical_and ? id::logical_or : id::logical_and);
@@ -345,14 +345,14 @@ namespace moses {
     for(combo_tree_ns_set_it i = _actions->begin(); i != _actions->end(); ++i) 
       perms.push_back(*i);
 
-    // LADSUtil::lazy_random_selector sel(number_of_actions);
+    // opencog::lazy_random_selector sel(number_of_actions);
     // dorepeat(n) {  // add n builtin actions
     //   int i=sel();  // since this argument is varied, it doesn't matter what was the initial value
     // }      
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    LADSUtil::lazy_random_selector select(number_of_actions*(number_of_actions-1),rng);
+    opencog::lazy_random_selector select(number_of_actions*(number_of_actions-1),rng);
    
     dorepeat(n) {
       combo_tree v(id::action_boolean_if);
@@ -434,7 +434,7 @@ namespace moses {
   // if there are multiple divisors, they will be transformed into separate terms
   void build_knobs::contin_canonize(pre_it it) {
     if (*it==id::div) {
-      LADSUtil::cassert(TRACE_INFO, (it.number_of_children() == 2), "id::div built in must have exactly 2 children.");
+      opencog::cassert(TRACE_INFO, (it.number_of_children() == 2), "id::div built in must have exactly 2 children.");
       _exemplar.append_child(_exemplar.insert_above(it,id::plus),contin_t(0));
       
       canonize_div(it);
@@ -524,7 +524,7 @@ namespace moses {
 	if (!is_contin(*sib)) {
 	  sib=canonize_times(sib);
 	  rec_canonize(sib.begin());
-	  LADSUtil::cassert(TRACE_INFO, (is_contin(*sib.last_child())), "Sibling's last child isn't id::contin.");
+	  opencog::cassert(TRACE_INFO, (is_contin(*sib.last_child())), "Sibling's last child isn't id::contin.");
 	  rec_canonize(_exemplar.insert_above(sib.last_child(),id::plus));
 	}
       }
@@ -538,7 +538,7 @@ namespace moses {
       cout << _exemplar << " | " << combo_tree(it) << endl;
       linear_canonize(it.begin());
     } else {
-      LADSUtil::cassert(TRACE_INFO, is_argument(*it), "Node not an buitin, but either an argument.");
+      opencog::cassert(TRACE_INFO, is_argument(*it), "Node not an buitin, but either an argument.");
     }
   }
 

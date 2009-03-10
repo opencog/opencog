@@ -1,8 +1,8 @@
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/moses/scoring_functions.h"
+#include "moses/moses.h"
+#include "moses/scoring_functions.h"
 
 //ant_combo_vocabulary is used only for the boolean core vocabulary
-#include <ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace moses;
 using namespace ant_combo;

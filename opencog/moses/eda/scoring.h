@@ -1,14 +1,14 @@
 #ifndef _EDA_SCORING_H
 #define _EDA_SCORING_H
 
-#include "MosesEda/eda/eda.h"
-#include <LADSUtil/functional.h>
+#include "eda/eda.h"
+#include "util/functional.h"
 
 namespace eda {
   
   template<typename ScoreT>
-  struct scored_instance : public LADSUtil::tagged_item<instance,ScoreT> {
-    typedef LADSUtil::tagged_item<instance,ScoreT> super;
+  struct scored_instance : public opencog::tagged_item<instance,ScoreT> {
+    typedef opencog::tagged_item<instance,ScoreT> super;
 
     scored_instance(const instance& i,const ScoreT& s) : super(i,s) { }
     scored_instance(const instance& i) : super(i) { }

@@ -1,16 +1,16 @@
 #ifndef _MOSES_OPTIMIZE_H
 #define _MOSES_OPTIMIZE_H
 
-#include "MosesEda/moses/moses.h"
-#include "MosesEda/eda/termination.h"
-#include "MosesEda/eda/replacement.h"
-#include "MosesEda/eda/logging.h"
-#include "MosesEda/eda/local_structure.h"
-#include "MosesEda/eda/optimize.h"
-#include "MosesEda/eda/initialization.h"
-#include <LADSUtil/selection.h>
-#include <LADSUtil/dorepeat.h>
-#include <LADSUtil/exceptions.h>
+#include "moses/moses.h"
+#include "eda/termination.h"
+#include "eda/replacement.h"
+#include "eda/logging.h"
+#include "eda/local_structure.h"
+#include "eda/optimize.h"
+#include "eda/initialization.h"
+#include "util/selection.h"
+#include "util/dorepeat.h"
+#include "util/exceptions.h"
 
 #define MAX_DISTANCE_FROM_EXEMPLAR 5
 #define FRACTION_OF_REMAINING     10 
@@ -87,7 +87,7 @@ namespace moses {
   
   template<typename Out>
   void generate_initial_sample(const eda::field_set& fs,int n,Out out,
-			       LADSUtil::RandGen& rng) {
+			       opencog::RandGen& rng) {
     dorepeat(n) {
 
       eda::instance inst(fs.packed_width());
@@ -121,7 +121,7 @@ namespace moses {
   // sample_size  - number of instances to be generated
   // out - deme (where to store the instances) 
   template<typename Out>
-  void sample_from_neighborhood(const eda::field_set& fs,int n, int sample_size, Out out, LADSUtil::RandGen& rng) {
+  void sample_from_neighborhood(const eda::field_set& fs,int n, int sample_size, Out out, opencog::RandGen& rng) {
     if (n<=0 || sample_size<=0) 
       return;
 
@@ -328,7 +328,7 @@ namespace moses {
 
 
   struct univariate_optimization {
-    univariate_optimization(LADSUtil::RandGen& _rng, const eda_parameters& p=eda_parameters()) : rng(_rng), params(p) {}
+    univariate_optimization(opencog::RandGen& _rng, const eda_parameters& p=eda_parameters()) : rng(_rng), params(p) {}
 
     template<typename Scoring>
     int operator()(eda::instance_set<tree_score>& deme,
@@ -361,12 +361,12 @@ namespace moses {
 	   eda::terminate_if_gte_or_no_improv<tree_score>
 	   (tree_score(params.terminate_if_gte,worst_possible_score.second),
 	    max_gens_improv),
-	   LADSUtil::tournament_selection(int(params.selection), rng),
+	   opencog::tournament_selection(int(params.selection), rng),
 	   eda::univariate(),eda::local_structure_probs_learning(),
 	   eda::rtr_replacement(deme.fields(),params.rtr_window_size(deme.fields()), rng),
 	   logger, rng);
       } else { //truncation selection
-	LADSUtil::cassert(TRACE_INFO, TRACE_INFO, false,
+	opencog::cassert(TRACE_INFO, TRACE_INFO, false,
 			  "Trunction selection not implemented. Tournament should be used instead.");
 	return 42;
 	/*
@@ -380,7 +380,7 @@ namespace moses {
       }
     }
 
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     eda_parameters params;
   };
 
@@ -388,7 +388,7 @@ namespace moses {
 
 
  struct iterative_hillclimbing {
-    iterative_hillclimbing(LADSUtil::RandGen& _rng, const eda_parameters& p=eda_parameters()) : rng(_rng), params(p) {}
+    iterative_hillclimbing(opencog::RandGen& _rng, const eda_parameters& p=eda_parameters()) : rng(_rng), params(p) {}
 
     template<typename Scoring>
     int operator()(eda::instance_set<tree_score>& deme,
@@ -509,7 +509,7 @@ namespace moses {
       return current_number_of_instances;
     }
 
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     eda_parameters params;
   };
 
@@ -525,7 +525,7 @@ namespace moses {
     } MState;
 
 
-    sliced_iterative_hillclimbing(LADSUtil::RandGen& _rng, const eda_parameters& p=eda_parameters()) : rng(_rng), params(p), m_state(M_INIT), _evals_per_slice(MAX_EVALS_PER_SLICE) {}
+    sliced_iterative_hillclimbing(opencog::RandGen& _rng, const eda_parameters& p=eda_parameters()) : rng(_rng), params(p), m_state(M_INIT), _evals_per_slice(MAX_EVALS_PER_SLICE) {}
 
     void set_evals_per_slice(int evals_per_slice) { _evals_per_slice=evals_per_slice; } 
 
@@ -690,7 +690,7 @@ namespace moses {
     int current_number_of_instances;
     int target_size;
 
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
     eda_parameters params;
     MState m_state;
     int _evals_per_slice;

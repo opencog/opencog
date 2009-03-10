@@ -1,17 +1,17 @@
 #ifndef _MOSES_KNOBS_H
 #define _MOSES_KNOBS_H
 
-#include <LADSUtil/tree.h>
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/based_variant.h>
+#include "util/tree.h"
+#include "util/exceptions.h"
+#include "util/numeric.h"
+#include "util/based_variant.h"
 
-#include <ComboReduct/reduct/reduct.h>
-#include <ComboReduct/combo/complexity.h>
-#include <ComboReduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/complexity.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
 
-#include "MosesEda/moses/using.h"	
-#include "MosesEda/eda/field_set.h"
+#include "moses/using.h"	
+#include "eda/field_set.h"
 #include <bitset>
 
 using namespace std;
@@ -148,7 +148,7 @@ namespace moses {
 
     void turn(int idx) {
       idx=map_idx(idx);
-      LADSUtil::cassert(TRACE_INFO, (idx < 3), "Index greater than 3.");
+      opencog::cassert(TRACE_INFO, (idx < 3), "Index greater than 3.");
 
       if (idx==_current) //already set, nothing to 
 	return;
@@ -195,7 +195,7 @@ namespace moses {
     action_subtree_knob(combo_tree& tr,combo_tree::iterator tgt,vector<combo_tree>& perms)
       : knob_with_arity<MAX_PERM_ACTIONS>(tr),_current(0),_loc(tr.end()),_perms(perms) {
 
-      LADSUtil::cassert(TRACE_INFO, ((int)_perms.size()<MAX_PERM_ACTIONS), "Too many perms.");
+      opencog::cassert(TRACE_INFO, ((int)_perms.size()<MAX_PERM_ACTIONS), "Too many perms.");
 
        for(int i=_perms.size()+1;i<MAX_PERM_ACTIONS;i++)
 	 disallow(i);
@@ -220,7 +220,7 @@ namespace moses {
 
     void turn(int idx) {
       idx=map_idx(idx);
-      LADSUtil::cassert(TRACE_INFO, (idx <= (int)_perms.size()), "Index too big.");
+      opencog::cassert(TRACE_INFO, (idx <= (int)_perms.size()), "Index too big.");
 
       if (idx==_current) //already set, nothing to 
 	return;
@@ -281,7 +281,7 @@ namespace moses {
 
     void turn(int idx) {
       idx=map_idx(idx);
-      LADSUtil::cassert(TRACE_INFO, (idx < 4), "Index greater than 3.");
+      opencog::cassert(TRACE_INFO, (idx < 4), "Index greater than 3.");
 
     if (idx==_current) //already set, nothing to 
 	return;
@@ -352,7 +352,7 @@ namespace moses {
 
     void turn(int idx) {
       idx=map_idx(idx);
-      LADSUtil::cassert(TRACE_INFO, (idx < 2), "Index greater than 2.");
+      opencog::cassert(TRACE_INFO, (idx < 2), "Index greater than 2.");
 
       if (idx==_current) //already set, nothing to 
 	return;
@@ -382,7 +382,7 @@ namespace moses {
 
 
 
-  typedef LADSUtil::based_variant<boost::variant<logical_subtree_knob,action_subtree_knob,simple_action_subtree_knob>,
+  typedef opencog::based_variant<boost::variant<logical_subtree_knob,action_subtree_knob,simple_action_subtree_knob>,
 			      disc_knob_base> disc_knob;
 } //~namespace moses
 

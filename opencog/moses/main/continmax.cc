@@ -1,6 +1,6 @@
-#include "MosesEda/main/edaopt.h"
-#include "MosesEda/eda/initialization.h"
-#include <LADSUtil/mt19937ar.h>
+#include "main/edaopt.h"
+#include "eda/initialization.h"
+#include "util/mt19937ar.h"
 
 int main(int argc,char** argv) { 
   cassert(TRACE_INFO, argc==6);
@@ -8,7 +8,7 @@ int main(int argc,char** argv) {
   int depth=lexical_cast<int>(argv[5]);
   cout_log_best_and_gen logger;
 
-  LADSUtil::MT19937RandGen rng(args.rand_seed);
+  opencog::MT19937RandGen rng(args.rand_seed);
 
   /*field_set fs(field_set::spec(field_set::contin_spec(2.0,2.5,0.5,depth),
     args.length));*/

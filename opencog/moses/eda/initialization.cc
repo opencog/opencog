@@ -1,4 +1,4 @@
-#include "MosesEda/eda/initialization.h"
+#include "eda/initialization.h"
 
 namespace eda {
 
@@ -55,7 +55,7 @@ namespace eda {
   void uniform_randomize_bits(const field_set& fs,instance& inst,
 		       RandGen& rng) {
     //could be faster
-    generate(fs.begin_bits(inst),fs.end_bits(inst),bind(&LADSUtil::RandGen::randbool, ref(rng)));
+    generate(fs.begin_bits(inst),fs.end_bits(inst),bind(&opencog::RandGen::randbool, ref(rng)));
   }
 
   void uniform_randomize_disc(const field_set& fs,instance& inst,

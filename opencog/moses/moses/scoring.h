@@ -1,14 +1,14 @@
 #ifndef _MOSES_SCORING_H
 #define _MOSES_SCORING_H
 
-#include <ComboReduct/reduct/reduct.h>
-#include <ComboReduct/combo/eval.h>
-#include <ComboReduct/reduct/meta_rules.h>
+#include "comboreduct/reduct/reduct.h"
+#include "comboreduct/combo/eval.h"
+#include "comboreduct/reduct/meta_rules.h"
 
-#include "MosesEda/moses/using.h"
-#include "MosesEda/moses/representation.h"
-#include "MosesEda/moses/types.h"
-#include "MosesEda/moses/ant_scoring.h" 
+#include "moses/using.h"
+#include "moses/representation.h"
+#include "moses/types.h"
+#include "moses/ant_scoring.h" 
 
 #include <iostream>  
 #include <fstream>   
@@ -26,53 +26,53 @@ namespace moses {
 
   struct logical_score : public unary_function<combo_tree,int> {
     template<typename Scoring>
-    logical_score(const Scoring& score,int a, LADSUtil::RandGen& _rng) 
+    logical_score(const Scoring& score,int a, opencog::RandGen& _rng) 
       : target(score,a,_rng),arity(a),rng(_rng) { }
 
     int operator()(const combo_tree& tr) const;
 
     combo::truth_table target;
     int arity;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
   };
   struct logical_bscore : public unary_function<combo_tree,behavioral_score> {
     template<typename Scoring>
-    logical_bscore(const Scoring& score,int a, LADSUtil::RandGen& _rng) 
+    logical_bscore(const Scoring& score,int a, opencog::RandGen& _rng) 
       : target(score,a,_rng),arity(a),rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
     
     combo::truth_table target;
     int arity;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
   };
 
   struct contin_score : public unary_function<combo_tree,contin_t> {
     template<typename Scoring>
-    contin_score(const Scoring& score,const RndNumTable& r, LADSUtil::RandGen& _rng)
+    contin_score(const Scoring& score,const RndNumTable& r, opencog::RandGen& _rng)
       : target(score,r),rands(r),rng(_rng) { }
 
     contin_t operator()(const combo_tree& tr) const;
 
     combo::contin_table target;
     RndNumTable rands;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
   };
   struct contin_bscore : public unary_function<combo_tree,behavioral_score> {
     template<typename Scoring>
-    contin_bscore(const Scoring& score,const RndNumTable& r, LADSUtil::RandGen& _rng)
+    contin_bscore(const Scoring& score,const RndNumTable& r, opencog::RandGen& _rng)
       : target(score,r),rands(r),rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     combo::contin_table target;
     RndNumTable rands;    
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
   };
 
   template<typename Scoring>
   struct complexity_based_scorer : public unary_function<eda::instance,tree_score> {
-    complexity_based_scorer(const Scoring& s,representation& rep, LADSUtil::RandGen& _rng)
+    complexity_based_scorer(const Scoring& s,representation& rep, opencog::RandGen& _rng)
       : score(s),_rep(&rep),rng(_rng) { }
     
     tree_score operator()(const eda::instance& inst) const {
@@ -103,12 +103,12 @@ namespace moses {
     Scoring score;
   protected:
     representation* _rep;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
   };
 
   template<typename Scoring>
   struct count_based_scorer : public unary_function<eda::instance,tree_score> {
-    count_based_scorer(const Scoring& s,representation& rep,int base_count, LADSUtil::RandGen& _rng)
+    count_based_scorer(const Scoring& s,representation& rep,int base_count, opencog::RandGen& _rng)
       : score(s),_rep(&rep),_base_count(base_count),rng(_rng) { }
     
     tree_score operator()(const eda::instance& inst) const {
@@ -147,7 +147,7 @@ namespace moses {
   protected:
     representation* _rep; 
     int _base_count;
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
    
   };
 
