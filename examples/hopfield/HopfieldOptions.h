@@ -39,7 +39,6 @@
 #define HDEMO_DEFAULT_SHOW_MATRIX false
 #define HDEMO_DEFAULT_SHOW_TOTAL false
 #define HDEMO_DEFAULT_NPATTERNS 1
-#define HDEMO_DEFAULT_FORGET_PERCENT 0.05 
 #define HDEMO_DEFAULT_PATTERN_DENSITY 0.2f
 #define HDEMO_DEFAULT_RETRIEVE_CYCLES 10
 #define HDEMO_DEFAULT_IMPRINT_CYCLES 15
@@ -54,6 +53,12 @@
 #define HDEMO_DEFAULT_VISUALIZE 0
 #define HDEMO_DEFAULT_VIS_DELAY 1.0f
 #define HDEMO_DEFAULT_VIS_PROCESS_LABELS false
+
+#define HDEMO_DEFAULT_FORGET_PERCENT 0.05 
+
+#define HDEMO_DEFAULT_DIFFUSION_THRESHOLD 0.0f
+#define HDEMO_DEFAULT_MAX_SPREAD_PERCENTAGE 1.0f
+#define HDEMO_DEFAULT_DECIDER_SHAPE 30
 
 namespace opencog
 {
@@ -99,6 +104,12 @@ public:
     int spreadCycles;
     int imprintCycles;
 
+    //! Importance diffusion options
+    float diffusionThreshold;
+    float maxSpreadPercentage;
+    float deciderFunctionShape;
+
+    //! Percentage of links to forget
     float forgetPercent;
 
     float cueErrorRate;

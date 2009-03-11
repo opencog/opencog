@@ -42,7 +42,6 @@ HopfieldOptions::HopfieldOptions()
     totalFlag = HDEMO_DEFAULT_SHOW_TOTAL;
     nPatterns = HDEMO_DEFAULT_NPATTERNS;
     keyNodes = HDEMO_DEFAULT_KEY_NODES;
-    forgetPercent = HDEMO_DEFAULT_FORGET_PERCENT;
     genPatternDensity = HDEMO_DEFAULT_PATTERN_DENSITY;
     retrieveCycles = HDEMO_DEFAULT_RETRIEVE_CYCLES;
     spreadCycles = HDEMO_DEFAULT_SPREAD_CYCLES;
@@ -60,6 +59,11 @@ HopfieldOptions::HopfieldOptions()
     visDelay = HDEMO_DEFAULT_VIS_DELAY;
     visLabel = HDEMO_DEFAULT_VIS_PROCESS_LABELS;
 
+    forgetPercent = HDEMO_DEFAULT_FORGET_PERCENT;
+
+    diffusionThreshold = HDEMO_DEFAULT_DIFFUSION_THRESHOLD;
+    maxSpreadPercentage = HDEMO_DEFAULT_MAX_SPREAD_PERCENTAGE;
+    deciderFunctionShape = HDEMO_DEFAULT_DECIDER_SHAPE;
 }
 
 void HopfieldOptions::printHelp()
