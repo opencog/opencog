@@ -14,10 +14,10 @@ TARGET_LINK_LIBRARIES(ubigraph
     m
     curl # TODO currently requires making a library called libcurl.so (linked to a specific version) 
     ${UBIGRAPHCLIENT_LIBRARIES} #    ubigraphclient
-#    {$XMLRPC_LIBRARIES} #
+    ${XMLRPC_LIBRARIES} #
     xmlrpc_client
     xmlrpc
-    xmlrpc_util
+#    xmlrpc_util
     xmlrpc_xmlparse
     xmlrpc_xmltok
 
