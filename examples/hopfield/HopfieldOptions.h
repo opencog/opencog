@@ -67,7 +67,8 @@ private:
     HopfieldServer* hServer;
 
 public:
-    enum learningScheme_t {SEQUENCE = 0, INTERLEAVE, PALIMPSEST };
+    enum learningScheme_t {SEQUENCE = 0, INTERLEAVE, PALIMPSEST,
+        PALIMPSEST_NEIGHBOURS};
     learningScheme_t learningScheme;
 
     enum updateMethod_t {CONJUNCTION = 0, STORKEY };

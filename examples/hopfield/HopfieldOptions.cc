@@ -75,7 +75,8 @@ void HopfieldOptions::printHelp()
         "                  \t each imprint and test.\n"
         "   -i --interleave <N> \t Interleave training of each pattern with N spacing\n"
         "                  \t between imprinting start.\n"
-        "   -P --palimpsest <N> \t Palimpsest training with N \% tolerance\n"
+        "   -P --palimpsest <N> \t Palimpsest testing using one cue pattern with N \% tolerance\n"
+        "      --pneighbours <N>\t Palimpsest testing using all neighbours with N \% tolerance\n"
         "   == Output ==\n"
         "   -v, --verbose \t Set to verbose output, can be used more than once for more\n"
         "                 \t detail (log level \"INFO\" -> \"DEBUG\" -> \"FINE\")\n"
@@ -96,8 +97,8 @@ void HopfieldOptions::printHelp()
         "   -d --density N \t Set the number of links to a ratio of the total possible links\n"
         "                  \t   numLinks = density *  sum(1:(( width * height ) - 1 ))\n"
         "  == Dynamics ==\n"
-        "   -u --update-rule <x>\t The rule used to update the connections, one of [diffusion,\n"
-        "                       \t spreading,storkey].\n"
+        "   -u --update-rule <x>\t The rule used to update the connections, one of [conjunction,\n"
+        "                       \t storkey].\n"
         "   -s --stimulus N\t Amount of stimulus to give an atom during imprinting or retrieval\n"
         "   -f --focus N \t Attentional focus boundary.\n"
         "   -z --viz-threshold N\t The atom STI needed for an atom to be considered \"on\" when\n"
@@ -149,7 +150,9 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"spread", required_argument, 0, 'y'},    // # of spread iterations
                 {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
                 {"interleave", optional_argument, 0, 'i'},  // interleave imprint of each pattern
-                {"palimpsest", optional_argument, 0, 'P'},  // interleave imprint of each pattern
+                {"palimpsest", optional_argument, 0, 'P'},  // set Palimpsest testing
+                // Palimpsest testing of neighbours
+                {"pneighbours", optional_argument, 0, '7'},
                 {"error", required_argument, 0, 'e'},   // cue error rate
                 {"total", 0, &totalFlag, 1},    // t_o_tal, reports mean, suitable for batch output
                 {"spread-multiplier", required_argument, 0, 'q'},   // multiplier for importance spread, if 0 then evenly spread across links
@@ -260,7 +263,13 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 palimpsestTolerance = atoi(optarg);
             }
             break;
-
+        case '7':
+            learningScheme = PALIMPSEST_NEIGHBOURS;
+            if (optarg) {
+                //cout << "palimpsest tolerance " << optarg << endl;
+                palimpsestTolerance = atoi(optarg);
+            }
+            break;
         case 'o':
             totalFlag = 1;
             break;

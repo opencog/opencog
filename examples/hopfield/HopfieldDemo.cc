@@ -34,12 +34,14 @@
 
 using namespace opencog;
 #define foreach BOOST_FOREACH
+#define HDEMO_NORESULT -100
 
 std::vector< Pattern > getPatterns();
-void testHopfieldNetworkPalimpsest();
 void testHopfieldNetworkRolling();
 void testHopfieldNetworkRollingOld();
 void testHopfieldNetworkInterleave();
+void testHopfieldNetworkPalimpsest();
+void testHopfieldNetworkPalimpsestNeighbours();
 
 HopfieldOptions *o;
 
@@ -85,6 +87,10 @@ int main(int argc, char *argv[])
         break;
     case HopfieldOptions::PALIMPSEST:
         testHopfieldNetworkPalimpsest();
+        break;
+    case HopfieldOptions::PALIMPSEST_NEIGHBOURS:
+        testHopfieldNetworkPalimpsestNeighbours();
+        break;
     }
 
     if (o->recordToFile) o->closeOutputFiles();
@@ -108,23 +114,24 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
 {
     std::vector< Pattern > cs;
     if (ps.size() == 0) {
-        cout << "Load original patterns before cue patterns!" << endl;
+        cerr << "Load original patterns before cue patterns!" << endl;
         return cs;
     }
 
     if (o->fileCue.size() > 0) {
+        // If there is a file to load patterns from...
         cs = Pattern::loadPatterns(o->fileCue, (static_cast<HopfieldServer&>(server())).height);
         assert((unsigned int) o->nPatterns == cs.size());
-
     } else {
+        // otherwise, just copy imprint patterns.
         for (std::vector< Pattern >::iterator i = ps.begin();
                 i != ps.end(); i++) {
+            // Cue patterns shouldn't be mutated unless cueGenerateOnce is set.
             cs.push_back( (*i) );
-            // Cue patterns shouldn't be mutated unless 
-            // .mutatePattern(o->cueErrorRate));
         }
-
     }
+    // If cueGenerateOnce is set, then mutate all patterns
+    // (they won't be mutated later)
     if (o->cueGenerateOnce) {
         for (std::vector< Pattern >::iterator i = cs.begin();
             i != cs.end(); i++) {
@@ -134,9 +141,8 @@ std::vector< Pattern > getCuePatterns(std::vector< Pattern > ps)
     return cs;
 }
 
-void testHopfieldNetworkPalimpsest()
+void testHopfieldNetworkPalimpsestNeighbours()
 {
-# define HDEMO_NORESULT -100
     std::vector< Pattern > patterns;
     std::vector< Pattern > cuePatterns;
     std::vector< std::vector < float > > results;
@@ -144,9 +150,6 @@ void testHopfieldNetworkPalimpsest()
     int totalCycles;
 
     patterns = getPatterns();
-    cuePatterns = getCuePatterns(patterns);
-
-//    totalCycles = (o->interleaveAmount * (o->nPatterns - 1)) + o->imprintCycles;
     totalCycles = patterns.size();
 
     for (int i = 0; i < totalCycles; i++) {
@@ -168,7 +171,69 @@ void testHopfieldNetworkPalimpsest()
         // level...
         for (int j = i; j >= 0; j--) {
             float rSim = 0.0f;
-/*            Pattern c(0,0);
+            // palimpsest learning measured by checking
+            // the stability of neighbouring states (1 bit errors).
+            std::vector<bool> stableBit =
+                (static_cast<HopfieldServer&>(server())).checkNeighbourStability(
+                        patterns[j], o->palimpsestTolerance / 100.0f);
+
+            foreach (bool b, stableBit) {
+            //    cout << b << " ";
+                if (b) rSim += 1; 
+            }
+            //cout << endl;
+            rSim /= stableBit.size();
+            //cout << "rSim = " << rSim << endl;
+
+            //logger().debug(" Similarity %.2f ( diff: %.2f )", rSim, rSim - patterns[j].hammingSimilarity(cuePatterns[j]));
+            
+            if ( rSim < 1) {
+                break;
+            }
+            memory++;
+
+        }
+        cout  << ", " << memory << flush;
+        results.push_back(cycleResults);
+
+    }
+    cout << endl;
+
+
+}
+void testHopfieldNetworkPalimpsest()
+{
+    std::vector< Pattern > patterns;
+    std::vector< Pattern > cuePatterns;
+    std::vector< std::vector < float > > results;
+
+    int totalCycles;
+
+    patterns = getPatterns();
+    cuePatterns = getCuePatterns(patterns);
+
+    totalCycles = patterns.size();
+
+    for (int i = 0; i < totalCycles; i++) {
+        int memory = 0;
+        std::vector< float > cycleResults;
+        std::vector< int > bitErrors;
+        std::vector< Pattern > toPrint;
+
+        if (o->showMatrixFlag) {
+            std::vector< Pattern > toPrint;
+            cout << endl;
+            toPrint.push_back(patterns[i]);
+            (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
+        }
+        (static_cast<HopfieldServer&>(server())).resetNodes();
+        (static_cast<HopfieldServer&>(server())).imprintPattern(patterns[i], o->imprintCycles);
+
+        // Go back until patterns are not recalled withing palimpsest tolerance
+        // level...
+        for (int j = i; j >= 0; j--) {
+            float rSim = 0.0f;
+            Pattern c(0,0);
             if (!o->cueGenerateOnce) {
                 if (o->fileCue.size() > 0) {
                     c = cuePatterns[j].mutatePattern(o->cueErrorRate);
@@ -179,15 +244,8 @@ void testHopfieldNetworkPalimpsest()
                 c = cuePatterns[j];
             }
             Pattern rPattern = (static_cast<HopfieldServer&>(server())).retrievePattern(c,
-                    o->retrieveCycles, o->spreadCycles);*/
-            // --- 
-            // Above is old method, but palimpsest learning is actually measured by checking
-            // the stability of neighbouring states (1 bit errors).
-            std::vector<bool> stableBit =
-                (static_cast<HopfieldServer&>(server())).checkNeighbourStability(
-                        patterns[j], o->palimpsestTolerance / 100.0f);
-
-            /*if (o->showMatrixFlag) {
+                    o->retrieveCycles, o->spreadCycles);
+            if (o->showMatrixFlag) {
                 std::vector< Pattern > toPrint;
                 toPrint.push_back(patterns[j]);
                 toPrint.push_back(c);
@@ -196,35 +254,18 @@ void testHopfieldNetworkPalimpsest()
                 (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
                 cout << "---" << endl;
             }
-
             rSim = patterns[j].hammingSimilarity(rPattern);
             cycleResults.push_back(rSim);
-            bitErrors.push_back(patterns[j].bitErrors(rPattern));*/
-            foreach (bool b, stableBit) {
-            //    cout << b << " ";
-                if (b) rSim += 1; 
-            }
-            //cout << endl;
-            rSim /= stableBit.size();
-            //cout << "rSim = " << rSim << endl;
 
             logger().debug(" Similarity %.2f ( diff: %.2f )", rSim, rSim - patterns[j].hammingSimilarity(cuePatterns[j]));
             
-            //if ( (rSim * 100) < (100 - o->palimpsestTolerance) ) {
-            if ( rSim < 1) {
-                break;
-            }
+            if ( (rSim * 100) < (100 - o->palimpsestTolerance) ) break;
             memory++;
 
         }
-        //cout << "cycle " << i << " ,\t";
-        //cout << setw(4) << memory << endl;
         cout  << ", " << memory << flush;
-        //foreach (int r, bitErrors) {
-        //    cout << ", " << r << flush;
-        //}
-        //cout << endl;
-        //if (o->showMatrixFlag) (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
+        if (o->showMatrixFlag)
+            (static_cast<HopfieldServer&>(server())).printMatrixResult(toPrint);
         results.push_back(cycleResults);
 
     }
@@ -235,7 +276,6 @@ void testHopfieldNetworkPalimpsest()
 
 void testHopfieldNetworkInterleave()
 {
-# define HDEMO_NORESULT -100
     std::vector< Pattern > patterns;
     std::vector< Pattern > cuePatterns;
     std::vector< std::vector < float > > results;
