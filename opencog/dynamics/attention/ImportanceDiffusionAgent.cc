@@ -80,7 +80,10 @@ void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
 
 ImportanceDiffusionAgent::~ImportanceDiffusionAgent()
 {
-
+    if (spreadDecider) {
+        delete spreadDecider;
+        spreadDecider = NULL;
+    }
 }
 
 void ImportanceDiffusionAgent::setMaxSpreadPercentage(float p)
