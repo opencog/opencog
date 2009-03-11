@@ -40,7 +40,6 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/type_codes.h>
 #include <opencog/util/Logger.h>
 
 #define OBFUSCATE (0x55555555UL)

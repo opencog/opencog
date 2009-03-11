@@ -1410,7 +1410,8 @@ next_args:;
 BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) const
 {
     vector<Vertex> ForAllArgs;
-    BoundVertex new_result(Handle(ATOM));
+    Vertex v = Handle(ATOM);
+    BoundVertex new_result(v);
 
     const float min_confidence = 0.0001f;
 
@@ -1426,10 +1427,14 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
                 ForAllArgs.push_back(b.value);
             }
 
-        if (_resultT == FORALL_LINK)
-            new_result = FORALLRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
-        else
-            new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
+        if (_resultT == FORALL_LINK) {
+            //new_result = FORALLRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
+            new_result = FORALLRule(ASW(), Handle::UNDEFINED, FORALL_LINK).compute(ForAllArgs);
+        } 
+        else {
+            //new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
+            new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED, VARIABLE_SCOPE_LINK).compute(ForAllArgs);
+        }
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());
         printTree(v2h(new_result.value),0,0);

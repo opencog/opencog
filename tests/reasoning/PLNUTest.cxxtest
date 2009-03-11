@@ -38,6 +38,7 @@
 #include "opencog/reasoning/pln/rules/RuleProvider.h"
 
 #include <opencog/adaptors/tulip/TulipWriter.h>
+#include <opencog/nlp/wsd/atom_types.h>
 
 using namespace reasoning;
 
@@ -226,6 +227,7 @@ public:
 
     PLNUTest()
     {
+        ClassServer::init();
         // initial values for running tests multiple times
         seed = 11111;
         tempi=0;
@@ -375,8 +377,8 @@ public:
         iAtomSpaceWrapper* parent = ASW();
 
     //  DefaultVariableRuleProvider rp;
-        InversionRule<INHERITANCE_LINK> *invR = new InversionRule<INHERITANCE_LINK>(parent);
-        DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK> *deduR = new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent);
+        InversionRule *invR = new InversionRule(parent, INHERITANCE_LINK);
+        DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK);
 
         printf("v0\n");
         vtree v0(mva((Handle)INHERITANCE_LINK,

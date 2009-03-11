@@ -1,0 +1,27 @@
+/* File automatically generated. Do not edit */
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/types.h>
+#include "atom_types.h"
+opencog::Type opencog::DISTINGUISHED_NODE;
+opencog::Type opencog::CONTEXT_LINK;
+opencog::Type opencog::REFERENCE_LINK;
+opencog::Type opencog::DOCUMENT_NODE;
+opencog::Type opencog::SENTENCE_NODE;
+opencog::Type opencog::PARSE_NODE;
+opencog::Type opencog::PARSE_LINK;
+opencog::Type opencog::LINK_GRAMMAR_RELATIONSHIP_NODE;
+opencog::Type opencog::DEFINED_LINGUISTIC_CONCEPT_NODE;
+opencog::Type opencog::DEFINED_LINGUISTIC_RELATIONSHIP_NODE;
+opencog::Type opencog::DEFINED_FRAME_NODE;
+opencog::Type opencog::DEFINED_FRAME_ELEMENT_NODE;
+opencog::Type opencog::FRAME_ELEMENT_LINK;
+opencog::Type opencog::WORD_SENSE_NODE;
+opencog::Type opencog::WORD_SENSE_LINK;
+opencog::Type opencog::PART_OF_SPEECH_NODE;
+opencog::Type opencog::PART_OF_SPEECH_LINK;
+opencog::Type opencog::LEMMA_NODE;
+opencog::Type opencog::LEMMA_LINK;
+opencog::Type opencog::HOLONYM_LINK;
+opencog::Type opencog::WORD_INSTANCE_NODE;
+opencog::Type opencog::COSENSE_LINK;

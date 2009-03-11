@@ -14,6 +14,7 @@ LINK_LIBRARIES(
 	atomspace
 	persist
 	server
+        wsd
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}

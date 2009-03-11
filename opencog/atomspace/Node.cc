@@ -42,7 +42,7 @@ void Node::init(Type type,
            const TruthValue& tv)
 throw (InvalidParamException, AssertionException)
 {
-    if (!ClassServer::isAssignableFrom(NODE, type)) {
+    if (!ClassServer::isA(type, NODE)) {
         throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
     }
     name = cname;

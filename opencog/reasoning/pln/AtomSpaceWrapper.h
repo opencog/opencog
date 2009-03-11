@@ -39,7 +39,6 @@
 //#include <boost/bimap/bimap.hpp>
 
 #include <opencog/atomspace/TimeServer.h>
-#include <opencog/atomspace/type_codes.h>
 
 #include "PLN.h"
 
@@ -216,7 +215,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
 
     // TODO: +1000 to be safe, but should check that no extra types are
     // defined elsewhere and just use +1.
-    const static unsigned int mapOffset = NOTYPE + 100000;
+    //const static unsigned int mapOffset = NOTYPE + 100000;
+    const static unsigned int mapOffset = (1 << (8 * sizeof(Type))); // NOTYPE+1
 
     //! Add a tree of non real atoms to AtomSpace.
     //! @param v of atoms to add.

@@ -375,7 +375,7 @@ bool CogServer::loadModule(const std::string& filename)
     dlerror();
 
     logger().info("Loading module \"%s\"", filename.c_str());
-    void *dynLibrary = dlopen(filename.c_str(), RTLD_LAZY);
+    void *dynLibrary = dlopen(filename.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     const char* dlsymError = dlerror();
     if ((dynLibrary == NULL) || (dlsymError)) {
         logger().error("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);

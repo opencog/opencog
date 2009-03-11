@@ -32,7 +32,7 @@
 // We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
 // ensure we find the file whether or not we're building using a separate build
 // dir
-#define ATOM_TABLE_TEST_XML_FILE OPENCOG_SOURCE_DIR"/tests/atomspace/cw_proxy_1.xml"
+#define ATOM_TABLE_TEST_XML_FILE OPENCOG_SOURCE_DIR"/tests/atomspace/atom_table_utest.xml"
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -100,8 +100,8 @@ public:
 
     void testSimple() {
         AtomTable atomTable(false);
-        Handle word = atomTable.add(new Node(WORD_NODE, "test"));
-        Handle sense = atomTable.add(new Node(WORD_SENSE_NODE, "28675194"));
+        Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
+        Handle sense = atomTable.add(new Node(CONCEPT_NODE, "28675194"));
         std::vector<Handle> os;
         os.push_back(word);
         os.push_back(sense);
@@ -111,91 +111,91 @@ public:
     void REMOVEDtestPredicateIndices() {
         /* TODO: REVIEW ALL THIS STUFF */
         HandleEntry* expectedEntries[6];
-        //printf("building expectedEntries\n");
+        //logger().debug("building expectedEntries");
         for (int index = 0; index < 6; index++) {
             HandleEntry* indexedHandles = table->getPredicateHandleSet(index);
-            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             expectedEntries[index] = indexedHandles;
-            //printf("Handles in the index %d: \n", index);
+            //logger().debug("Handles in the index %d: ", index);
             int matchCount = 0;
             while (indexedHandles != NULL) {
                 matchCount++;
-                //printf("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //logger().debug("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
                 indexedHandles = indexedHandles->next;
             }
-            //printf("\ncount = %d, expected count = %d\n", matchCount, numberOfExpectedMatches[index]);
+            //logger().debug("\ncount = %d, expected count = %d", matchCount, numberOfExpectedMatches[index]);
             TS_ASSERT(matchCount == numberOfExpectedMatches[index]);
         }
-        //printf("testPredicateIndices with NULL_VERSION_HANDLE\n");
+        //logger().debug("testPredicateIndices with NULL_VERSION_HANDLE");
         for (int index = 0; index < 6; index++) {
             HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index]);
-            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
-            //printf("Handles that matches predicate %s: \n", gpnNames[index]);
+            //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
+            //logger().debug("Handles that matches predicate %s: ", gpnNames[index]);
             HandleEntry* expectedEntry = expectedEntries[index];
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //printf("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //logger().debug("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
             }
             TS_ASSERT(!expectedEntry);
-            //printf("\n");
+            //logger().debug("");
         }
         // test with non-null VersionHandles
-        //printf("adding versioned TVs\n");
+        //logger().debug("adding versioned TVs");
         for (int index = 0; index < 6; index++) {
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
             while (expectedEntry != NULL) {
                 if (count < numberOfExpectedMatchesWithVH1[index]) {
-                    //printf("adding versioned tv with VH1\n");
+                    //logger().debug("adding versioned tv with VH1");
                     Atom* atom = TLB::getAtom(expectedEntry->handle);
                     TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
                     atom->setTruthValue(*tv);
                     delete tv;
-                    //printf("resulting tv = %s\n", atom->getTruthValue()->toString().c_str());
+                    //logger().debug("resulting tv = %s", atom->getTruthValue()->toString().c_str());
                 }
                 if (numberOfExpectedMatches[index] - count <=  numberOfExpectedMatchesWithVH2[index]) {
-                    //printf("adding versioned tv with VH2\n");
+                    //logger().debug("adding versioned tv with VH2");
                     Atom* atom = TLB::getAtom(expectedEntry->handle);
                     TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
                     atom->setTruthValue(*tv);
                     delete tv;
-                    //printf("resulting tv = %s\n", atom->getTruthValue()->toString().c_str());
+                    //logger().debug("resulting tv = %s", atom->getTruthValue()->toString().c_str());
                 }
                 expectedEntry = expectedEntry->next;
                 count++;
             }
         }
-        //printf("testPredicateIndices with VH1\n");
+        //logger().debug("testPredicateIndices with VH1");
         for (int index = 0; index < 6; index++) {
             HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH1);
-            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //printf("Checking atom with TV = %s\n", TLB::getAtom(indexedHandles->handle)->getTruthValue().toString().c_str());
+                //logger().debug("Checking atom with TV = %s", TLB::getAtom(indexedHandles->handle)->getTruthValue().toString().c_str());
                 TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
             }
-            //printf("count before = %d\n", count);
+            //logger().debug("count before = %d", count);
             while (count < numberOfExpectedMatches[index]) {
                 TS_ASSERT(expectedEntry);
                 expectedEntry = expectedEntry->next;
                 count++;
             }
-            //printf("count after = %d\n", count);
+            //logger().debug("count after = %d", count);
             TS_ASSERT(!expectedEntry);
         }
-        //printf("testPredicateIndices with VH2\n");
+        //logger().debug("testPredicateIndices with VH2");
         for (int index = 0; index < 6; index++) {
             HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH2);
-            //printf("indexedHandles for index = %d => %p\n", index, indexedHandles);
+            //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
             while (numberOfExpectedMatches[index] - count > numberOfExpectedMatchesWithVH2[index]) {
@@ -203,39 +203,39 @@ public:
                 expectedEntry = expectedEntry->next;
                 count++;
             }
-            //printf("count before = %d\n", count);
+            //logger().debug("count before = %d", count);
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //printf("Checking atom with TV = %s\n", TLB::getAtom(indexedHandles->handle)->getTruthValue()->toString().c_str());
+                //logger().debug("Checking atom with TV = %s", TLB::getAtom(indexedHandles->handle)->getTruthValue()->toString().c_str());
                 TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
             }
-            //printf("count after = %d\n", count);
+            //logger().debug("count after = %d", count);
             TS_ASSERT(!expectedEntry);
         }
 
-        //printf("testPredicateIndices(): END TEST\n");fflush(stdout);
+        //logger().debug("testPredicateIndices(): END TEST");fflush(stdout);
     }
 
     // Look for atoms in the following structure:
     //      <ListLink timestamp="630057840">
-    //          <Element class="CWPixelPerceptNode" name="630057840_11"/>
-    //          <Element class="NumberNode" name="12"/>
+    //          <Element class="CWPixelPerceptNode" name="00065349"/>
+    //          <Element class="NumberNode" name="on"/>
     //      </ListLink>
     void testGetHandleSet() {
         //== getHandleSet(const char**, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
-        const char* names1[] = {"630057840_11", "12"};
-        Type types1[] = {CW_PIXEL_PERCEPT_NODE, NUMBER_NODE};
+        const char* names1[] = {"00065349", "12"};
+        Type types1[] = {CONCEPT_NODE, NUMBER_NODE};
         HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result != NULL);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete (result);
 
-        const char* names2[] = {"12", "630057840_11"};
-        Type types2[] = {NUMBER_NODE, CW_PIXEL_PERCEPT_NODE};
+        const char* names2[] = {"12", "00065349"};
+        Type types2[] = {NUMBER_NODE, CONCEPT_NODE};
         result = table->getHandleSet(names2, types2, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result == NULL);
 
@@ -243,22 +243,22 @@ public:
         Type types3[] = {NOTYPE, NUMBER_NODE};
         result = table->getHandleSet(names3, types3, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result != NULL);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        const char* names4[] = {NULL, "630057840_11"};
-        Type types4[] = {NOTYPE, CW_PIXEL_PERCEPT_NODE};
+        const char* names4[] = {NULL, "00065349"};
+        Type types4[] = {NOTYPE, CONCEPT_NODE};
         result = table->getHandleSet(names4, types4, NULL, 2, LIST_LINK, false);
-        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(result == NULL);
 
         result = table->getHandleSet((const char**) NULL, types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result != NULL);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet((const char**) NULL, types2, NULL, 2, LIST_LINK, false);
-        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(result == NULL);
 
         TS_ASSERT_THROWS(table->getHandleSet(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
@@ -268,26 +268,26 @@ public:
 
         //== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         std::vector<Handle> handles1(2);
-        handles1[0] = table->getHandle("630057840_11", CW_PIXEL_PERCEPT_NODE);
+        handles1[0] = table->getHandle("00065349", CONCEPT_NODE);
         handles1[1] = table->getHandle("12", NUMBER_NODE);
         result = table->getHandleSet(handles1, types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         std::vector<Handle> handles2(2);
         handles2[0] = table->getHandle("12", NUMBER_NODE);
-        handles2[1] = table->getHandle("630057840_11", CW_PIXEL_PERCEPT_NODE);
+        handles2[1] = table->getHandle("00065349", CONCEPT_NODE);
         result = table->getHandleSet(handles2, types2, NULL, 2, LIST_LINK, false);
         TS_ASSERT(!result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
 
         std::vector<Handle> handles3(2);
         handles3[0] = Handle::UNDEFINED;
         handles3[1] = table->getHandle("12", NUMBER_NODE);
         result = table->getHandleSet(handles3, types3, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         std::vector<Handle> handles4(2);
@@ -295,40 +295,40 @@ public:
         handles4[1] = Handle::UNDEFINED;
         result = table->getHandleSet(handles4, types4, NULL, 2, LIST_LINK, false);
         TS_ASSERT(!result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
 
         result = table->getHandleSet(std::vector<Handle>(), types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet(std::vector<Handle>(), types2, NULL, 2, LIST_LINK, false);
-        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
         result = table->getHandleSet(handles1, NULL , NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet(handles2, NULL, NULL, 2, LIST_LINK, false);
-        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
         result = table->getHandleSet(handles3, NULL , NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet(handles4, NULL, NULL, 2, LIST_LINK, false);
-        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
         //== getHandleSet(Type*, bool*, Arity, Type = ATOM, bool = true) ==/
 
         result = table->getHandleSet(types1, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet(types2, NULL, 2, LIST_LINK, false);
@@ -336,11 +336,11 @@ public:
 
         result = table->getHandleSet(types3, NULL, 2, LIST_LINK, false);
         TS_ASSERT(result);
-        //printf("result = %s\n", result->toString().c_str());
+        //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         result = table->getHandleSet(types4, NULL, 2, LIST_LINK, false);
-        //if (result != NULL) printf("result = %s\n", result->toString().c_str());
+        //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
     }
 
@@ -386,11 +386,11 @@ public:
         AtomTable atomTable;
 
         /* add a simple set of links & nodes */
-        Node* wordNode = new Node(WORD_NODE, "test");
+        Node* wordNode = new Node(NUMBER_NODE, "1");
         wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) - 10));
         Handle wnHandle = atomTable.add(wordNode);
 
-        Node* senseNode = new Node(WORD_SENSE_NODE, "28675194");
+        Node* senseNode = new Node(CONCEPT_NODE, "28675194");
         senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) 30));
         Handle snHandle = atomTable.add(senseNode);
 
@@ -465,14 +465,13 @@ public:
         boost::signals::connection remove2 =
             atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, _1));
 
-
         /* add and remove a simple node */
         __testSignalsCounter = 0;
         logger().debug("before first atom add");
-        Handle wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
+        Handle wnHandle = atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(__testSignalsCounter == 11);
         logger().debug("before second atom add");
-        atomTable.add(new Node(WORD_NODE, "test"));
+        atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(__testSignalsCounter == 1111);
         logger().debug("before atom remove");
         atomTable.remove(wnHandle);
@@ -480,7 +479,7 @@ public:
 
         /* add a simple node and let decayShortTermImportance remove it */
         __testSignalsCounter = 0;
-        Node *node = new Node(WORD_NODE, "test");
+        Node *node = new Node(NUMBER_NODE, "1");
         wnHandle = atomTable.add(node);
         TS_ASSERT(__testSignalsCounter == 11);
         node->setAttentionValue(AttentionValue(config().get_int("MIN_STI") + 10,
@@ -495,8 +494,8 @@ public:
         add1.disconnect();
         merge1.disconnect();
         remove1.disconnect();
-        wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
-        atomTable.add(new Node(WORD_NODE, "test"));
+        wnHandle = atomTable.add(new Node(NUMBER_NODE, "1"));
+        atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(__testSignalsCounter == 1010);
         atomTable.remove(wnHandle);
         TS_ASSERT(__testSignalsCounter == 101010);
@@ -505,8 +504,8 @@ public:
         add2.disconnect();
         merge2.disconnect();
         remove2.disconnect();
-        wnHandle = atomTable.add(new Node(WORD_NODE, "test"));
-        atomTable.add(new Node(WORD_NODE, "test"));
+        wnHandle = atomTable.add(new Node(NUMBER_NODE, "1"));
+        atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(__testSignalsCounter == 0);
         atomTable.remove(wnHandle);
         TS_ASSERT(__testSignalsCounter == 0);
@@ -532,11 +531,11 @@ public:
         __testSignalsCounter = 0;
 
         /* add a simple tree of links & nodes */
-        Node* wordNode = new Node(WORD_NODE, "test");
+        Node* wordNode = new Node(NUMBER_NODE, "1");
         wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 7)));
         Handle wnHandle = atomTable.add(wordNode);
 
-        Node* senseNode = new Node(WORD_SENSE_NODE, "28675194");
+        Node* senseNode = new Node(CONCEPT_NODE, "28675194");
         senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
         Handle snHandle = atomTable.add(senseNode);
 
@@ -558,8 +557,8 @@ public:
         // should be about to be removed
         for (int i = 0; i < 5; i++) atomTable.decayShortTermImportance();
         // and test the existance of each atom
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        != NULL);
         TS_ASSERT(__testSignalsCounter == 4); // no atoms removed yet
@@ -567,8 +566,8 @@ public:
         // run another decaying cycle; the list link node should have been
         // removed
         atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
         TS_ASSERT(__testSignalsCounter == 3); // 1 atom removed
@@ -576,16 +575,16 @@ public:
         // an another one; the inheritance link and the sense node should have
         // been removed
         atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
         TS_ASSERT(__testSignalsCounter == 1); // 2 more atoms removed
 
         // and another, final one; by now all nodes should have been removed
         atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_NODE)        == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) WORD_SENSE_NODE)  == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
         TS_ASSERT(__testSignalsCounter == 0); // last one removed
@@ -595,8 +594,8 @@ public:
      * same atom twice (or more) */
     void testDoubleLink() {
         AtomTable atomTable;
-        Node* n1 = new Node(WORD_NODE, "the");
-        Node* n2 = new Node(WORD_NODE, "of");
+        Node* n1 = new Node(NUMBER_NODE, "1");
+        Node* n2 = new Node(NUMBER_NODE, "2");
         Handle hn1 = atomTable.add(n1);
         Handle hn2 = atomTable.add(n2);
 
@@ -610,16 +609,16 @@ public:
     void testMerge() {
         AtomTable atomTable;
 
-        Node* n1 = new Node(WORD_NODE, "the", SimpleTruthValue(0.1f, 0.2f));
+        Node* n1 = new Node(NUMBER_NODE, "1", SimpleTruthValue(0.1f, 0.2f));
         Handle hn1 = atomTable.add(n1);
 
-        Node* n2 = new Node(WORD_NODE, "the", SimpleTruthValue(0.3f, 0.4f));
+        Node* n2 = new Node(NUMBER_NODE, "1", SimpleTruthValue(0.3f, 0.4f));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n2));
 
-        Node* n3 = new Node(WORD_NODE, "the", SimpleTruthValue(0.8f, 0.3f));
+        Node* n3 = new Node(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
 
-        Handle h = atomTable.getHandle("the", WORD_NODE);
+        Handle h = atomTable.getHandle("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
         TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getMean(), 0.3f, 0.000001);
         TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getCount(), 0.4f, 0.000001);

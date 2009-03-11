@@ -28,6 +28,7 @@
 #include <vector>
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Agent.h>

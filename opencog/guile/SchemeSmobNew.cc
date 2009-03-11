@@ -183,7 +183,7 @@ Type SchemeSmob::validate_node (SCM stype, const char *subrname)
 {
 	Type t = validate_atom(stype, subrname);
 
-	if (false == ClassServer::isAssignableFrom(NODE, t))
+	if (false == ClassServer::isA(t, NODE))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog node type");
 
 	return t;
@@ -261,7 +261,7 @@ static Type verify_link (SCM stype, const char * subrname)
 	if (NOTYPE == t)
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
 
-	if (false == ClassServer::isAssignableFrom(LINK, t))
+	if (false == ClassServer::isA(t, LINK))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog link type");
 
 	return t;

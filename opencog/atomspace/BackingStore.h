@@ -38,6 +38,7 @@ namespace opencog
 class BackingStore
 {
 	public:
+        virtual ~BackingStore() {}
 		/** 
 		 * Return a handle to a link of the indicated type and outset,
 		 * if it exists; else return an undefined handle.  */

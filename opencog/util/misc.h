@@ -35,8 +35,8 @@
 #include <cxxabi.h>
 #endif
 
-#include <opencog/util/tree.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/util/tree.h>
 
 namespace opencog
 {

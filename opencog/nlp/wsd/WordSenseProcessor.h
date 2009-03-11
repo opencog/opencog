@@ -47,6 +47,7 @@ class WordSenseProcessor
 		virtual void run(CogServer *server);
 		virtual void run_no_delay(CogServer *server);
 		void use_threads(bool);
+        static void init_atom_types();
 };
 
 } // namespace opencog

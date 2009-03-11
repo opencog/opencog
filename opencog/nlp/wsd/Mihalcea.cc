@@ -11,12 +11,13 @@
 #include <stdio.h>
 
 #include <opencog/atomspace/ForeachChaseLink.h>
-#include <opencog/util/platform.h>
+#include <opencog/nlp/wsd/atom_types.h>
 #include <opencog/nlp/wsd/MihalceaEdge.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>
 #include <opencog/nlp/wsd/ParseRank.h>
 #include <opencog/nlp/wsd/SenseRank.h>
 #include <opencog/nlp/wsd/ReportRank.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 

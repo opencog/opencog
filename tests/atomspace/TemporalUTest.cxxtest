@@ -27,6 +27,7 @@
 #include <limits.h>
 
 #include <opencog/atomspace/Temporal.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
 using namespace opencog;
@@ -380,11 +381,11 @@ public:
             const Temporal& t2 = Temporal::getFromTimeNodeName(name1.c_str());
             const std::string& name2 = t2.getTimeNodeName();
             if (t1 != t2) {
-                printf("t1=%s, t2=%s\n", t1.toString().c_str(), t2.toString().c_str());
+                logger().debug("t1=%s, t2=%s", t1.toString().c_str(), t2.toString().c_str());
             }
             TS_ASSERT(t1 == t2);
             if (name1 != name2) {
-                printf("name1=%s, name2=%s\n", name1.c_str(), name2.c_str());
+                logger().debug("name1=%s, name2=%s", name1.c_str(), name2.c_str());
             }
             TS_ASSERT(name1 == name2);
         }

@@ -128,9 +128,8 @@ bool echo=false;
 		assert(0);
 	}
 	
-	switch(T)
-	{
-	case AND_LINK:	p("AND");
+	if (T == AND_LINK) {
+        p("AND");
 		for (s = 0; s < hs.size(); s++)
 			if (!(*((MetaPredicate*)(hs[s].get())))(h))
 			{
@@ -139,8 +138,8 @@ bool echo=false;
 			}
 			p("yes");
 			return true;
-			break;
-	case OR_LINK: case __OR:	p("OR");
+    } else if (T == OR_LINK || T == __OR) {
+        p("OR");
 		for (s = 0; s < hs.size(); s++)
 			if ((*((MetaPredicate*)(hs[s].get())))(h))
 			{
@@ -149,8 +148,8 @@ bool echo=false;
 			}
 			p("no");
 			return false;
-			break;
-	case NOT_LINK:	for (s = 0; s < hs.size(); s++) //Actually this is "NOT AND"
+    } else if (T == NOT_LINK) { 
+        for (s = 0; s < hs.size(); s++) //Actually this is "NOT AND"
 						if (!(*((MetaPredicate*)(hs[s].get())))(h))
 						{
 							p("yes");
@@ -158,7 +157,6 @@ bool echo=false;
 						}
 						p("no");
 						return false;
-						break;
 	}
 
 	return (this->real == h || (*this) == atom(h));

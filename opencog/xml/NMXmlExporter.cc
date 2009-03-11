@@ -72,7 +72,7 @@ void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalL
         exportables->add(h);
 
         Atom *newAtom = TLB::getAtom(h);
-        if (ClassServer::isAssignableFrom(LINK, newAtom->getType())) {
+        if (ClassServer::isA(newAtom->getType(), LINK)) {
             internalLinks->add(h);
         }
         findExportables(exportables, internalLinks, newAtom);
@@ -82,14 +82,14 @@ void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalL
 
 std::string NMXmlExporter::toXML(HandleSet *elements)
 {
-    bool typesUsed[NUMBER_OF_CLASSES];
+    bool typesUsed[ClassServer::getNumberOfClasses()];
     char aux[1<<16];
     std::string result;
 
     sprintf(aux, "<%s>\n", LIST_TOKEN);
     result += aux;
 
-    memset(typesUsed, 0, sizeof(bool)*NUMBER_OF_CLASSES);
+    memset(typesUsed, 0, sizeof(bool) * ClassServer::getNumberOfClasses());
     HandleSetIterator *it = elements->keys();
     while (it->hasNext()) {
         exportAtom(it->next(), typesUsed, result);
@@ -97,7 +97,7 @@ std::string NMXmlExporter::toXML(HandleSet *elements)
     delete(it);
     sprintf(aux, "<%s>\n", TAG_DESCRIPTION_TOKEN);
     result += aux;
-    for (int i = 0 ; i < NUMBER_OF_CLASSES; i++) {
+    for (unsigned int i = 0 ; i < ClassServer::getNumberOfClasses(); i++) {
         if (typesUsed[i]) {
             sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, ClassServer::getTypeName(i).c_str(), VALUE_TOKEN, ClassServer::getTypeName(i).c_str());
             result += aux;
@@ -120,7 +120,7 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
     Atom *atom = TLB::getAtom(atomHandle);
     char aux[1<<16];
     typesUsed[atom->getType()] = true;
-    if (ClassServer::isAssignableFrom(NODE, atom->getType())) {
+    if (ClassServer::isA(atom->getType(), NODE)) {
         if (!isInternal) {
             sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
             result += aux;

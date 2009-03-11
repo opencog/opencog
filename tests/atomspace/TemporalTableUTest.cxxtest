@@ -25,6 +25,7 @@
 #include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TemporalTable.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
 
 using namespace opencog;
@@ -46,8 +47,8 @@ public:
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i*2, i*2);
             char name[1<<16];
-            sprintf(name, "name-%d", i);
-            Node *n = new Node(WORD_NODE, name);
+            sprintf(name, "%d", i);
+            Node *n = new Node(NUMBER_NODE, name);
             handles[i] = TLB::addAtom(n);
         }
     }
@@ -186,8 +187,8 @@ public:
                     delete result;
                     result = temporalTable->get(handles[i], *(times[j]), TemporalTable::OVERLAPS);
                     hte = result;
-//                    printf("hte = %s\n", hte->toString().c_str());
-//                    printf("expected time = %s\n", ((TemporalEntry::compare(&time, times[j]) < 0)?&time:times[j])->toString().c_str());
+                    //logger().debug("hte = %s", hte->toString().c_str());
+                    //logger().debug("expected time = %s", ((TemporalEntry::compare(&time, times[j]) < 0)?&time:times[j])->toString().c_str());
                     TS_ASSERT(hte);
                     TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(),
                                                      (TemporalEntry::compare(&time, times[j]) < 0) ? &time : times[j]) == 0);
@@ -289,49 +290,49 @@ public:
                     HandleTemporalPairEntry* hte = result;
                     int numberOfReturnedEntries = hte->getSize();
                     if (numberOfReturnedEntries != expectedNumberOfEntries[h][t][c]) {
-                        printf("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s",
-                               TLB::getAtom(handles[h])->toString().c_str(),
-                               search_intervals[t].toString().c_str(),
-                               TemporalTable::getTemporalRelationshipStr(criteria[c]),
-                               expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, hte->toString().c_str());
+                        logger().debug("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s",
+                                       TLB::getAtom(handles[h])->toString().c_str(),
+                                       search_intervals[t].toString().c_str(),
+                                       TemporalTable::getTemporalRelationshipStr(criteria[c]),
+                                       expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, hte->toString().c_str());
                     }
                     TS_ASSERT(numberOfReturnedEntries == expectedNumberOfEntries[h][t][c]);
                     for (int i = 0; i < expectedNumberOfEntries[h][t][c]; i++) {
                         TS_ASSERT(hte);
                         if (criteria[c] == TemporalTable::NEXT_AFTER_START_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) != expectedNextAfterStartOf[h][t]) {
-                                printf("Next after start of t %s for h (%s) does not match\nExpected %s, but got %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       expectedNextAfterStartOf[h][t].toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Next after start of t %s for h (%s) does not match\nExpected %s, but got %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               expectedNextAfterStartOf[h][t].toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == expectedNextAfterStartOf[h][t]);
                         } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) != expectedNextAfterEndOf[h][t]) {
-                                printf("Next after end of t %s for h (%s) does not match\nExpected %s, but got %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       expectedNextAfterEndOf[h][t].toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Next after end of t %s for h (%s) does not match\nExpected %s, but got %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               expectedNextAfterEndOf[h][t].toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == expectedNextAfterEndOf[h][t]);
                         } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) != expectedPreviousBeforeStartOf[h][t]) {
-                                printf("Previous before start of t %s for h (%s) does not match\nExpected %s, but got %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       expectedPreviousBeforeStartOf[h][t].toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Previous before start of t %s for h (%s) does not match\nExpected %s, but got %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               expectedPreviousBeforeStartOf[h][t].toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == expectedPreviousBeforeStartOf[h][t]);
                         } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) != expectedPreviousBeforeEndOf[h][t]) {
-                                printf("Previous before end of t %s for h (%s) does not match\nExpected %s, but got %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       expectedPreviousBeforeEndOf[h][t].toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Previous before end of t %s for h (%s) does not match\nExpected %s, but got %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               expectedPreviousBeforeEndOf[h][t].toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == expectedPreviousBeforeEndOf[h][t]);
                         }
@@ -645,10 +646,10 @@ public:
                     (expectedNumberOfEntries[0][t][c] + expectedNumberOfEntries[1][t][c]) :
                     (expectedNumberOfEntries[0][t][c] | expectedNumberOfEntries[1][t][c]);
                 if (numberOfReturnedEntries != totalExpectedNumberOfEntries) {
-                    printf("\nWrong number of entries returned t=%s, c=%s\nExpected %d, but got %d => %s",
-                           search_intervals[t].toString().c_str(),
-                           TemporalTable::getTemporalRelationshipStr(criteria[c]),
-                           totalExpectedNumberOfEntries, numberOfReturnedEntries, hte->toString().c_str());
+                    logger().debug("\nWrong number of entries returned t=%s, c=%s\nExpected %d, but got %d => %s",
+                                   search_intervals[t].toString().c_str(),
+                                   TemporalTable::getTemporalRelationshipStr(criteria[c]),
+                                   totalExpectedNumberOfEntries, numberOfReturnedEntries, hte->toString().c_str());
                 }
                 TS_ASSERT(numberOfReturnedEntries == totalExpectedNumberOfEntries);
                 for (int i = 0; i < totalExpectedNumberOfEntries; i++) {
@@ -663,10 +664,10 @@ public:
                             expectedNextAfterStartOf[0][t] :
                             expectedNextAfterStartOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) != nextAfterStartOf) {
-                            printf("Next after start of t %s does not match\nExpected %s, but got %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   nextAfterStartOf.toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Next after start of t %s does not match\nExpected %s, but got %s",
+                                           search_intervals[t].toString().c_str(),
+                                           nextAfterStartOf.toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == nextAfterStartOf);
                     } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) {
@@ -679,10 +680,10 @@ public:
                             expectedNextAfterEndOf[0][t] :
                             expectedNextAfterEndOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) != nextAfterEndOf) {
-                            printf("Next after end of t %s does not match\nExpected %s, but got %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   nextAfterEndOf.toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Next after end of t %s does not match\nExpected %s, but got %s",
+                                           search_intervals[t].toString().c_str(),
+                                           nextAfterEndOf.toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == nextAfterEndOf);
                     } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) {
@@ -695,10 +696,10 @@ public:
                             expectedPreviousBeforeStartOf[0][t] :
                             expectedPreviousBeforeStartOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) != previousBeforeStartOf) {
-                            printf("Previous before start of t %s does not match\nExpected %s, but got %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   previousBeforeStartOf.toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Previous before start of t %s does not match\nExpected %s, but got %s",
+                                           search_intervals[t].toString().c_str(),
+                                           previousBeforeStartOf.toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == previousBeforeStartOf);
                     } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) {
@@ -711,10 +712,10 @@ public:
                             expectedPreviousBeforeEndOf[0][t] :
                             expectedPreviousBeforeEndOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) != previousBeforeEndOf) {
-                            printf("Previous before end of t %s does not match\nExpected %s, but got %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   previousBeforeEndOf.toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Previous before end of t %s does not match\nExpected %s, but got %s",
+                                           search_intervals[t].toString().c_str(),
+                                           previousBeforeEndOf.toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) == previousBeforeEndOf);
                     }
@@ -967,9 +968,9 @@ public:
             delete result;
         }
         /*
-        printf("All entries in TemporalTable = %s\n", temporalTable->get(Handle::UNDEFINED)->toString().c_str());
+        logger().debug("All entries in TemporalTable = %s", temporalTable->get(Handle::UNDEFINED)->toString().c_str());
         Temporal specialTime(0, (N_TIMES-1)*2); // overlaps any inserted time
-        printf("specialTime = %s\n", specialTime.toString().c_str());
+        logger().debug("specialTime = %s", specialTime.toString().c_str());
         temporalTable->remove(Handle::UNDEFINED, specialTime, TemporalTable::OVERLAPS);
         */
         // Removes the entries and check
@@ -998,7 +999,7 @@ public:
         }
         // Check if they are all removed.
         hte = temporalTable->get(Handle::UNDEFINED);
-        //printf("All entries in TemporalTable = %s\n", hte->toString().c_str());
+        //logger().debug("All entries in TemporalTable = %s", hte->toString().c_str());
         TS_ASSERT(!hte);
         for (int i = 0; i < N_TIMES; i++) {
             delete specialTimes[i];
@@ -1024,13 +1025,13 @@ public:
         }
         // Removes each time and check
         for (int i = 0; i < N_TIMES; i++) {
-//printf("i = %d\n", i);
+            //logger().debug("i = %d", i);
             temporalTable->remove(Handle::UNDEFINED, *(times[i]));
             for (int j = 0; j < N_TIMES - 1; j++) {
-//printf("j = %d\n", j);
+                //logger().debug("j = %d", j);
                 HandleTemporalPairEntry* result = temporalTable->get(handles[j]);
                 HandleTemporalPairEntry* hte = result;
-//printf("hte => %s\n", hte->toString().c_str());
+                //logger().debug("hte => %s", hte->toString().c_str());
                 if (j < i) {
                     TS_ASSERT(!hte);
                 } else if (j == i) {
@@ -1119,7 +1120,7 @@ public:
             for (int j = 0; j < N_TIMES - 1; j++) {
                 HandleTemporalPairEntry* result = temporalTable->get(handles[j]);
                 HandleTemporalPairEntry* hte = result;
-                //printf("j= %d, i = %d, hte = %s\n", j, i, hte->toString().c_str());
+                //logger().debug("j= %d, i = %d, hte = %s", j, i, hte->toString().c_str());
                 if (j < i) {
                     // [j,j] [j+1,j+1] [0,j+1] removed
                     TS_ASSERT(!hte);
@@ -1170,11 +1171,11 @@ public:
                     hte = result;
                     int numberOfReturnedEntries = hte->getSize();
                     if (numberOfReturnedEntries != (totalNumberOfEntries - expectedNumberOfEntries[h][t][c])) {
-                        printf("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s",
-                               TLB::getAtom(handles[h])->toString().c_str(),
-                               search_intervals[t].toString().c_str(),
-                               TemporalTable::getTemporalRelationshipStr(criteria[c]),
-                               expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, hte->toString().c_str());
+                        logger().debug("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s",
+                                       TLB::getAtom(handles[h])->toString().c_str(),
+                                       search_intervals[t].toString().c_str(),
+                                       TemporalTable::getTemporalRelationshipStr(criteria[c]),
+                                       expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, hte->toString().c_str());
                     }
                     TS_ASSERT(numberOfReturnedEntries == (totalNumberOfEntries - expectedNumberOfEntries[h][t][c]));
 
@@ -1183,34 +1184,34 @@ public:
                         TS_ASSERT(hte);
                         if (criteria[c] == TemporalTable::NEXT_AFTER_START_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) == expectedNextAfterStartOf[h][t]) {
-                                printf("Next after start of t %s for h (%s), that should have been removed is still there: %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Next after start of t %s for h (%s), that should have been removed is still there: %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != expectedNextAfterStartOf[h][t]);
                         } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) == expectedNextAfterEndOf[h][t]) {
-                                printf("Next after end of t %s for h (%s), that should have been removed is still there: %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Next after end of t %s for h (%s), that should have been removed is still there: %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != expectedNextAfterEndOf[h][t]);
                         } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) == expectedPreviousBeforeStartOf[h][t]) {
-                                printf("Previous before start of t %s for h (%s), that should have been removed is still there: %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Previous before start of t %s for h (%s), that should have been removed is still there: %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != expectedPreviousBeforeStartOf[h][t]);
                         } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) {
                             if (*(hte->handleTemporalPair.getTemporal()) == expectedPreviousBeforeEndOf[h][t]) {
-                                printf("Previous before end of t %s for h (%s), that should have been removed is still there: %s\n",
-                                       search_intervals[t].toString().c_str(),
-                                       TLB::getAtom(handles[h])->toString().c_str(),
-                                       hte->handleTemporalPair.getTemporal()->toString().c_str());
+                                logger().debug("Previous before end of t %s for h (%s), that should have been removed is still there: %s",
+                                               search_intervals[t].toString().c_str(),
+                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               hte->handleTemporalPair.getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != expectedPreviousBeforeEndOf[h][t]);
                         }
@@ -1259,13 +1260,13 @@ public:
                                                        (expectedNumberOfEntries[0][t][c] + expectedNumberOfEntries[1][t][c]) :
                                                        (expectedNumberOfEntries[0][t][c] | expectedNumberOfEntries[1][t][c])
                                                    );
-                //printf("expectedNumberOfEntries[0][t][c] = %d, expectedNumberOfEntries[1][t][c] = %d\n", expectedNumberOfEntries[0][t][c], expectedNumberOfEntries[1][t][c]);
-                //printf("nRetEntries = %d, totalExpEntries = %d\n", numberOfReturnedEntries, totalExpectedNumberOfEntries);
+                //logger().debug("expectedNumberOfEntries[0][t][c] = %d, expectedNumberOfEntries[1][t][c] = %d", expectedNumberOfEntries[0][t][c], expectedNumberOfEntries[1][t][c]);
+                //logger().debug("nRetEntries = %d, totalExpEntries = %d", numberOfReturnedEntries, totalExpectedNumberOfEntries);
                 if (numberOfReturnedEntries != totalExpectedNumberOfEntries) {
-                    printf("\nWrong number of entries returned t=%s, c=%s\nExpected %d, but got %d => %s",
-                           search_intervals[t].toString().c_str(),
-                           TemporalTable::getTemporalRelationshipStr(criteria[c]),
-                           totalExpectedNumberOfEntries, numberOfReturnedEntries, hte->toString().c_str());
+                    logger().debug("\nWrong number of entries returned t=%s, c=%s\nExpected %d, but got %d => %s",
+                                   search_intervals[t].toString().c_str(),
+                                   TemporalTable::getTemporalRelationshipStr(criteria[c]),
+                                   totalExpectedNumberOfEntries, numberOfReturnedEntries, hte->toString().c_str());
                 }
                 TS_ASSERT(numberOfReturnedEntries == totalExpectedNumberOfEntries);
                 for (int i = 0; i < totalExpectedNumberOfEntries; i++) {
@@ -1280,9 +1281,9 @@ public:
                             expectedNextAfterStartOf[0][t] :
                             expectedNextAfterStartOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) == nextAfterStartOf) {
-                            printf("Next after start of t %s, that should have been removed, is still there: %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Next after start of t %s, that should have been removed, is still there: %s",
+                                           search_intervals[t].toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != nextAfterStartOf);
                     } else if (criteria[c] == TemporalTable::NEXT_AFTER_END_OF) {
@@ -1295,9 +1296,9 @@ public:
                             expectedNextAfterEndOf[0][t] :
                             expectedNextAfterEndOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) == nextAfterEndOf) {
-                            printf("Next after end of t %s, that should have been removed, is still there: %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Next after end of t %s, that should have been removed, is still there: %s",
+                                           search_intervals[t].toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != nextAfterEndOf);
                     } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_START_OF) {
@@ -1310,9 +1311,9 @@ public:
                             expectedPreviousBeforeStartOf[0][t] :
                             expectedPreviousBeforeStartOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) == previousBeforeStartOf) {
-                            printf("Previous before start of t %s, that should have been removed, is still there: %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Previous before start of t %s, that should have been removed, is still there: %s",
+                                           search_intervals[t].toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != previousBeforeStartOf);
                     } else if (criteria[c] == TemporalTable::PREVIOUS_BEFORE_END_OF) {
@@ -1325,9 +1326,9 @@ public:
                             expectedPreviousBeforeEndOf[0][t] :
                             expectedPreviousBeforeEndOf[1][t];
                         if (*(hte->handleTemporalPair.getTemporal()) == previousBeforeEndOf) {
-                            printf("Previous before end of t %s, that should have been removed, is still there: %s\n",
-                                   search_intervals[t].toString().c_str(),
-                                   hte->handleTemporalPair.getTemporal()->toString().c_str());
+                            logger().debug("Previous before end of t %s, that should have been removed, is still there: %s",
+                                           search_intervals[t].toString().c_str(),
+                                           hte->handleTemporalPair.getTemporal()->toString().c_str());
                         }
                         TS_ASSERT(*(hte->handleTemporalPair.getTemporal()) != previousBeforeEndOf);
                     }
@@ -1345,7 +1346,7 @@ public:
 
     void testStress() {
         int NUMBER_OF_ENTRIES = 100;
-        //printf("testStress(): adding...\n");
+        //logger().debug("testStress(): adding...");
         for (int i = 0; i < N_TIMES; i++) {
             for (int j = 0; j < N_TIMES; j++) {
                 temporalTable->add(handles[i], *(times[j]));
@@ -1356,7 +1357,7 @@ public:
                 temporalTable->add(handles[i], Temporal(N_TIMES - 1, j));
             }
         }
-        //printf("testStress(): removing...\n");
+        //logger().debug("testStress(): removing...");
         for (int i = 0; i < N_TIMES; i++) {
             for (int j = 0; j < N_TIMES; j++) {
                 temporalTable->remove(handles[i], *(times[j]));

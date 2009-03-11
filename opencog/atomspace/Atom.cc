@@ -32,8 +32,6 @@
 #include <unistd.h>
 #endif
 
-#include <opencog/util/platform.h>
-
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -44,6 +42,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/platform.h>
 
 //#define USE_SHARED_DEFAULT_TV
 
@@ -107,7 +106,7 @@ Atom::~Atom() throw (RuntimeException)
 bool Atom::isReal() const
 {
     unsigned long value = (unsigned long) this;
-    bool real = (value >= NUMBER_OF_CLASSES);
+    bool real = (value >= ClassServer::getNumberOfClasses());
     //if(!real){
     //fprintf(stdout, "Atom - Type: %d, Pointe converted: (%p, %d)\n", type, this, (long)this);
     //fflush(stdout);
@@ -205,7 +204,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
 #endif
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
-    if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+    if (ClassServer::isA(type, UNORDERED_LINK)) {
         std::sort(outgoing.begin(), outgoing.end(), CoreUtils::HandleComparison());
     }
 }
@@ -395,7 +394,7 @@ HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, b
         Link *link = dynamic_cast<Link*>(TLB::getAtom(h->handle));
         Type linkType = link->getType();
         //printf("linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
-        if ((linkType == desiredLinkType) || (subClasses && ClassServer::isAssignableFrom(desiredLinkType, linkType))) {
+        if ((linkType == desiredLinkType) || (subClasses && ClassServer::isA(linkType, desiredLinkType))) {
             int linkArity = link->getArity();
             for (int i = 0; i < linkArity; i++) {
                 Handle handle = link->getOutgoingSet()[i];
