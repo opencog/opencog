@@ -249,7 +249,10 @@ void HopfieldServer::init(int width, int height, int numLinks)
     startAgent(imprintAgent);
     diffuseAgent = static_cast<ImportanceDiffusionAgent*>(
             this->createAgent(ImportanceDiffusionAgent::info().id, true));
-    diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC);
+    diffuseAgent->setDiffusionThreshold(options->diffusionThreshold);
+    diffuseAgent->setMaxSpreadPercentage(options->maxSpreadPercentage);
+    diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC,
+            options->deciderFunctionShape);
 //    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
     forgetAgent = static_cast<ForgettingAgent*>(
             this->createAgent(ForgettingAgent::info().id, true));

@@ -115,6 +115,9 @@ void HopfieldOptions::printHelp()
         "                  \t spread across links.\n"
         "   -F --forget N \t percentage of links to forget.\n"
         "   -k --key N    \t number of key nodes for glocal storage.\n"
+        "      --diffuse-t N\t Threshold of diffusion [-1..1], default 0==AF.\n"
+        "      --diffuse-max N\t Maximum diffusion percentage [0..1], default 1==100\%.\n"
+        "      --diffuse-s N\t Shape of hyperbolic diffusion decision function, default 30.\n"
         "   == Pattern commands ==\n"
         "   -p --patterns N \t Number of patterns to test.\n"
         "   -g --gen-density N \t Density of generated patterns (active/inactive nodes).\n"
@@ -172,6 +175,9 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
                 {"visualize", 0, &visualize, 1},
                 {"vdelay", required_argument, 0, '6'},
                 {"vlabel", 0, &visLabel, 1},
+                {"diffuse-t", required_argument, 0, '8'},
+                {"diffuse-max", required_argument, 0, '9'},
+                {"diffuse-s", required_argument, 0, '2'},
                 {"help", 0, 0, '?'},
                 {0, 0, 0, 0}
             };
@@ -310,6 +316,15 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
             break;
         case '6':
             visDelay = atof(optarg);
+            break;
+        case '8':
+            diffusionThreshold = atof(optarg);
+            break;
+        case '9':
+            maxSpreadPercentage = atof(optarg);
+            break;
+        case '2':
+            deciderFunctionShape = atof(optarg);
             break;
         case '?':
             printHelp();
