@@ -36,6 +36,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/nlp/wsd/atom_types.h>
 
 using namespace opencog;
 

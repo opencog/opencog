@@ -35,6 +35,7 @@
 #include <opencog/server/Factory.h>
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/nlp/wsd/atom_types.h>
 
 //#define LINK_GRAMMAR_DATA_DIR (char*)"/usr/share/link-grammar/en/"
 
@@ -115,7 +116,7 @@ struct compare_link {
         Link *l = (Link*)a;
         Type at = a->getType();
 
-        if (!(at == t || subclass && ClassServer::isAssignableFrom(t, at)))
+        if (!(at == t || subclass && ClassServer::isA(at, t)))
             return false;
 
         if (position == (Arity)-1)
@@ -133,7 +134,7 @@ struct compare_link {
         if (!targetSubclass)
             return false;
 
-        return ClassServer::isAssignableFrom(tt, tat);
+        return ClassServer::isA(tat, tt);
     }
 };
 
