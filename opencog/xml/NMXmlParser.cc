@@ -214,7 +214,7 @@ throw (RuntimeException, InconsistenceException)
 //        timeval s;
 //        gettimeofday(&s, NULL);
 
-        if (ClassServer::isAssignableFrom(NODE, typeFound)) {
+        if (ClassServer::isA(typeFound, NODE)) {
             //cprintf(5,"Processing Node: %d (%s)\n",  typeFound, name);
             r = (Atom*) new Node(typeFound, "", NMXmlParser::DEFAULT_TV());
             logger().fine("Pushing r = %p", r);
@@ -251,10 +251,10 @@ throw (RuntimeException, InconsistenceException)
         // inheritance links may be declared inside lexical category node
         // tags. this information is ignored once it is redundant with source
         // and target data contained in the inheritance link declaration
-        if (ClassServer::isAssignableFrom(LINK, typeFound)) {
+        if (ClassServer::isA(typeFound, LINK)) {
 //            timeval s;
 //            gettimeofday(&s, NULL);
-            //cprintf(5,"Processing Link: %d (%s)\n", typeFound, name);
+            printf("Processing Link: %d (%s)\n", typeFound, name);
             r = (Atom*) new Link(typeFound, std::vector<Handle>(), NMXmlParser::DEFAULT_TV());
 
             const TruthValue& t = r->getTruthValue();
@@ -366,15 +366,15 @@ throw (InconsistenceException)
             //timeval s;
             //gettimeofday(&s, NULL);
             Type type = getTypeFromString(name, false);
-            if ((ClassServer::isAssignableFrom(NODE, type) && ud->status.processNodes) ||
-                (ClassServer::isAssignableFrom(LINK, type) && ud->status.processRelationships)) {
+            if ((ClassServer::isA(type, NODE) && ud->status.processNodes) ||
+                (ClassServer::isA(type, LINK) && ud->status.processRelationships)) {
                 if (currentAtom->getType() == type) {
-                    if (ClassServer::isAssignableFrom(LINK, type)) {
+                    if (ClassServer::isA(type, LINK)) {
                         pop(ud->stack);
                         logger().fine("(1) Pushing currentAtom = %p", currentAtom);
                         push(ud->stack, currentAtom);
                     }
-                    if (ClassServer::isAssignableFrom(UNORDERED_LINK, type)) {
+                    if (ClassServer::isA(type, UNORDERED_LINK)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently...
                         Link *link = dynamic_cast<Link *>(currentAtom);
@@ -409,7 +409,7 @@ throw (InconsistenceException)
                     // would be better if this was replaced by
                     // if (NULL != dynamic_cast<Link *>(currentAtom))
                     // and also a few lines down.
-                    if (ClassServer::isAssignableFrom(LINK, currentAtom->getType())) {
+                    if (ClassServer::isA(currentAtom->getType(), LINK)) {
                         //KMI -- find out if this is a nested link
                         pop(ud->stack);
                         Atom* nextUd = (Atom*) top(ud->stack);

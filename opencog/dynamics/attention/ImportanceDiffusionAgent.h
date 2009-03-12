@@ -56,6 +56,7 @@ protected:
 
 public:
     SpreadDecider() {}
+    virtual ~SpreadDecider() {}
 
     virtual void setFocusBoundary(float b = 0.0f) {};
     RandGen* getRNG();
@@ -71,6 +72,7 @@ public:
     float focusBoundary;
     HyperbolicDecider(float _s=10.0f):
         shape(_s), focusBoundary(0.0f) {}
+    virtual ~HyperbolicDecider() {}
     void setFocusBoundary(float b = 0.0f);
 };
 
@@ -81,6 +83,7 @@ class StepDecider : SpreadDecider
 public:
     int focusBoundary;
     StepDecider() {}
+    virtual ~StepDecider() {}
     void setFocusBoundary(float b = 0.0f);
 };
 

@@ -448,7 +448,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 
     while ((set != NULL) &&
             ((!subclass && (type != set->getAtom()->getType())) ||
-             (subclass && !ClassServer::isAssignableFrom(type, set->getAtom()->getType())))) {
+             (subclass && !ClassServer::isA(set->getAtom()->getType(), type)))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -460,7 +460,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
     HandleEntry* head = set;
     while (set->next != NULL) {
         if ((!subclass && (type != set->next->getAtom()->getType())) ||
-                (subclass && !ClassServer::isAssignableFrom(type, set->next->getAtom()->getType()))) {
+            (subclass && !ClassServer::isA(set->next->getAtom()->getType(), type))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -555,7 +555,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             for (position = 0; position < arity; position++) {
                 if ((target = link->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
-                         (subclass && ClassServer::isAssignableFrom(type, target)))) {
+                         (subclass && ClassServer::isA(target, type)))) {
                     break;
                 }
             }
@@ -587,7 +587,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             for (position = 0; position < arity; position++) {
                 if ((target = link->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
-                         (subclass && ClassServer::isAssignableFrom(type, target)))) {
+                         (subclass && ClassServer::isA(target, type)))) {
                     break;
                 }
             }
@@ -626,7 +626,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         if ((link->getArity() != arity) ||
              (target = link->getOutgoingAtom(position)->getType(),
               ((!subclass && (type != target)) ||
-               (subclass && !ClassServer::isAssignableFrom(type, target))))) {
+               (subclass && !ClassServer::isA(target, type))))) {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -645,7 +645,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         if (((link->getArity() != arity) ||
                 (target = link->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
-                  (subclass && !ClassServer::isAssignableFrom(type, target)))))) {
+                  (subclass && !ClassServer::isA(target, type)))))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -814,7 +814,7 @@ bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, V
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
                 !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
             if (targetSubclasses) {
-                result = ClassServer::isAssignableFrom(targetType, target->getType());
+                result = ClassServer::isA(target->getType(), targetType);
             } else {
                 result = targetType == target->getType();
             }
@@ -946,9 +946,9 @@ std::string HandleEntry::toString()
     for (HandleEntry* current = this; current != NULL; current = current->next) {
         Atom* atom = TLB::getAtom(current->handle);
         if (atom != NULL) {
-            if (ClassServer::isAssignableFrom(NODE, atom->getType())) {
+            if (ClassServer::isA(atom->getType(), NODE)) {
                 answer += ((Node*) atom)->getName();
-            } else if (ClassServer::isAssignableFrom(LINK, atom->getType())) {
+            } else if (ClassServer::isA(atom->getType(), LINK)) {
                 answer += ((Link*) atom)->toShortString();
             }
             //char buf[1024];

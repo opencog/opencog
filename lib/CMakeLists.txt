@@ -13,8 +13,9 @@ INSTALL (FILES
 	FindPthreads.cmake
 	FindSTLPort.cmake
 	FindUnixODBC.cmake
-    FindLinkGrammar.cmake
-    FindLibUbiGraphClient.cmake
+	FindLinkGrammar.cmake
+	FindLibUbiGraphClient.cmake
+	OpenCogAtomTypes.cmake
 	OpenCogConfig.cmake
 	DESTINATION "${DATADIR}/cmake"
 )

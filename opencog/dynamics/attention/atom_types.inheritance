@@ -1,0 +1,10 @@
+/* File automatically generated. Do not edit */
+opencog::HEBBIAN_LINK = opencog::ClassServer::addType(opencog::LINK, "HebbianLink");
+opencog::ASYMMETRIC_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::ORDERED_LINK, "AsymmetricHebbianLink");
+opencog::ASYMMETRIC_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::HEBBIAN_LINK, "AsymmetricHebbianLink");
+opencog::SYMMETRIC_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::UNORDERED_LINK, "SymmetricHebbianLink");
+opencog::SYMMETRIC_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::HEBBIAN_LINK, "SymmetricHebbianLink");
+opencog::INVERSE_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::ORDERED_LINK, "InverseHebbianLink");
+opencog::INVERSE_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::HEBBIAN_LINK, "InverseHebbianLink");
+opencog::SYMMETRIC_INVERSE_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::UNORDERED_LINK, "SymmetricInverseHebbianLink");
+opencog::SYMMETRIC_INVERSE_HEBBIAN_LINK = opencog::ClassServer::addType(opencog::HEBBIAN_LINK, "SymmetricInverseHebbianLink");

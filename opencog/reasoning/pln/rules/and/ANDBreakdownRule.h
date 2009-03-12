@@ -22,6 +22,8 @@
 #ifndef ANDBREAKDOWNRULE_H
 #define ANDBREAKDOWNRULE_H
 
+using namespace opencog;
+
 namespace reasoning
 {
 

@@ -34,8 +34,9 @@
 
 #include <stdio.h>
 
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/nlp/wsd/atom_types.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 

@@ -178,7 +178,7 @@ SCM SchemeSmob::ss_get_types (void)
 {
 	SCM list = SCM_EOL;
 
-	Type t = NUMBER_OF_CLASSES;
+	Type t = ClassServer::getNumberOfClasses();
 	while (1)
 	{
 		t--;

@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
 	CMAKE_POLICY(SET CMP0005 OLD)
@@ -122,6 +122,9 @@ IF (NOT DEFINED DATADIR)
     SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
 ENDIF (NOT DEFINED DATADIR)
 ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
+
+# include custom opencog cmake macros
+INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs

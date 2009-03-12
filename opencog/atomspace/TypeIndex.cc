@@ -23,17 +23,15 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/type_codes.h>
 
 using namespace opencog;
 
 TypeIndex::TypeIndex(void)
 {
-	// The typeIndex is NUMBER_OF_CLASSES+2 because NOTYPE is 
-	// NUMBER_OF_CLASSES+1 and typeIndex[NOTYPE] is asked for if a
-	// typename is misspelled, because ClassServer::getType()
-	// returns NOTYPE in this case).
-	resize(ClassServer::getNumberOfClasses() + 2);
+    // The typeIndex is NOTYPE+1 because NOTYPE is the id of the last possible
+    // type and typeIndex[NOTYPE] is asked for if a typename is  misspelled.
+    // (because ClassServer::getType() returns NOTYPE in this case).
+    resize(NOTYPE + 1);
 }
 
 void TypeIndex::insertHandle(Handle h)
@@ -79,7 +77,7 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 	{
 		// Find the first type which is a subtype, and start iteration there.
 		if ((it.type == it.currtype) || 
-		    (sub && (ClassServer::isAssignableFrom(it.type, it.currtype))))
+		    (sub && (ClassServer::isA(it.currtype, it.type))))
 		{
 			it.se = it.s->begin();
 			if (it.se != it.s->end()) return it;
@@ -151,7 +149,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 
 			// Find the first type which is a subtype, and start iteration there.
 			if ((type == currtype) || 
-			    (subclass && (ClassServer::isAssignableFrom(type, currtype))))
+			    (subclass && (ClassServer::isA(currtype, type))))
 			{
 				se = s->begin();
 				if (se != s->end()) return *this;

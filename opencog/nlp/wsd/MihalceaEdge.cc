@@ -19,13 +19,14 @@
 
 #include <stdio.h>
 
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/nlp/wsd/atom_types.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/nlp/wsd/MihalceaEdge.h>
 #include <opencog/nlp/wsd/SenseCache.h>
 #include <opencog/nlp/wsd/SenseSimilarityLCH.h>
 #include <opencog/nlp/wsd/SenseSimilaritySQL.h>
+#include <opencog/util/platform.h>
 
 #define DEBUG
 // #define DETAIL_DEBUG

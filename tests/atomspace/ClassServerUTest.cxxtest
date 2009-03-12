@@ -22,6 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 
 using namespace opencog;
@@ -32,6 +35,7 @@ private:
 
 public:
     ClassServerUTest() {
+        ClassServer::init();
     }
 
     void setUp() {
@@ -43,27 +47,77 @@ public:
     void testIsAssignableFrom() {
         int numClasses = ClassServer::getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
-            printf("Checking type %d\n", t);
-            TS_ASSERT(ClassServer::isAssignableFrom(t, t));
-            if (t > 0) {
-                TS_ASSERT(ClassServer::isAssignableFrom(NODE, t) || ClassServer::isAssignableFrom(LINK, t));
-            }
+            TS_ASSERT(ClassServer::isA(t, t));
+            if (t > 0) TS_ASSERT(ClassServer::isA(t, NODE) || ClassServer::isA(t, LINK));
         }
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, CONCEPT_NODE));
-        TS_ASSERT(!ClassServer::isAssignableFrom(CONCEPT_NODE, NODE));
 
-        // TODO: Make more tests with well-known atom hierarchy
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_NODE));
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_OBJECT_NODE));
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_PET_NODE));
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, SL_AVATAR_NODE));
-
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, PREDICATE_NODE));
-        TS_ASSERT(ClassServer::isAssignableFrom(NODE, NUMBER_NODE));
-        TS_ASSERT(ClassServer::isAssignableFrom(LINK, EVALUATION_LINK));
-        TS_ASSERT(ClassServer::isAssignableFrom(LINK, LIST_LINK));
+        TS_ASSERT( ClassServer::isA(NODE, ATOM));
+        TS_ASSERT( ClassServer::isA(LINK, ATOM));
+        TS_ASSERT( ClassServer::isA(NUMBER_NODE, NODE));
+        TS_ASSERT(!ClassServer::isA(NODE, NUMBER_NODE));
+        TS_ASSERT( ClassServer::isA(ORDERED_LINK, LINK));
+        TS_ASSERT( ClassServer::isA(LIST_LINK, ORDERED_LINK));
+        TS_ASSERT( ClassServer::isA(LIST_LINK, LINK));
+        TS_ASSERT( ClassServer::isA(LIST_LINK, ATOM));
+        TS_ASSERT(!ClassServer::isA(LIST_LINK, NODE));
+        TS_ASSERT(!ClassServer::isA(NUMBER_NODE, LINK));
+        TS_ASSERT(!ClassServer::isA(ATOM, LIST_LINK));
     }
 
-    // TODO: Make tests with other ClassServer methods
+    void testNames() {
+        TS_ASSERT(ClassServer::getTypeName(ATOM)      == "Atom");
+        TS_ASSERT(ClassServer::getTypeName(LINK)      == "Link");
+        TS_ASSERT(ClassServer::getTypeName(NODE)      == "Node");
+        TS_ASSERT(ClassServer::getTypeName(NUMBER_NODE) == "NumberNode");
+        TS_ASSERT(ClassServer::getTypeName(LIST_LINK) == "ListLink");
+    }
 
+    void testCodes() {
+        TS_ASSERT(ClassServer::getType("Atom") == 0);
+        TS_ASSERT(ClassServer::getType("Node") <= 2);
+        TS_ASSERT(ClassServer::getType("Link") <= 2);
+    }
+
+    void testCustomTypes() {
+        Type ntypes = ClassServer::getNumberOfClasses();
+
+        Type CS_UTEST_NODE   = ClassServer::addType(NODE, "CsUtestNode");
+        TS_ASSERT(CS_UTEST_NODE   == ntypes);
+        TS_ASSERT( ClassServer::isA(CS_UTEST_NODE, NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_NODE, NUMBER_NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_NODE, LINK));
+
+        Type CS_UTEST_LINK   = ClassServer::addType(LIST_LINK, "CsUtestLink");
+        TS_ASSERT(CS_UTEST_LINK   == (ntypes + 1));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK, LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK, ORDERED_LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK, LIST_LINK));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK, UNORDERED_LINK));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK, NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK, NUMBER_NODE));
+
+        Type CS_UTEST_NODE_2 = ClassServer::addType(NODE, "CsUtestNode");
+        TS_ASSERT(CS_UTEST_NODE_2 == ntypes);
+        TS_ASSERT( ClassServer::isA(CS_UTEST_NODE_2, NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_NODE_2, NUMBER_NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_NODE_2, LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_NODE, NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_NODE, NUMBER_NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_NODE, LINK));
+
+        Type CS_UTEST_LINK_2 = ClassServer::addType(UNORDERED_LINK, "CsUtestLink");
+        TS_ASSERT(CS_UTEST_LINK_2 == (ntypes + 1));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK_2, LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK_2, ORDERED_LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK_2, LIST_LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK_2, UNORDERED_LINK));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK_2, NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK_2, NUMBER_NODE));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK,   LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK,   ORDERED_LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK,   LIST_LINK));
+        TS_ASSERT( ClassServer::isA(CS_UTEST_LINK,   UNORDERED_LINK));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK,   NODE));
+        TS_ASSERT(!ClassServer::isA(CS_UTEST_LINK,   NUMBER_NODE));
+    }
 };

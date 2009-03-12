@@ -410,7 +410,7 @@ bool Ubigrapher::addEdges(Handle h)
                 logger().error("Status was %d", status);
             
             int style = compactLinkStyle;
-            if (ClassServer::isAssignableFrom(ORDERED_LINK, a->getType()))
+            if (ClassServer::isA(a->getType(), ORDERED_LINK))
                 style = compactLinkStyleDirected;
             ubigraph_change_edge_style(id, style);
             if (labelsOn) {
@@ -427,7 +427,7 @@ bool Ubigrapher::addEdges(Handle h)
             return false;
         } else {
             int style = outgoingStyle;
-            if (ClassServer::isAssignableFrom(ORDERED_LINK, a->getType()))
+            if (ClassServer::isA(a->getType(), ORDERED_LINK))
                 style = outgoingStyleDirected;
             for (size_t i = 0; i < out.size(); i++) {
                 int id = ubigraph_new_edge(h.value(),out[i].value());

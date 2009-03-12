@@ -60,10 +60,9 @@ public:
         AttentionValue::sti_t min_sti = config().get_int("MIN_STI");
 
         AtomSpace *as = cogserver.getAtomSpace();
-        Handle h = as->addNode(WORD_NODE, "test");
+        Handle h = as->addNode(NUMBER_NODE, "1");
         Node *node = dynamic_cast<Node*>(TLB::getAtom(h));
         node->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
-
 
         // first, ensure the node's sti is what it should
         h = as->getHandle(node->getType(), node->getName());

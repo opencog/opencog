@@ -26,6 +26,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -49,15 +50,15 @@ public:
     }
 
     void printHandleEntry(HandleEntry* p) {
-        printf("HandleEntry = %s\n", p->toString().c_str());
+        logger().debug("HandleEntry = %s", p->toString().c_str());
         /*
         while (p != NULL) {
-            printf("p = %p\n", p);
-            printf("p->getAtom() = %p\n", p->getAtom());
-            printf("p->getAtom()->getTruthValue() = %p\n", p->getAtom()->getTruthValue());
+            logger().debug("p = %p", p);
+            logger().debug("p->getAtom() = %p", p->getAtom());
+            logger().debug("p->getAtom()->getTruthValue() = %p", p->getAtom()->getTruthValue());
             TruthValue* tv = p->getAtom()->getTruthValue();
-            printf("%s\n", TruthValue::typeToStr(tv->getType()).c_str());
-            printf("%s\n", tv->toString().c_str());
+            logger().debug("%s", TruthValue::typeToStr(tv->getType()).c_str());
+            logger().debug("%s", tv->toString().c_str());
             p = p->next;
         }
         */
@@ -80,17 +81,17 @@ public:
         TS_ASSERT(he->getSize() == 5);
 
         // Now filter
-        //printf("======================\nFiltering using NULL_VERSION_HANDLE\n");
+        //logger().debug("======================\nFiltering using NULL_VERSION_HANDLE");
         he = HandleEntry::filterSet(he, NULL_VERSION_HANDLE);
         printHandleEntry(he);
         TS_ASSERT(he->getSize() == 5);
 
-        //printf("======================\nFiltering using VH1\n");
+        //logger().debug("======================\nFiltering using VH1");
         he = HandleEntry::filterSet(he, VH1);
         printHandleEntry(he);
         TS_ASSERT(he->getSize() == 2);
 
-        //printf("======================\nFiltering using VH2\n");
+        //logger().debug("======================\nFiltering using VH2");
         he = HandleEntry::filterSet(he, VH2);
         printHandleEntry(he);
         TS_ASSERT(he->getSize() == 1);

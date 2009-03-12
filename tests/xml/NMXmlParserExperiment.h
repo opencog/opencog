@@ -45,9 +45,9 @@ private:
 	static bool checkExp0();
 	static bool checkExp1();
 
-	static opencog::Handle sport;
-	static opencog::Handle soccer;
-	static opencog::Handle link_sport_socker;
+	static opencog::Handle one;
+	static opencog::Handle two;
+	static opencog::Handle link_one_two;
 	static opencog::Handle hihger_order_link;
 
     static opencog::AtomSpace* atomSpace;

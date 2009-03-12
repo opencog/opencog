@@ -23,7 +23,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/type_codes.h>
+#include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;
 
@@ -77,7 +77,7 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 		for (Type s = 0; s < max; s++)
 		{
 			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
-			if (ClassServer::isAssignableFrom(type, s))
+			if (ClassServer::isA(s, type))
 			{
 				const NameIndex &ni = idx[s];
 				Handle h = ni.get(name);

@@ -25,11 +25,12 @@
 namespace reasoning
 {
 
-template<Type InclusionLink>
+//template<Type InclusionLink>
 class InversionRule : public GenericRule<InversionFormula>
 {
 protected:
 // mutable std::vector<Type> ti;
+    Type InclusionLink;
 
     virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray,
                                        int* newN) const {
@@ -64,8 +65,10 @@ protected:
     }
 
 public:
-    InversionRule(iAtomSpaceWrapper *_destTable)
-            : GenericRule<InversionFormula> (_destTable, false, "InversionRule") {
+    //InversionRule(iAtomSpaceWrapper *_destTable)
+            //: GenericRule<InversionFormula> (_destTable, false, "InversionRule") {
+    InversionRule(iAtomSpaceWrapper *_destTable, Type linkType)
+            : GenericRule<InversionFormula> (_destTable, false, "InversionRule"), InclusionLink(linkType) {
         inputFilter.push_back(meta(
                                   new tree<Vertex>(
                                       mva((Handle)InclusionLink,

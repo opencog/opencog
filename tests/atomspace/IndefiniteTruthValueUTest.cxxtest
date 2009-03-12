@@ -28,6 +28,7 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 
@@ -173,8 +174,8 @@ public:
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
-        //printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
         TS_ASSERT(isEqual(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
+        //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
         for (int i = 0; i < NUM_TVS; i++) {
@@ -208,8 +209,8 @@ public:
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
-        //printf("tv->getCount() = %f, expectedCount = %f\n", tv->getCount() , expectedCount);
         TS_ASSERT(isEqual(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
+        //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
         for (int i = 0; i < NUM_TVS; i++) {
@@ -304,7 +305,7 @@ public:
 	    TS_ASSERT(isEqual(itv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(itv->isSymmetric());
             if (testChangedMean) {
-                //printf("itv->getMean() = %f, means[0] = %f\n", itv->getMean(), means[0]);
+                //logger().debug("itv->getMean() = %f, means[0] = %f", itv->getMean(), means[0]);
                 TS_ASSERT(fabs(itv->getMean() - means[0]) <= ERROR_THRESHOLD);
             } else {
                 TS_ASSERT(fabs(itv->getMean() - means[i]) <= ERROR_THRESHOLD);
@@ -395,7 +396,7 @@ public:
                 float diff = j * 0.1f;
                 tv->setDiff(diff);
                 TS_ASSERT(fabs(tv->getDiff()  - diff) <= FLOAT_ACCEPTABLE_ERROR);
-                //printf("diff = %f, tv->getL_() = %f, (ls[i] - diff) = %f\n", diff, tv->getL_(), (ls[i] - diff));
+                //logger().debug("diff = %f, tv->getL_() = %f, (ls[i] - diff) = %f", diff, tv->getL_(), (ls[i] - diff));
                 TS_ASSERT(fabs(tv->getL_() - (ls[i] - diff)) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getU_() - (us[i] + diff)) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);

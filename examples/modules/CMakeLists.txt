@@ -9,6 +9,5 @@ ADD_LIBRARY (samplemodule SHARED
 )
 
 ADD_LIBRARY (singleagentmodule SHARED
-    SingleAgentModule
+	SingleAgentModule
 )
-
