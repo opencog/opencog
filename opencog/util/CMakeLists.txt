@@ -56,7 +56,7 @@ INSTALL (FILES
         PorterStemmer.h
 	RandGen.h
 	recent_val.h
-        slection.h
+        selection.h
         slist.h
         StringManipulator.h
 	StringTokenizer.h
