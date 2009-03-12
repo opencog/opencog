@@ -9,57 +9,55 @@ ATOM
 NODE <- ATOM
 LINK <- ATOM
 
-// basic nodes
 CONCEPT_NODE <- NODE
 NUMBER_NODE <- NODE
 
-// basic links
+// Basic Links
 ORDERED_LINK <- LINK
 UNORDERED_LINK <- LINK
 
-// basic sets
+// Basic sets
 SET_LINK <- UNORDERED_LINK
 SUBSET_LINK <- ORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK
 
-// boolean set operations and related ideas.
+// Boolean set operations, logical constants
 AND_LINK <- ORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
 FALSE_LINK <- ORDERED_LINK
 TRUE_LINK <- ORDERED_LINK
 
-// variable management
-VARIABLE_NODE <- NODE
-VARIABLE_SCOPE_LINK <- ORDERED_LINK
-FW_VARIABLE_NODE <- NODE "FWVariableNode"
-
-// mathematical quantifiers
+// Logical quantifiers
 FORALL_LINK <- ORDERED_LINK
 EXIST_LINK <- ORDERED_LINK
 SCHOLEM_LINK <- ORDERED_LINK
 
-// generic association
+// Universe of discourse
+CONTEXT_LINK <- ORDERED_LINK
+
+// Basic first-order logic ungrounded terms
+IMPLICATION_LINK <- ORDERED_LINK
+VARIABLE_NODE <- NODE
+VARIABLE_SCOPE_LINK <- ORDERED_LINK
+EVALUATION_LINK <- ORDERED_LINK
+
+// SYMBOL_LINK <- ORDERED_LINK
+
+// Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// first-order logical links
+// Inheritence and association links
 INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
+
 EXTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
 EXTENSIONAL_SIMILARITY_LINK <- ORDERED_LINK
 INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
 INTENSIONAL_SIMILARITY_LINK <- ORDERED_LINK
 
-// higher-order logical links
-IMPLICATION_LINK <- ORDERED_LINK
-EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- ORDERED_LINK
-EQUIVALENCE_LINK <- ORDERED_LINK
-INTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
-INTENSIONAL_EQUIVALENCE_LINK <- ORDERED_LINK
-
-// proceedure, schema and predicate nodes.
+// Proceedure, schema and predicate nodes.
 PROCEDURE_NODE <- NODE
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
@@ -67,83 +65,157 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 SCHEMA_NODE <- PROCEDURE_NODE
 PREDICATE_NODE <- SCHEMA_NODE
 SATISFYING_SET_LINK <- ORDERED_LINK
+
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
-EVALUATION_LINK <- ORDERED_LINK
+
 EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
-// temporal links
+// Temporal Links
+
 PREDICTIVE_IMPLICATION <- ORDERED_LINK
 TAIL_PREDICTIVE_IMPLICATION <- ORDERED_LINK
 SEQUENTIAL_AND_LINK <- AND_LINK
 SIMULTANEOUS_AND_LINK <- AND_LINK
+
 EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
 EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
 
-/// other PLN types:
+/// PLN types:
 // These are used in PLN currently, but can perhaps be replaced/removed
 HYPOTHETICAL_LINK <- ORDERED_LINK
 MIXED_IMPLICATION_LINK <- ORDERED_LINK
+EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
+// Should be replaced by entensional and intensional
+// equivalence
+EQUIVALENCE_LINK <- UNORDERED_LINK
+EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
+// 
 
-// pb atoms
-FEELING_NODE <- GROUNDED_PREDICATE_NODE
-GOAL_NODE <- GROUNDED_PREDICATE_NODE
-LEARNED_SCHEMA_GOAL_NODE <- GOAL_NODE
-SCHEMA_GOAL_IMPLICATION_LINK <- IMPLICATION_LINK
-
-// time-related atoms:
-AT_TIME_LINK <- ORDERED_LINK
-TIME_NODE <- NODE
-
-
-//===============================================================================================================
-// NLP-RELATED ATOMS: 
-// TODO: move all types bellow to opencog/nlp/wsd/atom_types.script when the atom types initialization issue 
-// is definitely solved.
-//===============================================================================================================
-
-// new relex nodes, added by Linas per names used by Ben
-// these are subject to change or deletion pending review.
-// some of the link types may go away.
+// Older parsing and language handling nodes;
+// Commented out, as these are currently unused,
+// and are being replaced by newer RelEx forms.
+// Some of these may be revived. See below.
+//
+// PHRASE_NODE <- NODE
+// COLLOCATION_NODE <- WORD_NODE
+// SEQUENCE_LINK <- ORDERED_LINK
+// 
+// SEMANTIC_SENSE_NODE <- WORD_SENSE_NODE
+// 
+// TENSE_LINK <- FEATURE_LINK
+// QUANTITY_LINK <- FEATURE_LINK
+// NOUN_NUMBER_LINK <- FEATURE_LINK
+// WORD_GENDER_LINK <- FEATURE_LINK
+//
+// TENSE_NODE <- FEATURE_NODE
+// NOUN_NUMBER_NODE <- FEATURE_NODE
+// WORD_GENDER_NODE <- FEATURE_NODE
+// FLAG_NODE <- NODE
+//
+// QUERY_VARIABLE_LINK <- ORDERED_LINK
+//
+// New RelEx nodes, added by Linas per names used by Ben
+// These are subject to change or deletion pending review.
+// Some of the link types may go away.
 
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
 DISTINGUISHED_NODE <- NODE
 
-// Universe of discourse
-CONTEXT_LINK <- ORDERED_LINK
+// Holder of statistical truth values. 
+COUNT_LINK <- ORDERED_LINK
 
-// nlp related atoms
 WORD_NODE <- NODE
 REFERENCE_LINK <- ASSOCIATIVE_LINK
+
+// Custom atoms to identify documents, sentences, word instances
 DOCUMENT_NODE <- CONCEPT_NODE
 SENTENCE_NODE <- CONCEPT_NODE
 PARSE_NODE <- CONCEPT_NODE
 PARSE_LINK <- ASSOCIATIVE_LINK
+WORD_INSTANCE_NODE <- CONCEPT_NODE
+WORD_INSTANCE_LINK <- ASSOCIATIVE_LINK
 
 // Custom atoms to identify features, relations
-LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE
-DEFINED_LINGUISTIC_CONCEPT_NODE <- CONCEPT_NODE
+// Note that the feature links could (should ??) be replaced by
+// predicate links, where the feature type is encodeed in the 
+// predicate name, rather than in the link type.  However, there
+// is no immediate need for this, and custom link-types use less RAM.
+// So we define a bunch of custom link types.
+FEATURE_NODE <- CONCEPT_NODE
+FEATURE_LINK <- ORDERED_LINK
+LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX+"
+LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
+DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE
+
+// Frame related stuff, almost certainly will be changed soon
 DEFINED_FRAME_NODE <- CONCEPT_NODE
 DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
 FRAME_ELEMENT_LINK <- ORDERED_LINK
 
 // New wordnet-import nodes, added by Linas.
 // These are subject to change, pending review.
-// The links should almost certainly be replaced by
-// a predicate-style construction (where the relation
-// is explicitly named)
 WORD_SENSE_NODE <- CONCEPT_NODE
 WORD_SENSE_LINK <- ASSOCIATIVE_LINK
-PART_OF_SPEECH_NODE <- CONCEPT_NODE
-PART_OF_SPEECH_LINK <- ORDERED_LINK
+PART_OF_SPEECH_NODE <- FEATURE_NODE
+PART_OF_SPEECH_LINK <- FEATURE_LINK
 LEMMA_NODE <- CONCEPT_NODE
 LEMMA_LINK <- ORDERED_LINK
 HOLONYM_LINK <- INHERITANCE_LINK
-WORD_INSTANCE_NODE <- CONCEPT_NODE
 
 // New word-sense-disambiguation nodes, added by Linas
 COSENSE_LINK <- UNORDERED_LINK
+
+// AGISim related links and nodes
+AGISIM_SOUND_NODE <- NODE "AGISIMSoundNode"
+AGISIM_TASTE_NODE <- NODE "AGISIMTasteNode"
+AGISIM_SMELL_NODE <- NODE "AGISIMSmellNode"
+AGISIM_SELF_NODE <- NODE "AGISIMSelfNode"
+AGISIM_PERCEPT_NODE <- NODE "AGISIMPerceptNode"
+AGISIM_VISUAL_PERCEPT_NODE <- NODE "AGIMSIMVisualPerceptNode" // note
+AGISIM_PIXEL_PERCEPT_NODE <- NODE "AGISIMPixelPerceptNode"
+AGISIM_POLYGON_PERCEPT_NODE <- NODE "AGISIMPolygonPerceptNode"
+AGISIM_OBJECT_PERCEPT_NODE <- NODE "AGISIMObjectPerceptNode"
+
+CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
+CW_COLOR_NODE <- NODE "CWColorNode"
+
+FW_VARIABLE_NODE <- NODE "FWVariableNode"
+
+// PB atoms
+
+FEELING_NODE <- GROUNDED_PREDICATE_NODE
+GOAL_NODE <- GROUNDED_PREDICATE_NODE
+LEARNED_SCHEMA_GOAL_NODE <- GOAL_NODE
+SCHEMA_GOAL_IMPLICATION_LINK <- IMPLICATION_LINK
+
+// Second-Life specific atoms:
+
+SL_NODE <- NODE "SLNode"
+SL_OBJECT_NODE <- SL_NODE "SLObjectNode"
+SL_PET_NODE <- SL_OBJECT_NODE "SLPetNode"
+SL_AVATAR_NODE <- SL_OBJECT_NODE "SLAvatarNode"
+SL_STRUCTURE_NODE <- SL_OBJECT_NODE "SLStructureNode"
+SL_ACCESSORY_NODE <- SL_OBJECT_NODE "SLAccessoryNode"
+SL_HUMANOID_NODE <- SL_OBJECT_NODE "SLHumanoidNode"
+
+// Time-related atoms:
+
+AT_TIME_LINK <- ORDERED_LINK
+TIME_NODE <- NODE
+
+// Space-related atoms:
+SPACE_MAP_NODE <- NODE
+
+// Attention allocation atoms:
+
+HEBBIAN_LINK <- LINK
+ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
+SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
+INVERSE_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
+SYMMETRIC_INVERSE_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
+

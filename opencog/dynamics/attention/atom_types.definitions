@@ -3,8 +3,3 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
 #include "atom_types.h"
-opencog::Type opencog::HEBBIAN_LINK;
-opencog::Type opencog::ASYMMETRIC_HEBBIAN_LINK;
-opencog::Type opencog::SYMMETRIC_HEBBIAN_LINK;
-opencog::Type opencog::INVERSE_HEBBIAN_LINK;
-opencog::Type opencog::SYMMETRIC_INVERSE_HEBBIAN_LINK;
