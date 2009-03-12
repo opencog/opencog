@@ -22,6 +22,7 @@
 #include <opencog/server/CogServer.h>
 
 #include "WordSenseProcessor.h"
+#include "atom_types.definitions"
 
 using namespace opencog;
 
@@ -85,6 +86,11 @@ void WordSenseProcessor::work_thread(void)
 		out.push_back(completion_handle);
 		atom_space->addLink(INHERITANCE_LINK, out);
 	}
+}
+
+void WordSenseProcessor::init_atom_types(void)
+{
+    #include "atom_types.inheritance"
 }
 
 // ----------------------------------------
@@ -163,5 +169,45 @@ bool WordSenseProcessor::check_start(Handle h)
 	if (h == start_handle) return true;
 	return false;
 }
+
+
+// dynamic library initialization
+#if defined(WIN32) && defined(_DLL)
+namespace win {
+#include <windows.h>
+}
+win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
+                           win::DWORD fdwReason,     // reason for calling function
+                           win::LPVOID lpvReserved)  // reserved
+{
+    System::setModuleHandle(hinstDLL);
+    switch(fdwReason) {
+        case DLL_PROCESS_ATTACH:
+            #include "atom_types.inheritance"
+            break;
+        case DLL_THREAD_ATTACH:
+            break;
+        case DLL_THREAD_DETACH:
+            break;
+        case DLL_PROCESS_DETACH:
+            break;
+    }
+    return TRUE;
+}
+#elif __GNUC__
+static __attribute__ ((constructor)) void _init(void)
+{
+    // TODO: This does not work because of the "static initialilzation order fiasco" issue (see http://www.parashift.com/c++-faq-lite/ctors.html#faq-10.12).
+    //ClassServer::init(); Even calling this here, the static ClassServer
+    //variables may be not initialized yet... A possible solution would be make
+    //ClassServer a singleton by using a static ClassServer::getInstance() method to access it. 
+    //This method must assure a single instance will be initialized (i.e., it
+    //must be thread safe as well).  
+    //#include "atom_types.inheritance"
+}
+static __attribute__ ((constructor)) void _fini(void)
+{
+}
+#endif
 
 /* ======================= END OF FILE ==================== */

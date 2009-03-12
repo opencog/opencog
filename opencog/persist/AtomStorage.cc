@@ -44,7 +44,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/type_codes.h>
 #include <opencog/persist/odbcxx.h>
 
 using namespace opencog;
@@ -797,7 +796,7 @@ void AtomStorage::setup_typemap(void)
 	rp.rs->foreach_row(&Response::type_cb, &rp);
 	rp.rs->release();
 
-	for (Type t=0; t<NUMBER_OF_CLASSES; t++)
+	for (Type t=0; t<ClassServer::getNumberOfClasses(); t++)
 	{
 		int sqid = storing_typemap[t];
 		/* If this typename is not yet known, record it */
@@ -1038,7 +1037,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		// A negative height is "unknown" and must be checked.
 		if ((0 == rp.height) || 
 		    ((-1 == rp.height) &&
-		      ClassServer::isAssignableFrom(NODE, realtype)))
+		      ClassServer::isA(realtype, NODE)))
 		{
 			atom = new Node(realtype, rp.name);
 		}

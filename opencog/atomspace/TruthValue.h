@@ -76,7 +76,9 @@ class TruthValue
     friend class SavingLoading;
     friend class Atom;
 
-    friend class ::TruthValueUTest; // WTF is this ?? XXX FIXME
+    // the TruthValueUTest class needs to access private members from the
+    // TruthValue class, so we declare it as a friend class.
+    friend class ::TruthValueUTest;
 
 public:
 

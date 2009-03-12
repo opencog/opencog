@@ -25,17 +25,21 @@
 namespace reasoning
 {
 
-template<typename FormulaType, Type OUTPUT_LINK_TYPE>
+//template<typename FormulaType, Type OUTPUT_LINK_TYPE>
+template<typename FormulaType>
 class QuantifierRule : public Rule
 {
 	Handle domain;
 	FormulaType f;
+    Type OUTPUT_LINK_TYPE;
 public:
 	bool validate2				(MPs& args) const { return true; }
 
-	QuantifierRule(iAtomSpaceWrapper *_destTable, const Handle& _domain)
-	: Rule(_destTable, false, true, "QuantifierRule"),
-	domain(_domain) {
+	//QuantifierRule(iAtomSpaceWrapper *_destTable, const Handle& _domain)
+	QuantifierRule(iAtomSpaceWrapper *_destTable, const Handle& _domain, Type outLinkType)
+	: Rule(_destTable, false, true, "QuantifierRule"), 
+	//domain(_domain) {
+	domain(_domain), OUTPUT_LINK_TYPE(outLinkType) {
 		inputFilter.push_back(meta(
 			new tree<Vertex>(
 				mva((Handle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXIST_LINK : FORALL_LINK),
@@ -76,9 +80,14 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
+/*
 typedef QuantifierRule<FORALLFormula, FORALL_LINK> FORALLRule;
 typedef QuantifierRule<EXISTFormula, EXIST_LINK> ExistRule;
 typedef QuantifierRule<PredicateTVFormula, VARIABLE_SCOPE_LINK> PLNPredicateRule;
+*/
+typedef QuantifierRule<FORALLFormula> FORALLRule;
+typedef QuantifierRule<EXISTFormula> ExistRule;
+typedef QuantifierRule<PredicateTVFormula> PLNPredicateRule;
 
 } // namespace reasoning
 #endif // QUANTIFIERRULE_H

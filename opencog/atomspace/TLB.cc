@@ -26,18 +26,16 @@
 #include "TLB.h"
 
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/type_codes.h>
 
 #ifdef USE_TLB_MAP
 
 using namespace opencog;
 
-// Low-lying values are reserved for "non-real" atoms.
-// Leave a large gap between the highest "non-real" atom,
-// and the first "real" handle.  This allows new atom types
-// to be added, while still not overlapping with handles
-// in older persistent storage.
-unsigned long TLB::uuid = NOTYPE + 1000;
+// Low-lying values are reserved for "non-real" atoms. Real atom start after the
+// last definable type (opencog::NOTYPE) opencog::NOTYPE is defined as
+// ((1 << (8 * sizeof(opencog::Type))) - 1), which is 65535 when Type is "unsigned
+// short int"
+unsigned long TLB::uuid = (1 << (8 * sizeof(opencog::Type)));
 
 std::map<Handle, const Atom*> TLB::handle_map;
 std::map<const Atom*, Handle> TLB::atom_map;

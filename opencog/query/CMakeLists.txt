@@ -4,6 +4,14 @@ INCLUDE_DIRECTORIES(
 	${OPENCOG_SOURCE_DIR}/src/util
 )
 
+# gama's note: I'm adding a dependency on the wsd module because the atom types
+# used by the query module are defined there, so it's need at runtime. however,
+# I'm unsure if I've placed the definitions in the right place, so linas should
+# review this a rearrange as he deems appropriate
+LINK_LIBRARIES(
+    wsd
+)
+
 ADD_LIBRARY(query SHARED
 	FrameQuery.cc
 	QueryProcessor.cc

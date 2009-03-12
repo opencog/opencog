@@ -1233,7 +1233,7 @@ void printAtomTree(const atom& a, int level, int LogLevel)
     } else {
         char buf[500];
         sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(),
-                (*ClassServer::getClassName())[a.T].c_str(), a.T, (int)a.real.value());
+                ClassServer::getTypeName(a.T).c_str(), a.T, (int)a.real.value());
         string subst_buf = make_subst_buf(a);
 
         LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
@@ -1774,7 +1774,7 @@ bool ttsubstitutableTo(Handle from, Handle to,
                         found_unbound_variable = true;
                     }
                 } else {
-                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", (*(ClassServer::getClassName()))[from_T].c_str(), variable_index, i);
+                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", ClassServer::getTypeName(from_T).c_str(), variable_index, i);
                 }
             }
         }
@@ -2238,7 +2238,7 @@ Vertex transitive_produce( const containerT& chain,
     rule_args.push_back(v2h(last_result) ? last_result : (*next_it++));
     rule_args.push_back(*next_it++);
 
-    Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula, TRANSITIVE_LINK_TYPE>(ASW()).compute(rule_args);
+    Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula>(ASW(), TRANSITIVE_LINK_TYPE).compute(rule_args);
 
     return (next_it != chain.end())
            ? transitive_produce<TRANSITIVE_LINK_TYPE>(chain, next_it, my_result)

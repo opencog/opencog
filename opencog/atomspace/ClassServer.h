@@ -2,8 +2,12 @@
  * opencog/atomspace/ClassServer.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
- * Written by $Authors_Name <$Authors_email>
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
+ *
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
+ *            Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,12 +28,13 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
-#include <opencog/atomspace/classes.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/util/platform.h>
+#include <vector>
 
 #include <stdlib.h>
-#include <vector>
+
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/util/platform.h>
 
 namespace opencog
 {
@@ -41,56 +46,48 @@ namespace opencog
  */
 class ClassServer
 {
-
 private:
 
     /** Private default constructor for this class to make it abstract. */
     ClassServer() {}
-    static void init_inheritance(std::vector<std::vector<bool> >& map, int parentClassNum, int classNum);
+
+    static Type nTypes;
+    static bool initialized;
+
+    static std::vector< std::vector<bool> >            inheritanceMap;
+    static std::tr1::unordered_map<std::string, Type>  name2CodeMap;
+    static std::tr1::unordered_map<Type, const std::string*> code2NameMap;
+
+    static void setParentRecursively(Type parent, Type type);
 
 public:
-    static std::vector<std::vector<bool> >& getMap();
-    static ClassTypeHashMap *getClassType();
-    static ClassNameHashMap *getClassName();
+
+    static Type addType(Type parent, const std::string& name);
+    static void init(void);
 
     /**
-     * Initialize derived class mapping.
-     *
-     * @return A boolean matrix[NUMBER_OF_CLASSES][NUMBER_OF_CLASSES].
+     * Stores the children types on the OutputIterator 'result'. Returns the
+     * number of children types.
      */
-    static std::vector<std::vector<bool> > init_map();
-
-    /**
-     * Initialize class name to type mapping.
-     *
-     * @return A hash_map pointer to a ClassTypeHashMap.
-     */
-    static ClassTypeHashMap *init_type();
-
-    /**
-     * Initialize type to class name mapping.
-     *
-     * @return A hash_map pointer to a ClassTypeHashMap.
-     */
-    static ClassNameHashMap *init_name();
-
-    /**
-     * Returns an array containing an int, indicating the number of
-     * subclasses of a given type, followed by an array with all
-     * subclasses.
-     *
-     * @return An array containing an int, indicating the number of
-     * subclasses of a given type, followed by an array with all
-     * subclasses.
-     */
-    static Type* getChildren(Type type, int &n);
+    template<typename OutputIterator>
+    static unsigned int getChildren(Type type, OutputIterator result)
+    {
+        unsigned int n_children = 0;
+        for (Type i = 0; i < nTypes; ++i) {
+            if (inheritanceMap[type][i] && (type != i)) {
+                *(result++) = i;
+                n_children++;
+            }
+        }
+        return n_children;
+    }
 
     /**
      * Returns the total number of classes in the system.
      *
      * @return The total number of classes in the system.
      */
-    static int getNumberOfClasses();
+    static unsigned int getNumberOfClasses();
 
     /**
      * Returns whether a given class is assignable from another.
@@ -99,7 +96,7 @@ public:
      * @param Subclass.
      * @return Whether a given class is assignable from another.
      */
-    static bool isAssignableFrom(Type super, Type sub);
+    static bool isA(Type super, Type sub);
 
     /**
      * Returns true if given class is a Link.
@@ -107,7 +104,7 @@ public:
      * @param class.
      * @return Whether a given class is Link.
      */
-    static bool isLink(Type t) { return isAssignableFrom(LINK, t); }
+    static bool isLink(Type t) { return isA(t, LINK); }
 
     /**
      * Returns true if given class is a Node.
@@ -115,15 +112,12 @@ public:
      * @param class.
      * @return Whether a given class is Node.
      */
-    static bool isNode(Type t) { return isAssignableFrom(NODE, t); }
+    static bool isNode(Type t) { return isA(t, NODE); }
 
     /**
-     * Returns whether a given class is derived from another.
-     *
-     * @param Class type name.
-     * @return Whether a given class is derived from another.
+     * Returns whether a class with name 'typeName' is defined.
      */
-    static bool isDefined(const char *typeName);
+    static bool isDefined(const string& typeName);
 
     /**
      * Returns the type of a given class.
@@ -131,7 +125,7 @@ public:
      * @param Class type name.
      * @return The type of a givenn class.
      */
-    static Type getType(const char *typeName);
+    static Type getType(const string& typeName);
 
     /**
      * Returns the string representation of a given atom type.

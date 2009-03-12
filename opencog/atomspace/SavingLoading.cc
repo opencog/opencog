@@ -413,7 +413,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
             CoreUtils::updateHandle(&(link->outgoing[i]), handles);
         }
 
-        if (ClassServer::isAssignableFrom(UNORDERED_LINK, atom->type)) {
+        if (ClassServer::isA(atom->type, UNORDERED_LINK)) {
             std::sort(link->outgoing.begin(), link->outgoing.end(), CoreUtils::HandleComparison());
         }
 
@@ -422,7 +422,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     }
 
     // updates handles for trail
-    if (ClassServer::isAssignableFrom(LINK, atom->type)) {
+    if (ClassServer::isA(atom->type, LINK)) {
         Trail *t = ((Link *)atom)->getTrail();
         if (t->getSize()) {
             //logger().fine("SavingLoading::updateHandles: trails");

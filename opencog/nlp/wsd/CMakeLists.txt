@@ -1,4 +1,5 @@
 # ADD_DEFINITIONS(-DDEBUG)
+OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
 
 INCLUDE_DIRECTORIES (
     ${ODBC_INCLUDE_DIRS}
@@ -11,6 +12,7 @@ ENDIF (${ODBC_FOUND})
 ADD_LIBRARY (wsd SHARED
 	EdgeThin.cc
 	EdgeUtils.cc
+	atom_types
 	Mihalcea.cc
 	MihalceaEdge.cc
 	MihalceaLabel.cc

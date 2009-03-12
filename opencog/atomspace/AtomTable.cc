@@ -186,7 +186,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      bool subclass) const
 {
     // Check if it is the special case of looking for an specific atom
-    if (ClassServer::isAssignableFrom(LINK, type) && 
+    if (ClassServer::isA(type, LINK) && 
         (arity == 0 || !handles.empty()))
     {
         //printf("special case\n");
@@ -213,7 +213,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         }
     }
 
-    if (ClassServer::isAssignableFrom(LINK, type) && (arity == 0)) {
+    if (ClassServer::isA(type, LINK) && (arity == 0)) {
         HandleEntry* result = getHandleSet(type, subclass);
         result = HandleEntry::filterSet(result, arity);
         return result;
@@ -328,16 +328,16 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
                 if (sub) {
                     // if subclasses are accepted, the subclasses are returned in the
                     // array types.
-                    int n;
+                    std::vector<Type> subTypes;
 
-                    Type *subTypes = ClassServer::getChildren(types[i], n);
+                    ClassServer::getChildren(types[i], std::back_inserter(subTypes));
 
                     // for all subclasses found, a set is concatenated to the answer set
-                    for (int j = 0; j < n; j++) {
+                    for (unsigned int j = 0; j < subTypes.size(); j++) {
                         HandleEntry *subSet = getHandleSet(names[i], subTypes[j], type, subclass);
                         sets[i] = HandleEntry::concatenation(sets[i], subSet);
                     }
-                    delete[](subTypes);
+                    //delete[](subTypes);
                 }
                 sets[i] = HandleEntry::filterSet(sets[i], names[i], types[i], sub, i, arity);
             } else {
@@ -489,7 +489,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
     AtomHashSet::const_iterator it;
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
-        bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
+        bool matched = (subclass && ClassServer::isA(atom->getType(), type)) || type == atom->getType();
         if (matched) logger.debug("%d: %s", TLB::getHandle(atom).value(), atom->toString().c_str());
     }
 }
@@ -499,7 +499,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
     AtomHashSet::const_iterator it;
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
-        bool matched = (subclass && ClassServer::isAssignableFrom(type, atom->getType())) || type == atom->getType();
+        bool matched = (subclass && ClassServer::isA(atom->getType(), type)) || type == atom->getType();
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
 }

@@ -29,6 +29,7 @@
 //#include <gsl/gsl_blas.h>
 
 #include <opencog/atomspace/Link.h>
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
@@ -217,7 +218,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         type = TLB::getAtom(*hi)->getType(); 
 
         targets = dynamic_cast<Link*>(TLB::getAtom(*hi))->getOutgoingSet();
-        if (ClassServer::isAssignableFrom(ORDERED_LINK,type)) {
+        if (ClassServer::isA(type,ORDERED_LINK)) {
             Handle sourceHandle;
 
             // Add only the source index

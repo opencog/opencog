@@ -127,6 +127,8 @@ private:
 
 public:
     AtomSpaceUTest() {
+        logger().setLevel(Logger::INFO);
+        logger().setPrintToStdoutFlag(true);
     }
 
     void setUp() {
@@ -348,6 +350,9 @@ public:
                     }
                 }
             }
+
+            TS_ASSERT(ClassServer::isA(SCHEMA_EXECUTION_LINK, INHERITANCE_LINK));
+
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
             atomSpace->getHandleSet(back_inserter(links), LINK, "", true, vh);
@@ -359,11 +364,14 @@ public:
             TS_ASSERT(links.size() == 0);
             HandleSeq allInhLinks;
             atomSpace->getHandleSet(back_inserter(allInhLinks), INHERITANCE_LINK, "", true, vh);
-            //logger().debug("3) allInhLinks.size() = %d\n", allInhLinks.size());
+            //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
+            //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
+            //    logger().info("allInhLinks[x]: %s\n", TLB::getAtom(allInhLinks[x])->toString().c_str());
+            //}
             TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
             HandleSeq justInhLinks;
             atomSpace->getHandleSet(back_inserter(justInhLinks), INHERITANCE_LINK, "", false, vh);
-            //logger().debug("4) justInhLinks.size() = %d\n", justInhLinks.size());
+            //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == (vhIdx == 0 ? 4 : 1));
             HandleSeq partOfLinks;
             atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, "", true, vh);

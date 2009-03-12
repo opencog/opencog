@@ -28,16 +28,21 @@ namespace reasoning
 extern std::map<int, string> type2name;
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 
-template<typename FormulaType, Type SRC_LINK, Type DEST_LINK>
+//template<typename FormulaType, Type SRC_LINK, Type DEST_LINK>
+template<typename FormulaType>
 class Link2LinkRule : public GenericRule<FormulaType>
 {
+    Type SRC_LINK;
+    Type DEST_LINK;
 protected:
 //	mutable std::vector<Type> ti;
 
 public:
 	bool validate2				(Rule::MPs& args) const { return true; }
-	Link2LinkRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<FormulaType>(_destTable,false,"")
+	//Link2LinkRule(iAtomSpaceWrapper *_destTable)
+	//: GenericRule<FormulaType>(_destTable,false,"")
+	Link2LinkRule(iAtomSpaceWrapper *_destTable, Type src, Type dest)
+	: GenericRule<FormulaType>(_destTable,false,""), SRC_LINK(src), DEST_LINK(dest)
 	{
 		GenericRule<FormulaType>::name = "Link2Link(" + type2name[SRC_LINK] + "=>" + type2name[DEST_LINK] +")";
 		GenericRule<FormulaType>::inputFilter.push_back(meta(
@@ -95,6 +100,7 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
+/*
 typedef  Link2LinkRule<Mem2InhFormula, MEMBER_LINK, EXTENSIONAL_INHERITANCE_LINK> Mem2InhRule;
 typedef  Link2LinkRule<Int2ExtFormula, IMPLICATION_LINK, MIXED_IMPLICATION_LINK>				IntImp2ExtRule;
 //typedef  Link2LinkRule<Int2ExtFormula, INHERITANCE_LINK, MIXED_INHERITANCE_LINK>				IntInh2ExtRule;
@@ -107,6 +113,14 @@ typedef  Link2LinkRule<Imp2InhFormula, IMPLICATION_LINK, INHERITANCE_LINK>					I
 typedef  Link2LinkRule<Mem2EvalFormula, MEMBER_LINK, EVALUATION_LINK> Mem2EvalRule;
 //typedef  Link2LinkRule<Eval2InhFormula, EVALUATION_LINK, INHERITANCE_LINK> Eval2InhRule;
 //typedef  Link2LinkRule<Formula, _LINK, _LINK> Rule;
+*/
+
+typedef  Link2LinkRule<Mem2InhFormula> Mem2InhRule;
+typedef  Link2LinkRule<Int2ExtFormula> Int2ExtRule;
+typedef  Link2LinkRule<Ext2IntFormula> Ext2IntRule;
+typedef  Link2LinkRule<Inh2ImpFormula> Inh2ImpRule;
+typedef  Link2LinkRule<Imp2InhFormula> Imp2InhRule;
+typedef  Link2LinkRule<Mem2EvalFormula> Mem2EvalRule;
 
 } // namespace reasoning
 #endif // LINK2LINKRULE_H

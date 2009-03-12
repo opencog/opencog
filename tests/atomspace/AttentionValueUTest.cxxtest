@@ -59,6 +59,8 @@ private:
 
 public:
     AttentionValueUTest() {
+        //logger().setLevel(Logger::DEBUG);
+        //logger().setPrintToStdoutFlag(true);
 
         sti[0] = DEFAULTATOMSTI;
         sti[1] = AV1_STI;
@@ -98,9 +100,9 @@ public:
 
         for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
-            //printf("getSTI()=%d, sti[i]=%d\n", av->getSTI(), sti[i]);
-            //printf("getLTI()=%d, lti[i]=%d\n", av->getLTI(), lti[i]);
-            //printf("getVLTI()=%d, vlti[i]=%d\n", av->getVLTI(), vlti[i]);
+            //logger().debug("getSTI()=%d, sti[i]=%d", av->getSTI(), sti[i]);
+            //logger().debug("getLTI()=%d, lti[i]=%d", av->getLTI(), lti[i]);
+            //logger().debug("getVLTI()=%d, vlti[i]=%d", av->getVLTI(), vlti[i]);
             TS_ASSERT(av != NULL);
             TS_ASSERT(av->getSTI() == sti[i]);
             TS_ASSERT(av->getLTI() == lti[i]);
@@ -139,9 +141,9 @@ public:
         for (int i = 0; i < NUM_AVS; i++) {
             const AttentionValue& av1 = *avs[i];
             const AttentionValue& av2 = *av1.clone();
-            //printf("getSTI()=%d, cloned=%d\n", av1.getSTI(), av2.getSTI());
-            //printf("getLTI()=%d, cloned=%d\n", av1.getLTI(), av2.getLTI());
-            //printf("getVLTI()=%d, cloned=%d\n", av1.getVLTI(), av2.getVLTI());
+            //logger().debug("getSTI()=%d, cloned=%d", av1.getSTI(), av2.getSTI());
+            //logger().debug("getLTI()=%d, cloned=%d", av1.getLTI(), av2.getLTI());
+            //logger().debug("getVLTI()=%d, cloned=%d", av1.getVLTI(), av2.getVLTI());
             TS_ASSERT(av1 == av2);
         }
     }
@@ -269,9 +271,9 @@ public:
     //static std::string toStr();
     void testtoString() {
         char buffer[100];
-        //printf("AttentionValue::testtoString()\n");
+        //logger().debug("AttentionValue::testtoString()");
         for (int i = 0; i < NUM_AVS; i++) {
-            //printf("AV[%d] = %s\n", i, avs[i]->toString().c_str());
+            //logger().debug("AV[%d] = %s", i, avs[i]->toString().c_str());
             std::string str = avs[i]->toString();
             sprintf(buffer, "[%d, %d, %s]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE");
             TS_ASSERT(!strcmp(str.c_str(), buffer));

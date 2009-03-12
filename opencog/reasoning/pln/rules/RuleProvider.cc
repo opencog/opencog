@@ -109,17 +109,19 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 //	AddRule(new ImplicationTailExpansionRule(parent), 10.0f);
 //	AddRule(new ImplicationConstructionRule(parent), 10.0f);
 //	AddRule(new InversionRule<IMPLICATION_LINK>(parent), 7.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
-	AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
+	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
+	AddRule(new DeductionRule<DeductionSimpleFormula>(parent, IMPLICATION_LINK), 8.0f);
+	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
+	AddRule(new InversionRule(parent, INHERITANCE_LINK), 7.0f);
+	AddRule(new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK), 8.0f);
 			  
 //	AddRule(new ORPartitionRule(parent), 10.0f);
 	AddRule(new CrispTheoremRule(parent), 10.0f);
 
-	AddRule(new IntImp2ExtRule(parent), 10.0f);
-	AddRule(new IntInh2ExtRule(parent), 10.0f);
-	AddRule(new ExtImp2IntRule(parent), 10.0f);
-	AddRule(new ExtInh2IntRule(parent), 10.0f);
+	AddRule(new Int2ExtRule(parent, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+	AddRule(new Int2ExtRule(parent, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
+	AddRule(new Ext2IntRule(parent, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+	AddRule(new Ext2IntRule(parent, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
 
 	AddRule(new HypothesisRule(parent), 30.0f);
 //	AddRule(new SimSubstRule1(parent), 5.0f);
@@ -225,7 +227,7 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
 	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
 	//AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula, ASSOCIATIVE_LINK>(parent), 8.0f);
+	AddRule(new DeductionRule<DeductionSimpleFormula>(parent, ASSOCIATIVE_LINK), 8.0f);
     reset();
 }
 

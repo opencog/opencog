@@ -32,6 +32,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/types.h>
 #include <opencog/persist/odbcxx.h>
 
 namespace opencog
@@ -77,8 +78,9 @@ class AtomStorage
 		unsigned long getMaxUUID(void);
 		void setMaxUUID(unsigned long);
 
-		// Reserve extra space for future growth -- 1200 should be enough.
-		#define TYPEMAP_SZ (NUMBER_OF_CLASSES + 1200)
+		// TYPEMAP_SZ is defined as the maximum number of possible opencog Types
+		// (65536 as Type is a short int)
+		#define TYPEMAP_SZ (1 << (8 * sizeof(Type)))
 		int  storing_typemap[TYPEMAP_SZ];
 		Type loading_typemap[TYPEMAP_SZ];
 		char * db_typename[TYPEMAP_SZ];

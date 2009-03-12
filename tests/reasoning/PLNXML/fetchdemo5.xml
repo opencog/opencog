@@ -18,16 +18,16 @@
 	<And>
 		<EvaluationLink>
 			<Element name="do" class="PredicateNode" confidence="0"/>
-			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+			<ListLink> <Element name="$1" class="FWVariableNode"/> </ListLink>
 		</EvaluationLink>
 		<EvaluationLink>
 			<Element name="can_do" class="PredicateNode" confidence="0"/>
-			<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+			<ListLink> <Element name="$1" class="FWVariableNode"/> </ListLink>
 		</EvaluationLink>
 	</And>
 	<EvaluationLink>
 		<Element name="just_done" class="PredicateNode" confidence="0"/>
-		<ListLink> <Element name="$1" class="FreeVariableNode"/> </ListLink>
+		<ListLink> <Element name="$1" class="FWVariableNode"/> </ListLink>
 	</EvaluationLink>
 </ImplicationLink>
 
@@ -100,14 +100,14 @@
 		<ListLink>
 			<EvaluationLink>
 				<Element name="walktowards" class="SchemaNode" confidence="0"/>		
-				<ListLink> <Element name="$2" class="FreeVariableNode"/> </ListLink>
+				<ListLink> <Element name="$2" class="FWVariableNode"/> </ListLink>
 			</EvaluationLink>
 		</ListLink>
 	</EvaluationLink>
 </And>
 	<EvaluationLink>
 		<Element name="near" class="PredicateNode" confidence="0"/>
-		<ListLink> <Element name="$2" class="FreeVariableNode"/> </ListLink>
+		<ListLink> <Element name="$2" class="FWVariableNode"/> </ListLink>
 	</EvaluationLink>
 </ImplicationLink>
 

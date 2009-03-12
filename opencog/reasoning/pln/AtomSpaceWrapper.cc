@@ -171,7 +171,7 @@ void AtomSpaceWrapper::HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest
 
 bool AtomSpaceWrapper::inheritsType(Type T1, Type T2)
 {
-    return ClassServer::isAssignableFrom(T2, T1);
+    return ClassServer::isA(T1, T2);
 }
 
 bool AtomSpaceWrapper::isSubType(Handle h, Type T)

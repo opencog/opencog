@@ -27,10 +27,12 @@ namespace reasoning
 
 #define CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE 0
 
-template<typename DeductionFormula, Type InclusionLink> //=IMPLICATION_LINK>
+//template<typename DeductionFormula, Type InclusionLink> //=IMPLICATION_LINK>
+template<typename DeductionFormula>
 class DeductionRule : public GenericRule<DeductionFormula>
 {
     //DeductionFormula f;
+    Type InclusionLink;
 
 	meta i2oType(const vector<Vertex>& h) const
 	{
@@ -88,8 +90,10 @@ class DeductionRule : public GenericRule<DeductionFormula>
 
 public:
 
-	DeductionRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule")
+	//DeductionRule(iAtomSpaceWrapper *_destTable)
+	//: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule")
+	DeductionRule(iAtomSpaceWrapper *_destTable, Type linkType)
+	: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule"), InclusionLink(linkType) 
 	{
 		/// TODO: should use real variable for the other input.
 		

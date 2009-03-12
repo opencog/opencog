@@ -90,6 +90,7 @@ void BasicSCMUTest::setUp(void)
 
 void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
 {
+    printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
 	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
 	eval.eval(buff);

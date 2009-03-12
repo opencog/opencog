@@ -1,6 +1,10 @@
+SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM true)
+OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
+
 ADD_LIBRARY (atomspace SHARED
 	Atom.cc
 	AtomSpace.cc
+	AtomSpaceInit.cc
 	AtomTable.cc
 	AttentionValue.cc
 	ClassServer.cc
@@ -20,7 +24,6 @@ ADD_LIBRARY (atomspace SHARED
 	IndefiniteTruthValue.cc
 	Link.cc
 	LinkIndex.cc
-	md5.c
 	NameIndex.cc
 	Node.cc
 	NodeIndex.cc
@@ -41,14 +44,12 @@ ADD_LIBRARY (atomspace SHARED
 	Trail.cc
 	TruthValue.cc
 	TypeIndex.cc
-    utils.cc
-    #utils2.cc
-	types.cc
+	utils.cc
+#	utils2.cc
 	VersionHandle.cc
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/util
+	atom_types.h
+	md5.c
+	types.cc
 )
 
 TARGET_LINK_LIBRARIES(atomspace
@@ -66,9 +67,9 @@ INSTALL (FILES
 	AtomSpaceDefinitions.h
 	AtomSpace.h
 	AtomTable.h
+	atom_types.h
 	AttentionValue.h
 	BackingStore.h
-	classes.h
 	ClassServer.h
 	CompositeTruthValue.h
 	CountTruthValue.h
@@ -79,6 +80,7 @@ INSTALL (FILES
 	ForeachChaseLink.h
 	Foreach.h
 	ForeachTwo.h
+	Handle.h
 	HandleEntry.h
 	HandleIterator.h
 	HandleMap.h
@@ -91,7 +93,6 @@ INSTALL (FILES
 	ImportanceIndex.h
 	Link.h
 	LinkIndex.h
-	md5.h
 	NameIndex.h
 	Node.h
 	NodeIndex.h
@@ -114,14 +115,11 @@ INSTALL (FILES
 	Trail.h
 	TruthValue.h
 	TypeIndex.h
-	type_classint.h
-	type_codes.h
-	type_inheritance.h
-	type_intclass.h
-	type_names.h
-	types.h
-    utils.h
-    #utils2.h
 	VersionHandle.h
+	atom_types.h
+	md5.h
+	types.h
+	utils.h
+#	utils2.h
 	DESTINATION "include/opencog/atomspace"
 )

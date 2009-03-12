@@ -28,9 +28,12 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/persist/AtomStorage.h>
 
+#include <opencog/nlp/wsd/atom_types.h>
+
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
+#include <opencog/nlp/wsd/WordSenseProcessor.h>
 
 using namespace opencog;
 
@@ -55,6 +58,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		BasicSaveUTest(void)
 		{
+            WordSenseProcessor::init_atom_types();
 			try
 			{
 				config().load("opencog-test.conf");

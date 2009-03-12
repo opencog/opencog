@@ -28,11 +28,10 @@ using namespace opencog;
 
 TargetTypeIndex::TargetTypeIndex(void)
 {
-	// The typeIndex is NUMBER_OF_CLASSES+2 because NOTYPE is 
-	// NUMBER_OF_CLASSES+1 and typeIndex[NOTYPE] is asked for if a
-	// typename is misspelled, because ClassServer::getType()
-	// returns NOTYPE in this case).
-	resize(ClassServer::getNumberOfClasses() + 2);
+    // The typeIndex is NOTYPE+1 because NOTYPE is the id of the last possible
+    // type and typeIndex[NOTYPE] is asked for if a typename is  misspelled.
+    // (because ClassServer::getType() returns NOTYPE in this case).
+    resize(NOTYPE + 1);
 }
 
 void TargetTypeIndex::insertHandle(Handle h)
