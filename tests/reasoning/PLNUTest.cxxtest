@@ -38,7 +38,6 @@
 #include "opencog/reasoning/pln/rules/RuleProvider.h"
 
 #include <opencog/adaptors/tulip/TulipWriter.h>
-#include <opencog/nlp/wsd/atom_types.h>
 
 using namespace reasoning;
 

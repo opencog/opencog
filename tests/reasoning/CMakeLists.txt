@@ -37,7 +37,6 @@ LINK_LIBRARIES (
     util
     pln
     xml
-    wsd
 #    ${Boost_SIGNALS_LIBRARY}
     ${GSL_LIBRARIES}
 #    ${CSOCKETS_LIBRARIES}

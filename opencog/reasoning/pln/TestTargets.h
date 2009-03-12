@@ -1,4 +1,3 @@
-#include <opencog/nlp/wsd/atom_types.h>
 map<int, Btr<vtree > > tests;
 
 void initTests()

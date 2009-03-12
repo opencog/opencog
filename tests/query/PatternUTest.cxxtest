@@ -26,7 +26,6 @@
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
-#include <opencog/nlp/wsd/atom_types.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 
 using namespace opencog;
@@ -71,7 +70,6 @@ class PatternUTest :  public CxxTest::TestSuite
 		{
 			logger().setLevel(Logger::DEBUG);
 			logger().setPrintToStdoutFlag(true);
-            WordSenseProcessor::init_atom_types();
 		}
 
 		~PatternUTest()
