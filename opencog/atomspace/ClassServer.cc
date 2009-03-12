@@ -30,6 +30,7 @@
 #include <exception>
 #include <functional>
 #include <tr1/functional>
+#include <algorithm>
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
