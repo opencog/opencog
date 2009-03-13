@@ -28,6 +28,7 @@
 #include <hash_map>
 #else
 #include <ext/hash_map>
+#endif // WIN32
 
 namespace opencog {
     using __gnu_cxx::hash_map;
@@ -42,6 +43,5 @@ template<> struct hash<std::string> {
     }
 };
 }
-#endif // WIN32
 
 #endif // _OPENCOG_HASH_MAP_H

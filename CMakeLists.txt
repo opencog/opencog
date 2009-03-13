@@ -24,7 +24,12 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
         SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
 	ENDIF (APPLE)
 
-	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+        #Nil: added -Wno-deprecated to avoid multiple warnings
+        #due to hash_map which is deprecated in gcc 4.3
+        #note that when replacing hash_map by unordered_map
+        #it results in other warnings explaining that C++0x support is still
+        #experimental, which is why I let hash_map for now
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated")
 	SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
 	SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)

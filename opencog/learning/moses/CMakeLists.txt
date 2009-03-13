@@ -27,10 +27,12 @@ TARGET_LINK_LIBRARIES (moses
 
 INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog
-    ${OPENCOG_SOURCE_DIR}/opencog/moses
+    ${OPENCOG_SOURCE_DIR}/opencog/learning
+    ${OPENCOG_SOURCE_DIR}/opencog/learning/moses
 )
 
 LINK_DIRECTORIES (
+    ${OPENCOG_BINARY_DIR}/opencog/learning/moses
     ${OPENCOG_BINARY_DIR}/opencog/comboreduct
     ${OPENCOG_BINARY_DIR}/opencog/util
 )

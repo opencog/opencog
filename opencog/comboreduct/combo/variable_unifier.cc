@@ -12,7 +12,7 @@ variable_unifier& variable_unifier::DEFAULT_VU()
 }
 
 variable_unifier::variable_unifier()
-    : updated(false), oneVariableActive(false)
+    : oneVariableActive(false), updated(false)
 {
 }
 
