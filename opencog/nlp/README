@@ -132,27 +132,27 @@ Input file format
 -----------------
 This style of input may be produced in one of two ways. It is produced
 directly by RelEx, when using the opencog output format: the -o flag
-appeneded to the relex.RelationExtractor executable. The other way is
+appended to the relex.RelationExtractor executable. The other way is
 indirect, but can be considerably more convenient: First, parse text
 using the  relex.WebFormat module, to create the "compact file format".
 Then, use the relex/src/perl/cff-to-opencog.pl perl script to convert 
 this to the final output. 
 
 
-A Side-note About Syntatactic Sugar
+A Side-note About Syntactic Sugar
 ===================================
 This has been said before, but it bears repeating. Consider the node
 type WordInstanceNode, for example:
 
-   (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+    (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
 
-This custom-defined node type should be thought of as syntatctic sugar
+This custom-defined node type should be thought of as syntactic sugar
 for the more "primitive" graph:
 
    (InheritenceLink
-		(ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
-		(ConceptNode "WordInstance")
-	)
+        (ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+        (ConceptNode "WordInstance")
+    )
 
 The above InheritenceLink essentially assigns a "type" to the word
 instance. This type can be used in the same way that types are
@@ -162,20 +162,21 @@ manipulate and delete narrowly typed atoms.
 
 Similarly, for links, we use the syntactic sugar
 
-	(PartOfSpeechLink
-	   (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
-	   (DefinedLinguisticConceptNode "noun")
-	)
+    (PartOfSpeechLink
+        (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+        (DefinedLinguisticConceptNode "noun")
+    )
 
 which stands for the more "primitive" construct:
 
-	(EvaluationLink
-		(PredicateNode "PartOfSpeech"
-		(ListLink
-			(WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
-			(DefinedLinguisticConceptNode "noun")
-		)
-	)
+    (EvaluationLink
+        (PredicateNode "PartOfSpeech"
+            (ListLink
+                (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
+                (DefinedLinguisticConceptNode "noun")
+            )
+        )
+    )
 
 Notationally, these forms should be considered to be "equivalent"
 although there is a bunch of actual code that depends on the one or
@@ -183,7 +184,7 @@ the other, cand cannot freely intermingle these cases.
 
 Not everything in the RelEx export gets its own specially-declared
 node or link type. Those that do not are explicitly declared in the
-file "src/nlp/scm/type-defninitions.scm"
+file "src/nlp/scm/type-definitions.scm"
 
 ======================================================================
 References:
@@ -192,3 +193,4 @@ References:
 N. Ostler, B.T.S.Atkins, "Predictable Meaning Shift: Some Linguistic
 Properties of Lexical Implication Rules", (1991) Proceedings of the
 First SIGLEX Workshop on Lexical Semantics and Knowledge Representation
+
