@@ -95,6 +95,10 @@ relations.
 The directory contains a script to convert RelEx Frame rules into 
 opencog ImplicationLinks.
 
+types
+-----
+Scripts, etc. to load NLP-specific atom types.
+
 wordnet-import
 --------------
 The wordnet-import directory contains stand-alone code (i.e. not a part

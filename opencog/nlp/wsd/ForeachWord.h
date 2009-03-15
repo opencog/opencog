@@ -18,7 +18,7 @@
 #include <opencog/atomspace/ForeachChaseLink.h>
 #include <opencog/atomspace/FollowLink.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/nlp/wsd/atom_types.h>
+#include <opencog/nlp/types/atom_types.h>
 
 namespace opencog {
 

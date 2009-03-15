@@ -22,7 +22,6 @@
 #include <opencog/server/CogServer.h>
 
 #include "WordSenseProcessor.h"
-#include "atom_types.definitions"
 
 using namespace opencog;
 
@@ -86,11 +85,6 @@ void WordSenseProcessor::work_thread(void)
 		out.push_back(completion_handle);
 		atom_space->addLink(INHERITANCE_LINK, out);
 	}
-}
-
-void WordSenseProcessor::init_atom_types(void)
-{
-    #include "atom_types.inheritance"
 }
 
 // ----------------------------------------
