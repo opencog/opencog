@@ -96,27 +96,23 @@ float HopfieldServer::totalEnergy()
             iSTI = a->getNormalisedSTI(hGrid[i],false);
             jSTI = a->getNormalisedSTI(hGrid[j],false);
             if (iSTI > 0.0f || jSTI > 0.0f) {
-                switch (a->getType(ret[0])) {
-                case SYMMETRIC_HEBBIAN_LINK:
+                Type rType = a->getType(ret[0]);
+                if (rType == SYMMETRIC_HEBBIAN_LINK) {
                     if (iSTI > jSTI)
                         E += a->getTV(ret[0]).getMean() * (iSTI - jSTI);
                     else
                         E += a->getTV(ret[0]).getMean() * (jSTI - iSTI);
-                    break;
-                case INVERSE_HEBBIAN_LINK:
+                } else if (rType == INVERSE_HEBBIAN_LINK) {
                     if (iSTI > 0.0f && iSTI > jSTI)
                         E += (a->getTV(ret[0]).getMean()) * (iSTI - jSTI);
-                    break;
-                case SYMMETRIC_INVERSE_HEBBIAN_LINK:
+                } else if (rType == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                     if (iSTI > jSTI)
                         E += (a->getTV(ret[0]).getMean()) * fabs(iSTI - jSTI);
                     else
                         E += (a->getTV(ret[0]).getMean()) * fabs(jSTI - iSTI);
-                    break;
-                default:
+                } else {
                     logger().error("Unknown Hebbian link type between unit s_%d and j_%d."
                             " Ignoring.", i, j);
-                    break;
                 }
             }
         }
@@ -577,7 +573,7 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
     HandleSeq::iterator j;
     for(j = links.begin(); j != links.end(); j++) {
         Handle lh = *j;
-        if (!ClassServer::isAssignableFrom(linkType,getAtomSpace()->getType(lh)))
+        if (!ClassServer::isA(getAtomSpace()->getType(lh),linkType))
             continue;
         Handle destH;
         HandleSeq lseq = getAtomSpace()->getOutgoing(lh);
@@ -627,16 +623,15 @@ Handle HopfieldServer::findKeyNode() {
                     }
                 }
                 // check type of link 
-                switch (lt) {
-                case SYMMETRIC_HEBBIAN_LINK:
+                if (lt == SYMMETRIC_HEBBIAN_LINK) {
                     sim += a->getTV(lh).getMean() * a->getNormalisedSTI(patternH,false);
                     break;
-                case ASYMMETRIC_HEBBIAN_LINK:
+                } else if (lt == ASYMMETRIC_HEBBIAN_LINK) {
                     logger().error("Asymmetic links are not supported by the Hopfield "
                             "example, ignoring.");
                     break;
-                case INVERSE_HEBBIAN_LINK:
-                case SYMMETRIC_INVERSE_HEBBIAN_LINK:
+                } else if (lt == INVERSE_HEBBIAN_LINK ||
+                        lt == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                     sim += a->getTV(lh).getMean() * -a->getNormalisedSTI(patternH,false);
                     break;
                 }

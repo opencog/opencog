@@ -96,7 +96,7 @@ public:
      * @param Subclass.
      * @return Whether a given class is assignable from another.
      */
-    static bool isA(Type super, Type sub);
+    static bool isA(Type sub, Type super);
 
     /**
      * Returns true if given class is a Link.
