@@ -1,0 +1,239 @@
+/** 
+ * LearnMessage.cc
+ * 
+ * Author: Carlos Lopes
+ * Copyright(c), 2007
+ */
+#include <vector>
+#include "LearnMessage.h"
+
+#include "SpaceServer.h"
+#include <LADSUtil/StringTokenizer.h>
+
+#include <opencog/xml/NMXmlParser.h>
+#include <opencog/xml/NMXmlExporter.h>
+#include <opencog/xml/StringXMLBufferReader.h>
+
+using namespace LearningServerMessages;
+
+/**
+ * Constructor and destructor
+ */
+LearnMessage::~LearnMessage(){
+}
+
+LearnMessage::LearnMessage(const std::string &from, const std::string &to) : 
+						   Message(from, to, MessagingSystem::Message::LEARN){
+	schema.assign("");
+	//spaceMap.assign("");
+	behaviorDescriptions.assign("");
+}
+
+LearnMessage::LearnMessage(const std::string &from, const std::string &to, 
+						   const std::string &msg) :
+						   Message(from, to, MessagingSystem::Message::LEARN){
+						   	
+	loadPlainTextRepresentation(msg.c_str());
+}
+
+LearnMessage::LearnMessage(const std::string &from, const std::string &to,
+                           const std::string &schm,  const std::vector<std::string> &argumentsList,
+                           const std::string &owId,
+                           const std::string &avId, const SpaceServer &spaceServer)
+                           throw (LADSUtil::InvalidParamException, std::bad_exception): 
+                           Message(from, to, MessagingSystem::Message::LEARN) { 
+                           
+
+    NMXmlExporter exporter;
+
+    schema.assign(schm);
+    ownerId.assign(owId);
+    avatarId.assign(avId);
+    setSchemaArguments(argumentsList);
+
+    //look for the exemplars time intervals to fill spaceMaps
+    Handle trick_h = spaceServer.getAtomSpace().getHandle(CONCEPT_NODE, schm);
+    if(trick_h == Handle::UNDEFINED){
+        throw LADSUtil::InvalidParamException(TRACE_INFO, 
+                                    "LearnMessage - AtomSpace does not contain '%s' concept node.",
+                                    schm.c_str());
+    }
+    
+    std::list<HandleTemporalPair> htp_seq;
+    spaceServer.getAtomSpace().getTimeInfo(back_inserter(htp_seq), trick_h);
+
+#ifdef USE_MAP_HANDLE_SET
+    // TODO: THIS DOES NOT WORK BECAUSE MAPS GETS WRONG ORDER (Suggestion: to use a set of timestamps instead) 
+    // So, for now, we may send duplicate maps, which is inneficient but should not cause any error
+    std::set<Handle> mapsToSend;
+#endif
+    foreach(HandleTemporalPair htp, htp_seq) {
+        Temporal t = *htp.getTemporal();
+        HandleSeq sm_seq;	
+        spaceServer.getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
+
+        foreach(Handle sm_h, sm_seq) {
+            try{
+                if (spaceServer.containsMap(sm_h)) { 
+#ifdef USE_MAP_HANDLE_SET
+                    mapsToSend.insert(sm_h);
+#else
+                    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+                       "LearnMessage - adding space map (%s) to the message.", 
+                        TLB::getAtom(sm_h)->toString().c_str());
+                        spaceMaps.push_back(spaceServer.mapToString(sm_h));
+#endif
+                } else {
+                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+                        "LearnMessage - SpaceServer has no space map (%s) to be added to the message!",
+                        TLB::getAtom(sm_h)->toString().c_str());
+                    spaceServer.getAtomSpace().removeAtom(sm_h, true);
+                }
+            } catch (LADSUtil::AssertionException& e) {
+                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+                    "LearnMessage - Failed to add map (%s) into LearnMessage.",
+                    TLB::getAtom(sm_h)->toString().c_str());
+            }
+        }
+    }
+
+#ifdef USE_MAP_HANDLE_SET
+    foreach(Handle sm_h, mapsToSend) {
+        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+           "LearnMessage - adding space map (%s) to the message.", 
+           TLB::getAtom(sm_h)->toString().c_str());
+        spaceMaps.push_back(spaceServer.MapToString(sm_h));
+    }
+#endif
+
+    behaviorDescriptions.assign(exporter.toXML(spaceServer.getAtomSpace().getAtomTable().getHandleSet(ATOM, true)));
+    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "LearnMessage - finished creating message (behavior descriptors just added."); 
+}
+
+/**
+ * Public methods
+ */
+const char * LearnMessage::getPlainTextRepresentation(){
+	message.assign("");
+	
+	//schema id
+	message.append(schema);
+	message.append(END_TOKEN);
+	//ownerId
+  	message.append(ownerId);
+	message.append(END_TOKEN);
+	//avatarId to imitate
+ 	message.append(avatarId);
+	message.append(END_TOKEN);
+	//behavior description
+	message.append(behaviorDescriptions);
+	message.append(END_TOKEN);
+	//schema arguments
+	message.append(boost::lexical_cast<string>(schemaArguments.size()));
+	foreach(std::string s, schemaArguments) {
+	  message.append(END_TOKEN);
+	  message.append(s);
+	}
+	//spaceMaps
+	foreach(std::string s, spaceMaps) {
+	  message.append(END_TOKEN);	  
+	  message.append(s);
+	}
+	return message.c_str();	
+}
+
+void LearnMessage::loadPlainTextRepresentation(const char *strMessage) {
+        LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage, 
+					      (std::string)END_TOKEN);
+	//schema id
+	schema = stringTokenizer.nextToken();
+	//ownerId
+	ownerId = stringTokenizer.nextToken();
+	//avatarId to imitate
+	avatarId = stringTokenizer.nextToken();
+	//behavior description
+	behaviorDescriptions = stringTokenizer.nextToken();
+	//schema arguments
+	schemaArguments.clear();
+	unsigned int arity = boost::lexical_cast<unsigned int>(stringTokenizer.nextToken());
+	for(unsigned int i = 0; i < arity; i++)
+	  schemaArguments.push_back(stringTokenizer.nextToken());
+	//spaceMaps
+	spaceMaps.clear();
+	std::string s = stringTokenizer.nextToken();
+	while(!s.empty()) {
+	  spaceMaps.push_back(s);
+	  s = stringTokenizer.nextToken();
+	}
+}
+
+/**
+ * Getters and setters
+ */
+void LearnMessage::setSchema(const std::string &schm){
+	schema.assign(schm);
+}
+
+const std::string & LearnMessage::getSchema(){
+	return schema;
+}
+
+void LearnMessage::setAvatarId(const std::string &avId){
+	avatarId.assign(avId);
+}
+
+const std::string & LearnMessage::getAvatarId(){
+	return avatarId;
+}
+
+void LearnMessage::setOwnerId(const std::string &owId){
+	ownerId.assign(owId);
+}
+
+const std::string & LearnMessage::getOwnerId(){
+	return ownerId;
+}
+
+const std::string & LearnMessage::getBehaviorDescriptions(){
+	return behaviorDescriptions;
+}
+
+const std::vector<std::string> & LearnMessage::getSpaceMaps(){
+	return spaceMaps;
+}
+
+const std::vector<std::string> & LearnMessage::getSchemaArguments(){
+	return schemaArguments;
+}
+
+void LearnMessage::setSchemaArguments(const std::vector<std::string> &argumentsList)
+{
+    schemaArguments = argumentsList;
+}
+
+
+bool LearnMessage::populateAtomSpace(SpaceServer &spaceServer){
+	
+	// load AtomSpace	
+	std::vector<XMLBufferReader *> reader(1, new StringXMLBufferReader(behaviorDescriptions.c_str()));
+    try {
+        //NMXmlParser::loadXML(reader, atomSpace, true, true);
+        NMXmlParser::loadXML(reader, &spaceServer.getAtomSpace(), false, false);
+
+        // load SpaceMap into AtomSpace
+        foreach(std::string s, spaceMaps) {
+            SpaceServer::TimestampMap timestampMap = SpaceServer::mapFromString(s);
+            spaceServer.addSpaceMap(timestampMap.first, timestampMap.second);
+        }
+
+    // catch all RuntimeExceptions descendents, specially
+    // InconsistenceException
+    } catch(LADSUtil::RuntimeException& e) {
+        delete reader[0];
+        return false;
+    }
+	
+	delete reader[0]; 
+    return true;
+}
+

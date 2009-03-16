@@ -1,0 +1,199 @@
+/**
+ * EntityRelevanceFilter.h
+ *
+ * Author: Carlos Lopes
+ * Copyright(c), 2007
+ */
+#ifndef ENTITYRELEVANCEFILTER_H_
+#define ENTITYRELEVANCEFILTER_H_
+
+#include "comboreduct/combo/vertex.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <atom_types.h>
+
+#include "SpaceServer.h"
+#include "WorldProvider.h"
+
+#include <set>
+#include <vector>
+#include <string>
+
+typedef std::vector<combo::definite_object> definite_object_vec;
+typedef definite_object_vec::iterator definite_object_vec_it;
+typedef definite_object_vec::const_iterator definite_object_vec_const_it;
+typedef std::set<definite_object_vec> definite_object_vec_set;
+typedef definite_object_vec_set::iterator definite_object_vec_set_it;
+typedef definite_object_vec_set::const_iterator definite_object_vec_set_const_it;
+typedef std::map<combo::definite_object, definite_object_vec_set> agent_to_actions;
+typedef agent_to_actions::iterator agent_to_actions_it;
+typedef agent_to_actions::const_iterator agent_to_actions_const_it;
+
+class EntityRelevanceFilter {
+
+		private:   
+  		std::vector<Handle> spaceMapHandles;
+  		std::vector<std::string> spaceMapIds;
+	  
+  		const std::string _selfID; //the ID corresponding to self
+  		const std::string _ownerID; //the ID corresponding to owner
+	  
+	public:
+		EntityRelevanceFilter();
+  		//selfID and owner are given here to be changed into
+  		//"self" and "owner" respectively
+  		EntityRelevanceFilter(const SpaceServer::SpaceMap &spaceMap,
+				const std::string& selfID,
+				const std::string& ownerID);
+  		~EntityRelevanceFilter();
+	  
+  		/**
+   		* Gets the entities (i.e. definite_object) in a LocaSpaceMap2D related to the given type (and its decendents). 
+   		* NOTE: the type MUST be a NODE or some descendent
+   		* 
+   		* @param type The atom type   
+   		* @return A vector containing all the entities names 
+   		*/
+  		const combo::definite_object_set getEntities(Type type = SL_OBJECT_NODE) const;
+
+		/**
+   		* Gets the entities (i.e. definite_object) of a given type (and its decendents) in all LocaSpaceMap2D related to a given trick. 
+   		* NOTE: the type MUST be a NODE or some descendent
+   		* 
+   		* @param wp WorldProvider to search over
+   		* @param trick name of the trick
+   		* @param selfID id of the pet, to change it into "self"
+   		* @param ownerID id of the owner, to change it into "owner"
+   		* @param type The atom type   
+   		* @return A set containing all the entities names 
+   		*/
+  		const combo::definite_object_set getEntities(const WorldProvider& wp,
+							     const std::string& trick,
+							     const std::string& selfID,
+							     const std::string& ownerID,
+							     Type type = SL_OBJECT_NODE) const;
+
+
+		/**
+   		* Gets the set of messages that span over the exemplar trick
+   		* possibly addressed to toID
+   		*
+   		* @param wp             WorldProvider to search over
+   		* @param trick          the name of the trick
+   		* @param toID           ID of destination
+   		* @param exclude_prefix whether it exclude the prefix
+   		*                       "to:toID: "
+   		* @param strict_within  whether the start and stop time
+   		*                       are included in the temporal
+   		*                       this is used to possibly avoid
+   		*                       messages from the owner to
+   		*                       start and stop learning
+   		* @return A set containing all messages meeting the constraint
+   		*/
+  		const combo::message_set getMessages(const WorldProvider& wp,
+						     const std::string& trick,
+						     const std::string& toID = string(),
+						     bool exclude_prefix = false,
+						     bool strict_within = true) const;
+
+		/**
+   		* Gets the set of messages that span over the interval t
+   		* possibly addressed to toID
+   		*
+   		* @param wp             WorldProvider to search over
+   		* @param t              time interval where to look for
+   		* @param toID           ID of destination
+   		* @param exclude_prefix whether it exclude the prefix
+   		*                       "to:toID: "
+   		* @param strict_within  whether the start and stop time
+   		*                       are included in the temporal
+   		*                       this is used to possibly avoid
+   		*                       messages from the owner to
+   		*                       start and stop learning
+   		* @return A set containing all messages meeting the constraint
+   		*/
+  		const combo::message_set getMessages(const WorldProvider& wp,
+						     Temporal t,
+						     const std::string& toID = string(),
+						     bool exclude_prefix = false,
+						     bool strict_within = true) const;
+
+		/**
+		* Gets the set of messages that span over the interval t
+		* possibly addressed to toID
+		*
+		* @param as     AtomSpace to search over
+		* @param t              time interval where to look for
+		* @param toID           ID of destination
+		* @param exclude_prefix whether it exclude the prefix
+		*                       "to:toID: "
+		* @param strict_within  whether the start and stop time
+		*                       are included in the temporal
+		*                       this is used to possibly avoid
+		*                       messages from the owner to
+		*                       start and stop learning
+		* @return A set containing all messages meeting the constraint
+		*/
+		const combo::message_set getMessages(const SpaceServer& spaceServer,
+						     Temporal t,
+						     const std::string& toID = string(),
+						     bool exclude_prefix = false,
+						     bool strict_within = true) const;
+		
+		/**
+		* Gets the set of all agent actions
+		* (under the form of action definite_objects)
+		* of which the actionDone ending time span over a trick
+		*
+		* @param wp             WorldProvider to search over
+		* @param trick          the name of the trick
+		* @param exclude_self   that flag is used because we may
+		*                       not want to consider proprioceptions
+		*                       here
+		* @return a map associating agent id with their actions definite_object
+		*/
+		const agent_to_actions getAgentActions(const WorldProvider& wp,
+						       const std::string& trick,
+						       const std::string& selfID,
+						       const std::string& ownerID,
+						       const std::set<string>& exclude_set = std::set<string>()) const;
+		
+		/**
+		* Gets the set of all agent actions
+		* (under the form of action definite_objects)
+		* of which the actionDone ending time span over t
+		*
+		* @param as             WorldProvider to search over
+		* @param t              time interval where to look in
+		* @param exclude_self   that flag is used because we may
+		*                       not want to consider proprioceptions
+		*                       here
+		* @return a map associating agent id with their actions definite_object
+		*/
+		const agent_to_actions getAgentActions(const WorldProvider& wp,
+						       const Temporal& t,
+						       const std::string& selfID,
+						       const std::string& ownerID,
+						       const std::set<string>& exclude_set = std::set<string>()) const;
+		
+		/**
+		* Gets the set of all agent actions
+		* (under the form of action definite_objects)
+		* of which the actionDone ending time span over t
+		*
+		* @param as             AtomSpace to search over
+		* @param t              time interval where to look in
+		* @param exclude_self   that flag is used because we may
+		*                       not want to consider proprioceptions
+		*                       here
+		* @return a map associating agent id with their actions definite_object
+		*/
+		const agent_to_actions getAgentActions(const AtomSpace& as,
+						       const Temporal& t,
+						       const std::string& selfID,
+						       const std::string& ownerID,
+						       const std::set<string>& exclude_set = std::set<string>()) const;
+
+}; // class
+//}  // namespace
+
+#endif 
