@@ -65,55 +65,14 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/src/atomspace
     ${OPENCOG_SOURCE_DIR}/src/xml
     ${OPENCOG_SOURCE_DIR}/src/server
-    ${OPENCOG_SOURCE_DIR}/src/guile
-    ${OPENCOG_SOURCE_DIR}/src/adaptors/tulip
-    ${OPENCOG_SOURCE_DIR}/src/nlp/wsd
-    ${OPENCOG_SOURCE_DIR}/src/persist
-    ${OPENCOG_SOURCE_DIR}/src/query
-    ${OPENCOG_SOURCE_DIR}/src/reasoning
-    ${CSOCKETS_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIR}
-    ${IODBC_INCLUDE_DIRS}
-    ${GSL_INCLUDE_DIR}
 )
-
-#ADD_EXECUTABLE(plnshell PLNShell.cc)
 
 TARGET_LINK_LIBRARIES(pln
     atomspace
-#    server
     xml
     util
-    #query
-#    smob #scheme
-#    adaptor-tulip
-    ${IODBC_LIBRARIES}
-    ${CSOCKETS_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-    ${EXPAT_LIBRARIES}
-#    ${GUILE_LIBRARIES}
-    ${GSL_LIBRARIES}
-    ${Boost_SIGNALS_LIBRARY}
+    #${Boost_SIGNALS_LIBRARY}
 )
-
-#TARGET_LINK_LIBRARIES(plnshell pln
-#    #atomspace
-#    server
-#    xml
-#    util
-#    #query
-#    smob #scheme
-#    #wsd
-#    persist
-#   adaptor-tulip
-#    ${IODBC_LIBRARIES}
-#    ${CSOCKETS_LIBRARIES}
-#    ${OPENSSL_LIBRARIES}
-#    ${EXPAT_LIBRARIES}
-#    ${GUILE_LIBRARIES}
-#    ${GSL_LIBRARIES}
-#    ${Boost_SIGNALS_LIBRARY}
-#)
 
 INSTALL (TARGETS pln
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

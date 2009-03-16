@@ -55,6 +55,7 @@ ADD_LIBRARY (atomspace SHARED
 TARGET_LINK_LIBRARIES(atomspace
 	util
 	${GSL_LIBRARIES}
+	${Boost_SIGNALS_LIBRARY}
 )
 
 INSTALL (TARGETS atomspace
