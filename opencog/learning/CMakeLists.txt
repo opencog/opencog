@@ -1,1 +1,2 @@
 ADD_SUBDIRECTORY (moses)
+ADD_SUBDIRECTORY (hillclimbing)

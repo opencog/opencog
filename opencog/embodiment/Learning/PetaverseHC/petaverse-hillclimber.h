@@ -3,7 +3,6 @@
 
 #include "hillclimber.h"
 #include "DistortedComboSize.h"
-#include "util/tree.h"
 #include "PetaverseImitationLearning.h"
 
 namespace hillclimbing {
