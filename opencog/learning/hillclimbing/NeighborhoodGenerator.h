@@ -262,6 +262,9 @@ public:
     //populate the neighborhood of center, dealing with variations
     //on the subtree starting from it
     void populate_neighborhood(neighborhood& nh, const combo_tree& tr, pre_it it) {
+
+        std::cout << "POPULATE_NEIGHBORHOOD FROM: " << tr << " AT: " << combo_tree(it) << std::endl;
+        
         opencog::cassert(TRACE_INFO, !tr.empty(), "center should not be empty");
         opencog::cassert(TRACE_INFO, tr.is_valid(it),
                          "Invalide node associated to the tree");
@@ -413,13 +416,15 @@ public:
                 add_neighbor(nh, tmp);
             }
         }
-        //--------------
-        //builtin action
-        //--------------
-        else if (is_builtin_action(*it)) {
+        //-----------------------------------------------------------
+        //builtin action (including action_success or action_failure)
+        //-----------------------------------------------------------
+        else if (is_builtin_action(*it)
+                 ||
+                 *it == id::action_success || *it == id::action_failure) {
             //substitute the action by any composite actions
             for (combo_tree_ns_set_const_it compact = _composite_actions.begin();
-                    compact != _composite_actions.end(); ++compact) {
+                 compact != _composite_actions.end(); ++compact) {
                 opencog::cassert(TRACE_INFO, !compact->empty(),
                                  "composite action cannot be empty");
                 pre_it compact_head = compact->begin();
@@ -430,29 +435,39 @@ public:
                 add_neighbor(nh, tmp);
             }
 #ifdef PERMUTATION_NEIGHBORHOOD_EXPANSION
-            //move the builtin action under other sequential_and
+            //if the action is under a sequential_and then
+            //move it under other sequential_and at each possible position
             {
-                combo_tree tmp = tr;
-                pre_it tmp_it = get_same_position(tr, tmp, it);
-                combo_tree act_tr(tmp_it);
-                tmp.erase(tmp_it);
-                for (pre_it pos_it = tmp.begin(); pos_it != tmp.end(); ++pos_it) {
-                    if (*pos_it == id::sequential_and) {
-                        //prepend child act_tr
-                        {
-                            combo_tree ins_tmp = tmp;
-                            pre_it ins_tmp_it = get_same_position(tmp, ins_tmp, pos_it);
-                            ins_tmp.replace(ins_tmp.prepend_child(ins_tmp_it),
-                                            act_tr.begin());
-                            add_neighbor(nh, ins_tmp);
-                        }
-                        //insert after each child
-                        for (sib_it sib = pos_it.begin(); sib != pos_it.end(); ++sib) {
-                            combo_tree ins_tmp = tmp;
-                            pre_it ins_tmp_it = get_same_position(tmp, ins_tmp,
-                                                                  pre_it(sib));
-                            ins_tmp.insert_subtree_after(ins_tmp_it, act_tr.begin());
-                            add_neighbor(nh, ins_tmp);
+                pre_it it_parent = tr.parent(it);
+                if(tr.is_valid(it_parent) && *it_parent == id::sequential_and) {
+                    combo_tree tmp = tr;
+                    pre_it tmp_it = get_same_position(tr, tmp, it);
+                    combo_tree act_tr(tmp_it);
+                    tmp.erase(tmp_it);
+                    for (pre_it pos_it = tmp.begin();
+                         pos_it != tmp.end(); ++pos_it) {
+                        if (*pos_it == id::sequential_and) {
+                            //prepend child act_tr
+                            {
+                                combo_tree ins_tmp = tmp;
+                                pre_it ins_tmp_it = get_same_position(tmp,
+                                                                      ins_tmp,
+                                                                      pos_it);
+                                ins_tmp.replace(ins_tmp.prepend_child(ins_tmp_it),
+                                                act_tr.begin());
+                                add_neighbor(nh, ins_tmp);
+                            }
+                            //insert after each child
+                            for (sib_it sib = pos_it.begin();
+                                 sib != pos_it.end(); ++sib) {
+                                combo_tree ins_tmp = tmp;
+                                pre_it ins_tmp_it = get_same_position(tmp,
+                                                                      ins_tmp,
+                                                                      pre_it(sib));
+                                ins_tmp.insert_subtree_after(ins_tmp_it,
+                                                             act_tr.begin());
+                                add_neighbor(nh, ins_tmp);
+                            }
                         }
                     }
                 }
@@ -462,8 +477,15 @@ public:
         //--------------------------------------------------
         //no case, should not get into that part of the code
         //--------------------------------------------------
-        else opencog::cassert(TRACE_INFO, false,
-                                  "Should not get into that part of the code");
+        else {
+            std::stringstream ss_tr, ss_it;
+            ss_tr << tr;
+            ss_it << combo_tree(it);
+            opencog::cassert(TRACE_INFO, false,
+                             "Should not get into that part of the code, the combo_tree %s, has subtree %s which is not yet handled by the method populate_neighborhood",
+                             ss_tr.str().c_str(),
+                             ss_it.str().c_str());
+        }
     }
 
     const combo_tree_ns_set& getCompositePerceptions() const {
