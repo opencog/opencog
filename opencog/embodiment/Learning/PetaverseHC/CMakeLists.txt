@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES(
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+    ${OPENCOG_SOURCE_DIR}/opencog/learning/hillclimbing
     ${OPENCOG_SOURCE_DIR}/opencog
 )
 
@@ -20,20 +21,18 @@ LINK_DIRECTORIES(
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/RewritingRules
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/FitnessEstimator
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/behavior
+    ${OPENCOG_BINARY_DIR}/opencog/learning/hillclimbing
     ${OPENCOG_BINARY_DIR}/opencog/util
     ${OPENCOG_BINARY_DIR}/opencog/comboreduct
 )
 
-ADD_LIBRARY(hillclimbing
-	hillclimber
+ADD_LIBRARY(PetaverseHC
 	petaverse-hillclimber
-	ant-hillclimber
-	interactive-hillclimber
-	NeighborhoodGenerator
 	HCPetaverseVocabularyProvider
 )
 
-TARGET_LINK_LIBRARIES(hillclimbing
+TARGET_LINK_LIBRARIES(PetaverseHC
+        hillclimbing
 	RewritingRules
 	comboreduct
 	util

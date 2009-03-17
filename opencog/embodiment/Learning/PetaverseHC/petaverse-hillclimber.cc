@@ -1,4 +1,5 @@
 #include "petaverse-hillclimber.h"
+#include "RewritingRules.h"
 
 namespace hillclimbing {
 
@@ -16,7 +17,10 @@ namespace hillclimbing {
       _elementary_operators(eo), _conditions(conditions),
       _actions(actions), _rng(rng), 
       _hillclimber(fitness_estimator, nepc, _elementary_operators,
-		   _conditions, _actions, _comp, abibb, neic) {
+		   _conditions, _actions, _comp,
+                   hillclimbing_action_reduction(),
+                   hillclimbing_full_reduction(),
+                   abibb, neic) {
     
     //right after run the operator once to have already a learned candidate
     _hillclimber();
