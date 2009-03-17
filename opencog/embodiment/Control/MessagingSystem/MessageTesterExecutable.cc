@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+#ifndef WIN32
+#include <unistd.h>
+#endif
+
+#include <SystemParameters.h>
+#include "NetworkElement.h"
+#include "StringMessage.h"
+
+#ifdef WIN32
+unsigned sleep(unsigned seconds)
+	{
+		Sleep(seconds * 1000);
+		return 0;
+	}
+#endif
+
+using namespace MessagingSystem;
+
+class MyElement : public NetworkElement {
+
+    private:
+
+    std::string myID;
+    std::string peerID;
+    int sleepBeforeSending;
+
+    public:
+
+    MyElement(const Control::SystemParameters &params, std::string myID, std::string peerID, int port, int sleep) : NetworkElement(params, myID, std::string("127.0.0.1"), port) {
+        this->myID = myID;
+        this->peerID = peerID;
+        this->sleepBeforeSending = sleep;
+    }
+
+    void run() {
+        StringMessage message(myID, peerID, "Message 1 sent by " + myID);
+        printf("Sleeping for %d seconds...\n", sleepBeforeSending);
+        sleep(sleepBeforeSending);
+        printf("Sending message 1 to %s...\n", peerID.c_str());
+        sendMessage(message);
+        printf("Sent\n");
+        printf("Waiting for message...\n");
+        while (!haveUnreadMessage()) {
+        }
+        printf("Router notified message arrival. Requesting it...\n");
+        retrieveMessages(-1);
+        printf("Messages retrieved:\n");
+        /*
+        for (int i = 0; i < messages->size(); i++) {
+            printf("%s\n", messages->at(i)->getPlainTextRepresentation());
+        }
+        */
+    }
+};
+
+int main(int argc, char *argv[]) {
+
+    Control::SystemParameters parameters;
+
+    printf("Handshaking with router...\n");
+    MyElement *myElement = new MyElement(parameters, argv[1], argv[2], atoi(argv[3]), atoi(argv[4]));
+    printf("OK. Sleeping for 10 seconds...\n");
+    sleep(10);
+    printf("Starting test\n");
+    myElement->run();
+    
+    return 0;
+}

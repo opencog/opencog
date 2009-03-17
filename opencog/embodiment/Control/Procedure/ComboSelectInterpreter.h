@@ -1,0 +1,95 @@
+#ifndef _COMBO_SELECT_INTERPRETER_H
+#define _COMBO_SELECT_INTERPRETER_H
+
+#include "PAI.h"
+#include "IdleTask.h"
+#include "ComboProcedure.h"
+#include "ComboInterpreter.h"
+#include "RunningProcedureId.h"
+#include "RunningComboSelectProcedure.h"
+
+#include <ComboReduct/combo/vertex.h>
+#include <ComboReduct/combo/variable_unifier.h>
+
+namespace Procedure {
+
+class ComboSelectInterpreter : public MessagingSystem::IdleTask {
+
+    public:
+        
+        ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, LADSUtil::RandGen& rng);
+        ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, LADSUtil::RandGen& rng);
+        ~ComboSelectInterpreter();
+        
+        // from idle task
+        void run(MessagingSystem::NetworkElement *ne);
+
+        /**
+         * add a ComboSelect procedure to be run by the interpreter.
+         *
+         * @param f The first combo script
+         * @param s The second combo script
+         * @param arguments The overall procedure arguments. Currently this will
+         *        empty most of the time.
+         */
+        Procedure::RunningProcedureId runProcedure(const ComboProcedure& f, const ComboProcedure& s,
+                                                        const std::vector<combo::vertex> arguments); 
+
+        /**
+         * add a ComboSelect procedure to be run by the interpreter with a
+         * variable unifier.
+         *
+         * @param f The first combo script
+         * @param s The second combo script
+         * @param arguments The overall procedure arguments. Currently this will
+         *        empty most of the time.
+         * @param vu The variable unifier
+         */
+        Procedure::RunningProcedureId runProcedure(const ComboProcedure& f, const ComboProcedure& s,
+                                                        const std::vector<combo::vertex> arguments, 
+                                                        combo::variable_unifier& vu); 
+        
+        // 
+        bool isFinished(Procedure::RunningProcedureId id);
+
+        //
+        bool isFailed(Procedure::RunningProcedureId id);
+
+        // Get the result of the procedure with the given id
+        // Can be called only if the following conditions are true:
+        // - procedure execution is finished (checked by isFinished() method)
+        // - procedure execution has not failed (checked by isFailed() method)
+        // - procedure execution was not stopped (by calling stopProcedure() method) 
+        combo::vertex getResult(RunningProcedureId id);
+
+        // Get the result of the variable unification carried within the procedure
+        // execution.
+        // Can be called only if the following conditions are true:
+        // - procedure execution is finished (checked by isFinished() method)
+        // - procedure execution has not failed (checked by isFailed() method)
+        // - procedure execution was not stopped (by calling stopProcedure() method)    
+        combo::variable_unifier& getUnifierResult(RunningProcedureId id);
+        
+        // stop the running procedure and remove it from result, failed and
+        // unifer maps, if present there.
+        void stopProcedure(RunningProcedureId id);
+
+    private:
+
+        typedef std::map<RunningProcedureId, RunningComboSelectProcedure> idProcedureMap;
+        typedef std::map<RunningProcedureId, combo::variable_unifier> idUnifierMap;
+        typedef std::map<RunningProcedureId, combo::vertex> idVertexMap;
+       
+        idProcedureMap runningProc;
+        idUnifierMap unifier;
+        idVertexMap result;
+
+        std::set<RunningProcedureId> failed;
+
+        unsigned long next;
+        ComboInterpreter * comboInterpreter;
+
+}; // class
+}  // namespace
+
+#endif 
