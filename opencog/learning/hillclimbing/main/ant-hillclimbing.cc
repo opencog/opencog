@@ -4,7 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include "moses/moses/ant_scoring.h"
+#include "moses/ant_scoring.h"
 
 using namespace hillclimbing;
 using namespace combo;

@@ -38,20 +38,6 @@ IF(COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
-ADD_EXECUTABLE (interactive-hillclimbing interactive-hillclimbing)
-TARGET_LINK_LIBRARIES (interactive-hillclimbing
-	hillclimbing
-	util
-	comboreduct
-)
-
-ADD_EXECUTABLE (ant-hillclimbing ant-hillclimbing)
-TARGET_LINK_LIBRARIES (ant-hillclimbing
-	hillclimbing
-	util
-	comboreduct
-)
-
 ADD_EXECUTABLE (moses-petbrain moses-petbrain)
 TARGET_LINK_LIBRARIES (moses-petbrain
 	${MOSES_LIBRARY}

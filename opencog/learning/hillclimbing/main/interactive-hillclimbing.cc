@@ -1,4 +1,4 @@
-#include "hillclimbing/interactive-hillclimber.h"
+#include "interactive-hillclimber.h"
 #include "comboreduct/combo/vertex.h"
 #include "util/lru_cache.h"
 #include <set>
