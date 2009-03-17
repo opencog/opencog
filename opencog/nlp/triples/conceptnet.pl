@@ -10,6 +10,8 @@
 # a sport played in an arena". This script extracts those sentences,
 # one per line.
 #
+# The 20080605 dump contains 254K sentences.
+#
 # Usage: "bzless conceptnet_en_20080605.n3.bz2 | ./conceptnet.pl"
 #
 # Linas Vepstas March 2009
@@ -21,9 +23,37 @@ use warnings;
 
 while (<>)
 {
-	# if (/conceptnet:Sentence "(\w+)"\./)
+	# Find the sentences
 	if (/conceptnet:Sentence "(.+)"\./)
 	{
-		print "$1\n";
+		my $sent = $1;
+
+		my $more = 1;
+		do {
+			# Trim leading blanks
+			$sent =~ s/^\s//;
+			$sent =~ s/^\s//;
+			$sent =~ s/^\s//;
+	
+			# Trim trailing blanks
+			$sent =~ s/\s$//;
+			$sent =~ s/\s$//;
+			$sent =~ s/\s$//;
+
+			# Place multiple sentences on individual lines.
+			# Err, no. Looks like most multi-sentence constructions are ugly,
+			# so don't print them at all.
+			if ($sent =~ /(.+?\.)(.+)/)
+			{
+				# print "$1\n";
+				# $sent = $2;
+				$more = 0;
+			}
+			else
+			{
+				print "$sent\n";
+				$more = 0;
+			}
+		} while ($more);
 	}
 }
