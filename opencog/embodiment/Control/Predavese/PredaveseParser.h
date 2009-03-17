@@ -4,8 +4,8 @@
 #include <map>
 #include <set>
 
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include "Predavese.h"
 #include "PetInterface.h"
@@ -31,7 +31,7 @@ namespace predavese {
     template<typename OutputIterT> void Parse(string s, unsigned long timestamp, OutputIterT actions) const {
       set<pAtom, less_atom_by_structure> res;
 
-      parse(LADSUtil::StringManipulator::clean(s), inserter(res, res.begin()));
+      parse(opencog::StringManipulator::clean(s), inserter(res, res.begin()));
       
       for(set<pAtom, less_atom_by_structure>::const_iterator itr = res.begin(); itr != res.end(); itr++) {
 	pAtom a = *itr;
@@ -88,7 +88,7 @@ namespace predavese {
     pAtom add_terminal(const pat& p);
     
     template<typename OutIterT> void parse(string s, OutIterT ret) const {
-      //MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "PredaveseParser - Parsing [%s]", s.c_str( ) );
+      //logger().log( opencog::Logger::DEBUG, "PredaveseParser - Parsing [%s]", s.c_str( ) );
       pat p = str2pat(s,patmap);
       return parse(p, ret, 0, 0);
     }
@@ -102,13 +102,13 @@ namespace predavese {
       // to find expressions that should be converted into I AM AMAZED
       PatMap::const_iterator ip = i_patmap.find(strs);
       
-      //MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "PredaveseParser - Starting parse expression. Strings[%d]", strs.size( ) );
+      //logger().log( opencog::Logger::DEBUG, "PredaveseParser - Starting parse expression. Strings[%d]", strs.size( ) );
 
       // if is such an expression should be parsed here
       if (ip != i_patmap.end() && original_offset == 0 ) {
 	const pat& newStrs = ip->second;
 	parse(newStrs, ret, depth+1, original_offset);
-	//MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "PredaveseParser - newStrs size[%d] next depth[%d]", newStrs.size( ), depth+1 );
+	//logger().log( opencog::Logger::DEBUG, "PredaveseParser - newStrs size[%d] next depth[%d]", newStrs.size( ), depth+1 );
       } else { // no such expression, do further tests
 	PatMap::const_iterator ep = elliptic_prefix_patmap.find(strs);
 	
@@ -116,7 +116,7 @@ namespace predavese {
 	  pat newp(ep->second);
 	  transform(strs.begin(), strs.end(), back_inserter(newp), promote());
 	  
-	  //MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "PredaveseParser - newp size[%d] next depth[%d]", newp.size( ), depth+1 );
+	  //logger().log( opencog::Logger::DEBUG, "PredaveseParser - newp size[%d] next depth[%d]", newp.size( ), depth+1 );
 	  parse(newp, ret, depth+1, original_offset);
 	} else {
 	  
@@ -128,7 +128,7 @@ namespace predavese {
 	      
 	      if (replace(&mod_strs[i], &mod_strs[i+len], &mod_strs[mod_strs.size()], reduction, patmap)) {
 		mod_strs.resize(mod_strs.size()-reduction);
-		//MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "PredaveseParser - mod_strs after reduction[%d] reduction[%d]", mod_strs.size( ), reduction );
+		//logger().log( opencog::Logger::DEBUG, "PredaveseParser - mod_strs after reduction[%d] reduction[%d]", mod_strs.size( ), reduction );
 		parse(mod_strs, ret, depth+1, i);
 	      } // if
 	      

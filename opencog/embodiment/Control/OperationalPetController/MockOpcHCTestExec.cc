@@ -1,13 +1,13 @@
 #include <SystemParameters.h>
 #include <unistd.h>
-#include <LADSUtil/files.h>
+#include "util/files.h"
 #include "MockOpcHCTest.h"
 
 using namespace OperationalPetController;
 
 int main(int argc, char *argv[]) {
   
-  LADSUtil::cassert(TRACE_INFO, argc == 3);
+  opencog::cassert(TRACE_INFO, argc == 3);
   Control::SystemParameters parameters;
   
   // if exists load file with configuration parameters 

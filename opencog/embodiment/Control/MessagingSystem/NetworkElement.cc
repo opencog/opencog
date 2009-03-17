@@ -57,7 +57,7 @@ Control::SystemParameters NetworkElement::parameters;
 // Public interface
   
 NetworkElement::~NetworkElement() {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - Destructor called.");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - Destructor called.");
 
     if(!NetworkElement::stopListenerThreadFlag){
         NetworkElement::stopListenerThread();
@@ -99,7 +99,7 @@ void NetworkElement::initialize(const Control::SystemParameters &params, const s
     this->parameters = params;
 
     // Initializes the main logger (static logger for this process)
-    LADSUtil::Logger::initMainLogger(Control::LoggerFactory::getLogger(parameters, myId));    
+    opencog::Logger::initMainLogger(Control::LoggerFactory::getLogger(parameters, myId));    
 
     this->routerID.assign(this->parameters.get("ROUTER_ID"));
     this->routerIP.assign(this->parameters.get("ROUTER_IP"));
@@ -110,7 +110,7 @@ void NetworkElement::initialize(const Control::SystemParameters &params, const s
 
     this->idleCyclesPerTick = atoi(this->parameters.get("IDLE_CYCLES_PER_TICK").c_str()); 
     
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "NetworkElement - Router address %s:%d", routerIP.c_str(), routerPort);
+    logger().log(opencog::Logger::INFO, "NetworkElement - Router address %s:%d", routerIP.c_str(), routerPort);
 
     idleCycles = 1;
     
@@ -126,7 +126,7 @@ void NetworkElement::initialize(const Control::SystemParameters &params, const s
     tickNumber = 0;
     ServerSocket::setMaster(this);
     if (!startListener()) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "NetworkElement - Could not initialize listener or its thread");
+        logger().log(opencog::Logger::ERROR, "NetworkElement - Could not initialize listener or its thread");
 	exit(-1);
     }
     handshakeWithRouter();
@@ -144,7 +144,7 @@ bool NetworkElement::haveUnreadMessage() {
     bool returnValue;
     pthread_mutex_lock(&messageQueueLock);
     returnValue = (numberOfUnreadMessages > 0);
-    //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement::haveUnreadMessage() - Number of unread messages: %d", numberOfUnreadMessages);
+    //logger().log(opencog::Logger::DEBUG, "NetworkElement::haveUnreadMessage() - Number of unread messages: %d", numberOfUnreadMessages);
     pthread_mutex_unlock(&messageQueueLock);
     return returnValue;
 }
@@ -155,22 +155,22 @@ bool NetworkElement::retrieveMessages(int limit) {
         return false;
     }
 
-    //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - Main thread: request message retrieving.");
+    //logger().log(opencog::Logger::DEBUG, "NetworkElement - Main thread: request message retrieving.");
     requestUnreadMessages(limit);
     return true;
 }
 
 bool NetworkElement::sendMessage(Message &msg) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - sendMessage - init");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - sendMessage - init");
     std::string messagePayload = msg.getPlainTextRepresentation();
 	
-    if (MAIN_LOGGER.getLevel() >= LADSUtil::Logger::FINE) {
-      MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NeworkElement - Preparing to send message:\n%s", messagePayload.c_str() );
+    if (logger().getLevel() >= opencog::Logger::FINE) {
+      logger().log(opencog::Logger::FINE, "NeworkElement - Preparing to send message:\n%s", messagePayload.c_str() );
     } // if
     
-    if (MAIN_LOGGER.getLevel() >= LADSUtil::Logger::FINE){
-      MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - Sending message to %s.", msg.getTo().c_str() );
+    if (logger().getLevel() >= opencog::Logger::FINE){
+      logger().log(opencog::Logger::FINE, "NetworkElement - Sending message to %s.", msg.getTo().c_str() );
     } // if
     
     int lineCount = 1;
@@ -192,11 +192,11 @@ bool NetworkElement::sendMessage(Message &msg) {
     message << lineCount << "\n";
     message << messagePayload << "\n";
 
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, 
+    logger().log(opencog::Logger::FINE, 
                     "NetworkElement - Sending command <%s> (%d lines)", message.str().c_str(), lineCount);
 	
-    if (MAIN_LOGGER.getLevel() >= LADSUtil::Logger::FINE){
-      MAIN_LOGGER.log(LADSUtil::Logger::FINE, 
+    if (logger().getLevel() >= opencog::Logger::FINE){
+      logger().log(opencog::Logger::FINE, 
 		      "NetworkElement - Message: \n%s", messagePayload.c_str());
     }
 
@@ -204,11 +204,11 @@ bool NetworkElement::sendMessage(Message &msg) {
     std::string response = sendMessageToRouter( msg_to_send );
     
     if ( response == OK_MESSAGE ) {
-     	MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+     	logger().log(opencog::Logger::DEBUG, 
             "NetworkElement - sendMessage - response = 'OK'");
         return true;
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        logger().log(opencog::Logger::ERROR, 
                "NetworkElement - sendMessage - response = %s. Expected OK.", 
                 response.c_str());
         return false;
@@ -218,7 +218,7 @@ bool NetworkElement::sendMessage(Message &msg) {
 #define SLEEP_TIME 100000
 void NetworkElement::sleepUntilNextMessageArrives() {
     if (!haveUnreadMessage() && messageCentral.isQueueEmpty(myId)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - Sleeping %d ms...", SLEEP_TIME);
+        logger().log(opencog::Logger::FINE, "NetworkElement - Sleeping %d ms...", SLEEP_TIME);
         usleep(SLEEP_TIME);
     }
 }
@@ -314,7 +314,7 @@ bool NetworkElement::serverCycle(bool waitTick) {
                 Message *message = messages[i];
 	        //check type of message
 	        if (message->getType() == Message::TICK) {
-	            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement::serverCycle() - addTick");
+	            logger().log(opencog::Logger::DEBUG, "NetworkElement::serverCycle() - addTick");
 	            addTick();
 	            delete(message);
 	        } else {
@@ -329,11 +329,11 @@ bool NetworkElement::serverCycle(bool waitTick) {
         }
     }
 	
-    //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement::tickedSserverLoop() - sleepCount %d", sleepCount++);
+    //logger().log(opencog::Logger::DEBUG, "NetworkElement::tickedSserverLoop() - sleepCount %d", sleepCount++);
 
     unsigned int msgQueueSize = this->messageCentral.queueSize( this->myId );
     if (msgQueueSize > 0) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement(%s) - messageCentral size: %d", 
+        logger().log(opencog::Logger::DEBUG, "NetworkElement(%s) - messageCentral size: %d", 
 		        this->myId.c_str(), msgQueueSize);
     }
 
@@ -347,12 +347,12 @@ bool NetworkElement::serverCycle(bool waitTick) {
 
 
 void NetworkElement::idleTime() {
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - idleTime() - init.");
+    logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - init.");
     if (idleTasks.size() == 0) {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - idleTime() - idleTasks.size() == 0");
+        logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - idleTasks.size() == 0");
         //sleepUntilNextMessageArrives();
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - idleTime() - Doing idleTasks");
+        logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - Doing idleTasks");
         int size = idleTasks.size();
         for (int i = 0; i < size; i++) {
             if ((idleCycles % idleTasks.at(i).frequency) == 0) {
@@ -366,13 +366,13 @@ void NetworkElement::idleTime() {
         idleCycles = 0;
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - idleTime() - end.");
+    logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - end.");
 
 }
 
 bool NetworkElement::processNextMessage(Message *message) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "NetworkElement - Discarding message from '%s'.\n%s",
+    logger().log(opencog::Logger::WARNING, "NetworkElement - Discarding message from '%s'.\n%s",
                     message->getFrom().c_str(), message->getPlainTextRepresentation());
     return false;
 }
@@ -409,19 +409,19 @@ const std::string &NetworkElement::getID() {
 
 void NetworkElement::newMessageInRouter(int numMessages) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - Notified about new message in router.");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - Notified about new message in router.");
     pthread_mutex_lock(&messageQueueLock);
     numberOfUnreadMessages += numMessages;
     pthread_mutex_unlock(&messageQueueLock);
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement::newMessageinRouter() - Number of unread messages: %d", numberOfUnreadMessages);
+    logger().log(opencog::Logger::DEBUG, "NetworkElement::newMessageinRouter() - Number of unread messages: %d", numberOfUnreadMessages);
 }
 
 void NetworkElement::newMessageRead(const std::string &from, const std::string &to, int type, const std::string &msg) {
 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - newMessageRead");
-	if (MAIN_LOGGER.getLevel() >= LADSUtil::Logger::FINE)
-	    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "NetworkElement - Received message. From '%s'. To '%s', Type '%d'.\n%s", 
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - newMessageRead");
+	if (logger().getLevel() >= opencog::Logger::FINE)
+	    logger().log(opencog::Logger::FINE, "NetworkElement - Received message. From '%s'. To '%s', Type '%d'.\n%s", 
     	             from.c_str(), to.c_str(), type, msg.c_str());
     
     try {
@@ -429,8 +429,8 @@ void NetworkElement::newMessageRead(const std::string &from, const std::string &
         Message *message = Message::factory(from, to, type, msg);
 	    this->messageCentral.push(this->myId, message);
 
-    } catch(LADSUtil::InvalidParamException& e) {
-	    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+    } catch(opencog::InvalidParamException& e) {
+	    logger().log(opencog::Logger::ERROR, 
             "NetworkElement - Discarding message with invalid parameter.\nMessage:\n%s.", 
             msg.c_str());
     }
@@ -438,17 +438,17 @@ void NetworkElement::newMessageRead(const std::string &from, const std::string &
     pthread_mutex_lock(&messageQueueLock);
     numberOfUnreadMessages--;
     pthread_mutex_unlock(&messageQueueLock);
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement::newMessageRead() - Number of unread messages: %d", numberOfUnreadMessages);
+    logger().log(opencog::Logger::DEBUG, "NetworkElement::newMessageRead() - Number of unread messages: %d", numberOfUnreadMessages);
 }
 
 void NetworkElement::noMoreMessages() {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - noMoreMessages.");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - noMoreMessages.");
     //pthread_cond_broadcast(&mainThreadBed);
 }
 
 void NetworkElement::unavailableElement(const std::string &id){
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - unavailableElement.");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - unavailableElement.");
     // Handles special case where Router sends unavailable notification about itself, 
     // which means it asks for handshake in a new connection 
     if(id == this->routerID){
@@ -481,7 +481,7 @@ bool NetworkElement::startListener() {
         // Give time so that it starts listening server port before sending any message to ROUTER.
         int count = atoi(parameters.get("WAIT_LISTENER_READY_TIMEOUT").c_str());
 	do {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - startListener(): waiting for listener to be ready.");
+            logger().log(opencog::Logger::DEBUG, "NetworkElement - startListener(): waiting for listener to be ready.");
             sleep(1); 
 	    if (--count <= 0) {
                 break;
@@ -496,16 +496,16 @@ bool NetworkElement::sendCommandToRouter(const std::string &cmd) {
   std::string response = sendMessageToRouter( cmd );
 
   if ( response == OK_MESSAGE ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - response = 'OK'");    
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - response = 'OK'");    
     return true;
   } else if ( response == FAILED_TO_CONNECT_MESSAGE || response == FAILED_MESSAGE ){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+    logger().log(opencog::Logger::WARNING, 
                     "NetworkElement - Unable to connect to Router in sendCommandToRouter.");
     // cannot connect to router, add it to unavailable elements list
     markAsUnavailableElement(this->routerID);
     return false;
   } else {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+    logger().log(opencog::Logger::ERROR, 
 		    "NetworkElement - SendCommandToRouter response = %s. Expected OK.", response.c_str());
     return false;
   } // else
@@ -513,7 +513,7 @@ bool NetworkElement::sendCommandToRouter(const std::string &cmd) {
 
 void NetworkElement::requestUnreadMessages(int limit) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - Requesting unread messages (limit = %d).", limit);
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - Requesting unread messages (limit = %d).", limit);
     char s[256];
     sprintf(s, "REQUEST_UNREAD_MESSAGES %s %d", myId.c_str(), limit);
     std::string cmd = s;
@@ -525,11 +525,11 @@ void NetworkElement::handshakeWithRouter() {
     char s[256];
     sprintf(s, "LOGIN %s %s %d", myId.c_str(), ipAddress.c_str(), portNumber);
     std::string cmd = s;
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - Handshaking with router...");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - Handshaking with router...");
     if (sendCommandToRouter(cmd)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "NetworkElement - Handshake with router done.");
+        logger().log(opencog::Logger::INFO, "NetworkElement - Handshake with router done.");
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "NetworkElement - Handshake with router failed.");
+        logger().log(opencog::Logger::ERROR, "NetworkElement - Handshake with router failed.");
     }
 }
 
@@ -538,11 +538,11 @@ void NetworkElement::logoutFromRouter(){
     char s[256];
     sprintf(s, "LOGOUT %s", myId.c_str());
     std::string cmd = s;
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - Logging out from router...");
+    logger().log(opencog::Logger::DEBUG, "NetworkElement - Logging out from router...");
     if (sendCommandToRouter(cmd)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "NetworkElement - Logout from router done.");
+        logger().log(opencog::Logger::INFO, "NetworkElement - Logout from router done.");
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "NetworkElement - Logout from router failed.");
+        logger().log(opencog::Logger::ERROR, "NetworkElement - Logout from router failed.");
     }
 }
 
@@ -563,39 +563,39 @@ void NetworkElement::parseCommandLine(const std::string &line, std::string &comm
   
 void *NetworkElement::portListener(void *arg) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworElement - Port listener executing.");
+    logger().log(opencog::Logger::DEBUG, "NetworElement - Port listener executing.");
 
     int port = *((int*) arg);
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "NetworElement - Binding to port %d.", port);
+    logger().log(opencog::Logger::INFO, "NetworElement - Binding to port %d.", port);
 
     SocketHandler socketHandler;
     ListenSocket<ServerSocket> listenSocket(socketHandler);
 	
     if (listenSocket.Bind(port)) {
-        throw LADSUtil::NetworkException(TRACE_INFO, "NetworkElement - Cannot bind to port %d.", port);
+        throw opencog::NetworkException(TRACE_INFO, "NetworkElement - Cannot bind to port %d.", port);
     }
 	
     socketHandler.Add(&listenSocket);
     socketHandler.Select(0,200);
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Port listener ready.");
+    logger().log(opencog::Logger::DEBUG, "Port listener ready.");
     socketListenerIsReady = true;
 
     while (!stopListenerThreadFlag) {
         if (socketHandler.GetCount() == 0) {
-            throw LADSUtil::NetworkException(TRACE_INFO, 
+            throw opencog::NetworkException(TRACE_INFO, 
                 "NetworkElement - Bind to port %d is broken.", port);
         }
         socketHandler.Select(0,200);
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Port listener finished.");
+    logger().log(opencog::Logger::DEBUG, "Port listener finished.");
     return NULL;
 }
 
 void NetworkElement::markAsUnavailableElement(const std::string &id){
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "NetworkElement - Adding %s to unavailable list.", 
+    logger().log(opencog::Logger::INFO, "NetworkElement - Adding %s to unavailable list.", 
                     id.c_str());
 
     unavailableElements.insert(id);
@@ -615,7 +615,7 @@ void NetworkElement::markAsAvailableElement(const std::string &id){
 
         // remove the element from the list
         unavailableElements.erase(id);  
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+        logger().log(opencog::Logger::INFO, 
                 "NetworkElement - Removing %s from unavailable list.", id.c_str());
 
         if(id == this->routerID){
@@ -637,24 +637,24 @@ void NetworkElement::stopListenerThread(){
 
 bool NetworkElement::connectToRouter(void) {
   if ( this->sock != -1 ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
 		    "NetworkElement - connectToRouter. Connection already established" );
     return true;
   } // if
   
   if ( (this->sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot create a socket" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
   } // if
   
   int on = 1; // keep connection alive
   if ( setsockopt ( this->sock, SOL_SOCKET, SO_REUSEADDR|SO_KEEPALIVE, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
   } // if
 #if 0 // TODO: This did not worked very well (got weird behaviors). This must be reviewed and fine tuned later.
   struct timeval tv;
   tv.tv_sec = 30;  // 30 Secs Timeout for receiving operation
   if ( setsockopt( this->sock, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval)) == -1 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
   } // if
 #endif
 
@@ -665,13 +665,13 @@ bool NetworkElement::connectToRouter(void) {
   client.sin_port = htons(this->routerPort);       /* server port */
 
   if ( connect(this->sock, (sockaddr *) &client, sizeof(client)) >= 0 ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
 		    "NetworkElement - connectToRouter. Connection established. ip=%s, port=%d", 
 		    this->routerIP.c_str(), this->routerPort );
     return true;
   } // if
   
-  MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+  logger().log(opencog::Logger::ERROR, 
 		  "NetworkElement - connectToRouter. Unable to connect to router. ip=%s, port=%d", 
 		  this->routerIP.c_str(), this->routerPort );
   markAsUnavailableElement(this->routerID);
@@ -683,7 +683,7 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message ) {
   pthread_mutex_lock(&socketAccessLock);
 
   if ( message.length( ) == 0 ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "NetworkElement - sendMessageToRouter. Invalid zero length message" );
+    logger().log(opencog::Logger::ERROR, "NetworkElement - sendMessageToRouter. Invalid zero length message" );
     pthread_mutex_unlock(&socketAccessLock);
     return FAILED_MESSAGE;
   } // if
@@ -700,7 +700,7 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message ) {
 
   unsigned int sentBytes = 0;
   if ( ( sentBytes = send(this->sock, sentText.c_str(), sentText.length(), 0) ) != sentText.length() ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "NetworkElement - sendMessageToRouter. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, sentText.length() );
+    logger().log(opencog::Logger::ERROR, "NetworkElement - sendMessageToRouter. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, sentText.length() );
     close(this->sock);
     this->sock = -1;
     pthread_mutex_unlock(&socketAccessLock);
@@ -716,7 +716,7 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message ) {
   char buffer[BUFFER_SIZE];
   int receivedBytes = 0;
   if ( (receivedBytes = recv(this->sock, buffer, BUFFER_SIZE-1, 0 ) ) <= 0 ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "NetworkElement - sendMessageToRouter. Invalid response. %d bytes received", receivedBytes );
+    logger().log(opencog::Logger::ERROR, "NetworkElement - sendMessageToRouter. Invalid response. %d bytes received", receivedBytes );
     close(this->sock);
     this->sock = -1;
     pthread_mutex_unlock(&socketAccessLock);
@@ -731,7 +731,7 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message ) {
     buffer[i] = '\0';
   } // if
   
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NetworkElement - sendMessageToRouter. Received response (after chomp): '%s' bytes: %d", buffer, receivedBytes );
+  logger().log(opencog::Logger::DEBUG, "NetworkElement - sendMessageToRouter. Received response (after chomp): '%s' bytes: %d", buffer, receivedBytes );
 
   pthread_mutex_unlock(&socketAccessLock);
   return buffer;

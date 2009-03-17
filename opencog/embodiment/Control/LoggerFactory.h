@@ -11,7 +11,7 @@
 #define LOGGERFACTORY_H
 
 #include <string>
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 #include "SystemParameters.h"
 
 namespace Control {
@@ -24,7 +24,7 @@ class LoggerFactory {
 
     public:
 
-        static LADSUtil::Logger* getLogger(const SystemParameters &parameters, const std::string &id);
+        static opencog::Logger* getLogger(const SystemParameters &parameters, const std::string &id);
 
 }; // class
 }  // namespace

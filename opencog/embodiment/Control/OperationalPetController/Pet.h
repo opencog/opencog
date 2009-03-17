@@ -81,7 +81,7 @@ namespace OperationalPetController {
     std::string grabbedObjId; // the id of the object the pet has on its mouth, 
     // empty if there is no object grabbed.
     
-    LADSUtil::RandGen* rng;
+    opencog::RandGen* rng;
 
     /**
      * Populate atom space with behavior nodes
@@ -91,7 +91,7 @@ namespace OperationalPetController {
     /**
      * Update the maps that should be kept (persisted) in spaceServer during the last exemplar session. 
      */
-    void updatePersistentSpaceMaps() throw (LADSUtil::RuntimeException, std::bad_exception);
+    void updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad_exception);
     
     /**
      * Update is_exemplar_avatar predicate for the pet based on exemplarAvatarId object.
@@ -99,7 +99,7 @@ namespace OperationalPetController {
      * @param active Inform if the predicate is active or not. An active predicate has its
      * TV set to 1.0 and 0.0 otherwise.
      */ 
-    void adjustIsExemplarAvatarPredicate(bool active) throw (LADSUtil::RuntimeException);
+    void adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException);
     
   public:
     
@@ -199,7 +199,7 @@ namespace OperationalPetController {
      * ONLY be called when the LS goes up again and the Pet is still in
      * LEARNING mode.
      */
-    void restartLearning() throw (LADSUtil::RuntimeException, std::bad_exception); 
+    void restartLearning() throw (opencog::RuntimeException, std::bad_exception); 
     
 		
     /**
@@ -219,7 +219,7 @@ namespace OperationalPetController {
      * @param filename The name of the file where data will be written.
      * @param pet The pet whose metadata will be written.
      */
-    static void exportToFile(const std::string& filename, Pet & pet) throw (LADSUtil::IOException, std::bad_exception);
+    static void exportToFile(const std::string& filename, Pet & pet) throw (opencog::IOException, std::bad_exception);
 
     // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined above): 
                  

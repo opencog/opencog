@@ -1,5 +1,5 @@
 #include "PetaverseDOMParser.h"
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 #include <xercesc/dom/DOMException.hpp>
 
 using namespace PerceptionActionInterface;
@@ -18,7 +18,7 @@ void PetaverseDOMParser::error (const unsigned int    errCode,
     char* errorTextStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(errorText);
     char* systemIdStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(systemId);
     char* publicIdStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(publicId);
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "PetaverseDOMParser - XML Parser error:"
+    logger().log(opencog::Logger::ERROR, "PetaverseDOMParser - XML Parser error:"
 		                         "\n  code = %u"
 		                         "\n  domain = %s"
 		                         "\n  type = %d"

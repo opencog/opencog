@@ -18,7 +18,7 @@ namespace OperationalPetController {
 
     void addLearnedSchema( const std::string& schemaName );
 
-    void selectLearnedTrick( std::string& schemaName, std::set<std::string>& arguments ) throw (LADSUtil::NotFoundException);
+    void selectLearnedTrick( std::string& schemaName, std::set<std::string>& arguments ) throw (opencog::NotFoundException);
     
     void rewardSchema( std::string& schemaName );
     
@@ -38,7 +38,7 @@ namespace OperationalPetController {
     std::set<Handle> punishedTricks;
     std::string latestSelectedTrick;
     int numberOfLearnedTricks;
-    LADSUtil::RandGen* randGen;
+    opencog::RandGen* randGen;
   };
 
 }; // OperationalPetController

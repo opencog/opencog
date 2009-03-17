@@ -30,7 +30,7 @@ void ImportanceDecayTask::run(MessagingSystem::NetworkElement *ne) {
     }
 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, 
+    logger().log(opencog::Logger::FINE, 
                     "ImportanceDecayTask - Executing decayShortTermImportance().");
     ((OPC *) ne)->decayShortTermImportance();
 

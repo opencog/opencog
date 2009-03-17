@@ -4,8 +4,8 @@
 #include "ComboProcedure.h"
 #include "ComboInterpreter.h"
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/combo/variable_unifier.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/variable_unifier.h"
 
 
 namespace Procedure {

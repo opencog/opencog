@@ -1,17 +1,17 @@
 INCLUDE_DIRECTORIES (
-	${PETAVERSE_SOURCE_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_SOURCE_DIR}/src/Spatial
-	${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
-	${PETAVERSE_SOURCE_DIR}/src/Control
-	${PETAVERSE_SOURCE_DIR}/src/Control/Predavese
-	${PETAVERSE_SOURCE_DIR}/include/xerces
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
+	${OPENCOG_SOURCE_DIR}/include/xerces
 )
 
 LINK_DIRECTORIES (
-	${PETAVERSE_BINARY_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_BINARY_DIR}/src/Control
-	${PETAVERSE_BINARY_DIR}/src/Control/Predavese
-	${PETAVERSE_SOURCE_DIR}/lib/linux/xerces
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
+	${OPENCOG_SOURCE_DIR}/lib/linux/xerces
 )
 
 CMAKE_POLICY(SET CMP0005 OLD)
@@ -34,7 +34,7 @@ ADD_LIBRARY (PAI
 TARGET_LINK_LIBRARIES(PAI 
 	Predavese 
 	Control 
-	${LADSUTIL_LIBRARY} 
+	util 
 	xerces-c 
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}

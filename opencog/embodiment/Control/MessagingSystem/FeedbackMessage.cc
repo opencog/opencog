@@ -8,7 +8,7 @@
  */
 
 #include "FeedbackMessage.h"
-#include <LADSUtil/StringTokenizer.h>
+#include "util/StringTokenizer.h"
 
 using namespace MessagingSystem;
 
@@ -52,7 +52,7 @@ const char *FeedbackMessage::getPlainTextRepresentation() {
 }
 
 void FeedbackMessage::loadPlainTextRepresentation(const char *strMessage) {
-    LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage,
+    opencog::StringTokenizer stringTokenizer((std::string)strMessage,
 					      (std::string)END_TOKEN);
 
     petId = stringTokenizer.nextToken();

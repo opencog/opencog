@@ -1,13 +1,13 @@
 #include "ComboProcedure.h"
-#include <LADSUtil/foreach.h>
-#include <LADSUtil/exceptions.h>
+#include "util/foreach.h"
+#include "util/exceptions.h"
 #include "PetComboVocabulary.h"
 
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
 using namespace Procedure;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace PetCombo;
 
 static combo_tree empty_procedure;

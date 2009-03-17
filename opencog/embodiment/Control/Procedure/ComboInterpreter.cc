@@ -1,7 +1,7 @@
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/lazy_random_selector.h>
-#include <LADSUtil/lazy_normal_selector.h>
+#include "util/Logger.h"
+#include "util/exceptions.h"
+#include "util/lazy_random_selector.h"
+#include "util/lazy_normal_selector.h"
 
 #include "ComboInterpreter.h"
 #include "NetworkElement.h"
@@ -13,10 +13,10 @@ namespace Procedure {
   using namespace boost;
   using namespace std;
   
-  ComboInterpreter::ComboInterpreter(PerceptionActionInterface::PAI& p, LADSUtil::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::PAIWorldWrapper(p,_rng)), _next(0) { 
+  ComboInterpreter::ComboInterpreter(PerceptionActionInterface::PAI& p, opencog::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::PAIWorldWrapper(p,_rng)), _next(0) { 
   }
 
-  ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, LADSUtil::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::RuleValidationWorldWrapper(v)), _next(0) {
+  ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::RuleValidationWorldWrapper(v)), _next(0) {
   }
 
   ComboInterpreter::~ComboInterpreter() { 
@@ -27,18 +27,18 @@ namespace Procedure {
           return;
 
       if (_vec.size() > 1) {
-          MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Got multiple (%d) running procedures in ComboInterpreter!", _vec.size());
+          logger().log(opencog::Logger::WARNING, "Got multiple (%d) running procedures in ComboInterpreter!", _vec.size());
       }
       
       std::set<RunningProcedureId> done;
 
-      LADSUtil::lazy_selector* sel; 
+      opencog::lazy_selector* sel; 
       if (NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") != "1") {
           //loop in random order until we find a running procedure that's ready 
           //along the way, get rid of done procedures
-          sel = new LADSUtil::lazy_random_selector(_vec.size(), rng); 
+          sel = new opencog::lazy_random_selector(_vec.size(), rng); 
       } else {
-          sel = new LADSUtil::lazy_normal_selector(_vec.size()); 
+          sel = new opencog::lazy_normal_selector(_vec.size()); 
       }
 
       while (!sel->empty()) {
@@ -47,11 +47,11 @@ namespace Procedure {
           RunningComboProcedure& rp=(*it)->second;
           
           if (rp.isReady()) {
-              MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Running procedure id '%d'.",  ((RunningProcedureId&) (*it)->first).getId());
+              logger().log(opencog::Logger::DEBUG, "Running procedure id '%d'.",  ((RunningProcedureId&) (*it)->first).getId());
               rp.cycle();
 
           } else if (rp.isFinished()) {
-              MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Done procedure id '%d'.", ((RunningProcedureId&) (*it)->first).getId());
+              logger().log(opencog::Logger::DEBUG, "Done procedure id '%d'.", ((RunningProcedureId&) (*it)->first).getId());
               done.insert((*it)->first);
           }
       }
@@ -69,7 +69,7 @@ namespace Procedure {
               // send it to combo shell, if any
               _failed.insert((*it)->first);
              
-              MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Not finished '%d' - adding to failed list",  ((RunningProcedureId&) (*it)->first).getId());
+              logger().log(opencog::Logger::ERROR, "Not finished '%d' - adding to failed list",  ((RunningProcedureId&) (*it)->first).getId());
               if (ne) {
                   StringMessage msg(ne->getID(),
                             NetworkElement::parameters.get("COMBO_SHELL_ID"),"action_failure");
@@ -137,7 +137,7 @@ namespace Procedure {
     }
     Map::iterator it=_map.find(id);
 
-//    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "_map!end '%s', finished '%s', failed '%s'.",
+//    logger().log(opencog::Logger::WARNING, "_map!end '%s', finished '%s', failed '%s'.",
 //                    (it!=_map.end())?"true":"false", it->second.isFinished()?"true":"false", it->second.isFailed()?"true":"false");
     return (it!=_map.end() && it->second.isFinished() && it->second.isFailed());
   }
@@ -148,27 +148,27 @@ namespace Procedure {
   // - procedure execution has not failed (checked by isFailed() method)
   // - procedure execution was not stopped (by calling stopProcedure() method) 
   combo::vertex ComboInterpreter::getResult(RunningProcedureId id) {
-    LADSUtil::cassert(TRACE_INFO, isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
-    LADSUtil::cassert(TRACE_INFO, !isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
+    opencog::cassert(TRACE_INFO, isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
+    opencog::cassert(TRACE_INFO, !isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
     
     ResultMap::iterator it = _resultMap.find(id);
 
     if (it==_resultMap.end()) {
       Map::iterator mi=_map.find(id);
-      LADSUtil::cassert(TRACE_INFO, mi!=_map.end(),"ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
+      opencog::cassert(TRACE_INFO, mi!=_map.end(),"ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
       return mi->second.getResult();
     }
     return it->second; 
   }
   
   combo::variable_unifier& ComboInterpreter::getUnifierResult(RunningProcedureId id){
-	  LADSUtil::cassert(TRACE_INFO, isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
-	  LADSUtil::cassert(TRACE_INFO, !isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
+	  opencog::cassert(TRACE_INFO, isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
+	  opencog::cassert(TRACE_INFO, !isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
 	  
 	  UnifierResultMap::iterator it = _unifierResultMap.find(id);
 	  if(it == _unifierResultMap.end()){
 		  Map::iterator m_it = _map.find(id);
-		  LADSUtil::cassert(TRACE_INFO, m_it!=_map.end(),"ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
+		  opencog::cassert(TRACE_INFO, m_it!=_map.end(),"ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
 		  return m_it->second.getUnifierResult();
 	  }
 	  return it->second;

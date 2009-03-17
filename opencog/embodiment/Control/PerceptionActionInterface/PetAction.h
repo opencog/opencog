@@ -75,7 +75,7 @@ class PetAction{
          * @throws InvalidParamException if the maximal number of parameters had been 
          * reached already or if the parameter to be added is not of the expected type.  
          */ 
-        void addParameter(ActionParameter param) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        void addParameter(ActionParameter param) throw (opencog::InvalidParamException, std::bad_exception);
     
         /**
          * Gets the list of parameter of this action.
@@ -120,14 +120,14 @@ class PetAction{
          *
          * The DOMElement follows the same convention described in method createPVPXmlElement().
          */
-        static PetAction *factory(XERCES_CPP_NAMESPACE::DOMElement *domElement) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        static PetAction *factory(XERCES_CPP_NAMESPACE::DOMElement *domElement) throw (opencog::InvalidParamException, std::bad_exception);
         
         /**
          * Sets the type of this action.
          * @param The pet action type.
          * @throws RuntimeException if the already added parameters become invalid for the given action type. 
          */
-        void setType(const ActionType& type) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        void setType(const ActionType& type) throw (opencog::InvalidParamException, std::bad_exception);
         
         /**
          * @return The pet action type.

@@ -27,6 +27,6 @@ void SleepTask::run(MessagingSystem::NetworkElement *opc) {
         return;
     }
 
-	MAIN_LOGGER.log(LADSUtil::Logger::FINE, "SleepTask - Sleeping for one second.");
+	logger().log(opencog::Logger::FINE, "SleepTask - Sleeping for one second.");
     sleep(1);
 }

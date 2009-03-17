@@ -12,7 +12,7 @@
 
 #include <string>
 #include <exception>
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
 #define END_TOKEN "***"
 #define sizeOfToken() strlen(END_TOKEN);  
@@ -74,7 +74,7 @@ class Message {
          *
          * @return A new Message of given type
          */
-        static Message *factory(const std::string &from, const std::string &to, int msgType, const std::string &msg) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        static Message *factory(const std::string &from, const std::string &to, int msgType, const std::string &msg) throw (opencog::InvalidParamException, std::bad_exception);
         
         /**
          * Built a message object of RouterMessage type. This method should be

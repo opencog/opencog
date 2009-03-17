@@ -1,11 +1,11 @@
 #include <fstream>
-#include <LADSUtil/files.h>
+#include "util/files.h"
 #include "PredaveseStdafx.h"
 #include "Predavese.h"
 #include "PredaveseParser.h"
 #include "PredaveseDefinitions.h"
-#include <LADSUtil/StringTokenizer.h>
-#include <LADSUtil/PorterStemmer.h>
+#include "util/StringTokenizer.h"
+#include "util/PorterStemmer.h"
 
 #include <boost/regex.hpp> 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -176,32 +176,32 @@ namespace predavese
         initEng();
 
         pat2action[add_terminal(
-                make_pat3(	LADSUtil::StringManipulator::toUpper(id2str[(Relation_obj        )]),
+                make_pat3(	opencog::StringManipulator::toUpper(id2str[(Relation_obj        )]),
                     pAtom(new Atom(Verb)),
                     pAtom(new Atom(Name)))
                 )] = new Relation_obj_action(petInterface);
         pat2action[add_terminal(
-                make_pat3(	LADSUtil::StringManipulator::toUpper(id2str[(Relation_subj        )]),
+                make_pat3(	opencog::StringManipulator::toUpper(id2str[(Relation_subj        )]),
                     pAtom(new Atom(Verb)),
                     pAtom(new Atom(Name)))
                 )] = new Relation_subj_action(petInterface);
         pat2action[add_terminal(
-                make_pat3(	LADSUtil::StringManipulator::toUpper(id2str[(Relation_obj2        )]),
+                make_pat3(	opencog::StringManipulator::toUpper(id2str[(Relation_obj2        )]),
                     pAtom(new Atom(Verb)),
                     pAtom(new Atom(Elem)))
                 )] = new Relation_obj2_action(petInterface);
         pat2action[add_terminal(
-                make_pat2(	LADSUtil::StringManipulator::toUpper(id2str[(Relation_poss        )]),
+                make_pat2(	opencog::StringManipulator::toUpper(id2str[(Relation_poss        )]),
                     pAtom(new Atom(Name)))
                 )] = new Relation_poss_action(petInterface);
         pat2action[add_terminal(
-                make_pat3(	LADSUtil::StringManipulator::toUpper(id2str[(Relation_subj_r        )]),
+                make_pat3(	opencog::StringManipulator::toUpper(id2str[(Relation_subj_r        )]),
                     pAtom(new Atom(Elem)),
                     pAtom(new Atom(Elem)))
                 )] = new Relation_subj_r_action(petInterface);
 
         pat2action[add_terminal(
-                make_pat3(	LADSUtil::StringManipulator::toUpper(id2str[(Relation_to_do        )]),
+                make_pat3(	opencog::StringManipulator::toUpper(id2str[(Relation_to_do        )]),
                     pAtom(new Atom(Verb)),
                     pAtom(new Atom(Verb)))
                 )] = new Relation_to_do_action(petInterface);
@@ -247,7 +247,7 @@ namespace predavese
         std::string filename = systemParameters.get(std::string("VOCABULARY_FILE"));
 
         if(!fileExists(filename.c_str())){
-	  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,
+	  logger().log(opencog::Logger::DEBUG,
 			  "PredaveseParser - file %s does not exist",
 			  filename.c_str());
 	  return false;
@@ -748,15 +748,15 @@ namespace predavese
 
 
     std::string PredaveseParser::petaveseToPredavese(const std::string& petaveseInstruction) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "PredaveseParser - PetaveseToPredavese.");
+        logger().log(opencog::Logger::INFO, "PredaveseParser - PetaveseToPredavese.");
         
         std::string predaveseInstruction("");
         std::string strToken("");
 
-        LADSUtil::StringTokenizer strTokenizer(petaveseInstruction, " ");
+        opencog::StringTokenizer strTokenizer(petaveseInstruction, " ");
         while ( (strToken = strTokenizer.nextToken()) != "") {
-            MAIN_LOGGER.log(LADSUtil::Logger::INFO, "PredaveseParser - PetaveseToPredavese - token: '%s'.", strToken.c_str());
-            LADSUtil::StringTokenizer strTokenizerContraction(strToken, "'");
+            logger().log(opencog::Logger::INFO, "PredaveseParser - PetaveseToPredavese - token: '%s'.", strToken.c_str());
+            opencog::StringTokenizer strTokenizerContraction(strToken, "'");
             std::string strTokenContraction("");
             while( (strTokenContraction = strTokenizerContraction.nextToken()) != "") {
                 if ( strTokenContraction == "LL" )
@@ -767,7 +767,7 @@ namespace predavese
                 if ( !isStopWord(strTokenContraction) ) {
                     if ( strTokenContraction.rfind("ING", strTokenContraction.length()-1) != string::npos && strTokenContraction.length() > 3 )
                     {
-                        strTokenContraction = LADSUtil::StringManipulator::toUpper(LADSUtil::PorterStemmer::getStem(LADSUtil::StringManipulator::toLower(strTokenContraction))); 
+                        strTokenContraction = opencog::StringManipulator::toUpper(opencog::PorterStemmer::getStem(opencog::StringManipulator::toLower(strTokenContraction))); 
                     }
                     predaveseInstruction = predaveseInstruction + strTokenContraction + " ";
                 }
@@ -778,12 +778,12 @@ namespace predavese
 
     int PredaveseParser::processInstruction(const string& instruction, unsigned long timestamp, const string& avatarId) {
         
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "PredaveseParser - Parse '%s' instruction given by '%s'.",
+        logger().log(opencog::Logger::INFO, "PredaveseParser - Parse '%s' instruction given by '%s'.",
             instruction.c_str(), avatarId.c_str());
         patmap[__p( KeyVerb          )]    = __p(Elem);
        
-        string clean_instruction = LADSUtil::StringManipulator::clean(instruction);
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PredaveseParser - clean_instruction '%s'.", clean_instruction.c_str());
+        string clean_instruction = opencog::StringManipulator::clean(instruction);
+        logger().log(opencog::Logger::DEBUG, "PredaveseParser - clean_instruction '%s'.", clean_instruction.c_str());
 
 
         // TODO: maybe computing the distance to the speaker can be better to
@@ -807,13 +807,13 @@ namespace predavese
         boost::regex avatarFrasesPattern( patternStr.str() );
         
         if ( avatarId != petInterface.getOwnerId( ) && !boost::regex_match( clean_instruction, avatarFrasesPattern ) ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PredaveseParser - Invalid instruction from non-owner. It can only say 'I RED TEAM' or 'I BLUE TEAM' but '%s' was said by '%s'",  instruction.c_str(), avatarId.c_str());
+            logger().log(opencog::Logger::DEBUG, "PredaveseParser - Invalid instruction from non-owner. It can only say 'I RED TEAM' or 'I BLUE TEAM' but '%s' was said by '%s'",  instruction.c_str(), avatarId.c_str());
             return 0;
         } // if
 
 
         string processedPetaveseInstruction = petaveseToPredavese(clean_instruction);
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PredaveseParser - processedPetaveseInstruction '%s'.", processedPetaveseInstruction.c_str());
+        logger().log(opencog::Logger::DEBUG, "PredaveseParser - processedPetaveseInstruction '%s'.", processedPetaveseInstruction.c_str());
 
         set<pAtom, less_atom_by_structure> res;
         parse(processedPetaveseInstruction, inserter(res, res.begin()));        
@@ -821,7 +821,7 @@ namespace predavese
         foreach(pAtom a, res)
         {
             if (STLhas(pat2action, a)) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PredaveseParser - Parse successfull. Taking actions.");
+                logger().log(opencog::Logger::DEBUG, "PredaveseParser - Parse successfull. Taking actions.");
 
                 //printf("Calling () operator for action\n");
                 if(!(*pat2action[a])(a, timestamp, avatarId )){
@@ -849,7 +849,7 @@ namespace predavese
     {
         if(!loadVocabulary())
         {
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "PredaveseParser - Cannot load vocabulary.");
+            logger().log(opencog::Logger::WARNING, "PredaveseParser - Cannot load vocabulary.");
         }
         initEng();
     }

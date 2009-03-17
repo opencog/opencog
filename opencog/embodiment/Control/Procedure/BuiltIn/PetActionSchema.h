@@ -33,7 +33,7 @@ public:
 
     const std::string& getName() const;
     bool isPetAction() const;
-    combo::vertex execute(const std::vector<combo::vertex>& arguments) const throw (LADSUtil::RuntimeException, LADSUtil::InvalidParamException, std::bad_exception);
+    combo::vertex execute(const std::vector<combo::vertex>& arguments) const throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception);
 };
 
 }  

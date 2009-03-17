@@ -7,7 +7,7 @@
 #ifndef BASICPREDICATEUPDATER_H_
 #define BASICPREDICATEUPDATER_H_
 
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 #include <opencog/atomspace/AtomSpace.h>
 #include "PredefinedProcedureNames.h"
 

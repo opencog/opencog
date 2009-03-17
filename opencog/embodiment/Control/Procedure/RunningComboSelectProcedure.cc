@@ -54,7 +54,7 @@ void RunningComboSelectProcedure::cycle(){
     stringstream ss;
 
     ss << firstScriptResult;
-    LADSUtil::cassert(TRACE_INFO, is_builtin(firstScriptResult), 
+    opencog::cassert(TRACE_INFO, is_builtin(firstScriptResult), 
             "RunningComboSelectProcedure - First script result should be a buit-in. Got '%s'",
             ss.str().c_str());
 
@@ -63,7 +63,7 @@ void RunningComboSelectProcedure::cycle(){
          
         // no need for unification, normal execution
         if(this->secondScript.getArity() == 0){
-            LADSUtil::cassert(TRACE_INFO, this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
+            opencog::cassert(TRACE_INFO, this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
 
             Procedure::RunningProcedureId id = interpreter.runProcedure(secondScript.getComboTree(), empty_args);
             while(!interpreter.isFinished(id)){
@@ -84,7 +84,7 @@ void RunningComboSelectProcedure::cycle(){
         // one or more parameters, if unifier isn't empty, the last parameter MUST be an
         // unifier result
         } else {
-            LADSUtil::cassert(TRACE_INFO, this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
+            opencog::cassert(TRACE_INFO, this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
             
             // variable unifier - use it
             if(!unifier.empty()){
@@ -95,7 +95,7 @@ void RunningComboSelectProcedure::cycle(){
 
                 for(it = unifier.begin(); it != unifier.end(); it++){
                     if(it->second){
-                        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+                        logger().log(opencog::Logger::DEBUG, 
                                         "RunningComboSelect - unfied var '%s'.",
                                         it->first.c_str());
                        
@@ -181,7 +181,7 @@ bool RunningComboSelectProcedure::isFailed() const {
 }
 
 combo::vertex RunningComboSelectProcedure::getResult(){
-    LADSUtil::cassert(TRACE_INFO, isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
+    opencog::cassert(TRACE_INFO, isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
     if(isFailed()){
         return combo::id::action_failure;
     }
@@ -189,8 +189,8 @@ combo::vertex RunningComboSelectProcedure::getResult(){
 }
 
 combo::variable_unifier& RunningComboSelectProcedure::getUnifierResult(){
-    LADSUtil::cassert(TRACE_INFO, isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
-    LADSUtil::cassert(TRACE_INFO, !isFailed(), "RunningComboSelectProcedure - Procedure failed.");
+    opencog::cassert(TRACE_INFO, isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
+    opencog::cassert(TRACE_INFO, !isFailed(), "RunningComboSelectProcedure - Procedure failed.");
     
     return unifier;
 }

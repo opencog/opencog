@@ -13,8 +13,8 @@
 
 #include <SystemParameters.h>
 
-#include <LADSUtil/exceptions.h>
-#include <ComboReduct/combo/variable_unifier.h>
+#include "util/exceptions.h"
+#include "comboreduct/combo/variable_unifier.h"
 
 #include <ProcedureInterpreter.h>
 
@@ -194,7 +194,7 @@ public:
     // methods
     RuleEngine( OPC* opc, const std::string& petName,
                 Control::SystemParameters& parameters )
-        throw(LADSUtil::RuntimeException);
+        throw(opencog::RuntimeException);
 
     virtual ~RuleEngine( void );
 
@@ -348,7 +348,7 @@ private:
     std::string groupLeaderId;
 
     // Random number Generator
-    LADSUtil::RandGen * rng;
+    opencog::RandGen * rng;
 
     /**
      * Process all rules suggesting actions / feelings / relations for the
@@ -518,7 +518,7 @@ private:
     Handle addEffectExecLink(const std::string& effect,
                              const std::vector<std::string> parameters,
                              bool permanent)
-        throw (LADSUtil::RuntimeException);
+        throw (opencog::RuntimeException);
 
     /**
      * Add SchemaDone predicate for the given executed schema and its parameters
@@ -571,7 +571,7 @@ private:
 
     // default method to handle problems on lua. it will raise an exception if it find some problem
     static int luaThrowException( lua_State* state )
-        throw(LADSUtil::RuntimeException);
+        throw(opencog::RuntimeException);
 };
 
 }; // OperationalPetController

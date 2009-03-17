@@ -8,8 +8,8 @@
 
 #include "Pet.h"
 #include "OPC.h"
-#include <LADSUtil/files.h>
-#include <LADSUtil/Logger.h>
+#include "util/files.h>
+#include "util/Logger.h>
 #include "behavior/BE.h"
 #include "behavior/BDTracker.h"
 #include "PredefinedProcedureNames.h"
@@ -21,7 +21,7 @@
 #include "DefaultAgentModeHandler.h"
 #include "LearningAgentModeHandler.h"
 
-#include <LADSUtil/mt19937ar.h>
+#include "util/mt19937ar.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -83,8 +83,8 @@ Pet::Pet(const std::string& petId, const std::string& petName, const std::string
   } else {
       rand_seed = time(NULL);
   }
-  this->rng = new LADSUtil::MT19937RandGen(rand_seed);
-  MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
+  this->rng = new opencog::MT19937RandGen(rand_seed);
+  logger().log(opencog::Logger::INFO, "Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
   
   this->modeHandler[ LEARNING ] = new LearningAgentModeHandler( this );
   this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler( this );
@@ -140,14 +140,14 @@ void Pet::initTraitsAndFeelings(){
     if(fileExists(name.str().c_str())){
         fin.open(name.str().c_str(), std::ios_base::in);
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
+        logger().log(opencog::Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
         name.str(std::string());
         name << boost::format( traitsFilenameMask ) % this->agentType % defaultDog;
 
         if(fileExists(name.str().c_str())){
             fin.open(name.str().c_str(), std::ios_base::in);
         } else {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
+            logger().log(opencog::Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
         }
     }   
 
@@ -162,7 +162,7 @@ void Pet::initTraitsAndFeelings(){
                 in >> trait;
                 in >> value;
 
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Loaded '%s' - trait '%s' with value '%.3f'.", 
+                logger().log(opencog::Logger::DEBUG, "Pet - Loaded '%s' - trait '%s' with value '%.3f'.", 
                         name.str().c_str(), trait.c_str(), value);
 
                 tv.setMean(value);
@@ -214,14 +214,14 @@ void Pet::setOwnerId(const std::string& ownerId){
   this->ownerId.assign(ownerId);
 }
 
-void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (LADSUtil::RuntimeException) {
+void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException) {
 	
 	if(this->exemplarAvatarId != ""){
 		std::vector<Handle> exemplarAvatarSet;
 		atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), SL_NODE, this->exemplarAvatarId, true);
 		  
 		if(exemplarAvatarSet.size() != 1){
-			throw LADSUtil::RuntimeException(TRACE_INFO, "Pet - Found '%d' node(s) with name '%s'. Expected exactly one node.", 
+			throw opencog::RuntimeException(TRACE_INFO, "Pet - Found '%d' node(s) with name '%s'. Expected exactly one node.", 
 					  				 exemplarAvatarSet.size(), this->exemplarAvatarId.c_str());
 		}
 		
@@ -253,7 +253,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode){
 
   case LEARNING:
     {
-      MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+      logger().log(opencog::Logger::INFO, 
 		      "Pet - '%s' entering LEARNING mode. Trick: '%s', exemplar avatar: '%s'.", 
               this->petName.c_str(),
 		      learningSchema.empty() ? "" : learningSchema.front().c_str(), 
@@ -267,7 +267,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode){
 
   case PLAYING:
     {
-      MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Pet - '%s' entering PLAYING mode.", this->petName.c_str());
+      logger().log(opencog::Logger::INFO, "Pet - '%s' entering PLAYING mode.", this->petName.c_str());
                
       // remove previous info realated to  exemplar avatar id,
       // learning schema and tried schema
@@ -290,7 +290,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode){
   }
   
   // sending feedback
-  MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
+  logger().log(opencog::Logger::INFO, "Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
   sender->sendFeedback(petId, feedback);
 }
 
@@ -308,7 +308,7 @@ void Pet::setTriedSchema(const std::string & triedSchema){
 }
 
 void Pet::schemaSelectedToExecute(const std::string & schemaName) {
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - schemaSelectedToExecute(%s)" , schemaName.c_str());
+      logger().log(opencog::Logger::DEBUG, "Pet - schemaSelectedToExecute(%s)" , schemaName.c_str());
   if (this->triedSchema == schemaName) {
       this->candidateSchemaExecuted = true;
 
@@ -321,7 +321,7 @@ void Pet::schemaSelectedToExecute(const std::string & schemaName) {
       sender->sendFeedback(petId, feedback);
       
   } else {
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
+      logger().log(opencog::Logger::DEBUG, "Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
   }
 }
 
@@ -355,7 +355,7 @@ Pet * Pet::importFromFile(const std::string& filename, const std::string& petId,
     petFile >> petMode;
   }
   catch(std::ifstream::failure e){
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Pet - Unable to load pet metadata.");
+    logger().log(opencog::Logger::ERROR, "Pet - Unable to load pet metadata.");
     return NULL;        
   }
   petFile.close();
@@ -366,7 +366,7 @@ Pet * Pet::importFromFile(const std::string& filename, const std::string& petId,
   return pet;
 }
         
-void Pet::exportToFile(const std::string& filename, Pet & pet) throw (LADSUtil::IOException, std::bad_exception) {
+void Pet::exportToFile(const std::string& filename, Pet & pet) throw (opencog::IOException, std::bad_exception) {
   // remove previous saved dumps
   remove(filename.c_str());
 
@@ -381,7 +381,7 @@ void Pet::exportToFile(const std::string& filename, Pet & pet) throw (LADSUtil::
   }
   catch(std::ofstream::failure e){
     petFile.close();
-    throw LADSUtil::IOException(TRACE_INFO, "Pet - Unable to save pet metadata.");
+    throw opencog::IOException(TRACE_INFO, "Pet - Unable to save pet metadata.");
   }
        
   petFile.close();
@@ -403,7 +403,7 @@ SpaceServer& Pet::getSpaceServer() {
 
 
 void Pet::stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Stop executing '%s' at %lu.",
+  logger().log(opencog::Logger::DEBUG, "Pet - Stop executing '%s' at %lu.",
 		  commandStatement.front().c_str(), timestamp);
   // TODO: 
   //  Cancel a Pet command instruction that was given before:
@@ -416,10 +416,10 @@ bool Pet::isInLearningMode() const {
 }
 
 void Pet::startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
+  logger().log(opencog::Logger::DEBUG, "Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
     
   if(isInLearningMode()){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
+    logger().log(opencog::Logger::WARNING, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
     std::string newExemplarAvatarId = exemplarAvatarId;
     stopLearning(learningSchema, timestamp);
     setExemplarAvatarId(newExemplarAvatarId);
@@ -437,7 +437,7 @@ void Pet::startLearning(const std::vector<std::string> &commandStatement, unsign
 }
 
 void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Stop learning '%s' trick at %lu.",
+  logger().log(opencog::Logger::DEBUG, "Pet - Stop learning '%s' trick at %lu.",
 		  commandStatement.front().c_str(), timestamp);    
     
   // reset all exemplar timestamps to avoid storing more maps than necessary
@@ -446,7 +446,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
 
   // check if stop learning corresponds to currently learning schema
   if(learningSchema != commandStatement){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
+    logger().log(opencog::Logger::WARNING, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;
   } 
@@ -489,16 +489,16 @@ bool Pet::isExemplarInProgress() const {
 }
 
 void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Exemplars for '%s' trick started at %lu with '%s'.",
+  logger().log(opencog::Logger::DEBUG, "Pet - Exemplars for '%s' trick started at %lu with '%s'.",
 		  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp, getExemplarAvatarId().c_str());
 
   if(!isInLearningMode()){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Unable to start exemplar. Not in LEARNING mode.");
+    logger().log(opencog::Logger::WARNING, "Pet - Unable to start exemplar. Not in LEARNING mode.");
     return;    
   }
     
   if(learningSchema != commandStatement && commandStatement.size() > 0){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
+    logger().log(opencog::Logger::WARNING, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;        
   }
@@ -508,17 +508,17 @@ void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsign
 }
 
 void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Exemplars for '%s' trick ended at %lu.",
+  logger().log(opencog::Logger::DEBUG, "Pet - Exemplars for '%s' trick ended at %lu.",
 		  (commandStatement.size() > 0 ? commandStatement.front().c_str(): learningSchema.front().c_str()), timestamp);    
 
   if(!isInLearningMode() || exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
+    logger().log(opencog::Logger::WARNING, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;        
   }
     
   if(learningSchema != commandStatement && commandStatement.size() > 0){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
+    logger().log(opencog::Logger::WARNING, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;        
   }
@@ -540,7 +540,7 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
     }
 
     for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, " args: %s", (*it).c_str());
+        logger().log(opencog::Logger::DEBUG, " args: %s", (*it).c_str());
   sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *spaceServer);    
     
   // after sending LearnMessage
@@ -620,11 +620,11 @@ void Pet::executeBehaviorEncoder(){
 }
 
 void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Try '%s' trick at %lu.", 
+  logger().log(opencog::Logger::DEBUG, "Pet - Try '%s' trick at %lu.", 
 		  (commandStatement.size() > 0 ? commandStatement.front().c_str(): learningSchema.front().c_str()), timestamp);    
 
   if(learningSchema != commandStatement && commandStatement.size() > 0){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Try schema, trick differs"); 
+    logger().log(opencog::Logger::WARNING, "Pet - Try schema, trick differs"); 
     return; 
   }
 
@@ -642,19 +642,19 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 //    std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
     sender->sendTrySchema(learningSchema.front(),  args);
   } else {
-     MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Did not executed the last received candidate yet!"); 
+     logger().log(opencog::Logger::WARNING, "Pet - Did not executed the last received candidate yet!"); 
      // Force a new attempt of executing the candidate schema.
      ruleEngine->tryExecuteSchema(learningSchema.front()); 
   }
 }
 
 void Pet::reward(unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Reward at %lu.",  timestamp);
+  logger().log(opencog::Logger::DEBUG, "Pet - Reward at %lu.",  timestamp);
   this->latestRewardTimestamp = timestamp;
     
   if (isInLearningMode()) {
       if(learningSchema.empty() ||  learningSchema.front() == "" || triedSchema == ""){
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Trying to reward a non-tried schema.");
+        logger().log(opencog::Logger::WARNING, "Pet - Trying to reward a non-tried schema.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;        
       }        
@@ -680,12 +680,12 @@ void Pet::reward(unsigned long timestamp) {
 }
 
 void Pet::punish(unsigned long timestamp) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Pet - Punishment at %lu.",  timestamp);
+  logger().log(opencog::Logger::DEBUG, "Pet - Punishment at %lu.",  timestamp);
   this->latestPunishmentTimestamp = timestamp;
 
   if (isInLearningMode()) {
       if(learningSchema.empty() || learningSchema.front() == "" || triedSchema == ""){
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Pet - Trying to punish a non-tried schema.");
+        logger().log(opencog::Logger::WARNING, "Pet - Trying to punish a non-tried schema.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;        
       }        
@@ -737,7 +737,7 @@ unsigned long Pet::getLatestPunishmentTimestamp( void ) {
 
 void Pet::setGrabbedObj(const string& id){
   if ( grabbedObjId == id ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
        "Pet - Pet is already holding '%s', ignoring...", grabbedObjId.c_str() );
     return;
   } // if
@@ -754,19 +754,19 @@ bool Pet::hasGrabbedObj(){
   return (!grabbedObjId.empty());
 }
 
-void Pet::updatePersistentSpaceMaps() throw (LADSUtil::RuntimeException, std::bad_exception) {
+void Pet::updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad_exception) {
     
   // sanity checks
   if(exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP || 
      exemplarEndTimestamp   == Pet::UNDEFINED_TIMESTAMP){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+    logger().log(opencog::Logger::WARNING, 
                     "Pet - Exemplar start/end should be set to update SppaceMapsToHold.");
     return; 
   }
   
   // sanity checks
   if(exemplarStartTimestamp > exemplarEndTimestamp){
-    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+    logger().log(opencog::Logger::WARNING, 
                     "Pet - Exemplar start should be smaller than exemplar end.");
     return; 
   }
@@ -781,20 +781,20 @@ void Pet::updatePersistentSpaceMaps() throw (LADSUtil::RuntimeException, std::ba
 			 Temporal(exemplarStartTimestamp, exemplarEndTimestamp),
 			 TemporalTable::STARTS_WITHIN);
 
-  MAIN_LOGGER.log(LADSUtil::Logger::FINE, 
+  logger().log(opencog::Logger::FINE, 
 		  "Pet - %d candidate maps to be checked.", pairs.size());
    
   foreach(HandleTemporalPair pair, pairs) {
     // mark any still existing spaceMap in this period as persistent
     Handle mapHandle = atomSpace->getAtTimeLink(pair);
     if (spaceServer->containsMap(mapHandle)) {
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+      logger().log(opencog::Logger::DEBUG, 
 		      "Pet - Marking map (%s) as persistent.", 
 		      TLB::getAtom(mapHandle)->toString().c_str());
       spaceServer->markMapAsPersistent(mapHandle);
     } else {
       // TODO: This should not be needed here. Remove it when a solution for that is implemented.
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+      logger().log(opencog::Logger::DEBUG, 
 		      "Pet - Removing map handle (%s) from AtomSpace. Map already removed from SpaceServer.", 
 		      TLB::getAtom(mapHandle)->toString().c_str());
       atomSpace->removeAtom(mapHandle, true); 
@@ -830,7 +830,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity) {
         if(objHandle.size() == 1) {
                 petVicinity.push_back(*objHandle.begin());
         } else {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR,  "Could not find handle of object with id \"%s\".", entity.c_str() ); 
+            logger().log(opencog::Logger::ERROR,  "Could not find handle of object with id \"%s\".", entity.c_str() ); 
             petVicinity.clear();
             return false; 
         }
@@ -852,7 +852,7 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects) {
 
 
 void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actionsDone) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  "Pet::getAllActionsDoneObservedAtTime");
+  logger().log(opencog::Logger::DEBUG,  "Pet::getAllActionsDoneObservedAtTime");
 
   std::vector<HandleTemporalPair> everyEventThatHappened;
   atomSpace->getTimeInfo(back_inserter(everyEventThatHappened), Handle::UNDEFINED, time, opencog::TemporalTable::OVERLAPS);
@@ -870,7 +870,7 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
 }
 
 void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actionsDone) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  "Pet::getAllActionsDoneInATrickAtTime");
+  logger().log(opencog::Logger::DEBUG,  "Pet::getAllActionsDoneInATrickAtTime");
 
   HandleSeq patternToSearchLearningSession;
   Handle conceptNode = atomSpace->getHandle(CONCEPT_NODE, "learningSession");
@@ -905,16 +905,16 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
   }
 }
 
-void Pet::restartLearning() throw (LADSUtil::RuntimeException, std::bad_exception){
+void Pet::restartLearning() throw (opencog::RuntimeException, std::bad_exception){
 
   // sanity checks
   if(learningSchema.empty()){
-    throw LADSUtil::RuntimeException(TRACE_INFO, "Pet - No learning schema set when restarting learning..");
+    throw opencog::RuntimeException(TRACE_INFO, "Pet - No learning schema set when restarting learning..");
     return;
   }
 
   if(exemplarAvatarId == ""){
-    throw LADSUtil::RuntimeException(TRACE_INFO, "Pet - No exemplar avatar id set when restarting learning..");
+    throw opencog::RuntimeException(TRACE_INFO, "Pet - No exemplar avatar id set when restarting learning..");
     return;
   }
 

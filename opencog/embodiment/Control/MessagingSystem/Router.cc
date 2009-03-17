@@ -13,8 +13,8 @@
 #include <LoggerFactory.h>
 #include <fstream>
 
-#include <LADSUtil/files.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/files.h"
+#include "util/StringManipulator.h"
 
 #include "Router.h"
 #include "RouterServerSocket.h"
@@ -45,7 +45,7 @@ Router::Router(const Control::SystemParameters &params) : parameters(params) {
     this->routerAvailableNotificationInterval = atoi(parameters.get("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL").c_str());
     this->noAckMessages = atoi(this->parameters.get("NO_ACK_MESSAGES").c_str()) == 1;
 
-    LADSUtil::Logger::initMainLogger(Control::LoggerFactory::getLogger(this->parameters, routerId));
+    opencog::Logger::initMainLogger(Control::LoggerFactory::getLogger(this->parameters, routerId));
     
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;
@@ -65,33 +65,33 @@ void Router::startListener() {
 }
 
 void *Router::portListener(void *arg) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Port listener executing.");
+    logger().log(opencog::Logger::DEBUG, "Router - Port listener executing.");
 
     int port = *((int*) arg);
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Router - Binding to port %d.", port);
+    logger().log(opencog::Logger::INFO, "Router - Binding to port %d.", port);
 
     SocketHandler socketHandler;
     ListenSocket<RouterServerSocket> listenSocket(socketHandler);
 	
     if (listenSocket.Bind(port)) {
-        throw LADSUtil::NetworkException(TRACE_INFO, "Router - Cannot bind to port %d.", port);
+        throw opencog::NetworkException(TRACE_INFO, "Router - Cannot bind to port %d.", port);
     }
 	
     socketHandler.Add(&listenSocket);
     socketHandler.Select(0,200);
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Port listener ready.");
+    logger().log(opencog::Logger::DEBUG, "Port listener ready.");
 
     while (!stopListenerThreadFlag) {
         if (socketHandler.GetCount() == 0) {
-            throw LADSUtil::NetworkException(TRACE_INFO, 
+            throw opencog::NetworkException(TRACE_INFO, 
                       "Router - Bind to port %d is broken.", port);
         }
         socketHandler.Select(0,200);
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Port listener finished.");
+    logger().log(opencog::Logger::DEBUG, "Port listener finished.");
     return NULL;
 }
 
@@ -150,7 +150,7 @@ void Router::run() {
         Router::toNotifyAvailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
-        //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Checked pending availability notifications: %d", localToNotifyAvailability.size());
+        //logger().log(opencog::Logger::DEBUG, "Router - Checked pending availability notifications: %d", localToNotifyAvailability.size());
 
         // Now sends the available element notifications 
         if(!localToNotifyAvailability.empty()){
@@ -171,7 +171,7 @@ void Router::run() {
         Router::toNotifyUnavailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
-        //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Checked pending unavailability notifications: %d", localToNotifyUnavailability.size());
+        //logger().log(opencog::Logger::DEBUG, "Router - Checked pending unavailability notifications: %d", localToNotifyUnavailability.size());
 
         // Now sends the unavailable element notifications 
         if(!localToNotifyUnavailability.empty()){
@@ -235,7 +235,7 @@ int Router::getControlSocket(const std::string &id) {
     if (it != controlSockets.end()) {
         sock = it->second;
     }
-    //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Getting control socket(%d) for element '%s'.", sock,  id.c_str()); 
+    //logger().log(opencog::Logger::DEBUG,"Getting control socket(%d) for element '%s'.", sock,  id.c_str()); 
     return sock;
 }
 
@@ -245,29 +245,29 @@ int Router::getDataSocket(const std::string &id) {
     if (it != dataSockets.end()) {
         sock = it->second;
     }
-    //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Getting data socket(%d) for element '%s'.", sock,  id.c_str()); 
+    //logger().log(opencog::Logger::DEBUG,"Getting data socket(%d) for element '%s'.", sock,  id.c_str()); 
     return sock;
 }
 
 void Router::closeControlSocket(const std::string &id) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Closing control socket for element '%s'.", id.c_str()); 
+    logger().log(opencog::Logger::DEBUG,"Closing control socket for element '%s'.", id.c_str()); 
     std::map<std::string,int>::iterator it = controlSockets.find(id); 
     if (it != controlSockets.end()) {
         int sock = it->second;
 	close(sock);
 	controlSockets.erase(id);
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Closed control socket: '%d'.", sock); 
+        logger().log(opencog::Logger::DEBUG,"Closed control socket: '%d'.", sock); 
     }
 }
 
 void Router::closeDataSocket(const std::string &id) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Closing data socket for element '%s'.", id.c_str()); 
+    logger().log(opencog::Logger::DEBUG,"Closing data socket for element '%s'.", id.c_str()); 
     std::map<std::string,int>::iterator it = dataSockets.find(id); 
     if (it != dataSockets.end()) {
         int sock = it->second;
 	close(sock);
 	dataSockets.erase(id);
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Closed data socket: '%d'.", sock); 
+        logger().log(opencog::Logger::DEBUG,"Closed data socket: '%d'.", sock); 
     }
 }
 
@@ -281,14 +281,14 @@ int Router::addNetworkElement(const std::string &strId, const std::string &strIp
        
 	ipAddress[id] = ip;
     portNumber[id] = port;
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
         "Router - Adding component: '%s' - IP: '%s', Port: '%d'.", 
         id.c_str(), ipAddress[id].c_str(), port);
     
     // new data inserted, updates persisted router table
     try{
         persistState();
-    } catch(LADSUtil::IOException& e){ }
+    } catch(opencog::IOException& e){ }
 
     // erease all messages from queue if have any 
     if(id == parameters.get("LS_ID") ||
@@ -336,7 +336,7 @@ void Router::removeNetworkElement(const std::string &id) {
     // save modifications into persisted data file
     try {
         persistState();
-    } catch(LADSUtil::IOException& e){ }
+    } catch(opencog::IOException& e){ }
 }
 
 void Router::clearNetworkElementMessageQueue(const std::string &id) {
@@ -361,10 +361,10 @@ void Router::reportThreadError(const int &errorCode){
             break;
         default:
             errorMsg = "Unknown error code: ";
-            errorMsg += LADSUtil::toString(errorCode);  
+            errorMsg += opencog::toString(errorCode);  
             // When pthread_join is not called, this gets error code 12 after 380 created threads! 
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+    logger().log(opencog::Logger::ERROR, 
                     "Thread error: \n%s.", errorMsg.c_str());
 }
 
@@ -375,7 +375,7 @@ void Router::persistState(){
     expandPath(path);
     
     if(!createDirectory(path.c_str())){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router - Cannot create directory '%s'.",
+        logger().log(opencog::Logger::ERROR, "Router - Cannot create directory '%s'.",
                         path.c_str());
         return;
     }
@@ -394,7 +394,7 @@ void Router::persistState(){
             
             std::string id = (*it).first;
             std::string ip = (*it).second;
-            std::string port = LADSUtil::toString(getPortNumber(id));
+            std::string port = opencog::toString(getPortNumber(id));
 
             // save data
             routerFile << id << " " << ip << " " << port  << std::endl;
@@ -402,7 +402,7 @@ void Router::persistState(){
     }
     catch(std::ofstream::failure e){
         routerFile.close();
-        throw LADSUtil::IOException(TRACE_INFO, "Router - Unable to save Router information.");
+        throw opencog::IOException(TRACE_INFO, "Router - Unable to save Router information.");
     }
        
     routerFile.close();
@@ -453,16 +453,16 @@ void Router::notifyMessageArrival(const std::string& toId, unsigned int numMessa
 }
 
 void Router::notifyElementAvailability(const std::string& id, bool available){
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router::notifyElementAvailability(%s, %d)", id.c_str(), available);
+    logger().log(opencog::Logger::DEBUG, "Router::notifyElementAvailability(%s, %d)", id.c_str(), available);
     
     std::map<std::string, std::string>::const_iterator it;
     for(it = ipAddress.begin(); it != ipAddress.end(); it++){
         std::string toId = (*it).first;
-        //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Check need for sending notification to %s", toId.c_str());
+        //logger().log(opencog::Logger::DEBUG, "Router - Check need for sending notification to %s", toId.c_str());
 
         // Prevent from sending a availability messages to the own element.
         if (toId == id) {
-            //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Discarding notification to the own unavailable element");
+            //logger().log(opencog::Logger::DEBUG, "Router - Discarding notification to the own unavailable element");
             continue;
         } 
        
@@ -478,7 +478,7 @@ void Router::notifyElementAvailability(const std::string& id, bool available){
                  id == parameters.get("LS_ID") ||
                  id == parameters.get("COMBO_SHELL_ID"))
               ){ 
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Discarding notification from internal network elements to Proxy");
+                logger().log(opencog::Logger::DEBUG, "Router - Discarding notification from internal network elements to Proxy");
                 continue;
             }
             
@@ -498,22 +498,22 @@ void Router::notifyElementAvailability(const std::string& id, bool available){
                 markElementAvailable(toId);
             }
         } else {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Discarding notification to element since it is unavailable (and reffered id is not router");
+            logger().log(opencog::Logger::DEBUG, "Router - Discarding notification to element since it is unavailable (and reffered id is not router");
         }
     }
-    //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router::notifyElementAvailability() ended");
+    //logger().log(opencog::Logger::DEBUG, "Router::notifyElementAvailability() ended");
 }
 
 bool Router::controlSocketConnection(const std::string& ne_id) {
   if ( controlSockets.find(ne_id) != controlSockets.end() ) {
     // Check if socket connection is still ok. If not so, remove the corresponding entry from controlSockets map and tries to re-connect.
     if(!isElementAvailable(ne_id)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+        logger().log(opencog::Logger::INFO, 
                         "Router - controlSocketConnection(%s): Element marked as unavailable. Trying to re-connect...", ne_id.c_str() );
 	closeControlSocket(ne_id);
         closeDataSocket(ne_id);
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
                         "Router - controlSocketConnection(%s): Connection already established", ne_id.c_str() );
         return true;
     }
@@ -521,20 +521,20 @@ bool Router::controlSocketConnection(const std::string& ne_id) {
 
   int sock; 
   if ( (sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot create a socket" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
   } // if
   
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Router - controlSocketConnection(%s): created new socket: %d.", ne_id.c_str(), sock); 
+  logger().log(opencog::Logger::DEBUG,"Router - controlSocketConnection(%s): created new socket: %d.", ne_id.c_str(), sock); 
 
   int on = 1; // Keep connection alive
   if ( setsockopt ( sock, SOL_SOCKET, SO_REUSEADDR|SO_KEEPALIVE, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
   } // if
 #if 0 // TODO: This did not worked very well (got weird behaviors). This must be reviewed and fine tuned later.
   struct timeval tv;
   tv.tv_sec = 30;  // 30 Secs Timeout for receiving operation
   if ( setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval)) == -1 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
   } // if
 #endif
 
@@ -547,7 +547,7 @@ bool Router::controlSocketConnection(const std::string& ne_id) {
   client.sin_port = htons(port);       /* server port */
 
   if ( connect(sock, (sockaddr *) &client, sizeof(client)) >= 0 ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
 		    "Router - controlSocketConnection(%s). Connection established. ip=%s, port=%d", 
 		    ne_id.c_str(), ipAddr.c_str(), port);
     controlSockets[ne_id] = sock;
@@ -555,7 +555,7 @@ bool Router::controlSocketConnection(const std::string& ne_id) {
     return true;
   } // if
   
-  MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+  logger().log(opencog::Logger::ERROR, 
 		  "Router - controlSocketConnection. Unable to connect to element %s. ip=%s, port=%d", 
 		   ne_id.c_str(), ipAddr.c_str(), port);
 
@@ -570,12 +570,12 @@ bool Router::dataSocketConnection(const std::string& ne_id) {
   if ( dataSockets.find(ne_id) != dataSockets.end() ) {
     // Check if socket connection is still ok. If not so, remove the corresponding entry from dataSockets map and tries to re-connect.
     if(!isElementAvailable(ne_id)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+        logger().log(opencog::Logger::INFO, 
                         "Router - dataSocketConnection(%s): Element marked as unavailable. Trying to re-connect...", ne_id.c_str() );
 	closeDataSocket(ne_id);
 	closeControlSocket(ne_id);
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
                         "Router - dataSocketConnection(%s): Connection already established", ne_id.c_str() );
         return true;
     }
@@ -583,19 +583,19 @@ bool Router::dataSocketConnection(const std::string& ne_id) {
 
   int sock; 
   if ( (sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot create a socket" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
   } // if
   
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,"Router - dataSocketConnection(%s): created new socket: %d.", ne_id.c_str(), sock); 
+  logger().log(opencog::Logger::DEBUG,"Router - dataSocketConnection(%s): created new socket: %d.", ne_id.c_str(), sock); 
   int on = 1; // keep connection alive
   if ( setsockopt ( sock, SOL_SOCKET, SO_REUSEADDR|SO_KEEPALIVE, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
   } // if
 #if 0 // TODO: This did not worked very well (got weird behaviors). This must be reviewed and fine tuned later.
   struct timeval tv;
   tv.tv_sec = 30;  // 30 Secs Timeout for receiving operation
   if ( setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval)) == -1 ) {
-    throw LADSUtil::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
+    throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
   } // if
 #endif
 
@@ -608,7 +608,7 @@ bool Router::dataSocketConnection(const std::string& ne_id) {
   client.sin_port = htons(port);       /* server port */
 
   if ( connect(sock, (sockaddr *) &client, sizeof(client)) >= 0 ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
 		    "Router - dataSocketConnection(%s). Connection established. ip=%s, port=%d", 
 		    ne_id.c_str(), ipAddr.c_str(), port);
     dataSockets[ne_id] = sock;
@@ -616,7 +616,7 @@ bool Router::dataSocketConnection(const std::string& ne_id) {
     return true;
   } // if
   
-  MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+  logger().log(opencog::Logger::ERROR, 
 		  "Router - dataSocketConnection. Unable to connect to element %s. ip=%s, port=%d", 
 		   ne_id.c_str(), ipAddr.c_str(), port);
 
@@ -628,7 +628,7 @@ bool Router::dataSocketConnection(const std::string& ne_id) {
 }
 
 bool Router::sendNotification(const NotificationData& data){
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Sending notification.");
+  logger().log(opencog::Logger::DEBUG, "Router - Sending notification.");
 
   try {
     std::string cmd;
@@ -647,23 +647,23 @@ bool Router::sendNotification(const NotificationData& data){
 
         case MESSAGE:
             cmd.append("cNOTIFY_NEW_MESSAGE ");
-            cmd.append(LADSUtil::toString(data.numMessages));
+            cmd.append(opencog::toString(data.numMessages));
             cmd.append("\n");
             break;
 
         default:
         
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router - Invalid notification type '%d'.", 
+            logger().log(opencog::Logger::ERROR, "Router - Invalid notification type '%d'.", 
                             (int)data.type);
             return false;
             break;
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Sending notification (socket = %d) '%s'.", data.sock, cmd.c_str());
+    logger().log(opencog::Logger::DEBUG, "Router - Sending notification (socket = %d) '%s'.", data.sock, cmd.c_str());
 
     unsigned int sentBytes = 0;
     if ( ( sentBytes = send(data.sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router - sendNotification. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
+        logger().log(opencog::Logger::ERROR, "Router - sendNotification. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
 	return false;
     }
 
@@ -676,7 +676,7 @@ bool Router::sendNotification(const NotificationData& data){
     int receivedBytes = 0;
 
     if ( (receivedBytes = recv(data.sock, response, BUFFER_SIZE-1, 0 ) ) <= 0 ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router - sendNotification. Invalid response. recv returned %d ", receivedBytes );
+        logger().log(opencog::Logger::ERROR, "Router - sendNotification. Invalid response. recv returned %d ", receivedBytes );
         return false;
     }
 
@@ -688,25 +688,25 @@ bool Router::sendNotification(const NotificationData& data){
         response[i] = '\0';
     }
   
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - sendNotification. Received response (after chomp): '%s' bytes: %d", response, receivedBytes );
+    logger().log(opencog::Logger::DEBUG, "Router - sendNotification. Received response (after chomp): '%s' bytes: %d", response, receivedBytes );
 
     std::string answer = response;
 
     if(answer == NetworkElement::OK_MESSAGE){
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Router - Sucessfully sent notification to '%s'.",
+        logger().log(opencog::Logger::DEBUG, "Router - Sucessfully sent notification to '%s'.",
                         data.toId.c_str());
 	markElementAvailable(data.toId);
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router - Failed to send notification to '%s'. (answer = %s)",
+        logger().log(opencog::Logger::ERROR, "Router - Failed to send notification to '%s'. (answer = %s)",
                         data.toId.c_str(), answer.c_str());
     }
 
   } catch(std::exception &e) {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router::sendNotification - std::exception: %s", e.what());
-  } catch(LADSUtil::StandardException &e) {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router::sendNotification - StandardException: %s", e.getMessage());
+    logger().log(opencog::Logger::ERROR, "Router::sendNotification - std::exception: %s", e.what());
+  } catch(opencog::StandardException &e) {
+    logger().log(opencog::Logger::ERROR, "Router::sendNotification - StandardException: %s", e.getMessage());
   } catch(...) {
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Router::sendNotification - unknown exception!");
+    logger().log(opencog::Logger::ERROR, "Router::sendNotification - unknown exception!");
   }
   return true;
 }

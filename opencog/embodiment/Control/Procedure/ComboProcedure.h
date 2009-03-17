@@ -6,7 +6,7 @@
  * 
  */
 #include "GeneralProcedure.h" 
-#include <ComboReduct/combo/procedure_call.h>
+#include "comboreduct/combo/procedure_call.h"
 
 #include <iostream>
 #include <exception>
@@ -32,7 +32,7 @@ class ComboProcedure : public GeneralProcedure, public combo::procedure_call_bas
 
 } 
 
-std::istream& operator>>(std::istream&,Procedure::ComboProcedure&) throw (LADSUtil::ComboException, std::bad_exception);
+std::istream& operator>>(std::istream&,Procedure::ComboProcedure&) throw (opencog::ComboException, std::bad_exception);
 std::ostream& operator<<(std::ostream&,const Procedure::ComboProcedure&);
 
 
