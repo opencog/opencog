@@ -3,6 +3,7 @@
 
 #include "hillclimber.h"
 #include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "comboreduct/reduct/reduct.h"
 
 namespace hillclimbing {
 
@@ -26,8 +27,9 @@ namespace hillclimbing {
       _perceptions.insert(p);
       
       _hillclimber = new hillclimber<FitnessEstimator>
-          (fe, fepc, _elementary_operators, _perceptions, _actions,
-           _comp, false, false);
+          (fe, fepc, _elementary_operators, _perceptions, _actions, _comp,
+           action_reduction(), action_reduction(),
+           false, false);
     }
 
     ~ant_hillclimber() {
