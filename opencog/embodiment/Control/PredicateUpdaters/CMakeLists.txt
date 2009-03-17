@@ -12,18 +12,18 @@ ADD_LIBRARY (PredicateUpdaters
 )
 
 INCLUDE_DIRECTORIES (
-	${PETAVERSE_SOURCE_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_SOURCE_DIR}/src/Control/PerceptionActionInterface
-	${PETAVERSE_SOURCE_DIR}/include/xerces
-	${PETAVERSE_SOURCE_DIR}/src/Spatial
-	${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
-	${PETAVERSE_SOURCE_DIR}/src/Control
-	${PETAVERSE_SOURCE_DIR}/src/Control/Predavese
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+	${OPENCOG_SOURCE_DIR}/include/xerces
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
 )
 
 
 LINK_DIRECTORIES (
-	${PETAVERSE_BINARY_DIR}/src/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
 )
 
 SET(CMAKE_BUILD_TYPE Debug)

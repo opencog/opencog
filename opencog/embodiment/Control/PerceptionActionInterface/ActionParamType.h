@@ -21,7 +21,7 @@
 #include <iostream>
 #include <exception>
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h>
 
 namespace PerceptionActionInterface {
     
@@ -60,11 +60,11 @@ class ActionParamType {
         /**
          * @throws InvalidParamException if an invalid Action parameter type string is given
          */
-        static const ActionParamType& getFromName(const std::string& name) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        static const ActionParamType& getFromName(const std::string& name) throw (opencog::InvalidParamException, std::bad_exception);
         /**
          * @throws InvalidParamException if an invalid Action parameter type code is given
          */
-        static const ActionParamType& getFromCode(ActionParamTypeCode code) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        static const ActionParamType& getFromCode(ActionParamTypeCode code) throw (opencog::InvalidParamException, std::bad_exception);
 
         static const ActionParamType& BOOLEAN();
         static const ActionParamType& INT();

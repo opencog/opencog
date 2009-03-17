@@ -1,4 +1,6 @@
-ADD_SUBDIRECTORY (Control)
+#ADD_SUBDIRECTORY (AtomSpaceExtensions)
+#ADD_SUBDIRECTORY (Control)
 ADD_SUBDIRECTORY (Learning)
 #ADD_SUBDIRECTORY (WorldWrapper)
 ADD_SUBDIRECTORY (PetComboVocabulary)
+#ADD_SUBDIRECTORY (Spatial)

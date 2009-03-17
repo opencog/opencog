@@ -6,7 +6,7 @@
  * 
  */
 #include "GeneralProcedure.h" 
-#include <ComboReduct/combo/vertex.h>
+#include "comboreduct/combo/vertex.h"
 #include <list> 
 
 namespace Procedure {

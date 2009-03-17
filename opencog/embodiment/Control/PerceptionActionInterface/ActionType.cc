@@ -1,6 +1,6 @@
 #include "ActionType.h"
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/Logger.h>
+#include "util/exceptions.h"
+#include "util/Logger.h"
 #include <iostream>
 
 using namespace PerceptionActionInterface;
@@ -613,10 +613,10 @@ ActionType::ActionType(ActionTypeCode _code,
 			paramNames(_paramNames),
                         helpText(_helpText)  {
     if (ActionType::existCode(code)) {
-    	LADSUtil::cassert(TRACE_INFO, false, "ActionType - Duplicate action type code definition: %d.", _code);
+    	opencog::cassert(TRACE_INFO, false, "ActionType - Duplicate action type code definition: %d.", _code);
     }
     if (ActionType::existName(name)) {
-    	LADSUtil::cassert(TRACE_INFO, false, "ActionType - Duplicate action type name definition: %s.", _name.c_str());
+    	opencog::cassert(TRACE_INFO, false, "ActionType - Duplicate action type name definition: %s.", _name.c_str());
     }
     nameMap[name] = this;
     codeMap[code] = this;
@@ -763,7 +763,7 @@ const ActionType& ActionType::getFromName(const std::string& name) {
     init();
     Name2ActionTypeMap::const_iterator itr = nameMap.find(name);
     if (itr == nameMap.end()) {
-    	LADSUtil::cassert(TRACE_INFO, false, "ActionType - Trying to get an ActionType with an invalid/unknown name: %s.", name.c_str());
+    	opencog::cassert(TRACE_INFO, false, "ActionType - Trying to get an ActionType with an invalid/unknown name: %s.", name.c_str());
     }
     return *(itr->second);
 }
@@ -772,7 +772,7 @@ const ActionType& ActionType::getFromCode(ActionTypeCode code) {
     init();
     Code2ActionTypeMap::const_iterator itr = codeMap.find(code);
     if (itr == codeMap.end()) {
-    	LADSUtil::cassert(TRACE_INFO, false, "ActionType - Trying to get an ActionType with an invalid/unknown code: %d.", code);
+    	opencog::cassert(TRACE_INFO, false, "ActionType - Trying to get an ActionType with an invalid/unknown code: %d.", code);
     }
     return *(itr->second);
 }
@@ -788,13 +788,13 @@ bool ActionType::existCode(ActionTypeCode code) {
 }
 
 void ActionType::printHelp() { 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+    logger().log(opencog::Logger::INFO, 
         "==================================== HELP OF PET ACTION TYPES ========================================");
     for (Name2ActionTypeMap::const_iterator itr = nameMap.begin(); itr != nameMap.end(); itr++) {
         const ActionType& t = *(itr->second);
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "    %s => %s", t.getName().c_str(), t.getHelpText().c_str());
+        logger().log(opencog::Logger::INFO, "    %s => %s", t.getName().c_str(), t.getHelpText().c_str());
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+    logger().log(opencog::Logger::INFO, 
         "======================================================================================================");    
 }
 

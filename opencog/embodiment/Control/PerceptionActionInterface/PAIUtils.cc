@@ -16,7 +16,7 @@ using namespace PerceptionActionInterface;
 const int PAIUtils::MAX_TAG_LENGTH = 512;
 const boost::posix_time::ptime PAIUtils::epoch( boost::gregorian::date( 2008, boost::gregorian::Jan, 1 ) );
 
-void PAIUtils::initializeXMLPlatform() throw (LADSUtil::XMLException, std::bad_exception) {
+void PAIUtils::initializeXMLPlatform() throw (opencog::XMLException, std::bad_exception) {
     static bool initialized = false;
     
     // TODO: This is not multi-thread safe
@@ -29,7 +29,7 @@ void PAIUtils::initializeXMLPlatform() throw (LADSUtil::XMLException, std::bad_e
         }
         catch(const XERCES_CPP_NAMESPACE::XMLException &toCatch)
         {
-            throw LADSUtil::XMLException(TRACE_INFO, "Error during Xerces-c initialization.");
+            throw opencog::XMLException(TRACE_INFO, "Error during Xerces-c initialization.");
         }
         initialized = true;
     }
@@ -39,7 +39,7 @@ void PAIUtils::terminateXMLPlatform() {
     XERCES_CPP_NAMESPACE::XMLPlatformUtils::Terminate();
 }
 
-XERCES_CPP_NAMESPACE::DOMImplementation* PAIUtils::getDOMImplementation() throw (LADSUtil::XMLException, std::bad_exception) {
+XERCES_CPP_NAMESPACE::DOMImplementation* PAIUtils::getDOMImplementation() throw (opencog::XMLException, std::bad_exception) {
 
     initializeXMLPlatform();
     
@@ -48,12 +48,12 @@ XERCES_CPP_NAMESPACE::DOMImplementation* PAIUtils::getDOMImplementation() throw 
         XERCES_CPP_NAMESPACE::DOMImplementationRegistry::getDOMImplementation(xmlVersion);
     XERCES_CPP_NAMESPACE::XMLString::release(&xmlVersion);
     if(implementation == NULL){
-        throw LADSUtil::XMLException(TRACE_INFO, "DOM Implementation not supported.");
+        throw opencog::XMLException(TRACE_INFO, "DOM Implementation not supported.");
     }   
     return implementation;         
 }                                   
 
-std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument * doc) throw (LADSUtil::RuntimeException, std::bad_exception){
+std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument * doc) throw (opencog::RuntimeException, std::bad_exception){
     std::string result;  
     if(!doc) return result;
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
@@ -81,11 +81,11 @@ std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument *
         delete (formatTarget);
     }
     catch (const XERCES_CPP_NAMESPACE::OutOfMemoryException& toCatch) {
-        throw LADSUtil::RuntimeException(TRACE_INFO, "PAIUtils - Out of Memory Exception!");
+        throw opencog::RuntimeException(TRACE_INFO, "PAIUtils - Out of Memory Exception!");
     }
     catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.getMessage());
-        throw LADSUtil::RuntimeException(TRACE_INFO, "PAIUtils - Exception message is: %s.",  message);
+        throw opencog::RuntimeException(TRACE_INFO, "PAIUtils - Exception message is: %s.",  message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
     }
     

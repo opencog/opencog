@@ -30,7 +30,7 @@ void IsPeePlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
 		return;
 	}
 
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "IsPeePlace - Updating is_pee_place for obj %s.",
+    logger().log(opencog::Logger::FINE, "IsPeePlace - Updating is_pee_place for obj %s.",
                    atomSpace.getName(object).c_str());
 
 	// truth value - mean equals 0.0 --> not pee place

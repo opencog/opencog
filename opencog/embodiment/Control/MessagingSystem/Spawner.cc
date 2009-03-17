@@ -22,14 +22,14 @@ using namespace MessagingSystem;
 Spawner::~Spawner() {
 }
 
-Spawner::Spawner(const Control::SystemParameters &params, const std::string &id, const std::string &ip, int port) throw (LADSUtil::InvalidParamException, std::bad_exception) : NetworkElement(params, id, ip, port) {
+Spawner::Spawner(const Control::SystemParameters &params, const std::string &id, const std::string &ip, int port) throw (opencog::InvalidParamException, std::bad_exception) : NetworkElement(params, id, ip, port) {
     
     minOpcPort = atoi(parameters.get("MIN_OPC_PORT").c_str());
     maxOpcPort = atoi(parameters.get("MAX_OPC_PORT").c_str());
     int maxNumberOfPets = maxOpcPort - minOpcPort;
 
     if (minOpcPort <= 0 || maxOpcPort <=0 || maxNumberOfPets < 0) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO, 
+        throw opencog::InvalidParamException(TRACE_INFO, 
                     "Spawner - Invalid port range defined by (Min '%d', Max '%d').",
                     minOpcPort, maxOpcPort);
     }
@@ -68,7 +68,7 @@ bool Spawner::processNextMessage(Message *message) {
     std::queue<std::string> args;
 
     parseCommandLine(cmdLine, command, args);
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Spawner - line(%s) command(%s) # of parsed arguments(%d).", cmdLine.c_str( ), command.c_str( ), args.size( ) );
+    logger().log(opencog::Logger::INFO, "Spawner - line(%s) command(%s) # of parsed arguments(%d).", cmdLine.c_str( ), command.c_str( ), args.size( ) );
 
     if (command == "LOAD_AGENT") {
       std::string agentID = args.front();
@@ -79,20 +79,20 @@ bool Spawner::processNextMessage(Message *message) {
       args.pop( );
       std::string agentTraits = args.front();
 
-	MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).", agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ), agentTraits.c_str( ) );
+	logger().log(opencog::Logger::INFO, "Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).", agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ), agentTraits.c_str( ) );
 
         // TODO: Find a way to figure out that OPC is already running.
         // The call to isElementAvailable method does not work because it only knows the unavailable elements, not the 
         // available ones:  
         //if (isElementAvailable(petID)) {
-            //MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Trying to load an OPC that is already available: %s\n", petID.c_str());
+            //logger().log(opencog::Logger::WARNING, "Trying to load an OPC that is already available: %s\n", petID.c_str());
             // TODO: send the LOAD SUCCESS message back
         //}
 	std::stringstream str;
 	//char str[512];
         int opcPort = allocateOpcPort(agentID); 
         if (opcPort <= 0) {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "There is no available socket port to run opc %s\n", agentID.c_str());
+            logger().log(opencog::Logger::ERROR, "There is no available socket port to run opc %s\n", agentID.c_str());
             // TODO: notify PROXY about this problem       
             return false;
         }
@@ -128,7 +128,7 @@ bool Spawner::processNextMessage(Message *message) {
 	      << agentTraits << " " 
 	      << opcPort << cmdSuffix << " &";
 	}
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Starting OPC for %s %s %s (%s) at port %d (command: %s)", agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), opcPort, str.str().c_str( ) );
+        logger().log(opencog::Logger::INFO, "Starting OPC for %s %s %s (%s) at port %d (command: %s)", agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), opcPort, str.str().c_str( ) );
 
 #define USE_SYSTEM_FUNCTION 
 #ifdef USE_SYSTEM_FUNCTION 
@@ -140,13 +140,13 @@ bool Spawner::processNextMessage(Message *message) {
 #else
         int pid = fork();
         if (pid < 0) { 
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Could not fork the spawner process to run opc %s\n", agentID.c_str());
+            logger().log(opencog::Logger::ERROR, "Could not fork the spawner process to run opc %s\n", agentID.c_str());
             // TODO: What to do now? Send a NACK back to proxy ???
         } else {
            if (pid == 0) {
                // child proccess
                int execResult = execl("./opc", "opc", agentID.c_str(), ownerID.c_str(), agentType.c_str( ), agentTraits.c_str( ), opcPortStr.c_str(), NULL);
-               MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "exec method returned %d\n", execResult);
+               logger().log(opencog::Logger::DEBUG, "exec method returned %d\n", execResult);
                exit(0); // cannot continue spawner execution...
            }
         } 
@@ -162,12 +162,12 @@ bool Spawner::processNextMessage(Message *message) {
         
         // then, unload it
         StringMessage saveExit(myId, agentID, "SAVE_AND_EXIT");
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Sending SAVE_AND_EXIT message to %s", agentID.c_str());
+        logger().log(opencog::Logger::INFO, "Sending SAVE_AND_EXIT message to %s", agentID.c_str());
         sendMessage(saveExit);
         
         releaseOpcPort(agentID);
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Unknown command <%s>. Discarding it", command.c_str());
+        logger().log(opencog::Logger::WARNING, "Unknown command <%s>. Discarding it", command.c_str());
     }
     return false;
 }

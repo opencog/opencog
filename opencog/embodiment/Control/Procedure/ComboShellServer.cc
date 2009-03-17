@@ -1,4 +1,4 @@
-#include <ComboReduct/combo/vertex.h>
+#include "comboreduct/combo/vertex.h"
 #include <iostream>
 #include <sstream>
 
@@ -42,7 +42,7 @@ bool ComboShellServer::processNextMessage(MessagingSystem::Message *msg){
 void ComboShellServer::idleTime() {
   if (_waiting) {
     if (haveUnreadMessage()) {
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ComboShellServer - Requesting messages (idleTime()).");
+      logger().log(opencog::Logger::DEBUG, "ComboShellServer - Requesting messages (idleTime()).");
       retrieveMessages(-1);
     } else {
       sleepUntilNextMessageArrives();

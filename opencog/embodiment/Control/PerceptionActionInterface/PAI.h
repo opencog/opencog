@@ -195,7 +195,7 @@ class PAI {
          * Then, gets the ptime from it and convert it to a "unsigned long" that represents the 
          * elapsed decimals of second since a speficic date (EPOCH, which is defined internally) used as reference.
          */
-        static unsigned long getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) throw (LADSUtil::RuntimeException, std::bad_exception);
+        static unsigned long getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) throw (opencog::RuntimeException, std::bad_exception);
 
         /**
          * Constructor
@@ -251,7 +251,7 @@ class PAI {
          *             - there is no action plan with the given ID (the plan may have never been created or was already sent away before).
          *             - the action plan could not be sent by the ActionPlanSender.   
          */
-        void sendActionPlan(ActionPlanID planId) throw (LADSUtil::RuntimeException, std::bad_exception);
+        void sendActionPlan(ActionPlanID planId) throw (opencog::RuntimeException, std::bad_exception);
 
         /**
          * Sends an Feelings XML message to PVP. Note that not all feelings are
@@ -278,7 +278,7 @@ class PAI {
          * @throws RuntimeException if the action contains invalid parameters for its type.
          * 
          */
-        ActionID addAction(ActionPlanID planId, const PetAction& action) throw (LADSUtil::RuntimeException, LADSUtil::InvalidParamException, std::bad_exception);
+        ActionID addAction(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception);
         
         /**
          * Return true if and only if the ActionPlan corresponding to
@@ -384,7 +384,7 @@ class PAI {
         /**
          * @param The agent-signal element to be processed
          */
-        void processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (LADSUtil::RuntimeException, LADSUtil::InvalidParamException, std::bad_exception);
+        void processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception);
 	
 	/**
 	 * @param The agent-sensor-info element to be processed
@@ -404,7 +404,7 @@ class PAI {
         /**
          * @param The avatar-signal element to be processed
          */
-        void processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (LADSUtil::RuntimeException, LADSUtil::InvalidParamException, std::bad_exception);
+        void processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception);
         
         /**
          *  TODO: DEPRECATED => actually, never used. Remove this later if it's not going to be used at all.
@@ -433,7 +433,7 @@ class PAI {
          * @param the Action to be represented 
          * @return the Handle of the action representation.
          */
-        Handle addActionToAtomSpace(ActionPlanID planId, const PetAction& action) throw (LADSUtil::RuntimeException, LADSUtil::InvalidParamException, std::bad_exception);
+        Handle addActionToAtomSpace(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception);
         
         /**
          * Adds the representation of the predicate about a status of a given action

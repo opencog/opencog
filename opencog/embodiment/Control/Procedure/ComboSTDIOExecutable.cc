@@ -1,10 +1,10 @@
-#include <ComboReduct/combo/vertex.h>
+#include "comboreduct/combo/vertex.h"
 #include "ComboInterpreter.h"
 #include "ComboProcedureRepository.h"
 #include "ShellWorldWrapper.h"
 #include <fstream>
 #include <iostream>
-#include <LADSUtil/mt19937ar.h>
+#include "util/mt19937ar.h"
 #include "PetComboVocabulary.h"
 
 
@@ -15,9 +15,9 @@ int main(int argc,char** argv) {
 
   //instantiate a Logger that does not print messages to not interfere with
   //standard IO
-  LADSUtil::Logger* NoIOLogger = new LADSUtil::Logger();
+  opencog::Logger* NoIOLogger = new opencog::Logger();
   NoIOLogger->setPrintToStdoutFlag(false);
-  LADSUtil::Logger::initMainLogger(NoIOLogger);    
+  opencog::Logger::initMainLogger(NoIOLogger);    
 
   ComboProcedureRepository cpr;
   
@@ -31,7 +31,7 @@ int main(int argc,char** argv) {
     std::cout << "loaded " << n << " combo functions from " << argv[1] << std::endl;
   }
 
-  LADSUtil::MT19937RandGen rng(0);
+  opencog::MT19937RandGen rng(0);
 
   combo_tree tr;
   WorldWrapper::ShellWorldWrapper sww;

@@ -3,7 +3,7 @@
 #include <Sockets/HttpClientSocket.h>
 #include <Sockets/Parse.h>
 
-#include <LADSUtil/StringManipulator.h>
+#include "util/StringManipulator.h>
 
 RouterHttpPostSocket::RouterHttpPostSocket(ISocketHandler& h,const std::string& url_in) :HttpClientSocket(h, url_in) {
 }
@@ -30,7 +30,7 @@ void RouterHttpPostSocket::OnConnect() {
     // TODO: use a method to set the content-type 
     //AddResponseHeader( "Content-type", "application/x-www-form-urlencoded" ); // Works with this content-type as well 
     AddResponseHeader( "Content-type", "text/plain" ); 
-    AddResponseHeader( "Content-length", LADSUtil::toString(body.size()) );
+    AddResponseHeader( "Content-length", opencog::toString(body.size()) );
     SendRequest();
 
     // send body

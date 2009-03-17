@@ -1,29 +1,29 @@
 INCLUDE_DIRECTORIES (
-    ${PETAVERSE_SOURCE_DIR}/src/AtomSpaceExtensions
-    ${PETAVERSE_SOURCE_DIR}/src/WorldWrapper
-    ${PETAVERSE_SOURCE_DIR}/src/Control
-    ${PETAVERSE_SOURCE_DIR}/src/Spatial
-    ${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
-    ${PETAVERSE_SOURCE_DIR}/src/RuleValidation/VirtualWorldData
-    ${PETAVERSE_SOURCE_DIR}/src/Control/PerceptionActionInterface
-    ${PETAVERSE_SOURCE_DIR}/src/Control/Predavese
-    ${PETAVERSE_SOURCE_DIR}/src/Control/Procedure
-    ${PETAVERSE_SOURCE_DIR}/src/Control/Procedure/BuiltIn
-    ${PETAVERSE_SOURCE_DIR}/src/Control/MessagingSystem
-    ${PETAVERSE_SOURCE_DIR}/include/xerces
-    ${PETAVERSE_SOURCE_DIR}/src/Learning
-    ${PETAVERSE_SOURCE_DIR}/src/PetComboVocabulary
-    ${PETAVERSE_SOURCE_DIR}/src/Control/OperationalPetController
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+    ${OPENCOG_SOURCE_DIR}/include/xerces
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
 )
 
 LINK_DIRECTORIES (
-    ${PETAVERSE_BINARY_DIR}/src/WorldWrapper
-    ${PETAVERSE_BINARY_DIR}/src/Control
-    ${PETAVERSE_BINARY_DIR}/src/RuleValidation/VirtualWorldData
-    ${PETAVERSE_BINARY_DIR}/src/Control/PerceptionActionInterface
-    ${PETAVERSE_BINARY_DIR}/src/Control/Predavese
-    ${PETAVERSE_SOURCE_DIR}/lib/linux/xerces
-    ${PETAVERSE_BINARY_DIR}/src/PetComboVocabulary
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
+    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
 )
 
 ADD_LIBRARY (Procedure

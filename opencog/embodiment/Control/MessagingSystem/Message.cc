@@ -34,7 +34,7 @@ Message::Message(const std::string &from, const std::string &to, int type) {
 
 // Factory method
 
-Message *Message::factory(const std::string &from, const std::string &to, int msgType, const std::string &msg) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+Message *Message::factory(const std::string &from, const std::string &to, int msgType, const std::string &msg) throw (opencog::InvalidParamException, std::bad_exception) {
 
     switch(msgType) {
 
@@ -80,7 +80,7 @@ Message *Message::factory(const std::string &from, const std::string &to, int ms
             break;
         }
         default: {
-            throw LADSUtil::InvalidParamException(TRACE_INFO, 
+            throw opencog::InvalidParamException(TRACE_INFO, 
                     "Message - Unknown message type id: '%d'.", msgType);
         }
     }

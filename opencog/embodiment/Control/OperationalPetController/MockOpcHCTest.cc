@@ -174,7 +174,7 @@ Pet & MockOpcHCTest::getPet()
 
 bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
 {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "DEBUG - OPC - Received msg");
+    logger().log(opencog::Logger::DEBUG, "DEBUG - OPC - Received msg");
 
     std::cout << "OPC RECEIVED MSG" << std::endl;
 
@@ -247,7 +247,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
             break;
 
         default:
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+            logger().log(opencog::Logger::ERROR,
                             "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
             break;
         }

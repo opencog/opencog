@@ -2,8 +2,8 @@
 #include <exception>
 #include <unistd.h>
 
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/files.h>
+#include "util/exceptions.h"
+#include "util/files.h"
 #include "OPC.h"
 
 using namespace OperationalPetController;
@@ -15,7 +15,7 @@ void opc_unexpected_handler(){
 int main(int argc, char *argv[]) {
 
     if(argc != 6){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
+        logger().log(opencog::Logger::ERROR, "OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
         return (1);
     }
 
@@ -45,11 +45,11 @@ int main(int argc, char *argv[]) {
         opc->tickedServerLoop();
         
     } catch(std::bad_alloc){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "OPCExec - OPC raised a bad_alloc exception.");
+        logger().log(opencog::Logger::ERROR, "OPCExec - OPC raised a bad_alloc exception.");
         opc->saveState();
         
     } catch(...) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        logger().log(opencog::Logger::ERROR, 
                         "OPC executable - An exceptional situation occured."
                         " Check log for more information.");
         opc->saveState();

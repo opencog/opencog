@@ -1,5 +1,5 @@
 #include "ActionParamType.h"
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 #include <iostream>
 
 using namespace PerceptionActionInterface;
@@ -49,10 +49,10 @@ ActionParamType::ActionParamType() {};
 ActionParamType::ActionParamType(ActionParamTypeCode _code, const std::string& _name): 
     code(_code), name(_name)  {
     if (ActionParamType::existCode(code)) {
-        LADSUtil::cassert(TRACE_INFO, false, "ActionParamType - Duplicate action parameter type code: %d", _code);
+        opencog::cassert(TRACE_INFO, false, "ActionParamType - Duplicate action parameter type code: %d", _code);
     }
     if (ActionParamType::existName(name)) {
-    	LADSUtil::cassert(TRACE_INFO, false, "ActionParamType - Duplicate action parameter type name: %s", _name.c_str());
+    	opencog::cassert(TRACE_INFO, false, "ActionParamType - Duplicate action parameter type name: %s", _name.c_str());
     }
     nameMap[name] = this;
     codeMap[code] = this;
@@ -94,21 +94,21 @@ void ActionParamType::init() {
     }
 } 
 
-const ActionParamType& ActionParamType::getFromName(const std::string& name) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+const ActionParamType& ActionParamType::getFromName(const std::string& name) throw (opencog::InvalidParamException, std::bad_exception) {
     init();
     Name2ActionParamTypeMap::const_iterator itr = nameMap.find(name);
     if (itr == nameMap.end()) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO,
+        throw opencog::InvalidParamException(TRACE_INFO,
                 "ActionParamType - Invalid/unknown ActionParam name: %s\n", name.c_str());
     }
     return *(itr->second);
 }
 
-const ActionParamType& ActionParamType::getFromCode(ActionParamTypeCode code) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+const ActionParamType& ActionParamType::getFromCode(ActionParamTypeCode code) throw (opencog::InvalidParamException, std::bad_exception) {
     init();
     Code2ActionParamTypeMap::const_iterator itr = codeMap.find(code);
     if (itr == codeMap.end()) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO,
+        throw opencog::InvalidParamException(TRACE_INFO,
                 "ActionParamType - Invalid/unknown ActionParam code: %d\n", code);
     }
     return *(itr->second);

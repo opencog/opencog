@@ -10,7 +10,7 @@
 #ifndef IDLETASK_H
 #define IDLETASK_H
 
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 
 namespace MessagingSystem {
 
@@ -44,7 +44,7 @@ class IdleTask {
          */
         void setTaskActive(const bool& state){
             taskActive = state;
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "IdleTask - taskActive set to = %d.", taskActive);
+            logger().log(opencog::Logger::DEBUG, "IdleTask - taskActive set to = %d.", taskActive);
         }
     
         bool isTaskActive(){

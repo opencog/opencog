@@ -27,7 +27,7 @@
 #include <boost/foreach.hpp>
 #else 
 //#include "foreach.hpp"
-#include <LADSUtil/foreach.h>
+#include "util/foreach.h"
 #endif
 
 #ifdef WIN32

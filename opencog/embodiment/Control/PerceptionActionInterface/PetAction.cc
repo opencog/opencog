@@ -6,15 +6,15 @@
  */ 
 #include "PetAction.h"
 
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/exceptions.h"
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include "PAIUtils.h"
 #include "PVPXmlConstants.h"
 
 using namespace PerceptionActionInterface;
-using namespace LADSUtil;
+using namespace opencog;
 
 PetAction::PetAction(){
     PAIUtils::initializeXMLPlatform();
@@ -31,10 +31,10 @@ PetAction::PetAction(const ActionType& type){
 PetAction::~PetAction(){
 }
 
-void PetAction::setType(const ActionType& actionType) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+void PetAction::setType(const ActionType& actionType) throw (opencog::InvalidParamException, std::bad_exception) {
     std::string errorMessage = validateParameters(actionType, parameters);
     if (!errorMessage.empty()) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO, "PetAction - Invalid parameter: '%s'. %s.",
+        throw opencog::InvalidParamException(TRACE_INFO, "PetAction - Invalid parameter: '%s'. %s.",
                                     actionType.getName().c_str(), errorMessage.c_str());
     }
 	this->type = actionType.getCode();
@@ -56,22 +56,22 @@ unsigned int PetAction::getSequence() const{
 	return this->sequence; 
 }
 
-void PetAction::addParameter(ActionParameter param) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+void PetAction::addParameter(ActionParameter param) throw (opencog::InvalidParamException, std::bad_exception) {
     
     const ActionType::ParamTypes& mandatoryParamTypes = ActionType::getFromCode(type).getMandatoryParamTypes();
     if (parameters.size() < mandatoryParamTypes.size()) {
         if (param.getType() != mandatoryParamTypes[parameters.size()]) {
-            throw LADSUtil::InvalidParamException(TRACE_INFO,
+            throw opencog::InvalidParamException(TRACE_INFO,
                     "PetAction - Param '%s', type '%s' with wrong type for parameter '%u' (mandatory: '%s').", param.getName().c_str(), param.getType().getName().c_str(), parameters.size()+1, mandatoryParamTypes[parameters.size()].getName().c_str());
         }
     } else {
         const ActionType::ParamTypes& optionalParamTypes =  ActionType::getFromCode(type).getOptionalParamTypes();
         unsigned int numberOfOptionalParams = parameters.size() - mandatoryParamTypes.size(); 
         if (numberOfOptionalParams >= optionalParamTypes.size()) {
-            throw LADSUtil::InvalidParamException(TRACE_INFO, "PetAction - Param '%s', type '%s': maximum number of parameters already reached", param.getName().c_str(), param.getType().getName().c_str());
+            throw opencog::InvalidParamException(TRACE_INFO, "PetAction - Param '%s', type '%s': maximum number of parameters already reached", param.getName().c_str(), param.getType().getName().c_str());
         }
         if (param.getType() != optionalParamTypes[numberOfOptionalParams]) {
-            throw LADSUtil::InvalidParamException(TRACE_INFO,
+            throw opencog::InvalidParamException(TRACE_INFO,
                     "PetAction - Param '%s', type '%s': wrong type for parameter %u (optional: %s)", param.getName().c_str(), param.getType().getName().c_str(), parameters.size()+1, optionalParamTypes[numberOfOptionalParams].getName().c_str());
         }
     }
@@ -85,7 +85,7 @@ const list<ActionParameter>& PetAction::getParameters() const {
 bool PetAction::containsValidParameters() const {
     std::string errorMessage = validateParameters(ActionType::getFromCode(type), parameters);
     if (errorMessage.size() > 0) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "PetAction - " + errorMessage);
+        logger().log(opencog::Logger::WARNING, "PetAction - " + errorMessage);
         return false;
     } 
     return true;
@@ -149,7 +149,7 @@ XERCES_CPP_NAMESPACE::DOMElement* PetAction::createPVPXmlElement(XERCES_CPP_NAME
     XERCES_CPP_NAMESPACE::XMLString::release(&nameStr);
 
     XERCES_CPP_NAMESPACE::XMLString::transcode(SEQUENCE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    XMLCh* sequenceStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(sequence).c_str());
+    XMLCh* sequenceStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(sequence).c_str());
     actionElement->setAttribute(tag, sequenceStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&sequenceStr);
                          
@@ -177,7 +177,7 @@ XERCES_CPP_NAMESPACE::DOMNodeList *PetAction::getChildren(XERCES_CPP_NAMESPACE::
     return element->getElementsByTagName(tag);
 }
 
-PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement) throw (opencog::InvalidParamException, std::bad_exception) {
 
     std::string actionName = getAttribute(actionDOMElement, NAME_ATTRIBUTE);
     ActionType actionType = ActionType::getFromName(actionName);
@@ -230,7 +230,7 @@ PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement
                 break;
             }
             default: {
-                throw LADSUtil::InvalidParamException(TRACE_INFO,
+                throw opencog::InvalidParamException(TRACE_INFO,
                         "PetAction - Invalid param type code: %d", typeCode);
                 break;
             }
@@ -257,7 +257,7 @@ std::string PetAction::stringRepresentation() const {
                 answer.append(",");
             }
             count++;
-        } catch (LADSUtil::RuntimeException& e){
+        } catch (opencog::RuntimeException& e){
             // just ignore the string representation of the ActionParameter that
             // caused the exception
         }

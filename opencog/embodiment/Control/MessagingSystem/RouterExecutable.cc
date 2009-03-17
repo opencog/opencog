@@ -1,9 +1,9 @@
 #include <SystemParameters.h>
 #include <exception>
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 #include "Router.h"
-#include <LADSUtil/files.h>
+#include "util/files.h"
 
 using namespace MessagingSystem;
 
@@ -31,13 +31,13 @@ int main(int argc, char *argv[]) {
     try{
         router->run();
     } catch(std::bad_alloc){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterExec - Router raised a bad_alloc exception.");
+        logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a bad_alloc exception.");
         router->persistState();
-    } catch(LADSUtil::NetworkException& e){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterExec - Router raised a Runtime exception.");
+    } catch(opencog::NetworkException& e){
+        logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a Runtime exception.");
         router->persistState();
     } catch(...){
-         MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+         logger().log(opencog::Logger::ERROR, 
              "RouterExec - An exceptional situation occured. Check log for more information.");
         router->persistState();
     }

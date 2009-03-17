@@ -31,7 +31,7 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
         return;
     }
 
-//    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "IsPickupable - Updating is_pickupable for ob %s.",
+//    logger().log(opencog::Logger::FINE, "IsPickupable - Updating is_pickupable for ob %s.",
 //                    atomsSpace.getName(object).c_str());
 
     // truth value - mean equals 0.0 --> not smaller than pet
@@ -49,7 +49,7 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
     }
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_pickupable", tv, object);
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "IsPickupablePredicateUpdater - Is element %s pickupable: %s",
+    logger().log(opencog::Logger::DEBUG, "IsPickupablePredicateUpdater - Is element %s pickupable: %s",
                     atomSpace.getName(object).c_str(), 
 		    ( tv.getMean( ) ? "t" : "f" ) );
 }

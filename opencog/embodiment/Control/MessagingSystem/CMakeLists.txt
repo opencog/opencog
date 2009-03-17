@@ -1,4 +1,5 @@
 CMAKE_POLICY(SET CMP0005 OLD)
+#TODO next line
 ADD_DEFINITIONS(-D_REENTRANT -DACTION_PLAN_TEST_XML_FILE=\\"${PETAVERSE_SOURCE_DIR}/test/Control/OperationalPetController/ActionPlanExample.xml\\")
 
 ADD_LIBRARY (MessagingSystem
@@ -22,22 +23,22 @@ ADD_LIBRARY (MessagingSystem
 )
 
 INCLUDE_DIRECTORIES (
-	${PETAVERSE_SOURCE_DIR}/src/Spatial
-	${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
-	${PETAVERSE_SOURCE_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_SOURCE_DIR}/src/Control
-	${PETAVERSE_SOURCE_DIR}/src/Control/MessagingSystem
-	${PETAVERSE_SOURCE_DIR}/src/Learning
-	${PETAVERSE_SOURCE_DIR}/src/Learning/LearningServerMessages
-	${PETAVERSE_SOURCE_DIR}/include
-	${PETAVERSE_SOURCE_DIR}/include/filesystem
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServerMessages
+	${OPENCOG_SOURCE_DIR}/include
+	${OPENCOG_SOURCE_DIR}/include/filesystem
 )
 
 LINK_DIRECTORIES (
-	${PETAVERSE_BINARY_DIR}/src/Control/MessagingSystem
-	${PETAVERSE_BINARY_DIR}/src/Learning/LearningServerMessages
-	${PETAVERSE_BINARY_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_BINARY_DIR}/src/Spatial
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Spatial
 )
 
 IF(COMMAND cmake_policy)
@@ -47,7 +48,7 @@ ENDIF(COMMAND cmake_policy)
 TARGET_LINK_LIBRARIES (MessagingSystem 
 	LearningServerMessages 
 	Control 
-	${LADSUTIL_LIBRARY} 
+	util
 	pthread 
 	ssl 
 	crypto 

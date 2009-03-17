@@ -9,8 +9,8 @@
 #include "PVPXmlConstants.h"
 #include "PAIUtils.h"
 
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/exceptions.h"
+#include "util/StringManipulator.h"
 
 using namespace PerceptionActionInterface;
 
@@ -27,19 +27,19 @@ ActionParameter::ActionParameter(const string& _name, const ActionParamType& _ty
         case INT_CODE: 
         case FLOAT_CODE: 
         case STRING_CODE:
-            LADSUtil::cassert(TRACE_INFO, isStringValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+            opencog::cassert(TRACE_INFO, isStringValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
             break;
         case VECTOR_CODE:
-            LADSUtil::cassert(TRACE_INFO, isVectorValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+            opencog::cassert(TRACE_INFO, isVectorValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
             break;
         case ROTATION_CODE:
-            LADSUtil::cassert(TRACE_INFO, isRotationValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+            opencog::cassert(TRACE_INFO, isRotationValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
             break;
         case ENTITY_CODE:
-            LADSUtil::cassert(TRACE_INFO, isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+            opencog::cassert(TRACE_INFO, isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
             break;
         default:  
-            LADSUtil::cassert(TRACE_INFO, false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
+            opencog::cassert(TRACE_INFO, false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
             break;            
     }
 }
@@ -88,17 +88,17 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
         XERCES_CPP_NAMESPACE::DOMElement *rotate = doc->createElement(tag);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* pitchStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(r.pitch).c_str());
+        XMLCh* pitchStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(r.pitch).c_str());
         rotate->setAttribute(tag, pitchStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&pitchStr);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* rollStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(r.roll).c_str());
+        XMLCh* rollStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(r.roll).c_str());
         rotate->setAttribute(tag, rollStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&rollStr);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* yawStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(r.yaw).c_str());
+        XMLCh* yawStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(r.yaw).c_str());
         rotate->setAttribute(tag, yawStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&yawStr);
 
@@ -109,17 +109,17 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
         XERCES_CPP_NAMESPACE::DOMElement *position = doc->createElement(tag);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* xStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(c.x).c_str());
+        XMLCh* xStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(c.x).c_str());
         position->setAttribute(tag, xStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&xStr);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* yStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(c.y).c_str());
+        XMLCh* yStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(c.y).c_str());
         position->setAttribute(tag, yStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&yStr);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* zStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(c.z).c_str());
+        XMLCh* zStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(c.z).c_str());
         position->setAttribute(tag, zStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&zStr);
 
@@ -183,7 +183,7 @@ bool ActionParameter::areFromSameType(const ParamValue& v1, const ParamValue& v2
     return result;
 }
 
-std::string ActionParameter::stringRepresentation() const throw (LADSUtil::RuntimeException, std::bad_exception) {
+std::string ActionParameter::stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception) {
 
     std::string answer;
 
@@ -202,34 +202,34 @@ std::string ActionParameter::stringRepresentation() const throw (LADSUtil::Runti
         }
         case VECTOR_CODE: {
             answer = "(";
-            answer.append(LADSUtil::toString(boost::get<Vector>(value).x));
+            answer.append(opencog::toString(boost::get<Vector>(value).x));
             answer.append(",");
-            answer.append(LADSUtil::toString(boost::get<Vector>(value).y));
+            answer.append(opencog::toString(boost::get<Vector>(value).y));
             answer.append(",");
-            answer.append(LADSUtil::toString(boost::get<Vector>(value).z));
+            answer.append(opencog::toString(boost::get<Vector>(value).z));
             answer.append(")");
             break;
         }
         case ROTATION_CODE: {
             answer = "(";
-            answer.append(LADSUtil::toString(boost::get<Rotation>(value).pitch));
+            answer.append(opencog::toString(boost::get<Rotation>(value).pitch));
             answer.append(",");
-            answer.append(LADSUtil::toString(boost::get<Rotation>(value).roll));
+            answer.append(opencog::toString(boost::get<Rotation>(value).roll));
             answer.append(",");
-            answer.append(LADSUtil::toString(boost::get<Rotation>(value).yaw));
+            answer.append(opencog::toString(boost::get<Rotation>(value).yaw));
             answer.append(")");
             break;
         }
         case ENTITY_CODE: {
             answer = "(";
-            answer.append(LADSUtil::toString(boost::get<Entity>(value).id));
+            answer.append(opencog::toString(boost::get<Entity>(value).id));
             answer.append(",");
-            answer.append(LADSUtil::toString(boost::get<Entity>(value).type));
+            answer.append(opencog::toString(boost::get<Entity>(value).type));
             answer.append(")");
             break;
         }
         default: {
-            throw LADSUtil::RuntimeException(TRACE_INFO, 
+            throw opencog::RuntimeException(TRACE_INFO, 
                     "ActionParameter - Invalid param type: %d", typeCode);
             break;
         }

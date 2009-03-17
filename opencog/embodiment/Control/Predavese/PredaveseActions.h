@@ -3,7 +3,7 @@
 
 //#include "PredaveseStdafx.h"
 #include "Predavese.h"
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 #include "PetInterface.h"
 #include "SystemParameters.h"
 #include "NominalReferenceResolver.h"
@@ -51,7 +51,7 @@ void FormatArgs(vector<c>& i_args, int start_index, OutIterT next_arg, int end_i
 		cassert(TRACE_INFO, s, "predavese::FormatArgs: Got no string from the argument %d\n", i);
 #else
         if (!s) {
-            throw LADSUtil::RuntimeException(TRACE_INFO, "predavese::FormatArgs: Got no string from the argument %d\n", i);
+            throw opencog::RuntimeException(TRACE_INFO, "predavese::FormatArgs: Got no string from the argument %d\n", i);
         }
 #endif        
         //if(*s != "DO" && *s != "TRY"){

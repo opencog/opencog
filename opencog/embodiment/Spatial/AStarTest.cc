@@ -1,0 +1,215 @@
+/**
+ * AStarTest.cc
+ */
+
+#include "util/mt19937ar.h"
+#include "util/StringManipulator.h"
+
+#include "AStarController.h"
+#include "LocalSpaceMap2DUtil.h"
+
+const unsigned int MAP_WIDTH = 200;
+const unsigned int MAP_HEIGHT = 200;
+const unsigned int OBJECTS = 20; //for randomly populating map
+const unsigned int NUM_SEARCHES = 5;
+const unsigned int PRINT_MAP = 1;
+const unsigned int PRINT_SOLUTION = 0;
+
+using namespace Spatial;
+using namespace std;
+using namespace opencog;
+
+typedef LocalSpaceMap2D Map;
+//typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int>, NoMetaData > Map;
+typedef LSMap2DSearchNode MapSearchNode;
+//typedef void* VoidMetaData;
+//typedef Spatial::GridPoint GridPoint;
+//typedef Spatial::Point Point;
+
+Map* populateRandomMap(RandGen& rng) {
+	Map *lmap = new Map(0, MAP_WIDTH, MAP_WIDTH,
+						0, MAP_HEIGHT, MAP_HEIGHT,
+	          			//5);
+	          			2);
+
+    cout << "Builing random map objects...\n";
+    //populateRandom<unsigned int,double,boost::hash<unsigned int> >(*lmap, OBJECTS,
+    populateRandom(rng, *lmap, OBJECTS, Spatial::GridPoint(0, 0));
+    cout << " done.\n";
+
+    return lmap;
+  }
+
+
+//generate a random legal (non-obstacle) node
+MapSearchNode getRandomNode(Map *map, RandGen& rng) {
+    MapSearchNode node;
+    do {
+	    node.x = rng.randint(map->xDim());
+	    node.y = rng.randint(map->yDim());
+    } while (!node.isLegal());
+    return node;
+}
+
+void generateRandomStartAndGoal(Map *lmap, LSMap2DSearchNode &nodeStart, LSMap2DSearchNode &nodeEnd, RandGen& rng) {
+	// Create a start and goal state with legal nodes
+	nodeStart = getRandomNode(lmap, rng);
+	nodeEnd = getRandomNode(lmap, rng);
+}
+
+
+//add solution path to the map (as non-obstacle),
+//so we can print it out with the map
+void addSolutionToMap(AStarController &asc, Map *map, RandGen& rng) {
+	vector<Spatial::Point> solution_points = asc.getSolutionPoints();
+    //add solution to map
+	Spatial::ObjectMetaData no_meta;
+//    map->addNonObstacle(toString(rng.randint()), solution_points.begin(), solution_points.end(), no_meta);
+    map->addObject(opencog::toString(rng.randint()), no_meta, false );
+}
+
+
+void printSolution(vector<Spatial::GridPoint> points) {
+	cout << "\nGrid Points Solution: \n";
+	vector<Spatial::GridPoint>::iterator iter;
+	int stepCount = 0;
+	for (iter = points.begin();
+			iter != points.end();
+			iter++) {
+		cout << "Node " << stepCount << ": (" << (*iter).first << "," << (*iter).second << ")\n";
+		stepCount++;
+	}
+}
+
+void printPointsSolution(vector<Spatial::Point> points) {
+	cout << "\nPoints Solution: \n";
+	vector<Spatial::Point>::iterator iter;
+	int stepCount = 0;
+	for (iter = points.begin();
+			iter != points.end();
+			iter++) {
+		cout << "Node " << stepCount << ": (" << (*iter).first << "," << (*iter).second << ")\n";
+		stepCount++;
+	}
+}
+
+
+//print out the map with solution path(s) as non-obstacles
+void mapout(Map *map) {
+  // Ascii output:
+  // Obstacles:             x    (1)
+  // non-obstacle objects:  #    (2)  //using non-obstacle object to show solution paths
+  // obstacle padding:      |    (4)
+  char characters[8]; characters[0] = ' ';
+
+  characters[1] = 'x'; // obstacle
+  characters[2] = '#'; // non-obstacle object
+  characters[4] = '|'; // obstacle padding
+  // Combine symbols for a more informative map output:
+  characters[3] = '*'; // obstacle and non-obstacle
+  characters[6] = '+'; // padding and non-obstacle
+  // If a position is occupied by an obstacle, being padded is insignificant:
+  characters[5] = characters[1];
+  characters[7] = characters[4];
+
+  for (unsigned int i=0;i<map->yDim();++i) {
+    for (unsigned int j=0;j<map->xDim();++j) {
+      int num = 0;
+      if (map->gridOccupied(j,i))
+        num += 1;
+      if (map->gridOccupied_nonObstacle(j,i))
+        num += 2;
+//      if (map->gridPadded(j,i))
+//        num += 4;
+      cout << characters[num];
+    }
+    cout << std::endl;
+  }
+}
+
+
+int main(int argc, char * argv[]) {
+
+	AStarController asc;
+	MapSearchNode nodeStart, nodeEnd;
+
+    //seed random number generator
+    MT19937RandGen rng(time(0));
+
+    //create and populate random map for test purposes
+	Map *map = populateRandomMap(rng);
+	asc.setMap(map);
+
+	unsigned int SearchCount = 0;
+	unsigned int SearchResult;
+	while(SearchCount < NUM_SEARCHES) {
+
+		//generate random start and goal for test purposes
+		generateRandomStartAndGoal(map,nodeStart,nodeEnd, rng);
+
+		//set start and goal nodes
+		asc.setStartAndGoalStates(nodeStart,nodeEnd);
+	    cout << "\n\nStart: (" << nodeStart.x << "," << nodeStart.y << ")\n";
+	    cout << "End:   (" << nodeEnd.x << "," << nodeEnd.y << ")\n";
+
+		//find the shortest path
+	    SearchResult = asc.findPath();
+	    if (PRINT_MAP) {
+	    	addSolutionToMap(asc, map, rng);
+	    }
+
+	    //get the solution path as grid points
+	    vector<Spatial::GridPoint> solutionGridPoints = asc.getSolutionGridPoints();
+
+	    if (PRINT_SOLUTION) {
+	    	printSolution(solutionGridPoints);
+	    }
+
+	    //get the solution path as distance points
+		//vector<Spatial::Point> solutionPoints = asc.getSolutionPoints();
+		//printPointsSolution(solutionPoints);
+
+	    SearchCount ++;
+	}
+	if (PRINT_MAP) {
+		mapout(map);
+	}
+
+	return (SearchResult==AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED ? 0 : 1);
+}
+
+
+
+/******
+	//old code for testing/comparing goal distance estimate heuristics
+	while(SearchCount < NUM_SEARCHES) {
+		generateRandomStartAndGoal(map,nodeStart,nodeEnd);
+
+		//for searching for consecutive paths
+		//if (SearchCount>0) {
+		//	nodeStart = nodeEnd;
+		//	nodeEnd = getRandomNode(map);
+		//}
+
+		asc.setStartAndGoalStates(nodeStart,nodeEnd);
+
+	    //test with manhattan estimate
+	    //MapSearchNode::setHeuristic(MapSearchNode::MANHATTAN);
+	    unsigned int SearchResult = asc.doSearch();
+	    if (PRINT_MAP) {
+	    	addSolutionToMap(asc.astarsearch, map); //TODO: make param just asc
+	    }
+	    //SearchResult = 0;
+
+	    //test with diagonal estimate
+	    //asc.resetSearch(nodeStart,nodeEnd);  //will keep same start and goal nodes
+	    //need to create new astar
+	    //MapSearchNode::setHeuristic(MapSearchNode::DIAGONAL);
+	    //SearchResult = asc.doSearch();
+
+	    SearchCount ++;
+	}
+	if (PRINT_MAP) {
+		mapout(map);
+	}
+*/

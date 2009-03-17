@@ -15,12 +15,12 @@ using namespace MessagingSystem;
 NetworkElement *ServerSocket::master = NULL;
 
 ServerSocket::~ServerSocket() {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Connection closed.");
+    logger().log(opencog::Logger::DEBUG, "ServerSocket - Connection closed.");
 }
 
 ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Serving connection.");
+    logger().log(opencog::Logger::DEBUG, "ServerSocket - Serving connection.");
     // Enables "line-based" protocol, which will cause onLine() be called
     // everytime the peer send a line
     SetLineProtocol();
@@ -36,13 +36,13 @@ void ServerSocket::setMaster(NetworkElement *ne) {
 
 void ServerSocket::OnLine(const std::string& line) {
     
-//    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "ServerSocket - Received line: <%s>", line.c_str());
+//    logger().log(opencog::Logger::FINE, "ServerSocket - Received line: <%s>", line.c_str());
     char selector = line[0]; 
     std::string contents = line.substr(1);
     std::string command;
 
     if (selector == 'c') {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Received command: '%s'", contents.c_str());
+        logger().log(opencog::Logger::DEBUG, "ServerSocket - Received command: '%s'", contents.c_str());
 
         unsigned int pos1 = contents.find(' ', 0);
         if (pos1 == contents.npos) {
@@ -52,27 +52,27 @@ void ServerSocket::OnLine(const std::string& line) {
             command = contents.substr(0, pos1);
         }
 
-//        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Parsed command: <%s>",
+//        logger().log(opencog::Logger::DEBUG, "ServerSocket - Parsed command: <%s>",
  //                       command.c_str());
 
         if (command == "NOTIFY_NEW_MESSAGE") {
-            //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Full line: <%s>", contents.c_str());
+            //logger().log(opencog::Logger::DEBUG, "ServerSocket - Full line: <%s>", contents.c_str());
             std::string tmpStr = contents.substr(pos1 + 1);
             int numMessages = atoi(tmpStr.c_str());
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Received notification of %u new message(s) from router", numMessages);
+            logger().log(opencog::Logger::DEBUG, "ServerSocket - Received notification of %u new message(s) from router", numMessages);
             master->newMessageInRouter(numMessages);
 	    if (!master->noAckMessages) {
-                //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Answering OK");
+                //logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n");
 	    }
 
         } else if (command == "UNAVAILABLE_ELEMENT") {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ServerSocket - Received UNAVAILABLE_ELEMENT message.");
             
             unsigned int pos2 = contents.find(' ', pos1 + 1);
             if (pos2 != contents.npos) {
-                MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+                logger().log(opencog::Logger::WARNING, 
                     "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", 
                     line.c_str());
             }
@@ -81,17 +81,17 @@ void ServerSocket::OnLine(const std::string& line) {
             master->unavailableElement(id);
 
 	    if (!master->noAckMessages) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Answering OK");
+                logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n");
 	    }
 
         } else if (command == "AVAILABLE_ELEMENT") {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ServerSocket - Received AVAILABLE_ELEMENT message.");
             
             unsigned int pos2 = contents.find(' ', pos1 + 1);
             if (pos2 != contents.npos) {
-                MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+                logger().log(opencog::Logger::WARNING, 
                     "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", 
                     line.c_str());
             }
@@ -100,7 +100,7 @@ void ServerSocket::OnLine(const std::string& line) {
             master->availableElement(id);
 
 	    if (!master->noAckMessages) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Answering OK");
+                logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n");
 	    }
 
@@ -116,16 +116,16 @@ void ServerSocket::OnLine(const std::string& line) {
                 if (currentState == DOING_NOTHING) {
                     currentState = READING_MESSAGES;
                 } else {
-                    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Unexpected command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
+                    logger().log(opencog::Logger::WARNING, "ServerSocket - Unexpected command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
                 }
             }
             unsigned int pos2 = contents.find(' ', pos1 + 1);
             if (pos2 == contents.npos) {
-                MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", line.c_str());
+                logger().log(opencog::Logger::WARNING, "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", line.c_str());
             }
             unsigned int pos3 = contents.find(' ', pos2 + 1);
             if (pos3 == contents.npos) {
-                MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", line.c_str());
+                logger().log(opencog::Logger::WARNING, "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", line.c_str());
             }
             //currentMessageFrom.assign(contents.substr(pos1 + 1, pos2 - pos1 - 1));
             currentMessageFrom = contents.substr(pos1 + 1, pos2 - pos1 - 1);
@@ -147,17 +147,17 @@ void ServerSocket::OnLine(const std::string& line) {
                 currentMessageType = -1;
                 currentState = DOING_NOTHING;
             } else {
-                MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Unexpected command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
+                logger().log(opencog::Logger::WARNING, "ServerSocket - Unexpected command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
             }
             // Currently, router does not manage error during a message delivery. That's why we are sending
             // an OK even if above error occurs.
 	    if (!master->noAckMessages) {
-                //MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ServerSocket - Answering OK");
+                //logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n"); 
 	    }
 
         } else {
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Unknown command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
+            logger().log(opencog::Logger::WARNING, "ServerSocket - Unknown command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
         }
 
     } else if (selector == 'd') {
@@ -169,10 +169,10 @@ void ServerSocket::OnLine(const std::string& line) {
             currentMessage.append(contents);
             lineCount++;
         } else {
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Unexpected data line. Discarding the entire line:\n\t%s", contents.c_str(), line.c_str());
+            logger().log(opencog::Logger::WARNING, "ServerSocket - Unexpected data line. Discarding the entire line:\n\t%s", contents.c_str(), line.c_str());
         }
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "ServerSocket - Invalid selection char ('%c') in received line. Expected 'c' or 'd'. Discarding the entire line:\n\t%s", selector, line.c_str());
+        logger().log(opencog::Logger::WARNING, "ServerSocket - Invalid selection char ('%c') in received line. Expected 'c' or 'd'. Discarding the entire line:\n\t%s", selector, line.c_str());
     }
 }
 

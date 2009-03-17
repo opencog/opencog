@@ -55,7 +55,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
         return;
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "IsSmall - Updating is_small for obj %s.", 
+    logger().log(opencog::Logger::FINE, "IsSmall - Updating is_small for obj %s.", 
                     atomSpace.getName(object).c_str());        
 
     // truth value - mean equals 0.0 --> not smaller than pet
