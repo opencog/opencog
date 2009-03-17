@@ -1,0 +1,151 @@
+/*******************************************************\
+	Filename:	WorldWrapperUtilCacheUTest.cxxtest
+	Author:		Carlos Eduardo Lopes
+	Desc:		Unit test for WorldWrapperUtilCache
+\*******************************************************/
+
+#include <WorldWrapperUtilCache.h>
+
+static std::string pName1 = "near";
+static std::string pName2 = "next";
+static std::string pName3 = "is_hungry";
+static std::string pName4 = "is_poo_place";
+static std::string pName5 = "is_proportional_next";
+
+static std::string arg1 = "id_Fido";
+static std::string arg2 = "id_Ball";
+static std::string arg3 = "id_Stick";
+static std::string arg4 = "id_Wynx";
+static std::string arg5 = "id_Home";
+
+using namespace WorldWrapper;
+
+class WorldWrapperUtilCacheUTest :  public CxxTest::TestSuite {
+private:
+
+    WorldWrapperUtilCache cache;
+
+    predicate p1;
+    predicate p2;
+    predicate p3;
+    predicate p4;
+    predicate p5;
+
+public:
+ 	WorldWrapperUtilCacheUTest(){
+	}
+
+    void setUp(){
+        std::vector<std::string> argList;
+
+        argList.push_back(arg1);
+        argList.push_back(arg2);
+        p1.name = pName1;
+        p1.arguments = argList;
+
+        argList.clear();
+        argList.push_back(arg1);
+        argList.push_back(arg3);
+        p2.name = pName2;
+        p2.arguments = argList;
+
+        argList.clear();
+        argList.push_back(arg4);
+        p3.name = pName3;
+        p3.arguments = argList;
+
+        argList.clear();
+        argList.push_back(arg5);
+        p4.name = pName4;
+        p4.arguments = argList;
+
+        argList.clear();
+        argList.push_back(arg1);
+        argList.push_back(arg3);
+        argList.push_back(arg5);
+        p5.name = pName5;
+        p5.arguments = argList;
+    }
+
+    void testConstructor(){
+        TS_ASSERT(cache.size() == 0);
+        TS_ASSERT(cache.getTimestamp() == 0);
+    }
+
+    void testAdd(){
+        cache.add(1, p1, 1.0f);
+        cache.add(1, p2, 1.0f);
+        cache.add(1, p3, 0.5f);
+        cache.add(1, p4, 0.1f);
+        cache.add(1, p5, 0.0f);
+        
+        TS_ASSERT(cache.size() == 5);
+        TS_ASSERT(cache.getTimestamp() == 1);
+    }
+
+    void testFindNoMiss(){
+        float result;
+
+        result = cache.find(1, p1);
+        TS_ASSERT_DELTA(result, 1.0f, 0.001f);
+
+        result = cache.find(1, p2);
+        TS_ASSERT_DELTA(result, 1.0f, 0.001f);
+        
+        result = cache.find(1, p3);
+        TS_ASSERT_DELTA(result, 0.5f, 0.001f);
+        
+        result = cache.find(1, p4);
+        TS_ASSERT_DELTA(result, 0.1f, 0.001f);
+        
+        result = cache.find(1, p5);
+        TS_ASSERT_DELTA(result, 0.0f, 0.001f);
+    
+        TS_ASSERT(cache.size() == 5);
+        TS_ASSERT(cache.getTimestamp() == 1);
+    }
+
+    void testFindWithMiss(){
+
+        predicate p6;
+        std::vector<std::string> argList;
+
+        argList.push_back(arg1);
+        argList.push_back(arg3);
+        p6.name = pName1;
+        p6.arguments = argList;
+
+        float result;
+        result = cache.find(1, p6);
+        TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
+        TS_ASSERT(cache.size() == 5);
+        TS_ASSERT(cache.getTimestamp() == 1);
+
+        result = cache.find(2, p1);
+        TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
+        TS_ASSERT(cache.size() == 0);
+        TS_ASSERT(cache.getTimestamp() == 2);
+
+        // the following timestamp remains 2 since the find will return a 
+        // cache miss because of empty cache
+        result = cache.find(3, p2);
+        TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
+        TS_ASSERT(cache.size() == 0);
+        TS_ASSERT(cache.getTimestamp() == 2);
+       
+        result = cache.find(4, p3);
+        TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
+        TS_ASSERT(cache.size() == 0);
+        TS_ASSERT(cache.getTimestamp() == 2);
+        
+        result = cache.find(5, p4);
+        TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
+        TS_ASSERT(cache.size() == 0);
+        TS_ASSERT(cache.getTimestamp() == 2);
+       
+        result = cache.find(6, p5);
+        TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
+        TS_ASSERT(cache.size() == 0);
+        TS_ASSERT(cache.getTimestamp() == 2);
+    }
+};
