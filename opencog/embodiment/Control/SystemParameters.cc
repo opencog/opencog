@@ -8,7 +8,7 @@
  */
 
 #include "SystemParameters.h"
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <fstream>
@@ -63,11 +63,11 @@ SystemParameters::SystemParameters() {
 
     // log levels
     char fine[64], debug[64], info[64], warning[64], error[64];
-    sprintf(fine, "%d", LADSUtil::Logger::FINE);
-    sprintf(debug, "%d", LADSUtil::Logger::DEBUG);
-    sprintf(info, "%d", LADSUtil::Logger::INFO);
-    sprintf(warning, "%d", LADSUtil::Logger::WARNING);
-    sprintf(error, "%d", LADSUtil::Logger::ERROR);
+    sprintf(fine, "%d", opencog::Logger::FINE);
+    sprintf(debug, "%d", opencog::Logger::DEBUG);
+    sprintf(info, "%d", opencog::Logger::INFO);
+    sprintf(warning, "%d", opencog::Logger::WARNING);
+    sprintf(error, "%d", opencog::Logger::ERROR);
     
     // component log levels
     table["PROXY_LOG_LEVEL"] = fine;

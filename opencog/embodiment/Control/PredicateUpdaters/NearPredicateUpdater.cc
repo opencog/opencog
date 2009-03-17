@@ -34,7 +34,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 
   const SpaceServer::SpaceMap& spaceMap = spaceServer.getLatestMap();
   if (!spaceMap.containsObject(objectName)) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NearPredicateUpdater::update: Did  not find object %s in the map", objectName.c_str());
+    logger().log(opencog::Logger::DEBUG, "NearPredicateUpdater::update: Did  not find object %s in the map", objectName.c_str());
 
     vector<std::string> entities; 
     spaceMap.findAllEntities(back_inserter(entities));
@@ -99,7 +99,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
         nextDistStrength = std::max( 0.0, 1.0 - dist/nextDistance );
       } // if
 
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "NearPredicateUpdater::update: (%s X %s) | dist = %f => nearDistance = %f | nearDistStrength = %f | nextDistance = %f | nextDistStregth = %f", objectName.c_str(), entity.c_str(), dist, nearDistance, nearDistStrength, nextDistance, nextDistStrength );
+      logger().log(opencog::Logger::DEBUG, "NearPredicateUpdater::update: (%s X %s) | dist = %f => nearDistance = %f | nearDistStrength = %f | nextDistance = %f | nextDistStregth = %f", objectName.c_str(), entity.c_str(), dist, nearDistance, nearDistStrength, nextDistance, nextDistStrength );
 
       Handle entityHandle = getHandle(entity);
       if(entityHandle != Handle::UNDEFINED){                

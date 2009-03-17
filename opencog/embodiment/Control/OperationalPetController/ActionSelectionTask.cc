@@ -27,10 +27,10 @@ void ActionSelectionTask::run(MessagingSystem::NetworkElement *opc) {
     
     // task not active, do not execute its actions
     if(!isTaskActive()){
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ActionSelectionTask - Task is no active.");
+        logger().log(opencog::Logger::DEBUG, "ActionSelectionTask - Task is no active.");
         return;
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ActionSelectionTask - Executing schemaSelection().");
+    logger().log(opencog::Logger::DEBUG, "ActionSelectionTask - Executing schemaSelection().");
     ((OPC *) opc)->schemaSelection();
 }

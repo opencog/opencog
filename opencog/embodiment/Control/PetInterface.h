@@ -11,7 +11,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 #include "SpaceServer.h"
 #include "AgentModeHandler.h"
 
@@ -128,9 +128,9 @@ namespace Control {
      * Save a LocalSpaceMap2D copy on the current application directory
      */
     void saveSpaceMapFile() {
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  "PetInterface - saveSpaceMapFile()."); 
+      logger().log(opencog::Logger::DEBUG,  "PetInterface - saveSpaceMapFile()."); 
       if (!getSpaceServer().isLatestMapValid()) {
-	MAIN_LOGGER.log(LADSUtil::Logger::WARNING,  "PetInterface - There is no space map yet."); 
+	logger().log(opencog::Logger::WARNING,  "PetInterface - There is no space map yet."); 
 	return;
       }
       const SpaceServer::SpaceMap& sm = getSpaceServer().getLatestMap();

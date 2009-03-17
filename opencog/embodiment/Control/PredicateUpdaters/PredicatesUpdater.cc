@@ -23,7 +23,7 @@ using namespace OperationalPetController;
 
 PredicatesUpdater::PredicatesUpdater(SpaceServer &_spaceServer, const std::string &_petId) :
 									spaceServer(_spaceServer), petId(_petId){
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
+    logger().log(opencog::Logger::DEBUG, "%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
 
     // perceptual predicates
     updaters.push_back(new IsSmallPredicateUpdater(_spaceServer.getAtomSpace()));

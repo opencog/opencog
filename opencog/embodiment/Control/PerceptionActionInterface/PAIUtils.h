@@ -16,7 +16,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
 namespace PerceptionActionInterface {
 
@@ -38,7 +38,7 @@ class PAIUtils{
     /** 
      * Initializes the xerces-c XML Platform
      */ 
-    static void initializeXMLPlatform() throw (LADSUtil::XMLException, std::bad_exception);
+    static void initializeXMLPlatform() throw (opencog::XMLException, std::bad_exception);
     
     /** 
      * Teminate the xerces-c XML Platform
@@ -49,12 +49,12 @@ class PAIUtils{
       * Gets the object that implements the DOM interface of xerces library 
       * for handling xml docs.
       */
-	static XERCES_CPP_NAMESPACE::DOMImplementation* getDOMImplementation() throw (LADSUtil::XMLException, std::bad_exception);
+	static XERCES_CPP_NAMESPACE::DOMImplementation* getDOMImplementation() throw (opencog::XMLException, std::bad_exception);
 
     /**
      * Gets the serialized string representation of a XML DOM document
      */ 	
-    static std::string getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument * doc) throw (LADSUtil::RuntimeException, std::bad_exception);
+    static std::string getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument * doc) throw (opencog::RuntimeException, std::bad_exception);
     
     /**
      * Gets the internal id for an object, given its exteranal id

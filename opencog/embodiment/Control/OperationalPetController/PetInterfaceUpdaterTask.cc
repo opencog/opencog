@@ -20,7 +20,7 @@
 #include "PetInterfaceUpdaterTask.h"
 #include "LocalSpaceMap2D.h"
 
-#include <LADSUtil/StringManipulator.h>
+#include "util/StringManipulator.h"
 
 using namespace OperationalPetController;
 using namespace Spatial;
@@ -44,7 +44,7 @@ public:
     }
 
     void OnLine(const std::string& line) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
                         "PetInterfaceUpdaterTask - onLine(%s)", line.c_str());
         if (! line.size()) {
             SetCloseAndDelete();
@@ -67,7 +67,7 @@ void PetInterfaceUpdaterTask::startGUI() {
 
 void PetInterfaceUpdaterTask::run(MessagingSystem::NetworkElement *ne) {
     
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetInterfaceUpdaterTask - run()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - run()");
 
     OPC *opc = (OPC *) ne;
     updateLocalMap(opc);
@@ -76,8 +76,8 @@ void PetInterfaceUpdaterTask::run(MessagingSystem::NetworkElement *ne) {
 }
 
 void PetInterfaceUpdaterTask::sendLine(const std::string &line) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetInterfaceUpdaterTask - sendLine()");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetInterfaceUpdaterTask - line = %s", line.c_str());
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - sendLine()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - line = %s", line.c_str());
     SocketHandler h;
     InterfaceUpdaterClientSocket cc(h, line);
     cc.Open("127.0.0.1", interfacePortNumber);
@@ -86,12 +86,12 @@ void PetInterfaceUpdaterTask::sendLine(const std::string &line) {
     while (h.GetCount()) {
         h.Select(1,0);
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetInterfaceUpdaterTask - sendLine() finished");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - sendLine() finished");
 }
 
 void PetInterfaceUpdaterTask::updateLastSelectedAction(OPC *opc) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetInterfaceUpdaterTask - updateLastSelectedAction()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - updateLastSelectedAction()");
 
     std::string line = "LASTSELECTEDGOAL ";
     line.append("No goals");
@@ -112,7 +112,7 @@ void PetInterfaceUpdaterTask::updateLastSelectedAction(OPC *opc) {
 
 void PetInterfaceUpdaterTask::updateFeelings(OPC *opc) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetInterfaceUpdaterTask - updateFeelings()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - updateFeelings()");
 
     std::vector<std::string> allFeelingNames;
     Handle petHandle = opc->getAtomSpace().getHandle(SL_PET_NODE, opc->getPet().getName());
@@ -120,8 +120,8 @@ void PetInterfaceUpdaterTask::updateFeelings(OPC *opc) {
       petHandle = opc->getAtomSpace().getHandle(SL_HUMANOID_NODE, opc->getPet().getName());
     } // if
 
-    std::string hunger = LADSUtil::toString(AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(), "hunger", petHandle));
-    std::string thirst = LADSUtil::toString(AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(), "thirst", petHandle));
+    std::string hunger = opencog::toString(AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(), "hunger", petHandle));
+    std::string thirst = opencog::toString(AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(), "thirst", petHandle));
 
     allFeelingNames.push_back(hunger);
     allFeelingNames.push_back(thirst);
@@ -151,9 +151,9 @@ void PetInterfaceUpdaterTask::updateLocalMap(OPC *opc) {
     std::vector<std::string> objectIds;
     latestMap.getAllObjects(back_inserter(objectIds));
     std::string line = "LOCALMAP ";
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "num objects = %d", objectIds.size());
+    logger().log(opencog::Logger::DEBUG, "num objects = %d", objectIds.size());
     for (unsigned int i = 0; i < objectIds.size(); i++) {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "%s:", objectIds[i].c_str());
+        logger().log(opencog::Logger::FINE, "%s:", objectIds[i].c_str());
         line.append(objectIds[i]);
         line.append(" ");
 
@@ -164,7 +164,7 @@ void PetInterfaceUpdaterTask::updateLocalMap(OPC *opc) {
             for (unsigned int j = 0; j < perimeter.size(); j++) {
 	      Spatial::Point realPoint = latestMap.unsnap( perimeter[j] );
 
-	      MAIN_LOGGER.log(LADSUtil::Logger::FINE, "(%f,%f)", 
+	      logger().log(opencog::Logger::FINE, "(%f,%f)", 
 			      realPoint.first, realPoint.second);
                 char s[128];
                 sprintf(s, "%f", realPoint.first);
@@ -176,8 +176,8 @@ void PetInterfaceUpdaterTask::updateLocalMap(OPC *opc) {
                     line.append(" ");
                 }
             }
-        } catch (LADSUtil::AssertionException& e){
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Object '%s' has no points.", 
+        } catch (opencog::AssertionException& e){
+            logger().log(opencog::Logger::ERROR, "Object '%s' has no points.", 
                             objectIds[i].c_str());
         }
 

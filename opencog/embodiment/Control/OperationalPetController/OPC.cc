@@ -5,13 +5,13 @@
  * Copyright(c), 2007
  */
 
-#include <ComboReduct/combo/type_tree.h>
+#include "comboreduct/combo/type_tree.h"
 
 #include "OPC.h"
 #include "SleepTask.h"
 #include "SchemaMessage.h"
 
-#include <LADSUtil/files.h>
+#include "util/files.h"
 
 #include <fstream>
 #include <iostream>
@@ -41,7 +41,7 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
     // OpenCog-related initialization
     atom_types_init::init();
     opencog::config().set("MIN_STI", parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
-    opencog::logger().setFilename(MAIN_LOGGER.getFilename()+ "_opencog");
+    opencog::logger().setFilename(logger().getFilename()+ "_opencog");
     opencog::logger().setLevel((opencog::Logger::Level) atoi(parameters.get("OPENCOG_LOG_LEVEL").c_str()));
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ? 
@@ -79,7 +79,7 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "OPC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
+        logger().log(opencog::Logger::INFO, "OPC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
                         parameters.get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
                         parameters.get("RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
                         parameters.get("RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
@@ -89,44 +89,44 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+            logger().log(opencog::Logger::ERROR,
                             "OPC - Unable to load Combo stdlib.");
         }
         fin.close();
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO,
+        logger().log(opencog::Logger::INFO,
                         "OPC - %d Combo functions loaded.", cnt);
         
         fin.open(parameters.get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
         	cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-        	MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+        	logger().log(opencog::Logger::ERROR,
                                 "OPC - Unable to load RulePreconditions combo.");
         }
         fin.close();
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO,
+        logger().log(opencog::Logger::INFO,
                         "OPC - RulesPreconditions combo functions loaded.");   
 
         fin.open(parameters.get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
         	cnt = procedureRepository->loadComboSelectFromStream(fin);
         } else {
-        	MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+        	logger().log(opencog::Logger::ERROR,
                                 "OPC - Unable to load RulePreconditions combo select.");
         }
         fin.close();
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO,
+        logger().log(opencog::Logger::INFO,
                         "OPC - RulesPreconditions combo select functions loaded.");   
 
         fin.open(parameters.get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
         if (fin.good()) {
         	cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-        	MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+        	logger().log(opencog::Logger::ERROR,
                                 "OPC - Unable to load RulesActionSchemata combo.");
         }
         fin.close();
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO,
+        logger().log(opencog::Logger::INFO,
                         "OPC - RulesActionSchemata combo functions loaded.");   
     }
  
@@ -141,9 +141,9 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
     char str[100];
     sprintf(str, "SUCCESS LOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()).c_str());
     StringMessage successLoad(myId, parameters.get("PROXY_ID"), str);
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "OPC spawned. Acking requestor");
+    logger().log(opencog::Logger::INFO, "OPC spawned. Acking requestor");
     if (!sendMessage(successLoad)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Could not send SUCCESS LOAD to PROXY!");
+        logger().log(opencog::Logger::ERROR, "Could not send SUCCESS LOAD to PROXY!");
 	exit(-1);
     }
  
@@ -164,9 +164,9 @@ OPC::~OPC(){
     // removal if fast enough remove this hack and make delete operation
     // permanent
     if(atoi(parameters.get("CHECK_OPC_MEMORY_LEAKS").c_str())){
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - Starting AtomSpace removal.");
+        logger().log(opencog::Logger::DEBUG, "OPC - Starting AtomSpace removal.");
         delete (atomSpace);
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - Finished AtomSpace removal.");
+        logger().log(opencog::Logger::DEBUG, "OPC - Finished AtomSpace removal.");
     }
 
     delete (planSender);
@@ -203,7 +203,7 @@ void OPC::loadAtomSpace(const std::string& petId){
 void OPC::saveState(){
 
     if(!createDirectory(getPath(pet->getPetId()).c_str())){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "OPC - Cannot create directory '%s'.",
+        logger().log(opencog::Logger::ERROR, "OPC - Cannot create directory '%s'.",
                         getPath(pet->getPetId()).c_str());
         return;
     }
@@ -221,9 +221,9 @@ void OPC::saveState(){
     char str[100];
     sprintf(str, "SUCCESS UNLOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
     StringMessage successUnload(myId, parameters.get("PROXY_ID"), str);
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "OPC - OPC despawned (state saved). Acking requestor");
+    logger().log(opencog::Logger::INFO, "OPC - OPC despawned (state saved). Acking requestor");
     if (!sendMessage(successUnload)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Could not send SUCCESS UNLOAD to PROXY!");
+        logger().log(opencog::Logger::ERROR, "Could not send SUCCESS UNLOAD to PROXY!");
     }
 }
 
@@ -242,7 +242,7 @@ void OPC::adjustPetToBePersisted(){
 }
 
 bool OPC::processSpawnerMessage(const std::string & spawnerMessage){
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "OPC::processSpawnerMessage: msg = %s", spawnerMessage.c_str()); 
+    logger().log(opencog::Logger::INFO, "OPC::processSpawnerMessage: msg = %s", spawnerMessage.c_str()); 
     if(spawnerMessage == "SAVE_AND_EXIT"){
         adjustPetToBePersisted();
         saveState();
@@ -294,12 +294,12 @@ PVPActionPlanSender & OPC::getPlanSender() {
 bool OPC::processNextMessage(MessagingSystem::Message *msg){
     using namespace combo;
 
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "OPC - Processing next message.");
+    logger().log(opencog::Logger::FINE, "OPC - Processing next message.");
     bool result;
 
     // message not for the OPC
     if (msg->getTo() != getID()){
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "OPC - Wrong destination. Message to: %s",
+        logger().log(opencog::Logger::WARNING, "OPC - Wrong destination. Message to: %s",
                         msg->getTo().c_str());
         return false;
     }
@@ -310,13 +310,13 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
         if(!result){
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "OPC - Unable to process XML message.");
+            logger().log(opencog::Logger::ERROR, "OPC - Unable to process XML message.");
         } else {
 
             // PVP message processed, update predicates for the
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-                    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - Message successfully  processed.");
+                    logger().log(opencog::Logger::DEBUG, "OPC - Message successfully  processed.");
         }
         return false;
     }
@@ -328,7 +328,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
         // Message correctly processed, just exit
         if(result){
             // TODO: Save status...
-            MAIN_LOGGER.log(LADSUtil::Logger::INFO, "OPC - Exiting...");
+            logger().log(opencog::Logger::INFO, "OPC - Exiting...");
             return true;
         }
     }
@@ -336,7 +336,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
     // message from the combo shell to execute a schema
     if (msg->getFrom() == parameters.get("COMBO_SHELL_ID")) {
       std::string str(msg->getPlainTextRepresentation());
-      MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "OPC - Got combo shell msg: '%s'",str.c_str());
+      logger().log(opencog::Logger::ERROR, "OPC - Got combo shell msg: '%s'",str.c_str());
 
       if (str.empty())
         return false; //a timing error, maybe?
@@ -347,20 +347,20 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
       ComboProcedure cp("",0,tr);
       std::vector<vertex> args; //an expression, not a function - no args
       procedureInterpreter->runProcedure(cp,args);
-      MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+      logger().log(opencog::Logger::ERROR,
 		      "OPC - Called runProcedure(" + ss.str() + ")");
     }
 
     // message from learning server
     if(msg->getFrom() == parameters.get("LS_ID")){
         LearningServerMessages::SchemaMessage * sm = (LearningServerMessages::SchemaMessage *)msg;
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
+        logger().log(opencog::Logger::DEBUG, "OPC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
         
         // sanity check to see if LS does not return an empty
         // ComboSchema
         if(sm->getComboSchema().empty()){
             
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+            logger().log(opencog::Logger::WARNING, 
                     "OPC - Received an empty ComboSchema fom LS. Discarding it.");
             return false;
 
@@ -416,7 +416,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
 
             default:
                 {
-                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                    logger().log(opencog::Logger::ERROR,
                         "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
                 }
                 break;
@@ -426,7 +426,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
 }
 
 void OPC::schemaSelection() {
-  MAIN_LOGGER.log(LADSUtil::Logger::FINE, "OPC - Executing selectSchemaToExecute().");
+  logger().log(opencog::Logger::FINE, "OPC - Executing selectSchemaToExecute().");
 
   this->pet->getCurrentModeHandler( ).update( );
   this->ruleEngine->processNextAction( );
@@ -487,7 +487,7 @@ void OPC::setUp() {
 }
 
 void OPC::markAsUnavailableElement(const std::string& id){
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - markAsUnavailableElement(%s).", id.c_str());
+    logger().log(opencog::Logger::DEBUG, "OPC - markAsUnavailableElement(%s).", id.c_str());
 
     // add element to unavailable list and reset unread messages number if
     // router
@@ -499,7 +499,7 @@ void OPC::markAsUnavailableElement(const std::string& id){
     if(mode == PLAYING && 
        id   != parameters.get("LS_ID")){
 
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - markAsUnavailableElement(): setting task non-active");
+        logger().log(opencog::Logger::DEBUG, "OPC - markAsUnavailableElement(): setting task non-active");
         // disable idle tasks that are not necessary avoiding sending messages
         // while ROUTER or PROXY are down
         //sgiLinkMiningTask->setTaskActive(false);
@@ -510,7 +510,7 @@ void OPC::markAsUnavailableElement(const std::string& id){
 }
 
 void OPC::markAsAvailableElement(const std::string& id){
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - markAsAvailableElement(%s).", id.c_str());
+    logger().log(opencog::Logger::DEBUG, "OPC - markAsAvailableElement(%s).", id.c_str());
 
     // remove element from unavailable list and handshake if router
     NetworkElement::markAsAvailableElement(id);
@@ -535,7 +535,7 @@ const std::string OPC::getPath(const std::string& petId, const std::string& file
     std::string base = parameters.get("PET_DATABASE");
     expandPath(base);
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - Pet database directory: %s", base.c_str());
+    logger().log(opencog::Logger::DEBUG, "OPC - Pet database directory: %s", base.c_str());
     path.append(base);
     path.append("/pet_");
     path.append(petId);
@@ -546,7 +546,7 @@ const std::string OPC::getPath(const std::string& petId, const std::string& file
         path.append(filename);
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "OPC - getPath: " + path);
+    logger().log(opencog::Logger::DEBUG, "OPC - getPath: " + path);
 
     return path;
 }

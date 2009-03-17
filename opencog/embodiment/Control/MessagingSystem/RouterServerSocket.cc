@@ -12,8 +12,8 @@
 #include "RouterServerSocket.h"
 #include "NetworkElement.h"
 
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include <Sockets/SocketHandler.h>
 #include <Sockets/StdoutLog.h>
@@ -29,14 +29,14 @@ Router *RouterServerSocket::master = NULL;
 bool no_msg_arrival_notification = false; // TEST: unfortunately it didn't work well when set to true. Needs more testing and debbuging.
 
 RouterServerSocket::~RouterServerSocket() {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket[%p] - destroyed. Connection closed.", this);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket[%p] - destroyed. Connection closed.", this);
 }
 
 RouterServerSocket::RouterServerSocket(ISocketHandler &handler):TcpSocket(handler) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket[%p] - Serving connection", this);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket[%p] - Serving connection", this);
     currentState = WAITING_COMMAND;
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - CurrentState = %d", currentState);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - CurrentState = %d", currentState);
 
     // Enables "line-based" protocol, which will cause onLine() be called
     // everytime the peer send a line
@@ -49,20 +49,20 @@ void RouterServerSocket::setMaster(Router *router) {
 }
 
 void RouterServerSocket::sendAnswer(const std::string &msg) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Answering: %s", msg.c_str());
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Answering: %s", msg.c_str());
     if (!master->noAckMessages) {
         Send(msg + "\n");
     }
 }
 
 void RouterServerSocket::addNetworkElement(const std::string &id, const std::string &ip, int port) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Add network element (%s,%s,%d)", id.c_str(), ip.c_str(), port);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Add network element (%s,%s,%d)", id.c_str(), ip.c_str(), port);
 
     char errorCode = master->addNetworkElement(id, ip, port);
     std::string answer;
 
     if (errorCode == Router::PORT_EXISTS) {
-        answer.assign("FAILED - port number already exists: "); answer.append(LADSUtil::toString(port));
+        answer.assign("FAILED - port number already exists: "); answer.append(opencog::toString(port));
     } else if (errorCode == Router::ID_EXISTS) {
         answer.assign("FAILED - id already exists: "); answer.append(id);
     } else if (errorCode == Router::NO_ERROR || errorCode == Router::HAS_PENDING_MSGS) {
@@ -90,7 +90,7 @@ void RouterServerSocket::addNetworkElement(const std::string &id, const std::str
             // proves to be wrong then get the sender of the first message in
             // the queue.
             unsigned int numMessages = master->getMessageCentral()->queueSize(id);
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Number of pending messages to %s: %u", id.c_str(), numMessages);
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Number of pending messages to %s: %u", id.c_str(), numMessages);
 	    if (no_msg_arrival_notification) {
                 sendRequestedMessages(id, numMessages);
 	    } else {
@@ -105,33 +105,33 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
     std::string answer;
     char s[256];
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Network element %s requested %d messages", id.c_str(), limit);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Network element %s requested %d messages", id.c_str(), limit);
 
     bool known = master->knownID(id);
 
     if (known) {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "RouterServerSocket - known destination");
+        logger().log(opencog::Logger::FINE, "RouterServerSocket - known destination");
         answer.assign(NetworkElement::OK_MESSAGE);
         sendAnswer(answer);
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "RouterServerSocket - unknow destination");
+        logger().log(opencog::Logger::WARNING, "RouterServerSocket - unknow destination");
         answer.assign("FAILED - could not send messages. Unknown ID: "); answer.append(id);
         sendAnswer(answer);
         return;
     }
 
     if (master->getMessageCentral()->isQueueEmpty(id)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "RouterServerSocket - There is no message to %s", id.c_str());
+        logger().log(opencog::Logger::WARNING, "RouterServerSocket - There is no message to %s", id.c_str());
         return;
     }
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "RouterServerSocket - Delivering messages to %s", id.c_str());
+    logger().log(opencog::Logger::INFO, "RouterServerSocket - Delivering messages to %s", id.c_str());
     if (useHttpRequest) {
         while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
 
             Message *message = master->getMessageCentral()->pop(id); 
             if(message->getType() != Message::STRING){
-    		    MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+    		    logger().log(opencog::Logger::WARNING, 
                 "RouterServerSocket - HttpRequest support STRING messages. Discarding message type: %d.", 
                 message->getType());
 
@@ -142,7 +142,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
             sendHttpRequest(message->getFrom().c_str(), message->getTo().c_str(), 
                             message->getPlainTextRepresentation());
 
-		    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+		    logger().log(opencog::Logger::DEBUG, 
                             "RouterServerSocket - Message sent to %s using HttpRequest.", id.c_str());
             
             delete(message);
@@ -162,13 +162,13 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
             RouterMessage *message = (RouterMessage *)master->getMessageCentral()->pop(id); 
             sprintf(s, "cSTART_MESSAGE %s %s %d", message->getFrom().c_str(), 
                     message->getTo().c_str(), message->getEncapsulateType());
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Sending message (socket = %d): <%s>", sock, s);
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Sending message (socket = %d): <%s>", sock, s);
 
             cmd.assign(s);
             cmd.append("\n");
             unsigned int sentBytes = 0;
             if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
+                logger().log(opencog::Logger::ERROR, "RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
                 master->closeDataSocket(id);
                 master->closeControlSocket(id);
                 master->markElementUnavailable(id);
@@ -179,12 +179,12 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
             std::istringstream stream(message->getPlainTextRepresentation());
             std::string line;
             while (getline(stream, line)) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Sending line <d%s>", line.c_str());
+                logger().log(opencog::Logger::DEBUG, "Sending line <d%s>", line.c_str());
 		line.insert(0,"d");
 		line.append("\n");
                 sentBytes = 0;
                 if ( ( sentBytes = send(sock, line.c_str(), line.length(), 0) ) != line.length() ) {
-                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
+                    logger().log(opencog::Logger::ERROR, "RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
                     master->closeDataSocket(id);
                     master->closeControlSocket(id);
                     master->markElementUnavailable(id);
@@ -201,7 +201,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
         unsigned int sentBytes = 0;
 	cmd.assign("cNO_MORE_MESSAGES\n");
         if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
+            logger().log(opencog::Logger::ERROR, "RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
             master->closeControlSocket(id);
             master->closeDataSocket(id);
             master->markElementUnavailable(id); 
@@ -210,12 +210,12 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
 
 
         if (!master->noAckMessages) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Waiting OK (after sending message).");
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Waiting OK (after sending message).");
 #define BUFFER_SIZE 256
             char response[BUFFER_SIZE];
             int receivedBytes = 0;
             if ( (receivedBytes = recv(sock, response, BUFFER_SIZE-1, 0 ) ) <= 0 ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
+                logger().log(opencog::Logger::ERROR, "RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
                 master->closeDataSocket(id);
                 master->closeControlSocket(id);
                 master->markElementUnavailable(id); 
@@ -229,33 +229,33 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                 response[i] = '\0';
             }
   
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Received response (after chomp): '%s' bytes: %d", 
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Received response (after chomp): '%s' bytes: %d", 
                             response, receivedBytes );
             std::string answer = response;
 
             if(answer == NetworkElement::OK_MESSAGE){
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Sucessfully sent messages to '%s'.", 
+                logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Sucessfully sent messages to '%s'.", 
                                 id.c_str());
             } else {
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterServerSocket - Failed to send messages to '%s'. (answer = %s)",
+                logger().log(opencog::Logger::ERROR, "RouterServerSocket - Failed to send messages to '%s'. (answer = %s)",
                                 id.c_str(), answer.c_str());
             }
         }
 
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - id <%s> message queue size %d", id.c_str(), master->getMessageCentral()->queueSize(id));
+        logger().log(opencog::Logger::DEBUG, "RouterServerSocket - id <%s> message queue size %d", id.c_str(), master->getMessageCentral()->queueSize(id));
     }
     
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - OK");
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - OK");
 }
 
 bool RouterServerSocket::sendHttpRequest(const std::string& messageFrom, const std::string& messageTo, const std::string& messageText) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Send HttpRequest. From '%s'. To '%s'.", messageFrom.c_str(), messageTo.c_str());
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Send HttpRequest. From '%s'. To '%s'.", messageFrom.c_str(), messageTo.c_str());
     // example of url: "http://localhost:8211/petproxy/pet/78/action/5dfe52f9-7344-4ffe-99b7-493f428d5b34"  
     //
     std::string url = "http://"; 
     url += master->getIPAddress(currentMessageTo).c_str(); 
     url += ":" ;
-    url += LADSUtil::toString(master->getPortNumber(currentMessageTo));
+    url += opencog::toString(master->getPortNumber(currentMessageTo));
     url += "/petproxy/pet/";
     url += messageFrom;
 #if 1
@@ -272,7 +272,7 @@ bool RouterServerSocket::sendHttpRequest(const std::string& messageFrom, const s
     url += actionPlanId; 
     free(petId);
 #endif
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - HTTP request to url = %s", url.c_str());
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - HTTP request to url = %s", url.c_str());
 
     StdoutLog log;
     SocketHandler h(&log);
@@ -285,7 +285,7 @@ bool RouterServerSocket::sendHttpRequest(const std::string& messageFrom, const s
     while (h.GetCount()) {
         h.Select(1,0);
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Status: %s %s", sock.GetStatus().c_str(), sock.GetStatusText().c_str());
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Status: %s %s", sock.GetStatus().c_str(), sock.GetStatusText().c_str());
     return (!strcmp(sock.GetStatus().c_str(), "200")); 
 }
 
@@ -295,20 +295,20 @@ void RouterServerSocket::storeNewMessage() {
     bool addToMasterQueue = true;
     bool notifyMessageArrival = true;
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - New message arrived. From '%s'. To '%s'. Type '%d'. Lines: %d", currentMessageFrom.c_str(), currentMessageTo.c_str(), currentMessageType, currentMessageSize);
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Message body:\n%s", currentMessageText.c_str());
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - New message arrived. From '%s'. To '%s'. Type '%d'. Lines: %d", currentMessageFrom.c_str(), currentMessageTo.c_str(), currentMessageType, currentMessageSize);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Message body:\n%s", currentMessageText.c_str());
 
     bool knownFrom = master->knownID(currentMessageFrom);
     bool knownTo   = master->knownID(currentMessageTo);
 
     if (!knownFrom) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Unknown from '%s'. Discarding message.", currentMessageFrom.c_str());
+        logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Unknown from '%s'. Discarding message.", currentMessageFrom.c_str());
         answer.assign("FAILED - Unknown <from> ID: "); answer.append(currentMessageFrom);
         sendAnswer(answer);
         return;
 
     } else if (!knownTo) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Unknown to '%s' (from '%s'). Wont be notified.", currentMessageTo.c_str(), currentMessageFrom.c_str());
+        logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Unknown to '%s' (from '%s'). Wont be notified.", currentMessageTo.c_str(), currentMessageFrom.c_str());
         
         // since the component is not registred there is no need to notify it about new messages
         notifyMessageArrival = false;
@@ -321,7 +321,7 @@ void RouterServerSocket::storeNewMessage() {
         //sendAnswer(answer);
         //return;
     } else if (!master->isElementAvailable(currentMessageTo)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "RouterServerSocket - Element '%s' unavailable. Discarding message.", currentMessageTo.c_str());
+        logger().log(opencog::Logger::WARNING, "RouterServerSocket - Element '%s' unavailable. Discarding message.", currentMessageTo.c_str());
         answer.assign("FAILED - Element unavailable: "); answer.append(currentMessageTo);
         sendAnswer(answer);
         return;
@@ -346,15 +346,15 @@ void RouterServerSocket::storeNewMessage() {
 
     
 
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Building Message object.");
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Building Message object.");
             Message *message = Message::routerMessageFactory(currentMessageFrom, currentMessageTo, 
                                                          currentMessageType, currentMessageText);
 
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Queueing message.");
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Queueing message.");
             master->getMessageCentral()->push(currentMessageTo, message);
 
 //        } catch (InvalidParamException& e){
-//    	    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+//    	    logger().log(opencog::Logger::ERROR, 
 //                "RouterServerSocket - Discarding message with invalid parameter.\nMessage:\n%s.", 
 //                currentMessageText.c_str());
 //        }
@@ -362,7 +362,7 @@ void RouterServerSocket::storeNewMessage() {
 
     // Ack sender that message was delivered successfully
     answer.assign(NetworkElement::OK_MESSAGE);
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Sending OK.");
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Sending OK.");
     sendAnswer(answer);
     
     if (notifyMessageArrival) {
@@ -372,22 +372,22 @@ void RouterServerSocket::storeNewMessage() {
             master->notifyMessageArrival(currentMessageTo, 1);
         }
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "RouterServerSocket - Finished queueing messages.");
+    logger().log(opencog::Logger::FINE, "RouterServerSocket - Finished queueing messages.");
 }
 
 
 void RouterServerSocket::OnLine(const std::string& line) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket[%p] - Received line <%s>",
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket[%p] - Received line <%s>",
                     this, line.c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - State = %d", currentState);
+    logger().log(opencog::Logger::DEBUG, "RouterServerSocket - State = %d", currentState);
 
     switch (currentState) {
         case WAITING_COMMAND: {
             std::string command;
             std::queue<std::string> args;
             NetworkElement::parseCommandLine(line, command, args);
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Parsed command <%s>. Args size: %d.", command.c_str(), args.size());
+            logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Parsed command <%s>. Args size: %d.", command.c_str(), args.size());
             if (command == "LOGIN") {
             // handshake
                 std::string id = args.front();
@@ -397,7 +397,7 @@ void RouterServerSocket::OnLine(const std::string& line) {
                 int port = atoi(args.front().c_str());
                 args.pop();
 
-                MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+                logger().log(opencog::Logger::INFO, 
                     "RouterServerSocket - Handshaking: id = %s ip = %s port = %d.", 
                     id.c_str(), ip.c_str(), port);
 
@@ -408,7 +408,7 @@ void RouterServerSocket::OnLine(const std::string& line) {
                 std::string id = args.front();
                 args.pop();
  
-                MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+                logger().log(opencog::Logger::INFO, 
                     "RouterServerSocket - Logout: id = %s.", id.c_str());
                 
                 master->removeNetworkElement(id);
@@ -428,7 +428,7 @@ void RouterServerSocket::OnLine(const std::string& line) {
                 std::string targetId = args.front();
                 args.pop();
  
-                MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+                logger().log(opencog::Logger::INFO, 
                     "RouterServerSocket - Clear message queue: id = '%s' requesting for '%s'.", 
                     requestorId.c_str(), targetId.c_str());
               
@@ -437,7 +437,7 @@ void RouterServerSocket::OnLine(const std::string& line) {
                 
             } else if (command == "SHUTDOWN"){
             // exit 
-                MAIN_LOGGER.log(LADSUtil::Logger::INFO, "RouterServerSocket - Shutdown router.");
+                logger().log(opencog::Logger::INFO, "RouterServerSocket - Shutdown router.");
                 master->shutdown();
 
             } else if (command == "REQUEST_UNREAD_MESSAGES") {
@@ -446,7 +446,7 @@ void RouterServerSocket::OnLine(const std::string& line) {
                 args.pop();
                 int limit = atoi(args.front().c_str());
                 args.pop();
-                MAIN_LOGGER.log(LADSUtil::Logger::INFO, "RouterServerSocket - %s requested messages (limit = %d).", id.c_str(), limit);
+                logger().log(opencog::Logger::INFO, "RouterServerSocket - %s requested messages (limit = %d).", id.c_str(), limit);
                 sendRequestedMessages(id, limit);
 
             } else if (command == "NEW_MESSAGE") {
@@ -463,9 +463,9 @@ void RouterServerSocket::OnLine(const std::string& line) {
                 currentState = READING_MESSAGE;
                 firstLineOfMessageFlag = true;
                 messageLinesCountdown = currentMessageSize;
-                MAIN_LOGGER.log(LADSUtil::Logger::INFO, "RouterServerSocket - Message arriving. From '%s' To '%s'.", currentMessageFrom.c_str(), currentMessageTo.c_str());
+                logger().log(opencog::Logger::INFO, "RouterServerSocket - Message arriving. From '%s' To '%s'.", currentMessageFrom.c_str(), currentMessageTo.c_str());
             } else {
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RouterServerSocket - Invalid command (%s) received. Discarding it.", command.c_str());
+                logger().log(opencog::Logger::ERROR, "RouterServerSocket - Invalid command (%s) received. Discarding it.", command.c_str());
 	    }
             break;
         }
@@ -478,14 +478,14 @@ void RouterServerSocket::OnLine(const std::string& line) {
             currentMessageText.append(line);
             messageLinesCountdown--;
             if (messageLinesCountdown == 0) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RouterServerSocket - Message complete.");
+                logger().log(opencog::Logger::DEBUG, "RouterServerSocket - Message complete.");
                 storeNewMessage();
                 currentState = WAITING_COMMAND;
             }
             break;
         }
         default: {
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "RouterServerSocket - Invalid state (%d). Comming back to WAITING_COMMAND (discarded last line).", currentState);
+            logger().log(opencog::Logger::WARNING, "RouterServerSocket - Invalid state (%d). Comming back to WAITING_COMMAND (discarded last line).", currentState);
             currentState = WAITING_COMMAND;
             break;
         }

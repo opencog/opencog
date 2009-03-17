@@ -1,19 +1,19 @@
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include "NominalReferenceResolver.h"
 #include "WorldWrapperUtil.h"
 #include "AtomSpaceUtil.h"
 #include "Predavese.h"
 
-using namespace LADSUtil;
+using namespace opencog;
 
 NominalReferenceResolver::NominalReferenceResolver(Control::PetInterface& _petInterface) : petInterface(_petInterface) {
 
 }
 
 string NominalReferenceResolver::solve(const string& name, const string& speakerId, unsigned long timestamp) const {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  " %s - Name: \"%s\", timestamp: %lu.", __FUNCTION__, name.c_str(), timestamp); 
+    logger().log(opencog::Logger::DEBUG,  " %s - Name: \"%s\", timestamp: %lu.", __FUNCTION__, name.c_str(), timestamp); 
 
     if (name == "") 
         return name;
@@ -31,7 +31,7 @@ string NominalReferenceResolver::solve(const string& name, const string& speaker
 
 bool NominalReferenceResolver::createSetOfCandidates(const string& name, unsigned long timestamp, set<Handle> & candidates) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  " %s - Name: \"%s\".", __FUNCTION__, name.c_str()); 
+    logger().log(opencog::Logger::DEBUG,  " %s - Name: \"%s\".", __FUNCTION__, name.c_str()); 
 
     // currently or recently observed by the pet
     // known according to the pet's memory to be in the pet's vicinity
@@ -59,13 +59,13 @@ bool NominalReferenceResolver::createSetOfCandidates(const string& name, unsigne
     foreach(Handle it, candidates){
         strCandidates << TLB::getAtom(it)->toString() << ", "; 
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  " %s - Candidates set: %s", __FUNCTION__, strCandidates.str().c_str()); 
+    logger().log(opencog::Logger::DEBUG,  " %s - Candidates set: %s", __FUNCTION__, strCandidates.str().c_str()); 
     return true;
 }
 
 void NominalReferenceResolver::scoreCandidates(const string& name, const string& speakerId, unsigned long timestamp, const set<Handle> & candidatesSet, scoreCandidatesMap& scoredCandidates) const {
 
-   MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  "%s - %d candidates.", __FUNCTION__, candidatesSet.size()); 
+   logger().log(opencog::Logger::DEBUG,  "%s - %d candidates.", __FUNCTION__, candidatesSet.size()); 
 
     const AtomSpace& as = petInterface.getAtomSpace();
     const SpaceServer::SpaceMap& sm = petInterface.getSpaceServer().getLatestMap();
@@ -214,11 +214,11 @@ void NominalReferenceResolver::scoreCandidates(const string& name, const string&
     foreach(scoredCandidate_t it, scoredCandidates){
         strScored << TLB::getAtom(it.first)->toString() << " score: " <<  it.second << ", "; 
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  "%s - Scored Candidates: %s", __FUNCTION__, strScored.str().c_str()); 
+    logger().log(opencog::Logger::DEBUG,  "%s - Scored Candidates: %s", __FUNCTION__, strScored.str().c_str()); 
 } 
 
 Handle NominalReferenceResolver::selectCandidate(const scoreCandidatesMap& scoredCandidates) const {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  " %s. %d scored candidates.", __FUNCTION__, scoredCandidates.size()); 
+    logger().log(opencog::Logger::DEBUG,  " %s. %d scored candidates.", __FUNCTION__, scoredCandidates.size()); 
 
     typedef pair<Handle, double> candidate_t;
     candidate_t selected = *scoredCandidates.begin();
@@ -226,7 +226,7 @@ Handle NominalReferenceResolver::selectCandidate(const scoreCandidatesMap& score
         if (candidate.second > selected.second) 
             selected = candidate;
     }
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,  "%s - Selected \"%s\" with %d score.", __FUNCTION__, petInterface.getAtomSpace().getName(selected.first).c_str(), selected.second); 
+    logger().log(opencog::Logger::DEBUG,  "%s - Selected \"%s\" with %d score.", __FUNCTION__, petInterface.getAtomSpace().getName(selected.first).c_str(), selected.second); 
 
     return selected.first;
 }

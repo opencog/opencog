@@ -26,7 +26,7 @@ PVPActionPlanSender::~PVPActionPlanSender() {
 bool PVPActionPlanSender::sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
     MessagingSystem::StringMessage msg(ne->getID(), ne->parameters.get("PROXY_ID"), actionPlan.getPVPmessage(petId));
     if (logPVPMessage) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
+        logger().log(opencog::Logger::INFO, "PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
     }
     return ne->sendMessage(msg);
 }
@@ -34,7 +34,7 @@ bool PVPActionPlanSender::sendActionPlan(const PerceptionActionInterface::Action
 bool PVPActionPlanSender::sendEmotionalFeelings(const std::string& feelings){
     MessagingSystem::StringMessage msg(ne->getID(), ne->parameters.get("PROXY_ID"), feelings);
     if (logPVPMessage) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "PVPActionPlanSender::sendEmotionalFeelings():\n%s\n", msg.getPlainTextRepresentation());
+        logger().log(opencog::Logger::INFO, "PVPActionPlanSender::sendEmotionalFeelings():\n%s\n", msg.getPlainTextRepresentation());
     }
     return ne->sendMessage(msg);
 }

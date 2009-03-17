@@ -1,5 +1,5 @@
-#include <LADSUtil/StringManipulator.h>
-#include <LADSUtil/exceptions.h>
+#include "util/StringManipulator.h"
+#include "util/exceptions.h"
 
 #include "BuiltInProcedureRepository.h"
 #include "PetActionSchema.h"
@@ -65,7 +65,7 @@ BuiltInProcedureRepository::~BuiltInProcedureRepository() {
 }
 
 void BuiltInProcedureRepository::add(BuiltInProcedure* proc) {
-    LADSUtil::cassert(TRACE_INFO, !contains(proc->getName()), 
+    opencog::cassert(TRACE_INFO, !contains(proc->getName()), 
             "BuitInProcedureRepository - Repository already contains procedure %s.",
             proc->getName().c_str());
     _map[proc->getName()] = proc; 

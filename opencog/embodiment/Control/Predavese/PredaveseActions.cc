@@ -1,5 +1,5 @@
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include "PredaveseActions.h"
 #include "AtomSpaceUtil.h"
@@ -21,9 +21,9 @@ using namespace Control;
 reward_action::reward_action(PetInterface& petInterface) : action(petInterface) {
 }
 bool reward_action::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "reward_action - Got Reward Instruction");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "reward_action - Args: \n%s", arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "reward_action - petId = %s, timestamp = %lu", petInterface.getPetId().c_str(), timestamp);
+    logger().log(opencog::Logger::INFO, "reward_action - Got Reward Instruction");
+    logger().log(opencog::Logger::DEBUG, "reward_action - Args: \n%s", arg->toString().c_str());
+    logger().log(opencog::Logger::DEBUG, "reward_action - petId = %s, timestamp = %lu", petInterface.getPetId().c_str(), timestamp);
     
     //    AtomSpaceUtil::addRewardPredicate(petInterface.getAtomSpace(), toString(petInterface.getPetId()).c_str(), timestamp);
     
@@ -37,9 +37,9 @@ bool reward_action::operator()(const pAtom& arg, unsigned long timestamp, const 
 punish_action::punish_action(PetInterface& petInterface) : action(petInterface) {
 }
 bool punish_action::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO, "punish_action - Got punish instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "punish_action - Args: \n%s", arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "punish_action - petId = %s, timestamp = %lu", petInterface.getPetId().c_str(), timestamp);
+    logger().log(opencog::Logger::INFO, "punish_action - Got punish instruction.");
+    logger().log(opencog::Logger::DEBUG, "punish_action - Args: \n%s", arg->toString().c_str());
+    logger().log(opencog::Logger::DEBUG, "punish_action - petId = %s, timestamp = %lu", petInterface.getPetId().c_str(), timestamp);
     
     //    AtomSpaceUtil::addPunishmentPredicate(petInterface.getAtomSpace(), toString(petInterface.getPetId()).c_str(), timestamp);
     
@@ -54,9 +54,9 @@ predicate_action::predicate_action(PetInterface& petInterface, int _arity ) : ac
 }
 bool predicate_action::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "predicate_action - Got predicate instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "predicate_action - Args:\n%s", arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "predicate_action - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::INFO,  "predicate_action - Got predicate instruction.");
+    logger().log(opencog::Logger::DEBUG, "predicate_action - Args:\n%s", arg->toString().c_str());
+    logger().log(opencog::Logger::DEBUG, "predicate_action - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
  
     // TODO: When we know what this would generate...
@@ -82,16 +82,16 @@ pet_dev_meta_command::pet_dev_meta_command(PetInterface& petInterface, int _arit
 }
 bool pet_dev_meta_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_dev_meta_command - Got Meta Command.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_dev_meta_command - Args: %s", arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_dev_meta_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::INFO,  "pet_dev_meta_command - Got Meta Command.");
+    logger().log(opencog::Logger::DEBUG, "pet_dev_meta_command - Args: %s", arg->toString().c_str());
+    logger().log(opencog::Logger::DEBUG, "pet_dev_meta_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
  
     vector<string> f_args;
     FormatArgs(arg->out, 0, back_inserter(f_args), arity);
 
     string meta_command = f_args.front();
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "Meta Command: '%s'.", meta_command.c_str());
+    logger().log(opencog::Logger::INFO,  "Meta Command: '%s'.", meta_command.c_str());
 
     if (meta_command == "SAVE_MAP") {
         petInterface.saveSpaceMapFile();
@@ -99,7 +99,7 @@ bool pet_dev_meta_command::operator()(const pAtom& arg, unsigned long timestamp,
         std::vector<std::string> arguments;
         petInterface.getCurrentModeHandler( ).handleCommand( "saveVisMap", arguments );
     } else {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "Unrecognized meta command: '%s'", meta_command.c_str());
+        logger().log(opencog::Logger::WARNING, "Unrecognized meta command: '%s'", meta_command.c_str());
     } // else
 
     // TODO: When we know what this would generate...
@@ -114,15 +114,15 @@ pet_command::pet_command(PetInterface& petInterface, int _arity) : action(petInt
 }
 bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_command - Got pet instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_command - Args: \n%s", arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_command - petId = %s, timestamp = %lu", petInterface.getPetId().c_str(), timestamp);
+    logger().log(opencog::Logger::INFO,  "pet_command - Got pet instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_command - Args: \n%s", arg->toString().c_str());
+    logger().log(opencog::Logger::DEBUG, "pet_command - petId = %s, timestamp = %lu", petInterface.getPetId().c_str(), timestamp);
    
 
     // TODO: Only handles intransitive and transitive verbs. Ditransitive is not addressed yet 
     vector<string> f_args;
     FormatArgs(arg->out, 0, back_inserter(f_args), arity);
-    LADSUtil::cassert(TRACE_INFO, !f_args.empty(), "pet_command - Unable to format arguments.");
+    opencog::cassert(TRACE_INFO, !f_args.empty(), "pet_command - Unable to format arguments.");
 
     { // block used to handle playing
         std::vector<std::string> arguments;
@@ -137,16 +137,16 @@ bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const st
         } // for
 
         if ( !arguments.empty( ) ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PredaveseActions - User requested to play something. # of arguments: %d", arguments.size( ) );
+            logger().log(opencog::Logger::DEBUG, "PredaveseActions - User requested to play something. # of arguments: %d", arguments.size( ) );
             if ( ( arguments[0] == "SCAVENGER" && arguments[1] == "HUNT" ) || ( arguments[0] == "SH" ) ) {
                 std::vector<std::string> arguments;
                 arguments.push_back( "lets_play_scavenger_hunt" ); // PetMode::SCAVENGER_HUNT
                 petInterface.getCurrentModeHandler( ).handleCommand( "receivedOwnerCommand", arguments );
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PredaveseActions - Starting to play scavenger hunt" );
+                logger().log(opencog::Logger::DEBUG, "PredaveseActions - Starting to play scavenger hunt" );
                 return true;
             } // if
 
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "PredaveseActions - Don't know how to play %s", arguments[0].c_str( ) );
+            logger().log(opencog::Logger::WARNING, "PredaveseActions - Don't know how to play %s", arguments[0].c_str( ) );
             return false;
         } // if
     } // end block
@@ -218,16 +218,16 @@ bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const st
 
     vector<string> resolvedNames;
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_command - trick: %s", trickName.c_str());
+    logger().log(opencog::Logger::DEBUG, "pet_command - trick: %s", trickName.c_str());
     Handle S = petInterface.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, trickName);
 
     if (!CoreUtils::compare(S, Handle::UNDEFINED)) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "pet_command - Found no schema node: %s", trickName.c_str());
+        logger().log(opencog::Logger::WARNING, "pet_command - Found no schema node: %s", trickName.c_str());
         // Grounded schema S does not exist. Gets the built-in "unknowTrick" schema instead. 
 	    // (i.e., the schema where pet makes an interrogation gesture or something like that)
         S = petInterface.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, UNKNOWN_TRICK_SCHEMA_NAME);
         if (!CoreUtils::compare(S, Handle::UNDEFINED)) {
-            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "pet_command - Found no schema node: %s", UNKNOWN_TRICK_SCHEMA_NAME);
+            logger().log(opencog::Logger::WARNING, "pet_command - Found no schema node: %s", UNKNOWN_TRICK_SCHEMA_NAME);
         } else {
             // the given command will feed RuleEngine with the unknow trick
             petInterface.setRequestedCommand( UNKNOWN_TRICK_SCHEMA_NAME, resolvedNames);
@@ -254,10 +254,10 @@ pet_learn_command::pet_learn_command(PetInterface& petInterface, int _arity) : a
 }
 bool pet_learn_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_learn_command - Got learn instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_learn_command - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "pet_learn_command - Got learn instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_learn_command - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_learn_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "pet_learn_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     vector<string> f_args;
@@ -269,7 +269,7 @@ bool pet_learn_command::operator()(const pAtom& arg, unsigned long timestamp, co
         // Get the real avatar id, since the received argument is actually the name
         string avatar_id = AtomSpaceUtil::getObjIdFromName(petInterface.getAtomSpace(), f_args.back());
         if (avatar_id.empty()) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_learn_command - found no avatar with name %s", f_args.back().c_str());
+            logger().log(opencog::Logger::DEBUG, "pet_learn_command - found no avatar with name %s", f_args.back().c_str());
             // There is no object/avatar with such name 
             return false;
         }
@@ -301,10 +301,10 @@ pet_stop_learn_command::pet_stop_learn_command(PetInterface& petInterface, int _
 }
 bool pet_stop_learn_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_stop_learn_command - Got stop learn instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_stop_learn_command - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "pet_stop_learn_command - Got stop learn instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_stop_learn_command - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_stop_learn_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "pet_stop_learn_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
     
     vector<string> f_args;
@@ -313,7 +313,7 @@ bool pet_stop_learn_command::operator()(const pAtom& arg, unsigned long timestam
     //    printf("\t%s\n", a.c_str());
 
     if (f_args.empty()) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "pet_stop_learn_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARNING, "pet_stop_learn_command - Schema name should be provided.");
         return false;
     } 
     
@@ -337,10 +337,10 @@ bool pet_stop_learn_command::operator()(const pAtom& arg, unsigned long timestam
 pet_stop_command::pet_stop_command(PetInterface& petInterface, int _arity) : action(petInterface), arity(_arity) {
 }
 bool pet_stop_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_stop_command - Got stop instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_stop_command - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "pet_stop_command - Got stop instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_stop_command - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_stop_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "pet_stop_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     vector<string> f_args;
@@ -349,7 +349,7 @@ bool pet_stop_command::operator()(const pAtom& arg, unsigned long timestamp, con
     //    printf("\t%s\n", a.c_str());
     
     if (f_args.empty()) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "pet_stop_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARNING, "pet_stop_command - Schema name should be provided.");
         return false;
     }
 
@@ -375,10 +375,10 @@ exemplar_start_command::exemplar_start_command(PetInterface& petInterface, int _
 }
 bool exemplar_start_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "exemplar_start - Got exemplar start instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "exemplar_start - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "exemplar_start - Got exemplar start instruction.");
+    logger().log(opencog::Logger::DEBUG, "exemplar_start - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "exemplar_start - petId = %s, timestamp = %lu, owner id = %s .",
+    logger().log(opencog::Logger::DEBUG, "exemplar_start - petId = %s, timestamp = %lu, owner id = %s .",
                     petInterface.getPetId().c_str(), timestamp, petInterface.getOwnerId().c_str());
 
     vector<string> f_args;
@@ -387,7 +387,7 @@ bool exemplar_start_command::operator()(const pAtom& arg, unsigned long timestam
     std::string exemplarAvatarId = f_args.front();
     string avatar_id = AtomSpaceUtil::getObjIdFromName(petInterface.getAtomSpace(), f_args.front());
     if (avatar_id.empty()) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_learn_command - found no avatar with name %s", f_args.front().c_str());
+        logger().log(opencog::Logger::DEBUG, "pet_learn_command - found no avatar with name %s", f_args.front().c_str());
     } else {
         exemplarAvatarId = avatar_id;
     }
@@ -413,12 +413,12 @@ bool exemplar_start_command::operator()(const pAtom& arg, unsigned long timestam
 
     } else if (  ( petInterface.getExemplarAvatarId() != petInterface.getOwnerId() && exemplarAvatarId == "I" ) 
                  || (petInterface.getExemplarAvatarId() != exemplarAvatarId && exemplarAvatarId != "I" ) ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "exemplar_start_command - '%s' is an invalid exemplar avatar id. The exemplar id registered is '%s' .", f_args.front().c_str(), petInterface.getExemplarAvatarId().c_str());
+        logger().log(opencog::Logger::WARNING, "exemplar_start_command - '%s' is an invalid exemplar avatar id. The exemplar id registered is '%s' .", f_args.front().c_str(), petInterface.getExemplarAvatarId().c_str());
         return false;
     }
    
     if (f_args.size() == 0 && !isSpecialCase) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "exemplar_start_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARNING, "exemplar_start_command - Schema name should be provided.");
         return false;
     } 
 
@@ -442,10 +442,10 @@ exemplar_end_command::exemplar_end_command(PetInterface& petInterface, int _arit
 }
 bool exemplar_end_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "exemplar_end - Got exemplar end instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "exemplar_end - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "exemplar_end - Got exemplar end instruction.");
+    logger().log(opencog::Logger::DEBUG, "exemplar_end - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "exemplar_end - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "exemplar_end - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     vector<string> f_args;
@@ -455,7 +455,7 @@ bool exemplar_end_command::operator()(const pAtom& arg, unsigned long timestamp,
     
     /*
       if (f_args.empty()) {
-      MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "exemplar_end_command - Schema name should be provided.");
+      logger().log(opencog::Logger::WARNING, "exemplar_end_command - Schema name should be provided.");
       return false;
       } 
     */
@@ -480,17 +480,17 @@ try_schema_command::try_schema_command(PetInterface& petInterface, int _arity) :
 }
 bool try_schema_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const { 
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "try_schema_command - Got try schema instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "try_schema_command - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "try_schema_command - Got try schema instruction.");
+    logger().log(opencog::Logger::DEBUG, "try_schema_command - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "try_schema_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "try_schema_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     vector<string> f_args;
     FormatArgs(arg->out, arity-1, back_inserter(f_args));
     
     if (f_args.empty() && !petInterface.isInLearningMode()) {
-        MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "try_schema_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARNING, "try_schema_command - Schema name should be provided.");
         return false;
     } 
     //printf("Try schema: %s\n", f_args[0].c_str());
@@ -511,10 +511,10 @@ bool try_schema_command::operator()(const pAtom& arg, unsigned long timestamp, c
 pet_meta_command::pet_meta_command(PetInterface& petInterface, int _arity) : action(petInterface), arity(_arity) {}
 bool pet_meta_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_meta_command - meta command instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_meta_command- Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "pet_meta_command - meta command instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_meta_command- Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_meta_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "pet_meta_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     return true;
@@ -523,10 +523,10 @@ bool pet_meta_command::operator()(const pAtom& arg, unsigned long timestamp, con
 pet_interrogative_command::pet_interrogative_command(PetInterface& petInterface, int _arity) : action(petInterface), arity(_arity) {}
 bool pet_interrogative_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_interrogative_command - question instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_interrogative_command- Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "pet_interrogative_command - question instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_interrogative_command- Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_interrogative_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "pet_interrogative_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     return true;
@@ -535,10 +535,10 @@ bool pet_interrogative_command::operator()(const pAtom& arg, unsigned long times
 pet_declarative_command::pet_declarative_command(PetInterface& petInterface, int _arity) : action(petInterface), arity(_arity) {}
 bool pet_declarative_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "pet_declarative_command - declarative instruction.");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_declarative_command- Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "pet_declarative_command - declarative instruction.");
+    logger().log(opencog::Logger::DEBUG, "pet_declarative_command- Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "pet_declarative_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "pet_declarative_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     return true;
@@ -547,10 +547,10 @@ bool pet_declarative_command::operator()(const pAtom& arg, unsigned long timesta
 any_command::any_command(PetInterface& petInterface) : action(petInterface) {}
 bool any_command::operator()(const pAtom& arg, unsigned long timestamp, const std::string& agentIdWhichSentTheCommand ) const {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::INFO,  "any_command - Dummy instruction (should not be invoked).");
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "any_command - Args: \n%s",
+    logger().log(opencog::Logger::INFO,  "any_command - Dummy instruction (should not be invoked).");
+    logger().log(opencog::Logger::DEBUG, "any_command - Args: \n%s",
                     arg->toString().c_str());
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "any_command - petId = %s, timestamp = %lu",
+    logger().log(opencog::Logger::DEBUG, "any_command - petId = %s, timestamp = %lu",
                     petInterface.getPetId().c_str(), timestamp);
 
     return true;

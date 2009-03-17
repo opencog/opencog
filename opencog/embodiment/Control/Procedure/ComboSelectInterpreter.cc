@@ -1,16 +1,16 @@
 #include "ComboSelectInterpreter.h"
 
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/exceptions.h>
+#include "util/Logger.h"
+#include "util/exceptions.h"
 
 using namespace Procedure;
 
-ComboSelectInterpreter::ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, LADSUtil::RandGen& rng){
+ComboSelectInterpreter::ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, opencog::RandGen& rng){
     this->comboInterpreter = new ComboInterpreter(pai, rng);
     this->next = 0;
 }
 
-ComboSelectInterpreter::ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, LADSUtil::RandGen& rng){
+ComboSelectInterpreter::ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng){
     this->comboInterpreter = new ComboInterpreter(v, rng);
     this->next = 0;
 }
@@ -28,19 +28,19 @@ void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne){
     RunningComboSelectProcedure& rp = it->second;
     
     rp.cycle();
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+    logger().log(opencog::Logger::DEBUG, 
             "RunningComboSelect - Terminei o cycle.");
    
     if(!rp.isFinished()){
         
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
                 "RunningComboSelect - Procedure not finished. Marking it failed.");
        
         // failed -  should be finished
         failed.insert(it->first);
 
     } else if(rp.getResult() != combo::id::null_vertex){
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
                 "RunningComboSelect - Procedure finished.");
 
         if(rp.isFailed()){
@@ -52,7 +52,7 @@ void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne){
     } else {
         stringstream ss;
         ss << rp.getResult();
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
                 "Third else - '%s'", ss.str().c_str());
     }
     runningProc.erase(it);
@@ -94,26 +94,26 @@ bool ComboSelectInterpreter::isFailed(Procedure::RunningProcedureId id){
 }
 
 combo::vertex ComboSelectInterpreter::getResult(RunningProcedureId id){
-    LADSUtil::cassert(TRACE_INFO, isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
-    LADSUtil::cassert(TRACE_INFO, !isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
+    opencog::cassert(TRACE_INFO, isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
+    opencog::cassert(TRACE_INFO, !isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
    
     idVertexMap::iterator it = result.find(id);
 
     if(it == result.end()){
         idProcedureMap::iterator runningProcIt = runningProc.find(id);
         if(runningProcIt == runningProc.end()){
-            LADSUtil::cassert(TRACE_INFO, false, "ERROR.");
+            opencog::cassert(TRACE_INFO, false, "ERROR.");
         }
 
-        LADSUtil::cassert(TRACE_INFO, runningProcIt->second.isFinished(), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
+        opencog::cassert(TRACE_INFO, runningProcIt->second.isFinished(), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
         return runningProcIt->second.getResult();
     }
     return it->second;
 }
 
 combo::variable_unifier& ComboSelectInterpreter::getUnifierResult(RunningProcedureId id){
-    LADSUtil::cassert(TRACE_INFO, isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
-    LADSUtil::cassert(TRACE_INFO, !isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
+    opencog::cassert(TRACE_INFO, isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
+    opencog::cassert(TRACE_INFO, !isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
 
     idUnifierMap::iterator it = unifier.find(id);
 

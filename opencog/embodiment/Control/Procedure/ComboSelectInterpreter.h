@@ -8,8 +8,8 @@
 #include "RunningProcedureId.h"
 #include "RunningComboSelectProcedure.h"
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/combo/variable_unifier.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/variable_unifier.h"
 
 namespace Procedure {
 
@@ -17,8 +17,8 @@ class ComboSelectInterpreter : public MessagingSystem::IdleTask {
 
     public:
         
-        ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, LADSUtil::RandGen& rng);
-        ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, LADSUtil::RandGen& rng);
+        ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, opencog::RandGen& rng);
+        ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
         ~ComboSelectInterpreter();
         
         // from idle task

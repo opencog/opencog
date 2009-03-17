@@ -37,7 +37,7 @@ bool PetMessageSender::sendExemplar(const std::string &schema, const std::vector
 								   SpaceServer &spaceServer){
 								   	
 	LearningServerMessages::LearnMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schema, schemaArguments, ownerId, avatarId, spaceServer);
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "PetMessageSender - sending exemplar message for schema '%s'.", schema.c_str()); 
+    logger().log(opencog::Logger::DEBUG, "PetMessageSender - sending exemplar message for schema '%s'.", schema.c_str()); 
 	return ne->sendMessage(msg);
 }
 

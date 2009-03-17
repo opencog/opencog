@@ -1,8 +1,8 @@
 #ifndef _COMBO_INTERPRETER_H
 #define _COMBO_INTERPRETER_H
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/combo/variable_unifier.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/variable_unifier.h"
 #include "PAI.h"
 #include "IdleTask.h"
 #include "VirtualWorldState.h"
@@ -39,8 +39,8 @@ namespace Procedure {
   class ComboInterpreter : public MessagingSystem::IdleTask,boost::noncopyable {
     
    public: 
-    ComboInterpreter(PerceptionActionInterface::PAI& p, LADSUtil::RandGen& rng);
-    ComboInterpreter(VirtualWorldData::VirtualWorldState& v, LADSUtil::RandGen& rng);
+    ComboInterpreter(PerceptionActionInterface::PAI& p, opencog::RandGen& rng);
+    ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
     virtual ~ComboInterpreter();
 
     //run executes a single action plan of some procedure (if any are ready)
@@ -82,7 +82,7 @@ namespace Procedure {
     typedef std::map<RunningProcedureId,combo::vertex> ResultMap;
     typedef std::map<RunningProcedureId,combo::variable_unifier> UnifierResultMap;
 
-    LADSUtil::RandGen& rng;
+    opencog::RandGen& rng;
 //    WorldWrapper::PAIWorldWrapper _ww;
     WorldWrapper::WorldWrapperBase * _ww;
     Map _map;

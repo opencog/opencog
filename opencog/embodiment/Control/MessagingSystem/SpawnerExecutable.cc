@@ -1,9 +1,9 @@
 #include <SystemParameters.h>
 #include <exception>
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h>
 #include "Spawner.h"
-#include <LADSUtil/files.h>
+#include "util/files.h>
 
 using namespace MessagingSystem;
 
@@ -41,14 +41,14 @@ int main(int argc, char *argv[]) {
 
         spawner->serverLoop();   
     
-    } catch(LADSUtil::InvalidParamException& ipe){
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+    } catch(opencog::InvalidParamException& ipe){
+        logger().log(opencog::Logger::ERROR, 
                         "SpawnerExec - Error creating spawner object.");
     } catch(std::bad_alloc) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        logger().log(opencog::Logger::ERROR, 
                         "SpawnerExec - Spawner raised a bad_alloc exception.");
     } catch(...) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+        logger().log(opencog::Logger::ERROR, 
         "Spawner executable - An exceptional situation occured. Check log for more information.");
     }
    

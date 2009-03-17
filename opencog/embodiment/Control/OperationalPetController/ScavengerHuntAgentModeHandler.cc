@@ -9,7 +9,7 @@
 #include "NetworkElement.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
@@ -58,7 +58,7 @@ void ScavengerHuntAgentModeHandler::changeState( int from, int to ) {
     AtomSpaceUtil::setPredicateValue( agent->getAtomSpace( ), "agentModeState", 
                                       SimpleTruthValue( 1.0, 1.0 ), agentHandle, toStateNodeHandle );
 
-    MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Changed state from %d to %d", from, to );
+    logger().log( opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Changed state from %d to %d", from, to );
 
     this->previousAgentState = this->agentState;
     this->agentState = to;
@@ -77,7 +77,7 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
         boost::to_lower( lowerCaseArguments[i] );
     } // for
   
-    MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - handlingCommand[%s] params[%s]", name.c_str( ), args.str( ).c_str( ) );
+    logger().log( opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - handlingCommand[%s] params[%s]", name.c_str( ), args.str( ).c_str( ) );
 
     if ( name == "groupCommandDone" ) {
         if ( arguments[0] == "lets_play_scavenger_hunt" ) {
@@ -180,10 +180,10 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
     } else if ( name == "visibilityMap" ) {
     
         if ( arguments.size( ) == 0 ) {
-            MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Invalid visibility map signal, string 0 signed" );
+            logger().log( opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Invalid visibility map signal, string 0 signed" );
             return;
         } // if
-        MAIN_LOGGER.log( LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Parsing visibility map signal" );
+        logger().log( opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Parsing visibility map signal" );
     
         Spatial::VisibilityMap* visibilityMap = getVisibilityMap( );
         if ( !visibilityMap ) {
@@ -209,7 +209,7 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
             } // while
 
             if ( range.size( ) == 0 || ( range.size( ) % 2 ) != 0 ) {
-                MAIN_LOGGER.log( LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - The columns number of a visibility map signal must be pair and greater than 0. row: %d", row );
+                logger().log( opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - The columns number of a visibility map signal must be pair and greater than 0. row: %d", row );
                 return;
             } // if
       
@@ -221,7 +221,7 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
                     if ( tile ) {
                         tile->setVisibility( true );
                     } else {
-                        MAIN_LOGGER.log( LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - There was an attempt to access an invalid tile row: %d col: %d", row, k );
+                        logger().log( opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - There was an attempt to access an invalid tile row: %d col: %d", row, k );
                     } // else
                 } // for
             } // for
@@ -296,7 +296,7 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
             if ( std::find( this->teamPlayers[this->myTeamCode].begin( ), this->teamPlayers[this->myTeamCode].end( ), targetId ) == this->teamPlayers[this->myTeamCode].end( ) ) {	
                 // target is not from my team, so spy him/her
                 //arguments[0]; // agent to spy
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Spying[%s] Id[%s]", arguments[0].c_str( ), targetId.c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Spying[%s] Id[%s]", arguments[0].c_str( ), targetId.c_str( ) );
                 setProperty( "spying", targetId );
                 setProperty( "customObject", targetId );
                 changeState( this->agentState, 1321 ); //spy an agent
@@ -322,7 +322,7 @@ Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void ) 
 
     Handle spaceMapHandle = this->agent->getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
         return NULL;
     } // if
 
@@ -338,7 +338,7 @@ Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void ) 
 }
 
 void ScavengerHuntAgentModeHandler::update( void ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Updating... Current state[%d] Previous state[%d] ElapsedTicks[%d]", this->agentState, this->previousAgentState, this->elapsedTicks );
+    logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Updating... Current state[%d] Previous state[%d] ElapsedTicks[%d]", this->agentState, this->previousAgentState, this->elapsedTicks );
 
     switch ( this->agentState ) {
     case 0: { // game started by the agent's owner
@@ -380,7 +380,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
             const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
             spaceMap.getEntity( getPropertyValue( "treasure" ) );
             // yeah! keep going after it
-        } catch( LADSUtil::NotFoundException& ex ) {
+        } catch( opencog::NotFoundException& ex ) {
             // no... so, forget about it
             setProperty( "treasure", "" );
             changeState( this->agentState, 1317 );
@@ -393,10 +393,10 @@ void ScavengerHuntAgentModeHandler::update( void ) {
             this->elapsedTicks = 0;
         } else if ( isAgentHoldingTreasure( ) ) {
             if ( isAgentNearBase( ) ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Agent is holding a treasure and is near it's base" );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Agent is holding a treasure and is near it's base" );
                 changeState( this->agentState, 1311 ); // drop treasure
             } else {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Agent is holding a treasure but is not near it's base" );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Agent is holding a treasure but is not near it's base" );
                 if ( myTeamCode == 0 ) {
                     setProperty( "customObject", redBaseId );
                 } else {
@@ -476,19 +476,19 @@ void ScavengerHuntAgentModeHandler::update( void ) {
     case 1319: { // follow owner
         if ( getPropertyValue( "collectTreasures" ) == "yes" && treasureWasFound( ) ) {
             changeState( this->agentState, 1305 ); // go to after it
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following, collecting treasures and a treasure was found" );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following, collecting treasures and a treasure was found" );
 
         } else if ( getPropertyValue( "spying" ).length( ) > 0 ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm spying[%s]",  getPropertyValue( "spying" ).c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm spying[%s]",  getPropertyValue( "spying" ).c_str( ) );
             if ( isAgentNextTo( getPropertyValue( "spying" ) ) ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm spying[%s] and next to target, so keep spying",  getPropertyValue( "spying" ).c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm spying[%s] and next to target, so keep spying",  getPropertyValue( "spying" ).c_str( ) );
                 changeState( this->agentState, 1321 ); // keepSpying
             } // if	
 
         } else if ( getPropertyValue( "following" ).length( ) == 0 ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following nothing" );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following nothing" );
             if ( isAgentNextTo( getPropertyValue( "customObject" ) ) && this->elapsedTicks > 10 ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following nothing and next to the target[%s]", getPropertyValue( "customObject" ).c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following nothing and next to the target[%s]", getPropertyValue( "customObject" ).c_str( ) );
                 changeState( this->agentState, 1317 ); // go 
             } // if
             ++this->elapsedTicks;
@@ -517,7 +517,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
                 setFollowingPosition( );
                 changeState( this->agentState, 1319 ); // go near target
             } // if
-        } catch( LADSUtil::NotFoundException& ex ) { 	// look at target
+        } catch( opencog::NotFoundException& ex ) { 	// look at target
             // search for the target	
             this->elapsedTicks = 0;
             std::stringstream targetPosition;
@@ -527,7 +527,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
             Spatial::Math::Quaternion rotation( Spatial::Math::Vector3::Z_UNIT, M_PI/2.0 );
             position += rotation.rotate( agentEntity->getDirection( ) ) * 1000;
 
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Trying to look at a 90 degrees right. yaw[%f] dirBefore[%s] dirAfter[%s] agentPosition[%s] finalPosition[%s]", agentEntity->getOrientation( ).getRoll( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getDirection( ) .toString( ).c_str( ), agentEntity->getPosition( ).toString( ).c_str( ), position.toString( ).c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Trying to look at a 90 degrees right. yaw[%f] dirBefore[%s] dirAfter[%s] agentPosition[%s] finalPosition[%s]", agentEntity->getOrientation( ).getRoll( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getDirection( ) .toString( ).c_str( ), agentEntity->getPosition( ).toString( ).c_str( ), position.toString( ).c_str( ) );
 	
             targetPosition << position.x << " " << position.y;
             setProperty( "customPosition", targetPosition.str( ) );
@@ -540,7 +540,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
         try {	
             spaceMap.getEntity( getPropertyValue( "spying" ) );
             changeState( this->agentState, 1321 ); // target found, so keep spying
-        } catch( LADSUtil::NotFoundException& ex ) {
+        } catch( opencog::NotFoundException& ex ) {
             if ( elapsedTicks > 3 ) {
                 this->elapsedTicks = 0;
 
@@ -550,7 +550,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
                 Spatial::Math::Quaternion rotation( Spatial::Math::Vector3::Z_UNIT, M_PI/2.0 );
                 position += rotation.rotate( agentEntity->getDirection( ) ) * 1000;
 
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Trying to look at a 90 degrees right. yaw[%f] dirBefore[%s] dirAfter[%s] agentPosition[%s] finalPosition[%s]", agentEntity->getOrientation( ).getRoll( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getPosition( ).toString( ).c_str( ), position.toString( ).c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Trying to look at a 90 degrees right. yaw[%f] dirBefore[%s] dirAfter[%s] agentPosition[%s] finalPosition[%s]", agentEntity->getOrientation( ).getRoll( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getPosition( ).toString( ).c_str( ), position.toString( ).c_str( ) );
 	
                 targetPosition << position.x << " " << position.y;
                 setProperty( "customPosition", targetPosition.str( ) );
@@ -572,14 +572,14 @@ void ScavengerHuntAgentModeHandler::update( void ) {
 
             // look at target
 
-        } catch( LADSUtil::NotFoundException& ex ) {
+        } catch( opencog::NotFoundException& ex ) {
             changeState( this->agentState, 1322 ); // search target
             this->elapsedTicks = 0;
         } // catch
     } break;
 
     case 1303: { // wait for answers during a short period
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Receiving group_commands. ElapsedTicks[%d]", this->elapsedTicks );      
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Receiving group_commands. ElapsedTicks[%d]", this->elapsedTicks );      
         if ( this->elapsedTicks > 3 ) {	
             this->elapsedTicks = 1;
             changeState( this->agentState, 1317 );
@@ -600,7 +600,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
                     const Spatial::VisibilityMap::TilePtr& tile = getVisibilityMap( )->getNearestVisibleTile( getVisibilityMap( )->getTile( position )->getCenter( ), this->exploringArea, NUMBER_OF_AREAS );
                     setProperty( "customPath", computeWalkAroundWaypoints( tile->getCenter( ) ) ); 
                     changeState( this->agentState, 1313 ); // go nearest to target visible area tile
-                } catch ( LADSUtil::NotFoundException& ex ) {
+                } catch ( opencog::NotFoundException& ex ) {
                     std::stringstream exploredArea;
                     exploredArea << this->exploringArea;
                     setProperty( "customObject", exploredArea.str( ) ); 
@@ -618,8 +618,8 @@ void ScavengerHuntAgentModeHandler::update( void ) {
                 const Spatial::VisibilityMap::TilePtr& tile = getVisibilityMap( )->getNearestVisibleTileToPosition( areaCenter );
                 setProperty( "customPath", computeWalkAroundWaypoints( tile->getCenter( ) ) );
                 changeState( this->agentState, 1313 ); // go to the nearest visible tile to target area
-            } catch ( LADSUtil::NotFoundException& ex ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG,
+            } catch ( opencog::NotFoundException& ex ) {
+                logger().log(opencog::Logger::DEBUG,
                                 "ScavengerHuntAgentModeHandler - There is no visible tile inside the current target area[%s]", ex.getMessage( ) );
                 static int fileCounter = 0;
                 std::stringstream fileName;
@@ -655,29 +655,29 @@ bool ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea( void
         this->agent->getAtomSpace().getHandleSet(back_inserter(objHandle), SL_OBJECT_NODE, entities[i] , true);
 
         if(objHandle.size() != 1){
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - %d handles were found to entity[%s]", objHandle.size( ), entities[i].c_str( ) );
+            logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - %d handles were found to entity[%s]", objHandle.size( ), entities[i].c_str( ) );
             continue;
         } // if
     
         if ( AtomSpaceUtil::isPredicateTrue( this->agent->getAtomSpace(), "is_edible", objHandle[0] ) ||
              AtomSpaceUtil::isPredicateTrue( this->agent->getAtomSpace(), "is_drinkable", objHandle[0] ) ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is edible or drinkable. ignoring...", entities[i].c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is edible or drinkable. ignoring...", entities[i].c_str( ) );
             continue;
         } // if
     
         try {
             const Spatial::EntityPtr& obstacle = spaceMap.getEntity( entities[i] );
             if ( !obstacle->getBooleanProperty( Spatial::Entity::OBSTACLE ) ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is not an obstacle. ignoring...", entities[i].c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is not an obstacle. ignoring...", entities[i].c_str( ) );
                 continue;
             } // if
 
             if ( !getVisibilityMap( )->isInsideArea( *obstacle, this->exploringArea, NUMBER_OF_AREAS ) ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is not inside area[%d]. ignoring...", entities[i].c_str( ), this->exploringArea );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is not inside area[%d]. ignoring...", entities[i].c_str( ), this->exploringArea );
                 continue;
             } // if
-        } catch( LADSUtil::NotFoundException& ex ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] was not found inside LocalSpaceMap2D",  entities[i].c_str( ) );
+        } catch( opencog::NotFoundException& ex ) {
+            logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] was not found inside LocalSpaceMap2D",  entities[i].c_str( ) );
             continue;
         } // if
 
@@ -685,7 +685,7 @@ bool ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea( void
             std::find( this->exploredObjects.begin( ), this->exploredObjects.end( ), entities[i] );
     
         if ( it == this->exploredObjects.end( ) ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Found entity[%s] inside area[%d]", entities[i].c_str( ), this->exploringArea );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Found entity[%s] inside area[%d]", entities[i].c_str( ), this->exploringArea );
             setProperty( "nextObjectToExplore", entities[i] );
             setProperty( "customPath", computeWalkAroundWaypoints( entities[i] ) );
             setProperty( "walkSpeed", "1.5" );
@@ -747,7 +747,7 @@ bool ScavengerHuntAgentModeHandler::isThereHiddenTilesInsideTargetArea( void ) {
 
 bool ScavengerHuntAgentModeHandler::imInsideTargetArea( void ) {
     if ( this->exploringArea == NUMBER_OF_AREAS ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::imInsideTargetArea - Exploring area was not definded" );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::imInsideTargetArea - Exploring area was not definded" );
         return false;
     } // if
 
@@ -755,13 +755,13 @@ bool ScavengerHuntAgentModeHandler::imInsideTargetArea( void ) {
         const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         bool imInside = getVisibilityMap( )->isInsideArea( *agentEntity, this->exploringArea, NUMBER_OF_AREAS );
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::imInsideTargetArea - Exploring area[%d] Current Agent position[%s] Inside?[%s]", this->exploringArea, agentEntity->getPosition( ).toString( ).c_str( ), (imInside?"yes":"no") );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::imInsideTargetArea - Exploring area[%d] Current Agent position[%s] Inside?[%s]", this->exploringArea, agentEntity->getPosition( ).toString( ).c_str( ), (imInside?"yes":"no") );
         return imInside;    
-    } catch ( LADSUtil::NotFoundException& ex ) {
+    } catch ( opencog::NotFoundException& ex ) {
     
         const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler::imInsideTargetArea - AgentPosition[%s] AreaNumber[%d] %s", agentEntity->getPosition( ).toString( ).c_str( ), this->exploringArea, ex.getMessage( ) );
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::imInsideTargetArea - AgentPosition[%s] AreaNumber[%d] %s", agentEntity->getPosition( ).toString( ).c_str( ), this->exploringArea, ex.getMessage( ) );
         return false;
     } // catch
 }
@@ -773,17 +773,17 @@ bool ScavengerHuntAgentModeHandler::isExecutingSchema( void ) {
     } // if
 
     if ( this->runningProcedureId == 0 ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isExecutingGoto - Running procedure id was not defined" );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isExecutingGoto - Running procedure id was not defined" );
         return false;
     } // if
   
     if ( this->agent->getRuleEngine( )->isSchemaExecFinished( this->runningProcedureId ) ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isExecutingSchema - Schema was finished[%d]", this->runningProcedureId );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isExecutingSchema - Schema was finished[%d]", this->runningProcedureId );
         this->runningProcedureId = 0;
         this->needToCollectProcedureId = false;
         return false;
     } // if
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isExecutionSchema - Schema was not finished[%d]", this->runningProcedureId );
+    logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isExecutionSchema - Schema was not finished[%d]", this->runningProcedureId );
     return true;
 }
 
@@ -809,26 +809,26 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void ) {
             const Spatial::EntityPtr& entity = spaceMap.getEntity( *it );
             Handle objectHandle = this->agent->getSpaceServer().getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, entity->getName( ) );
             if ( objectHandle == Handle::UNDEFINED ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not an accessory", (*it).c_str());
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not an accessory", (*it).c_str());
                 continue;
             } // if 
 
             if ( !AtomSpaceUtil::isPredicateTrue( this->agent->getSpaceServer().getAtomSpace( ), "is_pickupable", objectHandle ) ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not pickupable", (*it).c_str());
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not pickupable", (*it).c_str());
                 continue;
             } // if
       
             if ( redBaseEntity->distanceTo( entity ) <= 800 || blueBaseEntity->distanceTo( entity ) <= 800 ) {	
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is near a team base", (*it).c_str());
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is near a team base", (*it).c_str());
                 continue;
             } // if
       
             if ( AtomSpaceUtil::isObjectBeingHolded( this->agent->getSpaceServer().getAtomSpace( ), *it ) ) {
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Some agent is holding object[%s]", (*it).c_str());
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Some agent is holding object[%s]", (*it).c_str());
                 continue;
             } // if
 
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is a treasure", (*it).c_str());
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is a treasure", (*it).c_str());
             treasures.push_back( *it );
             distanceToAgent.push_back( agentEntity->distanceTo( entity ) );
 
@@ -847,7 +847,7 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void ) {
         } // if
   
         if ( chosenTreasure.length( ) > 0 ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s was selected as a treasure", chosenTreasure.c_str());
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s was selected as a treasure", chosenTreasure.c_str());
             setProperty( "customObject", chosenTreasure );
             setProperty( "treasure", chosenTreasure );
             return true;
@@ -855,8 +855,8 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void ) {
 
         return false;
     
-    } catch( LADSUtil::NotFoundException& ex ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - %s", ex.getMessage( ) );
+    } catch( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - %s", ex.getMessage( ) );
         return false;
     } // else
   
@@ -871,7 +871,7 @@ bool ScavengerHuntAgentModeHandler::isAgentNearTreasure( void ) {
     Handle treasureHandle = this->agent->getSpaceServer().getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, getPropertyValue( "treasure" ) );
 
     if ( agentHandle == Handle::UNDEFINED || treasureHandle == Handle::UNDEFINED ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure handle was not found" );
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure handle was not found" );
         return false;
     } // if
 
@@ -883,16 +883,16 @@ bool ScavengerHuntAgentModeHandler::isAgentNearTreasure( void ) {
         const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
     
         if ( redBaseEntity->distanceTo( treasureEntity ) <= 800 || blueBaseEntity->distanceTo( treasureEntity ) <= 800 ) {	
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure is near a team base" );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure is near a team base" );
             return false;
         } // if
     
         bool isNearTreasure = AtomSpaceUtil::isPredicateTrue( this->agent->getAtomSpace( ), "near", agentHandle, treasureHandle );
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Agent %s near treasure", (isNearTreasure?"is":"is not" ) );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Agent %s near treasure", (isNearTreasure?"is":"is not" ) );
         return isNearTreasure;
-    } catch( LADSUtil::NotFoundException& ex ) {
+    } catch( opencog::NotFoundException& ex ) {
         setProperty( "treasure", "" );
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "SavengerHuntAgentModeHandler::isAgentNearTreasure - %s", ex.getMessage( ) );
+        logger().log(opencog::Logger::DEBUG, "SavengerHuntAgentModeHandler::isAgentNearTreasure - %s", ex.getMessage( ) );
         return false;
     } // catch
 }
@@ -922,8 +922,8 @@ bool ScavengerHuntAgentModeHandler::isAgentNearBase( void ) {
             const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
             return ( blueBaseEntity->distanceTo( agentEntity ) <= 800 );
         } // else
-    } catch ( LADSUtil::NotFoundException& ex ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler::isAgentNearBase - %s", ex.getMessage( ) );
+    } catch ( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isAgentNearBase - %s", ex.getMessage( ) );
         return false;
     } // catch
 }
@@ -997,8 +997,8 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const std
             cursor = (cursor+1) % wayPoints.size( );
         } // if
     
-    } catch( LADSUtil::NotFoundException& ex ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+    } catch( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::ERROR,
                         "ScavengerHuntAgentModeHandler - There is no object %s inside map.", entityId.c_str( ) );
     } // catch
     return output.str( );
@@ -1014,17 +1014,17 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const Spa
         output << agentEntity->getPosition( ).x << " " << agentEntity->getPosition( ).y << ";";
         output << targetPosition.x << " " << targetPosition.z;
 
-    } catch( LADSUtil::NotFoundException& ex ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - Agent was not found inside map" );
+    } catch( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - Agent was not found inside map" );
     } // catch
     return output.str( );
 }
 
 void ScavengerHuntAgentModeHandler::addPlayer( const std::string& playerName, unsigned int teamCode, float randomNumber ) {
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - adding player[%s] teamCode[%d] randomNumber[%f]", playerName.c_str( ), teamCode, randomNumber );
+    logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - adding player[%s] teamCode[%d] randomNumber[%f]", playerName.c_str( ), teamCode, randomNumber );
     std::map<std::string, PlayerMetaData>::iterator it = this->players.find( playerName );
     if ( it == this->players.end( ) ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player needs to be added to a team" );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player needs to be added to a team" );
 
         this->players.insert( std::map<std::string, PlayerMetaData>::value_type( 
              playerName, PlayerMetaData( playerName, teamCode, randomNumber )
@@ -1041,34 +1041,34 @@ void ScavengerHuntAgentModeHandler::addPlayer( const std::string& playerName, un
             } // else
         } // for
 
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - redTeam has[%d], blueTeam has[%d] players", redTeam.size( ), blueTeam.size( ) );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - redTeam has[%d], blueTeam has[%d] players", redTeam.size( ), blueTeam.size( ) );
 
         int teamDiff = static_cast<int>(redTeam.size( )) - static_cast<int>(blueTeam.size( ) );
 
         while( std::abs(teamDiff) > 1 ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - teamDifference[%d]", teamDiff );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - teamDifference[%d]", teamDiff );
             if ( teamDiff < 0 ) {	 
                 // blue to red	 
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - passing %s from blue to red", blueTeam.rbegin( )->toString( ).c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - passing %s from blue to red", blueTeam.rbegin( )->toString( ).c_str( ) );
                 redTeam.insert( *blueTeam.rbegin( ) );
                 blueTeam.erase( *blueTeam.rbegin( ) );
             } else {
                 // red to blue
-                MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - passing %s from red to blue", redTeam.rbegin( )->toString( ).c_str( ) );
+                logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - passing %s from red to blue", redTeam.rbegin( )->toString( ).c_str( ) );
                 blueTeam.insert( *redTeam.rbegin( ) );
                 redTeam.erase( *redTeam.rbegin( ) );	 	 
             } // else
             teamDiff = static_cast<int>(redTeam.size( )) - static_cast<int>(blueTeam.size( ) );
         } // while
 
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - redTeam has[%d], blueTeam has[%d] players", redTeam.size( ), blueTeam.size( ) );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - redTeam has[%d], blueTeam has[%d] players", redTeam.size( ), blueTeam.size( ) );
 
         this->teamPlayers[0].clear( );
         this->teamPlayers[1].clear( );
 
         std::set<PlayerMetaData>::iterator it;
         for( it = redTeam.begin( ); it != redTeam.end( ); ++it ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Verifying red team %s ==? %s", it->name.c_str( ), this->agent->getPetId( ).c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Verifying red team %s ==? %s", it->name.c_str( ), this->agent->getPetId( ).c_str( ) );
             if ( it->name == this->agent->getPetId( ) ) {
                 this->myTeamCode = 0;
             } // if
@@ -1076,7 +1076,7 @@ void ScavengerHuntAgentModeHandler::addPlayer( const std::string& playerName, un
         } // for
 
         for( it = blueTeam.begin( ); it != blueTeam.end( ); ++it ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Verifying blue team %s ==? %s", it->name.c_str( ), this->agent->getPetId( ).c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Verifying blue team %s ==? %s", it->name.c_str( ), this->agent->getPetId( ).c_str( ) );
             if ( it->name == this->agent->getPetId( ) ) {
                 this->myTeamCode = 1;
             } // if
@@ -1090,17 +1090,17 @@ void ScavengerHuntAgentModeHandler::addPlayer( const std::string& playerName, un
         this->exploredAreas.resize(NUMBER_OF_AREAS);
         //std::fill( this->exploredAreas.begin(), this->exploredAreas.end(), false );     
 
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm from %s team. New player %s belongs to %s team", (this->myTeamCode == 0? "red" : "blue"), playerName.c_str( ), ( std::find( this->teamPlayers[0].begin( ), this->teamPlayers[0].end( ), playerName ) != this->teamPlayers[0].end( ) ? "red" : "blue" )  );     
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm from %s team. New player %s belongs to %s team", (this->myTeamCode == 0? "red" : "blue"), playerName.c_str( ), ( std::find( this->teamPlayers[0].begin( ), this->teamPlayers[0].end( ), playerName ) != this->teamPlayers[0].end( ) ? "red" : "blue" )  );     
     } // if
 }
 
 void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, unsigned int areaNumber, float randomNumber ) {
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - selecting an area to explore. player[%s] teamCode[%d] randomNumber[%f] : agent which will handle this command[%s]", playerName.c_str( ), areaNumber, randomNumber, this->agent->getPetId( ).c_str( ) );
+    logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - selecting an area to explore. player[%s] teamCode[%d] randomNumber[%f] : agent which will handle this command[%s]", playerName.c_str( ), areaNumber, randomNumber, this->agent->getPetId( ).c_str( ) );
  
     std::map<std::string, PlayerMetaData>::iterator it = this->players.find( playerName );
     if ( it == this->players.end( ) ) {
-        MAIN_LOGGER.log( LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - An invalid player send me a select area message %s %d %f", playerName.c_str( ), areaNumber, randomNumber );    
+        logger().log( opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - An invalid player send me a select area message %s %d %f", playerName.c_str( ), areaNumber, randomNumber );    
         return;
     } // if
 
@@ -1108,7 +1108,7 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
     std::vector<std::string>::iterator it2 = std::find( myTeam.begin( ), myTeam.end( ), playerName );
   
     if ( it2 == myTeam.end( ) ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player[%s] doesn't belong to my team", playerName.c_str( ) );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player[%s] doesn't belong to my team", playerName.c_str( ) );
         return; // handle only my team requests
     } // if
 
@@ -1116,7 +1116,7 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
     it->second.suggestedCode = areaNumber;
 
     if ( this->exploredAreas[areaNumber] ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - chosen area[%d] was already explored", areaNumber );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - chosen area[%d] was already explored", areaNumber );
         return; // ignore, maybe it will be necessary notify (again) the agent that that area was already explored
     } // if
 
@@ -1131,9 +1131,9 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
     } // for
 
     std::string looser = "";
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - exploring areas size[%d] for area number[%d]", this->exploringAreas[areaNumber].size( ), areaNumber );
+    logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - exploring areas size[%d] for area number[%d]", this->exploringAreas[areaNumber].size( ), areaNumber );
     if ( this->exploringAreas[areaNumber].size( ) == 0 ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - there is no agent exploring area[%d], so player[%s] will be allocated to it", areaNumber, playerName.c_str( ) );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - there is no agent exploring area[%d], so player[%s] will be allocated to it", areaNumber, playerName.c_str( ) );
         this->exploringAreas[areaNumber].push_back( playerName );
 
         if ( playerName == this->agent->getPetId( ) ) {
@@ -1141,11 +1141,11 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
         } // if    
 
     } else if ( this->exploringAreas[areaNumber].size( ) == 1 ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - there is just one agent[%s] exploring area[%d]", this->exploringAreas[areaNumber][0].c_str( ), areaNumber );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - there is just one agent[%s] exploring area[%d]", this->exploringAreas[areaNumber][0].c_str( ), areaNumber );
 
         std::map<std::string, PlayerMetaData>::iterator it3 = this->players.find( this->exploringAreas[areaNumber][0] );
         if ( it3 == this->players.end( ) ) {
-            MAIN_LOGGER.log( LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - An invalid player was allocated to an area of my team: %s %d", this->exploringAreas[areaNumber][0].c_str( ), areaNumber );
+            logger().log( opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - An invalid player was allocated to an area of my team: %s %d", this->exploringAreas[areaNumber][0].c_str( ), areaNumber );
             return;
         } // if
     
@@ -1156,14 +1156,14 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
             if ( playerName == this->agent->getPetId( ) ) {
                 this->exploringArea = areaNumber;
             } // if
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player[%s] win the agent that was exploring the area[%d], so he will assume this area. looser[%s]", playerName.c_str( ), areaNumber, looser.c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player[%s] win the agent that was exploring the area[%d], so he will assume this area. looser[%s]", playerName.c_str( ), areaNumber, looser.c_str( ) );
         } else {
             looser = playerName;
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player[%s] loose the agent that was exploring the area[%d], so he will try to find another area to explore", playerName.c_str( ), areaNumber );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - player[%s] loose the agent that was exploring the area[%d], so he will try to find another area to explore", playerName.c_str( ), areaNumber );
         } // else
 
         if ( looser == this->agent->getPetId( ) ) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - the agent[%s] is the looser, so reset the current exploring area", looser.c_str( ) );
+            logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - the agent[%s] is the looser, so reset the current exploring area", looser.c_str( ) );
             this->exploringArea = NUMBER_OF_AREAS;
         } // if  
     } // if
@@ -1180,7 +1180,7 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
             } // if
         } // for
 
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There are more than one agent expliring the same area, so lets reallocate the looser player" );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There are more than one agent expliring the same area, so lets reallocate the looser player" );
         // there are more than one player exploring the same area.
         // so, lets reallocate the looser player
         unsigned int numberOfExplorers = std::numeric_limits<unsigned int>::max( );
@@ -1192,7 +1192,7 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
                 numberOfExplorers = this->exploringAreas[i].size( );
             } // if
         } // for
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - less crowded area[%d] number of areas[%d]. if ", lessCrowdedAreaIndex, NUMBER_OF_AREAS );
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - less crowded area[%d] number of areas[%d]. if ", lessCrowdedAreaIndex, NUMBER_OF_AREAS );
 
         if ( lessCrowdedAreaIndex != NUMBER_OF_AREAS ) {
             // there is an area to explore
@@ -1215,8 +1215,8 @@ bool ScavengerHuntAgentModeHandler::isAgentNextTo( const std::string& targetId )
             return true;
         } // if
         return false;
-    } catch( LADSUtil::NotFoundException& ex ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no entity identifyed by[%s]", targetId.c_str( ) );
+    } catch( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no entity identifyed by[%s]", targetId.c_str( ) );
         return false;
     } // catch  
 }
@@ -1252,8 +1252,8 @@ void ScavengerHuntAgentModeHandler::setFollowingPosition( void ) {
         output << finalPosition.first << " " << finalPosition.second;
 
         setProperty( "customPath", output.str( ) );
-    } catch( LADSUtil::NotFoundException& ex ) {
-        MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ScavengerHuntAgentModeHandler - There is no entity identifyed by[%s]", getPropertyValue( "customObject" ).c_str( ) );
+    } catch( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - There is no entity identifyed by[%s]", getPropertyValue( "customObject" ).c_str( ) );
     } // catch  
 }
 

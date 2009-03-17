@@ -1,0 +1,58 @@
+#ifndef QUADTREE_H
+#define QUADTREE_H
+
+#include "HPASearch.h"
+#include <boost/shared_ptr.hpp>
+
+namespace Spatial {
+  /**
+   * class QuadTree
+   * Subdivides the grid on a quad tree and builds 
+   * a graph that tepresents the free nodes of the tree
+   */
+  class QuadTree {      
+  public:
+    enum POSITION {
+      TOP_LEFT,
+      TOP_RIGHT,
+      BOTTOM_LEFT,
+      BOTTOM_RIGHT,
+      RIGHT,
+      LEFT,
+      TOP,
+      BOTTOM
+    };
+    
+    QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsigned int clusterSideSize, HPASearch::Graph* graph, QuadTree* parentQuad = 0, GridPoint* currentPosition = 0 );
+    
+    virtual ~QuadTree( void ) { };
+    
+    void connectEdges( void );
+    
+  private:
+    // connect two quads vertices
+    void connectQuads( QuadTree* quad1, QuadTree* quad2, bool vertical );
+
+    // connect the two vertices lists with edges
+    void processVertices( const std::vector<unsigned int>& vertices1, const std::vector<unsigned int>& vertices2 );
+    
+    // return the vertices at POSITION
+    std::vector<unsigned int> getVerticesFrom( POSITION position );
+    
+    // if this quad has a free center position, vertexId will be defined
+    unsigned int vertexId;
+    unsigned int clusterSideSize;
+    // cell positioned at the center of quad
+    GridPoint centerCellPosition;
+    
+    bool hasFreeCenter;
+    
+    std::map<POSITION, boost::shared_ptr<QuadTree> > quads;
+    
+    HPASearch::Graph* graph;
+    HPASearch::Level* level;
+  };
+  
+}; // Spatial
+
+#endif // QUADTREE_H

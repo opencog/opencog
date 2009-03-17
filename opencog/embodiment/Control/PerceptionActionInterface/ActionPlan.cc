@@ -5,10 +5,10 @@
  * Copyright(c), 2007
  */
 
-#include <LADSUtil/platform.h>
-#include <LADSUtil/exceptions.h>
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/platform.h"
+#include "util/exceptions.h"
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include "ActionPlan.h"
 #include "PAIUtils.h"
@@ -22,7 +22,7 @@ using namespace PerceptionActionInterface;
         
 ActionPlan::ActionPlan() {
     PAIUtils::initializeXMLPlatform();
-    this->id = LADSUtil::toString(ULONG_MAX); // invalid id.
+    this->id = opencog::toString(ULONG_MAX); // invalid id.
 }
         
 ActionPlan::ActionPlan(ActionPlanID id){
@@ -49,10 +49,10 @@ ActionPlanID ActionPlan::getID() const {
 //       ...
 //   </action-plan>
 // 
-unsigned int ActionPlan::addAction(const PetAction& action) throw (LADSUtil::InvalidParamException, std::bad_exception) {
+unsigned int ActionPlan::addAction(const PetAction& action) throw (opencog::InvalidParamException, std::bad_exception) {
     
     if (!action.containsValidParameters()) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO,
+        throw opencog::InvalidParamException(TRACE_INFO,
                 "ActionPlan - PetAction with invalid parameters: '%s'", action.getName().c_str());
     }
 
@@ -69,10 +69,10 @@ bool ActionPlan::isSeqNumberValid(unsigned int seqNumber) const {
     return (seqNumber > 0 && seqNumber <= actions.size());
 }
 
-const PetAction& ActionPlan::getAction(unsigned int seqNumber) const throw (LADSUtil::IndexErrorException, std::bad_exception) {
+const PetAction& ActionPlan::getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception) {
     //assert(isSeqNumberValid(seqNumber));
     if (!isSeqNumberValid(seqNumber)) {
-        throw LADSUtil::IndexErrorException(TRACE_INFO, 
+        throw opencog::IndexErrorException(TRACE_INFO, 
                 "ActionPlan - Invalid action sequence number: '%d'.", seqNumber);
     }
     return actions[seqNumber-1];
@@ -171,7 +171,7 @@ bool ActionPlan::hasFailed() const {
  * Private methods used to create XML elements
  * --------------------------------------------
  */
-XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createPetaverseXMLDocument() const throw (LADSUtil::XMLException, std::bad_exception) {
+XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createPetaverseXMLDocument() const throw (opencog::XMLException, std::bad_exception) {
     XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
     XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
     XERCES_CPP_NAMESPACE::XMLString::transcode("http://proxy.esheepco.com/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
@@ -183,7 +183,7 @@ XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createPetaverseXMLDocument() cons
        );
 
     if (!doc){
-        throw LADSUtil::XMLException(TRACE_INFO, "ActionPlan - Error creating DOMDocument.");
+        throw opencog::XMLException(TRACE_INFO, "ActionPlan - Error creating DOMDocument.");
     }
     
     XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
@@ -204,7 +204,7 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionPlan::createActionPlanElement(XERCES_CPP
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     XERCES_CPP_NAMESPACE::XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    XMLCh* idStr = XERCES_CPP_NAMESPACE::XMLString::transcode(LADSUtil::toString(id).c_str());
+    XMLCh* idStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(id).c_str());
     actionPlan->setAttribute(tag, idStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&idStr);
 

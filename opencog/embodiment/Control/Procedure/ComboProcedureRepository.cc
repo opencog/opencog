@@ -1,8 +1,8 @@
 #include "ComboProcedureRepository.h"
 #include <fstream>
 
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include <opencog/atomspace/TLB.h>
 
@@ -45,12 +45,12 @@ unsigned int ComboProcedureRepository::loadFromStream(istream& in) {
       ComboProcedure* cp = new ComboProcedure(*pc);
       add(*cp);
       ++n;
-      MAIN_LOGGER.log(LADSUtil::Logger::FINE, 
+      logger().log(opencog::Logger::FINE, 
 		      "ComboProcedureRepository - Loaded '%s' with arity '%d'.", 
 		      pc->get_name().c_str(), pc->arity());
       
     } else {
-      MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+      logger().log(opencog::Logger::ERROR, 
 		      "ComboProcedureRepository - Error parsing combo function.");
     }
     delete(pc);
@@ -64,7 +64,7 @@ unsigned int ComboProcedureRepository::loadFromStream(istream& in) {
       stringstream ss;
       toStream(ss, true);
       print(true);
-      LADSUtil::cassert(TRACE_INFO, type_check_success,
+      opencog::cassert(TRACE_INFO, type_check_success,
 	      "Type Checking Error, one or more function are ill formed. See the list of function and there types :\n%s", ss.str().c_str());
     }
   }
@@ -77,7 +77,7 @@ bool ComboProcedureRepository::contains(const std::string& name) const {
 
 const ComboProcedure& ComboProcedureRepository::get(const std::string& name) const {
   procedure_call pc=instance(name);
-  LADSUtil::cassert(TRACE_INFO, pc,
+  opencog::cassert(TRACE_INFO, pc,
 	  "No ComboProcedure matches that name, you cannot get it");
   return dynamic_cast<const ComboProcedure&>(*pc);
 }
@@ -100,7 +100,7 @@ const char* ComboProcedureRepository::getId() const {
 }
 
 void ComboProcedureRepository::saveRepository(FILE* dump) const {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Saving %s (%ld)\n", getId(), ftell(dump));
+  logger().log(opencog::Logger::DEBUG, "Saving %s (%ld)\n", getId(), ftell(dump));
   fprintf(dump, "%d", _repo.size());
   for (str_proc_map_const_it itr = _repo.begin(); itr != _repo.end(); itr++) {
     const string &name = itr->first; 
@@ -109,8 +109,8 @@ void ComboProcedureRepository::saveRepository(FILE* dump) const {
     fwrite(name.c_str(), sizeof(char), nameLength+1, dump);
     int arity = itr->second->arity();
     fwrite(&arity, sizeof(int), 1, dump);
-    string treeStr = LADSUtil::toString(itr->second->get_body());
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "name: %s\ntree: %s\n", name.c_str(), treeStr.c_str()); 
+    string treeStr = opencog::toString(itr->second->get_body());
+    logger().log(opencog::Logger::FINE, "name: %s\ntree: %s\n", name.c_str(), treeStr.c_str()); 
     int treeStrLength = treeStr.length();  
     fwrite(&treeStrLength, sizeof(int), 1, dump);
     fwrite(treeStr.c_str(), sizeof(char), treeStrLength+1, dump);
@@ -118,7 +118,7 @@ void ComboProcedureRepository::saveRepository(FILE* dump) const {
 }
 
 void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* conv) {
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "Loading %s (%ld)\n", getId(), ftell(dump));
+  logger().log(opencog::Logger::DEBUG, "Loading %s (%ld)\n", getId(), ftell(dump));
   char buffer[1<<16];
 
   bool tc = static_cast<bool>(atoi(MessagingSystem::NetworkElement::parameters.get("TYPE_CHECK_LOADING_PROCEDURES").c_str()));
@@ -138,7 +138,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
     int treeStrLength; 
     fread(&treeStrLength, sizeof(int), 1, dump);  
     fread(buffer, sizeof(char), treeStrLength+1, dump);
-    MAIN_LOGGER.log(LADSUtil::Logger::FINE, "name: %s\ntree: %s\n", name.c_str(), buffer); 
+    logger().log(opencog::Logger::FINE, "name: %s\ntree: %s\n", name.c_str(), buffer); 
     std::stringstream ss(buffer);
     combo_tree tr;
     ss >> tr;
@@ -156,7 +156,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
       stringstream ss;
       toStream(ss, true);
       print(true);
-      LADSUtil::cassert(TRACE_INFO, type_check_success,
+      opencog::cassert(TRACE_INFO, type_check_success,
 	      "Type Checking Error, one or more function are ill formed. See the list of function and there types :\n%s", ss.str().c_str());
     }
   }

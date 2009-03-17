@@ -7,6 +7,7 @@ ADD_SUBDIRECTORY (PredicateUpdaters)
 
 INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+    ${OPENCOG_SOURCE_DIR}/opencog
 )
 
 ADD_LIBRARY (Control

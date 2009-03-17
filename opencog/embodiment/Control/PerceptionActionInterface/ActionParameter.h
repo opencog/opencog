@@ -161,7 +161,7 @@ class ActionParameter {
         const Vector& getVectorValue() const;
         const Entity& getEntityValue() const;
         
-        std::string stringRepresentation() const throw (LADSUtil::RuntimeException, std::bad_exception);
+        std::string stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception);
         
         /**
          * Create a pvp xml element in the DOMDocument XML document. An action parameter element has the form:

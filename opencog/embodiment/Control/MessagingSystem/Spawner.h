@@ -12,9 +12,9 @@
 
 #include <SystemParameters.h>
 #include <exception>
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 #include "NetworkElement.h"
 
 namespace MessagingSystem {
@@ -33,7 +33,7 @@ class Spawner : public NetworkElement {
 
         ~Spawner();
         Spawner(const Control::SystemParameters &params, const std::string &id, 
-                const std::string &ip, int port) throw (LADSUtil::InvalidParamException, std::bad_exception);
+                const std::string &ip, int port) throw (opencog::InvalidParamException, std::bad_exception);
 
         // ***********************************************/
         // Overrides NetworkElement interface

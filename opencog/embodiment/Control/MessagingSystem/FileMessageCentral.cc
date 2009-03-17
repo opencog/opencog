@@ -8,7 +8,7 @@
 
 #include "stdio.h"
 #include "stdlib.h"
-#include <LADSUtil/Logger.h>
+#include "util/Logger.h"
 
 using namespace MessagingSystem;
 
@@ -29,12 +29,12 @@ FileMessageCentral::FileMessageCentral(const Control::SystemParameters &params) 
     if (user_index != std::string::npos) {
 	    //const char* username = getlogin();
 	    const char* username = getenv("LOGNAME");
-	    MAIN_LOGGER.log(Util::Logger::WARNING, "FileMessageCentral - processing $USER flag => username = %s\n", username);
+	    logger().log(Util::Logger::WARNING, "FileMessageCentral - processing $USER flag => username = %s\n", username);
 	    if (username == NULL) username = "unknown_user";
    	    dir.replace(user_index, strlen(USER_FLAG), username);  
 	}
     */
-	MAIN_LOGGER.log(Util::Logger::WARNING, "FileMessageCentral - creating message dir: %s\n", dir.c_str());
+	logger().log(Util::Logger::WARNING, "FileMessageCentral - creating message dir: %s\n", dir.c_str());
    	this->directory = dir; 
 	
 	lockQueue();

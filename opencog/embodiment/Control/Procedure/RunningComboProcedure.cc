@@ -4,24 +4,24 @@
 #include <sstream>
 #include <map>
 #include <opencog/atomspace/TLB.h>
-#include <LADSUtil/functional.h>
+#include "util/functional.h"
 #include "NetworkElement.h"
 #include "pet_builtin_action.h"
 #include "WorldWrapperUtil.h"
 
-#include <ComboReduct/combo/eval.h>
+#include "comboreduct/combo/eval.h"
 
 namespace Procedure {
 
     using namespace combo;
     using namespace Spatial;
-    using namespace LADSUtil;
+    using namespace opencog;
     using namespace boost::assign;
     using namespace PerceptionActionInterface;
 
     RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
 						 const combo::combo_tree& tr,
-						 LADSUtil::RandGen& rng,
+						 opencog::RandGen& rng,
 						 const std::vector<combo::vertex>& arguments,						
 						 bool dsdp, combo::variable_unifier& vu) 
       : _ww(ww), _tr(tr),_it(_tr.begin()), _rng(rng), _hasBegun(false),
@@ -41,7 +41,7 @@ namespace Procedure {
 	stream << "cannot copy a combo procedure (" << _tr 
 	       << ") that has begun running!" << std::endl;
 	
-	throw LADSUtil::FatalErrorException(TRACE_INFO, "RunningComboProcedure - %s",
+	throw opencog::FatalErrorException(TRACE_INFO, "RunningComboProcedure - %s",
 				  stream.str().c_str());
       }
 
@@ -50,7 +50,7 @@ namespace Procedure {
   
     vertex RunningComboProcedure::eval_action(combo_tree::iterator it, combo::variable_unifier& vu) {
       //TODO
-      LADSUtil::cassert(TRACE_INFO, false, "Not implemented yet");
+      opencog::cassert(TRACE_INFO, false, "Not implemented yet");
       return vertex();
     }
 
@@ -61,11 +61,11 @@ namespace Procedure {
         return *it;
     }
 
-    void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it) throw (LADSUtil::ComboException, LADSUtil::AssertionException, std::bad_exception) {
+    void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception) {
         
         // sanity checks
         if(!is_procedure_call(*it)){
-             throw LADSUtil::ComboException(TRACE_INFO,
+             throw opencog::ComboException(TRACE_INFO,
                    "RunningComboProcedure - combo_tree node does not represent a combo procedure call.");
         }
 	procedure_call pc = get_procedure_call(*it);
@@ -75,17 +75,17 @@ namespace Procedure {
 	                          //input arguments
 	combo::arity_t exp_arity = combo::abs_min_arity(ar);
 	arity_t ap_args = it.number_of_children();
-	//LADSUtil::cassert(TRACE_INFO, ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
+	//opencog::cassert(TRACE_INFO, ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
 	if(fixed_arity) {
 	  if(ap_args != ar){
-            throw LADSUtil::ComboException(TRACE_INFO,
+            throw opencog::ComboException(TRACE_INFO,
 					   "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_chindren: %d",
 					   get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
 	  }
 	}
 	else {
 	  if(ap_args < exp_arity) {
-            throw LADSUtil::ComboException(TRACE_INFO,
+            throw opencog::ComboException(TRACE_INFO,
 					   "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_chindren: %d",
 					   get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
 	  }
@@ -123,10 +123,10 @@ namespace Procedure {
     }
 
     void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
-                                              LADSUtil::AssertionException,
+                                              opencog::AssertionException,
                                               std::bad_exception) {
         //debug log
-        if(MAIN_LOGGER.getLevel() >= LADSUtil::Logger::DEBUG) {
+        if(logger().getLevel() >= opencog::Logger::DEBUG) {
             stringstream tr_ss;
             tr_ss << _tr;
             stringstream it_ss;
@@ -134,7 +134,7 @@ namespace Procedure {
             string message("RunningComboProcedure::cycle() with _tr = ");
             message += tr_ss.str() + string("and _it = ") + it_ss.str();
             //std::cout << message << std::endl;
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, message.c_str());
+            logger().log(opencog::Logger::DEBUG, message.c_str());
         }
     	//~debug log
 
@@ -160,12 +160,12 @@ namespace Procedure {
             }
         }
 
-        //MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "pop");
+        //logger().log(opencog::Logger::ERROR, "pop");
         do {
             sib_it parent=_tr.parent(_it);
-            //MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "ptp");
+            //logger().log(opencog::Logger::ERROR, "ptp");
             if (*_it==id::action_while) {
-            	LADSUtil::cassert(TRACE_INFO, _it.number_of_children()==1);
+            	opencog::cassert(TRACE_INFO, _it.number_of_children()==1);
                 if (isFailed()) {
                     _failed=false;
                     moveOn();
@@ -176,7 +176,7 @@ namespace Procedure {
             } else if (_tr.is_valid(parent) && *parent==id::sequential_and &&
                     isFailed()) {
                 //if the last plan failed and we need to abort a sequence
-                MAIN_LOGGER.log(LADSUtil::Logger::WARNING, 
+                logger().log(opencog::Logger::WARNING, 
                                 "RunningComboProc - Previous plan failed..."
                                 " aborting sequence.");
                 _it=parent.last_child();
@@ -184,7 +184,7 @@ namespace Procedure {
 
             } else if (*_it==id::action_action_if) {
                 //need to eval an action_action_if's first child
-            	LADSUtil::cassert(TRACE_INFO, _it.number_of_children()==3);
+            	opencog::cassert(TRACE_INFO, _it.number_of_children()==3);
                 _it=_it.begin();
 
             } else if (*_it==id::action_boolean_if) {
@@ -199,14 +199,14 @@ namespace Procedure {
                         stream << "Conditional should be true or false. Got '" 
                                << res << "', failing" << std::endl;
  
-                        throw LADSUtil::ComboException(TRACE_INFO,
+                        throw opencog::ComboException(TRACE_INFO,
                                                        "RunningComboProc - %s.",
                                                        stream.str().c_str());
                     }
 
                 } catch(...) { 
                     //some kind of runtime exception - halt execution and
-                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                    logger().log(opencog::Logger::ERROR,
                                     "RunningComboProc - action_boolean_if failure.");
                     _failed=true;
                     _it=_tr.end();
@@ -222,14 +222,14 @@ namespace Procedure {
                         if (res==id::logical_true) {
                             _it=++_it.begin();
                         } else {
-                            LADSUtil::cassert(TRACE_INFO,
+                            opencog::cassert(TRACE_INFO,
                                               res==id::logical_false);
                             moveOn();
                             return;
                         }
                     } catch(...) { 
                         //some kind of runtime exception - halt execution and
-                        MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                        logger().log(opencog::Logger::ERROR,
                                         "RunningComboProc - boolean_while failure.");
                         _failed=true;
                         _it=_tr.end();
@@ -248,14 +248,14 @@ namespace Procedure {
                 _tr=combo::combo_tree(*_it);
                 _it=_tr.begin();
 
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR,
+                logger().log(opencog::Logger::ERROR,
                                 "RunningComboProc - Tree node to exec: action_failure.");
 
                 _failed=true;
                 moveOn();
 
             } else if (*_it==id::return_success) {
-            	LADSUtil::cassert(TRACE_INFO, _failed==false || boost::logic::indeterminate(_failed));
+            	opencog::cassert(TRACE_INFO, _failed==false || boost::logic::indeterminate(_failed));
                 _it=_tr.end();
                 return;
 
@@ -263,12 +263,12 @@ namespace Procedure {
                 if (_stack.empty() || _stack.top().first!=_it) {
                     try {
                         vertex res=eval_throws(_rng, _it.begin(),this, _vu);
-                        LADSUtil::cassert(TRACE_INFO, is_contin(res));
+                        opencog::cassert(TRACE_INFO, is_contin(res));
                         _stack.push(make_pair(_it,get_contin(res)));
                     } catch(...) {
                         //some kind of runtime exception - halt execution and
-                        MAIN_LOGGER.log(
-                                LADSUtil::Logger::ERROR, "RunningComboProc - repeat_n failure.");
+                        logger().log(
+                                opencog::Logger::ERROR, "RunningComboProc - repeat_n failure.");
                         _failed=true;
                         _it=_tr.end();
                         return;
@@ -277,7 +277,7 @@ namespace Procedure {
                 if (get_contin(_stack.top().second)>=0.99) {
                     _it=_it.last_child();
                 } else {
-                	LADSUtil::cassert(TRACE_INFO, !_stack.empty());
+                	opencog::cassert(TRACE_INFO, !_stack.empty());
                     _stack.pop();
                     moveOn();
                 }
@@ -300,8 +300,8 @@ namespace Procedure {
                         //first evaluate the children
                         *sib=eval_throws(_rng, sib,this, _vu);
                         if (*sib==id::null_obj) { //just fail
-                            MAIN_LOGGER.log(
-                                    LADSUtil::Logger::ERROR, "RunningComboProc - Sibling is null_obj.");
+                            logger().log(
+                                    opencog::Logger::ERROR, "RunningComboProc - Sibling is null_obj.");
 
                             _failed=true;
                             moveOn();
@@ -341,8 +341,8 @@ namespace Procedure {
                     expand_procedure_call(_it);
                     continue;
 
-                }catch(LADSUtil::ComboException& e){
-                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RunningComboProc - Exception catch when expanding procedure call.");
+                }catch(opencog::ComboException& e){
+                    logger().log(opencog::Logger::ERROR, "RunningComboProc - Exception catch when expanding procedure call.");
                     // failed, cancel execution
                     _failed=true;
                     _it=_tr.end();
@@ -350,14 +350,14 @@ namespace Procedure {
                 }
 
             } else if (is_argument(*_it)) {
-            	LADSUtil::cassert(TRACE_INFO, false);
+            	opencog::cassert(TRACE_INFO, false);
 
             } else {
                 
                 if (_hasBegun) {
                     std::stringstream stream (std::stringstream::out);
                     stream << "Type error at '" << combo::combo_tree(_it) << "', failing" << std::endl;
-                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RunningComboProcedure - %s.", 
+                    logger().log(opencog::Logger::ERROR, "RunningComboProcedure - %s.", 
                     stream.str().c_str());
 
                     _failed=true;
@@ -373,7 +373,7 @@ namespace Procedure {
                 }
             }
         } while (_tr.is_valid(_it));
-        //MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "popl");
+        //logger().log(opencog::Logger::ERROR, "popl");
     }
 
     bool RunningComboProcedure::execSeq(sib_it from,sib_it to, combo::variable_unifier& vu) {
@@ -444,8 +444,8 @@ namespace Procedure {
 
             // catch all exceptions here since the treatment will be the same for
             // them, i.e., action execution failed.
-        } catch (LADSUtil::RuntimeException& e) {
-            MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RunningComboProc - Runtime exception catch when sendSequential_and.");
+        } catch (opencog::RuntimeException& e) {
+            logger().log(opencog::Logger::ERROR, "RunningComboProc - Runtime exception catch when sendSequential_and.");
             _planSent = false;
             _failed = true;
         }
@@ -481,7 +481,7 @@ namespace Procedure {
                     _it=parent;
                 }
             } else if (*parent==id::action_boolean_if) {
-            	LADSUtil::cassert(TRACE_INFO, _it!=parent.begin(),
+            	opencog::cassert(TRACE_INFO, _it!=parent.begin(),
 			"we must be in an action branch");
                 _it=parent;
             } else if (*parent==id::action_while) {
@@ -492,23 +492,23 @@ namespace Procedure {
                 _stack.top().second=get_contin(_stack.top().second)-1;
                 return;
             } else if (*parent==id::boolean_while) {
-            	LADSUtil::cassert(TRACE_INFO, _it!=parent.begin()); //we must be in an action branch
-            	LADSUtil::cassert(TRACE_INFO, _it==parent.last_child());
+            	opencog::cassert(TRACE_INFO, _it!=parent.begin()); //we must be in an action branch
+            	opencog::cassert(TRACE_INFO, _it==parent.last_child());
                 _it=parent;
                 return;
             } else if (*parent==id::action_while) {
-            	LADSUtil::cassert(TRACE_INFO, _it==parent.begin());
+            	opencog::cassert(TRACE_INFO, _it==parent.begin());
                 _it=parent;
                 if(!isFailed()) //back for another action_while loop
                     return;
             } else if (*parent==id::action_not) {
-            	LADSUtil::cassert(TRACE_INFO, _it==parent.begin());
+            	opencog::cassert(TRACE_INFO, _it==parent.begin());
 		_failed = !isFailed();
 		_it=parent;
 	    }
 
-            LADSUtil::cassert(TRACE_INFO, !is_procedure_call(*parent));
-            LADSUtil::cassert(TRACE_INFO, _it!=tmp_it,
+            opencog::cassert(TRACE_INFO, !is_procedure_call(*parent));
+            opencog::cassert(TRACE_INFO, _it!=tmp_it,
                     "The loop go infinitly other wise, there must be a bug in that method or somewhere else");
         }
         //we are at the root and have executed it already - invalidate the iterator

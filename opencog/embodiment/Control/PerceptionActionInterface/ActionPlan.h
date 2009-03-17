@@ -60,7 +60,7 @@ class ActionPlan {
          * @return The position of the added action in this plan.
          * @throws InvalidParamException if the action contains invalid parameters for its type.
          */
-        unsigned int addAction(const PetAction& action) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        unsigned int addAction(const PetAction& action) throw (opencog::InvalidParamException, std::bad_exception);
         
         /**
          * Return true iff there is no actions in the ActionPlan
@@ -75,7 +75,7 @@ class ActionPlan {
         /**
          * Gets the action of this action plan, given its sequence number
          */
-        const PetAction& getAction(unsigned int seqNumber) const throw (LADSUtil::IndexErrorException, std::bad_exception);
+        const PetAction& getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception);
         
         /**
          * Generates the corresponding PVP's message in XML format for this action plan
@@ -145,7 +145,7 @@ class ActionPlan {
          * 
          * @return The DOMDocument just created. 
          */
-        XERCES_CPP_NAMESPACE::DOMDocument* createPetaverseXMLDocument() const throw (LADSUtil::XMLException, std::bad_exception);
+        XERCES_CPP_NAMESPACE::DOMDocument* createPetaverseXMLDocument() const throw (opencog::XMLException, std::bad_exception);
         
         /**
          * Create a action-plan element in the DOMDocument XML document. An

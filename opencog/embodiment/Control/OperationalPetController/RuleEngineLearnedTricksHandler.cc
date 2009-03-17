@@ -1,5 +1,5 @@
 #include "RuleEngineLearnedTricksHandler.h"
-#include <LADSUtil/mt19937ar.h>
+#include "util/mt19937ar.h"
 
 #include <limits>
 
@@ -19,7 +19,7 @@ RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OPC* opc ) : opc
   } else {
     randSeed = time(NULL);
   } // else
-  this->randGen = new LADSUtil::MT19937RandGen( randSeed );  
+  this->randGen = new opencog::MT19937RandGen( randSeed );  
 
   // create a concept node for LEARNED_TRICK  
   this->learnedTrickNode = AtomSpaceUtil::addNode(*atomSpace, CONCEPT_NODE, LEARNED_TRICK_NODE_NAME, true);
@@ -43,7 +43,7 @@ void RuleEngineLearnedTricksHandler::addLearnedSchema( const std::string& schema
   //this->atomSpace->setSTI( inheritanceLink, std::numeric_limits<short>::max() );
 }
 
-void RuleEngineLearnedTricksHandler::selectLearnedTrick( std::string& schemaName, std::set<std::string>& arguments ) throw(LADSUtil::NotFoundException) {
+void RuleEngineLearnedTricksHandler::selectLearnedTrick( std::string& schemaName, std::set<std::string>& arguments ) throw(opencog::NotFoundException) {
   
   HandleSeq inheritance;
   inheritance.push_back( this->learnedTrickNode );
@@ -62,7 +62,7 @@ void RuleEngineLearnedTricksHandler::selectLearnedTrick( std::string& schemaName
   
   if ( stiHandles.size( ) == 0 ) {
     this->latestSelectedTrick = "";
-    throw LADSUtil::NotFoundException( TRACE_INFO,
+    throw opencog::NotFoundException( TRACE_INFO,
      "RuleEngineLearnedTricksHandler - There is no learned tricks at this moment" );    
   } // if
   
@@ -77,7 +77,7 @@ void RuleEngineLearnedTricksHandler::selectLearnedTrick( std::string& schemaName
   
   schemaName = this->atomSpace->getName(it->second);
   this->latestSelectedTrick = schemaName;
-  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RuleEngineLearnedTricksHandler - selected schema %s ", schemaName.c_str( ) );
+  logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - selected schema %s ", schemaName.c_str( ) );
   // TODO: restore parameters
 }
 
@@ -97,11 +97,11 @@ void RuleEngineLearnedTricksHandler::rewardSchema( std::string& schemaName ) {
       if ( it != punishedTricks.end( ) ) {
 	punishedTricks.erase( it );
       } // if
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RuleEngineLearnedTricksHandler - rewarded schema: %s | current sti: %d ", schemaName.c_str( ), this->atomSpace->getSTI( link ) );
+      logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - rewarded schema: %s | current sti: %d ", schemaName.c_str( ), this->atomSpace->getSTI( link ) );
       return;
     } // if
   } // if
-  MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RuleEngineLearnedTricksHandler - there is no schema named %s to reward", schemaName.c_str( ) );
+  logger().log(opencog::Logger::ERROR, "RuleEngineLearnedTricksHandler - there is no schema named %s to reward", schemaName.c_str( ) );
   
 }
 
@@ -119,11 +119,11 @@ void RuleEngineLearnedTricksHandler::punishSchema( std::string& schemaName ) {
 
       punishedTricks.insert( link );
 
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RuleEngineLearnedTricksHandler - punished schema: %s | current sti: %d ", schemaName.c_str( ), this->atomSpace->getSTI( link ) );
+      logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - punished schema: %s | current sti: %d ", schemaName.c_str( ), this->atomSpace->getSTI( link ) );
       return;
     } // if
   } // if
-  MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RuleEngineLearnedTricksHandler - there is no schema named %s to punish", schemaName.c_str( ) );
+  logger().log(opencog::Logger::ERROR, "RuleEngineLearnedTricksHandler - there is no schema named %s to punish", schemaName.c_str( ) );
 }
 
 void RuleEngineLearnedTricksHandler::update( void ) {
@@ -138,7 +138,7 @@ void RuleEngineLearnedTricksHandler::update( void ) {
     bool reward = false;
     bool punish = false;
 
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RuleEngineLearnedTricksHandler - Timestamps: current(%ld) reward(%ld) punishment(%ld)", currentTimestamp, rewardTimestamp, punishmentTimestamp );
+    logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - Timestamps: current(%ld) reward(%ld) punishment(%ld)", currentTimestamp, rewardTimestamp, punishmentTimestamp );
 
     if ( rewardTimestamp != Pet::UNDEFINED_TIMESTAMP && 
 	 ( currentTimestamp - rewardTimestamp ) < 5000 ) { // 5 seconds
@@ -173,7 +173,7 @@ void RuleEngineLearnedTricksHandler::update( void ) {
 
     Handle schemaHandle = atomSpace->getOutgoing(linkHandle,1);
     if ( schemaHandle == Handle::UNDEFINED ) {
-      MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "RuleEngineLearnedTricksHandler - undefined schema" );
+      logger().log(opencog::Logger::ERROR, "RuleEngineLearnedTricksHandler - undefined schema" );
       continue;
     } // if
 
@@ -181,7 +181,7 @@ void RuleEngineLearnedTricksHandler::update( void ) {
     if ( it == punishedTricks.end( ) &&  this->atomSpace->getName(schemaHandle) != latestSelectedTrick ) {
       addToSTIValue( linkHandle, NOT_SELECTED_VALUE );
 
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "RuleEngineLearnedTricksHandler - updated schema: %s | current sti: %d ",  this->atomSpace->getName(schemaHandle).c_str( ), this->atomSpace->getSTI( linkHandle ) );
+      logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - updated schema: %s | current sti: %d ",  this->atomSpace->getName(schemaHandle).c_str( ), this->atomSpace->getSTI( linkHandle ) );
     } // if
     if ( this->atomSpace->getSTI( linkHandle ) > atoi( MessagingSystem::NetworkElement::parameters.get("ATOM_TABLE_LOWER_STI_VALUE").c_str( ) ) ) {
       ++this->numberOfLearnedTricks;

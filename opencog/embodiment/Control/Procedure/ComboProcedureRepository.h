@@ -3,8 +3,8 @@
 
 #include "ComboProcedure.h"
 #include <opencog/atomspace/SavableRepository.h>
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/combo/procedure_repository.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/procedure_repository.h"
 
 #include <string>
 #include <map>

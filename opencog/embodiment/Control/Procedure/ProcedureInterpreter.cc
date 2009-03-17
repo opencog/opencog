@@ -1,5 +1,5 @@
-#include <LADSUtil/mt19937ar.h>
-#include <LADSUtil/exceptions.h>
+#include "util/mt19937ar.h"
+#include "util/exceptions.h"
 
 #include "ProcedureInterpreter.h"
 #include "ComboProcedure.h"
@@ -54,8 +54,8 @@ namespace Procedure {
         } else {
             rand_seed = time(NULL);
         }
-        rng = new LADSUtil::MT19937RandGen(rand_seed);
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, "Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
+        rng = new opencog::MT19937RandGen(rand_seed);
+        logger().log(opencog::Logger::INFO, "Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
         comboInterpreter = new ComboInterpreter(*_pai,*rng);
         comboSelectInterpreter = new ComboSelectInterpreter(*_pai, *rng);
         _next = 0;
@@ -69,16 +69,16 @@ namespace Procedure {
 
     RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p, const std::vector<combo::vertex>& arguments) { 
 
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+        logger().log(opencog::Logger::INFO, 
                         "ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
         
         if (p.getType() == COMBO) { 
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ProcedureInterpreter - Running a combo procedure.");
             RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
             _map.insert(make_pair(++_next,rcpID)); 
         } else if(p.getType() == COMBO_SELECT){
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ProcedureInterpreter - Running a combo select procedure.");
             const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
             RunningProcedureId rcpID =
@@ -88,7 +88,7 @@ namespace Procedure {
             _map.insert(make_pair(++_next,rcpID)); 
 
         } else if (p.getType() == BUILT_IN) {
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ProcedureInterpreter - Running a builtin procedure.");
             RunningBuiltInProcedure rbp = RunningBuiltInProcedure(*_pai, (const BuiltInProcedure&) p, arguments); 
             // For now, runs built-in procedure immediately, since they are atomic 
@@ -96,23 +96,23 @@ namespace Procedure {
             rbp.run();            
             _map.insert(make_pair(++_next,rbp)); 
         } else {
-            LADSUtil::cassert(TRACE_INFO, false, "ProcedureInterpreter -  unknown procedure type"); 
+            opencog::cassert(TRACE_INFO, false, "ProcedureInterpreter -  unknown procedure type"); 
         }
         return _next;
     }
     
     RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p, const std::vector<combo::vertex>& arguments, combo::variable_unifier& vu) {
-        MAIN_LOGGER.log(LADSUtil::Logger::INFO, 
+        logger().log(opencog::Logger::INFO, 
                         "ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
         
         if (p.getType() == COMBO) { 
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ProcedureInterpreter - Running a combo procedure.");
             RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments, vu);
             _map.insert(make_pair(++_next,rcpID));
 
         } else if(p.getType() == COMBO_SELECT){
-            MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+            logger().log(opencog::Logger::DEBUG, 
                             "ProcedureInterpreter - Running a combo select procedure.");
             const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
             RunningProcedureId rcpID = comboSelectInterpreter->runProcedure(procedure.getFirstScript(), 
@@ -121,13 +121,13 @@ namespace Procedure {
             _map.insert(make_pair(++_next,rcpID));
 
         } else {
-        	LADSUtil::cassert(TRACE_INFO, false, "ProcedureInterpreter - Only combo procedures accept variable unifier parameters."); 
+        	opencog::cassert(TRACE_INFO, false, "ProcedureInterpreter - Only combo procedures accept variable unifier parameters."); 
         }
         return _next;
     }
     
     bool ProcedureInterpreter::isFinished(RunningProcedureID id) const { 
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "ProcedureInterpreter - isFinished(%lu).", id);
+        logger().log(opencog::Logger::FINE, "ProcedureInterpreter - isFinished(%lu).", id);
         bool result = true;
         Map::const_iterator it=_map.find(id);
         if (it != _map.end()) { 
@@ -144,13 +144,13 @@ namespace Procedure {
                 }
             }
         }
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ProcedureInterpreter - isFinished(%lu)? Result: %d.",
+        logger().log(opencog::Logger::DEBUG, "ProcedureInterpreter - isFinished(%lu)? Result: %d.",
                         id, result);
 	return result;
     }
     
     bool ProcedureInterpreter::isFailed(RunningProcedureID id) const { 
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "ProcedureInterpreter - isFailed(%lu).", id);
+        logger().log(opencog::Logger::FINE, "ProcedureInterpreter - isFailed(%lu).", id);
         bool result = false; 
         Map::const_iterator it=_map.find(id);
         if (it != _map.end()) {
@@ -169,15 +169,15 @@ namespace Procedure {
         } else {
             result = (_failed.find(id)!=_failed.end());
         }
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "ProcedureInterpreter - isFailed(%lu)? Result: %d.",
+        logger().log(opencog::Logger::DEBUG, "ProcedureInterpreter - isFailed(%lu)? Result: %d.",
                         id, result);
 	return result;
     }
     
     combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id) {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "ProcedureInterpreter - getResult(%lu).", id);
-        LADSUtil::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
-        LADSUtil::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
+        logger().log(opencog::Logger::FINE, "ProcedureInterpreter - getResult(%lu).", id);
+        opencog::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
+        opencog::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
         
         combo::vertex result = combo::id::action_success;
         Map::const_iterator it=_map.find(id);
@@ -200,7 +200,7 @@ namespace Procedure {
 
         } else {
             ResultMap::iterator it = _resultMap.find(id);
-            LADSUtil::cassert(TRACE_INFO, it != _resultMap.end(), 
+            opencog::cassert(TRACE_INFO, it != _resultMap.end(), 
                     "ProcedureInterpreter - Cannot find result for procedure '%d'.", id);
             result= it->second; 
         }
@@ -208,16 +208,16 @@ namespace Procedure {
     }
     
     combo::variable_unifier& ProcedureInterpreter::getUnifierResult(RunningProcedureID id){
-        LADSUtil::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
-        LADSUtil::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
+        opencog::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
+        opencog::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
         UnifierResultMap::iterator it = _unifierResultMap.find(id);
-        LADSUtil::cassert(TRACE_INFO, it != _unifierResultMap.end(), 
+        opencog::cassert(TRACE_INFO, it != _unifierResultMap.end(), 
                 "ProcedureInterpreter - Cannot find unifier result for procedure '%d'.", id);
         return it->second; 
     }
 
     void ProcedureInterpreter::stopProcedure(RunningProcedureID id) {
-        MAIN_LOGGER.log(LADSUtil::Logger::FINE, "ProcedureInterpreter - stopProcedure(%lu).", id);
+        logger().log(opencog::Logger::FINE, "ProcedureInterpreter - stopProcedure(%lu).", id);
         Map::iterator it=_map.find(id);
         if (it != _map.end()) {
             RunningProcedureId* rpId = boost::get<RunningProcedureId>(&(it->second)); 

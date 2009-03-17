@@ -14,15 +14,15 @@
 ***/
 #include "PAI.h"
 
-#include <ComboReduct/combo/vertex.h>
-#include <ComboReduct/combo/type_tree.h>
-#include <ComboReduct/combo/eval.h>
+#include "comboreduct/combo/vertex.h"
+#include "comboreduct/combo/type_tree.h"
+#include "comboreduct/combo/eval.h"
 
 #include <stack>
 #include <exception>
 #include <boost/logic/tribool.hpp>
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 #include "WorldWrapper.h"
 
 namespace Procedure {
@@ -51,7 +51,7 @@ namespace Procedure {
 
     //construct an rp from a worldwrapper and a tree
     RunningComboProcedure(WorldWrapperBase& ww, const combo::combo_tree& tr,
-			  LADSUtil::RandGen& rng,
+			  opencog::RandGen& rng,
 			  const std::vector<combo::vertex>& arguments,
 			  bool doesSendDefinitePlan = true,
 			  combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
@@ -62,7 +62,7 @@ namespace Procedure {
     //each call to cycle executes a single action plan (if ready)
     //throws if execution of the action plan (PAI::sendActionPlan(ActionPlanID)) fails
     //TODO : above is not true anymore, find the equivalent
-    void cycle() throw(ActionPlanSendingFailure, LADSUtil::AssertionException, std::bad_exception);
+    void cycle() throw(ActionPlanSendingFailure, opencog::AssertionException, std::bad_exception);
 
     //terminate - prevent future plans from being evaluated,
     //sets result to null_vertex - note that this is not the same as failure
@@ -84,7 +84,7 @@ namespace Procedure {
 
 /*      stringstream ss;
       ss << _tr;
-      MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+      logger().log(opencog::Logger::DEBUG, 
       "RunningComboProcedure - '%s' is_valid '%s', has begun '%s', plan sent '%s', plan finished '%s'", 
       ss.str().c_str(), _tr.is_valid(_it)?"true":"false", _hasBegun?"true":"false", _planSent?"true":"false", _ww.isPlanFinished()?"true":"false");
 
@@ -104,7 +104,7 @@ namespace Procedure {
     // - procedure execution is finished (checked by isFinished() method)
     // returns null_procedure if execution was stopped in the middle
     combo::vertex getResult() {
-      LADSUtil::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+      opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
       if (_hasBegun)
           return isFailed()?combo::id::action_failure:combo::id::action_success;
       if (_tr.size()==1)
@@ -113,7 +113,7 @@ namespace Procedure {
     }
     
     combo::variable_unifier& getUnifierResult(){
-    	LADSUtil::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+    	opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
     	return _vu;
     }
     
@@ -131,7 +131,7 @@ namespace Procedure {
 		//conditional node itself indicates that the condition branch
 		//has not yet been evaluated
 
-    LADSUtil::RandGen& _rng; 
+    opencog::RandGen& _rng; 
 
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
@@ -154,7 +154,7 @@ namespace Procedure {
     void moveOn();
 
     //for evaluating procedures inplace
-    void expand_procedure_call(combo::combo_tree::iterator) throw (LADSUtil::ComboException, LADSUtil::AssertionException, std::bad_exception);
+    void expand_procedure_call(combo::combo_tree::iterator) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
 
   private:

@@ -1,5 +1,5 @@
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/Logger.h"
+#include "util/StringManipulator.h"
 
 #include "PetActionSchema.h"
 #include "PVPXmlConstants.h"
@@ -8,7 +8,7 @@ using namespace Procedure;
 using namespace PerceptionActionInterface; 
 
 PetActionSchema::PetActionSchema(PAI& _pai, const ActionType& _actionType) : pai(_pai), actionType(_actionType) {
-    name =  LADSUtil::StringManipulator::toUpper(actionType.getName());
+    name =  opencog::StringManipulator::toUpper(actionType.getName());
 
     minArity = actionType.getMandatoryParamSize();
     optionalArity = actionType.getOptionalParamSize();
@@ -51,12 +51,12 @@ bool PetActionSchema::isPetAction() const {
 
 **/
 
-combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (LADSUtil::RuntimeException, LADSUtil::InvalidParamException, std::bad_exception) {
+combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception) {
     PetAction action(actionType);
     
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
     if (arguments.size() < minArity) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO,
+        throw opencog::InvalidParamException(TRACE_INFO,
              "PetActionSchema - Schema %s got insuficient no. of parameters: %u (expected at least %u).", actionType.getName().c_str(), arguments.size(), minArity);
     }
     
@@ -65,7 +65,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     //const ActionType::ParamTypes& optionalParamTypes = actionType.getOptionalParamTypes();
     unsigned int maximalArity = minArity + optionalArity;
     if (arguments.size() > maximalArity) {
-        throw LADSUtil::InvalidParamException(TRACE_INFO,
+        throw opencog::InvalidParamException(TRACE_INFO,
             "PetActionSchema - Schema %s exceeded no. of parameters: %u (expected at most %u).",
                                    actionType.getName().c_str(), arguments.size(), maximalArity);
     }
@@ -83,7 +83,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                 const combo::id::builtin* arg = boost::get<combo::id::builtin>(&(arguments[argIndex]));
                 if (arg && (*arg == combo::id::logical_true || *arg == combo::id::logical_false)) {
                     bool value = (*arg == combo::id::logical_true);
-                    ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, LADSUtil::toString(value));
+                    ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, opencog::toString(value));
                     action.addParameter(actionParam);
                     validArg = true;
                 }
@@ -93,7 +93,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                 // TODO: Check this: it seems all numbers are double in combo (typedef double contin_t;)
                 const combo::contin_t* arg = boost::get<combo::contin_t>(&(arguments[argIndex]));
                 if (arg) {
-                    ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, LADSUtil::toString((int)*arg));
+                    ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, opencog::toString((int)*arg));
                     action.addParameter(actionParam);
                     validArg = true;
                 }
@@ -102,7 +102,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                 // TODO: Check this: it seems all numbers are double in combo (typedef double contin_t;)
                 const combo::contin_t* arg = boost::get<combo::contin_t>(&(arguments[argIndex]));
                 if (arg) {
-                    ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, LADSUtil::toString(*arg));
+                    ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, opencog::toString(*arg));
                     action.addParameter(actionParam);
                     validArg = true;
                 }
@@ -150,7 +150,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                                 atomTypes += ClassServer::getTypeName(atomSpace.getType(h)); 
                                 atomTypes += " ";
                             }
-                            MAIN_LOGGER.log(LADSUtil::Logger::WARNING, "WARNING: Got multiple SLObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str()); 
+                            logger().log(opencog::Logger::WARNING, "WARNING: Got multiple SLObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str()); 
                         }
                         Type atomType = atomSpace.getType(hs[0]);
                         // TODO: What about the other types of SL object? (accessory and structure) 
@@ -167,10 +167,10 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
         }
 
         if (!validArg) {
-            throw LADSUtil::InvalidParamException(TRACE_INFO,
+            throw opencog::InvalidParamException(TRACE_INFO,
                   "PetActionSchema - Schema %s got invalid argument at %u: %s (expected an %s).", 
                    actionType.getName().c_str(), argIndex, 
-                   LADSUtil::toString(arguments[0]).c_str(), paramType.getName().c_str());
+                   opencog::toString(arguments[0]).c_str(), paramType.getName().c_str());
         }
 
     }

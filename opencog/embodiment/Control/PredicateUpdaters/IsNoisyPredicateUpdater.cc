@@ -31,7 +31,7 @@ void IsNoisyPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 		return;
 	}
 
-	MAIN_LOGGER.log(LADSUtil::Logger::FINE, "IsNoisy - Updating is_noisy for obj %s.", 
+	logger().log(opencog::Logger::FINE, "IsNoisy - Updating is_noisy for obj %s.", 
 	 			   atomSpace.getName(object).c_str());	
 
 	// truth value - mean equals 0.0 --> not noisy

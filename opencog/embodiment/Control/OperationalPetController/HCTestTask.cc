@@ -25,10 +25,10 @@ HCTestTask::~HCTestTask() {
 
 
 void HCTestTask::run(MessagingSystem::NetworkElement* ne) {
-  MAIN_LOGGER.log(LADSUtil::Logger::FINE, "Executing HCTestTask.");    
+  logger().log(opencog::Logger::FINE, "Executing HCTestTask.");    
   cycle++;
   if(cycle > MAX_CYCLE) { //timeout in case the test takes too long
-    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, "Executing HCTestTask.");
+    logger().log(opencog::Logger::ERROR, "Executing HCTestTask.");
     exit(1);
   }
   // send the whole atomSpace to the LS
