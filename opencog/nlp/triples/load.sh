@@ -19,5 +19,5 @@ cat prep-maps.scm | netcat localhost 17003
 cat rules.txt | ./rules-to-implications.pl | netcat localhost 17003
 
 # Load some previously parsed sentences.
-cat o | netcat localhost 17003
+cat sample-sentences.scm | netcat localhost 17003
 
