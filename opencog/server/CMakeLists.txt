@@ -19,7 +19,6 @@ ADD_LIBRARY (builtinreqs SHARED
 
 TARGET_LINK_LIBRARIES(builtinreqs
 	xml
-	${EXPAT_LIBRARIES}
 )
 
 ADD_LIBRARY (server SHARED
@@ -41,6 +40,7 @@ IF (GUILE_FOUND)
         ${CSOCKETS_LIBRARIES}
         ${OPENSSL_LIBRARIES}
 		smob
+        xml
 	)
 ELSE (GUILE_FOUND)
 	TARGET_LINK_LIBRARIES(server
@@ -49,6 +49,7 @@ ELSE (GUILE_FOUND)
         ${OPENSSL_LIBRARIES}
 		smob
 		atomspace
+        xml
 	)
 ENDIF (GUILE_FOUND)
 
