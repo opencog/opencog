@@ -1693,9 +1693,9 @@ void BITNodeRoot::extract_plan(pHandle h, unsigned int level, vtree& do_template
 void BITNodeRoot::extract_plan(pHandle h) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    vtree do_template = mva(EVALUATION_LINK,
+    vtree do_template = mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
-                            mva(LIST_LINK,
+                            mva((pHandle)LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$999999999")));
 
     pHandleSeq plan;
@@ -1734,27 +1734,27 @@ void test_pool_policy()
     Rule* deductionR2 = NULL; //Should have no effect
 
     assert(obeysPoolPolicy(deductionR2,
-        Btr<tree<Vertex> > (new tree<Vertex>(mva(EVALUATION_LINK,
+        Btr<tree<Vertex> > (new tree<Vertex>(mva((pHandle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "killed"),
-                    mva(LIST_LINK,
+                    mva((pHandle)LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$killeri"),
                                 NewNode(CONCEPT_NODE, "Osama")
                             )
             )))));
 
     assert(!obeysPoolPolicy(deductionR2,
-        Btr<tree<Vertex> > (new tree<Vertex>(mva(EVALUATION_LINK,
+        Btr<tree<Vertex> > (new tree<Vertex>(mva((pHandle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "killed"),
-                    mva(LIST_LINK,
+                    mva((pHandle)LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$killeri"),
                                 NewNode(FW_VARIABLE_NODE, "$target")
                             )
             )))));
 
     assert(obeysPoolPolicy(deductionR2,
-        Btr<tree<Vertex> > (new tree<Vertex>(mva(EVALUATION_LINK,
+        Btr<tree<Vertex> > (new tree<Vertex>(mva((pHandle)EVALUATION_LINK,
                     NewNode(FW_VARIABLE_NODE, "$action"),,
-                    mva(LIST_LINK,
+                    mva((pHandle)LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$killeri"),
                                 NewNode(CONCEPT_NODE, "Osama")
                             )

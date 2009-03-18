@@ -35,9 +35,9 @@ public:
 	{
 
 		inputFilter.push_back(meta(
-				new tree<Vertex>(mva(ATOM))));
+				new tree<Vertex>(mva((pHandle)ATOM))));
 		inputFilter.push_back(meta(
-				new tree<Vertex>(mva(HYPOTHETICAL_LINK))
+				new tree<Vertex>(mva((pHandle)HYPOTHETICAL_LINK))
 			));
 	}
 

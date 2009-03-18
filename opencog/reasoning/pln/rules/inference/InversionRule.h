@@ -71,9 +71,9 @@ public:
             : GenericRule<InversionFormula> (_destTable, false, "InversionRule"), InclusionLink(linkType) {
         inputFilter.push_back(meta(
                                   new tree<Vertex>(
-                                      mva(InclusionLink,
-                                          mva(ATOM),
-                                          mva(ATOM))
+                                      mva((pHandle)InclusionLink,
+                                          mva((pHandle)ATOM),
+                                          mva((pHandle)ATOM))
                                   )));
     }
     bool validate2    (MPs& args) const {
@@ -88,7 +88,7 @@ public:
         cprintf(1,"INV New order:\n");
         printTree(child(boost::get<Handle>(h[0]),1),0,1);
         printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
-        return meta(new tree<Vertex>(mva(GET_ATW->getType(h0),
+        return meta(new tree<Vertex>(mva((pHandle)GET_ATW->getType(h0),
                                          mva(GET_ATW->getOutgoing(h0, 1)),
                                          mva(GET_ATW->getOutgoing(h0, 0))
                                         )));

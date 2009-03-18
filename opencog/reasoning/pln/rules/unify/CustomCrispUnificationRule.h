@@ -35,7 +35,7 @@ public:
 	: Rule(_destTable,false,false,"CrispUnificationRule"), ForallLink(_ForallLink)
 	{
 		inputFilter.push_back(meta(
-				new tree<Vertex>(mva(ATOM))));
+				new tree<Vertex>(mva((pHandle)ATOM))));
 	}
 
 	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const

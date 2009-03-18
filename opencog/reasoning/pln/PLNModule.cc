@@ -305,19 +305,19 @@ std::string RunCommand(std::list<std::string> args)
     AtomSpaceWrapper* atw = GET_ATW;
 
 /*  vector<Vertex> targs, targs2;
-    targs.push_back(mva(INHERITANCE_LINK,
+    targs.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "A"),
                     NewNode(CONCEPT_NODE, "B")
             ));
-    targs.push_back(mva(INHERITANCE_LINK,
+    targs.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "B"),
                     NewNode(CONCEPT_NODE, "C")
             ));
-    targs2.push_back(mva(INHERITANCE_LINK,
+    targs2.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "A"),
                     NewNode(CONCEPT_NODE, "D")
             ));
-    targs2.push_back(mva(INHERITANCE_LINK,
+    targs2.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "B"),
                     NewNode(CONCEPT_NODE, "C")
             ));
@@ -392,9 +392,9 @@ std::string RunCommand(std::list<std::string> args)
 /*            else if (c == "D") { test::debugger_control = (test::debugger_control?false:true);
                       for (int zz=0;zz<1000;zz++)
                             RuleRepository::Instance().rule[ForAll]->o2iMeta(
-                                meta(new vtree(mva(EVALUATION_LINK,
+                                meta(new vtree(mva((pHandle)EVALUATION_LINK,
                                 NewNode(PREDICATE_NODE, "friendOf"),
-                                mva(LIST_LINK,
+                                mva((pHandle)LIST_LINK,
                                 NewNode(CONCEPT_NODE, "Britney"),
                                 NewNode(CONCEPT_NODE, "Amir")
                                 )))));
@@ -450,9 +450,9 @@ std::string RunCommand(std::list<std::string> args)
 //                        puts("Enter Rule #: ");
                         input(qrule, args);
 
-                        bvt = (mva(bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
-                        avt1 = (mva(a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
-                        avt2 = (mva(a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
+                        bvt = (mva((pHandle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
+                        avt1 = (mva((pHandle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
+                        avt2 = (mva((pHandle)a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
 
                         rawPrint(bvt, bvt.begin(), -2);
                         rawPrint(avt1, avt1.begin(), -2);

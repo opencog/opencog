@@ -43,7 +43,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 		assert(nm->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
 		assert(nm->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
 	
-		return meta(new tree<Vertex>(mva(pHandle(InclusionLink), 
+		return meta(new tree<Vertex>(mva((pHandle)InclusionLink, 
 						vtree(Vertex(nm->getOutgoing(boost::get<pHandle>(h[0]),0))),
 						vtree(Vertex(nm->getOutgoing(boost::get<pHandle>(h[1]),1)))
 				)));
@@ -123,10 +123,10 @@ public:
 		
 		Vertex var = CreateVar(GenericRule<DeductionFormula>::destTable);
 		
-		ret.push_back(BBvtree(new BoundVTree(mva(Vertex((pHandle)InclusionLink),
+		ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
 			tree<Vertex>(outh->begin(top0)),
 			mva(var)))));
-		ret.push_back(BBvtree(new BoundVTree(mva(Vertex((pHandle)InclusionLink),
+		ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
 			mva(var),
 			tree<Vertex>(outh->last_child(top0))		
 			))));

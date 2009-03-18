@@ -61,7 +61,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
 
     ret1.push_back(BBvtree(new BoundVTree(mva(i->original_handle), pre_binds)));
 
-    BBvtree rootAtom(new BoundVTree(mva(HYPOTHETICAL_LINK, *i), pre_binds));
+    BBvtree rootAtom(new BoundVTree(mva((pHandle)HYPOTHETICAL_LINK, *i), pre_binds));
 
     ret1.push_back(rootAtom);
 
