@@ -302,27 +302,67 @@ ConceptNodes, the actual RelEx LemmaLinks specify WordNodes.  There's
 no immediate, direct way to turn WordNodes into ConceptNodes; this 
 will be fudged for now.
 
-And there is a another problem, a tricky one: it only makes sense to 
-extract relations between words in a sentence (or across sentences, 
-if reference resolution is implemented).  However, it seems to be
-somwhat tricky to specify that the searches should be performed only
-on a certain subset of the atom space -- so, at this point, the
-atomspace can only contain one, single sentence for processing.  
-Otherwise, if it contains multiple sentences, the rules can
-accidentally find matches to relations from different sentences.
+Another problem to note: it only makes sense to extract relations
+between words in a sentence (or across sentences, if reference resolution
+is implemented).  However, there is currently no natural way to specify
+that the searches should be performed only on a certain subset of the
+atom space -- e.g. to perform the matching only on terms that belong to 
+one sentence.  Thus, at this time, each frame rule contains explicit
+directives that force all matches to lie within one sentence. So, for
+example:
+
+# IF _subj(be,$var0) ^ _obj(be,$var1)
+      ^ $prep($var0,$var2)              ; preposition 
+      ^ %LemmaLink($var0,$word0)        ; word of word instance
+      ^ $phrase($word0, $prep)          ; convert to phrase
+      ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+      ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+      THEN ^3_$phrase($var2, $var1) 
+
+Note the use of WordInstanceLink to force both words to belong to 
+the same sentence.
+
 
 Running the current code
 ------------------------
 The file "rules.txt" contains the current set of rules.  The perl script
-"rules-to-implications.pl" will convert rules into OpenCog
+"rules-to-implications.pl" will convert rules into OpenCog 
 ImplicationLinks, as described above. 
+
+The shell script "ld.sh" in this directory will load the assorted scheme
+bits and pieces.  In addition, text that was parsed by relex, and output
+in opencog format, must be loaded. 
 
 Implications can be processed with the scheme interpreter, using the 
 ad-hoc command:
 
   (cog-ad-hoc "do-implication" stmt)
 
-where the stmt is the implication to evaluate.
+where the stmt is the implication to evaluate. So, for example, after
+loading rules.txt, one would try:
+
+  (cog-ad-hoc "do-implication" frame-rule-0)
+
+This will search the entire contents of the atomtable, looking for any
+hypergraphs that match the predicate of the implication.  The output is
+a list of all possible implicands: thus, for example:
+
+guile> (cog-ad-hoc "do-implication" frame-rule-0)
+(ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
+    (ListLink (WordInstanceNode "Germany@3cdca1f8-adf4-4532-a2d6-622da3f43ce6")
+       (WordInstanceNode "Berlin@a0d168f7-3735-48a1-b603-33dd0fc95228"))))
+
+guile> (cog-ad-hoc "do-implication" frame-rule-1)
+(ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
+    (ListLink (WordInstanceNode "Portugaul@36d41058-3dc8-4e6c-82b9-300a5f48e283")
+       (WordInstanceNode "Lisbon@9d5031b1-5caf-48eb-ae7c-b3a89bb11381"))))
+
+guile> (cog-ad-hoc "do-implication" frame-rule-2)
+(ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "color_of")
+    (ListLink (WordInstanceNode "sky@f3924dad-81a0-4967-81c8-900e31254f74")
+       (WordInstanceNode "blue@df54a7e9-1fb2-4643-be97-ca6ee1e7a359"))))
+
+
 
 
 Promoting Words to Concepts
