@@ -36,13 +36,13 @@ StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(iAtomSpaceWrapper
 {
         inputFilter.push_back(meta(
                 new tree<Vertex>(
-                mva((Handle)IMPLICATION_LINK,
-                    mva((Handle)ATOM),
-                    mva((Handle)ATOM)))
+                mva((pHandle)IMPLICATION_LINK,
+                    mva((pHandle)ATOM),
+                    mva((pHandle)ATOM)))
             ));
         inputFilter.push_back(meta(
                 new tree<Vertex>(       
-                    mva((Handle)ATOM))
+                    mva((pHandle)ATOM))
             ));
 }
 
@@ -61,7 +61,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
         printer.print(outh->begin(), 4);
 
         ret.push_back(BBvtree(new BoundVTree(
-                        mva((Handle)IMPLICATION_LINK, vtree(myvar),*outh))));
+                        mva((pHandle)IMPLICATION_LINK, vtree(myvar),*outh))));
         cprintf(4,"Need:\n");
 		ret.push_back(BBvtree(new BoundVTree(myvar)));
         printer.print(ret[0]->begin(), 4);
@@ -74,7 +74,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
         return makeSingletonSet(ret);
 }
 
-BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
         AtomSpaceWrapper *nm = GET_ATW;
         assert(validate(premiseArray));
@@ -85,13 +85,13 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
 
         NMPrinter printer(NMP_ALL);
         for (uint i=0;i<premiseArray.size();i++)
-            printer.print(v2h(premiseArray[i]), 3);
+            printer.print(_v2h(premiseArray[i]), 3);
 
 //  vtree   vt1(make_vtree(nm->getOutgoing(v2h(premiseArray[0]),0))),
 //          vt2(make_vtree(v2h(premiseArray[1])));
 
-    vtree   vt1(make_vtree(v2h(premiseArray[0]))),
-            vt2(make_vtree(v2h(premiseArray[1])));
+    vtree   vt1(make_vtree(_v2h(premiseArray[0]))),
+            vt2(make_vtree(_v2h(premiseArray[1])));
 
         /** haxx:: \todo Temporarily disabled!
             This check does not hold if one of the args
@@ -131,22 +131,22 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
     }
 #endif
     
-        std::vector<Handle> args = GET_ATW->getOutgoing(v2h(premiseArray[0]));
+        std::vector<pHandle> args = GET_ATW->getOutgoing(_v2h(premiseArray[0]));
         Type T = GET_ATW->getType(args[1]);
         std::string pname = nm->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[0]))),
-            (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[1]))),
+            (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[0]))),
+            (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[1]))),
             (TruthValue*) &(GET_ATW->getTV(args[1]))
         };
         
         TruthValue* retTV =
             ImplicationBreakdownFormula().compute(tvs, 3);
 
-        std::vector<Handle> new_args = nm->getOutgoing(args[1]);
+        std::vector<pHandle> new_args = nm->getOutgoing(args[1]);
 
-        Handle ret=Handle::UNDEFINED;
+        pHandle ret=PHANDLE_UNDEFINED;
     
         assert (!(GET_ATW->inheritsType(T, NODE)));
 

@@ -33,10 +33,21 @@
 #include <string>
 #endif
 
+
 using namespace opencog;
+
+namespace reasoning {
+
+// PLN atom handle, which can also wrapper atom types. 
+typedef unsigned int pHandle;
+typedef std::vector<pHandle> pHandleSeq;
+// pHandle ranges: 0 <= h < NOTYPE (atom types); h > NOTYPE (pln atom handles)
+const static unsigned int mapOffset = NOTYPE+1;
+#define PHANDLE_UNDEFINED NOTYPE
 
 class AtomLookupProvider
 {
+
 public:
     /** If name is non-empty, then return the set of all nodes with type T and
      * that name.
@@ -44,19 +55,20 @@ public:
      * subclasses too is optional.  NOTE! atoms with confidence < 0.0000001 are
      * not returned!
      */
-    virtual boost::shared_ptr<set<Handle> > getHandleSet(Type T, const string&
+    virtual boost::shared_ptr<set<pHandle> > getHandleSet(Type T, const string&
             name, bool subclass = false) =0 ;
 
     /** Return the set of all nodes with type T and the name str
      * NOTE! atoms with confidence < 0.0000001 are not returned!
      */
-    virtual Handle getHandle(Type t,const std::string& str) =0;
+    virtual pHandle getHandle(Type t,const std::string& str) =0;
 
     /** return the set of all links with type T and the given outgoing set
       * NOTE! atoms with confidence < 0.0000001 are not returned!
       */
-    virtual Handle getHandle(Type t,const HandleSeq& outgoing) =0;
+    virtual pHandle getHandle(Type t,const pHandleSeq& outgoing) =0;
 	virtual ~AtomLookupProvider() { };
 };
+} //~namespace reasoning
 
 #endif // _ATOMLOOKUPPROVIDER_H

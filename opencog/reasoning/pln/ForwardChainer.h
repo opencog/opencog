@@ -49,7 +49,7 @@ public:
 
     //! Rules that have yet to be attempted for forward chaining on seed handle.
     //! Consists of all rules at the beginning.
-    std::deque<Handle> seedStack;
+    std::deque<pHandle> seedStack;
 
     //! minimum confidence to accept a result or for using an atom
     float minConfidence;
@@ -68,7 +68,7 @@ public:
     //! Chain from a single seed Handle
     //! @param maximum number of rule applications before ending
     //! @return return Handles that were created
-    HandleSeq fwdChainSeed(Handle h, int maxRuleApps = 1);
+    pHandleSeq fwdChainSeed(pHandle h, int maxRuleApps = 1);
 
     //! Chain to specific target
     //! @param target Handle
@@ -79,14 +79,14 @@ public:
     //! Chain till (current) entire stack has been processed
     //! @param maximum number of rule applications before ending
     //! @return return Handles that were created
-    HandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
+    pHandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
 
     //! Get a random handle from the seed stack or global atomspace
-    Handle getRandomArgument(const std::vector< Vertex > &args);
+    pHandle getRandomArgument(const std::vector< Vertex > &args);
     static RandGen* rng;
     RandGen* getRNG();
 
-    HandleSeq getLocalLink(Handle lh, const std::vector< Vertex > &args);
+    pHandleSeq getLocalLink(pHandle lh, const std::vector< Vertex > &args);
     void printVertexVectorHandles(std::vector< Vertex > hs);
 };
 

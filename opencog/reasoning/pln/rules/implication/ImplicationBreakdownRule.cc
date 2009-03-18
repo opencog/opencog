@@ -36,9 +36,9 @@ ImplicationBreakdownRule::ImplicationBreakdownRule(iAtomSpaceWrapper *_destTable
 {
 		inputFilter.push_back(meta(
                 new tree<Vertex>(
-                mva((Handle)IMPLICATION_LINK,
-                    mva((Handle)ATOM),
-                    mva((Handle)ATOM)))
+                mva((pHandle)IMPLICATION_LINK,
+                    mva((pHandle)ATOM),
+                    mva((pHandle)ATOM)))
             ));
 /*      inputFilter.push_back(meta(
                 new tree<Vertex>(       
@@ -57,7 +57,7 @@ Rule::setOfMPs ImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideI
         Vertex myvar = CreateVar(destTable);
 
         // Joel: Wrapped up myvar in vtree to fit functions
-        ret.push_back(BBvtree(new BoundVTree(mva((Handle)IMPLICATION_LINK, 
+        ret.push_back(BBvtree(new BoundVTree(mva((pHandle)IMPLICATION_LINK, 
             vtree(myvar),
             *outh))));
 //		ret.push_back(meta(new BoundVTree(myvar)));
@@ -67,18 +67,18 @@ Rule::setOfMPs ImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideI
         return makeSingletonSet(ret);
 }
 	
-BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
         assert(validate(premiseArray));
 
 //printTree(premiseArray[0],0,1);
 
-        std::vector<Handle> args = GET_ATW->getOutgoing(v2h(premiseArray[0]));
+        std::vector<pHandle> args = GET_ATW->getOutgoing(_v2h(premiseArray[0]));
         Type T = GET_ATW->getType(args[1]);
         std::string pname = GET_ATW->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[0]))),
+            (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[0]))),
             (TruthValue*) &(GET_ATW->getTV(args[0])),
             (TruthValue*) &(GET_ATW->getTV(args[1]))
         };
@@ -86,9 +86,9 @@ BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray
         TruthValue* retTV =
             ImplicationBreakdownFormula().compute(tvs, 3);
 
-        std::vector<Handle> new_args = GET_ATW->getOutgoing(args[1]);
+        std::vector<pHandle> new_args = GET_ATW->getOutgoing(args[1]);
 
-        Handle ret=Handle::UNDEFINED;
+        pHandle ret=PHANDLE_UNDEFINED;
 
         /*if (inheritsType(T, NODE))
             ret = destTable->addNode(T, pname,

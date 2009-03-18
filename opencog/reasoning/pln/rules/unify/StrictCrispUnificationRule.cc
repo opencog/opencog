@@ -66,8 +66,8 @@ combined, no conflict will be found!
 Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
-    if (nm->inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
-        nm->inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (nm->inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        nm->inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0
@@ -90,7 +90,7 @@ Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrid
     {
         MPs ret1;
 
-        typedef pair<Handle,vtree> phvt;
+        typedef pair<pHandle,vtree> phvt;
         DeclareBtr(bindingsT, pre_binds);
 
         foreach(phvt vp, *i->bindings)
@@ -107,7 +107,7 @@ rawPrint(*ret1[0], ret1[0]->begin(),3);
 printer.print(ret1[0]->begin(),3);
 #endif
 
-        BBvtree rootAtom(new BoundVTree(mva((Handle)HYPOTHETICAL_LINK, *i), pre_binds));
+        BBvtree rootAtom(new BoundVTree(mva((pHandle)HYPOTHETICAL_LINK, *i), pre_binds));
 
 cprintf(3,"Root:\n");
 #if 0
@@ -131,9 +131,9 @@ printer.print(rootAtom->begin(),3);
             for (vtree::post_order_iterator pit = tRes.begin_post(); pit!=tRes.end_post(); pit++)
 			{
                 vtree pit_vtree(pit);
-                if ( (!nm->isReal(v2h(*pit))
-                    || nm->inheritsType(nm->getType(v2h(*pit)), FW_VARIABLE_NODE))
-                    && v2h(*pit) != (Handle)LIST_LINK
+                if ( (nm->isType(_v2h(*pit))
+                    || nm->inheritsType(nm->getType(_v2h(*pit)), FW_VARIABLE_NODE))
+                    && _v2h(*pit) != (pHandle)LIST_LINK
 					&& !STLhas(arg_targets, pit_vtree) )
                 {
 					ret1.push_back(BBvtree(new BoundVTree(pit_vtree, pre_binds)));

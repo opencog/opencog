@@ -68,8 +68,8 @@ namespace haxx
     extern reasoning::BITNodeRoot* bitnoderoot;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
-    map<Handle,vector<Handle> > inferred_from;
-    map<Handle,Rule*> inferred_with;
+    map<pHandle,vector<pHandle> > inferred_from;
+    map<pHandle,Rule*> inferred_with;
 }
 
 //! ARI: okay to delete design namespace?
@@ -149,12 +149,12 @@ static const float MIN_CONFIDENCE_FOR_RULE_APPLICATION = 0.00001f;
 bool RECORD_TRAILS = true;
 const bool PREVENT_LOOPS = false;
 
-extern Btr<set<Handle> > ForAll_handles;
+extern Btr<set<pHandle> > ForAll_handles;
 //map<BITNode*, set<BITNode*> > users;
 static int ParametrizedBITNodes = 0;
 
-void pr(pair<Handle, Handle> i);
-void pr3(pair<Handle, Handle> i);
+void pr(pair<pHandle, pHandle> i);
+void pr3(pair<pHandle, pHandle> i);
 
 ParametrizedBITNode::ParametrizedBITNode(BITNode* _prover, Btr<bindingsT> _bindings)
 : bindings(_bindings), prover(_prover)
@@ -211,9 +211,10 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     haxx::bitnoderoot = this;
 
     vtree::iterator target_it = _target->begin();
-    post_generalize_type = atw->inheritsType((Type)(v2h(*target_it).value()), VARIABLE_SCOPE_LINK)
+    Type targetType = (Type) _v2h(*target_it);
+    post_generalize_type = atw->inheritsType((Type)(_v2h(*target_it)), VARIABLE_SCOPE_LINK)
                                     ? VARIABLE_SCOPE_LINK
-                                    : atw->inheritsType((Type)(v2h(*target_it).value()), FORALL_LINK)
+                                    : atw->inheritsType((Type)(_v2h(*target_it)), FORALL_LINK)
                                         ? FORALL_LINK
                                         : 0;
     if (post_generalize_type)
@@ -237,7 +238,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 
     children.push_back(set<ParametrizedBITNode>());
 	cprintf(3, "scoper...\n");
-    BITNode* root_variable_scoper = CreateChild(0, NULL, dummy_args, Btr<BoundVTree>(new BoundVTree(make_vtree((Handle)NODE))),
+    BITNode* root_variable_scoper = CreateChild(0, NULL, dummy_args, Btr<BoundVTree>(new BoundVTree(make_vtree(NODE))),
             bindingsT(), NO_SIBLING_SPAWNING);
 	cprintf(3, "scoper ok\n");
     set<Vertex> vars;
@@ -263,11 +264,11 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
 void BITNode::ForceTargetVirtual(spawn_mode spawning)
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    Handle *ph = v2h(&(*raw_target->begin()));
+    pHandle *ph = boost::get<pHandle>(&(*raw_target->begin()));
     
-    if (ph && atw->isReal(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE)
+    if (ph && !atw->isType(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE)
     {
-        cprintf(2,"ForceTargetVirtual: Arg [%ld] (exists).\n", (long)(*ph).value());
+        cprintf(2,"ForceTargetVirtual: Arg [%u] (exists).\n", *ph);
         
         boost::shared_ptr<set<BoundVertex> > directResult(new set<BoundVertex>);
         
@@ -334,9 +335,9 @@ Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
         Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
         foreach(const BoundVertex& new_result, *results)
-            if (GET_ATW->getTV(v2h(new_result.value)).getConfidence() > min_confidence)
+            if (GET_ATW->getTV(_v2h(new_result.value)).getConfidence() > min_confidence)
             {
-                printTree(v2h(new_result.value),0,0);
+                printTree(_v2h(new_result.value),0,0);
 
                 nontrivial_results->insert(new_result);
             }
@@ -443,9 +444,9 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 
         SetTarget(_target, _pre_bindings);
 
-        if (atw->inheritsType(atw->getType(v2h(*bound_target->begin())), LINK) &&
-            ((atw->isReal(v2h(*bound_target->begin())) && !atw->getArity(v2h(*bound_target->begin()))) ||
-            (!atw->isReal(v2h(*bound_target->begin())) && !bound_target->number_of_children(bound_target->begin())))
+        if (atw->inheritsType(atw->getType(_v2h(*bound_target->begin())), LINK) &&
+            ((!atw->isType(_v2h(*bound_target->begin())) && !atw->getArity(_v2h(*bound_target->begin()))) ||
+            (atw->isType(_v2h(*bound_target->begin())) && !bound_target->number_of_children(bound_target->begin())))
             ) {
             rawPrint(*bound_target, bound_target->begin(),-10);
             assert(0);
@@ -612,7 +613,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
     foreach(const BoundVertex& bv, *directResult)
     {
         tlog(-2, "Added direct result:\n");
-        printTree(v2h(bv.value), 0, -2);
+        printTree(_v2h(bv.value), 0, -2);
     }
 
     foreach(const BoundVertex& bv, *directResult)
@@ -636,7 +637,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
     bool bdrum_changed = false;
     foreach(BoundVertex bv, *directResult)
     {
-        float confidence = atw->getTV(v2h(bv.value)).getConfidence();
+        float confidence = atw->getTV(_v2h(bv.value)).getConfidence();
         if (confidence > my_bdrum)
         {
             my_bdrum = confidence;
@@ -659,7 +660,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
             else //Proceed to Rule evaluation (if parent has other args already)
             {
                 tlog(0, "Unbound result: notify parent...\n");
-                Handle hh = v2h(bv.value);
+                pHandle hh = _v2h(bv.value);
                 /*printTree(hh,0,2); */
                 NotifyParentOfResult(new VtreeProviderWrapper(bv.value));
             }
@@ -869,7 +870,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
             if (!STLhas2(*_target, v))
             {
                 root->varOwner[v].insert(new_node);
-                cprintf(0,"[%ld] owns %s\n", (long)new_node, atw->getName(v2h(v)).c_str());
+                cprintf(0,"[%ld] owns %s\n", (long)new_node, atw->getName(_v2h(v)).c_str());
             }
 
         return new_node;
@@ -1014,9 +1015,9 @@ void BITNode::tryClone(hpair binding) const
         tlog(-2, "TryClone next...\n");
 
         // when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
-        map<Handle, Handle>::const_iterator it = find_if(p.bindings->begin(), p.bindings->end(),
-                bind(equal_to<Handle>(),
-                    bind(&second<Handle,Handle>, _1),
+        map<pHandle, pHandle>::const_iterator it = find_if(p.bindings->begin(), p.bindings->end(),
+                bind(equal_to<pHandle>(),
+                    bind(&second<pHandle,pHandle>, _1),
                     binding.first));
 
         if (p.bindings->end() != it)
@@ -1110,7 +1111,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
         foreach(VtreeProvider* vtp, *eval_res_vector_set.begin())
         {
             tlog(0, "get next TV\n");
-            assert(atw->isReal(vt2h(*vtp)));
+            assert(!atw->isType(vt2h(*vtp)));
             const TruthValue& etv = atw->getTV(vt2h(*vtp));
             if (!etv.isNullTv()) {
                 if (etv.getConfidence() > minConfidenceForAbort)
@@ -1177,8 +1178,8 @@ bool BITNode::CheckForDirectResults()
     if (!rule || rule->isComputable())
         return false;
 
-    Handle th = v2h(*GetTarget()->begin());
-    if (atw->isReal(th) && atw->getType(th) == FW_VARIABLE_NODE)
+    pHandle th = _v2h(*GetTarget()->begin());
+    if (!atw->isType(th) && atw->getType(th) == FW_VARIABLE_NODE)
     {
         tlog(-1,"Proof of FW_VARIABLE_NODE prohibited.\n");
         return true;
@@ -1226,7 +1227,7 @@ void BITNode::expandNextLevel()
         tlog(-2, "Expanding with fitness %.4f   In expansion pool: %s\n", fitness(), (STLhas2(root->exec_pool, this)?"YES":"NO"));
         rawPrint(*GetTarget(), GetTarget()->begin(), -2);
         printArgs();
-        if (atw->getType(v2h(*GetTarget()->begin())) == FW_VARIABLE_NODE)    
+        if (atw->getType(_v2h(*GetTarget()->begin())) == FW_VARIABLE_NODE)    
             tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
         tlog(0, "Rule:%s: ExpandNextLevel (%d children exist)\n", (rule?(rule->name.c_str()):"(root)"), children.size());
 
@@ -1262,8 +1263,8 @@ bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
     Vertex v = *(*new_result).getVtree().begin();
-    Handle h = v2h(v);
-    assert(atw->isReal(h)); //vt2h(*new_result)));
+    pHandle h = _v2h(v);
+    assert(!atw->isType(h));
 
     stats::Instance().ITN2atom[(BITNode*)this].insert(v); //*new_result->getVtree().begin());
 
@@ -1278,14 +1279,14 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
     AtomSpaceWrapper *atw = GET_ATW;
 //  tlog(-1, "ARG %d:\n", arg_i);
 //  printTree(v2h(new_result), 0,-1);
-    Handle h_new_result = v2h(*new_result->getVtree().begin());
+    pHandle h_new_result = _v2h(*new_result->getVtree().begin());
     printArgs();
 
     /// If any of the existing results are equal in structure and
     /// higher confidence than the new one, skip it.
 
     foreach(VtreeProvider* old_result, eval_results[arg_i])
-        if (IsIdenticalHigherConfidenceAtom(v2h(*old_result->getVtree().begin()), h_new_result))
+        if (IsIdenticalHigherConfidenceAtom(_v2h(*old_result->getVtree().begin()), h_new_result))
             return;
 
     eval_results[arg_i].insert(new_result);
@@ -1343,7 +1344,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
                 foreach(VtreeProvider* ra, rule_args)
                 {
-                    Handle h = v2h(*ra->getVtree().begin());
+                    pHandle h = _v2h(*ra->getVtree().begin());
                     if (!atw->inheritsType(atw->getType(h), HYPOTHETICAL_LINK) &&
                         atw->getTV(h).getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
                         goto next_args;
@@ -1354,7 +1355,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 ruleApp = new RuleApp(rule);
                 next_result = ruleApp->compute(rule_args.begin(), rule_args.end());
 
-                assert(atw->isReal(v2h(next_result.value)));
+                assert(!atw->isType(_v2h(next_result.value)));
                 
                 ii = rule_args.begin();
 
@@ -1367,15 +1368,15 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 {
                     NotifyParentOfResult(ruleApp);
 
-                    root->hsource[v2h(next_result.value)] = const_cast<BITNode*>(this);
+                    root->hsource[_v2h(next_result.value)] = const_cast<BITNode*>(this);
 
                     if (RECORD_TRAILS) {
                         foreach(VtreeProvider* v, rule_args)
                         {
-//                          root->inferred_from[v2h(next_result.value)].push_back(v2h(v.value));
-                            haxx::inferred_from[v2h(next_result.value)].push_back(v2h(*v->getVtree().begin()));
-//                          root->inferred_with[v2h(next_result.value)] = rule;
-                            haxx::inferred_with[v2h(next_result.value)] = rule;
+//                          root->inferred_from[_v2h(next_result.value)].push_back(_v2h(v.value));
+                            haxx::inferred_from[_v2h(next_result.value)].push_back(_v2h(*v->getVtree().begin()));
+//                          root->inferred_with[_v2h(next_result.value)] = rule;
+                            haxx::inferred_with[_v2h(next_result.value)] = rule;
                         }                       
                     }
                 }
@@ -1410,7 +1411,7 @@ next_args:;
 BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) const
 {
     vector<Vertex> ForAllArgs;
-    Vertex v = Handle(ATOM);
+    Vertex v = ATOM;
     BoundVertex new_result(v);
 
     const float min_confidence = 0.0001f;
@@ -1421,23 +1422,23 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
         tlog(0,"Generalizing results:\n");
 
         foreach(const BoundVertex& b, *bvs)
-            if (GET_ATW->getTV(v2h(b.value)).getConfidence() > min_confidence)
+            if (GET_ATW->getTV(_v2h(b.value)).getConfidence() > min_confidence)
             {
-                printTree(v2h(b.value),0,0);
+                printTree(_v2h(b.value),0,0);
                 ForAllArgs.push_back(b.value);
             }
 
         if (_resultT == FORALL_LINK) {
             //new_result = FORALLRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
-            new_result = FORALLRule(ASW(), Handle::UNDEFINED, FORALL_LINK).compute(ForAllArgs);
+            new_result = FORALLRule(ASW(), PHANDLE_UNDEFINED, FORALL_LINK).compute(ForAllArgs);
         } 
         else {
             //new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
-            new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED, VARIABLE_SCOPE_LINK).compute(ForAllArgs);
+            new_result = PLNPredicateRule(ASW(), PHANDLE_UNDEFINED, VARIABLE_SCOPE_LINK).compute(ForAllArgs);
         }
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());
-        printTree(v2h(new_result.value),0,0);
+        printTree(_v2h(new_result.value),0,0);
     }
     else
         tlog(1,"NO Results for the root query.\n");
@@ -1456,11 +1457,11 @@ int BITNode::number_of_free_variables_in_target() const
     AtomSpaceWrapper *atw = GET_ATW;
     /// Use set<> to prevent re-counting of the already-found Handles
     
-    set<Handle> vars;
+    set<pHandle> vars;
     
     for(vtree::iterator v  = GetTarget()->begin(); v != GetTarget()->end(); v++)
-        if (atw->getType(v2h(*v)) == FW_VARIABLE_NODE)
-            vars.insert(v2h(*v));   
+        if (atw->getType(_v2h(*v)) == FW_VARIABLE_NODE)
+            vars.insert(_v2h(*v));   
 
     tlog(4,"number_of_free_variables_in_target: %d\n", vars.size());
         
@@ -1663,21 +1664,21 @@ bool BITNode_fitness_comp::operator()(BITNode* lhs, BITNode* rhs) const
 /* Action */
 
 
-void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template, vector<Handle>& plan) const
+void BITNodeRoot::extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    map<Handle, vtree> bindings;
+    map<pHandle, vtree> bindings;
     
-    if (h == Handle::UNDEFINED || !atw->isReal(h))
+    if (atw->isType(h)) 
         puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
     
-    map<Handle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
+    map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     
     if (rule != haxx::inferred_with.end())
     {
-        foreach(Handle arg_h, haxx::inferred_from[h])
+        foreach(pHandle arg_h, haxx::inferred_from[h])
         {
-            if (unifiesTo(do_template, make_vtree(Handle( arg_h)), bindings, bindings, true))
+            if (unifiesTo(do_template, make_vtree(arg_h), bindings, bindings, true))
             {
                 puts("Satisfies do_template:");
                 printTree(arg_h,level+1,0);
@@ -1689,18 +1690,18 @@ void BITNodeRoot::extract_plan(Handle h, unsigned int level, vtree& do_template,
     }
 }
 
-void BITNodeRoot::extract_plan(Handle h) const
+void BITNodeRoot::extract_plan(pHandle h) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    vtree do_template = mva((Handle)EVALUATION_LINK,
+    vtree do_template = mva(EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
-                            mva((Handle)LIST_LINK,
+                            mva(LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$999999999")));
 
-    vector<Handle> plan;
+    pHandleSeq plan;
     extract_plan(h,0,do_template,plan);
 puts("PLAN BEGIN");
-    for (vector<Handle>::reverse_iterator i = plan.rbegin(); i!=plan.rend(); i++)
+    for (pHandleSeq::reverse_iterator i = plan.rbegin(); i!=plan.rend(); i++)
         printTree(*i,0,-10);
 puts("PLAN END");   
     if (plan.size()>0)
@@ -1733,27 +1734,27 @@ void test_pool_policy()
     Rule* deductionR2 = NULL; //Should have no effect
 
     assert(obeysPoolPolicy(deductionR2,
-        Btr<tree<Vertex> > (new tree<Vertex>(mva((Handle)EVALUATION_LINK,
+        Btr<tree<Vertex> > (new tree<Vertex>(mva(EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "killed"),
-                    mva((Handle)LIST_LINK,
+                    mva(LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$killeri"),
                                 NewNode(CONCEPT_NODE, "Osama")
                             )
             )))));
 
     assert(!obeysPoolPolicy(deductionR2,
-        Btr<tree<Vertex> > (new tree<Vertex>(mva((Handle)EVALUATION_LINK,
+        Btr<tree<Vertex> > (new tree<Vertex>(mva(EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "killed"),
-                    mva((Handle)LIST_LINK,
+                    mva(LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$killeri"),
                                 NewNode(FW_VARIABLE_NODE, "$target")
                             )
             )))));
 
     assert(obeysPoolPolicy(deductionR2,
-        Btr<tree<Vertex> > (new tree<Vertex>(mva((Handle)EVALUATION_LINK,
+        Btr<tree<Vertex> > (new tree<Vertex>(mva(EVALUATION_LINK,
                     NewNode(FW_VARIABLE_NODE, "$action"),,
-                    mva((Handle)LIST_LINK,
+                    mva(LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$killeri"),
                                 NewNode(CONCEPT_NODE, "Osama")
                             )
@@ -1772,8 +1773,8 @@ void BITNode::printResults() const
     {
         printf("[ ");
         foreach(VtreeProvider* vtp, vset)
-            printTree(v2h(*vtp->getVtree().begin()),0,-10);
-//          printf("%d ", v2h(bv.value));
+            printTree(_v2h(*vtp->getVtree().begin()),0,-10);
+//          printf("%d ", _v2h(bv.value));
         printf("]\n");
     }
 }
@@ -1804,7 +1805,7 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
             string cbuf("[ ");
             if (direct_results) {
                 foreach(const BoundVertex& bv, *direct_results)
-                    cbuf += i2str((int)v2h(bv.value).value()) + " ";
+                    cbuf += i2str(_v2h(bv.value)) + " ";
             }
             prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
             prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
@@ -1846,22 +1847,22 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
 
 static int _trail_print_more_count = 0;
 
-void BITNodeRoot::printTrail(Handle h, unsigned int level) const //, int decimal_places) const
+void BITNodeRoot::printTrail(pHandle h, unsigned int level) const //, int decimal_places) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
-    if (h == Handle::UNDEFINED || !atw->isReal(h))
+    if (h == PHANDLE_UNDEFINED || atw->isType(h))
         puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
-    map<Handle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
+    map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
-        printf("%s[%ld] was produced by applying %s to:\n", repeatc(' ', level*3).c_str(),
-                (long)h.value(), rule->second->name.c_str());
-        map<Handle,vector<Handle> >::const_iterator h_it = haxx::inferred_from.find(h);
+        printf("%s[%u] was produced by applying %s to:\n", repeatc(' ', level*3).c_str(),
+                h, rule->second->name.c_str());
+        map<pHandle,vector<pHandle> >::const_iterator h_it = haxx::inferred_from.find(h);
         assert (h_it != haxx::inferred_from.end());
-        foreach(Handle arg_h, h_it->second)
+        foreach(pHandle arg_h, h_it->second)
         {
           // If the handle is used in other places too, then and only then print it's id.
-          typedef pair<Handle, vector<Handle> > hvhT;
+          typedef pair<pHandle, vector<pHandle> > hvhT;
           int h_use_count = 0;
           if (haxx::inferred_from.find(arg_h) != haxx::inferred_from.end())
             h_use_count=2;
@@ -1921,7 +1922,7 @@ void BITNode::printFitnessPool()
     }
 }
 
-void BITNodeRoot::printTrail(Handle h) const
+void BITNodeRoot::printTrail(pHandle h) const
 {
     printTree(h,0,0);
     printTrail(h,0);

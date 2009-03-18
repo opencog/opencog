@@ -34,8 +34,8 @@ namespace reasoning
 Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
-    if (nm->inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
-        nm->inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (nm->inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        nm->inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0
@@ -53,7 +53,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
     setOfMPs ret;
     
     MPs ret1;
-    typedef pair<Handle,vtree> phvt;
+    typedef pair<pHandle,vtree> phvt;
     DeclareBtr(bindingsT, pre_binds);
 
     foreach(phvt vp, *i->bindings)
@@ -61,7 +61,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
 
     ret1.push_back(BBvtree(new BoundVTree(mva(i->original_handle), pre_binds)));
 
-    BBvtree rootAtom(new BoundVTree(mva((Handle)HYPOTHETICAL_LINK, *i), pre_binds));
+    BBvtree rootAtom(new BoundVTree(mva(HYPOTHETICAL_LINK, *i), pre_binds));
 
     ret1.push_back(rootAtom);
 

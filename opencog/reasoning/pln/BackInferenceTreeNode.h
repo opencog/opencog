@@ -334,7 +334,7 @@ protected:
 		}	*/
 		//AtomSpace *nm = CogServer::getAtomSpace();
 		for(IterT bv = rule_args_begin; bv != rule_args_end; bv++)
-			if (GET_ATW->getType(v2h(*(*bv)->getVtree().begin())) == FW_VARIABLE_NODE)
+			if (GET_ATW->getType(_v2h(*(*bv)->getVtree().begin())) == FW_VARIABLE_NODE)
 			{
 /*				LOG(0, "FW_VARIABLE_NODE found on Rule args: "+string(nm->getName(v2h(bv->value))));
 
@@ -354,13 +354,13 @@ protected:
 									ArgIterT rule_args_end,
 									Btr<bindingsT> bindings_of_all_args) const
 	{
-		Handle* ph;
+		pHandle* ph;
 
 		if (!(!new_result.bindings ||new_result.bindings->empty()))
 			printSubsts(new_result, -1);
 		assert(!new_result.bindings ||new_result.bindings->empty());
 
-        if ((ph = v2h(&new_result.value)) && *ph == Handle::UNDEFINED)
+        if ((ph = boost::get<pHandle>(&new_result.value)) && *ph == PHANDLE_UNDEFINED)
 		{
 			puts("Rule returned NULL! Args were:\n");
 
@@ -388,7 +388,7 @@ protected:
 		else
 		{
 			tlog(2,"::compute() resulted in: \n");
-			printTree(v2h(new_result.value),0,2);
+			printTree(boost::get<pHandle>(new_result.value),0,2);
 			printSubsts(new_result,2);
 
 			return true;
@@ -419,7 +419,7 @@ protected:
 			{
 				bc += "(";
 				foreach(VtreeProvider* bv, vbv)
-					bc += i2str((int)v2h(*bv->getVtree().begin()).value()) + " ";
+					bc += i2str(_v2h(*bv->getVtree().begin())) + " ";
 				bc += ")\n";
 			}
 			tlog(1, bc.c_str());
@@ -573,18 +573,18 @@ or you can create the BITNodeRoot directly.
 	BoundVertex Generalize(Btr<set<BoundVertex> >, Type _resultT) const;
 //	BoundVertex Generalize(const set<BoundVertex>&, Type _resultT) const;
 
-	/// Extraction of an actionable plan from the proof tree of the atom with Handle h.
-	void extract_plan(Handle h) const;
-	void extract_plan(Handle h, unsigned int level, vtree& do_template, vector<Handle>& plan) const;
+	/// Extraction of an actionable plan from the proof tree of the atom with pHandle h.
+	void extract_plan(pHandle h) const;
+	void extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const;
 
 	// Statistics
 	
 //	map<Handle,vector<Handle> > inferred_from;
 //	map<Handle,Rule*> inferred_with;
-	map<Handle,BITNode*> hsource;
+	map<pHandle,BITNode*> hsource;
 	long InferenceNodes;
 
-	void printTrail(Handle h) const;
+	void printTrail(pHandle h) const;
 
 	void print_users(BITNode* b);
 	void print_parents(BITNode* b);
@@ -625,7 +625,7 @@ protected:
 	BITNode* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 						
-	void printTrail(Handle h, unsigned int level) const;
+	void printTrail(pHandle h, unsigned int level) const;
 
 	friend class BITNode;
 };
@@ -711,8 +711,8 @@ public:
                 i->first->print(-10, true);
                 foreach(Vertex v, i->second)
                 {
-                    printf("%lu\n", v2h(v).value());
-                    NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(v2h(v));
+                    printf("%u\n", _v2h(v));
+                    NMPrinter(NMP_BRACKETED|NMP_TYPE_NAME |NMP_NODE_NAME|NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE|NMP_PRINT_TO_FILE, -10).print(_v2h(v));
                 }
                 printf("\n");
             }

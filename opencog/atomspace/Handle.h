@@ -39,9 +39,16 @@ namespace opencog
 class Handle
 {
 
+friend class TLB;
+friend class ListRequest;
+friend class AtomStorage;
+friend class SchemeSmob;
+
 private:
 
     unsigned long _value;
+
+    explicit Handle(const unsigned long h) : _value(h) {};
 
 public:
 
@@ -49,7 +56,6 @@ public:
 
     Handle(const Handle& h) : _value(h._value) {};
     explicit Handle() : _value(UNDEFINED._value) {};
-    explicit Handle(const unsigned long h) : _value(h) {};
     ~Handle() {}
 
     inline unsigned long value(void) const {

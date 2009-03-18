@@ -134,15 +134,15 @@ BoundVertex ArityFreeANDRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 }
 */
 
-void ArityFreeANDRule::DistinguishNodes(const vector<Vertex>& premiseArray, set<Handle>& ANDlinks, set<Handle>& nodes) const
+void ArityFreeANDRule::DistinguishNodes(const vector<Vertex>& premiseArray, set<pHandle>& ANDlinks, set<pHandle>& nodes) const
 {
       const int n = premiseArray.size();
       
     for (int pi = 0; pi < n; pi++)
-        ((((Type)(int)v2h(premiseArray[pi]).value()) == AND_LINK)
+        ((((Type)_v2h(premiseArray[pi])) == AND_LINK)
             ? ANDlinks
             : nodes
-            ).insert(v2h(premiseArray[pi]));
+            ).insert(_v2h(premiseArray[pi]));
 }
 
 } // namespace reasoning

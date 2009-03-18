@@ -32,6 +32,7 @@
 
 #include <boost/signal.hpp>
 
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/HandleEntry.h>
@@ -517,6 +518,14 @@ public:
     }
 
     /**
+     * Merge the existing atom with the given handle with the given truth value.
+     * If the handle is valid, emits atom merged signal.
+     * @param h     Handle of the Atom to be merged
+     * @param tvn   TruthValue to be merged to current atom's truth value.  
+     */
+    void merge(Handle h, const TruthValue& tvn);
+
+    /**
      * Adds an atom to the table, checking for duplicates and merging
      * when necessary.
      *
@@ -527,15 +536,6 @@ public:
      * @return The handle of the newly added atom.
      */
     Handle add(Atom*, bool dont_defer_incoming_links = true) throw (RuntimeException);
-
-    /**
-     * Merges the second atom into the first, then deletes the second
-     * argument. Atoms must be of same type, else exception is thrown.
-     *
-     * @param Original atom.
-     * @param Copy to be merged to original atom.
-     */
-    void merge(Atom*, Atom*);
 
     /**
      * Removes atom from the table.

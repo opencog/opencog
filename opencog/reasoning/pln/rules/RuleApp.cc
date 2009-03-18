@@ -40,7 +40,7 @@ const vtree& RuleApp::getVtree() const
 	return vt_result;
 }*/
 
-BoundVertex RuleApp::compute(const vector<Vertex>& h, Handle CX) const
+BoundVertex RuleApp::compute(const vector<Vertex>& h, pHandle CX) const
 {
 	vector<VtreeProvider*>::iterator next_unused_arg;
 
@@ -53,7 +53,7 @@ BoundVertex RuleApp::compute(const vector<Vertex>& h, Handle CX) const
 	return ret;
 }
 
-BoundVertex RuleApp::compute(Handle CX) const
+BoundVertex RuleApp::compute(pHandle CX) const
 {
     vector<VtreeProvider*> dummy_vp;
     return compute(dummy_vp.end(), dummy_vp.end(), CX);
@@ -66,7 +66,7 @@ RuleApp::~RuleApp() {
 RuleApp::RuleApp(//iAtomSpaceWrapper *_destTable,
         Rule *_root_rule)
         :	Rule(_root_rule->destTable, false, true, "Inference Pathway"),
-         result((Handle)NULL), arg_changes_since_last_compute(true), root_rule(_root_rule)
+         result(PHANDLE_UNDEFINED), arg_changes_since_last_compute(true), root_rule(_root_rule)
 { 
     if (!_root_rule->hasFreeInputArity())
     { int i = 1; }
@@ -87,7 +87,7 @@ bool RuleApp::Bind(int arg_i, VtreeProvider* arg) const
     {
         VtreeProviderWrapper* vtw = dynamic_cast<VtreeProviderWrapper*>(args[arg_i]);
 
-        Handle nh = Handle::UNDEFINED;
+        pHandle nh = PHANDLE_UNDEFINED;
         if (!vtw || vtw->val != vtree(nh))
         {
             assert(0);
@@ -146,7 +146,7 @@ set<Rule::MPs> RuleApp::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
         else //If the arg is a non-fulfilled (ie. ==NULL) vtree, assume it from my own input vector (ret_i)
         {
             const VtreeProviderWrapper* vtw = dynamic_cast<const VtreeProviderWrapper*>(*ai);
-            Handle nh=Handle::UNDEFINED;
+            pHandle nh=PHANDLE_UNDEFINED;
             if (vtw->val == vtree(nh))
                 final_input_args.push_back(*ret_i);
         }

@@ -35,17 +35,17 @@ ImplicationTailExpansionRule::ImplicationTailExpansionRule(reasoning::iAtomSpace
 : Rule(_destTable, false, true, "ImplicationTailExpansionRule")
 {
     inputFilter.push_back(meta(
-        new tree<Vertex>(mva((Handle)
+        new tree<Vertex>(mva((pHandle)
             IMPLICATION_LINK,
-                mva((Handle)ATOM),
-                mva((Handle)ATOM)
+                mva((pHandle)ATOM),
+                mva((pHandle)ATOM)
         ))
     ));
     inputFilter.push_back(meta(
-        new tree<Vertex>(mva((Handle)
+        new tree<Vertex>(mva((pHandle)
             IMPLICATION_LINK,
-                mva((Handle)ATOM),
-                mva((Handle)ATOM)
+                mva((pHandle)ATOM),
+                mva((pHandle)ATOM)
         ))
     ));
 }
@@ -53,7 +53,7 @@ ImplicationTailExpansionRule::ImplicationTailExpansionRule(reasoning::iAtomSpace
 Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
-    if (!(nm->inheritsType(nm->getType(v2h(*outh->begin())), IMPLICATION_LINK)))
+    if (!(nm->inheritsType(nm->getType(_v2h(*outh->begin())), IMPLICATION_LINK)))
         return Rule::setOfMPs();
         
     tree<Vertex>::sibling_iterator hs1 = outh->begin(outh->begin());
@@ -61,21 +61,21 @@ Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overr
     tree<Vertex>::sibling_iterator hs11 = outh->begin(hs1);
     tree<Vertex>::sibling_iterator hs10 =hs11++;
 
-cprintf(0,"T:%d\n", (Type)(int)v2h(*hs1).value());
+cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
     
     if (hs0  == outh->end(outh->begin()) ||
         hs11 == outh->end(hs1) ||
-        !(nm->inheritsType(nm->getType(v2h(*hs1)), AND_LINK)) )
+        !(nm->inheritsType(nm->getType(_v2h(*hs1)), AND_LINK)) )
         return Rule::setOfMPs();
 
     /// A => (B&C)
     
     MPs ret;
 
-    ret.push_back(BBvtree(new BoundVTree(mva((Handle)IMPLICATION_LINK, 
+    ret.push_back(BBvtree(new BoundVTree(mva((pHandle)IMPLICATION_LINK, 
             mva(*hs0),
             vtree(hs10)))));
-    ret.push_back(BBvtree(new BoundVTree(mva((Handle)IMPLICATION_LINK, 
+    ret.push_back(BBvtree(new BoundVTree(mva((pHandle)IMPLICATION_LINK, 
             mva(*hs0),
             vtree(hs11)))));
 //      ret.push_back(BBvtree(new BoundVTree(myvar)));
@@ -85,7 +85,7 @@ cprintf(0,"T:%d\n", (Type)(int)v2h(*hs1).value());
     return makeSingletonSet(ret);
 }
 
-BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
 
@@ -93,18 +93,18 @@ BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseA
         printTree(v2h(premiseArray[i]),0,0);
     getc(stdin);getc(stdin);*/
     
-    vtree res(mva((Handle)IMPLICATION_LINK,
-        mva(nm->getOutgoing(v2h(premiseArray[0]))[0]),
-        mva((Handle)AND_LINK,
-            mva(nm->getOutgoing(v2h(premiseArray[0]))[1]),
-            mva(nm->getOutgoing(v2h(premiseArray[1]))[1])
+    vtree res(mva((pHandle)IMPLICATION_LINK,
+        mva(nm->getOutgoing(_v2h(premiseArray[0]))[0]),
+        mva((pHandle)AND_LINK,
+            mva(nm->getOutgoing(_v2h(premiseArray[0]))[1]),
+            mva(nm->getOutgoing(_v2h(premiseArray[1]))[1])
         )
     ));
         
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
     
-    return Vertex(destTable->addAtom(res, GET_ATW->getTV(v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
+    return Vertex(destTable->addAtom(res, GET_ATW->getTV(_v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
 }
 
 } // namespace reasoning

@@ -33,7 +33,7 @@ class LookupRule : public Rule
 protected:
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
 	{
 		return premiseArray[0];
 	}

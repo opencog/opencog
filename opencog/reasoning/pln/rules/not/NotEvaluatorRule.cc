@@ -34,15 +34,15 @@ namespace reasoning
 NotEvaluatorRule::NotEvaluatorRule(reasoning::iAtomSpaceWrapper *_destTable)
     : GenericRule<reasoning::NotFormula>(_destTable, true, "NotEvaluatorRule")
 {
-    inputFilter.push_back(meta(new tree<Vertex>(mva((Handle)NOT_LINK,
-                                                    mva((Handle)ATOM)))
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
+                                                    mva((pHandle)ATOM)))
                                ));
 }
 
 meta NotEvaluatorRule::i2oType(const vector<Vertex>& h) const
 {
     assert(1 == h.size());
-    return meta(new tree<Vertex>(mva((Handle)NOT_LINK,
+    return meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
                                      tree<Vertex>(h[0])
                                      )));
 }
@@ -51,7 +51,7 @@ meta NotEvaluatorRule::i2oType(const vector<Vertex>& h) const
 Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
                                               bool& overrideInputFilter) const
 {
-    if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), NOT_LINK))
+    if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), NOT_LINK))
         return Rule::setOfMPs();
 
     LOG(-10, "SHOULD NOT BE HERE!");

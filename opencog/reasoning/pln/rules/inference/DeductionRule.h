@@ -38,14 +38,14 @@ class DeductionRule : public GenericRule<DeductionFormula>
 	{
 		assert(h.size()==2);
 		AtomSpaceWrapper *nm = GET_ATW;	
-		assert(nm->getArity(v2h(h[0]))==2);
-		assert(nm->getArity(v2h(h[1]))==2);
-		assert(nm->getOutgoing(v2h(h[0]),0) != Handle::UNDEFINED);
-		assert(nm->getOutgoing(v2h(h[1]),1) != Handle::UNDEFINED);
+		assert(nm->getArity(boost::get<pHandle>(h[0]))==2);
+		assert(nm->getArity(boost::get<pHandle>(h[1]))==2);
+		assert(nm->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
+		assert(nm->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
 	
-		return meta(new tree<Vertex>(mva(Handle(InclusionLink), 
-						vtree(Vertex(nm->getOutgoing(v2h(h[0]),0))),
-						vtree(Vertex(nm->getOutgoing(v2h(h[1]),1)))
+		return meta(new tree<Vertex>(mva(pHandle(InclusionLink), 
+						vtree(Vertex(nm->getOutgoing(boost::get<pHandle>(h[0]),0))),
+						vtree(Vertex(nm->getOutgoing(boost::get<pHandle>(h[1]),1)))
 				)));
 	}
 	bool validate2 (Rule::MPs& args) const
@@ -58,8 +58,8 @@ class DeductionRule : public GenericRule<DeductionFormula>
 
 		assert(premiseArray.size()==2);
 
-		std::vector<Handle> nodesAB = GET_ATW->getOutgoing(v2h(premiseArray[0]));
-		std::vector<Handle> nodesBC = GET_ATW->getOutgoing(v2h(premiseArray[1]));
+		pHandleSeq nodesAB = GET_ATW->getOutgoing(boost::get<pHandle>(premiseArray[0]));
+		pHandleSeq nodesBC = GET_ATW->getOutgoing(boost::get<pHandle>(premiseArray[1]));
 
 		//assert(equal(nodesAB[1], nodesBC[0]));
 
@@ -71,16 +71,16 @@ class DeductionRule : public GenericRule<DeductionFormula>
 			printTree(v2h(premiseArray[1]),0,0);
 #else 
             NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-            printer.print(v2h(premiseArray[0]));
-            printer.print(v2h(premiseArray[1]));
+            printer.print(_v2h(premiseArray[0]));
+            printer.print(_v2h(premiseArray[1]));
 #endif             
 			getc(stdin);getc(stdin);
 			return NULL;
 		}
 
 		AtomSpaceWrapper *nm = GET_ATW;
-		tvs[0] = (TruthValue*) &(nm->getTV(v2h(premiseArray[0])));
-		tvs[1] = (TruthValue*) &(nm->getTV(v2h(premiseArray[1])));
+		tvs[0] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[0])));
+		tvs[1] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[1])));
 		tvs[2] = (TruthValue*) &(nm->getTV(nodesAB[0]));
 		tvs[3] = (TruthValue*) &(nm->getTV(nodesAB[1])); //== nodesBC[0]);
 		tvs[4] = (TruthValue*) &(nm->getTV(nodesBC[1]));
@@ -99,20 +99,20 @@ public:
 		
 		GenericRule<DeductionFormula>::inputFilter.push_back(meta(
 				new tree<Vertex>(
-				mva((Handle)InclusionLink,
-					mva((Handle)ATOM),
-					mva((Handle)ATOM)))
+				mva((pHandle)InclusionLink,
+					mva((pHandle)ATOM),
+					mva((pHandle)ATOM)))
 			));		
 		GenericRule<DeductionFormula>::inputFilter.push_back(meta(
 				new tree<Vertex>(
-				mva((Handle)InclusionLink,
-					mva((Handle)ATOM),
-					mva((Handle)ATOM)))
+				mva((pHandle)InclusionLink,
+					mva((pHandle)ATOM),
+					mva((pHandle)ATOM)))
 			));		
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if ( !GET_ATW->inheritsType((Type)(int)v2h(*outh->begin()).value(), InclusionLink))
+		if ( !GET_ATW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
 			return Rule::setOfMPs();
 
 		std::string varname = ("$"+GetRandomString(10));
@@ -123,10 +123,10 @@ public:
 		
 		Vertex var = CreateVar(GenericRule<DeductionFormula>::destTable);
 		
-		ret.push_back(BBvtree(new BoundVTree(mva(Vertex((Handle)InclusionLink),
+		ret.push_back(BBvtree(new BoundVTree(mva(Vertex((pHandle)InclusionLink),
 			tree<Vertex>(outh->begin(top0)),
 			mva(var)))));
-		ret.push_back(BBvtree(new BoundVTree(mva(Vertex((Handle)InclusionLink),
+		ret.push_back(BBvtree(new BoundVTree(mva(Vertex((pHandle)InclusionLink),
 			mva(var),
 			tree<Vertex>(outh->last_child(top0))		
 			))));

@@ -40,7 +40,7 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
         tree<Vertex>::iterator top = outh->begin();
         
-        if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*top)), OR_LINK) ||
+        if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*top)), OR_LINK) ||
             top.number_of_children() > 2)
             return Rule::setOfMPs();
 
@@ -74,7 +74,7 @@ cprintf(3, "ORRule::formatTVarray...");
         int i = 0, ii=0;
         for (i = 0; i < N; i++)
         {
-            tvs[ii++] = (TruthValue*) &(GET_ATW->getTV(v2h(premiseArray[i])));
+            tvs[ii++] = (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[i])));
 cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
         }
         
@@ -84,14 +84,14 @@ cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
 #if USE_INCLUSION_EXCLUSION_IN_OR_RULE
 
 cprintf(4,"Look up ANDLINK for args #%d,%d\n", i,j);
-                TableGather comb(mva((Handle)AND_LINK,
+                TableGather comb(mva((pHandle)AND_LINK,
                                     mva(premiseArray[i]),
                                     mva(premiseArray[j])
                                 ), destTable);
 cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
                 tvs[ii++] = 
                                 (!comb.empty()
-                                ? getTruthValue(v2h(comb[0]))
+                                ? getTruthValue(_v2h(comb[0]))
 #if 0
 // Welter's comment: this change is waiting for Ari's aproval 
                                 : TruthValue::TRIVIAL_TV());
@@ -107,7 +107,7 @@ cprintf(4, "ORRule::formatTVarray OK.");
 
 meta ORRule::i2oType(const vector<Vertex>& h) const
 {
-        meta ret(new tree<Vertex>(mva((Handle)OR_LINK)));
+        meta ret(new tree<Vertex>(mva((pHandle)OR_LINK)));
 
         for (uint i=0; i < h.size(); i++)
             ret->append_child(ret->begin(), mva(h[i]).begin());

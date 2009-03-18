@@ -30,6 +30,7 @@
 #include <exception>
 #include <functional>
 #include <tr1/functional>
+#include <algorithm>
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
@@ -128,8 +129,3 @@ const std::string& ClassServer::getTypeName(Type type)
     return nullString;
 }
 
-// TODO: Implement smarter mapping from atom types to BuiltInTypeHandle IDs?
-Handle ClassServer::typeDesignatorHandle(Type T)
-{
-    return Handle(T);
-}

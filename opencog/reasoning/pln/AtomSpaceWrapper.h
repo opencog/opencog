@@ -58,7 +58,7 @@
 namespace reasoning
 {
 //! Construct a vtree around Handle h
-vtree make_vtree(Handle h);
+vtree make_vtree(pHandle h);
 
 typedef std::pair<Handle,VersionHandle> vhpair;
 
@@ -184,16 +184,13 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     //! Bidrectional map with right index being PLN "handle", left a <handle,
     //! versionhandle> pair.
     //!
-    //! @todo Handle is used, but eventually all references to Handle in PLN
-    //! should be replaced by pHandle (typedefed to long int) to ensure
-    //! distinctness from general OpenCog Handles... which will 
-    //! change from long int to another type in the future. Or, PLN should be
-    //! adapted to use vhpairs directly instead of relying on the AtomSpaceWrapper.
-    // vhmap_t vhmap;
-    
-    typedef std::map< Handle, vhpair > vhmap_t;
+    //! @todo pHandle (typedefed above) is used to ensure
+    //! distinctness from general OpenCog Handles... which is now defined  
+    //! as a class. In the future. PLN may be adapted to use vhpairs
+    //! directly instead of relying on the AtomSpaceWrapper.
+    typedef std::map< pHandle, vhpair > vhmap_t;
     typedef vhmap_t::value_type vhmap_pair_t;
-    typedef std::map< vhpair, Handle > vhmap_reverse_t;
+    typedef std::map< vhpair, pHandle > vhmap_reverse_t;
     typedef vhmap_reverse_t::value_type vhmap_reverse_pair_t;
     //! Instead of above bimap stuff, we will temporarily use two normal maps
     vhmap_t vhmap;
@@ -213,21 +210,16 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     //    return i;
     //}
 
-    // TODO: +1000 to be safe, but should check that no extra types are
-    // defined elsewhere and just use +1.
-    //const static unsigned int mapOffset = NOTYPE + 100000;
-    const static unsigned int mapOffset = (1 << (8 * sizeof(Type))); // NOTYPE+1
-
     //! Add a tree of non real atoms to AtomSpace.
     //! @param v of atoms to add.
     //! @param vi iterator to start adding atoms from
     //! @param tvn what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
     //! @param managed some kind of mechanism to manage memory
-    Handle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn, bool fresh, bool managed);
+    pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn, bool fresh, bool managed);
 
-    bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
-    bool isSubcontextOf(const Handle sub, const Handle super);
+    //bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
+    //bool isSubcontextOf(const Handle sub, const Handle super);
 
     //! used by filter_type to merge collections of handles.
     template<class T>
@@ -250,17 +242,17 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
 
 public:
 
-    //! Convert a specific VersionHandled TruthValue to a fake handle
-    Handle realToFakeHandle(const Handle h, const VersionHandle vh);
+    //! Convert a specific VersionHandled TruthValue to a pln handle
+    pHandle realToFakeHandle(const Handle h, const VersionHandle vh);
     //! Convert a a real handle into a fake handle for each VersionedHandled TV
-    HandleSeq realToFakeHandle(const Handle hs);
-    //! Convert a HandleSeq of fake handles to real, optionally expanding to
+    pHandleSeq realToFakeHandle(const Handle hs);
+    //! Convert a pHandleSeq of pln handles to real, optionally expanding to
     //! include every VersionHandled TV in each real handle
-    HandleSeq realToFakeHandles(HandleSeq hs, bool expand=false);
+    pHandleSeq realToFakeHandles(HandleSeq hs, bool expand=false);
     //! Match each context in the outgoing set of "context" with the handles
-    HandleSeq realToFakeHandles(Handle h, Handle context);
+    pHandleSeq realToFakeHandles(Handle h, Handle context);
 
-    vhpair fakeToRealHandle(const Handle f) const;
+    vhpair fakeToRealHandle(const pHandle f) const;
 
     //! Which XML files have been loaded by PLN to populate the AtomSpace
     set<std::string> loadedFiles;
@@ -285,22 +277,22 @@ public:
     }
 
     //! Get handles with type t and name str optionally subtypes as well
-    virtual Btr<set<Handle> > getHandleSet(Type T, const string& name,
+    virtual Btr<set<pHandle> > getHandleSet(Type T, const string& name,
             bool subclass = false);
     //! Get handle of node with type t and name str
-    Handle getHandle(Type t,const std::string& str);
+    pHandle getHandle(Type t,const std::string& str);
     //! Get handle of link with type t and outgoing set 
-    Handle getHandle(Type t,const HandleSeq& outgoing);
+    pHandle getHandle(Type t,const pHandleSeq& outgoing);
 
-    std::vector<Handle> getOutgoing(const Handle h);
+    pHandleSeq getOutgoing(const pHandle h);
 
-    Handle getOutgoing(const Handle h, const int i);
+    pHandle getOutgoing(const pHandle h, const int i);
 
     //! Get the incoming set for an atom
-    HandleSeq getIncoming(const Handle h);
+    pHandleSeq getIncoming(const pHandle h);
 
-    Type getType(const Handle h) const;
-    std::string getName(const Handle h) const;
+    Type getType(const pHandle h) const;
+    std::string getName(const pHandle h) const;
 
     //! Reset the AtomSpace
     void reset();
@@ -315,52 +307,52 @@ public:
     bool loadOther(const std::string& path, bool replaceOld);
 
     //! Add atom from tree vertex
-    Handle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
+    pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
             bool managed=true);
     //! Add link
-    virtual Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+    virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
             bool fresh=false, bool managed=true)=0;
     //! Add node
-    virtual Handle addNode(Type T, const std::string& name,
+    virtual pHandle addNode(Type T, const std::string& name,
             const TruthValue& tvn, bool fresh=false, bool managed=true)=0;
 
     //! Remove Atom
-    virtual bool removeAtom(Handle h);
+    virtual bool removeAtom(pHandle h);
 
     //! return a random handle of type T
-    Handle getRandomHandle(Type T);
+    pHandle getRandomHandle(Type T);
 
     //! get a number of high STI handles
-    std::vector<Handle> getImportantHandles(int number);
+    pHandleSeq getImportantHandles(int number);
 
     //! Adds handle h and linked nodes (if h is a link) to AtomSpace again with
     //! fresh set to true
-    Handle freshened(Handle h, bool managed);
+    pHandle freshened(pHandle h, bool managed);
 
     //! Whether the handle h has high enough TruthValue to be consider a binary True.
     //! @todo move to TruthValue classes
-    bool binaryTrue(Handle h);
+    bool binaryTrue(pHandle h);
 
     //! @todo Move the below conversion tools in a Converter class
     
     //! Wrap h in a NOT_LINK and return that 
-    Handle invert(Handle h);
+    pHandle invert(pHandle h);
     //! Convert from AND to OR link
-    Handle AND2ORLink(Handle& andL, Type _ANDLinkType, Type _ORLinkType);
+    pHandle AND2ORLink(pHandle& andL, Type _ANDLinkType, Type _ORLinkType);
     //! Convert from Equivalence to Implication link
-    hpair Equi2ImpLink(Handle& exL);
+    hpair Equi2ImpLink(pHandle& exL);
     //! Convert from Existance to For All link
-    Handle Exist2ForAllLink(Handle& exL);
+    pHandle Exist2ForAllLink(pHandle& exL);
     //! Convert from OR to AND link
-    Handle OR2ANDLink(Handle& andL);
+    pHandle OR2ANDLink(pHandle& andL);
     //! Convert from AND to OR link
-    Handle AND2ORLink(Handle& andL);
+    pHandle AND2ORLink(pHandle& andL);
     
     //! Add Link via dummy contexts method
-    Handle addLinkDC(Type t, const HandleSeq& hs, const TruthValue& tvn,
+    pHandle addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed);
     //! Add Node via dummy contexts method
-    Handle addNodeDC(Type t, const string& name, const TruthValue& tvn,
+    pHandle addNodeDC(Type t, const string& name, const TruthValue& tvn,
             bool fresh, bool managed);
 
     /** Add concrete atom using dummy contexts if it already exists
@@ -369,40 +361,40 @@ public:
      * nodes. This can be ensured by using the appropriate addNodeDC or
      * addNodeDC classes.
      */
-    Handle addAtomDC(Atom &a, bool fresh, bool managed, HandleSeq contexts = HandleSeq());
+    pHandle addAtomDC(Atom &a, bool fresh, bool managed, HandleSeq contexts = HandleSeq());
     Handle getNewContextLink(Handle h, HandleSeq destContexts);
 
-    Handle directAddLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+    pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);
 
     // Generate CrispTheoremRules for all crisp theorems
     void makeTheorems();
 
     //! returns whether the type of h is T or inherits from T
-    bool isSubType(Handle h, Type T);
+    bool isSubType(pHandle h, Type T);
     //! returns whether 
     bool inheritsType(Type subT, Type superT);
 
     void HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest) const;
-    const TruthValue& getTV(Handle h);
+    const TruthValue& getTV(pHandle h);
 
-    bool isReal(const Handle h) const;
+    bool isType(const pHandle h) const;
 
     const TimeServer& getTimeServer() const;
 
     /** Retrieve the arity of a given link */
-    int getArity(Handle) const;
+    int getArity(pHandle) const;
 
-    HandleSeq filter_type(Type t);
+    pHandleSeq filter_type(Type t);
 
     bool equal(const HandleSeq& lhs, const HandleSeq& rhs);
     bool equal(Handle A, Handle B);
 
-    int getFirstIndexOfType(HandleSeq hs, Type T) const;
+    int getFirstIndexOfType(pHandleSeq hs, Type T) const;
     bool symmetricLink(Type T);
-    bool isEmptyLink(Handle h);
-    bool hasFalsum(HandleSeq hs);
-    bool containsNegation(Handle ANDlink, Handle h);
+    bool isEmptyLink(pHandle h);
+    bool hasFalsum(pHandleSeq hs);
+    bool containsNegation(pHandle ANDlink, pHandle h);
     Type getTypeV(const tree<Vertex>& _target) const;
 
 // TODELETE
@@ -433,9 +425,9 @@ public:
     FIMATW() : next_free_pat_id(30001) {}
     virtual ~FIMATW() {}
 
-    Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+    pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true);
-    Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
+    pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
 // TODELETE:
 //  FIMATW(combo::NMCore* core) : AtomSpaceWrapper(core), next_free_pat_id(30001) {}
@@ -466,9 +458,9 @@ public:
         return *instance;
     }
     
-    Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+    pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true);
-    Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
+    pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
 
     // TODELETE:
@@ -488,9 +480,9 @@ public:
         return *instance;
     }
     
-    Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn,
+    pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
             bool fresh, bool managed=true);
-    Handle addNode(Type T, const std::string& name, const TruthValue& tvn,
+    pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh, bool managed=true);
     //Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
 

@@ -46,13 +46,13 @@ public:
         : Rule(_destTable, _FreeInputArity, true, _name) { }
 
     BoundVertex compute(const vector<Vertex>& premiseArray,
-                        Handle CX = NULL) const {
+                        pHandle CX = PHANDLE_UNDEFINED) const {
         const int n = (const int) premiseArray.size();
 
         printf("<Generic rule args> ");
         for (int j = 0;j < n;j++) {
-            const Handle *ph = boost::get<Handle>(&premiseArray[j]);
-            printf("[%lu] ", (ph->value() ? ph->value() : 0));
+            const pHandle *ph = boost::get<pHandle>(&premiseArray[j]);
+            printf("[%u] ", *ph);
             //printTree(premiseArray[j],0,3);
         }
         printf(" </Generic rule args>\n");
@@ -66,7 +66,7 @@ public:
 
         if (!tvs) {
             printf("Warning only: GenericRule: TV array formatting failure.");
-            return Vertex((Handle)NULL);
+            return Vertex(PHANDLE_UNDEFINED);
         }
 
         printf("Computing TV... \n");
@@ -77,14 +77,12 @@ public:
         printf("Res freed.\n");
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
-        Handle ret = destTable->addAtom(*i2oType(premiseArray),
+        pHandle ret = destTable->addAtom(*i2oType(premiseArray),
                                         *retTV,
                                         true);
 //   false);
 
         delete retTV;
-
-        assert(ret != Handle::UNDEFINED);
 
         printf("Atom added.");
 

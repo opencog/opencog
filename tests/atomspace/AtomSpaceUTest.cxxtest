@@ -40,12 +40,6 @@ using namespace opencog;
 using std::find;
 
 #define NUM_VHS 4
-VersionHandle VHs[NUM_VHS] = {
-    NULL_VERSION_HANDLE,
-    VersionHandle(HYPOTHETICAL, Handle(1)),
-    VersionHandle(HYPOTHETICAL, Handle(2)),
-    VersionHandle(CONTEXTUAL,   Handle(1)),
-};
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
@@ -123,7 +117,8 @@ class AtomSpaceUTest :  public CxxTest::TestSuite
 private:
 
     static AtomSpace *atomSpace;
-//AtomSpace *atomSpace;
+    VersionHandle VHs[NUM_VHS];
+
 
 public:
     AtomSpaceUTest() {
@@ -132,7 +127,13 @@ public:
     }
 
     void setUp() {
+// Number of nodes added for setting version handles
+#define NUM_VH_NODES 3 
         atomSpace = new AtomSpace();
+	VHs[0] = NULL_VERSION_HANDLE;
+        VHs[1] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL1"));
+        VHs[2] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL2"));
+        VHs[3] = VersionHandle(CONTEXTUAL, atomSpace->addNode(CONCEPT_NODE, "CONTEXTUAL"));
     }
 
     void tearDown() {
@@ -255,7 +256,7 @@ public:
         }
         //logger().debug("Primary and versioned TVS checked\n");
 
-        TS_ASSERT(atomSpace->Nodes() == NUM_NODES);
+        TS_ASSERT(atomSpace->Nodes() == (NUM_NODES + NUM_VH_NODES));
         TS_ASSERT(atomSpace->Links() == 8);
 
         // Test filters
@@ -280,9 +281,9 @@ public:
             switch (vhIdx) {
             case 0:
                 TS_ASSERT(high_mean.size() == 4);
-                TS_ASSERT(nodes.size() == NUM_NODES);
+                TS_ASSERT(nodes.size() == NUM_NODES + NUM_VH_NODES);
                 TS_ASSERT(links.size() == 8);
-                TS_ASSERT(all.size() == 14);
+                TS_ASSERT(all.size() == 14 + NUM_VH_NODES);
                 break;
             case 1:
                 TS_ASSERT(high_mean.size() == 2);
@@ -403,9 +404,9 @@ public:
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
 
 
-        tree<Vertex>* tr = mva(TLB::getHandle((Atom *)EVALUATION_LINK),
+        tree<Vertex>* tr = mva(EVALUATION_LINK,
                                mva(h1, NULL),
-                               mva(TLB::getHandle((Atom *)LIST_LINK),
+                               mva(LIST_LINK,
                                    mva(h2, NULL),
                                    mva(h3, NULL),
                                    NULL

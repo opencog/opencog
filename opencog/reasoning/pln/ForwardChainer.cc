@@ -43,7 +43,7 @@ ForwardChainer::~ForwardChainer()
 
 int ForwardChainer::fillStack(int number, bool random)
 {
-    std::set<Handle> newSeeds;
+    std::set<pHandle> newSeeds;
     // create seed stack (using random or based on attention)
     if (random) {
         while (number > 0) {
@@ -52,7 +52,7 @@ int ForwardChainer::fillStack(int number, bool random)
         }
     } else {
         // use atomspace to get top STI atoms
-        HandleSeq hs = GET_ATW->getImportantHandles(number);
+        pHandleSeq hs = GET_ATW->getImportantHandles(number);
         copy(hs.begin(), hs.end(), back_inserter(seedStack));
     }
     // remove duplicates from stack
@@ -76,14 +76,14 @@ RandGen* ForwardChainer::getRNG() {
     return rng;
 }
 
-Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
+pHandle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
 {
-    Handle a;
+    pHandle a;
     int counter = 0;
     const int maxTries = 50; // Should only be a problem with very small atomSpaces
                         // but guard against it.
     cout << "FWDCHAIN Getting random handle" << endl;
-    while (a == Handle::UNDEFINED && counter < maxTries) {
+    while (a == PHANDLE_UNDEFINED && counter < maxTries) {
         if (getRNG()->randfloat() <= probStack) {
             a = seedStack[(int) getRNG()->randfloat() * seedStack.size()];
         } else {
@@ -91,8 +91,8 @@ Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
         }
         // Check if a is already in args
         foreach(Vertex v, args) {
-            if (boost::get<Handle>(v) == a) {
-                a = Handle::UNDEFINED;
+            if (boost::get<pHandle>(v) == a) {
+                a = PHANDLE_UNDEFINED;
                 break;
             }
         }
@@ -104,25 +104,25 @@ Handle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
     return a;
 }
 
-HandleSeq ForwardChainer::getLocalLink(Handle lh, const std::vector< Vertex > &args) {
+pHandleSeq ForwardChainer::getLocalLink(pHandle lh, const std::vector< Vertex > &args) {
     AtomSpaceWrapper *atw = GET_ATW;
-    HandleSeq choices;
+    pHandleSeq choices;
     cout << "get local link" <<endl;
     // foreach outgoing dest (currently only supports target of lh)
     // check link is the source in the args... since this is a hack and Rules
     // don't check ordering when validating.
-    if ( lh != v2h(args[0]) ) {
+    if ( lh != _v2h(args[0]) ) {
         cout << "error: lh is not the source." <<endl;
         return choices;
     }
     // if lh is a link:
     if (atw->isSubType(lh,LINK)) {
         cout << "lh is a link" <<endl;
-        Handle junction = atw->getOutgoing(lh,1);
+        pHandle junction = atw->getOutgoing(lh,1);
         // Only one outgoing if the link is asymmetric?
-        HandleSeq inhs = atw->getIncoming(junction);
+        pHandleSeq inhs = atw->getIncoming(junction);
         // foreach incoming
-        foreach (Handle inh, inhs) {
+        foreach (pHandle inh, inhs) {
             if (inh != lh && atw->getOutgoing(inh,0) == junction) {
                 // add to vector
                 choices.push_back(inh);
@@ -147,7 +147,7 @@ void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
     cout << " >";
 }
 
-HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
+pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
 {
     // 4. For each remaining arg slot of R, find an atom A with 
     // TV.confidence > min_confidence that satisfies the filter, where the probability
@@ -166,8 +166,8 @@ HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
     // set_of_invalid_rules)
     rp.setSeed(s);
     Rule* r = NULL;
-    std::vector<Handle> results;
-    Handle out;
+    pHandleSeq results;
+    pHandle out;
     while (maxRuleApps && (r = rp.nextRule())) {
         vector<Vertex> cleanArgs;
         int argumentAttempts = 2;
@@ -176,7 +176,7 @@ HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
         cout << "FWDCHAIN Trying rule " << r->name << endl;
         cleanArgs.resize(filterSize);
         cleanArgs[rp.getSeedIndex()] = s;
-        HandleSeq choices = getLocalLink(s,cleanArgs);
+        pHandleSeq choices = getLocalLink(s,cleanArgs);
         do {
             vector<Vertex> args(cleanArgs);
             // Fill slot in the arguments selected by the rule provider
@@ -191,7 +191,7 @@ HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
                 if (i != rp.getSeedIndex()) {
                     // random selection
                     // TODO: sort based on strength and exponential random select
-                    Handle randArg;
+                    pHandle randArg;
                     if (choices.size() > 0) {
                         int index = (int) (getRNG()->randfloat() * choices.size() );
                         randArg = choices[index];
@@ -222,7 +222,7 @@ HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
         }
 
         Vertex V=((r->compute(cleanArgs)).GetValue());
-        out=boost::get<Handle>(V);
+        out=boost::get<pHandle>(V);
         const TruthValue& tv=GET_ATW->getTV(out);
         //cout<<printTV(out)<<'\n';
 
@@ -234,15 +234,15 @@ HandleSeq ForwardChainer::fwdChainSeed(const Handle s, int maxRuleApps)
             np.print(out);
         } else {
             // Remove atom if not satisfactory
-            GET_ATW->removeAtom(v2h(V));
+            GET_ATW->removeAtom(_v2h(V));
         }
     }
     return results;
 }
 
-HandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
+pHandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
 {
-    HandleSeq results;
+    pHandleSeq results;
     // save the length of the stack so that the new seed atoms don't
     // get confused with the ones we're about to process
     int seedStackEnd = seedStack.size();
@@ -251,14 +251,14 @@ HandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
 
     cout << "FWDCHAIN Forward chaining through stack - " << seedStackEnd << \
         " seeds to try." << endl;
-    Handle seed;
+    pHandle seed;
     while (maxRuleApps && seedStackEnd > 0 ) {
         seed = seedStack.front();
         seedStack.pop_front();
         //opencog::logger().info("Forward chaining on seed %u", seed);
         cout << "FWDCHAIN Forward chaining on seed " << seed << endl;
         np.print(seed);
-        HandleSeq hs = fwdChainSeed(seed, 1);
+        pHandleSeq hs = fwdChainSeed(seed, 1);
         copy(hs.begin(), hs.end(), back_inserter(results));
         cout << "FWDCHAIN Got " << hs.size() << " results from seed" << endl;
         maxRuleApps--;

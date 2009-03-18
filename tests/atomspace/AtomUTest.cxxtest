@@ -24,6 +24,7 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -47,8 +48,16 @@ class AtomUTest :  public CxxTest::TestSuite
 {
 private:
 
+    AtomSpace as;
+    std::vector<Handle> sortedHandles; 
+
+
 public:
     AtomUTest() {
+        sortedHandles.push_back(as.addNode(CONCEPT_NODE, "0"));
+        sortedHandles.push_back(as.addNode(CONCEPT_NODE, "1"));
+        sortedHandles.push_back(as.addNode(CONCEPT_NODE, "2"));
+        std::sort(sortedHandles.begin(), sortedHandles.end(), std::less<Handle>());
     }
 
     void setUp() {
@@ -59,24 +68,24 @@ public:
 
     void testConstructor() {
         std::vector<Handle> outgoing;
-        outgoing.push_back(Handle (10));
-        outgoing.push_back(Handle (5));
-        outgoing.push_back(Handle (9));
+        outgoing.push_back(sortedHandles[2]);
+        outgoing.push_back(sortedHandles[0]);
+        outgoing.push_back(sortedHandles[1]);
 
         Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
         Link *link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
 
         // Specific tests for ordered and unnordered links:
-        TS_ASSERT(link->getOutgoingSet()[0] == Handle (10));
-        TS_ASSERT(link->getOutgoingSet()[1] == Handle (5));
-        TS_ASSERT(link->getOutgoingSet()[2] == Handle (9));
+        TS_ASSERT(link->getOutgoingSet()[0] == sortedHandles[2]);
+        TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[0]);
+        TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[1]);
         atom = new ConcreteAtom(UNORDERED_LINK, outgoing);
         link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
-        TS_ASSERT(link->getOutgoingSet()[0] == Handle (5));
-        TS_ASSERT(link->getOutgoingSet()[1] == Handle (9));
-        TS_ASSERT(link->getOutgoingSet()[2] == Handle (10));
+        TS_ASSERT(link->getOutgoingSet()[0] == sortedHandles[0]);
+        TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[1]);
+        TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[2]);
     }
 
 };

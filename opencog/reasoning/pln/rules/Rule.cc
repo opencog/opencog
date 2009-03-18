@@ -51,21 +51,21 @@ Rule::~Rule()
         delete i->second;*/
 }
 
-BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
+BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX) const
 {
     bindingsT h_b;
     AtomSpaceWrapper *nm = GET_ATW;
     foreach(const BoundVertex& bv, h)
     {
-        if (!nm->isReal(v2h(bv.value)))
+        if (nm->isType(_v2h(bv.value)))
         {
             puts("!isReal");
-            printf("%lu\n", v2h(bv.value).value()); 
-            NMPrinter(NMP_ALL)(v2h(bv.value), -10);
+            printf("%u\n", _v2h(bv.value)); 
+            NMPrinter(NMP_ALL)(_v2h(bv.value), -10);
         }
 
-        assert(nm->isReal(v2h(bv.value)));
-        assert(nm->getType(v2h(bv.value)) != FW_VARIABLE_NODE);
+        assert(!nm->isType(_v2h(bv.value)));
+        assert(nm->getType(_v2h(bv.value)) != FW_VARIABLE_NODE);
     }
     
     vector<Vertex> rule_args(h.size());
@@ -77,7 +77,7 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, Handle CX) const
         if (bv->bindings) {
             insert_with_consistency_check(*bindings_of_all_args, bv->bindings->begin(), bv->bindings->end());
 
-          cprintf(3,"Bind [%d]:\n", v2h(bv->value).value());
+          cprintf(3,"Bind [%d]:\n", _v2h(bv->value));
 
             foreach(hpair phh, *bv->bindings)
             {
@@ -124,12 +124,12 @@ bool Rule::validate(const vector<Vertex>& h) const
     for (uint i = 0; i < n; i++)
     {
         vertex_wrapper mp(inputFilter[i]);
-        Handle h2 = v2h(myh[i]);
+        pHandle h2 = _v2h(myh[i]);
         if (!(mp(h2)))
         {
             uint    r=0;
             for (   r = i+1;
-                    r < n && !mp(v2h(myh[r]));
+                    r < n && !mp(_v2h(myh[r]));
                     r++);
             if (r < n)
                 std::swap(myh[i], myh[r]);
@@ -142,7 +142,7 @@ bool Rule::validate(const vector<Vertex>& h) const
 #else 
                 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
                 for (uint j=0;j<n;j++)
-                    printer.print(v2h(h[j]));
+                    printer.print(_v2h(h[j]));
 #endif             
                 
                 return false;
@@ -153,12 +153,12 @@ bool Rule::validate(const vector<Vertex>& h) const
     return true;
 }
 
-BoundVertex Rule::computeIfValid(const vector<Vertex>& h, Handle CX) const
+BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX) const
 {
     if (validate(h))
         return compute(h,CX);
     else
-        return Vertex((Handle)NULL);
+        return Vertex((pHandle) PHANDLE_UNDEFINED);
 }
 
 Rule::setOfMPs Rule::o2iMeta(meta outh) const

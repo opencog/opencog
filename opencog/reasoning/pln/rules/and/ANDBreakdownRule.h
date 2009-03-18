@@ -82,13 +82,13 @@ public:
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
   {
 	AtomSpaceWrapper *nm = GET_ATW;
-	std::vector<Handle> hs = nm->getOutgoing(v2h(premiseArray[0]));
+	std::vector<pHandle> hs = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));
 
 	assert(premiseArray.size() == 2);
 	assert(hs.size() == N);
-	assert(nm->getArity(v2h(premiseArray[1])) == 1);	  	  
+	assert(nm->getArity(boost::get<pHandle>(premiseArray[1])) == 1);	  	  
 
-	atom topological_model(nm->getOutgoing(v2h(premiseArray[1]))[0]);
+	atom topological_model(nm->getOutgoing(boost::get<pHandle>(premiseArray[1]))[0]);
 
 	for (uint i = 0; i < hs.size(); i++)
 	  if (atom(hs[i]) == topological_model)

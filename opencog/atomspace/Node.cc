@@ -69,14 +69,6 @@ void Node::setName(const std::string& cname) throw (RuntimeException)
     name = cname;
 }
 
-void Node::merge(Atom* atom) throw (InconsistenceException)
-{
-    if (*this != *atom)
-        throw InconsistenceException(TRACE_INFO,
-             "Node - Different nodes cannot be merged");
-    Atom::merge(atom);
-}
-
 std::string Node::toShortString() const
 {
 #define BUFSZ 1024

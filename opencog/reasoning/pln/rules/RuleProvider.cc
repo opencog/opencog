@@ -64,11 +64,12 @@ void VariableRuleProvider::CreateCustomCrispUnificationRules()
 */
 DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 {
+
 	iAtomSpaceWrapper* parent = ASW();
 
-	Btr<set<Handle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
+	Btr<set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
 	
-	foreach(Handle fah, *ForAll_handles)
+	foreach(pHandle fah, *ForAll_handles)
 		AddRule(new CustomCrispUnificationRule(fah, parent), 7.5f);
 
 	cprintf(-1, "Added %u CrispUnificationRules.\n", (unsigned int) size());
@@ -242,7 +243,7 @@ void ForwardChainerRuleProvider::reset()
     current = NULL;
 }
 
-void ForwardChainerRuleProvider::setSeed(Handle s)
+void ForwardChainerRuleProvider::setSeed(pHandle s)
 {
     reset();
     seed = s;
@@ -284,7 +285,7 @@ Rule* ForwardChainerRuleProvider::nextRule()
 {
     // 1. check seed is set, check if current has a Rule, if so
     // add it to invalidRules, set to NULL.
-    if (seed == Handle::UNDEFINED) {
+    if (seed == PHANDLE_UNDEFINED) {
         opencog::logger().warn("No seed set, so can't return an appropriate Rule via nextRule.");
         return NULL;
     }

@@ -31,8 +31,8 @@
 namespace haxx
 {
     /// \todo This data must persist even if the BITNodeRoot is deleted.
-    extern map<Handle,vector<Handle> > inferred_from;
-    extern map<Handle,reasoning::Rule*> inferred_with;
+    extern map<pHandle,vector<pHandle> > inferred_from;
+    extern map<pHandle,reasoning::Rule*> inferred_with;
 }
 
 namespace reasoning
@@ -42,8 +42,8 @@ bool UnificationRuleResultFreshness = true; //false;
 
 Btr<set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta outh)
 {
-    if (GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), FORALL_LINK) ||
-        GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Btr<set<BoundVertex > >();
 
 #if 0
@@ -61,7 +61,7 @@ cprintf(3,"FindMatchingUniversals OK!\n");
     Btr<set<BoundVertex > > ret(new set<BoundVertex >);
     
     MPs ret1;
-    typedef pair<Handle,vtree> phvt;
+    typedef pair<pHandle,vtree> phvt;
     DeclareBtr(bindingsT, pre_binds);
 
     foreach(phvt vp, *i->bindings)
@@ -80,9 +80,9 @@ cprintf(3,"FindMatchingUniversals OK!\n");
 
     BBvtree rootAtom(new BoundVTree(*i, pre_binds));
     bind_Bvtree(rootAtom, *i->bindings);
-    Handle topologicalStub = destTable->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
+    pHandle topologicalStub = destTable->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
 
-    Handle ret_h = destTable->addLink(  GET_ATW->getType(topologicalStub),
+    pHandle ret_h = destTable->addLink(  GET_ATW->getType(topologicalStub),
                                 GET_ATW->getOutgoing(topologicalStub),
                                 GET_ATW->getTV(i->original_handle),
                                 UnificationRuleResultFreshness);    

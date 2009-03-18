@@ -165,6 +165,7 @@ const float temperatures[] = {    0.00005, 0.00007, 10,
                         1, 3, 5 };
 
 class PLNUTest :  public CxxTest::TestSuite {
+
 private:
     AtomSpaceWrapper *atw;
     FILE *f;
@@ -224,6 +225,9 @@ private:
     }
 
 public:
+
+    static PLNUTest* createSuite() { return new PLNUTest(); }
+    static void destroySuite(PLNUTest* suite) { delete suite; }
 
     PLNUTest()
     {
@@ -381,28 +385,28 @@ public:
         DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK);
 
         printf("v0\n");
-        vtree v0(mva((Handle)INHERITANCE_LINK,
+        vtree v0(mva((pHandle)INHERITANCE_LINK,
                         mva(atw->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
                         mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
                         ));
         printf("v1\n");
-        vtree v1(mva((Handle)INHERITANCE_LINK,
+        vtree v1(mva((pHandle)INHERITANCE_LINK,
                         mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
                         mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
                         ));
         printf("v2\n");
-        vtree v2(mva((Handle)INHERITANCE_LINK,
+        vtree v2(mva((pHandle)INHERITANCE_LINK,
                         mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
                         mva(atw->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
 
         printf("h0\n");
-        Handle h0 = atw->addAtom(v0, 
+        pHandle h0 = atw->addAtom(v0, 
                 SimpleTruthValue(0.40f, getCount(0.80f)));
         printf("h1\n");
-        Handle h1 = atw->addAtom(v1,
+        pHandle h1 = atw->addAtom(v1,
                 SimpleTruthValue(0.60f, getCount(0.90f)));
         printf("h2\n");
-        Handle h2 = atw->addAtom(v2,
+        pHandle h2 = atw->addAtom(v2,
                 SimpleTruthValue(0.98f, getCount(0.95f)));
 
         RuleApp* top    = new RuleApp(deduR);
@@ -416,7 +420,7 @@ public:
         top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
 
         BoundVertex res1a = top->compute();
-        const TruthValue& tvA = atw->getTV(v2h(res1a.value));
+        const TruthValue& tvA = atw->getTV(_v2h(res1a.value));
         assert(tvA.getMean() > 0.01);
         assert(tvA.getConfidence() > 0.01);
 
@@ -432,7 +436,7 @@ public:
         BoundVertex res1b = topb->compute();
         assert(res1a.value == res1b.value);
 
-        const TruthValue& tvB = atw->getTV(v2h(res1a.value));
+        const TruthValue& tvB = atw->getTV(_v2h(res1a.value));
         assert(within(tvB.getMean(), tvA.getMean(), 0.001));
         assert(within(tvB.getConfidence(), tvA.getConfidence(), 0.001));
 
@@ -441,11 +445,11 @@ public:
         RuleApp* top3 = new RuleApp(invR);
         top3->Bind(0, top2);
 
-        const TruthValue& tv2 = atw->getTV(v2h(top2->compute().value));
+        const TruthValue& tv2 = atw->getTV(_v2h(top2->compute().value));
         assert(!within(tvB.getMean(), tv2.getMean(), 0.001));
     //  assert(!within(tvB.getConfidence(), tv2.getConfidence(), 0.001));
 
-        const TruthValue& tv3 = atw->getTV(v2h(top3->compute().value));
+        const TruthValue& tv3 = atw->getTV(_v2h(top3->compute().value));
         assert( within(tvB.getMean(), tv3.getMean(), 0.001));
         assert( within(tvB.getConfidence(), tv3.getConfidence(), 0.001));
 
@@ -463,7 +467,7 @@ public:
         BoundVertex resC = topc->compute(args.begin(), args.end());
 
         assert(resC.value == res1b.value);
-        const TruthValue& tvC = atw->getTV(v2h(resC.value));
+        const TruthValue& tvC = atw->getTV(_v2h(resC.value));
         assert( within(tvB.getMean(), tvC.getMean(), 0.001));
         assert( within(tvB.getConfidence(), tvC.getConfidence(), 0.001));
 
@@ -476,7 +480,7 @@ public:
         BoundVertex resD = topd->compute(args.begin(), args.end());
 
         assert(resD.value == res1b.value);
-        const TruthValue& tvD = atw->getTV(v2h(resD.value));
+        const TruthValue& tvD = atw->getTV(_v2h(resD.value));
         assert( within(tvB.getMean(), tvD.getMean(), 0.001));
         assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
         printf("finish MacroRuleTest\n");
@@ -491,7 +495,7 @@ public:
 
             puts("\nShould fail. The test for whether TV checks work.\n");
 
-            maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+            maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                             NewNode(CONCEPT_NODE, "AlQaeda"),
                             NewNode(CONCEPT_NODE, "terrorist")
                     )),
@@ -509,9 +513,9 @@ public:
 
             puts("\nShould fail. The test for whether random TVs come out too high:\n");
 
-            maketest(makemeta(mva((Handle)EVALUATION_LINK,
+            maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "killed"),
-                            mva((Handle)LIST_LINK,
+                            mva((pHandle)LIST_LINK,
                                         NewNode(FW_VARIABLE_NODE, "$killeri"),
                                         NewNode(CONCEPT_NODE, "Osama")
                                     )
@@ -526,9 +530,9 @@ public:
         if(RUN_FAILURE_TESTS) {
             puts("\nShould fail.");
             InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-            maketest(makemeta(mva((Handle)EVALUATION_LINK,
+            maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "symmetricRelation"),
-                            mva((Handle)LIST_LINK,
+                            mva((pHandle)LIST_LINK,
                                         NewNode(CONCEPT_NODE, "Amir"),
                                         NewNode(CONCEPT_NODE, "Osama")
                                     )
@@ -544,9 +548,9 @@ public:
     {
         puts("\nInverse Binding test\n");
         InitAxiomSet(PLN_TEST_DIR"inverse_binding.xml");
-        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "Possible"),
-                        mva((Handle)LIST_LINK,
+                        mva((pHandle)LIST_LINK,
                             NewNode(FW_VARIABLE_NODE, "$elmerist")
                         )
                     )),
@@ -562,9 +566,9 @@ public:
             printf("\nBasic spawning test %d\n", i);
             /// Basic spawning test
             InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-            maketest(makemeta(mva((Handle)EVALUATION_LINK,
+            maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "friendOf"),
-                        mva((Handle)LIST_LINK,
+                        mva((pHandle)LIST_LINK,
                                     NewNode(CONCEPT_NODE, "Britney"),
                                     NewNode(CONCEPT_NODE, "Amir")
                                 ))),
@@ -579,9 +583,9 @@ public:
         printf("\nTest for multiple roots spawning.\n");
         /// Test for multiple roots spawning
         InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "killed"),
-                        mva((Handle)LIST_LINK,
+                        mva((pHandle)LIST_LINK,
                                     NewNode(FW_VARIABLE_NODE, "$killeri"),
                                     NewNode(CONCEPT_NODE, "Osama")
                                 )
@@ -596,9 +600,9 @@ public:
         printf("\nTest Generalization for VARIABLE_SCOPE_LINK.\n");
         /// Test Generalization for VARIABLE_SCOPE_LINK
         InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-        maketest(makemeta(mva((Handle)VARIABLE_SCOPE_LINK,
-                    mva((Handle)LIST_LINK), //empty dummy
-                    mva((Handle)INHERITANCE_LINK,
+        maketest(makemeta(mva((pHandle)VARIABLE_SCOPE_LINK,
+                    mva((pHandle)LIST_LINK), //empty dummy
+                    mva((pHandle)INHERITANCE_LINK,
                         NewNode(FW_VARIABLE_NODE, "$i"),
                         NewNode(CONCEPT_NODE, "terrorist")
                 ))),
@@ -612,9 +616,9 @@ public:
         printf("\nTest Generalization for FORALL_LINK.\n");
         /// Test Generalization for FORALL_LINK
         InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-        maketest(makemeta(mva((Handle)FORALL_LINK,
-                    mva((Handle)LIST_LINK), //empty dummy
-                    mva((Handle)INHERITANCE_LINK,
+        maketest(makemeta(mva((pHandle)FORALL_LINK,
+                    mva((pHandle)LIST_LINK), //empty dummy
+                    mva((pHandle)INHERITANCE_LINK,
                         NewNode(FW_VARIABLE_NODE, "$i"),
                         NewNode(CONCEPT_NODE, "terrorist")
                 ))),
@@ -630,7 +634,7 @@ public:
         //foo42=true;
         printf("\nTest inheritance Osama/Abu.\n");
         InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-        maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+        maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                         NewNode(CONCEPT_NODE, "Osama"),
                         NewNode(CONCEPT_NODE, "Abu")
                 )),
@@ -645,7 +649,7 @@ public:
 // Takes a tad too long with bigdemo (but tested, and it works now)
     InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
 //    InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
-        maketest(makemeta(mva((Handle)INHERITANCE_LINK,
+        maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
             )),
@@ -660,9 +664,9 @@ public:
     {    
         InitAxiomSet(PLN_TEST_DIR"AnotBdemo.xml");
 
-        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "found_under"),
-                        mva((Handle)LIST_LINK,
+                        mva((pHandle)LIST_LINK,
                             NewNode(CONCEPT_NODE, "toy_6"),
                             NewNode(FW_VARIABLE_NODE, "$1")
                         )
@@ -675,7 +679,7 @@ public:
     void testFetchDemo5()
     {    
         InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
-        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "+++")
                     )
                 ),
@@ -689,12 +693,12 @@ public:
         //foo42=true;
         printf("\nTest fetch demo.\n");
         InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
-        maketest(makemeta(mva((Handle)EVALUATION_LINK,
+        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "just_done"),
-                            mva((Handle)LIST_LINK,
-                                mva((Handle)EVALUATION_LINK,
+                            mva((pHandle)LIST_LINK,
+                                mva((pHandle)EVALUATION_LINK,
                                     NewNode(SCHEMA_NODE, "give"),
-                                    mva((Handle)LIST_LINK,
+                                    mva((pHandle)LIST_LINK,
                                         NewNode(CONCEPT_NODE, "ball"),
                                         NewNode(CONCEPT_NODE, "teacher")
                                     )
@@ -711,7 +715,7 @@ public:
     {    
         //  InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         InitAxiomSet(PLN_TEST_DIR"woademo.xml");
-        maketest(makemeta(mva((Handle)SIMULTANEOUS_AND_LINK,
+        maketest(makemeta(mva((pHandle)SIMULTANEOUS_AND_LINK,
                             NewNode(WORD_NODE, "blockword"),
                             NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
                         )),
@@ -730,57 +734,57 @@ public:
     {
 	    AtomSpaceWrapper *atw = GET_ATW;
 
-	    map<Handle,Handle> bindings;
+	    map<pHandle,pHandle> bindings;
 
 	    TS_ASSERT( unifiesWithVariableChangeTo(
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(CONCEPT_NODE, "Osama"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(CONCEPT_NODE, "Osama"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
 					    bindings));
 
 	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(CONCEPT_NODE, "Osama"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(CONCEPT_NODE, "Osama"),
 						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
 					    bindings));
 
 	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(CONCEPT_NODE, "Osama"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "Osama"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
 					    bindings));
 
 	    TS_ASSERT( unifiesWithVariableChangeTo(
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "1"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "2"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
 					    bindings));
 
 	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "1"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "2"),
 						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
 					    bindings));
 	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "1"),
 						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((Handle)AND_LINK,
+					    mva((pHandle)AND_LINK,
 						    NewNode(FW_VARIABLE_NODE, "2"),
 						    NewNode(CONCEPT_NODE, "terrorist"),
 						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
@@ -1083,9 +1087,8 @@ bool satSetTest();
         currentDebugLevel=-4;
 
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
-
         uint s_i=0;
-        Handle eh=Handle::UNDEFINED;
+        pHandle eh=PHANDLE_UNDEFINED;
         TruthValue* etv = NULL;
         bool passed=false;
 
@@ -1120,9 +1123,9 @@ bool satSetTest();
 
                 currentDebugLevel=-4;
 
-                eh = (eres.empty() ? Handle::UNDEFINED : v2h(*(*eres.rbegin())->getVtree().begin()));
+                eh = (eres.empty() ? PHANDLE_UNDEFINED : _v2h(*(*eres.rbegin())->getVtree().begin()));
 
-                if (eh != Handle::UNDEFINED )
+                if (eh != PHANDLE_UNDEFINED )
                     etv = atw->getTV(eh).clone();
 //                else
 //                    etv = new SimpleTruthValue(0.0f,0.0f);
@@ -1140,7 +1143,7 @@ bool satSetTest();
                     printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
                 }
 
-                passed = (eh != Handle::UNDEFINED && etv &&
+                passed = (eh != PHANDLE_UNDEFINED && etv &&
                 etv->getConfidence() >= t->minTV->getConfidence() &&
                 etv->getMean()          >= t->minTV->getMean() &&
                 etv->getConfidence() <= t->maxTV->getConfidence() &&
@@ -1197,7 +1200,7 @@ bool satSetTest();
         {
             const TruthValue& tv = atw->getTV(vt2h(*bv));
             if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-                printf("%d ", (int)vt2h(*bv).value());
+                printf("%d ", vt2h(*bv));
         }
         printf("]\n");
 
@@ -1219,7 +1222,7 @@ bool satSetTest();
             puts(stv.c_str());
         }*/
 
-        stats::Instance().print(stats::triviality_filterT());
+        //stats::Instance().print(stats::triviality_filterT());
 
         TS_ASSERT(passed);
 #if WAIT_KEY_ON_FAILURE
