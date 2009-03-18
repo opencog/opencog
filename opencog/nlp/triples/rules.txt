@@ -6,9 +6,19 @@
 ; The format of this file is supposed to be simialr to, if not identical
 ; to the "mapping_rules.txt" file used in the Relex framing code.
 ;
+; Sentence: "Lisbon is the capital of Portugaul"
+; var0=Lisbon, var1=capital var2=Portugaul
+# IF _subj(be,$var0) ^ _obj(be,$var1)
+      ^ $prep($var1,$var2)              ; preposition 
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ $phrase($word1, $prep)          ; convert to phrase
+      ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+      ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+      THEN ^3_$phrase($var2, $var0) 
+
 ; Sentence: "The capital of Germany is Berlin"
 ; var0=capital, var1=Berlin var2=Germany
-# IF _subj(be,$var0) ^ _obj(be,$var1)
+# IF _subj(be,$var0) ^ _obj(be,$var1)   ; reversed subj, obj
       ^ $prep($var0,$var2)              ; preposition 
       ^ %LemmaLink($var0,$word0)        ; word of word instance
       ^ $phrase($word0, $prep)          ; convert to phrase
@@ -16,15 +26,8 @@
       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
       THEN ^3_$phrase($var2, $var1) 
 
-; Sentence: "Lisbon is the capital of Portugaul"
-; var0=Lisbon, var1=capital var2=Portugaul
-# IF _subj(be,$var0) ^ _obj(be,$var1)   ; flipped over subj, obj
-      ^ $prep($var1,$var2)              ; preposition 
-      ^ %LemmaLink($var1,$word1)        ; word of word instance
-      ^ $phrase($word1, $prep)          ; convert to phrase
-      ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
-      ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
-      THEN ^3_$phrase($var2, $var0) 
+; Note that the above rule is "reversed", in that, if the prep was
+; dropped, it loooks like a backwards IsA statement.
 
 ; Sentence: "The color of the sky is blue."
 ; var0=blue, var1=color, var2=sky  $prep=of
@@ -70,7 +73,8 @@
 ; Sentence "Berlin is a city"
 ; var1=Berlin var2=city
 ; This pattern is too simple, it has to exclude preps,
-; e.g. "the captial of Germany is Berlin", where the prep is crucial!
+; e.g. "the captial of Germany is Berlin", where the prep is crucial
+; in reversing the order of the subject and object!
 ;# IF _subj(be, $var1) ^ _obj(be, $var2)
 ;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
 ;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence

@@ -99,6 +99,7 @@ _obj(be, city)
 
 Clearly, even simple assertions have many different forms.
 
+
 A priori vs. Deduced Knowledge
 ------------------------------
 Consider again the following:
@@ -398,6 +399,67 @@ Several approaches are possible:
    statements.
 
    (Possibly need to re-examin Markov Logic Networks?)
+
+Consistency Checking
+--------------------
+Consider the following three sentences:
+   Berlin is a city.
+   Cities are capitals.
+   Berlin is the capital of Germany.
+
+Assume the first two sentences were previously determined to be true,
+with a high confidence value. How can we determine that the third 
+sentence is plausible, i.e. consistent with the first two sentences?
+
+IsA Sentences
+-------------
+Consider, for example: "Berlin is a city"
+   _subj(be, Berlin)
+   _obj(be, city)
+
+Which suggests the deduction: _isa(city, Berlin) which can be produced by
+
+# IF _subj(be, $var1) ^ _obj(be, $var2) THEN ^3_isa($var2, $var1)
+
+However, the sentence: "The captial of Germany is Berlin.", when parsed,
+has the subject and object in reverse order, and so, when this rule is
+applied, returns a backwards IsA relation ('capital is a berlin'). The
+preposition "of" signals the subect-object inversion; but also, the 
+determiners clash for an is-a ('the capital is the berlin') -- we expect
+the sentence patterns "x is a y" or "x is the y of ..." but not a naked
+"x is the y".
+
+   "Berlin is a city"
+      DEFINITE-FLAG(Berlin, T)
+      noun_number(Berlin, singular)
+      noun_number(city, singular)
+      _subj(be, Berlin)
+      _obj(be, city)
+
+   "The captial of Germany is Berlin."
+
+      DEFINITE-FLAG(Germany, T)
+      noun_number(Germany, singular)
+      of(capital, Germany)
+      DEFINITE-FLAG(capital, T)
+      noun_number(capital, singular)
+      DEFINITE-FLAG(Berlin, T)
+      noun_number(Berlin, singular)
+      _subj(be, capital)
+      _obj(be, Berlin)
+
+Ignoring the prepositional parts, we get:
+
+      DEFINITE-FLAG(capital, T)
+      noun_number(capital, singular)
+      DEFINITE-FLAG(Berlin, T)
+      noun_number(Berlin, singular)
+      _subj(be, capital)
+      _obj(be, Berlin)
+
+
+
+
 
 
 Deduction
