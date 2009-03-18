@@ -457,7 +457,11 @@ Ignoring the prepositional parts, we get:
       _subj(be, capital)
       _obj(be, Berlin)
 
+This suggests that the correct rule for is-a relations is:
 
+   # IF _subj(be, $var1) ^ _obj(be, $var2) 
+       ^ !DEFINITE-FLAG($var2)
+       THEN ^3_isa($var2, $var1)
 
 
 
