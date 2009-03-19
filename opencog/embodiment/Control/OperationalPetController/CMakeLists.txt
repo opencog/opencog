@@ -69,34 +69,35 @@ TARGET_LINK_LIBRARIES (OpcLib
     PAI
     MessagingSystem
     Procedure
+    ${OPENCOG_LIBRARIES}
 )
 
 IF(COMMAND cmake_policy)
       CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
-#ADD_EXECUTABLE (OpcTester OpcTester.cc)
-#TARGET_LINK_LIBRARIES (OpcTester
-#    OpcLib
-#    comboreduct
-#    PetComboVocabulary
-#    AtomSpaceExtensions
-#    ImaginaryLife
-#    ${OPENCOG_LIBRARIES}
-#)
+ADD_EXECUTABLE (OpcTester OpcTester.cc)
+TARGET_LINK_LIBRARIES (OpcTester
+    OpcLib
+    comboreduct
+    PetComboVocabulary
+    AtomSpaceExtensions
+    ImaginaryLife
+    ${OPENCOG_LIBRARIES}
+)
 
-#ADD_EXECUTABLE (opc OPCExecutable.cc)
-#TARGET_LINK_LIBRARIES (opc
-#    OpcLib
-#    comboreduct
-#    PetComboVocabulary
-#    ImaginaryLife
-#)
+ADD_EXECUTABLE (opc OPCExecutable.cc)
+TARGET_LINK_LIBRARIES (opc
+    OpcLib
+    comboreduct
+    PetComboVocabulary
+    ImaginaryLife
+)
 
-#ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
-#TARGET_LINK_LIBRARIES (opcHcTester
-#    OpcLib
-#    comboreduct
-#    PetComboVocabulary
-#    ImaginaryLife
-#)
+ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
+TARGET_LINK_LIBRARIES (opcHcTester
+    OpcLib
+    comboreduct
+    PetComboVocabulary
+    ImaginaryLife
+)

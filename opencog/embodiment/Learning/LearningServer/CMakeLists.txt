@@ -64,44 +64,44 @@ TARGET_LINK_LIBRARIES (lslib
     comboreduct
 )
 
-#ADD_EXECUTABLE (learningServer LSExecutable)
-#TARGET_LINK_LIBRARIES (learningServer
-#    lslib
-#    PetaverseHC
-#    MessagingSystem
-#    LearningServerMessages
-#    Control
-#    util
-#    comboreduct
-#    pthread
-#    ssl
-#    crypto
-#    dl
-#    Filter
-#    FitnessEstimator
-#    Procedure
-#    moses
-#    RewritingRules
-#    ${OPENCOG_LIBRARIES}
-#)
+ADD_EXECUTABLE (learningServer LSExecutable)
+TARGET_LINK_LIBRARIES (learningServer
+    lslib
+    PetaverseHC
+    MessagingSystem
+    LearningServerMessages
+    Control
+    util
+    comboreduct
+    pthread
+    ssl
+    crypto
+    dl
+    Filter
+    FitnessEstimator
+    Procedure
+    moses
+    RewritingRules
+    ${OPENCOG_LIBRARIES}
+)
 
-#ADD_EXECUTABLE (LSMocky LSMockyExec)
-#TARGET_LINK_LIBRARIES (LSMocky
-#    lslib
-#    PetaverseHC
-#    MessagingSystem
-#    LearningServerMessages
-#    Control
-#    util
-#    comboreduct
-#    PetComboVocabulary
-#    pthread
-#    ssl
-#    crypto
-#    dl
-#    behavior
-#    Procedure
-#    moses
-#    RewritingRules
-#    ${OPENCOG_LIBRARIES}
-#)
+ADD_EXECUTABLE (LSMocky LSMockyExec)
+TARGET_LINK_LIBRARIES (LSMocky
+    lslib
+    PetaverseHC
+    MessagingSystem
+    LearningServerMessages
+    Control
+    util
+    comboreduct
+    PetComboVocabulary
+    pthread
+    ssl
+    crypto
+    dl
+    behavior
+    Procedure
+    moses
+    RewritingRules
+    ${OPENCOG_LIBRARIES}
+)

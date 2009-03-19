@@ -64,22 +64,22 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 	${Boost_SIGNALS_LIBRARY}
 )
 
-#ADD_EXECUTABLE (router RouterExecutable.cc)
-#TARGET_LINK_LIBRARIES (router 
-#	MessagingSystem
-#)
+ADD_EXECUTABLE (router RouterExecutable.cc)
+TARGET_LINK_LIBRARIES (router 
+	MessagingSystem
+)
 
-#ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
-#TARGET_LINK_LIBRARIES (spawner 
-#	MessagingSystem
-#)
+ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
+TARGET_LINK_LIBRARIES (spawner 
+	MessagingSystem
+)
 
-#ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
-#TARGET_LINK_LIBRARIES (msgtester
-#	MessagingSystem
-#)
+ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
+TARGET_LINK_LIBRARIES (msgtester
+	MessagingSystem
+)
 
-#ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
-#TARGET_LINK_LIBRARIES (dummyserver
-#	MessagingSystem
-#)
+ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
+TARGET_LINK_LIBRARIES (dummyserver
+	MessagingSystem
+)

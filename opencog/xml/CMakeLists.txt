@@ -28,3 +28,7 @@ INSTALL (FILES
 	XMLBufferReader.h
 	DESTINATION "include/opencog/xml"
 )
+
+TARGET_LINK_LIBRARIES(xml
+  ${EXPAT_LIBRARIES}
+)

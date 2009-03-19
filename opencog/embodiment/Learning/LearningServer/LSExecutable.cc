@@ -6,6 +6,7 @@
 #include "LS.h"
 
 using namespace LearningServer;
+using namespace opencog;
 
 void ls_unexpected_handler(){
     throw;
@@ -35,10 +36,10 @@ int main(int argc, char *argv[]) {
         ls->serverLoop();
 
     } catch(std::bad_alloc){
-        MAIN_LOGGER.log(opencog::Logger::ERROR, "LSExec - LS raised a bad_alloc exception.");
+        logger().log(opencog::Logger::ERROR, "LSExec - LS raised a bad_alloc exception.");
         
     } catch(...) {
-        MAIN_LOGGER.log(opencog::Logger::ERROR, 
+        logger().log(opencog::Logger::ERROR, 
                 "LSExec - An exceptional situation occured. Check log for more information.");
     }
 
