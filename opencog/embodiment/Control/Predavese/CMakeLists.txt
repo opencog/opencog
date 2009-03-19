@@ -24,7 +24,6 @@ INCLUDE_DIRECTORIES (
 
 LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}
-    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
     ${OPENCOG_BINARY_DIR}/opencog/util
@@ -32,8 +31,8 @@ LINK_DIRECTORIES (
 
 TARGET_LINK_LIBRARIES (Predavese
     util
-    xerces-c
+    ${XERCESC_LIBRARIES}
     comboreduct
     WorldWrapper
-	${OPENCOG_LIBRARIES}
+    ${OPENCOG_LIBRARIES}
 )
