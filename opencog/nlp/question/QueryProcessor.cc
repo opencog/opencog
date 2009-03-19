@@ -18,8 +18,8 @@
 #include <opencog/atomspace/ForeachChaseLink.h>
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/query/FrameQuery.h>
-#include <opencog/query/RelexQuery.h>
+#include <opencog/nlp/question/FrameQuery.h>
+#include <opencog/nlp/question/RelexQuery.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 

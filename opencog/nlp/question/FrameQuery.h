@@ -12,7 +12,7 @@
 #include <map>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/RelexQuery.h>
+#include <opencog/nlp/question/RelexQuery.h>
 
 namespace opencog {
 

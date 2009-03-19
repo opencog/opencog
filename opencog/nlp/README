@@ -52,7 +52,14 @@ lexical_attraction
 ------------------
 The lexical-attraction directory contains a REAME file containing a
 short overview of Yuret's lexical attraction algorithm. A variant of
-this algo was implemented in java, in the lextat project on launchpad.
+this algo was implemented in java, in the lexat project on launchpad.
+
+question
+--------
+C++ code that implements a basic question-answering algorithm, based on
+matching the NL pattern of a question to the NL pattern of an assertion.
+If the atomspace contains an assertion such as "John threw the ball", 
+then this code can correctly answer the question "Who threw the ball?"
 
 refres
 ------
