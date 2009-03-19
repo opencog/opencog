@@ -140,20 +140,13 @@ public:
     /**
      * Tells whether the atom is real or not (a type designator)
      */
-    bool isReal() const;
-
     /**
      * Returns the type of the atom.
      *
      * @return The type of the atom.
      */
     inline Type getType() const {
-        // TODO: Implement smarter mapping from atom types to
-        // BuiltInTypeHandle IDs?
-        if (isReal())
-            return type;
-        else
-            return (Type)((long)this);
+        return type;
     }
 
     /**
@@ -247,25 +240,6 @@ public:
      * @param The handle of the atom to be excluded.
      */
     void removeIncomingHandle(Handle) throw (RuntimeException);
-
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    /**
-     * Sets the next entry pointed by this atom in one of the indices
-     * linked-lists.
-     *
-     * @param Which index to change.
-     * @param The next entry in the given index linked-list.
-     */
-    void setNext(int, Handle);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    /**
-     * Merges two atoms.
-     *
-     * @param A pointer to the atom that will be merged to the current
-     * one.
-     */
-    virtual void merge(Atom*) throw (InconsistenceException);
 
     /**
      * Returns whether this atom is marked for removal.

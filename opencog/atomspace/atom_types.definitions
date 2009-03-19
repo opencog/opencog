@@ -3,10 +3,6 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
 #include "atom_types.h"
-// set notype's code with the last possible Type code, which is
-//    ((1 << (2 * sizeof(Type))) - 1) == 65535
-// as Type == unsigned short int
-const opencog::Type opencog::NOTYPE=((1 << (8 * sizeof(Type))) - 1);
 opencog::Type opencog::ATOM;
 opencog::Type opencog::NODE;
 opencog::Type opencog::LINK;

@@ -155,7 +155,7 @@ public:
         printf("======== PHASE 1: CompositeTVs ==========\n");
         TruthValue* compositeTVs[NUM_ATOMS];
         for (int i = 0; i < NUM_ATOMS; i++) {
-            compositeTVs[i] = new CompositeTruthValue(*(atoms[i]), VersionHandle(HYPOTHETICAL, (Handle) 1));
+            compositeTVs[i] = new CompositeTruthValue(*(atoms[i]), VersionHandle(HYPOTHETICAL, Handle::UNDEFINED));
         }
         // run with the same SimpleTruthValues. Must get same results...
         resultTv = reasoning::OldANDFormula().compute(compositeTVs, 2);

@@ -66,7 +66,7 @@ using namespace boost;
 using namespace opencog;
 using namespace reasoning;
 
-typedef variant < Handle, vtree, vtree::iterator_base > NMPrintable;
+typedef variant < pHandle, vtree, vtree::iterator_base > NMPrintable;
 
 /**
  * This class provides methods for printing a data structure that represents an atom or 
@@ -168,7 +168,7 @@ private:
     bool isVtreeIterator(NMPrintable p) const;
     
     void toStream(ostream& out, const NMPrintable p, int indentationLevel) const;
-    void printHandle(ostream& out, Handle h, int indentationLevel) const;
+    void printHandle(ostream& out, pHandle h, int indentationLevel) const;
     void printVTree(ostream& out, vtree::iterator top, int indentationLevel) const;
     bool logLevelOk(int logLevel) const;
     void printSpaces(ostream& out, int indentationLevel) const;

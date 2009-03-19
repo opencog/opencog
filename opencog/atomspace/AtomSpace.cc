@@ -114,9 +114,9 @@ void AtomSpace::atomRemoved(Handle h)
     //logger().debug("AtomSpace::atomAdded(%p): %s", h, TLB::getAtom(h)->toString().c_str());
     Type type = getType(h);
     if (type == AT_TIME_LINK) {
-        cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::decayShortTermImportance(): Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
+        cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
         Handle timeNode = getOutgoing(h, 0);
-        cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::removeAtom: Got no TimeNode node at the first position of the AtTimeLink\n");
+        cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
         Handle timedAtom = getOutgoing(h, 1);
         timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
     }
@@ -256,13 +256,6 @@ Type AtomSpace::getTypeV(const tree<Vertex>& _target) const
     return getType(boost::get<Handle>(*_target.begin()));
 }
 
-bool AtomSpace::isReal(Handle h) const
-{
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-    return TLB::getAtom(h)->isReal();
-}
-
 Type AtomSpace::getType(Handle h) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
@@ -385,26 +378,27 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflush(stdout);
 
-    cassert(TRACE_INFO, boost::get<Handle>(&(*it)) != NULL, "AtomSpace::addAtom(): Vertex should be of 'Handle' type.");
+    Handle* head_handle_ptr = boost::get<Handle>(&(*it));
+    Type* head_type_ptr = boost::get<Type>(&(*it));
+    cassert(TRACE_INFO, (head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "AtomSpace::addAtom(): Vertex should be of 'Handle' or 'Type' type.");
 
     HandleSeq handles;
-    Handle head_type = boost::get<Handle>(*it);
 
-    if (isReal(head_type)) {
-        return addRealAtom(*(TLB::getAtom(head_type)), tvn);
+    if (head_handle_ptr != NULL) {
+        return addRealAtom(*(TLB::getAtom(*head_handle_ptr)), tvn);
     }
 
     for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
         Handle *h_ptr = boost::get<Handle>(&*i);
 
-        if (h_ptr && isReal(*h_ptr)) {
+        if (h_ptr) {
             handles.push_back(addRealAtom(*TLB::getAtom(*h_ptr), TruthValue::NULL_TV()));
         } else {
             handles.push_back(addAtom(a, i, TruthValue::TRIVIAL_TV()));
         }
     }
 
-    return addLink((Type) ((long) TLB::getAtom(head_type)), handles, tvn);
+    return addLink(*head_type_ptr, handles, tvn);
 }
 
 Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn)
@@ -462,11 +456,14 @@ void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
 
 Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 {
-    Handle result = atomTable.getHandle(name.c_str(), t);
+    Handle result = getHandle(t, name);
     if (TLB::isValidHandle(result))
     {
         // Just merges the TV
-        if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+        // if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+        // Even if the node already exists, it must be merged properly 
+	    // for updating its truth and attention values. 
+        atomTable.merge(result, tvn); 
         return result;
     }
 
@@ -480,6 +477,8 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
         result = backing_store->getHandle(t, name.c_str());
         if (TLB::isValidHandle(result))
         {
+            // TODO: Check if merge signal must be emitted here (AtomTable::merge
+            // does that, but what to do with atoms that are not there?)
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);
             return atomTable.add(TLB::getAtom(result));
         }
@@ -491,11 +490,14 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
 Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
                           const TruthValue& tvn)
 {
-    Handle result = atomTable.getHandle(t, outgoing);
+    Handle result = getHandle(t, outgoing);
     if (TLB::isValidHandle(result))
     {
         // Just merges the TV
-        if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+        //if (!tvn.isNullTv()) do_merge_tv(result, tvn);
+        // Even if the node already exists, it must be merged properly 
+        // for updating its truth and attention values. 
+        atomTable.merge(result, tvn); 
         return result;
     }
 
@@ -509,6 +511,8 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
         result = backing_store->getHandle(t, outgoing);
         if (TLB::isValidHandle(result))
         {
+            // TODO: Check if merge signal must be emitted here (AtomTable::merge
+            // does that, but what to do with atoms that are not there?)
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);
             return atomTable.add(TLB::getAtom(result));
         }

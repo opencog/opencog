@@ -66,23 +66,23 @@ public:
         SimpleTruthValue tv(0.8, 0.9);
         SimpleTruthValue tv2(0.4, 0.9);
         cout << "test add nodes" << endl;
-        Handle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
-        Handle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
-        HandleSeq outgoing;
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
+        pHandle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
+        pHandleSeq outgoing;
         outgoing.push_back(h1);
         outgoing.push_back(h2);
 
         cout << "test add link to NULL version nodes" << endl;
-        Handle l1 = asw->addLink(LINK, outgoing, tv);
+        pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
         cout << "test getoutgoing: " << endl;
-        foreach (Handle i, asw->getOutgoing(l1)) {
+        foreach (pHandle i, asw->getOutgoing(l1)) {
             cout << i << " ";
         }
         cout << endl;
 
         cout << "test getincoming: " << endl;
-        foreach (Handle i, asw->getIncoming(h1)) {
+        foreach (pHandle i, asw->getIncoming(h1)) {
             cout << i << " ";
         }
         cout << endl;
@@ -92,16 +92,16 @@ public:
         asw->addNode(CONCEPT_NODE, "test2", tv2, false, true);
 
         cout << "test add nodes fresh=true" << endl;
-        Handle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
-        Handle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
 
         cout << "test add link to one versioned node" << endl;
         outgoing.clear();
         outgoing.push_back(h1);
         outgoing.push_back(h4);
-        Handle l2 = asw->addLink(LINK, outgoing, tv, true, true);
+        pHandle l2 = asw->addLink(LINK, outgoing, tv, true, true);
         cout << "test getoutgoing: " << endl;
-        foreach (Handle i, asw->getOutgoing(l2)) {
+        foreach (pHandle i, asw->getOutgoing(l2)) {
             cout << i << " ";
         }
         cout << endl;
@@ -109,21 +109,21 @@ public:
         outgoing.clear();
         outgoing.push_back(h3);
         outgoing.push_back(h4);
-        Handle l3 = asw->addLink(LINK, outgoing, tv, true, true);
+        pHandle l3 = asw->addLink(LINK, outgoing, tv, true, true);
         cout << "test getoutgoing: " << endl;
-        foreach (Handle i, asw->getOutgoing(l3)) {
+        foreach (pHandle i, asw->getOutgoing(l3)) {
             cout << i << " ";
         }
         cout << endl;
 
         cout << "test getincoming of unversioned again: " << endl;
-        foreach (Handle i, asw->getIncoming(h1)) {
+        foreach (pHandle i, asw->getIncoming(h1)) {
             cout << i << " ";
         }
         cout << endl;
 
         cout << "test getincoming versioned: " << endl;
-        foreach (Handle i, asw->getIncoming(h4)) {
+        foreach (pHandle i, asw->getIncoming(h4)) {
             cout << i << " ";
         }
         cout << endl;

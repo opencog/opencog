@@ -28,20 +28,20 @@ namespace reasoning
 class CustomCrispUnificationRule : public Rule
 {
 protected:
-	Handle ForallLink;
+	pHandle ForallLink;
 public:
 
-	CustomCrispUnificationRule(Handle _ForallLink, iAtomSpaceWrapper *_destTable)
+	CustomCrispUnificationRule(pHandle _ForallLink, iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable,false,false,"CrispUnificationRule"), ForallLink(_ForallLink)
 	{
 		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((Handle)ATOM))));
+				new tree<Vertex>(mva((pHandle)ATOM))));
 	}
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
 	{
 		assert(0);
-		return Vertex((Handle)NULL);
+		return Vertex(PHANDLE_UNDEFINED);
 	}
 
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const

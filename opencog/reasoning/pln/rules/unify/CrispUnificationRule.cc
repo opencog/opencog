@@ -157,7 +157,7 @@ printf("dovar3: substitutableTo:");
 					for(set<string>::iterator	v = remainingVariables.begin();
 												v != remainingVariables.end(); v++)
 					{
-						Handle FW_var = v2h(CreateVar(table));
+						pHandle FW_var = _v2h(CreateVar(table));
 						unsubsted_ForAll_candidate.substitute(
 							atom(FW_var),
 							*v);
@@ -202,8 +202,8 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
 	AtomSpaceWrapper *nm = GET_ATW;
-	if (inheritsType(nm->getType(v2h(*outh->begin())), FORALL_LINK) ||
-		inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+	if (inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+		inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
 		return Rule::setOfMPs();
 	
 	set<atom, lessatom_ignoreVarNameDifferences> varforms;

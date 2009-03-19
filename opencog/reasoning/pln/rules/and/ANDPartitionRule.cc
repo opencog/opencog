@@ -36,10 +36,10 @@ Rule::setOfMPs ANDPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
         return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, AND_LINK);
 }
 
-BoundVertex ANDPartitionRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex ANDPartitionRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
         const int N = (int)premiseArray.size();
-        Handle *hs = new Handle[N];
+        pHandle *hs = new pHandle[N];
         
         transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
 //          Concat<DropVertexBindings, GetHandle, BoundVertex, Handle>());

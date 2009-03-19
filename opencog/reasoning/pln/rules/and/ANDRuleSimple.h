@@ -27,9 +27,9 @@ namespace reasoning
 {
 
 const bool RuleResultFreshness = true;
-Handle UnorderedCcompute(iAtomSpaceWrapper *destTable,
+pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable,
 					Type linkT, const ArityFreeFormula<TruthValue,
-			       TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX=Handle::UNDEFINED);
+			       TruthValue*>& fN, pHandle* premiseArray, const int n, pHandle CX=PHANDLE_UNDEFINED);
 
 template<int N>
 class SimpleANDRule : public ArityFreeANDRule
@@ -41,14 +41,14 @@ public:
 		name = "Simple AND Rule";
 		for (int i = 0; i < N; i++)
 			inputFilter.push_back(meta(
-				new tree<Vertex>(mva((Handle)ATOM))
+				new tree<Vertex>(mva((pHandle)ATOM))
 			));
 	}
 	bool validate2				(MPs& args) const { return true; }
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ATW->inheritsType(GET_ATW->getType(boost::get<Handle>(*outh->begin())), AND_LINK)
+		if (!GET_ATW->inheritsType(GET_ATW->getType(boost::get<pHandle>(*outh->begin())), AND_LINK)
 			|| outh->begin().number_of_children() != N)
 			return Rule::setOfMPs();
 		
@@ -66,13 +66,13 @@ public:
 		return makeSingletonSet(ret);
 	}
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX=PHANDLE_UNDEFINED) const
 	{
-		Handle *hs = new Handle[premiseArray.size()];
+		pHandle *hs = new pHandle[premiseArray.size()];
 		transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
 		const int n = (int)premiseArray.size();
-		vector<Handle> dummy_outgoing;
-		dummy_outgoing.push_back(v2h(premiseArray[0]));
+		pHandleSeq dummy_outgoing;
+		dummy_outgoing.push_back(boost::get<pHandle>(premiseArray[0]));
 
 		//printf("ANDRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
 
@@ -81,9 +81,9 @@ public:
 			printTree(v2h(v),0,-3);
 	*/
 		//currentDebugLevel = 3;
-		Handle ret = ((N>1)
+		pHandle ret = ((N>1)
 			      ? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
-			      : destTable->addLink(AND_LINK, dummy_outgoing, GET_ATW->getTV(v2h(premiseArray[0])),
+			      : destTable->addLink(AND_LINK, dummy_outgoing, GET_ATW->getTV(boost::get<pHandle>(premiseArray[0])),
 				RuleResultFreshness));
 		    delete[] hs;
 

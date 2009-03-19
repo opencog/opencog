@@ -127,7 +127,7 @@ void NMPrinter::toStream(ostream& out, const NMPrintable p, int indentationLevel
     //printf("NMPrinter::toStream()\n");
     if (isHandle(p)) {
         //printf("PRINTING HANDLE:\n");
-        Handle h = boost::get<Handle>(p);
+        pHandle h = boost::get<pHandle>(p);
         printHandle(out, h, indentationLevel);
         if (printOptions & NMP_BRACKETED) {
             out << endl;
@@ -197,9 +197,9 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
   char* str = strdup(result.c_str());
 
   while (strlen(str)>2 && str[strlen(str)-1] == '0')
-    str[strlen(str)-1] = NULL;
+    str[strlen(str)-1] = '\0';
   if (strlen(str) == 2) // 1,
-    str[1] = NULL;
+    str[1] = '\0';
 
   result = str;
   free(str);
@@ -207,7 +207,7 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
   return result;
 }
 
-void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
+void NMPrinter::printHandle(ostream& out, pHandle h, int indentationLevel) const{
     //printf("NMPrinter::printHandle()\n");
 //    printf("NMPrinter::printHandle(%p): printOptions = %X\n", h, printOptions);
     AtomSpaceWrapper* atw = GET_ATW; 
@@ -215,7 +215,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
     bool isNode = atw->isSubType(h,NODE); 
     Type type = atw->getType(h);
     if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (atw->getArity(h) == 1)) {
-        Handle newH = atw->getOutgoing(h, 0);
+        pHandle newH = atw->getOutgoing(h, 0);
         printHandle(out, newH, indentationLevel);
     } else {
         if (!(printOptions & NMP_BRACKETED)) printSpaces(out, indentationLevel);
@@ -247,8 +247,8 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
             if (printToFile) fprintf(logFile, "[typeId=%d]", type);
         }
         if (printOptions & NMP_ATOM_ADDRESS) {
-            out << "[address=" << ((void*) h.value()) << "]"; 
-            if (printToFile) fprintf(logFile, "[address=%p]", (void*) h.value());
+            out << "[handle=" << h << "]"; 
+            if (printToFile) fprintf(logFile, "[handle=%d]", h);
         }
         if (printOptions & NMP_TRUTH_VALUE) {
             const TruthValue& tv = atw->getTV(h);
@@ -272,7 +272,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
         }
         if (printOptions & NMP_HANDLE) {
             char str[100];
-            sprintf(str, "%lu", (long) h.value());
+            sprintf(str, "%u", h);
             out << " [" << str << "]"; 
             if (printToFile) fprintf(logFile, " [%s]", str);
         }
@@ -291,7 +291,7 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
                     out << ",";
                     if (printToFile) fprintf(logFile, ",");
                 }
-                Handle newH = atw->getOutgoing(h, i);
+                pHandle newH = atw->getOutgoing(h, i);
                 printHandle(out, newH, indentationLevel+1);
             }
             if (printOptions & NMP_BRACKETED) {
@@ -305,20 +305,20 @@ void NMPrinter::printHandle(ostream& out, Handle h, int indentationLevel) const{
 void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLevel) const{
     //printf("NMPrinter::printVTree()\n");
 
-    Handle h = boost::get<Handle>(*top);
-    Handle undefined; // = TLB::UndefinedHandle();
-    if (CoreUtils::handleCompare(&h,&undefined) == 0)
+    pHandle h = boost::get<pHandle>(*top);
+    pHandle undefined = PHANDLE_UNDEFINED;
+    if (h == undefined)
     { 
         out << "null" << endl;
         if (printToFile) fprintf(logFile, "null\n");
         return;
     }
 
-    if (GET_ATW->isReal(h))
+    if (!GET_ATW->isType(h))
     {
         printHandle(out, h, indentationLevel);
     } else {
-        Type type = (Type)((int)h.value());
+        Type type = (Type)h;
 
         if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (top.number_of_children() == 1)) {
             vtree::sibling_iterator c=top.begin();
@@ -370,8 +370,8 @@ bool NMPrinter::areFromSameType(NMPrintable p1, NMPrintable p2) const{
     return result;
 }
 
-NMPrintable HANDLE_NM_PRINTABLE_EXAMPLE = (Handle) NULL;
-NMPrintable VTREE_NM_PRINTABLE_EXAMPLE = mva((Handle) NULL);
+NMPrintable HANDLE_NM_PRINTABLE_EXAMPLE = (pHandle) PHANDLE_UNDEFINED;
+NMPrintable VTREE_NM_PRINTABLE_EXAMPLE = mva((pHandle) PHANDLE_UNDEFINED);
 NMPrintable VTREE_ITERATOR_NM_PRINTABLE_EXAMPLE = vtree::iterator_base();
 
 bool NMPrinter::isHandle(NMPrintable p) const {

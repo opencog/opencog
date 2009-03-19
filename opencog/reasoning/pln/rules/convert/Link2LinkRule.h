@@ -47,20 +47,20 @@ public:
 		GenericRule<FormulaType>::name = "Link2Link(" + type2name[SRC_LINK] + "=>" + type2name[DEST_LINK] +")";
 		GenericRule<FormulaType>::inputFilter.push_back(meta(
 			new tree<Vertex>(
-				mva((Handle)SRC_LINK,
-					mva((Handle)ATOM),
-					mva((Handle)ATOM))
+				mva((pHandle)SRC_LINK,
+					mva((pHandle)ATOM),
+					mva((pHandle)ATOM))
 			)));
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ATW->inheritsType((Type)(int)boost::get<Handle>(*outh->begin()).value(), DEST_LINK))
+		if (!GET_ATW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
 			return Rule::setOfMPs();
 
 		Rule::MPs ret;
 
 		BBvtree ret_m(new BoundVTree(*outh));
-		*ret_m->begin() = Vertex((Handle)SRC_LINK);
+		*ret_m->begin() = Vertex((pHandle)SRC_LINK);
 		ret.push_back(ret_m);
 		
 		overrideInputFilter = true;
@@ -74,7 +74,7 @@ public:
 
 		assert(premiseArray.size()==1);
 
-		tvs[0] = (TruthValue*) &(GET_ATW->getTV(boost::get<Handle>(premiseArray[0])));
+		tvs[0] = (TruthValue*) &(GET_ATW->getTV(boost::get<pHandle>(premiseArray[0])));
 
 		return tvs;
 	}

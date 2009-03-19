@@ -162,7 +162,8 @@ public:
         InternalIterator ti = handle_map->find(key);
 
         // assert the key exists. Otherwise throws an exception.
-        if (ti == handle_map->end()) {
+        if (ti == handle_map->end())
+       	{
             unlock();
             throw AssertionException("HandleMap: key (%d) does not exist in this map", key.value());  
         }

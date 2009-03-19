@@ -33,8 +33,6 @@
 namespace reasoning
 {
 
-Handle _v2h(const Vertex& v) { return v2h(v); }
-
 boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh)
 {
     set<BoundVertex>* ret = new set<BoundVertex>;
@@ -52,7 +50,7 @@ boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(met
             ret->insert(BoundVertex(destTable->addAtom(*outh, TruthValue::TRIVIAL_TV(), false, true)));
 
 			 cprintf(4,"HYP:\n");
-             printer.print(v2h(ret->begin()->value), 4);
+             printer.print(_v2h(ret->begin()->value), 4);
 		}
 
     return boost::shared_ptr<set<BoundVertex> >(ret);

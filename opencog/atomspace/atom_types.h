@@ -2,7 +2,13 @@
 #include <opencog/atomspace/types.h>
 namespace opencog
 {
-extern const opencog::Type NOTYPE;
+#ifndef _OPENCOG_NOTYPE_
+#define _OPENCOG_NOTYPE_
+// set notype's code with the last possible Type code, which is
+//    ((1 << (2 * sizeof(Type))) - 1) == 65535
+// as Type == unsigned short int
+static const opencog::Type NOTYPE=((1 << (8 * sizeof(Type))) - 1);
+#endif // _OPENCOG_NOTYPE_
 extern opencog::Type ATOM;
 extern opencog::Type NODE;
 extern opencog::Type LINK;

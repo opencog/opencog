@@ -25,26 +25,23 @@
 namespace reasoning
 {
 
-//template<typename FormulaType, Type OUTPUT_LINK_TYPE>
 template<typename FormulaType>
 class QuantifierRule : public Rule
 {
-	Handle domain;
+	pHandle domain;
 	FormulaType f;
     Type OUTPUT_LINK_TYPE;
 public:
 	bool validate2				(MPs& args) const { return true; }
 
-	//QuantifierRule(iAtomSpaceWrapper *_destTable, const Handle& _domain)
-	QuantifierRule(iAtomSpaceWrapper *_destTable, const Handle& _domain, Type outLinkType)
+	QuantifierRule(iAtomSpaceWrapper *_destTable, const pHandle& _domain, Type outLinkType)
 	: Rule(_destTable, false, true, "QuantifierRule"), 
-	//domain(_domain) {
 	domain(_domain), OUTPUT_LINK_TYPE(outLinkType) {
 		inputFilter.push_back(meta(
 			new tree<Vertex>(
-				mva((Handle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXIST_LINK : FORALL_LINK),
-					mva((Handle)ATOM),
-					mva((Handle)ATOM))
+				mva((pHandle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXIST_LINK : FORALL_LINK),
+					mva((pHandle)ATOM),
+					mva((pHandle)ATOM))
 			)));
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
@@ -54,20 +51,20 @@ public:
 
 	//Domain should be inferred instead from the premis ConceptNodes!!!
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
+	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
 	{
 		const int n = (int)premiseArray.size();
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
 		int i;
 		for (i = 0; i < n; i++)
-			tvs[i] = (TruthValue*) &(GET_ATW->getTV(boost::get<Handle>(premiseArray[i])));
+			tvs[i] = (TruthValue*) &(GET_ATW->getTV(boost::get<pHandle>(premiseArray[i])));
 
 		TruthValue* retTV = f.compute(tvs, n);	
 
 		delete[] tvs;
 
 //haxx::
-		Handle ret = destTable->addLink(OUTPUT_LINK_TYPE, HandleSeq(),
+		pHandle ret = destTable->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
 				*retTV,
 				RuleResultFreshness);	
 //				false);
@@ -80,11 +77,6 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-/*
-typedef QuantifierRule<FORALLFormula, FORALL_LINK> FORALLRule;
-typedef QuantifierRule<EXISTFormula, EXIST_LINK> ExistRule;
-typedef QuantifierRule<PredicateTVFormula, VARIABLE_SCOPE_LINK> PLNPredicateRule;
-*/
 typedef QuantifierRule<FORALLFormula> FORALLRule;
 typedef QuantifierRule<EXISTFormula> ExistRule;
 typedef QuantifierRule<PredicateTVFormula> PLNPredicateRule;

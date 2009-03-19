@@ -25,6 +25,7 @@
 #include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TemporalTable.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
 
@@ -40,6 +41,7 @@ private:
     Handle handles[N_TIMES];
 
     TemporalTable *temporalTable;
+    AtomSpace as;
 
 public:
 
@@ -1371,19 +1373,20 @@ public:
     }
 
     void testSpecificRemoveCase1() {
+        Handle h1 = as.addNode(CONCEPT_NODE, "H1");
         TemporalTable table;
         Temporal t1(100);
         Temporal t2(200);
-        table.add((Handle) 1, t1);
-        table.add((Handle) 1, t2);
-        TS_ASSERT(table.remove((Handle) 1, Temporal(150), TemporalTable::STARTS_BEFORE));
-        HandleTemporalPairEntry* result = table.get((Handle) 1);
+        table.add(h1, t1);
+        table.add(h1, t2);
+        TS_ASSERT(table.remove(h1, Temporal(150), TemporalTable::STARTS_BEFORE));
+        HandleTemporalPairEntry* result = table.get(h1);
         HandleTemporalPairEntry* htpe = result;
         TS_ASSERT(htpe);
-        TS_ASSERT(htpe->handleTemporalPair.getHandle() == (Handle) 1);
+        TS_ASSERT(htpe->handleTemporalPair.getHandle() == h1);
         TS_ASSERT(*(htpe->handleTemporalPair.getTemporal()) == t2);
-        TS_ASSERT(table.remove((Handle) 1));
-        htpe = table.get((Handle) 1);
+        TS_ASSERT(table.remove(h1));
+        htpe = table.get(h1);
         TS_ASSERT(!htpe);
         delete result;
     }

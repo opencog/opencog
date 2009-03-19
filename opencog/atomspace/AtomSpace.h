@@ -582,8 +582,6 @@ public:
     /** Retrieve the arity of a given link */
     int getArity(Handle) const;
 
-    bool isReal(Handle h) const;
-
     /** Retrieve the outgoing set of a given link */
     const HandleSeq& getOutgoing(Handle h) const;
 

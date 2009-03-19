@@ -97,14 +97,14 @@ void BackChainingAgent::chooseTarget()
 //    Btr<BackInferenceTreeRootT> Bstate;
 //    BackInferenceTreeRootT *state;
 
-    std::vector<Handle> fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
     if (fakeHandles.empty()) {
         log->error("[BackChainingAgent] fakeHandles is empty");
         Bstate.reset();
         state = NULL;
         return;
     }
-    Handle fakeHandle = fakeHandles[0];    
+    pHandle fakeHandle = fakeHandles[0];    
     Btr<vtree> target(new vtree(fakeHandle));
 
     Bstate.reset(new BITNodeRoot(target, NULL));//new DefaultVariableRuleProvider));

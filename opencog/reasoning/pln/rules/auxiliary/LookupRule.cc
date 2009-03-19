@@ -39,9 +39,9 @@ bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
     bool is_changed = false;
     
     for(vtree::iterator i = target.begin(); i != target.end(); i++)
-        if (nm->inheritsType(nm->getType(v2h(*i)), CONCEPT_NODE))
+        if (nm->inheritsType(nm->getType(_v2h(*i)), CONCEPT_NODE))
         {
-            string name = nm->getName(v2h(*i));
+            string name = nm->getName(_v2h(*i));
             if (name == "!whileago" || name == "!now")
             {
 #ifndef WIN32
