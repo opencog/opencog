@@ -2,12 +2,14 @@
                           ----------------
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
-                        Revised on 13 May 2008
+                        Revised on 18 March 2009
 
 This directory contains code that implements a subgraph isomorphism
-algorithm, and then uses this algorithm to perform query processing.
+algorithm, and then uses this algorithm to support several functions,
+including query processing and a first-order-logic forward chainer.
 The first part of the file describes the generic algorithm; the second
-part describes its application to query processing.
+part describes its applications to query processing, foreward chainging
+and so on.
 
 This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
@@ -29,8 +31,11 @@ on the incidence graph, while the edges of the incidence graph
 reflect the connectivity of the hypergraph.  The input to the
 algorithm must be specified as a set of trees in the incidence
 graph, with some nodes shared between the trees, so as to form
-a single, connected graph. This is a natural fit for the currently
-envisioned linguistics applications; for example:
+a single, connected graph. 
+
+An easy example of decomposing a general graph into a collection 
+of trees comes from natural language (English) that has been 
+parsed to extract relations. So, for example:
 
   _subj(John, throw)
   _obj(ball, throw)
@@ -76,12 +81,17 @@ The incidence graph of a hypergraph is called the "Levi graph".
 Levi graphs are bipartite; although the algorithm does not make
 use of this.
 
+A solution that assigns a value to a variable is called a "grounding"
+of that variable. Graphs that contain variables will sometimes be 
+called ungrounded graphs.
+
 The Basic Algorithmic Idea
 --------------------------
 The basic idea is to treat the query as a graph, in which are embedded
 some number of variables or unknowns. This query graph can be loosely
 understood to be kind of like a predicate, in that the query is solved
-only when the variables take on appropriate values.
+only when the variables take on appropriate values, i.e. when the 
+variables are grounded.
 
 The goal of query processing is to scan the collection of all knowledge,
 (the "universe hypergraph"), looking for a subgraph that matches the
@@ -256,6 +266,12 @@ has been decomposed into a set of trees.
 
 [On OpenCog, the entire implementation is in PatternMatch.[h, .cc].]
 
+Example Code
+------------
+The test/query directory contains several test cases checking on this
+functionality. The BigPatternUTest test case is a small, simple, clear
+example of using the simple forward chainer.
+
 Foreach iterators
 -----------------
 The algorithm makes heavy use of "foreach" iterators to walk the
@@ -307,8 +323,8 @@ Since solutions are returned as they are found, each can be ranked on
 the fly, and the search terminated once a solution that is "good enough"
 has been found.
 
-Note that one can used the existing framework to implement approximate
-matching, but manually computing a partial-match score on the fly. One
+Note that one can use the existing framework to implement approximate
+matching, by manually computing a partial-match score on the fly. One
 would do this by accepting poor matches unconditionally, while also
 keeping a running total score. If the running total gets too low, then
 the current node match can be rejected.  At this point, the algo will
@@ -323,6 +339,26 @@ matching, some nodes may be visited multiple times, even during the same
 match attempt. This was a matter of convenience, but will screw up
 partial scores, if not accounted for. 
 
+Forward Chainer
+---------------
+The PattnerMatch::imply() method implements a critical component for a
+forward chainer: it is able to accept, as input, an ImplicationLink, and
+return as output, a ListLink of the implicands. An ImplicationLink is
+basically an IF ... THEN ... statement, expressed as an OpenCog hypergraph.
+
+Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand". 
+The predicate is presumed to contain VariableNodes, while the implicand
+is a hypergraph making used of those VariableNodes.  The predicate is 
+run through the pattern-matching engine. When groundings for the 
+variables are found, then a hypegraph is created based on the implicand,
+using the grounded values found.  Because there may be more than one
+grounding, a ListLink of all grounded implicands is returned.
+
+Thus, the PattnerMatch::imply() method can be used to implement a 
+simple forward-chainer. For example, one may create a collection of
+ImplicationLinks. Then, calling each in turn, from a loop, will cause
+cause each to be evaluated. Thus, N iterations of the loop is equivalent
+to chaining N levels deep.
 
 Hypergraph Query Language (HQL)
 -------------------------------
@@ -410,3 +446,4 @@ using the English language is (a lot) easier than writing a formal
 HQL query.  In this sense, English is the "best" query language, and
 it is supported. 
 
+ -------------------------- END OF FILE ------------------------
