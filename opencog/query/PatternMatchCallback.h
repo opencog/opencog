@@ -68,6 +68,23 @@ class PatternMatchCallback
 		 */
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln) = 0;
+
+		/**
+		 * Called when a top-level predicate (tree) has been fully
+		 * matched. This is meant to be used for evaluating truth
+		 * values of predicates, as an intermediate stage for
+		 * evaluating the overall truth value of a solution.
+		 *
+		 * A tree match has occured if all calls to node_match()
+		 * and tree_match() in that tree have returned false.
+		 * 
+		 * Return true to discard the use of this tree as a possible 
+		 * grounding, return false to use this grounding.
+		 */
+		virtual bool tree_match(Link *pattrn, Link *grnd)
+		{
+			return false;
+		}
 };
 
 } // namespace opencog

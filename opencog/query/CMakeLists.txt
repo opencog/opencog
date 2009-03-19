@@ -18,5 +18,6 @@ INSTALL (FILES
 	PatternMatch.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
+	SimpleLogicPMCB.h
 	DESTINATION "include/opencog/query"
 )

@@ -15,8 +15,13 @@
 namespace opencog {
 
 /**
- * Callback class, used to implement specifics of node 
- * matching, and also, to report solutions when found.
+ * Callback class, used to examine and work with SimpleTruthValues so
+ * as to implement basic term logic-like (boolean logic-like) combinations
+ * of truth values.  That is, this code attempts to combine the truth 
+ * values in the predicate part of the pattern match, in order to arrive
+ * at reasonable TruthValues for any given grounding.
+ *
+ * This callback is meant to be chained into place: etc.
  */
 class SimpleLogicPMCB :
 	public PatternMatchCallback
@@ -82,6 +87,13 @@ class SimpleLogicPMCB :
 		 */
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln) = 0;
+
+		
+		virtual bool tree_match(Link *pattrn, Link *grnd)
+		{
+printf ("hello world\n");
+			return false;
+		}
 };
 
 } // namespace opencog
