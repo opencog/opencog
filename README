@@ -53,30 +53,30 @@ cd bin
 cmake ..
 make
 
-libs will be built into each src subdirectory.
+Libraries will be built into subdirectories within bin, mirroring the structure
+of the source directory root.
 
 Unit tests:
 -----------
-To build and run the unit tests, from the bin directory enter (after building
-opencog as bellow): 
+To build and run the unit tests, from the ./bin directory enter (after building
+opencog as above): 
 
 make test
 
 Running the server:
 -------------------
-The CogServer provides a simple server interface to the reasoning
+The cogserver provides a simple server interface to the reasoning
 system.
 
 See CommandRequestProcessor.cc as an example control interface to
 the server.  This command processor understands 3 simple commands:
 load <xml file name>, ls and shutdown. There is an example XML file
-under test/CogServer/atomSpace.xml
+under tests/server/atomSpace.xml
 
 To run a simple test, build everything and execute
-bin/src/CogServer/cogServer.  From another terminal, run
+bin/opencog/server/cogserver. Then, from another terminal, run
 "telnet localhost 17001". Try loading the example XML file and ls
 to see all the nodes and links.
-
 
 Config file
 -----------
@@ -96,17 +96,10 @@ for the available OpenCog commands can be found in src/guile/README.
 
 Modifying the list of basic types
 ---------------------------------
-At this time, the types are hard-coded (this should be fixed someday).
-To build a new set of types, cd to src/AtomSpace, edit type.script
-and then say "make", in that directory.  The makefile there will 
-automatically build the new header files that define the types.
+See the example under ./examples/atomtypes
 
-
-ToDo
-----
-Get cmake to automatically search for and detect cxxtest
-(and complain when its missing)
-
+CMake notes
+-----------
 Some useful CMake's web sites/pages: 
 
  - http://www.cmake.org (main page) 
@@ -124,3 +117,8 @@ be a good idea to at least temporarily unset NDEBUG. Also if the Boost assert.h
 is used it will be necessary to unset NDEBUG. Boost ublas is intended to
 respond to a specific BOOST_UBLAS_NDEBUG, however this is not available as of
 the current Ubuntu standard version (1.34).
+
+-Wno-deprecated is currently enabled by default to avoid a number of warnings
+regarding hash_map being deprecated (because the alternative is still
+experimental!)
+
