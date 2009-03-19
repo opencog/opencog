@@ -15,20 +15,19 @@
 namespace opencog {
 
 /**
- * Callback class, used to examine and work with SimpleTruthValues so
- * as to implement basic term logic-like (boolean logic-like) combinations
- * of truth values.  That is, this code attempts to combine the truth 
- * values in the predicate part of the pattern match, in order to arrive
- * at reasonable TruthValues for any given grounding.
+ * Callback mixin class, used to examine and work with SimpleTruthValues
+ * so as to implement basic term logic-like (boolean logic-like)
+ * combinations of truth values.  That is, this code attempts to
+ * combine the truth values in the predicate part of the pattern
+ * match, in order to arrive at reasonable TruthValues for any
+ * given grounding.
  *
  * This callback is meant to be chained into place: etc.
  */
 class SimpleLogicPMCB :
-	public PatternMatchCallback
+	public virtual PatternMatchCallback
 {
 	public:
-		virtual ~SimpleLogicPMCB() {};
-
 		/**
 		 * Called when a node in the template pattern
 		 * needs to be compared to a possibly matching
@@ -80,15 +79,6 @@ class SimpleLogicPMCB :
 			return false;
 		}
 
-		/**
-		 * Called when a solution is found. Should 
-		 * return false to search for more solutions;
-		 * or return true to terminate search.
-		 */
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln) = 0;
-
-		
 		virtual bool tree_match(Link *pattrn, Link *grnd)
 		{
 printf ("hello world\n");

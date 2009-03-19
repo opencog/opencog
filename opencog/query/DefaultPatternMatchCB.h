@@ -15,15 +15,14 @@
 namespace opencog {
 
 /**
- * Callback class, used to implement specifics of node 
- * matching, and also, to report solutions when found.
+ * Callback mixin class, used to provide a default node and link
+ * matching behaviour. This class is stile a pure virtual class,
+ * since ith does not implement the solution method.
  */
 class DefaultPatternMatchCB :
-	public PatternMatchCallback
+	public virtual PatternMatchCallback
 {
 	public:
-		virtual ~DefaultPatternMatchCB() {};
-
 		/**
 		 * Called when a node in the template pattern
 		 * needs to be compared to a possibly matching
@@ -47,7 +46,6 @@ class DefaultPatternMatchCB :
 
 			return true;
 		}
-
 
 		/**
 		 * Called when a link in the template pattern
@@ -74,14 +72,6 @@ class DefaultPatternMatchCB :
 			    (pattype != soltype)) return true;
 			return false;
 		}
-
-		/**
-		 * Called when a solution is found. Should 
-		 * return false to search for more solutions;
-		 * or return true to terminate search.
-		 */
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln) = 0;
 };
 
 } // namespace opencog

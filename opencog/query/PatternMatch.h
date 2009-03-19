@@ -38,6 +38,7 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
+		Handle do_imply(Handle, PatternMatchCallback *);
 	public:
 		PatternMatch(void);
 		void set_atomspace(AtomSpace *as)
@@ -51,6 +52,7 @@ class PatternMatch
 		           Handle vars);
 
 		Handle imply(Handle);
+		Handle logic_imply(Handle);
 };
 
 } // namespace opencog

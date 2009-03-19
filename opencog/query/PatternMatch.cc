@@ -23,6 +23,7 @@
 
 #include "PatternMatch.h"
 #include "DefaultPatternMatchCB.h"
+#include "SimpleLogicPMCB.h"
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/TLB.h>
@@ -236,7 +237,7 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
  * grounding.  A list of grounded expressions is created in 'result_list'.
  */
 class Implicator :
-	public DefaultPatternMatchCB
+	public virtual PatternMatchCallback
 {
 	private:
 		Instantiator inst;
@@ -336,7 +337,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * method repeatedly on them, until one is exhausted.
  */
 
-Handle PatternMatch::imply (Handle himplication)
+Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 {
 	Atom * aimpl = TLB::getAtom(himplication);
 	Link * limpl = dynamic_cast<Link *>(aimpl);
@@ -381,16 +382,41 @@ Handle PatternMatch::imply (Handle himplication)
 	fv.find_vars(hclauses);
 
 	// Now perform the search.
-	Implicator impl;
-	impl.implicand = implicand;
-	impl.as = atom_space;
-	pme.match(&impl, lclauses->getOutgoingSet(), fv.varlist);
+	Implicator *impl = dynamic_cast<Implicator *>(pmc);
+	impl->implicand = implicand;
+	pme.match(pmc, lclauses->getOutgoingSet(), fv.varlist);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = atom_space->addLink(LIST_LINK, impl.result_list);
+	Handle gl = atom_space->addLink(LIST_LINK, impl->result_list);
 
 	return gl;
+}
+
+class DefaultImplicator:
+	public virtual Implicator,
+	public virtual DefaultPatternMatchCB
+{};
+
+Handle PatternMatch::imply (Handle himplication)
+{
+	// Now perform the search.
+	DefaultImplicator impl;
+	impl.as = atom_space;
+	return do_imply(himplication, &impl);
+}
+
+class LogicImplicator:
+	public virtual Implicator,
+	public virtual SimpleLogicPMCB
+{};
+
+Handle PatternMatch::logic_imply (Handle himplication)
+{
+	// Now perform the search.
+	LogicImplicator impl;
+	impl.as = atom_space;
+	return do_imply(himplication, &impl);
 }
 
 /* ===================== END OF FILE ===================== */
