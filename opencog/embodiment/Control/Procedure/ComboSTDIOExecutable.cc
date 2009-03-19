@@ -15,9 +15,9 @@ int main(int argc,char** argv) {
 
   //instantiate a Logger that does not print messages to not interfere with
   //standard IO
-  opencog::Logger* NoIOLogger = new opencog::Logger();
-  NoIOLogger->setPrintToStdoutFlag(false);
-  opencog::Logger::initMainLogger(NoIOLogger);    
+  //opencog::Logger* NoIOLogger = new opencog::Logger();
+  opencog::logger().setPrintToStdoutFlag(false);
+  //opencog::Logger::initMainLogger(NoIOLogger);    
 
   ComboProcedureRepository cpr;
   

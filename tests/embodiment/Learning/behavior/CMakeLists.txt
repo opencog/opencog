@@ -31,12 +31,12 @@ LINK_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/lib/linux/luabind
 )
 
-#ADD_CXXTEST(BehaviorDescriptionMatcherUTest)
-#TARGET_LINK_LIBRARIES(BehaviorDescriptionMatcherUTest
-#   behavior
-#   ${LADSUTIL_LIBRARY}
-#	${OPENCOG_LIBRARIES}
-#)
+ADD_CXXTEST(BehaviorDescriptionMatcherUTest)
+TARGET_LINK_LIBRARIES(BehaviorDescriptionMatcherUTest
+   behavior
+   util
+   ${OPENCOG_LIBRARIES}
+)
 
 
 ADD_CXXTEST(CompositeBehaviorDescriptionUTest)

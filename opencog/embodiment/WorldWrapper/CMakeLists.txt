@@ -53,5 +53,5 @@ TARGET_LINK_LIBRARIES(WorldWrapper
     ImaginaryLife
     PetComboVocabulary
     VirtualWorldData
-    xercesc
+    xerces-c
 )
