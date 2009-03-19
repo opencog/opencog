@@ -45,10 +45,10 @@ TARGET_LINK_LIBRARIES(Processor
     util
 )
 
-#ADD_EXECUTABLE (ruleProcessor ProcessorExec.cc)
-#TARGET_LINK_LIBRARIES (ruleProcessor
-#    Processor
-#    Procedure
-#    ImaginaryLife
-#)
+ADD_EXECUTABLE (ruleProcessor ProcessorExec.cc)
+TARGET_LINK_LIBRARIES (ruleProcessor
+    Processor
+    Procedure
+    ImaginaryLife
+)
 

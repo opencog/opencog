@@ -1,11 +1,12 @@
 #include <SystemParameters.h>
 #include <exception>
 
-#include "util/exceptions.h>
+#include "util/exceptions.h"
 #include "Spawner.h"
-#include "util/files.h>
+#include "util/files.h"
 
 using namespace MessagingSystem;
+using namespace opencog;
 
 void spawner_unexpected_handler(){
     throw;
