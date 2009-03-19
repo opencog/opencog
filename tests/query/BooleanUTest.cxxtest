@@ -64,7 +64,7 @@ class BooleanUTest :  public CxxTest::TestSuite
  *  # IF _subj(be, $var1) ^ 
  *       _obj(be, $var2) ^
  *        !DEFINITE-FLAG($var2)
- *      THEN ^3_isa($var2, $var1)
+ *      THEN ^3_isa($var1, $var2)
  * i.e. want to assure the *absence* of DEFINITE_FLAG
  */
 #define an as->addNode
@@ -103,8 +103,8 @@ void BooleanUTest::setUp(void)
 		al(EVALUATION_LINK,
 			his_a = an(PREDICATE_NODE, "is_a"),
 			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var2"),
-				an(VARIABLE_NODE, "$var1")
+				an(VARIABLE_NODE, "$var1"),
+				an(VARIABLE_NODE, "$var2")
 			)
 		)
 	);
@@ -198,23 +198,19 @@ void BooleanUTest::test_isa(void)
 
 	// Result should be a ListLink
 	Handle result = pm.logic_imply(implication);
-printf("duude arity=%d\n", getarity(result));
-
-#if 0
+printf("duude result arity=%d\n", getarity(result));
 	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
+
 	// Then, evaluationLink, as above.
 	Handle heval = getlink(result, 0);
 	Handle vis_a = getlink(heval, 0);
 	Handle hlist = getlink(heval, 1);
 	Handle vberlin = getlink(hlist, 0);
 	Handle vcity = getlink(hlist, 1);
-#endif
 
-#if 0
 	TSM_ASSERT_EQUALS("incorrect is_a", his_a, vis_a);
 	TSM_ASSERT_EQUALS("incorrect berlin", hberlin, vberlin);
 	TSM_ASSERT_EQUALS("incorrect city", hcity, vcity);
-#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

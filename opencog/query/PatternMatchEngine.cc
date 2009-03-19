@@ -107,7 +107,7 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  *
  * Return true if there's a mis-match. The goal here is to walk over
  * the entire tree, without mismatches.  Since a return value of true
- * stops the iteration, true is used to signal a mistmatch.
+ * stops the iteration, true is used to signal a mismatch.
  */
 bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 {
@@ -118,7 +118,8 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.count(ha))
 	{
-		// But... if ab happens to also be a bound var, then its a mismatch.
+		// But... if atom b happens to also be a bound var,
+		// then its a mismatch.
 		if (bound_vars.count(hb)) return true;
 
 		// If we already have a grounding for this variable, the new

@@ -71,6 +71,8 @@ class SimpleLogicPMCB :
 
 			Type pattype = lpat->getType();
 			Type gndtype = lgnd->getType();
+printf ("comp link type %d(%s) %d(%s)\n", pattype,  ClassServer::getTypeName(pattype).c_str(),
+gndtype, ClassServer::getTypeName(gndtype).c_str());
 			if (NOT_LINK == pattype)
 			{
 printf("ola have not link\n");

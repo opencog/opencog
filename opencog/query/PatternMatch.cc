@@ -377,6 +377,30 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 		return Handle::UNDEFINED;
 	}
 
+	// Inpute is in conjunctive normal form, consisting of clasues,
+	// or thier negations. Split these into two distinct lists.
+	// Any clause that is a NotLink is "negated"; strip off the 
+	// negation and put it into its own list.
+	const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+	std::vector<Handle> affirm, negate;
+	size_t clen = cset.size();
+	for (size_t i=0; i<clen; i++)
+	{
+		Handle h = cset[i];
+		Atom *a = TLB::getAtom(h);
+		Type t = a->getType();
+		if (NOT_LINK == t)
+		{
+			Link *l = static_cast<Link *>(a);
+			h = l->getOutgoingHandle(0);
+			negate.push_back(h);
+		}
+		else
+		{
+			affirm.push_back(h);
+		}
+	}
+
 	// Extract a list of variables.
 	FindVariables fv;
 	fv.find_vars(hclauses);
@@ -384,7 +408,7 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
-	pme.match(pmc, lclauses->getOutgoingSet(), fv.varlist);
+	pme.match(pmc, affirm, fv.varlist);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
