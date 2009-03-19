@@ -20,6 +20,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
     ${OPENCOG_SOURCE_DIR}/opencog
+    ${XERCESC_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES (
@@ -38,7 +39,7 @@ LINK_DIRECTORIES (
 
 TARGET_LINK_LIBRARIES (FitnessEstimator
 	util
-	xerces-c
+	${XERCESC_LIBRARIES}
 	comboreduct
 	behavior
 	WorldWrapper

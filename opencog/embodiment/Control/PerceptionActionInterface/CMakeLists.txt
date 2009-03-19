@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
 	${OPENCOG_SOURCE_DIR}/opencog
-	${OPENCOG_SOURCE_DIR}/include/xerces
+	${XERCESC_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES (
@@ -13,7 +13,6 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
 	${OPENCOG_BINARY_DIR}/opencog/util
-	${OPENCOG_SOURCE_DIR}/lib/linux/xerces
 )
 
 CMAKE_POLICY(SET CMP0005 OLD)
@@ -37,7 +36,7 @@ TARGET_LINK_LIBRARIES(PAI
 	Predavese 
 	Control 
 	util 
-	xerces-c 
+	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}
 	${OPENCOG_LIBRARIES}

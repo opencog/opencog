@@ -8,7 +8,7 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/src/Learning/LearningServer
 	${OPENCOG_SOURCE_DIR}/src/Control/OperationalPetController
 	${OPENCOG_SOURCE_DIR}/src/Control
-	${OPENCOG_SOURCE_DIR}/include/xerces
+	${XERCESC_INCLUDE_DIR}
 	${OPENCOG_SOURCE_DIR}/src/Control/PerceptionActionInterface
 	${OPENCOG_SOURCE_DIR}/test/Control/PerceptionActionInterface
 	${OPENCOG_SOURCE_DIR}/src/Control/MessagingSystem
@@ -25,10 +25,7 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/src/Control/OperationalPetController
 	${OPENCOG_BINARY_DIR}/src/PetComboVocabulary
 	${OPENCOG_BINARY_DIR}/src/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/lib/linux/xerces
 	${OPENCOG_BINARY_DIR}/src/WorldWrapper
-	${OPENCOG_SOURCE_DIR}/lib/linux/lua
-	${OPENCOG_SOURCE_DIR}/lib/linux/luabind
 )
 
 ADD_CXXTEST(BehaviorDescriptionMatcherUTest)
@@ -57,7 +54,7 @@ ADD_CXXTEST(BDRetrieverUTest)
 TARGET_LINK_LIBRARIES(BDRetrieverUTest
 	behavior
 	PetComboVocabulary
-	xerces-c
+	${XERCESC_LIBRARIES}
 	comboreduct
 	${OPENCOG_LIBRARIES}	
 )

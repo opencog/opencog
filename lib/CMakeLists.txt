@@ -15,6 +15,9 @@ INSTALL (FILES
 	FindUnixODBC.cmake
 	FindLinkGrammar.cmake
 	FindLibUbiGraphClient.cmake
+        FindLua51.cmake
+	FindLuabind.cmake
+	FindXercesC.cmake
 	OpenCogAtomTypes.cmake
 	OpenCogConfig.cmake
 	DESTINATION "${DATADIR}/cmake"

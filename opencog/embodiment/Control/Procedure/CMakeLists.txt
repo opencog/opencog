@@ -10,7 +10,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-    ${OPENCOG_SOURCE_DIR}/include/xerces
+    ${XERCESC_INCLUDE_DIR}
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
@@ -23,7 +23,6 @@ LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/PerceptionActionInterface
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
-    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
     ${OPENCOG_BINARY_DIR}/opencog/util
     ${OPENCOG_BINARY_DIR}/opencog/comboreduct
@@ -76,7 +75,7 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
     Control
     WorldWrapper
     util
-    xerces-c
+    ${XERCESC_LIBRARIES}
     PetComboVocabulary
     ${OPENCOG_LIBRARIES}
 )
@@ -92,7 +91,7 @@ TARGET_LINK_LIBRARIES (combo_shell
     Control
     WorldWrapper
     util
-    xerces-c
+    ${XERCESC_LIBRARIES}
     ssl
     crypto
     pthread

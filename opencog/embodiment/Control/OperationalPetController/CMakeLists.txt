@@ -33,13 +33,13 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PredicateUpdaters
-    ${OPENCOG_SOURCE_DIR}/include/xerces
-    ${OPENCOG_SOURCE_DIR}/include/lua
-    ${OPENCOG_SOURCE_DIR}/include/luabind
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServerMessages
     ${OPENCOG_SOURCE_DIR}/opencog
+    ${XERCESC_INCLUDE_DIR}
+    ${LUA51_INCLUDE_DIR}
+    ${LUABIND_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES (
@@ -56,15 +56,12 @@ LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
     ${OPENCOG_BINARY_DIR}/opencog/util
     ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
-    ${OPENCOG_SOURCE_DIR}/lib/linux/lua
-    ${OPENCOG_SOURCE_DIR}/lib/linux/luabind
 )
 
 TARGET_LINK_LIBRARIES (OpcLib
-    lua5.1
-    luabind
-    xerces-c
+    ${LUA51_LIBRARIES}
+    ${LUABIND_LIBRARIES}
+    ${XERCESC_LIBRARIES}
     PredicateUpdaters
     PAI
     MessagingSystem
