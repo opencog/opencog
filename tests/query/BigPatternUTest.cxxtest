@@ -143,12 +143,17 @@ void BigPatternUTest::setUp(void)
 #define getlink(hand,pos) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
 
+#define getarity(hand) \
+	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
+
 void BigPatternUTest::test_prep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
 	Handle result = pm.imply(imake);
+	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
+
 	// Then, evaluationLink, as above.
 	Handle heval = getlink(result, 0);
 	Handle vmake_from = getlink(heval, 0);
