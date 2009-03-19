@@ -592,10 +592,10 @@ void RuleEngine::logRelations(int l)
     // log them at level l
     const AtomSpace& as = opc->getAtomSpace();
 
-    logger().log(l,
-                    "RuleEngine - TruthValue relations at RuleEngine cycle %d",
-                    getCycle());
-
+    logger().log(static_cast<opencog::Logger::Level>(l),
+                 "RuleEngine - TruthValue relations at RuleEngine cycle %d",
+                 getCycle());
+    
     std::list<Handle> ret;
     as.getHandleSet(back_inserter(ret), EVALUATION_LINK, false);
     for(std::list<Handle>::const_iterator h_it = ret.begin();
@@ -625,7 +625,7 @@ void RuleEngine::logRelations(int l)
             message_str += tv.toString();
 
             // log the message
-            logger().log(l, message_str);
+            logger().log(static_cast<opencog::Logger::Level>(l), message_str);
         }
     }
 }
@@ -637,7 +637,7 @@ void RuleEngine::removeRelation(const Relation& relation)
     Handle relationHandle = opc->getAtomSpace().getHandle(PREDICATE_NODE,
                                                           relation.getName() );
     if ( relationHandle == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "RuleEngine - attempted to remove a relation"
                         " that not exists");
         return;
@@ -1094,7 +1094,7 @@ void RuleEngine::updateSchemaExecutionStatus()
         } else {
             stringstream unexpected_result;
             unexpected_result << result;
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                             "RuleEngine - Procedure result should be"
                             " built-in or action result. Got '%s'.",
                             unexpected_result.str().c_str());
@@ -1388,7 +1388,7 @@ void RuleEngine::processNextAction( void )
 
     // Process next action only if there is map info data available...
     if ( this->opc->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "RuleEngine - There is no map info available yet!");
         return;
     }
@@ -1765,12 +1765,12 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
     logger().log(opencog::Logger::DEBUG, "RuleEngine - Got EvalLinks.");
 
     if (pairs.empty()) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "RuleEngine - Found mo EvaluationLink with"
                         " SelectedRule pred.");
 
     } else if (pairs.size() == 1) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "RuleEngine - Found only one EvaluationLink with"
                         " SelectedRule pred.");
 
@@ -1803,7 +1803,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
         }
 
     } else {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "RuleEngine - Found '%d' one EvaluationLink"
                         " with SelectedRule pred.", pairs.size());
 

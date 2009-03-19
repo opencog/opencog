@@ -35,7 +35,7 @@ class LearnMessage : public MessagingSystem::Message {
 		LearnMessage(const std::string &from, const std::string &to, 
 					 const std::string &msg);	
 		LearnMessage(const std::string &from, const std::string &to, 
-			     const std::string &schema, const std::vector<std::string> &argumentsList, const std::string &ownerId, const std::string &avatarId, const SpaceServer &spaceServer) throw (LADSUtil::InvalidParamException, std::bad_exception);
+			     const std::string &schema, const std::vector<std::string> &argumentsList, const std::string &ownerId, const std::string &avatarId, const SpaceServer &spaceServer) throw (opencog::InvalidParamException, std::bad_exception);
 		
         /**
          * Return A (char *) representation of the message, a c-style string terminated with '\0'.

@@ -1,7 +1,7 @@
 /**
  * BDRetriever.h
  *
- * Author(s): 
+ * Author(s):
  *   Nil Geisweiller
  * Creation: Thu Sep 6 2007
  */
@@ -12,17 +12,19 @@
 #include "CompositeBehaviorDescription.h"
 #include "BehaviorCategory.h"
 
-namespace behavior {
+namespace behavior
+{
 
-  /**
-   * That class contains static methods to retrieve and create a
-   * BehaviorDescripton or BehaviorCategory representing the exemplar(s)
-   * of a certain trick
-   */
+/**
+ * That class contains static methods to retrieve and create a
+ * BehaviorDescripton or BehaviorCategory representing the exemplar(s)
+ * of a certain trick
+ */
 
-  class BDRetriever {
-  public:
-    
+class BDRetriever
+{
+public:
+
     /**
      * retrieve and fill from the WorldProvider 'wp'
      * the object with the exemplar of the trick 'trick_name'
@@ -31,17 +33,17 @@ namespace behavior {
      * The result is added to 'bd'
      */
     static void retrieveExemplar(CompositeBehaviorDescription& bd,
-				 const WorldProvider& wp,
-				 const std::string trick_name,
-				 const Temporal& temp);
+                                 const WorldProvider& wp,
+                                 const std::string trick_name,
+                                 const Temporal& temp);
     /**
      * as previously but uses directly the Handle of a trick concept node
      * instead of its name
      */
     static void retrieveExemplar(CompositeBehaviorDescription& bd,
-				 const WorldProvider& wp,
-				 Handle trickConceptNode,
-				 const Temporal& temp);
+                                 const WorldProvider& wp,
+                                 Handle trickConceptNode,
+                                 const Temporal& temp);
 
     /**
      * retrieve and fill from the WorldProvider 'wp'
@@ -55,11 +57,11 @@ namespace behavior {
      * necessarily matches the behavior description
      */
     static void retrieveLastExemplar(CompositeBehaviorDescription& bd,
-				     Temporal& exemplarTemporal,
-				     const WorldProvider& wp,
-				     const std::string& name);
-    
-    
+                                     Temporal& exemplarTemporal,
+                                     const WorldProvider& wp,
+                                     const std::string& name);
+
+
     /**
      * retrieve from the WorldProvider 'wp'
      * and fill the object with the last exemplar
@@ -70,10 +72,10 @@ namespace behavior {
      * necessarily matches the behavior description
      */
     static void addLastExemplar(BehaviorCategory& bc,
-				std::vector<Temporal>& exemplarsTemporal,
-				const WorldProvider& wp,
-				const std::string& trick_name);
-    
+                                std::vector<Temporal>& exemplarsTemporal,
+                                const WorldProvider& wp,
+                                const std::string& trick_name);
+
     /**
      * retrieve from the WorldProvider 'wp'
      * and fill the object with all exemplars
@@ -81,11 +83,11 @@ namespace behavior {
      * If no such exemplars exist then do nothing.
      */
     static void retrieveAllExemplars(BehaviorCategory& bc,
-				     std::vector<Temporal>& exemplarsTemporal,
-				     const WorldProvider& wp,
-				     const std::string& name);
+                                     std::vector<Temporal>& exemplarsTemporal,
+                                     const WorldProvider& wp,
+                                     const std::string& name);
 
-  };
+};
 }//~namespace behavior
 
 #endif

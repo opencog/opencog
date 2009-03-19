@@ -16,7 +16,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/HandleMap.h>
 
-#include "util/exceptions.h>
+#include "util/exceptions.h"
 
 #include "LocalSpaceMap2D.h"
 

@@ -14,10 +14,10 @@ namespace Spatial {
     class Dimension2 {
     public:
 
-      inline Dimension2( float width = 1, float height = 1 ) throw ( LADSUtil::InvalidParamException ) :
+      inline Dimension2( float width = 1, float height = 1 ) throw ( opencog::InvalidParamException ) :
 	width( width ), height( height ) { 
 	if ( width < 0 || height < 0 ) {
-	  throw LADSUtil::InvalidParamException( TRACE_INFO, "Invalid dimension [negative parameter(s)]" );
+	  throw opencog::InvalidParamException( TRACE_INFO, "Invalid dimension [negative parameter(s)]" );
 	} // if
       }
 

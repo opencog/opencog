@@ -1,10 +1,10 @@
 #ifndef _LOCAL_SPACE_MAP2D_UTIL_H
 #define _LOCAL_SPACE_MAP2D_UTIL_H
 
-#include <LADSUtil/RandGen.h>
-#include <LADSUtil/foreach.h>
-#include <LADSUtil/hash_set.h>
-#include <LADSUtil/hash_map.h>
+#include "util/RandGen.h"
+#include "util/foreach.h"
+#include "util/hash_set.h"
+#include "util/hash_map.h"
 
 #include <map>
 #include <iostream>
@@ -25,7 +25,7 @@ namespace Spatial{
   typedef std::pair<Distance, Distance> Point; 
   typedef std::pair<unsigned int,unsigned int> GridPoint;
 
-  typedef LADSUtil::hash_set<GridPoint,boost::hash<GridPoint> > GridSet;
+  typedef opencog::hash_set<GridPoint,boost::hash<GridPoint> > GridSet;
   
   struct c_str_compare {
     bool operator()(const char* s1, const char* s2) const {
@@ -33,8 +33,8 @@ namespace Spatial{
     }
   };
   typedef std::set<const char*, c_str_compare> ObjectIDSet;  
-  typedef LADSUtil::hash_map<GridPoint,ObjectIDSet,boost::hash<GridPoint> > GridMap;
-  typedef LADSUtil::hash_map<long,std::vector<GridPoint>,boost::hash<long> > LongGridPointVectorHashMap;
+  typedef opencog::hash_map<GridPoint,ObjectIDSet,boost::hash<GridPoint> > GridMap;
+  typedef opencog::hash_map<long,std::vector<GridPoint>,boost::hash<long> > LongGridPointVectorHashMap;
   
   /**
    * Represents the object geometry
@@ -154,7 +154,7 @@ namespace Spatial{
   /**
    * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
    */
-  void populateRandom(LADSUtil::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
+  void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
 		      int obstacles, const Spatial::GridPoint& prob_center, int std_dev = 75);
   
 } // namespace spatial

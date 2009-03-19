@@ -9,7 +9,7 @@
 #include "LineSegment.h"
 #include "Rectangle.h"
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -84,7 +84,7 @@ namespace Spatial {
          * Create a super entity. If the parameters are entities that did not intersect 
          * each other an InvalidParamException will be raised to notify the error
          */
-        SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (LADSUtil::InvalidParamException);
+        SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (opencog::InvalidParamException);
 
         virtual ~SuperEntity( void );
 
@@ -121,7 +121,7 @@ namespace Spatial {
          * Remove an entity from the superEntity. It will throw an InvalidParamException if these
          * operation results in an invalid superentity (just one entity or far entities)
          */
-        void removeEntity( long id ) throw (LADSUtil::InvalidParamException);
+        void removeEntity( long id ) throw (opencog::InvalidParamException);
 
         /**
          * Create a copy of this super entity

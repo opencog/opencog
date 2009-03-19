@@ -14,34 +14,36 @@
 #include "IdleTask.h"
 #include "EntropyFilter.h"
 #include "AtomSpaceWorldProvider.h"
-#include <opencog/atomspace/AtomSpace.h>
+#include "atomspace/AtomSpace.h"
 #include "PetaverseImitationLearning.h"
 #include "PetaverseVocabularyProvider.h"
-#include "hillclimbing/petaverse-hillclimber.h"
-#include "hillclimbing/HCPetaverseVocabularyProvider.h"
+#include "petaverse-hillclimber.h"
+#include "HCPetaverseVocabularyProvider.h"
 
 
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
-  using namespace hillclimbing;
-  using namespace combo;
-  using namespace std;
-  using namespace Filter;
+using namespace hillclimbing;
+using namespace combo;
+using namespace std;
+using namespace Filter;
 
-  class NetworkElement;
+class NetworkElement;
 
-  class ImitationLearningTask : public IdleTask {
+class ImitationLearningTask : public IdleTask
+{
 
     typedef FitnessEstimator::NoSpaceLifeFitnessEstimator FE;
 
 
     typedef enum {
-      LTS_IDLE,
-      LTS_LEARN
+        LTS_IDLE,
+        LTS_LEARN
     } learningTaskState;
 
-  public:
+public:
     ImitationLearningTask();
     ~ImitationLearningTask();
 
@@ -51,12 +53,12 @@ namespace MessagingSystem {
     //return true if it succeeds
     //false if it fails
     bool initLearning(int number_of_estimation_per_cycle,
-		      WorldProvider* wp,
-		      const argument_list& al,
-		      const std::string& pet_id,
-		      const std::string& owner_id,
-		      const std::string& avatar_id,
-		      const std::string& trick_name);
+                      WorldProvider* wp,
+                      const argument_list& al,
+                      const std::string& pet_id,
+                      const std::string& owner_id,
+                      const std::string& avatar_id,
+                      const std::string& trick_name);
 
     void addLearningExample(WorldProvider* wp, const argument_list& al);
     void waitForReward();
@@ -65,7 +67,7 @@ namespace MessagingSystem {
     const combo_tree& getBestSchema();
     const combo_tree& getBestSchemaEstimated();
 
-  private:
+private:
 
     learningTaskState _lts;
 
@@ -93,7 +95,7 @@ namespace MessagingSystem {
     std::string _trick_name;
 
     RandGen* _rng;
-  };
+};
 
 }//~MessageSystem
 

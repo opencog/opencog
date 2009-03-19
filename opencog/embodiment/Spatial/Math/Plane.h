@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
 #include "Vector3.h"
 #include "Matrix4.h"
@@ -87,7 +87,7 @@ namespace Spatial {
        * @param plane3
        * @return
        */
-      Vector3 getIntersectionPoint( const Plane& plane2, const Plane& plane3 ) throw (LADSUtil::NotFoundException);
+      Vector3 getIntersectionPoint( const Plane& plane2, const Plane& plane3 ) throw (opencog::NotFoundException);
 
       /*
        *

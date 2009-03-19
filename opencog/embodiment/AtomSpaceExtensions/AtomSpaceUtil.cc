@@ -541,7 +541,7 @@ bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
                            seq, NULL, NULL, 2, EVALUATION_LINK, false);
 
     if (allHandles.size() != 1) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "IsFriendly - Found %d EvalLinks. Should be one.",
                         allHandles.size());
         return false;
@@ -717,7 +717,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
 
     Handle primaryListLink = atomSpace.getOutgoing(selectedEvalLink, 1);
     if (primaryListLink == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null primary listLink.",
                         predicateName.c_str());
         return -1;
@@ -727,14 +727,14 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
     do {
         Handle secondaryListLink = atomSpace.getOutgoing(primaryListLink, i);
         if (secondaryListLink == Handle::UNDEFINED) {
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                             "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null secondary listLink.",
                             predicateName.c_str());
             return -1;
         }
         Handle paramName = atomSpace.getOutgoing(secondaryListLink, 0);
         if (paramName == Handle::UNDEFINED) {
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                             "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null paramName.",
                             predicateName.c_str());
             return -1;
@@ -743,7 +743,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
         if (atomSpace.getName(paramName) == "level") {
             Handle paramValue = atomSpace.getOutgoing(secondaryListLink, 1);
             if (paramValue == Handle::UNDEFINED) {
-                logger().log(opencog::Logger::WARNING,
+                logger().log(opencog::Logger::WARN,
                                 "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null paramValue.",
                                 predicateName.c_str());
                 return -1;
@@ -755,7 +755,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
         i++;
 
         if (i >= atomSpace.getArity(primaryListLink)) {
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                             "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Invalid listLink.",
                             predicateName.c_str());
             return -1;

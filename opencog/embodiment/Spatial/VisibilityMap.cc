@@ -8,6 +8,7 @@
 #include <boost/scoped_ptr.hpp>
 
 using namespace Spatial;
+using namespace opencog;
 
 /// Start Class Tile
 VisibilityMap::Tile::Tile( double x, double y, int row, int col, const Math::Vector3& normal, double tileSideSize ) : 

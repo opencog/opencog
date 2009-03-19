@@ -5,9 +5,9 @@
  *   Carlos Lopes
  * Creation: Wed Oct 28 2008
  */
-#include <opencog/functional.h>
-#include <opencog/foreach.h>
-#include <opencog/Logger.h>
+#include "util/functional.h"
+#include "util/foreach.h"
+#include "util/Logger.h"
 
 #include "WorldWrapperUtilMock.h"
 #include <math.h>

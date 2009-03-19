@@ -8,25 +8,32 @@ ADD_LIBRARY (LearningServerMessages
 )
 
 INCLUDE_DIRECTORIES (
-    ${PETAVERSE_SOURCE_DIR}/src/Control/MessagingSystem
-    ${PETAVERSE_SOURCE_DIR}/src/AtomSpaceExtensions
-    ${PETAVERSE_SOURCE_DIR}/src/Learning
-    ${PETAVERSE_SOURCE_DIR}/src/PetComboVocabulary
-    ${PETAVERSE_SOURCE_DIR}/src/Spatial
-    ${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+    ${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
-    ${PETAVERSE_BINARY_DIR}/src/PetComboVocabulary
-    ${PETAVERSE_BINARY_DIR}/src/AtomSpaceExtensions
-    ${PETAVERSE_BINARY_DIR}/src/Spatial
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Spatial
+    ${OPENCOG_BINARY_DIR}/opencog/util
+    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
+    ${OPENCOG_BINARY_DIR}/opencog/xml
+    ${OPENCOG_BINARY_DIR}/opencog/atomspace
 )
 
 TARGET_LINK_LIBRARIES (LearningServerMessages
     MessagingSystem
     PetComboVocabulary
-    ${COMBOREDUCT_LIBRARY}
-    ${LADSUTIL_LIBRARY}
+    comboreduct
+    util
+    xml
     AtomSpaceExtensions
+    atomspace
     ${OPENCOG_LIBRARIES}
 )

@@ -8,8 +8,8 @@
 
 #include "Pet.h"
 #include "OPC.h"
-#include "util/files.h>
-#include "util/Logger.h>
+#include "util/files.h"
+#include "util/Logger.h"
 #include "behavior/BE.h"
 #include "behavior/BDTracker.h"
 #include "PredefinedProcedureNames.h"
@@ -419,7 +419,7 @@ void Pet::startLearning(const std::vector<std::string> &commandStatement, unsign
   logger().log(opencog::Logger::DEBUG, "Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
     
   if(isInLearningMode()){
-    logger().log(opencog::Logger::WARNING, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
+    logger().log(opencog::Logger::WARN, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
     std::string newExemplarAvatarId = exemplarAvatarId;
     stopLearning(learningSchema, timestamp);
     setExemplarAvatarId(newExemplarAvatarId);
@@ -446,7 +446,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
 
   // check if stop learning corresponds to currently learning schema
   if(learningSchema != commandStatement){
-    logger().log(opencog::Logger::WARNING, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
+    logger().log(opencog::Logger::WARN, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;
   } 
@@ -493,12 +493,12 @@ void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsign
 		  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp, getExemplarAvatarId().c_str());
 
   if(!isInLearningMode()){
-    logger().log(opencog::Logger::WARNING, "Pet - Unable to start exemplar. Not in LEARNING mode.");
+    logger().log(opencog::Logger::WARN, "Pet - Unable to start exemplar. Not in LEARNING mode.");
     return;    
   }
     
   if(learningSchema != commandStatement && commandStatement.size() > 0){
-    logger().log(opencog::Logger::WARNING, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
+    logger().log(opencog::Logger::WARN, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;        
   }
@@ -512,13 +512,13 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
 		  (commandStatement.size() > 0 ? commandStatement.front().c_str(): learningSchema.front().c_str()), timestamp);    
 
   if(!isInLearningMode() || exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP){
-    logger().log(opencog::Logger::WARNING, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
+    logger().log(opencog::Logger::WARN, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;        
   }
     
   if(learningSchema != commandStatement && commandStatement.size() > 0){
-    logger().log(opencog::Logger::WARNING, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
+    logger().log(opencog::Logger::WARN, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
     // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
     return;        
   }
@@ -624,7 +624,7 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 		  (commandStatement.size() > 0 ? commandStatement.front().c_str(): learningSchema.front().c_str()), timestamp);    
 
   if(learningSchema != commandStatement && commandStatement.size() > 0){
-    logger().log(opencog::Logger::WARNING, "Pet - Try schema, trick differs"); 
+    logger().log(opencog::Logger::WARN, "Pet - Try schema, trick differs"); 
     return; 
   }
 
@@ -642,7 +642,7 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 //    std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
     sender->sendTrySchema(learningSchema.front(),  args);
   } else {
-     logger().log(opencog::Logger::WARNING, "Pet - Did not executed the last received candidate yet!"); 
+     logger().log(opencog::Logger::WARN, "Pet - Did not executed the last received candidate yet!"); 
      // Force a new attempt of executing the candidate schema.
      ruleEngine->tryExecuteSchema(learningSchema.front()); 
   }
@@ -654,7 +654,7 @@ void Pet::reward(unsigned long timestamp) {
     
   if (isInLearningMode()) {
       if(learningSchema.empty() ||  learningSchema.front() == "" || triedSchema == ""){
-        logger().log(opencog::Logger::WARNING, "Pet - Trying to reward a non-tried schema.");
+        logger().log(opencog::Logger::WARN, "Pet - Trying to reward a non-tried schema.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;        
       }        
@@ -685,7 +685,7 @@ void Pet::punish(unsigned long timestamp) {
 
   if (isInLearningMode()) {
       if(learningSchema.empty() || learningSchema.front() == "" || triedSchema == ""){
-        logger().log(opencog::Logger::WARNING, "Pet - Trying to punish a non-tried schema.");
+        logger().log(opencog::Logger::WARN, "Pet - Trying to punish a non-tried schema.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;        
       }        
@@ -759,14 +759,14 @@ void Pet::updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad
   // sanity checks
   if(exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP || 
      exemplarEndTimestamp   == Pet::UNDEFINED_TIMESTAMP){
-    logger().log(opencog::Logger::WARNING, 
+    logger().log(opencog::Logger::WARN, 
                     "Pet - Exemplar start/end should be set to update SppaceMapsToHold.");
     return; 
   }
   
   // sanity checks
   if(exemplarStartTimestamp > exemplarEndTimestamp){
-    logger().log(opencog::Logger::WARNING, 
+    logger().log(opencog::Logger::WARN, 
                     "Pet - Exemplar start should be smaller than exemplar end.");
     return; 
   }

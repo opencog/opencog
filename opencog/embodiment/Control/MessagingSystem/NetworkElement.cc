@@ -43,6 +43,8 @@
 
 
 using namespace MessagingSystem;
+using namespace opencog;
+
 const std::string NetworkElement::OK_MESSAGE = "OK";
 const std::string NetworkElement::FAILED_MESSAGE = "FAILED";
 const std::string NetworkElement::FAILED_TO_CONNECT_MESSAGE = "FAILED_TO_CONNECT";
@@ -99,7 +101,8 @@ void NetworkElement::initialize(const Control::SystemParameters &params, const s
     this->parameters = params;
 
     // Initializes the main logger (static logger for this process)
-    opencog::Logger::initMainLogger(Control::LoggerFactory::getLogger(parameters, myId));    
+    //Nil: I comment that hopefully we don't need it
+    //opencog::Logger::initMainLogger(Control::LoggerFactory::getLogger(parameters, myId));    
 
     this->routerID.assign(this->parameters.get("ROUTER_ID"));
     this->routerIP.assign(this->parameters.get("ROUTER_IP"));
@@ -372,7 +375,7 @@ void NetworkElement::idleTime() {
 
 bool NetworkElement::processNextMessage(Message *message) {
 
-    logger().log(opencog::Logger::WARNING, "NetworkElement - Discarding message from '%s'.\n%s",
+    logger().log(opencog::Logger::WARN, "NetworkElement - Discarding message from '%s'.\n%s",
                     message->getFrom().c_str(), message->getPlainTextRepresentation());
     return false;
 }
@@ -499,7 +502,7 @@ bool NetworkElement::sendCommandToRouter(const std::string &cmd) {
     logger().log(opencog::Logger::DEBUG, "NetworkElement - response = 'OK'");    
     return true;
   } else if ( response == FAILED_TO_CONNECT_MESSAGE || response == FAILED_MESSAGE ){
-    logger().log(opencog::Logger::WARNING, 
+    logger().log(opencog::Logger::WARN, 
                     "NetworkElement - Unable to connect to Router in sendCommandToRouter.");
     // cannot connect to router, add it to unavailable elements list
     markAsUnavailableElement(this->routerID);

@@ -2,7 +2,7 @@
 #define RECTANGLE_H
 
 #include "Vector3.h"
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 
 namespace Spatial {
   namespace Math {
@@ -12,7 +12,7 @@ namespace Spatial {
 
       Rectangle( const Rectangle& other );
 
-      Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, const Vector3& rightBottomCorner ) throw(LADSUtil::InvalidParamException);
+      Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, const Vector3& rightBottomCorner ) throw(opencog::InvalidParamException);
 
       inline virtual ~Rectangle( void ) { };
 

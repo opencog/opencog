@@ -12,6 +12,7 @@
 #define HUGE_DISTANCE 999999.9
 
 using namespace Spatial;
+using namespace opencog;
 
 bool LocalSpaceMap2D::addToSuperEntity( const EntityPtr& entity ) {
     bool merged = false;

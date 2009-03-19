@@ -99,7 +99,7 @@ bool pet_dev_meta_command::operator()(const pAtom& arg, unsigned long timestamp,
         std::vector<std::string> arguments;
         petInterface.getCurrentModeHandler( ).handleCommand( "saveVisMap", arguments );
     } else {
-        logger().log(opencog::Logger::WARNING, "Unrecognized meta command: '%s'", meta_command.c_str());
+        logger().log(opencog::Logger::WARN, "Unrecognized meta command: '%s'", meta_command.c_str());
     } // else
 
     // TODO: When we know what this would generate...
@@ -146,7 +146,7 @@ bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const st
                 return true;
             } // if
 
-            logger().log(opencog::Logger::WARNING, "PredaveseActions - Don't know how to play %s", arguments[0].c_str( ) );
+            logger().log(opencog::Logger::WARN, "PredaveseActions - Don't know how to play %s", arguments[0].c_str( ) );
             return false;
         } // if
     } // end block
@@ -222,12 +222,12 @@ bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const st
     Handle S = petInterface.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, trickName);
 
     if (!CoreUtils::compare(S, Handle::UNDEFINED)) {
-        logger().log(opencog::Logger::WARNING, "pet_command - Found no schema node: %s", trickName.c_str());
+        logger().log(opencog::Logger::WARN, "pet_command - Found no schema node: %s", trickName.c_str());
         // Grounded schema S does not exist. Gets the built-in "unknowTrick" schema instead. 
 	    // (i.e., the schema where pet makes an interrogation gesture or something like that)
         S = petInterface.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, UNKNOWN_TRICK_SCHEMA_NAME);
         if (!CoreUtils::compare(S, Handle::UNDEFINED)) {
-            logger().log(opencog::Logger::WARNING, "pet_command - Found no schema node: %s", UNKNOWN_TRICK_SCHEMA_NAME);
+            logger().log(opencog::Logger::WARN, "pet_command - Found no schema node: %s", UNKNOWN_TRICK_SCHEMA_NAME);
         } else {
             // the given command will feed RuleEngine with the unknow trick
             petInterface.setRequestedCommand( UNKNOWN_TRICK_SCHEMA_NAME, resolvedNames);
@@ -313,7 +313,7 @@ bool pet_stop_learn_command::operator()(const pAtom& arg, unsigned long timestam
     //    printf("\t%s\n", a.c_str());
 
     if (f_args.empty()) {
-        logger().log(opencog::Logger::WARNING, "pet_stop_learn_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARN, "pet_stop_learn_command - Schema name should be provided.");
         return false;
     } 
     
@@ -349,7 +349,7 @@ bool pet_stop_command::operator()(const pAtom& arg, unsigned long timestamp, con
     //    printf("\t%s\n", a.c_str());
     
     if (f_args.empty()) {
-        logger().log(opencog::Logger::WARNING, "pet_stop_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARN, "pet_stop_command - Schema name should be provided.");
         return false;
     }
 
@@ -413,12 +413,12 @@ bool exemplar_start_command::operator()(const pAtom& arg, unsigned long timestam
 
     } else if (  ( petInterface.getExemplarAvatarId() != petInterface.getOwnerId() && exemplarAvatarId == "I" ) 
                  || (petInterface.getExemplarAvatarId() != exemplarAvatarId && exemplarAvatarId != "I" ) ) {
-        logger().log(opencog::Logger::WARNING, "exemplar_start_command - '%s' is an invalid exemplar avatar id. The exemplar id registered is '%s' .", f_args.front().c_str(), petInterface.getExemplarAvatarId().c_str());
+        logger().log(opencog::Logger::WARN, "exemplar_start_command - '%s' is an invalid exemplar avatar id. The exemplar id registered is '%s' .", f_args.front().c_str(), petInterface.getExemplarAvatarId().c_str());
         return false;
     }
    
     if (f_args.size() == 0 && !isSpecialCase) {
-        logger().log(opencog::Logger::WARNING, "exemplar_start_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARN, "exemplar_start_command - Schema name should be provided.");
         return false;
     } 
 
@@ -455,7 +455,7 @@ bool exemplar_end_command::operator()(const pAtom& arg, unsigned long timestamp,
     
     /*
       if (f_args.empty()) {
-      logger().log(opencog::Logger::WARNING, "exemplar_end_command - Schema name should be provided.");
+      logger().log(opencog::Logger::WARN, "exemplar_end_command - Schema name should be provided.");
       return false;
       } 
     */
@@ -490,7 +490,7 @@ bool try_schema_command::operator()(const pAtom& arg, unsigned long timestamp, c
     FormatArgs(arg->out, arity-1, back_inserter(f_args));
     
     if (f_args.empty() && !petInterface.isInLearningMode()) {
-        logger().log(opencog::Logger::WARNING, "try_schema_command - Schema name should be provided.");
+        logger().log(opencog::Logger::WARN, "try_schema_command - Schema name should be provided.");
         return false;
     } 
     //printf("Try schema: %s\n", f_args[0].c_str());

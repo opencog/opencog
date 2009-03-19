@@ -36,7 +36,7 @@ namespace FitnessEstimator {
     int s = DistortedComboSize::size(tr, _dos);
 
     //debug log for SPCTools
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "SizePenalty - SPCTools - Combo size : %d", s);
+    opencog::logger().log(opencog::Logger::DEBUG, "SizePenalty - SPCTools - Combo size : %d", s);
     //~debug log for SPCTools
 
     return std::exp(-a*std::log(b*c+std::exp(1))*(double)s);

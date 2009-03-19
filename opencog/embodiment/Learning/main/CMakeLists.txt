@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
-    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/hillclimbing
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/PetaverseHC
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/FitnessEstimator 
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/Filter 
@@ -16,12 +16,13 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
     ${OPENCOG_SOURCE_DIR}/opencog/learning
+    ${OPENCOG_SOURCE_DIR}/opencog/learning/moses
     ${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
-    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/hillclimbing
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/PetaverseHC
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/behavior
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/FitnessEstimator
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/RewritingRules
@@ -40,7 +41,7 @@ ENDIF(COMMAND cmake_policy)
 
 ADD_EXECUTABLE (moses-petbrain moses-petbrain)
 TARGET_LINK_LIBRARIES (moses-petbrain
-	${MOSES_LIBRARY}
+	moses
 	hillclimbing
 	util
 	comboreduct

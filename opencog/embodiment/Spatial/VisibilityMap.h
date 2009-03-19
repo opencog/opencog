@@ -3,7 +3,7 @@
 
 #include "Vector3.h"
 #include "Entity.h"
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
@@ -62,7 +62,7 @@ namespace Spatial {
     class TileVisitor {
     public:
 
-      TileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (LADSUtil::InvalidParamException);
+      TileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
       inline virtual ~TileVisitor( void ) { };
 
@@ -84,7 +84,7 @@ namespace Spatial {
 
     class HiddenTileVisitor : public TileVisitor {
     public:
-      HiddenTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (LADSUtil::InvalidParamException);
+      HiddenTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
       virtual ~HiddenTileVisitor( void ) { }
       
       virtual bool operator( )( const TilePtr& tile );
@@ -92,7 +92,7 @@ namespace Spatial {
 
     class VisibleTileVisitor : public TileVisitor {
     public:
-      VisibleTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (LADSUtil::InvalidParamException);
+      VisibleTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
       virtual ~VisibleTileVisitor( void ) { }
       
       virtual bool operator( )( const TilePtr& tile );
@@ -102,7 +102,7 @@ namespace Spatial {
     class NearestTileVisitor : public TileVisitor {
     public:
       // look for nearest tiles to a given referencePosition and which has a given visibility
-      NearestTileVisitor( const Spatial::Math::Vector3& referencePosition, bool visibility, unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (LADSUtil::InvalidParamException);
+      NearestTileVisitor( const Spatial::Math::Vector3& referencePosition, bool visibility, unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
       virtual ~NearestTileVisitor( void ) { }
       
@@ -115,9 +115,9 @@ namespace Spatial {
     }; // NearestTileVisitor
 
 
-    const TilePtr& getTile( const Math::Vector3& position ) const throw( LADSUtil::NotFoundException );
+    const TilePtr& getTile( const Math::Vector3& position ) const throw( opencog::NotFoundException );
 
-    const TilePtr& getTile( unsigned int row, unsigned int column ) const throw( LADSUtil::NotFoundException );
+    const TilePtr& getTile( unsigned int row, unsigned int column ) const throw( opencog::NotFoundException );
 
 
     /**
@@ -159,23 +159,23 @@ row,col(0,0)
      * +-+-+-+
      * |6|7|n|
      */
-    const TilePtr& getNextHiddenTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (LADSUtil::NotFoundException, LADSUtil::InvalidParamException);
+    const TilePtr& getNextHiddenTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException, opencog::InvalidParamException);
 
-    const TilePtr& getNextVisibleTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (LADSUtil::NotFoundException, LADSUtil::InvalidParamException);
+    const TilePtr& getNextVisibleTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException, opencog::InvalidParamException);
 
-    const TilePtr& getNearestHiddenTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (LADSUtil::NotFoundException);
+    const TilePtr& getNearestHiddenTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
 
-    const TilePtr& getNearestVisibleTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (LADSUtil::NotFoundException);
+    const TilePtr& getNearestVisibleTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
 
-    Spatial::Math::Vector3 getAreaCenter( unsigned int areaNumber, unsigned int numberOfAreas ) throw (LADSUtil::NotFoundException);
+    Spatial::Math::Vector3 getAreaCenter( unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException);
 
-    bool isInsideArea( const Spatial::Entity& entity, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (LADSUtil::NotFoundException);
+    bool isInsideArea( const Spatial::Entity& entity, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
 
-    const TilePtr& getNearestVisibleTileToPosition( const Spatial::Math::Vector3& referencePosition ) throw (LADSUtil::NotFoundException);
+    const TilePtr& getNearestVisibleTileToPosition( const Spatial::Math::Vector3& referencePosition ) throw (opencog::NotFoundException);
 
     static bool saveToFile( const std::string& fileName, const VisibilityMap& map );
 
-    static VisibilityMapPtr loadFromFile( const std::string& fileName ) throw( LADSUtil::NotFoundException );
+    static VisibilityMapPtr loadFromFile( const std::string& fileName ) throw( opencog::NotFoundException );
 
   private:
     unsigned int numberOfTiles;

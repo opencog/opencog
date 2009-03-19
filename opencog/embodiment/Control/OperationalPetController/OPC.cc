@@ -299,7 +299,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
 
     // message not for the OPC
     if (msg->getTo() != getID()){
-        logger().log(opencog::Logger::WARNING, "OPC - Wrong destination. Message to: %s",
+        logger().log(opencog::Logger::WARN, "OPC - Wrong destination. Message to: %s",
                         msg->getTo().c_str());
         return false;
     }
@@ -360,7 +360,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
         // ComboSchema
         if(sm->getComboSchema().empty()){
             
-            logger().log(opencog::Logger::WARNING, 
+            logger().log(opencog::Logger::WARN, 
                     "OPC - Received an empty ComboSchema fom LS. Discarding it.");
             return false;
 

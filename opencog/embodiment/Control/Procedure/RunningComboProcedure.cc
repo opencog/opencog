@@ -176,7 +176,7 @@ namespace Procedure {
             } else if (_tr.is_valid(parent) && *parent==id::sequential_and &&
                     isFailed()) {
                 //if the last plan failed and we need to abort a sequence
-                logger().log(opencog::Logger::WARNING, 
+                logger().log(opencog::Logger::WARN, 
                                 "RunningComboProc - Previous plan failed..."
                                 " aborting sequence.");
                 _it=parent.last_child();

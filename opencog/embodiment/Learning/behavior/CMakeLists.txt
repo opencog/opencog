@@ -22,6 +22,9 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
+    ${OPENCOG_SOURCE_DIR}/opencog
+    ${OPENCOG_SOURCE_DIR}/opencog/atomspace
+    ${OPENCOG_SOURCE_DIR}/include/xerces
 )
 
 LINK_DIRECTORIES (
@@ -34,6 +37,9 @@ LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/PerceptionActionInterface
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
+    ${OPENCOG_BINARY_DIR}/opencog/util
+    ${OPENCOG_BINARY_DIR}/opencog/atomspace
+    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
 )
 
 TARGET_LINK_LIBRARIES (behavior
@@ -42,5 +48,5 @@ TARGET_LINK_LIBRARIES (behavior
 	xerces-c
 	MessagingSystem
 	AtomSpaceExtensions
-	${OPENCOG_LIBRARIES}
+	atomspace
 )

@@ -30,7 +30,7 @@ class TrySchemaMessage : public MessagingSystem::Message {
 					 const std::string &msg);	
 		TrySchemaMessage(const std::string &from, const std::string &to, 
 				     const std::string &schema, const std::vector<std::string> &argumentsList) 
-                     throw (LADSUtil::InvalidParamException, std::bad_exception);
+                     throw (opencog::InvalidParamException, std::bad_exception);
 		
         /**
          * Return A (char *) representation of the message, a c-style string terminated with '\0'.

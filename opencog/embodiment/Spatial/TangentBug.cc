@@ -11,6 +11,7 @@
 
 using namespace Spatial;
 using namespace TangentBugBits;
+using namespace opencog;
 
 /** ---------------------------------------------------------------------------
  * Protected functions
@@ -156,7 +157,7 @@ bool TangentBug::tb_timeout(){
     {
         unsigned int max_number_steps = 3000;
         if (calculatedPath.size() > max_number_steps) {
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                     "TangentBug - Algorithm timed out in the worst possible "
                     "way. The relatively nice timeout algorithm was not triggered, but "
                     "instead the maximum allowed number of moves was reached. This is "
@@ -487,7 +488,7 @@ std::vector<TangentBugBits::look_info> TangentBug::get_obstacle_endpoints() {
 }
 
 std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations2(){
-    logger().log(opencog::Logger::WARNING, "TangentBug - get_visible_destination2 is not implemented. Returning an empty look_info struct.");
+    logger().log(opencog::Logger::WARN, "TangentBug - get_visible_destination2 is not implemented. Returning an empty look_info struct.");
 
     // TODO: the idea is to represent the area around me curr_pos as a
     // continuous interval of 360 degrees, and I do not look all the way to the
@@ -825,7 +826,7 @@ bool TangentBug::seek_goal(){
                     //   if (! _move(subgoal))    return false;
                     //   break;
                 default:
-                    logger().log(opencog::Logger::WARNING, "TangentBug - Only TO_GOAL and NORMAL moves are treated.");
+                    logger().log(opencog::Logger::WARN, "TangentBug - Only TO_GOAL and NORMAL moves are treated.");
                     break;
             }
         }
@@ -851,7 +852,7 @@ TangentBugBits::look_info TangentBug::look_along_ray(
 
             //logger().log(opencog::Logger::FINE, "TangentBug::look_along_ray(): initial_point: before gridIllegal");
     if (lsm->gridIllegal(initial_point)) {
-        logger().log(opencog::Logger::WARNING, "TangentBug - Returning a struct where last_point_before_hit is in fact not before the hit, because the first point is occupied or out of bounds.");
+        logger().log(opencog::Logger::WARN, "TangentBug - Returning a struct where last_point_before_hit is in fact not before the hit, because the first point is occupied or out of bounds.");
         ret_val.last_point_before_hit = initial_point;
         ret_val.last_point = initial_point;
         ret_val.collided = true;
@@ -1189,7 +1190,8 @@ void TangentBug::printLocalSpaceMap() const {
             }
             result += "\n";
         }
-        logger().log(logLevel, "\nLSM:%s\n", result.c_str());
+        logger().log(static_cast<opencog::Logger::Level>(logLevel),
+                     "\nLSM:%s\n", result.c_str());
     }
 }
 

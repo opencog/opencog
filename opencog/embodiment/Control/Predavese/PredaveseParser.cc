@@ -849,7 +849,7 @@ namespace predavese
     {
         if(!loadVocabulary())
         {
-            logger().log(opencog::Logger::WARNING, "PredaveseParser - Cannot load vocabulary.");
+            logger().log(opencog::Logger::WARN, "PredaveseParser - Cannot load vocabulary.");
         }
         initEng();
     }

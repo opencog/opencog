@@ -4,6 +4,8 @@
 #include "util/Logger.h"
 #include "QuadTree.h"
 
+using namespace opencog;
+
 namespace Spatial {
 
   HPASearch::Level::Level( LocalSpaceMap2D* map, unsigned int level, unsigned int maximumClusters ) {

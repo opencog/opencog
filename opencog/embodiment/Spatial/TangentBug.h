@@ -121,7 +121,7 @@ namespace Spatial {
                 void getch() { ; } // This may be laying around.
 #endif
                
-		LADSUtil::RandGen& rng;
+		opencog::RandGen& rng;
 
             public:
                  /**
@@ -129,7 +129,7 @@ namespace Spatial {
                  *
                  * Pass in an empty list that we can put points into. 
                  */
-                TangentBug(const Map& lsm, CalculatedPath& calculatedPath, LADSUtil::RandGen& _rng);
+                TangentBug(const Map& lsm, CalculatedPath& calculatedPath, opencog::RandGen& _rng);
                 ~TangentBug();
 
                 TangentBugBits::look_info look_along_ray(
