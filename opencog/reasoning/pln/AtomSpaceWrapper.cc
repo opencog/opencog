@@ -176,8 +176,11 @@ bool AtomSpaceWrapper::inheritsType(Type T1, Type T2)
 
 bool AtomSpaceWrapper::isSubType(pHandle h, Type T)
 {
-    Handle r = fakeToRealHandle(h).first;
-    return inheritsType(AS_PTR->getType(r), T);
+    if (isType(h))
+        return inheritsType((Type) h, T);
+
+    Type t = AS_PTR->getType(fakeToRealHandle(h).first); 
+    return inheritsType(t, T);
 }
 
 pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
@@ -299,7 +302,8 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 {
     // Don't map Handles that are Types
     if (isType(h)) {
-        throw RuntimeException(TRACE_INFO, "Invalid fake handle %u: it's actually a type", h);
+        printf("Cannot convert an atom type (%u) to a real Handle", h);
+        throw RuntimeException(TRACE_INFO, "Cannot convert an atom type (%u) to a real Handle", h);
     }
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
@@ -1448,6 +1452,8 @@ pHandleSeq AtomSpaceWrapper::filter_type(Type t)
 
 Type AtomSpaceWrapper::getType(const pHandle h) const
 {
+    if (isType(h))
+        return (Type) h;
     return AS_PTR->getType(fakeToRealHandle(h).first);
 }
 
