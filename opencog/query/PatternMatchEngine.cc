@@ -215,15 +215,24 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	if (no_match) return false;
 
 	// Ahh ! found a match!  If we've navigated to the top of the 
-	// predicate, then we're done with it.  Look for the next 
-	// unsovled predicate.
+	// predicate, then it is fully grounded, and we're done with it.
+	// Start work on the next unsovled predicate. But do all of this
+	// only if the callback allows it.
 	if (curr_pred_handle == curr_root)
 	{
+		// Does the callback wish to continue? If not, then
+		// its the same as a mismatch; try the next one.
+		Link *lp = dynamic_cast<Link *>(ap);
+		Link *ls = dynamic_cast<Link *>(as);
+		no_match = pmc->tree_match(lp, ls);
+		if (no_match) return false;
+
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
 		pred_solutn_stack.push(predicate_solution);
 		var_solutn_stack.push(var_solution);
+		pmc->push();
 
 		curr_soln_handle = TLB::getHandle(as);
 		predicate_solution[curr_root] = curr_soln_handle;
@@ -261,8 +270,10 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			curr_soln_handle = curr_soln_save;
 		}
 
-		// If we failed to find anything at this level,
-		// we need to pop, and try other possible matches.
+		// If we failed to find anything at this level, we need to 
+		// backtrack, i.e. pop the stack, pop, and begin a search for
+		// other possible matches and groundings.
+		pmc->pop();
 		curr_root = root_handle_stack.top();
 		root_handle_stack.pop();
 

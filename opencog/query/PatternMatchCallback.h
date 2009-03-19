@@ -71,7 +71,7 @@ class PatternMatchCallback
 
 		/**
 		 * Called when a top-level predicate (tree) has been fully
-		 * matched. This is meant to be used for evaluating truth
+		 * grounded. This is meant to be used for evaluating truth
 		 * values of predicates, as an intermediate stage for
 		 * evaluating the overall truth value of a solution.
 		 *
@@ -85,6 +85,21 @@ class PatternMatchCallback
 		{
 			return false;
 		}
+
+		/**
+		 * Called after a top-level predicate (tree) has been fully
+		 * grounded. This gives the callee the opportunity to save
+		 * state onto a stack, if needed.
+		 */
+		virtual void push(void) {}
+
+		/**
+		 * Called prior to starting a back-track, retreating from the
+		 * most recently grounded top-level predicate (tree). This
+		 * gives the callee the opportunity to save state onto a stack,
+		 * if needed.
+		 */
+		virtual void pop(void) {}
 };
 
 } // namespace opencog
