@@ -113,7 +113,7 @@ struct TypeWrapper {
 };
 typedef TypeWrapper<Temporal> TimeStampWrapper;
 
-typedef boost::variant<Handle, TimeStampWrapper, int, unsigned int, float, bool,
+typedef boost::variant<Handle, Type, TimeStampWrapper, int, unsigned int, float, bool,
                        unsigned char, char, short int> Vertex;
 
 } // namespace opencog

@@ -61,10 +61,10 @@ extern int varcount;
 
 Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname)
 {
-    Handle ret = atw->addNode(FW_VARIABLE_NODE,varname,
+    pHandle ret = atw->addNode(FW_VARIABLE_NODE,varname,
         TruthValue::TRIVIAL_TV(),false,false);
     
-cprintf(4, "CreateVar Added node as NEW: %s / [%lu]\n", varname.c_str(), (ulong) ret.value());
+cprintf(4, "CreateVar Added node as NEW: %s / [%u]\n", varname.c_str(), ret);
 
     varcount++;
 
@@ -84,13 +84,13 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 }
 
 // Redundant, hopefully:
-BBvtree atomWithNewType(Handle h, Type T)
+BBvtree atomWithNewType(pHandle h, Type T)
 {
     assert(GET_ATW->inheritsType(T, LINK));
     AtomSpaceWrapper *nm = GET_ATW;
-    vector<Handle> children = nm->getOutgoing(h);
-    BBvtree ret_m(new BoundVTree(mva((Handle)T)));
-    foreach(Handle c, children)
+    vector<pHandle> children = nm->getOutgoing(h);
+    BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
+    foreach(pHandle c, children)
     {
         ret_m->append_child(ret_m->begin(), mva(c).begin());
     }
@@ -100,23 +100,23 @@ BBvtree atomWithNewType(Handle h, Type T)
     
 BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 {
-    Handle *ph = v2h(&*v.begin());
+    pHandle *ph = boost::get<pHandle>(&*v.begin());
 // TODO just call the overloaded Vertex version below
     AtomSpaceWrapper *nm = GET_ATW;
-    if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
+    if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
     {
     
         BBvtree ret_m(new BoundVTree(v));
-        *ret_m->begin() = Vertex((Handle)T);
+        *ret_m->begin() = Vertex((pHandle)T);
         return ret_m;
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
         assert(GET_ATW->inheritsType(T, LINK));
 
-        vector<Handle> children = nm->getOutgoing(*ph);
-        BBvtree ret_m(new BoundVTree(mva((Handle)T)));
-        foreach(Handle c, children)
+        vector<pHandle> children = nm->getOutgoing(*ph);
+        BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
+        foreach(pHandle c, children)
         {
             ret_m->append_child(ret_m->begin(), mva(c).begin());
         }
@@ -127,22 +127,22 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 
 BBvtree atomWithNewType(const Vertex& v, Type T)
 {
-    Handle *ph = (Handle*) v2h(&v);
+    const pHandle *ph = boost::get<pHandle>(&v);
     AtomSpaceWrapper *nm = GET_ATW;
-    if (!ph || !nm->isReal(*ph)) //Virtual: just replace the root node
+    if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
     {
     
         BBvtree ret_m(new BoundVTree(v));
-        *ret_m->begin() = Vertex((Handle)T);
+        *ret_m->begin() = Vertex((pHandle)T);
         return ret_m;
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
         assert(GET_ATW->inheritsType(T, LINK));
 
-        vector<Handle> children = nm->getOutgoing(*ph);
-        BBvtree ret_m(new BoundVTree(mva((Handle)T)));
-        foreach(Handle c, children)
+        vector<pHandle> children = nm->getOutgoing(*ph);
+        BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
+        foreach(pHandle c, children)
         {
             ret_m->append_child(ret_m->begin(), mva(c).begin());
         }
@@ -160,9 +160,9 @@ bool UnprovableType(Type T)
 }
 
 template<Type T>
-Handle Join(Handle* h, int N, AtomSpaceWrapper& atw)
+pHandle Join(pHandle* h, int N, AtomSpaceWrapper& atw)
 {
-    vector<Handle> hs;
+    vector<pHandle> hs;
     for (int i = 0; i < N; i++)
         hs.push_back(h[i]);
 
@@ -170,9 +170,9 @@ Handle Join(Handle* h, int N, AtomSpaceWrapper& atw)
 }
 
 template<Type T, typename ATW>
-Handle Join(Handle h1, Handle h2, ATW& atw)
+pHandle Join(pHandle h1, pHandle h2, ATW& atw)
 {
-    Handle h[] = { h1, h2 };
+    pHandle h[] = { h1, h2 };
     return Join<T>(h, 2, atw);
 }
 
@@ -244,8 +244,8 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
     return ret;
 }
 
-Handle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
-             TruthValue*>& fN, Handle* premiseArray, const int n, Handle CX)
+pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
+             TruthValue*>& fN, pHandle* premiseArray, const int n, pHandle CX)
 {
         TruthValue** tvs = new TruthValue*[n];
         for (int i = 0; i < n; i++)
@@ -254,11 +254,11 @@ Handle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityFr
 //puts("Computing formula");
         TruthValue* retTV = fN.compute(tvs, n);
 //puts("Creating outset");
-        HandleSeq outgoing;
+        pHandleSeq outgoing;
         for (int j = 0; j < n; j++)
             outgoing.push_back(premiseArray[j]);
 //puts("Adding link");
-        Handle ret = destTable->addLink(linkT, outgoing,
+        pHandle ret = destTable->addLink(linkT, outgoing,
             *retTV,
             RuleResultFreshness);   
 
@@ -274,7 +274,7 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, 
 {
         const int N = outh->begin().number_of_children();
         
-        if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), OutLinkType) ||
+        if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), OutLinkType) ||
             N <= MAX_ARITY_FOR_PERMUTATION)
             return Rule::setOfMPs();
 
@@ -286,13 +286,13 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, 
         vector<atom> hs;
         tree<Vertex>::sibling_iterator ptr = outh->begin(outh->begin());
         BBvtree root(new BoundVTree);
-        root->set_head((Handle)OutLinkType);
+        root->set_head((pHandle)OutLinkType);
 
         for (int i = 0; i <= parts; i++)
         {
             int elems = ( (i<parts) ? MAX_ARITY_FOR_PERMUTATION : remainder);
             
-            BoundVTree elem(mva((Handle)AND_LINK));
+            BoundVTree elem(mva((pHandle)AND_LINK));
             
             if (elems>1)
             {
@@ -439,9 +439,8 @@ Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
     return ass.attach(destTable);
 }*/
 
-void pr(pair<Handle, Handle> i);
-void pr2(pair<Handle, vtree> i);
-
+void pr2(pair<pHandle, vtree> i);
+void pr(pair<pHandle, pHandle> i);
 
 template <class InputIterator,
                         class OutputIterator,
@@ -504,7 +503,7 @@ Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
         rawPrint(*ret, ret->begin(), 4);
 #else 
         NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-        printer.print(v2h(*vit), 4);
+        printer.print(_v2h(*vit), 4);
         printer.print(ret->begin(), 4);
 #endif
     }
@@ -513,7 +512,7 @@ Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
 }
 
 //Btr<ModifiedVTree> convertToModifiedVTree(Btr<vtree> vt)
-Btr<ModifiedVTree> convertToModifiedVTree(Handle h, Btr<vtree> vt)
+Btr<ModifiedVTree> convertToModifiedVTree(pHandle h, Btr<vtree> vt)
 {
     return Btr<ModifiedVTree>(new ModifiedVTree(*vt, h));
 }
@@ -589,7 +588,7 @@ bool consistent_bindingsVTreeT(TM& b1, bindContainerIterT b2start, bindContainer
     return true;
 }
 
-void insert_with_consistency_check_bindingsVTreeT(map<Handle, vtree>& m, map<Handle, vtree>::iterator rstart, map<Handle, vtree>::iterator rend)
+void insert_with_consistency_check_bindingsVTreeT(map<pHandle, vtree>& m, map<pHandle, vtree>::iterator rstart, map<pHandle, vtree>::iterator rend)
 {
     if (consistent_bindingsVTreeT<Vertex>(m, rstart, rend))
         m.insert(rstart, rend);
@@ -597,9 +596,9 @@ void insert_with_consistency_check_bindingsVTreeT(map<Handle, vtree>& m, map<Han
         throw PLNexception("InconsistentBindingException");
 }
 
-Btr<set<Handle> > ForAll_handles;
+Btr<set<pHandle> > ForAll_handles;
 
-Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, Handle ForAllLink, iAtomSpaceWrapper* table)
+Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, iAtomSpaceWrapper* table)
 {
 	cprintf(4,"FindMatchingUniversal...");
 	
@@ -693,7 +692,7 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
         getc(stdin);
     }
 
-    foreach(Handle h, *ForAll_handles)
+    foreach(pHandle h, *ForAll_handles)
     {
         Btr<ModifiedBoundVTree> BoundUniversal = FindMatchingUniversal(target, h, table);
         if (BoundUniversal)

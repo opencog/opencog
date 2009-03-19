@@ -93,13 +93,6 @@ public:
     void  setName(const std::string&) throw (RuntimeException);
 
     /**
-     * Merges two nodes.
-     *
-     * @param Node to be merged.
-     */
-    virtual void merge(Atom*) throw (InconsistenceException);
-
-    /**
      * Returns a string representation of the node.
      *
      * @return A string representation of the node.

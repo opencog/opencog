@@ -157,8 +157,8 @@ std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
 }
 
 void opencog::setTarget(Handle h) {
-    std::vector<Handle> fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
-    Handle fakeHandle = fakeHandles[0];
+    pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    pHandle fakeHandle = fakeHandles[0];
 //    vtree target* = new vtree(fakeHandle);
     Btr<vtree> target(new vtree(fakeHandle));
     
@@ -177,8 +177,8 @@ void opencog::infer(Handle h, int &steps)
     Btr<BackInferenceTreeRootT> Bstate;
     BackInferenceTreeRootT *state;
 
-    std::vector<Handle> fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
-    Handle fakeHandle = fakeHandles[0];
+    pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    pHandle fakeHandle = fakeHandles[0];
     Btr<vtree> target(new vtree(fakeHandle));
 
     Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
@@ -305,19 +305,19 @@ std::string RunCommand(std::list<std::string> args)
     AtomSpaceWrapper* atw = GET_ATW;
 
 /*  vector<Vertex> targs, targs2;
-    targs.push_back(mva((Handle)INHERITANCE_LINK,
+    targs.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "A"),
                     NewNode(CONCEPT_NODE, "B")
             ));
-    targs.push_back(mva((Handle)INHERITANCE_LINK,
+    targs.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "B"),
                     NewNode(CONCEPT_NODE, "C")
             ));
-    targs2.push_back(mva((Handle)INHERITANCE_LINK,
+    targs2.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "A"),
                     NewNode(CONCEPT_NODE, "D")
             ));
-    targs2.push_back(mva((Handle)INHERITANCE_LINK,
+    targs2.push_back(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "B"),
                     NewNode(CONCEPT_NODE, "C")
             ));
@@ -337,7 +337,7 @@ std::string RunCommand(std::list<std::string> args)
         int a1T, a2T, bT, tempi=0;
         string a10, a11, a20, a21, b1, b2;
         vtree avt1, avt2, bvt;
-        int qrule=NULL;
+        int qrule=0;
         Rule::MPs rule_args;
         bindingsT new_bindings;
 
@@ -351,7 +351,7 @@ std::string RunCommand(std::list<std::string> args)
         int test_i=0;
         int s_i=0;
         bool axioms_ok;
-        boost::shared_ptr<set<Handle> > ts;
+        boost::shared_ptr<set<pHandle> > ts;
         Vertex v;
         Handle eh=Handle::UNDEFINED;
         // TODELETE doesn't affect anything
@@ -375,7 +375,7 @@ std::string RunCommand(std::list<std::string> args)
 #else
             input(h, args);
             ts = atw->getHandleSet((Type)h,"");
-            foreach(Handle ti, *ts)
+            foreach(pHandle ti, *ts)
             {
                 if (atw->getTV(ti).isNullTv())
                 {
@@ -392,9 +392,9 @@ std::string RunCommand(std::list<std::string> args)
 /*            else if (c == "D") { test::debugger_control = (test::debugger_control?false:true);
                       for (int zz=0;zz<1000;zz++)
                             RuleRepository::Instance().rule[ForAll]->o2iMeta(
-                                meta(new vtree(mva((Handle)EVALUATION_LINK,
+                                meta(new vtree(mva((pHandle)EVALUATION_LINK,
                                 NewNode(PREDICATE_NODE, "friendOf"),
-                                mva((Handle)LIST_LINK,
+                                mva((pHandle)LIST_LINK,
                                 NewNode(CONCEPT_NODE, "Britney"),
                                 NewNode(CONCEPT_NODE, "Amir")
                                 )))));
@@ -402,7 +402,7 @@ std::string RunCommand(std::list<std::string> args)
                             //atw->getHandle(NODE, "temmpo");
                         puts("...");
                         }*/
-            else if (c == "plan") { input(h, args); state->extract_plan((Handle)h); }
+            else if (c == "plan") { input(h, args); state->extract_plan((pHandle)h); }
             else if (c == "rule-arguments") { input(h, args);
                             ((BackInferenceTreeRootT*)h)->printArgs();
                             
@@ -436,7 +436,7 @@ std::string RunCommand(std::list<std::string> args)
                          }*/
             // TODO deal with arguments to this thing
             else if (c == "find-bitnode") { 
-                //input(h, args); cprintf(0,"Origin Node #%d\n", state->hsource[(Handle)h]); }
+                //input(h, args); cprintf(0,"Origin Node #%d\n", state->hsource[h]); }
 /*                        fflush(stdin);
                         cin >> bT; cin >> b1; cin >> b2;
                         cin >> a1T; cin >> a10; cin >> a11;
@@ -450,9 +450,9 @@ std::string RunCommand(std::list<std::string> args)
 //                        puts("Enter Rule #: ");
                         input(qrule, args);
 
-                        bvt = (mva((Handle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
-                        avt1 = (mva((Handle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
-                        avt2 = (mva((Handle)a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
+                        bvt = (mva((pHandle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
+                        avt1 = (mva((pHandle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
+                        avt2 = (mva((pHandle)a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
 
                         rawPrint(bvt, bvt.begin(), -2);
                         rawPrint(avt1, avt1.begin(), -2);
@@ -494,7 +494,7 @@ std::string RunCommand(std::list<std::string> args)
                       ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
                                 "EQ" : "IN-EQ" ) << std::endl;
                         }
-            else if (c == "atom") { input(h, args); printTree((Handle)h,0,0); }
+            else if (c == "atom") { input(h, args); printTree((pHandle)h,0,0); }
             else if (c == "eval") {   try { state->evaluate(); }
                         catch(string s) { cprintf(0,s.c_str()); }
                         }
@@ -515,7 +515,7 @@ std::string RunCommand(std::list<std::string> args)
                         }
 
             else if (c == "n") { state->expandNextLevel(); }
-            else if (c == "trail") { input(h, args); state->printTrail((Handle)h); }
+            else if (c == "trail") { input(h, args); state->printTrail((pHandle)h); }
             else if (c == "f") { state->expandFittest(); }
 
             else if (c == "print-bit") { input(h, args);

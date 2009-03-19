@@ -63,15 +63,12 @@ struct less_subst;
 struct atom //: public BoundHandle
 {
 public:
-    mutable Handle real;
+    mutable pHandle handle;
     mutable std::map<std::string,atom>* bindings;
 
     Type T;
     int arity;
     std::string name;
-
-    /// cx doesn't seem to be used.
-    Handle cx;
 
     std::vector<boost::shared_ptr<atom> > hs;
     
@@ -80,9 +77,9 @@ public:
     bool operator<(const atom& rhs) const;
     bool operator!=(const atom& rhs) const { return (*this)<rhs || rhs<(*this); }
 
-    void setHandle(Handle h);   
+    void setHandle(pHandle h);   
 
-    explicit atom(Handle h);
+    explicit atom(pHandle h);
     atom();
     atom(const atom& rhs);
     atom(Type _T, std::string _name);
@@ -100,15 +97,12 @@ public:
 
     /// Probably expensive operation.
 
-    void SetOutgoing(std::vector<Handle> _hs);
+    void SetOutgoing(pHandleSeq _hs);
 
     /// Create a copy of this wrapper into the core, regardless whether this
     /// was created from a core handle.
 
-    Handle attach(iAtomSpaceWrapper* core) const;
-    //{
-    //  return cx;
-    //};
+    pHandle attach(iAtomSpaceWrapper* core) const;
     void detach() const;
 
     /// Copy this as an integer array into the dest array
@@ -135,15 +129,15 @@ public:
 
     /** Metapredicate operation */
 
-    bool operator()(Handle h) const;
+    bool operator()(pHandle h) const;
 
     static bool ValidMetaPredicate(Type T);
 
-    static std::vector<Handle> convertVector(const std::vector<boost::shared_ptr<atom> >& hs,
+    static pHandleSeq convertVector(const std::vector<boost::shared_ptr<atom> >& hs,
                                         iAtomSpaceWrapper* table);
 
-    void substitute(Handle rhs, std::string varname);
-    void substitute(Handle dest, atom src);
+    void substitute(pHandle rhs, std::string varname);
+    void substitute(pHandle dest, atom src);
     void substitute(const atom& dest, const atom& src);
     void substitute(const atom& rhs, std::string varname);
     
@@ -155,7 +149,7 @@ public:
     /// Actualize the substitution from bindings, delete forbiddenBindings, on new instance..
 
     void getWithActualizedSubstitutions(atom& target) const;
-    Handle bindHandle(iAtomSpaceWrapper* table) const;
+    pHandle bindHandle(iAtomSpaceWrapper* table) const;
 
     void extractVars(set<std::string>& vars) const;
     void extractFWVars(set<std::string>& vars) const;
@@ -255,7 +249,7 @@ template<int L>
 class handle_print
 {
 public:
-    void operator()(Handle rhs) { 
+    void operator()(pHandle rhs) { 
     //  printTree(rhs, 0,L); 
     }
 };
@@ -267,7 +261,7 @@ void getAtomTreeString(const atom& a, std::string& outbuf);
 void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
                      set<subst>* forbiddenBindings);
 bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
-                            const std::vector<Handle>& link_set, std::vector<boost::shared_ptr<atom> >& result);
+                            const std::vector<pHandle>& link_set, std::vector<boost::shared_ptr<atom> >& result);
 
 atom* neBoundVertexWithNewType(Handle h, Type T);
 

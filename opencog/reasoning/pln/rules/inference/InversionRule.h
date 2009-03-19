@@ -38,9 +38,9 @@ protected:
 
         assert(premiseArray.size() == 1);
         AtomSpaceWrapper *nm = GET_ATW;
-        std::vector<Handle> nodes = nm->getOutgoing(boost::get<Handle>(premiseArray[0]));
+        pHandleSeq nodes = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));
 
-        tvs[0] = (TruthValue*) & (nm->getTV(boost::get<Handle>(premiseArray[0])));
+        tvs[0] = (TruthValue*) & (nm->getTV(boost::get<pHandle>(premiseArray[0])));
         tvs[1] = (TruthValue*) & (nm->getTV(nodes[0]));
         tvs[2] = (TruthValue*) & (nm->getTV(nodes[1]));
 
@@ -49,7 +49,7 @@ protected:
     std::vector<BoundVertex> r;
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-        if (!GET_ATW->inheritsType((Type)(int)boost::get<Handle>(*outh->begin()).value(), InclusionLink))
+        if (!GET_ATW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
 
         Rule::MPs ret;
@@ -71,9 +71,9 @@ public:
             : GenericRule<InversionFormula> (_destTable, false, "InversionRule"), InclusionLink(linkType) {
         inputFilter.push_back(meta(
                                   new tree<Vertex>(
-                                      mva((Handle)InclusionLink,
-                                          mva(Handle(ATOM)),
-                                          mva((Handle)ATOM))
+                                      mva((pHandle)InclusionLink,
+                                          mva((pHandle)ATOM),
+                                          mva((pHandle)ATOM))
                                   )));
     }
     bool validate2    (MPs& args) const {
@@ -82,13 +82,13 @@ public:
 
     virtual meta i2oType(const vector<Vertex>& h) const {
         assert(1 == h.size());
-        Handle h0 = boost::get<Handle>(h[0]);
+        pHandle h0 = boost::get<pHandle>(h[0]);
         /*cprintf(1,"INV OLD ATOM:\n");
         printTree(boost::get<Handle>(h[0]),0,1);
         cprintf(1,"INV New order:\n");
         printTree(child(boost::get<Handle>(h[0]),1),0,1);
         printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
-        return meta(new tree<Vertex>(mva(Handle(GET_ATW->getType(h0)),
+        return meta(new tree<Vertex>(mva((pHandle)GET_ATW->getType(h0),
                                          mva(GET_ATW->getOutgoing(h0, 1)),
                                          mva(GET_ATW->getOutgoing(h0, 0))
                                         )));

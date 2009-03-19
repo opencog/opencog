@@ -27,10 +27,10 @@ namespace reasoning
 
 class CustomCrispUnificationRuleComposer : public BaseCrispUnificationRule
 {
-	Handle ForallLink;
+	pHandle ForallLink;
 public:
 
-	CustomCrispUnificationRuleComposer(Handle _ForallLink, iAtomSpaceWrapper *_destTable)
+	CustomCrispUnificationRuleComposer(pHandle _ForallLink, iAtomSpaceWrapper *_destTable)
 	: BaseCrispUnificationRule(_destTable), ForallLink(_ForallLink) {}
 
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;

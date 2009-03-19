@@ -60,7 +60,7 @@ namespace haxx
 {
 // extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 bool printRealAtoms = false;
-Handle VarTypes[STD_VARS];
+pHandle VarTypes[STD_VARS];
 }
 
 /// Legacy log system from Novamente, TODO: replace
@@ -104,7 +104,7 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
     if (_rloglevel > currentDebugLevel)
         return;
 
-    Handle *hptr = boost::get<Handle>(&*top);
+    pHandle *hptr = boost::get<pHandle>(&*top);
     if (!hptr) {
         printf("null\n");
         return;
@@ -116,12 +116,12 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
             fprintf(test::logfile, "   ");
     }
 
-    if (hptr && atw->isReal(*hptr)) {
+    if (hptr && !atw->isType(*hptr)) {
 //puts("reasoning::printTree");
         if (!::haxx::printRealAtoms) {
-            cprintf(_rloglevel, "[%lu]\n", (*hptr).value());
+            cprintf(_rloglevel, "[%u]\n", (*hptr));
             if (test::logfile && _rloglevel >= currentDebugLevel)
-                fprintf(test::logfile, "[%lu]\n", (*hptr).value());
+                fprintf(test::logfile, "[%u]\n", (*hptr));
         } else
             reasoning::printTree(*hptr, level, _rloglevel);
 
@@ -132,9 +132,9 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
     IntegerWrapper* iptr;
 
     if (hptr) {
-        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
+        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
+            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
         cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
@@ -157,7 +157,7 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
     if (_rloglevel > currentDebugLevel)
         return;
 
-    Handle *hptr = boost::get<Handle>(&*top);
+    pHandle *hptr = boost::get<pHandle>(&*top);
     if (!hptr) {
         printf("null\n");
         return;
@@ -169,12 +169,12 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
             fprintf(test::logfile, "   ");
     }
 
-    if (hptr && atw->isReal(*hptr)) {
+    if (hptr && !atw->isType(*hptr)) {
 //puts("reasoning::printTree");
         if (!::haxx::printRealAtoms) {
-            cprintf(_rloglevel, "[%d]\n", (*hptr).value());
+            cprintf(_rloglevel, "[%d]\n", (*hptr));
             if (test::logfile && _rloglevel >= currentDebugLevel)
-                fprintf(test::logfile, "[%lu]\n", (*hptr).value());
+                fprintf(test::logfile, "[%u]\n", (*hptr));
         } else
             reasoning::printTree(*hptr, level, _rloglevel);
 
@@ -185,9 +185,9 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
     IntegerWrapper* iptr;
 
     if (hptr) {
-        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
+        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr).value()), top.number_of_children());
+            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
         cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
@@ -215,11 +215,11 @@ namespace reasoning
 {
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
                                  vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
-                                 map<Handle, Handle>& bindings);
+                                 map<pHandle, pHandle>& bindings);
 
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-                                 map<Handle, Handle>& bindings)
+                                 map<pHandle, pHandle>& bindings)
 {
 // bindings.clear();
     return unifiesWithVariableChangeTo(lhs_t, rhs_t, lhs_t.begin(), rhs_t.begin(), bindings);
@@ -227,7 +227,7 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
                                  vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
-                                 map<Handle, Handle>& bindings)
+                                 map<pHandle, pHandle>& bindings)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -241,13 +241,13 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
     cprintf(5, "Empty checks ok\n");
 
     if (!((*rtop) == (*ltop))) {
-        Handle *ph_ltop = v2h(&*ltop);
-        Handle *ph_rtop = v2h(&*rtop);
+        pHandle *ph_ltop = boost::get<pHandle>(&*ltop);
+        pHandle *ph_rtop = boost::get<pHandle>(&*rtop);
 
         if (!ph_ltop || !ph_rtop)
             return false;
 
-        if (!atw->isReal(*ph_ltop) || !atw->isReal(*ph_rtop))
+        if (atw->isType(*ph_ltop) || atw->isType(*ph_rtop))
             return false;
 
         bool lhs_is_node = atw->inheritsType(atw->getType(*ph_ltop), NODE);
@@ -262,7 +262,7 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
         if (!rhs_is_var)
             return false;
 
-        map<Handle, Handle>::const_iterator s = bindings.find(*ph_ltop);
+        map<pHandle, pHandle>::const_iterator s = bindings.find(*ph_ltop);
 
         if (s == bindings.end()) {
             bindings[*ph_ltop] = *ph_rtop;
@@ -294,12 +294,12 @@ string make_subst_buf(const BoundVertex& a);
  }
 };*/
 
-Handle getOutgoingFun::operator()(Handle h, int i)
+pHandle getOutgoingFun::operator()(pHandle h, int i)
 {
     return GET_ATW->getOutgoing(h, i);
 }
 
-bool equal_vectors(Handle* lhs, int lhs_arity, Handle* rhs)
+bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs)
 {
     for (int i = 0; i < lhs_arity; i++)
         if (lhs[i] != rhs[i])
@@ -517,8 +517,8 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
     LOG(3, "BEGIN GATHER for:");
     rawPrint(_MP, _MP.begin(), 3);
 
-    Handle *h_ptr = boost::get<Handle>(&*_MP.begin());
-    if (!h_ptr || *h_ptr == Handle::UNDEFINED ) {
+    pHandle *h_ptr = boost::get<pHandle>(&*_MP.begin());
+    if (!h_ptr || *h_ptr == PHANDLE_UNDEFINED ) {
         LOG(3, "No handle in vertex.");
         //currentDebugLevel = previousDebugLevel;
         return;
@@ -527,13 +527,13 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
     Type T = atw->getType(*h_ptr);
 
     /// Needs to be handled separately.
-    if (atw->isReal(*h_ptr) && T != VarT) {
+    if (!atw->isType(*h_ptr) && T != VarT) {
         LOG(2, "TableGather:: Note: A real handle was asked for.\n");
         insert(Vertex(*h_ptr));
         //currentDebugLevel = previousDebugLevel;
         return;
     }
-    if (atw->isReal(*h_ptr) && T == VarT) {
+    if (!atw->isType(*h_ptr) && T == VarT) {
         LOG(0, "Lookup for a VarT is NOT allowed!\n");
         getc(stdin);getc(stdin);
         //currentDebugLevel = previousDebugLevel;
@@ -551,18 +551,18 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
      }
      else
      {*/
-    Btr<set<Handle> > lookupResults = aprovider->getHandleSet(T, name);
+    Btr<set<pHandle> > lookupResults = aprovider->getHandleSet(T, name);
 
     cprintf(3, "%u objects matched the type %d.\n", (uint) lookupResults->size(), T);
 
     /// If _MP has children, they must match!
 
-    for (set<Handle>::iterator i = lookupResults->begin();
+    for (set<pHandle>::iterator i = lookupResults->begin();
             i != lookupResults->end(); i++) {
         const TruthValue& tv = atw->getTV(*i);
 
         if (tv.isNullTv()) {
-            printf("NULL TV! %d\n", (int)i->value());
+            printf("NULL TV! %d\n", *i);
             getc(stdin);
             continue;
         }
@@ -638,14 +638,14 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
         //    and if so, same as Case1.
 
         tree<Vertex>::pre_order_iterator rootNode = _MP.begin();
-        Handle rootHandle = boost::get<Handle>(*rootNode);
-        if (rootHandle == (Handle) EVALUATION_LINK) {
+        pHandle rootHandle = boost::get<pHandle>(*rootNode);
+        if (rootHandle == (pHandle) EVALUATION_LINK) {
             if (rootNode.number_of_children() == 2) {
                 tree<Vertex>::sibling_iterator child = rootNode.begin();
-                Handle predicateHandle = boost::get<Handle>(*child++);
+                pHandle predicateHandle = boost::get<pHandle>(*child++);
                 tree<Vertex>::pre_order_iterator listNode = child;
-                Handle listHandle = boost::get<Handle>(*listNode);
-                if (listHandle == (Handle) LIST_LINK) {
+                pHandle listHandle = boost::get<pHandle>(*listNode);
+                if (listHandle == (pHandle) LIST_LINK) {
                     Type t = atw->getType(predicateHandle);
                     if (t == PREDICATE_NODE) {
                         std::string nameStr = atw->getName(predicateHandle);
@@ -654,7 +654,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
                             if (listNode.number_of_children() == 2) {
                                 tree<Vertex>::sibling_iterator child = listNode.begin();
                                 tree<Vertex>::pre_order_iterator ANode = child++;
-                                Handle tHandle = boost::get<Handle>(*child);
+                                pHandle tHandle = boost::get<pHandle>(*child);
                                 if (atw->getType(tHandle) == NUMBER_NODE) {
                                     // Case 1:
                                     printf("Case 1 detected\n");
@@ -663,7 +663,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
                                     TableGather matchingSet(ATree, aprovider, VarT);
                                     TableGather::iterator itr = matchingSet.begin();
                                     while (itr != matchingSet.end()) {
-                                        Handle matchingHandle = boost::get<Handle>(itr->value);
+                                        pHandle matchingHandle = boost::get<pHandle>(itr->value);
                                         cout << "got a matching element for A: " << matchingHandle << endl;
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long tLong = atol(atw->getName(tHandle).c_str());
@@ -671,22 +671,23 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
                                         Temporal* ts = new Temporal(false, tLong, tLong);
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries with the exact timestamp: " << ts->toString() << endl;
-                                        atw->getTimeServer().get(back_inserter(timeEntries), matchingHandle, *ts, TemporalTable::EXACT);
+                                        Handle realMatchingHandle = atw->fakeToRealHandle(matchingHandle).first; // what about the version handle?
+                                        atw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *ts, TemporalTable::EXACT);
                                         if (timeEntries.size() > 0) {
                                             cout << "matched element satisfies the time condition " << timeEntries.front().toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", tLong);
-                                            Handle tNode = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
-                                            vector<Handle> listLinkOutgoing;
+                                            pHandle tNode = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandleSeq listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(tNode);
-                                            Handle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            Handle atTimePredNode = atw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
-                                            vector<Handle> evalLinkOutgoing;
+                                            pHandle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
+                                            pHandle atTimePredNode = atw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
+                                            pHandleSeq evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-                                            Handle evalLink = atw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+                                            pHandle evalLink = atw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
                                             if (itr->bindings) {
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
@@ -702,8 +703,8 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
                             if (listNode.number_of_children() == 3) {
                                 tree<Vertex>::sibling_iterator child = listNode.begin();
                                 tree<Vertex>::pre_order_iterator ANode = child++;
-                                Handle t1Handle = boost::get<Handle>(*child++);
-                                Handle t2Handle = boost::get<Handle>(*child);
+                                pHandle t1Handle = boost::get<pHandle>(*child++);
+                                pHandle t2Handle = boost::get<pHandle>(*child);
                                 if (atw->getType(t1Handle) == NUMBER_NODE &&
                                         atw->getType(t2Handle) == NUMBER_NODE) {
                                     // Case 2:
@@ -712,7 +713,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
                                     TableGather matchingSet(ATree, aprovider, VarT);
                                     TableGather::iterator itr = matchingSet.begin();
                                     while (itr != matchingSet.end()) {
-                                        Handle matchingHandle = boost::get<Handle>(itr->value);
+                                        pHandle matchingHandle = boost::get<pHandle>(itr->value);
                                         cout << "got a matching element for A: " << matchingHandle << endl;
                                         // Checks if the matching atom satisfy the time condition
                                         unsigned long t1Long = atol(atw->getName(t1Handle).c_str());
@@ -721,25 +722,26 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries inside the following temporal: " << tl->toString() << endl;
                                         //! @TODO: is STARTS_WITHIN correct?
-                                        atw->getTimeServer().get(back_inserter(timeEntries), matchingHandle, *tl, TemporalTable::STARTS_WITHIN);
+                                        Handle realMatchingHandle = atw->fakeToRealHandle(matchingHandle).first; // TODO: what about the version handle? 
+                                        atw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *tl, TemporalTable::STARTS_WITHIN);
                                         if (timeEntries.size() > 0) {
                                             cout << "matched element satisfies the time condition: " << timeEntries.front().toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", t1Long);
-                                            Handle t1Node = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle t1Node = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             sprintf(tNodeName, "%lu", t2Long);
-                                            Handle t2Node = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
-                                            std::vector<Handle> listLinkOutgoing;
+                                            pHandle t2Node = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandleSeq listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(t1Node);
                                             listLinkOutgoing.push_back(t2Node);
-                                            Handle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            Handle atTimePredNode = atw->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
-                                            std::vector<Handle> evalLinkOutgoing;
+                                            pHandle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
+                                            pHandle atTimePredNode = atw->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
+                                            pHandleSeq evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-                                            Handle evalLink = atw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+                                            pHandle evalLink = atw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
 
                                             cprintf(1, "Created new atInterval link:\n");
                                             printTree(evalLink, 0, 1);
@@ -775,8 +777,8 @@ void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 {
     AtomSpaceWrapper* atw = GET_ATW;
     for (tree<Vertex>::iterator v = value->begin(); v != value->end(); v++) {
-        Handle *ph = boost::get<Handle>(&*v);
-        if (ph && (atw->inheritsType((Type)(ph->value()), NODE))) {
+        pHandle *ph = boost::get<pHandle>(&*v);
+        if (ph && (atw->inheritsType((Type)*ph, NODE))) {
             bindingsT::iterator substed = bindings->find(*ph);
             if (substed != bindings->end())
                 *v = Vertex(substed->second);
@@ -787,10 +789,10 @@ void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 /// Slow, and doesn't handle the meta-level AND,OR,NOT operations.
 
 template<>
-bool weak_atom<Btr<tree<Vertex> > >::operator()(Handle h)
+bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
 {
     ///haxx:: ATOM is the completely free variable.
-    if (h.value() == ATOM)
+    if (h == ATOM)
         return true;
 
     bool restart;
@@ -907,20 +909,20 @@ bool existMPin(const vector<Btr<atom> >& hs)
 //bool equal(const HandleWrapper& A, const HandleWrapper& B) { return A.equal(B); }
 //bool isLink(int v) { return v >= 2; }
 
-bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& link_set, Handle& result)
+bool getLargestIntersection(const set<pHandle>& keyelem_set, const set<pHandle>& link_set, pHandle& result)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
     int max_size = 0;
 
-    for (set<Handle>::const_iterator i = link_set.begin(); i != link_set.end(); i++) {
-        if (*i == Handle::UNDEFINED) {
+    for (set<pHandle>::const_iterator i = link_set.begin(); i != link_set.end(); i++) {
+        if (*i == PHANDLE_UNDEFINED) {
             LOG(2, "getLargestIntersection(): NULL in input set");
             continue;
         }
 //     const vector<Handle> inc2 = getOutgoing(*i);
 //  const vector<Handle>* inc = &inc2;
-        vector<Handle> inc = atw->getOutgoing(*i);
+        pHandleSeq inc = atw->getOutgoing(*i);
         int inc_arity = atw->getArity(*i);
 
 //  string s = atw->getName(*keyelem_set.begin());
@@ -940,7 +942,7 @@ bool getLargestIntersection(const set<Handle>& keyelem_set, const set<Handle>& l
 }
 
 bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
-                             const std::vector<Handle>& link_set, std::vector<Btr<atom> >& result)
+                             const pHandleSeq& link_set, std::vector<Btr<atom> >& result)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -949,9 +951,9 @@ bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
 
     uint max_size = 0;
 
-    for (vector<Handle>::const_iterator i = link_set.begin(); i != link_set.end(); i++) {
+    for (pHandleSeq::const_iterator i = link_set.begin(); i != link_set.end(); i++) {
         //const vector<Handle> inc2 = getOutgoing(*i);
-        assert(atw->isReal(*i));
+        assert(!atw->isType(*i));
         atom atom_i(*i);
         vector<atom> base_set;
 
@@ -972,7 +974,7 @@ bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
     return (max_size > 0);
 }
 
-void printNode1(Handle h, int level, int LogLevel)
+void printNode1(pHandle h, int level, int LogLevel)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -982,7 +984,7 @@ void printNode1(Handle h, int level, int LogLevel)
     char buf[500];
 
     if (!tv.isNullTv())
-        sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(), (int)h.value());
+        sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(), h);
     else
         sprintf(buf, "NULL TV!");
 
@@ -995,7 +997,7 @@ void printNode1(Handle h, int level, int LogLevel)
 // LOG0(LogLevel, repeatc(' ', level*3) + buf);
 }
 
-void printTree(Handle h, int level, int LogLevel)
+void printTree(pHandle h, int level, int LogLevel)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -1006,17 +1008,16 @@ void printTree(Handle h, int level, int LogLevel)
         level = 20;
     }
 
-    if (h == Handle::UNDEFINED) {
+    if (h == PHANDLE_UNDEFINED) {
         //LOG0(LogLevel, repeatc(' ', level*3) + "NULL HANDLE!");
-
         return;
     }
 
-    if (!atw->isReal(h)) {
+    if (atw->isType(h)) {
         char buf[500];
+        Type t = (Type) h;
 
-        sprintf(buf, "Virtual %s (%d) [%d]\n", reasoning::Type2Name((Type)(int)h.value()),
-                (Type)(int)h.value(),  (int)h.value());
+        sprintf(buf, "Virtual %s (%d)\n", reasoning::Type2Name(t), t);
 
         if (test::logfile && LogLevel >= currentDebugLevel)
             fprintf(test::logfile, "%s", buf);
@@ -1028,7 +1029,7 @@ void printTree(Handle h, int level, int LogLevel)
     if (atw->getArity(h) == 0) {
         printNode1(h, level, LogLevel);
     } else {
-        vector<Handle> hs = atw->getOutgoing(h);
+        vector<pHandle> hs = atw->getOutgoing(h);
         Type t = atw->getType(h);
         const TruthValue& tv = atw->getTV(h);
 
@@ -1037,7 +1038,7 @@ void printTree(Handle h, int level, int LogLevel)
         if (!tv.isNullTv())
             sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(),
                     reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(),
-                    (int)h.value());
+                    h);
         else
             sprintf(buf, "NULL TV!");
 
@@ -1046,7 +1047,7 @@ void printTree(Handle h, int level, int LogLevel)
 
         LOG(LogLevel, (repeatc(' ', level*3) + buf ).c_str());
 
-        for (vector<Handle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
+        for (vector<pHandle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
             printTree(*hi, level + 1, LogLevel);
     }
 
@@ -1055,7 +1056,7 @@ void printTree(Handle h, int level, int LogLevel)
 map<int, Type> counter;
 
 struct countAtom {
-    static bool exec(Handle h, int level) {
+    static bool exec(pHandle h, int level) {
         AtomSpaceWrapper* atw = GET_ATW;
         Type t = atw->getType(h);
         counter[t]++;
@@ -1118,6 +1119,7 @@ string GetRandomString(int size)
  char s[1000];
 
  for (int i = 0; i < size-1; i++)
+ A
   s[i] = 'A'+rand()%('Z'-'A'+1);
  s[size-1]=0;
 
@@ -1140,16 +1142,6 @@ string GetRandomString(int size)
   return ss;
  }
   //return GetRandomString(size);
-}*/
-
-/*bool HandleSeqHas(const vector<Handle>& container, Handle key)
-{
- for (int i = 0; i < container.size(); i++)
-  if (TheHandleWrapperFactory.New(container[i])->unify(TheHandleWrapperFactory.New(key)))
-//  if (container[i] == key)
-   return true;
-
- return false;
 }*/
 
 /*string log_periodical_report()
@@ -1219,7 +1211,7 @@ void printNode1(const atom& a, int level, int LogLevel)
     char buf[500];
 
     sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), reasoning::Type2Name(a.T), a.T,
-            (int)a.real.value());
+            a.handle);
 
     string subst_buf = make_subst_buf(a);
 
@@ -1233,7 +1225,7 @@ void printAtomTree(const atom& a, int level, int LogLevel)
     } else {
         char buf[500];
         sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(),
-                ClassServer::getTypeName(a.T).c_str(), a.T, (int)a.real.value());
+                ClassServer::getTypeName(a.T).c_str(), a.T, a.handle);
         string subst_buf = make_subst_buf(a);
 
         LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
@@ -1356,7 +1348,11 @@ public:
 namespace reasoning
 {
 
-bool MPunifyHandle(Handle lhs,
+pHandle _v2h(const Vertex& v) {
+   return  boost::get<pHandle>(v);
+}
+
+bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,
                    bindingsT& bindings,
                    set<hsubst>** forbiddenBindings,
@@ -1364,7 +1360,7 @@ bool MPunifyHandle(Handle lhs,
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    assert(atw->isReal(lhs));
+    assert(!atw->isType(lhs));
 
     Type lhs_T = atw->getType(lhs);
 
@@ -1400,13 +1396,13 @@ bool MPunifyHandle(Handle lhs,
 
                 cprintf(4, "Request rhs handle...\n");
 
-                Handle rhs_h = rhs.attach(ASW());
-                if (rhs_h == Handle::UNDEFINED) {
+                pHandle rhs_h = rhs.attach(ASW());
+                if (rhs_h == PHANDLE_UNDEFINED) {
                     cprintf(0, "Could not add handle!\n");
                     return false;
                 }
 
-                cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h.value());
+                cprintf(4, "Request rhs handle ok %d\n", rhs_h);
 
                 if (!forbiddenBindings)
                     cprintf(4, "No forbiddenBindings\n");
@@ -1429,7 +1425,7 @@ bool MPunifyHandle(Handle lhs,
             return true;
         }
     } else {
-        vector<Handle> lhs_out = atw->getOutgoing(lhs);
+        pHandleSeq lhs_out = atw->getOutgoing(lhs);
         uint lhs_arity = atw->getArity(lhs);
 
         LOG(4, "MPunifyHandle: UnifyVector exec...");
@@ -1470,12 +1466,12 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
         return false;
 
 //boost::apply_visitor(printVisitor<4>(), *lhs_ti);
-    Handle *lhs_ptr = boost::get<Handle>(&*lhs_ti);
+    pHandle *lhs_ptr = boost::get<pHandle>(&*lhs_ti);
     if (!lhs_ptr)
         return false;
-    Handle lhs = *lhs_ptr;
+    pHandle lhs = *lhs_ptr;
 
-    if (rhs.T == ATOM || lhs == (Handle)ATOM)
+    if (rhs.T == ATOM || lhs == (pHandle)ATOM)
         return true;
 
     Type lhs_T = atw->getType(lhs);
@@ -1509,11 +1505,11 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
         // If a node, then check if the names are different
         (lhs_is_node && rhs.name != lhs_name) ||
         // If lhs is a real atom, check whether lhs and rhs cannot be unified
-        (atw->isReal(lhs) && !MPunifyHandle(lhs, rhs, bindings,
+        (!atw->isType(lhs) && !MPunifyHandle(lhs, rhs, bindings,
                                             forbiddenBindings, restart, VarT)) ||
         // If lhs isn't a real atom, check whether lhs and rhs cannot be unified
         // based on the atoms pointed to by rhs.
-        (!atw->isReal(lhs) && !MPunifyVector(lhs_t, lhs_ti, rhs.hs,
+        (atw->isType(lhs) && !MPunifyVector(lhs_t, lhs_ti, rhs.hs,
                                              bindings, forbiddenBindings, restart, VarT))) {
         LOG(4, "Difference found.");
 
@@ -1523,13 +1519,13 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
 
             cprintf(4, "Request rhs handle...\n");
 
-            Handle rhs_h = rhs.attach(ASW());
-            if (rhs_h == Handle::UNDEFINED) {
+            pHandle rhs_h = rhs.attach(ASW());
+            if (rhs_h == PHANDLE_UNDEFINED) {
                 cprintf(0, "Could not add handle!\n");
                 return false;
             }
 
-            cprintf(4, "Request rhs handle ok %d\n", (int)rhs_h.value());
+            cprintf(4, "Request rhs handle ok %d\n", rhs_h);
 
             if (!forbiddenBindings)
                 cprintf(4, "No forbiddenBindings\n");
@@ -1642,7 +1638,7 @@ string condensed_form(const atom& a)
 class getNameOp
 {
 public:
-    string operator()(Handle h) {
+    string operator()(pHandle h) {
         AtomSpaceWrapper* atw = GET_ATW;
         return string(atw->getName(h));
     }
@@ -1665,15 +1661,15 @@ void foo()
 }*/
 
 template<typename BindKeyT, typename BindKeyOpT, typename BindItT>
-bool ttsubstitutableTo(Handle from, Handle to,
-                       map<BindKeyT, Handle>& bindings,
+bool ttsubstitutableTo(pHandle from, pHandle to,
+                       map<BindKeyT, pHandle>& bindings,
                        BindKeyOpT bind_key_op)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    if (from == Handle::UNDEFINED && to == Handle::UNDEFINED)
+    if (from == PHANDLE_UNDEFINED && to == PHANDLE_UNDEFINED)
         return true;
-    if (from == Handle::UNDEFINED || to == Handle::UNDEFINED)
+    if (from == PHANDLE_UNDEFINED || to == PHANDLE_UNDEFINED)
         return false;
 
     /*LOG(0, "-Source");
@@ -1739,8 +1735,8 @@ bool ttsubstitutableTo(Handle from, Handle to,
     if (to_arity != from_arity)
         return false;
 
-    vector<Handle> from_hs = atw->getOutgoing(from);
-    vector<Handle> to_hs = atw->getOutgoing(to);
+    vector<pHandle> from_hs = atw->getOutgoing(from);
+    vector<pHandle> to_hs = atw->getOutgoing(to);
 
 // Check if it matches with at least one combination of permutation of variable elements in outgoing set of FROM side.
 // TODO: FOR NOW, UNORDERED LINKS MAY HAVE ONLY ONE VARIABLE IN THE OUTGOING SET
@@ -1749,7 +1745,7 @@ bool ttsubstitutableTo(Handle from, Handle to,
 //            printf("%d: from_hs=%p\nto_hs=%p\n", i, from_hs[i], to_hs[i]);
 //        }
         // Uses a clone of the outgoing set
-        vector<Handle> new_from_hs(from_hs);
+        vector<pHandle> new_from_hs(from_hs);
 
         // Look for variables in from side
         //BindKeyT unbound_variable_key = 0; // BUG FIX: This causes basic_string initialization error!
@@ -1837,22 +1833,22 @@ bool ttsubstitutableTo(Handle from, Handle to,
 
 void foo2()
 {
-    Handle from, to;
-    map<string, Handle> bindings;
+    pHandle from, to;
+    map<string, pHandle> bindings;
 
-    ttsubstitutableTo<string, getNameOp, map<string, Handle>::iterator>(from, to, bindings, getNameOp());
+    ttsubstitutableTo<string, getNameOp, map<string, pHandle>::iterator>(from, to, bindings, getNameOp());
 }
 
-bool substitutableTo(Handle from, Handle to,
-                     map<string, Handle>& bindings)
+bool substitutableTo(pHandle from, pHandle to,
+                     map<string, pHandle>& bindings)
 {
-    return ttsubstitutableTo<string, getNameOp, map<string, Handle>::iterator>(from, to, bindings, getNameOp());
+    return ttsubstitutableTo<string, getNameOp, map<string, pHandle>::iterator>(from, to, bindings, getNameOp());
 }
 
 class handleNoOp
 {
 public:
-    Handle operator()(Handle h) {
+    pHandle operator()(pHandle h) {
         return h;
     }
 };
@@ -1861,10 +1857,10 @@ public:
  Whether one can produce 'to' from 'from' by some variable substitutions.
 */
 
-bool substitutableTo(Handle from, Handle to,
-                     map<Handle, Handle>& bindings)
+bool substitutableTo(pHandle from, pHandle to,
+                     map<pHandle, pHandle>& bindings)
 {
-    return ttsubstitutableTo<Handle, handleNoOp, map<Handle, Handle>::iterator>(from, to, bindings, handleNoOp());
+    return ttsubstitutableTo<pHandle, handleNoOp, map<pHandle, pHandle>::iterator>(from, to, bindings, handleNoOp());
 }
 
 char unnamed_type[] = "unnamed-type";
@@ -1879,28 +1875,28 @@ const char* Type2Name(Type t)
     */
 }
 
-Handle make_real(vtree& vt)
+pHandle make_real(vtree& vt)
 {
     //printTree(ASW()->addAtom(vt, TruthValue::TRIVIAL_TV(), false),0,0);
     return ASW()->addAtom(vt, TruthValue::TRIVIAL_TV(), false);
 }
 
-void recursiveBind(Vertex& v, const map<Handle, Handle>& binds)
+void recursiveBind(Vertex& v, const map<pHandle, pHandle>& binds)
 {
     // Recursive bind steps through the chain of bindings
     // e.g. when A -> B, but a parent has C -> A
-    Handle *ph = v2h(&v);
+    pHandle *ph = boost::get<pHandle>(&v);
     if (ph) {
-        map<Handle, Handle>::const_iterator it = binds.find(*ph);
+        map<pHandle, pHandle>::const_iterator it = binds.find(*ph);
         if (it != binds.end()) {
-            cprintf(4, "Bound to %lu", it->second.value());
+            cprintf(4, "Bound to %u", it->second);
             v = Vertex(it->second);
             recursiveBind(v, binds);
         }
     }
 }
 
-meta bind_vtree(vtree &targ, const map<Handle, Handle>& binds)
+meta bind_vtree(vtree &targ, const map<pHandle, pHandle>& binds)
 {
     meta thm_substed(new BoundVTree(targ));
 
@@ -1966,7 +1962,7 @@ void removeRecursionFromHandleHandleMap(bindingsT& ret_bindings)
 
     /// 3. Deconvert handle=>vtree to handle=>handle
 
-    typedef pair<Handle, vtree> phvt;
+    typedef pair<pHandle, vtree> phvt;
     foreach(phvt vp, bindsWithVTree)
     ret_bindings[vp.first] = make_real(vp.second);
 }
@@ -1986,13 +1982,13 @@ unsigned long BoundVTree::getFingerPrint()
     const vtree& vt = this->getStdTree();
 
     for (vtree::sibling_iterator i1 = vt.begin(); i1 != vt.end(); i1++) {
-        ret += (unsigned long)v2h(*i1).value();
+        ret += (unsigned long)_v2h(*i1);
 
         for (vtree::sibling_iterator i2 = vt.begin(i1); i2 != vt.end(i1); i2++) {
-            ret += (unsigned long)v2h(*i2).value() * 100;
+            ret += (unsigned long)_v2h(*i2) * 100;
 
             for (vtree::sibling_iterator i3 = vt.begin(i2); i3 != vt.end(i2); i3++)
-                ret += (unsigned long)v2h(*i3).value() * 10000;
+                ret += (unsigned long)_v2h(*i3) * 10000;
         }
     }
 
@@ -2018,7 +2014,7 @@ void BoundVTree::createMyStdTree()
     int vars = 0;
 
     for (vtree::pre_order_iterator i = my_std_tree.begin(); i != my_std_tree.end(); i++) {
-        Handle *plh = v2h(&*i);
+        pHandle *plh = boost::get<pHandle>(&*i);
         if (plh && ((long)plh) > 220 +::haxx::STD_VARS && atw->inheritsType(atw->getType(*plh), FW_VARIABLE_NODE)) {
             bindingsT::iterator old_mapping = varmap.find(*plh);
             if (old_mapping != varmap.end()) {
@@ -2052,8 +2048,8 @@ bool equalVariableStructure(const vtree& lhs, const vtree& rhs)
     vtree::pre_order_iterator li = _lhs->begin();
 
     for (;li != _lhs->end(); li++) {
-        Handle *plh = v2h(&*li);
-        Handle *prh = v2h(&*ri);
+        pHandle *plh = boost::get<pHandle>(&*li);
+        pHandle *prh = boost::get<pHandle>(&*ri);
 
         /// != operator is not supported by Vertex.
         if (!(*li == *ri)) {
@@ -2085,15 +2081,15 @@ void ForceVirtual(meta _target, vtree::iterator& vit)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    Handle *ph = v2h(&(*vit));
-    if (ph && atw->isReal(*ph) && !atw->inheritsType(atw->getType(*ph), NODE)) {
+    pHandle *ph = boost::get<pHandle>(&(*vit));
+    if (ph && !atw->isType(*ph) && !atw->inheritsType(atw->getType(*ph), NODE)) {
         // A real link cannot have children in a vtree! That'd screw everything up.
         assert(!_target->number_of_children(vit));
 
         // Save the sib it because the replace() will invalidate 'vit'
 //  vtree::sibling_iterator next_sib = _target->next_sibling(vit);
 
-        cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)ph->value());
+        cprintf(2, "ForceVirtual: [%d] (exists).\n", *ph);
 
         vtree virtualized_ph(make_vtree(*ph));
         _target->replace(vit, virtualized_ph.begin());
@@ -2121,11 +2117,11 @@ meta ForceRootLinkVirtual(meta _target)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    Handle *ph = v2h(&(*_target->begin()));
+    pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
 
     Type t = atw->getType(*ph);
-    if (ph && atw->isReal(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE) {
-        cprintf(2, "ForceVirtual: [%d] (exists).\n", (int)ph->value());
+    if (ph && !atw->isType(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE) {
+        cprintf(2, "ForceVirtual: [%d] (exists).\n", *ph);
 
         return meta(new vtree(make_vtree(*ph)));
     } else
@@ -2143,9 +2139,9 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    Handle *ph = v2h(&(*_target->begin()));
-    if (ph && atw->isReal(*ph)) {
-        cprintf(2, "Arg [%d] exists.\n", (int)ph->value());
+    pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
+    if (ph && !atw->isType(*ph)) {
+        cprintf(2, "Arg [%d] exists.\n", *ph);
         const TruthValue& tv = atw->getTV(*ph);
         if (tv.isNullTv())
             cprintf(2, "NO TV!\n");
@@ -2161,7 +2157,7 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
 void bind(BoundVTree& bbvt, hpair new_bind)
 {
     for (vtree::iterator v = bbvt.begin(); v != bbvt.end(); v++)
-        if (v2h(*v) == new_bind.first)
+        if (_v2h(*v) == new_bind.first)
             *v = Vertex(new_bind.second);
 }
 
@@ -2169,7 +2165,7 @@ void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 {
     for (vtree::iterator v = arg->begin();
             v != arg->end();) {
-        bindingsVTreeT::const_iterator it = binds.find(v2h(*v));
+        bindingsVTreeT::const_iterator it = binds.find(_v2h(*v));
         if (it != binds.end()) {
             arg->replace(v, it->second.begin());
             v = arg->begin();
@@ -2181,9 +2177,9 @@ void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 /// Ok, you're not allowed to laugh at the following. It's a collection of my
 /// various quick-hack binding printers from the last 6 months.
 
-void pr2(pair<Handle, vtree> i)
+void pr2(pair<pHandle, vtree> i)
 {
-    cprintf(4, "%d => ", (int)i.first.value());
+    cprintf(4, "%d => ", i.first);
     rawPrint(i.second, i.second.begin(), 3);
 }
 
@@ -2198,12 +2194,12 @@ void printBinding(const pair<string, Handle> p)
     cprintf(3, "%s => %d\n", p.first.c_str(), (int)p.second.value());
 }
 
-void pr(pair<Handle, Handle> i)
+void pr(pair<pHandle, pHandle> i)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    string s1 = atw->inheritsType(atw->getType(i.first), NODE) ? atw->getName(i.first) : i2str((int)i.first.value());
-    string s2 = atw->inheritsType(atw->getType(i.second), NODE) ? atw->getName(i.second) : i2str((int)i.second.value());
+    string s1 = atw->inheritsType(atw->getType(i.first), NODE) ? atw->getName(i.first) : i2str(i.first);
+    string s2 = atw->inheritsType(atw->getType(i.second), NODE) ? atw->getName(i.second) : i2str(i.second);
 
     cout << s1 << " => " << s2 << "\n";
 // cout << (int)i.first << " => " << (int)i.second << "\n";
@@ -2235,7 +2231,7 @@ Vertex transitive_produce( const containerT& chain,
                            Vertex last_result = (Handle)NULL)
 {
     vector<Vertex> rule_args;
-    rule_args.push_back(v2h(last_result) ? last_result : (*next_it++));
+    rule_args.push_back(_v2h(last_result) ? last_result : (*next_it++));
     rule_args.push_back(*next_it++);
 
     Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula>(ASW(), TRANSITIVE_LINK_TYPE).compute(rule_args);
@@ -2252,7 +2248,7 @@ Vertex transitive_produce( const containerT& chain,
 }*/
 
 
-bool IsIdenticalHigherConfidenceAtom(Handle a, Handle b)
+bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -2268,8 +2264,8 @@ bool IsIdenticalHigherConfidenceAtom(Handle a, Handle b)
 
 bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
                 vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
-                map<Handle, vtree>& Lbindings,
-                map<Handle, vtree>& Rbindings,
+                map<pHandle, vtree>& Lbindings,
+                map<pHandle, vtree>& Rbindings,
                 bool allow_rhs_binding,
                 Type VarType)
 {
@@ -2290,8 +2286,8 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
 //  return false;
 
     if (!((*rtop) == (*ltop))) {
-        Handle *ph_ltop = v2h(&*ltop);
-        Handle *ph_rtop = v2h(&*rtop);
+        pHandle *ph_ltop = boost::get<pHandle>(&*ltop);
+        pHandle *ph_rtop = boost::get<pHandle>(&*rtop);
 
         if (ph_ltop) {
             bool lhs_is_node = atw->inheritsType(atw->getType(*ph_ltop), NODE);
@@ -2300,14 +2296,14 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
 
             bool lhs_is_var  = lhs_is_node && ( atw->inheritsType(atw->getType(*ph_ltop), VarType) || atw->inheritsType(atw->getType(*ph_ltop), FW_VARIABLE_NODE));
 
-            if (atw->isReal(*ph_ltop) && !lhs_is_node) {
+            if (!atw->isType(*ph_ltop) && !lhs_is_node) {
                 vtree ltop_as_tree(reasoning::make_vtree(*ph_ltop));
 
                 return unifiesTo(ltop_as_tree, rhs_t,
                                  ltop_as_tree.begin(), rtop, Lbindings, Rbindings, allow_rhs_binding, VarType);
             }
 
-            map<Handle, vtree>::const_iterator s = Lbindings.find(*ph_ltop);
+            map<pHandle, vtree>::const_iterator s = Lbindings.find(*ph_ltop);
 
             if (s == Lbindings.end() &&
                     (s = Rbindings.find(*ph_ltop)) == Rbindings.end()) {
@@ -2315,14 +2311,14 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
                     bool rhs_is_node = atw->inheritsType(atw->getType(*ph_rtop), NODE);
                     bool rhs_is_var  = rhs_is_node && ( atw->inheritsType(atw->getType(*ph_rtop), VarType)  || atw->inheritsType(atw->getType(*ph_rtop), FW_VARIABLE_NODE));
 
-                    if (atw->isReal(*ph_rtop) && !rhs_is_node) {
+                    if (!atw->isType(*ph_rtop) && !rhs_is_node) {
                         vtree rtop_as_tree(reasoning::make_vtree(*ph_rtop));
 
                         return unifiesTo(lhs_t, rtop_as_tree,
                                          rtop, rtop_as_tree.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
                     }
 
-                    map<Handle, vtree>::const_iterator s = Rbindings.find(*ph_rtop);
+                    map<pHandle, vtree>::const_iterator s = Rbindings.find(*ph_rtop);
 
                     if (s == Rbindings.end() &&
                             (s = Lbindings.find(*ph_rtop)) == Lbindings.end()) { /// If neither has been bound
@@ -2394,6 +2390,7 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
   Handle *ph_ltop = v2h(&*ltop);
 
   if (ph_ltop)
+  A
   {
    bool is_node = atw->inheritsType(atw->getType(*ph_ltop),NODE);
 
@@ -2487,7 +2484,7 @@ cprintf(4,"FW_VAR");
     bool allow_rhs_binding,
     Type VarType);*/
 
-bool unifiesTo(const vtree& lhs, const vtree& rhs, map<Handle, vtree>& Lbindings, map<Handle, vtree>& Rbindings, bool allow_rhs_binding, Type VarType)
+bool unifiesTo(const vtree& lhs, const vtree& rhs, map<pHandle, vtree>& Lbindings, map<pHandle, vtree>& Rbindings, bool allow_rhs_binding, Type VarType)
 {
     return unifiesTo(lhs, rhs, lhs.begin(), rhs.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
 }

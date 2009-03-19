@@ -262,32 +262,12 @@ typedef TypeWrapper<short int> ShortIntegerWrapper;
 /// Handles are actually mostly types, here. The Handle/Type ambiguity
 /// will be resolved soon enough. (says Ari, March 20, 2006)
 
-//#ifdef WIN32
-tree<Vertex> MakeVirtualAtom_slow(Type T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4, const tree<Vertex>& t5);
-tree<Vertex> MakeVirtualAtom_slow(Type T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4);
-tree<Vertex> MakeVirtualAtom_slow(Type T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3);
-tree<Vertex> MakeVirtualAtom_slow(Type T, const tree<Vertex>& t1, const tree<Vertex>& t2);
-tree<Vertex> MakeVirtualAtom_slow(Type T, const tree<Vertex>& t1);
-tree<Vertex> MakeVirtualAtom_slow(Type T);
-//tree<Vertex> MakeVirtualAtom_slow(Type T, std::string name)
-//#endif
-
-//#else
-/*tree<Vertex> MakeVirtualAtom_slow(Handle T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4, const tree<Vertex>& t5);
-tree<Vertex> MakeVirtualAtom_slow(Handle T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4);
-tree<Vertex> MakeVirtualAtom_slow(Handle T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3);
-tree<Vertex> MakeVirtualAtom_slow(Handle T, const tree<Vertex>& t1, const tree<Vertex>& t2);
-tree<Vertex> MakeVirtualAtom_slow(Handle T, const tree<Vertex>& t1);
-tree<Vertex> MakeVirtualAtom_slow(Handle T);*/
-//tree<Vertex> MakeVirtualAtom_slow(Handle T, std::string name);
-//#endif
-
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4, const tree<Vertex>& t5);
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4);
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3);
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, const tree<Vertex>& t1, const tree<Vertex>& t2);
-tree<Vertex> MakeVirtualAtom_slow(Vertex T, const tree<Vertex>& t1);
-tree<Vertex> MakeVirtualAtom_slow(Vertex T);
+tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4, const tree<Vertex>& t5);
+tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4);
+tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3);
+tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2);
+tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1);
+tree<Vertex> MakeVirtualAtom_slow(Vertex v);
 
 
 /// Convert a real atom into vtree in which only NODEs are left as real atoms

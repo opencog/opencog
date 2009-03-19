@@ -23,6 +23,7 @@
  */
 
 #include <opencog/atomspace/CoreUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/exceptions.h>
@@ -35,6 +36,7 @@ using namespace opencog;
 class HandleMapUTest :  public CxxTest::TestSuite
 {
 private:
+    AtomSpace as;
     Handle handles[N_HANDLES];
     char *content[N_HANDLES];
 
@@ -42,7 +44,9 @@ private:
 public:
     HandleMapUTest() {
         for (int i = 0; i < N_HANDLES; i++) {
-            handles[i] = (Handle) i;
+	    ostringstream oss;
+	    oss << i;
+            handles[i] = as.addNode(CONCEPT_NODE, oss.str());
             content[i] = new char[1];
         }
     }

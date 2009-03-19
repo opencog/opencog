@@ -35,9 +35,9 @@ public:
 	{
 
 		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((Handle)ATOM))));
+				new tree<Vertex>(mva((pHandle)ATOM))));
 		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((Handle)HYPOTHETICAL_LINK))
+				new tree<Vertex>(mva((pHandle)HYPOTHETICAL_LINK))
 			));
 	}
 
@@ -49,7 +49,7 @@ public:
 		which affect the Arg #2!
 	*/
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const;
+	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
 
 	NO_DIRECT_PRODUCTION;
 };

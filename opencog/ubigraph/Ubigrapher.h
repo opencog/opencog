@@ -79,6 +79,7 @@ protected:
     
 public:
     Ubigrapher();
+    virtual ~Ubigrapher() {}
 
     AtomSpace *space;
 

@@ -38,11 +38,11 @@ CrispTheoremRule::CrispTheoremRule(reasoning::iAtomSpaceWrapper *_destTable)
     
     inputFilter.push_back(meta(
         new tree<Vertex>(mva(
-            (Handle)ATOM))));
+            (pHandle)ATOM))));
 }
 
 map<vtree, vector<vtree> ,less_vtree> CrispTheoremRule::thms;
-BBvtree bind_vtree(vtree &targ, map<Handle, vtree>& binds)
+BBvtree bind_vtree(vtree &targ, map<pHandle, vtree>& binds)
 {
                 BBvtree thm_substed(new BoundVTree(targ));
                 
@@ -57,15 +57,15 @@ BBvtree bind_vtree(vtree &targ, map<Handle, vtree>& binds)
                     {
 						cprintf(4,"Next change check...\n");
                         
-                        Handle *ph = v2h(&*vit);
+                        pHandle *ph = boost::get<pHandle>(&*vit);
                         if (ph)
                         {
 							cprintf(4,"(ph)");
                             
-                            map<Handle, vtree>::iterator it = binds.find(*ph);
+                            map<pHandle, vtree>::iterator it = binds.find(*ph);
                             if (it != binds.end()) {
                             
-                                cprintf(4,"replacing...[%lu]\n", v2h(*vit).value());
+                                cprintf(4,"replacing...[%u]\n", _v2h(*vit));
                                 cprintf(4,"with...\n");
                                 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
                                 printer.print(it->second.begin(),4);
@@ -101,8 +101,8 @@ bool htemp=false;
 
     for (map<vtree, vector<vtree> ,less_vtree>::iterator thm=thms.begin(); thm != thms.end(); thm++)
     {
-        map<Handle, vtree> binds;
-        set<Handle> vars;
+        map<pHandle, vtree> binds;
+        set<pHandle> vars;
         
         /// Grab the FW_VARs
         
@@ -122,17 +122,17 @@ bool htemp=false;
 
             //foreach(Vertex v, targ)
             for(vtree::iterator v  = targ.begin(); v != targ.end(); v++)
-                if (nm->getType(v2h(*v)) == FW_VARIABLE_NODE)
+                if (nm->getType(_v2h(*v)) == FW_VARIABLE_NODE)
                 {
-                    vars.insert(v2h(*v));
+                    vars.insert(_v2h(*v));
                     count1++;
                 }
         }
         //foreach(Vertex v, thm->first)
         for(vtree::iterator v  = thm->first.begin(); v != thm->first.end(); v++)
-                if (nm->getType(v2h(*v)) == FW_VARIABLE_NODE)
+                if (nm->getType(_v2h(*v)) == FW_VARIABLE_NODE)
                 {
-                    vars.insert(v2h(*v));   
+                    vars.insert(_v2h(*v));   
                     count1++;
                 }
                         
@@ -140,10 +140,8 @@ bool htemp=false;
         
         bindingsT newPreBinds;
         
-        foreach(Handle h, vars)
-            newPreBinds[h] = v2h(CreateVar(destTable));
-                
-         typedef pair<Handle,Handle> hpair;
+        foreach(pHandle h, vars)
+            newPreBinds[h] = _v2h(CreateVar(destTable));
                 
 		 cprintf(4,"Bindings are:\n");
                 
@@ -160,7 +158,7 @@ bool htemp=false;
             //foreach(Vertex& v, targ)
             for(vtree::iterator v  = targ.begin(); v != targ.end(); v++)
             {
-                bindingsT::iterator bit = newPreBinds.find(v2h(*v));
+                bindingsT::iterator bit = newPreBinds.find(_v2h(*v));
                 if (bit != newPreBinds.end())
                 {
                     *v = Vertex(bit->second);
@@ -171,7 +169,7 @@ bool htemp=false;
         //foreach(Vertex& v, thm_target)
             for(vtree::iterator v  = thm_target.begin(); v != thm_target.end(); v++)
             {
-                bindingsT::iterator bit = newPreBinds.find(v2h(*v));
+                bindingsT::iterator bit = newPreBinds.find(_v2h(*v));
                 if (bit != newPreBinds.end())
                 {
                     *v = Vertex(bit->second);
@@ -189,7 +187,7 @@ bool htemp=false;
         
          cprintf(4,"counts: %ld %ld\n", count1, count2);
         
-         cprintf(4,"Unifies to %lu:\n",v2h(*outh->begin()).value());
+         cprintf(4,"Unifies to %u:\n",_v2h(*outh->begin()));
 
          printer.print(outh->begin(), 4);
 
@@ -203,9 +201,9 @@ bool htemp=false;
 
              printer.print(tmp.begin(), 4);
             
-             for (map<Handle, vtree>::iterator ii=binds.begin(); ii!=binds.end(); ii++)
+             for (map<pHandle, vtree>::iterator ii=binds.begin(); ii!=binds.end(); ii++)
              {
-                cprintf(4,"%lu=>\n", ii->first.value());
+                cprintf(4,"%u=>\n", ii->first);
                 printer.print(ii->second.begin(), 4);
              }
 
@@ -230,7 +228,7 @@ bool htemp=false;
                 new_thm_args.push_back(thm_substed);
             }
 
-            new_thm_args.push_back(BBvtree(new BoundVTree(mva((Handle)HYPOTHETICAL_LINK,
+            new_thm_args.push_back(BBvtree(new BoundVTree(mva((pHandle)HYPOTHETICAL_LINK,
                 *outh))));
 
             ret.insert(new_thm_args);
@@ -241,7 +239,7 @@ bool htemp=false;
             for (uint i = 0; i < new_thm_args.size(); i++)
                 const_cast<MPsIn*>(&inputFilter)->push_back(meta(
                     new tree<Vertex>(mva(
-                    (Handle)ATOM))));
+                    (pHandle)ATOM))));
         }
 
     }
@@ -253,7 +251,7 @@ bool htemp=false;
 }
 
 
-BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
 
@@ -269,7 +267,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
     
     //vtree res(mva(nm->getOutgoing(v2h(premiseArray[1]))[1]));
     
-    cprintf(3,"CrispTheoremRule::compute... [%lu]\n", nm->getOutgoing(v2h(premiseArray[real_args]))[0].value());
+    cprintf(3,"CrispTheoremRule::compute... [%u]\n", nm->getOutgoing(_v2h(premiseArray[real_args]))[0]);
     
 /*  printTree(nm->getOutgoing(v2h(premiseArray[0]))[0],0,0);
     printTree(nm->getOutgoing(v2h(premiseArray[1]))[0],0,0);
@@ -279,7 +277,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
     
     /// Unravel the HYPOTHETICAL_LINK:
     
-    vtree res(make_vtree(nm->getOutgoing(v2h(premiseArray[real_args]))[0]));
+    vtree res(make_vtree(nm->getOutgoing(_v2h(premiseArray[real_args]))[0]));
     
 //  cprintf(0,"CrispTheoremRule::compute... make_vtree ok\n");
         
@@ -290,7 +288,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
     int i=0;
     foreach(const Vertex& v, premiseArray)
     {
-        tvs[i++] = (TruthValue*) &(nm->getTV(v2h(v)));
+        tvs[i++] = (TruthValue*) &(nm->getTV(_v2h(v)));
     }
     
     bool use_AND_rule = (real_args>1);
@@ -298,7 +296,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, Handle
 //  cprintf(0,"CrispTheoremRule::compute... TV ok\n");
     
     TruthValue* tv = (use_AND_rule?SymmetricANDFormula().compute(tvs,real_args):tvs[0]->clone());
-    Handle ret_h = destTable->addAtom(res, *tv, true,true);
+    pHandle ret_h = destTable->addAtom(res, *tv, true,true);
     delete tv;
     
 	cprintf(3,"CrispTheoremRule::compute produced:\n");

@@ -83,7 +83,7 @@ bool lessatom::operator()(const atom& lhs, const atom& rhs) const
 }
 
 //bool MetaPredicate::operator()(HandleType h) const
-bool atom::operator()(Handle h) const
+bool atom::operator()(pHandle h) const
 {
 	uint s=0;
 
@@ -159,7 +159,7 @@ bool echo=false;
 						return false;
 	}
 
-	return (this->real == h || (*this) == atom(h));
+	return (this->handle == h || (*this) == atom(h));
 }
 	
 atom::~atom()
@@ -168,18 +168,18 @@ atom::~atom()
 }
 
 atom::atom()
-:real(0), bindings(0), T(ATOM), arity(0), forbiddenBindings(0)
+:handle(PHANDLE_UNDEFINED), bindings(0), T(ATOM), arity(0), forbiddenBindings(0)
 {
 	atom_alloc_count++;
 }
 
 atom::atom(Type _T, vector<Btr<atom> > _hs)
-: real(0), bindings(0), T(_T), hs(_hs), forbiddenBindings(0)
+: handle(PHANDLE_UNDEFINED), bindings(0), T(_T), hs(_hs), forbiddenBindings(0)
 {
 	atom_alloc_count++;
 }
 
-atom::atom(Handle h)
+atom::atom(pHandle h)
 : bindings(0), forbiddenBindings(0)
 {
 	setHandle(h);
@@ -187,8 +187,8 @@ atom::atom(Handle h)
 }
 
 atom::atom(const atom& rhs)
-:   real(rhs.real), bindings(rhs.bindings), T(rhs.T), arity(rhs.arity),
-    name(rhs.name), cx(rhs.cx), hs(rhs.hs), 
+:   handle(rhs.handle), bindings(rhs.bindings), T(rhs.T), arity(rhs.arity),
+    name(rhs.name), hs(rhs.hs), 
 //,bindings(0), forbiddenBindings(0)
 forbiddenBindings(rhs.forbiddenBindings)
 {
@@ -196,7 +196,7 @@ forbiddenBindings(rhs.forbiddenBindings)
 }
 
 atom::atom(Type _T, string _name)
-: real(0),bindings(0), T(_T), arity(0), name(_name), 
+: handle(PHANDLE_UNDEFINED),bindings(0), T(_T), arity(0), name(_name), 
 forbiddenBindings(0)
 {
 	atom_alloc_count++;
@@ -209,7 +209,7 @@ forbiddenBindings(0)
 */
 
 atom::atom(Type _T, int _arity, ...)
-: real(0), bindings(0), T(_T), arity(_arity), forbiddenBindings(0)
+: handle(PHANDLE_UNDEFINED), bindings(0), T(_T), arity(_arity), forbiddenBindings(0)
 {
 LOG(5, "Variable arity argument list processing...");
 	try
@@ -262,32 +262,23 @@ LOG(5, "Variable arity argument list ok.");
 	atom_alloc_count++;
 }
 
-void atom::setHandle(Handle h)
+void atom::setHandle(pHandle h)
 {
-/*
-    if ((int)h < NUMBER_OF_CLASSES) {
-    printf("GOT AN INVALID HANDLE (%d) TO BUILD A reasoning::atom object!!!\n", h); 
-            T = (Type)(int)h;
-    real = 0;
-            return;
-    }
-*/
 	T=GET_ATW->getType(h);
 	name=GET_ATW->getName(h);
-	HandleSeq _hs = GET_ATW->getOutgoing(h);
+	pHandleSeq _hs = GET_ATW->getOutgoing(h);
 //	arity= _hs.size();
-	cx=Handle::UNDEFINED;
 
 	hs.clear();
 	for (unsigned int i = 0; i < _hs.size(); i++)
 		hs.push_back(Btr<atom>(new atom(_hs[i])));
 
-	real = h;
+	handle = h;
 	//SetOutgoing(_hs);
 }
 
 
-Handle atom::bindHandle(iAtomSpaceWrapper* table) const
+pHandle atom::bindHandle(iAtomSpaceWrapper* table) const
 {
 	atom target(*this);
 
@@ -312,9 +303,9 @@ void atom::getWithActualizedSubstitutions(atom& target) const
 		}
 	target.bindings = this->bindings;
 
-	target.real = this->real;
+	target.handle = this->handle;
 
-	if (target.real != Handle::UNDEFINED )
+	if (target.handle != PHANDLE_UNDEFINED )
 	{
 		LOG(4, "Warning! Substituted the atom though it's attached to Core!");
 	}
@@ -323,7 +314,7 @@ void atom::getWithActualizedSubstitutions(atom& target) const
 
 void atom::detach() const
 {
-	real = Handle::UNDEFINED;
+	handle = PHANDLE_UNDEFINED;
 
 	for (unsigned int i = 0; i < hs.size(); i++)
 		hs[i]->detach();
@@ -357,7 +348,7 @@ int atom::asIntegerArray(unsigned int* dest, unsigned int patlen, map<atom,int,l
 		map<atom,int,lessatom>::iterator my_pat_id = node2pat_id.find(*this);
 		if (my_pat_id == node2pat_id.end())
 		{
-			fim::pat_id pid = 300+(real ? (unsigned int)real : next_free_pat_id++);
+			fim::pat_id pid = 300+(handle ? (unsigned int)handle : next_free_pat_id++);
 
 			dest[index++] = pid;
 			node2pat_id[*this] = pid;
@@ -387,7 +378,7 @@ int atom::asIntegerArray(unsigned int* dest, unsigned int patlen, map<atom,int,l
 }
 #endif
 
-Handle atom::attach(iAtomSpaceWrapper* core) const
+pHandle atom::attach(iAtomSpaceWrapper* core) const
 {
 //printf("atom::attach()\n");
 	::test::attachs++;
@@ -402,18 +393,18 @@ LOG(4, "Attaching...");
 	if (GET_ATW->inheritsType(T, NODE))
 	{
 //printf("atom::attach: it's a node: type: %d, name: %s, core: %p\n", T, name.c_str(), core);
-        real = at->getHandle(T, name);
-//printf("atom::attach: real = %p\n", real);
-		if (real == Handle::UNDEFINED)
+        handle = at->getHandle(T, name);
+//printf("atom::attach: handle = %p\n", handle);
+		if (handle == PHANDLE_UNDEFINED)
 		{
-//printf("atom::attach: real is null => adding node\n");
-            real = at->addNode(T, name, tvn, true);
-cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real.value());
+//printf("atom::attach: handle is null => adding node\n");
+            handle = at->addNode(T, name, tvn, true);
+cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), handle);
 		}
 	}
 	else
 	{
-		vector<Handle> outg;
+		pHandleSeq outg;
 
 		for (unsigned int i = 0; i < hs.size(); i++)
 		{		
@@ -421,21 +412,21 @@ cprintf(4, "Added node as NEW: %s / [%d]\n", name.c_str(), real.value());
 		}
 cprintf(4, "Attaching %d entries...\n", outg.size());
 		
-        if ((real = at->getHandle(T, outg))==Handle::UNDEFINED)
+        if ((handle = at->getHandle(T, outg))==PHANDLE_UNDEFINED)
 		{
 cprintf(4, "Not exist.\n");
-            real = at->addLink(T, outg, tvn, true);
+            handle = at->addLink(T, outg, tvn, true);
 		}
 	}
 	
 LOG(4, "Attached.");
 
-	assert(real != Handle::UNDEFINED);
+	assert(handle != PHANDLE_UNDEFINED);
 
-	return real;
+	return handle;
 }
 
-void atom::SetOutgoing(HandleSeq _hs)
+void atom::SetOutgoing(pHandleSeq _hs)
 {
 	for (unsigned int i = 0; i < _hs.size(); i++)
 		hs.push_back(Btr<atom>(new atom(_hs[i])));
@@ -525,7 +516,7 @@ void atom::substitute(const atom& rhs, string varname)
 	substitute(rhs, atom(FW_VARIABLE_NODE, varname));
 }
 
-void atom::substitute(Handle dest, atom src)
+void atom::substitute(pHandle dest, atom src)
 {
 	if (src == *this) //(this->attach()))
 		setHandle(dest);
@@ -541,18 +532,18 @@ void atom::substitute(Handle dest, atom src)
 			s->second.substitute(dest, src);
 }
 
-void atom::substitute(Handle rhs, string varname)
+void atom::substitute(pHandle rhs, string varname)
 {
 	substitute(rhs, atom(VARIABLE_NODE, varname));
 	substitute(rhs, atom(FW_VARIABLE_NODE, varname));
 }
 
-vector<Handle> atom::convertVector(const vector<Btr<atom> >& hs, iAtomSpaceWrapper* table)
+pHandleSeq atom::convertVector(const vector<Btr<atom> >& hs, iAtomSpaceWrapper* table)
 {
-	vector<Handle> ret;		
+	pHandleSeq ret;		
 
 	for (unsigned int i = 0; i < hs.size(); i++)
-		ret.push_back(hs[i]->real != Handle::UNDEFINED? hs[i]->real : hs[i]->attach(table));
+		ret.push_back(hs[i]->handle != PHANDLE_UNDEFINED? hs[i]->handle : hs[i]->attach(table));
 
 	return ret;
 
@@ -578,18 +569,18 @@ void prn(tree< Btr<atom> >& tr)
       }
 }
 /*
-void makeHandletree(Handle real, iAtomSpaceWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
+void makeHandletree(Handle handle, iAtomSpaceWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
 {
 	Handle top=(Handle)0;
-	Type T=GET_ATW->getType(real);
+	Type T=GET_ATW->getType(handle);
 
 	if (!fullVirtual || inheritsType(T, NODE))
-		ret.set_head(real);
+		ret.set_head(handle);
 	else //Virtual
 	{
 		ret.set_head((Handle)T);
 	
-		HandleSeq _hs = GET_ATW->getOutgoing(real);
+		HandleSeq _hs = GET_ATW->getOutgoing(handle);
 		foreach(Handle child_h, hs)
 		{
 			tree<Vertex> child = makeHandletree(child_h, table, fullVirtual);
@@ -600,25 +591,24 @@ void makeHandletree(Handle real, iAtomSpaceWrapper* table, bool fullVirtual, tre
 */
 
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top);
-void makeHandletree(Handle real, bool fullVirtual, tree<Vertex>& ret)
+void makeHandletree(pHandle h, bool fullVirtual, tree<Vertex>& ret)
 {
-	ret.set_head(real);
+	ret.set_head(h);
 	expandHandletree(fullVirtual, ret, ret.begin());
 }
 
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top)
 {
-    // Although it's called real, it's a fake PLN handle
-	Handle real = v2h(*ret_top);
-	Type T=GET_ATW->getType(real);
+	pHandle h = boost::get<pHandle>(*ret_top);
+	Type T=GET_ATW->getType(h);
 
 	/// If virtual link, then we keep expanding
 	if (fullVirtual && !GET_ATW->inheritsType(T, NODE))
 	{
-		*ret_top = Vertex((Handle)T);
+		*ret_top = Vertex((pHandle)T);
 	
-		HandleSeq _hs = GET_ATW->getOutgoing(real);
-		foreach(Handle child_h, _hs)
+		pHandleSeq _hs = GET_ATW->getOutgoing(h);
+		foreach(pHandle child_h, _hs)
 		{
 			tree<Vertex>::iterator next_i = ret.append_child(ret_top, child_h);
 			expandHandletree(fullVirtual, ret, next_i);
@@ -629,14 +619,14 @@ void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_t
 tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) const
 {
 	tree<Vertex> ret;
-	Handle top = Handle::UNDEFINED;
+	pHandle top = PHANDLE_UNDEFINED;
 	
-	if (real != Handle::UNDEFINED && (!fullVirtual || GET_ATW->inheritsType(GET_ATW->getType(real), FW_VARIABLE_NODE)))
-		top = real;
+	if (handle != PHANDLE_UNDEFINED && (!fullVirtual || GET_ATW->inheritsType(GET_ATW->getType(handle), FW_VARIABLE_NODE)))
+		top = handle;
 	else
 		top = (GET_ATW->inheritsType(T, NODE)
 					? attach(table)
-					: (Handle)T);
+					: (pHandle)T);
 
 	ret.set_head(top);
 	
@@ -653,7 +643,7 @@ tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) co
 tree< Btr<atom> > atom::maketree() const //tree<Btr<atom> >& dest)
 {
 	Btr<atom> pseudo_atom(new atom(this->T, this->name));
-	pseudo_atom->real = this->real;
+	pseudo_atom->handle = this->handle;
 	tree< Btr<atom> > ret(pseudo_atom);
 
 	for (unsigned int i = 0; i < this->hs.size(); i++)
@@ -676,7 +666,7 @@ atom::atom(const tree<Btr<atom> >& a, tree<Btr<atom> >::iterator parent_node, bo
 
 	T = (*parent_node)->T;
 	name = (*parent_node)->name;
-	real = (*parent_node)->real;
+	handle = (*parent_node)->handle;
 
 	if (!GET_ATW->inheritsType(T, NODE)) //nodes have no children...
 		for (tree<Btr<atom> >::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
@@ -688,7 +678,7 @@ atom::atom(const tree<Btr<atom> >& a, tree<Btr<atom> >::iterator parent_node, bo
 			
 			b->T = (*s)->T;
 			b->name = (*s)->name;
-			b->real = (*s)->real;
+			b->handle = (*s)->handle;
 			
 			hs.push_back(b);
 		}
@@ -706,24 +696,24 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 	if (parent_node == a.end())
 		return;
 
-	T = GET_ATW->getType(boost::get<Handle>(*parent_node));
-	name = GET_ATW->getName(boost::get<Handle>(*parent_node));
-	real = boost::get<Handle>(*parent_node);
+	T = GET_ATW->getType(_v2h(*parent_node));
+	name = GET_ATW->getName(_v2h(*parent_node));
+	handle = _v2h(*parent_node);
 	
-//cprintf(4,"REAL: %d\n", real);
+//cprintf(4,"REAL: %d\n", handle);
 	
 	if (!GET_ATW->inheritsType(T, NODE)) //nodes have no children...
 		for (tree<Vertex>::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
 		{	
 			Btr<atom> b(new atom);
 			
-			if (s.number_of_children() > 0 && !GET_ATW->inheritsType(GET_ATW->getType(boost::get<Handle>(*s)), NODE) )
+			if (s.number_of_children() > 0 && !GET_ATW->inheritsType(GET_ATW->getType(_v2h(*s)), NODE) )
 				b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 
-			b->T = GET_ATW->getType(boost::get<Handle>(*s));
-			b->name = GET_ATW->getName(boost::get<Handle>(*s));
-			b->real = boost::get<Handle>(*s);
-//cprintf(4,"REAL SUB: %d\n", b.real);			
+			b->T = GET_ATW->getType(_v2h(*s));
+			b->name = GET_ATW->getName(_v2h(*s));
+			b->handle = _v2h(*s);
+//cprintf(4,"REAL SUB: %d\n", b.handle);			
 			hs.push_back(b);
 		}
 }

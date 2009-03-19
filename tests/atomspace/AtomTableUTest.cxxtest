@@ -56,9 +56,6 @@ using namespace std::tr1::placeholders;
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
 
-#define VH1 VersionHandle(HYPOTHETICAL,  (Handle) 1)
-#define VH2 VersionHandle(CONTEXTUAL,  (Handle) 2)
-
 int numberOfExpectedMatchesWithVH1[] = {15, 15, 15, 0, 0, 0};
 int numberOfExpectedMatchesWithVH2[] = {15, 15, 15, 1, 1, 1};
 
@@ -69,6 +66,8 @@ private:
 
     AtomTable* table;
     AtomSpace* atomSpace;
+    VersionHandle VH1;
+    VersionHandle VH2;
     int        __testSignalsCounter;
 
 public:
@@ -92,6 +91,9 @@ public:
         HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
         delete result;
         delete readers[0];
+
+	VH1 = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL"));
+	VH2 = VersionHandle(CONTEXTUAL, atomSpace->addNode(CONCEPT_NODE, "CONTEXTUAL"));
     }
 
     void tearDown() {
@@ -487,6 +489,22 @@ public:
                                 node->getAttentionValue().getVLTI()));
         for (unsigned int i = 0; i <= 10; ++i)
             atomTable.decayShortTermImportance();
+        TS_ASSERT(__testSignalsCounter == 110011);
+
+        /* add a node with LTI == 1 so that decayShortTermImportance cannot remove it */
+        __testSignalsCounter = 0;
+        Node *ltiNode = new Node(NUMBER_NODE, "1");
+        wnHandle = atomTable.add(ltiNode);
+        TS_ASSERT(__testSignalsCounter == 11);
+        ltiNode->setAttentionValue(AttentionValue(config().get_int("MIN_STI") + 10,
+                                1, 
+                                ltiNode->getAttentionValue().getVLTI()));
+        for (unsigned int i = 0; i <= 10; ++i) {
+            std::cout << ltiNode->getAttentionValue().toString() << std::endl;
+            atomTable.decayShortTermImportance();
+        }
+        TS_ASSERT(__testSignalsCounter == 11);
+	atomTable.remove(wnHandle);
         TS_ASSERT(__testSignalsCounter == 110011);
 
         // test disconnections

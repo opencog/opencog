@@ -55,7 +55,7 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
 {
     boost::shared_ptr<set<BoundVertex > > ret;
     
-    if (!GET_ATW->inheritsType(GET_ATW->getType(v2h(*outh->begin())), SCHOLEM_LINK))
+    if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), SCHOLEM_LINK))
         return ret;
 
     //assert(outh->begin().number_of_children() == 2);
@@ -64,7 +64,7 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
     {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) with != 2 args.");
-        printer.print(v2h(*outh->begin()), 2);
+        printer.print(_v2h(*outh->begin()), 2);
     }
 
     tree<Vertex> old_subst(*outh);
@@ -80,18 +80,18 @@ haxx::AllowFW_VARIABLENODESinCore = true;
     
 //  assert(!inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE));
 //  assert(!inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE));
-    if (GET_ATW->inheritsType(GET_ATW->getType(v2h(*child1)), VARIABLE_NODE))
+    if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*child1)), VARIABLE_NODE))
     {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child1 problem.");
-        printer.print(v2h(*child1), 2);
+        printer.print(_v2h(*child1), 2);
     }
     
-    if (GET_ATW->inheritsType(GET_ATW->getType(v2h(*child2)), VARIABLE_NODE))
+    if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*child2)), VARIABLE_NODE))
     {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child2 problem.");
-        printer.print(v2h(*child2), 2);
+        printer.print(_v2h(*child2), 2);
     }
 
     

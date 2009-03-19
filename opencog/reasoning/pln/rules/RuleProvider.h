@@ -60,7 +60,7 @@ class ForwardChainerRuleProvider : public VariableRuleProvider
 {
 private:
     //! The seed handle
-    Handle seed;
+    pHandle seed;
     unsigned int seedIndex;
 
     //! Current rule that's been checked out last by getRule
@@ -76,7 +76,7 @@ public:
 
     //! Set the seed atom, when this changes the seedStack and invalidRules need to
     //! be reset.
-    void setSeed(Handle s);
+    void setSeed(pHandle s);
     
     //! Get the index for the seed in the last Rule provided by nextRule;
     unsigned int getSeedIndex();

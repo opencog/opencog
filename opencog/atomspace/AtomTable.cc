@@ -392,11 +392,26 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
     return getHandleSet((const char**) NULL, types, subclasses, arity, type, subclass);
 }
 
-
-void AtomTable::merge(Atom *original, Atom *copy)
+void AtomTable::merge(Handle h, const TruthValue& tvn)
 {
-    original->merge(copy);
-    delete copy;
+    if (TLB::isValidHandle(h)) {
+        Atom* atom = TLB::getAtom(h);
+        // Merge the TVs
+        if (!tvn.isNullTv()) {
+            const TruthValue& currentTV = atom->getTruthValue();
+            if (currentTV.isNullTv()) {
+                atom->setTruthValue(tvn);
+            } else {
+                TruthValue* mergedTV = currentTV.merge(tvn);
+                atom->setTruthValue(*mergedTV);
+                delete mergedTV;
+            }
+        }
+        // emit "merge atom" signal
+        _mergeAtomSignal(h);
+        if (logger().getLevel() >= Logger::DEBUG) 
+            logger().debug("Atom merged: %d => %s", h.value(), atom->toString().c_str());
+    } 
 }
 
 Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
@@ -417,11 +432,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     if (TLB::isValidHandle(existingHandle)) {
         //printf("Merging existing Atom with the Atom being added ...\n");
-        merge(TLB::getAtom(existingHandle), atom);
-
-        // emit "merge atom" signal
-        _mergeAtomSignal(existingHandle);
-
+        merge(existingHandle, atom->getTruthValue());
+        delete atom;
         return existingHandle;
     }
 
@@ -473,6 +485,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     // emit add atom signal
     _addAtomSignal(handle);
+    if (logger().getLevel() >= Logger::DEBUG) logger().debug("Atom added: %d => %s", handle.value(), atom->toString().c_str());
 
     logger().fine("[AtomTable] add: %p", handle.value());
 
@@ -593,6 +606,7 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
         _removeAtomSignal(*it);
 
         Atom* atom = TLB::getAtom(*it);
+        if (logger().getLevel() >= Logger::DEBUG) logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
         TLB::removeAtom(atom);
         delete atom;
     }

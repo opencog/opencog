@@ -413,7 +413,7 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
 {
     AttentionValue::sti_t val;
 
-    val = a->getMinSTI(false) + (scaledSTI * ( a->getMaxSTI(false) - a->getMinSTI(false) ));
+    val = (AttentionValue::sti_t) (a->getMinSTI(false) + (scaledSTI * ( a->getMaxSTI(false) - a->getMinSTI(false) )));
 /*
     AtomSpace *a = server().getAtomSpace();
     float af = a->getAttentionalFocusBoundary();
