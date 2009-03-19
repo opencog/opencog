@@ -40,10 +40,10 @@ class SimpleLogicPMCB :
 		 * By default, the nodes must be identical,
 		 * or one of them must be a variable.
 		 */
-		virtual bool node_match(Node *npat, Node *nsoln)
+		virtual bool node_match(Node *npat, Node *ngrnd)
 		{
 			// If equality, then a match.
-			if (npat == nsoln) return false;
+			if (npat == ngrnd) return false;
 
 			// If the ungrounded term is a variable, then OK.
 			Type pattype = npat->getType();
@@ -65,23 +65,28 @@ class SimpleLogicPMCB :
 		 * By default, the link arity and the 
 		 * link types must match.
 		 */
-		virtual bool link_match(Link *lpat, Link *lsoln)
+		virtual bool link_match(Link *lpat, Link *lgnd)
 		{
-			if (lpat == lsoln) return false;
+			if (lpat == lgnd) return false;
 
-			if (lpat->getArity() != lsoln->getArity()) return true;
 			Type pattype = lpat->getType();
-			Type soltype = lsoln->getType();
+			Type gndtype = lgnd->getType();
+			if (NOT_LINK == pattype)
+			{
+printf("ola have not link\n");
+			}
+			if (lpat->getArity() != lgnd->getArity()) return true;
 
 			// If types differ, no match,
 			if ((pattype != VARIABLE_SCOPE_LINK) && 
-			    (pattype != soltype)) return true;
+			    (pattype != gndtype)) return true;
 			return false;
 		}
 
 		virtual bool tree_match(Link *pattrn, Link *grnd)
 		{
-printf ("hello world\n");
+			const TruthValue &tv = grnd->getTruthValue();
+printf ("hello world str=%f\n", tv.getMean());
 			return false;
 		}
 };

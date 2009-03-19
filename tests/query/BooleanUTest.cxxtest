@@ -112,56 +112,65 @@ void BooleanUTest::setUp(void)
 	// Create data on which the above pattern should match
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Berlin"),
-		an(CONCEPT_NODE, "definite")
+		an(CONCEPT_NODE, "definite"),
+		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_subj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
 			hberlin = an(CONCEPT_NODE, "Berlin")
-		)
+		),
+		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
 			hcity = an(CONCEPT_NODE, "city")
-		)
+		),
+		TruthValue::TRUE_TV()
 	);
 #if LATER
 	// Create data on which the above pattern should fail
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Spain"),
-		an(CONCEPT_NODE, "definite")
+		an(CONCEPT_NODE, "definite"),
+		TruthValue::TRUE_TV()
 	);
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Madrid"),
-		an(CONCEPT_NODE, "definite")
+		an(CONCEPT_NODE, "definite"),
+		TruthValue::TRUE_TV()
 	);
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "capital"),
-		an(CONCEPT_NODE, "definite")
+		an(CONCEPT_NODE, "definite"),
+		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_subj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
 			an(CONCEPT_NODE, "capital")
-		)
+		),
+		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
 			an(CONCEPT_NODE, "Madrid")
-		)
+		),
+		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "capital"),
 			an(CONCEPT_NODE, "Spain")
-		)
+		),
+		TruthValue::TRUE_TV()
 	);
 #endif
 }
@@ -188,7 +197,7 @@ void BooleanUTest::test_isa(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = pm.imply(implication);
+	Handle result = pm.logic_imply(implication);
 printf("duude arity=%d\n", getarity(result));
 
 #if 0
