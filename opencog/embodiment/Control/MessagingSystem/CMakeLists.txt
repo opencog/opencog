@@ -30,6 +30,7 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServerMessages
+	${OPENCOG_SOURCE_DIR}/opencog
 	${OPENCOG_SOURCE_DIR}/include
 	${OPENCOG_SOURCE_DIR}/include/filesystem
 )
@@ -39,6 +40,8 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_BINARY_DIR}/opencog/util
+	${OPENCOG_BINARY_DIR}/opencog/xml
 )
 
 IF(COMMAND cmake_policy)
@@ -53,29 +56,30 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 	ssl 
 	crypto 
 	dl 
+        xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
-    ${OPENCOG_LIBRARIES}
-    ${CSOCKETS_LIBRARIES}
+        ${OPENCOG_LIBRARIES}
+        ${CSOCKETS_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 )
 
-ADD_EXECUTABLE (router RouterExecutable.cc)
-TARGET_LINK_LIBRARIES (router 
-	MessagingSystem
-)
+#ADD_EXECUTABLE (router RouterExecutable.cc)
+#TARGET_LINK_LIBRARIES (router 
+#	MessagingSystem
+#)
 
-ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
-TARGET_LINK_LIBRARIES (spawner 
-	MessagingSystem
-)
+#ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
+#TARGET_LINK_LIBRARIES (spawner 
+#	MessagingSystem
+#)
 
-ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
-TARGET_LINK_LIBRARIES (msgtester 
-	MessagingSystem
-)
+#ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
+#TARGET_LINK_LIBRARIES (msgtester
+#	MessagingSystem
+#)
 
-ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
-TARGET_LINK_LIBRARIES (dummyserver
-	MessagingSystem
-)
+#ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
+#TARGET_LINK_LIBRARIES (dummyserver
+#	MessagingSystem
+#)

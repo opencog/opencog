@@ -9,6 +9,7 @@
 #include "SleepTask.h"
 
 using namespace LearningServer;
+using namespace opencog;
 
 SleepTask::~SleepTask() {
 }
@@ -17,7 +18,7 @@ SleepTask::SleepTask() {
 }
 
 void SleepTask::run(MessagingSystem::NetworkElement *ls) {
-  MAIN_LOGGER.log(opencog::Logger::FINE,
-		  "SleepTask - Executing SleepTask.");
+    logger().log(opencog::Logger::FINE,
+                 "SleepTask - Executing SleepTask.");
   sleep(2);
 }

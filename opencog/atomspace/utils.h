@@ -62,13 +62,14 @@ std::string toString(double data);
 /**
  * Returns a string from the given argument by using the << operator
  */
-template <typename T>
-std::string toString(T data)
-{
-    std::ostringstream oss;
-    oss << data;
-    return oss.str();
-}
+//Nil: I comment that template because the exact same one is in StringManipulator
+//template <typename T>
+//std::string toString(T data)
+//{
+//    std::ostringstream oss;
+//    oss << data;
+//    return oss.str();
+//}
 
 /**
  * Returns a copy of the given string surrounded by ANSI bold tags.

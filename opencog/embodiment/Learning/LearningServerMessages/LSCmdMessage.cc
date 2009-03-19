@@ -5,7 +5,7 @@
  * Copyright(c), 2007
  */
 #include "LSCmdMessage.h"
-#include <LADSUtil/StringTokenizer.h>
+#include "util/StringTokenizer.h"
 
 using namespace LearningServerMessages;
 
@@ -50,7 +50,7 @@ const char * LSCmdMessage::getPlainTextRepresentation(){
 }
 
 void LSCmdMessage::loadPlainTextRepresentation(const char *strMessage) {
-	LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage, 
+	opencog::StringTokenizer stringTokenizer((std::string)strMessage, 
 										  (std::string)END_TOKEN);
 	
 	command = stringTokenizer.nextToken();

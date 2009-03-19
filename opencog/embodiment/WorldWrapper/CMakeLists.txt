@@ -13,6 +13,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/TangentBug
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
     ${OPENCOG_SOURCE_DIR}/opencog
+    ${OPENCOG_SOURCE_DIR}/include/xerces
 )
 
 LINK_DIRECTORIES (
@@ -26,7 +27,8 @@ LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/TangentBug
     ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-    ${OPENCOG_BINARY_DIR}/opencog/util    
+    ${OPENCOG_BINARY_DIR}/opencog/util
+    ${OPENCOG_SOURCE_DIR}/lib/xercesc
 )
 
 ADD_LIBRARY(WorldWrapper
@@ -51,4 +53,5 @@ TARGET_LINK_LIBRARIES(WorldWrapper
     ImaginaryLife
     PetComboVocabulary
     VirtualWorldData
+    xercesc
 )

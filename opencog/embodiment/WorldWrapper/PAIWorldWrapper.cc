@@ -553,13 +553,13 @@ namespace WorldWrapper {
         //make sure that the object location is valid
         Spatial::Point correctedLocation = location;
         if ( spaceMap.illegal( location ) ) {
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                             "PAIWorldWrapper - Position (%.2f, %.2f) is invalid (off the grid, near/inside an obstacle).",
                             location.first, location.second);
 
             correctedLocation = spaceMap.getNearestFreePoint( location );
 
-            logger().log(opencog::Logger::WARNING,
+            logger().log(opencog::Logger::WARN,
                             "PAIWorldWrapper - Changed position to the nearest valid point (%.2f, %.2f).",
                             correctedLocation.first, correctedLocation.second);
         } // if

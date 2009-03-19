@@ -6,8 +6,8 @@
  */
 
 #include "RewardMessage.h"
-#include <LADSUtil/StringTokenizer.h>
-#include <LADSUtil/StringManipulator.h>
+#include "util/StringTokenizer.h"
+#include "util/StringManipulator.h"
 #include "stdlib.h"
 
 using namespace LearningServerMessages;
@@ -57,13 +57,13 @@ const char * RewardMessage::getPlainTextRepresentation(){
     }
 	message.append(candidateSchema);
 	message.append(END_TOKEN);
-	message.append(LADSUtil::toString(reward));
+	message.append(opencog::toString(reward));
 
 	return message.c_str();
 }
 
 void RewardMessage::loadPlainTextRepresentation(const char *strMessage) {
-	LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage,
+	opencog::StringTokenizer stringTokenizer((std::string)strMessage,
 										  (std::string)END_TOKEN);
 
 	schema = stringTokenizer.nextToken();

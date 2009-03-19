@@ -8,7 +8,7 @@
 #define SCHEMAMESSAGE_H_
 
 #include "Message.h"
-#include <ComboReduct/combo/vertex.h>
+#include "comboreduct/combo/vertex.h"
 
 namespace LearningServerMessages{
 
@@ -56,7 +56,7 @@ class SchemaMessage : public MessagingSystem::Message {
          *
          * @param strMessage (char *) representation of the message to be built.
          */
-        void loadPlainTextRepresentation(const char *strMessage) throw (LADSUtil::InvalidParamException, std::bad_exception);
+        void loadPlainTextRepresentation(const char *strMessage) throw (opencog::InvalidParamException, std::bad_exception);
 		
 		/**
 		 * Set the schema to be sent by the message. This combo combo_tree

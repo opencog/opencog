@@ -31,13 +31,13 @@ int main(int argc, char *argv[]) {
     try{
         router->run();
     } catch(std::bad_alloc){
-        logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a bad_alloc exception.");
+        opencog::logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a bad_alloc exception.");
         router->persistState();
     } catch(opencog::NetworkException& e){
-        logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a Runtime exception.");
+        opencog::logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a Runtime exception.");
         router->persistState();
     } catch(...){
-         logger().log(opencog::Logger::ERROR, 
+        opencog::logger().log(opencog::Logger::ERROR, 
              "RouterExec - An exceptional situation occured. Check log for more information.");
         router->persistState();
     }

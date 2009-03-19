@@ -6,7 +6,7 @@
  */
 #include <sstream>
 #include "SchemaMessage.h"
-#include <LADSUtil/StringTokenizer.h>
+#include "util/StringTokenizer.h"
 #include "PetComboVocabulary.h"
 
 using namespace LearningServerMessages;
@@ -61,27 +61,27 @@ const char * SchemaMessage::getPlainTextRepresentation(){
 }
 
 void SchemaMessage::loadPlainTextRepresentation(const char *strMessage)
-                        throw (LADSUtil::InvalidParamException, std::bad_exception){
+                        throw (opencog::InvalidParamException, std::bad_exception){
 
-	LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
+	opencog::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
 
 	schemaName = stringTokenizer.nextToken();
     if(schemaName.empty()){
-        throw LADSUtil::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty name");
+        throw opencog::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty name");
     }
 
     if(getType() == CANDIDATE_SCHEMA){
 
         candidateSchemaName = stringTokenizer.nextToken();
         if(schemaName.empty()){
-            throw LADSUtil::InvalidParamException(TRACE_INFO,
+            throw opencog::InvalidParamException(TRACE_INFO,
                               "Cannot create a CandidateSchemaMessage with an empty candidate name");
         }
 	}
 
 	schema = stringTokenizer.nextToken();
     if(schema.empty()){
-        throw LADSUtil::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty schema");
+        throw opencog::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty schema");
     }
 }
 

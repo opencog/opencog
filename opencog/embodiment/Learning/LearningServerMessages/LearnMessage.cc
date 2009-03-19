@@ -8,7 +8,7 @@
 #include "LearnMessage.h"
 
 #include "SpaceServer.h"
-#include <LADSUtil/StringTokenizer.h>
+#include "util/StringTokenizer.h"
 
 #include <opencog/xml/NMXmlParser.h>
 #include <opencog/xml/NMXmlExporter.h>
@@ -40,7 +40,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                            const std::string &schm,  const std::vector<std::string> &argumentsList,
                            const std::string &owId,
                            const std::string &avId, const SpaceServer &spaceServer)
-                           throw (LADSUtil::InvalidParamException, std::bad_exception): 
+                           throw (opencog::InvalidParamException, std::bad_exception): 
                            Message(from, to, MessagingSystem::Message::LEARN) { 
                            
 
@@ -54,7 +54,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
     //look for the exemplars time intervals to fill spaceMaps
     Handle trick_h = spaceServer.getAtomSpace().getHandle(CONCEPT_NODE, schm);
     if(trick_h == Handle::UNDEFINED){
-        throw LADSUtil::InvalidParamException(TRACE_INFO, 
+        throw opencog::InvalidParamException(TRACE_INFO, 
                                     "LearnMessage - AtomSpace does not contain '%s' concept node.",
                                     schm.c_str());
     }
@@ -78,19 +78,19 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
 #ifdef USE_MAP_HANDLE_SET
                     mapsToSend.insert(sm_h);
 #else
-                    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+                    logger().log(opencog::Logger::DEBUG, 
                        "LearnMessage - adding space map (%s) to the message.", 
                         TLB::getAtom(sm_h)->toString().c_str());
                         spaceMaps.push_back(spaceServer.mapToString(sm_h));
 #endif
                 } else {
-                    MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+                    logger().log(opencog::Logger::ERROR, 
                         "LearnMessage - SpaceServer has no space map (%s) to be added to the message!",
                         TLB::getAtom(sm_h)->toString().c_str());
                     spaceServer.getAtomSpace().removeAtom(sm_h, true);
                 }
-            } catch (LADSUtil::AssertionException& e) {
-                MAIN_LOGGER.log(LADSUtil::Logger::ERROR, 
+            } catch (opencog::AssertionException& e) {
+                logger().log(opencog::Logger::ERROR, 
                     "LearnMessage - Failed to add map (%s) into LearnMessage.",
                     TLB::getAtom(sm_h)->toString().c_str());
             }
@@ -99,7 +99,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
 
 #ifdef USE_MAP_HANDLE_SET
     foreach(Handle sm_h, mapsToSend) {
-        MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, 
+        logger().log(opencog::Logger::DEBUG, 
            "LearnMessage - adding space map (%s) to the message.", 
            TLB::getAtom(sm_h)->toString().c_str());
         spaceMaps.push_back(spaceServer.MapToString(sm_h));
@@ -107,7 +107,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
 #endif
 
     behaviorDescriptions.assign(exporter.toXML(spaceServer.getAtomSpace().getAtomTable().getHandleSet(ATOM, true)));
-    MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "LearnMessage - finished creating message (behavior descriptors just added."); 
+    logger().log(opencog::Logger::DEBUG, "LearnMessage - finished creating message (behavior descriptors just added."); 
 }
 
 /**
@@ -143,7 +143,7 @@ const char * LearnMessage::getPlainTextRepresentation(){
 }
 
 void LearnMessage::loadPlainTextRepresentation(const char *strMessage) {
-        LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage, 
+        opencog::StringTokenizer stringTokenizer((std::string)strMessage, 
 					      (std::string)END_TOKEN);
 	//schema id
 	schema = stringTokenizer.nextToken();
@@ -228,7 +228,7 @@ bool LearnMessage::populateAtomSpace(SpaceServer &spaceServer){
 
     // catch all RuntimeExceptions descendents, specially
     // InconsistenceException
-    } catch(LADSUtil::RuntimeException& e) {
+    } catch(opencog::RuntimeException& e) {
         delete reader[0];
         return false;
     }

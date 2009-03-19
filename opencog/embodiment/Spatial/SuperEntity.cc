@@ -1,8 +1,10 @@
+#include <map>
+
 #include "SuperEntity.h"
 #include "util/Logger.h"
 
 using namespace Spatial;
-
+using namespace opencog;
 
 SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (opencog::InvalidParamException) {  
     boost::shared_ptr<SubEntity> subEntity1( createSubEntity(entity1) );

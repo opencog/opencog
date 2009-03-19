@@ -23,6 +23,7 @@
 using namespace behavior;
 using namespace Procedure;
 using namespace PetCombo;
+using namespace opencog;
 
 namespace FitnessEstimator {
 
@@ -64,11 +65,11 @@ namespace FitnessEstimator {
    */
   fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) const {
     //debug log
-    if(opencog::Logger::DEBUG <= MAIN_LOGGER.getLevel()) {
+      if(opencog::Logger::DEBUG <= opencog::logger().getLevel()) {
       stringstream ss_tr;
       ss_tr << tr;
       string s_tr = ss_tr.str();
-      MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Candidate being estimated : %s", s_tr.c_str());
+      opencog::logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Candidate being estimated : %s", s_tr.c_str());
     }
     //~debug log
 
@@ -80,7 +81,7 @@ namespace FitnessEstimator {
     opencog::cassert(TRACE_INFO, !bdce.empty(), "Error : No exemplars");
 
     //debug log
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Loop over Behavior Category starts");
+    opencog::logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Loop over Behavior Category starts");
     //~debug log
 
     //determine the number of times to run the schema
@@ -126,7 +127,7 @@ namespace FitnessEstimator {
 	      i++) {
 	    
 	    //debug log
-	    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Combo interpreter cycle : %d", i);
+              logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Combo interpreter cycle : %d", i);
 	    //~debug log
 	    
 	    rp.cycle();
@@ -134,9 +135,9 @@ namespace FitnessEstimator {
 	  CompositeBehaviorDescription& genBD =
 	    nspww.getNoSpaceLife().getGeneratedBD();
 	  //debug log
-	  if (opencog::Logger::DEBUG <= MAIN_LOGGER.getLevel()) {
-	    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Composite Behavior Description to imitate : %s", cbd_it->toString().c_str());
-	    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Composite Behavior Description generated : %s", genBD.toString().c_str());
+	  if (opencog::Logger::DEBUG <= logger().getLevel()) {
+              logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Composite Behavior Description to imitate : %s", cbd_it->toString().c_str());
+              logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Composite Behavior Description generated : %s", genBD.toString().c_str());
 	  }
 	  //~debug log
 	  
@@ -147,7 +148,7 @@ namespace FitnessEstimator {
 	bd_score /= trial_count;
 
 	//debug log
-	MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Score against the current Composite Behavior Description : %f", bd_score);
+	logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Score against the current Composite Behavior Description : %f", bd_score);
 	//~debug log
 
 #ifdef IS_FE_LRU_CACHE
@@ -162,7 +163,7 @@ namespace FitnessEstimator {
       score += bd_score; //non-normalized score
     }
     //debug log
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Loop over Behavior Category ends");
+      logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Loop over Behavior Category ends");
     //~debug log
 
 #ifdef IS_FE_LRU_CACHE
@@ -173,14 +174,14 @@ namespace FitnessEstimator {
     _total_fitness_call++;
 
     //debug log
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Total fitness call = %u, Cache success = %u", _total_fitness_call, _cache_success);
+    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Total fitness call = %u, Cache success = %u", _total_fitness_call, _cache_success);
     //~debug log
 #endif
 
     //compute score
     score /= (float)(bdce.size()); //normalized score
     //debug log for SPCTools
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - SPCTools - Score : %f", score);
+    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - SPCTools - Score : %f", score);
     //~debug log for SPCTools
       
     //compute size penalty
@@ -189,8 +190,8 @@ namespace FitnessEstimator {
     double fit = score*sp;
       
     //debug log
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Size penalty : %f", sp);
-    MAIN_LOGGER.log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Fitness : %f", fit);
+    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Size penalty : %f", sp);
+    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Fitness : %f", fit);
     //~debug log
       
     return fit;

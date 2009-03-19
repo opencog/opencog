@@ -12,7 +12,7 @@
 
 using namespace OperationalPetController;
 using namespace std;
-
+using namespace opencog;
 
 PVPActionPlanSender::PVPActionPlanSender(const std::string& petId, NetworkElement * ne) {
     this->petId = petId;

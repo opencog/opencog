@@ -20,7 +20,7 @@ namespace Spatial {
   };
 };
 
-#include <LADSUtil/exceptions.h>
+#include "util/exceptions.h"
 #include <string>
 #include <iostream>
 

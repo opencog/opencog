@@ -7,7 +7,7 @@ void PetaverseErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseExceptio
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::WARNING, "PetaverseErrorHandling - Got a warning while parsing XML: %s\n"
+    logger().log(opencog::Logger::WARN, "PetaverseErrorHandling - Got a warning while parsing XML: %s\n"
                     "Line: %d\n"
                     "Column: %d\n"
                     //"PublicId: %s\n"

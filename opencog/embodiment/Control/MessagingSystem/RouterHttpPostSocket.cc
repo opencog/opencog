@@ -3,7 +3,7 @@
 #include <Sockets/HttpClientSocket.h>
 #include <Sockets/Parse.h>
 
-#include "util/StringManipulator.h>
+#include "util/StringManipulator.h"
 
 RouterHttpPostSocket::RouterHttpPostSocket(ISocketHandler& h,const std::string& url_in) :HttpClientSocket(h, url_in) {
 }

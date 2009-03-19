@@ -28,6 +28,7 @@ LINK_DIRECTORIES(
 
 ADD_LIBRARY(PetaverseHC
 	petaverse-hillclimber
+        interactive-hillclimber
 	HCPetaverseVocabularyProvider
 )
 

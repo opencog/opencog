@@ -44,7 +44,7 @@ class IdleTask {
          */
         void setTaskActive(const bool& state){
             taskActive = state;
-            logger().log(opencog::Logger::DEBUG, "IdleTask - taskActive set to = %d.", taskActive);
+            opencog::logger().log(opencog::Logger::DEBUG, "IdleTask - taskActive set to = %d.", taskActive);
         }
     
         bool isTaskActive(){

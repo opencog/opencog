@@ -130,7 +130,7 @@ namespace Control {
     void saveSpaceMapFile() {
       logger().log(opencog::Logger::DEBUG,  "PetInterface - saveSpaceMapFile()."); 
       if (!getSpaceServer().isLatestMapValid()) {
-	logger().log(opencog::Logger::WARNING,  "PetInterface - There is no space map yet."); 
+	logger().log(opencog::Logger::WARN,  "PetInterface - There is no space map yet."); 
 	return;
       }
       const SpaceServer::SpaceMap& sm = getSpaceServer().getLatestMap();

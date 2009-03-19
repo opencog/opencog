@@ -2,19 +2,13 @@
 #define _OPENCOG_FOREACH_H
 
 #include <boost/iterator/counting_iterator.hpp>
-
-#ifndef BOOST_FOREACH
-//#include <boost/foreach.hpp>
-//to avoid breaking on boost 1.33 (which doesn't have foreach.hpp),
-//include a local copy
-#include "foreach_local_copy.hpp"
-#endif
+#include <boost/foreach.hpp>
 
 namespace boost {
-  namespace foreach {
-    template<>
-    struct is_lightweight_proxy<int> : mpl::true_ { };
-  } // namespace foreach
+    //namespace foreach {
+    // template<>
+    //struct is_lightweight_proxy<int> : mpl::true_ { };
+    //} // namespace foreach
 
   inline boost::counting_iterator<int> boost_range_begin(int) {
     return make_counting_iterator(0);
