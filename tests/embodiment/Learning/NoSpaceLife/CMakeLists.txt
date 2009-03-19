@@ -13,14 +13,13 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/src/Learning/behavior
 	${OPENCOG_BINARY_DIR}/src/Learning/NoSpaceLife
 	${OPENCOG_BINARY_DIR}/src/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/lib/linux/xerces
 )
 
 ADD_CXXTEST(NoSpaceLifeUTest)
 TARGET_LINK_LIBRARIES(NoSpaceLifeUTest
 	behavior
 	ImaginaryLife
-	xerces-c
+	${XERCESC_LIBRARIES}
         comboreduct
         util
 	${OPENCOG_LIBRARIES}

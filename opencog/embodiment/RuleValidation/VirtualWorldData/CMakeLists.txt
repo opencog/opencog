@@ -1,10 +1,9 @@
 INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/include/xerces
     ${OPENCOG_SOURCE_DIR}/opencog
+    ${XERCESC_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
     ${OPENCOG_BINARY_DIR}/opencog/util
 )
 
@@ -17,7 +16,7 @@ ADD_LIBRARY(VirtualWorldData
 )
 
 TARGET_LINK_LIBRARIES(VirtualWorldData
-    xerces-c
+    ${XERCESC_LIBRARIES}
     util
 )
 
