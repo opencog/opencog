@@ -19,9 +19,11 @@ Subgraph Isomorphism Discovery
 Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
 subgraph isomorphism algorithm finds and returns the corresponding
 smaller graph within the universe graph.  The smaller graph may include
-one or more variable nodes or links, which will match any corresponding
-node or link in the universe; for this reason, subgraph matching
-can be used to perform query processing, to "fill in the blanks".
+one or more variable nodes or links; these denote variables which will
+be given values (groundings): a variable will match any corresponding
+node or link in the universe, as long as it occurs in the correct
+location.  Thus, subgraph matching can be used to perform query 
+processing, to "fill in the blanks".
 
 The subgraph matching algorithm is fairly general, but with an
 important restriction on how the subgraph is specified. Every
@@ -31,7 +33,11 @@ on the incidence graph, while the edges of the incidence graph
 reflect the connectivity of the hypergraph.  The input to the
 algorithm must be specified as a set of trees in the incidence
 graph, with some nodes shared between the trees, so as to form
-a single, connected graph. 
+a single, connected graph. General mathematical theorems state
+that ever graph can be decomposed into a collection of trees.
+As a practical matter, it is very easy to perform this decomposition
+within OpenCog: all OpenCog hypergraphs are always naturally
+specified as trees.
 
 An easy example of decomposing a general graph into a collection 
 of trees comes from natural language (English) that has been 
@@ -70,6 +76,10 @@ with the explicit mapping given by:
     atom John_51 maps to John_85
     atom _$qVar_05 maps to ball_79
 
+It is up to the callback to determine whether throw_49 and throw_22 both
+refer to the same concept of "throw", and thus to return false or true to
+accept or reject the match.
+
 
 Algorithm overview
 ------------------
@@ -102,6 +112,13 @@ The problem of finding certain subgraphs within graphs is known as the
 "subgraph isomorphism problem" or the "subgraph matching problem", and
 one uses a "subgraph isomorphism algorithm" to find the match.
 
+The input to the algorithm is a set of trees. Because each tree may have
+several groundings, the algorithm maintains a stack to hold intermediate
+groundings, as the universe is explored. A solution is declared when
+every tree has been grounded. If no grounding is found, or if another
+solution is to be searched for, the algorithm will backtrack to the 
+most recent unexplored part of the universe, poping the stack as it 
+backtracks. To this degree, the algorithm resembles a pushdown automaton.
 
 Currently Implemented Algorithm
 -------------------------------
