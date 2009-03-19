@@ -3,10 +3,10 @@
 
 #include <math.h>
 
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/functional.h>
-#include <LADSUtil/RandGen.h>
+#include "util/Logger.h"
+#include "util/numeric.h"
+#include "util/functional.h"
+#include "util/RandGen.h"
 
 #include "LocalSpaceMap2DUtil.h"
 
@@ -151,7 +151,7 @@ namespace Spatial {
 
     // Get the nearest free (not occupied or out of bounds) 
     // point from the given point 
-    Spatial::Point getNearestFreePoint(const Spatial::Point& pt) const throw (LADSUtil::RuntimeException, std::bad_exception);
+    Spatial::Point getNearestFreePoint(const Spatial::Point& pt) const throw (opencog::RuntimeException, std::bad_exception);
 
     // Is the given point occupied by any obstacle or out of bounds?
     bool gridIllegal(const Spatial::GridPoint& gp) const;
@@ -163,13 +163,13 @@ namespace Spatial {
     bool gridOccupied_nonObstacle(const Spatial::GridPoint& gp) const;
     bool gridOccupied_nonObstacle(unsigned int i,unsigned int j) const;
 
-    //const ObjectMetaData& getMetaData(const Spatial::ObjectID& id) const throw(LADSUtil::NotFoundException);
+    //const ObjectMetaData& getMetaData(const Spatial::ObjectID& id) const throw(opencog::NotFoundException);
 
     bool containsObject(const Spatial::ObjectID& id) const;
     bool isObstacle(const Spatial::ObjectID& id) const;
     bool isNonObstacle(const Spatial::ObjectID& id) const;
 
-    const std::vector<Spatial::GridPoint>& getObjectPoints(const Spatial::ObjectID& id) const throw(LADSUtil::NotFoundException);
+    const std::vector<Spatial::GridPoint>& getObjectPoints(const Spatial::ObjectID& id) const throw(opencog::NotFoundException);
 
     // Note: At time of writing, this function is only used for the unit tests.
     // List all objects IDs (obstacles and non-obstacles) on this map
@@ -242,7 +242,7 @@ namespace Spatial {
 	tmp.erase(std::partition(tmp.begin(), tmp.end(), pred), tmp.end());
 
 	if (d >= maxD && tmp.empty()){
-	  MAIN_LOGGER.log(LADSUtil::Logger::DEBUG, "LocalSpaceMap - Found no object that verifies the predicate. Distance %.2f, Max distance %.2f.", d, maxD); 
+            opencog::logger().log(opencog::Logger::DEBUG, "LocalSpaceMap - Found no object that verifies the predicate. Distance %.2f, Max distance %.2f.", d, maxD); 
 	  //won't find anything
 	  return ObjectID();
 	}
@@ -264,7 +264,7 @@ namespace Spatial {
 
     //find a random entity satisfying some predicate
     template<typename Pred>
-    ObjectID findRandomFiltered(Pred pred, LADSUtil::RandGen& rng) const {
+    ObjectID findRandomFiltered(Pred pred, opencog::RandGen& rng) const {
 
       //filter out all entities that match
       std::vector<Spatial::ObjectID> tmp;
@@ -326,8 +326,8 @@ namespace Spatial {
     //Euclidean distance between points
     template<typename PointT>
     static Distance eucDist(const PointT& p1,const PointT& p2) {
-      return std::sqrt(LADSUtil::power(p1.first - p2.first, 2)+
-		       LADSUtil::power(p1.second - p2.second, 2));
+      return std::sqrt(opencog::power(p1.first - p2.first, 2)+
+		       opencog::power(p1.second - p2.second, 2));
     }
 
     //are the given /grid coordinates/ within the dimensions of this grid?
@@ -369,7 +369,7 @@ namespace Spatial {
      * @param distance Maximum distance from the given position to search the free point
      * @param startDirection Vector that points to the direction of the first rayTrace
      */      
-    Spatial::Point getNearFreePointAtDistance( const Spatial::Point& position, float distance, const Spatial::Point& startDirection ) const throw (LADSUtil::NotFoundException);
+    Spatial::Point getNearFreePointAtDistance( const Spatial::Point& position, float distance, const Spatial::Point& startDirection ) const throw (opencog::NotFoundException);
       
     /**
      * Get the nearest object point of a given a reference point
@@ -378,7 +378,7 @@ namespace Spatial {
      * @param objectID Object ID
      * @return The nearest object point
      */
-    Spatial::Point getNearestObjectPoint( const Spatial::Point& referencePoint, const Spatial::ObjectID& objectID ) const throw(LADSUtil::NotFoundException);
+    Spatial::Point getNearestObjectPoint( const Spatial::Point& referencePoint, const Spatial::ObjectID& objectID ) const throw(opencog::NotFoundException);
 
     /**
      * Find all points belonging to a given line segment
@@ -415,14 +415,14 @@ namespace Spatial {
      */
     void updateObject( const Spatial::ObjectID& id, const Spatial::ObjectMetaData& metadata, bool isObstacle = false );
     
-    //const Object& getObject( const Spatial::ObjectID& id ) const throw (LADSUtil::NotFoundException);
+    //const Object& getObject( const Spatial::ObjectID& id ) const throw (opencog::NotFoundException);
 
-    const EntityPtr& getEntity( const std::string& id ) const throw (LADSUtil::NotFoundException);
-    const EntityPtr& getEntity( long id ) const throw (LADSUtil::NotFoundException);
+    const EntityPtr& getEntity( const std::string& id ) const throw (opencog::NotFoundException);
+    const EntityPtr& getEntity( long id ) const throw (opencog::NotFoundException);
     
     bool belongsToSuperEntity( const Spatial::ObjectID& id ) const;
     
-    const SuperEntityPtr& getSuperEntityWhichContains( const Spatial::ObjectID& id ) const throw(LADSUtil::NotFoundException);
+    const SuperEntityPtr& getSuperEntityWhichContains( const Spatial::ObjectID& id ) const throw(opencog::NotFoundException);
 
     inline const std::list<SuperEntityPtr>& getSuperEntities( void ) const {
       return this->superEntities;

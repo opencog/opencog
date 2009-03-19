@@ -27,7 +27,7 @@ namespace Procedure {
           return;
 
       if (_vec.size() > 1) {
-          logger().log(opencog::Logger::WARNING, "Got multiple (%d) running procedures in ComboInterpreter!", _vec.size());
+          logger().log(opencog::Logger::WARN, "Got multiple (%d) running procedures in ComboInterpreter!", _vec.size());
       }
       
       std::set<RunningProcedureId> done;
@@ -137,7 +137,7 @@ namespace Procedure {
     }
     Map::iterator it=_map.find(id);
 
-//    logger().log(opencog::Logger::WARNING, "_map!end '%s', finished '%s', failed '%s'.",
+//    logger().log(opencog::Logger::WARN, "_map!end '%s', finished '%s', failed '%s'.",
 //                    (it!=_map.end())?"true":"false", it->second.isFinished()?"true":"false", it->second.isFailed()?"true":"false");
     return (it!=_map.end() && it->second.isFinished() && it->second.isFailed());
   }

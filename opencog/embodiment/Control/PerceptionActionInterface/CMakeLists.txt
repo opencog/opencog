@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
+	${OPENCOG_SOURCE_DIR}/opencog
 	${OPENCOG_SOURCE_DIR}/include/xerces
 )
 
@@ -11,6 +12,7 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
+	${OPENCOG_BINARY_DIR}/opencog/util
 	${OPENCOG_SOURCE_DIR}/lib/linux/xerces
 )
 

@@ -1,8 +1,9 @@
 INCLUDE_DIRECTORIES (
-	${PETAVERSE_SOURCE_DIR}/src/Control
-	${PETAVERSE_SOURCE_DIR}/src/Spatial
-	${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
-	${PETAVERSE_SOURCE_DIR}/src/AtomspaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomspaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog
 )
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
@@ -50,7 +51,7 @@ TARGET_LINK_LIBRARIES(tangentbug
     Control
     SpaceMap
     TangentBug
-    ${LADSUTIL_LIBRARY}
+    util
 )
 
 # Uncomment the following line to enable ncurses printing:
@@ -76,7 +77,7 @@ TARGET_LINK_LIBRARIES(astartest
     SpaceMap
     TangentBug
     AStar
-    ${LADSUTIL_LIBRARY}
+    util
 )
 
 # uncomment the lines below to compile MapViewer. You must have libsdl and libsdl_gfx

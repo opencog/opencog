@@ -33,7 +33,7 @@ class ElementaryBehaviorDescription {
 	std::string toString() const {
 	  std::string str = std::string("{") +
 	    (handle==Handle::UNDEFINED? std::string("Handle::UNDEFINED"):
-	     opencog::toString(handle))
+	     TLB::getAtom(handle)->toString())
 	    + std::string(",") + temporal.toString() + std::string("}");
 	  return str;
 	}

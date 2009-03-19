@@ -9,7 +9,7 @@
 #include "TrySchemaMessage.h"
 
 #include "SpaceServer.h"
-#include <LADSUtil/StringTokenizer.h>
+#include "util/StringTokenizer.h"
 
 #include <opencog/xml/NMXmlParser.h>
 #include <opencog/xml/NMXmlExporter.h>
@@ -38,7 +38,7 @@ TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &t
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
                            const std::string &schm,  const std::vector<std::string> &argumentsList)
-                           throw (LADSUtil::InvalidParamException, std::bad_exception): 
+                           throw (opencog::InvalidParamException, std::bad_exception): 
                            Message(from, to, MessagingSystem::Message::TRY) { 
 
     schema.assign(schm);
@@ -63,7 +63,7 @@ const char * TrySchemaMessage::getPlainTextRepresentation(){
 
 void TrySchemaMessage::loadPlainTextRepresentation(const char *strMessage) {
 
-	LADSUtil::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
+	opencog::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
 
 	schema = stringTokenizer.nextToken();
 

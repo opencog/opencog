@@ -18,6 +18,7 @@
 #include <sstream>
 
 using namespace MessagingSystem;
+using namespace opencog;
 
 Spawner::~Spawner() {
 }
@@ -85,7 +86,7 @@ bool Spawner::processNextMessage(Message *message) {
         // The call to isElementAvailable method does not work because it only knows the unavailable elements, not the 
         // available ones:  
         //if (isElementAvailable(petID)) {
-            //logger().log(opencog::Logger::WARNING, "Trying to load an OPC that is already available: %s\n", petID.c_str());
+            //logger().log(opencog::Logger::WARN, "Trying to load an OPC that is already available: %s\n", petID.c_str());
             // TODO: send the LOAD SUCCESS message back
         //}
 	std::stringstream str;
@@ -167,7 +168,7 @@ bool Spawner::processNextMessage(Message *message) {
         
         releaseOpcPort(agentID);
     } else {
-        logger().log(opencog::Logger::WARNING, "Unknown command <%s>. Discarding it", command.c_str());
+        logger().log(opencog::Logger::WARN, "Unknown command <%s>. Discarding it", command.c_str());
     }
     return false;
 }

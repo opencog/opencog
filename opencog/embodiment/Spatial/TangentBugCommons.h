@@ -7,10 +7,10 @@
 #ifndef _TANGENT_BUG_COMMONS
 #define _TANGENT_BUG_COMMONS
 
-#include <LADSUtil/Logger.h>
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/hash_set.h>
-#include <LADSUtil/hash_map.h>
+#include "util/Logger.h"
+#include "util/numeric.h"
+#include "util/hash_set.h"
+#include "util/hash_map.h"
 
 #include <set> 
 #include <string>
@@ -25,8 +25,8 @@ namespace Spatial{
         typedef unsigned int coord;
         typedef std::pair<coord, coord> point_2d; // Parent class of Point
         
-        typedef LADSUtil::hash_set<int> int_set;
-        typedef LADSUtil::hash_map<point_2d, int_set, boost::hash<point_2d> > point_map;
+        typedef opencog::hash_set<int> int_set;
+        typedef opencog::hash_map<point_2d, int_set, boost::hash<point_2d> > point_map;
        
         /**
          * Ray class
@@ -130,7 +130,8 @@ namespace Spatial{
 #ifdef TB_PRINT_NCURSES
             cerr << message << endl;
 #else
-            MAIN_LOGGER.log(status, message);
+            opencog::logger().log(static_cast<opencog::Logger::Level>(status),
+                                  message);
 #endif
         }
 

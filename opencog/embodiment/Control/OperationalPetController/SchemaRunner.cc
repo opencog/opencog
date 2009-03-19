@@ -49,7 +49,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     // Cannot select a schema to execute while
     // there is no map info data available...
     if(this->opc->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "SchemaRunner - Cannot select any schema to be executed"
                         " because there is no map info available yet!");
         return false; 

@@ -108,7 +108,7 @@ namespace Spatial {
 
       const Graph& getAbstractGraph( void );
 
-      bool processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint ) throw( LADSUtil::RuntimeException );
+      bool processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint ) throw( opencog::RuntimeException );
       
       const std::vector<Math::Vector2>& getProcessedPath( void ) const;
 
@@ -161,13 +161,13 @@ namespace Spatial {
     HPASearch( LocalSpaceMap2D* map, unsigned int numberOfLevels = 1, unsigned int maximumClusters = 16 );
 
     // process a path from informed start and end positions
-    bool processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint, unsigned int levelId = 1 ) throw( LADSUtil::RuntimeException );
+    bool processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint, unsigned int levelId = 1 ) throw( opencog::RuntimeException );
 
-    const std::vector<Math::Vector2>& getProcessedPath( unsigned int levelId ) const throw( LADSUtil::RuntimeException );
+    const std::vector<Math::Vector2>& getProcessedPath( unsigned int levelId ) const throw( opencog::RuntimeException );
 
     virtual ~HPASearch(void);
 
-    Level* getLevel( unsigned int levelId ) const throw( LADSUtil::RuntimeException );
+    Level* getLevel( unsigned int levelId ) const throw( opencog::RuntimeException );
 
     unsigned int getNumberOfLevels( void );
 

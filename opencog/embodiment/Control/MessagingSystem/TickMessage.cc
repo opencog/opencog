@@ -15,22 +15,26 @@ using namespace MessagingSystem;
 // ***********************************************/
 // Constructors/destructors
 
-TickMessage::~TickMessage() {
-} 
+TickMessage::~TickMessage()
+{
+}
 
-TickMessage::TickMessage(const std::string &from, const std::string &to) : Message(from, to, Message::TICK) {
+TickMessage::TickMessage(const std::string &from, const std::string &to) : Message(from, to, Message::TICK)
+{
 }
 
 
 // ***********************************************/
 // Overwritten from message
 
-const char *TickMessage::getPlainTextRepresentation() {
-static char* tick = "TICK_MESSAGE";
-	return tick;
+const char *TickMessage::getPlainTextRepresentation()
+{
+    static const char* tick = "TICK_MESSAGE";
+    return tick;
 }
 
-void TickMessage::loadPlainTextRepresentation(const char *strMessage) {
+void TickMessage::loadPlainTextRepresentation(const char *strMessage)
+{
 
 }
-  
+

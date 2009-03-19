@@ -29,14 +29,16 @@ opencog::Logger* LoggerFactory::getLogger(const SystemParameters &parameters, co
     if (user_index != std::string::npos) {
 		//const char* username = getlogin();
 		const char* username = getenv("LOGNAME");
-		logger().log(opencog::Logger::WARNING, "LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
+                opencog::logger().log(opencog::Logger::WARN, "LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
 		if (username == NULL)
 			username = "unknown_user";
         logFile = logFile.replace(user_index, strlen(USER_FLAG), username);
     }
     logFile.append(slash);
     logFile.append(id);
-    logger().log(opencog::Logger::WARNING, "LoggerFactory:getLogger(): log dir: %s\n", logFile.c_str());
+    opencog::logger().log(opencog::Logger::WARN,
+                          "LoggerFactory:getLogger(): log dir: %s\n",
+                          logFile.c_str());
 
     if (id == parameters.get("SPAWNER_ID")) {
         level = atoi(parameters.get("SPAWNER_LOG_LEVEL").c_str());
@@ -56,7 +58,9 @@ opencog::Logger* LoggerFactory::getLogger(const SystemParameters &parameters, co
         timestampEnabled = true;
     }
 
-    opencog::Logger* result = new opencog::Logger(logFile, level, timestampEnabled);
+    opencog::Logger* result = new opencog::Logger(logFile,
+                                                  opencog::Logger::Level(level),
+                                                  timestampEnabled);
 
     if (atoi(parameters.get("PRINT_LOG_TO_STDOUT").c_str()) == 1) {
         result->setPrintToStdoutFlag(true);

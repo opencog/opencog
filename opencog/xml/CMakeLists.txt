@@ -1,10 +1,10 @@
 FIND_PACKAGE(EXPAT REQUIRED)
 
 ADD_LIBRARY(xml SHARED
-	FileXMLBufferReader.cc
-	NMXmlExporter.cc
-	NMXmlParser.cc
-	StringXMLBufferReader.cc
+        FileXMLBufferReader
+        NMXmlExporter
+        NMXmlParser
+        StringXMLBufferReader
 )
 
 INCLUDE_DIRECTORIES (

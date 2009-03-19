@@ -66,7 +66,7 @@ SystemParameters::SystemParameters() {
     sprintf(fine, "%d", opencog::Logger::FINE);
     sprintf(debug, "%d", opencog::Logger::DEBUG);
     sprintf(info, "%d", opencog::Logger::INFO);
-    sprintf(warning, "%d", opencog::Logger::WARNING);
+    sprintf(warning, "%d", opencog::Logger::WARN);
     sprintf(error, "%d", opencog::Logger::ERROR);
     
     // component log levels

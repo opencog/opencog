@@ -24,6 +24,7 @@
 
 
 using namespace MessagingSystem;
+using namespace opencog;
 
 Router *RouterServerSocket::master = NULL;
 bool no_msg_arrival_notification = false; // TEST: unfortunately it didn't work well when set to true. Needs more testing and debbuging.
@@ -114,14 +115,14 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
         answer.assign(NetworkElement::OK_MESSAGE);
         sendAnswer(answer);
     } else {
-        logger().log(opencog::Logger::WARNING, "RouterServerSocket - unknow destination");
+        logger().log(opencog::Logger::WARN, "RouterServerSocket - unknow destination");
         answer.assign("FAILED - could not send messages. Unknown ID: "); answer.append(id);
         sendAnswer(answer);
         return;
     }
 
     if (master->getMessageCentral()->isQueueEmpty(id)) {
-        logger().log(opencog::Logger::WARNING, "RouterServerSocket - There is no message to %s", id.c_str());
+        logger().log(opencog::Logger::WARN, "RouterServerSocket - There is no message to %s", id.c_str());
         return;
     }
 
@@ -131,7 +132,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
 
             Message *message = master->getMessageCentral()->pop(id); 
             if(message->getType() != Message::STRING){
-    		    logger().log(opencog::Logger::WARNING, 
+    		    logger().log(opencog::Logger::WARN, 
                 "RouterServerSocket - HttpRequest support STRING messages. Discarding message type: %d.", 
                 message->getType());
 
@@ -321,7 +322,7 @@ void RouterServerSocket::storeNewMessage() {
         //sendAnswer(answer);
         //return;
     } else if (!master->isElementAvailable(currentMessageTo)) {
-        logger().log(opencog::Logger::WARNING, "RouterServerSocket - Element '%s' unavailable. Discarding message.", currentMessageTo.c_str());
+        logger().log(opencog::Logger::WARN, "RouterServerSocket - Element '%s' unavailable. Discarding message.", currentMessageTo.c_str());
         answer.assign("FAILED - Element unavailable: "); answer.append(currentMessageTo);
         sendAnswer(answer);
         return;
@@ -485,7 +486,7 @@ void RouterServerSocket::OnLine(const std::string& line) {
             break;
         }
         default: {
-            logger().log(opencog::Logger::WARNING, "RouterServerSocket - Invalid state (%d). Comming back to WAITING_COMMAND (discarded last line).", currentState);
+            logger().log(opencog::Logger::WARN, "RouterServerSocket - Invalid state (%d). Comming back to WAITING_COMMAND (discarded last line).", currentState);
             currentState = WAITING_COMMAND;
             break;
         }

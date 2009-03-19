@@ -84,5 +84,5 @@ bool BasicPredicateUpdater::isUpdated(Handle object, std::string predicateName){
 }
 
 void BasicPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp ){
-  logger().log(opencog::Logger::WARNING, "BasicPredUpdater - Virtual method. Subclasses should implement it.");	
+  logger().log(opencog::Logger::WARN, "BasicPredUpdater - Virtual method. Subclasses should implement it.");	
 }

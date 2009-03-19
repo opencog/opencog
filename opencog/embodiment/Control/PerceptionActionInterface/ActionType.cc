@@ -788,13 +788,13 @@ bool ActionType::existCode(ActionTypeCode code) {
 }
 
 void ActionType::printHelp() { 
-    logger().log(opencog::Logger::INFO, 
+    opencog::logger().log(opencog::Logger::INFO, 
         "==================================== HELP OF PET ACTION TYPES ========================================");
     for (Name2ActionTypeMap::const_iterator itr = nameMap.begin(); itr != nameMap.end(); itr++) {
         const ActionType& t = *(itr->second);
-        logger().log(opencog::Logger::INFO, "    %s => %s", t.getName().c_str(), t.getHelpText().c_str());
+        opencog::logger().log(opencog::Logger::INFO, "    %s => %s", t.getName().c_str(), t.getHelpText().c_str());
     }
-    logger().log(opencog::Logger::INFO, 
+    opencog::logger().log(opencog::Logger::INFO, 
         "======================================================================================================");    
 }
 

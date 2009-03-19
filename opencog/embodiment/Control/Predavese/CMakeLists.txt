@@ -9,24 +9,25 @@ ADD_LIBRARY(Predavese
     NominalReferenceResolver.cc
 )
 
-LINK_DIRECTORIES (
-    ${OPENCOG_BINARY_DIR}
-    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
-    ${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
-    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
-)
-
 INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
     ${OPENCOG_SOURCE_DIR}/test/Control/PerceptionActionInterface
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+    ${OPENCOG_SOURCE_DIR}/opencog)
+
+LINK_DIRECTORIES (
+    ${OPENCOG_BINARY_DIR}
+    ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
+    ${OPENCOG_BINARY_DIR}/opencog/util
 )
 
 TARGET_LINK_LIBRARIES (Predavese

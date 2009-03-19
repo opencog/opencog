@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
+    ${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
@@ -24,6 +25,8 @@ LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
     ${OPENCOG_SOURCE_DIR}/lib/linux/xerces
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
+    ${OPENCOG_BINARY_DIR}/opencog/util
+    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
 )
 
 ADD_LIBRARY (Procedure
@@ -47,7 +50,7 @@ ADD_LIBRARY (Procedure
 TARGET_LINK_LIBRARIES (Procedure
     PAI
     MessagingSystem
-    ${COMBOREDUCT_LIBRARY}
+    comboreduct
     WorldWrapper
     pthread
     ssl
@@ -63,37 +66,37 @@ IF(COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
-ADD_EXECUTABLE (combo_shell_stdio ComboSTDIOExecutable)
-TARGET_LINK_LIBRARIES (combo_shell_stdio
-    ${COMBOREDUCT_LIBRARY}
-    Procedure
-    behavior
-    PAI
-    Predavese
-    Control
-    WorldWrapper
-    ${LADSUTIL_LIBRARY}
-    xerces-c
-    PetComboVocabulary
-    ${OPENCOG_LIBRARIES}
-)
+#ADD_EXECUTABLE (combo_shell_stdio ComboSTDIOExecutable)
+#TARGET_LINK_LIBRARIES (combo_shell_stdio
+#    comboreduct
+#    Procedure
+#    behavior
+#    PAI
+#    Predavese
+#    Control
+#    WorldWrapper
+#    util
+#    xerces-c
+#    PetComboVocabulary
+#    ${OPENCOG_LIBRARIES}
+#)
 
-ADD_EXECUTABLE (combo_shell ComboPAIExecutable)
-TARGET_LINK_LIBRARIES (combo_shell
-    ${COMBOREDUCT_LIBRARY}
-    Procedure
-    behavior
-    PAI
-    Predavese
-    MessagingSystem
-    Control
-    WorldWrapper
-    ${LADSUTIL_LIBRARY}
-    xerces-c
-    ssl
-    crypto
-    pthread
-    dl
-    PetComboVocabulary
-    ${OPENCOG_LIBRARIES}
-)
+#ADD_EXECUTABLE (combo_shell ComboPAIExecutable)
+#TARGET_LINK_LIBRARIES (combo_shell
+#    comboreduct
+#    Procedure
+#    behavior
+#    PAI
+#    Predavese
+#    MessagingSystem
+#    Control
+#    WorldWrapper
+#    util
+#    xerces-c
+#    ssl
+#    crypto
+#    pthread
+#    dl
+#    PetComboVocabulary
+#    ${OPENCOG_LIBRARIES}
+#)

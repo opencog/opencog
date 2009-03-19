@@ -11,6 +11,7 @@
 #include "RewardMessage.h"
 
 using namespace LearningServer;
+using namespace opencog;
 
 /**
  * Constructor and destructor
@@ -39,7 +40,7 @@ bool LSMocky::processNextMessage(MessagingSystem::Message *msg){
 		
 		case MessagingSystem::Message::LS_CMD:
 			cm = (LearningServerMessages::LSCmdMessage *)msg;
-            MAIN_LOGGER.log(opencog::Logger::INFO, "LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
+            logger().log(opencog::Logger::INFO, "LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
                             cm->getCommand().c_str(), 
                             cm->getFrom().c_str(),
                             cm->getSchema().c_str());
@@ -47,21 +48,21 @@ bool LSMocky::processNextMessage(MessagingSystem::Message *msg){
 		 	
 		case MessagingSystem::Message::LEARN:
 			lm = (LearningServerMessages::LearnMessage *)msg;
-	         MAIN_LOGGER.log(opencog::Logger::INFO, "LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
+	         logger().log(opencog::Logger::INFO, "LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
                          lm->getFrom().c_str(), 
                          lm->getSchema().c_str());
              break;
 			
 		case MessagingSystem::Message::REWARD:
 			rm = (LearningServerMessages::RewardMessage *)msg;
-	        MAIN_LOGGER.log(opencog::Logger::INFO, "LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
+	        logger().log(opencog::Logger::INFO, "LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
                          rm->getFrom().c_str(), 
                          rm->getCandidateSchema().c_str());
 			
 			break;
 		
 		default: 
-			MAIN_LOGGER.log(opencog::Logger::ERROR, "LSMocky - Unknown message type.");
+			logger().log(opencog::Logger::ERROR, "LSMocky - Unknown message type.");
 	}
 	return false;
 }

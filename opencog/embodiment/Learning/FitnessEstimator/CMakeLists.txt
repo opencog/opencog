@@ -19,6 +19,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+    ${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
@@ -31,6 +32,8 @@ LINK_DIRECTORIES (
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
+    ${OPENCOG_BINARY_DIR}/opencog/util
 )
 
 TARGET_LINK_LIBRARIES (FitnessEstimator

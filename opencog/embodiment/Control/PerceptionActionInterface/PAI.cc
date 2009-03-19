@@ -40,6 +40,7 @@ using namespace boost::gregorian;
 using namespace PerceptionActionInterface;
 using namespace predavese;
 using namespace Control;
+using namespace opencog;
 
 // The number of possible matchs for the DateTime RegEx. This will change if the
 // expression is altered.
@@ -225,7 +226,7 @@ ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (ope
         // Maps the planID + seqNumber to the actionID for further usage.
         planToActionIdsMaps[planId][seqNumber] = result; 
     } else {
-        logger().log(opencog::Logger::WARNING, "PAI - No action plan with id = %s in progress\n", planId.c_str());
+        logger().log(opencog::Logger::WARN, "PAI - No action plan with id = %s in progress\n", planId.c_str());
         // TODO: throw an Exception? 
     }
     return result;
@@ -237,14 +238,14 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId) {
     if (it != inProgressActionPlans.end()) {
         return it->second.empty();
     } else {
-        logger().log(opencog::Logger::WARNING,
+        logger().log(opencog::Logger::WARN,
                         "PAI - No action plan with id = %s in progress\n",
                         planId.c_str());
         return false; 
     }
 }
 
-#include "util/files.h>
+#include "util/files.h"
 
 bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles) {
 
@@ -858,7 +859,7 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     }
 
     if(matches.size() != REGEX_OUTPUT_SIZE){
-        logger().log(opencog::Logger::WARNING, 
+        logger().log(opencog::Logger::WARN, 
                         "PAI - RegEx result size (%d) differs from predifined one (%d).", 
                          matches.size(), REGEX_OUTPUT_SIZE);
         // return what???
@@ -1374,7 +1375,7 @@ void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element) {
                 Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
                 atomSpace.addTimeInfo(evalLink, tsValue); // NOTE: latest info not handled because this is not used at all.
             } else {
-                logger().log(opencog::Logger::WARNING, "PAI - The object-signal param '%s' has no value!\n", paramName);
+                logger().log(opencog::Logger::WARN, "PAI - The object-signal param '%s' has no value!\n", paramName);
             }
 
             XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
@@ -1948,7 +1949,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     } else {
         // Get the length, width and height of the object
         // For now, assume any object's size does not change in time.
-        logger().log(opencog::Logger::WARNING, "PAI - addSpacePredicates(): No size information available in mapinfo.");  
+        logger().log(opencog::Logger::WARN, "PAI - addSpacePredicates(): No size information available in mapinfo.");  
 
         Handle predNode = atomSpace.getHandle( PREDICATE_NODE, SIZE_PREDICATE_NAME);
         if (predNode != Handle::UNDEFINED) {
@@ -1970,10 +1971,10 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
                     }
                 } 
             }
-        logger().log(opencog::Logger::WARNING, "PAI - addSpacePredicates(): Got last size information available.");  
+        logger().log(opencog::Logger::WARN, "PAI - addSpacePredicates(): Got last size information available.");  
         }
         if (length <= 0 || width <= 0 || height <= 0) {
-            logger().log(opencog::Logger::WARNING, "PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
+            logger().log(opencog::Logger::WARN, "PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
             if (length < 0) length = 0;
             if (width < 0) width = 0;
             if (height < 0) height = 0;
@@ -2143,7 +2144,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
         }
 
     } else {
-        logger().log(opencog::Logger::WARNING, 
+        logger().log(opencog::Logger::WARN, 
             "PAI - No pending action plan with the given id '%s'.", 
             planId.c_str());
     }

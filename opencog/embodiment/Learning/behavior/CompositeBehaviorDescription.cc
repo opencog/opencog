@@ -242,7 +242,7 @@ void CompositeBehaviorDescription::buildTimelineRepresentation(std::vector<Predi
             unsigned long lower = entries[j].temporal.getLowerBound();
             unsigned long upper = entries[j].temporal.getUpperBound();
             Handle handle = entries[j].handle;
-            if ((upper > intervalStart) && (lower < intervalEnd) ||
+            if (((upper > intervalStart) && (lower < intervalEnd)) ||
                 ((upper == lower) && (upper == intervalStart)) ||
                 ((upper == lower) && (upper == intervalEnd))) {
                 currentSet.insert(handle);
