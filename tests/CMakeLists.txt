@@ -25,7 +25,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (server)
 	ADD_SUBDIRECTORY (dynamics)
 	ADD_SUBDIRECTORY (reasoning)
-	ADD_SUBDIRECTORY (comboreduct)
+        ADD_SUBDIRECTORY (comboreduct)
         ADD_SUBDIRECTORY (embodiment)
 ENDIF (CXXTEST_FOUND)
 
