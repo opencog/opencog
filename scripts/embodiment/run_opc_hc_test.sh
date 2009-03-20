@@ -4,15 +4,15 @@
 ./cleanup.csh
 
 echo "Start router, please wait..."
-../bin/src/Control/MessagingSystem/router &
+./router &
 sleep 5
 echo "Start LS, please wait..."
-../bin/src/Learning/LearningServer/learningServer &
+./learningServer &
 sleep 10
 echo "Start MockOPCHCTest"
 #comment the following command line
 #and uncomment the 3 after if you want to use a debugger
-../bin/src/Control/OperationalPetController/opcHcTester Fido 16330
-#echo ===== enter the following arguments in the debugger ====
-#echo ===== Fido 16330                                    ====
-#kdbg ../bin/src/Control/OperationalPetController/opcHcTester
+./opcHcTester Fido 16330
+#echo ===== you may want to enter the following arguments in the debugger ====
+#echo ===== Fido 16330                                                    ====
+#nemiver ./opcHcTester Fido 16330

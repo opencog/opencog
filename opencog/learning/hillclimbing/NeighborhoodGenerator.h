@@ -263,8 +263,6 @@ public:
     //on the subtree starting from it
     void populate_neighborhood(neighborhood& nh, const combo_tree& tr, pre_it it) {
 
-        std::cout << "POPULATE_NEIGHBORHOOD FROM: " << tr << " AT: " << combo_tree(it) << std::endl;
-        
         opencog::cassert(TRACE_INFO, !tr.empty(), "center should not be empty");
         opencog::cassert(TRACE_INFO, tr.is_valid(it),
                          "Invalide node associated to the tree");
