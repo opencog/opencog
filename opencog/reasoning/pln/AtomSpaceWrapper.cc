@@ -1115,6 +1115,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
 }
 
 Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
+    // All handles in this method are REAL AtomSpace handles.
     // insert root as beginning
     contexts.insert(contexts.begin(),AS_PTR->getHandle(CONCEPT_NODE, rootContext));
 

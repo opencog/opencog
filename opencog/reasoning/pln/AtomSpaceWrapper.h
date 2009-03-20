@@ -64,20 +64,22 @@ typedef std::pair<Handle,VersionHandle> vhpair;
 
 /** The bridge between the OpenCog AtomSpace and PLN.
  *
- * <h2>Fixing Fresh = true</h2>
+ * <h3>Fixing Fresh = true</h3>
  * 
  * The original version of Probabilistic Logic Networks made improper use of a
  * parameter in Novemente called \b fresh when adding new atoms to the
- * AtomSpace. This allowed atoms to be added to the AtomSpace without checking
- * for duplicates. The end result is that atoms were no longer unique: nodes
+ * #opencog::AtomSpace. This allowed atoms to be added to the AtomSpace without
+ * checking for duplicates. The end result is that atoms were no longer unique:
+ * nodes
  * with the same name and type, or links that had the same outgoing set and
  * type, could duplicated. OpenCog does not allow this behaviour.
  * 
  * To fix this, all accesses to the AtomSpace now occur through the
  * AtomSpaceWrapper, which presents fake Handles to PLN and interprets them to a
- * combination of a real \c Handle and a \c VersionHandle. A system of dummy
- * contexts is used to emulate the behaviour of allowing duplicate atoms in the
- * AtomSpace by storing multiple \c TruthValues within a CompositeTruthValue.
+ * combination of a real #opencog::Handle and a #opencog::VersionHandle. A
+ * system of dummy contexts is used to emulate the behaviour of allowing
+ * duplicate atoms in the AtomSpace by storing multiple #opencog::TruthValues
+ * within a #opencog::CompositeTruthValue.
  *
  * The AtomSpaceWrapper did exist in the original PLN, but it was more for
  * carrying out normalisation and allowing different AtomSpace backends to be
@@ -90,7 +92,7 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * duplicate atoms they refer to, or the root dummy context if they refer to the
  * original version of an atom.
  * 
- * <h3> Node example </h3>
+ * <h4> Node example </h4>
  *
  * If a node already exists, then a dummy context is created that links to the
  * root PLN dummy context.
@@ -114,7 +116,7 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  *  ConceptNode "x" <0.8, 0.9> [ Context dc <0.5, 0.5> ]
  * \endcode
  * 
- * <h3> Link example </h3>
+ * <h4> Link example </h4>
  * 
  * If a link already exists, then the appropriate contexts for each outgoing
  * atom are linked by a new dummy context link (with the appropriate context
@@ -137,7 +139,7 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * 
  * If we want to create another link with a different \c TruthValue, but between
  * the versions of x and y that are under the dummy context (instead of the
- * original TruthValues) then we get:
+ * original \c TruthValues) then we get:
  * 
  * \code
  *  dc_x_y <- OrderedLink (dc_x dc_y)
