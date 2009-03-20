@@ -68,10 +68,18 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-			// Get the database logins & etc from the config file.
-			dbname = config()["TEST_DB_NAME"].c_str();
-			username = config()["TEST_DB_USERNAME"].c_str();
-			passwd = config()["TEST_DB_PASSWD"].c_str();
+            try {
+                // Get the database logins & etc from the config file.
+                dbname = config()["TEST_DB_NAME"].c_str();
+                username = config()["TEST_DB_USERNAME"].c_str();
+                passwd = config()["TEST_DB_PASSWD"].c_str();
+            }
+            catch (InvalidParamException &e)
+            {
+                TS_FAIL("Incomplete DB setup for test. Edit opencog-test.conf");
+                exit(1);
+            }
+
 		}
 
 		~BasicSaveUTest()
