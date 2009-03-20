@@ -77,32 +77,48 @@ PatternMatch::PatternMatch(void)
  * technlogy (or at what point this would be needed).
  */
 void PatternMatch::match(PatternMatchCallback *cb,
+                         Handle hvarbles,
                          Handle hclauses,
-                         Handle hvarbles)
+                         Handle hnegates)
 {
-	Atom * aclauses = TLB::getAtom(hclauses);
 	Atom * avarbles = TLB::getAtom(hvarbles);
-	Link * lclauses = dynamic_cast<Link *>(aclauses);
+	Atom * aclauses = TLB::getAtom(hclauses);
+	Atom * anegates = TLB::getAtom(hnegates);
 	Link * lvarbles = dynamic_cast<Link *>(avarbles);
+	Link * lclauses = dynamic_cast<Link *>(aclauses);
+	Link * lnegates = dynamic_cast<Link *>(anegates);
 
 	// Both must be non-empty.
 	if (!lclauses || !lvarbles) return;
 
 	// Types must be as expected
-	Type tclauses = lclauses->getType();
 	Type tvarbles = lvarbles->getType();
-	if (AND_LINK != tclauses)
-	{
-		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-		return;
-	}
+	Type tclauses = lclauses->getType();
 	if (LIST_LINK != tvarbles)
 	{
 		logger().warn("%s: expected ListLink for bound variable list", __FUNCTION__);
 		return;
 	}
+	if (AND_LINK != tclauses)
+	{
+		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
+		return;
+	}
 
-	pme.match(cb, lclauses->getOutgoingSet(), lvarbles->getOutgoingSet());
+	// negation clauses are optionally present
+	std::vector<Handle> negs;
+	if (NULL != lnegates)
+	{
+		Type tnegates = lnegates->getType();
+		if (AND_LINK != tnegates)
+		{
+			logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
+			return;
+		}
+		negs = lnegates->getOutgoingSet();
+	}
+
+	pme.match(cb, lvarbles->getOutgoingSet(), lclauses->getOutgoingSet(), negs);
 }
 
 /* ================================================================= */
@@ -408,7 +424,7 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
-	pme.match(pmc, affirm, fv.varlist);
+	pme.match(pmc, fv.varlist, affirm, negate);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.

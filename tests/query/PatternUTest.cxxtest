@@ -230,8 +230,10 @@ void PatternUTest::test_simple_link(void)
 	std::vector<Handle> preds;
 	preds.push_back(he);
 
+	std::vector<Handle> negs;
+
 	PMCB pmcb;
-	pme.match(&pmcb, preds, vars);
+	pme.match(&pmcb, vars, preds, negs);
 
 	// Should find only one solution.
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -286,8 +288,10 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hlx);
 	preds.push_back(hly);
 
+	std::vector<Handle> negs;
+
 	PMCB pmcb;
-	pme.match(&pmcb, preds, vars);
+	pme.match(&pmcb, vars, preds, negs);
 
 	// Should find four solutions:
 	// var_x = soln_b and var_y = soln_b
@@ -300,7 +304,7 @@ void PatternUTest::test_two_links(void)
 
 	// Test the non-std::vector interface also.
 	pmcb.found = 0;
-	pm.match(&pmcb, han, hv);
+	pm.match(&pmcb, hv, han, Handle::UNDEFINED);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -346,8 +350,10 @@ void PatternUTest::test_eval(void)
 	std::vector<Handle> preds;
 	preds.push_back(heval);
 
+	std::vector<Handle> negs;
+
 	PMCB pmcb;
-	pme.match(&pmcb, preds, vars);
+	pme.match(&pmcb, vars, preds, negs);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -369,8 +375,10 @@ void PatternUTest::test_eval(void)
 	std::vector<Handle> spreds;
 	spreds.push_back(hshort_eval);
 
+	std::vector<Handle> snegs;
+
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, spreds, svars);
+	pme.match(&pmcb, svars, spreds, snegs);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -382,7 +390,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(hshort_eval);
 	vars.push_back(hprns);
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, preds, vars);
+	pme.match(&pmcb, vars, preds, snegs);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);

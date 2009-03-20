@@ -99,11 +99,13 @@ class PatternMatchEngine
 		void set_atomspace(AtomSpace *);
 
 		void match(PatternMatchCallback *,
+		           const std::vector<Handle> &vars,
 		           const std::vector<Handle> &clauses,
-		           const std::vector<Handle> &vars);
+		           const std::vector<Handle> &negations);
 
-		static void print_solution(const std::map<Handle, Handle> &preds,
-		                           const std::map<Handle, Handle> &vars);
+		static void print_solution(const std::map<Handle, Handle> &vars,
+		                           const std::map<Handle, Handle> &clauses,
+		                           const std::map<Handle, Handle> &negations);
 
 };
 

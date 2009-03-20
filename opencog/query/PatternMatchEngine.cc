@@ -37,7 +37,7 @@ using namespace opencog;
 #ifdef DEBUG
 	#define dbgprt printf
 #else
-    // something better?
+	// something better?
 	#define dbgprt
 #endif
 #else
@@ -427,18 +427,39 @@ bool PatternMatchEngine::note_root(Handle h)
 }
 
 /**
- * Solve a predicate.
- * Its understood that the input "graph" is a predicate, of sorts,
- * with the list of "bound vars" are to be solved for (or "evaluated")
- * bound vars must be, by definition, Nodes.
+ * Find a grounding for a sequence of clauses in conjunctive normal form.
+ *
+ * The list of clauses, and the list of negations, are both OpenCog
+ * hypergraphs.  Both should also be envisioned as a kind of predicate:
+ * i.e. something which may or may not exist (may or may not be "true")
+ * in that the subgraph defined by the predicate might not actually
+ * be found in the universe of all atoms in the atomspace.
+ *
+ * The list of "bound vars" are to be solved for ("grounded", or 
+ * "evaluated") during pattern matching. That is, if the subgraph
+ * defined by the clauses is located, then the vars are given the 
+ * corresponding values associated to that match.
+ *
+ * The negations are a set of clauses whose truth values are to be
+ * inverted.  That is, while the clauses define a subgraph that 
+ * *must* be found, the negations define a subgraph that probably
+ * should not be found, or, if found, should have a truth value of
+ * 'false'.  The precise handing of the negated clauses is determined
+ * by the callback, although the search engine itself will proclaim
+ * a match whether or not it finds negated clauses.
+ *
+ * The PatternMatchCallback is consulted to determine whether a 
+ * veritable match has been found, or not. The callback is given
+ * individual nodes and links to compare for a match.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         const std::vector<Handle> &preds,
-                         const std::vector<Handle> &vars)
+                         const std::vector<Handle> &vars,
+                         const std::vector<Handle> &clauses,
+                         const std::vector<Handle> &negations)
 {
 	if (!atom_space) return;
 
-	normed_predicate = preds;
+	normed_predicate = clauses;
 
 	std::vector<Handle>::const_iterator i;
 	for (i = vars.begin();
@@ -506,8 +527,9 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 }
 
 void PatternMatchEngine::print_solution(
-	const std::map<Handle, Handle> &preds,
-   const std::map<Handle, Handle> &vars)
+	const std::map<Handle, Handle> &vars,
+	const std::map<Handle, Handle> &clauses,
+	const std::map<Handle, Handle> &negations)
 {
 	printf("\nSolution atom mapping:\n");
 
@@ -529,10 +551,19 @@ void PatternMatchEngine::print_solution(
 		}
 	}
 
-	// Print out the full binding to all of the preds.
-	printf("\nFull solution:\n");
+	// Print out the full binding to all of the clauses.
+	printf("\nGrounded clauses:\n");
 	std::map<Handle, Handle>::const_iterator m;
-	for (m = preds.begin(); m != preds.end(); m++) 
+	for (m = clauses.begin(); m != clauses.end(); m++) 
+	{
+		std::string str = TLB::getAtom(m->second)->toString();
+		printf ("   %s\n", str.c_str());
+	}
+	printf ("\n");
+
+	// Print out the full binding to all of the clauses.
+	printf("\nNegated clauses:\n");
+	for (m = negations.begin(); m != negations.end(); m++) 
 	{
 		std::string str = TLB::getAtom(m->second)->toString();
 		printf ("   %s\n", str.c_str());

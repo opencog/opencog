@@ -48,8 +48,9 @@ class PatternMatch
 		}
 
 		void match(PatternMatchCallback *,
+		           Handle vars,
 		           Handle clauses,
-		           Handle vars);
+		           Handle negations);
 
 		Handle imply(Handle);
 		Handle logic_imply(Handle);
