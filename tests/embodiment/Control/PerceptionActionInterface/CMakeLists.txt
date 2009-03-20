@@ -16,6 +16,8 @@ INCLUDE_DIRECTORIES (
 )
 
 LINK_DIRECTORIES (
+	${OPENCOG_BINARY_DIR}/opencog/util
+	${OPENCOG_BINARY_DIR}/opencog/comboreduct
 	${OPENCOG_BINARY_DIR}
 )
 
@@ -33,31 +35,27 @@ TARGET_LINK_LIBRARIES(processPVPMessage
 	${OPENCOG_LIBRARIES}
 )
 
-#TODO:Nil
-#ADD_CXXTEST(ActionPlanUTest)
-#TARGET_LINK_LIBRARIES(ActionPlanUTest PAI)
-#IF(WIN32)
-#    TARGET_LINK_LIBRARIES(ActionPlanTest winmm)
-#ENDIF(WIN32)
+ADD_CXXTEST(ActionPlanUTest)
+TARGET_LINK_LIBRARIES(ActionPlanUTest PAI util comboreduct)
+IF(WIN32)
+    TARGET_LINK_LIBRARIES(ActionPlanTest winmm)
+ENDIF(WIN32)
 
-#TODO:NIL
-#ADD_CXXTEST(ActionTypeUTest)
-#TARGET_LINK_LIBRARIES(ActionTypeUTest PAI)
-#IF(WIN32)
-#    TARGET_LINK_LIBRARIES(ActionTypeTest winmm)
-#ENDIF(WIN32)
+ADD_CXXTEST(ActionTypeUTest)
+TARGET_LINK_LIBRARIES(ActionTypeUTest PAI util comboreduct)
+IF(WIN32)
+    TARGET_LINK_LIBRARIES(ActionTypeTest winmm)
+ENDIF(WIN32)
 
-#TODO:NIL
-#ADD_CXXTEST(ActionParamTypeUTest)
-#TARGET_LINK_LIBRARIES(ActionParamTypeUTest PAI)
-#IF(WIN32)
-#    TARGET_LINK_LIBRARIES(ActionParamTypeTest winmm)
-#ENDIF(WIN32)
+ADD_CXXTEST(ActionParamTypeUTest)
+TARGET_LINK_LIBRARIES(ActionParamTypeUTest PAI util comboreduct)
+IF(WIN32)
+    TARGET_LINK_LIBRARIES(ActionParamTypeTest winmm)
+ENDIF(WIN32)
 
-#TODO:NIL
-#ADD_CXXTEST(PetActionUTest)
-#TARGET_LINK_LIBRARIES(PetActionUTest PAI)
-#IF(WIN32)
-#    TARGET_LINK_LIBRARIES(PetActionUTest winmm)
-#ENDIF(WIN32)
+ADD_CXXTEST(PetActionUTest)
+TARGET_LINK_LIBRARIES(PetActionUTest PAI util comboreduct)
+IF(WIN32)
+    TARGET_LINK_LIBRARIES(PetActionUTest winmm)
+ENDIF(WIN32)
 
