@@ -2,6 +2,8 @@ ADD_LIBRARY (dotty SHARED
 	DottyModule.cc 
 )
 
+ADD_DEPENDENCIES(dotty opencog_atom_types)
+
 INCLUDE_DIRECTORIES (
 	${CSOCKETS_INCLUDE_DIRS}
 	${OPENSSL_INCLUDE_DIR}

@@ -1,7 +1,9 @@
 SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM true)
 OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
+ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 
 ADD_LIBRARY (atomspace SHARED
+	atom_types.h
 	Atom.cc
 	AtomSpace.cc
 	AtomSpaceInit.cc
@@ -47,7 +49,6 @@ ADD_LIBRARY (atomspace SHARED
 	utils.cc
 #	utils2.cc
 	VersionHandle.cc
-	atom_types.h
 	md5.c
 	types.cc
 )
@@ -117,7 +118,6 @@ INSTALL (FILES
 	TruthValue.h
 	TypeIndex.h
 	VersionHandle.h
-	atom_types.h
 	md5.h
 	types.h
 	utils.h
