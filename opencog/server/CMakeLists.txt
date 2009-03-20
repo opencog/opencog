@@ -37,19 +37,19 @@ IF (GUILE_FOUND)
 	TARGET_LINK_LIBRARIES(server
 		util
 		atomspace
-        ${CSOCKETS_LIBRARIES}
-        ${OPENSSL_LIBRARIES}
+		${CSOCKETS_LIBRARIES}
+		${OPENSSL_LIBRARIES}
 		smob
-        xml
+		xml
 	)
 ELSE (GUILE_FOUND)
 	TARGET_LINK_LIBRARIES(server
 		util
-        ${CSOCKETS_LIBRARIES}
-        ${OPENSSL_LIBRARIES}
+		${CSOCKETS_LIBRARIES}
+		${OPENSSL_LIBRARIES}
 		smob
 		atomspace
-        xml
+		xml
 	)
 ENDIF (GUILE_FOUND)
 
