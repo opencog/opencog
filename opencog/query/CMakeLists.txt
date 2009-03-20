@@ -8,6 +8,8 @@ ADD_LIBRARY(query SHARED
 	PatternMatchEngine.cc
 )
 
+ADD_DEPENDENCIES(query opencog_atom_types)
+
 INSTALL (TARGETS query
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

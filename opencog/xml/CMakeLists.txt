@@ -7,6 +7,8 @@ ADD_LIBRARY(xml SHARED
 	StringXMLBufferReader.cc
 )
 
+ADD_DEPENDENCIES(xml opencog_atom_types)
+
 INCLUDE_DIRECTORIES (
 	${EXPAT_INCLUDE_DIRS}
 )

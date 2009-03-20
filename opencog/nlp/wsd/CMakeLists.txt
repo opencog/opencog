@@ -24,6 +24,8 @@ ADD_LIBRARY (wsd SHARED
 	WordSenseProcessor.cc
 )
 
+ADD_DEPENDENCIES(wsd nlp_atom_types)
+
 INSTALL (TARGETS wsd
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

@@ -25,6 +25,8 @@ ADD_EXECUTABLE (hopfield
     ImprintAgent.cc
 )
 
+ADD_DEPENDENCIES(hopfield attention_atom_types)
+
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention

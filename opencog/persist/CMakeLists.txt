@@ -12,6 +12,8 @@ ADD_LIBRARY (persist SHARED
 	PersistModule.cc
 )
 
+ADD_DEPENDENCIES(persist opencog_atom_types)
+
 ADD_EXECUTABLE(sniff
 	sniff.cc
 )
