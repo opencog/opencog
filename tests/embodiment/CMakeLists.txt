@@ -1,2 +1,5 @@
+ADD_SUBDIRECTORY (AutomatedSystemTest)
+ADD_SUBDIRECTORY (Control)
 ADD_SUBDIRECTORY (Learning)
+ADD_SUBDIRECTORY (Spatial)
 ADD_SUBDIRECTORY (WorldWrapper)

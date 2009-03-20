@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pet:petaverse-msg 
+  xmlns:pet="http://proxy.esheepco.com/brain"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://proxy.esheepco.com/brain BrainProxyAxon.xsd">
+    <map-info global-position-x="-256" global-position-y="-256" global-position-offset="512">
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="true" length="1" width="1" height="1">
+        <entity id="22066" name="Fido" owner-id="Wynx" owner-name="Wynx" type="pet"/>
+        <position x="5" y="5" z="23.2"/>
+        <rotation pitch="30" roll="30" yaw="182.5"/>
+        <velocity x="1.0" y="1.0" z="0.0"/>
+    </blip>
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="false">
+        <entity id="Wynx" name="Wynx" type="avatar"/>
+        <position x="15" y="114" z="14"/>
+        <rotation pitch="0.01" roll="0.02" yaw="2.53"/>
+        <velocity x="1.0" y="1.0" z="0.0"/>
+    </blip>
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="true">
+        <entity id="13-20" type="accessory"/>
+        <position x="50" y="115" z="4.251"/>
+        <rotation pitch="10" roll="10" yaw="12.5"/>
+        <velocity x="1.0" y="1.0" z="0.0"/>
+    </blip>
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="true"
+    length="0.25" width="0.25" height="1" edible="true">
+        <entity id="meat" type="object"/>
+        <position x="108" y="22" z="4.251"/>
+        <rotation pitch="10" roll="10" yaw="12.5"/>
+        <velocity x="0.0" y="0.0" z="0.0"/>
+    </blip>
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="true"
+    length="0.25" width="0.25" height="1" drinkable="true">
+        <entity id="milk" owner-id="Wynx" type="object"/>
+        <position x="14" y="95" z="4.251"/>
+        <rotation pitch="10" roll="10" yaw="12.5"/>
+        <velocity x="0.0" y="0.0" z="0.0"/>
+    </blip>
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="true">
+        <entity id="Macku" name="Macku" owner-id="Wynx" owner-name="Wynx" type="pet"/>
+        <position x="20" y="160" z="23.2"/>
+        <rotation pitch="30" roll="30" yaw="182.5"/>
+        <velocity x="1.0" y="1.0" z="0.0"/>
+    </blip>
+     <blip timestamp="2007-06-18T20:15:00.000-07:00" petHome="true" detector="true">
+        <entity id="House" name="House" owner-name="Wynx" type="structure"/>
+        <position x="107" y="165" z="50"/>
+        <rotation pitch="30" roll="30" yaw="182.5"/>
+        <velocity x="0.0" y="0.0" z="0.0"/>
+    </blip>
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" petHome="false" foodBowl="true" detector="true">
+        <entity id="Food"  type="object"/>
+        <position x="-108" y="-33" z="50"/>
+        <rotation pitch="30" roll="30" yaw="182.5"/>
+        <velocity x="0.0" y="0.0" z="0.0"/>
+    </blip>
+     <blip timestamp="2007-06-18T20:15:00.000-07:00" petHome="false"
+           waterBowl="true"  detector="true">
+        <entity id="Water" type="object"/>
+        <position x="120" y="120" z="50"/>
+        <rotation pitch="30" roll="30" yaw="182.5"/>
+        <velocity x="0.0" y="0.0" z="0.0"/>
+    </blip>
+  
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="true" length="5" width="2" height="1">
+        <entity id="wall" type="structure"/>
+        <position x="40" y="105" z="4.251"/>
+        <rotation pitch="0" roll="0" yaw="0"/>
+        <velocity x="0.0" y="0.0" z="0.0"/>
+    </blip>
+  	</map-info>
+</pet:petaverse-msg>
+

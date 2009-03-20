@@ -1,31 +1,35 @@
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/Learning/behavior
-	${OPENCOG_SOURCE_DIR}/src/PetComboVocabulary
-	${OPENCOG_SOURCE_DIR}/src/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/src/Spatial
-        ${OPENCOG_SOURCE_DIR}/src/Spatial/Math
-	${OPENCOG_SOURCE_DIR}/src/Learning
-	${OPENCOG_SOURCE_DIR}/src/Learning/LearningServer
-	${OPENCOG_SOURCE_DIR}/src/Control/OperationalPetController
-	${OPENCOG_SOURCE_DIR}/src/Control
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServer
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
 	${XERCESC_INCLUDE_DIR}
-	${OPENCOG_SOURCE_DIR}/src/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/test/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/src/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/src/Control/PredicateUpdaters
-	${OPENCOG_SOURCE_DIR}/src/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/src/Control/Procedure
-	${OPENCOG_SOURCE_DIR}/src/Control/Procedure/BuiltIn
-	${OPENCOG_SOURCE_DIR}/src/WorldWrapper
-	${OPENCOG_SOURCE_DIR}/test/Control/OperationalPetController
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/PerceptionActionInterface
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PredicateUpdaters
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
+	${OPENCOG_SOURCE_DIR}/opencog/atomspace
+	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/OperationalPetController
+	${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/Learning/behavior
-	${OPENCOG_BINARY_DIR}/src/Control/OperationalPetController
-	${OPENCOG_BINARY_DIR}/src/PetComboVocabulary
-	${OPENCOG_BINARY_DIR}/src/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/src/WorldWrapper
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/behavior
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/OperationalPetController
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
+	${OPENCOG_BINARY_DIR}/opencog/util
+	${OPENCOG_BINARY_DIR}/opencog/atomspace
 )
 
 ADD_CXXTEST(BehaviorDescriptionMatcherUTest)

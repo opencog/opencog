@@ -6,7 +6,7 @@
 using namespace moses;
 using namespace reduct;
 using namespace combo;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace std;
 
 class KnobTurningUTest : public CxxTest::TestSuite {

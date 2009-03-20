@@ -1,0 +1,532 @@
+/**
+ * PredicatesUpdaterUTest.cxxtest
+ *
+ * Author: Carlos Lopes
+ * Copyright(c), 2007
+ */
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+
+#include "PredicatesUpdater.h"
+#include "AtomSpaceUtil.h"
+#include "PAITestUtil.h"
+
+#include "util/StringManipulator.h"
+
+#include <string>
+#include <stdio.h>
+#include <atom_types_init.h>
+
+static const std::string petId = "Fido";
+static const std::string owner = "Dudu";
+static const std::string stick = "stick";
+static const std::string food  = "meat";
+static const std::string drink = "water";
+static const std::string wall = "wall";
+
+
+using namespace OperationalPetController;
+
+class PredicatesUpdaterUTest :  public CxxTest::TestSuite {
+
+    private:
+
+        AtomSpace* atomSpace;
+        PredicatesUpdater * updater;
+        SpaceServer * spaceServer;
+
+        std::vector<Handle> handles;
+        unsigned int lastTimestamp;
+
+    public:
+
+        PredicatesUpdaterUTest(){
+            opencog::atom_types_init::init();
+            atomSpace = new AtomSpace();
+            spaceServer = new SpaceServer(*atomSpace);
+            updater = new PredicatesUpdater(*spaceServer, petId);
+            addOnwerInfo();
+            lastTimestamp = 0;
+        }
+
+        ~PredicatesUpdaterUTest(){
+            // NOTE: there is memory leak, since atomSpace/updater is not released here.
+            // However, since cxxtest declares the PredicatesUpdaterUTest as static, atomSpace should not 
+            // be released here, because it depends on ClassServer, which could have been released already at 
+            // this point...
+        }
+
+        void setUp(){
+        }
+
+        void tearDown(){
+        }
+
+        void addOnwerInfo(){
+
+            // adding ownership relation
+            Handle petHandle = atomSpace->addNode(SL_PET_NODE, petId);
+            Handle ownerHandle = atomSpace->addNode(SL_AVATAR_NODE, owner);
+
+            HandleSeq seq0;
+            seq0.push_back(ownerHandle);
+            seq0.push_back(petHandle);
+
+            HandleSeq seq;
+            seq.push_back(atomSpace->addNode(PREDICATE_NODE, "owns"));
+            seq.push_back(atomSpace->addLink(LIST_LINK, seq0));
+
+            atomSpace->addLink(EVALUATION_LINK, seq);
+        }
+
+        void addSpaceInfoMock(double baseX, double baseY){
+            handles.clear();
+            unsigned long timestamp = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
+
+            TS_ASSERT(lastTimestamp != timestamp);
+
+            // adding pet
+            Handle objs = atomSpace->addNode(SL_PET_NODE, petId);
+            spaceServer->addSpaceInfo(true, objs, timestamp, baseX, baseY, 0.5, 0.5, 0.5, 0, false);
+            addSizeInfo(objs, 0.5, 0.5);
+            handles.push_back(objs);
+
+            // adding avatar
+            objs = atomSpace->addNode(SL_AVATAR_NODE, owner);
+            spaceServer->addSpaceInfo(true, objs, timestamp, baseX + 1.5, baseY + 1.5, 0.5, 0.5, 0.5, 0, false);
+            addSizeInfo(objs, 1, 1);
+            handles.push_back(objs);
+
+            // adding stick
+            objs = atomSpace->addNode(SL_ACCESSORY_NODE, stick);
+            spaceServer->addSpaceInfo(true, objs, timestamp, baseX + 0.2, baseY + 0.2, 0.2, 0.2, 0.2, 0, false);
+            addSizeInfo(objs, 0.2, 0.2);
+            handles.push_back(objs);
+
+            // adding food
+            objs = atomSpace->addNode(SL_OBJECT_NODE, food);
+            spaceServer->addSpaceInfo(true, objs, timestamp, baseX, baseY + 0.4, 0.1, 0.1, 0.1, 0, false);
+            addSizeInfo(objs, 0.1, 0.1);
+            handles.push_back(objs);
+            AtomSpaceUtil::addPropertyPredicate(*atomSpace, "is_edible", objs, SimpleTruthValue(1.0, 1.0));
+
+            // adding drink
+            objs = atomSpace->addNode(SL_OBJECT_NODE, drink);
+            spaceServer->addSpaceInfo(true, objs, timestamp, baseX, baseY + 0.4, 0.1, 0.1, 0.1, 0, false);
+            addSizeInfo(objs, 0.1, 0.1);
+            handles.push_back(objs);
+            AtomSpaceUtil::addPropertyPredicate(*atomSpace, "is_drinkable", objs, SimpleTruthValue(1.0, 1.0));
+
+            // adding wall
+            objs = atomSpace->addNode(SL_STRUCTURE_NODE, wall);
+            spaceServer->addSpaceInfo(true, objs, timestamp, 3, 3, 2, 0.2, 1, 0, true);
+            addSizeInfo(objs, 2, 0.2);
+            handles.push_back(objs);
+
+            lastTimestamp = timestamp;
+        }
+
+        void addSizeInfo(Handle obj, double length, double width){
+            HandleSeq seq0;
+            seq0.push_back(obj);
+            seq0.push_back(atomSpace->addNode(NUMBER_NODE, opencog::toString(length)));
+            seq0.push_back(atomSpace->addNode(NUMBER_NODE, opencog::toString(width)));
+            seq0.push_back(atomSpace->addNode(NUMBER_NODE, "1.0")); // TODO: height must be considered too...
+
+            HandleSeq seq;
+            seq.push_back(atomSpace->addNode(PREDICATE_NODE, "size"));
+            seq.push_back(atomSpace->addLink(LIST_LINK, seq0));
+
+            atomSpace->addLink(EVALUATION_LINK, seq);
+        }
+
+        /**
+         * test everything but without movement
+         */
+        void testRound01(){
+            // used to see if the predicates where correctly set
+            BasicPredicateUpdater checker(*atomSpace);
+
+            // add objs
+            addSpaceInfoMock(10, 10);
+            updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 01 - stick predicates - should not move\n");
+            Handle obj = atomSpace->getHandle(SL_ACCESSORY_NODE, stick);
+            // stick should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // stick should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // stick should be pickupable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // stick should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // stick should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // stick should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+             // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking stick predicates\n");
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 01 - owner predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_AVATAR_NODE, owner);
+            // owner should not be small
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // owner should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // owner should not be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // owner should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // owner should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // owner should be noisy
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking owner predicates\n");
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 01 - food predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_OBJECT_NODE, food);
+            // food should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // food should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // food should be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // food should be edible
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // food should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // food should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+             // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking food predicates\n");
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 01 - drink predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_OBJECT_NODE, drink);
+            // drink should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // drink should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // drink should not be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // drink should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // drink should be drinkable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // drink should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking drink predicates\n");
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 01 - wall predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_STRUCTURE_NODE, wall);
+            // wall should be small
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // wall not should be movable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // wall not should be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // wall should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // wall should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // wall should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+            // wall should be poo place
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // wall should be pee_place
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking wall predicates\n");
+            printf("---------------------------------------------------------------\n");
+        }
+
+        /**
+         * test everything, now the objects have moved
+         */
+        void testRound2(){
+            sleep(1);
+
+            // used to see if the predicates where correctly set
+            BasicPredicateUpdater checker(*atomSpace);
+
+            // add objs
+            addSpaceInfoMock(15, 15);
+            updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 02 - stick predicates - should move\n");
+            Handle obj = atomSpace->getHandle(SL_ACCESSORY_NODE, stick);
+            // stick should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // stick should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // stick should be pickupable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // stick should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking stick predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+            printf("Round 02 - owner predicates - should move\n");
+            obj = atomSpace->getHandle(SL_AVATAR_NODE, owner);
+            // owner should not be small
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // owner should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // owner should not be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // owner should be noisy
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking owner predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+            printf("Round 02 - food predicates - should move\n");
+            obj = atomSpace->getHandle(SL_OBJECT_NODE, food);
+            // food should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // food should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // food should be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // food should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking food predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+            printf("Round 02 - drink predicates - should move\n");
+            obj = atomSpace->getHandle(SL_OBJECT_NODE, drink);
+            // drink should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // drink should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // drink should not be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // drink should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // drink should be drinkable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // drink should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking drink predicates\n");
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 02 - wall predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_STRUCTURE_NODE, wall);
+            // wall should be small
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // wall not should be movable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // wall not should be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // wall should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // wall should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // wall should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+            // wall should be poo place
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // wall should be pee_place
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking wall predicates\n");
+            printf("---------------------------------------------------------------\n");
+        }
+
+        /**
+         * test everything, now the objects have moved
+         */
+        void testRound3(){
+            sleep(1);
+
+            // used to see if the predicates where correctly set
+            BasicPredicateUpdater checker(*atomSpace);
+
+            // add objs
+            addSpaceInfoMock(15, 15);
+            updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 03 - stick predicates - should not move\n");
+            Handle obj = atomSpace->getHandle(SL_ACCESSORY_NODE, stick);
+            // stick should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // stick should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // stick should be pickupable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // stick should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // stick should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // stick should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking stick predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+            printf("Round 03 - owner predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_AVATAR_NODE, owner);
+            // owner should not be small
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // owner should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // owner should not be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // owner should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // owner should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // owner should be noisy
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+
+            printf("End checking owner predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+            printf("Round 03 - food predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_OBJECT_NODE, food);
+            // food should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // food should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // food should be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // food should be edible
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // food should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // food should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+
+            printf("End checking food predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+            printf("Round 03 - drink predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_OBJECT_NODE, drink);
+            // drink should be small
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // drink should be movable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // drink should not be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // drink should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // drink should be drinkable
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // drink should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+              // stick should not be poo_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // stick should not be pee_place
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking drink predicates\n");
+
+            printf("---------------------------------------------------------------\n");
+            printf("Round 03 - wall predicates - should not move\n");
+            obj = atomSpace->getHandle(SL_STRUCTURE_NODE, wall);
+            // wall should be small
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
+            // wall not should be movable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+            // wall not should be pickupable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
+            // wall should not be edible
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_edible", obj));
+            // wall should not be drinkable
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_drinkable", obj));
+            // wall should not be noisy
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_noisy", obj));
+            // wall should be poo place
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_poo_place", obj));
+            // wall should be pee_place
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pee_place", obj));
+            printf("End checking wall predicates\n");
+            printf("---------------------------------------------------------------\n");
+
+        }
+
+        void testNearPredicates(){
+            Handle petH   = atomSpace->getHandle(SL_PET_NODE, petId);
+            Handle ownerH = atomSpace->getHandle(SL_AVATAR_NODE, owner);
+            Handle stickH = atomSpace->getHandle(SL_ACCESSORY_NODE, stick);
+            Handle wallH  = atomSpace->getHandle(SL_STRUCTURE_NODE, wall);
+            Handle foodH  = atomSpace->getHandle(SL_OBJECT_NODE, food);
+            Handle drinkH = atomSpace->getHandle(SL_OBJECT_NODE, drink);
+
+            // pet near
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, foodH));
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, drinkH));
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, stickH));
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, wallH));
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, ownerH));
+
+            // owner
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH, petH));
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH,  stickH));
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH, wallH));
+
+            // wall - near to nothing
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", wallH, petH));
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", wallH, ownerH));
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", wallH, foodH));
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", wallH, stickH));
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", wallH, drinkH));
+
+            /// food and drink
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", drinkH, foodH));
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", foodH, drinkH));
+
+
+	    FILE * fp = fopen( "firstMap.bin", "wb+");
+	    assert(fp != 0);
+	    spaceServer->getLatestMap( ).save( fp );
+	    fflush(fp);
+	    fclose(fp);
+
+        }
+
+};

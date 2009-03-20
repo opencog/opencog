@@ -1,25 +1,27 @@
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/Learning/NoSpaceLife
-	${OPENCOG_SOURCE_DIR}/src/Learning/behavior
-	${OPENCOG_SOURCE_DIR}/src/Learning
-	${OPENCOG_SOURCE_DIR}/src/PetComboVocabulary
-	${OPENCOG_SOURCE_DIR}/src/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/src/Spatial
-	${OPENCOG_SOURCE_DIR}/src/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/NoSpaceLife
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/PetComboVocabulary
-	${OPENCOG_BINARY_DIR}/src/Learning/behavior
-	${OPENCOG_BINARY_DIR}/src/Learning/NoSpaceLife
-	${OPENCOG_BINARY_DIR}/src/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/behavior
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/NoSpaceLife
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/util
+	${OPENCOG_BINARY_DIR}/opencog/comboreduct
 )
 
 ADD_CXXTEST(NoSpaceLifeUTest)
 TARGET_LINK_LIBRARIES(NoSpaceLifeUTest
 	behavior
 	ImaginaryLife
-	${XERCESC_LIBRARIES}
         comboreduct
         util
 	${OPENCOG_LIBRARIES}

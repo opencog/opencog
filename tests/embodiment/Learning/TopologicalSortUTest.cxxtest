@@ -1,17 +1,17 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <cassert>
-#include <LADSUtil/digraph.h>
-#include <LADSUtil/foreach.h>
+#include "util/digraph.h"
+#include "util/foreach.h"
 
 using namespace std;
-using namespace LADSUtil;
+using namespace opencog;
 using namespace boost;
 
 class TopologicalSortUTest : public CxxTest::TestSuite {
 public:
   void test1() {
-    LADSUtil::seed_rand(time(NULL));
+    opencog::seed_rand(time(NULL));
     digraph foo(100);
     for (int i=1;i<100;++i) //a chain
       foo.insert(i-1,i);

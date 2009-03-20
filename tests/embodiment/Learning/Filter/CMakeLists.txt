@@ -9,13 +9,13 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
         ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
-	${XERCESC_INCLUDE_DIR}
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
+	${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
@@ -28,13 +28,14 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Procedure
+	${OPENCOG_BINARY_DIR}/opencog/util
+	${OPENCOG_BINARY_DIR}/opencog/comboreduct
 )
 
 ADD_CXXTEST(EntropyFilterUTest)
 TARGET_LINK_LIBRARIES(EntropyFilterUTest
 	PetComboVocabulary
 	Filter
-	${XERCESC_LIBRARIES}
         comboreduct
         util
 	${OPENCOG_LIBRARIES}
@@ -45,7 +46,6 @@ TARGET_LINK_LIBRARIES(ActionFilterUTest
 	behavior
 	PetComboVocabulary
 	Filter
-	${XERCESC_LIBRARIES}
         comboreduct
         util
 	${OPENCOG_LIBRARIES}
