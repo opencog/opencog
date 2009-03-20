@@ -45,10 +45,9 @@ IF (GUILE_FOUND)
 ELSE (GUILE_FOUND)
 	TARGET_LINK_LIBRARIES(server
 		util
+		atomspace
 		${CSOCKETS_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		smob
-		atomspace
 		xml
 	)
 ENDIF (GUILE_FOUND)
