@@ -70,18 +70,37 @@ class PatternMatchCallback
 		                      std::map<Handle, Handle> &var_soln) = 0;
 
 		/**
-		 * Called when a top-level predicate (tree) has been fully
-		 * grounded. This is meant to be used for evaluating truth
-		 * values of predicates, as an intermediate stage for
-		 * evaluating the overall truth value of a solution.
+		 * Called when a top-level clause has been fully grounded.
+		 * This is meant to be used for evaluating the truth value
+		 * of the clause, as an intermediate stage for evaluating
+		 * the overall truth value of a solution (grounding).
 		 *
-		 * A tree match has occured if all calls to node_match()
-		 * and tree_match() in that tree have returned false.
+		 * A clause match has occured if all calls to node_match()
+		 * and link_match() in that clause have returned false.
 		 * 
-		 * Return true to discard the use of this tree as a possible 
+		 * Return true to discard the use of this clause as a possible 
 		 * grounding, return false to use this grounding.
 		 */
-		virtual bool tree_match(Link *pattrn, Link *grnd)
+		virtual bool clause_match(Link *pattrn, Link *grnd)
+		{
+			return false;
+		}
+
+		/**
+		 * Called when the search for a top-level optional clause
+		 * has been completed. The clause may or may not have been
+		 * grounded as a result of the search. If it has been grounded,
+		 * then grnd will be non-null.
+		 *
+		 * Return true to terminate further searches from this point
+		 * on; the result of termination will be backtracking to search
+		 * for other possible groundings of the required clauses. 
+		 * Return false to examine the next optional clause (if any).
+		 *
+		 * Note that all required clauses will have been grounded before
+		 * any optional clauses are examined.
+		 */
+		virtual bool optional_clause_match(Link *pattrn, Link *grnd)
 		{
 			return false;
 		}

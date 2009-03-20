@@ -85,10 +85,20 @@ printf("ola have not link\n");
 			return false;
 		}
 
-		virtual bool tree_match(Link *pattrn, Link *grnd)
+		virtual bool clause_match(Link *pattrn, Link *grnd)
 		{
 			const TruthValue &tv = grnd->getTruthValue();
 printf ("hello world str=%f\n", tv.getMean());
+			return false;
+		}
+
+		virtual bool optional_clause_match(Link *pattrn, Link *grnd)
+		{
+printf ("hello optional term!! %p\n", grnd);
+
+			if (NULL == grnd) return false;
+			const TruthValue &tv = grnd->getTruthValue();
+printf ("hello optional str=%f\n", tv.getMean());
 			return false;
 		}
 };

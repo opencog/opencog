@@ -122,7 +122,7 @@ void BooleanUTest::setUp(void)
 		)
 	);
 
-#define MISS 1
+// #define MISS 1
 #if MISS
 	// Create data on which the above pattern should match
 	al(INHERITANCE_LINK,

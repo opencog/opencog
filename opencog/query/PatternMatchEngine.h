@@ -53,7 +53,7 @@ class PatternMatchEngine
 		// predicate to be solved.
 		std::set<Handle> bound_vars;
 		std::vector<Handle> cnf_clauses;
-		std::set<Handle> cnf_negates;
+		std::set<Handle> optionals;
 
 		// -------------------------------------------
 		// Traversal utilities
@@ -91,7 +91,6 @@ class PatternMatchEngine
 		// Result of solving the predicate
 		std::map<Handle, Handle> var_grounding;
 		std::map<Handle, Handle> clause_grounding;
-		std::map<Handle, Handle> negate_grounding;
 
 		// callback to report results.
 		PatternMatchCallback *pmc;
@@ -106,8 +105,7 @@ class PatternMatchEngine
 		           const std::vector<Handle> &negations);
 
 		static void print_solution(const std::map<Handle, Handle> &vars,
-		                           const std::map<Handle, Handle> &clauses,
-		                           const std::map<Handle, Handle> &negations);
+		                           const std::map<Handle, Handle> &clauses);
 
 };
 

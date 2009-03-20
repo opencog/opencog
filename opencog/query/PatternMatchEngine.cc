@@ -69,7 +69,11 @@ bool PatternMatchEngine::prt(Atom *atom)
 inline void PatternMatchEngine::prtmsg(const char * msg, Atom *atom)
 {
 #ifdef DEBUG
-	if (!atom) return;
+	if (!atom)
+	{
+		printf ("%s (null handle)\n", msg);
+		return;
+	}
 	std::string str = atom->toString();
 	printf ("%s %s\n", msg, str.c_str());
 #endif
@@ -212,26 +216,50 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	depth = 1;
 	bool no_match = tree_compare(ap, as);
 
-	if (curr_pred_handle == curr_root)
+	// If no match, and not at the root, then try the next one.
+	if (no_match)
 	{
-printf ("duuude navigated to the top, and miss=%d is opt: %d\n", no_match, cnf_negates.count(curr_root));
-		
+		// If not at the root, try looking around some more.
+		if (curr_pred_handle != curr_root) return false;
+
+		// If match is required (i.e. this is not an optional clause)
+		// then look around some more.
+		if (0 == optionals.count(curr_root)) return false;
 	}
 
-	// If no match, then try the next one.
-	if (no_match) return false;
-
-	// Ahh ! found a match!  If we've navigated to the top of the 
-	// predicate, then it is fully grounded, and we're done with it.
+	// If we are here, then either
+	// 1) there's a tree match
+	// 2) there's no match, but we're at the top of an optional clause.
+	//
+	// If we've navigated to the top of the clause, and its matched, 
+	// then it is fully grounded, and we're done with it. If its 
+	// not matched, and its an optional clause, that's OK.
+	//
 	// Start work on the next unsovled predicate. But do all of this
 	// only if the callback allows it.
 	if (curr_pred_handle == curr_root)
 	{
+		if (no_match)
+		{
+			curr_soln_handle = Handle::UNDEFINED;
+			as = NULL;
+prtmsg("duude navigated to top of optional clause:", curr_root);
+prtmsg("duude soln: ", curr_soln_handle);
+
+		}
+
 		// Does the callback wish to continue? If not, then
 		// its the same as a mismatch; try the next one.
 		Link *lp = dynamic_cast<Link *>(ap);
 		Link *ls = dynamic_cast<Link *>(as);
-		no_match = pmc->tree_match(lp, ls);
+		if (no_match)
+		{
+			no_match = pmc->optional_clause_match(lp, ls);
+		}
+		else
+		{
+			no_match = pmc->clause_match(lp, ls);
+		}
 		if (no_match) return false;
 
 		root_handle_stack.push(curr_root);
@@ -250,7 +278,7 @@ printf ("duuude navigated to the top, and miss=%d is opt: %d\n", no_match, cnf_n
 		get_next_unsolved_pred();
 
 		prtmsg("next clause is", curr_root);
-		dbgprt("This clause is %s\n", cnf_negates.count(curr_root)? "optional" : "required");
+		dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
 		prtmsg("joining handle is", curr_pred_handle);
 
 		// If there are no further predicates to solve,
@@ -260,7 +288,7 @@ printf ("duuude navigated to the top, and miss=%d is opt: %d\n", no_match, cnf_n
 		{
 			dbgprt ("==================== FINITO!\n");
 #ifdef DEBUG
-			print_solution(var_grounding, clause_grounding, negate_grounding);
+			print_solution(var_grounding, clause_grounding);
 #endif
 			found = pmc->solution(clause_grounding, var_grounding);
 		}
@@ -400,7 +428,6 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 	// Cleanup
 	var_grounding.clear();
 	clause_grounding.clear();
-	negate_grounding.clear();
 	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while(!root_handle_stack.empty()) root_handle_stack.pop();
@@ -490,12 +517,11 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	{
 		Handle h = *i;
 		cnf_clauses.push_back(h);
-		cnf_negates.insert(h);
+		optionals.insert(h);
 	}
 
 	var_grounding.clear();
 	clause_grounding.clear();
-	negate_grounding.clear();
 
 	if (cnf_clauses.size() == 0) return;
 
@@ -553,8 +579,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 
 void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
-	const std::map<Handle, Handle> &clauses,
-	const std::map<Handle, Handle> &negations)
+	const std::map<Handle, Handle> &clauses)
 {
 	printf("\nSolution atom mapping:\n");
 
@@ -581,20 +606,12 @@ void PatternMatchEngine::print_solution(
 	std::map<Handle, Handle>::const_iterator m;
 	for (m = clauses.begin(); m != clauses.end(); m++) 
 	{
-		std::string str = TLB::getAtom(m->second)->toString();
+		Atom *ac = TLB::getAtom(m->second);
+		if (NULL == ac) continue;
+		std::string str = ac->toString();
 		printf ("   %s\n", str.c_str());
 	}
 	printf ("\n");
-
-	// Print out the full binding to all of the clauses.
-	printf("\nNegated clauses:\n");
-	for (m = negations.begin(); m != negations.end(); m++) 
-	{
-		std::string str = TLB::getAtom(m->second)->toString();
-		printf ("   %s\n", str.c_str());
-	}
-	printf ("\n");
-	fflush(stdout);
 }
 
 /* ===================== END OF FILE ===================== */
