@@ -1,30 +1,30 @@
 ADD_SUBDIRECTORY (behavior)
 ADD_SUBDIRECTORY (LearningServerMessages)
-#ADD_SUBDIRECTORY (FitnessEstimator)
+ADD_SUBDIRECTORY (FitnessEstimator)
 ADD_SUBDIRECTORY (Filter)
 ADD_SUBDIRECTORY (NoSpaceLife)
 ADD_SUBDIRECTORY (hillclimbing)
 
 INCLUDE_DIRECTORIES (
-	${PETAVERSE_SOURCE_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_SOURCE_DIR}/src/Control/PerceptionActionInterface
-	${PETAVERSE_SOURCE_DIR}/test/Control/PerceptionActionInterface
-	${PETAVERSE_SOURCE_DIR}/src/Control/Predavese
-	${PETAVERSE_SOURCE_DIR}/src/Control
-	${PETAVERSE_SOURCE_DIR}/src/Spatial
-        ${PETAVERSE_SOURCE_DIR}/src/Spatial/Math
-	${PETAVERSE_SOURCE_DIR}/src/Learning
-	${PETAVERSE_SOURCE_DIR}/test/Learning/behavior
-	${PETAVERSE_SOURCE_DIR}/src/Learning/behavior
-	${PETAVERSE_SOURCE_DIR}/include/xerces
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+	${OPENCOG_SOURCE_DIR}/test/embodiment/Control/PerceptionActionInterface
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
+	${OPENCOG_SOURCE_DIR}/test/embodiment/Learning/behavior
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
+	${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
-	${PETAVERSE_BINARY_DIR}/src/AtomSpaceExtensions
-	${PETAVERSE_BINARY_DIR}/src/Control/MessagingSystem
-	${PETAVERSE_BINARY_DIR}/src/Control/OperationalPetController
-	${PETAVERSE_BINARY_DIR}/src/Control/PerceptionActionInterface
-	${PETAVERSE_SOURCE_DIR}/lib/linux/xerces
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/OperationalPetController
+	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/PerceptionActionInterface
+	${OPENCOG_BINARY_DIR}/opencog/util
 )
 
 #ADD_CXXTEST(EdaUTest)

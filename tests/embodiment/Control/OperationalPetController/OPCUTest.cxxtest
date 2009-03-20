@@ -1,0 +1,33 @@
+/**
+ * PetUTest.cxxtest
+ *
+ * Author: Carlos Lopes 
+ * Copyright(c), 2007
+ */
+#include <OPC.h>
+#include <iostream>
+using namespace std;
+using namespace OperationalPetController;
+ 
+class OPCUTest :  public CxxTest::TestSuite {
+	private:
+		OPC * petController;
+		
+	public:
+		OPCUTest(){
+		}
+		
+		~OPCUTest(){
+		}
+		
+	    void setUp() {
+
+    	}
+
+    	void tearDown(){
+    	}
+    	
+    	void testConstructor(){
+    		TS_ASSERT(petController == NULL);
+    	}
+};

@@ -1,0 +1,29 @@
+/**
+ * RouterUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Fri Jun 22 15:07:50 BRT 2007
+ */
+
+#include <Router.h>
+
+using namespace MessagingSystem;
+
+class RouterUTest : public CxxTest::TestSuite {
+
+    private:
+
+    public:
+
+    RouterUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

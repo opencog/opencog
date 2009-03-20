@@ -1,0 +1,85 @@
+/**
+ * PetActionSchemaUTest.cxxtest
+ *
+ * Author: Welter Luigi 
+ * Copyright(c), 2007
+ */
+#include "PetActionSchema.h"
+#include "ActionPlanSenderMock.h"
+#include "PetInterfaceMock.h"
+#include "SystemParameters.h"
+
+using namespace Procedure;
+using namespace PerceptionActionInterface;
+
+class PetActionSchemaUTest :  public CxxTest::TestSuite {
+    
+    public:
+        PetActionSchemaUTest(){
+        }
+        
+        ~PetActionSchemaUTest(){
+        }
+        
+        void setUp(){
+        }
+
+        void tearDown(){
+        }
+
+
+    void testGetName() {
+        AtomSpace as;
+        SpaceServer spaceServer(as);
+        
+        Control::SystemParameters sp;
+        FailureActionPlanSender ap;
+        PetInterfaceMock pi;
+        PAI pai(spaceServer, ap, pi, sp);
+        pi.setPAI(&pai);
+        PetActionSchema bark(pai, ActionType::BARK());
+        TS_ASSERT(!strcmp(bark.getName().c_str(), "BARK"));
+    }
+    
+    void testExecuteOk() {
+        AtomSpace as;
+        SpaceServer spaceServer(as);
+        
+        Control::SystemParameters sp;
+        std::list<ActionPlan> plans;
+        OKActionPlanSender ap(plans);
+        PetInterfaceMock pi;
+        PAI pai(spaceServer, ap, pi, sp);
+        pi.setPAI(&pai);
+        PetActionSchema bark(pai, ActionType::BARK());
+        std::vector<combo::vertex> args(1,"Wynx");
+	combo::vertex result = bark.execute(args);
+	ActionPlanID* planId = boost::get<ActionPlanID>(&result);
+	TS_ASSERT(planId);
+	TS_ASSERT(!pai.isPlanFinished(*planId));
+        TS_ASSERT(!plans.empty());
+        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
+    } 
+        
+    void testExecuteFailure() {
+        AtomSpace as;
+        SpaceServer spaceServer(as);
+        
+        Control::SystemParameters sp;
+        FailureActionPlanSender ap;
+        PetInterfaceMock pi;
+        PAI pai(spaceServer, ap, pi, sp);
+        pi.setPAI(&pai);
+        PetActionSchema bark(pai, ActionType::BARK());
+        PetActionSchema eat(pai, ActionType::EAT());
+
+        // param exception
+        std::vector<combo::vertex> args(1, "food");
+	    TS_ASSERT_THROWS(eat.execute(args), opencog::InvalidParamException&);
+
+        // send exception
+        std::vector<combo::vertex> args2(1,"Wynx");
+	    TS_ASSERT_THROWS(bark.execute(args2), opencog::RuntimeException&);
+    } 
+        
+};
