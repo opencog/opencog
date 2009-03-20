@@ -53,7 +53,7 @@ class PatternMatchEngine
 		// predicate to be solved.
 		std::set<Handle> bound_vars;
 		std::vector<Handle> cnf_clauses;
-		std::vector<Handle> cnf_negates;
+		std::set<Handle> cnf_negates;
 
 		// -------------------------------------------
 		// Traversal utilities

@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -198,8 +198,8 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		return mismatch;
 	}
 
-	// If we got to here, there is a clear mismatch
-	// (probably because one is a node, and the other a link)
+	// If we got to here, there is a clear mismatch, probably because
+	// one is a node, and the other a link. 
 	return true;
 }
 
@@ -212,7 +212,13 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	depth = 1;
 	bool no_match = tree_compare(ap, as);
 
-	// If no match, try the next one.
+	if (curr_pred_handle == curr_root)
+	{
+printf ("duuude navigated to the top, and miss=%d is opt: %d\n", no_match, cnf_negates.count(curr_root));
+		
+	}
+
+	// If no match, then try the next one.
 	if (no_match) return false;
 
 	// Ahh ! found a match!  If we've navigated to the top of the 
@@ -237,13 +243,14 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 
 		curr_soln_handle = TLB::getHandle(as);
 		clause_grounding[curr_root] = curr_soln_handle;
-		prtmsg("--------------------- \npred:", curr_root);
-		prtmsg("soln:", curr_soln_handle);
+		prtmsg("--------------------- \nclause:", curr_root);
+		prtmsg("ground:", curr_soln_handle);
 		dbgprt("\n");
 		
 		get_next_unsolved_pred();
 
-		prtmsg("next pred is", curr_root);
+		prtmsg("next clause is", curr_root);
+		dbgprt("This clause is %s\n", cnf_negates.count(curr_root)? "optional" : "required");
 		prtmsg("joining handle is", curr_pred_handle);
 
 		// If there are no further predicates to solve,
@@ -253,7 +260,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		{
 			dbgprt ("==================== FINITO!\n");
 #ifdef DEBUG
-			print_solution(clause_grounding, var_grounding);
+			print_solution(var_grounding, clause_grounding, negate_grounding);
 #endif
 			found = pmc->solution(clause_grounding, var_grounding);
 		}
@@ -300,10 +307,10 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	curr_soln_handle = TLB::getHandle(as);
 
 	// Move up the predicate, and hunt for a match, again.
-	prtmsg("node has soln, move up:", as);
+	prtmsg("node has grnd, move up:", as);
 	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatchEngine::pred_up, this);
-	dbgprt("after moving up the clause, find =%d\n", found);
+	dbgprt("after moving up the clause, found = %d\n", found);
 
 	curr_soln_handle = soln_handle_stack.top();
 	soln_handle_stack.pop();
@@ -326,7 +333,7 @@ bool PatternMatchEngine::pred_up(Handle h)
 	                     &PatternMatchEngine::soln_up, this);
 
 	curr_pred_handle = curr_pred_save;
-	dbgprt("upward soln find =%d\n", found);
+	dbgprt("found upward soln = %d\n", found);
 	return found;
 }
 
@@ -391,14 +398,16 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 	}
 
 	// Cleanup
-	clause_grounding.clear();
 	var_grounding.clear();
+	clause_grounding.clear();
+	negate_grounding.clear();
 	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while(!root_handle_stack.empty()) root_handle_stack.pop();
 	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while(!var_solutn_stack.empty()) var_solutn_stack.pop();
 
+	// Match the required clauses.
 	curr_root = cnf_clauses[0];
 	curr_pred_handle = curr_root;
 	bool found = soln_up(ah);
@@ -446,7 +455,10 @@ bool PatternMatchEngine::note_root(Handle h)
  * should not be found, or, if found, should have a truth value of
  * 'false'.  The precise handing of the negated clauses is determined
  * by the callback, although the search engine itself will proclaim
- * a match whether or not it finds negated clauses.
+ * a match whether or not it finds negated clauses. Thus, the neg
+ * clauses can be understood as "optional" matches: they will be
+ * matched, if possible, but are not required to be matched. The idea
+ * that these are actually "negated" is governed by the callback.
  *
  * The PatternMatchCallback is consulted to determine whether a 
  * veritable match has been found, or not. The callback is given
@@ -459,16 +471,26 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 {
 	if (!atom_space) return;
 
-	cnf_clauses = clauses;
-	cnf_negates = negations;
-
-	// Make a copy of the variables (XXX why copy ??)
+	// Copy the variables from vector to set; this makes it easier to
+	// determine set membership.
 	std::vector<Handle>::const_iterator i;
 	for (i = vars.begin();
 	     i != vars.end(); i++)
 	{
 		Handle h = *i;
 		bound_vars.insert(h);
+	}
+
+	cnf_clauses = clauses;
+
+	// Copy the negates into the clause list
+	// Copy the negates into a set.
+	for (i = negations.begin();
+	     i != negations.end(); i++)
+	{
+		Handle h = *i;
+		cnf_clauses.push_back(h);
+		cnf_negates.insert(h);
 	}
 
 	var_grounding.clear();
