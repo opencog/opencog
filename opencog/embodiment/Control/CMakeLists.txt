@@ -1,3 +1,4 @@
+#ADD_SUBDIRECTORY (AutomatedSystemTest)
 ADD_SUBDIRECTORY (MessagingSystem)
 ADD_SUBDIRECTORY (Predavese)
 ADD_SUBDIRECTORY (PerceptionActionInterface)

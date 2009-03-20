@@ -40,10 +40,10 @@ int main(int argc, char *argv[]) {
     try {
         pbTester.serverLoop();
     } catch(std::bad_alloc){
-        MAIN_LOGGER.log(opencog::Logger::ERROR, "PBTesterExec - PBTester raised a bad_alloc exception.");
+        logger().log(opencog::Logger::ERROR, "PBTesterExec - PBTester raised a bad_alloc exception.");
        
     } catch(...) {
-        MAIN_LOGGER.log(opencog::Logger::ERROR, 
+        logger().log(opencog::Logger::ERROR, 
         "PBTesterExec - An exceptional situation occured. Check log for information.");
     }
 

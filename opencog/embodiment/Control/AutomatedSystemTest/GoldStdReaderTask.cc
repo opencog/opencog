@@ -19,7 +19,7 @@ GoldStdReaderTask::~GoldStdReaderTask() {
 GoldStdReaderTask::GoldStdReaderTask(TestParameters& _testParameters, const char* goldStdFilename) : testParameters(_testParameters) {
     goldStdFile = fopen(goldStdFilename, "r");
     if (!goldStdFile) {
-        MAIN_LOGGER.log(opencog::Logger::ERROR, "Could not open gold standard file: %s", goldStdFilename);
+        logger().log(opencog::Logger::ERROR, "Could not open gold standard file: %s", goldStdFilename);
 	exit(-1);
     }
     messageToSend = NULL;
@@ -40,17 +40,17 @@ void GoldStdReaderTask::run(MessagingSystem::NetworkElement *ne) {
     {
         unsigned long elapsedTime = GoldStdGen::getCurrentTimestamp() - pbTester->getReceivedTimeOfCurrentExpectedMessage(); 
         if (elapsedTime > timeout) {
-            MAIN_LOGGER.log(opencog::Logger::ERROR, "Timeout. elapsed time: %lu.", elapsedTime);
+            logger().log(opencog::Logger::ERROR, "Timeout. elapsed time: %lu.", elapsedTime);
             exit(-1);
         }
     } 
 
     while (!pbTester->hasExpectedMessages() && !endOfFile) { // THIS WAY, IT SENDS ALL CONSECUTIVE MESSAGES AT ONCE
-        MAIN_LOGGER.log(opencog::Logger::INFO, "No expected messages");
+        logger().log(opencog::Logger::INFO, "No expected messages");
         if (messageToSend) {
             unsigned long elapsedTime = GoldStdGen::getCurrentTimestamp() - initialTime;
             if (elapsedTime >= messageToSend->getTimestamp()) {
-                MAIN_LOGGER.log(opencog::Logger::INFO, "Send last read message...");
+                logger().log(opencog::Logger::INFO, "Send last read message...");
                 pbTester->sendMessage(*(messageToSend->getMessage()));
                 if (testParameters.get("SAVE_MESSAGES_TO_FILE") == "1") {
                     pbTester->getGoldStdGen()->writeMessage(*(messageToSend->getMessage()), true);
@@ -63,12 +63,12 @@ void GoldStdReaderTask::run(MessagingSystem::NetworkElement *ne) {
 #else
                 unsigned long usec = (messageToSend->getTimestamp() - elapsedTime)*10000; 
 #endif
-                MAIN_LOGGER.log(opencog::Logger::INFO, "Sleeping for %lu micro seconds before sending next message...", usec);
+                logger().log(opencog::Logger::INFO, "Sleeping for %lu micro seconds before sending next message...", usec);
                 usleep(usec);
             }
         }
         while (!messageToSend && !endOfFile) {
-            MAIN_LOGGER.log(opencog::Logger::INFO, "Resume reading of gold std file...");
+            logger().log(opencog::Logger::INFO, "Resume reading of gold std file...");
             if (fgets(line_buf, LINE_BUF_SIZE, goldStdFile) == NULL) {
                 endOfFile = true;
                 break;
@@ -76,19 +76,19 @@ void GoldStdReaderTask::run(MessagingSystem::NetworkElement *ne) {
                 //return;
             }
             if (!strcmp(RECEIVED_MESSAGE_FLAG, line_buf)) {
-                MAIN_LOGGER.log(opencog::Logger::INFO, "Reading expected message...");
+                logger().log(opencog::Logger::INFO, "Reading expected message...");
                 GoldStdMessage* msg = GoldStdGen::readMessage(line_buf, LINE_BUF_SIZE, goldStdFile);
                 if (!msg) exit(-1);
                 
                 pbTester->addExpectedMessage(msg->getMessage(), GoldStdGen::getCurrentTimestamp());
   
             } else if (!strcmp(SENT_MESSAGE_FLAG, line_buf)) {
-                MAIN_LOGGER.log(opencog::Logger::INFO, "Reading message to send...");
+                logger().log(opencog::Logger::INFO, "Reading message to send...");
                 messageToSend = GoldStdGen::readMessage(line_buf, LINE_BUF_SIZE, goldStdFile);
-                MAIN_LOGGER.log(opencog::Logger::FINE, "Message to send: %s", messageToSend->getMessage()->getPlainTextRepresentation());
+                logger().log(opencog::Logger::FINE, "Message to send: %s", messageToSend->getMessage()->getPlainTextRepresentation());
                 if (!messageToSend) exit(-1);
             } else {
-                MAIN_LOGGER.log(opencog::Logger::ERROR, "Unexpected line: '%s' (expecting '%s' or '%s')", line_buf, RECEIVED_MESSAGE_FLAG, SENT_MESSAGE_FLAG);
+                logger().log(opencog::Logger::ERROR, "Unexpected line: '%s' (expecting '%s' or '%s')", line_buf, RECEIVED_MESSAGE_FLAG, SENT_MESSAGE_FLAG);
                 exit(-1);
             }
         }
