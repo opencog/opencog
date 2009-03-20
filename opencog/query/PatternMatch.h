@@ -50,7 +50,7 @@ class PatternMatch
 		void match(PatternMatchCallback *,
 		           Handle vars,
 		           Handle clauses,
-		           Handle negations);
+		           Handle negations = Handle::UNDEFINED);
 
 		Handle imply(Handle);
 		Handle logic_imply(Handle);

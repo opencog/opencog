@@ -125,7 +125,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		// If we already have a grounding for this variable, the new
 		// proposed grounding must match the existing one. Such multiple
 		// groundings can occur when traversing graphs with loops in them.
-		Handle gnd = var_solution[ha];
+		Handle gnd = var_grounding[ha];
 		if (TLB::isValidHandle(gnd))
 		{
 			if (gnd != hb) return true;
@@ -137,7 +137,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", ha);
 		prtmsg("$$ ground term: ", hb);
-		var_solution[ha] = hb;
+		var_grounding[ha] = hb;
 		return false;
 	}
 
@@ -145,7 +145,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	// ... but only if ab is not a subclause of the current clause.
 	if ((ha == hb) && (hb != curr_pred_handle))
 	{
-		var_solution[ha] = hb;
+		var_grounding[ha] = hb;
 		return false;
 	}
 
@@ -165,7 +165,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		// The recursion step: traverse down the tree.
 		// Only links can have non-empty outgoing sets.
 		depth ++;
-		var_solutn_stack.push(var_solution);
+		var_solutn_stack.push(var_grounding);
 		mismatch = foreach_outgoing_atom_pair(ha, hb,
 		              	      &PatternMatchEngine::tree_compare, this);
 		depth --;
@@ -173,11 +173,11 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 
 		if (false == mismatch)
 		{
-			var_solution[ha] = hb;
+			var_grounding[ha] = hb;
 			var_solutn_stack.pop();  // pop entry created, but keep current.
 		}
 		else
-			POPTOP(var_solution, var_solutn_stack);
+			POPTOP(var_grounding, var_solutn_stack);
 		return mismatch;
 	}
 
@@ -193,7 +193,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 			dbgprt("Found matching nodes\n");
 			prtmsg("# pattern: ", ha);
 			prtmsg("# match:   ", hb);
-			var_solution[ha] = hb;
+			var_grounding[ha] = hb;
 		}
 		return mismatch;
 	}
@@ -231,12 +231,12 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
-		pred_solutn_stack.push(predicate_solution);
-		var_solutn_stack.push(var_solution);
+		pred_solutn_stack.push(clause_grounding);
+		var_solutn_stack.push(var_grounding);
 		pmc->push();
 
 		curr_soln_handle = TLB::getHandle(as);
-		predicate_solution[curr_root] = curr_soln_handle;
+		clause_grounding[curr_root] = curr_soln_handle;
 		prtmsg("--------------------- \npred:", curr_root);
 		prtmsg("soln:", curr_soln_handle);
 		dbgprt("\n");
@@ -253,9 +253,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		{
 			dbgprt ("==================== FINITO!\n");
 #ifdef DEBUG
-			print_solution(predicate_solution, var_solution);
+			print_solution(clause_grounding, var_grounding);
 #endif
-			found = pmc->solution(predicate_solution, var_solution);
+			found = pmc->solution(clause_grounding, var_grounding);
 		}
 		else
 		{
@@ -265,7 +265,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			// was a variable, look up its grounding; else the join is a 'real' atom.
 			Handle curr_soln_save = curr_soln_handle;
 
-			curr_soln_handle = var_solution[curr_pred_handle];
+			curr_soln_handle = var_grounding[curr_pred_handle];
 			found = soln_up(curr_soln_handle);
 
 			curr_soln_handle = curr_soln_save;
@@ -285,8 +285,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		soln_handle_stack.pop();
 
 		// The grounding stacks are handled differently.
-		POPTOP(predicate_solution, pred_solutn_stack);
-		POPTOP(var_solution, var_solutn_stack);
+		POPTOP(clause_grounding, pred_solutn_stack);
+		POPTOP(var_grounding, var_solutn_stack);
 
 		prtmsg("pop to joining handle", curr_pred_handle);
 		prtmsg("pop to pred", curr_root);
@@ -351,7 +351,7 @@ void PatternMatchEngine::get_next_unsolved_pred(void)
 		for (i=rl->begin(); i != rl->end(); i++)
 		{
 			Handle root = *i;
-			if(TLB::isValidHandle(predicate_solution[root]))
+			if(TLB::isValidHandle(clause_grounding[root]))
 			{
 				solved = true;
 			}
@@ -385,21 +385,21 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 {
 	// Don't stare at our navel.
 	std::vector<Handle>::iterator i;
-	for (i = normed_predicate.begin(); i != normed_predicate.end(); i++)
+	for (i = cnf_clauses.begin(); i != cnf_clauses.end(); i++)
 	{
 		if (ah == *i) return false;
 	}
 
 	// Cleanup
-	predicate_solution.clear();
-	var_solution.clear();
+	clause_grounding.clear();
+	var_grounding.clear();
 	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while(!root_handle_stack.empty()) root_handle_stack.pop();
 	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while(!var_solutn_stack.empty()) var_solutn_stack.pop();
 
-	curr_root = normed_predicate[0];
+	curr_root = cnf_clauses[0];
 	curr_pred_handle = curr_root;
 	bool found = soln_up(ah);
 
@@ -459,8 +459,10 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 {
 	if (!atom_space) return;
 
-	normed_predicate = clauses;
+	cnf_clauses = clauses;
+	cnf_negates = negations;
 
+	// Make a copy of the variables (XXX why copy ??)
 	std::vector<Handle>::const_iterator i;
 	for (i = vars.begin();
 	     i != vars.end(); i++)
@@ -469,17 +471,18 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		bound_vars.insert(h);
 	}
 
-	predicate_solution.clear();
-	var_solution.clear();
+	var_grounding.clear();
+	clause_grounding.clear();
+	negate_grounding.clear();
 
-	if (normed_predicate.size() == 0) return;
+	if (cnf_clauses.size() == 0) return;
 
 	// Preparation prior to search.
-	// Create a table of nodes in the predicates, with
-	// a list of the predicates that each node participates in.
+	// Create a table of the nodes that appear in the clauses, and
+	// a list of the clauses that each node participates in.
 	root_map.clear();
-	for (i = normed_predicate.begin();
-	     i != normed_predicate.end(); i++)
+	for (i = cnf_clauses.begin();
+	     i != cnf_clauses.end(); i++)
 	{
 		Handle h = *i;
 		curr_root = h;
@@ -491,8 +494,8 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	// Print out the predicate ...
 	printf("\nPredicate consists of the following clauses:\n");
 	int cl = 0;
-	for (i = normed_predicate.begin();
-	     i != normed_predicate.end(); i++)
+	for (i = cnf_clauses.begin();
+	     i != cnf_clauses.end(); i++)
 	{
 		printf("Clause %d: ", cl);
 		Handle h = *i;
@@ -515,7 +518,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 
 	// Get type of the first item in the predicate list.
-	Handle h = normed_predicate[0];
+	Handle h = cnf_clauses[0];
 	Atom *a = TLB::getAtom(h);
 	Type ptype = a->getType();
 

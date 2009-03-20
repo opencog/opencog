@@ -50,9 +50,10 @@ class PatternMatchEngine
 		static void prtmsg(const char *, Handle);
 
 		// -------------------------------------------
-		// predicates to be solved.
-		std::vector<Handle> normed_predicate;
+		// predicate to be solved.
 		std::set<Handle> bound_vars;
+		std::vector<Handle> cnf_clauses;
+		std::vector<Handle> cnf_negates;
 
 		// -------------------------------------------
 		// Traversal utilities
@@ -88,8 +89,9 @@ class PatternMatchEngine
 		// -------------------------------------------
 
 		// Result of solving the predicate
-		std::map<Handle, Handle> var_solution;
-		std::map<Handle, Handle> predicate_solution;
+		std::map<Handle, Handle> var_grounding;
+		std::map<Handle, Handle> clause_grounding;
+		std::map<Handle, Handle> negate_grounding;
 
 		// callback to report results.
 		PatternMatchCallback *pmc;
