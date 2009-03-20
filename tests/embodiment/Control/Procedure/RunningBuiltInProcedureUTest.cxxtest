@@ -1,0 +1,82 @@
+/**
+ * RunningBuiltInProcedureUTest.cxxtest
+ *
+ * Author: Welter Luigi 
+ * Copyright(c), 2007
+ */
+#include "RunningBuiltInProcedure.h"
+#include "ActionPlanSenderMock.h"
+#include "PetInterfaceMock.h"
+#include "PetActionSchema.h"
+#include "SystemParameters.h"
+
+using namespace Procedure;
+using namespace PerceptionActionInterface;
+
+class RunningBuiltInProcedureUTest :  public CxxTest::TestSuite {
+    
+    public:
+        RunningBuiltInProcedureUTest(){
+        }
+        
+        ~RunningBuiltInProcedureUTest(){
+        }
+        
+        void setUp(){
+        }
+
+        void tearDown(){
+        }
+
+        void testOk() {
+            AtomSpace as;
+            SpaceServer spaceServer(as);
+            
+            Control::SystemParameters sp;
+            std::list<ActionPlan> plans;
+            OKActionPlanSender ap(plans);
+            PetInterfaceMock pi;
+            PAI pai(spaceServer, ap, pi, sp);
+            pi.setPAI(&pai);
+            std::vector<combo::vertex> arguments; 
+	    PetActionSchema p(pai, ActionType::BARK());
+            RunningBuiltInProcedure rbp(pai, p, arguments);
+            TS_ASSERT(!rbp.isFinished());
+            TS_ASSERT(!rbp.isFailed());
+            rbp.run();
+#if 0 // TODO: Add a pai.processPVPMessage(<action status message>) to make the procecure be marked as finished	    
+            TS_ASSERT(rbp.isFinished());
+            TS_ASSERT(!rbp.isFailed());
+            combo::vertex result = rbp.getResult();
+	    //cout << "result = '" << result << "'" << endl;
+            TS_ASSERT(get<ActionPlanID>(&result));
+            TS_ASSERT(get<ActionPlanID>(result) == "0");
+            TS_ASSERT(!plans.empty());
+            TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
+#endif
+	}
+            
+        void testFailure() {
+            AtomSpace as;
+            SpaceServer spaceServer(as);
+            
+            Control::SystemParameters sp;
+            FailureActionPlanSender ap;
+            PetInterfaceMock pi;
+            PAI pai(spaceServer, ap, pi, sp);
+            pi.setPAI(&pai);
+            PetActionSchema p(pai, ActionType::BARK());
+            std::vector<combo::vertex> arguments; 
+            RunningBuiltInProcedure rbp(pai, p, arguments);
+            TS_ASSERT(!rbp.isFinished());
+            TS_ASSERT(!rbp.isFailed());
+            rbp.run();
+            TS_ASSERT(rbp.isFinished());
+            TS_ASSERT(rbp.isFailed());
+            combo::vertex result = rbp.getResult();
+	    //cout << "result = '" << result << "'" << endl;
+            TS_ASSERT(get<combo::id::builtin>(&result));
+            TS_ASSERT(get<combo::id::builtin>(result) == combo::id::null_vertex);
+        } 
+        
+};

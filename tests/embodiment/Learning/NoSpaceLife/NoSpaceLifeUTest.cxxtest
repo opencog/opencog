@@ -5,8 +5,8 @@
  * Creation: Mon Dec 10 2007
  */
 
-#include <LADSUtil/numeric.h>
-#include <LADSUtil/mt19937ar.h>
+#include "util/numeric.h"
+#include "util/mt19937ar.h"
 
 #include "comboreduct/combo/vertex.h"
 

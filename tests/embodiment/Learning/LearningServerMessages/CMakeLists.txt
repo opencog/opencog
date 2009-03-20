@@ -8,7 +8,7 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
-	${OPENCOG_SOURCE_DIR}/include/xerces
+	${OPENCOG_SOURCE_DIR}/opencog
 )
 
 LINK_DIRECTORIES (
@@ -18,7 +18,7 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
-	${OPENCOG_SOURCE_DIR}/lib/linux/xerces
+	${OPENCOG_BINARY_DIR}/opencog/util
 )
 
 CMAKE_POLICY(SET CMP0005 OLD)

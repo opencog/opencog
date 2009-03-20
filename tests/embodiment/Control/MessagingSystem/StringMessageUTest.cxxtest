@@ -1,0 +1,50 @@
+/**
+ * StringMessageUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Wed Jun 20 14:19:25 BRT 2007
+ */
+
+#include <StringMessage.h>
+#include <string>
+#include <string.h>
+
+using namespace MessagingSystem;
+
+class StringMessageUTest : public CxxTest::TestSuite {
+
+    private:
+
+    public:
+
+	StringMessageUTest() {
+	}
+
+    void testLoadPlainTextRepresentation() {
+
+        char *msg = strdup("msg1");
+        std::string stmsg(strdup("msg2"));
+
+        StringMessage *obj1 = new StringMessage(msg);
+        StringMessage *obj2 = new StringMessage(stmsg);
+
+        StringMessage *obj3 = new StringMessage();
+        StringMessage *obj4 = new StringMessage();
+
+        obj3->loadPlainTextRepresentation(obj1->getPlainTextRepresentation());
+        obj4->loadPlainTextRepresentation(obj2->getPlainTextRepresentation());
+
+        TS_ASSERT(! strcmp(obj1->getPlainTextRepresentation(), obj3->getPlainTextRepresentation()));
+        TS_ASSERT(! strcmp(obj2->getPlainTextRepresentation(), obj4->getPlainTextRepresentation()));
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+}; // class

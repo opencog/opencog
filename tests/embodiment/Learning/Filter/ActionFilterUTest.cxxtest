@@ -57,7 +57,7 @@ public:
   ActionFilterUTest() {
      opencog::atom_types_init::init();
 
-     MAIN_LOGGER.setPrintErrorLevelStdout();
+     logger().setPrintErrorLevelStdout();
   }
 
   void test_computeLikelihood() {

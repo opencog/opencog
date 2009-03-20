@@ -1,0 +1,32 @@
+/**
+ * NetworkElementUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Wed Jun 20 16:00:19 BRT 2007
+ */
+
+#include <NetworkElement.h>
+
+using namespace MessagingSystem;
+
+class NetworkElementUTest : public CxxTest::TestSuite {
+
+    private:
+
+    public:
+
+    NetworkElementUTest() {
+
+    }
+
+    void testDummy() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class
