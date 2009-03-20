@@ -244,7 +244,8 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			curr_soln_handle = Handle::UNDEFINED;
 			as = NULL;
 prtmsg("duude navigated to top of optional clause:", curr_root);
-prtmsg("duude soln: ", curr_soln_handle);
+prtmsg("========== duude curr soln: ", curr_soln_handle);
+return false;
 
 		}
 
@@ -252,7 +253,7 @@ prtmsg("duude soln: ", curr_soln_handle);
 		// its the same as a mismatch; try the next one.
 		Link *lp = dynamic_cast<Link *>(ap);
 		Link *ls = dynamic_cast<Link *>(as);
-		if (no_match)
+		if (optionals.count(curr_root))
 		{
 			no_match = pmc->optional_clause_match(lp, ls);
 		}
@@ -306,8 +307,13 @@ prtmsg("duude soln: ", curr_soln_handle);
 			curr_soln_handle = curr_soln_save;
 		}
 
+if (0 == found) {
+printf ("duuuuuuuuuuuuuuuuuuude I think I'm exhasuted, opt=%d\n",
+optionals.count(curr_root));
+}
+
 		// If we failed to find anything at this level, we need to 
-		// backtrack, i.e. pop the stack, pop, and begin a search for
+		// backtrack, i.e. pop the stack, and begin a search for
 		// other possible matches and groundings.
 		pmc->pop();
 		curr_root = root_handle_stack.top();
@@ -323,8 +329,8 @@ prtmsg("duude soln: ", curr_soln_handle);
 		POPTOP(clause_grounding, pred_solutn_stack);
 		POPTOP(var_grounding, var_solutn_stack);
 
-		prtmsg("pop to joining handle", curr_pred_handle);
-		prtmsg("pop to pred", curr_root);
+		prtmsg("pop to joiner", curr_pred_handle);
+		prtmsg("pop to clause", curr_root);
 
 		return found;
 	}
