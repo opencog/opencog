@@ -275,7 +275,7 @@ prtmsg("duude soln: ", curr_soln_handle);
 		prtmsg("ground:", curr_soln_handle);
 		dbgprt("\n");
 		
-		get_next_unsolved_pred();
+		get_next_unsolved_clause();
 
 		prtmsg("next clause is", curr_root);
 		dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
@@ -365,14 +365,53 @@ bool PatternMatchEngine::pred_up(Handle h)
 	return found;
 }
 
-void PatternMatchEngine::get_next_unsolved_pred(void)
+void PatternMatchEngine::get_next_unsolved_clause(void)
 {
-	// Search for an as-yet unsolved/unmatched predicate.
-	// For each solved node, look up root to see if root is solved.
-	// If not, start working on that.
+	// Search for an as-yet ungrounded clause. Search for required
+	// clauses first; then, only if none of those are left, move on
+	// to the optional clauses.  We can find ungrounded clauses by
+	// looking at the grounded vars, looking up the root, to see if
+	// the root is grounded.  If its not, start working on that.
 	Handle pursue = Handle::UNDEFINED;
-	Handle unsolved_pred = Handle::UNDEFINED;
+	Handle unsolved_clause = Handle::UNDEFINED;
 	RootMap::iterator k;
+	for (k=root_map.begin(); k != root_map.end(); k++)
+	{
+		RootPair vk = *k;
+		RootList *rl = vk.second;
+		pursue = vk.first;
+
+		bool unsolved = false;
+		bool solved = false;
+
+		std::vector<Handle>::iterator i;
+		for (i=rl->begin(); i != rl->end(); i++)
+		{
+			Handle root = *i;
+			if(TLB::isValidHandle(clause_grounding[root]))
+			{
+				solved = true;
+			}
+			else if (0 == optionals.count(root))
+			{
+				unsolved_clause = root;
+				unsolved = true;
+			}
+		}
+		if (solved && unsolved) break;
+	}
+
+	// Pursue is a pointer to a node that's shared between
+	// several clauses. One of the predicates has been
+	// solved, another has not.  We want to now traverse 
+	// upwards from this node, to find the top of the 
+	// unsolved clause.
+	curr_root = unsolved_clause;
+	curr_pred_handle = pursue;
+
+	if (Handle::UNDEFINED != unsolved_clause) return;
+
+	// Try again, this time, considering the optional clauses.
 	for (k=root_map.begin(); k != root_map.end(); k++)
 	{
 		RootPair vk = *k;
@@ -392,19 +431,19 @@ void PatternMatchEngine::get_next_unsolved_pred(void)
 			}
 			else
 			{
-				unsolved_pred = root;
+				unsolved_clause = root;
 				unsolved = true;
 			}
 		}
 		if (solved && unsolved) break;
 	}
 
-	// pursue is a pointer to a node that's shared between
-	// several predicates. One of the predicates has been
+	// Pursue is a pointer to a node that's shared between
+	// several clauses. One of the predicates has been
 	// solved, another has not.  We want to now traverse 
 	// upwards from this node, to find the top of the 
-	// unsolved predicate.
-	curr_root = unsolved_pred;
+	// unsolved clause.
+	curr_root = unsolved_clause;
 	curr_pred_handle = pursue;
 }
 
@@ -581,7 +620,7 @@ void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
 {
-	printf("\nSolution atom mapping:\n");
+	printf("\nNode groundings:\n");
 
 	// Print out the bindings of solutions to variables.
 	std::map<Handle, Handle>::const_iterator j;
@@ -596,7 +635,7 @@ void PatternMatchEngine::print_solution(
 		Node *ns = dynamic_cast<Node *>(as);
 		if (ns && nv)
 		{
-			printf("atom %s maps to %s\n", 
+			printf("\tNode %s maps to %s\n", 
 			       nv->getName().c_str(), ns->getName().c_str());
 		}
 	}
@@ -604,12 +643,14 @@ void PatternMatchEngine::print_solution(
 	// Print out the full binding to all of the clauses.
 	printf("\nGrounded clauses:\n");
 	std::map<Handle, Handle>::const_iterator m;
+	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); m++) 
 	{
 		Atom *ac = TLB::getAtom(m->second);
 		if (NULL == ac) continue;
 		std::string str = ac->toString();
-		printf ("   %s\n", str.c_str());
+		printf ("%d.   %s\n", i, str.c_str());
+		i++;
 	}
 	printf ("\n");
 }
