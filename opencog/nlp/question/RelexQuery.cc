@@ -325,7 +325,8 @@ void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 #endif
 
 	// Solve...
-	pme->match(this, normed_predicate, bound_vars);
+	std::vector<Handle> ign;
+	pme->match(this, bound_vars, normed_predicate, ign);
 }
 
 /* ======================================================== */
