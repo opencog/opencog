@@ -346,7 +346,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
 
         BehaviorDescriptionMatcher matcher;
         //printf("\n%s\n", matcher.toStringBounds(category).c_str());
-        TS_ASSERT(matcher.toStringBounds(category) == "{}: (5, 5)\n{P1}: (1, 4)\n{P2}: (1, 3)\n{P4}: (2, 2)\n{P3}: (2, 3)\n");
+        TS_ASSERT(matcher.toStringBounds(category) == "{}: (5, 5)\n{P1}: (1, 4)\n{P2}: (1, 3)\n{P3}: (2, 3)\n{P4}: (2, 2)\n");
     }
 
     void test_case1() {

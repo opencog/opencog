@@ -130,8 +130,8 @@ public:
 
     void testLoadComboFromStream() {
         {
-            ifstream fin(SOURCE_DIR "/scripts/stdlib.combo");
-            
+            ifstream fin(OPENCOG_SOURCE_DIR "/scripts/embodiment/stdlib.combo");
+
             int n = 0;
             if (fin.good()) {
                 n = pr->loadComboFromStream(fin);
@@ -141,8 +141,8 @@ public:
             fin.close();
         }
         {
-            ifstream fin(SOURCE_DIR "/scripts/rules_action_schemata.combo");
-            
+            ifstream fin(OPENCOG_SOURCE_DIR "/scripts/embodiment/rules_action_schemata.combo");
+
             int n = 0;
             if (fin.good()) {
                 n = pr->loadComboFromStream(fin);
