@@ -106,6 +106,15 @@ void BooleanUTest::setUp(void)
 					an(VARIABLE_NODE, "$var2")
 				)
 			),
+			// used to gaurentee that both are in the same "sentence"
+			al(ORDERED_LINK,
+				an(VARIABLE_NODE, "$var1"),
+				an(VARIABLE_NODE, "$sent")
+			),
+			al(ORDERED_LINK,
+				an(VARIABLE_NODE, "$var2"),
+				an(VARIABLE_NODE, "$sent")
+			),
 			al(NOT_LINK,
 				al(INHERITANCE_LINK,
 					an(VARIABLE_NODE, "$var2"),
@@ -122,8 +131,6 @@ void BooleanUTest::setUp(void)
 		)
 	);
 
-#define MISS 1
-#if MISS
 	// Create data on which the above pattern should match
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Berlin"),
@@ -146,7 +153,14 @@ void BooleanUTest::setUp(void)
 		),
 		TruthValue::TRUE_TV()
 	);
-#else 
+	al(ORDERED_LINK,
+		an(CONCEPT_NODE, "Berlin"),
+		an(CONCEPT_NODE, "sentence-AAA")
+	);
+	al(ORDERED_LINK,
+		an(CONCEPT_NODE, "city"),
+		an(CONCEPT_NODE, "sentence-AAA")
+	);
 
 	// Create data on which the above pattern should fail
 	al(INHERITANCE_LINK,
@@ -188,7 +202,14 @@ void BooleanUTest::setUp(void)
 		),
 		TruthValue::TRUE_TV()
 	);
-#endif
+	al(ORDERED_LINK,
+		an(CONCEPT_NODE, "Madrid"),
+		an(CONCEPT_NODE, "sentence-BBB")
+	);
+	al(ORDERED_LINK,
+		an(CONCEPT_NODE, "capital"),
+		an(CONCEPT_NODE, "sentence-BBB")
+	);
 }
 
 /*
