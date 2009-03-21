@@ -23,7 +23,7 @@
 
 #include "PatternMatch.h"
 #include "DefaultPatternMatchCB.h"
-#include "SimpleLogicPMCB.h"
+#include "CrispLogicPMCB.h"
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/TLB.h>
@@ -446,15 +446,15 @@ Handle PatternMatch::imply (Handle himplication)
 	return do_imply(himplication, &impl);
 }
 
-class LogicImplicator:
+class CrispImplicator:
 	public virtual Implicator,
-	public virtual SimpleLogicPMCB
+	public virtual CrispLogicPMCB
 {};
 
 Handle PatternMatch::logic_imply (Handle himplication)
 {
 	// Now perform the search.
-	LogicImplicator impl;
+	CrispImplicator impl;
 	impl.as = atom_space;
 	return do_imply(himplication, &impl);
 }

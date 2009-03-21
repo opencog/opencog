@@ -15,11 +15,11 @@ INSTALL (TARGETS query
 )
 
 INSTALL (FILES
+	CrispLogicPMCB.h
 	DefaultPatternMatchCB.h
 	OutgoingTree.h
 	PatternMatch.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
-	SimpleLogicPMCB.h
 	DESTINATION "include/opencog/query"
 )
