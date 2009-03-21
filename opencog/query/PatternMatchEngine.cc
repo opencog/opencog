@@ -216,43 +216,21 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	depth = 1;
 	bool no_match = tree_compare(ap, as);
 
-	// If no match, and not at the root, then try the next one.
-	if (no_match)
-	{
-		// If not at the root, try looking around some more.
-		if (curr_pred_handle != curr_root) return false;
+	// If no match, then try the next one.
+	if (no_match) return false;
 
-		// If match is required (i.e. this is not an optional clause)
-		// then look around some more.
-		if (0 == optionals.count(curr_root)) return false;
-	}
-
-	// If we are here, then either
-	// 1) there's a tree match
-	// 2) there's no match, but we're at the top of an optional clause.
-	//
 	// If we've navigated to the top of the clause, and its matched, 
-	// then it is fully grounded, and we're done with it. If its 
-	// not matched, and its an optional clause, that's OK.
-	//
+	// then it is fully grounded, and we're done with it. 
 	// Start work on the next unsovled predicate. But do all of this
 	// only if the callback allows it.
 	if (curr_pred_handle == curr_root)
 	{
-		if (no_match)
-		{
-			curr_soln_handle = Handle::UNDEFINED;
-			as = NULL;
-prtmsg("duude navigated to top of optional clause:", curr_root);
-prtmsg("========== duude curr soln: ", curr_soln_handle);
-return false;
-
-		}
-
-		// Does the callback wish to continue? If not, then
-		// its the same as a mismatch; try the next one.
 		Link *lp = dynamic_cast<Link *>(ap);
 		Link *ls = dynamic_cast<Link *>(as);
+
+		// Is this required to match? If so, then let the callback
+		// make the final decision; if callback rejects, then it's
+		// the same as a mismatch; try the next one.
 		if (optionals.count(curr_root))
 		{
 			no_match = pmc->optional_clause_match(lp, ls);
@@ -262,6 +240,7 @@ return false;
 			no_match = pmc->clause_match(lp, ls);
 		}
 		if (no_match) return false;
+		clause_accepted = true;
 
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
@@ -299,18 +278,44 @@ return false;
 			// We continue our search at the atom that "joins" (is shared in common)
 			// between the previous (solved) clause, and this clause. If the "join"
 			// was a variable, look up its grounding; else the join is a 'real' atom.
-			Handle curr_soln_save = curr_soln_handle;
 
+			clause_accepted = false;
 			curr_soln_handle = var_grounding[curr_pred_handle];
 			found = soln_up(curr_soln_handle);
 
-			curr_soln_handle = curr_soln_save;
-		}
-
-if (0 == found) {
+			// If we are here, and found is false, then we've exhausted all
+			// of the search possibilities for the current clause. If this 
+			// is an optional clause, and no solutions were reported for it,
+			// then report the failure of finding a solution now. If this was
+			// also the final optional clause, then in fact, we've got a 
+			// grounding for the whole thing ... report that!
+			if ((false == found) && 
+			    (false == clause_accepted) &&
+			    (optionals.count(curr_root)))
+			{
+				Atom *acl = TLB::getAtom(curr_pred_handle);
+				Link *lcl = dynamic_cast<Link *>(acl);
 printf ("duuuuuuuuuuuuuuuuuuude I think I'm exhasuted, opt=%d\n",
 optionals.count(curr_root));
-}
+				no_match = pmc->optional_clause_match(lcl, NULL);
+				if (no_match) return false;
+
+				Handle curr_root_save = curr_root;
+				Handle curr_pred_save = curr_pred_handle;
+				get_next_unsolved_clause();
+	prtmsg("duuuuudeski ========= the next clause is", curr_root);
+				if (Handle::UNDEFINED == curr_root)
+				{
+					dbgprt ("==================== FINITO BANDITO!\n");
+#ifdef DEBUG
+					print_solution(var_grounding, clause_grounding);
+#endif
+					found = pmc->solution(clause_grounding, var_grounding);
+				}
+				curr_root = curr_root_save;
+				curr_pred_handle = curr_pred_save;
+			}
+		}
 
 		// If we failed to find anything at this level, we need to 
 		// backtrack, i.e. pop the stack, and begin a search for
