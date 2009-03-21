@@ -438,6 +438,13 @@ class DefaultImplicator:
 	public virtual DefaultPatternMatchCB
 {};
 
+/**
+ * Default evaluator of implication statements.  Does not consider
+ * the truth value of any of the matched clauses; instead, looks
+ * purely for a structural match.
+ *
+ * See the do_imply function for details.
+ */
 Handle PatternMatch::imply (Handle himplication)
 {
 	// Now perform the search.
@@ -451,7 +458,22 @@ class CrispImplicator:
 	public virtual CrispLogicPMCB
 {};
 
-Handle PatternMatch::logic_imply (Handle himplication)
+/**
+ * Use the crisp-logic callback to evaluate boolean implication
+ * statements; i.e. statements that have truth values assigned
+ * thier clauses, and statements that start with NotLink's.
+ * These are evaluated using "crisp" logic: if a matched clause 
+ * is true, its accepted, if its false, its rejected. If the 
+ * clause begins with a NotLink, true and false are reversed.
+ *
+ * The NotLink is also interpreted as an "absence of a clause";
+ * if the atomspace does NOT contain a NotLink clause, then the
+ * match is considered postive, and the clause is accepted (and
+ * it has a null or "invalid" grounding).
+ *
+ * See the do_imply function for details.
+ */
+Handle PatternMatch::crisp_logic_imply (Handle himplication)
 {
 	// Now perform the search.
 	CrispImplicator impl;

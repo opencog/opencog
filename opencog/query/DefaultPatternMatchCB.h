@@ -17,7 +17,10 @@ namespace opencog {
 /**
  * Callback mixin class, used to provide a default node and link
  * matching behaviour. This class is stile a pure virtual class,
- * since ith does not implement the solution method.
+ * since it does not implement the solution method.
+ *
+ * The *only* thing it provides is node and link matching; it does
+ * not consider any truth values in establishing a match.
  */
 class DefaultPatternMatchCB :
 	public virtual PatternMatchCallback

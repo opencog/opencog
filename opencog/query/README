@@ -144,116 +144,124 @@ Currently Implemented Algorithm
    by definition, the incidence tree root must be a hypergraph link,
    as hypergraph node cannot, by definition, have a non-trivial
    incidence tree under it.  Each tree is, by definition, acyclic.
+   These trees are also refered to as "clauses", below [and in the code].
+   This is because, in some cases, the tree can play the role of a
+   logical clause. In some cases, the tree is also refered to as a 
+   a "predicate", although sometimes the whole collection of clauses
+   is also called the predicate. Sorry for the confusion.
 
-   Thus, for example: _subj(row, Steve) has _subj at the root of the
-   tree, with "row" and "Steve" as leaves.
-
-   In the following [and in the code], each tree will be referred to as
-   a "predicate"; although this term is potentially misleading, as the
-   resemblance to logical predicates is superficial.
+   Thus, for example: the clause _subj(row, Steve) has _subj at the
+   root of the tree, with "row" and "Steve" as leaves.
 
    Distinct trees may have common vertices.  The common vertices
    act to join together the trees into a single, connected graph.
    Disconnected graphs are not allowed; the algorithm will fail to
-   find and solve disconnected components.  The graph as a whole may
+   find and ground disconnected components.  The graph as a whole may
    contain loops (the decomposition into trees keeps the algorithm
    from having to explicitly accommodate loops).
 
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
-   specific vertex. [This list is implemented as PatternMatch::root_map]
+   specific vertex. [This list is implemented as 
+   PatternMatchEngine::root_map]
 
-   The universe graph may have any structure whatsoever; there is no
-   requirement that the universe be decomposable into trees.
+   The universe graph may have any structure whatsoever; there are no
+   limitations put on it.
 
-2) Input includes a list of the bound variables in the expressions.
+2) Input includes a list of the bound variables in the clauses.
    Thus, for example _obj(row,_$qVar) has _$qVar is the variable
    to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
    The designated variables need not be leaf vertices. There may be
-   zero, one or more variables.
+   zero, one or more variables.  They are called "bound" simply 
+   because they have been called out; whereas "free variables" are
+   variables that may occur in the clauses, but have not been 
+   identified to the algorithm.
 
 3) Node equivalence is determined by means of a callback; the user
    may implement any notion at all of "equivalence".  In particular,
    the equivalence callback may be used as an alternate way to perform
    variable bindings, with the callback itself determining when a
    node is variable, and what the allowed bindings to it may be.
+   The callback is free to consider node truth values, or anything else,
+   in determining whether to accept or reject a candidate grounding.
+   Link equivalence is likewise governed by a callback.
 
-   [This callback is implemented in PatternMatchCallback::node_match().
-   In OpenCog, links are not given unique names, only types. Thus,
-   links are considered to match when their types match, and the
-   tree given by the link's outgoing set also matches. In particular,
-   the node_match() callback is never called for links.]
+   [The node equivalence callback is implemented in 
+   PatternMatchCallback::node_match(). The link equivalence callback is
+   PatternMatchCallback::link_match().]
 
 4) Pick the first tree. Get the type of the root atom of the
    first tree. Get a list of all atoms in the universe of this type.
-   These are the "candidate atoms".  Iterate over this list.
+   These are the "candidate groundings".  Iterate over this list.
    The iterator is the next step below (step 5).
 
-   [This step is implemented in PatternMatch::match(), which calls
-   PatternMatch::do_candidate() for each candidate root.]
+   [This step is implemented in PatternMatchEngine::match(), which
+   calls PatternMatchEngine::do_candidate() for each candidate root.]
 
 5) Initiate a recursive tree matching algorithm, comparing the
-   incidence tree of the first predicate to that rooted at the
-   candidate atom.
+   incidence tree of the first clause to that rooted at the
+   candidate grounding.
 
    First, the tree matching algo checks to see if the given
    node in the predicate is a variable; if so, then the match
-   is considered to be successful, and the corresponding node
-   in the universe is recorded as a solution.
+   is considered to be successful. The node-match callback is 
+   invoked to decide whether this grounding is to be accepted;
+   if it is, then the corresponding node in the universe is 
+    recorded as a grounding.
 
-   If the predicate itself is found in the universe, it is rejected.
+   If the clause itself is found in the universe, it is rejected.
 
-   If the atom is a link, so that it has a non-zero number of outgoing
-   edges, then the number of edges (the arity) of both the predicate
-   and the corresponding link in the universe, must be equal.
+   If the atom is a link, the link-match callback is invoked to 
+   determine whether its an acceptable grounding.
 
-   The tree matching algorithm invokes the node-equivalence callback,
-   as each pair of nodes is encountered.  Recursion is terminated when
-   a mismatch is found.
+   The tree matching algorithm recurses to subtrees; recursion
+   is terminated when a mismatch is found.
 
-   [This step is implemented in PatternMatch::tree_compare().
-   Atoms with different types are rejected before the callback is
-   called. Because links are anonymous, the callback is never
-   called for links.]
+   [This step is implemented in PatternMatchEngine::tree_compare().]
+
+   After an entire clause has been grounded, another callback, the 
+   clause-match callback, is called. This callback may reject the 
+   grounding of the clause as a whole.
 
 6) Assuming a single tree has been successfully matched in the previous
-   step, the next step is to find a predicate tree that has not yet been
-   solved.  This is done by examining the list of all nodes that are
-   shared between the most recently solved tree, looking for an unsolved
-   tree.
+   step, the next step is to find a clause that has not yet been
+   grounded.  This is done by examining the list of all nodes that are
+   shared between the most recently grounded clause, looking for an
+   unsolved clause.
 
-   [This is implemented in PatternMatch::get_next_unsolved_pred()]
+   [This is implemented in PatternMatchEngine::get_next_unsolved_clause()]
 
 7) If an unsolved tree is found, then tree-matching, as described in
    step 5), resumes. However, the tree matching resumes at the shared
-   node of the unsolved tree. The unsolved tree is recursively walked
-   upwards, towards its root, with a tree match attempted at ever stage.
+   node of the ungrounded tree. The ungrounded tree is recursively walked
+   upwards, towards its root, with a tree match attempted at every stage.
 
    The upwards recursion uses a stack to track state; this is required
    in the case of there being multiple possible matches to a tree:
    after finding one match, the stack may be popped to explore other
-   possible matches.
+   possible matches.  Push and pop callbacks are provided, in case the
+   callback also needs to maintain stack state.
 
    If the upwards recursion reaches the root of the predicate, the
    predicate is now considered to be solved. Go to step 6), to find
    other unsolved predicates.
 
-   [This is implemented by two routines: PatternMatch::soln_up()
-   and PatternMatch::pred_up(). These two routines alternate
+   [This is implemented by two routines: PatternMatchEngine::soln_up()
+   and PatternMatchEngine::pred_up(). These two routines alternate
    calls to each other, by traversing the *incoming* set of the
-   current node in the predicate, and the candidate solution node.
+   current node in the clause, and the candidate solution node.
    The incoming set takes one "upwards" in the tree.]
 
-   [The stack of current state is maintained in PatternMatch::
+   [The stack of current state is maintained in PatternMatchEngine::
    pred_handle_stack, etc. These are pushed as an upwards(incoming)
    edge is explored, and popped when the edge is rejected.]
 
-   [Partial solutions are recorded in PatternMatch::var_solution and
-   PatternMatch::predicate_solution.  These partial solutions must also
-   be kept on stack, as a failed match at a later stage means that
-   backtracking must be done. Since the partial solutions are used to
-   find unsolved predicates, care must be taken that the partial
+   [Partial solutions are recorded in PatternMatchEngine::var_grounding
+   and PatternMatchEngine::clause_grounding.  These partial solutions
+   must also be kept on stack, as a failed match at a later stage means
+   that backtracking must be done. Since the partial solutions are used
+   to find unsolved predicates, care must be taken that the partial
    solution is correct after backtracking: i.e. they must be popped
    as failed matches are encountered.]
 
@@ -268,20 +276,30 @@ Currently Implemented Algorithm
    so that the backtracking can be performed to find other,
    overlapping solutions.
 
-8) If no unsolved tree is found, then the matching is complete.
-   The full solution is reported via callback.  The callback may
+8) If no ungrounded tree is found, then the matching is complete.
+   The full grounding is reported via callback.  The callback may
    indicate that the search be terminated, or that it continue to
    find other possible solutions.
 
+   In addition to a list of clauses that MUST be grounded, the algorithm
+   accepts a list of clauses that need only be optionally grounded. The
+   optional list is exactly that: if no grounding is found, that's OK,
+   and a solution is still reported for the must-list. The optional
+   list can be used to implement pattern-rejection: so, for example, 
+   if a grounding for an optional clause is found, then the match as 
+   as a whole can be rejected. This kind of pattern-rejection is 
+   explicitly done with the crisp-boolean-logic callback.
+   
+
 Summary
 -------
-The above describes the specific implementation of a subgraph matching
+The above describes a specific implementation of a subgraph matching
 algorithm. It is generic, in that it makes no reference to the
 specifics of the actual data layout, or of node equivalences in the
 data.  The only restriction made is that the input, query graph,
 has been decomposed into a set of trees.
 
-[On OpenCog, the entire implementation is in PatternMatch.[h, .cc].]
+[On OpenCog, the entire implementation is in PatternMatchEngine.[h, .cc].]
 
 Example Code
 ------------
@@ -289,48 +307,14 @@ The test/query directory contains several test cases checking on this
 functionality. The BigPatternUTest test case is a small, simple, clear
 example of using the simple forward chainer.
 
-Foreach iterators
------------------
-The algorithm makes heavy use of "foreach" iterators to walk the
-incoming and outgoing edges of an atom.  The "foreach" mechanism
-has multiple advantages over other techniques, and it is important
-to understand these.
+Ranking; Approximate matching; Crisp and Fuzzy Logic
+----------------------------------------------------
+The final decision on matching to a given query pattern is delegated
+to a callback.
 
-A) The details of the Atom.h incoming and outgoing sets are abstracted.
-   Thus, while the outgoing set uses std:vector, the incoming set uses
-   a simple linked list. This detail is immaterial to the "foreach" user,
-   as both look the same. The only requirement is that each edge is visited
-   exactly once.
+aPattern
 
-B) The foreach abstraction makes multi-threaded implementation,
-   including mutex locking, much easier. In particular, the semantics
-   of atomic locking of a foreach traversal is much simpler than complexity
-   of trying to lock a naked linked list for read-only or read-write
-   traversal.
 
-C) The foreach abstraction can (and will) have performance that is
-   equal to a for-loop iteration over an array or linked list. This
-   is because, when the set to be iterated over is a simple list or
-   array, the foreach iterator can be implemented as an inline function.
-   Modern compilers are able to inline such functions correctly,
-   and optimize the result, providing performance equivalent to
-   a raw for-loop iteration.
-
-D) The foreach abstraction allows complex iterators to be implemented.
-   Thus, the foreach abstraction eliminates the data copying associated
-   with naive "filters", and thus can offer superior space *and* time
-   performance over filters. For example, consider a long linked list
-   consisting of many types of atoms, and one wants to perform a certain
-   operation only on a specific type of atom. Traditional "filters"
-   would make a copy of the list, including only the desired atom
-   types in the copied list. This requires significant overhead:
-   nodes must be copied, iterated over, and then freed.  The foreach
-   abstraction allows a zero-copy filter to be implemented: the
-   callback is invoked only for those nodes that match the filter
-   criteria.
-
-Ranking; Approximate matching
------------------------------
 Because the solution subgraph is returned, a ranking of the quality of
 the solution can be performed in a post-processing stage, by applying
 weights to links, etc.  There seems to be little advantage to computing
@@ -462,5 +446,45 @@ Thus, at least for RelEx-based queries, there is no need for HQL, as
 using the English language is (a lot) easier than writing a formal
 HQL query.  In this sense, English is the "best" query language, and
 it is supported. 
+
+Foreach iterators
+-----------------
+The algorithm makes heavy use of "foreach" iterators to walk the
+incoming and outgoing edges of an atom.  The "foreach" mechanism
+has multiple advantages over other techniques, and it is important
+to understand these.
+
+A) The details of the Atom.h incoming and outgoing sets are abstracted.
+   Thus, while the outgoing set uses std:vector, the incoming set uses
+   a simple linked list. This detail is immaterial to the "foreach" user,
+   as both look the same. The only requirement is that each edge is visited
+   exactly once.
+
+B) The foreach abstraction makes multi-threaded implementation,
+   including mutex locking, much easier. In particular, the semantics
+   of atomic locking of a foreach traversal is much simpler than complexity
+   of trying to lock a naked linked list for read-only or read-write
+   traversal.
+
+C) The foreach abstraction can (and will) have performance that is
+   equal to a for-loop iteration over an array or linked list. This
+   is because, when the set to be iterated over is a simple list or
+   array, the foreach iterator can be implemented as an inline function.
+   Modern compilers are able to inline such functions correctly,
+   and optimize the result, providing performance equivalent to
+   a raw for-loop iteration.
+
+D) The foreach abstraction allows complex iterators to be implemented.
+   Thus, the foreach abstraction eliminates the data copying associated
+   with naive "filters", and thus can offer superior space *and* time
+   performance over filters. For example, consider a long linked list
+   consisting of many types of atoms, and one wants to perform a certain
+   operation only on a specific type of atom. Traditional "filters"
+   would make a copy of the list, including only the desired atom
+   types in the copied list. This requires significant overhead:
+   nodes must be copied, iterated over, and then freed.  The foreach
+   abstraction allows a zero-copy filter to be implemented: the
+   callback is invoked only for those nodes that match the filter
+   criteria.
 
  -------------------------- END OF FILE ------------------------
