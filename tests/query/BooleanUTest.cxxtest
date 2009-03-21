@@ -107,11 +107,11 @@ void BooleanUTest::setUp(void)
 				)
 			),
 			// used to gaurentee that both are in the same "sentence"
-			al(ORDERED_LINK,
+			al(MEMBER_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$sent")
 			),
-			al(ORDERED_LINK,
+			al(MEMBER_LINK,
 				an(VARIABLE_NODE, "$var2"),
 				an(VARIABLE_NODE, "$sent")
 			),
@@ -153,13 +153,15 @@ void BooleanUTest::setUp(void)
 		),
 		TruthValue::TRUE_TV()
 	);
-	al(ORDERED_LINK,
+	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "Berlin"),
-		an(CONCEPT_NODE, "sentence-AAA")
+		an(CONCEPT_NODE, "sentence-AAA"),
+		TruthValue::TRUE_TV()
 	);
-	al(ORDERED_LINK,
+	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "city"),
-		an(CONCEPT_NODE, "sentence-AAA")
+		an(CONCEPT_NODE, "sentence-AAA"),
+		TruthValue::TRUE_TV()
 	);
 
 	// Create data on which the above pattern should fail
@@ -202,13 +204,15 @@ void BooleanUTest::setUp(void)
 		),
 		TruthValue::TRUE_TV()
 	);
-	al(ORDERED_LINK,
+	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "Madrid"),
-		an(CONCEPT_NODE, "sentence-BBB")
+		an(CONCEPT_NODE, "sentence-BBB"),
+		TruthValue::TRUE_TV()
 	);
-	al(ORDERED_LINK,
+	al(MEMBER_LINK,
 		an(CONCEPT_NODE, "capital"),
-		an(CONCEPT_NODE, "sentence-BBB")
+		an(CONCEPT_NODE, "sentence-BBB"),
+		TruthValue::TRUE_TV()
 	);
 }
 
