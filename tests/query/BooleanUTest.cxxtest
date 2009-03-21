@@ -239,9 +239,11 @@ void BooleanUTest::test_isa(void)
 
 	// Result should be a ListLink
 	Handle result = pm.logic_imply(implication);
-printf("duude result arity=%d\n", getarity(result));
-#if LATER
-	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
+
+	// There should be only one solution: the Berlin one.
+	// The Madrid graph should be rejected because of the 
+	// NOT definite link.
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// Then, evaluationLink, as above.
 	Handle heval = getlink(result, 0);
@@ -253,7 +255,6 @@ printf("duude result arity=%d\n", getarity(result));
 	TSM_ASSERT_EQUALS("incorrect is_a", his_a, vis_a);
 	TSM_ASSERT_EQUALS("incorrect berlin", hberlin, vberlin);
 	TSM_ASSERT_EQUALS("incorrect city", hcity, vcity);
-#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
