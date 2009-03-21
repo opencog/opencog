@@ -93,6 +93,9 @@ class PatternMatchEngine
 		std::map<Handle, Handle> var_grounding;
 		std::map<Handle, Handle> clause_grounding;
 
+		// Handle used to denote non-existant grounding.
+		Handle invalid_grounding;
+
 		// callback to report results.
 		PatternMatchCallback *pmc;
 

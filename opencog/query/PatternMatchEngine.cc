@@ -56,6 +56,9 @@ PatternMatchEngine::PatternMatchEngine(void)
 void PatternMatchEngine::set_atomspace(AtomSpace *as)
 {
 	atom_space = as;
+
+	HandleSeq oset;
+	invalid_grounding = as->addLink(LINK, oset);
 }
 
 bool PatternMatchEngine::prt(Atom *atom)
@@ -295,15 +298,14 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			{
 				Atom *acl = TLB::getAtom(curr_pred_handle);
 				Link *lcl = dynamic_cast<Link *>(acl);
-printf ("duuuuuuuuuuuuuuuuuuude I think I'm exhasuted, opt=%d\n",
-optionals.count(curr_root));
 				no_match = pmc->optional_clause_match(lcl, NULL);
+				dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
 				if (no_match) return false;
 
-				Handle curr_root_save = curr_root;
-				Handle curr_pred_save = curr_pred_handle;
+				// XXX Maybe should push n pop here? No, maybe not ... 
+				clause_grounding[curr_root] = invalid_grounding;
 				get_next_unsolved_clause();
-	prtmsg("duuuuudeski ========= the next clause is", curr_root);
+				prtmsg("Next optional clause is", curr_root);
 				if (Handle::UNDEFINED == curr_root)
 				{
 					dbgprt ("==================== FINITO BANDITO!\n");
@@ -312,8 +314,6 @@ optionals.count(curr_root));
 #endif
 					found = pmc->solution(clause_grounding, var_grounding);
 				}
-				curr_root = curr_root_save;
-				curr_pred_handle = curr_pred_save;
 			}
 		}
 
