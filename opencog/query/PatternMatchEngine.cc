@@ -236,6 +236,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		// the same as a mismatch; try the next one.
 		if (optionals.count(curr_root))
 		{
+			clause_accepted = true;
 			no_match = pmc->optional_clause_match(lp, ls);
 		}
 		else
@@ -243,7 +244,6 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			no_match = pmc->clause_match(lp, ls);
 		}
 		if (no_match) return false;
-		clause_accepted = true;
 
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
