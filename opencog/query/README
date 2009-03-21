@@ -310,35 +310,44 @@ example of using the simple forward chainer.
 Ranking; Approximate matching; Crisp and Fuzzy Logic
 ----------------------------------------------------
 The final decision on matching to a given query pattern is delegated
-to a callback.
+to a callback. This allows for considerable flexibility in controlling
+matching for hypergraphs that represent crisp logic statements, or those
+that use probalistic logic, or for ranking matches by quality.
 
-aPattern
+Callbacks are provided to accept or reject individual node and link
+groundings, and to accpt of reject the grounding of individual clauses.
+In addition, the "optional clause" mechanism provides a means of 
+pattern rejection. This can be done by specifying the pattern to be
+rejected as "optional": thus, if it is not found, a solution is reported;
+but if it is found, then the callback can reject the solution.
+The callback is free to examine truth values, STI/LTI, etc. in 
+accpeting or rejecting any given grounding.  Push and pop callbacks
+are provided to help maintain state on a stack, to deal with partial
+matches, if needed.
 
+The "optional" mechanism can also be used to implement approximate
+matching, by specifying the parts of the graph that would be "nice
+to match", but not strictly required. 
 
-Because the solution subgraph is returned, a ranking of the quality of
-the solution can be performed in a post-processing stage, by applying
-weights to links, etc.  There seems to be little advantage to computing
-a ranking score during the graph search itself.
+Alternately, the ranking/acceptance/rejection of the solution subgraph
+can be performed in a post-processing stage.  This may be an easier
+approach for many cases.
 
-Since solutions are returned as they are found, each can be ranked on
-the fly, and the search terminated once a solution that is "good enough"
-has been found.
+At this time, two generic callbacks are provided:
 
-Note that one can use the existing framework to implement approximate
-matching, by manually computing a partial-match score on the fly. One
-would do this by accepting poor matches unconditionally, while also
-keeping a running total score. If the running total gets too low, then
-the current node match can be rejected.  At this point, the algo will
-back-track, trying alternate matches. An approximate match is found
-when matching has completed, without the running score having dipped too
-low. Even after a match, there will be back-tracking, so other, nearby
-solutions will also be found as well.
+*) The DefaultPatternMatchCB. This callback implements node and link
+   match methods that accept only strict node/link matches, unless a
+   node is of type VariableNode, in which case the match is also
+   accepted. No effort is made to consult truth values or other atom
+   properties to determine a match.
 
-Two gotchas: probably need to export push-pop callbacks, in order to
-enable the above approximate-matching scoring.  Also, note that during
-matching, some nodes may be visited multiple times, even during the same
-match attempt. This was a matter of convenience, but will screw up
-partial scores, if not accounted for. 
+*) The CrispLogicPMCB. This callback implements a crisp boolean logic
+   matching scheme. If a clause is matched, then the grounding must
+   have a truth value of greater than 0.5 to be considered a match.
+   By contrast, optional cluases must have a truth value of less than
+   0.5 to be acceptable; optional clauses are interpreted as negations:
+   they can be absent, or, if present, they must be false.
+
 
 Forward Chainer
 ---------------

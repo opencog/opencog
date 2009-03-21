@@ -53,7 +53,7 @@ class PatternMatch
 		           Handle negations = Handle::UNDEFINED);
 
 		Handle imply(Handle);
-		Handle logic_imply(Handle);
+		Handle crisp_logic_imply(Handle);
 };
 
 } // namespace opencog

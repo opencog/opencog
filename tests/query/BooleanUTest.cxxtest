@@ -238,7 +238,7 @@ void BooleanUTest::test_isa(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = pm.logic_imply(implication);
+	Handle result = pm.crisp_logic_imply(implication);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the 
