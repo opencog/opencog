@@ -28,9 +28,10 @@
 #define _OPENCOG_TLB_H
 
 // Use the TLB map only if SQL storage is being used.
-//#ifdef HAVE_SQL_STORAGE
+// (or if distributed processing is enabled)
+#ifdef HAVE_SQL_STORAGE
 #define USE_TLB_MAP 1
-//#endif
+#endif
 
 #define CHECK_MAP_CONSISTENCY
 
@@ -214,18 +215,16 @@ public:
 
     static inline bool isInvalidHandle(const Handle& h) {
 #ifdef USE_TLB_MAP
-        return (h == Handle::UNDEFINED) || (h.value() >= uuid);
+        return (h == Handle::UNDEFINED) ||
+               (h.value() >= uuid) || 
+               (NULL == getAtom(h));
 #else
         return (h == Handle::UNDEFINED);
 #endif
     }
 
     static inline bool isValidHandle(Handle h) {
-#ifdef USE_TLB_MAP
-        return (h != Handle::UNDEFINED) && (h.value() < uuid);
-#else
-        return (h != Handle::UNDEFINED);
-#endif
+        return (false == isInvalidHandle(h));
     }
 
 #ifdef USE_TLB_MAP
