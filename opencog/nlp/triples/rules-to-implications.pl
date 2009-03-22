@@ -68,12 +68,12 @@ sub parse_clause
 }
 
 # --------------------------------------------------------------------
-# Print a single clause. 
+# Print a triple-style clause. 
 # Expects as input a clause, for example, "_subj(be,$var0)", and 
 # some whitespace to indent by. Prints, as output, the standard
 # OpenCog EvaluationLink equivalent of the clause.
 #
-sub print_clause
+sub print_triple_clause
 {
 	my ($clause, $cnt, $indent) = @_;
 
@@ -117,6 +117,31 @@ sub print_clause
 	}
 	print "$indent   )\n";
 	print "$indent)\n";
+}
+
+# --------------------------------------------------------------------
+# Print a clause. 
+# Expects as input a clause, for example, "_subj(be,$var0)", and 
+# some whitespace to indent by. 
+#
+sub print_clause
+{
+	my ($clause, $cnt, $indent) = @_;
+
+	# Pull out the parts of the clause.
+	my @parts = parse_clause($clause);
+
+	if ($#parts == 3)
+	{
+		print_triple_clause(@_);
+	}
+	else 
+	{
+		if ($#parts == 2)
+		{
+print "ooooooooooooooooooooooooooooooooooola\n";
+		}
+	}
 }
 
 # --------------------------------------------------------------------
@@ -233,6 +258,7 @@ sub parse_rule
 		s/^\s*//g;
 		my $indent = "      ";
 
+		# Clauses that start with a bang (!) are Not's, to be inverted.
 		my $inv = 0;
 		if (/^!/)
 		{
@@ -241,6 +267,8 @@ sub parse_rule
 			$indent = $indent . "   ";
 			s/^!//;
 		}
+
+		# Clauses starting with % are "literals"
 		if (/^\%/)
 		{
 			print_link ($_, $indent);
