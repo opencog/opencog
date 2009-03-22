@@ -35,15 +35,18 @@ sub parse_clause
 {
 	my ($clause) = @_;
 
+	# Ditch the white space, this'll make matching easier.
+	$clause =~ s/\s*//g;
+
 	# Pull the three parts out of the clause.
 	# The pattern matches "blah(ding,dong)"
-	$clause =~ m/\s*([\$!%\-\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
+	$clause =~ m/\s*([\$\!%\-\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
 	my $rest = $4;
 
-	my @parts;
+	my @parts = ();
 
 	# if above failed, then its a double.
 	if ($pred eq "")
@@ -215,12 +218,16 @@ sub print_link
 
 # --------------------------------------------------------------------
 # print_lemma_link
-# Print a lemma link to connect a word instance to its word -- but only
-# if neccessary.
+# Print a lemma link to connect a word instance to its word.
+# But print it only if the thing looks like a word instance,
+# i.e. no printing for variables, which start with $.
 #
 sub print_lemma_link
 {
 	my ($clause, $item, $cnt, $indent) = @_;
+
+	if ($item eq "") { return; }
+
 	if (!($item =~ /^\$/))
 	{
 		print "$indent;; word-instance lemma of $clause\n";
@@ -252,7 +259,7 @@ sub print_word_instance
 	my ($clause, $cnt, $indent) = @_;
 
 	# Pull the three parts out of the clause.
-	$clause =~ s/\s*^\%//;
+	$clause =~ s/\s*//g;
 	my ($link, $item1, $item2) = parse_clause($clause);
 
 	# Print a copy of the original clause for reference
