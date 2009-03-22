@@ -66,11 +66,11 @@
 ; "the captial of Germany is Berlin", the prep is crucial to reversing
 ; the order of the subject and object! Alternately, demand that $var2
 ; is indefinite.
-;# IF _subj(be, $var1) ^ _obj(be, $var2)
-;      ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
-;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
-;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
-;      THEN ^3_isa($var2, $var1) 
+# IF _subj(be, $var1) ^ _obj(be, $var2)
+      ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
+      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+      THEN ^3_isa($var2, $var1) 
 
 ; Sentence: "Berlin is in Germany", alternate parse
 ; (This becomes the dominant parse for "Berlin is a city in Germany").
