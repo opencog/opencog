@@ -60,6 +60,18 @@
       ^ %ListLink($prep,$prword)
       THEN ^3_$prep($var2, $var1) 
 
+; Sentence "Berlin is a city"
+; var1=Berlin var2=city
+; Must be careful not to make the pattern too simple, as, for example,
+; "the captial of Germany is Berlin", the prep is crucial to reversing
+; the order of the subject and object! Alternately, demand that $var2
+; is indefinite.
+;# IF _subj(be, $var1) ^ _obj(be, $var2)
+;      ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
+;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+;      THEN ^3_isa($var2, $var1) 
+
 ; Sentence: "Berlin is in Germany", alternate parse
 ; (This becomes the dominant parse for "Berlin is a city in Germany").
 ; var1=Berlin var2=Germany $prep=in
@@ -70,12 +82,3 @@
 ;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
 ;      THEN ^3_$prep($var2, $var1) 
 
-; Sentence "Berlin is a city"
-; var1=Berlin var2=city
-; This pattern is too simple, it has to exclude preps,
-; e.g. "the captial of Germany is Berlin", where the prep is crucial
-; in reversing the order of the subject and object!
-;# IF _subj(be, $var1) ^ _obj(be, $var2)
-;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
-;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
-;      THEN ^3_isa($var2, $var1) 

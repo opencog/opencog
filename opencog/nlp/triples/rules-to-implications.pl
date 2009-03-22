@@ -12,22 +12,54 @@
 #
 #    cat some-rule-file.txt | ./rules-to-implications.pl 
 #
+# This perl script implements a very simple parser. Some day in the future,
+# it would proably make sense to re-write this in terms of lex & yacc. Maybe.
 
 use strict;
 
 # --------------------------------------------------------------------
+# parse_clause -- Split a clause into it's parts. 
+#
+# A clause is assumed to be either a triple, such as "blah(foo, bar)"
+# or a double, such as "ding ( dong )". The parens are required. The
+# whitespace is optional. Its a triple, if it has a comma, else its a
+# double. Triples return a list of four items: the triple, plus the
+# rest of the line (i.e. trailing characters). Doubles only return a
+# list of three things.
+#
 sub parse_clause
 {
 	my ($clause) = @_;
 
 	# Pull the three parts out of the clause.
-	$clause =~ m/\s*([\$%\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
+	# The pattern matches "blah(ding,dong)"
+	$clause =~ m/\s*([\$!%\-\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
 	my $rest = $4;
 
-	my @parts = ($pred, $item1, $item2, $rest);
+	my @parts;
+
+	# if above failed, then its a double.
+	if ($pred eq "")
+	{
+		# The pattern matches "blah(ding)"
+		$clause =~ m/\s*([\$!%\-\w]+)\s*\(\s*([\$%\w]+)\s*\)(.*)/;
+		$pred = $1;
+		$item1 = $2;
+		$rest = $3;
+
+		# Create the list only is the parse succeeded.
+		if ($pred ne "")
+		{
+			@parts = ($pred, $item1, $rest);
+		}
+	}
+	else
+	{
+		@parts = ($pred, $item1, $item2, $rest);
+	}
 	@parts;
 }
 
