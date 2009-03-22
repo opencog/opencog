@@ -57,7 +57,9 @@ class ImportanceSpreadingAgent;
 class ImportanceUpdatingAgent;
 class StorkeyAgent;
 class ImprintAgent;
+#ifdef HAVE_UBIGRAPH
 class HopfieldUbigrapher;
+#endif //HAVE_UBIGRAPH
 
 /** Emulates a hopfield network using OpenCog dynamics */
 class HopfieldServer : public CogServer
@@ -78,8 +80,10 @@ private:
     //! that inherit from linkType.
     std::map<Handle,Handle> getDestinationsFrom(Handle src, Type linkType);
 
+#ifdef HAVE_UBIGRAPH
     //! Ubigrapher for visualising
     HopfieldUbigrapher* ubi;
+#endif //HAVE_UBIGRAPH
 
     HandleSeq recentlyAddedLinks;
 public:

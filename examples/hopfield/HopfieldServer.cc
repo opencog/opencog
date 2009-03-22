@@ -43,14 +43,16 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
-#include "HopfieldUbigrapher.h"
 #include "HopfieldOptions.h"
 #include "StorkeyAgent.h"
 #include "ImprintAgent.h"
 
+#ifdef HAVE_UBIGRAPH
+#include "HopfieldUbigrapher.h"
 extern "C" {
     #include <UbigraphAPI.h>
 }
+#endif //HAVE_UBIGRAPH
 
 using namespace opencog;
 using namespace std;
@@ -218,7 +220,9 @@ HopfieldServer::HopfieldServer()
     options->setServer(this);
     hebUpdateAgent = NULL;
     storkeyAgent = NULL;
+#ifdef HAVE_UBIGRAPH
     ubi = NULL;
+#endif //HAVE_UBIGRAPH
 }
 
 HopfieldServer::~HopfieldServer()
@@ -336,10 +340,11 @@ void HopfieldServer::init(int width, int height, int numLinks)
     //spreadAgent->setSpreadThreshold(options->spreadThreshold);
     //spreadAgent->setImportanceSpreadingMultiplier(options->importanceSpreadingMultiplier);
 
-
+#ifdef HAVE_UBIGRAPH
     if (options->visualize) {
         ubi = new HopfieldUbigrapher();
     }
+#endif //HAVE_UBIGRAPH
     
     // Create nodes
     for (int i = 0; i < this->width; i++) {
@@ -356,10 +361,12 @@ void HopfieldServer::init(int width, int height, int numLinks)
             }
         }
     }
+#ifdef HAVE_UBIGRAPH
     if (options->visualize) {
         ubi->showText = true;
         ubi->setGroundNode(hGrid[0]);
     }
+#endif //HAVE_UBIGRAPH
 
     // If only 1 node, don't try and connect it
     if (hGrid.size() < 2) {
@@ -391,7 +398,9 @@ void HopfieldServer::chooseKeyNodes()
             hGridKey[index] = true;
             currentKeyNodes++;
             keyNodes.push_back(hGrid[index]);
+#ifdef HAVE_UBIGRAPH
             if (options->visualize) ubi->setAsKeyNode(hGrid[index]);
+#endif //HAVE_UBIGRAPH
         }
     }
 
@@ -455,9 +464,11 @@ void HopfieldServer::addRandomLinks()
         } else {
             Handle rl = atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
             recentlyAddedLinks.push_back(rl);
+#ifdef HAVE_UBIGRAPH
             if (options->visualize) {
                 ubi->setAsNewRandomLink(rl);
             }
+#endif //HAVE_UBIGRAPH
             amount--;
             attempts = 0;
         }
@@ -492,10 +503,12 @@ void HopfieldServer::resetNodes(bool toDefault)
 			a->setLTI(n->handle, startLTI);
 		}
 	}
+#ifdef HAVE_UBIGRAPH
     if (options->visualize) {
         ubi->applyStyleToType(CONCEPT_NODE, ubi->notPatternStyle);
         ubi->applyStyleToHandleSeq(keyNodes, ubi->keyNodeStyle);
     }
+#endif //HAVE_UBIGRAPH
     
     delete nodes;
 
@@ -679,11 +692,13 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
     for (int currCycles = 0; currCycles < cycles; currCycles++) {
         Handle keyNodeHandle;
 
+#ifdef HAVE_UBIGRAPH
         if (options->visualize) {
             ostringstream o;
             o << "Imprinting pattern: cycle " << currCycles;
             ubi->setText(o.str());
         }
+#endif //HAVE_UBIGRAPH
 
         // encode pattern
         logger().fine("---Imprint:Encoding pattern with ImprintAgent");
@@ -696,6 +711,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         importUpdateAgent->run(this);
         printStatus();
 
+#ifdef HAVE_UBIGRAPH
         if (options->visualize) {
             //unsigned char startRGB[3] = { 50, 50, 50 };
             //unsigned char endRGB[3] = { 100, 255, 80 };
@@ -705,6 +721,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
                     ubi->updateSizeOfHandle(hGrid[j], Ubigrapher::STI, 2.0);
             }*/
         }
+#endif //HAVE_UBIGRAPH
 
         // If using glocal key nodes, find the closest matching
         if (options->keyNodes) {
@@ -713,10 +730,12 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             // Make key node "Active"
             getAtomSpace()->setSTI(keyNodeHandle, (AttentionValue::sti_t)
                     patternStimulus / max(pattern.activity(),1));
+#ifdef HAVE_UBIGRAPH
             if (options->visualize) {
                 // Set active key node style
                 ubi->setAsActiveKeyNode(keyNodeHandle);
             }
+#endif //HAVE_UBIGRAPH
         }
 
         if (first)
@@ -748,6 +767,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             logger().fine("---Imprint:Storkey update rule");
             storkeyAgent->run(this);
         }
+#ifdef HAVE_UBIGRAPH
         if (options->visualize) {
             ubi->applyStyleToHandleSeq(recentlyAddedLinks,
                     ubi->compactLinkStyle);
@@ -755,8 +775,10 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             unsigned char endRGB2[3] = { 80, 100, 255 };
             ubi->updateColourOfType(INVERSE_HEBBIAN_LINK,
                     Ubigrapher::NONE, startRGB2, endRGB2);
-            ubi->updateSizeOfType(HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, 20.0, 0.1);
+            ubi->updateSizeOfType(HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, 20.0,
+                    0.1);
         }
+#endif //HAVE_UBIGRAPH
         recentlyAddedLinks.clear();
 // Unnecessary
 //        logger().fine("---Imprint:Importance spreading");
@@ -830,11 +852,13 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles,
     }
     while (i < numCycles) {
         logger().fine("---Retrieve:Encoding pattern");
+#ifdef HAVE_UBIGRAPH
         if (options->visualize) {
             ostringstream o;
             o << "Retrieving pattern: cycle " << i;
             ubi->setText(o.str());
         }
+#endif //HAVE_UBIGRAPH
         encodePattern(partialPattern, patternStimulus);
         printStatus();
 
@@ -898,6 +922,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
 
     logger().info("---Retreive:Running Importance updating agent");
     importUpdateAgent->run(this);
+#ifdef HAVE_UBIGRAPH
     if (options->visualize) {
         if (originalPattern.size() == hGrid.size()) {
             // *** show agreement in green
@@ -915,6 +940,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
         ubi->setText(o.str());
 
     }
+#endif //HAVE_UBIGRAPH
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
     //float temp = 1.0;
@@ -933,6 +959,7 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
         diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC,temp);
         temp *= 1.5;
         diffuseAgent->run(this);
+#ifdef HAVE_UBIGRAPH
         if (options->visualize) {
             if (originalPattern.size() == hGrid.size()) {
                 Pattern tp(getGridSTIAsPattern(false).binarisePattern(options->vizThreshold) );
@@ -946,6 +973,8 @@ void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
             o << "Retrieving pattern: diffusion (cycle " << i << ")";
             ubi->setText(o.str());
         }
+#endif //HAVE_UBIGRAPH
+
 //        temp *= (spreadCycles - i)/( (float) spreadCycles + 1 );
 // Old spread agent.
 //        spreadAgent->run(this);

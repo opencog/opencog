@@ -15,14 +15,19 @@ INCLUDE_DIRECTORIES (
 	${UBIGRAPHCLIENT_INCLUDE_DIRS}
 )
 
+IF (UBIGRAPHCLIENT_FOUND)
+    SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
+    SET (OPENCOG_UBI_LIB ubigraph)
+ENDIF (LIBUBIGRAPHCLIENT_FOUND)
+
 ADD_EXECUTABLE (hopfield
 	HopfieldDemo.cc
 	HopfieldServer.cc
 	Pattern.cc
 	HopfieldOptions.cc
-    HopfieldUbigrapher.cc
 	StorkeyAgent.cc
     ImprintAgent.cc
+    ${HOPFIELD_UBI_SRC}
 )
 
 ADD_DEPENDENCIES(hopfield attention_atom_types)
@@ -30,7 +35,7 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
-    ubigraph
+    ${OPENCOG_UBI_LIB}
 	${Boost_SIGNALS_LIBRARY}
 #	${GSL_LIBRARIES}
 	${CSOCKETS_LIBRARIES}

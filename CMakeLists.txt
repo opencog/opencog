@@ -110,6 +110,9 @@ ENDIF (LINK_GRAMMAR_FOUND)
 
 # XML-RPC and Ubigraph client library, used by the ubigraph module
 FIND_PACKAGE(LibUbiGraphClient)
+IF (UBIGRAPHCLIENT_FOUND)
+	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
+ENDIF (UBIGRAPHCLIENT_FOUND)
 FIND_PACKAGE(XMLRPC)
 
 # At this time,. there is no reason to build with memcached for
