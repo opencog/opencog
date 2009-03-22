@@ -14,6 +14,10 @@
 #
 # This perl script implements a very simple parser. Some day in the future,
 # it would proably make sense to re-write this in terms of lex & yacc. Maybe.
+#
+# Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
+# Created in January, March 2009.
+#
 
 use strict;
 
@@ -202,6 +206,7 @@ sub print_word_instance
 	print_lemma_link ($clause, $item2, $cnt+1, $indent);
 }
 
+# --------------------------------------------------------------------
 # Parse a single rule, generate the equivalent OpenCog ImplicationLink.
 #
 # For example, expected input is of the form
@@ -226,14 +231,26 @@ sub parse_rule
 	foreach (@clauses)
 	{
 		s/^\s*//g;
+		my $indent = "      ";
+
+		my $inv = 0;
+		if (/^!/)
+		{
+			$inv = 1;
+			print "      (NotLink\n";
+			$indent = $indent . "   ";
+			s/^!//;
+		}
 		if (/^\%/)
 		{
-			print_link ($_, "      ");
+			print_link ($_, $indent);
 		}
 		else
 		{
-			print_clause ($_, $cnt, "      ");
+			print_clause ($_, $cnt, $indent);
 		}
+
+		if($inv) { print "      )  ;; NotLink\n"; } # closure to NotLink
 		$cnt += 2;
 	}
 	$cnt = 0;
@@ -242,7 +259,7 @@ sub parse_rule
 		print_word_instance ($_, $cnt, "      ");
 		$cnt += 2;
 	}
-	print "   )\n";
+	print "   )  ;; AndLink\n";  # closing paren to AndLink
 
 	# We are done with the and link. Move on to the implicand.
 	while (1)
@@ -268,6 +285,12 @@ sub parse_rule
 	print ")\n";
 }
 
+# --------------------------------------------------------------------
+# Main file-processing loop. Reads from stdin, processes, and prints to stdout.
+#
+# Tries to pick out rules, one at a time, from input, and pass them to 
+# "parse_rule" for processing.
+#
 # Global vars -- hold the current fragment of a rule, read from input.
 my $have_rule = 0;
 my $curr_rule = "";
@@ -301,7 +324,7 @@ while(<>)
 
 		$have_rule = 1;
 
-		# strip off the leading hash, the traling comment, and any newline
+		# Strip off the leading hash, the trailing comment, and any newline
 		chop;
 		m/^# (.*)/;
 		my $line = $1;
@@ -310,7 +333,7 @@ while(<>)
 		next;
 	}
 
-	# strip off trailing newline, and any trailing comments; append.
+	# Strip off trailing newline, and any trailing comments; append.
 	chop;
 	my ($line, $rest) = split(/\;/);
 	$curr_rule = $curr_rule . $line;
