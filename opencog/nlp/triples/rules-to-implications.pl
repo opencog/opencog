@@ -68,6 +68,27 @@ sub parse_clause
 }
 
 # --------------------------------------------------------------------
+# print a variable or a word instance
+# The word-instance is printed as a variable; this is joined
+# to a particular word, later on, by a LemmaLink.
+#
+sub print_var_or_word_instance
+{
+	my ($item, $cnt, $indent) = @_;
+
+	if ($item =~ /^\$/)
+	{
+		print "$indent(VariableNode \"$item\")\n";
+	}
+	else
+	{
+		# Dang, not a word node, but some unknown word-instance node.
+		# print "$indent(WordNode \"$item1\")\n";
+		print "$indent(VariableNode \"\$word-instance-$cnt\")\n";
+	}
+}
+
+# --------------------------------------------------------------------
 # Print a triple-style clause. 
 # Expects as input a clause, for example, "_subj(be,$var0)", and 
 # some whitespace to indent by. Prints, as output, the standard
@@ -93,29 +114,37 @@ sub print_triple_clause
 	}
 
 	print "$indent   (ListLink\n";
-	if ($item1 =~ /^\$/)
-	{
-		print "$indent      (VariableNode \"$item1\")\n";
-	}
-	else
-	{
-		# Dang, not a word node, but some unknown word-instance node.
-		# print "$indent      (WordNode \"$item1\")\n";
-		print "$indent      (VariableNode \"\$word-instance-$cnt\")\n";
-	}
 
-	if ($item2 =~ /^\$/)
-	{
-		print "$indent      (VariableNode \"$item2\")\n";
-	}
-	else
-	{
-		# Dang, not a word node, but some unknown word-instance node.
-		# print "$indent      (WordNode \"$item2\")\n";
-		$cnt ++;
-		print "$indent      (VariableNode \"\$word-instance-$cnt\")\n";
-	}
+	print_var_or_word_instance($item1, $cnt, $indent . "      ");
+	$cnt++;
+	print_var_or_word_instance($item2, $cnt, $indent . "      ");
+
 	print "$indent   )\n";
+	print "$indent)\n";
+}
+
+# --------------------------------------------------------------------
+# Print a triple-style clause. 
+# Expects as input a clause, for example, "_subj(be,$var0)", and 
+# some whitespace to indent by. Prints, as output, the standard
+# OpenCog EvaluationLink equivalent of the clause.
+#
+sub print_double_clause
+{
+	my ($clause, $cnt, $indent) = @_;
+
+	# Pull the two parts out of the clause.
+	my ($pred, $item1) = parse_clause($clause);
+
+	# strip out the -FLAG at the end
+	$pred =~ s/-FLAG//;
+	$pred =~ tr/[A-Z]/[a-z]/;
+
+	# Print a copy of the original clause for reference
+	print "$indent;; $clause\n";
+	print "$indent(InheritanceLink\n";
+	print_var_or_word_instance($item1, $cnt, $indent . "   ");
+	print "$indent   (DefinedLinguisticConceptNode \"$pred\")\n";
 	print "$indent)\n";
 }
 
@@ -139,7 +168,7 @@ sub print_clause
 	{
 		if ($#parts == 2)
 		{
-print "ooooooooooooooooooooooooooooooooooola\n";
+			print_double_clause(@_);
 		}
 	}
 }
