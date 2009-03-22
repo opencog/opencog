@@ -844,12 +844,14 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles,
     logger().fine("---Retrieve:Resetting nodes");
     resetNodes();
 
+#ifdef HAVE_UBIGRAPH
     if (options->visualize) {
         ostringstream o;
         o << "Retrieving pattern for " << numCycles << " cycles";
         ubi->setText(o.str());
 
     }
+#endif //HAVE_UBIGRAPH
     while (i < numCycles) {
         logger().fine("---Retrieve:Encoding pattern");
 #ifdef HAVE_UBIGRAPH
