@@ -21,7 +21,7 @@ IF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
         # TODO currently requires library called
         # libcurl.so (linked to a specific version) 
         # - find curl library using cmake
-        curl 
+        #        curl 
         ${UBIGRAPHCLIENT_LIBRARIES}
 #       {$XMLRPC_LIBRARIES}
         xmlrpc_client
