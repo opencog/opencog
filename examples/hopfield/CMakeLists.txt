@@ -22,6 +22,13 @@ IF (UBIGRAPHCLIENT_FOUND)
         # libcurl.so (linked to a specific version) 
         # - find curl library using cmake
         curl 
+        ${UBIGRAPHCLIENT_LIBRARIES}
+#       {$XMLRPC_LIBRARIES}
+        xmlrpc_client
+        xmlrpc
+        xmlrpc_util
+        xmlrpc_xmlparse
+        xmlrpc_xmltok
         )
 ENDIF (LIBUBIGRAPHCLIENT_FOUND)
 
@@ -40,17 +47,9 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
-    ${OPENCOG_UBI_LIB}
 	${Boost_SIGNALS_LIBRARY}
-#	${GSL_LIBRARIES}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${EXPAT_LIBRARIES}
-    ${UBIGRAPHCLIENT_LIBRARIES} #    ubigraphclient
-#    {$XMLRPC_LIBRARIES} #
-    xmlrpc_client
-    xmlrpc
-    xmlrpc_util
-    xmlrpc_xmlparse
-    xmlrpc_xmltok
+    ${OPENCOG_UBI_LIB}
 )
