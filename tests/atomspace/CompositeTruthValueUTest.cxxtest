@@ -27,6 +27,7 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
@@ -52,6 +53,8 @@ private:
     float counts[NUM_TVS];
     float confidences[NUM_TVS];
     VersionHandle versionHandles[NUM_TVS];
+    Atom * atoms[NUM_TVS];
+    Handle atomhand[NUM_TVS];
 
 public:
     CompositeTruthValueUTest() {
@@ -61,9 +64,15 @@ public:
         counts[0] = TV1_COUNT;
         counts[1] = TV2_COUNT;
         counts[2] = TV3_COUNT;
-        versionHandles[0] = VersionHandle(HYPOTHETICAL, TLB::getHandle((Atom *) 1));
-        versionHandles[1] = VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *) 2));
-        versionHandles[2] = VersionHandle(UNKNOWN, TLB::getHandle((Atom *) 3));
+        atoms[0] = new Node(CONCEPT_NODE, "zero");
+        atoms[1] = new Node(CONCEPT_NODE, "one");
+        atoms[2] = new Node(CONCEPT_NODE, "two");
+        atomhand[0] = TLB::addAtom(atoms[0]);
+        atomhand[1] = TLB::addAtom(atoms[1]);
+        atomhand[2] = TLB::addAtom(atoms[2]);
+        versionHandles[0] = VersionHandle(HYPOTHETICAL, atomhand[0]);
+        versionHandles[1] = VersionHandle(CONTEXTUAL, atomhand[1]);
+        versionHandles[2] = VersionHandle(UNKNOWN, atomhand[2]);
     }
 
     void setUp() {
@@ -491,16 +500,16 @@ public:
         logger().debug("testUpdateVersionHandles()");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
         HandleMap<Atom *>* handles = new HandleMap<Atom *>();
-        handles->add(TLB::getHandle((Atom *) 1), (Atom *) 2);
-        handles->add(TLB::getHandle((Atom *) 2), (Atom *) 3);
-        handles->add(TLB::getHandle((Atom *) 3), (Atom *) 1);
+        handles->add(atomhand[0], atoms[1]);
+        handles->add(atomhand[1], atoms[2]);
+        handles->add(atomhand[2], atoms[0]);
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue* tv = tvs[i];
             tv->updateVersionHandles(handles);
             const TruthValue& versionedTv1 = tv->getVersionedTV(versionHandles[i]);
             TS_ASSERT(versionedTv1.isNullTv());
             //logger().debug("%d => %p", i+1, handles->get(i+1));
-            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, TLB::getHandle((Atom *) handles->get(TLB::getHandle((Atom *)(i + 1))))));
+            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, TLB::getHandle(handles->get(atomhand[i]))));
             TS_ASSERT(!versionedTv2.isNullTv());
             TS_ASSERT(fabs(versionedTv2.getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(versionedTv2.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
