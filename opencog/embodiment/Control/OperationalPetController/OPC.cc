@@ -40,9 +40,8 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
 
     // OpenCog-related initialization
     atom_types_init::init();
-    opencog::config().set("MIN_STI", parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
-    opencog::logger().setFilename(logger().getFilename()+ "_opencog");
-    opencog::logger().setLevel((opencog::Logger::Level) atoi(parameters.get("OPENCOG_LOG_LEVEL").c_str()));
+    opencog::config().set("MIN_STI",
+                          parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ? 
                          agentType : parameters.get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );

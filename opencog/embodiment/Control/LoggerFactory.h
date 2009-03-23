@@ -14,17 +14,20 @@
 #include "util/Logger.h"
 #include "SystemParameters.h"
 
-namespace Control {
+namespace Control
+{
 
-class LoggerFactory {
+class LoggerFactory
+{
 
-    private:
+private:
 
-        LoggerFactory();
+    LoggerFactory();
 
-    public:
+public:
 
-        static opencog::Logger* getLogger(const SystemParameters &parameters, const std::string &id);
+    static opencog::Logger getLogger(const SystemParameters &parameters,
+                                     const std::string &id);
 
 }; // class
 }  // namespace

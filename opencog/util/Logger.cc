@@ -65,6 +65,18 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
     pthread_mutex_init(&lock, NULL);
 }
 
+Logger::Logger(const Logger& log) {
+    this->fileName.assign(log.fileName);
+    this->currentLevel = log.currentLevel;
+    this->timestampEnabled = log.timestampEnabled;
+    this->printToStdout = log.printToStdout;
+
+    this->logEnabled = log.logEnabled;
+    this->f = log.f;
+
+    this->lock = log.lock; //Nil: I'm not sure about that    
+}
+
 // ***********************************************/
 // API
 
