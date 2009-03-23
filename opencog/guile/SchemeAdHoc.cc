@@ -48,7 +48,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 
 		PatternMatch pm;
 		pm.set_atomspace(as);
-		Handle grounded_expressions = pm.imply(h);
+		Handle grounded_expressions = pm.crisp_logic_imply(h);
 		return handle_to_scm(grounded_expressions);
 	}
 

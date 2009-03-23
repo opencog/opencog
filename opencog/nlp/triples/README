@@ -436,7 +436,7 @@ the sentence patterns "x is a y" or "x is the y of ..." but not a naked
       _subj(be, Berlin)
       _obj(be, city)
 
-   "The captial of Germany is Berlin."
+   "The capital of Germany is Berlin."
 
       DEFINITE-FLAG(Germany, T)
       noun_number(Germany, singular)
@@ -462,7 +462,6 @@ This suggests that the correct rule for is-a relations is:
    # IF _subj(be, $var1) ^ _obj(be, $var2) 
        ^ !DEFINITE-FLAG($var2)
        THEN ^3_isa($var2, $var1)
-
 
 
 
