@@ -72,6 +72,25 @@
       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
       THEN ^3_isa($var2, $var1) 
 
+; Sentence "Men are mortal"
+; var1=mortal var2=men
+; Must reject prepositions, so that "the color (of the sky) is blue." 
+; is rejected.
+# IF _predadj($var1, $var2) 
+      ^ ! $prep($var2,$var3)
+      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+      THEN ^3_isa($var1, $var2)
+
+; Sentence "The color (of the sky) is blue."
+; if the prep is present, then reverse the order.
+; var1=blue var2=color
+# IF _predadj($var1, $var2) 
+      ^ $prep($var2,$var3)
+      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+      THEN ^3_isa($var2, $var1)
+
 ; Sentence: "Berlin is in Germany", alternate parse
 ; (This becomes the dominant parse for "Berlin is a city in Germany").
 ; var1=Berlin var2=Germany $prep=in

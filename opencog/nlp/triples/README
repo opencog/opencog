@@ -407,6 +407,10 @@ Several approaches are possible:
 Consistency Checking
 --------------------
 Consider the following three sentences:
+   Aristotle is a man.
+   Men are mortal.
+
+
    Berlin is the capital of Germany.
    Capitals are cities.
    Berlin is a city.
@@ -418,6 +422,10 @@ sentence is plausible, i.e. consistent with the first two sentences?
 
 IsA Sentences
 -------------
+Copulas, and "is-a" sentences in general, pose difficulties to naive
+approaches of extracting is-a relations from text.  This section
+examines some of these difficulties, and possible solutions.
+
 Consider, for example: "Berlin is a city"
    _subj(be, Berlin)
    _obj(be, city)
@@ -475,6 +483,33 @@ values set so that they're true. This is because the truth value
 is examined to compute the effect of !. The default truth value
 in Opencog is (false, unconfident), so it must be over-ridden
 to state (true, confident).
+
+Consider now: "Men are mortal."
+   _predadj(mortal, men)
+
+which suggests the rule:
+
+ # IF _predadj($var1, $var2) THEN ^3_isa($var1, $var2)
+
+However, prepositions again confound word order:
+Input sentence: "The color of the sky is blue."
+   of(color, sky)
+   _predadj(blue, color)
+
+By ignoring the preposition, the sentence becomes: "color is blue", 
+i.e. that 'colors' are a kind-of blue, which is inverted from the 
+intended sense. The next-most naive rule is then:
+
+  # IF _predadj($var1, $var2) ^ 
+       ! $prep($var2,$var3)
+       THEN ^3_isa($var1, $var2)
+
+and also the inverted word-order case:
+
+  # IF _predadj($var1, $var2) ^ 
+       $prep($var2,$var3)
+       THEN ^3_isa($var2, $var1)
+
 
 
 Deduction
