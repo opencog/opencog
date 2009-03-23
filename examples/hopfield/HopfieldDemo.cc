@@ -364,7 +364,9 @@ void testHopfieldNetworkRolling()
     patterns = getPatterns();
     cuePatterns = getCuePatterns(patterns);
 
-    sleep(10);
+#ifdef HAVE_UBIGRAPH
+    if (o->visualise) sleep(10 * o->vdelay);
+#endif //HAVE_UBIGRAPH
     for (unsigned int i = 0; i < patterns.size(); i++) {
         if (o->resetFlag)
             (static_cast<HopfieldServer&>(server())).reset();
