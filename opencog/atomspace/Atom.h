@@ -138,9 +138,6 @@ public:
     virtual ~Atom() throw (RuntimeException);
 
     /**
-     * Tells whether the atom is real or not (a type designator)
-     */
-    /**
      * Returns the type of the atom.
      *
      * @return The type of the atom.
