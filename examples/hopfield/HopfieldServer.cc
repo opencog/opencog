@@ -182,7 +182,9 @@ float HopfieldServer::singleImprintAndTestPattern(Pattern p, int retrieve = 1, f
         options->afterFile << result;
         options->diffFile << (result - before);
     }
+#ifdef HAVE_UBIGRAPH
     if (options->visualize) sleep(AFTER_RETRIEVAL_DELAY * options->visDelay);
+#endif //HAVE_UBIGRAPH
 
     // Nodes are left with STI after retrieval
     resetNodes();
@@ -788,7 +790,9 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         printStatus();
 
         //logger().fine("---Imprint:Energy.");
+#ifdef HAVE_UBIGRAPH
         if (options->visualize) sleep( AFTER_IMPRINT_DELAY * options->visDelay);
+#endif //HAVE_UBIGRAPH
         logger().fine("---Imprint:Resetting nodes");
         resetNodes();
     }
