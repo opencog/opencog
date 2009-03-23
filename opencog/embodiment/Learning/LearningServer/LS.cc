@@ -22,327 +22,339 @@ using namespace opencog;
  */
 LS::LS(const std::string &myId, const std::string &ip,
        int portNumber, Control::SystemParameters & parameters)
-  : NetworkElement(parameters, myId, ip, portNumber) {
-  // OpenCog-related initialization
-  opencog::atom_types_init::init();
-  opencog::config().set("MIN_STI", parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
-  opencog::logger().setFilename(logger().getFilename()+ "_opencog");
-  opencog::logger().setLevel((opencog::Logger::Level)atoi(parameters.get("OPENCOG_LOG_LEVEL").c_str()));
+        : NetworkElement(parameters, myId, ip, portNumber)
+{
+    // OpenCog-related initialization
+    opencog::atom_types_init::init();
+    opencog::config().set("MIN_STI",
+                          parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
 
-  this->busy = false;
-  this->candidateSchemaCnt = 0;
+    this->busy = false;
+    this->candidateSchemaCnt = 0;
 }
 
-LS::~LS(){
+LS::~LS()
+{
 }
 /**
  * Inherated functions from NetworkElement
  */
-void LS::setUp(){
-  //insert ImitationLearningTask
-  plugInIdleTask(&ILTask, 1);
+void LS::setUp()
+{
+    //insert ImitationLearningTask
+    plugInIdleTask(&ILTask, 1);
 }
 
-bool LS::processNextMessage(MessagingSystem::Message *msg){
-	LearningServerMessages::LearnMessage  * lm;
-	LearningServerMessages::RewardMessage * rm;
-	LearningServerMessages::LSCmdMessage  * cm;
+bool LS::processNextMessage(MessagingSystem::Message *msg)
+{
+    LearningServerMessages::LearnMessage  * lm;
+    LearningServerMessages::RewardMessage * rm;
+    LearningServerMessages::LSCmdMessage  * cm;
 
-	switch(msg->getType()){
+    switch (msg->getType()) {
 
-		case MessagingSystem::Message::LS_CMD:
-			cm = (LearningServerMessages::LSCmdMessage *)msg;
+    case MessagingSystem::Message::LS_CMD:
+        cm = (LearningServerMessages::LSCmdMessage *)msg;
 
-			if(learningPet == cm->getFrom() &&
-			   learningSchema == cm->getSchema()){
+        if (learningPet == cm->getFrom() &&
+                learningSchema == cm->getSchema()) {
 
-			   	if(cm->getCommand() == parameters.get("STOP_LEARNING_CMD")){
-			   		stopLearn();
-			   		return false;
-			   	}
-
-			   	if(cm->getCommand() == parameters.get("TRY_SCHEMA_CMD")){
-			   		trySchema();
-			   		return false;
-			   	}
-			}
-		 	break;
-
-		case MessagingSystem::Message::LEARN:
-			lm = (LearningServerMessages::LearnMessage *)msg;
-
-			ownerID = lm->getOwnerId();
-
-			avatarID = lm->getAvatarId();
-
-			// no learning in progress... start a new one
-			if(!isBusy()){
-			        busy = true;
-
-				AtomSpace *as = new AtomSpace();
-			        SpaceServer *ss = new SpaceServer(*as);
-			        wp = new AtomSpaceWorldProvider(*ss);
-				learningPet = lm->getFrom();
-				learningSchema = lm->getSchema();
-
-				logger().log(opencog::Logger::INFO, "LS - Starting new learning: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
-				initLearn(lm);
-				break;
-			}
-
-			// learning in progress, message from the pet currently using LS
-			// and the currently trick being learned (that is, it's a new
-			// example)
-			if(learningPet == lm->getFrom() &&
-			   learningSchema == lm->getSchema()){
-
-				logger().log(opencog::Logger::INFO, "LS - Adding example: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
-
-                // TODO verify if commented change has some effect
-				//wp = new AtomSpaceWorldProvider(new AtomSpace());
-				addLearnExample(lm);
-				break;
-			}
-
-			// currently the LS do not have a queue of tricks to learn or execute
-			// more than one learning process (no concurrency) soh just return
-			logger().log(opencog::Logger::WARN, "LS - LS does not support concurent learning (LS busy right now).");
-			break;
-
-		case MessagingSystem::Message::REWARD:
-			rm = (LearningServerMessages::RewardMessage *)msg;
-
-			if(!isBusy()){
-				logger().log(opencog::Logger::WARN, "LS - LS should be learning when receive a reward message.");
-				return false;
-			}
-
-			// message from the learning pet and rewarding the learning schema
-
-			if(learningPet == rm->getFrom() &&
-			   learningSchema /*getCandidateSchemaName()*/ == rm->getCandidateSchema()){
-				rewardCandidateSchema(rm);
-			}
-			break;
-        case MessagingSystem::Message::TRY:
-            LearningServerMessages::TrySchemaMessage  * tryMsg;
-            tryMsg = (LearningServerMessages::TrySchemaMessage  *)msg;
-
-            // TODO: verify if the arguments are the same?
-	    if(learningPet == tryMsg->getFrom() &&  learningSchema == tryMsg->getSchema()){
-                trySchema();
-            }
-            break;
-
-        case MessagingSystem::Message::STOP_LEARNING:
-            LearningServerMessages::StopLearningMessage  * stopLearningMsg;
-            stopLearningMsg = (LearningServerMessages::StopLearningMessage  *)msg;
-
-            // TODO: verify if the arguments are the same?
-	    if(learningPet == stopLearningMsg->getFrom() &&  learningSchema == stopLearningMsg->getSchema()){
+            if (cm->getCommand() == parameters.get("STOP_LEARNING_CMD")) {
                 stopLearn();
+                return false;
             }
-            break;
 
-		default:
-			logger().log(opencog::Logger::ERROR, "LS - Unknown message type.");
-	}
-	return false;
+            if (cm->getCommand() == parameters.get("TRY_SCHEMA_CMD")) {
+                trySchema();
+                return false;
+            }
+        }
+        break;
+
+    case MessagingSystem::Message::LEARN:
+        lm = (LearningServerMessages::LearnMessage *)msg;
+
+        ownerID = lm->getOwnerId();
+
+        avatarID = lm->getAvatarId();
+
+        // no learning in progress... start a new one
+        if (!isBusy()) {
+            busy = true;
+
+            AtomSpace *as = new AtomSpace();
+            SpaceServer *ss = new SpaceServer(*as);
+            wp = new AtomSpaceWorldProvider(*ss);
+            learningPet = lm->getFrom();
+            learningSchema = lm->getSchema();
+
+            logger().log(opencog::Logger::INFO, "LS - Starting new learning: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
+            initLearn(lm);
+            break;
+        }
+
+        // learning in progress, message from the pet currently using LS
+        // and the currently trick being learned (that is, it's a new
+        // example)
+        if (learningPet == lm->getFrom() &&
+                learningSchema == lm->getSchema()) {
+
+            logger().log(opencog::Logger::INFO, "LS - Adding example: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
+
+            // TODO verify if commented change has some effect
+            //wp = new AtomSpaceWorldProvider(new AtomSpace());
+            addLearnExample(lm);
+            break;
+        }
+
+        // currently the LS do not have a queue of tricks to learn or execute
+        // more than one learning process (no concurrency) soh just return
+        logger().log(opencog::Logger::WARN, "LS - LS does not support concurent learning (LS busy right now).");
+        break;
+
+    case MessagingSystem::Message::REWARD:
+        rm = (LearningServerMessages::RewardMessage *)msg;
+
+        if (!isBusy()) {
+            logger().log(opencog::Logger::WARN, "LS - LS should be learning when receive a reward message.");
+            return false;
+        }
+
+        // message from the learning pet and rewarding the learning schema
+
+        if (learningPet == rm->getFrom() &&
+                learningSchema /*getCandidateSchemaName()*/ == rm->getCandidateSchema()) {
+            rewardCandidateSchema(rm);
+        }
+        break;
+    case MessagingSystem::Message::TRY:
+        LearningServerMessages::TrySchemaMessage  * tryMsg;
+        tryMsg = (LearningServerMessages::TrySchemaMessage  *)msg;
+
+        // TODO: verify if the arguments are the same?
+        if (learningPet == tryMsg->getFrom() &&  learningSchema == tryMsg->getSchema()) {
+            trySchema();
+        }
+        break;
+
+    case MessagingSystem::Message::STOP_LEARNING:
+        LearningServerMessages::StopLearningMessage  * stopLearningMsg;
+        stopLearningMsg = (LearningServerMessages::StopLearningMessage  *)msg;
+
+        // TODO: verify if the arguments are the same?
+        if (learningPet == stopLearningMsg->getFrom() &&  learningSchema == stopLearningMsg->getSchema()) {
+            stopLearn();
+        }
+        break;
+
+    default:
+        logger().log(opencog::Logger::ERROR, "LS - Unknown message type.");
+    }
+    return false;
 }
 
 /**
  * Public methods
  */
-bool LS::isBusy(){
-	return busy;
+bool LS::isBusy()
+{
+    return busy;
 }
 
-void LS::sendCandidateSchema(const combo::combo_tree & schema){
-	candidateSchemaCnt++;
-	sendSchema(schema, learningSchema, getCandidateSchemaName());
+void LS::sendCandidateSchema(const combo::combo_tree & schema)
+{
+    candidateSchemaCnt++;
+    sendSchema(schema, learningSchema, getCandidateSchemaName());
 }
 
-void LS::sendBestSchema(const combo::combo_tree& schema){
-        opencog::cassert(TRACE_INFO, isBusy());
-	sendSchema(schema, learningSchema);
-	resetLearningServer();
-	//inform imitation learning task to stop learning
-	ILTask.stopLearning();
+void LS::sendBestSchema(const combo::combo_tree& schema)
+{
+    opencog::cassert(TRACE_INFO, isBusy());
+    sendSchema(schema, learningSchema);
+    resetLearningServer();
+    //inform imitation learning task to stop learning
+    ILTask.stopLearning();
 }
 
 /**
  * Private methods
  */
-void LS::sendSchema(const combo::combo_tree & schema, std::string schemaName, std::string candidateName){
+void LS::sendSchema(const combo::combo_tree & schema, std::string schemaName, std::string candidateName)
+{
+    stringstream ss;
+    ss << schema;
+    logger().log(opencog::Logger::INFO, "LS - Sending schema: (%s, %s, %s).", learningPet.c_str(), schemaName.c_str(), ss.str().c_str());
+    LearningServerMessages::SchemaMessage msg(this->getID(), learningPet, schema, schemaName, candidateName);
+    sendMessage(msg);
+}
+
+const std::string LS::getCandidateSchemaName()
+{
+    if (learningSchema == "") {
+        logger().log(opencog::Logger::WARN, "LS - Trying to get a candidate name from a nameless schema.");
+        return ("");
+    }
+
+    std::string candidateName;
+    candidateName.append(learningSchema);
+    candidateName.append("_");
+    candidateName.append(opencog::toString(candidateSchemaCnt));
+
+    return candidateName;
+}
+
+void LS::resetLearningServer()
+{
+    busy = false;
+    candidateSchemaCnt = 0;
+
+    learningPet.assign("");
+    learningSchema.assign("");
+    ownerID.assign("");
+    avatarID.assign("");
+}
+
+void LS::initLearn(LearningServerMessages::LearnMessage * msg)
+{
+    logger().log(opencog::Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
+
+    bool result = msg->populateAtomSpace(wp->getSpaceServer());
+    if (!result) {
+        // TODO: do something when fails
+        logger().log(opencog::Logger::WARN, "LS - initLearn():  failed to populate AtomSpace.");
+    }
+    logger().log(opencog::Logger::DEBUG, "LS - Data from LearnMessage gotten.");
+
+
+    //debug print
+    //wp->getAtomSpace()->print();
+    //~debug print
+
+    // TODO: use atoms from atomSpace
+
+    // For now the Learning Server only uses hillclimbing - getting definite objects from all maps covering the exemplars
+
+    logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process.");
+
+    combo::argument_list al;
+    std::vector<std::string> stral = msg->getSchemaArguments();
+    //convert string list in vertex list
+    for (std::vector<std::string>::iterator ai = stral.begin();
+            ai != stral.end(); ++ai) {
+        //since the argument are given as atom name
+        //we first convert them to be definite_object
+        //here self correspond to avatarID because
+        //the pet goes under the skin of the avatar to imitate
+        combo::definite_object cdo =
+            WorldWrapperUtil::atom_name_to_definite_object(*ai,
+                    avatarID, ownerID);
+        al.push_back(cdo);
+    }
+
+    bool initLearningSucceeds =
+        ILTask.initLearning(atoi(parameters.get("NUMBER_OF_ESTIMATIONS_PER_CYCLE").c_str()),
+                            wp,
+                            al,
+                            PerceptionActionInterface::PAIUtils::getInternalId(learningPet.c_str()),
+                            ownerID,
+                            avatarID,
+                            learningSchema);
+    if (initLearningSucceeds)
+        logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process - Done.");
+    else {
+        resetLearningServer();
+        logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process - Failed.");
+    }
+}
+
+void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
+{
+    logger().log(opencog::Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
+
+    // TODO: do something when resul equals false
+    bool result = msg->populateAtomSpace(wp->getSpaceServer());
+    if (!result) {
+        // TODO: do something when fails
+        logger().log(opencog::Logger::WARN, "LS - addLearnExample(): failed to populate AtomSpace.");
+    }
+    logger().log(opencog::Logger::DEBUG, "LS - Data from LearnMessage gotten.");
+
+    logger().log(opencog::Logger::DEBUG, "LS - Adding exemplar to Learning Process.");
+    //get world map and atomSpace from message
+    //and update learning algorithm environment
+    combo::argument_list al;
+    std::vector<std::string> stral = msg->getSchemaArguments();
+    //convert string list in vertex list
+    for (std::vector<std::string>::iterator ai = stral.begin();
+            ai != stral.end(); ++ai) {
+        //since the argument are given as atom name
+        //we first convert them to be definite_object
+        //here self correspond to avatarID because
+        //the pet goes under the skin of the avatar to imitate
+        combo::definite_object cdo =
+            WorldWrapperUtil::atom_name_to_definite_object(*ai,
+                    avatarID, ownerID);
+        al.push_back(cdo);
+    }
+    ILTask.addLearningExample(wp, al);
+    logger().log(opencog::Logger::DEBUG, "LS - Adding exemplar to Learning Process - done.");
+}
+
+void LS::rewardCandidateSchema(LearningServerMessages::RewardMessage * msg)
+{
+    logger().log(opencog::Logger::INFO, "LS - Receive Reward: %f.",
+                 msg->getReward());
+    // use RewardMessage data to adjust learning algorithm
+    double f = msg->getReward();
+    ILTask.setFitness(f);
+}
+
+void LS::stopLearn()
+{
+    logger().log(opencog::Logger::DEBUG, "LS - Stopping learn process.");
+    combo::combo_tree bestSchema;
+
+    if (isBusy()) {
+        // finish the learning process and get best schema soh far as the
+        // learned schema.
+        bestSchema = ILTask.getBestSchema();
+        //no need because sendBestSchema reset the task
+        //ILTask.stopLearning();
         stringstream ss;
-	ss << schema;
-	logger().log(opencog::Logger::INFO, "LS - Sending schema: (%s, %s, %s).", learningPet.c_str(), schemaName.c_str(), ss.str().c_str());
-	LearningServerMessages::SchemaMessage msg(this->getID(), learningPet, schema, schemaName, candidateName);
-	sendMessage(msg);
-}
-
-const std::string LS::getCandidateSchemaName(){
-	if(learningSchema == ""){
-		logger().log(opencog::Logger::WARN, "LS - Trying to get a candidate name from a nameless schema.");
-		return ("");
-	}
-
-	std::string candidateName;
-	candidateName.append(learningSchema);
-	candidateName.append("_");
-	candidateName.append(opencog::toString(candidateSchemaCnt));
-
-	return candidateName;
-}
-
-void LS::resetLearningServer(){
-	busy = false;
-	candidateSchemaCnt = 0;
-
-	learningPet.assign("");
-	learningSchema.assign("");
-	ownerID.assign("");
-	avatarID.assign("");
-}
-
-void LS::initLearn(LearningServerMessages::LearnMessage * msg){
-	logger().log(opencog::Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
-
-	bool result = msg->populateAtomSpace(wp->getSpaceServer());
-	if (!result) {
-		// TODO: do something when fails
-		logger().log(opencog::Logger::WARN, "LS - initLearn():  failed to populate AtomSpace.");
-	}
-	logger().log(opencog::Logger::DEBUG, "LS - Data from LearnMessage gotten.");
-
-
-	//debug print
-	//wp->getAtomSpace()->print();
-	//~debug print
-
-	// TODO: use atoms from atomSpace
-
-	// For now the Learning Server only uses hillclimbing - getting definite objects from all maps covering the exemplars
-
-	logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process.");
-
-	combo::argument_list al;
-	std::vector<std::string> stral = msg->getSchemaArguments();
-	//convert string list in vertex list
-	for(std::vector<std::string>::iterator ai = stral.begin();
-	    ai != stral.end(); ++ai) {
-	  //since the argument are given as atom name
-	  //we first convert them to be definite_object
-	  //here self correspond to avatarID because
-	  //the pet goes under the skin of the avatar to imitate
-	  combo::definite_object cdo =
-	    WorldWrapperUtil::atom_name_to_definite_object(*ai,
-							   avatarID, ownerID);
-	  al.push_back(cdo);
-	}
-
-	bool initLearningSucceeds =
-	  ILTask.initLearning(atoi(parameters.get("NUMBER_OF_ESTIMATIONS_PER_CYCLE").c_str()),
-			      wp,
-			      al,
-			      PerceptionActionInterface::PAIUtils::getInternalId(learningPet.c_str()),
-			      ownerID,
-			      avatarID,
-			      learningSchema);
-	if(initLearningSucceeds)
-	  logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process - Done.");
-	else {
-	  resetLearningServer();
-	  logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process - Failed.");
-	}
-}
-
-void LS::addLearnExample(LearningServerMessages::LearnMessage * msg){
-	logger().log(opencog::Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
-
-	// TODO: do something when resul equals false
-	bool result = msg->populateAtomSpace(wp->getSpaceServer());
-	if (!result) {
-		// TODO: do something when fails
-		logger().log(opencog::Logger::WARN, "LS - addLearnExample(): failed to populate AtomSpace.");
-	}
-	logger().log(opencog::Logger::DEBUG, "LS - Data from LearnMessage gotten.");
-
-	logger().log(opencog::Logger::DEBUG, "LS - Adding exemplar to Learning Process.");
-	//get world map and atomSpace from message
-	//and update learning algorithm environment
-	combo::argument_list al;
-	std::vector<std::string> stral = msg->getSchemaArguments();
-	//convert string list in vertex list
-	for(std::vector<std::string>::iterator ai = stral.begin();
-	    ai != stral.end(); ++ai) {
-	  //since the argument are given as atom name
-	  //we first convert them to be definite_object
-	  //here self correspond to avatarID because
-	  //the pet goes under the skin of the avatar to imitate
-	  combo::definite_object cdo =
-	    WorldWrapperUtil::atom_name_to_definite_object(*ai,
-							   avatarID, ownerID);
-	  al.push_back(cdo);
-	}
-	ILTask.addLearningExample(wp, al);
-	logger().log(opencog::Logger::DEBUG, "LS - Adding exemplar to Learning Process - done.");
-}
-
-void LS::rewardCandidateSchema(LearningServerMessages::RewardMessage * msg){
-  logger().log(opencog::Logger::INFO, "LS - Receive Reward: %f.",
-		  msg->getReward());
-  // use RewardMessage data to adjust learning algorithm
-  double f = msg->getReward();
-  ILTask.setFitness(f);
-}
-
-void LS::stopLearn(){
-	logger().log(opencog::Logger::DEBUG, "LS - Stopping learn process.");
-	combo::combo_tree bestSchema;
-
-	if(isBusy()) {
-	  // finish the learning process and get best schema soh far as the
-	  // learned schema.
-	  bestSchema = ILTask.getBestSchema();
-	  //no need because sendBestSchema reset the task
-	  //ILTask.stopLearning();
-	  stringstream ss;
-	  ss << bestSchema;
-	  string s = ss.str();
-	  logger().log(opencog::Logger::DEBUG,
-			  "LS - Send the final learned schema : %s", s.c_str());
-	  sendBestSchema(bestSchema);
-
-	  //delete wp
-	  delete(wp);
-	}
-	else {
-	  logger().log(opencog::Logger::DEBUG,
-			  "LS - Send no schema because LS is not busy");
-	}
-}
-
-void LS::trySchema(){
+        ss << bestSchema;
+        string s = ss.str();
         logger().log(opencog::Logger::DEBUG,
-			"LS - Trying schema");
-	combo::combo_tree bestSchema;
+                     "LS - Send the final learned schema : %s", s.c_str());
+        sendBestSchema(bestSchema);
 
-	if(isBusy()) {
-	  // get a candidate schema to execute.
-	  //the learning algorithm will pause until
-	  // a reward message is received.
-	  bestSchema = ILTask.getBestSchemaEstimated();
-	  stringstream ss;
-	  ss << bestSchema;
-	  string s = ss.str();
-	  logger().log(opencog::Logger::DEBUG,
-			  "LS - Trying the following schema : %s", s.c_str());
-	  ILTask.waitForReward();
-	  sendCandidateSchema(bestSchema);
-	}
-	else {
-	  logger().log(opencog::Logger::DEBUG,
-			  "LS - Trying no schema because LS is not busy");
-	}
+        //delete wp
+        delete(wp);
+    } else {
+        logger().log(opencog::Logger::DEBUG,
+                     "LS - Send no schema because LS is not busy");
+    }
+}
+
+void LS::trySchema()
+{
+    logger().log(opencog::Logger::DEBUG,
+                 "LS - Trying schema");
+    combo::combo_tree bestSchema;
+
+    if (isBusy()) {
+        // get a candidate schema to execute.
+        //the learning algorithm will pause until
+        // a reward message is received.
+        bestSchema = ILTask.getBestSchemaEstimated();
+        stringstream ss;
+        ss << bestSchema;
+        string s = ss.str();
+        logger().log(opencog::Logger::DEBUG,
+                     "LS - Trying the following schema : %s", s.c_str());
+        ILTask.waitForReward();
+        sendCandidateSchema(bestSchema);
+    } else {
+        logger().log(opencog::Logger::DEBUG,
+                     "LS - Trying no schema because LS is not busy");
+    }
 }

@@ -14,10 +14,10 @@ ADD_LIBRARY(attention SHARED
 )
 
 INCLUDE_DIRECTORIES(
-	${OPENCOG_SOURCE_DIR}/src/util
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/server
-	${OPENCOG_SOURCE_DIR}/src/query
+	${OPENCOG_SOURCE_DIR}/opencog/util
+	${OPENCOG_SOURCE_DIR}/opencog/atomspace
+	${OPENCOG_SOURCE_DIR}/opencog/server
+	${OPENCOG_SOURCE_DIR}/opencog/query
 )
 
 TARGET_LINK_LIBRARIES(attention server)

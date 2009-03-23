@@ -46,8 +46,8 @@ Router::Router(const Control::SystemParameters &params) : parameters(params) {
     this->routerAvailableNotificationInterval = atoi(parameters.get("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL").c_str());
     this->noAckMessages = atoi(this->parameters.get("NO_ACK_MESSAGES").c_str()) == 1;
 
-    //Nil: I comment that hopefully we don't need it
-    //opencog::Logger::initMainLogger(Control::LoggerFactory::getLogger(this->parameters, routerId));
+    opencog::logger() = Control::LoggerFactory::getLogger(this->parameters,
+                                                          routerId);
     
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;

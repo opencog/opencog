@@ -101,8 +101,8 @@ void NetworkElement::initialize(const Control::SystemParameters &params, const s
     this->parameters = params;
 
     // Initializes the main logger (static logger for this process)
-    //Nil: I comment that hopefully we don't need it
-    //opencog::Logger::initMainLogger(Control::LoggerFactory::getLogger(parameters, myId));    
+    // merely specify the file name of the logger
+    opencog::logger() = Control::LoggerFactory::getLogger(parameters, myId);
 
     this->routerID.assign(this->parameters.get("ROUTER_ID"));
     this->routerIP.assign(this->parameters.get("ROUTER_IP"));
