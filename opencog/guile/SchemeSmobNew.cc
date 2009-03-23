@@ -42,8 +42,6 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 {
 	if (Handle::UNDEFINED == h) return "#<Undefined atom handle>";
 
-	if (h.value() <= NOTYPE) return "#<non-real atom>";
-
 	Atom *atom = TLB::getAtom(h);
 	if (NULL == atom) return "#<Invalid handle>";
 	Node *node = dynamic_cast<Node *>(atom);
