@@ -41,6 +41,9 @@ $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
 $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
+$binDirH/opencog/embodiment/PetaverseProxySimulator/pvpSimulator \
+$binDirH/opencog/embodiment/AGISimSim/server/AGISimSimServer \
+$pdh/opencog/embodiment/AGISimSim/server/simconfig.def \
 ./killpb.csh \
 ./cleanup.csh \
 ./pb.csh \
@@ -61,13 +64,25 @@ $pdh/opencog/embodiment/pet_traits_princess.lua \
 $pdh/opencog/embodiment/pet_traits_sleepy.lua \
 $pdh/opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorld.xsd \
 $pdh/opencog/embodiment/RuleValidation/Processor/validation_core.lua \
+$pdh/opencog/embodiment/PetaverseProxySimulator/pvpsim.cfg \
+$pdh/opencog/embodiment/PetaverseProxySimulator/PVPSimulatorInterface.tcl \
 $pdh/opencog/embodiment/Control/OperationalPetController/PetInterface.tcl \
 ./SPCTools.py \
+]
+
+set flistAGI [list \
+$pdh/opencog/embodiment/AGISimSim/server/data/simworld.def \
+$pdh/opencog/embodiment/AGISimSim/server/data/sl_script_case01.def \
+$pdh/opencog/embodiment/AGISimSim/server/data/sl_script.def \
 ]
 
 if {$type_dist == "dev"} {
     set flistconfig [list \
     $pdh/opencog/embodiment/dev_config/config.cfg \
+    $binDirH/opencog/embodiment/AutomatedSystemTest/pbTester \
+    $pdh/tests/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_0.txt \
+    $pdh/tests/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_1.txt \
+    $pdh/tests/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_2.txt \
     run_system_test.sh \
     ]
 } elseif {$type_dist == "user"} {
@@ -87,6 +102,10 @@ exec mkdir -p $distDir/data
 
 foreach file $flist {
     exec cp -r $file $distDir
+}
+
+foreach file $flistAGI {
+    exec cp -r $file $distDir/data
 }
 
 foreach file $flistconfig {

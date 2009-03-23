@@ -54,7 +54,7 @@ FIND_PACKAGE(Luabind REQUIRED)
 
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals regex date_time REQUIRED)
+FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals regex date_time thread REQUIRED)
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)
