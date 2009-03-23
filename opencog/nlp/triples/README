@@ -189,6 +189,10 @@ rules that are already used in the RelEx framing code; i.e. the syntax
 is meant to be identical to that of the file "data/frame/mapping_rules.txt"
 in the RelEx source tree.
 
+The ! symbol denotes "not". Used in front of a term, it states that the
+term must be *absent*, or, if present, must have a truth value of 'false'.
+See the section "is-a", below, for an example usage.
+
 The above rule cannot be applied to the following:
 
    Input sentence: "Berlin is the capital of Germany."
@@ -330,7 +334,7 @@ The file "rules.txt" contains the current set of rules.  The perl script
 "rules-to-implications.pl" will convert rules into OpenCog 
 ImplicationLinks, as described above. 
 
-The shell script "ld.sh" in this directory will load the assorted scheme
+The shell script "load.sh" in this directory will load the assorted scheme
 bits and pieces.  In addition, text that was parsed by relex, and output
 in opencog format, must be loaded. 
 
@@ -403,13 +407,14 @@ Several approaches are possible:
 Consistency Checking
 --------------------
 Consider the following three sentences:
-   Berlin is a city.
-   Cities are capitals.
    Berlin is the capital of Germany.
+   Capitals are cities.
+   Berlin is a city.
 
 Assume the first two sentences were previously determined to be true,
 with a high confidence value. How can we determine that the third 
 sentence is plausible, i.e. consistent with the first two sentences?
+
 
 IsA Sentences
 -------------
@@ -463,6 +468,13 @@ This suggests that the correct rule for is-a relations is:
        ^ !DEFINITE-FLAG($var2)
        THEN ^3_isa($var2, $var1)
 
+The ! in front of DEFINITE-FLAG means "not" or "invert"; the 
+DEFINITE-FLAG must be absent, or, if present, must be false.
+Note that all top-level clauses (subj, obj, etc.) must have truth
+values set so that they're true. This is because the truth value
+is examined to compute the effect of !. The default truth value
+in Opencog is (false, unconfident), so it must be over-ridden
+to state (true, confident).
 
 
 Deduction
