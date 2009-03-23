@@ -17,7 +17,12 @@ INCLUDE_DIRECTORIES (
 
 IF (UBIGRAPHCLIENT_FOUND)
     SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
-    SET (OPENCOG_UBI_LIB ubigraph)
+    SET (OPENCOG_UBI_LIB ubigraph
+        # TODO currently requires library called
+        # libcurl.so (linked to a specific version) 
+        # - find curl library using cmake
+        curl 
+        )
 ENDIF (LIBUBIGRAPHCLIENT_FOUND)
 
 ADD_EXECUTABLE (hopfield
@@ -41,7 +46,6 @@ TARGET_LINK_LIBRARIES (hopfield
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${EXPAT_LIBRARIES}
-    curl # TODO currently requires making a library called libcurl.so (linked to a specific version) 
     ${UBIGRAPHCLIENT_LIBRARIES} #    ubigraphclient
 #    {$XMLRPC_LIBRARIES} #
     xmlrpc_client
