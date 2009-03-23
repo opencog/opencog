@@ -625,6 +625,10 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	atom_space->foreach_handle_of_type(ptype,
 	      &PatternMatchEngine::do_candidate, this);
 
+	dbgprt ("==================== Done Matching ==================\n");
+#ifdef DEBUG
+	fflush(stdout);
+#endif
 }
 
 void PatternMatchEngine::print_solution(
