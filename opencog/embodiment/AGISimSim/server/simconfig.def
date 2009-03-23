@@ -1,0 +1,148 @@
+<config>
+
+<note> Use extra nodes such as this one liberally, as long as they
+do not conflict with the actual config nodes. </note>
+
+<note> All distance values here are in SI units (ie. meters) 
+Time values currently vary from ms to us...
+</note>
+
+<AgentMax>7</AgentMax>
+<DemonMax>8</DemonMax>
+
+
+<note>
+<World> pre </world>
+<World> scripted </world>
+</note>
+
+<World> scripted </world>
+<MakeWalls> 0 </MakeWalls>
+<LibraryLoading> 1 </LibraryLoading>
+
+<LogLevel> 3 </LogLevel>
+<sockets> 7 </sockets>
+
+<CollisionDetection> 0 </CollisionDetection>
+
+<note><ObjectVisionResolution> 50 </ObjectVisionResolution></note>
+<ObjectVisionResolution> 1 </ObjectVisionResolution>
+<PixelVisionResolution> 20 </PixelVisionResolution>
+
+<ShowTopView> 1 </ShowTopView>
+<TopViewFollowAgent> 0 </TopViewFollowAgent>
+<TopViewCamX> 0.0 </TopViewCamX>
+<TopViewCamY> 10.0 </TopViewCamY>
+<TopViewCamZ> 0.0 </TopViewCamZ>
+
+<TopViewRotX> -80.0 </TopViewRotX>
+<TopViewRotY> 0.0 </TopViewRotY>
+
+<TopViewWindowPercent> 50 </TopViewWindowPercent>
+
+<EnableAnimation> 1 </EnableAnimation>
+<ForceAnimatedAgentView> 1 </ForceAnimatedAgentView>
+
+<AnimationMoveSpeed> 1.0 </AnimationMoveSpeed>
+<AnimationMoveName> walk </AnimationMoveName>
+<AnimationTurnSpeed> 1.0 </AnimationTurnSpeed>
+<AnimationTurnName> strut </AnimationTurnName>
+
+<MaximalLiftDistance> 1.0 </MaximalLiftDistance>
+<note> Since LocalSpaceMap has 0.25 x 0.25 grid blocks. We must keep a safe minimal distance, greater than the diagonal of a such grid block, between objects. The radius of the objects must be considered too </note>
+<WalkTowardsMinimalDistance> 0.36 </WalkTowardsMinimalDistance>
+
+<FrameUpdateDelay> 1000000 </FrameUpdateDelay>
+<TicsPerFrame> 5000 </TicsPerFrame>
+
+<alternative>
+<FrameUpdateDelay> 100 </FrameUpdateDelay>
+<TicsPerFrame> 5000 </TicsPerFrame>
+<FrameUpdateDelay> 60000 </FrameUpdateDelay>
+<TicsPerFrame> 200000 </TicsPerFrame>
+<comment> The above value means that AgiSim updates the vision
+spontaneously only once for every 200000 frame updates. As long as there are no
+intrinsically moving objects, this value can be infinite.  </comment>
+</alternative>
+
+<SocketPollingDelay> 5 </SocketPollingDelay>
+
+<note> Since LocalSpaceMap has 0.25 x 0.25 grid blocks. We must keep a safe minimal distance, greater than the diagonal of a such grid block, between objects </note>
+<MinBounceOnCollision> 0.36 </MinBounceOnCollision>
+
+<SenseBrightnessInObjectVision> 0 </SenseBrightnessInObjectVision>
+<SenseDistanceInPixelVision> 0 </SenseDistanceInPixelVision>
+
+<SenseMapInfo> 1 </SenseMapInfo>
+<SENSEPSEUDOVISION> 1 </SENSEPSEUDOVISION>
+<SENSEPIXELVISION> 0 </SENSEPIXELVISION>
+<SENSEOBJECTVISION> 0 </SENSEOBJECTVISION>
+<SENSEAURAL> 0 </SENSEAURAL>
+<SENSESMELL> 0 </SENSESMELL>
+<SENSETASTE> 0 </SENSETASTE>
+<SENSESELF> 1 </SENSESELF>
+
+<LogOnFile> 1 </LogOnFile>
+
+<UsePolygonNameInObjectVision> 0 </UsePolygonNameInObjectVision>
+
+<DrawGUI> 0 </DrawGUI>
+
+<EyeThetaMax> 2.4 </EyeThetaMax>
+<EyeThetaMin> -0.8 </EyeThetaMin>
+
+<RoomSizeX> 128 </RoomSizeX>
+<RoomSizeY> 15 </RoomSizeY>
+<RoomSizeZ> 128 </RoomSizeZ>
+<RescaleObjects> 1 </RescaleObjects>
+
+<CameraRelativeX> 0.0 </CameraRelativeX>
+<CameraRelativeY> 0.75 </CameraRelativeY>
+<CameraRelativeZ> 0.0 </CameraRelativeZ>
+<AgentBodyRadius> 0.25 </AgentBodyRadius>
+<LiftHeight> 3 </LiftHeight>
+
+<EatQuantum> 100 </EatQuantum>
+
+<DeathDisablesAgent> 0 </DeathDisablesAgent>
+
+	<VolumeFadePerDistance> 10 </VolumeFadePerDistance>
+
+	<InitialEnergy> 10000 </InitialEnergy>
+	<MaxEnergy> 15000 </MaxEnergy>
+
+	<SENSETOUCH> 0 </SENSETOUCH>
+
+	<WalkStepLength> 20 </WalkStepLength>
+
+	<PricePerStep> 10 </PricePerStep>
+	
+	<PricePerkgm> 1 </PricePerkgm>
+	<AgentBodyDensity>100 </AgentBodyDensity>
+	
+	<PricePerEat> 5 </PricePerEat>
+	<PricePerHandMove> 0.01 </PricePerHandMove>
+	<PricePerTurn> 0.01 </PricePerTurn>
+	<PricePerEyeMove> 0.01 </PricePerEyeMove>
+	<PricePerNoise> 0 </PricePerNoise>
+	<PricePerMessage> 0 </PricePerMessage>
+	
+	<TurnQuantum> 0.01 </TurnQuantum>
+	<HandMoveQuantum> 0.01 </HandMoveQuantum>
+	<EyeMoveQuantum> 0.01 </EyeMoveQuantum>
+	<MoveQuantum> 0.2 </MoveQuantum>
+	
+	<DefaultDensity> 100 </DefaultDensity>
+	<MaximalEatDistance> 1.0 </MaximalEatDistance>
+	<MaximalNudgeDistance> 1.0 </MaximalNudgeDistance>
+	
+	<LogSenseData> 0 </LogSenseData>
+
+	<EyePhiMin> -3.13 </EyePhiMin>
+	<EyePhiMax> +3.13 </EyePhiMax>
+	
+
+	<SimWorldFileName> data/simworld.def </SimWorldFileName>
+	<SimScriptFileName> data/sl_script_case01.def </SimScriptFileName>
+
+</config>

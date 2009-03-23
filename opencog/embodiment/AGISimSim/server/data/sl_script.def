@@ -1,0 +1,8 @@
+# World map for simulating a SL 
+
+new -10 0 -10 avatar box Bob no_init 0.20 1.75 0.40
+new   0 0   0 pet ball lightball no_init 0.2
+new   8 0  -3 object box food no_init 0.05 0.02 0.5
+new  -4 0  -3 object box water no_init 0.05 0.01 0.5
+new   5 0   7 structure box heavyball no_init 0.1 10 0.1
+new  -4 0   5 accessory box lightball no_init 0.5 0.01 0.01 
