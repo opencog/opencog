@@ -336,7 +336,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
     }
 #ifndef HAVE_UBIGRAPH
     if (visualize) {
-        cout << "Warning: Ubigraph visualisation not enabled on compilation.
+        cout << "Warning: Ubigraph visualisation not enabled on compilation."
             << endl << "Ignoring visualisation options" << endl;
     }
 #endif
