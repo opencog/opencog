@@ -84,8 +84,8 @@ public:
     static inline Atom* getAtom(const Handle& handle)
     {
 #ifdef USE_TLB_MAP
-        if (handle.value() <= NOTYPE) // check for "non-real" atoms
-            return reinterpret_cast<Atom*>(handle.value());
+        // if (handle.value() <= NOTYPE) // check for "non-real" atoms
+        //     return reinterpret_cast<Atom*>(handle.value());
 
         std::map<Handle, const Atom*>::iterator it = handle_map.find(handle);
         if (it == handle_map.end()) return NULL;
@@ -104,8 +104,8 @@ public:
     static inline Handle getHandle(const Atom* atom)
     {
 #ifdef USE_TLB_MAP
-        Handle h(reinterpret_cast<unsigned long>(atom));
-        if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
+        // Handle h(reinterpret_cast<unsigned long>(atom));
+        // if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
 
         std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
         if (it != atom_map.end()) return it->second;
@@ -137,8 +137,8 @@ public:
     static inline Handle holdsHandle(const Atom* atom)
     {
 #ifdef USE_TLB_MAP
-        Handle h(reinterpret_cast<unsigned long>(atom));
-        if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
+        // Handle h(reinterpret_cast<unsigned long>(atom));
+        // if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
 
         std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
         if (it != atom_map.end()) return it->second;
@@ -158,8 +158,8 @@ public:
                                  Handle handle = Handle::UNDEFINED)
     {
 #ifdef USE_TLB_MAP
-        Handle h(reinterpret_cast<unsigned long>(atom));
-        if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
+        // Handle h(reinterpret_cast<unsigned long>(atom));
+        // if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
 
         std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
         if (it != atom_map.end())
@@ -196,8 +196,8 @@ public:
      */
     static inline const Atom* removeAtom(const Atom* atom) {
 #ifdef USE_TLB_MAP
-        Handle h(reinterpret_cast<unsigned long>(atom));
-        if (h.value() <= NOTYPE) return atom; // check for "non-real" atoms
+        // Handle h(reinterpret_cast<unsigned long>(atom));
+        // if (h.value() <= NOTYPE) return atom; // check for "non-real" atoms
 
         std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
         if (it == atom_map.end()) {
