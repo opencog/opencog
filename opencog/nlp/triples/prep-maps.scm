@@ -4,7 +4,7 @@ scm
 ;
 ; (static) Map of verb-preposition pairs to a single term
 ;
-(EvaluationLink
+(EvaluationLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "capital_of")
 	(ListLink
 		(WordNode "capital")
@@ -12,7 +12,7 @@ scm
 	)
 )
 
-(EvaluationLink
+(EvaluationLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "color_of")
 	(ListLink
 		(WordNode "color")
@@ -20,7 +20,7 @@ scm
 	)
 )
 
-(EvaluationLink
+(EvaluationLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "make_from")
 	(ListLink
 		(WordNode "make")
@@ -28,7 +28,7 @@ scm
 	)
 )
 
-(EvaluationLink
+(EvaluationLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "spin_from")
 	(ListLink
 		(WordNode "spin")
@@ -38,15 +38,15 @@ scm
 
 
 ; ===============================
-(ListLink
+(ListLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "behind")
 	(WordNode "behind")
 )
-(ListLink
+(ListLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "inside")
 	(WordNode "inside")
 )
-(ListLink
+(ListLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "in")
 	(WordNode "in")
 )
