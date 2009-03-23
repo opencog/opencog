@@ -31,16 +31,24 @@
 
 using namespace opencog;
 
-#define VH1 VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *)1))
-#define VH2 VersionHandle(CONTEXTUAL, TLB::getHandle((Atom *)2))
+#define VH1 VersionHandle(CONTEXTUAL, h1)
+#define VH2 VersionHandle(CONTEXTUAL, h2)
 
 class HandleEntryUTest :  public CxxTest::TestSuite
 {
 
 private:
+    Atom *a1;
+    Atom *a2;
+    Handle h1;
+    Handle h2;
 
 public:
     HandleEntryUTest() {
+        a1 = new Node(CONCEPT_NODE, "atom one");
+        a2 = new Node(CONCEPT_NODE, "atom two");
+        h1 = TLB::addAtom(a1);
+        h2 = TLB::addAtom(a2);
     }
 
     void setUp() {
