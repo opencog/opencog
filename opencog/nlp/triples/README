@@ -14,12 +14,20 @@ the triple is then "color_of(sky, blue)", with "color_of" being the
 property or predicate, while "sky" and "blue" are the subject and
 object, respectively.
 
+One reason for creating semantic triples is that it simplifies certain
+types of deductions and inferences. For example, "author_of('Pride and 
+Prejudice', 'Jane Austen')" and "wrote('Pride and Prejudice', 'Jane 
+Austen')" are more or less synonymous expressions. Normalizing more
+complex structures (such as the output of RelEx, or of dependency 
+parsers in general), make it considerably easier to automatically
+discover such synonymous expressions.
+
 The primary challenges here are three-fold:
 1) Dealing with the diversity of expression in the English language, 
    where most sentences are NOT short, to-the-point assertions that
    something is true. For short, simple sentences, ReLex seems to
    provide enough normalization to extract at least some triples. But 
-   it is not clear how far this idea can be pushed.
+   it is not clear how far this idea (of using triples) can be pushed.
 2) Learning new relations. It is simple to code up, by hand, "framing"
    relationships, such as a list of colors, or a list properties that
    an object can have. It is harder to determine, when encountering a 
