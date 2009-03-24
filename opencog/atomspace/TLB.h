@@ -91,6 +91,7 @@ public:
         if (it == handle_map.end()) return NULL;
         else return const_cast<Atom*>(it->second);
 #else
+        if (Handle::UNDEFINED == handle) return NULL;
         return reinterpret_cast<Atom*>(handle.value() ^ OBFUSCATE);
 #endif
     }
