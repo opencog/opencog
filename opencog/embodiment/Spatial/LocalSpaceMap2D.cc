@@ -407,9 +407,9 @@ bool LocalSpaceMap2D::gridIllegal(const Spatial::GridPoint& gp) const{
 
 bool LocalSpaceMap2D::gridIllegal(unsigned int i, unsigned int j) const{ 
     bool result;
-    if (result = gridOccupied(i, j)) {
+    if ((result = gridOccupied(i, j))) {
         logger().log(opencog::Logger::FINE, "LocalSpaceMap - gridIllegal(%u, %u): grid occupied by an object!", i, j); 
-    } else if (result = !coordinatesAreOnGrid(i, j)) {
+    } else if ((result = !coordinatesAreOnGrid(i, j))) {
         logger().log(opencog::Logger::FINE, "LocalSpaceMap - gridIllegal(%u, %u): coordinates not on grid!", i, j); 
     }
     return result;

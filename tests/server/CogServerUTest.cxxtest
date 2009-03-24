@@ -25,6 +25,7 @@
 #include <string>
 
 #include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -60,6 +61,21 @@ public:
         s->add(h);
         _utilizedHandleSets.push_back(s);
     }
+};
+
+class CustomCogServer : public CogServer
+{
+    int tickCount;
+    public:
+        CustomCogServer() : tickCount(1) {
+            // Make it use external tick so that it does not call sleep inside serverLoop
+            config().set("EXTERNAL_TICK_MODE", "true");
+        }
+        bool customLoopRun() {
+            bool runCycle  = (tickCount++ % 100 == 0); 
+            if (tickCount > 998) stop();
+            return runCycle;
+        }
 };
 
 class CogServerUTest :  public CxxTest::TestSuite
@@ -147,6 +163,13 @@ public:
         TS_ASSERT(aat[a[2]].size() == 13);
         TS_ASSERT(aat[a[3]].size() == 12);
         TS_ASSERT(aat[a[4]].size() == 10);
+    }
+
+    /* test custom server, like required by virtual agents (embodiment) */
+    void testCustomCogServer() {
+       CogServer& cogServer = *(new CustomCogServer()); 
+       cogServer.serverLoop();
+       TS_ASSERT(cogServer.getCycleCount() == 10);
     }
 
 };

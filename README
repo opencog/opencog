@@ -42,7 +42,10 @@ iodbc       -- Generic SQL Database client access libraries
 openssl     -- SSL sockets library 
                Debian/Ubuntu package libssl-dev
 libgsl      -- The GNU Scientific Library
-               Debaian/Ubuntu package libgsl0-dev
+               Debian/Ubuntu package libgsl0-dev
+
+xercesc     -- Apache Xerces-C++ XML Parser
+               Debian/Ubuntu packages libxerces-c28 and libxerces-c2-dev
 
 
 To build opencog:
