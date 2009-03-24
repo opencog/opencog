@@ -40,6 +40,7 @@ $binDirH/opencog/embodiment/Control/OperationalPetController/opcHcTester \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
+$binDirH/opencog/embodiment/Learning/LearningServer/learningServer_CogServer \
 $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
 $binDirH/opencog/embodiment/PetaverseProxySimulator/pvpSimulator \
 $binDirH/opencog/embodiment/AGISimSim/server/AGISimSimServer \

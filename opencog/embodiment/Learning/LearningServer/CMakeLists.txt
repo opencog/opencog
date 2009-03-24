@@ -1,5 +1,6 @@
 ADD_LIBRARY(lslib
 	LS
+        LS_CogServer
 	LSMocky
 	SleepTask
 	ImitationLearningTask
@@ -53,6 +54,7 @@ LINK_DIRECTORIES(
     ${OPENCOG_BINARY_DIR}/opencog/comboreduct
     ${OPENCOG_BINARY_DIR}/opencog/learning/hillclimbing
     ${OPENCOG_BINARY_DIR}/opencog/learning/moses
+    ${OPENCOG_BINARY_DIR}/opencog/server
 )
 
 IF(COMMAND cmake_policy)
@@ -62,10 +64,32 @@ ENDIF(COMMAND cmake_policy)
 TARGET_LINK_LIBRARIES (lslib
     PetaverseMOSES
     comboreduct
+    server
 )
 
 ADD_EXECUTABLE (learningServer LSExecutable)
 TARGET_LINK_LIBRARIES (learningServer
+    lslib
+    PetaverseHC
+    MessagingSystem
+    LearningServerMessages
+    Control
+    util
+    comboreduct
+    pthread
+    ssl
+    crypto
+    dl
+    Filter
+    FitnessEstimator
+    Procedure
+    moses
+    RewritingRules
+    ${OPENCOG_LIBRARIES}
+)
+
+ADD_EXECUTABLE (learningServer_CogServer LS_CogServerExecutable)
+TARGET_LINK_LIBRARIES (learningServer_CogServer
     lslib
     PetaverseHC
     MessagingSystem
