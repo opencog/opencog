@@ -7,7 +7,7 @@ echo "Start router, please wait..."
 ./router &
 sleep 5
 echo "Start LS, please wait..."
-./learningServer &
+./learningServer_CogServer &
 sleep 10
 echo "Start MockOPCHCTest"
 #comment the following command line

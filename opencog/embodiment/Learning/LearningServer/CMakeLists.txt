@@ -4,6 +4,7 @@ ADD_LIBRARY(lslib
 	LSMocky
 	SleepTask
 	ImitationLearningTask
+        ImitationLearningAgent
 )
 
 INCLUDE_DIRECTORIES (
