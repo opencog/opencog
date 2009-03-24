@@ -6,30 +6,30 @@
 
 namespace combo {
 
-class Exception {
+class ComboReductException {
 protected:
-  std::string _message;
+    std::string _message;
 public:
-  Exception();
-  Exception(std::string m);
+    ComboReductException();
+    ComboReductException(std::string m);
 
-  std::string get_message();
+    std::string get_message();
 };
 
-class EvalException : public Exception {
-  combo::vertex _vertex;
+class EvalException : public ComboReductException {
+    combo::vertex _vertex;
 public:
-  EvalException();
-  EvalException(combo::vertex v);
-  
-  combo::vertex get_vertex();
+    EvalException();
+    EvalException(combo::vertex v);
+
+    combo::vertex get_vertex();
 };
 
-class TypeCheckException : public Exception {
-  int _arg;
- public:
-  TypeCheckException();
-  TypeCheckException(int arg);
+class TypeCheckException : public ComboReductException {
+    int _arg;
+public:
+    TypeCheckException();
+    TypeCheckException(int arg);
 };
 
 }

@@ -18,7 +18,7 @@
 #include "LSCmdMessage.h"
 #include "LearnMessage.h"
 #include "RewardMessage.h"
-#include "ImitationLearningTask.h"
+#include "ImitationLearningAgent.h"
 #include "TrySchemaMessage.h"
 #include "StopLearningMessage.h"
 
@@ -26,6 +26,8 @@
 
 namespace LearningServer
 {
+
+using namespace MessagingSystem;
 
 class LS : public MessagingSystem::NetworkElement, public opencog::CogServer 
 {
@@ -94,7 +96,9 @@ private:
     int candidateSchemaCnt;
 
     //imitation learning task (can plug hillclimbing or MOSES)
-    MessagingSystem::ImitationLearningTask ILTask;
+    MessagingSystem::ImitationLearningAgent* ILAgent;
+
+    Factory<ImitationLearningAgent, Agent> factory;
 
     /**
      * Return the candidate schema name according to the acctual candidate
