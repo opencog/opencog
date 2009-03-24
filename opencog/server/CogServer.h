@@ -148,6 +148,14 @@ public:
      *  sleeps for the remaining time until the end of the cycle (if any) */
     virtual void serverLoop(void);
 
+    /** Customized server loop run. This method is called inside serverLoop
+     * (between processing request queue and scheduled agents) and can be 
+     * overwritten by CogServer's subclasses in order to customize the 
+     * server loop behavior. It also control the server cycles by returning
+     * 'true' if the server must run a cycle and 'false' if it must not.
+     * By default it does nothing and returns true */
+    virtual bool customLoopRun(void);
+
     /** Returns the number of executed cycles so far */
     virtual long getCycleCount(void);
 

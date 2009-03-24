@@ -135,6 +135,7 @@ void CogServer::serverLoop()
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
+    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
     logger().info("opencog server ready.");
 
@@ -145,22 +146,33 @@ void CogServer::serverLoop()
             processRequests();
         }
 
-        if (agentsRunning) {
-            processAgents();
+        bool runCycle = customLoopRun();
+
+        if (runCycle) {
+            if (agentsRunning) {
+                processAgents();
+            }
+
+            cycleCount++;
+            if (cycleCount < 0) cycleCount = 0;
         }
 
-        cycleCount++;
-        if (cycleCount < 0) cycleCount = 0;
-
-        // sleep long enough so that the next cycle will only start
-        // after config["SERVER_CYCLE_DURATION"] milliseconds
-        gettimeofday(&timer_end, NULL);
-        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                       (timer_end.tv_usec - timer_start.tv_usec);
-        if ((cycle_duration - elapsed_time) > 0)
-            usleep((unsigned int) (cycle_duration - elapsed_time));
-        timer_start = timer_end;
+        if (!externalTickMode) {
+            // sleep long enough so that the next cycle will only start
+            // after config["SERVER_CYCLE_DURATION"] milliseconds
+            gettimeofday(&timer_end, NULL);
+            elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                           (timer_end.tv_usec - timer_start.tv_usec);
+            if ((cycle_duration - elapsed_time) > 0)
+                usleep((unsigned int) (cycle_duration - elapsed_time));
+            timer_start = timer_end;
+        }
     }
+}
+
+bool CogServer::customLoopRun(void) 
+{
+    return true;
 }
 
 void CogServer::processRequests(void)
