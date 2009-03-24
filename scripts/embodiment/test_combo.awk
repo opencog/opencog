@@ -2,7 +2,7 @@
 
 BEGIN {
   N=200; # number of tests to run
-  exec="../src/Control/Procedure/combo_shell_stdio `find ../../ -name 'funcs.combo'`";
+  exec="../opencog/embodiment/Control/Procedure/combo_shell_stdio `find ../../ -name 'funcs.combo'`";
   FS="[ ()]";
 #by elvys: 
 #  Nowadys the functions names is not printed. So, I need to charge the
