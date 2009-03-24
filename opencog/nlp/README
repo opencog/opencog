@@ -15,7 +15,15 @@ running experiments. Thus, what is contained here should be thought of
 as a "bag of parts".  It is up to you to figure out what these parts
 are, and to assemble them into something meaningful.
 
-Currently, the basic experimental flow is as follows:
+Currently, there are three basic experimental flows that are possble:
+the semantic triples process, the word-sense-disambiguation (WSD) process, 
+and the question-answering process.  The semantic-triples process is
+described in nlp/triples/README, and is the simplest/most-straightforward
+experiment. The question-answering process is described in 
+nlp/question/README, and is also very striaght-forward. The most
+difficult process is WSD, which requires creating and maintain large,
+complex databases.  It is summarized here:
+
  * Download and compile opencog, relex, lexical-attraction from
    launchpad.
  * Create a bunch of SQL tables, as specified in the lexical-attr 

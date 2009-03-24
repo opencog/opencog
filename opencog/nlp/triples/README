@@ -510,6 +510,11 @@ and also the inverted word-order case:
        $prep($var2,$var3)
        THEN ^3_isa($var2, $var1)
 
+XXX However, this doesn't quite work because  $prep($var2,$var3) is
+so broad, that it can match to just about anything, including things
+are not DefineLinguisticRelationship nodes. Thus, we need to force
+type matching in variables.
+
 
 
 Deduction

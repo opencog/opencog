@@ -1,5 +1,5 @@
-                          question answering
-                          ----------------
+                          Question Answering
+                          ------------------
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
                         Revised on 13 May 2008
@@ -27,6 +27,16 @@ broken the kinds of patterns generated, and thus, the way that they
 are matched. This code might trip over the new way in which sentences
 are specified.... or maybe this code will work?  Untested...
 
+General conclusion: while question answering is possible, it could be
+made much more robust by implementing two ideas. One idea is to identify
+synonymous phrases, as described by Lin & Patel [Lin2001]. The other
+is to create more compact representations of concepts, along the lines
+of work described in nlp/triples/README.  Thus, work on question
+answering is suspended until the above objectives are reached.
+
+* [Lin2001] Dekang Lin and Patrick Pantel. 2001.  "Discovery of Inference
+  Rules for Question Answering." ''Natural Language Engineering'' 
+  '''7'''(4):343-360.  http://www.cs.ualberta.ca/~lindek/papers/jnle01.pdf 
 
 Question Answering Overview
 ---------------------------
