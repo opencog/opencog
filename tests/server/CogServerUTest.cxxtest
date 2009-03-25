@@ -66,14 +66,27 @@ public:
 class CustomCogServer : public CogServer
 {
     int tickCount;
-    public:
-        CustomCogServer() : tickCount(1) {
-            // Make it use external tick so that it does not call sleep inside serverLoop
-            config().set("EXTERNAL_TICK_MODE", "true");
+    bool tickBased;
+    int maxCount;
+    public: 
+
+        static BaseServer* createInstance() {
+            return new CustomCogServer();
         }
+
+        CustomCogServer() : tickCount(1), tickBased(false), maxCount(1000) {}
+
+        void setTickBased(bool _tickBased) {
+            tickBased = _tickBased;
+        }
+
+        void setMaxCount(int _maxCount) {
+            maxCount = _maxCount;
+        }
+
         bool customLoopRun() {
-            bool runCycle  = (tickCount++ % 100 == 0); 
-            if (tickCount > 998) stop();
+            bool runCycle  = tickBased?(tickCount % 100 == 0):true; 
+            if (++tickCount > maxCount) stop();
             return runCycle;
         }
 };
@@ -104,8 +117,12 @@ public:
     }
 
     void testProcessAgents() {
+        // set cycle duration to a smaller value so that this test do not take too long.
+        config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
         Factory<MyAgent, Agent> factory;
-        CogServer& cogserver = static_cast<CogServer&>(server());
+        CustomCogServer& cogserver = static_cast<CustomCogServer&>(server(CustomCogServer::createInstance)); 
+        cogserver.setTickBased(false);
+        cogserver.setMaxCount(50);
         cogserver.registerAgent(MyAgent::info().id, &factory);
 
         MyAgent* a[5];
@@ -117,7 +134,7 @@ public:
             cogserver.startAgent(a[i]);
         }
 
-        cogserver.unitTestServerLoop(50);
+        cogserver.serverLoop();
 
         TS_ASSERT(a[0]->count() == 50);
         TS_ASSERT(a[1]->count() == 25);
@@ -167,9 +184,13 @@ public:
 
     /* test custom server, like required by virtual agents (embodiment) */
     void testCustomCogServer() {
-       CogServer& cogServer = *(new CustomCogServer()); 
-       cogServer.serverLoop();
-       TS_ASSERT(cogServer.getCycleCount() == 10);
+        // Make it use external tick so that it does not call sleep inside serverLoop
+        config().set("EXTERNAL_TICK_MODE", "true");
+        CustomCogServer cogserver;
+        cogserver.setTickBased(true);
+        cogserver.setMaxCount(998);
+        cogserver.serverLoop();
+        TS_ASSERT(cogserver.getCycleCount() == 10);
     }
 
 };

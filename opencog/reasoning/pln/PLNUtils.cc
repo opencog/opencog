@@ -1022,7 +1022,7 @@ void printTree(pHandle h, int level, int LogLevel)
         if (test::logfile && LogLevel >= currentDebugLevel)
             fprintf(test::logfile, "%s", buf);
 
-        printf((repeatc(' ', level*3) + buf ).c_str());
+        printf("%s",(repeatc(' ', level*3) + buf ).c_str());
         return;
     }
 
