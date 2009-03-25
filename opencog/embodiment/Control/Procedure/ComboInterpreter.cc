@@ -26,14 +26,6 @@ namespace Procedure {
       if (_vec.empty())
           return;
 
-      /* This is a normal situation now that rules and their preconditions are
-       * written in combo. So, disabling this warning message, which causes too
-       * much overhead since warn logs get and print the stack trace...
-      if (_vec.size() > 1) {
-          logger().log(opencog::Logger::WARN, "Got multiple (%d) running procedures in ComboInterpreter!", _vec.size());
-      }
-      */
-      
       std::set<RunningProcedureId> done;
 
       opencog::lazy_selector* sel; 
