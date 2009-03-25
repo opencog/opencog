@@ -191,6 +191,9 @@ public:
 /**
  * Exception to be thrown when an invalid parameter is used within a function or
  * an object initalization.
+ *
+ * This exception will not log an error when throwed, because the error must be
+ * handled inside the code
  */
 class InvalidParamException : public RuntimeException
 {
@@ -250,6 +253,9 @@ public:
 
 /**
  * Exception to be called when the searched item was not found
+ *
+ * This exception will not log an error when throwed, because the error must be
+ * handled inside the code
  */
 class NotFoundException : public StandardException {
 public:
