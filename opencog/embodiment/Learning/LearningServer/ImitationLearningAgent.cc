@@ -53,12 +53,14 @@ ImitationLearningAgent::~ImitationLearningAgent()
 }
 
 //run method
-/*void ImitationLearningAgent::run(CogServer* server)
+void ImitationLearningAgent::run(CogServer* server)
 {
+
+    //std::cout << "IMITATION LEARNING AGENT RUN" << std::endl;
 
     //TODO: hack so NetworkElement can treat the messages
     //will be replaced by OpenCog version...
-    static_cast<LS*>(server)->serverCycle(true);
+    static_cast<LS*>(server)->serverCycle(false);
 
     switch (_lts) {
     case LTS_LEARN:
@@ -75,7 +77,7 @@ ImitationLearningAgent::~ImitationLearningAgent()
         // do nothing
         break;
     }
-    }*/
+}
 
 //command methods
 bool ImitationLearningAgent::initLearning(int nepc,

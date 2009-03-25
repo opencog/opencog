@@ -142,7 +142,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         // message from the learning pet and rewarding the learning schema
 
         if (learningPet == rm->getFrom() &&
-                learningSchema /*getCandidateSchemaName()*/ == rm->getCandidateSchema()) {
+            learningSchema == rm->getCandidateSchema()) {
             rewardCandidateSchema(rm);
         }
         break;

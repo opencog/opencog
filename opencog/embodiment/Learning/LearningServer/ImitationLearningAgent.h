@@ -43,7 +43,7 @@ public:
     ImitationLearningAgent();
     ~ImitationLearningAgent();
 
-    void run(CogServer* server) { }
+    void run(CogServer* server);
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {

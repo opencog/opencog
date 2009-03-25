@@ -52,6 +52,8 @@ ImitationLearningTask::~ImitationLearningTask()
 void ImitationLearningTask::run(NetworkElement* /*ne*/)
 {
 
+    std::cout << "IMITATION LEARNNG TASK RUN" << std::endl;
+
     switch (_lts) {
     case LTS_LEARN:
         opencog::cassert(TRACE_INFO, _PIL != NULL);
