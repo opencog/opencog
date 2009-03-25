@@ -279,8 +279,8 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
             changeState( this->agentState, 1320 );
         } // if
     } else if ( name == "regroupTeam" ) {    
-        if ( ( lowerCaseArguments[0] == "red" && this->myTeamCode == 0 || 
-               lowerCaseArguments[0] == "blue" && this->myTeamCode == 1 ) &&
+        if ( ( (lowerCaseArguments[0] == "red" && this->myTeamCode == 0) || 
+               (lowerCaseArguments[0] == "blue" && this->myTeamCode == 1) ) &&
              isTeamMember( arguments[1], this->myTeamCode ) ) {
             setProperty( "waiting", "" );
             setProperty( "following", "" );
