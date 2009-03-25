@@ -52,7 +52,7 @@ ImitationLearningTask::~ImitationLearningTask()
 void ImitationLearningTask::run(NetworkElement* /*ne*/)
 {
 
-    std::cout << "IMITATION LEARNNG TASK RUN" << std::endl;
+    //std::cout << "IMITATION LEARNNG TASK RUN" << std::endl;
 
     switch (_lts) {
     case LTS_LEARN:
