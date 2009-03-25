@@ -47,7 +47,6 @@ using namespace opencog;
 // messages greater than this will be truncated
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
 const char* levelStrings[] = {"ERROR", "WARN", "INFO", "DEBUG", "FINE"};
-bool backTraceLevel = config().get_int("BACK_TRACE_LOG_LEVEL");
 
 Logger::~Logger()
 {
@@ -182,6 +181,8 @@ void Logger::log(Logger::Level level, const std::string &txt)
         if (printToStdout) fprintf(stdout, "[%s] %s\n", getLevelString(level), txt.c_str());
         fflush(f);
 
+        // TODO: make this a member of the Logger and add setter method to it.
+        bool backTraceLevel = config().get_int("BACK_TRACE_LOG_LEVEL");
         if (level <= backTraceLevel)
         {
             prt_backtrace(f);
