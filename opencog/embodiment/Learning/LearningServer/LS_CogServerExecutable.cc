@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
                                     parameters);
 
     try  {
-        static_cast<LS&>(server()).NetworkElement::serverLoop();
+        static_cast<LS&>(server()).CogServer::serverLoop();
 
     } catch(std::bad_alloc){
         logger().log(opencog::Logger::ERROR, "LSExec - LS raised a bad_alloc exception.");

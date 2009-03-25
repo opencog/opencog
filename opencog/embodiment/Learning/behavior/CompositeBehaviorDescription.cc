@@ -271,12 +271,11 @@ std::string CompositeBehaviorDescription::toString() const {
         answer.append(",");
         answer.append(entries[i].temporal.toString());
         answer.append(")");
-        if (i == (entries.size() - 1)) {
-            answer.append("}");
-        } else {
+        if (i < (entries.size() - 1)) {
             answer.append(",");
         }
     }
+    answer.append("}");
 
     return answer;
 }
