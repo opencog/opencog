@@ -68,29 +68,29 @@ TARGET_LINK_LIBRARIES (lslib
     server
 )
 
-ADD_EXECUTABLE (learningServer LSExecutable)
-TARGET_LINK_LIBRARIES (learningServer
-    lslib
-    PetaverseHC
-    MessagingSystem
-    LearningServerMessages
-    Control
-    util
-    comboreduct
-    pthread
-    ssl
-    crypto
-    dl
-    Filter
-    FitnessEstimator
-    Procedure
-    moses
-    RewritingRules
-    ${OPENCOG_LIBRARIES}
-)
+#ADD_EXECUTABLE (learningServer LSExecutable)
+#TARGET_LINK_LIBRARIES (learningServer
+#    lslib
+#    PetaverseHC
+#    MessagingSystem
+#    LearningServerMessages
+#    Control
+#    util
+#    comboreduct
+#    pthread
+#    ssl
+#    crypto
+#    dl
+#    Filter
+#    FitnessEstimator
+#    Procedure
+#    moses
+#    RewritingRules
+#    ${OPENCOG_LIBRARIES}
+#)
 
-ADD_EXECUTABLE (learningServer_CogServer LS_CogServerExecutable)
-TARGET_LINK_LIBRARIES (learningServer_CogServer
+ADD_EXECUTABLE (learningServer LS_CogServerExecutable)
+TARGET_LINK_LIBRARIES (learningServer
     lslib
     PetaverseHC
     MessagingSystem
