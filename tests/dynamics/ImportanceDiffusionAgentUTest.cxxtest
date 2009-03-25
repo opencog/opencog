@@ -150,7 +150,7 @@ public:
     void testRun() {
         int STI_ALLOWABLE_ERROR = 1;
         agent->setDiffusionThreshold(0.0);
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         
         TS_ASSERT(abs(10-cogserver.getAtomSpace()->getSTI(atoms[0]))<=STI_ALLOWABLE_ERROR);
         TS_ASSERT(abs(90-cogserver.getAtomSpace()->getSTI(atoms[1]))<=STI_ALLOWABLE_ERROR);
@@ -159,7 +159,7 @@ public:
 
         // 1. check atoms less than diffusion threshold are not spread from
         agent->setDiffusionThreshold(0.5);
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         TS_ASSERT(abs(10-cogserver.getAtomSpace()->getSTI(atoms[0]))<=STI_ALLOWABLE_ERROR);
         TS_ASSERT(abs(90-cogserver.getAtomSpace()->getSTI(atoms[1]))<=STI_ALLOWABLE_ERROR);
         TS_ASSERT(abs(257-cogserver.getAtomSpace()->getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
@@ -168,7 +168,7 @@ public:
         // 2. no more than max percentage is spread, even if Hebbian link is
         // strong
         agent->setMaxSpreadPercentage(0.05);
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
 
         TS_ASSERT(abs(269-cogserver.getAtomSpace()->getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
         TS_ASSERT(abs(230-cogserver.getAtomSpace()->getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);

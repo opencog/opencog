@@ -141,22 +141,7 @@ void CogServer::serverLoop()
 
     gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
-
-        if (getRequestQueueSize() != 0) {
-            processRequests();
-        }
-
-        bool runCycle = customLoopRun();
-
-        if (runCycle) {
-            if (agentsRunning) {
-                processAgents();
-            }
-
-            cycleCount++;
-            if (cycleCount < 0) cycleCount = 0;
-        }
-
+        runLoopStep();
         if (!externalTickMode) {
             // sleep long enough so that the next cycle will only start
             // after config["SERVER_CYCLE_DURATION"] milliseconds
@@ -168,6 +153,25 @@ void CogServer::serverLoop()
             timer_start = timer_end;
         }
     }
+}
+
+void CogServer::runLoopStep(void) 
+{
+    if (getRequestQueueSize() != 0) {
+        processRequests();
+    }
+
+    bool runCycle = customLoopRun();
+
+    if (runCycle) {
+        if (agentsRunning) {
+            processAgents();
+        }
+
+        cycleCount++;
+        if (cycleCount < 0) cycleCount = 0;
+    }
+
 }
 
 bool CogServer::customLoopRun(void) 
@@ -503,13 +507,3 @@ Module* CogServer::getModule(const std::string& moduleId)
     return getModuleData(moduleId).module;
 }
 
-// Used for debug purposes on unit tests
-void CogServer::unitTestServerLoop(int nCycles)
-{
-    for (int i = 0; (nCycles == 0) || (i < nCycles); ++i) {
-        processRequests();
-        processAgents();
-        cycleCount++;
-        if (cycleCount < 0) cycleCount = 0;
-    }
-}

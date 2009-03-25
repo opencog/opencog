@@ -10,6 +10,7 @@
 #include "LoggerFactory.h"
 #include "stdlib.h"
 #include "string.h"
+#include <opencog/util/Config.h>
 using namespace Control;
 
 LoggerFactory::LoggerFactory()
@@ -32,16 +33,18 @@ opencog::Logger LoggerFactory::getLogger(const SystemParameters &parameters,
     if (user_index != std::string::npos) {
         //const char* username = getlogin();
         const char* username = getenv("LOGNAME");
-        opencog::logger().log(opencog::Logger::WARN, "LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
+        opencog::logger().log(opencog::Logger::INFO, "LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
         if (username == NULL)
             username = "unknown_user";
         logFile = logFile.replace(user_index, strlen(USER_FLAG), username);
     }
     logFile.append(slash);
     logFile.append(id);
-    opencog::logger().log(opencog::Logger::WARN,
+    opencog::logger().log(opencog::Logger::INFO,
                           "LoggerFactory:getLogger(): log dir: %s\n",
                           logFile.c_str());
+
+    opencog::config().set("BACK_TRACE_LOG_LEVEL", parameters.get("BACK_TRACE_LOG_LEVEL")); 
 
     if (id == parameters.get("SPAWNER_ID")) {
         level = atoi(parameters.get("SPAWNER_LOG_LEVEL").c_str());

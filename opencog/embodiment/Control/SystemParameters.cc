@@ -77,6 +77,7 @@ SystemParameters::SystemParameters() {
     table["SPAWNER_LOG_LEVEL"] = fine;
     table["OPENCOG_LOG_LEVEL"] = fine;
     table["TIMESTAMP_ENABLED_IN_LOGS"] = "1";
+    table["BACK_TRACE_LOG_LEVEL"] = error; 
     
     // paths
     table["LOG_DIR"] = "/tmp/$USER/Petaverse/Logs";

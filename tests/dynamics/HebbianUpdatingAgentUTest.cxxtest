@@ -181,7 +181,7 @@ public:
         in_out_inv = createCase(true, 10, false, -10, true, 0.1, "inoutinv");
         out_in_norm = createCase(false, -10, true, 10, false, 0.1, "outinnorm");
         out_in_inv = createCase(false, -10, true, 10, true, 0.1, "outininv");
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
 
         // replaced links, so handles no longer valid. find links through
         // outgoing sets.

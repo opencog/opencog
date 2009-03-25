@@ -53,7 +53,9 @@ protected:
             "LTI_FUNDS_BUFFER",      "10000",
             "MIN_STI",               "-400",
             "PROMPT",                "opencog> ",
-            "MODULES",                "libbuiltinreqs.so",
+            "MODULES",               "libbuiltinreqs.so",
+            "EXTERNAL_TICK_MODE",    "false",
+            "BACK_TRACE_LOG_LEVEL",  "1", // WARN
             "",                      ""
         };
         return defaultConfig;
