@@ -55,7 +55,6 @@ TARGET_LINK_LIBRARIES (Procedure
     ssl
     crypto
     dl
-    ${OPENCOG_LIBARIES}
     VirtualWorldData
 )
 
@@ -77,7 +76,6 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
     util
     ${XERCESC_LIBRARIES}
     PetComboVocabulary
-    ${OPENCOG_LIBRARIES}
 )
 
 ADD_EXECUTABLE (combo_shell ComboPAIExecutable)
@@ -97,5 +95,4 @@ TARGET_LINK_LIBRARIES (combo_shell
     pthread
     dl
     PetComboVocabulary
-    ${OPENCOG_LIBRARIES}
 )

@@ -59,7 +59,6 @@ TARGET_LINK_LIBRARIES (MessagingSystem
         xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
-        ${OPENCOG_LIBRARIES}
         ${CSOCKETS_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 )
