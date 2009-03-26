@@ -43,11 +43,18 @@ int main(int argc, char *argv[]) {
         static_cast<LS&>(server()).CogServer::serverLoop();
 
     } catch(std::bad_alloc){
-        logger().log(opencog::Logger::ERROR, "LSExec - LS raised a bad_alloc exception.");
-        
+        logger().log(Logger::ERROR,
+                     "LSExec - LS raised a bad_alloc exception.");       
+    } catch(StandardException se) {
+        logger().log(Logger::ERROR,
+                     "OPC executable - An exceptional situation occured"
+                     " with the following message '%s'"
+                     ". Check log for more information.",
+                     se.getMessage());
     } catch(...) {
-        logger().log(opencog::Logger::ERROR, 
-                "LSExec - An exceptional situation occured. Check log for more information.");
+        logger().log(Logger::ERROR, 
+                     "LSExec - An exceptional situation occured."
+                     " Check log for more information.");
     }
 
     //delete ls;
