@@ -1,24 +1,29 @@
 
                              wsd-post
                              --------
-                 Linas Vepstas == December 2008
-  Miscellaneous scripts for post-processing word-sense disambiguation data.
+                   Linas Vepstas == December 2008
+            Miscellaneous scripts for post-processing 
+                   word-sense disambiguation data.
 
 
-The wsd directory contains an implementation of the Rada Mihalcea word-sense
-disambiguation algorithm. The scm directory contains a set of scripts that
-attach word senses to link-grammar parse disjuncts, and then update the 
-corresponding scripts in SQL tables. SQL is used because it can take weeks
-(or months) to accumulat a sufficient amount of statistics to be meaningul.
-This directory contains code that implements the next steps in this processing
-pipeline: scripts to compute marginal probabilities, obtained from the raw
-counts stored in the SQL database.
+See the file "README-overview" for a motivational explanation
+of *why* this stuff is being done.
 
-The general analysis framework here is an outgrowth of the code that is found
-in the 'lexical attraction' package, which is a distinct launchpad project.
-In particular, the SQL table definitions are given there, not here. This
-cross-project tie-in is a bit of a mess at the moment;  its not clear how
-to best resolve it.
+The wsd directory contains an implementation of the Rada Mihalcea
+word-sense disambiguation algorithm. The scm directory contains a set
+of scripts that attach word senses to link-grammar parse disjuncts,
+and then update the corresponding scripts in SQL tables. SQL is used
+because it can take weeks (or months) to accumulate a sufficient amount
+of statistics to be meaningful.  This directory contains code that
+implements the next steps in this processing pipeline: scripts to
+compute marginal probabilities, obtained from the raw counts stored
+in the SQL database.
+
+The general analysis framework here is an outgrowth of the code that
+is found in the 'lexical attraction' package, which is a distinct
+launchpad project.  In particular, the SQL table definitions are given
+there, not here. This cross-project tie-in is a bit of a mess at the
+moment;  its not clear how to best resolve it.
 
 Overview, Notes
 ---------------
