@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/indefinite_object.cc
+ * opencog/comboreduct/combo/indefinite_object.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

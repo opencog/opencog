@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/contin-reductor.cc
+ * opencog/comboreduct/main/contin-reductor.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

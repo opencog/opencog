@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/mixed-reductor.cc
+ * opencog/comboreduct/main/mixed-reductor.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

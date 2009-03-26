@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/perception_eval.h
+ * opencog/comboreduct/combo/perception_eval.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

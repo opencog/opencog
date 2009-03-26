@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/procedure_call.h
+ * opencog/comboreduct/combo/procedure_call.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

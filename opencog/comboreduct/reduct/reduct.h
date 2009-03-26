@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct.h
+ * opencog/comboreduct/reduct/reduct.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/exception.h
+ * opencog/comboreduct/crutil/exception.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

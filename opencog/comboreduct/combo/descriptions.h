@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/descriptions.h
+ * opencog/comboreduct/combo/descriptions.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

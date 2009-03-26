@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/logical_rules.h
+ * opencog/comboreduct/reduct/logical_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

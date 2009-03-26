@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/operator_base.h
+ * opencog/comboreduct/combo/operator_base.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

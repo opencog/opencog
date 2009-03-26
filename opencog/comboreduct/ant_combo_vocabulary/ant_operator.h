@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant_operator.h
+ * opencog/comboreduct/ant_combo_vocabulary/ant_operator.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

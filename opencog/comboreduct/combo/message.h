@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/message.h
+ * opencog/comboreduct/combo/message.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

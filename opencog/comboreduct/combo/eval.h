@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/eval.h
+ * opencog/comboreduct/combo/eval.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

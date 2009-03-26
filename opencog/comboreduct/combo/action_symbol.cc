@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/action_symbol.cc
+ * opencog/comboreduct/combo/action_symbol.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/perception_reduction.cc
+ * opencog/comboreduct/reduct/perception_reduction.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

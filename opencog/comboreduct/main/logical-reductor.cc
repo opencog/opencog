@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/logical-reductor.cc
+ * opencog/comboreduct/main/logical-reductor.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

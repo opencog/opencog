@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant_builtin_action.cc
+ * opencog/comboreduct/ant_combo_vocabulary/ant_builtin_action.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
