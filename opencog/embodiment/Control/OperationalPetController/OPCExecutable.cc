@@ -45,13 +45,20 @@ int main(int argc, char *argv[]) {
         opc->tickedServerLoop();
         
     } catch(std::bad_alloc){
-        logger().log(opencog::Logger::ERROR, "OPCExec - OPC raised a bad_alloc exception.");
+        logger().log(Logger::ERROR,
+                     "OPCExec - OPC raised a bad_alloc exception.");
+        opc->saveState();        
+    } catch(StandardException se) {
+        logger().log(Logger::ERROR,
+                     "OPC executable - An exceptional situation occured"
+                     " with the following message '%s'"
+                     ". Check log for more information.",
+                     se.getMessage());
         opc->saveState();
-        
     } catch(...) {
-        logger().log(opencog::Logger::ERROR, 
-                        "OPC executable - An exceptional situation occured."
-                        " Check log for more information.");
+        logger().log(Logger::ERROR, 
+                     "OPC executable - An exceptional situation occured"
+                     ". Check log for more information.");
         opc->saveState();
     }
     
