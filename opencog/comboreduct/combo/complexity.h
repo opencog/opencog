@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/complexity.h
+ * opencog/comboreduct/combo/complexity.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

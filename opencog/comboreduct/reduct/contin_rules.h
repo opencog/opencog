@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/contin_rules.h
+ * opencog/comboreduct/reduct/contin_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

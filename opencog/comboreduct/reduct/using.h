@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/using.h
+ * opencog/comboreduct/reduct/using.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

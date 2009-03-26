@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/full_reduction.cc
+ * opencog/comboreduct/reduct/full_reduction.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

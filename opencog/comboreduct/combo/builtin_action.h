@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/builtin_action.h
+ * opencog/comboreduct/combo/builtin_action.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

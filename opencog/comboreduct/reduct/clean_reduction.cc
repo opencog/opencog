@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/clean_reduction.cc
+ * opencog/comboreduct/reduct/clean_reduction.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

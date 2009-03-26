@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/variable_unifier.cc
+ * opencog/comboreduct/combo/variable_unifier.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

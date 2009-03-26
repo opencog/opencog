@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/flat_normal_form.h
+ * opencog/comboreduct/reduct/flat_normal_form.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

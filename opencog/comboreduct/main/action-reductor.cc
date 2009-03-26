@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/action-reductor.cc
+ * opencog/comboreduct/main/action-reductor.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

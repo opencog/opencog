@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/action_eval.h
+ * opencog/comboreduct/combo/action_eval.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

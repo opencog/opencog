@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/tree_gen.cc
+ * opencog/comboreduct/main/tree_gen.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/procedure_repository.cc
+ * opencog/comboreduct/combo/procedure_repository.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
