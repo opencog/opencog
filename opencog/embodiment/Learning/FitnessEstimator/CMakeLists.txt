@@ -44,5 +44,4 @@ TARGET_LINK_LIBRARIES (FitnessEstimator
 	behavior
 	WorldWrapper
 	AtomSpaceExtensions
-	${OPENCOG_LIBRARIES}
 )

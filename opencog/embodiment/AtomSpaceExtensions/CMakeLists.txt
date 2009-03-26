@@ -23,5 +23,4 @@ LINK_DIRECTORIES (
 TARGET_LINK_LIBRARIES(AtomSpaceExtensions 
     SpaceMap
     util
-    ${OPENCOG_LIBRARIES}
 )

@@ -42,5 +42,4 @@ TARGET_LINK_LIBRARIES(Filter
 	RewritingRules
 	WorldWrapper
 	AtomSpaceExtensions
-	${OPENCOG_LIBRARIES}
 )

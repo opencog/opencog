@@ -36,5 +36,4 @@ TARGET_LINK_LIBRARIES(ImaginaryLife
 	behavior
 	WorldWrapper
 	AtomSpaceExtensions
-	${OPENCOG_LIBRARIES} 
 )

@@ -34,5 +34,4 @@ TARGET_LINK_LIBRARIES (Predavese
     ${XERCESC_LIBRARIES}
     comboreduct
     WorldWrapper
-    ${OPENCOG_LIBRARIES}
 )

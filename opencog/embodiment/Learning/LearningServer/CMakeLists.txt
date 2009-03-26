@@ -107,7 +107,6 @@ TARGET_LINK_LIBRARIES (learningServer
     Procedure
     moses
     RewritingRules
-    ${OPENCOG_LIBRARIES}
 )
 
 ADD_EXECUTABLE (LSMocky LSMockyExec)
@@ -128,5 +127,4 @@ TARGET_LINK_LIBRARIES (LSMocky
     Procedure
     moses
     RewritingRules
-    ${OPENCOG_LIBRARIES}
 )

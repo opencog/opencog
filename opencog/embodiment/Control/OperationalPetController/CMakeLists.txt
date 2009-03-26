@@ -66,7 +66,6 @@ TARGET_LINK_LIBRARIES (OpcLib
     PAI
     MessagingSystem
     Procedure
-    ${OPENCOG_LIBRARIES}
 )
 
 IF(COMMAND cmake_policy)
@@ -80,7 +79,6 @@ TARGET_LINK_LIBRARIES (OpcTester
     PetComboVocabulary
     AtomSpaceExtensions
     ImaginaryLife
-    ${OPENCOG_LIBRARIES}
 )
 
 ADD_EXECUTABLE (opc OPCExecutable.cc)
