@@ -219,6 +219,7 @@ scm
 		)
 	)
 
+	; Debug printing
 	; (display "Word: ")
 	; (display iword)
 	; (display " -- ")
@@ -226,6 +227,7 @@ scm
 	; (display parse-score)
 	; (display " -- ")
 	; (display (cog-name sense))
+	; (display " -- ")
 	; (display sense-score)
 	; (display "\n")
 
@@ -283,7 +285,7 @@ scm
 		(ldj-process-disjunct-simple iword djstr score)
 		(ldj-process-disjunct-senses word iword djstr score)
 
-		; (display "Word: ")
+		; (display "ldj-process-disjunct: ")
 		; (display iword)
 		; (display " -- ")
 		; (display djstr)
