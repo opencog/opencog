@@ -80,6 +80,19 @@ public:
      */
     Level getLevel() const;
 
+    /**
+     * Set the level of messages which should be logged with back trace. 
+     * Every message with log-level lower than or equals to the given argument
+     * will have back trace.
+     */
+    void setBackTraceLevel(Level);
+
+    /**
+     * Get the current back trace log level that determines which messages
+     * should be logged with back trace. 
+     */
+    Level getBackTraceLevel() const;
+
     /* filename property */
     void setFilename(const std::string&);
     const std::string& getFilename();
@@ -144,6 +157,7 @@ private:
     std::string fileName;
     bool timestampEnabled;
     Level currentLevel;
+    Level backTraceLevel;
     bool logEnabled;
     bool printToStdout;
     pthread_mutex_t lock;

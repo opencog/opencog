@@ -43,6 +43,7 @@ protected:
             "SERVER_PORT",           "17001",
             "LOG_FILE",              "opencog_server.log",
             "LOG_LEVEL",             "info",
+            "BACK_TRACE_LOG_LEVEL",  "warn",
             "LOG_TO_STDOUT",         "true",
             "SERVER_CYCLE_DURATION", "100",     // in milliseconds
             "EXTERNAL_TICK_MODE",    "false",
@@ -53,8 +54,6 @@ protected:
             "MIN_STI",               "-400",
             "PROMPT",                "opencog> ",
             "MODULES",               "libbuiltinreqs.so",
-            "EXTERNAL_TICK_MODE",    "false",
-            "BACK_TRACE_LOG_LEVEL",  "1", // WARN
             "",                      ""
         };
         return defaultConfig;
