@@ -1,16 +1,27 @@
-/***************************************************************************
- *  The main server application classes.
- * 
- *  Project: AgiSim
+/*
+ * opencog/embodiment/AGISimSim/server/include/agisim.h
  *
- *  See implementation (.cc, .cpp) files for license details (GPL).
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
  *
- *  Fri Feb 18 11:35:16 2005
- *  Copyright  2005  Ari A. Heljakka & Joel Pitt / Novamente LLC
- *  Email [heljakka at iki dot fi]
- *																			
- *	19.01.06	FP	formatting 
- ****************************************************************************/
+ * Written by Ari A. Heljakka
+ *            Joel Pitt
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __AGISIM_H__
 #define __AGISIM_H__

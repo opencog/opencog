@@ -1,32 +1,25 @@
 /*
- * Copyright 2002,2004 The Apache Software Foundation.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/*
- * $Id: DOMPrintErrorHandler.hpp 176026 2004-09-08 13:57:07Z peiyongz $
- * $Log$
- * Revision 1.3  2004/09/08 13:55:31  peiyongz
- * Apache License Version 2.0
+ * opencog/embodiment/AGISimSim/proxy/DOMPrintErrorHandler.h
  *
- * Revision 1.2  2002/11/05 21:46:19  tng
- * Explicit code using namespace in application.
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
  *
- * Revision 1.1  2002/05/29 21:19:50  peiyongz
- * DOM3 DOMWriter/DOMWriterFilter
+ * Written by TO_COMPLETE
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
  *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 
