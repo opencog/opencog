@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/AGISimSim/SimClient.cc
+ * opencog/embodiment/AGISimSim/client/SimClient.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
