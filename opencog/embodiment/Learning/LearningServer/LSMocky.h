@@ -9,27 +9,30 @@
 
 #include "util/Logger.h"
 #include <opencog/atomspace/AtomSpace.h>
-#include <NetworkElement.h>
+#include <EmbodimentCogServer.h>
 #include <SystemParameters.h>
+#include "SleepAgent.h"
 
 using namespace opencog;
 
 namespace LearningServer{
 
-class LSMocky : public MessagingSystem::NetworkElement {
+class LSMocky : public MessagingSystem::EmbodimentCogServer {
 
 	public:
 
 		/**
 		 * Constructor and Destructor
 		 */
-		LSMocky(const std::string &myId, const std::string &ip, int portNumber,
+        static BaseServer* createInstance();
+		LSMocky();
+		void init(const std::string &myId, const std::string &ip, int portNumber,
 		   Control::SystemParameters & parameters);
 		~LSMocky();
 
 		bool processNextMessage(MessagingSystem::Message *msg);
 
-		void setUp();
+        Factory<SleepAgent, Agent> sleepAgentFactory;
 
 	private:
 

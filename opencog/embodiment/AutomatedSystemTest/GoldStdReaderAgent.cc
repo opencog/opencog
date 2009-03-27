@@ -1,10 +1,10 @@
 /**
- * GoldStdReaderTask.cc
+ * GoldStdReaderAgent.cc
  *
  * Author: Welter Luigi
  */
 
-#include "GoldStdReaderTask.h"
+#include "GoldStdReaderAgent.h"
 #include "PBTester.h"
 #include <unistd.h>
 
@@ -13,11 +13,15 @@ using namespace MessagingSystem;
 using namespace PetaverseProxySimulator;
 using namespace opencog;
 
-GoldStdReaderTask::~GoldStdReaderTask() {
+GoldStdReaderAgent::~GoldStdReaderAgent() {
     if (goldStdFile) fclose(goldStdFile);
 }
 
-GoldStdReaderTask::GoldStdReaderTask(TestParameters& _testParameters, const char* goldStdFilename) : testParameters(_testParameters) {
+GoldStdReaderAgent::GoldStdReaderAgent() {
+}
+
+void GoldStdReaderAgent::init(TestParameters& _testParameters, const char* goldStdFilename) {
+    testParameters = &_testParameters;
     goldStdFile = fopen(goldStdFilename, "r");
     if (!goldStdFile) {
         logger().log(opencog::Logger::ERROR, "Could not open gold standard file: %s", goldStdFilename);
@@ -28,9 +32,9 @@ GoldStdReaderTask::GoldStdReaderTask(TestParameters& _testParameters, const char
     endOfFile = false;
 }
 
-void GoldStdReaderTask::run(MessagingSystem::NetworkElement *ne) {
+void GoldStdReaderAgent::run(opencog::CogServer *server) {
 
-    PBTester* pbTester = (PBTester*) ne;
+    PBTester* pbTester = (PBTester*) server;
     //if (!pbTester->hasExpectedMessages()) { // THIS WAY, IT WAITS NEXT CYCLE TO RUN THE NEXT CONSECUTIVE MESSAGE
     if (!pbTester->hasExpectedMessages() && endOfFile){
         pbTester->notifyEndOfGoldStdFile();
@@ -53,7 +57,7 @@ void GoldStdReaderTask::run(MessagingSystem::NetworkElement *ne) {
             if (elapsedTime >= messageToSend->getTimestamp()) {
                 logger().log(opencog::Logger::INFO, "Send last read message...");
                 pbTester->sendMessage(*(messageToSend->getMessage()));
-                if (testParameters.get("SAVE_MESSAGES_TO_FILE") == "1") {
+                if (testParameters->get("SAVE_MESSAGES_TO_FILE") == "1") {
                     pbTester->getGoldStdGen()->writeMessage(*(messageToSend->getMessage()), true);
                 }
                 delete messageToSend;

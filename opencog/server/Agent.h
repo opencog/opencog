@@ -139,6 +139,9 @@ public:
     /** Returns the agent's frequency. */
     virtual int frequency(void) const { return _frequency; }
 
+    /** Sets the agent's frequency. */
+    virtual void setFrequency(int frequency) { _frequency=frequency; }
+
     /** Returns the agent's class info. */
     virtual const ClassInfo& classinfo() const = 0;
     

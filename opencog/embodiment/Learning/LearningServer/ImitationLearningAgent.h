@@ -9,7 +9,6 @@
 
 #include <algorithm>
 
-#include "IdleTask.h"
 #include "EntropyFilter.h"
 #include "AtomSpaceWorldProvider.h"
 #include "atomspace/AtomSpace.h"

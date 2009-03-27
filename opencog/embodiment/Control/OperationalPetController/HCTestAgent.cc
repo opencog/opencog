@@ -1,11 +1,11 @@
 /**
- * HCTestTask.cc
+ * HCTestAgent.cc
  *
  * Author: Nil Geisweiller
  * Creation: Thu Sep 13 2007
  */
 
-#include "HCTestTask.h"
+#include "HCTestAgent.h"
 #include "OPC.h"
 
 #define IDLE_TIME 1
@@ -17,18 +17,27 @@
 
 using namespace OperationalPetController;
 
-HCTestTask::HCTestTask(std::string sn, std::vector<std::string> schemaArgs, std::string a, std::string b, SpaceServer* ss, MessageSender* s)
-  : mode(HCT_INIT), cycle(0), schemaName(sn), schemaArguments(schemaArgs), avatarId(a), ownerId(b), spaceServer(ss), sender(s) {
+HCTestAgent::HCTestAgent() {
 }
-HCTestTask::~HCTestTask() {
+void HCTestAgent::init(std::string sn, std::vector<std::string> schemaArgs, std::string a, std::string b, SpaceServer* ss, MessageSender* s) {
+  mode = HCT_INIT;
+  cycle = 0;
+  schemaName = sn;
+  schemaArguments = schemaArgs;
+  avatarId = a;
+  ownerId = b;
+  spaceServer = ss;
+  sender = s;
+}
+HCTestAgent::~HCTestAgent() {
 }
 
 
-void HCTestTask::run(MessagingSystem::NetworkElement* ne) {
-  logger().log(opencog::Logger::FINE, "Executing HCTestTask.");    
+void HCTestAgent::run(opencog::CogServer* ne) {
+  logger().log(opencog::Logger::FINE, "Executing HCTestAgent.");    
   cycle++;
   if(cycle > MAX_CYCLE) { //timeout in case the test takes too long
-    logger().log(opencog::Logger::ERROR, "Executing HCTestTask.");
+    logger().log(opencog::Logger::ERROR, "Executing HCTestAgent.");
     exit(1);
   }
   // send the whole atomSpace to the LS

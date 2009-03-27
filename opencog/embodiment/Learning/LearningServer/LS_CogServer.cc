@@ -42,26 +42,17 @@ LS::~LS()
 void LS::init(const std::string &myId, const std::string &ip,
               int portNumber, Control::SystemParameters & parameters)
 {
-    initialize(parameters, myId, ip, portNumber);
+    setNetworkElement(new NetworkElement(parameters, myId, ip, portNumber));
 
     // OpenCog-related initialization
     opencog::atom_types_init::init();
     opencog::config().set("MIN_STI",
-                          parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
+                          getParameters().get("ATOM_TABLE_LOWER_STI_VALUE"));
 
     this->busy = false;
 
     this->registerAgent(ImitationLearningAgent::info().id, &factory);
-    ILAgent = static_cast<ImitationLearningAgent*>(this->createAgent(ImitationLearningAgent::info().id, &factory));
-}
-
-/**
- * Inherated functions from NetworkElement
- */
-void LS::setUp()
-{
-    //insert ImitationLearningAgent
-    //plugInIdleTask(&ILAgent, 1);
+    ILAgent = static_cast<ImitationLearningAgent*>(this->createAgent(ImitationLearningAgent::info().id, true));
 }
 
 bool LS::processNextMessage(MessagingSystem::Message *msg)
@@ -78,12 +69,12 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         if (learningPet == cm->getFrom() &&
                 learningSchema == cm->getSchema()) {
 
-            if (cm->getCommand() == parameters.get("STOP_LEARNING_CMD")) {
+            if (cm->getCommand() == getParameters().get("STOP_LEARNING_CMD")) {
                 stopLearn();
                 return false;
             }
 
-            if (cm->getCommand() == parameters.get("TRY_SCHEMA_CMD")) {
+            if (cm->getCommand() == getParameters().get("TRY_SCHEMA_CMD")) {
                 trySchema();
                 return false;
             }
@@ -271,7 +262,7 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
     }
 
     bool initLearningSucceeds =
-        ILAgent->initLearning(atoi(parameters.get("NUMBER_OF_ESTIMATIONS_PER_CYCLE").c_str()),
+        ILAgent->initLearning(atoi(getParameters().get("NUMBER_OF_ESTIMATIONS_PER_CYCLE").c_str()),
                               wp,
                               al,
                               PerceptionActionInterface::PAIUtils::getInternalId(learningPet.c_str()),

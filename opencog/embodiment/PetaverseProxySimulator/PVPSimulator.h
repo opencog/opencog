@@ -25,7 +25,7 @@
 #include <map>
 #include <set>
 
-#include <NetworkElement.h>
+#include <EmbodimentCogServer.h>
 #include <Message.h>
 #include <ActionParamType.h>
 #include <ActionType.h>
@@ -44,7 +44,7 @@
 
 namespace PetaverseProxySimulator {
 
-    class PVPSimulator : public MessagingSystem::NetworkElement, AsynchronousPerceptionAndStatusHandler {
+    class PVPSimulator : public MessagingSystem::EmbodimentCogServer, AsynchronousPerceptionAndStatusHandler {
 
         private:
 
@@ -109,7 +109,7 @@ namespace PetaverseProxySimulator {
 
             std::string PVP_ID;
 
-	    SimulationParameters& simParams;
+            SimulationParameters* simParams;
 
             void initialize();
 
@@ -133,10 +133,11 @@ namespace PetaverseProxySimulator {
             // ***********************************************/
             // Constructors/destructors
 
+            static opencog::BaseServer* createInstance();
             ~PVPSimulator();
-
-            PVPSimulator(SimulationParameters&);
-            PVPSimulator(const Control::SystemParameters &params, SimulationParameters& simParams, const std::string &myId, const std::string &ip, int portNumber);
+            PVPSimulator();
+            void init(SimulationParameters&);
+            void init(const Control::SystemParameters &params, SimulationParameters& simParams, const std::string &myId, const std::string &ip, int portNumber);
 
             // ***********************************************/
             // API

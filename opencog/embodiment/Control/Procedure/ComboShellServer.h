@@ -4,17 +4,23 @@
 #include <string>
 #include <SystemParameters.h>
 #include "Message.h"
-#include "NetworkElement.h"
+#include "EmbodimentCogServer.h"
 
 namespace MessagingSystem {
-  struct ComboShellServer : public NetworkElement {
-    ComboShellServer(const Control::SystemParameters &params);
+
+class ComboShellServer : public EmbodimentCogServer {
+
+    public:
+        static BaseServer* createInstance();
+        ComboShellServer();
+        void init(const Control::SystemParameters &params);
     
-    bool processNextMessage(Message *message);
-    void idleTime();
-  private:
-    bool _waiting;
-  }; // class
+        // overrides
+        bool customLoopRun();
+        bool processNextMessage(Message *message);
+    private:
+        bool _waiting;
+}; // class
 } // namespace
 
 #endif

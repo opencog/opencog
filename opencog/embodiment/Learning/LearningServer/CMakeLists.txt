@@ -1,9 +1,9 @@
 ADD_LIBRARY(lslib
-	LS
+	#LS
         LS_CogServer
 	LSMocky
-	SleepTask
-	ImitationLearningTask
+	SleepAgent
+	#ImitationLearningTask
         ImitationLearningAgent
 )
 

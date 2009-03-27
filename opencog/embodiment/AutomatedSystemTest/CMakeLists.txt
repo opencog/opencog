@@ -1,7 +1,7 @@
 ADD_LIBRARY(PBTester
 	PBTester
 	TestParameters
-	GoldStdReaderTask
+	GoldStdReaderAgent
 )
 
 INCLUDE_DIRECTORIES (

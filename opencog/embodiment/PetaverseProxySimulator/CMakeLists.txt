@@ -2,9 +2,9 @@ ADD_LIBRARY (PVPSimulator
     SimulationParameters
     WorldSimulator
     PhysiologicalModel
-    TickerTask
-    InterfaceListenerTask
-    MessageSenderTask
+    TickerAgent
+    InterfaceListenerAgent
+    MessageSenderAgent
     PVPSimulator
     AGISimSimulator
     GoldStdGen

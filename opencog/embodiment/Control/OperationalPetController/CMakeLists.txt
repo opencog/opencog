@@ -3,12 +3,13 @@ ADD_LIBRARY (OpcLib
     OPC
     PetMessageSender
     PVPActionPlanSender
-    ImportanceDecayTask
-    ActionSelectionTask
-    SleepTask
-    PetInterfaceUpdaterTask
+    ProcedureInterpreterAgent
+    ImportanceDecayAgent
+    ActionSelectionAgent
+    SleepAgent
+    PetInterfaceUpdaterAgent
     MockOpcHCTest
-    HCTestTask
+    HCTestAgent
     RuleEngine
     #NewRuleEngine
     RuleEngineUtil

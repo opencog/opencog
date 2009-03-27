@@ -35,11 +35,12 @@ int main(int argc, char *argv[]) {
 
     try {
    
-        spawner = new Spawner(parameters, 
-                              parameters.get("SPAWNER_ID"), 
-                              parameters.get("SPAWNER_IP"), 
-                              atoi(parameters.get("SPAWNER_PORT").c_str()));
-
+        server(Spawner::createInstance);
+        spawner = &(static_cast<Spawner&>(server()));
+        spawner->init(parameters, 
+                     parameters.get("SPAWNER_ID"), 
+                     parameters.get("SPAWNER_IP"), 
+                     atoi(parameters.get("SPAWNER_PORT").c_str()));
         spawner->serverLoop();   
     
     } catch(opencog::InvalidParamException& ipe){

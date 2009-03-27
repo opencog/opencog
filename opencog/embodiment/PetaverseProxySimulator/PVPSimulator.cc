@@ -36,6 +36,10 @@ const int PVPSimulator::PET_SIGNAL_SENDING_INTERVAL = 1; // ticks
 const char* PVPSimulator::DEFAULT_PET_ID = "Fido";
 const char* PVPSimulator::DEFAULT_OWNER_ID = "Wynx";
 
+opencog::BaseServer* PVPSimulator::createInstance() {
+    return new PVPSimulator;
+}
+
 PVPSimulator::~PVPSimulator() {
 
     for( PetsPhysiologicalModelMap::iterator it = petsPhysiologicalModel.begin(); it != petsPhysiologicalModel.end(); it++) {
@@ -44,17 +48,24 @@ PVPSimulator::~PVPSimulator() {
     petsPhysiologicalModel.clear();
 
     delete(this->worldSimulator);
-    if (simParams.get("GENERATE_GOLD_STANDARD") == "1") {
+    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
         delete goldStdGen;
     }
 }
 
-PVPSimulator::PVPSimulator(SimulationParameters& _simParams) : simParams(_simParams) {
+PVPSimulator::PVPSimulator() {
+}
+
+void PVPSimulator::init(SimulationParameters& _simParams) {
+    simParams = &_simParams;
     initialize();
     worldSimulator = new WorldSimulator();
 }
 
-PVPSimulator::PVPSimulator(const Control::SystemParameters &params, SimulationParameters& _simParams, const std::string &myId, const std::string &ip, int portNumber) : NetworkElement(params, myId, ip, portNumber), PVP_ID("PVP"), simParams(_simParams) {
+void PVPSimulator::init(const Control::SystemParameters &params, SimulationParameters& _simParams, const std::string &myId, const std::string &ip, int portNumber) {
+    setNetworkElement(new NetworkElement(params, myId, ip, portNumber));
+    PVP_ID = "PVP";
+    simParams = &_simParams;
     initialize();
     worldSimulator = new AGISimSimulator("localhost", this);
     //worldSimulator = new AGISimSimulator("10.1.0.5", this);
@@ -69,8 +80,8 @@ void PVPSimulator::initialize() {
     messagesToSend.createQueue(PVP_ID);
     pthread_mutex_init(&currentTimeLock, NULL);
 
-    if (simParams.get("GENERATE_GOLD_STANDARD") == "1") {
-        goldStdGen = new GoldStdGen(simParams.get("GOLD_STANDARD_FILENAME").c_str());
+    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
+        goldStdGen = new GoldStdGen(simParams->get("GOLD_STANDARD_FILENAME").c_str());
     }
  
     /**
@@ -78,9 +89,9 @@ void PVPSimulator::initialize() {
      * than check if such file exists in filesystem. If so, start recovery
      * process.
      */
-    std::string recoveryFile = this->parameters.get("PROXY_DATABASE_DIR");
+    std::string recoveryFile = getParameters().get("PROXY_DATABASE_DIR");
     expandPath(recoveryFile);
-    recoveryFile.append("/" + this->parameters.get("PROXY_DATA_FILE"));
+    recoveryFile.append("/" + getParameters().get("PROXY_DATA_FILE"));
 
     if(fileExists(recoveryFile.c_str())){
         recoveryFromPersistedData(recoveryFile);
@@ -89,7 +100,7 @@ void PVPSimulator::initialize() {
 }
 
 bool PVPSimulator::processNextMessage(MessagingSystem::Message *message) {
-    if (simParams.get("GENERATE_GOLD_STANDARD") == "1") {
+    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
         goldStdGen->writeMessage(*message, false);
     }
     if ( strcasestr( message->getPlainTextRepresentation(), "SUCCESS")){
@@ -105,7 +116,7 @@ bool PVPSimulator::processNextMessage(MessagingSystem::Message *message) {
 
             // used only to shutdown the simulator. Real PVP do not have something
             // like this
-            if(message->getFrom() == parameters.get("SPAWNER_ID")){
+            if(message->getFrom() == getParameters().get("SPAWNER_ID")){
                 if(std::string(message->getPlainTextRepresentation()) == "SAVE_AND_EXIT"){
                     throw opencog::RuntimeException(TRACE_INFO, "PVPSim - Forcing a runtime exception.");
                 }
@@ -117,17 +128,17 @@ bool PVPSimulator::processNextMessage(MessagingSystem::Message *message) {
 }
 
 bool PVPSimulator::sendMessage(Message &msg) {
-    if (simParams.get("GENERATE_GOLD_STANDARD") == "1") {
+    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
         goldStdGen->writeMessage(msg, true);
     }
-    return NetworkElement::sendMessage(msg);
+    return EmbodimentCogServer::sendMessage(msg);
 }
 
 void PVPSimulator::timeTick() {
 
     logger().log(opencog::Logger::DEBUG, "PVPSimulator::timeTick()");
 
-    simParams.timeTick();
+    simParams->timeTick();
     worldSimulator->timeTick();
     for( PetsPhysiologicalModelMap::iterator it = petsPhysiologicalModel.begin(); it != petsPhysiologicalModel.end(); it++ )
         it->second->timeTick();
@@ -150,7 +161,7 @@ void PVPSimulator::resetPhysiologicalModel(string petId) {
 void PVPSimulator::persistState() throw (opencog::IOException, std::bad_exception){
     
     // TODO: add some timestamp info to filename
-    std::string path = parameters.get("PROXY_DATABASE_DIR");
+    std::string path = getParameters().get("PROXY_DATABASE_DIR");
     expandPath(path);
     
     if(!createDirectory(path.c_str())){
@@ -160,7 +171,7 @@ void PVPSimulator::persistState() throw (opencog::IOException, std::bad_exceptio
     }
     
     // TODO: Insert timestamp information into routerInfo file
-    std::string filename = path + "/" + parameters.get("PROXY_DATA_FILE");
+    std::string filename = path + "/" + getParameters().get("PROXY_DATA_FILE");
     remove(filename.c_str());
 
     std::ofstream pvpFile(filename.c_str());
@@ -219,7 +230,7 @@ void PVPSimulator::sendMessages() {
         Message *msg = this->messagesToSend.pop(PVP_ID);
         
         // router available, send message. Otherwise just delete the message
-        if(isElementAvailable(parameters.get("ROUTER_ID"))){
+        if(isElementAvailable(getParameters().get("ROUTER_ID"))){
             sendMessage(*msg);
         }
 
@@ -230,7 +241,7 @@ void PVPSimulator::sendMessages() {
 std::string PVPSimulator::getCurrentTimestamp() {
     static boost::posix_time::ptime epoch_time( PAIUtils::getSystemEpoch( ) );
 
-    int seconds = simParams.getCurrentSimulationSeconds();
+    int seconds = simParams->getCurrentSimulationSeconds();
     boost::posix_time::ptime t = epoch_time + boost::posix_time::seconds(seconds);
     return to_iso_extended_string(t);
 }
@@ -405,7 +416,7 @@ bool PVPSimulator::sendAgentAction( char *txt, const char *agentId, const char* 
 	      continue;
             } // if
 
-            StringMessage *message = new StringMessage(myId, itPet->first, xmlText);
+            StringMessage *message = new StringMessage(getID(), itPet->first, xmlText);
             messagesToSend.push(PVP_ID, message);
         }
     }
@@ -431,7 +442,7 @@ void PVPSimulator::sendPredavese(const char *txt, string petId) {
         return;
     }
 
-    if(!isElementAvailable(parameters.get("ROUTER_ID"))){
+    if(!isElementAvailable(getParameters().get("ROUTER_ID"))){
         printf("ROUTERUNAVAILABLE\n"); fflush(stdout);
         return;
     }
@@ -466,7 +477,7 @@ void PVPSimulator::sendPredavese(const char *txt, string petId) {
     xmlText.append("</pet:petaverse-msg>");
 
     logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
-    StringMessage *message = new StringMessage(myId, petId, xmlText);
+    StringMessage *message = new StringMessage(getID(), petId, xmlText);
     
     messagesToSend.push(PVP_ID, message);
     pthread_mutex_unlock(&currentTimeLock);    
@@ -591,11 +602,11 @@ void PVPSimulator::sendPetSignals() {
         xmlText.append("</pet:petaverse-msg>\n");
 
         logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
-        StringMessage *message = new StringMessage(myId, petId, xmlText);
+        StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
         messagesToSend.push(PVP_ID, message);
 
-	    Message *tick_message = Message::factory(myId, petId, Message::TICK, myId);
+	    Message *tick_message = Message::factory(getID(), petId, Message::TICK, getID());
         messagesToSend.push(PVP_ID, tick_message);
 	
     }
@@ -636,7 +647,7 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
     xmlText.append("</pet:petaverse-msg>\n");
 
     logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
-    StringMessage *message = new StringMessage(myId, petId, xmlText);
+    StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
     messagesToSend.push(PVP_ID, message);
     pthread_mutex_unlock(&currentTimeLock);    
@@ -648,8 +659,8 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
       const std::list<ActionParameter>& actionParameters = action.getParameters( );
       std::list<ActionParameter>::const_iterator it;
       for( it = actionParameters.begin( ); it != actionParameters.end( ); ++it ) {
-	parameters << " ";
-	parameters << it->stringRepresentation( );
+          parameters << " ";
+          parameters << it->stringRepresentation( );
       } // if
       char* message = new char[parameters.str( ).length( )];
       strcpy( message, parameters.str( ).c_str( ) );
@@ -685,7 +696,7 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
     xmlText.append("</pet:petaverse-msg>\n");
 
     logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
-    StringMessage *message = new StringMessage(myId, petId, xmlText);
+    StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
     messagesToSend.push(PVP_ID, message);
     pthread_mutex_unlock(&currentTimeLock);    
@@ -1048,7 +1059,7 @@ void PVPSimulator::mapInfo(std::vector<ObjMapInfo>& objects) {
             continue;
         }
        
-        StringMessage *message = new StringMessage(myId, itPetId->first, xmlText);
+        StringMessage *message = new StringMessage(getID(), itPetId->first, xmlText);
         messagesToSend.push(PVP_ID, message);
     }
     pthread_mutex_unlock(&currentTimeLock);    
@@ -1124,7 +1135,7 @@ std::string PVPSimulator::createPet(const std::string& petId, const std::string&
     }
     petsId[createdPetId] = false;
     ownership[createdPetId] = ownerId;
-    petsPhysiologicalModel[createdPetId] = new PhysiologicalModel(simParams);
+    petsPhysiologicalModel[createdPetId] = new PhysiologicalModel(*simParams);
 
     printf("PETCREATED %s\n", createdPetId.c_str()); fflush(stdout);
     // recovey data. PVP went down but pet is still executing fine. No need to
@@ -1162,7 +1173,7 @@ bool PVPSimulator::loadPet(const std::string& petId) {
 
     std::string msgCmd = "LOAD_PET ";
     msgCmd += petId;
-    MessagingSystem::StringMessage msg(parameters.get("PROXY_ID"), parameters.get("SPAWNER_ID"), msgCmd);
+    MessagingSystem::StringMessage msg(getParameters().get("PROXY_ID"), getParameters().get("SPAWNER_ID"), msgCmd);
     sendMessage(msg);
     return  true;
 }

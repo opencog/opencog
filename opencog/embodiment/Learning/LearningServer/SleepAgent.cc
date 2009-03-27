@@ -1,24 +1,24 @@
 /**
- * SleepTask.cc
+ * SleepAgent.cc
  *
  * $Header$
  *
  * Author: Andre Senna
  * Creation: Wed Jul  4 12:36:43 BRT 2007
  */
-#include "SleepTask.h"
+#include "SleepAgent.h"
 
 using namespace LearningServer;
 using namespace opencog;
 
-SleepTask::~SleepTask() {
+SleepAgent::~SleepAgent() {
 }
 
-SleepTask::SleepTask() {
+SleepAgent::SleepAgent() {
 }
 
-void SleepTask::run(MessagingSystem::NetworkElement *ls) {
+void SleepAgent::run(CogServer *ls) {
     logger().log(opencog::Logger::FINE,
-                 "SleepTask - Executing SleepTask.");
+                 "SleepAgent - Executing SleepAgent.");
   sleep(2);
 }

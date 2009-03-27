@@ -24,10 +24,10 @@ int main(int argc, char *argv[]) {
   int portNumber = atoi(argv[2]);
   //sprintf(petName, "%d", petID);
   
-  MockOpcHCTest *mOpcHcTest = 
-    new MockOpcHCTest(argv[1], "127.0.0.1", portNumber, argv[1], parameters);
-  mOpcHcTest->serverLoop();
-  delete mOpcHcTest;
-
+  server(MockOpcHCTest::createInstance);
+  MockOpcHCTest& mOpcHcTest = static_cast<MockOpcHCTest&>(server()); 
+  mOpcHcTest.init(argv[1], "127.0.0.1", portNumber, argv[1], parameters);
+  mOpcHcTest.serverLoop();
+  //delete mOpcHcTest;
   return 0;
 }

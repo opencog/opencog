@@ -15,13 +15,20 @@ using namespace boost;
 using namespace std;
 using namespace MessagingSystem;
 
-ComboShellServer::ComboShellServer(const Control::SystemParameters &params)
-  : NetworkElement(params,
-		   params.get("COMBO_SHELL_ID"), 
-		   params.get("COMBO_SHELL_IP"), 
-		   lexical_cast<int>(params.get("COMBO_SHELL_PORT"))),
-    _waiting(false)
-{ }
+BaseServer* ComboShellServer::createInstance() {
+    return new ComboShellServer;
+}
+
+ComboShellServer::ComboShellServer() {
+}
+
+void ComboShellServer::init(const Control::SystemParameters &params) {
+    setNetworkElement(new NetworkElement(params,
+		               params.get("COMBO_SHELL_ID"), 
+		               params.get("COMBO_SHELL_IP"), 
+		               lexical_cast<int>(params.get("COMBO_SHELL_PORT"))));
+    _waiting = false;
+}
 
 bool ComboShellServer::processNextMessage(MessagingSystem::Message *msg){
   if (msg->getTo()!=getID())
@@ -39,15 +46,9 @@ bool ComboShellServer::processNextMessage(MessagingSystem::Message *msg){
   return false;
 }
 
-void ComboShellServer::idleTime() {
+bool ComboShellServer::customLoopRun() {
   if (_waiting) {
-    if (haveUnreadMessage()) {
-      logger().log(opencog::Logger::DEBUG, "ComboShellServer - Requesting messages (idleTime()).");
-      retrieveMessages(-1);
-    } else {
-      sleepUntilNextMessageArrives();
-    }
-    return;
+    return EmbodimentCogServer::customLoopRun();
   }
   
   combo_tree tr;
@@ -83,7 +84,7 @@ void ComboShellServer::idleTime() {
   try {
     stringstream ss;
     ss << tr;
-    StringMessage msg(parameters.get("COMBO_SHELL_ID"),
+    StringMessage msg(getParameters().get("COMBO_SHELL_ID"),
 		      "1", //to the OPC - this is a hack...
 		      ss.str());
     cout << "sending schema " << ss.str() << "..." << endl;
@@ -93,4 +94,6 @@ void ComboShellServer::idleTime() {
   } catch(...) {
     cout << "execution failed (threw exception)" << endl;
   }
+
+  return true;
 }

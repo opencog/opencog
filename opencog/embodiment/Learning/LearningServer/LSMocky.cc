@@ -5,31 +5,37 @@
  * Copyright(c), 2007
  */
 #include "LSMocky.h"
-#include "SleepTask.h"
+#include "SleepAgent.h"
 #include "LSCmdMessage.h"
 #include "LearnMessage.h"
 #include "RewardMessage.h"
 
 using namespace LearningServer;
 using namespace opencog;
+using namespace MessagingSystem;
 
 /**
  * Constructor and destructor
  */
-LSMocky::LSMocky(const std::string &myId, const std::string &ip, 
-       int portNumber, Control::SystemParameters & parameters)
-  : NetworkElement(parameters, myId, ip, portNumber) {
+BaseServer* LSMocky::createInstance() {
+    return new LSMocky;
+}
+
+LSMocky::LSMocky() {
+}
+
+void LSMocky::init(const std::string &myId, const std::string &ip, 
+       int portNumber, Control::SystemParameters & parameters) {
+  setNetworkElement(new NetworkElement(parameters, myId, ip, portNumber));
+  registerAgent(SleepAgent::info().id, &sleepAgentFactory);
+  SleepAgent* sleepAgent= static_cast<SleepAgent*>(
+          createAgent(SleepAgent::info().id, &sleepAgentFactory));
+  startAgent(sleepAgent);
 }
 
 LSMocky::~LSMocky(){
 }
 
-/**
- * Inherated functions from NetworkElement
- */
-void LSMocky::setUp(){
-    plugInIdleTask(new SleepTask(), 1);
-}
 
 bool LSMocky::processNextMessage(MessagingSystem::Message *msg){
 	LearningServerMessages::LearnMessage  * lm;

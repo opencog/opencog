@@ -4,7 +4,6 @@
 #include "comboreduct/combo/vertex.h"
 #include "comboreduct/combo/variable_unifier.h"
 #include "PAI.h"
-#include "IdleTask.h"
 #include "VirtualWorldState.h"
 #include "PAIWorldWrapper.h"
 #include "RuleValidationWorldWrapper.h"
@@ -12,6 +11,8 @@
 #include "RunningComboProcedure.h"
 #include <vector>
 #include <boost/noncopyable.hpp>
+#include <opencog/server/CogServer.h>
+#include "NetworkElement.h"
 
 namespace Procedure {
 
@@ -36,7 +37,7 @@ namespace Procedure {
   }; // DoneSet
 
   // 
-  class ComboInterpreter : public MessagingSystem::IdleTask,boost::noncopyable {
+  class ComboInterpreter : public boost::noncopyable {
     
    public: 
     ComboInterpreter(PerceptionActionInterface::PAI& p, opencog::RandGen& rng);

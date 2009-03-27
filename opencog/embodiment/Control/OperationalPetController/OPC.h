@@ -11,27 +11,43 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SavingLoading.h>
 #include <StringMessage.h>
-#include <NetworkElement.h>
+#include <EmbodimentCogServer.h>
 
 #include "PAI.h"
 #include "Pet.h"
 //#include "TangetBug.h"
 #include "PetMessageSender.h"
-#include "PredicatesUpdater.h"
+#include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include "PVPActionPlanSender.h"
 #include "ProcedureRepository.h"
 #include "ProcedureInterpreter.h"
-#include "ActionSelectionTask.h"
-#include "ImportanceDecayTask.h"
-#include "PetInterfaceUpdaterTask.h"
+#include "ProcedureInterpreterAgent.h"
+#include "ActionSelectionAgent.h"
+#include "ImportanceDecayAgent.h"
+#include "PetInterfaceUpdaterAgent.h"
 
 #include "RuleEngine.h"
 
 namespace OperationalPetController{
 
-class OPC : public MessagingSystem::NetworkElement {
+/* Defines a single factory template to allow insert a same agent
+ * multiple times in the Cogserver schedule */
+template< typename _Type, typename _BaseType >
+class SingletonFactory : public Factory<_Type, _BaseType>
+{
+public:
+    explicit SingletonFactory() : Factory<_Type, _BaseType>() {}
+    virtual ~SingletonFactory() {}
+    virtual _BaseType* create() const { 
+        static _BaseType* inst =  new _Type; 
+        return inst; 
+    }
+}; 
+
+class OPC : public EmbodimentCogServer {
 
     private:
+
         /**
          * Object used to save/load atomSpace dumps. Other componentes that
          * need persistence should extend SavableRepository interface and
@@ -76,9 +92,11 @@ class OPC : public MessagingSystem::NetworkElement {
          */
         PredicatesUpdater * predicatesUpdater;
 
-        ImportanceDecayTask* importanceDecayTask;
-        ActionSelectionTask* actionSelectionTask;
-        PetInterfaceUpdaterTask* petInterfaceUpdaterTask;
+        /** opencog Agents */
+        ProcedureInterpreterAgent* procedureInterpreterAgent;
+        ImportanceDecayAgent* importanceDecayAgent;
+        ActionSelectionAgent* actionSelectionAgent;
+        PetInterfaceUpdaterAgent* petInterfaceUpdaterAgent;
 
         RuleEngine* ruleEngine;
         AtomSpace* atomSpace;
@@ -123,14 +141,18 @@ class OPC : public MessagingSystem::NetworkElement {
 
     public:
 
+        static opencog::BaseServer* createInstance();
+
         /**
          * Constructor and destructor
          */
-        OPC(const std::string &myId, const std::string &ip, int portNumber,
-            const std::string& petId, const std::string& ownerId, 
-	    const std::string& agentType, const std::string& agentTraits,
-            Control::SystemParameters & parameters);
+        OPC();
         ~OPC();
+
+        void init(const std::string &myId, const std::string &ip, int portNumber,
+            const std::string& petId, const std::string& ownerId, 
+            const std::string& agentType, const std::string& agentTraits,
+            Control::SystemParameters & parameters);
 
         /**
          * Save the OCP state.
@@ -204,16 +226,6 @@ class OPC : public MessagingSystem::NetworkElement {
         /**
          * Method inherited from network element
          */
-        void markAsUnavailableElement(const std::string& id);
-
-        /**
-         * Method inherited from network element
-         */
-        void markAsAvailableElement(const std::string& id);
-
-        /**
-         * Method inherited from network element
-         */
         void setUp();
 
         /**
@@ -237,6 +249,10 @@ class OPC : public MessagingSystem::NetworkElement {
          */
         const std::string getPath(const std::string & petId, const std::string & filename = "");
 
+        SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
+        SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
+        SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
+        SingletonFactory<PetInterfaceUpdaterAgent, Agent> petInterfaceUpdaterAgentFactory;
     
 }; // class
 }  // namespace

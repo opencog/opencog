@@ -22,7 +22,7 @@ namespace Procedure {
   ComboInterpreter::~ComboInterpreter() { 
   }
 
-  void ComboInterpreter::run(NetworkElement *ne) { 
+  void ComboInterpreter::run(MessagingSystem::NetworkElement *ne) { 
       if (_vec.empty())
           return;
 

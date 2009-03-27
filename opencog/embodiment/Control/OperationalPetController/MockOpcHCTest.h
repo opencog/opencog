@@ -10,12 +10,12 @@
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <StringMessage.h>
-#include <NetworkElement.h>
+#include <EmbodimentCogServer.h>
 
 #include "Pet.h"
 #include "PetMessageSender.h"
 #include "LearnMessage.h"
-#include "HCTestTask.h"
+#include "HCTestAgent.h"
 #include "SpaceServer.h"
 
 using namespace opencog;
@@ -23,7 +23,7 @@ using namespace opencog;
 namespace OperationalPetController
 {
 
-class MockOpcHCTest : public MessagingSystem::NetworkElement
+class MockOpcHCTest : public MessagingSystem::EmbodimentCogServer
 {
 
 private:
@@ -32,7 +32,7 @@ private:
     SpaceServer * spaceServer;
     PetMessageSender * lsMessageSender;
 
-    HCTestTask* _HCTt;
+    HCTestAgent* _HCTa;
 
     //Handle to keep in memory for the second BD
     //fill the atomSpace with the initial scene
@@ -66,10 +66,15 @@ private:
 
 public:
 
-    MockOpcHCTest(const std::string &myId, const std::string & ip,
-                  int portNumber, const std::string & petId,
-                  Control::SystemParameters & parameters);
+    static BaseServer* createInstance();
+
+    MockOpcHCTest();
+    void init(const std::string &myId, const std::string & ip,
+              int portNumber, const std::string & petId,
+              Control::SystemParameters & parameters);
     ~MockOpcHCTest();
+
+    Factory<HCTestAgent,Agent> HCTestAgentFactory;
 
     /**
      * @return The AtomSpace that represents the pet's short memory
