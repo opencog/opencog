@@ -57,6 +57,7 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
 {
     this->fileName.assign(fileName);
     this->currentLevel = level;
+    this->backTraceLevel = WARN; 
     this->timestampEnabled = timestampEnabled;
     this->printToStdout = false;
 
@@ -89,6 +90,16 @@ void Logger::setLevel(Logger::Level newLevel)
 Logger::Level Logger::getLevel() const
 {
     return currentLevel;
+}
+
+void Logger::setBackTraceLevel(Logger::Level newLevel)
+{
+    backTraceLevel = newLevel;
+}
+
+Logger::Level Logger::getBackTraceLevel() const
+{
+    return backTraceLevel;
 }
 
 void Logger::setFilename(const std::string& s)
@@ -181,8 +192,6 @@ void Logger::log(Logger::Level level, const std::string &txt)
         if (printToStdout) fprintf(stdout, "[%s] %s\n", getLevelString(level), txt.c_str());
         fflush(f);
 
-        // TODO: make this a member of the Logger and add setter method to it.
-        bool backTraceLevel = config().get_int("BACK_TRACE_LOG_LEVEL");
         if (level <= backTraceLevel)
         {
             prt_backtrace(f);

@@ -77,7 +77,10 @@ SystemParameters::SystemParameters() {
     table["SPAWNER_LOG_LEVEL"] = fine;
     table["OPENCOG_LOG_LEVEL"] = fine;
     table["TIMESTAMP_ENABLED_IN_LOGS"] = "1";
-    table["BACK_TRACE_LOG_LEVEL"] = error; 
+    // TODO: Convert all log level parameters above in string, which is more
+    // readable (see opencog/util/Config.h and Logger::getLevelFromString), just
+    // like bellow:
+    table["BACK_TRACE_LOG_LEVEL"] = "warn"; 
     
     // paths
     table["LOG_DIR"] = "/tmp/$USER/Petaverse/Logs";

@@ -214,7 +214,9 @@ public:
 
     static inline bool isInvalidHandle(const Handle& h) {
 #ifdef USE_TLB_MAP
-        return (h == Handle::UNDEFINED) || (h.value() >= uuid);
+        return (h == Handle::UNDEFINED) ||
+               (h.value() >= uuid) ||
+               (NULL == getAtom(h));
 #else
         return (h == Handle::UNDEFINED);
 #endif
