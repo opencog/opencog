@@ -37,31 +37,33 @@ int main(int argc, char *argv[]) {
     //int portNumber = 5100 + petID;
     int portNumber = atoi(argv[5]);
 
-    OPC *opc = new OPC(argv[1], "127.0.0.1", portNumber, 
-                       PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
-                       PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
-		       argv[3], argv[4], parameters);
+    server(OPC::createInstance);
+    OPC& opc = static_cast<OPC&>(server());
+    opc.init(argv[1], "127.0.0.1", portNumber, 
+             PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
+             PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
+		     argv[3], argv[4], parameters);
     try {
-        opc->tickedServerLoop();
-        
+        opc.serverLoop();
     } catch(std::bad_alloc){
         logger().log(Logger::ERROR,
                      "OPCExec - OPC raised a bad_alloc exception.");
-        opc->saveState();        
+        opc.saveState();        
     } catch(StandardException se) {
         logger().log(Logger::ERROR,
                      "OPC executable - An exceptional situation occured"
                      " with the following message '%s'"
                      ". Check log for more information.",
                      se.getMessage());
-        opc->saveState();
+        opc.saveState();
     } catch(...) {
         logger().log(Logger::ERROR, 
                      "OPC executable - An exceptional situation occured"
                      ". Check log for more information.");
-        opc->saveState();
+        opc.saveState();
     }
     
-    delete opc;
+    // TODO: how to delete opc now?
+    //delete opc;
     return (0);
 }

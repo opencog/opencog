@@ -3,13 +3,14 @@
 #include "util/exceptions.h"
 #include "PVPSimulator.h"
 #include "SimulationParameters.h"
-#include "TickerTask.h"
-#include "InterfaceListenerTask.h"
-#include "MessageSenderTask.h"
+#include "TickerAgent.h"
+#include "InterfaceListenerAgent.h"
+#include "MessageSenderAgent.h"
 #include "util/files.h"
 #include <StringMessage.h>
 #include <unistd.h>
 
+using namespace PetaverseProxySimulator;
 int main(int argc, char *argv[]) {
 
     Control::SystemParameters parameters;
@@ -17,22 +18,33 @@ int main(int argc, char *argv[]) {
     	parameters.loadFromFile(parameters.get("CONFIG_FILE"));
     }
 
-    PetaverseProxySimulator::SimulationParameters simParameters;
+    SimulationParameters simParameters;
     if(fileExists(simParameters.get("CONFIG_FILE").c_str())){
     	simParameters.loadFromFile(simParameters.get("CONFIG_FILE"));
     }
-    //PetaverseProxySimulator::PVPSimulator simulator(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 8211);
+    //PVPSimulator simulator(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 8211);
 
-    PetaverseProxySimulator::PVPSimulator simulator(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 16315);
+    server(PVPSimulator::createInstance);
+    PVPSimulator& simulator = static_cast<PVPSimulator&>(server());
+    simulator.init(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 16315);
 
     if (!simulator.connectToSimWorld()) {
         logger().log(opencog::Logger::ERROR, "Could not connect to the simulated World\n");
         exit(0);
     }
 
-    simulator.plugInIdleTask(new PetaverseProxySimulator::TickerTask(simParameters), 1);
-    simulator.plugInIdleTask(new PetaverseProxySimulator::InterfaceListenerTask(), 1);
-    simulator.plugInIdleTask(new PetaverseProxySimulator::MessageSenderTask(), 1);
+    Factory<TickerAgent, Agent> tickerAgentFactory;
+    simulator.registerAgent(TickerAgent::info().id, &tickerAgentFactory);
+    simulator.createAgent(TickerAgent::info().id, true);
+
+    Factory<InterfaceListenerAgent, Agent> interfaceListenerAgentFactory;
+    simulator.registerAgent(InterfaceListenerAgent::info().id, &interfaceListenerAgentFactory);
+    simulator.createAgent(InterfaceListenerAgent::info().id, true);
+
+    Factory<MessageSenderAgent, Agent> messageSenderAgentFactory;
+    simulator.registerAgent(MessageSenderAgent::info().id, &messageSenderAgentFactory);
+    simulator.createAgent(MessageSenderAgent::info().id, true);
+
     simParameters.startSimulation();
 
     try {

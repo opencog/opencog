@@ -15,40 +15,42 @@
 #include "util/Logger.h"
 
 #include "util/exceptions.h"
-#include "NetworkElement.h"
+#include "EmbodimentCogServer.h"
 
 namespace MessagingSystem {
 
-class Spawner : public NetworkElement {
+class Spawner : public EmbodimentCogServer {
 
     private:
         int minOpcPort, maxOpcPort;
-	std::map<int, std::string> port2PetIdMap;
-	std::map<std::string, int> petId2PortMap;
+        std::map<int, std::string> port2PetIdMap;
+        std::map<std::string, int> petId2PortMap;
 
     public:
 
         // ***********************************************/
         // Constructors/destructors
 
+        static BaseServer* createInstance();
         ~Spawner();
-        Spawner(const Control::SystemParameters &params, const std::string &id, 
-                const std::string &ip, int port) throw (opencog::InvalidParamException, std::bad_exception);
+        Spawner(); 
+        void init(const Control::SystemParameters &params, const std::string &id, 
+             const std::string &ip, int port) throw (opencog::InvalidParamException, std::bad_exception);
 
         // ***********************************************/
-        // Overrides NetworkElement interface
+        // Overrides EmbodimentCogServer interface
 
         bool processNextMessage(Message *message);
 
-	/**
-	 * Allocates an available port number, from the range of ports reserved for OPCs, to a given pet id.
-	 * If there is no available port, returns -1.
-	 */
+        /**
+         * Allocates an available port number, from the range of ports reserved for OPCs, to a given pet id.
+         * If there is no available port, returns -1.
+         */
         int allocateOpcPort(const std::string& petId);
 
         /**
-	 * Releases the port number allocated to the given pet id, if any
-	 */
+         * Releases the port number allocated to the given pet id, if any
+         */
         void releaseOpcPort(const std::string& petId);
         
 }; // class

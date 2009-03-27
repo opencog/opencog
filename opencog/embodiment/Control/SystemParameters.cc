@@ -208,9 +208,6 @@ SystemParameters::SystemParameters() {
 	//lower bound (high age) of atoms in atomTable
     table["ATOM_TABLE_LOWER_STI_VALUE"] = "-400";
 
-    //number of cycles to run at each tick message
-    table["IDLE_CYCLES_PER_TICK"] = "3";
-    
     //0 with no random operator optimization for NoSpaceLife
     //1 with optimization (to avoid Monte Carlos simulations)
     table["RANDOM_OPERATOR_OPTIMIZATION"] = "1";

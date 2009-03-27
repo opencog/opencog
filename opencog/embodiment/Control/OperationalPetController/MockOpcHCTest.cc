@@ -7,7 +7,7 @@
 
 #include "MockOpcHCTest.h"
 #include "SchemaMessage.h"
-#include "HCTestTask.h"
+#include "HCTestAgent.h"
 #include "PetComboVocabulary.h"
 #include "atom_types_init.h"
 
@@ -49,19 +49,26 @@ std::vector<std::string> TRICK_ARGS;
 using namespace OperationalPetController;
 using namespace PetCombo;
 
-MockOpcHCTest::MockOpcHCTest(const std::string & myId,
-                             const std::string & ip,
-                             int portNumber, const std::string& petId,
-                             Control::SystemParameters & parameters) :
-        NetworkElement (parameters, myId, ip, portNumber)
+BaseServer* MockOpcHCTest::createInstance() {
+    return new MockOpcHCTest;
+}
+
+MockOpcHCTest::MockOpcHCTest() {
+}
+
+void MockOpcHCTest::init(const std::string & myId,
+                         const std::string & ip,
+                         int portNumber, const std::string& petId,
+                         Control::SystemParameters &parameters)
 {
 
+    setNetworkElement(new MessagingSystem::NetworkElement(parameters, myId, ip, portNumber));
     opencog::atom_types_init::init();
 
-    this->parameters = parameters;
+    this->getParameters() = parameters;
     this->atomSpace  = new AtomSpace();
     this->spaceServer = new SpaceServer(*atomSpace);
-    this->lsMessageSender = new PetMessageSender(this);
+    this->lsMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     //fill the atomSpace with the initial scene
     owner_h = atomSpace->addNode(SL_AVATAR_NODE, OWNER_NAME);
@@ -147,6 +154,14 @@ MockOpcHCTest::MockOpcHCTest(const std::string & myId,
     atomSpace->addLink(MEMBER_LINK, m2_seq);
 
     first_try = true;
+
+    registerAgent(HCTestAgent::info().id, &HCTestAgentFactory);
+    _HCTa  = static_cast<HCTestAgent*>(
+             createAgent(HCTestAgent::info().id, false));
+    _HCTa->init(TRICK_NAME, TRICK_ARGS,
+                OWNER_NAME, OWNER_NAME,
+                spaceServer, lsMessageSender);
+    startAgent(_HCTa);
 }
 
 MockOpcHCTest::~MockOpcHCTest()
@@ -184,7 +199,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
     }
 
     // message from learning server
-    if (msg->getFrom() == parameters.get("LS_ID")) {
+    if (msg->getFrom() == getParameters().get("LS_ID")) {
         LearningServerMessages::SchemaMessage* sm
         = (LearningServerMessages::SchemaMessage *)msg;
 
@@ -237,12 +252,12 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
 
                 lsMessageSender->sendReward(TRICK_NAME, TRICK_ARGS,
                                             SCHEMA_NAME, REWARD_1);
-                _HCTt->setWait2();
+                _HCTa->setWait2();
                 first_try = false;
             } else {
                 lsMessageSender->sendReward(TRICK_NAME, TRICK_ARGS,
                                             SCHEMA_NAME, REWARD_2);
-                _HCTt->setWait4();
+                _HCTa->setWait4();
             }
             break;
 
@@ -255,10 +270,3 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
     return false;
 }
 
-void MockOpcHCTest::setUp()
-{
-    _HCTt = new HCTestTask(TRICK_NAME, TRICK_ARGS,
-                           OWNER_NAME, OWNER_NAME,
-                           spaceServer, lsMessageSender);
-    plugInIdleTask(_HCTt, 1);
-}

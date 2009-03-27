@@ -17,9 +17,10 @@ ADD_LIBRARY (MessagingSystem
 	Router.cc
 	RouterServerSocket.cc
 	Spawner.cc
-	DummyServer.cc
+	#DummyServer.cc
 	RouterHttpPostSocket.cc
 	#MemoryLeakTask.cc
+        EmbodimentCogServer
 )
 
 INCLUDE_DIRECTORIES (
@@ -59,6 +60,7 @@ TARGET_LINK_LIBRARIES (MessagingSystem
         xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
+        server
         ${CSOCKETS_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 )
@@ -78,7 +80,7 @@ TARGET_LINK_LIBRARIES (msgtester
 	MessagingSystem
 )
 
-ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
-TARGET_LINK_LIBRARIES (dummyserver
-	MessagingSystem
-)
+#ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
+#TARGET_LINK_LIBRARIES (dummyserver
+	#MessagingSystem
+#)

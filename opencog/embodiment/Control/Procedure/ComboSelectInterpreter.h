@@ -2,7 +2,6 @@
 #define _COMBO_SELECT_INTERPRETER_H
 
 #include "PAI.h"
-#include "IdleTask.h"
 #include "ComboProcedure.h"
 #include "ComboInterpreter.h"
 #include "RunningProcedureId.h"
@@ -13,7 +12,7 @@
 
 namespace Procedure {
 
-class ComboSelectInterpreter : public MessagingSystem::IdleTask {
+class ComboSelectInterpreter {
 
     public:
         

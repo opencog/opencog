@@ -1,5 +1,5 @@
 /**
- * PetInterfaceUpdaterTask.h
+ * PetInterfaceUpdaterAgent.h
  *
  * $Header$
  *
@@ -7,18 +7,17 @@
  * Creation: Thu Oct 18 12:46:07 BRDT 2007
  */
 
-#ifndef PETINTERFACEUPDATERTASK_H
-#define PETINTERFACEUPDATERTASK_H
+#ifndef PETINTERFACEUPDATERAGENT_H
+#define PETINTERFACEUPDATERAGENT_H
 
-#include <NetworkElement.h>
-#include <IdleTask.h>
+#include <opencog/server/Agent.h>
 #include <string>
 
 namespace OperationalPetController {
 
 class OPC; 
 
-class PetInterfaceUpdaterTask : public MessagingSystem::IdleTask {
+class PetInterfaceUpdaterAgent : public opencog::Agent {
 
     private:
 
@@ -30,10 +29,16 @@ class PetInterfaceUpdaterTask : public MessagingSystem::IdleTask {
         // ***********************************************/
         // Constructors/destructors
 
-        ~PetInterfaceUpdaterTask();
-        PetInterfaceUpdaterTask();
+        ~PetInterfaceUpdaterAgent();
+        PetInterfaceUpdaterAgent();
 
-        void run(MessagingSystem::NetworkElement *ne);
+        virtual const ClassInfo& classinfo() const { return info(); }
+        static const ClassInfo& info() {
+            static const ClassInfo _ci("OperationalPetController::PetInterfaceUpdaterAgent");
+            return _ci;
+        }
+
+        void run(opencog::CogServer *server);
         void updateLocalMap(OPC *opc);
         void updateFeelings(OPC *opc);
         void updateLastSelectedAction(OPC *opc);

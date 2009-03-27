@@ -14,23 +14,33 @@ using namespace MessagingSystem;
 using namespace PetaverseProxySimulator;
 using namespace opencog;
 
+opencog::BaseServer* PBTester::createInstance() {
+    return new PBTester;
+}
+
+PBTester::PBTester() {
+}
+
 PBTester::~PBTester() {
-    if (testParams.get("SAVE_MESSAGES_TO_FILE") == "1") {
+    if (testParams->get("SAVE_MESSAGES_TO_FILE") == "1") {
         delete goldStdGen;
     }
 }
 
-PBTester::PBTester(TestParameters& _testParams) : testParams(_testParams) {
+void PBTester::init(TestParameters& _testParams) {
+    testParams = &_testParams;
     initialize();
 }
 
-PBTester::PBTester(const Control::SystemParameters &params, TestParameters& _testParams, const std::string &myId, const std::string &ip, int portNumber) : NetworkElement(params, myId, ip, portNumber), testParams(_testParams) {
+void PBTester::init(const Control::SystemParameters &params, TestParameters& _testParams, const std::string &myId, const std::string &ip, int portNumber) {
+    setNetworkElement(new NetworkElement(params, myId, ip, portNumber));
+    testParams = &_testParams;
     initialize();
 }
 
 void PBTester::initialize() {
-    if (testParams.get("SAVE_MESSAGES_TO_FILE") == "1") {
-        goldStdGen = new GoldStdGen(testParams.get("MESSAGES_FILENAME").c_str());
+    if (testParams->get("SAVE_MESSAGES_TO_FILE") == "1") {
+        goldStdGen = new GoldStdGen(testParams->get("MESSAGES_FILENAME").c_str());
     }
     failed = false;
     numberOfReceivedMessages = 0;
@@ -39,7 +49,7 @@ void PBTester::initialize() {
 bool PBTester::processNextMessage(MessagingSystem::Message *message) {
     //logger().log(opencog::Logger::INFO, "RECEIVED MESSAGE:\n%s", message->getPlainTextRepresentation());
 
-    if (testParams.get("SAVE_MESSAGES_TO_FILE") == "1") {
+    if (testParams->get("SAVE_MESSAGES_TO_FILE") == "1") {
         goldStdGen->writeMessage(*message, false);
     }
     if (expectedMessages.empty()) {

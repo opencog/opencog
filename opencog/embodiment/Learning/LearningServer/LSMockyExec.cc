@@ -16,10 +16,12 @@ int main(int argc, char *argv[]) {
     	parameters.loadFromFile(parameters.get("CONFIG_FILE"));
     }
 
-  	LSMocky * ls = new LSMocky(parameters.get("LS_ID"), 
-  					 parameters.get("LS_IP"), 
-  					 std::atoi(parameters.get("LS_PORT").c_str()), 
-  					 parameters);
-  	ls->serverLoop();
+    server(LSMocky::createInstance);
+    LSMocky& ls = static_cast<LSMocky&>(server());
+  	ls.init(parameters.get("LS_ID"), 
+  			parameters.get("LS_IP"), 
+  			std::atoi(parameters.get("LS_PORT").c_str()), 
+  			parameters);
+  	ls.serverLoop();
   	return 0;
 }

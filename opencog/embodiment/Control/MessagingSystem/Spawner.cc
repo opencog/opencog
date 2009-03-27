@@ -20,13 +20,25 @@
 using namespace MessagingSystem;
 using namespace opencog;
 
+BaseServer* Spawner::createInstance() {
+    return new Spawner;
+}
+
 Spawner::~Spawner() {
 }
 
-Spawner::Spawner(const Control::SystemParameters &params, const std::string &id, const std::string &ip, int port) throw (opencog::InvalidParamException, std::bad_exception) : NetworkElement(params, id, ip, port) {
+Spawner::Spawner() {
+}
+
+void Spawner::init(const Control::SystemParameters &params, 
+                   const std::string &id, 
+                   const std::string &ip, 
+                   int port) throw (opencog::InvalidParamException, std::bad_exception) {
+
+    setNetworkElement(new NetworkElement(params, id, ip, port));
     
-    minOpcPort = atoi(parameters.get("MIN_OPC_PORT").c_str());
-    maxOpcPort = atoi(parameters.get("MAX_OPC_PORT").c_str());
+    minOpcPort = atoi(getParameters().get("MIN_OPC_PORT").c_str());
+    maxOpcPort = atoi(getParameters().get("MAX_OPC_PORT").c_str());
     int maxNumberOfPets = maxOpcPort - minOpcPort;
 
     if (minOpcPort <= 0 || maxOpcPort <=0 || maxNumberOfPets < 0) {
@@ -68,7 +80,7 @@ bool Spawner::processNextMessage(Message *message) {
     std::string command;
     std::queue<std::string> args;
 
-    parseCommandLine(cmdLine, command, args);
+    NetworkElement::parseCommandLine(cmdLine, command, args);
     logger().log(opencog::Logger::INFO, "Spawner - line(%s) command(%s) # of parsed arguments(%d).", cmdLine.c_str( ), command.c_str( ), args.size( ) );
 
     if (command == "LOAD_AGENT") {
@@ -99,8 +111,8 @@ bool Spawner::processNextMessage(Message *message) {
         }
         std::string cmdPrefix;
         std::string cmdSuffix;
-	if (atoi(parameters.get("RUN_OPC_DEBUGGER").c_str()) != 0) {
-	    cmdPrefix = parameters.get("OPC_DEBUGGER_PATH");
+	if (atoi(getParameters().get("RUN_OPC_DEBUGGER").c_str()) != 0) {
+	    cmdPrefix = getParameters().get("OPC_DEBUGGER_PATH");
 	    cmdPrefix += " ";
 	    std::cout << "======= YOU MUST ENTER DEBUGGER PARAMETERS ======="
 		      << std::endl;
@@ -109,16 +121,16 @@ bool Spawner::processNextMessage(Message *message) {
 	    std::cout << agentID << " " << ownerID << " " << agentType << " " << agentTraits << " " << opcPort << std::endl;
 	    str << cmdPrefix << "./opc &";
 	} else {
-	  if (atoi(parameters.get("CHECK_OPC_MEMORY_LEAKS").c_str()) != 0) {
-            cmdPrefix = parameters.get("VALGRIND_PATH");
+	  if (atoi(getParameters().get("CHECK_OPC_MEMORY_LEAKS").c_str()) != 0) {
+            cmdPrefix = getParameters().get("VALGRIND_PATH");
             cmdPrefix += " --leak-check=full ";
             cmdSuffix += " > opc.valgrind.memcheck 2>&1"; 
-	  } else if (atoi(parameters.get("CHECK_OPC_MEMORY_USAGE").c_str()) != 0) { 
-	    cmdPrefix = parameters.get("VALGRIND_PATH");
+	  } else if (atoi(getParameters().get("CHECK_OPC_MEMORY_USAGE").c_str()) != 0) { 
+	    cmdPrefix = getParameters().get("VALGRIND_PATH");
             cmdPrefix += " --tool=massif --detailed-freq=";
-            cmdPrefix += parameters.get("MASSIF_DETAILED_FREQ");
+            cmdPrefix += getParameters().get("MASSIF_DETAILED_FREQ");
             cmdPrefix += " --depth="; 
-            cmdPrefix += parameters.get("MASSIF_DEPTH");
+            cmdPrefix += getParameters().get("MASSIF_DEPTH");
             cmdPrefix += " ";
             cmdSuffix += " > opc.valgrind.massif 2>&1"; 
 	  }
@@ -133,7 +145,7 @@ bool Spawner::processNextMessage(Message *message) {
 
 #define USE_SYSTEM_FUNCTION 
 #ifdef USE_SYSTEM_FUNCTION 
-        if (atoi(parameters.get("MANUAL_OPC_LAUNCH").c_str()) == 0) {
+        if (atoi(getParameters().get("MANUAL_OPC_LAUNCH").c_str()) == 0) {
             system(str.str().c_str( ) );
         } else {
             printf("\nSpawner Command: %s\n", str.str().c_str());
@@ -157,12 +169,12 @@ bool Spawner::processNextMessage(Message *message) {
        
         // request router to erase all messages for the given pet
         std::string cmd("CLEAR_MESSAGE_QUEUE ");
-        cmd.append(myId + " ");
+        cmd.append(getID() + " ");
         cmd.append(agentID);
         sendCommandToRouter(cmd);
         
         // then, unload it
-        StringMessage saveExit(myId, agentID, "SAVE_AND_EXIT");
+        StringMessage saveExit(getID(), agentID, "SAVE_AND_EXIT");
         logger().log(opencog::Logger::INFO, "Sending SAVE_AND_EXIT message to %s", agentID.c_str());
         sendMessage(saveExit);
         

@@ -107,16 +107,10 @@ void NetworkElement::initialize(const Control::SystemParameters &params, const s
     this->routerID.assign(this->parameters.get("ROUTER_ID"));
     this->routerIP.assign(this->parameters.get("ROUTER_IP"));
     this->routerPort = atoi(this->parameters.get("ROUTER_PORT").c_str());
-    this->unreadMessagesCheckInterval = atoi(this->parameters.get("UNREAD_MESSAGES_CHECK_INTERVAL").c_str()); 
-    this->unreadMessagesRetrievalLimit = atoi(this->parameters.get("UNREAD_MESSAGES_RETRIEVAL_LIMIT").c_str()); 
     this->noAckMessages = atoi(this->parameters.get("NO_ACK_MESSAGES").c_str()) == 1;
 
-    this->idleCyclesPerTick = atoi(this->parameters.get("IDLE_CYCLES_PER_TICK").c_str()); 
-    
     logger().log(opencog::Logger::INFO, "NetworkElement - Router address %s:%d", routerIP.c_str(), routerPort);
 
-    idleCycles = 1;
-    
     //messageCentral has been initialized
     this->messageCentral.createQueue(this->myId);
     this->messageCentral.createQueue("ticks_queue");
@@ -216,182 +210,6 @@ bool NetworkElement::sendMessage(Message &msg) {
                 response.c_str());
         return false;
     }  // else
-}
-
-#define SLEEP_TIME 100000
-void NetworkElement::sleepUntilNextMessageArrives() {
-    if (!haveUnreadMessage() && messageCentral.isQueueEmpty(myId)) {
-        logger().log(opencog::Logger::FINE, "NetworkElement - Sleeping %d ms...", SLEEP_TIME);
-        usleep(SLEEP_TIME);
-    }
-}
-
-void NetworkElement::serverLoop() {
-
-    setUp();
-
-    do {
-
-		bool mustExit = serverCycle();
-		
-		if (mustExit) return;
-		
-    } while(true);
-}
-
-void NetworkElement::tickedServerLoop() {
-
-    setUp();
-
-    do {
-
-		bool mustExit = serverCycle(true);
-
-		if (mustExit) return;
-
-    } while(true);
-}
-
-void NetworkElement::addTick() {
-	
-    pthread_mutex_lock(&tickLock);
-    tickNumber = (tickNumber + 1) % 32750;
-    pthread_mutex_unlock(&tickLock);
-	
-}
-
-int NetworkElement::getTick() {
-    int result = 0;
-
-    pthread_mutex_lock(&tickLock);
-    result = tickNumber;
-    pthread_mutex_unlock(&tickLock);
-	
-    return result;
-}
-
-bool NetworkElement::serverCycle(bool waitTick) {
-
-    if (!waitTick) {
-        // Retrieve new messages from router, if any
-        if ((idleCycles % unreadMessagesCheckInterval) == 0) {
-	    retrieveMessages(unreadMessagesRetrievalLimit);
-        }
-
-        // Process all messages in queue
-        std::vector<Message*> messages; 
-        while (! this->messageCentral.isQueueEmpty(this->myId) ) {
-            Message *message = this->messageCentral.pop(this->myId);
-            messages.push_back(message);
-        }
-	for(unsigned int i = 0; i < messages.size(); i++) {
-            Message *message = messages[i];
-            if (message->getType() != Message::TICK) {
-	        bool mustExit = processNextMessage(message);
-	        delete(message);
-	        if (mustExit) return true;
-            } else {
-	        delete(message);
-            }
-        }
-
-        //sleep a bit to not keep cpu busy and do not keep requesting for unread messages 
-        usleep(50000);
-
-    } else {
-	
-        int tickCount = getTick();
-	    
-        //while tick not arrive from router, get and process messages.
-        while (tickCount == getTick()) {
-
-	    retrieveMessages(unreadMessagesRetrievalLimit);
-
-	    // Process all messages in queue
-            std::vector<Message*> messages; 
-	    while (!this->messageCentral.isQueueEmpty(this->myId) && tickCount == getTick()) {
-                Message *message = this->messageCentral.pop(this->myId);
-                messages.push_back(message);
-            }
-	    for(unsigned int i = 0; i < messages.size(); i++) {
-                Message *message = messages[i];
-	        //check type of message
-	        if (message->getType() == Message::TICK) {
-	            logger().log(opencog::Logger::DEBUG, "NetworkElement::serverCycle() - addTick");
-	            addTick();
-	            delete(message);
-	        } else {
-	            bool mustExit = processNextMessage(message);
-	            delete(message);
-	            if (mustExit) return true;
-	        }
-	    }
-
-            //sleep a bit to not keep cpu busy and do not keep requesting for unread messages 
-            usleep(50000);
-        }
-    }
-	
-    //logger().log(opencog::Logger::DEBUG, "NetworkElement::tickedSserverLoop() - sleepCount %d", sleepCount++);
-
-    unsigned int msgQueueSize = this->messageCentral.queueSize( this->myId );
-    if (msgQueueSize > 0) {
-        logger().log(opencog::Logger::DEBUG, "NetworkElement(%s) - messageCentral size: %d", 
-		        this->myId.c_str(), msgQueueSize);
-    }
-
-    // Call idleTime(), which may be specific for each kind of server (subclass of NE) 
-    for (int i = 0; i < idleCyclesPerTick; i++)
-        idleTime();
-	    
-    return false;
-	
-}
-
-
-void NetworkElement::idleTime() {
-    logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - init.");
-    if (idleTasks.size() == 0) {
-        logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - idleTasks.size() == 0");
-        //sleepUntilNextMessageArrives();
-    } else {
-        logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - Doing idleTasks");
-        int size = idleTasks.size();
-        for (int i = 0; i < size; i++) {
-            if ((idleCycles % idleTasks.at(i).frequency) == 0) {
-                idleTasks.at(i).task->run(this);
-            }
-        }
-    }
-
-    idleCycles++;
-    if (idleCycles < 0) {
-        idleCycles = 0;
-    }
-
-    logger().log(opencog::Logger::FINE, "NetworkElement - idleTime() - end.");
-
-}
-
-bool NetworkElement::processNextMessage(Message *message) {
-
-    logger().log(opencog::Logger::WARN, "NetworkElement - Discarding message from '%s'.\n%s",
-                    message->getFrom().c_str(), message->getPlainTextRepresentation());
-    return false;
-}
-
-
-void NetworkElement::setUp() {
-    // does nothing
-    // subclasses are supposed to override this method as needed
-}
-
-void NetworkElement::plugInIdleTask(IdleTask *task, int frequency) {
-
-    ScheduledIdleTask newTask;
-    newTask.task = task;
-    newTask.frequency = frequency;
-    idleTasks.push_back(newTask);
 }
 
 int NetworkElement::getPortNumber() {
@@ -739,3 +557,16 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message ) {
   pthread_mutex_unlock(&socketAccessLock);
   return buffer;
 }
+
+unsigned int NetworkElement::getIncomingQueueSize() {
+    return messageCentral.queueSize(myId);
+}
+
+bool NetworkElement::isIncomingQueueEmpty() {
+    return messageCentral.isQueueEmpty(myId);
+}
+
+Message* NetworkElement::popIncomingQueue() {
+    return messageCentral.pop(myId);
+}
+

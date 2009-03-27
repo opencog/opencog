@@ -1,5 +1,5 @@
 /**
- * PetInterfaceUpdaterTask.cc
+ * PetInterfaceUpdaterAgent.cc
  *
  * $Header$
  *
@@ -17,7 +17,7 @@
 
 #include "AtomSpaceUtil.h"
 #include "OPC.h"
-#include "PetInterfaceUpdaterTask.h"
+#include "PetInterfaceUpdaterAgent.h"
 #include "LocalSpaceMap2D.h"
 
 #include "util/StringManipulator.h"
@@ -45,7 +45,7 @@ public:
 
     void OnLine(const std::string& line) {
         logger().log(opencog::Logger::DEBUG, 
-                        "PetInterfaceUpdaterTask - onLine(%s)", line.c_str());
+                        "PetInterfaceUpdaterAgent - onLine(%s)", line.c_str());
         if (! line.size()) {
             SetCloseAndDelete();
         }
@@ -53,31 +53,31 @@ public:
 
 };
 
-PetInterfaceUpdaterTask::~PetInterfaceUpdaterTask() {
+PetInterfaceUpdaterAgent::~PetInterfaceUpdaterAgent() {
 }
 
-PetInterfaceUpdaterTask::PetInterfaceUpdaterTask() {
+PetInterfaceUpdaterAgent::PetInterfaceUpdaterAgent() {
     interfacePortNumber = 11354; // Remember to change PetInterface.tcl if you 
                                  // change this port number
 }
 
-void PetInterfaceUpdaterTask::startGUI() {
+void PetInterfaceUpdaterAgent::startGUI() {
     system("wish -f ./PetInterface.tcl &");
 }
 
-void PetInterfaceUpdaterTask::run(MessagingSystem::NetworkElement *ne) {
+void PetInterfaceUpdaterAgent::run(opencog::CogServer *server) {
     
-    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - run()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - run()");
 
-    OPC *opc = (OPC *) ne;
+    OPC *opc = (OPC *) server;
     updateLocalMap(opc);
     updateFeelings(opc);
     updateLastSelectedAction(opc);
 }
 
-void PetInterfaceUpdaterTask::sendLine(const std::string &line) {
-    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - sendLine()");
-    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - line = %s", line.c_str());
+void PetInterfaceUpdaterAgent::sendLine(const std::string &line) {
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - sendLine()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - line = %s", line.c_str());
     SocketHandler h;
     InterfaceUpdaterClientSocket cc(h, line);
     cc.Open("127.0.0.1", interfacePortNumber);
@@ -86,12 +86,12 @@ void PetInterfaceUpdaterTask::sendLine(const std::string &line) {
     while (h.GetCount()) {
         h.Select(1,0);
     }
-    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - sendLine() finished");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - sendLine() finished");
 }
 
-void PetInterfaceUpdaterTask::updateLastSelectedAction(OPC *opc) {
+void PetInterfaceUpdaterAgent::updateLastSelectedAction(OPC *opc) {
 
-    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - updateLastSelectedAction()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - updateLastSelectedAction()");
 
     std::string line = "LASTSELECTEDGOAL ";
     line.append("No goals");
@@ -110,9 +110,9 @@ void PetInterfaceUpdaterTask::updateLastSelectedAction(OPC *opc) {
 
 
 
-void PetInterfaceUpdaterTask::updateFeelings(OPC *opc) {
+void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc) {
 
-    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterTask - updateFeelings()");
+    logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - updateFeelings()");
 
     std::vector<std::string> allFeelingNames;
     Handle petHandle = opc->getAtomSpace().getHandle(SL_PET_NODE, opc->getPet().getName());
@@ -140,7 +140,7 @@ void PetInterfaceUpdaterTask::updateFeelings(OPC *opc) {
     }
 }
 
-void PetInterfaceUpdaterTask::updateLocalMap(OPC *opc) {
+void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc) {
 
     if (! opc->getSpaceServer().isLatestMapValid()) {
         return;

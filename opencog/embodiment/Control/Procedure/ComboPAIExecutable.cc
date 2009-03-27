@@ -15,7 +15,9 @@ int main(int argc,char** argv) {
     parameters.loadFromFile(parameters.get("CONFIG_FILE"));
   }
 
-  ComboShellServer css=ComboShellServer(parameters);
+  opencog::server(ComboShellServer::createInstance);
+  ComboShellServer& css=static_cast<ComboShellServer&>(opencog::server());
+  css.init(parameters);
   css.serverLoop();
   return 0;
 }

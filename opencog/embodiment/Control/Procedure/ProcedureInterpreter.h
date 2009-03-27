@@ -12,7 +12,7 @@ namespace Procedure {
 typedef unsigned long int RunningProcedureID;
 typedef boost::variant<RunningProcedureId, RunningBuiltInProcedure> RunningProcedure;
 
-class ProcedureInterpreter : public MessagingSystem::IdleTask,boost::noncopyable {
+class ProcedureInterpreter : public boost::noncopyable {
 
 public: 
     ProcedureInterpreter(PerceptionActionInterface::PAI& p);

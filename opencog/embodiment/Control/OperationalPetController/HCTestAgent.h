@@ -1,24 +1,26 @@
 /**
- * HCTestTask.h
+ * HCTestAgent.h
  *
  * Author: Nil Geisweiller
  * Creation: Thu Sep 13 2007
  */
 
-#ifndef HCTESTTASK_H
-#define HCTESTTASK_H
+#ifndef HCTESTAGENT_H
+#define HCTESTAGENT_H
 
-#include <NetworkElement.h>
+#include <opencog/server/Agent.h>
 #include "MessageSender.h"
 
 namespace OperationalPetController {
+
+  using namespace opencog;
 
   /**
    * That class is in charge of executing a scenario to test hillclimbing
    * hosted by LS
    */
 
-  class HCTestTask : public MessagingSystem::IdleTask {
+  class HCTestAgent : public Agent {
     
     enum HCTestMode {
       HCT_IDLE,
@@ -41,10 +43,17 @@ namespace OperationalPetController {
     
   public:
     
-    HCTestTask(std::string sn, std::vector<std::string> schemaArgs, std::string b, std::string a, SpaceServer* ss, MessageSender* s);
-    ~HCTestTask();
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("OperationalPetController::HCTestAgent");
+        return _ci;
+    }
+
+    HCTestAgent();
+    void init(std::string sn, std::vector<std::string> schemaArgs, std::string b, std::string a, SpaceServer* ss, MessageSender* s);
+    ~HCTestAgent();
     
-    void run(MessagingSystem::NetworkElement* ne);
+    void run(opencog::CogServer* ne);
 
     void setWait2() {
       mode = HCT_WAIT2;

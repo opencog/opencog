@@ -12,7 +12,9 @@
 #include <exception>
 #include <unistd.h>
 #include "util/files.h"
-#include "GoldStdReaderTask.h"
+#include "GoldStdReaderAgent.h"
+
+using namespace AutomatedSystemTest;
 
 int main(int argc, char *argv[]) {
 
@@ -27,15 +29,22 @@ int main(int argc, char *argv[]) {
     	parameters.loadFromFile(parameters.get("CONFIG_FILE"));
     }
 
-    AutomatedSystemTest::TestParameters testParameters;
+    TestParameters testParameters;
     if(fileExists(testParameters.get("CONFIG_FILE").c_str())){
     	testParameters.loadFromFile(testParameters.get("CONFIG_FILE"));
     }
 
-//    AutomatedSystemTest::PBTester pbTester(parameters, testParameters, parameters.get("PROXY_ID"), parameters.get("PROXY_IP"), atoi(parameters.get("PROXY_PORT").c_str()));
-    AutomatedSystemTest::PBTester pbTester(parameters, testParameters, parameters.get("PROXY_ID"), testParameters.get("PROXY_IP"), atoi(testParameters.get("PROXY_PORT").c_str()));
+    server(PBTester::createInstance);
+    PBTester& pbTester = static_cast<PBTester&>(server());
+    pbTester.init(parameters, testParameters, parameters.get("PROXY_ID"), testParameters.get("PROXY_IP"), atoi(testParameters.get("PROXY_PORT").c_str()));
 
-    pbTester.plugInIdleTask(new AutomatedSystemTest::GoldStdReaderTask(testParameters, filename), 1);
+    Factory<GoldStdReaderAgent,Agent> goldStdReaderAgentFactory;
+
+    pbTester.registerAgent(GoldStdReaderAgent::info().id, &goldStdReaderAgentFactory);
+    GoldStdReaderAgent* goldStdReaderAgent = static_cast<GoldStdReaderAgent*>(
+            pbTester.createAgent(GoldStdReaderAgent::info().id, false));
+    goldStdReaderAgent->init(testParameters, filename);
+    pbTester.startAgent(goldStdReaderAgent);
 
     try {
         pbTester.serverLoop();

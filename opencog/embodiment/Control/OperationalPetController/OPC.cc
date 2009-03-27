@@ -8,7 +8,6 @@
 #include "comboreduct/combo/type_tree.h"
 
 #include "OPC.h"
-#include "SleepTask.h"
 #include "SchemaMessage.h"
 
 #include "util/files.h"
@@ -32,11 +31,18 @@ using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;
 
-OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
+opencog::BaseServer* OPC::createInstance() {
+    return new OPC;
+}
+
+OPC::OPC() {}
+
+void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
          const std::string& petId, const std::string& ownerId,
          const std::string& agentType, const std::string& agentTraits,
-         Control::SystemParameters & parameters) :
-         NetworkElement (parameters, myId, ip, portNumber)  {
+         Control::SystemParameters & parameters) {
+
+    setNetworkElement(new NetworkElement(parameters, myId, ip, portNumber));
 
     // OpenCog-related initialization
     atom_types_init::init();
@@ -47,11 +53,10 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
                          agentType : parameters.get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
 
 
-    this->parameters = parameters;
     this->atomSpace  = new AtomSpace();
     this->spaceServer = new SpaceServer(*atomSpace);
-    this->planSender = new PVPActionPlanSender(petId, this);
-    this->petMessageSender = new PetMessageSender(this);
+    this->planSender = new PVPActionPlanSender(petId, &(getNetworkElement()));
+    this->petMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     // load pet
     if(fileExists(getPath(petId, parameters.get("PET_DUMP")).c_str())){
@@ -67,6 +72,7 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
 
     this->procedureRepository = new ProcedureRepository(*pai);
     this->procedureInterpreter = new ProcedureInterpreter(*pai);
+
     this->pet->setPAI(pai);
 
     // adds all savable repositories for further calls to save/load methods.
@@ -136,6 +142,58 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
 
     predicatesUpdater = new PredicatesUpdater(*spaceServer, pet->getPetId());
 
+    // TODO: remove component reference from component constructors
+
+    // Register and create agents 
+    // IMPORTANT: the order the agents are created matters 
+    //            if they must be executed sequencially.
+
+    this->registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
+    procedureInterpreterAgent = static_cast<ProcedureInterpreterAgent*>(
+            this->createAgent(ProcedureInterpreterAgent::info().id, false));
+    procedureInterpreterAgent->setInterpreter(procedureInterpreter);
+
+    this->registerAgent(ActionSelectionAgent::info().id, &actionSelectionAgentFactory);
+    actionSelectionAgent = static_cast<ActionSelectionAgent*>(
+            this->createAgent(ActionSelectionAgent::info().id, false));
+
+    this->registerAgent(ImportanceDecayAgent::info().id, &importanceDecayAgentFactory);
+    importanceDecayAgent = static_cast<ImportanceDecayAgent*>(
+            this->createAgent(ImportanceDecayAgent::info().id, false));
+
+    this->registerAgent(PetInterfaceUpdaterAgent::info().id, &petInterfaceUpdaterAgentFactory);
+    petInterfaceUpdaterAgent = static_cast<PetInterfaceUpdaterAgent*>(
+            this->createAgent(PetInterfaceUpdaterAgent::info().id, false));
+
+    if (atoi(getParameters().get("PROCEDURE_INTERPRETER_ENABLED").c_str())) {
+        this->startAgent(procedureInterpreterAgent);
+    }
+
+    if (atoi(getParameters().get("ACTION_SELECTION_ENABLED").c_str())) {
+        actionSelectionAgent->setFrequency(atoi(getParameters().get("RE_CYCLE_PERIOD").c_str()));
+        this->startAgent(actionSelectionAgent);
+    }
+
+    if (atoi(getParameters().get("PROCEDURE_INTERPRETER_ENABLED").c_str())) {
+        // adds the same procedure interpreter agent to schedule again
+        this->startAgent(procedureInterpreterAgent);
+    }
+
+    if (atoi(getParameters().get("IMPORTANCE_DECAY_ENABLED").c_str())) {
+        // TODO: Create a config parameter to control this frequency
+        importanceDecayAgent->setFrequency(15);
+        this->startAgent(importanceDecayAgent);
+    }
+
+    // local map 2D interface
+    if (atoi(getParameters().get("PET_INTERFACE_ENABLED").c_str())) {
+//        PetInterfaceUpdaterTask::startGUI();
+//        petInterfaceUpdaterAgent->setFrequency(atoi(getParameters().get("PET_INTERFACE_UPDATE_PERIOD").c_str()));
+//        this->startAgent(petInterfaceUpdaterAgent);
+    }
+
+    // TODO: This should be done only after NetworkElement is initialized
+    // (i.e., handshake with router is done)
     // Send SUCCESS_LOAD to PROXY, so that it can start sending perception messages
     char str[100];
     sprintf(str, "SUCCESS LOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()).c_str());
@@ -146,12 +204,6 @@ OPC::OPC(const std::string & myId, const std::string & ip, int portNumber,
 	exit(-1);
     }
  
-    importanceDecayTask = NULL;
-    actionSelectionTask = NULL;
-    petInterfaceUpdaterTask = NULL;
-
-    markAsInitialized();
-    // TODO: remove component reference from component constructors
 }
 
 OPC::~OPC(){
@@ -162,7 +214,7 @@ OPC::~OPC(){
     // TODO: This is a hack to allow valgrind tests to work fine. When atomSpace
     // removal if fast enough remove this hack and make delete operation
     // permanent
-    if(atoi(parameters.get("CHECK_OPC_MEMORY_LEAKS").c_str())){
+    if(atoi(getParameters().get("CHECK_OPC_MEMORY_LEAKS").c_str())){
         logger().log(opencog::Logger::DEBUG, "OPC - Starting AtomSpace removal.");
         delete (atomSpace);
         logger().log(opencog::Logger::DEBUG, "OPC - Finished AtomSpace removal.");
@@ -172,14 +224,17 @@ OPC::~OPC(){
     delete (petMessageSender);
     delete (predicatesUpdater);
     delete (pai);
-    delete (procedureInterpreter);
     delete (procedureRepository);
     delete (pet);
+
+    // agents
+    delete (procedureInterpreterAgent);
+    delete (importanceDecayAgent);
+    delete (actionSelectionAgent);
+    delete (petInterfaceUpdaterAgent);
+
     // TODO: It takes too much time to delete atomspace 
     // delete (atomSpace);
-    if (importanceDecayTask != NULL) delete importanceDecayTask;
-    if (actionSelectionTask != NULL) delete actionSelectionTask;
-    if (petInterfaceUpdaterTask != NULL) delete petInterfaceUpdaterTask;
 }
 
 /* --------------------------------------
@@ -189,13 +244,13 @@ OPC::~OPC(){
 
 void OPC::loadPet(const std::string& petId){
     // load pet metadata
-    std::string file = getPath(petId, parameters.get("PET_DUMP"));
+    std::string file = getPath(petId, getParameters().get("PET_DUMP"));
     this->pet = Pet::importFromFile(file, petId, spaceServer, petMessageSender);
 }
 
 void OPC::loadAtomSpace(const std::string& petId){
     // load atom space and other repositories
-    std::string file = getPath(petId, parameters.get("ATOM_SPACE_DUMP"));
+    std::string file = getPath(petId, getParameters().get("ATOM_SPACE_DUMP"));
     savingLoading.load(file.c_str(), spaceServer->getAtomSpace());
 }
 
@@ -208,18 +263,18 @@ void OPC::saveState(){
     }
 
     // save atom space and othe repositories
-    std::string file = getPath(pet->getPetId(), parameters.get("ATOM_SPACE_DUMP"));
+    std::string file = getPath(pet->getPetId(), getParameters().get("ATOM_SPACE_DUMP"));
     remove(file.c_str());
     savingLoading.save(file.c_str(), spaceServer->getAtomSpace());
 
     // save pet metadata
-    file = getPath(pet->getPetId(), parameters.get("PET_DUMP"));
+    file = getPath(pet->getPetId(), getParameters().get("PET_DUMP"));
     Pet::exportToFile(file, getPet());
 
     // Pet state saved, send success unload message to proxy
     char str[100];
-    sprintf(str, "SUCCESS UNLOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
-    StringMessage successUnload(myId, parameters.get("PROXY_ID"), str);
+    sprintf(str, "SUCCESS UNLOAD %s %s", getID().c_str(), PerceptionActionInterface::PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
+    StringMessage successUnload(getID(), getParameters().get("PROXY_ID"), str);
     logger().log(opencog::Logger::INFO, "OPC - OPC despawned (state saved). Acking requestor");
     if (!sendMessage(successUnload)) {
         logger().log(opencog::Logger::ERROR, "Could not send SUCCESS UNLOAD to PROXY!");
@@ -245,7 +300,7 @@ bool OPC::processSpawnerMessage(const std::string & spawnerMessage){
     if(spawnerMessage == "SAVE_AND_EXIT"){
         adjustPetToBePersisted();
         saveState();
-        NetworkElement::logoutFromRouter();
+        logoutFromRouter();
         return true;
     }
     return false;
@@ -304,7 +359,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
     }
 
     // message from petaverse proxy - send to PAI
-    if(msg->getFrom() == parameters.get("PROXY_ID")){
+    if(msg->getFrom() == getParameters().get("PROXY_ID")){
         HandleSeq toUpdateHandles;
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
@@ -321,7 +376,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
     }
 
     // message from spawner - probabily a SAVE_AND_EXIT
-    if(msg->getFrom() == parameters.get("SPAWNER_ID")){
+    if(msg->getFrom() == getParameters().get("SPAWNER_ID")){
         result = processSpawnerMessage((std::string)msg->getPlainTextRepresentation());
 
         // Message correctly processed, just exit
@@ -333,7 +388,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
     }
 
     // message from the combo shell to execute a schema
-    if (msg->getFrom() == parameters.get("COMBO_SHELL_ID")) {
+    if (msg->getFrom() == getParameters().get("COMBO_SHELL_ID")) {
       std::string str(msg->getPlainTextRepresentation());
       logger().log(opencog::Logger::ERROR, "OPC - Got combo shell msg: '%s'",str.c_str());
 
@@ -351,7 +406,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
     }
 
     // message from learning server
-    if(msg->getFrom() == parameters.get("LS_ID")){
+    if(msg->getFrom() == getParameters().get("LS_ID")){
         LearningServerMessages::SchemaMessage * sm = (LearningServerMessages::SchemaMessage *)msg;
         logger().log(opencog::Logger::DEBUG, "OPC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
         
@@ -376,7 +431,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg){
 	    //note that if the type is infered and checked
 	    //it doesn't matter what arity is specified (here 0)
 	    //because it is going to be overwrite with at the type check
-	    bool tc = static_cast<bool>(atoi(MessagingSystem::NetworkElement::parameters.get("TYPE_CHECK_LOADING_PROCEDURES").c_str()));
+	    bool tc = static_cast<bool>(atoi(getParameters().get("TYPE_CHECK_LOADING_PROCEDURES").c_str()));
 	    arity_t a = infer_arity(sm->getComboSchema());
             procedureRepository->add(ComboProcedure(sm->getSchemaName(),
 						    a, sm->getComboSchema(),
@@ -440,74 +495,9 @@ void OPC::decayShortTermImportance() {
     atomSpace->decayShortTermImportance();
 }
 
-void OPC::setUp() {
-    // IMPORTANT: the order the idle tasks are inserted matters if tow tasks are
-    // to executed sequencially.
 
-    if (atoi(parameters.get("PROCEDURE_INTERPRETER_ENABLED").c_str())) {
-        // set up the general procedure interpreter task
-        plugInIdleTask(procedureInterpreter, 1);
-    }
-
-    if (atoi(parameters.get("COMBO_INTERPRETER_ENABLED").c_str())) {
-        // set up the combo interpreter task (NOTE: we dont need this if general
-        // procedure interpreter calls combo interpreter's run() method as well.
-        plugInIdleTask(&(procedureInterpreter->getComboInterpreter()), 1);
-    }
-
-    if (atoi(parameters.get("ACTION_SELECTION_ENABLED").c_str())) {
-        actionSelectionTask = new ActionSelectionTask();
-        plugInIdleTask(actionSelectionTask,
-                       atoi(parameters.get("RE_CYCLE_PERIOD").c_str()));
-    }
-
-    if (atoi(parameters.get("COMBO_INTERPRETER_ENABLED").c_str())) {
-        // set up the combo interpreter task to execute again with after an
-        // action has been selected and possibily sent to execution 
-        plugInIdleTask(&(procedureInterpreter->getComboInterpreter()), 2);
-    }
-
-    if (atoi(parameters.get("IMPORTANCE_DECAY_ENABLED").c_str())) {
-        // perform importance decay once each 10 idle cycles
-        importanceDecayTask = new ImportanceDecayTask();
-        plugInIdleTask(importanceDecayTask, 15);
-    }
-
-
-    // Used in debug mode
-    //plugInIdleTask(new SleepTask(), 1);
-
-    // local map 2D interface
-    if (atoi(parameters.get("PET_INTERFACE_ENABLED").c_str())) {
-//        PetInterfaceUpdaterTask::startGUI();
-//        plugInIdleTask(new PetInterfaceUpdaterTask(),
-//                       atoi(parameters.get("PET_INTERFACE_UPDATE_PERIOD").c_str()));
-    }
-}
-
-void OPC::markAsUnavailableElement(const std::string& id){
-    logger().log(opencog::Logger::DEBUG, "OPC - markAsUnavailableElement(%s).", id.c_str());
-
-    // add element to unavailable list and reset unread messages number if
-    // router
-    NetworkElement::markAsUnavailableElement(id);
-
-/* TODO: COMBO_SHELL is getting unavailable for some unknown reason. Review this...
-    // OPC especific actions
-    PetMode mode = pet->getMode();
-    if(mode == PLAYING && 
-       id   != parameters.get("LS_ID")){
-
-        logger().log(opencog::Logger::DEBUG, "OPC - markAsUnavailableElement(): setting task non-active");
-        // disable idle tasks that are not necessary avoiding sending messages
-        // while ROUTER or PROXY are down
-        //sgiLinkMiningTask->setTaskActive(false);
-        actionSelectionTask->setTaskActive(false);
-
-   } 
-*/
-}
-
+/* TODO: OPC does not extend NetworkElement anymore. 
+ * So, a better design must be created to figure out LS has just recovered from a failure:
 void OPC::markAsAvailableElement(const std::string& id){
     logger().log(opencog::Logger::DEBUG, "OPC - markAsAvailableElement(%s).", id.c_str());
 
@@ -521,17 +511,18 @@ void OPC::markAsAvailableElement(const std::string& id){
             // Pet still in learning mode and LS has recovered from a crash. Restart
             // the learning process from the begining
 	    // TODO: Review this. Perhaps the best thing to do is exiting Learning mode and give feedback to the user (via Feedback messages)
-            if(id == parameters.get("LS_ID")){
+            if(id == getParameters().get("LS_ID")){
                 pet->restartLearning();
             }
         }
     }
 }
+*/
 
 const std::string OPC::getPath(const std::string& petId, const std::string& filename){
     std::string path;
 
-    std::string base = parameters.get("PET_DATABASE");
+    std::string base = getParameters().get("PET_DATABASE");
     expandPath(base);
 
     logger().log(opencog::Logger::DEBUG, "OPC - Pet database directory: %s", base.c_str());

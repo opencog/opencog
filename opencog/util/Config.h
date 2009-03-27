@@ -46,7 +46,6 @@ protected:
             "LOG_TO_STDOUT",         "true",
             "SERVER_CYCLE_DURATION", "100",     // in milliseconds
             "EXTERNAL_TICK_MODE",    "false",
-            "IDLE_CYCLES_PER_TICK",  "3",
             "STARTING_STI_FUNDS",    "10000",
             "STARTING_LTI_FUNDS",    "10000",
             "STI_FUNDS_BUFFER",      "10000",

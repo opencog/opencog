@@ -12,7 +12,6 @@
 #include "util/Logger.h"
 
 #include "WorldProvider.h"
-#include "NetworkElement.h"
 #include "SystemParameters.h"
 
 #include "LSCmdMessage.h"
@@ -22,14 +21,14 @@
 #include "TrySchemaMessage.h"
 #include "StopLearningMessage.h"
 
-#include <opencog/server/CogServer.h>
+#include "EmbodimentCogServer.h"
 
 namespace LearningServer
 {
 
 using namespace MessagingSystem;
 
-class LS : public MessagingSystem::NetworkElement, public opencog::CogServer 
+class LS : public EmbodimentCogServer 
 {
 
 public:
@@ -51,11 +50,6 @@ public:
      * Method inherited from network element
      */
     bool processNextMessage(MessagingSystem::Message *msg);
-
-    /**
-     * Method inherited from network element
-     */
-    void setUp();
 
     /**
      * Informs whenever the LS is busy performing a learning action or not.
