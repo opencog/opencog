@@ -209,17 +209,8 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 OPC::~OPC(){
     
     // WARNIG: free memory should be implemented if there are more than one opc
-    // per machine (host)
+    // per process 
     
-    // TODO: This is a hack to allow valgrind tests to work fine. When atomSpace
-    // removal if fast enough remove this hack and make delete operation
-    // permanent
-    if(atoi(getParameters().get("CHECK_OPC_MEMORY_LEAKS").c_str())){
-        logger().log(opencog::Logger::DEBUG, "OPC - Starting AtomSpace removal.");
-        delete (atomSpace);
-        logger().log(opencog::Logger::DEBUG, "OPC - Finished AtomSpace removal.");
-    }
-
     delete (planSender);
     delete (petMessageSender);
     delete (predicatesUpdater);
@@ -234,7 +225,14 @@ OPC::~OPC(){
     delete (petInterfaceUpdaterAgent);
 
     // TODO: It takes too much time to delete atomspace 
-    // delete (atomSpace);
+    // TODO: This is a hack to allow valgrind tests to work fine. When atomSpace
+    // removal if fast enough remove this hack and make delete operation
+    // permanent
+    if(atoi(getParameters().get("CHECK_OPC_MEMORY_LEAKS").c_str())){
+        logger().log(opencog::Logger::DEBUG, "OPC - Starting AtomSpace removal.");
+        delete (atomSpace);
+        logger().log(opencog::Logger::DEBUG, "OPC - Finished AtomSpace removal.");
+    }
 }
 
 /* --------------------------------------

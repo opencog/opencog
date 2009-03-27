@@ -126,8 +126,14 @@ namespace predavese
   
   int next_free_terminal_id = NEXT_FREE_TERMINAL_ID;
   
-  PredaveseParser::~PredaveseParser(){
-    saveVocabulary();
+    PredaveseParser::PredaveseParser(Control::PetInterface& _petInterface, 
+                                   Control::SystemParameters& _systemParameters) : 
+                                   petInterface(_petInterface) {
+        vocabularyFilename = _systemParameters.get(std::string("VOCABULARY_FILE"));
+    }
+
+    PredaveseParser::~PredaveseParser(){
+        saveVocabulary();
 
         map<pAtom, action*, less_atom>::iterator it;
         for(it = pat2action.begin(); it != pat2action.end(); it++){
@@ -216,8 +222,7 @@ namespace predavese
     }
    
     bool PredaveseParser::saveVocabulary(){
-        std::string filename = systemParameters.get(std::string("VOCABULARY_FILE"));
-        std::ofstream out(filename.c_str(), ios_base::trunc);
+        std::ofstream out(vocabularyFilename.c_str(), ios_base::trunc);
         
 //        printf("patmap.size %d", patmap.size());
         foreach(pp _pp, patmap){
@@ -244,17 +249,15 @@ namespace predavese
 
     bool PredaveseParser::loadVocabulary()
     {
-        std::string filename = systemParameters.get(std::string("VOCABULARY_FILE"));
-
-        if(!fileExists(filename.c_str())){
-	  logger().log(opencog::Logger::DEBUG,
-			  "PredaveseParser - file %s does not exist",
-			  filename.c_str());
-	  return false;
+        if(!fileExists(vocabularyFilename.c_str())){
+            logger().log(opencog::Logger::INFO,
+                "PredaveseParser - file %s does not exist. It will be created at shutdown.",
+                vocabularyFilename.c_str());
+            return false;
         }
 
         char line[256];
-        std::ifstream fin(filename.c_str());
+        std::ifstream fin(vocabularyFilename.c_str());
 
         std::string name;
         PatIDT type;

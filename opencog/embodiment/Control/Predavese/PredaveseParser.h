@@ -23,7 +23,7 @@ namespace predavese {
     /// Run this before using the Parser!
     void Create();
     
-    PredaveseParser(Control::PetInterface& _petInterface, Control::SystemParameters& _systemParameters) : petInterface(_petInterface), systemParameters(_systemParameters) {} 
+    PredaveseParser(Control::PetInterface&, Control::SystemParameters&);
 
     virtual ~PredaveseParser( );
 
@@ -54,7 +54,7 @@ namespace predavese {
   protected:
     
     Control::PetInterface& petInterface;
-    Control::SystemParameters& systemParameters;
+    std::string vocabularyFilename;
     
     /// patmap is a mapping from A to B so that len(A) >= len(B)
     /// i(nterjection)_patmap is a mapping from A to B so that len(A) and len(B) are independent
