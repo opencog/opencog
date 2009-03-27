@@ -11,8 +11,11 @@ namespace Procedure {
     using namespace boost;
 
     void ProcedureInterpreter::run(MessagingSystem::NetworkElement *ne) {
-        // For now, comboInterpreter is a separate IdleTask. Otherwise, the next line should be uncommented.  
-        //comboInterpreter->run(ne);
+ 
+        // If a separate Agent is used for comboInterpreter, just comment the
+        // next line :  
+        comboInterpreter->run(ne);
+
         Set toBeRemoved;    
         // Runs each pending RunningBuildInProcedure and checks status of any procedure.
         for (Map::iterator it = _map.begin(); it != _map.end(); it++) {
