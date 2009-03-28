@@ -29,9 +29,12 @@
 
 // Use the TLB map only if SQL storage is being used.
 // (or if distributed processing is enabled)
-#ifdef HAVE_SQL_STORAGE
+// Various tests fail if TLB is not enabled. Until these are fixed,
+// we will enable the TLB. Anyway, long-term, it is needed, so may
+// as well turn it on for good ... 
+// #ifdef HAVE_SQL_STORAGE
 #define USE_TLB_MAP 1
-#endif
+// #endif
 
 #define CHECK_MAP_CONSISTENCY
 
