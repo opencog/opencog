@@ -545,7 +545,8 @@ class RndNumTable : public contin_matrix
 public:
     //constructor
     RndNumTable() {}
-    RndNumTable(int sample_count, int arity, opencog::RandGen& rng);
+    RndNumTable(int sample_count, int arity, opencog::RandGen& rng,
+                double max_randvalue = 1.0, double min_randvalue = -1.0);
 };
 
 /*

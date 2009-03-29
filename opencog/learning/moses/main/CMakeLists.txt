@@ -86,3 +86,9 @@ TARGET_LINK_LIBRARIES (eval-truth-table
         comboreduct
         util
 )
+ADD_EXECUTABLE (gen-contin-table gen-contin-table)
+TARGET_LINK_LIBRARIES (gen-contin-table
+	moses
+        comboreduct
+        util
+)

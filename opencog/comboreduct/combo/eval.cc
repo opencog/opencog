@@ -138,13 +138,15 @@ truth_table::hamming_distance(const truth_table& other) const
     return res;
 }
 
-RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng)
+RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng, 
+                         double max_randvalue , double min_randvalue )
 {
     //populate the matrix
     for (int i = 0; i < sample_count; ++i) {
         contin_vector cv;
         for (int j = 0; j < arity; ++j)
-            cv.push_back(rng.randdouble()*2.0 - 1.0); //TODO : rescale wrt
+        //   cv.push_back(rng.randdouble()*2.0 - 1.0); //TODO : rescale wrt
+        cv.push_back((max_randvalue - min_randvalue) * rng.randdouble() + min_randvalue); 
         // input interval
         push_back(cv);
     }
