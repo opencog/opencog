@@ -540,19 +540,12 @@ typedef contin_matrix::const_iterator const_cm_it;
   class RndNumTable
     matrix of randomly generated contin_t of sample_count rows and arity columns
 */
-class RndNumTable
+class RndNumTable : public contin_matrix
 {
-private:
-    contin_matrix _matrix;
 public:
     //constructor
     RndNumTable() {}
     RndNumTable(int sample_count, int arity, opencog::RandGen& rng);
-
-    //access method
-    const contin_matrix& matrix() const {
-        return _matrix;
-    }
 };
 
 /*
@@ -571,7 +564,7 @@ public:
     contin_table(const combo_tree& t, const RndNumTable& rnt, opencog::RandGen& rng);
     template<typename Func>
     contin_table(const Func& f, const RndNumTable& rnt) {
-        foreach(const contin_vector& v, rnt.matrix())
+        foreach(const contin_vector& v, rnt)
         push_back(f(v.begin(), v.end()));
     }
 
@@ -664,8 +657,7 @@ public:
         for (unsigned long int i = 0; i < bool_table_size; ++i) {
             for (int bai = 0; bai < _bool_arg_count; ++bai) //bool arg index
                 binding(_bool_arg[bai] + 1) = bool_to_vertex((i >> bai) % 2);
-            for (const_cm_it si = rnt.matrix().begin();
-                 si != rnt.matrix().end(); ++si) {
+            for (const_cm_it si = rnt.begin(); si != rnt.end(); ++si) {
                 int cai = 0; //contin arg index
                 for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
                     binding(_contin_arg[cai] + 1) = *j;
@@ -803,7 +795,7 @@ public:
                 binding(arg_idx) = (arg_val ? id::action_success : id::action_failure);
             }
             //contin populate
-            for (const_cm_it si = rnt.matrix().begin();si != rnt.matrix().end();++si) {
+            for (const_cm_it si = rnt.begin();si != rnt.end();++si) {
                 int cai = 0; //contin arg index
                 for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
                     binding(_contin_arg[cai] + 1) = *j;
@@ -870,7 +862,7 @@ inline std::ostream& operator<<(std::ostream& out,
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::RndNumTable& rnt)
 {
-    out << rnt.matrix();
+    out << static_cast<combo::contin_matrix>(rnt);
     return out;
 }
 

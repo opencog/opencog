@@ -146,13 +146,13 @@ RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng)
         for (int j = 0; j < arity; ++j)
             cv.push_back(rng.randdouble()*2.0 - 1.0); //TODO : rescale wrt
         // input interval
-        _matrix.push_back(cv);
+        push_back(cv);
     }
 }
 
 contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, opencog::RandGen& rng)
 {
-    for (const_cm_it i = rnt.matrix().begin(); i != rnt.matrix().end(); ++i) {
+    for (const_cm_it i = rnt.begin(); i != rnt.end(); ++i) {
         int arg = 1;
         for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j, ++arg)
             binding(arg) = *j;
