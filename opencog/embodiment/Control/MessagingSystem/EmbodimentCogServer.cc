@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/EmbodimentCogServer.cc
+ * opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
