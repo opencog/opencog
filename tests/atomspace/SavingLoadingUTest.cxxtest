@@ -339,6 +339,30 @@ public:
 
         if (!CxxTest::TestTracker::tracker().testFailed())
             std::remove(DUMP_FILENAME);
+
+
+        AtomSpace *atomSpace5 = new AtomSpace();      
+        
+        HandleSeq execLinkOutgoing;
+        execLinkOutgoing.push_back( atomSpace5->addNode( GROUNDED_SCHEMA_NODE, "bark") );
+        execLinkOutgoing.push_back( atomSpace5->addLink( LIST_LINK, HandleSeq() ) );
+        
+        HandleSeq externalLinkOutgoing;
+        externalLinkOutgoing.push_back( atomSpace5->addLink( EXECUTION_LINK, execLinkOutgoing ) );
+
+        atomSpace5->addLink( LIST_LINK, externalLinkOutgoing );
+
+        SavingLoading savingLoading;
+        savingLoading.save( DUMP_FILENAME, *atomSpace5 );
+        delete atomSpace5;
+
+        AtomSpace* atomSpace6 = new AtomSpace( );
+        savingLoading.load( DUMP_FILENAME, *atomSpace6 );
+        delete atomSpace6;
+
+
+        if (!CxxTest::TestTracker::tracker().testFailed())
+            std::remove(DUMP_FILENAME);
     }
 
 };

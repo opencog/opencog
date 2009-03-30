@@ -146,6 +146,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
         Node* node = dynamic_cast<Node*>(TLB::getAtom(atomHandle));
+        logger().fine( "Saving Node handle %d name %s", atomHandle.value(), node->toString().c_str() );
         writeNode(f, node);
         numNodes++;
         int percentage = (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR)));
@@ -185,17 +186,39 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     // creates a iterator to iterate on all links
     HandleIterator* iter = atomTable.getHandleIterator(LINK, true);
 
-    // writes links to file and increments link counter
+    /**
+     * All handles must be copied to a single set to keep the ordering
+     * of all handle types. Ex. There are more than one types of links.
+     * Each type has it's instances keeped at a distinct set of handles.
+     * An iterator travels each set of each type. So, it will not keep
+     * the increasing ordering in a situation like:
+     * Suppose that a ListLink is inserted with handle.value() = 65558
+     * Then, an ExecutionLink is inserted with handle.value() = 65559
+     * Finally, a ListLink is inserted with handle.value() = 65560
+     * The first and second links are outgoing of the third link.
+     *
+     * If we use a simple HandleIterator, the links will be retrieved
+     * at the following sequence: 65558, 65560, 65559. This way, the links
+     * will be saved in a non increasing sequence and when the loadLinks
+     * was called, a segmentation fault will occour given that link
+     * 65560 requires 65559 but the the last one wasn't loaded yet.
+     */
+    std::set<Handle> linkHandles;
     while (iter->hasNext()) {
-        Handle atomHandle = iter->next();
-        Link* link = dynamic_cast<Link*>(TLB::getAtom(atomHandle));
+        linkHandles.insert( iter->next( ) );
+    } // while
+    delete iter;
+
+    // writes links to file and increments link counter
+    std::set<Handle>::iterator itLinks;
+    for( itLinks = linkHandles.begin( ); itLinks != linkHandles.end( ); ++itLinks ) {
+        Link* link = dynamic_cast<Link*>(TLB::getAtom(*itLinks));
+        logger().fine( "Saving Link handle %d name %s", itLinks->value(), link->toString().c_str() );
         writeLink(f, link);
         numLinks++;
         printf( "Memory dump: %d%% done.\r", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR))));
-        fflush(stdout);
-    }
-
-    delete iter;
+        fflush(stdout);        
+    } // for
 
     // rewind to position where number of links must be written
     fseek(f, numLinksOffset, SEEK_SET);
