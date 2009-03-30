@@ -57,7 +57,7 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
 {
     this->fileName.assign(fileName);
     this->currentLevel = level;
-    this->backTraceLevel = WARN; 
+    this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]); 
     this->timestampEnabled = timestampEnabled;
     this->printToStdout = false;
 
@@ -70,6 +70,7 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
 Logger::Logger(const Logger& log) {
     this->fileName.assign(log.fileName);
     this->currentLevel = log.currentLevel;
+    this->backTraceLevel = log.backTraceLevel;
     this->timestampEnabled = log.timestampEnabled;
     this->printToStdout = log.printToStdout;
 

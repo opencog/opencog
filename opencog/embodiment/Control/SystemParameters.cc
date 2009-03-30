@@ -95,7 +95,7 @@ SystemParameters::SystemParameters() {
     // TODO: Convert all log level parameters above in string, which is more
     // readable (see opencog/util/Config.h and Logger::getLevelFromString), just
     // like bellow:
-    table["BACK_TRACE_LOG_LEVEL"] = "warn"; 
+    table["BACK_TRACE_LOG_LEVEL"] = "error"; 
     
     // paths
     table["LOG_DIR"] = "/tmp/$USER/Petaverse/Logs";
