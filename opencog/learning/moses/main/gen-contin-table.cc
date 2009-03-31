@@ -35,8 +35,9 @@ int main(int argc, char ** argv)
     }
 
     while (cin.good()) {
+        cout << "Please input the combo program :" << endl;
         // get the combo_tree from the stream
-        cin >> combo_tr;   // compile error , is the operator from the  ant_combo_vocabulary? Should I write it for myself
+        cin >> combo_tr;
         if (!cin.good())
             break;
 
@@ -49,15 +50,21 @@ int main(int argc, char ** argv)
         size_t arg_number = arg_type_list.size();
         RndNumTable rands(nsamples, arg_number, rng, max_randvalue, min_randvalue);
 
-        contin_table contintable(combo_tr, rands, rng);
+        try {
+            contin_table contintable(combo_tr, rands, rng);
 
-        // output the contin-table
-        int k = 0;
-        for (const_cm_it i = rands.begin(); i != rands.end(); ++i, ++ k) {
-            for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j) {
-                cout << (*j) << " ";
+            // output the contin-table
+            int k = 0;
+            for (const_cm_it i = rands.begin(); i != rands.end(); ++i, ++ k) {
+                for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j) {
+                    cout << (*j) << " ";
+                }
+                cout << contintable[k] << endl;
             }
-            cout << contintable[k] << endl;
+        } catch (...) {
+            cout << "an exception has been raised perhaps you should try again with a different"
+                 "min_randvalue or max_rand value" << endl;
+            exit(1);
         }
     }
     return 0;
