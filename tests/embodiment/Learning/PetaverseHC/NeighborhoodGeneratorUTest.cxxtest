@@ -7,12 +7,14 @@
 
 #include "NeighborhoodGenerator.h"
 #include "PetComboVocabulary.h"
-#include "comboreduct/
+#include "hillclimbing_action_reduction.h"
+#include "hillclimbing_full_reduction.h"
 #include <iostream>
 
 using namespace hillclimbing;
 using namespace std;
 using namespace PetCombo;
+using namespace reduct;
 
 class NeighborhoodGeneratorUTest : public CxxTest::TestSuite {
 
@@ -31,7 +33,10 @@ public:
     precomputeConditions(conditions);
     precomputeActions(actions);
 
-    NeighborhoodGenerator<> ng(operators, conditions, actions);
+    NeighborhoodGenerator<> ng(operators, conditions, actions,
+                               hillclimbing_action_reduction(),
+                               hillclimbing_full_reduction(),
+                               0, true);
 
     ng.precomputeCompositePerceptions();
 
@@ -66,7 +71,10 @@ public:
     precomputeActions(actions);
     precomputeConditions(conditions);
 
-    NeighborhoodGenerator<> ng(operators, conditions, actions);
+    NeighborhoodGenerator<> ng(operators, conditions, actions,
+                               hillclimbing_action_reduction(),
+                               hillclimbing_full_reduction(),
+                               0, true);
 
     ng.precomputeCompositePerceptions();
     ng.precomputeCompositeActions();
@@ -99,7 +107,10 @@ public:
     precomputeActions(actions);
     precomputeConditions(conditions);
 
-    NeighborhoodGenerator<> ng(operators, conditions, actions);
+    NeighborhoodGenerator<> ng(operators, conditions, actions,
+                               hillclimbing_action_reduction(),
+                               hillclimbing_full_reduction(),
+                               0, true);
 
     ng.precomputeCompositePerceptions();
     ng.precomputeCompositeActions();

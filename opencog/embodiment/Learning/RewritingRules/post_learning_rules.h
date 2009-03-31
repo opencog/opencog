@@ -24,13 +24,21 @@
 
 #include "comboreduct/reduct/reduct.h"
 
-namespace reduct {
+namespace reduct
+{
 
-  //add a drop action in front of a grab action
-  struct post_learning_drop_before_grab 
-    : public crule<post_learning_drop_before_grab> {
+//add a drop action in front of a grab action
+struct post_learning_drop_before_grab
+            : public crule<post_learning_drop_before_grab> {
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
-  };
+};
+
+//add action_success at child of any empty and_seq
+struct post_learning_empty_and_seq
+            : public crule<post_learning_empty_and_seq> {
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
+};
+
 }//~namespace reduct
 
 #endif

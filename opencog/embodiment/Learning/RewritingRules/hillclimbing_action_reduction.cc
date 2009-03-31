@@ -40,8 +40,7 @@ namespace reduct {
 			   //action
 			   downwards(reduce_action_action_if_always_succeeds()),
 			   downwards(reduce_action_if()),
-			   downwards(reduce_action_while_always_fails()),
-                           downwards(reduce_const_action_seq())
+			   downwards(reduce_action_while_always_fails())
 			   )
 		);
     

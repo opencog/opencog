@@ -29,7 +29,8 @@ namespace reduct {
 
   const rule& post_learning_rewriting() {
     static sequential r = 
-      sequential(downwards(post_learning_drop_before_grab()));
+        sequential(downwards(post_learning_drop_before_grab()),
+                   downwards(post_learning_empty_and_seq()));
     
     return r;
   }

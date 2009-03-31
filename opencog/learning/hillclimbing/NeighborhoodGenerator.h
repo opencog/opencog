@@ -44,7 +44,7 @@
 
 //added action_success under an empty and_seq, that's to insure that
 //the arity is positive or null (because empty and_seq have arity -1)
-#define NOT_EMPTY_AND_SEQ
+//#define NOT_EMPTY_AND_SEQ
 
 namespace hillclimbing
 {
