@@ -800,4 +800,4 @@ lookForTargetPrecondition(0) :=
 
 # debug preconditions
 
-chainAllActionsPrecondition(0) := true
+truePrecondition(0) := true

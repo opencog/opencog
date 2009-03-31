@@ -656,3 +656,9 @@ rule ( "feelLessAngryAfterGotoGrowlOrBite", FEELING_RULE, { PLAYING_MODE=1.0, SC
 ---       { PLAYING_MODE=1, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
 ---       "chainAllActionsPrecondition",
 ---       "chainAllActions()" );
+
+rule ( "debugRule",
+       SCHEMA_RULE,
+       { PLAYING_MODE=1, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
+       "truePrecondition",
+       "debugSchema()" );

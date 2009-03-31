@@ -3,7 +3,7 @@ ADD_SUBDIRECTORY (LearningServerMessages)
 ADD_SUBDIRECTORY (FitnessEstimator)
 ADD_SUBDIRECTORY (Filter)
 ADD_SUBDIRECTORY (NoSpaceLife)
-ADD_SUBDIRECTORY (hillclimbing)
+ADD_SUBDIRECTORY (PetaverseHC)
 
 INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions

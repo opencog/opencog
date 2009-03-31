@@ -27,5 +27,6 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (reasoning)
         ADD_SUBDIRECTORY (comboreduct)
         ADD_SUBDIRECTORY (embodiment)
+        ADD_SUBDIRECTORY (learning)
 ENDIF (CXXTEST_FOUND)
 

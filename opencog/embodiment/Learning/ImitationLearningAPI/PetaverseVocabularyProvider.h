@@ -1,6 +1,26 @@
+/*
+ * opencog/embodiment/Learning/ImitationLearningAPI//PetaverseVocabularyProvider.h
+ *
+ * Copyright (C) 2007-2008 Nil Geisweiller
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 /** 
- * PetaverseVocabularyProviderBase.h
- * 
  * Abstract class to be inherited to use a learning algo in the context
  * of petaverse imitation learning, the inherited class will be used by
  * ImitationLearningTask and provides the methods needed by the EntropyFilter
@@ -8,10 +28,6 @@
  * involved in imitation learning. The operator set is still requiered to
  * compute sizePenalty function in the fitness estimator. It should contain
  * only non action, non perception, non indefinite_object operators.
- *
- * Author(s):
- *    Nil Geisweiller
- * Created : Wed 19 Mar 2008
  */
 #ifndef _PETAVERSE_VOCABULARY_PROVIDER_BASE_H
 #define _PETAVERSE_VOCABULARY_PROVIDER_BASE_H

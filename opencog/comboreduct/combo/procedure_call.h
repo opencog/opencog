@@ -162,14 +162,17 @@ combo::procedure_call load_procedure_call(std::istream& in,
     }
 
     string name = str.substr(0, lparen);
-    unsigned int arity;
+    int arity;
     string arity_str = str.substr(lparen + 1, rparen - lparen - 1);
     try {
-        arity = boost::lexical_cast<unsigned int>(arity_str);
+        arity = boost::lexical_cast<int>(arity_str);
     } catch (...) {
         opencog::logger().log(opencog::Logger::ERROR, 
-                        "procedure_call - Lexical error: '%s' supposed to be an arity in procedure definition '%s' does not correspond to a number",
-                        arity_str.c_str(), str.c_str());
+                              "procedure_call - Lexical error: '%s'"
+                              " supposed to be an arity in procedure"
+                              " definition '%s' does not correspond to"
+                              " a number",
+                              arity_str.c_str(), str.c_str());
         return NULL;
     }
 
@@ -185,8 +188,11 @@ combo::procedure_call load_procedure_call(std::istream& in,
                 stringstream arg_ss;
                 arg_ss << arg;
                 opencog::logger().log(opencog::Logger::ERROR, 
-                                "procedure_call - Semantic error: the procedure '%s' has arity '%d' but contains variable argument '%s' out of range",
-                                str.c_str(), arity, arg_ss.str().c_str());
+                                      "procedure_call - Semantic error:"
+                                      " the procedure '%s' has arity '%d'"
+                                      " but contains variable argument '%s'"
+                                      " out of range",
+                                      str.c_str(), arity, arg_ss.str().c_str());
                 return NULL;
             }
         }
