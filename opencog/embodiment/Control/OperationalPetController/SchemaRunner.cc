@@ -258,7 +258,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
         combo::arity_t ap_input_args = schemaArguments.size();
 	
         if(fixed_arity) {
-            if(arity != (int)schemaArguments.size()) {
+            if(arity != (int)ap_input_args) {
                 logger().log(opencog::Logger::ERROR,
                                 "SchemaRunner - Number of arguments %d for"
                                 " Procedure '%s' does not match arity %d",
@@ -268,7 +268,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             }
         }
         else {
-            if(abs_min_arity > (int)schemaArguments.size()) {
+            if(abs_min_arity > (int)ap_input_args) {
                 logger().log(opencog::Logger::ERROR,
                                 "SchemaRunner - Number of arguments %d for"
                                 " Procedure '%s' is too few,"

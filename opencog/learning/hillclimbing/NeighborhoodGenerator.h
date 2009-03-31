@@ -42,6 +42,10 @@
 //and_seq(A2 A1 A3), and_seq(A2 A3 A1), and_seq(A1 A3 A2), and_seq(A3 A1 A2)
 #define PERMUTATION_NEIGHBORHOOD_EXPANSION
 
+//added action_success under an empty and_seq, that's to insure that
+//the arity is positive or null (because empty and_seq have arity -1)
+#define NOT_EMPTY_AND_SEQ
+
 namespace hillclimbing
 {
 
@@ -164,9 +168,14 @@ public:
                         pre_it br1 = tmp1.append_child(head_it, id::sequential_and);
                         tmp1.replace(tmp1.append_child(br1), act1_head_it);
                         //add and_seq() at second branche
-                        pre_it second_and_seq_it = tmp1.append_child(head_it,
-                                                   id::sequential_and);
+                        pre_it empty_and_seq_it =
+                            tmp1.append_child(head_it, id::sequential_and);
+#ifdef NOT_EMPTY_AND_SEQ
+                        tmp1.append_child(empty_and_seq_it,
+                                          id::action_success);
+#endif
                         add_composite_action(tmp1);
+                                          
                         //add the second branche if _conditional_both_branch_extension
                         if (_action_boolean_if_both_branches) {
                             for (combo_tree_ns_set_const_it act2 = _actions.begin();
@@ -174,7 +183,10 @@ public:
                                 pre_it act2_head_it = act2->begin();
                                 combo_tree tmp2 = tmp1;
                                 pre_it sas_it2 = get_same_position(tmp1, tmp2,
-                                                                   second_and_seq_it);
+                                                                   empty_and_seq_it);
+#ifdef NOT_EMPTY_AND_SEQ
+                                tmp2.erase_children(sas_it2);
+#endif
                                 tmp2.replace(tmp2.append_child(sas_it2), act2_head_it);
                                 add_composite_action(tmp2);
                             }
@@ -208,7 +220,12 @@ public:
                             pre_it br1 = tmp1.append_child(head, id::sequential_and);
                             tmp1.replace(tmp1.append_child(br1), act_head);
                             //add and_seq() at second branche
-                            tmp1.append_child(head, id::sequential_and);
+                            pre_it empty_and_seq_it =
+                                tmp1.append_child(head, id::sequential_and);
+#ifdef NOT_EMPTY_AND_SEQ
+                            tmp1.append_child(empty_and_seq_it,
+                                              id::action_success);
+#endif
                             add_composite_action(tmp1);
                         }
                         { //add action_action_if(cond and_seq() and_seq(act))
@@ -217,9 +234,14 @@ public:
                             pre_it head = tmp2.begin();
                             //add condition
                             tmp2.replace(tmp2.append_child(head), cond_head);
-                            //add and_seq(act) at first branche
-                            tmp2.append_child(head, id::sequential_and);
-                            //add and_seq() at second branche
+                            //add and_seq() at first branche
+                            pre_it empty_and_seq_it =
+                                tmp2.append_child(head, id::sequential_and);
+#ifdef NOT_EMPTY_AND_SEQ
+                            tmp2.append_child(empty_and_seq_it,
+                                              id::action_success);
+#endif
+                            //add and_seq(act) at second branche
                             pre_it br2 = tmp2.append_child(head, id::sequential_and);
                             tmp2.replace(tmp2.append_child(br2), act_head);
                             add_composite_action(tmp2);

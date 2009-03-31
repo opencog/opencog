@@ -1,9 +1,23 @@
-/** 
- * WorldWrapper.h
- * 
- * Author(s):
- *    Carlos E. R. Lopes
- * Created : Thu, Jul 30 2008
+/*
+ * opencog/embodiment/WorldWrapper/WorldWrapperUtilCache.h
+ *
+ * Copyright (C) 2007-2008 Carlos Lopes
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #ifndef _WORLD_WRAPPER_UTIL_CACHE_H
 #define _WORLD_WRAPPER_UTIL_CACHE_H
