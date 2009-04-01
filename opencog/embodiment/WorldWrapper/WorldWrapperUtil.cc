@@ -34,7 +34,7 @@
 #include <sstream>
 #include <ext/functional>
 
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
 

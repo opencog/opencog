@@ -11,7 +11,7 @@
 #include "comboreduct/combo/message.h"
 
 #include "CompareAtomTreeTemplate.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "EntropyFilter.h"
 #include "EntityRelevanceFilter.h"
 #include "PredefinedProcedureNames.h"

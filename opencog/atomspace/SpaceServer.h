@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/SpaceServer.h
+ * opencog/atomspace/SpaceServer.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -34,27 +34,27 @@
  *
  * @author Welter Luigi
  */
-#include <opencog/atomspace/SavableRepository.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/HandleMap.h>
+#include "SavableRepository.h"
+#include "AtomSpace.h"
+#include "types.h"
+#include "HandleMap.h"
 
-#include "util/exceptions.h"
-
-#include "LocalSpaceMap2D.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Spatial/LocalSpaceMap2D.h>
 
 #include <exception>
 #include <string>
 #include <map>
 
 
-using namespace opencog;
+namespace opencog {
 
 class SpaceServer : public SavableRepository {
 
 public:
 
     static const char* SPACE_MAP_NODE_NAME;
+    Handle latestSpaceMap;
 
     //typedef Spatial::LocalSpaceMap2D<Handle, double, hashHandle, ObjMetaData> SpaceMap;
     typedef Spatial::Point SpaceMapPoint;
@@ -187,14 +187,27 @@ public:
 
 
     /**
-     *
+     * Converts the map identified by the given Handle into a string
+     * representation of it.
      */
     std::string mapToString(Handle mapHandle) const;
 
     /**
-     *
+     * Convert a string representation of a map to a Timestamped map.
      */
     static TimestampMap mapFromString(const std::string &stringMap);
+
+    /**
+     * Update the reference to the latest map in the SpaceServer.
+     */
+    // TODO: check if this is really needed
+    //void updateLatestSpaceMap(Handle atTimeLink);
+
+    /**
+     * Creates the space map node, if not created yet.
+     * returns its handle of the node.
+     */
+    Handle addSpaceMapNode();
 
      /**
      * Gets all SpaceMap handles that would be needed inside the given interval.
@@ -332,5 +345,6 @@ private:
     void atomMerged(Handle h);
 
 };
+} // namespace opencog
 
 #endif // SPACESERVER_H

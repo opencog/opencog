@@ -34,7 +34,7 @@ namespace Spatial {
   };
 };
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 #include <string>
 #include <iostream>
 

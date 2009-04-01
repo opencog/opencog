@@ -3,7 +3,7 @@
 #include "ActionPlanSenderMock.h"
 #include "PetInterfaceMock.h"
 #include "PredicatesUpdater.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
 #include "util/files.h"
 #include <opencog/xml/NMXmlExporter.h>

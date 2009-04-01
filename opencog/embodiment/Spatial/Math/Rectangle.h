@@ -23,7 +23,7 @@
 #define RECTANGLE_H
 
 #include "Vector3.h"
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 namespace Spatial {
   namespace Math {

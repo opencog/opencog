@@ -30,7 +30,7 @@
 #include "WorldProvider.h"
 #include "RewritingRules.h"
 #include "BehaviorCategory.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "EntityRelevanceFilter.h"
 
 #include <boost/functional/hash.hpp>

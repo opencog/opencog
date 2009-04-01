@@ -9,7 +9,7 @@
 #include <opencog/util/misc.h>
 
 /* #include "CompareAtomTreeTemplate.h" */
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "EntityRelevanceFilter.h"
 #include "PredefinedProcedureNames.h"
 #include "PetComboVocabulary.h"

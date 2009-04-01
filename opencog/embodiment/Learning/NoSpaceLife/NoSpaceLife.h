@@ -25,7 +25,7 @@
 #include "comboreduct/combo/vertex.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "CompositeBehaviorDescription.h"
 #include "PetComboVocabulary.h"
 

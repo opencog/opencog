@@ -3,7 +3,6 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions ato
 ADD_LIBRARY (AtomSpaceExtensions STATIC 
     atom_types
     atom_types_init
-    SpaceServer 
     AtomSpaceUtil
     CompareAtomTreeTemplate
 )

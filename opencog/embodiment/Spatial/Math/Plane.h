@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 #include "Vector3.h"
 #include "Matrix4.h"

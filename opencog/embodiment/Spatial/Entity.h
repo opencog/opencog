@@ -22,10 +22,10 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "Dimension3.h"
-#include "BoundingBox.h"
-#include "Vector3.h"
-#include "Quaternion.h"
+#include "Math/Dimension3.h"
+#include "Math/BoundingBox.h"
+#include "Math/Vector3.h"
+#include "Math/Quaternion.h"
 
 #include <vector>
 #include <ext/hash_map>

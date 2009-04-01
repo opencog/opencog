@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "EntityRelevanceFilter.h"
 #include "LearnMessage.h"
 #include <atom_types_init.h>

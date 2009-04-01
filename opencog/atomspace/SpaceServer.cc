@@ -22,21 +22,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "SpaceServer.h"
+#include "TLB.h"
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringTokenizer.h>
+#include <opencog/util/StringManipulator.h>
 
-#include "util/Logger.h"
-#include "util/StringTokenizer.h"
-#include "util/StringManipulator.h"
-
-#include <atom_types.h>
-#include <AtomSpaceUtil.h>
+#include <opencog/atomspace/atom_types.h>
+//#include <AtomSpaceUtil.h>
 
 #include <string>
 #include <vector>
 #include <cstdlib>
 #include <tr1/functional>
+
+using namespace opencog;
 
 const char* SpaceServer::SPACE_MAP_NODE_NAME = "SpaceMap";
 #define DELIMITER " "
@@ -50,6 +50,9 @@ SpaceServer::SpaceServer(AtomSpace &as): atomSpace(as) {
     yMax = 256;
     xDim = 1024;
     yDim = 1024;
+
+    latestSpaceMap = Handle::UNDEFINED;
+
     //connect signals
     AtomTable& at = (AtomTable&) as.getAtomTable();
     addedAtomConnection = at.addAtomSignal().connect(std::tr1::bind(&SpaceServer::atomAdded, this, std::tr1::placeholders::_1));
@@ -93,7 +96,8 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
         logger().log(opencog::Logger::INFO,
             "SpaceServer - New map: xMin: %.3lf, xMax: %.3lf, yMin: %.3lf, yMax: %.3lf",
             xMin, xMax, yMin, yMax);
-        AtomSpaceUtil::updateLatestSpaceMap(atomSpace, spaceMapHandle);
+    // TODO: check if this is really needed
+    //    updateLatestSpaceMap(spaceMapHandle);
 
         if (!sortedMapHandles.empty()) {
             Handle latestMapHandle = sortedMapHandles.back();
@@ -465,7 +469,7 @@ bool SpaceServer::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned
                               double objLength, double objWidth, double objHeight,
                               double objYaw, bool isObstacle) {
 
-    Handle spaceMapNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, SPACE_MAP_NODE_NAME, true);
+    Handle spaceMapNode = addSpaceMapNode();
     Handle spaceMapAtTimeLink = atomSpace.addTimeInfo(spaceMapNode, timestamp);
     bool result =  add( keepPreviousMap, spaceMapAtTimeLink, atomSpace.getName(objectNode),
                         objX, objY, objLength, objWidth, objHeight, objYaw, isObstacle);
@@ -476,7 +480,7 @@ bool SpaceServer::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned
 
 Handle SpaceServer::addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap){
 
-    Handle spaceMapNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, SPACE_MAP_NODE_NAME, true);
+    Handle spaceMapNode = addSpaceMapNode();
     Handle spaceMapAtTimeLink = atomSpace.addTimeInfo(spaceMapNode, timestamp);
     add(spaceMapAtTimeLink, spaceMap);
 
@@ -487,7 +491,7 @@ Handle SpaceServer::removeSpaceInfo(bool keepPreviousMap, Handle objectNode, uns
 
     logger().log(opencog::Logger::DEBUG, "%s(%s)\n", __FUNCTION__, atomSpace.getName(objectNode).c_str());
 
-    Handle spaceMapNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, SPACE_MAP_NODE_NAME, true);
+    Handle spaceMapNode = addSpaceMapNode();
     Handle spaceMapAtTimeLink = atomSpace.addTimeInfo(spaceMapNode, timestamp);
     remove(keepPreviousMap, spaceMapAtTimeLink, atomSpace.getName(objectNode));
 
@@ -629,6 +633,49 @@ SpaceServer::TimestampMap SpaceServer::mapFromString(const std::string& stringMa
     return timestampMap;
 }
 
+/* TODO: Check if this is really needed
+void SpaceServer::updateLatestSpaceMap(Handle atTimeLink)
+{
+    if (latestSpaceMap != Handle::UNDEFINED) 
+    {
+        atomSpace.removeAtom(latestSpaceMap);
+    }
+    HandleSeq hs;
+    hs.push_back(atTimeLink);
+    latestSpaceMap = atomSpace.getHandle(LATEST_LINK, hs);
+    if (latestSpaceMap == Handle::UNDEFINED) 
+    {
+        latestSpaceMap = atomSpace.addLink(LATEST_LINK, hs);
+        atomSpace.setLTI(latestSpaceMap, 1);
+    } 
+    else 
+    {
+        if (atomSpace.getLTI(latestSpaceMap) < 1) 
+        {
+            atomSpace.setLTI(latestSpaceMap, 1);
+        }
+    }
+}
+*/
+
+Handle SpaceServer::addSpaceMapNode() 
+{
+    Handle result = atomSpace.getHandle(CONCEPT_NODE, SPACE_MAP_NODE_NAME);
+    if (result == Handle::UNDEFINED) 
+    {
+        result = atomSpace.addNode(CONCEPT_NODE, SPACE_MAP_NODE_NAME);
+        atomSpace.setLTI(result, 1);
+    } 
+    else 
+    {
+        if (atomSpace.getLTI(result) < 1) 
+        {
+            atomSpace.setLTI(result, 1);
+        }
+    }
+    return result;
+}
+
 void SpaceServer::cleanupSpaceServer(){
 
     // sanity checks
@@ -639,7 +686,7 @@ void SpaceServer::cleanupSpaceServer(){
     }
 
     // sanity tests passed, cleaning SpaceServer
-    Handle spaceMapNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, SPACE_MAP_NODE_NAME, true);
+    Handle spaceMapNode = addSpaceMapNode();
 
     // get all HandleTemporalPairs associated with the SpaceMap concept node.
     std::vector<HandleTemporalPair> pairs;

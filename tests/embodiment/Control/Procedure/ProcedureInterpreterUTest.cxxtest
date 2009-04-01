@@ -9,7 +9,7 @@
 #include "PetInterfaceMock.h"
 #include "PetActionSchema.h"
 #include "SystemParameters.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
 using namespace Procedure;
 using namespace PerceptionActionInterface;
