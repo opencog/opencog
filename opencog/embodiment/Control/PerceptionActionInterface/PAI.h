@@ -43,7 +43,7 @@
 #include "PetInterface.h"
 #include "PredaveseParser.h"
 #include "SystemParameters.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
  
 #include <map>

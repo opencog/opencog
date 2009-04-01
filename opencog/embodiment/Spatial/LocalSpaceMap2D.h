@@ -24,10 +24,10 @@
 
 #include <math.h>
 
-#include "util/Logger.h"
-#include "util/numeric.h"
-#include "util/functional.h"
-#include "util/RandGen.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/functional.h>
+#include <opencog/util/RandGen.h>
 
 #include "LocalSpaceMap2DUtil.h"
 

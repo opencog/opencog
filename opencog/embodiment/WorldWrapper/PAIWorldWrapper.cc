@@ -22,7 +22,7 @@
 
 #include "PAIWorldWrapper.h"
 #include "WorldWrapperUtil.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "TangentBug.h"
 #include "PVPXmlConstants.h"
 #include "AStarController.h"

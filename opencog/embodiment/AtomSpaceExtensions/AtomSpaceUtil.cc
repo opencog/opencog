@@ -36,10 +36,10 @@
 #include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/HandleTemporalPairEntry.h>
+#include <opencog/atomspace/SpaceServer.h>
 
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
-#include "SpaceServer.h"
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
 #include "CompareAtomTreeTemplate.h"
@@ -1935,7 +1935,6 @@ std::map<Handle, Handle> AtomSpaceUtil::latestAvatarActionDone;
 std::map<Handle, Handle> AtomSpaceUtil::latestPetActionPredicate;
 std::map<Handle, std::map<Handle, Handle> > AtomSpaceUtil::latestSpatialPredicate;
 std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
-Handle AtomSpaceUtil::latestSpaceMap = Handle::UNDEFINED;
 Handle AtomSpaceUtil::latestIsExemplarAvatar = Handle::UNDEFINED;
 
 void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
@@ -2025,11 +2024,6 @@ void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle
     HandleSeq hs;
     hs.push_back(atTimeLink);
     latestSingleInfoHandle = addLink(as, LATEST_LINK, hs, true);
-}
-
-void AtomSpaceUtil::updateLatestSpaceMap(AtomSpace& as, Handle atTimeLink)
-{
-    updateGenericLatestSingleInfo(latestSpaceMap, as, atTimeLink);
 }
 
 void AtomSpaceUtil::updateLatestIsExemplarAvatar(AtomSpace& as,

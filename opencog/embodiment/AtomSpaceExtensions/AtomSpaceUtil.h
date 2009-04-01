@@ -33,13 +33,16 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <atom_types.h>
-#include "SpaceServer.h"
-#include "Vector3.h"
+#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/embodiment/Spatial/Math/Vector3.h>
+
+#include "atom_types.h"
+
+using namespace opencog;
 
 class AtomSpaceUtil
 {
+
 
 private:
 
@@ -88,7 +91,6 @@ private:
     static std::map<Handle, Handle> latestPetActionPredicate;
     static std::map<Handle, std::map<Handle, Handle> > latestSpatialPredicate;
     static std::map<Handle, Handle> latestSchemaPredicate;
-    static Handle latestSpaceMap;
     static Handle latestIsExemplarAvatar;
 
     static void updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
@@ -834,8 +836,6 @@ public:
     static void updateLatestSchemaPredicate(AtomSpace& as,
                                             Handle atTimeLink,
                                             Handle predicateNode);
-    static void updateLatestSpaceMap(AtomSpace& as,
-                                     Handle atTimeLink);
     static void updateLatestIsExemplarAvatar(AtomSpace& as,
                                              Handle atTimeLink);
 

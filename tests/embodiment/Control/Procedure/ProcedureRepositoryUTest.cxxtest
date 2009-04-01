@@ -9,7 +9,7 @@
 #include "util/files.h"
 #include "PetInterfaceMock.h"
 #include "ComboProcedureRepository.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
 #include "LSMessageSenderMock.h"
 #include "Pet.h"

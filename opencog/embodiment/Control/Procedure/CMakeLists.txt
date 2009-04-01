@@ -72,7 +72,6 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
     PAI
     Predavese
     Control
-    WorldWrapper
     util
     ${XERCESC_LIBRARIES}
     PetComboVocabulary

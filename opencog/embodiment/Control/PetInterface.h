@@ -35,7 +35,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "util/Logger.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "AgentModeHandler.h"
 
 using namespace opencog;

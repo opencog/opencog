@@ -22,7 +22,7 @@
 #ifndef DIMENSION2_H
 #define DIMENSION2_H
 
-#include "Prerequisites.h"
+#include <opencog/embodiment/Spatial/Prerequisites.h>
 #include <sstream>
 
 namespace Spatial {

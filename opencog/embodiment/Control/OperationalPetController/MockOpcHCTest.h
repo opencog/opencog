@@ -37,7 +37,7 @@
 #include "PetMessageSender.h"
 #include "LearnMessage.h"
 #include "HCTestAgent.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
 using namespace opencog;
 

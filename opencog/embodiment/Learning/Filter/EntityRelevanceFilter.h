@@ -26,7 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <atom_types.h>
 
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "WorldProvider.h"
 
 #include <set>
@@ -42,6 +42,8 @@ typedef definite_object_vec_set::const_iterator definite_object_vec_set_const_it
 typedef std::map<combo::definite_object, definite_object_vec_set> agent_to_actions;
 typedef agent_to_actions::iterator agent_to_actions_it;
 typedef agent_to_actions::const_iterator agent_to_actions_const_it;
+
+using namespace opencog;
 
 class EntityRelevanceFilter {
 

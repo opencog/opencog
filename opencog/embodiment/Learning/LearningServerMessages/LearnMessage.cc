@@ -22,7 +22,7 @@
 #include <vector>
 #include "LearnMessage.h"
 
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "util/StringTokenizer.h"
 
 #include <opencog/xml/NMXmlParser.h>

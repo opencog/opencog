@@ -25,9 +25,11 @@
 #include <string>
 #include <opencog/atomspace/HandleEntry.h>
 
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
 namespace OperationalPetController{
+
+using namespace opencog;
 
 class MessageSender{
 	

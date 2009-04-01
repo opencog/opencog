@@ -22,10 +22,10 @@
 #ifndef _LOCAL_SPACE_MAP2D_UTIL_H
 #define _LOCAL_SPACE_MAP2D_UTIL_H
 
-#include "util/RandGen.h"
-#include "util/foreach.h"
-#include "util/hash_set.h"
-#include "util/hash_map.h"
+#include <opencog/util/RandGen.h>
+#include <opencog/util/foreach.h>
+#include <opencog/util/hash_set.h>
+#include <opencog/util/hash_map.h>
 
 #include <map>
 #include <iostream>
@@ -33,9 +33,9 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "Triangle.h"
-#include "LineSegment.h"
-#include "Vector3.h"
+#include "Math/Triangle.h"
+#include "Math/LineSegment.h"
+#include "Math/Vector3.h"
 
 namespace Spatial{  
   class LocalSpaceMap2D;

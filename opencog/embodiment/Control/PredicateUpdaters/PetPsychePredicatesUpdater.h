@@ -23,7 +23,7 @@
 #define PETPSYCHEPREDICATESUPDATER_H
 
 #include "BasicPredicateUpdater.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "Triangle.h"
 
 namespace OperationalPetController {

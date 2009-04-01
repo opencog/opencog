@@ -33,7 +33,7 @@
 #include "SystemParameters.h"
 #include "PetComboVocabulary.h"
 #include "WorldWrapperUtilCache.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 #include "NetworkElement.h"
 
 #include <exception>
@@ -45,6 +45,8 @@ namespace WorldWrapper
  * Class containing a set of methods to access perceptions or objects
  * into the atomSpace or spaceMap according to vertex representation
  */
+
+using namespace opencog;
 
 class WorldWrapperUtil
 {

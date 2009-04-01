@@ -27,7 +27,7 @@
  * changes its position in the latest SpaceMap. 
  */
 #include "BasicPredicateUpdater.h"
-#include "SpaceServer.h"
+#include <opencog/atomspace/SpaceServer.h>
 
 namespace OperationalPetController{
 

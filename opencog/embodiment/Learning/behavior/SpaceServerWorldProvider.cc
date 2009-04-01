@@ -21,7 +21,7 @@
  */
 #include "SpaceServerWorldProvider.h"
 
-SpaceServerWorldProvider::SpaceServerWorldProvider(SpaceServer& ss,
+SpaceServerWorldProvider::SpaceServerWorldProvider(opencog::SpaceServer& ss,
 						   unsigned long
 						   latestSimWorldTimestamp)
   : _ss(ss), _latestSimWorldTimestamp(latestSimWorldTimestamp) {}
@@ -35,7 +35,7 @@ void SpaceServerWorldProvider::setLatestSimWorldTimestamp(unsigned long t) {
   _latestSimWorldTimestamp = t;
 }
 
-SpaceServer& SpaceServerWorldProvider::getSpaceServer() const
+opencog::SpaceServer& SpaceServerWorldProvider::getSpaceServer() const
 {
   return _ss;
 }

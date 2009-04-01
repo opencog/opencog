@@ -27,10 +27,10 @@
 #include <list>
 
 #include "Entity.h"
-#include "LineSegment.h"
-#include "Rectangle.h"
+#include "Math/LineSegment.h"
+#include "Math/Rectangle.h"
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 #include <boost/shared_ptr.hpp>
 
