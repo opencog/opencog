@@ -7,8 +7,6 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpace
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
 	${OPENCOG_SOURCE_DIR}/opencog
 	${OPENCOG_SOURCE_DIR}/include

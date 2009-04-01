@@ -34,7 +34,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SpaceServer.h>
-#include <opencog/embodiment/Spatial/Math/Vector3.h>
+#include <opencog/spatial/Math/Vector3.h>
 
 #include "atom_types.h"
 

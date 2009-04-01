@@ -6,8 +6,6 @@ ADD_LIBRARY (FitnessEstimator
 
 INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/NoSpaceLife

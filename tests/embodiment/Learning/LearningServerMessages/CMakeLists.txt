@@ -3,8 +3,6 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/Filter
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
