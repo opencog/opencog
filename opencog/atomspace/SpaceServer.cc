@@ -29,7 +29,6 @@
 #include <opencog/util/StringManipulator.h>
 
 #include <opencog/atomspace/atom_types.h>
-//#include <AtomSpaceUtil.h>
 
 #include <string>
 #include <vector>
