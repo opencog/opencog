@@ -24,8 +24,6 @@ ADD_LIBRARY (MessagingSystem
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
@@ -40,7 +38,6 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
 	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Spatial
 	${OPENCOG_BINARY_DIR}/opencog/util
 	${OPENCOG_BINARY_DIR}/opencog/xml
 )

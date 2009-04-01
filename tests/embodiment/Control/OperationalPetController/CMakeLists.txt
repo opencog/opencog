@@ -12,8 +12,6 @@ INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/Predavese
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
         ${OPENCOG_SOURCE_DIR}/opencog
 )
 

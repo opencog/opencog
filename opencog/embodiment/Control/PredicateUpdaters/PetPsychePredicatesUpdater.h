@@ -24,7 +24,7 @@
 
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/SpaceServer.h>
-#include "Triangle.h"
+#include <opencog/spatial/Math/Triangle.h>
 
 namespace OperationalPetController {
 

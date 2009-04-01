@@ -23,7 +23,7 @@
 #define SCAVENGER_HUNT_AGENT_MODE_HANDLER_H
 
 #include "AgentModeHandler.h"
-#include "VisibilityMap.h"
+#include <opencog/spatial/VisibilityMap.h>
 #include <sstream>
 #include <ProcedureInterpreter.h>
 

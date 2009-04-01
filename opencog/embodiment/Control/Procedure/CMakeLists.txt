@@ -2,8 +2,6 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
     ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese

@@ -26,7 +26,7 @@
 #include "AtomSpaceUtil.h"
 #include "PredaveseStdafx.h"
 #include "PredefinedProcedureNames.h"
-#include "LocalSpaceMap2DUtil.h"
+#include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <iostream>

@@ -40,7 +40,7 @@
 #include "HandleMap.h"
 
 #include <opencog/util/exceptions.h>
-#include <opencog/embodiment/Spatial/LocalSpaceMap2D.h>
+#include <opencog/spatial/LocalSpaceMap2D.h>
 
 #include <exception>
 #include <string>

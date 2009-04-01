@@ -2,7 +2,7 @@
 #define DEFAULT_AGENT_MODE_HANDLER
 
 #include "AgentModeHandler.h"
-#include "VisibilityMap.h"
+#include <opencog/spatial/VisibilityMap.h>
 
 namespace OperationalPetController {
   class Pet;

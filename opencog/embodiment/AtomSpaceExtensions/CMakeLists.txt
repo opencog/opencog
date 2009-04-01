@@ -8,8 +8,6 @@ ADD_LIBRARY (AtomSpaceExtensions STATIC
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_SOURCE_DIR}/opencog
 )

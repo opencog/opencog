@@ -31,7 +31,7 @@
 #include "AtomSpaceUtil.h"
 #include "OPC.h"
 #include "PetInterfaceUpdaterAgent.h"
-#include "LocalSpaceMap2D.h"
+#include <opencog/spatial/LocalSpaceMap2D.h>
 
 #include "util/StringManipulator.h"
 
