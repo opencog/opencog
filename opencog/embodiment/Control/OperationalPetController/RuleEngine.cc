@@ -70,7 +70,7 @@ throw( opencog::RuntimeException ) :
         groupingMode(false), groupLeaderId("")
 {
 
-    this->petHandle = AtomSpaceUtil::getAgentHandle( opc->getAtomSpace( ),
+    this->petHandle = AtomSpaceUtil::getAgentHandle( *(opc->getAtomSpace()),
                                                      petName );
     rng = new opencog::MT19937RandGen(0);
     if ( petHandle == Handle::UNDEFINED ) {
@@ -195,7 +195,7 @@ RuleEngine::~RuleEngine( )
 void RuleEngine::setPredicateValue( const std::string& name, float value)
 {
     SimpleTruthValue truthValue( value, 1.0 );
-    AtomSpaceUtil::setPredicateValue( opc->getAtomSpace(), name,
+    AtomSpaceUtil::setPredicateValue( *(opc->getAtomSpace()), name,
                                       truthValue, this->petHandle );
 }
 
@@ -273,12 +273,12 @@ void RuleEngine::preCompGaussianDistributionVector(float window,
 
 void RuleEngine::addSchemaNode(const std::string& schemaName)
 {
-    Handle result = AtomSpaceUtil::addNode(opc->getAtomSpace(),
+    Handle result = AtomSpaceUtil::addNode(*(opc->getAtomSpace()),
                                            GROUNDED_SCHEMA_NODE,
                                            schemaName, true);
 
-    opc->getAtomSpace().setAV(result, *longTermAttentionValue);
-    opc->getAtomSpace().setTV(result, *defaultTruthValue);
+    opc->getAtomSpace()->setAV(result, *longTermAttentionValue);
+    opc->getAtomSpace()->setTV(result, *defaultTruthValue);
 
     logger().log(opencog::Logger::DEBUG,
                     "addSchemaNode - Added GROUNDED_SCHEMA_NODE '%s'.",
@@ -336,7 +336,7 @@ void RuleEngine::updateKnownEntities()
 
     // update objects, avatars
     const SpaceServer::SpaceMap& spaceMap =
-        this->opc->getAtomSpace().getSpaceServer().getLatestMap();
+        this->opc->getAtomSpace()->getSpaceServer().getLatestMap();
 
     std::vector<std::string> entities;
     spaceMap.findAllEntities(back_inserter(entities));
@@ -347,7 +347,7 @@ void RuleEngine::updateKnownEntities()
                         entity.c_str());
 
         std::vector<Handle> objectHandle;
-        opc->getAtomSpace().getHandleSet(back_inserter(objectHandle),
+        opc->getAtomSpace()->getHandleSet(back_inserter(objectHandle),
                                          SL_NODE, entity, true);
 
         if (objectHandle.size() != 1) {
@@ -363,7 +363,7 @@ void RuleEngine::updateKnownEntities()
             continue;
         }// if
 
-        bool isNextEntity = AtomSpaceUtil::isPredicateTrue(opc->getAtomSpace(),
+        bool isNextEntity = AtomSpaceUtil::isPredicateTrue(*(opc->getAtomSpace()),
                                                            "next",
                                                            entityHandle,
                                                            petHandle);
@@ -372,7 +372,7 @@ void RuleEngine::updateKnownEntities()
                          + this->petName + "': "
                          + ((isNextEntity) ? "true" : "false")).c_str());
 
-        Type t = opc->getAtomSpace().getType(entityHandle);
+        Type t = opc->getAtomSpace()->getType(entityHandle);
             
         
         if (isNextEntity) {
@@ -398,12 +398,12 @@ void RuleEngine::updateKnownEntities()
 
     // update has_novelty predicate
     if (this->util->isNovelty()) {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "has_novelty",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
     } else {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "has_novelty",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -411,12 +411,12 @@ void RuleEngine::updateKnownEntities()
 
     // update has_learned_tricks predicate
     if (this->learnedTricksHandler->hasLearnedTricks()) {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "has_learned_tricks",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
     } else {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "has_learned_tricks",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -424,12 +424,12 @@ void RuleEngine::updateKnownEntities()
 
     // update requested schema predicates, that is, if the owner has requested a schema to be executed
     if (this->util->isThereARequestedSchema()) {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "has_requested_schema",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
     } else {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "has_requested_schema",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -438,13 +438,13 @@ void RuleEngine::updateKnownEntities()
     switch (this->opc->getPet().getMode()) {
     case PLAYING:
     case SCAVENGER_HUNT:
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "is_learning",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
         break;
     case LEARNING:
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "is_learning",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
@@ -452,14 +452,14 @@ void RuleEngine::updateKnownEntities()
     }
 
     if (this->avatarAskedToTry) {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "avatar_asked_to_try",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
         ++this->numberOfCyclesSinceAvatarAskToTry;
 
     } else {
-        AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                          "avatar_asked_to_try",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -534,7 +534,7 @@ void RuleEngine::suggestAction( const std::string& rule,
                     rule.c_str(), action.c_str());
 
     // get rule -> action implication link strength
-    float strength = AtomSpaceUtil::getRuleImplicationLinkStrength(this->opc->getAtomSpace(), rule, this->opc->getPet( ).getCurrentModeHandler( ).getModeName( ) );
+    float strength = AtomSpaceUtil::getRuleImplicationLinkStrength(*(this->opc->getAtomSpace()), rule, this->opc->getPet( ).getCurrentModeHandler( ).getModeName( ) );
     suggestedActions.insert(std::pair<Action, RuleEngine::RuleStrPair>(Action(finalAction,
                                                                               finalParameters),
                             RuleEngine::RuleStrPair(rule, strength)));
@@ -564,7 +564,7 @@ void RuleEngine::addRelation(const Relation& relation)
 
     // verify if the target of relation is a valid object or avatar
     HandleSeq objHandle;
-    this->opc->getAtomSpace().getHandleSet(back_inserter(objHandle),
+    this->opc->getAtomSpace()->getHandleSet(back_inserter(objHandle),
                                            SL_OBJECT_NODE,
                                            relation.getTarget(), true);
 
@@ -593,7 +593,7 @@ void RuleEngine::addRelation(const Relation& relation)
 
     // yes! the target is a valid object, so setup relation with it
     SimpleTruthValue truthValue(relation.getIntensity(), 1.0 );
-    AtomSpaceUtil::setPredicateValue(opc->getAtomSpace(), relation.getName(),
+    AtomSpaceUtil::setPredicateValue(*(opc->getAtomSpace()), relation.getName(),
                                      truthValue, this->petHandle,
                                      targetHandle);
 
@@ -611,7 +611,7 @@ void RuleEngine::logRelations(int l)
 {
     // it looks at the existing relating in the atomSpace
     // log them at level l
-    const AtomSpace& as = opc->getAtomSpace();
+    const AtomSpace& as = *(opc->getAtomSpace());
 
     logger().log(static_cast<opencog::Logger::Level>(l),
                  "RuleEngine - TruthValue relations at RuleEngine cycle %d",
@@ -655,7 +655,7 @@ void RuleEngine::logRelations(int l)
 void RuleEngine::removeRelation(const Relation& relation)
 {
 
-    Handle relationHandle = opc->getAtomSpace().getHandle(PREDICATE_NODE,
+    Handle relationHandle = opc->getAtomSpace()->getHandle(PREDICATE_NODE,
                                                           relation.getName() );
     if ( relationHandle == Handle::UNDEFINED ) {
         logger().log(opencog::Logger::WARN,
@@ -666,7 +666,7 @@ void RuleEngine::removeRelation(const Relation& relation)
 
     // verify if the target of relation is a valid object or avatar
     HandleSeq objHandle;
-    this->opc->getAtomSpace().getHandleSet(back_inserter(objHandle),
+    this->opc->getAtomSpace()->getHandleSet(back_inserter(objHandle),
                                            SL_OBJECT_NODE,
                                            relation.getTarget(), true);
 
@@ -694,7 +694,7 @@ void RuleEngine::removeRelation(const Relation& relation)
     } // if
 
     SimpleTruthValue truthValue( 0.0f, 1.0 );
-    AtomSpaceUtil::setPredicateValue(opc->getAtomSpace(),
+    AtomSpaceUtil::setPredicateValue(*(opc->getAtomSpace()),
                                      relation.getName(),
                                      truthValue, this->petHandle,
                                      targetHandle );
@@ -787,7 +787,7 @@ void RuleEngine::addRuleToAtomSpace(const std::string& rule,
                                     const std::vector<std::string>& effectParameters)
 {
 
-    AtomSpace& atomSpace = opc->getAtomSpace();
+    AtomSpace& atomSpace = *(opc->getAtomSpace());
 
     Handle preconditionEvalLink = addPreconditionEvalLink(precondition);
     Handle schemaExecLink = addEffectExecLink(effect, effectParameters, true);
@@ -836,7 +836,7 @@ Handle RuleEngine::addEffectExecLink(const std::string& effect,
 throw (opencog::RuntimeException)
 {
 
-    AtomSpace& atomSpace = opc->getAtomSpace();
+    AtomSpace& atomSpace = *(opc->getAtomSpace());
 
     HandleSeq list;
     foreach( std::string param, parameters ) {
@@ -950,7 +950,7 @@ throw (opencog::RuntimeException)
 
 Handle RuleEngine::addPreconditionEvalLink(const std::string& precondition)
 {
-    AtomSpace& atomSpace = opc->getAtomSpace();
+    AtomSpace& atomSpace = *(opc->getAtomSpace());
 
     logger().log(opencog::Logger::DEBUG,
                     "addPreconditionEvalLink - preCond %s."
@@ -996,7 +996,7 @@ void RuleEngine::tryExecuteSchema( const std::string& schemaName )
 
 void RuleEngine::updateCurrentActionRepetitions()
 {
-    AtomSpace& atomSpace = this->opc->getAtomSpace();
+    AtomSpace& atomSpace = *(opc->getAtomSpace());
 
     Handle handle = AtomSpaceUtil::addNode(atomSpace,
                                            CONCEPT_NODE,
@@ -1045,7 +1045,7 @@ void RuleEngine::addSchemaDoneOrFailurePred(const std::string& schema,
     if (schema == "") {
         return;
     }
-    AtomSpace& atomSpace = this->opc->getAtomSpace();
+    AtomSpace& atomSpace = *(opc->getAtomSpace());
 
     Handle execLink = addEffectExecLink(schema, parameters, false);
 
@@ -1408,13 +1408,13 @@ void RuleEngine::processNextAction( void )
     bool enable_rand_wild_card = boost::lexical_cast<bool>(parameters.get("RE_WILD_CARD_RANDOM_SELECTION"));
 
     // Process next action only if there is map info data available...
-    if ( this->opc->getAtomSpace().getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
+    if ( this->opc->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().log(opencog::Logger::WARN,
                         "RuleEngine - There is no map info available yet!");
         return;
     }
     // ... and pet spatial info is already received
-    if ( !this->opc->getAtomSpace().getSpaceServer().getLatestMap().containsObject(petName) ) {
+    if ( !this->opc->getAtomSpace()->getSpaceServer().getLatestMap().containsObject(petName) ) {
         logger().log(opencog::Logger::ERROR,
                         "RuleEngine - Pet was not inserted in the space map yet!" );    
         return;
@@ -1427,7 +1427,7 @@ void RuleEngine::processNextAction( void )
     if (getCurrentAction().length() == 0) {
         std::map<std::string, float> feelingsUpdatedMap;
         foreach(std::string feeling, feelings) {
-            float value = AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(),
+            float value = AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()),
                                                            feeling, petHandle);
             feelingsUpdatedMap[ feeling ] = value;
         } // while
@@ -1608,12 +1608,12 @@ void RuleEngine::processNextAction( void )
             newValue /= it->second.size( );
 
             float oldValue =
-                AtomSpaceUtil::getPredicateValue(this->opc->getAtomSpace(),
+                AtomSpaceUtil::getPredicateValue(*(this->opc->getAtomSpace()),
                                                  it->first, this->petHandle);
 
             float revisedValue =  reviseValue( oldValue, newValue );
 
-            AtomSpaceUtil::setPredicateValue(this->opc->getAtomSpace(),
+            AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
                                              it->first,
                                              SimpleTruthValue(revisedValue,
                                                               0.0f),
@@ -1670,12 +1670,12 @@ void RuleEngine::processNextAction( void )
         foreach(std::string feeling, feelings) {
 
             float oldValue =
-                AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(),
+                AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()),
                                                  feeling, petHandle);
             float revisedValue =
                 limitValue( oldValue - feelingsDecreaseFactor );
 
-            AtomSpaceUtil::setPredicateValue(opc->getAtomSpace(), feeling,
+            AtomSpaceUtil::setPredicateValue(*(opc->getAtomSpace()), feeling,
                                              SimpleTruthValue(revisedValue,
                                                               0.0f),
                                              petHandle);
@@ -1778,7 +1778,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
     logger().log(opencog::Logger::DEBUG,
                     "RuleEngine - Getting EvalLinks.");
 
-    AtomSpaceUtil::getAllEvaluationLinks(this->opc->getAtomSpace(), pairs,
+    AtomSpaceUtil::getAllEvaluationLinks(*(this->opc->getAtomSpace()), pairs,
                                          SELECTED_RULE_PREDICATE_NAME,
                                          temporal, TemporalTable::OVERLAPS,
                                          true);
@@ -1798,15 +1798,15 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
         // only one selected rule, apply full reward/punish
 
         Handle evalLink = pairs[0].getHandle();
-        if (opc->getAtomSpace().getType(evalLink) == EVALUATION_LINK) {
+        if (opc->getAtomSpace()->getType(evalLink) == EVALUATION_LINK) {
 
-            Handle listLink = opc->getAtomSpace().getOutgoing(evalLink, 1);
-            if (opc->getAtomSpace().getType(listLink) == LIST_LINK) {
+            Handle listLink = opc->getAtomSpace()->getOutgoing(evalLink, 1);
+            if (opc->getAtomSpace()->getType(listLink) == LIST_LINK) {
 
                 logger().log(opencog::Logger::DEBUG,
                                 "RuleEngine - Apply reinfocement.");
                 applyReinforcement(type,
-                                   opc->getAtomSpace().getOutgoing(listLink,0),
+                                   opc->getAtomSpace()->getOutgoing(listLink,0),
                                    1.0);
                 logger().log(opencog::Logger::DEBUG,
                                 "RuleEngine - Applied reinfocement.");
@@ -1845,15 +1845,15 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             }
 
             Handle evalLink = pair.getHandle();
-            if (opc->getAtomSpace().getType(evalLink) != EVALUATION_LINK) {
+            if (opc->getAtomSpace()->getType(evalLink) != EVALUATION_LINK) {
                 logger().log(opencog::Logger::ERROR,
                                 "RuleEngine - Handle informed do not"
                                 " represent an evaluation link.");
                 continue;
             }
 
-            Handle listLink = opc->getAtomSpace().getOutgoing(evalLink, 1);
-            if (opc->getAtomSpace().getType(listLink) != LIST_LINK) {
+            Handle listLink = opc->getAtomSpace()->getOutgoing(evalLink, 1);
+            if (opc->getAtomSpace()->getType(listLink) != LIST_LINK) {
                 logger().log(opencog::Logger::ERROR,
                                 "RuleEngine - Handle informed do not"
                                 " represent list link.");
@@ -1863,7 +1863,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             logger().log(opencog::Logger::DEBUG,
                             "RuleEngine - Apply reinfocement.");
             applyReinforcement(type,
-                               opc->getAtomSpace().getOutgoing(listLink, 0),
+                               opc->getAtomSpace()->getOutgoing(listLink, 0),
                                this->gaussianVector[index]);
             logger().log(opencog::Logger::DEBUG,
                             "RuleEngine - Applied reinfocement.");
@@ -1915,7 +1915,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 void RuleEngine::applyReinforcement(ReinforcementType type,
                                     Handle implicationLink, float factor)
 {
-    AtomSpace& atomSpace = this->opc->getAtomSpace();
+    AtomSpace& atomSpace = *(this->opc->getAtomSpace());
 
     if (atomSpace.getType(implicationLink) != IMPLICATION_LINK) {
         logger().log(opencog::Logger::ERROR,

@@ -49,7 +49,7 @@ RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelEntityHandleSet( void )
 RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelObjectHandleSet( void )
 {
     HandleContainer res;
-    const AtomSpace& as = ruleEngine->opc->getAtomSpace();
+    const AtomSpace& as = *(ruleEngine->opc->getAtomSpace());
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->objects.begin( );
           it != this->ruleEngine->objects.end( ); ++it ) {
@@ -66,7 +66,7 @@ RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelObjectHandleSet( void )
 RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelAgentHandleSet( void )
 {
     HandleContainer res;
-    const AtomSpace& as = ruleEngine->opc->getAtomSpace();
+    const AtomSpace& as = *(ruleEngine->opc->getAtomSpace());
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->avatars.begin( );
           it != this->ruleEngine->avatars.end( ); ++it ) {

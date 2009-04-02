@@ -68,7 +68,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
                          agentType : parameters.get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
 
 
-    this->atomSpace  = new AtomSpace();
     this->planSender = new PVPActionPlanSender(petId, &(getNetworkElement()));
     this->petMessageSender = new PetMessageSender(&(getNetworkElement()));
 
@@ -322,12 +321,6 @@ bool OPC::processSpawnerMessage(const std::string & spawnerMessage){
  * Public Methods
  * --------------------------------------
  */
-AtomSpace & OPC::getAtomSpace() {
-    return *atomSpace;
-}
-const AtomSpace& OPC::getAtomSpace() const {
-    return *atomSpace;
-}
 
 PerceptionActionInterface::PAI & OPC::getPAI(){
     return *pai;

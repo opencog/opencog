@@ -51,9 +51,9 @@ SchemaRunner::~SchemaRunner( ) {
 
 Handle SchemaRunner::addLink( Type linkType, const HandleSeq& outgoing ) {
     logger().log(opencog::Logger::FINE, "SchemaRunner - addLink - init"); 
-    Handle result = AtomSpaceUtil::addLink(opc->getAtomSpace( ), linkType, outgoing );
-    opc->getAtomSpace().setAV(result, *defaultAttentionValue);
-    opc->getAtomSpace().setTV(result, *defaultTruthValue);
+    Handle result = AtomSpaceUtil::addLink(*(opc->getAtomSpace()), linkType, outgoing );
+    opc->getAtomSpace()->setAV(result, *defaultAttentionValue);
+    opc->getAtomSpace()->setTV(result, *defaultTruthValue);
     logger().log(opencog::Logger::FINE, "SchemaRunner - addLink - end"); 
     return result;
 }
@@ -65,11 +65,11 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     logger().log(opencog::Logger::FINE,
                     ("SchemaRunner - Executing runSchema: " + schemaName).c_str());
 
-    const AtomSpace& atomSpace = this->opc->getAtomSpace( );
+    const AtomSpace& atomSpace = *(this->opc->getAtomSpace( ));
 
     // Cannot select a schema to execute while
     // there is no map info data available...
-    if(this->opc->getAtomSpace().getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
+    if(this->opc->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
         logger().log(opencog::Logger::WARN,
                         "SchemaRunner - Cannot select any schema to be executed"
                         " because there is no map info available yet!");
@@ -84,7 +84,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
             Handle listLink = addLink(LIST_LINK, listLinkOutgoing);
             Handle selectedRulePredicateNode =
-                AtomSpaceUtil::addNode(this->opc->getAtomSpace(),
+                AtomSpaceUtil::addNode(*(this->opc->getAtomSpace()),
                                        PREDICATE_NODE,
                                        SELECTED_RULE_PREDICATE_NAME);
 
@@ -95,7 +95,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             Handle evalLink = addLink(EVALUATION_LINK, evalLinkOutgoing);
 
             // adding atTimeLink
-            this->opc->getAtomSpace().addTimeInfo(evalLink, this->opc->getPAI( ).getLatestSimWorldTimestamp( ) );
+            this->opc->getAtomSpace()->addTimeInfo(evalLink, this->opc->getPAI( ).getLatestSimWorldTimestamp( ) );
 
             // clear executingSchema variables
             this->petIsMoving = false;
@@ -123,7 +123,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                         // check if the target move, thus replan
                         std::pair<std::string, Spatial::Point> lastTargetObject = this->opc->getPet( ).getLatestGotoTarget( );
                         const SpaceServer::SpaceMap& spaceMap =
-                            this->opc->getAtomSpace().getSpaceServer( ).getLatestMap( );
+                            this->opc->getAtomSpace()->getSpaceServer( ).getLatestMap( );
                         try {
                             //const Spatial::Object& targetObject = spaceMap.getObject( lastTargetObject.first );
                             const Spatial::EntityPtr& targetEntity =
@@ -212,7 +212,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                         "SchemaRunner - invalid selected schema: %s",
                         schemaName.c_str());
 
-        schemaNode = this->opc->getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE,
+        schemaNode = this->opc->getAtomSpace()->getHandle(GROUNDED_SCHEMA_NODE,
                                                          "full_of_doubts" );
         if ( schemaNode == Handle::UNDEFINED ) {
             return false;
