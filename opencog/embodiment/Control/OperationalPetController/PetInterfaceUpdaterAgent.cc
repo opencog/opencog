@@ -128,21 +128,21 @@ void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc) {
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - updateFeelings()");
 
     std::vector<std::string> allFeelingNames;
-    Handle petHandle = opc->getAtomSpace().getHandle(SL_PET_NODE, opc->getPet().getName());
+    Handle petHandle = opc->getAtomSpace()->getHandle(SL_PET_NODE, opc->getPet().getName());
     if ( petHandle == Handle::UNDEFINED ) {
-      petHandle = opc->getAtomSpace().getHandle(SL_HUMANOID_NODE, opc->getPet().getName());
+      petHandle = opc->getAtomSpace()->getHandle(SL_HUMANOID_NODE, opc->getPet().getName());
     } // if
 
-    std::string hunger = opencog::toString(AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(), "hunger", petHandle));
-    std::string thirst = opencog::toString(AtomSpaceUtil::getPredicateValue(opc->getAtomSpace(), "thirst", petHandle));
+    std::string hunger = opencog::toString(AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()), "hunger", petHandle));
+    std::string thirst = opencog::toString(AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()), "thirst", petHandle));
 
     allFeelingNames.push_back(hunger);
     allFeelingNames.push_back(thirst);
     //allFeelingNames.push_back(GoalsActionsImportance::OWNER_SATISFACTION);
 
     for (unsigned int i = 0; i < allFeelingNames.size(); i++) {
-        Handle goalHandle = opc->getAtomSpace().getHandle(FEELING_NODE, allFeelingNames[i]);
-        float strength = opc->getAtomSpace().getTV(goalHandle).getMean();
+        Handle goalHandle = opc->getAtomSpace()->getHandle(FEELING_NODE, allFeelingNames[i]);
+        float strength = opc->getAtomSpace()->getTV(goalHandle).getMean();
         std::string line = "FEELING ";
         line.append(allFeelingNames[i]);
         line.append(" ");
@@ -155,11 +155,11 @@ void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc) {
 
 void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc) {
 
-    if (! opc->getAtomSpace().getSpaceServer().isLatestMapValid()) {
+    if (! opc->getAtomSpace()->getSpaceServer().isLatestMapValid()) {
         return;
     }
 
-    const SpaceServer::SpaceMap& latestMap = opc->getAtomSpace().getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& latestMap = opc->getAtomSpace()->getSpaceServer().getLatestMap();
     //HandleSeq objectHandles;
     std::vector<std::string> objectIds;
     latestMap.getAllObjects(back_inserter(objectIds));

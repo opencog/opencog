@@ -32,7 +32,7 @@ const int RuleEngineLearnedTricksHandler::PUNISHMENT_VALUE = -50;
 const int RuleEngineLearnedTricksHandler::NOT_SELECTED_VALUE = 2;
 
 RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OPC* opc ) : opc( opc ),
-  atomSpace( &opc->getAtomSpace( ) ), latestSelectedTrick( "" ), numberOfLearnedTricks( 0 ) {
+  atomSpace( opc->getAtomSpace( ) ), latestSelectedTrick( "" ), numberOfLearnedTricks( 0 ) {
   
   unsigned long randSeed; 
   if (MessagingSystem::NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") == "1") { 

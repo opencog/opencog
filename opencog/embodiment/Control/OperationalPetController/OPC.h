@@ -23,7 +23,6 @@
 #define OPC_H
 
 #include <string>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SavingLoading.h>
 #include <StringMessage.h>
 #include <EmbodimentCogServer.h>
@@ -114,7 +113,6 @@ class OPC : public EmbodimentCogServer {
         PetInterfaceUpdaterAgent* petInterfaceUpdaterAgent;
 
         RuleEngine* ruleEngine;
-        AtomSpace* atomSpace;
 
         /**
          * Load pet metadata for a given pet.
@@ -176,12 +174,6 @@ class OPC : public EmbodimentCogServer {
          *            should be persisted.
          */
         void saveState();
-
-        /**
-         * @return The AtomSpace that represents the pet's short memory
-         */
-        AtomSpace & getAtomSpace();
-        const AtomSpace& getAtomSpace() const;
 
         /**
          * @return The Percpetion/Action Interface object used to exchange

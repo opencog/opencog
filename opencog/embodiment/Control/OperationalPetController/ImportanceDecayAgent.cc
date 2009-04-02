@@ -47,10 +47,10 @@ void ImportanceDecayAgent::run(opencog::CogServer *server) {
 
 void ImportanceDecayAgent::atomMerged(Handle h) {
     logger().log(opencog::Logger::DEBUG, "ImportanceDecayAgent::atomMerged(%lu)", h.value());
-    AtomSpace& atomSpace = ((OPC *) server)->getAtomSpace();
+    AtomSpace* atomSpace = server().getAtomSpace();
     // Restore the default STI value if it has decayed 
     // TODO: Remove this code when the merge of atoms consider the STI values this way as well.
-    if (atomSpace.getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
-        atomSpace.setSTI(h, AttentionValue::DEFAULTATOMSTI);
+    if (atomSpace->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
+        atomSpace->setSTI(h, AttentionValue::DEFAULTATOMSTI);
     }
 }
