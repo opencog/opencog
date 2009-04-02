@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef HUMANOIDAGENT_H
-#define HUMANOIDAGENT_H
+#ifndef _SPATIAL_HUMANOIDAGENT_H_
+#define _SPATIAL_HUMANOIDAGENT_H_
 
 #include "Agent.h"
 
@@ -52,7 +52,7 @@ namespace Spatial {
 
   }; // HumanoidAgent
 
-}; // Spatial
+} // Spatial
 
-#endif // HUMANOIDAGENT_H
+#endif // _SPATIAL_HUMANOIDAGENT_H_
 

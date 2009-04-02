@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Learning/behavior/SpaceServerWorldProvider.cc
+ * opencog/embodiment/Learning/behavior/BasicWorldProvider.h
  *
  * Copyright (C) 2007-2008 TO_COMPLETE
  * All Rights Reserved
@@ -19,23 +19,24 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "SpaceServerWorldProvider.h"
+#ifndef _SPACESERVERWORLDPROVIDER_H
+#define _SPECESERVERWORLDPROVIDER_H
 
-SpaceServerWorldProvider::SpaceServerWorldProvider(opencog::SpaceServer& ss,
-						   unsigned long
-						   latestSimWorldTimestamp)
-  : _ss(ss), _latestSimWorldTimestamp(latestSimWorldTimestamp) {}
+#include "WorldProvider.h"
+#include <opencog/atomspace/AtomSpace.h>
 
-unsigned long SpaceServerWorldProvider::getLatestSimWorldTimestamp() const
+//That WorldProvider is used when one would need a simple
+//WorldProvider implementation, used for UTest for instance
+class BasicWorldProvider : public WorldProvider
 {
-    return _latestSimWorldTimestamp;
-}
+  opencog::AtomSpace& _atomSpace;
+  unsigned long _latestSimWorldTimestamp;
+public:
+  BasicWorldProvider(opencog::AtomSpace& atomSpace,
+			   unsigned long latestSimWorldTimestamp = 0);
+  unsigned long getLatestSimWorldTimestamp() const;
+  void setLatestSimWorldTimestamp(unsigned long t);
+  opencog::AtomSpace& getAtomSpace() const;
+};
 
-void SpaceServerWorldProvider::setLatestSimWorldTimestamp(unsigned long t) {
-  _latestSimWorldTimestamp = t;
-}
-
-opencog::SpaceServer& SpaceServerWorldProvider::getSpaceServer() const
-{
-  return _ss;
-}
+#endif

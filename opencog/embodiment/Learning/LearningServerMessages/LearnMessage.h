@@ -49,8 +49,12 @@ class LearnMessage : public MessagingSystem::Message {
 		LearnMessage(const std::string &from, const std::string &to);
 		LearnMessage(const std::string &from, const std::string &to, 
 					 const std::string &msg);	
-		LearnMessage(const std::string &from, const std::string &to, 
-			     const std::string &schema, const std::vector<std::string> &argumentsList, const std::string &ownerId, const std::string &avatarId, const SpaceServer &spaceServer) throw (opencog::InvalidParamException, std::bad_exception);
+        LearnMessage(const std::string &from, const std::string &to, 
+                     const std::string &schema, 
+                     const std::vector<std::string> &argumentsList, 
+                     const std::string &ownerId, 
+                     const std::string &avatarId, AtomSpace &atomSpace) 
+            throw (opencog::InvalidParamException, std::bad_exception);
 		
         /**
          * Return A (char *) representation of the message, a c-style string terminated with '\0'.
@@ -109,7 +113,7 @@ class LearnMessage : public MessagingSystem::Message {
          * @return True if atomSpace was succesfully populated and false
          * otherwise
          */
-        bool populateAtomSpace(SpaceServer &spaceServer);
+        bool populateAtomSpace(AtomSpace &atomSpace);
 
         /**
          * Schema arguments get and set methods.

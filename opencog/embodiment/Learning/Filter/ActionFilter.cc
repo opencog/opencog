@@ -153,7 +153,7 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
             //get current time and a spaceMapHandle associated
             unsigned long time = cbd.getIndexStartTime(index);
             Handle smh =
-                AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_wp.getSpaceServer(),
+                AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_wp.getAtomSpace(),
                                                             time);
             opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
                               "There must be a SpaceMap, ask Nil for more.");
@@ -196,7 +196,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
                                            Handle smh,
                                            unsigned long time) const
 {
-    const AtomSpace& as = _wp.getSpaceServer().getAtomSpace();
+    const AtomSpace& as = _wp.getAtomSpace();
 
     opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
                       "h must conrrespond to a defined handle");
@@ -387,7 +387,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
                                               (_rng,
                                                smh,
                                                time,
-                                               _wp.getSpaceServer(),
+                                               _wp.getAtomSpace(),
                                                _self_id, _owner_id,
                                                it,
                                                true));
@@ -401,7 +401,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
                 vertex v = WorldWrapperUtil::evalIndefiniteObject(_rng,
                                                                   smh,
                                                                   time,
-                                                                  _wp.getSpaceServer(),
+                                                                  _wp.getAtomSpace(),
                                                                   _self_id,
                                                                   _owner_id,
                                                                   io,

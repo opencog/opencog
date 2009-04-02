@@ -122,8 +122,7 @@ class PetInterfaceMock: public Control::PetInterface {
         }
 
         const string& getPetId() const { return pet; }
-        AtomSpace& getAtomSpace() { return pai->getSpaceServer().getAtomSpace(); }
-        SpaceServer& getSpaceServer() { return pai->getSpaceServer(); }
+        AtomSpace& getAtomSpace() { return pai->getAtomSpace(); }
 
         void stopExecuting(const vector<string> &commandStatement, unsigned long timestamp) {
             cout << "PetInterfaceMock: stop executing '" << commandStatement.front() << "' at " << timestamp << endl;

@@ -117,7 +117,7 @@ Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void ) {
     return this->visibilityMap;
   } // if
 
-  Handle spaceMapHandle = this->agent->getSpaceServer().getLatestMapHandle();
+  Handle spaceMapHandle = this->agent->getAtomSpace().getSpaceServer().getLatestMapHandle();
   if (spaceMapHandle == Handle::UNDEFINED) {
     logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
     return 0;
@@ -126,7 +126,7 @@ Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void ) {
   unsigned int numberOfTilesPerSide = 
     static_cast<unsigned int>( atoi( MessagingSystem::NetworkElement::parameters.get( "MAP_XDIM" ).c_str( ) ) ) / 4;
 
-  const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+  const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
   Spatial::Math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
   Spatial::Math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
   this->visibilityMap = new Spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );

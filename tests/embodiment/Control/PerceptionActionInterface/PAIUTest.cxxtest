@@ -10,7 +10,6 @@
 #include "AtomSpaceUtil.h"
 #include "ActionPlanSenderMock.h"
 #include "PredefinedProcedureNames.h"
-#include <opencog/atomspace/SpaceServer.h>
 
 #include "util/exceptions.h"
 #include "util/files.h"
@@ -53,15 +52,14 @@ public:
         }
 
         AtomSpace atomSpace;
-        SpaceServer spaceServer(atomSpace);
         
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai1(spaceServer, sender, petInterface, parameters);
+        PAI pai1(atomSpace, sender, petInterface, parameters);
         petInterface.setPAI(&pai1);
         ActionPlanID planId = pai1.createActionPlan();
         TS_ASSERT(planId == "0");
-        PAI pai2(spaceServer, sender, petInterface, parameters, 10);
+        PAI pai2(atomSpace, sender, petInterface, parameters, 10);
         petInterface.setPAI(&pai2);
         planId = pai2.createActionPlan();
         TS_ASSERT(planId == "10"); 
@@ -75,11 +73,10 @@ public:
         }
        
         AtomSpace atomSpace;
-        SpaceServer spaceServer(atomSpace);
         
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(spaceServer, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface, parameters);
         petInterface.setPAI(&pai);
         ActionPlanID plans[NUM_PLANS];
         for (int i = 0; i < NUM_PLANS; i++) {
@@ -101,11 +98,10 @@ public:
         }
 
         AtomSpace atomSpace;
-        SpaceServer spaceServer(atomSpace);
         
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(spaceServer, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface, parameters);
         petInterface.setPAI(&pai);
 
         TS_ASSERT_THROWS(pai.sendActionPlan("0"), opencog::RuntimeException&);
@@ -123,7 +119,7 @@ public:
         }
         
         FailureActionPlanSender sender2;
-        PAI pai2(spaceServer, sender2, petInterface, parameters);
+        PAI pai2(atomSpace, sender2, petInterface, parameters);
 
         TS_ASSERT_THROWS(pai2.sendActionPlan("0"), opencog::RuntimeException&);
         TS_ASSERT_THROWS(pai2.sendActionPlan("1"), opencog::RuntimeException&);
@@ -145,11 +141,10 @@ public:
  
 
         AtomSpace atomSpace;
-        SpaceServer spaceServer(atomSpace);
         
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(spaceServer, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface, parameters);
         petInterface.setPAI(&pai);
         ActionPlanID plan1 = pai.createActionPlan();
         ActionPlanID plan2 = pai.createActionPlan();
@@ -192,11 +187,10 @@ public:
         }
        
         AtomSpace atomSpace;
-        SpaceServer spaceServer(atomSpace);
         
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(spaceServer, sender, petInterface, parameters, 10);
+        PAI pai(atomSpace, sender, petInterface, parameters, 10);
         petInterface.setPAI(&pai);
         
         // Check Action Plan status before creating them, according with the passed "nextActionPlanId" argument to the constructor
@@ -1265,11 +1259,10 @@ public:
         }
 
         AtomSpace atomSpace;
-        SpaceServer spaceServer(atomSpace);
         
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(spaceServer, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface, parameters);
         petInterface.setPAI(&pai);
 
 /*

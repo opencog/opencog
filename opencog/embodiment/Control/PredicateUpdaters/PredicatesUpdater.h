@@ -48,12 +48,12 @@ namespace OperationalPetController{
     std::vector<BasicPredicateUpdater *> updaters;
     BasicPredicateUpdater* petPsychePredicatesUpdater;
 		
-    SpaceServer &spaceServer;
+    AtomSpace &atomSpace;
     std::string petId;
 
   public:
 		
-    PredicatesUpdater(SpaceServer &_spaceServer, const std::string &_petId);
+    PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_petId);
 
     ~PredicatesUpdater();
 		

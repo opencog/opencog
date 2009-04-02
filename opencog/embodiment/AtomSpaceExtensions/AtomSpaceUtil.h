@@ -273,11 +273,11 @@ public:
      * just preceeding t.
      * If there no such spaceMapHandle then return Handle::UNDEFINED
      *
-     * @param spaceServer The spaceServer with the atomSpace where the spaceMap is
+     * @param atomSpace The AtomSpace with the spaceServer where the spaceMap is
      * @param t  The timestamp to look at
      * @return   The spaceMapHandle at time t or if none the first one before t
      */
-    static Handle getSpaceMapHandleAtTimestamp(const SpaceServer &spaceServer,
+    static Handle getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
                                                unsigned long t);
 
     /**
@@ -312,7 +312,7 @@ public:
      * NOTE: the above, inside and below predicates depends on 3D information
      * currently not available (26/09/2007).
      */
-    static bool getPredicateValueAtTimestamp(const SpaceServer &spaceServer,
+    static bool getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
                                              const std::string& predicate,
                                              unsigned long timestamp,
                                              Handle objectA, Handle objectB);

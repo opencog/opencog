@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PETAGENT_H
-#define PETAGENT_H
+#ifndef _SPATIAL_PETAGENT_H_
+#define _SPATIAL_PETAGENT_H_
 
 #include "Agent.h"
 
@@ -50,7 +50,7 @@ namespace Spatial {
 
   }; // PetAgent
 
-}; // Spatial
+} // Spatial
 
-#endif // PETAGENT_H
+#endif // _SPATIAL_PETAGENT_H_
 

@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef FACE_H
-#define FACE_H
+#ifndef _SPATIAL_MATH_FACE_H_
+#define _SPATIAL_MATH_FACE_H_
 
 #include "Vector3.h"
 #include "Plane.h"
@@ -93,7 +93,7 @@ namespace Spatial {
       
     }; // Face
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // FACE_H
+#endif // _SPATIAL_MATH_FACE_H_

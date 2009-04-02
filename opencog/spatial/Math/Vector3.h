@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#ifndef _SPATIAL_MATH_VECTOR3_H_
+#define _SPATIAL_MATH_VECTOR3_H_
 
 #include <cassert>
 #include <cmath>
@@ -381,7 +381,7 @@ namespace Spatial {
     
     };
 
-  }; // Math  
-}; // Spatial
+  } // Math  
+} // Spatial
 
-#endif // VECTOR3_H
+#endif // _SPATIAL_MATH_VECTOR3_H_

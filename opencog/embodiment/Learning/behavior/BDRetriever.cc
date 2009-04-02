@@ -37,7 +37,7 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                    const std::string name,
                                    const Temporal& temp)
 {
-    Handle h = wp.getSpaceServer().getAtomSpace().getHandle(CONCEPT_NODE, name);
+    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, name);
     if (h != Handle::UNDEFINED)
         retrieveExemplar(bd, wp, h, temp);
 }
@@ -48,13 +48,13 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                    const Temporal& temp)
 {
     std::list<HandleTemporalPair> retP;
-    wp.getSpaceServer().getAtomSpace().getTimeInfo(std::back_inserter(retP),
+    wp.getAtomSpace().getTimeInfo(std::back_inserter(retP),
             trickConceptNode, temp,
             TemporalTable::EXACT);
     if (!retP.empty()) {
         opencog::cassert(TRACE_INFO, retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");
-        Handle h = wp.getSpaceServer().getAtomSpace().getAtTimeLink(*(retP.begin()));
+        Handle h = wp.getAtomSpace().getAtTimeLink(*(retP.begin()));
         opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
                          "Handle h should not be an 'Handle::UNDEFINED'.");
         std::list<Handle> result;
@@ -65,21 +65,21 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
         types[0] = AT_TIME_LINK;
         types[1] = AT_TIME_LINK;
 
-        wp.getSpaceServer().getAtomSpace().getHandleSet(back_inserter(result), outputs,
+        wp.getAtomSpace().getHandleSet(back_inserter(result), outputs,
                 types, NULL, 2, MEMBER_LINK, false);
         for (std::list<Handle>::iterator ih = result.begin(); ih != result.end(); ++ih) {
 
-            opencog::cassert(TRACE_INFO, (*ih) != Handle::UNDEFINED && wp.getSpaceServer().getAtomSpace().getArity(*ih) == 2,
+            opencog::cassert(TRACE_INFO, (*ih) != Handle::UNDEFINED && wp.getAtomSpace().getArity(*ih) == 2,
                              "Handle should not be an 'Handle::UNDEFINED' and should have arity 2.");
 
-            Handle h_at_time = wp.getSpaceServer().getAtomSpace().getOutgoing(*ih, 0);
-            opencog::cassert(TRACE_INFO, h_at_time != Handle::UNDEFINED && wp.getSpaceServer().getAtomSpace().getType(h_at_time) == AT_TIME_LINK,
+            Handle h_at_time = wp.getAtomSpace().getOutgoing(*ih, 0);
+            opencog::cassert(TRACE_INFO, h_at_time != Handle::UNDEFINED && wp.getAtomSpace().getType(h_at_time) == AT_TIME_LINK,
                              "Handle h_at_time should not be an 'Handle::UNDEFINED' and should be an 'AT_TIME_LINK'.");
 
-            opencog::cassert(TRACE_INFO, wp.getSpaceServer().getAtomSpace().getArity(h_at_time) == 2, "Handle h_at_time should have arity 2.");
+            opencog::cassert(TRACE_INFO, wp.getAtomSpace().getArity(h_at_time) == 2, "Handle h_at_time should have arity 2.");
 
-            Temporal t = Temporal::getFromTimeNodeName(wp.getSpaceServer().getAtomSpace().getName(wp.getSpaceServer().getAtomSpace().getOutgoing(h_at_time, 0)).c_str());
-            Handle h_bd = wp.getSpaceServer().getAtomSpace().getOutgoing(h_at_time, 1);
+            Temporal t = Temporal::getFromTimeNodeName(wp.getAtomSpace().getName(wp.getAtomSpace().getOutgoing(h_at_time, 0)).c_str());
+            Handle h_bd = wp.getAtomSpace().getOutgoing(h_at_time, 1);
             bd.addPredicate(h_bd, t);
         }
     }
@@ -90,10 +90,10 @@ void BDRetriever::retrieveLastExemplar(CompositeBehaviorDescription& bd,
                                        const WorldProvider& wp,
                                        const std::string& tn)
 {
-    Handle h = wp.getSpaceServer().getAtomSpace().getHandle(CONCEPT_NODE, tn);
+    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, tn);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        wp.getSpaceServer().getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+        wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
                 Temporal(wp.getLatestSimWorldTimestamp()),
                 TemporalTable::PREVIOUS_BEFORE_START_OF);
         if (!retP.empty()) {
@@ -129,10 +129,10 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
                                        const WorldProvider& wp,
                                        const std::string& tn)
 {
-    Handle h = wp.getSpaceServer().getAtomSpace().getHandle(CONCEPT_NODE, tn);
+    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, tn);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        wp.getSpaceServer().getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+        wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
                 Temporal(wp.getLatestSimWorldTimestamp()),
                 TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::iterator ip = retP.begin(); ip != retP.end(); ++ip) {

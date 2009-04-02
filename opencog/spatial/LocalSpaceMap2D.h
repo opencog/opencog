@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef LOCAL_SPACE_MAP_2D_H
-#define LOCAL_SPACE_MAP_2D_H
+#ifndef _SPATIAL_LOCAL_SPACE_MAP_2D_H_
+#define _SPATIAL_LOCAL_SPACE_MAP_2D_H_
 
 #include <math.h>
 
@@ -277,7 +277,7 @@ namespace Spatial {
       //now find the closest
       std::vector<Spatial::Distance> dists(tmp.size());
       std::transform(tmp.begin(), tmp.end(), dists.begin(),
-		     boost::bind(&LocalSpaceMap2D::minDist, this, _1,boost::cref(p)));
+		     boost::bind(&LocalSpaceMap2D::minDist, this,  ::_1, boost::cref(p)));
 
       return *(tmp.begin() + distance(dists.begin(), 
 				      min_element(dists.begin(), dists.end())));

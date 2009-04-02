@@ -11,7 +11,7 @@
 #include "comboreduct/combo/message.h"
 
 #include "CompareAtomTreeTemplate.h"
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "EntropyFilter.h"
 #include "EntityRelevanceFilter.h"
 #include "PredefinedProcedureNames.h"
@@ -107,7 +107,6 @@ public:
 
     //fill atomSpace with dummy_object and dummy_avatar definite object
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
     
     Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
     Handle avatar_h = atomSpace.addNode(SL_AVATAR_NODE, avatar_str);
@@ -116,10 +115,10 @@ public:
     atomSpace.addNode(CONCEPT_NODE, trick_name);
     
     //fill the spacemap with the locations of stick and Paul
-    spaceServer.addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, avatar_h, T1, AVATAR_X1, AVATAR_Y1, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, avatar_h, T2, AVATAR_X2, AVATAR_Y2, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, avatar_h, T3, AVATAR_X3, AVATAR_Y3, 1, 1, 1, 0);
+    atomSpace.addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, 1, 1, 1, 0);
+    atomSpace.addSpaceInfo(true, avatar_h, T1, AVATAR_X1, AVATAR_Y1, 1, 1, 1, 0);
+    atomSpace.addSpaceInfo(true, avatar_h, T2, AVATAR_X2, AVATAR_Y2, 1, 1, 1, 0);
+    atomSpace.addSpaceInfo(true, avatar_h, T3, AVATAR_X3, AVATAR_Y3, 1, 1, 1, 0);
     
     //fill atomSpace with behaved concept node
     Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
@@ -306,13 +305,13 @@ public:
     //retrieve set of messages
     EntityRelevanceFilter filter;
 
-    message_set messages = filter.getMessages(spaceServer,
+    message_set messages = filter.getMessages(atomSpace,
 					      Temporal(10*TIME_INTERVAL, 12*TIME_INTERVAL),
 					      petID);
 
     //instanciation of EntropyFilter
     argument_type_list atl(2, type_tree(id::definite_object_type));
-    Filter::EntropyFilter ef(pet_str, avatar_str, spaceServer,
+    Filter::EntropyFilter ef(pet_str, avatar_str, atomSpace,
 			     ps, idos, dos, messages, atas, atl, rng);
 
     //generate filtered perceptions

@@ -46,8 +46,8 @@
  * 
  */
 
-#ifndef ASTARCONTROLLER_H
-#define ASTARCONTROLLER_H
+#ifndef _SPATIAL_ASTARCONTROLLER_H_
+#define _SPATIAL_ASTARCONTROLLER_H_
 
 #include "LSMap2DSearchNode.h"
 
@@ -102,4 +102,4 @@ public:
 }; //class
 }  //namespace
 
-#endif /*ASTARCONTROLLER_H*/
+#endif /*_SPATIAL_ASTARCONTROLLER_H_*/

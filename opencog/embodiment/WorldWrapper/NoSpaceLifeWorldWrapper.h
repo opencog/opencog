@@ -47,7 +47,7 @@ public:
      * ctor, dtor
      * cbd is the composite behavior description to imitate
      */
-    NoSpaceLifeWorldWrapper(SpaceServer& spaceServer,
+    NoSpaceLifeWorldWrapper(AtomSpace& atomSpace,
                             const string& petName,
                             const string& ownerName,
                             const string& avatarName,
@@ -97,7 +97,7 @@ private:
     bool _isFinished;
 
     NoSpaceLife _noSpaceLife;
-    SpaceServer& _spaceServer;
+    AtomSpace& _atomSpace;
 
     const string& _petName;
     const string& _ownerName;

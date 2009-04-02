@@ -36,21 +36,21 @@ static const unsigned long timeWindow = 600;
 
 using namespace OperationalPetController;
 
-PredicatesUpdater::PredicatesUpdater(SpaceServer &_spaceServer, const std::string &_petId) :
-									spaceServer(_spaceServer), petId(_petId){
+PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_petId) :
+									atomSpace(_atomSpace), petId(_petId){
     logger().log(opencog::Logger::DEBUG, "%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
 
     // perceptual predicates
-    updaters.push_back(new IsSmallPredicateUpdater(_spaceServer.getAtomSpace()));
-    updaters.push_back(new IsNoisyPredicateUpdater(_spaceServer.getAtomSpace()));
-    updaters.push_back(new IsMovablePredicateUpdater(_spaceServer.getAtomSpace()));
-    updaters.push_back(new IsPickupablePredicateUpdater(_spaceServer.getAtomSpace()));
-    updaters.push_back(new IsPooPlacePredicateUpdater(_spaceServer.getAtomSpace()));
-    updaters.push_back(new IsPeePlacePredicateUpdater(_spaceServer.getAtomSpace()));
+    updaters.push_back(new IsSmallPredicateUpdater(atomSpace));
+    updaters.push_back(new IsNoisyPredicateUpdater(atomSpace));
+    updaters.push_back(new IsMovablePredicateUpdater(atomSpace));
+    updaters.push_back(new IsPickupablePredicateUpdater(atomSpace));
+    updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
+    updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
     // relation predicates
-    updaters.push_back(new NearPredicateUpdater(_spaceServer));
+    updaters.push_back(new NearPredicateUpdater(atomSpace));
 
-    petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(_spaceServer);
+    petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }
 
 PredicatesUpdater::~PredicatesUpdater(){
@@ -63,9 +63,9 @@ PredicatesUpdater::~PredicatesUpdater(){
 
 void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timestamp){
 	
-  Handle petHandle = spaceServer.getAtomSpace().getHandle(SL_PET_NODE, petId);
+  Handle petHandle = atomSpace.getHandle(SL_PET_NODE, petId);
   if ( petHandle == Handle::UNDEFINED ) {
-    petHandle = spaceServer.getAtomSpace().getHandle(SL_HUMANOID_NODE, petId);
+    petHandle = atomSpace.getHandle(SL_HUMANOID_NODE, petId);
   } // if
   
   for(unsigned int i = 0; i < objects.size(); i++){

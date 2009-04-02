@@ -27,18 +27,15 @@
  * changes its position in the latest SpaceMap. 
  */
 #include "BasicPredicateUpdater.h"
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace OperationalPetController{
 
 class NearPredicateUpdater : public OperationalPetController::BasicPredicateUpdater {
 
-    private:
-    	SpaceServer& spaceServer;
-
     public:
 
-        NearPredicateUpdater(SpaceServer& _spaceServer);
+        NearPredicateUpdater(AtomSpace& _atomSpace);
         ~NearPredicateUpdater();
 
         void update(Handle object, Handle pet, unsigned long timestamp );

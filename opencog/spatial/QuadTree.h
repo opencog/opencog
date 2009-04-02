@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef QUADTREE_H
-#define QUADTREE_H
+#ifndef _SPATIAL_QUADTREE_H_
+#define _SPATIAL_QUADTREE_H_
 
 #include "HPASearch.h"
 #include <boost/shared_ptr.hpp>
@@ -74,6 +74,6 @@ namespace Spatial {
     HPASearch::Level* level;
   };
   
-}; // Spatial
+} // Spatial
 
-#endif // QUADTREE_H
+#endif // _SPATIAL_QUADTREE_H_

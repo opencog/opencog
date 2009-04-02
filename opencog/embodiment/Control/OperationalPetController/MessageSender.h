@@ -25,7 +25,7 @@
 #include <string>
 #include <opencog/atomspace/HandleEntry.h>
 
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace OperationalPetController{
 
@@ -45,7 +45,7 @@ class MessageSender{
 		/**
 		 * 
 		 */
-		virtual bool sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &ownerId, const std::string &avatarId, SpaceServer& spaceServer) = 0;
+		virtual bool sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &ownerId, const std::string &avatarId, AtomSpace& atomSpace) = 0;
 	
 		/**
 		 * 

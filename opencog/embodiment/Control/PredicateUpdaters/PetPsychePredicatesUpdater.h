@@ -23,7 +23,6 @@
 #define PETPSYCHEPREDICATESUPDATER_H
 
 #include "BasicPredicateUpdater.h"
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/spatial/Math/Triangle.h>
 
 namespace OperationalPetController {
@@ -35,12 +34,11 @@ namespace OperationalPetController {
 
   private: 
       unsigned long latestSimWorldTimestamp;
-	  SpaceServer& spaceServer;
       Spatial::Math::Triangle createFieldOfViewTriangle(Handle agent);
 	  
   public:
     
-    PetPsychePredicatesUpdater(SpaceServer& _spaceServer);
+    PetPsychePredicatesUpdater(AtomSpace& _atomSpace);
     
     virtual ~PetPsychePredicatesUpdater( );
     

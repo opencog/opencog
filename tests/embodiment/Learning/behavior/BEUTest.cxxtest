@@ -1,5 +1,5 @@
 #include "BE.h"
-#include "SpaceServerWorldProvider.h"
+#include "BasicWorldProvider.h"
 #include "atom_types_init.h"
 #include "PredefinedProcedureNames.h"
 #include "BDRetriever.h"
@@ -38,7 +38,6 @@ public:
     unsigned long tu3 = 400;
 
     //fill atomSpace
-    SpaceServer spaceServer(as);
 
     Handle avatar_h = as.addNode(SL_AVATAR_NODE, avatar_str);
     Handle action1_h = as.addNode(GROUNDED_SCHEMA_NODE, action1_str);
@@ -85,9 +84,8 @@ public:
     Handle tt_h = as.addTimeInfo(trick_h, ex_temp);
 
     //instantiate the behavior encoder
-    SpaceServer ss(as);
-    SpaceServerWorldProvider sswp(ss);
-    BehaviorEncoder be(&sswp, pet_str, tt_h, 1);
+    BasicWorldProvider bwp(as);
+    BehaviorEncoder be(&bwp, pet_str, tt_h, 1);
     atom_tree* actionTemplate =
       makeVirtualAtom(EVALUATION_LINK,
 		      makeVirtualAtom(actionDone_h, NULL),
@@ -102,7 +100,7 @@ public:
 
     CompositeBehaviorDescription bd;
 
-    BDRetriever::retrieveExemplar(bd, sswp, trick_str, ex_temp);
+    BDRetriever::retrieveExemplar(bd, bwp, trick_str, ex_temp);
 
     std::cout << "RETRIEVED BD : " << bd.toString() << std::endl;
 

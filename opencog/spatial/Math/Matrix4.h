@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef MATRIX4_H
-#define MATRIX4_H
+#ifndef _SPATIAL_MATH_MATRIX4_H_
+#define _SPATIAL_MATH_MATRIX4_H_
 
 #include <vector>
 #include "Vector4.h"
@@ -160,7 +160,7 @@ namespace Spatial {
     }; // Matrix4
 
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // MATRIX4_H
+#endif // _SPATIAL_MATH_MATRIX4_H_

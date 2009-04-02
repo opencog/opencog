@@ -29,7 +29,7 @@ unsigned long PAIWorldProvider::getLatestSimWorldTimestamp() const
     return pai->getLatestSimWorldTimestamp();
 }
 
-SpaceServer& PAIWorldProvider::getSpaceServer() const
+AtomSpace& PAIWorldProvider::getAtomSpace() const
 {
-  return pai->getSpaceServer();
+  return pai->getAtomSpace();
 }

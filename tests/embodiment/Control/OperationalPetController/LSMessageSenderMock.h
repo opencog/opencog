@@ -17,7 +17,7 @@ class LSMessageSenderMock : public MessageSender {
             return true;
         }
         
-        bool sendExemplar(const std::string &schema, const std::vector<std::string> &schemaArgs, const std::string &ownerId, const std::string &avatarId, SpaceServer &spaceServer){
+        bool sendExemplar(const std::string &schema, const std::vector<std::string> &schemaArgs, const std::string &ownerId, const std::string &avatarId, AtomSpace &atomSpace){
             fprintf(stdout, "Sending exemplar. schema: '%s', owner: '%s', avatar: '%s'\n", schema.c_str(), ownerId.c_str(), avatarId.c_str());            
             return true;
         }

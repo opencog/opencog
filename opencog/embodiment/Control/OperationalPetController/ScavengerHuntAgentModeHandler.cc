@@ -341,7 +341,7 @@ Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void ) 
         return this->visibilityMap;
     } // if
 
-    Handle spaceMapHandle = this->agent->getSpaceServer().getLatestMapHandle();
+    Handle spaceMapHandle = this->agent->getAtomSpace().getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
         logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
         return NULL;
@@ -350,7 +350,7 @@ Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void ) 
     unsigned int numberOfTilesPerSide = 
         static_cast<unsigned int>( atoi( MessagingSystem::NetworkElement::parameters.get( "MAP_XDIM" ).c_str( ) ) ) / 4;
 
-    const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
     Spatial::Math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
     Spatial::Math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
     this->visibilityMap = new Spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );
@@ -398,7 +398,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
     case 1305: {
         // the treasure exists yet?
         try {
-            const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+            const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
             spaceMap.getEntity( getPropertyValue( "treasure" ) );
             // yeah! keep going after it
         } catch( opencog::NotFoundException& ex ) {
@@ -530,7 +530,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
 
 
     case 1321: { // spying an agent
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         try {
             const Spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
@@ -556,7 +556,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
         } // catch
     } break;
     case 1322: {
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         try {	
             spaceMap.getEntity( getPropertyValue( "spying" ) );
@@ -581,7 +581,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
     } break;
     case 1323: {
         try {
-            const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+            const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
 
             const Spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
             const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
@@ -660,7 +660,7 @@ void ScavengerHuntAgentModeHandler::update( void ) {
 }
 
 bool ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea( void ) {
-    const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
     std::vector<std::string> entities; 
     spaceMap.findAllEntities(back_inserter(entities));
 
@@ -773,14 +773,14 @@ bool ScavengerHuntAgentModeHandler::imInsideTargetArea( void ) {
     } // if
 
     try {
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         bool imInside = getVisibilityMap( )->isInsideArea( *agentEntity, this->exploringArea, NUMBER_OF_AREAS );
         logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler::imInsideTargetArea - Exploring area[%d] Current Agent position[%s] Inside?[%s]", this->exploringArea, agentEntity->getPosition( ).toString( ).c_str( ), (imInside?"yes":"no") );
         return imInside;    
     } catch ( opencog::NotFoundException& ex ) {
     
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::imInsideTargetArea - AgentPosition[%s] AreaNumber[%d] %s", agentEntity->getPosition( ).toString( ).c_str( ), this->exploringArea, ex.getMessage( ) );
         return false;
@@ -811,7 +811,7 @@ bool ScavengerHuntAgentModeHandler::isExecutingSchema( void ) {
 bool ScavengerHuntAgentModeHandler::treasureWasFound( void ) {
     try {
       
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
   
         std::list<std::string> entities;
         spaceMap.getAllObjects( back_inserter( entities ) );
@@ -828,13 +828,13 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void ) {
         for( it = entities.begin( ); it != entities.end( ); ++it ) {
 
             const Spatial::EntityPtr& entity = spaceMap.getEntity( *it );
-            Handle objectHandle = this->agent->getSpaceServer().getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, entity->getName( ) );
+            Handle objectHandle = this->agent->getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, entity->getName( ) );
             if ( objectHandle == Handle::UNDEFINED ) {
                 logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not an accessory", (*it).c_str());
                 continue;
             } // if 
 
-            if ( !AtomSpaceUtil::isPredicateTrue( this->agent->getSpaceServer().getAtomSpace( ), "is_pickupable", objectHandle ) ) {
+            if ( !AtomSpaceUtil::isPredicateTrue( this->agent->getAtomSpace( ), "is_pickupable", objectHandle ) ) {
                 logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not pickupable", (*it).c_str());
                 continue;
             } // if
@@ -844,7 +844,7 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void ) {
                 continue;
             } // if
       
-            if ( AtomSpaceUtil::isObjectBeingHolded( this->agent->getSpaceServer().getAtomSpace( ), *it ) ) {
+            if ( AtomSpaceUtil::isObjectBeingHolded( this->agent->getAtomSpace( ), *it ) ) {
                 logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - Some agent is holding object[%s]", (*it).c_str());
                 continue;
             } // if
@@ -889,14 +889,14 @@ bool ScavengerHuntAgentModeHandler::isAgentNearTreasure( void ) {
     } // if
 
     Handle agentHandle = AtomSpaceUtil::getAgentHandle( this->agent->getAtomSpace( ), this->agent->getPetId( ) );
-    Handle treasureHandle = this->agent->getSpaceServer().getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, getPropertyValue( "treasure" ) );
+    Handle treasureHandle = this->agent->getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, getPropertyValue( "treasure" ) );
 
     if ( agentHandle == Handle::UNDEFINED || treasureHandle == Handle::UNDEFINED ) {
         logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure handle was not found" );
         return false;
     } // if
 
-    const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
 
     try {
         const Spatial::EntityPtr& treasureEntity = spaceMap.getEntity( getPropertyValue( "treasure" ) );
@@ -933,7 +933,7 @@ bool ScavengerHuntAgentModeHandler::isAgentHoldingTreasure( void ) {
 
 bool ScavengerHuntAgentModeHandler::isAgentNearBase( void ) {
     try {
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
     
         if ( this->myTeamCode == 0 ) {
@@ -953,7 +953,7 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const std
 
     std::stringstream output;
     try {
-        const SpaceServer::SpaceMap& sm = this->agent->getSpaceServer( ).getLatestMap( );
+        const SpaceServer::SpaceMap& sm = this->agent->getAtomSpace().getSpaceServer( ).getLatestMap( );
 
         const Spatial::EntityPtr& occluderEntity = sm.getEntity( entityId );
         const Spatial::EntityPtr& agentEntity = sm.getEntity( this->agent->getPetId( ) );
@@ -1028,7 +1028,7 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const std
 std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const Spatial::Math::Vector3& targetPosition ) {
     std::stringstream output;
     try {
-        const SpaceServer::SpaceMap& sm = this->agent->getSpaceServer( ).getLatestMap( );
+        const SpaceServer::SpaceMap& sm = this->agent->getAtomSpace().getSpaceServer( ).getLatestMap( );
 
         const Spatial::EntityPtr& agentEntity = sm.getEntity( this->agent->getPetId( ) );  
 
@@ -1228,7 +1228,7 @@ void ScavengerHuntAgentModeHandler::selectArea( const std::string& playerName, u
 
 bool ScavengerHuntAgentModeHandler::isAgentNextTo( const std::string& targetId ) {
     try {
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         const Spatial::EntityPtr& targetEntity = spaceMap.getEntity( targetId );
     
@@ -1253,7 +1253,7 @@ bool ScavengerHuntAgentModeHandler::isTeamMember( const std::string& agentId, un
 
 void ScavengerHuntAgentModeHandler::setFollowingPosition( void ) {
     try {
-        const SpaceServer::SpaceMap& spaceMap = this->agent->getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
         const Spatial::EntityPtr& targetEntity = spaceMap.getEntity( getPropertyValue( "customObject" ) );
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );    
 

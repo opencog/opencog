@@ -22,13 +22,13 @@
 #ifndef _WORLD_PROVIDER_H_
 #define _WORLD_PROVIDER_H_
 
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 class WorldProvider
 {
  public:
   virtual unsigned long getLatestSimWorldTimestamp() const=0;
-  virtual opencog::SpaceServer& getSpaceServer() const = 0;
+  virtual opencog::AtomSpace& getAtomSpace() const = 0;
   virtual ~WorldProvider() { }
 };
 

@@ -206,14 +206,13 @@ bool AtomSpaceUtil::getXYZOFromPositionEvalLink(const AtomSpace& atomspace,
     return true;
 }
 
-Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const SpaceServer &spaceServer,
+Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
                                                    unsigned long t)
 {
     Temporal temporal(t);
     std::vector<HandleTemporalPair> temporalPairs;
 
-    Handle spaceMapNode = spaceServer.getAtomSpace().getHandle(CONCEPT_NODE,
-                                                               SpaceServer::SPACE_MAP_NODE_NAME);
+    Handle spaceMapNode = atomSpace.getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
 
     Handle spaceMapHandle = Handle::UNDEFINED;
 
@@ -221,15 +220,17 @@ Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const SpaceServer &spaceServe
         return spaceMapHandle;
     }
 
+    const SpaceServer& spaceServer = atomSpace.getSpaceServer();
+
     // get temporal pair for the EXACT timestamp. Only spaceMapNodes are
     // considered
-    spaceServer.getAtomSpace().getTimeInfo(back_inserter(temporalPairs),
+    atomSpace.getTimeInfo(back_inserter(temporalPairs),
                                            spaceMapNode, temporal,
                                            TemporalTable::EXACT);
     if (!temporalPairs.empty()) {
 
         // found at least one temporalPair. There should be at most one
-        spaceMapHandle = spaceServer.getAtomSpace().getAtTimeLink(temporalPairs[0]);
+        spaceMapHandle = atomSpace.getAtTimeLink(temporalPairs[0]);
         if (!spaceServer.containsMap(spaceMapHandle)) {
             spaceMapHandle = Handle::UNDEFINED;
         }
@@ -239,19 +240,19 @@ Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const SpaceServer &spaceServe
         // found none temporalPair with EXACT timestamp. Now looking for
         // timestamps before the one used.
         temporalPairs.clear();
-        spaceServer.getAtomSpace().getTimeInfo(back_inserter(temporalPairs),
+        atomSpace.getTimeInfo(back_inserter(temporalPairs),
                                                spaceMapNode,
                                                temporal,
                                                TemporalTable::PREVIOUS_BEFORE_START_OF);
         while (!temporalPairs.empty()) {
-            spaceMapHandle = spaceServer.getAtomSpace().getAtTimeLink(temporalPairs[0]);
+            spaceMapHandle = atomSpace.getAtTimeLink(temporalPairs[0]);
             Temporal* nextTemporal = temporalPairs[0].getTemporal();
             if (spaceServer.containsMap(spaceMapHandle)) {
                 break;
             } else {
                 spaceMapHandle = Handle::UNDEFINED;
                 temporalPairs.clear();
-                spaceServer.getAtomSpace().getTimeInfo(back_inserter(temporalPairs),
+                atomSpace.getTimeInfo(back_inserter(temporalPairs),
                                                        spaceMapNode,
                                                        *nextTemporal,
                                                        TemporalTable::PREVIOUS_BEFORE_START_OF);
@@ -318,20 +319,20 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(const AtomSpace& atomSpace,
     } else return false;
 }
 
-bool AtomSpaceUtil::getPredicateValueAtTimestamp(const SpaceServer &spaceServer,
+bool AtomSpaceUtil::getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
                                                  const std::string& predicate,
                                                  unsigned long timestamp,
                                                  Handle obj1, Handle obj2)
 {
     // get the SpaceMap to do the test
-    Handle spaceMapHandle = getSpaceMapHandleAtTimestamp(spaceServer,
+    Handle spaceMapHandle = getSpaceMapHandleAtTimestamp(atomSpace,
                                                          timestamp);
     if (spaceMapHandle == Handle::UNDEFINED) {
         return false;
     } else {
         const SpaceServer::SpaceMap&
-        sm = spaceServer.getMap(spaceMapHandle);
-        return getPredicateValueAtSpaceMap(spaceServer.getAtomSpace(),
+        sm = atomSpace.getSpaceServer().getMap(spaceMapHandle);
+        return getPredicateValueAtSpaceMap(atomSpace,
                                            predicate, sm, obj1, obj2);
     }
 }

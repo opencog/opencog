@@ -28,8 +28,8 @@
 using namespace OperationalPetController;
 using namespace opencog;
 
-NearPredicateUpdater::NearPredicateUpdater(SpaceServer &_spaceServer) : 
-    BasicPredicateUpdater(_spaceServer.getAtomSpace()), spaceServer(_spaceServer) {}
+NearPredicateUpdater::NearPredicateUpdater(AtomSpace &_atomSpace) : 
+    BasicPredicateUpdater(_atomSpace) {}
 
 NearPredicateUpdater::~NearPredicateUpdater(){
 }
@@ -42,12 +42,12 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
   std::string objectName = atomSpace.getName(object);
 
   // there is no map, no update is possible
-  Handle spaceMapHandle = spaceServer.getLatestMapHandle();
+  Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
   if (spaceMapHandle == Handle::UNDEFINED) {
     return;
   }
 
-  const SpaceServer::SpaceMap& spaceMap = spaceServer.getLatestMap();
+  const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
   if (!spaceMap.containsObject(objectName)) {
     logger().log(opencog::Logger::DEBUG, "NearPredicateUpdater::update: Did  not find object %s in the map", objectName.c_str());
 

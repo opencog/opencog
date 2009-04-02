@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PREREQUISITES_H
-#define PREREQUISITES_H
+#ifndef _SPATIAL_PREREQUISITES_H_
+#define _SPATIAL_PREREQUISITES_H_
 
 
 namespace Spatial {
@@ -31,12 +31,12 @@ namespace Spatial {
     class Dimension2;
     class Dimension3;
     class Vector2;
-  };
-};
+  }
+}
 
 #include <opencog/util/exceptions.h>
 #include <string>
 #include <iostream>
 
 
-#endif // PREREQUISITES_H
+#endif // _SPATIAL_PREREQUISITES_H_

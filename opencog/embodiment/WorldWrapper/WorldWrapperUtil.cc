@@ -22,10 +22,8 @@
 
 #include "WorldWrapperUtil.h"
 
-#include "util/functional.h"
-#include "util/RandGen.h"
-
-#include <opencog/atomspace/Node.h>
+#include <opencog/util/functional.h>
+#include <opencog/util/RandGen.h>
 
 #include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string.hpp>
@@ -34,7 +32,6 @@
 #include <sstream>
 #include <ext/functional>
 
-#include <opencog/atomspace/SpaceServer.h>
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
 
@@ -270,7 +267,7 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
 vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                               Handle smh,
                                               unsigned long time,
-                                              const SpaceServer& spaceServer,
+                                              const AtomSpace& atomSpace,
                                               const string& self_id,
                                               const string& owner_id,
                                               combo::indefinite_object io,
@@ -281,7 +278,7 @@ throw (opencog::ComboException,
        std::bad_exception)
 {
 
-    return evalIndefiniteObject(rng, smh, time, spaceServer,
+    return evalIndefiniteObject(rng, smh, time, atomSpace,
                                 self_id, owner_id, get_enum(io),
                                 isInThePast, vu);
 
@@ -290,7 +287,7 @@ throw (opencog::ComboException,
 vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                               Handle smh,
                                               unsigned long time,
-                                              const SpaceServer& spaceServer,
+                                              const AtomSpace& atomSpace,
                                               const string& self_id,
                                               const string& owner_id,
                                               combo::pet_indefinite_object_enum ioe,
@@ -307,11 +304,10 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
     opencog::cassert(TRACE_INFO,
                       smh != Handle::UNDEFINED,
                       "A SpaceMap must exist");
-    const SpaceServer::SpaceMap& sm = spaceServer.getMap(smh);
-    AtomSpace& as = spaceServer.getAtomSpace();
+    const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
 
     try {
-        selfLoc = getLocation(sm, as, self_id);
+        selfLoc = getLocation(sm, atomSpace, self_id);
 
     } catch (...) {
         // TODO: check if it is necessary to catch the exceptions separately.
@@ -326,10 +322,10 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         std::string objectId;
         if (isInThePast) {
             objectId =
-                AtomSpaceUtil::getHoldingObjectIdAtTime(as, self_id, time);
+                AtomSpaceUtil::getHoldingObjectIdAtTime(atomSpace, self_id, time);
         } else {
             objectId =
-                AtomSpaceUtil::getHoldingObjectId(as, self_id);
+                AtomSpaceUtil::getHoldingObjectId(atomSpace, self_id);
         }
         //if
         if ( objectId != "" ) {
@@ -366,7 +362,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
              boost::bind(&combo::vertex_to_bool,
                          boost::bind(&WorldWrapperUtil::evalPerception,
                                      boost::ref(rng),
-                                     smh, time, boost::cref(spaceServer),
+                                     smh, time, boost::cref(atomSpace),
                                      boost::cref(self_id),
                                      boost::cref(owner_id),
                                      boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -380,7 +376,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
              boost::bind(&combo::vertex_to_bool,
                          boost::bind(&WorldWrapperUtil::evalPerception,
                                      boost::ref(rng),
-                                     smh, time, boost::cref(spaceServer),
+                                     smh, time, boost::cref(atomSpace),
                                      boost::cref(self_id),
                                      boost::cref(owner_id),
                                      boost::bind(&WorldWrapperUtil::maketree_percept,
@@ -391,11 +387,11 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         std::string objectId;
         if (isInThePast) {
             objectId =
-                AtomSpaceUtil::getHoldingObjectIdAtTime( as,
+                AtomSpaceUtil::getHoldingObjectIdAtTime( atomSpace,
                         self_id, time );
         } else {
             objectId =
-                AtomSpaceUtil::getHoldingObjectId( as,
+                AtomSpaceUtil::getHoldingObjectId( atomSpace,
                                                    self_id );
         }
         p = nearest_random_X_to_is_X(ioe);
@@ -411,7 +407,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                                            boost::bind<bool>(combo::vertex_to_bool,
                                                                              boost::bind(&WorldWrapperUtil::evalPerception,
                                                                                          boost::ref(rng),
-                                                                                         smh, time, boost::cref(spaceServer),
+                                                                                         smh, time, boost::cref(atomSpace),
                                                                                          boost::cref(self_id),
                                                                                          boost::cref(owner_id),
                                                                                          boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -428,7 +424,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                  boost::bind(&combo::vertex_to_bool,
                              boost::bind(&WorldWrapperUtil::evalPerception,
                                          boost::ref(rng),
-                                         smh, time, boost::cref(spaceServer),
+                                         smh, time, boost::cref(atomSpace),
                                          boost::cref(self_id),
                                          boost::cref(owner_id),
                                          boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -443,7 +439,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
              boost::bind(&combo::vertex_to_bool,
                          boost::bind(&WorldWrapperUtil::evalPerception,
                                      boost::ref(rng),
-                                     smh, time, boost::cref(spaceServer),
+                                     smh, time, boost::cref(atomSpace),
                                      boost::cref(self_id),
                                      boost::cref(owner_id),
                                      boost::bind(&WorldWrapperUtil::maketree_percept,
@@ -460,7 +456,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                               boost::bind(&WorldWrapperUtil::evalPerception,
                                           boost::ref(rng),
                                           smh, time,
-                                          boost::cref(spaceServer),
+                                          boost::cref(atomSpace),
                                           boost::cref(self_id),
                                           boost::cref(owner_id),
                                           bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -478,7 +474,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                      bind(&WorldWrapperUtil::evalPerception,
                                           boost::ref(rng),
                                           smh, time,
-                                          boost::cref(spaceServer),
+                                          boost::cref(atomSpace),
                                           boost::cref(self_id),
                                           boost::cref(owner_id),
                                           boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -492,7 +488,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                          boost::bind(&WorldWrapperUtil::evalPerception,
                                      boost::ref(rng),
                                      smh, time,
-                                     boost::cref(spaceServer),
+                                     boost::cref(atomSpace),
                                      boost::cref(self_id),
                                      boost::cref(owner_id),
                                      boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -508,7 +504,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                      boost::bind(&WorldWrapperUtil::evalPerception,
                                                  boost::ref(rng),
                                                  smh, time,
-                                                 boost::cref(spaceServer),
+                                                 boost::cref(atomSpace),
                                                  boost::cref(self_id),
                                                  boost::cref(owner_id),
                                                  bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -526,7 +522,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                      boost::bind(&WorldWrapperUtil::evalPerception,
                                                  boost::ref(rng),
                                                  smh, time,
-                                                 boost::cref(spaceServer),
+                                                 boost::cref(atomSpace),
                                                  boost::cref(self_id),
                                                  boost::cref(owner_id),
                                                  bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -540,7 +536,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                          boost::bind(&WorldWrapperUtil::evalPerception,
                                      boost::ref(rng),
                                      smh, time,
-                                     boost::cref(spaceServer),
+                                     boost::cref(atomSpace),
                                      boost::cref(self_id),
                                      boost::cref(owner_id),
                                      boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -553,7 +549,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
              boost::bind(&combo::vertex_to_bool,
                          boost::bind(&WorldWrapperUtil::evalPerception,
                                      boost::ref(rng),
-                                     smh, time, boost::cref(spaceServer),
+                                     smh, time, boost::cref(atomSpace),
                                      boost::cref(self_id),
                                      boost::cref(owner_id),
                                      boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -568,7 +564,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -580,14 +576,14 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
                        isInThePast, vu)), rng);
         break;
     case id::random_pickupable: {
-        std::string objectId = AtomSpaceUtil::getHoldingObjectId( as, self_id );
+        std::string objectId = AtomSpaceUtil::getHoldingObjectId( atomSpace, self_id );
 
         p = nearest_random_X_to_is_X(ioe);
         if ( objectId != "" ) {
@@ -603,7 +599,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                                           boost::bind<bool>(combo::vertex_to_bool,
                                                                             bind(&WorldWrapperUtil::evalPerception,
                                                                                  boost::ref(rng),
-                                                                                 smh, time, boost::cref(spaceServer),
+                                                                                 smh, time, boost::cref(atomSpace),
                                                                                  boost::cref(self_id),
                                                                                  boost::cref(owner_id),
                                                                                  boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -619,7 +615,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                 (bind(&combo::vertex_to_bool,
                       bind(&WorldWrapperUtil::evalPerception,
                            boost::ref(rng),
-                           smh, time, boost::cref(spaceServer),
+                           smh, time, boost::cref(atomSpace),
                            boost::cref(self_id),
                            boost::cref(owner_id),
                            boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -636,7 +632,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -648,7 +644,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -662,7 +658,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                   bind(&combo::vertex_to_bool,
                        boost::bind(&WorldWrapperUtil::evalPerception,
                                    boost::ref(rng),
-                                   smh, time, boost::cref(spaceServer),
+                                   smh, time, boost::cref(atomSpace),
                                    boost::cref(self_id),
                                    boost::cref(owner_id),
                                    boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -674,7 +670,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -686,7 +682,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -698,7 +694,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -710,7 +706,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -722,7 +718,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
             (bind(&combo::vertex_to_bool,
                   bind(&WorldWrapperUtil::evalPerception,
                        boost::ref(rng),
-                       smh, time, boost::cref(spaceServer),
+                       smh, time, boost::cref(atomSpace),
                        boost::cref(self_id),
                        boost::cref(owner_id),
                        bind(&WorldWrapperUtil::maketree_percept, p, _1),
@@ -731,38 +727,38 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         // NOTE: there is another way to get food/water bowl. Create
         // an is_food/water_bowl predicate and do the same as above.
     case id::food_bowl:
-        res = lookupInheritanceLink(rng, as, toHandle(as, "food_bowl",
+        res = lookupInheritanceLink(rng, atomSpace, toHandle(atomSpace, "food_bowl",
                                                       self_id, owner_id));
         break;
     case id::water_bowl:
-        res = lookupInheritanceLink(rng, as, toHandle(as, "water_bowl",
+        res = lookupInheritanceLink(rng, atomSpace, toHandle(atomSpace, "water_bowl",
                                                       self_id, owner_id));
         break;
     case id::pet_home:
-        res = lookupInheritanceLink(rng, as, toHandle(as, "pet_home",
+        res = lookupInheritanceLink(rng, atomSpace, toHandle(atomSpace, "pet_home",
                                                       self_id, owner_id));
         break;
     case id::pet_bowl:
-        res = lookupExecLink(rng, as, toHandle(as, "pet_bowl",
+        res = lookupExecLink(rng, atomSpace, toHandle(atomSpace, "pet_bowl",
                                                self_id, owner_id));
         break;
     case id::last_food_place:
-        res = lookupExecLink(rng, as, toHandle(as, "last_food_place",
+        res = lookupExecLink(rng, atomSpace, toHandle(atomSpace, "last_food_place",
                                                self_id, owner_id));
         break;
     case id::exemplar_avatar: {
-        Handle evalLink = AtomSpaceUtil::getMostRecentEvaluationLink(as, std::string("is_exemplar_avatar"));
+        Handle evalLink = AtomSpaceUtil::getMostRecentEvaluationLink(atomSpace, std::string("is_exemplar_avatar"));
 
         if (evalLink != Handle::UNDEFINED) {
-            if (as.getTV(evalLink).getMean() > meanTruthThreshold) {
-                Handle ll = as.getOutgoing(evalLink, 1);
+            if (atomSpace.getTV(evalLink).getMean() > meanTruthThreshold) {
+                Handle ll = atomSpace.getOutgoing(evalLink, 1);
                 if (ll != Handle::UNDEFINED) {
-                    Handle teacher = as.getOutgoing(ll, 0);
-                    Handle student = as.getOutgoing(ll, 1);
+                    Handle teacher = atomSpace.getOutgoing(ll, 0);
+                    Handle student = atomSpace.getOutgoing(ll, 1);
 
                     if (teacher != Handle::UNDEFINED
-                        && self_id == as.getName(student)) {
-                        return vertex(as.getName(teacher));
+                        && self_id == atomSpace.getName(student)) {
+                        return vertex(atomSpace.getName(teacher));
                     }
                 }
             }
@@ -800,7 +796,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
 combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                Handle smh,
                                                unsigned long time,
-                                               const SpaceServer& spaceServer,
+                                               const AtomSpace& atomSpace,
                                                const string& self_id,
                                                const string& owner_id,
                                                const pre_it it,
@@ -812,8 +808,6 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                       is_perception(*it),
                       "It is assumed that '*it' is a perception");
 
-    const AtomSpace& as = spaceServer.getAtomSpace();
-
     perception p = get_perception(*it);
     if (p == instance(id::is_null)) { //just check directly
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1);
@@ -823,7 +817,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             v = WorldWrapperUtil::evalIndefiniteObject(rng,
                                                        smh,
                                                        time,
-                                                       spaceServer,
+                                                       atomSpace,
                                                        self_id, owner_id,
                                                        get_indefinite_object(v),
                                                        isInThePast);
@@ -838,8 +832,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         opencog::cassert(TRACE_INFO,
                           smh != Handle::UNDEFINED,
                           "A SpaceMap must exist");
-        const SpaceServer::SpaceMap& sm = spaceServer.getMap(smh);
-        return combo::bool_to_vertex(inSpaceMap(sm, as, self_id, owner_id,
+        const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
+        return combo::bool_to_vertex(inSpaceMap(sm, atomSpace, self_id, owner_id,
                                                 *it.begin()));
     }
 
@@ -852,67 +846,67 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::exists_edible:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_edible)
                                       != vertex(id::null_obj)));
     case id::exists_movable:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_movable)
                                       != vertex(id::null_obj)));
     case id::exists_pickupable:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_pickupable)
                                       != vertex(id::null_obj)));
     case id::exists_drinkable:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_drinkable)
                                       != vertex(id::null_obj)));
     case id::exists_avatar:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_avatar)
                                       != vertex(id::null_obj)));
     case id::exists_pet:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_pet)
                                       != vertex(id::null_obj)));
     case id::exists_small:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_small)
                                       != vertex(id::null_obj)));
     case id::exists_moving:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_moving)
                                       != vertex(id::null_obj)));
     case id::exists_noisy:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_noisy)
                                       != vertex(id::null_obj)));
     case id::exists_poo_place:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_poo_place)
                                       != vertex(id::null_obj)));
     case id::exists_pee_place:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           spaceServer,
+                                                           atomSpace,
                                                            self_id, owner_id,
                                                            id::random_pee_place)
                                       != vertex(id::null_obj)));
@@ -921,7 +915,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         vertex vo = *it.begin();
         std::vector<definite_object> definite_objects =
             WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                 spaceServer,
+                                                 atomSpace,
                                                  self_id, owner_id,
                                                  vo, isInThePast, vu);
         
@@ -945,7 +939,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         } else {
             try {
                 // if the definite object exists inside the latest map it exists
-                spaceServer.getLatestMap( ).getEntity( def_obj );
+                atomSpace.getSpaceServer().getLatestMap( ).getEntity( def_obj );
                 result = true;
             } catch ( opencog::NotFoundException& ex ) {
                 // wheter not found inside map, it doesn't exists
@@ -967,7 +961,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         vertex vo = *it.begin();
         std::vector<definite_object> definite_objects =
             WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                 spaceServer,
+                                                 atomSpace,
                                                  self_id, owner_id, vo,
                                                  isInThePast, vu);
         // cache predicate data variables
@@ -987,7 +981,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 result = (data > meanTruthThreshold);
                 
             } else {
-                result = as.inheritsType(as.getType(toHandle(as,
+                result = atomSpace.inheritsType(atomSpace.getType(toHandle(atomSpace,
                                                              def_obj,
                                                              self_id,
                                                              owner_id)),
@@ -1024,7 +1018,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                     spaceServer,
+                                                     atomSpace,
                                                      self_id, owner_id, vo,
                                                      isInThePast, vu);
 
@@ -1045,7 +1039,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     result = (data > meanTruthThreshold);
 
                 } else {
-                    result =  as.inheritsType(as.getType(toHandle(as,
+                    result =  atomSpace.inheritsType(atomSpace.getType(toHandle(atomSpace,
                                                                   def_obj,
                                                                   self_id,
                                                                   owner_id)),
@@ -1080,7 +1074,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                     spaceServer,
+                                                     atomSpace,
                                                      self_id, owner_id, vo,
                                                      isInThePast, vu);
 
@@ -1101,7 +1095,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     result = (data > meanTruthThreshold);
 
                 } else {
-                    Handle obj_handle = WorldWrapperUtil::toHandle(as,
+                    Handle obj_handle = WorldWrapperUtil::toHandle(atomSpace,
                                                                    def_obj,
                                                                    self_id,
                                                                    owner_id);
@@ -1109,10 +1103,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     // for the time being all nodes that are no avatar or structure
                     // are considered objects
                     result = 
-                        !as.inheritsType(as.getType(obj_handle),
+                        !atomSpace.inheritsType(atomSpace.getType(obj_handle),
                                          SL_AVATAR_NODE)
                         &&
-                        !as.inheritsType(as.getType(obj_handle),
+                        !atomSpace.inheritsType(atomSpace.getType(obj_handle),
                                          SL_STRUCTURE_NODE);
 
                     // cache miss, compute value and cache it
@@ -1145,7 +1139,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                     spaceServer,
+                                                     atomSpace,
                                                      self_id, owner_id, vo,
                                                      isInThePast, vu);
 
@@ -1153,6 +1147,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                               is_definite_object(vo),
                               "Should be of type definite object");
 
+            const SpaceServer& spaceServer = atomSpace.getSpaceServer();
             Handle pre_smh = spaceServer.getPreviousMapHandle(smh);
             if (pre_smh == Handle::UNDEFINED) {
                 return id::logical_false;
@@ -1179,8 +1174,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 } else {
 
-                    Handle obj_h = toHandle(as, def_obj, self_id, owner_id);
-                    result = AtomSpaceUtil::isMovingBtwSpaceMap(as,
+                    Handle obj_h = toHandle(atomSpace, def_obj, self_id, owner_id);
+                    result = AtomSpaceUtil::isMovingBtwSpaceMap(atomSpace,
                                                                 pre_sm,
                                                                 sm,
                                                                 obj_h);
@@ -1221,7 +1216,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                     spaceServer,
+                                                     atomSpace,
                                                      self_id, owner_id, vo,
                                                      isInThePast, vu);
 
@@ -1243,7 +1238,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     
                 } else {
  
-                    result = AtomSpaceUtil::isHoldingSomething(as,
+                    result = AtomSpaceUtil::isHoldingSomething(atomSpace,
                                                                def_obj);
 
                     // cache miss, compute value and cache it
@@ -1288,7 +1283,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 vertex vo1 = *sib_arg;
                 std::vector<combo::definite_object> vo1_definite_objects =
                     WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                         spaceServer,
+                                                         atomSpace,
                                                          self_id,
                                                          owner_id,
                                                          vo1,
@@ -1298,7 +1293,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 vertex vo2 = *(++sib_arg);
                 std::vector<combo::definite_object> vo2_definite_objects =
                     WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                         spaceServer,
+                                                         atomSpace,
                                                          self_id,
                                                          owner_id,
                                                          vo2,
@@ -1308,7 +1303,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 bool general_result = false;
                 foreach(combo::definite_object vo1_def_obj,
                         vo1_definite_objects) {
-                    Handle h1 = toHandle(as, vo1_def_obj, self_id, owner_id);
+                    Handle h1 = toHandle(atomSpace, vo1_def_obj, self_id, owner_id);
                     opencog::cassert(TRACE_INFO,
                                       h1 != Handle::UNDEFINED,
                                       "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
@@ -1316,7 +1311,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     foreach(combo::definite_object vo2_def_obj,
                             vo2_definite_objects) {
                         
-                        Handle h2 = toHandle(as, vo2_def_obj,
+                        Handle h2 = toHandle(atomSpace, vo2_def_obj,
                                              self_id, owner_id);
 
                         opencog::cassert(TRACE_INFO, h1 != Handle::UNDEFINED, "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
@@ -1326,10 +1321,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         ss << instance(pe);
 
                         const SpaceServer::SpaceMap& sm =
-                            spaceServer.getMap(smh);
+                            atomSpace.getSpaceServer().getMap(smh);
 
                         bool result =
-                            AtomSpaceUtil::getPredicateValueAtSpaceMap(as,
+                            AtomSpaceUtil::getPredicateValueAtSpaceMap(atomSpace,
                                                                        ss.str(),
                                                                        sm,
                                                                        h1,
@@ -1370,7 +1365,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         sib_it sib_arg = it.begin();
         vertex va1 = *sib_arg;
         std::vector<definite_object> definite_objects =
-            WorldWrapperUtil::getDefiniteObjects(rng, smh, time, spaceServer,
+            WorldWrapperUtil::getDefiniteObjects(rng, smh, time, atomSpace,
                                                  self_id, owner_id, va1,
                                                  isInThePast, vu);
 
@@ -1398,8 +1393,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 result = (data > meanTruthThreshold);
 
             } else {
-                Handle from_h = toHandle(as, def_obj, self_id, owner_id);
-                result = AtomSpaceUtil::getHasSaidValueAtTime(as,
+                Handle from_h = toHandle(atomSpace, def_obj, self_id, owner_id);
+                result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace,
                                                               time,
                                                               getHasSaidDelay(),
                                                               from_h,
@@ -1437,7 +1432,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         vertex vo = *it.begin();
         if (is_indefinite_object(vo)) {
             vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                        spaceServer,
+                                                        atomSpace,
                                                         self_id, owner_id,
                                                         get_indefinite_object(vo),
                                                         isInThePast);
@@ -1447,7 +1442,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             definite_object_to_atom_name(get_definite_object(vo),
                                          self_id, owner_id);
         return WorldWrapperUtil::getPhysiologicalFeeling
-            (as, std::string(HUNGER_PREDICATE_NAME), target, time);
+            (atomSpace, std::string(HUNGER_PREDICATE_NAME), target, time);
         
         /*
         // cache predicate data variables
@@ -1459,7 +1454,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         float feeling = WorldWrapperUtil::cache.find(time, pred);
         
         if(feeling == CACHE_MISS){
-        feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target,
+        feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
         std::string(HUNGER_PREDICATE_NAME));
         WorldWrapperUtil::cache.add(time, pred, feeling);
         }
@@ -1477,7 +1472,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            spaceServer,
+                                                            atomSpace,
                                                             self_id, owner_id,
                                                             get_indefinite_object(vo),
                                                             isInThePast);
@@ -1487,7 +1482,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (as,  std::string(THIRST_PREDICATE_NAME), target, time);
+                (atomSpace,  std::string(THIRST_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1499,7 +1494,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
-                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target,
+                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
                                   std::string(THIRST_PREDICATE_NAME));
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
@@ -1516,7 +1511,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            spaceServer,
+                                                            atomSpace,
                                                             self_id, owner_id,
                                                             get_indefinite_object(vo),
                                                             isInThePast);
@@ -1526,7 +1521,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (as,  std::string(ENERGY_PREDICATE_NAME), target, time);
+                (atomSpace,  std::string(ENERGY_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1538,7 +1533,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
-                            feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target,
+                            feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
                                   std::string(ENERGY_PREDICATE_NAME));
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
@@ -1555,7 +1550,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            spaceServer,
+                                                            atomSpace,
                                                             self_id, owner_id,
                                                             get_indefinite_object(vo),
                                                             isInThePast);
@@ -1565,7 +1560,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (as, std::string(FITNESS_PREDICATE_NAME), target, time);
+                (atomSpace, std::string(FITNESS_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1577,7 +1572,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
-                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target,
+                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
                                 std::string(FITNESS_PREDICATE_NAME));
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
@@ -1594,7 +1589,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            spaceServer,
+                                                            atomSpace,
                                                             self_id, owner_id,
                                                             get_indefinite_object(vo),
                                                             isInThePast);
@@ -1603,7 +1598,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             std::string target =
                 definite_object_to_atom_name(get_definite_object(vo), self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (as, std::string(PEE_URGENCY_PREDICATE_NAME), target, time);
+                (atomSpace, std::string(PEE_URGENCY_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1615,7 +1610,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
-                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target,
+                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
                                 std::string(PEE_URGENCY_PREDICATE_NAME));
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
@@ -1632,7 +1627,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            spaceServer,
+                                                            atomSpace,
                                                             self_id, owner_id,
                                                             get_indefinite_object(vo),
                                                             isInThePast);
@@ -1642,7 +1637,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (as, std::string(POO_URGENCY_PREDICATE_NAME), target, time);
+                (atomSpace, std::string(POO_URGENCY_PREDICATE_NAME), target, time);
 
             /*            // cache predicate data variables
                         std::string name = p->get_name();
@@ -1653,7 +1648,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
-                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target,
+                         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
                                   std::string(POO_URGENCY_PREDICATE_NAME));
                          WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
@@ -1672,13 +1667,13 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         float repetition = WorldWrapperUtil::cache.find(time, pred);
 
         if (repetition == CACHE_MISS) {
-            Handle handle = as.getHandle(CONCEPT_NODE,
+            Handle handle = atomSpace.getHandle(CONCEPT_NODE,
                                          "currentActionRepetition");
             opencog::cassert(TRACE_INFO, handle != Handle::UNDEFINED,
                               "WWUtil - There should be a ConceptNode for currentActionRepetition");
 
             HandleSeq result;
-            as.getHandleSet(back_inserter(result),
+            atomSpace.getHandleSet(back_inserter(result),
                             handle, FREQUENCY_LINK, false);
 
             if (result.size() != 1) {
@@ -1688,15 +1683,15 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             } else {
 
-                handle = as.getOutgoing(result[0], 1);
-                if (as.getType(handle) != NUMBER_NODE) { // error
+                handle = atomSpace.getOutgoing(result[0], 1);
+                if (atomSpace.getType(handle) != NUMBER_NODE) { // error
                     logger().log(opencog::Logger::WARN,
                                     "WWUtil - Outgoing atom[1] should be a NumberNode.");
                     repetition = 0.0f;
 
                 } else {
 
-                    repetition = atof(as.getName(handle).c_str());
+                    repetition = atof(atomSpace.getName(handle).c_str());
                 }
             }
 
@@ -1732,14 +1727,14 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         float state = WorldWrapperUtil::cache.find(time, pred);
 
         if (state == CACHE_MISS) {
-            Handle agentHandle = AtomSpaceUtil::getAgentHandle( as, self_id );
+            Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, self_id );
             opencog::cassert(TRACE_INFO,
                               agentHandle != Handle::UNDEFINED,
                               "WWUtil - is_agent_state invalid agentHandle");
-            Handle stateNodeHandle = as.getHandle( NUMBER_NODE, stateNumber );
+            Handle stateNodeHandle = atomSpace.getHandle( NUMBER_NODE, stateNumber );
             if (stateNodeHandle != Handle::UNDEFINED) {
                 state = 
-                    AtomSpaceUtil::isPredicateTrue(as,
+                    AtomSpaceUtil::isPredicateTrue(atomSpace,
                                                    "agentModeState",
                                                    agentHandle,
                                                    stateNodeHandle ) ? 1 : 0;
@@ -1815,7 +1810,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 if (is_indefinite_object(*arg)) {
                     *arg = WorldWrapperUtil::evalIndefiniteObject(rng, smh,
                                                                   time,
-                                                                  spaceServer,
+                                                                  atomSpace,
                                                                   self_id,
                                                                   owner_id,
                                                                   get_indefinite_object(*arg),
@@ -1860,14 +1855,14 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 } else {
                     // cache miss, compute the new value and cache it
-                    Handle h = rec_lookup(as, tree_it, self_id, owner_id);
+                    Handle h = rec_lookup(atomSpace, tree_it, self_id, owner_id);
 
                     if (h == Handle::UNDEFINED) {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                         return id::logical_false;
 
                     } else {
-                        float tv = as.getTV(h).getMean();
+                        float tv = atomSpace.getTV(h).getMean();
                         WorldWrapperUtil::cache.add(time, pred, tv);
 
                         return combo::bool_to_vertex
@@ -1919,11 +1914,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         } else {
 
                             // cache miss, compute the new value and cache it
-                            Handle h = rec_lookup(as, tree_it,
+                            Handle h = rec_lookup(atomSpace, tree_it,
                                                   self_id, owner_id);
 
                             if (h != Handle::UNDEFINED) {
-                                float tv = as.getTV(h).getMean();
+                                float tv = atomSpace.getTV(h).getMean();
                                 WorldWrapperUtil::cache.add(time, pred, tv);
 
                                 result = WorldWrapperUtil::evaluateLogicalOperation(operation, tv, value);
@@ -1956,7 +1951,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             combo::vertex vo1 = *sib_arg;
             std::vector<combo::definite_object> agent_definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                     spaceServer,
+                                                     atomSpace,
                                                      self_id,
                                                      owner_id,
                                                      vo1, isInThePast, vu);
@@ -2013,7 +2008,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             bool general_result = false;
 
             foreach(combo::definite_object def_obj, agent_definite_objects) {
-                if ( AtomSpaceUtil::getAgentHandle( as, def_obj ) == Handle::UNDEFINED ) {
+                if ( AtomSpaceUtil::getAgentHandle( atomSpace, def_obj ) == Handle::UNDEFINED ) {
                     // ignore non-agent objects
                     continue;
                 } // if
@@ -2044,7 +2039,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     unsigned long delay_past = 30 * PerceptionActionInterface::PAIUtils::getTimeFactor();
                     unsigned long t_past = (delay_past < time ? time - delay_past : 0);
 
-                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( as, def_obj, "group_command", Temporal( t_past, time ) );
+                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( atomSpace, def_obj, "group_command", Temporal( t_past, time ) );
 
                     if (agentActionLink == Handle::UNDEFINED ) {
                         // found no previous action inside the timeframe
@@ -2055,22 +2050,22 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         continue;
                     } // if
 
-                    if ( as.getArity( agentActionLink ) <= 2 ) {
+                    if ( atomSpace.getArity( agentActionLink ) <= 2 ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - group_command should have have more than one parameters" );
                     } // if
 
-                    Handle actionParametersLink = as.getOutgoing(agentActionLink, 2);
+                    Handle actionParametersLink = atomSpace.getOutgoing(agentActionLink, 2);
                     if ( actionParametersLink == Handle::UNDEFINED ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command an action EvalLink should has a listLink" );
                     } // if
 
-                    Handle groupCommandParametersLink = as.getOutgoing( actionParametersLink, 2 );
+                    Handle groupCommandParametersLink = atomSpace.getOutgoing( actionParametersLink, 2 );
                     if ( actionParametersLink == Handle::UNDEFINED ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command an action Parameters ListLink should has three params" );
                     } // if
 
                     std::vector<std::string> actionParams;
-                    boost::split( actionParams, as.getName( groupCommandParametersLink ), boost::is_any_of( ";" ) );
+                    boost::split( actionParams, atomSpace.getName( groupCommandParametersLink ), boost::is_any_of( ";" ) );
                     unsigned int i;
                     foreach(std::string param, actionParams) {
                         boost::trim(param);
@@ -2139,7 +2134,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             vertex vo1 = *sib_arg;
             std::vector<combo::definite_object> agent_definite_objects =
-                WorldWrapperUtil::getDefiniteObjects(rng, smh, time, spaceServer,
+                WorldWrapperUtil::getDefiniteObjects(rng, smh, time, atomSpace,
                                                      self_id, owner_id, vo1,
                                                      isInThePast, vu);
 
@@ -2156,7 +2151,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 vertex v_temp = *sib_arg;
 
                 if (is_indefinite_object(v_temp)) {
-                    v_temp = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time, spaceServer, self_id,
+                    v_temp = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time, atomSpace, self_id,
                              owner_id, get_indefinite_object(v_temp),
                              isInThePast);
                 }
@@ -2203,7 +2198,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     //we handle in once the now and isInThePast cases
                     unsigned long delay_past = 30 * PerceptionActionInterface::PAIUtils::getTimeFactor();
                     unsigned long t_past = (delay_past < time ? time - delay_past : 0);
-                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(as,
+                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(atomSpace,
                                              std::string(def_obj),
                                              t_past, time);
                     // found no previous action inside the timeframe
@@ -2215,11 +2210,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         continue;
                     }
 
-                    //std::cout << "LAST AGENT ACTION : " << as.getName(as.getOutgoing(agentActionLink, 1))
+                    //std::cout << "LAST AGENT ACTION : " << atomSpace.getName(atomSpace.getOutgoing(agentActionLink, 1))
                     //      << " IS_LAST_AGENT_ACTION TARGET : " << action_name << std::endl;
 
                     // action found isn't the one we are looking for
-                    if (as.getName(as.getOutgoing(agentActionLink, 1)) != action_name) {
+                    if (atomSpace.getName(atomSpace.getOutgoing(agentActionLink, 1)) != action_name) {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                         if (is_wild_card(vo2)) {
                             vu.setVariableState(def_obj, false);
@@ -2230,7 +2225,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     // the action we want has parameters, check them with the ones stored in
                     // AtomSpace last agent action
                     if (!parameters.empty()) {
-                        std::string actionParamsStr = AtomSpaceUtil::convertAgentActionParametersToString(as, agentActionLink);
+                        std::string actionParamsStr = AtomSpaceUtil::convertAgentActionParametersToString(atomSpace, agentActionLink);
 
                         std::vector<std::string> actionParams;
                         boost::split( actionParams, actionParamsStr, boost::is_any_of( ";" ) );
@@ -2315,7 +2310,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 std::vector<combo::definite_object> v_temp_defs =
                     WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
-                                                         spaceServer, self_id,
+                                                         atomSpace, self_id,
                                                          owner_id, v_temp,
                                                          isInThePast, vu);
                 parameters.push_back(v_temp_defs);
@@ -2324,7 +2319,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             // look for the latest executed action (30 secs frame)
             // TODO is 30 secs enough?
             unsigned long  t = time - (30 * PerceptionActionInterface::PAIUtils::getTimeFactor());
-            Handle execLink = AtomSpaceUtil::getMostRecentPetSchemaExecLink(as, t, schemaSuccessful);
+            Handle execLink = AtomSpaceUtil::getMostRecentPetSchemaExecLink(atomSpace, t, schemaSuccessful);
 
             // found no executed action in recent past,
             // mark wild card candidates false (if any) and return false
@@ -2344,16 +2339,16 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 return combo::bool_to_vertex(false);
             }
 
-            Handle groundedPred = as.getOutgoing(execLink, 0);
+            Handle groundedPred = atomSpace.getOutgoing(execLink, 0);
             if (groundedPred != Handle::UNDEFINED) {
 
                 // last executed action not the one we are looking for
-                if (as.getName(groundedPred) != action_name) {
+                if (atomSpace.getName(groundedPred) != action_name) {
 
                     logger().log(opencog::Logger::DEBUG,
                                     "WWUtil - Last action found '%s',"
                                     " needed '%s'.",
-                                    as.getName(groundedPred).c_str(),
+                                    atomSpace.getName(groundedPred).c_str(),
                                     action_name.c_str());
 
                     if (has_wild_card) {
@@ -2370,7 +2365,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             bool general_result = false;
             if (!parameters.empty()) {
-                std::string actionParamsStr = AtomSpaceUtil::convertPetExecLinkParametersToString(as, execLink);
+                std::string actionParamsStr = AtomSpaceUtil::convertPetExecLinkParametersToString(atomSpace, execLink);
 
                 std::vector<std::string> actionParams;
                 boost::split( actionParams, actionParamsStr, boost::is_any_of( "," ) );
@@ -2433,49 +2428,49 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         //case id::is_aggressive:
     case id::get_aggressiveness:
         WorldWrapperUtil::changePredicateName(tmp, std::string(AGGRESSIVENESS_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_curious:
     case id::get_curiosity:
         WorldWrapperUtil::changePredicateName(tmp, std::string(CURIOSITY_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_playful:
     case id::get_playfulness:
         WorldWrapperUtil::changePredicateName(tmp, std::string(PLAYFULNESS_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_friendly:
     case id::get_friendliness:
         WorldWrapperUtil::changePredicateName(tmp, std::string(FRIENDLINESS_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_fearful:
     case id::get_fearfulness:
         WorldWrapperUtil::changePredicateName(tmp, std::string(FEARFULNESS_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_appreciative:
     case id::get_appreciativeness:
         WorldWrapperUtil::changePredicateName(tmp, std::string(APPRECIATIVENESS_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_excitable:
     case id::get_excitability:
         WorldWrapperUtil::changePredicateName(tmp, std::string(EXCITABILITY_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
@@ -2483,56 +2478,56 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         //case id::is_happy:
     case id::get_happiness:
         WorldWrapperUtil::changePredicateName(tmp, std::string(HAPPINESS_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_fear:
     case id::get_fear:
         WorldWrapperUtil::changePredicateName(tmp, std::string(FEAR_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_proud:
     case id::get_pride:
         WorldWrapperUtil::changePredicateName(tmp, std::string(PRIDE_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_lovely:
     case id::get_love:
         WorldWrapperUtil::changePredicateName(tmp, std::string(LOVE_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_hateful:
     case id::get_hate:
         WorldWrapperUtil::changePredicateName(tmp, std::string(HATE_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_angry:
     case id::get_anger:
         WorldWrapperUtil::changePredicateName(tmp, std::string(ANGER_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_grateful:
     case id::get_gratitude:
         WorldWrapperUtil::changePredicateName(tmp, std::string(GRATITUDE_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
         //case id::is_excited:
     case id::get_excitement:
         WorldWrapperUtil::changePredicateName(tmp, std::string(EXCITEMENT_PREDICATE_NAME));
-        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, spaceServer, self_id, owner_id,
+        return WorldWrapperUtil::getEmotionalFeelingOrTrait(rng, smh, time, atomSpace, self_id, owner_id,
                 tmp.begin(), isInThePast, vu);
         break;
 
@@ -2565,7 +2560,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     for (sib_it arg = tmp_it.begin(); arg != tmp_it.end(); ++arg) {
         if (is_indefinite_object(*arg)) {
             *arg = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                          spaceServer,
+                                                          atomSpace,
                                                           self_id, owner_id,
                                                           get_indefinite_object(*arg),
                                                           isInThePast);
@@ -2630,10 +2625,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                             "WWUtil - default - %s - cache miss",
                             ss.str().c_str());
 
-            Handle h = rec_lookup(as, tmp_it, self_id, owner_id);
+            Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
             if (h != Handle::UNDEFINED) {
-                float tv = as.getTV(h).getMean();
+                float tv = atomSpace.getTV(h).getMean();
                 WorldWrapperUtil::cache.add(time, pred, tv);
 
             } else {
@@ -2641,7 +2636,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             }
 
             //closed-world-assumption
-            return combo::bool_to_vertex((h != Handle::UNDEFINED && as.getTV(h).getMean() > meanTruthThreshold));
+            return combo::bool_to_vertex((h != Handle::UNDEFINED && atomSpace.getTV(h).getMean() > meanTruthThreshold));
         }
 
         // eval wild card
@@ -2688,17 +2683,17 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     result = (data >  meanTruthThreshold);
                 } else {
 
-                    Handle h = rec_lookup(as, tmp_it, self_id, owner_id);
+                    Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
                     if (h != Handle::UNDEFINED) {
-                        float tv =  as.getTV(h).getMean();
+                        float tv =  atomSpace.getTV(h).getMean();
                         WorldWrapperUtil::cache.add(time, pred, tv);
                     } else {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                     }
 
                     result = (h != Handle::UNDEFINED
-                              && (as.getTV(h).getMean() > meanTruthThreshold));
+                              && (atomSpace.getTV(h).getMean() > meanTruthThreshold));
                 }
 
                 vu.setVariableState(def_obj, result);
@@ -2720,7 +2715,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
 SpaceServer::SpaceMapPoint
 WorldWrapperUtil::getLocation(const SpaceServer::SpaceMap& sm,
-                              const AtomSpace& as,
+                              const AtomSpace& atomSpace,
                               const std::string& handleName)
 throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
 {
@@ -2755,19 +2750,19 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
 
 SpaceServer::SpaceMapPoint
 WorldWrapperUtil::getLocation(const SpaceServer::SpaceMap& sm,
-                              const AtomSpace& as,
+                              const AtomSpace& atomSpace,
                               Handle h)
 {
-    std::string handleName = as.getName(h);
-    return getLocation(sm, as, handleName);
+    std::string handleName = atomSpace.getName(h);
+    return getLocation(sm, atomSpace, handleName);
 }
 
 double
 WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
-                                 const AtomSpace& as,
+                                 const AtomSpace& atomSpace,
                                  Handle h) throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
 {
-    std::string handleName = as.getName(h);
+    std::string handleName = atomSpace.getName(h);
 
     if (!sm.containsObject(handleName)) {
         throw opencog::InvalidParamException(TRACE_INFO,
@@ -2860,7 +2855,7 @@ bool WorldWrapperUtil::is_builtin_atomic_action(const vertex& v)
 std::vector<combo::definite_object>
 WorldWrapperUtil::getDefiniteObjects(opencog::RandGen& rng,
                                      Handle smh, unsigned long time,
-                                     const SpaceServer& spaceServer,
+                                     const AtomSpace& atomSpace,
                                      const string& self_id,
                                      const string& owner_id, combo::vertex& v,
                                      bool isInThePast,
@@ -2870,7 +2865,7 @@ WorldWrapperUtil::getDefiniteObjects(opencog::RandGen& rng,
     std::vector<definite_object> definite_objects;
 
     if (is_indefinite_object(v)) { //eval indefinite object of argument
-        v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time, spaceServer,
+        v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time, atomSpace,
                                                    self_id, owner_id,
                                                    get_indefinite_object(v),
                                                    isInThePast);
@@ -2919,7 +2914,7 @@ bool WorldWrapperUtil::evaluateLogicalOperation(int operation,
     } // switch
 }
 
-float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& as,
+float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
                                                 const std::string& feeling,
                                                 const std::string& target,
                                                 unsigned long time)
@@ -2934,7 +2929,7 @@ float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& as,
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
-        value = AtomSpaceUtil::getCurrentPetFeelingLevel(as, target, feeling);
+        value = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target, feeling);
         WorldWrapperUtil::cache.add(time, pred, value);
     }
 
@@ -2947,7 +2942,7 @@ float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& as,
 float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
                                                    Handle smh,
                                                    unsigned long time,
-                                                   const SpaceServer& spaceServer,
+                                                   const AtomSpace& atomSpace,
                                                    const string& self_id,
                                                    const string& owner_id,
                                                    const combo::combo_tree::iterator it,
@@ -2960,7 +2955,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
     for (sib_it arg = it.begin(); arg != it.end(); ++arg) {
         if (is_indefinite_object(*arg)) {
             *arg = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                          spaceServer,
+                                                          atomSpace,
                                                           self_id, owner_id,
                                                           get_indefinite_object(*arg),
                                                           isInThePast);
@@ -3004,12 +2999,11 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
 
     } else {
 
-        const AtomSpace& as = spaceServer.getAtomSpace();
         float data = -1.0f;
-        Handle h = rec_lookup(as, it, self_id, owner_id);
+        Handle h = rec_lookup(atomSpace, it, self_id, owner_id);
 
         if (h != Handle::UNDEFINED) {
-            data = as.getTV(h).getMean();
+            data = atomSpace.getTV(h).getMean();
         }
         WorldWrapperUtil::cache.add(time, pred, data);
 

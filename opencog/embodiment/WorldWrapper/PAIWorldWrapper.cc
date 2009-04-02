@@ -22,7 +22,6 @@
 
 #include "PAIWorldWrapper.h"
 #include "WorldWrapperUtil.h"
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/spatial/TangentBug.h>
 #include "PVPXmlConstants.h"
 #include <opencog/spatial/AStarController.h>
@@ -99,8 +98,8 @@ namespace WorldWrapper {
         _hasPlanFailed = false;
         _planID = _pai.createActionPlan();
 
-        const SpaceServer::SpaceMap& sm = _pai.getSpaceServer().getLatestMap();
-        const AtomSpace& as = _pai.getSpaceServer().getAtomSpace();
+        const AtomSpace& as = _pai.getAtomSpace();
+        const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
         //treat the case when the action is a compound
         if(WorldWrapperUtil::is_builtin_compound_action(*from)) {
             opencog::cassert(TRACE_INFO, ++sib_it(from)==to); //there is only one compound action
@@ -321,8 +320,7 @@ namespace WorldWrapper {
                     MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
                     return false;
                 }
-                if(!build_goto_plan(WorldWrapperUtil::ownerHandle(_pai.getSpaceServer().getAtomSpace(),
-                                                                  ownerName())))
+                if(!build_goto_plan(WorldWrapperUtil::ownerHandle(as, ownerName())))
                     _planID=_pai.createActionPlan();
                 //then add a heel action at the end
                 _pai.addAction(_planID,PetAction(ActionType::HEEL()));
@@ -477,12 +475,12 @@ namespace WorldWrapper {
     }
 
     combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier& vu) {
-        Handle smh = _pai.getSpaceServer().getLatestMapHandle();
+        Handle smh = _pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
         unsigned int current_time = _pai.getLatestSimWorldTimestamp();
         opencog::cassert(TRACE_INFO, smh!=Handle::UNDEFINED,
                           "A SpaceMap must exists");
         combo::vertex v = WorldWrapperUtil::evalPerception(rng, smh, current_time,
-                                                           _pai.getSpaceServer(),
+                                                           _pai.getAtomSpace(),
                                                            selfName(), ownerName(),
                                                            it, false, vu);
 
@@ -502,13 +500,13 @@ namespace WorldWrapper {
 
     combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
                                                         combo::variable_unifier& vu) {
-        Handle smh = _pai.getSpaceServer().getLatestMapHandle();
+        Handle smh = _pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
         unsigned int current_time = _pai.getLatestSimWorldTimestamp();
         opencog::cassert(TRACE_INFO, smh!=Handle::UNDEFINED,
                           "A SpaceMap must exists");
 
         combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, current_time,
-                                                                 _pai.getSpaceServer(),
+                                                                 _pai.getAtomSpace(),
                                                                  selfName(), ownerName(),
                                                                  io, false, vu);
     
@@ -533,7 +531,7 @@ namespace WorldWrapper {
     void PAIWorldWrapper::clearPlan( std::vector<Spatial::Point>& actions,
                                      const Spatial::Point& startPoint,
                                      const Spatial::Point& endPoint ) {
-        const SpaceServer::SpaceMap& sm = _pai.getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
         double closestDist = SpaceServer::SpaceMap::eucDist( startPoint,
                                                              endPoint );
@@ -561,7 +559,7 @@ namespace WorldWrapper {
     }
 
     Spatial::Point PAIWorldWrapper::getValidPosition( const Spatial::Point& location ) {
-        const SpaceServer::SpaceMap& spaceMap = _pai.getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& spaceMap = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
         //make sure that the object location is valid
         Spatial::Point correctedLocation = location;
@@ -584,7 +582,7 @@ namespace WorldWrapper {
         const std::string pathFindingAlgorithm =
             MessagingSystem::NetworkElement::parameters.get("NAVIGATION_ALGORITHM");
 
-        const SpaceServer::SpaceMap& sm = _pai.getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
         try {
             Spatial::Point begin = startPoint;
@@ -612,7 +610,7 @@ namespace WorldWrapper {
                 AStar.setStartAndGoalStates(petNode, goalNode);
 
                 //finally, run AStar
-                _hasPlanFailed = (AStar.findPath() != AStarSearch<Spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
+                _hasPlanFailed = (AStar.findPath() != Spatial::AStarSearch<Spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
                 actions = AStar.getShortestCalculatedPath( );
 
                 logger().log(opencog::Logger::DEBUG,
@@ -662,8 +660,8 @@ namespace WorldWrapper {
   
     bool PAIWorldWrapper::buildGotoPlan( const Spatial::Point& position, float customSpeed ) {
 
-        const AtomSpace& as = _pai.getSpaceServer().getAtomSpace();
-        const SpaceServer::SpaceMap& sm = _pai.getSpaceServer().getLatestMap();
+        const AtomSpace& as = _pai.getAtomSpace();
+        const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
         std::vector<Spatial::Point> actions;
 
         Spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as, 
@@ -704,7 +702,7 @@ namespace WorldWrapper {
                 action=PetAction(ActionType::NUDGE_TO());
                 action.addParameter(ActionParameter("moveableObj",
                                                     ActionParamType::ENTITY(),
-                                                    Entity(_pai.getSpaceServer().getAtomSpace().getName(toNudge),
+                                                    Entity(_pai.getAtomSpace().getName(toNudge),
                                                            resolveType(toNudge))));
                 action.addParameter(ActionParameter("target",
                                                     ActionParamType::VECTOR(),
@@ -735,8 +733,8 @@ namespace WorldWrapper {
                                           Handle toNudge,
                                           Handle goBehind, float walkSpeed ) {
 
-        const AtomSpace& atomSpace = _pai.getSpaceServer().getAtomSpace();
-        const SpaceServer::SpaceMap& spaceMap = _pai.getSpaceServer().getLatestMap();
+        const AtomSpace& atomSpace = _pai.getAtomSpace();
+        const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
         std::string goalName = atomSpace.getName(goalHandle);
 
         opencog::cassert(TRACE_INFO, goalHandle != Handle::UNDEFINED);
@@ -778,8 +776,8 @@ namespace WorldWrapper {
 
     PetAction PAIWorldWrapper::buildPetAction(sib_it from) {
         unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-        const AtomSpace& as = _pai.getSpaceServer().getAtomSpace();
-        const SpaceServer::SpaceMap& sm = _pai.getSpaceServer().getLatestMap();
+        const AtomSpace& as = _pai.getAtomSpace();
+        const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
         static const std::map<pet_builtin_action_enum,ActionType> actions2types=
             boost::assign::map_list_of
             (id::bark, ActionType::BARK())
@@ -998,12 +996,12 @@ namespace WorldWrapper {
 
             // retrieve all agents
             std::vector<Handle> agentsHandles;
-            _pai.getSpaceServer().getAtomSpace( ).getHandleSet( back_inserter(agentsHandles), SL_AVATAR_NODE, false );
-            _pai.getSpaceServer().getAtomSpace( ).getHandleSet( back_inserter(agentsHandles), SL_HUMANOID_NODE, false );
-            _pai.getSpaceServer().getAtomSpace( ).getHandleSet( back_inserter(agentsHandles), SL_PET_NODE, false );
+            as.getHandleSet( back_inserter(agentsHandles), SL_AVATAR_NODE, false );
+            as.getHandleSet( back_inserter(agentsHandles), SL_HUMANOID_NODE, false );
+            as.getHandleSet( back_inserter(agentsHandles), SL_PET_NODE, false );
       
       
-            Handle selfHandle = WorldWrapperUtil::selfHandle(  _pai.getSpaceServer().getAtomSpace( ), selfName( ) );
+            Handle selfHandle = WorldWrapperUtil::selfHandle(  as, selfName( ) );
             unsigned int i;
             for( i = 0; i < agentsHandles.size( ); ++i ) {
                 if ( agentsHandles[i] == Handle::UNDEFINED || agentsHandles[i] == selfHandle ) {
@@ -1011,14 +1009,14 @@ namespace WorldWrapper {
                     // ignore self
                     continue;
                 } // if
-                std::string agentId = _pai.getSpaceServer().getAtomSpace( ).getName( agentsHandles[i] );
+                std::string agentId = as.getName( agentsHandles[i] );
                 logger().log(opencog::Logger::DEBUG, 
                                 "PAIWorldWrapper - verifying agent[%s]", agentId.c_str( ) );
 
                 unsigned long delay_past = 10 * PerceptionActionInterface::PAIUtils::getTimeFactor();
                 unsigned long t_past = ( delay_past < current_time ? current_time - delay_past : 0 );
 	
-                Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( _pai.getSpaceServer().getAtomSpace( ), agentId, "group_command", Temporal( t_past, current_time ), TemporalTable::OVERLAPS );
+                Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( as, agentId, "group_command", Temporal( t_past, current_time ), TemporalTable::OVERLAPS );
 	
                 if ( agentActionLink == Handle::UNDEFINED ) {
                     logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - agent[%s] did not sent group command during the last 30 seconds", agentId.c_str( ) );
@@ -1027,7 +1025,7 @@ namespace WorldWrapper {
 
 
                 std::string parametersString = 
-                    AtomSpaceUtil::convertAgentActionParametersToString( _pai.getSpaceServer().getAtomSpace( ), agentActionLink );
+                    AtomSpaceUtil::convertAgentActionParametersToString( as, agentActionLink );
 	
                 std::vector<std::string> commandParameters;
                 boost::split( commandParameters, parametersString, boost::is_any_of( ";" ) );
@@ -1187,19 +1185,19 @@ namespace WorldWrapper {
             theta=2.0*PI*rng.randdouble();
             goto build_step;
         case id::step_backward :     // step_backward
-            theta=getAngleFacing(WorldWrapperUtil::selfHandle(_pai.getSpaceServer().getAtomSpace(),
+            theta=getAngleFacing(WorldWrapperUtil::selfHandle(as,
                                                               selfName()))+PI;
             if (theta>2*PI)
                 theta-=2*PI;
             goto build_step;
         case id::step_forward:      // step_forward
-            theta=getAngleFacing(WorldWrapperUtil::selfHandle(_pai.getSpaceServer().getAtomSpace(),
+            theta=getAngleFacing(WorldWrapperUtil::selfHandle(as,
                                                               selfName()));
 
         build_step:
             //now compute a step in which direction the pet is going
             {
-                Spatial::Point petLoc = WorldWrapperUtil::getLocation(sm, as, WorldWrapperUtil::selfHandle(_pai.getSpaceServer().getAtomSpace(), selfName()));
+                Spatial::Point petLoc = WorldWrapperUtil::getLocation(sm, as, WorldWrapperUtil::selfHandle(as, selfName()));
 
                 double stepSize = (sm.diagonalSize())*STEP_SIZE_PERCENTAGE/100; // 2% of the width
                 double x = (double)petLoc.first + (cos(theta) * stepSize);
@@ -1442,12 +1440,13 @@ namespace WorldWrapper {
        NumberNode "$yaw"
     **/
     double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception) {
-        const AtomSpace& as=_pai.getSpaceServer().getAtomSpace();
+        const AtomSpace& as=_pai.getAtomSpace();
+        const SpaceServer& spaceServer = as.getSpaceServer();
         //get the time node of the latest map, via the link AtTimeLink(TimeNode,SpaceMap)
-        Handle atTimeLink=_pai.getSpaceServer().getLatestMapHandle();
+        Handle atTimeLink=spaceServer.getLatestMapHandle();
         opencog::cassert(TRACE_INFO, atTimeLink != Handle::UNDEFINED);
 #if 1
-        const SpaceServer::SpaceMap& sm = _pai.getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& sm = spaceServer.getLatestMap();
         const string& slObjName = as.getName(slobj);
         if (sm.containsObject(slObjName)) {
             //return the yaw
@@ -1498,7 +1497,7 @@ namespace WorldWrapper {
     }
 
     Handle PAIWorldWrapper::toHandle(combo::definite_object obj) {
-        return WorldWrapperUtil::toHandle(_pai.getSpaceServer().getAtomSpace(), obj,
+        return WorldWrapperUtil::toHandle(_pai.getAtomSpace(), obj,
                                           selfName(), ownerName());
     }
 

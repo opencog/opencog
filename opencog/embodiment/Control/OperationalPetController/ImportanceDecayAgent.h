@@ -24,6 +24,7 @@
 #define IMPORTANCEDECAYAGENT_H
 
 #include <opencog/server/Agent.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <time.h>
 
 namespace OperationalPetController {
@@ -33,6 +34,10 @@ class ImportanceDecayAgent : public opencog::Agent {
     private:
 
         time_t lastTickTime;
+        /**
+         * signal connections used to keep track of atom merge in the AtomSpace
+         */
+        boost::signals::connection mergedAtomConnection; 
 
     public:
 
@@ -46,6 +51,14 @@ class ImportanceDecayAgent : public opencog::Agent {
         }
 
         void run(opencog::CogServer *server);
+
+        // connects to the signals from AtomSpace it needs to know
+        void connectSignals(AtomSpace& as);
+
+        /**
+         * Method to receive atom merge signals from AtomTable
+         */
+        void atomMerged(Handle h);
 
 }; // class
 }  // namespace

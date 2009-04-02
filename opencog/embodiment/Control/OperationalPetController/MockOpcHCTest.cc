@@ -82,7 +82,6 @@ void MockOpcHCTest::init(const std::string & myId,
 
     this->getParameters() = parameters;
     this->atomSpace  = new AtomSpace();
-    this->spaceServer = new SpaceServer(*atomSpace);
     this->lsMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     //fill the atomSpace with the initial scene
@@ -92,15 +91,15 @@ void MockOpcHCTest::init(const std::string & myId,
     speed_h = atomSpace->addNode(NUMBER_NODE,
                                  boost::lexical_cast<string>(2));
 
-    spaceServer->addSpaceInfo(true, pet_h, T1, PET_X, PET_Y,
+    atomSpace->addSpaceInfo(true, pet_h, T1, PET_X, PET_Y,
                               OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    spaceServer->addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y,
+    atomSpace->addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y,
                               OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    spaceServer->addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1,
+    atomSpace->addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1,
                               OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    spaceServer->addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2,
+    atomSpace->addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2,
                               OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    spaceServer->addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3,
+    atomSpace->addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3,
                               OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     //add necessary nodes to represent BDs
     behaved_h = atomSpace->addNode(PREDICATE_NODE, BEHAVED_STR);
@@ -175,7 +174,7 @@ void MockOpcHCTest::init(const std::string & myId,
              createAgent(HCTestAgent::info().id, false));
     _HCTa->init(TRICK_NAME, TRICK_ARGS,
                 OWNER_NAME, OWNER_NAME,
-                spaceServer, lsMessageSender);
+                atomSpace, lsMessageSender);
     startAgent(_HCTa);
 }
 

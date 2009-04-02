@@ -25,8 +25,8 @@
  * User state class for LocalSpaceMap2D used by A* pathfinding
  * 
  */
-#ifndef LSMAP2DSEARCHNODE_H
-#define LSMAP2DSEARCHNODE_H
+#ifndef _SPATIAL_LSMAP2DSEARCHNODE_H_
+#define _SPATIAL_LSMAP2DSEARCHNODE_H_
 
 #include "stlastar.h"
 #include "LocalSpaceMap2D.h"
@@ -76,4 +76,4 @@ public:
 }  //namespace Spacial
 
 
-#endif /*LSMAP2DSEARCHNODE_H*/
+#endif // _SPATIAL_LSMAP2DSEARCHNODE_H_

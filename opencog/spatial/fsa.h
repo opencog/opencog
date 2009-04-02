@@ -42,11 +42,13 @@ given where due.
 
 */
 
-#ifndef FSA_H
-#define FSA_H
+#ifndef _SPATIAL_FSA_H_
+#define _SPATIAL_FSA_H_
 
 #include <string.h>
 #include <stdio.h>
+
+namespace Spatial {
 
 template <class USER_TYPE> class FixedSizeAllocator
 {
@@ -223,5 +225,7 @@ private: // data
 
 };
 
-#endif // defined FSA_H
+} // Spatial
+
+#endif // _SPATIAL_FSA_H_
 

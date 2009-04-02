@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _LOCAL_SPACE_MAP2D_UTIL_H
-#define _LOCAL_SPACE_MAP2D_UTIL_H
+#ifndef _SPATIAL__LOCAL_SPACE_MAP2D_UTIL_H_
+#define _SPATIAL__LOCAL_SPACE_MAP2D_UTIL_H_
 
 #include <opencog/util/RandGen.h>
 #include <opencog/util/foreach.h>

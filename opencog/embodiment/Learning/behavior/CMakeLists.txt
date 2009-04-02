@@ -2,7 +2,7 @@ ADD_LIBRARY(behavior
     BDTracker
     BE
     PAIWorldProvider
-    SpaceServerWorldProvider
+    BasicWorldProvider
     PredicateHandleSet
     BehaviorCategory
     BehaviorDescriptionMatcher

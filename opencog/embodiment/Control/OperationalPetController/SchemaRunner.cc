@@ -69,7 +69,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
     // Cannot select a schema to execute while
     // there is no map info data available...
-    if(this->opc->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
+    if(this->opc->getAtomSpace().getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
         logger().log(opencog::Logger::WARN,
                         "SchemaRunner - Cannot select any schema to be executed"
                         " because there is no map info available yet!");
@@ -123,7 +123,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                         // check if the target move, thus replan
                         std::pair<std::string, Spatial::Point> lastTargetObject = this->opc->getPet( ).getLatestGotoTarget( );
                         const SpaceServer::SpaceMap& spaceMap =
-                            this->opc->getSpaceServer( ).getLatestMap( );
+                            this->opc->getAtomSpace().getSpaceServer( ).getLatestMap( );
                         try {
                             //const Spatial::Object& targetObject = spaceMap.getObject( lastTargetObject.first );
                             const Spatial::EntityPtr& targetEntity =
@@ -164,7 +164,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                       if ( this->petIsMoving && schemaName == "keepMoving" &&
                       targetObject.first.length( ) > 0 ) {
 
-                      const SpaceServer::SpaceMap& spaceMap = this->opc->getSpaceServer().getLatestMap();
+                      const SpaceServer::SpaceMap& spaceMap = this->opc->getAtomSpace().getSpaceServer().getLatestMap();
                       Spatial::Point currentTargetPosition = spaceMap.centerOf( targetObject.first );
                       // verify if the distance between the objects start position and current position
                       // is greater than tolerance

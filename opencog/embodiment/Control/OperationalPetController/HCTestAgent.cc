@@ -34,14 +34,14 @@ using namespace OperationalPetController;
 
 HCTestAgent::HCTestAgent() {
 }
-void HCTestAgent::init(std::string sn, std::vector<std::string> schemaArgs, std::string a, std::string b, SpaceServer* ss, MessageSender* s) {
+void HCTestAgent::init(std::string sn, std::vector<std::string> schemaArgs, std::string a, std::string b, AtomSpace* as, MessageSender* s) {
   mode = HCT_INIT;
   cycle = 0;
   schemaName = sn;
   schemaArguments = schemaArgs;
   avatarId = a;
   ownerId = b;
-  spaceServer = ss;
+  atomSpace = as;
   sender = s;
 }
 HCTestAgent::~HCTestAgent() {
@@ -63,7 +63,7 @@ void HCTestAgent::run(opencog::CogServer* ne) {
     break;
   case HCT_INIT:
     std::cout << "OPC INIT" << std::endl;
-    sender->sendExemplar(schemaName, schemaArguments, ownerId, avatarId, *spaceServer);
+    sender->sendExemplar(schemaName, schemaArguments, ownerId, avatarId, *atomSpace);
     mode = HCT_WAIT1;
     break;
   case HCT_WAIT1:
@@ -79,7 +79,7 @@ void HCTestAgent::run(opencog::CogServer* ne) {
     std::cout << "OPC WAIT2" << std::endl;
     sleep(WAIT2_TIME);
     std::cout << "OPC WAIT2 DONE" << std::endl;
-    sender->sendExemplar(schemaName, schemaArguments, ownerId, avatarId, *spaceServer);
+    sender->sendExemplar(schemaName, schemaArguments, ownerId, avatarId, *atomSpace);
     mode = HCT_WAIT3;
     break;
 

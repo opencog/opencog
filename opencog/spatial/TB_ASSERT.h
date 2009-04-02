@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef TBASSERT_H
-#define TBASSERT_H
+#ifndef _SPATIAL_TBASSERT_H_
+#define _SPATIAL_TBASSERT_H_
 
 #include "util/exceptions.h"
 

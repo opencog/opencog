@@ -54,7 +54,7 @@ namespace FitnessEstimator {
     : _wp(wp), _dos(dos), _petName(petName), _ownerName(ownerName),
       _avatarName(avatarName), _trickName(trickName),
       _BDCat(BDCat), _exemplarTemporals(ets), _all(all),
-      _BDMatcher(&wp->getSpaceServer().getAtomSpace()),
+      _BDMatcher(&wp->getAtomSpace()),
       _sizePenalty(dos, indefinite_object_count, operator_count,
 		   predicate_count, action_count),
 #ifdef IS_FE_LRU_CACHE
@@ -125,7 +125,7 @@ namespace FitnessEstimator {
 #endif
 	for(int i = 0; i < trial_count; i++) {
 	  //generate behavior description with NoSpaceLife
-	  WorldWrapper::NoSpaceLifeWorldWrapper nspww(_wp->getSpaceServer(),
+	  WorldWrapper::NoSpaceLifeWorldWrapper nspww(_wp->getAtomSpace(),
 						      _petName,
 						      _ownerName,
 						      _avatarName,

@@ -55,15 +55,14 @@ const unsigned long Pet::UNDEFINED_TIMESTAMP = 0;
  * ------------------------------------
  */
 Pet::Pet(const std::string& petId, const std::string& petName, const std::string& agentType, 
-         const std::string& agentTraits, const std::string& ownerId, SpaceServer * spaceServer, MessageSender * sender){
+         const std::string& agentTraits, const std::string& ownerId, AtomSpace* atomSpace, MessageSender* sender){
 
   this->pai = NULL;
   this->ruleEngine = NULL; 
   this->latestRewardTimestamp = UNDEFINED_TIMESTAMP;
   this->latestPunishmentTimestamp = UNDEFINED_TIMESTAMP;
   this->sender = sender;
-  this->spaceServer = spaceServer;
-  this->atomSpace = &spaceServer->getAtomSpace();
+  this->atomSpace = atomSpace;
  
   setMode(PLAYING);
   
@@ -352,8 +351,8 @@ unsigned long Pet::getExemplarEndTimestamp(){
  * Public Methods
  * ------------------------------------
  */
-Pet * Pet::importFromFile(const std::string& filename, const std::string& petId, SpaceServer * spaceServer, MessageSender * sender){
-  Pet * pet;
+Pet* Pet::importFromFile(const std::string& filename, const std::string& petId, AtomSpace* atomSpace, MessageSender* sender){
+  Pet* pet;
   unsigned int petMode;
   std::string ownerId;
   std::string petName;
@@ -375,7 +374,7 @@ Pet * Pet::importFromFile(const std::string& filename, const std::string& petId,
   }
   petFile.close();
 
-  pet = new Pet(petId, petName, agentType, agentTraits, ownerId, spaceServer, sender);
+  pet = new Pet(petId, petName, agentType, agentTraits, ownerId, atomSpace, sender);
   pet->setMode((PetMode)petMode);
     
   return pet;
@@ -410,12 +409,6 @@ void Pet::exportToFile(const std::string& filename, Pet & pet) throw (opencog::I
 AtomSpace& Pet::getAtomSpace() {
   return *atomSpace;
 }
-
-SpaceServer& Pet::getSpaceServer() {
-  return *spaceServer;
-}
-
-
 
 void Pet::stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp) {
   logger().log(opencog::Logger::DEBUG, "Pet - Stop executing '%s' at %lu.",
@@ -556,7 +549,7 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
 
     for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
         logger().log(opencog::Logger::DEBUG, " args: %s", (*it).c_str());
-  sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *spaceServer);    
+  sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *atomSpace);    
     
   // after sending LearnMessage
   exemplarStartTimestamp = Pet::UNDEFINED_TIMESTAMP;
@@ -802,11 +795,11 @@ void Pet::updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad
   foreach(HandleTemporalPair pair, pairs) {
     // mark any still existing spaceMap in this period as persistent
     Handle mapHandle = atomSpace->getAtTimeLink(pair);
-    if (spaceServer->containsMap(mapHandle)) {
+    if (atomSpace->getSpaceServer().containsMap(mapHandle)) {
       logger().log(opencog::Logger::DEBUG, 
 		      "Pet - Marking map (%s) as persistent.", 
 		      TLB::getAtom(mapHandle)->toString().c_str());
-      spaceServer->markMapAsPersistent(mapHandle);
+      atomSpace->getSpaceServer().markMapAsPersistent(mapHandle);
     } else {
       // TODO: This should not be needed here. Remove it when a solution for that is implemented.
       logger().log(opencog::Logger::DEBUG, 
@@ -830,10 +823,10 @@ Handle Pet::getMyHandle() const {
 
 bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity) {
     vector<string> entitiesInVicinity;
-    Handle spaceMapHandle = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(*spaceServer, timestamp);
+    Handle spaceMapHandle = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(*atomSpace, timestamp);
 
     if (spaceMapHandle != Handle::UNDEFINED) {
-        const SpaceServer::SpaceMap& spaceMap = spaceServer->getMap(spaceMapHandle);
+        const SpaceServer::SpaceMap& spaceMap = atomSpace->getSpaceServer().getMap(spaceMapHandle);
         Spatial::Point petLoc = WorldWrapperUtil::getLocation(spaceMap, *atomSpace, this->petId);
         spaceMap.findEntities( spaceMap.snap(petLoc), rayOfVicinity, back_inserter(entitiesInVicinity) );
     }
@@ -942,7 +935,7 @@ void Pet::restartLearning() throw (opencog::RuntimeException, std::bad_exception
         }
 
 //  std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
-  sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *spaceServer); 
+  sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *atomSpace); 
 }
 
 void Pet::setRequestedCommand(string command, vector<string> parameters) {

@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef SUPERENTITY_H
-#define SUPERENTITY_H
+#ifndef _SPATIAL_SUPERENTITY_H_
+#define _SPATIAL_SUPERENTITY_H_
 
 #include <ext/hash_map>
 
@@ -119,7 +119,7 @@ namespace Spatial {
         /**
          * Get a list of the super entity corners
          */
-        std::list<Math::Vector3> getCorners( void ) const;;
+        std::list<Math::Vector3> getCorners( void ) const;
 
         /**
          * Merge an entity into this superentity. It will return true if merged or false if the given entity does not 
@@ -182,6 +182,6 @@ namespace Spatial {
 
     }; // SuperEntity
 
-}; // Spatial
+} // Spatial
 
-#endif // SUPERENTITY_H
+#endif // _SPATIAL_SUPERENTITY_H_

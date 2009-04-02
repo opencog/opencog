@@ -89,7 +89,7 @@ void NominalReferenceResolver::scoreCandidates(const string& name, const string&
    logger().log(opencog::Logger::DEBUG,  "%s - %d candidates.", __FUNCTION__, candidatesSet.size()); 
 
     const AtomSpace& as = petInterface.getAtomSpace();
-    const SpaceServer::SpaceMap& sm = petInterface.getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     
     unsigned long timestampOfRecently;
     if ( timestamp > predavese::recentPeriodOfTime )

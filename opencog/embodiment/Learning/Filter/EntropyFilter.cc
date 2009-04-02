@@ -64,7 +64,7 @@ namespace Filter {
   //constructor, desctructor
   EntropyFilter::EntropyFilter(const std::string& self_id,
 			       const std::string& owner_id,
-			       SpaceServer& spaceServer,
+			       AtomSpace& atomSpace,
 			       const perception_set& ep,
 			       const indefinite_object_set& idos,
 			       const definite_object_set& dos,
@@ -73,7 +73,7 @@ namespace Filter {
 			       const argument_type_list& input_arg_types,
 			       opencog::RandGen& rng)
     : _self_id(self_id), _owner_id(owner_id),
-      _spaceServer(spaceServer), _elementary_perceptions(ep),
+      _atomSpace(atomSpace), _elementary_perceptions(ep),
       _idos(idos), _dos(dos), _ms(ms), _atas(atas),
       _input_arg_types(input_arg_types),
       _total_time(0),
@@ -100,7 +100,7 @@ namespace Filter {
 
     //init spaceMapNode
 
-    _spaceMapNode = _spaceServer.getAtomSpace().getHandle(CONCEPT_NODE,
+    _spaceMapNode = _atomSpace.getHandle(CONCEPT_NODE,
 					 SpaceServer::SPACE_MAP_NODE_NAME);
     opencog::cassert(TRACE_INFO, _spaceMapNode != Handle::UNDEFINED,
 	    "There must a be a map node in the atomSpace");
@@ -149,8 +149,7 @@ namespace Filter {
     std::vector<HandleTemporalPair> htps;
     //get the first map at tl or if not before tl
     Temporal temp_right_after(tl+1, tu);
-    AtomSpace& as = _spaceServer.getAtomSpace();
-    as.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
+    _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
 		   TemporalTable::PREVIOUS_BEFORE_START_OF);
     opencog::cassert(TRACE_INFO, !htps.empty(),
 	    "There must be a map that starts at %d or at least before %d",
@@ -158,7 +157,7 @@ namespace Filter {
     //try to get the map
     // get temporal pairs that start within temp_right_after, to not get
     //twice the first map
-    as.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
+    _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
 		   TemporalTable::STARTS_WITHIN);
 
     const SpaceServer::SpaceMap* pre_sm = NULL; //previous spaceMap
@@ -167,10 +166,10 @@ namespace Filter {
     for(std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
 	htp_it != htps.end(); ++htp_it) {
       //determine spaceMap
-      Handle smh = as.getAtTimeLink(*htp_it);
+      Handle smh = _atomSpace.getAtTimeLink(*htp_it);
       opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
 			"There must be a spaceMap for that handle");
-      const SpaceServer::SpaceMap& sm = _spaceServer.getMap(smh);
+      const SpaceServer::SpaceMap& sm = _atomSpace.getSpaceServer().getMap(smh);
       //determine lower and upper boundary of that spaceMap
       //if the space map started before the exemplar start time
       //ltl is the exemplar start time instead
@@ -219,7 +218,7 @@ namespace Filter {
 	      *opra =
 		WorldWrapperUtil::evalIndefiniteObject(_rng, smh,
 						       ltl,
-						       _spaceServer,
+						       _atomSpace,
 						       _self_id,
 						       _owner_id,
 						       io,
@@ -263,7 +262,7 @@ namespace Filter {
 	    if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
 								      smh,
 								      i,
-								      _spaceServer,
+								      _atomSpace,
 								      _self_id,
 								      _owner_id,
 								      head_it,
@@ -289,22 +288,22 @@ namespace Filter {
 	  //retreive all actions of the agent involved in the perception
 	  //in time interval of the SpaceMap
 	  std::list<HandleTemporalPair> htp;
-	  as.getTimeInfo(back_inserter(htp),
+	  _atomSpace.getTimeInfo(back_inserter(htp),
 			 Handle::UNDEFINED,
 			 Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 
 	  pre_it head_child_it = head_it.begin();
-	  Handle action_done_h = as.getHandle(PREDICATE_NODE,
+	  Handle action_done_h = _atomSpace.getHandle(PREDICATE_NODE,
 					      ACTION_DONE_PREDICATE_NAME);
 	  Handle agent_h =
-	    WorldWrapperUtil::toHandle(as, get_definite_object(*head_child_it),
+	    WorldWrapperUtil::toHandle(_atomSpace, get_definite_object(*head_child_it),
 				       _self_id, _owner_id);
 	  //define template to match
 	  atom_tree* no_arg_actionDone = makeVirtualAtom(EVALUATION_LINK, 
 			  makeVirtualAtom(action_done_h, NULL), 
 			  makeVirtualAtom(LIST_LINK, makeVirtualAtom(agent_h, NULL), NULL),
 			  NULL);
-	  does_fit_template dft(*no_arg_actionDone, &as, false);
+	  does_fit_template dft(*no_arg_actionDone, &_atomSpace, false);
 	  for(std::list<HandleTemporalPair>::const_iterator i = htp.begin();
 	      i != htp.end(); ++i) {
 	    Handle evalLink_h = i->getHandle();
@@ -314,7 +313,7 @@ namespace Filter {
 	      if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
 									smh,
 									cur_tu,
-									_spaceServer,
+									_atomSpace,
 									_self_id,
 									_owner_id,
 									head_it,
@@ -398,7 +397,7 @@ namespace Filter {
 	    p.first =
 	      combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng, smh,
 								     ltl,
-								     _spaceServer,
+								     _atomSpace,
 								     _self_id,
 								     _owner_id,
 								     head_it,
@@ -415,7 +414,7 @@ namespace Filter {
 	    if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
 								      smh,
 								      i,
-								      _spaceServer,
+								      _atomSpace,
 								      _self_id,
 								      _owner_id,
 								      head_it,
@@ -432,7 +431,7 @@ namespace Filter {
 	  if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
 								    smh,
 								    ltl,
-								    _spaceServer,
+								    _atomSpace,
 								    _self_id,
 								    _owner_id,
 								    head_it,
@@ -507,12 +506,12 @@ namespace Filter {
     if(pre_sm==NULL)
       _isMoving.insert(obj);
     else {
-      Handle obj_h = WorldWrapperUtil::toHandle(_spaceServer.getAtomSpace(),
+      Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
 						obj,
 						_self_id,
 						_owner_id);
       definite_object_hash_set_const_it obj_it = _isMoving.find(obj);
-      if(AtomSpaceUtil::isMovingBtwSpaceMap(_spaceServer.getAtomSpace(),*pre_sm,sm,obj_h)) {
+      if(AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,*pre_sm,sm,obj_h)) {
 	if(obj_it==_isMoving.end())
 	  _isMoving.insert(obj);
       }
@@ -525,11 +524,11 @@ namespace Filter {
     if(pre_sm==NULL)
       _isMoving[obj] = true;
     else {
-      Handle obj_h = WorldWrapperUtil::toHandle(_spaceServer.getAtomSpace(),
+      Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
 						obj,
 						_self_id,
 						_owner_id);
-      _isMoving[obj] = AtomSpaceUtil::isMovingBtwSpaceMap(_spaceServer.getAtomSpace(),
+      _isMoving[obj] = AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
 							  obj,
 							  sm,
 							  obj_h);

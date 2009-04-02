@@ -22,9 +22,7 @@
 #include <vector>
 #include "LearnMessage.h"
 
-#include <opencog/atomspace/SpaceServer.h>
-#include "util/StringTokenizer.h"
-
+#include <opencog/util/StringTokenizer.h>
 #include <opencog/xml/NMXmlParser.h>
 #include <opencog/xml/NMXmlExporter.h>
 #include <opencog/xml/StringXMLBufferReader.h>
@@ -54,7 +52,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
 LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                            const std::string &schm,  const std::vector<std::string> &argumentsList,
                            const std::string &owId,
-                           const std::string &avId, const SpaceServer &spaceServer)
+                           const std::string &avId, AtomSpace &atomSpace)
                            throw (opencog::InvalidParamException, std::bad_exception): 
                            Message(from, to, MessagingSystem::Message::LEARN) { 
                            
@@ -67,7 +65,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
     setSchemaArguments(argumentsList);
 
     //look for the exemplars time intervals to fill spaceMaps
-    Handle trick_h = spaceServer.getAtomSpace().getHandle(CONCEPT_NODE, schm);
+    Handle trick_h = atomSpace.getHandle(CONCEPT_NODE, schm);
     if(trick_h == Handle::UNDEFINED){
         throw opencog::InvalidParamException(TRACE_INFO, 
                                     "LearnMessage - AtomSpace does not contain '%s' concept node.",
@@ -75,17 +73,18 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
     }
     
     std::list<HandleTemporalPair> htp_seq;
-    spaceServer.getAtomSpace().getTimeInfo(back_inserter(htp_seq), trick_h);
+    atomSpace.getTimeInfo(back_inserter(htp_seq), trick_h);
 
 #ifdef USE_MAP_HANDLE_SET
     // TODO: THIS DOES NOT WORK BECAUSE MAPS GETS WRONG ORDER (Suggestion: to use a set of timestamps instead) 
     // So, for now, we may send duplicate maps, which is inneficient but should not cause any error
     std::set<Handle> mapsToSend;
 #endif
+    const SpaceServer& spaceServer = atomSpace.getSpaceServer(); 
     foreach(HandleTemporalPair htp, htp_seq) {
         Temporal t = *htp.getTemporal();
         HandleSeq sm_seq;	
-        spaceServer.getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
+        atomSpace.getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
 
         foreach(Handle sm_h, sm_seq) {
             try{
@@ -102,7 +101,10 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                     logger().log(opencog::Logger::ERROR, 
                         "LearnMessage - SpaceServer has no space map (%s) to be added to the message!",
                         TLB::getAtom(sm_h)->toString().c_str());
-                    spaceServer.getAtomSpace().removeAtom(sm_h, true);
+                    // TODO: is this really needed? If not, we can get a const
+                    // AtomSpace reference instead. Check if this atom will be
+                    // removed by forgetting mechanism later anyway
+                    atomSpace.removeAtom(sm_h, true);
                 }
             } catch (opencog::AssertionException& e) {
                 logger().log(opencog::Logger::ERROR, 
@@ -121,7 +123,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
     }
 #endif
 
-    behaviorDescriptions.assign(exporter.toXML(spaceServer.getAtomSpace().getAtomTable().getHandleSet(ATOM, true)));
+    behaviorDescriptions.assign(exporter.toXML(atomSpace.getAtomTable().getHandleSet(ATOM, true)));
     logger().log(opencog::Logger::DEBUG, "LearnMessage - finished creating message (behavior descriptors just added."); 
 }
 
@@ -227,18 +229,18 @@ void LearnMessage::setSchemaArguments(const std::vector<std::string> &argumentsL
 }
 
 
-bool LearnMessage::populateAtomSpace(SpaceServer &spaceServer){
+bool LearnMessage::populateAtomSpace(AtomSpace &atomSpace){
 	
 	// load AtomSpace	
 	std::vector<XMLBufferReader *> reader(1, new StringXMLBufferReader(behaviorDescriptions.c_str()));
     try {
         //NMXmlParser::loadXML(reader, atomSpace, true, true);
-        NMXmlParser::loadXML(reader, &spaceServer.getAtomSpace(), false, false);
+        NMXmlParser::loadXML(reader, &atomSpace, false, false);
 
         // load SpaceMap into AtomSpace
         foreach(std::string s, spaceMaps) {
             SpaceServer::TimestampMap timestampMap = SpaceServer::mapFromString(s);
-            spaceServer.addSpaceMap(timestampMap.first, timestampMap.second);
+            atomSpace.addSpaceMap(timestampMap.first, timestampMap.second);
         }
 
     // catch all RuntimeExceptions descendents, specially

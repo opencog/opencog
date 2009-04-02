@@ -172,7 +172,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 {
     double dist_ratio_threshold = atof(MessagingSystem::NetworkElement::parameters.get("DIST_PERCENTAGE_THRESHOLD_WALK_TO_GOTO").c_str()) / (double)100;
 
-    AtomSpace& as = wp->getSpaceServer().getAtomSpace();
+    AtomSpace& as = wp->getAtomSpace();
 
     foreach(const VFpair& vf, factories) {
         vector<HandleTemporalPair> temps;
@@ -291,10 +291,10 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     //get the position of the avatar at the start of the walk
                     //COULD BE OPTIMIZED
-                    Handle sms_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getSpaceServer(), tl);
+                    Handle sms_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tl);
                     opencog::cassert(TRACE_INFO, sms_h != Handle::UNDEFINED,
                                       "Handle sms_h should not be an 'Handle::UNDEFINED'.");
-                    const SpaceServer::SpaceMap& sms = wp->getSpaceServer().getMap(sms_h);
+                    const SpaceServer::SpaceMap& sms = wp->getAtomSpace().getSpaceServer().getMap(sms_h);
                     //sas stands for Subject At Start
                     const Spatial::EntityPtr& sasEntity = sms.getEntity(subject_id);
 
@@ -322,10 +322,10 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     //find the nearest object to the subject at the end of the walk
                     //which is different of the object at the start if there is
-                    Handle sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getSpaceServer(), tu);
+                    Handle sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tu);
                     opencog::cassert(TRACE_INFO, sm_h != Handle::UNDEFINED,
                                       "Handle sm_h should not be an 'Handle::UNDEFINED'.");
-                    const SpaceServer::SpaceMap& sm = wp->getSpaceServer().getMap(sm_h);
+                    const SpaceServer::SpaceMap& sm = wp->getAtomSpace().getSpaceServer().getMap(sm_h);
                     std::string obj_id = sm.findNearestFiltered(p_walk_dest, pred);
 
                     const Spatial::EntityPtr& objectEntity = sm.getEntity(obj_id);
@@ -355,9 +355,9 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //~debug print
 
                     //debug print
-                    //Handle next_sm_h =  wp->getSpaceServer().getNextMapHandle(sm_h);
+                    //Handle next_sm_h =  wp->getAtomSpace().getSpaceServer().getNextMapHandle(sm_h);
                     //if(next_sm_h!=Handle::UNDEFINED) {
-                    //const SpaceServer::SpaceMap& next_sm = wp->getSpaceServer().getMap(next_sm_h);
+                    //const SpaceServer::SpaceMap& next_sm = wp->getAtomSpace().getSpaceServer().getMap(next_sm_h);
 
                     //const Spatial::EntityPtr& nextObjectEntity = sm.getEntity(obj_id);
                     //const Spatial::EntityPtr& nextSubjectEndEntity = next_sm.getEntity(subject_id);
@@ -371,10 +371,10 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //~debug print
 
                     //debug print
-                    //Handle instant_next_sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getSpaceServer(), tu+1);
+                    //Handle instant_next_sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tu+1);
                     //opencog::cassert(TRACE_INFO, instant_next_sm_h!=Handle::UNDEFINED,
                     //     "Handle sm_h should not be an 'Handle::UNDEFINED'.");
-                    //const SpaceServer::SpaceMap& instant_next_sm = wp->getSpaceServer().getMap(instant_next_sm_h);
+                    //const SpaceServer::SpaceMap& instant_next_sm = wp->getAtomSpace().getSpaceServer().getMap(instant_next_sm_h);
 
                     //const SpaceServer::ObjectMetadata& instant_next_md_obj = instant_next_sm.getMetaData(obj_id);
                     //SpaceServer::SpaceMapPoint instant_next_obj_p(instant_next_md_obj.centerX, instant_next_md_obj.centerY);
@@ -511,7 +511,7 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
         vector<HandleTemporalPair> new_temps;
         //insert into new_temps all pairs (handle,temporal)
         //that have their starting time within t_grab_range
-        wp->getSpaceServer().getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
+        wp->getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
                 Handle::UNDEFINED,
                 *ti,
                 TemporalTable::STARTS_WITHIN);
@@ -525,7 +525,7 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
             opencog::copy_if(new_perceptions.begin(),
                               new_perceptions.end(),
                               inserter(f_perceptions, f_perceptions.begin()),
-                              does_fit_template(vf.first, &wp->getSpaceServer().getAtomSpace()));
+                              does_fit_template(vf.first, &wp->getAtomSpace()));
 
             vf.second->update(trickExemplarAtTime,
                               *ti,
@@ -538,7 +538,7 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
 
 bool BehaviorEncoder::update(Temporal start_moment)
 {
-    //wp->getSpaceServer().getAtomSpace()->print();
+    //wp->getAtomSpace()->print();
 
     if (!start_moment.getLowerBound() && !start_moment.getUpperBound())
         start_moment = next_moment;
@@ -559,7 +559,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
     vector<HandleTemporalPair> new_temps;
     //insert into new_temps all pairs (handle,temporal)
     //that have their starting time within t_grab_range
-    wp->getSpaceServer().getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
+    wp->getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
             Handle::UNDEFINED,
             t_grab_range,
             TemporalTable::STARTS_WITHIN);
@@ -576,7 +576,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
         opencog::copy_if(new_perceptions.begin(),
                           new_perceptions.end(),
                           inserter(f_perceptions, f_perceptions.begin()),
-                          does_fit_template(vf.first, &wp->getSpaceServer().getAtomSpace()));
+                          does_fit_template(vf.first, &wp->getAtomSpace()));
 
         bprintf("Found %d valid perceptions\n", f_perceptions.size());
 

@@ -53,7 +53,7 @@ namespace OperationalPetController {
     std::vector<std::string> schemaArguments;
     std::string avatarId;
     std::string ownerId;
-    SpaceServer* spaceServer;
+    AtomSpace* atomSpace;
     MessageSender* sender;
     
   public:
@@ -65,7 +65,7 @@ namespace OperationalPetController {
     }
 
     HCTestAgent();
-    void init(std::string sn, std::vector<std::string> schemaArgs, std::string b, std::string a, SpaceServer* ss, MessageSender* s);
+    void init(std::string sn, std::vector<std::string> schemaArgs, std::string b, std::string a, AtomSpace* as, MessageSender* s);
     ~HCTestAgent();
     
     void run(opencog::CogServer* ne);

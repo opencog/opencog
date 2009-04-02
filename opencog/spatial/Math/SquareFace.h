@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef SQUAREFACE_H
-#define SQUAREFACE_H
+#ifndef _SPATIAL_MATH_SQUAREFACE_H_
+#define _SPATIAL_MATH_SQUAREFACE_H_
 
 #include "Face.h"
 #include <vector>
@@ -82,7 +82,7 @@ namespace Spatial {
 
     }; // SquareFace
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // SQUAREFACE_H
+#endif // _SPATIAL_MATH_SQUAREFACE_H_

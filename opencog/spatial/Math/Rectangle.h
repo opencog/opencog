@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef RECTANGLE_H
-#define RECTANGLE_H
+#ifndef _SPATIAL_MATH_RECTANGLE_H_
+#define _SPATIAL_MATH_RECTANGLE_H_
 
 #include "Vector3.h"
 #include <opencog/util/exceptions.h>
@@ -51,7 +51,7 @@ namespace Spatial {
 	Vector3 leftBottomCorner;      
     }; // Rectangle
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // RECTANGLE_H
+#endif // _SPATIAL_MATH_RECTANGLE_H_

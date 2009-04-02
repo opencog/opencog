@@ -53,13 +53,12 @@ public:
 
     //fill atomSpace with definite objects
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
     
     Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
     Handle owner_h = atomSpace.addNode(SL_AVATAR_NODE, owner_str);
     //fill add these object into a SpaceMap
-    spaceServer.addSpaceInfo(false, obj_h, T1, 20, 20, 1, 1, 1, 1);
-    spaceServer.addSpaceInfo(false, owner_h, T1, 10, 10, 1, 1, 1, 1);
+    atomSpace.addSpaceInfo(false, obj_h, T1, 20, 20, 1, 1, 1, 1);
+    atomSpace.addSpaceInfo(false, owner_h, T1, 10, 10, 1, 1, 1, 1);
 
     //fill atomSpace with behaved concept node
     Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
@@ -123,7 +122,7 @@ public:
     //generate the first and_seq without random_object
     //and check that it fits
 
-    NoSpaceLife nsl(spaceServer, pet_str, owner_str, owner_str, bd,
+    NoSpaceLife nsl(atomSpace, pet_str, owner_str, owner_str, bd,
 		    Temporal(0, 3*ACTION_DONE_TIME+2*PAUSE_TIME), rng);
 
     combo_tree::iterator head = tr.begin();
@@ -143,7 +142,7 @@ public:
     //generate the second and_seq with random_object
     //and check that it fits too
 
-    NoSpaceLife nsl_rand(spaceServer, pet_str, owner_str, owner_str, bd,
+    NoSpaceLife nsl_rand(atomSpace, pet_str, owner_str, owner_str, bd,
 			 Temporal(0, 3*ACTION_DONE_TIME+2*PAUSE_TIME), rng);
 
     combo_tree::iterator head_rand = tr_rand.begin();

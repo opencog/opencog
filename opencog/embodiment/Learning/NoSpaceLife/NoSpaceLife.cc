@@ -37,13 +37,13 @@ using namespace PetCombo;
  * public methods
  */
 
-NoSpaceLife::NoSpaceLife(SpaceServer& spaceServer, const std::string& pet_id,
+NoSpaceLife::NoSpaceLife(AtomSpace& atomSpace, const std::string& pet_id,
                          const std::string& owner_id,
                          const std::string& avatar_id,
                          const CompositeBehaviorDescription& cbd,
                          const Temporal& et,
                          opencog::RandGen& rng) :
-    _spaceServer(spaceServer), _pet_id(pet_id), _owner_id(owner_id),
+    _atomSpace(atomSpace), _pet_id(pet_id), _owner_id(owner_id),
     _avatar_id(avatar_id),
     _currentTime(0), _currentIndex(0), _currentMapHandle(Handle::UNDEFINED),
     _hasTimeChanged(true), _imitatedBD(cbd), _exemplarTemporal(et), _rng(rng)
@@ -99,7 +99,7 @@ Handle NoSpaceLife::getCurrentMapHandle()
 {
     if (_hasTimeChanged) {
         _currentMapHandle
-        = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_spaceServer,
+        = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_atomSpace,
                 _currentTime);
         _hasTimeChanged = false;
     }
@@ -113,7 +113,7 @@ unsigned long NoSpaceLife::getCurrentTime()
 
 AtomSpace& NoSpaceLife::getAtomSpace() const
 {
-    return _spaceServer.getAtomSpace();
+    return _atomSpace;
 }
 
 /**
@@ -127,21 +127,19 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
 {
     opencog::cassert(TRACE_INFO, is_builtin_action(*it));
 
-    AtomSpace& as = _spaceServer.getAtomSpace();
-
     builtin_action a = get_builtin_action(*it);
     HandleSeq hs;
     Handle h;
 
     //add the subject of the action to create
-    hs.push_back(as.addNode(SL_PET_NODE, _pet_id));
+    hs.push_back(_atomSpace.addNode(SL_PET_NODE, _pet_id));
 
     //add the action
     if (a == instance(id::random_step))
         a = choose_random_step();
     std::stringstream ss;
     ss << a;
-    hs.push_back(as.addNode(NODE, ss.str()));
+    hs.push_back(_atomSpace.addNode(NODE, ss.str()));
 
     //add the arguments
     int arg_index = 0;
@@ -162,11 +160,11 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
                 //the behavior description at the particular moment
                 obj = choose_definite_object_that_fits(io, arg_index);
             }
-            arg_h = WorldWrapperUtil::toHandle(as, obj, _pet_id, _owner_id);
+            arg_h = WorldWrapperUtil::toHandle(_atomSpace, obj, _pet_id, _owner_id);
         }
         //contin case
         else if (is_contin(*sib)) {
-            arg_h = as.addNode(NUMBER_NODE,
+            arg_h = _atomSpace.addNode(NUMBER_NODE,
                                boost::lexical_cast<std::string>(get_contin(*sib)));
         }
         else {
@@ -180,13 +178,13 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
     //Create the output of the EvalLink
     HandleSeq eo;
     //add predicatNode:"behaved"
-    h = as.addNode(PREDICATE_NODE, BEHAVED_STR);
+    h = _atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
     eo.push_back(h);
     //create and add listLink with hs to eo
-    h = as.addLink(LIST_LINK, hs);
+    h = _atomSpace.addLink(LIST_LINK, hs);
     eo.push_back(h);
     //create the EvaluationLink
-    h = as.addLink(EVALUATION_LINK, eo);
+    h = _atomSpace.addLink(EVALUATION_LINK, eo);
     //fill the elementary BD
     Temporal t(start_time, end_time);
     ebd.handle = h;
@@ -230,22 +228,22 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
             Handle h = *hs.getSet().begin();
             //check that it matches Behavior Description atom structure
             opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED);
-            opencog::cassert(TRACE_INFO, _spaceServer.getAtomSpace().getType(h) == EVALUATION_LINK);
-            opencog::cassert(TRACE_INFO, _spaceServer.getAtomSpace().getArity(h) == 2, "An EvaluationLink must have only 2 arguments");
+            opencog::cassert(TRACE_INFO, _atomSpace.getType(h) == EVALUATION_LINK);
+            opencog::cassert(TRACE_INFO, _atomSpace.getArity(h) == 2, "An EvaluationLink must have only 2 arguments");
 
-            Handle list_h = _spaceServer.getAtomSpace().getOutgoing(h, 1);
-            opencog::cassert(TRACE_INFO, _spaceServer.getAtomSpace().getType(list_h) == LIST_LINK);
+            Handle list_h = _atomSpace.getOutgoing(h, 1);
+            opencog::cassert(TRACE_INFO, _atomSpace.getType(list_h) == LIST_LINK);
             //check if the equivalent argument exists
             //and can correspond to a random operator
-            if (arg_index < _spaceServer.getAtomSpace().getArity(list_h) - 2) {
-                Handle arg_h = _spaceServer.getAtomSpace().getOutgoing(list_h, arg_index + 2);
+            if (arg_index < _atomSpace.getArity(list_h) - 2) {
+                Handle arg_h = _atomSpace.getOutgoing(list_h, arg_index + 2);
                 opencog::cassert(TRACE_INFO, arg_h != Handle::UNDEFINED);
                 opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(arg_h)),
                                   "arg_h must be a Node");
                 //convert to self or owner if name is _avatar_id or _owner_id
                 //(avatarName corresponds to self because the puts itself under its
                 //skin
-                do_id = WorldWrapperUtil::atom_name_to_definite_object(_spaceServer.getAtomSpace().getName(arg_h), _avatar_id, _owner_id);
+                do_id = WorldWrapperUtil::atom_name_to_definite_object(_atomSpace.getName(arg_h), _avatar_id, _owner_id);
                 //depending on the random operator check if the object belongs to
                 //the set
                 if (io == instance(id::random_object))
@@ -256,7 +254,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
                     corresponding_arg_exists =
                         combo::vertex_to_bool(
                             WorldWrapperUtil::evalPerception(_rng, getCurrentMapHandle(),
-                                                             _currentTime, _spaceServer,
+                                                             _currentTime, _atomSpace,
                                                              _avatar_id, _owner_id,
                                                              it, true));
                 }
@@ -271,7 +269,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
         vertex v = WorldWrapperUtil::evalIndefiniteObject(_rng,
                    getCurrentMapHandle(),
                    _currentTime,
-                   _spaceServer,
+                   _atomSpace,
                    _avatar_id,
                    _owner_id,
                    io,

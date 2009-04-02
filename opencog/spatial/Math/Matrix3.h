@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef MATRIX3_H
-#define MATRIX3_H
+#ifndef _SPATIAL_MATH_MATRIX3_H_
+#define _SPATIAL_MATH_MATRIX3_H_
 
 #include <vector>
 #include <string>
@@ -129,7 +129,7 @@ namespace Spatial {
 
     }; // Matrix3
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // MATRIX3_H
+#endif // _SPATIAL_MATH_MATRIX3_H_

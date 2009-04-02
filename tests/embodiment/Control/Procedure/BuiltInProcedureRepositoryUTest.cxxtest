@@ -30,12 +30,11 @@ class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite {
 
     void testContains() {
         AtomSpace as;
-    	SpaceServer spaceServer(as);
     	
         Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
-        PAI pai(spaceServer, ap, pi, sp);
+        PAI pai(as, ap, pi, sp);
         pi.setPAI(&pai);
         BuiltInProcedureRepository rep(pai);
         TS_ASSERT(rep.contains(string("BARK")));
@@ -44,12 +43,11 @@ class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite {
     
     void testGet() {
         AtomSpace as;
-    	SpaceServer spaceServer(as);
     	
         Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
-        PAI pai(spaceServer, ap, pi, sp);
+        PAI pai(as, ap, pi, sp);
         pi.setPAI(&pai);
         BuiltInProcedureRepository rep(pai);
         const BuiltInProcedure& proc = rep.get(string("BARK"));

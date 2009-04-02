@@ -34,7 +34,6 @@ public:
     string avatar_str = "Paul";
     //fill atomSpace with dummy_object and dummy_avatar definite object
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
     
     Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
     Handle avatar_h = atomSpace.addNode(SL_AVATAR_NODE, avatar_str);
@@ -112,7 +111,7 @@ public:
 
     //retrieve the BD
     CompositeBehaviorDescription BDretrieved;
-    AtomSpaceWorldProvider wp(spaceServer);
+    AtomSpaceWorldProvider wp(atomSpace);
     Temporal et(0);
     BDRetriever::retrieveLastExemplar(BDretrieved, et, wp, trick_str);
 
@@ -132,7 +131,6 @@ public:
     string avatar_str = "Paul";
     //fill atomSpace with dummy_object and dummy_avatar definite object
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
     
     Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
     Handle avatar_h = atomSpace.addNode(SL_AVATAR_NODE, avatar_str);
@@ -263,7 +261,7 @@ public:
 
     //retrieve the BC
     BehaviorCategory BCretrieved;
-    AtomSpaceWorldProvider wp(spaceServer);
+    AtomSpaceWorldProvider wp(atomSpace);
     std::vector<Temporal> est;
     BDRetriever::retrieveAllExemplars(BCretrieved, est, wp, trick_str);
 

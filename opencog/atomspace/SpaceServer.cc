@@ -40,9 +40,9 @@ using namespace opencog;
 const char* SpaceServer::SPACE_MAP_NODE_NAME = "SpaceMap";
 #define DELIMITER " "
 
-SpaceServer::SpaceServer(AtomSpace &as): atomSpace(as) {
+SpaceServer::SpaceServer(SpaceServerContainer &_container): container(_container) {
     // Default values (should only be used for test purposes)
-    petRadius = 0.25;
+    agentRadius = 0.25;
     xMin = 0;
     xMax = 256;
     yMin = 0;
@@ -51,27 +51,18 @@ SpaceServer::SpaceServer(AtomSpace &as): atomSpace(as) {
     yDim = 1024;
 
     latestSpaceMap = Handle::UNDEFINED;
-
-    //connect signals
-    AtomTable& at = (AtomTable&) as.getAtomTable();
-    addedAtomConnection = at.addAtomSignal().connect(std::tr1::bind(&SpaceServer::atomAdded, this, std::tr1::placeholders::_1));
-    removedAtomConnection = at.removeAtomSignal().connect(std::tr1::bind(&SpaceServer::atomRemoved, this, std::tr1::placeholders::_1));
-    mergedAtomConnection = at.mergeAtomSignal().connect(std::tr1::bind(&SpaceServer::atomMerged, this, std::tr1::placeholders::_1));
 }
 
 SpaceServer::~SpaceServer() {
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
-    mergedAtomConnection.disconnect();
     for(HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); itr++) {
         delete itr->second;
     }
 }
 
-void SpaceServer::setPetRadius(double _radius) {
-    if (petRadius != _radius) {
-        petRadius = _radius;
-        logger().log(opencog::Logger::INFO, "SpaceServer - PetRadius: %.3lf", petRadius);
+void SpaceServer::setAgentRadius(double _radius) {
+    if (agentRadius != _radius) {
+        agentRadius = _radius;
+        logger().log(opencog::Logger::INFO, "SpaceServer - AgentRadius: %.3lf", agentRadius);
     }
 }
 
@@ -116,20 +107,20 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                             logger().log(opencog::Logger::DEBUG, "SpaceServer - The 2 previous maps are equals. Previous map (%s) transfered to new map (%s).", TLB::getAtom(latestMapHandle)->toString().c_str(), TLB::getAtom(spaceMapHandle)->toString().c_str());
                             sortedMapHandles.erase(sortedMapHandles.end()-1);
                             spaceMaps.erase(latestMapHandle);
-                            atomSpace.removeAtom(latestMapHandle);
+                            container.mapRemoved(latestMapHandle);
                             map = latestMap; // reuse the spaceMap object
                             mapReused = true;
                             persistentMapHandles.insert(lastButOneMapHandle);
-                            atomSpace.setLTI(lastButOneMapHandle, 1);
+                            container.mapPersisted(lastButOneMapHandle);
                             logger().log(opencog::Logger::DEBUG, "SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(lastButOneMapHandle)->toString().c_str());
                         } else {
                             persistentMapHandles.insert(latestMapHandle);
-                            atomSpace.setLTI(latestMapHandle, 1);
+                            container.mapPersisted(latestMapHandle);
                             logger().log(opencog::Logger::DEBUG, "SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(latestMapHandle)->toString().c_str());
                         }
                     } else {
                         persistentMapHandles.insert(latestMapHandle);
-                        atomSpace.setLTI(latestMapHandle, 1);
+                        container.mapPersisted(latestMapHandle);
                         logger().log(opencog::Logger::DEBUG, "SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(latestMapHandle)->toString().c_str());
                     }
                 } else if (persistentMapHandles.find(latestMapHandle) == persistentMapHandles.end()) {
@@ -148,7 +139,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                 // latest map dimensions do not match new map dimensions.
                 // Create an empty map
                 logger().log(opencog::Logger::DEBUG, "SpaceServer - New map (%s) created by copying.", TLB::getAtom(spaceMapHandle)->toString().c_str());
-                map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+                map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius);
                 // Copy each object in latest map into the new map
                 map->copyObjects(*latestMap);
                 if (!keepPreviousMap) {
@@ -161,7 +152,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
             }
         } else {
             // Create first map
-            map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+            map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius);
             logger().log(opencog::Logger::DEBUG, "SpaceServer - First map (%s) created", TLB::getAtom(spaceMapHandle)->toString().c_str());
         }
         spaceMaps[spaceMapHandle] = map;
@@ -362,7 +353,7 @@ void SpaceServer::markMapAsPersistent(Handle spaceMapHandle) {
                 TLB::getAtom(spaceMapHandle)->toString().c_str());
     }
     persistentMapHandles.insert(spaceMapHandle);
-    atomSpace.setLTI(spaceMapHandle, 1);
+    container.mapPersisted(spaceMapHandle);
 }
 
 bool SpaceServer::isMapPersistent(Handle spaceMapHandle) const {
@@ -463,41 +454,6 @@ void SpaceServer::clear() {
     spaceMaps.clear();
 }
 
-bool SpaceServer::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY,
-                              double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle) {
-
-    Handle spaceMapNode = addSpaceMapNode();
-    Handle spaceMapAtTimeLink = atomSpace.addTimeInfo(spaceMapNode, timestamp);
-    bool result =  add( keepPreviousMap, spaceMapAtTimeLink, atomSpace.getName(objectNode),
-                        objX, objY, objLength, objWidth, objHeight, objYaw, isObstacle);
-
-    //if (!keepPreviousMap) cleanupSpaceServer();
-    return result;
-}
-
-Handle SpaceServer::addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap){
-
-    Handle spaceMapNode = addSpaceMapNode();
-    Handle spaceMapAtTimeLink = atomSpace.addTimeInfo(spaceMapNode, timestamp);
-    add(spaceMapAtTimeLink, spaceMap);
-
-    return spaceMapAtTimeLink;
-}
-
-Handle SpaceServer::removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp) {
-
-    logger().log(opencog::Logger::DEBUG, "%s(%s)\n", __FUNCTION__, atomSpace.getName(objectNode).c_str());
-
-    Handle spaceMapNode = addSpaceMapNode();
-    Handle spaceMapAtTimeLink = atomSpace.addTimeInfo(spaceMapNode, timestamp);
-    remove(keepPreviousMap, spaceMapAtTimeLink, atomSpace.getName(objectNode));
-
-    //if (!keepPreviousMap) cleanupSpaceServer();
-    return spaceMapAtTimeLink;
-}
-
 
 std::string SpaceServer::mapToString(Handle mapHandle) const{
 
@@ -505,9 +461,7 @@ std::string SpaceServer::mapToString(Handle mapHandle) const{
   stringMap.precision(16);
   SpaceMap map = getMap(mapHandle);
 
-    // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
-    // So, in order to get the timestamp is the name of the TimeNode
-  stringMap << atomSpace.getName(atomSpace.getOutgoing(mapHandle, 0));
+  stringMap << container.getMapIdString(mapHandle);
   stringMap << DELIMITER;
   stringMap << map.xMin();
   stringMap << DELIMITER;
@@ -657,82 +611,3 @@ void SpaceServer::updateLatestSpaceMap(Handle atTimeLink)
 }
 */
 
-Handle SpaceServer::addSpaceMapNode() 
-{
-    Handle result = atomSpace.getHandle(CONCEPT_NODE, SPACE_MAP_NODE_NAME);
-    if (result == Handle::UNDEFINED) 
-    {
-        result = atomSpace.addNode(CONCEPT_NODE, SPACE_MAP_NODE_NAME);
-        atomSpace.setLTI(result, 1);
-    } 
-    else 
-    {
-        if (atomSpace.getLTI(result) < 1) 
-        {
-            atomSpace.setLTI(result, 1);
-        }
-    }
-    return result;
-}
-
-void SpaceServer::cleanupSpaceServer(){
-
-    // sanity checks
-    if (getSpaceMapsSize() < 1) {
-        logger().log(opencog::Logger::DEBUG,
-                       "AtomSpace - No need to clean SpaceServer. It has no space map yet.");
-        return;
-    }
-
-    // sanity tests passed, cleaning SpaceServer
-    Handle spaceMapNode = addSpaceMapNode();
-
-    // get all HandleTemporalPairs associated with the SpaceMap concept node.
-    std::vector<HandleTemporalPair> pairs;
-    atomSpace.getTimeInfo(back_inserter(pairs), spaceMapNode);
-
-    int j = 0;
-    // remember to leave at least one map in SpaceServer, the newer one.
-    for(unsigned int i = 0; i < pairs.size() - 1; i++){
-
-        // get SpaceMap handles
-        Handle mapHandle = atomSpace.getAtTimeLink(pairs[i]);
-
-        // mapHandle not among the ones that should be preserved
-        if (!containsMap(mapHandle) || !isMapPersistent(mapHandle)){
-            j++;
-            logger().log(opencog::Logger::DEBUG, "AtomSpace - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
-            // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
-            atomSpace.removeAtom(mapHandle, true);
-        }
-    }
-    logger().log(opencog::Logger::DEBUG, "AtomSpace - Number of deleted maps: %d.", j);
-}
-
-void SpaceServer::atomAdded(Handle h) {
-    //logger().log(opencog::Logger::DEBUG, "SpceServer::atomAdded(%lu)", h.value());
-}
-
-void SpaceServer::atomRemoved(Handle h) {
-    //logger().log(opencog::Logger::DEBUG, "SpceServer::atomRemoved(%lu)", h.value());
-    Type type = atomSpace.getType(h);
-    if (type == AT_TIME_LINK) {
-        Handle timedAtom = atomSpace.getOutgoing(h, 1);
-        // outgoingSet[1] is a SpaceMap concept node, remove related map
-        // from SpaceServer
-        if( getAtomSpace( ).getHandle(CONCEPT_NODE, SPACE_MAP_NODE_NAME) == timedAtom ){
-           this->removeMap(h);
-        } // if
-    } else if ( atomSpace.inheritsType(type, SL_OBJECT_NODE) ) {
-        this->removeObject(atomSpace.getName(h));
-    } // else if
-}
-
-void SpaceServer::atomMerged(Handle h) {
-    //logger().log(opencog::Logger::DEBUG, "SpceServer::atomMerged(%lu)", h.value());
-    // Restore the default STI value if it has decayed 
-    // TODO: Remove this code when the merge of atoms consider the STI values this way as well.
-    if (atomSpace.getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
-        atomSpace.setSTI(h, AttentionValue::DEFAULTATOMSTI);
-    }
-}

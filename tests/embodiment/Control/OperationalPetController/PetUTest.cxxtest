@@ -39,7 +39,6 @@ class PetUTest :  public CxxTest::TestSuite {
         Control::SystemParameters *parameters;
         Pet * pet;
         AtomSpace * atomSpace;
-        SpaceServer * spaceServer;
         LSMessageSenderMock * sender;
         PAI* pai;
         ActionPlanSender* apSender;
@@ -52,7 +51,6 @@ class PetUTest :  public CxxTest::TestSuite {
             opencog::atom_types_init::init();
             parameters = new Control::SystemParameters();
             atomSpace = new AtomSpace();
-            spaceServer = new SpaceServer(*atomSpace);
             sender = new LSMessageSenderMock();
             timestamp2 = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
             timestamp = timestamp2 - 30; 
@@ -71,9 +69,9 @@ class PetUTest :  public CxxTest::TestSuite {
         }
         
         void TestExportToFile(){            
-            pet = new Pet(petId, petName, petType, petTraits, ownerId, spaceServer, sender);
+            pet = new Pet(petId, petName, petType, petTraits, ownerId, atomSpace, sender);
             apSender = new FailureActionPlanSender();
-            pai = new PAI(*spaceServer, *apSender, *pet, *parameters);
+            pai = new PAI(*atomSpace, *apSender, *pet, *parameters);
             pet->setPAI(pai);
         
             TS_ASSERT(pet != NULL);
@@ -89,9 +87,9 @@ class PetUTest :  public CxxTest::TestSuite {
         }
         
         void TestImportFromFile(){
-            pet = Pet::importFromFile(file, petId, spaceServer, sender);
+            pet = Pet::importFromFile(file, petId, atomSpace, sender);
             apSender = new FailureActionPlanSender();
-            pai = new PAI(*spaceServer, *apSender, *pet, *parameters);
+            pai = new PAI(*atomSpace, *apSender, *pet, *parameters);
             pet->setPAI(pai);
             
             TS_ASSERT(pet != NULL);

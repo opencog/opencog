@@ -161,7 +161,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                 if (arg) {
                     std::string objectId = *arg;
                     // Builds the Entity param 
-                    AtomSpace& atomSpace = pai.getSpaceServer().getAtomSpace();
+                    AtomSpace& atomSpace = pai.getAtomSpace();
                     HandleSeq hs; 
                     atomSpace.getHandleSet(back_inserter(hs), SL_OBJECT_NODE, objectId, true); 
                     if (!hs.empty()) {

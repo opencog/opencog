@@ -43,7 +43,6 @@
 #include "PetInterface.h"
 #include "PredaveseParser.h"
 #include "SystemParameters.h"
-#include <opencog/atomspace/SpaceServer.h>
 
  
 #include <map>
@@ -94,12 +93,9 @@ class PAI {
         std::string camelCaseToUnderscore(const char* s);
 
         /**
-         * The reference to the SpaceServer and AtomSpace this PAI is working with.
-         * There is a reference of AtomSpace used by SpaceServer and PAI inside SpaceServer
+         * The reference to the AtomSpace this PAI is working with.
          */
-        SpaceServer& spaceServer;
         AtomSpace& atomSpace;
-
         
         /**
          * The reference to an ActionPlanSender object this PAI uses to send action plans.
@@ -170,12 +166,12 @@ class PAI {
         double yMax;
 
         /**
-         * Current pet radius
+         * Current agent radius
          */
-        double petRadius; 
+        double agentRadius; 
 
         /**
-         * Object that updates the "near" predicates between the objects in the field of view of the pet.
+         * Object that updates the "near" predicates between the objects in the field of view of the agent.
          */
 
 #ifdef HAVE_LIBPTHREAD
@@ -221,14 +217,13 @@ class PAI {
         /**
          * Constructor
          * 
-         * @param _spaceServer Reference to SpaceServer that contains a reference
-         *          for a AtomSpace which this PAI will add Atoms related to received perceptions or sent actions.
+         * @param _atomSpace Reference to AtomSpace which this PAI will add Atoms related to received perceptions or sent actions in.
          * @param actionSender    The reference to the object that will be used to send action plans to the Virtual World.
          * @param nextPlanID    The next plan ID to be used as return of the next call to startActionPlan() method. 
          *                         This argument may be useful to continue a previous sequence of action plan IDs (when restarting 
          *                      OPC, for instance). If not provided, assumes 0 as default. 
          */
-        PAI(SpaceServer& _spaceServer, ActionPlanSender& actionSender, Control::PetInterface& petInterface, Control::SystemParameters& systemParameters, unsigned long nextPlanID = 0);
+        PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender, Control::PetInterface& petInterface, Control::SystemParameters& systemParameters, unsigned long nextPlanID = 0);
         
         /**
          * Destructor
@@ -236,9 +231,9 @@ class PAI {
         ~PAI();
         
         /**
-         * Gets the reference to the SpaceServer this PAI works with
+         * Gets the reference to the AtomSpace this PAI works with
          */
-        SpaceServer& getSpaceServer();
+        AtomSpace& getAtomSpace();
 
         
         /**

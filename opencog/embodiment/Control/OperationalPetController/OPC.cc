@@ -69,7 +69,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 
 
     this->atomSpace  = new AtomSpace();
-    this->spaceServer = new SpaceServer(*atomSpace);
     this->planSender = new PVPActionPlanSender(petId, &(getNetworkElement()));
     this->petMessageSender = new PetMessageSender(&(getNetworkElement()));
 
@@ -79,10 +78,10 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
       this->pet = new Pet(petId, parameters.get("UNKNOWN_PET_NAME"), 
                           aType, agentTraits, ownerId, 
-                          spaceServer, petMessageSender);
+                          atomSpace, petMessageSender);
     }
 
-    this->pai = new PerceptionActionInterface::PAI(*spaceServer, *planSender, *pet,
+    this->pai = new PerceptionActionInterface::PAI(*atomSpace, *planSender, *pet,
                                                    parameters);
 
     this->procedureRepository = new ProcedureRepository(*pai);
@@ -91,7 +90,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->pet->setPAI(pai);
 
     // adds all savable repositories for further calls to save/load methods.
-    savingLoading.addSavableRepository(spaceServer);
     savingLoading.addSavableRepository(procedureRepository);
 
     if(fileExists(getPath(petId, parameters.get("ATOM_SPACE_DUMP")).c_str())){
@@ -155,7 +153,7 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->ruleEngine = new RuleEngine( this, petId, parameters );
     this->pet->setRuleEngine(ruleEngine);
 
-    predicatesUpdater = new PredicatesUpdater(*spaceServer, pet->getPetId());
+    predicatesUpdater = new PredicatesUpdater(*atomSpace, pet->getPetId());
 
     // TODO: remove component reference from component constructors
 
@@ -175,6 +173,7 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->registerAgent(ImportanceDecayAgent::info().id, &importanceDecayAgentFactory);
     importanceDecayAgent = static_cast<ImportanceDecayAgent*>(
             this->createAgent(ImportanceDecayAgent::info().id, false));
+    importanceDecayAgent->connectSignals(*atomSpace);
 
     this->registerAgent(PetInterfaceUpdaterAgent::info().id, &petInterfaceUpdaterAgentFactory);
     petInterfaceUpdaterAgent = static_cast<PetInterfaceUpdaterAgent*>(
@@ -258,13 +257,13 @@ OPC::~OPC(){
 void OPC::loadPet(const std::string& petId){
     // load pet metadata
     std::string file = getPath(petId, getParameters().get("PET_DUMP"));
-    this->pet = Pet::importFromFile(file, petId, spaceServer, petMessageSender);
+    this->pet = Pet::importFromFile(file, petId, atomSpace, petMessageSender);
 }
 
 void OPC::loadAtomSpace(const std::string& petId){
     // load atom space and other repositories
     std::string file = getPath(petId, getParameters().get("ATOM_SPACE_DUMP"));
-    savingLoading.load(file.c_str(), spaceServer->getAtomSpace());
+    savingLoading.load(file.c_str(), *atomSpace);
 }
 
 void OPC::saveState(){
@@ -278,7 +277,7 @@ void OPC::saveState(){
     // save atom space and othe repositories
     std::string file = getPath(pet->getPetId(), getParameters().get("ATOM_SPACE_DUMP"));
     remove(file.c_str());
-    savingLoading.save(file.c_str(), spaceServer->getAtomSpace());
+    savingLoading.save(file.c_str(), *atomSpace);
 
     // save pet metadata
     file = getPath(pet->getPetId(), getParameters().get("PET_DUMP"));
@@ -328,10 +327,6 @@ AtomSpace & OPC::getAtomSpace() {
 }
 const AtomSpace& OPC::getAtomSpace() const {
     return *atomSpace;
-}
-
-const SpaceServer & OPC::getSpaceServer() const{
-    return *spaceServer;
 }
 
 PerceptionActionInterface::PAI & OPC::getPAI(){
@@ -553,4 +548,3 @@ const std::string OPC::getPath(const std::string& petId, const std::string& file
 
     return path;
 }
-

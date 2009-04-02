@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef LINESEGMENT_H
-#define LINESEGMENT_H
+#ifndef _SPATIAL_MATH_LINESEGMENT_H_
+#define _SPATIAL_MATH_LINESEGMENT_H_
 
 #include <cassert>
 #include <cmath>
@@ -200,7 +200,7 @@ namespace Spatial {
                   
         }; 
     
-    }; // Spatial
-}; // Math
+    } // Math
+} // Spatial
 
-#endif // LINESEGMENT_H
+#endif // _SPATIAL_MATH_LINESEGMENT_H_

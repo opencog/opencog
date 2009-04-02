@@ -9,7 +9,7 @@
 #include "util/files.h"
 #include "PetInterfaceMock.h"
 #include "ComboProcedureRepository.h"
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "LSMessageSenderMock.h"
 #include "Pet.h"
@@ -35,7 +35,7 @@ class ProcedureRepositoryUTest :  public CxxTest::TestSuite
 {
 
 private:
-    SpaceServer* spaceServer;
+    AtomSpace* atomSpace;
     HandleSeq toUpdateHandles;
     list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
@@ -50,8 +50,7 @@ private:
 public:
     ProcedureRepositoryUTest() {
 
-        AtomSpace * as = new AtomSpace();
-        spaceServer = new SpaceServer(*as);
+        atomSpace = new AtomSpace();
 
         //set flag to print only cassert and other ERROR level logs on stdout
         logger().setPrintErrorLevelStdout();
@@ -59,7 +58,7 @@ public:
 
         sender = new ResponsiveActionPlanSender();
         petInterface = new PetInterfaceMock(PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"), PAIUtils::getInternalId("Wynx"), string(""));
-        ppai = new PAI(*spaceServer, *sender, *petInterface, sysPar);
+        ppai = new PAI(*atomSpace, *sender, *petInterface, sysPar);
         petInterface->setPAI(ppai);
 
         sender->setPai(ppai);
