@@ -27,40 +27,44 @@
 #include "util/Logger.h"
 
 #include "WorldProvider.h"
-#include "NetworkElement.h"
 #include "SystemParameters.h"
 
 #include "LSCmdMessage.h"
 #include "LearnMessage.h"
 #include "RewardMessage.h"
-#include "ImitationLearningTask.h"
+#include "ImitationLearningAgent.h"
 #include "TrySchemaMessage.h"
 #include "StopLearningMessage.h"
+
+#include "EmbodimentCogServer.h"
 
 namespace LearningServer
 {
 
-class LS : public MessagingSystem::NetworkElement
+using namespace MessagingSystem;
+
+class LS : public EmbodimentCogServer 
 {
 
 public:
+
+    static opencog::BaseServer* derivedCreateInstance();
 
     /**
      * Constructor and Destructor
      */
     LS(const std::string &myId, const std::string &ip, int portNumber,
        Control::SystemParameters & parameters);
+    LS();
     ~LS();
+
+    void init(const std::string &myId, const std::string &ip, int portNumber,
+              Control::SystemParameters & parameters);
 
     /**
      * Method inherited from network element
      */
     bool processNextMessage(MessagingSystem::Message *msg);
-
-    /**
-     * Method inherited from network element
-     */
-    void setUp();
 
     /**
      * Informs whenever the LS is busy performing a learning action or not.
@@ -101,7 +105,9 @@ private:
     int candidateSchemaCnt;
 
     //imitation learning task (can plug hillclimbing or MOSES)
-    MessagingSystem::ImitationLearningTask ILTask;
+    MessagingSystem::ImitationLearningAgent* ILAgent;
+
+    Factory<ImitationLearningAgent, Agent> factory;
 
     /**
      * Return the candidate schema name according to the acctual candidate
