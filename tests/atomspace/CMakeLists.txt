@@ -1,17 +1,23 @@
 INCLUDE_DIRECTORIES(
-	${OPENCOG_SOURCE_DIR}/src/util
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/xml
+	${OPENCOG_SOURCE_DIR}/opencog
+	${OPENCOG_SOURCE_DIR}/opencog/util
+	${OPENCOG_SOURCE_DIR}/opencog/atomspace
+	${OPENCOG_SOURCE_DIR}/opencog/xml
+        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
+	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
 )
 
 LINK_DIRECTORIES(
-	${OPENCOG_BINARY_DIR}/src/atomspace
-	${OPENCOG_BINARY_DIR}/src/xml
+	${OPENCOG_BINARY_DIR}/opencog/atomspace
+	${OPENCOG_BINARY_DIR}/opencog/xml
+        ${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
 )
 
 LINK_LIBRARIES(
 	atomspace
 	${Boost_SIGNALS_LIBRARY}
+        AtomSpaceExtensions
 )
 
 # AtomTableUTest requires the XML libraries

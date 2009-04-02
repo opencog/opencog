@@ -30,15 +30,12 @@
 #include "EntityRelevanceFilter.h"
 #include "moses-learning.h"
 
-#include "LS_CogServer.h"
-
 #include "ImitationLearningAgent.h"
 
 namespace MessagingSystem
 {
 
 using namespace opencog;
-using namespace LearningServer;
 
 //constructor destructor
 ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),

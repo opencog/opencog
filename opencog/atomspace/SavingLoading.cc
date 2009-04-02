@@ -146,7 +146,11 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
         Node* node = dynamic_cast<Node*>(TLB::getAtom(atomHandle));
-        logger().fine( "Saving Node handle %d name %s", atomHandle.value(), node->toString().c_str() );
+        if ( node == NULL ) {
+            logger().error( "Trying to save a node which isn't registered at TLB. Handle %d", atomHandle.value() );
+            continue;
+        } // if
+        logger().info( "Saving Node handle %d name %s", atomHandle.value(), node->toString().c_str() );
         writeNode(f, node);
         numNodes++;
         int percentage = (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR)));
@@ -280,19 +284,12 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
 
     std::vector<Type> dumpToCore;
     loadClassServerInfo(f, dumpToCore);
-    loadNodes(f, handles, atomTable);
-    loadLinks(f, handles, atomTable);
+    loadNodes(f, handles, atomTable, dumpToCore);
+    loadLinks(f, handles, atomTable, dumpToCore);
 
-    // logger().info("nodes, links and indices loaded. number of handles = %d", handles->getCount());
-    // update types in all atoms
     HandleMapIterator<Atom *> *it = handles->keys();
     while (it->hasNext()) {
         Atom *element = (Atom *)handles->get(it->next());
-        if (dumpToCore[element->getType()] > ClassServer::getNumberOfClasses()) {
-            throw InconsistenceException(TRACE_INFO,
-                                         "SavingLoading - Type inconsistence clash '%d'.", element->getType());
-        }
-        element->type =  dumpToCore[element->getType()];
         updateHandles(element, handles);
     }
     delete(it);
@@ -346,36 +343,35 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
 
 }
 
-void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
+void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore )
 {
     logger().fine("SavingLoading::loadNodes");
 
     int numNodes;
     // reads the total number of nodes
-    fread(&numNodes, sizeof(int), 1, f);
+    fread(&numNodes, sizeof(int), 1, f);    
 
     // reads each node from the file
     for (int i = 0; i < numNodes; i++) {
-        Node* node = readNode(f, handles);
-        node->setAtomTable(&atomTable);
+        Node *node = new Node(NODE, "");
+        
+        Type oldType;
+        fread(&oldType, sizeof(Type), 1, f);        
+        if (dumpToCore[oldType] > ClassServer::getNumberOfClasses()) {
+            throw InconsistenceException(TRACE_INFO,
+                                         "SavingLoading - Type inconsistence clash '%d'.", oldType );
+        }
+        node->type = dumpToCore[oldType];
+        readNode(f, node, handles);
 
-        // XXX Why are we not calling atomTable.addAtom() here?
-        // Wouldn't that be the more correct thing to do?
-        atomTable.atomSet.insert(node);
-
-        Handle handle = TLB::getHandle(node);
-        atomTable.nodeIndex.insertHandle(handle);
-        atomTable.typeIndex.insertHandle(handle);
-        atomTable.importanceIndex.insertHandle(handle);
-        atomTable.predicateIndex.insertHandle(handle);
-
+        atomTable.add( node );
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
-    atomTable.size += numNodes;
+
 }
 
-void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable)
+void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadLinks");
 
@@ -383,26 +379,28 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
     // reads the total number of links
     fread(&numLinks, sizeof(int), 1, f);
 
-    // reads each link from the file
+    /**
+     * Before registering indexes for a loaded link, all it's outgoing handles must be
+     * already loaded in order to avoid INVALID_HANDLE issues. So, a handle list
+     * will be used to store all the link handles registered at TLB. Then, all indexes 
+     * related to each link will be created.
+     */
+    // first reads each link from the file
     for (int i = 0; i < numLinks; i++) {
-        Link* link = readLink(f, handles);
-        link->setAtomTable(&atomTable);
+        // a new link is created
+        Link *link = new Link(LINK, std::vector<Handle>());
 
-        // XXX Why are we not calling atomTable.addAtom() here?
-        // Wouldn't that be the more correct thing to do?
-        atomTable.atomSet.insert(link);
+        Type oldType;
+        fread(&oldType, sizeof(Type), 1, f);        
+        if (dumpToCore[oldType] > ClassServer::getNumberOfClasses()) {
+            throw InconsistenceException(TRACE_INFO,
+                                         "SavingLoading - Type inconsistence clash '%d'.", oldType );
+        }
+        link->type = dumpToCore[oldType];
+        readLink( f, link, handles );
 
-        Handle handle = TLB::getHandle(link);
-        atomTable.typeIndex.insertHandle(handle);
-        atomTable.linkIndex.insertHandle(handle);
-        atomTable.targetTypeIndex.insertHandle(handle);
-        atomTable.importanceIndex.insertHandle(handle);
-        atomTable.predicateIndex.insertHandle(handle);
-
-        printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-        fflush(stdout);
-    }
-    atomTable.size += numLinks;
+        atomTable.add(link);
+    } // for
 }
 
 void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
@@ -413,37 +411,10 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     if (atom->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE) {
         //logger().fine("SavingLoading::updateHandles: CTV");
         CompositeTruthValue ctv((const CompositeTruthValue&) atom->getTruthValue());
-        ctv.updateVersionHandles(handles);
-        atom->setTruthValue(ctv);
-    }
-
-    //logger().fine("SavingLoading::updateHandles: incoming set");
-    // updates the handles for the atom's incoming set
-    for (HandleEntry *p = atom->incoming; p != NULL; p = p->next) {
-        CoreUtils::updateHandle(&p->handle, handles);
-    }
-
-    Link *link = dynamic_cast<Link *>(atom);
-    if (link && (link->getArity() > 0)) {
-        //logger().fine("SavingLoading::updateHandles: outgoing set");
-        AtomTable& atomTable = *(atom->getAtomTable());
-
-        // BUG FIX: Links should be updated in AtomSet because it still uses old handles in its outgoing
-        atomTable.atomSet.erase(atom);
-//        printf("AtomTable[%d]::atomSet.erase(%p) => size = %d\n", t, atom, atomTable.atomSet.size());
-        // updates the handles for the atom outgoing set
-        for (int i = 0; i < link->getArity(); i++) {
-            CoreUtils::updateHandle(&(link->outgoing[i]), handles);
-        }
-
-        if (ClassServer::isA(atom->type, UNORDERED_LINK)) {
-            std::sort(link->outgoing.begin(), link->outgoing.end(), CoreUtils::HandleComparison());
-        }
-
-        atomTable.atomSet.insert(atom);
-//        printf("AtomTable[%d]::atomSet.insert(%p) => size = %d\n", t, atom, atomTable.atomSet.size());
-    }
-
+        ctv.updateVersionHandles( handles );
+        atom->setTruthValue(ctv);        
+    } // if
+    
     // updates handles for trail
     if (ClassServer::isA(atom->type, LINK)) {
         Trail *t = ((Link *)atom)->getTrail();
@@ -460,11 +431,12 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
             delete(t);
         }
     }
+    
 }
 
 void SavingLoading::writeAtom(FILE *f, Atom *atom)
 {
-    logger().fine("SavingLoading::writeAtom: %p (type = %d)", atom, atom->getType());
+    logger().info("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), TLB::getHandle(atom).value( ));
 
     // writes the atom type
     fwrite(&atom->type, sizeof(Type), 1, f);
@@ -475,27 +447,7 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     Handle handle = TLB::getHandle(atom);
     fwrite(&handle, sizeof(Handle), 1, f);
 
-    // store the position on the file where the number of incoming atoms will be
-    // written.
-    int incomingOffset = ftell(f);
-    int incomingSize = 0;
-    fwrite(&incomingSize, sizeof(int), 1, f);
-
-    // for each incoming atom, it will be written on the file and the number
-    // of incoming atoms will be incremented
-    for (HandleEntry *p = atom->incoming; p != NULL; p = p->next) {
-        fwrite(&p->handle, sizeof(Handle), 1, f);
-        incomingSize++;
-    }
-
-    // rewind to position where incomming set size must be written
-    fseek(f, incomingOffset, SEEK_SET);
-
-    // writes incomming set size in the proper position
-    fwrite(&incomingSize, sizeof(int), 1, f);
-
-    // returns the pointer back to the end of the file
-    fseek(f, 0, SEEK_END);
+    // incoming references will be re-created during the loading process
 
     // writes the Attention Value
     writeAttentionValue(f, atom->getAttentionValue());
@@ -508,13 +460,6 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
 {
     logger().fine("SavingLoading::readAtom()");
 
-    // reads the atom type
-    //atom->type
-    fread(&atom->type, sizeof(Type), 1, f);
-//    if((int)type > ClassServer::getNumberOfClasses()){
-//        fprintf(stdout, "Undefined type read %d\n", type);
-//        fflush(stdout);
-//    }
 
     // reads the atom flags
     fread(&atom->flags, sizeof(char), 1, f);
@@ -528,21 +473,6 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
         logger().fine("Added handles in map: %p => %p (type = %d)", atomHandle.value(), atom, atom->getType());
     } else {
         logger().warn("No HandleMap while reading atom from file: %p (type = %d)", atom, atom->getType());
-    }
-
-    // Put it into the atom into the TLB with the correct value!
-    Handle existingHandle = TLB::holdsHandle(atom);
-    if (TLB::isInvalidHandle(existingHandle)) TLB::addAtom(atom, atomHandle);
-    else logger().warn(" Handle already exists in the TLB!!\n");
-
-    // reads the incoming set of the atom, including the number of incoming
-    // atoms
-    int incomingSize;
-    fread(&incomingSize, sizeof(int), 1, f);
-    for (int i = 0; i < incomingSize; i++) {
-        Handle incomingHandle;
-        fread(&incomingHandle, sizeof(Handle), 1, f);
-        atom->addIncomingHandle(incomingHandle);
     }
 
     // reads AttentionValue
@@ -569,11 +499,9 @@ void SavingLoading::writeNode(FILE *f, Node *node)
     }
 }
 
-Node* SavingLoading::readNode(FILE *f, HandleMap<Atom *> *handles)
+void SavingLoading::readNode(FILE *f, Node* node, HandleMap<Atom *> *handles) 
 {
     logger().fine("SavingLoading::readNode()");
-    // a new node is created
-    Node *node = new Node(NODE, "");
 
     // the atom properties of the node is read from the file
     readAtom(f, handles, node);
@@ -589,7 +517,6 @@ Node* SavingLoading::readNode(FILE *f, HandleMap<Atom *> *handles)
         delete[](name);
     }
 
-    return node;
 }
 
 void SavingLoading::writeLink(FILE *f, Link *link)
@@ -636,6 +563,7 @@ void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attention
 void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv)
 {
     string tvStr = tv.toString();
+    logger().info( "SavingLoading::writeTruthValue() tvStr = %s\n", tvStr.c_str());
     TruthValueType type = tv.getType();
     int length = tvStr.size();
 
@@ -672,16 +600,15 @@ TruthValue *SavingLoading::readTruthValue(FILE *f)
     tvStr[length] = '\0';
 
     //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
+    logger().info("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     TruthValue* result = TruthValue::factory(type, tvStr);
     delete[] tvStr;
     return result;
 }
 
-Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
+void SavingLoading::readLink(FILE *f, Link *link, HandleMap<Atom *> *handles)
 {
-    // a new link is created
-    Link *link = new Link(LINK, std::vector<Handle>());
-
+    logger().fine("SavingLoading::readLink()");
     readAtom(f, handles, link);
 
     // the link's arity is read from the file
@@ -692,7 +619,7 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
     for (int i = 0; i < arity; i++) {
         Handle h;
         fread(&h, sizeof(Handle), 1, f);
-        link->outgoing.push_back(h);
+        link->outgoing.push_back( TLB::getHandle( handles->get(h) ) );
     }
 
     // the trail
@@ -702,10 +629,8 @@ Link *SavingLoading::readLink(FILE *f, HandleMap<Atom *> *handles)
     for (int i = 0; i < trailSize; i++) {
         Handle handle;
         fread(&handle, sizeof(Handle), 1, f);
-        trail->insert(handle, false);
+        trail->insert( handle, false);
     }
-
-    return link;
 }
 
 void SavingLoading::printProgress(const char *s, int n)
