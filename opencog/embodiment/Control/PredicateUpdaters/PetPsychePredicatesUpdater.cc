@@ -36,7 +36,7 @@
 using namespace OperationalPetController;
 using namespace opencog;
 
-PetPsychePredicatesUpdater::PetPsychePredicatesUpdater(SpaceServer &_spaceServer ) : BasicPredicateUpdater(_spaceServer.getAtomSpace()), spaceServer(_spaceServer)
+PetPsychePredicatesUpdater::PetPsychePredicatesUpdater(AtomSpace &_atomSpace ) : BasicPredicateUpdater(_atomSpace)
 	{
 
 	this->latestSimWorldTimestamp = 0L;
@@ -46,7 +46,7 @@ PetPsychePredicatesUpdater::~PetPsychePredicatesUpdater(){
 }
 
 Spatial::Math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Handle agent) {
-  const SpaceServer::SpaceMap& spaceMap = spaceServer.getLatestMap( );
+  const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap( );
 
   const Spatial::EntityPtr& entity = spaceMap.getEntity( atomSpace.getName(agent) );
 
@@ -117,13 +117,13 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
   } // if
  
   // there is no map, no update is possible
-  Handle spaceMapHandle = spaceServer.getLatestMapHandle();
+  Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
   if (spaceMapHandle == Handle::UNDEFINED) {
     logger().log(opencog::Logger::INFO, "PetPsychePredicatesUpdater - there is no space map defined at this moment..." );
     return;
   } // if
 
-  const SpaceServer::SpaceMap& spaceMap = spaceServer.getLatestMap();
+  const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
     
   const std::string& petName = atomSpace.getName(pet);
   if ( !spaceMap.containsObject(petName) ) {
@@ -228,7 +228,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
       velocity.normalise( );
 
       // retrieve pet and target metadata
-      const Spatial::LocalSpaceMap2D& map = spaceServer.getLatestMap();
+      const Spatial::LocalSpaceMap2D& map = atomSpace.getSpaceServer().getLatestMap();
       const Spatial::EntityPtr& targetEntity = map.getEntity( entity );
       //const Spatial::Object& targetObject = map.getObject( entity );
       const Spatial::EntityPtr& agentEntity = map.getEntity( atomSpace.getName(pet) );

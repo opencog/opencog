@@ -30,13 +30,12 @@ class RunningBuiltInProcedureUTest :  public CxxTest::TestSuite {
 
         void testOk() {
             AtomSpace as;
-            SpaceServer spaceServer(as);
             
             Control::SystemParameters sp;
             std::list<ActionPlan> plans;
             OKActionPlanSender ap(plans);
             PetInterfaceMock pi;
-            PAI pai(spaceServer, ap, pi, sp);
+            PAI pai(as, ap, pi, sp);
             pi.setPAI(&pai);
             std::vector<combo::vertex> arguments; 
 	    PetActionSchema p(pai, ActionType::BARK());
@@ -58,12 +57,11 @@ class RunningBuiltInProcedureUTest :  public CxxTest::TestSuite {
             
         void testFailure() {
             AtomSpace as;
-            SpaceServer spaceServer(as);
             
             Control::SystemParameters sp;
             FailureActionPlanSender ap;
             PetInterfaceMock pi;
-            PAI pai(spaceServer, ap, pi, sp);
+            PAI pai(as, ap, pi, sp);
             pi.setPAI(&pai);
             PetActionSchema p(pai, ActionType::BARK());
             std::vector<combo::vertex> arguments; 

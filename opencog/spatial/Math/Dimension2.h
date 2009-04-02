@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef DIMENSION2_H
-#define DIMENSION2_H
+#ifndef _SPATIAL_MATH_DIMENSION2_H_
+#define _SPATIAL_MATH_DIMENSION2_H_
 
 #include <opencog/spatial/Prerequisites.h>
 #include <sstream>
@@ -59,7 +59,7 @@ namespace Spatial {
       float height;
     };
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // DIMENSION2_H
+#endif // _SPATIAL_MATH_DIMENSION2_

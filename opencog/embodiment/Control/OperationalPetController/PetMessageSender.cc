@@ -49,9 +49,9 @@ bool PetMessageSender::sendReward(const std::string &schema, const std::vector<s
 bool PetMessageSender::sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, 
                                    const std::string &ownerId,
                                    const std::string &avatarId,
-								   SpaceServer &spaceServer){
+								   AtomSpace &atomSpace){
 								   	
-	LearningServerMessages::LearnMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schema, schemaArguments, ownerId, avatarId, spaceServer);
+	LearningServerMessages::LearnMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schema, schemaArguments, ownerId, avatarId, atomSpace);
     logger().log(opencog::Logger::DEBUG, "PetMessageSender - sending exemplar message for schema '%s'.", schema.c_str()); 
 	return ne->sendMessage(msg);
 }

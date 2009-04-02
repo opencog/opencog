@@ -155,11 +155,11 @@ void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc) {
 
 void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc) {
 
-    if (! opc->getSpaceServer().isLatestMapValid()) {
+    if (! opc->getAtomSpace().getSpaceServer().isLatestMapValid()) {
         return;
     }
 
-    const SpaceServer::SpaceMap& latestMap = opc->getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& latestMap = opc->getAtomSpace().getSpaceServer().getLatestMap();
     //HandleSeq objectHandles;
     std::vector<std::string> objectIds;
     latestMap.getAllObjects(back_inserter(objectIds));

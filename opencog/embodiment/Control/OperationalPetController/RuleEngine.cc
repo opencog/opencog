@@ -336,7 +336,7 @@ void RuleEngine::updateKnownEntities()
 
     // update objects, avatars
     const SpaceServer::SpaceMap& spaceMap =
-        this->opc->getSpaceServer().getLatestMap();
+        this->opc->getAtomSpace().getSpaceServer().getLatestMap();
 
     std::vector<std::string> entities;
     spaceMap.findAllEntities(back_inserter(entities));
@@ -1408,13 +1408,13 @@ void RuleEngine::processNextAction( void )
     bool enable_rand_wild_card = boost::lexical_cast<bool>(parameters.get("RE_WILD_CARD_RANDOM_SELECTION"));
 
     // Process next action only if there is map info data available...
-    if ( this->opc->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
+    if ( this->opc->getAtomSpace().getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().log(opencog::Logger::WARN,
                         "RuleEngine - There is no map info available yet!");
         return;
     }
     // ... and pet spatial info is already received
-    if ( !this->opc->getSpaceServer().getLatestMap().containsObject(petName) ) {
+    if ( !this->opc->getAtomSpace().getSpaceServer().getLatestMap().containsObject(petName) ) {
         logger().log(opencog::Logger::ERROR,
                         "RuleEngine - Pet was not inserted in the space map yet!" );    
         return;

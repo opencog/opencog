@@ -6,11 +6,10 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#ifndef _OPENCOG_FOREACH_H
-#define _OPENCOG_FOREACH_H
+#ifndef _OPENCOG_ATOMSPACE_FOREACH_H
+#define _OPENCOG_ATOMSPACE_FOREACH_H
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/TLB.h>
 
@@ -97,4 +96,4 @@ inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
 
 } // namespace opencog
 
-#endif // _OPENCOG_FOREACH_H
+#endif // _OPENCOG_ATOMSPACE_FOREACH_H

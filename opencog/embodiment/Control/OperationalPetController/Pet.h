@@ -71,13 +71,12 @@ namespace OperationalPetController {
     PetMode mode;
     std::map<PetMode, Control::AgentModeHandler*> modeHandler;
     
-    // opc componets received as constructor parameter
-    SpaceServer * spaceServer;
-    AtomSpace * atomSpace;
-    MessageSender * sender;		
-    RuleEngine * ruleEngine;
+    // opc components received as constructor parameter
+    AtomSpace* atomSpace;
+    MessageSender* sender;		
+    RuleEngine* ruleEngine;
 
-    PerceptionActionInterface::PAI * pai;
+    PerceptionActionInterface::PAI* pai;
     
     std::string exemplarAvatarId;       // the Id of the avatar that is 
     // performing the exemplars 
@@ -144,7 +143,7 @@ namespace OperationalPetController {
      * @param atomSpace A atomSpace with the Pet short memory AtomTable.
      */
     Pet(const std::string& petId, const std::string& petName, const std::string& agentType, 
-        const std::string& agentTraits, const std::string& ownerID, SpaceServer * spaceServer, MessageSender * sender);
+        const std::string& agentTraits, const std::string& ownerID, AtomSpace* atomSpace, MessageSender* sender);
     ~Pet();
 
     /**
@@ -226,7 +225,7 @@ namespace OperationalPetController {
      * 
      * @return The pet newly created.
      */
-    static Pet * importFromFile(const std::string& filename, const std::string& petId, SpaceServer * spaceServer, MessageSender * sender);
+    static Pet* importFromFile(const std::string& filename, const std::string& petId, AtomSpace* atomSpace, MessageSender* sender);
 		
     /**
      * Save pet metadata into file.
@@ -239,7 +238,6 @@ namespace OperationalPetController {
     // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined above): 
                  
     AtomSpace& getAtomSpace();
-    SpaceServer& getSpaceServer();
         
     void stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp);
         

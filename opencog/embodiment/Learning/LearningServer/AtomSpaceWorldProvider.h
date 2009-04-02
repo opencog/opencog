@@ -28,18 +28,15 @@
 
 class AtomSpaceWorldProvider : public WorldProvider {
 
-    SpaceServer& spaceServer;
+    AtomSpace& atomSpace;
 
     public:
-        AtomSpaceWorldProvider(SpaceServer& _spaceServer): spaceServer(_spaceServer) {}
+        AtomSpaceWorldProvider(AtomSpace& _atomSpace): atomSpace(_atomSpace) {}
         unsigned long getLatestSimWorldTimestamp() const {
-            return spaceServer.getAtomSpace().getTimeServer().getLatestTimestamp();
+            return atomSpace.getTimeServer().getLatestTimestamp();
         }
         AtomSpace& getAtomSpace() const {
-            return spaceServer.getAtomSpace();
-        }
-        SpaceServer& getSpaceServer() const {
-        	return spaceServer;
+            return atomSpace;
         }
 };
 

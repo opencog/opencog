@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef VECTOR4_H
-#define VECTOR4_H
+#ifndef _SPATIAL_MATH_VECTOR4_H_
+#define _SPATIAL_MATH_VECTOR4_H_
 
 #include "Vector3.h"
 
@@ -86,7 +86,7 @@ namespace Spatial {
       
     }; // Vector4
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // VECTOR4_H
+#endif // _SPATIAL_MATH_VECTOR4_H_

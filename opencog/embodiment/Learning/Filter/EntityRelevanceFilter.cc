@@ -70,21 +70,21 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
 							     Type type) const {
   definite_object_set result;
   //get all maps that span over the exemplars of the trick
-  Handle h = wp.getSpaceServer().getAtomSpace().getHandle(CONCEPT_NODE, trick_name);
+  Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trick_name);
   opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
           "EntityRelevanceFilter - There is no CONCEPT_NODE in AtomSpace for trick '%s'.",
           trick_name.c_str());
   std::list<HandleTemporalPair> retP;
-  wp.getSpaceServer().getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+  wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
 				 Temporal(wp.getLatestSimWorldTimestamp()),
 				 TemporalTable::STARTS_BEFORE);
   for(std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
       ip != retP.end(); ++ip) {
     Temporal temp = *(ip->getTemporal());
     HandleSeq resmh;
-    wp.getSpaceServer().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
+    wp.getAtomSpace().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
     foreach(Handle h, resmh) {
-      SpaceServer::SpaceMap spacemap = wp.getSpaceServer().getMap(h);
+      SpaceServer::SpaceMap spacemap = wp.getAtomSpace().getSpaceServer().getMap(h);
       //then make union of the object of that map with the result
       EntityRelevanceFilter erf(spacemap, selfID, ownerID);
       definite_object_set ires = erf.getEntities();
@@ -103,10 +103,10 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
 						     bool strict_within) const {
   message_set res;
   //get all temporals denoting the start and end of the exemplars of the trick
-  Handle h = wp.getSpaceServer().getAtomSpace().getHandle(CONCEPT_NODE, trickName);
+  Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trickName);
   if(h != Handle::UNDEFINED) {
     std::list<HandleTemporalPair> retP;
-    wp.getSpaceServer().getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+    wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
 				   Temporal(wp.getLatestSimWorldTimestamp()),
 				   TemporalTable::STARTS_BEFORE);
     for(std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
@@ -127,11 +127,11 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
 						     const std::string& toID,
 						     bool exclude_prefix,
 						     bool strict_within) const {
-  return getMessages(wp.getSpaceServer(), t, toID, exclude_prefix,
+  return getMessages(wp.getAtomSpace(), t, toID, exclude_prefix,
 		     strict_within);
 }
 
-const message_set EntityRelevanceFilter::getMessages(const SpaceServer& spaceServer,
+const message_set EntityRelevanceFilter::getMessages(const AtomSpace& atomSpace,
 						     Temporal t,
 						     const std::string& toID,
 						     bool exclude_prefix,
@@ -139,18 +139,18 @@ const message_set EntityRelevanceFilter::getMessages(const SpaceServer& spaceSer
   message_set res;
   //check if all atoms of the structure to find are present
   //returns the empty set of messages if one is missing
-  Handle action_done_h = spaceServer.getAtomSpace().getHandle(PREDICATE_NODE,
+  Handle action_done_h = atomSpace.getHandle(PREDICATE_NODE,
 				      ACTION_DONE_PREDICATE_NAME);
   if(action_done_h == Handle::UNDEFINED)
     return res;
-  Handle say_h = spaceServer.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
+  Handle say_h = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
   if(say_h == Handle::UNDEFINED)
     return res;
   if(strict_within)
     t = Temporal(t.getLowerBound()+1, t.getUpperBound()-1);
 
   std::list<HandleTemporalPair> htp;
-  spaceServer.getAtomSpace().getTimeInfo(back_inserter(htp),
+  atomSpace.getTimeInfo(back_inserter(htp),
 		 Handle::UNDEFINED,
 		 t, TemporalTable::STARTS_WITHIN);
   //define template to match
@@ -171,7 +171,7 @@ const message_set EntityRelevanceFilter::getMessages(const SpaceServer& spaceSer
                                 NULL
 			                );
 			            
-  does_fit_template dft(*say_template, &spaceServer.getAtomSpace(), true);
+  does_fit_template dft(*say_template, &atomSpace, true);
   for(std::list<HandleTemporalPair>::iterator i = htp.begin();
       i != htp.end(); ++i) {
     Handle evalLink_h = i->getHandle();
@@ -182,14 +182,14 @@ const message_set EntityRelevanceFilter::getMessages(const SpaceServer& spaceSer
       //0 points to ExecutionLink
       //1 points to ListLink
       //1 points to SentenceNode
-      Handle listLink_h = spaceServer.getAtomSpace().getOutgoing(evalLink_h,1);
-      Handle executionLink_h = spaceServer.getAtomSpace().getOutgoing(listLink_h,0);
-      listLink_h = spaceServer.getAtomSpace().getOutgoing(executionLink_h,1);
-      Handle sentence_h = spaceServer.getAtomSpace().getOutgoing(listLink_h,1);
+      Handle listLink_h = atomSpace.getOutgoing(evalLink_h,1);
+      Handle executionLink_h = atomSpace.getOutgoing(listLink_h,0);
+      listLink_h = atomSpace.getOutgoing(executionLink_h,1);
+      Handle sentence_h = atomSpace.getOutgoing(listLink_h,1);
 
       opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(sentence_h)),
 	      "Failed to dynamically cast sentence_h to a 'Node'.");
-      std::string message_str = spaceServer.getAtomSpace().getName(sentence_h);
+      std::string message_str = atomSpace.getName(sentence_h);
       if(exclude_prefix) {
 	std::string pref = string("to:") + toID + string(": ");
 	//check if the message is for toID
@@ -214,16 +214,16 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const WorldProvide
 							      const std::set<string>& exclude_set) const {
   agent_to_actions res;
   //get all temporals denoting the start and end of the exemplars of the trick
-  Handle h = wp.getSpaceServer().getAtomSpace().getHandle(CONCEPT_NODE, trick);
+  Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trick);
   if(h != Handle::UNDEFINED) {
     std::list<HandleTemporalPair> retP;
-    wp.getSpaceServer().getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+    wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
 						   Temporal(wp.getLatestSimWorldTimestamp()),
 						   TemporalTable::STARTS_BEFORE);
     for(std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
 	ip != retP.end(); ++ip) {
       Temporal temp = *(ip->getTemporal());
-      agent_to_actions atas = getAgentActions(wp.getSpaceServer().getAtomSpace(),
+      agent_to_actions atas = getAgentActions(wp.getAtomSpace(),
 					      temp, selfID, ownerID, exclude_set);
       //insert all elements of atas in res
       for(agent_to_actions_const_it atas_it = atas.begin();
@@ -249,7 +249,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const WorldProvide
 							      const std::string& selfID,
 							      const std::string& ownerID,
 							      const std::set<string>& exclude_set) const {
-  return getAgentActions(wp.getSpaceServer().getAtomSpace(), t, selfID, ownerID, exclude_set);
+  return getAgentActions(wp.getAtomSpace(), t, selfID, ownerID, exclude_set);
 }
 
 const agent_to_actions EntityRelevanceFilter::getAgentActions(const AtomSpace& as,

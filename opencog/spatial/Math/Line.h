@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef LINE_H
-#define LINE_H
+#ifndef _SPATIAL_MATH_LINE_H_
+#define _SPATIAL_MATH_LINE_H_
 
 #include "Vector3.h"
 
@@ -117,7 +117,7 @@ namespace Spatial {
       Vector3 pointB;        
     };
     
-  }; // Spatial
-}; // Math
+  } // Math
+} // Spatial
 
-#endif // LINE_H
+#endif // _SPATIAL_MATH_LINE_H_

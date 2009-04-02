@@ -99,6 +99,7 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     saveLinks(f, atomTable, atomCount);
 
     atomSpace.timeServer.saveRepository(f);
+    atomSpace.spaceServer->saveRepository(f);
     saveRepositories(f);
 
     // closes the file
@@ -299,6 +300,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
 
 
     atomSpace.timeServer.loadRepository(f, handles);
+    atomSpace.spaceServer->loadRepository(f, handles);
     loadRepositories(f, handles);
 
     delete handles;

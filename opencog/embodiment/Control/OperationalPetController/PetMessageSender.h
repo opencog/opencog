@@ -52,7 +52,7 @@ class PetMessageSender : public MessageSender {
 		/**
 		 * 
 		 */
-		bool sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &ownerId, const std::string &avatarId, SpaceServer &spaceServer);
+		bool sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &ownerId, const std::string &avatarId, AtomSpace &atomSpace);
 	
 		/**
 		 * 

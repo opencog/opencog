@@ -110,8 +110,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
             delete(atomSpace); //it may be null expect perhaps the first time
             atomSpace = new AtomSpace(); //atomSpace is a protective member of
                                          //BaseServer
-            SpaceServer *ss = new SpaceServer(atomspace());
-            wp = new AtomSpaceWorldProvider(*ss);
+            wp = new AtomSpaceWorldProvider(*atomSpace);
             learningPet = lm->getFrom();
             learningSchema = lm->getSchema();
 
@@ -245,7 +244,7 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
 {
     logger().log(opencog::Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
 
-    bool result = msg->populateAtomSpace(wp->getSpaceServer());
+    bool result = msg->populateAtomSpace(wp->getAtomSpace());
     if (!result) {
         // TODO: do something when fails
         logger().log(opencog::Logger::WARN, "LS - initLearn():  failed to populate AtomSpace.");
@@ -299,7 +298,7 @@ void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
     logger().log(opencog::Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
 
     // TODO: do something when resul equals false
-    bool result = msg->populateAtomSpace(wp->getSpaceServer());
+    bool result = msg->populateAtomSpace(wp->getAtomSpace());
     if (!result) {
         // TODO: do something when fails
         logger().log(opencog::Logger::WARN, "LS - addLearnExample(): failed to populate AtomSpace.");

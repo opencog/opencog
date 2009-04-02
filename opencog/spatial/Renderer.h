@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef RENDERER_H
-#define RENDERER_H
+#ifndef _SPATIAL_RENDERER_H_
+#define _SPATIAL_RENDERER_H_
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_gfxPrimitives.h>
@@ -60,6 +60,6 @@ namespace Spatial {
         SDL_Surface* screen;
     };
 
-}; // Spatial
+} // Spatial
 
 #endif

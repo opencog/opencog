@@ -31,7 +31,7 @@ class PAIWorldProvider : public WorldProvider
 public:
   PAIWorldProvider(PerceptionActionInterface::PAI* _pai);
   unsigned long getLatestSimWorldTimestamp() const;
-  SpaceServer& getSpaceServer() const;
+  AtomSpace& getAtomSpace() const;
 };
 
 #endif

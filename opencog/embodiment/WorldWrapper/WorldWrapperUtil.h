@@ -22,18 +22,17 @@
 #ifndef _WORLDWRAPPERUTIL_H
 #define _WORLDWRAPPERUTIL_H
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/variable_unifier.h"
-#include "comboreduct/combo/definite_object.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/variable_unifier.h>
+#include <opencog/comboreduct/combo/definite_object.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "SystemParameters.h"
 #include "PetComboVocabulary.h"
 #include "WorldWrapperUtilCache.h"
-#include <opencog/atomspace/SpaceServer.h>
 #include "NetworkElement.h"
 
 #include <exception>
@@ -68,7 +67,7 @@ private:
         getDefiniteObjects(opencog::RandGen& rng,
                            Handle smh,
                            unsigned long time,
-                           const SpaceServer& spaceServer,
+                           const AtomSpace& atomSpace,
                            const string& self_id,
                            const string& owner_id,
                            combo::vertex& v,
@@ -122,7 +121,7 @@ private:
      * @param rng          random number generator
      * @param smh          a SpaceMap Handle
      * @param time         world timestamp at which the evaluation occurs
-     * @param spaceServer  the SpaceServer
+     * @param atomSpace    the AtomSpace
      * @param self_id      the agent's id
      * @param owner_id     the agent's owner id
      * @param it           iterator to the combo script tree
@@ -134,7 +133,7 @@ private:
     static float getEmotionalFeelingOrTrait(opencog::RandGen& rng,
                                             Handle smh,
                                             unsigned long time,
-                                            const SpaceServer& spaceServer,
+                                            const AtomSpace& atomSpace,
                                             const string& self_id,
                                             const string& owner_id,
                                             const combo::combo_tree::iterator it,
@@ -263,7 +262,7 @@ public:
     static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
                                               Handle smh,
                                               unsigned long time,
-                                              const SpaceServer& spaceServer,
+                                              const AtomSpace& atomSpace,
                                               const string& self_id,
                                               const string& owner_id,
                                               combo::indefinite_object io,
@@ -275,7 +274,7 @@ public:
     static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
                                               Handle smh,
                                               unsigned long time,
-                                              const SpaceServer& spaceServer,
+                                              const AtomSpace& atomSpace,
                                               const string& self_id,
                                               const string& owner_id,
                                               combo::pet_indefinite_object_enum ioe,
@@ -295,7 +294,7 @@ public:
     static combo::vertex evalPerception(opencog::RandGen& rng,
                                         Handle smh,
                                         unsigned long time,
-                                        const SpaceServer& spaceServer,
+                                        const AtomSpace& atomSpace,
                                         const string& self_id,
                                         const string& owner_id,
                                         const combo::combo_tree::iterator it,

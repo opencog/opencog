@@ -35,7 +35,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "util/Logger.h"
-#include <opencog/atomspace/SpaceServer.h>
 #include "AgentModeHandler.h"
 
 using namespace opencog;
@@ -51,7 +50,6 @@ namespace Control {
     virtual const std::string& getExemplarAvatarId() const=0;
 
     virtual AtomSpace& getAtomSpace()=0;
-    virtual SpaceServer& getSpaceServer()=0;
 
     virtual void stopExecuting(const vector<string> &commandStatement, unsigned long timestamp)=0;
 
@@ -152,11 +150,11 @@ namespace Control {
      */
     void saveSpaceMapFile() {
       logger().log(opencog::Logger::DEBUG,  "PetInterface - saveSpaceMapFile()."); 
-      if (!getSpaceServer().isLatestMapValid()) {
+      if (!getAtomSpace().getSpaceServer().isLatestMapValid()) {
 	logger().log(opencog::Logger::WARN,  "PetInterface - There is no space map yet."); 
 	return;
       }
-      const SpaceServer::SpaceMap& sm = getSpaceServer().getLatestMap();
+      const SpaceServer::SpaceMap& sm = getAtomSpace().getSpaceServer().getLatestMap();
       static unsigned int mapCounter = 0;
       std::stringstream fileName;
       fileName << "ww_mapPersistence_";

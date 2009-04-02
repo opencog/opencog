@@ -9,7 +9,7 @@
 #include <opencog/util/misc.h>
 
 /* #include "CompareAtomTreeTemplate.h" */
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "EntityRelevanceFilter.h"
 #include "PredefinedProcedureNames.h"
 #include "PetComboVocabulary.h"
@@ -37,7 +37,6 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
     
     private:
         AtomSpace *atomSpace;
-        SpaceServer *spaceServer;
         EntityRelevanceFilter * filter;
         
         std::string pet;
@@ -79,7 +78,6 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
         bone = "bone";
 
         atomSpace = new AtomSpace();
-        spaceServer = new SpaceServer(*atomSpace);
         cout << "as and ss created" << endl;
 
         std::string test1 = "test1";
@@ -105,15 +103,14 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
     
     ~EntityRelevanceFilterUTest () {
         printf("~EntityRelevanceFilterUTest()\n");
-        delete spaceServer;
         delete atomSpace;
     }
 
     void setUp() {
-        spaceServer->addSpaceInfo(true, pet_h, 0, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        spaceServer->addSpaceInfo(true, avatar_h, 0, 100, 80, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        spaceServer->addSpaceInfo(true, ball_h, 0, 92, 88, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-	    spaceServer->addSpaceInfo(true, meat_h, 0, 100, 90, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, pet_h, 0, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, avatar_h, 0, 100, 80, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, ball_h, 0, 92, 88, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+	    atomSpace->addSpaceInfo(true, meat_h, 0, 100, 90, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
 
 		//add say sentence1 and say sentence 2 perception
 		Handle sentence1_h = atomSpace->addNode(SENTENCE_NODE, str1);
@@ -194,7 +191,7 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
     //}
 
     void testGetEntities(){
-        filter = new EntityRelevanceFilter(spaceServer->getLatestMap(), pet, avatar);
+        filter = new EntityRelevanceFilter(atomSpace->getSpaceServer().getLatestMap(), pet, avatar);
         std::set<std::string> ent = filter->getEntities();
         
         TS_ASSERT(ent.size() == 4);
@@ -208,12 +205,12 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
     
     void testSecondMap(){
         
-        spaceServer->addSpaceInfo(true, pet_h, T2, 100, 80, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        spaceServer->addSpaceInfo(true, avatar_h, T2, 80,  90, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        spaceServer->addSpaceInfo(true, bone_h, T2, 85, 85, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        spaceServer->addSpaceInfo(true, stick_h, T2, 95, 95, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, pet_h, T2, 100, 80, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, avatar_h, T2, 80,  90, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, bone_h, T2, 85, 85, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, stick_h, T2, 95, 95, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
         
-        filter = new EntityRelevanceFilter(spaceServer->getLatestMap(), "pet", "avatar");
+        filter = new EntityRelevanceFilter(atomSpace->getSpaceServer().getLatestMap(), "pet", "avatar");
         std::set<std::string> ent = filter->getEntities();
         
         // additive maps
@@ -236,8 +233,8 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
 
     void test_getMessages() {
       EntityRelevanceFilter filter;
-      std::set<combo::message> messages1 = filter.getMessages(*spaceServer, Temporal(T1l, T1u));
-      std::set<combo::message> messages2 = filter.getMessages(*spaceServer, Temporal(T2l, T2u));
+      std::set<combo::message> messages1 = filter.getMessages(*atomSpace, Temporal(T1l, T1u));
+      std::set<combo::message> messages2 = filter.getMessages(*atomSpace, Temporal(T2l, T2u));
 
       atomSpace->print();
 
@@ -258,7 +255,7 @@ class EntityRelevanceFilterUTest : public CxxTest::TestSuite{
 
     void test_getAgentAction() {
       EntityRelevanceFilter filter;
-      AtomSpaceWorldProvider wp(*spaceServer);
+      AtomSpaceWorldProvider wp(*atomSpace);
 
       agent_to_actions atas = filter.getAgentActions(wp, Temporal(T1l, T1u), "dummy_self_id", "dummy_owner_id");
 

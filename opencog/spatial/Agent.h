@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef _SPATIAL_AGENT_H_
+#define _SPATIAL_AGENT_H_
 
 #include "MovableEntity.h"
 
@@ -54,6 +54,6 @@ namespace Spatial {
 
   }; // Agent
 
-}; // Spatial
+} // Spatial
 
-#endif // AGENT_H
+#endif // _SPATIAL_AGENT_H_

@@ -233,7 +233,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         argument_type_list atl(_arity, type_tree(id::definite_object_type));
 
         _entropyFilter = new EntropyFilter(_avatar_id, _owner_id,
-                                           wp->getSpaceServer(),
+                                           wp->getAtomSpace(),
                                            ep, io, _definite_objects, _messages,
                                            _atas,
                                            atl,

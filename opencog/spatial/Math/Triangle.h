@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef TRIANGLE_H
-#define TRIANGLE_H
+#ifndef _SPATIAL_MATH_TRIANGLE_H_
+#define _SPATIAL_MATH_TRIANGLE_H_
 
 #include "Vector3.h"
 
@@ -80,7 +80,7 @@ namespace Spatial {
       Vector3 pointC;
     }; 
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // TRIANGLE_H
+#endif // _SPATIAL_MATH_TRIANGLE_H_

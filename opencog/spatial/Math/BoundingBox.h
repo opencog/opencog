@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BOUNDINGBOX_H
-#define BOUNDINGBOX_H
+#ifndef _SPATIAL_MATH_BOUNDINGBOX_H_
+#define _SPATIAL_MATH_BOUNDINGBOX_H_
 
 #include <vector>
 #include "Vector3.h"
@@ -124,7 +124,7 @@ namespace Spatial {
 
     }; // BoundingBox
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // BOUNDINGBOX_H
+#endif // _SPATIAL_MATH_BOUNDINGBOX_H_

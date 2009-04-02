@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef HPASEARCH_H
-#define HPASEARCH_H
+#ifndef _SPATIAL_HPASEARCH_H_
+#define _SPATIAL_HPASEARCH_H_
 
 #include "LocalSpaceMap2D.h"
 #include <boost/graph/adjacency_list.hpp>
@@ -199,6 +199,6 @@ namespace Spatial {
 
   };
 
-}; // Spatial
+} // Spatial
 
 #endif

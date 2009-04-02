@@ -1,5 +1,5 @@
-#ifndef _OPENCOG_FOREACH_H
-#define _OPENCOG_FOREACH_H
+#ifndef _OPENCOG_UTIL_FOREACH_H
+#define _OPENCOG_UTIL_FOREACH_H
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/foreach.hpp>

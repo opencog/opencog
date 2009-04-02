@@ -62,8 +62,8 @@ using namespace opencog;
 #define REGEX_OUTPUT_SIZE 8
 
 
-PAI::PAI(SpaceServer& _spaceServer, ActionPlanSender& _actionSender, PetInterface& _petInterface, SystemParameters& _systemParameters, unsigned long nextPlanID) :
-            spaceServer(_spaceServer), atomSpace(_spaceServer.getAtomSpace()), actionSender(_actionSender), petInterface(_petInterface), systemParameters(_systemParameters), nextActionPlanId(nextPlanID) {
+PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _petInterface, SystemParameters& _systemParameters, unsigned long nextPlanID) :
+            atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), systemParameters(_systemParameters), nextActionPlanId(nextPlanID) {
     PAIUtils::initializeXMLPlatform();
     predaveseParser = new PredaveseParser(petInterface, systemParameters);
     predaveseParser->Create();
@@ -71,7 +71,7 @@ PAI::PAI(SpaceServer& _spaceServer, ActionPlanSender& _actionSender, PetInterfac
     yMin = -1;
     xMax = -1;
     yMax = -1;
-    petRadius = -1;
+    agentRadius = -1;
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&plock, NULL);
@@ -114,8 +114,8 @@ PAI::~PAI() {
     //PAIUtils::terminateXMLPlatform();
 }
 
-SpaceServer& PAI::getSpaceServer() {
-    return spaceServer;
+AtomSpace& PAI::getAtomSpace() {
+    return atomSpace;
 }
 
 PetInterface& PAI::getPetInterface(){
@@ -1444,6 +1444,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     unsigned int xDim = atoi(systemParameters.get(std::string("MAP_XDIM")).c_str());
     unsigned int yDim = atoi(systemParameters.get(std::string("MAP_YDIM")).c_str());
 
+    SpaceServer& spaceServer = atomSpace.getSpaceServer();
     spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim);
 
     bool keepPreviousMap = petInterface.isExemplarInProgress();
@@ -1529,7 +1530,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         string internalEntityId = PAIUtils::getInternalId(entityId);
          
         bool isPetObject = (internalEntityId == petInterface.getPetId());
-	bool isPetOwner = (internalEntityId == petInterface.getOwnerId()); 
+        bool isPetOwner = (internalEntityId == petInterface.getOwnerId()); 
         // NOTE: blip for the pet itself should be the first one. This way, owner's id will be already known 
         // at petInterface when blip for the onwer comes.
 
@@ -1593,7 +1594,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         toUpdateHandles.push_back(objectNode);
 
         if (objRemoval) {
-            spaceServer.removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
+            atomSpace.removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
             
             // check if the object to be removed is marked as grabbed in 
             // PetInterface. If so grabbed status should be unset.
@@ -1672,7 +1673,11 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosYStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosOffsetStr);
 
-    if (!keepPreviousMap) spaceServer.cleanupSpaceServer();
+    // TODO: Check if this is really needed. It seems ImportanceDecayAgent 
+    // will eventually remove the atoms that represents the space maps and, this
+    // way, these maps will be removed from spaceServer as well throught the 
+    // AtomSpace::atomRemoved() method connected to removal signal of AtomSpace.
+    if (!keepPreviousMap) atomSpace.cleanupSpaceServer();
 
 }    
 
@@ -1958,8 +1963,8 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
 
         // If the object is the Pet, save its radius for new space maps 
         if (isSelfObject) {
-            petRadius = sqrt(length*length + width*width)/2;
-            spaceServer.setPetRadius(petRadius);
+            agentRadius = sqrt(length*length + width*width)/2;
+            atomSpace.getSpaceServer().setAgentRadius(agentRadius);
         }
     } else {
         // Get the length, width and height of the object
@@ -2010,7 +2015,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
 
     logger().log(opencog::Logger::DEBUG, "PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent?"t":"f"), (hasPetHeight?"t":"f"), (isObstacle?"t":"f"), height, pet_height, (isPickupable?"t":"f"), (isSelfObject?"t":"f") );
 
-    return spaceServer.addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, length, width, height, rotation.yaw, isObstacle);
+    return atomSpace.addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, length, width, height, rotation.yaw, isObstacle);
 }            
  
 Handle PAI::addPhysiologicalFeelingParam(const char* paramName, 

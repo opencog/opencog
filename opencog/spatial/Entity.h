@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef ENTITY_H
-#define ENTITY_H
+#ifndef _SPATIAL_ENTITY_H_
+#define _SPATIAL_ENTITY_H_
 
 #include "Math/Dimension3.h"
 #include "Math/BoundingBox.h"
@@ -288,6 +288,6 @@ namespace Spatial {
 
   typedef __gnu_cxx::hash_map<long, EntityPtr, __gnu_cxx::hash<long> > LongEntityPtrHashMap;
   
-}; // Spatial
+} // Spatial
 
-#endif // ENTITY_H
+#endif // _SPATIAL_ENTITY_H_

@@ -26,7 +26,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <atom_types.h>
 
-#include <opencog/atomspace/SpaceServer.h>
 #include "WorldProvider.h"
 
 #include <set>
@@ -150,7 +149,7 @@ class EntityRelevanceFilter {
 		*                       start and stop learning
 		* @return A set containing all messages meeting the constraint
 		*/
-		const combo::message_set getMessages(const SpaceServer& spaceServer,
+		const combo::message_set getMessages(const AtomSpace& as,
 						     Temporal t,
 						     const std::string& toID = string(),
 						     bool exclude_prefix = false,

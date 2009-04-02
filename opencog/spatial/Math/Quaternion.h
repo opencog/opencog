@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef QUATERNION_H
-#define QUATERNION_H
+#ifndef _SPATIAL_MATH_QUATERNION_H_
+#define _SPATIAL_MATH_QUATERNION_H_
 
 #include "Vector3.h"
 #include "Matrix3.h"
@@ -217,7 +217,7 @@ namespace Spatial {
       
     }; // Quaternion
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // QUATERNION_H
+#endif // _SPATIAL_MATH_QUATERNION_H_

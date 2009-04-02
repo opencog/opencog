@@ -32,7 +32,6 @@ class ComboInterpreterUTest  {
 protected:
 
   AtomSpace* atomSpace;
-  SpaceServer * spaceServer;
   Control::SystemParameters parameters;
   HandleSeq toUpdateHandles;
   std::list<ActionPlan> sentActionPlans;
@@ -63,13 +62,12 @@ public:
   void init(std::string _xmlFileName, std::string petName){
     opencog::atom_types_init::init();
     atomSpace = new AtomSpace();
-    spaceServer = new SpaceServer(*atomSpace);
 
     xmlFileName = _xmlFileName;
 
     sender = new ResponsiveActionPlanSender();
     petInterface = new PetInterfaceMock(petName, PAIUtils::getInternalId("Wynx"), string(""));
-    ppai = new PAI(*spaceServer, *sender, *petInterface, parameters);
+    ppai = new PAI(*atomSpace, *sender, *petInterface, parameters);
     petInterface->setPAI(ppai);
 
     sender->setPai(ppai);
@@ -85,7 +83,7 @@ public:
 
     PredicatesUpdater * updater;
 
-    updater = new PredicatesUpdater(*spaceServer, petInterface->getPetId());
+    updater = new PredicatesUpdater(*atomSpace, petInterface->getPetId());
 
     updater->update(toUpdateHandles, ppai->getLatestSimWorldTimestamp());
 

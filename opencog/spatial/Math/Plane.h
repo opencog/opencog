@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PLANE_H
-#define PLANE_H
+#ifndef _SPATIAL_MATH_PLANE_H_
+#define _SPATIAL_MATH_PLANE_H_
 
 #include <string>
 
@@ -126,7 +126,7 @@ namespace Spatial {
       double distanceFromOrigo;      
     }; // Plane
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // PLANE_H
+#endif // _SPATIAL_MATH_PLANE_H_

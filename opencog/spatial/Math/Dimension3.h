@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef DIMENSION3_H
-#define DIMENSION3_H
+#ifndef _SPATIAL_MATH_DIMENSION3_H_
+#define _SPATIAL_MATH_DIMENSION3_H_
 
 #include "Dimension2.h"
 
@@ -59,7 +59,7 @@ namespace Spatial {
       float length;
     };
 
-  }; // Math
-}; // Spatial
+  } // Math
+} // Spatial
 
-#endif // DIMENSION3_H
+#endif // _SPATIAL_MATH_DIMENSION3_H_

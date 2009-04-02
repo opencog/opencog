@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef VISIBILITY_MAP_H
-#define VISIBILITY_MAP_H
+#ifndef _SPATIAL_VISIBILITY_MAP_H_
+#define _SPATIAL_VISIBILITY_MAP_H_
 
 #include "Math/Vector3.h"
 #include "Entity.h"
@@ -206,6 +206,6 @@ row,col(0,0)
     Math::Vector3 maximumExtent;
   }; // VisibilityMap
 
-}; // Spatial
+} // Spatial
 
-#endif // VISIBILITY_MAP_H
+#endif // _SPATIAL_VISIBILITY_MAP_H_

@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef STATICENTITY_H
-#define STATICENTITY_H
+#ifndef _SPATIAL_STATICENTITY_H_
+#define _SPATIAL_STATICENTITY_H_
 
 #include "Entity.h"
 namespace Spatial {
@@ -61,6 +61,6 @@ namespace Spatial {
 
   }; // StaticEntity
 
-}; // Spatial
+} // Spatial
 
-#endif // STATICENTITY_H
+#endif // _SPATIAL_STATICENTITY_H_

@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _TANGENT_BUG_COMMONS
-#define _TANGENT_BUG_COMMONS
+#ifndef _SPATIAL_TANGENT_BUG_COMMONS_H_
+#define _SPATIAL_TANGENT_BUG_COMMONS_H_
 
 #include "util/Logger.h"
 #include "util/numeric.h"

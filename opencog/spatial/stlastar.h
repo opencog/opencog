@@ -22,8 +22,8 @@ given where due.
   Use at your own risk!
 
 */
-#ifndef STLASTAR_H
-#define STLASTAR_H
+#ifndef _SPATIAL_STLASTAR_H_
+#define _SPATIAL_STLASTAR_H_
 
 
 // used for text debugging
@@ -37,8 +37,6 @@ given where due.
 #include <set>
 #include <vector>
 
-using namespace std;
-
 // fast fixed size memory allocator, used for fast node memory management
 #include "fsa.h"
 
@@ -49,6 +47,10 @@ using namespace std;
 // disable warning that debugging information has lines that are truncated
 // occurs in stl headers
 //#pragma warning( disable : 4786 )
+
+namespace Spatial {
+
+using namespace std;
 
 // The AStar search class. UserState is the users state space type
 template <class UserState> class AStarSearch
@@ -756,6 +758,7 @@ private: // data
 
 };
 
+} // Spatial
 #endif
 
 

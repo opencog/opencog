@@ -25,7 +25,6 @@
 #include "comboreduct/combo/vertex.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/SpaceServer.h>
 #include "CompositeBehaviorDescription.h"
 #include "PetComboVocabulary.h"
 
@@ -53,7 +52,7 @@ public:
      * the timestamps of cbd to calculate the action durations
      * and pause durations
      */
-    NoSpaceLife(SpaceServer& spaceServer, const std::string& pet_id,
+    NoSpaceLife(AtomSpace& atomSpace, const std::string& pet_id,
                 const std::string& owner_id, const std::string& avatar_id,
                 const CompositeBehaviorDescription& cbd,
                 const Temporal& exemplarTemporal,
@@ -83,7 +82,7 @@ public:
     AtomSpace& getAtomSpace() const;
 
 private:
-    SpaceServer& _spaceServer; //a reference to the SpaceServer and AtomSpace that lives within LS
+    AtomSpace& _atomSpace; //a reference to the AtomSpace that lives within LS
     //not a const because it can be changed by the algo
 
     const std::string& _pet_id;

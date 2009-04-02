@@ -116,8 +116,6 @@ class OPC : public EmbodimentCogServer {
         RuleEngine* ruleEngine;
         AtomSpace* atomSpace;
 
-        SpaceServer *spaceServer;
-
         /**
          * Load pet metadata for a given pet.
          *
@@ -184,11 +182,6 @@ class OPC : public EmbodimentCogServer {
          */
         AtomSpace & getAtomSpace();
         const AtomSpace& getAtomSpace() const;
-
-        /**
-         * @return The SpaceServer used to handle the spatial information
-         */
-        const SpaceServer & getSpaceServer() const;
 
         /**
          * @return The Percpetion/Action Interface object used to exchange

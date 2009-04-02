@@ -34,7 +34,7 @@ using namespace PetCombo;
 /**
  * ctor, dtor
  */
-NoSpaceLifeWorldWrapper::NoSpaceLifeWorldWrapper(SpaceServer& spaceServer,
+NoSpaceLifeWorldWrapper::NoSpaceLifeWorldWrapper(AtomSpace& atomSpace,
                                                  const string& petName,
                                                  const string& ownerName,
                                                  const string& avatarName,
@@ -42,8 +42,8 @@ NoSpaceLifeWorldWrapper::NoSpaceLifeWorldWrapper(SpaceServer& spaceServer,
                                                  const Temporal& et,
                                                  opencog::RandGen& _rng)
     : _isFailed(false), _isFinished(true),
-      _noSpaceLife(spaceServer, petName, ownerName, avatarName, cbd, et, _rng),
-      _spaceServer(spaceServer), _petName(petName), _ownerName(ownerName),
+      _noSpaceLife(atomSpace, petName, ownerName, avatarName, cbd, et, _rng),
+      _atomSpace(atomSpace), _petName(petName), _ownerName(ownerName),
       _avatarName(avatarName), rng(_rng) {}
 
 NoSpaceLifeWorldWrapper::~NoSpaceLifeWorldWrapper() {}
@@ -91,7 +91,7 @@ bool NoSpaceLifeWorldWrapper::sendSequential_and(sib_it from, sib_it to)
                     //avatar_to_imitate's view point
                     *arg = WorldWrapperUtil::evalIndefiniteObject(rng, h,
                                                                   simulated_time,
-                                                                  _spaceServer,
+                                                                  _atomSpace,
                                                                   _avatarName,
                                                                   _ownerName,
                                                                   io);
@@ -110,7 +110,7 @@ combo::vertex NoSpaceLifeWorldWrapper::evalPerception(pre_it it, combo::variable
     //eval perception, put _avatarName as selfName to get
     //avatar_to_imitate's view point
     return WorldWrapperUtil::evalPerception(rng, h, simulated_time,
-                                            _spaceServer, _avatarName,
+                                            _atomSpace, _avatarName,
                                             _ownerName, it, LOOK_IN_THE_PAST);
 }
 
@@ -123,7 +123,7 @@ combo::vertex NoSpaceLifeWorldWrapper::evalIndefiniteObject(combo::indefinite_ob
     //avatar_to_imitate's view point
     return WorldWrapperUtil::evalIndefiniteObject(rng, h,
             simulated_time,
-            _spaceServer,
+            _atomSpace,
             _avatarName, _ownerName, io,
             LOOK_IN_THE_PAST);
 }

@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _TANGENTBUG_H
-#define _TANGENTBUG_H
+#ifndef _SPATIAL__TANGENTBUG_H_
+#define _SPATIAL__TANGENTBUG_H_
 
 // The timeout is a hack that allows TangentBug to return false gracefully
 // instead of walking forever (when the algorithm is not successful due to an

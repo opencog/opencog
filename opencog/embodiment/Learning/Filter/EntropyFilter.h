@@ -30,7 +30,7 @@
 #include "WorldProvider.h"
 #include "RewritingRules.h"
 #include "BehaviorCategory.h"
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "EntityRelevanceFilter.h"
 
 #include <boost/functional/hash.hpp>
@@ -107,7 +107,7 @@ namespace Filter {
     //while ados contains the set of agents' actions definite_objects
     EntropyFilter(const std::string& self_id,
 		  const std::string& owner_id,
-		  SpaceServer& spaceServer,
+		  AtomSpace& atomSpace,
 		  const perception_set& elementary_perceptions,
 		  const indefinite_object_set& idos,
 		  const definite_object_set& dos,
@@ -157,7 +157,7 @@ namespace Filter {
     //attributes
     const std::string& _self_id;
     const std::string& _owner_id;
-    SpaceServer& _spaceServer;
+    AtomSpace& _atomSpace;
     const perception_set& _elementary_perceptions;
     const indefinite_object_set& _idos;
     const definite_object_set& _dos;

@@ -76,7 +76,6 @@ public:
     string trick_name = "fnorb";
     
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
 
     //fill atomSpace with dummy_object and dummy_avatar definite object
     Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
@@ -92,19 +91,19 @@ public:
     atomSpace.addNode(CONCEPT_NODE, trick_name);
 
     //fill the spacemap with the locations of Fido, stick and Paul
-    spaceServer.addSpaceInfo(true, pet_h, T1,
+    atomSpace.addSpaceInfo(true, pet_h, T1,
 			     PET_X, PET_Y, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, obj_h,
+    atomSpace.addSpaceInfo(true, obj_h,
 			     T1, OBJ_X, OBJ_Y, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, avatar_h, T1,
+    atomSpace.addSpaceInfo(true, avatar_h, T1,
 			     AVATAR_X1, AVATAR_Y1, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, avatar_h, T2,
+    atomSpace.addSpaceInfo(true, avatar_h, T2,
 			     AVATAR_X2, AVATAR_Y2, 1, 1, 1, 0);
-    spaceServer.addSpaceInfo(true, avatar_h, T3,
+    atomSpace.addSpaceInfo(true, avatar_h, T3,
 			     AVATAR_X3, AVATAR_Y3, 1, 1, 1, 0);
 
     FILE* mapFile = fopen( "file.bin", "wb+" );
-    spaceServer.getLatestMap( ).save( mapFile );
+    atomSpace.getSpaceServer().getLatestMap( ).save( mapFile );
     fclose( mapFile );
 
     //fill atomSpace with behaved concept node
@@ -224,7 +223,7 @@ public:
     bas.insert(instance(id::drop));
 
     //retrieve BDs
-    AtomSpaceWorldProvider wp(spaceServer);
+    AtomSpaceWorldProvider wp(atomSpace);
     BehaviorCategory BDCat;
     std::vector<Temporal> est;
     BDRetriever::retrieveAllExemplars(BDCat, est, wp, trick_name);
