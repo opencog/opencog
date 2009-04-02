@@ -107,8 +107,10 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         if (!isBusy()) {
             busy = true;
 
-            AtomSpace *as = new AtomSpace();
-            SpaceServer *ss = new SpaceServer(*as);
+            delete(atomSpace); //it may be null expect perhaps the first time
+            atomSpace = new AtomSpace(); //atomSpace is a protective member of
+                                         //BaseServer
+            SpaceServer *ss = new SpaceServer(atomspace());
             wp = new AtomSpaceWorldProvider(*ss);
             learningPet = lm->getFrom();
             learningSchema = lm->getSchema();
