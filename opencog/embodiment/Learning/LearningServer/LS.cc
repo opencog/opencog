@@ -32,32 +32,42 @@ using namespace LearningServer;
 using namespace WorldWrapper;
 using namespace opencog;
 
+BaseServer* LS::derivedCreateInstance()
+{
+    return new LS;
+}
+
 /**
  * Constructor and destructor
  */
 LS::LS(const std::string &myId, const std::string &ip,
        int portNumber, Control::SystemParameters & parameters)
-        : NetworkElement(parameters, myId, ip, portNumber)
 {
-    // OpenCog-related initialization
-    opencog::atom_types_init::init();
-    opencog::config().set("MIN_STI",
-                          parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
+    init(myId, ip, portNumber, parameters);
+}
 
-    this->busy = false;
-    this->candidateSchemaCnt = 0;
+LS::LS()
+{
 }
 
 LS::~LS()
 {
 }
-/**
- * Inherated functions from NetworkElement
- */
-void LS::setUp()
+
+void LS::init(const std::string &myId, const std::string &ip,
+              int portNumber, Control::SystemParameters & parameters)
 {
-    //insert ImitationLearningTask
-    plugInIdleTask(&ILTask, 1);
+    setNetworkElement(new NetworkElement(parameters, myId, ip, portNumber));
+
+    // OpenCog-related initialization
+    opencog::atom_types_init::init();
+    opencog::config().set("MIN_STI",
+                          getParameters().get("ATOM_TABLE_LOWER_STI_VALUE"));
+
+    this->busy = false;
+
+    this->registerAgent(ImitationLearningAgent::info().id, &factory);
+    ILAgent = static_cast<ImitationLearningAgent*>(this->createAgent(ImitationLearningAgent::info().id, true));
 }
 
 bool LS::processNextMessage(MessagingSystem::Message *msg)
@@ -74,12 +84,12 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         if (learningPet == cm->getFrom() &&
                 learningSchema == cm->getSchema()) {
 
-            if (cm->getCommand() == parameters.get("STOP_LEARNING_CMD")) {
+            if (cm->getCommand() == getParameters().get("STOP_LEARNING_CMD")) {
                 stopLearn();
                 return false;
             }
 
-            if (cm->getCommand() == parameters.get("TRY_SCHEMA_CMD")) {
+            if (cm->getCommand() == getParameters().get("TRY_SCHEMA_CMD")) {
                 trySchema();
                 return false;
             }
@@ -97,8 +107,10 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         if (!isBusy()) {
             busy = true;
 
-            AtomSpace *as = new AtomSpace();
-            SpaceServer *ss = new SpaceServer(*as);
+            delete(atomSpace); //it may be null expect perhaps the first time
+            atomSpace = new AtomSpace(); //atomSpace is a protective member of
+                                         //BaseServer
+            SpaceServer *ss = new SpaceServer(atomspace());
             wp = new AtomSpaceWorldProvider(*ss);
             learningPet = lm->getFrom();
             learningSchema = lm->getSchema();
@@ -138,7 +150,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         // message from the learning pet and rewarding the learning schema
 
         if (learningPet == rm->getFrom() &&
-                learningSchema /*getCandidateSchemaName()*/ == rm->getCandidateSchema()) {
+            learningSchema == rm->getCandidateSchema()) {
             rewardCandidateSchema(rm);
         }
         break;
@@ -188,7 +200,7 @@ void LS::sendBestSchema(const combo::combo_tree& schema)
     sendSchema(schema, learningSchema);
     resetLearningServer();
     //inform imitation learning task to stop learning
-    ILTask.stopLearning();
+    ILAgent->stopLearning();
 }
 
 /**
@@ -267,13 +279,13 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
     }
 
     bool initLearningSucceeds =
-        ILTask.initLearning(atoi(parameters.get("NUMBER_OF_ESTIMATIONS_PER_CYCLE").c_str()),
-                            wp,
-                            al,
-                            PerceptionActionInterface::PAIUtils::getInternalId(learningPet.c_str()),
-                            ownerID,
-                            avatarID,
-                            learningSchema);
+        ILAgent->initLearning(atoi(getParameters().get("NUMBER_OF_ESTIMATIONS_PER_CYCLE").c_str()),
+                              wp,
+                              al,
+                              PerceptionActionInterface::PAIUtils::getInternalId(learningPet.c_str()),
+                              ownerID,
+                              avatarID,
+                              learningSchema);
     if (initLearningSucceeds)
         logger().log(opencog::Logger::DEBUG, "LS - Initiating Learning Process - Done.");
     else {
@@ -311,7 +323,7 @@ void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
                     avatarID, ownerID);
         al.push_back(cdo);
     }
-    ILTask.addLearningExample(wp, al);
+    ILAgent->addLearningExample(wp, al);
     logger().log(opencog::Logger::DEBUG, "LS - Adding exemplar to Learning Process - done.");
 }
 
@@ -321,7 +333,7 @@ void LS::rewardCandidateSchema(LearningServerMessages::RewardMessage * msg)
                  msg->getReward());
     // use RewardMessage data to adjust learning algorithm
     double f = msg->getReward();
-    ILTask.setFitness(f);
+    ILAgent->setFitness(f);
 }
 
 void LS::stopLearn()
@@ -332,9 +344,9 @@ void LS::stopLearn()
     if (isBusy()) {
         // finish the learning process and get best schema soh far as the
         // learned schema.
-        bestSchema = ILTask.getBestSchema();
+        bestSchema = ILAgent->getBestSchema();
         //no need because sendBestSchema reset the task
-        //ILTask.stopLearning();
+        //ILAgent->stopLearning();
         stringstream ss;
         ss << bestSchema;
         string s = ss.str();
@@ -360,13 +372,13 @@ void LS::trySchema()
         // get a candidate schema to execute.
         //the learning algorithm will pause until
         // a reward message is received.
-        bestSchema = ILTask.getBestSchemaEstimated();
+        bestSchema = ILAgent->getBestSchemaEstimated();
         stringstream ss;
         ss << bestSchema;
         string s = ss.str();
         logger().log(opencog::Logger::DEBUG,
                      "LS - Trying the following schema : %s", s.c_str());
-        ILTask.waitForReward();
+        ILAgent->waitForReward();
         sendCandidateSchema(bestSchema);
     } else {
         logger().log(opencog::Logger::DEBUG,

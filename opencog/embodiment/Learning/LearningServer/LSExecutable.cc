@@ -1,7 +1,7 @@
 /*
  * opencog/embodiment/Learning/LearningServer/LSExecutable.cc
  *
- * Copyright (C) 2007-2008 Carlos Lopes
+ * Copyright (C) 2007-2008 Nil Geisweiller
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,23 +48,37 @@ int main(int argc, char *argv[]) {
     // especified ones is throw in the code
     std::set_unexpected(ls_unexpected_handler);
 
-    LS * ls = new LS(parameters.get("LS_ID"),
-		     parameters.get("LS_IP"),
-		     std::atoi(parameters.get("LS_PORT").c_str()),
-		     parameters);
+    server(LS::derivedCreateInstance);
+
+    //LS* ls = new LS(parameters.get("LS_ID"),
+    //              parameters.get("LS_IP"),
+    //              std::atoi(parameters.get("LS_PORT").c_str()),
+    //              parameters);
+
+    static_cast<LS&>(server()).init(parameters.get("LS_ID"),
+                                    parameters.get("LS_IP"),
+                                    std::atoi(parameters.get("LS_PORT").c_str()),
+                                    parameters);
 
     try  {
-        ls->serverLoop();
+        static_cast<LS&>(server()).CogServer::serverLoop();
 
     } catch(std::bad_alloc){
-        logger().log(opencog::Logger::ERROR, "LSExec - LS raised a bad_alloc exception.");
-        
+        logger().log(Logger::ERROR,
+                     "LSExec - LS raised a bad_alloc exception.");       
+    } catch(StandardException se) {
+        logger().log(Logger::ERROR,
+                     "OPC executable - An exceptional situation occured"
+                     " with the following message '%s'"
+                     ". Check log for more information.",
+                     se.getMessage());
     } catch(...) {
-        logger().log(opencog::Logger::ERROR, 
-                "LSExec - An exceptional situation occured. Check log for more information.");
+        logger().log(Logger::ERROR, 
+                     "LSExec - An exceptional situation occured."
+                     " Check log for more information.");
     }
 
-    delete ls;
+    //delete ls;
 
     return (0);
 }
