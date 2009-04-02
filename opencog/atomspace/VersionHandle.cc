@@ -41,6 +41,11 @@ VersionHandle::VersionHandle(IndicatorType ind, Handle subs)
     substantive = subs;
 }
 
+VersionHandle::VersionHandle( const VersionHandle& other ) {
+    this->indicator = other.indicator;
+    this->substantive = other.substantive;
+}
+
 const char* VersionHandle::indicatorToStr(IndicatorType indicator) throw (InvalidParamException)
 {
     switch (indicator) {
@@ -108,4 +113,9 @@ bool VersionHandle::operator<(const VersionHandle &other) const {
 bool VersionHandle::operator>(const VersionHandle &other) const {
     // doesn't really matter
     return substantive > other.substantive;
+}
+
+VersionHandle& VersionHandle::operator=( const VersionHandle& other ) {
+    this->indicator = other.indicator;
+    this->substantive = other.substantive;
 }
