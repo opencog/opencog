@@ -284,6 +284,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                         logger().log(opencog::Logger::DEBUG, "BE - Detected a walk command with the time interval (%u, %u), from the agent %s holding the object %s", tl, tu, subject_id.c_str(), held_object_id.c_str());
                     else
                         logger().log(opencog::Logger::DEBUG, "BE - Detected a walk command with the time interval (%u, %u), from the agent %s holding no object", tl, tu, subject_id.c_str());
+                    //~LOGGER DEBUG
 
                     //and except the nearest object (if such) at the start of
                     //the walk command
@@ -296,13 +297,6 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     const SpaceServer::SpaceMap& sms = wp->getSpaceServer().getMap(sms_h);
                     //sas stands for Subject At Start
                     const Spatial::EntityPtr& sasEntity = sms.getEntity(subject_id);
-
-                    //debug print
-                    //std::cout << "SUBJECT POSITION AT START OF WALK SEQUENCE X  : "
-                    //<< md_sas.centerX << " Y : " << md_sas.centerY
-                    //<< sasEntity->getPosition().toString()
-                    //<< std::endl;
-                    //~debug print
 
                     //get the position of the nearest object to the subject at the
                     //start of the walk command
@@ -340,21 +334,6 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     double dist_subject_end = objectEntity->distanceTo(subjectEndEntity);
 
-                    //debug print
-                    //std::cout << "SUBJECT POSITION AT THE END OF WALK"
-                    //<< " X : " << md_subject_end.centerX
-                    //<< " Y : " << md_subject_end.centerY
-                    //        << subjectEndEntity->getPosition().toString()
-                    //    << " DIST : " << dist_subject_end
-                    //    << std::endl;
-                    //~debug print
-
-                    //debug print
-                    //std::cout << "WALK DESTINATION POSITION X : "
-                    //    << x << " Y : " << y
-                    //    << std::endl;
-                    //~debug print
-
 
                     //WARNING : not used because position after a walk command and of walk command destination does not coincide
                     //double dist = (objectEntity->getPosition() - Spatial::Math::Vector3(p.first, p.second)).length();
@@ -373,7 +352,6 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //    << obj_id << " DIST : " << dist_subject_end
                     //    << " DIST THRESHOLD : "
                     //    << dist_ratio_threshold*sm.diagonalSize() << std::endl;
-
                     //~debug print
 
                     //debug print
@@ -415,11 +393,11 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //~debug print
 
                     if (dist_subject_end > dist_ratio_threshold*sm.diagonalSize()) {
-                        logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is too far to be considered to have reached it", subject_id.c_str(), dist_subject_end, obj_id.c_str());
+                        logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is too far to be considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
                         continue; //go directly to the next iteration
                         //and skip the creation of an elementary BD
                     } else {
-                        logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is close enough and therefore is considered to have reached it", subject_id.c_str(), dist_subject_end, obj_id.c_str());
+                        logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is close enough and therefore is considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
 
                         //create the arg list of goto_obj
                         HandleSeq arg_seq;
@@ -461,13 +439,6 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     }
                     new_arg_list_h = as.addLink(LIST_LINK, arg_seq);
                 }
-                //debug print arglist
-                //for(int n = 0; n < arg_list->getArity(); n++) {
-                //std::cout << "ARG_LIST " << n << " "
-                //  << arg_list->getOutgoingAtom(n)->toString() << std::endl;
-                //}
-                //~debug print arglist
-
                 //if the instruction pointer arrives at that point of the code
                 //it means either that the action being tracked is not a
                 //walk command (cause it has not been taken the if branch above)

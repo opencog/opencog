@@ -425,5 +425,5 @@ chasePetHoldingSomething(1) :=
 
 debugSchema(0) := and_seq(goto_obj(owner 2.5) boolean_while(near(self owner)
 and_seq(action_success)) drop grab(owner) boolean_while(near(self owner)
-and_seq(boolean_while(near(self owner) and_seq(action_success)
+and_seq(boolean_while(near(self owner) and_seq(action_success))
 goto_obj(owner 2.5))))
