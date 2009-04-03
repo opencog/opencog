@@ -1,0 +1,60 @@
+/**
+ * RouterMessageUTest
+ *
+ *
+ * Author: Carlos Lopes
+ * Creation: Fri Feb 1 2008
+ */
+
+#include <RouterMessage.h>
+#include <string>
+#include <string.h>
+
+using namespace MessagingSystem;
+
+static const std::string to = "Fido";
+static const std::string from = "Proxy";
+static const int encapsulateType = 3;
+
+class RouterMessageUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    RouterMessageUTest() {
+    }
+
+    void testGettersAndSetters() {
+        std::string msg(strdup("msg"));
+        RouterMessage *obj1 = new RouterMessage(to, from, encapsulateType, msg);
+        RouterMessage *obj2 = new RouterMessage(to, from, 1);
+
+        obj2->setMessage(obj1->getMessage());
+        obj2->setEncapsulateType(obj1->getEncapsulateType());
+
+        TS_ASSERT(obj1->getType() == obj2->getType());
+        TS_ASSERT(obj1->getMessage() == obj2->getMessage());
+        TS_ASSERT(obj1->getEncapsulateType() == obj2->getEncapsulateType());
+    }
+
+    void testLoadPlainTextRepresentation() {
+
+        std::string msg(strdup("msg"));
+        RouterMessage *obj1 = new RouterMessage(to, from, encapsulateType, msg);
+
+        RouterMessage *obj2 = new RouterMessage(to, from, encapsulateType);
+
+        obj2->loadPlainTextRepresentation(obj1->getPlainTextRepresentation());
+
+        TS_ASSERT(! strcmp(obj1->getPlainTextRepresentation(), obj2->getPlainTextRepresentation()));
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+}; // class

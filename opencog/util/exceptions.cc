@@ -43,16 +43,16 @@ using namespace opencog;
  * StandardException class
  * ----------------------------------------------------------------------------
  */
-void StandardException::parseErrorMessage(const char* fmt, va_list ap)
+void StandardException::parseErrorMessage(const char* fmt, va_list ap, bool logError)
 {
     char buf[MAX_MSG_LENGTH];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    opencog::logger().error(buf);
+    if (logError) opencog::logger().error(buf);
     setMessage(buf);
 }
 
-void StandardException::parseErrorMessage(const char *trace, const char * msg, va_list ap)
+void StandardException::parseErrorMessage(const char *trace, const char * msg, va_list ap, bool logError)
 {
     size_t tlen = 0;
     if (trace) tlen = strlen(trace);
@@ -63,7 +63,7 @@ void StandardException::parseErrorMessage(const char *trace, const char * msg, v
     strcat(concatMsg, msg);
     if (trace) strcat(concatMsg, trace);
 
-    parseErrorMessage(concatMsg, ap);
+    parseErrorMessage(concatMsg, ap, logError);
 
     delete [] concatMsg;
 }
@@ -182,8 +182,20 @@ InvalidParamException::InvalidParamException(const char * trace, const char * fm
 {
     va_list  ap;
     va_start(ap, fmt);
-    parseErrorMessage(trace, fmt, ap);
+    
+    char * concatMsg = new char[strlen(getMessage()) + strlen(trace) + 1];
+    *concatMsg = '\0'; // empty c-string
+    
+    strcat(concatMsg, getMessage());
+    strcat(concatMsg, trace);
+
+    char buf[MAX_MSG_LENGTH];
+    vsnprintf(buf, MAX_MSG_LENGTH, concatMsg, ap);
+    setMessage(buf);
+
     va_end(ap);
+
+    delete [] concatMsg;
 }
 
 /**
@@ -234,8 +246,20 @@ NotFoundException::NotFoundException(const char * trace, const char * fmt, ...)
 {
     va_list  ap;
     va_start(ap, fmt);
-    parseErrorMessage(trace, fmt, ap);
+    
+    char * concatMsg = new char[strlen(getMessage()) + strlen(trace) + 1];
+    *concatMsg = '\0'; // empty c-string
+    
+    strcat(concatMsg, getMessage());
+    strcat(concatMsg, trace);
+
+    char buf[MAX_MSG_LENGTH];
+    vsnprintf(buf, MAX_MSG_LENGTH, concatMsg, ap);
+    setMessage(buf);
+
     va_end(ap);
+
+    delete [] concatMsg;
 }
 
 /**

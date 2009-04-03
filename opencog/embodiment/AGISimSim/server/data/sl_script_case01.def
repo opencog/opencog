@@ -1,0 +1,85 @@
+# World map for simulating a SL 
+
+#
+# creating pets area with house, water and food bowl, tree, fence
+# pet house = 4 x 4 m2
+# pet bowls = 0.25 x 0.25 m2
+# trees = 0.50 x 0.50 m2
+# fence = 0.25 width, lenght depends on the fence
+# 
+# Note: width grows horizontally and the depth vertically
+# Note2: when adding the high of an object dont forget that the y coord is the
+# high and that the the values added is divided by two and added to both sides
+# of the point
+#
+
+# --------------------------------------------------------------
+# petHome - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+# pet house (lower rigth corner)
+new 60 0.5 -60 structure box petHome (density=2000) 4 1 4
+
+# --------------------------------------------------------------
+# structures - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+# fence outside pet house (horizontal)  
+new 57 1 -54 structure box structure no_init 10 2 0.25
+# fence outside pet house (vertical) - a 2 meters space is left between the fences
+new 52 1 -59 structure box structure no_init 0.25 2 6
+# wall in the middle of the map (horizontal)
+new -9  1 19  structure box structure no_init 30 2 0.25
+# wall in the middle of the map (vertical)
+new -22  1 -6  structure box structure no_init 0.25 2 50
+
+
+# --------------------------------------------------------------
+# trees - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+new  54 2 -60 structure box tree no_init 0.5 4 0.5
+new  26 2 -51 structure box tree no_init 0.5 4 0.5
+new   6 2 -36 structure box tree no_init 0.5 4 0.5
+new  51 2 -11  structure box tree no_init 0.5 4 0.5
+new  26 2  4  structure box tree no_init 0.5 4 0.5
+new  56 2  34  structure box tree no_init 0.5 4 0.5
+new -14 2  4   structure box tree no_init 0.5 4 0.5
+new -29 2 -4  structure box tree no_init 0.5 4 0.5
+new -42 2 -51 structure box tree no_init 0.5 4 0.5
+new -44 2  14  structure box tree no_init 0.5 4 0.5
+new -22 2  44  structure box tree no_init 0.5 4 0.5
+
+# --------------------------------------------------------------
+# water - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+new  36  0 -36 object box  water (energy=10) 1.5 1 1.5
+new -14  0 -11  object box water no_init 2.5 12 2.5
+new  31  0  24  object box water (energy=100000) 12 1 12
+new -54  0  54  object box water (energy=100000) 12 1 12
+
+# --------------------------------------------------------------
+# food - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+new  24  0.1 -52 object box food (energy=10) 0.25 0.25 0.25
+new -14  0.1  -9 object box food no_init 0.25 0.25 0.25
+new   6  0.1  29 object box food no_init 0.25 0.25 0.25
+new  56  0.1  33 object box food no_init 0.25 0.25 0.25
+new -34  0.1 -46 object box food (energy=10000) 0.25 0.25 0.25
+new -24  0.1  43 object box food (energy=10000) 0.25 0.25 0.25
+new  28  0.1 -16 object box food (energy=10000) 0.25 0.25 0.25
+
+# --------------------------------------------------------------
+# toys - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+new -4  0.15 -56  accessory ball ball (density=100) 0.15 
+new -54 0.15 -11  accessory ball ball (density=100) 0.15 
+new  36 0.05 -52  accessory box stick (density=100) 0.1 0.1 0.4 
+new -49 0.05 -54  accessory box stick (density=100) 0.1 0.1 0.4 
+new  16 0.05 -31  accessory box doll  (density=100) 0.2 0.1 0.4 
+new -39 0.05 -16  accessory box doll  (density=100) 0.2 0.1 0.4 
+
+# --------------------------------------------------------------
+# bowls - created in the order presented in the map (see figure)
+# --------------------------------------------------------------
+new  57  0.07 -52 object box foodBowl (density=1000&taste.quality=2&taste.intensity=1&energy=1000) 0.2 0.15 0.2 
+new -59  0.07  21 object box foodBowl (density=1000&taste.quality=2&taste.intensity=1&energy=1000) 0.2 0.15 0.2 
+new  56  0.07 -52 object box waterBowl (density=1000&taste.quality=3&taste.intensity=1&energy=1000) 0.2 0.15 0.2 
+

@@ -1,0 +1,156 @@
+/**
+ * LearnMessageUTest
+ *
+ * Author: Carlos Lopes
+ * Copyright(c), 2007
+ */
+#include <opencog/xml/FileXMLBufferReader.h>
+#include <opencog/xml/NMXmlParser.h>
+
+#include <string.h>
+#include <stdlib.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include "EntityRelevanceFilter.h"
+#include "LearnMessage.h"
+#include <atom_types_init.h>
+
+#define OBJ_LENGTH 0.5
+#define OBJ_WIDTH 0.5
+#define OBJ_HEIGHT 0.5
+#define OBJ_YAW 0.0
+
+using namespace LearningServerMessages;
+
+static const std::string from   = "PET";
+static const std::string to     = "LS";
+static const std::string trick  = "fetch";
+static const std::string pet    = "pet";
+static const std::string owner  = "Ben";
+static const std::string avatar = "avatar";
+static const std::string ball   = "ball";
+static const std::string nonSL  = "nonSL";
+static const std::vector<std::string> trickArgs;
+
+class LearnMessageUTest : public CxxTest::TestSuite
+{
+
+private:
+
+
+    std::string toLoad;
+
+public:
+
+    static LearnMessageUTest *createSuite() {
+        return new LearnMessageUTest( );
+    }
+    static void destroySuite( LearnMessageUTest *suite ) {
+        delete suite;
+    }
+
+    LearnMessageUTest() {
+        opencog::atom_types_init::init();
+    }
+
+    ~LearnMessageUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testCreateMessage() {
+
+        AtomSpace * atomSpace;
+        LearnMessage * learnMessage;
+
+        atomSpace = new AtomSpace();
+
+        Handle n1 = atomSpace->addNode(NODE, nonSL);
+        Handle n2 = atomSpace->addNode(SL_PET_NODE, pet);
+        Handle n3 = atomSpace->addNode(SL_OBJECT_NODE, ball);
+        Handle n4 = atomSpace->addNode(SL_AVATAR_NODE, avatar);
+        Handle n5 = atomSpace->addNode(SL_AVATAR_NODE, owner);
+
+        atomSpace->addSpaceInfo(true, n1, 1, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, n2, 1, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, n3, 1, 102, 102, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, n4, 1, 104, 104, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, n5, 1, 106, 106, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+
+        //to satisfy an assert of LearnMessage
+        Handle trick_h = atomSpace->addNode(CONCEPT_NODE, trick);
+        Temporal t(1, 100);
+        atomSpace->addTimeInfo(trick_h, t);
+
+        learnMessage = new LearnMessage(from, to, trick, trickArgs, owner, avatar, *atomSpace);
+        TS_ASSERT(learnMessage);
+        TS_ASSERT(learnMessage->getSchema() == trick);
+        TS_ASSERT(learnMessage->getOwnerId() == owner);
+        TS_ASSERT(learnMessage->getAvatarId() == avatar);
+
+        toLoad = learnMessage->getPlainTextRepresentation();
+        //printf("%s\n", learnMessage->getSchemaActions().c_str());
+        //printf("%s\n", toLoad.c_str());
+
+        delete learnMessage;
+        delete atomSpace;
+    }
+
+    void testDefiniteObjects() {
+        AtomSpace * atomSpace = new AtomSpace();
+
+        LearnMessage * lm = new LearnMessage(from, to);
+
+        lm->loadPlainTextRepresentation(toLoad.c_str());
+
+        lm->populateAtomSpace(*atomSpace);
+
+        Handle petHandle = atomSpace->getHandle(SL_PET_NODE, pet);
+        TS_ASSERT(petHandle != Handle::UNDEFINED);
+
+        Handle avatarHandle = atomSpace->getHandle(SL_AVATAR_NODE, avatar);
+        TS_ASSERT(avatarHandle != Handle::UNDEFINED);
+
+        Handle ownerHandle = atomSpace->getHandle(SL_AVATAR_NODE, owner);
+        TS_ASSERT(ownerHandle != Handle::UNDEFINED);
+
+        Handle ballHandle = atomSpace->getHandle(SL_OBJECT_NODE, ball);
+        TS_ASSERT(ballHandle != Handle::UNDEFINED);
+
+        EntityRelevanceFilter filter(atomSpace->getSpaceServer().getLatestMap(), pet, owner);
+        std::set<std::string> definiteObjects = filter.getEntities();
+
+        // should be 5 since SpaceMap does not have knowledge about the types
+        // of the objects inside the map
+        TS_ASSERT(definiteObjects.size() == 5);
+        printf("definiteObjects.size %d\n", definiteObjects.size());
+        TS_ASSERT(definiteObjects.find(ball) != definiteObjects.end());
+        TS_ASSERT(definiteObjects.find("owner") != definiteObjects.end());
+        TS_ASSERT(definiteObjects.find("self") != definiteObjects.end());
+    }
+
+    void testLoadPlainTextRepresentation() {
+        AtomSpace * atomSpace = new AtomSpace();
+
+        LearnMessage * lm = new LearnMessage(from, to);
+
+        lm->loadPlainTextRepresentation(toLoad.c_str());
+        TS_ASSERT(lm);
+        TS_ASSERT(lm->getSchema() == trick);
+        TS_ASSERT(lm->getAvatarId() == avatar);
+        TS_ASSERT(lm->getOwnerId() == owner);
+
+        std::string loaded = lm->getPlainTextRepresentation();
+        TS_ASSERT(toLoad == loaded);
+
+        lm->populateAtomSpace(*atomSpace);
+        TS_ASSERT(atomSpace);
+
+        delete lm;
+    }
+
+}; // class

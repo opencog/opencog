@@ -1,0 +1,15 @@
+<sensation>
+  <selfdata>
+    <energy> 100 </energy>
+    <position> (0.00,0.16,0.00) </position>
+    <orientation> (0.00,0.00,0.00,0.10) </orientation>
+    <eye>
+      <orientation> (0.00,0.00) </orientation>
+    </eye>
+    <custom>
+      <msg> Yum! Gained energy: 100 </msg>
+      <quality> 101 </quality>
+      <intensity> 1 </intensity>
+    </custom>
+  </selfdata>
+</sensation>

@@ -1,0 +1,46 @@
+/**
+ * ActionParamTypeUTest.cxxtest
+ *
+ * Author: Welter
+ */
+#include "ActionParamType.h"
+
+using namespace PerceptionActionInterface;
+
+class ActionParamTypeUTest :  public CxxTest::TestSuite
+{
+public:
+    ActionParamTypeUTest() {
+    }
+
+    ~ActionParamTypeUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testActionParamType() {
+        //cout << "testActionParamType" << endl;
+        int typeCode = STRING_CODE;
+        for (; typeCode < NUMBER_OF_ACTION_PARAM_TYPES; typeCode++) {
+            const ActionParamType& actionParamType = ActionParamType::getFromCode((ActionParamTypeCode)typeCode);
+            const std::string& pName = actionParamType.getName();
+            TS_ASSERT(strlen(pName.c_str()) > 0);
+            const ActionParamType& actionParamTypeByName = ActionParamType::getFromName(pName);
+            TS_ASSERT(&actionParamType == &actionParamTypeByName);
+            int otherTypeCode = STRING_CODE;
+            for (; otherTypeCode < NUMBER_OF_ACTION_PARAM_TYPES; otherTypeCode++) {
+                const ActionParamType& otherActionParamType = ActionParamType::getFromCode((ActionParamTypeCode) otherTypeCode);
+                if (typeCode != otherTypeCode) {
+                    TS_ASSERT(&actionParamType != &otherActionParamType);
+                } else {
+                    TS_ASSERT(&actionParamType == &otherActionParamType);
+                }
+            }
+        }
+    }
+
+};

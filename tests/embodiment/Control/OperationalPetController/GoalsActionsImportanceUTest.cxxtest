@@ -1,0 +1,30 @@
+/**
+ * GoalsActionsImportanceUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Mon Jul 16 21:39:55 BRT 2007
+ */
+
+#include <GoalsActionsImportance.h>
+
+using namespace OperationalPetController;
+
+class GoalsActionsImportanceUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    GoalsActionsImportanceUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

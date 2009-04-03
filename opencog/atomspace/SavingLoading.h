@@ -99,7 +99,7 @@ private:
      * @param Table that maps from old to new handles, necessary during
      * loading.
      */
-    void loadNodes(FILE *, HandleMap<Atom *> *, AtomTable& );
+    void loadNodes(FILE *, HandleMap<Atom *> *, AtomTable&, const std::vector<Type>& );
 
     /**
      * This method loads links from a given file.
@@ -108,7 +108,7 @@ private:
      * @param Table that maps from old to new handles, necessary during
      * loading.
      */
-    void loadLinks(FILE *, HandleMap<Atom *> *, AtomTable& );
+    void loadLinks(FILE *, HandleMap<Atom *> *, AtomTable&, const std::vector<Type>& );
 
     /**
      * This post-loading method translates all occurrences of old handles
@@ -177,20 +177,20 @@ private:
      * readAtom() to read superclass members.
      *
      * @param File from where the node will be read.
+     * @param Newly read node.
      * @param Table to be filled with mappings from old to new handles.
-     * @return Newly read node.
      */
-    Node *readNode(FILE *, HandleMap<Atom *> *);
+    void readNode(FILE *, Node *, HandleMap<Atom *> *);
 
     /**
      * This method reads all link members from a given file, and uses
      * readAtom() to read superclass members.
      *
      * @param File from where the link will be read.
+     * @param Newly read link.
      * @param Table to be filled with mappings from old to new handles.
-     * @return Newly read link.
      */
-    Link *readLink(FILE *, HandleMap<Atom *> *);
+    void readLink(FILE *, Link *, HandleMap<Atom *> *);
 
     /**
      * This method reads all TruthValue members from a given file.

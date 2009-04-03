@@ -1,10 +1,10 @@
 FIND_PACKAGE(EXPAT REQUIRED)
 
 ADD_LIBRARY(xml SHARED
-	FileXMLBufferReader.cc
-	NMXmlExporter.cc
-	NMXmlParser.cc
-	StringXMLBufferReader.cc
+        FileXMLBufferReader
+        NMXmlExporter
+        NMXmlParser
+        StringXMLBufferReader
 )
 
 ADD_DEPENDENCIES(xml opencog_atom_types)
@@ -29,4 +29,8 @@ INSTALL (FILES
 	StringXMLBufferReader.h
 	XMLBufferReader.h
 	DESTINATION "include/opencog/xml"
+)
+
+TARGET_LINK_LIBRARIES(xml
+  ${EXPAT_LIBRARIES}
 )

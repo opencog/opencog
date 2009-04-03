@@ -1,0 +1,22 @@
+INCLUDE_DIRECTORIES(
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AGISimSim/proxy
+    ${OPENCOG_SOURCE_DIR}/opencog
+)
+
+LINK_DIRECTORIES(
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/AGISimSim/proxy
+    ${OPENCOG_BINARY_DIR}/opencog/util
+)
+
+IF(COMMAND cmake_policy)
+    CMAKE_POLICY(SET CMP0003 NEW)
+ENDIF(COMMAND cmake_policy)
+
+ADD_EXECUTABLE(simclient SimClient.cc)
+TARGET_LINK_LIBRARIES(simclient 
+    AGISimSimProxy
+    util
+    ${CSOCKETS_LIBRARIES}
+)
+
+EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/script ${CMAKE_CURRENT_BINARY_DIR}/script)

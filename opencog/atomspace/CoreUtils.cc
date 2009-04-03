@@ -34,7 +34,7 @@ using namespace opencog;
 void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (RuntimeException)
 {
     //printf("CoreUtils::updateHandle(%p)\n", *handle);
-    if (TLB::isInvalidHandle(*handle)) return;
+    //if (TLB::isInvalidHandle(*handle)) return;
 
     // Assume that the HandleMap stores <Handle, Atom *> pairs ....
     Handle newH = TLB::getHandle(handles->get(*handle));

@@ -1,0 +1,30 @@
+/**
+ * GoalsmanipulatorUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Fri Jul 13 16:17:26 BRT 2007
+ */
+
+#include <Goalsmanipulator.h>
+
+using namespace OperationalPetController;
+
+class GoalsmanipulatorUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    GoalsmanipulatorUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

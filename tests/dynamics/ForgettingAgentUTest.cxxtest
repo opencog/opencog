@@ -125,7 +125,7 @@ public:
         int count = 100;
         atoms = createNodes(cogserver.getAtomSpace(), "forgetPercent", count);
 
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         count = count - (int) (count * agent->forgetPercentage);
 
         // Case: 100 atoms, 10% loss, all same LTI
@@ -135,7 +135,7 @@ public:
         // --
         count = cogserver.getAtomSpace()->Nodes();
         agent->forgetPercentage = 0.0f;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
 
         // Case: 90 atoms, 0% loss, all same LTI
         // Result: 0 random atom lost
@@ -143,7 +143,7 @@ public:
 
         // --
         agent->forgetPercentage = 1.0f;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         count = 0;
 
         // Case: 90 atoms, 100% loss, all same LTI
@@ -158,7 +158,7 @@ public:
         }
 
         agent->forgetPercentage = 0.20;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         // First two handles should now be invalid...
 #ifdef USE_TLB_MAP 
         TS_ASSERT(TLB::getAtom(atoms[0]) == NULL);
@@ -174,7 +174,7 @@ public:
 
         // Forget all
         agent->forgetPercentage = 1.0f;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         count = 0;
 
     }
@@ -191,7 +191,7 @@ public:
 
         // Case: 100 atoms, none below threshold
         // Result: Nothing lost
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 
         // Case: 100 atoms, 10 below threshold (ranging from threshold to
@@ -203,7 +203,7 @@ public:
         }
         count = 90;
 
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 #ifdef USE_TLB_MAP
         for (int i = 0; i < 10; i++) {
@@ -221,7 +221,7 @@ public:
 
         // Forget all
         agent->forgetThreshold = AttentionValue::MAXLTI;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         count = 0;
 
     }
@@ -244,7 +244,7 @@ public:
                 agent->forgetThreshold);
         }
         count = 95;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 #ifdef USE_TLB_MAP
         for (int i = 0; i < 5; i++) {
@@ -267,7 +267,7 @@ public:
                 agent->forgetThreshold);
         }
         count = 86;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
         numRemoved = 0;
 #ifdef USE_TLB_MAP
@@ -295,7 +295,7 @@ public:
         // Forget all
         agent->forgetPercentage = 1.0f;
         agent->forgetThreshold = AttentionValue::MINLTI;
-        cogserver.unitTestServerLoop(1);
+        cogserver.runLoopStep();
         count = 0;
 
     }

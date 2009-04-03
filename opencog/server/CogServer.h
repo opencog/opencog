@@ -148,6 +148,25 @@ public:
      *  sleeps for the remaining time until the end of the cycle (if any) */
     virtual void serverLoop(void);
 
+    /** Runs a single server loop step.
+     *  Made public to be used in unit tests and for debug purposes only*/
+    virtual void runLoopStep(void); 
+
+    /** Customized server loop run. This method is called inside serverLoop
+     *  (between processing request queue and scheduled agents) and can be 
+     *  overwritten by CogServer's subclasses in order to customize the 
+     *  server loop behavior. 
+     *
+     *  This method controls the execution of server cycles by returning
+     *  'true' if the server must run a cycle and 'false' if it must not.
+     *  By default it does nothing and returns true.
+     *
+     *  If EXTERNAL_TICK_MODE config parameter is enabled, serverLoop will not
+     *  go sleep at all. So, in this case, this method must be in charge of
+     *  going sleep when the server is idle to prevent excessive cpu 
+     *  consumption. */
+    virtual bool customLoopRun(void);
+
     /** Returns the number of executed cycles so far */
     virtual long getCycleCount(void);
 
@@ -255,9 +274,6 @@ public:
 
     /** Force drain of all outstanding requests */
     void processRequests(void);
-
-    // used for debug purposes in unit tests
-    virtual void unitTestServerLoop(int limitNumberOfCycles);
 
 }; // class
 
