@@ -25,13 +25,13 @@
 #include "util/Logger.h"
 
 SimClientSocket::SimClientSocket(ISocketHandler& h, AsynchronousMessageReceiver* _receiver, bool echoing)
-:TcpSocket(h)
+        : TcpSocket(h)
 {
-	m_bEchoing = echoing;
+    m_bEchoing = echoing;
     m_bWaitingForResponse = false;
     m_bConnectionFailed = false;
     receiver = _receiver;
-	SetLineProtocol();
+    SetLineProtocol();
 
     // TODO: create a thread to periodically call h->Select() method and read spontaneous messages from AGISIM.
 }
@@ -43,35 +43,40 @@ SimClientSocket::~SimClientSocket()
 
 void SimClientSocket::OnConnectFailed()
 {
-	printf("SimClientSocket::OnConnectFailed()!!!\n");
-	m_bWaitingForResponse = false;
+    printf("SimClientSocket::OnConnectFailed()!!!\n");
+    m_bWaitingForResponse = false;
     m_bConnectionFailed = true;
     m_sResponse = "";
 }
 
-bool SimClientSocket::ConnectionFailed() {
-	return m_bConnectionFailed;
+bool SimClientSocket::ConnectionFailed()
+{
+    return m_bConnectionFailed;
 }
 
 void SimClientSocket::OnConnect()
 {
-	printf("SimClientSocket::OnConnect()!!!\n");
+    printf("SimClientSocket::OnConnect()!!!\n");
 }
 
-bool SimClientSocket::isWaitingForResponse() {
-	return m_bWaitingForResponse;
+bool SimClientSocket::isWaitingForResponse()
+{
+    return m_bWaitingForResponse;
 }
 
-void SimClientSocket::cancelWaitingForResponse() {
+void SimClientSocket::cancelWaitingForResponse()
+{
     m_bWaitingForResponse = false;
 }
 
-void SimClientSocket::markWaitingForResponse() {
+void SimClientSocket::markWaitingForResponse()
+{
     m_bWaitingForResponse = true;
 }
 
 
-std::string SimClientSocket::getResponse() {
+std::string SimClientSocket::getResponse()
+{
     return m_sResponse;
 }
 
@@ -87,36 +92,33 @@ void SimClientSocket::OnLine(const std::string& line)
 
     if (opencog::logger().getLevel() >= opencog::Logger::FINE)
         opencog::logger().log(opencog::Logger::FINE, "SimClientSocket::OnLine: %s", line.c_str());
-  // TODO: More than one response can arrive for a same command!
-  //       How to handle this? 
-  //       a) Get only the first response 
-  //       b) Get only the last (in this case, there could be synchonization problems, 
-  //          since SimProxy's send() code does not know if there will be more responses) 
-  //       c) Handle the responses independently (calling a method of a Listener registered in the SimClientSocket).
-  //
-  // CURRENT IMPLEMENTATION IS A MIX OF (a) and (c). CALLER CAN/MUST ALSO CANCEL RESPONSE RECEPTION IN SPECIFIC SITUATIONS (TIMEOUT, FOR EXAMPLE). 
-  //
-  timeval theTime;
-  gettimeofday(&theTime, NULL);
-  if (m_bEchoing)
-	  printf("AGISim Server (@%ld.%ld ms) >> '%s'\n", theTime.tv_usec/1000, theTime.tv_usec%1000, line.c_str());
-  if (strstr(line.c_str(), "</sensation>") != NULL || 
-      strstr(line.c_str(), "</agisim>") != NULL ) 
-  {
-    if (m_bWaitingForResponse) {
-        m_bWaitingForResponse = false;
-        m_sResponse = line;
-    } else {
-        if (receiver != NULL) {
-            receiver->receiveAsynchronousMessage(line);
+    // TODO: More than one response can arrive for a same command!
+    //       How to handle this?
+    //       a) Get only the first response
+    //       b) Get only the last (in this case, there could be synchonization problems,
+    //          since SimProxy's send() code does not know if there will be more responses)
+    //       c) Handle the responses independently (calling a method of a Listener registered in the SimClientSocket).
+    //
+    // CURRENT IMPLEMENTATION IS A MIX OF (a) and (c). CALLER CAN/MUST ALSO CANCEL RESPONSE RECEPTION IN SPECIFIC SITUATIONS (TIMEOUT, FOR EXAMPLE).
+    //
+    timeval theTime;
+    gettimeofday(&theTime, NULL);
+    if (m_bEchoing)
+        printf("AGISim Server (@%ld.%ld ms) >> '%s'\n", theTime.tv_usec / 1000, theTime.tv_usec % 1000, line.c_str());
+    if (strstr(line.c_str(), "</sensation>") != NULL ||
+            strstr(line.c_str(), "</agisim>") != NULL ) {
+        if (m_bWaitingForResponse) {
+            m_bWaitingForResponse = false;
+            m_sResponse = line;
+        } else {
+            if (receiver != NULL) {
+                receiver->receiveAsynchronousMessage(line);
+            }
         }
-    }
-  }
-  else
-  {
+    } else {
 //    printf("Invalid message received: %s\n", line.c_str());
-//	SetCloseAndDelete();
-  }
+// SetCloseAndDelete();
+    }
 }
 
 

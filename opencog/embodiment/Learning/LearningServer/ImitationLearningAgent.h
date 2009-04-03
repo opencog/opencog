@@ -59,7 +59,9 @@ public:
 
     void run(CogServer* server);
 
-    virtual const ClassInfo& classinfo() const { return info(); }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::ImitationLearningAgent");
         return _ci;

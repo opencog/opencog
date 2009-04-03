@@ -48,15 +48,16 @@ using namespace Processor;
  * ----------------------------------------------------------------------------
  */
 
-RuleProcessor::RuleProcessor(Control::SystemParameters& p, const std::string & type) : 
-               comboSelectRepository(comboRepository), parameters(p) {
-    
+RuleProcessor::RuleProcessor(Control::SystemParameters& p, const std::string & type) :
+        comboSelectRepository(comboRepository), parameters(p)
+{
+
     // filenames for stdlib combo, combo preconditions and combo selection
     std::string comboLib = parameters.get("COMBO_STDLIB_REPOSITORY_FILE");
     std::string comboPre = parameters.get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE");
     std::string comboSel = parameters.get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE");
     std::string comboAct = parameters.get("COMBO_RULES_ACTION_SCHEMATA__REPOSITORY_FILE");
-   
+
     // ... to load combo scritpts
     loadComboScripts(comboLib, comboPre, comboSel, comboAct);
 
@@ -66,45 +67,45 @@ RuleProcessor::RuleProcessor(Control::SystemParameters& p, const std::string & t
     luaopen_base  (luaState);
     luaopen_math  (luaState);
     luaopen_table (luaState);
-    luaopen_debug (luaState);        
-    luaopen_string(luaState);        
+    luaopen_debug (luaState);
+    luaopen_string(luaState);
 
     luabind::open(luaState);
     luabind::set_pcall_callback(&luaThrowException);
 
-    // register class to makes lua understand is's structure        
+    // register class to makes lua understand is's structure
     luabind::module(this->luaState) [
         luabind::class_<std::vector<std::string> >( "StringVector" )
         .def( luabind::constructor<>() )
         .def( "push_back", &std::vector<std::string>::push_back )
-        ];
+    ];
 
     luabind::module( this->luaState ) [
         luabind::class_< std::map<std::string, float>::value_type >( "StringFloatPair" )
         .def( luabind::constructor<const std::string&, const float&>() )
-        ];
+    ];
 
     luabind::module( this->luaState ) [
         luabind::class_< std::pair<std::map<std::string,float>::iterator,bool> >( "StringFloatMapInsertReturn" )
-        ];
+    ];
 
     luabind::module( this->luaState ) [
         luabind::class_<std::map<std::string, float> >( "StringFloatMap" )
         .def( luabind::constructor<>() )
         .def( "insert", (std::pair<std::map<std::string,float>::iterator,bool> (std::map<std::string,float>::*) (const std::map<std::string,float>::value_type&) ) &std::map<std::string,float>::insert )
-        ];
+    ];
 
     luabind::module( this->luaState ) [
         luabind::class_<RuleProcessor>( "RuleProcessor" )
         .def( "addRule", &RuleProcessor::addRule )
-        ];
+    ];
 
     luabind::globals( this->luaState )[ "ruleProcessor" ] = this;
 
     // load core file
     if ( luaL_dofile( this->luaState, parameters.get("RV_CORE_FILE").c_str() ) ) {
         luaThrowException( this->luaState );
-    }         
+    }
 
     std::string agentRules = (boost::format(parameters.get("RE_RULES_FILENAME_MASK")) % type).str();
 
@@ -114,10 +115,12 @@ RuleProcessor::RuleProcessor(Control::SystemParameters& p, const std::string & t
     }
 }
 
-RuleProcessor::~RuleProcessor(){
+RuleProcessor::~RuleProcessor()
+{
 }
 
-void RuleProcessor::evaluateRules(const std::string & filename){
+void RuleProcessor::evaluateRules(const std::string & filename)
+{
 
     // create the world scenario
     loadWorldState(filename);
@@ -133,55 +136,55 @@ void RuleProcessor::evaluateRules(const std::string & filename){
 
     {
         std::multimap<Action, std::string>::iterator it;
-        for(it = this->suggestedActions.begin(); it != this->suggestedActions.end(); ++it ) {
+        for (it = this->suggestedActions.begin(); it != this->suggestedActions.end(); ++it ) {
             maxWeightedActions[it->first] = -1.0f;
-        } 
+        }
 
         // grouping actions...
-        for(it = this->suggestedActions.begin(); it != this->suggestedActions.end(); ++it) {
+        for (it = this->suggestedActions.begin(); it != this->suggestedActions.end(); ++it) {
 
             RuleStrengthIt ruleIt = ruleStrengthMap.find(it->second);
-            
+
             float strength = 0.0f;
-            if(ruleIt != ruleStrengthMap.end()){
+            if (ruleIt != ruleStrengthMap.end()) {
                 strength = ruleIt->second[worldState.getPetMode()];
             } else {
-                logger().log(opencog::Logger::ERROR, 
-                        "evaluateRules - Found not strength for rule precondition '%s'.", 
-                        it->second.c_str());
+                logger().log(opencog::Logger::ERROR,
+                             "evaluateRules - Found not strength for rule precondition '%s'.",
+                             it->second.c_str());
             }
 
             weightedActions[it->first].push_back(strength);
 
             // if there are more than one rule that leads to the same action,
             // the selected rule should be the one with higher weight
-            if(strength > maxWeightedActions[it->first]){
+            if (strength > maxWeightedActions[it->first]) {
                 maxWeightedActions[it->first] = strength;
                 this->actionsRuleMap[it->first] = it->second;
             }
-        } 
+        }
     } // end block
-    
+
 
     { // calculating the strength mean of all suggested actions..
         std::map<Action, std::vector<float> >::iterator it;
         float maximumWeight = -1;
 
-        for( it = weightedActions.begin( ); it != weightedActions.end( ); ++it ) {
-            
+        for ( it = weightedActions.begin( ); it != weightedActions.end( ); ++it ) {
+
             // mean weight
             float candidateWeight = 0;
-            for(unsigned int i = 0; i < it->second.size( ); ++i ) {
+            for (unsigned int i = 0; i < it->second.size( ); ++i ) {
                 candidateWeight += it->second[ i ];
-            } 
+            }
             candidateWeight /= it->second.size( );
-            
+
             // take the maximum weighted action
             if ( candidateWeight > maximumWeight ) {
                 maximumWeight = candidateWeight;
                 this->selectedAction = it->first;
-                this->selectedRule   = this->actionsRuleMap[it->first]; 
-            } 
+                this->selectedRule   = this->actionsRuleMap[it->first];
+            }
         }
     } // end block
 
@@ -193,115 +196,114 @@ void RuleProcessor::evaluateRules(const std::string & filename){
  * Private functions
  * ----------------------------------------------------------------------------
  */
-void RuleProcessor::evaluatePreconditions(){
-    
-    opencog::MT19937RandGen rng(0);
- 	Procedure::ComboInterpreter comboInterpreter(this->worldState, rng); 
-	Procedure::ComboSelectInterpreter comboSelectInterpreter(this->worldState, rng); 
-	
-	std::map<std::string, std::string>::iterator it;	
-	for(it = this->rulePreconditionMap.begin(); it != this->rulePreconditionMap.end(); it++){
-		std::string ruleName = (*it).first;
-		std::string precondition = (*it).second;
-		
-        this->validCandidates.clear();
-		combo::variable_unifier unifier;
-		const std::vector<std::string> & entities =  worldState.getWorldEntities();
+void RuleProcessor::evaluatePreconditions()
+{
 
-        for(unsigned int i = 0; i < entities.size(); i++){
-			unifier.insert(entities[i], true);
+    opencog::MT19937RandGen rng(0);
+    Procedure::ComboInterpreter comboInterpreter(this->worldState, rng);
+    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->worldState, rng);
+
+    std::map<std::string, std::string>::iterator it;
+    for (it = this->rulePreconditionMap.begin(); it != this->rulePreconditionMap.end(); it++) {
+        std::string ruleName = (*it).first;
+        std::string precondition = (*it).second;
+
+        this->validCandidates.clear();
+        combo::variable_unifier unifier;
+        const std::vector<std::string> & entities =  worldState.getWorldEntities();
+
+        for (unsigned int i = 0; i < entities.size(); i++) {
+            unifier.insert(entities[i], true);
         }
         this->validCandidates = entities;
 
         combo::vertex result;
- 		std::vector<combo::vertex> arguments;
-      	Procedure::RunningProcedureId procedureId;
+        std::vector<combo::vertex> arguments;
+        Procedure::RunningProcedureId procedureId;
 
-        if(comboRepository.contains(precondition)){
+        if (comboRepository.contains(precondition)) {
             const Procedure::ComboProcedure& p = comboRepository.get(precondition);
             procedureId = comboInterpreter.runProcedure(p.getComboTree(), arguments, unifier);
 
-            while(!comboInterpreter.isFinished(procedureId)){
+            while (!comboInterpreter.isFinished(procedureId)) {
                 comboInterpreter.run(NULL);
             }
 
             if (comboInterpreter.isFailed(procedureId)) {
-                logger().log(opencog::Logger::ERROR, 
-                        "evaluatePreconditions - Combo precondition '%s' failed.", 
-                        precondition.c_str());
+                logger().log(opencog::Logger::ERROR,
+                             "evaluatePreconditions - Combo precondition '%s' failed.",
+                             precondition.c_str());
                 continue;
             }
 
             result = comboInterpreter.getResult(procedureId);
 
-        } else if(comboSelectRepository.contains(precondition)){
+        } else if (comboSelectRepository.contains(precondition)) {
             const Procedure::ComboSelectProcedure& p = comboSelectRepository.get(precondition);
-            procedureId = comboSelectInterpreter.runProcedure(p.getFirstScript(), 
-                                                              p.getSecondScript(), 
-                                                              arguments, unifier);
+            procedureId = comboSelectInterpreter.runProcedure(p.getFirstScript(),
+                          p.getSecondScript(),
+                          arguments, unifier);
 
-            while(!comboSelectInterpreter.isFinished(procedureId)){
+            while (!comboSelectInterpreter.isFinished(procedureId)) {
                 comboSelectInterpreter.run(NULL);
             }
 
             if (comboSelectInterpreter.isFailed(procedureId)) {
-                logger().log(opencog::Logger::ERROR, 
-                        "evaluatePreconditions - ComboSelect precondition '%s' failed.", 
-                        precondition.c_str());
+                logger().log(opencog::Logger::ERROR,
+                             "evaluatePreconditions - ComboSelect precondition '%s' failed.",
+                             precondition.c_str());
                 continue;
             }
 
             result = comboSelectInterpreter.getResult(procedureId);
 
         } else {
-            throw opencog::RuntimeException(TRACE_INFO, 
-                  "evaluatePreconditions - Procedure type should be COMBO or COMBO_SELECT.");
+            throw opencog::RuntimeException(TRACE_INFO,
+                                            "evaluatePreconditions - Procedure type should be COMBO or COMBO_SELECT.");
         }
-	        
-	    if(is_builtin(result) && (get_builtin(result) == combo::id::logical_true)){
-            logger().log(opencog::Logger::DEBUG, 
-                    "RuleProcessor - Rule '%s' evaluated true.", ruleName.c_str());
 
-            if(procedureId.getType() == Procedure::COMBO){
-    	    	updateValidCandidates(comboInterpreter.getUnifierResult(procedureId));
-            } else if(procedureId.getType() == Procedure::COMBO_SELECT){
-    	    	updateValidCandidates(comboSelectInterpreter.getUnifierResult(procedureId));
+        if (is_builtin(result) && (get_builtin(result) == combo::id::logical_true)) {
+            logger().log(opencog::Logger::DEBUG,
+                         "RuleProcessor - Rule '%s' evaluated true.", ruleName.c_str());
+
+            if (procedureId.getType() == Procedure::COMBO) {
+                updateValidCandidates(comboInterpreter.getUnifierResult(procedureId));
+            } else if (procedureId.getType() == Procedure::COMBO_SELECT) {
+                updateValidCandidates(comboSelectInterpreter.getUnifierResult(procedureId));
             } else {
-                throw opencog::RuntimeException(TRACE_INFO, 
-                      "evaluatePreconditions -  Procedure type should be COMBO or COMBO_SELECT.");
+                throw opencog::RuntimeException(TRACE_INFO,
+                                                "evaluatePreconditions -  Procedure type should be COMBO or COMBO_SELECT.");
             }
-	    	
-            switch(this->ruleTypeMap[ruleName]){
-                case 0: // schema effect
-                    {
-                        Action action = boost::get<Action>(this->ruleEffectMap[ruleName]);
-                        suggestAction(ruleName, action.getName(), action.getParameters());
-                    }
-                    break;
 
-                case 1: // feeling effect
-                    {
-                        Feeling feeling = boost::get<Feeling>(this->ruleEffectMap[ruleName]);
-                        suggestFeeling(ruleName, feeling.getName(), feeling.getIntensity());
-                    }
-                    break;
-
-                case 2:	// relation effect
-                    {
-                        Relation relation = boost::get<Relation>(this->ruleEffectMap[ruleName]);
-                        suggestRelation(ruleName, relation.getName(), 
-                                        relation.getTarget(), relation.getIntensity());
-                    }
-                    break;
-
-                default:
-                    continue;
+            switch (this->ruleTypeMap[ruleName]) {
+            case 0: { // schema effect
+                Action action = boost::get<Action>(this->ruleEffectMap[ruleName]);
+                suggestAction(ruleName, action.getName(), action.getParameters());
             }
-	    }
-	}
+            break;
+
+            case 1: { // feeling effect
+                Feeling feeling = boost::get<Feeling>(this->ruleEffectMap[ruleName]);
+                suggestFeeling(ruleName, feeling.getName(), feeling.getIntensity());
+            }
+            break;
+
+            case 2: { // relation effect
+                Relation relation = boost::get<Relation>(this->ruleEffectMap[ruleName]);
+                suggestRelation(ruleName, relation.getName(),
+                                relation.getTarget(), relation.getIntensity());
+            }
+            break;
+
+            default:
+                continue;
+            }
+        }
+    }
 }
 
-int RuleProcessor::luaThrowException( lua_State * state ) {
+int RuleProcessor::luaThrowException( lua_State * state )
+{
     lua_Debug debugger;
     lua_getfield( state, LUA_GLOBALSINDEX, "f");  /* get global 'f' */
     lua_getinfo( state, "> Sln ", &debugger );
@@ -320,27 +322,29 @@ int RuleProcessor::luaThrowException( lua_State * state ) {
     throw opencog::RuntimeException( TRACE_INFO, message.str( ).c_str( ) );
 }
 
-void RuleProcessor::loadWorldState(const std::string & filename){
+void RuleProcessor::loadWorldState(const std::string & filename)
+{
     VirtualWorldData::XmlLoader loader;
 
     // populate worldState with the xml files
-    if(!loader.fromFile(filename, this->worldState)){
-        throw opencog::RuntimeException(TRACE_INFO, 
-              "RuleProcessor - Unable to load WorldState. Check log.");
+    if (!loader.fromFile(filename, this->worldState)) {
+        throw opencog::RuntimeException(TRACE_INFO,
+                                        "RuleProcessor - Unable to load WorldState. Check log.");
     }
 }
 
-void RuleProcessor::loadComboScripts(const std::string & comboLib, 
+void RuleProcessor::loadComboScripts(const std::string & comboLib,
                                      const std::string & comboPre,
                                      const std::string & comboSel,
-                                     const std::string & comboAct) {
+                                     const std::string & comboAct)
+{
     ifstream fin(comboLib.c_str());
     if (fin.good()) {
         comboRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN, 
-                        "loadComboScripts - Unable to load '%s'.",
-                        comboLib.c_str());
+        logger().log(opencog::Logger::WARN,
+                     "loadComboScripts - Unable to load '%s'.",
+                     comboLib.c_str());
     }
     fin.close();
 
@@ -348,9 +352,9 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN, 
-                        "loadComboScripts - Unable to load '%s'.",
-                        comboPre.c_str());
+        logger().log(opencog::Logger::WARN,
+                     "loadComboScripts - Unable to load '%s'.",
+                     comboPre.c_str());
     }
     fin.close();
 
@@ -358,9 +362,9 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboSelectRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN, 
-                        "loadComboScripts - Unable to load '%s'.",
-                        comboSel.c_str());
+        logger().log(opencog::Logger::WARN,
+                     "loadComboScripts - Unable to load '%s'.",
+                     comboSel.c_str());
     }
     fin.close();
 
@@ -368,117 +372,125 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboSelectRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN, 
-                        "loadComboScripts - Unable to load '%s'.",
-                        comboAct.c_str());
+        logger().log(opencog::Logger::WARN,
+                     "loadComboScripts - Unable to load '%s'.",
+                     comboAct.c_str());
     }
     fin.close();
 }
 
-void RuleProcessor::addRule(const std::string& rule, const int type, 
+void RuleProcessor::addRule(const std::string& rule, const int type,
                             const std::map<std::string, float>& modesStrength,
                             const std::string& precondition,
                             const std::string& effect,
-                            const std::vector<std::string>& effectParameters){
-    
+                            const std::vector<std::string>& effectParameters)
+{
+
     // all preconditions should be inserted in ComboRepository and ProcedureRepository as combo
     // scripts with no parameters
-    if(!comboRepository.contains(precondition) && 
-       !comboSelectRepository.contains(precondition)){
+    if (!comboRepository.contains(precondition) &&
+            !comboSelectRepository.contains(precondition)) {
         // error
         return;
     }
-    
+
     this->ruleTypeMap[rule] = type;
     this->ruleStrengthMap[rule] = modesStrength;
     this->rulePreconditionMap[rule] = precondition;
-    
-    switch(type){
+
+    switch (type) {
     case 0: // schema rule
         this->ruleEffectMap[rule] = Processor::RuleProcessor::Action(effect, effectParameters);
         break;
-        
+
     case 1: // feeling rule
-        if(effectParameters.size() != 2) {
-            throw opencog::InvalidParamException(TRACE_INFO, 
-                                                  "addRule - Feeling effect need two arguments. Got '%d'.", 
-                                                  effectParameters.size());
+        if (effectParameters.size() != 2) {
+            throw opencog::InvalidParamException(TRACE_INFO,
+                                                 "addRule - Feeling effect need two arguments. Got '%d'.",
+                                                 effectParameters.size());
         }
-        this->ruleEffectMap [rule] = Processor::RuleProcessor::Feeling(effectParameters[0], 
-                                                                       atof(effectParameters[1].c_str()));
+        this->ruleEffectMap [rule] = Processor::RuleProcessor::Feeling(effectParameters[0],
+                                     atof(effectParameters[1].c_str()));
         break;
-        
+
     case 2: // relation rule
-        if(effectParameters.size() != 3) { 	
-            throw opencog::InvalidParamException(TRACE_INFO, 
-                                                  "addRule - Relation effect need three arguments. Got '%d'.",
-                                                  effectParameters.size());
+        if (effectParameters.size() != 3) {
+            throw opencog::InvalidParamException(TRACE_INFO,
+                                                 "addRule - Relation effect need three arguments. Got '%d'.",
+                                                 effectParameters.size());
         }
-        this->ruleEffectMap[rule] = Processor::RuleProcessor::Relation(effectParameters[0], 
-                                                                       effectParameters[1], 
-                                                                       atof(effectParameters[2].c_str()));
+        this->ruleEffectMap[rule] = Processor::RuleProcessor::Relation(effectParameters[0],
+                                    effectParameters[1],
+                                    atof(effectParameters[2].c_str()));
         break;
-        
+
     default:
-        break;	
+        break;
     }
 }
 
-void RuleProcessor::suggestFeeling(const std::string& rule, const std::string& feeling, float intensity){ 
+void RuleProcessor::suggestFeeling(const std::string& rule, const std::string& feeling, float intensity)
+{
     this->suggestedFeelings.insert(std::pair<Feeling, std::string>(Feeling(feeling, intensity), rule));
 }
 
 void RuleProcessor::suggestRelation(const std::string& rule, const std::string& relation,
-                                    const std::string& target, float intensity){
+                                    const std::string& target, float intensity)
+{
     if (target == "_*_") {
         std::vector<std::string> targets = this->validCandidates; // make a copy
-        for(unsigned int i = 0; i < targets.size(); ++i ) {
+        for (unsigned int i = 0; i < targets.size(); ++i ) {
             suggestRelation(rule, relation, targets[i], intensity );
         } // for
         return;
     } // if
-    
+
     this->suggestedRelations.insert(std::pair<Relation, std::string>(
-                                    Relation(relation, target, intensity), rule));   
+                                        Relation(relation, target, intensity), rule));
 }
 
-void RuleProcessor::suggestAction(const std::string& rule, 
-							      const std::string& action,
-        					      const std::vector<std::string>& parameters) {
-	
+void RuleProcessor::suggestAction(const std::string& rule,
+                                  const std::string& action,
+                                  const std::vector<std::string>& parameters)
+{
+
     if (std::find(parameters.begin(), parameters.end(), "_*_") != parameters.end()) {
-    	
+
         std::vector<std::string> validTargets = validCandidates; // make a copy
-        for(unsigned int i = 0; i < validTargets.size( ); ++i ) {      
+        for (unsigned int i = 0; i < validTargets.size( ); ++i ) {
             std::vector<std::string> bindParameters = parameters;
 
             // replace all WILD_CARD elements by valid target element
-            std::replace_if(bindParameters.begin(), bindParameters.end(), 
-                    		std::bind2nd(std::equal_to<std::string>(), "_*_"), validTargets[i]);
+            std::replace_if(bindParameters.begin(), bindParameters.end(),
+                            std::bind2nd(std::equal_to<std::string>(), "_*_"), validTargets[i]);
 
             suggestAction(rule, action, bindParameters);
         } // for
         return;
     } // if
-    
+
     this->suggestedActions.insert(std::pair<Action, std::string>(
-                                  Action(action, parameters), rule));  
+                                      Action(action, parameters), rule));
 }
 
-void RuleProcessor::updateValidCandidates(combo::variable_unifier unifier){
+void RuleProcessor::updateValidCandidates(combo::variable_unifier unifier)
+{
     this->validCandidates.clear();
-   
-    if(!unifier.isUpdated()) { return; }
+
+    if (!unifier.isUpdated()) {
+        return;
+    }
 
     combo::UnifierIt it;
-    for(it = unifier.begin(); it != unifier.end(); it++) {
-        if((*it).second){
+    for (it = unifier.begin(); it != unifier.end(); it++) {
+        if ((*it).second) {
             this->validCandidates.push_back((*it).first);
         }
     }
 }
 
-void RuleProcessor::formatOutputResult(const std::string & inputFilename){
+void RuleProcessor::formatOutputResult(const std::string & inputFilename)
+{
 
     fprintf(stdout, "Execution Summary\n");
     fprintf(stdout, "-------------------------------------------------\n");
@@ -490,9 +502,9 @@ void RuleProcessor::formatOutputResult(const std::string & inputFilename){
     fprintf(stdout, "Suggested actions with rules\n");
     fprintf(stdout, "-------------------------------------------------\n");
     std::multimap<Action, std::string>::iterator actionIt;
-    for(actionIt = suggestedActions.begin(); actionIt != suggestedActions.end(); actionIt++){
-        fprintf(stdout, "Action: '%s'\n\tRule: '%s'\n", 
-                (actionIt->first).toString().c_str(), 
+    for (actionIt = suggestedActions.begin(); actionIt != suggestedActions.end(); actionIt++) {
+        fprintf(stdout, "Action: '%s'\n\tRule: '%s'\n",
+                (actionIt->first).toString().c_str(),
                 actionIt->second.c_str());
     }
     fprintf(stdout, "\n\n");
@@ -500,9 +512,9 @@ void RuleProcessor::formatOutputResult(const std::string & inputFilename){
     fprintf(stdout, "Suggested relations with rules\n");
     fprintf(stdout, "-------------------------------------------------\n");
     std::multimap<Relation, std::string>::iterator relationIt;
-    for(relationIt = suggestedRelations.begin(); relationIt != suggestedRelations.end(); relationIt++){
-        fprintf(stdout, "Relation: '%s'\n\tRule: '%s'\n", 
-                relationIt->first.toString().c_str(), 
+    for (relationIt = suggestedRelations.begin(); relationIt != suggestedRelations.end(); relationIt++) {
+        fprintf(stdout, "Relation: '%s'\n\tRule: '%s'\n",
+                relationIt->first.toString().c_str(),
                 relationIt->second.c_str());
     }
     fprintf(stdout, "\n\n");
@@ -510,9 +522,9 @@ void RuleProcessor::formatOutputResult(const std::string & inputFilename){
     fprintf(stdout, "Suggested feelings with rules\n");
     fprintf(stdout, "-------------------------------------------------\n");
     std::multimap<Feeling, std::string>::iterator feelingIt;
-    for(feelingIt = suggestedFeelings.begin(); feelingIt != suggestedFeelings.end(); feelingIt++){
-        fprintf(stdout, "Feeling: '%s'\n\tRule: '%s'\n", 
-                feelingIt->first.toString().c_str(), 
+    for (feelingIt = suggestedFeelings.begin(); feelingIt != suggestedFeelings.end(); feelingIt++) {
+        fprintf(stdout, "Feeling: '%s'\n\tRule: '%s'\n",
+                feelingIt->first.toString().c_str(),
                 feelingIt->second.c_str());
     }
     fprintf(stdout, "\n\n");

@@ -28,53 +28,54 @@
 #include <opencog/server/CogServer.h>
 #include "NetworkElement.h"
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
 /** Abstract CogServer class for embodiment servers which needs a NetworkElement */
 class EmbodimentCogServer : public opencog::CogServer
 {
 
-    private:
-        NetworkElement* ne;
+private:
+    NetworkElement* ne;
 
-    protected:
-        bool externalTickMode;
+protected:
+    bool externalTickMode;
 
-        // controls the interval (in number of cycles) in which the 
-        // serverLoop will check for messages
-        int unreadMessagesCheckInterval; 
+    // controls the interval (in number of cycles) in which the
+    // serverLoop will check for messages
+    int unreadMessagesCheckInterval;
 
-        // sets the limit of messages per request to be retrieved from the 
-        // router (-1 for unlimitted)
-        int unreadMessagesRetrievalLimit; 
+    // sets the limit of messages per request to be retrieved from the
+    // router (-1 for unlimitted)
+    int unreadMessagesRetrievalLimit;
 
-    public:
+public:
 
-        EmbodimentCogServer();
-        virtual ~EmbodimentCogServer();
+    EmbodimentCogServer();
+    virtual ~EmbodimentCogServer();
 
-        // override CogServer methods
-        virtual bool customLoopRun(void);
+    // override CogServer methods
+    virtual bool customLoopRun(void);
 
-        void setNetworkElement(NetworkElement*);
-        NetworkElement& getNetworkElement(void);
+    void setNetworkElement(NetworkElement*);
+    NetworkElement& getNetworkElement(void);
 
-        /**
-         * This is called when this servers needs to process a Message received 
-         * from router. Subclasses must override this to perform something useful.
-         * @return true, if the CogServer must be stopped (e.g. it received a 
-         * SAVE_AND_EXIT message)
-         */
-        virtual bool processNextMessage(Message *message)=0;
+    /**
+     * This is called when this servers needs to process a Message received
+     * from router. Subclasses must override this to perform something useful.
+     * @return true, if the CogServer must be stopped (e.g. it received a
+     * SAVE_AND_EXIT message)
+     */
+    virtual bool processNextMessage(Message *message) = 0;
 
-        // convenient medhods, which are delegated to NetworkElement
-        virtual bool sendMessage(Message &msg);
-        virtual bool sendCommandToRouter(const std::string &cmd);
-        Control::SystemParameters& getParameters();
-        const std::string& getID(void);
-        int getPortNumber(void);
-        bool isElementAvailable(const std::string& id);
-        void logoutFromRouter();
+    // convenient medhods, which are delegated to NetworkElement
+    virtual bool sendMessage(Message &msg);
+    virtual bool sendCommandToRouter(const std::string &cmd);
+    Control::SystemParameters& getParameters();
+    const std::string& getID(void);
+    int getPortNumber(void);
+    bool isElementAvailable(const std::string& id);
+    void logoutFromRouter();
 
 };
 }

@@ -26,28 +26,32 @@
 #include <opencog/server/Agent.h>
 #include <time.h>
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
 using namespace std;
 
-class ActionSelectionAgent : public opencog::Agent {
+class ActionSelectionAgent : public opencog::Agent
+{
 
-    private:
+private:
 
-        time_t lastTickTime;
+    time_t lastTickTime;
 
-    public:
+public:
 
-        ~ActionSelectionAgent();
-        ActionSelectionAgent();
+    ~ActionSelectionAgent();
+    ActionSelectionAgent();
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("OperationalPetController::ActionSelectionAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("OperationalPetController::ActionSelectionAgent");
+        return _ci;
+    }
 
-        void run(opencog::CogServer *server);
+    void run(opencog::CogServer *server);
 
 }; // class
 }  // namespace

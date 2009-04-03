@@ -27,20 +27,22 @@
 #include "Message.h"
 #include "EmbodimentCogServer.h"
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
-class ComboShellServer : public EmbodimentCogServer {
+class ComboShellServer : public EmbodimentCogServer
+{
 
-    public:
-        static BaseServer* createInstance();
-        ComboShellServer();
-        void init(const Control::SystemParameters &params);
-    
-        // overrides
-        bool customLoopRun();
-        bool processNextMessage(Message *message);
-    private:
-        bool _waiting;
+public:
+    static BaseServer* createInstance();
+    ComboShellServer();
+    void init(const Control::SystemParameters &params);
+
+    // overrides
+    bool customLoopRun();
+    bool processNextMessage(Message *message);
+private:
+    bool _waiting;
 }; // class
 } // namespace
 

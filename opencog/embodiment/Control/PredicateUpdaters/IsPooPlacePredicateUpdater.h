@@ -24,17 +24,19 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalPetController{
+namespace OperationalPetController
+{
 
-class IsPooPlacePredicateUpdater : public OperationalPetController::BasicPredicateUpdater {
+class IsPooPlacePredicateUpdater : public OperationalPetController::BasicPredicateUpdater
+{
 
-	public:
-		IsPooPlacePredicateUpdater(AtomSpace &atomSpace);
-		~IsPooPlacePredicateUpdater();
-	
-		void update(Handle object, Handle pet, unsigned long timestamp );
-	
-}; // class; 
+public:
+    IsPooPlacePredicateUpdater(AtomSpace &atomSpace);
+    ~IsPooPlacePredicateUpdater();
+
+    void update(Handle object, Handle pet, unsigned long timestamp );
+
+}; // class;
 } // namespace
 
 #endif /*ISDRINKABLE_H_*/

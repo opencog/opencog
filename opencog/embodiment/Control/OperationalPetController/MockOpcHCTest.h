@@ -95,7 +95,7 @@ public:
               Control::SystemParameters & parameters);
     ~MockOpcHCTest();
 
-    Factory<HCTestAgent,Agent> HCTestAgentFactory;
+    Factory<HCTestAgent, Agent> HCTestAgentFactory;
 
     /**
      * @return The AtomSpace that represents the pet's short memory

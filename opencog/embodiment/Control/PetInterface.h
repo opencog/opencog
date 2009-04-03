@@ -23,13 +23,13 @@
  */
 #ifndef PET_INTERFACE_H_
 #define PET_INTERFACE_H_
-/** 
+/**
  * PetInterface.h
- * 
- * This is an abstract class to define the interface that the Pet class must 
+ *
+ * This is an abstract class to define the interface that the Pet class must
  * provide for usage by other classes (like PAI, Predavese parser and handlers, etc).
- * 
- * Author: Welter Luigi 
+ *
+ * Author: Welter Luigi
  * Copyright(c), 2007
  */
 
@@ -39,43 +39,45 @@
 
 using namespace opencog;
 
-namespace Control {
+namespace Control
+{
 
-  class PetInterface {
-    
-  public: 
+class PetInterface
+{
+
+public:
     virtual ~PetInterface() {}
-        
-    virtual const std::string& getPetId() const=0;
-    virtual const std::string& getExemplarAvatarId() const=0;
 
-    virtual AtomSpace& getAtomSpace()=0;
+    virtual const std::string& getPetId() const = 0;
+    virtual const std::string& getExemplarAvatarId() const = 0;
 
-    virtual void stopExecuting(const vector<string> &commandStatement, unsigned long timestamp)=0;
+    virtual AtomSpace& getAtomSpace() = 0;
 
-    virtual bool isInLearningMode() const=0;
-    virtual void startLearning(const vector<string> &commandStatement, unsigned long timestamp)=0;
-    virtual void stopLearning(const vector<string> &commandStatement, unsigned long timestamp)=0;
+    virtual void stopExecuting(const vector<string> &commandStatement, unsigned long timestamp) = 0;
 
-    virtual bool isExemplarInProgress() const=0;
-    virtual void startExemplar(const vector<string> &commandStatement, unsigned long timestamp)=0;
-    virtual void endExemplar(const vector<string> &commandStatement, unsigned long timestamp)=0;
+    virtual bool isInLearningMode() const = 0;
+    virtual void startLearning(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void stopLearning(const vector<string> &commandStatement, unsigned long timestamp) = 0;
 
-    virtual void trySchema(const vector<string> &commandStatement, unsigned long timestamp)=0;
-    virtual void reward(unsigned long timestamp)=0;
-    virtual void punish(unsigned long timestamp)=0;
+    virtual bool isExemplarInProgress() const = 0;
+    virtual void startExemplar(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void endExemplar(const vector<string> &commandStatement, unsigned long timestamp) = 0;
 
-    /** 
+    virtual void trySchema(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void reward(unsigned long timestamp) = 0;
+    virtual void punish(unsigned long timestamp) = 0;
+
+    /**
      * One handler mode shall be created to every agent mode.
      */
     virtual AgentModeHandler& getCurrentModeHandler( void ) = 0;
 
-    virtual void setOwnerId(const string& ownerId)=0;
-    virtual void setExemplarAvatarId(const string& avatarId)=0;
-    virtual const std::string& getOwnerId() const=0;
-    virtual void setName(const string& petName)=0;
-    virtual const string& getName() const=0;
-        
+    virtual void setOwnerId(const string& ownerId) = 0;
+    virtual void setExemplarAvatarId(const string& avatarId) = 0;
+    virtual const std::string& getOwnerId() const = 0;
+    virtual void setName(const string& petName) = 0;
+    virtual const string& getName() const = 0;
+
     // functions used to set, get and verify if Pet has something in its
     // mouth, i.e., if it has grabbed something
     virtual void setGrabbedObj(const string& id) = 0;
@@ -89,17 +91,17 @@ namespace Control {
     virtual void getHighLTIObjects(HandleSeq& highLTIObjects) = 0;
 
     /**
-     * This method keeps the latest object name, used by goto_obj and gonear_obj 
+     * This method keeps the latest object name, used by goto_obj and gonear_obj
      * when building a goto plan
      * @param target Object name amn it's position on LocalSpaceMap
      */
-    virtual void setLatestGotoTarget( const std::pair<std::string,Spatial::Point>& target ) = 0;
+    virtual void setLatestGotoTarget( const std::pair<std::string, Spatial::Point>& target ) = 0;
     /**
      * Returns the latest object name used by goto_obj or gonear_obj
      * @return Object name and it's position
      */
-    virtual const std::pair<std::string,Spatial::Point>& getLatestGotoTarget( void ) = 0;
-	
+    virtual const std::pair<std::string, Spatial::Point>& getLatestGotoTarget( void ) = 0;
+
     /**
      * When an avatar requests the pet to execute a trick, this
      * method will be used to register the command on RuleEngine
@@ -114,20 +116,26 @@ namespace Control {
      * Tristan this "The range of valid values for speed is between -5m/s and
      * 30m/s" (whatever the hell traveling at "-5m/s" means)
      */
-    virtual float computeWalkingSpeed() const { return 3.5; }
+    virtual float computeWalkingSpeed() const {
+        return 3.5;
+    }
 
     /**
      * Computes an angle to be the minimal rotation for pet in combo schema execution
      * (possibly based on its mood & the schema its executing, possibly with
      * random variation to make it less robotic) - in radians
      */
-    virtual float computeRotationAngle() const { return 0.1; }
+    virtual float computeRotationAngle() const {
+        return 0.1;
+    }
 
     /**
      * Computes a duration for following, in seconds, e.g. based on how obedient
      * / interested / whatever the pet is
      */
-    virtual float computeFollowingDuration() const { return 5.0; }
+    virtual float computeFollowingDuration() const {
+        return 5.0;
+    }
 
     /**
      * Return the type of the Agent (pet, humanoid, etc)
@@ -149,28 +157,28 @@ namespace Control {
      * Save a LocalSpaceMap2D copy on the current application directory
      */
     void saveSpaceMapFile() {
-      logger().log(opencog::Logger::DEBUG,  "PetInterface - saveSpaceMapFile()."); 
-      if (!getAtomSpace().getSpaceServer().isLatestMapValid()) {
-	logger().log(opencog::Logger::WARN,  "PetInterface - There is no space map yet."); 
-	return;
-      }
-      const SpaceServer::SpaceMap& sm = getAtomSpace().getSpaceServer().getLatestMap();
-      static unsigned int mapCounter = 0;
-      std::stringstream fileName;
-      fileName << "ww_mapPersistence_";
-      fileName << getPetId();
-      fileName << "_";
-      fileName << mapCounter;
-      fileName << ".bin";
-      SpaceServer::SpaceMap& map = (SpaceServer::SpaceMap&) sm;
-      
-      FILE* saveFile = fopen( fileName.str( ).c_str( ), "w+b" );
-      map.save( saveFile );
-      fclose( saveFile );
-      ++mapCounter;
+        logger().log(opencog::Logger::DEBUG,  "PetInterface - saveSpaceMapFile().");
+        if (!getAtomSpace().getSpaceServer().isLatestMapValid()) {
+            logger().log(opencog::Logger::WARN,  "PetInterface - There is no space map yet.");
+            return;
+        }
+        const SpaceServer::SpaceMap& sm = getAtomSpace().getSpaceServer().getLatestMap();
+        static unsigned int mapCounter = 0;
+        std::stringstream fileName;
+        fileName << "ww_mapPersistence_";
+        fileName << getPetId();
+        fileName << "_";
+        fileName << mapCounter;
+        fileName << ".bin";
+        SpaceServer::SpaceMap& map = (SpaceServer::SpaceMap&) sm;
+
+        FILE* saveFile = fopen( fileName.str( ).c_str( ), "w+b" );
+        map.save( saveFile );
+        fclose( saveFile );
+        ++mapCounter;
     }
-    
-  };  
+
+};
 
 } // Control
 

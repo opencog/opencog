@@ -25,28 +25,30 @@
 #include "comboreduct/combo/operator_base.h"
 #include "comboreduct/combo/type_tree.h"
 
-namespace combo {
+namespace combo
+{
 
-  using namespace std;
+using namespace std;
 
-  //this class implement operator_base in a generic way using
-  //an enum
-  //enum_count corresponds to the last enum element of OPERATOR_ENUM
-  //supposely denoting the number of elements
-  template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-  class pet_operator : public operator_base {
+//this class implement operator_base in a generic way using
+//an enum
+//enum_count corresponds to the last enum element of OPERATOR_ENUM
+//supposely denoting the number of elements
+template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
+class pet_operator : public operator_base
+{
 
-  public:
+public:
 
     //struct for description of name and type
     struct basic_description {
-      OPERATOR_ENUM operator_enum;
-      string name;
-      string type;
+        OPERATOR_ENUM operator_enum;
+        string name;
+        string type;
     };
 
-  protected:
-    
+protected:
+
     //enum, i.e. set of operators
     OPERATOR_ENUM _enum;
 
@@ -70,56 +72,58 @@ namespace combo {
     //array returned by get_basic_description_array
     void set_basic_description(OPERATOR_ENUM oe);
 
-  public:
+public:
     OPERATOR_ENUM get_enum() const;
 
-  };
+};
 
-  template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-  pet_operator<OPERATOR_ENUM, enum_count>::pet_operator() {
+template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
+pet_operator<OPERATOR_ENUM, enum_count>::pet_operator()
+{
     _enum = enum_count;
     _name = "UNDEFINED_OPERATOR";
     _arity = 0;
     _output_type = type_tree(id::ill_formed_type);
-  }
+}
 
-  template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-  void pet_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENUM oe) {
+template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
+void pet_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENUM oe)
+{
     const basic_description* bd = get_basic_description_array();
     unsigned int bd_count = get_basic_description_array_count();
-    opencog::cassert(TRACE_INFO, bd_count==(unsigned int)enum_count,
+    opencog::cassert(TRACE_INFO, bd_count == (unsigned int)enum_count,
                      "there must be entries for all perceptions.");
     bool found = false;
-    for(unsigned int i = 0; i < bd_count && !found; ++i) {
-      if(bd[i].operator_enum==oe) {
-	found = true;
-	//setting perception name
-	_name = bd[i].name;
-	//setting perception type tree
-	std::istringstream is(bd[i].type);
-	try {
-	  is >> _type_tree;
-	}
-	catch(opencog::InconsistenceException& ie) {
-	  std::cout << "WARNING : there must be a problem with the type description of " << _name << ", as the interpretation of the type string : " << "\"" << is.str() << "\"" << " has raised the following exception : " << ie.getMessage() << std::endl;
-	}
-	//setting arity
-	_arity = type_tree_arity(_type_tree); 
-	//setting output type
-	_output_type = type_tree_output_type_tree(_type_tree);
-	//setting input argument type trees
-	_arg_type_tree = type_tree_input_arg_types(_type_tree);
-      }
+    for (unsigned int i = 0; i < bd_count && !found; ++i) {
+        if (bd[i].operator_enum == oe) {
+            found = true;
+            //setting perception name
+            _name = bd[i].name;
+            //setting perception type tree
+            std::istringstream is(bd[i].type);
+            try {
+                is >> _type_tree;
+            } catch (opencog::InconsistenceException& ie) {
+                std::cout << "WARNING : there must be a problem with the type description of " << _name << ", as the interpretation of the type string : " << "\"" << is.str() << "\"" << " has raised the following exception : " << ie.getMessage() << std::endl;
+            }
+            //setting arity
+            _arity = type_tree_arity(_type_tree);
+            //setting output type
+            _output_type = type_tree_output_type_tree(_type_tree);
+            //setting input argument type trees
+            _arg_type_tree = type_tree_input_arg_types(_type_tree);
+        }
     }
     opencog::cassert(TRACE_INFO, found,
                      "pet_perception with enum %d has not been found in pbd",
-                     oe);    
-  }
+                     oe);
+}
 
-  template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-  OPERATOR_ENUM pet_operator<OPERATOR_ENUM, enum_count>::get_enum() const {
+template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
+OPERATOR_ENUM pet_operator<OPERATOR_ENUM, enum_count>::get_enum() const
+{
     return _enum;
-  }  
+}
 
 
 }//~namespace combo

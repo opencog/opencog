@@ -27,113 +27,126 @@
 using namespace LearningServerMessages;
 using namespace PetCombo;
 
-SchemaMessage::~SchemaMessage(){
+SchemaMessage::~SchemaMessage()
+{
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to) :
-							 Message(from, to, MessagingSystem::Message::SCHEMA) {
-	schema.assign("");
-	schemaName.assign("");
-	candidateSchemaName.assign("");
+        Message(from, to, MessagingSystem::Message::SCHEMA)
+{
+    schema.assign("");
+    schemaName.assign("");
+    candidateSchemaName.assign("");
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
-						     const std::string &msg, int msgType) :
-						     Message(from, to, msgType){
+                             const std::string &msg, int msgType) :
+        Message(from, to, msgType)
+{
 
-	loadPlainTextRepresentation(msg.c_str());
+    loadPlainTextRepresentation(msg.c_str());
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
-		      				 const combo::combo_tree & comboSchema, const std::string &schemaName,
-		      				 const std::string &candidateSchemaName) :
-		      				 Message(from, to, MessagingSystem::Message::SCHEMA) {
+                             const combo::combo_tree & comboSchema, const std::string &schemaName,
+                             const std::string &candidateSchemaName) :
+        Message(from, to, MessagingSystem::Message::SCHEMA)
+{
 
-	this->schemaName.assign(schemaName);
-	if(candidateSchemaName.size() != 0){
-		this->candidateSchemaName.assign(candidateSchemaName);
-		setType(CANDIDATE_SCHEMA);
-	}
+    this->schemaName.assign(schemaName);
+    if (candidateSchemaName.size() != 0) {
+        this->candidateSchemaName.assign(candidateSchemaName);
+        setType(CANDIDATE_SCHEMA);
+    }
 
-	setSchema(comboSchema);
+    setSchema(comboSchema);
 }
 
-const char * SchemaMessage::getPlainTextRepresentation(){
-	message.assign("");
+const char * SchemaMessage::getPlainTextRepresentation()
+{
+    message.assign("");
 
-	message.append(schemaName);
+    message.append(schemaName);
 
-	// candidate schema messages has an extra parameter
-	if(getType() == CANDIDATE_SCHEMA){
-		message.append(END_TOKEN);
-		message.append(candidateSchemaName);
-	}
+    // candidate schema messages has an extra parameter
+    if (getType() == CANDIDATE_SCHEMA) {
+        message.append(END_TOKEN);
+        message.append(candidateSchemaName);
+    }
 
-	message.append(END_TOKEN);
-	message.append(schema);
+    message.append(END_TOKEN);
+    message.append(schema);
 
-	return message.c_str();
+    return message.c_str();
 }
 
 void SchemaMessage::loadPlainTextRepresentation(const char *strMessage)
-                        throw (opencog::InvalidParamException, std::bad_exception){
+throw (opencog::InvalidParamException, std::bad_exception)
+{
 
-	opencog::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
+    opencog::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
 
-	schemaName = stringTokenizer.nextToken();
-    if(schemaName.empty()){
+    schemaName = stringTokenizer.nextToken();
+    if (schemaName.empty()) {
         throw opencog::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty name");
     }
 
-    if(getType() == CANDIDATE_SCHEMA){
+    if (getType() == CANDIDATE_SCHEMA) {
 
         candidateSchemaName = stringTokenizer.nextToken();
-        if(schemaName.empty()){
+        if (schemaName.empty()) {
             throw opencog::InvalidParamException(TRACE_INFO,
-                              "Cannot create a CandidateSchemaMessage with an empty candidate name");
+                                                 "Cannot create a CandidateSchemaMessage with an empty candidate name");
         }
-	}
+    }
 
-	schema = stringTokenizer.nextToken();
-    if(schema.empty()){
+    schema = stringTokenizer.nextToken();
+    if (schema.empty()) {
         throw opencog::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty schema");
     }
 }
 
-void SchemaMessage::setSchema(const combo::combo_tree & comboSchema){
-	std::stringstream stream;
-	stream << comboSchema;
+void SchemaMessage::setSchema(const combo::combo_tree & comboSchema)
+{
+    std::stringstream stream;
+    stream << comboSchema;
 
-	this->schema = stream.str();
+    this->schema = stream.str();
 }
 
-const combo::combo_tree SchemaMessage::getComboSchema(){
+const combo::combo_tree SchemaMessage::getComboSchema()
+{
     using namespace combo;
 
-	combo::combo_tree comboSchema;
-	std::stringstream stream(schema);
+    combo::combo_tree comboSchema;
+    std::stringstream stream(schema);
 
-	stream >> comboSchema;
+    stream >> comboSchema;
 
-	return comboSchema;
+    return comboSchema;
 }
 
-const std::string & SchemaMessage::getSchema(){
-	return schema;
+const std::string & SchemaMessage::getSchema()
+{
+    return schema;
 }
 
-void SchemaMessage::setSchemaName(const std::string & schemaName){
-	this->schemaName.assign(schemaName);
+void SchemaMessage::setSchemaName(const std::string & schemaName)
+{
+    this->schemaName.assign(schemaName);
 }
 
-const std::string & SchemaMessage::getSchemaName(){
-	return schemaName;
+const std::string & SchemaMessage::getSchemaName()
+{
+    return schemaName;
 }
 
-void SchemaMessage::setCandidateSchemaName(const std::string & candidateSchemaName){
-	this->candidateSchemaName.assign(candidateSchemaName);
+void SchemaMessage::setCandidateSchemaName(const std::string & candidateSchemaName)
+{
+    this->candidateSchemaName.assign(candidateSchemaName);
 }
 
-const std::string & SchemaMessage::getCandidateSchemaName(){
-	return candidateSchemaName;
+const std::string & SchemaMessage::getCandidateSchemaName()
+{
+    return candidateSchemaName;
 }

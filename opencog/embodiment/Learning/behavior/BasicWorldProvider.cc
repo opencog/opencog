@@ -22,20 +22,21 @@
 #include "BasicWorldProvider.h"
 
 BasicWorldProvider::BasicWorldProvider(opencog::AtomSpace& atomSpace,
-						   unsigned long
-						   latestSimWorldTimestamp)
-  : _atomSpace(atomSpace), _latestSimWorldTimestamp(latestSimWorldTimestamp) {}
+                                       unsigned long
+                                       latestSimWorldTimestamp)
+        : _atomSpace(atomSpace), _latestSimWorldTimestamp(latestSimWorldTimestamp) {}
 
 unsigned long BasicWorldProvider::getLatestSimWorldTimestamp() const
 {
     return _latestSimWorldTimestamp;
 }
 
-void BasicWorldProvider::setLatestSimWorldTimestamp(unsigned long t) {
-  _latestSimWorldTimestamp = t;
+void BasicWorldProvider::setLatestSimWorldTimestamp(unsigned long t)
+{
+    _latestSimWorldTimestamp = t;
 }
 
 opencog::AtomSpace& BasicWorldProvider::getAtomSpace() const
 {
-  return _atomSpace;
+    return _atomSpace;
 }

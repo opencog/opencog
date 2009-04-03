@@ -28,17 +28,19 @@
 
 using namespace OperationalPetController;
 using namespace opencog;
- 
+
 IsSmallPredicateUpdater::IsSmallPredicateUpdater(AtomSpace & atomSpace) :
-                         BasicPredicateUpdater(atomSpace){
+        BasicPredicateUpdater(atomSpace)
+{
 }
 
-IsSmallPredicateUpdater::~IsSmallPredicateUpdater(){
+IsSmallPredicateUpdater::~IsSmallPredicateUpdater()
+{
 }
 
 /**
  * Size predicate template
- * 
+ *
  * EvalLink
  *   PredicateNode:"size"
  *   ListLink
@@ -47,13 +49,14 @@ IsSmallPredicateUpdater::~IsSmallPredicateUpdater(){
  *      NumberNode:"<width>"
  *      NumberNode:"<height>"
  */
-double IsSmallPredicateUpdater::getSize(Handle object){
+double IsSmallPredicateUpdater::getSize(Handle object)
+{
     double length = 0.0;
     double width  = 0.0;
     double height  = 0.0;
 
     bool result = AtomSpaceUtil::getSizeInfo(atomSpace, object, length, width, height);
-    if(!result){
+    if (!result) {
         return 0.0;
     }
 
@@ -61,44 +64,45 @@ double IsSmallPredicateUpdater::getSize(Handle object){
 }
 
 
-void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp ){
-    
+void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
+{
+
     // an is_small predicate is already assigned for this object, just
     // return. This function is used to keep the predicates consistent
     // over time
-    if(isUpdated(object, "is_small")){
+    if (isUpdated(object, "is_small")) {
         return;
     }
 
-    logger().log(opencog::Logger::FINE, "IsSmall - Updating is_small for obj %s.", 
-                    atomSpace.getName(object).c_str());        
+    logger().log(opencog::Logger::FINE, "IsSmall - Updating is_small for obj %s.",
+                 atomSpace.getName(object).c_str());
 
     // truth value - mean equals 0.0 --> not smaller than pet
-    //                 mean equals 1.0 --> is  smaller than pet 
+    //                 mean equals 1.0 --> is  smaller than pet
     SimpleTruthValue tv(0.0, 1.0);
-    
-    // while there are no size information some assumptions 
+
+    // while there are no size information some assumptions
     // will guide the is_small predicate
 
     // 1. all avatars are considered bigger than any pet
-    if(atomSpace.getType(object) == SL_AVATAR_NODE){
+    if (atomSpace.getType(object) == SL_AVATAR_NODE) {
         tv.setMean(0.0);
         AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);
         return;
     }
-    
+
     // 2. all accessories are considered smaller than the pet
-    if(atomSpace.getType(object) == SL_ACCESSORY_NODE){
+    if (atomSpace.getType(object) == SL_ACCESSORY_NODE) {
         tv.setMean(1.0);
         AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);
-        return;        
+        return;
     }
-    
-    // 3. compare the size of the pet and the object and compare 
-    if(getSize(pet) > getSize(object)){
-        tv.setMean(1.0);        
+
+    // 3. compare the size of the pet and the object and compare
+    if (getSize(pet) > getSize(object)) {
+        tv.setMean(1.0);
     } else {
         tv.setMean(0.0);
     }
-    AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);    
+    AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);
 }

@@ -27,24 +27,27 @@
 unsigned sleep(unsigned useconds);
 //#ifdef WIN32
 //unsigned sleep(unsigned useconds)
-//	{
-//		Sleep(useconds * 1000);
-//		return 0;
-//	}
+// {
+//  Sleep(useconds * 1000);
+//  return 0;
+// }
 //#endif
 
 using namespace MessagingSystem;
 
-DummyServer::~DummyServer() {
+DummyServer::~DummyServer()
+{
 }
 
-DummyServer::DummyServer(const Control::SystemParameters &params, const std::string &id, const std::string &ip, int port) : NetworkElement(params, id, ip, port) {
+DummyServer::DummyServer(const Control::SystemParameters &params, const std::string &id, const std::string &ip, int port) : NetworkElement(params, id, ip, port)
+{
     parameters = params;
     cycleCount = 0;
     petCount = 0;
 }
 
-bool DummyServer::processNextMessage(Message *message) {
+bool DummyServer::processNextMessage(Message *message)
+{
 
     std::string cmdLine = message->getPlainTextRepresentation();
     std::string command;
@@ -67,7 +70,8 @@ bool DummyServer::processNextMessage(Message *message) {
     return false;
 }
 
-void DummyServer::idleTime() {
+void DummyServer::idleTime()
+{
 
     if (haveUnreadMessage()) {
         // Retrieve at most 1 new Message per cycle

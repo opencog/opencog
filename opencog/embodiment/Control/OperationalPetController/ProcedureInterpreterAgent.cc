@@ -25,17 +25,21 @@
 
 using namespace OperationalPetController;
 
-ProcedureInterpreterAgent::~ProcedureInterpreterAgent() {
+ProcedureInterpreterAgent::~ProcedureInterpreterAgent()
+{
 }
 
-ProcedureInterpreterAgent::ProcedureInterpreterAgent() {
+ProcedureInterpreterAgent::ProcedureInterpreterAgent()
+{
 }
 
-void ProcedureInterpreterAgent::setInterpreter(Procedure::ProcedureInterpreter* _interpreter) {
+void ProcedureInterpreterAgent::setInterpreter(Procedure::ProcedureInterpreter* _interpreter)
+{
     interpreter = _interpreter;
 }
 
-void ProcedureInterpreterAgent::run(opencog::CogServer *server) {
+void ProcedureInterpreterAgent::run(opencog::CogServer *server)
+{
     logger().log(opencog::Logger::FINE, "ProcedureInterpreterAgent::run()");
     interpreter->run(&(((OPC*)server)->getNetworkElement()));
 }

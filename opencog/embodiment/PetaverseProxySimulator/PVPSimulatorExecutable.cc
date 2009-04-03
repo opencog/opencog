@@ -32,16 +32,17 @@
 #include <unistd.h>
 
 using namespace PetaverseProxySimulator;
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
     Control::SystemParameters parameters;
-    if(fileExists(parameters.get("CONFIG_FILE").c_str())){
-    	parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
+        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
     }
 
     SimulationParameters simParameters;
-    if(fileExists(simParameters.get("CONFIG_FILE").c_str())){
-    	simParameters.loadFromFile(simParameters.get("CONFIG_FILE"));
+    if (fileExists(simParameters.get("CONFIG_FILE").c_str())) {
+        simParameters.loadFromFile(simParameters.get("CONFIG_FILE"));
     }
     //PVPSimulator simulator(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 8211);
 
@@ -70,13 +71,13 @@ int main(int argc, char *argv[]) {
 
     try {
         simulator.serverLoop();
-    } catch(std::bad_alloc){
+    } catch (std::bad_alloc) {
         logger().log(opencog::Logger::ERROR, "PVPSimExec - PVPSim raised a bad_alloc exception.");
         simulator.persistState();
 
-    } catch(...) {
-        logger().log(opencog::Logger::ERROR, 
-        "PVPSimExec - An exceptional situation occured. Check log for information.");
+    } catch (...) {
+        logger().log(opencog::Logger::ERROR,
+                     "PVPSimExec - An exceptional situation occured. Check log for information.");
         simulator.persistState();
     }
 

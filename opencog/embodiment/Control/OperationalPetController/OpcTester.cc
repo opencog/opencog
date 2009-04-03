@@ -35,40 +35,40 @@ using namespace OperationalPetController;
 
 int main()
 {
-	Control::SystemParameters sp;
+    Control::SystemParameters sp;
     MessagingSystem::StringMessage *msg = new MessagingSystem::StringMessage("", "", "");
-  	int length;
-  	char * buffer;	
-	
-  	ifstream is;
-  	is.open ("arquivo.xml", ios::binary );
+    int length;
+    char * buffer;
 
-  	// get length of file:
-  	is.seekg (0, ios::end);
-  	length = is.tellg();
-  	is.seekg (0, ios::beg);
-  
+    ifstream is;
+    is.open ("arquivo.xml", ios::binary );
 
-  	// allocate memory:
-  	buffer = new char [length];
+    // get length of file:
+    is.seekg (0, ios::end);
+    length = is.tellg();
+    is.seekg (0, ios::beg);
 
-  	// read data as a block:
-  	is.read (buffer,length);
-  	is.close();
-  	string xml = buffer;
-  		
-	//char * file = "arquivo.xml";
-	//string xml = "<?xml version=\"1.0\"?><instruction pet-id=\"1\" avatar-id=\"2\" timestamp=\"2007-06-20\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:SchemaLocation=\"http://www.electricsheepcompany.com/xml/ns/PetProxy /home/dlopes/projetos/petaverse/trunk/Petaverse/build/src/PetController/petBrain.xsd\">start learning!</instruction><instruction pet-id=\"1\" avatar-id=\"2\" timestamp=\"2007-06-20\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:SchemaLocation=\"http://www.electricsheepcompany.com/xml/ns/PetProxy /home/dlopes/projetos/petaverse/trunk/Petaverse/build/src/PetController/petBrain.xsd\">stop learning</instruction>";	
-	
+
+    // allocate memory:
+    buffer = new char [length];
+
+    // read data as a block:
+    is.read (buffer, length);
+    is.close();
+    string xml = buffer;
+
+    //char * file = "arquivo.xml";
+    //string xml = "<?xml version=\"1.0\"?><instruction pet-id=\"1\" avatar-id=\"2\" timestamp=\"2007-06-20\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:SchemaLocation=\"http://www.electricsheepcompany.com/xml/ns/PetProxy /home/dlopes/projetos/petaverse/trunk/Petaverse/build/src/PetController/petBrain.xsd\">start learning!</instruction><instruction pet-id=\"1\" avatar-id=\"2\" timestamp=\"2007-06-20\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:SchemaLocation=\"http://www.electricsheepcompany.com/xml/ns/PetProxy /home/dlopes/projetos/petaverse/trunk/Petaverse/build/src/PetController/petBrain.xsd\">stop learning</instruction>";
+
     server(OPC::createInstance);
     OPC& opc = static_cast<OPC&>(server());
     opc.init("teste-opc", "127.0.0.1", 4000, "1", "2", "pet", "neutral", sp);
-	msg->setMessage(xml);
-	opc.processNextMessage(msg);
-	
-	delete[] buffer;
+    msg->setMessage(xml);
+    opc.processNextMessage(msg);
+
+    delete[] buffer;
     // TODO: how to delete opc now?
     //delete opc;
-	return 0;  
+    return 0;
 }
 

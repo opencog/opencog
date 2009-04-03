@@ -31,18 +31,21 @@ using namespace OperationalPetController;
 using namespace opencog;
 
 IsPickupablePredicateUpdater::IsPickupablePredicateUpdater(AtomSpace &atomSpace) :
-                              BasicPredicateUpdater(atomSpace){
+        BasicPredicateUpdater(atomSpace)
+{
 }
 
-IsPickupablePredicateUpdater::~IsPickupablePredicateUpdater(){
+IsPickupablePredicateUpdater::~IsPickupablePredicateUpdater()
+{
 }
 
-void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp ){
+void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
+{
 
     // an is_pickupable predicate is already assigned for this object, just
     // return. This test is used to keep the predicates consistent
     // over time
-    if(isUpdated(object, "is_pickupable")){
+    if (isUpdated(object, "is_pickupable")) {
         return;
     }
 
@@ -56,15 +59,15 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
     // 1. to be pickupable an object must be movable and
     //    small. If these requeriments aren't satisfied then
     //    they are not moveable
-    if(AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) &&
-       AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) &&
-       atomSpace.getType(object) == SL_ACCESSORY_NODE &&
-       !AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object)) {
+    if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) &&
+            AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) &&
+            atomSpace.getType(object) == SL_ACCESSORY_NODE &&
+            !AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object)) {
         tv.setMean(1.0);
     }
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_pickupable", tv, object);
 
     logger().log(opencog::Logger::DEBUG, "IsPickupablePredicateUpdater - Is element %s pickupable: %s",
-                    atomSpace.getName(object).c_str(), 
-		    ( tv.getMean( ) ? "t" : "f" ) );
+                 atomSpace.getName(object).c_str(),
+                 ( tv.getMean( ) ? "t" : "f" ) );
 }

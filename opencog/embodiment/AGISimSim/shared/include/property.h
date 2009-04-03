@@ -1,5 +1,5 @@
 /***************************************************************************
- *  VOS property class.        
+ *  VOS property class.
  *
  *  Project: AgiSim
  *
@@ -9,13 +9,13 @@
  *  Copyright  2005  Ari A. Heljakka / Novamente LLC
  *  Email [heljakka at iki dot fi]
  *
- *	19.01.06	FP	formatting 	
+ * 19.01.06 FP formatting
  ****************************************************************************/
 
-/*	This file has been altered to suit AgiSim
-	by Ari Heljakka / Novamente LLC.
-	
-	The original copyright and license follows:
+/* This file has been altered to suit AgiSim
+ by Ari Heljakka / Novamente LLC.
+
+ The original copyright and license follows:
 
     This file is part of the Virtual Object System of
     the Interreality project (http://interreality.org).
@@ -53,10 +53,11 @@
 //------------------------------------------------------------------------------------------------------------
 /** @class Property property.hh property.hh
  *  \brief VOS property class adaptation, possibly useful in future releases.
- *	Currently the RemoteObject class should be used instead.
+ * Currently the RemoteObject class should be used instead.
  *  Property stores data of any type and size. */
-//------------------------------------------------------------------------------------------------------------ 
-class Property {
+//------------------------------------------------------------------------------------------------------------
+class Property
+{
 protected:
     boost::recursive_mutex data_mutex;
     std::string data;
@@ -71,12 +72,12 @@ public:
     /** Read decoded data into target, possibly performing decode if necesary  @see read(std::string, int, int)  */
     void read (std::string& target);
 
-   /** Read a substring of decoded data into target, possibly performing decode if necesary
-     * @param target    Place data in this string
-     * @param start     Byte offset to start reading
-     * @param length    Number of bytes to read. If this parameter is -1, read
-     *                  until the end of the data.
-     */
+    /** Read a substring of decoded data into target, possibly performing decode if necesary
+      * @param target    Place data in this string
+      * @param start     Byte offset to start reading
+      * @param length    Number of bytes to read. If this parameter is -1, read
+      *                  until the end of the data.
+      */
     void read(std::string& target, int start, int length);
 
     /** Return decoded data, possibly performing decode if necesary
@@ -110,7 +111,7 @@ public:
     //@{
     void replace (const char* format, size_t maxlen, ...);
     void replace (const char* format, const char* type, size_t maxlen, ...);
-    void replace (const char* str);    
+    void replace (const char* str);
     void replace (bool b);
     void replace (int i);
     void replace (float x);
@@ -124,19 +125,19 @@ public:
     void replace (std::vector<float>& vec);
     void replace (std::vector<int>& vec);
 
-    void read	 (const char* format, ...);
-	void read	 (int& i);
-    void read	 (bool& i);
-    void read	 (double& x);
-    void read 	 (double& x, double& y);
-    void read	 (double& x, double& y, double& z);
-    void read 	 (double& x, double& y, double& z, double& r);
-    void read 	 (float& x);
-    void read 	 (float& x, float& y);
-    void read 	 (float& x, float& y, float& z);
-    void read 	 (float& x, float& y, float& z, float& r);
-    void read 	 (std::vector<float>& vec);
-    void read	 (std::vector<int>& vec);
+    void read  (const char* format, ...);
+    void read  (int& i);
+    void read  (bool& i);
+    void read  (double& x);
+    void read   (double& x, double& y);
+    void read  (double& x, double& y, double& z);
+    void read   (double& x, double& y, double& z, double& r);
+    void read   (float& x);
+    void read   (float& x, float& y);
+    void read   (float& x, float& y, float& z);
+    void read   (float& x, float& y, float& z, float& r);
+    void read   (std::vector<float>& vec);
+    void read  (std::vector<int>& vec);
     //@}
 };
 

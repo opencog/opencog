@@ -43,10 +43,10 @@ NoSpaceLife::NoSpaceLife(AtomSpace& atomSpace, const std::string& pet_id,
                          const CompositeBehaviorDescription& cbd,
                          const Temporal& et,
                          opencog::RandGen& rng) :
-    _atomSpace(atomSpace), _pet_id(pet_id), _owner_id(owner_id),
-    _avatar_id(avatar_id),
-    _currentTime(0), _currentIndex(0), _currentMapHandle(Handle::UNDEFINED),
-    _hasTimeChanged(true), _imitatedBD(cbd), _exemplarTemporal(et), _rng(rng)
+        _atomSpace(atomSpace), _pet_id(pet_id), _owner_id(owner_id),
+        _avatar_id(avatar_id),
+        _currentTime(0), _currentIndex(0), _currentMapHandle(Handle::UNDEFINED),
+        _hasTimeChanged(true), _imitatedBD(cbd), _exemplarTemporal(et), _rng(rng)
 {
     _currentTime = _imitatedBD.getStartTime();
 }
@@ -147,15 +147,15 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
         //argument to add to action of the elementary behavior description
         Handle arg_h = Handle::UNDEFINED;
         //definite or indefinite object case
-        if(is_definite_object(*sib) || is_indefinite_object(*sib)) {
+        if (is_definite_object(*sib) || is_indefinite_object(*sib)) {
             definite_object obj;
             if (is_definite_object(*sib))
                 obj = get_definite_object(*sib);
             else if (is_indefinite_object(*sib)) {
                 indefinite_object io = get_indefinite_object(*sib);
                 opencog::cassert(TRACE_INFO, is_random(io),
-                                  "%s must be random",
-                                  io->get_name().c_str());
+                                 "%s must be random",
+                                 io->get_name().c_str());
                 //determine the definite object obj that fits the best
                 //the behavior description at the particular moment
                 obj = choose_definite_object_that_fits(io, arg_index);
@@ -165,15 +165,14 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
         //contin case
         else if (is_contin(*sib)) {
             arg_h = _atomSpace.addNode(NUMBER_NODE,
-                               boost::lexical_cast<std::string>(get_contin(*sib)));
-        }
-        else {
+                                       boost::lexical_cast<std::string>(get_contin(*sib)));
+        } else {
             opencog::cassert(TRACE_INFO, false,
-                              "That case is not handled yet");
+                             "That case is not handled yet");
         }
         opencog::cassert(TRACE_INFO, arg_h != Handle::UNDEFINED);
         hs.push_back(arg_h);
-    }                 
+    }
 
     //Create the output of the EvalLink
     HandleSeq eo;
@@ -205,7 +204,7 @@ builtin_action NoSpaceLife::choose_random_step() const
         return instance(id::rotate_right);
     default:
         opencog::cassert(TRACE_INFO, false,
-                          "Combo2BD::choose_random_step() : UNKNOWN CASE");
+                         "Combo2BD::choose_random_step() : UNKNOWN CASE");
         return instance(id::random_step);
     }
 }
@@ -239,7 +238,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
                 Handle arg_h = _atomSpace.getOutgoing(list_h, arg_index + 2);
                 opencog::cassert(TRACE_INFO, arg_h != Handle::UNDEFINED);
                 opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(arg_h)),
-                                  "arg_h must be a Node");
+                                 "arg_h must be a Node");
                 //convert to self or owner if name is _avatar_id or _owner_id
                 //(avatarName corresponds to self because the puts itself under its
                 //skin

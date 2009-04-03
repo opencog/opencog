@@ -43,7 +43,7 @@ bool DOMPrintErrorHandler::handleError(const DOMError &domError)
         XERCES_STD_QUALIFIER cerr << "\nFatal Message: ";
 
     char *msg = XMLString::transcode(domError.getMessage());
-    XERCES_STD_QUALIFIER cerr<< msg <<XERCES_STD_QUALIFIER endl;
+    XERCES_STD_QUALIFIER cerr << msg << XERCES_STD_QUALIFIER endl;
     XMLString::release(&msg);
 
     // Instructs the serializer to continue serialization if possible.

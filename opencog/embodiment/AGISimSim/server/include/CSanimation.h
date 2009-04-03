@@ -33,50 +33,53 @@ class CSAgent;
 
 class CSanimation : public iAnimTimeUpdateHandler
 {
- private:
-  csRef<iSpriteCal3DState> cal3d;
-  iMeshWrapper * m_pMesh_w;
+private:
+    csRef<iSpriteCal3DState> cal3d;
+    iMeshWrapper * m_pMesh_w;
 
- public:
-  SCF_DECLARE_IBASE;
+public:
+    SCF_DECLARE_IBASE;
 
-  CSanimation(csRef<iMeshWrapper> model);
-  virtual ~CSanimation()
-  {
-  }
+    CSanimation(csRef<iMeshWrapper> model);
+    virtual ~CSanimation() {
+    }
 
-  void ExecuteMoveAnimation(const char * anim, csVector3 start, csVector3 end, float speed);
-  bool IsMoveAnimationActive() {return m_moveAnimationActive;}
-  void UpdateMoveAnimation(float time);
+    void ExecuteMoveAnimation(const char * anim, csVector3 start, csVector3 end, float speed);
+    bool IsMoveAnimationActive() {
+        return m_moveAnimationActive;
+    }
+    void UpdateMoveAnimation(float time);
 
-  void ExecuteRotateAnimation(const char * anim, float start_a, float end_a, float speed);
-  bool IsRotateAnimationActive() {return m_rotateAnimationActive;}
-  void UpdateRotateAnimation(float time);
-
-
-  bool AnimationActive() {return (m_rotateAnimationActive||m_moveAnimationActive);}
-  void UpdateAnimation(float time)
-  {
-    UpdateMoveAnimation(time);
-    UpdateRotateAnimation(time);
-  }
-
- private:
-  csVector3 m_startPos, m_endPos, m_movePos;
-  float m_moveSpeed;
-  float m_moveTime;
-  bool m_moveAnimationActive;
-  std::string m_moveAnimationName;
+    void ExecuteRotateAnimation(const char * anim, float start_a, float end_a, float speed);
+    bool IsRotateAnimationActive() {
+        return m_rotateAnimationActive;
+    }
+    void UpdateRotateAnimation(float time);
 
 
-  float m_startRotAngle, m_endRotAngle, m_rotAngle; 
-  bool m_rotateAnimationActive; 
-  float m_rotSpeed, m_rotTime;
-  std::string m_rotateAnimationName;
+    bool AnimationActive() {
+        return (m_rotateAnimationActive || m_moveAnimationActive);
+    }
+    void UpdateAnimation(float time) {
+        UpdateMoveAnimation(time);
+        UpdateRotateAnimation(time);
+    }
 
-  virtual void UpdatePosition(float delta, CalModel * cm)
-  {
-  }
+private:
+    csVector3 m_startPos, m_endPos, m_movePos;
+    float m_moveSpeed;
+    float m_moveTime;
+    bool m_moveAnimationActive;
+    std::string m_moveAnimationName;
+
+
+    float m_startRotAngle, m_endRotAngle, m_rotAngle;
+    bool m_rotateAnimationActive;
+    float m_rotSpeed, m_rotTime;
+    std::string m_rotateAnimationName;
+
+    virtual void UpdatePosition(float delta, CalModel * cm) {
+    }
 
 };
 

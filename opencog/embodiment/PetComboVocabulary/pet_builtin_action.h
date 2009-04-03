@@ -36,7 +36,7 @@ enum pet_builtin_action_enum {
 
     //Note that all following comments are based on experimentation
     //with the MV-Proxy. It does not necessarily apply for another proxy
-    
+
     //==== goto_obj(destination speed) ====
     // There isn't a fixed maximum and minimum value for speed.
     // It depends on the proxy implementation.
@@ -202,7 +202,7 @@ enum pet_builtin_action_enum {
 
     //==== lick_at(object) ====
     lick_at,
-    
+
     //==== belch ====
     // not implemented in MV-Proxy yet
     belch,
@@ -225,7 +225,7 @@ enum pet_builtin_action_enum {
 
     //==== fearful_posture ====
     fearful_posture,
-    
+
     //=== clean ====
     // not implemented in MV-Proxy yet
     clean,
@@ -470,20 +470,20 @@ static const action_property_description apd[] = {
     { id::sniff_at,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::sniff_pet_part, false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::sniff_avatar_part,
-                          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::eat,            false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::drink,          false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::chew,           false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::beg,            false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::hide_face,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::look_up_turn_head,
-                          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::sit,            false,    true,      false,      true,           (pet_builtin_action_enum)0 },
     { id::stretch,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::run_in_circle,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::scratch_self,   false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::scratch_ground_back_legs,
-                          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::scratch_other,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::lie_down,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::trick_for_food, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
@@ -500,15 +500,15 @@ static const action_property_description apd[] = {
     { id::growl_at,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::whine,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::whine_at,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::fearful_posture,false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+    { id::fearful_posture, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::clean,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::tap_dance,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::bare_teeth,     false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::bare_teeth_at,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::play_dead,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::vomit,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::lean_rock_dance,false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::anticipate_play,false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+    { id::lean_rock_dance, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+    { id::anticipate_play, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::back_flip,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::move_left_ear,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::move_right_ear, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
@@ -526,7 +526,7 @@ static const action_property_description apd[] = {
     { id::kick_right,     false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::group_command,  false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::receive_latest_group_commands,
-                          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::look_at,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
 };
 
@@ -577,7 +577,7 @@ static const action_argument_property_description aapd[] = {
     { id::bare_teeth_at,            0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
     { id::move_left_ear,            0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
     { id::move_right_ear,           0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
-    { id::dream,                    0,    false, false,  false,  0,  0 }, 
+    { id::dream,                    0,    false, false,  false,  0,  0 },
     { id::tail_flex,                0,    true,  false,  true,  -PI,  PI },
     { id::bite,                     0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::pet,                      0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1

@@ -11,11 +11,12 @@
 
 using namespace MessagingSystem;
 
-class RouterUTest : public CxxTest::TestSuite {
+class RouterUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     RouterUTest() {
 

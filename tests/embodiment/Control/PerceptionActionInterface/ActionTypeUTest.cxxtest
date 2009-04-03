@@ -7,21 +7,22 @@
 
 using namespace PerceptionActionInterface;
 
-class ActionTypeUTest :  public CxxTest::TestSuite{
+class ActionTypeUTest :  public CxxTest::TestSuite
+{
 public:
-	ActionTypeUTest(){
-	}
-	
-	~ActionTypeUTest(){
+    ActionTypeUTest() {
     }
-	
-    void setUp(){
+
+    ~ActionTypeUTest() {
     }
-	
-    void tearDown(){
+
+    void setUp() {
     }
-	
-	void testActionType(){
+
+    void tearDown() {
+    }
+
+    void testActionType() {
         //cout << "testActionType" << endl;
         int typeCode = BARK_CODE;
         for (; typeCode < NUMBER_OF_ACTION_TYPES; typeCode++) {
@@ -41,8 +42,8 @@ public:
             }
         }
     }
-   
-    void testPrintHelp(){
+
+    void testPrintHelp() {
         ActionType::printHelp();
     }
 

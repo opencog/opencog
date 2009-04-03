@@ -1,7 +1,7 @@
 /**
  * scriptsComboSelectInterpreterUTest.cxxtest
  *
- * Author: Carlos Lopes 
+ * Author: Carlos Lopes
  * Copyright(c), 2008
  */
 
@@ -26,138 +26,139 @@ static std::string meat = "id_meat";
 static std::string wynx = "id_Wynx";
 static std::string milk = "id_milk";
 
-class scriptsComboSelectInterpreterUTest :  public CxxTest::TestSuite , ComboSelectInterpreterUTest {
+class scriptsComboSelectInterpreterUTest :  public CxxTest::TestSuite , ComboSelectInterpreterUTest
+{
 
-    private:
+private:
 
-        opencog::RandGen* rng;
+    opencog::RandGen* rng;
 
-    public :
+public :
 
-        scriptsComboSelectInterpreterUTest() {
+    scriptsComboSelectInterpreterUTest() {
 
-            rng = new opencog::MT19937RandGen(0);
-            //load scripts
-            
-            string file_combo(PVP_XML_FILE_PATH "/scripts.combo");
-            ifstream fin(file_combo.c_str());
-            int n = cpr.loadFromStream(fin);
-            cout << "loaded " << n << " combo functions from " << file_combo << std::endl;
+        rng = new opencog::MT19937RandGen(0);
+        //load scripts
 
-            addFeelingsAndTraits();
+        string file_combo(PVP_XML_FILE_PATH "/scripts.combo");
+        ifstream fin(file_combo.c_str());
+        int n = cpr.loadFromStream(fin);
+        cout << "loaded " << n << " combo functions from " << file_combo << std::endl;
+
+        addFeelingsAndTraits();
+    }
+
+    ~scriptsComboSelectInterpreterUTest() {
+        delete rng;
+    }
+
+    opencog::RandGen& getRandGen() {
+        return *rng;
+    }
+
+    void addFeelingsAndTraits() {
+        Handle pet = atomSpace->getHandle(SL_PET_NODE, PAIUtils::getInternalId("Macku"));
+        if (pet == Handle::UNDEFINED) {
+            std::cout << "Not able to find Macku" << std::endl;
+            return;
         }
 
-        ~scriptsComboSelectInterpreterUTest() {
-            delete rng;
-        }
+        SimpleTruthValue tv(0.6, 1.0);
+        SimpleTruthValue tv2(0.4, 1.0);
 
-        opencog::RandGen& getRandGen() {
-            return *rng;
-        }
+        // traits
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "curiosity", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "fearfulness", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "playfulness", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "excitability", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "friendliness", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "aggressiveness", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "appreciativeness", tv2, pet);
 
-        void addFeelingsAndTraits(){
-            Handle pet = atomSpace->getHandle(SL_PET_NODE, PAIUtils::getInternalId("Macku"));
-            if(pet == Handle::UNDEFINED){
-                std::cout << "Not able to find Macku" << std::endl;
-                return;
-            }
+        // feelings
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "fear", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "love", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "hate", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "pride", tv2, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "anger", tv2, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "gratitude", tv2, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "happiness", tv, pet);
+        AtomSpaceUtil::setPredicateValue(*atomSpace, "excitement", tv, pet);
 
-            SimpleTruthValue tv(0.6, 1.0);
-            SimpleTruthValue tv2(0.4, 1.0);
+        // add new one
+        HandleSeq freqLink;
+        freqLink.push_back(atomSpace->addNode(CONCEPT_NODE, "currentActionRepetition"));
+        freqLink.push_back(atomSpace->addNode(NUMBER_NODE, "2"));
 
-            // traits	 
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "curiosity", tv, pet);	 
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "fearfulness", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "playfulness", tv, pet);	 
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "excitability", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "friendliness", tv, pet);	 
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "aggressiveness", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "appreciativeness", tv2, pet);	 
+        atomSpace->addLink(FREQUENCY_LINK, freqLink);
+    }
 
-            // feelings
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "fear", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "love", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "hate", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "pride", tv2, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "anger", tv2, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "gratitude", tv2, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "happiness", tv, pet);
-            AtomSpaceUtil::setPredicateValue(*atomSpace, "excitement", tv, pet);
+    void testWildCard() {
+        combo::variable_unifier vu;
+        vu.insert(wynx, true);
+        vu.insert(milk, true);
+        vu.insert(meat, true);
+        vu.insert(stick, true);
+        vu.insert(macku, true);
 
-            // add new one
-            HandleSeq freqLink;
-            freqLink.push_back(atomSpace->addNode(CONCEPT_NODE, "currentActionRepetition"));
-            freqLink.push_back(atomSpace->addNode(NUMBER_NODE, "2"));
+        combo::variable_unifier vu1(vu);
+        combo::variable_unifier vu2(vu);
+        combo::variable_unifier vu3(vu);
 
-            atomSpace->addLink(FREQUENCY_LINK, freqLink);
-        } 
+        std::string fname("firstScript");
+        std::string sname("secondScript");
 
-        void testWildCard(){
-            combo::variable_unifier vu;
-            vu.insert(wynx, true);
-            vu.insert(milk, true);
-            vu.insert(meat, true);
-            vu.insert(stick, true);
-            vu.insert(macku, true);
+        std::string fcmd("is_pet(_*_)");
+        std::string scmd("greater_than(get_fear(#1) 0.55)");
+        Procedure::ComboProcedure cp1 = createComboProcedure(fname, 0, fcmd);
+        Procedure::ComboProcedure cp2 = createComboProcedure(sname, 1, scmd);
 
-            combo::variable_unifier vu1(vu);
-            combo::variable_unifier vu2(vu);
-            combo::variable_unifier vu3(vu);
+        combo::variable_unifier vu_result;
+        vu_result.insert(wynx, false);
+        vu_result.insert(milk, false);
+        vu_result.insert(meat, false);
+        vu_result.insert(stick, false);
+        vu_result.insert(macku, true);
+        runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_true, vu, vu_result);
 
-            std::string fname("firstScript");
-            std::string sname("secondScript");
+        // ======================================================================
+        fcmd.assign("and(is_pickupable(_*_) is_movable(_*_) is_small(_*_))");
+        scmd.assign("not(is_edible(#1))");
+        cp1 = createComboProcedure(fname, 0, fcmd);
+        cp2 = createComboProcedure(sname, 1, scmd);
 
-            std::string fcmd("is_pet(_*_)");
-            std::string scmd("greater_than(get_fear(#1) 0.55)");
-            Procedure::ComboProcedure cp1 = createComboProcedure(fname, 0, fcmd);
-            Procedure::ComboProcedure cp2 = createComboProcedure(sname, 1, scmd);
-            
-            combo::variable_unifier vu_result;
-            vu_result.insert(wynx, false);
-            vu_result.insert(milk, false);
-            vu_result.insert(meat, false);
-            vu_result.insert(stick, false);	  
-            vu_result.insert(macku, true);
-            runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_true, vu, vu_result);
-            
-            // ======================================================================
-            fcmd.assign("and(is_pickupable(_*_) is_movable(_*_) is_small(_*_))");
-            scmd.assign("not(is_edible(#1))");
-            cp1 = createComboProcedure(fname, 0, fcmd);
-            cp2 = createComboProcedure(sname, 1, scmd);
-            
-            vu_result.setVariableState(wynx, false);
-            vu_result.setVariableState(milk, false);
-            vu_result.setVariableState(meat, false);
-            vu_result.setVariableState(stick, true);
-            vu_result.setVariableState(macku, false);
-            runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_true, vu1, vu_result);
+        vu_result.setVariableState(wynx, false);
+        vu_result.setVariableState(milk, false);
+        vu_result.setVariableState(meat, false);
+        vu_result.setVariableState(stick, true);
+        vu_result.setVariableState(macku, false);
+        runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_true, vu1, vu_result);
 
-            //===================================================================
-            fcmd.assign("and(is_pickupable(_*_) is_movable(_*_) is_small(_*_))");
-            scmd.assign("is_edible(#1)");
-            cp1 = createComboProcedure(fname, 0, fcmd);
-            cp2 = createComboProcedure(sname, 1, scmd);
-            
-            vu_result.setVariableState(wynx, false);
-            vu_result.setVariableState(milk, false);
-            vu_result.setVariableState(meat, false);
-            vu_result.setVariableState(stick, false);
-            vu_result.setVariableState(macku, false);
-            runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_false, vu2, vu_result);
+        //===================================================================
+        fcmd.assign("and(is_pickupable(_*_) is_movable(_*_) is_small(_*_))");
+        scmd.assign("is_edible(#1)");
+        cp1 = createComboProcedure(fname, 0, fcmd);
+        cp2 = createComboProcedure(sname, 1, scmd);
 
-            //===================================================================
-            fcmd.assign("and(is_drinkable(_*_) near(_*_ meat))");
-            scmd.assign("is_edible(#1)");
-            cp1 = createComboProcedure(fname, 0, fcmd);
-            cp2 = createComboProcedure(sname, 1, scmd);
-            
-            vu_result.setVariableState(wynx, false);
-            vu_result.setVariableState(milk, false);
-            vu_result.setVariableState(meat, false);
-            vu_result.setVariableState(stick, false);
-            vu_result.setVariableState(macku, false);
-            runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_false, vu3, vu_result);
+        vu_result.setVariableState(wynx, false);
+        vu_result.setVariableState(milk, false);
+        vu_result.setVariableState(meat, false);
+        vu_result.setVariableState(stick, false);
+        vu_result.setVariableState(macku, false);
+        runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_false, vu2, vu_result);
 
-        }
+        //===================================================================
+        fcmd.assign("and(is_drinkable(_*_) near(_*_ meat))");
+        scmd.assign("is_edible(#1)");
+        cp1 = createComboProcedure(fname, 0, fcmd);
+        cp2 = createComboProcedure(sname, 1, scmd);
+
+        vu_result.setVariableState(wynx, false);
+        vu_result.setVariableState(milk, false);
+        vu_result.setVariableState(meat, false);
+        vu_result.setVariableState(stick, false);
+        vu_result.setVariableState(macku, false);
+        runProcedureInComboSelectWildCard(cp1, cp2, combo::id::logical_false, vu3, vu_result);
+
+    }
 };

@@ -28,10 +28,12 @@
 
 #include <exception>
 
-namespace WorldWrapper {
+namespace WorldWrapper
+{
 
-  class PAIWorldWrapper : public WorldWrapperBase {
-  public:
+class PAIWorldWrapper : public WorldWrapperBase
+{
+public:
 
     //ctor, dtor
     PAIWorldWrapper(PerceptionActionInterface::PAI& pai, opencog::RandGen& _rng);
@@ -55,32 +57,32 @@ namespace WorldWrapper {
      * returns true iff and action plan gets executed
      */
     bool sendSequential_and(sib_it from, sib_it to) throw (opencog::ComboException,
-							   opencog::AssertionException,
-							   std::bad_exception);
+            opencog::AssertionException,
+            std::bad_exception);
 
     /**
      * evaluate a perception
      */
     combo::vertex evalPerception(pre_it per,
-				 combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+                                 combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
     /**
      * evaluate an indefinite object
      */
     combo::vertex evalIndefiniteObject(combo::indefinite_object io,
-				       combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+                                       combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
-  private:
+private:
     //attributes
     PerceptionActionInterface::PAI& _pai;
     opencog::RandGen& rng;
     PerceptionActionInterface::ActionPlanID _planID;
 
     bool _hasPlanFailed; //sometimes it is possible to know in advance
-                         //whether the plan has failed without sending it
-                         //if _planHasFailed is true then we know for sure
-                         //that the plan has already failed
-                         //otherwise we don't know
+    //whether the plan has failed without sending it
+    //if _planHasFailed is true then we know for sure
+    //that the plan has already failed
+    //otherwise we don't know
 
     //methods
 
@@ -100,8 +102,8 @@ namespace WorldWrapper {
      * @param endPoint Goal position
      */
     void clearPlan( std::vector<Spatial::Point>& actions,
-		    const Spatial::Point& startPoint,
-		    const Spatial::Point& endPoint );
+                    const Spatial::Point& startPoint,
+                    const Spatial::Point& endPoint );
 
     /**
      * Given a start and an end point, return the waypoints necessary to travel between them
@@ -130,14 +132,14 @@ namespace WorldWrapper {
      *                not null
      */
     bool createWalkPlanAction( std::vector<Spatial::Point>& actions,
-			       bool useExistingID = false,
-			       Handle toNudge = Handle::UNDEFINED,
-			       float customSpeed = 0);
-    
+                               bool useExistingID = false,
+                               Handle toNudge = Handle::UNDEFINED,
+                               float customSpeed = 0);
+
 
     //builds plans for actions relying on goto (goto_obj, follow, etc)
-    bool build_goto_plan(Handle,bool useExistingID=false,
-			 Handle nudgeHandle=Handle::UNDEFINED,Handle goBehind=Handle::UNDEFINED, float walkSpeed = 0);
+    bool build_goto_plan(Handle, bool useExistingID = false,
+                         Handle nudgeHandle = Handle::UNDEFINED, Handle goBehind = Handle::UNDEFINED, float walkSpeed = 0);
 
     //synthesize a PetAction obj from a subtree
     PerceptionActionInterface::PetAction buildPetAction(sib_it from);
@@ -158,14 +160,14 @@ namespace WorldWrapper {
     //determing angle an slobject is facing based on atomtable lookup
     double getAngleFacing(Handle) throw (opencog::ComboException,
                                          opencog::AssertionException,
-					 std::bad_exception);
+                                         std::bad_exception);
 
     //convenience conversion function
     Handle toHandle(combo::definite_object);
 
     bool eval_percept_with_pai(pre_it it);
 
-  };
+};
 }
 
 #endif

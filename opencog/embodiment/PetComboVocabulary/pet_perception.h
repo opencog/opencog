@@ -27,302 +27,304 @@
 #include "comboreduct/combo/perception.h"
 #include "pet_operator.h"
 
-namespace combo {
-  
-  namespace id {
-    enum pet_perception_enum {
-      exists,
-      exists_edible,
-      exists_movable,
-      exists_pickupable,
-      exists_drinkable,
-      exists_avatar,
-      exists_pet,
-      exists_small,
-      exists_moving,
-      exists_noisy,
-      exists_poo_place,
-      exists_pee_place,
+namespace combo
+{
 
-      is_edible,
-      is_movable,
-      is_pickupable,
-      is_drinkable,
-      is_avatar,
-      is_object,
-      is_pet,
-      is_small,
-      is_moving,
-      is_noisy,
-      is_poo_place,
-      is_pee_place,
-      is_null,
-      
-      is_owner,      
-      is_moving_toward,
+namespace id {
+enum pet_perception_enum {
+    exists,
+    exists_edible,
+    exists_movable,
+    exists_pickupable,
+    exists_drinkable,
+    exists_avatar,
+    exists_pet,
+    exists_small,
+    exists_moving,
+    exists_noisy,
+    exists_poo_place,
+    exists_pee_place,
 
-      is_holding_something,
+    is_edible,
+    is_movable,
+    is_pickupable,
+    is_drinkable,
+    is_avatar,
+    is_object,
+    is_pet,
+    is_small,
+    is_moving,
+    is_noisy,
+    is_poo_place,
+    is_pee_place,
+    is_null,
 
-      near,
-      next,
-      above,
-      below,
-      inside,
+    is_owner,
+    is_moving_toward,
 
-      has_said,
-      has_novelty,
-      has_learned_tricks,
-      has_requested_schema,      
-      
-      // traits
-      get_aggressiveness, 
-      get_curiosity, 
-      get_playfulness, 
-      get_friendliness, 
-      get_fearfulness, 
-      get_appreciativeness, 
-      get_excitability,
+    is_holding_something,
 
-      // pet emotional feelings (internal)
-      get_happiness,
-      get_fear,
-      get_pride,
-      get_love,
-      get_hate,
-      get_anger,
-      get_gratitude, 
-      get_excitement,
+    near,
+    next,
+    above,
+    below,
+    inside,
 
-      is_learning,
-      is_agent_state,      
-      // pet feelings (signals from proxy). Boolean functions are implemented
-      // as combo scripts 
-      get_hunger,
-      get_thirst,
-      get_energy,
-      get_fitness,    
-      get_pee_urgency,
-      get_poo_urgency,
+    has_said,
+    has_novelty,
+    has_learned_tricks,
+    has_requested_schema,
 
-      get_current_action_repetition,
-      
-      avatar_asked_to_try,
-      
-      inside_pet_fov,
-      
-      // relation between two objects
-      is_there_relation,
-      
-      // how next two objects are
-      is_proportional_next,
-      
-      is_last_agent_action,
-      is_last_pet_schema,
-      is_last_group_command,
+    // traits
+    get_aggressiveness,
+    get_curiosity,
+    get_playfulness,
+    get_friendliness,
+    get_fearfulness,
+    get_appreciativeness,
+    get_excitability,
 
-      pet_perception_count
-    };
-  }
+    // pet emotional feelings (internal)
+    get_happiness,
+    get_fear,
+    get_pride,
+    get_love,
+    get_hate,
+    get_anger,
+    get_gratitude,
+    get_excitement,
 
-  typedef id::pet_perception_enum pet_perception_enum;
+    is_learning,
+    is_agent_state,
+    // pet feelings (signals from proxy). Boolean functions are implemented
+    // as combo scripts
+    get_hunger,
+    get_thirst,
+    get_energy,
+    get_fitness,
+    get_pee_urgency,
+    get_poo_urgency,
 
-  /*********************************************************************
-   *       Arrays containing perception name type and properties       *
-   *                 to be edited by the developer                     *
-   *********************************************************************/
+    get_current_action_repetition,
 
-  namespace pet_perception_properties {
+    avatar_asked_to_try,
 
-    //struct for description of name and type
-    typedef combo::pet_operator<pet_perception_enum, id::pet_perception_count>::basic_description perception_basic_description;
+    inside_pet_fov,
 
-    //struct for decription of perception properties
-    struct perception_property_description {
-      pet_perception_enum perception;
-      bool ultrametric;
-      bool transitive;
-      bool irreflexive;
-      bool reflexive;
-      bool symmetric;
-      bool identity_of_indiscernibles;
-    };
-    
-    static const perception_basic_description pbd[] = {
-      //perception             name                 type
-      { id::exists,            "exists",            "->(union(definite_object indefinite_object) boolean)" },  
-      { id::exists_edible,     "exists_edible",     "boolean" },
-      { id::exists_movable,    "exists_movable",    "boolean" },
-      { id::exists_pickupable, "exists_pickupable", "boolean" },
-      { id::exists_drinkable,  "exists_drinkable",  "boolean" },
-      { id::exists_avatar,     "exists_avatar",     "boolean" },
-      { id::exists_pet,        "exists_pet",        "boolean" },
-      { id::exists_small,      "exists_small",      "boolean" },
-      { id::exists_moving,     "exists_moving",     "boolean" },
-      { id::exists_noisy,      "exists_noisy",      "boolean" },
-      { id::exists_poo_place,  "exists_poo_place",  "boolean" },
-      { id::exists_pee_place,  "exists_pee_place",  "boolean" },
-      
-      { id::is_edible,         "is_edible",         "->(union(indefinite_object wild_card) boolean)" },
-      { id::is_movable,        "is_movable",        "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_pickupable,     "is_pickupable",     "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_drinkable,      "is_drinkable",      "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_avatar,         "is_avatar",         "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_object,         "is_object",         "->(union(indefinite_object wild_card) boolean)" },
-      { id::is_pet,            "is_pet",            "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_small,          "is_small",          "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_moving,         "is_moving",         "->(union(definite_object indefinite_object wild_card) boolean)" },  
-      { id::is_noisy,          "is_noisy",          "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_poo_place,      "is_poo_place",      "->(union(indefinite_object wild_card) boolean)" },  
-      { id::is_pee_place,      "is_pee_place",      "->(union(indefinite_object wild_card) boolean)" },
-      { id::is_null,           "is_null",           "->(union(definite_object indefinite_object) boolean)" },  
+    // relation between two objects
+    is_there_relation,
 
-      { id::is_owner,  		   "is_owner",  		"->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },      
-      { id::is_moving_toward,  "is_moving_toward",  "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
-      
-      { id::is_holding_something,  "is_holding_something",  "->(union(definite_object indefinite_object wild_card) boolean)" },
+    // how next two objects are
+    is_proportional_next,
 
-      { id::near,              "near",              "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },  
-      { id::next,              "next",              "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
-      { id::above,             "above",             "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },  
-      { id::below,             "below",             "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },  
-      { id::inside,            "inside",            "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },  
-      { id::has_said,          "has_said",          "->(union(definite_object indefinite_object wild_card) message boolean)" },
-      { id::has_novelty,       "has_novelty",       "->(union(definite_object indefinite_object) boolean)" },
-      
-      { id::has_learned_tricks,   "has_learned_tricks",   "->(union(definite_object indefinite_object) boolean)" },
-      { id::has_requested_schema, "has_requested_schema", "->(union(definite_object indefinite_object) boolean)" },
-      
-      {	id::get_aggressiveness,   "get_aggressiveness",   "->(union(definite_object indefinite_object) contin)"},
-      {	id::get_curiosity, 	      "get_curiosity", 		  "->(union(definite_object indefinite_object) contin)"},
-      { id::get_playfulness,	  "get_playfulness", 	  "->(union(definite_object indefinite_object) contin)"},
-      { id::get_friendliness,	  "get_friendliness", 	  "->(union(definite_object indefinite_object) contin)"},
-      { id::get_fearfulness, 	  "get_fearfulness", 	  "->(union(definite_object indefinite_object) contin)"},
-      { id::get_appreciativeness, "get_appreciativeness", "->(union(definite_object indefinite_object) contin)"}, 
-      { id::get_excitability,	  "get_excitability",	  "->(union(definite_object indefinite_object) contin)"},
-      
-      {	id::get_happiness,	   "get_happiness",		"->(union(definite_object indefinite_object) contin)"},		
-      {	id::get_fear,		   "get_fear",			"->(union(definite_object indefinite_object) contin)"},
-      {	id::get_pride,		   "get_pride",			"->(union(definite_object indefinite_object) contin)"},
-      {	id::get_love,		   "get_love",			"->(union(definite_object indefinite_object) contin)"},
-      {	id::get_hate,		   "get_hate",		    "->(union(definite_object indefinite_object) contin)"},
-      {	id::get_anger,		   "get_anger",			"->(union(definite_object indefinite_object) contin)"},
-      {	id::get_gratitude,	   "get_gratitude",		"->(union(definite_object indefinite_object) contin)"},
-      {	id::get_excitement,	   "get_excitement",	"->(union(definite_object indefinite_object) contin)"},      
-      
-      { id::is_learning,       "is_learning",       "->(union(definite_object indefinite_object) boolean)" },
+    is_last_agent_action,
+    is_last_pet_schema,
+    is_last_group_command,
 
-      { id::get_hunger,		   "get_hunger",		"->(union(definite_object indefinite_object) contin)"},	
-      { id::get_thirst,		   "get_thirst",		"->(union(definite_object indefinite_object) contin)"},
-      { id::get_energy,		   "get_energy",		"->(union(definite_object indefinite_object) contin)"},
-      { id::get_fitness,       "get_fitness",		"->(union(definite_object indefinite_object) contin)"},
-      { id::get_pee_urgency,   "get_pee_urgency",	"->(union(definite_object indefinite_object) contin)"},
-      { id::get_poo_urgency,   "get_poo_urgency",	"->(union(definite_object indefinite_object) contin)"},
-      
-      { id::get_current_action_repetition,   "get_current_action_repetition",	"contin"},
-      { id::is_agent_state,   "is_agent_state",	"->(contin boolean)"},
+    pet_perception_count
+};
+}
 
-      { id::avatar_asked_to_try,  "avatar_asked_to_try", "->(union(definite_object indefinite_object wild_card) boolean)" },
-      { id::inside_pet_fov,    "inside_pet_fov",    "->(definite_object union(definite_object indefinite_object wild_card) boolean)" },
-      
-      { id::is_there_relation, "is_there_relation", "->(definite_object union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },     
-      { id::is_proportional_next, "is_proportional_next", "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) contin contin boolean)" },
-      
-      { id::is_last_agent_action, "is_last_agent_action", "->(union(definite_object indefinite_object wild_card) action_definite_object arg_list(union(definite_object indefinite_object)) boolean)" },
-      { id::is_last_pet_schema,   "is_last_pet_schema",   "->(action_definite_object action_result arg_list(union(definite_object indefinite_object wild_card)) boolean)" },
-      { id::is_last_group_command, "is_last_group_command", "->(definite_object definite_object arg_list(union(definite_object contin)) boolean)" }
-    };  
-    
-    static const perception_property_description ppd[] = {
-      //perception             ultrametric transitive irreflexive reflexive symmetric identity_of_indiscernibles
-      { id::exists,            false,      false,     false,      false,    false,    false },  
-      { id::exists_edible,     false,      false,     false,      false,    false,    false },
-      { id::exists_movable,    false,      false,     false,      false,    false,    false },
-      { id::exists_pickupable, false,      false,     false,      false,    false,    false },
-      { id::exists_drinkable,  false,      false,     false,      false,    false,    false },
-      { id::exists_avatar,     false,      false,     false,      false,    false,    false },
-      { id::exists_pet,        false,      false,     false,      false,    false,    false },
-      { id::exists_small,      false,      false,     false,      false,    false,    false },
-      { id::exists_moving,     false,      false,     false,      false,    false,    false },
-      { id::exists_noisy,      false,      false,     false,      false,    false,    false },
-      { id::exists_poo_place,  false,      false,     false,      false,    false,    false },
-      { id::exists_pee_place,  false,      false,     false,      false,    false,    false },
-      
-      { id::is_edible,         false,      false,     false,      false,    false,    false },  
-      { id::is_movable,        false,      false,     false,      false,    false,    false },  
-      { id::is_pickupable,     false,      false,     false,      false,    false,    false },  
-      { id::is_drinkable,      false,      false,     false,      false,    false,    false },  
-      { id::is_avatar,         false,      false,     false,      false,    false,    false },  
-      { id::is_object,         false,      false,     false,      false,    false,    false },
-      { id::is_pet,            false,      false,     false,      false,    false,    false },  
-      { id::is_small,          false,      false,     false,      false,    false,    false },  
-      { id::is_moving,         false,      false,     false,      false,    false,    false },  
-      { id::is_noisy,          false,      false,     false,      false,    false,    false },  
-      { id::is_poo_place,      false,      false,     false,      false,    false,    false },  
-      { id::is_pee_place,      false,      false,     false,      false,    false,    false },  
-      { id::is_null,           false,      false,     false,      false,    false,    false },
-      
-      { id::is_owner,  	       false,      false,     false,      false,    false,    false },
-      { id::is_moving_toward,  false,      false,     false,      false,    false,    false },
-      
-      { id::is_holding_something,
-                               false,      false,     false,      false,    false,    false },
+typedef id::pet_perception_enum pet_perception_enum;
 
-      { id::near,              false,      false,     false,      true,     true,     false },
-      { id::next,              false,      false,     false,      true,     true,     false },
-      { id::above,             false,      true,      true,       false,    false,    false },  
-      { id::below,             false,      true,      true,       false,    false,    false },  
-      { id::inside,            false,      true,      true,       false,    false,    false },  
-      { id::has_said,          false,      false,     false,      false,    false,    false },
-      { id::has_novelty,       false,      false,     false,      false,    false,    false },
-      { id::has_learned_tricks,   false,   false,     false,      false,    false,    false },
-      { id::has_requested_schema, false,   false,     false,      false,    false,    false },
-      
-      { id::get_aggressiveness,   false,   false,     false,      false,    false,    false },
-      { id::get_curiosity,        false,   false,     false,      false,    false,    false },
-      { id::get_playfulness,      false,   false,     false,      false,    false,    false },
-      { id::get_friendliness,     false,   false,     false,      false,    false,    false },
-      { id::get_fearfulness,      false,   false,     false,      false,    false,    false },
-      { id::get_appreciativeness, false,   false,     false,      false,    false,    false },
-      { id::get_excitability,  	  false,   false,     false,      false,    false,    false },
-      
-      {	id::get_happiness,	   false,      false,     false,      false,    false,    false },
-      {	id::get_fear,		   false,      false,     false,      false,    false,    false },
-      {	id::get_pride,		   false,      false,     false,      false,    false,    false },
-      {	id::get_love,		   false,      false,     false,      false,    false,    false },
-      {	id::get_hate,		   false,      false,     false,      false,    false,    false },
-      {	id::get_anger,		   false,      false,     false,      false,    false,    false },
-      {	id::get_gratitude,	   false,      false,     false,      false,    false,    false },
-      {	id::get_excitement,	   false,      false,     false,      false,    false,    false },
-      
-      {	id::is_learning,	   false,      false,     false,      false,    false,    false },
-      
-      { id::get_hunger, 	   false,      false,     false,      false,    false,    false },
-      { id::get_thirst,	   	   false,      false,     false,      false,    false,    false },
-      { id::get_energy,	   	   false,      false,     false,      false,    false,    false },
-      { id::get_fitness,       false,      false,     false,      false,    false,    false },
-      { id::get_pee_urgency,   false,      false,     false,      false,    false,    false },
-      { id::get_poo_urgency,   false,      false,     false,      false,    false,    false },
+/*********************************************************************
+ *       Arrays containing perception name type and properties       *
+ *                 to be edited by the developer                     *
+ *********************************************************************/
 
-      { id::get_current_action_repetition, false, false, false,   false,    false,    false },
-      { id::is_agent_state, false, false, false,   false,    false,    false },
-      
-      { id::avatar_asked_to_try, false,    false,     false,      false,    false,    false },
-      { id::inside_pet_fov,    false,      false,     false,      false,    false,    false },
-      
-      { id::is_there_relation, false,      false,     false,      false,    false,    false },      
-      { id::is_proportional_next, false,   false,     false,   	  true,     true,     false },      
-      { id::is_last_agent_action, false,   false,     false,   	  false,    false,    false },
-      { id::is_last_pet_schema,   false,   false,     false,   	  false,    false,    false },
-      { id::is_last_group_command,   false,   false,     false,   	  false,    false,    false } 
-    };
+namespace pet_perception_properties {
 
-    
-  }//~namespace pet_perception_properties
+//struct for description of name and type
+typedef combo::pet_operator<pet_perception_enum, id::pet_perception_count>::basic_description perception_basic_description;
 
-  //pet_perception both derive from perception_base and pet_operator
-  class pet_perception : public pet_operator<pet_perception_enum, id::pet_perception_count>, public perception_base {
+//struct for decription of perception properties
+struct perception_property_description {
+    pet_perception_enum perception;
+    bool ultrametric;
+    bool transitive;
+    bool irreflexive;
+    bool reflexive;
+    bool symmetric;
+    bool identity_of_indiscernibles;
+};
 
-  private:
+static const perception_basic_description pbd[] = {
+    //perception             name                 type
+    { id::exists,            "exists",            "->(union(definite_object indefinite_object) boolean)" },
+    { id::exists_edible,     "exists_edible",     "boolean" },
+    { id::exists_movable,    "exists_movable",    "boolean" },
+    { id::exists_pickupable, "exists_pickupable", "boolean" },
+    { id::exists_drinkable,  "exists_drinkable",  "boolean" },
+    { id::exists_avatar,     "exists_avatar",     "boolean" },
+    { id::exists_pet,        "exists_pet",        "boolean" },
+    { id::exists_small,      "exists_small",      "boolean" },
+    { id::exists_moving,     "exists_moving",     "boolean" },
+    { id::exists_noisy,      "exists_noisy",      "boolean" },
+    { id::exists_poo_place,  "exists_poo_place",  "boolean" },
+    { id::exists_pee_place,  "exists_pee_place",  "boolean" },
+
+    { id::is_edible,         "is_edible",         "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_movable,        "is_movable",        "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_pickupable,     "is_pickupable",     "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_drinkable,      "is_drinkable",      "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_avatar,         "is_avatar",         "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_object,         "is_object",         "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_pet,            "is_pet",            "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_small,          "is_small",          "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_moving,         "is_moving",         "->(union(definite_object indefinite_object wild_card) boolean)" },
+    { id::is_noisy,          "is_noisy",          "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_poo_place,      "is_poo_place",      "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_pee_place,      "is_pee_place",      "->(union(indefinite_object wild_card) boolean)" },
+    { id::is_null,           "is_null",           "->(union(definite_object indefinite_object) boolean)" },
+
+    { id::is_owner,       "is_owner",    "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::is_moving_toward,  "is_moving_toward",  "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+
+    { id::is_holding_something,  "is_holding_something",  "->(union(definite_object indefinite_object wild_card) boolean)" },
+
+    { id::near,              "near",              "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::next,              "next",              "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::above,             "above",             "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::below,             "below",             "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::inside,            "inside",            "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::has_said,          "has_said",          "->(union(definite_object indefinite_object wild_card) message boolean)" },
+    { id::has_novelty,       "has_novelty",       "->(union(definite_object indefinite_object) boolean)" },
+
+    { id::has_learned_tricks,   "has_learned_tricks",   "->(union(definite_object indefinite_object) boolean)" },
+    { id::has_requested_schema, "has_requested_schema", "->(union(definite_object indefinite_object) boolean)" },
+
+    { id::get_aggressiveness,   "get_aggressiveness",   "->(union(definite_object indefinite_object) contin)"},
+    { id::get_curiosity,        "get_curiosity",     "->(union(definite_object indefinite_object) contin)"},
+    { id::get_playfulness,   "get_playfulness",    "->(union(definite_object indefinite_object) contin)"},
+    { id::get_friendliness,   "get_friendliness",    "->(union(definite_object indefinite_object) contin)"},
+    { id::get_fearfulness,    "get_fearfulness",    "->(union(definite_object indefinite_object) contin)"},
+    { id::get_appreciativeness, "get_appreciativeness", "->(union(definite_object indefinite_object) contin)"},
+    { id::get_excitability,   "get_excitability",   "->(union(definite_object indefinite_object) contin)"},
+
+    { id::get_happiness,    "get_happiness",  "->(union(definite_object indefinite_object) contin)"},
+    { id::get_fear,     "get_fear",   "->(union(definite_object indefinite_object) contin)"},
+    { id::get_pride,     "get_pride",   "->(union(definite_object indefinite_object) contin)"},
+    { id::get_love,     "get_love",   "->(union(definite_object indefinite_object) contin)"},
+    { id::get_hate,     "get_hate",      "->(union(definite_object indefinite_object) contin)"},
+    { id::get_anger,     "get_anger",   "->(union(definite_object indefinite_object) contin)"},
+    { id::get_gratitude,    "get_gratitude",  "->(union(definite_object indefinite_object) contin)"},
+    { id::get_excitement,    "get_excitement", "->(union(definite_object indefinite_object) contin)"},
+
+    { id::is_learning,       "is_learning",       "->(union(definite_object indefinite_object) boolean)" },
+
+    { id::get_hunger,     "get_hunger",  "->(union(definite_object indefinite_object) contin)"},
+    { id::get_thirst,     "get_thirst",  "->(union(definite_object indefinite_object) contin)"},
+    { id::get_energy,     "get_energy",  "->(union(definite_object indefinite_object) contin)"},
+    { id::get_fitness,       "get_fitness",  "->(union(definite_object indefinite_object) contin)"},
+    { id::get_pee_urgency,   "get_pee_urgency", "->(union(definite_object indefinite_object) contin)"},
+    { id::get_poo_urgency,   "get_poo_urgency", "->(union(definite_object indefinite_object) contin)"},
+
+    { id::get_current_action_repetition,   "get_current_action_repetition", "contin"},
+    { id::is_agent_state,   "is_agent_state", "->(contin boolean)"},
+
+    { id::avatar_asked_to_try,  "avatar_asked_to_try", "->(union(definite_object indefinite_object wild_card) boolean)" },
+    { id::inside_pet_fov,    "inside_pet_fov",    "->(definite_object union(definite_object indefinite_object wild_card) boolean)" },
+
+    { id::is_there_relation, "is_there_relation", "->(definite_object union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
+    { id::is_proportional_next, "is_proportional_next", "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) contin contin boolean)" },
+
+    { id::is_last_agent_action, "is_last_agent_action", "->(union(definite_object indefinite_object wild_card) action_definite_object arg_list(union(definite_object indefinite_object)) boolean)" },
+    { id::is_last_pet_schema,   "is_last_pet_schema",   "->(action_definite_object action_result arg_list(union(definite_object indefinite_object wild_card)) boolean)" },
+    { id::is_last_group_command, "is_last_group_command", "->(definite_object definite_object arg_list(union(definite_object contin)) boolean)" }
+};
+
+static const perception_property_description ppd[] = {
+    //perception             ultrametric transitive irreflexive reflexive symmetric identity_of_indiscernibles
+    { id::exists,            false,      false,     false,      false,    false,    false },
+    { id::exists_edible,     false,      false,     false,      false,    false,    false },
+    { id::exists_movable,    false,      false,     false,      false,    false,    false },
+    { id::exists_pickupable, false,      false,     false,      false,    false,    false },
+    { id::exists_drinkable,  false,      false,     false,      false,    false,    false },
+    { id::exists_avatar,     false,      false,     false,      false,    false,    false },
+    { id::exists_pet,        false,      false,     false,      false,    false,    false },
+    { id::exists_small,      false,      false,     false,      false,    false,    false },
+    { id::exists_moving,     false,      false,     false,      false,    false,    false },
+    { id::exists_noisy,      false,      false,     false,      false,    false,    false },
+    { id::exists_poo_place,  false,      false,     false,      false,    false,    false },
+    { id::exists_pee_place,  false,      false,     false,      false,    false,    false },
+
+    { id::is_edible,         false,      false,     false,      false,    false,    false },
+    { id::is_movable,        false,      false,     false,      false,    false,    false },
+    { id::is_pickupable,     false,      false,     false,      false,    false,    false },
+    { id::is_drinkable,      false,      false,     false,      false,    false,    false },
+    { id::is_avatar,         false,      false,     false,      false,    false,    false },
+    { id::is_object,         false,      false,     false,      false,    false,    false },
+    { id::is_pet,            false,      false,     false,      false,    false,    false },
+    { id::is_small,          false,      false,     false,      false,    false,    false },
+    { id::is_moving,         false,      false,     false,      false,    false,    false },
+    { id::is_noisy,          false,      false,     false,      false,    false,    false },
+    { id::is_poo_place,      false,      false,     false,      false,    false,    false },
+    { id::is_pee_place,      false,      false,     false,      false,    false,    false },
+    { id::is_null,           false,      false,     false,      false,    false,    false },
+
+    { id::is_owner,          false,      false,     false,      false,    false,    false },
+    { id::is_moving_toward,  false,      false,     false,      false,    false,    false },
+
+    { id::is_holding_something,
+      false,      false,     false,      false,    false,    false },
+
+    { id::near,              false,      false,     false,      true,     true,     false },
+    { id::next,              false,      false,     false,      true,     true,     false },
+    { id::above,             false,      true,      true,       false,    false,    false },
+    { id::below,             false,      true,      true,       false,    false,    false },
+    { id::inside,            false,      true,      true,       false,    false,    false },
+    { id::has_said,          false,      false,     false,      false,    false,    false },
+    { id::has_novelty,       false,      false,     false,      false,    false,    false },
+    { id::has_learned_tricks,   false,   false,     false,      false,    false,    false },
+    { id::has_requested_schema, false,   false,     false,      false,    false,    false },
+
+    { id::get_aggressiveness,   false,   false,     false,      false,    false,    false },
+    { id::get_curiosity,        false,   false,     false,      false,    false,    false },
+    { id::get_playfulness,      false,   false,     false,      false,    false,    false },
+    { id::get_friendliness,     false,   false,     false,      false,    false,    false },
+    { id::get_fearfulness,      false,   false,     false,      false,    false,    false },
+    { id::get_appreciativeness, false,   false,     false,      false,    false,    false },
+    { id::get_excitability,     false,   false,     false,      false,    false,    false },
+
+    { id::get_happiness,    false,      false,     false,      false,    false,    false },
+    { id::get_fear,     false,      false,     false,      false,    false,    false },
+    { id::get_pride,     false,      false,     false,      false,    false,    false },
+    { id::get_love,     false,      false,     false,      false,    false,    false },
+    { id::get_hate,     false,      false,     false,      false,    false,    false },
+    { id::get_anger,     false,      false,     false,      false,    false,    false },
+    { id::get_gratitude,    false,      false,     false,      false,    false,    false },
+    { id::get_excitement,    false,      false,     false,      false,    false,    false },
+
+    { id::is_learning,    false,      false,     false,      false,    false,    false },
+
+    { id::get_hunger,     false,      false,     false,      false,    false,    false },
+    { id::get_thirst,        false,      false,     false,      false,    false,    false },
+    { id::get_energy,        false,      false,     false,      false,    false,    false },
+    { id::get_fitness,       false,      false,     false,      false,    false,    false },
+    { id::get_pee_urgency,   false,      false,     false,      false,    false,    false },
+    { id::get_poo_urgency,   false,      false,     false,      false,    false,    false },
+
+    { id::get_current_action_repetition, false, false, false,   false,    false,    false },
+    { id::is_agent_state, false, false, false,   false,    false,    false },
+
+    { id::avatar_asked_to_try, false,    false,     false,      false,    false,    false },
+    { id::inside_pet_fov,    false,      false,     false,      false,    false,    false },
+
+    { id::is_there_relation, false,      false,     false,      false,    false,    false },
+    { id::is_proportional_next, false,   false,     false,      true,     true,     false },
+    { id::is_last_agent_action, false,   false,     false,      false,    false,    false },
+    { id::is_last_pet_schema,   false,   false,     false,      false,    false,    false },
+    { id::is_last_group_command,   false,   false,     false,      false,    false,    false }
+};
+
+
+}//~namespace pet_perception_properties
+
+//pet_perception both derive from perception_base and pet_operator
+class pet_perception : public pet_operator<pet_perception_enum, id::pet_perception_count>, public perception_base
+{
+
+private:
 
     //standard properties
     bool _ultrametric;
@@ -343,7 +345,7 @@ namespace combo {
     static const pet_perception* init_perceptions();
     void set_perception(pet_perception_enum);
 
-  public:
+public:
     //name
     const std::string& get_name() const;
 
@@ -378,7 +380,7 @@ namespace combo {
     bool is_symmetric() const;
     bool is_identity_of_indiscernibles() const;
 
-  };
+};
 }//~namespace combo
 
 #endif

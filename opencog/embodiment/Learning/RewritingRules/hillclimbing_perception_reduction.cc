@@ -25,18 +25,20 @@
 #include "comboreduct/reduct/general_rules.h"
 #include "comboreduct/reduct/perception_rules.h"
 
-namespace reduct {
+namespace reduct
+{
 
-  const rule& hillclimbing_perception_reduction() {
+const rule& hillclimbing_perception_reduction()
+{
     static iterative r;
-    
+
     r = iterative(sequential(//perception
-			     downwards(reduce_reflexive()),
-			     downwards(reduce_irreflexive()),
-			     upwards(reorder_commutative())
-			     ));
-    
+                      downwards(reduce_reflexive()),
+                      downwards(reduce_irreflexive()),
+                      upwards(reorder_commutative())
+                  ));
+
     return r;
-  }
+}
 }
 

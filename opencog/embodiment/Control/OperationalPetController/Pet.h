@@ -36,28 +36,30 @@
 
 using namespace opencog;
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-  class RuleEngine;
+class RuleEngine;
 
-  // PetMode
-  enum PetMode{
-      LEARNING,
-      PLAYING,
-      SCAVENGER_HUNT
-  };
+// PetMode
+enum PetMode {
+    LEARNING,
+    PLAYING,
+    SCAVENGER_HUNT
+};
 
-  /**
-   * 
-   */
-  class Pet : public Control::PetInterface {
-    
+/**
+ *
+ */
+class Pet : public Control::PetInterface
+{
 
 
-  private:	
-    
+
+private:
+
     // pet metadata
-    std::string petId;		
+    std::string petId;
     std::string petName;
     std::string agentTraits;
     std::string ownerId;
@@ -67,82 +69,83 @@ namespace OperationalPetController {
     std::string agentType;
 
     double rayOfVicinity;
-    
+
     PetMode mode;
     std::map<PetMode, Control::AgentModeHandler*> modeHandler;
-    
+
     // opc components received as constructor parameter
     AtomSpace* atomSpace;
-    MessageSender* sender;		
+    MessageSender* sender;
     RuleEngine* ruleEngine;
 
     PerceptionActionInterface::PAI* pai;
-    
-    std::string exemplarAvatarId;       // the Id of the avatar that is 
-    // performing the exemplars 
-    std::string triedSchema;			// last schema tried 
-    std::vector<std::string> learningSchema; 		// schema being learned
-    
-    unsigned long exemplarStartTimestamp;	// start/end timestamp to get behaviors from 
-    unsigned long exemplarEndTimestamp;		// the atomSpace.
-    
+
+    std::string exemplarAvatarId;       // the Id of the avatar that is
+    // performing the exemplars
+    std::string triedSchema;   // last schema tried
+    std::vector<std::string> learningSchema;   // schema being learned
+
+    unsigned long exemplarStartTimestamp; // start/end timestamp to get behaviors from
+    unsigned long exemplarEndTimestamp;  // the atomSpace.
+
     unsigned long startLearningSessionTimestamp;
     unsigned long endLearningSessionTimestamp;
-    
-    bool candidateSchemaExecuted; 
-    
-    
-    std::string grabbedObjId; // the id of the object the pet has on its mouth, 
+
+    bool candidateSchemaExecuted;
+
+
+    std::string grabbedObjId; // the id of the object the pet has on its mouth,
     // empty if there is no object grabbed.
-    
+
     opencog::RandGen* rng;
 
     /**
      * Populate atom space with behavior nodes
      */
     void executeBehaviorEncoder();
-    
+
     /**
-     * Update the maps that should be kept (persisted) in spaceServer during the last exemplar session. 
+     * Update the maps that should be kept (persisted) in spaceServer during the last exemplar session.
      */
     void updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad_exception);
-    
+
     /**
      * Update is_exemplar_avatar predicate for the pet based on exemplarAvatarId object.
-     * 
+     *
      * @param active Inform if the predicate is active or not. An active predicate has its
      * TV set to 1.0 and 0.0 otherwise.
-     */ 
+     */
     void adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException);
-    
-  public:
-    
+
+public:
+
     static const unsigned long UNDEFINED_TIMESTAMP;
 
     /**
      * A requested command is a trick sent to the pet to be executed
      */
-    class RequestedCommand {
+    class RequestedCommand
+    {
     public:
-      inline RequestedCommand( void ) : name( "" ), readed( true ) { }
-      virtual inline ~RequestedCommand( void ) { }
-      // 
-      std::string name;
-      std::vector<std::string> arguments;
-      bool readed;
+        inline RequestedCommand( void ) : name( "" ), readed( true ) { }
+        virtual inline ~RequestedCommand( void ) { }
+        //
+        std::string name;
+        std::vector<std::string> arguments;
+        bool readed;
     };
 
     /**
      * Pet constructor.
-     * 
+     *
      * @param petID The SL id of the pet.
      * @param name The name the pet.
      * @param agentType The agent type (pet or humanoid)
      * @param agentTraits The agent traits type
-     * @param ownerID The SL id of the owner of the pet.* 
+     * @param ownerID The SL id of the owner of the pet.*
      * @param atomSpace A atomSpace with the Pet short memory AtomTable.
      */
-    Pet(const std::string& petId, const std::string& petName, const std::string& agentType, 
+    Pet(const std::string& petId, const std::string& petName, const std::string& agentType,
         const std::string& agentTraits, const std::string& ownerID, AtomSpace* atomSpace, MessageSender* sender);
     ~Pet();
 
@@ -151,19 +154,23 @@ namespace OperationalPetController {
      */
     void setPAI(PerceptionActionInterface::PAI* pai);
 
-    inline PerceptionActionInterface::PAI& getPai( void ) { return *pai; }
+    inline PerceptionActionInterface::PAI& getPai( void ) {
+        return *pai;
+    }
 
     /**
      * Set/Get the RuleEngine of this Pet
      */
     void setRuleEngine(RuleEngine* ruleEngine);
-    inline RuleEngine* getRuleEngine( void ) { return ruleEngine; }
-    
+    inline RuleEngine* getRuleEngine( void ) {
+        return ruleEngine;
+    }
+
     /**
-     * Init AtomSpace with pet traits, feelings and other atoms 
+     * Init AtomSpace with pet traits, feelings and other atoms
      */
     void initTraitsAndFeelings();
-    
+
     /**
      * Getter and setter for the pet name.
      */
@@ -174,84 +181,84 @@ namespace OperationalPetController {
      * Getter for agent type. An agent should never have its type changed
      */
     const std::string& getType() const;
-		
+
     /**
      * Getter for pet id. A pet should never have its id changed
      */
     const std::string& getPetId() const;
-    
+
     /**
      * Getter and setter for owner id.
      */
     const std::string& getOwnerId() const;
     const std::string& getExemplarAvatarId() const;
     void  setOwnerId(const std::string& ownerId);
-    
-    // always use this method, even inside the class because it controls 
+
+    // always use this method, even inside the class because it controls
     // the is_teacher predicate for the pet
     void  setExemplarAvatarId(const std::string& exemplarAvatarId);
-    
+
     /**
      * Getter and setter for  pet mode (PLAYING or LEARNING).
      */
     const PetMode getMode() const;
     void  setMode(PetMode);
-    
+
     /**
      * Get the tried and learning schemata names
-     */		
+     */
     const std::string & getTriedSchema();
     const std::vector<std::string> & getLearningSchema();
-    
+
     void setTriedSchema(const std::string & triedSchema);
-    
+
     unsigned long getExemplarStartTimestamp();
     unsigned long getExemplarEndTimestamp();
-    
+
     /**
      * Restart a learning process when the LS goes down. This method should
      * ONLY be called when the LS goes up again and the Pet is still in
      * LEARNING mode.
      */
-    void restartLearning() throw (opencog::RuntimeException, std::bad_exception); 
-    
-		
+    void restartLearning() throw (opencog::RuntimeException, std::bad_exception);
+
+
     /**
      * Create a new Pet loading pet metadata from file.
-     * 
+     *
      * @param filename The name of the file with the pet metadata.
      * @param petId The pet identification number.
      * @param atomSpace An AtomSpace containing the pet short memory.
-     * 
+     *
      * @return The pet newly created.
      */
     static Pet* importFromFile(const std::string& filename, const std::string& petId, AtomSpace* atomSpace, MessageSender* sender);
-		
+
     /**
      * Save pet metadata into file.
-     * 
+     *
      * @param filename The name of the file where data will be written.
      * @param pet The pet whose metadata will be written.
      */
     static void exportToFile(const std::string& filename, Pet & pet) throw (opencog::IOException, std::bad_exception);
 
-    // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined above): 
-                 
+    // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined above):
+
     AtomSpace& getAtomSpace();
-        
+
     void stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp);
-        
+
     bool isInLearningMode() const;
     void startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp);
     void stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp);
-        
+
     bool isExemplarInProgress() const;
     void startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp);
     void endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp);
-        
+
     void trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp);
     void reward(unsigned long timestamp);
-    void punish(unsigned long timestamp);        
+    void punish(unsigned long timestamp);
 
     Control::AgentModeHandler& getCurrentModeHandler( void );
 
@@ -271,24 +278,26 @@ namespace OperationalPetController {
     /**
      * @see PetInterface::setLatestGotoTarget
      */
-    void setLatestGotoTarget( const std::pair<std::string,Spatial::Point>& target ) {
-      this->targetObject = target;
+    void setLatestGotoTarget( const std::pair<std::string, Spatial::Point>& target ) {
+        this->targetObject = target;
     };
     /**
      * @see PetInterface::getLatestGotoTarget
      */
-    const std::pair<std::string,Spatial::Point>& getLatestGotoTarget( void ) {
-      return this->targetObject;
+    const std::pair<std::string, Spatial::Point>& getLatestGotoTarget( void ) {
+        return this->targetObject;
     };
 
     void setRequestedCommand(string command, vector<string> parameters);
 
-    inline RequestedCommand& getLatestRequestedCommand( void ) { 
-      lastRequestedCommand.readed = true;
-      return lastRequestedCommand; 
+    inline RequestedCommand& getLatestRequestedCommand( void ) {
+        lastRequestedCommand.readed = true;
+        return lastRequestedCommand;
     };
 
-    inline bool isRequestedCommandNotReaded( void ) { return !lastRequestedCommand.readed; }
+    inline bool isRequestedCommandNotReaded( void ) {
+        return !lastRequestedCommand.readed;
+    }
 
     /**
      * Callback method called by RuleEngine to indicate the candidate schema was selected to be executed
@@ -328,9 +337,9 @@ namespace OperationalPetController {
     unsigned long latestPunishmentTimestamp;
 
     // target object used by goto and gonear combo functions
-    std::pair<std::string,Spatial::Point> targetObject;
-    
-  }; // class
+    std::pair<std::string, Spatial::Point> targetObject;
+
+}; // class
 }  // namespace
 
-#endif 
+#endif

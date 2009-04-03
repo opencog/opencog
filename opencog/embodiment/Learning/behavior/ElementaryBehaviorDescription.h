@@ -31,25 +31,27 @@
 
 using namespace opencog;
 
-namespace behavior {
+namespace behavior
+{
 
-class ElementaryBehaviorDescription {
+class ElementaryBehaviorDescription
+{
 
-    public:
+public:
 
-        Handle handle;
-        Temporal temporal;
+    Handle handle;
+    Temporal temporal;
 
-	ElementaryBehaviorDescription() : temporal(0) {}
-        ElementaryBehaviorDescription(Handle h, const Temporal& t): handle(h), temporal(t) {}
+    ElementaryBehaviorDescription() : temporal(0) {}
+    ElementaryBehaviorDescription(Handle h, const Temporal& t): handle(h), temporal(t) {}
 
-	std::string toString() const {
-	  std::string str = std::string("{") +
-	    (handle==Handle::UNDEFINED? std::string("Handle::UNDEFINED"):
-	     TLB::getAtom(handle)->toString())
-	    + std::string(",") + temporal.toString() + std::string("}");
-	  return str;
-	}
+    std::string toString() const {
+        std::string str = std::string("{") +
+                          (handle == Handle::UNDEFINED ? std::string("Handle::UNDEFINED") :
+                           TLB::getAtom(handle)->toString())
+                          + std::string(",") + temporal.toString() + std::string("}");
+        return str;
+    }
 
 }; // class
 }  // namespace

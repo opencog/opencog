@@ -25,36 +25,39 @@
 
 #include <stdarg.h>
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
 /**
- * Thrown when a listener unsucessfully tries to bind to a given port 
+ * Thrown when a listener unsucessfully tries to bind to a given port
  */
-class CantBindToPortException {
+class CantBindToPortException
+{
 
-    public:
+public:
 
-        /**
-         * Thrown when a listener unsucessfully tries to bind to a given port 
-         *
-         * @param Port number the listener tried to bind to.
-         */
-        CantBindToPortException(int port);
+    /**
+     * Thrown when a listener unsucessfully tries to bind to a given port
+     *
+     * @param Port number the listener tried to bind to.
+     */
+    CantBindToPortException(int port);
 };
 
 /**
  * Thrown when a listener sucessfully binded to a given port but this binding was broken afterwards for some reason.
  */
-class BrokedPortBindingException {
+class BrokedPortBindingException
+{
 
-    public:
+public:
 
-        /**
-         * Thrown when a listener sucessfully binded to a given port but this binding was broken afterwards for some reason.
-         *
-         * @param Port number the listener tried to bind to.
-         */
-        BrokedPortBindingException(int port);
+    /**
+     * Thrown when a listener sucessfully binded to a given port but this binding was broken afterwards for some reason.
+     *
+     * @param Port number the listener tried to bind to.
+     */
+    BrokedPortBindingException(int port);
 };
 
 } // namespace

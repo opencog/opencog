@@ -62,8 +62,8 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
 {
     const std::vector<CompositeBehaviorDescription>& cbds = bc.getEntries();
     opencog::cassert(TRACE_INFO, all.size() == cbds.size(),
-                      "There must be as many behavior descriptions"
-                      " as argument lists");
+                     "There must be as many behavior descriptions"
+                     " as argument lists");
     std::vector<CompositeBehaviorDescription>::const_iterator ie = cbds.begin();
     argument_list_list_const_it alci = all.begin();
     for (; ie != cbds.end(); ie++, alci++)
@@ -80,8 +80,8 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
     generateCompleteActionSeqs(completeSeq_set, cbd, al);
     //then select all sub sequences of size <=max_size
     opencog::cassert(TRACE_INFO, max_size > 0 || max_size == -1,
-                      "You wanna select no action? Don't use an action"
-                      " filter then!");
+                     "You wanna select no action? Don't use an action"
+                     " filter then!");
     for (combo_tree_ns_set_const_it ias = completeSeq_set.begin();
             ias != completeSeq_set.end(); ++ias) {
         //determine max_size for ias, noted ms
@@ -97,7 +97,7 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                 if (ias->number_of_children(head) >= s) {
                     if (s == 1) {
                         for (sib_it sib = head.begin();
-                             sib != head.end(); ++sib) {
+                                sib != head.end(); ++sib) {
                             combo_tree tmp(sib);
                             actSubseq_set.insert(tmp);
                         }
@@ -119,8 +119,8 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                 }
             } else {
                 opencog::cassert(TRACE_INFO, is_builtin_action(*head),
-                                  "If head is not and_seq them must be"
-                                  " single builtin_action");
+                                 "If head is not and_seq them must be"
+                                 " single builtin_action");
                 if (s == 1) actSubseq_set.insert(*ias);
             }
         }
@@ -128,25 +128,25 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
 }
 
 void ActionFilter::generateCompleteActionSeqs(combo_tree_ns_set& actSeq_set,
-                                              const CompositeBehaviorDescription& cbd,
-                                              const argument_list& al) const
+        const CompositeBehaviorDescription& cbd,
+        const argument_list& al) const
 {
     opencog::cassert(TRACE_INFO, actSeq_set.empty(),
-                      "It is assumed that actSeq_set but must be empty");
+                     "It is assumed that actSeq_set but must be empty");
     completeActionPrefixes(actSeq_set, cbd, al, 0);
 }
 
 void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
-                                          const CompositeBehaviorDescription& cbd,
-                                          const argument_list& al,
-                                          unsigned index) const
+        const CompositeBehaviorDescription& cbd,
+        const argument_list& al,
+        unsigned index) const
 {
     const std::vector<PredicateHandleSet>& tls = cbd.getTimelineSets();
     if (index < tls.size()) {
         const PredicateHandleSet& phs = tls[index];
         unsigned s = phs.getSize();
         opencog::cassert(TRACE_INFO, s == 0 || s == 1,
-                          "There must is 0 or 1 action in phs");
+                         "There must is 0 or 1 action in phs");
         if (s > 0) {
             Handle h = *phs.getSet().begin();
             combo_tree_ns_set act_set;
@@ -154,9 +154,9 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
             unsigned long time = cbd.getIndexStartTime(index);
             Handle smh =
                 AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_wp.getAtomSpace(),
-                                                            time);
+                        time);
             opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
-                              "There must be a SpaceMap, ask Nil for more.");
+                             "There must be a SpaceMap, ask Nil for more.");
             generatePossibleActions(act_set, h, al, smh, time);
             //when actPrefix_set is empty
             if (actPrefix_set.empty()) {
@@ -172,13 +172,13 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
                 combo_tree prefix = *vsi;
                 pre_it prefix_head = prefix.begin();
                 opencog::cassert(TRACE_INFO,
-                                  *prefix_head == id::sequential_and,
-                                  "It should be assumed that prefix_head"
-                                  " is sequential_and");
+                                 *prefix_head == id::sequential_and,
+                                 "It should be assumed that prefix_head"
+                                 " is sequential_and");
                 for (combo_tree_ns_set_it ai = act_set.begin();
                         ai != act_set.end(); ++ai) {
                     opencog::cassert(TRACE_INFO, !ai->empty(),
-                                      "ai should not be empty");
+                                     "ai should not be empty");
                     combo_tree tmp(prefix_head);
                     tmp.replace(tmp.append_child(tmp.begin()), ai->begin());
                     actPrefix_set.insert(tmp);
@@ -191,30 +191,30 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
 }
 
 void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
-                                           Handle h,
-                                           const argument_list& al,
-                                           Handle smh,
-                                           unsigned long time) const
+        Handle h,
+        const argument_list& al,
+        Handle smh,
+        unsigned long time) const
 {
     const AtomSpace& as = _wp.getAtomSpace();
 
     opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
-                      "h must conrrespond to a defined handle");
+                     "h must conrrespond to a defined handle");
     opencog::cassert(TRACE_INFO,
-                      as.getType(h) == EVALUATION_LINK,
-                      "ActionFilter - h should be of type EVALUATION_LINK.");
+                     as.getType(h) == EVALUATION_LINK,
+                     "ActionFilter - h should be of type EVALUATION_LINK.");
     //get the list of args
     Handle list_arg_h = as.getOutgoing(h, 1);
     opencog::cassert(TRACE_INFO, list_arg_h != Handle::UNDEFINED,
-                      "list_arg_h must correspond to a defined handle");
+                     "list_arg_h must correspond to a defined handle");
     opencog::cassert(TRACE_INFO,
-                      as.getType(list_arg_h) == LIST_LINK,
-                      "ActionFilter - h outgoing atom 1 should be of type LIST_LINK. ");
+                     as.getType(list_arg_h) == LIST_LINK,
+                     "ActionFilter - h outgoing atom 1 should be of type LIST_LINK. ");
     //get finally action name
     Handle action_h = as.getOutgoing(list_arg_h, 1);
     opencog::cassert(TRACE_INFO,
-                      as.inheritsType(as.getType(action_h), NODE),
-                      "ActionFilter - action handle should inherits from NODE");
+                     as.inheritsType(as.getType(action_h), NODE),
+                     "ActionFilter - action handle should inherits from NODE");
     //get the action name
     std::string action_name = (as.getName(action_h));
 
@@ -223,32 +223,31 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
     stringstream ss(action_name);
     ss >> head_v;
     opencog::cassert(TRACE_INFO, is_builtin_action(head_v),
-                      "%s is not a builtin_action", ss.str().c_str());
+                     "%s is not a builtin_action", ss.str().c_str());
 
     if (_bas.find(get_builtin_action(head_v)) != _bas.end()) {
         //get arg list names and generate all possible list of arguments
         std::vector<vertex> operand_list;
         int list_arg_arity = as.getArity(list_arg_h);
 
-        if(list_arg_arity == 2) { //check if the action has no argument
-            act_set.insert(combo_tree(head_v));            
-        }
-        else { //the action has arguments
-            for(int i = 2; i < list_arg_arity; ++i) {
+        if (list_arg_arity == 2) { //check if the action has no argument
+            act_set.insert(combo_tree(head_v));
+        } else { //the action has arguments
+            for (int i = 2; i < list_arg_arity; ++i) {
                 Handle arg_h = as.getOutgoing(list_arg_h, i);
-                
+
                 Type arg_type = as.getType(arg_h);
                 const string& arg_name = as.getName(arg_h);
                 //check if the argument is an identifier
-                if(as.inheritsType(arg_type, SL_OBJECT_NODE)) {
-                    vertex arg_v = 
+                if (as.inheritsType(arg_type, SL_OBJECT_NODE)) {
+                    vertex arg_v =
                         WorldWrapperUtil::atom_name_to_definite_object(arg_name,
-                                                                       _self_id,
-                                                                       _owner_id);
+                                _self_id,
+                                _owner_id);
                     operand_list.push_back(arg_v);
                 }
                 //check if the argument is a number
-                else if(as.inheritsType(arg_type, NUMBER_NODE)) {
+                else if (as.inheritsType(arg_type, NUMBER_NODE)) {
                     vertex arg_v = boost::lexical_cast<contin_t>(arg_name);
                     operand_list.push_back(arg_v);
                 }
@@ -258,65 +257,64 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
                             "Only identifier and number are accepted as argument");
                 }
             }
-            
+
             std::set< std::vector<vertex> > operand_list_set;
             generatePossibleOperands(operand_list_set, operand_list,
                                      al, smh, time);
-            
+
             //generate all possible actions by varying all possible operands
             for (std::set< std::vector<vertex> >::const_iterator vsi
-                     = operand_list_set.begin(); vsi != operand_list_set.end();
-                 ++vsi) {
+                    = operand_list_set.begin(); vsi != operand_list_set.end();
+                    ++vsi) {
                 combo_tree tmp;
                 tmp.set_head(head_v);
                 pre_it head = tmp.begin();
                 for (std::vector<vertex>::const_iterator ai = vsi->begin();
-                     ai != vsi->end(); ++ai) {
+                        ai != vsi->end(); ++ai) {
                     tmp.append_child(head, *ai);
                 }
                 act_set.insert(tmp);
             }
         }
-    }
-    else {
+    } else {
         logger().log(opencog::Logger::WARN,
-                        "ActionFilter - builtin action '%s' is not in the list"
-                        " _bas of action of interest and will be ignored",
-                        action_name.c_str());
+                     "ActionFilter - builtin action '%s' is not in the list"
+                     " _bas of action of interest and will be ignored",
+                     action_name.c_str());
     }
-    
+
     //type check the generated actions
-    if(_type_check) {
-        for(combo_tree_ns_set_const_it ati = act_set.begin();
-            ati != act_set.end(); ++ati) {
+    if (_type_check) {
+        for (combo_tree_ns_set_const_it ati = act_set.begin();
+                ati != act_set.end(); ++ati) {
             type_tree tt = infer_type_tree(*ati);
             stringstream ss_tr;
             ss_tr << *ati;
             opencog::cassert(TRACE_INFO, is_well_formed(tt),
-                              "Action combo tree '%s' is not well formed,"
-                              " see the log for more information",
-                              ss_tr.str().c_str());
+                             "Action combo tree '%s' is not well formed,"
+                             " see the log for more information",
+                             ss_tr.str().c_str());
         }
     }
 }
 
 void ActionFilter::generatePossibleOperands(std::set< std::vector<vertex> >& opras_set,
-                                            const std::vector<vertex>& ovl,
-                                            const argument_list& al,
-                                            Handle smh,
-                                            unsigned long time) const
+        const std::vector<vertex>& ovl,
+        const argument_list& al,
+        Handle smh,
+        unsigned long time) const
 {
     opencog::cassert(TRACE_INFO, opras_set.empty(),
-                      "opars_set must be empty");
+                     "opars_set must be empty");
     completePrefixOperands(opras_set, 0, ovl, al, smh, time);
 }
 
 void ActionFilter::completePrefixOperands(std::set< std::vector<vertex> >& prefix_opras,
-                                          unsigned index,
-                                          const std::vector<vertex>& ovl,
-                                          const argument_list& al,
-                                          Handle smh,
-                                          unsigned long time) const
+        unsigned index,
+        const std::vector<vertex>& ovl,
+        const argument_list& al,
+        Handle smh,
+        unsigned long time) const
 {
     if (index < ovl.size()) {
         const vertex operand = ovl[index];
@@ -334,9 +332,9 @@ void ActionFilter::completePrefixOperands(std::set< std::vector<vertex> >& prefi
             std::set< std::vector<vertex> > prefix_opras_copy = prefix_opras;
             prefix_opras.clear();
             for (std::set< std::vector<vertex> >::const_iterator si =
-                     prefix_opras_copy.begin(); si != prefix_opras_copy.end(); si++) {
+                        prefix_opras_copy.begin(); si != prefix_opras_copy.end(); si++) {
                 for (std::set<vertex>::const_iterator asi = opra_set.begin();
-                     asi != opra_set.end(); asi++) {
+                        asi != opra_set.end(); asi++) {
                     std::vector<vertex> vv = *si;
                     vv.push_back(*asi);
                     prefix_opras.insert(vv);
@@ -349,27 +347,27 @@ void ActionFilter::completePrefixOperands(std::set< std::vector<vertex> >& prefi
 }
 
 void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
-                                            const vertex& operand,
-                                            const argument_list& al,
-                                            Handle smh,
-                                            unsigned long time) const
+        const vertex& operand,
+        const argument_list& al,
+        Handle smh,
+        unsigned long time) const
 {
     //fist of all add the operand itself
     opras.insert(operand);
-    
+
     //definite_object case
-    if(is_definite_object(operand)) {
+    if (is_definite_object(operand)) {
         definite_object defo = get_definite_object(operand);
         opencog::cassert(TRACE_INFO, _dos.find(defo) != _dos.end(),
-                          "The definite object %s found in the behavior"
-                          " descriptions is not in the set of definite object"
-                          " of interest, there must be something wrong"
-                          " happening with the Behavior Encoder/Tracker",
-                          defo.c_str());
+                         "The definite object %s found in the behavior"
+                         " descriptions is not in the set of definite object"
+                         " of interest, there must be something wrong"
+                         " happening with the Behavior Encoder/Tracker",
+                         defo.c_str());
 
         //add the indefinite objects
         for (indefinite_object_set_const_it ioi = _ios.begin();
-             ioi != _ios.end(); ++ioi) {
+                ioi != _ios.end(); ++ioi) {
             indefinite_object io = *ioi;
 
             // random_object case
@@ -377,7 +375,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
                 if (io == id::random_object)
                     opras.insert(io);
                 //check that the object could be such random indefinite object
-                else { 
+                else {
                     perception is_X =
                         WorldWrapperUtil::nearest_random_X_to_is_X(io);
                     pre_it it =
@@ -399,13 +397,13 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
             //evaluate the indefinite object and check that it matches obj_name
             else {
                 vertex v = WorldWrapperUtil::evalIndefiniteObject(_rng,
-                                                                  smh,
-                                                                  time,
-                                                                  _wp.getAtomSpace(),
-                                                                  _self_id,
-                                                                  _owner_id,
-                                                                  io,
-                                                                  true);
+                           smh,
+                           time,
+                           _wp.getAtomSpace(),
+                           _self_id,
+                           _owner_id,
+                           io,
+                           true);
                 if (v == defo)
                     opras.insert(io);
             }

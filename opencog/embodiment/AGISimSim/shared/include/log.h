@@ -1,5 +1,5 @@
 /***************************************************************************
- *  Log class.        
+ *  Log class.
  *
  *  Project: AgiSim
  *
@@ -9,14 +9,14 @@
  *  Copyright  2005  Ari A. Heljakka / Novamente LLC
  *  Email [heljakka at iki dot fi]
  *
- *	19.01.06	FP	formatting 	
+ * 19.01.06 FP formatting
  ****************************************************************************/
- 
- 
-/*	This file has been altered to suit AgiSim
-	by Ari Heljakka / Novamente LLC.
-	
-	The original copyright and license follows:
+
+
+/* This file has been altered to suit AgiSim
+ by Ari Heljakka / Novamente LLC.
+
+ The original copyright and license follows:
 
     This file is part of the Virtual Object System of
     the Interreality project (http://interreality.org).
@@ -100,45 +100,45 @@
 # define VOS_LOG_MAXLINELENGTH 1024
 
 // Macro to write text in LogFile or LogTerminal
-# define LOG(c, l, m) {                						 \
-    if(l <= Log::masterLogLevel) {      					 \
-        Log* _lg = Log::getLog(c);         					 \
-        if(! _lg) { _lg=new Log(c); Log::addChannel(_lg); }  \
-        if(_lg->getLevel() >= l) {          				 \
-          char _y[VOS_LOG_MAXLINELENGTH];                    \
-          memset(_y, 0, sizeof(_y));       					 \
-          std::ostrstream _x(_y, sizeof(_y)-1); 			 \
-          _x << m;                        					 \
-          _lg->log(l, _x.str());           					 \
-        } 													 \
-    }                                  						 \
-}
+# define LOG(c, l, m) {                       \
+        if(l <= Log::masterLogLevel) {            \
+            Log* _lg = Log::getLog(c);               \
+            if(! _lg) { _lg=new Log(c); Log::addChannel(_lg); }  \
+            if(_lg->getLevel() >= l) {               \
+                char _y[VOS_LOG_MAXLINELENGTH];                    \
+                memset(_y, 0, sizeof(_y));             \
+                std::ostrstream _x(_y, sizeof(_y)-1);     \
+                _x << m;                              \
+                _lg->log(l, _x.str());                 \
+            }               \
+        }                                         \
+    }
 #else
 # include <sstream>
-# define LOG(c, l, m) {								         \
-    if(l <= Log::masterLogLevel) { 							 \
-        Log* _lg = Log::getLog(c); 							 \
-        if(! _lg) { _lg=new Log(c); Log::addChannel(_lg); }  \
-        if(_lg->getLevel() >= l) {  						 \
-          std::ostringstream _x;        					 \
-          _x << m;                 							 \
-          _lg->log(l, _x.str());    						 \
-        }                          							 \
-    } 														 \
-}
+# define LOG(c, l, m) {                 \
+        if(l <= Log::masterLogLevel) {         \
+            Log* _lg = Log::getLog(c);         \
+            if(! _lg) { _lg=new Log(c); Log::addChannel(_lg); }  \
+            if(_lg->getLevel() >= l) {         \
+                std::ostringstream _x;              \
+                _x << m;                         \
+                _lg->log(l, _x.str());           \
+            }                                  \
+        }                \
+    }
 #endif
 
 //------------------------------------------------------------------------------------------------------------
 /** Symbolic level names for use with the LOG macro.  The log level threshold
     is typically set at LOG_NOTIFY, or LOG_DETAIL if compiled in debugging mode. */
 //------------------------------------------------------------------------------------------------------------
-enum LogLevelSym {    
-    LOG_ERROR = 0, 	/// Critical, possibly fatal errors    
-    LOG_WARN, 		/// Important warnings    
-    LOG_NOTIFY,		/// Important information about program state or progress.    
-    LOG_DETAIL,		/// Details about program state or progress, which may be useful for users    
-    LOG_DEBUG,    	/// Verbose program debugging, useful for developers, and details about VOS state or progress. 
-    LOG_MSGDATA		/// Contents of messages.
+enum LogLevelSym {
+    LOG_ERROR = 0,  /// Critical, possibly fatal errors
+    LOG_WARN,   /// Important warnings
+    LOG_NOTIFY,  /// Important information about program state or progress.
+    LOG_DETAIL,  /// Details about program state or progress, which may be useful for users
+    LOG_DEBUG,     /// Verbose program debugging, useful for developers, and details about VOS state or progress.
+    LOG_MSGDATA  /// Contents of messages.
 };
 
 //------------------------------------------------------------------------------------------------------------
@@ -149,26 +149,28 @@ enum LogLevelSym {
     methods in this class as well as you can set properties of individual
     channels. */
 //------------------------------------------------------------------------------------------------------------
-class Log {
+class Log
+{
 private:
     std::string   channelname;
     std::ostream* output;
-    int 	  loglevel;
+    int    loglevel;
     static int    defaultloglevel;
     static bool   didReadEnv;
     static std::ostream* defaultostream;
 
-    class StrCmp {
+    class StrCmp
+    {
     public:
         inline bool operator()(const char* p, const char* q) const {
             return (strcmp(p, q) < 0); //!!! Was passiert hier ? operator() ?
         };
     };
 
-    static boost::mutex& 			  channels_mutex();
+    static boost::mutex&      channels_mutex();
     static std::map <const char*, Log*, StrCmp>&  channels();
-    static boost::mutex 			  defaultostream_mutex;
-    static boost::mutex& 			  log_io_mutex();
+    static boost::mutex      defaultostream_mutex;
+    static boost::mutex&      log_io_mutex();
 public:
 
     /** A level that applies to all channels. (default is 10) */

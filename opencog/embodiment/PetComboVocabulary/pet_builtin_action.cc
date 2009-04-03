@@ -67,8 +67,8 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
     //standard and PetBrain properties specific to action
     unsigned int apd_count = sizeof(apd) / sizeof(action_property_description);
     opencog::cassert(TRACE_INFO,
-                      apd_count == (unsigned int)id::pet_builtin_action_count,
-                      "there must be entries for all actions.");
+                     apd_count == (unsigned int)id::pet_builtin_action_count,
+                     "there must be entries for all actions.");
     bool found = false;
     for (unsigned int i = 0; i < apd_count && !found; ++i) {
         if (apd[i].action == pbae) {
@@ -83,7 +83,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
         }
     }
     opencog::cassert(TRACE_INFO, found,
-                      "pet_builtin_action with enum %d has not been found in apd", pbae);
+                     "pet_builtin_action with enum %d has not been found in apd", pbae);
     //standard properties specific to action argument
     unsigned int aapd_count =
         sizeof(aapd) / sizeof(action_argument_property_description);
@@ -105,7 +105,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
             arity_t index = aapd[i].argument_index;
             std::set<arity_t>::iterator it = arg_not_found.find(index);
             opencog::cassert(TRACE_INFO, it != arg_not_found.end(),
-                              "Either action %s does not have argument %d or this argument has already been found", _name.c_str(), index);
+                             "Either action %s does not have argument %d or this argument has already been found", _name.c_str(), index);
             arg_not_found.erase(it);
             opencog::cassert(TRACE_INFO, index < abs_arity);
             _arg_additive[index] = aapd[i].additive;
@@ -116,7 +116,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
         }
     }
     opencog::cassert(TRACE_INFO, arg_not_found.empty(),
-                      "Some argument are not found in aapd for action %s", _name.c_str());
+                     "Some argument are not found in aapd for action %s", _name.c_str());
     //check if exists additive, zero_neutral
     bool not_exists_additive = true;
     for (std::vector<bool>::const_iterator it = _arg_additive.begin();

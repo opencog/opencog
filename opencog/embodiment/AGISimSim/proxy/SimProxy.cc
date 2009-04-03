@@ -81,14 +81,12 @@ public :
     // -----------------------------------------------------------------------
     //  Constructors and Destructor
     // -----------------------------------------------------------------------
-    XStr(const char* const toTranscode)
-    {
+    XStr(const char* const toTranscode) {
         // Call the private transcoding method
         fUnicodeForm = XMLString::transcode(toTranscode);
     }
 
-    ~XStr()
-    {
+    ~XStr() {
         XMLString::release(&fUnicodeForm);
     }
 
@@ -96,8 +94,7 @@ public :
     // -----------------------------------------------------------------------
     //  Getter methods
     // -----------------------------------------------------------------------
-    const XMLCh* unicodeForm() const
-    {
+    const XMLCh* unicodeForm() const {
         return fUnicodeForm;
     }
 
@@ -113,7 +110,8 @@ private :
 
 #define X(str) XStr(str).unicodeForm()
 
-SimProxy::SimProxy(const std::string& _host, unsigned short  _port, AsynchronousPerceptionAndStatusHandler* handler, bool _echoing) {
+SimProxy::SimProxy(const std::string& _host, unsigned short  _port, AsynchronousPerceptionAndStatusHandler* handler, bool _echoing)
+{
     host = _host;
     port = _port;
     perceptionAndStatusHandler = handler;
@@ -130,7 +128,8 @@ SimProxy::SimProxy(const std::string& _host, unsigned short  _port, Asynchronous
     printf("\nSimProxy constructor: number of instances = %lu\n", numberOfInstances);
 }
 
-SimProxy::~SimProxy() {
+SimProxy::~SimProxy()
+{
     if (checkingAsynchronousMessages) {
         checkingAsynchronousMessages = false;
         void* threadReturn;
@@ -141,20 +140,21 @@ SimProxy::~SimProxy() {
     }
 
     delete cc;
-	delete sh;
+    delete sh;
 
     numberOfInstances--;
     printf("\nSimProxy destructor: number of instances = %lu\n", numberOfInstances);
     TerminateXMLPlatform();
 }
 
-void* SimProxy::ThreadCheckAsynchronousMessages(void* args) {
+void* SimProxy::ThreadCheckAsynchronousMessages(void* args)
+{
     logger().log(opencog::Logger::DEBUG, "SimProxy::ThreadCheckAsynchronousMessages called");
     SimProxy* proxy = (SimProxy*) args;
-    while(true) {
+    while (true) {
         //sleep(1); // 1s
         usleep(100000); // 100ms
-	if (!proxy->checkingAsynchronousMessages) {
+        if (!proxy->checkingAsynchronousMessages) {
             pthread_exit(NULL);
         }
         proxy->checkAsynchronousMessages();
@@ -162,24 +162,23 @@ void* SimProxy::ThreadCheckAsynchronousMessages(void* args) {
     return NULL;
 }
 
-bool SimProxy::eqstr::operator()(char *s1, char *s2) const {
+bool SimProxy::eqstr::operator()(char *s1, char *s2) const
+{
     return strcmp(s1, s2) == 0;
 }
 
-void SimProxy::InitXMLPlatform() {
+void SimProxy::InitXMLPlatform()
+{
     if (numberOfInstances > 0) return;
 
     printf("\nInitializing Xerces-c XML Platform\n");
     // Initialize the XML4C2 system
-    try
-    {
+    try {
         XMLPlatformUtils::Initialize();
-    }
-    catch(const XMLException &toCatch)
-    {
+    } catch (const XMLException &toCatch) {
         XERCES_STD_QUALIFIER cerr << "Error during Xerces-c Initialization.\n"
-             << "  Exception message:"
-             << StrX(toCatch.getMessage()) << XERCES_STD_QUALIFIER endl;
+                                  << "  Exception message:"
+                                  << StrX(toCatch.getMessage()) << XERCES_STD_QUALIFIER endl;
     }
     domImplementation =  DOMImplementationRegistry::getDOMImplementation(X("Core"));
     if (domImplementation == NULL) {
@@ -188,21 +187,23 @@ void SimProxy::InitXMLPlatform() {
     }
 }
 
-void SimProxy::TerminateXMLPlatform() {
+void SimProxy::TerminateXMLPlatform()
+{
     if (!numberOfInstances) {
         printf("\nTerminating Xerces-c XML Platform\n");
         XMLPlatformUtils::Terminate();
     }
 }
 
-bool SimProxy::connect() {
+bool SimProxy::connect()
+{
     bool result = false;
-    if (cc->Open(host,port)) {
+    if (cc->Open(host, port)) {
         sh->Add(cc);
-        sh->Select(1,0);
+        sh->Select(1, 0);
         // Check connection (It took a while to connect)
-        while(!cc->IsConnected()) {
-            sh->Select(0,0);
+        while (!cc->IsConnected()) {
+            sh->Select(0, 0);
             if (cc->ConnectionFailed()) {
                 break;
             }
@@ -215,45 +216,50 @@ bool SimProxy::connect() {
             checkingAsynchronousMessages = true;
 
             result = true;
-        //} else {
-          //    printf("Could not open connection to the AGISIM server (%s, %d)\n", host.c_str(), port);
+            //} else {
+            //    printf("Could not open connection to the AGISIM server (%s, %d)\n", host.c_str(), port);
         }
     } else {
-           //printf("Could not open connection to the AGISIM server (%s, %d)\n", host.c_str(), port);
+        //printf("Could not open connection to the AGISIM server (%s, %d)\n", host.c_str(), port);
     }
     return result;
 }
 
-bool SimProxy::IsConnected() {
+bool SimProxy::IsConnected()
+{
     return cc->IsConnected();
 }
 
-bool SimProxy::hasPendingActions() {
+bool SimProxy::hasPendingActions()
+{
     //if (numberOfPendingActions > 0) printf("SimProxy::hasPendingActions(): numberOfPendingActions = %d\n", numberOfPendingActions);
     return (numberOfPendingActions > 0);
 }
 
-void SimProxy::checkAsynchronousMessages() {
+void SimProxy::checkAsynchronousMessages()
+{
     //logger().log(opencog::Logger::FINE, "SimProxy::checkAsynchronousMessages()");
     if (IsConnected()) {
-        while(sh->Select(SEC_DELAY, USEC_DELAY)>0){}; // to get any old/spontaneous responses
+        while (sh->Select(SEC_DELAY, USEC_DELAY) > 0) {}; // to get any old/spontaneous responses
     }
 }
 
-std::string SimProxy::getAgentName() {
+std::string SimProxy::getAgentName()
+{
     return agentName;
 }
 
 
 
-bool SimProxy::timeout(timeval beginTime, timeval currentTime, long waitTimeout) {
+bool SimProxy::timeout(timeval beginTime, timeval currentTime, long waitTimeout)
+{
     long timeoutSec = beginTime.tv_sec + waitTimeout;
     if (currentTime.tv_sec < timeoutSec) {
-       return false;
+        return false;
     } else if (currentTime.tv_sec == timeoutSec) {
-       return (currentTime.tv_usec > beginTime.tv_usec);
+        return (currentTime.tv_usec > beginTime.tv_usec);
     } else {
-       return true;
+        return true;
     }
 }
 
@@ -263,7 +269,8 @@ bool SimProxy::timeout(timeval beginTime, timeval currentTime, long waitTimeout)
 
 // Internal methods
 
-XERCES_CPP_NAMESPACE::DOMDocument* SimProxy::parseXML(const std::string &xmlStr) {
+XERCES_CPP_NAMESPACE::DOMDocument* SimProxy::parseXML(const std::string &xmlStr)
+{
 //    printf("SimProxy::parseXML()\n");
     //  Create MemBufferInputSource from the buffer containing the XML
     //  statements.
@@ -302,15 +309,15 @@ XERCES_CPP_NAMESPACE::DOMDocument* SimProxy::parseXML(const std::string &xmlStr)
         errorsOccured = true;
     } catch (const XMLException& e) {
         XERCES_STD_QUALIFIER cerr << "An error occurred during parsing\n   Message: "
-             << StrX(e.getMessage()) << XERCES_STD_QUALIFIER endl;
+                                  << StrX(e.getMessage()) << XERCES_STD_QUALIFIER endl;
         errorsOccured = true;
     } catch (const DOMException& e) {
         const unsigned int maxChars = 2047;
         XMLCh errText[maxChars + 1];
         XERCES_STD_QUALIFIER cerr << "\nDOM Error during parsing message\n"
-             << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
+                                  << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
         if (DOMImplementation::loadDOMExceptionMsg(e.code, errText, maxChars))
-             XERCES_STD_QUALIFIER cerr << "Message is: " << StrX(errText) << XERCES_STD_QUALIFIER endl;
+            XERCES_STD_QUALIFIER cerr << "Message is: " << StrX(errText) << XERCES_STD_QUALIFIER endl;
         errorsOccured = true;
     } catch (...) {
         XERCES_STD_QUALIFIER cerr << "An error occurred during parsing\n " << XERCES_STD_QUALIFIER endl;
@@ -333,7 +340,8 @@ XERCES_CPP_NAMESPACE::DOMDocument* SimProxy::parseXML(const std::string &xmlStr)
     return result;
 }
 
-std::string SimProxy::convert(const XMLCh * xString) {
+std::string SimProxy::convert(const XMLCh * xString)
+{
     if (xString) {
         // Convert string.
         char * s =  XERCES_CPP_NAMESPACE::XMLString::transcode(xString);
@@ -347,20 +355,21 @@ std::string SimProxy::convert(const XMLCh * xString) {
 }
 
 // Splits the values in the text with the following format: "(0.04,0.16,0.20)"
-void SimProxy::splitValues(char*text, std::vector<char*>& values) {
+void SimProxy::splitValues(char*text, std::vector<char*>& values)
+{
     char* buf;
-    char *value = __strtok_r(text," (,", &buf);
-    while(value != NULL) {
+    char *value = __strtok_r(text, " (,", &buf);
+    while (value != NULL) {
         values.push_back(value);
-        value = __strtok_r(NULL," (,)", &buf);
+        value = __strtok_r(NULL, " (,)", &buf);
     }
 }
 
-std::string SimProxy::getString(XERCES_CPP_NAMESPACE::DOMDocument* doc) {
+std::string SimProxy::getString(XERCES_CPP_NAMESPACE::DOMDocument* doc)
+{
     std::string result;
     if (!doc) return result;
-    try
-    {
+    try {
         // get a serializer, an instance of DOMWriter
         XMLCh tempStr[100];
         XMLString::transcode("LS", tempStr, 99);
@@ -412,42 +421,40 @@ std::string SimProxy::getString(XERCES_CPP_NAMESPACE::DOMDocument* doc) {
         delete myErrorHandler;
         delete myFormatTarget;
 
-    }
-     catch (const OutOfMemoryException&)
-    {
+    } catch (const OutOfMemoryException&) {
         XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
         //retval = 5;
-    }
-    catch (XMLException& e)
-    {
+    } catch (XMLException& e) {
         XERCES_STD_QUALIFIER cerr << "An error occurred during creation of output transcoder. Msg is:"
-            << XERCES_STD_QUALIFIER endl
-            << StrX(e.getMessage()) << XERCES_STD_QUALIFIER endl;
-       // retval = 4;
+                                  << XERCES_STD_QUALIFIER endl
+                                  << StrX(e.getMessage()) << XERCES_STD_QUALIFIER endl;
+        // retval = 4;
     }
     return result;
 }
 
-void SimProxy::addAtomType(std::vector<char *>&atomTypes, const char* newAtomType) {
+void SimProxy::addAtomType(std::vector<char *>&atomTypes, const char* newAtomType)
+{
     //return;
     for (unsigned int i = 0; i < atomTypes.size(); i++) {
-         if (strcmp(atomTypes[i],newAtomType) == 0) {
-             return;
-         }
+        if (strcmp(atomTypes[i], newAtomType) == 0) {
+            return;
+        }
     }
     atomTypes.push_back(strdup(newAtomType));
 }
 
 #if 0
 void SimProxy::createBasicSensationEvalLinkElem(XERCES_CPP_NAMESPACE::DOMDocument* novamenteDoc,
-                                                DOMElement* parentElem,
-                                                DOMElement* agisimSensationNodeElem,
-                                                DOMElement* attrElem,
-                                                const char* predicateNodeName,
-                                                std::vector<char*>& atomTypes,
-                                                NodesMap* declaredNodes,
-                                                bool isNumber,
-                                                const char* timestamp) {
+        DOMElement* parentElem,
+        DOMElement* agisimSensationNodeElem,
+        DOMElement* attrElem,
+        const char* predicateNodeName,
+        std::vector<char*>& atomTypes,
+        NodesMap* declaredNodes,
+        bool isNumber,
+        const char* timestamp)
+{
 
     std::vector<char*> values(1, XMLString::transcode(attrElem->getTextContent()));
     XMLString::trim(values[0]);
@@ -456,18 +463,19 @@ void SimProxy::createBasicSensationEvalLinkElem(XERCES_CPP_NAMESPACE::DOMDocumen
 }
 
 void SimProxy::createMultiArgSensationEvalLinkElem(XERCES_CPP_NAMESPACE::DOMDocument* novamenteDoc,
-                                                   DOMElement* parentElem,
-                                                   DOMElement* agisimSensationNodeElem,
-                                                   DOMElement* attrElem,
-                                                   const char* predicateNodeName,
-                                                   std::vector<char*>& atomTypes,
-                                                   NodesMap* declaredNodes,
-                                                   bool isNumber,
-                                                   const char* timestamp) {
+        DOMElement* parentElem,
+        DOMElement* agisimSensationNodeElem,
+        DOMElement* attrElem,
+        const char* predicateNodeName,
+        std::vector<char*>& atomTypes,
+        NodesMap* declaredNodes,
+        bool isNumber,
+        const char* timestamp)
+{
     // Get the multiple values of the attribute.
     std::vector<char *> values;
     DOMNode* valueElem;
-    for(valueElem = attrElem->getFirstChild(); valueElem != NULL; valueElem=valueElem->getNextSibling()) {
+    for (valueElem = attrElem->getFirstChild(); valueElem != NULL; valueElem = valueElem->getNextSibling()) {
         if (valueElem->getNodeType() != DOMNode::ELEMENT_NODE) {
             continue;
         }
@@ -482,10 +490,11 @@ void SimProxy::createMultiArgSensationEvalLinkElem(XERCES_CPP_NAMESPACE::DOMDocu
 }
 #endif
 
-void SimProxy::processSelfDataElements(DOMElement* sensationElem) {
+void SimProxy::processSelfDataElements(DOMElement* sensationElem)
+{
     //printf("SimProxy::processSelfDataElements()\n");
     DOMNode* childElem;
-    for(childElem = sensationElem->getFirstChild(); childElem != NULL; childElem=childElem->getNextSibling()) {
+    for (childElem = sensationElem->getFirstChild(); childElem != NULL; childElem = childElem->getNextSibling()) {
         if (childElem->getNodeType() != DOMNode::ELEMENT_NODE) {
             continue;
         }
@@ -498,7 +507,7 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem) {
             bool holdingObjectEvent = false;
             bool isBroadcastMessage = false;
             DOMElement* messageAttrElem = NULL;
-            for(attrElem = childElem->getFirstChild(); attrElem != NULL; attrElem=attrElem->getNextSibling()) {
+            for (attrElem = childElem->getFirstChild(); attrElem != NULL; attrElem = attrElem->getNextSibling()) {
                 if (attrElem->getNodeType() != DOMNode::ELEMENT_NODE) {
                     continue;
                 }
@@ -509,89 +518,86 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem) {
                     switch (qualityValue) {
 #ifdef CONVERT_ACTION_STARTED_EVENTS
                         // Check if this is an ACTION STARTED EVENT
-                        case CUSTOM_SENSATION_MOVE_ANIMATION_STARTED:
-                        case CUSTOM_SENSATION_TURN_ANIMATION_STARTED:
-                        case CUSTOM_SENSATION_GENERIC_ANIMATION_STARTED:
-                        case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_STARTED:
-                            {
-                                //printf("SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
-                                logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
-                                unsigned long actionTicket = getActionInProgress(qualityValue-1);
-                                if (actionTicket) {
-                                    //printf("Dequeued action with ticket = %ld\n", actionTicket);
-                                    logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
-                                    // TODO: If start event must be considered, the 2nd argument bellow must be an enum, not a boolean
-                                    //perceptionAndStatusHandler->actionStatus(actionTicket, ???);
-                                } else {
-                                    //printf("WARN: Found no action in progress for this action type!\n");
-                                    logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
-                                }
-                            }
-                            break;
+                    case CUSTOM_SENSATION_MOVE_ANIMATION_STARTED:
+                    case CUSTOM_SENSATION_TURN_ANIMATION_STARTED:
+                    case CUSTOM_SENSATION_GENERIC_ANIMATION_STARTED:
+                    case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_STARTED: {
+                        //printf("SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
+                        logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
+                        unsigned long actionTicket = getActionInProgress(qualityValue - 1);
+                        if (actionTicket) {
+                            //printf("Dequeued action with ticket = %ld\n", actionTicket);
+                            logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
+                            // TODO: If start event must be considered, the 2nd argument bellow must be an enum, not a boolean
+                            //perceptionAndStatusHandler->actionStatus(actionTicket, ???);
+                        } else {
+                            //printf("WARN: Found no action in progress for this action type!\n");
+                            logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
+                        }
+                    }
+                    break;
 #endif
-                        // Check if this is an ACTION ENDED EVENT
-                        case CUSTOM_SENSATION_MOVE_ANIMATION_DONE:
-                        case CUSTOM_SENSATION_TURN_ANIMATION_DONE:
-                        case CUSTOM_SENSATION_GENERIC_ANIMATION_DONE:
-                        case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_DONE:
-                            {
-                                //printf("SimProxy received ACTION END EVENT: %s\n", strQualityValue);
-                                logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION END EVENT: %s\n", strQualityValue);
-                                unsigned long actionTicket = dequeueActionInProgress(qualityValue-2);
-                                if (actionTicket) {
-                                    //printf("Dequeued action with ticket = %ld\n", actionTicket);
-                                    logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
-                                    perceptionAndStatusHandler->actionStatus(actionTicket, true);
-                                } else {
-                                    //printf("WARN: Found no action in progress for this action type!\n");
-                                    logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
-                                }
-                            }
-                            break;
-                        // Check if this is an ACTION FAILED EVENT
-                        case CUSTOM_SENSATION_MOVE_ANIMATION_FAILED:
-                        case CUSTOM_SENSATION_TURN_ANIMATION_FAILED:
-                        case CUSTOM_SENSATION_GENERIC_ANIMATION_FAILED:
-                        case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_FAILED:
-                            {
-                                //printf("SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
-                                logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
-                                unsigned long actionTicket = dequeueActionInProgress(qualityValue-3);
-                                if (actionTicket) {
-                                    //printf("Dequeued action with ticket = %ld\n", actionTicket);
-                                    logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
-                                    perceptionAndStatusHandler->actionStatus(actionTicket, false);
-                                } else {
-                                    //printf("WARN: Found no action in progress for this action type!\n");
-                                    logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
-                                }
-                            }
-                            break;
-                        case CUSTOM_SENSATION_HOLDING_OBJECT:
-                            if (messageAttrElem) {
-                                //printf("SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
-                                logger().log(opencog::Logger::DEBUG, "SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
-                                //createHoldingObjectElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, inc_stamp);
-                            } else {
-                                holdingObjectEvent = true;
-                            }
-                            break;
-                        case CUSTOM_SENSATION_BROADCAST_MESSAGE:
-                            if (messageAttrElem) {
-                                char* fullMessage = XMLString::transcode(messageAttrElem->getTextContent());
-                                //printf("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
-								if (logger().getLevel() >= opencog::Logger::FINE)
-								    logger().log(opencog::Logger::FINE, "SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
-                                XMLString::release(&fullMessage);
-                                //createSayingMessageElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, timestamp);
-                            } else {
-                                isBroadcastMessage = true;
-                            }
-                        default:
-                            // TODO: Check if this is the right handling for each remaining type/quality of CustomSensation
-                            // (CUSTOM_SENSATION_ENERGY_GAIN, CUSTOM_SENSATION_ENERGY_LOSS, CUSTOM_SENSATION_OBJECT_TOO_FAR_TO_EAT, etc)
-                            //createBasicSensationEvalLinkElem(novamenteDoc, parentElem, agisimPerceptNodeElem, (DOMElement*) attrElem, AGISIM_QUALITY_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
-                            break;
+                    // Check if this is an ACTION ENDED EVENT
+                    case CUSTOM_SENSATION_MOVE_ANIMATION_DONE:
+                    case CUSTOM_SENSATION_TURN_ANIMATION_DONE:
+                    case CUSTOM_SENSATION_GENERIC_ANIMATION_DONE:
+                    case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_DONE: {
+                        //printf("SimProxy received ACTION END EVENT: %s\n", strQualityValue);
+                        logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION END EVENT: %s\n", strQualityValue);
+                        unsigned long actionTicket = dequeueActionInProgress(qualityValue - 2);
+                        if (actionTicket) {
+                            //printf("Dequeued action with ticket = %ld\n", actionTicket);
+                            logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
+                            perceptionAndStatusHandler->actionStatus(actionTicket, true);
+                        } else {
+                            //printf("WARN: Found no action in progress for this action type!\n");
+                            logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
+                        }
+                    }
+                    break;
+                    // Check if this is an ACTION FAILED EVENT
+                    case CUSTOM_SENSATION_MOVE_ANIMATION_FAILED:
+                    case CUSTOM_SENSATION_TURN_ANIMATION_FAILED:
+                    case CUSTOM_SENSATION_GENERIC_ANIMATION_FAILED:
+                    case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_FAILED: {
+                        //printf("SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
+                        logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
+                        unsigned long actionTicket = dequeueActionInProgress(qualityValue - 3);
+                        if (actionTicket) {
+                            //printf("Dequeued action with ticket = %ld\n", actionTicket);
+                            logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
+                            perceptionAndStatusHandler->actionStatus(actionTicket, false);
+                        } else {
+                            //printf("WARN: Found no action in progress for this action type!\n");
+                            logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
+                        }
+                    }
+                    break;
+                    case CUSTOM_SENSATION_HOLDING_OBJECT:
+                        if (messageAttrElem) {
+                            //printf("SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
+                            logger().log(opencog::Logger::DEBUG, "SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
+                            //createHoldingObjectElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, inc_stamp);
+                        } else {
+                            holdingObjectEvent = true;
+                        }
+                        break;
+                    case CUSTOM_SENSATION_BROADCAST_MESSAGE:
+                        if (messageAttrElem) {
+                            char* fullMessage = XMLString::transcode(messageAttrElem->getTextContent());
+                            //printf("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
+                            if (logger().getLevel() >= opencog::Logger::FINE)
+                                logger().log(opencog::Logger::FINE, "SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
+                            XMLString::release(&fullMessage);
+                            //createSayingMessageElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, timestamp);
+                        } else {
+                            isBroadcastMessage = true;
+                        }
+                    default:
+                        // TODO: Check if this is the right handling for each remaining type/quality of CustomSensation
+                        // (CUSTOM_SENSATION_ENERGY_GAIN, CUSTOM_SENSATION_ENERGY_LOSS, CUSTOM_SENSATION_OBJECT_TOO_FAR_TO_EAT, etc)
+                        //createBasicSensationEvalLinkElem(novamenteDoc, parentElem, agisimPerceptNodeElem, (DOMElement*) attrElem, AGISIM_QUALITY_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
+                        break;
                     }
                     XMLString::release(&strQualityValue);
                 } else if (strcmp(AGISIM_INTENSITY_TAG, attrElemName) == 0) {
@@ -609,8 +615,8 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem) {
                     if (isBroadcastMessage) {
                         char* fullMessage = XMLString::transcode(attrElem->getTextContent());
                         //printf("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
-						if (logger().getLevel() >= opencog::Logger::FINE)
-                    	    logger().log(opencog::Logger::FINE, "SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
+                        if (logger().getLevel() >= opencog::Logger::FINE)
+                            logger().log(opencog::Logger::FINE, "SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
                         XMLString::release(&fullMessage);
                         //createSayingMessageElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, timestamp);
                     }
@@ -622,7 +628,8 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem) {
     }
 }
 
-void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
+void SimProxy::processMapInfoElements(DOMElement* sensationElem)
+{
     //printf("SimProxy::processMapInfoElements()\n");
 
     std::vector<ObjMapInfo> objects;
@@ -631,7 +638,7 @@ void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
 
     XERCES_CPP_NAMESPACE::XMLString::transcode(AGISIM_OBJECT_TAG, tag, MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * objList = sensationElem->getElementsByTagName(tag);
-    for(unsigned int i = 0; i < objList->getLength(); i++){
+    for (unsigned int i = 0; i < objList->getLength(); i++) {
         ObjMapInfo objMapInfo;
 
         XERCES_CPP_NAMESPACE::DOMElement* objElement = (XERCES_CPP_NAMESPACE::DOMElement*) objList->item(i);
@@ -655,9 +662,9 @@ void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
         XERCES_CPP_NAMESPACE::XMLString::trim(remove);
         //printf("==========================================\nSimProxy: remove: '%s'\n", remove);
 
-	objMapInfo.name = name;
-	objMapInfo.type = type;
-        objMapInfo.removed = !strcmp(remove,"true");
+        objMapInfo.name = name;
+        objMapInfo.type = type;
+        objMapInfo.removed = !strcmp(remove, "true");
 
         if (!objMapInfo.removed) {
             XERCES_CPP_NAMESPACE::XMLString::transcode(AGISIM_OBJECT_POSITION_TAG, tag, MAX_TAG_LENGTH);
@@ -665,8 +672,8 @@ void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
             char* pos = XERCES_CPP_NAMESPACE::XMLString::transcode(posElement->getTextContent());
             XERCES_CPP_NAMESPACE::XMLString::trim(pos);
             //printf("SimProxy: pos: %s\n", pos);
-            double posX,posY,posZ;
-            sscanf(pos, "%lf,%lf,%lf", &posX,&posY,&posZ);
+            double posX, posY, posZ;
+            sscanf(pos, "%lf,%lf,%lf", &posX, &posY, &posZ);
             //printf("SimProxy: posX: %lf, posY: %lf, posZ: %lf\n", posX, posY, posZ);
 
             XERCES_CPP_NAMESPACE::XMLString::transcode(AGISIM_OBJECT_ROTATION_TAG, tag, MAX_TAG_LENGTH);
@@ -674,8 +681,8 @@ void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
             char* rot = XERCES_CPP_NAMESPACE::XMLString::transcode(rotElement->getTextContent());
             XERCES_CPP_NAMESPACE::XMLString::trim(rot);
             //printf("SimProxy: rot: %s\n", rot);
-            double rotX,rotY,rotZ;
-            sscanf(rot, "%lf,%lf,%lf", &rotX,&rotY,&rotZ);
+            double rotX, rotY, rotZ;
+            sscanf(rot, "%lf,%lf,%lf", &rotX, &rotY, &rotZ);
             //printf("SimProxy: rotX: %lf, rotY: %lf, rotZ: %lf\n", rotX, rotY, rotZ);
 
             XERCES_CPP_NAMESPACE::XMLString::transcode(AGISIM_OBJECT_SIZE_TAG, tag, MAX_TAG_LENGTH);
@@ -683,8 +690,8 @@ void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
             char* size = XERCES_CPP_NAMESPACE::XMLString::transcode(sizeElement->getTextContent());
             XERCES_CPP_NAMESPACE::XMLString::trim(size);
             //printf("SimProxy: size: %s\n", size);
-            double length,width,height;
-            sscanf(size, "%lf,%lf,%lf", &length,&height,&width);
+            double length, width, height;
+            sscanf(size, "%lf,%lf,%lf", &length, &height, &width);
             //printf("SimProxy: length: %lf, width: %lf, height: %lf\n", length, width, height);
 
             XERCES_CPP_NAMESPACE::XMLString::transcode(AGISIM_OBJECT_EDIBLE_TAG, tag, MAX_TAG_LENGTH);
@@ -751,114 +758,118 @@ void SimProxy::processMapInfoElements(DOMElement* sensationElem) {
         XERCES_CPP_NAMESPACE::XMLString::release(&type);
         XERCES_CPP_NAMESPACE::XMLString::release(&remove);
 
-	objects.push_back(objMapInfo);
+        objects.push_back(objMapInfo);
     }
     perceptionAndStatusHandler->mapInfo(objects);
 }
 
 #if 0
 void SimProxy::createObjectPerceptElements(XERCES_CPP_NAMESPACE::DOMDocument *novamenteDoc,
-                                           DOMElement* parentElem,
-                                           DOMElement* sensationElem,
-                                           std::vector<char*>& atomTypes,
-                                           NodesMap* declaredNodes,
-                                           const char* timestamp) {
+        DOMElement* parentElem,
+        DOMElement* sensationElem,
+        std::vector<char*>& atomTypes,
+        NodesMap* declaredNodes,
+        const char* timestamp)
+{
     DOMNode* objectNode;
-if (using_single_component_mode) {
-    for(objectNode = sensationElem->getFirstChild(); objectNode != NULL; objectNode=objectNode->getNextSibling()) {
-        if (objectNode->getNodeType() != DOMNode::ELEMENT_NODE) {
-            continue;
-        }
-        DOMElement* objectElem = (DOMElement*) objectNode;
-        // GET OBJECT NAME
-        DOMNodeList* nodeList = objectElem->getElementsByTagName(X(AGISIM_NAME_TAG));
-        char* nodeName = XMLString::transcode(nodeList->item(0)->getTextContent());
-        XMLString::trim(nodeName);
-        // Remove "/null" part
-        char* p = nodeName; while (*p != '\0') { if (*p == '/') *p = '\0'; else p++; };
-        DOMElement* agisimObjectPerceptNodeElem = createNodeElem(novamenteDoc, AGISIM_OBJECT_PERCEPT_NODE_CLASS, nodeName, atomTypes, declaredNodes, timestamp);
-        XMLString::release(&nodeName);
-        DOMNode* attrElem;
-        for(attrElem = objectNode->getFirstChild(); attrElem != NULL; attrElem=attrElem->getNextSibling()) {
-            if (attrElem->getNodeType() != DOMNode::ELEMENT_NODE) {
+    if (using_single_component_mode) {
+        for (objectNode = sensationElem->getFirstChild(); objectNode != NULL; objectNode = objectNode->getNextSibling()) {
+            if (objectNode->getNodeType() != DOMNode::ELEMENT_NODE) {
                 continue;
             }
-            char *attrElemName = XMLString::transcode(attrElem->getNodeName());
-            if (strcmp(AGISIM_BRIGHTNESS_TAG, attrElemName) == 0) {
-                createBasicSensationEvalLinkElem(novamenteDoc, parentElem, agisimObjectPerceptNodeElem, (DOMElement*) attrElem, AGISIM_BRIGHTNESS_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
-            } else if (strcmp(AGISIM_FOV_POS_TAG, attrElemName) == 0) {
-                createMultiArgSensationEvalLinkElem(novamenteDoc, parentElem, agisimObjectPerceptNodeElem, (DOMElement*) attrElem, AGISIM_POSITION_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
+            DOMElement* objectElem = (DOMElement*) objectNode;
+            // GET OBJECT NAME
+            DOMNodeList* nodeList = objectElem->getElementsByTagName(X(AGISIM_NAME_TAG));
+            char* nodeName = XMLString::transcode(nodeList->item(0)->getTextContent());
+            XMLString::trim(nodeName);
+            // Remove "/null" part
+            char* p = nodeName; while (*p != '\0') {
+                if (*p == '/') *p = '\0'; else p++;
+            };
+            DOMElement* agisimObjectPerceptNodeElem = createNodeElem(novamenteDoc, AGISIM_OBJECT_PERCEPT_NODE_CLASS, nodeName, atomTypes, declaredNodes, timestamp);
+            XMLString::release(&nodeName);
+            DOMNode* attrElem;
+            for (attrElem = objectNode->getFirstChild(); attrElem != NULL; attrElem = attrElem->getNextSibling()) {
+                if (attrElem->getNodeType() != DOMNode::ELEMENT_NODE) {
+                    continue;
+                }
+                char *attrElemName = XMLString::transcode(attrElem->getNodeName());
+                if (strcmp(AGISIM_BRIGHTNESS_TAG, attrElemName) == 0) {
+                    createBasicSensationEvalLinkElem(novamenteDoc, parentElem, agisimObjectPerceptNodeElem, (DOMElement*) attrElem, AGISIM_BRIGHTNESS_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
+                } else if (strcmp(AGISIM_FOV_POS_TAG, attrElemName) == 0) {
+                    createMultiArgSensationEvalLinkElem(novamenteDoc, parentElem, agisimObjectPerceptNodeElem, (DOMElement*) attrElem, AGISIM_POSITION_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
+                }
+                XMLString::release(&attrElemName);
             }
-            XMLString::release(&attrElemName);
+        }
+    } else {
+        for (objectNode = sensationElem->getFirstChild(); objectNode != NULL; objectNode = objectNode->getNextSibling()) {
+            if (objectNode->getNodeType() != DOMNode::ELEMENT_NODE) {
+                continue;
+            }
+            DOMElement* objectElem = (DOMElement*) objectNode;
+            // GET OBJECT NAME
+            DOMNodeList* nodeList = objectElem->getElementsByTagName(X(AGISIM_NAME_TAG));
+            char* nodeName = XMLString::transcode(nodeList->item(0)->getTextContent());
+            XMLString::trim(nodeName);
+            // Creates an evaluationLink for Brightness predicate only if Node was not mentioned before (since the brighness of a same object does not change)
+            auto_ptr<char> key(new char[1024]);
+            sprintf(key.get(), "%s_%s", AGISIM_OBJECT_PERCEPT_NODE_CLASS, nodeName);
+            NodesMapIterator ti =  declaredNodes->find(key.get());
+            bool createBrightness = (ti == declaredNodes->end());
+            // Create a new element for this object
+            DOMElement* agisimObjectPerceptNodeElem = createNodeElem(novamenteDoc, AGISIM_OBJECT_PERCEPT_NODE_CLASS, nodeName, atomTypes, declaredNodes, timestamp);
+            if (createBrightness) {
+                // GET OBJECT BRIGHTNESS
+                nodeList = objectElem->getElementsByTagName(X(AGISIM_BRIGHTNESS_TAG));
+                createBasicSensationEvalLinkElem(novamenteDoc, parentElem, agisimObjectPerceptNodeElem,
+                                                 (DOMElement*) nodeList->item(0), AGISIM_BRIGHTNESS_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
+            }
+            free(nodeName);
+            // GET POLYGON OBJECT NAME
+            nodeList = objectElem->getElementsByTagName(X(AGISIM_POLYGON_NAME_TAG));
+            nodeName = XMLString::transcode(nodeList->item(0)->getTextContent());
+            XMLString::trim(nodeName);
+            // Create an Element for this polygon
+            DOMElement* agisimPolygonPerceptNodeElem = createNodeElem(novamenteDoc, AGISIM_POLYGON_PERCEPT_NODE_CLASS, nodeName, atomTypes, declaredNodes, timestamp);
+            // Create a member link between Polygon and Object
+            DOMElement* memberLinkElem = createLinkElem(novamenteDoc, MEMBER_LINK_CLASS, atomTypes, timestamp);
+            memberLinkElem->appendChild(agisimPolygonPerceptNodeElem);
+            memberLinkElem->appendChild(createBrightness ? agisimObjectPerceptNodeElem->cloneNode(false) : agisimObjectPerceptNodeElem);
+            parentElem->appendChild(memberLinkElem);
+            // Get Polygon Node declaration element
+            sprintf(key.get(), "%s_%s", AGISIM_POLYGON_PERCEPT_NODE_CLASS, nodeName);
+            XMLString::release(&nodeName);
+            DOMElement* agisimPolygonNodeDeclarationElem = declaredNodes->find(key.get())->second;
+            // GET POLYGON CORNERS
+            nodeList = objectElem->getElementsByTagName(X(AGISIM_POLYGON_CORNER_TAG));
+            for (unsigned int i = 0; i < nodeList->getLength(); i++) {
+                // Create the corner element in the polygonNode element.
+                DOMElement* cornerElem = novamenteDoc->createElement(X(POLYGON_CORNER_TOKEN));
+                char* text = XMLString::transcode(((DOMElement*) nodeList->item(i))->getTextContent());
+                std::vector<char*> values;
+                splitValues(text, values);
+                if (values.size() != 3) {
+                    printf("ERROR: Got wrong number of coordinates for polygon corner: %d\n", values.size());
+                } else {
+                    cornerElem->setAttribute(X(POLYGON_CORNER_X_TOKEN), XMLString::transcode(values[0]));
+                    cornerElem->setAttribute(X(POLYGON_CORNER_Y_TOKEN), XMLString::transcode(values[1]));
+                    cornerElem->setAttribute(X(POLYGON_CORNER_Z_TOKEN), XMLString::transcode(values[2]));
+                    agisimPolygonNodeDeclarationElem->appendChild(cornerElem);
+                }
+                XMLString::release(&text);
+            }
         }
     }
-} else {
-    for(objectNode = sensationElem->getFirstChild(); objectNode != NULL; objectNode=objectNode->getNextSibling()) {
-        if (objectNode->getNodeType() != DOMNode::ELEMENT_NODE) {
-            continue;
-        }
-        DOMElement* objectElem = (DOMElement*) objectNode;
-        // GET OBJECT NAME
-        DOMNodeList* nodeList = objectElem->getElementsByTagName(X(AGISIM_NAME_TAG));
-        char* nodeName = XMLString::transcode(nodeList->item(0)->getTextContent());
-        XMLString::trim(nodeName);
-        // Creates an evaluationLink for Brightness predicate only if Node was not mentioned before (since the brighness of a same object does not change)
-        auto_ptr<char> key(new char[1024]);
-        sprintf(key.get(), "%s_%s", AGISIM_OBJECT_PERCEPT_NODE_CLASS, nodeName);
-        NodesMapIterator ti =  declaredNodes->find(key.get());
-        bool createBrightness = (ti == declaredNodes->end());
-        // Create a new element for this object
-        DOMElement* agisimObjectPerceptNodeElem = createNodeElem(novamenteDoc, AGISIM_OBJECT_PERCEPT_NODE_CLASS, nodeName, atomTypes, declaredNodes, timestamp);
-        if (createBrightness) {
-            // GET OBJECT BRIGHTNESS
-            nodeList = objectElem->getElementsByTagName(X(AGISIM_BRIGHTNESS_TAG));
-            createBasicSensationEvalLinkElem(novamenteDoc, parentElem, agisimObjectPerceptNodeElem,
-                (DOMElement*) nodeList->item(0), AGISIM_BRIGHTNESS_PREDICATE_NAME, atomTypes, declaredNodes, true, timestamp);
-        }
-        free(nodeName);
-        // GET POLYGON OBJECT NAME
-        nodeList = objectElem->getElementsByTagName(X(AGISIM_POLYGON_NAME_TAG));
-        nodeName = XMLString::transcode(nodeList->item(0)->getTextContent());
-        XMLString::trim(nodeName);
-        // Create an Element for this polygon
-        DOMElement* agisimPolygonPerceptNodeElem = createNodeElem(novamenteDoc, AGISIM_POLYGON_PERCEPT_NODE_CLASS, nodeName, atomTypes, declaredNodes, timestamp);
-        // Create a member link between Polygon and Object
-        DOMElement* memberLinkElem = createLinkElem(novamenteDoc, MEMBER_LINK_CLASS, atomTypes, timestamp);
-        memberLinkElem->appendChild(agisimPolygonPerceptNodeElem);
-        memberLinkElem->appendChild(createBrightness?agisimObjectPerceptNodeElem->cloneNode(false):agisimObjectPerceptNodeElem);
-        parentElem->appendChild(memberLinkElem);
-        // Get Polygon Node declaration element
-        sprintf(key.get(), "%s_%s", AGISIM_POLYGON_PERCEPT_NODE_CLASS, nodeName);
-        XMLString::release(&nodeName);
-        DOMElement* agisimPolygonNodeDeclarationElem = declaredNodes->find(key.get())->second;
-        // GET POLYGON CORNERS
-        nodeList = objectElem->getElementsByTagName(X(AGISIM_POLYGON_CORNER_TAG));
-        for (unsigned int i = 0; i < nodeList->getLength(); i++) {
-            // Create the corner element in the polygonNode element.
-            DOMElement* cornerElem = novamenteDoc->createElement(X(POLYGON_CORNER_TOKEN));
-            char* text = XMLString::transcode(((DOMElement*) nodeList->item(i))->getTextContent());
-            std::vector<char*> values;
-            splitValues(text, values);
-            if (values.size() != 3) {
-                printf("ERROR: Got wrong number of coordinates for polygon corner: %d\n", values.size());
-            } else {
-                cornerElem->setAttribute(X(POLYGON_CORNER_X_TOKEN), XMLString::transcode(values[0]));
-                cornerElem->setAttribute(X(POLYGON_CORNER_Y_TOKEN), XMLString::transcode(values[1]));
-                cornerElem->setAttribute(X(POLYGON_CORNER_Z_TOKEN), XMLString::transcode(values[2]));
-                agisimPolygonNodeDeclarationElem->appendChild(cornerElem);
-            }
-            XMLString::release(&text);
-        }
-    }
-}
 }
 
 void SimProxy::createHoldingObjectElements(XERCES_CPP_NAMESPACE::DOMDocument* novamenteDoc,
-                                      DOMElement* parentElem,
-                                      DOMElement* objectNameElem,
-                                      std::vector<char*>& atomTypes,
-                                      NodesMap* declaredNodes,
-                                      const char* timestamp) {
+        DOMElement* parentElem,
+        DOMElement* objectNameElem,
+        std::vector<char*>& atomTypes,
+        NodesMap* declaredNodes,
+        const char* timestamp)
+{
 
     DOMElement* evalLinkElem = createLinkElem(novamenteDoc, EVALUATION_LINK_CLASS, atomTypes, timestamp);
     // PredicateNode element
@@ -877,11 +888,12 @@ void SimProxy::createHoldingObjectElements(XERCES_CPP_NAMESPACE::DOMDocument* no
 }
 
 void SimProxy::createSayingMessageElements(XERCES_CPP_NAMESPACE::DOMDocument* novamenteDoc,
-                                      DOMElement* parentElem,
-                                      DOMElement* objectNameElem,
-                                      std::vector<char*>& atomTypes,
-                                      NodesMap* declaredNodes,
-                                      const char* timestamp) {
+        DOMElement* parentElem,
+        DOMElement* objectNameElem,
+        std::vector<char*>& atomTypes,
+        NodesMap* declaredNodes,
+        const char* timestamp)
+{
 
     // Parses the full message and gets the demon/agent name and the said message.
     char* fullMessage = XMLString::transcode(objectNameElem->getTextContent());
@@ -926,7 +938,8 @@ void SimProxy::createSayingMessageElements(XERCES_CPP_NAMESPACE::DOMDocument* no
 #endif
 
 
-unsigned long SimProxy::enqueueActionInProgress(int actionType) {
+unsigned long SimProxy::enqueueActionInProgress(int actionType)
+{
     //printf("SimProxy::enqueueActionInProgress()\n");
     logger().log(opencog::Logger::DEBUG, "SimProxy::enqueueActionInProgress()\n");
 
@@ -950,13 +963,14 @@ unsigned long SimProxy::enqueueActionInProgress(int actionType) {
     return result;
 }
 
-unsigned long SimProxy::dequeueActionInProgress(int actionType) {
+unsigned long SimProxy::dequeueActionInProgress(int actionType)
+{
     //printf("SimProxy::dequeueActionInProgress()\n");
     unsigned long actionTicket = 0;
     EventId2AtomRepMap::iterator itr = eventMap->find(actionType);
     if (itr != eventMap->end()) {
         //printf("Found an associated list to this action type\n");
-    std::deque<unsigned long> actionList = (*itr).second;
+        std::deque<unsigned long> actionList = (*itr).second;
         actionTicket = actionList.front();
         actionList.pop_front();
         if (actionList.empty()) {
@@ -978,7 +992,8 @@ unsigned long SimProxy::dequeueActionInProgress(int actionType) {
     return actionTicket;
 }
 
-unsigned long SimProxy::getActionInProgress(int actionType) {
+unsigned long SimProxy::getActionInProgress(int actionType)
+{
     //printf("SimProxy::getActionInProgress()\n");
     unsigned long actionTicket = 0;
     EventId2AtomRepMap::iterator itr = eventMap->find(actionType);
@@ -995,10 +1010,11 @@ unsigned long SimProxy::getActionInProgress(int actionType) {
 
 #if 0
 XERCES_CPP_NAMESPACE::DOMDocument* SimProxy::createActionDocument(const char* actionSchemaName,
-                                                     const char* firstArgStr,
-                                                     const char* firstArgAtomClass,
-                                                     const char* secondArgStr,
-                                                     const char* secondArgAtomClass) {
+        const char* firstArgStr,
+        const char* firstArgAtomClass,
+        const char* secondArgStr,
+        const char* secondArgAtomClass)
+{
     // Creates the new DOM document
     XERCES_CPP_NAMESPACE::DOMDocument* actionDoc = domImplementation->createDocument(NULL, X(LIST_TOKEN), NULL);
 
@@ -1038,30 +1054,32 @@ XERCES_CPP_NAMESPACE::DOMDocument* SimProxy::createActionDocument(const char* ac
 }
 
 void SimProxy::addTypeDescriptionsAndFreeAuxiliarData(XERCES_CPP_NAMESPACE::DOMDocument* novamenteDoc,
-                                                      DOMElement* descElem,
-                                                      std::vector<char*>& atomTypes,
-                                                      NodesMap* declaredNodes) {
-        for(int i = 0; i < atomTypes.size(); i++) {
-            DOMElement* tagElem = novamenteDoc->createElement(X(TAG_TOKEN));
-            tagElem->setAttribute(X(NAME_TOKEN), X(atomTypes[i]));
-            tagElem->setAttribute(X(VALUE_TOKEN), X(atomTypes[i]));
-            descElem->appendChild(tagElem);
-            free(atomTypes[i]);
-        }
-        atomTypes.clear();
+        DOMElement* descElem,
+        std::vector<char*>& atomTypes,
+        NodesMap* declaredNodes)
+{
+    for (int i = 0; i < atomTypes.size(); i++) {
+        DOMElement* tagElem = novamenteDoc->createElement(X(TAG_TOKEN));
+        tagElem->setAttribute(X(NAME_TOKEN), X(atomTypes[i]));
+        tagElem->setAttribute(X(VALUE_TOKEN), X(atomTypes[i]));
+        descElem->appendChild(tagElem);
+        free(atomTypes[i]);
+    }
+    atomTypes.clear();
 
-        NodesMapIterator current = declaredNodes->begin();
-        while (current != declaredNodes->end()) {
-            char* key = current->first;
-            declaredNodes->erase(current);
-            free(key);
-            current = declaredNodes->begin();
-        }
-        delete declaredNodes;
+    NodesMapIterator current = declaredNodes->begin();
+    while (current != declaredNodes->end()) {
+        char* key = current->first;
+        declaredNodes->erase(current);
+        free(key);
+        current = declaredNodes->begin();
+    }
+    delete declaredNodes;
 }
 #endif
 
-void SimProxy::processPerceptionAndStatus(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc) {
+void SimProxy::processPerceptionAndStatus(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc)
+{
     //printf("SimProxy::processPerceptionAndStatus\n");
     int errorCode = 0;
     try {
@@ -1075,54 +1093,55 @@ void SimProxy::processPerceptionAndStatus(XERCES_CPP_NAMESPACE::DOMDocument* agi
         XMLString::release(&sensationElemName);
 
         DOMNode* child;
-        for (child = sensationElem->getFirstChild(); child != NULL; child=child->getNextSibling()) {
-           if (child->getNodeType() != DOMNode::ELEMENT_NODE) {
-               continue;
-           }
-           char *childNodeName = XMLString::transcode(child->getNodeName());
-           if (strcmp(AGISIM_SMELL_DATA_TAG,childNodeName) == 0) {
-               //printf("GOT smell data\n");
-               //createBasicSensationElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, AGISIM_SMELL_NODE_CLASS, atomTypes, declaredNodes, timestamp);
-           } else if (strcmp(AGISIM_TASTE_DATA_TAG,childNodeName) == 0) {
-               //printf("GOT taste data\n");
-               //createBasicSensationElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, AGISIM_TASTE_NODE_CLASS, atomTypes, declaredNodes, timestamp);
-           } else if (strcmp(AGISIM_AUDIO_DATA_TAG,childNodeName) == 0) {
-               //printf("GOT sound data\n");
-               //createBasicSensationElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, AGISIM_SOUND_NODE_CLASS, atomTypes, declaredNodes, timestamp);
-           } else if (strcmp(AGISIM_SELF_DATA_TAG,childNodeName) == 0) {
-               //printf("GOT self data\n");
-               processSelfDataElements((DOMElement*) child);
-           } else if (strcmp(AGISIM_OBJECT_VISUAL_TAG,childNodeName) == 0) {
-               //printf("GOT object visual data\n");
+        for (child = sensationElem->getFirstChild(); child != NULL; child = child->getNextSibling()) {
+            if (child->getNodeType() != DOMNode::ELEMENT_NODE) {
+                continue;
+            }
+            char *childNodeName = XMLString::transcode(child->getNodeName());
+            if (strcmp(AGISIM_SMELL_DATA_TAG, childNodeName) == 0) {
+                //printf("GOT smell data\n");
+                //createBasicSensationElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, AGISIM_SMELL_NODE_CLASS, atomTypes, declaredNodes, timestamp);
+            } else if (strcmp(AGISIM_TASTE_DATA_TAG, childNodeName) == 0) {
+                //printf("GOT taste data\n");
+                //createBasicSensationElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, AGISIM_TASTE_NODE_CLASS, atomTypes, declaredNodes, timestamp);
+            } else if (strcmp(AGISIM_AUDIO_DATA_TAG, childNodeName) == 0) {
+                //printf("GOT sound data\n");
+                //createBasicSensationElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, AGISIM_SOUND_NODE_CLASS, atomTypes, declaredNodes, timestamp);
+            } else if (strcmp(AGISIM_SELF_DATA_TAG, childNodeName) == 0) {
+                //printf("GOT self data\n");
+                processSelfDataElements((DOMElement*) child);
+            } else if (strcmp(AGISIM_OBJECT_VISUAL_TAG, childNodeName) == 0) {
+                //printf("GOT object visual data\n");
 
-               //createObjectPerceptElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, atomTypes, declaredNodes, timestamp);
-           } else if (strcmp(AGISIM_VISUAL_TAG,childNodeName) == 0) {
-               //printf("GOT pixel visual data\n");
-               //createPixelPerceptElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, atomTypes, declaredNodes, timestamp);
-           } else if (strcmp(AGISIM_MAP_INFO_TAG,childNodeName) == 0) {
-               //printf("GOT map info data\n");
-               logger().log(opencog::Logger::DEBUG, "GOT map info data\n");
-               processMapInfoElements((DOMElement*) child);
-           } else {
-               //printf("WARN: Unknown sensation data tag: %s\n", childNodeName);
-               logger().log(opencog::Logger::WARN, "SimProxy: Unknown sensation data tag: %s\n", childNodeName);
-           }
-           XMLString::release(&childNodeName);
+                //createObjectPerceptElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, atomTypes, declaredNodes, timestamp);
+            } else if (strcmp(AGISIM_VISUAL_TAG, childNodeName) == 0) {
+                //printf("GOT pixel visual data\n");
+                //createPixelPerceptElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, atomTypes, declaredNodes, timestamp);
+            } else if (strcmp(AGISIM_MAP_INFO_TAG, childNodeName) == 0) {
+                //printf("GOT map info data\n");
+                logger().log(opencog::Logger::DEBUG, "GOT map info data\n");
+                processMapInfoElements((DOMElement*) child);
+            } else {
+                //printf("WARN: Unknown sensation data tag: %s\n", childNodeName);
+                logger().log(opencog::Logger::WARN, "SimProxy: Unknown sensation data tag: %s\n", childNodeName);
+            }
+            XMLString::release(&childNodeName);
         }
 
     } catch (const OutOfMemoryException&) {
-           XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
-       errorCode = 5;
+        XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
+        errorCode = 5;
     } catch (const DOMException& e) {
-       XERCES_STD_QUALIFIER cerr << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
-       errorCode = 2;
+        XERCES_STD_QUALIFIER cerr << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
+        errorCode = 2;
     } catch (...) {
-       XERCES_STD_QUALIFIER cerr << "An error occurred creating the document" << XERCES_STD_QUALIFIER endl;
-       errorCode = 3;
+        XERCES_STD_QUALIFIER cerr << "An error occurred creating the document" << XERCES_STD_QUALIFIER endl;
+        errorCode = 3;
     }
 }
 
-bool SimProxy::isAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc) {
+bool SimProxy::isAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc)
+{
     // Check if root element is ok
     char* rootElemName = XMLString::transcode(agiSimMessageDoc->getDocumentElement()->getNodeName());
     if (strcmp(AGISIM_ADMIN_ROOT_TAG, rootElemName) != 0) {
@@ -1133,7 +1152,8 @@ bool SimProxy::isAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageD
     return true;
 }
 
-bool SimProxy::processAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc, std::string& message) {
+bool SimProxy::processAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc, std::string& message)
+{
     DOMNodeList* msgElems = agiSimMessageDoc->getDocumentElement()->getElementsByTagName(X(AGISIM_ADMIN_MSG_TAG));
     if (msgElems->getLength() > 0) {
         char* msg = XMLString::transcode(msgElems->item(0)->getTextContent());
@@ -1157,11 +1177,12 @@ bool SimProxy::processAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* agiSimMes
     return false;
 }
 
-std::string SimProxy::processAgiSimMessage(const std::string& agiSimMessage, bool isAdminCommand) {
+std::string SimProxy::processAgiSimMessage(const std::string& agiSimMessage, bool isAdminCommand)
+{
     std::string result;
     //printf("SimProxy::processAgiSimMessage():\n%s\n", agiSimMessage.c_str());
-	if (logger().getLevel() >= opencog::Logger::FINE)
-	    logger().log(opencog::Logger::FINE, "SimProxy::processAgiSimMessage():\n%s\n", agiSimMessage.c_str());
+    if (logger().getLevel() >= opencog::Logger::FINE)
+        logger().log(opencog::Logger::FINE, "SimProxy::processAgiSimMessage():\n%s\n", agiSimMessage.c_str());
     XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc = parseXML(agiSimMessage);
     if (agiSimMessageDoc != NULL) {
         if (isAdminResponse(agiSimMessageDoc)) {
@@ -1188,14 +1209,15 @@ std::string SimProxy::processAgiSimMessage(const std::string& agiSimMessage, boo
     return result;
 }
 
-std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool waitResponse) {
+std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool waitResponse)
+{
     //printf("SimProxy::send(\"%s\", %d, %d)\n", str.c_str(), isAdminCommand, waitResponse);
     //printf("AgentName = %s\n", agentName.c_str());
-	if (logger().getLevel() >= opencog::Logger::FINE){
-	    logger().log(opencog::Logger::FINE, "SimProxy::send(\"%s\", %d, %d)\n", str.c_str(), isAdminCommand, waitResponse);
-    	logger().log(opencog::Logger::DEBUG, "AgentName = %s\n", agentName.c_str());
-	}
-	std::string result;
+    if (logger().getLevel() >= opencog::Logger::FINE) {
+        logger().log(opencog::Logger::FINE, "SimProxy::send(\"%s\", %d, %d)\n", str.c_str(), isAdminCommand, waitResponse);
+        logger().log(opencog::Logger::DEBUG, "AgentName = %s\n", agentName.c_str());
+    }
+    std::string result;
 
     timeval beginTime;
     gettimeofday(&beginTime, NULL);
@@ -1211,7 +1233,7 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
     //printf("SPENT TIME TO RECEIVE SPONTANEOUS MESSAGE = %ld\n", ((curTime.tv_sec-beginTime.tv_sec)*1000)+((curTime.tv_usec-beginTime.tv_usec)/1000));
     if (echoing) {
         //printf("Agisim Client (@%ld.%ld ms) << '%s'\n", beginTime.tv_usec/1000, beginTime.tv_usec%1000, str.c_str());
-        logger().log(opencog::Logger::DEBUG, "SimProxy - Send - Agisim Client (@%ld.%ld ms) << '%s'\n", beginTime.tv_usec/1000, beginTime.tv_usec%1000, str.c_str());
+        logger().log(opencog::Logger::DEBUG, "SimProxy - Send - Agisim Client (@%ld.%ld ms) << '%s'\n", beginTime.tv_usec / 1000, beginTime.tv_usec % 1000, str.c_str());
     }
     if (cc->IsConnected()) {
         if (str.size() > 0) {
@@ -1227,9 +1249,9 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
                 timeval theTime;
                 gettimeofday(&theTime, NULL);
                 if (echoing) {
-    //                printf("Polling @%ld.%ld  ms\n", theTime.tv_sec*1000 + theTime.tv_usec/1000, theTime.tv_usec%1000);
+                    //                printf("Polling @%ld.%ld  ms\n", theTime.tv_sec*1000 + theTime.tv_usec/1000, theTime.tv_usec%1000);
                 }
-                if (timeout(beginTime,theTime,WAIT_RESPONSE_TIMEOUT)) {
+                if (timeout(beginTime, theTime, WAIT_RESPONSE_TIMEOUT)) {
                     break;
                 }
                 sh->Select(SEC_DELAY, USEC_DELAY);
@@ -1263,49 +1285,53 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
     return result;
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName, float value) {
+bool SimProxy::sendActionCommand(const char* cmdName, float value)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
     cmd_str += cmdName;
     cmd_str += " ";
     char floatStr[20];
-    sprintf(floatStr,"%f\n",value);
+    sprintf(floatStr, "%f\n", value);
     cmd_str += floatStr;
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName, float value1, float value2) {
+bool SimProxy::sendActionCommand(const char* cmdName, float value1, float value2)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
     cmd_str += cmdName;
     cmd_str += " ";
     char floatStr[20];
-    sprintf(floatStr,"%f ",value1);
+    sprintf(floatStr, "%f ", value1);
     cmd_str += floatStr;
-    sprintf(floatStr,"%f\n",value2);
+    sprintf(floatStr, "%f\n", value2);
     cmd_str += floatStr;
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName, float value1, float value2, float value3) {
+bool SimProxy::sendActionCommand(const char* cmdName, float value1, float value2, float value3)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
     cmd_str += cmdName;
     cmd_str += " ";
     char floatStr[20];
-    sprintf(floatStr,"%f ",value1);
+    sprintf(floatStr, "%f ", value1);
     cmd_str += floatStr;
-    sprintf(floatStr,"%f ",value2);
+    sprintf(floatStr, "%f ", value2);
     cmd_str += floatStr;
-    sprintf(floatStr,"%f\n",value3);
+    sprintf(floatStr, "%f\n", value3);
     cmd_str += floatStr;
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName) {
+bool SimProxy::sendActionCommand(const char* cmdName)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
@@ -1314,7 +1340,8 @@ bool SimProxy::sendActionCommand(const char* cmdName) {
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName, const char* str) {
+bool SimProxy::sendActionCommand(const char* cmdName, const char* str)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
@@ -1325,7 +1352,8 @@ bool SimProxy::sendActionCommand(const char* cmdName, const char* str) {
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float value) {
+bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float value)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
@@ -1333,13 +1361,14 @@ bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float val
     cmd_str += " ";
     cmd_str += str;
     char floatStr[20];
-    sprintf(floatStr," %f ", value);
+    sprintf(floatStr, " %f ", value);
     cmd_str += floatStr;
     cmd_str += "\n";
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
-bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float value1, float value2) {
+bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float value1, float value2)
+{
     std::string cmd_str;
     cmd_str += AGISIM_ACTION;
     cmd_str += " ";
@@ -1347,9 +1376,9 @@ bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float val
     cmd_str += " ";
     cmd_str += str;
     char floatStr[20];
-    sprintf(floatStr," %f", value1);
+    sprintf(floatStr, " %f", value1);
     cmd_str += floatStr;
-    sprintf(floatStr," %f", value2);
+    sprintf(floatStr, " %f", value2);
     cmd_str += floatStr;
     cmd_str += "\n";
     return !strcmp(send(cmd_str, false, false).c_str(), "ok");
@@ -1357,28 +1386,32 @@ bool SimProxy::sendActionCommand(const char* cmdName, const char* str, float val
 
 // body movements
 
-unsigned long SimProxy::turnLeft(float value) {
+unsigned long SimProxy::turnLeft(float value)
+{
     if (sendActionCommand(AGISIM_TURN_LEFT, value)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_TURN_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::turnRight(float value) {
+unsigned long SimProxy::turnRight(float value)
+{
     if (sendActionCommand(AGISIM_TURN_RIGHT, value)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_TURN_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::moveForward(float value) {
+unsigned long SimProxy::moveForward(float value)
+{
     if (sendActionCommand(AGISIM_MOVE_FORWARD, value)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::moveGoto(std::string objName) {
+unsigned long SimProxy::moveGoto(std::string objName)
+{
     const char* argStr = objName.c_str();
     if (sendActionCommand(AGISIM_GOTO, argStr)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
@@ -1386,28 +1419,32 @@ unsigned long SimProxy::moveGoto(std::string objName) {
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::moveBackward(float value) {
+unsigned long SimProxy::moveBackward(float value)
+{
     if (sendActionCommand(AGISIM_MOVE_BACKWARD, value)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::strafeLeft(float value) {
+unsigned long SimProxy::strafeLeft(float value)
+{
     if (sendActionCommand(AGISIM_STRAFE_LEFT, value)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::strafeRight(float value) {
+unsigned long SimProxy::strafeRight(float value)
+{
     if (sendActionCommand(AGISIM_STRAFE_RIGHT, value)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::walkTowards(std::string objName) {
+unsigned long SimProxy::walkTowards(std::string objName)
+{
     const char* argStr = objName.c_str();
     if (sendActionCommand(AGISIM_WALK_TOWARDS, argStr)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
@@ -1415,7 +1452,8 @@ unsigned long SimProxy::walkTowards(std::string objName) {
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::walkTowards(float x, float z, float max_distance) {
+unsigned long SimProxy::walkTowards(float x, float z, float max_distance)
+{
     if (max_distance >= 0) {
         if (sendActionCommand(AGISIM_WALK_TOWARDS, x, z, max_distance)) {
             return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
@@ -1428,7 +1466,8 @@ unsigned long SimProxy::walkTowards(float x, float z, float max_distance) {
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::nudgeTo(std::string objName, float x, float z) {
+unsigned long SimProxy::nudgeTo(std::string objName, float x, float z)
+{
     const char* argStr = objName.c_str();
     if (sendActionCommand(AGISIM_NUDGE_TO, argStr, x, z)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_MOVE_ANIMATION);
@@ -1436,7 +1475,8 @@ unsigned long SimProxy::nudgeTo(std::string objName, float x, float z) {
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::turnTo(std::string objName) {
+unsigned long SimProxy::turnTo(std::string objName)
+{
     const char* argStr = objName.c_str();
     if (sendActionCommand(AGISIM_TURN_TO, argStr)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_TURN_ANIMATION);
@@ -1447,25 +1487,30 @@ unsigned long SimProxy::turnTo(std::string objName) {
 
 // eye movements
 
-bool SimProxy::eyeUp(float value) {
-  return sendActionCommand(AGISIM_EYE_UP, value);
+bool SimProxy::eyeUp(float value)
+{
+    return sendActionCommand(AGISIM_EYE_UP, value);
 }
 
-bool SimProxy::eyeDown(float value) {
-  return sendActionCommand(AGISIM_EYE_DOWN, value);
+bool SimProxy::eyeDown(float value)
+{
+    return sendActionCommand(AGISIM_EYE_DOWN, value);
 }
 
-bool SimProxy::eyeLeft(float value) {
-  return sendActionCommand(AGISIM_EYE_LEFT, value);
+bool SimProxy::eyeLeft(float value)
+{
+    return sendActionCommand(AGISIM_EYE_LEFT, value);
 }
 
-bool SimProxy::eyeRight(float value) {
-  return sendActionCommand(AGISIM_EYE_RIGHT, value);
+bool SimProxy::eyeRight(float value)
+{
+    return sendActionCommand(AGISIM_EYE_RIGHT, value);
 }
 
 // Misc
 
-unsigned long SimProxy::lift(std::string objName) {
+unsigned long SimProxy::lift(std::string objName)
+{
     const char* argStr = objName.c_str();
     if (sendActionCommand(AGISIM_LIFT, argStr)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_SEMIPOSE_ANIMATION);
@@ -1473,67 +1518,76 @@ unsigned long SimProxy::lift(std::string objName) {
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::drop() {
+unsigned long SimProxy::drop()
+{
     if (sendActionCommand(AGISIM_DROP)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_SEMIPOSE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::throws(float distance) {
+unsigned long SimProxy::throws(float distance)
+{
     if (sendActionCommand(AGISIM_THROW, distance)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_SEMIPOSE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::throwsAt(float x, float z) {
+unsigned long SimProxy::throwsAt(float x, float z)
+{
     if (sendActionCommand(AGISIM_THROW_AT, x, z)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_SEMIPOSE_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::kickLow() {
+unsigned long SimProxy::kickLow()
+{
     if (sendActionCommand(AGISIM_KICK_LOW)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::kickHigh() {
+unsigned long SimProxy::kickHigh()
+{
     if (sendActionCommand(AGISIM_KICK_HIGH)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::smile() {
+unsigned long SimProxy::smile()
+{
     if (sendActionCommand(AGISIM_SMILE)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::frown() {
+unsigned long SimProxy::frown()
+{
     if (sendActionCommand(AGISIM_FROWN)) {
         return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::eat(std::string objName, float quantity) {
+unsigned long SimProxy::eat(std::string objName, float quantity)
+{
     if (quantity > 0) {
         if (sendActionCommand(AGISIM_EAT, objName.c_str(), quantity)) {
             return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
-	}
+        }
     } else if (sendActionCommand(AGISIM_EAT, objName.c_str())) {
         return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
     }
     return ULONG_MAX;
 }
 
-unsigned long SimProxy::drink(std::string objName, float quantity) {
+unsigned long SimProxy::drink(std::string objName, float quantity)
+{
     if (quantity > 0) {
         if (sendActionCommand(AGISIM_DRINK, objName.c_str(), quantity)) {
             return enqueueActionInProgress(CUSTOM_SENSATION_GENERIC_ANIMATION);
@@ -1546,13 +1600,15 @@ unsigned long SimProxy::drink(std::string objName, float quantity) {
 
 // Communications
 
-bool SimProxy::noiseMake() {
+bool SimProxy::noiseMake()
+{
     return sendActionCommand(AGISIM_NOISE_MAKE);
 }
 
 // message command
 
-unsigned long SimProxy::message(const char* msg) {
+unsigned long SimProxy::message(const char* msg)
+{
 
     logger().log(opencog::Logger::FINE, "SimProxy::message - init\n");
     std::string cmd_str;
@@ -1561,10 +1617,10 @@ unsigned long SimProxy::message(const char* msg) {
     cmd_str += msg;
     cmd_str += "\n";
     //printf("SimProxy::message(%s) => %s\n", msg, cmd_str.c_str());
-	if (logger().getLevel() >= opencog::Logger::FINE){
-	    logger().log(opencog::Logger::FINE, "SimProxy::message(%s) => %s\n", msg, cmd_str.c_str());
-	}
-	std::string result = send(cmd_str, false, false);
+    if (logger().getLevel() >= opencog::Logger::FINE) {
+        logger().log(opencog::Logger::FINE, "SimProxy::message(%s) => %s\n", msg, cmd_str.c_str());
+    }
+    std::string result = send(cmd_str, false, false);
     //printf("SimProxy::message() result = %s\n", result.c_str());
     if (!strcmp(result.c_str(), "ok")) {
 #ifdef BROADCAST_MESSAGE_GOES_TO_PENDING_ACTIONS
@@ -1576,35 +1632,38 @@ unsigned long SimProxy::message(const char* msg) {
 
 // goto command
 
-unsigned long SimProxy::gotoTarget(const char* target) {
-  std::string cmd_str;
-  cmd_str += "test 2 "; // TODO: Use the right command. For now, using this hack.
-  cmd_str += target; // TODO: Use integer coordinates. For now, just use the string comming from target arg.
-  cmd_str += "\n";
-  //printf("SimProxy::gotoTarget => %s\n", cmd_str.c_str());
-  send(cmd_str, false);
-  return moveForward(10.0f);
+unsigned long SimProxy::gotoTarget(const char* target)
+{
+    std::string cmd_str;
+    cmd_str += "test 2 "; // TODO: Use the right command. For now, using this hack.
+    cmd_str += target; // TODO: Use integer coordinates. For now, just use the string comming from target arg.
+    cmd_str += "\n";
+    //printf("SimProxy::gotoTarget => %s\n", cmd_str.c_str());
+    send(cmd_str, false);
+    return moveForward(10.0f);
 }
 
-bool SimProxy::getCurrentSense() {
-  std::string cmd_str;
-  cmd_str += AGISIM_SENSE;
-  cmd_str += "\n";
-  return !strcmp(send(cmd_str, false, false).c_str(), "ok");
+bool SimProxy::getCurrentSense()
+{
+    std::string cmd_str;
+    cmd_str += AGISIM_SENSE;
+    cmd_str += "\n";
+    return !strcmp(send(cmd_str, false, false).c_str(), "ok");
 }
 
 
 // ADMIN COMMANDS
 
-std::string SimProxy::newAgent(float x, float y, float z,  const char* objectType, const char*  meshType, float radius, const char* agentBaseName) {
+std::string SimProxy::newAgent(float x, float y, float z,  const char* objectType, const char*  meshType, float radius, const char* agentBaseName)
+{
     std::string cmd_str;
     cmd_str += AGISIM_NEW;
     char floatStr[20];
-    sprintf(floatStr," %f ",x);
+    sprintf(floatStr, " %f ", x);
     cmd_str += floatStr;
-    sprintf(floatStr,"%f ",y);
+    sprintf(floatStr, "%f ", y);
     cmd_str += floatStr;
-    sprintf(floatStr,"%f ",z);
+    sprintf(floatStr, "%f ", z);
     cmd_str += floatStr;
     cmd_str += " ";
     cmd_str += objectType;
@@ -1614,7 +1673,7 @@ std::string SimProxy::newAgent(float x, float y, float z,  const char* objectTyp
     cmd_str += agentBaseName;
     cmd_str += " agent "; // special init_string parameter
 #if 1
-    sprintf(floatStr,"%f ",radius);
+    sprintf(floatStr, "%f ", radius);
     cmd_str += floatStr;
 #else // this is for AGISim only (not AGISimSIm)
     cmd_str += AGISIM_AGENT;
@@ -1649,82 +1708,89 @@ std::string SimProxy::newAgent(float x, float y, float z,  const char* objectTyp
     return answer;
 }
 
-std::string SimProxy::resetCurrentWorld() {
-  std::string cmd_str;
-  cmd_str += AGISIM_RESET;
-  cmd_str += " soft\n";
-  return send(cmd_str, true, true);
+std::string SimProxy::resetCurrentWorld()
+{
+    std::string cmd_str;
+    cmd_str += AGISIM_RESET;
+    cmd_str += " soft\n";
+    return send(cmd_str, true, true);
 }
 
-std::string SimProxy::disableAgiSimClock() {
-  std::string cmd_str;
-  cmd_str += AGISIM_CONFIG;
-  cmd_str += " ";
-  cmd_str += AGISIM_FRAME_UPDATE_DELAY;
-  cmd_str += "=2000000000\n";
-  return send(cmd_str, true, true);
+std::string SimProxy::disableAgiSimClock()
+{
+    std::string cmd_str;
+    cmd_str += AGISIM_CONFIG;
+    cmd_str += " ";
+    cmd_str += AGISIM_FRAME_UPDATE_DELAY;
+    cmd_str += "=2000000000\n";
+    return send(cmd_str, true, true);
 }
 
 
 // Special commands
 
-std::string SimProxy::getPos(std::string objName) {
-  std::string cmd_str;
-  cmd_str += "getpos ";
-  cmd_str += objName;
-  cmd_str += "\n";
-  //printf("SimProxy::getPos => %s\n", cmd_str.c_str());
-  return send(cmd_str, false);
+std::string SimProxy::getPos(std::string objName)
+{
+    std::string cmd_str;
+    cmd_str += "getpos ";
+    cmd_str += objName;
+    cmd_str += "\n";
+    //printf("SimProxy::getPos => %s\n", cmd_str.c_str());
+    return send(cmd_str, false);
 }
 
-std::string SimProxy::setPos(std::string objName, float x, float y, float z) {
-  std::string cmd_str;
-  cmd_str += "setpos ";
-  cmd_str += objName;
-  cmd_str += " ";
-  char floatStr[20];
-  sprintf(floatStr,"%f ",x);
-  cmd_str += floatStr;
-  sprintf(floatStr,"%f ",y);
-  cmd_str += floatStr;
-  sprintf(floatStr,"%f\n",z);
-  cmd_str += floatStr;
-  //printf("SimProxy::setPos => %s\n", cmd_str.c_str());
-  return send(cmd_str, false);
+std::string SimProxy::setPos(std::string objName, float x, float y, float z)
+{
+    std::string cmd_str;
+    cmd_str += "setpos ";
+    cmd_str += objName;
+    cmd_str += " ";
+    char floatStr[20];
+    sprintf(floatStr, "%f ", x);
+    cmd_str += floatStr;
+    sprintf(floatStr, "%f ", y);
+    cmd_str += floatStr;
+    sprintf(floatStr, "%f\n", z);
+    cmd_str += floatStr;
+    //printf("SimProxy::setPos => %s\n", cmd_str.c_str());
+    return send(cmd_str, false);
 }
 
-std::string SimProxy::getRot(std::string objName) {
-  std::string cmd_str;
-  cmd_str += "getrot ";
-  cmd_str += objName;
-  cmd_str += "\n";
-  //printf("SimProxy::getRot => %s\n", cmd_str.c_str());
-  return send(cmd_str, false);
+std::string SimProxy::getRot(std::string objName)
+{
+    std::string cmd_str;
+    cmd_str += "getrot ";
+    cmd_str += objName;
+    cmd_str += "\n";
+    //printf("SimProxy::getRot => %s\n", cmd_str.c_str());
+    return send(cmd_str, false);
 }
 
-std::string SimProxy::setRot(std::string objName, float x, float y, float z) {
-  std::string cmd_str;
-  cmd_str += "setrot ";
-  cmd_str += objName;
-  cmd_str += " ";
-  char floatStr[20];
-  sprintf(floatStr,"%f ",x);
-  cmd_str += floatStr;
-  sprintf(floatStr,"%f ",y);
-  cmd_str += floatStr;
-  sprintf(floatStr,"%f\n",z);
-  cmd_str += floatStr;
-  //printf("SimProxy::setRot => %s\n", cmd_str.c_str());
-  return send(cmd_str, false);
+std::string SimProxy::setRot(std::string objName, float x, float y, float z)
+{
+    std::string cmd_str;
+    cmd_str += "setrot ";
+    cmd_str += objName;
+    cmd_str += " ";
+    char floatStr[20];
+    sprintf(floatStr, "%f ", x);
+    cmd_str += floatStr;
+    sprintf(floatStr, "%f ", y);
+    cmd_str += floatStr;
+    sprintf(floatStr, "%f\n", z);
+    cmd_str += floatStr;
+    //printf("SimProxy::setRot => %s\n", cmd_str.c_str());
+    return send(cmd_str, false);
 }
 
 
 // IMPLEMENTATION OF ABSTRACT METHODS
 
-void SimProxy::receiveAsynchronousMessage(const std::string& agiSimMessage) {
+void SimProxy::receiveAsynchronousMessage(const std::string& agiSimMessage)
+{
 
-	if (logger().getLevel() >= opencog::Logger::FINE)
-	    logger().log(opencog::Logger::FINE, "SimProxy::receiveAsynchronousMessage: %s", agiSimMessage.c_str());
+    if (logger().getLevel() >= opencog::Logger::FINE)
+        logger().log(opencog::Logger::FINE, "SimProxy::receiveAsynchronousMessage: %s", agiSimMessage.c_str());
     processAgiSimMessage(agiSimMessage, false);
 }
 
@@ -1733,29 +1799,33 @@ void SimProxy::receiveAsynchronousMessage(const std::string& agiSimMessage) {
 
 // Mock for perception and status handler
 
-DefaultPerceptionAndStatusHandler::~DefaultPerceptionAndStatusHandler() {
+DefaultPerceptionAndStatusHandler::~DefaultPerceptionAndStatusHandler()
+{
 }
 
-void DefaultPerceptionAndStatusHandler::mapInfo(std::vector<ObjMapInfo>& objects) {
+void DefaultPerceptionAndStatusHandler::mapInfo(std::vector<ObjMapInfo>& objects)
+{
 
-	if (logger().getLevel() >= opencog::Logger::FINE) {
-            foreach(ObjMapInfo obj, objects) {
-	        logger().log(opencog::Logger::FINE, "=========================================\n");
-	        logger().log(opencog::Logger::FINE, "object: %s, type: %s%s\n", obj.name.c_str(), obj.type.c_str(), obj.removed?" => REMOVED!":"");
-	        logger().log(opencog::Logger::FINE, "Position: posX = %lf, posY = %lf, posZ = %lf\n", obj.posX, obj.posY, obj.posZ);
-	        logger().log(opencog::Logger::FINE, "Position: rotX = %lf, rotY = %lf, rotZ = %lf\n", obj.rotX, obj.rotY, obj.rotZ);
-	        logger().log(opencog::Logger::FINE, "Size: length = %lf, width = %lf, height = %lf\n", obj.length, obj.width, obj.height);
-	        logger().log(opencog::Logger::FINE, "Edible: %d, Drinkable: %d\n\n", obj.edible, obj.drinkable);
-	        logger().log(opencog::Logger::FINE, "PetHome: %d, FoodBowl: %d, WaterBowl: %d\n\n", obj.petHome, obj.foodBowl, obj.waterBowl);
-	    }
-	}
+    if (logger().getLevel() >= opencog::Logger::FINE) {
+        foreach(ObjMapInfo obj, objects) {
+            logger().log(opencog::Logger::FINE, "=========================================\n");
+            logger().log(opencog::Logger::FINE, "object: %s, type: %s%s\n", obj.name.c_str(), obj.type.c_str(), obj.removed ? " => REMOVED!" : "");
+            logger().log(opencog::Logger::FINE, "Position: posX = %lf, posY = %lf, posZ = %lf\n", obj.posX, obj.posY, obj.posZ);
+            logger().log(opencog::Logger::FINE, "Position: rotX = %lf, rotY = %lf, rotZ = %lf\n", obj.rotX, obj.rotY, obj.rotZ);
+            logger().log(opencog::Logger::FINE, "Size: length = %lf, width = %lf, height = %lf\n", obj.length, obj.width, obj.height);
+            logger().log(opencog::Logger::FINE, "Edible: %d, Drinkable: %d\n\n", obj.edible, obj.drinkable);
+            logger().log(opencog::Logger::FINE, "PetHome: %d, FoodBowl: %d, WaterBowl: %d\n\n", obj.petHome, obj.foodBowl, obj.waterBowl);
+        }
+    }
 }
 
-void DefaultPerceptionAndStatusHandler::actionStatus(unsigned long actionTicket, bool success) {
+void DefaultPerceptionAndStatusHandler::actionStatus(unsigned long actionTicket, bool success)
+{
     logger().log(opencog::Logger::DEBUG, "actionStatus: actionTicket = %ld, success = %d\n", actionTicket, success);
 }
 
-void DefaultPerceptionAndStatusHandler::errorNotification(const std::string& errorMsg) {
+void DefaultPerceptionAndStatusHandler::errorNotification(const std::string& errorMsg)
+{
     logger().log(opencog::Logger::DEBUG, "ERROR: errorMsg = %s\n", errorMsg.c_str());
 }
 

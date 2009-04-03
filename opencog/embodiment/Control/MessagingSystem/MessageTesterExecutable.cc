@@ -31,23 +31,24 @@
 
 #ifdef WIN32
 unsigned sleep(unsigned seconds)
-	{
-		Sleep(seconds * 1000);
-		return 0;
-	}
+{
+    Sleep(seconds * 1000);
+    return 0;
+}
 #endif
 
 using namespace MessagingSystem;
 
-class MyElement : public NetworkElement {
+class MyElement : public NetworkElement
+{
 
-    private:
+private:
 
     std::string myID;
     std::string peerID;
     int sleepBeforeSending;
 
-    public:
+public:
 
     MyElement(const Control::SystemParameters &params, std::string myID, std::string peerID, int port, int sleep) : NetworkElement(params, myID, std::string("127.0.0.1"), port) {
         this->myID = myID;
@@ -76,7 +77,8 @@ class MyElement : public NetworkElement {
     }
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
     Control::SystemParameters parameters;
 
@@ -86,6 +88,6 @@ int main(int argc, char *argv[]) {
     sleep(10);
     printf("Starting test\n");
     myElement->run();
-    
+
     return 0;
 }

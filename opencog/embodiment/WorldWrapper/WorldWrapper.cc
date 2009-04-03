@@ -21,9 +21,10 @@
  */
 #include "WorldWrapper.h"
 
-namespace WorldWrapper {
+namespace WorldWrapper
+{
 
-  WorldWrapperBase::WorldWrapperBase() {}
-  WorldWrapperBase::~WorldWrapperBase() {}
-    
+WorldWrapperBase::WorldWrapperBase() {}
+WorldWrapperBase::~WorldWrapperBase() {}
+
 }//~namespace WorldWrapper

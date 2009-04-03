@@ -27,88 +27,90 @@
 #include <PetAction.h>
 #include "SimulationParameters.h"
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
-class PhysiologicalModel {
+class PhysiologicalModel
+{
 
-    private:
+private:
 
-        SimulationParameters& simParameters;
+    SimulationParameters& simParameters;
 
-        typedef enum {SLEEP = 0, IDLE, ACTIVE} PetMode;
+    typedef enum {SLEEP = 0, IDLE, ACTIVE} PetMode;
 
-        //static const double PET_MASS;
-        //static const double FOOD_PER_EAT_COMMAND;
-        //static const double WATER_PER_DRINK_COMMAND;
+    //static const double PET_MASS;
+    //static const double FOOD_PER_EAT_COMMAND;
+    //static const double WATER_PER_DRINK_COMMAND;
 
-        static const double EAT_STOPS_PER_DAY;
-        static const double DRINK_STOPS_PER_DAY;
+    static const double EAT_STOPS_PER_DAY;
+    static const double DRINK_STOPS_PER_DAY;
 
-        static const double PEE_STOPS_PER_DAY;
-        static const double POO_STOPS_PER_DAY;
+    static const double PEE_STOPS_PER_DAY;
+    static const double POO_STOPS_PER_DAY;
 
-        static const double FITNESS_MAX;
-        static const double INITIAL_FITNESS;
+    static const double FITNESS_MAX;
+    static const double INITIAL_FITNESS;
 
-        static const double ENERGY_MAX;
-        static const double INITIAL_ENERGY;
+    static const double ENERGY_MAX;
+    static const double INITIAL_ENERGY;
 
-        // Monitored state variables
-        double hunger;       
-        double thirst;       
-        double peeUrgency;
-        double pooUrgency;
-        double fitness;       
-        double energy;       
-   
-        PetMode petMode;
-        int time[3];
+    // Monitored state variables
+    double hunger;
+    double thirst;
+    double peeUrgency;
+    double pooUrgency;
+    double fitness;
+    double energy;
 
-        //double amountOfEatenFood;
-        //double amountOfDrunkWater;
+    PetMode petMode;
+    int time[3];
 
-        //int ticksSinceLastPee;
-        //int ticksSinceLastPoo;
-        //double waterToPee;
-        //double foodToPoo;
+    //double amountOfEatenFood;
+    //double amountOfDrunkWater;
 
-        double minutesPerTick;
+    //int ticksSinceLastPee;
+    //int ticksSinceLastPoo;
+    //double waterToPee;
+    //double foodToPoo;
 
-        void computeHunger();
-        void computeThirst();
-        void computePeeUrgency();
-        void computePooUrgency();
-        void computeFitness();
-        void computeEnergy();
-        double zeroOneCut(double f);
-        double actionCost(const PerceptionActionInterface::PetAction &petAction);
-        double ticksToMinutes(int ticks);
+    double minutesPerTick;
 
-    public:
+    void computeHunger();
+    void computeThirst();
+    void computePeeUrgency();
+    void computePooUrgency();
+    void computeFitness();
+    void computeEnergy();
+    double zeroOneCut(double f);
+    double actionCost(const PerceptionActionInterface::PetAction &petAction);
+    double ticksToMinutes(int ticks);
 
-        // ***********************************************/
-        // Constructors/destructors
+public:
 
-        ~PhysiologicalModel();
-        PhysiologicalModel(SimulationParameters&);
+    // ***********************************************/
+    // Constructors/destructors
 
-        // ***********************************************/
-        // API
+    ~PhysiologicalModel();
+    PhysiologicalModel(SimulationParameters&);
 
-        void processCommand(const PerceptionActionInterface::PetAction &petAction);
-        void timeTick();
-        
-        double getHunger();
-        double getThirst();
-        double getPeeUrgency();
-        double getPooUrgency();
-        double getFitness();
-        double getEnergy();
-        double getScaledEnergy();
-        double getScaledFitness();
-        void setMinutesPerTick(double f);
-        
-        void reset();
+    // ***********************************************/
+    // API
+
+    void processCommand(const PerceptionActionInterface::PetAction &petAction);
+    void timeTick();
+
+    double getHunger();
+    double getThirst();
+    double getPeeUrgency();
+    double getPooUrgency();
+    double getFitness();
+    double getEnergy();
+    double getScaledEnergy();
+    double getScaledFitness();
+    void setMinutesPerTick(double f);
+
+    void reset();
 
 }; // class
 }  // namespace

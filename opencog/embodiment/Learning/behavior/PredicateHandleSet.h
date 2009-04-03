@@ -29,37 +29,39 @@
 
 using namespace opencog;
 
-namespace behavior {
+namespace behavior
+{
 
 // TODO: this class should extend std::set
-class PredicateHandleSet {
+class PredicateHandleSet
+{
 
-    private:
+private:
 
-        std::set<Handle> handles;
+    std::set<Handle> handles;
 
-    public:
+public:
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        virtual ~PredicateHandleSet();
-        PredicateHandleSet();
+    virtual ~PredicateHandleSet();
+    PredicateHandleSet();
 
-        // ***********************************************/
-        // API
+    // ***********************************************/
+    // API
 
-        void insert(const Handle &handle);
-        void clear();
-        const std::set<Handle> &getSet() const;
-        int hashCode();
-        int getSize() const;
-	bool empty() const;
-        bool equals(const PredicateHandleSet &other) const;
-        std::string toString() const;
-        virtual PredicateHandleSet &operator=(const PredicateHandleSet& other);
-        virtual bool operator==(const PredicateHandleSet& other) const;
-        virtual bool operator<(const PredicateHandleSet& other) const;
+    void insert(const Handle &handle);
+    void clear();
+    const std::set<Handle> &getSet() const;
+    int hashCode();
+    int getSize() const;
+    bool empty() const;
+    bool equals(const PredicateHandleSet &other) const;
+    std::string toString() const;
+    virtual PredicateHandleSet &operator=(const PredicateHandleSet& other);
+    virtual bool operator==(const PredicateHandleSet& other) const;
+    virtual bool operator<(const PredicateHandleSet& other) const;
 }; // class
 }  // namespace
 

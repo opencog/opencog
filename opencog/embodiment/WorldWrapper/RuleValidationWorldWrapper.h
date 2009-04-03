@@ -26,37 +26,39 @@
 #include "VirtualWorldState.h"
 #include "util/exceptions.h"
 
-namespace WorldWrapper {
+namespace WorldWrapper
+{
 
-class RuleValidationWorldWrapper : public WorldWrapperBase {
-    
-    public:
+class RuleValidationWorldWrapper : public WorldWrapperBase
+{
 
-        RuleValidationWorldWrapper(VirtualWorldData::VirtualWorldState & virtualWorld);//, opencog::RandGen& _rng);
-        ~RuleValidationWorldWrapper();
+public:
 
-        // override
-        bool isPlanFinished() const;
+    RuleValidationWorldWrapper(VirtualWorldData::VirtualWorldState & virtualWorld);//, opencog::RandGen& _rng);
+    ~RuleValidationWorldWrapper();
 
-        // override
-        bool isPlanFailed() const;
+    // override
+    bool isPlanFinished() const;
 
-        // override
-        bool sendSequential_and(sib_it from, sib_it to); 
+    // override
+    bool isPlanFailed() const;
 
-       
-        // override
-        combo::vertex evalPerception(pre_it per,
-                combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+    // override
+    bool sendSequential_and(sib_it from, sib_it to);
 
-        // override
-        combo::vertex evalIndefiniteObject(combo::indefinite_object io,
-                combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
-    private:
+    // override
+    combo::vertex evalPerception(pre_it per,
+                                 combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
-        VirtualWorldData::VirtualWorldState& virtualWorld;
-        //opencog::RandGen& rng;
+    // override
+    combo::vertex evalIndefiniteObject(combo::indefinite_object io,
+                                       combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+
+private:
+
+    VirtualWorldData::VirtualWorldState& virtualWorld;
+    //opencog::RandGen& rng;
 };
 }
 

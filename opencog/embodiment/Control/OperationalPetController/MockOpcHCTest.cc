@@ -64,11 +64,13 @@ std::vector<std::string> TRICK_ARGS;
 using namespace OperationalPetController;
 using namespace PetCombo;
 
-BaseServer* MockOpcHCTest::createInstance() {
+BaseServer* MockOpcHCTest::createInstance()
+{
     return new MockOpcHCTest;
 }
 
-MockOpcHCTest::MockOpcHCTest() {
+MockOpcHCTest::MockOpcHCTest()
+{
 }
 
 void MockOpcHCTest::init(const std::string & myId,
@@ -92,15 +94,15 @@ void MockOpcHCTest::init(const std::string & myId,
                                  boost::lexical_cast<string>(2));
 
     atomSpace->addSpaceInfo(true, pet_h, T1, PET_X, PET_Y,
-                              OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     atomSpace->addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y,
-                              OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     atomSpace->addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1,
-                              OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     atomSpace->addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2,
-                              OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     atomSpace->addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3,
-                              OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     //add necessary nodes to represent BDs
     behaved_h = atomSpace->addNode(PREDICATE_NODE, BEHAVED_STR);
     //fill atomSpace with actions goto_obj grab and wag
@@ -117,7 +119,7 @@ void MockOpcHCTest::init(const std::string & myId,
     trick_h = atomSpace->addNode(CONCEPT_NODE, TRICK_NAME);
     //add AtTimeLink to it
     tt1_h = atomSpace->addTimeInfo(trick_h, Temporal(0,
-                                                     3 * TIME_INTERVAL));
+                                   3 * TIME_INTERVAL));
     //add first behavior, goto to stick and wag the taile (subject : owner)
     //(yes the owner wag its taile)
     //for goto_obj
@@ -156,7 +158,7 @@ void MockOpcHCTest::init(const std::string & myId,
     //add atTimeLink to it
     ebdg_h = atomSpace->addTimeInfo(eval_grab_obj_h,
                                     Temporal(2 * TIME_INTERVAL,
-                                    3 * TIME_INTERVAL));
+                                             3 * TIME_INTERVAL));
     //add member link to trick concept
     HandleSeq m1_seq;
     m1_seq.push_back(ebd1_h);
@@ -171,7 +173,7 @@ void MockOpcHCTest::init(const std::string & myId,
 
     registerAgent(HCTestAgent::info().id, &HCTestAgentFactory);
     _HCTa  = static_cast<HCTestAgent*>(
-             createAgent(HCTestAgent::info().id, false));
+                 createAgent(HCTestAgent::info().id, false));
     _HCTa->init(TRICK_NAME, TRICK_ARGS,
                 OWNER_NAME, OWNER_NAME,
                 atomSpace, lsMessageSender);
@@ -277,7 +279,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
 
         default:
             logger().log(opencog::Logger::ERROR,
-                            "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
+                         "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
             break;
         }
     }

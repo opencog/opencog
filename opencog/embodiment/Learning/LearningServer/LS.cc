@@ -109,7 +109,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
 
             delete(atomSpace); //it may be null expect perhaps the first time
             atomSpace = new AtomSpace(); //atomSpace is a protective member of
-                                         //BaseServer
+            //BaseServer
             wp = new AtomSpaceWorldProvider(*atomSpace);
             learningPet = lm->getFrom();
             learningSchema = lm->getSchema();
@@ -149,7 +149,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         // message from the learning pet and rewarding the learning schema
 
         if (learningPet == rm->getFrom() &&
-            learningSchema == rm->getCandidateSchema()) {
+                learningSchema == rm->getCandidateSchema()) {
             rewardCandidateSchema(rm);
         }
         break;

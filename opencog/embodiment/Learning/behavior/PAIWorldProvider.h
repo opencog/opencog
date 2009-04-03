@@ -27,11 +27,11 @@
 
 class PAIWorldProvider : public WorldProvider
 {
-  PerceptionActionInterface::PAI* pai;
+    PerceptionActionInterface::PAI* pai;
 public:
-  PAIWorldProvider(PerceptionActionInterface::PAI* _pai);
-  unsigned long getLatestSimWorldTimestamp() const;
-  AtomSpace& getAtomSpace() const;
+    PAIWorldProvider(PerceptionActionInterface::PAI* _pai);
+    unsigned long getLatestSimWorldTimestamp() const;
+    AtomSpace& getAtomSpace() const;
 };
 
 #endif

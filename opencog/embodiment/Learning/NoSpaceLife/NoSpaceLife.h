@@ -116,7 +116,7 @@ private:
     builtin_action choose_random_step() const;
 
     definite_object choose_definite_object_that_fits(indefinite_object obj,
-                                                     int arg_index);
+            int arg_index);
 
 };
 

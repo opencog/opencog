@@ -29,14 +29,17 @@
 #include <time.h>
 #include "MessagingSystemExceptions.h"
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
-CantBindToPortException::CantBindToPortException(int port) {
+CantBindToPortException::CantBindToPortException(int port)
+{
     fprintf(stderr, "Can't bind to port %d\n", port);
     fflush(stdout);
 }
 
-BrokedPortBindingException::BrokedPortBindingException(int port) {
+BrokedPortBindingException::BrokedPortBindingException(int port)
+{
     fprintf(stderr, "Binding to port %d is broken\n", port);
     fflush(stdout);
 }

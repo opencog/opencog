@@ -1,7 +1,7 @@
 /**
  * BuiltInProcedureRepositoryUTest.cxxtest
  *
- * Author: Welter Luigi 
+ * Author: Welter Luigi
  * Copyright(c), 2007
  */
 #include "BuiltInProcedureRepository.h"
@@ -12,25 +12,26 @@
 using namespace Procedure;
 using namespace PerceptionActionInterface;
 
-class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite {
-    
-    public:
-        BuiltInProcedureRepositoryUTest(){
-        }
-        
-        ~BuiltInProcedureRepositoryUTest(){
-        }
-        
-        void setUp(){
-        }
+class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite
+{
 
-        void tearDown(){
-        }
+public:
+    BuiltInProcedureRepositoryUTest() {
+    }
+
+    ~BuiltInProcedureRepositoryUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
 
 
     void testContains() {
         AtomSpace as;
-    	
+
         Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
@@ -40,10 +41,10 @@ class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite {
         TS_ASSERT(rep.contains(string("BARK")));
         TS_ASSERT(!rep.contains("non-existing-builtin-schema"));
     }
-    
+
     void testGet() {
         AtomSpace as;
-    	
+
         Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
@@ -52,6 +53,6 @@ class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite {
         BuiltInProcedureRepository rep(pai);
         const BuiltInProcedure& proc = rep.get(string("BARK"));
         TS_ASSERT(proc.getName() == "BARK");
-    } 
-        
+    }
+
 };

@@ -55,180 +55,182 @@
 
 #define TEST_TICKET ULONG_MAX - 1
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
-    class PVPSimulator : public MessagingSystem::EmbodimentCogServer, AsynchronousPerceptionAndStatusHandler {
+class PVPSimulator : public MessagingSystem::EmbodimentCogServer, AsynchronousPerceptionAndStatusHandler
+{
 
-        private:
+private:
 
-            typedef std::map<unsigned long, std::string> ActionTicketToPlanIdMap;
-            typedef std::map<unsigned long, std::string> ActionTicketToPetIdMap;
-            typedef std::map<unsigned long, PerceptionActionInterface::PetAction> ActionTicketToActionMap;
-            typedef std::map<std::string, std::string> ObjTimestampMap;
-            typedef std::map<std::string, PerceptionActionInterface::Vector> ObjPositionMap;
-            
-            typedef std::list<PerceptionActionInterface::PetAction *> PetActionsList;
+    typedef std::map<unsigned long, std::string> ActionTicketToPlanIdMap;
+    typedef std::map<unsigned long, std::string> ActionTicketToPetIdMap;
+    typedef std::map<unsigned long, PerceptionActionInterface::PetAction> ActionTicketToActionMap;
+    typedef std::map<std::string, std::string> ObjTimestampMap;
+    typedef std::map<std::string, PerceptionActionInterface::Vector> ObjPositionMap;
 
-            typedef std::set<std::string> AvatarsIdSet;
-            typedef std::set<std::string> PetsIdSet;
-            typedef std::map<std::string, bool> PetsIdMap;
-            typedef std::map<std::string, std::string> OwnershipMap;
+    typedef std::list<PerceptionActionInterface::PetAction *> PetActionsList;
 
-            typedef std::map<std::string, PetActionsList> PetActionsListMap;
-            typedef std::map<std::string, std::string> CurrentPlanIdMap;
-            typedef std::map<std::string, PhysiologicalModel *> PetsPhysiologicalModelMap;
+    typedef std::set<std::string> AvatarsIdSet;
+    typedef std::set<std::string> PetsIdSet;
+    typedef std::map<std::string, bool> PetsIdMap;
+    typedef std::map<std::string, std::string> OwnershipMap;
 
-            static const int PET_SIGNAL_SENDING_INTERVAL;
-            static const char* DEFAULT_OWNER_ID;
+    typedef std::map<std::string, PetActionsList> PetActionsListMap;
+    typedef std::map<std::string, std::string> CurrentPlanIdMap;
+    typedef std::map<std::string, PhysiologicalModel *> PetsPhysiologicalModelMap;
 
-            AvatarsIdSet avatarsId;
-            PetsIdMap petsId;
-            PetsIdSet recoveryPetsId;
-            OwnershipMap ownership;
+    static const int PET_SIGNAL_SENDING_INTERVAL;
+    static const char* DEFAULT_OWNER_ID;
+
+    AvatarsIdSet avatarsId;
+    PetsIdMap petsId;
+    PetsIdSet recoveryPetsId;
+    OwnershipMap ownership;
 
 
-            // list of all actions to be executed
-            PetActionsListMap petActionsList;
-            
-            // the id of the plan currently being executed
-            CurrentPlanIdMap currentPlanId;
+    // list of all actions to be executed
+    PetActionsListMap petActionsList;
 
-            WorldSimulator *worldSimulator;
-            PetsPhysiologicalModelMap petsPhysiologicalModel;
+    // the id of the plan currently being executed
+    CurrentPlanIdMap currentPlanId;
 
-            bool firstMessageFlag;
+    WorldSimulator *worldSimulator;
+    PetsPhysiologicalModelMap petsPhysiologicalModel;
 
-            GoldStdGen* goldStdGen; 
-            
-            /**
-             * Process all actions within an action plan. One or more of these
-             * actions may need to be executed oin the server and then we need
-             * to wait its response to continue execution.
-             */
-            void processPetActions(const std::string& petId);
+    bool firstMessageFlag;
 
-            /**
-             * Cancel the action plan being executed. Most of the time this is
-             * due to the arrival of a new action plan.
-             */
-            void cancelActionPlan(const std::string& petId);
+    GoldStdGen* goldStdGen;
 
-            void parseActionPlan(XERCES_CPP_NAMESPACE::DOMElement *actionPlan);
-            void parseDOMDocument(XERCES_CPP_NAMESPACE::DOMDocument *document);
-            bool parseXML(const std::string& xmlText);
-            char *getNextToken(char *cursor, char *target);
-            void addActionParameters(PerceptionActionInterface::PetAction& action, std::string &xmlText, char * &cursor, PerceptionActionInterface::ActionType &actionType, std::vector<PerceptionActionInterface::ActionParamType> &typeList, bool required, unsigned int paramOffset);
-            std::string getCurrentTimestamp();
+    /**
+     * Process all actions within an action plan. One or more of these
+     * actions may need to be executed oin the server and then we need
+     * to wait its response to continue execution.
+     */
+    void processPetActions(const std::string& petId);
 
-            std::string PVP_ID;
+    /**
+     * Cancel the action plan being executed. Most of the time this is
+     * due to the arrival of a new action plan.
+     */
+    void cancelActionPlan(const std::string& petId);
 
-            SimulationParameters* simParams;
+    void parseActionPlan(XERCES_CPP_NAMESPACE::DOMElement *actionPlan);
+    void parseDOMDocument(XERCES_CPP_NAMESPACE::DOMDocument *document);
+    bool parseXML(const std::string& xmlText);
+    char *getNextToken(char *cursor, char *target);
+    void addActionParameters(PerceptionActionInterface::PetAction& action, std::string &xmlText, char * &cursor, PerceptionActionInterface::ActionType &actionType, std::vector<PerceptionActionInterface::ActionParamType> &typeList, bool required, unsigned int paramOffset);
+    std::string getCurrentTimestamp();
 
-            void initialize();
+    std::string PVP_ID;
 
-            int tickCount;
+    SimulationParameters* simParams;
 
-            ActionTicketToPlanIdMap ticketToPlanIdMap;
-            ActionTicketToActionMap ticketToActionMap;
-            ActionTicketToPetIdMap ticketToPetId;
+    void initialize();
 
-            pthread_mutex_t currentTimeLock; 
-            MessagingSystem::MemoryMessageCentral messagesToSend;
+    int tickCount;
 
-            ObjTimestampMap objTimestamp;
-            ObjPositionMap objPosition;
-            ObjPositionMap objPreviousPosition;
+    ActionTicketToPlanIdMap ticketToPlanIdMap;
+    ActionTicketToActionMap ticketToActionMap;
+    ActionTicketToPetIdMap ticketToPetId;
 
-        public:
+    pthread_mutex_t currentTimeLock;
+    MessagingSystem::MemoryMessageCentral messagesToSend;
 
-            static const char* DEFAULT_PET_ID;
+    ObjTimestampMap objTimestamp;
+    ObjPositionMap objPosition;
+    ObjPositionMap objPreviousPosition;
 
-            // ***********************************************/
-            // Constructors/destructors
+public:
 
-            static opencog::BaseServer* createInstance();
-            ~PVPSimulator();
-            PVPSimulator();
-            void init(SimulationParameters&);
-            void init(const Control::SystemParameters &params, SimulationParameters& simParams, const std::string &myId, const std::string &ip, int portNumber);
+    static const char* DEFAULT_PET_ID;
 
-            // ***********************************************/
-            // API
+    // ***********************************************/
+    // Constructors/destructors
 
-            /**
-             * Called when NE retrieve a Message from router to perform some useful proceesing on it. Subclasses
-             * are supposed to override this to perform something useful (default implementation just outputs
-             * Message contents to stdout).
-             */
-            virtual bool processNextMessage(MessagingSystem::Message *message);
+    static opencog::BaseServer* createInstance();
+    ~PVPSimulator();
+    PVPSimulator();
+    void init(SimulationParameters&);
+    void init(const Control::SystemParameters &params, SimulationParameters& simParams, const std::string &myId, const std::string &ip, int portNumber);
 
-            /**
-             * This method is overriden just for generating gold standards for automated tests
-             */
-            virtual bool sendMessage(MessagingSystem::Message &msg);
+    // ***********************************************/
+    // API
 
-            /**
-             * Called to indicate that one time tick of simulation time has passed.
-             */
-            void timeTick();
+    /**
+     * Called when NE retrieve a Message from router to perform some useful proceesing on it. Subclasses
+     * are supposed to override this to perform something useful (default implementation just outputs
+     * Message contents to stdout).
+     */
+    virtual bool processNextMessage(MessagingSystem::Message *message);
 
-            /**
-             * Called by MessageSenderTask to send the enqueued messages to PB.
-             */
-            void sendMessages();
+    /**
+     * This method is overriden just for generating gold standards for automated tests
+     */
+    virtual bool sendMessage(MessagingSystem::Message &msg);
 
-            bool sendAgentAction(char *txt, const char *avatarId, const char* agentType );
+    /**
+     * Called to indicate that one time tick of simulation time has passed.
+     */
+    void timeTick();
 
-            std::string createAvatar(const std::string& avatarId, float x, float y);
-            std::string createPet(const std::string& petId, const std::string& ownerId, float x, float y);
+    /**
+     * Called by MessageSenderTask to send the enqueued messages to PB.
+     */
+    void sendMessages();
 
-            void sendPredavese(const char *txt, std::string petId);
-            bool sendOwnerAction(char *txt);
-            void sendPetSignals();
-            void sendActionStatusPetSignal(const std::string& planId, const std::string& petId, const PerceptionActionInterface::PetAction& action, bool success);
+    bool sendAgentAction(char *txt, const char *avatarId, const char* agentType );
 
-            void sendActionStatusPetSignal(const std::string& planId, const std::string& petId, bool success);
+    std::string createAvatar(const std::string& avatarId, float x, float y);
+    std::string createPet(const std::string& petId, const std::string& ownerId, float x, float y);
 
-            void setWorldSimulator(WorldSimulator *worldSimulator);
-            void setPhysiologicalModel(PhysiologicalModel *physiologicalModel);
+    void sendPredavese(const char *txt, std::string petId);
+    bool sendOwnerAction(char *txt);
+    void sendPetSignals();
+    void sendActionStatusPetSignal(const std::string& planId, const std::string& petId, const PerceptionActionInterface::PetAction& action, bool success);
 
-            bool connectToSimWorld();
-            bool loadPet(const std::string& petId);
-            void resetPhysiologicalModel(string petId);
+    void sendActionStatusPetSignal(const std::string& planId, const std::string& petId, bool success);
 
-            // ***********************************************/
-            // Methods of the AsynchronousPerceptionAndStatusHandler interface:
+    void setWorldSimulator(WorldSimulator *worldSimulator);
+    void setPhysiologicalModel(PhysiologicalModel *physiologicalModel);
 
-            /**
-             * Receives an object metadata from WorldSimulator
-             */
-            void mapInfo(std::vector<ObjMapInfo>& objects);
+    bool connectToSimWorld();
+    bool loadPet(const std::string& petId);
+    void resetPhysiologicalModel(string petId);
 
-            /**
-             * Receives a notification of action status from WorldSimulator
-             */
-            void actionStatus(unsigned long actionTicket, bool success);
+    // ***********************************************/
+    // Methods of the AsynchronousPerceptionAndStatusHandler interface:
 
-            /**
-             * Receives a notification of an error from WorldSimulator
-             */
-            void errorNotification(const std::string& errorMsg);
+    /**
+     * Receives an object metadata from WorldSimulator
+     */
+    void mapInfo(std::vector<ObjMapInfo>& objects);
 
-            // ***********************************************/
-            // Tests/Debug 
-            //
-            // Althogh the following methods are public, they are not part of the API, thus
-            // THEY ARE NOT TO BE TRUSTED
+    /**
+     * Receives a notification of action status from WorldSimulator
+     */
+    void actionStatus(unsigned long actionTicket, bool success);
 
-            void publicParseXML(const std::string& xmlText);
-            
-            /**
-             * Routines to persiste and recovery states
-             */
-            void persistState() throw (opencog::IOException, std::bad_exception);
-            void recoveryFromPersistedData(const std::string& fileName);
+    /**
+     * Receives a notification of an error from WorldSimulator
+     */
+    void errorNotification(const std::string& errorMsg);
 
-    }; // class
+    // ***********************************************/
+    // Tests/Debug
+    //
+    // Althogh the following methods are public, they are not part of the API, thus
+    // THEY ARE NOT TO BE TRUSTED
+
+    void publicParseXML(const std::string& xmlText);
+
+    /**
+     * Routines to persiste and recovery states
+     */
+    void persistState() throw (opencog::IOException, std::bad_exception);
+    void recoveryFromPersistedData(const std::string& fileName);
+
+}; // class
 }  // namespace
 
 #endif

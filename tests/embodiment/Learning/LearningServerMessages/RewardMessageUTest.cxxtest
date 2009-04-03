@@ -16,38 +16,39 @@ static const double reward = -1.0;
 static const std::string candidate = "do fetch";
 static std::vector<std::string> trickArguments;
 
-class RewardMessageUTest : public CxxTest::TestSuite {
+class RewardMessageUTest : public CxxTest::TestSuite
+{
 
-    private:
-		RewardMessage * rm;
-		
-    public:
+private:
+    RewardMessage * rm;
 
-	RewardMessageUTest() {
-		rm = new RewardMessage(from, to, trick, trickArguments, candidate, reward);
-	}
-	
-	~RewardMessageUTest(){
-		delete(rm);
-	}
+public:
+
+    RewardMessageUTest() {
+        rm = new RewardMessage(from, to, trick, trickArguments, candidate, reward);
+    }
+
+    ~RewardMessageUTest() {
+        delete(rm);
+    }
 
     void testLoadPlainTextRepresentation() {
-		RewardMessage rm2(from, to);
-		
-		rm2.loadPlainTextRepresentation(rm->getPlainTextRepresentation());
-		TS_ASSERT(rm2.getSchema() == trick);
-		TS_ASSERT_DELTA(rm2.getReward(), reward, 0.0001);		
-		TS_ASSERT(rm2.getCandidateSchema() == candidate);
+        RewardMessage rm2(from, to);
+
+        rm2.loadPlainTextRepresentation(rm->getPlainTextRepresentation());
+        TS_ASSERT(rm2.getSchema() == trick);
+        TS_ASSERT_DELTA(rm2.getReward(), reward, 0.0001);
+        TS_ASSERT(rm2.getCandidateSchema() == candidate);
     }
-    
-    void testGettersSetters(){
-    	rm->setSchema("rollOver");
-    	rm->setCandidateSchema("do roll over");
-    	rm->setReward(1.0);
-    	
-		TS_ASSERT(rm->getSchema() == "rollOver");
-		TS_ASSERT_DELTA(rm->getReward(), 1.0, 0.0001);		
-		TS_ASSERT(rm->getCandidateSchema() == "do roll over");
+
+    void testGettersSetters() {
+        rm->setSchema("rollOver");
+        rm->setCandidateSchema("do roll over");
+        rm->setReward(1.0);
+
+        TS_ASSERT(rm->getSchema() == "rollOver");
+        TS_ASSERT_DELTA(rm->getReward(), 1.0, 0.0001);
+        TS_ASSERT(rm->getCandidateSchema() == "do roll over");
     }
 
     void setUp() {

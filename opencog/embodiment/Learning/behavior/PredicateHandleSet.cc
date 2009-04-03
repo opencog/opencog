@@ -26,32 +26,38 @@
 
 using namespace behavior;
 
-PredicateHandleSet::~PredicateHandleSet() {
+PredicateHandleSet::~PredicateHandleSet()
+{
 }
 
-PredicateHandleSet::PredicateHandleSet() {
+PredicateHandleSet::PredicateHandleSet()
+{
 }
 
-void PredicateHandleSet::insert(const Handle &handle) {
+void PredicateHandleSet::insert(const Handle &handle)
+{
     handles.insert(handle);
 }
 
-void PredicateHandleSet::clear() {
+void PredicateHandleSet::clear()
+{
     handles.clear();
 }
 
-const std::set<Handle> &PredicateHandleSet::getSet() const {
+const std::set<Handle> &PredicateHandleSet::getSet() const
+{
     return handles;
 }
 
-bool PredicateHandleSet::equals(const PredicateHandleSet &other) const {
+bool PredicateHandleSet::equals(const PredicateHandleSet &other) const
+{
 
     if (other.getSize() != this->getSize()) {
         return false;
     }
 
     std::set<Handle>::iterator it1, it2;
-    for(it1 = handles.begin(), it2 = other.handles.begin(); it1 != handles.end(); it1++, it2++ ) {
+    for (it1 = handles.begin(), it2 = other.handles.begin(); it1 != handles.end(); it1++, it2++ ) {
         if (! (TLB::getAtom((*it1)) == TLB::getAtom(*it2))) {
             return false;
         }
@@ -60,7 +66,8 @@ bool PredicateHandleSet::equals(const PredicateHandleSet &other) const {
     return true;
 }
 
-std::string PredicateHandleSet::toString() const {
+std::string PredicateHandleSet::toString() const
+{
 
     std::string answer = "{";
     std::set<Handle>::iterator it = handles.begin();
@@ -70,14 +77,13 @@ std::string PredicateHandleSet::toString() const {
         //printing the atom name instead of its string representation
         //is kept for compatibility reason
         std::string str;
-        if(dynamic_cast<Node*>(TLB::getAtom(*it))) {
-	  const std::string an = ((Node *) TLB::getAtom(*it))->getName();
-	  str = an;
-	}
-	else {
-	  str = TLB::getAtom((*it))->toString();
-	}
-	answer.append(str);
+        if (dynamic_cast<Node*>(TLB::getAtom(*it))) {
+            const std::string an = ((Node *) TLB::getAtom(*it))->getName();
+            str = an;
+        } else {
+            str = TLB::getAtom((*it))->toString();
+        }
+        answer.append(str);
         it++;
         if (it != handles.end()) {
             answer.append(",");
@@ -88,7 +94,8 @@ std::string PredicateHandleSet::toString() const {
     return answer;
 }
 
-bool PredicateHandleSet::operator==(const PredicateHandleSet& other) const {
+bool PredicateHandleSet::operator==(const PredicateHandleSet& other) const
+{
 
     //printf("operator %s == %s\n", toString().c_str(), other.toString().c_str());
 
@@ -105,7 +112,8 @@ bool PredicateHandleSet::operator==(const PredicateHandleSet& other) const {
     return answer;
 }
 
-PredicateHandleSet &PredicateHandleSet::operator=(const PredicateHandleSet& other) {
+PredicateHandleSet &PredicateHandleSet::operator=(const PredicateHandleSet & other)
+{
 
     //printf("operator %s = %s\n", toString().c_str(), other.toString().c_str());
 
@@ -117,7 +125,8 @@ PredicateHandleSet &PredicateHandleSet::operator=(const PredicateHandleSet& othe
     return *this;
 }
 
-bool PredicateHandleSet::operator<(const PredicateHandleSet& other) const {
+bool PredicateHandleSet::operator<(const PredicateHandleSet& other) const
+{
 
     //printf("operator %s < %s\n", toString().c_str(), other.toString().c_str());
 
@@ -134,7 +143,7 @@ bool PredicateHandleSet::operator<(const PredicateHandleSet& other) const {
     }
 
     std::set<Handle>::iterator it1, it2;
-    for(it1 = handles.begin(), it2 = other.handles.begin(); ((it1 != handles.end()) && (it2 != other.handles.end())); ) {
+    for (it1 = handles.begin(), it2 = other.handles.begin(); ((it1 != handles.end()) && (it2 != other.handles.end())); ) {
         if ((*it1) < (*it2)) {
             //printf("true 1\n");
             return true;
@@ -167,20 +176,23 @@ bool PredicateHandleSet::operator<(const PredicateHandleSet& other) const {
     return false;
 }
 
-int PredicateHandleSet::getSize() const {
+int PredicateHandleSet::getSize() const
+{
     return handles.size();
 }
 
-bool PredicateHandleSet::empty() const {
-  return handles.empty();
+bool PredicateHandleSet::empty() const
+{
+    return handles.empty();
 }
 
-int PredicateHandleSet::hashCode() {
+int PredicateHandleSet::hashCode()
+{
 
     int hashCode = 0;
 
     std::set<Handle>::iterator it;
-    for(it = handles.begin(); it != handles.end(); it++ ) {
+    for (it = handles.begin(); it != handles.end(); it++ ) {
         hashCode += (int) (it->value());
     }
 

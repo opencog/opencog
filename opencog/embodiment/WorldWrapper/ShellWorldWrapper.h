@@ -24,36 +24,38 @@
 
 #include "WorldWrapper.h"
 
-namespace WorldWrapper {
+namespace WorldWrapper
+{
 
-  /**
-   * interactive shell world wrapper
-   */
+/**
+ * interactive shell world wrapper
+ */
 
-  class ShellWorldWrapper : public WorldWrapperBase {
-    
-  public:
+class ShellWorldWrapper : public WorldWrapperBase
+{
+
+public:
 
     /**
      * Constructor, destructor
      */
     ShellWorldWrapper();
     ~ShellWorldWrapper();
-    
+
 
     /**
      * return true is the current action plan is finished
      * false otherwise or if there is no action plan
      */
     bool isPlanFinished() const;
- 
+
     /**
      * return true if the plan has failed
      * false otherwise
      * pre-condition : the plan is finished
      */
     bool isPlanFailed() const;
-    
+
     /**
      * Send a sequence of sequential_and actions [from, to)
      * stdio the user to decide whether the plan has failed or not
@@ -64,19 +66,19 @@ namespace WorldWrapper {
     /**
      * evaluate a perception
      */
-    combo::vertex evalPerception(pre_it per, 
-    							 combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
-    
+    combo::vertex evalPerception(pre_it per,
+                                 combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+
     /**
      * evaluate an indefinite object
      */
-    combo::vertex evalIndefiniteObject(combo::indefinite_object io, 
-    								   combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+    combo::vertex evalIndefiniteObject(combo::indefinite_object io,
+                                       combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
-  private:
+private:
     bool _isFailed;
     bool _isFinished;
-  };
+};
 
 }//~namespace WorldWrapper
 

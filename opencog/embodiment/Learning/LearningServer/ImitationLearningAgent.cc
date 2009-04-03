@@ -95,12 +95,12 @@ void ImitationLearningAgent::run(CogServer* server)
 
 //command methods
 bool ImitationLearningAgent::initLearning(int nepc,
-                                         WorldProvider* wp,
-                                         const argument_list& al,
-                                         const string& pet_id,
-                                         const string& owner_id,
-                                         const string& avatar_id,
-                                         const string& trick_name)
+        WorldProvider* wp,
+        const argument_list& al,
+        const string& pet_id,
+        const string& owner_id,
+        const string& avatar_id,
+        const string& trick_name)
 {
     opencog::cassert(TRACE_INFO, wp, "The World Provider points to NULL");
     //retreive exemplars
@@ -348,7 +348,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
 }
 
 void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
-                                               const argument_list& al)
+        const argument_list& al)
 {
     opencog::cassert(TRACE_INFO, wp, "The World Provider points to NULL");
     //add new exemplar

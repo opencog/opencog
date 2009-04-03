@@ -11,11 +11,12 @@
 
 using namespace OperationalPetController;
 
-class GoalsmanipulatorUTest : public CxxTest::TestSuite {
+class GoalsmanipulatorUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     GoalsmanipulatorUTest() {
 

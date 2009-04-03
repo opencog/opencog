@@ -26,7 +26,7 @@
 #define SIMCOMMON_H
 
 #ifdef WIN32
-	#define HAVE_SNPRINTF 
+#define HAVE_SNPRINTF
 #endif
 
 #include <math.h>
@@ -50,52 +50,52 @@ using namespace boost;
 /// "Variable" Singletons are sometimes created with this structure
 //------------------------------------------------------------------------------------------------------------
 #define SINGLETON(TYPE, VAR) TYPE& VAR() { \
-    static TYPE* s = new TYPE(); \
-    return *s; \
-}
+        static TYPE* s = new TYPE(); \
+        return *s; \
+    }
 
 //------------------------------------------------------------------------------------------------------------
-/**	Some helper macros to define a 'bridge' design pattern.
-	They're ugly, but the resulting bridges are pretty. */
+/** Some helper macros to define a 'bridge' design pattern.
+ They're ugly, but the resulting bridges are pretty. */
 /// Put this inside the bridge header definition:
 //------------------------------------------------------------------------------------------------------------
-#define DEFINE_BRIDGE(__iclass) 	 \
-	protected: 						 \
-	static __iclass* implementation; \
-	public: 						 \
-	static __iclass& Get(); 		 \
-	static __iclass& ResetBridge();  \
-	protected:
+#define DEFINE_BRIDGE(__iclass)   \
+    protected:        \
+    static __iclass* implementation; \
+    public:        \
+    static __iclass& Get();    \
+    static __iclass& ResetBridge();  \
+    protected:
 
-//------------------------------------------------------------------------------------------------------------	
-/// These 3 definitions in cpp file, in this order:	
 //------------------------------------------------------------------------------------------------------------
-#define IMPLEMENT_BRIDGE(__iclass, __par) 		\
-	__iclass* __iclass::implementation = NULL;	\
-	__iclass& __iclass::ResetBridge() 			\
-	{ 											\
-		if (implementation) { 					\
-			delete implementation; 				\
-			implementation = NULL; 				\
-		} 										\
-		return Get(); 							\
-	} 											\
-	__iclass& __iclass::Get() 					\
-	{ 											\
-		if (!implementation) 					\
-		{ 
+/// These 3 definitions in cpp file, in this order:
+//------------------------------------------------------------------------------------------------------------
+#define IMPLEMENT_BRIDGE(__iclass, __par)   \
+    __iclass* __iclass::implementation = NULL; \
+    __iclass& __iclass::ResetBridge()    \
+    {            \
+        if (implementation) {      \
+            delete implementation;     \
+            implementation = NULL;     \
+        }           \
+        return Get();        \
+    }            \
+    __iclass& __iclass::Get()      \
+    {            \
+        if (!implementation)      \
+        {
 
 //------------------------------------------------------------------------------------------------------------
 /** BRIDGE_PROVIDER for each implementation (__imp)
  which is selected if __condition is true.
  You can pass constructor parameters in __par or leave it empty.*/
-//------------------------------------------------------------------------------------------------------------			
-#define BRIDGE_PROVIDER(__imp, __condition, __par) 	\
-	if (__condition) 								\
-		implementation = new __imp(__par);
+//------------------------------------------------------------------------------------------------------------
+#define BRIDGE_PROVIDER(__imp, __condition, __par)  \
+    if (__condition)         \
+        implementation = new __imp(__par);
 
-#define END_BRIDGE } 		\
-	return *implementation; \
-	}
+#define END_BRIDGE }   \
+    return *implementation; \
+           }
 
 #endif

@@ -23,22 +23,23 @@
 #include "util/files.h"
 #include <SystemParameters.h>
 
-int main(int argc,char** argv) {
-  using namespace MessagingSystem;
+int main(int argc, char** argv)
+{
+    using namespace MessagingSystem;
 
-  // set up the system for talking to the router
-  Control::SystemParameters parameters;
-  // if exists load file with configuration parameters 
-  // IMPORTANT: this file should be the same for all executables that create
-  // a systemParameter object. 
+    // set up the system for talking to the router
+    Control::SystemParameters parameters;
+    // if exists load file with configuration parameters
+    // IMPORTANT: this file should be the same for all executables that create
+    // a systemParameter object.
 
-  if(fileExists(parameters.get("CONFIG_FILE").c_str())){
-    parameters.loadFromFile(parameters.get("CONFIG_FILE"));
-  }
+    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
+        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    }
 
-  opencog::server(ComboShellServer::createInstance);
-  ComboShellServer& css=static_cast<ComboShellServer&>(opencog::server());
-  css.init(parameters);
-  css.serverLoop();
-  return 0;
+    opencog::server(ComboShellServer::createInstance);
+    ComboShellServer& css = static_cast<ComboShellServer&>(opencog::server());
+    css.init(parameters);
+    css.serverLoop();
+    return 0;
 }

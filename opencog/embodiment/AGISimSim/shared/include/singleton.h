@@ -27,35 +27,35 @@
 
 //------------------------------------------------------------------------------------------------------------
 /** @class Singleton
-	\brief The superclass for all singleton classes.
-	Provides the \i singleton design pattern. */
+ \brief The superclass for all singleton classes.
+ Provides the \i singleton design pattern. */
 //------------------------------------------------------------------------------------------------------------
 template <typename T>
 class Singleton
 {
 private:
-	Singleton (const Singleton&) {};
-	Singleton& operator = (const Singleton&) {};
+    Singleton (const Singleton&) {};
+    Singleton& operator = (const Singleton&) {};
 protected:
-	static T* instance;
-	Singleton () { };
-	~Singleton() { }
+    static T* instance;
+    Singleton () { };
+    ~Singleton() { }
 public:
-	static void ResetSingleton() {
-		if (instance) {
-			delete instance;
-			instance = NULL;
-		}
-	}
-	static T& Instance() {
-		if (!instance) {
-			return *(instance = new T());
-		}
-		return *instance;
-	}
-	static bool Exists() {
-		return (instance != NULL);
-	}
+    static void ResetSingleton() {
+        if (instance) {
+            delete instance;
+            instance = NULL;
+        }
+    }
+    static T& Instance() {
+        if (!instance) {
+            return *(instance = new T());
+        }
+        return *instance;
+    }
+    static bool Exists() {
+        return (instance != NULL);
+    }
 };
 
 template <typename T>

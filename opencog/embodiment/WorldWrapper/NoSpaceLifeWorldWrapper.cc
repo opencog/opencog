@@ -35,16 +35,16 @@ using namespace PetCombo;
  * ctor, dtor
  */
 NoSpaceLifeWorldWrapper::NoSpaceLifeWorldWrapper(AtomSpace& atomSpace,
-                                                 const string& petName,
-                                                 const string& ownerName,
-                                                 const string& avatarName,
-                                                 const CompositeBehaviorDescription& cbd,
-                                                 const Temporal& et,
-                                                 opencog::RandGen& _rng)
-    : _isFailed(false), _isFinished(true),
-      _noSpaceLife(atomSpace, petName, ownerName, avatarName, cbd, et, _rng),
-      _atomSpace(atomSpace), _petName(petName), _ownerName(ownerName),
-      _avatarName(avatarName), rng(_rng) {}
+        const string& petName,
+        const string& ownerName,
+        const string& avatarName,
+        const CompositeBehaviorDescription& cbd,
+        const Temporal& et,
+        opencog::RandGen& _rng)
+        : _isFailed(false), _isFinished(true),
+        _noSpaceLife(atomSpace, petName, ownerName, avatarName, cbd, et, _rng),
+        _atomSpace(atomSpace), _petName(petName), _ownerName(ownerName),
+        _avatarName(avatarName), rng(_rng) {}
 
 NoSpaceLifeWorldWrapper::~NoSpaceLifeWorldWrapper() {}
 
@@ -73,12 +73,12 @@ bool NoSpaceLifeWorldWrapper::sendSequential_and(sib_it from, sib_it to)
         opencog::cassert(TRACE_INFO, is_builtin_action(*sib));
         for (sib_it arg = sib.begin(); arg != sib.end(); ++arg) {
             opencog::cassert(TRACE_INFO,
-                              is_definite_object(*arg)
-                              || is_indefinite_object(*arg)
-                              || is_contin(*arg),
-                              "In the current implementation builtin_action"
-                              " arguments must be definite_object,"
-                              " indefinite_object or contin");
+                             is_definite_object(*arg)
+                             || is_indefinite_object(*arg)
+                             || is_contin(*arg),
+                             "In the current implementation builtin_action"
+                             " arguments must be definite_object,"
+                             " indefinite_object or contin");
             if (is_indefinite_object(*arg)) {
                 indefinite_object io = get_indefinite_object(*arg);
                 //check that it's not a random indefinite object and evaluate it
@@ -86,15 +86,15 @@ bool NoSpaceLifeWorldWrapper::sendSequential_and(sib_it from, sib_it to)
                     opencog::cassert(TRACE_INFO, arg.is_childless());
                     Handle h = _noSpaceLife.getCurrentMapHandle();
                     opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
-                                      "A SpaceMap must exists");
+                                     "A SpaceMap must exists");
                     //eval indefinite object, put _avatarName as selfName to get
                     //avatar_to_imitate's view point
                     *arg = WorldWrapperUtil::evalIndefiniteObject(rng, h,
-                                                                  simulated_time,
-                                                                  _atomSpace,
-                                                                  _avatarName,
-                                                                  _ownerName,
-                                                                  io);
+                            simulated_time,
+                            _atomSpace,
+                            _avatarName,
+                            _ownerName,
+                            io);
                 }
             }
         }

@@ -28,46 +28,48 @@
 #include <Sockets/TcpSocket.h>
 #include <Sockets/ISocketHandler.h>
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
-class ServerSocket : public TcpSocket {
+class ServerSocket : public TcpSocket
+{
 
-    private:
+private:
 
-        // Used to call-back when Message arrives
-        static NetworkElement *master;
+    // Used to call-back when Message arrives
+    static NetworkElement *master;
 
-        // States used in in the state machine inside onLine()
-        static const int DOING_NOTHING = 0;
-        static const int READING_MESSAGES = 1;
-        int currentState;
+    // States used in in the state machine inside onLine()
+    static const int DOING_NOTHING = 0;
+    static const int READING_MESSAGES = 1;
+    int currentState;
 
-        std::string currentMessage;
-        std::string currentMessageFrom;
-        std::string currentMessageTo;
-        int currentMessageType;
-        int lineCount;
+    std::string currentMessage;
+    std::string currentMessageFrom;
+    std::string currentMessageTo;
+    int currentMessageType;
+    int lineCount;
 
-    public:
+public:
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        ~ServerSocket();
-        ServerSocket(ISocketHandler &handler);
+    ~ServerSocket();
+    ServerSocket(ISocketHandler &handler);
 
-        // ***********************************************/
-        // General
+    // ***********************************************/
+    // General
 
-        /**
-         * Sets the class that will be notified by call-back regarding communication events.
-         */
-        static void setMaster(NetworkElement *ne);
-          
-        // ***********************************************/
-        // Overriden from TcpSocket
-          
-        void OnLine(const std::string&);
+    /**
+     * Sets the class that will be notified by call-back regarding communication events.
+     */
+    static void setMaster(NetworkElement *ne);
+
+    // ***********************************************/
+    // Overriden from TcpSocket
+
+    void OnLine(const std::string&);
 
 }; // class
 }  // namespace

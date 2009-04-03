@@ -12,14 +12,15 @@
 using namespace PerceptionActionInterface;
 using namespace OperationalPetController;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc < 2) {
         printf("Wrong number of arguments\nUsage: %s <pvp_msg_xml_file1> [<pvp_msg_xml_file2>... [<pvp_msg_xml_fileN>]]\n", argv[0]);
         exit(-1);
     }
     Control::SystemParameters parameters;
-    if(fileExists(parameters.get("CONFIG_FILE").c_str())){
-  	    parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
+        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
     }
 
     AtomSpace atomSpace;

@@ -31,51 +31,53 @@
 #include <map>
 #include <boost/noncopyable.hpp>
 
-namespace Procedure {
-    
+namespace Procedure
+{
+
 typedef std::map<std::string, ComboSelectProcedure> Name2ProcedureMap;
 typedef std::map<std::string, ComboSelectProcedure>::const_iterator Name2ProcedureMapIterator;
 
 //noncopyable because combo_trees may point at procedures in the repository
-class ComboSelectProcedureRepository : public SavableRepository , public boost::noncopyable {
+class ComboSelectProcedureRepository : public SavableRepository , public boost::noncopyable
+{
 
-    public:
+public:
 
-        // creates a ComboSelectProcedureRepository. The comboRepository used as
-        // argument MUST be the same global comboRepository. It is used mostly
-        // to save and load first and second scripts
-        ComboSelectProcedureRepository(ComboProcedureRepository& );
+    // creates a ComboSelectProcedureRepository. The comboRepository used as
+    // argument MUST be the same global comboRepository. It is used mostly
+    // to save and load first and second scripts
+    ComboSelectProcedureRepository(ComboProcedureRepository& );
 
-        // inform if the repository contains a ComboSelectProcedure with the
-        // given name
-        bool contains(const std::string& name) const;
-    
-        // get the ComboSelectProcedure 
-        const ComboSelectProcedure& get(const std::string& name) ;
+    // inform if the repository contains a ComboSelectProcedure with the
+    // given name
+    bool contains(const std::string& name) const;
 
-        // add a ComboSelectProcedure to repository. 
-        void add(const ComboSelectProcedure& procedure);
+    // get the ComboSelectProcedure
+    const ComboSelectProcedure& get(const std::string& name) ;
 
-        // remove a ComboSelectProcedure from repository. The first and second
-        // ComboProcedures stored within the ComboRepository are not removed
-        // since they can be reused.
-        void remove(const std::string& name);
+    // add a ComboSelectProcedure to repository.
+    void add(const ComboSelectProcedure& procedure);
 
-        // return a reference to the ComboRepository
-        ComboProcedureRepository& getComboRepository();
+    // remove a ComboSelectProcedure from repository. The first and second
+    // ComboProcedures stored within the ComboRepository are not removed
+    // since they can be reused.
+    void remove(const std::string& name);
 
-        unsigned int loadFromStream(std::istream& in);
+    // return a reference to the ComboRepository
+    ComboProcedureRepository& getComboRepository();
 
-        // Methods from SavableRepository interface
-        const char* getId() const;
-        void saveRepository(FILE*) const;
-        void loadRepository(FILE*, HandleMap<Atom *>*);
-        void clear();
+    unsigned int loadFromStream(std::istream& in);
 
-    private:
+    // Methods from SavableRepository interface
+    const char* getId() const;
+    void saveRepository(FILE*) const;
+    void loadRepository(FILE*, HandleMap<Atom *>*);
+    void clear();
 
-        Name2ProcedureMap procedureMap;
-        ComboProcedureRepository& comboRepository;
+private:
+
+    Name2ProcedureMap procedureMap;
+    ComboProcedureRepository& comboRepository;
 
 }; // class
 }  // namespace

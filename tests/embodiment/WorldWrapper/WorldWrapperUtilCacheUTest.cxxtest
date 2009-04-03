@@ -1,7 +1,7 @@
 /*******************************************************\
-	Filename:	WorldWrapperUtilCacheUTest.cxxtest
-	Author:		Carlos Eduardo Lopes
-	Desc:		Unit test for WorldWrapperUtilCache
+ Filename: WorldWrapperUtilCacheUTest.cxxtest
+ Author:  Carlos Eduardo Lopes
+ Desc:  Unit test for WorldWrapperUtilCache
 \*******************************************************/
 
 #include <WorldWrapperUtilCache.h>
@@ -20,7 +20,8 @@ static std::string arg5 = "id_Home";
 
 using namespace WorldWrapper;
 
-class WorldWrapperUtilCacheUTest :  public CxxTest::TestSuite {
+class WorldWrapperUtilCacheUTest :  public CxxTest::TestSuite
+{
 private:
 
     WorldWrapperUtilCache cache;
@@ -32,10 +33,10 @@ private:
     predicate p5;
 
 public:
- 	WorldWrapperUtilCacheUTest(){
-	}
+    WorldWrapperUtilCacheUTest() {
+    }
 
-    void setUp(){
+    void setUp() {
         std::vector<std::string> argList;
 
         argList.push_back(arg1);
@@ -67,23 +68,23 @@ public:
         p5.arguments = argList;
     }
 
-    void testConstructor(){
+    void testConstructor() {
         TS_ASSERT(cache.size() == 0);
         TS_ASSERT(cache.getTimestamp() == 0);
     }
 
-    void testAdd(){
+    void testAdd() {
         cache.add(1, p1, 1.0f);
         cache.add(1, p2, 1.0f);
         cache.add(1, p3, 0.5f);
         cache.add(1, p4, 0.1f);
         cache.add(1, p5, 0.0f);
-        
+
         TS_ASSERT(cache.size() == 5);
         TS_ASSERT(cache.getTimestamp() == 1);
     }
 
-    void testFindNoMiss(){
+    void testFindNoMiss() {
         float result;
 
         result = cache.find(1, p1);
@@ -91,21 +92,21 @@ public:
 
         result = cache.find(1, p2);
         TS_ASSERT_DELTA(result, 1.0f, 0.001f);
-        
+
         result = cache.find(1, p3);
         TS_ASSERT_DELTA(result, 0.5f, 0.001f);
-        
+
         result = cache.find(1, p4);
         TS_ASSERT_DELTA(result, 0.1f, 0.001f);
-        
+
         result = cache.find(1, p5);
         TS_ASSERT_DELTA(result, 0.0f, 0.001f);
-    
+
         TS_ASSERT(cache.size() == 5);
         TS_ASSERT(cache.getTimestamp() == 1);
     }
 
-    void testFindWithMiss(){
+    void testFindWithMiss() {
 
         predicate p6;
         std::vector<std::string> argList;
@@ -126,23 +127,23 @@ public:
         TS_ASSERT(cache.size() == 0);
         TS_ASSERT(cache.getTimestamp() == 2);
 
-        // the following timestamp remains 2 since the find will return a 
+        // the following timestamp remains 2 since the find will return a
         // cache miss because of empty cache
         result = cache.find(3, p2);
         TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
         TS_ASSERT(cache.size() == 0);
         TS_ASSERT(cache.getTimestamp() == 2);
-       
+
         result = cache.find(4, p3);
         TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
         TS_ASSERT(cache.size() == 0);
         TS_ASSERT(cache.getTimestamp() == 2);
-        
+
         result = cache.find(5, p4);
         TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
         TS_ASSERT(cache.size() == 0);
         TS_ASSERT(cache.getTimestamp() == 2);
-       
+
         result = cache.find(6, p5);
         TS_ASSERT_DELTA(result, CACHE_MISS, 0.001f);
         TS_ASSERT(cache.size() == 0);

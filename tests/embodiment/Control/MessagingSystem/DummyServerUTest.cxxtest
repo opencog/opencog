@@ -11,11 +11,12 @@
 
 using namespace MessagingSystem;
 
-class DummyServerUTest : public CxxTest::TestSuite {
+class DummyServerUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     DummyServerUTest() {
 

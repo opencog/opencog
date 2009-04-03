@@ -1,7 +1,7 @@
 /**
  * nearestComboInterpreterUTest.cxxtest
  *
- * Author: Elvys Borges 
+ * Author: Elvys Borges
  * Copyright(c), 2007
  */
 
@@ -13,84 +13,85 @@ using namespace PerceptionActionInterface;
 using namespace PetCombo;
 using namespace std;
 
-class nearestComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpreterUTest {
+class nearestComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpreterUTest
+{
 
-  private:
-  opencog::RandGen* rng;
- 
-  public :
- 
-  nearestComboInterpreterUTest() {
-     rng = new opencog::MT19937RandGen(0);
-  }
- 
-  ~nearestComboInterpreterUTest() {
-     delete rng;
-  }
+private:
+    opencog::RandGen* rng;
 
-  opencog::RandGen& getRandGen() {
-     return *rng;
-  }
+public :
 
-  void testNearestObject() {
-    std::string str("nearest_object");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
-  }
+    nearestComboInterpreterUTest() {
+        rng = new opencog::MT19937RandGen(0);
+    }
 
-  void testNearestEdible() {
-    std::string str("nearest_edible");
-    runProcedureInCombo(str, PAIUtils::getInternalId("meat"));
-  }
+    ~nearestComboInterpreterUTest() {
+        delete rng;
+    }
 
-  void testNearestMovable() {
-    std::string str("nearest_movable");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
-  }
+    opencog::RandGen& getRandGen() {
+        return *rng;
+    }
 
-  void testNearestPickupable() {
-    std::string str("nearest_pickupable");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
-  }
+    void testNearestObject() {
+        std::string str("nearest_object");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
+    }
 
-  void testNearestDrinkable() {
-    std::string str("nearest_drinkable");
-    runProcedureInCombo(str, PAIUtils::getInternalId("milk"));
-  }
+    void testNearestEdible() {
+        std::string str("nearest_edible");
+        runProcedureInCombo(str, PAIUtils::getInternalId("meat"));
+    }
 
-  void testNearestAvatar() {
-    std::string str("nearest_avatar");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Wynx"));
-  }
+    void testNearestMovable() {
+        std::string str("nearest_movable");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
+    }
 
-  void testNearestPet() {
-    std::string str("nearest_pet");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Macku"));
-  }
+    void testNearestPickupable() {
+        std::string str("nearest_pickupable");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
+    }
 
-  void testNearestSmall() {
-    std::string str("nearest_small");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
-  }
+    void testNearestDrinkable() {
+        std::string str("nearest_drinkable");
+        runProcedureInCombo(str, PAIUtils::getInternalId("milk"));
+    }
 
-  void testNearestMoving() {
-    std::string str("nearest_moving");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
-  }
-	
-  void testNearestPooPlace() {
-    std::string str("nearest_poo_place");
-    runProcedureInCombo(str, PAIUtils::getInternalId("wall"));
-  }
+    void testNearestAvatar() {
+        std::string str("nearest_avatar");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Wynx"));
+    }
 
-  void testNearestPeePlace() {
-    std::string str("nearest_pee_place");
-    runProcedureInCombo(str, PAIUtils::getInternalId("wall"));
-  }
+    void testNearestPet() {
+        std::string str("nearest_pet");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Macku"));
+    }
 
-  void testNearestNoise() {
-    std::string str("nearest_noisy");
-    runProcedureInCombo(str, PAIUtils::getInternalId("Macku"));
-  }
+    void testNearestSmall() {
+        std::string str("nearest_small");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
+    }
+
+    void testNearestMoving() {
+        std::string str("nearest_moving");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
+    }
+
+    void testNearestPooPlace() {
+        std::string str("nearest_poo_place");
+        runProcedureInCombo(str, PAIUtils::getInternalId("wall"));
+    }
+
+    void testNearestPeePlace() {
+        std::string str("nearest_pee_place");
+        runProcedureInCombo(str, PAIUtils::getInternalId("wall"));
+    }
+
+    void testNearestNoise() {
+        std::string str("nearest_noisy");
+        runProcedureInCombo(str, PAIUtils::getInternalId("Macku"));
+    }
 
 };
 

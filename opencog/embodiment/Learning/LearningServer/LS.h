@@ -43,7 +43,7 @@ namespace LearningServer
 
 using namespace MessagingSystem;
 
-class LS : public EmbodimentCogServer 
+class LS : public EmbodimentCogServer
 {
 
 public:

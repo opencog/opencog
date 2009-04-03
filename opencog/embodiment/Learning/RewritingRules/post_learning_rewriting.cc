@@ -25,13 +25,15 @@
 #include "post_learning_rewriting.h"
 #include "post_learning_rules.h"
 
-namespace reduct {
+namespace reduct
+{
 
-  const rule& post_learning_rewriting() {
-    static sequential r = 
+const rule& post_learning_rewriting()
+{
+    static sequential r =
         sequential(downwards(post_learning_drop_before_grab()),
                    downwards(post_learning_empty_and_seq()));
-    
+
     return r;
-  }
+}
 }

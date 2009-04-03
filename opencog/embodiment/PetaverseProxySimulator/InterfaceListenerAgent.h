@@ -25,29 +25,33 @@
 
 #include <opencog/server/Agent.h>
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
 using namespace opencog;
 
-class InterfaceListenerAgent : public Agent {
+class InterfaceListenerAgent : public Agent
+{
 
-    private:
+private:
 
-    public:
+public:
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("PetaverseProxySimulator::MessageSenderAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("PetaverseProxySimulator::MessageSenderAgent");
+        return _ci;
+    }
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        ~InterfaceListenerAgent();
-        InterfaceListenerAgent();
+    ~InterfaceListenerAgent();
+    InterfaceListenerAgent();
 
-        void run(CogServer *ne);
+    void run(CogServer *ne);
 
 }; // class
 }  // namespace

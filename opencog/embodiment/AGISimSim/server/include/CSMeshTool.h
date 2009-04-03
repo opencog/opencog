@@ -30,49 +30,49 @@
 #include <iutil/document.h>
 
 /** @class CSMeshTool
-	The class implements loading of 
+ The class implements loading of
 */
 
 class CSMeshTool : public Singleton<CSMeshTool>
 {
 protected:
-  void CloneNode (iDocumentNode* from, iDocumentNode* to);
+    void CloneNode (iDocumentNode* from, iDocumentNode* to);
 
-  csRef<iDocumentSystem> docsys;
-  std::map<std::string, csRef<iDocument> > m_Docs;
+    csRef<iDocumentSystem> docsys;
+    std::map<std::string, csRef<iDocument> > m_Docs;
 
-  void GetFromNodes(const char * kind, iDocumentNode * node, std::stack<csRef<iDocumentNode> >& nodes);
-  void RemoveNodes(iDocumentNode*node, const char* value, const char*name=NULL);
-  csRef<iDocument> CloneFrom(iDocumentNode * node);
-  
-  void ReplaceNodeValues(iDocumentNode*node, const char * key, const char * value);
-  bool RunDoc(iDocument*doc);
+    void GetFromNodes(const char * kind, iDocumentNode * node, std::stack<csRef<iDocumentNode> >& nodes);
+    void RemoveNodes(iDocumentNode*node, const char* value, const char*name = NULL);
+    csRef<iDocument> CloneFrom(iDocumentNode * node);
 
-  csRef<iDocument> GetDocument(std::string doc, bool reload = false);
+    void ReplaceNodeValues(iDocumentNode*node, const char * key, const char * value);
+    bool RunDoc(iDocument*doc);
+
+    csRef<iDocument> GetDocument(std::string doc, bool reload = false);
 
 public:
-	
-  friend class Singleton<CSMeshTool>;
-  csRef<iDocumentNode> FindNode(iDocumentNode * node, 
-				const char * nodevalue,
-				const char * attributename,
-				const char * attributevalue);
-  /// Reads in a specific mesh from the world file
-  bool LoadModelFrom (const char * world_name, string mesh_name);
-  csRef<iMeshWrapper> ReadModels (const char * world_name, csVector3 pos, string mesh_type, string mesh_name);
-  csRef<iMeshWrapper> InsertInstance(const char * mesh_name);
 
-  // returns used displacement
-  csVector3 ReCenter(iMeshWrapper*mesh_w, bool y_floor=true);
+    friend class Singleton<CSMeshTool>;
+    csRef<iDocumentNode> FindNode(iDocumentNode * node,
+                                  const char * nodevalue,
+                                  const char * attributename,
+                                  const char * attributevalue);
+    /// Reads in a specific mesh from the world file
+    bool LoadModelFrom (const char * world_name, string mesh_name);
+    csRef<iMeshWrapper> ReadModels (const char * world_name, csVector3 pos, string mesh_type, string mesh_name);
+    csRef<iMeshWrapper> InsertInstance(const char * mesh_name);
 
-  // scale by Y maintaining aspect
-  void ScaleByY(iMeshWrapper * mesh_w, float y);
+    // returns used displacement
+    csVector3 ReCenter(iMeshWrapper*mesh_w, bool y_floor = true);
 
-  void ReportGeom(iMeshWrapper*mesh_w);
+    // scale by Y maintaining aspect
+    void ScaleByY(iMeshWrapper * mesh_w, float y);
 
-  CSMeshTool ();
+    void ReportGeom(iMeshWrapper*mesh_w);
 
-  ~CSMeshTool ();
+    CSMeshTool ();
+
+    ~CSMeshTool ();
 };
 
 #endif // __CSMeshTool2_H__

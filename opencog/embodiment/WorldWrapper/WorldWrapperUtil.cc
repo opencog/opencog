@@ -66,8 +66,8 @@ definite_object WorldWrapperUtil::atom_name_to_definite_object(const string& ato
 }
 
 string WorldWrapperUtil::definite_object_to_atom_name(const definite_object& d,
-                                                      const string& self_id,
-                                                      const string& owner_id)
+        const string& self_id,
+        const string& owner_id)
 {
     if (d == id::self)
         return self_id;
@@ -77,19 +77,19 @@ string WorldWrapperUtil::definite_object_to_atom_name(const definite_object& d,
 }
 
 bool WorldWrapperUtil::definite_object_equal(const definite_object& d1,
-                                             const definite_object& d2,
-                                             const string& self_id,
-                                             const string& owner_id)
+        const definite_object& d2,
+        const string& self_id,
+        const string& owner_id)
 {
     if (d1 == d2)
         return true;
     else {
         definite_object dt1 = atom_name_to_definite_object(d1,
-                                                           self_id,
-                                                           owner_id);
+                              self_id,
+                              owner_id);
         definite_object dt2 = atom_name_to_definite_object(d2,
-                                                           self_id,
-                                                           owner_id);
+                              self_id,
+                              owner_id);
         return dt1 == d2 || d1 == dt2 || dt1 == dt2;
     }
 }
@@ -101,16 +101,16 @@ Handle WorldWrapperUtil::toHandle(const AtomSpace& as,
 {
     string id = definite_object_to_atom_name(obj, self_id, owner_id);
     Handle h = AtomSpaceUtil::getObjectHandle(as, id);
-    if(h == Handle::UNDEFINED) { // not an object, let try if it's an agent
+    if (h == Handle::UNDEFINED) { // not an object, let try if it's an agent
         h = AtomSpaceUtil::getAgentHandle(as, id);
     }
-    if(h == Handle::UNDEFINED) {
+    if (h == Handle::UNDEFINED) {
         //Nil: I add this case because apparently some object have type SL_NODE
         HandleSeq tmp;
         as.getHandleSet(std::back_inserter(tmp), SL_NODE, id);
         //unique id assumption
-        opencog::cassert(TRACE_INFO, tmp.size() <= 1); 
-        return tmp.empty()? Handle::UNDEFINED : tmp.front();
+        opencog::cassert(TRACE_INFO, tmp.size() <= 1);
+        return tmp.empty() ? Handle::UNDEFINED : tmp.front();
     }
     return h;
 }
@@ -187,7 +187,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     //assert(is_definite_object(*it));
 
     definite_object obj = is_definite_object(*it) ?
-        get_definite_object(*it) : definite_object(ss.str());
+                          get_definite_object(*it) : definite_object(ss.str());
 
     //search first for an SL_NODE
     if (it.is_childless()) {
@@ -206,8 +206,8 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     opencog::cassert(TRACE_INFO, tmp.size() <= 1); //need to assume that PredicateNode names are unique
     if (tmp.empty()) {
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil - rec_lookup found no predicate node for '%s'.",
-                        obj.c_str());
+                     "WWUtil - rec_lookup found no predicate node for '%s'.",
+                     obj.c_str());
         return Handle::UNDEFINED;
     }
 
@@ -241,7 +241,7 @@ Handle WorldWrapperUtil::ownerHandle(const AtomSpace& as,
 }
 
 Handle WorldWrapperUtil::getAvatarHandle(const AtomSpace& as,
-                                         const string& avatar_id)
+        const string& avatar_id)
 {
     return as.getHandle(SL_AVATAR_NODE, avatar_id);
 }
@@ -255,24 +255,24 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
     opencog::cassert(TRACE_INFO, is_definite_object(v));
 
     opencog::cassert(TRACE_INFO,
-                      toHandle(as, get_definite_object(v), self_id, owner_id)
-                      != Handle::UNDEFINED,
-                      "WorldWrapperUtil - Null handle for definite objetc %s.",
-                      get_definite_object(v).c_str());
+                     toHandle(as, get_definite_object(v), self_id, owner_id)
+                     != Handle::UNDEFINED,
+                     "WorldWrapperUtil - Null handle for definite objetc %s.",
+                     get_definite_object(v).c_str());
 
     return sm.containsObject(as.getName(toHandle(as, get_definite_object(v),
-                                                 self_id, owner_id)));
+                                        self_id, owner_id)));
 }
 
 vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
-                                              Handle smh,
-                                              unsigned long time,
-                                              const AtomSpace& atomSpace,
-                                              const string& self_id,
-                                              const string& owner_id,
-                                              combo::indefinite_object io,
-                                              bool isInThePast,
-                                              combo::variable_unifier& vu)
+        Handle smh,
+        unsigned long time,
+        const AtomSpace& atomSpace,
+        const string& self_id,
+        const string& owner_id,
+        combo::indefinite_object io,
+        bool isInThePast,
+        combo::variable_unifier& vu)
 throw (opencog::ComboException,
        opencog::AssertionException,
        std::bad_exception)
@@ -285,25 +285,25 @@ throw (opencog::ComboException,
 }
 
 vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
-                                              Handle smh,
-                                              unsigned long time,
-                                              const AtomSpace& atomSpace,
-                                              const string& self_id,
-                                              const string& owner_id,
-                                              combo::pet_indefinite_object_enum ioe,
-                                              bool isInThePast,
-                                              combo::variable_unifier& vu)
-    throw (opencog::ComboException,
-           opencog::AssertionException,
-           std::bad_exception)
+        Handle smh,
+        unsigned long time,
+        const AtomSpace& atomSpace,
+        const string& self_id,
+        const string& owner_id,
+        combo::pet_indefinite_object_enum ioe,
+        bool isInThePast,
+        combo::variable_unifier& vu)
+throw (opencog::ComboException,
+       opencog::AssertionException,
+       std::bad_exception)
 {
 
     std::string res;
     SpaceServer::SpaceMapPoint selfLoc;
 
     opencog::cassert(TRACE_INFO,
-                      smh != Handle::UNDEFINED,
-                      "A SpaceMap must exist");
+                     smh != Handle::UNDEFINED,
+                     "A SpaceMap must exist");
     const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
 
     try {
@@ -330,24 +330,24 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         //if
         if ( objectId != "" ) {
             logger().log(opencog::Logger::DEBUG,
-                            "WorldWrapperUtil - isHolding (%s)",
-                            objectId.c_str());
+                         "WorldWrapperUtil - isHolding (%s)",
+                         objectId.c_str());
             res = sm.findNearestFiltered
-                (selfLoc,
-                 boost::bind(std::logical_and<bool>(),
-                             boost::bind(std::not_equal_to<std::string>(),
-                                         _1,
-                                         objectId),
-                             boost::bind(std::not_equal_to<std::string>(),
-                                         _1,
-                                         self_id) ) );
+                  (selfLoc,
+                   boost::bind(std::logical_and<bool>(),
+                               boost::bind(std::not_equal_to<std::string>(),
+                                           _1,
+                                           objectId),
+                               boost::bind(std::not_equal_to<std::string>(),
+                                           _1,
+                                           self_id) ) );
         } else {
             logger().log( opencog::Logger::DEBUG,
-                             "WorldWrapperUtil - not holding any object" );
+                          "WorldWrapperUtil - not holding any object" );
             res = sm.findNearestFiltered
-                (selfLoc,
-                 std::bind2nd( std::not_equal_to<std::string>(), self_id )
-                 );
+                  (selfLoc,
+                   std::bind2nd( std::not_equal_to<std::string>(), self_id )
+                  );
         } // if
 
     }
@@ -356,32 +356,32 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         p = nearest_random_X_to_is_X(ioe);
 
         logger().log( opencog::Logger::DEBUG,
-                         "WorldWrapperUtil - nearest edible.");
+                      "WorldWrapperUtil - nearest edible.");
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(&combo::vertex_to_bool,
-                         boost::bind(&WorldWrapperUtil::evalPerception,
-                                     boost::ref(rng),
-                                     smh, time, boost::cref(atomSpace),
-                                     boost::cref(self_id),
-                                     boost::cref(owner_id),
-                                     boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                     isInThePast, vu)));
+              (selfLoc,
+               boost::bind(&combo::vertex_to_bool,
+                           boost::bind(&WorldWrapperUtil::evalPerception,
+                                       boost::ref(rng),
+                                       smh, time, boost::cref(atomSpace),
+                                       boost::cref(self_id),
+                                       boost::cref(owner_id),
+                                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                       isInThePast, vu)));
     }
     break;
     case id::nearest_movable:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(&combo::vertex_to_bool,
-                         boost::bind(&WorldWrapperUtil::evalPerception,
-                                     boost::ref(rng),
-                                     smh, time, boost::cref(atomSpace),
-                                     boost::cref(self_id),
-                                     boost::cref(owner_id),
-                                     boost::bind(&WorldWrapperUtil::maketree_percept,
-                                                 p, _1),
-                                     isInThePast, vu)));
+              (selfLoc,
+               boost::bind(&combo::vertex_to_bool,
+                           boost::bind(&WorldWrapperUtil::evalPerception,
+                                       boost::ref(rng),
+                                       smh, time, boost::cref(atomSpace),
+                                       boost::cref(self_id),
+                                       boost::cref(owner_id),
+                                       boost::bind(&WorldWrapperUtil::maketree_percept,
+                                                   p, _1),
+                                       isInThePast, vu)));
         break;
     case id::nearest_pickupable: {
         std::string objectId;
@@ -397,8 +397,8 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         p = nearest_random_X_to_is_X(ioe);
         if ( objectId != "" ) {
             logger().log(opencog::Logger::DEBUG,
-                            "WorldWrapperUtil - isHolding (%s)",
-                            objectId.c_str());
+                         "WorldWrapperUtil - isHolding (%s)",
+                         objectId.c_str());
             res = sm.findNearestFiltered(selfLoc,
                                          boost::bind<bool>(std::logical_and<bool>(),
                                                            boost::bind<bool>(std::logical_and<bool>(),
@@ -414,146 +414,146 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                                                                                          isInThePast, vu))));
 
             logger().log(opencog::Logger::DEBUG,
-                            "WorldWrapperUtil - Nearest filtered (%s)",
-                            res.c_str( ) );
+                         "WorldWrapperUtil - Nearest filtered (%s)",
+                         res.c_str( ) );
         } else {
             logger().log(opencog::Logger::DEBUG,
-                            "WorldWrapperUtil - not holding any object");
+                         "WorldWrapperUtil - not holding any object");
             res = sm.findNearestFiltered
-                (selfLoc,
-                 boost::bind(&combo::vertex_to_bool,
-                             boost::bind(&WorldWrapperUtil::evalPerception,
-                                         boost::ref(rng),
-                                         smh, time, boost::cref(atomSpace),
-                                         boost::cref(self_id),
-                                         boost::cref(owner_id),
-                                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                         isInThePast, vu)));
+                  (selfLoc,
+                   boost::bind(&combo::vertex_to_bool,
+                               boost::bind(&WorldWrapperUtil::evalPerception,
+                                           boost::ref(rng),
+                                           smh, time, boost::cref(atomSpace),
+                                           boost::cref(self_id),
+                                           boost::cref(owner_id),
+                                           boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                           isInThePast, vu)));
         } // if
     }
     break;
     case id::nearest_drinkable:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(&combo::vertex_to_bool,
-                         boost::bind(&WorldWrapperUtil::evalPerception,
-                                     boost::ref(rng),
-                                     smh, time, boost::cref(atomSpace),
-                                     boost::cref(self_id),
-                                     boost::cref(owner_id),
-                                     boost::bind(&WorldWrapperUtil::maketree_percept,
-                                                 p, _1),
-                                     isInThePast, vu)));
+              (selfLoc,
+               boost::bind(&combo::vertex_to_bool,
+                           boost::bind(&WorldWrapperUtil::evalPerception,
+                                       boost::ref(rng),
+                                       smh, time, boost::cref(atomSpace),
+                                       boost::cref(self_id),
+                                       boost::cref(owner_id),
+                                       boost::bind(&WorldWrapperUtil::maketree_percept,
+                                                   p, _1),
+                                       isInThePast, vu)));
         break;
     case id::nearest_avatar: //this is more complex than the others to make sure we don't return the avatar to imitation when the pet takes its skin
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             bind(std::logical_and<bool>(),
-                  boost::bind(std::not_equal_to<std::string>(), self_id, _1),
-                  boost::bind(&combo::vertex_to_bool,
-                              boost::bind(&WorldWrapperUtil::evalPerception,
-                                          boost::ref(rng),
-                                          smh, time,
-                                          boost::cref(atomSpace),
-                                          boost::cref(self_id),
-                                          boost::cref(owner_id),
-                                          bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                          isInThePast, vu))));
+              (selfLoc,
+               bind(std::logical_and<bool>(),
+                    boost::bind(std::not_equal_to<std::string>(), self_id, _1),
+                    boost::bind(&combo::vertex_to_bool,
+                                boost::bind(&WorldWrapperUtil::evalPerception,
+                                            boost::ref(rng),
+                                            smh, time,
+                                            boost::cref(atomSpace),
+                                            boost::cref(self_id),
+                                            boost::cref(owner_id),
+                                            bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                            isInThePast, vu))));
         break;
     case id::nearest_pet: //this is more complex than the others to make sure we don't return *our* pet
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(std::logical_and<bool>(),
-                         boost::bind(std::not_equal_to<std::string>(),
-                                     self_id,
-                                     _1),
-                         boost::bind(&combo::vertex_to_bool,
-                                     bind(&WorldWrapperUtil::evalPerception,
-                                          boost::ref(rng),
-                                          smh, time,
-                                          boost::cref(atomSpace),
-                                          boost::cref(self_id),
-                                          boost::cref(owner_id),
-                                          boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                          isInThePast, vu))));
+              (selfLoc,
+               boost::bind(std::logical_and<bool>(),
+                           boost::bind(std::not_equal_to<std::string>(),
+                                       self_id,
+                                       _1),
+                           boost::bind(&combo::vertex_to_bool,
+                                       bind(&WorldWrapperUtil::evalPerception,
+                                            boost::ref(rng),
+                                            smh, time,
+                                            boost::cref(atomSpace),
+                                            boost::cref(self_id),
+                                            boost::cref(owner_id),
+                                            boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                            isInThePast, vu))));
         break;
     case id::nearest_small:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(&combo::vertex_to_bool,
-                         boost::bind(&WorldWrapperUtil::evalPerception,
-                                     boost::ref(rng),
-                                     smh, time,
-                                     boost::cref(atomSpace),
-                                     boost::cref(self_id),
-                                     boost::cref(owner_id),
-                                     boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                     isInThePast, vu) ) );
+              (selfLoc,
+               boost::bind(&combo::vertex_to_bool,
+                           boost::bind(&WorldWrapperUtil::evalPerception,
+                                       boost::ref(rng),
+                                       smh, time,
+                                       boost::cref(atomSpace),
+                                       boost::cref(self_id),
+                                       boost::cref(owner_id),
+                                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                       isInThePast, vu) ) );
         break;
     case id::nearest_moving: //this is more complex than the others to make sure we don't return the subject in case it is moving
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(std::logical_and<bool>(),
-                         boost::bind(std::not_equal_to<std::string>(), self_id, _1),
-                         boost::bind(&combo::vertex_to_bool,
-                                     boost::bind(&WorldWrapperUtil::evalPerception,
-                                                 boost::ref(rng),
-                                                 smh, time,
-                                                 boost::cref(atomSpace),
-                                                 boost::cref(self_id),
-                                                 boost::cref(owner_id),
-                                                 bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                                 isInThePast, vu) ) ) );
+              (selfLoc,
+               boost::bind(std::logical_and<bool>(),
+                           boost::bind(std::not_equal_to<std::string>(), self_id, _1),
+                           boost::bind(&combo::vertex_to_bool,
+                                       boost::bind(&WorldWrapperUtil::evalPerception,
+                                                   boost::ref(rng),
+                                                   smh, time,
+                                                   boost::cref(atomSpace),
+                                                   boost::cref(self_id),
+                                                   boost::cref(owner_id),
+                                                   bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                                   isInThePast, vu) ) ) );
         break;
     case id::nearest_noisy: //this is more complex than the others to make sure we don't return the subject in case it is noisy
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(std::logical_and<bool>(),
-                         boost::bind(std::not_equal_to<std::string>(),
-                                     self_id,
-                                     _1),
-                         boost::bind(&combo::vertex_to_bool,
-                                     boost::bind(&WorldWrapperUtil::evalPerception,
-                                                 boost::ref(rng),
-                                                 smh, time,
-                                                 boost::cref(atomSpace),
-                                                 boost::cref(self_id),
-                                                 boost::cref(owner_id),
-                                                 bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                                 isInThePast, vu))));
+              (selfLoc,
+               boost::bind(std::logical_and<bool>(),
+                           boost::bind(std::not_equal_to<std::string>(),
+                                       self_id,
+                                       _1),
+                           boost::bind(&combo::vertex_to_bool,
+                                       boost::bind(&WorldWrapperUtil::evalPerception,
+                                                   boost::ref(rng),
+                                                   smh, time,
+                                                   boost::cref(atomSpace),
+                                                   boost::cref(self_id),
+                                                   boost::cref(owner_id),
+                                                   bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                                   isInThePast, vu))));
         break;
     case id::nearest_poo_place:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(&combo::vertex_to_bool,
-                         boost::bind(&WorldWrapperUtil::evalPerception,
-                                     boost::ref(rng),
-                                     smh, time,
-                                     boost::cref(atomSpace),
-                                     boost::cref(self_id),
-                                     boost::cref(owner_id),
-                                     boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                     isInThePast, vu)));
+              (selfLoc,
+               boost::bind(&combo::vertex_to_bool,
+                           boost::bind(&WorldWrapperUtil::evalPerception,
+                                       boost::ref(rng),
+                                       smh, time,
+                                       boost::cref(atomSpace),
+                                       boost::cref(self_id),
+                                       boost::cref(owner_id),
+                                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                       isInThePast, vu)));
         break;
     case id::nearest_pee_place:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findNearestFiltered
-            (selfLoc,
-             boost::bind(&combo::vertex_to_bool,
-                         boost::bind(&WorldWrapperUtil::evalPerception,
-                                     boost::ref(rng),
-                                     smh, time, boost::cref(atomSpace),
-                                     boost::cref(self_id),
-                                     boost::cref(owner_id),
-                                     boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                     isInThePast, vu)));
+              (selfLoc,
+               boost::bind(&combo::vertex_to_bool,
+                           boost::bind(&WorldWrapperUtil::evalPerception,
+                                       boost::ref(rng),
+                                       smh, time, boost::cref(atomSpace),
+                                       boost::cref(self_id),
+                                       boost::cref(owner_id),
+                                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                       isInThePast, vu)));
         break;
     case id::random_object:
         res = sm.findRandomFiltered(make_const_function(true), rng);
@@ -561,26 +561,26 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
     case id::random_edible:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_movable:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_pickupable: {
         std::string objectId = AtomSpaceUtil::getHoldingObjectId( atomSpace, self_id );
@@ -589,162 +589,162 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         if ( objectId != "" ) {
             logger().log( opencog::Logger::DEBUG, "WorldWrapperUtil - isHolding (%s)", objectId.c_str( ) );
             res = sm.findRandomFiltered(boost::bind<bool>(std::logical_and<bool>(),
-                                                          boost::bind<bool>(std::logical_and<bool>(),
-                                                                            boost::bind( std::not_equal_to<std::string>(),
-                                                                                         _1,
-                                                                                         objectId ),
-                                                                            boost::bind( std::not_equal_to<std::string>(),
-                                                                                         _1,
-                                                                                         self_id )),
-                                                          boost::bind<bool>(combo::vertex_to_bool,
-                                                                            bind(&WorldWrapperUtil::evalPerception,
-                                                                                 boost::ref(rng),
-                                                                                 smh, time, boost::cref(atomSpace),
-                                                                                 boost::cref(self_id),
-                                                                                 boost::cref(owner_id),
-                                                                                 boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                                                                 isInThePast, vu))), rng);
+                                        boost::bind<bool>(std::logical_and<bool>(),
+                                                          boost::bind( std::not_equal_to<std::string>(),
+                                                                       _1,
+                                                                       objectId ),
+                                                          boost::bind( std::not_equal_to<std::string>(),
+                                                                       _1,
+                                                                       self_id )),
+                                        boost::bind<bool>(combo::vertex_to_bool,
+                                                          bind(&WorldWrapperUtil::evalPerception,
+                                                               boost::ref(rng),
+                                                               smh, time, boost::cref(atomSpace),
+                                                               boost::cref(self_id),
+                                                               boost::cref(owner_id),
+                                                               boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                                               isInThePast, vu))), rng);
 
             logger().log(opencog::Logger::DEBUG,
-                            "WorldWrapperUtil - Random pickupable filtered (%s)",
-                            res.c_str( ) );
+                         "WorldWrapperUtil - Random pickupable filtered (%s)",
+                         res.c_str( ) );
         } else {
             logger().log(opencog::Logger::DEBUG,
-                            "WorldWrapperUtil - Pet isn't holding an object");
+                         "WorldWrapperUtil - Pet isn't holding an object");
             res = sm.findRandomFiltered
-                (bind(&combo::vertex_to_bool,
-                      bind(&WorldWrapperUtil::evalPerception,
-                           boost::ref(rng),
-                           smh, time, boost::cref(atomSpace),
-                           boost::cref(self_id),
-                           boost::cref(owner_id),
-                           boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                           isInThePast, vu)), rng);
+                  (bind(&combo::vertex_to_bool,
+                        bind(&WorldWrapperUtil::evalPerception,
+                             boost::ref(rng),
+                             smh, time, boost::cref(atomSpace),
+                             boost::cref(self_id),
+                             boost::cref(owner_id),
+                             boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                             isInThePast, vu)), rng);
         } // if
         logger().log( opencog::Logger::DEBUG,
-                         "WorldWrapperUtil - Selected random pickupable %s",
-                         res.c_str( ) );
+                      "WorldWrapperUtil - Selected random pickupable %s",
+                      res.c_str( ) );
     }
     break;
     case id::random_drinkable:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_avatar:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_pet: //this is more complex than the others to make sure we don't return *our* pet
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(std::logical_and<bool>(),
-                  bind(std::not_equal_to<std::string>(), self_id, _1),
-                  bind(&combo::vertex_to_bool,
-                       boost::bind(&WorldWrapperUtil::evalPerception,
-                                   boost::ref(rng),
-                                   smh, time, boost::cref(atomSpace),
-                                   boost::cref(self_id),
-                                   boost::cref(owner_id),
-                                   boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                                   isInThePast, vu))), rng);
+              (bind(std::logical_and<bool>(),
+                    bind(std::not_equal_to<std::string>(), self_id, _1),
+                    bind(&combo::vertex_to_bool,
+                         boost::bind(&WorldWrapperUtil::evalPerception,
+                                     boost::ref(rng),
+                                     smh, time, boost::cref(atomSpace),
+                                     boost::cref(self_id),
+                                     boost::cref(owner_id),
+                                     boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                                     isInThePast, vu))), rng);
         break;
     case id::random_small:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_moving:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_noisy:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_poo_place:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
     case id::random_pee_place:
         p = nearest_random_X_to_is_X(ioe);
         res = sm.findRandomFiltered
-            (bind(&combo::vertex_to_bool,
-                  bind(&WorldWrapperUtil::evalPerception,
-                       boost::ref(rng),
-                       smh, time, boost::cref(atomSpace),
-                       boost::cref(self_id),
-                       boost::cref(owner_id),
-                       bind(&WorldWrapperUtil::maketree_percept, p, _1),
-                       isInThePast, vu)), rng);
+              (bind(&combo::vertex_to_bool,
+                    bind(&WorldWrapperUtil::evalPerception,
+                         boost::ref(rng),
+                         smh, time, boost::cref(atomSpace),
+                         boost::cref(self_id),
+                         boost::cref(owner_id),
+                         bind(&WorldWrapperUtil::maketree_percept, p, _1),
+                         isInThePast, vu)), rng);
         break;
         // NOTE: there is another way to get food/water bowl. Create
         // an is_food/water_bowl predicate and do the same as above.
     case id::food_bowl:
         res = lookupInheritanceLink(rng, atomSpace, toHandle(atomSpace, "food_bowl",
-                                                      self_id, owner_id));
+                                    self_id, owner_id));
         break;
     case id::water_bowl:
         res = lookupInheritanceLink(rng, atomSpace, toHandle(atomSpace, "water_bowl",
-                                                      self_id, owner_id));
+                                    self_id, owner_id));
         break;
     case id::pet_home:
         res = lookupInheritanceLink(rng, atomSpace, toHandle(atomSpace, "pet_home",
-                                                      self_id, owner_id));
+                                    self_id, owner_id));
         break;
     case id::pet_bowl:
         res = lookupExecLink(rng, atomSpace, toHandle(atomSpace, "pet_bowl",
-                                               self_id, owner_id));
+                             self_id, owner_id));
         break;
     case id::last_food_place:
         res = lookupExecLink(rng, atomSpace, toHandle(atomSpace, "last_food_place",
-                                               self_id, owner_id));
+                             self_id, owner_id));
         break;
     case id::exemplar_avatar: {
         Handle evalLink = AtomSpaceUtil::getMostRecentEvaluationLink(atomSpace, std::string("is_exemplar_avatar"));
@@ -757,7 +757,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
                     Handle student = atomSpace.getOutgoing(ll, 1);
 
                     if (teacher != Handle::UNDEFINED
-                        && self_id == atomSpace.getName(student)) {
+                            && self_id == atomSpace.getName(student)) {
                         return vertex(atomSpace.getName(teacher));
                     }
                 }
@@ -770,10 +770,10 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
     default:
         std::stringstream stream (std::stringstream::out);
         stream << "Unrecognized indefinite object '"
-               << vertex(io) << "'" << std::endl;
+        << vertex(io) << "'" << std::endl;
         throw opencog::ComboException(TRACE_INFO,
-                                       "WorldWrapperUtil - %s.",
-                                       stream.str().c_str());
+                                      "WorldWrapperUtil - %s.",
+                                      stream.str().c_str());
     }
 
     std::stringstream ss;
@@ -787,26 +787,26 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
     //  res = id::owner;
 
     logger().log(opencog::Logger::DEBUG,
-                    "WorldWrapperUtil - Analyzing '%s'. Result: '%s'.",
-                    ss.str().c_str(), res.c_str());
+                 "WorldWrapperUtil - Analyzing '%s'. Result: '%s'.",
+                 ss.str().c_str(), res.c_str());
 
     return vertex(res);
 }
 
 combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
-                                               Handle smh,
-                                               unsigned long time,
-                                               const AtomSpace& atomSpace,
-                                               const string& self_id,
-                                               const string& owner_id,
-                                               const pre_it it,
-                                               bool isInThePast,
-                                               combo::variable_unifier& vu)
+        Handle smh,
+        unsigned long time,
+        const AtomSpace& atomSpace,
+        const string& self_id,
+        const string& owner_id,
+        const pre_it it,
+        bool isInThePast,
+        combo::variable_unifier& vu)
 {
 
     opencog::cassert(TRACE_INFO,
-                      is_perception(*it),
-                      "It is assumed that '*it' is a perception");
+                     is_perception(*it),
+                     "It is assumed that '*it' is a perception");
 
     perception p = get_perception(*it);
     if (p == instance(id::is_null)) { //just check directly
@@ -815,12 +815,12 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         combo::vertex v = *it.begin();
         if (is_indefinite_object(v)) { //eval indefinite object of argument
             v = WorldWrapperUtil::evalIndefiniteObject(rng,
-                                                       smh,
-                                                       time,
-                                                       atomSpace,
-                                                       self_id, owner_id,
-                                                       get_indefinite_object(v),
-                                                       isInThePast);
+                    smh,
+                    time,
+                    atomSpace,
+                    self_id, owner_id,
+                    get_indefinite_object(v),
+                    isInThePast);
         }
 
         //std::cout << "is_null(" << *it.begin() << ") = " << (get_definite_object(v) == id::null_obj ? "true" : "false") << std::endl;
@@ -828,10 +828,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     } else if (p == instance(id::exists)) {
         opencog::cassert(TRACE_INFO,
-                          it.number_of_children() == 1);
+                         it.number_of_children() == 1);
         opencog::cassert(TRACE_INFO,
-                          smh != Handle::UNDEFINED,
-                          "A SpaceMap must exist");
+                         smh != Handle::UNDEFINED,
+                         "A SpaceMap must exist");
         const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
         return combo::bool_to_vertex(inSpaceMap(sm, atomSpace, self_id, owner_id,
                                                 *it.begin()));
@@ -846,69 +846,69 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::exists_edible:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_edible)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_edible)
                                       != vertex(id::null_obj)));
     case id::exists_movable:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_movable)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_movable)
                                       != vertex(id::null_obj)));
     case id::exists_pickupable:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_pickupable)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_pickupable)
                                       != vertex(id::null_obj)));
     case id::exists_drinkable:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_drinkable)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_drinkable)
                                       != vertex(id::null_obj)));
     case id::exists_avatar:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_avatar)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_avatar)
                                       != vertex(id::null_obj)));
     case id::exists_pet:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_pet)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_pet)
                                       != vertex(id::null_obj)));
     case id::exists_small:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_small)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_small)
                                       != vertex(id::null_obj)));
     case id::exists_moving:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_moving)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_moving)
                                       != vertex(id::null_obj)));
     case id::exists_noisy:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_noisy)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_noisy)
                                       != vertex(id::null_obj)));
     case id::exists_poo_place:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_poo_place)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_poo_place)
                                       != vertex(id::null_obj)));
     case id::exists_pee_place:
         return combo::bool_to_vertex((evalIndefiniteObject(rng, smh, time,
-                                                           atomSpace,
-                                                           self_id, owner_id,
-                                                           id::random_pee_place)
+                                      atomSpace,
+                                      self_id, owner_id,
+                                      id::random_pee_place)
                                       != vertex(id::null_obj)));
     case id::exists: {
         assert(it.number_of_children() == 1);
@@ -918,7 +918,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                  atomSpace,
                                                  self_id, owner_id,
                                                  vo, isInThePast, vu);
-        
+
         if ( definite_objects.size( ) != 1 ) {
             // there is no definite object, so return false immediately
             return combo::bool_to_vertex(false);
@@ -967,26 +967,26 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         // cache predicate data variables
         std::string name = p->get_name();
         std::vector<std::string> argument;
-        
+
         bool general_result = false;
         foreach(combo::definite_object def_obj, definite_objects) {
-            
+
             argument.clear();
             argument.push_back(std::string(def_obj));
             WorldWrapper::predicate pred(name, argument);
             float data = WorldWrapperUtil::cache.find(time, pred);
-            
+
             bool result;
             if (data != CACHE_MISS) {
                 result = (data > meanTruthThreshold);
-                
+
             } else {
                 result = atomSpace.inheritsType(atomSpace.getType(toHandle(atomSpace,
-                                                             def_obj,
-                                                             self_id,
-                                                             owner_id)),
-                                         SL_PET_NODE);
-                
+                                                def_obj,
+                                                self_id,
+                                                owner_id)),
+                                                SL_PET_NODE);
+
                 // cache miss, compute value and cache it
                 if (result) {
                     WorldWrapperUtil::cache.add(time, pred, 1.0f);
@@ -994,7 +994,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     WorldWrapperUtil::cache.add(time, pred, 0.0f);
                 }
             }
-            
+
             if (is_wild_card(vo)) {
                 vu.setVariableState(def_obj, result);
             }
@@ -1002,7 +1002,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 general_result = true;
             }
         }
-        
+
         if (is_wild_card(vo)) {
             vu.setUpdated(true);
             vu.setOneVariableActive(general_result);
@@ -1010,7 +1010,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         return combo::bool_to_vertex(general_result);
     }
     break;
-    
+
     // is_avatar - handle directly via type inference
     case id::is_avatar:
         assert(it.number_of_children() == 1);
@@ -1040,10 +1040,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 } else {
                     result =  atomSpace.inheritsType(atomSpace.getType(toHandle(atomSpace,
-                                                                  def_obj,
-                                                                  self_id,
-                                                                  owner_id)),
-                                              SL_AVATAR_NODE);
+                                                     def_obj,
+                                                     self_id,
+                                                     owner_id)),
+                                                     SL_AVATAR_NODE);
 
                     // cache miss, compute value and cache it
                     if (result) {
@@ -1096,18 +1096,18 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 } else {
                     Handle obj_handle = WorldWrapperUtil::toHandle(atomSpace,
-                                                                   def_obj,
-                                                                   self_id,
-                                                                   owner_id);
+                                        def_obj,
+                                        self_id,
+                                        owner_id);
 
                     // for the time being all nodes that are no avatar or structure
                     // are considered objects
-                    result = 
+                    result =
                         !atomSpace.inheritsType(atomSpace.getType(obj_handle),
-                                         SL_AVATAR_NODE)
+                                                SL_AVATAR_NODE)
                         &&
                         !atomSpace.inheritsType(atomSpace.getType(obj_handle),
-                                         SL_STRUCTURE_NODE);
+                                                SL_STRUCTURE_NODE);
 
                     // cache miss, compute value and cache it
                     if (result) {
@@ -1144,8 +1144,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                      isInThePast, vu);
 
             opencog::cassert(TRACE_INFO,
-                              is_definite_object(vo),
-                              "Should be of type definite object");
+                             is_definite_object(vo),
+                             "Should be of type definite object");
 
             const SpaceServer& spaceServer = atomSpace.getSpaceServer();
             Handle pre_smh = spaceServer.getPreviousMapHandle(smh);
@@ -1176,9 +1176,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                     Handle obj_h = toHandle(atomSpace, def_obj, self_id, owner_id);
                     result = AtomSpaceUtil::isMovingBtwSpaceMap(atomSpace,
-                                                                pre_sm,
-                                                                sm,
-                                                                obj_h);
+                             pre_sm,
+                             sm,
+                             obj_h);
 
                     // cache miss, compute value and cache it
                     if (result) {
@@ -1206,13 +1206,12 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::is_holding_something: {
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "is_holding_something perception takes"
-                          " only one argument and got %d",
-                          it.number_of_children());
-        if(isInThePast) {
+                         "is_holding_something perception takes"
+                         " only one argument and got %d",
+                         it.number_of_children());
+        if (isInThePast) {
             opencog::cassert(TRACE_INFO, false, "not implemented yet");
-        }
-        else {
+        } else {
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
@@ -1226,7 +1225,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             bool general_result = false;
             foreach(combo::definite_object def_obj, definite_objects) {
-                
+
                 argument.clear();
                 argument.push_back(std::string(def_obj));
                 WorldWrapper::predicate pred(name, argument);
@@ -1235,11 +1234,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 bool result;
                 if (data != CACHE_MISS) {
                     result = (data > meanTruthThreshold);
-                    
+
                 } else {
- 
+
                     result = AtomSpaceUtil::isHoldingSomething(atomSpace,
-                                                               def_obj);
+                             def_obj);
 
                     // cache miss, compute value and cache it
                     if (result) {
@@ -1248,7 +1247,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                     }
                 }
-                
+
                 if (is_wild_card(vo)) {
                     vu.setVariableState(def_obj, result);
                 }
@@ -1256,7 +1255,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     general_result = true;
                 }
             }
-            
+
             if (is_wild_card(vo)) {
                 vu.setUpdated(true);
                 vu.setOneVariableActive(general_result);
@@ -1275,8 +1274,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         // present occurancies are taken care as default
         if (isInThePast) {
             opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
-                              "WWUtil - near - wrong number of arguments (should be 2) : %d",
-                              it.number_of_children());
+                             "WWUtil - near - wrong number of arguments (should be 2) : %d",
+                             it.number_of_children());
             {
                 sib_it sib_arg = it.begin();
 
@@ -1305,12 +1304,12 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         vo1_definite_objects) {
                     Handle h1 = toHandle(atomSpace, vo1_def_obj, self_id, owner_id);
                     opencog::cassert(TRACE_INFO,
-                                      h1 != Handle::UNDEFINED,
-                                      "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
+                                     h1 != Handle::UNDEFINED,
+                                     "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
 
                     foreach(combo::definite_object vo2_def_obj,
                             vo2_definite_objects) {
-                        
+
                         Handle h2 = toHandle(atomSpace, vo2_def_obj,
                                              self_id, owner_id);
 
@@ -1325,10 +1324,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                         bool result =
                             AtomSpaceUtil::getPredicateValueAtSpaceMap(atomSpace,
-                                                                       ss.str(),
-                                                                       sm,
-                                                                       h1,
-                                                                       h2);
+                                    ss.str(),
+                                    sm,
+                                    h1,
+                                    h2);
 
                         // note that, although we test booth vo1 and vo2, currently only one wild card
                         // is accepted. Thus, a near (_*_, _*_) will always be true because the arguments
@@ -1395,11 +1394,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             } else {
                 Handle from_h = toHandle(atomSpace, def_obj, self_id, owner_id);
                 result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace,
-                                                              time,
-                                                              getHasSaidDelay(),
-                                                              from_h,
-                                                              Handle::UNDEFINED,
-                                                              message);
+                         time,
+                         getHasSaidDelay(),
+                         from_h,
+                         Handle::UNDEFINED,
+                         message);
 
                 // cache miss, compute value and cache it
                 if (result) {
@@ -1428,61 +1427,61 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     // at the moment. is_X functions for pet feelings are implemented as combo scripts.
     case id::get_hunger: {
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "WWUtil - getHunger perception accept only one argument. Got '%d'.", it.number_of_children());
+                         "WWUtil - getHunger perception accept only one argument. Got '%d'.", it.number_of_children());
         vertex vo = *it.begin();
         if (is_indefinite_object(vo)) {
             vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                        atomSpace,
-                                                        self_id, owner_id,
-                                                        get_indefinite_object(vo),
-                                                        isInThePast);
+                    atomSpace,
+                    self_id, owner_id,
+                    get_indefinite_object(vo),
+                    isInThePast);
         }
-        
+
         std::string target =
             definite_object_to_atom_name(get_definite_object(vo),
                                          self_id, owner_id);
         return WorldWrapperUtil::getPhysiologicalFeeling
-            (atomSpace, std::string(HUNGER_PREDICATE_NAME), target, time);
-        
+               (atomSpace, std::string(HUNGER_PREDICATE_NAME), target, time);
+
         /*
         // cache predicate data variables
         std::string name = p->get_name();
         std::vector<std::string> argument;
         argument.push_back(target);
-        
+
         WorldWrapper::predicate pred(name, argument);
         float feeling = WorldWrapperUtil::cache.find(time, pred);
-        
+
         if(feeling == CACHE_MISS){
         feeling = AtomSpaceUtil::getCurrentPetFeelingLevel(atomSpace, target,
         std::string(HUNGER_PREDICATE_NAME));
         WorldWrapperUtil::cache.add(time, pred, feeling);
         }
-        
+
         logger().log(opencog::Logger::DEBUG, "WWUtil - '%d' hunger '%f'.", target.c_str(), feeling);
         return vertex(feeling);
         */
     }
     break;
-        
+
     case id::get_thirst:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "WWUtil - get_thirst perception accept only one argument. Got '%d'.", it.number_of_children());
+                         "WWUtil - get_thirst perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            atomSpace,
-                                                            self_id, owner_id,
-                                                            get_indefinite_object(vo),
-                                                            isInThePast);
+                        atomSpace,
+                        self_id, owner_id,
+                        get_indefinite_object(vo),
+                        isInThePast);
             }
 
             std::string target =
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (atomSpace,  std::string(THIRST_PREDICATE_NAME), target, time);
+                   (atomSpace,  std::string(THIRST_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1506,22 +1505,22 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::get_energy:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "WWUtil - get_energy perception accept only one argument. Got '%d'.", it.number_of_children());
+                         "WWUtil - get_energy perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            atomSpace,
-                                                            self_id, owner_id,
-                                                            get_indefinite_object(vo),
-                                                            isInThePast);
+                        atomSpace,
+                        self_id, owner_id,
+                        get_indefinite_object(vo),
+                        isInThePast);
             }
 
             std::string target =
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (atomSpace,  std::string(ENERGY_PREDICATE_NAME), target, time);
+                   (atomSpace,  std::string(ENERGY_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1545,22 +1544,22 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::get_fitness:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "WWUtil - get_fitness perception accept only one argument. Got '%d'.", it.number_of_children());
+                         "WWUtil - get_fitness perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            atomSpace,
-                                                            self_id, owner_id,
-                                                            get_indefinite_object(vo),
-                                                            isInThePast);
+                        atomSpace,
+                        self_id, owner_id,
+                        get_indefinite_object(vo),
+                        isInThePast);
             }
 
             std::string target =
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (atomSpace, std::string(FITNESS_PREDICATE_NAME), target, time);
+                   (atomSpace, std::string(FITNESS_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1584,21 +1583,21 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::get_pee_urgency:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "WWUtil - get_pee_urgency perception accept only one argument. Got '%d'.", it.number_of_children());
+                         "WWUtil - get_pee_urgency perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            atomSpace,
-                                                            self_id, owner_id,
-                                                            get_indefinite_object(vo),
-                                                            isInThePast);
+                        atomSpace,
+                        self_id, owner_id,
+                        get_indefinite_object(vo),
+                        isInThePast);
             }
 
             std::string target =
                 definite_object_to_atom_name(get_definite_object(vo), self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (atomSpace, std::string(PEE_URGENCY_PREDICATE_NAME), target, time);
+                   (atomSpace, std::string(PEE_URGENCY_PREDICATE_NAME), target, time);
 
             /*
                         // cache predicate data variables
@@ -1622,22 +1621,22 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::get_poo_urgency:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
-                          "WWUtil - get_poo_urgency perception accept only one argument. Got '%d'.", it.number_of_children());
+                         "WWUtil - get_poo_urgency perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
             if (is_indefinite_object(vo)) {
                 vo = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                            atomSpace,
-                                                            self_id, owner_id,
-                                                            get_indefinite_object(vo),
-                                                            isInThePast);
+                        atomSpace,
+                        self_id, owner_id,
+                        get_indefinite_object(vo),
+                        isInThePast);
             }
 
             std::string target =
                 definite_object_to_atom_name(get_definite_object(vo),
                                              self_id, owner_id);
             return WorldWrapperUtil::getPhysiologicalFeeling
-                (atomSpace, std::string(POO_URGENCY_PREDICATE_NAME), target, time);
+                   (atomSpace, std::string(POO_URGENCY_PREDICATE_NAME), target, time);
 
             /*            // cache predicate data variables
                         std::string name = p->get_name();
@@ -1668,17 +1667,17 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
         if (repetition == CACHE_MISS) {
             Handle handle = atomSpace.getHandle(CONCEPT_NODE,
-                                         "currentActionRepetition");
+                                                "currentActionRepetition");
             opencog::cassert(TRACE_INFO, handle != Handle::UNDEFINED,
-                              "WWUtil - There should be a ConceptNode for currentActionRepetition");
+                             "WWUtil - There should be a ConceptNode for currentActionRepetition");
 
             HandleSeq result;
             atomSpace.getHandleSet(back_inserter(result),
-                            handle, FREQUENCY_LINK, false);
+                                   handle, FREQUENCY_LINK, false);
 
             if (result.size() != 1) {
                 logger().log(opencog::Logger::WARN, "WWUtil - There should be only one FrequencyLink, got '%d'",
-                                result.size());
+                             result.size());
                 repetition = 0.0f;
 
             } else {
@@ -1686,7 +1685,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 handle = atomSpace.getOutgoing(result[0], 1);
                 if (atomSpace.getType(handle) != NUMBER_NODE) { // error
                     logger().log(opencog::Logger::WARN,
-                                    "WWUtil - Outgoing atom[1] should be a NumberNode.");
+                                 "WWUtil - Outgoing atom[1] should be a NumberNode.");
                     repetition = 0.0f;
 
                 } else {
@@ -1699,17 +1698,17 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         }
 
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil - Current action repetition '%f'.",
-                        repetition);
+                     "WWUtil - Current action repetition '%f'.",
+                     repetition);
         return vertex(repetition);
     }
     break;
 
     case id::is_agent_state: {
         opencog::cassert(TRACE_INFO,
-                          it.number_of_children()==1 && is_contin(*it.begin()),
-                          "WWUtil - is_agent_state perception accept one argument and it must be a contin. Got '%d' arguments.",
-                          it.number_of_children());
+                         it.number_of_children() == 1 && is_contin(*it.begin()),
+                         "WWUtil - is_agent_state perception accept one argument and it must be a contin. Got '%d' arguments.",
+                         it.number_of_children());
 
         std::string stateNumber;
         {
@@ -1729,11 +1728,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         if (state == CACHE_MISS) {
             Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, self_id );
             opencog::cassert(TRACE_INFO,
-                              agentHandle != Handle::UNDEFINED,
-                              "WWUtil - is_agent_state invalid agentHandle");
+                             agentHandle != Handle::UNDEFINED,
+                             "WWUtil - is_agent_state invalid agentHandle");
             Handle stateNodeHandle = atomSpace.getHandle( NUMBER_NODE, stateNumber );
             if (stateNodeHandle != Handle::UNDEFINED) {
-                state = 
+                state =
                     AtomSpaceUtil::isPredicateTrue(atomSpace,
                                                    "agentModeState",
                                                    agentHandle,
@@ -1745,9 +1744,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         } // if
 
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil - scavenger hunt truth value: '%f' for state %s .",
-                        state,
-                        stateNumber.c_str( ) );
+                     "WWUtil - scavenger hunt truth value: '%f' for state %s .",
+                     state,
+                     stateNumber.c_str( ) );
         return combo::bool_to_vertex( state == 1.0f );
 
     } // case
@@ -1755,9 +1754,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::is_there_relation:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
-                          "WWUtil - is_there_relation perception needs"
-                          " three arguments. Got '%d'.",
-                          it.number_of_children());
+                         "WWUtil - is_there_relation perception needs"
+                         " three arguments. Got '%d'.",
+                         it.number_of_children());
         {
             pre_it tree_it = tmp.begin();
             sib_it sib_relation = tree_it.begin();
@@ -1765,8 +1764,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             // relation parameter should be childless and a definite_object
             if (!sib_relation.is_childless() && !is_definite_object(*sib_relation)) {
                 throw opencog::InvalidParamException(TRACE_INFO,
-                                                      "WWUtil - Relation vertex should be childless and a definite_object. Got '%d' children an is_definite_object '%s'",
-                                                      sib_relation.number_of_children(), is_definite_object(*sib_relation) ? "true" : "false");
+                                                     "WWUtil - Relation vertex should be childless and a definite_object. Got '%d' children an is_definite_object '%s'",
+                                                     sib_relation.number_of_children(), is_definite_object(*sib_relation) ? "true" : "false");
             }
 
             *tree_it = *sib_relation;
@@ -1776,7 +1775,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::is_proportional_next:
         opencog::cassert(TRACE_INFO, it.number_of_children() == 4,
-                          "WWUtil - is_proportional_next perception needs four arguments. Got '%d'.", it.number_of_children());
+                         "WWUtil - is_proportional_next perception needs four arguments. Got '%d'.", it.number_of_children());
         {
             WorldWrapperUtil::changePredicateName(tmp, std::string("next"));
 
@@ -1796,8 +1795,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             if (!is_contin(op) && !is_contin(val)) {
                 throw opencog::InvalidParamException(TRACE_INFO,
-                                                      "WWUtil - is_proportional_next params error. Got operation is contin '%s', value is contin '%s'",
-                                                      is_contin(op) ? "true" : "false", is_contin(val) ? "true" : "false");
+                                                     "WWUtil - is_proportional_next params error. Got operation is contin '%s', value is contin '%s'",
+                                                     is_contin(op) ? "true" : "false", is_contin(val) ? "true" : "false");
             }
 
             double value = get_contin(val);
@@ -1809,12 +1808,12 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             for (sib_it arg = tree_it.begin(); arg != tree_it.end(); ++arg) {
                 if (is_indefinite_object(*arg)) {
                     *arg = WorldWrapperUtil::evalIndefiniteObject(rng, smh,
-                                                                  time,
-                                                                  atomSpace,
-                                                                  self_id,
-                                                                  owner_id,
-                                                                  get_indefinite_object(*arg),
-                                                                  isInThePast);
+                            time,
+                            atomSpace,
+                            self_id,
+                            owner_id,
+                            get_indefinite_object(*arg),
+                            isInThePast);
 
                 } else if (is_wild_card(*arg)) {
                     wild_card_it.push_back(arg);
@@ -1835,8 +1834,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 } else {
                     opencog::cassert(TRACE_INFO,
-                                      false,
-                                      "WWUtil - is_proportional_next - argument should be perception or definite_object");
+                                     false,
+                                     "WWUtil - is_proportional_next - argument should be perception or definite_object");
                 }
 
                 std::vector<std::string> arguments;
@@ -1849,9 +1848,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 if (data != CACHE_MISS) {
                     return combo::bool_to_vertex
-                        (WorldWrapperUtil::evaluateLogicalOperation(operation,
-                                                                    data,
-                                                                    value));
+                           (WorldWrapperUtil::evaluateLogicalOperation(operation,
+                                   data,
+                                   value));
 
                 } else {
                     // cache miss, compute the new value and cache it
@@ -1866,9 +1865,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         WorldWrapperUtil::cache.add(time, pred, tv);
 
                         return combo::bool_to_vertex
-                            (WorldWrapperUtil::evaluateLogicalOperation(operation,
-                                                                        tv,
-                                                                        value));
+                               (WorldWrapperUtil::evaluateLogicalOperation(operation,
+                                       tv,
+                                       value));
                     }
                 }
 
@@ -1979,7 +1978,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                             throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command the 'any' parameter shouldn't be preceded by an operation" );
                         } // if
                         stringParameters << " -1 NULL";
-                        parameters.push_back(std::pair<int, boost::any>(-1,0));
+                        parameters.push_back(std::pair<int, boost::any>(-1, 0));
                         continue;
                     } // if
                     if ( !operationDefined ) {
@@ -2128,7 +2127,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::is_last_agent_action:
         opencog::cassert(TRACE_INFO, it.number_of_children() >= 2,
-                          "WWUtil - is_last_agent_action perception needs at least two arguments. Got '%d'.", it.number_of_children());
+                         "WWUtil - is_last_agent_action perception needs at least two arguments. Got '%d'.", it.number_of_children());
         {
             sib_it sib_arg = it.begin();
 
@@ -2156,7 +2155,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                              isInThePast);
                 }
                 opencog::cassert(TRACE_INFO, is_definite_object(v_temp),
-                                  "WWUtil - is_last_agent_action action parameters should already be a definite_objects.");
+                                 "WWUtil - is_last_agent_action action parameters should already be a definite_objects.");
                 parameters.push_back(std::string(get_definite_object(v_temp)));
             }
 
@@ -2271,23 +2270,23 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     case id::is_last_pet_schema:
         opencog::cassert(TRACE_INFO, it.number_of_children() >= 1,
-                          "WWUtil - is_last_pet_schema perception needs at"
-                          " least one argument. Got '%d'.",
-                          it.number_of_children());
+                         "WWUtil - is_last_pet_schema perception needs at"
+                         " least one argument. Got '%d'.",
+                         it.number_of_children());
         {
             sib_it sib_arg = it.begin();
 
             vertex vo1 = *sib_arg;
             opencog::cassert(TRACE_INFO, is_definite_object(vo1),
-                              "WWUtil - is_last_pet_action 1st parameter"
-                              " should be a definite_object");
+                             "WWUtil - is_last_pet_action 1st parameter"
+                             " should be a definite_object");
 
             std::string action_name = get_action_name(get_definite_object(vo1));
 
             vo1 = *(++sib_arg);
             opencog::cassert(TRACE_INFO, is_action_result(vo1),
-                              "WWUtil - is_last_pet_schema 2nd parameter"
-                              " should be an action_result");
+                             "WWUtil - is_last_pet_schema 2nd parameter"
+                             " should be an action_result");
 
             bool schemaSuccessful = false;
             if (get_action(vo1) == combo::id::action_success) {
@@ -2295,8 +2294,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             }
 
             logger().log(opencog::Logger::DEBUG,
-                            "WWUtil - is_last_pet_schema desired '%s'.",
-                            action_name.c_str());
+                         "WWUtil - is_last_pet_schema desired '%s'.",
+                         action_name.c_str());
 
             bool has_wild_card = false;
             std::vector<std::vector<combo::definite_object> > parameters;
@@ -2326,8 +2325,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             if (execLink == Handle::UNDEFINED) {
 
                 logger().log(opencog::Logger::DEBUG,
-                                "WWUtil - Found no action executed by pet"
-                                " in last 30s.");
+                             "WWUtil - Found no action executed by pet"
+                             " in last 30s.");
                 if (has_wild_card) {
                     combo::UnifierIt u_it;
                     for (u_it = vu.begin(); u_it != vu.end(); u_it++) {
@@ -2346,14 +2345,14 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 if (atomSpace.getName(groundedPred) != action_name) {
 
                     logger().log(opencog::Logger::DEBUG,
-                                    "WWUtil - Last action found '%s',"
-                                    " needed '%s'.",
-                                    atomSpace.getName(groundedPred).c_str(),
-                                    action_name.c_str());
+                                 "WWUtil - Last action found '%s',"
+                                 " needed '%s'.",
+                                 atomSpace.getName(groundedPred).c_str(),
+                                 action_name.c_str());
 
                     if (has_wild_card) {
                         for (combo::UnifierIt uit = vu.begin();
-                             uit != vu.end(); uit++) {
+                                uit != vu.end(); uit++) {
                             uit->second = false;
                         }
                         vu.setUpdated(true);
@@ -2374,19 +2373,19 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 }
 
                 bool result = true;
-                for(unsigned int i = 0;
-                    i < std::min(parameters.size(), actionParams.size());
-                    ++i ) {
+                for (unsigned int i = 0;
+                        i < std::min(parameters.size(), actionParams.size());
+                        ++i ) {
                     std::vector<combo::definite_object> p = parameters[i];
                     // normal definite object
                     if (p.size() == 1) {
-                        if(!definite_object_equal(p[0],
-                                                  actionParams[i],
-                                                  self_id, owner_id)) {
+                        if (!definite_object_equal(p[0],
+                                                   actionParams[i],
+                                                   self_id, owner_id)) {
                             result = false;
                         }
 
-                    // wild card
+                        // wild card
                     } else {
                         foreach(combo::definite_object def_obj, p) {
                             if (definite_object_equal(def_obj,
@@ -2547,11 +2546,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     stringstream ss;
     ss << tmp;
     opencog::cassert(TRACE_INFO, !isInThePast, "There is no methods yet to evaluate the perception %s in the past",
-                      ss.str().c_str());
+                     ss.str().c_str());
 
 
     logger().log(opencog::Logger::DEBUG,
-                    "WWUtil - default - %s", ss.str().c_str());
+                 "WWUtil - default - %s", ss.str().c_str());
 
     pre_it tmp_it = tmp.begin();
     std::vector<sib_it> wild_card_it;
@@ -2560,19 +2559,19 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     for (sib_it arg = tmp_it.begin(); arg != tmp_it.end(); ++arg) {
         if (is_indefinite_object(*arg)) {
             *arg = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                          atomSpace,
-                                                          self_id, owner_id,
-                                                          get_indefinite_object(*arg),
-                                                          isInThePast);
+                    atomSpace,
+                    self_id, owner_id,
+                    get_indefinite_object(*arg),
+                    isInThePast);
 
         } else if (is_wild_card(*arg)) {
             wild_card_it.push_back(arg);
         }
     }
     logger().log(opencog::Logger::DEBUG,
-                    "WWUtil - default - %s - eval all indefinite"
-                    " objects or wild_card",
-                    ss.str().c_str());
+                 "WWUtil - default - %s - eval all indefinite"
+                 " objects or wild_card",
+                 ss.str().c_str());
 
 
     // default eval - no wild card
@@ -2588,42 +2587,42 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             name = get_definite_object(*tmp_it);
         } else {
             opencog::cassert(TRACE_INFO, false,
-                              "WWUtil - default - argument tmp_it should"
-                              " be a perception or definite_object.");
+                             "WWUtil - default - argument tmp_it should"
+                             " be a perception or definite_object.");
         }
         std::vector<std::string> arguments;
 
         for (sib_it arg = tmp_it.begin(); arg != tmp_it.end(); ++arg) {
             opencog::cassert(TRACE_INFO, is_definite_object(*arg),
-                              "WWUtil - default eval - argument should"
-                              " already be definite_object");
+                             "WWUtil - default eval - argument should"
+                             " already be definite_object");
             arguments.push_back(get_definite_object(*arg));
         }
 
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil - default - %s - pred created",
-                        ss.str().c_str());
+                     "WWUtil - default - %s - pred created",
+                     ss.str().c_str());
 
         WorldWrapper::predicate pred(name, arguments);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil - default - %s - cache consult done",
-                        ss.str().c_str());
+                     "WWUtil - default - %s - cache consult done",
+                     ss.str().c_str());
 
         if (data != CACHE_MISS) {
 
             logger().log(opencog::Logger::DEBUG,
-                            "WWUtil - default - %s - cache hit",
-                            ss.str().c_str());
+                         "WWUtil - default - %s - cache hit",
+                         ss.str().c_str());
 
             return  combo::bool_to_vertex(data > meanTruthThreshold);
 
         } else {
 
             logger().log(opencog::Logger::DEBUG,
-                            "WWUtil - default - %s - cache miss",
-                            ss.str().c_str());
+                         "WWUtil - default - %s - cache miss",
+                         ss.str().c_str());
 
             Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
@@ -2654,8 +2653,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             name = get_definite_object(*tmp_it);
         } else {
             opencog::cassert(TRACE_INFO, false,
-                              "WWUtil - default - argument tmp_it should"
-                              " be a perception or definite_object.");
+                             "WWUtil - default - argument tmp_it should"
+                             " be a perception or definite_object.");
         }
 
         for (it = vu.begin(); it != vu.end(); it++) {
@@ -2670,8 +2669,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 std::vector<std::string> arguments;
                 for (sib_it arg = tmp_it.begin(); arg != tmp_it.end(); ++arg) {
                     opencog::cassert(TRACE_INFO, is_definite_object(*arg),
-                                      "WWUtil - default eval - argument should"
-                                      " already be definite_object");
+                                     "WWUtil - default eval - argument should"
+                                     " already be definite_object");
                     arguments.push_back(get_definite_object(*arg));
                 }
 
@@ -2701,10 +2700,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     general_result = true;
                 }
                 logger().log(opencog::Logger::DEBUG,
-                                "WWUtil - default - %s - with _*_ = %s"
-                                " - result '%s'",
-                                ss.str().c_str(), def_obj.c_str(),
-                                result ? "true" : "false");
+                             "WWUtil - default - %s - with _*_ = %s"
+                             " - result '%s'",
+                             ss.str().c_str(), def_obj.c_str(),
+                             result ? "true" : "false");
             }
         }
         vu.setUpdated(true);
@@ -2737,10 +2736,10 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
         ++mapCounter;
 
         throw opencog::InvalidParamException(TRACE_INFO,
-                                              "WorldWrapperUtil - Space map does not contain '%s'."
-                                              " The corresponding space map was saved in the %s file.",
-                                              handleName.c_str(),
-                                              fileName.str().c_str());
+                                             "WorldWrapperUtil - Space map does not contain '%s'."
+                                             " The corresponding space map was saved in the %s file.",
+                                             handleName.c_str(),
+                                             fileName.str().c_str());
     }
 
     //const SpaceServer::ObjectMetadata& md = sm.getMetaData(handleName);
@@ -2766,7 +2765,7 @@ WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
 
     if (!sm.containsObject(handleName)) {
         throw opencog::InvalidParamException(TRACE_INFO,
-                                              "WorldWrapperUtil - Space map does not contain '%s'.", handleName.c_str());
+                                             "WorldWrapperUtil - Space map does not contain '%s'.", handleName.c_str());
     }
 
     //const SpaceServer::ObjectMetadata& md = sm.getMetaData(handleName);
@@ -2866,17 +2865,17 @@ WorldWrapperUtil::getDefiniteObjects(opencog::RandGen& rng,
 
     if (is_indefinite_object(v)) { //eval indefinite object of argument
         v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time, atomSpace,
-                                                   self_id, owner_id,
-                                                   get_indefinite_object(v),
-                                                   isInThePast);
+                self_id, owner_id,
+                get_indefinite_object(v),
+                isInThePast);
         if (is_definite_object(v)) {
             definite_objects.push_back(get_definite_object(v));
         }
 
     } else if (is_wild_card(v)) {
         opencog::cassert(TRACE_INFO, !vu.empty(),
-                          "WWUtil - evalPerception - unifier should"
-                          " not be empty.");
+                         "WWUtil - evalPerception - unifier should"
+                         " not be empty.");
         definite_objects = vu.getActiveSet();
     } else if (is_definite_object(v)) {
         std::string target =
@@ -2889,14 +2888,14 @@ WorldWrapperUtil::getDefiniteObjects(opencog::RandGen& rng,
 }
 
 void WorldWrapperUtil::changePredicateName(combo::combo_tree& tr,
-                                           const std::string& name)
+        const std::string& name)
 {
     pre_it t_it = tr.begin();
     *t_it = vertex(name);
 }
 
 bool WorldWrapperUtil::evaluateLogicalOperation(int operation,
-                                                double valueA, double valueB)
+        double valueA, double valueB)
 {
     switch ( operation ) {
     case 0: // lesser than
@@ -2915,9 +2914,9 @@ bool WorldWrapperUtil::evaluateLogicalOperation(int operation,
 }
 
 float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
-                                                const std::string& feeling,
-                                                const std::string& target,
-                                                unsigned long time)
+        const std::string& feeling,
+        const std::string& target,
+        unsigned long time)
 {
 
     // cache predicate data variables
@@ -2934,20 +2933,20 @@ float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
     }
 
     logger().log(opencog::Logger::DEBUG,
-                    "WWUtil - '%s' with '%s' '%f'.",
-                    target.c_str(), feeling.c_str(), value);
+                 "WWUtil - '%s' with '%s' '%f'.",
+                 target.c_str(), feeling.c_str(), value);
     return value;
 }
 
 float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
-                                                   Handle smh,
-                                                   unsigned long time,
-                                                   const AtomSpace& atomSpace,
-                                                   const string& self_id,
-                                                   const string& owner_id,
-                                                   const combo::combo_tree::iterator it,
-                                                   bool isInThePast,
-                                                   combo::variable_unifier& vu)
+        Handle smh,
+        unsigned long time,
+        const AtomSpace& atomSpace,
+        const string& self_id,
+        const string& owner_id,
+        const combo::combo_tree::iterator it,
+        bool isInThePast,
+        combo::variable_unifier& vu)
 {
 
 
@@ -2955,14 +2954,14 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
     for (sib_it arg = it.begin(); arg != it.end(); ++arg) {
         if (is_indefinite_object(*arg)) {
             *arg = WorldWrapperUtil::evalIndefiniteObject(rng, smh, time,
-                                                          atomSpace,
-                                                          self_id, owner_id,
-                                                          get_indefinite_object(*arg),
-                                                          isInThePast);
+                    atomSpace,
+                    self_id, owner_id,
+                    get_indefinite_object(*arg),
+                    isInThePast);
         }
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil - getEmotionalFeelingOrTrait - eval all"
-                        " indefinite objects.");
+                     "WWUtil - getEmotionalFeelingOrTrait - eval all"
+                     " indefinite objects.");
     }
 
     combo_tree tmp(it);
@@ -2975,15 +2974,15 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
         name = get_definite_object(*it);
     } else {
         opencog::cassert(TRACE_INFO, false,
-                          "WWUtil - getEmotionalFeelingOrTrait - argument"
-                          " it should be definite_object.");
+                         "WWUtil - getEmotionalFeelingOrTrait - argument"
+                         " it should be definite_object.");
     }
     std::vector<std::string> arguments;
 
     for (sib_it arg = it.begin(); arg != it.end(); ++arg) {
         opencog::cassert(TRACE_INFO, is_definite_object(*arg),
-                          "WWUtil -  getEmotionalFeelingOrTrait - argument"
-                          " should be definite_object");
+                         "WWUtil -  getEmotionalFeelingOrTrait - argument"
+                         " should be definite_object");
         arguments.push_back(get_definite_object(*arg));
     }
 
@@ -2992,9 +2991,9 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
 
     if (data != CACHE_MISS) {
         logger().log(opencog::Logger::DEBUG,
-                        "WWUtil -  getEmotionalFeelingOrTrait - %s - cache hit"
-                        " - value '%.2f'.",
-                        ss.str().c_str(), data);
+                     "WWUtil -  getEmotionalFeelingOrTrait - %s - cache hit"
+                     " - value '%.2f'.",
+                     ss.str().c_str(), data);
         return data;
 
     } else {
@@ -3008,7 +3007,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
         WorldWrapperUtil::cache.add(time, pred, data);
 
         logger().log(opencog::Logger::DEBUG, "WWUtil -  getEmotionalFeelingOrTrait - %s - cache miss - value '%.2f'.",
-                        ss.str().c_str(), data);
+                     ss.str().c_str(), data);
         return data;
     }
 }

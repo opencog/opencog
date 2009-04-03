@@ -1,7 +1,7 @@
 /**
  * ProcedureInterpreterUTest.cxxtest
  *
- * Author: Welter Luigi 
+ * Author: Welter Luigi
  * Copyright(c), 2007
  */
 #include "ProcedureInterpreter.h"
@@ -14,80 +14,81 @@
 using namespace Procedure;
 using namespace PerceptionActionInterface;
 
-class ProcedureInterpreterUTest :  public CxxTest::TestSuite {
-    
-    public:
-        ProcedureInterpreterUTest(){
-        }
-        
-        ~ProcedureInterpreterUTest(){
-        }
-        
-        void setUp(){
-        }
+class ProcedureInterpreterUTest :  public CxxTest::TestSuite
+{
 
-        void tearDown(){
-        }
+public:
+    ProcedureInterpreterUTest() {
+    }
 
-        void testOk() {
-            AtomSpace as;
-            
-            Control::SystemParameters sp;
-            std::list<ActionPlan> plans;
-            OKActionPlanSender ap(plans);
-            PetInterfaceMock pi;
-            PAI pai(as, ap, pi, sp);
-            pi.setPAI(&pai);
-            std::vector<combo::vertex> arguments; 
-	    PetActionSchema p(pai, ActionType::BARK());
-            ProcedureInterpreter interpreter(pai);
-	    RunningProcedureID id = interpreter.runProcedure(p,arguments);
-            //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
-            TS_ASSERT(!interpreter.isFailed(id));
-            interpreter.run(NULL);
+    ~ProcedureInterpreterUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testOk() {
+        AtomSpace as;
+
+        Control::SystemParameters sp;
+        std::list<ActionPlan> plans;
+        OKActionPlanSender ap(plans);
+        PetInterfaceMock pi;
+        PAI pai(as, ap, pi, sp);
+        pi.setPAI(&pai);
+        std::vector<combo::vertex> arguments;
+        PetActionSchema p(pai, ActionType::BARK());
+        ProcedureInterpreter interpreter(pai);
+        RunningProcedureID id = interpreter.runProcedure(p, arguments);
+        //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
+        TS_ASSERT(!interpreter.isFailed(id));
+        interpreter.run(NULL);
 #if 0 // TODO: Add pai.processPVPMessage(<action status message>) so that the action can be marked finished
-            TS_ASSERT(interpreter.isFinished(id));
-            TS_ASSERT(!interpreter.isFailed(id));
-            combo::vertex result = interpreter.getResult(id);
-	    //cout << "result = '" << result << "'" << endl;
-            TS_ASSERT(get<ActionPlanID>(&result));
-            TS_ASSERT(get<ActionPlanID>(result) == "0");
-            TS_ASSERT(!plans.empty());
-            TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
-	    interpreter.stopProcedure(id);
-            TS_ASSERT(interpreter.isFinished(id));
-            TS_ASSERT(!interpreter.isFailed(id));
-#endif	    
-	}
-            
-        void testFailure() {
-            AtomSpace as;
-            
-            Control::SystemParameters sp;
-            FailureActionPlanSender ap;
-            PetInterfaceMock pi;
-            PAI pai(as, ap, pi, sp);
-            pi.setPAI(&pai);
-            std::vector<combo::vertex> arguments; 
-	    PetActionSchema p(pai, ActionType::BARK());
-            ProcedureInterpreter interpreter(pai);
-	    RunningProcedureID id = interpreter.runProcedure(p,arguments);
-            //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
-            TS_ASSERT(interpreter.isFailed(id));
-            interpreter.run(NULL);
-            TS_ASSERT(interpreter.isFailed(id));
-#if 0// TODO: Add pai.processPVPMessage(<action status message>) so that the action can be marked finished
-            TS_ASSERT(interpreter.isFinished(id));
-	    /* Cannot call getResult if the procedure has failed
-            combo::vertex result = interpreter.getResult(id);
-	    //cout << "result = '" << result << "'" << endl;
-            TS_ASSERT(get<combo::id::builtin>(&result));
-            TS_ASSERT(get<combo::id::builtin>(result) == combo::id::null_vertex);
-	    */
-	    interpreter.stopProcedure(id);
-            TS_ASSERT(interpreter.isFinished(id));
-            TS_ASSERT(!interpreter.isFailed(id));
+        TS_ASSERT(interpreter.isFinished(id));
+        TS_ASSERT(!interpreter.isFailed(id));
+        combo::vertex result = interpreter.getResult(id);
+        //cout << "result = '" << result << "'" << endl;
+        TS_ASSERT(get<ActionPlanID>(&result));
+        TS_ASSERT(get<ActionPlanID>(result) == "0");
+        TS_ASSERT(!plans.empty());
+        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
+        interpreter.stopProcedure(id);
+        TS_ASSERT(interpreter.isFinished(id));
+        TS_ASSERT(!interpreter.isFailed(id));
 #endif
-	}
-        
+    }
+
+    void testFailure() {
+        AtomSpace as;
+
+        Control::SystemParameters sp;
+        FailureActionPlanSender ap;
+        PetInterfaceMock pi;
+        PAI pai(as, ap, pi, sp);
+        pi.setPAI(&pai);
+        std::vector<combo::vertex> arguments;
+        PetActionSchema p(pai, ActionType::BARK());
+        ProcedureInterpreter interpreter(pai);
+        RunningProcedureID id = interpreter.runProcedure(p, arguments);
+        //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
+        TS_ASSERT(interpreter.isFailed(id));
+        interpreter.run(NULL);
+        TS_ASSERT(interpreter.isFailed(id));
+#if 0// TODO: Add pai.processPVPMessage(<action status message>) so that the action can be marked finished
+        TS_ASSERT(interpreter.isFinished(id));
+        /* Cannot call getResult if the procedure has failed
+               combo::vertex result = interpreter.getResult(id);
+        //cout << "result = '" << result << "'" << endl;
+               TS_ASSERT(get<combo::id::builtin>(&result));
+               TS_ASSERT(get<combo::id::builtin>(result) == combo::id::null_vertex);
+        */
+        interpreter.stopProcedure(id);
+        TS_ASSERT(interpreter.isFinished(id));
+        TS_ASSERT(!interpreter.isFailed(id));
+#endif
+    }
+
 };

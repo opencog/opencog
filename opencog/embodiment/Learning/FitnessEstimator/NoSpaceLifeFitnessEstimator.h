@@ -1,7 +1,7 @@
 /**
  * NoSpaceLifeFitnessEstimator.h
  *
- * Author(s): 
+ * Author(s):
  *   Nil Geisweiller
  * Creation: Fri Dec 07 2007
  */
@@ -26,19 +26,20 @@
 #define IS_FE_LRU_CACHE
 #define FE_LRU_CACHE_SIZE 1000000
 
-namespace FitnessEstimator {
-  
-  typedef double fitness_t;
-  
-  typedef combo::combo_tree::iterator pre_it;
-  typedef combo::combo_tree::sibling_iterator sib_it;
+namespace FitnessEstimator
+{
 
-  /**
-   *fitness estimation using NoSpaceLife and BehaviorDescriptionMatcher
-   */
-  struct NoSpaceLifeFitnessEstimator: unary_function<combo::combo_tree, fitness_t> {
+typedef double fitness_t;
 
-  public:
+typedef combo::combo_tree::iterator pre_it;
+typedef combo::combo_tree::sibling_iterator sib_it;
+
+/**
+ *fitness estimation using NoSpaceLife and BehaviorDescriptionMatcher
+ */
+struct NoSpaceLifeFitnessEstimator: unary_function<combo::combo_tree, fitness_t> {
+
+public:
 
     /**
      * constructor
@@ -56,19 +57,19 @@ namespace FitnessEstimator {
      *                    filter, it is used to compute sizePenalty function
      */
     NoSpaceLifeFitnessEstimator(WorldProvider* wp,
-				const std::string& petName,
-				const std::string& ownerName,
-				const std::string& avatarName,
-				const std::string& trickName,
-				const combo::definite_object_set& dos,
-				behavior::BehaviorCategory& BDCat,
-				const std::vector<Temporal>& exemplarTemporals,
-				const combo::argument_list_list& all,
-				int indefinite_object_count,
-				int operator_count,
-				int predicate_Count,
-				int action_count,
-				opencog::RandGen& rng);
+                                const std::string& petName,
+                                const std::string& ownerName,
+                                const std::string& avatarName,
+                                const std::string& trickName,
+                                const combo::definite_object_set& dos,
+                                behavior::BehaviorCategory& BDCat,
+                                const std::vector<Temporal>& exemplarTemporals,
+                                const combo::argument_list_list& all,
+                                int indefinite_object_count,
+                                int operator_count,
+                                int predicate_Count,
+                                int action_count,
+                                opencog::RandGen& rng);
 
     ~NoSpaceLifeFitnessEstimator();
 
@@ -86,12 +87,12 @@ namespace FitnessEstimator {
      * and update predCount and actionCount
      */
     void update(int indefinite_object_count, int operator_count,
-		int predicate_count, int action_count);
+                int predicate_count, int action_count);
 
-  private:
+private:
 
     WorldProvider* _wp; //not const because Combo2BD may add atoms
-                        //into wp's atomspace
+    //into wp's atomspace
 
     const combo::definite_object_set& _dos;
 
@@ -130,7 +131,7 @@ namespace FitnessEstimator {
      */
     int getTrialCount(const combo::combo_tree& tr) const;
 
-  };
+};
 }
 
 #endif

@@ -35,7 +35,8 @@
 #include <iostream>
 #include <exception>
 
-namespace MessagingSystem{
+namespace MessagingSystem
+{
 
 using namespace boost::filesystem;
 
@@ -44,39 +45,40 @@ using namespace boost::filesystem;
  * Implements MessageCentral using a map of queue, in memory.
  *
  */
-class FileMessageCentral : public MessageCentral {
-	
-	private:
-	
-        const Control::SystemParameters& parameters;
-        path directory;
-		
-	public:
-	
-		/**
-		 * Constructors and destructor
-		 */
-		~FileMessageCentral();
+class FileMessageCentral : public MessageCentral
+{
 
-		FileMessageCentral(const Control::SystemParameters &params) throw (RuntimeException, std::bad_exception);
-		
-		void createQueue(const std::string id, const bool reset = false);
-	
-        void clearQueue(const std::string id);
-        
-        void removeQueue(const std::string id);
+private:
 
-		const bool isQueueEmpty(const std::string id);		
+    const Control::SystemParameters& parameters;
+    path directory;
 
-		const int sizeQueue(const std::string id);		
+public:
 
-		const bool existsQueue(const std::string id);		
+    /**
+     * Constructors and destructor
+     */
+    ~FileMessageCentral();
 
-		void push(const std::string id, Message *message);
-		
-		Message* pop(const std::string id);
-		
+    FileMessageCentral(const Control::SystemParameters &params) throw (RuntimeException, std::bad_exception);
+
+    void createQueue(const std::string id, const bool reset = false);
+
+    void clearQueue(const std::string id);
+
+    void removeQueue(const std::string id);
+
+    const bool isQueueEmpty(const std::string id);
+
+    const int sizeQueue(const std::string id);
+
+    const bool existsQueue(const std::string id);
+
+    void push(const std::string id, Message *message);
+
+    Message* pop(const std::string id);
+
 }; // class
 }  // namespace
 
-#endif 
+#endif

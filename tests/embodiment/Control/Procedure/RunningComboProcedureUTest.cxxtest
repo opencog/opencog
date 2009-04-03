@@ -8,18 +8,20 @@ using namespace std;
 
 bool chatty = true;
 
-class ChattyActionPlanSender : public PerceptionActionInterface::ActionPlanSender {
-  bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
-    for (unsigned int i=0;i<actionPlan.size();++i)
-      cout << "[" << actionPlan.getAction(i).getName() << " " 
-	   << actionPlan.getAction(i).getType() << "]" << endl;
-    return true;
-  }
+class ChattyActionPlanSender : public PerceptionActionInterface::ActionPlanSender
+{
+    bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
+        for (unsigned int i = 0;i < actionPlan.size();++i)
+            cout << "[" << actionPlan.getAction(i).getName() << " "
+                 << actionPlan.getAction(i).getType() << "]" << endl;
+        return true;
+    }
 };
 
-class RunningComboProcedureUTest :  public CxxTest::TestSuite {
+class RunningComboProcedureUTest :  public CxxTest::TestSuite
+{
 public:
-  void test1() {
-  }
+    void test1() {
+    }
 
 };

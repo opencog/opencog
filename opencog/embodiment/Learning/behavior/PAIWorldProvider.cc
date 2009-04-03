@@ -31,5 +31,5 @@ unsigned long PAIWorldProvider::getLatestSimWorldTimestamp() const
 
 AtomSpace& PAIWorldProvider::getAtomSpace() const
 {
-  return pai->getAtomSpace();
+    return pai->getAtomSpace();
 }

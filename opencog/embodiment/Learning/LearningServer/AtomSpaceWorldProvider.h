@@ -26,18 +26,19 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 
-class AtomSpaceWorldProvider : public WorldProvider {
+class AtomSpaceWorldProvider : public WorldProvider
+{
 
     AtomSpace& atomSpace;
 
-    public:
-        AtomSpaceWorldProvider(AtomSpace& _atomSpace): atomSpace(_atomSpace) {}
-        unsigned long getLatestSimWorldTimestamp() const {
-            return atomSpace.getTimeServer().getLatestTimestamp();
-        }
-        AtomSpace& getAtomSpace() const {
-            return atomSpace;
-        }
+public:
+    AtomSpaceWorldProvider(AtomSpace& _atomSpace): atomSpace(_atomSpace) {}
+    unsigned long getLatestSimWorldTimestamp() const {
+        return atomSpace.getTimeServer().getLatestTimestamp();
+    }
+    AtomSpace& getAtomSpace() const {
+        return atomSpace;
+    }
 };
 
 #endif // _ATOMSPACE_WORLD_PROVIDER_H_

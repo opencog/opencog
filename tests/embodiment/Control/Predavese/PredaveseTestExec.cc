@@ -63,18 +63,17 @@ void PredaveseParser::testPre()
     vector<string> ok_tests, fail_tests;
 
     fail_tests.push_back(id2str[(Relation_obj        )] + "(walk, walk)");
-    ok_tests.push_back(id2str[(Relation_obj        )]+"(fetch, stick)");
-    ok_tests.push_back(id2str[(Relation_subj    )]	+"(fetch, stick)");
-    ok_tests.push_back(id2str[(Relation_obj2    )]	+"(fetch, stick)");
-    ok_tests.push_back(id2str[(Relation_poss    )]	+"(Ben)");
-    ok_tests.push_back(id2str[(Relation_subj_r    )]+"(good, stick)");
-    ok_tests.push_back(id2str[(Relation_to_do    )]+"(fetch, enjoy)");
+    ok_tests.push_back(id2str[(Relation_obj        )] + "(fetch, stick)");
+    ok_tests.push_back(id2str[(Relation_subj    )] + "(fetch, stick)");
+    ok_tests.push_back(id2str[(Relation_obj2    )] + "(fetch, stick)");
+    ok_tests.push_back(id2str[(Relation_poss    )] + "(Ben)");
+    ok_tests.push_back(id2str[(Relation_subj_r    )] + "(good, stick)");
+    ok_tests.push_back(id2str[(Relation_to_do    )] + "(fetch, enjoy)");
 //    ok_tests.push_back("_subj_a(big, stick)");
 
-   set<pAtom, less_atom_by_structure> res;
+    set<pAtom, less_atom_by_structure> res;
 
-    foreach(string s, ok_tests)
-    {
+    foreach(string s, ok_tests) {
 //set<pAtom, less_atom_by_structure> res;
         unsigned int original_res_size = (unsigned int)res.size();
 //        Parser parser(patmap);
@@ -95,8 +94,7 @@ void PredaveseParser::testPre()
             parse_error();
     }
 
-    foreach(string s, fail_tests)
-    {
+    foreach(string s, fail_tests) {
         unsigned int original_res_size = (unsigned int)res.size();
         //parse(clean_string::clean(s.c_str()), inserter(res, res.begin())); //->print();
         parse(opencog::StringManipulator::clean(s), inserter(res, res.begin())); //->print();
@@ -113,16 +111,14 @@ void PredaveseParser::testPre()
 
     puts("Results:");
 
-    foreach(pAtom a, res)
-    {
+    foreach(pAtom a, res) {
         a->print();
         puts("");
     }
 
     puts("\nTaking actions...");
 
-    foreach(pAtom a, res)
-    {
+    foreach(pAtom a, res) {
         if (STLhas(pat2action, a))
             (*pat2action[a])(a, 0, "Sarah");
     }
@@ -144,7 +140,7 @@ void PredaveseParser::testEng()
     //ok_tests.push_back("boy is your dog"); //slow?
     //ok_tests.push_back("Your boy is a dog");
 
-	ok_tests.push_back("good boy");
+    ok_tests.push_back("good boy");
     ok_tests.push_back("boy is a dog");
     ok_tests.push_back("good dog");
     ok_tests.push_back("bad pet");
@@ -175,7 +171,7 @@ void PredaveseParser::testEng()
 
     ok_tests.push_back("I fetch");
     ok_tests.push_back("done fetch");
-	ok_tests.push_back("Sit");
+    ok_tests.push_back("Sit");
 
     ok_tests.push_back("learn to dig");
     ok_tests.push_back("i dig");
@@ -184,36 +180,35 @@ void PredaveseParser::testEng()
     ok_tests.push_back("do dig");
     ok_tests.push_back("stop dig");
 
-	//ok_tests.push_back("You are a good dog. ");
-	//ok_tests.push_back("I am fnorbling.");
-	//ok_tests.push_back("I am going to fnorbl now.");
-	//ok_tests.push_back("I am done fnorbling.");
-	//ok_tests.push_back("Try fnorbling");
-	//ok_tests.push_back("Try to fnorbl");
-	//ok_tests.push_back("Try to sit   ");
-	//ok_tests.push_back("Like this    ");
-	//ok_tests.push_back("That is a big stick");
-	//ok_tests.push_back("That is a log  ");
-	//ok_tests.push_back("That is a really big stick");
-	//ok_tests.push_back("There is your log. ");
-	//ok_tests.push_back("That is Bobs stick. ");
+    //ok_tests.push_back("You are a good dog. ");
+    //ok_tests.push_back("I am fnorbling.");
+    //ok_tests.push_back("I am going to fnorbl now.");
+    //ok_tests.push_back("I am done fnorbling.");
+    //ok_tests.push_back("Try fnorbling");
+    //ok_tests.push_back("Try to fnorbl");
+    //ok_tests.push_back("Try to sit   ");
+    //ok_tests.push_back("Like this    ");
+    //ok_tests.push_back("That is a big stick");
+    //ok_tests.push_back("That is a log  ");
+    //ok_tests.push_back("That is a really big stick");
+    //ok_tests.push_back("There is your log. ");
+    //ok_tests.push_back("That is Bobs stick. ");
 
     //vector<pAtom> res;
     //foreach(string s, tests)
     //    parse(clean_string::clean(s.c_str()), back_inserter(res)); //->print();
     set<pAtom, less_atom_by_structure> res;
 
-    foreach(string s, ok_tests)
-    {
+    foreach(string s, ok_tests) {
 //set<pAtom, less_atom_by_structure> res;
         unsigned int original_res_size = (unsigned int)res.size();
 
         map<pAtom, action*, less_atom> _pat2action = pat2action;
-map<pat, pAtom, less_pat<less_atom> > _terminal = terminal;
-map<pat, pat, less_pat<less_atom> > _patmap = patmap, _i_patmap = i_patmap,
-    _elliptic_prefix_patmap = elliptic_prefix_patmap;
+        map<pat, pAtom, less_pat<less_atom> > _terminal = terminal;
+        map<pat, pat, less_pat<less_atom> > _patmap = patmap, _i_patmap = i_patmap,
+                _elliptic_prefix_patmap = elliptic_prefix_patmap;
 
-        if (_patmap!=patmap) puts("!!!!! 3");
+        if (_patmap != patmap) puts("!!!!! 3");
 
         //string clean_s = clean_string::clean(s.c_str());
         string clean_s = opencog::StringManipulator::clean(s);
@@ -226,24 +221,23 @@ map<pat, pat, less_pat<less_atom> > _patmap = patmap, _i_patmap = i_patmap,
         }
 #endif
         if (_terminal != terminal) puts("1");
-        if (_pat2action!=pat2action) puts("2");
-        if (_patmap!=patmap) puts("3");
-        if (_i_patmap!=i_patmap) puts("4");
-        if (_elliptic_prefix_patmap!=elliptic_prefix_patmap) puts("5");
+        if (_pat2action != pat2action) puts("2");
+        if (_patmap != patmap) puts("3");
+        if (_i_patmap != i_patmap) puts("4");
+        if (_elliptic_prefix_patmap != elliptic_prefix_patmap) puts("5");
 
         printf(" (Res.size = %d (vs. %d before)) \n", res.size(), original_res_size);
 
         if (!(res.size() > original_res_size)
-            || (_terminal != terminal)
-            || (_pat2action!=pat2action)
-            || (_patmap!=patmap)
-            || (_i_patmap!=i_patmap)
-            || (_elliptic_prefix_patmap!=elliptic_prefix_patmap))
+                || (_terminal != terminal)
+                || (_pat2action != pat2action)
+                || (_patmap != patmap)
+                || (_i_patmap != i_patmap)
+                || (_elliptic_prefix_patmap != elliptic_prefix_patmap))
             parse_error();
     }
 
-    foreach(string s, fail_tests)
-    {
+    foreach(string s, fail_tests) {
         unsigned int original_res_size = (unsigned int)res.size();
         //parse(clean_string::clean(s.c_str()), inserter(res, res.begin())); //->print();
         parse(opencog::StringManipulator::clean(s), inserter(res, res.begin())); //->print();
@@ -260,8 +254,7 @@ map<pat, pat, less_pat<less_atom> > _patmap = patmap, _i_patmap = i_patmap,
 
     puts("Results:");
 
-    foreach(pAtom a, res)
-    {
+    foreach(pAtom a, res) {
         a->print();
         puts("");
     }
@@ -269,8 +262,7 @@ map<pat, pat, less_pat<less_atom> > _patmap = patmap, _i_patmap = i_patmap,
     puts("\nTaking actions...");
 
     unsigned long timestamp = 1;
-    foreach(pAtom a, res)
-    {
+    foreach(pAtom a, res) {
         if (STLhas(pat2action, a))
             (*pat2action[a])(a, timestamp++, "Sarah");
     }
@@ -288,12 +280,12 @@ int _tmain(int argc, _TCHAR* argv[])
 int main(int argc, char* argv[])
 #endif
 {
-/*    map<pat, pat, less_pat<less_atom> > patmap;
-    //initPre(patmap);
-    //testPre(patmap);
+    /*    map<pat, pat, less_pat<less_atom> > patmap;
+        //initPre(patmap);
+        //testPre(patmap);
 
-    initEng(patmap);
-	testEng(patmap);*/
+        initEng(patmap);
+     testEng(patmap);*/
 
 
     AtomSpace atomSpace;
@@ -319,14 +311,14 @@ int main(int argc, char* argv[])
         p->testEng();
     }
 
-/*    set<ActionAtomPair> s;
-    p.Parse("Learn to fetch!", inserter(s, s.begin()));
-    p.Parse("Stop learning to fetch!", inserter(s, s.begin()));
+    /*    set<ActionAtomPair> s;
+        p.Parse("Learn to fetch!", inserter(s, s.begin()));
+        p.Parse("Stop learning to fetch!", inserter(s, s.begin()));
 
-    foreach(const ActionAtomPair& a, s)
-    {
-        (*a.first)(a.second);
-    }
-*/
+        foreach(const ActionAtomPair& a, s)
+        {
+            (*a.first)(a.second);
+        }
+    */
     return 0;
 }

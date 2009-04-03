@@ -25,26 +25,28 @@
 #include "BasicPredicateUpdater.h"
 #include <opencog/spatial/Math/Triangle.h>
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-  /**
-   * This class is used to update all the predicates related with PetPsyche 
-   */
-  class PetPsychePredicatesUpdater : public BasicPredicateUpdater {  
+/**
+ * This class is used to update all the predicates related with PetPsyche
+ */
+class PetPsychePredicatesUpdater : public BasicPredicateUpdater
+{
 
-  private: 
-      unsigned long latestSimWorldTimestamp;
-      Spatial::Math::Triangle createFieldOfViewTriangle(Handle agent);
-	  
-  public:
-    
+private:
+    unsigned long latestSimWorldTimestamp;
+    Spatial::Math::Triangle createFieldOfViewTriangle(Handle agent);
+
+public:
+
     PetPsychePredicatesUpdater(AtomSpace& _atomSpace);
-    
+
     virtual ~PetPsychePredicatesUpdater( );
-    
+
     void update( Handle object, Handle pet, unsigned long timestamp );
-    
-  }; // class
+
+}; // class
 
 } // OperationalPetController
 

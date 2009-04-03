@@ -33,44 +33,46 @@
 
 #include "util/exceptions.h"
 
-namespace PerceptionActionInterface {
+namespace PerceptionActionInterface
+{
 
 
 
 /**
  * Some usefull methods for the Operational Pet Controller.
- */ 
-class PAIUtils{
-	
-	public:
+ */
+class PAIUtils
+{
+
+public:
 
     /**
      * Used in XML parsing. The max length of XML tags names which will be parsed.
      */
     static const int MAX_TAG_LENGTH;
-    static const boost::posix_time::ptime epoch; 
+    static const boost::posix_time::ptime epoch;
 
-    /** 
+    /**
      * Initializes the xerces-c XML Platform
-     */ 
+     */
     static void initializeXMLPlatform() throw (opencog::XMLException, std::bad_exception);
-    
-    /** 
+
+    /**
      * Teminate the xerces-c XML Platform
-     */ 
+     */
     static void terminateXMLPlatform();
 
     /**
-      * Gets the object that implements the DOM interface of xerces library 
+      * Gets the object that implements the DOM interface of xerces library
       * for handling xml docs.
       */
-	static XERCES_CPP_NAMESPACE::DOMImplementation* getDOMImplementation() throw (opencog::XMLException, std::bad_exception);
+    static XERCES_CPP_NAMESPACE::DOMImplementation* getDOMImplementation() throw (opencog::XMLException, std::bad_exception);
 
     /**
      * Gets the serialized string representation of a XML DOM document
-     */ 	
+     */
     static std::string getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument * doc) throw (opencog::RuntimeException, std::bad_exception);
-    
+
     /**
      * Gets the internal id for an object, given its exteranal id
      */
@@ -93,16 +95,16 @@ class PAIUtils{
      * struct tm
      * {
      *  int tm_sec;                    Seconds.     [0-60] (1 leap second)
-     *  int tm_min;                    Minutes.     [0-59] 
-     *  int tm_hour;                   Hours.       [0-23] 
-     *  int tm_mday;                   Day.         [1-31] 
-     *  int tm_mon;                    Month.       [0-11] 
-     *  int tm_year;                   Year - 1900.  
-     *  int tm_wday;                   Day of week. [0-6] 
-     *  int tm_yday;                   Days in year.[0-365] 
+     *  int tm_min;                    Minutes.     [0-59]
+     *  int tm_hour;                   Hours.       [0-23]
+     *  int tm_mday;                   Day.         [1-31]
+     *  int tm_mon;                    Month.       [0-11]
+     *  int tm_year;                   Year - 1900.
+     *  int tm_wday;                   Day of week. [0-6]
+     *  int tm_yday;                   Days in year.[0-365]
      *  int tm_isdst;                  DST.         [-1/0/1]
-     *  long int tm_gmtoff;            Seconds east of UTC.  
-     *  __const char *tm_zone;         Timezone abbreviation.  
+     *  long int tm_gmtoff;            Seconds east of UTC.
+     *  __const char *tm_zone;         Timezone abbreviation.
      * };
      */
     static tm getTimeInfo( unsigned long timestamp );
@@ -112,8 +114,8 @@ class PAIUtils{
      * representation.
      */
     static int getTimeFactor();
-    
+
 }; // class
 }  // namespace
 
-#endif 
+#endif

@@ -27,7 +27,8 @@
 using namespace PetaverseProxySimulator;
 using namespace MessagingSystem;
 
-GoldStdGen::GoldStdGen(const char* goldStdFilename) {
+GoldStdGen::GoldStdGen(const char* goldStdFilename)
+{
     file = fopen(goldStdFilename, "w");
     if (file) {
         logger().log(opencog::Logger::INFO, "Generating gold standard in file: %s", goldStdFilename);
@@ -37,29 +38,32 @@ GoldStdGen::GoldStdGen(const char* goldStdFilename) {
     initial_time = getCurrentTimestamp();
 }
 
-GoldStdGen::~GoldStdGen() {
+GoldStdGen::~GoldStdGen()
+{
     if (file) {
         fclose(file);
         fflush(file);
     }
 }
 
-            
-void GoldStdGen::writeMessage(MessagingSystem::Message& message, bool sending) {
+
+void GoldStdGen::writeMessage(MessagingSystem::Message& message, bool sending)
+{
     if (file) {
-        fprintf(file, "%s%lu\n%s %s %d\n%s\n%s", 
-                      sending?SENT_MESSAGE_FLAG:RECEIVED_MESSAGE_FLAG,
-                      getCurrentTimestamp()-initial_time,
-                      message.getFrom().c_str(), 
-                      message.getTo().c_str(),
-                      message.getType(),
-                      message.getPlainTextRepresentation(),
-                      MESSAGE_END_FLAG); 
+        fprintf(file, "%s%lu\n%s %s %d\n%s\n%s",
+                sending ? SENT_MESSAGE_FLAG : RECEIVED_MESSAGE_FLAG,
+                getCurrentTimestamp() - initial_time,
+                message.getFrom().c_str(),
+                message.getTo().c_str(),
+                message.getType(),
+                message.getPlainTextRepresentation(),
+                MESSAGE_END_FLAG);
         fflush(file);
     }
 }
 
-GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE* file) {
+GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE* file)
+{
     // read timestamp
     if (fgets(line_buf, lineBufSize, file) == NULL) {
         logger().log(opencog::Logger::ERROR, "Unexpected end of file while reading message's header");
@@ -79,7 +83,7 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
     sscanf(line_buf, "%s %s %d", from, to, &type);
 
     // read the message body
-    std::string message; 
+    std::string message;
     while (true) {
         if (fgets(line_buf, lineBufSize, file) == NULL) {
             logger().log(opencog::Logger::ERROR, "Unexpected end of file while reading message: %s", message.c_str());
@@ -91,16 +95,17 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
         message += line_buf;
     }
     // check and remove the '\n' added by writeMessage() method at the end of the message
-    if (message.at(message.length()-1) != '\n') {
+    if (message.at(message.length() - 1) != '\n') {
         logger().log(opencog::Logger::ERROR, "Failed reading message, which should terminate with <new line> character: %s", message.c_str());
         exit(-1);
     }
-    message.erase(message.length()-1); 
-    
+    message.erase(message.length() - 1);
+
     return new GoldStdMessage(timestamp, Message::factory(from, to, type, message));
 }
 
-unsigned long GoldStdGen::getCurrentTimestamp() {
+unsigned long GoldStdGen::getCurrentTimestamp()
+{
     boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
     string timeStr = to_iso_extended_string(now);
     //cout << "Current date/time = " << timeStr << endl;

@@ -28,21 +28,25 @@
 
 using namespace PetaverseProxySimulator;
 
-TickerAgent::~TickerAgent() {
+TickerAgent::~TickerAgent()
+{
 }
 
-TickerAgent::TickerAgent() {
+TickerAgent::TickerAgent()
+{
 }
 
-void TickerAgent::init(SimulationParameters& _simParameters) {
+void TickerAgent::init(SimulationParameters& _simParameters)
+{
     simParameters = &_simParameters;
     lastTickTime = 0;
     realTimeSecondsInOneTick = atoi(simParameters->get("REAL_TIME_SECONDS_IN_ONE_TICK").c_str());
 }
 
-void TickerAgent::run(opencog::CogServer *server) {
+void TickerAgent::run(opencog::CogServer *server)
+{
     time_t currentTime = time(NULL);
-    if ((currentTime- lastTickTime) >= realTimeSecondsInOneTick) {
+    if ((currentTime - lastTickTime) >= realTimeSecondsInOneTick) {
         ((PVPSimulator *) server)->timeTick();
         lastTickTime = currentTime;
     }

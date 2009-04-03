@@ -23,44 +23,53 @@
 
 using namespace MessagingSystem;
 
-RouterMessage::~RouterMessage(){
+RouterMessage::~RouterMessage()
+{
 }
 
-RouterMessage::RouterMessage(const std::string &from, const std::string &to, 
-                             int _encapsulateType) : Message(from, to, Message::ROUTER){
+RouterMessage::RouterMessage(const std::string &from, const std::string &to,
+                             int _encapsulateType) : Message(from, to, Message::ROUTER)
+{
     encapsulateType = _encapsulateType;
-    message.assign("");                                 
+    message.assign("");
 }
 
-RouterMessage::RouterMessage(const std::string &from, const std::string &to, 
-                             int _encapsulateType, const std::string& msg) 
-                             : Message(from, to, Message::ROUTER){
+RouterMessage::RouterMessage(const std::string &from, const std::string &to,
+                             int _encapsulateType, const std::string& msg)
+        : Message(from, to, Message::ROUTER)
+{
     encapsulateType = _encapsulateType;
     message.assign(msg);
 }
 
-const char *  RouterMessage::getPlainTextRepresentation(){
+const char *  RouterMessage::getPlainTextRepresentation()
+{
     return message.c_str();
 }
 
 
-void RouterMessage::loadPlainTextRepresentation(const char *strMessage){
+void RouterMessage::loadPlainTextRepresentation(const char *strMessage)
+{
     message.assign(strMessage);
 }
 
-void RouterMessage::setMessage(const std::string& msg){
+void RouterMessage::setMessage(const std::string& msg)
+{
     message.assign(msg);
 }
 
-const std::string& RouterMessage::getMessage(){
+const std::string& RouterMessage::getMessage()
+{
     return message;
 }
 
-void RouterMessage::setEncapsulateType(int type){
+void RouterMessage::setEncapsulateType(int type)
+{
     encapsulateType = type;
 }
 
-int RouterMessage::getEncapsulateType(){
+int RouterMessage::getEncapsulateType()
+{
     return encapsulateType;
 }
 

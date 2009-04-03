@@ -32,38 +32,43 @@ static const std::string ball   = "ball";
 static const std::string nonSL  = "nonSL";
 static const std::vector<std::string> trickArgs;
 
-class LearnMessageUTest : public CxxTest::TestSuite {
+class LearnMessageUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
 
-        std::string toLoad;
+    std::string toLoad;
 
-    public:
+public:
 
-        static LearnMessageUTest *createSuite() { return new LearnMessageUTest( ); }
-        static void destroySuite( LearnMessageUTest *suite ) { delete suite; }
+    static LearnMessageUTest *createSuite() {
+        return new LearnMessageUTest( );
+    }
+    static void destroySuite( LearnMessageUTest *suite ) {
+        delete suite;
+    }
 
-        LearnMessageUTest() {
-           opencog::atom_types_init::init();
-        }
+    LearnMessageUTest() {
+        opencog::atom_types_init::init();
+    }
 
-        ~LearnMessageUTest() {
-        }
+    ~LearnMessageUTest() {
+    }
 
-        void setUp() {
-        }
+    void setUp() {
+    }
 
     void tearDown() {
     }
 
-    void testCreateMessage(){
+    void testCreateMessage() {
 
         AtomSpace * atomSpace;
         LearnMessage * learnMessage;
-        
+
         atomSpace = new AtomSpace();
-        
+
         Handle n1 = atomSpace->addNode(NODE, nonSL);
         Handle n2 = atomSpace->addNode(SL_PET_NODE, pet);
         Handle n3 = atomSpace->addNode(SL_OBJECT_NODE, ball);
@@ -78,7 +83,7 @@ class LearnMessageUTest : public CxxTest::TestSuite {
 
         //to satisfy an assert of LearnMessage
         Handle trick_h = atomSpace->addNode(CONCEPT_NODE, trick);
-        Temporal t(1,100);
+        Temporal t(1, 100);
         atomSpace->addTimeInfo(trick_h, t);
 
         learnMessage = new LearnMessage(from, to, trick, trickArgs, owner, avatar, *atomSpace);
@@ -95,9 +100,9 @@ class LearnMessageUTest : public CxxTest::TestSuite {
         delete atomSpace;
     }
 
-    void testDefiniteObjects(){
+    void testDefiniteObjects() {
         AtomSpace * atomSpace = new AtomSpace();
-        
+
         LearnMessage * lm = new LearnMessage(from, to);
 
         lm->loadPlainTextRepresentation(toLoad.c_str());
@@ -116,7 +121,7 @@ class LearnMessageUTest : public CxxTest::TestSuite {
         Handle ballHandle = atomSpace->getHandle(SL_OBJECT_NODE, ball);
         TS_ASSERT(ballHandle != Handle::UNDEFINED);
 
-	    EntityRelevanceFilter filter(atomSpace->getSpaceServer().getLatestMap(), pet, owner);
+        EntityRelevanceFilter filter(atomSpace->getSpaceServer().getLatestMap(), pet, owner);
         std::set<std::string> definiteObjects = filter.getEntities();
 
         // should be 5 since SpaceMap does not have knowledge about the types
@@ -124,13 +129,13 @@ class LearnMessageUTest : public CxxTest::TestSuite {
         TS_ASSERT(definiteObjects.size() == 5);
         printf("definiteObjects.size %d\n", definiteObjects.size());
         TS_ASSERT(definiteObjects.find(ball) != definiteObjects.end());
-	    TS_ASSERT(definiteObjects.find("owner") != definiteObjects.end());
+        TS_ASSERT(definiteObjects.find("owner") != definiteObjects.end());
         TS_ASSERT(definiteObjects.find("self") != definiteObjects.end());
     }
 
     void testLoadPlainTextRepresentation() {
         AtomSpace * atomSpace = new AtomSpace();
-                
+
         LearnMessage * lm = new LearnMessage(from, to);
 
         lm->loadPlainTextRepresentation(toLoad.c_str());

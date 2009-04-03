@@ -10,97 +10,98 @@
 
 using namespace Procedure;
 
-class PetRandomSchemaUTest :  public CxxTest::TestSuite {
-    
-    private:
-        PopulateAtomSpace pop;
+class PetRandomSchemaUTest :  public CxxTest::TestSuite
+{
 
-    public:
-        
-        PetRandomSchemaUTest(){
-        }
+private:
+    PopulateAtomSpace pop;
 
-        ~PetRandomSchemaUTest(){
-        }
+public:
 
-        void setUp(){
-        }
+    PetRandomSchemaUTest() {
+    }
 
-        void tearDown(){
-        }
+    ~PetRandomSchemaUTest() {
+    }
 
-        void testRound01(){
-            pop.addSpaceInfoMock(10, 10);
-            pop.callUpdater();
-            
-            // random_edible
-            PetRandomSchema re(pop.getPAI(), (string)"random_edible");
-            std::vector<combo::vertex> args;
-	        combo::vertex result = re.execute(args);
-            TS_ASSERT(boost::get<combo::definite_object>(result) == food ||
-                      boost::get<combo::definite_object>(result) == ration);
-            
-            // random_drinkable
-            PetRandomSchema rd(pop.getPAI(), (string)"random_drinkable");
-	        result = rd.execute(args);
-            TS_ASSERT(boost::get<combo::definite_object>(result) == drink ||
-                      boost::get<combo::definite_object>(result) == milk);
- 
-            // random_moving
-            PetRandomSchema rm(pop.getPAI(), (string)"random_moving");
-	        result = rm.execute(args);
-            TS_ASSERT(boost::get<combo::definite_object>(result) == id::null_obj);
+    void setUp() {
+    }
 
-            // random_friendly
-            PetRandomSchema rf(pop.getPAI(), (string)"random_friendly");
-	        result = rf.execute(args);
-            TS_ASSERT(boost::get<combo::definite_object>(result) == owner || 
-                      boost::get<combo::definite_object>(result) == avatar);
-            
-            // random_small
-            PetRandomSchema rs(pop.getPAI(), (string)"random_small");
-            std::string resultString = boost::get<combo::definite_object>(rs.execute(args));  
-            TS_ASSERT(resultString == stick || resultString == doll || 
-                      resultString == food  || resultString == ball ||
-                      resultString == milk  || resultString == ration ||
-                      resultString == drink);
+    void tearDown() {
+    }
 
-            // random_movable - tudo que eh small eh movable
-            PetRandomSchema rmv(pop.getPAI(), (string)"random_movable");
-            resultString = boost::get<combo::definite_object>(rmv.execute(args));  
-            TS_ASSERT(resultString == stick || resultString == doll || 
-                      resultString == food  || resultString == ball ||
-                      resultString == milk  || resultString == ration ||
-                      resultString == drink || resultString == owner ||
-                      resultString == avatar);
+    void testRound01() {
+        pop.addSpaceInfoMock(10, 10);
+        pop.callUpdater();
 
-            // random_pickupable
-            PetRandomSchema rp(pop.getPAI(), (string)"random_pickupable");
-            resultString = boost::get<combo::definite_object>(rp.execute(args));  
-            TS_ASSERT(resultString == stick || resultString == doll || 
-                      resultString == food  || resultString == ball ||
-                      resultString == milk  || resultString == ration ||
-                      resultString == drink);
+        // random_edible
+        PetRandomSchema re(pop.getPAI(), (string)"random_edible");
+        std::vector<combo::vertex> args;
+        combo::vertex result = re.execute(args);
+        TS_ASSERT(boost::get<combo::definite_object>(result) == food ||
+                  boost::get<combo::definite_object>(result) == ration);
+
+        // random_drinkable
+        PetRandomSchema rd(pop.getPAI(), (string)"random_drinkable");
+        result = rd.execute(args);
+        TS_ASSERT(boost::get<combo::definite_object>(result) == drink ||
+                  boost::get<combo::definite_object>(result) == milk);
+
+        // random_moving
+        PetRandomSchema rm(pop.getPAI(), (string)"random_moving");
+        result = rm.execute(args);
+        TS_ASSERT(boost::get<combo::definite_object>(result) == id::null_obj);
+
+        // random_friendly
+        PetRandomSchema rf(pop.getPAI(), (string)"random_friendly");
+        result = rf.execute(args);
+        TS_ASSERT(boost::get<combo::definite_object>(result) == owner ||
+                  boost::get<combo::definite_object>(result) == avatar);
+
+        // random_small
+        PetRandomSchema rs(pop.getPAI(), (string)"random_small");
+        std::string resultString = boost::get<combo::definite_object>(rs.execute(args));
+        TS_ASSERT(resultString == stick || resultString == doll ||
+                  resultString == food  || resultString == ball ||
+                  resultString == milk  || resultString == ration ||
+                  resultString == drink);
+
+        // random_movable - tudo que eh small eh movable
+        PetRandomSchema rmv(pop.getPAI(), (string)"random_movable");
+        resultString = boost::get<combo::definite_object>(rmv.execute(args));
+        TS_ASSERT(resultString == stick || resultString == doll ||
+                  resultString == food  || resultString == ball ||
+                  resultString == milk  || resultString == ration ||
+                  resultString == drink || resultString == owner ||
+                  resultString == avatar);
+
+        // random_pickupable
+        PetRandomSchema rp(pop.getPAI(), (string)"random_pickupable");
+        resultString = boost::get<combo::definite_object>(rp.execute(args));
+        TS_ASSERT(resultString == stick || resultString == doll ||
+                  resultString == food  || resultString == ball ||
+                  resultString == milk  || resultString == ration ||
+                  resultString == drink);
 
 
-            PetRandomSchema rn(pop.getPAI(), (string)"random_noisy");
-            resultString = boost::get<combo::definite_object>(rn.execute(args));  
-            TS_ASSERT(resultString == owner || resultString == avatar);
+        PetRandomSchema rn(pop.getPAI(), (string)"random_noisy");
+        resultString = boost::get<combo::definite_object>(rn.execute(args));
+        TS_ASSERT(resultString == owner || resultString == avatar);
 
-        }
+    }
 
-         void testRound02(){
-            pop.addSpaceInfoMock(40, 40);
-            pop.callUpdater();
-            
-            // random_moving
-            PetRandomSchema rm(pop.getPAI(), (string)"random_moving");
-            std::vector<combo::vertex> args;
-	        combo::vertex result = rm.execute(args);
-            TS_ASSERT(boost::get<combo::definite_object>(result) != id::null_obj);
+    void testRound02() {
+        pop.addSpaceInfoMock(40, 40);
+        pop.callUpdater();
 
-            printf("************** %s ********************\n",
-                  ((std::string)(boost::get<combo::definite_object>(result))).c_str());
-        }
+        // random_moving
+        PetRandomSchema rm(pop.getPAI(), (string)"random_moving");
+        std::vector<combo::vertex> args;
+        combo::vertex result = rm.execute(args);
+        TS_ASSERT(boost::get<combo::definite_object>(result) != id::null_obj);
+
+        printf("************** %s ********************\n",
+               ((std::string)(boost::get<combo::definite_object>(result))).c_str());
+    }
 };
 

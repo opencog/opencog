@@ -26,7 +26,8 @@
 
 using namespace AutomatedSystemTest;
 
-TestParameters::TestParameters() {
+TestParameters::TestParameters()
+{
 
     table["CONFIG_FILE"] = "test.cfg";
 
@@ -39,6 +40,7 @@ TestParameters::TestParameters() {
     table["PROXY_PORT"] = "16315";
 }
 
-TestParameters::~TestParameters() {
+TestParameters::~TestParameters()
+{
 }
 

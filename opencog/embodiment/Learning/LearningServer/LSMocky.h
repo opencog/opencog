@@ -30,32 +30,34 @@
 
 using namespace opencog;
 
-namespace LearningServer{
+namespace LearningServer
+{
 
-class LSMocky : public MessagingSystem::EmbodimentCogServer {
+class LSMocky : public MessagingSystem::EmbodimentCogServer
+{
 
-	public:
+public:
 
-		/**
-		 * Constructor and Destructor
-		 */
-        static BaseServer* createInstance();
-		LSMocky();
-		void init(const std::string &myId, const std::string &ip, int portNumber,
-		   Control::SystemParameters & parameters);
-		~LSMocky();
+    /**
+     * Constructor and Destructor
+     */
+    static BaseServer* createInstance();
+    LSMocky();
+    void init(const std::string &myId, const std::string &ip, int portNumber,
+              Control::SystemParameters & parameters);
+    ~LSMocky();
 
-		bool processNextMessage(MessagingSystem::Message *msg);
+    bool processNextMessage(MessagingSystem::Message *msg);
 
-        Factory<SleepAgent, Agent> sleepAgentFactory;
+    Factory<SleepAgent, Agent> sleepAgentFactory;
 
-	private:
+private:
 
-		AtomSpace * atomSpace;			// store behavior descriptors and space server
-										// with latest map
+    AtomSpace * atomSpace;   // store behavior descriptors and space server
+    // with latest map
 
-		std::string learningPet;		// the id of the pet using the LS
-		std::string learningSchema;     // the trick being learned
+    std::string learningPet;  // the id of the pet using the LS
+    std::string learningSchema;     // the trick being learned
 
 }; // class
 }  // namespace

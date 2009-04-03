@@ -50,7 +50,7 @@ void print(pat p);
 
 #define __p(elT) make_pat1(pAtom(new Atom(elT)))
 
-class Atom 
+class Atom
 {
 public:
     PatIDT id;
@@ -58,23 +58,21 @@ public:
 
     Atom(PatIDT _id, vector<c> _out = vector<c>()) : id(_id), out(_out) {}
 
-    string	toString() const;
-	string	toPrettyString() const;
+    string toString() const;
+    string toPrettyString() const;
     string toIndentString(int indentLevel) const;
-    void	print() const;
-	void	prettyprint() const;
+    void print() const;
+    void prettyprint() const;
     void indentprint() const;
 };
 
 /// Treats Atoms identical if their IDs are identical. The outgoing set isn't compared here.
 /// The idea is that you can't "patmap" Atoms to other Atoms.
 
-struct less_atom
-{
+struct less_atom {
     less_atom() {}
-    
-    bool operator()(pAtom a, pAtom b) const
-    {
+
+    bool operator()(pAtom a, pAtom b) const {
         if (a->id < b->id)
             return true;
         else
@@ -85,10 +83,8 @@ struct less_atom
 /// Used by less_pat. Takes the atom comparison operator as a template arg
 
 template<typename less_atomT>
-struct less_c
-{
-    bool operator()(const c& a, const c& b) const
-    {
+struct less_c {
+    bool operator()(const c& a, const c& b) const {
         const string* a_s = get<string>(&a);
         pAtom* a_atom    = const_cast<pAtom*>(get<pAtom>(&a));
         const string* b_s = get<string>(&b);
@@ -98,15 +94,12 @@ struct less_c
             return true;
         if (b_atom && !a_atom)
             return false;
-        if (a_atom && b_atom)
-        {
+        if (a_atom && b_atom) {
             if (less_atomT()(*a_atom, *b_atom))
                 return true;
             if (less_atomT()(*b_atom, *a_atom))
                 return false;
-        }
-        else
-        {
+        } else {
             if (*a_s < *b_s)
                 return true;
             if (*b_s < *a_s)
@@ -120,10 +113,8 @@ struct less_c
 /// Pattern comparison functor. Takes the atom comparison operator as a template arg.
 
 template<typename less_atomT>
-struct less_pat
-{
-    bool operator()(const pat& a, const pat& b) const
-    {
+struct less_pat {
+    bool operator()(const pat& a, const pat& b) const {
         if (a.size() < b.size())
             return true;
         if (a.size() > b.size())
@@ -136,17 +127,15 @@ struct less_pat
                 return true;
             else if (less_c<less_atomT>()(*bi, *ai))
                 return false;
-        
+
         return false;
     }
 };
 
 /// Treats Atoms identical if their IDs and outgoing vectors are identical.
 
-struct less_atom_by_structure
-{
-    bool operator()(pAtom a, pAtom b) const
-    {
+struct less_atom_by_structure {
+    bool operator()(pAtom a, pAtom b) const {
         if (a->id < b->id)
             return true;
         if (a->id > b->id)
@@ -168,7 +157,7 @@ struct less_atom_by_structure
 typedef map<pat, pat, less_pat<less_atom> > PatMap;
 
 
-//#define isvalidtoken(ch) ((ch) == ')' || (ch)== '(' || (ch) == ',')	
+//#define isvalidtoken(ch) ((ch) == ')' || (ch)== '(' || (ch) == ',')
 /// Clean str from non-alphadigit and convert to lower case before passing here. (This function
 /// is recursively called, so we can't clean up here.
 /*struct clean_string : public string
@@ -184,8 +173,8 @@ typedef map<pat, pat, less_pat<less_atom> > PatMap;
         bool started = false;
         for (int i=0; i < len; i++)
             if (isalpha(rhs[i]) || isdigit(rhs[i]) ||
-				rhs[i] == '_' ||
-				isvalidtoken(rhs[i]) ||
+    rhs[i] == '_' ||
+    isvalidtoken(rhs[i]) ||
                 (started && rhs[i] == ' ') )
             {
                 ret.push_back( (rhs[i]>'Z' && isalpha(rhs[i])) ? (rhs[i]-('z'-'Z') ) : rhs[i]);
@@ -197,13 +186,11 @@ typedef map<pat, pat, less_pat<less_atom> > PatMap;
 };
 */
 
-struct promote
-{
-    c operator()(c _c)
-    {
+struct promote {
+    c operator()(c _c) {
         //string* s = get<string>(&_c);
         pAtom* a = get<pAtom>(&_c);
-        if (a && (*a)->out.size()==1)
+        if (a && (*a)->out.size() == 1)
             return promote()((*a)->out[0]);
         else
             return _c;
@@ -221,7 +208,7 @@ class Parser
 {
     const PatMap& patmap;
 
-	friend class PredaveseParser;
+ friend class PredaveseParser;
 
 public:
     Parser(const map<pat, pat, less_pat<less_atom> >& _patmap)
@@ -230,7 +217,7 @@ public:
     template<typename OutIterT>
     void parse(string s, OutIterT ret)
     {
-        pat p = str2pat(s,patmap); 
+        pat p = str2pat(s,patmap);
         return parse(p, ret, 0, 0);
     }
 
@@ -238,7 +225,7 @@ public:
     void parse(const pat& strs, OutIterT ret, int depth, int original_offset)
     {
         //    print(strs);
-        if (STLhas(i_patmap, strs) && original_offset==0) 
+        if (STLhas(i_patmap, strs) && original_offset==0)
         {
             const pat& newStrs = i_patmap[strs];
             parse(newStrs, ret, depth+1, original_offset);
@@ -259,23 +246,23 @@ public:
             //    printf("\n***     %d     ***\n\n", depth);
 
             /// Parse all variations of strs created by mapping some subvector of strings into a pattern ID
-	        for (unsigned int i=0; i < strs.size(); i++)
+         for (unsigned int i=0; i < strs.size(); i++)
                 for (unsigned int len=0; i+len <= strs.size(); len++)
                 {
-                    vector<c> mod_strs(strs);    
+                    vector<c> mod_strs(strs);
 #ifdef _DEBUG
                     //print(mod_strs);
                     //printf("-------------------------------------------------------------------------\n");
 #endif
                     int reduction=0;
-		   	
-		    //c* pc = &mod_strs[mod_strs.size()];
-		    if (replace(&mod_strs[i], &mod_strs[i+len], &mod_strs[mod_strs.size()], reduction, patmap))
+
+      //c* pc = &mod_strs[mod_strs.size()];
+      if (replace(&mod_strs[i], &mod_strs[i+len], &mod_strs[mod_strs.size()], reduction, patmap))
                     {
                         mod_strs.resize(mod_strs.size()-reduction);
                         parse(mod_strs, ret, depth+1, i);
                     }
-		    
+
                     if (STLhas(terminal, mod_strs))
                     {
                         //                        print(mod_strs);

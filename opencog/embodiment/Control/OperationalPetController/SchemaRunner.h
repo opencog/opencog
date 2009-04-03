@@ -28,24 +28,26 @@
 #include <opencog/atomspace/Node.h>
 #include "OPC.h"
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-  /**
-   * class SchemaRunner
-   * this class is responsible to receive a schemaname and execute it
-   */
-  class SchemaRunner {
-  public:
+/**
+ * class SchemaRunner
+ * this class is responsible to receive a schemaname and execute it
+ */
+class SchemaRunner
+{
+public:
 
     SchemaRunner( OPC* opc, Control::SystemParameters& parameters );
 
     virtual ~SchemaRunner( );
 
     Handle addLink( Type linkType, const HandleSeq& outgoing );
-    
+
     /**
      * Returns true if the schema with the given name was really
-     * sent to ProcedureInterpreter to be executed. 
+     * sent to ProcedureInterpreter to be executed.
      */
     bool runSchema(const std::string& ruleName,
                    const std::string& schemaName,
@@ -60,32 +62,32 @@ namespace OperationalPetController {
      * Return the rule implication link for the current executing schema.
      * UndefinedHandle is returned if there is no executing schema.
      */
-    inline Handle getExecutingSchemaImplicationLink(){
+    inline Handle getExecutingSchemaImplicationLink() {
         return this->executingSchemaImplicationLink;
     }
 
     /**
      * Return the start timestamp for the current executing schema.
      */
-    inline unsigned long getExecutingSchemaTimestamp(){ 
-        return this->executingSchemaTimestamp; 
+    inline unsigned long getExecutingSchemaTimestamp() {
+        return this->executingSchemaTimestamp;
     }
 
     /**
      * Return true if there is an schema being executed or false otherwise.
      */
-    inline bool isExecutingSchema() { 
-        return !isSchemaExecFinished();//this->executingSchema; 
+    inline bool isExecutingSchema() {
+        return !isSchemaExecFinished();//this->executingSchema;
     }
 
     /**
      * Return true if the current executing schema Id has finished its
      * execution, false otherwise.
      */
-    inline bool isSchemaExecFinished(){
+    inline bool isSchemaExecFinished() {
         return isSchemaExecFinished( this->executingSchemaID );
     }
-    
+
     /**
      * Return the result for the executing schema Id. If called before the
      * schema has finished its execution an assertion exception will be raised.
@@ -96,21 +98,21 @@ namespace OperationalPetController {
     combo::vertex getSchemaExecResult();
 
     inline bool isSchemaExecFinished( Procedure::RunningProcedureID schemaId ) {
-      if(schemaId){
-	return (this->opc->getProcedureInterpreter().isFinished( schemaId ));
-      }
-      
-      // there is no schema being executed, so it is finished
-      return true;    
-    }
-    
-    inline Procedure::RunningProcedureID getExecutingSchemaID( void ) const {
-      return this->executingSchemaID;
-    } 
+        if (schemaId) {
+            return (this->opc->getProcedureInterpreter().isFinished( schemaId ));
+        }
 
-  private:
+        // there is no schema being executed, so it is finished
+        return true;
+    }
+
+    inline Procedure::RunningProcedureID getExecutingSchemaID( void ) const {
+        return this->executingSchemaID;
+    }
+
+private:
     OPC* opc;
-   
+
     // Executing schema state variables
     bool executingSchema;
     Handle executingSchemaNode;
@@ -121,7 +123,7 @@ namespace OperationalPetController {
     Procedure::RunningProcedureID executingSchemaID;
     SimpleTruthValue *defaultTruthValue;
     AttentionValue *defaultAttentionValue;
-    
+
     float defaultMean;
     float defaultCount;
     long procedureExecutionTimeout;
@@ -132,8 +134,8 @@ namespace OperationalPetController {
     std::string currentWalkingTargetId;
 
     friend class RuleEngineUtil;
-  };
-  
+};
+
 }; // OperationalPetController;
 
 #endif // SCHEMARUNNER_H

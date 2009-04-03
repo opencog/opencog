@@ -31,25 +31,27 @@
 #define RECEIVED_MESSAGE_FLAG "RECEIVED MESSAGE:\n"
 #define MESSAGE_END_FLAG "MESSAGE END.\n"
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
-    class GoldStdGen {
+class GoldStdGen
+{
 
-        private:
+private:
 
-            FILE* file;
-            unsigned long initial_time;
+    FILE* file;
+    unsigned long initial_time;
 
-        public:
+public:
 
-            GoldStdGen(const char* goldStdFilename);
-            ~GoldStdGen();
-            
-            void writeMessage(MessagingSystem::Message& message, bool sending);
-            static GoldStdMessage* readMessage(char* line_buf, size_t lineBufSize, FILE* file);
-            static unsigned long getCurrentTimestamp();
+    GoldStdGen(const char* goldStdFilename);
+    ~GoldStdGen();
 
-    }; // class
+    void writeMessage(MessagingSystem::Message& message, bool sending);
+    static GoldStdMessage* readMessage(char* line_buf, size_t lineBufSize, FILE* file);
+    static unsigned long getCurrentTimestamp();
+
+}; // class
 }  // namespace
 
 #endif

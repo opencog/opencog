@@ -24,20 +24,21 @@
 
 #include "PetaverseVocabularyProvider.h"
 
-namespace hillclimbing {
+namespace hillclimbing
+{
 
-  using namespace combo;
+using namespace combo;
 
-  //-----------------------------------------------------------------------
-  //Definitions of the operators, actions and perceptions used in petaverse
-  //for imitation learning
-  //-----------------------------------------------------------------------
-  
-  /**
-   * operators used for petaverse hillclimber
-   */
-  
-  static const vertex _elementary_operators[] = {
+//-----------------------------------------------------------------------
+//Definitions of the operators, actions and perceptions used in petaverse
+//for imitation learning
+//-----------------------------------------------------------------------
+
+/**
+ * operators used for petaverse hillclimber
+ */
+
+static const vertex _elementary_operators[] = {
     id::sequential_and,
     id::action_boolean_if,
     //id::action_action_if,
@@ -45,17 +46,17 @@ namespace hillclimbing {
     id::boolean_while,
     //id::action_not,
     id::logical_not
-  };
-  
-  static const unsigned int _elementary_operators_size =
-    sizeof(_elementary_operators)/sizeof(vertex);
-  
-  
-  /**
-   * action and perception set for petaverse hillclimber
-   */
-  
-  static const pet_builtin_action_enum _elementary_actions[] = {
+};
+
+static const unsigned int _elementary_operators_size =
+    sizeof(_elementary_operators) / sizeof(vertex);
+
+
+/**
+ * action and perception set for petaverse hillclimber
+ */
+
+static const pet_builtin_action_enum _elementary_actions[] = {
     id::goto_obj,
     id::step_forward,
     id::step_backward,
@@ -77,12 +78,12 @@ namespace hillclimbing {
     id::heel,
     id::tap_dance,
     id::lean_rock_dance
-  };
-  
-  static const unsigned int _elementary_actions_size =
-    sizeof(_elementary_actions)/sizeof(pet_builtin_action_enum);
-  
-  static const pet_perception_enum _elementary_perceptions[] = {
+};
+
+static const unsigned int _elementary_actions_size =
+    sizeof(_elementary_actions) / sizeof(pet_builtin_action_enum);
+
+static const pet_perception_enum _elementary_perceptions[] = {
     id::exists_edible,
     id::is_pet,
     id::is_avatar,
@@ -93,50 +94,50 @@ namespace hillclimbing {
     //id::inside
     id::has_said,
     id::is_last_agent_action
-  };
-  
-  static const unsigned int _elementary_perceptions_size =
-    sizeof(_elementary_perceptions)/sizeof(pet_perception_enum);
-    
-  static const pet_indefinite_object_enum _indefinite_objects[] = {
+};
+
+static const unsigned int _elementary_perceptions_size =
+    sizeof(_elementary_perceptions) / sizeof(pet_perception_enum);
+
+static const pet_indefinite_object_enum _indefinite_objects[] = {
     //id::random_object,
     //id::nearest_object
-  };
-  
-  static const unsigned int _indefinite_objects_size =
-    sizeof(_indefinite_objects)/sizeof(pet_indefinite_object_enum);
+};
 
-  class HCPetaverseVocabularyProvider : public PetaverseVocabularyProviderBase 
-  {
+static const unsigned int _indefinite_objects_size =
+    sizeof(_indefinite_objects) / sizeof(pet_indefinite_object_enum);
 
-  public:
-    
+class HCPetaverseVocabularyProvider : public PetaverseVocabularyProviderBase
+{
+
+public:
+
     //ctor, dtor
-    
+
     HCPetaverseVocabularyProvider();
     ~HCPetaverseVocabularyProvider() {}
-    
+
     //access methods
-    
+
     //return a reference of the set of operators
     const operator_set& get_elementary_operators() const;
-    
+
     //return a reference of the set of actions
     const builtin_action_set& get_elementary_actions() const;
-    
+
     //return a reference of the set of perceptions
     const perception_set& get_elementary_perceptions() const;
-    
+
     //return a reference of the set of indefinite objects
     const indefinite_object_set& get_indefinite_objects() const;
-    
-  private:
+
+private:
     operator_set eo; //elementary operators
     builtin_action_set ea; //elementary builtin actions
     perception_set ep; //elementary perceptions
     indefinite_object_set is; //indefinite objects
-  };
-  
+};
+
 }//~namespace hillclimbing
 
 #endif

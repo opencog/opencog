@@ -24,26 +24,30 @@
 
 #include "AgentModeHandler.h"
 
-namespace OperationalPetController {
-  class Pet;
-  /**
-   * Handle commands used by Learning mode
-   */
-  class LearningAgentModeHandler : public Control::AgentModeHandler {
-  public:
+namespace OperationalPetController
+{
+class Pet;
+/**
+ * Handle commands used by Learning mode
+ */
+class LearningAgentModeHandler : public Control::AgentModeHandler
+{
+public:
     LearningAgentModeHandler( Pet* agent );
     inline virtual ~LearningAgentModeHandler( void ) { };
 
     void handleCommand( const std::string& name, const std::vector<std::string>& arguments );
 
-    inline const std::string& getModeName( void ) { return this->modeName; }
+    inline const std::string& getModeName( void ) {
+        return this->modeName;
+    }
 
     void update( void );
 
-  protected:    
+protected:
     const std::string modeName;
     Pet* agent;
-  };
+};
 
 }; // OperationalPetController
 

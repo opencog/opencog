@@ -37,19 +37,19 @@ int gettimeofday(timeval *tv, void *tz);
 /**
  * Initializes the reference time that will be used for getting current elapsed times
  */
-void initReferenceTime(); 
+void initReferenceTime();
 /**
- * Gets the elapsed time (in milliseconds) since the reference time initialized with 
- * initReferenceTime() function. The initReferenceTime() function must be called before 
+ * Gets the elapsed time (in milliseconds) since the reference time initialized with
+ * initReferenceTime() function. The initReferenceTime() function must be called before
  * this function be called by the first time.
  */
 unsigned long getElapsedMillis();
 
 #ifndef WIN32
-	#include <string.h>
-	#include <dirent.h>
+#include <string.h>
+#include <dirent.h>
 #  ifndef __APPLE__
-//	#include <libiberty.h>
+// #include <libiberty.h>
 #  endif
 #endif
 
@@ -89,7 +89,8 @@ char Isox(char s);
  *  * Returns a string from the given argument by using the << operator
  *   */
 template <typename T>
-string toString(T data) {
+string toString(T data)
+{
     ostringstream oss;
     string result;
     oss << data;
@@ -103,9 +104,9 @@ string toupper(string k);
 bool LoadTextFile(const string fname, string& dest);
 
 /** A function to create XML elements.
-	\param elem The element's name (eg. "xml" in "<xml> text <xml>")
-	\param pcdata The element data (eg. "text" in "<xml> text <xml>")
-	\return The XML element.
+ \param elem The element's name (eg. "xml" in "<xml> text <xml>")
+ \param pcdata The element data (eg. "text" in "<xml> text <xml>")
+ \return The XML element.
 */
 std::string XMLembed (const std::string &elem, const std::string &pcdata);
 
@@ -114,34 +115,33 @@ std::string XMLembed (const std::string &elem, const std::string &pcdata);
 //------------------------------------------------------------------------------------------------------------
 class StringTokenizer : public vector<string>
 {
-	public:
-		StringTokenizer (const string &rStr, const string &rDelimiters = " ,\n");
-		vector<string> WithoutEmpty() const;
+public:
+    StringTokenizer (const string &rStr, const string &rDelimiters = " ,\n");
+    vector<string> WithoutEmpty() const;
 };
 
 //------------------------------------------------------------------------------------------------------------
 /** @class nocase_string
-	\brief An STL string class which ignores the case. */
+ \brief An STL string class which ignores the case. */
 //------------------------------------------------------------------------------------------------------------
-struct nocase_string : public string
-{
+struct nocase_string : public string {
 public:
-	nocase_string (const char* str);
-	nocase_string (const nocase_string& str);
-	nocase_string (const string& str);
-	nocase_string ();
-	
-	bool operator <  (const char* rhs);
-	bool operator <  (const nocase_string& rhs);
-	bool operator <  (const string& rhs);
-	bool operator == (const char* rhs);
-	bool operator == (const nocase_string& rhs);
-	bool operator == (const string& rhs);
-	bool operator != (const char* rhs);
-	bool operator != (const nocase_string& rhs);
-	bool operator != (const string& rhs);
-	void operator += (nocase_string s);
-	nocase_string operator+ (nocase_string s);
+    nocase_string (const char* str);
+    nocase_string (const nocase_string& str);
+    nocase_string (const string& str);
+    nocase_string ();
+
+    bool operator <  (const char* rhs);
+    bool operator <  (const nocase_string& rhs);
+    bool operator <  (const string& rhs);
+    bool operator == (const char* rhs);
+    bool operator == (const nocase_string& rhs);
+    bool operator == (const string& rhs);
+    bool operator != (const char* rhs);
+    bool operator != (const nocase_string& rhs);
+    bool operator != (const string& rhs);
+    void operator += (nocase_string s);
+    nocase_string operator+ (nocase_string s);
 };
 
 #define _Int(s) atoi((s).c_str())
@@ -149,40 +149,41 @@ public:
 
 //------------------------------------------------------------------------------------------------------------
 /** @class Listener
-	\brief The abstract listener interface. */
-//------------------------------------------------------------------------------------------------------------	
+ \brief The abstract listener interface. */
+//------------------------------------------------------------------------------------------------------------
 struct Listener {
-	virtual void OnUpdate(const void*)=0;
-	virtual ~Listener() {}
+    virtual void OnUpdate(const void*) = 0;
+    virtual ~Listener() {}
 };
 
 //------------------------------------------------------------------------------------------------------------
 /** @class Action
-	\brief The function object interface. */
+ \brief The function object interface. */
 //------------------------------------------------------------------------------------------------------------
 struct Action {
-	virtual bool execute(void*)=0;
-	virtual ~Action() {}
+    virtual bool execute(void*) = 0;
+    virtual ~Action() {}
 };
 
 //------------------------------------------------------------------------------------------------------------
 /** @class LocalObj3D
-	\brief The CS-independent structure for location and orientation
-	data of 3D objects. */
+ \brief The CS-independent structure for location and orientation
+ data of 3D objects. */
 //------------------------------------------------------------------------------------------------------------
-class LocalObj3D {
+class LocalObj3D
+{
 public:
-	LocalObj3D();
-	double x, y, z, ox, oy, oz, ophi;
-	float radius;
+    LocalObj3D();
+    double x, y, z, ox, oy, oz, ophi;
+    float radius;
 
-	void getOrientation (double &_ox, double &_oy, double &_oz, double &_ophi)  const;
-	void setOrientation (double _ox, double _oy, double _oz,	double _ophi);
-	void getPosition    (double& _x, double& _y, double& _z) const;
-	void setPosition    (double _x, double _y, double _z);
-	void setListener    (Listener* _l);
+    void getOrientation (double &_ox, double &_oy, double &_oz, double &_ophi)  const;
+    void setOrientation (double _ox, double _oy, double _oz, double _ophi);
+    void getPosition    (double& _x, double& _y, double& _z) const;
+    void setPosition    (double _x, double _y, double _z);
+    void setListener    (Listener* _l);
 protected:
-	Listener* listener;
+    Listener* listener;
 };
 
 typedef LocalObj3D Obj3D;

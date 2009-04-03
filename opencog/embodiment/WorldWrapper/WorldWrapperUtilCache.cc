@@ -23,7 +23,8 @@
 
 using namespace WorldWrapper;
 
-WorldWrapperUtilCache::WorldWrapperUtilCache(){
+WorldWrapperUtilCache::WorldWrapperUtilCache()
+{
     this->notFoundMiss = 0;
     this->emptyCacheMiss = 0;
     this->timestampChangeMiss = 0;
@@ -32,33 +33,35 @@ WorldWrapperUtilCache::WorldWrapperUtilCache(){
     this->timestamp = 0;
 }
 
-bool WorldWrapperUtilCache::add(unsigned long timestamp, WorldWrapper::predicate& pred, float value){
-    if(this->timestamp != timestamp){
+bool WorldWrapperUtilCache::add(unsigned long timestamp, WorldWrapper::predicate& pred, float value)
+{
+    if (this->timestamp != timestamp) {
         clearCache(timestamp);
     }
-    
+
     std::pair<cacheMapIt, bool> result;
     result = cache.insert(cacheMap::value_type(pred, value));
 
     return result.second;
 }
 
-float WorldWrapperUtilCache::find(unsigned long timestamp, WorldWrapper::predicate& pred){
+float WorldWrapperUtilCache::find(unsigned long timestamp, WorldWrapper::predicate& pred)
+{
     this->finds++;
 
-    if(cache.empty()) { 
+    if (cache.empty()) {
         this->emptyCacheMiss++;
         return (CACHE_MISS);
-    } 
+    }
 
-    if(this->timestamp != timestamp){
+    if (this->timestamp != timestamp) {
         this->timestampChangeMiss++;
         clearCache(timestamp);
         return (CACHE_MISS);
     }
 
     cacheMapIt result = cache.find(pred);
-    if(result == cache.end()){
+    if (result == cache.end()) {
         this->notFoundMiss++;
         return (CACHE_MISS);
     }
@@ -66,14 +69,15 @@ float WorldWrapperUtilCache::find(unsigned long timestamp, WorldWrapper::predica
     return result->second;
 }
 
-void WorldWrapperUtilCache::clearCache(unsigned long timestamp){
+void WorldWrapperUtilCache::clearCache(unsigned long timestamp)
+{
 //    double missRate = (double)(notFoundMiss + emptyCacheMiss + timestampChangeMiss) / (double)finds;
 //    std::cout << "Cache - timestamp '" << timestamp << std::endl;
 //    std::cout << "' finds '" << finds << "' emptyCacheMiss '" << emptyCacheMiss <<
-//                 "' timestampChangeMiss '" << timestampChangeMiss << "' notFound miss '" << notFoundMiss << std::endl; 
+//                 "' timestampChangeMiss '" << timestampChangeMiss << "' notFound miss '" << notFoundMiss << std::endl;
 //    std::cout << "' hit rate '" << ((1 - missRate) * 100)
-//              << "%' miss hate '" << (missRate * 100) << "%'." << std::endl; 
-    
+//              << "%' miss hate '" << (missRate * 100) << "%'." << std::endl;
+
     this->cache.clear();
     this->timestamp = timestamp;
 

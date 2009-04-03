@@ -83,8 +83,8 @@ public:
     {
     public:
         EntityPerception( int firstSeenCycle = 0 ) :
-            firstSeenCycle( firstSeenCycle ),
-            lastSeenCycle( firstSeenCycle ) { }
+                firstSeenCycle( firstSeenCycle ),
+                lastSeenCycle( firstSeenCycle ) { }
 
         inline int getFirstSeenCycle( void ) const {
             return firstSeenCycle;
@@ -116,7 +116,7 @@ public:
     public:
         inline Action( const std::string& name = "",
                        const std::vector<std::string>& parameters = std::vector<std::string>() ) :
-            pair<std::string, std::vector<std::string> >( name, parameters ) { }
+                pair<std::string, std::vector<std::string> >( name, parameters ) { }
 
         inline const std::string& getName( void ) const {
             return first;
@@ -185,7 +185,7 @@ public:
     // print in the log all relations and their strength that has been
     // set so far at the level log l
     void logRelations(int l);
-    
+
     /**
      * Feeling represents an emotional feeling and its intensity
      */
@@ -215,7 +215,7 @@ public:
     // methods
     RuleEngine( OPC* opc, const std::string& petName,
                 Control::SystemParameters& parameters )
-        throw(opencog::RuntimeException);
+    throw(opencog::RuntimeException);
 
     virtual ~RuleEngine( void );
 
@@ -539,7 +539,7 @@ private:
     Handle addEffectExecLink(const std::string& effect,
                              const std::vector<std::string> parameters,
                              bool permanent)
-        throw (opencog::RuntimeException);
+    throw (opencog::RuntimeException);
 
     /**
      * Add SchemaDone predicate for the given executed schema and its parameters
@@ -592,7 +592,7 @@ private:
 
     // default method to handle problems on lua. it will raise an exception if it find some problem
     static int luaThrowException( lua_State* state )
-        throw(opencog::RuntimeException);
+    throw(opencog::RuntimeException);
 };
 
 }; // OperationalPetController

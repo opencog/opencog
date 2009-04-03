@@ -190,9 +190,9 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
     //  std::cout << "PS2 H : " << h->toString() << std::endl;
     //}
     opencog::cassert(TRACE_INFO, s1 == 0 || s1 == 1,
-                      "PredicateHandleSet ps1 should have 0 or 1 item.");
+                     "PredicateHandleSet ps1 should have 0 or 1 item.");
     opencog::cassert(TRACE_INFO, s2 == 0 || s2 == 1,
-                      "PredicateHandleSet ps2 should have 0 or 1 item.");
+                     "PredicateHandleSet ps2 should have 0 or 1 item.");
     if (s1 == 0 && s2 == 0)
         return 1.0;
     else if ( (s1 == 1 && s2 == 0) || (s1 == 0 && s2 == 1) )
@@ -202,44 +202,44 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
         Handle h2 = *ps2.getSet().begin();
 
         opencog::cassert(TRACE_INFO, atomSpace->getType(h1) == EVALUATION_LINK && atomSpace->getArity(h1) == 2,
-                          "Handle h1 should be an 'EVALUATION_LINK' and have arity 2.");
+                         "Handle h1 should be an 'EVALUATION_LINK' and have arity 2.");
         opencog::cassert(TRACE_INFO, atomSpace->getType(h2) == EVALUATION_LINK && atomSpace->getArity(h2) == 2,
-                          "Handle h2 should be an 'EVALUATION_LINK' and have arity 2.");
+                         "Handle h2 should be an 'EVALUATION_LINK' and have arity 2.");
 
         Handle hargs1 = atomSpace->getOutgoing(h1, 1);
         Handle hargs2 = atomSpace->getOutgoing(h2, 1);
 
         opencog::cassert(TRACE_INFO, atomSpace->getType(hargs1) == LIST_LINK && atomSpace->getArity(hargs1) >= 2,
-                          "Handle hargs1 should be an 'LIST_LINK' and have arity 2.");
+                         "Handle hargs1 should be an 'LIST_LINK' and have arity 2.");
         opencog::cassert(TRACE_INFO, atomSpace->getType(hargs2) == LIST_LINK && atomSpace->getArity(hargs2) >= 2,
-                          "Handle hargs2 should be an 'LIST_LINK' and have arity 2.");
+                         "Handle hargs2 should be an 'LIST_LINK' and have arity 2.");
 
         Handle hact1 = atomSpace->getOutgoing(hargs1, 1);
         Handle hact2 = atomSpace->getOutgoing(hargs2, 1);
-        
+
         //print for debug
         //std::cout << "act1 : " << hact1->toString() << std::endl;
         //std::cout << "act2 : " << hact2->toString() << std::endl;
         //~print for debug
 
         opencog::cassert(TRACE_INFO,
-                          dynamic_cast<Node*>(TLB::getAtom(hact1)),
-                          "Failed to dynamically cast hact1 to a 'Node'");
+                         dynamic_cast<Node*>(TLB::getAtom(hact1)),
+                         "Failed to dynamically cast hact1 to a 'Node'");
         opencog::cassert(TRACE_INFO,
-                          dynamic_cast<Node*>(TLB::getAtom(hact2)),
-                          "Failed to dynamically cast hact2 to a 'Node'");
+                         dynamic_cast<Node*>(TLB::getAtom(hact2)),
+                         "Failed to dynamically cast hact2 to a 'Node'");
         if (atomSpace->getName(hact1) == atomSpace->getName(hact2)) {
             int a1 = atomSpace->getArity(hargs1);
             int a2 = atomSpace->getArity(hargs2);
             if (a1 == a2) {
-                for(int i = 2; i < a1; ++i) {
+                for (int i = 2; i < a1; ++i) {
                     //compare action parameters
                     Handle arg_p_1 = atomSpace->getOutgoing(hargs1, i);
                     Handle arg_p_2 = atomSpace->getOutgoing(hargs2, i);
                     //we only compare if there type is not NUMBER_NODE
-                    if(atomSpace->getType(arg_p_1) != NUMBER_NODE
-                       && atomSpace->getType(arg_p_2) != NUMBER_NODE
-                       && atomSpace->getName(arg_p_1) != atomSpace->getName(arg_p_2)) {
+                    if (atomSpace->getType(arg_p_1) != NUMBER_NODE
+                            && atomSpace->getType(arg_p_2) != NUMBER_NODE
+                            && atomSpace->getName(arg_p_1) != atomSpace->getName(arg_p_2)) {
                         return 0.0;
                     }
                 }
@@ -487,7 +487,7 @@ float BehaviorDescriptionMatcher::computeIntervalFitness(CompositeBehaviorDescri
     std::vector<PredicateHandleSet> sets = bd.getTimelineSets();
     std::vector<long> intervals = bd.getTimelineIntervals();
     opencog::cassert(TRACE_INFO, sets.size() == intervals.size(),
-                      "TimelineSet and TimelineIntervals should have equal sizes (computeIntervalFitness).");
+                     "TimelineSet and TimelineIntervals should have equal sizes (computeIntervalFitness).");
 
     float sum = 0;
     for (unsigned int i = 0; i < sets.size(); i++) {
@@ -528,7 +528,7 @@ float BehaviorDescriptionMatcher::computeIntervalRelevance(BehaviorCategory &cat
         std::vector<PredicateHandleSet> sets = bds[i].getTimelineSets();
         std::vector<long> intervals = bds[i].getTimelineIntervals();
         opencog::cassert(TRACE_INFO, sets.size() == intervals.size(),
-                          "TimelineSet and TimelineIntervals should have equal sizes (computeIntervalRelevance).");
+                         "TimelineSet and TimelineIntervals should have equal sizes (computeIntervalRelevance).");
         for (unsigned int j = 0; j < sets.size(); j++) {
             long d1 = intervals[j] - lowerBound[sets[j]];
             long d2 = upperBound[sets[j]] - intervals[j];
@@ -557,7 +557,7 @@ void BehaviorDescriptionMatcher::computeTimeLengthBoundaries(BehaviorCategory &c
         std::vector<PredicateHandleSet> sets = bds[i].getTimelineSets();
         std::vector<long> intervals = bds[i].getTimelineIntervals();
         opencog::cassert(TRACE_INFO, sets.size() == intervals.size(),
-                          "TimelineSet and TimelineIntervals should have equal sizes (computeTimeLengthBoundaries).");
+                         "TimelineSet and TimelineIntervals should have equal sizes (computeTimeLengthBoundaries).");
         for (unsigned int j = 0; j < sets.size(); j++) {
             if (upperBound.find(sets[j]) == upperBound.end()) {
                 upperBound[sets[j]] = intervals[j];
