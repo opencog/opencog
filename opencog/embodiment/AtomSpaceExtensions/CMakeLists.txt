@@ -7,6 +7,8 @@ ADD_LIBRARY (AtomSpaceExtensions STATIC
     CompareAtomTreeTemplate
 )
 
+ADD_DEPENDENCIES(AtomSpaceExtensions opencog_atom_types)
+
 INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
 	${OPENCOG_SOURCE_DIR}/opencog

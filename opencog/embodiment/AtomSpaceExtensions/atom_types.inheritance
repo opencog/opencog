@@ -1,15 +1,1 @@
 /* File automatically generated. Do not edit */
-opencog::PHRASE_NODE = opencog::ClassServer::addType(opencog::NODE, "PhraseNode");
-opencog::WORD_NODE = opencog::ClassServer::addType(opencog::NODE, "WordNode");
-opencog::SENTENCE_NODE = opencog::ClassServer::addType(opencog::NODE, "SentenceNode");
-opencog::WR_LINK = opencog::ClassServer::addType(opencog::ASSOCIATIVE_LINK , "WRLink");
-opencog::FREQUENCY_LINK = opencog::ClassServer::addType(opencog::INHERITANCE_LINK, "FrequencyLink");
-opencog::REFERENCE_LINK = opencog::ClassServer::addType(opencog::ORDERED_LINK, "ReferenceLink");
-opencog::LATEST_LINK = opencog::ClassServer::addType(opencog::ORDERED_LINK, "LatestLink");
-opencog::SL_NODE = opencog::ClassServer::addType(opencog::NODE , "SLNode");
-opencog::SL_OBJECT_NODE = opencog::ClassServer::addType(opencog::SL_NODE , "SLObjectNode");
-opencog::SL_PET_NODE = opencog::ClassServer::addType(opencog::SL_OBJECT_NODE , "SLPetNode");
-opencog::SL_HUMANOID_NODE = opencog::ClassServer::addType(opencog::SL_OBJECT_NODE , "SLHumanoidNode");
-opencog::SL_AVATAR_NODE = opencog::ClassServer::addType(opencog::SL_OBJECT_NODE , "SLAvatarNode");
-opencog::SL_STRUCTURE_NODE = opencog::ClassServer::addType(opencog::SL_OBJECT_NODE , "SLStructureNode");
-opencog::SL_ACCESSORY_NODE = opencog::ClassServer::addType(opencog::SL_OBJECT_NODE , "SLAccessoryNode");

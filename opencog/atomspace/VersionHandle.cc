@@ -118,4 +118,5 @@ bool VersionHandle::operator>(const VersionHandle &other) const {
 VersionHandle& VersionHandle::operator=( const VersionHandle& other ) {
     this->indicator = other.indicator;
     this->substantive = other.substantive;
+    return *this;
 }
