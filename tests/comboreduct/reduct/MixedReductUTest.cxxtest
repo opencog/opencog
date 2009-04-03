@@ -40,11 +40,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -77,11 +81,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -113,11 +121,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -146,11 +158,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -182,11 +198,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -214,11 +234,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -249,11 +273,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -285,11 +313,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -320,11 +352,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -352,11 +388,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -384,11 +424,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -416,11 +460,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -448,11 +496,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -480,11 +532,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {
@@ -512,11 +568,15 @@ public:
 
     RndNumTable rnt(s, ca, rng);
 
+    int size_before, size_after;
     try {
       mixed_table mt1(tr, rnt, tr_type, rng);
+      size_before=tr.size();
       mixed_reduce(tr, rng);
+      size_after=tr.size();
       mixed_table mt2(tr, rnt, tr_type, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
     }
     catch(EvalException& e) {

@@ -37,11 +37,16 @@ public:
 
     RndNumTable rnt(s, a, rng);
 
+    int size_before,size_after;
     try {
-      contin_table ct1(tr, rnt, rng);
+      
+      contin_table ct1(tr, rnt, rng); 
+      size_before=tr.size();
       contin_reduce(tr, rng);
+      size_after=tr.size();
       contin_table ct2(tr, rnt, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
     }
     catch(EvalException& e) {
@@ -65,11 +70,15 @@ public:
 
     RndNumTable rnt(s, a, rng);
 
+    int size_before,size_after;
     try {
       contin_table ct1(tr, rnt, rng);
+      size_before=tr.size();
       contin_reduce(tr, rng);
+      size_after=tr.size();
       contin_table ct2(tr, rnt, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
     }
     catch(EvalException& e) {
@@ -93,11 +102,15 @@ public:
 
     RndNumTable rnt(s, a, rng);
 
+    int size_before,size_after;
     try {
       contin_table ct1(tr, rnt, rng);
+      size_before=tr.size();
       contin_reduce(tr, rng);
+      size_after=tr.size();
       contin_table ct2(tr, rnt, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
     }
     catch(EvalException& e) {
@@ -122,11 +135,15 @@ public:
 
     RndNumTable rnt(s, a, rng);
 
+    int size_before,size_after;
     try {
       contin_table ct1(tr, rnt, rng);
+      size_before=tr.size();
       contin_reduce(tr, rng);
+      size_after=tr.size();
       contin_table ct2(tr, rnt, rng);
 
+      TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
     }
     catch(EvalException& e) {
@@ -151,11 +168,15 @@ public:
 
     RndNumTable rnt(s, a, rng);
 
+    int size_before,size_after;
     try {
       contin_table ct1(tr, rnt, rng);
+      size_before=tr.size();
       contin_reduce(tr, rng);
+      size_after=tr.size();;
       contin_table ct2(tr, rnt, rng);
 
+      TS_ASSERT_LESS_THAN_EQUALS(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
     }
     catch(EvalException& e) {
