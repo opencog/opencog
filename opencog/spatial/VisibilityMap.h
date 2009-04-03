@@ -29,110 +29,121 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Spatial {
+namespace Spatial
+{
 
-  /**
-   * Visibility map is a class to keep track of the already visible areas.
-   * When the agent is exploring new areas, the tiles corresponding to these areas
-   * is been marked as visible.
-   */
-  class VisibilityMap;
-  typedef boost::shared_ptr<VisibilityMap> VisibilityMapPtr;
+/**
+ * Visibility map is a class to keep track of the already visible areas.
+ * When the agent is exploring new areas, the tiles corresponding to these areas
+ * is been marked as visible.
+ */
+class VisibilityMap;
+typedef boost::shared_ptr<VisibilityMap> VisibilityMapPtr;
 
-  class VisibilityMap {
-    
-  public:
+class VisibilityMap
+{
+
+public:
 
     /**
      * A tile covers a specific area of the VisibilityMap
      */
-    class Tile {
+    class Tile
+    {
     public:
-      
-      Tile( double x, double y, int row, int col, const Math::Vector3& normal, double tileSideSize );
 
-      inline virtual ~Tile( void ) { };
+        Tile( double x, double y, int row, int col, const Math::Vector3& normal, double tileSideSize );
 
-      std::vector<Math::Vector3> getCorners( void );
+        inline virtual ~Tile( void ) { };
 
-      void setVisibility( bool visible );
+        std::vector<Math::Vector3> getCorners( void );
 
-      bool isVisible( void );
+        void setVisibility( bool visible );
 
-      const Math::Vector3& getNormal( void );
+        bool isVisible( void );
 
-      const Math::Vector3& getCenter( void );
+        const Math::Vector3& getNormal( void );
 
-      int getRow( void ) const;
+        const Math::Vector3& getCenter( void );
 
-      int getCol( void ) const;
-	
+        int getRow( void ) const;
+
+        int getCol( void ) const;
+
     private:
-      double tileSideSize;
-      bool visible;
-      long discoveringTime;
-      int row;
-      int col;
-      Math::Vector3 normal;
-      Math::Vector3 center;
+        double tileSideSize;
+        bool visible;
+        long discoveringTime;
+        int row;
+        int col;
+        Math::Vector3 normal;
+        Math::Vector3 center;
     }; // Tile
     typedef boost::shared_ptr<Tile> TilePtr;
 
 
 
-    class TileVisitor {
+    class TileVisitor
+    {
     public:
 
-      TileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
+        TileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
-      inline virtual ~TileVisitor( void ) { };
+        inline virtual ~TileVisitor( void ) { };
 
-      // visitor method
-      virtual bool operator( )( const TilePtr& tile ) = 0;
+        // visitor method
+        virtual bool operator( )( const TilePtr& tile ) = 0;
 
-      inline unsigned int getAreaNumber( void ) const { return this->areaNumber; }
+        inline unsigned int getAreaNumber( void ) const {
+            return this->areaNumber;
+        }
 
-      inline unsigned int getNumberOfAreas( void ) const { return this->numberOfAreas; }
+        inline unsigned int getNumberOfAreas( void ) const {
+            return this->numberOfAreas;
+        }
 
-      const TilePtr& getLastValidTile( void ) const;
+        const TilePtr& getLastValidTile( void ) const;
 
     protected:
-      
-      unsigned int areaNumber;
-      unsigned int numberOfAreas;
-      TilePtr lastValidTile;
+
+        unsigned int areaNumber;
+        unsigned int numberOfAreas;
+        TilePtr lastValidTile;
     }; // TileVisitor
 
-    class HiddenTileVisitor : public TileVisitor {
+    class HiddenTileVisitor : public TileVisitor
+    {
     public:
-      HiddenTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
-      virtual ~HiddenTileVisitor( void ) { }
-      
-      virtual bool operator( )( const TilePtr& tile );
+        HiddenTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
+        virtual ~HiddenTileVisitor( void ) { }
+
+        virtual bool operator( )( const TilePtr& tile );
     }; // HiddenTileVisitor
 
-    class VisibleTileVisitor : public TileVisitor {
+    class VisibleTileVisitor : public TileVisitor
+    {
     public:
-      VisibleTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
-      virtual ~VisibleTileVisitor( void ) { }
-      
-      virtual bool operator( )( const TilePtr& tile );
+        VisibleTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
+        virtual ~VisibleTileVisitor( void ) { }
+
+        virtual bool operator( )( const TilePtr& tile );
     }; // VisibleTileVisitor
 
 
-    class NearestTileVisitor : public TileVisitor {
+    class NearestTileVisitor : public TileVisitor
+    {
     public:
-      // look for nearest tiles to a given referencePosition and which has a given visibility
-      NearestTileVisitor( const Spatial::Math::Vector3& referencePosition, bool visibility, unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
+        // look for nearest tiles to a given referencePosition and which has a given visibility
+        NearestTileVisitor( const Spatial::Math::Vector3& referencePosition, bool visibility, unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
-      virtual ~NearestTileVisitor( void ) { }
-      
-      virtual bool operator( )( const TilePtr& tile );
+        virtual ~NearestTileVisitor( void ) { }
+
+        virtual bool operator( )( const TilePtr& tile );
 
     private:
-      Spatial::Math::Vector3 referencePosition;      
-      bool visibility;
-      double currentDistance;
+        Spatial::Math::Vector3 referencePosition;
+        bool visibility;
+        double currentDistance;
     }; // NearestTileVisitor
 
 
@@ -150,7 +161,7 @@ namespace Spatial {
        |           |
        |(minExtent)|
        +-----------+
-row,col(0,0)
+    row,col(0,0)
      */
     VisibilityMap( const Math::Vector3& minimumExtent, const Math::Vector3& maximumExtent, unsigned int numberOfTiles );
 
@@ -168,8 +179,10 @@ row,col(0,0)
 
     void visitTiles( TileVisitor* visitor );
 
-    inline unsigned int getNumberOfTilesPerRow( void ) const { return this->tiles.size( ); };
-    
+    inline unsigned int getNumberOfTilesPerRow( void ) const {
+        return this->tiles.size( );
+    };
+
 
     /**
      * area number
@@ -198,13 +211,13 @@ row,col(0,0)
 
     static VisibilityMapPtr loadFromFile( const std::string& fileName ) throw( opencog::NotFoundException );
 
-  private:
+private:
     unsigned int numberOfTiles;
     double tileSideSize;
-    std::vector< std::vector<TilePtr> > tiles;		
+    std::vector< std::vector<TilePtr> > tiles;
     Math::Vector3 minimumExtent;
     Math::Vector3 maximumExtent;
-  }; // VisibilityMap
+}; // VisibilityMap
 
 } // Spatial
 

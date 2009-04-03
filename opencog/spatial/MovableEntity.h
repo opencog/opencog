@@ -24,20 +24,22 @@
 
 #include "Entity.h"
 
-namespace Spatial {
+namespace Spatial
+{
 
-  class MovableEntity;
-  typedef boost::shared_ptr<MovableEntity> MovableEntityPtr;
+class MovableEntity;
+typedef boost::shared_ptr<MovableEntity> MovableEntityPtr;
 
-  class MovableEntity : public Entity {
-  public:    	
+class MovableEntity : public Entity
+{
+public:
 
     /**
      * Simple Copy constructor
      * @param object
      */
     inline MovableEntity( const MovableEntity& object ) : Entity( object.id, object.name, object.position, object.dimension, object.orientation, object.expansionRadius ), velocity( object.getVelocity() ) { };
-    
+
     /**
      * Custom constructor
      * @param id
@@ -52,9 +54,9 @@ namespace Spatial {
      * Update it's internal structures after a move or rotation action
      */
     void update( void ) {
-      if ( needUpdate ) {
-	boundingBox.update( );
-      } // if
+        if ( needUpdate ) {
+            boundingBox.update( );
+        } // if
     }
 
     /**
@@ -74,13 +76,13 @@ namespace Spatial {
      * @param orientation
      */
     void setOrientation(const Math::Quaternion& orientation);
-	
+
     /**
      * Getter to the entity velocity
      * @return
      */
     inline double getVelocity( void ) const {
-      return this->velocity;
+        return this->velocity;
     }
 
     /**
@@ -88,25 +90,25 @@ namespace Spatial {
      * @param velocity
      */
     inline void setVelocity(double velocity) {
-      this->velocity = velocity;
+        this->velocity = velocity;
     }
 
     virtual inline ENTITY_TYPE getType( void ) const {
-      return Entity::MOVABLE;
+        return Entity::MOVABLE;
     };
 
     virtual inline EntityPtr clone( void ) const {
-      MovableEntityPtr clone( new MovableEntity( *this ) );
-      clone->setVelocity( getVelocity( ) );
-      clone->properties = this->properties;
-      return clone;
+        MovableEntityPtr clone( new MovableEntity( *this ) );
+        clone->setVelocity( getVelocity( ) );
+        clone->properties = this->properties;
+        return clone;
     }
 
-  private:
+private:
     double velocity;
     bool needUpdate;
 
-  }; // MovableEntity
+}; // MovableEntity
 
 } // Spatial
 

@@ -40,13 +40,13 @@ class SpaceServerContainer
 
 public:
     /** Called by SpaceServer when a map was removed */
-    virtual void mapRemoved(Handle mapId)=0;
+    virtual void mapRemoved(Handle mapId) = 0;
     /** Called by SpaceServer when a map was marked persistent, what means it
      * must not be removed by the container */
-    virtual void mapPersisted(Handle mapId)=0;
+    virtual void mapPersisted(Handle mapId) = 0;
     /** Called by SpaceServer when it needs a string representation of the map
      * id */
-    virtual std::string getMapIdString(Handle mapId)=0;
+    virtual std::string getMapIdString(Handle mapId) = 0;
 
 };
 

@@ -21,141 +21,145 @@
  */
 #include "QuadTree.h"
 
-namespace Spatial {
+namespace Spatial
+{
 
-  QuadTree::QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsigned int clusterSideSize, HPASearch::Graph* graph, QuadTree* parentQuad,  GridPoint* currentPosition ) {
-        
+QuadTree::QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsigned int clusterSideSize, HPASearch::Graph* graph, QuadTree* parentQuad,  GridPoint* currentPosition )
+{
+
     this->hasFreeCenter = false;
     this->graph = graph;
     this->level = level;
     this->clusterSideSize = clusterSideSize;
     bool splitted = false;
     if ( clusterSideSize > 1 ) {
-      unsigned int row;
-      unsigned int col;
+        unsigned int row;
+        unsigned int col;
 
-      int currentRow = 0;
-      int currentCol = 0;
-      // do not start from beginning if currentPosition was set
-      if ( currentPosition ) {
-	
-	currentRow = static_cast<int>( currentPosition->second ) - 
-	  static_cast<int>( cellPosition.second );
+        int currentRow = 0;
+        int currentCol = 0;
+        // do not start from beginning if currentPosition was set
+        if ( currentPosition ) {
 
-	currentCol = static_cast<int>( currentPosition->first ) - 
-	  static_cast<int>( cellPosition.first );
+            currentRow = static_cast<int>( currentPosition->second ) -
+                         static_cast<int>( cellPosition.second );
 
-	if ( currentRow < 0 ) {
-	  currentRow = 0;
-	} // if
+            currentCol = static_cast<int>( currentPosition->first ) -
+                         static_cast<int>( cellPosition.first );
 
-	// if currentRow is greater than clusterSideSize, ignore it
+            if ( currentRow < 0 ) {
+                currentRow = 0;
+            } // if
 
-	if ( currentCol < 0 ) {
-	  currentCol = 0;
-	} else if ( currentCol > static_cast<int>( clusterSideSize ) ) { // goto next line
-	  currentCol = 0;
-	  ++currentRow;
-	} // if
+            // if currentRow is greater than clusterSideSize, ignore it
 
-      } // if
+            if ( currentCol < 0 ) {
+                currentCol = 0;
+            } else if ( currentCol > static_cast<int>( clusterSideSize ) ) { // goto next line
+                currentCol = 0;
+                ++currentRow;
+            } // if
 
-      for( row = currentRow; !splitted && row < clusterSideSize; ++row ) {
-	for( col = currentCol; !splitted && col < clusterSideSize; ++col ) {
-	  GridPoint currentPosition( cellPosition.first + col, 
-				     cellPosition.second + row );
+        } // if
 
-	  // split cluster if it has obstacles
-	  if ( level->map->gridIllegal( currentPosition ) ) {
-	    // split on four quads
-	    unsigned int nextNumberOfColumns = clusterSideSize/2;
-	    // quad 1
-	    QuadTree* quad1 = new QuadTree( level, cellPosition, nextNumberOfColumns, graph, this, &currentPosition );
+        for ( row = currentRow; !splitted && row < clusterSideSize; ++row ) {
+            for ( col = currentCol; !splitted && col < clusterSideSize; ++col ) {
+                GridPoint currentPosition( cellPosition.first + col,
+                                           cellPosition.second + row );
 
-	    // quad 2
-	    QuadTree* quad2 = new QuadTree( level, GridPoint( cellPosition.first+nextNumberOfColumns, cellPosition.second ), nextNumberOfColumns, graph, this, &currentPosition );
+                // split cluster if it has obstacles
+                if ( level->map->gridIllegal( currentPosition ) ) {
+                    // split on four quads
+                    unsigned int nextNumberOfColumns = clusterSideSize / 2;
+                    // quad 1
+                    QuadTree* quad1 = new QuadTree( level, cellPosition, nextNumberOfColumns, graph, this, &currentPosition );
 
-	    // quad 3
-	    QuadTree* quad3 = new QuadTree( level, GridPoint( cellPosition.first, cellPosition.second+nextNumberOfColumns ), nextNumberOfColumns, graph, this, &currentPosition );
+                    // quad 2
+                    QuadTree* quad2 = new QuadTree( level, GridPoint( cellPosition.first + nextNumberOfColumns, cellPosition.second ), nextNumberOfColumns, graph, this, &currentPosition );
 
-	    // quad 4
-	    QuadTree* quad4 = new QuadTree( level, GridPoint( cellPosition.first+nextNumberOfColumns, cellPosition.second+nextNumberOfColumns ), nextNumberOfColumns, graph, this, &currentPosition );
-	    
-	    quads[ TOP_LEFT ].reset( quad1 );
-	    quads[ TOP_RIGHT ].reset( quad2 );
-	    quads[ BOTTOM_LEFT ].reset( quad3 );
-	    quads[ BOTTOM_RIGHT ].reset( quad4 );
-	    
-	    splitted = true;
-	  } // if
-	} // for
+                    // quad 3
+                    QuadTree* quad3 = new QuadTree( level, GridPoint( cellPosition.first, cellPosition.second + nextNumberOfColumns ), nextNumberOfColumns, graph, this, &currentPosition );
 
-	currentCol = 0;
-      } // for
+                    // quad 4
+                    QuadTree* quad4 = new QuadTree( level, GridPoint( cellPosition.first + nextNumberOfColumns, cellPosition.second + nextNumberOfColumns ), nextNumberOfColumns, graph, this, &currentPosition );
 
-      // if cluster was not splitted, put a vertex on it's center
-      if ( !splitted ) {
-	this->centerCellPosition.second = cellPosition.second + clusterSideSize/2;
-	this->centerCellPosition.first = cellPosition.first + clusterSideSize/2;
+                    quads[ TOP_LEFT ].reset( quad1 );
+                    quads[ TOP_RIGHT ].reset( quad2 );
+                    quads[ BOTTOM_LEFT ].reset( quad3 );
+                    quads[ BOTTOM_RIGHT ].reset( quad4 );
 
-	this->hasFreeCenter = true;
+                    splitted = true;
+                } // if
+            } // for
 
-	if ( parentQuad ) {
-	  
-	  boost::property_map<HPASearch::Graph, HPASearch::VertexPosition>::type position = 
-	    boost::get( HPASearch::VertexPosition( ), *graph );
-	  
-	  Point realPosition = level->map->unsnap( this->centerCellPosition );
-	  boost::put( position, level->vertexCounter, Math::Vector2( realPosition.first, realPosition.second ) );
-	  this->vertexId = level->vertexCounter;
-	  level->graphVertices[ this->centerCellPosition ] = this->vertexId;
-	  ++level->vertexCounter;
+            currentCol = 0;
+        } // for
 
-	} // if
+        // if cluster was not splitted, put a vertex on it's center
+        if ( !splitted ) {
+            this->centerCellPosition.second = cellPosition.second + clusterSideSize / 2;
+            this->centerCellPosition.first = cellPosition.first + clusterSideSize / 2;
 
-      } // if      
-      
+            this->hasFreeCenter = true;
+
+            if ( parentQuad ) {
+
+                boost::property_map<HPASearch::Graph, HPASearch::VertexPosition>::type position =
+                    boost::get( HPASearch::VertexPosition( ), *graph );
+
+                Point realPosition = level->map->unsnap( this->centerCellPosition );
+                boost::put( position, level->vertexCounter, Math::Vector2( realPosition.first, realPosition.second ) );
+                this->vertexId = level->vertexCounter;
+                level->graphVertices[ this->centerCellPosition ] = this->vertexId;
+                ++level->vertexCounter;
+
+            } // if
+
+        } // if
+
     } else if ( !level->map->gridIllegal( cellPosition ) ) {
-      // partitioning reaches the deeper level
-      this->hasFreeCenter = true;
+        // partitioning reaches the deeper level
+        this->hasFreeCenter = true;
 
-      if ( parentQuad ) {
-	boost::property_map<HPASearch::Graph, HPASearch::VertexPosition>::type position = 
-	  boost::get( HPASearch::VertexPosition( ), *graph );
-      
-	Point realPosition = level->map->unsnap( cellPosition );
-	boost::put( position, level->vertexCounter, Math::Vector2( realPosition.first, realPosition.second ) );
-	
-	this->vertexId = level->vertexCounter;
-	level->graphVertices[ cellPosition ] = this->vertexId;
-	++level->vertexCounter;
-      } // if
+        if ( parentQuad ) {
+            boost::property_map<HPASearch::Graph, HPASearch::VertexPosition>::type position =
+                boost::get( HPASearch::VertexPosition( ), *graph );
+
+            Point realPosition = level->map->unsnap( cellPosition );
+            boost::put( position, level->vertexCounter, Math::Vector2( realPosition.first, realPosition.second ) );
+
+            this->vertexId = level->vertexCounter;
+            level->graphVertices[ cellPosition ] = this->vertexId;
+            ++level->vertexCounter;
+        } // if
     } // else
-    
-  } 
 
-  void QuadTree::connectEdges( ) {
-    if ( quads.size( ) > 0 ) {      
-      
-      std::map<POSITION, boost::shared_ptr<QuadTree> >::iterator it;	
-      
-      for( it = quads.begin( ); it != quads.end( ); ++it ) {
-	it->second->connectEdges( );
-      } // for      
-      // quad1 and quad2
-      connectQuads( quads[ TOP_LEFT ].get( ), quads[ TOP_RIGHT ].get( ), false );
-      // quad3 and quad4
-      connectQuads( quads[ BOTTOM_LEFT ].get( ), quads[ BOTTOM_RIGHT ].get( ), false );
-      // quad1 and quad3
-      connectQuads( quads[ TOP_LEFT ].get( ), quads[ BOTTOM_LEFT ].get( ), true );
-      // quad2 and quad4
-      connectQuads( quads[ TOP_RIGHT ].get( ), quads[ BOTTOM_RIGHT ].get( ), true );
-      
+}
+
+void QuadTree::connectEdges( )
+{
+    if ( quads.size( ) > 0 ) {
+
+        std::map<POSITION, boost::shared_ptr<QuadTree> >::iterator it;
+
+        for ( it = quads.begin( ); it != quads.end( ); ++it ) {
+            it->second->connectEdges( );
+        } // for
+        // quad1 and quad2
+        connectQuads( quads[ TOP_LEFT ].get( ), quads[ TOP_RIGHT ].get( ), false );
+        // quad3 and quad4
+        connectQuads( quads[ BOTTOM_LEFT ].get( ), quads[ BOTTOM_RIGHT ].get( ), false );
+        // quad1 and quad3
+        connectQuads( quads[ TOP_LEFT ].get( ), quads[ BOTTOM_LEFT ].get( ), true );
+        // quad2 and quad4
+        connectQuads( quads[ TOP_RIGHT ].get( ), quads[ BOTTOM_RIGHT ].get( ), true );
+
     } // if
 
-  }
+}
 
-  void QuadTree::connectQuads( QuadTree* quad1, QuadTree* quad2, bool vertical ) {
+void QuadTree::connectQuads( QuadTree* quad1, QuadTree* quad2, bool vertical )
+{
     POSITION side1;
     POSITION side2;
     POSITION position1;
@@ -164,75 +168,77 @@ namespace Spatial {
     POSITION position4;
 
     if ( vertical ) {
-      side1 = BOTTOM;
-      side2 = TOP;
-      position1 = BOTTOM_LEFT;
-      position2 = TOP_LEFT;
-      position3 = BOTTOM_RIGHT;
-      position4 = TOP_RIGHT;	
+        side1 = BOTTOM;
+        side2 = TOP;
+        position1 = BOTTOM_LEFT;
+        position2 = TOP_LEFT;
+        position3 = BOTTOM_RIGHT;
+        position4 = TOP_RIGHT;
     } else {
-      side1 = RIGHT;
-      side2 = LEFT;
-      position1 = TOP_RIGHT;
-      position2 = TOP_LEFT;
-      position3 = BOTTOM_RIGHT;
-      position4 = BOTTOM_LEFT;	
+        side1 = RIGHT;
+        side2 = LEFT;
+        position1 = TOP_RIGHT;
+        position2 = TOP_LEFT;
+        position3 = BOTTOM_RIGHT;
+        position4 = BOTTOM_LEFT;
     } // else
 
-    if ( ( quad1->hasFreeCenter && quad2->hasFreeCenter ) || 
-	 ( !quad1->hasFreeCenter && quad1->quads.size( ) > 0 && quad2->hasFreeCenter ) ||
-	 ( !quad2->hasFreeCenter && quad2->quads.size( ) > 0 && quad1->hasFreeCenter ) ) {
-      // simple quads
-      processVertices( quad1->getVerticesFrom( side1 ),
-		       quad2->getVerticesFrom( side2 ) );
+    if ( ( quad1->hasFreeCenter && quad2->hasFreeCenter ) ||
+            ( !quad1->hasFreeCenter && quad1->quads.size( ) > 0 && quad2->hasFreeCenter ) ||
+            ( !quad2->hasFreeCenter && quad2->quads.size( ) > 0 && quad1->hasFreeCenter ) ) {
+        // simple quads
+        processVertices( quad1->getVerticesFrom( side1 ),
+                         quad2->getVerticesFrom( side2 ) );
     } else if ( quad1->quads.size( ) > 0 ) {
-      // complexs quads (many subdivisions)
-      connectQuads( quad1->quads[ position1 ].get( ), quad2->quads[ position2 ].get( ), vertical );
-      connectQuads( quad1->quads[ position3 ].get( ), quad2->quads[ position4 ].get( ), vertical );
+        // complexs quads (many subdivisions)
+        connectQuads( quad1->quads[ position1 ].get( ), quad2->quads[ position2 ].get( ), vertical );
+        connectQuads( quad1->quads[ position3 ].get( ), quad2->quads[ position4 ].get( ), vertical );
     } // else
-  }
+}
 
-  void QuadTree::processVertices( const std::vector<unsigned int>& vertices1, const std::vector<unsigned int>& vertices2 ) {
+void QuadTree::processVertices( const std::vector<unsigned int>& vertices1, const std::vector<unsigned int>& vertices2 )
+{
     unsigned int i;
     unsigned int j;
-    
-    for( i = 0; i < vertices1.size( ); ++i ) {
-      for ( j = 0; j < vertices2.size( ); ++j ) {
-	Math::Vector2 position1 = 
-	  boost::get( HPASearch::VertexPosition( ), *this->graph, vertices1[ i ] );
-	
-	Math::Vector2 position2 = 
-	  boost::get( HPASearch::VertexPosition( ), *this->graph, vertices2[ j ] );
-	
-	boost::add_edge( vertices1[ i ], vertices2[ j ], 1, *graph );
-      } // for
-    } // for    
-    
-  }
-  
-  std::vector<unsigned int> QuadTree::getVerticesFrom( POSITION position ) {
+
+    for ( i = 0; i < vertices1.size( ); ++i ) {
+        for ( j = 0; j < vertices2.size( ); ++j ) {
+            Math::Vector2 position1 =
+                boost::get( HPASearch::VertexPosition( ), *this->graph, vertices1[ i ] );
+
+            Math::Vector2 position2 =
+                boost::get( HPASearch::VertexPosition( ), *this->graph, vertices2[ j ] );
+
+            boost::add_edge( vertices1[ i ], vertices2[ j ], 1, *graph );
+        } // for
+    } // for
+
+}
+
+std::vector<unsigned int> QuadTree::getVerticesFrom( POSITION position )
+{
     std::vector<unsigned int> response;
     if ( this->hasFreeCenter ) {
-      response.push_back( vertexId );      
+        response.push_back( vertexId );
     } else {
-      std::back_insert_iterator< std::vector<unsigned int> > ii( response );
+        std::back_insert_iterator< std::vector<unsigned int> > ii( response );
 
-      std::map<POSITION, boost::shared_ptr<QuadTree> >::iterator it;
-      for( it = quads.begin( ); it != quads.end( ); ++it ) {
-	if ( it->first == position || 
-	     ( position == RIGHT && ( it->first == TOP_RIGHT || it->first == BOTTOM_RIGHT ) ) ||
-	     ( position == LEFT && ( it->first == TOP_LEFT || it->first == BOTTOM_LEFT ) ) ||
-	     ( position == TOP && ( it->first == TOP_LEFT || it->first == TOP_RIGHT ) ) ||
-	     ( position == BOTTOM && ( it->first == BOTTOM_LEFT || it->first == BOTTOM_RIGHT ) ) ) {	    
-	  std::vector<unsigned int> partialResponse = 
-	    it->second->getVerticesFrom( position );
-	  
-	  std::copy( partialResponse.begin( ), partialResponse.end( ), ii );
-	} // if
-      } // for
-      
+        std::map<POSITION, boost::shared_ptr<QuadTree> >::iterator it;
+        for ( it = quads.begin( ); it != quads.end( ); ++it ) {
+            if ( it->first == position ||
+                    ( position == RIGHT && ( it->first == TOP_RIGHT || it->first == BOTTOM_RIGHT ) ) ||
+                    ( position == LEFT && ( it->first == TOP_LEFT || it->first == BOTTOM_LEFT ) ) ||
+                    ( position == TOP && ( it->first == TOP_LEFT || it->first == TOP_RIGHT ) ) ||
+                    ( position == BOTTOM && ( it->first == BOTTOM_LEFT || it->first == BOTTOM_RIGHT ) ) ) {
+                std::vector<unsigned int> partialResponse =
+                    it->second->getVerticesFrom( position );
+
+                std::copy( partialResponse.begin( ), partialResponse.end( ), ii );
+            } // if
+        } // for
+
     } // else
     return response;
-  }  
-  
+}
+
 }; // Spatial

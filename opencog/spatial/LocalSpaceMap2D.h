@@ -46,26 +46,27 @@
  *
  * behavior is undefined for queries involving points outside this region
  */
-namespace Spatial {
+namespace Spatial
+{
 
-  class LocalSpaceMap2D;
+class LocalSpaceMap2D;
 
-  /**
-   * Struct rec_find
-   */
-  struct rec_find {
+/**
+ * Struct rec_find
+ */
+struct rec_find {
 
-    private:
+private:
 
     Spatial::GridPoint _current;
-    const Spatial::GridPoint& _g;    
+    const Spatial::GridPoint& _g;
 
     const GridMap& _grid;
 
     Spatial::ObjectIDSet& _out;
-            
+
     const Spatial::LocalSpaceMap2D* _parent;
-    
+
     bool too_far() const;
 
     void move_left();
@@ -81,20 +82,21 @@ namespace Spatial {
     unsigned int last_x_difference;
     unsigned int last_y_difference;
 
-    public:
-    rec_find(const Spatial::GridPoint& current, 
-	     const Spatial::GridMap& grid,
-	     Spatial::ObjectIDSet& out,
-	     const Spatial::LocalSpaceMap2D& parent);
+public:
+    rec_find(const Spatial::GridPoint& current,
+             const Spatial::GridMap& grid,
+             Spatial::ObjectIDSet& out,
+             const Spatial::LocalSpaceMap2D& parent);
 
     void johnnie_walker(Spatial::Distance d);
 
-  }; // struct rec_find
+}; // struct rec_find
 
-  class LocalSpaceMap2D {
-    
-  protected:
-            
+class LocalSpaceMap2D
+{
+
+protected:
+
     Spatial::GridMap _grid;
     Spatial::GridMap _grid_nonObstacle;
 
@@ -106,7 +108,7 @@ namespace Spatial {
 
     bool addToSuperEntity( const EntityPtr& entity );
 
-  private:
+private:
     Spatial::Distance _xMin;
     Spatial::Distance _xMax;
     unsigned int _xDim;
@@ -116,23 +118,23 @@ namespace Spatial {
     unsigned int _yDim;
 
     Spatial::Distance _diagonalSize;
- 
+
     //this is an argument to the constructor and stored so we can
     //cache things for performance
-    Spatial::Distance _radius; 
+    Spatial::Distance _radius;
 
     // used only for test
     const Spatial::GridSet _empty_set;
 
     bool outsideMap( const std::vector<Math::LineSegment>& segments );
 
-    public:
+public:
 
     /**
      * Constructor
      */
-    LocalSpaceMap2D(Distance xMin,Distance xMax,unsigned int xDim,
-                    Distance yMin,Distance yMax,unsigned int yDim,
+    LocalSpaceMap2D(Distance xMin, Distance xMax, unsigned int xDim,
+                    Distance yMin, Distance yMax, unsigned int yDim,
                     Distance radius);
 
     LocalSpaceMap2D( const LocalSpaceMap2D& map );
@@ -170,8 +172,8 @@ namespace Spatial {
     // Is the given point occupied by any obstacle or out of bounds?
     bool illegal(const Spatial::Point& pt) const;
 
-    // Get the nearest free (not occupied or out of bounds) 
-    // point from the given point 
+    // Get the nearest free (not occupied or out of bounds)
+    // point from the given point
     Spatial::Point getNearestFreePoint(const Spatial::Point& pt) const throw (opencog::RuntimeException, std::bad_exception);
 
     // Is the given point occupied by any obstacle or out of bounds?
@@ -179,10 +181,10 @@ namespace Spatial {
     bool gridIllegal(unsigned int i, unsigned int j) const;
 
     bool gridOccupied(const Spatial::GridPoint& gp) const;
-    bool gridOccupied(unsigned int i,unsigned int j) const;
-           
+    bool gridOccupied(unsigned int i, unsigned int j) const;
+
     bool gridOccupied_nonObstacle(const Spatial::GridPoint& gp) const;
-    bool gridOccupied_nonObstacle(unsigned int i,unsigned int j) const;
+    bool gridOccupied_nonObstacle(unsigned int i, unsigned int j) const;
 
     //const ObjectMetaData& getMetaData(const Spatial::ObjectID& id) const throw(opencog::NotFoundException);
 
@@ -197,17 +199,17 @@ namespace Spatial {
     template<typename Out>
     Out getAllObjects(Out out) const {
 
-      ObjectIDSet localObjects;
+        ObjectIDSet localObjects;
 
-      //ObjectHashMap::const_iterator it;
-      LongEntityPtrHashMap::const_iterator it;
-      //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
-      for( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
-	//localObjects.insert( it->first.c_str( ) );
-	localObjects.insert( it->second->getName( ).c_str( ) );
-      } // for
+        //ObjectHashMap::const_iterator it;
+        LongEntityPtrHashMap::const_iterator it;
+        //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
+        for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
+            //localObjects.insert( it->first.c_str( ) );
+            localObjects.insert( it->second->getName( ).c_str( ) );
+        } // for
 
-      return std::copy(localObjects.begin(), localObjects.end(), out);
+        return std::copy(localObjects.begin(), localObjects.end(), out);
     }
 
     // Copy all objects of the given map into this one
@@ -220,135 +222,135 @@ namespace Spatial {
     //same code use in findNearestFiltered
     template<typename Out>
     Out findEntities(const Spatial::GridPoint& g, Spatial::Distance d, Out out) const {
-      Spatial::ObjectIDSet objs;
-                
-      struct rec_find finder(g, _grid, objs, *this);
-      struct rec_find finderNonObstacle(g, _grid_nonObstacle, objs, *this);
-                
-      finder.johnnie_walker(d);
-      finderNonObstacle.johnnie_walker(d);
+        Spatial::ObjectIDSet objs;
 
-      return std::copy(objs.begin(),objs.end(),out);
-    
-}
+        struct rec_find finder(g, _grid, objs, *this);
+        struct rec_find finderNonObstacle(g, _grid_nonObstacle, objs, *this);
+
+        finder.johnnie_walker(d);
+        finderNonObstacle.johnnie_walker(d);
+
+        return std::copy(objs.begin(), objs.end(), out);
+
+    }
     //find the minimal distance between some point in an object and a reference
     //point
     Distance minDist(const Spatial::ObjectID& id, const Spatial::Point& p) const;
 
     //find the nearest entity to a given point satisfying some predicate
     template<typename Pred>
-    ObjectID findNearestFiltered(const Point& p,Pred pred) const {
+    ObjectID findNearestFiltered(const Point& p, Pred pred) const {
 
-      std::vector<Spatial::ObjectID> tmp;
-      Spatial::Distance d = 5;
+        std::vector<Spatial::ObjectID> tmp;
+        Spatial::Distance d = 5;
 
-      //convert to greidPoint
-      Spatial::GridPoint g = snap(p);
-                
-      Distance x = fmax(xDim() - g.first -1, g.first);
-      Distance y = fmax(yDim() - g.second -1, g.second);
-      Spatial::Distance maxD = sqrt((x * x) + (y * y));
-                
-      Spatial::ObjectIDSet objs;
-                
-      struct rec_find finder(g, _grid, objs, *this);
-      struct rec_find finderNonObstacle(g, _grid_nonObstacle, objs, *this);
-                
-      do {
-	finder.johnnie_walker(d);
-	finderNonObstacle.johnnie_walker(d);
+        //convert to greidPoint
+        Spatial::GridPoint g = snap(p);
 
-	std::copy(objs.begin(),objs.end(), back_inserter(tmp));
+        Distance x = fmax(xDim() - g.first - 1, g.first);
+        Distance y = fmax(yDim() - g.second - 1, g.second);
+        Spatial::Distance maxD = sqrt((x * x) + (y * y));
 
-	tmp.erase(std::partition(tmp.begin(), tmp.end(), pred), tmp.end());
+        Spatial::ObjectIDSet objs;
 
-	if (d >= maxD && tmp.empty()){
-            opencog::logger().log(opencog::Logger::DEBUG, "LocalSpaceMap - Found no object that verifies the predicate. Distance %.2f, Max distance %.2f.", d, maxD); 
-	  //won't find anything
-	  return ObjectID();
-	}
-	d *= 1.5; //maybe it shouldn't grow so fast?
-	if (d > maxD ){
-	  d = maxD;
-	}
-	
-      } while (tmp.empty());
+        struct rec_find finder(g, _grid, objs, *this);
+        struct rec_find finderNonObstacle(g, _grid_nonObstacle, objs, *this);
 
-      //now find the closest
-      std::vector<Spatial::Distance> dists(tmp.size());
-      std::transform(tmp.begin(), tmp.end(), dists.begin(),
-		     boost::bind(&LocalSpaceMap2D::minDist, this,  ::_1, boost::cref(p)));
+        do {
+            finder.johnnie_walker(d);
+            finderNonObstacle.johnnie_walker(d);
 
-      return *(tmp.begin() + distance(dists.begin(), 
-				      min_element(dists.begin(), dists.end())));
+            std::copy(objs.begin(), objs.end(), back_inserter(tmp));
+
+            tmp.erase(std::partition(tmp.begin(), tmp.end(), pred), tmp.end());
+
+            if (d >= maxD && tmp.empty()) {
+                opencog::logger().log(opencog::Logger::DEBUG, "LocalSpaceMap - Found no object that verifies the predicate. Distance %.2f, Max distance %.2f.", d, maxD);
+                //won't find anything
+                return ObjectID();
+            }
+            d *= 1.5; //maybe it shouldn't grow so fast?
+            if (d > maxD ) {
+                d = maxD;
+            }
+
+        } while (tmp.empty());
+
+        //now find the closest
+        std::vector<Spatial::Distance> dists(tmp.size());
+        std::transform(tmp.begin(), tmp.end(), dists.begin(),
+                       boost::bind(&LocalSpaceMap2D::minDist, this,  ::_1, boost::cref(p)));
+
+        return *(tmp.begin() + distance(dists.begin(),
+                                        min_element(dists.begin(), dists.end())));
     }
 
     //find a random entity satisfying some predicate
     template<typename Pred>
     ObjectID findRandomFiltered(Pred pred, opencog::RandGen& rng) const {
 
-      //filter out all entities that match
-      std::vector<Spatial::ObjectID> tmp;
+        //filter out all entities that match
+        std::vector<Spatial::ObjectID> tmp;
 
-      //ObjectHashMap::const_iterator it;
-      LongEntityPtrHashMap::const_iterator it;
-      //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
-      for( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
-	//if ( pred( it->first ) ){
-	if ( pred( it->second->getName( ) ) ){
-	  //tmp.push_back( it->first );
-	  tmp.push_back( it->second->getName( ) );
-	} // if
-      } // for
+        //ObjectHashMap::const_iterator it;
+        LongEntityPtrHashMap::const_iterator it;
+        //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
+        for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
+            //if ( pred( it->first ) ){
+            if ( pred( it->second->getName( ) ) ) {
+                //tmp.push_back( it->first );
+                tmp.push_back( it->second->getName( ) );
+            } // if
+        } // for
 
-      return tmp.empty() ? ObjectID() : tmp[rng.randint(tmp.size())];
+        return tmp.empty() ? ObjectID() : tmp[rng.randint(tmp.size())];
     }
 
     // return id's of all objects within the space map
     template<typename Out>
     Out findAllEntities(Out out) const {
-                
-      // If one object id is stored as an obstacle and a non-obstacle,
-      // only count it once:
-      Spatial::ObjectIDSet localObjects;
 
-      //ObjectHashMap::const_iterator it;
-      LongEntityPtrHashMap::const_iterator it;
-      //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
-      for( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
-	//localObjects.insert( it->first.c_str( ) );
-	localObjects.insert( it->second->getName( ).c_str( ) );
-      } // for
+        // If one object id is stored as an obstacle and a non-obstacle,
+        // only count it once:
+        Spatial::ObjectIDSet localObjects;
 
-      return std::copy(localObjects.begin(), localObjects.end(), out);
+        //ObjectHashMap::const_iterator it;
+        LongEntityPtrHashMap::const_iterator it;
+        //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
+        for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
+            //localObjects.insert( it->first.c_str( ) );
+            localObjects.insert( it->second->getName( ).c_str( ) );
+        } // for
+
+        return std::copy(localObjects.begin(), localObjects.end(), out);
     }
 
     //all of the points associated with a given object
     template<typename Out>
     Out allPoints(const Spatial::ObjectID& id, Out out) const {
-      std::vector<Spatial::Point> points;
+        std::vector<Spatial::Point> points;
 
-      //ObjectHashMap::const_iterator it = this->objects.find( id );
-      long idHash = boost::hash<std::string>()( id );
-      LongGridPointVectorHashMap::const_iterator it = this->gridPoints.find( idHash );
-      //if ( it != this->objects.end( ) ) {
-      if ( it != this->gridPoints.end( ) ) {
-	unsigned int i;
-	//for( i = 0; i < it->second.gridPoints.size( ); ++i ) {
-	for( i = 0; i < it->second.size( ); ++i ) {
-	  //points.push_back( unsnap( it->second.gridPoints[ i ] ) );
-	  points.push_back( unsnap( it->second[ i ] ) );
-	} // for
-      } // if
+        //ObjectHashMap::const_iterator it = this->objects.find( id );
+        long idHash = boost::hash<std::string>()( id );
+        LongGridPointVectorHashMap::const_iterator it = this->gridPoints.find( idHash );
+        //if ( it != this->objects.end( ) ) {
+        if ( it != this->gridPoints.end( ) ) {
+            unsigned int i;
+            //for( i = 0; i < it->second.gridPoints.size( ); ++i ) {
+            for ( i = 0; i < it->second.size( ); ++i ) {
+                //points.push_back( unsnap( it->second.gridPoints[ i ] ) );
+                points.push_back( unsnap( it->second[ i ] ) );
+            } // for
+        } // if
 
-      return std::copy(points.begin(), points.end(), out);
+        return std::copy(points.begin(), points.end(), out);
     }
 
     //Euclidean distance between points
     template<typename PointT>
-    static Distance eucDist(const PointT& p1,const PointT& p2) {
-      return std::sqrt(opencog::power(p1.first - p2.first, 2)+
-		       opencog::power(p1.second - p2.second, 2));
+    static Distance eucDist(const PointT& p1, const PointT& p2) {
+        return std::sqrt(opencog::power(p1.first - p2.first, 2) +
+                         opencog::power(p1.second - p2.second, 2));
     }
 
     //are the given /grid coordinates/ within the dimensions of this grid?
@@ -389,9 +391,9 @@ namespace Spatial {
      * @param position Given position
      * @param distance Maximum distance from the given position to search the free point
      * @param startDirection Vector that points to the direction of the first rayTrace
-     */      
+     */
     Spatial::Point getNearFreePointAtDistance( const Spatial::Point& position, float distance, const Spatial::Point& startDirection ) const throw (opencog::NotFoundException);
-      
+
     /**
      * Get the nearest object point of a given a reference point
      *
@@ -407,11 +409,11 @@ namespace Spatial {
      * @param points Calculated vector grid points (out)
      * @param segment Segment used to calculate the points
      */
-    void calculateSegmentGridPoints( std::vector<Spatial::GridPoint>& points, const Math::LineSegment& segment );      
+    void calculateSegmentGridPoints( std::vector<Spatial::GridPoint>& points, const Math::LineSegment& segment );
 
     /**
      * Find all points belonging to an object, represented by it's segments
-     * 
+     *
      * @param points Calculated vector grid points (out)
      * @param segments Vector of segments that represtends an object
      */
@@ -427,7 +429,7 @@ namespace Spatial {
     void addObject( const Spatial::ObjectID& id, const Spatial::ObjectMetaData& metadata, bool isObstacle = false );
 
     /**
-     * Update the points of an object. If the object metadata has not changed, 
+     * Update the points of an object. If the object metadata has not changed,
      * nothing will be done. If it was changed from object<->nonObject it will be updated too.
      *
      * @param id Object id
@@ -435,23 +437,23 @@ namespace Spatial {
      * @param isObstacle If true the object will be considered an obstacle, false an nonObstacle
      */
     void updateObject( const Spatial::ObjectID& id, const Spatial::ObjectMetaData& metadata, bool isObstacle = false );
-    
+
     //const Object& getObject( const Spatial::ObjectID& id ) const throw (opencog::NotFoundException);
 
     const EntityPtr& getEntity( const std::string& id ) const throw (opencog::NotFoundException);
     const EntityPtr& getEntity( long id ) const throw (opencog::NotFoundException);
-    
+
     bool belongsToSuperEntity( const Spatial::ObjectID& id ) const;
-    
+
     const SuperEntityPtr& getSuperEntityWhichContains( const Spatial::ObjectID& id ) const throw(opencog::NotFoundException);
 
     inline const std::list<SuperEntityPtr>& getSuperEntities( void ) const {
-      return this->superEntities;
+        return this->superEntities;
     }
 
 
-  }; // struct LocalSpaceMap2D
-   
+}; // struct LocalSpaceMap2D
+
 } //~namespace Spatial
 
 #endif

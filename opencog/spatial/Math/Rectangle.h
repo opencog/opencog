@@ -25,33 +25,35 @@
 #include "Vector3.h"
 #include <opencog/util/exceptions.h>
 
-namespace Spatial {
-  namespace Math {
+namespace Spatial
+{
+namespace Math {
 
-    class Rectangle {
-    public:
+class Rectangle
+{
+public:
 
-      Rectangle( const Rectangle& other );
+    Rectangle( const Rectangle& other );
 
-      Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, const Vector3& rightBottomCorner ) throw(opencog::InvalidParamException);
+    Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, const Vector3& rightBottomCorner ) throw(opencog::InvalidParamException);
 
-      inline virtual ~Rectangle( void ) { };
+    inline virtual ~Rectangle( void ) { };
 
-      bool isInside( const Vector3& point );
+    bool isInside( const Vector3& point );
 
-      Rectangle& operator=( const Rectangle& o );
+    Rectangle& operator=( const Rectangle& o );
 
-      bool operator==( const Rectangle& o ) const;
+    bool operator==( const Rectangle& o ) const;
 
 
-    private:
-	Vector3 leftTopCorner;
-	Vector3 rightTopCorner;
-	Vector3 rightBottomCorner;      
-	Vector3 leftBottomCorner;      
-    }; // Rectangle
+private:
+    Vector3 leftTopCorner;
+    Vector3 rightTopCorner;
+    Vector3 rightBottomCorner;
+    Vector3 leftBottomCorner;
+}; // Rectangle
 
-  } // Math
+} // Math
 } // Spatial
 
 #endif // _SPATIAL_MATH_RECTANGLE_H_

@@ -38,9 +38,10 @@ using namespace opencog;
  * Protected functions
  * ----------------------------------------------------------------------------
  */
-void TangentBug::init_vars() {
+void TangentBug::init_vars()
+{
     edge_following_recently_ended = false;
-    curr_pos = TangentBugBits::Point(0,0);
+    curr_pos = TangentBugBits::Point(0, 0);
     center = TangentBugBits::Point(lsm->xDim() / 2, lsm->yDim() / 2);
     random_walk_randomness = 1;
 
@@ -48,15 +49,17 @@ void TangentBug::init_vars() {
     debug_wall_follow = false;
 }
 
-bool TangentBug::is_local_minimum(const TangentBugBits::Point& next_point) const{
+bool TangentBug::is_local_minimum(const TangentBugBits::Point& next_point) const
+{
     // True if we are getting closer to the goal with the next step (or if we
     // aren't moving).
     return (((goal - next_point).length() > (goal - curr_pos).length()) ||
             (next_point == curr_pos));
 }
 
-TangentBugBits::Ray TangentBug::dir_closest_wall(){
-    
+TangentBugBits::Ray TangentBug::dir_closest_wall()
+{
+
     double delta = PI / 24;
     TangentBugBits::Point pt;
 
@@ -64,7 +67,7 @@ TangentBugBits::Ray TangentBug::dir_closest_wall(){
     for (int distance_to_look = 1; distance_to_look <= SIGHT_DISTANCE; ++distance_to_look) {
         for (double theta = 0; theta < 2 * PI; theta += delta) {
             pt.first = curr_pos.first + static_cast<int>(distance_to_look * cos(theta));
-            pt.second= curr_pos.second + static_cast<int>(distance_to_look * sin(theta));
+            pt.second = curr_pos.second + static_cast<int>(distance_to_look * sin(theta));
             //logger().log(opencog::Logger::FINE, "TangentBug::dir_closest_wall(): before gridIllegal");
             if (lsm->gridIllegal(pt))
                 // This point must be the closest wall.
@@ -76,9 +79,10 @@ TangentBugBits::Ray TangentBug::dir_closest_wall(){
     return Ray(); // Keep the compiler warnings at bay...
 }
 
-void TangentBug::cleanup_action_plan(){
+void TangentBug::cleanup_action_plan()
+{
     logger().log(opencog::Logger::INFO, "TangentBug - Shortening action plan. It has %d elem.",
-        calculatedPath.size());
+                 calculatedPath.size());
 
     // Repeatedly ensure that the path is free between begin_range and end_range,
     // and erase the range (begin_range,end_range)
@@ -114,34 +118,37 @@ void TangentBug::cleanup_action_plan(){
     // every two points because that's not necessarily true. We could TB_ASSERT
     // that there is some free straight path from A to B, but not that the
     // (main) path from A to B is free.
-    logger().log(opencog::Logger::INFO," TangentBug - Shortening action plan complete. It has %d elem.", 
-        calculatedPath.size());
+    logger().log(opencog::Logger::INFO, " TangentBug - Shortening action plan complete. It has %d elem.",
+                 calculatedPath.size());
 }
 
-bool TangentBug::path_free_to_goal() {
+bool TangentBug::path_free_to_goal()
+{
 
-    if ((goal - curr_pos).length() <= SIGHT_DISTANCE){
+    if ((goal - curr_pos).length() <= SIGHT_DISTANCE) {
         return path_free(curr_pos, goal);
-    } 
-    return path_free(curr_pos, goal-curr_pos, SIGHT_DISTANCE);
+    }
+    return path_free(curr_pos, goal - curr_pos, SIGHT_DISTANCE);
 }
 
 // Perform no checks, but go to a point:
-bool TangentBug::_move(const TangentBugBits::Ray& r, double distance){
+bool TangentBug::_move(const TangentBugBits::Ray& r, double distance)
+{
     return _move(curr_pos + r.normalize() * distance);
 }
 
-bool TangentBug::_move(const TangentBugBits::Point& dest){
+bool TangentBug::_move(const TangentBugBits::Point& dest)
+{
     logger().log(opencog::Logger::DEBUG, "TangentBug - _move() called.");
     TB_ASSERT(movement != UNSET);
 
-    if (edge_following_recently_ended){
+    if (edge_following_recently_ended) {
         edge_following_recently_ended = false;
     }
 
     prev_pos = curr_pos;
     curr_pos = Point(dest);
-    logger().log(opencog::Logger::DEBUG,"TangentBug - Moved to: (%d, %d).", curr_pos.first, curr_pos.second); 
+    logger().log(opencog::Logger::DEBUG, "TangentBug - Moved to: (%d, %d).", curr_pos.first, curr_pos.second);
 
     trace_path(prev_pos, curr_pos, TRACE_PURPLE);
 
@@ -153,25 +160,26 @@ bool TangentBug::_move(const TangentBugBits::Point& dest){
     calculatedPath.push_back(boost::tuples::make_tuple(lsm->unsnap(curr_pos),
                              curr_pos,
                              status_code));
-    if (tb_timeout()){
+    if (tb_timeout()) {
         return false;
     }
 
 #ifndef NDEBUG
-    std::pair<double,double> point_pair = boost::tuples::get<0>(calculatedPath.back());
+    std::pair<double, double> point_pair = boost::tuples::get<0>(calculatedPath.back());
     TB_ASSERT(curr_pos == lsm->snap(point_pair));
 #endif
 
-            //logger().log(opencog::Logger::FINE, "TangentBug::_move(): before gridIllegal");
+    //logger().log(opencog::Logger::FINE, "TangentBug::_move(): before gridIllegal");
     TB_ASSERT(! lsm->gridIllegal(curr_pos));
     return true;
 }
 
-bool TangentBug::tb_timeout(){
+bool TangentBug::tb_timeout()
+{
 
 #ifndef TB_NO_TIMEOUT
     TB_ASSERT(movement != UNSET);
-    if (movement == TO_GOAL){
+    if (movement == TO_GOAL) {
         return false; // No conceivable reason to time out.
     }
 
@@ -179,12 +187,12 @@ bool TangentBug::tb_timeout(){
         unsigned int max_number_steps = 3000;
         if (calculatedPath.size() > max_number_steps) {
             logger().log(opencog::Logger::WARN,
-                    "TangentBug - Algorithm timed out in the worst possible "
-                    "way. The relatively nice timeout algorithm was not triggered, but "
-                    "instead the maximum allowed number of moves was reached. This is "
-                    "surely because you are on a very large map. Either the "
-                    "max_number_steps is too small, or M and N are too small, and "
-                    "cycles are going unnoticed.");
+                         "TangentBug - Algorithm timed out in the worst possible "
+                         "way. The relatively nice timeout algorithm was not triggered, but "
+                         "instead the maximum allowed number of moves was reached. This is "
+                         "surely because you are on a very large map. Either the "
+                         "max_number_steps is too small, or M and N are too small, and "
+                         "cycles are going unnoticed.");
             return true;
         }
     }
@@ -206,19 +214,19 @@ bool TangentBug::tb_timeout(){
     // TWEAK ME:
     unsigned int M = 200;
     unsigned int N = 500;
-    TB_ASSERT(M<N);
-    if (calculatedPath.size() < N){
+    TB_ASSERT(M < N);
+    if (calculatedPath.size() < N) {
         return false; // We can't work in these conditions!
     }
 
     // Coordinates of minimum bounding rectangle in the last M moves:
     coord lowest_m = std::numeric_limits<coord>::max(),
-          leftmost_m   = std::numeric_limits<coord>::max(),
-          highest_m    = std::numeric_limits<coord>::min(),
-          rightmost_m  = std::numeric_limits<coord>::min();
+                     leftmost_m   = std::numeric_limits<coord>::max(),
+                                    highest_m    = std::numeric_limits<coord>::min(),
+                                                   rightmost_m  = std::numeric_limits<coord>::min();
 
     CalculatedPath::iterator itr = calculatedPath.end();
-    for(unsigned int i=0; i<M; ++i) {
+    for (unsigned int i = 0; i < M; ++i) {
         --itr;
         const Point& p = boost::tuples::get<1>(*itr);
         if (p.first  < leftmost_m)  leftmost_m  = p.first;
@@ -231,11 +239,11 @@ bool TangentBug::tb_timeout(){
 
     // Coordinates of minimum bounding rectangle in the last N moves:
     coord lowest_n = lowest_m,
-          leftmost_n   = leftmost_m,
-          highest_n    = highest_m,
-          rightmost_n  = rightmost_m;
+                     leftmost_n   = leftmost_m,
+                                    highest_n    = highest_m,
+                                                   rightmost_n  = rightmost_m;
     // Iterate through the list of the remaining N-M points to consider:
-    for(unsigned int i=0; i<(N-M); ++i) {
+    for (unsigned int i = 0; i < (N - M); ++i) {
         --itr;
         const Point& p = boost::tuples::get<1>(*itr);
         if (p.first  < leftmost_n)  leftmost_n  = p.first;
@@ -245,7 +253,7 @@ bool TangentBug::tb_timeout(){
     }
     TB_ASSERT(leftmost_n <= rightmost_n);
     TB_ASSERT(lowest_n <= highest_n);
-    
+
     // If the minimum bounding rectangle around the M last points does not
     // differ significantly from that around the N last points, return true, the
     // algorithm has timed out. Calculate similarity by percent of area shared.
@@ -260,42 +268,42 @@ bool TangentBug::tb_timeout(){
     lowest_overlapping > highest_overlapping)
     return false;
     */
-    
+
     // The diagonals of the minimum bounding rectangles:
     double diagonal_m = sqrt(pow((double)rightmost_m - leftmost_m, 2) +
-            pow((double)highest_m - lowest_m , 2));
+                             pow((double)highest_m - lowest_m , 2));
     double diagonal_n = sqrt(pow((double)rightmost_n - leftmost_n, 2) +
-            pow((double)highest_n - lowest_n , 2));
+                             pow((double)highest_n - lowest_n , 2));
     double diagonal_epsilon = sqrt(pow(std::numeric_limits<double>::min(), 2) +
-            pow(std::numeric_limits<double>::min(), 2));
+                                   pow(std::numeric_limits<double>::min(), 2));
 
     TB_ASSERT(diagonal_n >= diagonal_m - diagonal_epsilon);
     if (diagonal_m <= diagonal_epsilon) {
         logger().log(opencog::Logger::ERROR, "TangentBug - Bug is trapped in some sort of corner. Failed.");
-	printLocalSpaceMap();
+        printLocalSpaceMap();
         return true;
     }
 
     double similarity = diagonal_m / diagonal_n;
 
     TB_ASSERT(0 <= similarity && similarity <= 1);
-    
+
     // TWEAK ME: what similarity is grounds for failure?
     if (similarity >= 0.85) {
         logger().log(opencog::Logger::ERROR, "TangentBug - The area the bug has occupied in the last %d steps does not differ significantly from the area the bug has occupied in the last %d steps. Terminating.", M, N);
-	printLocalSpaceMap();
+        printLocalSpaceMap();
         return true;
-    }
-    else return false;
+    } else return false;
 
 #else
     return false;
 #endif // ifndef TB_NO_TIMEOUT
-   
+
 }
 
-bool TangentBug::follow_edge(){
-    
+bool TangentBug::follow_edge()
+{
+
     // Used to tell when we have gone in a circle:
     std::vector<TangentBugBits::Point> first_few_points;
     std::deque <TangentBugBits::Point> most_recent_points;
@@ -314,27 +322,26 @@ bool TangentBug::follow_edge(){
     double d_reach = d_followed;
     //d_followed = d_reach = (curr_pos - goal).length();
 
-    TangentBugBits::Ray moving_direction1; 
+    TangentBugBits::Ray moving_direction1;
     get_wall_tangent(LEFT, moving_direction1);
-    TangentBugBits::Ray moving_direction2; 
-    get_wall_tangent(RIGHT,moving_direction2);
+    TangentBugBits::Ray moving_direction2;
+    get_wall_tangent(RIGHT, moving_direction2);
 
     // Which of these directions is more aligned with the direction we were just
     // moving? Maximize the dot product with the direction we are moving...
     TangentBugBits::Ray old_dir = curr_pos - prev_pos;
     int wall_follow_dir;
 
-    if (old_dir * moving_direction1 > old_dir * moving_direction2){
+    if (old_dir * moving_direction1 > old_dir * moving_direction2) {
         wall_follow_dir = LEFT;
-    }
-    else {
+    } else {
         wall_follow_dir = RIGHT;
     }
 
     // Wall following conditions:
     while ((d_reach >= (d_followed - std::numeric_limits<double>::epsilon())) &&
             (goal != curr_pos)) {
-        
+
         // *************** Pick a direction to move: ****************************
         TangentBugBits::Ray moving_direction;
         bool trapped = ! get_wall_tangent(wall_follow_dir, moving_direction);
@@ -342,25 +349,24 @@ bool TangentBug::follow_edge(){
         if (trapped) {
             trace_path(curr_pos, curr_pos + moving_direction);
             logger().log(opencog::Logger::ERROR, "TangentBug - It seems to have become trapped.");
-	    printLocalSpaceMap();
+            printLocalSpaceMap();
             //print();
             return false;
         }
 
         // We have a direction to move. Move there:
-        if (! _move(moving_direction, FOLLOW_STEP_DISTANCE)){
+        if (! _move(moving_direction, FOLLOW_STEP_DISTANCE)) {
             return false;
         }
 
         // ******** Evaluate whether we have gone in a circle: ***************
 
         // Update the two position lists:
-        if (first_few_points.size() < 5){
+        if (first_few_points.size() < 5) {
             first_few_points.push_back(curr_pos);
-        }
-        else {
+        } else {
             most_recent_points.push_back(curr_pos);
-            if (most_recent_points.size() > 5){
+            if (most_recent_points.size() > 5) {
                 most_recent_points.pop_front();
             }
 
@@ -370,10 +376,10 @@ bool TangentBug::follow_edge(){
             // 1) There is no obstacle between them
             // 2) they are within a step of each other.
             int matching_points = 0;
-            for (int i = 0; i < 5; ++i){
-                if (((first_few_points[i] - most_recent_points[i]).length()) <= 
-                    (1.5 * FOLLOW_STEP_DISTANCE) &&
-                    path_free(first_few_points[i], most_recent_points[i])){
+            for (int i = 0; i < 5; ++i) {
+                if (((first_few_points[i] - most_recent_points[i]).length()) <=
+                        (1.5 * FOLLOW_STEP_DISTANCE) &&
+                        path_free(first_few_points[i], most_recent_points[i])) {
                     matching_points++;
                 }
             }
@@ -387,7 +393,7 @@ bool TangentBug::follow_edge(){
         // ************ Update d_reach and d_follow **********************
         // d_followed: closest distance on wall to goal
         d_followed = std::min(d_followed,
-                closest_distance_on_obstacle_to_goal(dir_closest_wall()));
+                              closest_distance_on_obstacle_to_goal(dir_closest_wall()));
         TB_ASSERT(look_along_ray(curr_pos, dir_closest_wall(), SIGHT_DISTANCE).collided);
 
         // When moving is discrete steps greater than 2, it is possible to step
@@ -395,18 +401,16 @@ bool TangentBug::follow_edge(){
         // condition. This is a modification to the TangentBug algorithm to render
         // this impossible.
         if (path_free_to_goal()) {
-            if ((goal - curr_pos).length() <= SIGHT_DISTANCE){
+            if ((goal - curr_pos).length() <= SIGHT_DISTANCE) {
 
                 // Break edge following, because the goal is in sight and reachable.
                 d_reach = 0;
-            }
-            else{
+            } else {
 
                 // This is what the pure TB algorithm says to do:
                 d_reach = (goal - curr_pos).length();
             }
-        }
-        else {
+        } else {
             d_reach = closest_distance_on_obstacle_to_goal(goal - curr_pos);
         }
 
@@ -422,36 +426,36 @@ bool TangentBug::follow_edge(){
     return true;
 }
 
-double TangentBug::closest_distance_on_obstacle_to_goal(TangentBugBits::Ray dir_to_object){
-    
+double TangentBug::closest_distance_on_obstacle_to_goal(TangentBugBits::Ray dir_to_object)
+{
+
     // Scan left, scan right
     double deltas[] = { PI / 30, -PI / 30 };
-    double best_distance; // = std::numeric_limits<double>::max();
-    {
+    double best_distance; { // = std::numeric_limits<double>::max();
         TangentBugBits::Point best_point =
             look_along_ray(curr_pos, dir_to_object, SIGHT_DISTANCE).last_point;
         best_distance = (best_point - goal).length();
     }
 
     BOOST_FOREACH(double delta, deltas) {
-        TangentBugBits::look_info prev_glance = look_along_ray(curr_pos, 
-                                                               dir_to_object, 
-                                                               SIGHT_DISTANCE);
+        TangentBugBits::look_info prev_glance = look_along_ray(curr_pos,
+                                                dir_to_object,
+                                                SIGHT_DISTANCE);
         TB_ASSERT(prev_glance.collided);
 
         TangentBugBits::Point prev_point = prev_glance.last_point;
         TangentBugBits::Ray r(dir_to_object);
 
-        for (double theta=0; std::fabs(theta) < PI; theta += delta) {
+        for (double theta = 0; std::fabs(theta) < PI; theta += delta) {
             // Rotate r theta degrees
-            double _x = cos(delta)*r.x - sin(delta)*r.y;
-            double _y = sin(delta)*r.x + cos(delta)*r.y;
+            double _x = cos(delta) * r.x - sin(delta) * r.y;
+            double _y = sin(delta) * r.x + cos(delta) * r.y;
             r.x = _x, r.y = _y;
 
             // Find point on wall in direction r
             look_info vision = look_along_ray(curr_pos, r, SIGHT_DISTANCE);
-            if (!vision.collided || 
-                (vision.last_point - prev_point).length() > MAX_CONTIG_DISTANCE){
+            if (!vision.collided ||
+                    (vision.last_point - prev_point).length() > MAX_CONTIG_DISTANCE) {
                 break;
             }
 
@@ -462,8 +466,9 @@ double TangentBug::closest_distance_on_obstacle_to_goal(TangentBugBits::Ray dir_
     return best_distance;
 }
 
-std::vector<TangentBugBits::look_info> TangentBug::get_obstacle_endpoints() {
-    
+std::vector<TangentBugBits::look_info> TangentBug::get_obstacle_endpoints()
+{
+
     std::vector<TangentBugBits::look_info> look_dests = get_visible_destinations();
     std::vector<TangentBugBits::look_info> endpoints;
     TangentBugBits::look_info prev_look = look_dests.back();
@@ -482,22 +487,20 @@ std::vector<TangentBugBits::look_info> TangentBug::get_obstacle_endpoints() {
     //
     // To deal with the fact that these points are circular, the last shall be
     // first and the first shall be last:
-    
+
     // Can I safely use reference (e.g., look_info& this_look) if I am aggregating them in a container:
     BOOST_FOREACH(look_info this_look, look_dests) {
         if (! this_look.collided) {
-            if (prev_look.collided){
+            if (prev_look.collided) {
                 endpoints.push_back(prev_look);
             }
-        }
-        else {
+        } else {
             // This point collided
-            if (! prev_look.collided){
+            if (! prev_look.collided) {
                 endpoints.push_back(this_look);
-            }
-            else {
+            } else {
                 // Is there discontinuity based on distance?
-                if ((this_look.last_point-prev_look.last_point).length() > MAX_CONTIG_DISTANCE) {
+                if ((this_look.last_point - prev_look.last_point).length() > MAX_CONTIG_DISTANCE) {
                     endpoints.push_back(prev_look);
                     endpoints.push_back(this_look);
                 }
@@ -508,7 +511,8 @@ std::vector<TangentBugBits::look_info> TangentBug::get_obstacle_endpoints() {
     return endpoints;
 }
 
-std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations2(){
+std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations2()
+{
     logger().log(opencog::Logger::WARN, "TangentBug - get_visible_destination2 is not implemented. Returning an empty look_info struct.");
 
     // TODO: the idea is to represent the area around me curr_pos as a
@@ -528,7 +532,8 @@ std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations2(){
     return std::vector<TangentBugBits::look_info>();
 }
 
-std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations(){
+std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations()
+{
 
     std::vector<TangentBugBits::look_info> visible_points;
     TangentBugBits::Ray gaze((double)SIGHT_DISTANCE, 0.f);
@@ -550,17 +555,19 @@ std::vector<TangentBugBits::look_info> TangentBug::get_visible_destinations(){
     return visible_points;
 }
 
-void TangentBug::_place_pet(const TangentBugBits::Point& pt) {
+void TangentBug::_place_pet(const TangentBugBits::Point& pt)
+{
     // check not an illegal position
-            //logger().log(opencog::Logger::FINE, "TangentBug::_place_pet(): before gridIllegal");
+    //logger().log(opencog::Logger::FINE, "TangentBug::_place_pet(): before gridIllegal");
     TB_ASSERT(!lsm->gridIllegal(pt));
     curr_pos = pt;
     aux_map[pt].insert(CURR_POS);
 }
 
-void TangentBug::_place_goal(const TangentBugBits::Point& pt, bool allow_enclosed) {
-    if (!allow_enclosed){
-            //logger().log(opencog::Logger::FINE, "TangentBug::_place_goal(): before gridIllegal");
+void TangentBug::_place_goal(const TangentBugBits::Point& pt, bool allow_enclosed)
+{
+    if (!allow_enclosed) {
+        //logger().log(opencog::Logger::FINE, "TangentBug::_place_goal(): before gridIllegal");
         TB_ASSERT(! lsm->gridIllegal(pt));
     }
 
@@ -568,29 +575,30 @@ void TangentBug::_place_goal(const TangentBugBits::Point& pt, bool allow_enclose
     aux_map[pt].insert(GOAL);
 }
 
-bool TangentBug::get_wall_tangent(int right_or_left, TangentBugBits::Ray& tangent){
+bool TangentBug::get_wall_tangent(int right_or_left, TangentBugBits::Ray& tangent)
+{
     // Initial stab at a direction--we assume this is blocked.
-    tangent  = dir_closest_wall().normalize()* FOLLOW_STEP_DISTANCE;
+    tangent  = dir_closest_wall().normalize() * FOLLOW_STEP_DISTANCE;
     double theta_delta = PI / 24;
 
-    if (right_or_left == RIGHT){
+    if (right_or_left == RIGHT) {
         theta_delta = -theta_delta;
     }
 
     double rotated_degrees = 0;
     double s = sin(theta_delta), c = cos(theta_delta);
-    
+
     // Until our step vector leads to a free path
     do {
         // Rotate tangent theta_delta degrees around the z-axis
-        double _x = c*tangent.x - s*tangent.y;
-        double _y = s*tangent.x + c*tangent.y;
+        double _x = c * tangent.x - s * tangent.y;
+        double _y = s * tangent.x + c * tangent.y;
         tangent.x = _x, tangent.y = _y;
 
         if (std::fabs(rotated_degrees) > 2*PI) {
             trace_path(curr_pos, curr_pos + tangent, TRACE_RED); print();
             logger().log(opencog::Logger::ERROR, "TangentBug - Could not find a tangent to the wall. May be trapped.");
-	    printLocalSpaceMap();
+            printLocalSpaceMap();
             return false;
         }
         rotated_degrees += theta_delta;
@@ -601,10 +609,11 @@ bool TangentBug::get_wall_tangent(int right_or_left, TangentBugBits::Ray& tangen
     return true;
 }
 
-bool TangentBug::path_free(const TangentBugBits::Point& pt1, 
-                           const TangentBugBits::Point& pt2) const {
+bool TangentBug::path_free(const TangentBugBits::Point& pt1,
+                           const TangentBugBits::Point& pt2) const
+{
     if (pt1 == pt2) {
-            //logger().log(opencog::Logger::FINE, "TangentBug::path_free(): before gridIllegal");
+        //logger().log(opencog::Logger::FINE, "TangentBug::path_free(): before gridIllegal");
         return ! lsm->gridIllegal(pt1);
     }
 
@@ -612,13 +621,15 @@ bool TangentBug::path_free(const TangentBugBits::Point& pt1,
     return path_free(pt1, r, r.length());
 }
 
-bool TangentBug::path_free(const TangentBugBits::Point& pt1, 
-                           const TangentBugBits::Ray& direction, 
-                           double distance) const{
+bool TangentBug::path_free(const TangentBugBits::Point& pt1,
+                           const TangentBugBits::Ray& direction,
+                           double distance) const
+{
     return !(look_along_ray(pt1, direction, distance).collided);
 }
 
-bool TangentBug::reeval_subgoal(look_info &new_subgoal){
+bool TangentBug::reeval_subgoal(look_info &new_subgoal)
+{
 
     if (path_free_to_goal()) {
         movement = TO_GOAL;
@@ -646,25 +657,25 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal){
     // If the bug has just finished edge following, try to prevent it from
     // starting again. Do this by filtering all points that are very close to our
     // current position.
-    if (edge_following_recently_ended){
+    if (edge_following_recently_ended) {
         new_end = remove_if(endpoints.begin(), endpoints.end(),
-                boost::bind(&TangentBug::closer_than_n_pixels,this,_1,3,false));
+                            boost::bind(&TangentBug::closer_than_n_pixels, this, _1, 3, false));
     }
 
     // Otherwise, just filter the points that are very close and not in the
     // general direction of the goal.
-    else{
+    else {
         new_end = remove_if(endpoints.begin(), endpoints.end(),
-                boost::bind(&TangentBug::closer_than_n_pixels,this,_1,3,true));
+                            boost::bind(&TangentBug::closer_than_n_pixels, this, _1, 3, true));
     }
 
     endpoints.erase(new_end, endpoints.end());
-    BOOST_FOREACH(TangentBugBits::look_info &look, endpoints){
+    BOOST_FOREACH(TangentBugBits::look_info &look, endpoints) {
         aux_map[look.last_point_before_hit].insert(TRACE_CYAN);
     }
-    
+
     print(); //getch();
-    BOOST_FOREACH(TangentBugBits::look_info &look, endpoints){
+    BOOST_FOREACH(TangentBugBits::look_info &look, endpoints) {
         aux_map[look.last_point_before_hit].erase(TRACE_CYAN);
     }
 
@@ -674,7 +685,7 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal){
         // We see no points of discontinuity, and thus can't move. Most likely, we
         // are just in an enclosed space with a very small opening.
         //random_walk(2);
-        if (! random_walk(2)){
+        if (! random_walk(2)) {
             return false;
         }
         return reeval_subgoal(new_subgoal);
@@ -693,7 +704,7 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal){
             best_point = look;
         }
     }
-            //logger().log(opencog::Logger::FINE, "TangentBug::reeval_subgoal(): before gridIllegal");
+    //logger().log(opencog::Logger::FINE, "TangentBug::reeval_subgoal(): before gridIllegal");
     TB_ASSERT(! lsm->gridIllegal(best_point.last_point_before_hit));
     new_subgoal = best_point;
     return true;
@@ -705,41 +716,47 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal){
  * ----------------------------------------------------------------------------
  */
 TangentBug::TangentBug(const Map& lsm, CalculatedPath& calculatedPath, opencog::RandGen& _rng) :
-                       lsm(&lsm), calculatedPath(calculatedPath), rng(_rng) {
+        lsm(&lsm), calculatedPath(calculatedPath), rng(_rng)
+{
     init_vars();
 }
 
-TangentBug::~TangentBug(){
+TangentBug::~TangentBug()
+{
 }
 
-const TangentBugBits::Point& TangentBug::getCenter() const { 
-    return const_cast<const Point&>(center); 
+const TangentBugBits::Point& TangentBug::getCenter() const
+{
+    return const_cast<const Point&>(center);
 }
 
-const TangentBugBits::Point& TangentBug::getGoal() const {
-    return const_cast<const TangentBugBits::Point&>(goal); 
+const TangentBugBits::Point& TangentBug::getGoal() const
+{
+    return const_cast<const TangentBugBits::Point&>(goal);
 }
 
-const TangentBugBits::Point& TangentBug::getCurrPos() const { 
-    return const_cast<const TangentBugBits::Point&>(curr_pos); 
+const TangentBugBits::Point& TangentBug::getCurrPos() const
+{
+    return const_cast<const TangentBugBits::Point&>(curr_pos);
 }
 
-bool TangentBug::seek_goal(){
-    
+bool TangentBug::seek_goal()
+{
+
     movement = UNSET;
     print();
-    
+
     while (curr_pos != goal) {
-        logger().log(opencog::Logger::DEBUG, "TangentBug - pet pos (%d, %d), goal (%d, %d)", 
-                        curr_pos.first, curr_pos.second, goal.first, goal.second);
+        logger().log(opencog::Logger::DEBUG, "TangentBug - pet pos (%d, %d), goal (%d, %d)",
+                     curr_pos.first, curr_pos.second, goal.first, goal.second);
 
         TangentBugBits::look_info subgoal;
-        if (!reeval_subgoal(subgoal)){
+        if (!reeval_subgoal(subgoal)) {
             logger().log(opencog::Logger::DEBUG, "TangentBug - Cannot reeval subgoal. Clean path.");
             cleanup_action_plan();
             return false;
         }
-            //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): before gridIllegal");
+        //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): before gridIllegal");
         TB_ASSERT(!lsm->gridIllegal(subgoal.last_point_before_hit));
 
         if (is_local_minimum(subgoal.last_point_before_hit)) {
@@ -749,9 +766,9 @@ bool TangentBug::seek_goal(){
             if (edge_following_recently_ended) {
                 // We will likely enter an infinite loop unless we do something.
                 //random_walk(3);
-                if (! random_walk(3)){
-                    logger().log(opencog::Logger::ERROR, 
-                        "TangentBug - Random walk to scape failed! Clean path.");
+                if (! random_walk(3)) {
+                    logger().log(opencog::Logger::ERROR,
+                                 "TangentBug - Random walk to scape failed! Clean path.");
                     cleanup_action_plan();
                     return false;
                 }
@@ -767,7 +784,7 @@ bool TangentBug::seek_goal(){
             movement = FOLLOWING;
             if (!follow_edge()) {
                 logger().log(opencog::Logger::ERROR, "TangentBug - EDGE follow failed! Clean path.");
-	        printLocalSpaceMap();
+                printLocalSpaceMap();
                 cleanup_action_plan();
 
                 return false;
@@ -777,78 +794,76 @@ bool TangentBug::seek_goal(){
             edge_following_recently_ended = true;
             logger().log(opencog::Logger::DEBUG, "TangentBug - End EDGE FOLLOWING");
             movement = NORMAL;
-        }
-        else {
-            switch(movement) {
+        } else {
+            switch (movement) {
 
-                case TO_GOAL :
-                    // In this case, there is no lost directional information if we just
-                    // move toward a point--the directional information was created based
-                    // on the point.
-                    if ((subgoal.last_point_before_hit - curr_pos).length() > MAX_STEP_DISTANCE) {
-                        if (!_move(subgoal.orig_direction, MAX_STEP_DISTANCE)){
-                            logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move MAX_STEP_DIST. Clean path.");
-	                    printLocalSpaceMap();
-                            cleanup_action_plan();
-                            return false;
-                        }
-            //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): TO_GOAL 1: before gridIllegal");
-                        TB_ASSERT(! lsm->gridIllegal(curr_pos));
+            case TO_GOAL :
+                // In this case, there is no lost directional information if we just
+                // move toward a point--the directional information was created based
+                // on the point.
+                if ((subgoal.last_point_before_hit - curr_pos).length() > MAX_STEP_DISTANCE) {
+                    if (!_move(subgoal.orig_direction, MAX_STEP_DISTANCE)) {
+                        logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move MAX_STEP_DIST. Clean path.");
+                        printLocalSpaceMap();
+                        cleanup_action_plan();
+                        return false;
                     }
-                    else {
-                        if (!_move(subgoal.last_point_before_hit)){
-                            logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move last_point_before_hit. Clean path.");
-	                    printLocalSpaceMap();
-                            cleanup_action_plan();
-                            return false;
-                        }
-            //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): TO_GOAL 2: before gridIllegal");
-                        TB_ASSERT(! lsm->gridIllegal(curr_pos));
+                    //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): TO_GOAL 1: before gridIllegal");
+                    TB_ASSERT(! lsm->gridIllegal(curr_pos));
+                } else {
+                    if (!_move(subgoal.last_point_before_hit)) {
+                        logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move last_point_before_hit. Clean path.");
+                        printLocalSpaceMap();
+                        cleanup_action_plan();
+                        return false;
                     }
-                    break;
+                    //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): TO_GOAL 2: before gridIllegal");
+                    TB_ASSERT(! lsm->gridIllegal(curr_pos));
+                }
+                break;
 
-                case NORMAL :
-                    if ((subgoal.last_point_before_hit - curr_pos).length() > STEP_DISTANCE) {
-            //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): NORMAL 1: before gridIllegal");
-                        TB_ASSERT(!lsm->gridIllegal(subgoal.last_point_before_hit));
+            case NORMAL :
+                if ((subgoal.last_point_before_hit - curr_pos).length() > STEP_DISTANCE) {
+                    //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): NORMAL 1: before gridIllegal");
+                    TB_ASSERT(!lsm->gridIllegal(subgoal.last_point_before_hit));
 
-                        //debug_look_along_ray = true;
-                        TB_ASSERT(path_free(curr_pos, subgoal.orig_direction, STEP_DISTANCE));
+                    //debug_look_along_ray = true;
+                    TB_ASSERT(path_free(curr_pos, subgoal.orig_direction, STEP_DISTANCE));
 
-                        //aux_map[curr_pos + subgoal.orig_direction.normalize()*STEP_DISTANCE].insert(TRACE_RED);
-                        //print();
+                    //aux_map[curr_pos + subgoal.orig_direction.normalize()*STEP_DISTANCE].insert(TRACE_RED);
+                    //print();
 
-            //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): NORMAL 2: before gridIllegal");
-                        TB_ASSERT(! lsm->gridIllegal(curr_pos + subgoal.orig_direction.normalize()*STEP_DISTANCE));
+                    //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): NORMAL 2: before gridIllegal");
+                    TB_ASSERT(! lsm->gridIllegal(curr_pos + subgoal.orig_direction.normalize()*STEP_DISTANCE));
 
-                        if (!_move(subgoal.orig_direction, STEP_DISTANCE)){
-                            logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move STEP_DISTANCE. Clean path.");
-	                    printLocalSpaceMap();
-                            cleanup_action_plan();
-                            return false;
-                        }
+                    if (!_move(subgoal.orig_direction, STEP_DISTANCE)) {
+                        logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move STEP_DISTANCE. Clean path.");
+                        printLocalSpaceMap();
+                        cleanup_action_plan();
+                        return false;
                     }
+                }
 
-                    else {
-                        if (! _move(subgoal.last_point_before_hit)){
-                            logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move last_point_before_hit 2. Clean path.");
-	                    printLocalSpaceMap();
-                            cleanup_action_plan();
-                            return false;
-                        }
-            //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): NORMAL 3: before gridIllegal");
-                        TB_ASSERT(! lsm->gridIllegal(curr_pos));
+                else {
+                    if (! _move(subgoal.last_point_before_hit)) {
+                        logger().log(opencog::Logger::ERROR, "TangentBug - Cannot move last_point_before_hit 2. Clean path.");
+                        printLocalSpaceMap();
+                        cleanup_action_plan();
+                        return false;
                     }
-                    break;
+                    //logger().log(opencog::Logger::FINE, "TangentBug::seek_goal(): NORMAL 3: before gridIllegal");
+                    TB_ASSERT(! lsm->gridIllegal(curr_pos));
+                }
+                break;
 
-                    // The following isn't used, because the following method calls _move directly:
-                    //
-                    //   case FOLLOWING :
-                    //   if (! _move(subgoal))    return false;
-                    //   break;
-                default:
-                    logger().log(opencog::Logger::WARN, "TangentBug - Only TO_GOAL and NORMAL moves are treated.");
-                    break;
+                // The following isn't used, because the following method calls _move directly:
+                //
+                //   case FOLLOWING :
+                //   if (! _move(subgoal))    return false;
+                //   break;
+            default:
+                logger().log(opencog::Logger::WARN, "TangentBug - Only TO_GOAL and NORMAL moves are treated.");
+                break;
             }
         }
     }
@@ -857,13 +872,14 @@ bool TangentBug::seek_goal(){
 }
 
 TangentBugBits::look_info TangentBug::look_along_ray(
-                                      const TangentBugBits::Point& initial_point,
-                                      const TangentBugBits::Ray& _direction,
-                                      double distance) const {
+    const TangentBugBits::Point& initial_point,
+    const TangentBugBits::Ray& _direction,
+    double distance) const
+{
     if (distance < 0) {
         distance = SIGHT_DISTANCE;
     }
-    TangentBugBits::Ray r = _direction.normalize()*distance;
+    TangentBugBits::Ray r = _direction.normalize() * distance;
 
     TangentBugBits::look_info ret_val;
     ret_val.orig_direction = _direction;
@@ -871,7 +887,7 @@ TangentBugBits::look_info TangentBug::look_along_ray(
     // This does not guarantee that last_point_before_hit is actually free.
     ret_val.last_point_before_hit = initial_point;
 
-            //logger().log(opencog::Logger::FINE, "TangentBug::look_along_ray(): initial_point: before gridIllegal");
+    //logger().log(opencog::Logger::FINE, "TangentBug::look_along_ray(): initial_point: before gridIllegal");
     if (lsm->gridIllegal(initial_point)) {
         logger().log(opencog::Logger::WARN, "TangentBug - Returning a struct where last_point_before_hit is in fact not before the hit, because the first point is occupied or out of bounds.");
         ret_val.last_point_before_hit = initial_point;
@@ -890,10 +906,10 @@ TangentBugBits::look_info TangentBug::look_along_ray(
     double delta_x = std::fabs(r.x);
     double delta_y = std::fabs(r.y);
     double error_delta;
-   
+
     // If this is so, we'll need to loop over
-    bool steep = (delta_x < delta_y); 
-    
+    bool steep = (delta_x < delta_y);
+
     // y, and increment (or not) x. We have two directions of movement--"main" and
     // "otro". The main direction is the one that moves faster, while "incr" is
     // sometimes incremented and sometimes not. If (steep), main is the y
@@ -906,7 +922,7 @@ TangentBugBits::look_info TangentBug::look_along_ray(
     // This row / column is NOT drawn, it is beyond the last point:
     TangentBugBits::coord main_end;
     TangentBugBits::coord otro_end;
- 
+
     // We want to be able to refer to x and y by name, in addition to thinking
     // of them as the main coordinate and the otro coordinate (or vice-versa,
     // which is the problem)
@@ -929,9 +945,8 @@ TangentBugBits::look_info TangentBug::look_along_ray(
         px_end = &otro_end;
         px = &otro_coord;
 
-        error_delta= delta_x / delta_y;
-    }
-    else {
+        error_delta = delta_x / delta_y;
+    } else {
         // x:
         main_coord = initial_point.first;
         main_incr  = (r.x > 0) ? 1 : -1; // The main coordinate will move left or right?
@@ -945,7 +960,7 @@ TangentBugBits::look_info TangentBug::look_along_ray(
         py_end = &otro_end;
         py = &otro_coord;
 
-        error_delta= delta_y / delta_x;
+        error_delta = delta_y / delta_x;
     }
     double error = error_delta / 2;
 
@@ -954,16 +969,16 @@ TangentBugBits::look_info TangentBug::look_along_ray(
     const coord &x = *px;
     const coord &y = *py;
 
-/*
-       fprintf(stderr, "main_coord: %i\n", main_coord);
-       fprintf(stderr, "otro_coord: %i\n\n", otro_coord);
-       fprintf(stderr, "main_end: %i\n", main_end);
-       fprintf(stderr, "otro_end: %i\n", otro_end);
-       fprintf(stderr, "error_delta: %0.2f\n", error_delta);
-       fprintf(stderr, "main_incr: %i\n", main_incr);
-       fprintf(stderr, "otro_incr: %i\n", otro_incr);
-       std::cerr << "direction: " <<  r << std::endl;
-       */
+    /*
+           fprintf(stderr, "main_coord: %i\n", main_coord);
+           fprintf(stderr, "otro_coord: %i\n\n", otro_coord);
+           fprintf(stderr, "main_end: %i\n", main_end);
+           fprintf(stderr, "otro_end: %i\n", otro_end);
+           fprintf(stderr, "error_delta: %0.2f\n", error_delta);
+           fprintf(stderr, "main_incr: %i\n", main_incr);
+           fprintf(stderr, "otro_incr: %i\n", otro_incr);
+           std::cerr << "direction: " <<  r << std::endl;
+           */
 
 
     // We do not know whether we are incrementing x or y, so x and y are
@@ -973,11 +988,11 @@ TangentBugBits::look_info TangentBug::look_along_ray(
         std::cerr << "---------- look_along_ray():" << std::endl;
         std::cerr << "initial_point is " << initial_point << std::endl;
         std::cerr << "the last point is (should be): " <<
-            (initial_point + r) << std::endl;
+                  (initial_point + r) << std::endl;
         std::cerr << "r is " << r << std::endl;
         std::cerr << "steep is " << (steep ? "true" : "false") << std::endl;
         std::cerr << "the end() row / column are: " <<
-            Point(x_end, y_end) << std::endl;
+                  Point(x_end, y_end) << std::endl;
         fprintf(stderr, "error_delta is %g\n", error_delta);
     }
 
@@ -990,18 +1005,17 @@ TangentBugBits::look_info TangentBug::look_along_ray(
         }
 
         // If we are off the map, or the grid here is occupied:
-            //logger().log(opencog::Logger::FINE, "TangentBug::look_along_ray(): ret_val.last_point (%u,%u): before gridIllegal", x, y);
+        //logger().log(opencog::Logger::FINE, "TangentBug::look_along_ray(): ret_val.last_point (%u,%u): before gridIllegal", x, y);
         if (lsm->gridIllegal(ret_val.last_point)) {
             ret_val.collided = true;
 
             // debug:
             if (debug_look_along_ray) {
                 const_cast<TangentBug*>(this)->
-                    aux_map[ret_val.last_point].insert(TRACE_RED);
+                aux_map[ret_val.last_point].insert(TRACE_RED);
             }
             return ret_val;
-        }
-        else {
+        } else {
             ret_val.last_point_before_hit = ret_val.last_point;
         }
 
@@ -1021,25 +1035,26 @@ TangentBugBits::look_info TangentBug::look_along_ray(
 
     if (debug_look_along_ray) {
         std::cerr << "the loop broke because " << (x == x_end ? "x == x_end" :
-                (y == y_end ? "y == y_end" :
-                 "ERROR, loop shouldn't have broken")) <<
-            std::endl;
+                  (y == y_end ? "y == y_end" :
+                   "ERROR, loop shouldn't have broken")) <<
+                  std::endl;
         std::cerr << "ret_val.last_point is " << ret_val.last_point << std::endl;
         std::cerr << "the next point, had the loop not broken, would be " <<
-            TangentBugBits::Point(x, y) << std::endl;
+                  TangentBugBits::Point(x, y) << std::endl;
     }
 
     // We have reached the end and no point has collided.
     TB_ASSERT(ret_val.last_point == ret_val.last_point_before_hit);
-    TB_ASSERT(ret_val.last_point == initial_point+r);
+    TB_ASSERT(ret_val.last_point == initial_point + r);
 
-    // TODO: check memory leak for *px *py and other 
+    // TODO: check memory leak for *px *py and other
     return ret_val;
 }
 
-void TangentBug::test_look_along_ray() const {
+void TangentBug::test_look_along_ray() const
+{
 #ifndef NDEBUG
-    for (int i=0;i<1000;++i) {
+    for (int i = 0;i < 1000;++i) {
         double lenx = rng.randDoubleOneExcluded() * 100 * rng.randPositiveNegative();
         double leny = rng.randDoubleOneExcluded() * 100 * rng.randPositiveNegative();
         Ray dir(lenx, leny);
@@ -1048,23 +1063,27 @@ void TangentBug::test_look_along_ray() const {
 #endif
 }
 
-void TangentBug::place_pet(Spatial::Distance x, Spatial::Distance y){
-    _place_pet(lsm->snap(Spatial::Point(x,y)));
+void TangentBug::place_pet(Spatial::Distance x, Spatial::Distance y)
+{
+    _place_pet(lsm->snap(Spatial::Point(x, y)));
     logger().log(opencog::Logger::DEBUG, "TangentBug - Pet SLCoord (%.2f, %.2f), MapCoord (%d, %d).", x, y, curr_pos.first, curr_pos.second);
 }
 
-void TangentBug::place_goal(Spatial::Distance x, Spatial::Distance y){
-     _place_goal(lsm->snap(Spatial::Point(x,y)),true);
-     logger().log(opencog::Logger::DEBUG, "TangentBug - Goal SLCoord (%.2f, %.2f), MapCoord (%d, %d).", x, y, goal.first, goal.second);
+void TangentBug::place_goal(Spatial::Distance x, Spatial::Distance y)
+{
+    _place_goal(lsm->snap(Spatial::Point(x, y)), true);
+    logger().log(opencog::Logger::DEBUG, "TangentBug - Goal SLCoord (%.2f, %.2f), MapCoord (%d, %d).", x, y, goal.first, goal.second);
 }
 
-void TangentBug::trace_path2(const TangentBugBits::Point& pt1, 
-                             const TangentBugBits::Point& pt2){
+void TangentBug::trace_path2(const TangentBugBits::Point& pt1,
+                             const TangentBugBits::Point& pt2)
+{
 }
 
-void TangentBug::trace_path(const TangentBugBits::Point &pt1, 
-                            const TangentBugBits::Point &pt2, 
-                            int val){
+void TangentBug::trace_path(const TangentBugBits::Point &pt1,
+                            const TangentBugBits::Point &pt2,
+                            int val)
+{
 #ifdef TB_PRINT_NCURSES
     // This method is not rigorous about coloring every single point--it may
     // appear perforated.
@@ -1079,14 +1098,15 @@ void TangentBug::trace_path(const TangentBugBits::Point &pt1,
 #endif
 }
 
-void TangentBug::untrace_path(const TangentBugBits::Point &pt1, 
-                              const TangentBugBits::Point &pt2, 
-                              int val){
+void TangentBug::untrace_path(const TangentBugBits::Point &pt1,
+                              const TangentBugBits::Point &pt2,
+                              int val)
+{
 #ifdef TB_PRINT_NCURSES
     TangentBugBits::Ray direction = pt2 - pt1;
     double length = direction.length();
     TangentBugBits::point_map::iterator hash_itr;
-    for (double itr=0; itr < (int)length; itr+=.1) {
+    for (double itr = 0; itr < (int)length; itr += .1) {
         TangentBugBits::Point r = (pt1 + (direction * (itr / length)));
         aux_map[pt1 + (direction * (itr / length))].erase(val);
     }
@@ -1095,19 +1115,20 @@ void TangentBug::untrace_path(const TangentBugBits::Point &pt1,
 }
 
 bool TangentBug::place_pet_randomly(const TangentBugBits::Point& prob_center,
-                                    int max_retries){
+                                    int max_retries)
+{
     if (max_retries < 0) {
         logger().log(opencog::Logger::ERROR, "TangentBug - Maximum number of retries to place the pet in an unoccupied space failed. Perhaps the grid is too full of obstacles?");
-	printLocalSpaceMap();
+        printLocalSpaceMap();
         TB_ASSERT(max_retries >= 0);
         return false;
     }
-    
+
     int x = rng.pos_gaussian_rand(25, prob_center.first);
     int y = rng.pos_gaussian_rand(25, prob_center.second);
 
     TangentBugBits::Point pt(x, y);
-            //logger().log(opencog::Logger::FINE, "TangentBug::place_pet_randomly(): before gridIllegal");
+    //logger().log(opencog::Logger::FINE, "TangentBug::place_pet_randomly(): before gridIllegal");
     if (! lsm->gridIllegal(pt)) {
         _place_pet(pt);
         return true;
@@ -1116,11 +1137,12 @@ bool TangentBug::place_pet_randomly(const TangentBugBits::Point& prob_center,
 }
 
 bool TangentBug::place_goal_randomly(const TangentBugBits::Point& prob_center,
-                         bool allow_enclosed, int max_retries){
-    
+                                     bool allow_enclosed, int max_retries)
+{
+
     if (max_retries < 0) {
         logger().log(opencog::Logger::ERROR, "TangentBug - Maximum number of retries to place the goal in an unoccupied space failed. Perhaps the grid is too full of obstacles?");
-	printLocalSpaceMap();
+        printLocalSpaceMap();
         TB_ASSERT(max_retries >= 0);
         return false;
     }
@@ -1128,17 +1150,18 @@ bool TangentBug::place_goal_randomly(const TangentBugBits::Point& prob_center,
     int x = rng.pos_gaussian_rand(300, prob_center.first);
     int y = rng.pos_gaussian_rand(200, prob_center.second);
 
-            //logger().log(opencog::Logger::FINE, "TangentBug::place_pet_randomly(): before gridIllegal");
+    //logger().log(opencog::Logger::FINE, "TangentBug::place_pet_randomly(): before gridIllegal");
     TangentBugBits::Point pt(x, y);
     if (lsm->coordinatesAreOnGrid(x, y) &&
             (allow_enclosed || ! lsm->gridIllegal(pt))) {
         _place_goal(pt, allow_enclosed);
         return true;
-    } 
+    }
     return place_goal_randomly(prob_center, allow_enclosed, max_retries - 1);
 }
 
-void TangentBug::print() const {
+void TangentBug::print() const
+{
 #ifdef TB_PRINT_NCURSES
     clear();
 
@@ -1147,57 +1170,57 @@ void TangentBug::print() const {
 #ifdef TB_PRINT_CENTERED_AT_CURR_POS
     // width and height are arbitrary:
     unsigned int width = 600;
-    unsigned int height= 300;
-    for(unsigned int screen_y = 0; screen_y < height; ++screen_y) {
-        for(unsigned int screen_x = 0; screen_x < width; ++screen_x) {
+    unsigned int height = 300;
+    for (unsigned int screen_y = 0; screen_y < height; ++screen_y) {
+        for (unsigned int screen_x = 0; screen_x < width; ++screen_x) {
             // Print centered at curr_pos:
-            int x = screen_x + curr_pos.first - (width/2);
-            int y = -screen_y + curr_pos.second + (height/2);
+            int x = screen_x + curr_pos.first - (width / 2);
+            int y = -screen_y + curr_pos.second + (height / 2);
 #else
-            unsigned int width = lsm->yDim();
-            unsigned int height= lsm->xDim();
-            for(unsigned int y = 0; y < height; ++y) {
-                for(unsigned int x = 0; x < width; ++x) {
-                    unsigned int screen_y = width - y;
-                    unsigned int screen_x = x;
+    unsigned int width = lsm->yDim();
+    unsigned int height = lsm->xDim();
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            unsigned int screen_y = width - y;
+            unsigned int screen_x = x;
 #endif
-                    // Check occupancy at this position:
-                    if(lsm->gridOccupied(x, y))
-                        mvaddch(screen_y, screen_x, '#' | white);
+            // Check occupancy at this position:
+            if (lsm->gridOccupied(x, y))
+                mvaddch(screen_y, screen_x, '#' | white);
 //                    else if (lsm->gridPadded(x, y))
 //                        mvaddch(screen_y, screen_x, '#' | green);
-                    else TB_ASSERT(! lsm->gridIllegal(Point(x, y)));
+            else TB_ASSERT(! lsm->gridIllegal(Point(x, y)));
 
-                    // Print additional information, if there is any. This may override the
-                    // previous line, if there is more important information to print in a
-                    // given square.
-                    TangentBugBits::point_map::const_iterator itr = aux_map.find(Point(x,y));
-                    if (itr != aux_map.end()) {
-                        int_set s = itr->second;
-                        // value, action pair:
-                        typedef pair<int, int> vap;
-                        // Change the order to change the precedence with which the objects
-                        // are drawn:
-                        vap vaps[] = {
-                            vap(CURR_POS, 'C' | blue | bold | blink),
-                            vap(GOAL, 'G' | red | bold | blink),
-                            vap(TRACE_RED, 'T' | red),
-                            vap(TRACE_CYAN, 'T' | cyan),
-                            vap(TRACE_PURPLE, 'T' | magenta),
-                            //vap(OCCUPIED, 'O' | white),
-                            vap(OCCUPIED_VIRTUALLY, 'O' | green),
-                        };
-                        vap value_action_pair;
-                        BOOST_FOREACH(vap& value_action_pair, vaps) {
-                            if (s.find(value_action_pair.first) != s.end()) {
-                                mvaddch(screen_y, screen_x, value_action_pair.second);
-                                break;
-                            }
-                        }
+            // Print additional information, if there is any. This may override the
+            // previous line, if there is more important information to print in a
+            // given square.
+            TangentBugBits::point_map::const_iterator itr = aux_map.find(Point(x, y));
+            if (itr != aux_map.end()) {
+                int_set s = itr->second;
+                // value, action pair:
+                typedef pair<int, int> vap;
+                // Change the order to change the precedence with which the objects
+                // are drawn:
+                vap vaps[] = {
+                    vap(CURR_POS, 'C' | blue | bold | blink),
+                    vap(GOAL, 'G' | red | bold | blink),
+                    vap(TRACE_RED, 'T' | red),
+                    vap(TRACE_CYAN, 'T' | cyan),
+                    vap(TRACE_PURPLE, 'T' | magenta),
+                    //vap(OCCUPIED, 'O' | white),
+                    vap(OCCUPIED_VIRTUALLY, 'O' | green),
+                };
+                vap value_action_pair;
+                BOOST_FOREACH(vap& value_action_pair, vaps) {
+                    if (s.find(value_action_pair.first) != s.end()) {
+                        mvaddch(screen_y, screen_x, value_action_pair.second);
+                        break;
                     }
                 }
             }
-            refresh();
+        }
+    }
+    refresh();
 #endif
 }
 
@@ -1207,7 +1230,7 @@ void TangentBug::printLocalSpaceMap() const {
         std::string result = "\n";
         for (unsigned int x = 0; x < lsm->xDim(); x++) {
             for (unsigned int y = 0; y < lsm->yDim(); y++) {
-                result += lsm->gridOccupied(x,y)?'O':/*lsm->gridPadded(x,y)?'o':*/'-';
+                result += lsm->gridOccupied(x, y) ? 'O' :/*lsm->gridPadded(x,y)?'o':*/'-';
             }
             result += "\n";
         }
@@ -1221,22 +1244,22 @@ bool TangentBug::random_walk(int min_number_steps) {
     int number_of_steps = std::max(random_walk_randomness, min_number_steps);
 
     logger().log(opencog::Logger::DEBUG, "TangentBug - Random walk of %d steps.",
-                    number_of_steps);
+                 number_of_steps);
 
-    for (int i = 0; i<number_of_steps; ++i) {
+    for (int i = 0; i < number_of_steps; ++i) {
         double angle = 2 * PI * rng.randDoubleOneExcluded();
         Ray move_direction(cos(angle), sin(angle));
 
         // Free point in this direction:
         Point pt = look_along_ray(curr_pos, move_direction, STEP_DISTANCE).last_point_before_hit;
-        
+
         // At this point, do not check whether pt == curr_pos. Because what if
         // pt == curr_pos upon every iteration through the loop? That would mean no
         // movement would take place, random_walk() would get called repeatedly, and
         // the logic to return failure would never happen (because the action plan
         // would not get updated). This happens when the bug is completely trapped.
 
-            //logger().log(opencog::Logger::FINE, "TangentBug::random_walk(): before gridIllegal");
+        //logger().log(opencog::Logger::FINE, "TangentBug::random_walk(): before gridIllegal");
         TB_ASSERT(! lsm->gridIllegal(pt));
 
         //_move(pt);
@@ -1250,7 +1273,7 @@ bool TangentBug::random_walk(int min_number_steps) {
     return true;
 }
 
-void TangentBug::stop_ncurses(){
+void TangentBug::stop_ncurses() {
 #ifdef TB_PRINT_NCURSES
     WINDOW * stdscr = initscr();
     initscr();
@@ -1276,15 +1299,15 @@ void TangentBug::stop_ncurses(){
     white = COLOR_PAIR(7);
     bold = A_BOLD;
     blink = A_BLINK;
-#endif    
+#endif
 }
 
-void TangentBug::init_ncurses(){
+void TangentBug::init_ncurses() {
 #ifdef TB_PRINT_NCURSES
     echo();
     nocbreak();
     nl();
     endwin();
-#endif    
+#endif
 }
 

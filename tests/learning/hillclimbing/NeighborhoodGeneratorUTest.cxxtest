@@ -21,11 +21,12 @@ using namespace std;
 using namespace ant_combo;
 using namespace reduct;
 
-class NeighborhoodGeneratorUTest : public CxxTest::TestSuite {
-    
+class NeighborhoodGeneratorUTest : public CxxTest::TestSuite
+{
+
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
-    
+
 public:
 
     const rule& action_reduction_for_test() {
@@ -33,141 +34,141 @@ public:
 
         r =
             iterative(sequential(//general
-                                 downwards(level()),
-                                 
-                                 //perception, that's because composite actions
-                                 //contain perceptions
-                                 downwards(reduce_not_cond_action_boolean_if()),
-                                 
-                                 //action
-                                 downwards(reduce_action_action_if_always_succeeds()),
-                                 downwards(reduce_action_if()),
-                                 downwards(reduce_action_while_always_fails()),
-                                 downwards(reduce_const_action_seq())
-                                 )
-                      );
-        
+                          downwards(level()),
+
+                          //perception, that's because composite actions
+                          //contain perceptions
+                          downwards(reduce_not_cond_action_boolean_if()),
+
+                          //action
+                          downwards(reduce_action_action_if_always_succeeds()),
+                          downwards(reduce_action_if()),
+                          downwards(reduce_action_while_always_fails()),
+                          downwards(reduce_const_action_seq())
+                      )
+                     );
+
         return r;
     }
 
     const rule& full_reduction_for_test() {
         static iterative r;
-        
+
         r =
             iterative(sequential(//general
-                                 downwards(level()),
-                                 //action
-                                 downwards(reduce_action_if()),
-                                 downwards(reduce_action_boolean_if_sub_cond()),
-                                 downwards(reduce_boolean_while_sub_cond()),
-                                 downwards(reduce_repeat_out_action_while()),
-                                 downwards(reduce_repeat_in_action_while()),
-                                 //action based on properties
-                                 downwards(reduce_idempotent()),
-                                 downwards(reduce_opposite()),
-                                 downwards(reduce_additive()),
-                                 downwards(reduce_zero_neutral()),
-                                 //action based on get_action_result
-                                 downwards(reduce_action_action_if_always_succeeds()),
-                                 downwards(reduce_action_while_always_fails()),
-                                 downwards(reduce_sequential_and_always_fails()),
-                                 //perception
-                                 downwards(reduce_nots()),
-                                 downwards(reduce_not_cond_action_boolean_if())
-                                 ));
-        
+                          downwards(level()),
+                          //action
+                          downwards(reduce_action_if()),
+                          downwards(reduce_action_boolean_if_sub_cond()),
+                          downwards(reduce_boolean_while_sub_cond()),
+                          downwards(reduce_repeat_out_action_while()),
+                          downwards(reduce_repeat_in_action_while()),
+                          //action based on properties
+                          downwards(reduce_idempotent()),
+                          downwards(reduce_opposite()),
+                          downwards(reduce_additive()),
+                          downwards(reduce_zero_neutral()),
+                          //action based on get_action_result
+                          downwards(reduce_action_action_if_always_succeeds()),
+                          downwards(reduce_action_while_always_fails()),
+                          downwards(reduce_sequential_and_always_fails()),
+                          //perception
+                          downwards(reduce_nots()),
+                          downwards(reduce_not_cond_action_boolean_if())
+                      ));
+
         return r;
     }
- 
+
     void test_percomputeCompositePerceptions() {
         //generate the compositePerceptions set
         std::set<vertex> operators;
         combo_tree_ns_set conditions;
         combo_tree_ns_set actions;
-        
+
         precomputeOperators(operators);
         precomputeConditions(conditions);
         precomputeActions(actions);
-        
+
         NeighborhoodGenerator<> ng(operators, conditions, actions,
                                    action_reduction_for_test(),
                                    full_reduction_for_test());
-        
+
         ng.precomputeCompositePerceptions();
-        
+
         const combo_tree_ns_set& compositePerceptions = ng.getCompositePerceptions();
-        
-        for(combo_tree_ns_set_it i = compositePerceptions.begin();
-            i != compositePerceptions.end(); ++i) {
+
+        for (combo_tree_ns_set_it i = compositePerceptions.begin();
+                i != compositePerceptions.end(); ++i) {
             std::cout << "NEIGHBORHOODGENERATOR TEST COMPOSITE PERCEPTION : "
                       << *i << std::endl;
         }
-        
+
         //generate the set that compositePerceptions should be
         combo_tree_ns_set cpCopyTest;
         precomputeCPCopyTest(cpCopyTest);
-        
-        for(combo_tree_ns_set_it i = cpCopyTest.begin(); i != cpCopyTest.end(); ++i) {
+
+        for (combo_tree_ns_set_it i = cpCopyTest.begin(); i != cpCopyTest.end(); ++i) {
             std::cout << "NEIGHBORHOODGENERATOR COPY COMPOSITE PERCEPTION : " << *i << std::endl;
         }
-        
+
         //check that they both have the same set of compositePerceptions
         TS_ASSERT_EQUALS(cpCopyTest, compositePerceptions);
-        
+
     }
-    
+
     void test_precomputeCompositeActions() {
         //generate the compositeActions set
         std::set<vertex> operators;
         combo_tree_ns_set actions;
         combo_tree_ns_set conditions;
-        
+
         precomputeOperators(operators);
         precomputeActions(actions);
         precomputeConditions(conditions);
-        
+
         NeighborhoodGenerator<> ng(operators, conditions, actions,
                                    action_reduction_for_test(),
                                    full_reduction_for_test());
-        
+
         ng.precomputeCompositePerceptions();
         ng.precomputeCompositeActions();
-        
+
         const combo_tree_ns_set& compositeActions = ng.getCompositeActions();
-        
-        for(combo_tree_ns_set_it i = compositeActions.begin(); i != compositeActions.end(); ++i) {
+
+        for (combo_tree_ns_set_it i = compositeActions.begin(); i != compositeActions.end(); ++i) {
             std::cout << "NEIGHBORHOODGENERATOR TEST COMPOSITE ACTION : " << *i << std::endl;
         }
-        
+
         //generate the set that compositeActions should be
         combo_tree_ns_set caCopyTest;
         precomputeCACopyTest(caCopyTest);
-        
-        for(combo_tree_ns_set_it i = caCopyTest.begin(); i != caCopyTest.end(); ++i) {
+
+        for (combo_tree_ns_set_it i = caCopyTest.begin(); i != caCopyTest.end(); ++i) {
             std::cout << "NEIGHBORHOODGENERATOR COPY COMPOSITE ACTION : " << *i << std::endl;
         }
-        
+
         //check that they both have the same set of compositeActions
         TS_ASSERT_EQUALS(caCopyTest, compositeActions);
     }
-    
+
     void test_populate_neighborhood() {
         //generate the compositeActions set
         std::set<vertex> operators;
         combo_tree_ns_set actions;
         combo_tree_ns_set conditions;
-        
+
         precomputeOperators(operators);
         precomputeActions(actions);
         precomputeConditions(conditions);
-        
+
         NeighborhoodGenerator<> ng(operators, conditions, actions,
                                    action_reduction_for_test(),
                                    full_reduction_for_test());
-        
+
         ng.precomputeCompositePerceptions();
         ng.precomputeCompositeActions();
-        
+
         //generate the neighborhood of and_set(move_forward)
         combo_tree_ns_set nh; //neighborhood
         combo_tree center;
@@ -176,23 +177,23 @@ public:
         ss >> center;
         cassert(TRACE_INFO, !center.empty(), "in this test center cannot be empty");
         ng.populate_neighborhood(nh, center, pre_it(center.begin()));
-        
-        for(combo_tree_ns_set_it i = nh.begin(); i != nh.end(); ++i) {
+
+        for (combo_tree_ns_set_it i = nh.begin(); i != nh.end(); ++i) {
             std::cout << "NEIGHBORHOODGENERATOR TEST NEIGHBORHOOD : " << *i << std::endl;
         }
-        
+
         //generate the neighborhood set as it should be
         combo_tree_ns_set nhCopyTest;
         precomputeNeighborhoodCopytest(nhCopyTest);
-        
-        for(combo_tree_ns_set_it i = nhCopyTest.begin(); i != nhCopyTest.end(); ++i) {
+
+        for (combo_tree_ns_set_it i = nhCopyTest.begin(); i != nhCopyTest.end(); ++i) {
             std::cout << "NEIGHBORHOODGENERATOR COPY NEIGHBORHOOD : " << *i << std::endl;
         }
-        
+
         //check that the 2 sets are equal
         TS_ASSERT_EQUALS(nhCopyTest, nh);
     }
-    
+
 private:
 
     void precomputeOperators(std::set<vertex>& operators) {
@@ -204,16 +205,16 @@ private:
         operators.insert(id::action_not);
         operators.insert(id::logical_not);
     }
-    
+
     void precomputeActions(combo_tree_ns_set& actions) {
         actions.insert(combo_tree(instance(id::move_forward)));
         actions.insert(combo_tree(instance(id::turn_left)));
     }
-    
+
     void precomputeConditions(combo_tree_ns_set& conditions) {
         conditions.insert(combo_tree(instance(id::is_food_ahead)));
     }
-    
+
     void precomputeCPCopyTest(combo_tree_ns_set& compositePerceptions) {
         //elementary perceptions
         {
@@ -388,9 +389,9 @@ private:
             ss >> tmp26;
             compositeActions.insert(tmp26);
         }
-        
+
     }
-    
+
     void precomputeNeighborhoodCopytest(combo_tree_ns_set& nh) {
         //actions
         {

@@ -27,109 +27,111 @@
 
 #include "Vector3.h"
 
-namespace Spatial {
-  namespace Math {
+namespace Spatial
+{
+namespace Math {
 
-    class Matrix3 {
-    public:
-      // All elements of the matrix are 0
-      static const Matrix3 ZERO;
-      // An identity 3x3 matrix
-      static const Matrix3 IDENTITY;
+class Matrix3
+{
+public:
+    // All elements of the matrix are 0
+    static const Matrix3 ZERO;
+    // An identity 3x3 matrix
+    static const Matrix3 IDENTITY;
 
-      /**
-       * Simple constructor 
-       */
-      Matrix3( void );
+    /**
+     * Simple constructor
+     */
+    Matrix3( void );
 
-      /**
-       * Build a matrix using the given values
-       * @param m matrix values
-       */
-      Matrix3( const std::vector<std::vector<double> >& m );
+    /**
+     * Build a matrix using the given values
+     * @param m matrix values
+     */
+    Matrix3( const std::vector<std::vector<double> >& m );
 
-      /**
-       * Build a matrix using the given values
-       * @param e00
-       * @param e01
-       * @param e02
-       * @param e10
-       * @param e11
-       * @param e12
-       * @param e20
-       * @param e21
-       * @param e22
-       */
-      Matrix3( double e00, double e01, double e02,
-	       double e10, double e11, double e12,
-	       double e20, double e21, double e22 );
+    /**
+     * Build a matrix using the given values
+     * @param e00
+     * @param e01
+     * @param e02
+     * @param e10
+     * @param e11
+     * @param e12
+     * @param e20
+     * @param e21
+     * @param e22
+     */
+    Matrix3( double e00, double e01, double e02,
+             double e10, double e11, double e12,
+             double e20, double e21, double e22 );
 
-      /**
-       * A copy constructor
-       * @param matrix
-       */
-      Matrix3( const Matrix3& matrix );
-	
-      inline virtual ~Matrix3( void ) { };
+    /**
+     * A copy constructor
+     * @param matrix
+     */
+    Matrix3( const Matrix3& matrix );
 
-      /**
-       * Compute the matrix determinant
-       * @return determinant of this matrix
-       */
-      double determinant( void ) const;
+    inline virtual ~Matrix3( void ) { };
 
-      /**
-       * Do the transpose of a copy of this matrix
-       * @return Transposed matrix
-       */
-      Matrix3 transpose( void ) const;
+    /**
+     * Compute the matrix determinant
+     * @return determinant of this matrix
+     */
+    double determinant( void ) const;
 
-      /**
-       * Inverse a copy of this matrix 
-       * @return an inversed matrix
-       */
-      Matrix3 inverse( void ) const;
+    /**
+     * Do the transpose of a copy of this matrix
+     * @return Transposed matrix
+     */
+    Matrix3 transpose( void ) const;
 
-      /**
-       * Invert this matrix using cofactors
-       * @param rkInverse
-       * @param fTolerance
-       * @return
-       */
-      bool inverse( Matrix3& rkInverse, double fTolerance) const;
+    /**
+     * Inverse a copy of this matrix
+     * @return an inversed matrix
+     */
+    Matrix3 inverse( void ) const;
 
-      /**
-       * Set a new value for a specific matrix element
-       * @param x
-       * @param y
-       * @param value
-       */
-      void set( int x, int y, double value );
+    /**
+     * Invert this matrix using cofactors
+     * @param rkInverse
+     * @param fTolerance
+     * @return
+     */
+    bool inverse( Matrix3& rkInverse, double fTolerance) const;
 
-      /**
-       * Get the value of a specific matrix element
-       * @param x
-       * @param y
-       * @return
-       */
-      double get( int x, int y );
+    /**
+     * Set a new value for a specific matrix element
+     * @param x
+     * @param y
+     * @param value
+     */
+    void set( int x, int y, double value );
 
-      /**
-       * Multiply a given vector by this matrix and return the result
-       * @param point
-       * @return
-       */
-      Vector3 operator*( const Vector3& point );
+    /**
+     * Get the value of a specific matrix element
+     * @param x
+     * @param y
+     * @return
+     */
+    double get( int x, int y );
 
-      /*
-       */
-      std::string toString( void ) const;
-	
-      std::vector<std::vector<double> > m;
+    /**
+     * Multiply a given vector by this matrix and return the result
+     * @param point
+     * @return
+     */
+    Vector3 operator*( const Vector3& point );
 
-    }; // Matrix3
+    /*
+     */
+    std::string toString( void ) const;
 
-  } // Math
+    std::vector<std::vector<double> > m;
+
+}; // Matrix3
+
+} // Math
 } // Spatial
 
 #endif // _SPATIAL_MATH_MATRIX3_H_

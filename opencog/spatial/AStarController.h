@@ -20,30 +20,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** 
+/**
  * AStarController.h
- * 
+ *
  * A* pathfinding functionality
- * 
+ *
  * Current implementation uses LocalSpaceMap2D for map
  * LSMap2DSearchNode implements functionality specific to LocalSpaceMap2D
  * stlastar.h (and fsa.h) contains generic astar algorithm implementation
  * Currently, start and goal coordinates are based on gridpoints,
  * solution path movement is in 8 directions--horizontal, vertical, diagonal
- * 
+ *
  * See AStarTest.cc for example usage
- * 
+ *
  * General usage:
- * 			AStarController asc;
- * 			asc.setMap(map);
- * 
- *			asc.setStartAndGoalStates(nodeStart,nodeEnd);
- * 			int SearchResult = asc.findPath();
- * 
- * 			vector<Spatial::GridPoint> solution = asc.getSolutionGridPoints();
- * 					or
- * 			vector<Spatial::Point> solution = asc.getSolutionPoints()
- * 
+ *    AStarController asc;
+ *    asc.setMap(map);
+ *
+ *   asc.setStartAndGoalStates(nodeStart,nodeEnd);
+ *    int SearchResult = asc.findPath();
+ *
+ *    vector<Spatial::GridPoint> solution = asc.getSolutionGridPoints();
+ *      or
+ *    vector<Spatial::Point> solution = asc.getSolutionPoints()
+ *
  */
 
 #ifndef _SPATIAL_ASTARCONTROLLER_H_
@@ -56,49 +56,51 @@
 #define DEBUG_LIST_LENGTHS_ONLY 0
 #define DISPLAY_SOLUTION 0
 
-namespace Spatial {
+namespace Spatial
+{
 
-class AStarController {
+class AStarController
+{
 
-	//typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
-	typedef LocalSpaceMap2D Map;
-	typedef LSMap2DSearchNode MapSearchNode; 
+    //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
+    typedef LocalSpaceMap2D Map;
+    typedef LSMap2DSearchNode MapSearchNode;
 
 public:
-	AStarSearch<MapSearchNode> *astarsearch;
+    AStarSearch<MapSearchNode> *astarsearch;
 
-	AStarController();
-	~AStarController();
-  	
-	void setMap(Map *map);
-	void setStartAndGoalStates(MapSearchNode &startNode, MapSearchNode &goalNode);
+    AStarController();
+    ~AStarController();
 
-	//Create new astarsearch with same start and goal nodes, for testing and comparing different heuristics
-	void resetSearch(MapSearchNode &startNode, MapSearchNode &goalNode);
-	
-	/**
-	 * Calculates shortest route path
-	 * @return int SearchState code (defined in stlastar.h)
-	 * 		enum {
-	 * 			SEARCH_STATE_NOT_INITIALISED,
-	 *			SEARCH_STATE_SEARCHING,
-	 *			SEARCH_STATE_SUCCEEDED,
-	 *			SEARCH_STATE_FAILED,
-	 *			SEARCH_STATE_OUT_OF_MEMORY,
-	 *			SEARCH_STATE_INVALID	}
-	 */
-	unsigned int findPath();
-	
-	void debugLists(unsigned int SearchSteps);
-	
-	//get solution path as vector of grid points
-	vector<Spatial::GridPoint> getSolutionGridPoints();
-	//get solution path as vector of distance points
-	vector<Spatial::Point> getSolutionPoints();
+    void setMap(Map *map);
+    void setStartAndGoalStates(MapSearchNode &startNode, MapSearchNode &goalNode);
+
+    //Create new astarsearch with same start and goal nodes, for testing and comparing different heuristics
+    void resetSearch(MapSearchNode &startNode, MapSearchNode &goalNode);
+
+    /**
+     * Calculates shortest route path
+     * @return int SearchState code (defined in stlastar.h)
+     *   enum {
+     *    SEARCH_STATE_NOT_INITIALISED,
+     *   SEARCH_STATE_SEARCHING,
+     *   SEARCH_STATE_SUCCEEDED,
+     *   SEARCH_STATE_FAILED,
+     *   SEARCH_STATE_OUT_OF_MEMORY,
+     *   SEARCH_STATE_INVALID }
+     */
+    unsigned int findPath();
+
+    void debugLists(unsigned int SearchSteps);
+
+    //get solution path as vector of grid points
+    vector<Spatial::GridPoint> getSolutionGridPoints();
+    //get solution path as vector of distance points
+    vector<Spatial::Point> getSolutionPoints();
     vector<Spatial::Point> getShortestCalculatedPath();
-	
-	//MapSearchNode nodeStart, nodeEnd;
-	
+
+    //MapSearchNode nodeStart, nodeEnd;
+
 }; //class
 }  //namespace
 

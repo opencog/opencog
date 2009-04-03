@@ -29,36 +29,38 @@
 #include "Vector2.h"
 #include "LocalSpaceMap2DUtil.h"
 
-namespace Spatial {
-    class LocalSpaceMap2D;
-    class VisibilityMap;
+namespace Spatial
+{
+class LocalSpaceMap2D;
+class VisibilityMap;
 
-    class Renderer {
-    public:
+class Renderer
+{
+public:
 
-        static const int SCREEN_WIDTH;
-        static const int SCREEN_HEIGHT;
+    static const int SCREEN_WIDTH;
+    static const int SCREEN_HEIGHT;
 
-        Renderer( void );
+    Renderer( void );
 
-        virtual ~Renderer( void );
+    virtual ~Renderer( void );
 
-        void renderMap( LocalSpaceMap2D* map, unsigned int hpaClusters = 0 );
+    void renderMap( LocalSpaceMap2D* map, unsigned int hpaClusters = 0 );
 
-        void renderVisMap( VisibilityMap* visMap );
-    
-        void saveImageFile( const std::string& fileName );
-    
-        void drawLine( const GridPoint& startPoint, const GridPoint& endPoint, unsigned int tileSide, unsigned int color );
+    void renderVisMap( VisibilityMap* visMap );
 
-        void drawCircle( const GridPoint& center, unsigned int radius, unsigned int tileSide, unsigned int color );
+    void saveImageFile( const std::string& fileName );
 
-        void drawTile( const GridPoint& center, unsigned int side, unsigned int color );
+    void drawLine( const GridPoint& startPoint, const GridPoint& endPoint, unsigned int tileSide, unsigned int color );
+
+    void drawCircle( const GridPoint& center, unsigned int radius, unsigned int tileSide, unsigned int color );
+
+    void drawTile( const GridPoint& center, unsigned int side, unsigned int color );
 
 
-    private:
-        SDL_Surface* screen;
-    };
+private:
+    SDL_Surface* screen;
+};
 
 } // Spatial
 
